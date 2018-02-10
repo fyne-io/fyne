@@ -1,8 +1,10 @@
 package efl
 
-// #cgo pkg-config: ecore ecore-evas evas
+// #cgo pkg-config: ecore ecore-evas ecore-wl2 evas
+// #cgo CFLAGS: -DEFL_BETA_API_SUPPORT=1
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
+// #include <Ecore_Wl2.h>
 // #include <Evas.h>
 import "C"
 import "fmt"
@@ -47,6 +49,11 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 	}
 
 	w.SetTitle(title)
+	if engine == "wayland_shm" {
+		win := C.ecore_evas_wayland2_window_get(w.ee)
+		C.ecore_wl2_window_type_set(win, C.ECORE_WL2_WINDOW_TYPE_TOPLEVEL)
+	}
+
 	C.ecore_evas_show(ee)
 	return w
 }
