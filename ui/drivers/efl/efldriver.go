@@ -13,6 +13,7 @@ import "image"
 import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/theme"
 
 type window struct {
 	ee *C.Ecore_Evas
@@ -94,6 +95,9 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 		win := C.ecore_evas_wayland2_window_get(w.ee)
 		C.ecore_wl2_window_type_set(win, C.ECORE_WL2_WINDOW_TYPE_TOPLEVEL)
 	}
+
+	bg := c.NewRectangle(image.Rect(0, 0, 300, 200))
+	bg.SetColor(theme.Background())
 
 	w.SetTitle(title)
 	w.Show()
