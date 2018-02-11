@@ -97,7 +97,7 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 	}
 
 	bg := c.NewRectangle(image.Rect(0, 0, 300, 200))
-	bg.SetColor(theme.Background())
+	bg.SetColor(theme.BackgroundColor())
 
 	w.SetTitle(title)
 	w.Show()
