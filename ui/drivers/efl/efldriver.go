@@ -16,7 +16,7 @@ import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/theme"
 
 type window struct {
-	ee *C.Ecore_Evas
+	ee     *C.Ecore_Evas
 	canvas ui.Canvas
 }
 
@@ -40,7 +40,7 @@ func (w *window) Hide() {
 	C.ecore_evas_hide(w.ee)
 }
 
-func (w *window) Canvas() (ui.Canvas) {
+func (w *window) Canvas() ui.Canvas {
 	return w.canvas
 }
 
@@ -56,20 +56,20 @@ type canvas struct {
 	evas *C.Evas
 }
 
-func (c *canvas) NewRectangle(r image.Rectangle) (ui.CanvasObject) {
+func (c *canvas) NewRectangle(r image.Rectangle) ui.CanvasObject {
 	o := &canvasobject{
 		obj: C.evas_object_rectangle_add(c.evas),
 	}
 
 	C.evas_object_geometry_set(o.obj, C.Evas_Coord(r.Min.X), C.Evas_Coord(r.Min.Y),
-				   C.Evas_Coord(r.Max.X - r.Min.X), C.Evas_Coord(r.Max.Y - r.Min.Y))
+		C.Evas_Coord(r.Max.X-r.Min.X), C.Evas_Coord(r.Max.Y-r.Min.Y))
 	C.evas_object_show(o.obj)
 	return o
 }
 
 type canvasTextObject struct {
 	*canvasobject
-	size int
+	size         int
 	italic, bold bool
 }
 

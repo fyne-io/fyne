@@ -4,7 +4,7 @@ import "image/color"
 import "path"
 import "runtime"
 
-func BackgroundColor() (color.RGBA) {
+func BackgroundColor() color.RGBA {
 	return color.RGBA{0xcc, 0xcc, 0xcc, 0xff}
 }
 
