@@ -67,6 +67,73 @@ func (c *canvas) NewRectangle(r image.Rectangle) (ui.CanvasObject) {
 	return o
 }
 
+type canvasTextObject struct {
+	*canvasobject
+	size int
+	italic, bold bool
+}
+
+func (t *canvasTextObject) updateFont() {
+	font := theme.TextFont()
+
+	if t.bold {
+		if t.italic {
+			font = theme.TextBoldItalicFont()
+		} else {
+			font = theme.TextBoldFont()
+		}
+	} else if t.italic {
+		font = theme.TextItalicFont()
+	}
+
+	C.evas_object_text_font_set(t.canvasobject.obj, C.CString(font), C.Evas_Font_Size(t.size))
+}
+
+func (t *canvasTextObject) FontSize() int {
+	return t.size
+}
+
+func (t *canvasTextObject) SetFontSize(size int) {
+	t.size = size
+	t.updateFont()
+}
+
+func (t *canvasTextObject) Bold() bool {
+	return t.bold
+}
+
+func (t *canvasTextObject) SetBold(bold bool) {
+	t.bold = bold
+	t.updateFont()
+}
+
+func (t *canvasTextObject) Italic() bool {
+	return t.italic
+}
+
+func (t *canvasTextObject) SetItalic(italic bool) {
+	t.italic = italic
+	t.updateFont()
+}
+
+func (c *canvas) NewText(text string) ui.CanvasTextObject {
+	o := &canvasTextObject{
+		&canvasobject{
+			obj: C.evas_object_text_add(c.evas),
+		},
+		theme.TextSize(),
+		false,
+		false,
+	}
+
+	C.evas_object_text_text_set(o.obj, C.CString(text))
+	o.SetColor(theme.TextColor())
+	o.updateFont()
+
+	C.evas_object_show(o.obj)
+	return o
+}
+
 type EFLDriver struct {
 }
 
