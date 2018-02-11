@@ -1,14 +1,12 @@
 package efl
 
-// #cgo pkg-config: ecore ecore-evas ecore-wl2 evas
-// #cgo CFLAGS: -DEFL_BETA_API_SUPPORT=1
+// #cgo pkg-config: ecore ecore-evas evas
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
-// #include <Ecore_Wl2.h>
 // #include <Evas.h>
 import "C"
 
-import "fmt"
+import "log"
 import "image"
 import "image/color"
 
@@ -137,14 +135,19 @@ func (c *canvas) NewText(text string) ui.CanvasTextObject {
 type EFLDriver struct {
 }
 
-func (d EFLDriver) CreateWindow(title string) ui.Window {
-	engine := "wayland_shm"
+func findEngineName() string {
 	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
 
 	if env == nil {
-		fmt.Println("Unable to connect to Wayland - attempting X")
-		engine = "software_x11"
+		log.Println("Unable to connect to Wayland - attempting X")
+		return X11EngineName()
 	}
+
+	return WaylandEngineName()
+}
+
+func (d EFLDriver) CreateWindow(title string) ui.Window {
+	engine := findEngineName()
 
 	C.evas_init()
 	C.ecore_init()
@@ -158,9 +161,10 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 	}
 	w.canvas = c
 
-	if engine == "wayland_shm" {
-		win := C.ecore_evas_wayland2_window_get(w.ee)
-		C.ecore_wl2_window_type_set(win, C.ECORE_WL2_WINDOW_TYPE_TOPLEVEL)
+	if engine == WaylandEngineName() {
+		WaylandWindowInit(w)
+	} else {
+		X11WindowInit(w)
 	}
 
 	bg := c.NewRectangle(image.Rect(0, 0, 300, 200))
