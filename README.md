@@ -21,7 +21,8 @@ And then you're ready to write your first app - this example shows how:
     import "github.com/fyne-io/fyne/app"
 
     func main() {
-        app.NewWindow("test")
+        w := app.NewWindow("Hello")
+        w.Canvas().NewText("Hello Fyne!")
 
         app.Run()
     }
