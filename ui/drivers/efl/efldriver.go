@@ -44,23 +44,30 @@ func (w *window) Canvas() ui.Canvas {
 
 type canvasobject struct {
 	obj *C.Evas_Object
+	canvas ui.Canvas
 }
 
 func (o *canvasobject) SetColor(c color.RGBA) {
 	C.evas_object_color_set(o.obj, C.int(c.R), C.int(c.G), C.int(c.B), C.int(c.A))
 }
 
+func (o *canvasobject) Canvas() ui.Canvas {
+	return o.canvas
+}
+
 type canvas struct {
 	evas *C.Evas
+	scale float32
 }
 
 func (c *canvas) NewRectangle(r image.Rectangle) ui.CanvasObject {
 	o := &canvasobject{
 		obj: C.evas_object_rectangle_add(c.evas),
+		canvas: c,
 	}
 
-	C.evas_object_geometry_set(o.obj, C.Evas_Coord(r.Min.X), C.Evas_Coord(r.Min.Y),
-		C.Evas_Coord(r.Max.X-r.Min.X), C.Evas_Coord(r.Max.Y-r.Min.Y))
+	C.evas_object_geometry_set(o.obj, C.Evas_Coord(scaleInt(c, r.Min.X)), C.Evas_Coord(scaleInt(c, r.Min.Y)),
+		C.Evas_Coord(scaleInt(c, r.Max.X-r.Min.X)), C.Evas_Coord(scaleInt(c, r.Max.Y-r.Min.Y)))
 	C.evas_object_show(o.obj)
 	return o
 }
@@ -84,7 +91,7 @@ func (t *canvasTextObject) updateFont() {
 		font = theme.TextItalicFont()
 	}
 
-	C.evas_object_text_font_set(t.canvasobject.obj, C.CString(font), C.Evas_Font_Size(t.size))
+	C.evas_object_text_font_set(t.canvasobject.obj, C.CString(font), C.Evas_Font_Size(scaleInt(t.Canvas(), t.size)))
 }
 
 func (t *canvasTextObject) FontSize() int {
@@ -118,6 +125,7 @@ func (c *canvas) NewText(text string) ui.CanvasTextObject {
 	o := &canvasTextObject{
 		&canvasobject{
 			obj: C.evas_object_text_add(c.evas),
+			canvas: c,
 		},
 		theme.TextSize(),
 		false,
@@ -130,6 +138,24 @@ func (c *canvas) NewText(text string) ui.CanvasTextObject {
 
 	C.evas_object_show(o.obj)
 	return o
+}
+
+func scaleInt(c ui.Canvas, v int) int {
+	switch c.Scale() {
+	case 1.0:
+		return v
+	default:
+		return int(float32(v) * c.Scale())
+	}
+}
+
+func (c *canvas) Scale() float32 {
+	return c.scale
+}
+
+func (c *canvas) SetScale(scale float32) {
+	c.scale = scale
+	log.Println("TODO Update all our objects")
 }
 
 type EFLDriver struct {
@@ -146,20 +172,35 @@ func findEngineName() string {
 	return WaylandEngineName()
 }
 
+func scaleByDPI(w *window) float32 {
+	xdpi := C.int(0)
+
+	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
+	if (xdpi > 96) {
+		log.Println("High DPI", xdpi, "- scaling to 1.5")
+		return float32(1.5)
+	}
+
+	return float32(1.0)
+}
+
 func (d EFLDriver) CreateWindow(title string) ui.Window {
 	engine := findEngineName()
+	size := image.Pt(300, 200)
 
 	C.evas_init()
 	C.ecore_init()
 	C.ecore_evas_init()
 
 	w := &window{
-		ee: C.ecore_evas_new(C.CString(engine), 10, 10, 300, 200, nil),
+		ee: C.ecore_evas_new(C.CString(engine), 0, 0, 100, 100, nil),
 	}
 	c := &canvas{
 		evas: C.ecore_evas_get(w.ee),
+		scale: scaleByDPI(w),
 	}
 	w.canvas = c
+	C.ecore_evas_resize(w.ee, C.int(scaleInt(c, size.X)), C.int(scaleInt(c, size.Y)))
 
 	if engine == WaylandEngineName() {
 		WaylandWindowInit(w)
@@ -167,7 +208,7 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 		X11WindowInit(w)
 	}
 
-	bg := c.NewRectangle(image.Rect(0, 0, 300, 200))
+	bg := c.NewRectangle(image.Rect(0, 0, size.X, size.Y))
 	bg.SetColor(theme.BackgroundColor())
 
 	w.SetTitle(title)
