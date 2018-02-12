@@ -1,0 +1,15 @@
+language: go
+
+go:
+  - 1.9
+  - master 
+
+before_script:
+  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
+  - go get github.com/golang/lint/golint
+
+script:
+  - test -z $(gofmt -s -l $GO_FILES)
+  - go test -v -race ./...
+  - go vet ./...
+  - golint -set_exit_status $(go list ./...)
