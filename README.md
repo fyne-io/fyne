@@ -27,7 +27,7 @@ And then you're ready to write your first app - this example shows how:
 
     func main() {
         w := app.NewWindow("Hello")
-        w.Canvas().NewText("Hello Fyne!")
+        w.Canvas().AddObject(ui.NewText("Hello Fyne!"))
 
         app.Run()
     }

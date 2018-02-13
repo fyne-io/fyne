@@ -43,7 +43,7 @@ func (w *window) Canvas() ui.Canvas {
 }
 
 type canvasobject struct {
-	obj *C.Evas_Object
+	obj    *C.Evas_Object
 	canvas ui.Canvas
 }
 
@@ -55,89 +55,60 @@ func (o *canvasobject) Canvas() ui.Canvas {
 	return o.canvas
 }
 
-type canvas struct {
-	evas *C.Evas
+type eflCanvas struct {
+	ui.Canvas
+	evas  *C.Evas
+	w, h  int
 	scale float32
 }
 
-func (c *canvas) NewRectangle(r image.Rectangle) ui.CanvasObject {
-	o := &canvasobject{
-		obj: C.evas_object_rectangle_add(c.evas),
-		canvas: c,
+func buildCanvasObject(c *eflCanvas, o ui.CanvasObject) *C.Evas_Object {
+	var obj *C.Evas_Object
+
+	switch o.(type) {
+	case *ui.TextObject:
+		obj = C.evas_object_text_add(c.evas)
+
+		to, _ := o.(*ui.TextObject)
+		C.evas_object_color_set(obj, C.int(to.Color.R), C.int(to.Color.G),
+			C.int(to.Color.B), C.int(to.Color.A))
+
+		C.evas_object_text_text_set(obj, C.CString(to.Text))
+		updateFont(obj, c, to)
+	case *ui.RectangleObject:
+		obj = C.evas_object_rectangle_add(c.evas)
+
+		ro, _ := o.(*ui.RectangleObject)
+		C.evas_object_color_set(obj, C.int(ro.Color.R), C.int(ro.Color.G),
+			C.int(ro.Color.B), C.int(ro.Color.A))
+	default:
+		log.Println("Unrecognised Object", o)
 	}
 
-	C.evas_object_geometry_set(o.obj, C.Evas_Coord(scaleInt(c, r.Min.X)), C.Evas_Coord(scaleInt(c, r.Min.Y)),
-		C.Evas_Coord(scaleInt(c, r.Max.X-r.Min.X)), C.Evas_Coord(scaleInt(c, r.Max.Y-r.Min.Y)))
-	C.evas_object_show(o.obj)
-	return o
+	return obj
 }
 
-type canvasTextObject struct {
-	*canvasobject
-	size         int
-	italic, bold bool
+func (c *eflCanvas) AddObject(o ui.CanvasObject) {
+	obj := buildCanvasObject(c, o)
+
+	C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.w)), C.Evas_Coord(scaleInt(c, c.h)))
+	C.evas_object_show(obj)
 }
 
-func (t *canvasTextObject) updateFont() {
+func updateFont(obj *C.Evas_Object, c *eflCanvas, t *ui.TextObject) {
 	font := theme.TextFont()
 
-	if t.bold {
-		if t.italic {
+	if t.Bold {
+		if t.Italic {
 			font = theme.TextBoldItalicFont()
 		} else {
 			font = theme.TextBoldFont()
 		}
-	} else if t.italic {
+	} else if t.Italic {
 		font = theme.TextItalicFont()
 	}
 
-	C.evas_object_text_font_set(t.canvasobject.obj, C.CString(font), C.Evas_Font_Size(scaleInt(t.Canvas(), t.size)))
-}
-
-func (t *canvasTextObject) FontSize() int {
-	return t.size
-}
-
-func (t *canvasTextObject) SetFontSize(size int) {
-	t.size = size
-	t.updateFont()
-}
-
-func (t *canvasTextObject) Bold() bool {
-	return t.bold
-}
-
-func (t *canvasTextObject) SetBold(bold bool) {
-	t.bold = bold
-	t.updateFont()
-}
-
-func (t *canvasTextObject) Italic() bool {
-	return t.italic
-}
-
-func (t *canvasTextObject) SetItalic(italic bool) {
-	t.italic = italic
-	t.updateFont()
-}
-
-func (c *canvas) NewText(text string) ui.CanvasTextObject {
-	o := &canvasTextObject{
-		&canvasobject{
-			obj: C.evas_object_text_add(c.evas),
-			canvas: c,
-		},
-		theme.TextSize(),
-		false,
-		false,
-	}
-
-	C.evas_object_text_text_set(o.obj, C.CString(text))
-	o.SetColor(theme.TextColor())
-	o.updateFont()
-
-	C.evas_object_show(o.obj)
-	return o
+	C.evas_object_text_font_set(obj, C.CString(font), C.Evas_Font_Size(scaleInt(c, t.FontSize)))
 }
 
 func scaleInt(c ui.Canvas, v int) int {
@@ -149,11 +120,11 @@ func scaleInt(c ui.Canvas, v int) int {
 	}
 }
 
-func (c *canvas) Scale() float32 {
+func (c *eflCanvas) Scale() float32 {
 	return c.scale
 }
 
-func (c *canvas) SetScale(scale float32) {
+func (c *eflCanvas) SetScale(scale float32) {
 	c.scale = scale
 	log.Println("TODO Update all our objects")
 }
@@ -176,7 +147,7 @@ func scaleByDPI(w *window) float32 {
 	xdpi := C.int(0)
 
 	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
-	if (xdpi > 96) {
+	if xdpi > 96 {
 		log.Println("High DPI", xdpi, "- scaling to 1.5")
 		return float32(1.5)
 	}
@@ -195,8 +166,10 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 	w := &window{
 		ee: C.ecore_evas_new(C.CString(engine), 0, 0, 100, 100, nil),
 	}
-	c := &canvas{
-		evas: C.ecore_evas_get(w.ee),
+	c := &eflCanvas{
+		evas:  C.ecore_evas_get(w.ee),
+		w:     size.X,
+		h:     size.Y,
 		scale: scaleByDPI(w),
 	}
 	w.canvas = c
@@ -208,8 +181,7 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 		X11WindowInit(w)
 	}
 
-	bg := c.NewRectangle(image.Rect(0, 0, size.X, size.Y))
-	bg.SetColor(theme.BackgroundColor())
+	c.AddObject(ui.NewRectangle(theme.BackgroundColor()))
 
 	w.SetTitle(title)
 	w.Show()
