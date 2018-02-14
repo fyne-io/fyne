@@ -17,7 +17,7 @@ Before you can use the Fyne tools you need to have a stable copy of EFL installe
 
 Using standard go tools you can install Fyne's core library using:
 
-    go get github.com/fyne-io/fyne
+    go get github.com/fyne-io/fyne-efl
 
 And then you're ready to write your first app - this example shows how:
 
