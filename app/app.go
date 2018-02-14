@@ -1,14 +1,17 @@
 package app
 
 import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/drivers/efl"
 
-var driver efl.EFLDriver
+var uiDriver ui.Driver
+
+func SetUIDriver(d ui.Driver) {
+	uiDriver = d
+}
 
 func NewWindow(title string) ui.Window {
-	return driver.CreateWindow(title)
+	return uiDriver.CreateWindow(title)
 }
 
 func Run() {
-	driver.Run()
+	uiDriver.Run()
 }
