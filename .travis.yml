@@ -5,10 +5,10 @@ go:
   - master 
 
 before_script:
-  - go get github.com/golang/lint/golint
+#  - go get github.com/golang/lint/golint
 
 script:
   - test -z $(gofmt -s -l .)
   - go test -v -race ./...
   - go vet ./...
-  - golint -set_exit_status $(go list ./...)
+#  - golint -set_exit_status $(go list ./...)
