@@ -13,10 +13,13 @@ import "image/color"
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/theme"
 
+type EFLDriver struct {
+}
+
 type window struct {
 	ee     *C.Ecore_Evas
 	canvas ui.Canvas
-	driver Driver
+	driver *EFLDriver
 }
 
 func (w *window) Init(ee *C.Ecore_Evas) {
@@ -131,9 +134,6 @@ func (c *eflCanvas) SetScale(scale float32) {
 	log.Println("TODO Update all our objects")
 }
 
-type EFLDriver struct {
-}
-
 func findEngineName() string {
 	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
 
@@ -157,7 +157,7 @@ func scaleByDPI(w *window) float32 {
 	return float32(1.0)
 }
 
-func (d EFLDriver) CreateWindow(title string) ui.Window {
+func (d *EFLDriver) CreateWindow(title string) ui.Window {
 	engine := findEngineName()
 	size := image.Pt(300, 200)
 
@@ -166,7 +166,7 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 	C.ecore_evas_init()
 
 	w := &window{
-		ee: C.ecore_evas_new(C.CString(engine), 0, 0, 100, 100, nil),
+		ee:     C.ecore_evas_new(C.CString(engine), 0, 0, 100, 100, nil),
 		driver: d,
 	}
 	c := &eflCanvas{
@@ -190,6 +190,6 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 	return w
 }
 
-func (d EFLDriver) Run() {
+func (d *EFLDriver) Run() {
 	C.ecore_main_loop_begin()
 }

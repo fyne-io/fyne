@@ -6,11 +6,11 @@ import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne-efl/driver"
 
 type eflApp struct {
-	driver driver.Driver
+	driver *driver.EFLDriver
 }
 
 func (app *eflApp) NewWindow(title string) ui.Window {
-        return app.driver.CreateWindow(title)
+	return app.driver.CreateWindow(title)
 }
 
 func NewEFLApp() app.App {
