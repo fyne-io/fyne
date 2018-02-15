@@ -16,6 +16,7 @@ import "github.com/fyne-io/fyne/ui/theme"
 type window struct {
 	ee     *C.Ecore_Evas
 	canvas ui.Canvas
+	driver Driver
 }
 
 func (w *window) Init(ee *C.Ecore_Evas) {
@@ -32,6 +33,7 @@ func (w *window) SetTitle(title string) {
 
 func (w *window) Show() {
 	C.ecore_evas_show(w.ee)
+	w.driver.Run()
 }
 
 func (w *window) Hide() {
@@ -165,6 +167,7 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 
 	w := &window{
 		ee: C.ecore_evas_new(C.CString(engine), 0, 0, 100, 100, nil),
+		driver: d,
 	}
 	c := &eflCanvas{
 		evas:  C.ecore_evas_get(w.ee),
@@ -184,7 +187,6 @@ func (d EFLDriver) CreateWindow(title string) ui.Window {
 	c.AddObject(ui.NewRectangle(theme.BackgroundColor()))
 
 	w.SetTitle(title)
-	w.Show()
 	return w
 }
 
