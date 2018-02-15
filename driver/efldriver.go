@@ -93,11 +93,29 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject) *C.Evas_Object {
 	return obj
 }
 
-func (c *eflCanvas) AddObject(o ui.CanvasObject) {
+func (c *eflCanvas) addObject(o ui.CanvasObject) {
 	obj := buildCanvasObject(c, o)
 
 	C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.w)), C.Evas_Coord(scaleInt(c, c.h)))
 	C.evas_object_show(obj)
+}
+
+func (c *eflCanvas) SetContent(o ui.CanvasObject) {
+	switch o.(type) {
+	case *ui.Container:
+		c.addObject(ui.NewRectangle(theme.BackgroundColor()))
+		container := o.(*ui.Container)
+
+		for _, child := range container.Objects {
+			c.addObject(child)
+		}
+
+		if container.Layout != nil {
+			container.Layout.Layout(container)
+		}
+	default:
+		c.addObject(o)
+	}
 }
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, t *ui.TextObject) {
@@ -184,7 +202,7 @@ func (d *EFLDriver) CreateWindow(title string) ui.Window {
 		X11WindowInit(w)
 	}
 
-	c.AddObject(ui.NewRectangle(theme.BackgroundColor()))
+	c.SetContent(new(ui.Container))
 
 	w.SetTitle(title)
 	return w
