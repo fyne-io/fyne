@@ -1,7 +1,7 @@
 package ui
 
 type Canvas interface {
-	AddObject(CanvasObject)
+	SetContent(CanvasObject)
 
 	Scale() float32
 	SetScale(float32)
