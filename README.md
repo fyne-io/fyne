@@ -30,7 +30,7 @@ And then you're ready to write your first app - this example shows how:
             app := efl.NewEFLApp()
 
             w := app.NewWindow("Hello")
-            w.Canvas().AddObject(ui.NewText("Hello Fyne!"))
+            w.Canvas().SetContent(ui.NewText("Hello Fyne!"))
 
             w.Show()
     }
