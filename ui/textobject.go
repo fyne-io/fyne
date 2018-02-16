@@ -6,6 +6,7 @@ import "github.com/fyne-io/fyne/ui/theme"
 
 type TextObject struct {
 	Color color.RGBA
+	Size  Size
 
 	Text     string
 	FontSize int
@@ -13,8 +14,16 @@ type TextObject struct {
 	Italic   bool
 }
 
-func (t TextObject) MinSize() (int, int) {
-	return 1, 1 // TODO calcualte from font/string
+func (t *TextObject) CurrentSize() Size {
+	return t.Size
+}
+
+func (t *TextObject) Resize(size Size) {
+	t.Size = size
+}
+
+func (t *TextObject) MinSize() Size {
+	return NewSize(1, 1) // TODO calcualte from font/string
 }
 
 func NewText(text string) *TextObject {

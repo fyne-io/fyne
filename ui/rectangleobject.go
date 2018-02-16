@@ -4,10 +4,19 @@ import "image/color"
 
 type RectangleObject struct {
 	Color color.RGBA
+	Size  Size
 }
 
-func (r RectangleObject) MinSize() (int, int) {
-	return 1, 1
+func (t *RectangleObject) CurrentSize() Size {
+	return t.Size
+}
+
+func (t *RectangleObject) Resize(size Size) {
+	t.Size = size
+}
+
+func (r *RectangleObject) MinSize() Size {
+	return NewSize(1, 1)
 }
 
 func NewRectangle(color color.RGBA) *RectangleObject {

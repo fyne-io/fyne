@@ -1,5 +1,7 @@
 package ui
 
 type CanvasObject interface {
-	MinSize() (int, int)
+	CurrentSize() Size
+	Resize(Size)
+	MinSize() Size
 }
