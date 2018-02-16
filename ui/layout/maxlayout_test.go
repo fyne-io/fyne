@@ -16,7 +16,7 @@ func TestMaxLayout(t *testing.T) {
 		Objects: []ui.CanvasObject{obj},
 	}
 
-	MaxLayout(container, size)
+	NewMaxLayout().Layout(container, size)
 
 	if !reflect.DeepEqual(obj.Size, size) {
 		t.Fatalf("Expected %s but got %s", size, obj.Size)

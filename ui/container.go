@@ -1,8 +1,10 @@
 package ui
 
 type Container struct {
-	Layout  Layout
-	Size    Size
+	Layout   Layout
+	Size     Size
+	Position Position
+
 	Objects []CanvasObject
 }
 
@@ -12,6 +14,14 @@ func (c *Container) CurrentSize() Size {
 
 func (c *Container) Resize(size Size) {
 	c.Size = size
+}
+
+func (c *Container) CurrentPosition() Position {
+	return c.Position
+}
+
+func (c *Container) Move(pos Position) {
+	c.Position = pos
 }
 
 func (c *Container) MinSize() Size {

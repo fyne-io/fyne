@@ -3,16 +3,26 @@ package ui
 import "image/color"
 
 type RectangleObject struct {
+	Size     Size
+	Position Position
+
 	Color color.RGBA
-	Size  Size
 }
 
-func (t *RectangleObject) CurrentSize() Size {
-	return t.Size
+func (r *RectangleObject) CurrentSize() Size {
+	return r.Size
 }
 
-func (t *RectangleObject) Resize(size Size) {
-	t.Size = size
+func (r *RectangleObject) Resize(size Size) {
+	r.Size = size
+}
+
+func (r *RectangleObject) CurrentPosition() Position {
+	return r.Position
+}
+
+func (r *RectangleObject) Move(pos Position) {
+	r.Position = pos
 }
 
 func (r *RectangleObject) MinSize() Size {

@@ -5,8 +5,9 @@ import "image/color"
 import "github.com/fyne-io/fyne/ui/theme"
 
 type TextObject struct {
-	Color color.RGBA
-	Size  Size
+	Color    color.RGBA
+	Size     Size
+	Position Position
 
 	Text     string
 	FontSize int
@@ -20,6 +21,14 @@ func (t *TextObject) CurrentSize() Size {
 
 func (t *TextObject) Resize(size Size) {
 	t.Size = size
+}
+
+func (t *TextObject) CurrentPosition() Position {
+	return t.Position
+}
+
+func (t *TextObject) Move(pos Position) {
+	t.Position = pos
 }
 
 func (t *TextObject) MinSize() Size {
