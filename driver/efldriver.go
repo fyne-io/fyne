@@ -7,10 +7,10 @@ package driver
 import "C"
 
 import "log"
-import "image"
 import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
 
 type EFLDriver struct {
@@ -63,7 +63,7 @@ func (o *canvasobject) Canvas() ui.Canvas {
 type eflCanvas struct {
 	ui.Canvas
 	evas  *C.Evas
-	w, h  int
+	size  ui.Size
 	scale float32
 }
 
@@ -93,28 +93,36 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject) *C.Evas_Object {
 	return obj
 }
 
-func (c *eflCanvas) addObject(o ui.CanvasObject) {
-	obj := buildCanvasObject(c, o)
-
-	C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.w)), C.Evas_Coord(scaleInt(c, c.h)))
-	C.evas_object_show(obj)
-}
-
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	switch o.(type) {
 	case *ui.Container:
-		c.addObject(ui.NewRectangle(theme.BackgroundColor()))
+		obj := buildCanvasObject(c, ui.NewRectangle(theme.BackgroundColor()))
+		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
+		C.evas_object_show(obj)
+
 		container := o.(*ui.Container)
 
-		for _, child := range container.Objects {
-			c.addObject(child)
+		var objs = make([]*C.Evas_Object, len(container.Objects))
+		for i, child := range container.Objects {
+			obj := buildCanvasObject(c, child)
+			objs[i] = obj
 		}
 
 		if container.Layout != nil {
-			container.Layout.Layout(container)
+			container.Layout.Layout(container, c.size)
+		} else {
+			layout.MaxLayout(container, c.size)
+		}
+
+		for i, child := range container.Objects {
+			size := child.CurrentSize()
+			C.evas_object_geometry_set(objs[i], 0, 0, C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+			C.evas_object_show(objs[i])
 		}
 	default:
-		c.addObject(o)
+		obj := buildCanvasObject(c, o)
+		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
+		C.evas_object_show(obj)
 	}
 }
 
@@ -177,7 +185,7 @@ func scaleByDPI(w *window) float32 {
 
 func (d *EFLDriver) CreateWindow(title string) ui.Window {
 	engine := findEngineName()
-	size := image.Pt(300, 200)
+	size := ui.NewSize(300, 200)
 
 	C.evas_init()
 	C.ecore_init()
@@ -189,12 +197,11 @@ func (d *EFLDriver) CreateWindow(title string) ui.Window {
 	}
 	c := &eflCanvas{
 		evas:  C.ecore_evas_get(w.ee),
-		w:     size.X,
-		h:     size.Y,
+		size:  size,
 		scale: scaleByDPI(w),
 	}
 	w.canvas = c
-	C.ecore_evas_resize(w.ee, C.int(scaleInt(c, size.X)), C.int(scaleInt(c, size.Y)))
+	C.ecore_evas_resize(w.ee, C.int(scaleInt(c, size.Width)), C.int(scaleInt(c, size.Height)))
 
 	if engine == WaylandEngineName() {
 		WaylandWindowInit(w)
