@@ -111,12 +111,14 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 		if container.Layout != nil {
 			container.Layout.Layout(container, c.size)
 		} else {
-			layout.MaxLayout(container, c.size)
+			layout.NewMaxLayout().Layout(container, c.size)
 		}
 
 		for i, child := range container.Objects {
 			size := child.CurrentSize()
-			C.evas_object_geometry_set(objs[i], 0, 0, C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+			pos := child.CurrentPosition()
+			C.evas_object_geometry_set(objs[i], C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+			                           C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 			C.evas_object_show(objs[i])
 		}
 	default:
