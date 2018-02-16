@@ -19,6 +19,6 @@ func TestMaxLayout(t *testing.T) {
 	NewMaxLayout().Layout(container, size)
 
 	if !reflect.DeepEqual(obj.Size, size) {
-		t.Fatalf("Expected %s but got %s", size, obj.Size)
+		t.Fatal("Expected", size, "but got", obj.Size)
 	}
 }

@@ -23,10 +23,10 @@ func TestGridLayout(t *testing.T) {
 	NewGridLayout(2).Layout(container, gridSize)
 
 	if !reflect.DeepEqual(obj1.Size, cellSize) {
-		t.Fatalf("Expected %s but got %s", cellSize, obj1.Size)
+		t.Fatal("Expected", cellSize, "but got", obj1.Size)
 	}
 	cell2Pos := ui.NewPos(50, 0)
 	if !reflect.DeepEqual(obj2.Position, cell2Pos) {
-		t.Fatalf("Expected %s but got %s", cell2Pos, obj2.Position)
+		t.Fatal("Expected", cell2Pos, "but got", obj2.Position)
 	}
 }
