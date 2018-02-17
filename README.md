@@ -24,10 +24,10 @@ And then you're ready to write your first app - this example shows how:
     package main
 
     import "github.com/fyne-io/fyne/ui"
-    import "github.com/fyne-io/fyne-efl"
+    import "github.com/fyne-io/fyne-app"
 
     func main() {
-            app := efl.NewEFLApp()
+            app := fyneapp.NewApp()
 
             w := app.NewWindow("Hello")
             w.Canvas().SetContent(ui.NewText("Hello Fyne!"))
