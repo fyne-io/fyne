@@ -1,7 +1,6 @@
 package layout
 
 import "math"
-
 import "github.com/fyne-io/fyne/ui"
 
 type gridLayout struct {
@@ -20,7 +19,7 @@ func (g *gridLayout) Layout(c *ui.Container, size ui.Size) {
 		child.Move(ui.NewPos(x, y))
 		child.Resize(cellSize)
 
-		if i+1%g.Cols == 0 {
+		if (i+1)%g.Cols == 0 {
 			x = 0
 			y += cellHeight
 		} else {
