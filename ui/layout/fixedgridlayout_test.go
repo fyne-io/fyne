@@ -7,7 +7,7 @@ import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
 
-func TestGridLayout(t *testing.T) {
+func TestFixedfgGridLayout(t *testing.T) {
 	gridSize := ui.NewSize(125, 125)
 	cellSize := ui.NewSize(50, 50)
 
