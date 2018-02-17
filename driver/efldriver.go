@@ -4,10 +4,13 @@ package driver
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
 // #include <Evas.h>
+//
+// void onWindowResize_cgo(Ecore_Evas *);
 import "C"
 
 import "log"
 import "image/color"
+import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/layout"
@@ -22,9 +25,7 @@ type window struct {
 	driver *EFLDriver
 }
 
-func (w *window) Init(ee *C.Ecore_Evas) {
-	w.ee = ee
-}
+var windows = make(map[*C.Ecore_Evas]*window)
 
 func (w *window) Title() string {
 	return C.GoString(C.ecore_evas_title_get(w.ee))
@@ -62,9 +63,10 @@ func (o *canvasobject) Canvas() ui.Canvas {
 
 type eflCanvas struct {
 	ui.Canvas
-	evas  *C.Evas
-	size  ui.Size
-	scale float32
+	evas    *C.Evas
+	size    ui.Size
+	scale   float32
+	content ui.CanvasObject
 }
 
 func buildCanvasObject(c *eflCanvas, o ui.CanvasObject) *C.Evas_Object {
@@ -118,7 +120,7 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 			size := child.CurrentSize()
 			pos := child.CurrentPosition()
 			C.evas_object_geometry_set(objs[i], C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
-			                           C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+				C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 			C.evas_object_show(objs[i])
 		}
 	default:
@@ -126,6 +128,8 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
 		C.evas_object_show(obj)
 	}
+
+	c.content = o
 }
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, t *ui.TextObject) {
@@ -185,6 +189,18 @@ func scaleByDPI(w *window) float32 {
 	return float32(1.0)
 }
 
+//export onWindowResize
+func onWindowResize(ee *C.Ecore_Evas) {
+	var ww, hh C.int
+	C.ecore_evas_geometry_get(ee, nil, nil, &ww, &hh)
+
+	w := windows[ee]
+
+	canvas := w.canvas.(*eflCanvas)
+	canvas.size = ui.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
+	canvas.SetContent(canvas.content)
+}
+
 func (d *EFLDriver) CreateWindow(title string) ui.Window {
 	engine := findEngineName()
 	size := ui.NewSize(300, 200)
@@ -203,7 +219,9 @@ func (d *EFLDriver) CreateWindow(title string) ui.Window {
 		scale: scaleByDPI(w),
 	}
 	w.canvas = c
+	windows[w.ee] = w
 	C.ecore_evas_resize(w.ee, C.int(scaleInt(c, size.Width)), C.int(scaleInt(c, size.Height)))
+	C.ecore_evas_callback_resize_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowResize_cgo)))
 
 	if engine == WaylandEngineName() {
 		WaylandWindowInit(w)
