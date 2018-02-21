@@ -5,6 +5,7 @@ type Window interface {
 	SetTitle(string)
 	Show()
 	Hide()
+	Close()
 
 	Canvas() Canvas
 }
