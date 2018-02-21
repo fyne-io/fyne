@@ -6,15 +6,16 @@ package driver
 // #include <Evas.h>
 //
 // void onWindowResize_cgo(Ecore_Evas *);
+// void onObjectMouseDown_cgo(Evas_Object *, void *);
 import "C"
 
 import "log"
-import "image/color"
 import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
+import "github.com/fyne-io/fyne/ui/widget"
 
 type EFLDriver struct {
 }
@@ -53,12 +54,20 @@ type canvasobject struct {
 	canvas ui.Canvas
 }
 
-func (o *canvasobject) SetColor(c color.RGBA) {
-	C.evas_object_color_set(o.obj, C.int(c.R), C.int(c.G), C.int(c.B), C.int(c.A))
-}
+var objects = make(map[*C.Evas_Object]ui.CanvasObject)
 
 func (o *canvasobject) Canvas() ui.Canvas {
 	return o.canvas
+}
+
+//export onObjectMouseDown
+func onObjectMouseDown(obj *C.Evas_Object) {
+	co := objects[obj]
+
+	switch co.(type) {
+	case *widget.Button:
+		co.(*widget.Button).OnClicked()
+	}
 }
 
 type eflCanvas struct {
@@ -69,7 +78,7 @@ type eflCanvas struct {
 	content ui.CanvasObject
 }
 
-func buildCanvasObject(c *eflCanvas, o ui.CanvasObject) *C.Evas_Object {
+func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) *C.Evas_Object {
 	var obj *C.Evas_Object
 
 	switch o.(type) {
@@ -89,44 +98,73 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject) *C.Evas_Object {
 		C.evas_object_color_set(obj, C.int(ro.Color.R), C.int(ro.Color.G),
 			C.int(ro.Color.B), C.int(ro.Color.A))
 	default:
-		log.Println("Unrecognised Object", o)
+		log.Printf("Unrecognised Object %#v\n", o)
 	}
 
+	objects[obj] = target
+	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
+		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
+		nil)
 	return obj
+}
+
+func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
+	obj := buildCanvasObject(c, o, o2)
+
+	C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+		C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+	C.evas_object_show(obj)
+}
+
+func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObject, pos ui.Position, size ui.Size) {
+	for _, child := range objs {
+		switch child.(type) {
+		case *ui.Container:
+			container := child.(*ui.Container)
+
+			if container.Layout != nil {
+				container.Layout.Layout(container.Objects, c.size)
+			} else {
+				layout.NewMaxLayout().Layout(container.Objects, c.size)
+			}
+			c.setupContainer(container.Objects, nil, child.CurrentPosition(), child.CurrentSize())
+		case ui.Widget:
+			c.setupContainer(child.(ui.Widget).Layout(), child, child.CurrentPosition(), child.CurrentSize())
+
+		default:
+			if target == nil {
+				target = child
+			}
+
+			childPos := child.CurrentPosition().Add(pos)
+			c.setupObj(child, target, childPos, child.CurrentSize())
+		}
+	}
 }
 
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	switch o.(type) {
 	case *ui.Container:
-		obj := buildCanvasObject(c, ui.NewRectangle(theme.BackgroundColor()))
+		r := ui.NewRectangle(theme.BackgroundColor())
+		obj := buildCanvasObject(c, r, r)
 		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
 		C.evas_object_show(obj)
 
 		container := o.(*ui.Container)
-
-		var objs = make([]*C.Evas_Object, len(container.Objects))
-		for i, child := range container.Objects {
-			obj := buildCanvasObject(c, child)
-			objs[i] = obj
-		}
-
+		container.Resize(c.size)
+		// TODO should this move into container like widget?
 		if container.Layout != nil {
-			container.Layout.Layout(container, c.size)
+			container.Layout.Layout(container.Objects, c.size)
 		} else {
-			layout.NewMaxLayout().Layout(container, c.size)
+			layout.NewMaxLayout().Layout(container.Objects, c.size)
 		}
 
-		for i, child := range container.Objects {
-			size := child.CurrentSize()
-			pos := child.CurrentPosition()
-			C.evas_object_geometry_set(objs[i], C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
-				C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
-			C.evas_object_show(objs[i])
-		}
+		c.setupContainer(container.Objects, nil, ui.NewPos(0, 0), container.CurrentSize())
+	case ui.Widget:
+		widget := o.(ui.Widget)
+		c.setupContainer(widget.Layout(), o, widget.CurrentPosition(), widget.CurrentSize())
 	default:
-		obj := buildCanvasObject(c, o)
-		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
-		C.evas_object_show(obj)
+		c.setupObj(o, o, ui.NewPos(0, 0), c.size)
 	}
 
 	c.content = o

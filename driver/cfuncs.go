@@ -4,11 +4,18 @@ package driver
 #cgo pkg-config: ecore-evas
 #include <Ecore_Evas.h>
 
-// The gateway function
+// Gateway callback functions
+
 void onWindowResize_cgo(Ecore_Evas *ee)
 {
 	void onWindowResize(Ecore_Evas*);
 	onWindowResize(ee);
+}
+
+void onObjectMouseDown_cgo(void *data, Evas *e, Evas_Object *obj, void *event_info)
+{
+	void onObjectMouseDown(Evas_Object*);
+	onObjectMouseDown(obj);
 }
 */
 import "C"
