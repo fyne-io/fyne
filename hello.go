@@ -15,7 +15,7 @@ func main() {
 	w.Canvas().SetContent(ui.NewContainer(
 		[]ui.CanvasObject{
 			ui.NewText("Hello Fyne!"),
-			button,
+			quit,
 		},
 		layout.NewGridLayout(1)))
 
