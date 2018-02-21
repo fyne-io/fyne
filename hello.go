@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/widget"
