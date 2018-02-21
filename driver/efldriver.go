@@ -7,6 +7,7 @@ import "C"
 import "log"
 
 type EFLDriver struct {
+	running bool
 }
 
 func findEngineName() string {
@@ -21,9 +22,11 @@ func findEngineName() string {
 }
 
 func (d *EFLDriver) Run() {
+	d.running = true
 	C.ecore_main_loop_begin()
 }
 
 func (d *EFLDriver) Quit() {
 	C.ecore_main_loop_quit()
+	d.running = false
 }

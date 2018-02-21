@@ -18,6 +18,7 @@ type window struct {
 	ee     *C.Ecore_Evas
 	canvas ui.Canvas
 	driver *EFLDriver
+	master bool
 }
 
 var windows = make(map[*C.Ecore_Evas]*window)
@@ -33,13 +34,24 @@ func (w *window) SetTitle(title string) {
 func (w *window) Show() {
 	C.ecore_evas_show(w.ee)
 
-	if len(windows) == 1 {
+	w.master = len(windows) == 1
+	if !w.driver.running {
 		w.driver.Run()
 	}
 }
 
 func (w *window) Hide() {
 	C.ecore_evas_hide(w.ee)
+}
+
+func (w *window) Close() {
+	w.Hide()
+
+	if w.master || len(windows) == 1 {
+		w.driver.Quit()
+	} else {
+		delete(windows, w.ee)
+	}
 }
 
 func (w *window) Canvas() ui.Canvas {
@@ -72,13 +84,7 @@ func onWindowResize(ee *C.Ecore_Evas) {
 
 //export onWindowClose
 func onWindowClose(ee *C.Ecore_Evas) {
-	windows[ee].Hide()
-
-	if len(windows) == 1 {
-		windows[ee].driver.Quit()
-	} else {
-		delete(windows, ee)
-	}
+	windows[ee].Close()
 }
 
 func (d *EFLDriver) CreateWindow(title string) ui.Window {
