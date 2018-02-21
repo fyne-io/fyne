@@ -24,19 +24,32 @@ And then you're ready to write your first app - this example shows how:
     package main
 
     import "github.com/fyne-io/fyne/ui"
+    import "github.com/fyne-io/fyne/ui/layout"
+    import "github.com/fyne-io/fyne/ui/widget"
     import "github.com/fyne-io/fyne-app"
 
     func main() {
-            app := fyneapp.NewApp()
+    	app := fyneapp.NewApp()
 
-            w := app.NewWindow("Hello")
-            w.Canvas().SetContent(ui.NewText("Hello Fyne!"))
+    	w := app.NewWindow("Hello")
+    	quit := widget.NewButton("Quit", func() {
+    		app.Quit()
+    	})
+    	w.Canvas().SetContent(ui.NewContainer(
+    		[]ui.CanvasObject{
+    			ui.NewText("Hello Fyne!"),
+    			quit,
+    		},
+    		layout.NewGridLayout(1)))
 
-            w.Show()
+    	w.Show()
     }
-
 
 And you can run that simply as:
 
     go run main.go
+
+It should look like this:
+
+![Fyne Screenshot](hello.png "Fyne Screenshot")
 
