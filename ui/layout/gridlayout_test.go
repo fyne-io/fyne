@@ -15,12 +15,12 @@ func TestGridLayout(t *testing.T) {
 	obj2 := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
 	obj3 := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
 
-	container := &ui.CanvasGroup{
+	container := &ui.Container{
 		Size:    gridSize,
 		Objects: []ui.CanvasObject{obj1, obj2, obj3},
 	}
 
-	NewGridLayout(2).Layout(container, gridSize)
+	NewGridLayout(2).Layout(container.Objects, gridSize)
 
 	if !reflect.DeepEqual(obj1.Size, cellSize) {
 		t.Fatal("Expected", cellSize, "but got", obj1.Size)

@@ -11,12 +11,12 @@ func TestMaxLayout(t *testing.T) {
 	size := ui.NewSize(100, 100)
 
 	obj := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
-	container := &ui.CanvasGroup{
+	container := &ui.Container{
 		Size:    size,
 		Objects: []ui.CanvasObject{obj},
 	}
 
-	NewMaxLayout().Layout(container, size)
+	NewMaxLayout().Layout(container.Objects, size)
 
 	if !reflect.DeepEqual(obj.Size, size) {
 		t.Fatal("Expected", size, "but got", obj.Size)
