@@ -15,7 +15,7 @@ func TestGridLayout(t *testing.T) {
 	obj2 := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
 	obj3 := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
 
-	container := &ui.Container{
+	container := &ui.CanvasGroup{
 		Size:    gridSize,
 		Objects: []ui.CanvasObject{obj1, obj2, obj3},
 	}

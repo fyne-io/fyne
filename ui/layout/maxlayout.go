@@ -5,8 +5,8 @@ import "github.com/fyne-io/fyne/ui"
 type maxLayout struct {
 }
 
-func (m *maxLayout) Layout(c *ui.Container, size ui.Size) {
-	for _, child := range c.Objects {
+func (m *maxLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
+	for _, child := range objects {
 		child.Resize(size)
 	}
 }

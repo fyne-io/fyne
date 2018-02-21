@@ -1,5 +1,5 @@
 package ui
 
 type Layout interface {
-	Layout(*Container, Size)
+	Layout([]CanvasObject, Size)
 }

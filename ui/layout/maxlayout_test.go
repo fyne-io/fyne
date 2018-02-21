@@ -11,7 +11,7 @@ func TestMaxLayout(t *testing.T) {
 	size := ui.NewSize(100, 100)
 
 	obj := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
-	container := &ui.Container{
+	container := &ui.CanvasGroup{
 		Size:    size,
 		Objects: []ui.CanvasObject{obj},
 	}

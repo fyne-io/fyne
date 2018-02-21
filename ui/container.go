@@ -31,3 +31,10 @@ func (c *Container) MinSize() Size {
 func (c *Container) AddObject(o CanvasObject) {
 	c.Objects = append(c.Objects, o)
 }
+
+func NewContainer(objects []CanvasObject, layout Layout) *Container {
+	return &Container{
+		Layout:  layout,
+		Objects: objects,
+	}
+}

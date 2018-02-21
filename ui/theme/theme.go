@@ -8,6 +8,10 @@ func BackgroundColor() color.RGBA {
 	return color.RGBA{0xcc, 0xcc, 0xcc, 0xff}
 }
 
+func ButtonColor() color.RGBA {
+	return color.RGBA{0x80, 0x80, 0x80, 0xff}
+}
+
 func TextColor() color.RGBA {
 	return color.RGBA{0x10, 0x10, 0x10, 0xff}
 }

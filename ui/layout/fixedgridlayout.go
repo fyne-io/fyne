@@ -7,11 +7,11 @@ type fixedGridLayout struct {
 	Size ui.Size
 }
 
-func (g *fixedGridLayout) Layout(c *ui.Container, size ui.Size) {
+func (g *fixedGridLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
 	cols := int(math.Floor(float64(size.Width) / float64(g.Size.Width)))
 
 	x, y := 0, 0
-	for i, child := range c.Objects {
+	for i, child := range objects {
 		child.Move(ui.NewPos(x, y))
 		child.Resize(g.Size)
 
