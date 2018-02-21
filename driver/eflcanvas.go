@@ -43,8 +43,25 @@ type eflCanvas struct {
 	content ui.CanvasObject
 }
 
-func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) *C.Evas_Object {
+func nativeTextBounds(obj *C.Evas_Object) ui.Size {
+	width, height := 0, 0
+	var w, h C.Evas_Coord
+	length := int(C.strlen(C.evas_object_text_text_get(obj)))
+
+	for i := 0; i < length; i++ {
+		C.evas_object_text_char_pos_get(obj, C.int(i), nil, nil, &w, &h)
+		width += int(w) + 1
+		if int(h) > height {
+			height = int(h)
+		}
+	}
+
+	return ui.Size{width, height}
+}
+
+func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) (*C.Evas_Object, *ui.Size) {
 	var obj *C.Evas_Object
+	var min *ui.Size
 
 	switch o.(type) {
 	case *ui.TextObject:
@@ -54,8 +71,11 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) 
 		C.evas_object_color_set(obj, C.int(to.Color.R), C.int(to.Color.G),
 			C.int(to.Color.B), C.int(to.Color.A))
 
-		C.evas_object_text_text_set(obj, C.CString(to.Text))
 		updateFont(obj, c, to)
+		C.evas_object_text_text_set(obj, C.CString(to.Text))
+
+		native := nativeTextBounds(obj)
+		min = &ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
 	case *ui.RectangleObject:
 		obj = C.evas_object_rectangle_add(c.evas)
 
@@ -70,11 +90,14 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) 
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
 		nil)
-	return obj
+	return obj, min
 }
 
 func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
-	obj := buildCanvasObject(c, o, o2)
+	obj, min := buildCanvasObject(c, o, o2)
+	if min != nil {
+		pos = ui.NewPos(pos.X+(size.Width-min.Width)/2, pos.Y+(size.Height-min.Height)/2)
+	}
 
 	C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 		C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
@@ -111,7 +134,7 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	switch o.(type) {
 	case *ui.Container:
 		r := ui.NewRectangle(theme.BackgroundColor())
-		obj := buildCanvasObject(c, r, r)
+		obj, _ := buildCanvasObject(c, r, r)
 		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
 		C.evas_object_show(obj)
 
@@ -157,6 +180,15 @@ func scaleInt(c ui.Canvas, v int) int {
 		return v
 	default:
 		return int(float32(v) * c.Scale())
+	}
+}
+
+func unscaleInt(c ui.Canvas, v int) int {
+	switch c.Scale() {
+	case 1.0:
+		return v
+	default:
+		return int(float32(v) / c.Scale())
 	}
 }
 
