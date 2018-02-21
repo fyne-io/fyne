@@ -6,6 +6,7 @@ import "reflect"
 import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/theme"
 
 func TestFixedfgGridLayout(t *testing.T) {
 	gridSize := ui.NewSize(125, 125)
@@ -25,11 +26,11 @@ func TestFixedfgGridLayout(t *testing.T) {
 	if !reflect.DeepEqual(obj1.Size, cellSize) {
 		t.Fatal("Expected", cellSize, "but got", obj1.Size)
 	}
-	cell2Pos := ui.NewPos(50, 0)
+	cell2Pos := ui.NewPos(50 + (theme.Padding()*2), theme.Padding())
 	if !reflect.DeepEqual(obj2.Position, cell2Pos) {
 		t.Fatal("Expected", cell2Pos, "but got", obj2.Position)
 	}
-	cell3Pos := ui.NewPos(0, 50)
+	cell3Pos := ui.NewPos(theme.Padding(), 50 + (theme.Padding()*2))
 	if !reflect.DeepEqual(obj3.Position, cell3Pos) {
 		t.Fatal("Expected", cell3Pos, "but got", obj3.Position)
 	}

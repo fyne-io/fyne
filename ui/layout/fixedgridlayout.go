@@ -2,24 +2,25 @@ package layout
 
 import "math"
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/theme"
 
 type fixedGridLayout struct {
-	Size ui.Size
+	CellSize ui.Size
 }
 
 func (g *fixedGridLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
-	cols := int(math.Floor(float64(size.Width) / float64(g.Size.Width)))
+	cols := int(math.Floor(float64(size.Width - theme.Padding()) / float64(g.CellSize.Width + theme.Padding())))
 
-	x, y := 0, 0
+	x, y := theme.Padding(), theme.Padding()
 	for i, child := range objects {
 		child.Move(ui.NewPos(x, y))
-		child.Resize(g.Size)
+		child.Resize(g.CellSize)
 
 		if (i+1)%cols == 0 {
-			x = 0
-			y += g.Size.Height
+			x = theme.Padding()
+			y += g.CellSize.Height + theme.Padding()
 		} else {
-			x += g.Size.Width
+			x += g.CellSize.Width + theme.Padding()
 		}
 	}
 }

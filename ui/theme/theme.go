@@ -40,3 +40,7 @@ func TextItalicFont() string {
 func TextBoldItalicFont() string {
 	return fontPath("BoldItalic")
 }
+
+func Padding() int {
+	return 5
+}
