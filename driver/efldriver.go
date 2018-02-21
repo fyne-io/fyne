@@ -11,6 +11,7 @@ import "C"
 import "log"
 import "image/color"
 import "unsafe"
+import "runtime"
 
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/layout"
@@ -167,6 +168,10 @@ func (c *eflCanvas) SetScale(scale float32) {
 }
 
 func findEngineName() string {
+	if runtime.GOOS == "darwin" {
+		return CocoaEngineName()
+	}
+
 	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
 
 	if env == nil {
@@ -225,6 +230,8 @@ func (d *EFLDriver) CreateWindow(title string) ui.Window {
 
 	if engine == WaylandEngineName() {
 		WaylandWindowInit(w)
+	} else if engine == CocoaEngineName() {
+		CocoaWindowInit(w)
 	} else {
 		X11WindowInit(w)
 	}
