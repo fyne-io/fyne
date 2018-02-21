@@ -12,6 +12,12 @@ void onWindowResize_cgo(Ecore_Evas *ee)
 	onWindowResize(ee);
 }
 
+void onWindowClose_cgo(Ecore_Evas *ee)
+{
+	void onWindowClose(Ecore_Evas*);
+	onWindowClose(ee);
+}
+
 void onObjectMouseDown_cgo(void *data, Evas *e, Evas_Object *obj, void *event_info)
 {
 	void onObjectMouseDown(Evas_Object*);

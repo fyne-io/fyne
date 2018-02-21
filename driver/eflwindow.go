@@ -6,6 +6,7 @@ package driver
 // #include <Evas.h>
 //
 // void onWindowResize_cgo(Ecore_Evas *);
+// void onWindowClose_cgo(Ecore_Evas *);
 import "C"
 
 import "log"
@@ -31,7 +32,10 @@ func (w *window) SetTitle(title string) {
 
 func (w *window) Show() {
 	C.ecore_evas_show(w.ee)
-	w.driver.Run()
+
+	if len(windows) == 1 {
+		w.driver.Run()
+	}
 }
 
 func (w *window) Hide() {
@@ -43,15 +47,15 @@ func (w *window) Canvas() ui.Canvas {
 }
 
 func scaleByDPI(w *window) float32 {
-       xdpi := C.int(0)
+	xdpi := C.int(0)
 
-       C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
-       if xdpi > 96 {
-               log.Println("High DPI", xdpi, "- scaling to 1.5")
-               return float32(1.5)
-       }
+	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
+	if xdpi > 96 {
+		log.Println("High DPI", xdpi, "- scaling to 1.5")
+		return float32(1.5)
+	}
 
-       return float32(1.0)
+	return float32(1.0)
 }
 
 //export onWindowResize
@@ -64,6 +68,17 @@ func onWindowResize(ee *C.Ecore_Evas) {
 	canvas := w.canvas.(*eflCanvas)
 	canvas.size = ui.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
 	canvas.SetContent(canvas.content)
+}
+
+//export onWindowClose
+func onWindowClose(ee *C.Ecore_Evas) {
+	windows[ee].Hide()
+
+	if len(windows) == 1 {
+		windows[ee].driver.Quit()
+	} else {
+		delete(windows, ee)
+	}
 }
 
 func (d *EFLDriver) CreateWindow(title string) ui.Window {
@@ -87,6 +102,7 @@ func (d *EFLDriver) CreateWindow(title string) ui.Window {
 	windows[w.ee] = w
 	C.ecore_evas_resize(w.ee, C.int(scaleInt(c, size.Width)), C.int(scaleInt(c, size.Height)))
 	C.ecore_evas_callback_resize_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowResize_cgo)))
+	C.ecore_evas_callback_delete_request_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowClose_cgo)))
 
 	if engine == WaylandEngineName() {
 		WaylandWindowInit(w)

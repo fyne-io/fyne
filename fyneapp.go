@@ -20,3 +20,7 @@ func NewApp() app.App {
 
 	return app
 }
+
+func (app *eflApp) Quit() {
+	app.driver.Quit()
+}

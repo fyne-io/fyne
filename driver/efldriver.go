@@ -23,3 +23,7 @@ func findEngineName() string {
 func (d *EFLDriver) Run() {
 	C.ecore_main_loop_begin()
 }
+
+func (d *EFLDriver) Quit() {
+	C.ecore_main_loop_quit()
+}
