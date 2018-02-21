@@ -10,8 +10,8 @@ type fixedGridLayout struct {
 
 func (g *fixedGridLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
 	cols := 1
-	if size.Width > (g.CellSize.Width + (theme.Padding()*2)) {
-		cols = int(math.Floor(float64(size.Width - theme.Padding()) / float64(g.CellSize.Width + theme.Padding())))
+	if size.Width > (g.CellSize.Width + (theme.Padding() * 2)) {
+		cols = int(math.Floor(float64(size.Width-theme.Padding()) / float64(g.CellSize.Width+theme.Padding())))
 	}
 
 	x, y := theme.Padding(), theme.Padding()
