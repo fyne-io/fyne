@@ -9,15 +9,13 @@ func main() {
 	app := fyneapp.NewApp()
 
 	w := app.NewWindow("Hello")
-	quit := widget.NewButton("Quit", func() {
-		app.Quit()
-	})
-	w.Canvas().SetContent(ui.NewContainer(
-		[]ui.CanvasObject{
-			ui.NewText("Hello Fyne!"),
-			quit,
-		},
-		layout.NewGridLayout(1)))
+	container := ui.NewContainer(
+		ui.NewText("Hello Fyne!"),
+		widget.NewButton("Quit", func() {
+			app.Quit()
+		}))
+	container.Layout = layout.NewGridLayout(1)
 
+	w.Canvas().SetContent(container)
 	w.Show()
 }
