@@ -32,9 +32,8 @@ func (c *Container) AddObject(o CanvasObject) {
 	c.Objects = append(c.Objects, o)
 }
 
-func NewContainer(objects []CanvasObject, layout Layout) *Container {
+func NewContainer(objects ...CanvasObject) *Container {
 	return &Container{
-		Layout:  layout,
 		Objects: objects,
 	}
 }
