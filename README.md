@@ -51,5 +51,6 @@ And you can run that simply as:
 
 It should look like this:
 
-![Fyne Screenshot](hello.png "Fyne Screenshot")
-
+<p align="center">
+  ![Fyne Screenshot](hello.png "Fyne Screenshot")
+</p>
