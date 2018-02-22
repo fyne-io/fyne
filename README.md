@@ -52,5 +52,5 @@ And you can run that simply as:
 It should look like this:
 
 <p align="center" markdown="1">
-![Fyne Screenshot](hello.png "Fyne Screenshot")
+  <img src="hello.png" alt="Fyne Screenshot" />
 </p>
