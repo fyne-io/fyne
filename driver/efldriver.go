@@ -174,12 +174,11 @@ func findEngineName() string {
 
 	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
 
-	if env == nil {
-		log.Println("Unable to connect to Wayland - attempting X")
-		return X11EngineName()
+	if env != nil {
+		log.Println("Wayland support is currently disabled - attempting XWayland")
 	}
 
-	return WaylandEngineName()
+	return X11EngineName()
 }
 
 func scaleByDPI(w *window) float32 {
