@@ -5,20 +5,24 @@ package driver
 import "C"
 
 import "log"
+import "runtime"
 
 type EFLDriver struct {
 	running bool
 }
 
 func findEngineName() string {
-	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
-
-	if env == nil {
-		log.Println("Unable to connect to Wayland - attempting X")
-		return X11EngineName()
+	if runtime.GOOS == "darwin" {
+		return CocoaEngineName()
 	}
 
-	return WaylandEngineName()
+	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
+
+	if env != nil {
+		log.Println("Wayland support is currently disabled - attempting XWayland")
+	}
+
+	return X11EngineName()
 }
 
 func (d *EFLDriver) Run() {
