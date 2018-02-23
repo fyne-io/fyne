@@ -167,8 +167,16 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	c.refreshContent(o)
 
 	min := o.MinSize()
-	C.ecore_evas_size_min_set(c.window.ee, C.int(scaleInt(c, min.Width)),
-		C.int(scaleInt(c, min.Height)))
+	minWidth := scaleInt(c, min.Width)
+	minHeight := scaleInt(c, min.Height)
+
+	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
+
+	var w, h C.int
+	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
+	if int(w) < minWidth || int(h) < minHeight {
+		C.ecore_evas_resize(c.window.ee, C.int(minWidth), C.int(minHeight))
+	}
 }
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, t *ui.TextObject) {
