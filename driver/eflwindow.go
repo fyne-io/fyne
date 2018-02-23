@@ -79,7 +79,7 @@ func onWindowResize(ee *C.Ecore_Evas) {
 
 	canvas := w.canvas.(*eflCanvas)
 	canvas.size = ui.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
-	canvas.SetContent(canvas.content)
+	canvas.refreshContent(canvas.content)
 }
 
 //export onWindowClose
@@ -89,24 +89,23 @@ func onWindowClose(ee *C.Ecore_Evas) {
 
 func (d *EFLDriver) CreateWindow(title string) ui.Window {
 	engine := findEngineName()
-	size := ui.NewSize(300, 200)
 
 	C.evas_init()
 	C.ecore_init()
 	C.ecore_evas_init()
 
 	w := &window{
-		ee:     C.ecore_evas_new(C.CString(engine), 0, 0, 100, 100, nil),
+		ee:     C.ecore_evas_new(C.CString(engine), 0, 0, 10, 10, nil),
 		driver: d,
 	}
+	w.SetTitle(title)
 	c := &eflCanvas{
-		evas:  C.ecore_evas_get(w.ee),
-		size:  size,
-		scale: scaleByDPI(w),
+		evas:   C.ecore_evas_get(w.ee),
+		scale:  scaleByDPI(w),
+		window: w,
 	}
 	w.canvas = c
 	windows[w.ee] = w
-	C.ecore_evas_resize(w.ee, C.int(scaleInt(c, size.Width)), C.int(scaleInt(c, size.Height)))
 	C.ecore_evas_callback_resize_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowResize_cgo)))
 	C.ecore_evas_callback_delete_request_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowClose_cgo)))
 
@@ -117,7 +116,5 @@ func (d *EFLDriver) CreateWindow(title string) ui.Window {
 	}
 
 	c.SetContent(new(ui.Container))
-
-	w.SetTitle(title)
 	return w
 }

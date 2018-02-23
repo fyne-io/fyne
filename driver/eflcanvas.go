@@ -1,7 +1,8 @@
 package driver
 
-// #cgo pkg-config: evas
+// #cgo pkg-config: evas ecore-evas
 // #include <Evas.h>
+// #include <Ecore_Evas.h>
 //
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
 import "C"
@@ -41,6 +42,7 @@ type eflCanvas struct {
 	size    ui.Size
 	scale   float32
 	content ui.CanvasObject
+	window  *window
 }
 
 func nativeTextBounds(obj *C.Evas_Object) ui.Size {
@@ -76,6 +78,7 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) 
 
 		native := nativeTextBounds(obj)
 		min = &ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
+		to.SetMinSize(*min)
 	case *ui.RectangleObject:
 		obj = C.evas_object_rectangle_add(c.evas)
 
@@ -111,13 +114,13 @@ func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 			container := child.(*ui.Container)
 
 			if container.Layout != nil {
-				container.Layout.Layout(container.Objects, c.size)
+				container.Layout.Layout(container.Objects, child.CurrentSize())
 			} else {
-				layout.NewMaxLayout().Layout(container.Objects, c.size)
+				layout.NewMaxLayout().Layout(container.Objects, child.CurrentSize())
 			}
-			c.setupContainer(container.Objects, nil, child.CurrentPosition(), child.CurrentSize())
+			c.setupContainer(container.Objects, nil, child.CurrentPosition().Add(pos), child.CurrentSize())
 		case ui.Widget:
-			c.setupContainer(child.(ui.Widget).Layout(), child, child.CurrentPosition(), child.CurrentSize())
+			c.setupContainer(child.(ui.Widget).Layout(), child, child.CurrentPosition().Add(pos), child.CurrentSize())
 
 		default:
 			if target == nil {
@@ -130,7 +133,8 @@ func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 	}
 }
 
-func (c *eflCanvas) SetContent(o ui.CanvasObject) {
+func (c *eflCanvas) refreshContent(o ui.CanvasObject) {
+	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
 	switch o.(type) {
 	case *ui.Container:
 		r := ui.NewRectangle(theme.BackgroundColor())
@@ -139,23 +143,32 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 		C.evas_object_show(obj)
 
 		container := o.(*ui.Container)
-		container.Resize(c.size)
+		container.Move(ui.NewPos(theme.Padding(), theme.Padding()))
+		container.Resize(inner)
 		// TODO should this move into container like widget?
 		if container.Layout != nil {
-			container.Layout.Layout(container.Objects, c.size)
+			container.Layout.Layout(container.Objects, inner)
 		} else {
-			layout.NewMaxLayout().Layout(container.Objects, c.size)
+			layout.NewMaxLayout().Layout(container.Objects, inner)
 		}
 
-		c.setupContainer(container.Objects, nil, ui.NewPos(0, 0), container.CurrentSize())
+		c.setupContainer(container.Objects, nil, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	case ui.Widget:
 		widget := o.(ui.Widget)
-		c.setupContainer(widget.Layout(), o, widget.CurrentPosition(), widget.CurrentSize())
+		c.setupContainer(widget.Layout(), o, widget.CurrentPosition(), inner)
 	default:
-		c.setupObj(o, o, ui.NewPos(0, 0), c.size)
+		c.setupObj(o, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	}
 
 	c.content = o
+}
+
+func (c *eflCanvas) SetContent(o ui.CanvasObject) {
+	c.refreshContent(o)
+
+	min := o.MinSize()
+	C.ecore_evas_size_min_set(c.window.ee, C.int(scaleInt(c, min.Width)),
+		C.int(scaleInt(c, min.Height)))
 }
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, t *ui.TextObject) {
