@@ -9,6 +9,7 @@ type Button struct {
 	Position ui.Position
 
 	objects   []ui.CanvasObject
+	label     *ui.TextObject
 	onClicked func()
 }
 
@@ -29,7 +30,7 @@ func (b *Button) Move(pos ui.Position) {
 }
 
 func (b *Button) MinSize() ui.Size {
-	return ui.NewSize(1, 1)
+	return b.label.MinSize().Add(ui.NewSize(theme.Padding()*2, theme.Padding()*2))
 }
 
 func (b *Button) OnClicked() {
@@ -45,12 +46,14 @@ func (b *Button) Layout() []ui.CanvasObject {
 }
 
 func NewButton(label string, clicked func()) *Button {
+	text := ui.NewText(label)
 	button := &Button{
 		onClicked: clicked,
 		objects: []ui.CanvasObject{
 			ui.NewRectangle(theme.ButtonColor()),
-			ui.NewText(label),
+			text,
 		},
+		label: text,
 	}
 
 	return button

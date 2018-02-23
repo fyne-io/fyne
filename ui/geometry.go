@@ -5,6 +5,17 @@ type Size struct {
 	Height int
 }
 
+func (s1 Size) Add(s2 Size) Size {
+	return Size{s1.Width + s2.Width, s1.Height + s2.Height}
+}
+
+func (s1 Size) Union(s2 Size) Size {
+	maxW := Max(s1.Width, s2.Width)
+	maxH := Max(s1.Height, s2.Height)
+
+	return NewSize(maxW, maxH)
+}
+
 func NewSize(w int, h int) Size {
 	return Size{w, h}
 }

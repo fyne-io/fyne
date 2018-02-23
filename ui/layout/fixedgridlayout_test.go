@@ -8,7 +8,7 @@ import "image/color"
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/theme"
 
-func TestFixedfgGridLayout(t *testing.T) {
+func TestFixedGridLayout(t *testing.T) {
 	gridSize := ui.NewSize(125, 125)
 	cellSize := ui.NewSize(50, 50)
 
@@ -26,12 +26,25 @@ func TestFixedfgGridLayout(t *testing.T) {
 	if !reflect.DeepEqual(obj1.Size, cellSize) {
 		t.Fatal("Expected", cellSize, "but got", obj1.Size)
 	}
-	cell2Pos := ui.NewPos(50+(theme.Padding()*2), theme.Padding())
+	cell2Pos := ui.NewPos(50+theme.Padding(), 0)
 	if !reflect.DeepEqual(obj2.Position, cell2Pos) {
 		t.Fatal("Expected", cell2Pos, "but got", obj2.Position)
 	}
-	cell3Pos := ui.NewPos(theme.Padding(), 50+(theme.Padding()*2))
+	cell3Pos := ui.NewPos(0, 50+theme.Padding())
 	if !reflect.DeepEqual(obj3.Position, cell3Pos) {
 		t.Fatal("Expected", cell3Pos, "but got", obj3.Position)
+	}
+}
+
+func TestFixedGridLayoutMinSize(t *testing.T) {
+	cellSize := ui.NewSize(50, 50)
+	minSize := cellSize
+
+	container := ui.NewContainer(ui.NewRectangle(color.RGBA{0, 0, 0, 0}))
+	layout := NewFixedGridLayout(cellSize)
+
+	layoutMin := layout.MinSize(container.Objects)
+	if !reflect.DeepEqual(minSize, layoutMin) {
+		t.Fatal("Expected", minSize, "but got", layoutMin)
 	}
 }

@@ -13,6 +13,8 @@ type TextObject struct {
 	FontSize int
 	Bold     bool
 	Italic   bool
+
+	minSize Size
 }
 
 func (t *TextObject) CurrentSize() Size {
@@ -31,8 +33,12 @@ func (t *TextObject) Move(pos Position) {
 	t.Position = pos
 }
 
+func (t *TextObject) SetMinSize(size Size) {
+	t.minSize = size
+}
+
 func (t *TextObject) MinSize() Size {
-	return NewSize(1, 1) // TODO calcualte from font/string
+	return t.minSize
 }
 
 func NewText(text string) *TextObject {

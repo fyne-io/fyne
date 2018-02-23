@@ -11,6 +11,15 @@ func (m *maxLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
 	}
 }
 
+func (m *maxLayout) MinSize(objects []ui.CanvasObject) ui.Size {
+	minSize := ui.NewSize(0, 0)
+	for _, child := range objects {
+		minSize = minSize.Union(child.MinSize())
+	}
+
+	return minSize
+}
+
 func NewMaxLayout() *maxLayout {
 	return &maxLayout{}
 }

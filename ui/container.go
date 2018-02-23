@@ -25,7 +25,17 @@ func (c *Container) Move(pos Position) {
 }
 
 func (c *Container) MinSize() Size {
-	return NewSize(1, 1)
+	if c.Layout != nil {
+		return c.Layout.MinSize(c.Objects)
+	}
+
+	minSize := NewSize(1, 1)
+	for _, child := range c.Objects {
+		minSize = minSize.Union(child.MinSize())
+	}
+
+	return minSize
+
 }
 
 func (c *Container) AddObject(o CanvasObject) {
