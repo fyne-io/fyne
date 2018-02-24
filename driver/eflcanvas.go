@@ -8,6 +8,7 @@ package driver
 import "C"
 
 import "log"
+import "math"
 import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
@@ -155,7 +156,7 @@ func (c *eflCanvas) refreshContent(o ui.CanvasObject) {
 		c.setupContainer(container.Objects, nil, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	case ui.Widget:
 		widget := o.(ui.Widget)
-		c.setupContainer(widget.Layout(), o, widget.CurrentPosition(), inner)
+		c.setupContainer(widget.Layout(), o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	default:
 		c.setupObj(o, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	}
@@ -200,7 +201,7 @@ func scaleInt(c ui.Canvas, v int) int {
 	case 1.0:
 		return v
 	default:
-		return int(float32(v) * c.Scale())
+		return int(math.Round(float64(v) * float64(c.Scale())))
 	}
 }
 
