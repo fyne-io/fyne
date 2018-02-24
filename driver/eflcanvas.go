@@ -52,7 +52,7 @@ func nativeTextBounds(obj *C.Evas_Object) ui.Size {
 
 	for i := 0; i < length; i++ {
 		C.evas_object_text_char_pos_get(obj, C.int(i), nil, nil, &w, &h)
-		width += int(w) + 1
+		width += int(w) + 2
 		if int(h) > height {
 			height = int(h)
 		}
