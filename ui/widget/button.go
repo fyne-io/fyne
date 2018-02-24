@@ -30,7 +30,7 @@ func (b *Button) Move(pos ui.Position) {
 }
 
 func (b *Button) MinSize() ui.Size {
-	return b.label.MinSize().Add(ui.NewSize(theme.Padding()*2, theme.Padding()*2))
+	return b.label.MinSize().Add(ui.NewSize(theme.Padding()*4, theme.Padding()*2))
 }
 
 func (b *Button) OnClicked() {

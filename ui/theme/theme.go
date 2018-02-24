@@ -22,7 +22,7 @@ func TextSize() int {
 
 func fontPath(style string) string {
 	_, dirname, _, _ := runtime.Caller(0)
-	return path.Join(path.Dir(dirname), "font/Raleway-"+style+".ttf")
+	return path.Join(path.Dir(dirname), "font/NotoSans-"+style+".ttf")
 }
 
 func TextFont() string {
