@@ -25,6 +25,6 @@ And then you're ready to run an example, like this:
 
 It should look like this:
 
-<p align="center" markdown="1">
-  <img src="img/calc.png" alt="Fyne Calculator Example" />
-</p>
+| Linux | Max OS X |
+|:-----:|:--------:|
+| ![Calculator on Linux](img/calc.png) | ![Calculator on OS X](img/calc-osx.png) |
