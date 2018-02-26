@@ -168,8 +168,8 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	c.refreshContent(o)
 
 	min := o.MinSize()
-	minWidth := scaleInt(c, min.Width + theme.Padding()*2)
-	minHeight := scaleInt(c, min.Height + theme.Padding()*2)
+	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
+	minHeight := scaleInt(c, min.Height+theme.Padding()*2)
 
 	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
 
