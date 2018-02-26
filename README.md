@@ -25,6 +25,6 @@ And then you're ready to run an example, like this:
 
 It should look like this:
 
-| Linux | Max OS X |
-|:-----:|:--------:|
+| Linux | Max OS X | Windows |
+|:-----:|:--------:|:-------:|
 | ![Calculator on Linux](img/calc.png) | ![Calculator on OS X](img/calc-osx.png) | ![Calculator on Windows](img/calc-win.png) |
