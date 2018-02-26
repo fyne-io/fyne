@@ -7,11 +7,12 @@ package driver
 import "C"
 
 import "log"
+import "strings"
 
 func oSEngineName() string {
 	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
 
-	if env != nil {
+	if env == nil {
 		log.Println("Unable to connect to Wayland - attempting X")
 		return "software_x11"
 	}
@@ -28,7 +29,7 @@ func x11WindowInit(w *window) {
 }
 
 func oSWindowInit(w *window) {
-	if findEngineName() == WaylandEngineName() {
+	if strings.HasPrefix(oSEngineName(), "wayland_") {
 		waylandWindowInit(w)
 	} else {
 		x11WindowInit(w)
