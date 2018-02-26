@@ -1,9 +1,7 @@
-// +build !linux,!darwin,!windows
-
 package driver
 
 func oSEngineName() string {
-	return oSEngineOther
+	return "software_gdi"
 }
 
 func oSWindowInit(w *window) {
