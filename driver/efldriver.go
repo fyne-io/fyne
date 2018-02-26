@@ -10,12 +10,12 @@ const (
 	oSEngineOther = "unknown"
 )
 
-type EFLDriver struct {
+type eFLDriver struct {
 	running bool
 }
 
-func NewEFLDriver() *EFLDriver {
-	driver := new(EFLDriver)
+func NewEFLDriver() Driver {
+	driver := new(eFLDriver)
 
 	if oSEngineName() == oSEngineOther {
 		log.Fatalln("Unsupported operating system")
@@ -24,12 +24,12 @@ func NewEFLDriver() *EFLDriver {
 	return driver
 }
 
-func (d *EFLDriver) Run() {
+func (d *eFLDriver) Run() {
 	d.running = true
 	C.ecore_main_loop_begin()
 }
 
-func (d *EFLDriver) Quit() {
+func (d *eFLDriver) Quit() {
 	C.ecore_main_loop_quit()
 	d.running = false
 }

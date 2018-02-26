@@ -17,7 +17,7 @@ import "github.com/fyne-io/fyne/ui"
 type window struct {
 	ee     *C.Ecore_Evas
 	canvas ui.Canvas
-	driver *EFLDriver
+	driver *eFLDriver
 	master bool
 }
 
@@ -87,7 +87,7 @@ func onWindowClose(ee *C.Ecore_Evas) {
 	windows[ee].Close()
 }
 
-func (d *EFLDriver) CreateWindow(title string) ui.Window {
+func (d *eFLDriver) CreateWindow(title string) ui.Window {
 	engine := oSEngineName()
 
 	C.evas_init()

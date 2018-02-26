@@ -6,7 +6,7 @@ import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne-app/driver"
 
 type eflApp struct {
-	driver *driver.EFLDriver
+	driver driver.Driver
 }
 
 func (app *eflApp) NewWindow(title string) ui.Window {
