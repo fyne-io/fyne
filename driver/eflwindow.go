@@ -88,7 +88,7 @@ func onWindowClose(ee *C.Ecore_Evas) {
 }
 
 func (d *EFLDriver) CreateWindow(title string) ui.Window {
-	engine := findEngineName()
+	engine := oSEngineName()
 
 	C.evas_init()
 	C.ecore_init()
@@ -99,6 +99,7 @@ func (d *EFLDriver) CreateWindow(title string) ui.Window {
 		driver: d,
 	}
 	w.SetTitle(title)
+	oSWindowInit(w)
 	c := &eflCanvas{
 		evas:   C.ecore_evas_get(w.ee),
 		scale:  scaleByDPI(w),
@@ -108,12 +109,6 @@ func (d *EFLDriver) CreateWindow(title string) ui.Window {
 	windows[w.ee] = w
 	C.ecore_evas_callback_resize_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowResize_cgo)))
 	C.ecore_evas_callback_delete_request_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowClose_cgo)))
-
-	if engine == WaylandEngineName() {
-		WaylandWindowInit(w)
-	} else {
-		X11WindowInit(w)
-	}
 
 	c.SetContent(new(ui.Container))
 	return w
