@@ -15,7 +15,7 @@ func (app *eflApp) NewWindow(title string) ui.Window {
 
 func NewApp() app.App {
 	app := &eflApp{
-		driver: new(driver.EFLDriver),
+		driver: driver.NewEFLDriver(),
 	}
 
 	return app

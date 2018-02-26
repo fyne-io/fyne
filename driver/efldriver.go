@@ -4,8 +4,24 @@ package driver
 // #include <Ecore.h>
 import "C"
 
+import "log"
+
+const (
+	oSEngineOther = "unknown"
+)
+
 type EFLDriver struct {
 	running bool
+}
+
+func NewEFLDriver() *EFLDriver {
+	driver := new(EFLDriver)
+
+	if oSEngineName() == oSEngineOther {
+		log.Fatalln("Unsupported operating system")
+	}
+
+	return driver
 }
 
 func (d *EFLDriver) Run() {
