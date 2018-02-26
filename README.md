@@ -27,4 +27,4 @@ It should look like this:
 
 | Linux | Max OS X |
 |:-----:|:--------:|
-| ![Calculator on Linux](img/calc.png) | ![Calculator on OS X](img/calc-osx.png) |
+| ![Calculator on Linux](img/calc.png) | ![Calculator on OS X](img/calc-osx.png) | ![Calculator on Windows](img/calc-win.png) |
