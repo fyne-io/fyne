@@ -4,16 +4,32 @@ import "image/color"
 import "path"
 import "runtime"
 
+/*
+// LIGHT
 func BackgroundColor() color.RGBA {
-	return color.RGBA{0xcc, 0xcc, 0xcc, 0xff}
+	return color.RGBA{0xff, 0xff, 0xff, 0xff}
 }
 
 func ButtonColor() color.RGBA {
-	return color.RGBA{0x80, 0x80, 0x80, 0xff}
+	return color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
 }
 
 func TextColor() color.RGBA {
-	return color.RGBA{0x10, 0x10, 0x10, 0xff}
+	return color.RGBA{0x0, 0x0, 0x0, 0xdd}
+}
+*/
+
+// DARK
+func BackgroundColor() color.RGBA {
+	return color.RGBA{0x42, 0x42, 0x42, 0xff}
+}
+
+func ButtonColor() color.RGBA {
+	return color.RGBA{0x21, 0x21, 0x21, 0xff}
+}
+
+func TextColor() color.RGBA {
+	return color.RGBA{0xff, 0xff, 0xff, 0xff}
 }
 
 func TextSize() int {
