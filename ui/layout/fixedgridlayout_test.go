@@ -6,15 +6,16 @@ import "reflect"
 import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/theme"
 
 func TestFixedGridLayout(t *testing.T) {
 	gridSize := ui.NewSize(125, 125)
 	cellSize := ui.NewSize(50, 50)
 
-	obj1 := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj2 := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj3 := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 
 	container := &ui.Container{
 		Size:    gridSize,
@@ -40,7 +41,7 @@ func TestFixedGridLayoutMinSize(t *testing.T) {
 	cellSize := ui.NewSize(50, 50)
 	minSize := cellSize
 
-	container := ui.NewContainer(ui.NewRectangle(color.RGBA{0, 0, 0, 0}))
+	container := ui.NewContainer(canvas.NewRectangle(color.RGBA{0, 0, 0, 0}))
 	layout := NewFixedGridLayout(cellSize)
 
 	layoutMin := layout.MinSize(container.Objects)

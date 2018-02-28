@@ -6,11 +6,12 @@ import "reflect"
 import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/canvas"
 
 func TestMaxLayout(t *testing.T) {
 	size := ui.NewSize(100, 100)
 
-	obj := ui.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 	container := &ui.Container{
 		Size:    size,
 		Objects: []ui.CanvasObject{obj},
@@ -24,7 +25,7 @@ func TestMaxLayout(t *testing.T) {
 }
 
 func TestMaxLayoutMinSize(t *testing.T) {
-	text := ui.NewText("Padding")
+	text := canvas.NewText("Padding")
 	minSize := text.MinSize()
 
 	container := ui.NewContainer(text)
