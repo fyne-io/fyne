@@ -38,7 +38,7 @@ And then you're ready to write your first app - this example shows how:
     	})
     	w.Canvas().SetContent(ui.NewContainer(
     		[]ui.CanvasObject{
-    			ui.NewText("Hello Fyne!"),
+    			widget.NewLabel("Hello Fyne!"),
     			quit,
     		},
     		layout.NewGridLayout(1)))
