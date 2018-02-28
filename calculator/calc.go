@@ -4,6 +4,7 @@ import "log"
 import "strconv"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/widget"
 import "github.com/fyne-io/fyne-app"
@@ -57,72 +58,72 @@ func main() {
 
 	output = ui.NewText("")
 	row1 := ui.NewContainer(
-		widget.NewButton("+", func() {
+		widget.NewButton("+", func(*event.MouseEvent) {
 			character("+")
 		}),
-		widget.NewButton("-", func() {
+		widget.NewButton("-", func(*event.MouseEvent) {
 			character("-")
 		}),
-		widget.NewButton("*", func() {
+		widget.NewButton("*", func(*event.MouseEvent) {
 			character("*")
 		}),
-		widget.NewButton("/", func() {
+		widget.NewButton("/", func(*event.MouseEvent) {
 			character("/")
 		}))
 	row1.Layout = layout.NewGridLayout(4)
 	row2 := ui.NewContainer(
-		widget.NewButton("7", func() {
+		widget.NewButton("7", func(*event.MouseEvent) {
 			digit(7)
 		}),
-		widget.NewButton("8", func() {
+		widget.NewButton("8", func(*event.MouseEvent) {
 			digit(8)
 		}),
-		widget.NewButton("9", func() {
+		widget.NewButton("9", func(*event.MouseEvent) {
 			digit(9)
 		}),
-		widget.NewButton("C", func() {
+		widget.NewButton("C", func(*event.MouseEvent) {
 			clear()
 		}))
 	row2.Layout = layout.NewGridLayout(4)
 	row3 := ui.NewContainer(
-		widget.NewButton("4", func() {
+		widget.NewButton("4", func(*event.MouseEvent) {
 			digit(4)
 		}),
-		widget.NewButton("5", func() {
+		widget.NewButton("5", func(*event.MouseEvent) {
 			digit(5)
 		}),
-		widget.NewButton("6", func() {
+		widget.NewButton("6", func(*event.MouseEvent) {
 			digit(6)
 		}),
-		widget.NewButton("(", func() {
+		widget.NewButton("(", func(*event.MouseEvent) {
 			character("(")
 		}))
 	row3.Layout = layout.NewGridLayout(4)
 	row4 := ui.NewContainer(
-		widget.NewButton("1", func() {
+		widget.NewButton("1", func(*event.MouseEvent) {
 			digit(1)
 		}),
-		widget.NewButton("2", func() {
+		widget.NewButton("2", func(*event.MouseEvent) {
 			digit(2)
 		}),
-		widget.NewButton("3", func() {
+		widget.NewButton("3", func(*event.MouseEvent) {
 			digit(3)
 		}),
-		widget.NewButton(")", func() {
+		widget.NewButton(")", func(*event.MouseEvent) {
 			character(")")
 		}))
 	row4.Layout = layout.NewGridLayout(4)
 	row5a := ui.NewContainer(
-		widget.NewButton("0", func() {
+		widget.NewButton("0", func(*event.MouseEvent) {
 			digit(0)
 		}),
-		widget.NewButton(".", func() {
+		widget.NewButton(".", func(*event.MouseEvent) {
 			character(".")
 		}))
 	row5a.Layout = layout.NewGridLayout(2)
 	row5 := ui.NewContainer(
 		row5a,
-		widget.NewButton("=", func() {
+		widget.NewButton("=", func(*event.MouseEvent) {
 			evaluate()
 		}))
 	row5.Layout = layout.NewGridLayout(2)
