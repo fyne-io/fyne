@@ -43,7 +43,7 @@ func (b *Button) Layout() []ui.CanvasObject {
 
 func NewButton(label string, clicked func(*event.MouseEvent)) *Button {
 	text := ui.NewText(label)
-	button := &Button{
+	return &Button{
 		OnClicked: clicked,
 		objects: []ui.CanvasObject{
 			ui.NewRectangle(theme.ButtonColor()),
@@ -51,6 +51,4 @@ func NewButton(label string, clicked func(*event.MouseEvent)) *Button {
 		},
 		label: text,
 	}
-
-	return button
 }
