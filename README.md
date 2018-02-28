@@ -24,6 +24,7 @@ And then you're ready to write your first app - this example shows how:
     package main
 
     import "github.com/fyne-io/fyne/ui"
+    import "github.com/fyne-io/fyne/ui/event"
     import "github.com/fyne-io/fyne/ui/layout"
     import "github.com/fyne-io/fyne/ui/widget"
     import "github.com/fyne-io/fyne-app"
@@ -32,7 +33,7 @@ And then you're ready to write your first app - this example shows how:
     	app := fyneapp.NewApp()
 
     	w := app.NewWindow("Hello")
-    	quit := widget.NewButton("Quit", func() {
+    	quit := widget.NewButton("Quit", func(*event.MouseEvent) {
     		app.Quit()
     	})
     	w.Canvas().SetContent(ui.NewContainer(
