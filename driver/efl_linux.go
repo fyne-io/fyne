@@ -9,15 +9,23 @@ import "C"
 import "log"
 import "strings"
 
+var engine string
+
 func oSEngineName() string {
+	if engine != "" {
+		return engine
+	}
+
 	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
 
 	if env == nil {
 		log.Println("Unable to connect to Wayland - attempting X")
-		return "software_x11"
+		engine = "software_x11"
+	} else {
+		engine = "wayland_shm"
 	}
 
-	return "wayland_shm"
+	return engine
 }
 
 func waylandWindowInit(w *window) {
