@@ -1,6 +1,7 @@
 package widget
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
 
@@ -11,7 +12,7 @@ type Label struct {
 	Text string
 
 	objects []ui.CanvasObject
-	label   *ui.TextObject
+	label   *canvas.TextObject
 }
 
 func (l *Label) CurrentSize() ui.Size {
@@ -34,6 +35,11 @@ func (l *Label) MinSize() ui.Size {
 	return l.label.MinSize().Add(ui.NewSize(theme.Padding()*2, theme.Padding()*2))
 }
 
+func (l *Label) SetText(text string) {
+	l.Text = text
+	l.label.Text = text
+}
+
 func (l *Label) Layout() []ui.CanvasObject {
 	layout.NewMaxLayout().Layout(l.objects, l.Size)
 
@@ -41,10 +47,10 @@ func (l *Label) Layout() []ui.CanvasObject {
 }
 
 func NewLabel(text string) *Label {
-	obj := ui.NewText(text)
+	obj := canvas.NewText(text)
 	return &Label{
 		objects: []ui.CanvasObject{
-			ui.NewRectangle(theme.BackgroundColor()),
+			canvas.NewRectangle(theme.BackgroundColor()),
 			obj,
 		},
 		Text:  text,

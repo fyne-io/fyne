@@ -1,43 +1,44 @@
-package ui
+package canvas
 
 import "image/color"
 
+import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/theme"
 
 type TextObject struct {
 	Color    color.RGBA
-	Size     Size
-	Position Position
+	Size     ui.Size
+	Position ui.Position
 
 	Text     string
 	FontSize int
 	Bold     bool
 	Italic   bool
 
-	minSize Size
+	minSize ui.Size
 }
 
-func (t *TextObject) CurrentSize() Size {
+func (t *TextObject) CurrentSize() ui.Size {
 	return t.Size
 }
 
-func (t *TextObject) Resize(size Size) {
+func (t *TextObject) Resize(size ui.Size) {
 	t.Size = size
 }
 
-func (t *TextObject) CurrentPosition() Position {
+func (t *TextObject) CurrentPosition() ui.Position {
 	return t.Position
 }
 
-func (t *TextObject) Move(pos Position) {
+func (t *TextObject) Move(pos ui.Position) {
 	t.Position = pos
 }
 
-func (t *TextObject) SetMinSize(size Size) {
+func (t *TextObject) SetMinSize(size ui.Size) {
 	t.minSize = size
 }
 
-func (t *TextObject) MinSize() Size {
+func (t *TextObject) MinSize() ui.Size {
 	return t.minSize
 }
 

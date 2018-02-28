@@ -1,6 +1,7 @@
 package widget
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
@@ -12,7 +13,7 @@ type Button struct {
 	OnClicked func(*event.MouseEvent)
 
 	objects []ui.CanvasObject
-	label   *ui.TextObject
+	label   *canvas.TextObject
 }
 
 func (b *Button) CurrentSize() ui.Size {
@@ -42,11 +43,11 @@ func (b *Button) Layout() []ui.CanvasObject {
 }
 
 func NewButton(label string, clicked func(*event.MouseEvent)) *Button {
-	text := ui.NewText(label)
+	text := canvas.NewText(label)
 	return &Button{
 		OnClicked: clicked,
 		objects: []ui.CanvasObject{
-			ui.NewRectangle(theme.ButtonColor()),
+			canvas.NewRectangle(theme.ButtonColor()),
 			text,
 		},
 		label: text,
