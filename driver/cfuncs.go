@@ -20,8 +20,8 @@ void onWindowClose_cgo(Ecore_Evas *ee)
 
 void onObjectMouseDown_cgo(void *data, Evas *e, Evas_Object *obj, void *event_info)
 {
-	void onObjectMouseDown(Evas_Object*);
-	onObjectMouseDown(obj);
+	void onObjectMouseDown(Evas_Object*, Evas_Event_Mouse_Down*);
+	onObjectMouseDown(obj, event_info);
 }
 */
 import "C"

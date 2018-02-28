@@ -12,28 +12,29 @@ import "math"
 import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
 import "github.com/fyne-io/fyne/ui/widget"
 
-type canvasobject struct {
-	obj    *C.Evas_Object
-	canvas ui.Canvas
-}
-
-var objects = make(map[*C.Evas_Object]ui.CanvasObject)
-
-func (o *canvasobject) Canvas() ui.Canvas {
-	return o.canvas
-}
+var canvases = make(map[*C.Evas]*eflCanvas)
 
 //export onObjectMouseDown
-func onObjectMouseDown(obj *C.Evas_Object) {
-	co := objects[obj]
+func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
+	canvas := canvases[C.evas_object_evas_get(obj)]
+	co := canvas.objects[obj]
+
+	var x, y C.int
+	C.evas_object_geometry_get(obj, &x, &y, nil, nil)
+	pos := ui.NewPos(unscaleInt(canvas, int(info.canvas.x-x)), unscaleInt(canvas, int(info.canvas.y-y)))
+
+	ev := new(event.MouseEvent)
+	ev.Position = pos
+	ev.Button = event.MouseButton(int(info.button))
 
 	switch co.(type) {
 	case *widget.Button:
-		co.(*widget.Button).OnClicked()
+		co.(*widget.Button).OnClicked(ev)
 	}
 }
 
@@ -44,6 +45,8 @@ type eflCanvas struct {
 	scale   float32
 	content ui.CanvasObject
 	window  *window
+
+	objects map[*C.Evas_Object]ui.CanvasObject
 }
 
 func nativeTextBounds(obj *C.Evas_Object) ui.Size {
@@ -90,7 +93,7 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) 
 		log.Printf("Unrecognised Object %#v\n", o)
 	}
 
-	objects[obj] = target
+	c.objects[obj] = target
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
 		nil)
@@ -165,6 +168,8 @@ func (c *eflCanvas) refreshContent(o ui.CanvasObject) {
 }
 
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
+	canvases[C.ecore_evas_get(c.window.ee)] = c
+	c.objects = make(map[*C.Evas_Object]ui.CanvasObject)
 	c.refreshContent(o)
 
 	min := o.MinSize()
