@@ -12,12 +12,12 @@ import "github.com/fyne-io/fyne-app"
 import "github.com/Knetic/govaluate"
 
 var equation string
-var output *ui.TextObject
+var output *widget.Label
 var container *ui.Container
 var window ui.Window
 
 func display() {
-	output.Text = equation
+	output.SetText(equation)
 	window.Canvas().SetContent(container)
 }
 
@@ -56,7 +56,7 @@ func evaluate() {
 func main() {
 	app := fyneapp.NewApp()
 
-	output = ui.NewText("")
+	output = widget.NewLabel("")
 	row1 := ui.NewContainer(
 		widget.NewButton("+", func(*event.MouseEvent) {
 			character("+")
