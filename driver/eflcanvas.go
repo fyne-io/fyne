@@ -12,6 +12,7 @@ import "math"
 import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
@@ -70,10 +71,10 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) 
 	var min *ui.Size
 
 	switch o.(type) {
-	case *ui.TextObject:
+	case *canvas.TextObject:
 		obj = C.evas_object_text_add(c.evas)
 
-		to, _ := o.(*ui.TextObject)
+		to, _ := o.(*canvas.TextObject)
 		C.evas_object_color_set(obj, C.int(to.Color.R), C.int(to.Color.G),
 			C.int(to.Color.B), C.int(to.Color.A))
 
@@ -83,10 +84,10 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) 
 		native := nativeTextBounds(obj)
 		min = &ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
 		to.SetMinSize(*min)
-	case *ui.RectangleObject:
+	case *canvas.RectangleObject:
 		obj = C.evas_object_rectangle_add(c.evas)
 
-		ro, _ := o.(*ui.RectangleObject)
+		ro, _ := o.(*canvas.RectangleObject)
 		C.evas_object_color_set(obj, C.int(ro.Color.R), C.int(ro.Color.G),
 			C.int(ro.Color.B), C.int(ro.Color.A))
 	default:
@@ -141,7 +142,7 @@ func (c *eflCanvas) refreshContent(o ui.CanvasObject) {
 	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
 	switch o.(type) {
 	case *ui.Container:
-		r := ui.NewRectangle(theme.BackgroundColor())
+		r := canvas.NewRectangle(theme.BackgroundColor())
 		obj, _ := buildCanvasObject(c, r, r)
 		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
 		C.evas_object_show(obj)
@@ -185,7 +186,7 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	}
 }
 
-func updateFont(obj *C.Evas_Object, c *eflCanvas, t *ui.TextObject) {
+func updateFont(obj *C.Evas_Object, c *eflCanvas, t *canvas.TextObject) {
 	font := theme.TextFont()
 
 	if t.Bold {
