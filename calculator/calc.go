@@ -121,11 +121,13 @@ func main() {
 			character(".")
 		}))
 	row5a.Layout = layout.NewGridLayout(2)
+	equals := widget.NewButton("=", func(*event.MouseEvent) {
+		evaluate()
+	})
+	equals.Style = widget.PrimaryButton
 	row5 := ui.NewContainer(
 		row5a,
-		widget.NewButton("=", func(*event.MouseEvent) {
-			evaluate()
-		}))
+		equals)
 	row5.Layout = layout.NewGridLayout(2)
 
 	window = app.NewWindow("Calc")
