@@ -1,43 +1,68 @@
 package theme
 
 import "image/color"
+import "os"
 import "path"
 import "runtime"
 
-/*
-// LIGHT
+import "fmt"
+
+var loadedColors *themeColors
+
+type themeColors struct {
+	Background color.RGBA
+
+	Button, Text, Primary color.RGBA
+}
+
+func loadLightColors() *themeColors {
+	return &themeColors{
+		Background: color.RGBA{0xff, 0xff, 0xff, 0xff},
+		Button:     color.RGBA{0xee, 0xee, 0xee, 0xff},
+		Text:       color.RGBA{0x0, 0x0, 0x0, 0xdd},
+		Primary:    color.RGBA{0x9f, 0xa8, 0xda, 0xff},
+	}
+}
+
+func loadDarkColors() *themeColors {
+	return &themeColors{
+		Background: color.RGBA{0x42, 0x42, 0x42, 0xff},
+		Button:     color.RGBA{0x21, 0x21, 0x21, 0xff},
+		Text:       color.RGBA{0xff, 0xff, 0xff, 0xff},
+		Primary:    color.RGBA{0x1a, 0x23, 0x7e, 0xff},
+	}
+}
+
+func colors() *themeColors {
+	if loadedColors != nil {
+		return loadedColors
+	}
+
+	env := os.Getenv("FYNE_THEME")
+	fmt.Println("Theme", env)
+	if env == "light" {
+		loadedColors = loadLightColors()
+	} else {
+		loadedColors = loadDarkColors()
+	}
+
+	return loadedColors
+}
+
 func BackgroundColor() color.RGBA {
-	return color.RGBA{0xff, 0xff, 0xff, 0xff}
+	return colors().Background
 }
 
 func ButtonColor() color.RGBA {
-	return color.RGBA{0xee, 0xee, 0xee, 0xff}
+	return colors().Button
 }
 
 func TextColor() color.RGBA {
-	return color.RGBA{0x0, 0x0, 0x0, 0xdd}
+	return colors().Text
 }
 
 func PrimaryColor() color.RGBA {
-	return color.RGBA{0x9f, 0xa8, 0xda, 0xff}
-}
-*/
-
-// DARK
-func BackgroundColor() color.RGBA {
-	return color.RGBA{0x42, 0x42, 0x42, 0xff}
-}
-
-func ButtonColor() color.RGBA {
-	return color.RGBA{0x21, 0x21, 0x21, 0xff}
-}
-
-func TextColor() color.RGBA {
-	return color.RGBA{0xff, 0xff, 0xff, 0xff}
-}
-
-func PrimaryColor() color.RGBA {
-	return color.RGBA{0x1a, 0x23, 0x7e, 0xff}
+	return colors().Primary
 }
 
 func TextSize() int {
