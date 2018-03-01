@@ -16,6 +16,8 @@ script:
 
 notifications:
   irc: "irc.freenode.net#fyne"
+  template:
+    - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")
 
 env:
   global:
