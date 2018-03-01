@@ -18,6 +18,7 @@ notifications:
   irc:
     channels:
       - "irc.freenode.net#fyne"
+    on_success: change
     template:
       - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")"
 
