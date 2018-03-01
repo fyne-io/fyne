@@ -2,12 +2,13 @@ package layout
 
 import "testing"
 
-import "reflect"
 import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/theme"
+
+import "github.com/stretchr/testify/assert"
 
 func TestGridLayout(t *testing.T) {
 	gridSize := ui.NewSize(100+theme.Padding(), 100+theme.Padding())
@@ -24,17 +25,11 @@ func TestGridLayout(t *testing.T) {
 
 	NewGridLayout(2).Layout(container.Objects, gridSize)
 
-	if !reflect.DeepEqual(obj1.Size, cellSize) {
-		t.Fatal("Expected", cellSize, "but got", obj1.Size)
-	}
+	assert.Equal(t, obj1.Size, cellSize)
 	cell2Pos := ui.NewPos(50+theme.Padding(), 0)
-	if !reflect.DeepEqual(obj2.Position, cell2Pos) {
-		t.Fatal("Expected", cell2Pos, "but got", obj2.Position)
-	}
+	assert.Equal(t, obj2.Position, cell2Pos)
 	cell3Pos := ui.NewPos(0, 50+theme.Padding())
-	if !reflect.DeepEqual(obj3.Position, cell3Pos) {
-		t.Fatal("Expected", cell3Pos, "but got", obj3.Position)
-	}
+	assert.Equal(t, obj3.Position, cell3Pos)
 }
 
 func TestGridLayoutMinSize(t *testing.T) {
@@ -45,7 +40,5 @@ func TestGridLayoutMinSize(t *testing.T) {
 	container := ui.NewContainer(text1, text2)
 	layoutMin := NewGridLayout(1).MinSize(container.Objects)
 
-	if !reflect.DeepEqual(minSize, layoutMin) {
-		t.Fatal("Expected", minSize, "but got", layoutMin)
-	}
+	assert.Equal(t, minSize, layoutMin)
 }

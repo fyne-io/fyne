@@ -2,11 +2,12 @@ package layout
 
 import "testing"
 
-import "reflect"
 import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
+
+import "github.com/stretchr/testify/assert"
 
 func TestMaxLayout(t *testing.T) {
 	size := ui.NewSize(100, 100)
@@ -19,9 +20,7 @@ func TestMaxLayout(t *testing.T) {
 
 	NewMaxLayout().Layout(container.Objects, size)
 
-	if !reflect.DeepEqual(obj.Size, size) {
-		t.Fatal("Expected", size, "but got", obj.Size)
-	}
+	assert.Equal(t, obj.Size, size)
 }
 
 func TestMaxLayoutMinSize(t *testing.T) {
@@ -31,9 +30,7 @@ func TestMaxLayoutMinSize(t *testing.T) {
 	container := ui.NewContainer(text)
 	layoutMin := NewMaxLayout().MinSize(container.Objects)
 
-	if !reflect.DeepEqual(minSize, layoutMin) {
-		t.Fatal("Expected", minSize, "but got", layoutMin)
-	}
+	assert.Equal(t, minSize, layoutMin)
 }
 
 func TestContainerMaxLayoutMinSize(t *testing.T) {
@@ -44,7 +41,5 @@ func TestContainerMaxLayoutMinSize(t *testing.T) {
 	container.Layout = NewMaxLayout()
 	layoutMin := container.MinSize()
 
-	if !reflect.DeepEqual(minSize, layoutMin) {
-		t.Fatal("Expected", minSize, "but got", layoutMin)
-	}
+	assert.Equal(t, minSize, layoutMin)
 }

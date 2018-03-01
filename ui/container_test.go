@@ -2,7 +2,7 @@ package ui
 
 import "testing"
 
-import "reflect"
+import "github.com/stretchr/testify/assert"
 
 func TestDefaultMinSize(t *testing.T) {
 	text := new(dummyObject)
@@ -12,9 +12,7 @@ func TestDefaultMinSize(t *testing.T) {
 	container.AddObject(text)
 	layoutMin := container.MinSize()
 
-	if !reflect.DeepEqual(minSize, layoutMin) {
-		t.Fatal("Expected", minSize, "but got", layoutMin)
-	}
+	assert.Equal(t, minSize, layoutMin)
 }
 
 type dummyObject struct {
