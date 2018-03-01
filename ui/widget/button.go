@@ -9,12 +9,21 @@ import "github.com/fyne-io/fyne/ui/theme"
 type Button struct {
 	Size     ui.Size
 	Position ui.Position
+	Style    ButtonStyle
 
 	OnClicked func(*event.MouseEvent)
 
-	objects []ui.CanvasObject
-	label   *canvas.TextObject
+	objects    []ui.CanvasObject
+	label      *canvas.TextObject
+	background *canvas.RectangleObject
 }
+
+type ButtonStyle int
+
+const (
+	DefaultButton ButtonStyle = iota
+	PrimaryButton
+)
 
 func (b *Button) CurrentSize() ui.Size {
 	return b.Size
@@ -37,6 +46,9 @@ func (b *Button) MinSize() ui.Size {
 }
 
 func (b *Button) Layout() []ui.CanvasObject {
+	if b.Style == PrimaryButton {
+		b.background.Color = theme.PrimaryColor()
+	}
 	layout.NewMaxLayout().Layout(b.objects, b.Size)
 
 	return b.objects
@@ -44,12 +56,15 @@ func (b *Button) Layout() []ui.CanvasObject {
 
 func NewButton(label string, clicked func(*event.MouseEvent)) *Button {
 	text := canvas.NewText(label)
+	bg := canvas.NewRectangle(theme.ButtonColor())
+
 	return &Button{
 		OnClicked: clicked,
 		objects: []ui.CanvasObject{
-			canvas.NewRectangle(theme.ButtonColor()),
+			bg,
 			text,
 		},
-		label: text,
+		label:      text,
+		background: bg,
 	}
 }

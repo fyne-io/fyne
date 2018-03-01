@@ -11,11 +11,15 @@ func BackgroundColor() color.RGBA {
 }
 
 func ButtonColor() color.RGBA {
-	return color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
+	return color.RGBA{0xee, 0xee, 0xee, 0xff}
 }
 
 func TextColor() color.RGBA {
 	return color.RGBA{0x0, 0x0, 0x0, 0xdd}
+}
+
+func PrimaryColor() color.RGBA {
+	return color.RGBA{0x9f, 0xa8, 0xda, 0xff}
 }
 */
 
@@ -30,6 +34,10 @@ func ButtonColor() color.RGBA {
 
 func TextColor() color.RGBA {
 	return color.RGBA{0xff, 0xff, 0xff, 0xff}
+}
+
+func PrimaryColor() color.RGBA {
+	return color.RGBA{0x1a, 0x23, 0x7e, 0xff}
 }
 
 func TextSize() int {
