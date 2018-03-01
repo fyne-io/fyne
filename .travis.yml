@@ -15,9 +15,11 @@ script:
   - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 notifications:
-  irc: "irc.freenode.net#fyne"
-  template:
-    - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")"
+  irc:
+    channels:
+      - "irc.freenode.net#fyne"
+    template:
+      - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")"
 
 env:
   global:
