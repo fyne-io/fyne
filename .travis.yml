@@ -1,8 +1,7 @@
 language: go
 
 go:
-  - 1.9
-  - master 
+  - 1.10
 
 before_script:
 #  - go get github.com/golang/lint/golint
@@ -12,3 +11,6 @@ script:
   - go test -v -race ./...
   - go vet ./...
 #  - golint -set_exit_status $(go list ./...)
+
+notifications:
+  irc: "irc.freenode.net#fyne"
