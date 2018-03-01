@@ -35,3 +35,16 @@ func TestMaxLayoutMinSize(t *testing.T) {
 		t.Fatal("Expected", minSize, "but got", layoutMin)
 	}
 }
+
+func TestContainerMaxLayoutMinSize(t *testing.T) {
+	text := canvas.NewText("Padding")
+	minSize := text.MinSize()
+
+	container := ui.NewContainer(text)
+	container.Layout = NewMaxLayout()
+	layoutMin := container.MinSize()
+
+	if !reflect.DeepEqual(minSize, layoutMin) {
+		t.Fatal("Expected", minSize, "but got", layoutMin)
+	}
+}

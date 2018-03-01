@@ -9,6 +9,7 @@ func TestDefaultMinSize(t *testing.T) {
 	minSize := text.MinSize()
 
 	container := NewContainer(text)
+	container.AddObject(text)
 	layoutMin := container.MinSize()
 
 	if !reflect.DeepEqual(minSize, layoutMin) {
