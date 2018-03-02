@@ -23,7 +23,7 @@ And then you're ready to run an example, like this:
 
     go run calculator/calc.go
 
-It should look like this:
+It should look like one of these:
 
 |       | Linux | Max OS X | Windows |
 | -----:|:-----:|:--------:|:-------:|
