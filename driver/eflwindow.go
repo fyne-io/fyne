@@ -10,6 +10,8 @@ package driver
 import "C"
 
 import "log"
+import "os"
+import "strconv"
 import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
@@ -61,6 +63,12 @@ func (w *window) Canvas() ui.Canvas {
 func scaleByDPI(w *window) float32 {
 	xdpi := C.int(0)
 
+	env := os.Getenv("FYNE_SCALE")
+	if env != "" {
+		scale, _ := strconv.ParseFloat(env, 32)
+		log.Println("Scale specified, rendering at", scale)
+		return float32(scale)
+	}
 	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
 	if xdpi > 96 {
 		log.Println("High DPI", xdpi, "- scaling to 1.5")
