@@ -5,8 +5,6 @@ import "os"
 import "path"
 import "runtime"
 
-import "fmt"
-
 var loadedColors *themeColors
 
 type themeColors struct {
@@ -39,7 +37,6 @@ func colors() *themeColors {
 	}
 
 	env := os.Getenv("FYNE_THEME")
-	fmt.Println("Theme", env)
 	if env == "light" {
 		loadedColors = loadLightColors()
 	} else {
