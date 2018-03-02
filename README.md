@@ -25,6 +25,8 @@ And then you're ready to run an example, like this:
 
 It should look like this:
 
-| Linux | Max OS X | Windows |
-|:-----:|:--------:|:-------:|
-| ![Calculator on Linux](img/calc.png) | ![Calculator on OS X](img/calc-osx.png) | ![Calculator on Windows](img/calc-win.png) |
+|       | Linux | Max OS X | Windows |
+| -----:|:-----:|:--------:|:-------:|
+|  dark | ![Calculator on Linux](img/calc-linux-dark.png) | ![Calculator on OS X](img/calc-osx-dark.png) | ![Calculator on Windows](img/calc-windows-dark.png) |
+| light | ![Calculator (light) on Linux](img/calc-linux-light.png) | ![Calculator (light) on OS X](img/calc-osx-light.png) | ![Calculator (light) on Windows](img/calc-windows-light.png) |
+
