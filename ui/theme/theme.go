@@ -1,3 +1,4 @@
+// Package theme defines how a Fyne app should look when rendered
 package theme
 
 import "image/color"
@@ -13,6 +14,7 @@ type themeColors struct {
 	Button, Text, Primary color.RGBA
 }
 
+// Basic definition of light theme colours
 func loadLightColors() *themeColors {
 	return &themeColors{
 		Background: color.RGBA{0xff, 0xff, 0xff, 0xff},
@@ -22,6 +24,7 @@ func loadLightColors() *themeColors {
 	}
 }
 
+// Basic definition of dark theme colours
 func loadDarkColors() *themeColors {
 	return &themeColors{
 		Background: color.RGBA{0x42, 0x42, 0x42, 0xff},
@@ -31,6 +34,7 @@ func loadDarkColors() *themeColors {
 	}
 }
 
+// Load the right theme colours based on environment / settings
 func colors() *themeColors {
 	if loadedColors != nil {
 		return loadedColors
@@ -46,47 +50,59 @@ func colors() *themeColors {
 	return loadedColors
 }
 
+// BackgroundColor returns the theme's background colour
 func BackgroundColor() color.RGBA {
 	return colors().Background
 }
 
+// ButtonColor returns the theme's standard button colour
 func ButtonColor() color.RGBA {
 	return colors().Button
 }
 
+// TextColor returns the theme's standard text colour
 func TextColor() color.RGBA {
 	return colors().Text
 }
 
+// PrimaryColor returns the colour used to highlight primary features
 func PrimaryColor() color.RGBA {
 	return colors().Primary
 }
 
+// TextSize returns the standard text size
 func TextSize() int {
 	return 14
 }
 
+// fontPath is used to find the path of a font file for the specified style
 func fontPath(style string) string {
 	_, dirname, _, _ := runtime.Caller(0)
 	return path.Join(path.Dir(dirname), "font/NotoSans-"+style+".ttf")
 }
 
+// TextFont returns the font path for the regular font style
 func TextFont() string {
 	return fontPath("Regular")
 }
 
+// TextBoldFont retutns the font path for the bold font style
 func TextBoldFont() string {
 	return fontPath("Bold")
 }
 
+// TextItalicFont returns the font path for the italic font style
 func TextItalicFont() string {
 	return fontPath("Italic")
 }
 
+// TextBoldItalicFont returns the font path for the bold and italic font style
 func TextBoldItalicFont() string {
 	return fontPath("BoldItalic")
 }
 
+// Padding is the standard gap between elements and the border around interface
+// elements
 func Padding() int {
 	return 5
 }

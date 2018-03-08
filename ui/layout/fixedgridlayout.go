@@ -8,6 +8,9 @@ type fixedGridLayout struct {
 	CellSize ui.Size
 }
 
+// Layout is called to pack all child objects into a specified size.
+// For a FixedGridLayout this will attempt to lay all the child objects in a row
+// and wrap to a new row if the size is not large enough.
 func (g *fixedGridLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
 	cols := 1
 	if size.Width > g.CellSize.Width {
@@ -28,10 +31,15 @@ func (g *fixedGridLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
 	}
 }
 
+// MinSize finds the smallest size that satisfies all the child objects.
+// For a FixedGridLayout this is simply the specified cellsize as a single column
+// layout has no padding. The returned sie does not take into account the number
+// of child objects as this layout re-flows dynamically.
 func (g *fixedGridLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 	return g.CellSize
 }
 
+// NewFixedGridLayout returns a new FixedGridLayout instance
 func NewFixedGridLayout(size ui.Size) *fixedGridLayout {
 	return &fixedGridLayout{size}
 }
