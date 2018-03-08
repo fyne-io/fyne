@@ -6,29 +6,11 @@ import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
 
 type Label struct {
-	Size     ui.Size
-	Position ui.Position
+	baseWidget
 
 	Text string
 
-	objects []ui.CanvasObject
 	label   *canvas.TextObject
-}
-
-func (l *Label) CurrentSize() ui.Size {
-	return l.Size
-}
-
-func (l *Label) Resize(size ui.Size) {
-	l.Size = size
-}
-
-func (l *Label) CurrentPosition() ui.Position {
-	return l.Position
-}
-
-func (l *Label) Move(pos ui.Position) {
-	l.Position = pos
 }
 
 func (l *Label) MinSize() ui.Size {
@@ -49,11 +31,13 @@ func (l *Label) Layout() []ui.CanvasObject {
 func NewLabel(text string) *Label {
 	obj := canvas.NewText(text)
 	return &Label{
-		objects: []ui.CanvasObject{
-			canvas.NewRectangle(theme.BackgroundColor()),
-			obj,
+		baseWidget{
+			objects: []ui.CanvasObject{
+				canvas.NewRectangle(theme.BackgroundColor()),
+				obj,
+			},
 		},
-		Text:  text,
-		label: obj,
+		text,
+		obj,
 	}
 }
