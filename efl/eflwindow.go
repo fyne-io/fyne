@@ -1,4 +1,4 @@
-package driver
+package efl
 
 // #cgo pkg-config: ecore ecore-evas evas
 // #include <Ecore.h>

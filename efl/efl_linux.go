@@ -1,4 +1,4 @@
-package driver
+package efl
 
 // #cgo pkg-config: ecore-evas ecore-wl2
 // #cgo CFLAGS: -DEFL_BETA_API_SUPPORT=1

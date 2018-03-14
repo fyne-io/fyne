@@ -1,6 +1,6 @@
 // +build !linux,!darwin,!windows
 
-package driver
+package efl
 
 func oSEngineName() string {
 	return oSEngineOther

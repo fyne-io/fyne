@@ -1,21 +1,23 @@
+// Package fyneapp provides a full implementation of the Fyne APIs
 package fyneapp
 
 import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/ui"
 
-import "github.com/fyne-io/fyne-app/driver"
+import "github.com/fyne-io/fyne-app/efl"
 
 type eflApp struct {
-	driver driver.Driver
+	driver Driver
 }
 
 func (app *eflApp) NewWindow(title string) ui.Window {
 	return app.driver.CreateWindow(title)
 }
 
+// NewApp initialises a new Fyne application returning a handle to that App
 func NewApp() app.App {
 	app := &eflApp{
-		driver: driver.NewEFLDriver(),
+		driver: efl.NewEFLDriver(),
 	}
 
 	return app

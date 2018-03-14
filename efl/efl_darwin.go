@@ -1,4 +1,4 @@
-package driver
+package efl
 
 func oSEngineName() string {
 	return "opengl_cocoa"

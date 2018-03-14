@@ -1,4 +1,5 @@
-package driver
+// Package efl provides an EFL render provider for the Fyne implementation
+package efl
 
 // #cgo pkg-config: ecore
 // #include <Ecore.h>
@@ -14,7 +15,9 @@ type eFLDriver struct {
 	running bool
 }
 
-func NewEFLDriver() Driver {
+// NewEFLDriver returns a new Driver instance implemented using the
+// Enlightenment Foundation Libraries (EFL)
+func NewEFLDriver() *eFLDriver {
 	driver := new(eFLDriver)
 
 	if oSEngineName() == oSEngineOther {
