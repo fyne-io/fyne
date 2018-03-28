@@ -87,7 +87,7 @@ func onWindowResize(ee *C.Ecore_Evas) {
 
 	canvas := w.canvas.(*eflCanvas)
 	canvas.size = ui.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
-	canvas.refreshContent(canvas.content)
+	canvas.Refresh(canvas.content)
 }
 
 //export onWindowClose

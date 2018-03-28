@@ -138,7 +138,7 @@ func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 	}
 }
 
-func (c *eflCanvas) refreshContent(o ui.CanvasObject) {
+func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
 	switch o.(type) {
 	case *ui.Container:
@@ -171,7 +171,7 @@ func (c *eflCanvas) refreshContent(o ui.CanvasObject) {
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	canvases[C.ecore_evas_get(c.window.ee)] = c
 	c.objects = make(map[*C.Evas_Object]ui.CanvasObject)
-	c.refreshContent(o)
+	c.Refresh(o)
 
 	min := o.MinSize()
 	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
