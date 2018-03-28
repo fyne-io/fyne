@@ -18,7 +18,7 @@ var window ui.Window
 
 func display() {
 	output.SetText(equation)
-	window.Canvas().SetContent(container)
+	window.Canvas().Refresh(output)
 }
 
 func character(char string) {
