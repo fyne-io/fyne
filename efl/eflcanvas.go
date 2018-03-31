@@ -20,6 +20,8 @@ import "github.com/fyne-io/fyne/ui/widget"
 
 var canvases = make(map[*C.Evas]*eflCanvas)
 
+const vectorPad = 10
+
 //export onObjectMouseDown
 func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	canvas := canvases[C.evas_object_evas_get(obj)]
@@ -66,7 +68,7 @@ func nativeTextBounds(obj *C.Evas_Object) ui.Size {
 	return ui.Size{width, height}
 }
 
-func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) (*C.Evas_Object, *ui.Size) {
+func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, size ui.Size) (*C.Evas_Object, *ui.Size) {
 	var obj *C.Evas_Object
 	var min *ui.Size
 
@@ -90,6 +92,25 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) 
 		ro, _ := o.(*canvas.RectangleObject)
 		C.evas_object_color_set(obj, C.int(ro.Color.R), C.int(ro.Color.G),
 			C.int(ro.Color.B), C.int(ro.Color.A))
+	case *canvas.LineObject:
+		obj = C.evas_object_vg_add(c.evas)
+		lo, _ := o.(*canvas.LineObject)
+
+		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
+		C.evas_vg_shape_append_move_to(shape, vectorPad, vectorPad)
+		C.evas_vg_shape_append_line_to(shape, C.double(vectorPad+scaleInt(c, size.Width)), vectorPad+C.double(scaleInt(c, size.Height)))
+		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.Color.R), C.int(lo.Color.G),
+			C.int(lo.Color.B), C.int(lo.Color.A))
+		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.Width*c.Scale()))
+	case *canvas.CircleObject:
+		obj = C.evas_object_vg_add(c.evas)
+		lo, _ := o.(*canvas.CircleObject)
+
+		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
+		C.evas_vg_shape_append_circle(shape, C.double(vectorPad+scaleInt(c, size.Width/2)), vectorPad+C.double(scaleInt(c, size.Height/2)), C.double(scaleInt(c, size.Width/2)))
+		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.Color.R), C.int(lo.Color.G),
+			C.int(lo.Color.B), C.int(lo.Color.A))
+		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.Width*c.Scale()))
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
 	}
@@ -102,13 +123,19 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject) 
 }
 
 func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
-	obj, min := buildCanvasObject(c, o, o2)
+	obj, min := buildCanvasObject(c, o, o2, size)
 	if min != nil {
 		pos = ui.NewPos(pos.X+(size.Width-min.Width)/2, pos.Y+(size.Height-min.Height)/2)
 	}
 
-	C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
-		C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+	switch o.(type) {
+	case *canvas.LineObject, *canvas.CircleObject:
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)-vectorPad), C.Evas_Coord(scaleInt(c, pos.Y)-vectorPad),
+			C.Evas_Coord(scaleInt(c, size.Width)+vectorPad*2), C.Evas_Coord(scaleInt(c, size.Height)+vectorPad*2))
+	default:
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+	}
 	C.evas_object_show(obj)
 }
 
@@ -143,7 +170,7 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	switch o.(type) {
 	case *ui.Container:
 		r := canvas.NewRectangle(theme.BackgroundColor())
-		obj, _ := buildCanvasObject(c, r, r)
+		obj, _ := buildCanvasObject(c, r, r, inner)
 		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
 		C.evas_object_show(obj)
 
