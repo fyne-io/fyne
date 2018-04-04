@@ -96,9 +96,27 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 		obj = C.evas_object_vg_add(c.evas)
 		lo, _ := o.(*canvas.LineObject)
 
+		width := lo.Position2.X - lo.Position1.X
+		height := lo.Position2.Y - lo.Position1.Y
 		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
-		C.evas_vg_shape_append_move_to(shape, vectorPad, vectorPad)
-		C.evas_vg_shape_append_line_to(shape, C.double(vectorPad+scaleInt(c, size.Width)), vectorPad+C.double(scaleInt(c, size.Height)))
+		if width >= 0 {
+			if height >= 0 {
+				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)))
+				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad+width)), C.double(scaleInt(c, vectorPad+height)))
+			} else {
+				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad - height)))
+				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad+width)), C.double(scaleInt(c, vectorPad)))
+			}
+		} else {
+			if height >= 0 {
+				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad - width)), C.double(scaleInt(c, vectorPad)))
+				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad+height)))
+			} else {
+				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad - width)), C.double(scaleInt(c, vectorPad - height)))
+				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)))
+			}
+		}
+
 		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.Color.R), C.int(lo.Color.G),
 			C.int(lo.Color.B), C.int(lo.Color.A))
 		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.Width*c.Scale()))
@@ -107,7 +125,7 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 		lo, _ := o.(*canvas.CircleObject)
 
 		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
-		C.evas_vg_shape_append_circle(shape, C.double(vectorPad+scaleInt(c, size.Width/2)), vectorPad+C.double(scaleInt(c, size.Height/2)), C.double(scaleInt(c, size.Width/2)))
+		C.evas_vg_shape_append_circle(shape, C.double(scaleInt(c, vectorPad+size.Width/2)), C.double(scaleInt(c, vectorPad+size.Height/2)), C.double(scaleInt(c, size.Width/2)))
 		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.Color.R), C.int(lo.Color.G),
 			C.int(lo.Color.B), C.int(lo.Color.A))
 		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.Width*c.Scale()))
@@ -130,8 +148,8 @@ func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Siz
 
 	switch o.(type) {
 	case *canvas.LineObject, *canvas.CircleObject:
-		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)-vectorPad), C.Evas_Coord(scaleInt(c, pos.Y)-vectorPad),
-			C.Evas_Coord(scaleInt(c, size.Width)+vectorPad*2), C.Evas_Coord(scaleInt(c, size.Height)+vectorPad*2))
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X-vectorPad)), C.Evas_Coord(scaleInt(c, pos.Y-vectorPad)),
+			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Width)))+vectorPad*2)), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Height)))+vectorPad*2)))
 	default:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
