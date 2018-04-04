@@ -19,7 +19,7 @@ type LineObject struct {
 // CurrentSize returns the current size of bounding box for this line object
 func (l *LineObject) CurrentSize() ui.Size {
 	return ui.NewSize(int(math.Abs(float64(l.Position2.X))-math.Abs(float64(l.Position1.X))),
-	                  int(math.Abs(float64(l.Position2.Y))-math.Abs(float64(l.Position1.Y))))
+		int(math.Abs(float64(l.Position2.Y))-math.Abs(float64(l.Position1.Y))))
 }
 
 // Resize sets a new bottom-right position for the line object
