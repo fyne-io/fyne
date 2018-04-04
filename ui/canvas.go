@@ -6,6 +6,7 @@ type Canvas interface {
 	SetContent(CanvasObject)
 	Refresh(CanvasObject)
 
+	Size() Size
 	Scale() float32
 	SetScale(float32)
 }
