@@ -1,10 +1,13 @@
 package canvas
 
+import "math"
 import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
 
-// LineObject describes a coloured line primitive in a Fyne canvas
+// LineObject describes a coloured line primitive in a Fyne canvas.
+// Lines are special as they can have a negative width or height to indicate
+// an inverse slope (i.e. slope up vs down).
 type LineObject struct {
 	Position1 ui.Position // The current top-left position of the LineObject
 	Position2 ui.Position // The current bottomright position of the LineObject
@@ -15,7 +18,8 @@ type LineObject struct {
 
 // CurrentSize returns the current size of bounding box for this line object
 func (l *LineObject) CurrentSize() ui.Size {
-	return ui.NewSize(l.Position2.X-l.Position1.X, l.Position2.Y-l.Position1.Y)
+	return ui.NewSize(int(math.Abs(float64(l.Position2.X))-math.Abs(float64(l.Position1.X))),
+	                  int(math.Abs(float64(l.Position2.Y))-math.Abs(float64(l.Position1.Y))))
 }
 
 // Resize sets a new bottom-right position for the line object
@@ -25,7 +29,7 @@ func (l *LineObject) Resize(size ui.Size) {
 
 // CurrentPosition gets the current top-left position of this line object, relative to it's parent / canvas
 func (l *LineObject) CurrentPosition() ui.Position {
-	return l.Position1
+	return ui.NewPos(ui.Min(l.Position1.X, l.Position2.X), ui.Min(l.Position1.Y, l.Position2.Y))
 }
 
 // Move the line object to a new position, relative to it's parent / canvas
