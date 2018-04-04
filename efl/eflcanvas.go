@@ -105,15 +105,15 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)))
 				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad+width)), C.double(scaleInt(c, vectorPad+height)))
 			} else {
-				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad - height)))
+				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad-height)))
 				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad+width)), C.double(scaleInt(c, vectorPad)))
 			}
 		} else {
 			if height >= 0 {
-				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad - width)), C.double(scaleInt(c, vectorPad)))
+				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad-width)), C.double(scaleInt(c, vectorPad)))
 				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad+height)))
 			} else {
-				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad - width)), C.double(scaleInt(c, vectorPad - height)))
+				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad-width)), C.double(scaleInt(c, vectorPad-height)))
 				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)))
 			}
 		}
@@ -188,6 +188,7 @@ func (c *eflCanvas) Size() ui.Size {
 	return c.size
 }
 
+// TODO let's not draw over the top for every refresh!
 func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	C.ecore_thread_main_loop_begin()
 	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
