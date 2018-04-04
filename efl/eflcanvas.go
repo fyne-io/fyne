@@ -2,6 +2,7 @@ package efl
 
 // #cgo pkg-config: evas ecore-evas
 // #include <Evas.h>
+// #include <Ecore.h>
 // #include <Ecore_Evas.h>
 //
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
@@ -188,6 +189,7 @@ func (c *eflCanvas) Size() ui.Size {
 }
 
 func (c *eflCanvas) Refresh(o ui.CanvasObject) {
+	C.ecore_thread_main_loop_begin()
 	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
 	switch o.(type) {
 	case *ui.Container:
@@ -215,6 +217,7 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	}
 
 	c.content = o
+	C.ecore_thread_main_loop_end()
 }
 
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
