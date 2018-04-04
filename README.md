@@ -34,7 +34,7 @@ It should look like one of these:
 
 ## Clock
 
-    go run clock/clocl.go
+    go run clock/clock.go
 
 ![Clock dark](img/clock-dark.png)
 ![Clock light](img/clock-light.png)
