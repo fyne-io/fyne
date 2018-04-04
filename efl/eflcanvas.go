@@ -183,6 +183,10 @@ func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 	}
 }
 
+func (c *eflCanvas) Size() ui.Size {
+	return c.size
+}
+
 func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
 	switch o.(type) {
