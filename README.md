@@ -30,3 +30,11 @@ It should look like one of these:
 |  dark | ![Calculator on Linux](img/calc-linux-dark.png) | ![Calculator on OS X](img/calc-osx-dark.png) | ![Calculator on Windows](img/calc-windows-dark.png) |
 | light | ![Calculator (light) on Linux](img/calc-linux-light.png) | ![Calculator (light) on OS X](img/calc-osx-light.png) | ![Calculator (light) on Windows](img/calc-windows-light.png) |
 
+# Examples
+
+## Clock
+
+    go run clock/clocl.go
+
+![Clock dark](img/clock-dark.png)
+![Clock light](img/clock-light.png)
