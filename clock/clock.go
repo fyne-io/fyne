@@ -61,13 +61,13 @@ func (c *clockLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 }
 
 func (c *clockLayout) render() *ui.Container {
-	c.hourdot = &canvas.CircleObject{Color: theme.TextColor(), Width: 5}
-	c.seconddot = &canvas.CircleObject{Color: theme.PrimaryColor(), Width: 3}
+	c.hourdot = &canvas.CircleObject{StrokeColor: theme.TextColor(), StrokeWidth: 5}
+	c.seconddot = &canvas.CircleObject{StrokeColor: theme.PrimaryColor(), StrokeWidth: 3}
+	c.face = &canvas.CircleObject{StrokeColor: theme.TextColor(), StrokeWidth: 1}
 
-	c.face = &canvas.CircleObject{Color: theme.TextColor(), Width: 1}
-	c.hour = &canvas.LineObject{Color: theme.TextColor(), Width: 5}
-	c.minute = &canvas.LineObject{Color: theme.TextColor(), Width: 3}
-	c.second = &canvas.LineObject{Color: theme.PrimaryColor(), Width: 1}
+	c.hour = &canvas.LineObject{StrokeColor: theme.TextColor(), StrokeWidth: 5}
+	c.minute = &canvas.LineObject{StrokeColor: theme.TextColor(), StrokeWidth: 3}
+	c.second = &canvas.LineObject{StrokeColor: theme.PrimaryColor(), StrokeWidth: 1}
 
 	container := ui.NewContainer(c.hourdot, c.seconddot, c.face, c.hour, c.minute, c.second)
 	container.Layout = c
