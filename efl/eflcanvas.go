@@ -88,11 +88,19 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 		min = &ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
 		to.SetMinSize(*min)
 	case *canvas.RectangleObject:
-		obj = C.evas_object_rectangle_add(c.evas)
-
+		obj = C.evas_object_vg_add(c.evas)
 		ro, _ := o.(*canvas.RectangleObject)
-		C.evas_object_color_set(obj, C.int(ro.Color.R), C.int(ro.Color.G),
-			C.int(ro.Color.B), C.int(ro.Color.A))
+
+		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
+		C.evas_vg_shape_append_rect(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)),
+			C.double(scaleInt(c, size.Width)), C.double(scaleInt(c, size.Height)), 0, 0)
+		C.evas_vg_shape_stroke_color_set(shape, C.int(ro.StrokeColor.R), C.int(ro.StrokeColor.G),
+			C.int(ro.StrokeColor.B), C.int(ro.StrokeColor.A))
+		if ro.FillColor.A != 0 {
+			C.evas_vg_node_color_set(shape, C.int(ro.FillColor.R), C.int(ro.FillColor.G),
+				C.int(ro.FillColor.B), C.int(ro.FillColor.A))
+		}
+		C.evas_vg_shape_stroke_width_set(shape, C.double(ro.StrokeWidth*c.Scale()))
 	case *canvas.LineObject:
 		obj = C.evas_object_vg_add(c.evas)
 		lo, _ := o.(*canvas.LineObject)
@@ -118,18 +126,22 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 			}
 		}
 
-		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.Color.R), C.int(lo.Color.G),
-			C.int(lo.Color.B), C.int(lo.Color.A))
-		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.Width*c.Scale()))
+		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
+			C.int(lo.StrokeColor.B), C.int(lo.StrokeColor.A))
+		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.StrokeWidth*c.Scale()))
 	case *canvas.CircleObject:
 		obj = C.evas_object_vg_add(c.evas)
-		lo, _ := o.(*canvas.CircleObject)
+		co, _ := o.(*canvas.CircleObject)
 
 		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
 		C.evas_vg_shape_append_circle(shape, C.double(scaleInt(c, vectorPad+size.Width/2)), C.double(scaleInt(c, vectorPad+size.Height/2)), C.double(scaleInt(c, size.Width/2)))
-		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.Color.R), C.int(lo.Color.G),
-			C.int(lo.Color.B), C.int(lo.Color.A))
-		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.Width*c.Scale()))
+		C.evas_vg_shape_stroke_color_set(shape, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
+			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
+		if co.FillColor.A != 0 {
+			C.evas_vg_node_color_set(shape, C.int(co.FillColor.R), C.int(co.FillColor.G),
+				C.int(co.FillColor.B), C.int(co.FillColor.A))
+		}
+		C.evas_vg_shape_stroke_width_set(shape, C.double(co.StrokeWidth*c.Scale()))
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
 	}
@@ -148,7 +160,7 @@ func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Siz
 	}
 
 	switch o.(type) {
-	case *canvas.LineObject, *canvas.CircleObject:
+	case *canvas.RectangleObject, *canvas.LineObject, *canvas.CircleObject:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X-vectorPad)), C.Evas_Coord(scaleInt(c, pos.Y-vectorPad)),
 			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Width)))+vectorPad*2)), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Height)))+vectorPad*2)))
 	default:
@@ -194,8 +206,10 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
 	switch o.(type) {
 	case *ui.Container:
-		r := canvas.NewRectangle(theme.BackgroundColor())
-		obj, _ := buildCanvasObject(c, r, r, inner)
+		bg := theme.BackgroundColor()
+		obj := C.evas_object_rectangle_add(c.evas)
+		C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
+
 		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
 		C.evas_object_show(obj)
 
