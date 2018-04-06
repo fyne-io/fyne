@@ -9,8 +9,9 @@ type CircleObject struct {
 	Position1 ui.Position // The current top-left position of the CircleObject
 	Position2 ui.Position // The current bottomright position of the CircleObject
 
-	Color color.RGBA // The circle stroke colour
-	Width float32    // The stroke width of the circle
+	FillColor   color.RGBA // The circle fill colour
+	StrokeColor color.RGBA // The circle stroke colour
+	StrokeWidth float32    // The stroke width of the circle
 }
 
 // CurrentSize returns the current size of bounding box for this circle object
@@ -44,7 +45,6 @@ func (l *CircleObject) MinSize() ui.Size {
 // NewLine returns a new CircleObject instance
 func NewCircle(color color.RGBA) *CircleObject {
 	return &CircleObject{
-		Color: color,
-		Width: 1,
+		FillColor: color,
 	}
 }

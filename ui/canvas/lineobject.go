@@ -12,8 +12,8 @@ type LineObject struct {
 	Position1 ui.Position // The current top-left position of the LineObject
 	Position2 ui.Position // The current bottomright position of the LineObject
 
-	Color color.RGBA // The line stroke colour
-	Width float32    // The stroke width of the line
+	StrokeColor color.RGBA // The line stroke colour
+	StrokeWidth float32    // The stroke width of the line
 }
 
 // CurrentSize returns the current size of bounding box for this line object
@@ -48,7 +48,7 @@ func (l *LineObject) MinSize() ui.Size {
 // NewLine returns a new LineObject instance
 func NewLine(color color.RGBA) *LineObject {
 	return &LineObject{
-		Color: color,
-		Width: 1,
+		StrokeColor: color,
+		StrokeWidth: 1,
 	}
 }

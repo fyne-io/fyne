@@ -9,7 +9,9 @@ type RectangleObject struct {
 	Size     ui.Size     // The current size of the RectangleObject - the font will not scale to this Size
 	Position ui.Position // The current position of the RectangleObject
 
-	Color color.RGBA // The rectangle fill colour
+	FillColor   color.RGBA // The rectangle fill colour
+	StrokeColor color.RGBA // The rectangle stroke colour
+	StrokeWidth float32    // The stroke width of the rectangle
 }
 
 // CurrentSize returns the current size of this rectangle object
@@ -41,6 +43,6 @@ func (r *RectangleObject) MinSize() ui.Size {
 // NewRectangle returns a new RectangleObject instance
 func NewRectangle(color color.RGBA) *RectangleObject {
 	return &RectangleObject{
-		Color: color,
+		FillColor: color,
 	}
 }
