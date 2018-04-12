@@ -1,14 +1,14 @@
-package main
+package examples
 
 import "math"
 import "time"
 
+import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/theme"
-import "github.com/fyne-io/fyne-app"
 
-var window ui.Window
+var clockWindow ui.Window
 
 type clockLayout struct {
 	hour, minute, second     *canvas.LineObject
@@ -61,6 +61,7 @@ func (c *clockLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 }
 
 func (c *clockLayout) render() *ui.Container {
+	// TODO scale width to clock face size
 	c.hourdot = &canvas.CircleObject{StrokeColor: theme.TextColor(), StrokeWidth: 5}
 	c.seconddot = &canvas.CircleObject{StrokeColor: theme.PrimaryColor(), StrokeWidth: 3}
 	c.face = &canvas.CircleObject{StrokeColor: theme.TextColor(), StrokeWidth: 1}
@@ -82,21 +83,20 @@ func (c *clockLayout) animate() {
 		for {
 			select {
 			case <-tick.C:
-				c.Layout(nil, window.Canvas().Size())
-				window.Canvas().Refresh(c.canvas)
+				c.Layout(nil, clockWindow.Canvas().Size())
+				clockWindow.Canvas().Refresh(c.canvas)
 			}
 		}
 	}()
 }
 
-func main() {
-	app := fyneapp.NewApp()
-	window = app.NewWindow("Clock")
+func Clock(app app.App) {
+	clockWindow = app.NewWindow("Clock")
 	clock := &clockLayout{}
 
 	canvas := clock.render()
 	go clock.animate()
 
-	window.Canvas().SetContent(canvas)
-	window.Show()
+	clockWindow.Canvas().SetContent(canvas)
+	clockWindow.Show()
 }

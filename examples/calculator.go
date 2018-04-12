@@ -1,24 +1,24 @@
-package main
+package examples
 
 import "log"
 import "strconv"
 
+import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/widget"
-import "github.com/fyne-io/fyne-app"
 
 import "github.com/Knetic/govaluate"
 
 var equation string
 var output *widget.Label
 var container *ui.Container
-var window ui.Window
+var calcWindow ui.Window
 
 func display() {
 	output.SetText(equation)
-	window.Canvas().Refresh(output)
+	calcWindow.Canvas().Refresh(output)
 }
 
 func character(char string) {
@@ -53,9 +53,7 @@ func evaluate() {
 	equation = ""
 }
 
-func main() {
-	app := fyneapp.NewApp()
-
+func Calculator(app app.App) {
 	output = widget.NewLabel("")
 	row1 := ui.NewContainer(
 		widget.NewButton("+", func(*event.MouseEvent) {
@@ -130,9 +128,9 @@ func main() {
 		equals)
 	row5.Layout = layout.NewGridLayout(2)
 
-	window = app.NewWindow("Calc")
+	calcWindow = app.NewWindow("Calc")
 	container = ui.NewContainer(output, row1, row2, row3, row4, row5)
 	container.Layout = layout.NewGridLayout(1)
-	window.Canvas().SetContent(container)
-	window.Show()
+	calcWindow.Canvas().SetContent(container)
+	calcWindow.Show()
 }
