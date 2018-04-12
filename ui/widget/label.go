@@ -11,7 +11,7 @@ type Label struct {
 
 	Text string
 
-	label *canvas.TextObject
+	label *canvas.Text
 }
 
 // MinSize calculates the minimum size of a label.

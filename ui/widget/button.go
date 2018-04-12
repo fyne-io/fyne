@@ -13,8 +13,8 @@ type Button struct {
 
 	OnClicked func(*event.MouseEvent)
 
-	label      *canvas.TextObject
-	background *canvas.RectangleObject
+	label      *canvas.Text
+	background *canvas.Rectangle
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
