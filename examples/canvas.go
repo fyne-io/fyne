@@ -12,11 +12,11 @@ func Canvas(app app.App) {
 
 	content := ui.NewContainer(
 		canvas.NewText("Resize me"),
-		&canvas.RectangleObject{FillColor: color.RGBA{0x80, 0, 0, 0xff},
+		&canvas.Rectangle{FillColor: color.RGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.RGBA{0xff, 0xff, 0xff, 0xff},
 			StrokeWidth: 1},
-		&canvas.LineObject{StrokeColor: color.RGBA{0, 0x80, 0, 0xff}, StrokeWidth: 5},
-		&canvas.CircleObject{StrokeColor: color.RGBA{0, 0, 0x80, 0xff},
+		&canvas.Line{StrokeColor: color.RGBA{0, 0x80, 0, 0xff}, StrokeWidth: 5},
+		&canvas.Circle{StrokeColor: color.RGBA{0, 0, 0x80, 0xff},
 			FillColor:   color.RGBA{0x30, 0x30, 0x30, 0x60},
 			StrokeWidth: 2})
 	content.Layout = layout.NewFixedGridLayout(ui.NewSize(93, 93))

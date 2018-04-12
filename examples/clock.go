@@ -11,8 +11,8 @@ import "github.com/fyne-io/fyne/ui/theme"
 var clockWindow ui.Window
 
 type clockLayout struct {
-	hour, minute, second     *canvas.LineObject
-	hourdot, seconddot, face *canvas.CircleObject
+	hour, minute, second     *canvas.Line
+	hourdot, seconddot, face *canvas.Circle
 
 	canvas ui.CanvasObject
 }
@@ -62,13 +62,13 @@ func (c *clockLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 
 func (c *clockLayout) render() *ui.Container {
 	// TODO scale width to clock face size
-	c.hourdot = &canvas.CircleObject{StrokeColor: theme.TextColor(), StrokeWidth: 5}
-	c.seconddot = &canvas.CircleObject{StrokeColor: theme.PrimaryColor(), StrokeWidth: 3}
-	c.face = &canvas.CircleObject{StrokeColor: theme.TextColor(), StrokeWidth: 1}
+	c.hourdot = &canvas.Circle{StrokeColor: theme.TextColor(), StrokeWidth: 5}
+	c.seconddot = &canvas.Circle{StrokeColor: theme.PrimaryColor(), StrokeWidth: 3}
+	c.face = &canvas.Circle{StrokeColor: theme.TextColor(), StrokeWidth: 1}
 
-	c.hour = &canvas.LineObject{StrokeColor: theme.TextColor(), StrokeWidth: 5}
-	c.minute = &canvas.LineObject{StrokeColor: theme.TextColor(), StrokeWidth: 3}
-	c.second = &canvas.LineObject{StrokeColor: theme.PrimaryColor(), StrokeWidth: 1}
+	c.hour = &canvas.Line{StrokeColor: theme.TextColor(), StrokeWidth: 5}
+	c.minute = &canvas.Line{StrokeColor: theme.TextColor(), StrokeWidth: 3}
+	c.second = &canvas.Line{StrokeColor: theme.PrimaryColor(), StrokeWidth: 1}
 
 	container := ui.NewContainer(c.hourdot, c.seconddot, c.face, c.hour, c.minute, c.second)
 	container.Layout = c

@@ -40,7 +40,7 @@ func welcome(app app.App) {
 			canvasApp(app)
 		}),
 
-		&canvas.RectangleObject{},
+		&canvas.Rectangle{},
 		widget.NewButton("Quit", func(e *event.MouseEvent) {
 			app.Quit()
 		}))
