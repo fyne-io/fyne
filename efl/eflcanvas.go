@@ -74,10 +74,10 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 	var min *ui.Size
 
 	switch o.(type) {
-	case *canvas.TextObject:
+	case *canvas.Text:
 		obj = C.evas_object_text_add(c.evas)
 
-		to, _ := o.(*canvas.TextObject)
+		to, _ := o.(*canvas.Text)
 		C.evas_object_color_set(obj, C.int(to.Color.R), C.int(to.Color.G),
 			C.int(to.Color.B), C.int(to.Color.A))
 
@@ -87,9 +87,9 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 		native := nativeTextBounds(obj)
 		min = &ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
 		to.SetMinSize(*min)
-	case *canvas.RectangleObject:
+	case *canvas.Rectangle:
 		obj = C.evas_object_vg_add(c.evas)
-		ro, _ := o.(*canvas.RectangleObject)
+		ro, _ := o.(*canvas.Rectangle)
 
 		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
 		C.evas_vg_shape_append_rect(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)),
@@ -101,9 +101,9 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 				C.int(ro.FillColor.B), C.int(ro.FillColor.A))
 		}
 		C.evas_vg_shape_stroke_width_set(shape, C.double(ro.StrokeWidth*c.Scale()))
-	case *canvas.LineObject:
+	case *canvas.Line:
 		obj = C.evas_object_vg_add(c.evas)
-		lo, _ := o.(*canvas.LineObject)
+		lo, _ := o.(*canvas.Line)
 
 		width := lo.Position2.X - lo.Position1.X
 		height := lo.Position2.Y - lo.Position1.Y
@@ -129,9 +129,9 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
 			C.int(lo.StrokeColor.B), C.int(lo.StrokeColor.A))
 		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.StrokeWidth*c.Scale()))
-	case *canvas.CircleObject:
+	case *canvas.Circle:
 		obj = C.evas_object_vg_add(c.evas)
-		co, _ := o.(*canvas.CircleObject)
+		co, _ := o.(*canvas.Circle)
 
 		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
 		C.evas_vg_shape_append_circle(shape, C.double(scaleInt(c, vectorPad+size.Width/2)), C.double(scaleInt(c, vectorPad+size.Height/2)), C.double(scaleInt(c, size.Width/2)))
@@ -160,7 +160,7 @@ func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Siz
 	}
 
 	switch o.(type) {
-	case *canvas.RectangleObject, *canvas.LineObject, *canvas.CircleObject:
+	case *canvas.Rectangle, *canvas.Line, *canvas.Circle:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X-vectorPad)), C.Evas_Coord(scaleInt(c, pos.Y-vectorPad)),
 			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Width)))+vectorPad*2)), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Height)))+vectorPad*2)))
 	default:
@@ -253,7 +253,7 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	}
 }
 
-func updateFont(obj *C.Evas_Object, c *eflCanvas, t *canvas.TextObject) {
+func updateFont(obj *C.Evas_Object, c *eflCanvas, t *canvas.Text) {
 	font := theme.TextFont()
 
 	if t.Bold {
