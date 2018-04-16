@@ -32,6 +32,28 @@ func TestGridLayout(t *testing.T) {
 	assert.Equal(t, obj3.Position, cell3Pos)
 }
 
+func TestGridLayoutRounding(t *testing.T) {
+	gridSize := ui.NewSize(100+theme.Padding()*2, 50)
+
+	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+
+	container := &ui.Container{
+		Size:    gridSize,
+		Objects: []ui.CanvasObject{obj1, obj2, obj3},
+	}
+
+	NewGridLayout(3).Layout(container.Objects, gridSize)
+
+	assert.Equal(t, obj1.Position, ui.NewPos(0, 0))
+	assert.Equal(t, obj1.Size, ui.NewSize(33, 50))
+	assert.Equal(t, obj2.Position, ui.NewPos(33+theme.Padding(), 0))
+	assert.Equal(t, obj2.Size, ui.NewSize(34, 50))
+	assert.Equal(t, obj3.Position, ui.NewPos(67+theme.Padding()*2, 0))
+	assert.Equal(t, obj3.Size, ui.NewSize(33, 50))
+}
+
 func TestGridLayoutMinSize(t *testing.T) {
 	text1 := canvas.NewText("Large Text")
 	text2 := canvas.NewText("small")

@@ -12,6 +12,20 @@ func (g *gridLayout) countRows(objects []ui.CanvasObject) int {
 	return int(math.Ceil(float64(len(objects)) / float64(g.Cols)))
 }
 
+// Get the leading (top or left) edge of a grid cell.
+// size is the ideal cell size and the offset is which col or row it's on.
+func getLeading(size float64, offset int) int {
+	ret := (size + float64(theme.Padding())) * float64(offset)
+
+	return int(math.Round(ret))
+}
+
+// Get theh trailing (bottom or right) edge of a grid cell.
+// size is the ideal cell size and the offset is which col or row it's on.
+func getTrailing(size float64, offset int) int {
+	return getLeading(size, offset+1) - theme.Padding()
+}
+
 // Layout is called to pack all child objects into a specified size.
 // For a GridLayout this will pack objects into a table format with the number
 // of columns specified in our constructor.
@@ -21,20 +35,26 @@ func (g *gridLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
 	padWidth := (g.Cols - 1) * theme.Padding()
 	padHeight := (rows - 1) * theme.Padding()
 
-	cellWidth := int((size.Width - padWidth) / g.Cols)
-	cellHeight := int((size.Height - padHeight) / rows)
-	cellSize := ui.NewSize(cellWidth, cellHeight)
+	cellWidth := float64(size.Width-padWidth) / float64(g.Cols)
+	cellHeight := float64(size.Height-padHeight) / float64(rows)
 
-	x, y := 0, 0
+	row, col := 0, 0
 	for i, child := range objects {
-		child.Move(ui.NewPos(x, y))
-		child.Resize(cellSize)
+		x1 := getLeading(cellWidth, col)
+		y1 := getLeading(cellHeight, row)
+		x2 := getTrailing(cellWidth, col)
+		y2 := getTrailing(cellHeight, row)
+
+		child.Move(ui.NewPos(x1, y1))
+		child.Resize(ui.NewSize(x2-x1, y2-y1))
 
 		if (i+1)%g.Cols == 0 {
-			x = 0
-			y += cellHeight + theme.Padding()
+			row++
+			col = 0
+
 		} else {
-			x += cellWidth + theme.Padding()
+			col++
+
 		}
 	}
 }
