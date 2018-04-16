@@ -252,24 +252,23 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	C.ecore_thread_main_loop_end()
 }
 
+func (c *eflCanvas) fitContent() {
+	min := c.content.MinSize()
+	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
+	minHeight := scaleInt(c, min.Height+theme.Padding()*2)
+
+	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
+	C.ecore_evas_resize(c.window.ee, C.int(minWidth), C.int(minHeight))
+}
+
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	canvases[C.ecore_evas_get(c.window.ee)] = c
 	c.objects = make(map[*C.Evas_Object]ui.CanvasObject)
 	c.native = make(map[ui.CanvasObject]*C.Evas_Object)
 	c.content = o
+
 	c.Refresh(o)
-
-	min := o.MinSize()
-	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
-	minHeight := scaleInt(c, min.Height+theme.Padding()*2)
-
-	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
-
-	var w, h C.int
-	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
-	if int(w) < minWidth || int(h) < minHeight {
-		C.ecore_evas_resize(c.window.ee, C.int(minWidth), C.int(minHeight))
-	}
+	c.fitContent()
 }
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, t *canvas.Text) {
@@ -312,5 +311,7 @@ func (c *eflCanvas) Scale() float32 {
 
 func (c *eflCanvas) SetScale(scale float32) {
 	c.scale = scale
-	log.Println("TODO Update all our objects")
+
+	c.Refresh(c.content)
+	c.fitContent()
 }
