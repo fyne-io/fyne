@@ -51,6 +51,7 @@ type eflCanvas struct {
 	window  *window
 
 	objects map[*C.Evas_Object]ui.CanvasObject
+	native  map[ui.CanvasObject]*C.Evas_Object
 }
 
 func nativeTextBounds(obj *C.Evas_Object) ui.Size {
@@ -69,9 +70,8 @@ func nativeTextBounds(obj *C.Evas_Object) ui.Size {
 	return ui.Size{width, height}
 }
 
-func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, size ui.Size) (*C.Evas_Object, *ui.Size) {
+func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, size ui.Size) *C.Evas_Object {
 	var obj *C.Evas_Object
-	var min *ui.Size
 
 	switch o.(type) {
 	case *canvas.Text:
@@ -82,53 +82,18 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 			C.int(to.Color.B), C.int(to.Color.A))
 
 		updateFont(obj, c, to)
-		C.evas_object_text_text_set(obj, C.CString(to.Text))
-
-		native := nativeTextBounds(obj)
-		min = &ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
-		to.SetMinSize(*min)
 	case *canvas.Rectangle:
-		obj = C.evas_object_vg_add(c.evas)
+		obj = C.evas_object_rectangle_add(c.evas)
 		ro, _ := o.(*canvas.Rectangle)
 
-		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
-		C.evas_vg_shape_append_rect(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)),
-			C.double(scaleInt(c, size.Width)), C.double(scaleInt(c, size.Height)), 0, 0)
-		C.evas_vg_shape_stroke_color_set(shape, C.int(ro.StrokeColor.R), C.int(ro.StrokeColor.G),
-			C.int(ro.StrokeColor.B), C.int(ro.StrokeColor.A))
-		if ro.FillColor.A != 0 {
-			C.evas_vg_node_color_set(shape, C.int(ro.FillColor.R), C.int(ro.FillColor.G),
-				C.int(ro.FillColor.B), C.int(ro.FillColor.A))
-		}
-		C.evas_vg_shape_stroke_width_set(shape, C.double(ro.StrokeWidth*c.Scale()))
+		C.evas_object_color_set(obj, C.int(ro.FillColor.R), C.int(ro.FillColor.G),
+			C.int(ro.FillColor.B), C.int(ro.FillColor.A))
 	case *canvas.Line:
-		obj = C.evas_object_vg_add(c.evas)
+		obj = C.evas_object_line_add(c.evas)
 		lo, _ := o.(*canvas.Line)
 
-		width := lo.Position2.X - lo.Position1.X
-		height := lo.Position2.Y - lo.Position1.Y
-		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
-		if width >= 0 {
-			if height >= 0 {
-				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)))
-				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad+width)), C.double(scaleInt(c, vectorPad+height)))
-			} else {
-				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad-height)))
-				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad+width)), C.double(scaleInt(c, vectorPad)))
-			}
-		} else {
-			if height >= 0 {
-				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad-width)), C.double(scaleInt(c, vectorPad)))
-				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad+height)))
-			} else {
-				C.evas_vg_shape_append_move_to(shape, C.double(scaleInt(c, vectorPad-width)), C.double(scaleInt(c, vectorPad-height)))
-				C.evas_vg_shape_append_line_to(shape, C.double(scaleInt(c, vectorPad)), C.double(scaleInt(c, vectorPad)))
-			}
-		}
-
-		C.evas_vg_shape_stroke_color_set(shape, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
+		C.evas_object_color_set(obj, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
 			C.int(lo.StrokeColor.B), C.int(lo.StrokeColor.A))
-		C.evas_vg_shape_stroke_width_set(shape, C.double(lo.StrokeWidth*c.Scale()))
 	case *canvas.Circle:
 		obj = C.evas_object_vg_add(c.evas)
 		co, _ := o.(*canvas.Circle)
@@ -150,19 +115,56 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
 		nil)
-	return obj, min
+	return obj
 }
 
 func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
-	obj, min := buildCanvasObject(c, o, o2, size)
-	if min != nil {
+	var obj *C.Evas_Object
+	if c.native[o] == nil {
+		obj = buildCanvasObject(c, o, o2, size)
+		c.native[o] = obj
+	} else {
+		obj = c.native[o]
+	}
+
+	switch o.(type) {
+	case *canvas.Text:
+		to, _ := o.(*canvas.Text)
+		C.evas_object_text_text_set(obj, C.CString(to.Text))
+
+		native := nativeTextBounds(obj)
+		min := ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
+		to.SetMinSize(min)
+
 		pos = ui.NewPos(pos.X+(size.Width-min.Width)/2, pos.Y+(size.Height-min.Height)/2)
 	}
 
 	switch o.(type) {
-	case *canvas.Rectangle, *canvas.Line, *canvas.Circle:
+	case *canvas.Circle:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X-vectorPad)), C.Evas_Coord(scaleInt(c, pos.Y-vectorPad)),
 			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Width)))+vectorPad*2)), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Height)))+vectorPad*2)))
+	case *canvas.Line:
+		lo, _ := o.(*canvas.Line)
+		width := lo.Position2.X - lo.Position1.X
+		height := lo.Position2.Y - lo.Position1.Y
+
+		if width >= 0 {
+			if height >= 0 {
+				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+					C.Evas_Coord(scaleInt(c, pos.X+size.Width)), C.Evas_Coord(scaleInt(c, pos.Y+size.Height)))
+			} else {
+				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y-size.Height)),
+					C.Evas_Coord(scaleInt(c, pos.X+size.Width)), C.Evas_Coord(scaleInt(c, pos.Y)))
+			}
+		} else {
+			if height >= 0 {
+				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, pos.X-size.Width)), C.Evas_Coord(scaleInt(c, pos.Y)),
+					C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y+size.Height)))
+			} else {
+				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, pos.X-size.Width)), C.Evas_Coord(scaleInt(c, pos.Y-size.Height)),
+					C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)))
+			}
+		}
 	default:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
@@ -171,6 +173,29 @@ func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Siz
 }
 
 func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObject, pos ui.Position, size ui.Size) {
+	containerPos := pos
+	containerSize := size
+	if target == c.content {
+		containerPos = ui.NewPos(0, 0)
+		containerSize = ui.NewSize(size.Width+2*theme.Padding(), size.Height+2*theme.Padding())
+	}
+
+	if c.native[target] == nil {
+		obj := C.evas_object_rectangle_add(c.evas)
+		bg := theme.BackgroundColor()
+		C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
+
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, containerPos.X)), C.Evas_Coord(scaleInt(c, containerPos.Y)),
+			C.Evas_Coord(scaleInt(c, containerSize.Width)), C.Evas_Coord(scaleInt(c, containerSize.Height)))
+		C.evas_object_show(obj)
+
+		c.native[target] = obj
+	} else {
+		obj := c.native[target]
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, containerPos.X)), C.Evas_Coord(scaleInt(c, containerPos.Y)),
+			C.Evas_Coord(scaleInt(c, containerSize.Width)), C.Evas_Coord(scaleInt(c, containerSize.Height)))
+	}
+
 	for _, child := range objs {
 		switch child.(type) {
 		case *ui.Container:
@@ -206,13 +231,6 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
 	switch o.(type) {
 	case *ui.Container:
-		bg := theme.BackgroundColor()
-		obj := C.evas_object_rectangle_add(c.evas)
-		C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
-
-		C.evas_object_geometry_set(obj, 0, 0, C.Evas_Coord(scaleInt(c, c.size.Width)), C.Evas_Coord(scaleInt(c, c.size.Height)))
-		C.evas_object_show(obj)
-
 		container := o.(*ui.Container)
 		container.Move(ui.NewPos(theme.Padding(), theme.Padding()))
 		container.Resize(inner)
@@ -223,7 +241,7 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 			layout.NewMaxLayout().Layout(container.Objects, inner)
 		}
 
-		c.setupContainer(container.Objects, nil, ui.NewPos(theme.Padding(), theme.Padding()), inner)
+		c.setupContainer(container.Objects, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	case widget.Widget:
 		widget := o.(widget.Widget)
 		c.setupContainer(widget.Layout(), o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
@@ -231,13 +249,14 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 		c.setupObj(o, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	}
 
-	c.content = o
 	C.ecore_thread_main_loop_end()
 }
 
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	canvases[C.ecore_evas_get(c.window.ee)] = c
 	c.objects = make(map[*C.Evas_Object]ui.CanvasObject)
+	c.native = make(map[ui.CanvasObject]*C.Evas_Object)
+	c.content = o
 	c.Refresh(o)
 
 	min := o.MinSize()
