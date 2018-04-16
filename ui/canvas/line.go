@@ -5,12 +5,12 @@ import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
 
-// LineObject describes a coloured line primitive in a Fyne canvas.
+// Line describes a coloured line primitive in a Fyne canvas.
 // Lines are special as they can have a negative width or height to indicate
 // an inverse slope (i.e. slope up vs down).
 type Line struct {
-	Position1 ui.Position // The current top-left position of the LineObject
-	Position2 ui.Position // The current bottomright position of the LineObject
+	Position1 ui.Position // The current top-left position of the Line
+	Position2 ui.Position // The current bottomright position of the Line
 
 	StrokeColor color.RGBA // The line stroke colour
 	StrokeWidth float32    // The stroke width of the line
@@ -39,13 +39,13 @@ func (l *Line) Move(pos ui.Position) {
 	l.Position2 = ui.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }
 
-// MinSize for a LineObject simply returns Size{1, 1} as there is no
+// MinSize for a Line simply returns Size{1, 1} as there is no
 // explicit content
 func (l *Line) MinSize() ui.Size {
 	return ui.NewSize(1, 1)
 }
 
-// NewLine returns a new LineObject instance
+// NewLine returns a new Line instance
 func NewLine(color color.RGBA) *Line {
 	return &Line{
 		StrokeColor: color,

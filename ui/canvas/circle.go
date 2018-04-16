@@ -4,10 +4,10 @@ import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
 
-// CircleObject describes a coloured circle primitive in a Fyne canvas
+// Circle describes a coloured circle primitive in a Fyne canvas
 type Circle struct {
-	Position1 ui.Position // The current top-left position of the CircleObject
-	Position2 ui.Position // The current bottomright position of the CircleObject
+	Position1 ui.Position // The current top-left position of the Circle
+	Position2 ui.Position // The current bottomright position of the Circle
 
 	FillColor   color.RGBA // The circle fill colour
 	StrokeColor color.RGBA // The circle stroke colour
@@ -36,13 +36,13 @@ func (l *Circle) Move(pos ui.Position) {
 	l.Position2 = ui.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }
 
-// MinSize for a CircleObject simply returns Size{1, 1} as there is no
+// MinSize for a Circle simply returns Size{1, 1} as there is no
 // explicit content
 func (l *Circle) MinSize() ui.Size {
 	return ui.NewSize(1, 1)
 }
 
-// NewLine returns a new CircleObject instance
+// NewCircle returns a new Circle instance
 func NewCircle(color color.RGBA) *Circle {
 	return &Circle{
 		FillColor: color,

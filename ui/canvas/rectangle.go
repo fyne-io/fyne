@@ -4,10 +4,10 @@ import "image/color"
 
 import "github.com/fyne-io/fyne/ui"
 
-// RectangleObject describes a coloured rectangle primitive in a Fyne canvas
+// Rectangle describes a coloured rectangle primitive in a Fyne canvas
 type Rectangle struct {
-	Size     ui.Size     // The current size of the RectangleObject - the font will not scale to this Size
-	Position ui.Position // The current position of the RectangleObject
+	Size     ui.Size     // The current size of the Rectangle - the font will not scale to this Size
+	Position ui.Position // The current position of the Rectangle
 
 	FillColor   color.RGBA // The rectangle fill colour
 	StrokeColor color.RGBA // The rectangle stroke colour
@@ -34,13 +34,13 @@ func (r *Rectangle) Move(pos ui.Position) {
 	r.Position = pos
 }
 
-// MinSize for a RectangleObject simply returns Size{1, 1} as there is no
+// MinSize for a Rectangle simply returns Size{1, 1} as there is no
 // explicit content
 func (r *Rectangle) MinSize() ui.Size {
 	return ui.NewSize(1, 1)
 }
 
-// NewRectangle returns a new RectangleObject instance
+// NewRectangle returns a new Rectangle instance
 func NewRectangle(color color.RGBA) *Rectangle {
 	return &Rectangle{
 		FillColor: color,
