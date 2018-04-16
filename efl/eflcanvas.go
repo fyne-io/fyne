@@ -250,6 +250,7 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 		c.setupObj(o, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	}
 
+	c.fitContent()
 	C.ecore_thread_main_loop_end()
 }
 
@@ -258,8 +259,11 @@ func (c *eflCanvas) fitContent() {
 	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
 	minHeight := scaleInt(c, min.Height+theme.Padding()*2)
 
+	var w, h C.int
+	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
+
 	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
-	C.ecore_evas_resize(c.window.ee, C.int(minWidth), C.int(minHeight))
+	C.ecore_evas_resize(c.window.ee, C.int(ui.Max(minWidth, int(w))), C.int(ui.Max(minHeight, int(h))))
 }
 
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
@@ -269,7 +273,6 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	c.content = o
 
 	c.Refresh(o)
-	c.fitContent()
 }
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, t *canvas.Text) {
@@ -314,5 +317,4 @@ func (c *eflCanvas) SetScale(scale float32) {
 	c.scale = scale
 
 	c.Refresh(c.content)
-	c.fitContent()
 }
