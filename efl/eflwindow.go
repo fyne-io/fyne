@@ -121,3 +121,13 @@ func (d *eFLDriver) CreateWindow(title string) ui.Window {
 	c.SetContent(new(ui.Container))
 	return w
 }
+
+func (d *eFLDriver) AllWindows() []ui.Window {
+	wins := make([]ui.Window, 0, len(windows))
+
+	for  _, win := range windows {
+		wins = append(wins, win)
+	}
+
+	return wins
+}

@@ -7,6 +7,8 @@ import "C"
 
 import "log"
 
+import "github.com/fyne-io/fyne/ui"
+
 const (
 	oSEngineOther = "unknown"
 )
@@ -24,6 +26,7 @@ func NewEFLDriver() *eFLDriver {
 		log.Fatalln("Unsupported operating system")
 	}
 
+	ui.SetDriver(driver)
 	return driver
 }
 

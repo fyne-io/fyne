@@ -254,6 +254,10 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	C.ecore_thread_main_loop_end()
 }
 
+func (c *eflCanvas) Contains(obj ui.CanvasObject) bool {
+	return c.native[obj] != nil
+}
+
 func (c *eflCanvas) fitContent() {
 	min := c.content.MinSize()
 	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
