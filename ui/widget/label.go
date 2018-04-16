@@ -27,8 +27,8 @@ func (l *Label) SetText(text string) {
 }
 
 // Layout the components of the label widget
-func (l *Label) Layout() []ui.CanvasObject {
-	layout.NewMaxLayout().Layout(l.objects, l.Size)
+func (l *Label) Layout(size ui.Size) []ui.CanvasObject {
+	layout.NewMaxLayout().Layout(l.objects, size)
 
 	return l.objects
 }

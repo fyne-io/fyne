@@ -15,7 +15,7 @@ type Widget interface {
 	MinSize() ui.Size
 
 	// TODO should this move to a widget impl?... (private)
-	Layout() []ui.CanvasObject
+	Layout(ui.Size) []ui.CanvasObject
 }
 
 // A base widget class to define the standard widget behaviours.

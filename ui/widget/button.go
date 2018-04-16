@@ -34,11 +34,11 @@ func (b *Button) MinSize() ui.Size {
 }
 
 // Layout the components of the button widget
-func (b *Button) Layout() []ui.CanvasObject {
+func (b *Button) Layout(size ui.Size) []ui.CanvasObject {
 	if b.Style == PrimaryButton {
 		b.background.FillColor = theme.PrimaryColor()
 	}
-	layout.NewMaxLayout().Layout(b.objects, b.Size)
+	layout.NewMaxLayout().Layout(b.objects, size)
 
 	return b.objects
 }
