@@ -49,7 +49,7 @@ func main() {
 	app := fyneapp.NewApp()
 
 	var ex string
-	flag.StringVar(&ex, "example", "", "Launch an app directly")
+	flag.StringVar(&ex, "example", "", "Launch an app directly (calculator,canvas,clock)")
 	flag.Parse()
 
 	switch ex {
