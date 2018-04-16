@@ -6,10 +6,8 @@ import "flag"
 import "github.com/fyne-io/examples/examples"
 
 import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/event"
-import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/widget"
 import "github.com/fyne-io/fyne-app"
 
@@ -27,7 +25,7 @@ func clockApp(app app.App) {
 
 func welcome(app app.App) {
 	w := app.NewWindow("Examples")
-	container := ui.NewContainer(
+	w.Canvas().SetContent(widget.NewList(
 		widget.NewLabel("Fyne Examples!"),
 
 		widget.NewButton("Calculator", func(e *event.MouseEvent) {
@@ -43,10 +41,7 @@ func welcome(app app.App) {
 		&canvas.Rectangle{},
 		widget.NewButton("Quit", func(e *event.MouseEvent) {
 			app.Quit()
-		}))
-	container.Layout = layout.NewGridLayout(1)
-
-	w.Canvas().SetContent(container)
+		})))
 	w.Show()
 }
 
