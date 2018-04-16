@@ -21,7 +21,7 @@ Using standard go tools you can install Fyne's core library using:
 
 And then you're ready to run an example, like this:
 
-    go run calculator/calc.go
+    go run main.go -example calculator
 
 It should look like one of these:
 
@@ -34,7 +34,7 @@ It should look like one of these:
 
 ## Clock
 
-    go run clock/clock.go
+    go run main.go -example clock
 
 ![Clock dark](img/clock-dark.png)
 ![Clock light](img/clock-light.png)
