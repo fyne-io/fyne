@@ -11,6 +11,10 @@ import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/widget"
 import "github.com/fyne-io/fyne-app"
 
+func blogApp(app app.App) {
+	examples.Blog(app)
+}
+
 func calcApp(app app.App) {
 	examples.Calculator(app)
 }
@@ -28,6 +32,9 @@ func welcome(app app.App) {
 	w.Canvas().SetContent(widget.NewList(
 		widget.NewLabel("Fyne Examples!"),
 
+		widget.NewButton("Blog", func(e *event.MouseEvent) {
+			blogApp(app)
+		}),
 		widget.NewButton("Calculator", func(e *event.MouseEvent) {
 			calcApp(app)
 		}),
@@ -49,10 +56,12 @@ func main() {
 	app := fyneapp.NewApp()
 
 	var ex string
-	flag.StringVar(&ex, "example", "", "Launch an app directly (calculator,canvas,clock)")
+	flag.StringVar(&ex, "example", "", "Launch an app directly (blog,calculator,canvas,clock)")
 	flag.Parse()
 
 	switch ex {
+	case "blog":
+		blogApp(app)
 	case "calculator":
 		calcApp(app)
 	case "canvas":
