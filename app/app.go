@@ -12,6 +12,9 @@ type App interface {
 	// the application will exit
 	NewWindow(title string) ui.Window
 
+	// Open a URL in the default browser application
+	OpenURL(url string)
+
 	// Calling Quit on the application will cause the application to exit
 	// cleanly, closing all open windows.
 	Quit()
