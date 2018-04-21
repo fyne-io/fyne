@@ -14,6 +14,10 @@ func (app *eflApp) NewWindow(title string) ui.Window {
 	return app.driver.CreateWindow(title)
 }
 
+func (app *eflApp) Quit() {
+	app.driver.Quit()
+}
+
 // NewApp initialises a new Fyne application returning a handle to that App
 func NewApp() app.App {
 	app := &eflApp{
@@ -21,8 +25,4 @@ func NewApp() app.App {
 	}
 
 	return app
-}
-
-func (app *eflApp) Quit() {
-	app.driver.Quit()
 }
