@@ -125,7 +125,7 @@ func (d *eFLDriver) CreateWindow(title string) ui.Window {
 func (d *eFLDriver) AllWindows() []ui.Window {
 	wins := make([]ui.Window, 0, len(windows))
 
-	for  _, win := range windows {
+	for _, win := range windows {
 		wins = append(wins, win)
 	}
 
