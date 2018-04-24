@@ -1,7 +1,7 @@
 package efl
 
 // #cgo pkg-config: evas ecore-evas
-// #define EFL_BETA_API_SUPPORT master-compatibility-hack
+// #cgo CFLAGS: -DEFL_BETA_API_SUPPORT=master-compatibility-hack
 // #include <Evas.h>
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
