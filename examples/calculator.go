@@ -14,16 +14,14 @@ import "github.com/Knetic/govaluate"
 var equation string
 var output *widget.Label
 var container *ui.Container
-var calcWindow ui.Window
 
-func display() {
-	output.SetText(equation)
-	calcWindow.Canvas().Refresh(output)
+func display(newtext string) {
+	equation = newtext
+	output.SetText(newtext)
 }
 
 func character(char string) {
-	equation = equation + char
-	display()
+	display(equation + char)
 }
 
 func digit(d int) {
@@ -31,8 +29,7 @@ func digit(d int) {
 }
 
 func clear() {
-	equation = ""
-	display()
+	display("")
 }
 
 func evaluate() {
@@ -40,16 +37,15 @@ func evaluate() {
 	if err == nil {
 		result, err := expression.Evaluate(nil)
 		if err == nil {
-			equation = strconv.FormatFloat(result.(float64), 'f', -1, 64)
+			display(strconv.FormatFloat(result.(float64), 'f', -1, 64))
 		}
 	}
 
 	if err != nil {
 		log.Println("Error in calculation", err)
-		equation = ""
+		display("error")
 	}
 
-	display()
 	equation = ""
 }
 
@@ -128,9 +124,9 @@ func Calculator(app app.App) {
 		equals)
 	row5.Layout = layout.NewGridLayout(2)
 
-	calcWindow = app.NewWindow("Calc")
+	window := app.NewWindow("Calc")
 	container = ui.NewContainer(output, row1, row2, row3, row4, row5)
 	container.Layout = layout.NewGridLayout(1)
-	calcWindow.Canvas().SetContent(container)
-	calcWindow.Show()
+	window.Canvas().SetContent(container)
+	window.Show()
 }
