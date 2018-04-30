@@ -209,7 +209,8 @@ func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 			}
 			c.setupContainer(container.Objects, nil, child.CurrentPosition().Add(pos), child.CurrentSize())
 		case widget.Widget:
-			c.setupContainer(child.(widget.Widget).Layout(child.CurrentSize()), child, child.CurrentPosition().Add(pos), child.CurrentSize())
+			c.setupContainer(child.(widget.Widget).Layout(child.CurrentSize()),
+				child, child.CurrentPosition().Add(pos), child.CurrentSize())
 
 		default:
 			if target == nil {
@@ -245,7 +246,9 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 		c.setupContainer(container.Objects, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	case widget.Widget:
 		widget := o.(widget.Widget)
-		c.setupContainer(widget.Layout(inner), o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
+		c.setupContainer(widget.Layout(widget.CurrentSize()), o,
+			ui.NewPos(theme.Padding(), theme.Padding()),
+			widget.CurrentSize())
 	default:
 		c.setupObj(o, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
 	}
