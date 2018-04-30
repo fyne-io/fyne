@@ -24,6 +24,7 @@ func (l *Label) MinSize() ui.Size {
 func (l *Label) SetText(text string) {
 	l.Text = text
 	l.label.Text = text
+	ui.GetCanvas(l).Refresh(l)
 }
 
 // Layout the components of the label widget
