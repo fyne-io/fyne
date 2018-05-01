@@ -230,30 +230,28 @@ func (c *eflCanvas) Size() ui.Size {
 // TODO let's not draw over the top for every refresh!
 func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	C.ecore_thread_main_loop_begin()
-	inner := c.size.Add(ui.NewSize(theme.Padding()*-2, theme.Padding()*-2))
+	c.fitContent()
+
 	switch o.(type) {
 	case *ui.Container:
 		container := o.(*ui.Container)
-		container.Move(ui.NewPos(theme.Padding(), theme.Padding()))
-		container.Resize(inner)
 		// TODO should this move into container like widget?
 		if container.Layout != nil {
-			container.Layout.Layout(container.Objects, inner)
+			container.Layout.Layout(container.Objects, container.CurrentSize())
 		} else {
-			layout.NewMaxLayout().Layout(container.Objects, inner)
+			layout.NewMaxLayout().Layout(container.Objects, container.CurrentSize())
 		}
 
-		c.setupContainer(container.Objects, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
+		c.setupContainer(container.Objects, o, ui.NewPos(theme.Padding(), theme.Padding()), container.CurrentSize())
 	case widget.Widget:
 		widget := o.(widget.Widget)
 		c.setupContainer(widget.Layout(widget.CurrentSize()), o,
 			ui.NewPos(theme.Padding(), theme.Padding()),
 			widget.CurrentSize())
 	default:
-		c.setupObj(o, o, ui.NewPos(theme.Padding(), theme.Padding()), inner)
+		c.setupObj(o, o, ui.NewPos(theme.Padding(), theme.Padding()), o.CurrentSize())
 	}
 
-	c.fitContent()
 	C.ecore_thread_main_loop_end()
 }
 
@@ -262,15 +260,21 @@ func (c *eflCanvas) Contains(obj ui.CanvasObject) bool {
 }
 
 func (c *eflCanvas) fitContent() {
+	var w, h C.int
+	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
+
 	min := c.content.MinSize()
 	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
 	minHeight := scaleInt(c, min.Height+theme.Padding()*2)
 
-	var w, h C.int
-	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
+	width := ui.Max(minWidth, int(w))
+	height := ui.Max(minHeight, int(h))
 
 	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
-	C.ecore_evas_resize(c.window.ee, C.int(ui.Max(minWidth, int(w))), C.int(ui.Max(minHeight, int(h))))
+	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
+
+	c.content.Move(ui.NewPos(theme.Padding(), theme.Padding()))
+	c.content.Resize(ui.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
 }
 
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
