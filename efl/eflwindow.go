@@ -102,15 +102,20 @@ func (d *eFLDriver) CreateWindow(title string) ui.Window {
 	C.ecore_init()
 	C.ecore_evas_init()
 
+	evas := C.ecore_evas_new(C.CString(engine), 0, 0, 10, 10, nil)
+	if evas == nil {
+		log.Fatalln("Unable to create canvas, perhaps missing module for", engine)
+	}
+
 	w := &window{
-		ee:     C.ecore_evas_new(C.CString(engine), 0, 0, 10, 10, nil),
+		ee:     evas,
 		driver: d,
 	}
 	w.SetTitle(title)
 	oSWindowInit(w)
 	c := &eflCanvas{
-		evas:   C.ecore_evas_get(w.ee),
 		scale:  scaleByDPI(w),
+		evas:   C.ecore_evas_get(evas),
 		window: w,
 	}
 	w.canvas = c
