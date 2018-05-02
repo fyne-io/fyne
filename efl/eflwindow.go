@@ -6,6 +6,7 @@ package efl
 // #include <Evas.h>
 //
 // void onWindowResize_cgo(Ecore_Evas *);
+// void onWindowMove_cgo(Ecore_Evas *);
 // void onWindowClose_cgo(Ecore_Evas *);
 import "C"
 
@@ -66,13 +67,13 @@ func scaleByDPI(w *window) float32 {
 	env := os.Getenv("FYNE_SCALE")
 	if env != "" {
 		scale, _ := strconv.ParseFloat(env, 32)
-		log.Println("Scale specified, rendering at", scale)
 		return float32(scale)
 	}
 	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
-	if xdpi > 96 {
-		log.Println("High DPI", xdpi, "- scaling to 1.5")
+	if xdpi > 250 {
 		return float32(1.5)
+	} else if xdpi > 120 {
+		return float32(1.2)
 	}
 
 	return float32(1.0)
@@ -88,6 +89,17 @@ func onWindowResize(ee *C.Ecore_Evas) {
 	canvas := w.canvas.(*eflCanvas)
 	canvas.size = ui.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
 	canvas.Refresh(canvas.content)
+}
+
+//export onWindowMove
+func onWindowMove(ee *C.Ecore_Evas) {
+	w := windows[ee]
+	canvas := w.canvas.(*eflCanvas)
+
+	scale := scaleByDPI(w)
+	if scale != canvas.Scale() {
+		canvas.SetScale(scaleByDPI(w))
+	}
 }
 
 //export onWindowClose
@@ -114,13 +126,14 @@ func (d *eFLDriver) CreateWindow(title string) ui.Window {
 	w.SetTitle(title)
 	oSWindowInit(w)
 	c := &eflCanvas{
-		scale:  scaleByDPI(w),
 		evas:   C.ecore_evas_get(evas),
+		scale:  1.0,
 		window: w,
 	}
 	w.canvas = c
 	windows[w.ee] = w
 	C.ecore_evas_callback_resize_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowResize_cgo)))
+	C.ecore_evas_callback_move_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowMove_cgo)))
 	C.ecore_evas_callback_delete_request_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowClose_cgo)))
 
 	c.SetContent(new(ui.Container))

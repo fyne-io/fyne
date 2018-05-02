@@ -133,6 +133,7 @@ func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Siz
 		to, _ := o.(*canvas.Text)
 		C.evas_object_text_text_set(obj, C.CString(to.Text))
 
+		updateFont(obj, c, to)
 		native := nativeTextBounds(obj)
 		min := ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
 		to.SetMinSize(min)
@@ -325,7 +326,17 @@ func (c *eflCanvas) Scale() float32 {
 }
 
 func (c *eflCanvas) SetScale(scale float32) {
+	log.Println("FYNE_SCALE", scale)
+
+	ratio := scale / c.scale
 	c.scale = scale
 
-	c.Refresh(c.content)
+	var w, h C.int
+	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
+	width := int(float32(w) * ratio)
+	height := int(float32(h) * ratio)
+	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
+
+	c.content.Move(ui.NewPos(theme.Padding(), theme.Padding()))
+	c.content.Resize(ui.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
 }

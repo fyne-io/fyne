@@ -12,6 +12,12 @@ void onWindowResize_cgo(Ecore_Evas *ee)
 	onWindowResize(ee);
 }
 
+void onWindowMove_cgo(Ecore_Evas *ee)
+{
+	void onWindowMove(Ecore_Evas*);
+	onWindowMove(ee);
+}
+
 void onWindowClose_cgo(Ecore_Evas *ee)
 {
 	void onWindowClose(Ecore_Evas*);
