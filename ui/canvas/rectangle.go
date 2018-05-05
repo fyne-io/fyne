@@ -6,7 +6,7 @@ import "github.com/fyne-io/fyne/ui"
 
 // Rectangle describes a coloured rectangle primitive in a Fyne canvas
 type Rectangle struct {
-	Size     ui.Size     // The current size of the Rectangle - the font will not scale to this Size
+	Size     ui.Size     // The current size of the Rectangle
 	Position ui.Position // The current position of the Rectangle
 
 	FillColor   color.RGBA // The rectangle fill colour
