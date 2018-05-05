@@ -27,6 +27,10 @@ func clockApp(app app.App) {
 	examples.Clock(app)
 }
 
+func fractalApp(app app.App) {
+	examples.Fractal(app)
+}
+
 func welcome(app app.App) {
 	w := app.NewWindow("Examples")
 	w.Canvas().SetContent(widget.NewList(
@@ -40,6 +44,9 @@ func welcome(app app.App) {
 		}),
 		widget.NewButton("Clock", func(e *event.MouseEvent) {
 			clockApp(app)
+		}),
+		widget.NewButton("Fractal", func(e *event.MouseEvent) {
+			fractalApp(app)
 		}),
 		widget.NewButton("Canvas", func(e *event.MouseEvent) {
 			canvasApp(app)
@@ -68,6 +75,8 @@ func main() {
 		canvasApp(app)
 	case "clock":
 		clockApp(app)
+	case "fractal":
+		fractalApp(app)
 	default:
 		welcome(app)
 	}
