@@ -6,6 +6,8 @@ package efl
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
 //
+// void evas_bridge_image_pixel_set(Evas_Object *img, int x, int y, uint col);
+//
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
 import "C"
 
@@ -89,6 +91,10 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 
 		C.evas_object_color_set(obj, C.int(ro.FillColor.R), C.int(ro.FillColor.G),
 			C.int(ro.FillColor.B), C.int(ro.FillColor.A))
+	case *canvas.Image:
+		obj = C.evas_object_image_add(c.evas)
+		C.evas_object_image_alpha_set(obj, C.EINA_FALSE)
+		C.evas_object_image_filled_set(obj, C.EINA_TRUE)
 	case *canvas.Line:
 		obj = C.evas_object_line_add(c.evas)
 		lo, _ := o.(*canvas.Line)
@@ -139,9 +145,34 @@ func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Siz
 		to.SetMinSize(min)
 
 		pos = ui.NewPos(pos.X+(size.Width-min.Width)/2, pos.Y+(size.Height-min.Height)/2)
-	}
 
-	switch o.(type) {
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+	case *canvas.Image:
+		img, _ := o.(*canvas.Image)
+		var oldWidth, oldHeight C.int
+		C.evas_object_geometry_get(obj, nil, nil, &oldWidth, &oldHeight)
+
+		width := scaleInt(c, size.Width)
+		height := scaleInt(c, size.Height)
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+			C.Evas_Coord(width), C.Evas_Coord(height))
+
+		if int(oldWidth) != width || int(oldHeight) != height {
+			C.evas_object_image_size_set(obj, C.int(width), C.int(height))
+
+			for y := 0; y < height; y++ {
+				for x := 0; x < width; x++ {
+					color := img.PixelColor(x, y, width, height)
+					intcol := (uint32)(((uint32)(color.A) << 24) | ((uint32)(color.R) << 16) |
+						((uint32)(color.G) << 8) | (uint32)(color.B))
+
+					C.evas_bridge_image_pixel_set(obj, C.int(x), C.int(y), C.uint(intcol))
+				}
+			}
+
+			C.evas_object_image_data_update_add(obj, 0, 0, C.int(width), C.int(height))
+		}
 	case *canvas.Circle:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X-vectorPad)), C.Evas_Coord(scaleInt(c, pos.Y-vectorPad)),
 			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Width)))+vectorPad*2)), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Height)))+vectorPad*2)))
