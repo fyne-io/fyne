@@ -73,7 +73,7 @@ func nativeTextBounds(obj *C.Evas_Object) ui.Size {
 	return ui.Size{width, height}
 }
 
-func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, size ui.Size) *C.Evas_Object {
+func (c *eflCanvas) buildObject(o ui.CanvasObject, target ui.CanvasObject, size ui.Size) *C.Evas_Object {
 	var obj *C.Evas_Object
 
 	switch o.(type) {
@@ -81,10 +81,14 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 		obj = C.evas_object_text_add(c.evas)
 
 		to, _ := o.(*canvas.Text)
+		C.evas_object_text_text_set(obj, C.CString(to.Text))
 		C.evas_object_color_set(obj, C.int(to.Color.R), C.int(to.Color.G),
 			C.int(to.Color.B), C.int(to.Color.A))
 
 		updateFont(obj, c, to)
+		native := nativeTextBounds(obj)
+		min := ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
+		to.SetMinSize(min)
 	case *canvas.Rectangle:
 		obj = C.evas_object_rectangle_add(c.evas)
 		ro, _ := o.(*canvas.Rectangle)
@@ -116,22 +120,53 @@ func buildCanvasObject(c *eflCanvas, o ui.CanvasObject, target ui.CanvasObject, 
 		C.evas_vg_shape_stroke_width_set(shape, C.double(co.StrokeWidth*c.Scale()))
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
+		return nil
 	}
 
+	c.native[o] = obj
 	c.objects[obj] = target
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
 		nil)
+
+	C.evas_object_show(obj)
 	return obj
 }
 
-func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
-	var obj *C.Evas_Object
-	if c.native[o] == nil {
-		obj = buildCanvasObject(c, o, o2, size)
-		c.native[o] = obj
-	} else {
-		obj = c.native[o]
+func (c *eflCanvas) buildContainer(objs []ui.CanvasObject, target ui.CanvasObject, size ui.Size) {
+	obj := C.evas_object_rectangle_add(c.evas)
+	bg := theme.BackgroundColor()
+	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
+
+	C.evas_object_show(obj)
+	c.native[target] = obj
+
+	for _, child := range objs {
+		switch child.(type) {
+		case *ui.Container:
+			container := child.(*ui.Container)
+
+			c.buildContainer(container.Objects, child, child.CurrentSize())
+		case widget.Widget:
+			c.buildContainer(child.(widget.Widget).Layout(child.CurrentSize()),
+				child, child.CurrentSize())
+
+		default:
+			if target == nil {
+				target = child
+			}
+
+			c.buildObject(child, target, child.CurrentSize())
+		}
+	}
+}
+
+func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
+	obj := c.native[o]
+
+	// TODO a better solution here as objects are added to the UI
+	if obj == nil {
+		obj = c.buildObject(o, o2, size)
 	}
 
 	switch o.(type) {
@@ -202,10 +237,9 @@ func (c *eflCanvas) setupObj(o, o2 ui.CanvasObject, pos ui.Position, size ui.Siz
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	}
-	C.evas_object_show(obj)
 }
 
-func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObject, pos ui.Position, size ui.Size) {
+func (c *eflCanvas) refreshContainer(objs []ui.CanvasObject, target ui.CanvasObject, pos ui.Position, size ui.Size) {
 	containerPos := pos
 	containerSize := size
 	if target == c.content {
@@ -213,21 +247,9 @@ func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 		containerSize = ui.NewSize(size.Width+2*theme.Padding(), size.Height+2*theme.Padding())
 	}
 
-	if c.native[target] == nil {
-		obj := C.evas_object_rectangle_add(c.evas)
-		bg := theme.BackgroundColor()
-		C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
-
-		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, containerPos.X)), C.Evas_Coord(scaleInt(c, containerPos.Y)),
-			C.Evas_Coord(scaleInt(c, containerSize.Width)), C.Evas_Coord(scaleInt(c, containerSize.Height)))
-		C.evas_object_show(obj)
-
-		c.native[target] = obj
-	} else {
-		obj := c.native[target]
-		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, containerPos.X)), C.Evas_Coord(scaleInt(c, containerPos.Y)),
-			C.Evas_Coord(scaleInt(c, containerSize.Width)), C.Evas_Coord(scaleInt(c, containerSize.Height)))
-	}
+	obj := c.native[target]
+	C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, containerPos.X)), C.Evas_Coord(scaleInt(c, containerPos.Y)),
+		C.Evas_Coord(scaleInt(c, containerSize.Width)), C.Evas_Coord(scaleInt(c, containerSize.Height)))
 
 	for _, child := range objs {
 		switch child.(type) {
@@ -239,9 +261,9 @@ func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 			} else {
 				layout.NewMaxLayout().Layout(container.Objects, child.CurrentSize())
 			}
-			c.setupContainer(container.Objects, nil, child.CurrentPosition().Add(pos), child.CurrentSize())
+			c.refreshContainer(container.Objects, nil, child.CurrentPosition().Add(pos), child.CurrentSize())
 		case widget.Widget:
-			c.setupContainer(child.(widget.Widget).Layout(child.CurrentSize()),
+			c.refreshContainer(child.(widget.Widget).Layout(child.CurrentSize()),
 				child, child.CurrentPosition().Add(pos), child.CurrentSize())
 
 		default:
@@ -250,7 +272,7 @@ func (c *eflCanvas) setupContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 			}
 
 			childPos := child.CurrentPosition().Add(pos)
-			c.setupObj(child, target, childPos, child.CurrentSize())
+			c.refreshObject(child, target, childPos, child.CurrentSize())
 		}
 	}
 }
@@ -259,7 +281,25 @@ func (c *eflCanvas) Size() ui.Size {
 	return c.size
 }
 
-// TODO let's not draw over the top for every refresh!
+func (c *eflCanvas) setup(o ui.CanvasObject) {
+	C.ecore_thread_main_loop_begin()
+
+	switch o.(type) {
+	case *ui.Container:
+		container := o.(*ui.Container)
+
+		c.buildContainer(container.Objects, o, container.CurrentSize())
+	case widget.Widget:
+		widget := o.(widget.Widget)
+		c.buildContainer(widget.Layout(widget.CurrentSize()), o,
+			widget.CurrentSize())
+	default:
+		c.buildObject(o, o, o.CurrentSize())
+	}
+
+	C.ecore_thread_main_loop_end()
+}
+
 func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	C.ecore_thread_main_loop_begin()
 	c.fitContent()
@@ -274,14 +314,14 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 			layout.NewMaxLayout().Layout(container.Objects, container.CurrentSize())
 		}
 
-		c.setupContainer(container.Objects, o, ui.NewPos(theme.Padding(), theme.Padding()), container.CurrentSize())
+		c.refreshContainer(container.Objects, o, ui.NewPos(theme.Padding(), theme.Padding()), container.CurrentSize())
 	case widget.Widget:
 		widget := o.(widget.Widget)
-		c.setupContainer(widget.Layout(widget.CurrentSize()), o,
+		c.refreshContainer(widget.Layout(widget.CurrentSize()), o,
 			ui.NewPos(theme.Padding(), theme.Padding()),
 			widget.CurrentSize())
 	default:
-		c.setupObj(o, o, ui.NewPos(theme.Padding(), theme.Padding()), o.CurrentSize())
+		c.refreshObject(o, o, ui.NewPos(theme.Padding(), theme.Padding()), o.CurrentSize())
 	}
 
 	C.ecore_thread_main_loop_end()
@@ -315,6 +355,7 @@ func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	c.native = make(map[ui.CanvasObject]*C.Evas_Object)
 	c.content = o
 
+	c.setup(o)
 	c.Refresh(o)
 }
 
