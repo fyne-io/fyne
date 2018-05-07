@@ -5,6 +5,7 @@ import "image/color"
 import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
+import "github.com/fyne-io/fyne/ui/theme"
 
 const maxIterations = 20
 
@@ -37,7 +38,7 @@ func mandelbrot(px, py, w, h int) color.RGBA {
 	}
 
 	if i == maxIterations {
-		return color.RGBA{0, 0, 0, 0xff}
+		return theme.BackgroundColor()
 	} else {
 		mu := (float64(i) / float64(maxIterations))
 
