@@ -1,5 +1,6 @@
 package examples
 
+import "math"
 import "image/color"
 
 import "github.com/fyne-io/fyne/app"
@@ -7,7 +8,7 @@ import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/theme"
 
-const maxIterations = 20
+const maxIterations = 100
 
 type fractalLayout struct {
 	canvas ui.CanvasObject
@@ -19,6 +20,14 @@ func (c *fractalLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
 
 func (c *fractalLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 	return ui.NewSize(320, 240)
+}
+
+func scaleColor(c float64, start, end uint8) uint8 {
+	if end >= start {
+		return (uint8)(c*float64(end-start)) + start
+	} else {
+		return (uint8)((1-c)*float64(start-end)) + end
+	}
 }
 
 func mandelbrot(px, py, w, h int) color.RGBA {
@@ -41,8 +50,11 @@ func mandelbrot(px, py, w, h int) color.RGBA {
 		return theme.BackgroundColor()
 	} else {
 		mu := (float64(i) / float64(maxIterations))
+		c := math.Sin((mu / 2) * math.Pi)
 
-		return color.RGBA{(uint8)(mu*199 + 56), 72, (uint8)((1 - mu) * 255), 0xff}
+		return color.RGBA{scaleColor(c, theme.PrimaryColor().R, theme.TextColor().R),
+			scaleColor(c, theme.PrimaryColor().G, theme.TextColor().G),
+			scaleColor(c, theme.PrimaryColor().B, theme.TextColor().B), 0xff}
 	}
 }
 
