@@ -96,8 +96,13 @@ func (c *eflCanvas) buildObject(o ui.CanvasObject, target ui.CanvasObject, size 
 			C.int(ro.FillColor.B), C.int(ro.FillColor.A))
 	case *canvas.Image:
 		obj = C.evas_object_image_add(c.evas)
+		img, _ := o.(*canvas.Image)
 		C.evas_object_image_alpha_set(obj, C.EINA_FALSE)
 		C.evas_object_image_filled_set(obj, C.EINA_TRUE)
+
+		if img.File != "" {
+			C.evas_object_image_file_set(obj, C.CString(img.File), nil)
+		}
 	case *canvas.Line:
 		obj = C.evas_object_line_add(c.evas)
 		lo, _ := o.(*canvas.Line)
@@ -233,7 +238,7 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(width), C.Evas_Coord(height))
 
-		if int(oldWidth) != width || int(oldHeight) != height {
+		if img.PixelColor != nil && (int(oldWidth) != width || int(oldHeight) != height) {
 			C.evas_object_image_size_set(obj, C.int(width), C.int(height))
 
 			c.renderImage(img, 0, 0, width, height)
