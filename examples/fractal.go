@@ -9,6 +9,9 @@ import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/theme"
 
 const maxIterations = 100
+const currScale = 3.2
+const currX = -0.75
+const currY = 0.0
 
 type fractalLayout struct {
 	canvas ui.CanvasObject
@@ -31,8 +34,9 @@ func scaleColor(c float64, start, end uint8) uint8 {
 }
 
 func mandelbrot(px, py, w, h int) color.RGBA {
-	c_re := ((float64(px) / float64(w)) - .75) * 3
-	c_im := ((float64(py) / float64(h)) - .5) * 2.5
+	aspect := (float64(h) / float64(w))
+	c_re := ((float64(px) / float64(w)) - 0.5) * currScale + currX
+	c_im := ((float64(py) / float64(w)) - (0.5 * aspect)) * currScale - currY
 
 	var i int
 	var x, y, xsq, ysq float64
