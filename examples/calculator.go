@@ -14,7 +14,6 @@ import "github.com/Knetic/govaluate"
 
 var equation string
 var output *widget.Label
-var container *ui.Container
 
 func display(newtext string) {
 	equation = newtext
@@ -64,48 +63,41 @@ func charButton(char string) *widget.Button {
 
 func Calculator(app app.App) {
 	output = widget.NewLabel("")
-	row1 := ui.NewContainer(
-		charButton("+"),
-		charButton("-"),
-		charButton("*"),
-		charButton("/"))
-	row1.Layout = layout.NewGridLayout(4)
-	row2 := ui.NewContainer(
-		digitButton(7),
-		digitButton(8),
-		digitButton(9),
-		widget.NewButton("C", func(*event.MouseEvent) {
-			clear()
-		}))
-	row2.Layout = layout.NewGridLayout(4)
-	row3 := ui.NewContainer(
-		digitButton(4),
-		digitButton(5),
-		digitButton(6),
-		charButton("("))
-	row3.Layout = layout.NewGridLayout(4)
-	row4 := ui.NewContainer(
-		digitButton(1),
-		digitButton(2),
-		digitButton(3),
-		charButton(")"))
-	row4.Layout = layout.NewGridLayout(4)
-	row5a := ui.NewContainer(
-		digitButton(0),
-		charButton("."))
-	row5a.Layout = layout.NewGridLayout(2)
 	equals := widget.NewButton("=", func(*event.MouseEvent) {
 		evaluate()
 	})
 	equals.Style = widget.PrimaryButton
-	row5 := ui.NewContainer(
-		row5a,
-		equals)
-	row5.Layout = layout.NewGridLayout(2)
 
 	window := app.NewWindow("Calc")
-	container = ui.NewContainer(output, row1, row2, row3, row4, row5)
-	container.Layout = layout.NewGridLayout(1)
-	window.Canvas().SetContent(container)
+	window.Canvas().SetContent(ui.NewContainerWithLayout(layout.NewGridLayout(1),
+		output,
+		ui.NewContainerWithLayout(layout.NewGridLayout(4),
+			charButton("+"),
+			charButton("-"),
+			charButton("*"),
+			charButton("/")),
+		ui.NewContainerWithLayout(layout.NewGridLayout(4),
+			digitButton(7),
+			digitButton(8),
+			digitButton(9),
+			widget.NewButton("C", func(*event.MouseEvent) {
+				clear()
+			})),
+		ui.NewContainerWithLayout(layout.NewGridLayout(4),
+			digitButton(4),
+			digitButton(5),
+			digitButton(6),
+			charButton("(")),
+		ui.NewContainerWithLayout(layout.NewGridLayout(4),
+			digitButton(1),
+			digitButton(2),
+			digitButton(3),
+			charButton(")")),
+		ui.NewContainerWithLayout(layout.NewGridLayout(2),
+			ui.NewContainerWithLayout(layout.NewGridLayout(2),
+				digitButton(0),
+				charButton(".")),
+			equals)),
+	)
 	window.Show()
 }
