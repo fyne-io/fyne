@@ -6,13 +6,12 @@ package efl
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
 //
-// void evas_bridge_image_pixel_set(Evas_Object *img, int x, int y, uint col);
-//
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
 import "C"
 
 import "log"
 import "math"
+import "sync"
 import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
@@ -161,6 +160,47 @@ func (c *eflCanvas) buildContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 	}
 }
 
+func renderImagePortion(img *canvas.Image, pixels []uint32, wg *sync.WaitGroup,
+		startx, starty, width, height, imgWidth, imgHeight int) {
+	defer wg.Done()
+
+	// calculate image pixels
+	i := startx + starty*imgWidth
+	for y := starty; y < starty + height; y++ {
+		for x := startx; x < startx + width; x++ {
+			color := img.PixelColor(x, y, imgWidth, imgHeight)
+			pixels[i] = (uint32)(((uint32)(color.A) << 24) | ((uint32)(color.R) << 16) |
+				((uint32)(color.G) << 8) | (uint32)(color.B))
+			i++
+		}
+		i += imgWidth-width
+	}
+}
+
+func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
+	pixels := make([]uint32, width * height)
+
+	// Spawn 4 threads each calculating the pixels for a quadrant of the image
+	halfWidth := width / 2
+	halfHeight := height / 2
+
+	// use a WaitGroup so we don't render our pixels before they are ready
+	var wg sync.WaitGroup
+	wg.Add(4)
+	go renderImagePortion(img, pixels, &wg, 0, 0, halfWidth, halfHeight, width, height)
+	go renderImagePortion(img, pixels, &wg, halfWidth, 0, width - halfWidth, halfHeight, width, height)
+	go renderImagePortion(img, pixels, &wg, 0, halfHeight, halfWidth, height - halfHeight, width, height)
+	go renderImagePortion(img, pixels, &wg, halfWidth, halfHeight, width - halfWidth, height - halfHeight, width, height)
+	wg.Wait()
+
+	// write pixels to canvas
+	C.ecore_thread_main_loop_begin()
+	obj := c.native[img]
+	C.evas_object_image_data_set(obj, unsafe.Pointer(&pixels[0]))
+	C.evas_object_image_data_update_add(obj, 0, 0, C.int(width), C.int(height))
+	C.ecore_thread_main_loop_end()
+}
+
 func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
 	obj := c.native[o]
 
@@ -196,17 +236,7 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 		if int(oldWidth) != width || int(oldHeight) != height {
 			C.evas_object_image_size_set(obj, C.int(width), C.int(height))
 
-			for y := 0; y < height; y++ {
-				for x := 0; x < width; x++ {
-					color := img.PixelColor(x, y, width, height)
-					intcol := (uint32)(((uint32)(color.A) << 24) | ((uint32)(color.R) << 16) |
-						((uint32)(color.G) << 8) | (uint32)(color.B))
-
-					C.evas_bridge_image_pixel_set(obj, C.int(x), C.int(y), C.uint(intcol))
-				}
-			}
-
-			C.evas_object_image_data_update_add(obj, 0, 0, C.int(width), C.int(height))
+			c.renderImage(img, 0, 0, width, height)
 		}
 	case *canvas.Circle:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X-vectorPad)), C.Evas_Coord(scaleInt(c, pos.Y-vectorPad)),
