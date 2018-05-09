@@ -38,3 +38,9 @@ It should look like one of these:
 
 ![Clock dark](img/clock-dark.png)
 ![Clock light](img/clock-light.png)
+
+## Fractal (Mandelbrot)
+
+    go run main.go -example fractal
+
+![Fractal](img/fractal-dark.png)
