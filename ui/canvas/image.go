@@ -9,7 +9,9 @@ type Image struct {
 	Size     ui.Size     // The current size of the Image
 	Position ui.Position // The current position of the Image
 
-	PixelColor func(x, y, w, h int) color.RGBA
+	// one of the following sources will provide our image data
+	PixelColor func(x, y, w, h int) color.RGBA // Render the image from code
+	File       string                          // Load the image froma file
 }
 
 // CurrentSize returns the current size of this image object
@@ -42,5 +44,12 @@ func (r *Image) MinSize() ui.Size {
 func NewRaster(pixelColor func(x, y, w, h int) color.RGBA) *Image {
 	return &Image{
 		PixelColor: pixelColor,
+	}
+}
+
+// NewImageFromFile creates a new image from a local file
+func NewImageFromFile(file string) *Image {
+	return &Image{
+		File: file,
 	}
 }
