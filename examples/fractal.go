@@ -35,8 +35,8 @@ func scaleColor(c float64, start, end uint8) uint8 {
 
 func mandelbrot(px, py, w, h int) color.RGBA {
 	aspect := (float64(h) / float64(w))
-	c_re := ((float64(px) / float64(w)) - 0.5) * currScale + currX
-	c_im := ((float64(py) / float64(w)) - (0.5 * aspect)) * currScale - currY
+	c_re := ((float64(px)/float64(w))-0.5)*currScale + currX
+	c_im := ((float64(py)/float64(w))-(0.5*aspect))*currScale - currY
 
 	var i int
 	var x, y, xsq, ysq float64
