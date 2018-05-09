@@ -63,6 +63,6 @@ func NewContainer(objects ...CanvasObject) *Container {
 func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 	return &Container{
 		Objects: objects,
-		Layout: layout,
+		Layout:  layout,
 	}
 }
