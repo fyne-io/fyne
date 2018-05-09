@@ -1,5 +1,6 @@
 package examples
 
+import "fmt"
 import "log"
 import "strconv"
 
@@ -49,71 +50,49 @@ func evaluate() {
 	equation = ""
 }
 
+func digitButton(number int) *widget.Button {
+	return widget.NewButton(fmt.Sprintf("%d", number), func(e *event.MouseEvent) {
+		digit(number)
+	})
+}
+
+func charButton(char string) *widget.Button {
+	return widget.NewButton(char, func(e *event.MouseEvent) {
+		character(char)
+	})
+}
+
 func Calculator(app app.App) {
 	output = widget.NewLabel("")
 	row1 := ui.NewContainer(
-		widget.NewButton("+", func(*event.MouseEvent) {
-			character("+")
-		}),
-		widget.NewButton("-", func(*event.MouseEvent) {
-			character("-")
-		}),
-		widget.NewButton("*", func(*event.MouseEvent) {
-			character("*")
-		}),
-		widget.NewButton("/", func(*event.MouseEvent) {
-			character("/")
-		}))
+		charButton("+"),
+		charButton("-"),
+		charButton("*"),
+		charButton("/"))
 	row1.Layout = layout.NewGridLayout(4)
 	row2 := ui.NewContainer(
-		widget.NewButton("7", func(*event.MouseEvent) {
-			digit(7)
-		}),
-		widget.NewButton("8", func(*event.MouseEvent) {
-			digit(8)
-		}),
-		widget.NewButton("9", func(*event.MouseEvent) {
-			digit(9)
-		}),
+		digitButton(7),
+		digitButton(8),
+		digitButton(9),
 		widget.NewButton("C", func(*event.MouseEvent) {
 			clear()
 		}))
 	row2.Layout = layout.NewGridLayout(4)
 	row3 := ui.NewContainer(
-		widget.NewButton("4", func(*event.MouseEvent) {
-			digit(4)
-		}),
-		widget.NewButton("5", func(*event.MouseEvent) {
-			digit(5)
-		}),
-		widget.NewButton("6", func(*event.MouseEvent) {
-			digit(6)
-		}),
-		widget.NewButton("(", func(*event.MouseEvent) {
-			character("(")
-		}))
+		digitButton(4),
+		digitButton(5),
+		digitButton(6),
+		charButton("("))
 	row3.Layout = layout.NewGridLayout(4)
 	row4 := ui.NewContainer(
-		widget.NewButton("1", func(*event.MouseEvent) {
-			digit(1)
-		}),
-		widget.NewButton("2", func(*event.MouseEvent) {
-			digit(2)
-		}),
-		widget.NewButton("3", func(*event.MouseEvent) {
-			digit(3)
-		}),
-		widget.NewButton(")", func(*event.MouseEvent) {
-			character(")")
-		}))
+		digitButton(1),
+		digitButton(2),
+		digitButton(3),
+		charButton(")"))
 	row4.Layout = layout.NewGridLayout(4)
 	row5a := ui.NewContainer(
-		widget.NewButton("0", func(*event.MouseEvent) {
-			digit(0)
-		}),
-		widget.NewButton(".", func(*event.MouseEvent) {
-			character(".")
-		}))
+		digitButton(0),
+		charButton("."))
 	row5a.Layout = layout.NewGridLayout(2)
 	equals := widget.NewButton("=", func(*event.MouseEvent) {
 		evaluate()
