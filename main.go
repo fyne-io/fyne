@@ -31,26 +31,22 @@ func fractalApp(app app.App) {
 	examples.Fractal(app)
 }
 
+func appButton(app app.App, label string, onClick func(app.App)) *widget.Button {
+	return widget.NewButton(label, func(e *event.MouseEvent) {
+		onClick(app)
+	})
+}
+
 func welcome(app app.App) {
 	w := app.NewWindow("Examples")
 	w.Canvas().SetContent(widget.NewList(
 		widget.NewLabel("Fyne Examples!"),
 
-		widget.NewButton("Blog", func(e *event.MouseEvent) {
-			blogApp(app)
-		}),
-		widget.NewButton("Calculator", func(e *event.MouseEvent) {
-			calcApp(app)
-		}),
-		widget.NewButton("Clock", func(e *event.MouseEvent) {
-			clockApp(app)
-		}),
-		widget.NewButton("Fractal", func(e *event.MouseEvent) {
-			fractalApp(app)
-		}),
-		widget.NewButton("Canvas", func(e *event.MouseEvent) {
-			canvasApp(app)
-		}),
+		appButton(app, "Blog", blogApp),
+		appButton(app, "Calculator", calcApp),
+		appButton(app, "Clock", clockApp),
+		appButton(app, "Fractal", fractalApp),
+		appButton(app, "Canvas", canvasApp),
 
 		&canvas.Rectangle{},
 		widget.NewButton("Quit", func(e *event.MouseEvent) {
