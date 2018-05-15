@@ -10,6 +10,8 @@ type Canvas interface {
 	Size() Size
 	Scale() float32
 	SetScale(float32)
+
+	SetOnKeyDown(func(*KeyEvent))
 }
 
 // GetCanvas returns the canvas containing the passed CanvasObject.

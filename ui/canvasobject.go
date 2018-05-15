@@ -13,3 +13,10 @@ type CanvasObject interface {
 
 	MinSize() Size
 }
+
+// ClickableObject describes any CanvasObject that can also be clicked
+// (i.e. has mouse handlers). This should be implemented by buttons etc that
+// wish to handle pointer interactions.
+type ClickableObject interface {
+	OnMouseDown(*MouseEvent)
+}

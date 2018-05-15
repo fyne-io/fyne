@@ -2,7 +2,6 @@ package widget
 
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
 
@@ -11,7 +10,7 @@ type Button struct {
 	baseWidget
 	Style ButtonStyle
 
-	OnClicked func(*event.MouseEvent)
+	OnTapped func()
 
 	label      *canvas.Text
 	background *canvas.Rectangle
@@ -43,8 +42,14 @@ func (b *Button) Layout(size ui.Size) []ui.CanvasObject {
 	return b.objects
 }
 
-// NewButton creates a new button widget with the set label and click handler
-func NewButton(label string, clicked func(*event.MouseEvent)) *Button {
+func (b *Button) OnMouseDown(*ui.MouseEvent) {
+	if b.OnTapped != nil {
+		b.OnTapped()
+	}
+}
+
+// NewButton creates a new button widget with the set label and tap handler
+func NewButton(label string, tapped func()) *Button {
 	text := canvas.NewText(label)
 	bg := canvas.NewRectangle(theme.ButtonColor())
 
@@ -56,7 +61,7 @@ func NewButton(label string, clicked func(*event.MouseEvent)) *Button {
 			},
 		},
 		DefaultButton,
-		clicked,
+		tapped,
 		text,
 		bg,
 	}
