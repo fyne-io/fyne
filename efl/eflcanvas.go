@@ -16,7 +16,7 @@ import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/event"
+import "github.com/fyne-io/fyne/ui/input"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/theme"
 import "github.com/fyne-io/fyne/ui/widget"
@@ -34,13 +34,13 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	C.evas_object_geometry_get(obj, &x, &y, nil, nil)
 	pos := ui.NewPos(unscaleInt(canvas, int(info.canvas.x-x)), unscaleInt(canvas, int(info.canvas.y-y)))
 
-	ev := new(event.MouseEvent)
+	ev := new(ui.MouseEvent)
 	ev.Position = pos
-	ev.Button = event.MouseButton(int(info.button))
+	ev.Button = input.MouseButton(int(info.button))
 
-	switch co.(type) {
-	case *widget.Button:
-		co.(*widget.Button).OnClicked(ev)
+	switch obj := co.(type) {
+	case ui.ClickableObject:
+		obj.OnMouseDown(ev)
 	}
 }
 
@@ -51,6 +51,8 @@ type eflCanvas struct {
 	scale   float32
 	content ui.CanvasObject
 	window  *window
+
+	onKeyDown func(*ui.KeyEvent)
 
 	objects map[*C.Evas_Object]ui.CanvasObject
 	native  map[ui.CanvasObject]*C.Evas_Object
@@ -446,4 +448,8 @@ func (c *eflCanvas) SetScale(scale float32) {
 
 	c.content.Move(ui.NewPos(theme.Padding(), theme.Padding()))
 	c.content.Resize(ui.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
+}
+
+func (c *eflCanvas) SetOnKeyDown(keyDown func(*ui.KeyEvent)) {
+	c.onKeyDown = keyDown
 }

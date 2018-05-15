@@ -1,13 +1,16 @@
 package efl
 
-// #cgo pkg-config: ecore ecore-evas evas
+// #cgo pkg-config: ecore ecore-evas ecore-input evas
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
+// #include <Ecore_Input.h>
 // #include <Evas.h>
 //
 // void onWindowResize_cgo(Ecore_Evas *);
 // void onWindowMove_cgo(Ecore_Evas *);
 // void onWindowClose_cgo(Ecore_Evas *);
+//
+// void onWindowKeyDown_cgo(Ecore_Window, void *);
 import "C"
 
 import "log"
@@ -16,6 +19,7 @@ import "strconv"
 import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/ui/input"
 
 type window struct {
 	ee     *C.Ecore_Evas
@@ -107,6 +111,42 @@ func onWindowClose(ee *C.Ecore_Evas) {
 	windows[ee].Close()
 }
 
+//export onWindowKeyDown
+func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
+	var w *window
+	for _, win := range windows {
+		if C.ecore_evas_window_get(win.ee) == ew {
+			w = win
+		}
+	}
+
+	if w == nil {
+		log.Fatalln("Missing window?")
+		return
+	}
+	canvas := w.canvas.(*eflCanvas)
+
+	if canvas.onKeyDown == nil {
+		return
+	}
+
+	ev := new(ui.KeyEvent)
+	ev.String = C.GoString(info.string)
+	ev.Name = C.GoString(info.keyname)
+	ev.Code = input.KeyCode(int(info.keycode))
+	if (info.modifiers & C.ECORE_EVENT_MODIFIER_SHIFT) != 0 {
+		ev.Modifiers |= input.ShiftModifier
+	}
+	if (info.modifiers & C.ECORE_EVENT_MODIFIER_CTRL) != 0 {
+		ev.Modifiers |= input.ControlModifier
+	}
+	if (info.modifiers & C.ECORE_EVENT_MODIFIER_ALT) != 0 {
+		ev.Modifiers |= input.AltModifier
+	}
+
+	canvas.onKeyDown(ev)
+}
+
 func (d *eFLDriver) CreateWindow(title string) ui.Window {
 	engine := oSEngineName()
 
@@ -135,6 +175,8 @@ func (d *eFLDriver) CreateWindow(title string) ui.Window {
 	C.ecore_evas_callback_resize_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowResize_cgo)))
 	C.ecore_evas_callback_move_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowMove_cgo)))
 	C.ecore_evas_callback_delete_request_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowClose_cgo)))
+
+	C.ecore_event_handler_add(C.ECORE_EVENT_KEY_DOWN, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onWindowKeyDown_cgo)), nil)
 
 	c.SetContent(new(ui.Container))
 	return w
