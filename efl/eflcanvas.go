@@ -168,24 +168,24 @@ func (c *eflCanvas) buildContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 }
 
 func renderImagePortion(img *canvas.Image, pixels []uint32, wg *sync.WaitGroup,
-		startx, starty, width, height, imgWidth, imgHeight int) {
+	startx, starty, width, height, imgWidth, imgHeight int) {
 	defer wg.Done()
 
 	// calculate image pixels
 	i := startx + starty*imgWidth
-	for y := starty; y < starty + height; y++ {
-		for x := startx; x < startx + width; x++ {
+	for y := starty; y < starty+height; y++ {
+		for x := startx; x < startx+width; x++ {
 			color := img.PixelColor(x, y, imgWidth, imgHeight)
 			pixels[i] = (uint32)(((uint32)(color.A) << 24) | ((uint32)(color.R) << 16) |
 				((uint32)(color.G) << 8) | (uint32)(color.B))
 			i++
 		}
-		i += imgWidth-width
+		i += imgWidth - width
 	}
 }
 
 func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
-	pixels := make([]uint32, width * height)
+	pixels := make([]uint32, width*height)
 
 	// Spawn 4 threads each calculating the pixels for a quadrant of the image
 	halfWidth := width / 2
@@ -195,9 +195,9 @@ func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
 	var wg sync.WaitGroup
 	wg.Add(4)
 	go renderImagePortion(img, pixels, &wg, 0, 0, halfWidth, halfHeight, width, height)
-	go renderImagePortion(img, pixels, &wg, halfWidth, 0, width - halfWidth, halfHeight, width, height)
-	go renderImagePortion(img, pixels, &wg, 0, halfHeight, halfWidth, height - halfHeight, width, height)
-	go renderImagePortion(img, pixels, &wg, halfWidth, halfHeight, width - halfWidth, height - halfHeight, width, height)
+	go renderImagePortion(img, pixels, &wg, halfWidth, 0, width-halfWidth, halfHeight, width, height)
+	go renderImagePortion(img, pixels, &wg, 0, halfHeight, halfWidth, height-halfHeight, width, height)
+	go renderImagePortion(img, pixels, &wg, halfWidth, halfHeight, width-halfWidth, height-halfHeight, width, height)
 	wg.Wait()
 
 	// write pixels to canvas
