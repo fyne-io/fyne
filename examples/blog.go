@@ -3,7 +3,6 @@ package examples
 import "fmt"
 
 import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/widget"
 
 import "github.com/mmcdole/gofeed"
@@ -18,7 +17,7 @@ func parse(list *widget.List) {
 
 	for i, _ := range feed.Items {
 		item := feed.Items[i] // keep a reference to the slices
-		list.Append(widget.NewButton(item.Title, func(e *event.MouseEvent) {
+		list.Append(widget.NewButton(item.Title, func() {
 			parent.OpenURL(fmt.Sprintf("%s#about", item.Link))
 		}))
 	}

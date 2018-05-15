@@ -6,7 +6,6 @@ import "strconv"
 
 import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/widget"
 
@@ -14,6 +13,7 @@ import "github.com/Knetic/govaluate"
 
 var equation string
 var output *widget.Label
+var functions = make(map[string]func())
 
 func display(newtext string) {
 	equation = newtext
@@ -50,20 +50,40 @@ func evaluate() {
 }
 
 func digitButton(number int) *widget.Button {
-	return widget.NewButton(fmt.Sprintf("%d", number), func(e *event.MouseEvent) {
+	str := fmt.Sprintf("%d", number)
+	action := func() {
 		digit(number)
-	})
+	}
+	functions[str] = action
+	return widget.NewButton(str, action)
 }
 
 func charButton(char string) *widget.Button {
-	return widget.NewButton(char, func(e *event.MouseEvent) {
+	action := func() {
 		character(char)
-	})
+	}
+	functions[char] = action
+	return widget.NewButton(char, action)
+}
+
+func keyDown(ev *ui.KeyEvent) {
+	if ev.String == "=" || ev.Name == "Return" {
+		evaluate()
+		return
+	} else if ev.Name == "c" {
+		clear()
+		return
+	}
+
+	action := functions[ev.String]
+	if action != nil {
+		action()
+	}
 }
 
 func Calculator(app app.App) {
 	output = widget.NewLabel("")
-	equals := widget.NewButton("=", func(*event.MouseEvent) {
+	equals := widget.NewButton("=", func() {
 		evaluate()
 	})
 	equals.Style = widget.PrimaryButton
@@ -80,7 +100,7 @@ func Calculator(app app.App) {
 			digitButton(7),
 			digitButton(8),
 			digitButton(9),
-			widget.NewButton("C", func(*event.MouseEvent) {
+			widget.NewButton("C", func() {
 				clear()
 			})),
 		ui.NewContainerWithLayout(layout.NewGridLayout(4),
@@ -99,5 +119,7 @@ func Calculator(app app.App) {
 				charButton(".")),
 			equals)),
 	)
+
+	window.Canvas().SetOnKeyDown(keyDown)
 	window.Show()
 }

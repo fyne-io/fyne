@@ -7,7 +7,6 @@ import "github.com/fyne-io/examples/examples"
 
 import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/event"
 import "github.com/fyne-io/fyne/ui/widget"
 import "github.com/fyne-io/fyne-app"
 
@@ -32,7 +31,7 @@ func fractalApp(app app.App) {
 }
 
 func appButton(app app.App, label string, onClick func(app.App)) *widget.Button {
-	return widget.NewButton(label, func(e *event.MouseEvent) {
+	return widget.NewButton(label, func() {
 		onClick(app)
 	})
 }
@@ -49,7 +48,7 @@ func welcome(app app.App) {
 		appButton(app, "Canvas", canvasApp),
 
 		&canvas.Rectangle{},
-		widget.NewButton("Quit", func(e *event.MouseEvent) {
+		widget.NewButton("Quit", func() {
 			app.Quit()
 		})))
 	w.Show()
