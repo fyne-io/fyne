@@ -240,7 +240,7 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(width), C.Evas_Coord(height))
 
-		if img.PixelColor != nil && (int(oldWidth) != width || int(oldHeight) != height) {
+		if img.PixelColor != nil {
 			C.evas_object_image_size_set(obj, C.int(width), C.int(height))
 
 			c.renderImage(img, 0, 0, width, height)
