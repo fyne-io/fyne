@@ -386,6 +386,10 @@ func (c *eflCanvas) fitContent() {
 	c.content.Resize(ui.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
 }
 
+func (c *eflCanvas) Content() ui.CanvasObject {
+	return c.content
+}
+
 func (c *eflCanvas) SetContent(o ui.CanvasObject) {
 	canvases[C.ecore_evas_get(c.window.ee)] = c
 	c.objects = make(map[*C.Evas_Object]ui.CanvasObject)

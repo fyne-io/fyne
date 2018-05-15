@@ -38,6 +38,18 @@ func (w *window) SetTitle(title string) {
 	C.ecore_evas_title_set(w.ee, C.CString(title))
 }
 
+func (w *window) Fullscreen() bool {
+	return C.ecore_evas_fullscreen_get(w.ee) != 0
+}
+
+func (w *window) SetFullscreen(full bool) {
+	if full {
+		C.ecore_evas_fullscreen_set(w.ee, 1)
+	} else {
+		C.ecore_evas_fullscreen_set(w.ee, 0)
+	}
+}
+
 func (w *window) Show() {
 	C.ecore_evas_show(w.ee)
 
