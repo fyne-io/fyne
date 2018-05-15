@@ -9,6 +9,13 @@ type Window interface {
 	Title() string
 	// SetTitle updates the current title of the window
 	SetTitle(string)
+
+	// Fullscreen returns whether or not this window is currently full screen
+	Fullscreen() bool
+	// SetFullscreen changes the requested fullscreen property
+	// true for a fullscreen window and false to unset this.
+	SetFullscreen(bool)
+
 	// Show the window on screen
 	Show()
 	// Hide the window from the user.
