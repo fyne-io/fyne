@@ -125,6 +125,11 @@ func onWindowClose(ee *C.Ecore_Evas) {
 
 //export onWindowKeyDown
 func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
+	if ew == 0 {
+		log.Println("Keystroke missing window")
+		return
+	}
+
 	var w *window
 	for _, win := range windows {
 		if C.ecore_evas_window_get(win.ee) == ew {
@@ -133,7 +138,7 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	}
 
 	if w == nil {
-		log.Fatalln("Missing window?")
+		log.Println("Window not found")
 		return
 	}
 	canvas := w.canvas.(*eflCanvas)
