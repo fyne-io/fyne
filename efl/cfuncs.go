@@ -2,6 +2,7 @@ package efl
 
 /*
 #cgo pkg-config: ecore-evas ecore-input
+#include <Ecore.h>
 #include <Ecore_Evas.h>
 #include <Ecore_Input.h>
 
@@ -36,6 +37,12 @@ void onObjectMouseDown_cgo(void *data, Evas *e, Evas_Object *obj, void *event_in
 {
 	void onObjectMouseDown(Evas_Object*, Evas_Event_Mouse_Down*);
 	onObjectMouseDown(obj, event_info);
+}
+
+void onExit_cgo(Ecore_Event_Signal_Exit *sig)
+{
+	void Quit();
+	Quit();
 }
 */
 import "C"

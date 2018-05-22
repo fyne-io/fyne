@@ -15,7 +15,7 @@ func (app *eflApp) NewWindow(title string) ui.Window {
 }
 
 func (app *eflApp) Quit() {
-	app.driver.Quit()
+	efl.Quit()
 }
 
 func (app *eflApp) applyTheme(app.Settings) {
@@ -29,7 +29,6 @@ func NewApp() app.App {
 	newApp := &eflApp{
 		driver: efl.NewEFLDriver(),
 	}
-	app.CurrentApp = newApp
 
 	listener := make(chan app.Settings)
 	app.GetSettings().AddChangeListener(listener)

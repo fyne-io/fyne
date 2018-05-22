@@ -53,9 +53,9 @@ func (w *window) SetFullscreen(full bool) {
 func (w *window) Show() {
 	C.ecore_evas_show(w.ee)
 
-	w.master = len(windows) == 1
-	if !w.driver.running {
-		w.driver.Run()
+	if len(windows) == 1 {
+		w.master = true
+		initEFL()
 	}
 }
 
@@ -67,7 +67,7 @@ func (w *window) Close() {
 	w.Hide()
 
 	if w.master || len(windows) == 1 {
-		w.driver.Quit()
+		Quit()
 	} else {
 		delete(windows, w.ee)
 	}

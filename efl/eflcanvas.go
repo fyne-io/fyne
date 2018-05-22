@@ -1,17 +1,21 @@
 package efl
 
-// #cgo pkg-config: evas ecore-evas
+// #cgo pkg-config: eina evas ecore-evas
 // #cgo CFLAGS: -DEFL_BETA_API_SUPPORT=master-compatibility-hack
+// #include <Eina.h>
 // #include <Evas.h>
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
 //
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
+// void onExit_cgo(Ecore_Event_Signal_Exit *);
 import "C"
 
 import "log"
 import "math"
+import "runtime"
 import "sync"
+import "time"
 import "unsafe"
 
 import "github.com/fyne-io/fyne/ui"
@@ -56,6 +60,61 @@ type eflCanvas struct {
 
 	objects map[*C.Evas_Object]ui.CanvasObject
 	native  map[ui.CanvasObject]*C.Evas_Object
+}
+
+// Arrange that main.main runs on main thread.
+func init() {
+	runtime.LockOSThread()
+}
+
+func stepRenderer() {
+	C.ecore_main_loop_iterate()
+}
+
+func hookIntoEFL() {
+	C.ecore_event_handler_add(C.ECORE_EVENT_SIGNAL_EXIT, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onExit_cgo)), nil)
+
+	tick := time.NewTicker(time.Millisecond * 10)
+	go func() {
+		for {
+			<-tick.C
+			mainfunc <- func() {
+				stepRenderer()
+			}
+		}
+	}()
+}
+
+// initEFL runs our mainthread loop to execute UI functions for EFL
+func initEFL() {
+	hookIntoEFL()
+
+	for {
+		if f, ok := <-mainfunc; ok {
+			f()
+		} else {
+			break
+		}
+	}
+}
+
+//export Quit
+func Quit() {
+	close(mainfunc)
+}
+
+// queue of work to run in main thread.
+var mainfunc = make(chan func())
+
+// do runs f on the main thread.
+func queueRender(c *eflCanvas, co ui.CanvasObject) {
+	done := make(chan bool, 1)
+	mainfunc <- func() {
+		c.doRefresh(co)
+
+		done <- true
+	}
+	<-done
 }
 
 func nativeTextBounds(obj *C.Evas_Object) ui.Size {
@@ -201,11 +260,9 @@ func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
 	wg.Wait()
 
 	// write pixels to canvas
-	C.ecore_thread_main_loop_begin()
 	obj := c.native[img]
 	C.evas_object_image_data_set(obj, unsafe.Pointer(&pixels[0]))
 	C.evas_object_image_data_update_add(obj, 0, 0, C.int(width), C.int(height))
-	C.ecore_thread_main_loop_end()
 }
 
 func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
@@ -353,7 +410,10 @@ func (c *eflCanvas) setup(o ui.CanvasObject) {
 }
 
 func (c *eflCanvas) Refresh(o ui.CanvasObject) {
-	C.ecore_thread_main_loop_begin()
+	go queueRender(c, o)
+}
+
+func (c *eflCanvas) doRefresh(o ui.CanvasObject) {
 	c.fitContent()
 
 	switch o.(type) {
@@ -375,8 +435,6 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 	default:
 		c.refreshObject(o, o, ui.NewPos(theme.Padding(), theme.Padding()), o.CurrentSize())
 	}
-
-	C.ecore_thread_main_loop_end()
 }
 
 func (c *eflCanvas) Contains(obj ui.CanvasObject) bool {

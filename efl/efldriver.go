@@ -14,7 +14,6 @@ const (
 )
 
 type eFLDriver struct {
-	running bool
 }
 
 // NewEFLDriver returns a new Driver instance implemented using the
@@ -28,14 +27,4 @@ func NewEFLDriver() *eFLDriver {
 
 	ui.SetDriver(driver)
 	return driver
-}
-
-func (d *eFLDriver) Run() {
-	d.running = true
-	C.ecore_main_loop_begin()
-}
-
-func (d *eFLDriver) Quit() {
-	C.ecore_main_loop_quit()
-	d.running = false
 }
