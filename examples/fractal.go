@@ -30,7 +30,11 @@ func (c *fractalLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 }
 
 func refresh() {
-	currIterations = uint(100 * (1 + math.Pow((math.Log10(1/currScale)), 1.25)))
+	if currScale >= 1.0 {
+		currIterations = 100
+	} else {
+		currIterations = uint(100 * (1 + math.Pow((math.Log10(1/currScale)), 1.25)))
+	}
 
 	fractalWindow.Canvas().Refresh(fractalCanvas)
 }
