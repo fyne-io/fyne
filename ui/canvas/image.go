@@ -40,7 +40,8 @@ func (r *Image) MinSize() ui.Size {
 	return ui.NewSize(1, 1)
 }
 
-// NewImage returns a new Image instance
+// NewRaster returns a new Image instance that is rendered dynamically using
+// the specified pixelColor function
 func NewRaster(pixelColor func(x, y, w, h int) color.RGBA) *Image {
 	return &Image{
 		PixelColor: pixelColor,
