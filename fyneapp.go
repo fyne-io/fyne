@@ -34,7 +34,7 @@ func NewApp() app.App {
 	app.GetSettings().AddChangeListener(listener)
 	go func() {
 		for {
-			settings := <- listener
+			settings := <-listener
 			newApp.applyTheme(settings)
 		}
 	}()
