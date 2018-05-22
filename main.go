@@ -6,7 +6,9 @@ import "flag"
 import "github.com/fyne-io/examples/examples"
 
 import "github.com/fyne-io/fyne/app"
+import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
+import "github.com/fyne-io/fyne/ui/layout"
 import "github.com/fyne-io/fyne/ui/widget"
 import "github.com/fyne-io/fyne-app"
 
@@ -36,20 +38,28 @@ func appButton(app app.App, label string, onClick func(app.App)) *widget.Button 
 	})
 }
 
-func welcome(app app.App) {
-	w := app.NewWindow("Examples")
+func welcome(myApp app.App) {
+	w := myApp.NewWindow("Examples")
 	w.Canvas().SetContent(widget.NewList(
 		widget.NewLabel("Fyne Examples!"),
 
-		appButton(app, "Blog", blogApp),
-		appButton(app, "Calculator", calcApp),
-		appButton(app, "Clock", clockApp),
-		appButton(app, "Fractal", fractalApp),
-		appButton(app, "Canvas", canvasApp),
+		appButton(myApp, "Blog", blogApp),
+		appButton(myApp, "Calculator", calcApp),
+		appButton(myApp, "Clock", clockApp),
+		appButton(myApp, "Fractal", fractalApp),
+		appButton(myApp, "Canvas", canvasApp),
 
 		&canvas.Rectangle{},
+		ui.NewContainerWithLayout(layout.NewGridLayout(2),
+			widget.NewButton("Dark", func() {
+				app.GetSettings().SetTheme("dark")
+			}),
+			widget.NewButton("Light", func() {
+				app.GetSettings().SetTheme("light")
+			}),
+		),
 		widget.NewButton("Quit", func() {
-			app.Quit()
+			myApp.Quit()
 		})))
 	w.Show()
 }

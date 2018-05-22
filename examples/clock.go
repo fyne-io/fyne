@@ -8,8 +8,6 @@ import "github.com/fyne-io/fyne/ui"
 import "github.com/fyne-io/fyne/ui/canvas"
 import "github.com/fyne-io/fyne/ui/theme"
 
-var clockWindow ui.Window
-
 type clockLayout struct {
 	hour, minute, second     *canvas.Line
 	hourdot, seconddot, face *canvas.Circle
@@ -77,25 +75,38 @@ func (c *clockLayout) render() *ui.Container {
 	return container
 }
 
-func (c *clockLayout) animate() {
+func (c *clockLayout) animate(canvas ui.Canvas) {
 	tick := time.NewTicker(time.Second)
 	go func() {
 		for {
-			select {
-			case <-tick.C:
-				c.Layout(nil, clockWindow.Canvas().Size())
-				clockWindow.Canvas().Refresh(c.canvas)
-			}
+			<-tick.C
+			c.Layout(nil, canvas.Size())
+			canvas.Refresh(c.canvas)
 		}
 	}()
 }
 
-func Clock(app app.App) {
-	clockWindow = app.NewWindow("Clock")
+func ClockApplyTheme(clock *clockLayout, setting app.Settings) {
+	clock.hour.StrokeColor = theme.TextColor()
+	clock.minute.StrokeColor = theme.TextColor()
+	clock.second.StrokeColor = theme.PrimaryColor()
+}
+
+func Clock(myApp app.App) {
+	clockWindow := myApp.NewWindow("Clock")
 	clock := &clockLayout{}
 
 	canvas := clock.render()
-	go clock.animate()
+	go clock.animate(clockWindow.Canvas())
+
+	listener := make(chan app.Settings)
+	app.GetSettings().AddChangeListener(listener)
+	go func() {
+		for {
+			settings := <-listener
+			ClockApplyTheme(clock, settings)
+		}
+	}()
 
 	clockWindow.Canvas().SetContent(canvas)
 	clockWindow.Show()
