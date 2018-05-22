@@ -33,6 +33,9 @@ func (l *List) Append(object ui.CanvasObject) {
 	ui.GetCanvas(l).Refresh(l)
 }
 
+func (l *List) ApplyTheme() {
+}
+
 // NewList creates a new list widget with the specified list of child objects
 func NewList(children ...ui.CanvasObject) *List {
 	return &List{

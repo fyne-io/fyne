@@ -16,6 +16,7 @@ type Widget interface {
 
 	// TODO should this move to a widget impl?... (private)
 	Layout(ui.Size) []ui.CanvasObject
+	ApplyTheme()
 }
 
 // A base widget class to define the standard widget behaviours.

@@ -24,7 +24,7 @@ func TestMaxLayout(t *testing.T) {
 }
 
 func TestMaxLayoutMinSize(t *testing.T) {
-	text := canvas.NewText("Padding")
+	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
 	container := ui.NewContainer(text)
@@ -34,7 +34,7 @@ func TestMaxLayoutMinSize(t *testing.T) {
 }
 
 func TestContainerMaxLayoutMinSize(t *testing.T) {
-	text := canvas.NewText("Padding")
+	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
 	container := ui.NewContainer(text)

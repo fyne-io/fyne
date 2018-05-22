@@ -11,7 +11,8 @@ type Label struct {
 
 	Text string
 
-	label *canvas.Text
+	label      *canvas.Text
+	background *canvas.Rectangle
 }
 
 // MinSize calculates the minimum size of a label.
@@ -34,17 +35,24 @@ func (l *Label) Layout(size ui.Size) []ui.CanvasObject {
 	return l.objects
 }
 
+func (b *Label) ApplyTheme() {
+	b.label.Color = theme.TextColor()
+	b.background.FillColor = theme.BackgroundColor()
+}
+
 // NewLabel creates a new layout widget with the set text content
 func NewLabel(text string) *Label {
-	obj := canvas.NewText(text)
+	obj := canvas.NewText(text, theme.TextColor())
+	bg := canvas.NewRectangle(theme.BackgroundColor())
 	return &Label{
 		baseWidget{
 			objects: []ui.CanvasObject{
-				canvas.NewRectangle(theme.BackgroundColor()),
+				bg,
 				obj,
 			},
 		},
 		text,
 		obj,
+		bg,
 	}
 }

@@ -48,9 +48,14 @@ func (b *Button) OnMouseDown(*ui.MouseEvent) {
 	}
 }
 
+func (b *Button) ApplyTheme() {
+	b.label.Color = theme.TextColor()
+	b.background.FillColor = theme.ButtonColor()
+}
+
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
-	text := canvas.NewText(label)
+	text := canvas.NewText(label, theme.TextColor())
 	bg := canvas.NewRectangle(theme.ButtonColor())
 
 	return &Button{

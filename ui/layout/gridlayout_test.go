@@ -55,8 +55,8 @@ func TestGridLayoutRounding(t *testing.T) {
 }
 
 func TestGridLayoutMinSize(t *testing.T) {
-	text1 := canvas.NewText("Large Text")
-	text2 := canvas.NewText("small")
+	text1 := canvas.NewText("Large Text", color.RGBA{0xff, 0, 0, 0})
+	text2 := canvas.NewText("small", color.RGBA{0xff, 0, 0, 0})
 	minSize := text1.MinSize().Add(ui.NewSize(0, text1.MinSize().Height+theme.Padding()))
 
 	container := ui.NewContainer(text1, text2)

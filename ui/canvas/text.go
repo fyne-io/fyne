@@ -52,9 +52,9 @@ func (t *Text) MinSize() ui.Size {
 }
 
 // NewText returns a new Text implementation
-func NewText(text string) *Text {
+func NewText(text string, color color.RGBA) *Text {
 	return &Text{
-		Color:    theme.TextColor(),
+		Color:    color,
 		Text:     text,
 		FontSize: theme.TextSize(),
 	}

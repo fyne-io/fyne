@@ -2,11 +2,13 @@
 package theme
 
 import "image/color"
-import "os"
 import "path"
 import "runtime"
 
+import "github.com/fyne-io/fyne/app"
+
 var loadedColors *themeColors
+var loadedTheme string
 
 type themeColors struct {
 	Background color.RGBA
@@ -36,18 +38,22 @@ func loadDarkColors() *themeColors {
 
 // Load the right theme colours based on environment / settings
 func colors() *themeColors {
-	if loadedColors != nil {
-		return loadedColors
+	if loadedTheme != app.GetSettings().Theme() {
+		loadedColors = nil
 	}
 
-	env := os.Getenv("FYNE_THEME")
-	if env == "light" {
-		loadedColors = loadLightColors()
-	} else {
-		loadedColors = loadDarkColors()
+	c := loadedColors
+	if loadedColors == nil {
+
+		if app.GetSettings().Theme() == "light" {
+			c = loadLightColors()
+		} else {
+			c = loadDarkColors()
+		}
 	}
 
-	return loadedColors
+	loadedColors = c
+	return c
 }
 
 // BackgroundColor returns the theme's background colour
