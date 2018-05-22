@@ -18,11 +18,27 @@ func (app *eflApp) Quit() {
 	app.driver.Quit()
 }
 
+func (app *eflApp) applyTheme(app.Settings) {
+	for _, window := range app.driver.AllWindows() {
+		window.Canvas().Refresh(window.Canvas().Content())
+	}
+}
+
 // NewApp initialises a new Fyne application returning a handle to that App
 func NewApp() app.App {
-	app := &eflApp{
+	newApp := &eflApp{
 		driver: efl.NewEFLDriver(),
 	}
+	app.CurrentApp = newApp
 
-	return app
+	listener := make(chan app.Settings)
+	app.GetSettings().AddChangeListener(listener)
+	go func() {
+		for {
+			settings := <- listener
+			newApp.applyTheme(settings)
+		}
+	}()
+
+	return newApp
 }

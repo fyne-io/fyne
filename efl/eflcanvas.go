@@ -220,6 +220,8 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 	case *canvas.Text:
 		to, _ := o.(*canvas.Text)
 		C.evas_object_text_text_set(obj, C.CString(to.Text))
+		C.evas_object_color_set(obj, C.int(to.Color.R), C.int(to.Color.G),
+			C.int(to.Color.B), C.int(to.Color.A))
 
 		updateFont(obj, c, to)
 		native := nativeTextBounds(obj)
@@ -228,6 +230,13 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 
 		pos = ui.NewPos(pos.X+(size.Width-min.Width)/2, pos.Y+(size.Height-min.Height)/2)
 
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+	case *canvas.Rectangle:
+		ro, _ := o.(*canvas.Rectangle)
+
+		C.evas_object_color_set(obj, C.int(ro.FillColor.R), C.int(ro.FillColor.G),
+			C.int(ro.FillColor.B), C.int(ro.FillColor.A))
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	case *canvas.Image:
@@ -252,6 +261,9 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 		lo, _ := o.(*canvas.Line)
 		width := lo.Position2.X - lo.Position1.X
 		height := lo.Position2.Y - lo.Position1.Y
+
+		C.evas_object_color_set(obj, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
+			C.int(lo.StrokeColor.B), C.int(lo.StrokeColor.A))
 
 		if width >= 0 {
 			if height >= 0 {
@@ -285,11 +297,13 @@ func (c *eflCanvas) refreshContainer(objs []ui.CanvasObject, target ui.CanvasObj
 	}
 
 	obj := c.native[target]
+	bg := theme.BackgroundColor()
+	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
 	C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, containerPos.X)), C.Evas_Coord(scaleInt(c, containerPos.Y)),
 		C.Evas_Coord(scaleInt(c, containerSize.Width)), C.Evas_Coord(scaleInt(c, containerSize.Height)))
 
 	for _, child := range objs {
-		switch child.(type) {
+		switch typed := child.(type) {
 		case *ui.Container:
 			container := child.(*ui.Container)
 
@@ -300,6 +314,7 @@ func (c *eflCanvas) refreshContainer(objs []ui.CanvasObject, target ui.CanvasObj
 			}
 			c.refreshContainer(container.Objects, nil, child.CurrentPosition().Add(pos), child.CurrentSize())
 		case widget.Widget:
+			typed.ApplyTheme()
 			c.refreshContainer(child.(widget.Widget).Layout(child.CurrentSize()),
 				child, child.CurrentPosition().Add(pos), child.CurrentSize())
 
