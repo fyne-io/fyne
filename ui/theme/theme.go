@@ -76,6 +76,11 @@ func PrimaryColor() color.RGBA {
 	return colors().Primary
 }
 
+// FocusColor returns the colour used to highlight a focussed widget
+func FocusColor() color.RGBA {
+	return colors().Primary
+}
+
 // TextSize returns the standard text size
 func TextSize() int {
 	return 14
@@ -110,5 +115,5 @@ func TextBoldItalicFont() string {
 // Padding is the standard gap between elements and the border around interface
 // elements
 func Padding() int {
-	return 5
+	return 4
 }

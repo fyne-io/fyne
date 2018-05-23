@@ -48,3 +48,12 @@ func (w *baseWidget) CurrentPosition() ui.Position {
 func (w *baseWidget) Move(pos ui.Position) {
 	w.Position = pos
 }
+
+// FocussableWidget describes any widget that can respond to being focussed.
+// It will receive the OnFocusGained and OnFocusLost events appropriately and,
+// when focussed, it will also have OnKeyDown called as keys are pressed.
+type FocussableWidget interface {
+	OnFocusGained()
+	OnFocusLost()
+	OnKeyDown(*ui.KeyEvent)
+}
