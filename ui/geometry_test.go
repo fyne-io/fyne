@@ -14,6 +14,16 @@ func TestSizeAdd(t *testing.T) {
 	assert.Equal(t, size3.Height, size1.Height+size2.Height)
 }
 
+func TestSizeSubtract(t *testing.T) {
+	size1 := NewSize(25, 25)
+	size2 := NewSize(10, 10)
+
+	size3 := size1.Subtract(size2)
+
+	assert.Equal(t, size3.Width, size1.Width-size2.Width)
+	assert.Equal(t, size3.Height, size1.Height-size2.Height)
+}
+
 func TestSizeUnion(t *testing.T) {
 	size1 := NewSize(10, 100)
 	size2 := NewSize(100, 10)
