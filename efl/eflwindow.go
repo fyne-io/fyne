@@ -143,7 +143,7 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	}
 	canvas := w.canvas.(*eflCanvas)
 
-	if canvas.onKeyDown == nil {
+	if canvas.focussed == nil && canvas.onKeyDown == nil {
 		return
 	}
 
@@ -161,7 +161,12 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 		ev.Modifiers |= input.AltModifier
 	}
 
-	canvas.onKeyDown(ev)
+	if canvas.focussed != nil {
+		canvas.focussed.OnKeyDown(ev)
+	}
+	if canvas.onKeyDown != nil {
+		canvas.onKeyDown(ev)
+	}
 }
 
 func (d *eFLDriver) CreateWindow(title string) ui.Window {

@@ -45,16 +45,28 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	switch obj := co.(type) {
 	case ui.ClickableObject:
 		obj.OnMouseDown(ev)
+	case widget.FocussableWidget:
+		if canvas.focussed != nil {
+			if canvas.focussed == obj {
+				return
+			}
+
+			canvas.focussed.OnFocusLost()
+		}
+		canvas.focussed = obj
+		obj.OnFocusGained()
 	}
 }
 
 type eflCanvas struct {
 	ui.Canvas
-	evas    *C.Evas
-	size    ui.Size
-	scale   float32
-	content ui.CanvasObject
-	window  *window
+	evas  *C.Evas
+	size  ui.Size
+	scale float32
+
+	content  ui.CanvasObject
+	window   *window
+	focussed widget.FocussableWidget
 
 	onKeyDown func(*ui.KeyEvent)
 
