@@ -427,6 +427,10 @@ func (c *eflCanvas) Refresh(o ui.CanvasObject) {
 
 func (c *eflCanvas) doRefresh(o ui.CanvasObject) {
 	c.fitContent()
+	position := o.CurrentPosition()
+	if o != c.content {
+		position = position.Add(ui.NewPos(theme.Padding(), theme.Padding()))
+	}
 
 	switch o.(type) {
 	case *ui.Container:
@@ -438,14 +442,13 @@ func (c *eflCanvas) doRefresh(o ui.CanvasObject) {
 			layout.NewMaxLayout().Layout(container.Objects, container.CurrentSize())
 		}
 
-		c.refreshContainer(container.Objects, o, ui.NewPos(theme.Padding(), theme.Padding()), container.CurrentSize())
+		c.refreshContainer(container.Objects, o, position, container.CurrentSize())
 	case widget.Widget:
 		widget := o.(widget.Widget)
 		c.refreshContainer(widget.Layout(widget.CurrentSize()), o,
-			ui.NewPos(theme.Padding(), theme.Padding()),
-			widget.CurrentSize())
+			position, widget.CurrentSize())
 	default:
-		c.refreshObject(o, o, ui.NewPos(theme.Padding(), theme.Padding()), o.CurrentSize())
+		c.refreshObject(o, o, position, o.CurrentSize())
 	}
 }
 
