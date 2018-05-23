@@ -37,8 +37,8 @@ func (l *Label) Layout(size ui.Size) []ui.CanvasObject {
 
 // ApplyTheme is called when the Label may need to update it's look
 func (l *Label) ApplyTheme() {
-	b.label.Color = theme.TextColor()
-	b.background.FillColor = theme.BackgroundColor()
+	l.label.Color = theme.TextColor()
+	l.background.FillColor = theme.BackgroundColor()
 }
 
 // NewLabel creates a new layout widget with the set text content
