@@ -50,6 +50,7 @@ func welcome(myApp app.App) {
 		appButton(myApp, "Canvas", canvasApp),
 
 		&canvas.Rectangle{},
+		widget.NewEntry(),
 		ui.NewContainerWithLayout(layout.NewGridLayout(2),
 			widget.NewButton("Dark", func() {
 				app.GetSettings().SetTheme("dark")
