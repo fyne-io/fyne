@@ -33,6 +33,7 @@ func (l *List) Append(object ui.CanvasObject) {
 	ui.GetCanvas(l).Refresh(l)
 }
 
+// ApplyTheme is called when the List may need to update it's look
 func (l *List) ApplyTheme() {
 }
 

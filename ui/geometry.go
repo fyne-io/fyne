@@ -11,7 +11,7 @@ func (s1 Size) Add(s2 Size) Size {
 	return Size{s1.Width + s2.Width, s1.Height + s2.Height}
 }
 
-// Suntract returns a new Size that is the result of decreasing the current size by s2 Width and Height
+// Subtract returns a new Size that is the result of decreasing the current size by s2 Width and Height
 func (s1 Size) Subtract(s2 Size) Size {
 	return Size{s1.Width - s2.Width, s1.Height - s2.Height}
 }

@@ -35,7 +35,8 @@ func (l *Label) Layout(size ui.Size) []ui.CanvasObject {
 	return l.objects
 }
 
-func (b *Label) ApplyTheme() {
+// ApplyTheme is called when the Label may need to update it's look
+func (l *Label) ApplyTheme() {
 	b.label.Color = theme.TextColor()
 	b.background.FillColor = theme.BackgroundColor()
 }

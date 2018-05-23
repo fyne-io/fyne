@@ -39,12 +39,14 @@ func (b *Button) Layout(size ui.Size) []ui.CanvasObject {
 	return b.objects
 }
 
+// OnMouseDown is called when a mouse down event is captured and triggers any tap handler
 func (b *Button) OnMouseDown(*ui.MouseEvent) {
 	if b.OnTapped != nil {
 		b.OnTapped()
 	}
 }
 
+// ApplyTheme is called when the Button may need to update it's look
 func (b *Button) ApplyTheme() {
 	b.label.Color = theme.TextColor()
 
