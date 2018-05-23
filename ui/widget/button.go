@@ -34,9 +34,6 @@ func (b *Button) MinSize() ui.Size {
 
 // Layout the components of the button widget
 func (b *Button) Layout(size ui.Size) []ui.CanvasObject {
-	if b.Style == PrimaryButton {
-		b.background.FillColor = theme.PrimaryColor()
-	}
 	layout.NewMaxLayout().Layout(b.objects, size)
 
 	return b.objects
@@ -50,7 +47,12 @@ func (b *Button) OnMouseDown(*ui.MouseEvent) {
 
 func (b *Button) ApplyTheme() {
 	b.label.Color = theme.TextColor()
-	b.background.FillColor = theme.ButtonColor()
+
+	if b.Style == PrimaryButton {
+		b.background.FillColor = theme.PrimaryColor()
+	} else {
+		b.background.FillColor = theme.ButtonColor()
+	}
 }
 
 // NewButton creates a new button widget with the set label and tap handler
