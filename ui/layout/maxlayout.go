@@ -26,6 +26,6 @@ func (m *maxLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 }
 
 // NewMaxLayout creates a new MaxLayout instance
-func NewMaxLayout() *maxLayout {
+func NewMaxLayout() ui.Layout {
 	return &maxLayout{}
 }

@@ -75,6 +75,6 @@ func (g *gridLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 }
 
 // NewGridLayout returns a new GridLayout instance
-func NewGridLayout(cols int) *gridLayout {
+func NewGridLayout(cols int) ui.Layout {
 	return &gridLayout{cols}
 }

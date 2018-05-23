@@ -40,6 +40,6 @@ func (g *fixedGridLayout) MinSize(objects []ui.CanvasObject) ui.Size {
 }
 
 // NewFixedGridLayout returns a new FixedGridLayout instance
-func NewFixedGridLayout(size ui.Size) *fixedGridLayout {
+func NewFixedGridLayout(size ui.Size) ui.Layout {
 	return &fixedGridLayout{size}
 }
