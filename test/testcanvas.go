@@ -5,7 +5,7 @@ import "github.com/fyne-io/fyne/ui"
 var dummyCanvas ui.Canvas
 
 type testCanvas struct {
-	content *ui.CanvasObject
+	content ui.CanvasObject
 }
 
 func (c *testCanvas) Content() ui.CanvasObject {
