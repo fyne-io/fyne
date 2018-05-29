@@ -182,19 +182,6 @@ func (c *eflCanvas) buildObject(o ui.CanvasObject, target ui.CanvasObject, size 
 
 		C.evas_object_color_set(obj, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
 			C.int(lo.StrokeColor.B), C.int(lo.StrokeColor.A))
-	case *canvas.Circle:
-		obj = C.evas_object_vg_add(c.evas)
-		co, _ := o.(*canvas.Circle)
-
-		shape := C.evas_vg_shape_add(C.evas_object_vg_root_node_get(obj))
-		C.evas_vg_shape_append_circle(shape, C.double(scaleInt(c, vectorPad+size.Width/2)), C.double(scaleInt(c, vectorPad+size.Height/2)), C.double(scaleInt(c, size.Width/2)))
-		C.evas_vg_shape_stroke_color_set(shape, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
-			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
-		if co.FillColor.A != 0 {
-			C.evas_vg_node_color_set(shape, C.int(co.FillColor.R), C.int(co.FillColor.G),
-				C.int(co.FillColor.B), C.int(co.FillColor.A))
-		}
-		C.evas_vg_shape_stroke_width_set(shape, C.double(co.StrokeWidth*c.Scale()))
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
 		return nil
@@ -323,9 +310,6 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 
 			c.renderImage(img, 0, 0, width, height)
 		}
-	case *canvas.Circle:
-		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X-vectorPad)), C.Evas_Coord(scaleInt(c, pos.Y-vectorPad)),
-			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Width)))+vectorPad*2)), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(size.Height)))+vectorPad*2)))
 	case *canvas.Line:
 		lo, _ := o.(*canvas.Line)
 		width := lo.Position2.X - lo.Position1.X
