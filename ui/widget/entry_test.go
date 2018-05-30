@@ -13,8 +13,8 @@ func TestEntryTestSize(t *testing.T) {
 	entry := NewEntry()
 	min := entry.MinSize()
 
-	assert.True(t, min.Width >= theme.Padding()*2)
-	assert.True(t, min.Height >= theme.Padding()*2)
+	assert.True(t, min.Width > theme.Padding()*2)
+	assert.True(t, min.Height > theme.Padding()*2)
 }
 
 func TestEntryTestAppend(t *testing.T) {

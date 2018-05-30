@@ -40,16 +40,10 @@ func (t *Text) Move(pos ui.Position) {
 	t.Position = pos
 }
 
-// SetMinSize is used by the render implementation to specify the space the text requires.
-// This should not be called by application code.
-func (t *Text) SetMinSize(size ui.Size) {
-	t.minSize = size
-}
-
 // MinSize returns the minimum size of this text objet based on it's font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() ui.Size {
-	return t.minSize
+	return ui.GetDriver().RenderedTextSize(t.Text, t.FontSize)
 }
 
 // NewText returns a new Text implementation

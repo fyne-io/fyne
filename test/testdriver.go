@@ -13,9 +13,15 @@ func (d *testDriver) AllWindows() []ui.Window {
 	return windows
 }
 
+func (d *testDriver) RenderedTextSize(text string, size int) ui.Size {
+	return ui.NewSize(len(text)*size, size)
+}
+
 // NewTestDriver sets up and registers a new dummy driver for test purpose
 func NewTestDriver() ui.Driver {
 	driver := new(testDriver)
+	// make a single dummy window for rendering tests
+	NewTestWindow()
 
 	ui.SetDriver(driver)
 	return driver

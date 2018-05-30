@@ -5,6 +5,8 @@ package ui
 type Driver interface {
 	CreateWindow(string) Window // Create a new UI Window
 	AllWindows() []Window       // Get a slice containing all app windows
+
+	RenderedTextSize(string, int) Size // Return the size required to render a string of specified font size
 }
 
 var driver Driver
