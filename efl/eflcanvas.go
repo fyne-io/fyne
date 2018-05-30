@@ -284,7 +284,14 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 		min := ui.Size{unscaleInt(c, native.Width), unscaleInt(c, native.Height)}
 		to.SetMinSize(min)
 
-		pos = ui.NewPos(pos.X+(size.Width-min.Width)/2, pos.Y+(size.Height-min.Height)/2)
+		switch to.Alignment {
+		case ui.TextAlignLeading:
+			pos = ui.NewPos(pos.X, pos.Y+(size.Height-min.Height)/2)
+		case ui.TextAlignCenter:
+			pos = ui.NewPos(pos.X+(size.Width-min.Width)/2, pos.Y+(size.Height-min.Height)/2)
+		case ui.TextAlignTrailing:
+			pos = ui.NewPos(pos.X+size.Width-min.Width, pos.Y+(size.Height-min.Height)/2)
+		}
 
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
