@@ -303,21 +303,23 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 
 		if width >= 0 {
 			if height >= 0 {
-				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
-					C.Evas_Coord(scaleInt(c, pos.X+size.Width)), C.Evas_Coord(scaleInt(c, pos.Y+size.Height)))
+				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, 0)), C.Evas_Coord(scaleInt(c, 0)),
+					C.Evas_Coord(scaleInt(c, width)), C.Evas_Coord(scaleInt(c, height)))
 			} else {
-				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y-size.Height)),
-					C.Evas_Coord(scaleInt(c, pos.X+size.Width)), C.Evas_Coord(scaleInt(c, pos.Y)))
+				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, 0)), C.Evas_Coord(scaleInt(c, -height)),
+					C.Evas_Coord(scaleInt(c, width)), C.Evas_Coord(scaleInt(c, 0)))
 			}
 		} else {
 			if height >= 0 {
-				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, pos.X-size.Width)), C.Evas_Coord(scaleInt(c, pos.Y)),
-					C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y+size.Height)))
+				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, -width)), C.Evas_Coord(scaleInt(c, 0)),
+					C.Evas_Coord(scaleInt(c, 0)), C.Evas_Coord(scaleInt(c, height)))
 			} else {
-				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, pos.X-size.Width)), C.Evas_Coord(scaleInt(c, pos.Y-size.Height)),
-					C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)))
+				C.evas_object_line_xy_set(obj, C.Evas_Coord(scaleInt(c, 0)), C.Evas_Coord(scaleInt(c, 0)),
+					C.Evas_Coord(scaleInt(c, -width)), C.Evas_Coord(scaleInt(c, -height)))
 			}
 		}
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(width))))+1), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(height))))+1))
 	default:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
