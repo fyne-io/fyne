@@ -17,6 +17,10 @@ func (d *testDriver) RenderedTextSize(text string, size int) ui.Size {
 	return ui.NewSize(len(text)*size, size)
 }
 
+func (d *testDriver) Quit() {
+	// no-op
+}
+
 // NewTestDriver sets up and registers a new dummy driver for test purpose
 func NewTestDriver() ui.Driver {
 	driver := new(testDriver)
