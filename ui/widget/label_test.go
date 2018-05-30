@@ -16,4 +16,3 @@ func TestLabelSize(t *testing.T) {
 	label.SetText("Longer")
 	assert.True(t, label.MinSize().Width > min.Width)
 }
-
