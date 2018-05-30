@@ -83,6 +83,7 @@ func keyDown(ev *ui.KeyEvent) {
 
 func Calculator(app app.App) {
 	output = widget.NewLabel("")
+	output.Alignment = ui.TextAlignTrailing
 	equals := widget.NewButton("=", func() {
 		evaluate()
 	})
