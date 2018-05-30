@@ -7,9 +7,10 @@ import "github.com/fyne-io/fyne/ui/theme"
 
 // Text describes a text primitive in a Fyne canvas
 type Text struct {
-	Size     ui.Size     // The current size of the Text - the font will not scale to this Size
-	Position ui.Position // The current position of the Text
-	Color    color.RGBA  // The main text draw colour
+	Size      ui.Size      // The current size of the Text - the font will not scale to this Size
+	Position  ui.Position  // The current position of the Text
+	Color     color.RGBA   // The main text draw colour
+	Alignment ui.TextAlign // The alignment of the text content within the current size
 
 	Text     string // The string content of this Text
 	FontSize int    // Size of the font - if the Canvas scale is 1.0 this will be equivalent to point size

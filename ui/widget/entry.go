@@ -32,6 +32,9 @@ func (e *Entry) Layout(size ui.Size) []ui.CanvasObject {
 	e.box.Resize(e.box.CurrentSize().Subtract(ui.NewSize(theme.Padding(), theme.Padding())))
 	e.box.Move(ui.NewPos(theme.Padding()/2, theme.Padding()/2))
 
+	e.label.Resize(e.label.CurrentSize().Subtract(ui.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	e.label.Move(ui.NewPos(theme.Padding(), theme.Padding()))
+
 	return e.objects
 }
 

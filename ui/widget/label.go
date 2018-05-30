@@ -9,7 +9,8 @@ import "github.com/fyne-io/fyne/ui/theme"
 type Label struct {
 	baseWidget
 
-	Text string
+	Text      string       // The content of the label
+	Alignment ui.TextAlign // The alignment of the Text
 
 	label      *canvas.Text
 	background *canvas.Rectangle
@@ -39,6 +40,7 @@ func (l *Label) Layout(size ui.Size) []ui.CanvasObject {
 func (l *Label) ApplyTheme() {
 	l.label.Color = theme.TextColor()
 	l.background.FillColor = theme.BackgroundColor()
+	l.label.Alignment = l.Alignment
 }
 
 // NewLabel creates a new layout widget with the set text content
@@ -53,6 +55,7 @@ func NewLabel(text string) *Label {
 			},
 		},
 		text,
+		ui.TextAlignLeading,
 		obj,
 		bg,
 	}

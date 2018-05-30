@@ -60,6 +60,7 @@ func (b *Button) ApplyTheme() {
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
 	text := canvas.NewText(label, theme.TextColor())
+	text.Alignment = ui.TextAlignCenter
 	bg := canvas.NewRectangle(theme.ButtonColor())
 
 	return &Button{
