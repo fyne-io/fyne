@@ -110,6 +110,7 @@ func initEFL() {
 	}
 }
 
+// Quit will cause the render loop to end and the application to exit
 //export Quit
 func Quit() {
 	close(mainfunc)

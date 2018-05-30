@@ -18,7 +18,7 @@ type eFLDriver struct {
 
 // NewEFLDriver returns a new Driver instance implemented using the
 // Enlightenment Foundation Libraries (EFL)
-func NewEFLDriver() *eFLDriver {
+func NewEFLDriver() ui.Driver {
 	driver := new(eFLDriver)
 
 	if oSEngineName() == oSEngineOther {
