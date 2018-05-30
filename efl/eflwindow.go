@@ -67,7 +67,7 @@ func (w *window) Close() {
 	w.Hide()
 
 	if w.master || len(windows) == 1 {
-		Quit()
+		DoQuit()
 	} else {
 		delete(windows, w.ee)
 	}

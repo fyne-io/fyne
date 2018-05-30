@@ -4,31 +4,26 @@ package fyneapp
 import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/ui"
 
-import "github.com/fyne-io/fyne-app/efl"
-
-type eflApp struct {
-	driver ui.Driver
+type fyneApp struct {
 }
 
-func (app *eflApp) NewWindow(title string) ui.Window {
-	return app.driver.CreateWindow(title)
+func (app *fyneApp) NewWindow(title string) ui.Window {
+	return ui.GetDriver().CreateWindow(title)
 }
 
-func (app *eflApp) Quit() {
-	efl.Quit()
+func (app *fyneApp) Quit() {
+	ui.GetDriver().Quit()
 }
 
-func (app *eflApp) applyTheme(app.Settings) {
-	for _, window := range app.driver.AllWindows() {
+func (app *fyneApp) applyTheme(app.Settings) {
+	for _, window := range ui.GetDriver().AllWindows() {
 		window.Canvas().Refresh(window.Canvas().Content())
 	}
 }
 
 // NewApp initialises a new Fyne application returning a handle to that App
 func NewApp() app.App {
-	newApp := &eflApp{
-		driver: efl.NewEFLDriver(),
-	}
+	newApp := &fyneApp{}
 
 	listener := make(chan app.Settings)
 	app.GetSettings().AddChangeListener(listener)

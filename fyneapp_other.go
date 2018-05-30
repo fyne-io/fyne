@@ -4,6 +4,6 @@ package fyneapp
 
 import "log"
 
-func (app *eflApp) OpenURL(url string) {
+func (app *fyneApp) OpenURL(url string) {
 	log.Fatalf("Unable to open url for unknown operating system")
 }

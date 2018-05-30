@@ -110,9 +110,14 @@ func initEFL() {
 	}
 }
 
+// DoQuit will cause the driver's Quit method to be called to terminate the app
+//export DoQuit
+func DoQuit() {
+	ui.GetDriver().Quit()
+}
+
 // Quit will cause the render loop to end and the application to exit
-//export Quit
-func Quit() {
+func (d *eFLDriver) Quit() {
 	close(mainfunc)
 }
 

@@ -41,8 +41,8 @@ void onObjectMouseDown_cgo(void *data, Evas *e, Evas_Object *obj, void *event_in
 
 void onExit_cgo(Ecore_Event_Signal_Exit *sig)
 {
-	void Quit();
-	Quit();
+	void DoQuit();
+	DoQuit();
 }
 */
 import "C"

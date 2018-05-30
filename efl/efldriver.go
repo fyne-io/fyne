@@ -16,9 +16,9 @@ const (
 type eFLDriver struct {
 }
 
-// NewEFLDriver returns a new Driver instance implemented using the
+// init sets up a new Driver instance implemented using the
 // Enlightenment Foundation Libraries (EFL)
-func NewEFLDriver() ui.Driver {
+func init() {
 	driver := new(eFLDriver)
 
 	if oSEngineName() == oSEngineOther {
@@ -26,5 +26,4 @@ func NewEFLDriver() ui.Driver {
 	}
 
 	ui.SetDriver(driver)
-	return driver
 }
