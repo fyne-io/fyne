@@ -67,7 +67,7 @@ func charButton(char string) *widget.Button {
 }
 
 func keyDown(ev *ui.KeyEvent) {
-	if ev.String == "=" || ev.Name == "Return" {
+	if ev.String == "=" || ev.Name == "Return" || ev.Name == "KP_Enter" {
 		evaluate()
 		return
 	} else if ev.Name == "c" {
