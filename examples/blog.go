@@ -1,5 +1,6 @@
 package examples
 
+import "log"
 import "fmt"
 
 import "github.com/fyne-io/fyne/app"
@@ -13,7 +14,12 @@ var parent app.App
 
 func parse(list *widget.List) {
 	fp := gofeed.NewParser()
-	feed, _ := fp.ParseURL(feedURL)
+	feed, err := fp.ParseURL(feedURL)
+
+	if err != nil {
+		log.Println("Unable to load feed!")
+		return
+	}
 
 	for i, _ := range feed.Items {
 		item := feed.Items[i] // keep a reference to the slices
