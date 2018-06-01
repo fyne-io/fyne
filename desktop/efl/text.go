@@ -1,3 +1,5 @@
+// +build !ci
+
 package efl
 
 // #cgo pkg-config: ecore-evas

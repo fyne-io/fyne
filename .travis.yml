@@ -3,6 +3,8 @@ language: go
 go:
   - "1.10"
 
+gobuild_args: "-v -tags ci"
+
 before_script:
   - go get github.com/golang/lint/golint
   - go get github.com/mattn/goveralls

@@ -1,3 +1,5 @@
+// +build !ci
+
 package fyneapp
 
 import "os/exec"

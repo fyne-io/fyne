@@ -1,3 +1,5 @@
+// +build !ci
+
 // +build wayland
 
 package efl

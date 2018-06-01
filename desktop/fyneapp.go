@@ -1,3 +1,5 @@
+// +build !ci
+
 // Package fyneapp provides a full implementation of the Fyne APIs
 package fyneapp
 

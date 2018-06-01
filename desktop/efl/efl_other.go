@@ -1,3 +1,5 @@
+// +build !ci
+
 // +build !linux,!darwin,!windows
 
 package efl

@@ -1,3 +1,5 @@
+// +build !ci
+
 // Package efl provides an EFL render provider for the Fyne implementation
 package efl
 
