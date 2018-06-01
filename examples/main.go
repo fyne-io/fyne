@@ -12,7 +12,6 @@ import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/canvas"
 import "github.com/fyne-io/fyne/api/ui/layout"
 import "github.com/fyne-io/fyne/api/ui/widget"
-import "github.com/fyne-io/fyne/desktop"
 
 func blogApp(app app.App) {
 	examples.Blog(app)
@@ -68,7 +67,7 @@ func welcome(myApp app.App) {
 }
 
 func main() {
-	app := fyneapp.NewApp()
+	app := newApp()
 
 	var ex string
 	flag.StringVar(&ex, "example", "", "Launch an app directly (blog,calculator,canvas,clock)")
