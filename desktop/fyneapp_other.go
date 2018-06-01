@@ -1,7 +1,7 @@
 // +build !ci
 // +build !linux,!darwin,!windows
 
-package fyneapp
+package desktop
 
 import "log"
 

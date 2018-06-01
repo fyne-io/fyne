@@ -1,6 +1,6 @@
 // +build !ci
 
-package fyneapp
+package desktop
 
 import "os/exec"
 
