@@ -12,8 +12,8 @@ before_script:
 script:
   - test -z $(gofmt -s -l .)
   - go test -v -tags ci -race -covermode=atomic -coverprofile=coverage.out ./api/... ./examples/...
-  - go vet ./api/... ./examples/...
-  - golint -set_exit_status $(go list ./api/... ./examples/...)
+  - go vet -tags ci ./api/... ./examples/...
+  - golint -set_exit_status $(go list -tags ci ./api/... ./examples/...)
   - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 notifications:
