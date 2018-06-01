@@ -3,8 +3,8 @@ package examples
 import "log"
 import "fmt"
 
-import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/ui/widget"
+import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api/ui/widget"
 
 import "github.com/mmcdole/gofeed"
 

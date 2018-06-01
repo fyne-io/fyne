@@ -4,10 +4,10 @@ import "fmt"
 import "log"
 import "strconv"
 
-import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/layout"
-import "github.com/fyne-io/fyne/ui/widget"
+import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/layout"
+import "github.com/fyne-io/fyne/api/ui/widget"
 
 import "github.com/Knetic/govaluate"
 

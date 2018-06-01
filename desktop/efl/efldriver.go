@@ -7,7 +7,7 @@ import "C"
 
 import "log"
 
-import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/api/ui"
 
 const (
 	oSEngineOther = "unknown"

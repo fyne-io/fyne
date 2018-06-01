@@ -18,8 +18,8 @@ import "os"
 import "strconv"
 import "unsafe"
 
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/input"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/input"
 
 type window struct {
 	ee     *C.Ecore_Evas

@@ -4,10 +4,10 @@ import "runtime"
 import "image/color"
 import "path"
 
-import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/layout"
+import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui/layout"
 
 func rgbGradient(x, y, w, h int) color.RGBA {
 	g := int(float32(x) / float32(w) * float32(255))

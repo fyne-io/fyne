@@ -4,9 +4,9 @@ package efl
 // #include <Evas.h>
 import "C"
 
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/theme"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui/theme"
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, t *canvas.Text) {
 	font := theme.TextFont()

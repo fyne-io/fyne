@@ -3,14 +3,14 @@ package main
 
 import "flag"
 
-import "github.com/fyne-io/examples/examples/examples"
+import "github.com/fyne-io/fyne/examples/examples"
 
-import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/layout"
-import "github.com/fyne-io/fyne/ui/widget"
-import "github.com/fyne-io/fyne-app"
+import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui/layout"
+import "github.com/fyne-io/fyne/api/ui/widget"
+import "github.com/fyne-io/fyne/desktop"
 
 func blogApp(app app.App) {
 	examples.Blog(app)

@@ -3,10 +3,10 @@ package examples
 import "math"
 import "time"
 
-import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/theme"
+import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui/theme"
 
 type clockLayout struct {
 	hour, minute, second     *canvas.Line
