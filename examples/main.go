@@ -3,7 +3,7 @@ package main
 
 import "flag"
 
-import "github.com/fyne-io/examples/examples"
+import "github.com/fyne-io/examples/examples/examples"
 
 import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/ui"
