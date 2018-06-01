@@ -16,6 +16,7 @@ func rgbGradient(x, y, w, h int) color.RGBA {
 	return color.RGBA{uint8(255 - b), uint8(g), uint8(b), 0xff}
 }
 
+// Canvas loads a canvas example window for the specified app context
 func Canvas(app app.App) {
 	w := app.NewWindow("Main")
 

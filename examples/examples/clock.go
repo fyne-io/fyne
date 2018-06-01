@@ -86,12 +86,13 @@ func (c *clockLayout) animate(canvas ui.Canvas) {
 	}()
 }
 
-func ClockApplyTheme(clock *clockLayout, setting app.Settings) {
-	clock.hour.StrokeColor = theme.TextColor()
-	clock.minute.StrokeColor = theme.TextColor()
-	clock.second.StrokeColor = theme.PrimaryColor()
+func (c *clockLayout) applyTheme(setting app.Settings) {
+	c.hour.StrokeColor = theme.TextColor()
+	c.minute.StrokeColor = theme.TextColor()
+	c.second.StrokeColor = theme.PrimaryColor()
 }
 
+// Clock loads a clock example window for the specified app context
 func Clock(myApp app.App) {
 	clockWindow := myApp.NewWindow("Clock")
 	clock := &clockLayout{}
@@ -104,7 +105,7 @@ func Clock(myApp app.App) {
 	go func() {
 		for {
 			settings := <-listener
-			ClockApplyTheme(clock, settings)
+			clock.applyTheme(settings)
 		}
 	}()
 

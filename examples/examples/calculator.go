@@ -81,6 +81,7 @@ func keyDown(ev *ui.KeyEvent) {
 	}
 }
 
+// Calculator loads a calculator example window for the specified app context
 func Calculator(app app.App) {
 	output = widget.NewLabel("")
 	output.Alignment = ui.TextAlignTrailing

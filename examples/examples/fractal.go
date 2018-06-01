@@ -37,24 +37,24 @@ func (f *fractal) refresh() {
 func (f *fractal) scaleColor(c float64, start, end uint8) uint8 {
 	if end >= start {
 		return (uint8)(c*float64(end-start)) + start
-	} else {
-		return (uint8)((1-c)*float64(start-end)) + end
 	}
+
+	return (uint8)((1-c)*float64(start-end)) + end
 }
 
 func (f *fractal) mandelbrot(px, py, w, h int) color.RGBA {
 	drawScale := 3.5 * f.currScale
 	aspect := (float64(h) / float64(w))
-	c_re := ((float64(px)/float64(w))-0.5)*drawScale + f.currX
-	c_im := ((float64(py)/float64(w))-(0.5*aspect))*drawScale - f.currY
+	cRe := ((float64(px)/float64(w))-0.5)*drawScale + f.currX
+	cIm := ((float64(py)/float64(w))-(0.5*aspect))*drawScale - f.currY
 
 	var i uint
 	var x, y, xsq, ysq float64
 
 	for i = 0; i < f.currIterations && (xsq+ysq <= 4); i++ {
-		x_new := float64(xsq-ysq) + c_re
-		y = 2*x*y + c_im
-		x = x_new
+		xNew := float64(xsq-ysq) + cRe
+		y = 2*x*y + cIm
+		x = xNew
 
 		xsq = x * x
 		ysq = y * y
@@ -62,14 +62,14 @@ func (f *fractal) mandelbrot(px, py, w, h int) color.RGBA {
 
 	if i == f.currIterations {
 		return theme.BackgroundColor()
-	} else {
-		mu := (float64(i) / float64(f.currIterations))
-		c := math.Sin((mu / 2) * math.Pi)
-
-		return color.RGBA{f.scaleColor(c, theme.PrimaryColor().R, theme.TextColor().R),
-			f.scaleColor(c, theme.PrimaryColor().G, theme.TextColor().G),
-			f.scaleColor(c, theme.PrimaryColor().B, theme.TextColor().B), 0xff}
 	}
+
+	mu := (float64(i) / float64(f.currIterations))
+	c := math.Sin((mu / 2) * math.Pi)
+
+	return color.RGBA{f.scaleColor(c, theme.PrimaryColor().R, theme.TextColor().R),
+		f.scaleColor(c, theme.PrimaryColor().G, theme.TextColor().G),
+		f.scaleColor(c, theme.PrimaryColor().B, theme.TextColor().B), 0xff}
 }
 
 func (f *fractal) fractalKeyDown(ev *ui.KeyEvent) {
@@ -91,6 +91,7 @@ func (f *fractal) fractalKeyDown(ev *ui.KeyEvent) {
 	f.refresh()
 }
 
+// Fractal loads a Mandelbrot fractal example window for the specified app context
 func Fractal(app app.App) {
 	window := app.NewWindow("Fractal")
 	fractal := &fractal{window: window}

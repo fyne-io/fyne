@@ -29,6 +29,7 @@ func parse(list *widget.List) {
 	}
 }
 
+// Blog loads a blog example window for the specified app context
 func Blog(app app.App) {
 	parent = app
 	w := app.NewWindow("Blog")
