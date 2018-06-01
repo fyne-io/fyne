@@ -59,7 +59,7 @@ func NewContainer(objects ...CanvasObject) *Container {
 }
 
 // NewContainerWithLayout returns a new Container instance holding the specified
-// CanvasObjects which will be layed out according to the specified Layout
+// CanvasObjects which will be laid out according to the specified Layout
 func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 	return &Container{
 		Objects: objects,

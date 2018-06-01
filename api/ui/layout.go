@@ -1,6 +1,6 @@
 package ui
 
-// Layout defines how CanvasObjects may be layed out in a specified Size
+// Layout defines how CanvasObjects may be laid out in a specified Size
 type Layout interface {
 	// Layout will manipulate the listed CanvasObjects Size and Position
 	// to fit within the specified size
