@@ -18,14 +18,14 @@ Before you can use the Fyne tools you need to have a stable copy of EFL installe
 
 Using standard go tools you can install Fyne's core library using:
 
-    go get github.com/fyne-io/fyne-app
+    go get github.com/fyne-io/fyne
 
 And then you're ready to write your first app - this example shows how:
 
     package main
 
-    import "github.com/fyne-io/fyne/ui/widget"
-    import "github.com/fyne-io/fyne-app"
+    import "github.com/fyne-io/fyne/api/ui/widget"
+    import "github.com/fyne-io/fyne/desktop"
 
     func main() {
     	app := fyneapp.NewApp()

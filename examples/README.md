@@ -1,10 +1,6 @@
-<p align="center">
-  <a href="https://goreportcard.com/report/github.com/fyne-io/examples"><img src="https://goreportcard.com/badge/github.com/fyne-io/examples" alt="Code Status" /></a>
-</p>
-
 # About
 
-This is a repository of examples demonstrating the features of the 
+This is a repository of examples demonstrating the features of the
 [Fyne](http://fyne.io) UI toolkit and app API written in Go.
 The libraries are under heavy development but these examples will continue
 to demonstrate the latest capabilities and features.
@@ -17,10 +13,11 @@ Before you can use the Fyne tools you need to have a stable copy of EFL installe
 
 Using standard go tools you can install Fyne's core library using:
 
-    go get github.com/fyne-io/fyne-app
+    go get github.com/fyne-io/fyne
 
 And then you're ready to run an example, like this:
 
+    cd ~/go/src/github.com/fyne-io/fyne/examples/
     go run main.go main_desktop.go -example calculator
 
 It should look like one of these:
