@@ -1,7 +1,7 @@
 // Package app defines Fyne APIs for managing a graphical application.
 package app
 
-import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/api/ui"
 
 // An App is the definition of a graphical application.
 // Apps can have multiple windows, it will exit when the first windows to be

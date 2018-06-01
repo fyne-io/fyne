@@ -1,6 +1,6 @@
 package test
 
-import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/api/ui"
 
 var dummyCanvas ui.Canvas
 

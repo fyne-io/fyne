@@ -1,8 +1,8 @@
 package layout
 
 import "math"
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/theme"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/theme"
 
 type fixedGridLayout struct {
 	CellSize ui.Size

@@ -1,6 +1,6 @@
 package ui
 
-import "github.com/fyne-io/fyne/ui/input"
+import "github.com/fyne-io/fyne/api/ui/input"
 
 // KeyEvent describes a keyboard input event.
 type KeyEvent struct {

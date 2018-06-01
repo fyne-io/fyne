@@ -1,9 +1,9 @@
 package widget
 
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/layout"
-import "github.com/fyne-io/fyne/ui/theme"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui/layout"
+import "github.com/fyne-io/fyne/api/ui/theme"
 
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {

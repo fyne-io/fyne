@@ -2,7 +2,7 @@ package canvas
 
 import "image/color"
 
-import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/api/ui"
 
 // Image describes a raster image area that can render in a Fyne canvas
 type Image struct {

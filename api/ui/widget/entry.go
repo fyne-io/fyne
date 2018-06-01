@@ -2,10 +2,10 @@ package widget
 
 import "fmt"
 
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/layout"
-import "github.com/fyne-io/fyne/ui/theme"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui/layout"
+import "github.com/fyne-io/fyne/api/ui/theme"
 
 // Entry widget allows simple text to be input when focussed.
 type Entry struct {

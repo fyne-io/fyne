@@ -2,7 +2,7 @@ package canvas
 
 import "image/color"
 
-import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/api/ui"
 
 // Rectangle describes a coloured rectangle primitive in a Fyne canvas
 type Rectangle struct {

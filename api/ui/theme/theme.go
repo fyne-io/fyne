@@ -5,7 +5,7 @@ import "image/color"
 import "path"
 import "runtime"
 
-import "github.com/fyne-io/fyne/app"
+import "github.com/fyne-io/fyne/api/app"
 
 var loadedColors *themeColors
 var loadedTheme string

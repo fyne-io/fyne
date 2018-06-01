@@ -1,7 +1,7 @@
 package widget
 
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/layout"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/layout"
 
 // List widget is a simple list where the child elements are arranged in a single column.
 type List struct {

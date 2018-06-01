@@ -1,9 +1,9 @@
 package widget
 
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/layout"
-import "github.com/fyne-io/fyne/ui/theme"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui/layout"
+import "github.com/fyne-io/fyne/api/ui/theme"
 
 // Label widget is a basic text component with appropriate padding and layout.
 type Label struct {

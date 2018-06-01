@@ -1,7 +1,7 @@
 // Package widget defines the UI widgets within the Fyne toolkit
 package widget
 
-import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/api/ui"
 
 // Widget defines the standard behaviours of any widget. This extends the
 // CanvasObject - a widget behaves in the same basic way but will encapsulate

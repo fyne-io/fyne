@@ -4,8 +4,8 @@ import "testing"
 
 import "image/color"
 
-import "github.com/fyne-io/fyne/ui"
-import "github.com/fyne-io/fyne/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne/api/ui/canvas"
 
 import "github.com/stretchr/testify/assert"
 

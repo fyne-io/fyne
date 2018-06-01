@@ -5,8 +5,8 @@ import "testing"
 import "github.com/stretchr/testify/assert"
 
 import _ "github.com/fyne-io/fyne/test"
-import "github.com/fyne-io/fyne/ui/canvas"
-import "github.com/fyne-io/fyne/ui/theme"
+import "github.com/fyne-io/fyne/api/ui/canvas"
+import "github.com/fyne-io/fyne/api/ui/theme"
 
 func TestButtonSize(t *testing.T) {
 	button := NewButton("Hi", nil)

@@ -1,7 +1,7 @@
 // Package layout defines the various layouts available to Fyne apps
 package layout
 
-import "github.com/fyne-io/fyne/ui"
+import "github.com/fyne-io/fyne/api/ui"
 
 type maxLayout struct {
 }
