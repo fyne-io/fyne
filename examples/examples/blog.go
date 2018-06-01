@@ -23,7 +23,7 @@ func parse(list *widget.List) {
 		return
 	}
 
-	for i, _ := range feed.Items {
+	for i := range feed.Items {
 		item := feed.Items[i] // keep a reference to the slices
 		list.Append(widget.NewButton(item.Title, func() {
 			parent.OpenURL(fmt.Sprintf("%s#about", item.Link))
