@@ -18,7 +18,7 @@ Using standard go tools you can install Fyne's core library using:
 And then you're ready to run an example, like this:
 
     cd ~/go/src/github.com/fyne-io/fyne/examples/
-    go run main.go main_desktop.go -example calculator
+    go run main.go -example calculator
 
 It should look like one of these:
 
@@ -31,13 +31,13 @@ It should look like one of these:
 
 ## Clock
 
-    go run main.go main_desktop.go -example clock
+    go run main.go -example clock
 
 ![Clock dark](img/clock-dark.png)
 ![Clock light](img/clock-light.png)
 
 ## Fractal (Mandelbrot)
 
-    go run main.go main_desktop.go -example fractal
+    go run main.go -example fractal
 
 ![Fractal](img/fractal-dark.png)

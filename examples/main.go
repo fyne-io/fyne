@@ -3,7 +3,8 @@ package main
 
 import "flag"
 
-import "github.com/fyne-io/fyne/examples/examples"
+import "github.com/fyne-io/fyne/examples/apps"
+import "github.com/fyne-io/fyne/examples/driver"
 
 import "github.com/fyne-io/fyne/api/app"
 import "github.com/fyne-io/fyne/api/ui"
@@ -12,23 +13,23 @@ import "github.com/fyne-io/fyne/api/ui/layout"
 import "github.com/fyne-io/fyne/api/ui/widget"
 
 func blogApp(app app.App) {
-	examples.Blog(app)
+	apps.Blog(app)
 }
 
 func calcApp(app app.App) {
-	examples.Calculator(app)
+	apps.Calculator(app)
 }
 
 func canvasApp(app app.App) {
-	examples.Canvas(app)
+	apps.Canvas(app)
 }
 
 func clockApp(app app.App) {
-	examples.Clock(app)
+	apps.Clock(app)
 }
 
 func fractalApp(app app.App) {
-	examples.Fractal(app)
+	apps.Fractal(app)
 }
 
 func appButton(app app.App, label string, onClick func(app.App)) *widget.Button {
@@ -65,7 +66,7 @@ func welcome(myApp app.App) {
 }
 
 func main() {
-	app := newApp()
+	app := driver.NewApp()
 
 	var ex string
 	flag.StringVar(&ex, "example", "", "Launch an app directly (blog,calculator,canvas,clock)")

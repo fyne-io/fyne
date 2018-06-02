@@ -1,4 +1,4 @@
-package examples
+package apps
 
 import "math"
 import "time"

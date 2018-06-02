@@ -1,4 +1,4 @@
-package examples
+package apps
 
 import "fmt"
 import "log"

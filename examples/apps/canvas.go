@@ -1,4 +1,6 @@
-package examples
+// Package apps contains the various eample apps that are called to demonstrate
+// the capabilities and simple coding of Fyne based apps.
+package apps
 
 import "runtime"
 import "image/color"
