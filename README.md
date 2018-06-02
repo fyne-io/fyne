@@ -51,3 +51,30 @@ It should look like this:
 <p align="center" markdown="1">
   <img src="hello.png" alt="Fyne Screenshot" />
 </p>
+
+# Examples
+
+To see the examples you can run examples/main.go and optionally specify an example, like this:
+
+    cd ~/go/src/github.com/fyne-io/fyne/examples/
+    go run main.go -example calculator
+
+It should look like one of these:
+
+|       | Linux | Max OS X | Windows |
+| -----:|:-----:|:--------:|:-------:|
+|  dark | ![Calculator on Linux](img/calc-linux-dark.png) | ![Calculator on OS X](img/calc-osx-dark.png) | ![Calculator on Windows](img/calc-windows-dark.png) |
+| light | ![Calculator (light) on Linux](img/calc-linux-light.png) | ![Calculator (light) on OS X](img/calc-osx-light.png) | ![Calculator (light) on Windows](img/calc-windows-light.png) |
+
+## Clock
+
+    go run main.go -example clock
+
+![Clock dark](img/clock-dark.png)
+![Clock light](img/clock-light.png)
+
+## Fractal (Mandelbrot)
+
+    go run main.go -example fractal
+
+![Fractal](img/fractal-dark.png)
