@@ -28,7 +28,7 @@ And then you're ready to write your first app - this example shows how:
     import "github.com/fyne-io/fyne/desktop"
 
     func main() {
-    	app := fyneapp.NewApp()
+    	app := desktop.NewApp()
 
     	w := app.NewWindow("Hello")
     	quit := widget.NewButton("Quit", func() {

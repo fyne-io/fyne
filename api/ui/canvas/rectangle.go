@@ -1,3 +1,4 @@
+// Package canvas contains all of the primitive CanvasObjects that make up a Fyne GUI
 package canvas
 
 import "image/color"

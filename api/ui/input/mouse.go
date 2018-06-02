@@ -1,3 +1,4 @@
+// Package input defines the details of different input events and interactions
 package input
 
 // MouseButton represents a single button in a MouseEvent
