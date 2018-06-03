@@ -52,7 +52,7 @@ func nativeTextBounds(obj *C.Evas_Object) ui.Size {
 		}
 	}
 
-	return ui.Size{width, height}
+	return ui.NewSize(width, height)
 }
 
 func (d *eFLDriver) RenderedTextSize(text string, size int) ui.Size {
