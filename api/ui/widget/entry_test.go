@@ -9,7 +9,7 @@ import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/canvas"
 import "github.com/fyne-io/fyne/api/ui/theme"
 
-func TestEntryTestSize(t *testing.T) {
+func TestEntrySize(t *testing.T) {
 	entry := NewEntry()
 	min := entry.MinSize()
 
@@ -17,7 +17,7 @@ func TestEntryTestSize(t *testing.T) {
 	assert.True(t, min.Height > theme.Padding()*2)
 }
 
-func TestEntryTestAppend(t *testing.T) {
+func TestEntryAppend(t *testing.T) {
 	entry := NewEntry()
 
 	key := new(ui.KeyEvent)
@@ -29,7 +29,7 @@ func TestEntryTestAppend(t *testing.T) {
 	assert.Equal(t, entry.Text(), "Hi")
 }
 
-func TestEntryTestBackspace(t *testing.T) {
+func TestEntryBackspace(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
 
@@ -40,7 +40,7 @@ func TestEntryTestBackspace(t *testing.T) {
 	assert.Equal(t, entry.Text(), "H")
 }
 
-func TestEntryTestNotify(t *testing.T) {
+func TestEntryNotify(t *testing.T) {
 	entry := NewEntry()
 	changed := false
 
@@ -52,7 +52,7 @@ func TestEntryTestNotify(t *testing.T) {
 	assert.True(t, changed)
 }
 
-func TestEntryTestFocusHighlight(t *testing.T) {
+func TestEntryFocusHighlight(t *testing.T) {
 	entry := NewEntry()
 	bg := entry.Layout(entry.MinSize())[0].(*canvas.Rectangle)
 	color := bg.FillColor
