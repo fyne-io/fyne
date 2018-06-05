@@ -1,6 +1,6 @@
 // +build !ci
 
-// Package fyneapp provides a full implementation of the Fyne APIs
+// Package desktop provides a full implementation of the Fyne APIs
 package desktop
 
 import "github.com/fyne-io/fyne/api/app"
