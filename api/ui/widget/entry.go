@@ -68,6 +68,11 @@ func (e *Entry) OnFocusLost() {
 	ui.GetCanvas(e).Refresh(e)
 }
 
+// Focused returns whether or not this Entry has focus.
+func (e *Entry) Focused() bool {
+	return e.focused
+}
+
 // OnKeyDown receives key input events when the Entry widget is focussed.
 func (e *Entry) OnKeyDown(key *ui.KeyEvent) {
 	if key.Name == "BackSpace" {

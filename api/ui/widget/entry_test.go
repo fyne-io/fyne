@@ -52,6 +52,16 @@ func TestEntryNotify(t *testing.T) {
 	assert.True(t, changed)
 }
 
+func TestEntryFocus(t *testing.T) {
+	entry := NewEntry()
+
+	entry.OnFocusGained()
+	assert.True(t, entry.Focused())
+
+	entry.OnFocusLost()
+	assert.False(t, entry.Focused())
+}
+
 func TestEntryFocusHighlight(t *testing.T) {
 	entry := NewEntry()
 	bg := entry.Layout(entry.MinSize())[0].(*canvas.Rectangle)

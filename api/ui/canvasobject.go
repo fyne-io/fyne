@@ -27,6 +27,7 @@ type ClickableObject interface {
 type FocusableObject interface {
 	OnFocusGained()
 	OnFocusLost()
+	Focused() bool
 
 	OnKeyDown(*KeyEvent)
 }
