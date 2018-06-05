@@ -20,3 +20,13 @@ type CanvasObject interface {
 type ClickableObject interface {
 	OnMouseDown(*MouseEvent)
 }
+
+// FocusableObject describes any CanvasObject that can respond to being focused.
+// It will receive the OnFocusGained and OnFocusLost events appropriately and,
+// when focussed, it will also have OnKeyDown called as keys are pressed.
+type FocusableObject interface {
+	OnFocusGained()
+	OnFocusLost()
+
+	OnKeyDown(*KeyEvent)
+}

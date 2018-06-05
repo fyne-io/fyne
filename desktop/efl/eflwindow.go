@@ -24,10 +24,11 @@ import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/input"
 
 type window struct {
-	ee     *C.Ecore_Evas
-	canvas ui.Canvas
-	driver *eFLDriver
-	master bool
+	ee      *C.Ecore_Evas
+	canvas  ui.Canvas
+	driver  *eFLDriver
+	master  bool
+	focused bool
 }
 
 var windows = make(map[*C.Ecore_Evas]*window)
@@ -145,7 +146,7 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	}
 	canvas := w.canvas.(*eflCanvas)
 
-	if canvas.focussed == nil && canvas.onKeyDown == nil {
+	if canvas.focused == nil && canvas.onKeyDown == nil {
 		return
 	}
 
@@ -163,8 +164,8 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 		ev.Modifiers |= input.AltModifier
 	}
 
-	if canvas.focussed != nil {
-		canvas.focussed.OnKeyDown(ev)
+	if canvas.focused != nil {
+		canvas.focused.OnKeyDown(ev)
 	}
 	if canvas.onKeyDown != nil {
 		canvas.onKeyDown(ev)

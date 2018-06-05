@@ -13,7 +13,7 @@ type Entry struct {
 
 	OnChanged func(string)
 
-	focussed bool
+	focused bool
 
 	label   *canvas.Text
 	bg, box *canvas.Rectangle
@@ -56,14 +56,14 @@ func (e *Entry) SetText(text string) {
 
 // OnFocusGained is called when the Entry has been given focus.
 func (e *Entry) OnFocusGained() {
-	e.focussed = true
+	e.focused = true
 	e.ApplyTheme()
 	ui.GetCanvas(e).Refresh(e)
 }
 
 // OnFocusLost is called when the Entry has had focus removed.
 func (e *Entry) OnFocusLost() {
-	e.focussed = false
+	e.focused = false
 	e.ApplyTheme()
 	ui.GetCanvas(e).Refresh(e)
 }
@@ -86,7 +86,7 @@ func (e *Entry) OnKeyDown(key *ui.KeyEvent) {
 // ApplyTheme is called when the Entry may need to update it's look.
 func (e *Entry) ApplyTheme() {
 	e.label.Color = theme.TextColor()
-	if e.focussed {
+	if e.focused {
 		e.bg.FillColor = theme.FocusColor()
 	} else {
 		e.bg.FillColor = theme.ButtonColor()

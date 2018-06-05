@@ -6,6 +6,7 @@ var dummyCanvas ui.Canvas
 
 type testCanvas struct {
 	content ui.CanvasObject
+	focused ui.FocusableObject
 }
 
 func (c *testCanvas) Content() ui.CanvasObject {
@@ -21,6 +22,15 @@ func (c *testCanvas) Refresh(ui.CanvasObject) {
 
 func (c *testCanvas) Contains(ui.CanvasObject) bool {
 	return true
+}
+
+func (c *testCanvas) Focus(obj ui.FocusableObject) {
+	c.focused = obj
+	obj.OnFocusGained()
+}
+
+func (c *testCanvas) Focused() ui.FocusableObject {
+	return c.focused
 }
 
 func (c *testCanvas) Size() ui.Size {

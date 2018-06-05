@@ -47,16 +47,8 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	switch obj := co.(type) {
 	case ui.ClickableObject:
 		obj.OnMouseDown(ev)
-	case widget.FocussableWidget:
-		if canvas.focussed != nil {
-			if canvas.focussed == obj {
-				return
-			}
-
-			canvas.focussed.OnFocusLost()
-		}
-		canvas.focussed = obj
-		obj.OnFocusGained()
+	case ui.FocusableObject:
+		canvas.Focus(obj)
 	}
 }
 
@@ -66,9 +58,9 @@ type eflCanvas struct {
 	size  ui.Size
 	scale float32
 
-	content  ui.CanvasObject
-	window   *window
-	focussed widget.FocussableWidget
+	content ui.CanvasObject
+	window  *window
+	focused ui.FocusableObject
 
 	onKeyDown func(*ui.KeyEvent)
 
@@ -425,6 +417,23 @@ func (c *eflCanvas) doRefresh(o ui.CanvasObject) {
 
 func (c *eflCanvas) Contains(obj ui.CanvasObject) bool {
 	return c.native[obj] != nil
+}
+
+func (c *eflCanvas) Focus(obj ui.FocusableObject) {
+	if c.focused != nil {
+		if c.focused == obj {
+			return
+		}
+
+		c.focused.OnFocusLost()
+	}
+
+	c.focused = obj
+	obj.OnFocusGained()
+}
+
+func (c *eflCanvas) Focused() ui.FocusableObject {
+	return c.focused
 }
 
 func (c *eflCanvas) fitContent() {

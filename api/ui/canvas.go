@@ -7,6 +7,8 @@ type Canvas interface {
 	SetContent(CanvasObject)
 	Refresh(CanvasObject)
 	Contains(CanvasObject) bool
+	Focus(FocusableObject)
+	Focused() FocusableObject
 
 	Size() Size
 	Scale() float32
