@@ -4,6 +4,11 @@ import "github.com/fyne-io/fyne/api/ui"
 
 var dummyCanvas ui.Canvas
 
+// Canvas returns an un-rendered canvas that is used for behavioural testing
+func Canvas() ui.Canvas {
+	return dummyCanvas
+}
+
 type testCanvas struct {
 	content ui.CanvasObject
 	focused ui.FocusableObject

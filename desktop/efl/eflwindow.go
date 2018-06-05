@@ -10,6 +10,8 @@ package efl
 //
 // void onWindowResize_cgo(Ecore_Evas *);
 // void onWindowMove_cgo(Ecore_Evas *);
+// void onWindowFocusIn_cgo(Ecore_Evas *);
+// void onWindowFocusOut_cgo(Ecore_Evas *);
 // void onWindowClose_cgo(Ecore_Evas *);
 //
 // void onWindowKeyDown_cgo(Ecore_Window, void *);
@@ -121,6 +123,30 @@ func onWindowMove(ee *C.Ecore_Evas) {
 	}
 }
 
+//export onWindowFocusGained
+func onWindowFocusGained(ee *C.Ecore_Evas) {
+	w := windows[ee]
+	canvas := w.canvas.(*eflCanvas)
+
+	if canvas.focused == nil {
+		return
+	}
+
+	canvas.focused.OnFocusGained()
+}
+
+//export onWindowFocusLost
+func onWindowFocusLost(ee *C.Ecore_Evas) {
+	w := windows[ee]
+	canvas := w.canvas.(*eflCanvas)
+
+	if canvas.focused == nil {
+		return
+	}
+
+	canvas.focused.OnFocusLost()
+}
+
 //export onWindowClose
 func onWindowClose(ee *C.Ecore_Evas) {
 	windows[ee].Close()
@@ -199,6 +225,8 @@ func (d *eFLDriver) CreateWindow(title string) ui.Window {
 	windows[w.ee] = w
 	C.ecore_evas_callback_resize_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowResize_cgo)))
 	C.ecore_evas_callback_move_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowMove_cgo)))
+	C.ecore_evas_callback_focus_in_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowFocusIn_cgo)))
+	C.ecore_evas_callback_focus_out_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowFocusOut_cgo)))
 	C.ecore_evas_callback_delete_request_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowClose_cgo)))
 
 	C.ecore_event_handler_add(C.ECORE_EVENT_KEY_DOWN, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onWindowKeyDown_cgo)), nil)

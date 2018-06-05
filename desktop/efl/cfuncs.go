@@ -22,6 +22,18 @@ void onWindowMove_cgo(Ecore_Evas *ee)
 	onWindowMove(ee);
 }
 
+void onWindowFocusIn_cgo(Ecore_Evas *ee)
+{
+	void onWindowFocusGained(Ecore_Evas*);
+	onWindowFocusGained(ee);
+}
+
+void onWindowFocusOut_cgo(Ecore_Evas *ee)
+{
+	void onWindowFocusLost(Ecore_Evas*);
+	onWindowFocusLost(ee);
+}
+
 void onWindowClose_cgo(Ecore_Evas *ee)
 {
 	void onWindowClose(Ecore_Evas*);

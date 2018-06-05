@@ -4,7 +4,7 @@ import "testing"
 
 import "github.com/stretchr/testify/assert"
 
-import _ "github.com/fyne-io/fyne/test"
+import "github.com/fyne-io/fyne/test"
 import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/canvas"
 import "github.com/fyne-io/fyne/api/ui/theme"
@@ -60,6 +60,14 @@ func TestEntryFocus(t *testing.T) {
 
 	entry.OnFocusLost()
 	assert.False(t, entry.Focused())
+}
+
+func TestEntryWindowFocus(t *testing.T) {
+	entry := NewEntry()
+	canvas := test.Canvas()
+
+	canvas.Focus(entry)
+	assert.True(t, entry.Focused())
 }
 
 func TestEntryFocusHighlight(t *testing.T) {
