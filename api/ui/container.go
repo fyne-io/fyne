@@ -10,6 +10,18 @@ type Container struct {
 	Objects []CanvasObject // The set of CanvasObjects this container holds
 }
 
+func (c *Container) layout() {
+	if c.Layout != nil {
+		c.Layout.Layout(c.Objects, c.Size)
+		return
+	}
+
+	for _, child := range c.Objects {
+		child.Resize(c.Size)
+		child.Move(c.Position)
+	}
+}
+
 // CurrentSize returns the current size of this container
 func (c *Container) CurrentSize() Size {
 	return c.Size
@@ -18,6 +30,7 @@ func (c *Container) CurrentSize() Size {
 // Resize sets a new size for the Container
 func (c *Container) Resize(size Size) {
 	c.Size = size
+	c.layout()
 }
 
 // CurrentPosition gets the current position of this Container, relative to it's parent
@@ -28,6 +41,7 @@ func (c *Container) CurrentPosition() Position {
 // Move the container (and all it's children) to a new position, relative to it's parent
 func (c *Container) Move(pos Position) {
 	c.Position = pos
+	c.layout()
 }
 
 // MinSize calculates the minimum size of a Container.
@@ -49,6 +63,7 @@ func (c *Container) MinSize() Size {
 // AddObject adds another CanvasObject to the set this Container holds
 func (c *Container) AddObject(o CanvasObject) {
 	c.Objects = append(c.Objects, o)
+	c.layout()
 }
 
 // NewContainer returns a new Container instance holding the specified CanvasObjects

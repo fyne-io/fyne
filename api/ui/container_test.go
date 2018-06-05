@@ -5,31 +5,47 @@ import "testing"
 import "github.com/stretchr/testify/assert"
 
 func TestDefaultMinSize(t *testing.T) {
-	text := new(dummyObject)
-	minSize := text.MinSize()
+	box := new(dummyObject)
+	minSize := box.MinSize()
 
-	container := NewContainer(text)
-	container.AddObject(text)
-	layoutMin := container.MinSize()
+	container := NewContainer(box)
+	assert.Equal(t, minSize, container.MinSize())
 
-	assert.Equal(t, minSize, layoutMin)
+	container.AddObject(box)
+	assert.Equal(t, minSize, container.MinSize())
+}
+
+func TestDefaultLayout(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainer(box)
+
+	size := NewSize(100, 100)
+	container.Resize(size)
+	assert.Equal(t, size, box.CurrentSize())
+
+	container.AddObject(box)
+	assert.Equal(t, size, box.CurrentSize())
 }
 
 type dummyObject struct {
+	size Size
+	pos  Position
 }
 
 func (d *dummyObject) CurrentSize() Size {
-	return NewSize(10, 10)
+	return d.size
 }
 
-func (d *dummyObject) Resize(Size) {
+func (d *dummyObject) Resize(size Size) {
+	d.size = size
 }
 
 func (d *dummyObject) CurrentPosition() Position {
-	return NewPos(10, 10)
+	return d.pos
 }
 
-func (d *dummyObject) Move(Position) {
+func (d *dummyObject) Move(pos Position) {
+	d.pos = pos
 }
 
 func (d *dummyObject) MinSize() Size {
