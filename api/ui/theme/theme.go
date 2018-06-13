@@ -2,8 +2,6 @@
 package theme
 
 import "image/color"
-import "path"
-import "runtime"
 
 import "github.com/fyne-io/fyne/api/app"
 
@@ -86,30 +84,24 @@ func TextSize() int {
 	return 14
 }
 
-// fontPath is used to find the path of a font file for the specified style
-func fontPath(style string) string {
-	_, dirname, _, _ := runtime.Caller(0)
-	return path.Join(path.Dir(dirname), "font/NotoSans-"+style+".ttf")
-}
-
 // TextFont returns the font path for the regular font style
 func TextFont() string {
-	return fontPath("Regular")
+	return regular.CachePath()
 }
 
 // TextBoldFont retutns the font path for the bold font style
 func TextBoldFont() string {
-	return fontPath("Bold")
+	return bold.CachePath()
 }
 
 // TextItalicFont returns the font path for the italic font style
 func TextItalicFont() string {
-	return fontPath("Italic")
+	return italic.CachePath()
 }
 
 // TextBoldItalicFont returns the font path for the bold and italic font style
 func TextBoldItalicFont() string {
-	return fontPath("BoldItalic")
+	return bolditalic.CachePath()
 }
 
 // Padding is the standard gap between elements and the border around interface
