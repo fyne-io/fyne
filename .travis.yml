@@ -6,7 +6,9 @@ go:
 gobuild_args: "-v -tags ci"
 
 before_script:
-  - go get github.com/golang/lint/golint
+  - mkdir -p $(GOPATH)/src/golang.org/x
+  - git clone --depth=1 https://github.com/golang/lint.git $(GOPATH)/src/golang.org/x/lint
+  - go get -u golang.org/x/lint/golintgo get github.com/golang/lint/golint
   - go get github.com/mattn/goveralls
 
 script:
