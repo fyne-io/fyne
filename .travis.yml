@@ -8,7 +8,7 @@ gobuild_args: "-v -tags ci"
 before_script:
   - mkdir -p $(go env GOPATH)/src/golang.org/x
   - git clone --depth=1 https://github.com/golang/lint.git $(go env GOPATH)/src/golang.org/x/lint
-  - go get -u golang.org/x/lint/golintgo get github.com/golang/lint/golint
+  - go get -u golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
 
 script:
