@@ -138,8 +138,13 @@ func onWindowFocusGained(ee *C.Ecore_Evas) {
 //export onWindowFocusLost
 func onWindowFocusLost(ee *C.Ecore_Evas) {
 	w := windows[ee]
-	canvas := w.canvas.(*eflCanvas)
 
+	// we may be closing the window
+	if w == nil {
+		return
+	}
+
+	canvas := w.canvas.(*eflCanvas)
 	if canvas.focused == nil {
 		return
 	}
