@@ -4,7 +4,7 @@ import "fmt"
 import "log"
 import "strconv"
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/layout"
 import "github.com/fyne-io/fyne/api/ui/widget"
@@ -82,7 +82,7 @@ func keyDown(ev *ui.KeyEvent) {
 }
 
 // Calculator loads a calculator example window for the specified app context
-func Calculator(app app.App) {
+func Calculator(app fyne.App) {
 	output = widget.NewLabel("")
 	output.Alignment = ui.TextAlignTrailing
 	equals := widget.NewButton("=", func() {

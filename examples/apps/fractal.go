@@ -3,7 +3,7 @@ package apps
 import "math"
 import "image/color"
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/canvas"
 import "github.com/fyne-io/fyne/api/ui/theme"
@@ -92,7 +92,7 @@ func (f *fractal) fractalKeyDown(ev *ui.KeyEvent) {
 }
 
 // Fractal loads a Mandelbrot fractal example window for the specified app context
-func Fractal(app app.App) {
+func Fractal(app fyne.App) {
 	window := app.NewWindow("Fractal")
 	fractal := &fractal{window: window}
 	fractal.canvas = canvas.NewRaster(fractal.mandelbrot)

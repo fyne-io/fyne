@@ -6,7 +6,7 @@ import "runtime"
 import "image/color"
 import "path"
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/canvas"
 import "github.com/fyne-io/fyne/api/ui/layout"
@@ -19,7 +19,7 @@ func rgbGradient(x, y, w, h int) color.RGBA {
 }
 
 // Canvas loads a canvas example window for the specified app context
-func Canvas(app app.App) {
+func Canvas(app fyne.App) {
 	w := app.NewWindow("Main")
 
 	_, filename, _, _ := runtime.Caller(0)

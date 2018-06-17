@@ -3,7 +3,7 @@ package apps
 import "math"
 import "time"
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/canvas"
 import "github.com/fyne-io/fyne/api/ui/theme"
@@ -86,22 +86,22 @@ func (c *clockLayout) animate(canvas ui.Canvas) {
 	}()
 }
 
-func (c *clockLayout) applyTheme(setting app.Settings) {
+func (c *clockLayout) applyTheme(setting fyne.Settings) {
 	c.hour.StrokeColor = theme.TextColor()
 	c.minute.StrokeColor = theme.TextColor()
 	c.second.StrokeColor = theme.PrimaryColor()
 }
 
 // Clock loads a clock example window for the specified app context
-func Clock(myApp app.App) {
-	clockWindow := myApp.NewWindow("Clock")
+func Clock(app fyne.App) {
+	clockWindow := app.NewWindow("Clock")
 	clock := &clockLayout{}
 
 	canvas := clock.render()
 	go clock.animate(clockWindow.Canvas())
 
-	listener := make(chan app.Settings)
-	app.GetSettings().AddChangeListener(listener)
+	listener := make(chan fyne.Settings)
+	fyne.GetSettings().AddChangeListener(listener)
 	go func() {
 		for {
 			settings := <-listener

@@ -3,14 +3,14 @@ package apps
 import "log"
 import "fmt"
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/api/ui/widget"
 
 import "github.com/mmcdole/gofeed"
 
 const feedURL = "http://fyne.io/feed.xml"
 
-var parent app.App
+var parent fyne.App
 
 func parse(list *widget.List) {
 	fp := gofeed.NewParser()
@@ -30,7 +30,7 @@ func parse(list *widget.List) {
 }
 
 // Blog loads a blog example window for the specified app context
-func Blog(app app.App) {
+func Blog(app fyne.App) {
 	parent = app
 	w := app.NewWindow("Blog")
 	list := widget.NewList(widget.NewLabel(feedURL))

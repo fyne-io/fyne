@@ -3,7 +3,7 @@
 // Package desktop provides a full implementation of the Fyne APIs
 package desktop
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/api/ui"
 
 type fyneApp struct {
@@ -17,18 +17,18 @@ func (app *fyneApp) Quit() {
 	ui.GetDriver().Quit()
 }
 
-func (app *fyneApp) applyTheme(app.Settings) {
+func (app *fyneApp) applyTheme(fyne.Settings) {
 	for _, window := range ui.GetDriver().AllWindows() {
 		window.Canvas().Refresh(window.Canvas().Content())
 	}
 }
 
 // NewApp initialises a new Fyne application returning a handle to that App
-func NewApp() app.App {
+func NewApp() fyne.App {
 	newApp := &fyneApp{}
 
-	listener := make(chan app.Settings)
-	app.GetSettings().AddChangeListener(listener)
+	listener := make(chan fyne.Settings)
+	fyne.GetSettings().AddChangeListener(listener)
 	go func() {
 		for {
 			settings := <-listener

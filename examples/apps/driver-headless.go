@@ -1,11 +1,11 @@
 // +build ci
 
-package driver
+package apps
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/test"
 
 // NewApp creates a new headless app to test the examples code
-func NewApp() app.App {
+func NewApp() fyne.App {
 	return test.NewTestApp()
 }

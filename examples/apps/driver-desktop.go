@@ -1,11 +1,11 @@
 // +build !ci
 
-package driver
+package apps
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/desktop"
 
 // NewApp creates a new desktop app to run the examples
-func NewApp() app.App {
+func NewApp() fyne.App {
 	return desktop.NewApp()
 }

@@ -3,7 +3,7 @@ package theme
 
 import "image/color"
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 
 var loadedColors *themeColors
 var loadedTheme string
@@ -36,14 +36,14 @@ func loadDarkColors() *themeColors {
 
 // Load the right theme colours based on environment / settings
 func colors() *themeColors {
-	if loadedTheme != app.GetSettings().Theme() {
+	if loadedTheme != fyne.GetSettings().Theme() {
 		loadedColors = nil
 	}
 
 	c := loadedColors
 	if loadedColors == nil {
 
-		if app.GetSettings().Theme() == "light" {
+		if fyne.GetSettings().Theme() == "light" {
 			c = loadLightColors()
 		} else {
 			c = loadDarkColors()

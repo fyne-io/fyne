@@ -1,5 +1,7 @@
-// Package app defines Fyne APIs for managing a graphical application.
-package app
+// Package fyne describes the objects and components aailable to any Fyne app.
+// These can al be created and tested without renering (for speed) your main
+// package should import a driver which will actually render your UI.
+package fyne
 
 import "github.com/fyne-io/fyne/api/ui"
 

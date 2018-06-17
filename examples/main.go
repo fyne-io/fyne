@@ -4,69 +4,68 @@ package main
 import "flag"
 
 import "github.com/fyne-io/fyne/examples/apps"
-import "github.com/fyne-io/fyne/examples/driver"
 
-import "github.com/fyne-io/fyne/api/app"
+import "github.com/fyne-io/fyne/api"
 import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/canvas"
 import "github.com/fyne-io/fyne/api/ui/layout"
 import "github.com/fyne-io/fyne/api/ui/widget"
 
-func blogApp(app app.App) {
+func blogApp(app fyne.App) {
 	apps.Blog(app)
 }
 
-func calcApp(app app.App) {
+func calcApp(app fyne.App) {
 	apps.Calculator(app)
 }
 
-func canvasApp(app app.App) {
+func canvasApp(app fyne.App) {
 	apps.Canvas(app)
 }
 
-func clockApp(app app.App) {
+func clockApp(app fyne.App) {
 	apps.Clock(app)
 }
 
-func fractalApp(app app.App) {
+func fractalApp(app fyne.App) {
 	apps.Fractal(app)
 }
 
-func appButton(app app.App, label string, onClick func(app.App)) *widget.Button {
+func appButton(app fyne.App, label string, onClick func(fyne.App)) *widget.Button {
 	return widget.NewButton(label, func() {
 		onClick(app)
 	})
 }
 
-func welcome(myApp app.App) {
-	w := myApp.NewWindow("Examples")
+func welcome(app fyne.App) {
+	w := app.NewWindow("Examples")
 	w.Canvas().SetContent(widget.NewList(
 		widget.NewLabel("Fyne Examples!"),
 
-		appButton(myApp, "Blog", blogApp),
-		appButton(myApp, "Calculator", calcApp),
-		appButton(myApp, "Clock", clockApp),
-		appButton(myApp, "Fractal", fractalApp),
-		appButton(myApp, "Canvas", canvasApp),
+		appButton(app, "Blog", blogApp),
+		appButton(app, "Calculator", calcApp),
+		appButton(app, "Clock", clockApp),
+		appButton(app, "Fractal", fractalApp),
+		appButton(app, "Canvas", canvasApp),
 
 		&canvas.Rectangle{},
 		widget.NewEntry(),
 		ui.NewContainerWithLayout(layout.NewGridLayout(2),
 			widget.NewButton("Dark", func() {
-				app.GetSettings().SetTheme("dark")
+				fyne.GetSettings().SetTheme("dark")
 			}),
 			widget.NewButton("Light", func() {
-				app.GetSettings().SetTheme("light")
+				fyne.GetSettings().SetTheme("light")
 			}),
 		),
 		widget.NewButton("Quit", func() {
-			myApp.Quit()
+			app.Quit()
 		})))
 	w.Show()
 }
 
 func main() {
-	app := driver.NewApp()
+	app := apps.NewApp()
 
 	var ex string
 	flag.StringVar(&ex, "example", "", "Launch an app directly (blog,calculator,canvas,clock)")
