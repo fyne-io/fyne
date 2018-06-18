@@ -151,7 +151,7 @@ func (c *eflCanvas) buildObject(o ui.CanvasObject, target ui.CanvasObject, size 
 	case *canvas.Image:
 		obj = C.evas_object_image_add(c.evas)
 		img, _ := o.(*canvas.Image)
-		C.evas_object_image_alpha_set(obj, C.EINA_FALSE)
+		C.evas_object_image_alpha_set(obj, C.EINA_TRUE)
 		C.evas_object_image_filled_set(obj, C.EINA_TRUE)
 
 		if img.File != "" {
