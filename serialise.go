@@ -1,11 +1,11 @@
-package resource
+package fyne
 
 import "bytes"
 import "fmt"
 import "io/ioutil"
 
 func fromFile(name string) *Resource {
-	data, err := ioutil.ReadFile(filePath(name))
+	data, err := ioutil.ReadFile(cachePath(name))
 
 	if err != nil {
 		return nil
@@ -15,7 +15,7 @@ func fromFile(name string) *Resource {
 }
 
 func toFile(res *Resource) {
-	ioutil.WriteFile(filePath(res.Name), res.Content, 0644)
+	ioutil.WriteFile(cachePath(res.Name), res.Content, 0644)
 }
 
 // ToGo converts a Resource object to Go code.
@@ -23,7 +23,7 @@ func toFile(res *Resource) {
 func ToGo(res *Resource) string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString("&resource.Resource{\n")
+	buffer.WriteString("&fyne.Resource{\n")
 	buffer.WriteString("\tName:    \"" + res.Name + "\",\n")
 	buffer.WriteString("\tContent: []byte{")
 	for i, v := range res.Content {

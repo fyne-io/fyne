@@ -9,7 +9,7 @@ import "path"
 import "runtime"
 import "strings"
 
-import "github.com/fyne-io/fyne/resource"
+import "github.com/fyne-io/fyne"
 
 const filename = "bundled.go"
 
@@ -42,7 +42,7 @@ func main() {
 		return
 	}
 
-	_, err = f.WriteString("package theme\n\nimport \"github.com/fyne-io/fyne/resource\"\n\n")
+	_, err = f.WriteString("package theme\n\nimport \"github.com/fyne-io/fyne\"\n\n")
 	if err != nil {
 		fmt.Println("Unable to write file " + filename)
 		return

@@ -1,5 +1,4 @@
-// Package resource manages bundled assets in Fyne and Fyne applications
-package resource
+package fyne
 
 // Resource represents a single bundled resource.
 // A resource has an identifying name and byte array content.
@@ -14,7 +13,7 @@ type Resource struct {
 // If the resource has not previously been written to a cache this operation
 // will block until the data is available at the returned location.
 func (r *Resource) CachePath() string {
-	path := filePath(r.Name)
+	path := cachePath(r.Name)
 	if !pathExists(path) {
 		toFile(r)
 	}

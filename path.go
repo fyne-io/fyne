@@ -1,13 +1,13 @@
-package resource
+package fyne
 
 import "os"
 import "path"
 import "io/ioutil"
 import "os/user"
 
-var rootDir string
+var cacheDirPath string
 
-func lookupRoot() string {
+func lookupCacheDir() string {
 	// TODO replace this with io.UserCacheDir once Go 11 is out
 	user, err := user.Current()
 	if err == nil {
@@ -18,19 +18,19 @@ func lookupRoot() string {
 	return root
 }
 
-func rootPath() string {
-	if rootDir == "" {
-		rootDir = lookupRoot()
-		if !pathExists(rootDir) {
-			os.Mkdir(rootDir, 0700)
+func cacheDir() string {
+	if cacheDirPath == "" {
+		cacheDirPath = lookupCacheDir()
+		if !pathExists(cacheDirPath) {
+			os.Mkdir(cacheDirPath, 0700)
 		}
 	}
 
-	return rootDir
+	return cacheDirPath
 }
 
-func filePath(name string) string {
-	return path.Join(rootPath(), name)
+func cachePath(name string) string {
+	return path.Join(cacheDir(), name)
 }
 
 func pathExists(path string) bool {
