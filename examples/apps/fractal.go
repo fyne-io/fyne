@@ -3,7 +3,7 @@ package apps
 import "math"
 import "image/color"
 
-import "github.com/fyne-io/fyne/api"
+import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/api/ui"
 import "github.com/fyne-io/fyne/api/ui/canvas"
 import "github.com/fyne-io/fyne/api/ui/theme"

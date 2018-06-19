@@ -3,7 +3,7 @@
 // Package desktop provides a full implementation of the Fyne APIs
 package desktop
 
-import "github.com/fyne-io/fyne/api"
+import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/api/ui"
 
 type fyneApp struct {

@@ -3,7 +3,7 @@ package theme
 
 import "image/color"
 
-import "github.com/fyne-io/fyne/api"
+import "github.com/fyne-io/fyne"
 
 var loadedColors *themeColors
 var loadedTheme string

@@ -1,7 +1,7 @@
 // Package test provides utility drivers for running UI tests without rendering
 package test
 
-import "github.com/fyne-io/fyne/api"
+import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/api/ui"
 
 // ensure we have a dummy app loaded and ready to test

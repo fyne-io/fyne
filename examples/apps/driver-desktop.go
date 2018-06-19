@@ -2,7 +2,7 @@
 
 package apps
 
-import "github.com/fyne-io/fyne/api"
+import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/desktop"
 
 // NewApp creates a new desktop app to run the examples

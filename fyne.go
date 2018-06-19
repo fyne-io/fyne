@@ -1,4 +1,6 @@
-// Package fyne is the containing package for all aspects of the Fyne UI toolkit
+// Package fyne describes the objects and components available to any Fyne app.
+// These can all be created, manipulated and tested without renering (for speed).
+// Your main package should import a driver which will actually render your UI.
 //
 // A simple application may look like this:
 //
