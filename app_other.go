@@ -1,9 +1,9 @@
-// +build !linux,!darwin,!windows
+// +build ci !linux,!darwin,!windows
 
 package fyne
 
 import "log"
 
 func (app *fyneApp) OpenURL(url string) {
-	log.Fatalf("Unable to open url for unknown operating system")
+	log.Printf("Unable to open url for unknown operating system")
 }

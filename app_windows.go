@@ -1,3 +1,5 @@
+// +build !ci
+
 package fyne
 
 import "os/exec"

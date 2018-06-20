@@ -13,22 +13,3 @@ func TestGetMissingCanvas(t *testing.T) {
 	setDriver(new(dummyDriver))
 	assert.Equal(t, nil, GetCanvas(box))
 }
-
-type dummyDriver struct {
-}
-
-func (d *dummyDriver) CreateWindow(string) Window {
-	return nil
-}
-
-func (d *dummyDriver) AllWindows() []Window {
-	return nil
-}
-
-func (d *dummyDriver) RenderedTextSize(text string, size int) Size {
-	return NewSize(len(text)*size, size)
-}
-
-func (d *dummyDriver) Quit() {
-	// no-op
-}
