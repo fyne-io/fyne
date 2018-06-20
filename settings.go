@@ -17,7 +17,7 @@ type settings struct {
 	changeListeners []chan Settings
 }
 
-var singleton *settings
+var settingsCache *settings
 
 func (s *settings) Theme() string {
 	return s.theme
@@ -55,9 +55,9 @@ func loadSettings() *settings {
 
 // GetSettings returns the system wide settings currently configured
 func GetSettings() Settings {
-	if singleton == nil {
-		singleton = loadSettings()
+	if settingsCache == nil {
+		settingsCache = loadSettings()
 	}
 
-	return singleton
+	return settingsCache
 }
