@@ -23,9 +23,10 @@ Using standard go tools you can install Fyne's core library using:
 
 And then you're ready to write your first app - this example shows how:
 
+```go
     package main
 
-    import "github.com/fyne-io/fyne/api/ui/widget"
+    import "github.com/fyne-io/fyne/widget"
     import "github.com/fyne-io/fyne/desktop"
 
     func main() {
@@ -41,6 +42,7 @@ And then you're ready to write your first app - this example shows how:
 
     	w.Show()
     }
+```
 
 And you can run that simply as:
 
@@ -49,14 +51,24 @@ And you can run that simply as:
 It should look like this:
 
 <p align="center" markdown="1">
-  <img src="hello.png" alt="Fyne Screenshot" />
+  <img src="cmd/hello/hello-dark.png" alt="Fyne Hello Dark Theme" />
+</p>
+
+If you prefer a light theme then you could run:
+
+    FYNE_THEME=light go run main.go
+
+It should then look like this:
+
+<p align="center" markdown="1">
+  <img src="cmd/hello/hello-light.png" alt="Fyne Hello Light Theme" />
 </p>
 
 # Examples
 
 To see the examples you can run examples/main.go and optionally specify an example, like this:
 
-    cd ~/go/src/github.com/fyne-io/fyne/examples/
+    cd $GOPATH/src/github.com/fyne-io/fyne/examples/
     go run main.go -example calculator
 
 It should look like one of these:
