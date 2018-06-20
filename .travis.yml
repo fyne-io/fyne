@@ -6,14 +6,14 @@ go:
 gobuild_args: "-v -tags ci"
 
 before_script:
-#  - go get golang.org/x/lint/golint
+  - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
 
 script:
   - test -z $(gofmt -s -l .)
   - go test -v -tags ci -race -covermode=atomic -coverprofile=coverage.out ./...
   - go vet -tags ci ./...
-#  - golint -set_exit_status $(go list -tags ci ./api/... ./examples/...)
+  - golint -set_exit_status $(go list -tags ci ./api/... ./examples/...)
   - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 notifications:
