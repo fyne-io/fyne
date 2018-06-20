@@ -31,6 +31,14 @@ func (w *testWindow) Hide() {}
 
 func (w *testWindow) Close() {}
 
+func (w *testWindow) Content() fyne.CanvasObject {
+	return w.Canvas().Content()
+}
+
+func (w *testWindow) SetContent(obj fyne.CanvasObject) {
+	w.Canvas().SetContent(obj)
+}
+
 func (w *testWindow) Canvas() fyne.Canvas {
 	return GetTestCanvas()
 }

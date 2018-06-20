@@ -24,6 +24,10 @@ type Window interface {
 	// If it is the only open window, or the "master" window the app will Quit.
 	Close()
 
+	// Content returns the content of this window
+	Content() CanvasObject
+	// SetContent sets the content of this window
+	SetContent(CanvasObject)
 	// Canvas returns the canvas context to render in the window
 	Canvas() Canvas
 }

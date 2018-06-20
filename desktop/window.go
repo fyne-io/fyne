@@ -77,6 +77,14 @@ func (w *window) Close() {
 	}
 }
 
+func (w *window) Content() fyne.CanvasObject {
+	return w.Canvas().Content()
+}
+
+func (w *window) SetContent(obj fyne.CanvasObject) {
+	w.Canvas().SetContent(obj)
+}
+
 func (w *window) Canvas() fyne.Canvas {
 	return w.canvas
 }

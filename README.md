@@ -33,12 +33,12 @@ And then you're ready to write your first app - this example shows how:
     	app := desktop.NewApp()
 
     	w := app.NewWindow("Hello")
-    	quit := widget.NewButton("Quit", func() {
-    		app.Quit()
-    	})
-    	w.Canvas().SetContent(widget.NewList(
+    	w.SetContent(widget.NewList(
     		widget.NewLabel("Hello Fyne!"),
-    		quit))
+    		widget.NewButton("Quit", func() {
+    			app.Quit()
+    		}),
+    	))
 
     	w.Show()
     }

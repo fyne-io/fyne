@@ -90,7 +90,7 @@ func Calculator(app fyne.App) {
 	equals.Style = widget.PrimaryButton
 
 	window := app.NewWindow("Calc")
-	window.Canvas().SetContent(fyne.NewContainerWithLayout(layout.NewGridLayout(1),
+	window.SetContent(fyne.NewContainerWithLayout(layout.NewGridLayout(1),
 		output,
 		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
 			charButton("+"),

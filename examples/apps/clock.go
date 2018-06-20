@@ -108,6 +108,6 @@ func Clock(app fyne.App) {
 		}
 	}()
 
-	clockWindow.Canvas().SetContent(canvas)
+	clockWindow.SetContent(canvas)
 	clockWindow.Show()
 }

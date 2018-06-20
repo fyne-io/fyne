@@ -34,7 +34,7 @@ func Blog(app fyne.App) {
 	parent = app
 	w := app.NewWindow("Blog")
 	list := widget.NewList(widget.NewLabel(feedURL))
-	w.Canvas().SetContent(list)
+	w.SetContent(list)
 
 	go parse(list)
 

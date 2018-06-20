@@ -36,6 +36,6 @@ func Canvas(app fyne.App) {
 			StrokeWidth: 2})
 	content.Layout = layout.NewFixedGridLayout(fyne.NewSize(93, 93))
 
-	w.Canvas().SetContent(content)
+	w.SetContent(content)
 	w.Show()
 }

@@ -101,10 +101,7 @@ func Fractal(app fyne.App) {
 	fractal.currX = -0.75
 	fractal.currY = 0.0
 
-	container := fyne.NewContainer(fractal.canvas)
-	container.Layout = fractal
-
-	window.Canvas().SetContent(container)
+	window.SetContent(fyne.NewContainerWithLayout(fractal, fractal.canvas))
 	window.Canvas().SetOnKeyDown(fractal.fractalKeyDown)
 	window.Show()
 }

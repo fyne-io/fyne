@@ -38,7 +38,7 @@ func appButton(app fyne.App, label string, onClick func(fyne.App)) *widget.Butto
 
 func welcome(app fyne.App) {
 	w := app.NewWindow("Examples")
-	w.Canvas().SetContent(widget.NewList(
+	w.SetContent(widget.NewList(
 		widget.NewLabel("Fyne Examples!"),
 
 		appButton(app, "Blog", blogApp),
