@@ -62,6 +62,7 @@ func TestCustomLayout(t *testing.T) {
 	container := NewContainerWithLayout(layout, box)
 
 	size := layout.MinSize(container.Objects)
+	assert.Equal(t, size, container.MinSize())
 	assert.Equal(t, size, container.CurrentSize())
 	assert.Equal(t, size, box.CurrentSize())
 
