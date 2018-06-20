@@ -1,7 +1,6 @@
-// +build !ci
 // +build !linux,!darwin,!windows
 
-package desktop
+package fyne
 
 import "log"
 

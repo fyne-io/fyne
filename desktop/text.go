@@ -1,6 +1,6 @@
 // +build !ci
 
-package efl
+package desktop
 
 // #cgo pkg-config: ecore-evas
 // #include <Evas.h>

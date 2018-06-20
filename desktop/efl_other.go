@@ -2,7 +2,7 @@
 
 // +build !linux,!darwin,!windows
 
-package efl
+package desktop
 
 func oSEngineName() string {
 	return oSEngineOther

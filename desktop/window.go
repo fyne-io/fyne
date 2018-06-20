@@ -1,6 +1,6 @@
 // +build !ci
 
-package efl
+package desktop
 
 // #cgo pkg-config: ecore ecore-evas ecore-input evas
 // #include <Ecore.h>

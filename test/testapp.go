@@ -5,27 +5,29 @@ import "github.com/fyne-io/fyne"
 
 // ensure we have a dummy app loaded and ready to test
 func init() {
-	NewTestApp()
+	NewApp()
 }
 
 type testApp struct {
+	delegate fyne.App
 }
 
 func (a *testApp) NewWindow(title string) fyne.Window {
-	return NewTestWindow()
+	return a.delegate.NewWindow(title)
 }
 
 func (a *testApp) OpenURL(url string) {
+	// no-op
 }
 
 func (a *testApp) Quit() {
+	a.delegate.Quit()
 }
 
-// NewTestApp returns a new dummy app used for testing..
-// It laods a test driver and creates a single window in memory for testing UI.
-func NewTestApp() fyne.App {
-	NewTestDriver()
-	NewTestWindow()
+// NewApp returns a new dummy app used for testing..
+// It loads a test driver which creates a virtual window in memory for testing.
+func NewApp() fyne.App {
+	realApp := fyne.NewAppWithDriver(NewTestDriver())
 
-	return &testApp{}
+	return &testApp{delegate: realApp}
 }

@@ -16,3 +16,40 @@ type App interface {
 	// cleanly, closing all open windows.
 	Quit()
 }
+
+type fyneApp struct {
+}
+
+func (app *fyneApp) NewWindow(title string) Window {
+	return GetDriver().CreateWindow(title)
+}
+
+func (app *fyneApp) Quit() {
+	GetDriver().Quit()
+}
+
+func (app *fyneApp) applyTheme(Settings) {
+	for _, window := range GetDriver().AllWindows() {
+		window.Canvas().Refresh(window.Canvas().Content())
+	}
+}
+
+// NewAppWithDriver initialises a new Fyne application using the specified driver
+// and returns a handle to that App.
+// As this package has no default driver one must be provided.
+// Helpers are available - see desktop.NewApp() and test.NewApp().
+func NewAppWithDriver(d Driver) App {
+	newApp := &fyneApp{}
+	setDriver(d)
+
+	listener := make(chan Settings)
+	GetSettings().AddChangeListener(listener)
+	go func() {
+		for {
+			settings := <-listener
+			newApp.applyTheme(settings)
+		}
+	}()
+
+	return newApp
+}

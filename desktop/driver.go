@@ -1,7 +1,6 @@
 // +build !ci
 
-// Package efl provides an EFL render provider for the Fyne implementation
-package efl
+package desktop
 
 // #cgo pkg-config: ecore
 // #include <Ecore.h>
@@ -18,14 +17,16 @@ const (
 type eFLDriver struct {
 }
 
-// init sets up a new Driver instance implemented using the
-// Enlightenment Foundation Libraries (EFL)
-func init() {
+// NewEFLDriver sets up a new Driver instance implemented using the
+// Enlightenment Foundation Libraries (EFL).
+// It checks that there is a renderer available for the current operating system
+// and causes a fatal error if not.
+func NewEFLDriver() fyne.Driver {
 	driver := new(eFLDriver)
 
 	if oSEngineName() == oSEngineOther {
 		log.Fatalln("Unsupported operating system")
 	}
 
-	fyne.SetDriver(driver)
+	return driver
 }

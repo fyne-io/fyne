@@ -10,7 +10,7 @@ import "github.com/stretchr/testify/assert"
 func TestGetMissingCanvas(t *testing.T) {
 	box := new(dummyObject)
 
-	SetDriver(new(dummyDriver))
+	setDriver(new(dummyDriver))
 	assert.Equal(t, nil, GetCanvas(box))
 }
 
