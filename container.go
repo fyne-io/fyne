@@ -68,16 +68,25 @@ func (c *Container) AddObject(o CanvasObject) {
 
 // NewContainer returns a new Container instance holding the specified CanvasObjects
 func NewContainer(objects ...CanvasObject) *Container {
-	return &Container{
+	ret := &Container{
 		Objects: objects,
 	}
+
+	ret.Size = ret.MinSize()
+	ret.layout()
+
+	return ret
 }
 
 // NewContainerWithLayout returns a new Container instance holding the specified
 // CanvasObjects which will be laid out according to the specified Layout
 func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
-	return &Container{
+	ret := &Container{
 		Objects: objects,
 		Layout:  layout,
 	}
+
+	ret.Size = layout.MinSize(objects)
+	ret.layout()
+	return ret
 }
