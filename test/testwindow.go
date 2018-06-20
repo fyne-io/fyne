@@ -1,13 +1,13 @@
 package test
 
-import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne"
 
 type testWindow struct {
 	title      string
 	fullscreen bool
 }
 
-var windows = make([]ui.Window, 0)
+var windows = make([]fyne.Window, 0)
 
 func (w *testWindow) Title() string {
 	return w.title
@@ -31,12 +31,12 @@ func (w *testWindow) Hide() {}
 
 func (w *testWindow) Close() {}
 
-func (w *testWindow) Canvas() ui.Canvas {
+func (w *testWindow) Canvas() fyne.Canvas {
 	return GetTestCanvas()
 }
 
 // NewTestWindow creates and registers a new window for test purposes
-func NewTestWindow() ui.Window {
+func NewTestWindow() fyne.Window {
 	window := &testWindow{}
 	windows = append(windows, window)
 

@@ -4,24 +4,23 @@ import "math"
 import "image/color"
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/api/ui"
-import "github.com/fyne-io/fyne/api/ui/canvas"
-import "github.com/fyne-io/fyne/api/ui/theme"
+import "github.com/fyne-io/fyne/canvas"
+import "github.com/fyne-io/fyne/theme"
 
 type fractal struct {
 	currIterations          uint
 	currScale, currX, currY float64
 
-	window ui.Window
-	canvas ui.CanvasObject
+	window fyne.Window
+	canvas fyne.CanvasObject
 }
 
-func (f *fractal) Layout(objects []ui.CanvasObject, size ui.Size) {
+func (f *fractal) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	f.canvas.Resize(size)
 }
 
-func (f *fractal) MinSize(objects []ui.CanvasObject) ui.Size {
-	return ui.NewSize(320, 240)
+func (f *fractal) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	return fyne.NewSize(320, 240)
 }
 
 func (f *fractal) refresh() {
@@ -72,7 +71,7 @@ func (f *fractal) mandelbrot(px, py, w, h int) color.RGBA {
 		f.scaleColor(c, theme.PrimaryColor().B, theme.TextColor().B), 0xff}
 }
 
-func (f *fractal) fractalKeyDown(ev *ui.KeyEvent) {
+func (f *fractal) fractalKeyDown(ev *fyne.KeyEvent) {
 	delta := f.currScale * 0.2
 	if ev.Name == "Up" {
 		f.currY -= delta
@@ -102,7 +101,7 @@ func Fractal(app fyne.App) {
 	fractal.currX = -0.75
 	fractal.currY = 0.0
 
-	container := ui.NewContainer(fractal.canvas)
+	container := fyne.NewContainer(fractal.canvas)
 	container.Layout = fractal
 
 	window.Canvas().SetContent(container)

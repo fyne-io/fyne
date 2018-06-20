@@ -6,10 +6,9 @@ import "flag"
 import "github.com/fyne-io/fyne/examples/apps"
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/api/ui"
-import "github.com/fyne-io/fyne/api/ui/canvas"
-import "github.com/fyne-io/fyne/api/ui/layout"
-import "github.com/fyne-io/fyne/api/ui/widget"
+import "github.com/fyne-io/fyne/canvas"
+import "github.com/fyne-io/fyne/layout"
+import "github.com/fyne-io/fyne/widget"
 
 func blogApp(app fyne.App) {
 	apps.Blog(app)
@@ -50,7 +49,7 @@ func welcome(app fyne.App) {
 
 		&canvas.Rectangle{},
 		widget.NewEntry(),
-		ui.NewContainerWithLayout(layout.NewGridLayout(2),
+		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			widget.NewButton("Dark", func() {
 				fyne.GetSettings().SetTheme("dark")
 			}),

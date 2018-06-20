@@ -5,9 +5,8 @@ import "log"
 import "strconv"
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/api/ui"
-import "github.com/fyne-io/fyne/api/ui/layout"
-import "github.com/fyne-io/fyne/api/ui/widget"
+import "github.com/fyne-io/fyne/layout"
+import "github.com/fyne-io/fyne/widget"
 
 import "github.com/Knetic/govaluate"
 
@@ -66,7 +65,7 @@ func charButton(char string) *widget.Button {
 	return widget.NewButton(char, action)
 }
 
-func keyDown(ev *ui.KeyEvent) {
+func keyDown(ev *fyne.KeyEvent) {
 	if ev.String == "=" || ev.Name == "Return" || ev.Name == "KP_Enter" {
 		evaluate()
 		return
@@ -84,39 +83,39 @@ func keyDown(ev *ui.KeyEvent) {
 // Calculator loads a calculator example window for the specified app context
 func Calculator(app fyne.App) {
 	output = widget.NewLabel("")
-	output.Alignment = ui.TextAlignTrailing
+	output.Alignment = fyne.TextAlignTrailing
 	equals := widget.NewButton("=", func() {
 		evaluate()
 	})
 	equals.Style = widget.PrimaryButton
 
 	window := app.NewWindow("Calc")
-	window.Canvas().SetContent(ui.NewContainerWithLayout(layout.NewGridLayout(1),
+	window.Canvas().SetContent(fyne.NewContainerWithLayout(layout.NewGridLayout(1),
 		output,
-		ui.NewContainerWithLayout(layout.NewGridLayout(4),
+		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
 			charButton("+"),
 			charButton("-"),
 			charButton("*"),
 			charButton("/")),
-		ui.NewContainerWithLayout(layout.NewGridLayout(4),
+		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
 			digitButton(7),
 			digitButton(8),
 			digitButton(9),
 			widget.NewButton("C", func() {
 				clear()
 			})),
-		ui.NewContainerWithLayout(layout.NewGridLayout(4),
+		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
 			digitButton(4),
 			digitButton(5),
 			digitButton(6),
 			charButton("(")),
-		ui.NewContainerWithLayout(layout.NewGridLayout(4),
+		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
 			digitButton(1),
 			digitButton(2),
 			digitButton(3),
 			charButton(")")),
-		ui.NewContainerWithLayout(layout.NewGridLayout(2),
-			ui.NewContainerWithLayout(layout.NewGridLayout(2),
+		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 				digitButton(0),
 				charButton(".")),
 			equals)),

@@ -4,21 +4,20 @@
 package desktop
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/api/ui"
 
 type fyneApp struct {
 }
 
-func (app *fyneApp) NewWindow(title string) ui.Window {
-	return ui.GetDriver().CreateWindow(title)
+func (app *fyneApp) NewWindow(title string) fyne.Window {
+	return fyne.GetDriver().CreateWindow(title)
 }
 
 func (app *fyneApp) Quit() {
-	ui.GetDriver().Quit()
+	fyne.GetDriver().Quit()
 }
 
 func (app *fyneApp) applyTheme(fyne.Settings) {
-	for _, window := range ui.GetDriver().AllWindows() {
+	for _, window := range fyne.GetDriver().AllWindows() {
 		window.Canvas().Refresh(window.Canvas().Content())
 	}
 }

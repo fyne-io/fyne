@@ -7,9 +7,8 @@ import "image/color"
 import "path"
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/api/ui"
-import "github.com/fyne-io/fyne/api/ui/canvas"
-import "github.com/fyne-io/fyne/api/ui/layout"
+import "github.com/fyne-io/fyne/canvas"
+import "github.com/fyne-io/fyne/layout"
 
 func rgbGradient(x, y, w, h int) color.RGBA {
 	g := int(float32(x) / float32(w) * float32(255))
@@ -24,7 +23,7 @@ func Canvas(app fyne.App) {
 
 	_, filename, _, _ := runtime.Caller(0)
 	exampleDir := path.Dir(path.Dir(filename))
-	content := ui.NewContainer(
+	content := fyne.NewContainer(
 		canvas.NewText("Resize me", color.RGBA{0, 0, 0x80, 0xff}),
 		&canvas.Rectangle{FillColor: color.RGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.RGBA{0xff, 0xff, 0xff, 0xff},
@@ -35,7 +34,7 @@ func Canvas(app fyne.App) {
 		&canvas.Circle{StrokeColor: color.RGBA{0, 0, 0x80, 0xff},
 			FillColor:   color.RGBA{0x30, 0x30, 0x30, 0x60},
 			StrokeWidth: 2})
-	content.Layout = layout.NewFixedGridLayout(ui.NewSize(93, 93))
+	content.Layout = layout.NewFixedGridLayout(fyne.NewSize(93, 93))
 
 	w.Canvas().SetContent(content)
 	w.Show()

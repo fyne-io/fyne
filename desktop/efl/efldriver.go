@@ -9,7 +9,7 @@ import "C"
 
 import "log"
 
-import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne"
 
 const (
 	oSEngineOther = "unknown"
@@ -27,5 +27,5 @@ func init() {
 		log.Fatalln("Unsupported operating system")
 	}
 
-	ui.SetDriver(driver)
+	fyne.SetDriver(driver)
 }

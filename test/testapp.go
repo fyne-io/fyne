@@ -2,7 +2,6 @@
 package test
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/api/ui"
 
 // ensure we have a dummy app loaded and ready to test
 func init() {
@@ -12,7 +11,7 @@ func init() {
 type testApp struct {
 }
 
-func (a *testApp) NewWindow(title string) ui.Window {
+func (a *testApp) NewWindow(title string) fyne.Window {
 	return NewTestWindow()
 }
 

@@ -4,7 +4,7 @@ import "log"
 import "fmt"
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/api/ui/widget"
+import "github.com/fyne-io/fyne/widget"
 
 import "github.com/mmcdole/gofeed"
 

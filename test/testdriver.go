@@ -1,20 +1,20 @@
 package test
 
-import "github.com/fyne-io/fyne/api/ui"
+import "github.com/fyne-io/fyne"
 
 type testDriver struct {
 }
 
-func (d *testDriver) CreateWindow(string) ui.Window {
+func (d *testDriver) CreateWindow(string) fyne.Window {
 	return &testWindow{}
 }
 
-func (d *testDriver) AllWindows() []ui.Window {
+func (d *testDriver) AllWindows() []fyne.Window {
 	return windows
 }
 
-func (d *testDriver) RenderedTextSize(text string, size int) ui.Size {
-	return ui.NewSize(len(text)*size, size)
+func (d *testDriver) RenderedTextSize(text string, size int) fyne.Size {
+	return fyne.NewSize(len(text)*size, size)
 }
 
 func (d *testDriver) Quit() {
@@ -22,11 +22,11 @@ func (d *testDriver) Quit() {
 }
 
 // NewTestDriver sets up and registers a new dummy driver for test purpose
-func NewTestDriver() ui.Driver {
+func NewTestDriver() fyne.Driver {
 	driver := new(testDriver)
 	// make a single dummy window for rendering tests
 	NewTestWindow()
 
-	ui.SetDriver(driver)
+	fyne.SetDriver(driver)
 	return driver
 }

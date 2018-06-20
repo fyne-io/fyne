@@ -22,12 +22,11 @@ import "os"
 import "strconv"
 import "unsafe"
 
-import "github.com/fyne-io/fyne/api/ui"
-import "github.com/fyne-io/fyne/api/ui/input"
+import "github.com/fyne-io/fyne"
 
 type window struct {
 	ee      *C.Ecore_Evas
-	canvas  ui.Canvas
+	canvas  fyne.Canvas
 	driver  *eFLDriver
 	master  bool
 	focused bool
@@ -78,7 +77,7 @@ func (w *window) Close() {
 	}
 }
 
-func (w *window) Canvas() ui.Canvas {
+func (w *window) Canvas() fyne.Canvas {
 	return w.canvas
 }
 
@@ -108,7 +107,7 @@ func onWindowResize(ee *C.Ecore_Evas) {
 	w := windows[ee]
 
 	canvas := w.canvas.(*eflCanvas)
-	canvas.size = ui.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
+	canvas.size = fyne.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
 	canvas.Refresh(canvas.content)
 }
 
@@ -181,18 +180,18 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 		return
 	}
 
-	ev := new(ui.KeyEvent)
+	ev := new(fyne.KeyEvent)
 	ev.String = C.GoString(info.string)
 	ev.Name = C.GoString(info.keyname)
-	ev.Code = input.KeyCode(int(info.keycode))
+	ev.Code = fyne.KeyCode(int(info.keycode))
 	if (info.modifiers & C.ECORE_EVENT_MODIFIER_SHIFT) != 0 {
-		ev.Modifiers |= input.ShiftModifier
+		ev.Modifiers |= fyne.ShiftModifier
 	}
 	if (info.modifiers & C.ECORE_EVENT_MODIFIER_CTRL) != 0 {
-		ev.Modifiers |= input.ControlModifier
+		ev.Modifiers |= fyne.ControlModifier
 	}
 	if (info.modifiers & C.ECORE_EVENT_MODIFIER_ALT) != 0 {
-		ev.Modifiers |= input.AltModifier
+		ev.Modifiers |= fyne.AltModifier
 	}
 
 	if canvas.focused != nil {
@@ -203,7 +202,7 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	}
 }
 
-func (d *eFLDriver) CreateWindow(title string) ui.Window {
+func (d *eFLDriver) CreateWindow(title string) fyne.Window {
 	engine := oSEngineName()
 
 	C.evas_init()
@@ -236,12 +235,12 @@ func (d *eFLDriver) CreateWindow(title string) ui.Window {
 
 	C.ecore_event_handler_add(C.ECORE_EVENT_KEY_DOWN, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onWindowKeyDown_cgo)), nil)
 
-	c.SetContent(new(ui.Container))
+	c.SetContent(new(fyne.Container))
 	return w
 }
 
-func (d *eFLDriver) AllWindows() []ui.Window {
-	wins := make([]ui.Window, 0, len(windows))
+func (d *eFLDriver) AllWindows() []fyne.Window {
+	wins := make([]fyne.Window, 0, len(windows))
 
 	for _, win := range windows {
 		wins = append(wins, win)

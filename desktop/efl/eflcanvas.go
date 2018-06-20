@@ -20,12 +20,11 @@ import "sync"
 import "time"
 import "unsafe"
 
-import "github.com/fyne-io/fyne/api/ui"
-import "github.com/fyne-io/fyne/api/ui/canvas"
-import "github.com/fyne-io/fyne/api/ui/input"
-import "github.com/fyne-io/fyne/api/ui/layout"
-import "github.com/fyne-io/fyne/api/ui/theme"
-import "github.com/fyne-io/fyne/api/ui/widget"
+import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/canvas"
+import "github.com/fyne-io/fyne/layout"
+import "github.com/fyne-io/fyne/theme"
+import "github.com/fyne-io/fyne/widget"
 
 var canvases = make(map[*C.Evas]*eflCanvas)
 
@@ -38,34 +37,34 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 
 	var x, y C.int
 	C.evas_object_geometry_get(obj, &x, &y, nil, nil)
-	pos := ui.NewPos(unscaleInt(canvas, int(info.canvas.x-x)), unscaleInt(canvas, int(info.canvas.y-y)))
+	pos := fyne.NewPos(unscaleInt(canvas, int(info.canvas.x-x)), unscaleInt(canvas, int(info.canvas.y-y)))
 
-	ev := new(ui.MouseEvent)
+	ev := new(fyne.MouseEvent)
 	ev.Position = pos
-	ev.Button = input.MouseButton(int(info.button))
+	ev.Button = fyne.MouseButton(int(info.button))
 
 	switch obj := co.(type) {
-	case ui.ClickableObject:
+	case fyne.ClickableObject:
 		obj.OnMouseDown(ev)
-	case ui.FocusableObject:
+	case fyne.FocusableObject:
 		canvas.Focus(obj)
 	}
 }
 
 type eflCanvas struct {
-	ui.Canvas
+	fyne.Canvas
 	evas  *C.Evas
-	size  ui.Size
+	size  fyne.Size
 	scale float32
 
-	content ui.CanvasObject
+	content fyne.CanvasObject
 	window  *window
-	focused ui.FocusableObject
+	focused fyne.FocusableObject
 
-	onKeyDown func(*ui.KeyEvent)
+	onKeyDown func(*fyne.KeyEvent)
 
-	objects map[*C.Evas_Object]ui.CanvasObject
-	native  map[ui.CanvasObject]*C.Evas_Object
+	objects map[*C.Evas_Object]fyne.CanvasObject
+	native  map[fyne.CanvasObject]*C.Evas_Object
 }
 
 // Arrange that main.main runs on main thread.
@@ -107,7 +106,7 @@ func initEFL() {
 // DoQuit will cause the driver's Quit method to be called to terminate the app
 //export DoQuit
 func DoQuit() {
-	ui.GetDriver().Quit()
+	fyne.GetDriver().Quit()
 }
 
 // Quit will cause the render loop to end and the application to exit
@@ -119,7 +118,7 @@ func (d *eFLDriver) Quit() {
 var mainfunc = make(chan func())
 
 // do runs f on the main thread.
-func queueRender(c *eflCanvas, co ui.CanvasObject) {
+func queueRender(c *eflCanvas, co fyne.CanvasObject) {
 	done := make(chan bool, 1)
 	mainfunc <- func() {
 		c.doRefresh(co)
@@ -129,7 +128,7 @@ func queueRender(c *eflCanvas, co ui.CanvasObject) {
 	<-done
 }
 
-func (c *eflCanvas) buildObject(o ui.CanvasObject, target ui.CanvasObject, size ui.Size) *C.Evas_Object {
+func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, size fyne.Size) *C.Evas_Object {
 	var obj *C.Evas_Object
 
 	switch o.(type) {
@@ -178,7 +177,7 @@ func (c *eflCanvas) buildObject(o ui.CanvasObject, target ui.CanvasObject, size 
 	return obj
 }
 
-func (c *eflCanvas) buildContainer(objs []ui.CanvasObject, target ui.CanvasObject, size ui.Size) {
+func (c *eflCanvas) buildContainer(objs []fyne.CanvasObject, target fyne.CanvasObject, size fyne.Size) {
 	obj := C.evas_object_rectangle_add(c.evas)
 	bg := theme.BackgroundColor()
 	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
@@ -188,8 +187,8 @@ func (c *eflCanvas) buildContainer(objs []ui.CanvasObject, target ui.CanvasObjec
 
 	for _, child := range objs {
 		switch child.(type) {
-		case *ui.Container:
-			container := child.(*ui.Container)
+		case *fyne.Container:
+			container := child.(*fyne.Container)
 
 			c.buildContainer(container.Objects, child, child.CurrentSize())
 		case widget.Widget:
@@ -245,7 +244,7 @@ func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
 	C.evas_object_image_data_update_add(obj, 0, 0, C.int(width), C.int(height))
 }
 
-func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size ui.Size) {
+func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject, pos fyne.Position, size fyne.Size) {
 	obj := c.native[o]
 
 	// TODO a better solution here as objects are added to the UI
@@ -320,12 +319,12 @@ func (c *eflCanvas) refreshObject(o, o2 ui.CanvasObject, pos ui.Position, size u
 	}
 }
 
-func (c *eflCanvas) refreshContainer(objs []ui.CanvasObject, target ui.CanvasObject, pos ui.Position, size ui.Size) {
+func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.CanvasObject, pos fyne.Position, size fyne.Size) {
 	containerPos := pos
 	containerSize := size
 	if target == c.content {
-		containerPos = ui.NewPos(0, 0)
-		containerSize = ui.NewSize(size.Width+2*theme.Padding(), size.Height+2*theme.Padding())
+		containerPos = fyne.NewPos(0, 0)
+		containerSize = fyne.NewSize(size.Width+2*theme.Padding(), size.Height+2*theme.Padding())
 	}
 
 	obj := c.native[target]
@@ -336,8 +335,8 @@ func (c *eflCanvas) refreshContainer(objs []ui.CanvasObject, target ui.CanvasObj
 
 	for _, child := range objs {
 		switch typed := child.(type) {
-		case *ui.Container:
-			container := child.(*ui.Container)
+		case *fyne.Container:
+			container := child.(*fyne.Container)
 
 			if container.Layout != nil {
 				container.Layout.Layout(container.Objects, child.CurrentSize())
@@ -361,16 +360,16 @@ func (c *eflCanvas) refreshContainer(objs []ui.CanvasObject, target ui.CanvasObj
 	}
 }
 
-func (c *eflCanvas) Size() ui.Size {
+func (c *eflCanvas) Size() fyne.Size {
 	return c.size
 }
 
-func (c *eflCanvas) setup(o ui.CanvasObject) {
+func (c *eflCanvas) setup(o fyne.CanvasObject) {
 	C.ecore_thread_main_loop_begin()
 
 	switch o.(type) {
-	case *ui.Container:
-		container := o.(*ui.Container)
+	case *fyne.Container:
+		container := o.(*fyne.Container)
 
 		c.buildContainer(container.Objects, o, container.CurrentSize())
 	case widget.Widget:
@@ -384,20 +383,20 @@ func (c *eflCanvas) setup(o ui.CanvasObject) {
 	C.ecore_thread_main_loop_end()
 }
 
-func (c *eflCanvas) Refresh(o ui.CanvasObject) {
+func (c *eflCanvas) Refresh(o fyne.CanvasObject) {
 	go queueRender(c, o)
 }
 
-func (c *eflCanvas) doRefresh(o ui.CanvasObject) {
+func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 	c.fitContent()
 	position := o.CurrentPosition()
 	if o != c.content {
-		position = position.Add(ui.NewPos(theme.Padding(), theme.Padding()))
+		position = position.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
 	}
 
 	switch o.(type) {
-	case *ui.Container:
-		container := o.(*ui.Container)
+	case *fyne.Container:
+		container := o.(*fyne.Container)
 		// TODO should this move into container like widget?
 		if container.Layout != nil {
 			container.Layout.Layout(container.Objects, container.CurrentSize())
@@ -415,11 +414,11 @@ func (c *eflCanvas) doRefresh(o ui.CanvasObject) {
 	}
 }
 
-func (c *eflCanvas) Contains(obj ui.CanvasObject) bool {
+func (c *eflCanvas) Contains(obj fyne.CanvasObject) bool {
 	return c.native[obj] != nil
 }
 
-func (c *eflCanvas) Focus(obj ui.FocusableObject) {
+func (c *eflCanvas) Focus(obj fyne.FocusableObject) {
 	if c.focused != nil {
 		if c.focused == obj {
 			return
@@ -432,7 +431,7 @@ func (c *eflCanvas) Focus(obj ui.FocusableObject) {
 	obj.OnFocusGained()
 }
 
-func (c *eflCanvas) Focused() ui.FocusableObject {
+func (c *eflCanvas) Focused() fyne.FocusableObject {
 	return c.focused
 }
 
@@ -444,31 +443,31 @@ func (c *eflCanvas) fitContent() {
 	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
 	minHeight := scaleInt(c, min.Height+theme.Padding()*2)
 
-	width := ui.Max(minWidth, int(w))
-	height := ui.Max(minHeight, int(h))
+	width := fyne.Max(minWidth, int(w))
+	height := fyne.Max(minHeight, int(h))
 
 	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
 	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
 
-	c.content.Move(ui.NewPos(theme.Padding(), theme.Padding()))
-	c.content.Resize(ui.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
+	c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	c.content.Resize(fyne.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
 }
 
-func (c *eflCanvas) Content() ui.CanvasObject {
+func (c *eflCanvas) Content() fyne.CanvasObject {
 	return c.content
 }
 
-func (c *eflCanvas) SetContent(o ui.CanvasObject) {
+func (c *eflCanvas) SetContent(o fyne.CanvasObject) {
 	canvases[C.ecore_evas_get(c.window.ee)] = c
-	c.objects = make(map[*C.Evas_Object]ui.CanvasObject)
-	c.native = make(map[ui.CanvasObject]*C.Evas_Object)
+	c.objects = make(map[*C.Evas_Object]fyne.CanvasObject)
+	c.native = make(map[fyne.CanvasObject]*C.Evas_Object)
 	c.content = o
 
 	c.setup(o)
 	c.Refresh(o)
 }
 
-func scaleInt(c ui.Canvas, v int) int {
+func scaleInt(c fyne.Canvas, v int) int {
 	switch c.Scale() {
 	case 1.0:
 		return v
@@ -477,7 +476,7 @@ func scaleInt(c ui.Canvas, v int) int {
 	}
 }
 
-func unscaleInt(c ui.Canvas, v int) int {
+func unscaleInt(c fyne.Canvas, v int) int {
 	switch c.Scale() {
 	case 1.0:
 		return v
@@ -502,10 +501,10 @@ func (c *eflCanvas) SetScale(scale float32) {
 	height := int(float32(h) * ratio)
 	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
 
-	c.content.Move(ui.NewPos(theme.Padding(), theme.Padding()))
-	c.content.Resize(ui.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
+	c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	c.content.Resize(fyne.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
 }
 
-func (c *eflCanvas) SetOnKeyDown(keyDown func(*ui.KeyEvent)) {
+func (c *eflCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
 	c.onKeyDown = keyDown
 }

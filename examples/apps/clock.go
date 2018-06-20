@@ -4,18 +4,17 @@ import "math"
 import "time"
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/api/ui"
-import "github.com/fyne-io/fyne/api/ui/canvas"
-import "github.com/fyne-io/fyne/api/ui/theme"
+import "github.com/fyne-io/fyne/canvas"
+import "github.com/fyne-io/fyne/theme"
 
 type clockLayout struct {
 	hour, minute, second     *canvas.Line
 	hourdot, seconddot, face *canvas.Circle
 
-	canvas ui.CanvasObject
+	canvas fyne.CanvasObject
 }
 
-func (c *clockLayout) rotate(hand ui.CanvasObject, middle ui.Position, facePosition float64, offset, length int) {
+func (c *clockLayout) rotate(hand fyne.CanvasObject, middle fyne.Position, facePosition float64, offset, length int) {
 	rotation := math.Pi * 2 / 60 * float64(facePosition)
 	x2 := int(float64(length) * math.Sin(rotation))
 	y2 := int(float64(-length) * math.Cos(rotation))
@@ -27,19 +26,19 @@ func (c *clockLayout) rotate(hand ui.CanvasObject, middle ui.Position, facePosit
 		offY += int(float64(-offset) * math.Cos(rotation))
 	}
 
-	hand.Move(ui.NewPos(middle.X+offX, middle.Y+offY))
-	hand.Resize(ui.NewSize(x2, y2))
+	hand.Move(fyne.NewPos(middle.X+offX, middle.Y+offY))
+	hand.Resize(fyne.NewSize(x2, y2))
 }
 
-func (c *clockLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
-	diameter := ui.Min(size.Width, size.Height)
+func (c *clockLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	diameter := fyne.Min(size.Width, size.Height)
 	radius := diameter / 2
 	dotRadius := radius / 12
 	smallDotRadius := dotRadius / 8
 
-	size = ui.NewSize(diameter, diameter)
-	middle := ui.NewPos(size.Width/2, size.Height/2)
-	topleft := ui.NewPos(middle.X-radius, middle.Y-radius)
+	size = fyne.NewSize(diameter, diameter)
+	middle := fyne.NewPos(size.Width/2, size.Height/2)
+	topleft := fyne.NewPos(middle.X-radius, middle.Y-radius)
 
 	c.face.Resize(size)
 	c.face.Move(topleft)
@@ -48,17 +47,17 @@ func (c *clockLayout) Layout(objects []ui.CanvasObject, size ui.Size) {
 	c.rotate(c.minute, middle, float64(time.Now().Minute())+(float64(time.Now().Second())/60), dotRadius, int(float64(radius)*.9))
 	c.rotate(c.second, middle, float64(time.Now().Second()), 0, radius-3)
 
-	c.hourdot.Resize(ui.NewSize(dotRadius*2, dotRadius*2))
-	c.hourdot.Move(ui.NewPos(middle.X-dotRadius, middle.Y-dotRadius))
-	c.seconddot.Resize(ui.NewSize(smallDotRadius*2, smallDotRadius*2))
-	c.seconddot.Move(ui.NewPos(middle.X-smallDotRadius, middle.Y-smallDotRadius))
+	c.hourdot.Resize(fyne.NewSize(dotRadius*2, dotRadius*2))
+	c.hourdot.Move(fyne.NewPos(middle.X-dotRadius, middle.Y-dotRadius))
+	c.seconddot.Resize(fyne.NewSize(smallDotRadius*2, smallDotRadius*2))
+	c.seconddot.Move(fyne.NewPos(middle.X-smallDotRadius, middle.Y-smallDotRadius))
 }
 
-func (c *clockLayout) MinSize(objects []ui.CanvasObject) ui.Size {
-	return ui.NewSize(200, 200)
+func (c *clockLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	return fyne.NewSize(200, 200)
 }
 
-func (c *clockLayout) render() *ui.Container {
+func (c *clockLayout) render() *fyne.Container {
 	// TODO scale width to clock face size
 	c.hourdot = &canvas.Circle{StrokeColor: theme.TextColor(), StrokeWidth: 5}
 	c.seconddot = &canvas.Circle{StrokeColor: theme.PrimaryColor(), StrokeWidth: 3}
@@ -68,14 +67,14 @@ func (c *clockLayout) render() *ui.Container {
 	c.minute = &canvas.Line{StrokeColor: theme.TextColor(), StrokeWidth: 3}
 	c.second = &canvas.Line{StrokeColor: theme.PrimaryColor(), StrokeWidth: 1}
 
-	container := ui.NewContainer(c.hourdot, c.seconddot, c.face, c.hour, c.minute, c.second)
+	container := fyne.NewContainer(c.hourdot, c.seconddot, c.face, c.hour, c.minute, c.second)
 	container.Layout = c
 
 	c.canvas = container
 	return container
 }
 
-func (c *clockLayout) animate(canvas ui.Canvas) {
+func (c *clockLayout) animate(canvas fyne.Canvas) {
 	tick := time.NewTicker(time.Second)
 	go func() {
 		for {
