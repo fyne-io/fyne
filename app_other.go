@@ -1,4 +1,4 @@
-// +build ci !linux,!darwin,!windows
+// +build ci !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd
 
 package fyne
 

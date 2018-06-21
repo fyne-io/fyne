@@ -1,6 +1,6 @@
 // +build !ci
 
-// +build !linux,!darwin,!windows
+// +build !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd
 
 package desktop
 
