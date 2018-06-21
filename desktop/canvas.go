@@ -439,9 +439,13 @@ func (c *eflCanvas) fitContent() {
 	var w, h C.int
 	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
 
+	pad := theme.Padding()
+	if fyne.GetWindow(c).Fullscreen() {
+		pad = 0
+	}
 	min := c.content.MinSize()
-	minWidth := scaleInt(c, min.Width+theme.Padding()*2)
-	minHeight := scaleInt(c, min.Height+theme.Padding()*2)
+	minWidth := scaleInt(c, min.Width+pad*2)
+	minHeight := scaleInt(c, min.Height+pad*2)
 
 	width := fyne.Max(minWidth, int(w))
 	height := fyne.Max(minHeight, int(h))
@@ -449,8 +453,8 @@ func (c *eflCanvas) fitContent() {
 	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
 	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
 
-	c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	c.content.Resize(fyne.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
+	c.content.Move(fyne.NewPos(pad, pad))
+	c.content.Resize(fyne.NewSize(unscaleInt(c, width)-pad*2, unscaleInt(c, height)-pad*2))
 }
 
 func (c *eflCanvas) Content() fyne.CanvasObject {

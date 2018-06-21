@@ -31,3 +31,15 @@ type Window interface {
 	// Canvas returns the canvas context to render in the window
 	Canvas() Canvas
 }
+
+// GetWindow returns the window containing the passed Canvas.
+// It will return nil if the Canvas is not associated with any existing windows.
+func GetWindow(c Canvas) Window {
+	for _, window := range GetDriver().AllWindows() {
+		if window.Canvas() != nil && window.Canvas() == c {
+			return window
+		}
+	}
+
+	return nil
+}
