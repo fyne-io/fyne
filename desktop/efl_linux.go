@@ -8,8 +8,6 @@ package desktop
 // #include <Ecore_Evas.h>
 import "C"
 
-var engine string
-
 func oSEngineName() string {
 	return "software_x11"
 }

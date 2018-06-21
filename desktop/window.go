@@ -27,7 +27,6 @@ import "github.com/fyne-io/fyne"
 type window struct {
 	ee      *C.Ecore_Evas
 	canvas  fyne.Canvas
-	driver  *eFLDriver
 	master  bool
 	focused bool
 }
@@ -223,8 +222,7 @@ func (d *eFLDriver) CreateWindow(title string) fyne.Window {
 	}
 
 	w := &window{
-		ee:     evas,
-		driver: d,
+		ee: evas,
 	}
 	w.SetTitle(title)
 	oSWindowInit(w)
