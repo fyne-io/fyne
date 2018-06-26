@@ -20,13 +20,13 @@ func toFile(res *Resource) {
 
 // ToGo converts a Resource object to Go code.
 // This is useful if serialising to a go file for compilation into a binary
-func ToGo(res *Resource) string {
+func (r *Resource) ToGo() string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString("&fyne.Resource{\n")
-	buffer.WriteString("\tName:    \"" + res.Name + "\",\n")
+	buffer.WriteString("\tName: \"" + r.Name + "\",\n")
 	buffer.WriteString("\tContent: []byte{")
-	for i, v := range res.Content {
+	for i, v := range r.Content {
 		if i > 0 {
 			buffer.WriteString(", ")
 		}

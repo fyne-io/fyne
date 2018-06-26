@@ -31,5 +31,5 @@ func TestToFromFile(t *testing.T) {
 func TestToGo(t *testing.T) {
 	res := NewResource(imgName, imgBytes)
 
-	assert.Equal(t, imgGo, ToGo(res))
+	assert.Equal(t, imgGo, res.ToGo())
 }
