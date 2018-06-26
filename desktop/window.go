@@ -14,7 +14,6 @@ package desktop
 // void onWindowFocusOut_cgo(Ecore_Evas *);
 // void onWindowClose_cgo(Ecore_Evas *);
 //
-// void onWindowKeyDown_cgo(Ecore_Window, void *);
 import "C"
 
 import "log"
@@ -239,7 +238,6 @@ func (d *eFLDriver) CreateWindow(title string) fyne.Window {
 	C.ecore_evas_callback_focus_out_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowFocusOut_cgo)))
 	C.ecore_evas_callback_delete_request_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowClose_cgo)))
 
-	C.ecore_event_handler_add(C.ECORE_EVENT_KEY_DOWN, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onWindowKeyDown_cgo)), nil)
 
 	c.SetContent(new(fyne.Container))
 	return w

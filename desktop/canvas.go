@@ -3,21 +3,17 @@
 package desktop
 
 // #cgo pkg-config: eina evas ecore-evas
-// #cgo CFLAGS: -DEFL_BETA_API_SUPPORT=master-compatibility-hack
 // #include <Eina.h>
 // #include <Evas.h>
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
 //
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
-// void onExit_cgo(Ecore_Event_Signal_Exit *);
 import "C"
 
 import "log"
 import "math"
-import "runtime"
 import "sync"
-import "time"
 import "unsafe"
 
 import "github.com/fyne-io/fyne"
@@ -65,67 +61,7 @@ type eflCanvas struct {
 
 	objects map[*C.Evas_Object]fyne.CanvasObject
 	native  map[fyne.CanvasObject]*C.Evas_Object
-}
-
-// Arrange that main.main runs on main thread.
-func init() {
-	runtime.LockOSThread()
-}
-
-func stepRenderer() {
-	C.ecore_main_loop_iterate()
-}
-
-func hookIntoEFL() {
-	C.ecore_event_handler_add(C.ECORE_EVENT_SIGNAL_EXIT, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onExit_cgo)), nil)
-
-	tick := time.NewTicker(time.Millisecond * 10)
-	go func() {
-		for {
-			<-tick.C
-			mainfunc <- func() {
-				stepRenderer()
-			}
-		}
-	}()
-}
-
-// initEFL runs our mainthread loop to execute UI functions for EFL
-func initEFL() {
-	hookIntoEFL()
-
-	for {
-		if f, ok := <-mainfunc; ok {
-			f()
-		} else {
-			break
-		}
-	}
-}
-
-// DoQuit will cause the driver's Quit method to be called to terminate the app
-//export DoQuit
-func DoQuit() {
-	fyne.GetDriver().Quit()
-}
-
-// Quit will cause the render loop to end and the application to exit
-func (d *eFLDriver) Quit() {
-	close(mainfunc)
-}
-
-// queue of work to run in main thread.
-var mainfunc = make(chan func())
-
-// do runs f on the main thread.
-func queueRender(c *eflCanvas, co fyne.CanvasObject) {
-	done := make(chan bool, 1)
-	mainfunc <- func() {
-		c.doRefresh(co)
-
-		done <- true
-	}
-	<-done
+	dirty   map[fyne.CanvasObject]bool
 }
 
 func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, size fyne.Size) *C.Evas_Object {
@@ -384,7 +320,7 @@ func (c *eflCanvas) setup(o fyne.CanvasObject) {
 }
 
 func (c *eflCanvas) Refresh(o fyne.CanvasObject) {
-	go queueRender(c, o)
+	queueRender(c, o)
 }
 
 func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
@@ -465,6 +401,7 @@ func (c *eflCanvas) SetContent(o fyne.CanvasObject) {
 	canvases[C.ecore_evas_get(c.window.ee)] = c
 	c.objects = make(map[*C.Evas_Object]fyne.CanvasObject)
 	c.native = make(map[fyne.CanvasObject]*C.Evas_Object)
+	c.dirty = make(map[fyne.CanvasObject]bool)
 	c.content = o
 
 	c.setup(o)
