@@ -324,7 +324,6 @@ func (c *eflCanvas) Refresh(o fyne.CanvasObject) {
 }
 
 func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
-	c.fitContent()
 	position := o.CurrentPosition()
 	if o != c.content {
 		position = position.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
@@ -386,11 +385,25 @@ func (c *eflCanvas) fitContent() {
 	width := fyne.Max(minWidth, int(w))
 	height := fyne.Max(minHeight, int(h))
 
-	C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
-	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
+	if width != int(w) || height != int(h) {
+		C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
+		C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
+	}
+}
 
-	c.content.Move(fyne.NewPos(pad, pad))
-	c.content.Resize(fyne.NewSize(unscaleInt(c, width)-pad*2, unscaleInt(c, height)-pad*2))
+func (c *eflCanvas) resizeContent() {
+	var w, h C.int
+	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
+
+	pad := theme.Padding()
+	if fyne.GetWindow(c).Fullscreen() {
+		pad = 0
+	}
+	width := unscaleInt(c, int(w)) - pad*2
+	height := unscaleInt(c, int(h)) - pad*2
+
+	c.content.Resize(fyne.NewSize(width, height))
+	queueRender(c, c.content)
 }
 
 func (c *eflCanvas) Content() fyne.CanvasObject {
@@ -398,14 +411,13 @@ func (c *eflCanvas) Content() fyne.CanvasObject {
 }
 
 func (c *eflCanvas) SetContent(o fyne.CanvasObject) {
-	canvases[C.ecore_evas_get(c.window.ee)] = c
 	c.objects = make(map[*C.Evas_Object]fyne.CanvasObject)
 	c.native = make(map[fyne.CanvasObject]*C.Evas_Object)
 	c.dirty = make(map[fyne.CanvasObject]bool)
 	c.content = o
+	canvases[C.ecore_evas_get(c.window.ee)] = c
 
 	c.setup(o)
-	c.Refresh(o)
 }
 
 func scaleInt(c fyne.Canvas, v int) int {

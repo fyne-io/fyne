@@ -60,6 +60,7 @@ func (d *eFLDriver) Quit() {
 
 func drawDirty() {
 	for _, canvas := range canvases {
+		canvas.fitContent()
 		for obj := range canvas.dirty {
 			delete(canvas.dirty, obj)
 
