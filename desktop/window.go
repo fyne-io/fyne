@@ -13,7 +13,6 @@ package desktop
 // void onWindowFocusIn_cgo(Ecore_Evas *);
 // void onWindowFocusOut_cgo(Ecore_Evas *);
 // void onWindowClose_cgo(Ecore_Evas *);
-//
 import "C"
 
 import "log"
@@ -28,6 +27,12 @@ type window struct {
 	canvas  fyne.Canvas
 	master  bool
 	focused bool
+}
+
+func init() {
+	C.evas_init()
+	C.ecore_init()
+	C.ecore_evas_init()
 }
 
 var windows = make(map[*C.Ecore_Evas]*window)
@@ -208,13 +213,11 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	}
 }
 
-func (d *eFLDriver) CreateWindow(title string) fyne.Window {
-	engine := oSEngineName()
-
-	C.evas_init()
-	C.ecore_init()
-	C.ecore_evas_init()
-
+// CreateWindowWithEngine will create a new efl backed window using the specified
+// engine name. The possible options for EFL engines is out of scope of this
+// documentation and can be found on the http://enlightenment.org website.
+// USE OF THIS METHOD IS NOT RECOMMENDED
+func CreateWindowWithEngine(engine string) fyne.Window {
 	evas := C.ecore_evas_new(C.CString(engine), 0, 0, 10, 10, nil)
 	if evas == nil {
 		log.Fatalln("Unable to create canvas, perhaps missing module for", engine)
@@ -223,22 +226,30 @@ func (d *eFLDriver) CreateWindow(title string) fyne.Window {
 	w := &window{
 		ee: evas,
 	}
-	w.SetTitle(title)
 	oSWindowInit(w)
-	c := &eflCanvas{
+	windows[w.ee] = w
+
+	w.canvas = &eflCanvas{
 		evas:   C.ecore_evas_get(evas),
 		scale:  1.0,
 		window: w,
 	}
-	w.canvas = c
-	windows[w.ee] = w
+
+	return w
+}
+
+func (d *eFLDriver) CreateWindow(title string) fyne.Window {
+	win := CreateWindowWithEngine(oSEngineName())
+	win.SetTitle(title)
+
+	w := win.(*window)
 	C.ecore_evas_callback_resize_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowResize_cgo)))
 	C.ecore_evas_callback_move_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowMove_cgo)))
 	C.ecore_evas_callback_focus_in_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowFocusIn_cgo)))
 	C.ecore_evas_callback_focus_out_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowFocusOut_cgo)))
 	C.ecore_evas_callback_delete_request_set(w.ee, (C.Ecore_Evas_Event_Cb)(unsafe.Pointer(C.onWindowClose_cgo)))
 
-	c.SetContent(new(fyne.Container))
+	w.SetContent(new(fyne.Container))
 	return w
 }
 
