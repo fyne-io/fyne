@@ -9,6 +9,7 @@ import "github.com/fyne-io/fyne"
 type Image struct {
 	Size     fyne.Size     // The current size of the Image
 	Position fyne.Position // The current position of the Image
+	Options  Options       // Options to pass to the renderer
 
 	// one of the following sources will provide our image data
 	PixelColor func(x, y, w, h int) color.RGBA // Render the image from code

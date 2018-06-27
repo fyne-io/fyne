@@ -11,6 +11,7 @@ import "github.com/fyne-io/fyne"
 type Line struct {
 	Position1 fyne.Position // The current top-left position of the Line
 	Position2 fyne.Position // The current bottomright position of the Line
+	Options   Options       // Options to pass to the renderer
 
 	StrokeColor color.RGBA // The line stroke colour
 	StrokeWidth float32    // The stroke width of the line

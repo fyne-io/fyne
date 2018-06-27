@@ -9,6 +9,7 @@ import "github.com/fyne-io/fyne"
 type Rectangle struct {
 	Size     fyne.Size     // The current size of the Rectangle
 	Position fyne.Position // The current position of the Rectangle
+	Options  Options       // Options to pass to the renderer
 
 	FillColor   color.RGBA // The rectangle fill colour
 	StrokeColor color.RGBA // The rectangle stroke colour

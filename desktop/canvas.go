@@ -66,6 +66,7 @@ type eflCanvas struct {
 
 func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, size fyne.Size) *C.Evas_Object {
 	var obj *C.Evas_Object
+	var opts canvas.Options
 
 	switch o.(type) {
 	case *canvas.Text:
@@ -77,12 +78,14 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, s
 			C.int(to.Color.B), C.int(to.Color.A))
 
 		updateFont(obj, c, to)
+		opts = to.Options
 	case *canvas.Rectangle:
 		obj = C.evas_object_rectangle_add(c.evas)
 		ro, _ := o.(*canvas.Rectangle)
 
 		C.evas_object_color_set(obj, C.int(ro.FillColor.R), C.int(ro.FillColor.G),
 			C.int(ro.FillColor.B), C.int(ro.FillColor.A))
+		opts = ro.Options
 	case *canvas.Image:
 		obj = C.evas_object_image_add(c.evas)
 		img, _ := o.(*canvas.Image)
@@ -92,12 +95,14 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, s
 		if img.File != "" {
 			C.evas_object_image_file_set(obj, C.CString(img.File), nil)
 		}
+		opts = img.Options
 	case *canvas.Line:
 		obj = C.evas_object_line_add(c.evas)
 		lo, _ := o.(*canvas.Line)
 
 		C.evas_object_color_set(obj, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
 			C.int(lo.StrokeColor.B), C.int(lo.StrokeColor.A))
+		opts = lo.Options
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
 		return nil
@@ -108,6 +113,9 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, s
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
 		nil)
+	if opts.RepeatEvents {
+		C.evas_object_repeat_events_set(obj, 1)
+	}
 
 	C.evas_object_show(obj)
 	return obj

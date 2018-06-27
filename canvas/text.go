@@ -9,13 +9,14 @@ import "github.com/fyne-io/fyne/theme"
 type Text struct {
 	Size      fyne.Size      // The current size of the Text - the font will not scale to this Size
 	Position  fyne.Position  // The current position of the Text
-	Color     color.RGBA     // The main text draw colour
 	Alignment fyne.TextAlign // The alignment of the text content within the current size
+	Options   Options        // Options to pass to the renderer
 
-	Text     string // The string content of this Text
-	FontSize int    // Size of the font - if the Canvas scale is 1.0 this will be equivalent to point size
-	Bold     bool   // Should the text be bold
-	Italic   bool   // Should the text be italic
+	Color    color.RGBA // The main text draw colour
+	Text     string     // The string content of this Text
+	FontSize int        // Size of the font - if the Canvas scale is 1.0 this will be equivalent to point size
+	Bold     bool       // Should the text be bold
+	Italic   bool       // Should the text be italic
 }
 
 // CurrentSize gets the current size of this text object
