@@ -333,7 +333,7 @@ func (c *eflCanvas) Refresh(o fyne.CanvasObject) {
 
 func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 	position := o.CurrentPosition()
-	if o != c.content {
+	if o != c.content && !fyne.GetWindow(c).Fullscreen() {
 		position = position.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
 	}
 
@@ -425,6 +425,7 @@ func (c *eflCanvas) SetContent(o fyne.CanvasObject) {
 	c.content = o
 	canvases[C.ecore_evas_get(c.window.ee)] = c
 
+	c.resizeContent()
 	c.setup(o)
 }
 
