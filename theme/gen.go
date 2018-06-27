@@ -17,6 +17,7 @@ func bundleFile(name string, filepath string, f *os.File) {
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		fmt.Println("Unable to load file " + filepath)
+		return
 	}
 	res := fyne.NewResource(path.Base(filepath), bytes)
 
