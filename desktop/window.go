@@ -112,10 +112,13 @@ func scaleByDPI(w *window) float32 {
 
 //export onWindowResize
 func onWindowResize(ee *C.Ecore_Evas) {
+	w := windows[ee]
+	if w == nil {
+		return
+	}
+
 	var ww, hh C.int
 	C.ecore_evas_geometry_get(ee, nil, nil, &ww, &hh)
-
-	w := windows[ee]
 
 	canvas := w.canvas.(*eflCanvas)
 	canvas.size = fyne.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
@@ -125,6 +128,10 @@ func onWindowResize(ee *C.Ecore_Evas) {
 //export onWindowMove
 func onWindowMove(ee *C.Ecore_Evas) {
 	w := windows[ee]
+	if w == nil {
+		return
+	}
+
 	canvas := w.canvas.(*eflCanvas)
 
 	scale := scaleByDPI(w)
@@ -136,6 +143,10 @@ func onWindowMove(ee *C.Ecore_Evas) {
 //export onWindowFocusGained
 func onWindowFocusGained(ee *C.Ecore_Evas) {
 	w := windows[ee]
+	if w == nil {
+		return
+	}
+
 	canvas := w.canvas.(*eflCanvas)
 
 	if canvas.focused == nil {

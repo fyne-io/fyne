@@ -333,7 +333,7 @@ func (c *eflCanvas) Refresh(o fyne.CanvasObject) {
 
 func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 	position := o.CurrentPosition()
-	if o != c.content && !fyne.GetWindow(c).Fullscreen() {
+	if o != c.content && !c.window.Fullscreen() {
 		position = position.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
 	}
 
@@ -383,7 +383,7 @@ func (c *eflCanvas) fitContent() {
 	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
 
 	pad := theme.Padding()
-	if fyne.GetWindow(c).Fullscreen() {
+	if c.window.Fullscreen() {
 		pad = 0
 	}
 	min := c.content.MinSize()
@@ -404,13 +404,14 @@ func (c *eflCanvas) resizeContent() {
 	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
 
 	pad := theme.Padding()
-	if fyne.GetWindow(c).Fullscreen() {
+	if c.window.Fullscreen() {
 		pad = 0
 	}
 	width := unscaleInt(c, int(w)) - pad*2
 	height := unscaleInt(c, int(h)) - pad*2
 
 	c.content.Resize(fyne.NewSize(width, height))
+	c.content.Move(fyne.NewPos(pad, pad))
 	queueRender(c, c.content)
 }
 
@@ -462,9 +463,6 @@ func (c *eflCanvas) SetScale(scale float32) {
 	width := int(float32(w) * ratio)
 	height := int(float32(h) * ratio)
 	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
-
-	c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	c.content.Resize(fyne.NewSize(unscaleInt(c, width)-theme.Padding()*2, unscaleInt(c, height)-theme.Padding()*2))
 }
 
 func (c *eflCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
