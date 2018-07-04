@@ -90,17 +90,17 @@ func TextFont() *fyne.Resource {
 }
 
 // TextBoldFont retutns the font path for the bold font style
-func TextBoldFont() *fyne.Resource  {
+func TextBoldFont() *fyne.Resource {
 	return bold
 }
 
 // TextItalicFont returns the font path for the italic font style
-func TextItalicFont() *fyne.Resource  {
+func TextItalicFont() *fyne.Resource {
 	return italic
 }
 
 // TextBoldItalicFont returns the font path for the bold and italic font style
-func TextBoldItalicFont() *fyne.Resource  {
+func TextBoldItalicFont() *fyne.Resource {
 	return bolditalic
 }
 

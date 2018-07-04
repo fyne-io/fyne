@@ -7,7 +7,7 @@ func CancelIcon() *fyne.Resource {
 	return cancel
 }
 
-// CheckIcon returns a resource containing the standard confirm icon
+// ConfirmIcon returns a resource containing the standard confirm icon
 func ConfirmIcon() *fyne.Resource {
 	return check
 }
