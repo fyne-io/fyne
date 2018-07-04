@@ -68,42 +68,38 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 	var obj *C.Evas_Object
 	var opts canvas.Options
 
-	switch o.(type) {
+	switch co := o.(type) {
 	case *canvas.Text:
 		obj = C.evas_object_text_add(c.evas)
 
-		to, _ := o.(*canvas.Text)
-		C.evas_object_text_text_set(obj, C.CString(to.Text))
-		C.evas_object_color_set(obj, C.int(to.Color.R), C.int(to.Color.G),
-			C.int(to.Color.B), C.int(to.Color.A))
+		C.evas_object_text_text_set(obj, C.CString(co.Text))
+		C.evas_object_color_set(obj, C.int(co.Color.R), C.int(co.Color.G),
+			C.int(co.Color.B), C.int(co.Color.A))
 
-		updateFont(obj, c, to)
-		opts = to.Options
+		updateFont(obj, c, co)
+		opts = co.Options
 	case *canvas.Rectangle:
 		obj = C.evas_object_rectangle_add(c.evas)
-		ro, _ := o.(*canvas.Rectangle)
 
-		C.evas_object_color_set(obj, C.int(ro.FillColor.R), C.int(ro.FillColor.G),
-			C.int(ro.FillColor.B), C.int(ro.FillColor.A))
-		opts = ro.Options
+		C.evas_object_color_set(obj, C.int(co.FillColor.R), C.int(co.FillColor.G),
+			C.int(co.FillColor.B), C.int(co.FillColor.A))
+		opts = co.Options
 	case *canvas.Image:
 		obj = C.evas_object_image_filled_add(c.evas)
 		C.evas_object_image_alpha_set(obj, C.EINA_TRUE)
 
-		img, _ := o.(*canvas.Image)
-		if img.File != "" {
-			size := img.CurrentSize()
+		if co.File != "" {
+			size := co.CurrentSize()
 			C.evas_object_image_load_size_set(obj, C.int(size.Width), C.int(size.Height))
-			C.evas_object_image_file_set(obj, C.CString(img.File), nil)
+			C.evas_object_image_file_set(obj, C.CString(co.File), nil)
 		}
-		opts = img.Options
+		opts = co.Options
 	case *canvas.Line:
 		obj = C.evas_object_line_add(c.evas)
-		lo, _ := o.(*canvas.Line)
 
-		C.evas_object_color_set(obj, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
-			C.int(lo.StrokeColor.B), C.int(lo.StrokeColor.A))
-		opts = lo.Options
+		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
+			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
+		opts = co.Options
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
 		return nil
@@ -136,16 +132,13 @@ func (c *eflCanvas) buildContainer(objs []fyne.CanvasObject,
 
 	childOffset := offset.Add(pos)
 	for _, child := range objs {
-		switch child.(type) {
+		switch co := child.(type) {
 		case *fyne.Container:
-			container := child.(*fyne.Container)
-
-			c.buildContainer(container.Objects, child, child.CurrentSize(),
+			c.buildContainer(co.Objects, child, child.CurrentSize(),
 				child.CurrentPosition(), childOffset)
 		case widget.Widget:
-			c.buildContainer(child.(widget.Widget).Layout(child.CurrentSize()),
+			c.buildContainer(co.Layout(child.CurrentSize()),
 				child, child.CurrentSize(), child.CurrentPosition(), childOffset)
-
 		default:
 			if target == nil {
 				target = child
@@ -205,27 +198,23 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 	pos := c.offsets[o].Add(o.CurrentPosition())
 	size := o.CurrentSize()
 
-	switch o.(type) {
+	switch co := o.(type) {
 	case *canvas.Text:
-		to, _ := o.(*canvas.Text)
-		C.evas_object_text_text_set(obj, C.CString(to.Text))
-		C.evas_object_color_set(obj, C.int(to.Color.R), C.int(to.Color.G),
-			C.int(to.Color.B), C.int(to.Color.A))
+		C.evas_object_text_text_set(obj, C.CString(co.Text))
+		C.evas_object_color_set(obj, C.int(co.Color.R), C.int(co.Color.G),
+			C.int(co.Color.B), C.int(co.Color.A))
 
-		updateFont(obj, c, to)
-		pos = getTextPosition(to, pos, size)
+		updateFont(obj, c, co)
+		pos = getTextPosition(co, pos, size)
 
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	case *canvas.Rectangle:
-		ro, _ := o.(*canvas.Rectangle)
-
-		C.evas_object_color_set(obj, C.int(ro.FillColor.R), C.int(ro.FillColor.G),
-			C.int(ro.FillColor.B), C.int(ro.FillColor.A))
+		C.evas_object_color_set(obj, C.int(co.FillColor.R), C.int(co.FillColor.G),
+			C.int(co.FillColor.B), C.int(co.FillColor.A))
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	case *canvas.Image:
-		img, _ := o.(*canvas.Image)
 		var oldWidth, oldHeight C.int
 		C.evas_object_geometry_get(obj, nil, nil, &oldWidth, &oldHeight)
 
@@ -234,18 +223,17 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(width), C.Evas_Coord(height))
 
-		if img.PixelColor != nil {
+		if co.PixelColor != nil {
 			C.evas_object_image_size_set(obj, C.int(width), C.int(height))
 
-			c.renderImage(img, 0, 0, width, height)
+			c.renderImage(co, 0, 0, width, height)
 		}
 	case *canvas.Line:
-		lo, _ := o.(*canvas.Line)
-		width := lo.Position2.X - lo.Position1.X
-		height := lo.Position2.Y - lo.Position1.Y
+		width := co.Position2.X - co.Position1.X
+		height := co.Position2.Y - co.Position1.Y
 
-		C.evas_object_color_set(obj, C.int(lo.StrokeColor.R), C.int(lo.StrokeColor.G),
-			C.int(lo.StrokeColor.B), C.int(lo.StrokeColor.A))
+		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
+			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
 
 		if width >= 0 {
 			if height >= 0 {
