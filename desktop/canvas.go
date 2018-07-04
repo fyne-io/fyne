@@ -18,7 +18,6 @@ import "unsafe"
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/theme"
 import "github.com/fyne-io/fyne/widget"
 
@@ -61,10 +60,11 @@ type eflCanvas struct {
 
 	objects map[*C.Evas_Object]fyne.CanvasObject
 	native  map[fyne.CanvasObject]*C.Evas_Object
+	offsets map[fyne.CanvasObject]fyne.Position
 	dirty   map[fyne.CanvasObject]bool
 }
 
-func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, size fyne.Size) *C.Evas_Object {
+func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, offset fyne.Position) *C.Evas_Object {
 	var obj *C.Evas_Object
 	var opts canvas.Options
 
@@ -110,6 +110,7 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, s
 	}
 
 	c.native[o] = obj
+	c.offsets[o] = offset
 	c.objects[obj] = target
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
@@ -122,30 +123,35 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, s
 	return obj
 }
 
-func (c *eflCanvas) buildContainer(objs []fyne.CanvasObject, target fyne.CanvasObject, size fyne.Size) {
+func (c *eflCanvas) buildContainer(objs []fyne.CanvasObject,
+	target fyne.CanvasObject, size fyne.Size, pos, offset fyne.Position) {
+
 	obj := C.evas_object_rectangle_add(c.evas)
 	bg := theme.BackgroundColor()
 	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
 
 	C.evas_object_show(obj)
 	c.native[target] = obj
+	c.offsets[target] = offset
 
+	childOffset := offset.Add(pos)
 	for _, child := range objs {
 		switch child.(type) {
 		case *fyne.Container:
 			container := child.(*fyne.Container)
 
-			c.buildContainer(container.Objects, child, child.CurrentSize())
+			c.buildContainer(container.Objects, child, child.CurrentSize(),
+				child.CurrentPosition(), childOffset)
 		case widget.Widget:
 			c.buildContainer(child.(widget.Widget).Layout(child.CurrentSize()),
-				child, child.CurrentSize())
+				child, child.CurrentSize(), child.CurrentPosition(), childOffset)
 
 		default:
 			if target == nil {
 				target = child
 			}
 
-			c.buildObject(child, target, child.CurrentSize())
+			c.buildObject(child, target, childOffset)
 		}
 	}
 }
@@ -189,13 +195,15 @@ func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
 	C.evas_object_image_data_update_add(obj, 0, 0, C.int(width), C.int(height))
 }
 
-func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject, pos fyne.Position, size fyne.Size) {
+func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 	obj := c.native[o]
 
 	// TODO a better solution here as objects are added to the UI
 	if obj == nil {
-		obj = c.buildObject(o, o2, size)
+		obj = c.buildObject(o, o2, fyne.NewPos(0, 0)) // TODO fix offset
 	}
+	pos := c.offsets[o].Add(o.CurrentPosition())
+	size := o.CurrentSize()
 
 	switch o.(type) {
 	case *canvas.Text:
@@ -265,42 +273,39 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject, pos fyne.Position, si
 }
 
 func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.CanvasObject, pos fyne.Position, size fyne.Size) {
-	containerPos := pos
-	containerSize := size
-	if target == c.content {
-		containerPos = fyne.NewPos(0, 0)
-		containerSize = fyne.NewSize(size.Width+2*theme.Padding(), size.Height+2*theme.Padding())
-	}
+	position := c.offsets[target].Add(pos)
 
 	obj := c.native[target]
 	bg := theme.BackgroundColor()
 	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
-	C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, containerPos.X)), C.Evas_Coord(scaleInt(c, containerPos.Y)),
-		C.Evas_Coord(scaleInt(c, containerSize.Width)), C.Evas_Coord(scaleInt(c, containerSize.Height)))
+
+	if target == c.content {
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, 0)), C.Evas_Coord(scaleInt(c, 0)),
+			C.Evas_Coord(scaleInt(c, size.Width+theme.Padding()*2)), C.Evas_Coord(scaleInt(c, size.Height+theme.Padding()*2)))
+	} else {
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, position.X)), C.Evas_Coord(scaleInt(c, position.Y)),
+			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+	}
 
 	for _, child := range objs {
+		c.offsets[child] = position
+
 		switch typed := child.(type) {
 		case *fyne.Container:
 			container := child.(*fyne.Container)
 
-			if container.Layout != nil {
-				container.Layout.Layout(container.Objects, child.CurrentSize())
-			} else {
-				layout.NewMaxLayout().Layout(container.Objects, child.CurrentSize())
-			}
-			c.refreshContainer(container.Objects, nil, child.CurrentPosition().Add(pos), child.CurrentSize())
+			c.refreshContainer(container.Objects, child, child.CurrentPosition(), child.CurrentSize())
 		case widget.Widget:
 			typed.ApplyTheme()
 			c.refreshContainer(child.(widget.Widget).Layout(child.CurrentSize()),
-				child, child.CurrentPosition().Add(pos), child.CurrentSize())
+				child, child.CurrentPosition(), child.CurrentSize())
 
 		default:
 			if target == nil {
 				target = child
 			}
 
-			childPos := child.CurrentPosition().Add(pos)
-			c.refreshObject(child, target, childPos, child.CurrentSize())
+			c.refreshObject(child, target)
 		}
 	}
 }
@@ -309,20 +314,17 @@ func (c *eflCanvas) Size() fyne.Size {
 	return c.size
 }
 
-func (c *eflCanvas) setup(o fyne.CanvasObject) {
+func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
 	C.ecore_thread_main_loop_begin()
 
-	switch o.(type) {
+	switch set := o.(type) {
 	case *fyne.Container:
-		container := o.(*fyne.Container)
-
-		c.buildContainer(container.Objects, o, container.CurrentSize())
+		c.buildContainer(set.Objects, o, set.MinSize(), o.CurrentPosition(), offset)
 	case widget.Widget:
-		widget := o.(widget.Widget)
-		c.buildContainer(widget.Layout(widget.CurrentSize()), o,
-			widget.CurrentSize())
+		c.buildContainer(set.Layout(set.MinSize()), o,
+			set.MinSize(), o.CurrentPosition(), offset)
 	default:
-		c.buildObject(o, o, o.CurrentSize())
+		c.buildObject(o, o, offset)
 	}
 
 	C.ecore_thread_main_loop_end()
@@ -333,28 +335,15 @@ func (c *eflCanvas) Refresh(o fyne.CanvasObject) {
 }
 
 func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
-	position := o.CurrentPosition()
-	if o != c.content && !c.window.Fullscreen() {
-		position = position.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
-	}
-
-	switch o.(type) {
+	switch ref := o.(type) {
 	case *fyne.Container:
-		container := o.(*fyne.Container)
-		// TODO should this move into container like widget?
-		if container.Layout != nil {
-			container.Layout.Layout(container.Objects, container.CurrentSize())
-		} else {
-			layout.NewMaxLayout().Layout(container.Objects, container.CurrentSize())
-		}
-
-		c.refreshContainer(container.Objects, o, position, container.CurrentSize())
+		c.refreshContainer(ref.Objects, o, o.CurrentPosition(),
+			o.CurrentSize())
 	case widget.Widget:
-		widget := o.(widget.Widget)
-		c.refreshContainer(widget.Layout(widget.CurrentSize()), o,
-			position, widget.CurrentSize())
+		c.refreshContainer(ref.Layout(o.CurrentSize()), o,
+			o.CurrentPosition(), o.CurrentSize())
 	default:
-		c.refreshObject(o, o, position, o.CurrentSize())
+		c.refreshObject(o, o)
 	}
 }
 
@@ -423,12 +412,13 @@ func (c *eflCanvas) Content() fyne.CanvasObject {
 func (c *eflCanvas) SetContent(o fyne.CanvasObject) {
 	c.objects = make(map[*C.Evas_Object]fyne.CanvasObject)
 	c.native = make(map[fyne.CanvasObject]*C.Evas_Object)
+	c.offsets = make(map[fyne.CanvasObject]fyne.Position)
 	c.dirty = make(map[fyne.CanvasObject]bool)
 	c.content = o
 	canvases[C.ecore_evas_get(c.window.ee)] = c
 
 	c.resizeContent()
-	c.setup(o)
+	c.setup(o, fyne.NewPos(0, 0))
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
