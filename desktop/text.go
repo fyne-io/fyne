@@ -23,7 +23,8 @@ func updateFont(obj *C.Evas_Object, c *eflCanvas, t *canvas.Text) {
 		font = theme.TextItalicFont()
 	}
 
-	C.evas_object_text_font_set(obj, C.CString(font), C.Evas_Font_Size(scaleInt(c, t.FontSize)))
+	C.evas_object_text_font_set(obj, C.CString(font.CachePath()),
+		C.Evas_Font_Size(scaleInt(c, t.FontSize)))
 }
 
 func getTextPosition(t *canvas.Text, pos fyne.Position, size fyne.Size) fyne.Position {
@@ -60,7 +61,8 @@ func (d *eFLDriver) RenderedTextSize(text string, size int) fyne.Size {
 
 	textObj := C.evas_object_text_add(c.evas)
 	C.evas_object_text_text_set(textObj, C.CString(text))
-	C.evas_object_text_font_set(textObj, C.CString(theme.TextFont()), C.Evas_Font_Size(scaleInt(c, size)))
+	C.evas_object_text_font_set(textObj, C.CString(theme.TextFont().CachePath()),
+		C.Evas_Font_Size(scaleInt(c, size)))
 
 	native := nativeTextBounds(textObj)
 	return fyne.NewSize(unscaleInt(c, native.Width), unscaleInt(c, native.Height))

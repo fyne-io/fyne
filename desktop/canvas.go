@@ -87,12 +87,13 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, s
 			C.int(ro.FillColor.B), C.int(ro.FillColor.A))
 		opts = ro.Options
 	case *canvas.Image:
-		obj = C.evas_object_image_add(c.evas)
-		img, _ := o.(*canvas.Image)
+		obj = C.evas_object_image_filled_add(c.evas)
 		C.evas_object_image_alpha_set(obj, C.EINA_TRUE)
-		C.evas_object_image_filled_set(obj, C.EINA_TRUE)
 
+		img, _ := o.(*canvas.Image)
 		if img.File != "" {
+			size := img.CurrentSize()
+			C.evas_object_image_load_size_set(obj, C.int(size.Width), C.int(size.Height))
 			C.evas_object_image_file_set(obj, C.CString(img.File), nil)
 		}
 		opts = img.Options

@@ -85,23 +85,23 @@ func TextSize() int {
 }
 
 // TextFont returns the font path for the regular font style
-func TextFont() string {
-	return regular.CachePath()
+func TextFont() *fyne.Resource {
+	return regular
 }
 
 // TextBoldFont retutns the font path for the bold font style
-func TextBoldFont() string {
-	return bold.CachePath()
+func TextBoldFont() *fyne.Resource  {
+	return bold
 }
 
 // TextItalicFont returns the font path for the italic font style
-func TextItalicFont() string {
-	return italic.CachePath()
+func TextItalicFont() *fyne.Resource  {
+	return italic
 }
 
 // TextBoldItalicFont returns the font path for the bold and italic font style
-func TextBoldItalicFont() string {
-	return bolditalic.CachePath()
+func TextBoldItalicFont() *fyne.Resource  {
+	return bolditalic
 }
 
 // Padding is the standard gap between elements and the border around interface
