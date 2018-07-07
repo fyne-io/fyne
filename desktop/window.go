@@ -30,6 +30,9 @@ type window struct {
 }
 
 func init() {
+	// This is a workaround for a logged issue, phab.enlightenment.org/T7099
+	os.Setenv("EVAS_DRM_BUFFERS", "5")
+
 	C.evas_init()
 	C.ecore_init()
 	C.ecore_evas_init()
