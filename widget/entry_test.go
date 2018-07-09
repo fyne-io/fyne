@@ -72,7 +72,7 @@ func TestEntryWindowFocus(t *testing.T) {
 
 func TestEntryFocusHighlight(t *testing.T) {
 	entry := NewEntry()
-	bg := entry.Layout(entry.MinSize())[0].(*canvas.Rectangle)
+	bg := entry.CanvasObjects()[0].(*canvas.Rectangle)
 	color := bg.FillColor
 
 	entry.OnFocusGained()

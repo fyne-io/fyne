@@ -26,19 +26,6 @@ const (
 	PrimaryButton
 )
 
-// MinSize calculates the minimum size of a button.
-// This is based on the contained text with a standard amount of padding added.
-func (b *Button) MinSize() fyne.Size {
-	return b.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-}
-
-// Layout the components of the button widget
-func (b *Button) Layout(size fyne.Size) []fyne.CanvasObject {
-	layout.NewMaxLayout().Layout(b.objects, size)
-
-	return b.objects
-}
-
 // OnMouseDown is called when a mouse down event is captured and triggers any tap handler
 func (b *Button) OnMouseDown(*fyne.MouseEvent) {
 	if b.OnTapped != nil {
@@ -63,16 +50,20 @@ func NewButton(label string, tapped func()) *Button {
 	text.Alignment = fyne.TextAlignCenter
 	bg := canvas.NewRectangle(theme.ButtonColor())
 
-	return &Button{
+	b := &Button{
 		baseWidget{
 			objects: []fyne.CanvasObject{
 				bg,
 				text,
 			},
+			layout: layout.NewMaxLayout(),
 		},
 		DefaultButton,
 		tapped,
 		text,
 		bg,
 	}
+
+	b.Layout(b.MinSize())
+	return b
 }

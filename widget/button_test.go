@@ -18,7 +18,7 @@ func TestButtonSize(t *testing.T) {
 
 func TestButtonType(t *testing.T) {
 	button := NewButton("Hi", nil)
-	bg := button.Layout(button.MinSize())[0].(*canvas.Rectangle)
+	bg := button.CanvasObjects()[0].(*canvas.Rectangle)
 	color := bg.FillColor
 
 	button.Style = PrimaryButton

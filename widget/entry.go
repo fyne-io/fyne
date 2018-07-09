@@ -4,48 +4,48 @@ import "fmt"
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/theme"
 
-// Entry widget allows simple text to be input when focussed.
-type Entry struct {
-	baseWidget
-
-	OnChanged func(string)
-
-	focused bool
-
+type entryLayout struct {
 	label   *canvas.Text
 	bg, box *canvas.Rectangle
 }
 
 // MinSize calculates the minimum size of an entry widget.
 // This is based on the contained text with a standard amount of padding added.
-func (e *Entry) MinSize() fyne.Size {
+func (e *entryLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	return e.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 }
 
 // Layout the components of the entry widget.
-func (e *Entry) Layout(size fyne.Size) []fyne.CanvasObject {
-	layout.NewMaxLayout().Layout(e.objects, size)
+func (e *entryLayout) Layout(_ []fyne.CanvasObject, size fyne.Size) {
+	e.bg.Resize(size)
 
-	e.box.Resize(e.box.CurrentSize().Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
+	e.box.Resize(size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
 	e.box.Move(fyne.NewPos(theme.Padding()/2, theme.Padding()/2))
 
-	e.label.Resize(e.label.CurrentSize().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	e.label.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	e.label.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+}
 
-	return e.objects
+// Entry widget allows simple text to be input when focussed.
+type Entry struct {
+	baseWidget
+	layout *entryLayout
+
+	OnChanged func(string)
+
+	focused bool
 }
 
 // Text returns the current content of the Entry.
 func (e *Entry) Text() string {
-	return e.label.Text
+	return e.layout.label.Text
 }
 
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
-	e.label.Text = text
+	e.layout.label.Text = text
 
 	if e.OnChanged != nil {
 		e.OnChanged(text)
@@ -90,13 +90,13 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 
 // ApplyTheme is called when the Entry may need to update it's look.
 func (e *Entry) ApplyTheme() {
-	e.label.Color = theme.TextColor()
+	e.layout.label.Color = theme.TextColor()
 	if e.focused {
-		e.bg.FillColor = theme.FocusColor()
+		e.layout.bg.FillColor = theme.FocusColor()
 	} else {
-		e.bg.FillColor = theme.ButtonColor()
+		e.layout.bg.FillColor = theme.ButtonColor()
 	}
-	e.box.FillColor = theme.BackgroundColor()
+	e.layout.box.FillColor = theme.BackgroundColor()
 }
 
 // NewEntry creates a new entry widget.
@@ -104,19 +104,22 @@ func NewEntry() *Entry {
 	text := canvas.NewText("", theme.TextColor())
 	bg := canvas.NewRectangle(theme.ButtonColor())
 	box := canvas.NewRectangle(theme.BackgroundColor())
+	layout := &entryLayout{text, bg, box}
 
-	return &Entry{
+	e := &Entry{
 		baseWidget{
 			objects: []fyne.CanvasObject{
 				bg,
 				box,
 				text,
 			},
+			layout: layout,
 		},
+		layout,
 		nil,
 		false,
-		text,
-		bg,
-		box,
 	}
+
+	layout.Layout(nil, e.MinSize())
+	return e
 }

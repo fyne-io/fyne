@@ -29,13 +29,6 @@ func (l *Label) SetText(text string) {
 	fyne.GetCanvas(l).Refresh(l)
 }
 
-// Layout the components of the label widget
-func (l *Label) Layout(size fyne.Size) []fyne.CanvasObject {
-	layout.NewMaxLayout().Layout(l.objects, size)
-
-	return l.objects
-}
-
 // ApplyTheme is called when the Label may need to update it's look
 func (l *Label) ApplyTheme() {
 	l.label.Color = theme.TextColor()
@@ -47,16 +40,21 @@ func (l *Label) ApplyTheme() {
 func NewLabel(text string) *Label {
 	obj := canvas.NewText(text, theme.TextColor())
 	bg := canvas.NewRectangle(theme.BackgroundColor())
-	return &Label{
+
+	l := &Label{
 		baseWidget{
 			objects: []fyne.CanvasObject{
 				bg,
 				obj,
 			},
+			layout: layout.NewMaxLayout(),
 		},
 		text,
 		fyne.TextAlignLeading,
 		obj,
 		bg,
 	}
+
+	l.Layout(l.MinSize())
+	return l
 }

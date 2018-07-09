@@ -13,10 +13,8 @@ type Widget interface {
 	Move(fyne.Position)
 
 	MinSize() fyne.Size
-
-	// TODO should this move to a widget impl?... (private)
-	Layout(fyne.Size) []fyne.CanvasObject
 	ApplyTheme()
+	CanvasObjects() []fyne.CanvasObject
 }
 
 // A base widget class to define the standard widget behaviours.
@@ -25,6 +23,7 @@ type baseWidget struct {
 	Position fyne.Position
 
 	objects []fyne.CanvasObject
+	layout  fyne.Layout
 }
 
 // Get the current size of this widget.
@@ -36,6 +35,8 @@ func (w *baseWidget) CurrentSize() fyne.Size {
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *baseWidget) Resize(size fyne.Size) {
 	w.Size = size
+
+	w.Layout(size)
 }
 
 // Get the current position of this widget, relative to it's parent.
@@ -47,4 +48,18 @@ func (w *baseWidget) CurrentPosition() fyne.Position {
 // Note this hould not be used if the widget is being managed by a Layout within a Container.
 func (w *baseWidget) Move(pos fyne.Position) {
 	w.Position = pos
+}
+
+func (w *baseWidget) MinSize() fyne.Size {
+if w.layout == nil {return fyne.NewSize(1, 1)}
+	return w.layout.MinSize(w.objects)
+}
+
+func (w *baseWidget) Layout(size fyne.Size) {
+if w.layout == nil {return}
+	w.layout.Layout(w.objects, size)
+}
+
+func (w *baseWidget) CanvasObjects() []fyne.CanvasObject {
+	return w.objects
 }
