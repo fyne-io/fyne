@@ -2,7 +2,8 @@
 
 package desktop
 
-// #cgo pkg-config: ecore-evas
+// #cgo pkg-config: ecore evas
+// #include <Ecore.h>
 // #include <Evas.h>
 import "C"
 
@@ -59,11 +60,15 @@ func nativeTextBounds(obj *C.Evas_Object) fyne.Size {
 func (d *eFLDriver) RenderedTextSize(text string, size int) fyne.Size {
 	c := fyne.GetDriver().AllWindows()[0].Canvas().(*eflCanvas)
 
+	C.ecore_thread_main_loop_begin()
 	textObj := C.evas_object_text_add(c.evas)
 	C.evas_object_text_text_set(textObj, C.CString(text))
 	C.evas_object_text_font_set(textObj, C.CString(theme.TextFont().CachePath()),
 		C.Evas_Font_Size(scaleInt(c, size)))
-
 	native := nativeTextBounds(textObj)
+
+	C.evas_object_del(textObj)
+	C.ecore_thread_main_loop_end()
+
 	return fyne.NewSize(unscaleInt(c, native.Width), unscaleInt(c, native.Height))
 }
