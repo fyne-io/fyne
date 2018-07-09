@@ -51,12 +51,16 @@ func (w *baseWidget) Move(pos fyne.Position) {
 }
 
 func (w *baseWidget) MinSize() fyne.Size {
-if w.layout == nil {return fyne.NewSize(1, 1)}
+	if w.layout == nil {
+		return fyne.NewSize(1, 1)
+	}
 	return w.layout.MinSize(w.objects)
 }
 
 func (w *baseWidget) Layout(size fyne.Size) {
-if w.layout == nil {return}
+	if w.layout == nil {
+		return
+	}
 	w.layout.Layout(w.objects, size)
 }
 

@@ -33,7 +33,7 @@ func NewList(children ...fyne.CanvasObject) *List {
 	l := &List{
 		baseWidget{
 			objects: children,
-			layout: layout.NewGridLayout(1),
+			layout:  layout.NewGridLayout(1),
 		},
 	}
 
