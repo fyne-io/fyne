@@ -245,7 +245,7 @@ func CreateWindowWithEngine(engine string) fyne.Window {
 
 	w.canvas = &eflCanvas{
 		evas:   C.ecore_evas_get(evas),
-		scale:  1.0,
+		scale:  scaleByDPI(w),
 		window: w,
 	}
 
