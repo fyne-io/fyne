@@ -27,7 +27,9 @@ func (r *Resource) ToGo() string {
 	buffer.WriteString("\tName: \"" + r.Name + "\",\n")
 	buffer.WriteString("\tContent: []byte{")
 	for i, v := range r.Content {
-		if i > 0 {
+		if i == 0 {
+			buffer.WriteString("\n")
+		} else {
 			buffer.WriteString(", ")
 		}
 		buffer.WriteString(fmt.Sprint(v))
