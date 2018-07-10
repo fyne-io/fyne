@@ -2,6 +2,7 @@
 package main
 
 import "flag"
+import "fmt"
 
 import "github.com/fyne-io/fyne/examples/apps"
 
@@ -50,6 +51,7 @@ func welcome(app fyne.App) {
 
 		&canvas.Rectangle{},
 		widget.NewEntry(),
+		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			widget.NewButton("Dark", func() {
 				fyne.GetSettings().SetTheme("dark")

@@ -19,7 +19,7 @@ func bundleFile(name string, filepath string, f *os.File) {
 	}
 	res := fyne.NewResource(path.Base(filepath), bytes)
 
-	_, err = f.WriteString("var " + name + " = " + res.ToGo() + "\n")
+	_, err = f.WriteString("var " + strings.Replace(name, "-", "", -1) + " = " + res.ToGo() + "\n")
 	if err != nil {
 		fmt.Println("Unable to write to bundled file")
 	}
@@ -34,7 +34,7 @@ func bundleFont(name string, f *os.File) {
 
 func bundleIcon(name, theme string, f *os.File) {
 	_, dirname, _, _ := runtime.Caller(0)
-	path := path.Join(path.Dir(dirname), "icons", name+"-24px-"+theme+".svg")
+	path := path.Join(path.Dir(dirname), "icons", name+"-"+theme+".svg")
 
 	formatted := strings.ToLower(name) + strings.Title(strings.ToLower(theme))
 	bundleFile(formatted, path, f)
@@ -78,6 +78,8 @@ func main() {
 	for _, theme := range themes {
 		bundleIcon("cancel", theme, f)
 		bundleIcon("check", theme, f)
+		bundleIcon("check-box", theme, f)
+		bundleIcon("check-box-blank", theme, f)
 	}
 	f.Close()
 }
