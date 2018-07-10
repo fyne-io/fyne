@@ -8,6 +8,7 @@ import "github.com/fyne-io/fyne/examples/apps"
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/layout"
+import "github.com/fyne-io/fyne/theme"
 import "github.com/fyne-io/fyne/widget"
 
 func blogApp(app fyne.App) {
@@ -57,7 +58,7 @@ func welcome(app fyne.App) {
 				fyne.GetSettings().SetTheme("light")
 			}),
 		),
-		widget.NewButton("Quit", func() {
+		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
 			app.Quit()
 		})))
 	w.Show()

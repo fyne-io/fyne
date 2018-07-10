@@ -109,3 +109,8 @@ func TextBoldItalicFont() *fyne.Resource {
 func Padding() int {
 	return 4
 }
+
+// IconInlineSize is the standard size of icons which appear within buttons, labels etc.
+func IconInlineSize() int {
+	return 16
+}

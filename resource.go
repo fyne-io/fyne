@@ -30,3 +30,10 @@ func NewResource(name string, content []byte) *Resource {
 		Content: content,
 	}
 }
+
+// ThemedResource represents a resource that could be different depending on
+// the current theme. CurrentResource() will return the resource appropriate
+// to the theme that is active.
+type ThemedResource interface {
+	CurrentResource() *Resource
+}
