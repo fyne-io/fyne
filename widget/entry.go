@@ -14,9 +14,14 @@ type entryLayout struct {
 // MinSize calculates the minimum size of an entry widget.
 // This is based on the contained text with a standard amount of padding added.
 func (e *entryLayout) MinSize([]fyne.CanvasObject) fyne.Size {
-	textSize := fyne.GetDriver().RenderedTextSize("M", e.label.FontSize)
+	var textSize fyne.Size
+	if e.label.Text == "" {
+		textSize = fyne.GetDriver().RenderedTextSize("M", e.label.FontSize)
+	} else {
+		textSize = e.label.MinSize()
+	}
 
-	return textSize.Add(e.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2)))
+	return textSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 }
 
 // Layout the components of the entry widget.
