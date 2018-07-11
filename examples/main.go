@@ -32,6 +32,10 @@ func fractalApp(app fyne.App) {
 	apps.Fractal(app)
 }
 
+func layoutApp(app fyne.App) {
+	apps.Layout(app)
+}
+
 func appButton(app fyne.App, label string, onClick func(fyne.App)) *widget.Button {
 	return widget.NewButton(label, func() {
 		onClick(app)
@@ -48,6 +52,7 @@ func welcome(app fyne.App) {
 		appButton(app, "Clock", clockApp),
 		appButton(app, "Fractal", fractalApp),
 		appButton(app, "Canvas", canvasApp),
+		appButton(app, "Layout", layoutApp),
 
 		&canvas.Rectangle{},
 		widget.NewEntry(),
@@ -84,6 +89,8 @@ func main() {
 		clockApp(app)
 	case "fractal":
 		fractalApp(app)
+	case "layout":
+		layoutApp(app)
 	default:
 		welcome(app)
 	}
