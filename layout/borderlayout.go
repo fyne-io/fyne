@@ -1,0 +1,73 @@
+package layout
+
+import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/theme"
+
+type borderLayout struct {
+	top, bottom, left, right fyne.CanvasObject
+}
+
+// Layout is called to pack all child objects into a specified size.
+// For BorderLayout this arranges the top, bottom, left and right widgets at
+// the sides and any remaining widgets are maximised in the middle space.
+func (b *borderLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	var topSize, bottomSize, leftSize, rightSize fyne.Size
+	if b.top != nil {
+		b.top.Resize(fyne.NewSize(size.Width, b.top.MinSize().Height))
+		topSize = fyne.NewSize(size.Width, b.top.MinSize().Height+theme.Padding())
+	}
+	if b.bottom != nil {
+		b.bottom.Resize(fyne.NewSize(size.Width, b.bottom.MinSize().Height))
+		bottomSize = fyne.NewSize(size.Width, b.bottom.MinSize().Height+theme.Padding())
+	}
+	if b.left != nil {
+		b.left.Resize(fyne.NewSize(b.left.MinSize().Width, size.Height-topSize.Height-bottomSize.Height))
+		leftSize = fyne.NewSize(b.left.MinSize().Width+theme.Padding(), size.Height-topSize.Height-bottomSize.Height)
+	}
+	if b.right != nil {
+		b.right.Resize(fyne.NewSize(b.right.MinSize().Width, size.Height-topSize.Height-bottomSize.Height))
+		rightSize = fyne.NewSize(b.right.MinSize().Width+theme.Padding(), size.Height-topSize.Height-bottomSize.Height)
+	}
+
+	middleSize := fyne.NewSize(size.Width-leftSize.Width-rightSize.Width, size.Height-topSize.Height-bottomSize.Height)
+	for _, child := range objects {
+		if child != b.top && child != b.bottom && child != b.left && child != b.right {
+			child.Resize(middleSize)
+		}
+	}
+}
+
+// MinSize finds the smallest size that satisfies all the child objects.
+// For BorderLayout this is determined by the MinSize height of the top and
+// plus the MinSize width of the left and right, plus any padding needed.
+// This is then added to the union of the MinSize for any remaining content.
+func (b *borderLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	minSize := fyne.NewSize(0, 0)
+	for _, child := range objects {
+		if child != b.top && child != b.bottom && child != b.left && child != b.right {
+			minSize = minSize.Union(child.MinSize())
+		}
+	}
+
+	if b.top != nil {
+		minSize = minSize.Add(fyne.NewSize(0, b.top.MinSize().Height+theme.Padding()))
+	}
+	if b.bottom != nil {
+		minSize = minSize.Add(fyne.NewSize(0, b.bottom.MinSize().Height+theme.Padding()))
+	}
+	if b.left != nil {
+		minSize = minSize.Add(fyne.NewSize(b.left.MinSize().Width+theme.Padding(), 0))
+	}
+	if b.right != nil {
+		minSize = minSize.Add(fyne.NewSize(b.right.MinSize().Width+theme.Padding(), 0))
+	}
+
+	return minSize
+}
+
+// NewBorderLayout creates a new BorderLayout instance with top, left, bottom
+// and right objects set. All other items in the container will fill the centre
+// space
+func NewBorderLayout(top, bottom, left, right fyne.CanvasObject) fyne.Layout {
+	return &borderLayout{top, bottom, left, right}
+}
