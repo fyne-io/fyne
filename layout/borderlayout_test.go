@@ -40,6 +40,9 @@ func TestBorderLayoutTopBottom(t *testing.T) {
 
 	innerSize := fyne.NewSize(size.Width, size.Height-obj1.Size.Height-obj2.Size.Height-theme.Padding()*2)
 	assert.Equal(t, innerSize, obj3.Size)
+	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position)
+	assert.Equal(t, fyne.NewPos(0, size.Height-obj2.Size.Height), obj2.Position)
+	assert.Equal(t, fyne.NewPos(0, obj1.Size.Height+theme.Padding()), obj3.Position)
 }
 
 func TestBorderLayoutLeftRight(t *testing.T) {
@@ -58,6 +61,9 @@ func TestBorderLayoutLeftRight(t *testing.T) {
 
 	innerSize := fyne.NewSize(size.Width-obj1.Size.Width-obj2.Size.Width-theme.Padding()*2, size.Height)
 	assert.Equal(t, innerSize, obj3.Size)
+	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position)
+	assert.Equal(t, fyne.NewPos(size.Width-obj2.Size.Width, 0), obj2.Position)
+	assert.Equal(t, fyne.NewPos(obj1.Size.Width+theme.Padding(), 0), obj3.Position)
 }
 
 func TestBorderCenterLayoutMinSize(t *testing.T) {
