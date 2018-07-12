@@ -76,7 +76,7 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		C.evas_object_color_set(obj, C.int(co.Color.R), C.int(co.Color.G),
 			C.int(co.Color.B), C.int(co.Color.A))
 
-		updateFont(obj, c, co)
+		updateFont(obj, c, co.TextSize, co.TextStyle)
 		opts = co.Options
 	case *canvas.Rectangle:
 		obj = C.evas_object_rectangle_add(c.evas)
@@ -210,7 +210,7 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		C.evas_object_color_set(obj, C.int(co.Color.R), C.int(co.Color.G),
 			C.int(co.Color.B), C.int(co.Color.A))
 
-		updateFont(obj, c, co)
+		updateFont(obj, c, co.TextSize, co.TextStyle)
 		pos = getTextPosition(co, pos, size)
 
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),

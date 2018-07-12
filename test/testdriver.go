@@ -13,7 +13,7 @@ func (d *testDriver) AllWindows() []fyne.Window {
 	return windows
 }
 
-func (d *testDriver) RenderedTextSize(text string, size int) fyne.Size {
+func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	return fyne.NewSize(len(text)*size, size)
 }
 

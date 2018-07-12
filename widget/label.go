@@ -11,6 +11,7 @@ type Label struct {
 
 	Text      string         // The content of the label
 	Alignment fyne.TextAlign // The alignment of the Text
+	TextStyle fyne.TextStyle // The style of the label text
 
 	label      *canvas.Text
 	background *canvas.Rectangle
@@ -34,10 +35,12 @@ func (l *Label) ApplyTheme() {
 	l.label.Color = theme.TextColor()
 	l.background.FillColor = theme.BackgroundColor()
 	l.label.Alignment = l.Alignment
+	l.label.TextStyle = l.TextStyle
 }
 
 // NewLabel creates a new layout widget with the set text content
 func NewLabel(text string) *Label {
+	var style fyne.TextStyle
 	obj := canvas.NewText(text, theme.TextColor())
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 
@@ -51,6 +54,7 @@ func NewLabel(text string) *Label {
 		},
 		text,
 		fyne.TextAlignLeading,
+		style,
 		obj,
 		bg,
 	}

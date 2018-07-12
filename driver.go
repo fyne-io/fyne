@@ -3,11 +3,15 @@ package fyne
 // Driver defines an abstract concept of a Fyne render driver.
 // Any implementation must provide at least these methods.
 type Driver interface {
-	CreateWindow(string) Window // Create a new UI Window
-	AllWindows() []Window       // Get a slice containing all app windows
+	// Create a new UI Window
+	CreateWindow(string) Window
+	// Get a slice containing all app windows
+	AllWindows() []Window
 
-	RenderedTextSize(string, int) Size // Return the size required to render a string of specified font size
-	Quit()                             // Close the driver and open windows then exit the application
+	// Return the size required to render a string of specified font size
+	RenderedTextSize(string, int, TextStyle) Size
+	// Close the driver and open windows then exit the application
+	Quit()
 }
 
 var driver Driver

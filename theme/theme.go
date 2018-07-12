@@ -104,6 +104,11 @@ func TextBoldItalicFont() *fyne.Resource {
 	return bolditalic
 }
 
+// TextMonospaceFont retutns the font path for the monospace font face
+func TextMonospaceFont() *fyne.Resource {
+	return monospace
+}
+
 // Padding is the standard gap between elements and the border around interface
 // elements
 func Padding() int {

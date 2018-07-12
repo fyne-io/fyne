@@ -16,7 +16,7 @@ type entryLayout struct {
 func (e *entryLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 	var textSize fyne.Size
 	if e.label.Text == "" {
-		textSize = fyne.GetDriver().RenderedTextSize("M", e.label.FontSize)
+		textSize = fyne.GetDriver().RenderedTextSize("M", e.label.TextSize, e.label.TextStyle)
 	} else {
 		textSize = e.label.MinSize()
 	}

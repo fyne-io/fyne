@@ -19,7 +19,7 @@ func (d *dummyDriver) AllWindows() []Window {
 	return nil
 }
 
-func (d *dummyDriver) RenderedTextSize(text string, size int) Size {
+func (d *dummyDriver) RenderedTextSize(text string, size int, _ TextStyle) Size {
 	return NewSize(len(text)*size, size)
 }
 

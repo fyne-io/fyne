@@ -11,21 +11,25 @@ import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 
-func updateFont(obj *C.Evas_Object, c *eflCanvas, t *canvas.Text) {
+func updateFont(obj *C.Evas_Object, c *eflCanvas, size int, style fyne.TextStyle) {
 	font := theme.TextFont()
 
-	if t.Bold {
-		if t.Italic {
-			font = theme.TextBoldItalicFont()
-		} else {
-			font = theme.TextBoldFont()
+	if style.Monospace {
+		font = theme.TextMonospaceFont()
+	} else {
+		if style.Bold {
+			if style.Italic {
+				font = theme.TextBoldItalicFont()
+			} else {
+				font = theme.TextBoldFont()
+			}
+		} else if style.Italic {
+			font = theme.TextItalicFont()
 		}
-	} else if t.Italic {
-		font = theme.TextItalicFont()
 	}
 
 	C.evas_object_text_font_set(obj, C.CString(font.CachePath()),
-		C.Evas_Font_Size(scaleInt(c, t.FontSize)))
+		C.Evas_Font_Size(scaleInt(c, size)))
 }
 
 func getTextPosition(t *canvas.Text, pos fyne.Position, size fyne.Size) fyne.Position {
@@ -53,17 +57,16 @@ func nativeTextBounds(obj *C.Evas_Object) fyne.Size {
 		}
 	}
 
-	return fyne.NewSize(int(x + w), height)
+	return fyne.NewSize(int(x+w), height)
 }
 
-func (d *eFLDriver) RenderedTextSize(text string, size int) fyne.Size {
+func (d *eFLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	c := fyne.GetDriver().AllWindows()[0].Canvas().(*eflCanvas)
 
 	C.ecore_thread_main_loop_begin()
 	textObj := C.evas_object_text_add(c.evas)
 	C.evas_object_text_text_set(textObj, C.CString(text))
-	C.evas_object_text_font_set(textObj, C.CString(theme.TextFont().CachePath()),
-		C.Evas_Font_Size(scaleInt(c, size)))
+	updateFont(textObj, c, size, style)
 	native := nativeTextBounds(textObj)
 
 	C.evas_object_del(textObj)

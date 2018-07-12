@@ -84,6 +84,7 @@ func keyDown(ev *fyne.KeyEvent) {
 func Calculator(app fyne.App) {
 	output = widget.NewLabel("")
 	output.Alignment = fyne.TextAlignTrailing
+	output.TextStyle.Monospace = true
 	equals := widget.NewButton("=", func() {
 		evaluate()
 	})

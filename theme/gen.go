@@ -11,6 +11,8 @@ import "strings"
 
 import "github.com/fyne-io/fyne"
 
+const fontFace = "NotoSans"
+
 func bundleFile(name string, filepath string, f *os.File) {
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
@@ -25,9 +27,13 @@ func bundleFile(name string, filepath string, f *os.File) {
 	}
 }
 
-func bundleFont(name string, f *os.File) {
+func bundleFont(font, name string, f *os.File) {
 	_, dirname, _, _ := runtime.Caller(0)
-	path := path.Join(path.Dir(dirname), "font", "NotoSans-"+name+".ttf")
+	path := path.Join(path.Dir(dirname), "font", font+"-"+name+".ttf")
+
+	if name == "Regular" && font != fontFace {
+		name = "Monospace"
+	}
 
 	bundleFile(strings.ToLower(name), path, f)
 }
@@ -63,10 +69,11 @@ func main() {
 	if f == nil {
 		return
 	}
-	bundleFont("Regular", f)
-	bundleFont("Bold", f)
-	bundleFont("Italic", f)
-	bundleFont("BoldItalic", f)
+	bundleFont(fontFace, "Regular", f)
+	bundleFont(fontFace, "Bold", f)
+	bundleFont(fontFace, "Italic", f)
+	bundleFont(fontFace, "BoldItalic", f)
+	bundleFont("SourceCodePro", "Regular", f)
 	f.Close()
 
 	f = openFile("bundled-icons.go")
