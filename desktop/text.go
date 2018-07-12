@@ -42,19 +42,18 @@ func getTextPosition(t *canvas.Text, pos fyne.Position, size fyne.Size) fyne.Pos
 }
 
 func nativeTextBounds(obj *C.Evas_Object) fyne.Size {
-	width, height := 0, 0
-	var w, h C.Evas_Coord
+	var x, w, h C.Evas_Coord
 	length := len(C.GoString(C.evas_object_text_text_get(obj)))
+	height := 0
 
 	for i := 0; i < length; i++ {
-		C.evas_object_text_char_pos_get(obj, C.int(i), nil, nil, &w, &h)
-		width += int(w) + 2
+		C.evas_object_text_char_pos_get(obj, C.int(i), &x, nil, &w, &h)
 		if int(h) > height {
 			height = int(h)
 		}
 	}
 
-	return fyne.NewSize(width, height)
+	return fyne.NewSize(int(x + w), height)
 }
 
 func (d *eFLDriver) RenderedTextSize(text string, size int) fyne.Size {
