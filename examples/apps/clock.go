@@ -79,7 +79,7 @@ func (c *clockLayout) animate(canvas fyne.Canvas) {
 	go func() {
 		for {
 			<-tick.C
-			c.Layout(nil, canvas.Size())
+			c.Layout(nil, canvas.Size().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 			canvas.Refresh(c.canvas)
 		}
 	}()
