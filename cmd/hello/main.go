@@ -14,8 +14,7 @@ func main() {
 		widget.NewLabel("Hello Fyne!"),
 		widget.NewButton("Quit", func() {
 			app.Quit()
-		}),
-	))
+		})))
 
 	w.Show()
 }
