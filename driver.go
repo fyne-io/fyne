@@ -8,7 +8,7 @@ type Driver interface {
 	// Get a slice containing all app windows
 	AllWindows() []Window
 
-	// Return the size required to render a string of specified font size
+	// Return the size required to render the given string of specified font size and style
 	RenderedTextSize(string, int, TextStyle) Size
 	// Close the driver and open windows then exit the application
 	Quit()
