@@ -89,7 +89,7 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		C.evas_object_image_alpha_set(obj, C.EINA_TRUE)
 
 		if co.File != "" {
-			c.loadImage(co)
+			c.loadImage(co, obj)
 		}
 		opts = co.Options
 	case *canvas.Line:
@@ -186,9 +186,8 @@ func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
 	C.evas_object_image_data_update_add(obj, 0, 0, C.int(width), C.int(height))
 }
 
-func (c *eflCanvas) loadImage(img *canvas.Image) {
+func (c *eflCanvas) loadImage(img *canvas.Image, obj *C.Evas_Object) {
 	size := img.CurrentSize()
-	obj := c.native[img]
 
 	C.evas_object_image_load_size_set(obj, C.int(scaleInt(c, size.Width)), C.int(scaleInt(c, size.Height)))
 	C.evas_object_image_file_set(obj, C.CString(img.File), nil)
@@ -230,7 +229,7 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 			C.Evas_Coord(width), C.Evas_Coord(height))
 
 		if co.File != "" {
-			c.loadImage(co)
+			c.loadImage(co, obj)
 		}
 		if co.PixelColor != nil {
 			C.evas_object_image_size_set(obj, C.int(width), C.int(height))
