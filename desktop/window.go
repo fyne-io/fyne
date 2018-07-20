@@ -126,6 +126,9 @@ func onWindowResize(ee *C.Ecore_Evas) {
 	canvas := w.canvas.(*eflCanvas)
 	canvas.size = fyne.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
 	canvas.resizeContent()
+
+	// part of a NSRunLoop hack for macOS
+	drawDirty()
 }
 
 //export onWindowMove

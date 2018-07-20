@@ -10,10 +10,22 @@ package desktop
 
 // Gateway callback functions
 
+static Eina_Bool
+_immediate_iterate(void *data EINA_UNUSED)
+{
+	ecore_main_loop_iterate();
+
+	// only tick once
+	return ECORE_CALLBACK_CANCEL;
+}
+
 void onWindowResize_cgo(Ecore_Evas *ee)
 {
 	void onWindowResize(Ecore_Evas*);
 	onWindowResize(ee);
+
+	// On macOS the resize freezes NSRunLoop, so call iterate right away
+	ecore_timer_add(0.001, _immediate_iterate, NULL);
 }
 
 void onWindowMove_cgo(Ecore_Evas *ee)
