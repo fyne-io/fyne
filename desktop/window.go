@@ -13,10 +13,13 @@ package desktop
 // void onWindowFocusIn_cgo(Ecore_Evas *);
 // void onWindowFocusOut_cgo(Ecore_Evas *);
 // void onWindowClose_cgo(Ecore_Evas *);
+//
+// void force_render();
 import "C"
 
 import "log"
 import "os"
+import "runtime"
 import "strconv"
 import "unsafe"
 
@@ -127,8 +130,11 @@ func onWindowResize(ee *C.Ecore_Evas) {
 	canvas.size = fyne.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
 	canvas.resizeContent()
 
-	// part of a NSRunLoop hack for macOS
-	drawDirty()
+	if runtime.GOOS == "darwin" {
+		// part of a NSRunLoop hack for macOS
+		drawDirty()
+		C.force_render()
+	}
 }
 
 //export onWindowMove

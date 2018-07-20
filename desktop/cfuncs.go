@@ -8,8 +8,7 @@ package desktop
 #include <Ecore_Evas.h>
 #include <Ecore_Input.h>
 
-// Gateway callback functions
-
+// a callback if we need to force an immediate redraw on the main thread
 static Eina_Bool
 _immediate_iterate(void *data EINA_UNUSED)
 {
@@ -19,13 +18,19 @@ _immediate_iterate(void *data EINA_UNUSED)
 	return ECORE_CALLBACK_CANCEL;
 }
 
+// included so that darwin specific code can push an immediate refresh
+void
+force_render()
+{
+	ecore_timer_add(0.001, _immediate_iterate, NULL);
+}
+
+// Gateway callback functions
+
 void onWindowResize_cgo(Ecore_Evas *ee)
 {
 	void onWindowResize(Ecore_Evas*);
 	onWindowResize(ee);
-
-	// On macOS the resize freezes NSRunLoop, so call iterate right away
-	ecore_timer_add(0.001, _immediate_iterate, NULL);
 }
 
 void onWindowMove_cgo(Ecore_Evas *ee)
