@@ -24,10 +24,6 @@ func (l *List) Append(object fyne.CanvasObject) {
 	fyne.GetCanvas(l).Refresh(l)
 }
 
-// ApplyTheme is called when the List may need to update it's look
-func (l *List) ApplyTheme() {
-}
-
 // NewList creates a new list widget with the specified list of child objects
 func NewList(children ...fyne.CanvasObject) *List {
 	l := &List{

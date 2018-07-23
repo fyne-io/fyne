@@ -19,7 +19,6 @@ import "unsafe"
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
-import "github.com/fyne-io/fyne/widget"
 
 var canvases = make(map[*C.Evas]*eflCanvas)
 
@@ -134,7 +133,7 @@ func (c *eflCanvas) buildContainer(objs []fyne.CanvasObject,
 		case *fyne.Container:
 			c.buildContainer(co.Objects, child, child.CurrentSize(),
 				child.CurrentPosition(), childOffset)
-		case widget.Widget:
+		case fyne.Widget:
 			c.buildContainer(co.CanvasObjects(), child,
 				child.CurrentSize(), child.CurrentPosition(), childOffset)
 		default:
@@ -165,6 +164,10 @@ func renderImagePortion(img *canvas.Image, pixels []uint32, wg *sync.WaitGroup,
 }
 
 func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
+	if width == 0 || height == 0 {
+		return
+	}
+
 	pixels := make([]uint32, width*height)
 
 	// Spawn 4 threads each calculating the pixels for a quadrant of the image
@@ -289,8 +292,7 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 		switch typed := child.(type) {
 		case *fyne.Container:
 			c.refreshContainer(typed.Objects, child, child.CurrentPosition(), child.CurrentSize())
-		case widget.Widget:
-			typed.ApplyTheme()
+		case fyne.Widget:
 			c.refreshContainer(typed.CanvasObjects(), child,
 				child.CurrentPosition(), child.CurrentSize())
 		default:
@@ -313,7 +315,7 @@ func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
 	switch set := o.(type) {
 	case *fyne.Container:
 		c.buildContainer(set.Objects, o, set.MinSize(), o.CurrentPosition(), offset)
-	case widget.Widget:
+	case fyne.Widget:
 		c.buildContainer(set.CanvasObjects(), o,
 			set.MinSize(), o.CurrentPosition(), offset)
 	default:
@@ -332,7 +334,7 @@ func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 	case *fyne.Container:
 		c.refreshContainer(ref.Objects, o, o.CurrentPosition(),
 			o.CurrentSize())
-	case widget.Widget:
+	case fyne.Widget:
 		c.refreshContainer(ref.CanvasObjects(), o,
 			o.CurrentPosition(), o.CurrentSize())
 	default:

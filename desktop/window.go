@@ -131,7 +131,7 @@ func onWindowResize(ee *C.Ecore_Evas) {
 	canvas.resizeContent()
 
 	if runtime.GOOS == "darwin" {
-		// part of a NSRunLoop hack for macOS
+		// due to NSRunLoop freezing during window resize we need to force a refresh
 		drawDirty()
 		C.force_render()
 	}

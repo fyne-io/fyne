@@ -3,20 +3,6 @@ package widget
 
 import "github.com/fyne-io/fyne"
 
-// Widget defines the standard behaviours of any widget. This extends the
-// CanvasObject - a widget behaves in the same basic way but will encapsulate
-// many child objects to create the rendered widget.
-type Widget interface {
-	CurrentSize() fyne.Size
-	Resize(fyne.Size)
-	CurrentPosition() fyne.Position
-	Move(fyne.Position)
-
-	MinSize() fyne.Size
-	ApplyTheme()
-	CanvasObjects() []fyne.CanvasObject
-}
-
 // A base widget class to define the standard widget behaviours.
 type baseWidget struct {
 	Size     fyne.Size
@@ -62,6 +48,17 @@ func (w *baseWidget) Layout(size fyne.Size) {
 		return
 	}
 	w.layout.Layout(w.objects, size)
+}
+
+// ApplyTheme is a fallback method that applies the new theme to all contained
+// objects. Widgets that override this should consider doing similarly.
+func (w *baseWidget) ApplyTheme() {
+	for _, child := range w.objects {
+		switch themed := child.(type) {
+		case fyne.ThemedObject:
+			themed.ApplyTheme()
+		}
+	}
 }
 
 func (w *baseWidget) CanvasObjects() []fyne.CanvasObject {

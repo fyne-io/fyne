@@ -30,7 +30,14 @@ func (app *fyneApp) Quit() {
 
 func (app *fyneApp) applyTheme(Settings) {
 	for _, window := range GetDriver().AllWindows() {
-		window.Canvas().Refresh(window.Canvas().Content())
+		content := window.Content()
+
+		switch themed := content.(type) {
+		case ThemedObject:
+			themed.ApplyTheme()
+		}
+
+		window.Canvas().Refresh(content)
 	}
 }
 

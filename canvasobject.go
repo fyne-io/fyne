@@ -14,6 +14,13 @@ type CanvasObject interface {
 	MinSize() Size
 }
 
+// ThemedObject indicates that the associated CanvasObject reponse to theme
+// changes. When the settings detect a theme change the object will be informed
+// through the invocation of ApplyTheme().
+type ThemedObject interface {
+	ApplyTheme()
+}
+
 // ClickableObject describes any CanvasObject that can also be clicked
 // (i.e. has mouse handlers). This should be implemented by buttons etc that
 // wish to handle pointer interactions.
