@@ -7,14 +7,6 @@ import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 
-func aliveColor() color.RGBA {
-	return theme.TextColor()
-}
-
-func deadColor() color.RGBA {
-	return theme.BackgroundColor()
-}
-
 type board struct {
 	cells  [][]bool
 	width  int
@@ -85,20 +77,6 @@ func (b *board) renderState(state [][]bool) {
 	}
 }
 
-func (b *board) renderer(x, y, w, h int) color.RGBA {
-	xpos := int(float64(b.width) * (float64(x) / float64(w)))
-	ypos := int(float64(b.height) * (float64(y) / float64(h)))
-
-	if xpos >= b.width || ypos >= b.height {
-		return deadColor()
-	}
-	if b.cells[ypos][xpos] {
-		return aliveColor()
-	}
-
-	return deadColor()
-}
-
 func (b *board) load() {
 	b.cells[1][16] = true
 	b.cells[2][17] = true
@@ -127,42 +105,129 @@ func newBoard() *board {
 	return b
 }
 
-type boardLayout struct {
+type game struct {
 	board  *board
-	render *canvas.Image
+	paused bool
+
+	aliveColor color.RGBA
+	deadColor  color.RGBA
+
+	size     fyne.Size
+	position fyne.Position
+	render   *canvas.Image
+	objects  []fyne.CanvasObject
 }
 
-// Layout sets the Life render raster to be full size
-func (l *boardLayout) Layout(objs []fyne.CanvasObject, size fyne.Size) {
-	for _, obj := range objs {
-		obj.Resize(size)
+func (g *game) CurrentSize() fyne.Size {
+	return g.size
+}
+
+func (g *game) Resize(size fyne.Size) {
+	g.size = size
+	g.render.Resize(size)
+}
+
+func (g *game) CurrentPosition() fyne.Position {
+	return g.position
+}
+
+func (g *game) Move(pos fyne.Position) {
+	g.position = pos
+	g.render.Move(pos)
+}
+
+func (g *game) MinSize() fyne.Size {
+	return fyne.NewSize(g.board.width*10, g.board.height*10)
+}
+
+func (g *game) ApplyTheme() {
+	g.aliveColor = theme.TextColor()
+	g.deadColor = theme.BackgroundColor()
+}
+
+func (g *game) CanvasObjects() []fyne.CanvasObject {
+	return g.objects
+}
+
+func (g *game) cellForCoord(x, y, w, h int) (int, int) {
+	xpos := int(float64(g.board.width) * (float64(x) / float64(w)))
+	ypos := int(float64(g.board.height) * (float64(y) / float64(h)))
+
+	return xpos, ypos
+}
+
+func (g *game) renderer(x, y, w, h int) color.RGBA {
+	xpos, ypos := g.cellForCoord(x, y, w, h)
+
+	if xpos >= g.board.width || ypos >= g.board.height {
+		return g.deadColor
 	}
+	if g.board.cells[ypos][xpos] {
+		return g.aliveColor
+	}
+
+	return g.deadColor
 }
 
-// MinSize returns a suitable size to fit every cell at 10x10
-func (l *boardLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return fyne.NewSize(l.board.width*10, l.board.height*10)
+func (g *game) run() {
+	g.paused = false
 }
 
-func (l *boardLayout) animate() {
+func (g *game) stop() {
+	g.paused = true
+}
+
+func (g *game) toggleRun() {
+	g.paused = !g.paused
+}
+
+func (g *game) animate() {
 	go func() {
 		tick := time.NewTicker(time.Second / 6)
-		canvas := fyne.GetCanvas(l.render)
+		canvas := fyne.GetCanvas(g.render)
 
 		for {
 			select {
 			case <-tick.C:
-				state := l.board.nextGen()
-				l.board.renderState(state)
-				canvas.Refresh(l.render)
+				if g.paused {
+					continue
+				}
+
+				state := g.board.nextGen()
+				g.board.renderState(state)
+				canvas.Refresh(g.render)
 			}
 		}
 	}()
 }
 
-func newBoardLayout(b *board) *boardLayout {
-	render := canvas.NewRaster(b.renderer)
-	return &boardLayout{b, render}
+func (g *game) keyDown(ev *fyne.KeyEvent) {
+	if ev.Name == "space" {
+		g.toggleRun()
+	}
+}
+
+func (g *game) OnMouseDown(ev *fyne.MouseEvent) {
+	xpos, ypos := g.cellForCoord(ev.Position.X, ev.Position.Y, g.size.Width, g.size.Height)
+
+	if xpos >= g.board.width || ypos >= g.board.height {
+		return
+	}
+
+	g.board.cells[ypos][xpos] = !g.board.cells[ypos][xpos]
+
+	canvas := fyne.GetCanvas(g.render)
+	canvas.Refresh(g.render)
+}
+
+func newGame(b *board) *game {
+	g := &game{board: b}
+	render := canvas.NewRaster(g.renderer)
+	g.ApplyTheme()
+
+	g.render = render
+	g.objects = []fyne.CanvasObject{render}
+	return g
 }
 
 // Life starts a new game of life
@@ -170,14 +235,14 @@ func Life(app fyne.App) {
 	board := newBoard()
 	board.load()
 
-	layout := newBoardLayout(board)
+	game := newGame(board)
 
 	window := app.NewWindow("Life")
-	window.SetContent(fyne.NewContainerWithLayout(layout,
-		layout.render))
+	window.SetContent(game)
+	window.Canvas().SetOnKeyDown(game.keyDown)
 
 	// start the board animation before we show the window - it will block
-	layout.animate()
+	game.animate()
 
 	window.Show()
 }
