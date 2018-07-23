@@ -5,6 +5,8 @@ import "github.com/fyne-io/fyne"
 type testWindow struct {
 	title      string
 	fullscreen bool
+
+	canvas fyne.Canvas
 }
 
 var windows = make([]fyne.Window, 0)
@@ -29,7 +31,17 @@ func (w *testWindow) Show() {}
 
 func (w *testWindow) Hide() {}
 
-func (w *testWindow) Close() {}
+func (w *testWindow) Close() {
+	i := 0
+	for _, window := range windows {
+		if window == w {
+			break
+		}
+		i++
+	}
+
+	windows = append(windows[:i], windows[i+1:]...)
+}
 
 func (w *testWindow) Content() fyne.CanvasObject {
 	return w.Canvas().Content()
@@ -40,13 +52,15 @@ func (w *testWindow) SetContent(obj fyne.CanvasObject) {
 }
 
 func (w *testWindow) Canvas() fyne.Canvas {
-	return GetTestCanvas()
+	return w.canvas
 }
 
 // NewTestWindow creates and registers a new window for test purposes
-func NewTestWindow() fyne.Window {
-	window := &testWindow{}
-	windows = append(windows, window)
+func NewTestWindow(content fyne.CanvasObject) fyne.Window {
+	canvas := NewTestCanvas()
+	canvas.SetContent(content)
+	window := &testWindow{canvas: canvas}
 
+	windows = append(windows, window)
 	return window
 }

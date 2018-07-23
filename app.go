@@ -35,9 +35,8 @@ func (app *fyneApp) applyTheme(Settings) {
 		switch themed := content.(type) {
 		case ThemedObject:
 			themed.ApplyTheme()
+			window.Canvas().Refresh(content)
 		}
-
-		window.Canvas().Refresh(content)
 	}
 }
 

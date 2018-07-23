@@ -6,7 +6,7 @@ type testDriver struct {
 }
 
 func (d *testDriver) CreateWindow(string) fyne.Window {
-	return NewTestWindow()
+	return NewTestWindow(nil)
 }
 
 func (d *testDriver) AllWindows() []fyne.Window {
@@ -25,7 +25,7 @@ func (d *testDriver) Quit() {
 func NewTestDriver() fyne.Driver {
 	driver := new(testDriver)
 	// make a single dummy window for rendering tests
-	NewTestWindow()
+	NewTestWindow(nil)
 
 	return driver
 }

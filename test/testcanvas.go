@@ -4,11 +4,6 @@ import "github.com/fyne-io/fyne"
 
 var dummyCanvas fyne.Canvas
 
-// Canvas returns an un-rendered canvas that is used for behavioural testing
-func Canvas() fyne.Canvas {
-	return dummyCanvas
-}
-
 type testCanvas struct {
 	content fyne.CanvasObject
 	focused fyne.FocusableObject
@@ -51,10 +46,15 @@ func (c *testCanvas) SetScale(float32) {
 func (c *testCanvas) SetOnKeyDown(func(*fyne.KeyEvent)) {
 }
 
+// NewTestCanvas returns a single use in-memory canvas used for testing
+func NewTestCanvas() fyne.Canvas {
+	return &testCanvas{}
+}
+
 // GetTestCanvas returns a reusable in-memory canvas used for testing
 func GetTestCanvas() fyne.Canvas {
 	if dummyCanvas == nil {
-		dummyCanvas = &testCanvas{}
+		dummyCanvas = NewTestCanvas()
 	}
 
 	return dummyCanvas
