@@ -7,6 +7,7 @@ package desktop
 // #include <Ecore_Evas.h>
 // #include <Ecore_Input.h>
 // #include <Evas.h>
+// #include <stdlib.h>
 //
 // void onWindowResize_cgo(Ecore_Evas *);
 // void onWindowMove_cgo(Ecore_Evas *);
@@ -48,7 +49,9 @@ func (w *window) Title() string {
 }
 
 func (w *window) SetTitle(title string) {
-	C.ecore_evas_title_set(w.ee, C.CString(title))
+	cstr := C.CString(title)
+	C.ecore_evas_title_set(w.ee, cstr)
+	C.free(unsafe.Pointer(cstr))
 }
 
 func (w *window) Fullscreen() bool {
@@ -241,7 +244,9 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 // documentation and can be found on the http://enlightenment.org website.
 // USE OF THIS METHOD IS NOT RECOMMENDED
 func CreateWindowWithEngine(engine string) fyne.Window {
-	evas := C.ecore_evas_new(C.CString(engine), 0, 0, 10, 10, nil)
+	cstr := C.CString(engine)
+	evas := C.ecore_evas_new(cstr, 0, 0, 10, 10, nil)
+	C.free(unsafe.Pointer(cstr))
 	if evas == nil {
 		log.Fatalln("Unable to create canvas, perhaps missing module for", engine)
 	}

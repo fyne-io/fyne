@@ -7,6 +7,7 @@ package desktop
 // #include <Evas.h>
 // #include <Ecore.h>
 // #include <Ecore_Evas.h>
+// #include <stdlib.h>
 //
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
 import "C"
@@ -71,7 +72,9 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 	case *canvas.Text:
 		obj = C.evas_object_text_add(c.evas)
 
-		C.evas_object_text_text_set(obj, C.CString(co.Text))
+		cstr := C.CString(co.Text)
+		C.evas_object_text_text_set(obj, cstr)
+		C.free(unsafe.Pointer(cstr))
 		C.evas_object_color_set(obj, C.int(co.Color.R), C.int(co.Color.G),
 			C.int(co.Color.B), C.int(co.Color.A))
 
@@ -193,7 +196,9 @@ func (c *eflCanvas) loadImage(img *canvas.Image, obj *C.Evas_Object) {
 	size := img.CurrentSize()
 
 	C.evas_object_image_load_size_set(obj, C.int(scaleInt(c, size.Width)), C.int(scaleInt(c, size.Height)))
-	C.evas_object_image_file_set(obj, C.CString(img.File), nil)
+	cstr := C.CString(img.File)
+	C.evas_object_image_file_set(obj, cstr, nil)
+	C.free(unsafe.Pointer(cstr))
 }
 
 func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
@@ -208,7 +213,9 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 
 	switch co := o.(type) {
 	case *canvas.Text:
-		C.evas_object_text_text_set(obj, C.CString(co.Text))
+		cstr := C.CString(co.Text)
+		C.evas_object_text_text_set(obj, cstr)
+		C.free(unsafe.Pointer(cstr))
 		C.evas_object_color_set(obj, C.int(co.Color.R), C.int(co.Color.G),
 			C.int(co.Color.B), C.int(co.Color.A))
 

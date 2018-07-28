@@ -10,6 +10,7 @@ package desktop
 import "C"
 
 import "log"
+import "os"
 import "strings"
 
 var engine string
@@ -19,7 +20,7 @@ func oSEngineName() string {
 		return engine
 	}
 
-	env := C.getenv(C.CString("WAYLAND_DISPLAY"))
+	env := os.Getenv("WAYLAND_DISPLAY")
 
 	if env == nil {
 		log.Println("Unable to connect to Wayland - attempting X")

@@ -5,7 +5,10 @@ package desktop
 // #cgo pkg-config: ecore evas
 // #include <Ecore.h>
 // #include <Evas.h>
+// #include <stdlib.h>
 import "C"
+
+import "unsafe"
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
@@ -28,8 +31,9 @@ func updateFont(obj *C.Evas_Object, c *eflCanvas, size int, style fyne.TextStyle
 		}
 	}
 
-	C.evas_object_text_font_set(obj, C.CString(font.CachePath()),
-		C.Evas_Font_Size(scaleInt(c, size)))
+	cstr := C.CString(font.CachePath())
+	C.evas_object_text_font_set(obj, cstr, C.Evas_Font_Size(scaleInt(c, size)))
+	C.free(unsafe.Pointer(cstr))
 }
 
 func getTextPosition(t *canvas.Text, pos fyne.Position, size fyne.Size) fyne.Position {
@@ -65,7 +69,10 @@ func (d *eFLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle
 
 	C.ecore_thread_main_loop_begin()
 	textObj := C.evas_object_text_add(c.evas)
-	C.evas_object_text_text_set(textObj, C.CString(text))
+
+	cstr := C.CString(text)
+	C.evas_object_text_text_set(textObj, cstr)
+	C.free(unsafe.Pointer(cstr))
 	updateFont(textObj, c, size, style)
 	native := nativeTextBounds(textObj)
 
