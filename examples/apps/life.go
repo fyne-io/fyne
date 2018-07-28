@@ -78,24 +78,61 @@ func (b *board) renderState(state [][]bool) {
 }
 
 func (b *board) load() {
-	b.cells[1][16] = true
-	b.cells[2][17] = true
-	b.cells[2][18] = true
-	b.cells[3][16] = true
-	b.cells[3][17] = true
+	// gun
+	b.cells[5][1] = true
+	b.cells[5][2] = true
+	b.cells[6][1] = true
+	b.cells[6][2] = true
 
-	b.cells[15][22] = true
-	b.cells[15][23] = true
-	b.cells[15][24] = true
+	b.cells[3][13] = true
+	b.cells[3][14] = true
+	b.cells[4][12] = true
+	b.cells[4][16] = true
+	b.cells[5][11] = true
+	b.cells[5][17] = true
+	b.cells[6][11] = true
+	b.cells[6][15] = true
+	b.cells[6][17] = true
+	b.cells[6][18] = true
+	b.cells[7][11] = true
+	b.cells[7][17] = true
+	b.cells[8][12] = true
+	b.cells[8][16] = true
+	b.cells[9][13] = true
+	b.cells[9][14] = true
 
-	b.cells[15][32] = true
-	b.cells[15][33] = true
-	b.cells[16][32] = true
-	b.cells[16][33] = true
+	b.cells[1][25] = true
+	b.cells[2][23] = true
+	b.cells[2][25] = true
+	b.cells[3][21] = true
+	b.cells[3][22] = true
+	b.cells[4][21] = true
+	b.cells[4][22] = true
+	b.cells[5][21] = true
+	b.cells[5][22] = true
+	b.cells[6][23] = true
+	b.cells[6][25] = true
+	b.cells[7][25] = true
+
+	b.cells[3][35] = true
+	b.cells[3][36] = true
+	b.cells[4][35] = true
+	b.cells[4][36] = true
+
+	// spaceship
+	b.cells[34][2] = true
+	b.cells[34][3] = true
+	b.cells[34][4] = true
+	b.cells[34][5] = true
+	b.cells[35][1] = true
+	b.cells[35][5] = true
+	b.cells[36][5] = true
+	b.cells[37][1] = true
+	b.cells[37][4] = true
 }
 
 func newBoard() *board {
-	b := &board{nil, 50, 40}
+	b := &board{nil, 60, 50}
 	b.cells = make([][]bool, b.height)
 
 	for y := 0; y < b.height; y++ {
