@@ -119,33 +119,37 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 	return obj
 }
 
-func (c *eflCanvas) buildContainer(objs []fyne.CanvasObject,
-	target fyne.CanvasObject, size fyne.Size, pos, offset fyne.Position) {
+func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, objs []fyne.CanvasObject,
+	size fyne.Size, pos, offset fyne.Position) {
 
 	obj := C.evas_object_rectangle_add(c.evas)
 	bg := theme.BackgroundColor()
 	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
 
 	C.evas_object_show(obj)
-	c.native[target] = obj
-	c.offsets[target] = offset
+	c.native[parent] = obj
+	c.offsets[parent] = offset
 
 	childOffset := offset.Add(pos)
 	for _, child := range objs {
 		switch co := child.(type) {
 		case *fyne.Container:
-			c.buildContainer(co.Objects, child, child.CurrentSize(),
+			c.buildContainer(co, co.Objects, child.CurrentSize(),
 				child.CurrentPosition(), childOffset)
 		case fyne.Widget:
-			c.buildContainer(co.CanvasObjects(), child,
+			c.buildContainer(co, co.CanvasObjects(),
 				child.CurrentSize(), child.CurrentPosition(), childOffset)
 		default:
-			if target == nil {
-				target = child
+			if parent == nil {
+				parent = child
 			}
 
-			c.buildObject(child, target, childOffset)
+			c.buildObject(child, parent, childOffset)
 		}
+	}
+
+	if themed, ok := parent.(fyne.ThemedObject); ok {
+		themed.ApplyTheme()
 	}
 }
 
@@ -321,9 +325,9 @@ func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
 
 	switch set := o.(type) {
 	case *fyne.Container:
-		c.buildContainer(set.Objects, o, set.MinSize(), o.CurrentPosition(), offset)
+		c.buildContainer(set, set.Objects, set.MinSize(), o.CurrentPosition(), offset)
 	case fyne.Widget:
-		c.buildContainer(set.CanvasObjects(), o,
+		c.buildContainer(set, set.CanvasObjects(),
 			set.MinSize(), o.CurrentPosition(), offset)
 	default:
 		c.buildObject(o, o, offset)
