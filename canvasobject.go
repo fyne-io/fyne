@@ -38,3 +38,49 @@ type FocusableObject interface {
 
 	OnKeyDown(*KeyEvent)
 }
+
+// SpacerObject is a simple object that can be used in a list layout to space
+// out child objects
+type SpacerObject interface {
+	ExpandVertical() bool
+	ExpandHorizontal() bool
+}
+
+type spacerObject struct {
+	size Size
+	pos  Position
+}
+
+func (s *spacerObject) ExpandVertical() bool {
+	return true
+}
+
+func (s *spacerObject) ExpandHorizontal() bool {
+	return true
+}
+
+func (s *spacerObject) CurrentSize() Size {
+	return s.size
+}
+
+func (s *spacerObject) Resize(size Size) {
+	s.size = size
+}
+
+func (s *spacerObject) CurrentPosition() Position {
+	return s.pos
+}
+
+func (s *spacerObject) Move(pos Position) {
+	s.pos = pos
+}
+
+func (s *spacerObject) MinSize() Size {
+	return NewSize(0, 0)
+}
+
+// NewSpacer returns a spacer object which can fill vertical and horizontal
+// space. This is primarily used with a list layout.
+func NewSpacer() CanvasObject {
+	return &spacerObject{}
+}

@@ -7,7 +7,6 @@ import "fmt"
 import "github.com/fyne-io/fyne/examples/apps"
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/theme"
 import "github.com/fyne-io/fyne/widget"
@@ -59,9 +58,10 @@ func welcome(app fyne.App) {
 		appButton(app, "Layout", layoutApp),
 		appButton(app, "Life", lifeApp),
 
-		&canvas.Rectangle{},
+		fyne.NewSpacer(),
 		widget.NewEntry(),
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
+		fyne.NewSpacer(),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			widget.NewButton("Dark", func() {
 				fyne.GetSettings().SetTheme("dark")
