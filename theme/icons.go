@@ -32,12 +32,17 @@ func (res *darkLightResource) CachePath() string {
 }
 
 var cancel, confirm, checked, unchecked *darkLightResource
+var contentCut, contentCopy, contentPaste *darkLightResource
 
 func init() {
 	cancel = &darkLightResource{cancelDark, cancelLight}
 	confirm = &darkLightResource{checkDark, checkLight}
 	checked = &darkLightResource{checkboxDark, checkboxLight}
 	unchecked = &darkLightResource{checkboxblankDark, checkboxblankLight}
+
+	contentCut = &darkLightResource{contentcutDark, contentcutLight}
+	contentCopy = &darkLightResource{contentcopyDark, contentcopyLight}
+	contentPaste = &darkLightResource{contentpasteDark, contentpasteLight}
 }
 
 // CancelIcon returns a resource containing the standard cancel icon for the current theme
@@ -58,4 +63,19 @@ func CheckedIcon() fyne.Resource {
 // UncheckedIcon returns a resource containing the standard checkbox unchecked icon for the current theme
 func UncheckedIcon() fyne.Resource {
 	return unchecked
+}
+
+// CutIcon returns a resource containing the standard content cut icon for the current theme
+func CutIcon() fyne.Resource {
+	return contentCut
+}
+
+// CopyIcon returns a resource containing the standard content copy icon for the current theme
+func CopyIcon() fyne.Resource {
+	return contentCopy
+}
+
+// PasteIcon returns a resource containing the standard content paste icon for the current theme
+func PasteIcon() fyne.Resource {
+	return contentPaste
 }

@@ -87,6 +87,9 @@ func main() {
 		bundleIcon("check", theme, f)
 		bundleIcon("check-box", theme, f)
 		bundleIcon("check-box-blank", theme, f)
+		bundleIcon("content-cut", theme, f)
+		bundleIcon("content-copy", theme, f)
+		bundleIcon("content-paste", theme, f)
 	}
 	f.Close()
 }
