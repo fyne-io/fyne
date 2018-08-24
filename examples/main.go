@@ -58,10 +58,10 @@ func welcome(app fyne.App) {
 		appButton(app, "Layout", layoutApp),
 		appButton(app, "Life", lifeApp),
 
-		fyne.NewSpacer(),
+		layout.NewSpacer(),
 		widget.NewEntry(),
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
-		fyne.NewSpacer(),
+		layout.NewSpacer(),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			widget.NewButton("Dark", func() {
 				fyne.GetSettings().SetTheme("dark")

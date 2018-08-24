@@ -10,7 +10,7 @@ type listLayout struct {
 }
 
 func isVerticalSpacer(obj interface{}) bool {
-	if spacer, ok := obj.(fyne.SpacerObject); ok {
+	if spacer, ok := obj.(SpacerObject); ok {
 		return spacer.ExpandVertical()
 	}
 

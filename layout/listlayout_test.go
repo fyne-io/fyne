@@ -108,7 +108,7 @@ func TestSpacerListLayout(t *testing.T) {
 	obj2 := NewMinSizeRect(cellSize.Subtract(fyne.NewSize(25, 0)))
 	obj3 := NewMinSizeRect(cellSize)
 
-	container := fyne.NewContainerWithLayout(NewListLayout(), fyne.NewSpacer(), obj1, obj2, obj3)
+	container := fyne.NewContainerWithLayout(NewListLayout(), NewSpacer(), obj1, obj2, obj3)
 	container.Resize(fyne.NewSize(100, 300))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
@@ -127,7 +127,7 @@ func TestMiddleSpacerListLayout(t *testing.T) {
 	obj2 := NewMinSizeRect(cellSize.Subtract(fyne.NewSize(25, 0)))
 	obj3 := NewMinSizeRect(cellSize)
 
-	container := fyne.NewContainerWithLayout(NewListLayout(), obj1, obj2, fyne.NewSpacer(), obj3)
+	container := fyne.NewContainerWithLayout(NewListLayout(), obj1, obj2, NewSpacer(), obj3)
 	container.Resize(fyne.NewSize(100, 300))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
