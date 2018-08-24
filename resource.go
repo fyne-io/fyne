@@ -5,8 +5,8 @@ package fyne
 // The serialised path of a resource can be obtained which may result in a
 // blocking filesystem write operation.
 type Resource interface {
-	Name()      string
-	Content()   []byte
+	Name() string
+	Content() []byte
 	CachePath() string
 }
 

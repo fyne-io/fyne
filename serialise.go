@@ -25,13 +25,12 @@ func (r *StaticResource) ToGo() string {
 
 	buffer.WriteString("&fyne.StaticResource{\n")
 	buffer.WriteString("\tStaticName: \"" + r.StaticName + "\",\n")
-	buffer.WriteString("\tStaticContent: []byte{")
+	buffer.WriteString("\tStaticContent: []byte{\n\t\t")
 	for i, v := range r.StaticContent {
-		if i == 0 {
-			buffer.WriteString("\n")
-		} else {
+		if i > 0 {
 			buffer.WriteString(", ")
 		}
+
 		buffer.WriteString(fmt.Sprint(v))
 	}
 	buffer.WriteString("}}")
