@@ -85,27 +85,27 @@ func TextSize() int {
 }
 
 // TextFont returns the font path for the regular font style
-func TextFont() *fyne.Resource {
+func TextFont() fyne.Resource {
 	return regular
 }
 
 // TextBoldFont retutns the font path for the bold font style
-func TextBoldFont() *fyne.Resource {
+func TextBoldFont() fyne.Resource {
 	return bold
 }
 
 // TextItalicFont returns the font path for the italic font style
-func TextItalicFont() *fyne.Resource {
+func TextItalicFont() fyne.Resource {
 	return italic
 }
 
 // TextBoldItalicFont returns the font path for the bold and italic font style
-func TextBoldItalicFont() *fyne.Resource {
+func TextBoldItalicFont() fyne.Resource {
 	return bolditalic
 }
 
 // TextMonospaceFont retutns the font path for the monospace font face
-func TextMonospaceFont() *fyne.Resource {
+func TextMonospaceFont() fyne.Resource {
 	return monospace
 }
 

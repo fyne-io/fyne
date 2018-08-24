@@ -19,7 +19,7 @@ func bundleFile(name string, filepath string, f *os.File) {
 		fmt.Println("Unable to load file " + filepath)
 		return
 	}
-	res := fyne.NewResource(path.Base(filepath), bytes)
+	res := fyne.NewStaticResource(path.Base(filepath), bytes)
 
 	_, err = f.WriteString("var " + strings.Replace(name, "-", "", -1) + " = " + res.ToGo() + "\n")
 	if err != nil {

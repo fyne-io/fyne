@@ -60,15 +60,15 @@ func (c *Check) ApplyTheme() {
 	c.layout.background.FillColor = theme.BackgroundColor()
 
 	if c.Checked {
-		c.layout.icon.File = theme.CheckedIcon().CurrentResource().CachePath()
+		c.layout.icon.File = theme.CheckedIcon().CachePath()
 	} else {
-		c.layout.icon.File = theme.UncheckedIcon().CurrentResource().CachePath()
+		c.layout.icon.File = theme.UncheckedIcon().CachePath()
 	}
 }
 
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
-	icon := canvas.NewImageFromResource(theme.UncheckedIcon().CurrentResource())
+	icon := canvas.NewImageFromResource(theme.UncheckedIcon())
 
 	text := canvas.NewText(label, theme.TextColor())
 	text.Alignment = fyne.TextAlignCenter

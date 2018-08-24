@@ -17,7 +17,7 @@ func writeResource(file, name string) {
 		return
 	}
 
-	res := fyne.NewResource(path.Base(file), bytes)
+	res := fyne.NewStaticResource(path.Base(file), bytes)
 
 	fmt.Println("var " + name + " = " + res.ToGo())
 }

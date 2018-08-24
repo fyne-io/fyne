@@ -48,7 +48,7 @@ type Button struct {
 
 	OnTapped func()
 	layout   *buttonLayout
-	resource fyne.ThemedResource
+	resource fyne.Resource
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -79,14 +79,14 @@ func (b *Button) ApplyTheme() {
 	}
 
 	if b.resource != nil {
-		b.layout.icon.File = b.resource.CurrentResource().CachePath()
+		b.layout.icon.File = b.resource.CachePath()
 	}
 }
 
-func constructButton(label string, resource fyne.ThemedResource, tapped func()) *Button {
+func constructButton(label string, resource fyne.Resource, tapped func()) *Button {
 	var icon *canvas.Image
 	if resource != nil {
-		icon = canvas.NewImageFromResource(resource.CurrentResource())
+		icon = canvas.NewImageFromResource(resource)
 	}
 
 	text := canvas.NewText(label, theme.TextColor())
@@ -124,6 +124,6 @@ func NewButton(label string, tapped func()) *Button {
 
 // NewButtonWithIcon creates a new button widget with the specified label,
 // themed icon and tap handler
-func NewButtonWithIcon(label string, icon fyne.ThemedResource, tapped func()) *Button {
+func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
 	return constructButton(label, icon, tapped)
 }

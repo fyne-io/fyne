@@ -75,6 +75,6 @@ func NewImageFromFile(file string) *Image {
 
 // NewImageFromResource creates a new image by loading the specified resource.
 // Images returned from this method will scale to fit the canvas object.
-func NewImageFromResource(res *fyne.Resource) *Image {
+func NewImageFromResource(res fyne.Resource) *Image {
 	return NewImageFromFile(res.CachePath())
 }
