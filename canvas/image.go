@@ -7,39 +7,11 @@ import "github.com/fyne-io/fyne"
 
 // Image describes a raster image area that can render in a Fyne canvas
 type Image struct {
-	Size     fyne.Size     // The current size of the Image
-	Position fyne.Position // The current position of the Image
-	Options  Options       // Options to pass to the renderer
+	baseObject
 
 	// one of the following sources will provide our image data
 	PixelColor func(x, y, w, h int) color.RGBA // Render the image from code
 	File       string                          // Load the image froma file
-}
-
-// CurrentSize returns the current size of this image object
-func (r *Image) CurrentSize() fyne.Size {
-	return r.Size
-}
-
-// Resize sets a new size for the image object
-func (r *Image) Resize(size fyne.Size) {
-	r.Size = size
-}
-
-// CurrentPosition gets the current position of this image object, relative to it's parent / canvas
-func (r *Image) CurrentPosition() fyne.Position {
-	return r.Position
-}
-
-// Move the image object to a new position, relative to it's parent / canvas
-func (r *Image) Move(pos fyne.Position) {
-	r.Position = pos
-}
-
-// MinSize for a Image simply returns Size{1, 1} as there is no
-// explicit content
-func (r *Image) MinSize() fyne.Size {
-	return fyne.NewSize(1, 1)
 }
 
 // NewRaster returns a new Image instance that is rendered dynamically using

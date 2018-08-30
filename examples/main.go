@@ -9,7 +9,7 @@ import "github.com/fyne-io/fyne/examples/apps"
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/theme"
-import "github.com/fyne-io/fyne/widget"
+import W "github.com/fyne-io/fyne/widget"
 
 func blogApp(app fyne.App) {
 	apps.Blog(app)
@@ -39,16 +39,16 @@ func lifeApp(app fyne.App) {
 	apps.Life(app)
 }
 
-func appButton(app fyne.App, label string, onClick func(fyne.App)) *widget.Button {
-	return widget.NewButton(label, func() {
+func appButton(app fyne.App, label string, onClick func(fyne.App)) *W.Button {
+	return &W.Button{Text: label, OnTapped: func() {
 		onClick(app)
-	})
+	}}
 }
 
 func welcome(app fyne.App) {
 	w := app.NewWindow("Examples")
-	w.SetContent(widget.NewList(
-		widget.NewLabel("Fyne Examples!"),
+	w.SetContent(&W.List{Children: []fyne.CanvasObject{
+		&W.Label{Text: "Fyne Examples!"},
 
 		appButton(app, "Blog", blogApp),
 		appButton(app, "Calculator", calcApp),
@@ -59,20 +59,21 @@ func welcome(app fyne.App) {
 		appButton(app, "Life", lifeApp),
 
 		layout.NewSpacer(),
-		widget.NewEntry(),
-		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
+		&W.Entry{},
+		&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
 		layout.NewSpacer(),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-			widget.NewButton("Dark", func() {
+			&W.Button{Text: "Dark", OnTapped: func() {
 				fyne.GetSettings().SetTheme("dark")
-			}),
-			widget.NewButton("Light", func() {
+			}},
+			&W.Button{Text: "Light", OnTapped: func() {
 				fyne.GetSettings().SetTheme("light")
-			}),
+			}},
 		),
-		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
+		&W.Button{Text: "Quit", Icon: theme.CancelIcon(), OnTapped: func() {
 			app.Quit()
-		})))
+		}},
+	}})
 	w.Show()
 }
 

@@ -4,15 +4,18 @@ import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 
-type checkLayout struct {
+type checkRenderer struct {
 	background *canvas.Rectangle
 	icon       *canvas.Image
 	label      *canvas.Text
+
+	objects []fyne.CanvasObject
+	check   *Check
 }
 
 // MinSize calculates the minimum size of a check.
 // This is based on the contained text, the check icon and a standard amount of padding added.
-func (c *checkLayout) MinSize([]fyne.CanvasObject) fyne.Size {
+func (c *checkRenderer) MinSize() fyne.Size {
 	min := c.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 	min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 
@@ -20,7 +23,7 @@ func (c *checkLayout) MinSize([]fyne.CanvasObject) fyne.Size {
 }
 
 // Layout the components of the check widget
-func (c *checkLayout) Layout(_ []fyne.CanvasObject, size fyne.Size) {
+func (c *checkRenderer) Layout(size fyne.Size) {
 	c.background.Resize(size)
 
 	offset := fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)
@@ -34,19 +37,35 @@ func (c *checkLayout) Layout(_ []fyne.CanvasObject, size fyne.Size) {
 		(size.Height-theme.IconInlineSize())/2))
 }
 
+// ApplyTheme is called when the Check may need to update it's look
+func (c *checkRenderer) ApplyTheme() {
+	c.label.Color = theme.TextColor()
+	c.background.FillColor = theme.BackgroundColor()
+
+	if c.check.Checked {
+		c.icon.File = theme.CheckedIcon().CachePath()
+	} else {
+		c.icon.File = theme.UncheckedIcon().CachePath()
+	}
+}
+
+func (c *checkRenderer) Objects() []fyne.CanvasObject {
+	return c.objects
+}
+
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
 type Check struct {
 	baseWidget
+	Text    string
 	Checked bool
 
-	OnChanged func(bool)
-	layout    *checkLayout
+	OnChanged func(bool) `json:"-"`
 }
 
 // OnMouseDown is called when a mouse down event is captured and triggers any change handler
 func (c *Check) OnMouseDown(*fyne.MouseEvent) {
 	c.Checked = !c.Checked
-	c.ApplyTheme()
+	c.Renderer().ApplyTheme()
 
 	if c.OnChanged != nil {
 		c.OnChanged(c.Checked)
@@ -54,43 +73,34 @@ func (c *Check) OnMouseDown(*fyne.MouseEvent) {
 	fyne.GetCanvas(c).Refresh(c)
 }
 
-// ApplyTheme is called when the Check may need to update it's look
-func (c *Check) ApplyTheme() {
-	c.layout.label.Color = theme.TextColor()
-	c.layout.background.FillColor = theme.BackgroundColor()
+func (c *Check) createRenderer() fyne.WidgetRenderer {
+	icon := canvas.NewImageFromResource(theme.UncheckedIcon())
 
-	if c.Checked {
-		c.layout.icon.File = theme.CheckedIcon().CachePath()
-	} else {
-		c.layout.icon.File = theme.UncheckedIcon().CachePath()
+	text := canvas.NewText(c.Text, theme.TextColor())
+	text.Alignment = fyne.TextAlignCenter
+	bg := canvas.NewRectangle(theme.BackgroundColor())
+
+	return &checkRenderer{bg, icon, text, []fyne.CanvasObject{bg, icon, text}, c}
+}
+
+// Renderer is a private method to Fyne which links this widget to it's renderer
+func (c *Check) Renderer() fyne.WidgetRenderer {
+	if c.renderer == nil {
+		c.renderer = c.createRenderer()
 	}
+
+	return c.renderer
 }
 
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
-	icon := canvas.NewImageFromResource(theme.UncheckedIcon())
-
-	text := canvas.NewText(label, theme.TextColor())
-	text.Alignment = fyne.TextAlignCenter
-	bg := canvas.NewRectangle(theme.BackgroundColor())
-	layout := &checkLayout{bg, icon, text}
-
-	objects := []fyne.CanvasObject{
-		bg,
-		text,
-		icon,
-	}
-
 	c := &Check{
-		baseWidget{
-			objects: objects,
-			layout:  layout,
-		},
+		baseWidget{},
+		label,
 		false,
 		changed,
-		layout,
 	}
 
-	c.Layout(c.MinSize())
+	c.Renderer().Layout(c.MinSize())
 	return c
 }

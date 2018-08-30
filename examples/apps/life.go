@@ -146,13 +146,10 @@ type game struct {
 	board  *board
 	paused bool
 
-	aliveColor color.RGBA
-	deadColor  color.RGBA
-
 	size     fyne.Size
 	position fyne.Position
-	render   *canvas.Image
-	objects  []fyne.CanvasObject
+
+	renderer *gameRenderer
 }
 
 func (g *game) CurrentSize() fyne.Size {
@@ -161,7 +158,7 @@ func (g *game) CurrentSize() fyne.Size {
 
 func (g *game) Resize(size fyne.Size) {
 	g.size = size
-	g.render.Resize(size)
+	g.Renderer().Layout(size)
 }
 
 func (g *game) CurrentPosition() fyne.Position {
@@ -170,20 +167,74 @@ func (g *game) CurrentPosition() fyne.Position {
 
 func (g *game) Move(pos fyne.Position) {
 	g.position = pos
-	g.render.Move(pos)
+	g.Renderer().Layout(g.size)
 }
 
 func (g *game) MinSize() fyne.Size {
-	return fyne.NewSize(g.board.width*10, g.board.height*10)
+	return g.Renderer().MinSize()
 }
 
 func (g *game) ApplyTheme() {
+	g.Renderer().ApplyTheme()
+}
+
+func (g *game) Renderer() fyne.WidgetRenderer {
+	if g.renderer == nil {
+		g.renderer = g.createRenderer()
+	}
+
+	return g.renderer
+}
+
+type gameRenderer struct {
+	render  *canvas.Image
+	objects []fyne.CanvasObject
+
+	aliveColor color.RGBA
+	deadColor  color.RGBA
+
+	game *game
+}
+
+func (g *gameRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(g.game.board.width*10, g.game.board.height*10)
+}
+
+func (g *gameRenderer) Layout(size fyne.Size) {
+	g.render.Resize(size)
+}
+
+func (g *gameRenderer) ApplyTheme() {
 	g.aliveColor = theme.TextColor()
 	g.deadColor = theme.BackgroundColor()
 }
 
-func (g *game) CanvasObjects() []fyne.CanvasObject {
+func (g *gameRenderer) Objects() []fyne.CanvasObject {
 	return g.objects
+}
+
+func (g *gameRenderer) renderer(x, y, w, h int) color.RGBA {
+	xpos, ypos := g.game.cellForCoord(x, y, w, h)
+
+	if xpos >= g.game.board.width || ypos >= g.game.board.height {
+		return g.deadColor
+	}
+	if g.game.board.cells[ypos][xpos] {
+		return g.aliveColor
+	}
+
+	return g.deadColor
+}
+
+func (g *game) createRenderer() *gameRenderer {
+	renderer := &gameRenderer{game: g}
+
+	render := canvas.NewRaster(renderer.renderer)
+	renderer.render = render
+	renderer.objects = []fyne.CanvasObject{render}
+	renderer.ApplyTheme()
+
+	return renderer
 }
 
 func (g *game) cellForCoord(x, y, w, h int) (int, int) {
@@ -191,19 +242,6 @@ func (g *game) cellForCoord(x, y, w, h int) (int, int) {
 	ypos := int(float64(g.board.height) * (float64(y) / float64(h)))
 
 	return xpos, ypos
-}
-
-func (g *game) renderer(x, y, w, h int) color.RGBA {
-	xpos, ypos := g.cellForCoord(x, y, w, h)
-
-	if xpos >= g.board.width || ypos >= g.board.height {
-		return g.deadColor
-	}
-	if g.board.cells[ypos][xpos] {
-		return g.aliveColor
-	}
-
-	return g.deadColor
 }
 
 func (g *game) run() {
@@ -221,7 +259,7 @@ func (g *game) toggleRun() {
 func (g *game) animate() {
 	go func() {
 		tick := time.NewTicker(time.Second / 6)
-		canvas := fyne.GetCanvas(g.render)
+		canvas := fyne.GetCanvas(g)
 
 		for {
 			select {
@@ -232,7 +270,7 @@ func (g *game) animate() {
 
 				state := g.board.nextGen()
 				g.board.renderState(state)
-				canvas.Refresh(g.render)
+				canvas.Refresh(g)
 			}
 		}
 	}()
@@ -253,17 +291,12 @@ func (g *game) OnMouseDown(ev *fyne.MouseEvent) {
 
 	g.board.cells[ypos][xpos] = !g.board.cells[ypos][xpos]
 
-	canvas := fyne.GetCanvas(g.render)
-	canvas.Refresh(g.render)
+	fyne.GetCanvas(g).Refresh(g)
 }
 
 func newGame(b *board) *game {
 	g := &game{board: b}
-	render := canvas.NewRaster(g.renderer)
-	g.ApplyTheme()
 
-	g.render = render
-	g.objects = []fyne.CanvasObject{render}
 	return g
 }
 

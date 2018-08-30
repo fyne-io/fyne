@@ -8,8 +8,7 @@ type baseWidget struct {
 	Size     fyne.Size
 	Position fyne.Position
 
-	objects []fyne.CanvasObject
-	layout  fyne.Layout
+	renderer fyne.WidgetRenderer
 }
 
 // Get the current size of this widget.
@@ -22,7 +21,9 @@ func (w *baseWidget) CurrentSize() fyne.Size {
 func (w *baseWidget) Resize(size fyne.Size) {
 	w.Size = size
 
-	w.Layout(size)
+	if w.renderer != nil {
+		w.renderer.Layout(size)
+	}
 }
 
 // Get the current position of this widget, relative to it's parent.
@@ -37,30 +38,12 @@ func (w *baseWidget) Move(pos fyne.Position) {
 }
 
 func (w *baseWidget) MinSize() fyne.Size {
-	if w.layout == nil {
-		return fyne.NewSize(1, 1)
+	if w.renderer == nil {
+		return fyne.NewSize(0, 0)
 	}
-	return w.layout.MinSize(w.objects)
+	return w.renderer.MinSize()
 }
 
-func (w *baseWidget) Layout(size fyne.Size) {
-	if w.layout == nil {
-		return
-	}
-	w.layout.Layout(w.objects, size)
-}
-
-// ApplyTheme is a fallback method that applies the new theme to all contained
-// objects. Widgets that override this should consider doing similarly.
 func (w *baseWidget) ApplyTheme() {
-	for _, child := range w.objects {
-		switch themed := child.(type) {
-		case fyne.ThemedObject:
-			themed.ApplyTheme()
-		}
-	}
-}
-
-func (w *baseWidget) CanvasObjects() []fyne.CanvasObject {
-	return w.objects
+	w.renderer.ApplyTheme()
 }

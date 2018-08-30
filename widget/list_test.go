@@ -8,23 +8,25 @@ import _ "github.com/fyne-io/fyne/test"
 
 func TestListSize(t *testing.T) {
 	list := NewList(NewLabel("Hello"), NewLabel("World"))
-	assert.True(t, list.MinSize().Height > 0)
+	assert.Equal(t, 2, len(list.Children))
 }
 
 func TestListPrepend(t *testing.T) {
 	list := NewList(NewLabel("World"))
-	assert.True(t, list.MinSize().Height > 0)
+	assert.Equal(t, 1, len(list.Children))
 
-	min := list.MinSize()
-	list.Prepend(NewLabel("Hello"))
-	assert.True(t, list.MinSize().Height > min.Height)
+	prepend := NewLabel("Hello")
+	list.Prepend(prepend)
+	assert.Equal(t, 2, len(list.Children))
+	assert.Equal(t, prepend, list.Children[0])
 }
 
 func TestListAppend(t *testing.T) {
 	list := NewList(NewLabel("Hello"))
-	assert.True(t, list.MinSize().Height > 0)
+	assert.Equal(t, 1, len(list.Children))
 
-	min := list.MinSize()
-	list.Append(NewLabel("World"))
-	assert.True(t, list.MinSize().Height > min.Height)
+	append := NewLabel("World")
+	list.Append(append)
+	assert.True(t, len(list.Children) == 2)
+	assert.Equal(t, append, list.Children[1])
 }

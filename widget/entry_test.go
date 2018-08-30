@@ -6,7 +6,6 @@ import "github.com/stretchr/testify/assert"
 
 import "github.com/fyne-io/fyne/test"
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 
 func TestEntrySize(t *testing.T) {
@@ -26,7 +25,7 @@ func TestEntryAppend(t *testing.T) {
 	key.String = "i"
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, entry.Text(), "Hi")
+	assert.Equal(t, entry.Text, "Hi")
 }
 
 func TestEntryBackspace(t *testing.T) {
@@ -37,7 +36,7 @@ func TestEntryBackspace(t *testing.T) {
 	key.Name = "BackSpace"
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, entry.Text(), "H")
+	assert.Equal(t, entry.Text, "H")
 }
 
 func TestEntryNotify(t *testing.T) {
@@ -72,12 +71,10 @@ func TestEntryWindowFocus(t *testing.T) {
 
 func TestEntryFocusHighlight(t *testing.T) {
 	entry := NewEntry()
-	bg := entry.CanvasObjects()[0].(*canvas.Rectangle)
-	color := bg.FillColor
 
 	entry.OnFocusGained()
-	assert.NotEqual(t, bg.FillColor, color)
+	assert.True(t, entry.focused)
 
 	entry.OnFocusLost()
-	assert.Equal(t, bg.FillColor, color)
+	assert.False(t, entry.focused)
 }

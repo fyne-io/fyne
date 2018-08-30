@@ -2,49 +2,18 @@ package layout
 
 import (
 	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-type MinSizeRect struct {
-	Size     fyne.Size
-	Position fyne.Position
-
-	minSize fyne.Size
-}
-
-// CurrentSize returns the current size of this rectangle object
-func (r *MinSizeRect) CurrentSize() fyne.Size {
-	return r.Size
-}
-
-// Resize sets a new size for the rectangle object
-func (r *MinSizeRect) Resize(size fyne.Size) {
-	r.Size = size
-}
-
-// CurrentPosition gets the current position of this rectangle object, relative to it's parent / canvas
-func (r *MinSizeRect) CurrentPosition() fyne.Position {
-	return r.Position
-}
-
-// Move the rectangle object to a new position, relative to it's parent / canvas
-func (r *MinSizeRect) Move(pos fyne.Position) {
-	r.Position = pos
-}
-
-// MinSize for a Rectangle simply returns Size{1, 1} as there is no
-// explicit content
-func (r *MinSizeRect) MinSize() fyne.Size {
-	return r.minSize
-}
-
 // NewRectangle returns a new Rectangle instance
-func NewMinSizeRect(min fyne.Size) *MinSizeRect {
-	return &MinSizeRect{
-		minSize: min,
-	}
+func NewMinSizeRect(min fyne.Size) *canvas.Rectangle {
+	rect := &canvas.Rectangle{}
+	rect.SetMinSize(min)
+
+	return rect
 }
 
 func TestSimpleListLayout(t *testing.T) {

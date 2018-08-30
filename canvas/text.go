@@ -7,10 +7,8 @@ import "github.com/fyne-io/fyne/theme"
 
 // Text describes a text primitive in a Fyne canvas
 type Text struct {
-	Size      fyne.Size      // The current size of the Text - the font will not scale to this Size
-	Position  fyne.Position  // The current position of the Text
+	baseObject
 	Alignment fyne.TextAlign // The alignment of the text content
-	Options   Options        // Options to pass to the renderer
 
 	Color     color.RGBA     // The main text draw colour
 	Text      string         // The string content of this Text

@@ -5,7 +5,6 @@ import "testing"
 import "github.com/stretchr/testify/assert"
 
 import _ "github.com/fyne-io/fyne/test"
-import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 
 func TestButtonSize(t *testing.T) {
@@ -14,16 +13,6 @@ func TestButtonSize(t *testing.T) {
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
-}
-
-func TestButtonType(t *testing.T) {
-	button := NewButton("Hi", nil)
-	bg := button.CanvasObjects()[0].(*canvas.Rectangle)
-	color := bg.FillColor
-
-	button.Style = PrimaryButton
-	button.ApplyTheme()
-	assert.NotEqual(t, bg.FillColor, color)
 }
 
 func TestButtonNotify(t *testing.T) {

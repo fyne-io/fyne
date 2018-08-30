@@ -4,12 +4,19 @@ package fyne
 // CanvasObject - a widget behaves in the same basic way but will encapsulate
 // many child objects to create the rendered widget.
 type Widget interface {
-	CurrentSize() Size
-	Resize(Size)
-	CurrentPosition() Position
-	Move(Position)
+	CanvasObject
 
+	// TODO refresh?
+	Renderer() WidgetRenderer
+}
+
+// WidgetRenderer defines the behaviour of a widget's implementation.
+// This is returned from a widget's declarative object through the Render()
+// function and should be exactly one instance per widget in memory.
+type WidgetRenderer interface {
+	Layout(Size)
 	MinSize() Size
+
 	ApplyTheme()
-	CanvasObjects() []CanvasObject
+	Objects() []CanvasObject
 }

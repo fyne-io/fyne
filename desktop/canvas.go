@@ -137,7 +137,7 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, objs []fyne.CanvasO
 			c.buildContainer(co, co.Objects, child.CurrentSize(),
 				child.CurrentPosition(), childOffset)
 		case fyne.Widget:
-			c.buildContainer(co, co.CanvasObjects(),
+			c.buildContainer(co, co.Renderer().Objects(),
 				child.CurrentSize(), child.CurrentPosition(), childOffset)
 		default:
 			if parent == nil {
@@ -304,7 +304,7 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 		case *fyne.Container:
 			c.refreshContainer(typed.Objects, child, child.CurrentPosition(), child.CurrentSize())
 		case fyne.Widget:
-			c.refreshContainer(typed.CanvasObjects(), child,
+			c.refreshContainer(typed.Renderer().Objects(), child,
 				child.CurrentPosition(), child.CurrentSize())
 		default:
 			if target == nil {
@@ -327,7 +327,7 @@ func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
 	case *fyne.Container:
 		c.buildContainer(set, set.Objects, set.MinSize(), o.CurrentPosition(), offset)
 	case fyne.Widget:
-		c.buildContainer(set, set.CanvasObjects(),
+		c.buildContainer(set, set.Renderer().Objects(),
 			set.MinSize(), o.CurrentPosition(), offset)
 	default:
 		c.buildObject(o, o, offset)
@@ -346,7 +346,7 @@ func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 		c.refreshContainer(ref.Objects, o, o.CurrentPosition(),
 			o.CurrentSize())
 	case fyne.Widget:
-		c.refreshContainer(ref.CanvasObjects(), o,
+		c.refreshContainer(ref.Renderer().Objects(), o,
 			o.CurrentPosition(), o.CurrentSize())
 	default:
 		c.refreshObject(o, o)
