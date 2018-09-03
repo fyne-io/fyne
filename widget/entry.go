@@ -40,15 +40,21 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 
 // ApplyTheme is called when the Entry may need to update it's look.
 func (e *entryRenderer) ApplyTheme() {
-	e.label.Text = e.entry.Text
 	e.label.Color = theme.TextColor()
+	e.box.FillColor = theme.BackgroundColor()
+	e.Refresh()
+}
+
+func (e *entryRenderer) Refresh() {
+	e.label.Text = e.entry.Text
 
 	if e.entry.focused {
 		e.bg.FillColor = theme.FocusColor()
 	} else {
 		e.bg.FillColor = theme.ButtonColor()
 	}
-	e.box.FillColor = theme.BackgroundColor()
+
+	fyne.RefreshObject(e.entry)
 }
 
 func (e *entryRenderer) Objects() []fyne.CanvasObject {
@@ -73,22 +79,21 @@ func (e *Entry) SetText(text string) {
 		e.OnChanged(text)
 	}
 
-	e.ApplyTheme()
-	fyne.GetCanvas(e).Refresh(e)
+	e.Renderer().Refresh()
 }
 
 // OnFocusGained is called when the Entry has been given focus.
 func (e *Entry) OnFocusGained() {
 	e.focused = true
-	e.ApplyTheme()
-	fyne.GetCanvas(e).Refresh(e)
+
+	e.Renderer().Refresh()
 }
 
 // OnFocusLost is called when the Entry has had focus removed.
 func (e *Entry) OnFocusLost() {
 	e.focused = false
-	e.Renderer().ApplyTheme()
-	fyne.GetCanvas(e).Refresh(e)
+
+	e.Renderer().Refresh()
 }
 
 // Focused returns whether or not this Entry has focus.

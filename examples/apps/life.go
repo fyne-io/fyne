@@ -209,6 +209,10 @@ func (g *gameRenderer) ApplyTheme() {
 	g.deadColor = theme.BackgroundColor()
 }
 
+func (g *gameRenderer) Refresh() {
+	fyne.RefreshObject(g.render)
+}
+
 func (g *gameRenderer) Objects() []fyne.CanvasObject {
 	return g.objects
 }
@@ -259,7 +263,6 @@ func (g *game) toggleRun() {
 func (g *game) animate() {
 	go func() {
 		tick := time.NewTicker(time.Second / 6)
-		canvas := fyne.GetCanvas(g)
 
 		for {
 			select {
@@ -270,7 +273,7 @@ func (g *game) animate() {
 
 				state := g.board.nextGen()
 				g.board.renderState(state)
-				canvas.Refresh(g)
+				g.Renderer().Refresh()
 			}
 		}
 	}()
@@ -291,7 +294,7 @@ func (g *game) OnMouseDown(ev *fyne.MouseEvent) {
 
 	g.board.cells[ypos][xpos] = !g.board.cells[ypos][xpos]
 
-	fyne.GetCanvas(g).Refresh(g)
+	g.Renderer().Refresh()
 }
 
 func newGame(b *board) *game {

@@ -42,11 +42,19 @@ func (c *checkRenderer) ApplyTheme() {
 	c.label.Color = theme.TextColor()
 	c.background.FillColor = theme.BackgroundColor()
 
+	c.Refresh()
+}
+
+func (c *checkRenderer) Refresh() {
+	c.label.Text = c.check.Text
+
 	if c.check.Checked {
 		c.icon.File = theme.CheckedIcon().CachePath()
 	} else {
 		c.icon.File = theme.UncheckedIcon().CachePath()
 	}
+
+	fyne.RefreshObject(c.check)
 }
 
 func (c *checkRenderer) Objects() []fyne.CanvasObject {
@@ -65,12 +73,11 @@ type Check struct {
 // OnMouseDown is called when a mouse down event is captured and triggers any change handler
 func (c *Check) OnMouseDown(*fyne.MouseEvent) {
 	c.Checked = !c.Checked
-	c.Renderer().ApplyTheme()
 
 	if c.OnChanged != nil {
 		c.OnChanged(c.Checked)
 	}
-	fyne.GetCanvas(c).Refresh(c)
+	c.Renderer().Refresh()
 }
 
 func (c *Check) createRenderer() fyne.WidgetRenderer {

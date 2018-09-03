@@ -14,20 +14,14 @@ type List struct {
 func (l *List) Prepend(object fyne.CanvasObject) {
 	l.Children = append([]fyne.CanvasObject{object}, l.Children...)
 
-	render := l.Renderer().(*listRenderer)
-	render.objects = l.Children
-	render.Layout(l.CurrentSize())
-
-	fyne.GetCanvas(l).Refresh(l)
+	l.Renderer().Refresh()
 }
 
 // Append adds a new CanvasObject to the end of the list
 func (l *List) Append(object fyne.CanvasObject) {
 	l.Children = append(l.Children, object)
 
-	render := l.Renderer().(*listRenderer)
-
-	render.Refresh()
+	l.Renderer().Refresh()
 }
 
 func (l *List) createRenderer() fyne.WidgetRenderer {
@@ -85,5 +79,5 @@ func (l *listRenderer) Refresh() {
 	l.objects = l.list.Children
 	l.Layout(l.list.CurrentSize())
 
-	fyne.GetCanvas(l.list).Refresh(l.list)
+	fyne.RefreshObject(l.list)
 }

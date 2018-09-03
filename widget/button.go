@@ -48,6 +48,12 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 func (b *buttonRenderer) ApplyTheme() {
 	b.label.Color = theme.TextColor()
 
+	b.Refresh()
+}
+
+func (b *buttonRenderer) Refresh() {
+	b.label.Text = b.button.Text
+
 	if b.button.Style == PrimaryButton {
 		b.background.FillColor = theme.PrimaryColor()
 	} else {
@@ -57,6 +63,8 @@ func (b *buttonRenderer) ApplyTheme() {
 	if b.button.Icon != nil {
 		b.icon.File = b.button.Icon.CachePath()
 	}
+
+	fyne.RefreshObject(b.button)
 }
 
 func (b *buttonRenderer) Objects() []fyne.CanvasObject {

@@ -33,9 +33,14 @@ func (l *labelRenderer) ApplyTheme() {
 	l.background.FillColor = theme.BackgroundColor()
 
 	l.text.Color = theme.TextColor()
+}
+
+func (l *labelRenderer) Refresh() {
 	l.text.Alignment = l.label.Alignment
 	l.text.TextStyle = l.label.TextStyle
 	l.text.Text = l.label.Text
+
+	fyne.RefreshObject(l.label)
 }
 
 // Label widget is a basic text component with appropriate padding and layout.
@@ -50,8 +55,8 @@ type Label struct {
 // SetText updates the text of the label widget
 func (l *Label) SetText(text string) {
 	l.Text = text
-	l.ApplyTheme()
-	fyne.GetCanvas(l).Refresh(l)
+
+	l.Renderer().Refresh()
 }
 
 func (l *Label) createRenderer() fyne.WidgetRenderer {

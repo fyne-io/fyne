@@ -20,7 +20,7 @@ func (r *baseObject) CurrentSize() fyne.Size {
 func (r *baseObject) Resize(size fyne.Size) {
 	r.Size = size
 
-	// TODO refresh?
+	fyne.RefreshObject(r)
 }
 
 // CurrentPosition gets the current position of this rectangle object, relative to it's parent / canvas
@@ -32,17 +32,17 @@ func (r *baseObject) CurrentPosition() fyne.Position {
 func (r *baseObject) Move(pos fyne.Position) {
 	r.Position = pos
 
-	// TODO refresh?
+	fyne.RefreshObject(r)
 }
 
-// MinSize for a Rectangle simply returns Size{1, 1} as there is no
-// explicit content
+// MinSize returns the specified minumum size, if set, or {0, 0} otherwise
 func (r *baseObject) MinSize() fyne.Size {
 	return r.min
 }
 
+// SetMinSize specifies the smallest size this object should be
 func (r *baseObject) SetMinSize(size fyne.Size) {
 	r.min = size
 
-	// TODO refresh?
+	fyne.RefreshObject(r)
 }

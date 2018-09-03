@@ -17,14 +17,11 @@ type Canvas interface {
 	SetOnKeyDown(func(*KeyEvent))
 }
 
-// GetCanvas returns the canvas containing the passed CanvasObject.
-// It will return nil if the CanvasObject has not been added to any Canvas.
-func GetCanvas(obj CanvasObject) Canvas {
+// RefreshObject instructs the containing canvas to refresh the specified obj.
+func RefreshObject(obj CanvasObject) {
 	for _, window := range GetDriver().AllWindows() {
 		if window.Canvas() != nil && window.Canvas().Contains(obj) {
-			return window.Canvas()
+			window.Canvas().Refresh(obj)
 		}
 	}
-
-	return nil
 }

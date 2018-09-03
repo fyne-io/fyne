@@ -6,7 +6,6 @@ package fyne
 type Widget interface {
 	CanvasObject
 
-	// TODO refresh?
 	Renderer() WidgetRenderer
 }
 
@@ -17,6 +16,7 @@ type WidgetRenderer interface {
 	Layout(Size)
 	MinSize() Size
 
+	Refresh()
 	ApplyTheme()
 	Objects() []CanvasObject
 }
