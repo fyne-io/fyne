@@ -5,15 +5,15 @@ package main
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/desktop"
-import W "github.com/fyne-io/fyne/widget"
+import "github.com/fyne-io/fyne/widget"
 
 func main() {
 	app := desktop.NewApp()
 
 	w := app.NewWindow("Hello")
-	w.SetContent(&W.List{Children: []fyne.CanvasObject{
-		&W.Label{Text: "Hello Fyne!"},
-		&W.Button{Text: "Quit", OnTapped: func() {
+	w.SetContent(&widget.List{Children: []fyne.CanvasObject{
+		&widget.Label{Text: "Hello Fyne!"},
+		&widget.Button{Text: "Quit", OnTapped: func() {
 			app.Quit()
 		}},
 	}})

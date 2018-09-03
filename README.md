@@ -21,7 +21,33 @@ Using standard go tools you can install Fyne's core library using:
 
     go get github.com/fyne-io/fyne
 
-And then you're ready to write your first app - this example shows how:
+And then you're ready to write your first app!
+There are two types of API in Fyne - declarative and method based - a
+simple hello world application using the declarative API looks like this:
+
+```go
+package main
+
+import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/desktop"
+import "github.com/fyne-io/fyne/widget"
+
+func main() {
+	app := desktop.NewApp()
+
+	w := app.NewWindow("Hello")
+	w.SetContent(&widget.List{Children: []fyne.CanvasObject{
+		&widget.Label{Text: "Hello Fyne!"},
+		&widget.Button{Text: "Quit", OnTapped: func() {
+			app.Quit()
+		}},
+	}})
+
+	w.Show()
+}
+```
+
+Or if you prefer the method based API
 
 ```go
     package main
