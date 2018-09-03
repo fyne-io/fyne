@@ -20,6 +20,7 @@ import "unsafe"
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
+import "github.com/fyne-io/fyne/layout"
 
 var canvases = make(map[*C.Evas]*eflCanvas)
 
@@ -62,6 +63,14 @@ type eflCanvas struct {
 	native  map[fyne.CanvasObject]*C.Evas_Object
 	offsets map[fyne.CanvasObject]fyne.Position
 	dirty   map[fyne.CanvasObject]bool
+}
+
+func ignoreObject(o fyne.CanvasObject) bool {
+	if _, ok := o.(layout.SpacerObject); ok {
+		return true
+	}
+
+	return false
 }
 
 func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, offset fyne.Position) *C.Evas_Object {
@@ -144,7 +153,9 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, objs []fyne.CanvasO
 				parent = child
 			}
 
-			c.buildObject(child, parent, childOffset)
+			if !ignoreObject(child) {
+				c.buildObject(child, parent, childOffset)
+			}
 		}
 	}
 
@@ -210,6 +221,9 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 
 	// TODO a better solution here as objects are added to the UI
 	if obj == nil {
+		if ignoreObject(o) {
+			return
+		}
 		obj = c.buildObject(o, o2, c.offsets[o])
 	}
 	pos := c.offsets[o].Add(o.CurrentPosition())
@@ -330,7 +344,9 @@ func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
 		c.buildContainer(set, set.Renderer().Objects(),
 			set.MinSize(), o.CurrentPosition(), offset)
 	default:
-		c.buildObject(o, o, offset)
+		if !ignoreObject(o) {
+			c.buildObject(o, o, offset)
+		}
 	}
 
 	C.ecore_thread_main_loop_end()

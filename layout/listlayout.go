@@ -3,7 +3,6 @@ package layout
 import (
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
-	"log"
 )
 
 type listLayout struct {
@@ -38,7 +37,7 @@ func (g *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	if len(spacers) > 0 {
 		extraCellHeight = int(float64(extraHeight) / float64(len(spacers)))
 	}
-	log.Println("Missing allocation", extraHeight)
+
 	for _, child := range objects {
 		height := child.MinSize().Height
 		if isVerticalSpacer(child) {
