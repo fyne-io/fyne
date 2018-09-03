@@ -210,7 +210,7 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 
 	// TODO a better solution here as objects are added to the UI
 	if obj == nil {
-		obj = c.buildObject(o, o2, fyne.NewPos(0, 0)) // TODO fix offset
+		obj = c.buildObject(o, o2, c.offsets[o])
 	}
 	pos := c.offsets[o].Add(o.CurrentPosition())
 	size := o.CurrentSize()
