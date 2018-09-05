@@ -5,6 +5,7 @@ import "github.com/fyne-io/fyne"
 type testWindow struct {
 	title      string
 	fullscreen bool
+	onClosed   func()
 
 	canvas fyne.Canvas
 }
@@ -27,11 +28,19 @@ func (w *testWindow) SetFullscreen(fullscreen bool) {
 	w.fullscreen = fullscreen
 }
 
+func (w *testWindow) SetOnClosed(closed func()) {
+	w.onClosed = closed
+}
+
 func (w *testWindow) Show() {}
 
 func (w *testWindow) Hide() {}
 
 func (w *testWindow) Close() {
+	if w.onClosed != nil {
+		w.onClosed()
+	}
+
 	i := 0
 	for _, window := range windows {
 		if window == w {

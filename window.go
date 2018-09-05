@@ -15,6 +15,8 @@ type Window interface {
 	// true for a fullscreen window and false to unset this.
 	SetFullscreen(bool)
 
+	SetOnClosed(func())
+
 	// Show the window on screen
 	Show()
 	// Hide the window from the user.

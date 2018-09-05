@@ -3,12 +3,14 @@ package main
 
 import "flag"
 import "fmt"
+import "log"
 
 import "github.com/fyne-io/fyne/examples/apps"
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/theme"
+import "github.com/fyne-io/fyne/dialog"
 import W "github.com/fyne-io/fyne/widget"
 
 func blogApp(app fyne.App) {
@@ -45,6 +47,10 @@ func appButton(app fyne.App, label string, onClick func(fyne.App)) *W.Button {
 	}}
 }
 
+func confirmCallback(response bool) {
+	log.Println("Responded with", response)
+}
+
 func welcome(app fyne.App) {
 	w := app.NewWindow("Examples")
 	w.SetContent(&W.List{Children: []fyne.CanvasObject{
@@ -65,7 +71,18 @@ func welcome(app fyne.App) {
 			&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
 		}...),
 
+		W.NewGroup("Dialogs", []fyne.CanvasObject{
+			&W.Button{Text: "Info", OnTapped: func() {
+				dialog.ShowInformationDialog("Information", "You should know this thing...", app)
+			}},
+			&W.Button{Text: "Confirm", OnTapped: func() {
+				dialog.ShowConfirmDialog("Confirmation", "Do you want to confirm?", confirmCallback, app)
+			}},
+		}...),
+		&W.Entry{},
+		&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
 		layout.NewSpacer(),
+
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			&W.Button{Text: "Dark", OnTapped: func() {
 				fyne.GetSettings().SetTheme("dark")

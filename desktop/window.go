@@ -27,10 +27,11 @@ import "unsafe"
 import "github.com/fyne-io/fyne"
 
 type window struct {
-	ee      *C.Ecore_Evas
-	canvas  fyne.Canvas
-	master  bool
-	focused bool
+	ee       *C.Ecore_Evas
+	canvas   fyne.Canvas
+	master   bool
+	focused  bool
+	onClosed func()
 }
 
 func init() {
@@ -66,6 +67,10 @@ func (w *window) SetFullscreen(full bool) {
 	}
 }
 
+func (w *window) SetOnClosed(closed func()) {
+	w.onClosed = closed
+}
+
 func (w *window) Show() {
 	C.ecore_evas_show(w.ee)
 
@@ -81,6 +86,9 @@ func (w *window) Hide() {
 
 func (w *window) Close() {
 	w.Hide()
+	if w.onClosed != nil {
+		w.onClosed()
+	}
 
 	if w.master || len(windows) == 1 {
 		DoQuit()
@@ -190,6 +198,7 @@ func onWindowFocusLost(ee *C.Ecore_Evas) {
 
 //export onWindowClose
 func onWindowClose(ee *C.Ecore_Evas) {
+	// TODO notify any onclose...
 	windows[ee].Close()
 }
 
