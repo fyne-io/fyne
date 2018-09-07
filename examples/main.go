@@ -50,17 +50,21 @@ func welcome(app fyne.App) {
 	w.SetContent(&W.List{Children: []fyne.CanvasObject{
 		&W.Label{Text: "Fyne Examples!"},
 
-		appButton(app, "Blog", blogApp),
-		appButton(app, "Calculator", calcApp),
-		appButton(app, "Clock", clockApp),
-		appButton(app, "Fractal", fractalApp),
-		appButton(app, "Canvas", canvasApp),
-		appButton(app, "Layout", layoutApp),
-		appButton(app, "Life", lifeApp),
+		W.NewGroup("Apps", []fyne.CanvasObject{
+			appButton(app, "Blog", blogApp),
+			appButton(app, "Calculator", calcApp),
+			appButton(app, "Clock", clockApp),
+			appButton(app, "Fractal", fractalApp),
+			appButton(app, "Life", lifeApp),
+		}...),
 
-		layout.NewSpacer(),
-		&W.Entry{},
-		&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
+		W.NewGroup("Demos", []fyne.CanvasObject{
+			appButton(app, "Canvas", canvasApp),
+			appButton(app, "Layout", layoutApp),
+			&W.Entry{},
+			&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
+		}...),
+
 		layout.NewSpacer(),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			&W.Button{Text: "Dark", OnTapped: func() {
