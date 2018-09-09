@@ -104,6 +104,10 @@ func (e *Entry) Focused() bool {
 // OnKeyDown receives key input events when the Entry widget is focussed.
 func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	if key.Name == "BackSpace" {
+		if len(e.Text) == 0 {
+			return
+		}
+
 		runes := []rune(e.Text)
 		substr := string(runes[0 : len(runes)-1])
 
