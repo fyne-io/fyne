@@ -39,6 +39,19 @@ func TestEntryBackspace(t *testing.T) {
 	assert.Equal(t, entry.Text, "H")
 }
 
+func TestEntryBackspaceBeyondContent(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("Hi")
+
+	key := new(fyne.KeyEvent)
+	key.Name = "BackSpace"
+	entry.OnKeyDown(key)
+	entry.OnKeyDown(key)
+	entry.OnKeyDown(key)
+
+	assert.Equal(t, entry.Text, "")
+}
+
 func TestEntryNotify(t *testing.T) {
 	entry := NewEntry()
 	changed := false
