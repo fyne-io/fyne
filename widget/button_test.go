@@ -1,6 +1,7 @@
 package widget
 
 import "testing"
+import "time"
 
 import "github.com/stretchr/testify/assert"
 
@@ -16,11 +17,17 @@ func TestButtonSize(t *testing.T) {
 }
 
 func TestButtonNotify(t *testing.T) {
-	tapped := false
+	tapped := make(chan bool)
 	button := NewButton("Hi", func() {
-		tapped = true
+		tapped <- true
 	})
-	button.OnMouseDown(nil)
 
-	assert.True(t, tapped)
+	button.OnMouseDown(nil)
+	func() {
+		select {
+		case <-tapped:
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Timed out waiting for button tap")
+		}
+	}()
 }

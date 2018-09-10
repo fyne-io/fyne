@@ -94,7 +94,7 @@ const (
 // OnMouseDown is called when a mouse down event is captured and triggers any tap handler
 func (b *Button) OnMouseDown(*fyne.MouseEvent) {
 	if b.OnTapped != nil {
-		b.OnTapped() // TODO maybe spawn thread? (want to avoid blocking main!)
+		go b.OnTapped()
 	}
 }
 

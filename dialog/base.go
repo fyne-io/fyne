@@ -34,7 +34,7 @@ func (d *dialog) closed() {
 func newDialog(title string, callback func(bool), parent fyne.App) *dialog {
 	dialog := &dialog{}
 
-	win := parent.NewWindow(title) // TODO don't depend on the main loop calling this!
+	win := parent.NewWindow(title)
 	win.SetOnClosed(dialog.closed)
 
 	dialog.win = win

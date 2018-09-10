@@ -254,6 +254,8 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 // USE OF THIS METHOD IS NOT RECOMMENDED
 func CreateWindowWithEngine(engine string) fyne.Window {
 	cstr := C.CString(engine)
+
+	C.ecore_thread_main_loop_begin()
 	evas := C.ecore_evas_new(cstr, 0, 0, 10, 10, nil)
 	C.free(unsafe.Pointer(cstr))
 	if evas == nil {
@@ -271,6 +273,7 @@ func CreateWindowWithEngine(engine string) fyne.Window {
 		scale:  scaleByDPI(w),
 		window: w,
 	}
+	C.ecore_thread_main_loop_end()
 
 	return w
 }
