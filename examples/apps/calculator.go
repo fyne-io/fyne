@@ -10,71 +10,73 @@ import "github.com/fyne-io/fyne/widget"
 
 import "github.com/Knetic/govaluate"
 
-var equation string
-var output *widget.Label
-var functions = make(map[string]func())
-
-func display(newtext string) {
-	equation = newtext
-	output.SetText(newtext)
+type calc struct {
+	equation  string
+	output    *widget.Label
+	functions map[string]func()
 }
 
-func character(char string) {
-	display(equation + char)
+func (c *calc) display(newtext string) {
+	c.equation = newtext
+	c.output.SetText(newtext)
 }
 
-func digit(d int) {
-	character(strconv.Itoa(d))
+func (c *calc) character(char string) {
+	c.display(c.equation + char)
 }
 
-func clear() {
-	display("")
+func (c *calc) digit(d int) {
+	c.character(strconv.Itoa(d))
 }
 
-func evaluate() {
-	expression, err := govaluate.NewEvaluableExpression(output.Text)
+func (c *calc) clear() {
+	c.display("")
+}
+
+func (c *calc) evaluate() {
+	expression, err := govaluate.NewEvaluableExpression(c.output.Text)
 	if err == nil {
 		result, err := expression.Evaluate(nil)
 		if err == nil {
-			display(strconv.FormatFloat(result.(float64), 'f', -1, 64))
+			c.display(strconv.FormatFloat(result.(float64), 'f', -1, 64))
 		}
 	}
 
 	if err != nil {
 		log.Println("Error in calculation", err)
-		display("error")
+		c.display("error")
 	}
 
-	equation = ""
+	c.equation = ""
 }
 
-func digitButton(number int) *widget.Button {
+func (c *calc) digitButton(number int) *widget.Button {
 	str := fmt.Sprintf("%d", number)
 	action := func() {
-		digit(number)
+		c.digit(number)
 	}
-	functions[str] = action
+	c.functions[str] = action
 	return widget.NewButton(str, action)
 }
 
-func charButton(char string) *widget.Button {
+func (c *calc) charButton(char string) *widget.Button {
 	action := func() {
-		character(char)
+		c.character(char)
 	}
-	functions[char] = action
+	c.functions[char] = action
 	return widget.NewButton(char, action)
 }
 
-func keyDown(ev *fyne.KeyEvent) {
+func (c *calc) keyDown(ev *fyne.KeyEvent) {
 	if ev.String == "=" || ev.Name == "Return" || ev.Name == "KP_Enter" {
-		evaluate()
+		c.evaluate()
 		return
 	} else if ev.Name == "c" {
-		clear()
+		c.clear()
 		return
 	}
 
-	action := functions[ev.String]
+	action := c.functions[ev.String]
 	if action != nil {
 		action()
 	}
@@ -82,46 +84,49 @@ func keyDown(ev *fyne.KeyEvent) {
 
 // Calculator loads a calculator example window for the specified app context
 func Calculator(app fyne.App) {
-	output = widget.NewLabel("")
-	output.Alignment = fyne.TextAlignTrailing
-	output.TextStyle.Monospace = true
+	calc := &calc{}
+	calc.functions = make(map[string]func())
+
+	calc.output = widget.NewLabel("")
+	calc.output.Alignment = fyne.TextAlignTrailing
+	calc.output.TextStyle.Monospace = true
 	equals := widget.NewButton("=", func() {
-		evaluate()
+		calc.evaluate()
 	})
 	equals.Style = widget.PrimaryButton
 
 	window := app.NewWindow("Calc")
 	window.SetContent(fyne.NewContainerWithLayout(layout.NewGridLayout(1),
-		output,
+		calc.output,
 		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
-			charButton("+"),
-			charButton("-"),
-			charButton("*"),
-			charButton("/")),
+			calc.charButton("+"),
+			calc.charButton("-"),
+			calc.charButton("*"),
+			calc.charButton("/")),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
-			digitButton(7),
-			digitButton(8),
-			digitButton(9),
+			calc.digitButton(7),
+			calc.digitButton(8),
+			calc.digitButton(9),
 			widget.NewButton("C", func() {
-				clear()
+				calc.clear()
 			})),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
-			digitButton(4),
-			digitButton(5),
-			digitButton(6),
-			charButton("(")),
+			calc.digitButton(4),
+			calc.digitButton(5),
+			calc.digitButton(6),
+			calc.charButton("(")),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(4),
-			digitButton(1),
-			digitButton(2),
-			digitButton(3),
-			charButton(")")),
+			calc.digitButton(1),
+			calc.digitButton(2),
+			calc.digitButton(3),
+			calc.charButton(")")),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-				digitButton(0),
-				charButton(".")),
+				calc.digitButton(0),
+				calc.charButton(".")),
 			equals)),
 	)
 
-	window.Canvas().SetOnKeyDown(keyDown)
+	window.Canvas().SetOnKeyDown(calc.keyDown)
 	window.Show()
 }
