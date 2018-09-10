@@ -26,7 +26,7 @@ func TestGroupAppend(t *testing.T) {
 	assert.Equal(t, 1, len(group.list.Children))
 
 	append := NewLabel("World")
-	group.list.Append(append)
+	group.Append(append)
 	assert.True(t, len(group.list.Children) == 2)
 	assert.Equal(t, append, group.list.Children[1])
 }
