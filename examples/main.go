@@ -79,8 +79,6 @@ func welcome(app fyne.App) {
 				dialog.ShowConfirmDialog("Confirmation", "Do you want to confirm?", confirmCallback, app)
 			}},
 		}...),
-		&W.Entry{},
-		&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
 		layout.NewSpacer(),
 
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
