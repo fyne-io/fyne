@@ -118,8 +118,11 @@ func scaleByDPI(w *window) float32 {
 		return float32(scale)
 	}
 	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
-	if xdpi > 250 {
+	log.Println("DPI", xdpi)
+	if xdpi > 192 {
 		return float32(1.5)
+	} else if xdpi > 144 {
+		return float32(1.35)
 	} else if xdpi > 120 {
 		return float32(1.2)
 	}

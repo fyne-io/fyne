@@ -90,6 +90,10 @@ func main() {
 		bundleIcon("content-cut", theme, f)
 		bundleIcon("content-copy", theme, f)
 		bundleIcon("content-paste", theme, f)
+
+		bundleIcon("info", theme, f)
+		bundleIcon("question", theme, f)
+		bundleIcon("warning", theme, f)
 	}
 	f.Close()
 }

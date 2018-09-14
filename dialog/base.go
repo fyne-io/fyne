@@ -2,13 +2,17 @@ package dialog
 
 import (
 	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne/theme"
 	"github.com/fyne-io/fyne/widget"
 )
 
 type dialog struct {
 	win      fyne.Window
 	callback func(bool)
+	message  string
+	icon     fyne.Resource
 
 	response  chan bool
 	responded bool
@@ -26,13 +30,49 @@ func (d *dialog) wait() {
 }
 
 func (d *dialog) closed() {
-	if !d.responded {
+	if !d.responded && d.callback != nil {
 		d.callback(false)
 	}
 }
 
-func newDialog(title string, callback func(bool), parent fyne.App) *dialog {
-	dialog := &dialog{}
+func (d *dialog) setButtons(buttons fyne.CanvasObject) {
+	bgIcon := canvas.NewImageFromResource(d.icon)
+	bgIcon.Alpha = 0.25
+	d.win.SetContent(fyne.NewContainerWithLayout(d,
+		newLabel(d.message),
+		bgIcon,
+		buttons,
+	))
+}
+
+func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
+	middle := size.Height / 2
+
+	// icon
+	obj[1].Resize(fyne.NewSize(size.Height*2, size.Height*2))
+	obj[1].Move(fyne.NewPos(-size.Height*3/4, -size.Height/2))
+
+	// text
+	textMin := obj[0].MinSize()
+	obj[0].Move(fyne.NewPos(0, middle-textMin.Height-theme.Padding()/2))
+	obj[0].Resize(fyne.NewSize(size.Width, textMin.Height))
+
+	// buttons
+	btnMin := obj[2].MinSize()
+	obj[2].Resize(btnMin)
+	obj[2].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), middle+theme.Padding()/2))
+}
+
+func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
+	textMin := obj[0].MinSize()
+	btnMin := obj[2].MinSize()
+
+	return fyne.NewSize(fyne.Max(textMin.Width, btnMin.Width)+64,
+		textMin.Height+btnMin.Height+theme.Padding()+32)
+}
+
+func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.App) *dialog {
+	dialog := &dialog{message: message, icon: icon}
 
 	win := parent.NewWindow(title)
 	win.SetOnClosed(dialog.closed)
@@ -53,12 +93,11 @@ func newLabel(message string) fyne.CanvasObject {
 }
 
 func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
-	list := fyne.NewContainerWithLayout(layout.NewGridLayout(len(buttons)+2), layout.NewSpacer())
+	list := fyne.NewContainerWithLayout(layout.NewGridLayout(len(buttons)))
 
 	for _, button := range buttons {
 		list.AddObject(button)
 	}
 
-	list.AddObject(layout.NewSpacer())
 	return list
 }

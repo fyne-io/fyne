@@ -33,6 +33,7 @@ func (res *darkLightResource) CachePath() string {
 
 var cancel, confirm, checked, unchecked *darkLightResource
 var contentCut, contentCopy, contentPaste *darkLightResource
+var info, question, warning *darkLightResource
 
 func init() {
 	cancel = &darkLightResource{cancelDark, cancelLight}
@@ -43,6 +44,10 @@ func init() {
 	contentCut = &darkLightResource{contentcutDark, contentcutLight}
 	contentCopy = &darkLightResource{contentcopyDark, contentcopyLight}
 	contentPaste = &darkLightResource{contentpasteDark, contentpasteLight}
+
+	info = &darkLightResource{infoDark, infoLight}
+	question = &darkLightResource{questionDark, questionLight}
+	warning = &darkLightResource{warningDark, warningLight}
 }
 
 // CancelIcon returns a resource containing the standard cancel icon for the current theme
@@ -78,4 +83,19 @@ func CopyIcon() fyne.Resource {
 // PasteIcon returns a resource containing the standard content paste icon for the current theme
 func PasteIcon() fyne.Resource {
 	return contentPaste
+}
+
+// InfoIcon returns a resource containing the standard dialog info icon for the current theme
+func InfoIcon() fyne.Resource {
+	return info
+}
+
+// QuestionIcon returns a resource containing the standard dialog question icon for the current theme
+func QuestionIcon() fyne.Resource {
+	return question
+}
+
+// WarningIcon returns a resource containing the standard dialog warning icon for the current theme
+func WarningIcon() fyne.Resource {
+	return warning
 }
