@@ -11,43 +11,21 @@
 
 This is under heavy development and is not yet capable of supporting a full application
 
-# Prerequisites
+# Getting Started
+
+Fyne is designed to be really easy to code with, here are the steps to your first app.
+
+## Prerequisites
 
 Before you can use the Fyne tools you need to have a stable copy of EFL installed. This will be automated by our [bootstrap](https://github.com/fyne-io/bootstrap/) scripts soon, but for now you can follow our [setup instructions](https://github.com/fyne-io/bootstrap/blob/master/README.md).
 
-# Getting Started
-
-Using standard go tools you can install Fyne's core library using:
+Then using standard go tools you can install Fyne's core library using:
 
     go get github.com/fyne-io/fyne
 
+## Code
+
 And then you're ready to write your first app!
-There are two types of API in Fyne - declarative and method based - a
-simple hello world application using the declarative API looks like this:
-
-```go
-package main
-
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/desktop"
-import "github.com/fyne-io/fyne/widget"
-
-func main() {
-	app := desktop.NewApp()
-
-	w := app.NewWindow("Hello")
-	w.SetContent(&widget.List{Children: []fyne.CanvasObject{
-		&widget.Label{Text: "Hello Fyne!"},
-		&widget.Button{Text: "Quit", OnTapped: func() {
-			app.Quit()
-		}},
-	}})
-
-	w.Show()
-}
-```
-
-Or if you prefer the method based API
 
 ```go
     package main
@@ -77,6 +55,32 @@ And you can run that simply as:
 It should look like this:
 
 <p align="center" markdown="1">
+  <img src="img/hello-normal.png" alt="Fyne Hello Dark Theme" />
+</p>
+
+# Scaling
+
+Fyne is built entirely using vector graphics which means that applications
+that are written using it will scale to any value beautifully (not just whole number values).
+The default scale value is equated from your screen's DPI - and if you move
+a window to another screen it will re-calculate and adjust the window size accordingly!
+
+<table style="text-align: center"><tr>
+<td><img src="img/hello-normal.png" alt="Hello normal size" />
+  <br />Standard size</td>
+<td><img src="img/hello-small.png" alt="Hello small size" />
+  <br />FYNE_SCALE=0.5</td>
+<td><img src="img/hello-large.png" alt="Hello large size" />
+  <br />FYNE_SCALE=2.5</td>
+</tr></table>
+
+# Themes
+
+Fyne ships with two themes by default, "light" and "dark". You can choose
+which to use with the environment variable ```FYNE_THEME```.
+The default is dark:
+
+<p align="center" markdown="1">
   <img src="cmd/hello/hello-dark.png" alt="Fyne Hello Dark Theme" />
 </p>
 
@@ -89,6 +93,52 @@ It should then look like this:
 <p align="center" markdown="1">
   <img src="cmd/hello/hello-light.png" alt="Fyne Hello Light Theme" />
 </p>
+
+# Widget demo
+
+To run a showcase of the features of fyne execute the following:
+
+    cd $GOPATH/src/github.com/fyne-io/fyne/examples/
+    go run main.go
+
+And you should see something like this (after you click a few buttons):
+
+<p align="center" markdown="1" style="max-width: 100%">
+  <img src="img/widgets-dark.png" alt="Fyne Hello Light Theme" style="max-width: 100%" />
+</p>
+
+Or if you are using the light theme:
+
+<p align="center" markdown="1" style="max-width: 100%">
+  <img src="img/widgets-light.png" alt="Fyne Hello Light Theme" />
+</p>
+
+# Declarative API
+
+If you prefer a more declarative API then that is provided too.
+The following is exactly the same as the code above but in this different style.
+
+```go
+package main
+
+import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/desktop"
+import "github.com/fyne-io/fyne/widget"
+
+func main() {
+	app := desktop.NewApp()
+
+	w := app.NewWindow("Hello")
+	w.SetContent(&widget.List{Children: []fyne.CanvasObject{
+		&widget.Label{Text: "Hello Fyne!"},
+		&widget.Button{Text: "Quit", OnTapped: func() {
+			app.Quit()
+		}},
+	}})
+
+	w.Show()
+}
+```
 
 # Examples
 
