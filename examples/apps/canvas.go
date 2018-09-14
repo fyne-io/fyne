@@ -20,7 +20,7 @@ func rgbGradient(x, y, w, h int) color.RGBA {
 
 // Canvas loads a canvas example window for the specified app context
 func Canvas(app fyne.App) {
-	w := app.NewWindow("Main")
+	w := app.NewWindow("Canvas")
 
 	_, filename, _, _ := runtime.Caller(0)
 	exampleDir := path.Dir(path.Dir(filename))
