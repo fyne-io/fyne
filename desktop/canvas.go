@@ -59,11 +59,10 @@ type eflCanvas struct {
 
 	onKeyDown func(*fyne.KeyEvent)
 
-	objects    map[*C.Evas_Object]fyne.CanvasObject
-	native     map[fyne.CanvasObject]*C.Evas_Object
-	offsets    map[fyne.CanvasObject]fyne.Position
-	dirty      map[fyne.CanvasObject]bool
-	dirtyMutex sync.Mutex
+	objects map[*C.Evas_Object]fyne.CanvasObject
+	native  map[fyne.CanvasObject]*C.Evas_Object
+	offsets map[fyne.CanvasObject]fyne.Position
+	dirty   map[fyne.CanvasObject]bool
 }
 
 func ignoreObject(o fyne.CanvasObject) bool {

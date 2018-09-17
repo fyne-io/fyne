@@ -86,13 +86,11 @@ func drawDirty() {
 			continue
 		}
 		canvas.fitContent()
-		canvas.dirtyMutex.Lock()
 		for obj := range canvas.dirty {
 			delete(canvas.dirty, obj)
 
 			canvas.doRefresh(obj)
 		}
-		canvas.dirtyMutex.Unlock()
 	}
 }
 
