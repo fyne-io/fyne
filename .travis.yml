@@ -27,7 +27,7 @@ jobs:
   include:
     - stage: test
     - stage: "Coveralls"
-      if: env(COVERALLS_TOKEN) IS present
+      if: env(TRAVIS_PULL_REQUEST) IS NOT present
       script: $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 env:
