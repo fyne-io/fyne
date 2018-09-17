@@ -39,7 +39,9 @@ var (
 	// channel to signal quitting
 	quit = make(chan bool, 1)
 	// channel to queue a render on a component
-	renderqueue          = make(chan renderData, renderBufferSize)
+	renderqueue = make(chan renderData, renderBufferSize)
+	// ErrorRenderQueueFull represents a failure to queue a new object for
+	// render as the list of waiting render changes was full.
 	ErrorRenderQueueFull = errors.New("Render Queue is Full")
 )
 
