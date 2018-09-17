@@ -111,6 +111,13 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
 			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
 		opts = co.Options
+	case *canvas.Circle:
+		// TODO - this isnt all there yet, but at least this stops lots of debug output
+		obj = C.evas_object_rectangle_add(c.evas)
+
+		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
+			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
+		opts = co.Options
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
 		return nil

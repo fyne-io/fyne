@@ -14,14 +14,34 @@ package desktop
 // void onExit_cgo(Ecore_Event_Signal_Exit *);
 import "C"
 
-import "runtime"
-import "time"
-import "unsafe"
+import (
+	"errors"
+	"runtime"
+	"time"
+	"unsafe"
 
-import "github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne"
+)
 
-// channel to signal quitting
-var quit = make(chan bool, 1)
+type renderData struct {
+	c  *eflCanvas
+	co fyne.CanvasObject
+}
+
+const (
+	// How many render ops to queue up
+	renderBufferSize = 1024
+	// How fast to repaint the screen
+	renderInterval = time.Second / 120
+)
+
+var (
+	// channel to signal quitting
+	quit = make(chan bool, 1)
+	// channel to queue a render on a component
+	renderqueue          = make(chan renderData, renderBufferSize)
+	ErrorRenderQueueFull = errors.New("Render Queue is Full")
+)
 
 // Arrange that main.main runs on main thread.
 func init() {
@@ -33,13 +53,15 @@ func initEFL() {
 	C.ecore_event_handler_add(C.ECORE_EVENT_SIGNAL_EXIT, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onExit_cgo)), nil)
 	C.ecore_event_handler_add(C.ECORE_EVENT_KEY_DOWN, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onKeyDown_cgo)), nil)
 
-	tick := time.NewTicker(time.Second / 120)
+	tick := time.NewTicker(renderInterval)
 	for {
 		select {
 		case <-quit:
 			close(quit)
 			tick.Stop()
 			return
+		case data := <-renderqueue:
+			data.c.dirty[data.co] = true
 		case <-tick.C:
 			drawDirty()
 			C.ecore_main_loop_iterate()
@@ -73,6 +95,11 @@ func drawDirty() {
 }
 
 // do runs f on the main thread.
-func queueRender(c *eflCanvas, co fyne.CanvasObject) {
-	c.dirty[co] = true
+func queueRender(c *eflCanvas, co fyne.CanvasObject) error {
+	select {
+	case renderqueue <- renderData{c: c, co: co}: // write OK
+	default:
+		return ErrorRenderQueueFull // buffer full
+	}
+	return nil
 }
