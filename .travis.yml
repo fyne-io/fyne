@@ -23,10 +23,10 @@ notifications:
     template:
       - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")"
 
-stages:
-  - stage: coveralls
-    if: env(COVERALLS_TOKEN) IS present
-    script: $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+jobs:
+  include:
+    - if: env(COVERALLS_TOKEN) IS present
+      script: $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 env:
   global:
