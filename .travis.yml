@@ -14,7 +14,6 @@ script:
   - go test -v -tags ci -race -covermode=atomic -coverprofile=coverage.out ./...
   - go vet -tags ci ./...
   - golint -set_exit_status $(go list -tags ci)
-  - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 notifications:
   irc:
@@ -23,6 +22,11 @@ notifications:
     on_success: change
     template:
       - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")"
+
+stages:
+  - stage: coveralls
+    if: env(COVERALLS_TOKEN) IS present
+    script: $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 env:
   global:
