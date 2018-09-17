@@ -299,6 +299,11 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		}
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(width))))+1), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(height))))+1))
+	case *canvas.Circle:
+		C.evas_object_color_set(obj, C.int(co.FillColor.R), C.int(co.FillColor.G),
+			C.int(co.FillColor.B), C.int(co.FillColor.A))
+		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	default:
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
