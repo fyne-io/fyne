@@ -23,15 +23,15 @@ notifications:
     template:
       - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")"
 
-stages:
-  - name: coveralls
-    if: env(COVERALLS_TOKEN) IS present
- 
 jobs:
   include:
     - stage: coveralls
       script: $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
+stages:
+  - name: coveralls
+    if: env(COVERALLS_TOKEN) IS present
+ 
 env:
   global:
     secure: dxsvChfy84dx85yoDA08UQL9/uwuab2St/yzWGfI++tlY1yL+kUNTfaTTY0uiT6Fqwg8rfUdXPA95Z/9bwLPkMJ8p1zwRlxBKjzICTGjB/NDLUYWrZVW+kXOOWrLHEluccrAc5mvWY1/k6KaxqYslanIPOj8j9/7sZJBMsvH8teHjRDGn402sCIBO3SUwthGKktLuAUL5MCiVgo/Eym4mQ2a4OAbZBWqKRQ+7HJunbEzwA/2zOUm/WX3NTy8dg67yyPNLXgMarVsmRXRDYPMlSGfV6Y3kBGizhEGy/u8zXe17KmPjqEKDLWHZZxt0wWYVidERLk1EG2Sm0maIV0i6a+wunCLqQXKHPF8BDwZGftYNbbrED7+4Jnp2h5Y8fS5FlpNAgPZp4YWbOhMpZIhahms3qwGloTGrCj+YvnUu6wnKOnhsvcz2Ibgi+pXr2/3H8lSjAg//P7wRYQN0pvIdacDRD0Vx10bENPAO2IKV7COv/NI0WLrBezDcRS4j60m4EgAdmambKye/mYqERY2P+2e1pMVcn4xaehXxfdyb5MGsZtIh7h0vP9LxVpj+mIVE/WDk36sWPVlTtumVioC5vhr087RrTOj3fNAjHeEMvJa5uiyKxT3UOCx6YORGHkH0i9fz/2QHCA2FBrOdTFv3oe1L2W23iqs9cSx+FxaVCE=
