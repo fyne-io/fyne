@@ -59,10 +59,11 @@ type eflCanvas struct {
 
 	onKeyDown func(*fyne.KeyEvent)
 
-	objects map[*C.Evas_Object]fyne.CanvasObject
-	native  map[fyne.CanvasObject]*C.Evas_Object
-	offsets map[fyne.CanvasObject]fyne.Position
-	dirty   map[fyne.CanvasObject]bool
+	objects    map[*C.Evas_Object]fyne.CanvasObject
+	native     map[fyne.CanvasObject]*C.Evas_Object
+	offsets    map[fyne.CanvasObject]fyne.Position
+	dirty      map[fyne.CanvasObject]bool
+	dirtyMutex sync.Mutex
 }
 
 func ignoreObject(o fyne.CanvasObject) bool {
@@ -107,6 +108,13 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		opts = co.Options
 	case *canvas.Line:
 		obj = C.evas_object_line_add(c.evas)
+
+		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
+			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
+		opts = co.Options
+	case *canvas.Circle:
+		// TODO - this isnt all there yet
+		obj = C.evas_object_rectangle_add(c.evas)
 
 		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
 			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
