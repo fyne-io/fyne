@@ -61,6 +61,8 @@ func (l *Label) SetText(text string) {
 
 func (l *Label) createRenderer() fyne.WidgetRenderer {
 	obj := canvas.NewText(l.Text, theme.TextColor())
+	obj.Alignment = l.Alignment
+	obj.TextStyle = l.TextStyle
 	bg := canvas.NewRectangle(theme.ButtonColor())
 
 	objects := []fyne.CanvasObject{
