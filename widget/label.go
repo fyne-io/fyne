@@ -48,7 +48,7 @@ func (l *labelRenderer) Layout(size fyne.Size) {
 	yPos := 0
 	lineHeight := size.Height
 	if len(l.texts) > 1 {
-		lineHeight = size.Height/len(l.texts)
+		lineHeight = size.Height / len(l.texts)
 	}
 	lineSize := fyne.NewSize(size.Width, lineHeight)
 	for _, text := range l.texts {
@@ -100,19 +100,19 @@ func (l *Label) SetText(text string) {
 }
 
 func (l *Label) createRenderer() fyne.WidgetRenderer {
-	render := &labelRenderer{label:l}
+	render := &labelRenderer{label: l}
 
 	// TODO move this to a renderer method and call on setText too
 	texts := render.parseText(l.Text)
 	bg := canvas.NewRectangle(theme.ButtonColor())
-	objects := []fyne.CanvasObject{bg,}
+	objects := []fyne.CanvasObject{bg}
 	objects = append(objects, texts...)
 
 	render.objects = objects
 	render.background = bg
 	render.texts = texts
 
-return render
+	return render
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer
