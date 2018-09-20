@@ -21,13 +21,20 @@ func (l *labelRenderer) parseText(text string) []fyne.CanvasObject {
 		texts := []fyne.CanvasObject{}
 		s := bufio.NewScanner(strings.NewReader(text))
 		for s.Scan() {
-			texts = append(texts, canvas.NewText(s.Text(), theme.TextColor()))
+			obj := canvas.NewText(s.Text(), theme.TextColor())
+			obj.Alignment = l.label.Alignment
+			obj.TextStyle = l.label.TextStyle
+
+			texts = append(texts, obj)
 		}
 
 		return texts
 	}
 
-	return []fyne.CanvasObject{canvas.NewText(text, theme.TextColor())}
+	obj := canvas.NewText(text, theme.TextColor())
+	obj.Alignment = l.label.Alignment
+	obj.TextStyle = l.label.TextStyle
+	return []fyne.CanvasObject{obj}
 }
 
 // MinSize calculates the minimum size of a label.

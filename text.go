@@ -6,7 +6,7 @@ type TextAlign int
 
 const (
 	// TextAlignLeading specifies a left alignment for left-to-right languages
-	TextAlignLeading = iota
+	TextAlignLeading TextAlign = iota
 	// TextAlignCenter places the text centrally within the available space
 	TextAlignCenter
 	// TextAlignTrailing will align the text right for a left-to-right language
