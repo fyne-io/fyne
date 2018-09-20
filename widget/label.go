@@ -1,5 +1,8 @@
 package widget
 
+import "bufio"
+import "strings"
+
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
@@ -8,19 +11,52 @@ type labelRenderer struct {
 	objects []fyne.CanvasObject
 
 	background *canvas.Rectangle
-	text       *canvas.Text
+	texts      []fyne.CanvasObject
 
 	label *Label
+}
+
+func (l *labelRenderer) parseText(text string) []fyne.CanvasObject {
+	if strings.Contains(text, "\n") {
+		texts := []fyne.CanvasObject{}
+		s := bufio.NewScanner(strings.NewReader(text))
+		for s.Scan() {
+			texts = append(texts, canvas.NewText(s.Text(), theme.TextColor()))
+		}
+
+		return texts
+	}
+
+	return []fyne.CanvasObject{canvas.NewText(text, theme.TextColor())}
 }
 
 // MinSize calculates the minimum size of a label.
 // This is based on the contained text with a standard amount of padding added.
 func (l *labelRenderer) MinSize() fyne.Size {
-	return l.text.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	height := 0
+	width := 0
+	for _, text := range l.texts {
+		min := text.MinSize()
+		height += min.Height
+		width = fyne.Max(width, min.Width)
+	}
+
+	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 }
 
 func (l *labelRenderer) Layout(size fyne.Size) {
-	l.text.Resize(size)
+	yPos := 0
+	lineHeight := size.Height
+	if len(l.texts) > 1 {
+		lineHeight = size.Height/len(l.texts)
+	}
+	lineSize := fyne.NewSize(size.Width, lineHeight)
+	for _, text := range l.texts {
+		text.Resize(lineSize)
+		text.Move(fyne.NewPos(0, yPos))
+		yPos += lineHeight
+	}
+
 	l.background.Resize(size)
 }
 
@@ -32,13 +68,17 @@ func (l *labelRenderer) Objects() []fyne.CanvasObject {
 func (l *labelRenderer) ApplyTheme() {
 	l.background.FillColor = theme.BackgroundColor()
 
-	l.text.Color = theme.TextColor()
+	for _, text := range l.texts {
+		text.(*canvas.Text).Color = theme.TextColor()
+	}
 }
 
 func (l *labelRenderer) Refresh() {
-	l.text.Alignment = l.label.Alignment
-	l.text.TextStyle = l.label.TextStyle
-	l.text.Text = l.label.Text
+	for _, text := range l.texts {
+		text.(*canvas.Text).Alignment = l.label.Alignment
+		text.(*canvas.Text).TextStyle = l.label.TextStyle
+		text.(*canvas.Text).Text = l.label.Text
+	}
 
 	fyne.RefreshObject(l.label)
 }
@@ -60,15 +100,19 @@ func (l *Label) SetText(text string) {
 }
 
 func (l *Label) createRenderer() fyne.WidgetRenderer {
-	obj := canvas.NewText(l.Text, theme.TextColor())
+	render := &labelRenderer{label:l}
+
+	// TODO move this to a renderer method and call on setText too
+	texts := render.parseText(l.Text)
 	bg := canvas.NewRectangle(theme.ButtonColor())
+	objects := []fyne.CanvasObject{bg,}
+	objects = append(objects, texts...)
 
-	objects := []fyne.CanvasObject{
-		bg,
-		obj,
-	}
+	render.objects = objects
+	render.background = bg
+	render.texts = texts
 
-	return &labelRenderer{objects, bg, obj, l}
+return render
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer

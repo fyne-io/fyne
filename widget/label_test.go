@@ -1,13 +1,15 @@
 package widget
 
-import "testing"
+import (
+	"testing"
+)
 
 import "github.com/stretchr/testify/assert"
 
 import _ "github.com/fyne-io/fyne/test"
 import "github.com/fyne-io/fyne/theme"
 
-func TestLabelSize(t *testing.T) {
+func TestLabel_MinSize(t *testing.T) {
 	label := NewLabel("Test")
 	min := label.MinSize()
 
@@ -16,3 +18,22 @@ func TestLabelSize(t *testing.T) {
 	label.SetText("Longer")
 	assert.True(t, label.MinSize().Width > min.Width)
 }
+
+func TestText_MinSize_Multiline(t *testing.T) {
+	text := NewLabel("Break")
+	min := text.MinSize()
+
+	text = NewLabel("Bre\nak")
+	min2 := text.MinSize()
+	assert.True(t, min2.Width < min.Width)
+	assert.True(t, min2.Height > min.Height)
+
+	yPos := -1
+	for _, text := range text.Renderer().(*labelRenderer).texts {
+		assert.True(t, text.CurrentSize().Height < min2.Height)
+		assert.True(t, text.CurrentPosition().Y > yPos)
+		yPos = text.CurrentPosition().Y
+	}
+}
+
+// TODO test align
