@@ -67,7 +67,7 @@ func welcome(app fyne.App) {
 		W.NewGroup("Demos", []fyne.CanvasObject{
 			appButton(app, "Canvas", canvasApp),
 			appButton(app, "Layout", layoutApp),
-			&W.Entry{},
+			&W.Entry{Text: "Entry"},
 			&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
 		}...),
 
