@@ -5,7 +5,6 @@ import "testing"
 import "github.com/stretchr/testify/assert"
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
 import _ "github.com/fyne-io/fyne/test"
 import "github.com/fyne-io/fyne/theme"
 
@@ -22,7 +21,7 @@ func TestLabel_MinSize(t *testing.T) {
 func TestLabel_Alignment(t *testing.T) {
 	label := &Label{Text: "Test", Alignment: fyne.TextAlignTrailing}
 
-	assert.Equal(t, fyne.TextAlignTrailing, label.Renderer().(*labelRenderer).texts[0].(*canvas.Text).Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, label.Renderer().(*labelRenderer).texts[0].Alignment)
 }
 
 func TestText_MinSize_Multiline(t *testing.T) {

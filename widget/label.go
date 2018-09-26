@@ -11,30 +11,55 @@ type labelRenderer struct {
 	objects []fyne.CanvasObject
 
 	background *canvas.Rectangle
-	texts      []fyne.CanvasObject
+	texts      []*canvas.Text
 
 	label *Label
+	lines int
 }
 
-func (l *labelRenderer) parseText(text string) []fyne.CanvasObject {
-	if strings.Contains(text, "\n") {
-		texts := []fyne.CanvasObject{}
-		s := bufio.NewScanner(strings.NewReader(text))
-		for s.Scan() {
-			obj := canvas.NewText(s.Text(), theme.TextColor())
-			obj.Alignment = l.label.Alignment
-			obj.TextStyle = l.label.TextStyle
-
-			texts = append(texts, obj)
-		}
-
-		return texts
+func (l *labelRenderer) parseText(text string) []string {
+	if !strings.Contains(text, "\n") {
+		return []string{text}
 	}
 
-	obj := canvas.NewText(text, theme.TextColor())
-	obj.Alignment = l.label.Alignment
-	obj.TextStyle = l.label.TextStyle
-	return []fyne.CanvasObject{obj}
+	var texts []string
+	s := bufio.NewScanner(strings.NewReader(text))
+	for s.Scan() {
+		texts = append(texts, s.Text())
+	}
+	// this checks if Scan() ended on a blank line
+	if string(text[len(text)-1]) == "\n" {
+		texts = append(texts, "")
+	}
+
+	return texts
+}
+
+func (l *labelRenderer) updateTexts(strings []string) {
+	l.lines = len(strings)
+	count := len(l.texts)
+	refresh := false
+
+	for i, str := range strings {
+		if i >= count {
+			text := canvas.NewText("", theme.TextColor())
+			l.texts = append(l.texts, text)
+			l.objects = append(l.objects, text)
+
+			refresh = true
+		}
+		l.texts[i].Text = str
+	}
+
+	for i := l.lines; i < len(l.texts); i++ {
+		l.texts[i].Text = ""
+		refresh = true
+	}
+
+	if refresh {
+		// TODO invalidate container size (to shrink)
+		l.Refresh()
+	}
 }
 
 // MinSize calculates the minimum size of a label.
@@ -42,8 +67,11 @@ func (l *labelRenderer) parseText(text string) []fyne.CanvasObject {
 func (l *labelRenderer) MinSize() fyne.Size {
 	height := 0
 	width := 0
-	for _, text := range l.texts {
-		min := text.MinSize()
+	for i := 0; i < l.lines; i++ {
+		min := l.texts[i].MinSize()
+		if l.texts[i].Text == "" {
+			min = emptyTextMinSize(l.label.TextStyle)
+		}
 		height += min.Height
 		width = fyne.Max(width, min.Width)
 	}
@@ -52,15 +80,16 @@ func (l *labelRenderer) MinSize() fyne.Size {
 }
 
 func (l *labelRenderer) Layout(size fyne.Size) {
-	yPos := 0
-	lineHeight := size.Height
+	yPos := theme.Padding()
+	lineHeight := size.Height - theme.Padding()*2
 	if len(l.texts) > 1 {
-		lineHeight = size.Height / len(l.texts)
+		lineHeight = lineHeight / l.lines
 	}
 	lineSize := fyne.NewSize(size.Width, lineHeight)
-	for _, text := range l.texts {
+	for i := 0; i < l.lines; i++ {
+		text := l.texts[i]
 		text.Resize(lineSize)
-		text.Move(fyne.NewPos(0, yPos))
+		text.Move(fyne.NewPos(theme.Padding(), yPos))
 		yPos += lineHeight
 	}
 
@@ -76,15 +105,14 @@ func (l *labelRenderer) ApplyTheme() {
 	l.background.FillColor = theme.BackgroundColor()
 
 	for _, text := range l.texts {
-		text.(*canvas.Text).Color = theme.TextColor()
+		text.Color = theme.TextColor()
 	}
 }
 
 func (l *labelRenderer) Refresh() {
 	for _, text := range l.texts {
-		text.(*canvas.Text).Alignment = l.label.Alignment
-		text.(*canvas.Text).TextStyle = l.label.TextStyle
-		text.(*canvas.Text).Text = l.label.Text
+		text.Alignment = l.label.Alignment
+		text.TextStyle = l.label.TextStyle
 	}
 
 	fyne.RefreshObject(l.label)
@@ -103,21 +131,23 @@ type Label struct {
 func (l *Label) SetText(text string) {
 	l.Text = text
 
+	render := l.Renderer().(*labelRenderer)
+	for _, obj := range render.texts {
+		obj.Text = ""
+	}
+
+	render.updateTexts(render.parseText(l.Text))
+
 	l.Renderer().Refresh()
 }
 
 func (l *Label) createRenderer() fyne.WidgetRenderer {
 	render := &labelRenderer{label: l}
 
-	// TODO move this to a renderer method and call on setText too
-	texts := render.parseText(l.Text)
-	bg := canvas.NewRectangle(theme.ButtonColor())
-	objects := []fyne.CanvasObject{bg}
-	objects = append(objects, texts...)
-
-	render.objects = objects
-	render.background = bg
-	render.texts = texts
+	render.background = canvas.NewRectangle(theme.ButtonColor())
+	render.texts = []*canvas.Text{}
+	render.objects = []fyne.CanvasObject{render.background}
+	render.updateTexts(render.parseText(l.Text))
 
 	return render
 }

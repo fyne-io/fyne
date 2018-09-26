@@ -54,7 +54,7 @@ func confirmCallback(response bool) {
 func welcome(app fyne.App) {
 	w := app.NewWindow("Examples")
 	w.SetContent(&W.List{Children: []fyne.CanvasObject{
-		&W.Label{Text: "Fyne\nExamples!"},
+		&W.Label{Text: "Fyne Examples!"},
 
 		W.NewGroup("Apps", []fyne.CanvasObject{
 			appButton(app, "Blog", blogApp),
@@ -67,7 +67,7 @@ func welcome(app fyne.App) {
 		W.NewGroup("Demos", []fyne.CanvasObject{
 			appButton(app, "Canvas", canvasApp),
 			appButton(app, "Layout", layoutApp),
-			&W.Entry{},
+			&W.Entry{Text: "Entry"},
 			&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
 		}...),
 

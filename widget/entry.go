@@ -1,17 +1,22 @@
 package widget
 
 import "fmt"
+import "log"
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 
 type entryRenderer struct {
-	label   *canvas.Text
+	label   *Label
 	bg, box *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 	entry   *Entry
+}
+
+func emptyTextMinSize(style fyne.TextStyle) fyne.Size {
+	return fyne.GetDriver().RenderedTextSize("M", theme.TextSize(), style)
 }
 
 // MinSize calculates the minimum size of an entry widget.
@@ -19,7 +24,7 @@ type entryRenderer struct {
 func (e *entryRenderer) MinSize() fyne.Size {
 	var textSize fyne.Size
 	if e.label.Text == "" {
-		textSize = fyne.GetDriver().RenderedTextSize("M", e.label.TextSize, e.label.TextStyle)
+		textSize = emptyTextMinSize(e.label.TextStyle)
 	} else {
 		textSize = e.label.MinSize()
 	}
@@ -40,13 +45,13 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 
 // ApplyTheme is called when the Entry may need to update it's look.
 func (e *entryRenderer) ApplyTheme() {
-	e.label.Color = theme.TextColor()
+	e.label.ApplyTheme()
 	e.box.FillColor = theme.BackgroundColor()
 	e.Refresh()
 }
 
 func (e *entryRenderer) Refresh() {
-	e.label.Text = e.entry.Text
+	e.label.SetText(e.entry.Text)
 
 	if e.entry.focused {
 		e.bg.FillColor = theme.FocusColor()
@@ -61,7 +66,7 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 	return e.objects
 }
 
-// Entry widget allows simple text to be input when focussed.
+// Entry widget allows simple text to be input when focused.
 type Entry struct {
 	baseWidget
 
@@ -101,7 +106,7 @@ func (e *Entry) Focused() bool {
 	return e.focused
 }
 
-// OnKeyDown receives key input events when the Entry widget is focussed.
+// OnKeyDown receives key input events when the Entry widget is focused.
 func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	if key.Name == "BackSpace" {
 		if len(e.Text) == 0 {
@@ -112,16 +117,17 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		substr := string(runes[0 : len(runes)-1])
 
 		e.SetText(substr)
-		return
-	}
-
-	if key.String != "" {
+	} else if key.Name == "Return" {
+		e.SetText(fmt.Sprintf("%s\n", e.Text))
+	} else if key.String != "" {
 		e.SetText(fmt.Sprintf("%s%s", e.Text, key.String))
+	} else {
+		log.Println("Unhandled key press", key.String)
 	}
 }
 
 func (e *Entry) createRenderer() fyne.WidgetRenderer {
-	text := canvas.NewText(e.Text, theme.TextColor())
+	text := NewLabel(e.Text)
 	bg := canvas.NewRectangle(theme.ButtonColor())
 	box := canvas.NewRectangle(theme.BackgroundColor())
 
