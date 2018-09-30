@@ -107,3 +107,15 @@ func TestMiddleSpacerVBoxLayout(t *testing.T) {
 	cell3Pos := fyne.NewPos(0, 250)
 	assert.Equal(t, cell3Pos, obj3.Position)
 }
+
+func TestNewHBoxLayout(t *testing.T) {
+	lay := NewHBoxLayout()
+
+	assert.Equal(t, true, lay.(*boxLayout).horizontal)
+}
+
+func TestNewVBoxLayout(t *testing.T) {
+	lay := NewVBoxLayout()
+
+	assert.Equal(t, false, lay.(*boxLayout).horizontal)
+}

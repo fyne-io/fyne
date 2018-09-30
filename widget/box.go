@@ -8,7 +8,8 @@ import "github.com/fyne-io/fyne/layout"
 type Box struct {
 	baseWidget
 
-	Children []fyne.CanvasObject
+	Horizontal bool
+	Children   []fyne.CanvasObject
 }
 
 // Prepend inserts a new CanvasObject at the top/left of the box
@@ -26,7 +27,13 @@ func (b *Box) Append(object fyne.CanvasObject) {
 }
 
 func (b *Box) createRenderer() fyne.WidgetRenderer {
-	return &boxRenderer{objects: b.Children, layout: layout.NewVBoxLayout(), box: b}
+	var lay fyne.Layout
+	if b.Horizontal {
+		lay = layout.NewHBoxLayout()
+	} else {
+		lay = layout.NewVBoxLayout()
+	}
+	return &boxRenderer{objects: b.Children, layout: lay, box: b}
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer
@@ -38,9 +45,17 @@ func (b *Box) Renderer() fyne.WidgetRenderer {
 	return b.renderer
 }
 
+// NewHBox creates a new horizontally aligned box widget with the specified list of child objects
+func NewHBox(children ...fyne.CanvasObject) *Box {
+	box := &Box{baseWidget{}, true, children}
+
+	box.Renderer().Layout(box.MinSize())
+	return box
+}
+
 // NewVBox creates a new vertically aligned box widget with the specified list of child objects
 func NewVBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{baseWidget{}, children}
+	box := &Box{baseWidget{}, false, children}
 
 	box.Renderer().Layout(box.MinSize())
 	return box

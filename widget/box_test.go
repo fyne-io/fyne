@@ -6,12 +6,12 @@ import "github.com/stretchr/testify/assert"
 
 import _ "github.com/fyne-io/fyne/test"
 
-func TestVBoxSize(t *testing.T) {
+func TestBoxSize(t *testing.T) {
 	list := NewVBox(NewLabel("Hello"), NewLabel("World"))
 	assert.Equal(t, 2, len(list.Children))
 }
 
-func TestVBoxPrepend(t *testing.T) {
+func TestBoxPrepend(t *testing.T) {
 	list := NewVBox(NewLabel("World"))
 	assert.Equal(t, 1, len(list.Children))
 
@@ -21,7 +21,7 @@ func TestVBoxPrepend(t *testing.T) {
 	assert.Equal(t, prepend, list.Children[0])
 }
 
-func TestVBoxAppend(t *testing.T) {
+func TestBoxAppend(t *testing.T) {
 	list := NewVBox(NewLabel("Hello"))
 	assert.Equal(t, 1, len(list.Children))
 
