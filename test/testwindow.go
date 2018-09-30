@@ -5,6 +5,7 @@ import "github.com/fyne-io/fyne"
 type testWindow struct {
 	title      string
 	fullscreen bool
+	fixedSize  bool
 	onClosed   func()
 
 	canvas fyne.Canvas
@@ -26,6 +27,14 @@ func (w *testWindow) Fullscreen() bool {
 
 func (w *testWindow) SetFullscreen(fullscreen bool) {
 	w.fullscreen = fullscreen
+}
+
+func (w *testWindow) FixedSize() bool {
+	return w.fixedSize
+}
+
+func (w *testWindow) SetFixedSize(fixed bool) {
+	w.fixedSize = fixed
 }
 
 func (w *testWindow) SetOnClosed(closed func()) {

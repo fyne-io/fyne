@@ -76,6 +76,7 @@ func newDialog(title, message string, icon fyne.Resource, callback func(bool), p
 
 	win := parent.NewWindow(title)
 	win.SetOnClosed(dialog.closed)
+	win.SetFixedSize(true)
 
 	dialog.win = win
 	dialog.response = make(chan bool, 1)

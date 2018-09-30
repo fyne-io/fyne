@@ -15,6 +15,12 @@ type Window interface {
 	// true for a fullscreen window and false to unset this.
 	SetFullscreen(bool)
 
+	// FixedSize returns whether or not this window should disable resizing.
+	FixedSize() bool
+	// SetFixedSize sets a hint that states whether the window should be a fixed
+	// size or allow resizing.
+	SetFixedSize(b bool)
+
 	SetOnClosed(func())
 
 	// Show the window on screen

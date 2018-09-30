@@ -422,6 +422,10 @@ func (c *eflCanvas) fitContent() {
 	if width != int(w) || height != int(h) {
 		C.ecore_evas_size_min_set(c.window.ee, C.int(minWidth), C.int(minHeight))
 		C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
+
+		if c.window.FixedSize() {
+			C.ecore_evas_size_max_set(c.window.ee, C.int(minWidth), C.int(minHeight))
+		}
 	}
 }
 

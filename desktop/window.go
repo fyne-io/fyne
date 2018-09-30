@@ -27,10 +27,13 @@ import "unsafe"
 import "github.com/fyne-io/fyne"
 
 type window struct {
-	ee       *C.Ecore_Evas
-	canvas   fyne.Canvas
-	master   bool
-	focused  bool
+	ee     *C.Ecore_Evas
+	canvas fyne.Canvas
+
+	master    bool
+	focused   bool
+	fixedSize bool
+
 	onClosed func()
 }
 
@@ -65,6 +68,14 @@ func (w *window) SetFullscreen(full bool) {
 	} else {
 		C.ecore_evas_fullscreen_set(w.ee, 0)
 	}
+}
+
+func (w *window) FixedSize() bool {
+	return w.fixedSize
+}
+
+func (w *window) SetFixedSize(fixed bool) {
+	w.fixedSize = fixed
 }
 
 func (w *window) SetOnClosed(closed func()) {
