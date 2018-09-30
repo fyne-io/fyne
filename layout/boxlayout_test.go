@@ -16,14 +16,14 @@ func NewMinSizeRect(min fyne.Size) *canvas.Rectangle {
 	return rect
 }
 
-func TestSimpleListLayout(t *testing.T) {
+func TestSimpleVBoxLayout(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 
 	obj1 := NewMinSizeRect(cellSize)
 	obj2 := NewMinSizeRect(cellSize)
 	obj3 := NewMinSizeRect(cellSize)
 
-	container := fyne.NewContainerWithLayout(NewListLayout(), obj1, obj2, obj3)
+	container := fyne.NewContainerWithLayout(NewVBoxLayout(), obj1, obj2, obj3)
 	assert.Equal(t, container.MinSize(), fyne.NewSize(50, 150+(theme.Padding()*2)))
 
 	assert.Equal(t, obj1.Size, cellSize)
@@ -33,14 +33,14 @@ func TestSimpleListLayout(t *testing.T) {
 	assert.Equal(t, cell3Pos, obj3.Position)
 }
 
-func TestWideListLayout(t *testing.T) {
+func TestWideVBoxLayout(t *testing.T) {
 	cellSize := fyne.NewSize(100, 50)
 
 	obj1 := NewMinSizeRect(cellSize)
 	obj2 := NewMinSizeRect(cellSize.Subtract(fyne.NewSize(25, 0)))
 	obj3 := NewMinSizeRect(cellSize)
 
-	container := fyne.NewContainerWithLayout(NewListLayout(), obj1, obj2, obj3)
+	container := fyne.NewContainerWithLayout(NewVBoxLayout(), obj1, obj2, obj3)
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
 	assert.Equal(t, obj1.Size, cellSize)
@@ -51,14 +51,14 @@ func TestWideListLayout(t *testing.T) {
 	assert.Equal(t, cell3Pos, obj3.Position)
 }
 
-func TestTallListLayout(t *testing.T) {
+func TestTallVBoxLayout(t *testing.T) {
 	cellSize := fyne.NewSize(100, 50)
 
 	obj1 := NewMinSizeRect(cellSize)
 	obj2 := NewMinSizeRect(cellSize.Subtract(fyne.NewSize(25, 0)))
 	obj3 := NewMinSizeRect(cellSize)
 
-	container := fyne.NewContainerWithLayout(NewListLayout(), obj1, obj2, obj3)
+	container := fyne.NewContainerWithLayout(NewVBoxLayout(), obj1, obj2, obj3)
 	container.Resize(fyne.NewSize(100, 308))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
@@ -70,14 +70,14 @@ func TestTallListLayout(t *testing.T) {
 	assert.Equal(t, cell3Pos, obj3.Position)
 }
 
-func TestSpacerListLayout(t *testing.T) {
+func TestSpacerVBoxLayout(t *testing.T) {
 	cellSize := fyne.NewSize(100, 50)
 
 	obj1 := NewMinSizeRect(cellSize)
 	obj2 := NewMinSizeRect(cellSize.Subtract(fyne.NewSize(25, 0)))
 	obj3 := NewMinSizeRect(cellSize)
 
-	container := fyne.NewContainerWithLayout(NewListLayout(), NewSpacer(), obj1, obj2, obj3)
+	container := fyne.NewContainerWithLayout(NewVBoxLayout(), NewSpacer(), obj1, obj2, obj3)
 	container.Resize(fyne.NewSize(100, 300))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 
@@ -89,14 +89,14 @@ func TestSpacerListLayout(t *testing.T) {
 	assert.Equal(t, cell3Pos, obj3.Position)
 }
 
-func TestMiddleSpacerListLayout(t *testing.T) {
+func TestMiddleSpacerVBoxLayout(t *testing.T) {
 	cellSize := fyne.NewSize(100, 50)
 
 	obj1 := NewMinSizeRect(cellSize)
 	obj2 := NewMinSizeRect(cellSize.Subtract(fyne.NewSize(25, 0)))
 	obj3 := NewMinSizeRect(cellSize)
 
-	container := fyne.NewContainerWithLayout(NewListLayout(), obj1, obj2, NewSpacer(), obj3)
+	container := fyne.NewContainerWithLayout(NewVBoxLayout(), obj1, obj2, NewSpacer(), obj3)
 	container.Resize(fyne.NewSize(100, 300))
 	assert.Equal(t, container.MinSize(), fyne.NewSize(100, 150+(theme.Padding()*2)))
 

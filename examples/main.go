@@ -53,7 +53,7 @@ func confirmCallback(response bool) {
 
 func welcome(app fyne.App) {
 	w := app.NewWindow("Examples")
-	w.SetContent(&W.List{Children: []fyne.CanvasObject{
+	w.SetContent(&W.Box{Children: []fyne.CanvasObject{
 		&W.Label{Text: "Fyne Examples!"},
 
 		W.NewGroup("Apps", []fyne.CanvasObject{

@@ -1,5 +1,7 @@
 package widget
 
+import "log"
+
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/layout"
 
@@ -25,7 +27,8 @@ func (l *List) Append(object fyne.CanvasObject) {
 }
 
 func (l *List) createRenderer() fyne.WidgetRenderer {
-	return &listRenderer{objects: l.Children, layout: layout.NewListLayout(), list: l}
+	log.Println("Deprecated: The List widget is replaced by VBox")
+	return &listRenderer{objects: l.Children, layout: layout.NewVBoxLayout(), list: l}
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer
@@ -38,6 +41,7 @@ func (l *List) Renderer() fyne.WidgetRenderer {
 }
 
 // NewList creates a new list widget with the specified list of child objects
+// Deprecated: NewList has been replaced with NewVBox
 func NewList(children ...fyne.CanvasObject) *List {
 	list := &List{baseWidget{}, children}
 
