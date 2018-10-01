@@ -72,12 +72,18 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 		textMin.Height+btnMin.Height+theme.Padding()+32)
 }
 
+func newDialogWin(title string, parent fyne.App) fyne.Window {
+	win := parent.NewWindow(title)
+	win.SetFixedSize(true)
+
+	return win
+}
+
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.App) *dialog {
 	dialog := &dialog{message: message, icon: icon}
 
-	win := parent.NewWindow(title)
+	win := newDialogWin(title, parent)
 	win.SetOnClosed(dialog.closed)
-	win.SetFixedSize(true)
 
 	dialog.win = win
 	dialog.response = make(chan bool, 1)
@@ -100,4 +106,14 @@ func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 	}
 
 	return list
+}
+
+// ShowCustom shows a dialog over the specified application using custom
+// content. The MinSize() of the CanvasObject passed will be used to set
+// the size of the window.
+func ShowCustom(title string, content fyne.CanvasObject, parent fyne.App) {
+	win := newDialogWin(title, parent)
+
+	win.SetContent(content)
+	win.Show()
 }

@@ -19,7 +19,7 @@ type Window interface {
 	FixedSize() bool
 	// SetFixedSize sets a hint that states whether the window should be a fixed
 	// size or allow resizing.
-	SetFixedSize(b bool)
+	SetFixedSize(bool)
 
 	SetOnClosed(func())
 

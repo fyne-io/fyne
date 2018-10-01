@@ -83,6 +83,9 @@ func welcome(app fyne.App) {
 			&W.Button{Text: "Confirm", OnTapped: func() {
 				dialog.ShowConfirm("Confirmation", "Do you want to confirm?", confirmCallback, app)
 			}},
+			&W.Button{Text: "Custom", OnTapped: func() {
+				dialog.ShowCustom("Custom Dialog", &W.Check{Text: "Inside a dialog"}, app)
+			}},
 		}...),
 		layout.NewSpacer(),
 
