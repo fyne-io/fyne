@@ -1,6 +1,7 @@
 // Package main provides various examples of Fyne API capabilities
 package main
 
+import "errors"
 import "flag"
 import "fmt"
 import "log"
@@ -74,6 +75,10 @@ func welcome(app fyne.App) {
 		W.NewGroup("Dialogs", []fyne.CanvasObject{
 			&W.Button{Text: "Info", OnTapped: func() {
 				dialog.ShowInformation("Information", "You should know this thing...", app)
+			}},
+			&W.Button{Text: "Error", OnTapped: func() {
+				err := errors.New("A dummy error message")
+				dialog.ShowError(err, app)
 			}},
 			&W.Button{Text: "Confirm", OnTapped: func() {
 				dialog.ShowConfirm("Confirmation", "Do you want to confirm?", confirmCallback, app)

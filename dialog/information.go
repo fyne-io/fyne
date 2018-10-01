@@ -19,3 +19,9 @@ func ShowInformation(title, message string, parent fyne.App) {
 	go dialog.wait()
 	dialog.win.Show()
 }
+
+// ShowError shows a dialog over the specified application for an application
+// error. The title and message are extracted from the provided error.
+func ShowError(err error, parent fyne.App) {
+	ShowInformation("Application Error", err.Error(), parent)
+}
