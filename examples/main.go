@@ -73,10 +73,10 @@ func welcome(app fyne.App) {
 
 		W.NewGroup("Dialogs", []fyne.CanvasObject{
 			&W.Button{Text: "Info", OnTapped: func() {
-				dialog.ShowInformationDialog("Information", "You should know this thing...", app)
+				dialog.ShowInformation("Information", "You should know this thing...", app)
 			}},
 			&W.Button{Text: "Confirm", OnTapped: func() {
-				dialog.ShowConfirmDialog("Confirmation", "Do you want to confirm?", confirmCallback, app)
+				dialog.ShowConfirm("Confirmation", "Do you want to confirm?", confirmCallback, app)
 			}},
 		}...),
 		layout.NewSpacer(),

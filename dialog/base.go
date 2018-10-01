@@ -1,3 +1,4 @@
+// Package dialog defines standard dialog windows for application GUIs
 package dialog
 
 import (
