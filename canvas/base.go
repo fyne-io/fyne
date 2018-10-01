@@ -35,7 +35,7 @@ func (r *baseObject) Move(pos fyne.Position) {
 	fyne.RefreshObject(r)
 }
 
-// MinSize returns the specified minumum size, if set, or {0, 0} otherwise
+// MinSize returns the specified minimum size, if set, or {0, 0} otherwise
 func (r *baseObject) MinSize() fyne.Size {
 	return r.min
 }

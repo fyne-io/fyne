@@ -14,7 +14,7 @@ type CanvasObject interface {
 	MinSize() Size
 }
 
-// ThemedObject indicates that the associated CanvasObject reponse to theme
+// ThemedObject indicates that the associated CanvasObject responds to theme
 // changes. When the settings detect a theme change the object will be informed
 // through the invocation of ApplyTheme().
 type ThemedObject interface {
