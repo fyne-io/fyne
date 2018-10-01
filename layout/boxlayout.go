@@ -68,7 +68,11 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		height := child.MinSize().Height
 
 		if g.isSpacer(child) {
-			y += extraCell
+			if g.horizontal {
+				x += extraCell
+			} else {
+				y += extraCell
+			}
 			continue
 		}
 		child.Move(fyne.NewPos(x, y))
