@@ -45,5 +45,8 @@ func (w *baseWidget) MinSize() fyne.Size {
 }
 
 func (w *baseWidget) ApplyTheme() {
+	if w.renderer == nil {
+		return
+	}
 	w.renderer.ApplyTheme()
 }

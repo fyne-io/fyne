@@ -21,6 +21,7 @@ import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 import "github.com/fyne-io/fyne/layout"
+import "github.com/fyne-io/fyne/widget"
 
 var canvases = make(map[*C.Evas]*eflCanvas)
 
@@ -137,7 +138,7 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 	return obj
 }
 
-func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, objs []fyne.CanvasObject,
+func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, target fyne.CanvasObject, objs []fyne.CanvasObject,
 	size fyne.Size, pos, offset fyne.Position) {
 
 	obj := C.evas_object_rectangle_add(c.evas)
@@ -152,18 +153,25 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, objs []fyne.CanvasO
 	for _, child := range objs {
 		switch co := child.(type) {
 		case *fyne.Container:
-			c.buildContainer(co, co.Objects, child.CurrentSize(),
+			c.buildContainer(co, co, co.Objects, child.CurrentSize(),
 				child.CurrentPosition(), childOffset)
 		case fyne.Widget:
-			c.buildContainer(co, co.Renderer().Objects(),
+			click := child
+			if _, ok := parent.(*widget.Entry); ok {
+				click = parent
+			}
+			c.buildContainer(co, click, co.Renderer().Objects(),
 				child.CurrentSize(), child.CurrentPosition(), childOffset)
 		default:
-			if parent == nil {
-				parent = child
+			if target == nil {
+				target = parent
+				if target == nil {
+					target = child
+				}
 			}
 
 			if !ignoreObject(child) {
-				c.buildObject(child, parent, childOffset)
+				c.buildObject(child, target, childOffset)
 			}
 		}
 	}
@@ -353,9 +361,9 @@ func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
 
 	switch set := o.(type) {
 	case *fyne.Container:
-		c.buildContainer(set, set.Objects, set.MinSize(), o.CurrentPosition(), offset)
+		c.buildContainer(set, set, set.Objects, set.MinSize(), o.CurrentPosition(), offset)
 	case fyne.Widget:
-		c.buildContainer(set, set.Renderer().Objects(),
+		c.buildContainer(set, set, set.Renderer().Objects(),
 			set.MinSize(), o.CurrentPosition(), offset)
 	default:
 		if !ignoreObject(o) {
