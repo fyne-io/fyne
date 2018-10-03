@@ -12,7 +12,7 @@ const feedURL = "http://fyne.io/feed.xml"
 
 var parent fyne.App
 
-func parse(list *widget.List) {
+func parse(list *widget.Box) {
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(feedURL)
 
@@ -33,7 +33,7 @@ func parse(list *widget.List) {
 func Blog(app fyne.App) {
 	parent = app
 	w := app.NewWindow("Blog")
-	list := widget.NewList(widget.NewLabel(feedURL))
+	list := widget.NewVBox(widget.NewLabel(feedURL))
 	w.SetContent(list)
 
 	go parse(list)
