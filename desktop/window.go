@@ -129,7 +129,6 @@ func scaleByDPI(w *window) float32 {
 		return float32(scale)
 	}
 	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
-	log.Println("DPI", xdpi)
 	if xdpi > 192 {
 		return float32(1.5)
 	} else if xdpi > 144 {
@@ -151,9 +150,9 @@ func onWindowResize(ee *C.Ecore_Evas) {
 	var ww, hh C.int
 	C.ecore_evas_geometry_get(ee, nil, nil, &ww, &hh)
 
-	canvas := w.canvas.(*eflCanvas)
-	canvas.size = fyne.NewSize(int(float32(ww)/canvas.Scale()), int(float32(hh)/canvas.Scale()))
-	canvas.resizeContent()
+	current := w.canvas.(*eflCanvas)
+	current.size = fyne.NewSize(int(float32(ww)/current.Scale()), int(float32(hh)/current.Scale()))
+	current.resizeContent()
 
 	if runtime.GOOS == "darwin" {
 		// due to NSRunLoop freezing during window resize we need to force a refresh
@@ -184,13 +183,9 @@ func onWindowFocusGained(ee *C.Ecore_Evas) {
 		return
 	}
 
-	canvas := w.canvas.(*eflCanvas)
-
-	if canvas.focused == nil {
-		return
+	if canFocus, ok := w.canvas.(*eflCanvas); ok && canFocus.focused != nil {
+		canFocus.focused.OnFocusGained()
 	}
-
-	canvas.focused.OnFocusGained()
 }
 
 //export onWindowFocusLost
@@ -202,12 +197,9 @@ func onWindowFocusLost(ee *C.Ecore_Evas) {
 		return
 	}
 
-	canvas := w.canvas.(*eflCanvas)
-	if canvas.focused == nil {
-		return
+	if canFocus, ok := w.canvas.(*eflCanvas); ok && canFocus.focused != nil {
+		canFocus.focused.OnFocusLost()
 	}
-
-	canvas.focused.OnFocusLost()
 }
 
 //export onWindowClose

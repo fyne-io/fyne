@@ -39,10 +39,10 @@ var (
 	// channel to signal quitting
 	quit = make(chan bool, 1)
 	// channel to queue a render on a component
-	renderqueue = make(chan renderData, renderBufferSize)
+	renderQueue = make(chan renderData, renderBufferSize)
 	// ErrorRenderQueueFull represents a failure to queue a new object for
 	// render as the list of waiting render changes was full.
-	ErrorRenderQueueFull = errors.New("Render Queue is Full")
+	ErrorRenderQueueFull = errors.New("render queue is full")
 )
 
 // Arrange that main.main runs on main thread.
@@ -62,7 +62,7 @@ func initEFL() {
 			close(quit)
 			tick.Stop()
 			return
-		case data := <-renderqueue:
+		case data := <-renderQueue:
 			data.c.dirty[data.co] = true
 		case <-tick.C:
 			drawDirty()
@@ -99,7 +99,7 @@ func drawDirty() {
 // do runs f on the main thread.
 func queueRender(c *eflCanvas, co fyne.CanvasObject) error {
 	select {
-	case renderqueue <- renderData{c: c, co: co}: // write OK
+	case renderQueue <- renderData{c: c, co: co}: // write OK
 	default:
 		return ErrorRenderQueueFull // buffer full
 	}

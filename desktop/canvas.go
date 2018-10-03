@@ -25,16 +25,14 @@ import "github.com/fyne-io/fyne/widget"
 
 var canvases = make(map[*C.Evas]*eflCanvas)
 
-const vectorPad = 10
-
 //export onObjectMouseDown
 func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
-	canvas := canvases[C.evas_object_evas_get(obj)]
-	co := canvas.objects[obj]
+	current := canvases[C.evas_object_evas_get(obj)]
+	co := current.objects[obj]
 
 	var x, y C.int
 	C.evas_object_geometry_get(obj, &x, &y, nil, nil)
-	pos := fyne.NewPos(unscaleInt(canvas, int(info.canvas.x-x)), unscaleInt(canvas, int(info.canvas.y-y)))
+	pos := fyne.NewPos(unscaleInt(current, int(info.canvas.x-x)), unscaleInt(current, int(info.canvas.y-y)))
 
 	ev := new(fyne.MouseEvent)
 	ev.Position = pos
@@ -44,7 +42,7 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	case fyne.ClickableObject:
 		obj.OnMouseDown(ev)
 	case fyne.FocusableObject:
-		canvas.Focus(obj)
+		current.Focus(obj)
 	}
 }
 
