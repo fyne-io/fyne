@@ -98,7 +98,7 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 	case *canvas.Image:
 		obj = C.evas_object_image_filled_add(c.evas)
 		C.evas_object_image_alpha_set(obj, C.EINA_TRUE)
-		alpha := C.int(float64(255) * co.Alpha)
+		alpha := C.int(float64(255) * co.Alpha())
 		C.evas_object_color_set(obj, alpha, alpha, alpha, alpha) // premul ffffff*alpha
 
 		if co.File != "" {

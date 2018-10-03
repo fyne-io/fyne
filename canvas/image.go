@@ -12,7 +12,14 @@ type Image struct {
 	// one of the following sources will provide our image data
 	PixelColor func(x, y, w, h int) color.RGBA // Render the image from code
 	File       string                          // Load the image froma file
-	Alpha      float64                         // Set an alpha value < 1.0 to fade the image
+
+	Translucency float64 // Set a translucency value > 0.0 to fade the image
+}
+
+// Alpha is a convenience function that returns the alpha value for an image
+// based on it's Translucency value. The result is 1.0 - Translucency.
+func (i *Image) Alpha() float64 {
+	return 1.0 - i.Translucency
 }
 
 // NewRaster returns a new Image instance that is rendered dynamically using
@@ -22,7 +29,6 @@ type Image struct {
 func NewRaster(pixelColor func(x, y, w, h int) color.RGBA) *Image {
 	return &Image{
 		PixelColor: pixelColor,
-		Alpha:      1.0,
 	}
 }
 
@@ -36,7 +42,6 @@ func NewImageFromImage(img image.Image) *Image {
 			r, g, b, a := img.At(x, y).RGBA()
 			return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 		},
-		Alpha: 1.0,
 	}
 }
 
@@ -44,8 +49,7 @@ func NewImageFromImage(img image.Image) *Image {
 // Images returned from this method will scale to fit the canvas object.
 func NewImageFromFile(file string) *Image {
 	return &Image{
-		File:  file,
-		Alpha: 1.0,
+		File: file,
 	}
 }
 

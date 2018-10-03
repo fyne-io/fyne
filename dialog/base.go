@@ -38,7 +38,7 @@ func (d *dialog) closed() {
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	bgIcon := canvas.NewImageFromResource(d.icon)
-	bgIcon.Alpha = 0.25
+	bgIcon.Translucency = 0.75
 	d.win.SetContent(fyne.NewContainerWithLayout(d,
 		newLabel(d.message),
 		bgIcon,

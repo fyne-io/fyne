@@ -13,3 +13,15 @@ func TestImageFromImage(t *testing.T) {
 	assert.Equal(t, dest.PixelColor(2, 2, 6, 6).A, uint8(0xff))
 	assert.Equal(t, dest.PixelColor(4, 4, 6, 6).A, uint8(0x00))
 }
+
+func TestImage_AlphaDefault(t *testing.T) {
+	img := &Image{}
+
+	assert.Equal(t, 1.0, img.Alpha())
+}
+
+func TestImage_TranslucencyDefault(t *testing.T) {
+	img := &Image{}
+
+	assert.Equal(t, 0.0, img.Translucency)
+}
