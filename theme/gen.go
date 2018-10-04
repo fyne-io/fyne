@@ -38,9 +38,13 @@ func bundleFont(font, name string, f *os.File) {
 	bundleFile(strings.ToLower(name), path, f)
 }
 
-func bundleIcon(name, theme string, f *os.File) {
+func iconDir() string {
 	_, dirname, _, _ := runtime.Caller(0)
-	path := path.Join(path.Dir(dirname), "icons", name+"-"+theme+".svg")
+	return path.Join(path.Dir(dirname), "icons")
+}
+
+func bundleIcon(name, theme string, f *os.File) {
+	path := path.Join(iconDir(), name+"-"+theme+".svg")
 
 	formatted := strings.ToLower(name) + strings.Title(strings.ToLower(theme))
 	bundleFile(formatted, path, f)
@@ -80,6 +84,9 @@ func main() {
 	if f == nil {
 		return
 	}
+
+	icon := path.Join(iconDir(), "fyne.png")
+	bundleFile("fyne-logo", icon, f)
 
 	themes := []string{"dark", "light"}
 	for _, theme := range themes {

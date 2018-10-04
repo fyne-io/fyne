@@ -50,6 +50,11 @@ func init() {
 	warning = &darkLightResource{warningDark, warningLight}
 }
 
+// FyneLogo returns a resource containing the Fyne logo
+func FyneLogo() fyne.Resource {
+	return fynelogo
+}
+
 // CancelIcon returns a resource containing the standard cancel icon for the current theme
 func CancelIcon() fyne.Resource {
 	return cancel

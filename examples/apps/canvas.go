@@ -2,9 +2,7 @@
 // the capabilities and simple coding of Fyne based apps.
 package apps
 
-import "runtime"
 import "image/color"
-import "path"
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/canvas"
@@ -22,15 +20,13 @@ func rgbGradient(x, y, w, h int) color.RGBA {
 func Canvas(app fyne.App) {
 	w := app.NewWindow("Canvas")
 
-	_, filename, _, _ := runtime.Caller(0)
-	exampleDir := path.Dir(path.Dir(filename))
 	content := fyne.NewContainer(
 		canvas.NewText("Resize me", color.RGBA{0, 0x80, 0, 0xff}),
 		&canvas.Rectangle{FillColor: color.RGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.RGBA{0xff, 0xff, 0xff, 0xff},
 			StrokeWidth: 1},
 		canvas.NewRaster(rgbGradient),
-		canvas.NewImageFromFile(path.Join(exampleDir, "fyne.png")),
+		canvas.NewImageFromResource(theme.FyneLogo()),
 		canvas.NewImageFromResource(theme.CutIcon()),
 		&canvas.Line{StrokeColor: color.RGBA{0, 0, 0x80, 0xff}, StrokeWidth: 5},
 		&canvas.Circle{StrokeColor: color.RGBA{0, 0, 0x80, 0xff},
