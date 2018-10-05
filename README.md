@@ -3,6 +3,7 @@
   <a href="https://goreportcard.com/report/github.com/fyne-io/fyne"><img src="https://goreportcard.com/badge/github.com/fyne-io/fyne" alt="Code Status" /></a>
   <a href="https://travis-ci.org/fyne-io/fyne"><img src="https://travis-ci.org/fyne-io/fyne.svg" alt="Build Status" /></a>
   <a href='https://coveralls.io/github/fyne-io/fyne?branch=develop'><img src='https://coveralls.io/repos/github/fyne-io/fyne/badge.svg?branch=develop' alt='Coverage Status' /></a>
+  <a href='https://sourcegraph.com/github.com/fyne-io/fyne?badge'><img src='https://sourcegraph.com/github.com/fyne-io/fyne/-/badge.svg' alt='Used By' /></a>
 </p>
 
 # About
@@ -142,27 +143,5 @@ func main() {
 
 # Examples
 
-To see the examples you can run examples/main.go and optionally specify an example, like this:
+The main examples have been moved - you can find them in their [own repository][https://github.com/fyne-io/examples/].
 
-    cd $GOPATH/src/github.com/fyne-io/fyne/examples/
-    go run main.go -example calculator
-
-It should look like one of these:
-
-|       | Linux | Max OS X | Windows |
-| -----:|:-----:|:--------:|:-------:|
-|  dark | ![Calculator on Linux](img/calc-linux-dark.png) | ![Calculator on OS X](img/calc-osx-dark.png) | ![Calculator on Windows](img/calc-windows-dark.png) |
-| light | ![Calculator (light) on Linux](img/calc-linux-light.png) | ![Calculator (light) on OS X](img/calc-osx-light.png) | ![Calculator (light) on Windows](img/calc-windows-light.png) |
-
-## Clock
-
-    go run main.go -example clock
-
-![Clock dark](img/clock-dark.png)
-![Clock light](img/clock-light.png)
-
-## Fractal (Mandelbrot)
-
-    go run main.go -example fractal
-
-![Fractal](img/fractal-dark.png)
