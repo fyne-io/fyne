@@ -2,7 +2,6 @@
 package main
 
 import "errors"
-import "flag"
 import "fmt"
 import "log"
 
@@ -14,32 +13,12 @@ import "github.com/fyne-io/fyne/theme"
 import "github.com/fyne-io/fyne/dialog"
 import W "github.com/fyne-io/fyne/widget"
 
-func blogApp(app fyne.App) {
-	apps.Blog(app)
-}
-
-func calcApp(app fyne.App) {
-	apps.Calculator(app)
-}
-
 func canvasApp(app fyne.App) {
 	apps.Canvas(app)
 }
 
-func clockApp(app fyne.App) {
-	apps.Clock(app)
-}
-
-func fractalApp(app fyne.App) {
-	apps.Fractal(app)
-}
-
 func layoutApp(app fyne.App) {
 	apps.Layout(app)
-}
-
-func lifeApp(app fyne.App) {
-	apps.Life(app)
 }
 
 func appButton(app fyne.App, label string, onClick func(fyne.App)) *W.Button {
@@ -52,18 +31,16 @@ func confirmCallback(response bool) {
 	log.Println("Responded with", response)
 }
 
-func welcome(app fyne.App) {
+func main() {
+	app := apps.NewApp()
+
 	w := app.NewWindow("Examples")
 	w.SetContent(&W.Box{Children: []fyne.CanvasObject{
 		&W.Label{Text: "Fyne Examples!"},
 
-		W.NewGroup("Apps", []fyne.CanvasObject{
-			appButton(app, "Blog", blogApp),
-			appButton(app, "Calculator", calcApp),
-			appButton(app, "Clock", clockApp),
-			appButton(app, "Fractal", fractalApp),
-			appButton(app, "Life", lifeApp),
-		}...),
+		&W.Button{Text: "Apps", OnTapped: func() {
+			dialog.ShowInformation("Information", "Example applications have moved to https://github.com/fyne-io/examples", app)
+		}},
 
 		W.NewGroup("Demos", []fyne.CanvasObject{
 			appButton(app, "Canvas", canvasApp),
@@ -102,31 +79,4 @@ func welcome(app fyne.App) {
 		}},
 	}})
 	w.Show()
-}
-
-func main() {
-	app := apps.NewApp()
-
-	var ex string
-	flag.StringVar(&ex, "example", "", "Launch an app directly (blog,calculator,canvas,clock)")
-	flag.Parse()
-
-	switch ex {
-	case "blog":
-		blogApp(app)
-	case "calculator":
-		calcApp(app)
-	case "canvas":
-		canvasApp(app)
-	case "clock":
-		clockApp(app)
-	case "fractal":
-		fractalApp(app)
-	case "layout":
-		layoutApp(app)
-	case "life":
-		lifeApp(app)
-	default:
-		welcome(app)
-	}
 }
