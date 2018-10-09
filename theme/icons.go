@@ -34,6 +34,7 @@ func (res *darkLightResource) CachePath() string {
 var cancel, confirm, checked, unchecked *darkLightResource
 var contentCut, contentCopy, contentPaste *darkLightResource
 var info, question, warning *darkLightResource
+var mailCompose, mailForward, mailReply, mailReplyAll *darkLightResource
 
 func init() {
 	cancel = &darkLightResource{cancelDark, cancelLight}
@@ -48,6 +49,11 @@ func init() {
 	info = &darkLightResource{infoDark, infoLight}
 	question = &darkLightResource{questionDark, questionLight}
 	warning = &darkLightResource{warningDark, warningLight}
+
+	mailCompose = &darkLightResource{mailcomposeDark, mailcomposeLight}
+	mailForward = &darkLightResource{mailforwardDark, mailforwardLight}
+	mailReply = &darkLightResource{mailreplyDark, mailreplyLight}
+	mailReplyAll = &darkLightResource{mailreplyallDark, mailreplyallLight}
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -103,4 +109,24 @@ func QuestionIcon() fyne.Resource {
 // WarningIcon returns a resource containing the standard dialog warning icon for the current theme
 func WarningIcon() fyne.Resource {
 	return warning
+}
+
+// MailComposeIcon returns a resource containing the standard mail compose icon for the current theme
+func MailComposeIcon() fyne.Resource {
+	return mailCompose
+}
+
+// MailForwardIcon returns a resource containing the standard mail forward icon for the current theme
+func MailForwardIcon() fyne.Resource {
+	return mailForward
+}
+
+// MailReplyIcon returns a resource containing the standard mail reply icon for the current theme
+func MailReplyIcon() fyne.Resource {
+	return mailReply
+}
+
+// MailReplyAllIcon returns a resource containing the standard mail reply all icon for the current theme
+func MailReplyAllIcon() fyne.Resource {
+	return mailReplyAll
 }

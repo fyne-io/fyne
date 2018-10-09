@@ -13,6 +13,11 @@ import "github.com/fyne-io/fyne"
 
 const fontFace = "NotoSans"
 
+func formatVariable(name string) string {
+	str := strings.Replace(name, "-", "", -1)
+	return strings.Replace(str, "_", "", -1)
+}
+
 func bundleFile(name string, filepath string, f *os.File) {
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
@@ -21,7 +26,7 @@ func bundleFile(name string, filepath string, f *os.File) {
 	}
 	res := fyne.NewStaticResource(path.Base(filepath), bytes)
 
-	_, err = f.WriteString("var " + strings.Replace(name, "-", "", -1) + " = " + res.ToGo() + "\n")
+	_, err = f.WriteString("var " + formatVariable(name) + " = " + res.ToGo() + "\n")
 	if err != nil {
 		fmt.Println("Unable to write to bundled file")
 	}
@@ -101,6 +106,11 @@ func main() {
 		bundleIcon("info", theme, f)
 		bundleIcon("question", theme, f)
 		bundleIcon("warning", theme, f)
+
+		bundleIcon("mail-compose", theme, f)
+		bundleIcon("mail-forward", theme, f)
+		bundleIcon("mail-reply", theme, f)
+		bundleIcon("mail-reply_all", theme, f)
 	}
 	f.Close()
 }
