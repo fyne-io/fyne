@@ -11,11 +11,13 @@ import (
 // After creation you should call Show().
 func NewInformation(title, message string, parent fyne.Window) Dialog {
 	d := newDialog(title, message, theme.InfoIcon(), nil, parent)
-	d.setButtons(newButtonList(&widget.Button{Text: "OK", Style: widget.PrimaryButton,
+
+	d.dismiss = &widget.Button{Text: "OK",
 		OnTapped: func() {
 			d.response <- false
 		},
-	}))
+	}
+	d.setButtons(newButtonList(d.dismiss))
 
 	return d
 }

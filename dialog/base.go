@@ -9,9 +9,10 @@ import (
 	"github.com/fyne-io/fyne/widget"
 )
 
-// Dialog is the common API for any dialog window
+// Dialog is the common API for any dialog window with a single dismiss button
 type Dialog interface {
 	Show()
+	SetDismissText(label string)
 }
 
 type dialog struct {
@@ -19,6 +20,8 @@ type dialog struct {
 	callback func(bool)
 	content  fyne.CanvasObject
 	icon     fyne.Resource
+
+	dismiss *widget.Button
 
 	response  chan bool
 	responded bool
@@ -126,10 +129,15 @@ func (d *dialog) Show() {
 	d.win.Show()
 }
 
+// SetDismissText allows custom text to be set in the confirmation button
+func (d *dialog) SetDismissText(label string) {
+	d.dismiss.SetText(label)
+}
+
 // ShowCustom shows a dialog over the specified application using custom
-// content. The MinSize() of the CanvasObject passed will be used to set
-// the size of the window.
-func ShowCustom(title, confirm string, content fyne.CanvasObject, parent fyne.Window) {
+// content. The button will have th dismiss text set.
+// The MinSize() of the CanvasObject passed will be used to set the size of the window.
+func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
 	d := &dialog{content: content, icon: nil}
 
 	win := newDialogWin(title, parent)
@@ -137,14 +145,12 @@ func ShowCustom(title, confirm string, content fyne.CanvasObject, parent fyne.Wi
 	d.win = win
 	d.response = make(chan bool, 1)
 
-	d.setButtons(widget.NewHBox(layout.NewSpacer(),
-		&widget.Button{Text: confirm, Style: widget.PrimaryButton,
-			OnTapped: func() {
-				d.response <- false
-			},
+	d.dismiss = &widget.Button{Text: dismiss,
+		OnTapped: func() {
+			d.response <- false
 		},
-		layout.NewSpacer()),
-	)
+	}
+	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
 	d.Show()
 }

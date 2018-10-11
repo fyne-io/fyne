@@ -128,6 +128,14 @@ func (b *Button) Renderer() fyne.WidgetRenderer {
 	return b.renderer
 }
 
+// SetText allows the button label to be changed
+func (b *Button) SetText(text string) {
+	b.Text = text
+	b.Renderer().(*buttonRenderer).label.Text = text
+
+	b.Renderer().Refresh()
+}
+
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
 	button := &Button{baseWidget{}, label, DefaultButton, nil, tapped}

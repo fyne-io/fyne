@@ -66,7 +66,10 @@ func main() {
 				dialog.ShowError(err, w)
 			}},
 			&W.Button{Text: "Confirm", OnTapped: func() {
-				dialog.ShowConfirm("Confirmation", "Do you want to confirm?", confirmCallback, w)
+				cnf := dialog.NewConfirm("Confirmation", "Are you enjoying this demo?", confirmCallback, w)
+				cnf.SetDismissText("Nah")
+				cnf.SetConfirmText("Oh Yes!")
+				cnf.Show()
 			}},
 			&W.Button{Text: "Custom", OnTapped: func() {
 				dialog.ShowCustom("MyDialog", "Nice", &W.Check{Text: "Inside a dialog"}, w)

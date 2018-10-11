@@ -6,25 +6,37 @@ import (
 	"github.com/fyne-io/fyne/widget"
 )
 
+// ConfirmDialog is like the standard Dialog but with an additional confirmation button
+type ConfirmDialog struct {
+	*dialog
+
+	confirm *widget.Button
+}
+
+// SetConfirmText allows custom text to be set in the confirmation button
+func (d *ConfirmDialog) SetConfirmText(label string) {
+	d.confirm.SetText(label)
+}
+
 // NewConfirm creates a dialog over the specified window for user confirmation.
 // The title is used for the ialog window and message is the content.
 // The callback is executed when the user decides. After creation you should call Show().
-func NewConfirm(title, message string, callback func(bool), parent fyne.Window) Dialog {
+func NewConfirm(title, message string, callback func(bool), parent fyne.Window) *ConfirmDialog {
 	d := newDialog(title, message, theme.QuestionIcon(), callback, parent)
-	d.setButtons(newButtonList(
-		&widget.Button{Text: "No",
-			OnTapped: func() {
-				d.response <- false
-			},
-		},
-		&widget.Button{Text: "Yes", Style: widget.PrimaryButton,
-			OnTapped: func() {
-				d.response <- true
-			},
-		},
-	))
 
-	return d
+	d.dismiss = &widget.Button{Text: "No",
+		OnTapped: func() {
+			d.response <- false
+		},
+	}
+	confirm := &widget.Button{Text: "Yes", Style: widget.PrimaryButton,
+		OnTapped: func() {
+			d.response <- true
+		},
+	}
+	d.setButtons(newButtonList(d.dismiss, confirm))
+
+	return &ConfirmDialog{d, confirm}
 }
 
 // ShowConfirm shows a dialog over the specified window for a user
