@@ -9,10 +9,15 @@ import (
 	"github.com/fyne-io/fyne/widget"
 )
 
+// Dialog is the common API for any dialog window
+type Dialog interface {
+	Show()
+}
+
 type dialog struct {
 	win      fyne.Window
 	callback func(bool)
-	message  string
+	content  fyne.CanvasObject
 	icon     fyne.Resource
 
 	response  chan bool
@@ -37,13 +42,20 @@ func (d *dialog) closed() {
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
-	bgIcon := canvas.NewImageFromResource(d.icon)
-	bgIcon.Translucency = 0.75
-	d.win.SetContent(fyne.NewContainerWithLayout(d,
-		newLabel(d.message),
-		bgIcon,
-		buttons,
-	))
+	if d.icon == nil {
+		d.win.SetContent(fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+			d.content,
+			buttons,
+		))
+	} else {
+		bgIcon := canvas.NewImageFromResource(d.icon)
+		bgIcon.Translucency = 0.75
+		d.win.SetContent(fyne.NewContainerWithLayout(d,
+			d.content,
+			bgIcon,
+			buttons,
+		))
+	}
 }
 
 func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
@@ -72,24 +84,25 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 		textMin.Height+btnMin.Height+theme.Padding()+32)
 }
 
-func newDialogWin(title string, parent fyne.App) fyne.Window {
-	win := parent.NewWindow(title)
+func newDialogWin(title string, _ fyne.Window) fyne.Window {
+	win := fyne.GetDriver().CreateWindow(title)
 	win.SetFixedSize(true)
+	//	win.SetParent(parent)
 
 	return win
 }
 
-func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.App) *dialog {
-	dialog := &dialog{message: message, icon: icon}
+func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
+	d := &dialog{content: newLabel(message), icon: icon}
 
 	win := newDialogWin(title, parent)
-	win.SetOnClosed(dialog.closed)
+	win.SetOnClosed(d.closed)
 
-	dialog.win = win
-	dialog.response = make(chan bool, 1)
-	dialog.callback = callback
+	d.win = win
+	d.response = make(chan bool, 1)
+	d.callback = callback
 
-	return dialog
+	return d
 }
 
 func newLabel(message string) fyne.CanvasObject {
@@ -108,12 +121,30 @@ func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 	return list
 }
 
+func (d *dialog) Show() {
+	go d.wait()
+	d.win.Show()
+}
+
 // ShowCustom shows a dialog over the specified application using custom
 // content. The MinSize() of the CanvasObject passed will be used to set
 // the size of the window.
-func ShowCustom(title string, content fyne.CanvasObject, parent fyne.App) {
-	win := newDialogWin(title, parent)
+func ShowCustom(title, confirm string, content fyne.CanvasObject, parent fyne.Window) {
+	d := &dialog{content: content, icon: nil}
 
-	win.SetContent(content)
-	win.Show()
+	win := newDialogWin(title, parent)
+	win.SetOnClosed(d.closed)
+	d.win = win
+	d.response = make(chan bool, 1)
+
+	d.setButtons(widget.NewHBox(layout.NewSpacer(),
+		&widget.Button{Text: confirm, Style: widget.PrimaryButton,
+			OnTapped: func() {
+				d.response <- false
+			},
+		},
+		layout.NewSpacer()),
+	)
+
+	d.Show()
 }

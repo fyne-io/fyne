@@ -47,7 +47,7 @@ func main() {
 		&W.Label{Text: "Fyne Examples!"},
 
 		&W.Button{Text: "Apps", OnTapped: func() {
-			dialog.ShowInformation("Information", "Example applications have moved to https://github.com/fyne-io/examples", app)
+			dialog.ShowInformation("Information", "Example applications have moved to https://github.com/fyne-io/examples", w)
 		}},
 
 		W.NewGroup("Demos", []fyne.CanvasObject{
@@ -59,17 +59,17 @@ func main() {
 
 		W.NewGroup("Dialogs", []fyne.CanvasObject{
 			&W.Button{Text: "Info", OnTapped: func() {
-				dialog.ShowInformation("Information", "You should know this thing...", app)
+				dialog.ShowInformation("Information", "You should know this thing...", w)
 			}},
 			&W.Button{Text: "Error", OnTapped: func() {
 				err := errors.New("A dummy error message")
-				dialog.ShowError(err, app)
+				dialog.ShowError(err, w)
 			}},
 			&W.Button{Text: "Confirm", OnTapped: func() {
-				dialog.ShowConfirm("Confirmation", "Do you want to confirm?", confirmCallback, app)
+				dialog.ShowConfirm("Confirmation", "Do you want to confirm?", confirmCallback, w)
 			}},
 			&W.Button{Text: "Custom", OnTapped: func() {
-				dialog.ShowCustom("Custom Dialog", &W.Check{Text: "Inside a dialog"}, app)
+				dialog.ShowCustom("MyDialog", "Nice", &W.Check{Text: "Inside a dialog"}, w)
 			}},
 		}...),
 		&layout.Spacer{},
