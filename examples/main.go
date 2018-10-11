@@ -71,7 +71,7 @@ func main() {
 				dialog.ShowCustom("Custom Dialog", &W.Check{Text: "Inside a dialog"}, app)
 			}},
 		}...),
-		layout.NewSpacer(),
+		&layout.Spacer{},
 
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			&W.Button{Text: "Dark", OnTapped: func() {

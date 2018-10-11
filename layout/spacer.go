@@ -2,48 +2,59 @@ package layout
 
 import "github.com/fyne-io/fyne"
 
-// SpacerObject is a simple object that can be used in a list layout to space
-// out child objects
+// SpacerObject is any object that can be used to space out child objects
 type SpacerObject interface {
 	ExpandVertical() bool
 	ExpandHorizontal() bool
 }
 
-type spacerObject struct {
+// Spacer is any simple object that can be used in a box layout to space
+// out child objects
+type Spacer struct {
+	FixHorizontal bool
+	FixVertical   bool
+
 	size fyne.Size
 	pos  fyne.Position
 }
 
-func (s *spacerObject) ExpandVertical() bool {
-	return true
+// ExpandVertical returns whether or not this spacer expands on the vertical axis
+func (s *Spacer) ExpandVertical() bool {
+	return !s.FixVertical
 }
 
-func (s *spacerObject) ExpandHorizontal() bool {
-	return true
+// ExpandHorizontal returns whether or not this spacer expands on the horizontal axis
+func (s *Spacer) ExpandHorizontal() bool {
+	return !s.FixHorizontal
 }
 
-func (s *spacerObject) CurrentSize() fyne.Size {
+// CurrentSize returns the current size of this Spacer
+func (s *Spacer) CurrentSize() fyne.Size {
 	return s.size
 }
 
-func (s *spacerObject) Resize(size fyne.Size) {
+// Resize sets a new size for the Spacer - this will be called by the layout
+func (s *Spacer) Resize(size fyne.Size) {
 	s.size = size
 }
 
-func (s *spacerObject) CurrentPosition() fyne.Position {
+// CurrentPosition returns the current position of this Spacer
+func (s *Spacer) CurrentPosition() fyne.Position {
 	return s.pos
 }
 
-func (s *spacerObject) Move(pos fyne.Position) {
+// Move sets a new position for the Spacer - this will be called by the layout
+func (s *Spacer) Move(pos fyne.Position) {
 	s.pos = pos
 }
 
-func (s *spacerObject) MinSize() fyne.Size {
+// MinSize returns a 0 size as a Spacer can shrink to no actual size
+func (s *Spacer) MinSize() fyne.Size {
 	return fyne.NewSize(0, 0)
 }
 
 // NewSpacer returns a spacer object which can fill vertical and horizontal
-// space. This is primarily used with a list layout.
+// space. This is primarily used with a box layout.
 func NewSpacer() fyne.CanvasObject {
-	return &spacerObject{}
+	return &Spacer{}
 }
