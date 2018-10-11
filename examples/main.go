@@ -36,6 +36,13 @@ func main() {
 
 	w := app.NewWindow("Examples")
 	w.SetContent(&W.Box{Children: []fyne.CanvasObject{
+		&W.Toolbar{Items: []W.ToolbarItem{
+			&W.ToolbarAction{Icon: theme.MailComposeIcon(), OnActivated: func() { log.Println("New") }},
+			&W.ToolbarSpacer{},
+			&W.ToolbarAction{Icon: theme.CutIcon(), OnActivated: func() { log.Println("Cut") }},
+			&W.ToolbarAction{Icon: theme.CopyIcon(), OnActivated: func() { log.Println("Copy") }},
+			&W.ToolbarAction{Icon: theme.PasteIcon(), OnActivated: func() { log.Println("Paste") }},
+		}},
 		&W.Label{Text: "Fyne Examples!"},
 
 		&W.Button{Text: "Apps", OnTapped: func() {

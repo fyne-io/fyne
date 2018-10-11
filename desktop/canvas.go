@@ -321,6 +321,9 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 
 	obj := c.native[target]
 	bg := theme.BackgroundColor()
+	if _, ok := target.(*widget.Toolbar); ok { // TODO don't make this a special case
+		bg = theme.ButtonColor()
+	}
 	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
 
 	if target == c.content {
