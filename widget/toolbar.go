@@ -2,7 +2,9 @@ package widget
 
 import (
 	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne/theme"
 )
 
 // ToolbarItem represents any interface element that can be added to a toolbar
@@ -27,7 +29,7 @@ func NewToolbarAction(icon fyne.Resource, onActivated func()) ToolbarItem {
 }
 
 // ToolbarSpacer is a blank, stretchable space for a toolbar.
-// This is typically used to assit layout if you wish some left and some right aligned items.
+// This is typically used to assist layout if you wish some left and some right aligned items.
 // Space will be split evebly amongst all the spacers on a toolbar.
 type ToolbarSpacer struct {
 }
@@ -40,6 +42,22 @@ func (t *ToolbarSpacer) ToolbarObject() fyne.CanvasObject {
 // NewToolbarSpacer returns a new spacer item for a Toolbar to assist with ToolbarItem alignment
 func NewToolbarSpacer() ToolbarItem {
 	return &ToolbarSpacer{}
+}
+
+
+// ToolbarSeparator is a thin, visible divide that can be added to a Toolbar.
+// This is typically used to assist visual grouping of ToolbarItems.
+type ToolbarSeparator struct {
+}
+
+// ToolbarObject gets the visible line object for this ToolbarSeparator
+func (t *ToolbarSeparator) ToolbarObject() fyne.CanvasObject {
+	return canvas.NewRectangle(theme.TextColor())
+}
+
+// NewToolbarSeparator returns a new separator item for a Toolbar to assist with ToolbarItem grouping
+func NewToolbarSeparator() ToolbarItem {
+	return &ToolbarSeparator{}
 }
 
 // Toolbar widget creates a horizontal list of tool buttons
