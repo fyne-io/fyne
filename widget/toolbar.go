@@ -44,7 +44,6 @@ func NewToolbarSpacer() ToolbarItem {
 	return &ToolbarSpacer{}
 }
 
-
 // ToolbarSeparator is a thin, visible divide that can be added to a Toolbar.
 // This is typically used to assist visual grouping of ToolbarItems.
 type ToolbarSeparator struct {
