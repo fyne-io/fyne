@@ -21,6 +21,25 @@ func layoutApp(app fyne.App) {
 	apps.Layout(app)
 }
 
+func formApp(app fyne.App) {
+	w := app.NewWindow("Form")
+	largeText := W.NewEntry()
+
+	form := &W.Form{
+		OnCancel: func() {
+			w.Close()
+		},
+		OnSubmit: func() {
+			fmt.Println("Form submitted")
+		},
+	}
+	form.Append("Name", W.NewEntry())
+	form.Append("Email", W.NewEntry())
+	form.Append("Message", largeText)
+	w.SetContent(form)
+	w.Show()
+}
+
 func appButton(app fyne.App, label string, onClick func(fyne.App)) *W.Button {
 	return &W.Button{Text: label, OnTapped: func() {
 		onClick(app)
@@ -53,6 +72,7 @@ func main() {
 		W.NewGroup("Demos", []fyne.CanvasObject{
 			appButton(app, "Canvas", canvasApp),
 			appButton(app, "Layout", layoutApp),
+			appButton(app, "Form", formApp),
 			&W.Entry{Text: "Entry"},
 			&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
 		}...),
