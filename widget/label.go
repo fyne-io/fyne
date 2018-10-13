@@ -85,7 +85,7 @@ func (l *labelRenderer) Layout(size fyne.Size) {
 	if len(l.texts) > 1 {
 		lineHeight = lineHeight / l.lines
 	}
-	lineSize := fyne.NewSize(size.Width, lineHeight)
+	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
 	for i := 0; i < l.lines; i++ {
 		text := l.texts[i]
 		text.Resize(lineSize)
