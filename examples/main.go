@@ -3,7 +3,6 @@ package main
 
 import "errors"
 import "fmt"
-import "log"
 
 import "github.com/fyne-io/fyne/examples/apps"
 
@@ -24,6 +23,7 @@ func layoutApp(app fyne.App) {
 func formApp(app fyne.App) {
 	w := app.NewWindow("Form")
 	largeText := W.NewEntry()
+	//	largeText.Text = "\n\n\n"
 
 	form := &W.Form{
 		OnCancel: func() {
@@ -47,7 +47,7 @@ func appButton(app fyne.App, label string, onClick func(fyne.App)) *W.Button {
 }
 
 func confirmCallback(response bool) {
-	log.Println("Responded with", response)
+	fmt.Println("Responded with", response)
 }
 
 func main() {
@@ -56,12 +56,12 @@ func main() {
 	w := app.NewWindow("Examples")
 	w.SetContent(&W.Box{Children: []fyne.CanvasObject{
 		&W.Toolbar{Items: []W.ToolbarItem{
-			&W.ToolbarAction{Icon: theme.MailComposeIcon(), OnActivated: func() { log.Println("New") }},
+			&W.ToolbarAction{Icon: theme.MailComposeIcon(), OnActivated: func() { fmt.Println("New") }},
 			&W.ToolbarSeparator{},
 			&W.ToolbarSpacer{},
-			&W.ToolbarAction{Icon: theme.CutIcon(), OnActivated: func() { log.Println("Cut") }},
-			&W.ToolbarAction{Icon: theme.CopyIcon(), OnActivated: func() { log.Println("Copy") }},
-			&W.ToolbarAction{Icon: theme.PasteIcon(), OnActivated: func() { log.Println("Paste") }},
+			&W.ToolbarAction{Icon: theme.CutIcon(), OnActivated: func() { fmt.Println("Cut") }},
+			&W.ToolbarAction{Icon: theme.CopyIcon(), OnActivated: func() { fmt.Println("Copy") }},
+			&W.ToolbarAction{Icon: theme.PasteIcon(), OnActivated: func() { fmt.Println("Paste") }},
 		}},
 		&W.Label{Text: "Fyne Examples!"},
 
