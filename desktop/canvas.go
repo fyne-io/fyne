@@ -271,6 +271,10 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(width), C.Evas_Coord(height))
 
+		C.evas_object_image_alpha_set(obj, C.EINA_TRUE)
+		alpha := C.int(float64(255) * co.Alpha())
+		C.evas_object_color_set(obj, alpha, alpha, alpha, alpha) // premul ffffff*alpha
+
 		if co.File != "" {
 			c.loadImage(co, obj)
 		}

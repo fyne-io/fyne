@@ -31,6 +31,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 
 	if b.button.Icon == nil {
 		b.label.Resize(size)
+		b.label.Move(fyne.NewPos(0, 0))
 	} else {
 		offset := fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)
 		labelSize := size.Subtract(offset)
@@ -60,10 +61,19 @@ func (b *buttonRenderer) Refresh() {
 		b.background.FillColor = theme.ButtonColor()
 	}
 
+	// TODO don't tweak alpha, add visibility instead
 	if b.button.Icon != nil {
+		if b.icon == nil {
+			b.icon = canvas.NewImageFromResource(b.button.Icon)
+			b.objects = append(b.objects, b.icon)
+		}
+		b.icon.Translucency = 0
 		b.icon.File = b.button.Icon.CachePath()
+	} else if b.icon != nil {
+		b.icon.Translucency = 1
 	}
 
+	b.Layout(b.button.CurrentSize())
 	fyne.RefreshObject(b.button)
 }
 
@@ -131,7 +141,13 @@ func (b *Button) Renderer() fyne.WidgetRenderer {
 // SetText allows the button label to be changed
 func (b *Button) SetText(text string) {
 	b.Text = text
-	b.Renderer().(*buttonRenderer).label.Text = text
+
+	b.Renderer().Refresh()
+}
+
+// SetIcon updates the icon on a label - pass nil to hide an icon
+func (b *Button) SetIcon(icon fyne.Resource) {
+	b.Icon = icon
 
 	b.Renderer().Refresh()
 }
