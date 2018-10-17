@@ -18,9 +18,9 @@ func toFile(res *StaticResource) {
 	ioutil.WriteFile(cachePath(res.StaticName), res.StaticContent, 0644)
 }
 
-// ToGo converts a Resource object to Go code.
+// GoString converts a Resource object to Go code.
 // This is useful if serialising to a go file for compilation into a binary
-func (r *StaticResource) ToGo() string {
+func (r *StaticResource) GoString() string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString("&fyne.StaticResource{\n")

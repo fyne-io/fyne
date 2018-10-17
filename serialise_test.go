@@ -34,5 +34,5 @@ func TestToFromFile(t *testing.T) {
 func TestToGo(t *testing.T) {
 	res := NewStaticResource(imgName, imgBytes)
 
-	assert.Equal(t, imgGo, res.ToGo())
+	assert.Equal(t, imgGo, res.GoString())
 }

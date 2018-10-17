@@ -26,7 +26,7 @@ func bundleFile(name string, filepath string, f *os.File) {
 	}
 	res := fyne.NewStaticResource(path.Base(filepath), bytes)
 
-	_, err = f.WriteString("var " + formatVariable(name) + " = " + res.ToGo() + "\n")
+	_, err = f.WriteString(fmt.Sprintf("var %s = %#v\n", formatVariable(name), res))
 	if err != nil {
 		fmt.Println("Unable to write to bundled file")
 	}

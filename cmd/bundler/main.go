@@ -19,7 +19,7 @@ func writeResource(file, name string) {
 
 	res := fyne.NewStaticResource(path.Base(file), bytes)
 
-	fmt.Println("var " + name + " = " + res.ToGo())
+	fmt.Printf("var %s = %#v\n", name, res)
 }
 
 func writeHeader(pkg string) {
