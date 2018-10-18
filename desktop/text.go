@@ -69,18 +69,19 @@ func (d *eFLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle
 		return fyne.NewSize(0, 0)
 	}
 	c := fyne.GetDriver().AllWindows()[0].Canvas().(*eflCanvas)
+	var native fyne.Size
 
-	C.ecore_thread_main_loop_begin()
-	textObj := C.evas_object_text_add(c.evas)
+	runOnMain(func() {
+		textObj := C.evas_object_text_add(c.evas)
 
-	cstr := C.CString(text)
-	C.evas_object_text_text_set(textObj, cstr)
-	C.free(unsafe.Pointer(cstr))
-	updateFont(textObj, c, size, style)
-	native := nativeTextBounds(textObj)
+		cstr := C.CString(text)
+		C.evas_object_text_text_set(textObj, cstr)
+		updateFont(textObj, c, size, style)
+		native = nativeTextBounds(textObj)
+		C.free(unsafe.Pointer(cstr))
 
-	C.evas_object_del(textObj)
-	C.ecore_thread_main_loop_end()
+		C.evas_object_del(textObj)
+	})
 
 	return fyne.NewSize(unscaleInt(c, native.Width), unscaleInt(c, native.Height))
 }

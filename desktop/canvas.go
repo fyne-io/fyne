@@ -362,21 +362,19 @@ func (c *eflCanvas) Size() fyne.Size {
 }
 
 func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
-	C.ecore_thread_main_loop_begin()
-
-	switch set := o.(type) {
-	case *fyne.Container:
-		c.buildContainer(set, set, set.Objects, set.MinSize(), o.CurrentPosition(), offset)
-	case fyne.Widget:
-		c.buildContainer(set, set, set.Renderer().Objects(),
-			set.MinSize(), o.CurrentPosition(), offset)
-	default:
-		if !ignoreObject(o) {
-			c.buildObject(o, o, offset)
+	runOnMain(func() {
+		switch set := o.(type) {
+		case *fyne.Container:
+			c.buildContainer(set, set, set.Objects, set.MinSize(), o.CurrentPosition(), offset)
+		case fyne.Widget:
+			c.buildContainer(set, set, set.Renderer().Objects(),
+				set.MinSize(), o.CurrentPosition(), offset)
+		default:
+			if !ignoreObject(o) {
+				c.buildObject(o, o, offset)
+			}
 		}
-	}
-
-	C.ecore_thread_main_loop_end()
+	})
 }
 
 func (c *eflCanvas) Refresh(o fyne.CanvasObject) {

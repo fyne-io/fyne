@@ -105,3 +105,18 @@ func queueRender(c *eflCanvas, co fyne.CanvasObject) error {
 	}
 	return nil
 }
+
+// force a function f to run on the main thread
+func runOnMain(f func()) {
+	onMain := C.eina_main_loop_is() == 1
+
+	if !onMain {
+		C.ecore_thread_main_loop_begin()
+	}
+
+	f()
+
+	if !onMain {
+		C.ecore_thread_main_loop_end()
+	}
+}

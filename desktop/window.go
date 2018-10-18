@@ -260,26 +260,25 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 // USE OF THIS METHOD IS NOT RECOMMENDED
 func CreateWindowWithEngine(engine string) fyne.Window {
 	cstr := C.CString(engine)
+	w := &window{}
 
-	C.ecore_thread_main_loop_begin()
-	evas := C.ecore_evas_new(cstr, 0, 0, 10, 10, nil)
-	C.free(unsafe.Pointer(cstr))
-	if evas == nil {
-		log.Fatalln("Unable to create canvas, perhaps missing module for", engine)
-	}
+	runOnMain(func() {
+		evas := C.ecore_evas_new(cstr, 0, 0, 10, 10, nil)
+		C.free(unsafe.Pointer(cstr))
+		if evas == nil {
+			log.Fatalln("Unable to create canvas, perhaps missing module for", engine)
+		}
 
-	w := &window{
-		ee: evas,
-	}
-	oSWindowInit(w)
-	windows[w.ee] = w
+		w.ee = evas
+		oSWindowInit(w)
+		windows[w.ee] = w
 
-	w.canvas = &eflCanvas{
-		evas:   C.ecore_evas_get(evas),
-		scale:  scaleByDPI(w),
-		window: w,
-	}
-	C.ecore_thread_main_loop_end()
+		w.canvas = &eflCanvas{
+			evas:   C.ecore_evas_get(evas),
+			scale:  scaleByDPI(w),
+			window: w,
+		}
+	})
 
 	return w
 }
