@@ -65,7 +65,7 @@ func initEFL() {
 		case data := <-renderQueue:
 			data.c.dirty[data.co] = true
 		case <-tick.C:
-			drawDirty()
+			renderCycle()
 			C.ecore_main_loop_iterate()
 		}
 	}
@@ -82,7 +82,8 @@ func (d *eFLDriver) Quit() {
 	quit <- true
 }
 
-func drawDirty() {
+// renderCycle will cause all queued objects to be refreshed
+func renderCycle() {
 	for _, canvas := range canvases {
 		if len(canvas.dirty) == 0 {
 			continue
@@ -96,7 +97,7 @@ func drawDirty() {
 	}
 }
 
-// do runs f on the main thread.
+// queueRender will mark the specified object as dirty so it will be redrawn
 func queueRender(c *eflCanvas, co fyne.CanvasObject) error {
 	select {
 	case renderQueue <- renderData{c: c, co: co}: // write OK
