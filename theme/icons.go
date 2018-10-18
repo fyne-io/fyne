@@ -2,28 +2,34 @@ package theme
 
 import "github.com/fyne-io/fyne"
 
-type darkLightResource struct {
-	dark  *fyne.StaticResource
-	light *fyne.StaticResource
+// ThemedResource is a resource wrapper that will return an appropriate resource
+// for the currently selected theme. In this implementation it chooses between a dark
+// and light alternative to match the current setting.
+type ThemedResource struct {
+	dark  fyne.Resource
+	light fyne.Resource
 }
 
-func (res *darkLightResource) Name() string {
+// Name returns the underlrying resource name (used for caching)
+func (res *ThemedResource) Name() string {
 	if fyne.GetSettings().Theme() == "light" {
-		return res.light.StaticName
+		return res.light.Name()
 	}
 
-	return res.dark.StaticName
+	return res.dark.Name()
 }
 
-func (res *darkLightResource) Content() []byte {
+// Content returns the underlying content of the correct resource for the current theme
+func (res *ThemedResource) Content() []byte {
 	if fyne.GetSettings().Theme() == "light" {
-		return res.light.StaticContent
+		return res.light.Content()
 	}
 
-	return res.dark.StaticContent
+	return res.dark.Content()
 }
 
-func (res *darkLightResource) CachePath() string {
+// CachePath returns the cachepath of the correct resource for the current theme setting
+func (res *ThemedResource) CachePath() string {
 	if fyne.GetSettings().Theme() == "light" {
 		return res.light.CachePath()
 	}
@@ -31,29 +37,35 @@ func (res *darkLightResource) CachePath() string {
 	return res.dark.CachePath()
 }
 
-var cancel, confirm, checked, unchecked *darkLightResource
-var contentCut, contentCopy, contentPaste *darkLightResource
-var info, question, warning *darkLightResource
-var mailCompose, mailForward, mailReply, mailReplyAll *darkLightResource
+// NewThemedResource creates a resource that adapts to the current theme setting.
+// It is currently a simple pairing of a dark and light variant of the same resource.
+func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
+	return &ThemedResource{dark, light}
+}
+
+var cancel, confirm, checked, unchecked *ThemedResource
+var contentCut, contentCopy, contentPaste *ThemedResource
+var info, question, warning *ThemedResource
+var mailCompose, mailForward, mailReply, mailReplyAll *ThemedResource
 
 func init() {
-	cancel = &darkLightResource{cancelDark, cancelLight}
-	confirm = &darkLightResource{checkDark, checkLight}
-	checked = &darkLightResource{checkboxDark, checkboxLight}
-	unchecked = &darkLightResource{checkboxblankDark, checkboxblankLight}
+	cancel = &ThemedResource{cancelDark, cancelLight}
+	confirm = &ThemedResource{checkDark, checkLight}
+	checked = &ThemedResource{checkboxDark, checkboxLight}
+	unchecked = &ThemedResource{checkboxblankDark, checkboxblankLight}
 
-	contentCut = &darkLightResource{contentcutDark, contentcutLight}
-	contentCopy = &darkLightResource{contentcopyDark, contentcopyLight}
-	contentPaste = &darkLightResource{contentpasteDark, contentpasteLight}
+	contentCut = &ThemedResource{contentcutDark, contentcutLight}
+	contentCopy = &ThemedResource{contentcopyDark, contentcopyLight}
+	contentPaste = &ThemedResource{contentpasteDark, contentpasteLight}
 
-	info = &darkLightResource{infoDark, infoLight}
-	question = &darkLightResource{questionDark, questionLight}
-	warning = &darkLightResource{warningDark, warningLight}
+	info = &ThemedResource{infoDark, infoLight}
+	question = &ThemedResource{questionDark, questionLight}
+	warning = &ThemedResource{warningDark, warningLight}
 
-	mailCompose = &darkLightResource{mailcomposeDark, mailcomposeLight}
-	mailForward = &darkLightResource{mailforwardDark, mailforwardLight}
-	mailReply = &darkLightResource{mailreplyDark, mailreplyLight}
-	mailReplyAll = &darkLightResource{mailreplyallDark, mailreplyallLight}
+	mailCompose = &ThemedResource{mailcomposeDark, mailcomposeLight}
+	mailForward = &ThemedResource{mailforwardDark, mailforwardLight}
+	mailReply = &ThemedResource{mailreplyDark, mailreplyLight}
+	mailReplyAll = &ThemedResource{mailreplyallDark, mailreplyallLight}
 }
 
 // FyneLogo returns a resource containing the Fyne logo
