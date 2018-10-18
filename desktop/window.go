@@ -83,7 +83,9 @@ func (w *window) SetOnClosed(closed func()) {
 }
 
 func (w *window) Show() {
-	C.ecore_evas_show(w.ee)
+	runOnMain(func() {
+		C.ecore_evas_show(w.ee)
+	})
 
 	if len(windows) == 1 {
 		w.master = true
@@ -92,7 +94,9 @@ func (w *window) Show() {
 }
 
 func (w *window) Hide() {
-	C.ecore_evas_hide(w.ee)
+	runOnMain(func() {
+		C.ecore_evas_hide(w.ee)
+	})
 }
 
 func (w *window) Close() {
