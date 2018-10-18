@@ -25,6 +25,25 @@ force_render()
 	ecore_timer_add(0.001, _immediate_iterate, NULL);
 }
 
+// hook into go logging from EFL
+void
+log_callback(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args)
+{
+	void onLogCallback(const char*, int, const char*, int, char*);
+
+	size_t len = snprintf(NULL, 0, fmt, args);
+	char  *buffer = malloc(len + 1);
+	sprintf(buffer, fmt, args);
+
+	onLogCallback(d->name, level, file, line, buffer);
+	free(buffer);
+}
+
+void
+setup_log() {
+	eina_log_print_cb_set(log_callback, NULL);
+}
+
 // Gateway callback functions
 
 void onWindowResize_cgo(Ecore_Evas *ee)

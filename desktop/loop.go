@@ -12,10 +12,13 @@ package desktop
 //
 // void onKeyDown_cgo(Ecore_Window, void *);
 // void onExit_cgo(Ecore_Event_Signal_Exit *);
+// void setup_log();
 import "C"
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"runtime"
 	"time"
 	"unsafe"
@@ -52,6 +55,7 @@ func init() {
 
 // initEFL runs our mainthread loop to execute UI functions for EFL
 func initEFL() {
+	C.setup_log()
 	C.ecore_event_handler_add(C.ECORE_EVENT_SIGNAL_EXIT, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onExit_cgo)), nil)
 	C.ecore_event_handler_add(C.ECORE_EVENT_KEY_DOWN, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onKeyDown_cgo)), nil)
 
@@ -68,6 +72,23 @@ func initEFL() {
 			renderCycle()
 			C.ecore_main_loop_iterate()
 		}
+	}
+}
+
+//export onLogCallback
+func onLogCallback(domain *C.char, level int, file *C.char, num int, message *C.char) {
+	dom := C.GoString(domain)
+	if dom == "eo" || dom == "evas_main" { // ignoring messages that are confusing
+		return
+	}
+
+	line := fmt.Sprintf("EFL(%s) %s:%d %s", dom, C.GoString(file), num, C.GoString(message))
+	if level == C.EINA_LOG_LEVEL_CRITICAL {
+		log.Fatal(line)
+	}
+
+	if level == C.EINA_LOG_LEVEL_ERR || level == C.EINA_LOG_LEVEL_WARN {
+		log.Println(line)
 	}
 }
 
