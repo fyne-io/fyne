@@ -160,7 +160,10 @@ func onWindowResize(ee *C.Ecore_Evas) {
 
 	if runtime.GOOS == "darwin" {
 		// due to NSRunLoop freezing during window resize we need to force a refresh
-		renderCycle()
+		runOnMain(func() {
+			current.dirty[current.Content()] = true
+			renderCycle()
+		})
 		C.force_render()
 	}
 }
