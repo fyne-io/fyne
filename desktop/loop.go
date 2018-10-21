@@ -31,6 +31,11 @@ type renderData struct {
 	co fyne.CanvasObject
 }
 
+type funcData struct {
+	f    func()
+	done chan bool
+}
+
 const (
 	// How many render ops to queue up
 	renderBufferSize = 1024
@@ -43,6 +48,8 @@ var (
 	quit = make(chan bool, 1)
 	// channel to queue a render on a component
 	renderQueue = make(chan renderData, renderBufferSize)
+	// channel for queuing functions on the main thread
+	funcQueue = make(chan funcData)
 	// ErrorRenderQueueFull represents a failure to queue a new object for
 	// render as the list of waiting render changes was full.
 	ErrorRenderQueueFull = errors.New("render queue is full")
@@ -66,6 +73,9 @@ func initEFL() {
 			close(quit)
 			tick.Stop()
 			return
+		case f := <-funcQueue:
+			f.f()
+			f.done <- true
 		case data := <-renderQueue:
 			data.c.dirty[data.co] = true
 		case <-tick.C:
@@ -132,13 +142,13 @@ func queueRender(c *eflCanvas, co fyne.CanvasObject) error {
 func runOnMain(f func()) {
 	onMain := C.eina_main_loop_is() == 1
 
-	if !onMain {
-		C.ecore_thread_main_loop_begin()
-	}
+	// if we are on main just execute - otherwise add it to the main queue and wait
+	if onMain {
+		f()
+	} else {
+		done := make(chan bool)
 
-	f()
-
-	if !onMain {
-		C.ecore_thread_main_loop_end()
+		funcQueue <- funcData{f: f, done: done}
+		<-done
 	}
 }
