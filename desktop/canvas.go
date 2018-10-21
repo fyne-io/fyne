@@ -38,11 +38,11 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	ev.Position = pos
 	ev.Button = fyne.MouseButton(int(info.button))
 
-	switch obj := co.(type) {
+	switch w := co.(type) {
 	case fyne.ClickableObject:
-		obj.OnMouseDown(ev)
+		w.OnMouseDown(ev)
 	case fyne.FocusableObject:
-		current.Focus(obj)
+		current.Focus(w)
 	}
 }
 
