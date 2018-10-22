@@ -141,6 +141,18 @@ func (l *Label) SetText(text string) {
 	l.Renderer().Refresh()
 }
 
+// Rows returns the number of text rows in this text entry.
+// The entry may be longer than required to show this amount of content.
+func (l *Label) Rows() int {
+	return l.Renderer().(*labelRenderer).lines
+}
+
+// RowLength returns the number of visible characters in the row specified.
+// The row parameter should be between 0 and l.Rows()-1.
+func (l *Label) RowLength(row int) int {
+	return len(l.Renderer().(*labelRenderer).texts[row].Text)
+}
+
 func (l *Label) createRenderer() fyne.WidgetRenderer {
 	render := &labelRenderer{label: l}
 
