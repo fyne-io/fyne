@@ -143,5 +143,5 @@ func main() {
 
 # Examples
 
-The main examples have been moved - you can find them in their [own repository][https://github.com/fyne-io/examples/].
+The main examples have been moved - you can find them in their [own repository](https://github.com/fyne-io/examples/).
 
