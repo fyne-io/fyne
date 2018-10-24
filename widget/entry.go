@@ -117,6 +117,25 @@ func (e *Entry) SetText(text string) {
 	e.Renderer().Refresh()
 }
 
+func (e *Entry) cursorTextPos() int {
+	pos := 0
+	texts := e.label().renderer.(*labelRenderer).texts
+	for i := 0; i < e.CursorRow; i++ {
+		line := texts[i].Text
+		pos += len(line) + 1
+	}
+	pos += e.CursorColumn
+
+	return pos
+}
+
+func (e *Entry) insertAtCursor(text string) {
+	pos := e.cursorTextPos()
+	newText := fmt.Sprintf("%s%s%s", e.Text[:pos], text, e.Text[pos:])
+
+	e.SetText(newText)
+}
+
 // OnFocusGained is called when the Entry has been given focus.
 func (e *Entry) OnFocusGained() {
 	e.focused = true
@@ -139,14 +158,15 @@ func (e *Entry) Focused() bool {
 // OnKeyDown receives key input events when the Entry widget is focused.
 func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	if key.Name == "BackSpace" {
-		if len(e.Text) == 0 {
+		if len(e.Text) == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
 			return
 		}
 
 		runes := []rune(e.Text)
-		substr := string(runes[0 : len(runes)-1])
+		pos := e.cursorTextPos()
+		substr := fmt.Sprintf("%s%s", string(runes[:pos-1]), string(runes[pos:]))
 
-		if runes[len(runes)-1] == '\n' {
+		if runes[pos-1] == '\n' {
 			e.CursorRow--
 			e.CursorColumn = e.label().RowLength(e.CursorRow)
 		} else {
@@ -157,17 +177,19 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 
 		e.SetText(substr)
 	} else if key.Name == "Delete" {
-		if e.CursorColumn >= len(e.Text) {
+		texts := e.label().renderer.(*labelRenderer).texts
+		if len(e.Text) == 0 || (e.CursorRow == len(texts) && e.CursorColumn == len(texts[e.CursorRow].Text)) {
 			return
 		}
 
 		runes := []rune(e.Text)
-		substr := string(runes[1:])
+		pos := e.cursorTextPos()
+		substr := fmt.Sprintf("%s%s", string(runes[:pos]), string(runes[pos+1:]))
 
 		e.SetText(substr)
 	} else if key.Name == "Return" {
-		// TODO apply in the correct place
-		e.SetText(fmt.Sprintf("%s\n", e.Text))
+		e.insertAtCursor("\n")
+
 		e.CursorColumn = 0
 		e.CursorRow++
 	} else if key.Name == "Up" {
@@ -202,8 +224,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		}
 
 	} else if key.String != "" {
-		pos := e.CursorColumn // TODO with row...
-		e.SetText(fmt.Sprintf("%s%s%s", e.Text[:pos], key.String, e.Text[pos:]))
+		e.insertAtCursor(key.String)
 
 		e.CursorColumn += len(key.String)
 	} else {

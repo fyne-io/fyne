@@ -67,6 +67,9 @@ func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 func TestEntry_OnKeyDown_BackspaceBeyondContent(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
+	right := &fyne.KeyEvent{Name: "Right"}
+	entry.OnKeyDown(right)
+	entry.OnKeyDown(right)
 
 	key := new(fyne.KeyEvent)
 	key.Name = "BackSpace"
@@ -74,7 +77,21 @@ func TestEntry_OnKeyDown_BackspaceBeyondContent(t *testing.T) {
 	entry.OnKeyDown(key)
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, entry.Text, "")
+	assert.Equal(t, "", entry.Text)
+}
+
+func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("H\ni")
+
+	down := &fyne.KeyEvent{Name: "Down"}
+	entry.OnKeyDown(down)
+
+	key := new(fyne.KeyEvent)
+	key.Name = "BackSpace"
+	entry.OnKeyDown(key)
+
+	assert.Equal(t, "Hi", entry.Text)
 }
 
 func TestEntryNotify(t *testing.T) {
