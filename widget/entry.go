@@ -1,6 +1,9 @@
 package widget
 
-import "fmt"
+import (
+	"fmt"
+	"image/color"
+)
 import "log"
 
 import "github.com/fyne-io/fyne"
@@ -8,8 +11,8 @@ import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 
 type entryRenderer struct {
-	label   *Label
-	bg, box *canvas.Rectangle
+	label           *Label
+	bg, box, cursor *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -32,6 +35,27 @@ func (e *entryRenderer) MinSize() fyne.Size {
 	return textSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 }
 
+func (e *entryRenderer) cursorPosition() (int, int) {
+	label := e.label.renderer.(*labelRenderer).texts[0]
+	lineHeight := label.MinSize().Height
+
+	str := e.label.renderer.(*labelRenderer).texts[e.entry.CursorRow].Text
+	substr := str[0:e.entry.CursorColumn]
+	subSize := fyne.GetDriver().RenderedTextSize(substr, label.TextSize, label.TextStyle)
+
+	return subSize.Width, e.entry.CursorRow * lineHeight
+}
+
+func (e *entryRenderer) moveCursor() {
+	xPos, yPos := e.cursorPosition()
+	lineHeight := e.label.renderer.(*labelRenderer).texts[0].MinSize().Height
+
+	e.cursor.Resize(fyne.NewSize(2, lineHeight))
+	e.cursor.Move(fyne.NewPos(xPos+theme.Padding()*2, yPos+theme.Padding()*2))
+
+	fyne.RefreshObject(e.cursor)
+}
+
 // Layout the components of the entry widget.
 func (e *entryRenderer) Layout(size fyne.Size) {
 	e.bg.Resize(size)
@@ -41,6 +65,8 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 
 	e.label.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	e.label.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+
+	e.moveCursor()
 }
 
 // ApplyTheme is called when the Entry may need to update it's look.
@@ -55,8 +81,10 @@ func (e *entryRenderer) Refresh() {
 
 	if e.entry.focused {
 		e.bg.FillColor = theme.FocusColor()
+		e.cursor.FillColor = theme.FocusColor()
 	} else {
 		e.bg.FillColor = theme.ButtonColor()
+		e.cursor.FillColor = color.RGBA{0, 0, 0, 0}
 	}
 
 	fyne.RefreshObject(e.entry)
@@ -73,6 +101,8 @@ type Entry struct {
 	Text      string
 	OnChanged func(string) `json:"-"`
 
+	CursorRow, CursorColumn int
+
 	focused bool
 }
 
@@ -85,6 +115,25 @@ func (e *Entry) SetText(text string) {
 	}
 
 	e.Renderer().Refresh()
+}
+
+func (e *Entry) cursorTextPos() int {
+	pos := 0
+	texts := e.label().renderer.(*labelRenderer).texts
+	for i := 0; i < e.CursorRow; i++ {
+		line := texts[i].Text
+		pos += len(line) + 1
+	}
+	pos += e.CursorColumn
+
+	return pos
+}
+
+func (e *Entry) insertAtCursor(text string) {
+	pos := e.cursorTextPos()
+	newText := fmt.Sprintf("%s%s%s", e.Text[:pos], text, e.Text[pos:])
+
+	e.SetText(newText)
 }
 
 // OnFocusGained is called when the Entry has been given focus.
@@ -109,29 +158,94 @@ func (e *Entry) Focused() bool {
 // OnKeyDown receives key input events when the Entry widget is focused.
 func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	if key.Name == "BackSpace" {
-		if len(e.Text) == 0 {
+		if len(e.Text) == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
 			return
 		}
 
 		runes := []rune(e.Text)
-		substr := string(runes[0 : len(runes)-1])
+		pos := e.cursorTextPos()
+		substr := fmt.Sprintf("%s%s", string(runes[:pos-1]), string(runes[pos:]))
+
+		if runes[pos-1] == '\n' {
+			e.CursorRow--
+			e.CursorColumn = e.label().RowLength(e.CursorRow)
+		} else {
+			if e.CursorColumn > 0 {
+				e.CursorColumn--
+			}
+		}
+
+		e.SetText(substr)
+	} else if key.Name == "Delete" {
+		texts := e.label().renderer.(*labelRenderer).texts
+		if len(e.Text) == 0 || (e.CursorRow == len(texts) && e.CursorColumn == len(texts[e.CursorRow].Text)) {
+			return
+		}
+
+		runes := []rune(e.Text)
+		pos := e.cursorTextPos()
+		substr := fmt.Sprintf("%s%s", string(runes[:pos]), string(runes[pos+1:]))
 
 		e.SetText(substr)
 	} else if key.Name == "Return" {
-		e.SetText(fmt.Sprintf("%s\n", e.Text))
+		e.insertAtCursor("\n")
+
+		e.CursorColumn = 0
+		e.CursorRow++
+	} else if key.Name == "Up" {
+		if e.CursorRow > 0 {
+			e.CursorRow--
+		}
+
+		if e.CursorColumn > e.label().RowLength(e.CursorRow) {
+			e.CursorColumn = e.label().RowLength(e.CursorRow)
+		}
+	} else if key.Name == "Down" {
+		if e.CursorRow < e.label().Rows()-1 {
+			e.CursorRow++
+		}
+
+		if e.CursorColumn > e.label().RowLength(e.CursorRow) {
+			e.CursorColumn = e.label().RowLength(e.CursorRow)
+		}
+	} else if key.Name == "Left" {
+		if e.CursorColumn > 0 {
+			e.CursorColumn--
+		} else if e.CursorRow > 0 {
+			e.CursorRow--
+			e.CursorColumn = e.label().RowLength(e.CursorRow)
+		}
+	} else if key.Name == "Right" {
+		if e.CursorColumn < e.label().RowLength(e.CursorRow) {
+			e.CursorColumn++
+		} else if e.CursorRow < e.label().Rows()-1 {
+			e.CursorRow++
+			e.CursorColumn = 0
+		}
+
 	} else if key.String != "" {
-		e.SetText(fmt.Sprintf("%s%s", e.Text, key.String))
+		e.insertAtCursor(key.String)
+
+		e.CursorColumn += len(key.String)
 	} else {
 		log.Println("Unhandled key press", key.String)
 	}
+
+	e.Renderer().(*entryRenderer).moveCursor()
+}
+
+func (e *Entry) label() *Label {
+	return e.Renderer().(*entryRenderer).label
 }
 
 func (e *Entry) createRenderer() fyne.WidgetRenderer {
 	text := NewLabel(e.Text)
 	bg := canvas.NewRectangle(theme.ButtonColor())
 	box := canvas.NewRectangle(theme.BackgroundColor())
+	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
-	return &entryRenderer{text, bg, box, []fyne.CanvasObject{bg, box, text}, e}
+	return &entryRenderer{text, bg, box, cursor,
+		[]fyne.CanvasObject{bg, box, text, cursor}, e}
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer
@@ -145,12 +259,7 @@ func (e *Entry) Renderer() fyne.WidgetRenderer {
 
 // NewEntry creates a new entry widget.
 func NewEntry() *Entry {
-	e := &Entry{
-		baseWidget{},
-		"",
-		nil,
-		false,
-	}
+	e := &Entry{}
 
 	e.Renderer().Layout(e.MinSize())
 	return e
