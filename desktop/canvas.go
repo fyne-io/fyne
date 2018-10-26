@@ -197,7 +197,7 @@ func renderImagePortion(img *canvas.Image, pixels []uint32, wg *sync.WaitGroup,
 }
 
 func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
-	if width == 0 || height == 0 {
+	if width <= 0 || height <= 0 {
 		return
 	}
 
