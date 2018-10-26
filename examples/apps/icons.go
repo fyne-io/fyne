@@ -31,10 +31,10 @@ func (b *browser) setIcon(index int) {
 func Icons(app fyne.App) {
 	b := &browser{}
 
-	prev := widget.NewButtonWithIcon("", theme.NavigatePrevIcon, func() {
+	prev := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
 		b.setIcon(b.current - 1)
 	})
-	next := widget.NewButtonWithIcon("", theme.NavigateNextIcon, func() {
+	next := widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
 		b.setIcon(b.current + 1)
 	})
 	b.name = widget.NewLabel(icons[b.current].name)
@@ -83,6 +83,6 @@ var icons = []struct {
 	{"MailReplyIcon", theme.MailReplyIcon()},
 	{"MailReplyAllIcon", theme.MailReplyAllIcon()},
 
-	{"NavigatePrevIcon", theme.NavigatePrevIcon},
-	{"NavigateNextIcon", theme.NavigateNextIcon},
+	{"NavigateBackIcon", theme.NavigateBackIcon()},
+	{"NavigateNextIcon", theme.NavigateNextIcon()},
 }
