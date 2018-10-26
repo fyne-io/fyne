@@ -41,7 +41,7 @@ func Icons(app fyne.App) {
 	bar := widget.NewHBox(prev, next, b.name, layout.NewSpacer())
 
 	background := canvas.NewRaster(checkerPattern)
-	background.SetMinSize(fyne.NewSize(256, 256))
+	background.SetMinSize(fyne.NewSize(280, 280))
 	b.icon = canvas.NewImageFromResource(icons[b.current].icon)
 
 	win := app.NewWindow("Icons")
