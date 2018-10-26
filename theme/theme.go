@@ -117,5 +117,5 @@ func Padding() int {
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
 func IconInlineSize() int {
-	return 16
+	return TextSize() + Padding()
 }
