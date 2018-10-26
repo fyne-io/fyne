@@ -28,10 +28,11 @@ func (b *buttonRenderer) MinSize() fyne.Size {
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
 	b.background.Resize(size)
+	inner := size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	if b.button.Icon == nil {
-		b.label.Resize(size)
-		b.label.Move(fyne.NewPos(0, 0))
+		b.label.Resize(inner)
+		b.label.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	} else {
 		offset := fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)
 		labelSize := size.Subtract(offset)
