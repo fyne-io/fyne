@@ -16,6 +16,10 @@ func canvasApp(app fyne.App) {
 	apps.Canvas(app)
 }
 
+func iconsApp(app fyne.App) {
+	apps.Icons(app)
+}
+
 func layoutApp(app fyne.App) {
 	apps.Layout(app)
 }
@@ -71,6 +75,7 @@ func main() {
 
 		W.NewGroup("Demos", []fyne.CanvasObject{
 			appButton(app, "Canvas", canvasApp),
+			appButton(app, "Icons", iconsApp),
 			appButton(app, "Layout", layoutApp),
 			appButton(app, "Form", formApp),
 			&W.Entry{Text: "Entry"},
