@@ -99,6 +99,7 @@ func main() {
 		bundleIcon("check", theme, f)
 		bundleIcon("check-box", theme, f)
 		bundleIcon("check-box-blank", theme, f)
+
 		bundleIcon("content-cut", theme, f)
 		bundleIcon("content-copy", theme, f)
 		bundleIcon("content-paste", theme, f)
@@ -106,6 +107,9 @@ func main() {
 		bundleIcon("info", theme, f)
 		bundleIcon("question", theme, f)
 		bundleIcon("warning", theme, f)
+
+		bundleIcon("arrow-back", theme, f)
+		bundleIcon("arrow-forward", theme, f)
 
 		bundleIcon("mail-compose", theme, f)
 		bundleIcon("mail-forward", theme, f)

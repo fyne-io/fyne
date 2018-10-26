@@ -47,6 +47,7 @@ var cancel, confirm, checked, unchecked *ThemedResource
 var contentCut, contentCopy, contentPaste *ThemedResource
 var info, question, warning *ThemedResource
 var mailCompose, mailForward, mailReply, mailReplyAll *ThemedResource
+var arrowBack, arrowForward fyne.Resource
 
 func init() {
 	cancel = &ThemedResource{cancelDark, cancelLight}
@@ -66,6 +67,9 @@ func init() {
 	mailForward = &ThemedResource{mailforwardDark, mailforwardLight}
 	mailReply = &ThemedResource{mailreplyDark, mailreplyLight}
 	mailReplyAll = &ThemedResource{mailreplyallDark, mailreplyallLight}
+
+	arrowBack = &ThemedResource{arrowbackDark, arrowbackLight}
+	arrowForward = &ThemedResource{arrowforwardDark, arrowforwardLight}
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -141,4 +145,14 @@ func MailReplyIcon() fyne.Resource {
 // MailReplyAllIcon returns a resource containing the standard mail reply all icon for the current theme
 func MailReplyAllIcon() fyne.Resource {
 	return mailReplyAll
+}
+
+// NavigateBackIcon returns a resource containing the standard backward navigation icon for the current theme
+func NavigateBackIcon() fyne.Resource {
+	return arrowBack
+}
+
+// NavigateNextIcon returns a resource containing the standard forward navigation icon for the current theme
+func NavigateNextIcon() fyne.Resource {
+	return arrowForward
 }
