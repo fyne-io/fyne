@@ -45,7 +45,7 @@ And then you're ready to write your first app!
     		}),
     	))
 
-    	w.Show()
+    	w.ShowAndRun()
     }
 ```
 
@@ -137,7 +137,7 @@ func main() {
 		}},
 	}})
 
-	w.Show()
+	w.ShowAndRun()
 }
 ```
 
