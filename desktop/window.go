@@ -121,7 +121,7 @@ func (w *window) Close() {
 }
 
 func (w *window) ShowAndRun() {
-	w.doShow(w, false)
+	w.doShow(false)
 	runEFL()
 }
 
