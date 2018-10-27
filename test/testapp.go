@@ -20,6 +20,10 @@ func (a *testApp) OpenURL(url string) {
 	// no-op
 }
 
+func (a *testApp) Run() {
+	// no-op
+}
+
 func (a *testApp) Quit() {
 	a.delegate.Quit()
 }

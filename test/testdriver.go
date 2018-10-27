@@ -17,6 +17,10 @@ func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyl
 	return fyne.NewSize(len(text)*size, size)
 }
 
+func (d *testDriver) Run() {
+	// no-op
+}
+
 func (d *testDriver) Quit() {
 	// no-op
 }

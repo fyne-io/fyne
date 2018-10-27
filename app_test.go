@@ -23,6 +23,10 @@ func (d *dummyDriver) RenderedTextSize(text string, size int, _ TextStyle) Size 
 	return NewSize(len(text)*size, size)
 }
 
+func (d *dummyDriver) Run() {
+	// no-op
+}
+
 func (d *dummyDriver) Quit() {
 	// no-op
 }

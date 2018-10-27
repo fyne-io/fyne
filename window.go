@@ -32,6 +32,10 @@ type Window interface {
 	// If it is the only open window, or the "master" window the app will Quit.
 	Close()
 
+	// ShowAndRun is a shortcut to show the window and then run the application.
+	// This should be called near the end of a main() function as it will block.
+	ShowAndRun()
+
 	// Content returns the content of this window
 	Content() CanvasObject
 	// SetContent sets the content of this window

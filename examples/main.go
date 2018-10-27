@@ -114,5 +114,5 @@ func main() {
 			app.Quit()
 		}},
 	}})
-	w.Show()
+	w.ShowAndRun()
 }

@@ -61,6 +61,10 @@ func (w *testWindow) Close() {
 	windows = append(windows[:i], windows[i+1:]...)
 }
 
+func (w *testWindow) ShowAndRun() {
+	w.Show()
+}
+
 func (w *testWindow) Content() fyne.CanvasObject {
 	return w.Canvas().Content()
 }

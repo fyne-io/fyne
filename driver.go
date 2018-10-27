@@ -10,6 +10,8 @@ type Driver interface {
 
 	// Return the size required to render the given string of specified font size and style
 	RenderedTextSize(string, int, TextStyle) Size
+	// Start the main event loop of the driver
+	Run()
 	// Close the driver and open windows then exit the application
 	Quit()
 }

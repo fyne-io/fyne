@@ -17,6 +17,10 @@ const (
 type eFLDriver struct {
 }
 
+func (d *eFLDriver) Run() {
+	runEFL()
+}
+
 // NewEFLDriver sets up a new Driver instance implemented using the
 // Enlightenment Foundation Libraries (EFL).
 // It checks that there is a renderer available for the current operating system
