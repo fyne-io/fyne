@@ -36,19 +36,19 @@ func (e *entryRenderer) MinSize() fyne.Size {
 }
 
 func (e *entryRenderer) cursorPosition() (int, int) {
-	label := e.label.renderer.(*labelRenderer).texts[0]
-	lineHeight := label.MinSize().Height
+	renderlabel := e.label.renderer.(*labelRenderer).texts[0]
+	lineHeight := emptyTextMinSize(e.label.TextStyle).Height
 
 	str := e.label.renderer.(*labelRenderer).texts[e.entry.CursorRow].Text
 	substr := str[0:e.entry.CursorColumn]
-	subSize := fyne.GetDriver().RenderedTextSize(substr, label.TextSize, label.TextStyle)
+	subSize := fyne.GetDriver().RenderedTextSize(substr, renderlabel.TextSize, e.label.TextStyle)
 
 	return subSize.Width, e.entry.CursorRow * lineHeight
 }
 
 func (e *entryRenderer) moveCursor() {
 	xPos, yPos := e.cursorPosition()
-	lineHeight := e.label.renderer.(*labelRenderer).texts[0].MinSize().Height
+	lineHeight := emptyTextMinSize(e.label.TextStyle).Height
 
 	e.cursor.Resize(fyne.NewSize(2, lineHeight))
 	e.cursor.Move(fyne.NewPos(xPos+theme.Padding()*2, yPos+theme.Padding()*2))
