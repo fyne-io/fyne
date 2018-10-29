@@ -178,7 +178,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		e.SetText(substr)
 	} else if key.Name == "Delete" {
 		texts := e.label().renderer.(*labelRenderer).texts
-		if len(e.Text) == 0 || (e.CursorRow == len(texts) && e.CursorColumn == len(texts[e.CursorRow].Text)) {
+		if len(e.Text) == 0 || (e.CursorRow == len(texts)-1 && e.CursorColumn == len(texts[e.CursorRow].Text)) {
 			return
 		}
 
