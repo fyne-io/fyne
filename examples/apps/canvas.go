@@ -9,7 +9,7 @@ import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/theme"
 
-func rgbGradient(x, y, w, h int) color.RGBA {
+func rgbGradient(x, y, w, h int) color.Color {
 	g := int(float32(x) / float32(w) * float32(255))
 	b := int(float32(y) / float32(h) * float32(255))
 

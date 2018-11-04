@@ -13,8 +13,8 @@ type Line struct {
 	Position2 fyne.Position // The current bottomright position of the Line
 	Options   Options       // Options to pass to the renderer
 
-	StrokeColor color.RGBA // The line stroke colour
-	StrokeWidth float32    // The stroke width of the line
+	StrokeColor color.Color // The line stroke colour
+	StrokeWidth float32     // The stroke width of the line
 }
 
 // CurrentSize returns the current size of bounding box for this line object
@@ -47,7 +47,7 @@ func (l *Line) MinSize() fyne.Size {
 }
 
 // NewLine returns a new Line instance
-func NewLine(color color.RGBA) *Line {
+func NewLine(color color.Color) *Line {
 	return &Line{
 		StrokeColor: color,
 		StrokeWidth: 1,

@@ -50,7 +50,7 @@ func Icons(app fyne.App) {
 	win.Show()
 }
 
-func checkerPattern(x, y, _, _ int) color.RGBA {
+func checkerPattern(x, y, _, _ int) color.Color {
 	x /= 20
 	y /= 20
 

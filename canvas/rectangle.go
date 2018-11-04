@@ -7,13 +7,13 @@ import "image/color"
 type Rectangle struct {
 	baseObject
 
-	FillColor   color.RGBA // The rectangle fill colour
-	StrokeColor color.RGBA // The rectangle stroke colour
-	StrokeWidth float32    // The stroke width of the rectangle
+	FillColor   color.Color // The rectangle fill colour
+	StrokeColor color.Color // The rectangle stroke colour
+	StrokeWidth float32     // The stroke width of the rectangle
 }
 
 // NewRectangle returns a new Rectangle instance
-func NewRectangle(color color.RGBA) *Rectangle {
+func NewRectangle(color color.Color) *Rectangle {
 	return &Rectangle{
 		FillColor: color,
 	}

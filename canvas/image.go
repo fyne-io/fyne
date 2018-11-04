@@ -10,8 +10,8 @@ type Image struct {
 	baseObject
 
 	// one of the following sources will provide our image data
-	PixelColor func(x, y, w, h int) color.RGBA // Render the image from code
-	File       string                          // Load the image froma file
+	PixelColor func(x, y, w, h int) color.Color // Render the image from code
+	File       string                           // Load the image froma file
 
 	Translucency float64 // Set a translucency value > 0.0 to fade the image
 }
@@ -26,7 +26,7 @@ func (i *Image) Alpha() float64 {
 // the specified pixelColor function.
 // Images returned from this method should draw dynamically to fill the width
 // and height parameters passed to pixelColor.
-func NewRaster(pixelColor func(x, y, w, h int) color.RGBA) *Image {
+func NewRaster(pixelColor func(x, y, w, h int) color.Color) *Image {
 	return &Image{
 		PixelColor: pixelColor,
 	}
@@ -38,9 +38,8 @@ func NewRaster(pixelColor func(x, y, w, h int) color.RGBA) *Image {
 // starting img.Bounds().Min pixels from the top left of the canvas object.
 func NewImageFromImage(img image.Image) *Image {
 	return &Image{
-		PixelColor: func(x, y, w, h int) color.RGBA {
-			r, g, b, a := img.At(x, y).RGBA()
-			return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+		PixelColor: func(x, y, w, h int) color.Color {
+			return img.At(x, y)
 		},
 	}
 }

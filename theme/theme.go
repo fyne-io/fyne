@@ -9,9 +9,9 @@ var loadedColors *themeColors
 var loadedTheme string
 
 type themeColors struct {
-	Background color.RGBA
+	Background color.Color
 
-	Button, Text, Primary color.RGBA
+	Button, Text, Primary color.Color
 }
 
 // Basic definition of light theme colours
@@ -55,27 +55,27 @@ func colors() *themeColors {
 }
 
 // BackgroundColor returns the theme's background colour
-func BackgroundColor() color.RGBA {
+func BackgroundColor() color.Color {
 	return colors().Background
 }
 
 // ButtonColor returns the theme's standard button colour
-func ButtonColor() color.RGBA {
+func ButtonColor() color.Color {
 	return colors().Button
 }
 
 // TextColor returns the theme's standard text colour
-func TextColor() color.RGBA {
+func TextColor() color.Color {
 	return colors().Text
 }
 
 // PrimaryColor returns the colour used to highlight primary features
-func PrimaryColor() color.RGBA {
+func PrimaryColor() color.Color {
 	return colors().Primary
 }
 
 // FocusColor returns the colour used to highlight a focussed widget
-func FocusColor() color.RGBA {
+func FocusColor() color.Color {
 	return colors().Primary
 }
 

@@ -13,6 +13,7 @@ package desktop
 import "C"
 
 import "log"
+import "image/color"
 import "math"
 import "sync"
 import "unsafe"
@@ -72,6 +73,12 @@ func ignoreObject(o fyne.CanvasObject) bool {
 	return false
 }
 
+func setColor(obj *C.Evas_Object, col color.Color) {
+	r, g, b, a := col.RGBA()
+
+	C.evas_object_color_set(obj, C.int((uint8)(r)), C.int((uint8)(g)), C.int((uint8)(b)), C.int((uint8)(a)))
+}
+
 func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, offset fyne.Position) *C.Evas_Object {
 	var obj *C.Evas_Object
 	var opts canvas.Options
@@ -83,16 +90,14 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		cstr := C.CString(co.Text)
 		C.evas_object_text_text_set(obj, cstr)
 		C.free(unsafe.Pointer(cstr))
-		C.evas_object_color_set(obj, C.int(co.Color.R), C.int(co.Color.G),
-			C.int(co.Color.B), C.int(co.Color.A))
+		setColor(obj, co.Color)
 
 		updateFont(obj, c, co.TextSize, co.TextStyle)
 		opts = co.Options
 	case *canvas.Rectangle:
 		obj = C.evas_object_rectangle_add(c.evas)
 
-		C.evas_object_color_set(obj, C.int(co.FillColor.R), C.int(co.FillColor.G),
-			C.int(co.FillColor.B), C.int(co.FillColor.A))
+		setColor(obj, co.FillColor)
 		opts = co.Options
 	case *canvas.Image:
 		obj = C.evas_object_image_filled_add(c.evas)
@@ -107,15 +112,13 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 	case *canvas.Line:
 		obj = C.evas_object_line_add(c.evas)
 
-		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
-			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
+		setColor(obj, co.StrokeColor)
 		opts = co.Options
 	case *canvas.Circle:
 		// TODO - this isnt all there yet, but at least this stops lots of debug output
 		obj = C.evas_object_rectangle_add(c.evas)
 
-		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
-			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
+		setColor(obj, co.FillColor)
 		opts = co.Options
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
@@ -140,8 +143,8 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, target fyne.CanvasO
 	size fyne.Size, pos, offset fyne.Position) {
 
 	obj := C.evas_object_rectangle_add(c.evas)
-	bg := theme.BackgroundColor()
-	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
+	r, g, b, a := theme.BackgroundColor().RGBA()
+	C.evas_object_color_set(obj, C.int(r), C.int(g), C.int(b), C.int(a))
 
 	C.evas_object_show(obj)
 	c.native[parent] = obj
@@ -187,9 +190,12 @@ func renderImagePortion(img *canvas.Image, pixels []uint32, wg *sync.WaitGroup,
 	i := startx + starty*imgWidth
 	for y := starty; y < starty+height; y++ {
 		for x := startx; x < startx+width; x++ {
-			color := img.PixelColor(x, y, imgWidth, imgHeight)
-			pixels[i] = (uint32)(((uint32)(color.A) << 24) | ((uint32)(color.R) << 16) |
-				((uint32)(color.G) << 8) | (uint32)(color.B))
+			col := img.PixelColor(x, y, imgWidth, imgHeight)
+			// TODO support other color models
+			if rgba, ok := col.(color.RGBA); ok {
+				pixels[i] = (uint32)(((uint32)(rgba.A) << 24) | ((uint32)(rgba.R) << 16) |
+					((uint32)(rgba.G) << 8) | (uint32)(rgba.B))
+			}
 			i++
 		}
 		i += imgWidth - width
@@ -249,17 +255,15 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		cstr := C.CString(co.Text)
 		C.evas_object_text_text_set(obj, cstr)
 		C.free(unsafe.Pointer(cstr))
-		C.evas_object_color_set(obj, C.int(co.Color.R), C.int(co.Color.G),
-			C.int(co.Color.B), C.int(co.Color.A))
 
+		setColor(obj, co.Color)
 		updateFont(obj, c, co.TextSize, co.TextStyle)
 		pos = getTextPosition(co, pos, size)
 
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	case *canvas.Rectangle:
-		C.evas_object_color_set(obj, C.int(co.FillColor.R), C.int(co.FillColor.G),
-			C.int(co.FillColor.B), C.int(co.FillColor.A))
+		setColor(obj, co.FillColor)
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	case *canvas.Image:
@@ -287,8 +291,7 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		width := co.Position2.X - co.Position1.X
 		height := co.Position2.Y - co.Position1.Y
 
-		C.evas_object_color_set(obj, C.int(co.StrokeColor.R), C.int(co.StrokeColor.G),
-			C.int(co.StrokeColor.B), C.int(co.StrokeColor.A))
+		setColor(obj, co.StrokeColor)
 
 		if width >= 0 {
 			if height >= 0 {
@@ -310,8 +313,7 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(width))))+1), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(height))))+1))
 	case *canvas.Circle:
-		C.evas_object_color_set(obj, C.int(co.FillColor.R), C.int(co.FillColor.G),
-			C.int(co.FillColor.B), C.int(co.FillColor.A))
+		setColor(obj, co.FillColor)
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	default:
@@ -328,7 +330,7 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 	if _, ok := target.(*widget.Toolbar); ok { // TODO don't make this a special case
 		bg = theme.ButtonColor()
 	}
-	C.evas_object_color_set(obj, C.int(bg.R), C.int(bg.G), C.int(bg.B), C.int(bg.A))
+	setColor(obj, bg)
 
 	if target == c.content {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, 0)), C.Evas_Coord(scaleInt(c, 0)),

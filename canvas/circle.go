@@ -10,9 +10,9 @@ type Circle struct {
 	Position2 fyne.Position // The current bottomright position of the Circle
 	Options   Options       // Options to pass to the renderer
 
-	FillColor   color.RGBA // The circle fill colour
-	StrokeColor color.RGBA // The circle stroke colour
-	StrokeWidth float32    // The stroke width of the circle
+	FillColor   color.Color // The circle fill colour
+	StrokeColor color.Color // The circle stroke colour
+	StrokeWidth float32     // The stroke width of the circle
 }
 
 // CurrentSize returns the current size of bounding box for this circle object
@@ -44,7 +44,7 @@ func (l *Circle) MinSize() fyne.Size {
 }
 
 // NewCircle returns a new Circle instance
-func NewCircle(color color.RGBA) *Circle {
+func NewCircle(color color.Color) *Circle {
 	return &Circle{
 		FillColor: color,
 	}
