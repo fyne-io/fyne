@@ -24,6 +24,10 @@ func layoutApp(app fyne.App) {
 	apps.Layout(app)
 }
 
+func widgetApp(app fyne.App) {
+	apps.Widget(app)
+}
+
 func formApp(app fyne.App) {
 	w := app.NewWindow("Form")
 	largeText := W.NewEntry()
@@ -77,6 +81,7 @@ func main() {
 			appButton(app, "Canvas", canvasApp),
 			appButton(app, "Icons", iconsApp),
 			appButton(app, "Layout", layoutApp),
+			appButton(app, "TabContainer", widgetApp),
 			appButton(app, "Form", formApp),
 			&W.Entry{Text: "Entry"},
 			&W.Check{Text: "Check", OnChanged: func(on bool) { fmt.Println("checked", on) }},
