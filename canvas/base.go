@@ -7,6 +7,7 @@ type baseObject struct {
 	Size     fyne.Size     // The current size of the Rectangle
 	Position fyne.Position // The current position of the Rectangle
 	Options  Options       // Options to pass to the renderer
+	Hidden   bool          // Is this object currently hidden
 
 	min fyne.Size // The minimum size this object can be
 }
@@ -47,6 +48,25 @@ func (r *baseObject) MinSize() fyne.Size {
 // SetMinSize specifies the smallest size this object should be
 func (r *baseObject) SetMinSize(size fyne.Size) {
 	r.min = size
+
+	fyne.RefreshObject(r)
+}
+
+// IsVisible returns true if this object is visible, false otherwise
+func (r *baseObject) IsVisible() bool {
+	return !r.Hidden
+}
+
+// Show will set this object to be visible
+func (r *baseObject) Show() {
+	r.Hidden = false
+
+	fyne.RefreshObject(r)
+}
+
+// Hide will set this object to not be visible
+func (r *baseObject) Hide() {
+	r.Hidden = true
 
 	fyne.RefreshObject(r)
 }

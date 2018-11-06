@@ -9,7 +9,7 @@ type boxLayout struct {
 	horizontal bool
 }
 
-func isVerticalSpacer(obj interface{}) bool {
+func isVerticalSpacer(obj fyne.CanvasObject) bool {
 	if spacer, ok := obj.(SpacerObject); ok {
 		return spacer.ExpandVertical()
 	}
@@ -17,7 +17,7 @@ func isVerticalSpacer(obj interface{}) bool {
 	return false
 }
 
-func isHorizontalSpacer(obj interface{}) bool {
+func isHorizontalSpacer(obj fyne.CanvasObject) bool {
 	if spacer, ok := obj.(SpacerObject); ok {
 		return spacer.ExpandHorizontal()
 	}
@@ -25,7 +25,12 @@ func isHorizontalSpacer(obj interface{}) bool {
 	return false
 }
 
-func (g *boxLayout) isSpacer(obj interface{}) bool {
+func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
+	// invisible spacers don't impact layout
+	if !obj.IsVisible() {
+		return false
+	}
+
 	if g.horizontal {
 		return isHorizontalSpacer(obj)
 	}

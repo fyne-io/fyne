@@ -320,6 +320,14 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	}
+
+	if o.IsVisible() != (C.evas_object_visible_get(obj) != 0) {
+		if o.IsVisible() {
+			C.evas_object_show(obj)
+		} else {
+			C.evas_object_hide(obj)
+		}
+	}
 }
 
 func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.CanvasObject, pos fyne.Position, size fyne.Size) {
@@ -338,6 +346,14 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 	} else {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, position.X)), C.Evas_Coord(scaleInt(c, position.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
+	}
+
+	if target.IsVisible() != (C.evas_object_visible_get(obj) != 0) {
+		if target.IsVisible() {
+			C.evas_object_show(obj)
+		} else {
+			C.evas_object_hide(obj)
+		}
 	}
 
 	for _, child := range objs {

@@ -7,6 +7,7 @@ import "github.com/fyne-io/fyne"
 type baseWidget struct {
 	Size     fyne.Size
 	Position fyne.Position
+	Hidden   bool
 
 	renderer fyne.WidgetRenderer
 }
@@ -42,6 +43,24 @@ func (w *baseWidget) MinSize() fyne.Size {
 		return fyne.NewSize(0, 0)
 	}
 	return w.renderer.MinSize()
+}
+
+func (w *baseWidget) IsVisible() bool {
+	return !w.Hidden
+}
+
+func (w *baseWidget) Show() {
+	w.Hidden = false
+	for _, child := range w.renderer.Objects() {
+		child.Show()
+	}
+}
+
+func (w *baseWidget) Hide() {
+	w.Hidden = true
+	for _, child := range w.renderer.Objects() {
+		child.Hide()
+	}
 }
 
 func (w *baseWidget) ApplyTheme() {

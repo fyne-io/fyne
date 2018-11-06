@@ -14,8 +14,9 @@ type Spacer struct {
 	FixHorizontal bool
 	FixVertical   bool
 
-	size fyne.Size
-	pos  fyne.Position
+	size   fyne.Size
+	pos    fyne.Position
+	hidden bool
 }
 
 // ExpandVertical returns whether or not this spacer expands on the vertical axis
@@ -51,6 +52,21 @@ func (s *Spacer) Move(pos fyne.Position) {
 // MinSize returns a 0 size as a Spacer can shrink to no actual size
 func (s *Spacer) MinSize() fyne.Size {
 	return fyne.NewSize(0, 0)
+}
+
+// IsVisible returns true if this spacer should affect the layout
+func (s *Spacer) IsVisible() bool {
+	return !s.hidden
+}
+
+// Show sets the Spacer to be part of the layout calculations
+func (s *Spacer) Show() {
+	s.hidden = false
+}
+
+// Hide removes this Spacer from layout calculations
+func (s *Spacer) Hide() {
+	s.hidden = true
 }
 
 // NewSpacer returns a spacer object which can fill vertical and horizontal

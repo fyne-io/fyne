@@ -70,9 +70,19 @@ func TestCustomLayout(t *testing.T) {
 	assert.Equal(t, size, box.CurrentSize())
 }
 
+func TestContainer_Hide(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainer(box)
+
+	assert.True(t, box.IsVisible())
+	container.Hide()
+	assert.False(t, box.IsVisible())
+}
+
 type dummyObject struct {
-	size Size
-	pos  Position
+	size   Size
+	pos    Position
+	hidden bool
 }
 
 func (d *dummyObject) CurrentSize() Size {
@@ -93,4 +103,16 @@ func (d *dummyObject) Move(pos Position) {
 
 func (d *dummyObject) MinSize() Size {
 	return NewSize(5, 5)
+}
+
+func (d *dummyObject) IsVisible() bool {
+	return !d.hidden
+}
+
+func (d *dummyObject) Show() {
+	d.hidden = false
+}
+
+func (d *dummyObject) Hide() {
+	d.hidden = true
 }

@@ -12,6 +12,7 @@ type Line struct {
 	Position1 fyne.Position // The current top-left position of the Line
 	Position2 fyne.Position // The current bottomright position of the Line
 	Options   Options       // Options to pass to the renderer
+	Hidden    bool          // Is this Line currently hidden
 
 	StrokeColor color.Color // The line stroke colour
 	StrokeWidth float32     // The stroke width of the line
@@ -44,6 +45,25 @@ func (l *Line) Move(pos fyne.Position) {
 // explicit content
 func (l *Line) MinSize() fyne.Size {
 	return fyne.NewSize(1, 1)
+}
+
+// IsVisible returns true if this line// Show will set this circle to be visible is visible, false otherwise
+func (l *Line) IsVisible() bool {
+	return !l.Hidden
+}
+
+// Show will set this line to be visible
+func (l *Line) Show() {
+	l.Hidden = false
+
+	fyne.RefreshObject(l)
+}
+
+// Hide will set this line to not be visible
+func (l *Line) Hide() {
+	l.Hidden = true
+
+	fyne.RefreshObject(l)
 }
 
 // NewLine returns a new Line instance

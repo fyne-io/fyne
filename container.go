@@ -5,6 +5,7 @@ package fyne
 type Container struct {
 	Size     Size     // The current size of the Container
 	Position Position // The current position of the Container
+	Hidden   bool     // Is this Container hidden
 
 	Layout  Layout         // The Layout algorithm for arranging child CanvasObjects
 	Objects []CanvasObject // The set of CanvasObjects this container holds
@@ -58,6 +59,27 @@ func (c *Container) MinSize() Size {
 
 	return minSize
 
+}
+
+// IsVisible returns true if the container is currently visible, false otherwise.
+func (c *Container) IsVisible() bool {
+	return !c.Hidden
+}
+
+// Show sets this container, and all it's children, to be visible
+func (c *Container) Show() {
+	c.Hidden = false
+	for _, child := range c.Objects {
+		child.Show()
+	}
+}
+
+// Hide sets this container, and all it's children, to be not visible
+func (c *Container) Hide() {
+	c.Hidden = true
+	for _, child := range c.Objects {
+		child.Hide()
+	}
 }
 
 // AddObject adds another CanvasObject to the set this Container holds
