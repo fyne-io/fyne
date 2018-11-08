@@ -88,7 +88,7 @@ func (c *Container) AddObject(o CanvasObject) {
 	c.layout()
 }
 
-// ApplyTheme  ensures that all the contained objects that can be themed are
+// ApplyTheme ensures that all the contained objects that can be themed are
 // updated when the theme changes.
 func (c *Container) ApplyTheme() {
 	for _, child := range c.Objects {

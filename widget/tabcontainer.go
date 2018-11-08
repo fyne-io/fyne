@@ -145,8 +145,8 @@ func (t *tabContainerRenderer) ApplyTheme() {
 	t.tabBar.ApplyTheme()
 
 	for _, child := range t.container.Items {
-		if wid, ok := child.Content.(fyne.Widget); ok {
-			wid.Renderer().ApplyTheme()
+		if wid, ok := child.Content.(fyne.ThemedObject); ok {
+			wid.ApplyTheme()
 		}
 	}
 }
