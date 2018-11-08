@@ -1,6 +1,4 @@
-// Package apps contains the various eample apps that are called to demonstrate
-// the capabilities and simple coding of Fyne based apps.
-package apps
+package main
 
 import "image/color"
 

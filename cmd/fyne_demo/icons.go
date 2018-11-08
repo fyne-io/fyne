@@ -1,4 +1,4 @@
-package apps
+package main
 
 import (
 	"github.com/fyne-io/fyne"

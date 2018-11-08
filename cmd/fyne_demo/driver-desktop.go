@@ -1,6 +1,6 @@
 // +build !ci
 
-package apps
+package main
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/desktop"

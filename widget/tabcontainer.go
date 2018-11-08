@@ -9,6 +9,11 @@ type TabItem struct {
 	Content fyne.CanvasObject
 }
 
+// NewTabItem creates a new item for a tabbed widget - each item specifies the content an a label for it's tab.
+func NewTabItem(text string, content fyne.CanvasObject) *TabItem {
+	return &TabItem{Text: text, Content: content}
+}
+
 // TabContainer widget allows switching visible content from a list of TabItems.
 // Each item is represented by a button at the top of the widget.
 type TabContainer struct {
