@@ -35,9 +35,14 @@ type Position struct {
 	Y int // The position from the parent's top edge
 }
 
-// Add returns a new Position that is the result of ofsetting the current position by p2 X and Y
+// Add returns a new Position that is the result of offsetting the current position by p2 X and Y
 func (p1 Position) Add(p2 Position) Position {
 	return Position{p1.X + p2.X, p1.Y + p2.Y}
+}
+
+// Subtract returns a new Position that is the result of offsetting the current position by p2 -X and -Y
+func (p1 Position) Subtract(p2 Position) Position {
+	return Position{p1.X - p2.X, p1.Y - p2.Y}
 }
 
 // NewPos returns a newly allocated Position representing the specified coordinates

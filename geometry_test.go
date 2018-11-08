@@ -37,7 +37,7 @@ func TestSizeUnion(t *testing.T) {
 	assert.Equal(t, size3.Height, maxH)
 }
 
-func TestPositionAdd(t *testing.T) {
+func TestPosition_Add(t *testing.T) {
 	pos1 := NewPos(10, 10)
 	pos2 := NewPos(25, 25)
 
@@ -45,4 +45,14 @@ func TestPositionAdd(t *testing.T) {
 
 	assert.Equal(t, pos3.X, pos1.X+pos2.X)
 	assert.Equal(t, pos3.Y, pos1.Y+pos2.Y)
+}
+
+func TestPosition_Subtract(t *testing.T) {
+	pos1 := NewPos(25, 25)
+	pos2 := NewPos(10, 10)
+
+	pos3 := pos1.Subtract(pos2)
+
+	assert.Equal(t, pos3.X, pos1.X-pos2.X)
+	assert.Equal(t, pos3.Y, pos1.Y-pos2.Y)
 }
