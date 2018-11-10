@@ -99,8 +99,8 @@ It should then look like this:
 
 To run a showcase of the features of fyne execute the following:
 
-    cd $GOPATH/src/github.com/fyne-io/fyne/examples/
-    go run main.go
+    cd $GOPATH/src/github.com/fyne-io/fyne/cmd/fyne_demo/
+    go run .
 
 And you should see something like this (after you click a few buttons):
 
