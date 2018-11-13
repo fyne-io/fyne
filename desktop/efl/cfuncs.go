@@ -1,6 +1,6 @@
-// +build !ci
+// +build !ci,!gl
 
-package desktop
+package efl
 
 /*
 #cgo pkg-config: ecore-evas ecore-input

@@ -1,6 +1,6 @@
-// +build !ci
+// +build !ci,!gl
 
-package desktop
+package efl
 
 // #cgo pkg-config: ecore ecore-evas ecore-input evas
 // #include <Ecore.h>
@@ -255,7 +255,6 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	ev := new(fyne.KeyEvent)
 	ev.String = C.GoString(info.string)
 	ev.Name = C.GoString(info.keyname)
-	ev.Code = fyne.KeyCode(int(info.keycode))
 	if (info.modifiers & C.ECORE_EVENT_MODIFIER_SHIFT) != 0 {
 		ev.Modifiers |= fyne.ShiftModifier
 	}

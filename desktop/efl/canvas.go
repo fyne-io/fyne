@@ -1,6 +1,6 @@
-// +build !ci
+// +build !ci,!gl
 
-package desktop
+package efl
 
 // #cgo pkg-config: eina evas ecore-evas
 // #include <Eina.h>
@@ -34,7 +34,7 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	var x, y C.int
 	C.evas_object_geometry_get(obj, &x, &y, nil, nil)
 	pos := fyne.NewPos(unscaleInt(current, int(info.canvas.x)), unscaleInt(current, int(info.canvas.y)))
-	pos = pos.Subtract(current.offsets[co])
+	pos = pos.Subtract(current.offsets[co]).Subtract(fyne.NewPos(theme.Padding(), theme.Padding()))
 
 	ev := new(fyne.MouseEvent)
 	ev.Position = pos

@@ -5,7 +5,6 @@ type KeyEvent struct {
 	String string
 
 	Name      string
-	Code      KeyCode
 	Modifiers Modifier
 }
 

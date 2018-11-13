@@ -1,8 +1,8 @@
-// +build !ci
+// +build !ci,!gl
 
 // +build freebsd openbsd netbsd
 
-package desktop
+package efl
 
 // #cgo pkg-config: ecore-evas
 // #include <Ecore_Evas.h>

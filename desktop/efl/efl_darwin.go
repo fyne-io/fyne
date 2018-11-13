@@ -1,9 +1,9 @@
-// +build !ci
+// +build !ci,!gl
 
-package desktop
+package efl
 
 func oSEngineName() string {
-	return "software_gdi"
+	return "opengl_cocoa"
 }
 
 func oSWindowInit(w *window) {

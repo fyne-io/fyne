@@ -1,8 +1,8 @@
-// +build !ci
+// +build !ci,!gl
 
 // +build wayland
 
-package desktop
+package efl
 
 // #cgo pkg-config: ecore-evas ecore-wl2
 // #include <Ecore_Evas.h>
