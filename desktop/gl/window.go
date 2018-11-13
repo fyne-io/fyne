@@ -135,6 +135,10 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	min := content.MinSize()
 	w.canvas.SetScale(detectScale(w.viewport))
 
+	// Set the size of our new window
+	winWidth, winHeight := scaleInt(w.canvas, min.Width), scaleInt(w.canvas, min.Height)
+	w.viewport.SetSize(winWidth, winHeight)
+
 	w.SetFixedSize(w.fixedSize)
 	w.resize(min)
 }
@@ -153,6 +157,11 @@ func (w *window) closed(viewport *glfw.Window) {
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
 	w.resize(fyne.NewSize(width, height))
+}
+
+func (w *window) refresh(viewport *glfw.Window) {
+	w.canvas.refresh()
+	w.viewport.SwapBuffers()
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
@@ -250,6 +259,9 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	if master {
 		glfw.Init()
 	}
+
+	// make the window hidden, we will set it up and then show it later
+	glfw.WindowHint(glfw.Visible, 0)
 	win, _ := glfw.CreateWindow(100, 100, title, nil, nil)
 	win.MakeContextCurrent()
 
@@ -263,6 +275,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 	win.SetCloseCallback(ret.closed)
 	win.SetSizeCallback(ret.resized)
+	win.SetRefreshCallback(ret.refresh)
 	win.SetCursorPosCallback(ret.mouseMoved)
 	win.SetMouseButtonCallback(ret.mouseClicked)
 	win.SetKeyCallback(ret.keyPressed)
