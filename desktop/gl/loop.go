@@ -8,11 +8,11 @@ import (
 
 func (d *gLDriver) runGL() {
 	/*
-	select {
-	case <-d.done:
-		glfw.Terminate()
-		return
-	}
+		select {
+		case <-d.done:
+			glfw.Terminate()
+			return
+		}
 	*/
 
 	run := true

@@ -30,4 +30,3 @@ func NewGLDriver() fyne.Driver {
 
 	return driver
 }
-

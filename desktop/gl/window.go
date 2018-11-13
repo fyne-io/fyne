@@ -23,7 +23,7 @@ type window struct {
 	fixedSize  bool
 
 	mouseX, mouseY float64
-	onClosed func()
+	onClosed       func()
 }
 
 func (w *window) Title() string {
@@ -172,8 +172,8 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	switch button {
 	case glfw.MouseButtonRight:
 		ev.Button = fyne.RightMouseButton
-//	case glfw.MouseButtonMiddle:
-//		ev.Button = fyne.middleMouseButton
+		//	case glfw.MouseButtonMiddle:
+		//		ev.Button = fyne.middleMouseButton
 	default:
 		ev.Button = fyne.LeftMouseButton
 	}
