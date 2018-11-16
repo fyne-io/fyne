@@ -1,6 +1,6 @@
 // +build !ci
 
-package fyne
+package app
 
 import "os/exec"
 

@@ -1,6 +1,6 @@
 // +build ci !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd
 
-package fyne
+package app
 
 import "log"
 

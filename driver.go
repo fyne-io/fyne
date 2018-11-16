@@ -24,8 +24,8 @@ func GetDriver() Driver {
 	return driver
 }
 
-// setDriver sets the application driver.
+// SetDriver sets the application driver.
 // This bridges internal modularity - do not call this method directly.
-func setDriver(d Driver) {
+func SetDriver(d Driver) {
 	driver = d
 }

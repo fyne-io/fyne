@@ -9,11 +9,10 @@ func init() {
 }
 
 type testApp struct {
-	delegate fyne.App
 }
 
 func (a *testApp) NewWindow(title string) fyne.Window {
-	return a.delegate.NewWindow(title)
+	return &testWindow{title: title}
 }
 
 func (a *testApp) OpenURL(url string) {
@@ -25,13 +24,35 @@ func (a *testApp) Run() {
 }
 
 func (a *testApp) Quit() {
-	a.delegate.Quit()
+	// no-op
+}
+
+func (a *testApp) applyTheme(fyne.Settings) {
+	for _, window := range fyne.GetDriver().AllWindows() {
+		content := window.Content()
+
+		switch themed := content.(type) {
+		case fyne.ThemedObject:
+			themed.ApplyTheme()
+			window.Canvas().Refresh(content)
+		}
+	}
 }
 
 // NewApp returns a new dummy app used for testing..
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
-	realApp := fyne.NewAppWithDriver(NewTestDriver())
+	test := &testApp{}
+	fyne.SetDriver(NewTestDriver())
 
-	return &testApp{delegate: realApp}
+	listener := make(chan fyne.Settings)
+	fyne.GetSettings().AddChangeListener(listener)
+	go func() {
+		for {
+			settings := <-listener
+			test.applyTheme(settings)
+		}
+	}()
+
+	return test
 }

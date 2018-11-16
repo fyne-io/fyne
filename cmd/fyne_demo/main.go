@@ -5,6 +5,7 @@ import "errors"
 import "fmt"
 
 import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/theme"
 import "github.com/fyne-io/fyne/dialog"
@@ -31,18 +32,12 @@ func formApp(app fyne.App) {
 	w.Show()
 }
 
-func appButton(app fyne.App, label string, onClick func(fyne.App)) *widget.Button {
-	return widget.NewButton(label, func() {
-		onClick(app)
-	})
-}
-
 func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
 }
 
 func main() {
-	app := NewApp()
+	app := app.New()
 
 	w := app.NewWindow("Fyne Demo")
 	entry := widget.NewEntry()
