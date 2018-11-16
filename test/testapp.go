@@ -12,7 +12,7 @@ type testApp struct {
 }
 
 func (a *testApp) NewWindow(title string) fyne.Window {
-	return &testWindow{title: title}
+	return NewTestWindow(nil)
 }
 
 func (a *testApp) OpenURL(url string) {
