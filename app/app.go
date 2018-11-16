@@ -1,3 +1,6 @@
+// Package app provides app implementations for working with Fyne graphical interfaces.
+// The fastest way to get started is to call app.New() which will normally load a new desktop application.
+// If the "ci" tag is passed to go (go run -tags ci myapp.go) it will run an in-memory application.
 package app
 
 import (
