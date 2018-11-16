@@ -439,7 +439,7 @@ func (c *eflCanvas) fitContent() {
 	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
 
 	pad := theme.Padding()
-	if c.window.Fullscreen() {
+	if c.window.FullScreen() {
 		pad = 0
 	}
 	min := c.content.MinSize()
@@ -464,7 +464,7 @@ func (c *eflCanvas) resizeContent() {
 	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)
 
 	pad := theme.Padding()
-	if c.window.Fullscreen() {
+	if c.window.FullScreen() {
 		pad = 0
 	}
 	width := unscaleInt(c, int(w)) - pad*2

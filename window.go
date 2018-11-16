@@ -9,11 +9,11 @@ type Window interface {
 	// SetTitle updates the current title of the window
 	SetTitle(string)
 
-	// Fullscreen returns whether or not this window is currently full screen
-	Fullscreen() bool
-	// SetFullscreen changes the requested fullscreen property
-	// true for a fullscreen window and false to unset this.
-	SetFullscreen(bool)
+	// FullScreen returns whether or not this window is currently full screen
+	FullScreen() bool
+	// SetFullScreen changes the requested fullScreen property
+	// true for a fullScreen window and false to unset this.
+	SetFullScreen(bool)
 
 	// FixedSize returns whether or not this window should disable resizing.
 	FixedSize() bool
