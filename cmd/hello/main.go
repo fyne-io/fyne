@@ -4,11 +4,11 @@
 package main
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/desktop"
+import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/widget"
 
 func main() {
-	app := desktop.NewApp()
+	app := app.New()
 
 	w := app.NewWindow("Hello")
 	w.SetContent(&widget.Box{Horizontal: false, Children: []fyne.CanvasObject{

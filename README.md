@@ -32,10 +32,10 @@ And then you're ready to write your first app!
     package main
 
     import "github.com/fyne-io/fyne/widget"
-    import "github.com/fyne-io/fyne/desktop"
+    import "github.com/fyne-io/fyne/app"
 
     func main() {
-    	app := desktop.NewApp()
+    	app := app.New()
 
     	w := app.NewWindow("Hello")
     	w.SetContent(widget.NewList(
@@ -123,11 +123,11 @@ The following is exactly the same as the code above but in this different style.
 package main
 
 import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/desktop"
+import "github.com/fyne-io/fyne/app"
 import "github.com/fyne-io/fyne/widget"
 
 func main() {
-	app := desktop.NewApp()
+	app := app.New()
 
 	w := app.NewWindow("Hello")
 	w.SetContent(&widget.List{Children: []fyne.CanvasObject{
