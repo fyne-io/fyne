@@ -2,7 +2,7 @@
 
 // +build !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd
 
-package desktop
+package efl
 
 func oSEngineName() string {
 	return oSEngineOther

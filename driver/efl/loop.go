@@ -1,6 +1,6 @@
 // +build !ci
 
-package desktop
+package efl
 
 // #cgo pkg-config: eina evas ecore-evas ecore-input
 // #cgo CFLAGS: -DEFL_BETA_API_SUPPORT=master-compatibility-hack

@@ -2,7 +2,7 @@
 
 // +build openbsd freebsd netbsd
 
-package fyne
+package app
 
 import "os/exec"
 

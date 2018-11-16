@@ -1,6 +1,6 @@
 // +build !ci
 
-package desktop
+package efl
 
 // #cgo pkg-config: eina evas ecore-evas
 // #include <Eina.h>

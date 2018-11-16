@@ -1,6 +1,8 @@
 // +build !ci
 
-package desktop
+// Package efl provides a full Fyne render implementation using an EFL installation.
+// This supports Windows, Mac OS X and Linux using the EFL (Evas) render pipeline.
+package efl
 
 // #cgo pkg-config: ecore
 // #include <Ecore.h>

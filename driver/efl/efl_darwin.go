@@ -1,6 +1,6 @@
 // +build !ci
 
-package desktop
+package efl
 
 func oSEngineName() string {
 	return "opengl_cocoa"
