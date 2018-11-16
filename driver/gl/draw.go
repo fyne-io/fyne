@@ -60,7 +60,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 }
 
 const (
-vertexShaderSource = `
+	vertexShaderSource = `
     #version 130
     in vec3 vp;
     void main() {
@@ -68,7 +68,7 @@ vertexShaderSource = `
     }
 ` + "\x00"
 
-fragmentShaderSource = `
+	fragmentShaderSource = `
     #version 130
     out vec4 frag_colour;
     void main() {
@@ -79,14 +79,14 @@ fragmentShaderSource = `
 
 func square(size fyne.Size, pos fyne.Position, full fyne.Size) []float32 {
 	xPos := float32(pos.X) / float32(full.Width)
-	x1 := -1+xPos*2
-	x2Pos := float32(pos.X + size.Width) / float32(full.Width)
-	x2 := -1+x2Pos*2
+	x1 := -1 + xPos*2
+	x2Pos := float32(pos.X+size.Width) / float32(full.Width)
+	x2 := -1 + x2Pos*2
 
 	yPos := float32(pos.Y) / float32(full.Height)
-	y1 := 1-yPos*2
-	y2Pos := float32(pos.Y + size.Height) / float32(full.Height)
-	y2 := 1-y2Pos*2
+	y1 := 1 - yPos*2
+	y2Pos := float32(pos.Y+size.Height) / float32(full.Height)
+	y2 := 1 - y2Pos*2
 
 	return []float32{
 		x1, y1, 0,
@@ -136,7 +136,7 @@ func makeVao(points []float32) uint32 {
 
 func draw(vao uint32, len int) {
 	gl.BindVertexArray(vao)
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(len / 3))
+	gl.DrawArrays(gl.TRIANGLES, 0, int32(len/3))
 }
 
 func drawRectangle(rect *canvas.Rectangle, pos fyne.Position, view fyne.Canvas) {

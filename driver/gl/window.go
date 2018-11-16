@@ -61,8 +61,8 @@ func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 
 	min := w.canvas.content.MinSize()
-	winWidth := scaleInt(w.canvas, min.Width + theme.Padding())
-	winHeight := scaleInt(w.canvas, min.Height + theme.Padding())
+	winWidth := scaleInt(w.canvas, min.Width+theme.Padding())
+	winHeight := scaleInt(w.canvas, min.Height+theme.Padding())
 	if fixed {
 		w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
 	} else {
@@ -136,8 +136,8 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	w.canvas.SetScale(detectScale(w.viewport))
 
 	// Set the size of our new window
-	winWidth := scaleInt(w.canvas, min.Width + theme.Padding()*2)
-	winHeight := scaleInt(w.canvas, min.Height + theme.Padding()*2)
+	winWidth := scaleInt(w.canvas, min.Width+theme.Padding()*2)
+	winHeight := scaleInt(w.canvas, min.Height+theme.Padding()*2)
 	w.viewport.SetSize(winWidth, winHeight)
 
 	w.SetFixedSize(w.fixedSize)
@@ -157,7 +157,7 @@ func (w *window) closed(viewport *glfw.Window) {
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
-	w.resize(fyne.NewSize(unscaleInt(w.canvas, width) - theme.Padding()*2, unscaleInt(w.canvas, height)-theme.Padding()*2))
+	w.resize(fyne.NewSize(unscaleInt(w.canvas, width)-theme.Padding()*2, unscaleInt(w.canvas, height)-theme.Padding()*2))
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
@@ -165,8 +165,8 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-//	w.canvas.refresh()
-//	viewport.SwapBuffers()
+	//	w.canvas.refresh()
+	//	viewport.SwapBuffers()
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
