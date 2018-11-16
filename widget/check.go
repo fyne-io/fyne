@@ -54,7 +54,7 @@ func (c *checkRenderer) Refresh() {
 		c.icon.File = theme.UncheckedIcon().CachePath()
 	}
 
-	fyne.RefreshObject(c.check)
+	canvas.Refresh(c.check)
 }
 
 func (c *checkRenderer) Objects() []fyne.CanvasObject {

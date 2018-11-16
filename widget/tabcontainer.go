@@ -1,6 +1,7 @@
 package widget
 
 import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/canvas"
 
 // TabItem represents a single view in a TabContainer.
 // The Text is used for the tab button and the Content is shown when the corresponding tab is active.
@@ -176,5 +177,5 @@ func (t *tabContainerRenderer) Refresh() {
 		}
 	}
 
-	fyne.RefreshObject(t.container)
+	canvas.Refresh(t.container)
 }

@@ -21,7 +21,7 @@ func (r *baseObject) CurrentSize() fyne.Size {
 func (r *baseObject) Resize(size fyne.Size) {
 	r.Size = size
 
-	fyne.RefreshObject(r)
+	Refresh(r)
 }
 
 // CurrentPosition gets the current position of this rectangle object, relative to it's parent / canvas
@@ -33,7 +33,7 @@ func (r *baseObject) CurrentPosition() fyne.Position {
 func (r *baseObject) Move(pos fyne.Position) {
 	r.Position = pos
 
-	fyne.RefreshObject(r)
+	Refresh(r)
 }
 
 // MinSize returns the specified minimum size, if set, or {1, 1} otherwise
@@ -49,7 +49,7 @@ func (r *baseObject) MinSize() fyne.Size {
 func (r *baseObject) SetMinSize(size fyne.Size) {
 	r.min = size
 
-	fyne.RefreshObject(r)
+	Refresh(r)
 }
 
 // IsVisible returns true if this object is visible, false otherwise
@@ -61,12 +61,22 @@ func (r *baseObject) IsVisible() bool {
 func (r *baseObject) Show() {
 	r.Hidden = false
 
-	fyne.RefreshObject(r)
+	Refresh(r)
 }
 
 // Hide will set this object to not be visible
 func (r *baseObject) Hide() {
 	r.Hidden = true
 
-	fyne.RefreshObject(r)
+	Refresh(r)
+}
+
+// Refresh instructs the containing canvas to refresh the specified obj.
+// Use of this method directly is not recommended and it may be removed in a future release
+func Refresh(obj fyne.CanvasObject) {
+	for _, window := range fyne.GetDriver().AllWindows() {
+		if window.Canvas() != nil && window.Canvas().Contains(obj) {
+			window.Canvas().Refresh(obj)
+		}
+	}
 }

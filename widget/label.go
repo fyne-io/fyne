@@ -115,7 +115,7 @@ func (l *labelRenderer) Refresh() {
 		text.TextStyle = l.label.TextStyle
 	}
 
-	fyne.RefreshObject(l.label)
+	canvas.Refresh(l.label)
 }
 
 // Label widget is a basic text component with appropriate padding and layout.
