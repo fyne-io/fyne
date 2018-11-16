@@ -8,15 +8,14 @@ import (
 
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
 type window struct {
 	viewport *glfw.Window
-	canvas   *canvas
+	canvas   *glCanvas
 	title    string
-	content  fyne.CanvasObject
 
 	master     bool
 	fullscreen bool
@@ -47,7 +46,7 @@ func (w *window) SetFullscreen(full bool) {
 	if full {
 		w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 	} else {
-		min := w.content.MinSize()
+		min := w.canvas.content.MinSize()
 		winWidth, winHeight := scaleInt(w.canvas, min.Width), scaleInt(w.canvas, min.Height)
 
 		w.viewport.SetMonitor(nil, 0, 0, winWidth, winHeight, 0) // TODO remember position?
@@ -61,8 +60,9 @@ func (w *window) FixedSize() bool {
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 
-	min := w.content.MinSize()
-	winWidth, winHeight := scaleInt(w.canvas, min.Width), scaleInt(w.canvas, min.Height)
+	min := w.canvas.content.MinSize()
+	winWidth := scaleInt(w.canvas, min.Width + theme.Padding())
+	winHeight := scaleInt(w.canvas, min.Height + theme.Padding())
 	if fixed {
 		w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
 	} else {
@@ -123,20 +123,21 @@ func (w *window) ShowAndRun() {
 }
 
 func (w *window) Content() fyne.CanvasObject {
-	return w.content
+	return w.canvas.content
 }
 
 func (w *window) resize(size fyne.Size) {
-	w.content.Resize(size)
+	w.canvas.content.Resize(size)
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
-	w.content = content
+	w.canvas.SetContent(content)
 	min := content.MinSize()
 	w.canvas.SetScale(detectScale(w.viewport))
 
 	// Set the size of our new window
-	winWidth, winHeight := scaleInt(w.canvas, min.Width), scaleInt(w.canvas, min.Height)
+	winWidth := scaleInt(w.canvas, min.Width + theme.Padding()*2)
+	winHeight := scaleInt(w.canvas, min.Height + theme.Padding()*2)
 	w.viewport.SetSize(winWidth, winHeight)
 
 	w.SetFixedSize(w.fixedSize)
@@ -156,12 +157,16 @@ func (w *window) closed(viewport *glfw.Window) {
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
-	w.resize(fyne.NewSize(width, height))
+	w.resize(fyne.NewSize(unscaleInt(w.canvas, width) - theme.Padding()*2, unscaleInt(w.canvas, height)-theme.Padding()*2))
+}
+
+func (w *window) frameSized(viewport *glfw.Window, width, height int) {
+	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-	w.canvas.refresh()
-	w.viewport.SwapBuffers()
+//	w.canvas.refresh()
+//	viewport.SwapBuffers()
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
@@ -171,7 +176,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 	current := w.canvas
-	co := w.content // TODO find correct object
+	co := w.canvas.content // TODO find correct object
 
 	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
 	pos = pos.Subtract(fyne.NewPos(theme.Padding(), theme.Padding())) // TODO within parent
@@ -195,8 +200,18 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 }
 
-func keyToName(glfw.Key) string {
-	return "" // TODO
+func keyToName(key glfw.Key) string {
+	switch key {
+	case glfw.KeyRight:
+		return "Right"
+	case glfw.KeyLeft:
+		return "Left"
+	case glfw.KeyUp:
+		return "Up"
+	case glfw.KeyDown:
+		return "Down"
+	}
+	return ""
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
@@ -234,7 +249,7 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	}
 
 	ev := new(fyne.KeyEvent)
-	ev.Name = string(char)
+	ev.Name = fyne.KeyName(string(char))
 	ev.String = string(char)
 	if (mods & glfw.ModShift) != 0 {
 		ev.Modifiers |= fyne.ShiftModifier
@@ -265,8 +280,14 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	win, _ := glfw.CreateWindow(100, 100, title, nil, nil)
 	win.MakeContextCurrent()
 
+	glfw.WindowHint(glfw.ContextVersionMajor, 1)
+	glfw.WindowHint(glfw.ContextVersionMinor, 3)
+	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+
 	if master {
 		gl.Init()
+		gl.UseProgram(initOpenGL())
 	}
 	ret := &window{viewport: win, title: title}
 	ret.canvas = newCanvas(ret)
@@ -275,6 +296,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 	win.SetCloseCallback(ret.closed)
 	win.SetSizeCallback(ret.resized)
+	win.SetFramebufferSizeCallback(ret.frameSized)
 	win.SetRefreshCallback(ret.refresh)
 	win.SetCursorPosCallback(ret.mouseMoved)
 	win.SetMouseButtonCallback(ret.mouseClicked)

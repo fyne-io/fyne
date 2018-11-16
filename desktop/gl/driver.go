@@ -12,7 +12,7 @@ type gLDriver struct {
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
-	return fyne.NewSize(len(text)*5, size)
+	return fyne.NewSize(len(text)*10, size+4)
 }
 
 func (d *gLDriver) Quit() {
