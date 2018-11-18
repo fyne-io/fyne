@@ -53,14 +53,14 @@ func (l *Circle) IsVisible() bool {
 func (l *Circle) Show() {
 	l.Hidden = false
 
-	fyne.RefreshObject(l)
+	Refresh(l)
 }
 
 // Hide will set this circle to not be visible
 func (l *Circle) Hide() {
 	l.Hidden = true
 
-	fyne.RefreshObject(l)
+	Refresh(l)
 }
 
 // NewCircle returns a new Circle instance

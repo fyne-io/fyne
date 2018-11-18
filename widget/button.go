@@ -75,7 +75,7 @@ func (b *buttonRenderer) Refresh() {
 	}
 
 	b.Layout(b.button.CurrentSize())
-	fyne.RefreshObject(b.button)
+	canvas.Refresh(b.button)
 }
 
 func (b *buttonRenderer) Objects() []fyne.CanvasObject {

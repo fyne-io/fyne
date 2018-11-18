@@ -16,12 +16,3 @@ type Canvas interface {
 
 	SetOnKeyDown(func(*KeyEvent))
 }
-
-// RefreshObject instructs the containing canvas to refresh the specified obj.
-func RefreshObject(obj CanvasObject) {
-	for _, window := range GetDriver().AllWindows() {
-		if window.Canvas() != nil && window.Canvas().Contains(obj) {
-			window.Canvas().Refresh(obj)
-		}
-	}
-}

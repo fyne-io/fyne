@@ -4,7 +4,7 @@ import "github.com/fyne-io/fyne"
 
 type testWindow struct {
 	title      string
-	fullscreen bool
+	fullScreen bool
 	fixedSize  bool
 	onClosed   func()
 
@@ -21,12 +21,12 @@ func (w *testWindow) SetTitle(title string) {
 	w.title = title
 }
 
-func (w *testWindow) Fullscreen() bool {
-	return w.fullscreen
+func (w *testWindow) FullScreen() bool {
+	return w.fullScreen
 }
 
-func (w *testWindow) SetFullscreen(fullscreen bool) {
-	w.fullscreen = fullscreen
+func (w *testWindow) SetFullScreen(fullScreen bool) {
+	w.fullScreen = fullScreen
 }
 
 func (w *testWindow) FixedSize() bool {

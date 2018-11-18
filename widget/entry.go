@@ -53,7 +53,7 @@ func (e *entryRenderer) moveCursor() {
 	e.cursor.Resize(fyne.NewSize(2, lineHeight))
 	e.cursor.Move(fyne.NewPos(xPos+theme.Padding()*2, yPos+theme.Padding()*2))
 
-	fyne.RefreshObject(e.cursor)
+	canvas.Refresh(e.cursor)
 }
 
 // Layout the components of the entry widget.
@@ -87,7 +87,7 @@ func (e *entryRenderer) Refresh() {
 		e.cursor.FillColor = color.RGBA{0, 0, 0, 0}
 	}
 
-	fyne.RefreshObject(e.entry)
+	canvas.Refresh(e.entry)
 }
 
 func (e *entryRenderer) Objects() []fyne.CanvasObject {

@@ -1,9 +1,7 @@
 package widget
 
-import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-)
+import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/theme"
 
 const thickness = 2
@@ -104,5 +102,5 @@ func (g *groupRenderer) Refresh() {
 	g.label.Text = g.group.Text
 	g.Layout(g.group.CurrentSize())
 
-	fyne.RefreshObject(g.group)
+	canvas.Refresh(g.group)
 }

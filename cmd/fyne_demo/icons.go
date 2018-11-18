@@ -10,6 +10,7 @@ import (
 )
 
 type browser struct {
+	canvas  fyne.Canvas
 	current int
 
 	name *widget.Label
@@ -24,12 +25,13 @@ func (b *browser) setIcon(index int) {
 
 	b.name.SetText(icons[index].name)
 	b.icon.File = icons[index].icon.CachePath()
-	fyne.RefreshObject(b.icon)
+	b.canvas.Refresh(b.icon)
 }
 
 // Icons loads a window that shows the various icons available in Fyne
 func Icons(app fyne.App) {
-	b := &browser{}
+	win := app.NewWindow("Icons")
+	b := &browser{canvas: win.Canvas()}
 
 	prev := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
 		b.setIcon(b.current - 1)
@@ -44,7 +46,6 @@ func Icons(app fyne.App) {
 	background.SetMinSize(fyne.NewSize(280, 280))
 	b.icon = canvas.NewImageFromResource(icons[b.current].icon)
 
-	win := app.NewWindow("Icons")
 	win.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(
 		bar, nil, nil, nil), bar, background, b.icon))
 	win.Show()

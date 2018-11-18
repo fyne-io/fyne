@@ -6,13 +6,13 @@
 //
 //   package main
 //
+//   import "github.com/fyne-io/fyne/app"
 //   import "github.com/fyne-io/fyne/widget"
-//   import "github.com/fyne-io/fyne/desktop"
 //
 //   func main() {
-//   	app := desktop.NewApp()
+//   	a := app.New()
 //
-//   	w := app.NewWindow("Hello")
+//   	w := a.NewWindow("Hello")
 //   	w.SetContent(widget.NewList(
 //   		widget.NewLabel("Hello Fyne!"),
 //   		widget.NewButton("Quit", func() {

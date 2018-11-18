@@ -3,6 +3,7 @@ package widget
 import "log"
 
 import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/layout"
 
 // List widget is a simple list where the child elements are arranged in a single column.
@@ -83,5 +84,5 @@ func (l *listRenderer) Refresh() {
 	l.objects = l.list.Children
 	l.Layout(l.list.CurrentSize())
 
-	fyne.RefreshObject(l.list)
+	canvas.Refresh(l.list)
 }

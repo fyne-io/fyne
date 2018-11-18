@@ -56,14 +56,14 @@ func (l *Line) IsVisible() bool {
 func (l *Line) Show() {
 	l.Hidden = false
 
-	fyne.RefreshObject(l)
+	Refresh(l)
 }
 
 // Hide will set this line to not be visible
 func (l *Line) Hide() {
 	l.Hidden = true
 
-	fyne.RefreshObject(l)
+	Refresh(l)
 }
 
 // NewLine returns a new Line instance

@@ -1,6 +1,7 @@
 package widget
 
 import "github.com/fyne-io/fyne"
+import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/layout"
 
 // Box widget is a simple list where the child elements are arranged in a single column
@@ -95,5 +96,5 @@ func (b *boxRenderer) Refresh() {
 	b.objects = b.box.Children
 	b.Layout(b.box.CurrentSize())
 
-	fyne.RefreshObject(b.box)
+	canvas.Refresh(b.box)
 }

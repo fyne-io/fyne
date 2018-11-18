@@ -58,11 +58,11 @@ func (w *window) SetTitle(title string) {
 	C.free(unsafe.Pointer(cstr))
 }
 
-func (w *window) Fullscreen() bool {
+func (w *window) FullScreen() bool {
 	return C.ecore_evas_fullscreen_get(w.ee) != 0
 }
 
-func (w *window) SetFullscreen(full bool) {
+func (w *window) SetFullScreen(full bool) {
 	if full {
 		C.ecore_evas_fullscreen_set(w.ee, 1)
 	} else {
