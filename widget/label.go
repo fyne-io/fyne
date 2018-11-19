@@ -156,7 +156,7 @@ func (l *Label) RowLength(row int) int {
 func (l *Label) createRenderer() fyne.WidgetRenderer {
 	render := &labelRenderer{label: l}
 
-	render.background = canvas.NewRectangle(theme.ButtonColor())
+	render.background = canvas.NewRectangle(theme.BackgroundColor())
 	render.texts = []*canvas.Text{}
 	render.objects = []fyne.CanvasObject{render.background}
 	render.updateTexts(render.parseText(l.Text))

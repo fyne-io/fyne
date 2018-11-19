@@ -6,8 +6,16 @@ import (
 	"fmt"
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
 	"github.com/go-gl/gl/v3.3-core/gl"
+	"image/draw"
+	"log"
+	"os"
+	"path/filepath"
+
+	"image"
 	"image/color"
+	_ "image/png"
 	"strings"
 )
 
@@ -66,45 +74,31 @@ const (
 	vertexShaderSource = `
     #version 130
     in vec3 vp;
-    uniform vec4 obj_fill_color;
-    out vec4 fill_color;
+    in vec2 vertTexCoord;
+    out vec2 fragTexCoord;
+
     void main() {
-        fill_color = obj_fill_color;
+        fragTexCoord = vertTexCoord;
+
         gl_Position = vec4(vp, 1.0);
     }
 ` + "\x00"
 
 	fragmentShaderSource = `
     #version 130
-    in vec4 fill_color;
+    in vec2 fragTexCoord;
     out vec4 frag_colour;
+    uniform sampler2D tex;
+    
     void main() {
-        frag_colour = fill_color;
+        vec4 color = texture(tex, fragTexCoord);
+        if(color.a < 0.01)
+            discard;
+
+        frag_colour = color;
     }
 ` + "\x00"
 )
-
-func square(size fyne.Size, pos fyne.Position, full fyne.Size) []float32 {
-	xPos := float32(pos.X) / float32(full.Width)
-	x1 := -1 + xPos*2
-	x2Pos := float32(pos.X+size.Width) / float32(full.Width)
-	x2 := -1 + x2Pos*2
-
-	yPos := float32(pos.Y) / float32(full.Height)
-	y1 := 1 - yPos*2
-	y2Pos := float32(pos.Y+size.Height) / float32(full.Height)
-	y2 := 1 - y2Pos*2
-
-	return []float32{
-		x1, y1, 0,
-		x1, y2, 0,
-		x2, y2, 0,
-
-		x1, y1, 0,
-		x2, y1, 0,
-		x2, y2, 0,
-	}
-}
 
 func (d *gLDriver) initOpenGL() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
@@ -124,38 +118,110 @@ func (d *gLDriver) initOpenGL() {
 	d.program = prog
 }
 
-// makeVao initializes and returns a vertex array from the points provided.
-func (c *glCanvas) makeVao(points []float32, fill color.Color) uint32 {
+// rectCoords calculates the openGL coordinate space of a rectangle
+func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position) []float32 {
+	xPos := float32(pos.X) / float32(c.Size().Width)
+	x1 := -1 + xPos*2
+	x2Pos := float32(pos.X+size.Width) / float32(c.Size().Width)
+	x2 := -1 + x2Pos*2
+
+	yPos := float32(pos.Y) / float32(c.Size().Height)
+	y1 := 1 - yPos*2
+	y2Pos := float32(pos.Y+size.Height) / float32(c.Size().Height)
+	y2 := 1 - y2Pos*2
+
+	return []float32{
+		// coord x, y, x texture x, y
+		x1, y2, 0, 0.0, 1.0, // top left
+		x1, y1, 0, 0.0, 0.0, // bottom left
+		x2, y2, 0, 1.0, 1.0, // top right
+		x2, y1, 0, 1.0, 0.0, // bottom right
+	}
+}
+
+// textureForPoints initializes a vertex array and prepares a texture to draw on it
+func (c *glCanvas) textureForPoints(points []float32) {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
-
-	r, g, b, a := fill.RGBA()
-	loc := gl.GetUniformLocation(c.program, gl.Str("obj_fill_color\x00"))
-	gl.Uniform4f(loc, float32(uint8(r))/255,
-		float32(uint8(g))/255, float32(uint8(b))/255, float32(uint8(a))/255)
 
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
 	gl.EnableVertexAttribArray(0)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 5*4, nil)
 
-	return vao
-}
+	textureUniform := gl.GetUniformLocation(c.program, gl.Str("tex\x00"))
+	gl.Uniform1i(textureUniform, 0)
 
-func draw(vao uint32, len int) {
+	texCoordAttrib := uint32(gl.GetAttribLocation(c.program, gl.Str("vertTexCoord\x00")))
+	gl.EnableVertexAttribArray(texCoordAttrib)
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))
+
 	gl.BindVertexArray(vao)
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(len/3))
+
+	var texture uint32
+	gl.GenTextures(1, &texture)
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 }
 
 func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position) {
-	// Add the padding so that our calculations fit in a smaller area
-	points := square(rect.Size, pos, c.Size())
-	square := c.makeVao(points, rect.FillColor)
-	draw(square, len(points))
+	points := c.rectCoords(rect.Size, pos)
+	c.textureForPoints(points)
+
+	r, g, b, a := rect.FillColor.RGBA()
+	data := []uint8{uint8(r), uint8(g), uint8(b), uint8(a)}
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
+		gl.UNSIGNED_BYTE, gl.Ptr(data))
+
+	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
+}
+
+func (c *glCanvas) drawRawImage(img *image.RGBA, size fyne.Size, pos fyne.Position) {
+	points := c.rectCoords(size, pos)
+	c.textureForPoints(points)
+
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(img.Rect.Size().X), int32(img.Rect.Size().Y),
+		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(img.Pix))
+
+	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
+}
+
+func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position) {
+	raw := image.NewRGBA(image.Rect(0, 0, img.Size.Width, img.Size.Height))
+
+	if img.File != "" {
+		if strings.ToLower(filepath.Ext(img.File)) == ".svg" {
+			placeholderColor := &image.Uniform{color.RGBA{0, 0, 255, 255}}
+			draw.Draw(raw, raw.Bounds(), placeholderColor, image.ZP, draw.Src)
+		} else {
+			file, _ := os.Open(img.File)
+			pixels, _, err := image.Decode(file)
+
+			if err != nil {
+				log.Println("image err", err)
+
+				errColor := &image.Uniform{color.RGBA{255, 0, 0, 255}}
+				draw.Draw(raw, raw.Bounds(), errColor, image.ZP, draw.Src)
+			} else {
+				raw = image.NewRGBA(pixels.Bounds())
+
+				draw.Draw(raw, raw.Bounds(), pixels, image.ZP, draw.Src)
+			}
+		}
+	} else if img.PixelColor != nil {
+		pixels := NewPixelImage(img)
+		draw.Draw(raw, raw.Bounds(), pixels, image.ZP, draw.Src)
+	}
+
+	c.drawRawImage(raw, img.Size, pos)
 }
 
 func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position) {
@@ -163,5 +229,7 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position) {
 	switch obj := o.(type) {
 	case *canvas.Rectangle:
 		c.drawRectangle(obj, pos)
+	case *canvas.Image:
+		c.drawImage(obj, pos)
 	}
 }

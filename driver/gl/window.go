@@ -66,7 +66,7 @@ func (w *window) SetFixedSize(fixed bool) {
 	if fixed {
 		w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
 	} else {
-		w.viewport.SetSizeLimits(winWidth, winHeight, 10000, 10000)
+		w.viewport.SetSizeLimits(winWidth, winHeight, glfw.DontCare, glfw.DontCare)
 	}
 }
 

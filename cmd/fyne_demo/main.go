@@ -6,6 +6,7 @@ import "fmt"
 
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/app"
+import "github.com/fyne-io/fyne/canvas"
 import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/theme"
 import "github.com/fyne-io/fyne/dialog"
@@ -43,6 +44,9 @@ func main() {
 	entry := widget.NewEntry()
 	entry.Text = "Entry"
 
+	cv := canvas.NewImageFromResource(theme.FyneLogo())
+	cv.SetMinSize(fyne.NewSize(64, 64))
+
 	w.SetContent(widget.NewVBox(
 		widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
 			widget.NewToolbarSeparator(),
@@ -63,6 +67,8 @@ func main() {
 			widget.NewButton("Widgets", func() { Widget(app) }),
 			widget.NewButton("Form", func() { formApp(app) }),
 		),
+
+		widget.NewHBox(layout.NewSpacer(), cv, layout.NewSpacer()),
 
 		widget.NewGroup("Dialogs",
 			widget.NewButton("Info", func() {
