@@ -4,6 +4,10 @@ package gl
 
 import (
 	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/theme"
+	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font"
+	"log"
 )
 
 type gLDriver struct {
@@ -12,8 +16,30 @@ type gLDriver struct {
 	done    chan interface{}
 }
 
+// TODO for styles...
+var fontRegular *truetype.Font
+
+func fontCache() *truetype.Font {
+	if fontRegular != nil {
+		return fontRegular
+	}
+
+	loaded, err := truetype.Parse(theme.TextFont().Content())
+	if err != nil {
+		log.Println("Font error", err)
+	}
+	fontRegular = loaded
+	return fontRegular
+}
+
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
-	return fyne.NewSize(len(text)*10, size+4)
+	var opts truetype.Options
+
+	opts.Size = float64(size)
+	face := truetype.NewFace(fontCache(), &opts)
+	advance := font.MeasureString(face, text)
+
+	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
 }
 
 func (d *gLDriver) Quit() {

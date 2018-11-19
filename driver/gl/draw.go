@@ -8,6 +8,8 @@ import (
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
 	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/golang/freetype"
+	"github.com/golang/freetype/truetype"
 	"image/draw"
 	"log"
 	"os"
@@ -224,6 +226,31 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position) {
 	c.drawRawImage(raw, img.Size, pos)
 }
 
+func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position) {
+	bounds := text.MinSize()
+	width := scaleInt(c, bounds.Width)
+	height := scaleInt(c, bounds.Height)
+
+	img := image.NewRGBA(image.Rect(0, 0, width, height))
+
+	var opts truetype.Options
+	font := fontCache()
+	fontSize := float64(text.TextSize) * float64(c.Scale())
+	opts.Size = fontSize
+	face := truetype.NewFace(fontCache(), &opts)
+
+	ctx := freetype.NewContext()
+	ctx.SetDPI(72)
+	ctx.SetFont(font)
+	ctx.SetFontSize(fontSize)
+	ctx.SetClip(img.Bounds())
+	ctx.SetDst(img)
+	ctx.SetSrc(&image.Uniform{theme.TextColor()})
+
+	ctx.DrawString(text.Text, freetype.Pt(0, height+2-face.Metrics().Descent.Ceil()))
+	c.drawRawImage(img, bounds, pos)
+}
+
 func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position) {
 	pos := o.CurrentPosition().Add(offset)
 	switch obj := o.(type) {
@@ -231,5 +258,7 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position) {
 		c.drawRectangle(obj, pos)
 	case *canvas.Image:
 		c.drawImage(obj, pos)
+	case *canvas.Text:
+		c.drawText(obj, pos)
 	}
 }
