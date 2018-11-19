@@ -18,7 +18,7 @@ type window struct {
 	title    string
 
 	master     bool
-	fullscreen bool
+	fullScreen bool
 	fixedSize  bool
 
 	mouseX, mouseY float64
@@ -34,12 +34,12 @@ func (w *window) SetTitle(title string) {
 	w.SetTitle(title)
 }
 
-func (w *window) Fullscreen() bool {
-	return w.fullscreen
+func (w *window) FullScreen() bool {
+	return w.fullScreen
 }
 
-func (w *window) SetFullscreen(full bool) {
-	w.fullscreen = full
+func (w *window) SetFullScreen(full bool) {
+	w.fullScreen = full
 	monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
 	mode := monitor.GetVideoMode()
 
@@ -249,7 +249,7 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	}
 
 	ev := new(fyne.KeyEvent)
-	ev.Name = fyne.KeyName(string(char))
+	ev.Name = string(char)
 	ev.String = string(char)
 	if (mods & glfw.ModShift) != 0 {
 		ev.Modifiers |= fyne.ShiftModifier
