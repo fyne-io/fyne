@@ -1,3 +1,5 @@
+// +build !ci,gl
+
 package gl
 
 import (
