@@ -8,6 +8,7 @@ import (
 
 type gLDriver struct {
 	windows []fyne.Window
+	program uint32
 	done    chan interface{}
 }
 

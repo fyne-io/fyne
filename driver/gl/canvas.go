@@ -16,7 +16,8 @@ type glCanvas struct {
 
 	onKeyDown func(*fyne.KeyEvent)
 
-	scale float32
+	program uint32
+	scale   float32
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
@@ -108,14 +109,14 @@ func (c *glCanvas) refresh() {
 	pos := fyne.NewPos(0, 0)
 	switch co := c.content.(type) {
 	case *fyne.Container:
-		drawContainer(co, pos, c)
+		c.drawContainer(co, pos)
 	case fyne.Widget:
-		drawWidget(co, pos, c)
+		c.drawWidget(co, pos)
 	default:
-		drawObject(co, pos, c)
+		c.drawObject(co, pos)
 	}
 }
 
-func newCanvas(win *window) *glCanvas {
-	return &glCanvas{window: win, scale: 1.0}
+func newCanvas(win *window, program uint32) *glCanvas {
+	return &glCanvas{window: win, scale: 1.0, program: program}
 }

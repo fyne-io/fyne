@@ -7,33 +7,34 @@ import (
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/go-gl/gl/v3.3-core/gl"
+	"image/color"
 	"strings"
 )
 
-func drawContainer(c *fyne.Container, offset fyne.Position, canv fyne.Canvas) {
-	pos := c.Position.Add(offset)
-	for _, child := range c.Objects {
+func (c *glCanvas) drawContainer(cont *fyne.Container, offset fyne.Position) {
+	pos := cont.Position.Add(offset)
+	for _, child := range cont.Objects {
 		switch co := child.(type) {
 		case *fyne.Container:
-			drawContainer(co, pos, canv)
+			c.drawContainer(co, pos)
 		case fyne.Widget:
-			drawWidget(co, pos, canv)
+			c.drawWidget(co, pos)
 		default:
-			drawObject(co, pos, canv)
+			c.drawObject(co, pos)
 		}
 	}
 }
 
-func drawWidget(w fyne.Widget, offset fyne.Position, c fyne.Canvas) {
+func (c *glCanvas) drawWidget(w fyne.Widget, offset fyne.Position) {
 	pos := w.CurrentPosition().Add(offset)
 	for _, child := range w.Renderer().Objects() {
 		switch co := child.(type) {
 		case *fyne.Container:
-			drawContainer(co, pos, c)
+			c.drawContainer(co, pos)
 		case fyne.Widget:
-			drawWidget(co, pos, c)
+			c.drawWidget(co, pos)
 		default:
-			drawObject(co, pos, c)
+			c.drawObject(co, pos)
 		}
 	}
 }
@@ -65,16 +66,20 @@ const (
 	vertexShaderSource = `
     #version 130
     in vec3 vp;
+    uniform vec4 obj_fill_color;
+    out vec4 fill_color;
     void main() {
+        fill_color = obj_fill_color;
         gl_Position = vec4(vp, 1.0);
     }
 ` + "\x00"
 
 	fragmentShaderSource = `
     #version 130
+    in vec4 fill_color;
     out vec4 frag_colour;
     void main() {
-        frag_colour = vec4(.15, .15, .15, 1);
+        frag_colour = fill_color;
     }
 ` + "\x00"
 )
@@ -101,7 +106,7 @@ func square(size fyne.Size, pos fyne.Position, full fyne.Size) []float32 {
 	}
 }
 
-func initOpenGL() uint32 {
+func (d *gLDriver) initOpenGL() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
@@ -116,15 +121,20 @@ func initOpenGL() uint32 {
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
 
-	return prog
+	d.program = prog
 }
 
 // makeVao initializes and returns a vertex array from the points provided.
-func makeVao(points []float32) uint32 {
+func (c *glCanvas) makeVao(points []float32, fill color.Color) uint32 {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
+
+	r, g, b, a := fill.RGBA()
+	loc := gl.GetUniformLocation(c.program, gl.Str("obj_fill_color\x00"))
+	gl.Uniform4f(loc, float32(uint8(r))/255,
+		float32(uint8(g))/255, float32(uint8(b))/255, float32(uint8(a))/255)
 
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
@@ -141,17 +151,17 @@ func draw(vao uint32, len int) {
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len/3))
 }
 
-func drawRectangle(rect *canvas.Rectangle, pos fyne.Position, view fyne.Canvas) {
+func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position) {
 	// Add the padding so that our calculations fit in a smaller area
-	points := square(rect.Size, pos, view.Size())
-	square := makeVao(points)
+	points := square(rect.Size, pos, c.Size())
+	square := c.makeVao(points, rect.FillColor)
 	draw(square, len(points))
 }
 
-func drawObject(o fyne.CanvasObject, offset fyne.Position, view fyne.Canvas) {
+func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position) {
 	pos := o.CurrentPosition().Add(offset)
 	switch obj := o.(type) {
 	case *canvas.Rectangle:
-		drawRectangle(obj, pos, view)
+		c.drawRectangle(obj, pos)
 	}
 }

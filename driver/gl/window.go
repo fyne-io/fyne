@@ -287,10 +287,11 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 	if master {
 		gl.Init()
-		gl.UseProgram(initOpenGL())
+		d.initOpenGL()
+		gl.UseProgram(d.program)
 	}
 	ret := &window{viewport: win, title: title}
-	ret.canvas = newCanvas(ret)
+	ret.canvas = newCanvas(ret, d.program)
 	ret.master = master
 	d.windows = append(d.windows, ret)
 
