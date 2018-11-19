@@ -7,7 +7,7 @@ import (
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
-	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"image/draw"
@@ -74,7 +74,7 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 const (
 	vertexShaderSource = `
-    #version 130
+    #version 150
     in vec3 vp;
     in vec2 vertTexCoord;
     out vec2 fragTexCoord;
@@ -87,7 +87,7 @@ const (
 ` + "\x00"
 
 	fragmentShaderSource = `
-    #version 130
+    #version 150
     in vec2 fragTexCoord;
     out vec4 frag_colour;
     uniform sampler2D tex;

@@ -8,7 +8,7 @@ import (
 
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
-	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -277,13 +277,14 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 	// make the window hidden, we will set it up and then show it later
 	glfw.WindowHint(glfw.Visible, 0)
-	win, _ := glfw.CreateWindow(100, 100, title, nil, nil)
-	win.MakeContextCurrent()
 
-	glfw.WindowHint(glfw.ContextVersionMajor, 1)
-	glfw.WindowHint(glfw.ContextVersionMinor, 3)
+	glfw.WindowHint(glfw.ContextVersionMajor, 3)
+	glfw.WindowHint(glfw.ContextVersionMinor, 2)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+
+	win, _ := glfw.CreateWindow(100, 100, title, nil, nil)
+	win.MakeContextCurrent()
 
 	if master {
 		gl.Init()
