@@ -4,21 +4,24 @@ package gl
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	_ "image/png"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"image/draw"
-	"log"
-	"os"
-	"path/filepath"
 
-	"image"
-	"image/color"
-	_ "image/png"
-	"strings"
+	"github.com/andydotxyz/oksvg"
+	"github.com/srwiley/rasterx"
 )
 
 func (c *glCanvas) drawContainer(cont *fyne.Container, offset fyne.Position) {
@@ -201,8 +204,14 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position) {
 
 	if img.File != "" {
 		if strings.ToLower(filepath.Ext(img.File)) == ".svg" {
-			placeholderColor := &image.Uniform{color.RGBA{0, 0, 255, 255}}
-			draw.Draw(raw, raw.Bounds(), placeholderColor, image.ZP, draw.Src)
+			icon, _ := oksvg.ReadIcon(img.File)
+
+			w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
+			raw = image.NewRGBA(image.Rect(0, 0, w, h))
+			scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
+			raster := rasterx.NewDasher(w, h, scanner)
+
+			icon.Draw(raster, img.Alpha())
 		} else {
 			file, _ := os.Open(img.File)
 			pixels, _, err := image.Decode(file)
