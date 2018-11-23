@@ -127,7 +127,7 @@ func (c *glCanvas) newGlImageTexture(img *canvas.Image) uint32 {
 			}
 		}
 	} else if img.PixelColor != nil {
-		pixels := NewPixelImage(img)
+		pixels := NewPixelImage(img, c.Scale())
 		draw.Draw(raw, raw.Bounds(), pixels, image.ZP, draw.Src)
 	}
 

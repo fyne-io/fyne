@@ -10,6 +10,7 @@ import (
 
 type pixelImage struct {
 	source *canvas.Image
+	scale  float32
 }
 
 func (i *pixelImage) ColorModel() color.Model {
@@ -17,7 +18,10 @@ func (i *pixelImage) ColorModel() color.Model {
 }
 
 func (i *pixelImage) Bounds() image.Rectangle {
-	return image.Rect(0, 0, i.source.Size.Width, i.source.Size.Height)
+	width := int(float32(i.source.Size.Width) * i.scale)
+	height := int(float32(i.source.Size.Height) * i.scale)
+
+	return image.Rect(0, 0, width, height)
 }
 
 func (i *pixelImage) At(x, y int) color.Color {
@@ -25,9 +29,12 @@ func (i *pixelImage) At(x, y int) color.Color {
 		return color.Transparent
 	}
 
-	return i.source.PixelColor(x, y, i.source.Size.Width, i.source.Size.Height)
+	width := int(float32(i.source.Size.Width) * i.scale)
+	height := int(float32(i.source.Size.Height) * i.scale)
+
+	return i.source.PixelColor(x, y, width, height)
 }
 
-func NewPixelImage(source *canvas.Image) image.Image {
-	return &pixelImage{source: source}
+func NewPixelImage(source *canvas.Image, scale float32) image.Image {
+	return &pixelImage{source: source, scale: scale}
 }
