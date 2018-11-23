@@ -106,15 +106,7 @@ func (c *glCanvas) refresh() {
 		return
 	}
 
-	pos := fyne.NewPos(0, 0)
-	switch co := c.content.(type) {
-	case *fyne.Container:
-		c.drawContainer(co, pos)
-	case fyne.Widget:
-		c.drawWidget(co, pos)
-	default:
-		c.drawObject(co, pos)
-	}
+	walkObjects(c.content, fyne.NewPos(0, 0), c.drawObject)
 }
 
 func newCanvas(win *window, program uint32) *glCanvas {

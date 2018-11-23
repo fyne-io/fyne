@@ -10,31 +10,26 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-func (c *glCanvas) drawContainer(cont *fyne.Container, offset fyne.Position) {
-	pos := cont.Position.Add(offset)
-	for _, child := range cont.Objects {
-		switch co := child.(type) {
-		case *fyne.Container:
-			c.drawContainer(co, pos)
-		case fyne.Widget:
-			c.drawWidget(co, pos)
-		default:
-			c.drawObject(co, pos)
-		}
-	}
-}
+func walkObjects(obj fyne.CanvasObject, pos fyne.Position,
+	f func(object fyne.CanvasObject, pos fyne.Position)) {
 
-func (c *glCanvas) drawWidget(w fyne.Widget, offset fyne.Position) {
-	pos := w.CurrentPosition().Add(offset)
-	for _, child := range w.Renderer().Objects() {
-		switch co := child.(type) {
-		case *fyne.Container:
-			c.drawContainer(co, pos)
-		case fyne.Widget:
-			c.drawWidget(co, pos)
-		default:
-			c.drawObject(co, pos)
+	switch co := obj.(type) {
+	case *fyne.Container:
+		offset := co.Position.Add(pos)
+		f(obj, offset)
+
+		for _, child := range co.Objects {
+			walkObjects(child, offset, f)
 		}
+	case fyne.Widget:
+		offset := co.CurrentPosition().Add(pos)
+		f(obj, offset)
+
+		for _, child := range co.Renderer().Objects() {
+			walkObjects(child, offset, f)
+		}
+	default:
+		f(obj, pos)
 	}
 }
 

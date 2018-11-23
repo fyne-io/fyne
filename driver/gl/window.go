@@ -174,12 +174,36 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mouseY = ypos
 }
 
+func findMouseObj(obj fyne.CanvasObject, x, y int) fyne.CanvasObject {
+	found := obj
+	walkObjects(obj, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
+		if x < pos.X || y < pos.Y {
+			return
+		}
+
+		x2 := pos.X + walked.CurrentSize().Width
+		y2 := pos.Y + walked.CurrentSize().Height
+		if x >= x2 || y >= y2 {
+			return
+		}
+
+		switch walked.(type) {
+		case fyne.ClickableObject:
+			found = walked
+		case fyne.FocusableObject:
+			found = walked
+		}
+	})
+
+	return found
+}
+
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 	current := w.canvas
-	co := w.canvas.content // TODO find correct object
 
 	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
 	pos = pos.Subtract(fyne.NewPos(theme.Padding(), theme.Padding())) // TODO within parent
+	co := findMouseObj(w.canvas.content, pos.X, pos.Y)
 
 	ev := new(fyne.MouseEvent)
 	ev.Position = pos
@@ -194,7 +218,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 
 	switch w := co.(type) {
 	case fyne.ClickableObject:
-		w.OnMouseDown(ev)
+		if action == glfw.Press {
+			w.OnMouseDown(ev)
+		}
 	case fyne.FocusableObject:
 		current.Focus(w)
 	}
