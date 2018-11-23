@@ -15,7 +15,7 @@ func init() {
 }
 
 func (d *gLDriver) runGL() {
-	fps := time.NewTicker(time.Second / 60)
+	fps := time.NewTicker(time.Second / 6) /// 60)
 
 	for {
 		select {

@@ -3,25 +3,11 @@
 package gl
 
 import (
-	"fmt"
-	"image"
-	"image/color"
-	"image/draw"
 	_ "image/png"
-	"log"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
-
-	"github.com/andydotxyz/oksvg"
-	"github.com/srwiley/rasterx"
 )
 
 func (c *glCanvas) drawContainer(cont *fyne.Container, offset fyne.Position) {
@@ -52,78 +38,6 @@ func (c *glCanvas) drawWidget(w fyne.Widget, offset fyne.Position) {
 	}
 }
 
-func compileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	csources, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csources, nil)
-	free()
-	gl.CompileShader(shader)
-
-	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		info := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(info))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, info)
-	}
-
-	return shader, nil
-}
-
-const (
-	vertexShaderSource = `
-    #version 150
-    in vec3 vert;
-    in vec2 vertTexCoord;
-    out vec2 fragTexCoord;
-
-    void main() {
-        fragTexCoord = vertTexCoord;
-
-        gl_Position = vec4(vert, 1);
-    }
-` + "\x00"
-
-	fragmentShaderSource = `
-    #version 150
-    uniform sampler2D tex;
-
-    in vec2 fragTexCoord;
-    out vec4 frag_colour;
-    
-    void main() {
-        vec4 color = texture(tex, fragTexCoord);
-        if(color.a < 0.01)
-            discard;
-
-        frag_colour = color;
-    }
-` + "\x00"
-)
-
-func (d *gLDriver) initOpenGL() {
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		panic(err)
-	}
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		panic(err)
-	}
-
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(prog)
-
-	d.program = prog
-}
-
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position) []float32 {
 	xPos := float32(pos.X) / float32(c.Size().Width)
@@ -136,28 +50,23 @@ func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position) []float32 {
 	y2Pos := float32(pos.Y+size.Height) / float32(c.Size().Height)
 	y2 := 1 - y2Pos*2
 
-	return []float32{
+	points := []float32{
 		// coord x, y, x texture x, y
 		x1, y2, 0, 0.0, 1.0, // top left
 		x1, y1, 0, 0.0, 0.0, // bottom left
 		x2, y2, 0, 1.0, 1.0, // top right
 		x2, y1, 0, 1.0, 0.0, // bottom right
 	}
-}
-
-// textureForPoints initializes a vertex array and prepares a texture to draw on it
-func (c *glCanvas) textureForPoints(points []float32) {
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
 	gl.EnableVertexAttribArray(0)
+
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 5*4, nil)
+	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 
 	textureUniform := gl.GetUniformLocation(c.program, gl.Str("tex\x00"))
 	gl.Uniform1i(textureUniform, 0)
@@ -166,104 +75,46 @@ func (c *glCanvas) textureForPoints(points []float32) {
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
 
-
 	texCoordAttrib := uint32(gl.GetAttribLocation(c.program, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))
 
-	gl.BindVertexArray(vao)
+	return points
+}
 
-	var texture uint32
-	gl.GenTextures(1, &texture)
+func (c *glCanvas) drawTexture(texture uint32, points []float32) {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
 }
 
 func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position) {
 	points := c.rectCoords(rect.Size, pos)
-	c.textureForPoints(points)
+	texture := getTexture(rect, c.newGlRectTexture)
 
-	r, g, b, a := rect.FillColor.RGBA()
-	data := []uint8{uint8(r), uint8(g), uint8(b), uint8(a)}
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
-		gl.UNSIGNED_BYTE, gl.Ptr(data))
-
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
-}
-
-func (c *glCanvas) drawRawImage(img *image.RGBA, size fyne.Size, pos fyne.Position) {
-	points := c.rectCoords(size, pos)
-	c.textureForPoints(points)
-
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(img.Rect.Size().X), int32(img.Rect.Size().Y),
-		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(img.Pix))
-
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
+	c.drawTexture(texture, points)
 }
 
 func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position) {
-	raw := image.NewRGBA(image.Rect(0, 0, img.Size.Width, img.Size.Height))
-
-	if img.File != "" {
-		if strings.ToLower(filepath.Ext(img.File)) == ".svg" {
-			icon, _ := oksvg.ReadIcon(img.File)
-
-			w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
-			raw = image.NewRGBA(image.Rect(0, 0, w, h))
-			scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
-			raster := rasterx.NewDasher(w, h, scanner)
-
-			icon.Draw(raster, img.Alpha())
-		} else {
-			file, _ := os.Open(img.File)
-			pixels, _, err := image.Decode(file)
-
-			if err != nil {
-				log.Println("image err", err)
-
-				errColor := &image.Uniform{color.RGBA{255, 0, 0, 255}}
-				draw.Draw(raw, raw.Bounds(), errColor, image.ZP, draw.Src)
-			} else {
-				raw = image.NewRGBA(pixels.Bounds())
-
-				draw.Draw(raw, raw.Bounds(), pixels, image.ZP, draw.Src)
-			}
-		}
-	} else if img.PixelColor != nil {
-		pixels := NewPixelImage(img)
-		draw.Draw(raw, raw.Bounds(), pixels, image.ZP, draw.Src)
+	points := c.rectCoords(img.Size, pos)
+	texture := c.newGlImageTexture(img)
+	if texture == 0 {
+		return
 	}
 
-	c.drawRawImage(raw, img.Size, pos)
+	c.drawTexture(texture, points)
 }
 
 func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position) {
-	bounds := text.MinSize()
-	width := scaleInt(c, bounds.Width)
-	height := scaleInt(c, bounds.Height)
+	if text.Text == "" {
+		return
+	}
 
-	img := image.NewRGBA(image.Rect(0, 0, width, height))
+	points := c.rectCoords(text.MinSize(), pos)
+	texture := c.newGlTextTexture(text)
 
-	var opts truetype.Options
-	font := fontCache()
-	fontSize := float64(text.TextSize) * float64(c.Scale())
-	opts.Size = fontSize
-	face := truetype.NewFace(fontCache(), &opts)
-
-	ctx := freetype.NewContext()
-	ctx.SetDPI(72)
-	ctx.SetFont(font)
-	ctx.SetFontSize(fontSize)
-	ctx.SetClip(img.Bounds())
-	ctx.SetDst(img)
-	ctx.SetSrc(&image.Uniform{theme.TextColor()})
-
-	ctx.DrawString(text.Text, freetype.Pt(0, height+2-face.Metrics().Descent.Ceil()))
-	c.drawRawImage(img, bounds, pos)
+	c.drawTexture(texture, points)
 }
 
 func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position) {
