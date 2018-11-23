@@ -288,6 +288,8 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 	if master {
 		gl.Init()
+		gl.Disable(gl.DEPTH_TEST)
+
 		d.initOpenGL()
 		gl.UseProgram(d.program)
 	}

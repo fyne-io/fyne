@@ -78,22 +78,23 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 const (
 	vertexShaderSource = `
     #version 150
-    in vec3 vp;
+    in vec3 vert;
     in vec2 vertTexCoord;
     out vec2 fragTexCoord;
 
     void main() {
         fragTexCoord = vertTexCoord;
 
-        gl_Position = vec4(vp, 1.0);
+        gl_Position = vec4(vert, 1);
     }
 ` + "\x00"
 
 	fragmentShaderSource = `
     #version 150
+    uniform sampler2D tex;
+
     in vec2 fragTexCoord;
     out vec4 frag_colour;
-    uniform sampler2D tex;
     
     void main() {
         vec4 color = texture(tex, fragTexCoord);
@@ -160,6 +161,11 @@ func (c *glCanvas) textureForPoints(points []float32) {
 
 	textureUniform := gl.GetUniformLocation(c.program, gl.Str("tex\x00"))
 	gl.Uniform1i(textureUniform, 0)
+
+	vertAttrib := uint32(gl.GetAttribLocation(c.program, gl.Str("vert\x00")))
+	gl.EnableVertexAttribArray(vertAttrib)
+	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
+
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(c.program, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
