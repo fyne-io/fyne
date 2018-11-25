@@ -61,6 +61,8 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 
 func (c *glCanvas) newGlTextTexture(text fyne.CanvasObject) uint32 {
 	texture := newTexture()
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	bounds := text.MinSize()
 	width := scaleInt(c, bounds.Width)
@@ -92,6 +94,8 @@ func (c *glCanvas) newGlTextTexture(text fyne.CanvasObject) uint32 {
 
 func (c *glCanvas) newGlImageTexture(img *canvas.Image) uint32 {
 	texture := newTexture()
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	width := scaleInt(c, img.Size.Width)
 	height := scaleInt(c, img.Size.Height)
