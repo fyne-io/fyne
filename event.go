@@ -4,7 +4,7 @@ package fyne
 type KeyEvent struct {
 	String string
 
-	Name      string
+	Name      KeyName
 	Modifiers Modifier
 }
 

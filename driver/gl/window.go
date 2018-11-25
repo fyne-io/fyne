@@ -242,22 +242,106 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 }
 
-func keyToName(key glfw.Key) string {
+func keyToName(key glfw.Key) fyne.KeyName {
 	switch key {
+	// printable
+	case glfw.KeySpace:
+		return fyne.KeySpace
+
+	// non-printable
+	case glfw.KeyEscape:
+		return fyne.KeyEscape
+	case glfw.KeyEnter:
+		return fyne.KeyReturn
+	case glfw.KeyTab:
+		return fyne.KeyTab
+	case glfw.KeyBackspace:
+		return fyne.KeyBackspace
+	case glfw.KeyInsert:
+		return fyne.KeyInsert
+	case glfw.KeyDelete:
+		return fyne.KeyDelete
 	case glfw.KeyRight:
-		return "Right"
+		return fyne.KeyRight
 	case glfw.KeyLeft:
-		return "Left"
-	case glfw.KeyUp:
-		return "Up"
+		return fyne.KeyLeft
 	case glfw.KeyDown:
-		return "Down"
+		return fyne.KeyDown
+	case glfw.KeyUp:
+		return fyne.KeyUp
+	case glfw.KeyPageUp:
+		return fyne.KeyPageUp
+	case glfw.KeyPageDown:
+		return fyne.KeyPageDown
+	case glfw.KeyHome:
+		return fyne.KeyHome
+	case glfw.KeyEnd:
+		return fyne.KeyEnd
+
+	case glfw.KeyF1:
+		return fyne.KeyF1
+	case glfw.KeyF2:
+		return fyne.KeyF2
+	case glfw.KeyF3:
+		return fyne.KeyF3
+	case glfw.KeyF4:
+		return fyne.KeyF4
+	case glfw.KeyF5:
+		return fyne.KeyF5
+	case glfw.KeyF6:
+		return fyne.KeyF6
+	case glfw.KeyF7:
+		return fyne.KeyF7
+	case glfw.KeyF8:
+		return fyne.KeyF8
+	case glfw.KeyF9:
+		return fyne.KeyF9
+	case glfw.KeyF10:
+		return fyne.KeyF10
+	case glfw.KeyF11:
+		return fyne.KeyF11
+	case glfw.KeyF12:
+		return fyne.KeyF12
+
+	case glfw.KeyLeftShift:
+		fallthrough
+	case glfw.KeyRightShift:
+		return fyne.KeyShift
+	case glfw.KeyLeftControl:
+		fallthrough
+	case glfw.KeyRightControl:
+		return fyne.KeyControl
+	case glfw.KeyLeftAlt:
+		fallthrough
+	case glfw.KeyRightAlt:
+		return fyne.KeyAlt
+	case glfw.KeyLeftSuper:
+		fallthrough
+	case glfw.KeyRightSuper:
+		return fyne.KeySuper
+	case glfw.KeyMenu:
+		return fyne.KeyMenu
+
+	case glfw.KeyKPEnter:
+		return fyne.KeyEnter
+	}
+	return ""
+}
+
+func charToName(char rune) fyne.KeyName {
+	switch char {
+	case ' ':
+		return fyne.KeySpace
+
 	}
 	return ""
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	if w.canvas.Focused() == nil && w.canvas.onKeyDown == nil {
+		return
+	}
+	if action != glfw.Press { // ignore key up
 		return
 	}
 
@@ -291,7 +375,7 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	}
 
 	ev := new(fyne.KeyEvent)
-	ev.Name = string(char)
+	ev.Name = charToName(char)
 	ev.String = string(char)
 	if (mods & glfw.ModShift) != 0 {
 		ev.Modifiers |= fyne.ShiftModifier
