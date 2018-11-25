@@ -34,15 +34,15 @@ func walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 }
 
 // rectCoords calculates the openGL coordinate space of a rectangle
-func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position) []float32 {
-	xPos := float32(pos.X) / float32(c.Size().Width)
+func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size) []float32 {
+	xPos := float32(pos.X) / float32(frame.Width)
 	x1 := -1 + xPos*2
-	x2Pos := float32(pos.X+size.Width) / float32(c.Size().Width)
+	x2Pos := float32(pos.X+size.Width) / float32(frame.Width)
 	x2 := -1 + x2Pos*2
 
-	yPos := float32(pos.Y) / float32(c.Size().Height)
+	yPos := float32(pos.Y) / float32(frame.Height)
 	y1 := 1 - yPos*2
-	y2Pos := float32(pos.Y+size.Height) / float32(c.Size().Height)
+	y2Pos := float32(pos.Y+size.Height) / float32(frame.Height)
 	y2 := 1 - y2Pos*2
 
 	points := []float32{
@@ -84,23 +84,23 @@ func (c *glCanvas) drawTexture(texture uint32, points []float32) {
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
 }
 
-func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position) {
+func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
 	if !rect.IsVisible() {
 		return
 	}
 
-	points := c.rectCoords(rect.Size, pos)
+	points := c.rectCoords(rect.Size, pos, frame)
 	texture := getTexture(rect, c.newGlRectTexture)
 
 	c.drawTexture(texture, points)
 }
 
-func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position) {
+func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
 	if !img.IsVisible() {
 		return
 	}
 
-	points := c.rectCoords(img.Size, pos)
+	points := c.rectCoords(img.Size, pos, frame)
 	texture := c.newGlImageTexture(img)
 	if texture == 0 {
 		return
@@ -109,25 +109,25 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position) {
 	c.drawTexture(texture, points)
 }
 
-func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position) {
+func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
 	if !text.IsVisible() || text.Text == "" {
 		return
 	}
 
-	points := c.rectCoords(text.MinSize(), pos)
+	points := c.rectCoords(text.MinSize(), pos, frame)
 	texture := c.newGlTextTexture(text)
 
 	c.drawTexture(texture, points)
 }
 
-func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position) {
+func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame fyne.Size) {
 	pos := o.CurrentPosition().Add(offset)
 	switch obj := o.(type) {
 	case *canvas.Rectangle:
-		c.drawRectangle(obj, pos)
+		c.drawRectangle(obj, pos, frame)
 	case *canvas.Image:
-		c.drawImage(obj, pos)
+		c.drawImage(obj, pos, frame)
 	case *canvas.Text:
-		c.drawText(obj, pos)
+		c.drawText(obj, pos, frame)
 	}
 }

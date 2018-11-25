@@ -19,6 +19,8 @@ type glCanvas struct {
 
 	program uint32
 	scale   float32
+
+	dirty1, dirty2 bool
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
@@ -57,10 +59,11 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 	c.content.Resize(fyne.NewSize(width, height))
 	c.content.Move(fyne.NewPos(pad, pad))
+	c.setDirty()
 }
 
-func (c *glCanvas) Refresh(fyne.CanvasObject) {
-	// no-op
+func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
+	c.setDirty()
 }
 
 func (c *glCanvas) Contains(fyne.CanvasObject) bool {
@@ -95,14 +98,21 @@ func (c *glCanvas) Scale() float32 {
 
 func (c *glCanvas) SetScale(scale float32) {
 	c.scale = scale
+	c.setDirty()
 }
 
 func (c *glCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
 	c.onKeyDown = keyDown
 }
 
-func (c *glCanvas) refresh() {
-	// TODO check if it's really needed...
+func (c *glCanvas) paint(size fyne.Size) {
+	if c.dirty1 {
+		c.dirty1 = false
+	} else {
+		if c.dirty2 {
+			c.dirty2 = false
+		}
+	}
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -112,7 +122,20 @@ func (c *glCanvas) refresh() {
 		return
 	}
 
-	walkObjects(c.content, fyne.NewPos(0, 0), c.drawObject)
+	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
+		c.drawObject(obj, pos, size)
+	}
+	walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
+}
+
+func (c *glCanvas) setDirty() {
+	// we must set twice as it's double buffered
+	c.dirty1 = true
+	c.dirty2 = true
+}
+
+func (c *glCanvas) isDirty() bool {
+	return c.dirty1 || c.dirty2
 }
 
 func newCanvas(win *window) *glCanvas {

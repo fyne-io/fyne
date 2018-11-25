@@ -16,7 +16,7 @@ func init() {
 }
 
 func (d *gLDriver) runGL() {
-	fps := time.NewTicker(time.Second / 6) /// 60)
+	fps := time.NewTicker(time.Second / 60)
 
 	for {
 		select {
@@ -43,8 +43,17 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
+				if !canvas.isDirty() {
+					continue
+				}
 				win.(*window).fitContent()
-				canvas.refresh()
+
+				size := canvas.Size()
+				winWidth := scaleInt(canvas, size.Width)
+				winHeight := scaleInt(canvas, size.Height)
+
+				gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
+				canvas.paint(size)
 				win.(*window).viewport.SwapBuffers()
 			}
 		}

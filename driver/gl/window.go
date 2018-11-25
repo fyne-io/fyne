@@ -140,6 +140,7 @@ func (w *window) Content() fyne.CanvasObject {
 
 func (w *window) resize(size fyne.Size) {
 	w.canvas.content.Resize(size)
+	w.canvas.setDirty()
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
@@ -174,9 +175,6 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
-	w.viewport.MakeContextCurrent()
-
-	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
