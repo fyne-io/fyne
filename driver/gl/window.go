@@ -64,6 +64,12 @@ func (w *window) SetFixedSize(fixed bool) {
 
 	w.fixedSize = fixed
 
+	w.fitContent()
+}
+
+func (w *window) fitContent() {
+	w.viewport.MakeContextCurrent()
+
 	if w.canvas.content == nil {
 		return
 	}
@@ -71,7 +77,7 @@ func (w *window) SetFixedSize(fixed bool) {
 	min := w.canvas.content.MinSize()
 	winWidth := scaleInt(w.canvas, min.Width+theme.Padding())
 	winHeight := scaleInt(w.canvas, min.Height+theme.Padding())
-	if fixed {
+	if w.fixedSize {
 		w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
 	} else {
 		w.viewport.SetSizeLimits(winWidth, winHeight, glfw.DontCare, glfw.DontCare)
@@ -143,12 +149,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	min := content.MinSize()
 	w.canvas.SetScale(detectScale(w.viewport))
 
-	// Set the size of our new window
-	winWidth := scaleInt(w.canvas, min.Width+theme.Padding()*2)
-	winHeight := scaleInt(w.canvas, min.Height+theme.Padding()*2)
-	w.viewport.SetSize(winWidth, winHeight)
-
-	w.SetFixedSize(w.fixedSize)
+	w.fitContent()
 	w.resize(min)
 }
 

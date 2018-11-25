@@ -43,6 +43,7 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
+				win.(*window).fitContent()
 				canvas.refresh()
 				win.(*window).viewport.SwapBuffers()
 			}
