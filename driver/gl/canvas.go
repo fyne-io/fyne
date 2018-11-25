@@ -13,6 +13,7 @@ import (
 type glCanvas struct {
 	window  *window
 	content fyne.CanvasObject
+	focused fyne.FocusableObject
 
 	onKeyDown func(*fyne.KeyEvent)
 
@@ -63,15 +64,20 @@ func (c *glCanvas) Refresh(fyne.CanvasObject) {
 }
 
 func (c *glCanvas) Contains(fyne.CanvasObject) bool {
-	return false
+	return true
 }
 
-func (c *glCanvas) Focus(fyne.FocusableObject) {
-	// TODO focus
+func (c *glCanvas) Focus(obj fyne.FocusableObject) {
+	if c.focused != nil {
+		c.focused.(fyne.FocusableObject).OnFocusLost()
+	}
+
+	c.focused = obj
+	obj.OnFocusGained()
 }
 
 func (c *glCanvas) Focused() fyne.FocusableObject {
-	return nil // TODO get focused
+	return c.focused
 }
 
 func (c *glCanvas) Size() fyne.Size {
