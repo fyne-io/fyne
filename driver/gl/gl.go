@@ -191,7 +191,7 @@ const (
 ` + "\x00"
 )
 
-func (d *gLDriver) initOpenGL() {
+func (c *glCanvas) initOpenGL() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
@@ -206,6 +206,5 @@ func (d *gLDriver) initOpenGL() {
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
 
-	d.program = prog
-	gl.UseProgram(prog)
+	c.program = prog
 }

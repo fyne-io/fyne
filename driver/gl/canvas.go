@@ -115,6 +115,10 @@ func (c *glCanvas) refresh() {
 	walkObjects(c.content, fyne.NewPos(0, 0), c.drawObject)
 }
 
-func newCanvas(win *window, program uint32) *glCanvas {
-	return &glCanvas{window: win, scale: 1.0, program: program}
+func newCanvas(win *window) *glCanvas {
+	c := &glCanvas{window: win, scale: 1.0}
+
+	c.initOpenGL()
+
+	return c
 }

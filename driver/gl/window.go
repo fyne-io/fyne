@@ -39,6 +39,8 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
+	w.viewport.MakeContextCurrent()
+
 	w.fullScreen = full
 	monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
 	mode := monitor.GetVideoMode()
@@ -58,7 +60,13 @@ func (w *window) FixedSize() bool {
 }
 
 func (w *window) SetFixedSize(fixed bool) {
+	w.viewport.MakeContextCurrent()
+
 	w.fixedSize = fixed
+
+	if w.canvas.content == nil {
+		return
+	}
 
 	min := w.canvas.content.MinSize()
 	winWidth := scaleInt(w.canvas, min.Width+theme.Padding())
@@ -86,7 +94,9 @@ func scaleForDpi(xdpi int) float32 {
 	return float32(1.0)
 }
 
-func detectScale(_ *glfw.Window) float32 {
+func detectScale(win *glfw.Window) float32 {
+	win.MakeContextCurrent()
+
 	env := os.Getenv("FYNE_SCALE")
 	if env != "" {
 		scale, _ := strconv.ParseFloat(env, 32)
@@ -110,11 +120,9 @@ func (w *window) Hide() {
 }
 
 func (w *window) Close() {
-	w.viewport.SetShouldClose(true)
+	w.viewport.MakeContextCurrent()
 
-	if w.onClosed != nil {
-		w.onClosed()
-	}
+	w.viewport.SetShouldClose(true)
 }
 
 func (w *window) ShowAndRun() {
@@ -131,6 +139,8 @@ func (w *window) resize(size fyne.Size) {
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
+	w.viewport.MakeContextCurrent()
+
 	w.canvas.SetContent(content)
 	min := content.MinSize()
 	w.canvas.SetScale(detectScale(w.viewport))
@@ -149,11 +159,15 @@ func (w *window) Canvas() fyne.Canvas {
 }
 
 func (w *window) closed(viewport *glfw.Window) {
+	w.viewport.MakeContextCurrent()
 	viewport.SetShouldClose(true)
 
+	// trigger callbacks
 	if w.onClosed != nil {
 		w.onClosed()
 	}
+
+	viewport.Destroy()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -161,6 +175,8 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
+	w.viewport.MakeContextCurrent()
+
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
@@ -315,11 +331,9 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	if master {
 		gl.Init()
 		gl.Disable(gl.DEPTH_TEST)
-
-		d.initOpenGL()
 	}
 	ret := &window{viewport: win, title: title}
-	ret.canvas = newCanvas(ret, d.program)
+	ret.canvas = newCanvas(ret)
 	ret.master = master
 	d.windows = append(d.windows, ret)
 

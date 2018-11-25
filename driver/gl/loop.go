@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -25,13 +26,24 @@ func (d *gLDriver) runGL() {
 			return
 		case <-fps.C:
 			glfw.PollEvents()
-			for _, win := range d.windows { // TODO per window?
-				if win.(*window).viewport.ShouldClose() && win.(*window).master {
-					close(d.done)
+			for i, win := range d.windows {
+				viewport := win.(*window).viewport
+				viewport.MakeContextCurrent()
+
+				canvas := win.(*window).canvas
+				gl.UseProgram(canvas.program)
+
+				if viewport.ShouldClose() {
+					if win.(*window).master {
+						close(d.done)
+					}
+
+					// remove window from window list
+					d.windows = append(d.windows[:i], d.windows[i+1:]...)
 					continue
 				}
 
-				win.(*window).canvas.refresh()
+				canvas.refresh()
 				win.(*window).viewport.SwapBuffers()
 			}
 		}
