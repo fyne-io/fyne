@@ -120,9 +120,7 @@ func (w *window) Hide() {
 }
 
 func (w *window) Close() {
-	w.viewport.MakeContextCurrent()
-
-	w.viewport.SetShouldClose(true)
+	w.closed(w.viewport)
 }
 
 func (w *window) ShowAndRun() {
