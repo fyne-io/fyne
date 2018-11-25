@@ -85,6 +85,10 @@ func (c *glCanvas) drawTexture(texture uint32, points []float32) {
 }
 
 func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position) {
+	if !rect.IsVisible() {
+		return
+	}
+
 	points := c.rectCoords(rect.Size, pos)
 	texture := getTexture(rect, c.newGlRectTexture)
 
@@ -92,6 +96,10 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position) {
 }
 
 func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position) {
+	if !img.IsVisible() {
+		return
+	}
+
 	points := c.rectCoords(img.Size, pos)
 	texture := c.newGlImageTexture(img)
 	if texture == 0 {
@@ -102,7 +110,7 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position) {
 }
 
 func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position) {
-	if text.Text == "" {
+	if !text.IsVisible() || text.Text == "" {
 		return
 	}
 
