@@ -67,15 +67,13 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	if full {
-		runOnMain(func() {
+	runOnMain(func() {
+		if full {
 			C.ecore_evas_fullscreen_set(w.ee, 1)
-		})
-	} else {
-		runOnMain(func() {
+		} else {
 			C.ecore_evas_fullscreen_set(w.ee, 0)
-		})
-	}
+		}
+	})
 }
 
 func (w *window) FixedSize() bool {
