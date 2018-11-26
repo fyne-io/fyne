@@ -14,6 +14,11 @@ script:
   - go test -v -tags ci -race ./...
   - go vet -tags ci ./...
   - golint -set_exit_status $(go list -tags ci)
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then exit; fi'
+  - go test -tags ci -race -covermode=atomic -coverprofile=coverage.out ./...
+  - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+
+
 
 notifications:
   irc:
@@ -22,15 +27,6 @@ notifications:
     on_success: change
     template:
       - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")"
-
-jobs:
-  include:
-    - stage: test
-    - stage: "Coveralls"
-      if: env(TRAVIS_PULL_REQUEST) == false
-      script:
-        - go test -tags ci -race -covermode=atomic -coverprofile=coverage.out ./...
-        - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 env:
   global:
