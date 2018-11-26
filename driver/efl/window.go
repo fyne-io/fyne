@@ -18,13 +18,16 @@ package efl
 // void force_render();
 import "C"
 
-import "log"
-import "os"
-import "runtime"
-import "strconv"
-import "unsafe"
+import (
+	"fmt"
+	"log"
+	"os"
+	"runtime"
+	"strconv"
+	"unsafe"
 
-import "github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne"
+)
 
 type window struct {
 	ee     *C.Ecore_Evas
@@ -53,9 +56,13 @@ func (w *window) Title() string {
 }
 
 func (w *window) SetTitle(title string) {
-	cstr := C.CString(title)
-	C.ecore_evas_title_set(w.ee, cstr)
-	C.free(unsafe.Pointer(cstr))
+	fmt.Println("Set title", title)
+	runOnMain(func() {
+		cstr := C.CString(title)
+		C.ecore_evas_title_set(w.ee, cstr)
+		C.free(unsafe.Pointer(cstr))
+	})
+	fmt.Println("done set title")
 }
 
 func (w *window) FullScreen() bool {
@@ -64,9 +71,13 @@ func (w *window) FullScreen() bool {
 
 func (w *window) SetFullScreen(full bool) {
 	if full {
-		C.ecore_evas_fullscreen_set(w.ee, 1)
+		runOnMain(func() {
+			C.ecore_evas_fullscreen_set(w.ee, 1)
+		})
 	} else {
-		C.ecore_evas_fullscreen_set(w.ee, 0)
+		runOnMain(func() {
+			C.ecore_evas_fullscreen_set(w.ee, 0)
+		})
 	}
 }
 
