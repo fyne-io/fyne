@@ -19,7 +19,6 @@ package efl
 import "C"
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -56,13 +55,11 @@ func (w *window) Title() string {
 }
 
 func (w *window) SetTitle(title string) {
-	fmt.Println("Set title", title)
 	runOnMain(func() {
 		cstr := C.CString(title)
 		C.ecore_evas_title_set(w.ee, cstr)
 		C.free(unsafe.Pointer(cstr))
 	})
-	fmt.Println("done set title")
 }
 
 func (w *window) FullScreen() bool {
