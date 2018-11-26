@@ -13,6 +13,7 @@ package efl
 // void onKeyDown_cgo(Ecore_Window, void *);
 // void onExit_cgo(Ecore_Event_Signal_Exit *);
 // void setup_log();
+//
 import "C"
 
 import (
@@ -40,7 +41,7 @@ const (
 	// How many render ops to queue up
 	renderBufferSize = 1024
 	// How fast to repaint the screen
-	renderInterval = time.Second / 120
+	renderInterval = time.Second / 60
 )
 
 var (
@@ -121,10 +122,10 @@ func renderCycle() {
 		}
 		canvas.fitContent()
 		for obj := range canvas.dirty {
-			delete(canvas.dirty, obj)
-
 			canvas.doRefresh(obj)
 		}
+		// clear all the dirty for this canvas
+		canvas.dirty = make(map[fyne.CanvasObject]bool)
 	}
 }
 

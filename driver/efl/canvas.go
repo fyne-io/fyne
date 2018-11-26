@@ -434,6 +434,7 @@ func (c *eflCanvas) Focused() fyne.FocusableObject {
 	return c.focused
 }
 
+// fitContent is thread safe - its only every called from the main loop
 func (c *eflCanvas) fitContent() {
 	var w, h C.int
 	C.ecore_evas_geometry_get(c.window.ee, nil, nil, &w, &h)

@@ -40,6 +40,10 @@ func (e *entryRenderer) cursorPosition() (int, int) {
 	lineHeight := emptyTextMinSize(e.label.TextStyle).Height
 
 	str := e.label.renderer.(*labelRenderer).texts[e.entry.CursorRow].Text
+	// sanity check, as the underlying entry text can actually change
+	if e.entry.CursorColumn > len(str) {
+		e.entry.CursorColumn = len(str)
+	}
 	substr := str[0:e.entry.CursorColumn]
 	subSize := fyne.GetDriver().RenderedTextSize(substr, renderlabel.TextSize, e.label.TextStyle)
 
@@ -125,6 +129,13 @@ func (e *Entry) cursorTextPos() int {
 		pos += len(line) + 1
 	}
 	pos += e.CursorColumn
+
+	// Some sanity checks here
+	if pos > len(e.Text) {
+		pos = 0
+		e.CursorColumn = 0
+		e.CursorRow = 0
+	}
 
 	return pos
 }
