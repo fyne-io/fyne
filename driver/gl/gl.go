@@ -22,6 +22,7 @@ import (
 )
 
 var textures = make(map[fyne.CanvasObject]uint32)
+var refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
 	texture := textures[object]

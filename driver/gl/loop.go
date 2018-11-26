@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/fyne-io/fyne"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
@@ -24,6 +25,16 @@ func (d *gLDriver) runGL() {
 			fps.Stop()
 			glfw.Terminate()
 			return
+		case object := <-refreshQueue:
+			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position) {
+				texture := textures[obj]
+				if texture != 0 {
+					gl.DeleteTextures(1, &texture)
+					delete(textures, obj)
+				}
+			}
+
+			walkObjects(object, fyne.NewPos(0, 0), freeWalked)
 		case <-fps.C:
 			glfw.PollEvents()
 			for i, win := range d.windows {
