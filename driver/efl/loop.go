@@ -58,12 +58,11 @@ var (
 
 // Arrange that main.main runs on main thread.
 func init() {
-	//runtime.LockOSThread()
+	runtime.LockOSThread()
 }
 
 // runEFL runs our mainthread loop to execute UI functions for EFL
 func runEFL() {
-	runtime.LockOSThread()
 	C.setup_log()
 	C.ecore_event_handler_add(C.ECORE_EVENT_SIGNAL_EXIT, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onExit_cgo)), nil)
 	C.ecore_event_handler_add(C.ECORE_EVENT_KEY_DOWN, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onKeyDown_cgo)), nil)
@@ -147,7 +146,6 @@ func runOnMain(f func()) {
 
 	// if we are on main just execute - otherwise add it to the main queue and wait
 	if onMain {
-		fmt.Print(".")
 		f()
 	} else {
 		done := make(chan bool)
