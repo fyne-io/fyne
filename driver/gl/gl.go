@@ -12,13 +12,13 @@ import (
 	"strings"
 
 	"github.com/andydotxyz/oksvg"
+	"github.com/andydotxyz/rasterx"
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/srwiley/rasterx"
 )
 
 var textures = make(map[fyne.CanvasObject]uint32)
@@ -112,9 +112,9 @@ func (c *glCanvas) newGlImageTexture(img *canvas.Image) uint32 {
 
 				return 0
 			}
-			raw = image.NewRGBA(image.Rect(0, 0, w, h))
+			raw = image.NewRGBA(image.Rect(0, 0, width, height))
 			scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
-			raster := rasterx.NewDasher(w, h, scanner)
+			raster := rasterx.NewDasher(width, height, scanner)
 
 			icon.Draw(raster, img.Alpha())
 		} else {
