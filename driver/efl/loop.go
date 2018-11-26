@@ -13,6 +13,7 @@ package efl
 // void onKeyDown_cgo(Ecore_Window, void *);
 // void onExit_cgo(Ecore_Event_Signal_Exit *);
 // void setup_log();
+//
 import "C"
 
 import (
@@ -40,7 +41,7 @@ const (
 	// How many render ops to queue up
 	renderBufferSize = 1024
 	// How fast to repaint the screen
-	renderInterval = time.Second / 120
+	renderInterval = time.Second / 60
 )
 
 var (
@@ -57,11 +58,12 @@ var (
 
 // Arrange that main.main runs on main thread.
 func init() {
-	runtime.LockOSThread()
+	//runtime.LockOSThread()
 }
 
 // runEFL runs our mainthread loop to execute UI functions for EFL
 func runEFL() {
+	runtime.LockOSThread()
 	C.setup_log()
 	C.ecore_event_handler_add(C.ECORE_EVENT_SIGNAL_EXIT, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onExit_cgo)), nil)
 	C.ecore_event_handler_add(C.ECORE_EVENT_KEY_DOWN, (C.Ecore_Event_Handler_Cb)(unsafe.Pointer(C.onKeyDown_cgo)), nil)
@@ -79,6 +81,7 @@ func runEFL() {
 		case data := <-renderQueue:
 			data.c.dirty[data.co] = true
 		case <-tick.C:
+			//onMain = C.eina_main_loop_is()
 			renderCycle()
 			C.ecore_main_loop_iterate()
 		}
@@ -121,10 +124,10 @@ func renderCycle() {
 		}
 		canvas.fitContent()
 		for obj := range canvas.dirty {
-			delete(canvas.dirty, obj)
-
 			canvas.doRefresh(obj)
 		}
+		// clear all the dirty for this canvas
+		canvas.dirty = make(map[fyne.CanvasObject]bool)
 	}
 }
 
@@ -144,6 +147,7 @@ func runOnMain(f func()) {
 
 	// if we are on main just execute - otherwise add it to the main queue and wait
 	if onMain {
+		fmt.Print(".")
 		f()
 	} else {
 		done := make(chan bool)
