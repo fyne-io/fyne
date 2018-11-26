@@ -80,7 +80,6 @@ func runEFL() {
 		case data := <-renderQueue:
 			data.c.dirty[data.co] = true
 		case <-tick.C:
-			//onMain = C.eina_main_loop_is()
 			renderCycle()
 			C.ecore_main_loop_iterate()
 		}
