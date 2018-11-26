@@ -168,7 +168,7 @@ func (e *Entry) Focused() bool {
 
 // OnKeyDown receives key input events when the Entry widget is focused.
 func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
-	if key.Name == "BackSpace" {
+	if key.Name == fyne.KeyBackspace {
 		if len(e.Text) == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
 			return
 		}
@@ -187,7 +187,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		}
 
 		e.SetText(substr)
-	} else if key.Name == "Delete" {
+	} else if key.Name == fyne.KeyDelete {
 		texts := e.label().renderer.(*labelRenderer).texts
 		if len(e.Text) == 0 || (e.CursorRow == len(texts)-1 && e.CursorColumn == len(texts[e.CursorRow].Text)) {
 			return
@@ -198,12 +198,12 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		substr := fmt.Sprintf("%s%s", string(runes[:pos]), string(runes[pos+1:]))
 
 		e.SetText(substr)
-	} else if key.Name == "Return" {
+	} else if key.Name == fyne.KeyReturn {
 		e.insertAtCursor("\n")
 
 		e.CursorColumn = 0
 		e.CursorRow++
-	} else if key.Name == "Up" {
+	} else if key.Name == fyne.KeyUp {
 		if e.CursorRow > 0 {
 			e.CursorRow--
 		}
@@ -211,7 +211,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		if e.CursorColumn > e.label().RowLength(e.CursorRow) {
 			e.CursorColumn = e.label().RowLength(e.CursorRow)
 		}
-	} else if key.Name == "Down" {
+	} else if key.Name == fyne.KeyDown {
 		if e.CursorRow < e.label().Rows()-1 {
 			e.CursorRow++
 		}
@@ -219,14 +219,14 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		if e.CursorColumn > e.label().RowLength(e.CursorRow) {
 			e.CursorColumn = e.label().RowLength(e.CursorRow)
 		}
-	} else if key.Name == "Left" {
+	} else if key.Name == fyne.KeyLeft {
 		if e.CursorColumn > 0 {
 			e.CursorColumn--
 		} else if e.CursorRow > 0 {
 			e.CursorRow--
 			e.CursorColumn = e.label().RowLength(e.CursorRow)
 		}
-	} else if key.Name == "Right" {
+	} else if key.Name == fyne.KeyRight {
 		if e.CursorColumn < e.label().RowLength(e.CursorRow) {
 			e.CursorColumn++
 		} else if e.CursorRow < e.label().Rows()-1 {

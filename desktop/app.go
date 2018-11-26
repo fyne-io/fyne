@@ -1,4 +1,4 @@
-// +build !ci
+// +build !ci,!gl
 
 // Package desktop is a legacy package which provided a an EFL based driver.
 // This supports Windows, Mac OS X and Linux using the EFL (Evas) render pipeline.

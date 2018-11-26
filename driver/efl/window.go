@@ -260,8 +260,28 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 
 	ev := new(fyne.KeyEvent)
 	ev.String = C.GoString(info.string)
-	ev.Name = C.GoString(info.keyname)
-	ev.Code = fyne.KeyCode(int(info.keycode))
+	switch C.GoString(info.keyname) {
+	case "Shift_L":
+		fallthrough
+	case "Shift_R":
+		ev.Name = fyne.KeyShift
+	case "Control_L":
+		fallthrough
+	case "Control_R":
+		ev.Name = fyne.KeyControl
+	case "Alt_L":
+		fallthrough
+	case "Alt_R":
+		ev.Name = fyne.KeyAlt
+	case "Super_L":
+		fallthrough
+	case "Super_R":
+		ev.Name = fyne.KeySuper
+
+	default:
+		ev.Name = fyne.KeyName(C.GoString(info.keyname))
+	}
+
 	if (info.modifiers & C.ECORE_EVENT_MODIFIER_SHIFT) != 0 {
 		ev.Modifiers |= fyne.ShiftModifier
 	}
