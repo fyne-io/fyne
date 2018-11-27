@@ -39,8 +39,6 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	w.viewport.MakeContextCurrent()
-
 	w.fullScreen = full
 	monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
 	mode := monitor.GetVideoMode()
@@ -60,16 +58,12 @@ func (w *window) FixedSize() bool {
 }
 
 func (w *window) SetFixedSize(fixed bool) {
-	w.viewport.MakeContextCurrent()
-
 	w.fixedSize = fixed
 
 	w.fitContent()
 }
 
 func (w *window) fitContent() {
-	w.viewport.MakeContextCurrent()
-
 	if w.canvas.content == nil {
 		return
 	}
@@ -101,8 +95,6 @@ func scaleForDpi(xdpi int) float32 {
 }
 
 func detectScale(win *glfw.Window) float32 {
-	win.MakeContextCurrent()
-
 	env := os.Getenv("FYNE_SCALE")
 	if env != "" {
 		scale, _ := strconv.ParseFloat(env, 32)
@@ -144,8 +136,6 @@ func (w *window) resize(size fyne.Size) {
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
-	w.viewport.MakeContextCurrent()
-
 	w.canvas.SetContent(content)
 	min := content.MinSize()
 	w.canvas.SetScale(detectScale(w.viewport))
@@ -159,7 +149,6 @@ func (w *window) Canvas() fyne.Canvas {
 }
 
 func (w *window) closed(viewport *glfw.Window) {
-	w.viewport.MakeContextCurrent()
 	viewport.SetShouldClose(true)
 
 	// trigger callbacks
@@ -426,6 +415,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	win.SetMouseButtonCallback(ret.mouseClicked)
 	win.SetKeyCallback(ret.keyPressed)
 	win.SetCharModsCallback(ret.charModInput)
+	glfw.DetachCurrentContext()
 	return ret
 }
 

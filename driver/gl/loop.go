@@ -51,10 +51,12 @@ func (d *gLDriver) runGL() {
 
 					// remove window from window list
 					d.windows = append(d.windows[:i], d.windows[i+1:]...)
+					glfw.DetachCurrentContext()
 					continue
 				}
 
 				if !canvas.isDirty() {
+					glfw.DetachCurrentContext()
 					continue
 				}
 				win.(*window).fitContent()
@@ -65,7 +67,9 @@ func (d *gLDriver) runGL() {
 
 				gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
 				canvas.paint(size)
+
 				win.(*window).viewport.SwapBuffers()
+				glfw.DetachCurrentContext()
 			}
 		}
 	}
