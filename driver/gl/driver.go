@@ -33,8 +33,8 @@ func fontCache() *truetype.Font {
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	var opts truetype.Options
-
 	opts.Size = float64(size)
+
 	face := truetype.NewFace(fontCache(), &opts)
 	advance := font.MeasureString(face, text)
 

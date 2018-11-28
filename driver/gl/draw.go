@@ -118,13 +118,13 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 	containerSize := text.CurrentSize()
 	switch text.Alignment {
 	case fyne.TextAlignTrailing:
-		pos = fyne.NewPos(pos.X + containerSize.Width - size.Width, pos.Y)
+		pos = fyne.NewPos(pos.X+containerSize.Width-size.Width, pos.Y)
 	case fyne.TextAlignCenter:
-		pos = fyne.NewPos(pos.X + (containerSize.Width - size.Width)/2, pos.Y)
+		pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
 	}
 
 	if text.CurrentSize().Height > text.MinSize().Height {
-		pos = fyne.NewPos(pos.X, pos.Y + (text.CurrentSize().Height-text.MinSize().Height)/2)
+		pos = fyne.NewPos(pos.X, pos.Y+(text.CurrentSize().Height-text.MinSize().Height)/2)
 	}
 
 	points := c.rectCoords(size, pos, frame)
