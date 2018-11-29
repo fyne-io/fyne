@@ -1,7 +1,10 @@
 // Package test provides utility drivers for running UI tests without rendering
 package test
 
-import "github.com/fyne-io/fyne"
+import (
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/theme"
+)
 
 // ensure we have a dummy app loaded and ready to test
 func init() {
@@ -10,6 +13,14 @@ func init() {
 
 type testApp struct {
 	driver *testDriver
+}
+
+func (a *testApp) Icon() fyne.Resource {
+	return theme.FyneLogo()
+}
+
+func (a *testApp) SetIcon(fyne.Resource) {
+	// no-op
 }
 
 func (a *testApp) NewWindow(title string) fyne.Window {

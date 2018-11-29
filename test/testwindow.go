@@ -37,6 +37,14 @@ func (w *testWindow) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 }
 
+func (w *testWindow) Icon() fyne.Resource {
+	return fyne.CurrentApp().Icon()
+}
+
+func (w *testWindow) SetIcon(icon fyne.Resource) {
+	// no-op
+}
+
 func (w *testWindow) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }

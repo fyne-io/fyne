@@ -3,6 +3,9 @@
 package gl
 
 import (
+	"bytes"
+	"image"
+	_ "image/png" // for the icon
 	"os"
 	"strconv"
 
@@ -16,6 +19,7 @@ type window struct {
 	viewport *glfw.Window
 	canvas   *glCanvas
 	title    string
+	icon     fyne.Resource
 
 	master     bool
 	fullScreen bool
@@ -61,6 +65,18 @@ func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
 
 	w.fitContent()
+}
+
+func (w *window) Icon() fyne.Resource {
+	if w.icon == nil {
+		return fyne.CurrentApp().Icon()
+	}
+
+	return w.icon
+}
+
+func (w *window) SetIcon(icon fyne.Resource) {
+	w.icon = icon
 }
 
 func (w *window) fitContent() {
@@ -397,6 +413,12 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 	win, _ := glfw.CreateWindow(100, 100, title, nil, nil)
 	win.MakeContextCurrent()
+
+	iconRes := fyne.CurrentApp().Icon()
+	if iconRes != nil {
+		icon, _, _ := image.Decode(bytes.NewReader(iconRes.Content()))
+		win.SetIcon([]image.Image{icon})
+	}
 
 	if master {
 		gl.Init()

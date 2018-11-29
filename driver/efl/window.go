@@ -31,6 +31,7 @@ import (
 type window struct {
 	ee     *C.Ecore_Evas
 	canvas fyne.Canvas
+	icon   fyne.Resource
 
 	master    bool
 	focused   bool
@@ -82,6 +83,18 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
+}
+
+func (w *window) Icon() fyne.Resource {
+	if w.icon == nil {
+		return fyne.CurrentApp().Icon()
+	}
+
+	return w.icon
+}
+
+func (w *window) SetIcon(icon fyne.Resource) {
+	w.icon = icon
 }
 
 func (w *window) SetOnClosed(closed func()) {

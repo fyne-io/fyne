@@ -21,6 +21,14 @@ type Window interface {
 	// size or allow resizing.
 	SetFixedSize(bool)
 
+	// Icon returns the window icon, this is used in various ways depending on operating system.
+	// Most commonly this is displayed on the window border or task switcher
+	Icon() Resource
+
+	// SetIcon sets the icon resource used for this window.
+	// If none is set should return the application icon.
+	SetIcon(Resource)
+
 	SetOnClosed(func())
 
 	// Show the window on screen
