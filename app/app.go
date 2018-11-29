@@ -23,6 +23,10 @@ func (app *fyneApp) Quit() {
 	app.driver.Quit()
 }
 
+func (app *fyneApp) Driver() fyne.Driver {
+	return app.driver
+}
+
 func (app *fyneApp) applyTheme(fyne.Settings) {
 	for _, window := range app.driver.AllWindows() {
 		content := window.Content()
@@ -40,9 +44,8 @@ func (app *fyneApp) applyTheme(fyne.Settings) {
 // As this package has no default driver one must be provided.
 // Helpers are available - see desktop.NewApp() and test.NewApp().
 func NewAppWithDriver(d fyne.Driver) fyne.App {
-	newApp := &fyneApp{}
-	newApp.driver = d
-	fyne.SetDriver(d)
+	newApp := &fyneApp{driver: d}
+	fyne.SetCurrentApp(newApp)
 
 	listener := make(chan fyne.Settings)
 	fyne.GetSettings().AddChangeListener(listener)

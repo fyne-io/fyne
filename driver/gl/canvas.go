@@ -67,10 +67,6 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 	c.setDirty()
 }
 
-func (c *glCanvas) Contains(fyne.CanvasObject) bool {
-	return true
-}
-
 func (c *glCanvas) Focus(obj fyne.FocusableObject) {
 	if c.focused != nil {
 		c.focused.(fyne.FocusableObject).OnFocusLost()

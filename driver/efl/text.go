@@ -65,10 +65,10 @@ func nativeTextBounds(obj *C.Evas_Object) fyne.Size {
 }
 
 func (d *eFLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
-	if len(fyne.GetDriver().AllWindows()) == 0 {
+	if len(d.AllWindows()) == 0 {
 		return fyne.NewSize(0, 0)
 	}
-	c := fyne.GetDriver().AllWindows()[0].Canvas().(*eflCanvas)
+	c := d.AllWindows()[0].Canvas().(*eflCanvas)
 	var native fyne.Size
 
 	runOnMain(func() {

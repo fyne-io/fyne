@@ -41,7 +41,7 @@ func (t *Text) Move(pos fyne.Position) {
 // MinSize returns the minimum size of this text objet based on it's font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
-	return fyne.GetDriver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle)
+	return fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle)
 }
 
 // NewText returns a new Text implementation

@@ -413,10 +413,6 @@ func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 	}
 }
 
-func (c *eflCanvas) Contains(obj fyne.CanvasObject) bool {
-	return c.native[obj] != nil
-}
-
 func (c *eflCanvas) Focus(obj fyne.FocusableObject) {
 	if c.focused != nil {
 		if c.focused == obj {

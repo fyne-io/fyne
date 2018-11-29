@@ -15,6 +15,19 @@ type gLDriver struct {
 	done    chan interface{}
 }
 
+func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+	var found fyne.Canvas
+	for _, win := range d.windows {
+		walkObjects(win.Content(), fyne.NewPos(0, 0),
+			func(child fyne.CanvasObject, _ fyne.Position) {
+				if child == obj {
+					found = win.Canvas()
+				}
+			})
+	}
+	return found
+}
+
 // TODO for styles...
 var fontRegular *truetype.Font
 

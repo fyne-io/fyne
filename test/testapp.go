@@ -9,6 +9,7 @@ func init() {
 }
 
 type testApp struct {
+	driver *testDriver
 }
 
 func (a *testApp) NewWindow(title string) fyne.Window {
@@ -28,7 +29,7 @@ func (a *testApp) Quit() {
 }
 
 func (a *testApp) applyTheme(fyne.Settings) {
-	for _, window := range fyne.GetDriver().AllWindows() {
+	for _, window := range a.driver.AllWindows() {
 		content := window.Content()
 
 		switch themed := content.(type) {
@@ -39,11 +40,15 @@ func (a *testApp) applyTheme(fyne.Settings) {
 	}
 }
 
+func (a *testApp) Driver() fyne.Driver {
+	return a.driver
+}
+
 // NewApp returns a new dummy app used for testing..
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
-	test := &testApp{}
-	fyne.SetDriver(NewTestDriver())
+	test := &testApp{driver: NewTestDriver().(*testDriver)}
+	fyne.SetCurrentApp(test)
 
 	listener := make(chan fyne.Settings)
 	fyne.GetSettings().AddChangeListener(listener)

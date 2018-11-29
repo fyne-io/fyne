@@ -22,4 +22,20 @@ type App interface {
 	// Calling Quit on the application will cause the application to exit
 	// cleanly, closing all open windows.
 	Quit()
+
+	// Driver returns the driver that is rendering this application.
+	// Typically not needed for day to day work, mostly internal functionality.
+	Driver() Driver
+}
+
+var app App
+
+// SetCurrentApp is an internal function to set the app instance currently running
+func SetCurrentApp(current App) {
+	app = current
+}
+
+// CurrentApp returns the current application, for which there is only 1 per process.
+func CurrentApp() App {
+	return app
 }

@@ -19,6 +19,17 @@ const (
 type eFLDriver struct {
 }
 
+func (d *eFLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+	for _, win := range windows {
+		canv := win.canvas.(*eflCanvas)
+		if canv.native[obj] != nil {
+			return canv
+		}
+	}
+
+	return nil
+}
+
 func (d *eFLDriver) Run() {
 	runEFL()
 }

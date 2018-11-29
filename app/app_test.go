@@ -14,6 +14,10 @@ func TestDummyApp(t *testing.T) {
 type dummyDriver struct {
 }
 
+func (d *dummyDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
+	return nil
+}
+
 func (d *dummyDriver) CreateWindow(string) fyne.Window {
 	return nil
 }

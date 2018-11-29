@@ -20,10 +20,6 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 func (c *testCanvas) Refresh(fyne.CanvasObject) {
 }
 
-func (c *testCanvas) Contains(fyne.CanvasObject) bool {
-	return true
-}
-
 func (c *testCanvas) Focus(obj fyne.FocusableObject) {
 	c.focused = obj
 	obj.OnFocusGained()

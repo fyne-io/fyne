@@ -106,7 +106,7 @@ func onLogCallback(domain *C.char, level int, file *C.char, num int, message *C.
 // DoQuit will cause the driver's Quit method to be called to terminate the app
 //export DoQuit
 func DoQuit() {
-	fyne.GetDriver().Quit()
+	fyne.CurrentApp().Driver().Quit()
 }
 
 // Quit will cause the render loop to end and the application to exit

@@ -10,22 +10,12 @@ type Driver interface {
 
 	// Return the size required to render the given string of specified font size and style
 	RenderedTextSize(string, int, TextStyle) Size
+
+	// Get the canvas that is associated with a given CanvasObject
+	CanvasForObject(CanvasObject) Canvas
+
 	// Start the main event loop of the driver
 	Run()
 	// Close the driver and open windows then exit the application
 	Quit()
-}
-
-var driver Driver
-
-// GetDriver returns the current render driver.
-// This is basically an internal detail - use with caution.
-func GetDriver() Driver {
-	return driver
-}
-
-// SetDriver sets the application driver.
-// This bridges internal modularity - do not call this method directly.
-func SetDriver(d Driver) {
-	driver = d
 }

@@ -6,7 +6,6 @@ type Canvas interface {
 	Content() CanvasObject
 	SetContent(CanvasObject)
 	Refresh(CanvasObject)
-	Contains(CanvasObject) bool
 	Focus(FocusableObject)
 	Focused() FocusableObject
 

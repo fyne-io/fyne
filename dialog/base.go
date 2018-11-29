@@ -88,7 +88,7 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 }
 
 func newDialogWin(title string, _ fyne.Window) fyne.Window {
-	win := fyne.GetDriver().CreateWindow(title)
+	win := fyne.CurrentApp().Driver().CreateWindow(title)
 	win.SetFixedSize(true)
 	//	win.SetParent(parent)
 

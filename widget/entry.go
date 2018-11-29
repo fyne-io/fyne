@@ -19,7 +19,14 @@ type entryRenderer struct {
 }
 
 func emptyTextMinSize(style fyne.TextStyle) fyne.Size {
-	return fyne.GetDriver().RenderedTextSize("M", theme.TextSize(), style)
+	return textMinSize("M", theme.TextSize(), style)
+}
+
+func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
+	label := canvas.NewText(text, color.Black)
+	label.TextSize = size
+	label.TextStyle = style
+	return label.MinSize()
 }
 
 // MinSize calculates the minimum size of an entry widget.
@@ -45,7 +52,7 @@ func (e *entryRenderer) cursorPosition() (int, int) {
 		e.entry.CursorColumn = len(str)
 	}
 	substr := str[0:e.entry.CursorColumn]
-	subSize := fyne.GetDriver().RenderedTextSize(substr, renderlabel.TextSize, e.label.TextStyle)
+	subSize := textMinSize(substr, renderlabel.TextSize, e.label.TextStyle)
 
 	return subSize.Width, e.entry.CursorRow * lineHeight
 }
