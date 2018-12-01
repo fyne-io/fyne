@@ -134,6 +134,7 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 }
 
 func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame fyne.Size) {
+	canvases[o] = c
 	pos := o.CurrentPosition().Add(offset)
 	switch obj := o.(type) {
 	case *canvas.Rectangle:

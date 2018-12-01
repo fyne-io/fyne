@@ -10,22 +10,15 @@ import (
 	"log"
 )
 
+var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
+
 type gLDriver struct {
 	windows []fyne.Window
 	done    chan interface{}
 }
 
 func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
-	var found fyne.Canvas
-	for _, win := range d.windows {
-		walkObjects(win.Content(), fyne.NewPos(0, 0),
-			func(child fyne.CanvasObject, _ fyne.Position) {
-				if child == obj {
-					found = win.Canvas()
-				}
-			})
-	}
-	return found
+	return canvases[obj]
 }
 
 // TODO for styles...
