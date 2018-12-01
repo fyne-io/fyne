@@ -16,6 +16,7 @@ import (
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
@@ -52,7 +53,14 @@ func newTexture() uint32 {
 func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 	texture := newTexture()
 
-	r, g, b, a := rect.(*canvas.Rectangle).FillColor.RGBA()
+	col := theme.BackgroundColor()
+	if _, ok := rect.(*widget.Toolbar); ok { // TODO don't make this a special case
+		col = theme.ButtonColor()
+	} else if _, ok := rect.(*canvas.Rectangle); ok {
+		col = rect.(*canvas.Rectangle).FillColor
+	}
+
+	r, g, b, a := col.RGBA()
 	data := []uint8{uint8(r), uint8(g), uint8(b), uint8(a)}
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
 		gl.UNSIGNED_BYTE, gl.Ptr(data))
