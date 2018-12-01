@@ -10,7 +10,26 @@ const (
 	// Printable keys
 
 	// KeySpace name can also be checked with KeyEvent.String == " "
-	KeySpace = "Space"
+	KeySpace = "space"
+	/*
+		Apostrophe
+		Comma
+		Minus
+		Fullstop
+		Slash
+		0
+		..
+		9
+		Semicolon
+		Equal
+		A
+		..
+		Z
+		LeftBracket
+		Backslash
+		RightBracket
+		BackQuote
+	*/
 
 	// Non-printable keys
 
@@ -43,6 +62,12 @@ const (
 	// KeyEnd is the line-end key
 	KeyEnd = "End"
 
+	//	CapsLock
+	//	ScrollLock
+	//	NumLock
+	//	PrintScreen
+	//	Pause
+
 	// KeyF1 is the first function key
 	KeyF1 = "F1"
 	// KeyF2 is the second function key
@@ -67,6 +92,11 @@ const (
 	KeyF11 = "F11"
 	// KeyF12 is the twelfth function key
 	KeyF12 = "F12"
+	/*
+		F13
+		...
+		F25
+	*/
 
 	// KeyEnter is the enter/ return key (keypad)
 	KeyEnter = "KP_Enter"
