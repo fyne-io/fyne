@@ -12,6 +12,8 @@ import (
 
 var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
 
+const textDPI = 78
+
 type gLDriver struct {
 	windows []fyne.Window
 	done    chan interface{}
@@ -40,6 +42,7 @@ func fontCache() *truetype.Font {
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	var opts truetype.Options
 	opts.Size = float64(size)
+	opts.DPI = textDPI
 
 	face := truetype.NewFace(fontCache(), &opts)
 	advance := font.MeasureString(face, text)
