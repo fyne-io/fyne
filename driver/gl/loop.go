@@ -45,13 +45,14 @@ func (d *gLDriver) runGL() {
 				gl.UseProgram(canvas.program)
 
 				if viewport.ShouldClose() {
+					// remove window from window list
+					d.windows = append(d.windows[:i], d.windows[i+1:]...)
+					viewport.Destroy()
+					glfw.DetachCurrentContext()
+
 					if win.(*window).master {
 						close(d.done)
 					}
-
-					// remove window from window list
-					d.windows = append(d.windows[:i], d.windows[i+1:]...)
-					glfw.DetachCurrentContext()
 					continue
 				}
 

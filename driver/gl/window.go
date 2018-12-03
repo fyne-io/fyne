@@ -171,8 +171,6 @@ func (w *window) closed(viewport *glfw.Window) {
 	if w.onClosed != nil {
 		w.onClosed()
 	}
-
-	viewport.Destroy()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
