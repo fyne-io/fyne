@@ -38,7 +38,7 @@ And then you're ready to write your first app!
     	app := app.New()
 
     	w := app.NewWindow("Hello")
-    	w.SetContent(widget.NewList(
+    	w.SetContent(widget.NewVBox(
     		widget.NewLabel("Hello Fyne!"),
     		widget.NewButton("Quit", func() {
     			app.Quit()
