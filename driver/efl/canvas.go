@@ -24,11 +24,14 @@ import "github.com/fyne-io/fyne/theme"
 import "github.com/fyne-io/fyne/layout"
 import "github.com/fyne-io/fyne/widget"
 
+var canvasMutex sync.RWMutex
 var canvases = make(map[*C.Evas]*eflCanvas)
 
 //export onObjectMouseDown
 func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
+	canvasMutex.RLock()
 	current := canvases[C.evas_object_evas_get(obj)]
+	canvasMutex.RUnlock()
 	co := current.objects[obj]
 
 	var x, y C.int
@@ -482,7 +485,9 @@ func (c *eflCanvas) SetContent(o fyne.CanvasObject) {
 	c.offsets = make(map[fyne.CanvasObject]fyne.Position)
 	c.dirty = make(map[fyne.CanvasObject]bool)
 	c.content = o
+	canvasMutex.Lock()
 	canvases[C.ecore_evas_get(c.window.ee)] = c
+	canvasMutex.Unlock()
 
 	c.resizeContent()
 	c.setup(o, fyne.NewPos(0, 0))
