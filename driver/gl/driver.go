@@ -3,13 +3,16 @@
 package gl
 
 import (
+	"log"
+	"sync"
+
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
-	"log"
 )
 
+var canvasMutex sync.RWMutex
 var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
 
 const textDPI = 78

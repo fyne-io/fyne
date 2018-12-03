@@ -116,6 +116,8 @@ func (d *eFLDriver) Quit() {
 
 // renderCycle will cause all queued objects to be refreshed
 func renderCycle() {
+	canvasMutex.RLock()
+	defer canvasMutex.RUnlock()
 	for _, canvas := range canvases {
 		if len(canvas.dirty) == 0 {
 			continue
