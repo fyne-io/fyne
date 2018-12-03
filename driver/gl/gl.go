@@ -78,7 +78,7 @@ func (c *glCanvas) newGlTextTexture(text fyne.CanvasObject) uint32 {
 	height := scaleInt(c, bounds.Height*4)
 
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	dpi := float64(textDPI) * 4 * float64(c.Scale())
+	dpi := float64(textDPI) * 4
 
 	var opts truetype.Options
 	fc := fontCache()
