@@ -43,18 +43,20 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	w.fullScreen = full
-	monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
-	mode := monitor.GetVideoMode()
+	runOnMainAsync(func() {
+		w.fullScreen = full
+		monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
+		mode := monitor.GetVideoMode()
 
-	if full {
-		w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
-	} else {
-		min := w.canvas.content.MinSize()
-		winWidth, winHeight := scaleInt(w.canvas, min.Width), scaleInt(w.canvas, min.Height)
+		if full {
+			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
+		} else {
+			min := w.canvas.content.MinSize()
+			winWidth, winHeight := scaleInt(w.canvas, min.Width), scaleInt(w.canvas, min.Height)
 
-		w.viewport.SetMonitor(nil, 0, 0, winWidth, winHeight, 0) // TODO remember position?
-	}
+			w.viewport.SetMonitor(nil, 0, 0, winWidth, winHeight, 0) // TODO remember position?
+		}
+	})
 }
 
 func (w *window) FixedSize() bool {
@@ -84,19 +86,21 @@ func (w *window) fitContent() {
 		return
 	}
 
-	min := w.canvas.content.MinSize()
-	winWidth := scaleInt(w.canvas, min.Width+theme.Padding())
-	winHeight := scaleInt(w.canvas, min.Height+theme.Padding())
-	if w.fixedSize {
-		w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
-	} else {
-		w.viewport.SetSizeLimits(winWidth, winHeight, glfw.DontCare, glfw.DontCare)
-	}
+	runOnMainAsync(func() {
+		min := w.canvas.content.MinSize()
+		winWidth := scaleInt(w.canvas, min.Width+theme.Padding())
+		winHeight := scaleInt(w.canvas, min.Height+theme.Padding())
+		if w.fixedSize {
+			w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
+		} else {
+			w.viewport.SetSizeLimits(winWidth, winHeight, glfw.DontCare, glfw.DontCare)
+		}
 
-	width, height := w.viewport.GetSize()
-	if width < winWidth || height < winHeight {
-		w.viewport.SetSize(winWidth, winHeight)
-	}
+		width, height := w.viewport.GetSize()
+		if width < winWidth || height < winHeight {
+			w.viewport.SetSize(winWidth, winHeight)
+		}
+	})
 }
 
 func (w *window) SetOnClosed(closed func()) {
@@ -131,11 +135,15 @@ func detectScale(win *glfw.Window) float32 {
 }
 
 func (w *window) Show() {
-	w.viewport.Show()
+	runOnMainAsync(func() {
+		w.viewport.Show()
+	})
 }
 
 func (w *window) Hide() {
-	w.viewport.Hide()
+	runOnMainAsync(func() {
+		w.viewport.Hide()
+	})
 }
 
 func (w *window) Close() {
@@ -410,46 +418,49 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
-	master := len(d.windows) == 0
-	if master {
-		glfw.Init()
-	}
+	var ret *window
+	runOnMain(func() {
+		master := len(d.windows) == 0
+		if master {
+			glfw.Init()
+		}
 
-	// make the window hidden, we will set it up and then show it later
-	glfw.WindowHint(glfw.Visible, 0)
+		// make the window hidden, we will set it up and then show it later
+		glfw.WindowHint(glfw.Visible, 0)
 
-	glfw.WindowHint(glfw.ContextVersionMajor, 3)
-	glfw.WindowHint(glfw.ContextVersionMinor, 2)
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+		glfw.WindowHint(glfw.ContextVersionMajor, 3)
+		glfw.WindowHint(glfw.ContextVersionMinor, 2)
+		glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+		glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
-	win, _ := glfw.CreateWindow(100, 100, title, nil, nil)
-	win.MakeContextCurrent()
+		win, _ := glfw.CreateWindow(100, 100, title, nil, nil)
+		win.MakeContextCurrent()
 
-	iconRes := fyne.CurrentApp().Icon()
-	if iconRes != nil {
-		icon, _, _ := image.Decode(bytes.NewReader(iconRes.Content()))
-		win.SetIcon([]image.Image{icon})
-	}
+		iconRes := fyne.CurrentApp().Icon()
+		if iconRes != nil {
+			icon, _, _ := image.Decode(bytes.NewReader(iconRes.Content()))
+			win.SetIcon([]image.Image{icon})
+		}
 
-	if master {
-		gl.Init()
-		gl.Disable(gl.DEPTH_TEST)
-	}
-	ret := &window{viewport: win, title: title}
-	ret.canvas = newCanvas(ret)
-	ret.master = master
-	d.windows = append(d.windows, ret)
+		if master {
+			gl.Init()
+			gl.Disable(gl.DEPTH_TEST)
+		}
+		ret = &window{viewport: win, title: title}
+		ret.canvas = newCanvas(ret)
+		ret.master = master
+		d.windows = append(d.windows, ret)
 
-	win.SetCloseCallback(ret.closed)
-	win.SetSizeCallback(ret.resized)
-	win.SetFramebufferSizeCallback(ret.frameSized)
-	win.SetRefreshCallback(ret.refresh)
-	win.SetCursorPosCallback(ret.mouseMoved)
-	win.SetMouseButtonCallback(ret.mouseClicked)
-	win.SetKeyCallback(ret.keyPressed)
-	win.SetCharModsCallback(ret.charModInput)
-	glfw.DetachCurrentContext()
+		win.SetCloseCallback(ret.closed)
+		win.SetSizeCallback(ret.resized)
+		win.SetFramebufferSizeCallback(ret.frameSized)
+		win.SetRefreshCallback(ret.refresh)
+		win.SetCursorPosCallback(ret.mouseMoved)
+		win.SetMouseButtonCallback(ret.mouseClicked)
+		win.SetKeyCallback(ret.keyPressed)
+		win.SetCharModsCallback(ret.charModInput)
+		glfw.DetachCurrentContext()
+	})
 	return ret
 }
 

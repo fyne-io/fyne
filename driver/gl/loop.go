@@ -11,13 +11,45 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
+type funcData struct {
+	f    func()
+	done chan bool
+}
+
+// channel for queuing functions on the main thread
+var funcQueue = make(chan funcData)
+var running = false
+
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
 }
 
+// force a function f to run on the main thread
+func runOnMain(f func()) {
+	// TODO find a more reliable way to tell if we are on the main thread
+	//	onMain := len(fyne.CurrentApp().Driver().(*gLDriver).windows) < 1
+
+	// if we are on main just execute - otherwise add it to the main queue and wait
+	if !running {
+		f()
+	} else {
+		done := make(chan bool)
+
+		funcQueue <- funcData{f: f, done: done}
+		<-done
+	}
+}
+
+func runOnMainAsync(f func()) {
+	go func() {
+		funcQueue <- funcData{f: f, done: nil}
+	}()
+}
+
 func (d *gLDriver) runGL() {
 	fps := time.NewTicker(time.Second / 60)
+	running = true
 
 	for {
 		select {
@@ -25,6 +57,11 @@ func (d *gLDriver) runGL() {
 			fps.Stop()
 			glfw.Terminate()
 			return
+		case f := <-funcQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
 		case object := <-refreshQueue:
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position) {
 				texture := textures[obj]
