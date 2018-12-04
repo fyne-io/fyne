@@ -26,20 +26,39 @@ func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 	return canvases[obj]
 }
 
-// TODO for styles...
-var fontRegular *truetype.Font
+var fontFaces = make(map[fyne.TextStyle]*truetype.Font)
 
-func fontCache() *truetype.Font {
-	if fontRegular != nil {
-		return fontRegular
-	}
-
-	loaded, err := truetype.Parse(theme.TextFont().Content())
+func loadFont(data fyne.Resource) *truetype.Font {
+	loaded, err := truetype.Parse(data.Content())
 	if err != nil {
-		log.Println("Font error", err)
+		log.Println("Font load error", err)
 	}
-	fontRegular = loaded
-	return fontRegular
+
+	return loaded
+}
+
+func fontCache(style fyne.TextStyle) *truetype.Font {
+	if fontFaces[style] != nil {
+		return fontFaces[style]
+	}
+
+	var loaded *truetype.Font
+	if style.Monospace {
+		loaded = loadFont(theme.TextMonospaceFont())
+	} else if style.Bold {
+		if style.Italic {
+			loaded = loadFont(theme.TextBoldItalicFont())
+		} else {
+			loaded = loadFont(theme.TextBoldFont())
+		}
+	} else if style.Italic {
+		loaded = loadFont(theme.TextItalicFont())
+	} else {
+		loaded = loadFont(theme.TextFont())
+	}
+
+	fontFaces[style] = loaded
+	return loaded
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
@@ -47,7 +66,7 @@ func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle)
 	opts.Size = float64(size)
 	opts.DPI = textDPI
 
-	face := truetype.NewFace(fontCache(), &opts)
+	face := truetype.NewFace(fontCache(style), &opts)
 	advance := font.MeasureString(face, text)
 
 	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())

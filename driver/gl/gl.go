@@ -81,7 +81,7 @@ func (c *glCanvas) newGlTextTexture(text fyne.CanvasObject) uint32 {
 	dpi := float64(textDPI) * 4
 
 	var opts truetype.Options
-	fc := fontCache()
+	fc := fontCache(text.(*canvas.Text).TextStyle)
 	fontSize := float64(text.(*canvas.Text).TextSize) * float64(c.Scale())
 	opts.Size = fontSize
 	opts.DPI = dpi
