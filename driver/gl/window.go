@@ -92,6 +92,11 @@ func (w *window) fitContent() {
 	} else {
 		w.viewport.SetSizeLimits(winWidth, winHeight, glfw.DontCare, glfw.DontCare)
 	}
+
+	width, height := w.viewport.GetSize()
+	if width < winWidth || height < winHeight {
+		w.viewport.SetSize(winWidth, winHeight)
+	}
 }
 
 func (w *window) SetOnClosed(closed func()) {
@@ -181,8 +186,17 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-	//	w.canvas.refresh()
-	//	viewport.SwapBuffers()
+	viewport.MakeContextCurrent()
+
+	size := w.canvas.Size()
+	winWidth := scaleInt(w.canvas, size.Width)
+	winHeight := scaleInt(w.canvas, size.Height)
+
+	gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
+	w.canvas.paint(size)
+
+	viewport.SwapBuffers()
+	glfw.DetachCurrentContext()
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
@@ -442,3 +456,4 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 func (d *gLDriver) AllWindows() []fyne.Window {
 	return d.windows
 }
+
