@@ -65,8 +65,7 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-
-	w.fitContent()
+	runOnMainAsync(w.fitContent)
 }
 
 func (w *window) Icon() fyne.Resource {
@@ -169,7 +168,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	min := content.MinSize()
 	w.canvas.SetScale(detectScale(w.viewport))
 
-	w.fitContent()
+	runOnMainAsync(w.fitContent)
 	w.resize(min)
 }
 
