@@ -456,4 +456,3 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 func (d *gLDriver) AllWindows() []fyne.Window {
 	return d.windows
 }
-
