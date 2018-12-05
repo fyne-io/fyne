@@ -14,7 +14,7 @@ type browser struct {
 	current int
 
 	name *widget.Label
-	icon *canvas.Image
+	icon *widget.Icon
 }
 
 func (b *browser) setIcon(index int) {
@@ -24,8 +24,7 @@ func (b *browser) setIcon(index int) {
 	b.current = index
 
 	b.name.SetText(icons[index].name)
-	b.icon.File = icons[index].icon.CachePath()
-	b.canvas.Refresh(b.icon)
+	b.icon.SetResource(icons[index].icon)
 }
 
 // Icons loads a window that shows the various icons available in Fyne
@@ -44,7 +43,7 @@ func Icons(app fyne.App) {
 
 	background := canvas.NewRaster(checkerPattern)
 	background.SetMinSize(fyne.NewSize(280, 280))
-	b.icon = canvas.NewImageFromResource(icons[b.current].icon)
+	b.icon = widget.NewIcon(icons[b.current].icon)
 
 	win.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(
 		bar, nil, nil, nil), bar, background, b.icon))
