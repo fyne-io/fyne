@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/andydotxyz/oksvg"
-	"github.com/andydotxyz/rasterx"
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
@@ -20,6 +18,8 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
+	"github.com/srwiley/oksvg"
+	"github.com/srwiley/rasterx"
 )
 
 var textures = make(map[fyne.CanvasObject]uint32)
@@ -115,6 +115,7 @@ func (c *glCanvas) newGlImageTexture(img *canvas.Image) uint32 {
 	if img.File != "" {
 		if strings.ToLower(filepath.Ext(img.File)) == ".svg" {
 			icon, err := oksvg.ReadIcon(img.File)
+			icon.SetTarget(0, 0, float64(width), float64(height))
 
 			w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
 			if err != nil {
