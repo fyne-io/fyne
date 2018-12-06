@@ -112,7 +112,7 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 	}
 
 	points := c.rectCoords(img.Size, pos, frame)
-	texture := c.newGlImageTexture(img)
+	texture := getTexture(img, c.newGlImageTexture)
 	if texture == 0 {
 		return
 	}
