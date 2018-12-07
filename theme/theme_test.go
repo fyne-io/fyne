@@ -7,9 +7,9 @@ import "testing"
 import "github.com/stretchr/testify/assert"
 
 func TestThemeChange(t *testing.T) {
-	fyne.GetSettings().SetTheme("dark")
+	fyne.GlobalSettings().SetTheme("dark")
 	bg := BackgroundColor()
 
-	fyne.GetSettings().SetTheme("light")
+	fyne.GlobalSettings().SetTheme("light")
 	assert.NotEqual(t, bg, BackgroundColor())
 }

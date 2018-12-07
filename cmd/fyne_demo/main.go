@@ -93,10 +93,10 @@ func main() {
 
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			widget.NewButton("Dark", func() {
-				fyne.GetSettings().SetTheme("dark")
+				fyne.GlobalSettings().SetTheme("dark")
 			}),
 			widget.NewButton("Light", func() {
-				fyne.GetSettings().SetTheme("light")
+				fyne.GlobalSettings().SetTheme("light")
 			}),
 		),
 		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {

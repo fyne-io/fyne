@@ -47,8 +47,8 @@ func NewTestCanvas() fyne.Canvas {
 	return &testCanvas{}
 }
 
-// GetTestCanvas returns a reusable in-memory canvas used for testing
-func GetTestCanvas() fyne.Canvas {
+// Canvas returns a reusable in-memory canvas used for testing
+func Canvas() fyne.Canvas {
 	if dummyCanvas == nil {
 		dummyCanvas = NewTestCanvas()
 	}

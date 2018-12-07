@@ -162,7 +162,7 @@ func TestEntryFocus(t *testing.T) {
 
 func TestEntryWindowFocus(t *testing.T) {
 	entry := NewEntry()
-	canvas := test.GetTestCanvas()
+	canvas := test.Canvas()
 
 	canvas.Focus(entry)
 	assert.True(t, entry.Focused())

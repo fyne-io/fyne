@@ -36,14 +36,14 @@ func loadDarkColors() *themeColors {
 
 // Load the right theme colours based on environment / settings
 func colors() *themeColors {
-	if loadedTheme != fyne.GetSettings().Theme() {
+	if loadedTheme != fyne.GlobalSettings().Theme() {
 		loadedColors = nil
 	}
 
 	c := loadedColors
 	if loadedColors == nil {
 
-		if fyne.GetSettings().Theme() == "light" {
+		if fyne.GlobalSettings().Theme() == "light" {
 			c = loadLightColors()
 		} else {
 			c = loadDarkColors()

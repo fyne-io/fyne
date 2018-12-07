@@ -58,7 +58,7 @@ func NewAppWithDriver(d fyne.Driver) fyne.App {
 	fyne.SetCurrentApp(newApp)
 
 	listener := make(chan fyne.Settings)
-	fyne.GetSettings().AddChangeListener(listener)
+	fyne.GlobalSettings().AddChangeListener(listener)
 	go func() {
 		for {
 			settings := <-listener

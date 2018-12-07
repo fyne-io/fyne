@@ -53,8 +53,8 @@ func loadSettings() *settings {
 	return s
 }
 
-// GetSettings returns the system wide settings currently configured
-func GetSettings() Settings {
+// GlobalSettings returns the system wide settings currently configured
+func GlobalSettings() Settings {
 	if settingsCache == nil {
 		settingsCache = loadSettings()
 	}

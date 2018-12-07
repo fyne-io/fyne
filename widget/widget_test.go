@@ -23,7 +23,7 @@ func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{applied: make(chan bool)}
 
 	window := test.NewTestWindow(widget)
-	fyne.GetSettings().SetTheme("light")
+	fyne.GlobalSettings().SetTheme("light")
 
 	func() {
 		select {
@@ -41,7 +41,7 @@ func TestAppplyThemeCalledChild(t *testing.T) {
 	parent := NewList(child)
 
 	window := test.NewTestWindow(parent)
-	fyne.GetSettings().SetTheme("light")
+	fyne.GlobalSettings().SetTheme("light")
 
 	func() {
 		select {
