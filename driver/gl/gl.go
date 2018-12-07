@@ -102,13 +102,17 @@ func (c *glCanvas) newGlTextTexture(text fyne.CanvasObject) uint32 {
 	return texture
 }
 
-func (c *glCanvas) newGlImageTexture(img *canvas.Image) uint32 {
+func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
+	img := obj.(*canvas.Image)
 	texture := newTexture()
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	width := scaleInt(c, img.Size.Width)
 	height := scaleInt(c, img.Size.Height)
+	if width == 0 || height == 0 {
+		return 0
+	}
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	if img.File != "" {
