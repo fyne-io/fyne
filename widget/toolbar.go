@@ -98,6 +98,20 @@ func (t *Toolbar) Renderer() fyne.WidgetRenderer {
 	return t.renderer
 }
 
+// ApplyTheme updates this widget's visuals to reflect the current theme
+func (t *Toolbar) ApplyTheme() {
+	for i, item := range t.Items {
+		if _, ok := item.(*ToolbarSeparator); ok {
+			rect := t.renderer.(*boxRenderer).objects[i].(*canvas.Rectangle)
+			rect.FillColor = theme.TextColor()
+		}
+	}
+
+	t.renderer.ApplyTheme()
+	t.renderer.(*boxRenderer).setBackgroundColor(theme.ButtonColor())
+	t.renderer.Refresh()
+}
+
 // Append a new ToolbarItem to the end of this Toolbar
 func (t *Toolbar) Append(item ToolbarItem) {
 	t.Items = append(t.Items, item)

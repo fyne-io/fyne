@@ -63,6 +63,7 @@ func (w *baseWidget) Hide() {
 	}
 }
 
+// ApplyTheme updates this widget's visuals to reflect the current theme
 func (w *baseWidget) ApplyTheme() {
 	if w.renderer == nil {
 		return
