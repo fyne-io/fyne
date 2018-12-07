@@ -1,13 +1,16 @@
 package widget
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
+import (
+	"image/color"
+
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
 
 type checkRenderer struct {
-	background *canvas.Rectangle
-	icon       *canvas.Image
-	label      *canvas.Text
+	icon  *canvas.Image
+	label *canvas.Text
 
 	objects []fyne.CanvasObject
 	check   *Check
@@ -24,8 +27,6 @@ func (c *checkRenderer) MinSize() fyne.Size {
 
 // Layout the components of the check widget
 func (c *checkRenderer) Layout(size fyne.Size) {
-	c.background.Resize(size)
-
 	offset := fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)
 	labelSize := size.Subtract(offset)
 	c.label.Resize(labelSize)
@@ -40,9 +41,12 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 // ApplyTheme is called when the Check may need to update it's look
 func (c *checkRenderer) ApplyTheme() {
 	c.label.Color = theme.TextColor()
-	c.background.FillColor = theme.BackgroundColor()
 
 	c.Refresh()
+}
+
+func (c *checkRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
 }
 
 func (c *checkRenderer) Refresh() {
@@ -85,9 +89,8 @@ func (c *Check) createRenderer() fyne.WidgetRenderer {
 
 	text := canvas.NewText(c.Text, theme.TextColor())
 	text.Alignment = fyne.TextAlignCenter
-	bg := canvas.NewRectangle(theme.BackgroundColor())
 
-	return &checkRenderer{bg, icon, text, []fyne.CanvasObject{bg, icon, text}, c}
+	return &checkRenderer{icon, text, []fyne.CanvasObject{icon, text}, c}
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer

@@ -1,7 +1,12 @@
 package widget
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
+import (
+	"image/color"
+
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
 
 // TabItem represents a single view in a TabContainer.
 // The Text is used for the tab button and the Content is shown when the corresponding tab is active.
@@ -152,20 +157,15 @@ func (t *tabContainerRenderer) ApplyTheme() {
 	}
 }
 
+func (t *tabContainerRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
 func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
 	return t.objects
 }
 
 func (t *tabContainerRenderer) Refresh() {
-	for i, button := range t.tabBar.Children {
-		if i == t.container.current {
-			button.(*Button).Style = PrimaryButton
-		} else {
-			button.(*Button).Style = DefaultButton
-		}
-		button.(*Button).Renderer().Refresh()
-	}
-
 	t.tabBar.Renderer().Refresh()
 	t.Layout(t.container.CurrentSize())
 
@@ -178,4 +178,13 @@ func (t *tabContainerRenderer) Refresh() {
 	}
 
 	canvas.Refresh(t.container)
+
+	for i, button := range t.tabBar.Children {
+		if i == t.container.current {
+			button.(*Button).Style = PrimaryButton
+		} else {
+			button.(*Button).Style = DefaultButton
+		}
+		button.(*Button).Renderer().Refresh()
+	}
 }

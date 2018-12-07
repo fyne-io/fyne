@@ -1,8 +1,13 @@
 package widget
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/layout"
+import (
+	"image/color"
+
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne/theme"
+)
 
 // Box widget is a simple list where the child elements are arranged in a single column
 // for vertical or a single row for horizontal arrangement
@@ -34,7 +39,10 @@ func (b *Box) createRenderer() fyne.WidgetRenderer {
 	} else {
 		lay = layout.NewVBoxLayout()
 	}
-	return &boxRenderer{objects: b.Children, layout: lay, box: b}
+
+	renderer := &boxRenderer{objects: b.Children, layout: lay, box: b}
+	renderer.setBackgroundColor(theme.BackgroundColor())
+	return renderer
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer
@@ -63,7 +71,8 @@ func NewVBox(children ...fyne.CanvasObject) *Box {
 }
 
 type boxRenderer struct {
-	layout fyne.Layout
+	layout     fyne.Layout
+	background color.Color
 
 	objects []fyne.CanvasObject
 	box     *Box
@@ -86,6 +95,13 @@ func (b *boxRenderer) ApplyTheme() {
 			themed.ApplyTheme()
 		}
 	}
+
+	b.background = theme.BackgroundColor()
+	b.Refresh()
+}
+
+func (b *boxRenderer) BackgroundColor() color.Color {
+	return b.background
 }
 
 func (b *boxRenderer) Objects() []fyne.CanvasObject {
@@ -97,4 +113,8 @@ func (b *boxRenderer) Refresh() {
 	b.Layout(b.box.CurrentSize())
 
 	canvas.Refresh(b.box)
+}
+
+func (b *boxRenderer) setBackgroundColor(bg color.Color) {
+	b.background = bg
 }

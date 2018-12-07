@@ -1,5 +1,7 @@
 package fyne
 
+import "image/color"
+
 // Widget defines the standard behaviours of any widget. This extends the
 // CanvasObject - a widget behaves in the same basic way but will encapsulate
 // many child objects to create the rendered widget.
@@ -18,5 +20,6 @@ type WidgetRenderer interface {
 
 	Refresh()
 	ApplyTheme()
+	BackgroundColor() color.Color
 	Objects() []CanvasObject
 }

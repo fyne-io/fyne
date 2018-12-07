@@ -1,17 +1,19 @@
 package widget
 
-import "bufio"
-import "strings"
+import (
+	"bufio"
+	"image/color"
+	"strings"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
 
 type labelRenderer struct {
 	objects []fyne.CanvasObject
 
-	background *canvas.Rectangle
-	texts      []*canvas.Text
+	texts []*canvas.Text
 
 	label *Label
 	lines int
@@ -92,8 +94,6 @@ func (l *labelRenderer) Layout(size fyne.Size) {
 		text.Move(fyne.NewPos(theme.Padding(), yPos))
 		yPos += lineHeight
 	}
-
-	l.background.Resize(size)
 }
 
 func (l *labelRenderer) Objects() []fyne.CanvasObject {
@@ -102,11 +102,13 @@ func (l *labelRenderer) Objects() []fyne.CanvasObject {
 
 // ApplyTheme is called when the Label may need to update it's look
 func (l *labelRenderer) ApplyTheme() {
-	l.background.FillColor = theme.BackgroundColor()
-
 	for _, text := range l.texts {
 		text.Color = theme.TextColor()
 	}
+}
+
+func (l *labelRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
 }
 
 func (l *labelRenderer) Refresh() {
@@ -156,9 +158,8 @@ func (l *Label) RowLength(row int) int {
 func (l *Label) createRenderer() fyne.WidgetRenderer {
 	render := &labelRenderer{label: l}
 
-	render.background = canvas.NewRectangle(theme.BackgroundColor())
 	render.texts = []*canvas.Text{}
-	render.objects = []fyne.CanvasObject{render.background}
+	render.objects = []fyne.CanvasObject{}
 	render.updateTexts(render.parseText(l.Text))
 
 	return render

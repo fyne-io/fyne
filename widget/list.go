@@ -1,10 +1,14 @@
 package widget
 
-import "log"
+import (
+	"image/color"
+	"log"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne/theme"
+)
 
 // List widget is a simple list where the child elements are arranged in a single column.
 type List struct {
@@ -74,6 +78,10 @@ func (l *listRenderer) ApplyTheme() {
 			themed.ApplyTheme()
 		}
 	}
+}
+
+func (l *listRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
 }
 
 func (l *listRenderer) Objects() []fyne.CanvasObject {

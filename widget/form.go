@@ -1,7 +1,9 @@
 package widget
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/layout"
+import (
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/layout"
+)
 
 // FormItem provides the details for a row in a form
 type FormItem struct {

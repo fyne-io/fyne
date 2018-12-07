@@ -84,7 +84,7 @@ func (c *glCanvas) drawTexture(texture uint32, points []float32) {
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
 }
 
-func (c *glCanvas) drawContainer(box fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
 	if !box.IsVisible() {
 		return
 	}
@@ -156,9 +156,7 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame f
 		c.drawImage(obj, pos, frame)
 	case *canvas.Text:
 		c.drawText(obj, pos, frame)
-	case *fyne.Container:
-		c.drawContainer(obj, offset, frame)
 	case fyne.Widget:
-		c.drawContainer(obj, offset, frame)
+		c.drawWidget(obj, offset, frame)
 	}
 }

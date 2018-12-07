@@ -14,7 +14,6 @@ import (
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
-	"github.com/fyne-io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
@@ -54,8 +53,8 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 	texture := newTexture()
 
 	col := theme.BackgroundColor()
-	if _, ok := rect.(*widget.Toolbar); ok { // TODO don't make this a special case
-		col = theme.ButtonColor()
+	if wid, ok := rect.(fyne.Widget); ok {
+		col = wid.Renderer().BackgroundColor()
 	} else if _, ok := rect.(*canvas.Rectangle); ok {
 		col = rect.(*canvas.Rectangle).FillColor
 	}

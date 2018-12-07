@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"image/color"
+
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
@@ -31,6 +33,10 @@ func (i *iconRenderer) Objects() []fyne.CanvasObject {
 
 func (i *iconRenderer) ApplyTheme() {
 	i.Refresh()
+}
+
+func (i *iconRenderer) BackgroundColor() color.Color {
+	return color.Transparent
 }
 
 func (i *iconRenderer) Refresh() {

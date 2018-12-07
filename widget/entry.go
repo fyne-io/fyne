@@ -3,16 +3,16 @@ package widget
 import (
 	"fmt"
 	"image/color"
-)
-import "log"
+	"log"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
 
 type entryRenderer struct {
-	label           *Label
-	bg, box, cursor *canvas.Rectangle
+	label       *Label
+	box, cursor *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -69,8 +69,6 @@ func (e *entryRenderer) moveCursor() {
 
 // Layout the components of the entry widget.
 func (e *entryRenderer) Layout(size fyne.Size) {
-	e.bg.Resize(size)
-
 	e.box.Resize(size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
 	e.box.Move(fyne.NewPos(theme.Padding()/2, theme.Padding()/2))
 
@@ -87,14 +85,20 @@ func (e *entryRenderer) ApplyTheme() {
 	e.Refresh()
 }
 
+func (e *entryRenderer) BackgroundColor() color.Color {
+	if e.entry.focused {
+		return theme.FocusColor()
+	}
+
+	return theme.ButtonColor()
+}
+
 func (e *entryRenderer) Refresh() {
 	e.label.SetText(e.entry.Text)
 
 	if e.entry.focused {
-		e.bg.FillColor = theme.FocusColor()
 		e.cursor.FillColor = theme.FocusColor()
 	} else {
-		e.bg.FillColor = theme.ButtonColor()
 		e.cursor.FillColor = color.RGBA{0, 0, 0, 0}
 	}
 
@@ -258,12 +262,11 @@ func (e *Entry) label() *Label {
 
 func (e *Entry) createRenderer() fyne.WidgetRenderer {
 	text := NewLabel(e.Text)
-	bg := canvas.NewRectangle(theme.ButtonColor())
 	box := canvas.NewRectangle(theme.BackgroundColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
-	return &entryRenderer{text, bg, box, cursor,
-		[]fyne.CanvasObject{bg, box, text, cursor}, e}
+	return &entryRenderer{text, box, cursor,
+		[]fyne.CanvasObject{box, text, cursor}, e}
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer

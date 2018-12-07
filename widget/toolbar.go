@@ -92,6 +92,7 @@ func (t *Toolbar) Renderer() fyne.WidgetRenderer {
 			t.append(item)
 		}
 		t.renderer = t.box.Renderer()
+		t.renderer.(*boxRenderer).setBackgroundColor(theme.ButtonColor())
 	}
 
 	return t.renderer

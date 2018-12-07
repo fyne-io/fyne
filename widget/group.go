@@ -1,8 +1,12 @@
 package widget
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
+import (
+	"image/color"
+
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
 
 const thickness = 2
 
@@ -92,6 +96,10 @@ func (g *groupRenderer) ApplyTheme() {
 	g.bg.FillColor = theme.BackgroundColor()
 
 	g.group.box.ApplyTheme()
+}
+
+func (g *groupRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
 }
 
 func (g *groupRenderer) Objects() []fyne.CanvasObject {

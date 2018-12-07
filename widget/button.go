@@ -1,13 +1,16 @@
 package widget
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
+import (
+	"image/color"
+
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
 
 type buttonRenderer struct {
-	background *canvas.Rectangle
-	icon       *canvas.Image
-	label      *canvas.Text
+	icon  *canvas.Image
+	label *canvas.Text
 
 	objects []fyne.CanvasObject
 	button  *Button
@@ -27,7 +30,6 @@ func (b *buttonRenderer) MinSize() fyne.Size {
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
-	b.background.Resize(size)
 	inner := size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	if b.button.Icon == nil {
@@ -53,14 +55,16 @@ func (b *buttonRenderer) ApplyTheme() {
 	b.Refresh()
 }
 
+func (b *buttonRenderer) BackgroundColor() color.Color {
+	if b.button.Style == PrimaryButton {
+		return theme.PrimaryColor()
+	}
+
+	return theme.ButtonColor()
+}
+
 func (b *buttonRenderer) Refresh() {
 	b.label.Text = b.button.Text
-
-	if b.button.Style == PrimaryButton {
-		b.background.FillColor = theme.PrimaryColor()
-	} else {
-		b.background.FillColor = theme.ButtonColor()
-	}
 
 	// TODO don't tweak alpha, add visibility instead
 	if b.button.Icon != nil {
@@ -117,17 +121,15 @@ func (b *Button) createRenderer() fyne.WidgetRenderer {
 
 	text := canvas.NewText(b.Text, theme.TextColor())
 	text.Alignment = fyne.TextAlignCenter
-	bg := canvas.NewRectangle(theme.ButtonColor())
 
 	objects := []fyne.CanvasObject{
-		bg,
 		text,
 	}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{bg, icon, text, objects, b}
+	return &buttonRenderer{icon, text, objects, b}
 }
 
 // Renderer is a private method to Fyne which links this widget to it's renderer
