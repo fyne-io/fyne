@@ -7,6 +7,7 @@ import (
 
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
@@ -15,17 +16,17 @@ func walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 
 	switch co := obj.(type) {
 	case *fyne.Container:
-		offset := co.Position.Add(pos)
+		offset := co.Position().Add(pos)
 		f(obj, offset)
 
 		for _, child := range co.Objects {
 			walkObjects(child, offset, f)
 		}
 	case fyne.Widget:
-		offset := co.CurrentPosition().Add(pos)
+		offset := co.Position().Add(pos)
 		f(obj, offset)
 
-		for _, child := range co.Renderer().Objects() {
+		for _, child := range widget.Renderer(co).Objects() {
 			walkObjects(child, offset, f)
 		}
 	default:
@@ -85,33 +86,33 @@ func (c *glCanvas) drawTexture(texture uint32, points []float32) {
 }
 
 func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	if !box.IsVisible() {
+	if !box.Visible() {
 		return
 	}
 
-	points := c.rectCoords(box.CurrentSize(), pos, frame)
+	points := c.rectCoords(box.Size(), pos, frame)
 	texture := getTexture(box, c.newGlRectTexture)
 
 	c.drawTexture(texture, points)
 }
 
 func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	if !rect.IsVisible() {
+	if !rect.Visible() {
 		return
 	}
 
-	points := c.rectCoords(rect.Size, pos, frame)
+	points := c.rectCoords(rect.Size(), pos, frame)
 	texture := getTexture(rect, c.newGlRectTexture)
 
 	c.drawTexture(texture, points)
 }
 
 func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
-	if !img.IsVisible() {
+	if !img.Visible() {
 		return
 	}
 
-	points := c.rectCoords(img.Size, pos, frame)
+	points := c.rectCoords(img.Size(), pos, frame)
 	texture := getTexture(img, c.newGlImageTexture)
 	if texture == 0 {
 		return
@@ -121,12 +122,12 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 }
 
 func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
-	if !text.IsVisible() || text.Text == "" {
+	if !text.Visible() || text.Text == "" {
 		return
 	}
 
 	size := text.MinSize()
-	containerSize := text.CurrentSize()
+	containerSize := text.Size()
 	switch text.Alignment {
 	case fyne.TextAlignTrailing:
 		pos = fyne.NewPos(pos.X+containerSize.Width-size.Width, pos.Y)
@@ -134,8 +135,8 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 		pos = fyne.NewPos(pos.X+(containerSize.Width-size.Width)/2, pos.Y)
 	}
 
-	if text.CurrentSize().Height > text.MinSize().Height {
-		pos = fyne.NewPos(pos.X, pos.Y+(text.CurrentSize().Height-text.MinSize().Height)/2)
+	if text.Size().Height > text.MinSize().Height {
+		pos = fyne.NewPos(pos.X, pos.Y+(text.Size().Height-text.MinSize().Height)/2)
 	}
 
 	points := c.rectCoords(size, pos, frame)
@@ -148,7 +149,7 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame f
 	canvasMutex.Lock()
 	canvases[o] = c
 	canvasMutex.Unlock()
-	pos := o.CurrentPosition().Add(offset)
+	pos := o.Position().Add(offset)
 	switch obj := o.(type) {
 	case *canvas.Rectangle:
 		c.drawRectangle(obj, pos, frame)

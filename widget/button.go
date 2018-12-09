@@ -66,19 +66,19 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 func (b *buttonRenderer) Refresh() {
 	b.label.Text = b.button.Text
 
-	// TODO don't tweak alpha, add visibility instead
 	if b.button.Icon != nil {
 		if b.icon == nil {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
 			b.objects = append(b.objects, b.icon)
+		} else {
+			b.icon.File = b.button.Icon.CachePath()
 		}
-		b.icon.Translucency = 0
-		b.icon.File = b.button.Icon.CachePath()
+		b.icon.Hidden = false
 	} else if b.icon != nil {
-		b.icon.Translucency = 1
+		b.icon.Hidden = true
 	}
 
-	b.Layout(b.button.CurrentSize())
+	b.Layout(b.button.Size())
 	canvas.Refresh(b.button)
 }
 
@@ -106,6 +106,33 @@ const (
 	PrimaryButton
 )
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (b *Button) Resize(size fyne.Size) {
+	b.resize(size, b)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (b *Button) Move(pos fyne.Position) {
+	b.move(pos, b)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (b *Button) MinSize() fyne.Size {
+	return b.minSize(b)
+}
+
+// Show this widget, if it was previously hidden
+func (b *Button) Show() {
+	b.show(b)
+}
+
+// Hide this widget, if it was previously visible
+func (b *Button) Hide() {
+	b.hide(b)
+}
+
 // OnMouseDown is called when a mouse down event is captured and triggers any tap handler
 func (b *Button) OnMouseDown(*fyne.MouseEvent) {
 	if b.OnTapped != nil {
@@ -113,7 +140,8 @@ func (b *Button) OnMouseDown(*fyne.MouseEvent) {
 	}
 }
 
-func (b *Button) createRenderer() fyne.WidgetRenderer {
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
@@ -132,34 +160,25 @@ func (b *Button) createRenderer() fyne.WidgetRenderer {
 	return &buttonRenderer{icon, text, objects, b}
 }
 
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (b *Button) Renderer() fyne.WidgetRenderer {
-	if b.renderer == nil {
-		b.renderer = b.createRenderer()
-	}
-
-	return b.renderer
-}
-
 // SetText allows the button label to be changed
 func (b *Button) SetText(text string) {
 	b.Text = text
 
-	b.Renderer().Refresh()
+	Renderer(b).Refresh()
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
 	b.Icon = icon
 
-	b.Renderer().Refresh()
+	Renderer(b).Refresh()
 }
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
 	button := &Button{baseWidget{}, label, DefaultButton, nil, tapped}
 
-	button.Renderer().Layout(button.MinSize())
+	Renderer(button).Layout(button.MinSize())
 	return button
 }
 
@@ -168,6 +187,6 @@ func NewButton(label string, tapped func()) *Button {
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
 	button := &Button{baseWidget{}, label, DefaultButton, icon, tapped}
 
-	button.Renderer().Layout(button.MinSize())
+	Renderer(button).Layout(button.MinSize())
 	return button
 }

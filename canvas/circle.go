@@ -16,8 +16,8 @@ type Circle struct {
 	StrokeWidth float32     // The stroke width of the circle
 }
 
-// CurrentSize returns the current size of bounding box for this circle object
-func (l *Circle) CurrentSize() fyne.Size {
+// Size returns the current size of bounding box for this circle object
+func (l *Circle) Size() fyne.Size {
 	return fyne.NewSize(l.Position2.X-l.Position1.X, l.Position2.Y-l.Position1.Y)
 }
 
@@ -26,14 +26,14 @@ func (l *Circle) Resize(size fyne.Size) {
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }
 
-// CurrentPosition gets the current top-left position of this circle object, relative to it's parent / canvas
-func (l *Circle) CurrentPosition() fyne.Position {
+// Position gets the current top-left position of this circle object, relative to it's parent / canvas
+func (l *Circle) Position() fyne.Position {
 	return l.Position1
 }
 
 // Move the circle object to a new position, relative to it's parent / canvas
 func (l *Circle) Move(pos fyne.Position) {
-	size := l.CurrentSize()
+	size := l.Size()
 	l.Position1 = pos
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }
@@ -44,8 +44,8 @@ func (l *Circle) MinSize() fyne.Size {
 	return fyne.NewSize(1, 1)
 }
 
-// IsVisible returns true if this circle is visible, false otherwise
-func (l *Circle) IsVisible() bool {
+// Visible returns true if this circle is visible, false otherwise
+func (l *Circle) Visible() bool {
 	return !l.Hidden
 }
 

@@ -18,21 +18,49 @@ type Group struct {
 	box  *Box
 }
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (g *Group) Resize(size fyne.Size) {
+	g.resize(size, g)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (g *Group) Move(pos fyne.Position) {
+	g.move(pos, g)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (g *Group) MinSize() fyne.Size {
+	return g.minSize(g)
+}
+
+// Show this widget, if it was previously hidden
+func (g *Group) Show() {
+	g.show(g)
+}
+
+// Hide this widget, if it was previously visible
+func (g *Group) Hide() {
+	g.hide(g)
+}
+
 // Prepend inserts a new CanvasObject at the top of the group
 func (g *Group) Prepend(object fyne.CanvasObject) {
 	g.box.Prepend(object)
 
-	g.Renderer().Refresh()
+	Renderer(g).Refresh()
 }
 
 // Append adds a new CanvasObject to the end of the group
 func (g *Group) Append(object fyne.CanvasObject) {
 	g.box.Append(object)
 
-	g.Renderer().Refresh()
+	Renderer(g).Refresh()
 }
 
-func (g *Group) createRenderer() fyne.WidgetRenderer {
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	label := NewLabel(g.Text)
 	border := canvas.NewRectangle(theme.ButtonColor())
 	bg := canvas.NewRectangle(theme.BackgroundColor())
@@ -40,20 +68,11 @@ func (g *Group) createRenderer() fyne.WidgetRenderer {
 	return &groupRenderer{label: label, border: border, bg: bg, objects: objects, group: g}
 }
 
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (g *Group) Renderer() fyne.WidgetRenderer {
-	if g.renderer == nil {
-		g.renderer = g.createRenderer()
-	}
-
-	return g.renderer
-}
-
 // NewGroup creates a new grouped list widget with a title and the specified list of child objects
 func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 	group := &Group{baseWidget{}, title, NewVBox(children...)}
 
-	group.Renderer().Layout(group.MinSize())
+	Renderer(group).Layout(group.MinSize())
 	return group
 }
 
@@ -91,11 +110,11 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 }
 
 func (g *groupRenderer) ApplyTheme() {
-	g.label.ApplyTheme()
+	Renderer(g.label).ApplyTheme()
 	g.border.FillColor = theme.ButtonColor()
 	g.bg.FillColor = theme.BackgroundColor()
 
-	g.group.box.ApplyTheme()
+	Renderer(g.group.box).ApplyTheme()
 }
 
 func (g *groupRenderer) BackgroundColor() color.Color {
@@ -108,7 +127,7 @@ func (g *groupRenderer) Objects() []fyne.CanvasObject {
 
 func (g *groupRenderer) Refresh() {
 	g.label.Text = g.group.Text
-	g.Layout(g.group.CurrentSize())
+	g.Layout(g.group.Size())
 
 	canvas.Refresh(g.group)
 }

@@ -19,17 +19,17 @@ func TestFixedGridLayout(t *testing.T) {
 	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
-		Size:    gridSize,
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
+	container.Resize(gridSize)
 
 	NewFixedGridLayout(cellSize).Layout(container.Objects, gridSize)
 
-	assert.Equal(t, obj1.Size, cellSize)
+	assert.Equal(t, obj1.Size(), cellSize)
 	cell2Pos := fyne.NewPos(50+theme.Padding(), 0)
-	assert.Equal(t, obj2.Position, cell2Pos)
+	assert.Equal(t, obj2.Position(), cell2Pos)
 	cell3Pos := fyne.NewPos(0, 50+theme.Padding())
-	assert.Equal(t, obj3.Position, cell3Pos)
+	assert.Equal(t, obj3.Position(), cell3Pos)
 }
 
 func TestFixedGridLayoutMinSize(t *testing.T) {

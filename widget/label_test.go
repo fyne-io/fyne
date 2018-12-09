@@ -21,7 +21,7 @@ func TestLabel_MinSize(t *testing.T) {
 func TestLabel_Alignment(t *testing.T) {
 	label := &Label{Text: "Test", Alignment: fyne.TextAlignTrailing}
 
-	assert.Equal(t, fyne.TextAlignTrailing, label.Renderer().(*labelRenderer).texts[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, Renderer(label).(*labelRenderer).texts[0].Alignment)
 }
 
 func TestText_MinSize_Multiline(t *testing.T) {
@@ -34,9 +34,9 @@ func TestText_MinSize_Multiline(t *testing.T) {
 	assert.True(t, min2.Height > min.Height)
 
 	yPos := -1
-	for _, text := range text.Renderer().(*labelRenderer).texts {
-		assert.True(t, text.CurrentSize().Height < min2.Height)
-		assert.True(t, text.CurrentPosition().Y > yPos)
-		yPos = text.CurrentPosition().Y
+	for _, text := range Renderer(text).(*labelRenderer).texts {
+		assert.True(t, text.Size().Height < min2.Height)
+		assert.True(t, text.Position().Y > yPos)
+		yPos = text.Position().Y
 	}
 }

@@ -9,14 +9,14 @@ package fyne
 // Resize(Size) or Move(Position).
 type CanvasObject interface {
 	// geometry
-	CurrentSize() Size
+	Size() Size
 	Resize(Size)
-	CurrentPosition() Position
+	Position() Position
 	Move(Position)
 	MinSize() Size
 
 	// visibility
-	IsVisible() bool
+	Visible() bool
 	Show()
 	Hide()
 }

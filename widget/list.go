@@ -17,32 +17,51 @@ type List struct {
 	Children []fyne.CanvasObject
 }
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (l *List) Resize(size fyne.Size) {
+	l.resize(size, l)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (l *List) Move(pos fyne.Position) {
+	l.move(pos, l)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (l *List) MinSize() fyne.Size {
+	return l.minSize(l)
+}
+
+// Show this widget, if it was previously hidden
+func (l *List) Show() {
+	l.show(l)
+}
+
+// Hide this widget, if it was previously visible
+func (l *List) Hide() {
+	l.hide(l)
+}
+
 // Prepend inserts a new CanvasObject at the top of the list
 func (l *List) Prepend(object fyne.CanvasObject) {
 	l.Children = append([]fyne.CanvasObject{object}, l.Children...)
 
-	l.Renderer().Refresh()
+	Renderer(l).Refresh()
 }
 
 // Append adds a new CanvasObject to the end of the list
 func (l *List) Append(object fyne.CanvasObject) {
 	l.Children = append(l.Children, object)
 
-	l.Renderer().Refresh()
+	Renderer(l).Refresh()
 }
 
-func (l *List) createRenderer() fyne.WidgetRenderer {
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	log.Println("Deprecated: The List widget is replaced by VBox")
 	return &listRenderer{objects: l.Children, layout: layout.NewVBoxLayout(), list: l}
-}
-
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (l *List) Renderer() fyne.WidgetRenderer {
-	if l.renderer == nil {
-		l.renderer = l.createRenderer()
-	}
-
-	return l.renderer
 }
 
 // NewList creates a new list widget with the specified list of child objects
@@ -50,7 +69,7 @@ func (l *List) Renderer() fyne.WidgetRenderer {
 func NewList(children ...fyne.CanvasObject) *List {
 	list := &List{baseWidget{}, children}
 
-	list.Renderer().Layout(list.MinSize())
+	Renderer(list).Layout(list.MinSize())
 	return list
 }
 
@@ -90,7 +109,7 @@ func (l *listRenderer) Objects() []fyne.CanvasObject {
 
 func (l *listRenderer) Refresh() {
 	l.objects = l.list.Children
-	l.Layout(l.list.CurrentSize())
+	l.Layout(l.list.Size())
 
 	canvas.Refresh(l.list)
 }

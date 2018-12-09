@@ -18,26 +18,6 @@ type Text struct {
 	TextStyle fyne.TextStyle // The style of the text content
 }
 
-// CurrentSize gets the current size of this text object
-func (t *Text) CurrentSize() fyne.Size {
-	return t.Size
-}
-
-// Resize sets a new size for the text object
-func (t *Text) Resize(size fyne.Size) {
-	t.Size = size
-}
-
-// CurrentPosition gets the current position of this text object, relative to it's parent / canvas
-func (t *Text) CurrentPosition() fyne.Position {
-	return t.Position
-}
-
-// Move the text object to a new position, relative to it's parent / canvas
-func (t *Text) Move(pos fyne.Position) {
-	t.Position = pos
-}
-
 // MinSize returns the minimum size of this text objet based on it's font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {

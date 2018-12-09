@@ -27,7 +27,7 @@ func isHorizontalSpacer(obj fyne.CanvasObject) bool {
 
 func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
 	// invisible spacers don't impact layout
-	if !obj.IsVisible() {
+	if !obj.Visible() {
 		return false
 	}
 

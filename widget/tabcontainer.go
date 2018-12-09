@@ -29,6 +29,33 @@ type TabContainer struct {
 	current int
 }
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (t *TabContainer) Resize(size fyne.Size) {
+	t.resize(size, t)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (t *TabContainer) Move(pos fyne.Position) {
+	t.move(pos, t)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (t *TabContainer) MinSize() fyne.Size {
+	return t.minSize(t)
+}
+
+// Show this widget, if it was previously hidden
+func (t *TabContainer) Show() {
+	t.show(t)
+}
+
+// Hide this widget, if it was previously visible
+func (t *TabContainer) Hide() {
+	t.hide(t)
+}
+
 // SelectTab sets the specified TabItem to be selected and it's content visible.
 func (t *TabContainer) SelectTab(item *TabItem) {
 	for i, child := range t.Items {
@@ -51,7 +78,7 @@ func (t *TabContainer) SelectTabIndex(index int) {
 	}
 
 	t.current = index
-	t.Renderer().Refresh()
+	Renderer(t).Refresh()
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
@@ -71,7 +98,7 @@ func (t *TabContainer) Prepend(object fyne.CanvasObject) {
 	t.tabBar.Append(t.makeButton(item))
 	t.children = append(t.children, item.Content)
 
-	t.Renderer().Refresh()}
+	t.CreateRenderer().Refresh()}
 }
 
 // Append adds a new CanvasObject to the end of the group
@@ -80,11 +107,12 @@ func (t *TabContainer) Append(item TabItem) {
 //	t.tabBar.Append(t.makeButton(item))
 //	t.children = append(t.children, item.Content)
 
-	t.Renderer().Refresh()
+	t.CreateRenderer().Refresh()
 }
 */
 
-func (t *TabContainer) createRenderer() fyne.WidgetRenderer {
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 	var contents []fyne.CanvasObject
 
 	buttons := NewHBox()
@@ -103,20 +131,11 @@ func (t *TabContainer) createRenderer() fyne.WidgetRenderer {
 	return &tabContainerRenderer{tabBar: buttons, objects: objects, container: t}
 }
 
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (t *TabContainer) Renderer() fyne.WidgetRenderer {
-	if t.renderer == nil {
-		t.renderer = t.createRenderer()
-	}
-
-	return t.renderer
-}
-
 // NewTabContainer creates a new tab bar widget that allows the user to choose between different visible containers
 func NewTabContainer(items ...*TabItem) *TabContainer {
 	tabs := &TabContainer{baseWidget{}, items, 0}
 
-	tabs.Renderer().Layout(tabs.MinSize())
+	Renderer(tabs).Layout(tabs.MinSize())
 	return tabs
 }
 
@@ -148,7 +167,7 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (t *tabContainerRenderer) ApplyTheme() {
-	t.tabBar.ApplyTheme()
+	Renderer(t.tabBar).ApplyTheme()
 
 	for _, child := range t.container.Items {
 		if wid, ok := child.Content.(fyne.ThemedObject); ok {
@@ -166,8 +185,8 @@ func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (t *tabContainerRenderer) Refresh() {
-	t.tabBar.Renderer().Refresh()
-	t.Layout(t.container.CurrentSize())
+	Renderer(t.tabBar).Refresh()
+	t.Layout(t.container.Size())
 
 	for i, child := range t.container.Items {
 		if i == t.container.current {
@@ -185,6 +204,6 @@ func (t *tabContainerRenderer) Refresh() {
 		} else {
 			button.(*Button).Style = DefaultButton
 		}
-		button.(*Button).Renderer().Refresh()
+		Renderer(button.(*Button)).Refresh()
 	}
 }

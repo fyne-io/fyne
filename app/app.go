@@ -6,6 +6,7 @@ package app
 import (
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne/widget"
 )
 
 type fyneApp struct {
@@ -37,15 +38,29 @@ func (app *fyneApp) Driver() fyne.Driver {
 	return app.driver
 }
 
+func (app *fyneApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) {
+	if themed, ok := content.(fyne.ThemedObject); ok {
+		themed.ApplyTheme()
+		canvas.Refresh(content)
+	}
+	if wid, ok := content.(fyne.Widget); ok {
+		widget.Renderer(wid).ApplyTheme()
+		canvas.Refresh(content)
+
+		for _, o := range widget.Renderer(wid).Objects() {
+			app.applyThemeTo(o, canvas)
+		}
+	}
+	if c, ok := content.(*fyne.Container); ok {
+		for _, o := range c.Objects {
+			app.applyThemeTo(o, canvas)
+		}
+	}
+}
+
 func (app *fyneApp) applyTheme(fyne.Settings) {
 	for _, window := range app.driver.AllWindows() {
-		content := window.Content()
-
-		switch themed := content.(type) {
-		case fyne.ThemedObject:
-			themed.ApplyTheme()
-			window.Canvas().Refresh(content)
-		}
+		app.applyThemeTo(window.Content(), window.Canvas())
 	}
 }
 

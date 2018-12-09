@@ -14,13 +14,13 @@ func TestMaxLayout(t *testing.T) {
 
 	obj := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 	container := &fyne.Container{
-		Size:    size,
 		Objects: []fyne.CanvasObject{obj},
 	}
+	container.Resize(size)
 
 	NewMaxLayout().Layout(container.Objects, size)
 
-	assert.Equal(t, obj.Size, size)
+	assert.Equal(t, obj.Size(), size)
 }
 
 func TestMaxLayoutMinSize(t *testing.T) {

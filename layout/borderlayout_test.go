@@ -15,13 +15,13 @@ func TestBorderLayoutEmpty(t *testing.T) {
 
 	obj := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 	container := &fyne.Container{
-		Size:    size,
 		Objects: []fyne.CanvasObject{obj},
 	}
+	container.Resize(size)
 
 	NewBorderLayout(nil, nil, nil, nil).Layout(container.Objects, size)
 
-	assert.Equal(t, obj.Size, size)
+	assert.Equal(t, obj.Size(), size)
 }
 
 func TestBorderLayoutTopBottom(t *testing.T) {
@@ -32,17 +32,17 @@ func TestBorderLayoutTopBottom(t *testing.T) {
 	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
-		Size:    size,
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
+	container.Resize(size)
 
 	NewBorderLayout(obj1, obj2, nil, nil).Layout(container.Objects, size)
 
-	innerSize := fyne.NewSize(size.Width, size.Height-obj1.Size.Height-obj2.Size.Height-theme.Padding()*2)
-	assert.Equal(t, innerSize, obj3.Size)
-	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position)
-	assert.Equal(t, fyne.NewPos(0, size.Height-obj2.Size.Height), obj2.Position)
-	assert.Equal(t, fyne.NewPos(0, obj1.Size.Height+theme.Padding()), obj3.Position)
+	innerSize := fyne.NewSize(size.Width, size.Height-obj1.Size().Height-obj2.Size().Height-theme.Padding()*2)
+	assert.Equal(t, innerSize, obj3.Size())
+	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position())
+	assert.Equal(t, fyne.NewPos(0, size.Height-obj2.Size().Height), obj2.Position())
+	assert.Equal(t, fyne.NewPos(0, obj1.Size().Height+theme.Padding()), obj3.Position())
 }
 
 func TestBorderLayoutLeftRight(t *testing.T) {
@@ -53,17 +53,17 @@ func TestBorderLayoutLeftRight(t *testing.T) {
 	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
-		Size:    size,
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
+	container.Resize(size)
 
 	NewBorderLayout(nil, nil, obj1, obj2).Layout(container.Objects, size)
 
-	innerSize := fyne.NewSize(size.Width-obj1.Size.Width-obj2.Size.Width-theme.Padding()*2, size.Height)
-	assert.Equal(t, innerSize, obj3.Size)
-	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position)
-	assert.Equal(t, fyne.NewPos(size.Width-obj2.Size.Width, 0), obj2.Position)
-	assert.Equal(t, fyne.NewPos(obj1.Size.Width+theme.Padding(), 0), obj3.Position)
+	innerSize := fyne.NewSize(size.Width-obj1.Size().Width-obj2.Size().Width-theme.Padding()*2, size.Height)
+	assert.Equal(t, innerSize, obj3.Size())
+	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position())
+	assert.Equal(t, fyne.NewPos(size.Width-obj2.Size().Width, 0), obj2.Position())
+	assert.Equal(t, fyne.NewPos(obj1.Size().Width+theme.Padding(), 0), obj3.Position())
 }
 
 func TestBorderCenterLayoutMinSize(t *testing.T) {

@@ -18,8 +18,8 @@ type Line struct {
 	StrokeWidth float32     // The stroke width of the line
 }
 
-// CurrentSize returns the current size of bounding box for this line object
-func (l *Line) CurrentSize() fyne.Size {
+// Size returns the current size of bounding box for this line object
+func (l *Line) Size() fyne.Size {
 	return fyne.NewSize(int(math.Abs(float64(l.Position2.X))-math.Abs(float64(l.Position1.X))),
 		int(math.Abs(float64(l.Position2.Y))-math.Abs(float64(l.Position1.Y))))
 }
@@ -29,14 +29,14 @@ func (l *Line) Resize(size fyne.Size) {
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }
 
-// CurrentPosition gets the current top-left position of this line object, relative to it's parent / canvas
-func (l *Line) CurrentPosition() fyne.Position {
+// Position gets the current top-left position of this line object, relative to it's parent / canvas
+func (l *Line) Position() fyne.Position {
 	return fyne.NewPos(fyne.Min(l.Position1.X, l.Position2.X), fyne.Min(l.Position1.Y, l.Position2.Y))
 }
 
 // Move the line object to a new position, relative to it's parent / canvas
 func (l *Line) Move(pos fyne.Position) {
-	size := l.CurrentSize()
+	size := l.Size()
 	l.Position1 = pos
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }
@@ -47,8 +47,8 @@ func (l *Line) MinSize() fyne.Size {
 	return fyne.NewSize(1, 1)
 }
 
-// IsVisible returns true if this line// Show will set this circle to be visible is visible, false otherwise
-func (l *Line) IsVisible() bool {
+// Visible returns true if this line// Show will set this circle to be visible is visible, false otherwise
+func (l *Line) Visible() bool {
 	return !l.Hidden
 }
 

@@ -18,8 +18,8 @@ func (i *pixelImage) ColorModel() color.Model {
 }
 
 func (i *pixelImage) Bounds() image.Rectangle {
-	width := int(float32(i.source.Size.Width) * i.scale)
-	height := int(float32(i.source.Size.Height) * i.scale)
+	width := int(float32(i.source.Size().Width) * i.scale)
+	height := int(float32(i.source.Size().Height) * i.scale)
 
 	return image.Rect(0, 0, width, height)
 }
@@ -29,8 +29,8 @@ func (i *pixelImage) At(x, y int) color.Color {
 		return color.Transparent
 	}
 
-	width := int(float32(i.source.Size.Width) * i.scale)
-	height := int(float32(i.source.Size.Height) * i.scale)
+	width := int(float32(i.source.Size().Width) * i.scale)
+	height := int(float32(i.source.Size().Height) * i.scale)
 
 	return i.source.PixelColor(x, y, width, height)
 }

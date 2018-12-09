@@ -14,6 +14,7 @@ import (
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
@@ -54,7 +55,7 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 
 	col := theme.BackgroundColor()
 	if wid, ok := rect.(fyne.Widget); ok {
-		col = wid.Renderer().BackgroundColor()
+		col = widget.Renderer(wid).BackgroundColor()
 	} else if _, ok := rect.(*canvas.Rectangle); ok {
 		col = rect.(*canvas.Rectangle).FillColor
 	}
@@ -108,8 +109,8 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	width := scaleInt(c, img.Size.Width)
-	height := scaleInt(c, img.Size.Height)
+	width := scaleInt(c, img.Size().Width)
+	height := scaleInt(c, img.Size().Height)
 	if width == 0 || height == 0 {
 		return 0
 	}

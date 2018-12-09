@@ -129,33 +129,61 @@ type Label struct {
 	TextStyle fyne.TextStyle // The style of the label text
 }
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (l *Label) Resize(size fyne.Size) {
+	l.resize(size, l)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (l *Label) Move(pos fyne.Position) {
+	l.move(pos, l)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (l *Label) MinSize() fyne.Size {
+	return l.minSize(l)
+}
+
+// Show this widget, if it was previously hidden
+func (l *Label) Show() {
+	l.show(l)
+}
+
+// Hide this widget, if it was previously visible
+func (l *Label) Hide() {
+	l.hide(l)
+}
+
 // SetText updates the text of the label widget
 func (l *Label) SetText(text string) {
 	l.Text = text
 
-	render := l.Renderer().(*labelRenderer)
+	render := Renderer(l).(*labelRenderer)
 	for _, obj := range render.texts {
 		obj.Text = ""
 	}
 
 	render.updateTexts(render.parseText(l.Text))
 
-	l.Renderer().Refresh()
+	Renderer(l).Refresh()
 }
 
 // Rows returns the number of text rows in this text entry.
 // The entry may be longer than required to show this amount of content.
 func (l *Label) Rows() int {
-	return l.Renderer().(*labelRenderer).lines
+	return Renderer(l).(*labelRenderer).lines
 }
 
 // RowLength returns the number of visible characters in the row specified.
 // The row parameter should be between 0 and l.Rows()-1.
 func (l *Label) RowLength(row int) int {
-	return len(l.Renderer().(*labelRenderer).texts[row].Text)
+	return len(Renderer(l).(*labelRenderer).texts[row].Text)
 }
 
-func (l *Label) createRenderer() fyne.WidgetRenderer {
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	render := &labelRenderer{label: l}
 
 	render.texts = []*canvas.Text{}
@@ -163,15 +191,6 @@ func (l *Label) createRenderer() fyne.WidgetRenderer {
 	render.updateTexts(render.parseText(l.Text))
 
 	return render
-}
-
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (l *Label) Renderer() fyne.WidgetRenderer {
-	if l.renderer == nil {
-		l.renderer = l.createRenderer()
-	}
-
-	return l.renderer
 }
 
 // NewLabel creates a new layout widget with the set text content
@@ -185,6 +204,6 @@ func NewLabel(text string) *Label {
 		style,
 	}
 
-	l.Renderer().Layout(l.MinSize())
+	Renderer(l).Layout(l.MinSize())
 	return l
 }

@@ -8,7 +8,7 @@ import "image/color"
 type Widget interface {
 	CanvasObject
 
-	Renderer() WidgetRenderer
+	CreateRenderer() WidgetRenderer
 }
 
 // WidgetRenderer defines the behaviour of a widget's implementation.

@@ -68,9 +68,36 @@ type Toolbar struct {
 	box *Box
 }
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (t *Toolbar) Resize(size fyne.Size) {
+	t.resize(size, t)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (t *Toolbar) Move(pos fyne.Position) {
+	t.move(pos, t)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (t *Toolbar) MinSize() fyne.Size {
+	return t.minSize(t)
+}
+
+// Show this widget, if it was previously hidden
+func (t *Toolbar) Show() {
+	t.show(t)
+}
+
+// Hide this widget, if it was previously visible
+func (t *Toolbar) Hide() {
+	t.hide(t)
+}
+
 func (t *Toolbar) append(item ToolbarItem) {
 	if t.box == nil { // TODO fix smell
-		t.Renderer()
+		Renderer(t)
 	}
 
 	t.box.Append(item.ToolbarObject())
@@ -78,38 +105,32 @@ func (t *Toolbar) append(item ToolbarItem) {
 
 func (t *Toolbar) prepend(item ToolbarItem) {
 	if t.box == nil { // TODO fix smell
-		t.Renderer()
+		Renderer(t)
 	}
 
 	t.box.Prepend(item.ToolbarObject())
 }
 
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (t *Toolbar) Renderer() fyne.WidgetRenderer {
-	if t.box == nil {
-		t.box = NewHBox()
-		for _, item := range t.Items {
-			t.append(item)
-		}
-		t.renderer = t.box.Renderer()
-		t.renderer.(*boxRenderer).setBackgroundColor(theme.ButtonColor())
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
+	t.box = NewHBox()
+	t.box.setBackgroundColor(theme.ButtonColor())
+	for _, item := range t.Items {
+		t.append(item)
 	}
-
-	return t.renderer
+	return Renderer(t.box)
 }
 
 // ApplyTheme updates this widget's visuals to reflect the current theme
 func (t *Toolbar) ApplyTheme() {
+	t.box.setBackgroundColor(theme.ButtonColor())
+
 	for i, item := range t.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {
-			rect := t.renderer.(*boxRenderer).objects[i].(*canvas.Rectangle)
+			rect := Renderer(t).(*boxRenderer).objects[i].(*canvas.Rectangle)
 			rect.FillColor = theme.TextColor()
 		}
 	}
-
-	t.renderer.ApplyTheme()
-	t.renderer.(*boxRenderer).setBackgroundColor(theme.ButtonColor())
-	t.renderer.Refresh()
 }
 
 // Append a new ToolbarItem to the end of this Toolbar
@@ -128,9 +149,8 @@ func (t *Toolbar) Prepend(item ToolbarItem) {
 
 // NewToolbar creates a new toolbar widget.
 func NewToolbar(items ...ToolbarItem) *Toolbar {
-
 	t := &Toolbar{Items: items}
 
-	t.Renderer().Layout(t.MinSize())
+	Renderer(t).Layout(t.MinSize())
 	return t
 }

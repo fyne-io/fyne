@@ -158,15 +158,15 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, target fyne.CanvasO
 	for _, child := range objs {
 		switch co := child.(type) {
 		case *fyne.Container:
-			c.buildContainer(co, co, co.Objects, child.CurrentSize(),
-				child.CurrentPosition(), childOffset)
+			c.buildContainer(co, co, co.Objects, child.Size(),
+				child.Position(), childOffset)
 		case fyne.Widget:
 			click := child
 			if _, ok := parent.(*widget.Entry); ok {
 				click = parent
 			}
-			c.buildContainer(co, click, co.Renderer().Objects(),
-				child.CurrentSize(), child.CurrentPosition(), childOffset)
+			c.buildContainer(co, click, widget.Renderer(co).Objects(),
+				child.Size(), child.Position(), childOffset)
 		default:
 			if target == nil {
 				target = parent
@@ -233,7 +233,7 @@ func (c *eflCanvas) renderImage(img *canvas.Image, x, y, width, height int) {
 }
 
 func (c *eflCanvas) loadImage(img *canvas.Image, obj *C.Evas_Object) {
-	size := img.CurrentSize()
+	size := img.Size()
 
 	C.evas_object_image_load_size_set(obj, C.int(scaleInt(c, size.Width)), C.int(scaleInt(c, size.Height)))
 	cstr := C.CString(img.File)
@@ -251,8 +251,8 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		}
 		obj = c.buildObject(o, o2, c.offsets[o])
 	}
-	pos := c.offsets[o].Add(o.CurrentPosition())
-	size := o.CurrentSize()
+	pos := c.offsets[o].Add(o.Position())
+	size := o.Size()
 
 	switch co := o.(type) {
 	case *canvas.Text:
@@ -325,8 +325,8 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	}
 
-	if o.IsVisible() != (C.evas_object_visible_get(obj) != 0) {
-		if o.IsVisible() {
+	if o.Visible() != (C.evas_object_visible_get(obj) != 0) {
+		if o.Visible() {
 			C.evas_object_show(obj)
 		} else {
 			C.evas_object_hide(obj)
@@ -340,7 +340,7 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 	obj := c.native[target]
 	bg := theme.BackgroundColor()
 	if wid, ok := target.(fyne.Widget); ok {
-		bg = wid.Renderer().BackgroundColor()
+		bg = widget.Renderer(wid).BackgroundColor()
 	}
 	setColor(obj, bg)
 
@@ -352,8 +352,8 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	}
 
-	if target.IsVisible() != (C.evas_object_visible_get(obj) != 0) {
-		if target.IsVisible() {
+	if target.Visible() != (C.evas_object_visible_get(obj) != 0) {
+		if target.Visible() {
 			C.evas_object_show(obj)
 		} else {
 			C.evas_object_hide(obj)
@@ -365,10 +365,10 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 
 		switch typed := child.(type) {
 		case *fyne.Container:
-			c.refreshContainer(typed.Objects, child, child.CurrentPosition(), child.CurrentSize())
+			c.refreshContainer(typed.Objects, child, child.Position(), child.Size())
 		case fyne.Widget:
-			c.refreshContainer(typed.Renderer().Objects(), child,
-				child.CurrentPosition(), child.CurrentSize())
+			c.refreshContainer(widget.Renderer(typed).Objects(), child,
+				child.Position(), child.Size())
 		default:
 			if target == nil {
 				target = child
@@ -387,10 +387,10 @@ func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
 	runOnMain(func() {
 		switch set := o.(type) {
 		case *fyne.Container:
-			c.buildContainer(set, set, set.Objects, set.MinSize(), o.CurrentPosition(), offset)
+			c.buildContainer(set, set, set.Objects, set.MinSize(), o.Position(), offset)
 		case fyne.Widget:
-			c.buildContainer(set, set, set.Renderer().Objects(),
-				set.MinSize(), o.CurrentPosition(), offset)
+			c.buildContainer(set, set, widget.Renderer(set).Objects(),
+				set.MinSize(), o.Position(), offset)
 		default:
 			if !ignoreObject(o) {
 				c.buildObject(o, o, offset)
@@ -406,11 +406,11 @@ func (c *eflCanvas) Refresh(o fyne.CanvasObject) {
 func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 	switch ref := o.(type) {
 	case *fyne.Container:
-		c.refreshContainer(ref.Objects, o, o.CurrentPosition(),
-			o.CurrentSize())
+		c.refreshContainer(ref.Objects, o, o.Position(),
+			o.Size())
 	case fyne.Widget:
-		c.refreshContainer(ref.Renderer().Objects(), o,
-			o.CurrentPosition(), o.CurrentSize())
+		c.refreshContainer(widget.Renderer(ref).Objects(), o,
+			o.Position(), o.Size())
 	default:
 		c.refreshObject(o, o)
 	}

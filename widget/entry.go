@@ -43,10 +43,10 @@ func (e *entryRenderer) MinSize() fyne.Size {
 }
 
 func (e *entryRenderer) cursorPosition() (int, int) {
-	renderlabel := e.label.renderer.(*labelRenderer).texts[0]
+	renderlabel := Renderer(e.label).(*labelRenderer).texts[0]
 	lineHeight := emptyTextMinSize(e.label.TextStyle).Height
 
-	str := e.label.renderer.(*labelRenderer).texts[e.entry.CursorRow].Text
+	str := Renderer(e.label).(*labelRenderer).texts[e.entry.CursorRow].Text
 	// sanity check, as the underlying entry text can actually change
 	if e.entry.CursorColumn > len(str) {
 		e.entry.CursorColumn = len(str)
@@ -80,7 +80,7 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 
 // ApplyTheme is called when the Entry may need to update it's look.
 func (e *entryRenderer) ApplyTheme() {
-	e.label.ApplyTheme()
+	Renderer(e.label).ApplyTheme()
 	e.box.FillColor = theme.BackgroundColor()
 	e.Refresh()
 }
@@ -121,6 +121,33 @@ type Entry struct {
 	focused bool
 }
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (e *Entry) Resize(size fyne.Size) {
+	e.resize(size, e)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (e *Entry) Move(pos fyne.Position) {
+	e.move(pos, e)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (e *Entry) MinSize() fyne.Size {
+	return e.minSize(e)
+}
+
+// Show this widget, if it was previously hidden
+func (e *Entry) Show() {
+	e.show(e)
+}
+
+// Hide this widget, if it was previously visible
+func (e *Entry) Hide() {
+	e.hide(e)
+}
+
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
 	e.Text = text
@@ -129,12 +156,12 @@ func (e *Entry) SetText(text string) {
 		e.OnChanged(text)
 	}
 
-	e.Renderer().Refresh()
+	Renderer(e).Refresh()
 }
 
 func (e *Entry) cursorTextPos() int {
 	pos := 0
-	texts := e.label().renderer.(*labelRenderer).texts
+	texts := Renderer(e.label()).(*labelRenderer).texts
 	for i := 0; i < e.CursorRow; i++ {
 		line := texts[i].Text
 		pos += len(line) + 1
@@ -162,14 +189,14 @@ func (e *Entry) insertAtCursor(text string) {
 func (e *Entry) OnFocusGained() {
 	e.focused = true
 
-	e.Renderer().Refresh()
+	Renderer(e).Refresh()
 }
 
 // OnFocusLost is called when the Entry has had focus removed.
 func (e *Entry) OnFocusLost() {
 	e.focused = false
 
-	e.Renderer().Refresh()
+	Renderer(e).Refresh()
 }
 
 // Focused returns whether or not this Entry has focus.
@@ -199,7 +226,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 
 		e.SetText(substr)
 	} else if key.Name == fyne.KeyDelete {
-		texts := e.label().renderer.(*labelRenderer).texts
+		texts := Renderer(e.label()).(*labelRenderer).texts
 		if len(e.Text) == 0 || (e.CursorRow == len(texts)-1 && e.CursorColumn == len(texts[e.CursorRow].Text)) {
 			return
 		}
@@ -253,14 +280,15 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		log.Println("Unhandled key press", key.String)
 	}
 
-	e.Renderer().(*entryRenderer).moveCursor()
+	Renderer(e).(*entryRenderer).moveCursor()
 }
 
 func (e *Entry) label() *Label {
-	return e.Renderer().(*entryRenderer).label
+	return Renderer(e).(*entryRenderer).label
 }
 
-func (e *Entry) createRenderer() fyne.WidgetRenderer {
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	text := NewLabel(e.Text)
 	box := canvas.NewRectangle(theme.BackgroundColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
@@ -269,19 +297,10 @@ func (e *Entry) createRenderer() fyne.WidgetRenderer {
 		[]fyne.CanvasObject{box, text, cursor}, e}
 }
 
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (e *Entry) Renderer() fyne.WidgetRenderer {
-	if e.renderer == nil {
-		e.renderer = e.createRenderer()
-	}
-
-	return e.renderer
-}
-
 // NewEntry creates a new entry widget.
 func NewEntry() *Entry {
 	e := &Entry{}
 
-	e.Renderer().Layout(e.MinSize())
+	Renderer(e).Layout(e.MinSize())
 	return e
 }

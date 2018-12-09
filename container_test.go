@@ -22,12 +22,12 @@ func TestMove(t *testing.T) {
 	size := NewSize(100, 100)
 	pos := NewPos(0, 0)
 	container.Resize(size)
-	assert.Equal(t, pos, box.CurrentPosition())
+	assert.Equal(t, pos, box.Position())
 
 	pos = NewPos(10, 10)
 	container.Move(pos)
-	assert.Equal(t, pos, container.CurrentPosition())
-	assert.Equal(t, pos, box.CurrentPosition())
+	assert.Equal(t, pos, container.Position())
+	assert.Equal(t, pos, box.Position())
 }
 
 func TestDefaultLayout(t *testing.T) {
@@ -36,11 +36,11 @@ func TestDefaultLayout(t *testing.T) {
 
 	size := NewSize(100, 100)
 	container.Resize(size)
-	assert.Equal(t, size, container.CurrentSize())
-	assert.Equal(t, size, box.CurrentSize())
+	assert.Equal(t, size, container.Size())
+	assert.Equal(t, size, box.Size())
 
 	container.AddObject(box)
-	assert.Equal(t, size, box.CurrentSize())
+	assert.Equal(t, size, box.Size())
 }
 
 type customLayout struct {
@@ -63,20 +63,20 @@ func TestCustomLayout(t *testing.T) {
 
 	size := layout.MinSize(container.Objects)
 	assert.Equal(t, size, container.MinSize())
-	assert.Equal(t, size, container.CurrentSize())
-	assert.Equal(t, size, box.CurrentSize())
+	assert.Equal(t, size, container.Size())
+	assert.Equal(t, size, box.Size())
 
 	container.AddObject(box)
-	assert.Equal(t, size, box.CurrentSize())
+	assert.Equal(t, size, box.Size())
 }
 
 func TestContainer_Hide(t *testing.T) {
 	box := new(dummyObject)
 	container := NewContainer(box)
 
-	assert.True(t, box.IsVisible())
+	assert.True(t, box.Visible())
 	container.Hide()
-	assert.False(t, box.IsVisible())
+	assert.False(t, box.Visible())
 }
 
 type dummyObject struct {
@@ -85,7 +85,7 @@ type dummyObject struct {
 	hidden bool
 }
 
-func (d *dummyObject) CurrentSize() Size {
+func (d *dummyObject) Size() Size {
 	return d.size
 }
 
@@ -93,7 +93,7 @@ func (d *dummyObject) Resize(size Size) {
 	d.size = size
 }
 
-func (d *dummyObject) CurrentPosition() Position {
+func (d *dummyObject) Position() Position {
 	return d.pos
 }
 
@@ -105,7 +105,7 @@ func (d *dummyObject) MinSize() Size {
 	return NewSize(5, 5)
 }
 
-func (d *dummyObject) IsVisible() bool {
+func (d *dummyObject) Visible() bool {
 	return !d.hidden
 }
 

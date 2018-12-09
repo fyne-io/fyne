@@ -47,7 +47,7 @@ func (i *iconRenderer) Refresh() {
 		raster = canvas.NewImageFromResource(i.image.Resource)
 	}
 	i.objects = append(i.objects, raster)
-	i.Layout(i.image.CurrentSize())
+	i.Layout(i.image.Size())
 
 	canvas.Refresh(i.image)
 }
@@ -59,28 +59,47 @@ type Icon struct {
 	Resource fyne.Resource // The resource for this icon
 }
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (i *Icon) Resize(size fyne.Size) {
+	i.resize(size, i)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (i *Icon) Move(pos fyne.Position) {
+	i.move(pos, i)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (i *Icon) MinSize() fyne.Size {
+	return i.minSize(i)
+}
+
+// Show this widget, if it was previously hidden
+func (i *Icon) Show() {
+	i.show(i)
+}
+
+// Hide this widget, if it was previously visible
+func (i *Icon) Hide() {
+	i.hide(i)
+}
+
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res
 
-	i.Renderer().Refresh()
+	Renderer(i).Refresh()
 }
 
-func (i *Icon) createRenderer() fyne.WidgetRenderer {
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	render := &iconRenderer{image: i}
 
 	render.objects = []fyne.CanvasObject{}
 
 	return render
-}
-
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (i *Icon) Renderer() fyne.WidgetRenderer {
-	if i.renderer == nil {
-		i.renderer = i.createRenderer()
-	}
-
-	return i.renderer
 }
 
 // NewIcon returns a new icon widget that displays a themed icon resource

@@ -20,17 +20,17 @@ func TestGridLayout(t *testing.T) {
 	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
-		Size:    gridSize,
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
+	container.Resize(gridSize)
 
 	NewGridLayout(2).Layout(container.Objects, gridSize)
 
-	assert.Equal(t, obj1.Size, cellSize)
+	assert.Equal(t, obj1.Size(), cellSize)
 	cell2Pos := fyne.NewPos(50+theme.Padding(), 0)
-	assert.Equal(t, cell2Pos, obj2.Position)
+	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(0, 50+theme.Padding())
-	assert.Equal(t, cell3Pos, obj3.Position)
+	assert.Equal(t, cell3Pos, obj3.Position())
 }
 
 func TestGridLayoutRounding(t *testing.T) {
@@ -41,18 +41,18 @@ func TestGridLayoutRounding(t *testing.T) {
 	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
-		Size:    gridSize,
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
+	container.Resize(gridSize)
 
 	NewGridLayout(3).Layout(container.Objects, gridSize)
 
-	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position)
-	assert.Equal(t, fyne.NewSize(33, 50), obj1.Size)
-	assert.Equal(t, fyne.NewPos(33+theme.Padding(), 0), obj2.Position)
-	assert.Equal(t, fyne.NewSize(34, 50), obj2.Size)
-	assert.Equal(t, fyne.NewPos(67+theme.Padding()*2, 0), obj3.Position)
-	assert.Equal(t, fyne.NewSize(33, 50), obj3.Size)
+	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position())
+	assert.Equal(t, fyne.NewSize(33, 50), obj1.Size())
+	assert.Equal(t, fyne.NewPos(33+theme.Padding(), 0), obj2.Position())
+	assert.Equal(t, fyne.NewSize(34, 50), obj2.Size())
+	assert.Equal(t, fyne.NewPos(67+theme.Padding()*2, 0), obj3.Position())
+	assert.Equal(t, fyne.NewSize(33, 50), obj3.Size())
 }
 
 func TestGridLayoutMinSize(t *testing.T) {

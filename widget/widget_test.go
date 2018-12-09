@@ -14,9 +14,32 @@ type myWidget struct {
 	applied chan bool
 }
 
+func (m *myWidget) Resize(size fyne.Size) {
+	m.resize(size, m)
+}
+
+func (m *myWidget) Move(pos fyne.Position) {
+	m.move(pos, m)
+}
+
+func (m *myWidget) MinSize() fyne.Size {
+	return m.minSize(m)
+}
+
+func (m *myWidget) Show() {
+	m.show(m)
+}
+
+func (m *myWidget) Hide() {
+	m.hide(m)
+}
+
 func (m *myWidget) ApplyTheme() {
 	m.applied <- true
-	close(m.applied)
+}
+
+func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
+	return (&Box{}).CreateRenderer()
 }
 
 func TestApplyThemeCalled(t *testing.T) {
@@ -33,10 +56,11 @@ func TestApplyThemeCalled(t *testing.T) {
 		}
 	}()
 
+	close(widget.applied)
 	window.Close()
 }
 
-func TestAppplyThemeCalledChild(t *testing.T) {
+func TestApplyThemeCalledChild(t *testing.T) {
 	child := &myWidget{applied: make(chan bool)}
 	parent := NewList(child)
 
@@ -44,12 +68,17 @@ func TestAppplyThemeCalledChild(t *testing.T) {
 	fyne.GlobalSettings().SetTheme("light")
 
 	func() {
-		select {
-		case <-child.applied:
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Timed out waiting for child theme apply")
+		// we wait 2 times, one for parent, one for child
+		for i := 0; i < 2; {
+			select {
+			case <-child.applied:
+				i++
+			case <-time.After(1 * time.Second):
+				assert.Fail(t, "Timed out waiting for child theme apply")
+			}
 		}
 	}()
 
+	close(child.applied)
 	window.Close()
 }

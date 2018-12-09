@@ -29,8 +29,8 @@ func (s *Spacer) ExpandHorizontal() bool {
 	return !s.FixHorizontal
 }
 
-// CurrentSize returns the current size of this Spacer
-func (s *Spacer) CurrentSize() fyne.Size {
+// Size returns the current size of this Spacer
+func (s *Spacer) Size() fyne.Size {
 	return s.size
 }
 
@@ -39,8 +39,8 @@ func (s *Spacer) Resize(size fyne.Size) {
 	s.size = size
 }
 
-// CurrentPosition returns the current position of this Spacer
-func (s *Spacer) CurrentPosition() fyne.Position {
+// Position returns the current position of this Spacer
+func (s *Spacer) Position() fyne.Position {
 	return s.pos
 }
 
@@ -54,8 +54,8 @@ func (s *Spacer) MinSize() fyne.Size {
 	return fyne.NewSize(0, 0)
 }
 
-// IsVisible returns true if this spacer should affect the layout
-func (s *Spacer) IsVisible() bool {
+// Visible returns true if this spacer should affect the layout
+func (s *Spacer) Visible() bool {
 	return !s.hidden
 }
 

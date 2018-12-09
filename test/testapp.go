@@ -39,15 +39,33 @@ func (a *testApp) Quit() {
 	// no-op
 }
 
+func (a *testApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) {
+	if themed, ok := content.(fyne.ThemedObject); ok {
+		themed.ApplyTheme()
+		canvas.Refresh(content)
+	}
+	if wid, ok := content.(fyne.Widget); ok {
+		// we cannot use the renderer cache as that is in the widget package (import loop)
+		render := wid.CreateRenderer()
+		render.ApplyTheme()
+		canvas.Refresh(content)
+
+		for _, o := range render.Objects() {
+			a.applyThemeTo(o, canvas)
+		}
+	}
+	if c, ok := content.(*fyne.Container); ok {
+		for _, o := range c.Objects {
+			a.applyThemeTo(o, canvas)
+		}
+	}
+}
+
 func (a *testApp) applyTheme(fyne.Settings) {
 	for _, window := range a.driver.AllWindows() {
 		content := window.Content()
 
-		switch themed := content.(type) {
-		case fyne.ThemedObject:
-			themed.ApplyTheme()
-			window.Canvas().Refresh(content)
-		}
+		a.applyThemeTo(content, window.Canvas())
 	}
 }
 

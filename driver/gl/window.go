@@ -218,8 +218,8 @@ func findMouseObj(obj fyne.CanvasObject, x, y int) fyne.CanvasObject {
 			return
 		}
 
-		x2 := pos.X + walked.CurrentSize().Width
-		y2 := pos.Y + walked.CurrentSize().Height
+		x2 := pos.X + walked.Size().Width
+		y2 := pos.Y + walked.Size().Height
 		if x >= x2 || y >= y2 {
 			return
 		}

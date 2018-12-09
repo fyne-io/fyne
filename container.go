@@ -3,8 +3,8 @@ package fyne
 // Container is a CanvasObject that contains a collection of child objects.
 // The layout of the children is set by the specified Layout.
 type Container struct {
-	Size     Size     // The current size of the Container
-	Position Position // The current position of the Container
+	size     Size     // The current size of the Container
+	position Position // The current position of the Container
 	Hidden   bool     // Is this Container hidden
 
 	Layout  Layout         // The Layout algorithm for arranging child CanvasObjects
@@ -13,35 +13,35 @@ type Container struct {
 
 func (c *Container) layout() {
 	if c.Layout != nil {
-		c.Layout.Layout(c.Objects, c.Size)
+		c.Layout.Layout(c.Objects, c.size)
 		return
 	}
 
 	for _, child := range c.Objects {
-		child.Resize(c.Size)
-		child.Move(c.Position)
+		child.Resize(c.size)
+		child.Move(c.position)
 	}
 }
 
-// CurrentSize returns the current size of this container
-func (c *Container) CurrentSize() Size {
-	return c.Size
+// Size returns the current size of this container
+func (c *Container) Size() Size {
+	return c.size
 }
 
 // Resize sets a new size for the Container
 func (c *Container) Resize(size Size) {
-	c.Size = size
+	c.size = size
 	c.layout()
 }
 
-// CurrentPosition gets the current position of this Container, relative to it's parent
-func (c *Container) CurrentPosition() Position {
-	return c.Position
+// Position gets the current position of this Container, relative to it's parent
+func (c *Container) Position() Position {
+	return c.position
 }
 
 // Move the container (and all it's children) to a new position, relative to it's parent
 func (c *Container) Move(pos Position) {
-	c.Position = pos
+	c.position = pos
 	c.layout()
 }
 
@@ -61,8 +61,8 @@ func (c *Container) MinSize() Size {
 
 }
 
-// IsVisible returns true if the container is currently visible, false otherwise.
-func (c *Container) IsVisible() bool {
+// Visible returns true if the container is currently visible, false otherwise.
+func (c *Container) Visible() bool {
 	return !c.Hidden
 }
 
@@ -105,7 +105,7 @@ func NewContainer(objects ...CanvasObject) *Container {
 		Objects: objects,
 	}
 
-	ret.Size = ret.MinSize()
+	ret.size = ret.MinSize()
 	ret.layout()
 
 	return ret
@@ -119,7 +119,7 @@ func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 		Layout:  layout,
 	}
 
-	ret.Size = layout.MinSize(objects)
+	ret.size = layout.MinSize(objects)
 	ret.layout()
 	return ret
 }

@@ -25,6 +25,33 @@ type Form struct {
 	itemGrid *fyne.Container
 }
 
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (f *Form) Resize(size fyne.Size) {
+	f.resize(size, f)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (f *Form) Move(pos fyne.Position) {
+	f.move(pos, f)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (f *Form) MinSize() fyne.Size {
+	return f.minSize(f)
+}
+
+// Show this widget, if it was previously hidden
+func (f *Form) Show() {
+	f.show(f)
+}
+
+// Hide this widget, if it was previously visible
+func (f *Form) Hide() {
+	f.hide(f)
+}
+
 func (f *Form) createLabel(text string) *Label {
 	label := &Label{Text: text,
 		Alignment: fyne.TextAlignTrailing,
@@ -55,28 +82,24 @@ func (f *Form) AppendItem(item *FormItem) {
 	f.itemGrid.AddObject(f.createLabel(item.Text))
 	f.itemGrid.AddObject(item.Widget)
 
-	f.Renderer().Refresh()
+	Renderer(f).Refresh()
 }
 
-// Renderer is a private method to Fyne which links this widget to it's renderer
-func (f *Form) Renderer() fyne.WidgetRenderer {
-	if f.renderer == nil {
-		f.ensureGrid()
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (f *Form) CreateRenderer() fyne.WidgetRenderer {
+	f.ensureGrid()
 
-		buttons := NewHBox(layout.NewSpacer())
-		if f.OnCancel != nil {
-			buttons.Append(NewButton("Cancel", f.OnCancel))
-		}
-		if f.OnSubmit != nil {
-			submit := NewButton("Submit", f.OnSubmit)
-			submit.Style = PrimaryButton
-
-			buttons.Append(submit)
-		}
-		f.renderer = NewVBox(f.itemGrid, buttons).Renderer()
+	buttons := NewHBox(layout.NewSpacer())
+	if f.OnCancel != nil {
+		buttons.Append(NewButton("Cancel", f.OnCancel))
 	}
+	if f.OnSubmit != nil {
+		submit := NewButton("Submit", f.OnSubmit)
+		submit.Style = PrimaryButton
 
-	return f.renderer
+		buttons.Append(submit)
+	}
+	return Renderer(NewVBox(f.itemGrid, buttons))
 }
 
 // NewForm creates a new form widget with the specified rows of form items
@@ -84,6 +107,6 @@ func (f *Form) Renderer() fyne.WidgetRenderer {
 func NewForm(items ...*FormItem) *Form {
 	form := &Form{baseWidget: baseWidget{}, Items: items}
 
-	form.Renderer().Layout(form.MinSize())
+	Renderer(form).Layout(form.MinSize())
 	return form
 }
