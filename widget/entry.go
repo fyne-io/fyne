@@ -4,10 +4,16 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
+)
+
+const (
+	passwordChar = "*"
 )
 
 type entryRenderer struct {
@@ -96,11 +102,7 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 func (e *entryRenderer) Refresh() {
 	text := e.entry.Text
 	if e.entry.password {
-		obText := ""
-		for range text {
-			obText += "*"
-		}
-		text = obText
+		text = strings.Repeat(passwordChar, utf8.RuneCountInString(text))
 	}
 	e.label.SetText(text)
 
