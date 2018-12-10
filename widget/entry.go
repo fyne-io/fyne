@@ -316,8 +316,8 @@ func NewEntry() *Entry {
 	return e
 }
 
-// NewEntryPassword creates a new entry password widget
-func NewEntryPassword() *Entry {
+// NewPasswordEntry creates a new entry password widget
+func NewPasswordEntry() *Entry {
 	e := &Entry{password: true}
 
 	Renderer(e).Layout(e.MinSize())

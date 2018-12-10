@@ -8,16 +8,16 @@ import "github.com/fyne-io/fyne/test"
 import "github.com/fyne-io/fyne"
 import "github.com/fyne-io/fyne/theme"
 
-func TestEntryPassword_MinSize(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_MinSize(t *testing.T) {
+	entry := NewPasswordEntry()
 	min := entry.MinSize()
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
 }
 
-func TestEntryPassword_OnKeyDown(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_OnKeyDown(t *testing.T) {
+	entry := NewPasswordEntry()
 
 	key := new(fyne.KeyEvent)
 	key.String = "H"
@@ -28,8 +28,8 @@ func TestEntryPassword_OnKeyDown(t *testing.T) {
 	assert.Equal(t, "Hi", entry.Text)
 }
 
-func TestEntryPassword_OnKeyDown_Insert(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_OnKeyDown_Insert(t *testing.T) {
+	entry := NewPasswordEntry()
 
 	key := new(fyne.KeyEvent)
 	key.String = "H"
@@ -46,8 +46,8 @@ func TestEntryPassword_OnKeyDown_Insert(t *testing.T) {
 	assert.Equal(t, "Hoi", entry.Text)
 }
 
-func TestEntryPassword_OnKeyDown_Backspace(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_OnKeyDown_Backspace(t *testing.T) {
+	entry := NewPasswordEntry()
 	entry.SetText("Hi")
 	right := &fyne.KeyEvent{Name: "Right"}
 	entry.OnKeyDown(right)
@@ -64,8 +64,8 @@ func TestEntryPassword_OnKeyDown_Backspace(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
-func TestEntryPassword_OnKeyDown_BackspaceBeyondContent(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_OnKeyDown_BackspaceBeyondContent(t *testing.T) {
+	entry := NewPasswordEntry()
 	entry.SetText("Hi")
 	right := &fyne.KeyEvent{Name: "Right"}
 	entry.OnKeyDown(right)
@@ -80,8 +80,8 @@ func TestEntryPassword_OnKeyDown_BackspaceBeyondContent(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
-func TestEntryPassword_OnKeyDown_Delete(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_OnKeyDown_Delete(t *testing.T) {
+	entry := NewPasswordEntry()
 	entry.SetText("Hi")
 	right := &fyne.KeyEvent{Name: "Right"}
 	entry.OnKeyDown(right)
@@ -97,8 +97,8 @@ func TestEntryPassword_OnKeyDown_Delete(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
-func TestEntryPassword_OnKeyDown_DeleteBeyondContent(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_OnKeyDown_DeleteBeyondContent(t *testing.T) {
+	entry := NewPasswordEntry()
 	entry.SetText("Hi")
 
 	key := new(fyne.KeyEvent)
@@ -110,8 +110,8 @@ func TestEntryPassword_OnKeyDown_DeleteBeyondContent(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
-func TestEntryPassword_Notify(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_Notify(t *testing.T) {
+	entry := NewPasswordEntry()
 	changed := false
 
 	entry.OnChanged = func(string) {
@@ -122,8 +122,8 @@ func TestEntryPassword_Notify(t *testing.T) {
 	assert.True(t, changed)
 }
 
-func TestEntryPassword_Focus(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_Focus(t *testing.T) {
+	entry := NewPasswordEntry()
 
 	entry.OnFocusGained()
 	assert.True(t, entry.Focused())
@@ -132,16 +132,16 @@ func TestEntryPassword_Focus(t *testing.T) {
 	assert.False(t, entry.Focused())
 }
 
-func TestEntryPassword_WindowFocus(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_WindowFocus(t *testing.T) {
+	entry := NewPasswordEntry()
 	canvas := test.Canvas()
 
 	canvas.Focus(entry)
 	assert.True(t, entry.Focused())
 }
 
-func TestEntryPassword_FocusHighlight(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_FocusHighlight(t *testing.T) {
+	entry := NewPasswordEntry()
 
 	entry.OnFocusGained()
 	assert.True(t, entry.focused)
@@ -150,8 +150,8 @@ func TestEntryPassword_FocusHighlight(t *testing.T) {
 	assert.False(t, entry.focused)
 }
 
-func TestEntryPassword_CursorRow(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_CursorRow(t *testing.T) {
+	entry := NewPasswordEntry()
 	entry.SetText("test")
 	assert.Equal(t, 0, entry.CursorRow)
 
@@ -174,8 +174,8 @@ func TestEntryPassword_CursorRow(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 }
 
-func TestEntryPassword_CursorColumn(t *testing.T) {
-	entry := NewEntryPassword()
+func TestPasswordEntry_CursorColumn(t *testing.T) {
+	entry := NewPasswordEntry()
 	entry.SetText("")
 	assert.Equal(t, 0, entry.CursorColumn)
 

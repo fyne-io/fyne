@@ -17,7 +17,7 @@ func formApp(app fyne.App) {
 
 	name := widget.NewEntry()
 	email := widget.NewEntry()
-	password := widget.NewEntryPassword()
+	password := widget.NewPasswordEntry()
 	largeText := widget.NewEntry()
 	//	largeText.Text = "\n\n\n"
 
