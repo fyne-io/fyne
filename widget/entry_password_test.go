@@ -16,6 +16,16 @@ func TestPasswordEntry_MinSize(t *testing.T) {
 	assert.True(t, min.Height > theme.Padding()*2)
 }
 
+func TestPasswordEntry_Obfuscation(t *testing.T) {
+	entry := NewPasswordEntry()
+
+	key := new(fyne.KeyEvent)
+	key.String = "Hié™שרה"
+	entry.OnKeyDown(key)
+	assert.Equal(t, "Hié™שרה", entry.Text)
+	assert.Equal(t, "*******", entry.label().Text)
+}
+
 func TestPasswordEntry_OnKeyDown(t *testing.T) {
 	entry := NewPasswordEntry()
 
