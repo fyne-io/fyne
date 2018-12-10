@@ -245,7 +245,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		substr := fmt.Sprintf("%s%s", string(runes[:pos]), string(runes[pos+1:]))
 
 		e.SetText(substr)
-	} else if key.Name == fyne.KeyReturn && e.password == false {
+	} else if key.Name == fyne.KeyReturn && !e.password {
 		e.insertAtCursor("\n")
 
 		e.CursorColumn = 0
