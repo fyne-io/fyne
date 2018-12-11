@@ -83,10 +83,7 @@ func (l *labelRenderer) MinSize() fyne.Size {
 
 func (l *labelRenderer) Layout(size fyne.Size) {
 	yPos := theme.Padding()
-	lineHeight := size.Height - theme.Padding()*2
-	if len(l.texts) > 1 {
-		lineHeight = lineHeight / l.lines
-	}
+	lineHeight := emptyTextMinSize(l.label.TextStyle).Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
 	for i := 0; i < l.lines; i++ {
 		text := l.texts[i]
@@ -166,8 +163,7 @@ func (l *Label) SetText(text string) {
 	}
 
 	render.updateTexts(render.parseText(l.Text))
-
-	Renderer(l).Refresh()
+	Renderer(l).Layout(l.Size())
 }
 
 // Rows returns the number of text rows in this text entry.
