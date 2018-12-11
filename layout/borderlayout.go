@@ -55,14 +55,6 @@ func (b *borderLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		}
 	}
 
-	if b.top != nil {
-		minWidth := fyne.Max(minSize.Width, b.top.MinSize().Width)
-		minSize = fyne.NewSize(minWidth, minSize.Height+b.top.MinSize().Height+theme.Padding())
-	}
-	if b.bottom != nil {
-		minWidth := fyne.Max(minSize.Width, b.bottom.MinSize().Width)
-		minSize = fyne.NewSize(minWidth, minSize.Height+b.bottom.MinSize().Height+theme.Padding())
-	}
 	if b.left != nil {
 		minHeight := fyne.Max(minSize.Height, b.left.MinSize().Height)
 		minSize = fyne.NewSize(minSize.Width+b.left.MinSize().Width+theme.Padding(), minHeight)
@@ -70,6 +62,15 @@ func (b *borderLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	if b.right != nil {
 		minHeight := fyne.Max(minSize.Height, b.right.MinSize().Height)
 		minSize = fyne.NewSize(minSize.Width+b.right.MinSize().Width+theme.Padding(), minHeight)
+	}
+
+	if b.top != nil {
+		minWidth := fyne.Max(minSize.Width, b.top.MinSize().Width)
+		minSize = fyne.NewSize(minWidth, minSize.Height+b.top.MinSize().Height+theme.Padding())
+	}
+	if b.bottom != nil {
+		minWidth := fyne.Max(minSize.Width, b.bottom.MinSize().Width)
+		minSize = fyne.NewSize(minWidth, minSize.Height+b.bottom.MinSize().Height+theme.Padding())
 	}
 
 	return minSize
