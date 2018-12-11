@@ -15,6 +15,10 @@ type Window interface {
 	// true for a fullScreen window and false to unset this.
 	SetFullScreen(bool)
 
+	// Resize this window to the requested content size.
+	// The result may not be exactly as desired due to various desktop or platform constraints.
+	Resize(Size)
+
 	// FixedSize returns whether or not this window should disable resizing.
 	FixedSize() bool
 	// SetFixedSize sets a hint that states whether the window should be a fixed

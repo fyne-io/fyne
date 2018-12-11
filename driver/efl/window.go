@@ -77,6 +77,13 @@ func (w *window) SetFullScreen(full bool) {
 	})
 }
 
+func (w *window) Resize(size fyne.Size) {
+	scale := w.canvas.Scale()
+	runOnMain(func() {
+		C.ecore_evas_resize(w.ee, C.int(float32(size.Width)*scale), C.int(float32(size.Height)*scale))
+	})
+}
+
 func (w *window) FixedSize() bool {
 	return w.fixedSize
 }

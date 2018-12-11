@@ -29,6 +29,10 @@ func (w *testWindow) SetFullScreen(fullScreen bool) {
 	w.fullScreen = fullScreen
 }
 
+func (w *testWindow) Resize(fyne.Size) {
+	// no-op
+}
+
 func (w *testWindow) FixedSize() bool {
 	return w.fixedSize
 }

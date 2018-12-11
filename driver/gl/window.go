@@ -59,6 +59,13 @@ func (w *window) SetFullScreen(full bool) {
 	})
 }
 
+func (w *window) Resize(size fyne.Size) {
+	runOnMainAsync(func() {
+		scale := w.canvas.Scale()
+		w.viewport.SetSize(int(float32(size.Width)*scale), int(float32(size.Height)*scale))
+	})
+}
+
 func (w *window) FixedSize() bool {
 	return w.fixedSize
 }
