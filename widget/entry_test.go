@@ -269,3 +269,37 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 }
+
+func TestPasswordEntry_NewlineIgnored(t *testing.T) {
+	entry := NewPasswordEntry()
+	entry.SetText("test")
+	assert.Equal(t, 0, entry.CursorRow)
+
+	// only 1 line, do nothing
+	down := &fyne.KeyEvent{Name: "Down"}
+	entry.OnKeyDown(down)
+	assert.Equal(t, 0, entry.CursorRow)
+
+	// return is ignored, do nothing
+	ret := &fyne.KeyEvent{Name: "Return"}
+	entry.OnKeyDown(ret)
+	assert.Equal(t, 0, entry.CursorRow)
+
+	up := &fyne.KeyEvent{Name: "Up"}
+	entry.OnKeyDown(up)
+	assert.Equal(t, 0, entry.CursorRow)
+
+	// don't go beyond top
+	entry.OnKeyDown(up)
+	assert.Equal(t, 0, entry.CursorRow)
+}
+
+func TestPasswordEntry_Obfuscation(t *testing.T) {
+	entry := NewPasswordEntry()
+
+	key := new(fyne.KeyEvent)
+	key.String = "Hié™שרה"
+	entry.OnKeyDown(key)
+	assert.Equal(t, "Hié™שרה", entry.Text)
+	assert.Equal(t, "*******", entry.label().Text)
+}

@@ -4,10 +4,16 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
+)
+
+const (
+	passwordChar = "*"
 )
 
 type entryRenderer struct {
@@ -94,7 +100,11 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	e.label.SetText(e.entry.Text)
+	text := e.entry.Text
+	if e.entry.password {
+		text = strings.Repeat(passwordChar, utf8.RuneCountInString(text))
+	}
+	e.label.SetText(text)
 
 	if e.entry.focused {
 		e.cursor.FillColor = theme.FocusColor()
@@ -118,7 +128,8 @@ type Entry struct {
 
 	CursorRow, CursorColumn int
 
-	focused bool
+	focused  bool
+	password bool
 }
 
 // Resize sets a new size for a widget.
@@ -236,7 +247,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		substr := fmt.Sprintf("%s%s", string(runes[:pos]), string(runes[pos+1:]))
 
 		e.SetText(substr)
-	} else if key.Name == fyne.KeyReturn {
+	} else if key.Name == fyne.KeyReturn && !e.password {
 		e.insertAtCursor("\n")
 
 		e.CursorColumn = 0
@@ -300,6 +311,14 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 // NewEntry creates a new entry widget.
 func NewEntry() *Entry {
 	e := &Entry{}
+
+	Renderer(e).Layout(e.MinSize())
+	return e
+}
+
+// NewPasswordEntry creates a new entry password widget
+func NewPasswordEntry() *Entry {
+	e := &Entry{password: true}
 
 	Renderer(e).Layout(e.MinSize())
 	return e

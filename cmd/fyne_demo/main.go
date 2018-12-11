@@ -15,6 +15,9 @@ import "github.com/fyne-io/fyne/widget"
 func formApp(app fyne.App) {
 	w := app.NewWindow("Form")
 
+	name := widget.NewEntry()
+	email := widget.NewEntry()
+	password := widget.NewPasswordEntry()
 	largeText := widget.NewEntry()
 	//	largeText.Text = "\n\n\n"
 
@@ -24,10 +27,15 @@ func formApp(app fyne.App) {
 		},
 		OnSubmit: func() {
 			fmt.Println("Form submitted")
+			fmt.Println("Name:", name.Text)
+			fmt.Println("Email:", email.Text)
+			fmt.Println("Password:", password.Text)
+			fmt.Println("Message:", largeText.Text)
 		},
 	}
-	form.Append("Name", widget.NewEntry())
-	form.Append("Email", widget.NewEntry())
+	form.Append("Name", name)
+	form.Append("Email", email)
+	form.Append("Password", password)
 	form.Append("Message", largeText)
 	w.SetContent(form)
 	w.Show()
