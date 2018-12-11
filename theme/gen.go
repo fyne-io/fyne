@@ -97,6 +97,7 @@ func main() {
 	for _, theme := range themes {
 		bundleIcon("cancel", theme, f)
 		bundleIcon("check", theme, f)
+		bundleIcon("delete", theme, f)
 		bundleIcon("check-box", theme, f)
 		bundleIcon("check-box-blank", theme, f)
 

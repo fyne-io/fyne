@@ -43,7 +43,7 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 	return &ThemedResource{dark, light}
 }
 
-var cancel, confirm, checked, unchecked *ThemedResource
+var cancel, confirm, delete, checked, unchecked *ThemedResource
 var contentCut, contentCopy, contentPaste *ThemedResource
 var info, question, warning *ThemedResource
 var mailCompose, mailForward, mailReply, mailReplyAll *ThemedResource
@@ -52,6 +52,7 @@ var arrowBack, arrowForward fyne.Resource
 func init() {
 	cancel = &ThemedResource{cancelDark, cancelLight}
 	confirm = &ThemedResource{checkDark, checkLight}
+	delete = &ThemedResource{deleteDark, deleteLight}
 	checked = &ThemedResource{checkboxDark, checkboxLight}
 	unchecked = &ThemedResource{checkboxblankDark, checkboxblankLight}
 
@@ -85,6 +86,11 @@ func CancelIcon() fyne.Resource {
 // ConfirmIcon returns a resource containing the standard confirm icon for the current theme
 func ConfirmIcon() fyne.Resource {
 	return confirm
+}
+
+// DeleteIcon returns a resource containing the standard delete icon for the current theme
+func DeleteIcon() fyne.Resource {
+	return delete
 }
 
 // CheckedIcon returns a resource containing the standard checkbox icon for the current theme
