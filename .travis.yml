@@ -2,6 +2,7 @@ language: go
 
 go:
   - "1.10.x"
+  - "1.11.x"
 
 gobuild_args: "-v -tags ci"
 
