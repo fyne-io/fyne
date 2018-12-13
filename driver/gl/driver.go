@@ -23,6 +23,8 @@ type gLDriver struct {
 }
 
 func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
+	canvasMutex.RLock()
+	defer canvasMutex.RUnlock()
 	return canvases[obj]
 }
 
