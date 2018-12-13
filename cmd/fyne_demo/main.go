@@ -27,10 +27,10 @@ func formApp(app fyne.App) {
 		},
 		OnSubmit: func() {
 			fmt.Println("Form submitted")
-			fmt.Println("Name:", name.Text())
-			fmt.Println("Email:", email.Text())
-			fmt.Println("Password:", password.Text())
-			fmt.Println("Message:", largeText.Text())
+			fmt.Println("Name:", name.Text)
+			fmt.Println("Email:", email.Text)
+			fmt.Println("Password:", password.Text)
+			fmt.Println("Message:", largeText.Text)
 		},
 	}
 	form.Append("Name", name)

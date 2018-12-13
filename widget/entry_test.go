@@ -25,7 +25,7 @@ func TestEntry_OnKeyDown(t *testing.T) {
 	key.String = "i"
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, "Hi", entry.Text())
+	assert.Equal(t, "Hi", entry.Text)
 }
 
 func TestEntry_OnKeyDown_Insert(t *testing.T) {
@@ -36,14 +36,14 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 	entry.OnKeyDown(key)
 	key.String = "i"
 	entry.OnKeyDown(key)
-	assert.Equal(t, "Hi", entry.Text())
+	assert.Equal(t, "Hi", entry.Text)
 
 	left := &fyne.KeyEvent{Name: "Left"}
 	entry.OnKeyDown(left)
 
 	key.String = "o"
 	entry.OnKeyDown(key)
-	assert.Equal(t, "Hoi", entry.Text())
+	assert.Equal(t, "Hoi", entry.Text)
 }
 
 func TestEntry_OnKeyDown_Backspace(t *testing.T) {
@@ -59,7 +59,7 @@ func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 	key.Name = "BackSpace"
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, "H", entry.Text())
+	assert.Equal(t, "H", entry.Text)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 }
@@ -77,7 +77,7 @@ func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 	entry.OnKeyDown(key)
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, "", entry.Text())
+	assert.Equal(t, "", entry.Text)
 }
 
 func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
@@ -91,7 +91,7 @@ func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
 	key.Name = "BackSpace"
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, "Hi", entry.Text())
+	assert.Equal(t, "Hi", entry.Text)
 }
 
 func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
@@ -106,7 +106,7 @@ func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
 	bs := new(fyne.KeyEvent)
 	bs.Name = "BackSpace"
 	entry.OnKeyDown(bs)
-	assert.Equal(t, "", entry.Text())
+	assert.Equal(t, "", entry.Text)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
 }
@@ -123,7 +123,7 @@ func TestEntry_OnKeyDown_Delete(t *testing.T) {
 	key.Name = "Delete"
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, "H", entry.Text())
+	assert.Equal(t, "H", entry.Text)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 }
@@ -138,7 +138,7 @@ func TestEntry_OnKeyDown_DeleteBeyondText(t *testing.T) {
 	entry.OnKeyDown(key)
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, "", entry.Text())
+	assert.Equal(t, "", entry.Text)
 }
 
 func TestEntry_OnKeyDown_DeleteNewline(t *testing.T) {
@@ -152,7 +152,7 @@ func TestEntry_OnKeyDown_DeleteNewline(t *testing.T) {
 	key.Name = "Delete"
 	entry.OnKeyDown(key)
 
-	assert.Equal(t, "Hi", entry.Text())
+	assert.Equal(t, "Hi", entry.Text)
 }
 
 func TestEntryNotify(t *testing.T) {
@@ -317,6 +317,6 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 	key := new(fyne.KeyEvent)
 	key.String = "Hié™שרה"
 	entry.OnKeyDown(key)
-	assert.Equal(t, "Hié™שרה", entry.Text())
+	assert.Equal(t, "Hié™שרה", entry.Text)
 	assert.Equal(t, "*******", entry.label().Text)
 }
