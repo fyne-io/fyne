@@ -40,7 +40,7 @@ func (l *labelRenderer) parseText(text string) []string {
 func (l *labelRenderer) updateTexts(strings []string) {
 	l.lines = len(strings)
 	count := len(l.texts)
-	refresh := false
+	layout := false
 
 	for i, str := range strings {
 		if i >= count {
@@ -48,19 +48,20 @@ func (l *labelRenderer) updateTexts(strings []string) {
 			l.texts = append(l.texts, text)
 			l.objects = append(l.objects, text)
 
-			refresh = true
+			layout = true
 		}
 		l.texts[i].Text = str
 	}
 
 	for i := l.lines; i < len(l.texts); i++ {
 		l.texts[i].Text = ""
-		refresh = true
+		layout = true
 	}
 
-	if refresh {
+	l.Refresh()
+	if layout {
 		// TODO invalidate container size (to shrink)
-		l.Refresh()
+		l.Layout(l.label.Size())
 	}
 }
 
@@ -163,7 +164,6 @@ func (l *Label) SetText(text string) {
 	}
 
 	render.updateTexts(render.parseText(l.Text))
-	Renderer(l).Layout(l.Size())
 }
 
 // Rows returns the number of text rows in this text entry.
