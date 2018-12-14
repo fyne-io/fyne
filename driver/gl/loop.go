@@ -74,6 +74,7 @@ func (d *gLDriver) runGL() {
 			walkObjects(object, fyne.NewPos(0, 0), freeWalked)
 		case <-fps.C:
 			glfw.PollEvents()
+			closers := []int{}
 			for i, win := range d.windows {
 				viewport := win.(*window).viewport
 				viewport.MakeContextCurrent()
@@ -83,7 +84,8 @@ func (d *gLDriver) runGL() {
 
 				if viewport.ShouldClose() {
 					// remove window from window list
-					d.windows = append(d.windows[:i], d.windows[i+1:]...)
+					//d.windows = append(d.windows[:i], d.windows[i+1:]...)
+					closers = append(closers, i)
 					viewport.Destroy()
 					glfw.DetachCurrentContext()
 
@@ -108,6 +110,9 @@ func (d *gLDriver) runGL() {
 
 				win.(*window).viewport.SwapBuffers()
 				glfw.DetachCurrentContext()
+			}
+			for _, i := range closers {
+				d.windows = append(d.windows[:i], d.windows[i+1:]...)
 			}
 		}
 	}
