@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"strings"
@@ -52,12 +51,12 @@ func (e *entryRenderer) cursorPosition() (int, int) {
 	renderlabel := Renderer(e.label).(*labelRenderer).texts[0]
 	lineHeight := emptyTextMinSize(e.label.TextStyle).Height
 
-	str := Renderer(e.label).(*labelRenderer).texts[e.entry.CursorRow].Text
+	runes := []rune(Renderer(e.label).(*labelRenderer).texts[e.entry.CursorRow].Text)
 	// sanity check, as the underlying entry text can actually change
-	if e.entry.CursorColumn > len(str) {
-		e.entry.CursorColumn = len(str)
+	if e.entry.CursorColumn > len(runes) {
+		e.entry.CursorColumn = len(runes)
 	}
-	substr := str[0:e.entry.CursorColumn]
+	substr := string(runes[0:e.entry.CursorColumn])
 	subSize := textMinSize(substr, renderlabel.TextSize, e.label.TextStyle)
 
 	return subSize.Width, e.entry.CursorRow * lineHeight
@@ -100,10 +99,13 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	text := e.entry.Text
+	var text string
 	if e.entry.password {
-		text = strings.Repeat(passwordChar, utf8.RuneCountInString(text))
+		text = strings.Repeat(passwordChar, utf8.RuneCountInString(e.entry.Text))
+	} else {
+		text = e.entry.Text
 	}
+
 	e.label.SetText(text)
 
 	if e.entry.focused {
@@ -161,8 +163,12 @@ func (e *Entry) Hide() {
 
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
-	e.Text = text
+	e.updateText(text)
+}
 
+// updateText updates the internal text to the given value
+func (e *Entry) updateText(text string) {
+	e.Text = text
 	if e.OnChanged != nil {
 		e.OnChanged(text)
 	}
@@ -191,9 +197,15 @@ func (e *Entry) cursorTextPos() int {
 
 func (e *Entry) insertAtCursor(text string) {
 	pos := e.cursorTextPos()
-	newText := fmt.Sprintf("%s%s%s", e.Text[:pos], text, e.Text[pos:])
+	runes := []rune(e.Text)
+	runes = append(runes[:pos], append([]rune(text), runes[pos:]...)...)
+	e.updateText(string(runes))
+}
 
-	e.SetText(newText)
+func (e *Entry) deleteFromTo(from int, to int) {
+	runes := []rune(e.Text)
+	runes = append(runes[:from], runes[to:]...)
+	e.updateText(string(runes))
 }
 
 // OnFocusGained is called when the Entry has been given focus.
@@ -222,11 +234,8 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			return
 		}
 
-		runes := []rune(e.Text)
 		pos := e.cursorTextPos()
-		substr := fmt.Sprintf("%s%s", string(runes[:pos-1]), string(runes[pos:]))
-
-		if runes[pos-1] == '\n' {
+		if e.Text[pos-1] == '\n' {
 			e.CursorRow--
 			e.CursorColumn = e.label().RowLength(e.CursorRow)
 		} else {
@@ -234,19 +243,15 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 				e.CursorColumn--
 			}
 		}
-
-		e.SetText(substr)
+		e.deleteFromTo(pos-1, pos)
 	} else if key.Name == fyne.KeyDelete {
 		texts := Renderer(e.label()).(*labelRenderer).texts
 		if len(e.Text) == 0 || (e.CursorRow == len(texts)-1 && e.CursorColumn == len(texts[e.CursorRow].Text)) {
 			return
 		}
 
-		runes := []rune(e.Text)
 		pos := e.cursorTextPos()
-		substr := fmt.Sprintf("%s%s", string(runes[:pos]), string(runes[pos+1:]))
-
-		e.SetText(substr)
+		e.deleteFromTo(pos, pos+1)
 	} else if key.Name == fyne.KeyReturn && !e.password {
 		e.insertAtCursor("\n")
 

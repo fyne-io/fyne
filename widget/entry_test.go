@@ -64,7 +64,7 @@ func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
-func TestEntry_OnKeyDown_BackspaceBeyondContent(t *testing.T) {
+func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
 	right := &fyne.KeyEvent{Name: "Right"}
@@ -94,6 +94,23 @@ func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
 	assert.Equal(t, "Hi", entry.Text)
 }
 
+func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
+	entry := NewEntry()
+
+	key := new(fyne.KeyEvent)
+	key.String = "è"
+	entry.OnKeyDown(key)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	bs := new(fyne.KeyEvent)
+	bs.Name = "BackSpace"
+	entry.OnKeyDown(bs)
+	assert.Equal(t, "", entry.Text)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+}
+
 func TestEntry_OnKeyDown_Delete(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
@@ -111,7 +128,7 @@ func TestEntry_OnKeyDown_Delete(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
-func TestEntry_OnKeyDown_DeleteBeyondContent(t *testing.T) {
+func TestEntry_OnKeyDown_DeleteBeyondText(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
 

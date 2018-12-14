@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
 )
@@ -17,7 +18,7 @@ func makeButtonTab() fyne.Widget {
 
 func makeInputTab() fyne.Widget {
 	entry := widget.NewEntry()
-	entry.Text = "Entry"
+	entry.SetText("Entry")
 
 	return widget.NewVBox(
 		entry,

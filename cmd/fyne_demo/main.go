@@ -50,7 +50,7 @@ func main() {
 
 	w := app.NewWindow("Fyne Demo")
 	entry := widget.NewEntry()
-	entry.Text = "Entry"
+	entry.SetText("Entry")
 
 	cv := canvas.NewImageFromResource(theme.FyneLogo())
 	cv.SetMinSize(fyne.NewSize(64, 64))
