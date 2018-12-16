@@ -100,13 +100,11 @@ func (d *gLDriver) runGL() {
 				win.(*window).fitContent()
 
 				size := canvas.Size()
-				winWidth := scaleInt(canvas, size.Width)
-				winHeight := scaleInt(canvas, size.Height)
-
-				gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
 				canvas.paint(size)
 
-				win.(*window).viewport.SwapBuffers()
+				view := win.(*window)
+				updateGLContext(view)
+				view.viewport.SwapBuffers()
 				glfw.DetachCurrentContext()
 			}
 		}

@@ -17,6 +17,7 @@ import (
 
 type window struct {
 	viewport *glfw.Window
+	painted  int // part of the macOS GL fix, updated GLFW should fix this
 	canvas   *glCanvas
 	title    string
 	icon     fyne.Resource
@@ -197,16 +198,13 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
+	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
 	viewport.MakeContextCurrent()
 
 	size := w.canvas.Size()
-	winWidth := scaleInt(w.canvas, size.Width)
-	winHeight := scaleInt(w.canvas, size.Height)
-
-	gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
 	w.canvas.paint(size)
 
 	viewport.SwapBuffers()
