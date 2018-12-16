@@ -99,11 +99,11 @@ func (d *gLDriver) runGL() {
 				}
 				win.(*window).fitContent()
 
+				view := win.(*window)
+				updateGLContext(view)
 				size := canvas.Size()
 				canvas.paint(size)
 
-				view := win.(*window)
-				updateGLContext(view)
 				view.viewport.SwapBuffers()
 				glfw.DetachCurrentContext()
 			}
