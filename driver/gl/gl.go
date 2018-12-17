@@ -68,7 +68,8 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 	return texture
 }
 
-func (c *glCanvas) newGlTextTexture(text fyne.CanvasObject) uint32 {
+func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
+	text := obj.(*canvas.Text)
 	texture := newTexture()
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -81,8 +82,8 @@ func (c *glCanvas) newGlTextTexture(text fyne.CanvasObject) uint32 {
 	dpi := float64(textDPI) * 4
 
 	var opts truetype.Options
-	fc := fontCache(text.(*canvas.Text).TextStyle)
-	fontSize := float64(text.(*canvas.Text).TextSize) * float64(c.Scale())
+	fc := fontCache(text.TextStyle)
+	fontSize := float64(text.TextSize) * float64(c.Scale())
 	opts.Size = fontSize
 	opts.DPI = dpi
 	face := truetype.NewFace(fc, &opts)
@@ -93,9 +94,9 @@ func (c *glCanvas) newGlTextTexture(text fyne.CanvasObject) uint32 {
 	ctx.SetFontSize(fontSize)
 	ctx.SetClip(img.Bounds())
 	ctx.SetDst(img)
-	ctx.SetSrc(&image.Uniform{theme.TextColor()})
+	ctx.SetSrc(&image.Uniform{text.Color})
 
-	ctx.DrawString(text.(*canvas.Text).Text, freetype.Pt(0, height+2-face.Metrics().Descent.Ceil()))
+	ctx.DrawString(text.Text, freetype.Pt(0, height+2-face.Metrics().Descent.Ceil()))
 
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(img.Rect.Size().X), int32(img.Rect.Size().Y),
 		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(img.Pix))
