@@ -1,9 +1,24 @@
 package canvas
 
-import "image"
-import "image/color"
+import (
+	"image"
+	"image/color"
 
-import "github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne"
+)
+
+// ImageFill defines the different type of ways an image can stretch to fill it's space.
+type ImageFill int
+
+const (
+	// ImageFillStretch will scale the image to match the Size() values.
+	// This is the default and does not maintain aspect ratio.
+	ImageFillStretch ImageFill = iota
+	// ImageFillContain makes the image fit within the object Size(),
+	// centrally and maintaining aspect ratio.
+	// There may be transparent sections top and bottom or left and right.
+	ImageFillContain //(Fit)
+)
 
 // Image describes a raster image area that can render in a Fyne canvas
 type Image struct {
@@ -14,6 +29,7 @@ type Image struct {
 	File       string                           // Load the image froma file
 
 	Translucency float64 // Set a translucency value > 0.0 to fade the image
+	FillMode     ImageFill // Specify how the image should scale to fill or fit
 }
 
 // Alpha is a convenience function that returns the alpha value for an image

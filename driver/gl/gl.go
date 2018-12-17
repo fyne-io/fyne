@@ -27,8 +27,16 @@ var refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
 	texture := textures[object]
+
+	// TODO only ignore image if we rescale (i.e. change aspect)
+	_, isImg := object.(*canvas.Image)
 	if texture != 0 {
-		return texture
+		if !isImg {
+			return texture
+		}
+
+		gl.DeleteTextures(1, &texture)
+		delete(textures, object)
 	}
 
 	texture = creator(object)
@@ -104,6 +112,28 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	return texture
 }
 
+func (c *glCanvas) getImageOffset(rect, sourceRect image.Rectangle, mode canvas.ImageFill) image.Point {
+	if mode == canvas.ImageFillStretch {
+		return image.ZP
+	}
+
+	aspect := float32(sourceRect.Max.X - sourceRect.Min.X)/float32(sourceRect.Max.Y - sourceRect.Min.Y)
+	width := rect.Max.X - rect.Min.X
+	height := rect.Max.Y - rect.Min.Y
+	viewAspect := float32(width)/float32(height)
+
+	widthPad, heightPad := 0, 0
+	if viewAspect > aspect {
+		newWidth := int(float32(height) * aspect)
+		widthPad = (width - newWidth)/2
+	} else {
+		newHeight := int(float32(width) / aspect)
+		heightPad = (height - newHeight)/2
+	}
+
+	return image.Pt(-widthPad, -heightPad)
+}
+
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 	img := obj.(*canvas.Image)
 	texture := newTexture()
@@ -142,9 +172,11 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 				return 0
 			} else {
-				raw = image.NewRGBA(pixels.Bounds())
+				point := c.getImageOffset(image.Rect(0, 0, img.Size().Width, img.Size().Height), pixels.Bounds(), img.FillMode)
+				bounds := image.Rect(0, 0, pixels.Bounds().Max.X-(point.X*2), pixels.Bounds().Max.Y-(point.Y*2))
+				raw = image.NewRGBA(bounds)
 
-				draw.Draw(raw, raw.Bounds(), pixels, image.ZP, draw.Src)
+				draw.Draw(raw, bounds, pixels, point, draw.Src)
 			}
 		}
 	} else if img.PixelColor != nil {

@@ -271,14 +271,33 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	case *canvas.Image:
-		var oldWidth, oldHeight C.int
-		C.evas_object_geometry_get(obj, nil, nil, &oldWidth, &oldHeight)
-
 		width := scaleInt(c, size.Width)
 		height := scaleInt(c, size.Height)
-		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
-			C.Evas_Coord(width), C.Evas_Coord(height))
 
+		if co.FillMode == canvas.ImageFillStretch {
+			C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
+				C.Evas_Coord(width), C.Evas_Coord(height))
+		} else {
+			viewAspect := float32(size.Width)/float32(size.Height)
+
+			var iw, ih C.int
+			C.evas_object_image_size_get(obj, &iw, &ih)
+			aspect := float32(iw)/float32(ih)
+
+			widthPad, heightPad := 0, 0
+			if viewAspect > aspect {
+				newWidth := int(float32(height) * aspect)
+				widthPad = (width - newWidth)/2
+				width = newWidth
+			} else {
+				newHeight := int(float32(width) / aspect)
+				heightPad = (height - newHeight)/2
+				height = newHeight
+			}
+
+			C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)+widthPad), C.Evas_Coord(scaleInt(c, pos.Y)+heightPad),
+				C.Evas_Coord(width), C.Evas_Coord(height))
+		}
 		C.evas_object_image_alpha_set(obj, C.EINA_TRUE)
 		alpha := C.int(float64(255) * co.Alpha())
 		C.evas_object_color_set(obj, alpha, alpha, alpha, alpha) // premul ffffff*alpha
