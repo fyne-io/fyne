@@ -8,7 +8,6 @@ import "github.com/fyne-io/fyne"
 type Circle struct {
 	Position1 fyne.Position // The current top-left position of the Circle
 	Position2 fyne.Position // The current bottomright position of the Circle
-	Options   Options       // Options to pass to the renderer
 	Hidden    bool          // Is this circle currently hidden
 
 	FillColor   color.Color // The circle fill colour

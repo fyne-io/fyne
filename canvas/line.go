@@ -11,7 +11,6 @@ import "github.com/fyne-io/fyne"
 type Line struct {
 	Position1 fyne.Position // The current top-left position of the Line
 	Position2 fyne.Position // The current bottomright position of the Line
-	Options   Options       // Options to pass to the renderer
 	Hidden    bool          // Is this Line currently hidden
 
 	StrokeColor color.Color // The line stroke colour

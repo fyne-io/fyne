@@ -85,7 +85,6 @@ func setColor(obj *C.Evas_Object, col color.Color) {
 
 func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, offset fyne.Position) *C.Evas_Object {
 	var obj *C.Evas_Object
-	var opts canvas.Options
 
 	switch co := o.(type) {
 	case *canvas.Text:
@@ -97,12 +96,10 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		setColor(obj, co.Color)
 
 		updateFont(obj, c, co.TextSize, co.TextStyle)
-		opts = co.Options
 	case *canvas.Rectangle:
 		obj = C.evas_object_rectangle_add(c.evas)
 
 		setColor(obj, co.FillColor)
-		opts = co.Options
 	case *canvas.Image:
 		obj = C.evas_object_image_filled_add(c.evas)
 		C.evas_object_image_alpha_set(obj, C.EINA_TRUE)
@@ -112,18 +109,15 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		if co.File != "" {
 			c.loadImage(co, obj)
 		}
-		opts = co.Options
 	case *canvas.Line:
 		obj = C.evas_object_line_add(c.evas)
 
 		setColor(obj, co.StrokeColor)
-		opts = co.Options
 	case *canvas.Circle:
 		// TODO - this isnt all there yet, but at least this stops lots of debug output
 		obj = C.evas_object_rectangle_add(c.evas)
 
 		setColor(obj, co.FillColor)
-		opts = co.Options
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
 		return nil
@@ -135,9 +129,6 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
 		nil)
-	if opts.RepeatEvents {
-		C.evas_object_repeat_events_set(obj, 1)
-	}
 
 	C.evas_object_show(obj)
 	return obj
