@@ -62,10 +62,12 @@ func (g *Group) Append(object fyne.CanvasObject) {
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	label := NewLabel(g.Text)
+	labelBg := canvas.NewRectangle(theme.BackgroundColor())
 	border := canvas.NewRectangle(theme.ButtonColor())
 	bg := canvas.NewRectangle(theme.BackgroundColor())
-	objects := []fyne.CanvasObject{border, bg, label, g.box}
-	return &groupRenderer{label: label, border: border, bg: bg, objects: objects, group: g}
+	objects := []fyne.CanvasObject{border, bg, labelBg, label, g.box}
+	return &groupRenderer{label: label, border: border, bg: bg, labelBg: labelBg,
+		objects: objects, group: g}
 }
 
 // NewGroup creates a new grouped list widget with a title and the specified list of child objects
@@ -77,8 +79,8 @@ func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 }
 
 type groupRenderer struct {
-	label      *Label
-	border, bg *canvas.Rectangle
+	label               *Label
+	border, bg, labelBg *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 	group   *Group
@@ -101,6 +103,8 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 	g.bg.Move(fyne.NewPos(thickness, halfHeight+thickness))
 	g.bg.Resize((fyne.NewSize(size.Width-thickness*2, size.Height-halfHeight-thickness*2)))
 
+	g.labelBg.Move(fyne.NewPos(theme.Padding()+thickness, 0))
+	g.labelBg.Resize(g.label.MinSize())
 	g.label.Move(fyne.NewPos(theme.Padding()+thickness, 0))
 	g.label.Resize(g.label.MinSize())
 
@@ -113,6 +117,7 @@ func (g *groupRenderer) ApplyTheme() {
 	Renderer(g.label).ApplyTheme()
 	g.border.FillColor = theme.ButtonColor()
 	g.bg.FillColor = theme.BackgroundColor()
+	g.labelBg.FillColor = theme.BackgroundColor()
 
 	Renderer(g.group.box).ApplyTheme()
 }

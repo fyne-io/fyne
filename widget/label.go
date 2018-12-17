@@ -106,7 +106,7 @@ func (l *labelRenderer) ApplyTheme() {
 }
 
 func (l *labelRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
+	return color.Transparent
 }
 
 func (l *labelRenderer) Refresh() {
