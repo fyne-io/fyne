@@ -62,20 +62,16 @@ func TestApplyThemeCalled(t *testing.T) {
 
 func TestApplyThemeCalledChild(t *testing.T) {
 	child := &myWidget{applied: make(chan bool)}
-	parent := NewList(child)
+	parent := NewVBox(child)
 
 	window := test.NewTestWindow(parent)
 	fyne.GlobalSettings().SetTheme("light")
 
 	func() {
-		// we wait 2 times, one for parent, one for child
-		for i := 0; i < 2; {
-			select {
-			case <-child.applied:
-				i++
-			case <-time.After(1 * time.Second):
-				assert.Fail(t, "Timed out waiting for child theme apply")
-			}
+		select {
+		case <-child.applied:
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Timed out waiting for child theme apply")
 		}
 	}()
 

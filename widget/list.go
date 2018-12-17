@@ -91,12 +91,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 // ApplyTheme is a fallback method that applies the new theme to all contained
 // objects. Widgets that override this should consider doing similarly.
 func (l *listRenderer) ApplyTheme() {
-	for _, child := range l.objects {
-		switch themed := child.(type) {
-		case fyne.ThemedObject:
-			themed.ApplyTheme()
-		}
-	}
+	l.Refresh()
 }
 
 func (l *listRenderer) BackgroundColor() color.Color {
