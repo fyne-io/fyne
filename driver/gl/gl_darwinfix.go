@@ -25,3 +25,15 @@ func updateGLContext(w *window) {
 		w.painted++
 	}
 }
+
+// This forces a redraw of the window as we resize
+func updateWinSize(w *window) {
+	w.viewport.MakeContextCurrent()
+
+	size := w.canvas.Size()
+	w.canvas.paint(size)
+
+	w.viewport.SwapBuffers()
+	glfw.DetachCurrentContext()
+
+}

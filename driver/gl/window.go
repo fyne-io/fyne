@@ -202,13 +202,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-	viewport.MakeContextCurrent()
-
-	size := w.canvas.Size()
-	w.canvas.paint(size)
-
-	viewport.SwapBuffers()
-	glfw.DetachCurrentContext()
+	updateWinSize(w)
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
