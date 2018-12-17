@@ -26,7 +26,7 @@ type Image struct {
 
 	// one of the following sources will provide our image data
 	PixelColor func(x, y, w, h int) color.Color // Render the image from code
-	File       string                           // Load the image froma file
+	File       string                           // Load the image from a file
 
 	Translucency float64 // Set a translucency value > 0.0 to fade the image
 	FillMode     ImageFill // Specify how the image should scale to fill or fit
