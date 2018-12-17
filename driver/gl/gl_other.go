@@ -1,3 +1,4 @@
+// +build !ci,gl
 // +build !darwin arm arm64
 
 package gl
