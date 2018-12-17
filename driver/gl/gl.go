@@ -117,18 +117,18 @@ func (c *glCanvas) getImageOffset(rect, sourceRect image.Rectangle, mode canvas.
 		return image.ZP
 	}
 
-	aspect := float32(sourceRect.Max.X - sourceRect.Min.X)/float32(sourceRect.Max.Y - sourceRect.Min.Y)
+	aspect := float32(sourceRect.Max.X-sourceRect.Min.X) / float32(sourceRect.Max.Y-sourceRect.Min.Y)
 	width := rect.Max.X - rect.Min.X
 	height := rect.Max.Y - rect.Min.Y
-	viewAspect := float32(width)/float32(height)
+	viewAspect := float32(width) / float32(height)
 
 	widthPad, heightPad := 0, 0
 	if viewAspect > aspect {
 		newWidth := int(float32(height) * aspect)
-		widthPad = (width - newWidth)/2
+		widthPad = (width - newWidth) / 2
 	} else {
 		newHeight := int(float32(width) / aspect)
-		heightPad = (height - newHeight)/2
+		heightPad = (height - newHeight) / 2
 	}
 
 	return image.Pt(-widthPad, -heightPad)
