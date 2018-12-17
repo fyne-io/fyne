@@ -269,20 +269,20 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 			C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 				C.Evas_Coord(width), C.Evas_Coord(height))
 		} else {
-			viewAspect := float32(size.Width)/float32(size.Height)
+			viewAspect := float32(size.Width) / float32(size.Height)
 
 			var iw, ih C.int
 			C.evas_object_image_size_get(obj, &iw, &ih)
-			aspect := float32(iw)/float32(ih)
+			aspect := float32(iw) / float32(ih)
 
 			widthPad, heightPad := 0, 0
 			if viewAspect > aspect {
 				newWidth := int(float32(height) * aspect)
-				widthPad = (width - newWidth)/2
+				widthPad = (width - newWidth) / 2
 				width = newWidth
 			} else {
 				newHeight := int(float32(width) / aspect)
-				heightPad = (height - newHeight)/2
+				heightPad = (height - newHeight) / 2
 				height = newHeight
 			}
 
