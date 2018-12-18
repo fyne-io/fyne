@@ -5,117 +5,166 @@ import "image/color"
 
 import "github.com/fyne-io/fyne"
 
-var loadedColors *themeColors
-var loadedTheme string
+type builtinTheme struct {
+	background color.Color
 
-type themeColors struct {
-	Background color.Color
-
-	Button, Text, Primary color.Color
+	button, text, primary color.Color
 }
 
-// Basic definition of light theme colours
-func loadLightColors() *themeColors {
-	return &themeColors{
-		Background: color.RGBA{0xf5, 0xf5, 0xf5, 0xff},
-		Button:     color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
-		Text:       color.RGBA{0x0, 0x0, 0x0, 0xdd},
-		Primary:    color.RGBA{0x9f, 0xa8, 0xda, 0xff},
+var lightBackground = color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
+
+// LightTheme defines the built in light theme colours and sizes
+func LightTheme() fyne.Theme {
+	return &builtinTheme{
+		background: lightBackground,
+		button:     color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
+		text:       color.RGBA{0x0, 0x0, 0x0, 0xdd},
+		primary:    color.RGBA{0x9f, 0xa8, 0xda, 0xff},
 	}
 }
 
-// Basic definition of dark theme colours
-func loadDarkColors() *themeColors {
-	return &themeColors{
-		Background: color.RGBA{0x42, 0x42, 0x42, 0xff},
-		Button:     color.RGBA{0x21, 0x21, 0x21, 0xff},
-		Text:       color.RGBA{0xff, 0xff, 0xff, 0xff},
-		Primary:    color.RGBA{0x1a, 0x23, 0x7e, 0xff},
+// DarkTheme defines the built in dark theme colours and sizes
+func DarkTheme() fyne.Theme {
+	return &builtinTheme{
+		background: color.RGBA{0x42, 0x42, 0x42, 0xff},
+		button:     color.RGBA{0x21, 0x21, 0x21, 0xff},
+		text:       color.RGBA{0xff, 0xff, 0xff, 0xff},
+		primary:    color.RGBA{0x1a, 0x23, 0x7e, 0xff},
 	}
 }
 
-// Load the right theme colours based on environment / settings
-func colors() *themeColors {
-	if loadedTheme != fyne.GlobalSettings().Theme() {
-		loadedColors = nil
-	}
-
-	c := loadedColors
-	if loadedColors == nil {
-
-		if fyne.GlobalSettings().Theme() == "light" {
-			c = loadLightColors()
-		} else {
-			c = loadDarkColors()
-		}
-	}
-
-	loadedColors = c
-	return c
-}
-
-// BackgroundColor returns the theme's background colour
-func BackgroundColor() color.Color {
-	return colors().Background
+func (t *builtinTheme) BackgroundColor() color.Color {
+	return t.background
 }
 
 // ButtonColor returns the theme's standard button colour
-func ButtonColor() color.Color {
-	return colors().Button
+func (t *builtinTheme) ButtonColor() color.Color {
+	return t.button
 }
 
 // TextColor returns the theme's standard text colour
-func TextColor() color.Color {
-	return colors().Text
+func (t *builtinTheme) TextColor() color.Color {
+	return t.text
 }
 
 // PrimaryColor returns the colour used to highlight primary features
-func PrimaryColor() color.Color {
-	return colors().Primary
+func (t *builtinTheme) PrimaryColor() color.Color {
+	return t.primary
 }
 
 // FocusColor returns the colour used to highlight a focussed widget
-func FocusColor() color.Color {
-	return colors().Primary
+func (t *builtinTheme) FocusColor() color.Color {
+	return t.primary
 }
 
 // TextSize returns the standard text size
-func TextSize() int {
+func (t *builtinTheme) TextSize() int {
 	return 14
 }
 
 // TextFont returns the font path for the regular font style
-func TextFont() fyne.Resource {
+func (t *builtinTheme) TextFont() fyne.Resource {
 	return regular
 }
 
 // TextBoldFont retutns the font path for the bold font style
-func TextBoldFont() fyne.Resource {
+func (t *builtinTheme) TextBoldFont() fyne.Resource {
 	return bold
 }
 
 // TextItalicFont returns the font path for the italic font style
-func TextItalicFont() fyne.Resource {
+func (t *builtinTheme) TextItalicFont() fyne.Resource {
 	return italic
 }
 
 // TextBoldItalicFont returns the font path for the bold and italic font style
-func TextBoldItalicFont() fyne.Resource {
+func (t *builtinTheme) TextBoldItalicFont() fyne.Resource {
 	return bolditalic
 }
 
 // TextMonospaceFont retutns the font path for the monospace font face
-func TextMonospaceFont() fyne.Resource {
+func (t *builtinTheme) TextMonospaceFont() fyne.Resource {
 	return monospace
 }
 
 // Padding is the standard gap between elements and the border around interface
 // elements
-func Padding() int {
+func (t *builtinTheme) Padding() int {
 	return 4
 }
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
-func IconInlineSize() int {
+func (t *builtinTheme) IconInlineSize() int {
 	return TextSize() + Padding()
+}
+
+func current() fyne.Theme {
+	//	if fyne.CurrentApp().Theme() != nil
+	return fyne.GlobalSettings().Theme()
+}
+
+// BackgroundColor returns the theme's background colour
+func BackgroundColor() color.Color {
+	return current().BackgroundColor()
+}
+
+// ButtonColor returns the theme's standard button colour
+func ButtonColor() color.Color {
+	return current().ButtonColor()
+}
+
+// TextColor returns the theme's standard text colour
+func TextColor() color.Color {
+	return current().TextColor()
+}
+
+// PrimaryColor returns the colour used to highlight primary features
+func PrimaryColor() color.Color {
+	return current().PrimaryColor()
+}
+
+// FocusColor returns the colour used to highlight a focussed widget
+func FocusColor() color.Color {
+	return current().FocusColor()
+}
+
+// TextSize returns the standard text size
+func TextSize() int {
+	return current().TextSize()
+}
+
+// TextFont returns the font path for the regular font style
+func TextFont() fyne.Resource {
+	return current().TextFont()
+}
+
+// TextBoldFont retutns the font path for the bold font style
+func TextBoldFont() fyne.Resource {
+	return current().TextBoldFont()
+}
+
+// TextItalicFont returns the font path for the italic font style
+func TextItalicFont() fyne.Resource {
+	return current().TextItalicFont()
+}
+
+// TextBoldItalicFont returns the font path for the bold and italic font style
+func TextBoldItalicFont() fyne.Resource {
+	return current().TextBoldItalicFont()
+}
+
+// TextMonospaceFont retutns the font path for the monospace font face
+func TextMonospaceFont() fyne.Resource {
+	return current().TextMonospaceFont()
+}
+
+// Padding is the standard gap between elements and the border around interface
+// elements
+func Padding() int {
+	return current().Padding()
+}
+
+// IconInlineSize is the standard size of icons which appear within buttons, labels etc.
+func IconInlineSize() int {
+	return current().IconInlineSize()
 }

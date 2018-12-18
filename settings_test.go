@@ -1,32 +1,24 @@
 package fyne
 
-import "os"
-import "time"
+import (
+	"image/color"
+	"testing"
+	"time"
 
-import "testing"
-import "github.com/stretchr/testify/assert"
-
-func TestThemeDefault(t *testing.T) {
-	assert.Equal(t, "dark", GlobalSettings().Theme())
-}
-
-func TestThemeFromEnv(t *testing.T) {
-	settingsCache = nil
-	os.Setenv("FYNE_THEME", "light")
-
-	assert.Equal(t, "light", GlobalSettings().Theme())
-}
+	"github.com/stretchr/testify/assert"
+)
 
 func TestSetTheme(t *testing.T) {
-	GlobalSettings().SetTheme("light")
+	light := Theme(&dummyTheme{})
+	GlobalSettings().SetTheme(light)
 
-	assert.Equal(t, "light", GlobalSettings().Theme())
+	assert.Equal(t, light, GlobalSettings().Theme())
 }
 
 func TestListenerCallback(t *testing.T) {
 	listener := make(chan Settings)
 	GlobalSettings().AddChangeListener(listener)
-	GlobalSettings().SetTheme("light")
+	GlobalSettings().SetTheme(&dummyTheme{})
 
 	func() {
 		select {
@@ -35,4 +27,59 @@ func TestListenerCallback(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for callback")
 		}
 	}()
+}
+
+type dummyTheme struct {
+}
+
+func (dummyTheme) BackgroundColor() color.Color {
+	return color.White
+}
+
+func (dummyTheme) ButtonColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) TextColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) PrimaryColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) FocusColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) TextSize() int {
+	return 1
+}
+
+func (dummyTheme) TextFont() Resource {
+	return nil
+}
+
+func (dummyTheme) TextBoldFont() Resource {
+	return nil
+}
+
+func (dummyTheme) TextItalicFont() Resource {
+	return nil
+}
+
+func (dummyTheme) TextBoldItalicFont() Resource {
+	return nil
+}
+
+func (dummyTheme) TextMonospaceFont() Resource {
+	return nil
+}
+
+func (dummyTheme) Padding() int {
+	return 1
+}
+
+func (dummyTheme) IconInlineSize() int {
+	return 1
 }

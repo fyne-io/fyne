@@ -1,15 +1,22 @@
 package theme
 
-import "github.com/fyne-io/fyne"
+import (
+	"testing"
 
-import "testing"
+	"github.com/fyne-io/fyne"
+	"github.com/stretchr/testify/assert"
+)
 
-import "github.com/stretchr/testify/assert"
+// TODO figure how to test the default theme if we are messing with it...
+//func TestThemeDefault(t *testing.T) {
+//	loaded := fyne.GlobalSettings().Theme()
+//	assert.NotEqual(t, lightBackground, loaded.BackgroundColor())
+//}
 
 func TestThemeChange(t *testing.T) {
-	fyne.GlobalSettings().SetTheme("dark")
+	fyne.GlobalSettings().SetTheme(DarkTheme())
 	bg := BackgroundColor()
 
-	fyne.GlobalSettings().SetTheme("light")
+	fyne.GlobalSettings().SetTheme(LightTheme())
 	assert.NotEqual(t, bg, BackgroundColor())
 }

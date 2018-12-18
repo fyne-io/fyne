@@ -4,10 +4,21 @@
 package app
 
 import (
+	"os"
+
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
 	"github.com/fyne-io/fyne/widget"
 )
+
+func init() {
+	env := os.Getenv("FYNE_THEME")
+	if env == "light" {
+		fyne.GlobalSettings().SetTheme(theme.LightTheme())
+	} else {
+		fyne.GlobalSettings().SetTheme(theme.DarkTheme())
+	}
+}
 
 type fyneApp struct {
 	driver fyne.Driver

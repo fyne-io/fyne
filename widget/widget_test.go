@@ -1,12 +1,14 @@
 package widget
 
-import "testing"
-import "time"
+import (
+	"testing"
+	"time"
 
-import "github.com/stretchr/testify/assert"
-
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/test"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/test"
+	"github.com/fyne-io/fyne/theme"
+	"github.com/stretchr/testify/assert"
+)
 
 type myWidget struct {
 	baseWidget
@@ -46,7 +48,7 @@ func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{applied: make(chan bool)}
 
 	window := test.NewTestWindow(widget)
-	fyne.GlobalSettings().SetTheme("light")
+	fyne.GlobalSettings().SetTheme(theme.LightTheme())
 
 	func() {
 		select {
@@ -65,8 +67,7 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	parent := NewVBox(child)
 
 	window := test.NewTestWindow(parent)
-	fyne.GlobalSettings().SetTheme("light")
-
+	fyne.GlobalSettings().SetTheme(theme.LightTheme())
 	func() {
 		select {
 		case <-child.applied:

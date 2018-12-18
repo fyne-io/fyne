@@ -1,29 +1,27 @@
 package fyne
 
-import "os"
-
 // Settings describes the system configuration available and allows configurable
 // items to be changed.
 type Settings interface {
-	Theme() string
-	SetTheme(string)
+	Theme() Theme
+	SetTheme(Theme)
 
 	AddChangeListener(chan Settings)
 }
 
 type settings struct {
-	theme string
+	theme Theme
 
 	changeListeners []chan Settings
 }
 
 var settingsCache *settings
 
-func (s *settings) Theme() string {
+func (s *settings) Theme() Theme {
 	return s.theme
 }
 
-func (s *settings) SetTheme(theme string) {
+func (s *settings) SetTheme(theme Theme) {
 	s.theme = theme
 	s.apply()
 }
@@ -42,13 +40,6 @@ func (s *settings) apply() {
 
 func loadSettings() *settings {
 	s := &settings{}
-
-	env := os.Getenv("FYNE_THEME")
-	if env == "light" {
-		s.theme = env
-	} else {
-		s.theme = "dark"
-	}
 
 	return s
 }

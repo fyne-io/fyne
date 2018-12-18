@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/fyne-io/fyne"
 	"testing"
+
+	"github.com/fyne-io/fyne"
 )
 
 func TestDummyApp(t *testing.T) {
@@ -10,6 +11,14 @@ func TestDummyApp(t *testing.T) {
 
 	app.Quit()
 }
+
+// TODO figure how we can re-instate this
+//func TestThemeFromEnv(t *testing.T) {
+//	settingsCache = nil
+//	os.Setenv("FYNE_THEME", "light")
+
+//	assert.Equal(t, "light", fyne.GlobalSettings().Theme())
+//}
 
 type dummyDriver struct {
 }

@@ -10,9 +10,13 @@ type ThemedResource struct {
 	light fyne.Resource
 }
 
+func isThemeLight() bool {
+	return fyne.GlobalSettings().Theme().BackgroundColor() == lightBackground
+}
+
 // Name returns the underlrying resource name (used for caching)
 func (res *ThemedResource) Name() string {
-	if fyne.GlobalSettings().Theme() == "light" {
+	if isThemeLight() {
 		return res.light.Name()
 	}
 
@@ -21,7 +25,7 @@ func (res *ThemedResource) Name() string {
 
 // Content returns the underlying content of the correct resource for the current theme
 func (res *ThemedResource) Content() []byte {
-	if fyne.GlobalSettings().Theme() == "light" {
+	if isThemeLight() {
 		return res.light.Content()
 	}
 
@@ -30,7 +34,7 @@ func (res *ThemedResource) Content() []byte {
 
 // CachePath returns the cachepath of the correct resource for the current theme setting
 func (res *ThemedResource) CachePath() string {
-	if fyne.GlobalSettings().Theme() == "light" {
+	if isThemeLight() {
 		return res.light.CachePath()
 	}
 

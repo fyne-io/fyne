@@ -2,6 +2,8 @@
 package test
 
 import (
+	"image/color"
+
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
 )
@@ -76,6 +78,7 @@ func (a *testApp) Driver() fyne.Driver {
 // NewApp returns a new dummy app used for testing..
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
+	fyne.GlobalSettings().SetTheme(&dummyTheme{})
 	test := &testApp{driver: NewTestDriver().(*testDriver)}
 	fyne.SetCurrentApp(test)
 
@@ -89,4 +92,59 @@ func NewApp() fyne.App {
 	}()
 
 	return test
+}
+
+type dummyTheme struct {
+}
+
+func (dummyTheme) BackgroundColor() color.Color {
+	return color.White
+}
+
+func (dummyTheme) ButtonColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) TextColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) PrimaryColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) FocusColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) TextSize() int {
+	return 1
+}
+
+func (dummyTheme) TextFont() fyne.Resource {
+	return nil
+}
+
+func (dummyTheme) TextBoldFont() fyne.Resource {
+	return nil
+}
+
+func (dummyTheme) TextItalicFont() fyne.Resource {
+	return nil
+}
+
+func (dummyTheme) TextBoldItalicFont() fyne.Resource {
+	return nil
+}
+
+func (dummyTheme) TextMonospaceFont() fyne.Resource {
+	return nil
+}
+
+func (dummyTheme) Padding() int {
+	return 1
+}
+
+func (dummyTheme) IconInlineSize() int {
+	return 1
 }
