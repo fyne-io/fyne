@@ -75,10 +75,9 @@ func (app *fyneApp) applyTheme(fyne.Settings) {
 	}
 }
 
-// NewAppWithDriver initialises a new Fyne application using the specified driver
-// and returns a handle to that App.
-// As this package has no default driver one must be provided.
-// Helpers are available - see desktop.NewApp() and test.NewApp().
+// NewAppWithDriver initialises a new Fyne application using the specified
+// driver and returns a handle to that App.
+// Built in drivers are provided in the "driver" package.
 func NewAppWithDriver(d fyne.Driver) fyne.App {
 	newApp := &fyneApp{driver: d, icon: theme.FyneLogo()}
 	fyne.SetCurrentApp(newApp)
