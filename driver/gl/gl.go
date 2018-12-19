@@ -171,16 +171,16 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 				log.Println("image err", err)
 
 				return 0
-			} else {
-				point := c.getImageOffset(image.Rect(0, 0, img.Size().Width, img.Size().Height), pixels.Bounds(), img.FillMode)
-				bounds := image.Rect(0, 0, pixels.Bounds().Max.X-(point.X*2), pixels.Bounds().Max.Y-(point.Y*2))
-				raw = image.NewRGBA(bounds)
-
-				draw.Draw(raw, bounds, pixels, point, draw.Src)
 			}
+
+			point := c.getImageOffset(image.Rect(0, 0, img.Size().Width, img.Size().Height), pixels.Bounds(), img.FillMode)
+			bounds := image.Rect(0, 0, pixels.Bounds().Max.X-(point.X*2), pixels.Bounds().Max.Y-(point.Y*2))
+			raw = image.NewRGBA(bounds)
+
+			draw.Draw(raw, bounds, pixels, point, draw.Src)
 		}
 	} else if img.PixelColor != nil {
-		pixels := NewPixelImage(img, c.Scale())
+		pixels := newPixelImage(img, c.Scale())
 		draw.Draw(raw, raw.Bounds(), pixels, image.ZP, draw.Src)
 	}
 

@@ -35,6 +35,6 @@ func (i *pixelImage) At(x, y int) color.Color {
 	return i.source.PixelColor(x, y, width, height)
 }
 
-func NewPixelImage(source *canvas.Image, scale float32) image.Image {
+func newPixelImage(source *canvas.Image, scale float32) image.Image {
 	return &pixelImage{source: source, scale: scale}
 }

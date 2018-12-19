@@ -27,10 +27,8 @@ func init() {
 
 // force a function f to run on the main thread
 func runOnMain(f func()) {
-	// TODO find a more reliable way to tell if we are on the main thread
-	//	onMain := len(fyne.CurrentApp().Driver().(*gLDriver).windows) < 1
-
-	// if we are on main just execute - otherwise add it to the main queue and wait
+	// If we are on main just execute - otherwise add it to the main queue and wait.
+	// The "running" variable is normally false when we are on the main thread.
 	if !running {
 		f()
 	} else {
