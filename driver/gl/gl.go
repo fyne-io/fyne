@@ -63,9 +63,14 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 
 	col := theme.BackgroundColor()
 	if wid, ok := rect.(fyne.Widget); ok {
-		col = widget.Renderer(wid).BackgroundColor()
-	} else if _, ok := rect.(*canvas.Rectangle); ok {
-		col = rect.(*canvas.Rectangle).FillColor
+		widCol := widget.Renderer(wid).BackgroundColor()
+		if widCol != nil {
+			col = widCol
+		}
+	} else if rect, ok := rect.(*canvas.Rectangle); ok {
+		if rect.FillColor != nil {
+			col = rect.FillColor
+		}
 	}
 
 	r, g, b, a := col.RGBA()
