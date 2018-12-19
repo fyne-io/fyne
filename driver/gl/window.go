@@ -95,8 +95,8 @@ func (w *window) fitContent() {
 
 	runOnMainAsync(func() {
 		min := w.canvas.content.MinSize()
-		winWidth := scaleInt(w.canvas, min.Width+theme.Padding())
-		winHeight := scaleInt(w.canvas, min.Height+theme.Padding())
+		winWidth := scaleInt(w.canvas, min.Width+theme.Padding()*2)
+		winHeight := scaleInt(w.canvas, min.Height+theme.Padding()*2)
 		if w.fixedSize {
 			w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
 		} else {
