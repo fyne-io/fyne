@@ -1,4 +1,4 @@
-// +build !ci
+// +build !ci,efl
 
 // +build !linux,!darwin,!windows,!freebsd,!openbsd,!netbsd
 

@@ -1,4 +1,4 @@
-// +build !ci
+// +build !ci,efl
 
 // Package efl provides a full Fyne render implementation using an EFL installation.
 // This supports Windows, Mac OS X and Linux using the EFL (Evas) render pipeline.

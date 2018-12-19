@@ -1,4 +1,4 @@
-// +build !ci,gl
+// +build !ci
 // +build darwin,!arm,!arm64
 
 package gl

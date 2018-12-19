@@ -1,4 +1,4 @@
-// +build !ci,gl
+// +build !ci
 
 package gl
 
