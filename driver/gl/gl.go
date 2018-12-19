@@ -104,7 +104,7 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	ctx.SetDst(img)
 	ctx.SetSrc(&image.Uniform{text.Color})
 
-	ctx.DrawString(text.Text, freetype.Pt(0, height+2-face.Metrics().Descent.Ceil()))
+	ctx.DrawString(text.Text, freetype.Pt(0, height-face.Metrics().Descent.Ceil()))
 
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(img.Rect.Size().X), int32(img.Rect.Size().Y),
 		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(img.Pix))

@@ -95,7 +95,7 @@ func (t *builtinTheme) Padding() int {
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
 func (t *builtinTheme) IconInlineSize() int {
-	return TextSize() + Padding()
+	return 20
 }
 
 func current() fyne.Theme {
