@@ -83,7 +83,7 @@ func (b *Box) setBackgroundColor(bg color.Color) {
 
 // NewHBox creates a new horizontally aligned box widget with the specified list of child objects
 func NewHBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{baseWidget{}, theme.BackgroundColor(), true, children}
+	box := &Box{baseWidget: baseWidget{}, Horizontal: true, Children: children}
 
 	Renderer(box).Layout(box.MinSize())
 	return box
@@ -91,7 +91,7 @@ func NewHBox(children ...fyne.CanvasObject) *Box {
 
 // NewVBox creates a new vertically aligned box widget with the specified list of child objects
 func NewVBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{baseWidget{}, theme.BackgroundColor(), false, children}
+	box := &Box{baseWidget: baseWidget{}, Horizontal: false, Children: children}
 
 	Renderer(box).Layout(box.MinSize())
 	return box
@@ -116,6 +116,10 @@ func (b *boxRenderer) ApplyTheme() {
 }
 
 func (b *boxRenderer) BackgroundColor() color.Color {
+	if b.box.background == nil {
+		return theme.BackgroundColor()
+	}
+
 	return b.box.background
 }
 
