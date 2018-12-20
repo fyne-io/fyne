@@ -33,6 +33,9 @@ type App interface {
 	// Driver returns the driver that is rendering this application.
 	// Typically not needed for day to day work, mostly internal functionality.
 	Driver() Driver
+
+	// Settings return the application settings, determining theme and so on.
+	Settings() Settings
 }
 
 var app App

@@ -100,7 +100,7 @@ func Clock(app fyne.App) {
 	go clock.animate(clockWindow.Canvas())
 
 	listener := make(chan fyne.Settings)
-	fyne.GlobalSettings().AddChangeListener(listener)
+	app.Settings().AddChangeListener(listener)
 	go func() {
 		for {
 			settings := <-listener

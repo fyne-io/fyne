@@ -14,9 +14,9 @@ import (
 //}
 
 func TestThemeChange(t *testing.T) {
-	fyne.GlobalSettings().SetTheme(DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	bg := BackgroundColor()
 
-	fyne.GlobalSettings().SetTheme(LightTheme())
+	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.NotEqual(t, bg, BackgroundColor())
 }

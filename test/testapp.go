@@ -5,7 +5,6 @@ import (
 	"image/color"
 
 	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
 )
 
 // ensure we have a dummy app loaded and ready to test
@@ -14,11 +13,12 @@ func init() {
 }
 
 type testApp struct {
-	driver *testDriver
+	driver   *testDriver
+	settings fyne.Settings
 }
 
 func (a *testApp) Icon() fyne.Resource {
-	return theme.FyneLogo()
+	return nil
 }
 
 func (a *testApp) SetIcon(fyne.Resource) {
@@ -63,7 +63,7 @@ func (a *testApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) {
 	}
 }
 
-func (a *testApp) applyTheme(fyne.Settings) {
+func (a *testApp) applyTheme() {
 	for _, window := range a.driver.AllWindows() {
 		content := window.Content()
 
@@ -75,19 +75,23 @@ func (a *testApp) Driver() fyne.Driver {
 	return a.driver
 }
 
+func (a *testApp) Settings() fyne.Settings {
+	return a.settings
+}
+
 // NewApp returns a new dummy app used for testing..
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
-	fyne.GlobalSettings().SetTheme(&dummyTheme{})
-	test := &testApp{driver: NewTestDriver().(*testDriver)}
+	test := &testApp{driver: NewTestDriver().(*testDriver), settings: &testSettings{}}
+	test.Settings().SetTheme(&dummyTheme{})
 	fyne.SetCurrentApp(test)
 
 	listener := make(chan fyne.Settings)
-	fyne.GlobalSettings().AddChangeListener(listener)
+	test.Settings().AddChangeListener(listener)
 	go func() {
 		for {
-			settings := <-listener
-			test.applyTheme(settings)
+			_ = <-listener
+			test.applyTheme()
 		}
 	}()
 
@@ -147,4 +151,32 @@ func (dummyTheme) Padding() int {
 
 func (dummyTheme) IconInlineSize() int {
 	return 1
+}
+
+type testSettings struct {
+	theme fyne.Theme
+
+	changeListeners []chan fyne.Settings
+}
+
+func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
+	s.changeListeners = append(s.changeListeners, listener)
+}
+
+func (s *testSettings) SetTheme(theme fyne.Theme) {
+	s.theme = theme
+
+	s.apply()
+}
+
+func (s *testSettings) Theme() fyne.Theme {
+	return s.theme
+}
+
+func (s *testSettings) apply() {
+	for _, listener := range s.changeListeners {
+		go func(listener chan fyne.Settings) {
+			listener <- s
+		}(listener)
+	}
 }

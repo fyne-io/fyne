@@ -48,7 +48,7 @@ func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{applied: make(chan bool)}
 
 	window := test.NewTestWindow(widget)
-	fyne.GlobalSettings().SetTheme(theme.LightTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 
 	func() {
 		select {
@@ -67,7 +67,7 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	parent := NewVBox(child)
 
 	window := test.NewTestWindow(parent)
-	fyne.GlobalSettings().SetTheme(theme.LightTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 	func() {
 		select {
 		case <-child.applied:

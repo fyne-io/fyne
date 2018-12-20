@@ -100,7 +100,7 @@ func (t *builtinTheme) IconInlineSize() int {
 
 func current() fyne.Theme {
 	//	if fyne.CurrentApp().Theme() != nil
-	return fyne.GlobalSettings().Theme()
+	return fyne.CurrentApp().Settings().Theme()
 }
 
 // BackgroundColor returns the theme's background colour

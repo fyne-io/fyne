@@ -11,18 +11,11 @@ import (
 	"github.com/fyne-io/fyne/widget"
 )
 
-func init() {
-	env := os.Getenv("FYNE_THEME")
-	if env == "light" {
-		fyne.GlobalSettings().SetTheme(theme.LightTheme())
-	} else {
-		fyne.GlobalSettings().SetTheme(theme.DarkTheme())
-	}
-}
-
 type fyneApp struct {
 	driver fyne.Driver
 	icon   fyne.Resource
+
+	settings fyne.Settings
 }
 
 func (app *fyneApp) Icon() fyne.Resource {
@@ -49,6 +42,11 @@ func (app *fyneApp) Driver() fyne.Driver {
 	return app.driver
 }
 
+// Settings returns the application settings currently configured.
+func (app *fyneApp) Settings() fyne.Settings {
+	return app.settings
+}
+
 func (app *fyneApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) {
 	if themed, ok := content.(fyne.ThemedObject); ok {
 		themed.ApplyTheme()
@@ -69,9 +67,18 @@ func (app *fyneApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) 
 	}
 }
 
-func (app *fyneApp) applyTheme(fyne.Settings) {
+func (app *fyneApp) applyTheme() {
 	for _, window := range app.driver.AllWindows() {
 		app.applyThemeTo(window.Content(), window.Canvas())
+	}
+}
+
+func (app *fyneApp) setupTheme() {
+	env := os.Getenv("FYNE_THEME")
+	if env == "light" {
+		app.Settings().SetTheme(theme.LightTheme())
+	} else {
+		app.Settings().SetTheme(theme.DarkTheme())
 	}
 }
 
@@ -79,15 +86,16 @@ func (app *fyneApp) applyTheme(fyne.Settings) {
 // driver and returns a handle to that App.
 // Built in drivers are provided in the "driver" package.
 func NewAppWithDriver(d fyne.Driver) fyne.App {
-	newApp := &fyneApp{driver: d, icon: theme.FyneLogo()}
+	newApp := &fyneApp{driver: d, icon: theme.FyneLogo(), settings: loadSettings()}
 	fyne.SetCurrentApp(newApp)
+	newApp.setupTheme()
 
 	listener := make(chan fyne.Settings)
-	fyne.GlobalSettings().AddChangeListener(listener)
+	newApp.Settings().AddChangeListener(listener)
 	go func() {
 		for {
-			settings := <-listener
-			newApp.applyTheme(settings)
+			_ = <-listener
+			newApp.applyTheme()
 		}
 	}()
 

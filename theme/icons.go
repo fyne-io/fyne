@@ -11,7 +11,7 @@ type ThemedResource struct {
 }
 
 func isThemeLight() bool {
-	return fyne.GlobalSettings().Theme().BackgroundColor() == lightBackground
+	return fyne.CurrentApp().Settings().Theme().BackgroundColor() == lightBackground
 }
 
 // Name returns the underlrying resource name (used for caching)
