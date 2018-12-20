@@ -28,10 +28,16 @@ var refreshQueue = make(chan fyne.CanvasObject, 1024)
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
 	texture := textures[object]
 
-	// TODO only ignore image if we rescale (i.e. change aspect)
-	_, isImg := object.(*canvas.Image)
+	img, skipCache := object.(*canvas.Image)
+	if skipCache && img.PixelColor == nil {
+		if img.FillMode == canvas.ImageFillStretch {
+			skipCache = false
+		}
+		// TODO only ignore image if we rescale (i.e. change aspect)
+	}
+
 	if texture != 0 {
-		if !isImg {
+		if !skipCache {
 			return texture
 		}
 
