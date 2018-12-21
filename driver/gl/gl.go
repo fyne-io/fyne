@@ -128,21 +128,26 @@ func (c *glCanvas) getImageOffset(rect, sourceRect image.Rectangle, mode canvas.
 		return image.ZP
 	}
 
-	aspect := float32(sourceRect.Max.X-sourceRect.Min.X) / float32(sourceRect.Max.Y-sourceRect.Min.Y)
-	width := rect.Max.X - rect.Min.X
-	height := rect.Max.Y - rect.Min.Y
-	viewAspect := float32(width) / float32(height)
+	width := sourceRect.Max.X-sourceRect.Min.X
+	height := sourceRect.Max.Y-sourceRect.Min.Y
+	aspect := float32(width) / float32(height)
+	viewWidth := rect.Max.X - rect.Min.X
+	viewHeight := rect.Max.Y - rect.Min.Y
+	viewAspect := float32(viewWidth) / float32(viewHeight)
 
 	widthPad, heightPad := 0, 0
+	viewToImage := 0.0
 	if viewAspect > aspect {
-		newWidth := int(float32(height) * aspect)
-		widthPad = (width - newWidth) / 2
+		newWidth := int(float32(viewHeight) * aspect)
+		widthPad = (viewWidth - newWidth) / 2
+		viewToImage = float64(width) / float64(newWidth)
 	} else {
-		newHeight := int(float32(width) / aspect)
-		heightPad = (height - newHeight) / 2
+		newHeight := int(float32(viewWidth) / aspect)
+		heightPad = (viewHeight - newHeight) / 2
+		viewToImage = float64(height) / float64(newHeight)
 	}
 
-	return image.Pt(-widthPad, -heightPad)
+	return image.Pt(-int(float64(widthPad) * viewToImage), -int(float64(heightPad) * viewToImage))
 }
 
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
