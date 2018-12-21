@@ -1,5 +1,3 @@
-// +build !ci
-
 // Package gl provides a full Fyne render implementation using system OpenGL libraries.
 // This supports Windows, Mac OS X and Linux using the gl and glfw packages from go-gl.
 package gl
