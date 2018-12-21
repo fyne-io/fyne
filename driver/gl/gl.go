@@ -30,10 +30,7 @@ func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasO
 
 	img, skipCache := object.(*canvas.Image)
 	if skipCache && img.PixelColor == nil {
-		if img.FillMode == canvas.ImageFillStretch {
-			skipCache = false
-		}
-		// TODO only ignore image if we rescale (i.e. change aspect)
+		skipCache = false
 	}
 
 	if texture != 0 {
@@ -123,33 +120,6 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	return texture
 }
 
-func (c *glCanvas) getImageOffset(rect, sourceRect image.Rectangle, mode canvas.ImageFill) image.Point {
-	if mode == canvas.ImageFillStretch {
-		return image.ZP
-	}
-
-	width := sourceRect.Max.X - sourceRect.Min.X
-	height := sourceRect.Max.Y - sourceRect.Min.Y
-	aspect := float32(width) / float32(height)
-	viewWidth := rect.Max.X - rect.Min.X
-	viewHeight := rect.Max.Y - rect.Min.Y
-	viewAspect := float32(viewWidth) / float32(viewHeight)
-
-	widthPad, heightPad := 0, 0
-	viewToImage := 0.0
-	if viewAspect > aspect {
-		newWidth := int(float32(viewHeight) * aspect)
-		widthPad = (viewWidth - newWidth) / 2
-		viewToImage = float64(width) / float64(newWidth)
-	} else {
-		newHeight := int(float32(viewWidth) / aspect)
-		heightPad = (viewHeight - newHeight) / 2
-		viewToImage = float64(height) / float64(newHeight)
-	}
-
-	return image.Pt(-int(float64(widthPad)*viewToImage), -int(float64(heightPad)*viewToImage))
-}
-
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 	img := obj.(*canvas.Image)
 	texture := newTexture()
@@ -182,6 +152,8 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		} else {
 			file, _ := os.Open(img.File)
 			pixels, _, err := image.Decode(file)
+			// this is used by our render code, so let's set it to the file aspect
+			img.PixelAspect = float32(pixels.Bounds().Size().X) / float32(pixels.Bounds().Size().Y)
 
 			if err != nil {
 				log.Println("image err", err)
@@ -189,11 +161,8 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 				return 0
 			}
 
-			point := c.getImageOffset(image.Rect(0, 0, img.Size().Width, img.Size().Height), pixels.Bounds(), img.FillMode)
-			bounds := image.Rect(0, 0, pixels.Bounds().Max.X-(point.X*2), pixels.Bounds().Max.Y-(point.Y*2))
-			raw = image.NewRGBA(bounds)
-
-			draw.Draw(raw, bounds, pixels, point, draw.Src)
+			raw = image.NewRGBA(pixels.Bounds())
+			draw.Draw(raw, pixels.Bounds(), pixels, image.ZP, draw.Src)
 		}
 	} else if img.PixelColor != nil {
 		pixels := newPixelImage(img, c.Scale())

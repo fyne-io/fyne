@@ -1,13 +1,15 @@
 package canvas
 
-import "image"
-import "testing"
+import (
+	"image"
+	"testing"
 
-import "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
+)
 
-func TestImageFromImage(t *testing.T) {
+func TestRasterFromImage(t *testing.T) {
 	source := image.Rect(2, 2, 4, 4)
-	dest := NewImageFromImage(source)
+	dest := NewRasterFromImage(source)
 
 	// image.Rect is a 16 bit colour model
 	_, _, _, a := dest.PixelColor(0, 0, 6, 6).RGBA()

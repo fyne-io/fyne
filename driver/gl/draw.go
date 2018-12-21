@@ -32,8 +32,32 @@ func walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 	}
 }
 
+func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {
+	if fill == canvas.ImageFillContain {
+		// change pos and size accordingly
+
+		viewAspect := float32(size.Width) / float32(size.Height)
+
+		newWidth, newHeight := size.Width, size.Height
+		widthPad, heightPad := 0, 0
+		if viewAspect > aspect {
+			newWidth = int(float32(size.Height) * aspect)
+			widthPad = (size.Width - newWidth) / 2
+		} else if viewAspect < aspect {
+			newHeight = int(float32(size.Width) / aspect)
+			heightPad = (size.Height - newHeight) / 2
+		}
+
+		return fyne.NewSize(newWidth, newHeight), fyne.NewPos(pos.X+widthPad, pos.Y+heightPad)
+	}
+
+	return size, pos
+}
+
 // rectCoords calculates the openGL coordinate space of a rectangle
-func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size) []float32 {
+func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size, fill canvas.ImageFill, aspect float32) []float32 {
+	size, pos = rectInnerCoords(size, pos, fill, aspect)
+
 	xPos := float32(pos.X) / float32(frame.Width)
 	x1 := -1 + xPos*2
 	x2Pos := float32(pos.X+size.Width) / float32(frame.Width)
@@ -88,7 +112,7 @@ func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fy
 		return
 	}
 
-	points := c.rectCoords(box.Size(), pos, frame)
+	points := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
 	texture := getTexture(box, c.newGlRectTexture)
 
 	c.drawTexture(texture, points)
@@ -99,7 +123,7 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fram
 		return
 	}
 
-	points := c.rectCoords(rect.Size(), pos, frame)
+	points := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
 	texture := getTexture(rect, c.newGlRectTexture)
 
 	c.drawTexture(texture, points)
@@ -110,12 +134,12 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 		return
 	}
 
-	points := c.rectCoords(img.Size(), pos, frame)
 	texture := getTexture(img, c.newGlImageTexture)
 	if texture == 0 {
 		return
 	}
 
+	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, img.PixelAspect)
 	c.drawTexture(texture, points)
 }
 
@@ -137,7 +161,7 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 		pos = fyne.NewPos(pos.X, pos.Y+(text.Size().Height-text.MinSize().Height)/2)
 	}
 
-	points := c.rectCoords(size, pos, frame)
+	points := c.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0)
 	texture := c.newGlTextTexture(text)
 
 	c.drawTexture(texture, points)
