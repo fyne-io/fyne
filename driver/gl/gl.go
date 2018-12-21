@@ -128,8 +128,8 @@ func (c *glCanvas) getImageOffset(rect, sourceRect image.Rectangle, mode canvas.
 		return image.ZP
 	}
 
-	width := sourceRect.Max.X-sourceRect.Min.X
-	height := sourceRect.Max.Y-sourceRect.Min.Y
+	width := sourceRect.Max.X - sourceRect.Min.X
+	height := sourceRect.Max.Y - sourceRect.Min.Y
 	aspect := float32(width) / float32(height)
 	viewWidth := rect.Max.X - rect.Min.X
 	viewHeight := rect.Max.Y - rect.Min.Y
@@ -147,7 +147,7 @@ func (c *glCanvas) getImageOffset(rect, sourceRect image.Rectangle, mode canvas.
 		viewToImage = float64(height) / float64(newHeight)
 	}
 
-	return image.Pt(-int(float64(widthPad) * viewToImage), -int(float64(heightPad) * viewToImage))
+	return image.Pt(-int(float64(widthPad)*viewToImage), -int(float64(heightPad)*viewToImage))
 }
 
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
