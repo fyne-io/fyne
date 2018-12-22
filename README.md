@@ -18,9 +18,7 @@ Fyne is designed to be really easy to code with, here are the steps to your firs
 
 ## Prerequisites
 
-Before you can use the Fyne tools you need to have a stable copy of EFL (at least 1.19) installed. This will be automated by our [bootstrap](https://github.com/fyne-io/bootstrap/) scripts soon, but for now you can follow our [setup instructions](https://github.com/fyne-io/bootstrap/blob/master/README.md).
-
-Then using standard go tools you can install Fyne's core library using:
+Using the standard go tools you can install Fyne's core library using:
 
     go get github.com/fyne-io/fyne
 
