@@ -162,14 +162,14 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		} else {
 			file, _ := os.Open(img.File)
 			pixels, _, err := image.Decode(file)
-			// this is used by our render code, so let's set it to the file aspect
-			img.PixelAspect = float32(pixels.Bounds().Size().X) / float32(pixels.Bounds().Size().Y)
 
 			if err != nil {
 				log.Println("image err", err)
 
 				return 0
 			}
+			// this is used by our render code, so let's set it to the file aspect
+			img.PixelAspect = float32(pixels.Bounds().Size().X) / float32(pixels.Bounds().Size().Y)
 
 			raw = image.NewRGBA(pixels.Bounds())
 			draw.Draw(raw, pixels.Bounds(), pixels, image.ZP, draw.Src)
