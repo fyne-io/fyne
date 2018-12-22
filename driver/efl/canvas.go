@@ -186,11 +186,12 @@ func renderImagePortion(img *canvas.Image, pixels []uint32, wg *sync.WaitGroup,
 	for y := starty; y < starty+height; y++ {
 		for x := startx; x < startx+width; x++ {
 			col := img.PixelColor(x, y, imgWidth, imgHeight)
-			// TODO support other color models
-			if rgba, ok := col.(color.RGBA); ok {
-				pixels[i] = (uint32)(((uint32)(rgba.A) << 24) | ((uint32)(rgba.R) << 16) |
-					((uint32)(rgba.G) << 8) | (uint32)(rgba.B))
-			}
+
+			// convert from the 16 bit-per-channel RGBA to an 8 bit-per-channel ARGB
+			r, g, b, a := col.RGBA()
+			rgba := color.RGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> 8), uint8(a >> 8)}
+			pixels[i] = (uint32)(((uint32)(rgba.A) << 24) | ((uint32)(rgba.R) << 16) |
+				((uint32)(rgba.G) << 8) | (uint32)(rgba.B))
 			i++
 		}
 		i += imgWidth - width
