@@ -146,14 +146,14 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 	if img.File != "" {
 		if strings.ToLower(filepath.Ext(img.File)) == ".svg" {
 			icon, err := oksvg.ReadIcon(img.File)
-			icon.SetTarget(0, 0, float64(width), float64(height))
-
-			w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
 			if err != nil {
 				log.Println("SVG Load error:", err, img.File)
 
 				return 0
 			}
+			icon.SetTarget(0, 0, float64(width), float64(height))
+
+			w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
 			raw = image.NewRGBA(image.Rect(0, 0, width, height))
 			scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
 			raster := rasterx.NewDasher(width, height, scanner)
