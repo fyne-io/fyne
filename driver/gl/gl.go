@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
@@ -118,6 +119,15 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	return texture
 }
 
+func renderGlImagePortion(point image.Point, width, height int,
+	raw draw.Image, pixels image.Image, wg *sync.WaitGroup) {
+
+	defer wg.Done()
+	bounds := image.Rect(point.X, point.Y, point.X+width, point.Y+height)
+
+	draw.Draw(raw, bounds, pixels, point, draw.Src)
+}
+
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 	img := obj.(*canvas.Image)
 	texture := newTexture()
@@ -164,7 +174,20 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		}
 	} else if img.PixelColor != nil {
 		pixels := newPixelImage(img, c.Scale())
-		draw.Draw(raw, raw.Bounds(), pixels, image.ZP, draw.Src)
+
+		halfWidth := raw.Bounds().Size().X / 2
+		halfHeight := raw.Bounds().Size().Y / 2
+
+		// use a WaitGroup so we don't return our image until it's complete
+		var wg sync.WaitGroup
+		wg.Add(4)
+
+		go renderGlImagePortion(image.ZP, halfWidth, halfHeight, raw, pixels, &wg)
+		go renderGlImagePortion(image.Pt(0, halfHeight), halfWidth, height-halfHeight, raw, pixels, &wg)
+		go renderGlImagePortion(image.Pt(halfWidth, 0), width-halfWidth, halfHeight, raw, pixels, &wg)
+		go renderGlImagePortion(image.Pt(halfWidth, halfHeight), width-halfWidth, height-halfHeight, raw, pixels, &wg)
+
+		wg.Wait()
 	}
 
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
