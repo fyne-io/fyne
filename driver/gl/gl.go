@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	_ "image/jpeg"
-	_ "image/png"
+	_ "image/jpeg" // avoid users having to import when using image widget
+	_ "image/png"  // avoid the same for PNG images
 	"log"
 	"os"
 	"path/filepath"
