@@ -31,9 +31,8 @@ type Image struct {
 	PixelColor  func(x, y, w, h int) color.Color // Render the image from code
 	PixelAspect float32                          // Set an aspect ratio for pixel based images
 
-	Translucency float64    // Set a translucency value > 0.0 to fade the image
-	FillMode     ImageFill  // Specify how the image should scale to fill or fit
-	ImageSize    *fyne.Size // Size of the underlying object, or nil if not determined
+	Translucency float64   // Set a translucency value > 0.0 to fade the image
+	FillMode     ImageFill // Specify how the image should scale to fill or fit
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
