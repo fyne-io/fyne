@@ -92,7 +92,6 @@ func TestContainer_Show(t *testing.T) {
 	assert.True(t, container.Visible())
 }
 
-
 type dummyObject struct {
 	size   Size
 	pos    Position

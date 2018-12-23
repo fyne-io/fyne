@@ -64,6 +64,7 @@ func (app *fyneApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) 
 		for _, o := range c.Objects {
 			app.applyThemeTo(o, canvas)
 		}
+		canvas.Refresh(c)
 	}
 }
 
