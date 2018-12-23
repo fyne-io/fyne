@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	_ "image/jpeg"
 	"log"
 	"os"
 	"path/filepath"
@@ -129,7 +130,12 @@ func renderGlImagePortion(point image.Point, width, height int,
 }
 
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
-	img := obj.(*canvas.Image)
+	img, ok := obj.(*canvas.Image)
+	if !ok {
+		log.Println("obj is not an image")
+		return 0
+	}
+
 	texture := newTexture()
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -168,7 +174,9 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			bs := pixels.Bounds().Size()
 			// this is used by our render code, so let's set it to the file aspect
 			img.PixelAspect = float32(bs.X) / float32(bs.Y)
-			img.ImageSize = fyne.Size{bs.X, bs.Y}
+			if img.FillMode == canvas.ImageFillResize {
+				img.SetMinSize(fyne.Size{bs.X, bs.Y})
+			}
 
 			raw = image.NewRGBA(pixels.Bounds())
 			draw.Draw(raw, pixels.Bounds(), pixels, image.ZP, draw.Src)

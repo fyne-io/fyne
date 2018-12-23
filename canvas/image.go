@@ -18,6 +18,8 @@ const (
 	// centrally and maintaining aspect ratio.
 	// There may be transparent sections top and bottom or left and right.
 	ImageFillContain //(Fit)
+	// ImageFillResize will resize the canvas to fix the original image.
+	ImageFillResize
 )
 
 // Image describes a raster image area that can render in a Fyne canvas
@@ -29,10 +31,9 @@ type Image struct {
 	PixelColor  func(x, y, w, h int) color.Color // Render the image from code
 	PixelAspect float32                          // Set an aspect ratio for pixel based images
 
-	Translucency float64   // Set a translucency value > 0.0 to fade the image
-	FillMode     ImageFill // Specify how the image should scale to fill or fit
-
-	ImageSize fyne.Size // original image size - only supported on GL so far ???
+	Translucency float64    // Set a translucency value > 0.0 to fade the image
+	FillMode     ImageFill  // Specify how the image should scale to fill or fit
+	ImageSize    *fyne.Size // Size of the underlying object, or nil if not determined
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
