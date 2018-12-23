@@ -4,12 +4,19 @@ import (
 	"testing"
 
 	"github.com/fyne-io/fyne"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDummyApp(t *testing.T) {
-	app := NewAppWithDriver(new(dummyDriver))
+	app := New()
 
 	app.Quit()
+}
+
+func TestCurrentApp(t *testing.T) {
+	app := New()
+
+	assert.Equal(t, app, fyne.CurrentApp())
 }
 
 // TODO figure how we can re-instate this
@@ -19,30 +26,3 @@ func TestDummyApp(t *testing.T) {
 
 //	assert.Equal(t, "light", fyne.GlobalSettings().Theme())
 //}
-
-type dummyDriver struct {
-}
-
-func (d *dummyDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
-	return nil
-}
-
-func (d *dummyDriver) CreateWindow(string) fyne.Window {
-	return nil
-}
-
-func (d *dummyDriver) AllWindows() []fyne.Window {
-	return nil
-}
-
-func (d *dummyDriver) RenderedTextSize(text string, size int, _ fyne.TextStyle) fyne.Size {
-	return fyne.NewSize(len(text)*size, size)
-}
-
-func (d *dummyDriver) Run() {
-	// no-op
-}
-
-func (d *dummyDriver) Quit() {
-	// no-op
-}
