@@ -1,12 +1,14 @@
 package widget
 
-import "testing"
+import (
+	"testing"
 
-import "github.com/stretchr/testify/assert"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/test"
+	"github.com/fyne-io/fyne/theme"
 
-import "github.com/fyne-io/fyne/test"
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/theme"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
@@ -14,6 +16,21 @@ func TestEntry_MinSize(t *testing.T) {
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
+}
+
+func TestMultilineEntry_MinSize(t *testing.T) {
+	entry := NewEntry()
+	singleMin := entry.MinSize()
+
+	multi := NewMultilineEntry()
+	multiMin := multi.MinSize()
+
+	assert.Equal(t, singleMin.Width, multiMin.Width)
+	assert.True(t, multiMin.Height > singleMin.Height)
+
+	multi.Multiline = false
+	multiMin = multi.MinSize()
+	assert.Equal(t, singleMin.Height, multiMin.Height)
 }
 
 func TestEntry_OnKeyDown(t *testing.T) {
@@ -287,9 +304,7 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
-func TestPasswordEntry_NewlineIgnored(t *testing.T) {
-	entry := NewPasswordEntry()
-	entry.SetText("test")
+func checkNewlineIgnored(t *testing.T, entry *Entry) {
 	assert.Equal(t, 0, entry.CursorRow)
 
 	// only 1 line, do nothing
@@ -309,6 +324,20 @@ func TestPasswordEntry_NewlineIgnored(t *testing.T) {
 	// don't go beyond top
 	entry.OnKeyDown(up)
 	assert.Equal(t, 0, entry.CursorRow)
+}
+
+func TestSinglelineEntry_NewlineIgnored(t *testing.T) {
+	entry := &Entry{Multiline: false}
+	entry.SetText("test")
+
+	checkNewlineIgnored(t, entry)
+}
+
+func TestPasswordEntry_NewlineIgnored(t *testing.T) {
+	entry := NewPasswordEntry()
+	entry.SetText("test")
+
+	checkNewlineIgnored(t, entry)
 }
 
 func TestPasswordEntry_Obfuscation(t *testing.T) {

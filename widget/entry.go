@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	passwordChar = "*"
+	passwordChar  = "*"
+	multilineRows = 3
 )
 
 type entryRenderer struct {
@@ -36,12 +37,18 @@ func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
 
 // MinSize calculates the minimum size of an entry widget.
 // This is based on the contained text with a standard amount of padding added.
+// If Multiline is true then we will reserve space for at leasts 3 lines
 func (e *entryRenderer) MinSize() fyne.Size {
-	var textSize fyne.Size
-	if e.label.Text == "" {
-		textSize = emptyTextMinSize(e.label.TextStyle)
-	} else {
+	minTextSize := emptyTextMinSize(e.label.TextStyle)
+	textSize := minTextSize
+	if e.label.Text != "" {
 		textSize = e.label.MinSize()
+	}
+
+	if e.entry.Multiline == true {
+		if textSize.Height < minTextSize.Height*multilineRows {
+			textSize.Height = minTextSize.Height * multilineRows
+		}
 	}
 
 	return textSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
@@ -100,7 +107,7 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 
 func (e *entryRenderer) Refresh() {
 	var text string
-	if e.entry.password {
+	if e.entry.Password {
 		text = strings.Repeat(passwordChar, utf8.RuneCountInString(e.entry.Text))
 	} else {
 		text = e.entry.Text
@@ -127,11 +134,12 @@ type Entry struct {
 
 	Text      string
 	OnChanged func(string) `json:"-"`
+	Password  bool
+	Multiline bool
 
 	CursorRow, CursorColumn int
 
-	focused  bool
-	password bool
+	focused bool
 }
 
 // Resize sets a new size for a widget.
@@ -252,7 +260,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 
 		pos := e.cursorTextPos()
 		e.deleteFromTo(pos, pos+1)
-	} else if key.Name == fyne.KeyReturn && !e.password {
+	} else if key.Name == fyne.KeyReturn && e.Multiline {
 		e.insertAtCursor("\n")
 
 		e.CursorColumn = 0
@@ -313,7 +321,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		[]fyne.CanvasObject{box, text, cursor}, e}
 }
 
-// NewEntry creates a new entry widget.
+// NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
 	e := &Entry{}
 
@@ -321,9 +329,17 @@ func NewEntry() *Entry {
 	return e
 }
 
+// NewMultilineEntry creates a new entry that allows multiple lines
+func NewMultilineEntry() *Entry {
+	e := &Entry{Multiline: true}
+
+	Renderer(e).Layout(e.MinSize())
+	return e
+}
+
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{password: true}
+	e := &Entry{Password: true}
 
 	Renderer(e).Layout(e.MinSize())
 	return e
