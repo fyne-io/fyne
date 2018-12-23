@@ -79,6 +79,20 @@ func TestContainer_Hide(t *testing.T) {
 	assert.False(t, box.Visible())
 }
 
+func TestContainer_Show(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainer(box)
+
+	container.Hide()
+	assert.False(t, box.Visible())
+	assert.False(t, container.Visible())
+
+	container.Show()
+	assert.True(t, box.Visible())
+	assert.True(t, container.Visible())
+}
+
+
 type dummyObject struct {
 	size   Size
 	pos    Position
