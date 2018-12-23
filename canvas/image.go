@@ -31,6 +31,8 @@ type Image struct {
 
 	Translucency float64   // Set a translucency value > 0.0 to fade the image
 	FillMode     ImageFill // Specify how the image should scale to fill or fit
+
+	ImageSize fyne.Size // original image size - only supported on GL so far ???
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
