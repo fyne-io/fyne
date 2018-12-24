@@ -25,7 +25,11 @@ type Window interface {
 	// size or allow resizing.
 	SetFixedSize(bool)
 
+	// Padded, normally true, states whether the window should have inner
+	// padding so that components do not touch the window edge.
 	Padded() bool
+	// SetPadded allows applications to specify that a window should have
+	// no inner padding. Useful for fullscreen or graphic based applications.
 	SetPadded(bool)
 
 	// Icon returns the window icon, this is used in various ways depending on operating system.

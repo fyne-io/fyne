@@ -104,7 +104,7 @@ func (w *window) fitContent() {
 	runOnMainAsync(func() {
 		min := w.canvas.content.MinSize()
 		if w.Padded() {
-			pad := theme.Padding()*2
+			pad := theme.Padding() * 2
 			min = fyne.NewSize(min.Width+pad, min.Height+pad)
 		}
 		winWidth := scaleInt(w.canvas, min.Width)
@@ -181,7 +181,7 @@ func (w *window) Content() fyne.CanvasObject {
 func (w *window) resize(size fyne.Size) {
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		size = fyne.NewSize(size.Width - pad, size.Height - pad)
+		size = fyne.NewSize(size.Width-pad, size.Height-pad)
 	}
 
 	w.canvas.content.Resize(size)
@@ -195,7 +195,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		min = fyne.NewSize(min.Width + pad, min.Height + pad)
+		min = fyne.NewSize(min.Width+pad, min.Height+pad)
 	}
 	runOnMainAsync(func() {
 		w.fitContent()
