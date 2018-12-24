@@ -25,6 +25,9 @@ type Window interface {
 	// size or allow resizing.
 	SetFixedSize(bool)
 
+	Padded() bool
+	SetPadded(bool)
+
 	// Icon returns the window icon, this is used in various ways depending on operating system.
 	// Most commonly this is displayed on the window border or task switcher
 	Icon() Resource

@@ -36,6 +36,7 @@ type window struct {
 	master    bool
 	focused   bool
 	fixedSize bool
+	padded    bool
 
 	onClosed func()
 }
@@ -90,6 +91,14 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
+}
+
+func (w *window) Padded() bool {
+	return w.padded
+}
+
+func (w *window) SetPadded(padded bool) {
+	w.padded = padded
 }
 
 func (w *window) Icon() fyne.Resource {
@@ -326,7 +335,7 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 // USE OF THIS METHOD IS NOT RECOMMENDED
 func CreateWindowWithEngine(engine string) fyne.Window {
 	cstr := C.CString(engine)
-	w := &window{}
+	w := &window{padded: true}
 
 	runOnMain(func() {
 		evas := C.ecore_evas_new(cstr, 0, 0, 10, 10, nil)

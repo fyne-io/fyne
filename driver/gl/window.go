@@ -23,6 +23,7 @@ type window struct {
 	master     bool
 	fullScreen bool
 	fixedSize  bool
+	padded     bool
 
 	mouseX, mouseY float64
 	onClosed       func()
@@ -74,6 +75,15 @@ func (w *window) SetFixedSize(fixed bool) {
 	runOnMainAsync(w.fitContent)
 }
 
+func (w *window) Padded() bool {
+	return w.padded
+}
+
+func (w *window) SetPadded(padded bool) {
+	w.padded = padded
+	runOnMainAsync(w.fitContent)
+}
+
 func (w *window) Icon() fyne.Resource {
 	if w.icon == nil {
 		return fyne.CurrentApp().Icon()
@@ -93,8 +103,12 @@ func (w *window) fitContent() {
 
 	runOnMainAsync(func() {
 		min := w.canvas.content.MinSize()
-		winWidth := scaleInt(w.canvas, min.Width+theme.Padding()*2)
-		winHeight := scaleInt(w.canvas, min.Height+theme.Padding()*2)
+		if w.Padded() {
+			pad := theme.Padding()*2
+			min = fyne.NewSize(min.Width+pad, min.Height+pad)
+		}
+		winWidth := scaleInt(w.canvas, min.Width)
+		winHeight := scaleInt(w.canvas, min.Height)
 		if w.fixedSize {
 			w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
 		} else {
@@ -165,6 +179,11 @@ func (w *window) Content() fyne.CanvasObject {
 }
 
 func (w *window) resize(size fyne.Size) {
+	if w.Padded() {
+		pad := theme.Padding() * 2
+		size = fyne.NewSize(size.Width - pad, size.Height - pad)
+	}
+
 	w.canvas.content.Resize(size)
 	w.canvas.setDirty()
 }
@@ -174,8 +193,14 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	min := content.MinSize()
 	w.canvas.SetScale(detectScale(w.viewport))
 
-	runOnMainAsync(w.fitContent)
-	w.resize(min)
+	if w.Padded() {
+		pad := theme.Padding() * 2
+		min = fyne.NewSize(min.Width + pad, min.Height + pad)
+	}
+	runOnMainAsync(func() {
+		w.fitContent()
+		w.resize(min)
+	})
 }
 
 func (w *window) Canvas() fyne.Canvas {
@@ -192,7 +217,7 @@ func (w *window) closed(viewport *glfw.Window) {
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
-	w.resize(fyne.NewSize(unscaleInt(w.canvas, width)-theme.Padding()*2, unscaleInt(w.canvas, height)-theme.Padding()*2))
+	w.resize(fyne.NewSize(unscaleInt(w.canvas, width), unscaleInt(w.canvas, height)))
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
@@ -236,7 +261,6 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	current := w.canvas
 
 	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
-	pos = pos.Subtract(fyne.NewPos(theme.Padding(), theme.Padding())) // TODO within parent
 	co := findMouseObj(w.canvas.content, pos.X, pos.Y)
 
 	ev := new(fyne.MouseEvent)
@@ -445,6 +469,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret = &window{viewport: win, title: title}
 		ret.canvas = newCanvas(ret)
 		ret.master = master
+		ret.padded = true
 		d.windows = append(d.windows, ret)
 
 		win.SetCloseCallback(ret.closed)

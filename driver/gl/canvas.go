@@ -49,7 +49,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	var w, h = c.window.viewport.GetSize()
 
 	pad := theme.Padding()
-	if c.window.FullScreen() {
+	if !c.window.Padded() {
 		pad = 0
 	}
 	width := unscaleInt(c, int(w)) - pad*2

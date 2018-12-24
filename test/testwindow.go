@@ -6,6 +6,7 @@ type testWindow struct {
 	title      string
 	fullScreen bool
 	fixedSize  bool
+	padded     bool
 	onClosed   func()
 
 	canvas fyne.Canvas
@@ -39,6 +40,14 @@ func (w *testWindow) FixedSize() bool {
 
 func (w *testWindow) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
+}
+
+func (w *testWindow) Padded() bool {
+	return w.padded
+}
+
+func (w *testWindow) SetPadded(padded bool) {
+	w.padded = padded
 }
 
 func (w *testWindow) Icon() fyne.Resource {
