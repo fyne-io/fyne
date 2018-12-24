@@ -143,3 +143,24 @@ func main() {
 
 The main examples have been moved - you can find them in their [own repository](https://github.com/fyne-io/examples/).
 
+## Non-standard library dependencies
+
+Fyne requires the following imports which are not included in the go standard library:
+
+* github.com/go-gl/gl/v3.2-core/gl
+* github.com/go-gl/glfw/v3.2/glfw
+* github.com/golang/freetype
+* github.com/srwiley/oksvg
+* github.com/srwiley/rasterx
+* golang.org/x/image/font
+
+These can be included in your gopath by the following 'get' commands:
+
+* "go get github.com/go-gl/gl/v3.2-core/gl"
+* "go get github.com/go-gl/glfw/v3.2/glfw"
+* "go get github.com/golang/freetype"
+* "go get github.com/srwiley/oksvg"
+* "go get github.com/srwiley/rasterx"
+* "go get golang.org/x/image/font"
+
+You will also require a GCC compiler if you do not have one, this can be included by installing TDM-GCC.
