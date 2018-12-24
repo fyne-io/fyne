@@ -143,7 +143,7 @@ func main() {
 
 The main examples have been moved - you can find them in their [own repository](https://github.com/fyne-io/examples/).
 
-## Non-standard library dependencies
+## Dependencies
 
 Fyne requires the following imports which are not included in the go standard library:
 
@@ -163,4 +163,4 @@ These can be included in your gopath by the following 'get' commands:
 * "go get github.com/srwiley/rasterx"
 * "go get golang.org/x/image/font"
 
-You will also require a GCC compiler if you do not have one, this can be included by installing TDM-GCC.
+You will also require a GCC compiler if you do not have one, if on Windows this can be included by installing TDM-GCC.
