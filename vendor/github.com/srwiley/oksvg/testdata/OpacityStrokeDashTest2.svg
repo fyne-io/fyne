@@ -1,0 +1,21 @@
+<svg width="4cm" height="4cm" viewBox="0 0 400 400"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>dash lines on squares</title>
+  <desc>dash lines on squares</desc>
+
+   <desc>Testing dashes around a square.</desc>
+
+ <rect x="50" y="50" width="145" height="145"
+        fill="green" stroke="blue" stroke-width="12" stroke-dashoffset="2" stroke-dasharray="25,20" stroke-linecap="round"/>
+ 
+  <rect x="220" y="50" width="145" height="145"
+        fill="green" stroke-opacity="0.5" stroke="blue" stroke-width="12" stroke-dashoffset="7" stroke-dasharray="25,20" stroke-linecap="flat"/>
+ 
+  <rect x="50" y="220" width="145" height="145"
+        fill="green" fill-opacity="0.5" stroke="blue" stroke-width="12" stroke-dashoffset="8" stroke-dasharray="25,20" stroke-linecap="cubic"/>
+
+  <rect x="220" y="220" width="145" height="145"
+        fill="green" opacity="0.5" stroke="blue" stroke-width="12" stroke-dashoffset="11" stroke-dasharray="25,20" stroke-linecap="quadratic"/>
+
+
+</svg>

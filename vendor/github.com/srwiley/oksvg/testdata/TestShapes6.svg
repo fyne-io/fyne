@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<svg width="500" height="500"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+
+<radialGradient id="rg" cx="50%" cy="50%" fx="30%" fy ="30%"  r="30%" gradientUnits = "objectBoundingBox"  
+	gradientTransform=" rotate(-35) " spreadMethod="reflect" >
+<stop offset="1%" stop-color="powderblue" stop-opacity="1.00"/>
+<stop offset="10%" stop-color="silver" stop-opacity="1.00"/>
+<stop offset="30%" stop-color="darkblue" stop-opacity="1.00"/>
+<stop offset="40%" stop-color="black" stop-opacity="1.00"/>
+<stop offset="100%" stop-color="lime" stop-opacity="0.50"/>
+</radialGradient>
+
+
+<radialGradient id="rg2" cx="50%" cy="50%"   r="40%" gradientUnits = "objectBoundingBox"  
+spreadMethod="repeat" >
+<stop offset="10%" stop-color="goldenrod" />
+<stop offset="30%" stop-color="seagreen" />
+<stop offset="50%" stop-color="cyan" />
+<stop offset="70%" stop-color="black" />
+<stop offset="100%" stop-color="orange" />
+</radialGradient>
+
+<linearGradient id="lg" x1="0%" y1="0%" x2="0%" y2="100%" spreadMethod="pad" gradientTransform="rotate(25) ">
+<stop offset="0%" stop-color="green" stop-opacity="1.00"/>
+<stop offset="50%" stop-color="red" stop-opacity="1.00"/>
+<stop offset="100%" stop-color="blue" stop-opacity="1.00"/>
+</linearGradient>
+
+
+
+<ellipse cx="300" cy="150" rx="120" ry="100"  style="fill:url(#rg2)" /> 
+
+<rect x="100" y="340" width="200" height="140" style="fill:url(#lg)" /> 
+ <ellipse cx="350" cy="350" rx="80" ry="100" style="fill:url(#rg)" /> 
+ 
+<ellipse cx="250" cy="350" rx="80" ry="100" opacity = "0.3" style="fill:url(#rg)" /> 
+
+
+ <path d="M87, 212 C 138, 090,  269, 075, 259, 147 C 254, 081, 080,176, 128, 282z"
+	fill="none" stroke="url(#rg)" stroke-miterlimit="20"  stroke-linecap="cubic" stroke-linejoin="arc" stroke-width="15"/> 
+
+</svg>
