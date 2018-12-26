@@ -12,11 +12,12 @@ go:
 gobuild_args: "-v -tags ci"
 
 before_script:
+  - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
 
 script:
-  - test -z $(gofmt -s -l .)
+  - test -z $(gofmt -s -l $NO_VENDOR)
   - go test -v -tags ci -race ./...
   - go vet -tags ci ./...
   - golint -set_exit_status $(go list -tags ci)
