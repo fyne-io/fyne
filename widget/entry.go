@@ -37,7 +37,7 @@ func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
 
 // MinSize calculates the minimum size of an entry widget.
 // This is based on the contained text with a standard amount of padding added.
-// If Multiline is true then we will reserve space for at leasts 3 lines
+// If MultiLine is true then we will reserve space for at leasts 3 lines
 func (e *entryRenderer) MinSize() fyne.Size {
 	minTextSize := emptyTextMinSize(e.label.TextStyle)
 	textSize := minTextSize
@@ -45,7 +45,7 @@ func (e *entryRenderer) MinSize() fyne.Size {
 		textSize = e.label.MinSize()
 	}
 
-	if e.entry.Multiline == true {
+	if e.entry.MultiLine == true {
 		if textSize.Height < minTextSize.Height*multilineRows {
 			textSize.Height = minTextSize.Height * multilineRows
 		}
@@ -135,7 +135,7 @@ type Entry struct {
 	Text      string
 	OnChanged func(string) `json:"-"`
 	Password  bool
-	Multiline bool
+	MultiLine bool
 
 	CursorRow, CursorColumn int
 
@@ -261,7 +261,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		pos := e.cursorTextPos()
 		e.deleteFromTo(pos, pos+1)
 	} else if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter {
-		if e.Multiline {
+		if e.MultiLine {
 			e.insertAtCursor("\n")
 
 			e.CursorColumn = 0
@@ -333,7 +333,7 @@ func NewEntry() *Entry {
 
 // NewMultilineEntry creates a new entry that allows multiple lines
 func NewMultilineEntry() *Entry {
-	e := &Entry{Multiline: true}
+	e := &Entry{MultiLine: true}
 
 	Renderer(e).Layout(e.MinSize())
 	return e

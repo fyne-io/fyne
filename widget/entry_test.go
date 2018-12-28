@@ -28,7 +28,7 @@ func TestMultilineEntry_MinSize(t *testing.T) {
 	assert.Equal(t, singleMin.Width, multiMin.Width)
 	assert.True(t, multiMin.Height > singleMin.Height)
 
-	multi.Multiline = false
+	multi.MultiLine = false
 	multiMin = multi.MinSize()
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }
@@ -327,7 +327,7 @@ func checkNewlineIgnored(t *testing.T, entry *Entry) {
 }
 
 func TestSinglelineEntry_NewlineIgnored(t *testing.T) {
-	entry := &Entry{Multiline: false}
+	entry := &Entry{MultiLine: false}
 	entry.SetText("test")
 
 	checkNewlineIgnored(t, entry)
