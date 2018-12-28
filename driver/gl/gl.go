@@ -131,6 +131,7 @@ func renderGlImagePortion(point image.Point, width, height int,
 }
 
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
+	var raw *image.RGBA
 	img := obj.(*canvas.Image)
 	texture := newTexture()
 	gl.Enable(gl.BLEND)
@@ -141,7 +142,6 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 	if width == 0 || height == 0 {
 		return 0
 	}
-	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	if img.File != "" {
 		if strings.ToLower(filepath.Ext(img.File)) == ".svg" {
@@ -189,6 +189,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			draw.Draw(raw, pixels.Bounds(), pixels, image.ZP, draw.Src)
 		}
 	} else if img.PixelColor != nil {
+		raw = image.NewRGBA(image.Rect(0, 0, width, height))
 		pixels := newPixelImage(img, c.Scale())
 
 		halfWidth := raw.Bounds().Size().X / 2
@@ -204,6 +205,8 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		go renderGlImagePortion(image.Pt(halfWidth, halfHeight), width-halfWidth, height-halfHeight, raw, pixels, &wg)
 
 		wg.Wait()
+	} else {
+		raw = image.NewRGBA(image.Rect(0, 0, 1, 1))
 	}
 
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
