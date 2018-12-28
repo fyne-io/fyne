@@ -154,6 +154,14 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			icon.SetTarget(0, 0, float64(width), float64(height))
 
 			w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
+			// this is used by our render code, so let's set it to the file aspect
+			img.PixelAspect = float32(w) / float32(h)
+			// if the image specifies it should be original size we need at least that many pixels on screen
+			if img.FillMode == canvas.ImageFillOriginal {
+				pixSize := fyne.NewSize(unscaleInt(c, w), unscaleInt(c, h))
+				img.SetMinSize(pixSize)
+			}
+
 			raw = image.NewRGBA(image.Rect(0, 0, width, height))
 			scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
 			raster := rasterx.NewDasher(width, height, scanner)
@@ -168,8 +176,14 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 				return 0
 			}
+			origSize := pixels.Bounds().Size()
 			// this is used by our render code, so let's set it to the file aspect
-			img.PixelAspect = float32(pixels.Bounds().Size().X) / float32(pixels.Bounds().Size().Y)
+			img.PixelAspect = float32(origSize.X) / float32(origSize.Y)
+			// if the image specifies it should be original size we need at least that many pixels on screen
+			if img.FillMode == canvas.ImageFillOriginal {
+				pixSize := fyne.NewSize(unscaleInt(c, origSize.X), unscaleInt(c, origSize.Y))
+				img.SetMinSize(pixSize)
+			}
 
 			raw = image.NewRGBA(pixels.Bounds())
 			draw.Draw(raw, pixels.Bounds(), pixels, image.ZP, draw.Src)

@@ -31,7 +31,7 @@ func walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 }
 
 func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {
-	if fill == canvas.ImageFillContain {
+	if fill == canvas.ImageFillContain || fill == canvas.ImageFillOriginal {
 		// change pos and size accordingly
 
 		viewAspect := float32(size.Width) / float32(size.Height)

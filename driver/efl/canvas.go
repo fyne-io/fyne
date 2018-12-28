@@ -276,6 +276,12 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 			C.evas_object_image_size_get(obj, &iw, &ih)
 			aspect := float32(iw) / float32(ih)
 
+			// if the image specifies it should be original size we need at least that many pixels on screen
+			if co.FillMode == canvas.ImageFillOriginal {
+				pixSize := fyne.NewSize(unscaleInt(c, int(iw)), unscaleInt(c, int(ih)))
+				co.SetMinSize(pixSize)
+			}
+
 			widthPad, heightPad := 0, 0
 			if viewAspect > aspect {
 				newWidth := int(float32(height) * aspect)
