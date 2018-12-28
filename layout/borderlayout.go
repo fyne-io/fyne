@@ -1,7 +1,9 @@
 package layout
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/theme"
+import (
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/theme"
+)
 
 type borderLayout struct {
 	top, bottom, left, right fyne.CanvasObject

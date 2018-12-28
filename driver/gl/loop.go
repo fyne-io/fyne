@@ -66,8 +66,9 @@ func (d *gLDriver) runGL() {
 					delete(textures, obj)
 				}
 			}
-
+			texturesMutex.Lock()
 			walkObjects(object, fyne.NewPos(0, 0), freeWalked)
+			texturesMutex.Unlock()
 		case <-fps.C:
 			glfw.PollEvents()
 			for i, win := range d.windows {

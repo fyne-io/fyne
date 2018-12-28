@@ -24,9 +24,12 @@ import (
 )
 
 var textures = make(map[fyne.CanvasObject]uint32)
+var texturesMutex sync.RWMutex
 var refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
+	texturesMutex.Lock()
+	defer texturesMutex.Unlock()
 	texture := textures[object]
 
 	img, skipCache := object.(*canvas.Image)
