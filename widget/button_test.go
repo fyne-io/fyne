@@ -22,7 +22,7 @@ func TestButtonNotify(t *testing.T) {
 		tapped <- true
 	})
 
-	button.OnMouseDown(nil)
+	go button.OnMouseDown(nil)
 	func() {
 		select {
 		case <-tapped:

@@ -277,7 +277,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	switch w := co.(type) {
 	case fyne.ClickableObject:
 		if action == glfw.Press {
-			w.OnMouseDown(ev)
+			go w.OnMouseDown(ev)
 		}
 	case fyne.FocusableObject:
 		current.Focus(w)
@@ -404,10 +404,10 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	}
 
 	if w.canvas.Focused() != nil {
-		w.canvas.Focused().OnKeyDown(ev)
+		go w.canvas.Focused().OnKeyDown(ev)
 	}
 	if w.canvas.onKeyDown != nil {
-		w.canvas.onKeyDown(ev)
+		go w.canvas.onKeyDown(ev)
 	}
 }
 

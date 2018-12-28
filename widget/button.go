@@ -147,7 +147,7 @@ func (b *Button) Hide() {
 // OnMouseDown is called when a mouse down event is captured and triggers any tap handler
 func (b *Button) OnMouseDown(*fyne.MouseEvent) {
 	if b.OnTapped != nil {
-		go b.OnTapped()
+		b.OnTapped()
 	}
 }
 
