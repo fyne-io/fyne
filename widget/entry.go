@@ -260,11 +260,13 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 
 		pos := e.cursorTextPos()
 		e.deleteFromTo(pos, pos+1)
-	} else if key.Name == fyne.KeyReturn && e.Multiline {
-		e.insertAtCursor("\n")
+	} else if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter {
+		if e.Multiline {
+			e.insertAtCursor("\n")
 
-		e.CursorColumn = 0
-		e.CursorRow++
+			e.CursorColumn = 0
+			e.CursorRow++
+		}
 	} else if key.Name == fyne.KeyUp {
 		if e.CursorRow > 0 {
 			e.CursorRow--
