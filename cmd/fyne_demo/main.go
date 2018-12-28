@@ -16,7 +16,9 @@ func formApp(app fyne.App) {
 	w := app.NewWindow("Form")
 
 	name := widget.NewEntry()
+	name.SetPlaceHolder("John Smith")
 	email := widget.NewEntry()
+	email.SetPlaceHolder("test@example.com")
 	password := widget.NewPasswordEntry()
 	largeText := widget.NewEntry()
 	//	largeText.Text = "\n\n\n"

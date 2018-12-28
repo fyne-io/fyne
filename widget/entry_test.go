@@ -33,6 +33,21 @@ func TestMultilineEntry_MinSize(t *testing.T) {
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }
 
+func TestEntry_SetPlaceHolder(t *testing.T) {
+	entry := NewEntry()
+
+	assert.Equal(t, 0, len(entry.Text))
+	assert.Equal(t, 0, len(Renderer(entry).(*entryRenderer).label.Text))
+
+	entry.SetPlaceHolder("Test")
+	assert.Equal(t, 0, len(entry.Text))
+	assert.Equal(t, 4, len(Renderer(entry).(*entryRenderer).label.Text))
+
+	entry.SetText("Hi")
+	assert.Equal(t, 2, len(entry.Text))
+	assert.Equal(t, 2, len(Renderer(entry).(*entryRenderer).label.Text))
+}
+
 func TestEntry_OnKeyDown(t *testing.T) {
 	entry := NewEntry()
 

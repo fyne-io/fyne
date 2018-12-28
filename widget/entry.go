@@ -110,7 +110,11 @@ func (e *entryRenderer) Refresh() {
 	if e.entry.Password {
 		text = strings.Repeat(passwordChar, utf8.RuneCountInString(e.entry.Text))
 	} else {
-		text = e.entry.Text
+		if e.entry.Text == "" {
+			text = e.entry.PlaceHolder
+		} else {
+			text = e.entry.Text
+		}
 	}
 
 	e.label.SetText(text)
@@ -132,10 +136,11 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 type Entry struct {
 	baseWidget
 
-	Text      string
-	OnChanged func(string) `json:"-"`
-	Password  bool
-	MultiLine bool
+	Text        string
+	PlaceHolder string
+	OnChanged   func(string) `json:"-"`
+	Password    bool
+	MultiLine   bool
 
 	CursorRow, CursorColumn int
 
@@ -172,6 +177,13 @@ func (e *Entry) Hide() {
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
 	e.updateText(text)
+}
+
+// SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
+func (e *Entry) SetPlaceHolder(text string) {
+	e.PlaceHolder = text
+
+	Renderer(e).Refresh()
 }
 
 // updateText updates the internal text to the given value
@@ -268,6 +280,9 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			e.CursorRow++
 		}
 	} else if key.Name == fyne.KeyUp {
+		if e.Text == "" { // just displaying placeholder
+			return
+		}
 		if e.CursorRow > 0 {
 			e.CursorRow--
 		}
@@ -276,6 +291,9 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			e.CursorColumn = e.label().RowLength(e.CursorRow)
 		}
 	} else if key.Name == fyne.KeyDown {
+		if e.Text == "" { // just displaying placeholder
+			return
+		}
 		if e.CursorRow < e.label().Rows()-1 {
 			e.CursorRow++
 		}
@@ -284,6 +302,9 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			e.CursorColumn = e.label().RowLength(e.CursorRow)
 		}
 	} else if key.Name == fyne.KeyLeft {
+		if e.Text == "" { // just displaying placeholder
+			return
+		}
 		if e.CursorColumn > 0 {
 			e.CursorColumn--
 		} else if e.CursorRow > 0 {
@@ -291,6 +312,9 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			e.CursorColumn = e.label().RowLength(e.CursorRow)
 		}
 	} else if key.Name == fyne.KeyRight {
+		if e.Text == "" { // just displaying placeholder
+			return
+		}
 		if e.CursorColumn < e.label().RowLength(e.CursorRow) {
 			e.CursorColumn++
 		} else if e.CursorRow < e.label().Rows()-1 {
