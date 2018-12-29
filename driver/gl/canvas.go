@@ -61,7 +61,12 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 }
 
 func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
-	refreshQueue <- obj
+	select {
+	case refreshQueue <- obj:
+		// all good
+	default:
+		// queue is full, ignore
+	}
 	c.setDirty()
 }
 
