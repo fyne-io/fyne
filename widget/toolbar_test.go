@@ -1,9 +1,10 @@
 package widget
 
 import (
+	"testing"
+
 	"github.com/fyne-io/fyne/theme"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestToolbarSize(t *testing.T) {

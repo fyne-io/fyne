@@ -1,11 +1,13 @@
 package main
 
-import "image/color"
+import (
+	"image/color"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/layout"
-import "github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne/theme"
+)
 
 func rgbGradient(x, y, w, h int) color.Color {
 	g := int(float32(x) / float32(w) * float32(255))

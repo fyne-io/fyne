@@ -1,16 +1,18 @@
 // Package main provides various examples of Fyne API capabilities
 package main
 
-import "errors"
-import "fmt"
+import (
+	"errors"
+	"fmt"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/layout"
-import "github.com/fyne-io/fyne/theme"
-import "github.com/fyne-io/fyne/dialog"
-import "github.com/fyne-io/fyne/widget"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/app"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/dialog"
+	"github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne/widget"
+)
 
 func formApp(app fyne.App) {
 	w := app.NewWindow("Form")

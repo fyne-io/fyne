@@ -2,14 +2,16 @@
 
 package main
 
-import "fmt"
-import "io/ioutil"
-import "os"
-import "path"
-import "runtime"
-import "strings"
+import (
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path"
+	"runtime"
+	"strings"
 
-import "github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne"
+)
 
 const fontFace = "NotoSans"
 

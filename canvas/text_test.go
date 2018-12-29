@@ -1,10 +1,11 @@
 package canvas
 
 import (
-	_ "github.com/fyne-io/fyne/test"
-	"github.com/stretchr/testify/assert"
 	"image/color"
 	"testing"
+
+	_ "github.com/fyne-io/fyne/test"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestText_MinSize(t *testing.T) {

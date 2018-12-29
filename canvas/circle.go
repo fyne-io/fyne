@@ -1,8 +1,10 @@
 package canvas
 
-import "image/color"
+import (
+	"image/color"
 
-import "github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne"
+)
 
 // Circle describes a coloured circle primitive in a Fyne canvas
 type Circle struct {

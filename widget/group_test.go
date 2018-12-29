@@ -1,10 +1,11 @@
 package widget
 
-import "testing"
+import (
+	"testing"
 
-import "github.com/stretchr/testify/assert"
-
-import _ "github.com/fyne-io/fyne/test"
+	_ "github.com/fyne-io/fyne/test"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestGroupSize(t *testing.T) {
 	group := NewGroup("Test", NewLabel("Hello"), NewLabel("World"))

@@ -1,11 +1,13 @@
 package main
 
-import "math"
-import "time"
+import (
+	"math"
+	"time"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
 
 type clockLayout struct {
 	hour, minute, second     *canvas.Line

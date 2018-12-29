@@ -1,8 +1,11 @@
 package layout
 
-import "math"
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/theme"
+import (
+	"math"
+
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/theme"
+)
 
 type gridLayout struct {
 	Cols int

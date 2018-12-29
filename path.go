@@ -1,9 +1,11 @@
 package fyne
 
-import "os"
-import "path"
-import "io/ioutil"
-import "os/user"
+import (
+	"io/ioutil"
+	"os"
+	"os/user"
+	"path"
+)
 
 var cacheDirPath string
 

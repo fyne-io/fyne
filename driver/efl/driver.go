@@ -8,9 +8,11 @@ package efl
 // #include <Ecore.h>
 import "C"
 
-import "log"
+import (
+	"log"
 
-import "github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne"
+)
 
 const (
 	oSEngineOther = "unknown"

@@ -1,8 +1,10 @@
 package fyne
 
-import "testing"
+import (
+	"testing"
 
-import "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestMin(t *testing.T) {
 	assert.Equal(t, Min(1, 3), 1)

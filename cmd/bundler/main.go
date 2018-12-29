@@ -2,13 +2,15 @@
 // serialisation library.
 package main
 
-import "flag"
-import "fmt"
-import "io/ioutil"
-import "path"
-import "strings"
+import (
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"path"
+	"strings"
 
-import "github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne"
+)
 
 func writeResource(file, name string) {
 	bytes, err := ioutil.ReadFile(file)

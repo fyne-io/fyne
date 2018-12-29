@@ -1,9 +1,11 @@
 package canvas
 
-import "image/color"
+import (
+	"image/color"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/theme"
+)
 
 // Text describes a text primitive in a Fyne canvas.
 // A text object can have a style set which will apply to the whole string.

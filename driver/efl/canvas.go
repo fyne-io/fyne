@@ -12,17 +12,19 @@ package efl
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
 import "C"
 
-import "log"
-import "image/color"
-import "math"
-import "sync"
-import "unsafe"
+import (
+	"image/color"
+	"log"
+	"math"
+	"sync"
+	"unsafe"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
-import "github.com/fyne-io/fyne/layout"
-import "github.com/fyne-io/fyne/widget"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne/widget"
+)
 
 var canvasMutex sync.RWMutex
 var canvases = make(map[*C.Evas]*eflCanvas)

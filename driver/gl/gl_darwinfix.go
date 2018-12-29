@@ -13,9 +13,11 @@ void cocoa_update_nsgl_context(void* id) {
 */
 import "C"
 
-import "unsafe"
+import (
+	"unsafe"
 
-import "github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/glfw/v3.2/glfw"
+)
 
 // This fixes the initially blank window on macOS Mojave
 // We can remove this (and the gl_other.go) once GLFW 3.3 arrives in go_gl

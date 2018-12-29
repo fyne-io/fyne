@@ -1,9 +1,11 @@
 package canvas
 
-import "math"
-import "image/color"
+import (
+	"image/color"
+	"math"
 
-import "github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne"
+)
 
 // Line describes a coloured line primitive in a Fyne canvas.
 // Lines are special as they can have a negative width or height to indicate

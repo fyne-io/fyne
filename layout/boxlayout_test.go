@@ -1,11 +1,12 @@
 package layout
 
 import (
+	"testing"
+
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/theme"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 // NewRectangle returns a new Rectangle instance

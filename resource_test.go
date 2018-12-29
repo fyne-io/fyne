@@ -1,9 +1,11 @@
 package fyne
 
-import "os"
+import (
+	"os"
+	"testing"
 
-import "testing"
-import "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestNewResource(t *testing.T) {
 	name := "test"

@@ -1,15 +1,15 @@
 package layout
 
-import "testing"
+import (
+	"image/color"
+	"testing"
 
-import "image/color"
-
-import _ "github.com/fyne-io/fyne/test"
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
-
-import "github.com/stretchr/testify/assert"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	_ "github.com/fyne-io/fyne/test"
+	"github.com/fyne-io/fyne/theme"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestGridLayout(t *testing.T) {
 	gridSize := fyne.NewSize(100+theme.Padding(), 100+theme.Padding())

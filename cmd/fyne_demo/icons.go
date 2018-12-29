@@ -1,12 +1,13 @@
 package main
 
 import (
+	"image/color"
+
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/canvas"
 	"github.com/fyne-io/fyne/layout"
 	"github.com/fyne-io/fyne/theme"
 	"github.com/fyne-io/fyne/widget"
-	"image/color"
 )
 
 type browser struct {

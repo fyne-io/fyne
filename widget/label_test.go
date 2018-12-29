@@ -1,12 +1,13 @@
 package widget
 
-import "testing"
+import (
+	"testing"
 
-import "github.com/stretchr/testify/assert"
-
-import "github.com/fyne-io/fyne"
-import _ "github.com/fyne-io/fyne/test"
-import "github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne"
+	_ "github.com/fyne-io/fyne/test"
+	"github.com/fyne-io/fyne/theme"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestLabel_MinSize(t *testing.T) {
 	label := NewLabel("Test")

@@ -8,11 +8,13 @@ package efl
 // #include <stdlib.h>
 import "C"
 
-import "unsafe"
+import (
+	"unsafe"
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-import "github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, size int, style fyne.TextStyle) {
 	font := theme.TextFont()

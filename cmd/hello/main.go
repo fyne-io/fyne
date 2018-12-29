@@ -3,9 +3,11 @@
 // Package main loads a very basic Hello World graphical application
 package main
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/widget"
+import (
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/app"
+	"github.com/fyne-io/fyne/widget"
+)
 
 func main() {
 	app := app.New()

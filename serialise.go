@@ -1,8 +1,10 @@
 package fyne
 
-import "bytes"
-import "fmt"
-import "io/ioutil"
+import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+)
 
 func fromFile(name string) Resource {
 	data, err := ioutil.ReadFile(cachePath(name))

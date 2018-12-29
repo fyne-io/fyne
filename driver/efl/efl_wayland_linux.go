@@ -9,9 +9,11 @@ package efl
 // #include <Ecore_Wl2.h>
 import "C"
 
-import "log"
-import "os"
-import "strings"
+import (
+	"log"
+	"os"
+	"strings"
+)
 
 var engine string
 

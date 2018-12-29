@@ -1,9 +1,10 @@
 package gl
 
 import (
-	"github.com/fyne-io/fyne/canvas"
 	"image"
 	"image/color"
+
+	"github.com/fyne-io/fyne/canvas"
 )
 
 type pixelImage struct {

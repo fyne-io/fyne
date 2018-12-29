@@ -5,8 +5,8 @@ import (
 
 	"github.com/fyne-io/fyne"
 	"github.com/fyne-io/fyne/theme"
+	"github.com/fyne-io/fyne/widget"
 )
-import "github.com/fyne-io/fyne/widget"
 
 func makeButtonTab() fyne.Widget {
 	return widget.NewVBox(

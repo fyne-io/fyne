@@ -1,11 +1,12 @@
 package widget
 
-import "testing"
+import (
+	"testing"
 
-import "github.com/stretchr/testify/assert"
-
-import _ "github.com/fyne-io/fyne/test"
-import "github.com/fyne-io/fyne/theme"
+	_ "github.com/fyne-io/fyne/test"
+	"github.com/fyne-io/fyne/theme"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestCheckSize(t *testing.T) {
 	check := NewCheck("Hi", nil)

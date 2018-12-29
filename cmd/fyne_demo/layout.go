@@ -1,8 +1,10 @@
 package main
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/layout"
-import "github.com/fyne-io/fyne/widget"
+import (
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/layout"
+	"github.com/fyne-io/fyne/widget"
+)
 
 func makeBorderLayout() *fyne.Container {
 	top := widget.NewEntry()

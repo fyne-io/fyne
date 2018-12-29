@@ -1,13 +1,13 @@
 package layout
 
-import "testing"
+import (
+	"image/color"
+	"testing"
 
-import "image/color"
-
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/canvas"
-
-import "github.com/stretchr/testify/assert"
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestMaxLayout(t *testing.T) {
 	size := fyne.NewSize(100, 100)

@@ -1,12 +1,13 @@
 package widget
 
-import "testing"
-import "time"
+import (
+	"testing"
+	"time"
 
-import "github.com/stretchr/testify/assert"
-
-import _ "github.com/fyne-io/fyne/test"
-import "github.com/fyne-io/fyne/theme"
+	_ "github.com/fyne-io/fyne/test"
+	"github.com/fyne-io/fyne/theme"
+	"github.com/stretchr/testify/assert"
+)
 
 func TestButtonSize(t *testing.T) {
 	button := NewButton("Hi", nil)
