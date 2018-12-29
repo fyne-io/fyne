@@ -128,8 +128,7 @@ func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 2, entry.CursorColumn)
 
-	key := new(fyne.KeyEvent)
-	key.Name = "BackSpace"
+	key := &fyne.KeyEvent{Name: fyne.KeyBackspace}
 	entry.OnKeyDown(key)
 
 	assert.Equal(t, "H", entry.Text)
@@ -144,8 +143,7 @@ func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 	entry.OnKeyDown(right)
 	entry.OnKeyDown(right)
 
-	key := new(fyne.KeyEvent)
-	key.Name = "BackSpace"
+	key := &fyne.KeyEvent{Name: fyne.KeyBackspace}
 	entry.OnKeyDown(key)
 	entry.OnKeyDown(key)
 	entry.OnKeyDown(key)
@@ -160,8 +158,7 @@ func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
 	down := &fyne.KeyEvent{Name: fyne.KeyDown}
 	entry.OnKeyDown(down)
 
-	key := new(fyne.KeyEvent)
-	key.Name = "BackSpace"
+	key := &fyne.KeyEvent{Name: fyne.KeyBackspace}
 	entry.OnKeyDown(key)
 
 	assert.Equal(t, "Hi", entry.Text)
@@ -176,8 +173,7 @@ func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	bs := new(fyne.KeyEvent)
-	bs.Name = "BackSpace"
+	bs := &fyne.KeyEvent{Name: fyne.KeyBackspace}
 	entry.OnKeyDown(bs)
 	assert.Equal(t, "", entry.Text)
 	assert.Equal(t, 0, entry.CursorRow)
@@ -192,8 +188,7 @@ func TestEntry_OnKeyDown_Delete(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	key := new(fyne.KeyEvent)
-	key.Name = "Delete"
+	key := &fyne.KeyEvent{Name: fyne.KeyDelete}
 	entry.OnKeyDown(key)
 
 	assert.Equal(t, "H", entry.Text)
@@ -205,8 +200,7 @@ func TestEntry_OnKeyDown_DeleteBeyondText(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
 
-	key := new(fyne.KeyEvent)
-	key.Name = "Delete"
+	key := &fyne.KeyEvent{Name: fyne.KeyDelete}
 	entry.OnKeyDown(key)
 	entry.OnKeyDown(key)
 	entry.OnKeyDown(key)
@@ -221,8 +215,7 @@ func TestEntry_OnKeyDown_DeleteNewline(t *testing.T) {
 	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(right)
 
-	key := new(fyne.KeyEvent)
-	key.Name = "Delete"
+	key := &fyne.KeyEvent{Name: fyne.KeyDelete}
 	entry.OnKeyDown(key)
 
 	assert.Equal(t, "Hi", entry.Text)
