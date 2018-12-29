@@ -107,6 +107,18 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 	assert.Equal(t, "Hoi", entry.Text)
 }
 
+func TestEntry_OnKeyDown_Newline(t *testing.T) {
+	entry := &Entry{Text:"Hi", MultiLine:true}
+
+	down := &fyne.KeyEvent{Name: fyne.KeyRight}
+	entry.OnKeyDown(down)
+
+	key := &fyne.KeyEvent{Name: fyne.KeyReturn}
+	entry.OnKeyDown(key)
+
+	assert.Equal(t, "H\ni", entry.Text)
+}
+
 func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
