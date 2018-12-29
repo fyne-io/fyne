@@ -108,7 +108,7 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Newline(t *testing.T) {
-	entry := &Entry{Text:"Hi", MultiLine:true}
+	entry := &Entry{Text: "Hi", MultiLine: true}
 
 	down := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(down)
