@@ -99,7 +99,7 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 	entry.OnKeyDown(key)
 	assert.Equal(t, "Hi", entry.Text)
 
-	left := &fyne.KeyEvent{Name: "Left"}
+	left := &fyne.KeyEvent{Name: fyne.KeyLeft}
 	entry.OnKeyDown(left)
 
 	key.String = "o"
@@ -110,7 +110,7 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
-	right := &fyne.KeyEvent{Name: "Right"}
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(right)
 	entry.OnKeyDown(right)
 	assert.Equal(t, 0, entry.CursorRow)
@@ -128,7 +128,7 @@ func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
-	right := &fyne.KeyEvent{Name: "Right"}
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(right)
 	entry.OnKeyDown(right)
 
@@ -145,7 +145,7 @@ func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("H\ni")
 
-	down := &fyne.KeyEvent{Name: "Down"}
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
 	entry.OnKeyDown(down)
 
 	key := new(fyne.KeyEvent)
@@ -175,7 +175,7 @@ func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
 func TestEntry_OnKeyDown_Delete(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Hi")
-	right := &fyne.KeyEvent{Name: "Right"}
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(right)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
@@ -206,7 +206,7 @@ func TestEntry_OnKeyDown_DeleteNewline(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("H\ni")
 
-	right := &fyne.KeyEvent{Name: "Right"}
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(right)
 
 	key := new(fyne.KeyEvent)
@@ -262,7 +262,7 @@ func TestEntry_CursorRow(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 
 	// only 1 line, do nothing
-	down := &fyne.KeyEvent{Name: "Down"}
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
 	entry.OnKeyDown(down)
 	assert.Equal(t, 0, entry.CursorRow)
 
@@ -271,7 +271,7 @@ func TestEntry_CursorRow(t *testing.T) {
 	entry.OnKeyDown(down)
 	assert.Equal(t, 1, entry.CursorRow)
 
-	up := &fyne.KeyEvent{Name: "Up"}
+	up := &fyne.KeyEvent{Name: fyne.KeyUp}
 	entry.OnKeyDown(up)
 	assert.Equal(t, 0, entry.CursorRow)
 
@@ -286,7 +286,7 @@ func TestEntry_CursorColumn(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 
 	// only 0 columns, do nothing
-	right := &fyne.KeyEvent{Name: "Right"}
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(right)
 	assert.Equal(t, 0, entry.CursorColumn)
 
@@ -295,7 +295,7 @@ func TestEntry_CursorColumn(t *testing.T) {
 	entry.OnKeyDown(right)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	left := &fyne.KeyEvent{Name: "Left"}
+	left := &fyne.KeyEvent{Name: fyne.KeyLeft}
 	entry.OnKeyDown(left)
 	assert.Equal(t, 0, entry.CursorColumn)
 
@@ -311,7 +311,7 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 
 	// go to end of line
-	right := &fyne.KeyEvent{Name: "Right"}
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(right)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
@@ -322,7 +322,7 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 
 	// and back
-	left := &fyne.KeyEvent{Name: "Left"}
+	left := &fyne.KeyEvent{Name: fyne.KeyLeft}
 	entry.OnKeyDown(left)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
@@ -333,7 +333,7 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	entry.SetText("a\nbc")
 
 	// go to end of text
-	right := &fyne.KeyEvent{Name: "Right"}
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.OnKeyDown(right)
 	entry.OnKeyDown(right)
 	entry.OnKeyDown(right)
@@ -342,7 +342,7 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 2, entry.CursorColumn)
 
 	// go up, to a shorter line
-	up := &fyne.KeyEvent{Name: "Up"}
+	up := &fyne.KeyEvent{Name: fyne.KeyUp}
 	entry.OnKeyDown(up)
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
@@ -352,16 +352,16 @@ func checkNewlineIgnored(t *testing.T, entry *Entry) {
 	assert.Equal(t, 0, entry.CursorRow)
 
 	// only 1 line, do nothing
-	down := &fyne.KeyEvent{Name: "Down"}
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
 	entry.OnKeyDown(down)
 	assert.Equal(t, 0, entry.CursorRow)
 
 	// return is ignored, do nothing
-	ret := &fyne.KeyEvent{Name: "Return"}
+	ret := &fyne.KeyEvent{Name: fyne.KeyReturn}
 	entry.OnKeyDown(ret)
 	assert.Equal(t, 0, entry.CursorRow)
 
-	up := &fyne.KeyEvent{Name: "Up"}
+	up := &fyne.KeyEvent{Name: fyne.KeyUp}
 	entry.OnKeyDown(up)
 	assert.Equal(t, 0, entry.CursorRow)
 
