@@ -109,11 +109,14 @@ func (e *entryRenderer) Refresh() {
 	var text string
 	if e.entry.Password {
 		text = strings.Repeat(passwordChar, utf8.RuneCountInString(e.entry.Text))
+		e.label.color = theme.TextColor()
 	} else {
 		if e.entry.Text == "" {
 			text = e.entry.PlaceHolder
+			e.label.color = theme.PlaceHolderColor()
 		} else {
 			text = e.entry.Text
+			e.label.color = theme.TextColor()
 		}
 	}
 

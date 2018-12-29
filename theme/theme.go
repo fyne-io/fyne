@@ -10,7 +10,7 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, primary color.Color
+	button, text, placeholder, primary color.Color
 }
 
 var lightBackground = color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
@@ -18,20 +18,22 @@ var lightBackground = color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
 // LightTheme defines the built in light theme colours and sizes
 func LightTheme() fyne.Theme {
 	return &builtinTheme{
-		background: lightBackground,
-		button:     color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
-		text:       color.RGBA{0x0, 0x0, 0x0, 0xdd},
-		primary:    color.RGBA{0x9f, 0xa8, 0xda, 0xff},
+		background:  lightBackground,
+		button:      color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
+		text:        color.RGBA{0x0, 0x0, 0x0, 0xdd},
+		placeholder: color.RGBA{0x88, 0x88, 0x88, 0xff},
+		primary:     color.RGBA{0x9f, 0xa8, 0xda, 0xff},
 	}
 }
 
 // DarkTheme defines the built in dark theme colours and sizes
 func DarkTheme() fyne.Theme {
 	return &builtinTheme{
-		background: color.RGBA{0x42, 0x42, 0x42, 0xff},
-		button:     color.RGBA{0x21, 0x21, 0x21, 0xff},
-		text:       color.RGBA{0xff, 0xff, 0xff, 0xff},
-		primary:    color.RGBA{0x1a, 0x23, 0x7e, 0xff},
+		background:  color.RGBA{0x42, 0x42, 0x42, 0xff},
+		button:      color.RGBA{0x21, 0x21, 0x21, 0xff},
+		text:        color.RGBA{0xff, 0xff, 0xff, 0xff},
+		placeholder: color.RGBA{0x88, 0x88, 0x88, 0xff},
+		primary:     color.RGBA{0x1a, 0x23, 0x7e, 0xff},
 	}
 }
 
@@ -47,6 +49,11 @@ func (t *builtinTheme) ButtonColor() color.Color {
 // TextColor returns the theme's standard text colour
 func (t *builtinTheme) TextColor() color.Color {
 	return t.text
+}
+
+// PlaceHolderColor returns the theme's placeholder text colour
+func (t *builtinTheme) PlaceHolderColor() color.Color {
+	return t.placeholder
 }
 
 // PrimaryColor returns the colour used to highlight primary features
@@ -118,6 +125,11 @@ func ButtonColor() color.Color {
 // TextColor returns the theme's standard text colour
 func TextColor() color.Color {
 	return current().TextColor()
+}
+
+// PlaceHolderColor returns the theme's standard text colour
+func PlaceHolderColor() color.Color {
+	return current().PlaceHolderColor()
 }
 
 // PrimaryColor returns the colour used to highlight primary features

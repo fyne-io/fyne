@@ -101,7 +101,11 @@ func (l *labelRenderer) Objects() []fyne.CanvasObject {
 // ApplyTheme is called when the Label may need to update it's look
 func (l *labelRenderer) ApplyTheme() {
 	for _, text := range l.texts {
-		text.Color = theme.TextColor()
+		if l.label.color != nil {
+			text.Color = l.label.color
+		} else {
+			text.Color = theme.TextColor()
+		}
 	}
 }
 
@@ -110,6 +114,7 @@ func (l *labelRenderer) BackgroundColor() color.Color {
 }
 
 func (l *labelRenderer) Refresh() {
+	l.ApplyTheme()
 	for _, text := range l.texts {
 		text.Alignment = l.label.Alignment
 		text.TextStyle = l.label.TextStyle
@@ -125,6 +130,8 @@ type Label struct {
 	Text      string         // The content of the label
 	Alignment fyne.TextAlign // The alignment of the Text
 	TextStyle fyne.TextStyle // The style of the label text
+
+	color color.Color
 }
 
 // Resize sets a new size for a widget.
@@ -198,6 +205,7 @@ func NewLabel(text string) *Label {
 		text,
 		fyne.TextAlignLeading,
 		style,
+		nil,
 	}
 
 	Renderer(l).Layout(l.MinSize())
