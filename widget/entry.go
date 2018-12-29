@@ -140,6 +140,7 @@ type Entry struct {
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 	Password    bool
+	ReadOnly    bool
 	MultiLine   bool
 
 	CursorRow, CursorColumn int
@@ -182,6 +183,13 @@ func (e *Entry) SetText(text string) {
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
 func (e *Entry) SetPlaceHolder(text string) {
 	e.PlaceHolder = text
+
+	Renderer(e).Refresh()
+}
+
+// SetReadOnly sets whether or not the Entry should not be editable
+func (e *Entry) SetReadOnly(ro bool) {
+	e.ReadOnly = ro
 
 	Renderer(e).Refresh()
 }
@@ -230,6 +238,9 @@ func (e *Entry) deleteFromTo(from int, to int) {
 
 // OnFocusGained is called when the Entry has been given focus.
 func (e *Entry) OnFocusGained() {
+	if e.ReadOnly {
+		return
+	}
 	e.focused = true
 
 	Renderer(e).Refresh()
@@ -249,6 +260,10 @@ func (e *Entry) Focused() bool {
 
 // OnKeyDown receives key input events when the Entry widget is focused.
 func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
+	if e.ReadOnly {
+		return
+	}
+
 	if key.Name == fyne.KeyBackspace {
 		if len(e.Text) == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
 			return

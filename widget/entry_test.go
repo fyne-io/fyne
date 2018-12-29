@@ -60,6 +60,35 @@ func TestEntry_OnKeyDown(t *testing.T) {
 	assert.Equal(t, "Hi", entry.Text)
 }
 
+func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
+	entry := NewEntry()
+
+	key := new(fyne.KeyEvent)
+	key.String = "H"
+	entry.OnKeyDown(key)
+	entry.SetReadOnly(true)
+	key.String = "i"
+	entry.OnKeyDown(key)
+	assert.Equal(t, "H", entry.Text)
+
+	entry.SetReadOnly(false)
+	key.String = "i"
+	entry.OnKeyDown(key)
+	assert.Equal(t, "Hi", entry.Text)
+}
+
+func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
+	entry := NewEntry()
+	entry.SetReadOnly(true)
+
+	entry.OnFocusGained()
+	assert.False(t, entry.Focused())
+
+	entry.SetReadOnly(false)
+	entry.OnFocusGained()
+	assert.True(t, entry.Focused())
+}
+
 func TestEntry_OnKeyDown_Insert(t *testing.T) {
 	entry := NewEntry()
 
