@@ -143,3 +143,6 @@ func main() {
 
 The main examples have been moved - you can find them in their [own repository](https://github.com/fyne-io/examples/).
 
+## Dependencies
+
+You will require a GCC compiler if you do not have one, if on Windows this can be included by installing TDM-GCC. This can be downloaded and installed from http://tdm-gcc.tdragon.net/download
