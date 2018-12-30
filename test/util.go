@@ -4,7 +4,7 @@ import "github.com/fyne-io/fyne"
 
 // Click simulates a mouse click on the specified object
 func Click(obj fyne.ClickableObject) {
-	ev := &fyne.MouseEvent{Button:fyne.LeftMouseButton, Position:fyne.NewPos(1, 1)}
+	ev := &fyne.MouseEvent{Button: fyne.LeftMouseButton, Position: fyne.NewPos(1, 1)}
 	obj.OnMouseDown(ev)
 }
 
