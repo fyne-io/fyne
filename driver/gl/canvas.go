@@ -101,6 +101,10 @@ func (c *glCanvas) SetScale(scale float32) {
 	c.setDirty()
 }
 
+func (c *glCanvas) OnKeyDown() func(*fyne.KeyEvent) {
+	return c.onKeyDown
+}
+
 func (c *glCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
 	c.onKeyDown = keyDown
 }

@@ -8,14 +8,24 @@ func Click(obj fyne.ClickableObject) {
 	obj.OnMouseDown(ev)
 }
 
+func typeChars(chars string, keyDown func(event *fyne.KeyEvent)) {
+	for _, char := range chars {
+		ev := &fyne.KeyEvent{String: string(char), Name: fyne.KeyName(char)}
+		keyDown(ev)
+	}
+}
+
 // Type performs a series of key events to simulate typing of a value into the specified object.
 // The focusable object will be focused before typing begins.
 // The chars parameter will be input one rune at a time to the focused object.
 func Type(obj fyne.FocusableObject, chars string) {
 	obj.OnFocusGained()
 
-	for _, char := range chars {
-		ev := &fyne.KeyEvent{String: string(char), Name: fyne.KeyName(char)}
-		obj.OnKeyDown(ev)
-	}
+	typeChars(chars, obj.OnKeyDown)
+}
+
+// TypeOnCanvas is like the Type function but it passes the key events to the canvas object
+// rather than a focusable widget.
+func TypeOnCanvas(c fyne.Canvas, chars string) {
+	typeChars(chars, c.OnKeyDown())
 }

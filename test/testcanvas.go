@@ -7,6 +7,8 @@ var dummyCanvas fyne.Canvas
 type testCanvas struct {
 	content fyne.CanvasObject
 	focused fyne.FocusableObject
+
+	onKeyDown func(*fyne.KeyEvent)
 }
 
 func (c *testCanvas) Content() fyne.CanvasObject {
@@ -36,10 +38,16 @@ func (c *testCanvas) Size() fyne.Size {
 func (c *testCanvas) Scale() float32 {
 	return 1.0
 }
+
 func (c *testCanvas) SetScale(float32) {
 }
 
-func (c *testCanvas) SetOnKeyDown(func(*fyne.KeyEvent)) {
+func (c *testCanvas) OnKeyDown() func(*fyne.KeyEvent) {
+	return c.onKeyDown
+}
+
+func (c *testCanvas) SetOnKeyDown(handler func(*fyne.KeyEvent)) {
+	c.onKeyDown = handler
 }
 
 // NewCanvas returns a single use in-memory canvas used for testing

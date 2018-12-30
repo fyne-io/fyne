@@ -547,6 +547,10 @@ func (c *eflCanvas) SetScale(scale float32) {
 	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
 }
 
+func (c *eflCanvas) OnKeyDown() func(*fyne.KeyEvent) {
+	return c.onKeyDown
+}
+
 func (c *eflCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
 	c.onKeyDown = keyDown
 }

@@ -13,5 +13,6 @@ type Canvas interface {
 	Scale() float32
 	SetScale(float32)
 
+	OnKeyDown() func(*KeyEvent)
 	SetOnKeyDown(func(*KeyEvent))
 }
