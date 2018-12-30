@@ -47,7 +47,7 @@ func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{applied: make(chan bool)}
 
-	window := test.NewTestWindow(widget)
+	window := test.NewWindow(widget)
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 
 	func() {
@@ -66,7 +66,7 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	child := &myWidget{applied: make(chan bool)}
 	parent := NewVBox(child)
 
-	window := test.NewTestWindow(parent)
+	window := test.NewWindow(parent)
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 	func() {
 		select {

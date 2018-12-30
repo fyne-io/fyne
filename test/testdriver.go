@@ -11,7 +11,7 @@ func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *testDriver) CreateWindow(string) fyne.Window {
-	return NewTestWindow(nil)
+	return NewWindow(nil)
 }
 
 func (d *testDriver) AllWindows() []fyne.Window {
@@ -30,11 +30,11 @@ func (d *testDriver) Quit() {
 	// no-op
 }
 
-// NewTestDriver sets up and registers a new dummy driver for test purpose
-func NewTestDriver() fyne.Driver {
+// NewDriver sets up and registers a new dummy driver for test purpose
+func NewDriver() fyne.Driver {
 	driver := new(testDriver)
 	// make a single dummy window for rendering tests
-	NewTestWindow(nil)
+	NewWindow(nil)
 
 	return driver
 }

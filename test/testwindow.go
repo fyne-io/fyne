@@ -98,9 +98,9 @@ func (w *testWindow) Canvas() fyne.Canvas {
 	return w.canvas
 }
 
-// NewTestWindow creates and registers a new window for test purposes
-func NewTestWindow(content fyne.CanvasObject) fyne.Window {
-	canvas := NewTestCanvas()
+// NewWindow creates and registers a new window for test purposes
+func NewWindow(content fyne.CanvasObject) fyne.Window {
+	canvas := NewCanvas()
 	canvas.SetContent(content)
 	window := &testWindow{canvas: canvas}
 

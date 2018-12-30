@@ -42,15 +42,15 @@ func (c *testCanvas) SetScale(float32) {
 func (c *testCanvas) SetOnKeyDown(func(*fyne.KeyEvent)) {
 }
 
-// NewTestCanvas returns a single use in-memory canvas used for testing
-func NewTestCanvas() fyne.Canvas {
+// NewCanvas returns a single use in-memory canvas used for testing
+func NewCanvas() fyne.Canvas {
 	return &testCanvas{}
 }
 
 // Canvas returns a reusable in-memory canvas used for testing
 func Canvas() fyne.Canvas {
 	if dummyCanvas == nil {
-		dummyCanvas = NewTestCanvas()
+		dummyCanvas = NewCanvas()
 	}
 
 	return dummyCanvas

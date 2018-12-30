@@ -9,5 +9,5 @@ import (
 
 // New returns a new app instance using the test (headless) driver.
 func New() fyne.App {
-	return NewAppWithDriver(test.NewTestDriver())
+	return NewAppWithDriver(test.NewDriver())
 }

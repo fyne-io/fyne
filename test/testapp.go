@@ -26,7 +26,7 @@ func (a *testApp) SetIcon(fyne.Resource) {
 }
 
 func (a *testApp) NewWindow(title string) fyne.Window {
-	return NewTestWindow(nil)
+	return NewWindow(nil)
 }
 
 func (a *testApp) OpenURL(url string) {
@@ -82,7 +82,7 @@ func (a *testApp) Settings() fyne.Settings {
 // NewApp returns a new dummy app used for testing..
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
-	test := &testApp{driver: NewTestDriver().(*testDriver), settings: &testSettings{}}
+	test := &testApp{driver: NewDriver().(*testDriver), settings: &testSettings{}}
 	test.Settings().SetTheme(&dummyTheme{})
 	fyne.SetCurrentApp(test)
 
