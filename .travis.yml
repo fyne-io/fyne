@@ -1,13 +1,18 @@
-addons:
-  apt_packages:
-    - libgl1-mesa-dev
-    - xorg-dev
-
 language: go
 
 go:
   - "1.10.x"
   - "1.11.x"
+
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    packages:
+      - libgl1-mesa-dev
+      - xorg-dev
 
 gobuild_args: "-v -tags ci"
 
