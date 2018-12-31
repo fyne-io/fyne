@@ -78,7 +78,8 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 	}
 
 	r, g, b, a := col.RGBA()
-	data := []uint8{uint8(r), uint8(g), uint8(b), uint8(a)}
+	r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
+	data := []uint8{r8, g8, b8, a8}
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
 		gl.UNSIGNED_BYTE, gl.Ptr(data))
 
