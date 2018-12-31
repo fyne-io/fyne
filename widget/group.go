@@ -131,7 +131,7 @@ func (g *groupRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (g *groupRenderer) Refresh() {
-	g.label.Text = g.group.Text
+	g.label.SetText(g.group.Text)
 	g.Layout(g.group.Size())
 
 	canvas.Refresh(g.group)

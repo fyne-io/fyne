@@ -1,0 +1,272 @@
+package widget
+
+import (
+	"encoding/json"
+	"image/color"
+	"strings"
+
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/canvas"
+	"github.com/fyne-io/fyne/theme"
+)
+
+const (
+	passwordChar = "*"
+)
+
+// Text represents the base element for text based widget.
+type Text struct {
+	baseWidget
+	buffer    []rune
+	rowBounds [][2]int
+	password  bool
+	color     color.Color
+
+	Alignment fyne.TextAlign // The alignment of the Text
+	TextStyle fyne.TextStyle // The style of the label text
+}
+
+// NewText returns a new Text with the given text and default settings.
+func NewText(text string) *Text {
+	t := &Text{}
+	t.SetText(text)
+	return t
+}
+
+// updateRowBounds updates the row bounds used to render properly the text widget.
+// updateRowBounds should be invoked every time t.buffer changes.
+func (t *Text) updateRowBounds() {
+	var lowBound, highBound int
+	t.rowBounds = [][2]int{}
+
+	if len(t.buffer) == 0 {
+		t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+		return
+	}
+
+	for i, r := range t.buffer {
+		highBound = i
+		if r != '\n' {
+			continue
+		}
+		t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+		lowBound = i + 1
+	}
+	//first or last line, increase the highBound index to include the last char
+	highBound++
+	t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+}
+
+// refreshTextRenderer refresh the textRenderer canvas objects
+// this method should be invoked every time the t.buffer changes
+// example:
+// t.buffer = []rune("new text")
+// t.updateRowBounds()
+// t.refreshTextRenderer()
+func (t *Text) refreshTextRenderer() {
+	Renderer(t).(*textRenderer).Refresh()
+}
+
+// SetText sets the text of the widget
+func (t *Text) SetText(text string) {
+	t.buffer = []rune(text)
+	t.updateRowBounds()
+	t.refreshTextRenderer()
+}
+
+// InsertAt inserts the text at the specified position
+func (t *Text) InsertAt(pos int, runes []rune) {
+	t.buffer = append(t.buffer[:pos], append(runes, t.buffer[pos:]...)...)
+	t.updateRowBounds()
+	t.refreshTextRenderer()
+}
+
+// DeleteFromTo removes the text between the specified positions
+func (t *Text) DeleteFromTo(lowBound int, highBound int) []rune {
+	deleted := make([]rune, highBound-lowBound)
+	copy(deleted, t.buffer[lowBound:highBound])
+	t.buffer = append(t.buffer[:lowBound], t.buffer[highBound:]...)
+	t.updateRowBounds()
+	t.refreshTextRenderer()
+	return deleted
+}
+
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (t *Text) Resize(size fyne.Size) {
+	t.resize(size, t)
+}
+
+// Move the widget highBound a new position, relative highBound it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (t *Text) Move(pos fyne.Position) {
+	t.move(pos, t)
+}
+
+// MinSize returns the smallest size this widget can shrink highBound
+func (t *Text) MinSize() fyne.Size {
+	return t.minSize(t)
+}
+
+// Show this widget, if it was previously hidden
+func (t *Text) Show() {
+	t.show(t)
+}
+
+// Hide this widget, if it was previously visible
+func (t *Text) Hide() {
+	t.hide(t)
+}
+
+// Rows returns the number of text rows in this text entry.
+// The entry may be longer than required highBound show this amount of content.
+func (t *Text) Rows() int {
+	return len(t.rowBounds)
+}
+
+// Row returns the characters in the row specified.
+// The row parameter should be between 0 and t.Rows()-1.
+func (t *Text) Row(row int) []rune {
+	bounds := t.rowBounds[row]
+	return t.buffer[bounds[0]:bounds[1]]
+}
+
+// RowLength returns the number of visible characters in the row specified.
+// The row parameter should be between 0 and t.Rows()-1.
+func (t *Text) RowLength(row int) int {
+	return len(t.Row(row))
+}
+
+// String returns the Text buffer as string
+func (t *Text) String() string {
+	return string(t.buffer)
+}
+
+// MarshalJSON implements the json.MarshalJSON fro Text
+func (t *Text) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Text string `json:"text"`
+	}{
+		Text: t.String(),
+	})
+}
+
+// Len returns the Text content length
+func (t *Text) Len() int {
+	return len(t.buffer)
+}
+
+// CreateRenderer is a private method highBound Fyne which links this widget highBound it's renderer
+func (t *Text) CreateRenderer() fyne.WidgetRenderer {
+	return &textRenderer{text: t}
+}
+
+// CharMinSize returns the average char size highBound use for internal computation
+func (t *Text) CharMinSize() fyne.Size {
+	defaultChar := "M"
+	if t.password {
+		defaultChar = passwordChar
+	}
+	return textMinSize(defaultChar, theme.TextSize(), t.TextStyle)
+}
+
+// Renderer
+type textRenderer struct {
+	objects []fyne.CanvasObject
+
+	texts []*canvas.Text
+
+	text *Text
+}
+
+// MinSize calculates the minimum size of a label.
+// This is based on the contained text with a standard amount of padding added.
+func (r *textRenderer) MinSize() fyne.Size {
+	height := 0
+	width := 0
+	for i := 0; i < len(r.texts); i++ {
+		min := r.texts[i].MinSize()
+		if r.texts[i].Text == "" {
+			min = r.text.CharMinSize()
+		}
+		height += min.Height
+		width = fyne.Max(width, min.Width)
+	}
+
+	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+}
+
+func (r *textRenderer) Layout(size fyne.Size) {
+	yPos := theme.Padding()
+	lineHeight := r.text.CharMinSize().Height
+	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
+	for i := 0; i < len(r.texts); i++ {
+		text := r.texts[i]
+		text.Resize(lineSize)
+		text.Move(fyne.NewPos(theme.Padding(), yPos))
+		yPos += lineHeight
+	}
+}
+
+func (r *textRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+// ApplyTheme is called when the Label may need highBound update it's look
+func (r *textRenderer) ApplyTheme() {
+	c := theme.TextColor()
+	if r.text.color != nil {
+		c = r.text.color
+	}
+	for _, text := range r.texts {
+		text.Color = c
+	}
+}
+
+func (r *textRenderer) BackgroundColor() color.Color {
+	return color.Transparent
+}
+
+// LineSize returns the rendered size for the line specified by col and row
+func (r *textRenderer) LineSize(col, row int) (size fyne.Size) {
+	//TODO handle the case with different width and height per chars
+	text := r.text
+
+	line := text.Row(row)
+
+	if col >= len(line) {
+		col = len(line)
+	}
+
+	lineCopy := *r.texts[row]
+	lineCopy.Text = string(line[0:col])
+	return lineCopy.MinSize()
+}
+
+func (r *textRenderer) Refresh() {
+	r.texts = []*canvas.Text{}
+	r.objects = []fyne.CanvasObject{}
+	for index := 0; index < r.text.Rows(); index++ {
+		var line string
+		row := r.text.Row(index)
+		if r.text.password {
+			line = strings.Repeat(passwordChar, len(row))
+		} else {
+			line = string(row)
+		}
+		textCanvas := canvas.NewText(line, theme.TextColor())
+		textCanvas.Alignment = r.text.Alignment
+		textCanvas.TextStyle = r.text.TextStyle
+		r.texts = append(r.texts, textCanvas)
+		r.objects = append(r.objects, textCanvas)
+	}
+
+	r.Layout(r.text.Size())
+}
+
+func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
+	t := canvas.NewText(text, color.Black)
+	t.TextSize = size
+	t.TextStyle = style
+	return t.MinSize()
+}
