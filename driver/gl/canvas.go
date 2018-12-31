@@ -120,8 +120,8 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	r, g, b, a := theme.BackgroundColor().RGBA()
-	r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
-	gl.ClearColor(float32(r8)/255, float32(g8)/255, float32(b8)/255, float32(a8)/255)
+	max16bit := float32(255 * 255)
+	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 
 	if c.content == nil {
 		return
