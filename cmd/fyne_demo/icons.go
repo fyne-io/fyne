@@ -69,8 +69,8 @@ var icons = []struct {
 	{"CancelIcon", theme.CancelIcon()},
 	{"ConfirmIcon", theme.ConfirmIcon()},
 	{"DeleteIcon", theme.DeleteIcon()},
-	{"CheckedIcon", theme.CheckedIcon()},
-	{"UnCheckedIcon", theme.UncheckedIcon()},
+	{"CheckButtonIcon", theme.CheckButtonIcon()},
+	{"CheckButtonCheckedIcon", theme.CheckButtonCheckedIcon()},
 	{"RadioButtonIcon", theme.CheckButtonIcon()},
 	{"RadioButtonCheckedIcon", theme.CheckButtonCheckedIcon()},
 

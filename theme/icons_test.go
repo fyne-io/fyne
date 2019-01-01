@@ -28,7 +28,7 @@ func TestIconThemeChangeContent(t *testing.T) {
 
 func TestIconThemeChangePath(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	checked := CheckedIcon()
+	checked := CheckButtonIcon()
 	path := checked.CachePath()
 
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())

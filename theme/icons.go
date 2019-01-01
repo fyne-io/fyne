@@ -99,14 +99,14 @@ func DeleteIcon() fyne.Resource {
 	return delete
 }
 
-// CheckedIcon returns a resource containing the standard checkbox icon for the current theme
-func CheckedIcon() fyne.Resource {
-	return checked
+// CheckButtonIcon returns a resource containing the standard checkbox icon for the current theme
+func CheckButtonIcon() fyne.Resource {
+	return unchecked
 }
 
-// UncheckedIcon returns a resource containing the standard checkbox unchecked icon for the current theme
-func UncheckedIcon() fyne.Resource {
-	return unchecked
+// CheckButtonCheckedIcon returns a resource containing the standard checkbox checked icon for the current theme
+func CheckButtonCheckedIcon() fyne.Resource {
+	return checked
 }
 
 // RadioButtonIcon returns a resource containing the standard radio button icon for the current theme

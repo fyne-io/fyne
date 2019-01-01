@@ -53,9 +53,9 @@ func (c *checkRenderer) Refresh() {
 	c.label.Text = c.check.Text
 
 	if c.check.Checked {
-		c.icon.File = theme.CheckedIcon().CachePath()
+		c.icon.File = theme.CheckButtonCheckedIcon().CachePath()
 	} else {
-		c.icon.File = theme.UncheckedIcon().CachePath()
+		c.icon.File = theme.CheckButtonIcon().CachePath()
 	}
 
 	canvas.Refresh(c.check)
@@ -113,7 +113,7 @@ func (c *Check) OnMouseDown(*fyne.MouseEvent) {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
-	icon := canvas.NewImageFromResource(theme.UncheckedIcon())
+	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
 	text := canvas.NewText(c.Text, theme.TextColor())
 	text.Alignment = fyne.TextAlignCenter
