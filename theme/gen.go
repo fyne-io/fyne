@@ -102,6 +102,8 @@ func main() {
 		bundleIcon("delete", theme, f)
 		bundleIcon("check-box", theme, f)
 		bundleIcon("check-box-blank", theme, f)
+		bundleIcon("radio-button", theme, f)
+		bundleIcon("radio-button-checked", theme, f)
 
 		bundleIcon("content-cut", theme, f)
 		bundleIcon("content-copy", theme, f)

@@ -35,11 +35,11 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	current := canvases[C.evas_object_evas_get(obj)]
 	canvasMutex.RUnlock()
 	co := current.objects[obj]
+	target := current.native[co]
 
 	var x, y C.int
-	C.evas_object_geometry_get(obj, &x, &y, nil, nil)
-	pos := fyne.NewPos(unscaleInt(current, int(info.canvas.x)), unscaleInt(current, int(info.canvas.y)))
-	pos = pos.Subtract(current.offsets[co])
+	C.evas_object_geometry_get(target, &x, &y, nil, nil)
+	pos := fyne.NewPos(unscaleInt(current, int(info.canvas.x-x)), unscaleInt(current, int(info.canvas.y-y)))
 
 	ev := new(fyne.MouseEvent)
 	ev.Position = pos

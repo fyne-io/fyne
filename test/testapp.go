@@ -126,7 +126,7 @@ func (dummyTheme) FocusColor() color.Color {
 }
 
 func (dummyTheme) TextSize() int {
-	return 1
+	return 10
 }
 
 func (dummyTheme) TextFont() fyne.Resource {
@@ -150,11 +150,11 @@ func (dummyTheme) TextMonospaceFont() fyne.Resource {
 }
 
 func (dummyTheme) Padding() int {
-	return 1
+	return 4
 }
 
 func (dummyTheme) IconInlineSize() int {
-	return 1
+	return 5
 }
 
 type testSettings struct {
