@@ -22,7 +22,7 @@ func TestMultilineEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
 	singleMin := entry.MinSize()
 
-	multi := NewMultilineEntry()
+	multi := NewMultiLineEntry()
 	multiMin := multi.MinSize()
 
 	assert.Equal(t, singleMin.Width, multiMin.Width)

@@ -373,8 +373,8 @@ func NewEntry() *Entry {
 	return e
 }
 
-// NewMultilineEntry creates a new entry that allows multiple lines
-func NewMultilineEntry() *Entry {
+// NewMultiLineEntry creates a new entry that allows multiple lines
+func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
 
 	Renderer(e).Layout(e.MinSize())
