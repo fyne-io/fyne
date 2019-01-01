@@ -121,15 +121,17 @@ The following is exactly the same as the code above but in this different style.
 ```go
 package main
 
-import "github.com/fyne-io/fyne"
-import "github.com/fyne-io/fyne/app"
-import "github.com/fyne-io/fyne/widget"
+import (
+	"github.com/fyne-io/fyne"
+	"github.com/fyne-io/fyne/app"
+	"github.com/fyne-io/fyne/widget"
+)
 
 func main() {
 	app := app.New()
 
 	w := app.NewWindow("Hello")
-	w.SetContent(&widget.List{Children: []fyne.CanvasObject{
+	w.SetContent(&widget.Box{Children: []fyne.CanvasObject{
 		&widget.Label{Text: "Hello Fyne!"},
 		&widget.Button{Text: "Quit", OnTapped: func() {
 			app.Quit()
