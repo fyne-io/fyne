@@ -93,11 +93,11 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	bounds := text.MinSize()
-	width := scaleInt(c, bounds.Width*4)
-	height := scaleInt(c, bounds.Height*4)
+	width := scaleInt(c, bounds.Width)
+	height := scaleInt(c, bounds.Height)
 
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	dpi := float64(textDPI) * 4
+	dpi := float64(textDPI)
 
 	var opts truetype.Options
 	fc := fontCache(text.TextStyle)
