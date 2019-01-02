@@ -3,7 +3,7 @@ package widget
 import (
 	"testing"
 
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -6,8 +6,8 @@ import (
 	"log"
 	"sync"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 )

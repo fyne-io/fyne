@@ -2,11 +2,11 @@
 package dialog
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/layout"
-	"github.com/fyne-io/fyne/theme"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 // Dialog is the common API for any dialog window with a single dismiss button

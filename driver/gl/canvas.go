@@ -3,8 +3,8 @@ package gl
 import (
 	"math"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 

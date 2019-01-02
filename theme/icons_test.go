@@ -3,8 +3,8 @@ package theme
 import (
 	"testing"
 
-	"github.com/fyne-io/fyne"
-	_ "github.com/fyne-io/fyne/test"
+	"fyne.io/fyne"
+	_ "fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 

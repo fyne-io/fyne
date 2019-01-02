@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://godoc.org/github.com/fyne-io/fyne" title="GoDoc Reference" rel="nofollow"><img src="https://img.shields.io/badge/go-documentation-blue.svg?style=flat" alt="GoDoc Reference"></a>
-  <a href="https://goreportcard.com/report/github.com/fyne-io/fyne"><img src="https://goreportcard.com/badge/github.com/fyne-io/fyne" alt="Code Status" /></a>
+  <a href="https://godoc.org/fyne.io/fyne" title="GoDoc Reference" rel="nofollow"><img src="https://img.shields.io/badge/go-documentation-blue.svg?style=flat" alt="GoDoc Reference"></a>
+  <a href="https://goreportcard.com/report/fyne.io/fyne"><img src="https://goreportcard.com/badge/fyne.io/fyne" alt="Code Status" /></a>
   <a href="https://travis-ci.org/fyne-io/fyne"><img src="https://travis-ci.org/fyne-io/fyne.svg" alt="Build Status" /></a>
   <a href='https://coveralls.io/github/fyne-io/fyne?branch=develop'><img src='https://coveralls.io/repos/github/fyne-io/fyne/badge.svg?branch=develop' alt='Coverage Status' /></a>
   <a href='https://sourcegraph.com/github.com/fyne-io/fyne?badge'><img src='https://sourcegraph.com/github.com/fyne-io/fyne/-/badge.svg' alt='Used By' /></a>
@@ -22,7 +22,7 @@ Fyne is designed to be really easy to code with, here are the steps to your firs
 
 Using the standard go tools you can install Fyne's core library using:
 
-    go get github.com/fyne-io/fyne
+    go get fyne.io/fyne
 
 ## Code
 
@@ -31,8 +31,8 @@ And then you're ready to write your first app!
 ```go
     package main
 
-    import "github.com/fyne-io/fyne/widget"
-    import "github.com/fyne-io/fyne/app"
+    import "fyne.io/fyne/widget"
+    import "fyne.io/fyne/app"
 
     func main() {
     	app := app.New()
@@ -99,7 +99,7 @@ It should then look like this:
 
 To run a showcase of the features of fyne execute the following:
 
-    cd $GOPATH/src/github.com/fyne-io/fyne/cmd/fyne_demo/
+    cd $GOPATH/src/fyne.io/fyne/cmd/fyne_demo/
     go run .
 
 And you should see something like this (after you click a few buttons):
@@ -123,9 +123,9 @@ The following is exactly the same as the code above but in this different style.
 package main
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/app"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/app"
+	"fyne.io/fyne/widget"
 )
 
 func main() {

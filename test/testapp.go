@@ -4,7 +4,7 @@ package test
 import (
 	"image/color"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 // ensure we have a dummy app loaded and ready to test

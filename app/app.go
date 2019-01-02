@@ -6,9 +6,9 @@ package app
 import (
 	"os"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 type fyneApp struct {

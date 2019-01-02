@@ -4,7 +4,7 @@ package theme
 import (
 	"image/color"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 type builtinTheme struct {

@@ -1,6 +1,6 @@
 package theme
 
-import "github.com/fyne-io/fyne"
+import "fyne.io/fyne"
 
 // ThemedResource is a resource wrapper that will return an appropriate resource
 // for the currently selected theme. In this implementation it chooses between a dark

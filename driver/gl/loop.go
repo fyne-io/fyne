@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/layout"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/widget"
 )
 
 func makeBorderLayout() *fyne.Container {

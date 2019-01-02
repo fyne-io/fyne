@@ -1,6 +1,6 @@
 package test
 
-import "github.com/fyne-io/fyne"
+import "fyne.io/fyne"
 
 var dummyCanvas fyne.Canvas
 

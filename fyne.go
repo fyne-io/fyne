@@ -1,5 +1,5 @@
 // Package fyne describes the objects and components available to any Fyne app.
-// These can all be created, manipulated and tested without renering (for speed).
+// These can all be created, manipulated and tested without rendering (for speed).
 // Your main package should use the app package to create an application with
 // a default driver that will render your UI.
 //
@@ -7,8 +7,8 @@
 //
 //   package main
 //
-//   import "github.com/fyne-io/fyne/app"
-//   import "github.com/fyne-io/fyne/widget"
+//   import "fyne.io/fyne/app"
+//   import "fyne.io/fyne/widget"
 //
 //   func main() {
 //   	a := app.New()

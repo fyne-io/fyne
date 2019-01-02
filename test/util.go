@@ -1,6 +1,6 @@
 package test
 
-import "github.com/fyne-io/fyne"
+import "fyne.io/fyne"
 
 // Click simulates a mouse click on the specified object
 func Click(obj fyne.ClickableObject) {

@@ -11,9 +11,9 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/theme"
 )
 
 func updateFont(obj *C.Evas_Object, c *eflCanvas, size int, style fyne.TextStyle) {

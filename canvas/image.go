@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 // ImageFill defines the different type of ways an image can stretch to fill it's space.
