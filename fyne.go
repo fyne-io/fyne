@@ -22,4 +22,4 @@
 //
 //   	w.Show()
 //   }
-package fyne
+package fyne // import "fyne.io/fyne"
