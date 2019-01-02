@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
+	"log"
 	"os"
 	"strconv"
 
@@ -141,8 +142,12 @@ func scaleForDpi(xdpi int) float32 {
 func detectScale(win *glfw.Window) float32 {
 	env := os.Getenv("FYNE_SCALE")
 	if env != "" {
-		scale, _ := strconv.ParseFloat(env, 32)
-		return float32(scale)
+		scale, err := strconv.ParseFloat(env, 32)
+		if err != nil {
+			log.Println("Error reading scale:", err)
+		} else if scale != 0 {
+			return float32(scale)
+		}
 	}
 
 	monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
