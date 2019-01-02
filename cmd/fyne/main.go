@@ -1,11 +1,11 @@
-// Package main loads a command line helper version of the Fyne resource
-// serialisation library.
+// Run a command line helper for various Fyne tools.
 package main
 
 import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 
@@ -60,9 +60,20 @@ func main() {
 	flag.StringVar(&name, "name", "", "The variable name to assign the serialised resource")
 	flag.StringVar(&pkg, "package", "main", "The package to output in headers (if not appending)")
 	flag.BoolVar(&noheader, "append", false, "Append an existing go file (don't output headers)")
-	flag.Parse()
 
-	args := flag.Args()
+	// first let's extract the first "command"
+	args := os.Args[1:]
+	if len(args) < 1 {
+		fmt.Println("The fyne command requires a command parameter, one of \"bundle\"")
+		return
+	} else if args[0] != "bundle" {
+		fmt.Println("Currently the fyne tool only supports the \"bundle\" command")
+		return
+	}
+
+	// then parse the remaining args
+	flag.CommandLine.Parse(args[1:])
+	args = flag.Args()
 	if len(args) != 1 {
 		fmt.Println("Missing required file parameter after flags")
 		return
