@@ -1,5 +1,5 @@
 // Package test provides utility drivers for running UI tests without rendering
-package test
+package test // import "fyne.io/fyne/test"
 
 import (
 	"image/color"

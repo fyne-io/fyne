@@ -1,5 +1,5 @@
 // Package dialog defines standard dialog windows for application GUIs
-package dialog
+package dialog // import "fyne.io/fyne/dialog"
 
 import (
 	"fyne.io/fyne"

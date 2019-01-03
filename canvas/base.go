@@ -1,5 +1,5 @@
 // Package canvas contains all of the primitive CanvasObjects that make up a Fyne GUI
-package canvas
+package canvas // import "fyne.io/fyne/canvas"
 
 import "fyne.io/fyne"
 
