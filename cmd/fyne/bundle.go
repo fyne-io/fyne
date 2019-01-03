@@ -5,11 +5,17 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 
 	"fyne.io/fyne"
 )
+
+type bundler struct {
+	name, pkg string
+	noheader  bool
+}
 
 func writeResource(file, name string) {
 	bytes, err := ioutil.ReadFile(file)
@@ -41,7 +47,7 @@ func sanitiseName(file string) string {
 // (pkg) and the data will be assigned to variable named "name". If you are
 // appending an existing resource file then pass true to noheader as the headers
 // should only be output once per file.
-func Bundle(name, pkg string, noheader bool, filepath string) {
+func doBundle(name, pkg string, noheader bool, filepath string) {
 	if !noheader {
 		writeHeader(pkg)
 	}
@@ -53,20 +59,22 @@ func Bundle(name, pkg string, noheader bool, filepath string) {
 	writeResource(filepath, name)
 }
 
-var name, pkg string
-var noheader bool
-
-func bundleFlags() {
-	flag.StringVar(&name, "name", "", "The variable name to assign the serialised resource")
-	flag.StringVar(&pkg, "package", "main", "The package to output in headers (if not appending)")
-	flag.BoolVar(&noheader, "append", false, "Append an existing go file (don't output headers)")
+func (b *bundler) addFlags() {
+	flag.StringVar(&b.name, "name", "", "The variable name to assign the serialised resource")
+	flag.StringVar(&b.pkg, "package", "main", "The package to output in headers (if not appending)")
+	flag.BoolVar(&b.noheader, "append", false, "Append an existing go file (don't output headers)")
 }
 
-func bundleRun(args []string) {
+func (b *bundler) printHelp(indent string) {
+	fmt.Println(indent, "The bundle command embeds static content into your go application.")
+	fmt.Println(indent, "Command usage: fyne bundle [parameters] file")
+}
+
+func (b *bundler) run(args []string) {
 	if len(args) != 1 {
-		fmt.Println("Missing required file parameter after flags")
+		fmt.Fprintln(os.Stderr, "Missing required file parameter after flags")
 		return
 	}
 
-	Bundle(name, pkg, noheader, args[0])
+	doBundle(b.name, b.pkg, b.noheader, args[0])
 }
