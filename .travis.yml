@@ -3,7 +3,7 @@ language: go
 go:
   - "1.10.x"
   - "1.11.x"
-  import_path: fyne.io/fyne
+go_import_path: fyne.io/fyne
 
 os:
   - linux
