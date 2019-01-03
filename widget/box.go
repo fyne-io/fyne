@@ -3,10 +3,10 @@ package widget
 import (
 	"image/color"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/layout"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
 )
 
 // Box widget is a simple list where the child elements are arranged in a single column

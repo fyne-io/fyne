@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 const fontFace = "NotoSans"
@@ -66,7 +66,7 @@ func openFile(filename string) *os.File {
 		return nil
 	}
 
-	_, err = f.WriteString("package theme\n\nimport \"github.com/fyne-io/fyne\"\n\n")
+	_, err = f.WriteString("package theme\n\nimport \"fyne.io/fyne\"\n\n")
 	if err != nil {
 		fmt.Println("Unable to write file " + filename)
 		return nil

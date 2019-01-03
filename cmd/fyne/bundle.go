@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 func writeResource(file, name string) {

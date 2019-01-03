@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/app"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/dialog"
-	"github.com/fyne-io/fyne/layout"
-	"github.com/fyne-io/fyne/theme"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/app"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/dialog"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 func formApp(app fyne.App) {

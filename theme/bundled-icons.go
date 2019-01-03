@@ -1,6 +1,6 @@
 package theme
 
-import "github.com/fyne-io/fyne"
+import "fyne.io/fyne"
 
 var fynelogo = &fyne.StaticResource{
 	StaticName: "fyne.png",

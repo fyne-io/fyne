@@ -1,10 +1,10 @@
 // Package test provides utility drivers for running UI tests without rendering
-package test
+package test // import "fyne.io/fyne/test"
 
 import (
 	"image/color"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 // ensure we have a dummy app loaded and ready to test

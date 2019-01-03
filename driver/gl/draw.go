@@ -1,9 +1,9 @@
 package gl
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 

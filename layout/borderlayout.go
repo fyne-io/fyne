@@ -1,8 +1,8 @@
 package layout
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
 
 type borderLayout struct {

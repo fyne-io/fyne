@@ -4,9 +4,9 @@ import (
 	"image/color"
 	"testing"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
 

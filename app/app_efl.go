@@ -3,8 +3,8 @@
 package app
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/driver/efl"
+	"fyne.io/fyne"
+	"fyne.io/fyne/driver/efl"
 )
 
 // New returns a new app instance using the EFL driver.

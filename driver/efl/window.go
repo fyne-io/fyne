@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 type window struct {

@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/layout"
+	"fyne.io/fyne"
+	"fyne.io/fyne/layout"
 )
 
 // FormItem provides the details for a row in a form

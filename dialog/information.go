@@ -1,9 +1,9 @@
 package dialog
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 // NewInformation creates a dialog over the specified window for user information.

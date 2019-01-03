@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/fyne-io/fyne/canvas"
+	"fyne.io/fyne/canvas"
 )
 
 type pixelImage struct {

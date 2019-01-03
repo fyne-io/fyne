@@ -2,8 +2,8 @@
 package widget
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 )
 
 // A base widget class to define the standard widget behaviours.

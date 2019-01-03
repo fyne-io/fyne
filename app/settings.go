@@ -1,6 +1,6 @@
 package app
 
-import "github.com/fyne-io/fyne"
+import "fyne.io/fyne"
 
 type settings struct {
 	theme fyne.Theme

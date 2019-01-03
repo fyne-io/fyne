@@ -24,7 +24,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 type renderData struct {
