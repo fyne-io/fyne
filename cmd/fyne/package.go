@@ -41,6 +41,7 @@ func (p *packager) addFlags() {
 
 func (*packager) printHelp(indent string) {
 	fmt.Println(indent, "The package command prepares an application for distribution.")
+	fmt.Println(indent, "Before running this command you must to build the application for release.")
 	fmt.Println(indent, "Command usage: fyne package [parameters]")
 }
 
@@ -61,6 +62,7 @@ func (p *packager) run(_ []string) {
 
 	if !exists(p.exe) {
 		fmt.Fprintln(os.Stderr, "Executable", p.exe, "could not be found")
+		fmt.Fprintln(os.Stderr, "You may not have run \"go build\" for the target os")
 		os.Exit(1)
 	}
 	if p.name == "" {
