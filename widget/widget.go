@@ -1,5 +1,5 @@
 // Package widget defines the UI widgets within the Fyne toolkit
-package widget
+package widget // import "fyne.io/fyne/widget"
 
 import (
 	"fyne.io/fyne"

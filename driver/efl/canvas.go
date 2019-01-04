@@ -230,7 +230,14 @@ func (c *eflCanvas) loadImage(img *canvas.Image, obj *C.Evas_Object) {
 	size := img.Size()
 
 	C.evas_object_image_load_size_set(obj, C.int(scaleInt(c, size.Width)), C.int(scaleInt(c, size.Height)))
-	cstr := C.CString(img.File)
+
+	var file string
+	if img.Resource != nil {
+		file = img.Resource.CachePath()
+	} else {
+		file = img.File
+	}
+	cstr := C.CString(file)
 	C.evas_object_image_file_set(obj, cstr, nil)
 	C.free(unsafe.Pointer(cstr))
 }
@@ -302,7 +309,7 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		alpha := C.int(float64(255) * co.Alpha())
 		C.evas_object_color_set(obj, alpha, alpha, alpha, alpha) // premul ffffff*alpha
 
-		if co.File != "" {
+		if co.File != "" || co.Resource != nil {
 			c.loadImage(co, obj)
 		}
 		if co.PixelColor != nil {

@@ -1,11 +1,13 @@
 package gl
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/draw"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -144,11 +146,21 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		return 0
 	}
 
-	if img.File != "" {
-		if strings.ToLower(filepath.Ext(img.File)) == ".svg" {
-			icon, err := oksvg.ReadIcon(img.File)
+	if img.File != "" || img.Resource != nil {
+		var file io.Reader
+		var name string
+		if img.Resource != nil {
+			name = img.Resource.Name()
+			file = bytes.NewReader(img.Resource.Content())
+		} else {
+			name = img.File
+			file, _ = os.Open(img.File)
+		}
+
+		if strings.ToLower(filepath.Ext(name)) == ".svg" {
+			icon, err := oksvg.ReadIconStream(file)
 			if err != nil {
-				log.Println("SVG Load error:", err, img.File)
+				log.Println("SVG Load error:", err)
 
 				return 0
 			}
@@ -169,7 +181,6 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 			icon.Draw(raster, img.Alpha())
 		} else {
-			file, _ := os.Open(img.File)
 			pixels, _, err := image.Decode(file)
 
 			if err != nil {

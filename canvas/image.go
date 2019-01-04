@@ -31,6 +31,7 @@ type Image struct {
 
 	// one of the following sources will provide our image data
 	File        string                           // Load the image from a file
+	Resource    fyne.Resource                    // Load the image from an in-memory resource
 	PixelColor  func(x, y, w, h int) color.Color // Render the image from code
 	PixelAspect float32                          // Set an aspect ratio for pixel based images
 
@@ -79,7 +80,9 @@ func NewImageFromFile(file string) *Image {
 // Images returned from this method will scale to fit the canvas object.
 // The method for scaling can be set using the Fill field.
 func NewImageFromResource(res fyne.Resource) *Image {
-	return NewImageFromFile(res.CachePath())
+	return &Image{
+		Resource: res,
+	}
 }
 
 // NewImageFromImage returns a new Image instance that is rendered from the Go
