@@ -773,25 +773,19 @@ func (c *IconCursor) readStartElement(se xml.StartElement) (err error) {
 	return
 }
 
-// ReadIcon reads the Icon from the named file
+// ReadIconStream reads the Icon from the given io.Reader
 // This only supports a sub-set of SVG, but
 // is enough to draw many icons. If errMode is provided,
 // the first value determines if the icon ignores, errors out, or logs a warning
 // if it does not handle an element found in the icon file. Ignore warnings is
 // the default if no ErrorMode value is provided.
-func ReadIcon(iconFile string, errMode ...ErrorMode) (*SvgIcon, error) {
-	fin, errf := os.Open(iconFile)
-	if errf != nil {
-		return nil, errf
-	}
-	defer fin.Close()
-
+func ReadIconStream(stream io.Reader, errMode ...ErrorMode) (*SvgIcon, error) {
 	icon := &SvgIcon{Ids: make(map[string]interface{}), Transform: rasterx.Identity}
 	cursor := &IconCursor{StyleStack: []PathStyle{DefaultStyle}, icon: icon}
 	if len(errMode) > 0 {
 		cursor.ErrorMode = errMode[0]
 	}
-	decoder := xml.NewDecoder(fin)
+	decoder := xml.NewDecoder(stream)
 	decoder.CharsetReader = charset.NewReaderLabel
 	for {
 		t, err := decoder.Token()
@@ -837,6 +831,22 @@ func ReadIcon(iconFile string, errMode ...ErrorMode) (*SvgIcon, error) {
 		}
 	}
 	return icon, nil
+}
+
+// ReadIcon reads the Icon from the named file
+// This only supports a sub-set of SVG, but
+// is enough to draw many icons. If errMode is provided,
+// the first value determines if the icon ignores, errors out, or logs a warning
+// if it does not handle an element found in the icon file. Ignore warnings is
+// the default if no ErrorMode value is provided.
+func ReadIcon(iconFile string, errMode ...ErrorMode) (*SvgIcon, error) {
+	fin, errf := os.Open(iconFile)
+	if errf != nil {
+		return nil, errf
+	}
+	defer fin.Close()
+
+	return ReadIconStream(fin, errMode...)
 }
 
 func readFraction(v string) (f float64, err error) {
