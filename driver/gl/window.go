@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
+	"log"
 	"os"
 	"strconv"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
@@ -141,8 +142,12 @@ func scaleForDpi(xdpi int) float32 {
 func detectScale(win *glfw.Window) float32 {
 	env := os.Getenv("FYNE_SCALE")
 	if env != "" {
-		scale, _ := strconv.ParseFloat(env, 32)
-		return float32(scale)
+		scale, err := strconv.ParseFloat(env, 32)
+		if err != nil {
+			log.Println("Error reading scale:", err)
+		} else if scale != 0 {
+			return float32(scale)
+		}
 	}
 
 	monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
@@ -233,8 +238,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mouseY = ypos
 }
 
-func findMouseObj(obj fyne.CanvasObject, x, y int) fyne.CanvasObject {
+func findMouseObj(obj fyne.CanvasObject, x, y int) (fyne.CanvasObject, int, int) {
 	found := obj
+	foundX, foundY := 0, 0
 	walkObjects(obj, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
 		if x < pos.X || y < pos.Y {
 			return
@@ -249,22 +255,24 @@ func findMouseObj(obj fyne.CanvasObject, x, y int) fyne.CanvasObject {
 		switch walked.(type) {
 		case fyne.ClickableObject:
 			found = walked
+			foundX, foundY = pos.X, pos.Y
 		case fyne.FocusableObject:
 			found = walked
+			foundX, foundY = pos.X, pos.Y
 		}
 	})
 
-	return found
+	return found, foundX, foundY
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 	current := w.canvas
 
 	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
-	co := findMouseObj(w.canvas.content, pos.X, pos.Y)
+	co, x, y := findMouseObj(w.canvas.content, pos.X, pos.Y)
 
 	ev := new(fyne.MouseEvent)
-	ev.Position = pos
+	ev.Position = fyne.NewPos(pos.X-x, pos.Y-y)
 	switch button {
 	case glfw.MouseButtonRight:
 		ev.Button = fyne.RightMouseButton

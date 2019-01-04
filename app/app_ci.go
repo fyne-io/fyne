@@ -3,8 +3,8 @@
 package app
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/test"
+	"fyne.io/fyne"
+	"fyne.io/fyne/test"
 )
 
 // New returns a new app instance using the test (headless) driver.

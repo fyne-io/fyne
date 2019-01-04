@@ -12,10 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/theme"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
@@ -78,7 +78,8 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 	}
 
 	r, g, b, a := col.RGBA()
-	data := []uint8{uint8(r), uint8(g), uint8(b), uint8(a)}
+	r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
+	data := []uint8{r8, g8, b8, a8}
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
 		gl.UNSIGNED_BYTE, gl.Ptr(data))
 
@@ -92,11 +93,11 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	bounds := text.MinSize()
-	width := scaleInt(c, bounds.Width*4)
-	height := scaleInt(c, bounds.Height*4)
+	width := scaleInt(c, bounds.Width)
+	height := scaleInt(c, bounds.Height)
 
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	dpi := float64(textDPI) * 4
+	dpi := float64(textDPI)
 
 	var opts truetype.Options
 	fc := fontCache(text.TextStyle)

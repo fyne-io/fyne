@@ -3,7 +3,7 @@ package canvas
 import (
 	"image/color"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 // Circle describes a coloured circle primitive in a Fyne canvas

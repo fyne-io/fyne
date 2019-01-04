@@ -3,11 +3,11 @@ package main
 import (
 	"image/color"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/layout"
-	"github.com/fyne-io/fyne/theme"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 type browser struct {
@@ -69,8 +69,10 @@ var icons = []struct {
 	{"CancelIcon", theme.CancelIcon()},
 	{"ConfirmIcon", theme.ConfirmIcon()},
 	{"DeleteIcon", theme.DeleteIcon()},
-	{"CheckedIcon", theme.CheckedIcon()},
-	{"UnCheckedIcon", theme.UncheckedIcon()},
+	{"CheckButtonIcon", theme.CheckButtonIcon()},
+	{"CheckButtonCheckedIcon", theme.CheckButtonCheckedIcon()},
+	{"RadioButtonIcon", theme.CheckButtonIcon()},
+	{"RadioButtonCheckedIcon", theme.CheckButtonCheckedIcon()},
 
 	{"CutIcon", theme.CutIcon()},
 	{"CopyIcon", theme.CopyIcon()},

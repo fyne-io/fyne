@@ -4,7 +4,7 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 // Line describes a coloured line primitive in a Fyne canvas.

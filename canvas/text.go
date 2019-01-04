@@ -3,8 +3,8 @@ package canvas
 import (
 	"image/color"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
 
 // Text describes a text primitive in a Fyne canvas.

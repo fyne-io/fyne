@@ -3,8 +3,8 @@ package gl
 import (
 	"testing"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"github.com/stretchr/testify/assert"
 )
 

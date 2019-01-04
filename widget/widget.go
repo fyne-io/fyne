@@ -1,9 +1,9 @@
 // Package widget defines the UI widgets within the Fyne toolkit
-package widget
+package widget // import "fyne.io/fyne/widget"
 
 import (
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 )
 
 // A base widget class to define the standard widget behaviours.

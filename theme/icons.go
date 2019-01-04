@@ -1,6 +1,6 @@
 package theme
 
-import "github.com/fyne-io/fyne"
+import "fyne.io/fyne"
 
 // ThemedResource is a resource wrapper that will return an appropriate resource
 // for the currently selected theme. In this implementation it chooses between a dark
@@ -47,7 +47,7 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 	return &ThemedResource{dark, light}
 }
 
-var cancel, confirm, delete, checked, unchecked *ThemedResource
+var cancel, confirm, delete, checked, unchecked, radioButton, radioButtonChecked *ThemedResource
 var contentCut, contentCopy, contentPaste *ThemedResource
 var info, question, warning *ThemedResource
 var mailCompose, mailForward, mailReply, mailReplyAll *ThemedResource
@@ -59,6 +59,8 @@ func init() {
 	delete = &ThemedResource{deleteDark, deleteLight}
 	checked = &ThemedResource{checkboxDark, checkboxLight}
 	unchecked = &ThemedResource{checkboxblankDark, checkboxblankLight}
+	radioButton = &ThemedResource{radiobuttonDark, radiobuttonLight}
+	radioButtonChecked = &ThemedResource{radiobuttoncheckedDark, radiobuttoncheckedLight}
 
 	contentCut = &ThemedResource{contentcutDark, contentcutLight}
 	contentCopy = &ThemedResource{contentcopyDark, contentcopyLight}
@@ -97,14 +99,24 @@ func DeleteIcon() fyne.Resource {
 	return delete
 }
 
-// CheckedIcon returns a resource containing the standard checkbox icon for the current theme
-func CheckedIcon() fyne.Resource {
+// CheckButtonIcon returns a resource containing the standard checkbox icon for the current theme
+func CheckButtonIcon() fyne.Resource {
+	return unchecked
+}
+
+// CheckButtonCheckedIcon returns a resource containing the standard checkbox checked icon for the current theme
+func CheckButtonCheckedIcon() fyne.Resource {
 	return checked
 }
 
-// UncheckedIcon returns a resource containing the standard checkbox unchecked icon for the current theme
-func UncheckedIcon() fyne.Resource {
-	return unchecked
+// RadioButtonIcon returns a resource containing the standard radio button icon for the current theme
+func RadioButtonIcon() fyne.Resource {
+	return radioButton
+}
+
+// RadioButtonCheckedIcon returns a resource containing the standard radio button checked icon for the current theme
+func RadioButtonCheckedIcon() fyne.Resource {
+	return radioButtonChecked
 }
 
 // CutIcon returns a resource containing the standard content cut icon for the current theme

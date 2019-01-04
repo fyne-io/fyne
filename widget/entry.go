@@ -4,9 +4,9 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/canvas"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/theme"
 )
 
 const (
@@ -356,8 +356,8 @@ func NewEntry() *Entry {
 	return e
 }
 
-// NewMultilineEntry creates a new entry that allows multiple lines
-func NewMultilineEntry() *Entry {
+// NewMultiLineEntry creates a new entry that allows multiple lines
+func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
 
 	Renderer(e).Layout(e.MinSize())

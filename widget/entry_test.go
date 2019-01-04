@@ -3,9 +3,9 @@ package widget
 import (
 	"testing"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/test"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +23,7 @@ func TestMultilineEntry_MinSize(t *testing.T) {
 	entry.MinSize()
 	singleMin := entry.MinSize()
 
-	multi := NewMultilineEntry()
+	multi := NewMultiLineEntry()
 	multiMin := multi.MinSize()
 
 	assert.Equal(t, singleMin.Width, multiMin.Width)

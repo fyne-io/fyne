@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
-	"github.com/fyne-io/fyne/widget"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 func makeButtonTab() fyne.Widget {
@@ -23,6 +23,7 @@ func makeInputTab() fyne.Widget {
 	return widget.NewVBox(
 		entry,
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
+		widget.NewRadio([]string{"Item 1", "Item 2"}, func(s string) { fmt.Println("selected", s) }),
 	)
 }
 

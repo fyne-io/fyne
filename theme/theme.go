@@ -1,10 +1,10 @@
 // Package theme defines how a Fyne app should look when rendered
-package theme
+package theme // import "fyne.io/fyne/theme"
 
 import (
 	"image/color"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 type builtinTheme struct {

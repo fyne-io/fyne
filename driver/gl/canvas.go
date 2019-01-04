@@ -3,8 +3,8 @@ package gl
 import (
 	"math"
 
-	"github.com/fyne-io/fyne"
-	"github.com/fyne-io/fyne/theme"
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
@@ -120,7 +120,8 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	r, g, b, a := theme.BackgroundColor().RGBA()
-	gl.ClearColor(float32(uint8(r))/255, float32(uint8(g))/255, float32(uint8(b))/255, float32(uint8(a))/255)
+	max16bit := float32(255 * 255)
+	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 
 	if c.content == nil {
 		return

@@ -11,7 +11,7 @@ import "C"
 import (
 	"log"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 const (
