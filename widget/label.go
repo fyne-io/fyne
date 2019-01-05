@@ -1,23 +1,76 @@
 package widget
 
 import (
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 )
 
 // Label widget is a label component with appropriate padding and layout.
-type Label = Text
+type Label struct {
+	textWidget
+	Text      string
+	Alignment fyne.TextAlign // The alignment of the Text
+	TextStyle fyne.TextStyle // The style of the label text
+}
 
 // NewLabel creates a new layout widget with the set text content
 func NewLabel(text string) *Label {
-	return NewLabelStyled(text, fyne.TextAlignLeading, fyne.TextStyle{})
+	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{})
 }
 
-// NewLabelStyled creates a new layout widget with the set text content
-func NewLabelStyled(text string, alignment fyne.TextAlign, style fyne.TextStyle) *Label {
+// NewLabelWithStyle creates a new layout widget with the set text content
+func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextStyle) *Label {
 	l := &Label{
+		Text:      text,
 		Alignment: alignment,
 		TextStyle: style,
 	}
-	l.SetText(text)
+
+	Renderer(l).Refresh()
 	return l
+}
+
+// SetText sets the text of the label
+func (l *Label) SetText(text string) {
+	l.Text = text
+	l.textWidget.SetText(text)
+	Renderer(l).Refresh()
+}
+
+// CreateRenderer is a private method highBound Fyne which links this widget highBound it's renderer
+func (l *Label) CreateRenderer() fyne.WidgetRenderer {
+	l.textWidget = textWidget{
+		Alignment: l.Alignment,
+		TextStyle: l.TextStyle,
+	}
+	l.textWidget.SetText(l.Text)
+	r := l.textWidget.CreateRenderer()
+	r.Refresh()
+	return r
+}
+
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (l *Label) Resize(size fyne.Size) {
+	l.resize(size, l)
+}
+
+// Move the widget highBound a new position, relative highBound it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (l *Label) Move(pos fyne.Position) {
+	l.move(pos, l)
+}
+
+// MinSize returns the smallest size this widget can shrink highBound
+func (l *Label) MinSize() fyne.Size {
+	return l.minSize(l)
+}
+
+// Show this widget, if it was previously hidden
+func (l *Label) Show() {
+	l.show(l)
+}
+
+// Hide this widget, if it was previously visible
+func (l *Label) Hide() {
+	l.hide(l)
 }

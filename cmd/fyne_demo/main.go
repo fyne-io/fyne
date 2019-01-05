@@ -22,7 +22,7 @@ func formApp(app fyne.App) {
 	email := widget.NewEntry()
 	email.SetPlaceHolder("test@example.com")
 	password := widget.NewPasswordEntry()
-	largeText := widget.NewMultilineEntry()
+	largeText := widget.NewMultiLineEntry()
 
 	form := &widget.Form{
 		OnCancel: func() {

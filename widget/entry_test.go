@@ -18,7 +18,7 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.True(t, min.Height > theme.Padding()*2)
 }
 
-func TestMultilineEntry_MinSize(t *testing.T) {
+func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
 	entry.MinSize()
 	singleMin := entry.MinSize()
@@ -38,19 +38,19 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	entry := NewEntry()
 
 	assert.Equal(t, 0, len(entry.Text))
-	assert.Equal(t, 0, entry.textWidget().Len())
+	assert.Equal(t, 0, entry.textWidget().len())
 
 	entry.SetPlaceHolder("Test")
 	assert.Equal(t, 0, len(entry.Text))
-	assert.Equal(t, 0, entry.textWidget().Len())
-	assert.Equal(t, 4, entry.placeholderWidget().Len())
+	assert.Equal(t, 0, entry.textWidget().len())
+	assert.Equal(t, 4, entry.placeholderWidget().len())
 	assert.False(t, entry.placeholderWidget().Hidden)
 
 	entry.SetText("Hi")
 	assert.Equal(t, 2, len(entry.Text))
 	assert.True(t, entry.placeholderWidget().Hidden)
 
-	assert.Equal(t, 2, entry.textWidget().Len())
+	assert.Equal(t, 2, entry.textWidget().len())
 }
 
 func TestEntry_OnKeyDown(t *testing.T) {
@@ -171,7 +171,7 @@ func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
-	entry := NewMultilineEntry()
+	entry := NewMultiLineEntry()
 	entry.SetText("H\ni")
 
 	down := &fyne.KeyEvent{Name: fyne.KeyDown}
@@ -281,7 +281,7 @@ func TestEntryFocusHighlight(t *testing.T) {
 }
 
 func TestEntry_CursorRow(t *testing.T) {
-	entry := NewMultilineEntry()
+	entry := NewMultiLineEntry()
 	entry.SetText("test")
 	assert.Equal(t, 0, entry.CursorRow)
 
@@ -329,7 +329,7 @@ func TestEntry_CursorColumn(t *testing.T) {
 }
 
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
-	entry := NewMultilineEntry()
+	entry := NewMultiLineEntry()
 	entry.SetText("a\nb")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
@@ -353,7 +353,7 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 }
 
 func TestEntry_CursorColumn_Jump(t *testing.T) {
-	entry := NewMultilineEntry()
+	entry := NewMultiLineEntry()
 	entry.SetText("a\nbc")
 
 	// go to end of text

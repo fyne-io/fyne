@@ -53,7 +53,7 @@ func (f *Form) Hide() {
 }
 
 func (f *Form) createLabel(text string) *Label {
-	return NewLabelStyled(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
+	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }
 
 func (f *Form) ensureGrid() {

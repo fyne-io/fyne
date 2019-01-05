@@ -3,21 +3,12 @@ package widget
 import (
 	"testing"
 
-	"github.com/fyne-io/fyne"
+	"fyne.io/fyne"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestText_MarshalJSON(t *testing.T) {
-	text := Text{}
-	text.SetText("test")
-	assert.Equal(t, "test", text.String())
-	j, err := text.MarshalJSON()
-	assert.Equal(t, []byte(`{"text":"test"}`), j)
-	assert.Nil(t, err)
-}
-
 func TestText_Alignment(t *testing.T) {
-	text := &Text{
+	text := &textWidget{
 		Alignment: fyne.TextAlignTrailing,
 	}
 	text.SetText("Test")
@@ -25,43 +16,43 @@ func TestText_Alignment(t *testing.T) {
 }
 
 func TestText_Rows(t *testing.T) {
-	text := Text{}
+	text := textWidget{}
 	text.SetText("test")
-	assert.Equal(t, 1, text.Rows())
+	assert.Equal(t, 1, text.rows())
 
 	text.SetText("test\ntest")
-	assert.Equal(t, text.Rows(), 2)
+	assert.Equal(t, text.rows(), 2)
 
 	text.SetText("test\ntest\ntest")
-	assert.Equal(t, text.Rows(), 3)
+	assert.Equal(t, text.rows(), 3)
 
 	text.SetText("\n")
-	assert.Equal(t, text.Rows(), 2)
+	assert.Equal(t, text.rows(), 2)
 }
 
 func TestText_RowLength(t *testing.T) {
-	text := Text{}
+	text := textWidget{}
 	text.SetText("test")
 
-	rl := text.RowLength(0)
+	rl := text.rowLength(0)
 	assert.Equal(t, 4, rl)
 
 	text.SetText("test\ntèsts")
-	rl = text.RowLength(0)
+	rl = text.rowLength(0)
 	assert.Equal(t, 4, rl)
 
-	rl = text.RowLength(1)
+	rl = text.rowLength(1)
 	assert.Equal(t, 5, rl)
 
 	text.SetText("")
-	rl = text.RowLength(0)
+	rl = text.rowLength(0)
 	assert.Equal(t, 0, rl)
 
 	text.SetText("\nhello")
-	rl = text.RowLength(0)
+	rl = text.rowLength(0)
 	assert.Equal(t, 0, rl)
 
-	rl = text.RowLength(1)
+	rl = text.rowLength(1)
 	assert.Equal(t, 5, rl)
 }
 
@@ -100,22 +91,22 @@ func TestText_InsertAt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			text := &Text{
+			text := &textWidget{
 				buffer: tt.fields.buffer,
 			}
-			text.InsertAt(tt.args.pos, tt.args.runes)
+			text.insertAt(tt.args.pos, tt.args.runes)
 			assert.Equal(t, tt.wantBuffer, text.buffer)
 		})
 	}
 }
 
 func TestText_Insert(t *testing.T) {
-	text := &Text{}
-	text.InsertAt(0, []rune("a"))
+	text := &textWidget{}
+	text.insertAt(0, []rune("a"))
 	assert.Equal(t, []rune("a"), text.buffer)
-	text.InsertAt(1, []rune("\n"))
+	text.insertAt(1, []rune("\n"))
 	assert.Equal(t, []rune("a\n"), text.buffer)
-	text.InsertAt(2, []rune("b"))
+	text.insertAt(2, []rune("b"))
 	assert.Equal(t, []rune("a\nb"), text.buffer)
 }
 
@@ -167,10 +158,10 @@ func TestText_DeleteFromTo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			text := &Text{
+			text := &textWidget{
 				buffer: tt.fields.buffer,
 			}
-			got := text.DeleteFromTo(tt.args.lowBound, tt.args.highBound)
+			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
 			assert.Equal(t, tt.want, got)
 			assert.Equal(t, tt.wantBuffer, text.buffer)
 		})

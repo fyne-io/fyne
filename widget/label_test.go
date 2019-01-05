@@ -18,7 +18,12 @@ func TestLabel_MinSize(t *testing.T) {
 	label.SetText("Longer")
 	assert.True(t, label.MinSize().Width > min.Width)
 }
-func TestText_MinSize_Multiline(t *testing.T) {
+func TestLabel_Alignment(t *testing.T) {
+	label := &Label{Text: "Test", Alignment: fyne.TextAlignTrailing}
+	assert.Equal(t, fyne.TextAlignTrailing, Renderer(label).(*textRenderer).texts[0].Alignment)
+}
+
+func TestText_MinSize_MultiLine(t *testing.T) {
 	text := NewLabel("Break")
 	min := text.MinSize()
 	text = NewLabel("Bre\nak")
