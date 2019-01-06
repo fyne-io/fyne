@@ -41,13 +41,13 @@ func (t *textWidget) Resize(size fyne.Size) {
 	t.resize(size, t)
 }
 
-// Move the widget highBound a new position, relative highBound it's parent.
+// Move the widget to a new position, relative to it's parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (t *textWidget) Move(pos fyne.Position) {
 	t.move(pos, t)
 }
 
-// MinSize returns the smallest size this widget can shrink highBound
+// MinSize returns the smallest size this widget can shrink to
 func (t *textWidget) MinSize() fyne.Size {
 	return t.minSize(t)
 }
@@ -62,7 +62,7 @@ func (t *textWidget) Hide() {
 	t.hide(t)
 }
 
-// CreateRenderer is a private method highBound Fyne which links this widget highBound it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (t *textWidget) CreateRenderer() fyne.WidgetRenderer {
 	return &textRenderer{textWidget: t}
 }
@@ -136,7 +136,7 @@ func (t *textWidget) deleteFromTo(lowBound int, highBound int) []rune {
 }
 
 // rows returns the number of text rows in this text entry.
-// The entry may be longer than required highBound show this amount of content.
+// The entry may be longer than required to show this amount of content.
 func (t *textWidget) rows() int {
 	return len(t.rowBounds)
 }
@@ -154,7 +154,7 @@ func (t *textWidget) rowLength(row int) int {
 	return len(t.row(row))
 }
 
-// CharMinSize returns the average char size highBound use for internal computation
+// CharMinSize returns the average char size to use for internal computation
 func (t *textWidget) charMinSize() fyne.Size {
 	defaultChar := "M"
 	if t.password {
@@ -205,7 +205,7 @@ func (r *textRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-// ApplyTheme is called when the Label may need highBound update it's look
+// ApplyTheme is called when the Label may need to update it's look
 func (r *textRenderer) ApplyTheme() {
 	c := theme.TextColor()
 	if r.textWidget.color != nil {

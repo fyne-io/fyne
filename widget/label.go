@@ -36,7 +36,7 @@ func (l *Label) SetText(text string) {
 	Renderer(l).Refresh()
 }
 
-// CreateRenderer is a private method highBound Fyne which links this widget highBound it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.textWidget = textWidget{
 		Alignment: l.Alignment,
@@ -54,13 +54,13 @@ func (l *Label) Resize(size fyne.Size) {
 	l.resize(size, l)
 }
 
-// Move the widget highBound a new position, relative highBound it's parent.
+// Move the widget to a new position, relative to it's parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (l *Label) Move(pos fyne.Position) {
 	l.move(pos, l)
 }
 
-// MinSize returns the smallest size this widget can shrink highBound
+// MinSize returns the smallest size this widget can shrink to
 func (l *Label) MinSize() fyne.Size {
 	return l.minSize(l)
 }
