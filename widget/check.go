@@ -53,9 +53,9 @@ func (c *checkRenderer) Refresh() {
 	c.label.Text = c.check.Text
 
 	if c.check.Checked {
-		c.icon.File = theme.CheckButtonCheckedIcon().CachePath()
+		c.icon.Resource = theme.CheckButtonCheckedIcon()
 	} else {
-		c.icon.File = theme.CheckButtonIcon().CachePath()
+		c.icon.Resource = theme.CheckButtonIcon()
 	}
 
 	canvas.Refresh(c.check)

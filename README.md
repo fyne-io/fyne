@@ -100,7 +100,8 @@ It should then look like this:
 To run a showcase of the features of fyne execute the following:
 
     cd $GOPATH/src/fyne.io/fyne/cmd/fyne_demo/
-    go run .
+    go build
+    ./fyne_demo
 
 And you should see something like this (after you click a few buttons):
 
