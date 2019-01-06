@@ -14,10 +14,10 @@ func main() {
 
 	w := app.NewWindow("Hello")
 	w.SetContent(&widget.Box{Horizontal: false, Children: []fyne.CanvasObject{
-		widget.NewLabel("Hello Fyne!"),
-		widget.NewButton("Quit", func() {
+		&widget.Label{Text: "Hello Fyne!"},
+		&widget.Button{Text: "Quit", OnTapped: func() {
 			app.Quit()
-		}),
+		}},
 	}})
 
 	w.ShowAndRun()
