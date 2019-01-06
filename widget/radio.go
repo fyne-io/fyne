@@ -74,9 +74,9 @@ func (r *radioRenderer) Refresh() {
 		item.label.Text = option
 
 		if r.radio.Selected == option {
-			item.icon.File = theme.RadioButtonCheckedIcon().CachePath()
+			item.icon.Resource = theme.RadioButtonCheckedIcon()
 		} else {
-			item.icon.File = theme.RadioButtonIcon().CachePath()
+			item.icon.Resource = theme.RadioButtonIcon()
 		}
 	}
 
