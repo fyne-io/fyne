@@ -252,6 +252,10 @@ func findMouseObj(obj fyne.CanvasObject, x, y int) (fyne.CanvasObject, int, int)
 			return
 		}
 
+		if !walked.Visible() {
+			return
+		}
+
 		switch walked.(type) {
 		case fyne.ClickableObject:
 			found = walked
