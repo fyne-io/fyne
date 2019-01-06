@@ -244,7 +244,6 @@ func (r *textRenderer) BackgroundColor() color.Color {
 
 // lineSize returns the rendered size for the line specified by col and row
 func (r *textRenderer) lineSize(col, row int) (size fyne.Size) {
-	//TODO handle the case with different width and height per chars
 	text := r.textWidget
 
 	line := text.row(row)
@@ -252,9 +251,13 @@ func (r *textRenderer) lineSize(col, row int) (size fyne.Size) {
 	if col >= len(line) {
 		col = len(line)
 	}
-
 	lineCopy := *r.texts[row]
-	lineCopy.Text = string(line[0:col])
+	if r.textWidget.password {
+		lineCopy.Text = strings.Repeat(passwordChar, col)
+	} else {
+		lineCopy.Text = string(line[0:col])
+	}
+
 	return lineCopy.MinSize()
 }
 
