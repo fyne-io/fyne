@@ -1,0 +1,68 @@
+project_name: icnsify
+release:
+  github:
+    owner: jackmordaunt
+    name: icns
+  name_template: '{{.Tag}}'
+brew:
+  commit_author:
+    name: jackmordaunt
+    email: jackmordaunt@gmail.com
+  install: bin.install "icns"
+scoop:
+  commit_author:
+    name: jackmordaunt
+    email: jackmordaunt@gmail.com
+builds:
+- goos:
+  - linux
+  - darwin
+  goarch:
+  - amd64
+  - "386"
+  goarm:
+  - "6"
+  targets:
+  - linux_amd64
+  - darwin_amd64
+  - windows_amd64
+  main: ./cmd/icnsify
+  ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+  binary: icnsify
+  lang: go
+archive:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
+    }}v{{ .Arm }}{{ end }}'
+  format: tar.gz
+  files:
+  - licence*
+  - LICENCE*
+  - license*
+  - LICENSE*
+  - readme*
+  - README*
+  - changelog*
+  - CHANGELOG*
+nfpm:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
+    }}v{{ .Arm }}{{ end }}'
+  bindir: /usr/local/bin
+snapcraft:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm
+    }}v{{ .Arm }}{{ end }}'
+snapshot:
+  name_template: SNAPSHOT-{{ .Commit }}
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+dist: dist
+sign:
+  cmd: gpg
+  args:
+  - --output
+  - $signature
+  - --detach-sig
+  - $artifact
+  signature: ${artifact}.sig
+  artifacts: none
+env_files:
+  github_token: ~/.config/goreleaser/github_token
