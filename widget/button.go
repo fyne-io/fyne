@@ -82,7 +82,7 @@ func (b *buttonRenderer) Refresh() {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
 			b.objects = append(b.objects, b.icon)
 		} else {
-			b.icon.File = b.button.Icon.CachePath()
+			b.icon.Resource = b.button.Icon
 		}
 		b.icon.Hidden = false
 	} else if b.icon != nil {

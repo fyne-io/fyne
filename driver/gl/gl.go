@@ -142,7 +142,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 	width := scaleInt(c, img.Size().Width)
 	height := scaleInt(c, img.Size().Height)
-	if width == 0 || height == 0 {
+	if width <= 0 || height <= 0 {
 		return 0
 	}
 
