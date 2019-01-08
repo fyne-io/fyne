@@ -44,7 +44,7 @@ func copyFile(src, tgt string) error {
 	}
 	defer source.Close()
 
-	target, err := os.Create(tgt)
+	target, err := os.OpenFile(tgt, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}
