@@ -11,10 +11,7 @@ func makeBorderLayout() *fyne.Container {
 	bottom := widget.NewEntry()
 	left := widget.NewEntry()
 	right := widget.NewEntry()
-	middle := &widget.Label{
-		Text:      "BorderLayout",
-		Alignment: fyne.TextAlignCenter,
-	}
+	middle := widget.NewLabelWithStyle("BorderLayout", fyne.TextAlignCenter, fyne.TextStyle{})
 
 	borderLayout := layout.NewBorderLayout(top, bottom, left, right)
 	return fyne.NewContainerWithLayout(borderLayout,

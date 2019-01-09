@@ -18,8 +18,9 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.True(t, min.Height > theme.Padding()*2)
 }
 
-func TestMultilineEntry_MinSize(t *testing.T) {
+func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
+	entry.MinSize()
 	singleMin := entry.MinSize()
 
 	multi := NewMultiLineEntry()
@@ -37,15 +38,19 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	entry := NewEntry()
 
 	assert.Equal(t, 0, len(entry.Text))
-	assert.Equal(t, 0, len(Renderer(entry).(*entryRenderer).label.Text))
+	assert.Equal(t, 0, entry.textWidget().len())
 
 	entry.SetPlaceHolder("Test")
 	assert.Equal(t, 0, len(entry.Text))
-	assert.Equal(t, 4, len(Renderer(entry).(*entryRenderer).label.Text))
+	assert.Equal(t, 0, entry.textWidget().len())
+	assert.Equal(t, 4, entry.placeholderWidget().len())
+	assert.False(t, entry.placeholderWidget().Hidden)
 
 	entry.SetText("Hi")
 	assert.Equal(t, 2, len(entry.Text))
-	assert.Equal(t, 2, len(Renderer(entry).(*entryRenderer).label.Text))
+	assert.True(t, entry.placeholderWidget().Hidden)
+
+	assert.Equal(t, 2, entry.textWidget().len())
 }
 
 func TestEntry_OnKeyDown(t *testing.T) {
@@ -108,15 +113,29 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Newline(t *testing.T) {
-	entry := &Entry{Text: "Hi", MultiLine: true}
+	entry := &Entry{MultiLine: true}
+	entry.SetText("Hi")
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
 
-	down := &fyne.KeyEvent{Name: fyne.KeyRight}
-	entry.OnKeyDown(down)
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
+	entry.OnKeyDown(right)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
 
 	key := &fyne.KeyEvent{Name: fyne.KeyReturn}
 	entry.OnKeyDown(key)
 
 	assert.Equal(t, "H\ni", entry.Text)
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	key = new(fyne.KeyEvent)
+	key.String = "o"
+	entry.OnKeyDown(key)
+	assert.Equal(t, "H\noi", entry.textWidget().String())
+	assert.Equal(t, "H", entry.textWidgetRenderer().texts[0].Text)
+	assert.Equal(t, "oi", entry.textWidgetRenderer().texts[1].Text)
 }
 
 func TestEntry_OnKeyDown_Backspace(t *testing.T) {
@@ -152,7 +171,7 @@ func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
-	entry := NewEntry()
+	entry := NewMultiLineEntry()
 	entry.SetText("H\ni")
 
 	down := &fyne.KeyEvent{Name: fyne.KeyDown}
@@ -262,7 +281,7 @@ func TestEntryFocusHighlight(t *testing.T) {
 }
 
 func TestEntry_CursorRow(t *testing.T) {
-	entry := NewEntry()
+	entry := NewMultiLineEntry()
 	entry.SetText("test")
 	assert.Equal(t, 0, entry.CursorRow)
 
@@ -310,7 +329,7 @@ func TestEntry_CursorColumn(t *testing.T) {
 }
 
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
-	entry := NewEntry()
+	entry := NewMultiLineEntry()
 	entry.SetText("a\nb")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
@@ -334,7 +353,7 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 }
 
 func TestEntry_CursorColumn_Jump(t *testing.T) {
-	entry := NewEntry()
+	entry := NewMultiLineEntry()
 	entry.SetText("a\nbc")
 
 	// go to end of text
@@ -396,5 +415,5 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 	key.String = "Hié™שרה"
 	entry.OnKeyDown(key)
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "*******", entry.label().Text)
+	assert.Equal(t, "*******", entry.textWidgetRenderer().texts[0].Text)
 }
