@@ -38,6 +38,25 @@ func TestFormLayout(t *testing.T) {
 
 }
 
+func TestFormLayout_StretchX(t *testing.T) {
+	wideSize := fyne.NewSize(150, 50)
+
+	label1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label1.SetMinSize(fyne.NewSize(50, 50))
+	content1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content1.SetMinSize(fyne.NewSize(50, 50))
+
+	container := &fyne.Container{
+		Objects: []fyne.CanvasObject{label1, content1},
+	}
+	container.Resize(wideSize)
+
+	NewFormLayout().Layout(container.Objects, wideSize)
+
+	assert.Equal(t, fyne.NewSize(50, 50), label1.Size())
+	assert.Equal(t, fyne.NewSize(wideSize.Width-50-theme.Padding(), 50), content1.Size())
+}
+
 func TestFormLayoutMinSize(t *testing.T) {
 
 	label1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
