@@ -234,6 +234,7 @@ func (r *textRenderer) Refresh() {
 		r.objects = append(r.objects, textCanvas)
 	}
 
+	r.ApplyTheme()
 	r.Layout(r.textWidget.Size())
 	canvas.Refresh(r.textWidget)
 }

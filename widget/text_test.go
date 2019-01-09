@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
@@ -166,4 +167,12 @@ func TestText_DeleteFromTo(t *testing.T) {
 			assert.Equal(t, tt.wantBuffer, text.buffer)
 		})
 	}
+}
+
+func TestText_Color(t *testing.T) {
+	text := newTextWidget("test")
+	text.color = color.White
+	renderer := Renderer(text).(*textRenderer)
+	renderer.Refresh()
+	assert.Equal(t, color.White, renderer.texts[0].Color)
 }
