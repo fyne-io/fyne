@@ -20,6 +20,10 @@ Fyne is designed to be really easy to code with, here are the steps to your firs
 
 ## Prerequisites
 
+You will require a cgo compiler (typically gcc). On Windows this can be included by installing TDM-GCC from http://tdm-gcc.tdragon.net/download
+
+Fyne uses the [gl golang bindings](https://github.com/go-gl/gl) you may need to also need to install the `libgl1-mesa-dev` package on Debian/Ubuntu based systems.
+
 Using the standard go tools you can install Fyne's core library using:
 
     go get fyne.io/fyne
@@ -148,6 +152,3 @@ func main() {
 
 The main examples have been moved - you can find them in their [own repository](https://github.com/fyne-io/examples/).
 
-## Dependencies
-
-You will require a GCC compiler if you do not have one, if on Windows this can be included by installing TDM-GCC. This can be downloaded and installed from http://tdm-gcc.tdragon.net/download
