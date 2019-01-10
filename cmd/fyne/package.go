@@ -95,42 +95,37 @@ func (p *packager) packageLinux() {
 
 func (p *packager) packageDarwin() {
 	appDir := ensureSubDir(p.dir, p.name+".app")
+	exeName := filepath.Base(p.exe)
 
 	contentsDir := ensureSubDir(appDir, "Contents")
 	info := filepath.Join(contentsDir, "Info.plist")
 	infoFile, _ := os.Create(info)
-	io.WriteString(infoFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+
-		"<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"+
-		"<plist version=\"1.0\">"+
-		"<dict>"+
-		"<key>CFBundleGetInfoString</key>"+
-		"<string>"+p.name+"</string>"+
-		"<key>CFBundleExecutable</key>"+
-		"<string>"+p.name+"</string>"+
-		"<key>CFBundleIdentifier</key>"+
-		"<string>com.example."+p.name+"</string>"+
-		"<key>CFBundleName</key>"+
-		"<string>"+p.name+"</string>"+
-		"<key>CFBundleIconFile</key>"+
-		"<string>icon.icns</string>"+
-		"<key>CFBundleShortVersionString</key>"+
-		"<string>1.0</string>"+
-		"<key>CFBundleInfoDictionaryVersion</key>"+
-		"<string>6.0</string>"+
-		"<key>CFBundlePackageType</key>"+
-		"<string>APPL</string>"+
-		"<key>IFMajorVersion</key>"+
-		"<integer>0</integer>"+
-		"<key>IFMinorVersion</key>"+
-		"<integer>1</integer>"+
-		"<key>NSHighResolutionCapable</key><true/>"+
-		"<key>NSSupportsAutomaticGraphicsSwitching</key><true/>"+
-		"</dict>"+
-		"</plist>")
+	io.WriteString(infoFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+		"<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"+
+		"<plist version=\"1.0\">\n"+
+		"<dict>\n"+
+		"<key>CFBundleName</key>\n"+
+		"<string>"+p.name+"</string>\n"+
+		"<key>CFBundleExecutable</key>\n"+
+		"<string>"+exeName+"</string>\n"+
+		"<key>CFBundleIdentifier</key>\n"+
+		"<string>com.example."+p.name+"</string>\n"+
+		"<key>CFBundleIconFile</key>\n"+
+		"<string>icon.icns</string>\n"+
+		"<key>CFBundleShortVersionString</key>\n"+
+		"<string>1.0</string>\n"+
+		"<key>NSHighResolutionCapable</key>\n"+
+		"<true/>\n"+
+		"<key>CFBundleInfoDictionaryVersion</key>\n"+
+		"<string>6.0</string>\n"+
+		"<key>CFBundlePackageType</key>\n"+
+		"<string>APPL</string>\n"+
+		"</dict>\n"+
+		"</plist>\n")
 
 	macOSDir := ensureSubDir(contentsDir, "MacOS")
-	binName := filepath.Join(macOSDir, p.name)
-	copyFile(p.exe, binName)
+	binName := filepath.Join(macOSDir, exeName)
+	copyExeFile(p.exe, binName)
 
 	resDir := ensureSubDir(contentsDir, "Resources")
 	icnsPath := filepath.Join(resDir, "icon.icns")
