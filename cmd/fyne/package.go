@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -33,6 +34,14 @@ func ensureSubDir(parent, name string) string {
 }
 
 func copyFile(src, tgt string) error {
+	return copyFileMode(src, tgt, 0644)
+}
+
+func copyExeFile(src, tgt string) error {
+	return copyFileMode(src, tgt, 0755)
+}
+
+func copyFileMode(src, tgt string, perm os.FileMode) error {
 	_, err := os.Stat(src)
 	if err != nil {
 		return err
@@ -44,7 +53,7 @@ func copyFile(src, tgt string) error {
 	}
 	defer source.Close()
 
-	target, err := os.OpenFile(tgt, os.O_RDWR|os.O_CREATE, 0755)
+	target, err := os.OpenFile(tgt, os.O_RDWR|os.O_CREATE, perm)
 	if err != nil {
 		return err
 	}
@@ -59,7 +68,29 @@ type packager struct {
 }
 
 func (p *packager) packageLinux() {
-	fmt.Println("No packaging required for linux")
+	prefixDir := ensureSubDir(ensureSubDir(p.dir, "usr"), "local")
+	shareDir := ensureSubDir(prefixDir, "share")
+
+	appsDir := ensureSubDir(shareDir, "applications")
+	desktop := filepath.Join(appsDir, p.name+".desktop")
+	deskFile, _ := os.Create(desktop)
+	io.WriteString(deskFile, "[Desktop Entry]\n"+
+		"Type=Application\n"+
+		"Name="+p.name+"\n"+
+		"Exec="+filepath.Base(p.exe)+"\n"+
+		"Icon="+filepath.Base(p.icon)+"\n")
+
+	binDir := ensureSubDir(prefixDir, "bin")
+	binName := filepath.Join(binDir, filepath.Base(p.exe))
+	copyExeFile(p.exe, binName)
+
+	iconThemeDir := ensureSubDir(ensureSubDir(shareDir, "icons"), "hicolor")
+	iconDir := ensureSubDir(ensureSubDir(iconThemeDir, "512x512"), "apps")
+	iconPath := filepath.Join(iconDir, filepath.Base(p.icon))
+	copyFile(p.icon, iconPath)
+
+	tarCmd := exec.Command("tar", "cf", p.name+".tar.gz", "usr")
+	tarCmd.Run()
 }
 
 func (p *packager) packageDarwin() {
@@ -165,16 +196,16 @@ func (p *packager) run(_ []string) {
 		name := filepath.Base(p.exe)
 		p.name = strings.TrimSuffix(name, filepath.Ext(name))
 	}
+	if p.icon == "" {
+		fmt.Fprintln(os.Stderr, "The -icon parameter is required for packaging")
+		os.Exit(1)
+	}
 
 	switch p.os {
 	case "linux":
 		p.packageLinux()
 	case "darwin":
-		if p.icon == "" {
-			fmt.Fprintln(os.Stderr, "You must specify the -icon parameter for macOS packaging")
-		} else {
-			p.packageDarwin()
-		}
+		p.packageDarwin()
 	case "windows":
 		p.packageWindows()
 	default:
