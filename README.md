@@ -3,7 +3,7 @@
   <a href='https://github.com/avelino/awesome-go'><img src='https://awesome.re/mentioned-badge.svg' alt='Mentioned in Awesome' /></a>
   <a href='http://gophers.slack.com/messages/fyne'><img src='https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=blue' alt='Join us on Slack' /></a>
   <br />
-< <a href="https://goreportcard.com/report/fyne.io/fyne"><img src="https://goreportcard.com/badge/fyne.io/fyne" alt="Code Status" /></a>
+  <a href="https://goreportcard.com/report/fyne.io/fyne"><img src="https://goreportcard.com/badge/fyne.io/fyne" alt="Code Status" /></a>
   <a href="https://travis-ci.org/fyne-io/fyne"><img src="https://travis-ci.org/fyne-io/fyne.svg" alt="Build Status" /></a>
   <a href='https://coveralls.io/github/fyne-io/fyne?branch=develop'><img src='https://coveralls.io/repos/github/fyne-io/fyne/badge.svg?branch=develop' alt='Coverage Status' /></a>
   <!--a href='https://sourcegraph.com/github.com/fyne-io/fyne?badge'><img src='https://sourcegraph.com/github.com/fyne-io/fyne/-/badge.svg' alt='Used By' /></a-->
@@ -21,7 +21,7 @@ Fyne is designed to be really easy to code with, here are the steps to your firs
 
 ## Prerequisites
 
-As Fyne uses CGo you will require a C compiler (typically gcc). On Linux the "gcc" package may already be installed, if not youru package manager should have it.
+As Fyne uses CGo you will require a C compiler (typically gcc). On Linux the "gcc" package may already be installed, if not your package manager should have it.
 On macOS you should install XCode from the Mac App Store, you will also need to run "xcode-select --install" if you have not used the command line tools before.
 With Windows this can be included by installing TDM-GCC from http://tdm-gcc.tdragon.net/download.
 
@@ -36,24 +36,26 @@ Using the standard go tools you can install Fyne's core library using:
 And then you're ready to write your first app!
 
 ```go
-    package main
+package main
 
-    import "fyne.io/fyne/widget"
-    import "fyne.io/fyne/app"
+import (
+	"fyne.io/fyne/widget"
+	"fyne.io/fyne/app"
+)
 
-    func main() {
-    	app := app.New()
+func main() {
+	app := app.New()
 
-    	w := app.NewWindow("Hello")
-    	w.SetContent(widget.NewVBox(
-    		widget.NewLabel("Hello Fyne!"),
-    		widget.NewButton("Quit", func() {
-    			app.Quit()
-    		}),
-    	))
+	w := app.NewWindow("Hello")
+	w.SetContent(widget.NewVBox(
+		widget.NewLabel("Hello Fyne!"),
+		widget.NewButton("Quit", func() {
+			app.Quit()
+		}),
+	))
 
-    	w.ShowAndRun()
-    }
+	w.ShowAndRun()
+}
 ```
 
 And you can run that simply as:
