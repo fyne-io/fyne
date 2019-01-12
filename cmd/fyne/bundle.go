@@ -32,7 +32,7 @@ func writeResource(file, name string) {
 func writeHeader(pkg string) {
 	fmt.Println("package", pkg)
 	fmt.Println()
-	fmt.Println("import \"github.com/fyne-io/fyne\"")
+	fmt.Println("import \"fyne.io/fyne\"")
 }
 
 func sanitiseName(file string) string {
