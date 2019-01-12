@@ -20,7 +20,7 @@ func TestText_MinSize(t *testing.T) {
 	assert.True(t, min2.Width > min.Width)
 }
 
-func TestText_MinSize_NoMultiline(t *testing.T) {
+func TestText_MinSize_NoMultiLine(t *testing.T) {
 	text := NewText("Break", color.RGBA{0, 0, 0, 0xff})
 	min := text.MinSize()
 

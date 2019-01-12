@@ -2,8 +2,10 @@ package app
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
+	_ "fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,3 +28,17 @@ func TestCurrentApp(t *testing.T) {
 
 //	assert.Equal(t, "light", fyne.GlobalSettings().Theme())
 //}
+
+func TestDoubleRun(t *testing.T) {
+	app := New()
+
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+
+		app.Run() // this run is erroneous, but let's avoid breakage if users do it
+		app.Quit()
+	}()
+
+	app.NewWindow("testing") // just a dummy window to ensure that any driver contexts are initialised
+	app.Run()
+}

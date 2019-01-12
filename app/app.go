@@ -16,6 +16,7 @@ type fyneApp struct {
 	icon   fyne.Resource
 
 	settings fyne.Settings
+	running  bool
 }
 
 func (app *fyneApp) Icon() fyne.Resource {
@@ -31,11 +32,17 @@ func (app *fyneApp) NewWindow(title string) fyne.Window {
 }
 
 func (app *fyneApp) Run() {
+	if app.running {
+		return
+	}
+
+	app.running = true
 	app.driver.Run()
 }
 
 func (app *fyneApp) Quit() {
 	app.driver.Quit()
+	app.running = false
 }
 
 func (app *fyneApp) Driver() fyne.Driver {

@@ -109,9 +109,7 @@ func newDialog(title, message string, icon fyne.Resource, callback func(bool), p
 }
 
 func newLabel(message string) fyne.CanvasObject {
-	label := &widget.Label{Text: message, Alignment: fyne.TextAlignCenter}
-
-	return label
+	return widget.NewLabelWithStyle(message, fyne.TextAlignCenter, fyne.TextStyle{})
 }
 
 func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {

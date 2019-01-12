@@ -3,8 +3,6 @@ package widget
 import (
 	"image/color"
 	"log"
-	"strings"
-	"unicode/utf8"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -12,67 +10,49 @@ import (
 )
 
 const (
-	passwordChar  = "*"
-	multilineRows = 3
+	multiLineRows = 3
 )
 
 type entryRenderer struct {
-	label       *Label
+	text        *textWidget
+	placeholder *textWidget
 	box, cursor *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 	entry   *Entry
 }
 
-func emptyTextMinSize(style fyne.TextStyle) fyne.Size {
-	return textMinSize("M", theme.TextSize(), style)
-}
-
-func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
-	label := canvas.NewText(text, color.Black)
-	label.TextSize = size
-	label.TextStyle = style
-	return label.MinSize()
-}
-
 // MinSize calculates the minimum size of an entry widget.
 // This is based on the contained text with a standard amount of padding added.
 // If MultiLine is true then we will reserve space for at leasts 3 lines
 func (e *entryRenderer) MinSize() fyne.Size {
-	minTextSize := emptyTextMinSize(e.label.TextStyle)
+	minTextSize := e.text.charMinSize()
 	textSize := minTextSize
-	if e.label.Text != "" {
-		textSize = e.label.MinSize()
+
+	if e.placeholder.len() > 0 {
+		textSize = e.placeholder.MinSize()
+	}
+
+	if e.text.len() > 0 {
+		textSize = e.text.MinSize()
 	}
 
 	if e.entry.MultiLine == true {
-		if textSize.Height < minTextSize.Height*multilineRows {
-			textSize.Height = minTextSize.Height * multilineRows
+		if textSize.Height < minTextSize.Height*multiLineRows {
+			textSize.Height = minTextSize.Height * multiLineRows
 		}
 	}
 
 	return textSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 }
 
-func (e *entryRenderer) cursorPosition() (int, int) {
-	renderlabel := Renderer(e.label).(*labelRenderer).texts[0]
-	lineHeight := emptyTextMinSize(e.label.TextStyle).Height
-
-	runes := []rune(Renderer(e.label).(*labelRenderer).texts[e.entry.CursorRow].Text)
-	// sanity check, as the underlying entry text can actually change
-	if e.entry.CursorColumn > len(runes) {
-		e.entry.CursorColumn = len(runes)
-	}
-	substr := string(runes[0:e.entry.CursorColumn])
-	subSize := textMinSize(substr, renderlabel.TextSize, e.label.TextStyle)
-
-	return subSize.Width, e.entry.CursorRow * lineHeight
-}
-
 func (e *entryRenderer) moveCursor() {
-	xPos, yPos := e.cursorPosition()
-	lineHeight := emptyTextMinSize(e.label.TextStyle).Height
+	textRenderer := Renderer(e.text).(*textRenderer)
+	size := textRenderer.lineSize(e.entry.CursorColumn, e.entry.CursorRow)
+	xPos := size.Width
+	yPos := size.Height * e.entry.CursorRow
 
+	lineHeight := e.text.charMinSize().Height
 	e.cursor.Resize(fyne.NewSize(2, lineHeight))
 	e.cursor.Move(fyne.NewPos(xPos+theme.Padding()*2, yPos+theme.Padding()*2))
 
@@ -84,15 +64,18 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.box.Resize(size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
 	e.box.Move(fyne.NewPos(theme.Padding()/2, theme.Padding()/2))
 
-	e.label.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-	e.label.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	e.text.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	e.text.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+
+	e.placeholder.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	e.placeholder.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
 	e.moveCursor()
 }
 
 // ApplyTheme is called when the Entry may need to update it's look.
 func (e *entryRenderer) ApplyTheme() {
-	Renderer(e.label).ApplyTheme()
+	Renderer(e.text).ApplyTheme()
 	e.box.FillColor = theme.BackgroundColor()
 	e.Refresh()
 }
@@ -106,21 +89,10 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	var text string
-	if e.entry.Password {
-		text = strings.Repeat(passwordChar, utf8.RuneCountInString(e.entry.Text))
-		e.label.color = theme.TextColor()
-	} else {
-		if e.entry.Text == "" {
-			text = e.entry.PlaceHolder
-			e.label.color = theme.PlaceHolderColor()
-		} else {
-			text = e.entry.Text
-			e.label.color = theme.TextColor()
-		}
+	e.placeholder.Hide()
+	if e.text.len() == 0 {
+		e.placeholder.Show()
 	}
-
-	e.label.SetText(text)
 
 	if e.entry.focused {
 		e.cursor.FillColor = theme.FocusColor()
@@ -180,13 +152,14 @@ func (e *Entry) Hide() {
 
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
+	e.textWidget().SetText(text)
 	e.updateText(text)
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
 func (e *Entry) SetPlaceHolder(text string) {
 	e.PlaceHolder = text
-
+	e.placeholderWidget().SetText(text)
 	Renderer(e).Refresh()
 }
 
@@ -209,34 +182,13 @@ func (e *Entry) updateText(text string) {
 
 func (e *Entry) cursorTextPos() int {
 	pos := 0
-	texts := Renderer(e.label()).(*labelRenderer).texts
+	textWidget := e.textWidget()
 	for i := 0; i < e.CursorRow; i++ {
-		line := texts[i].Text
-		pos += len(line) + 1
+		rowLength := textWidget.rowLength(i)
+		pos += rowLength + 1
 	}
 	pos += e.CursorColumn
-
-	// Some sanity checks here
-	if pos > len(e.Text) {
-		pos = 0
-		e.CursorColumn = 0
-		e.CursorRow = 0
-	}
-
 	return pos
-}
-
-func (e *Entry) insertAtCursor(text string) {
-	pos := e.cursorTextPos()
-	runes := []rune(e.Text)
-	runes = append(runes[:pos], append([]rune(text), runes[pos:]...)...)
-	e.updateText(string(runes))
-}
-
-func (e *Entry) deleteFromTo(from int, to int) {
-	runes := []rune(e.Text)
-	runes = append(runes[:from], runes[to:]...)
-	e.updateText(string(runes))
 }
 
 // OnFocusGained is called when the Entry has been given focus.
@@ -266,103 +218,135 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	if e.ReadOnly {
 		return
 	}
-
-	if key.Name == fyne.KeyBackspace {
-		if len(e.Text) == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
+	textWidget := e.textWidget()
+	switch key.Name {
+	case fyne.KeyBackspace:
+		if textWidget.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
 			return
 		}
-
 		pos := e.cursorTextPos()
-		if e.Text[pos-1] == '\n' {
+		deleted := textWidget.deleteFromTo(pos-1, pos)
+		if deleted[0] == '\n' {
 			e.CursorRow--
-			e.CursorColumn = e.label().RowLength(e.CursorRow)
-		} else {
-			if e.CursorColumn > 0 {
-				e.CursorColumn--
-			}
+			rowLength := textWidget.rowLength(e.CursorRow)
+			e.CursorColumn = rowLength
+			break
 		}
-		e.deleteFromTo(pos-1, pos)
-	} else if key.Name == fyne.KeyDelete {
-		texts := Renderer(e.label()).(*labelRenderer).texts
-		if len(e.Text) == 0 || (e.CursorRow == len(texts)-1 && e.CursorColumn == len(texts[e.CursorRow].Text)) {
-			return
-		}
+		e.CursorColumn--
+	case fyne.KeyDelete:
 
 		pos := e.cursorTextPos()
-		e.deleteFromTo(pos, pos+1)
-	} else if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter {
-		if e.MultiLine {
-			e.insertAtCursor("\n")
-
-			e.CursorColumn = 0
-			e.CursorRow++
-		}
-	} else if key.Name == fyne.KeyUp {
-		if e.Text == "" { // just displaying placeholder
+		if textWidget.len() == 0 || pos == textWidget.len() {
 			return
 		}
+
+		textWidget.deleteFromTo(pos, pos+1)
+	case fyne.KeyReturn, fyne.KeyEnter:
+		if !e.MultiLine {
+			return
+		}
+		textWidget.insertAt(e.cursorTextPos(), []rune("\n"))
+		e.CursorColumn = 0
+		e.CursorRow++
+	case fyne.KeyUp:
+		if !e.MultiLine {
+			return
+		}
+
 		if e.CursorRow > 0 {
 			e.CursorRow--
 		}
 
-		if e.CursorColumn > e.label().RowLength(e.CursorRow) {
-			e.CursorColumn = e.label().RowLength(e.CursorRow)
+		rowLength := textWidget.rowLength(e.CursorRow)
+		if e.CursorColumn > rowLength {
+			e.CursorColumn = rowLength
 		}
-	} else if key.Name == fyne.KeyDown {
-		if e.Text == "" { // just displaying placeholder
+	case fyne.KeyDown:
+		if !e.MultiLine {
 			return
 		}
-		if e.CursorRow < e.label().Rows()-1 {
+
+		if e.CursorRow < textWidget.rows()-1 {
 			e.CursorRow++
 		}
 
-		if e.CursorColumn > e.label().RowLength(e.CursorRow) {
-			e.CursorColumn = e.label().RowLength(e.CursorRow)
+		rowLength := textWidget.rowLength(e.CursorRow)
+		if e.CursorColumn > rowLength {
+			e.CursorColumn = rowLength
 		}
-	} else if key.Name == fyne.KeyLeft {
-		if e.Text == "" { // just displaying placeholder
-			return
-		}
+	case fyne.KeyLeft:
 		if e.CursorColumn > 0 {
 			e.CursorColumn--
-		} else if e.CursorRow > 0 {
-			e.CursorRow--
-			e.CursorColumn = e.label().RowLength(e.CursorRow)
+			break
 		}
-	} else if key.Name == fyne.KeyRight {
-		if e.Text == "" { // just displaying placeholder
+
+		if e.MultiLine && e.CursorRow > 0 {
+			e.CursorRow--
+			rowLength := textWidget.rowLength(e.CursorRow)
+			e.CursorColumn = rowLength
+		}
+	case fyne.KeyRight:
+		if e.MultiLine {
+			rowLength := textWidget.rowLength(e.CursorRow)
+			if e.CursorColumn < rowLength {
+				e.CursorColumn++
+				break
+			}
+			if e.CursorRow < textWidget.rows()-1 {
+				e.CursorRow++
+				e.CursorColumn = 0
+			}
+			break
+		}
+		if e.CursorColumn < textWidget.len() {
+			e.CursorColumn++
+		}
+	case fyne.KeyUnnamed, fyne.KeySpace:
+		if key.String == "" {
 			return
 		}
-		if e.CursorColumn < e.label().RowLength(e.CursorRow) {
-			e.CursorColumn++
-		} else if e.CursorRow < e.label().Rows()-1 {
-			e.CursorRow++
-			e.CursorColumn = 0
-		}
-
-	} else if key.String != "" {
-		e.insertAtCursor(key.String)
-
-		e.CursorColumn += len(key.String)
-	} else {
+		runes := []rune(key.String)
+		textWidget.insertAt(e.cursorTextPos(), runes)
+		e.CursorColumn += len(runes)
+	default:
 		log.Println("Unhandled key press", key.String)
 	}
 
+	e.updateText(textWidget.String())
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
-func (e *Entry) label() *Label {
-	return Renderer(e).(*entryRenderer).label
+// textWidget returns the current text widget
+func (e *Entry) textWidget() *textWidget {
+	return Renderer(e).(*entryRenderer).text
+}
+
+// placeholderWidget returns the current placeholder widget
+func (e *Entry) placeholderWidget() *textWidget {
+	return Renderer(e).(*entryRenderer).placeholder
+}
+
+// textWidgetRenderer returns the renderer for the current text widget
+func (e *Entry) textWidgetRenderer() *textRenderer {
+	return Renderer(e.textWidget()).(*textRenderer)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
-	text := NewLabel(e.Text)
+	text := &textWidget{
+		password: e.Password,
+	}
+	text.SetText(e.Text)
+
+	placeholder := &textWidget{
+		color: theme.PlaceHolderColor(),
+	}
+	placeholder.SetText(e.PlaceHolder)
 	box := canvas.NewRectangle(theme.BackgroundColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
-	return &entryRenderer{text, box, cursor,
-		[]fyne.CanvasObject{box, text, cursor}, e}
+	return &entryRenderer{text, placeholder, box, cursor,
+		[]fyne.CanvasObject{box, placeholder, text, cursor}, e}
 }
 
 // NewEntry creates a new single line entry widget.
@@ -370,6 +354,7 @@ func NewEntry() *Entry {
 	e := &Entry{}
 
 	Renderer(e).Layout(e.MinSize())
+	Renderer(e).Refresh()
 	return e
 }
 
@@ -378,6 +363,7 @@ func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
 
 	Renderer(e).Layout(e.MinSize())
+	Renderer(e).Refresh()
 	return e
 }
 
@@ -386,5 +372,6 @@ func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 
 	Renderer(e).Layout(e.MinSize())
+	Renderer(e).Refresh()
 	return e
 }

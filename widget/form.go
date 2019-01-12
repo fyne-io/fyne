@@ -53,11 +53,7 @@ func (f *Form) Hide() {
 }
 
 func (f *Form) createLabel(text string) *Label {
-	label := &Label{Text: text,
-		Alignment: fyne.TextAlignTrailing,
-		TextStyle: fyne.TextStyle{Bold: true},
-	}
-	return label
+	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }
 
 func (f *Form) ensureGrid() {
@@ -65,7 +61,7 @@ func (f *Form) ensureGrid() {
 		return
 	}
 
-	f.itemGrid = fyne.NewContainerWithLayout(layout.NewGridLayout(2), []fyne.CanvasObject{}...)
+	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
 }
 
 // Append adds a new row to the form, using the text as a label next to the specified Widget
