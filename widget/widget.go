@@ -2,6 +2,8 @@
 package widget // import "fyne.io/fyne/widget"
 
 import (
+	"sync"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 )
@@ -64,16 +66,15 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 	}
 }
 
-var renderers = make(map[fyne.Widget]fyne.WidgetRenderer)
+var renderers sync.Map
 
 // Renderer looks up the render implementation for a widget
 func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
-	renderer := renderers[wid]
-
-	if renderer == nil {
+	renderer, ok := renderers.Load(wid)
+	if !ok {
 		renderer = wid.CreateRenderer()
-		renderers[wid] = renderer
+		renderers.Store(wid, renderer)
 	}
 
-	return renderer
+	return renderer.(fyne.WidgetRenderer)
 }
