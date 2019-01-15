@@ -4,80 +4,85 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path"
-	"strings"
-
-	"fyne.io/fyne"
 )
 
-func writeResource(file, name string) {
-	bytes, err := ioutil.ReadFile(file)
-	if err != nil {
-		fmt.Println("Unable to load file " + file)
-		return
+var commands map[string]command
+var provider command
+
+func printUsage() {
+	fmt.Println("Usage: fyne [command] [parameters], where command is one of:")
+	fmt.Print("  ")
+
+	i := 0
+	for id := range commands {
+		fmt.Print(id)
+
+		if i < len(commands)-1 {
+			fmt.Print(", ")
+		}
+		i++
 	}
 
-	res := fyne.NewStaticResource(path.Base(file), bytes)
-
-	fmt.Printf("var %s = %#v\n", name, res)
-}
-
-func writeHeader(pkg string) {
-	fmt.Println("package", pkg)
-	fmt.Println()
-	fmt.Println("import \"fyne.io/fyne\"")
-}
-
-func sanitiseName(file string) string {
-	name := strings.Replace(file, ".", "-", -1)
-	name = strings.Replace(name, " ", "", -1)
-
-	return strings.ToLower(name)
-}
-
-// Bundle takes a file (at filepath) and serialises it into Go to be output into
-// a generated bundle file. The go file will be part of the specified package
-// (pkg) and the data will be assigned to variable named "name". If you are
-// appending an existing resource file then pass true to noheader as the headers
-// should only be output once per file.
-func Bundle(name, pkg string, noheader bool, filepath string) {
-	if !noheader {
-		writeHeader(pkg)
-	}
+	fmt.Println(" or help")
 	fmt.Println()
 
-	if name == "" {
-		name = sanitiseName(path.Base(filepath))
+	if provider != nil {
+		provider.printHelp(" ")
+	} else {
+		for id, provider := range commands {
+			fmt.Printf("  %s\n", id)
+			provider.printHelp("   ")
+			fmt.Printf("    For more information run \"fyne help %s\"\n", id)
+			fmt.Println("")
+		}
 	}
-	writeResource(filepath, name)
+	flag.PrintDefaults()
+}
+
+func help() {
+	printUsage()
+	os.Exit(2) // consistent with flag.Parse() with -help
+}
+
+func loadCommands() {
+	commands = make(map[string]command)
+
+	commands["bundle"] = &bundler{}
+	commands["package"] = &packager{}
 }
 
 func main() {
-	var name, pkg string
-	var noheader bool
-	flag.StringVar(&name, "name", "", "The variable name to assign the serialised resource")
-	flag.StringVar(&pkg, "package", "main", "The package to output in headers (if not appending)")
-	flag.BoolVar(&noheader, "append", false, "Append an existing go file (don't output headers)")
-
+	loadCommands()
+	flag.Usage = printUsage
 	// first let's extract the first "command"
 	args := os.Args[1:]
 	if len(args) < 1 {
-		fmt.Println("The fyne command requires a command parameter, one of \"bundle\"")
-		return
-	} else if args[0] != "bundle" {
-		fmt.Println("Currently the fyne tool only supports the \"bundle\" command")
-		return
+		help()
 	}
 
-	// then parse the remaining args
-	flag.CommandLine.Parse(args[1:])
-	args = flag.Args()
-	if len(args) != 1 {
-		fmt.Println("Missing required file parameter after flags")
-		return
+	command := args[0]
+	if command[0] == '-' { // there was a parameter instead of a command
+		help()
 	}
 
-	Bundle(name, pkg, noheader, args[0])
+	if command == "help" {
+		if len(args) >= 2 {
+			provider = commands[args[1]]
+			provider.addFlags()
+		}
+		help()
+	} else {
+		provider = commands[command]
+		if provider == nil {
+			fmt.Fprintln(os.Stderr, "Unsupported command", command)
+			return
+		}
+
+		provider.addFlags()
+
+		// then parse the remaining args
+		flag.CommandLine.Parse(args[1:])
+		provider.run(flag.Args())
+	}
 }
