@@ -26,24 +26,19 @@ type entryRenderer struct {
 // This is based on the contained text with a standard amount of padding added.
 // If MultiLine is true then we will reserve space for at leasts 3 lines
 func (e *entryRenderer) MinSize() fyne.Size {
-	minTextSize := e.text.charMinSize()
-	textSize := minTextSize
 
-	if e.placeholder.len() > 0 {
-		textSize = e.placeholder.MinSize()
-	}
+	minSize := e.placeholder.MinSize()
 
 	if e.text.len() > 0 {
-		textSize = e.text.MinSize()
+		minSize = e.text.MinSize()
 	}
 
 	if e.entry.MultiLine == true {
-		if textSize.Height < minTextSize.Height*multiLineRows {
-			textSize.Height = minTextSize.Height * multiLineRows
-		}
+		// ensure multiline height is at least charMinSize * multilineRows
+		minSize.Height = fyne.Max(minSize.Height, e.text.charMinSize().Height*multiLineRows)
 	}
 
-	return textSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
+	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 }
 
 func (e *entryRenderer) moveCursor() {

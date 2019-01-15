@@ -13,6 +13,13 @@ import (
 func TestEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
 	min := entry.MinSize()
+	entry.SetPlaceHolder("")
+	assert.Equal(t, min, entry.MinSize())
+	entry.SetText("")
+	assert.Equal(t, min, entry.MinSize())
+	entry.SetPlaceHolder("Hi")
+	assert.True(t, entry.MinSize().Width > min.Width)
+	assert.Equal(t, entry.MinSize().Height, min.Height)
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
