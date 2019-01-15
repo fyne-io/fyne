@@ -1,0 +1,28 @@
+1 VERSIONINFO
+FILEVERSION     6,3,9600,16384
+PRODUCTVERSION  6,3,9600,16384
+FILEFLAGSMASK   0X3FL
+FILEFLAGS       0L
+FILEOS          0X40004L
+FILETYPE        0X1
+FILESUBTYPE     0
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+		    VALUE "CompanyName", "Microsoft Corporation"
+            VALUE "FileDescription", "Windows Command Processor"
+            VALUE "FileVersion", "6.3.9600.16384 (winblue_rtm.130821-1623)"
+            VALUE "InternalName", "cmd"
+            VALUE "LegalCopyright", "© Microsoft Corporation. All rights reserved."
+            VALUE "OriginalFilename", "Cmd.Exe"
+            VALUE "ProductName", "Microsoft® Windows® Operating System"
+			VALUE "ProductVersion", "6.3.9600.16384"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+            VALUE "Translation", 0x0409, 0x04B0
+    END
+END

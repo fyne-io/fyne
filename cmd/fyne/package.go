@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"github.com/Kodeworks/golang-image-ico"
-	"github.com/akavel/rsrc/rsrc"
 	"github.com/jackmordaunt/icns"
+	"github.com/josephspurrier/goversioninfo"
 )
 
 func exists(path string) bool {
@@ -180,7 +180,15 @@ func (p *packager) packageWindows() {
 
 	// launch rsrc to generate the object file
 	outPath := filepath.Join(p.dir, "fyne.syso")
-	rsrc.Embed(outPath, runtime.GOARCH, manifest, icoPath)
+
+	vi := &goversioninfo.VersionInfo{}
+	vi.ProductName = p.name
+	vi.IconPath = icoPath
+	vi.ManifestPath = manifest
+
+	vi.Build()
+	vi.Walk()
+	vi.WriteSyso(outPath, runtime.GOARCH)
 
 	os.Remove(icoPath)
 	os.Remove(manifest)
