@@ -5,6 +5,7 @@ package app // import "fyne.io/fyne/app"
 
 import (
 	"os"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -17,6 +18,7 @@ type fyneApp struct {
 
 	settings fyne.Settings
 	running  bool
+	runMutex sync.Mutex
 }
 
 func (app *fyneApp) Icon() fyne.Resource {
@@ -32,11 +34,16 @@ func (app *fyneApp) NewWindow(title string) fyne.Window {
 }
 
 func (app *fyneApp) Run() {
+	app.runMutex.Lock()
+
 	if app.running {
+		app.runMutex.Unlock()
 		return
 	}
 
 	app.running = true
+	app.runMutex.Unlock()
+
 	app.driver.Run()
 }
 
