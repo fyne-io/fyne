@@ -63,8 +63,27 @@ func doBundle(name, pkg, prefix string, noheader bool, filepath string) {
 	writeResource(filepath, name)
 }
 
+func dirBundle(pkg, prefix string, noheader bool, dirpath string) {
+	files, err := ioutil.ReadDir(dirpath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error reading specified directory", err)
+		return
+	}
+
+	omitHeader := noheader
+	for _, file := range files {
+		filepath := file.Name()
+		if path.Ext(filepath) == ".go" {
+			continue
+		}
+
+		doBundle("", pkg, prefix, omitHeader, filepath)
+		omitHeader = true // only output header once at most
+	}
+}
+
 func (b *bundler) addFlags() {
-	flag.StringVar(&b.name, "name", "", "The variable name to assign the serialised resource")
+	flag.StringVar(&b.name, "name", "", "The variable name to assign the resource (file mode only)")
 	flag.StringVar(&b.pkg, "package", "main", "The package to output in headers (if not appending)")
 	flag.StringVar(&b.prefix, "prefix", "resource", "A prefix for variables (ignored if name is set)")
 	flag.BoolVar(&b.noheader, "append", false, "Append an existing go file (don't output headers)")
@@ -72,15 +91,25 @@ func (b *bundler) addFlags() {
 
 func (b *bundler) printHelp(indent string) {
 	fmt.Println(indent, "The bundle command embeds static content into your go application.")
-	fmt.Println(indent, "Command usage: fyne bundle [parameters] file")
 	fmt.Println(indent, "Each resource will have a generated filename unless specified")
+	fmt.Println(indent, "Command usage: fyne bundle [parameters] file|directory")
 }
 
 func (b *bundler) run(args []string) {
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "Missing required file parameter after flags")
+		fmt.Fprintln(os.Stderr, "Missing required file or directory parameter after flags")
 		return
 	}
 
-	doBundle(b.name, b.pkg, b.prefix, b.noheader, args[0])
+	stat, err := os.Stat(args[0])
+	if os.IsNotExist(err) {
+		fmt.Fprintln(os.Stderr, "Specified file could not be found")
+	} else if stat.IsDir() {
+		dirBundle(b.pkg, b.prefix, b.noheader, args[0])
+	} else {
+		if b.name != "" {
+			b.prefix = ""
+		}
+		doBundle(b.name, b.pkg, b.prefix, b.noheader, args[0])
+	}
 }
