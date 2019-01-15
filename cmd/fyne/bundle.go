@@ -72,12 +72,12 @@ func dirBundle(pkg, prefix string, noheader bool, dirpath string) {
 
 	omitHeader := noheader
 	for _, file := range files {
-		filepath := file.Name()
-		if path.Ext(filepath) == ".go" {
+		filename := file.Name()
+		if path.Ext(filename) == ".go" {
 			continue
 		}
 
-		doBundle("", pkg, prefix, omitHeader, filepath)
+		doBundle("", pkg, prefix, omitHeader, path.Join(dirpath, filename))
 		omitHeader = true // only output header once at most
 	}
 }
