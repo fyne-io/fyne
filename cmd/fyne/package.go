@@ -14,6 +14,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/Kodeworks/golang-image-ico"
+	"github.com/akavel/rsrc/rsrc"
 	"github.com/jackmordaunt/icns"
 )
 
@@ -150,7 +152,39 @@ func (p *packager) packageDarwin() {
 }
 
 func (p *packager) packageWindows() {
+	// convert icon
+	img, err := os.Open(p.icon)
+	if err != nil {
+		log.Fatalf("opening source image: %v", err)
+	}
+	defer img.Close()
+	srcImg, _, err := image.Decode(img)
+	if err != nil {
+		log.Fatalf("decoding source image: %v", err)
+	}
 
+	icoPath := filepath.Join(p.dir, p.name+".ico")
+	file, err := os.Create(icoPath)
+	if err != nil {
+		log.Fatalf("unable to open image file: %v", err)
+	}
+	ico.Encode(file, srcImg)
+
+	// write manifest
+	manifest := p.exe + ".manifest"
+	manifestFile, _ := os.Create(manifest)
+	io.WriteString(manifestFile, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"+
+		"<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\" xmlns:asmv3=\"urn:schemas-microsoft-com:asm.v3\">\n"+
+		"<assemblyIdentity version=\"1.0.0.0\" processorArchitecture=\"*\" name=\""+p.name+"\" type=\"win32\"/>\n"+
+		"</assembly>")
+
+	// launch rsrc to generate the object file
+	outPath := filepath.Join(p.dir, "fyne.syso")
+	rsrc.Embed(outPath, runtime.GOARCH, manifest, icoPath)
+
+	os.Remove(icoPath)
+	os.Remove(manifest)
+	log.Println("For windows releases you need to re-run go build to include the changes")
 }
 
 func (p *packager) addFlags() {
