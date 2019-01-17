@@ -296,6 +296,10 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		if e.CursorColumn < textWidget.len() {
 			e.CursorColumn++
 		}
+	case fyne.KeyEnd:
+		e.CursorColumn = textWidget.len()
+	case fyne.KeyHome:
+		e.CursorColumn = 0
 	case fyne.KeyUnnamed, fyne.KeySpace:
 		if key.String == "" {
 			return
