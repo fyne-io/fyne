@@ -22,7 +22,8 @@ type Form struct {
 	OnSubmit func()
 	OnCancel func()
 
-	itemGrid *fyne.Container
+	itemGrid      *fyne.Container
+	minSizeCached fyne.Size
 }
 
 // Resize sets a new size for a widget.
@@ -39,7 +40,18 @@ func (f *Form) Move(pos fyne.Position) {
 
 // MinSize returns the smallest size this widget can shrink to
 func (f *Form) MinSize() fyne.Size {
-	return f.minSize(f)
+	minSize := f.minSize(f)
+	if f.minSizeCached != minSize {
+		// minSize is changed, this is due to children widgets like
+		// multiline entry that can grow or shrink.
+		// The form content elements width must be the same of the container
+		// so we'll set as the max size between the container size and
+		// content elements min width
+		f.minSizeCached = minSize
+		minSize.Width = fyne.Max(f.Size().Width, minSize.Width)
+		Renderer(f).Layout(minSize)
+	}
+	return minSize
 }
 
 // Show this widget, if it was previously hidden
