@@ -247,6 +247,23 @@ func TestEntry_OnKeyDown_DeleteNewline(t *testing.T) {
 	assert.Equal(t, "Hi", entry.Text)
 }
 
+func TestEntry_OnKeyDown_Home_End(t *testing.T) {
+	entry := &Entry{}
+	entry.SetText("Hi")
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	end := &fyne.KeyEvent{Name: fyne.KeyEnd}
+	entry.OnKeyDown(end)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 2, entry.CursorColumn)
+
+	home := &fyne.KeyEvent{Name: fyne.KeyHome}
+	entry.OnKeyDown(home)
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+}
+
 func TestEntryNotify(t *testing.T) {
 	entry := NewEntry()
 	changed := false
