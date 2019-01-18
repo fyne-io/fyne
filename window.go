@@ -61,4 +61,12 @@ type Window interface {
 	SetContent(CanvasObject)
 	// Canvas returns the canvas context to render in the window
 	Canvas() Canvas
+
+	//SetClipboardString sets the system clipboard to the specified UTF-8 encoded
+	//string.
+	SetClipboardString(str string)
+
+	//GetClipboardString returns the contents of the system clipboard, if it
+	//contains or is convertible to a UTF-8 encoded string.
+	GetClipboardString() (string, error)
 }

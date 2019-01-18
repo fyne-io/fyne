@@ -179,6 +179,18 @@ func (w *window) ShowAndRun() {
 	fyne.CurrentApp().Driver().Run()
 }
 
+//SetClipboardString sets the system clipboard to the specified UTF-8 encoded
+//string.
+func (w *window) SetClipboardString(str string) {
+	w.viewport.SetClipboardString(str)
+}
+
+//GetClipboardString returns the contents of the system clipboard, if it
+//contains or is convertible to a UTF-8 encoded string.
+func (w *window) GetClipboardString() (string, error) {
+	return w.viewport.GetClipboardString()
+}
+
 func (w *window) Content() fyne.CanvasObject {
 	return w.canvas.content
 }
@@ -301,6 +313,8 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	// printable
 	case glfw.KeySpace:
 		return fyne.KeySpace
+	case glfw.KeyV:
+		return fyne.KeyV
 
 	// non-printable
 	case glfw.KeyEscape:
@@ -399,9 +413,9 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		return
 	}
 
-	if key <= glfw.KeyWorld1 { // filter printable characters handled in charModInput
-		return
-	}
+	// if key <= glfw.KeyWorld1 { // filter printable characters handled in charModInput
+	// 	return
+	// }
 
 	ev := new(fyne.KeyEvent)
 	ev.Name = keyToName(key)

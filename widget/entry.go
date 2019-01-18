@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"log"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -116,6 +117,7 @@ type Entry struct {
 	CursorRow, CursorColumn int
 
 	focused bool
+	fyne.Window
 }
 
 // Resize sets a new size for a widget.
@@ -213,7 +215,32 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	if e.ReadOnly {
 		return
 	}
+
 	textWidget := e.textWidget()
+
+	if key.Modifiers != 0 {
+		if key.Modifiers&fyne.ControlModifier != 0 {
+			if key.Name == fyne.KeyV {
+				clipboard, err := e.Window.GetClipboardString()
+				if err != nil {
+					log.Println("cannot get clipboard string", err)
+					clipboard = ""
+				}
+
+				if !e.MultiLine {
+					clipboard = strings.Replace(clipboard, "\n", " ", -1)
+				}
+
+				runes := []rune(clipboard)
+				textWidget.insertAt(e.cursorTextPos(), runes)
+				e.CursorColumn += len(runes)
+				e.updateText(textWidget.String())
+				Renderer(e).(*entryRenderer).moveCursor()
+				return
+			}
+		}
+	}
+
 	switch key.Name {
 	case fyne.KeyBackspace:
 		if textWidget.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {

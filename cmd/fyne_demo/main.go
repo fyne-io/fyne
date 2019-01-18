@@ -18,11 +18,15 @@ func formApp(app fyne.App) {
 	w := app.NewWindow("Form")
 
 	name := widget.NewEntry()
+	name.Window = w
 	name.SetPlaceHolder("John Smith")
 	email := widget.NewEntry()
+	email.Window = w
 	email.SetPlaceHolder("test@example.com")
 	password := widget.NewPasswordEntry()
+	password.Window = w
 	largeText := widget.NewMultiLineEntry()
+	largeText.Window = w
 
 	form := &widget.Form{
 		OnCancel: func() {
