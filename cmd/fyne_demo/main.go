@@ -50,10 +50,7 @@ func confirmCallback(response bool) {
 
 func main() {
 	app := app.New()
-
 	w := app.NewWindow("Fyne Demo")
-	entry := widget.NewEntry()
-	entry.SetText("Entry")
 
 	cv := canvas.NewImageFromResource(theme.FyneLogo())
 	cv.SetMinSize(fyne.NewSize(64, 64))
