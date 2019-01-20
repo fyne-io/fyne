@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -95,17 +96,19 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+	textScale := 1
+	if runtime.GOOS == "darwin" {
+		textScale = 2
+	}
 	bounds := text.MinSize()
-	width := scaleInt(c, bounds.Width)
-	height := scaleInt(c, bounds.Height)
-
+	width := scaleInt(c, bounds.Width*textScale)
+	height := scaleInt(c, bounds.Height*textScale)
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	dpi := float64(textDPI)
 
 	var opts truetype.Options
 	fontSize := float64(text.TextSize) * float64(c.Scale())
 	opts.Size = fontSize
-	opts.DPI = dpi
+	opts.DPI = float64(textDPI * textScale)
 	face := cachedFontFace(text.TextStyle, &opts)
 
 	d := font.Drawer{}
