@@ -64,6 +64,12 @@ func (w *testWindow) SetOnClosed(closed func()) {
 
 func (w *testWindow) Show() {}
 
+func (w *testWindow) GetClipboardString() (string, error) {
+	return "clipboard content", nil
+}
+
+func (w *testWindow) SetClipboardString(str string) {}
+
 func (w *testWindow) Hide() {}
 
 func (w *testWindow) Close() {
