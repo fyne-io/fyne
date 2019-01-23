@@ -169,6 +169,7 @@ func (p *packager) packageWindows() {
 		log.Fatalf("unable to open image file: %v", err)
 	}
 	ico.Encode(file, srcImg)
+	file.Close()
 
 	// write manifest
 	manifest := p.exe + ".manifest"
