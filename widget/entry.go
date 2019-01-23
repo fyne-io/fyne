@@ -210,6 +210,31 @@ func (e *Entry) Focused() bool {
 	return e.focused
 }
 
+// OnCopy handles the clipboard copy command
+func (e *Entry) OnCopy(clipboard *fyne.Clipboard) {
+	log.Println("OnCopy not implemented yet")
+}
+
+// OnCut handles the clipboard cut command
+func (e *Entry) OnCut(clipboard *fyne.Clipboard) {
+	log.Println("OnCut not implemented yet")
+}
+
+// OnPaste handles the clipboard paste command
+func (e *Entry) OnPaste(clipboard *fyne.Clipboard) {
+	text := clipboard.Content()
+	if !e.MultiLine {
+		// format clipboard content to be compatible with single line entry
+		text = strings.Replace(text, "\n", " ", -1)
+	}
+	textWidget := e.textWidget()
+	runes := []rune(text)
+	textWidget.insertAt(e.cursorTextPos(), runes)
+	e.CursorColumn += len(runes)
+	e.updateText(textWidget.String())
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
 // OnKeyDown receives key input events when the Entry widget is focused.
 func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	if e.ReadOnly {
@@ -217,29 +242,6 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	}
 
 	textWidget := e.textWidget()
-
-	if key.Modifiers != 0 {
-		if key.Modifiers&fyne.ControlModifier != 0 {
-			if key.Name == fyne.KeyV {
-				clipboard, err := e.Window.GetClipboardString()
-				if err != nil {
-					log.Println("cannot get clipboard string", err)
-					clipboard = ""
-				}
-
-				if !e.MultiLine {
-					clipboard = strings.Replace(clipboard, "\n", " ", -1)
-				}
-
-				runes := []rune(clipboard)
-				textWidget.insertAt(e.cursorTextPos(), runes)
-				e.CursorColumn += len(runes)
-				e.updateText(textWidget.String())
-				Renderer(e).(*entryRenderer).moveCursor()
-				return
-			}
-		}
-	}
 
 	switch key.Name {
 	case fyne.KeyBackspace:
