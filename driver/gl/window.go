@@ -313,8 +313,12 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	// printable
 	case glfw.KeySpace:
 		return fyne.KeySpace
+	case glfw.KeyC:
+		return fyne.KeyC
 	case glfw.KeyV:
 		return fyne.KeyV
+	case glfw.KeyX:
+		return fyne.KeyX
 
 	// non-printable
 	case glfw.KeyEscape:
@@ -430,7 +434,24 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	}
 
 	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().OnKeyDown(ev)
+		focusedObject := w.canvas.Focused()
+
+		switch ev.Shortcut() {
+		case fyne.ShortcutPaste:
+			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+				clipboardableObject.OnPaste(&fyne.Clipboard{Window: w})
+			}
+		case fyne.ShortcutCopy:
+			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+				clipboardableObject.OnCopy(&fyne.Clipboard{Window: w})
+			}
+		case fyne.ShortcutCut:
+			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+				clipboardableObject.OnCut(&fyne.Clipboard{Window: w})
+			}
+		}
+
+		go focusedObject.OnKeyDown(ev)
 	}
 	if w.canvas.onKeyDown != nil {
 		go w.canvas.onKeyDown(ev)

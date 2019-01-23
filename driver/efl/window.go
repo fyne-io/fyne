@@ -334,7 +334,23 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	}
 
 	if canvas.focused != nil {
-		canvas.focused.OnKeyDown(ev)
+		focusedObject := canvas.focused
+
+		switch ev.Shortcut() {
+		case fyne.ShortcutPaste:
+			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+				clipboardableObject.OnPaste(&fyne.Clipboard{Window: w})
+			}
+		case fyne.ShortcutCopy:
+			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+				clipboardableObject.OnCopy(&fyne.Clipboard{Window: w})
+			}
+		case fyne.ShortcutCut:
+			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+				clipboardableObject.OnCut(&fyne.Clipboard{Window: w})
+			}
+		}
+		focusedObject.OnKeyDown(ev)
 	}
 	if canvas.onKeyDown != nil {
 		canvas.onKeyDown(ev)
