@@ -84,7 +84,7 @@ func main() {
 	bundleFont(fontFace, "Bold", f)
 	bundleFont(fontFace, "Italic", f)
 	bundleFont(fontFace, "BoldItalic", f)
-	bundleFont("SourceCodePro", "Regular", f)
+	bundleFont("NotoMono", "Regular", f)
 	f.Close()
 
 	f = openFile("bundled-icons.go")

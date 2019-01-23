@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -23,6 +24,7 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
+	"golang.org/x/image/font"
 )
 
 var textures = make(map[fyne.CanvasObject]uint32)
@@ -94,29 +96,27 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+	textScale := 1
+	if runtime.GOOS == "darwin" {
+		textScale = 2
+	}
 	bounds := text.MinSize()
-	width := scaleInt(c, bounds.Width)
-	height := scaleInt(c, bounds.Height)
-
+	width := scaleInt(c, bounds.Width*textScale)
+	height := scaleInt(c, bounds.Height*textScale)
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	dpi := float64(textDPI)
 
 	var opts truetype.Options
-	fc := fontCache(text.TextStyle)
 	fontSize := float64(text.TextSize) * float64(c.Scale())
 	opts.Size = fontSize
-	opts.DPI = dpi
-	face := truetype.NewFace(fc, &opts)
+	opts.DPI = float64(textDPI * textScale)
+	face := cachedFontFace(text.TextStyle, &opts)
 
-	ctx := freetype.NewContext()
-	ctx.SetDPI(dpi)
-	ctx.SetFont(fc)
-	ctx.SetFontSize(fontSize)
-	ctx.SetClip(img.Bounds())
-	ctx.SetDst(img)
-	ctx.SetSrc(&image.Uniform{text.Color})
-
-	ctx.DrawString(text.Text, freetype.Pt(0, height-face.Metrics().Descent.Ceil()))
+	d := font.Drawer{}
+	d.Dst = img
+	d.Src = &image.Uniform{text.Color}
+	d.Face = face
+	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
+	d.DrawString(text.Text)
 
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(img.Rect.Size().X), int32(img.Rect.Size().Y),
 		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(img.Pix))

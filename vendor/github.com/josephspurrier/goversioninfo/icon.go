@@ -1,6 +1,7 @@
 package goversioninfo
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 	"os"
@@ -63,7 +64,7 @@ func addIcon(coff *coff.Coff, fname string, newID <-chan uint16) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close() //don't defer, files will be closed by OS when app closes
+	defer f.Close()
 
 	icons, err := ico.DecodeHeaders(f)
 	if err != nil {
@@ -81,11 +82,25 @@ func addIcon(coff *coff.Coff, fname string, newID <-chan uint16) error {
 		for _, icon := range icons {
 			id := <-newID
 			r := io.NewSectionReader(f, int64(icon.ImageOffset), int64(icon.BytesInRes))
-			coff.AddResource(rtIcon, id, r)
+			buffered, err := bufferIcon(r)
+			if err != nil {
+				return err
+			}
+			coff.AddResource(rtIcon, id, buffered)
 			group.Entries = append(group.Entries, gRPICONDIRENTRY{IconDirEntryCommon: icon.IconDirEntryCommon, ID: id})
 		}
 		coff.AddResource(rtGroupIcon, gid, group)
 	}
 
 	return nil
+}
+
+func bufferIcon(read *io.SectionReader) (*io.SectionReader, error) {
+	size := read.Size()
+	data := make([]byte, size)
+	_, err := io.ReadFull(read, data)
+	if err != nil {
+		return nil, err
+	}
+	return io.NewSectionReader(bytes.NewReader(data), 0, size), nil
 }
