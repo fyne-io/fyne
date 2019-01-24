@@ -36,7 +36,7 @@ func (w *window) Title() string {
 
 func (w *window) SetTitle(title string) {
 	w.title = title
-	w.SetTitle(title)
+	w.viewport.SetTitle(title)
 }
 
 func (w *window) FullScreen() bool {
