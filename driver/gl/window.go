@@ -46,7 +46,7 @@ func (w *window) FullScreen() bool {
 func (w *window) SetFullScreen(full bool) {
 	runOnMainAsync(func() {
 		w.fullScreen = full
-		monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
+		monitor := getMonitorForWindow(w.viewport)
 		mode := monitor.GetVideoMode()
 
 		if full {
@@ -139,6 +139,24 @@ func scaleForDpi(xdpi int) float32 {
 	return float32(1.0)
 }
 
+func getMonitorForWindow(win *glfw.Window) *glfw.Monitor {
+	winx, winy := win.GetPos()
+	for _, monitor := range glfw.GetMonitors() {
+		x, y := monitor.GetPos()
+
+		if x > winx || y > winy {
+			continue
+		}
+		if x+monitor.GetVideoMode().Width <= winx || y+monitor.GetVideoMode().Height <= winy {
+			continue
+		}
+
+		return monitor
+	}
+
+	return glfw.GetPrimaryMonitor()
+}
+
 func detectScale(win *glfw.Window) float32 {
 	env := os.Getenv("FYNE_SCALE")
 	if env != "" {
@@ -150,7 +168,7 @@ func detectScale(win *glfw.Window) float32 {
 		}
 	}
 
-	monitor := glfw.GetPrimaryMonitor() // TODO detect if the window is on this one...
+	monitor := getMonitorForWindow(win)
 	widthMm, _ := monitor.GetPhysicalSize()
 	widthPx := monitor.GetVideoMode().Width
 
@@ -219,6 +237,23 @@ func (w *window) closed(viewport *glfw.Window) {
 	if w.onClosed != nil {
 		w.onClosed()
 	}
+}
+
+func (w *window) moved(viewport *glfw.Window, x, y int) {
+	scale := w.canvas.scale
+	newScale := detectScale(w.viewport)
+
+	if scale == newScale {
+		return
+	}
+
+	ratio := scale / newScale
+	newWidth, newHeight := viewport.GetSize()
+	newWidth = int(float32(newWidth) / ratio)
+	newHeight = int(float32(newHeight) / ratio)
+
+	w.canvas.SetScale(newScale)
+	viewport.SetSize(newWidth, newHeight)
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -485,6 +520,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		d.windows = append(d.windows, ret)
 
 		win.SetCloseCallback(ret.closed)
+		win.SetPosCallback(ret.moved)
 		win.SetSizeCallback(ret.resized)
 		win.SetFramebufferSizeCallback(ret.frameSized)
 		win.SetRefreshCallback(ret.refresh)
