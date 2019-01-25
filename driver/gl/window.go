@@ -60,6 +60,32 @@ func (w *window) SetFullScreen(full bool) {
 	})
 }
 
+func (w *window) CenterOnScreen() {
+	runOnMainAsync(func() {
+		// get window dimensions in pixels
+		monitor := getMonitorForWindow(w.viewport)
+		monMode := monitor.GetVideoMode()
+		monWidth := monMode.Width
+		monHeight := monMode.Height
+
+		// get current window dimensions in pixels
+		winContentSize := w.Content().MinSize()
+		viewWidth, viewHeight := w.viewport.GetSize()
+
+		// take the larger of the window size and the content
+		// if the window is hidden, the content will be larger
+		viewWidth = fyne.Max(winContentSize.Width, viewWidth)
+		viewHeight = fyne.Max(winContentSize.Height, viewHeight)
+
+		// math them to the middle
+		newX := (monWidth / 2) - (winContentSize.Width / 2)
+		newY := (monHeight / 2) - (winContentSize.Height / 2)
+
+		// set new window coordinates
+		w.viewport.SetPos(newX, newY)
+	})
+}
+
 func (w *window) Resize(size fyne.Size) {
 	runOnMainAsync(func() {
 		scale := w.canvas.Scale()

@@ -78,6 +78,12 @@ func (w *window) SetFullScreen(full bool) {
 	})
 }
 
+func (w *window) CenterOnScreen() {
+	runOnMain(func() {
+		// TODO
+	})
+}
+
 func (w *window) Resize(size fyne.Size) {
 	scale := w.canvas.Scale()
 	runOnMain(func() {
