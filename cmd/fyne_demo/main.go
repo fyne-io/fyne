@@ -49,8 +49,8 @@ func confirmCallback(response bool) {
 }
 
 func main() {
-	app := app.New()
-	w := app.NewWindow("Fyne Demo")
+	a := app.New()
+	w := a.NewWindow("Fyne Demo")
 
 	cv := canvas.NewImageFromResource(theme.FyneLogo())
 	cv.SetMinSize(fyne.NewSize(64, 64))
@@ -69,11 +69,11 @@ func main() {
 		}),
 
 		widget.NewGroup("Demos",
-			widget.NewButton("Canvas", func() { Canvas(app) }),
-			widget.NewButton("Icons", func() { Icons(app) }),
-			widget.NewButton("Layout", func() { Layout(app) }),
-			widget.NewButton("Widgets", func() { Widget(app) }),
-			widget.NewButton("Form", func() { formApp(app) }),
+			widget.NewButton("Canvas", func() { Canvas(a) }),
+			widget.NewButton("Icons", func() { Icons(a) }),
+			widget.NewButton("Layout", func() { Layout(a) }),
+			widget.NewButton("Widgets", func() { Widget(a) }),
+			widget.NewButton("Form", func() { formApp(a) }),
 		),
 
 		widget.NewHBox(layout.NewSpacer(), cv, layout.NewSpacer()),
@@ -101,14 +101,14 @@ func main() {
 
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 			widget.NewButton("Dark", func() {
-				app.Settings().SetTheme(theme.DarkTheme())
+				a.Settings().SetTheme(theme.DarkTheme())
 			}),
 			widget.NewButton("Light", func() {
-				app.Settings().SetTheme(theme.LightTheme())
+				a.Settings().SetTheme(theme.LightTheme())
 			}),
 		),
 		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
-			app.Quit()
+			a.Quit()
 		}),
 	))
 	w.ShowAndRun()
