@@ -154,7 +154,9 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			file = bytes.NewReader(img.Resource.Content())
 		} else {
 			name = img.File
-			file, _ = os.Open(img.File)
+			handle, _ := os.Open(img.File)
+			defer handle.Close()
+			file = handle
 		}
 
 		if strings.ToLower(filepath.Ext(name)) == ".svg" {
