@@ -21,6 +21,8 @@ type window struct {
 	title    string
 	icon     fyne.Resource
 
+	clipboard fyne.Clipboard
+
 	master     bool
 	fullScreen bool
 	fixedSize  bool
@@ -197,16 +199,12 @@ func (w *window) ShowAndRun() {
 	fyne.CurrentApp().Driver().Run()
 }
 
-//SetClipboardString sets the system clipboard to the specified UTF-8 encoded
-//string.
-func (w *window) SetClipboardString(str string) {
-	w.viewport.SetClipboardString(str)
-}
-
-//GetClipboardString returns the contents of the system clipboard, if it
-//contains or is convertible to a UTF-8 encoded string.
-func (w *window) GetClipboardString() (string, error) {
-	return w.viewport.GetClipboardString()
+//Clipboard returns the system clipboard
+func (w *window) Clipboard() fyne.Clipboard {
+	if w.clipboard == nil {
+		w.clipboard = &Clipboard{window: w.viewport}
+	}
+	return w.clipboard
 }
 
 func (w *window) Content() fyne.CanvasObject {
@@ -444,17 +442,27 @@ func charToName(char rune) fyne.KeyName {
 	return ""
 }
 
+// keyPressed sets the key callback which is called when a key is pressed,
+// repeated or released.
+//
+// The key functions deal with physical keys, with layout independent key tokens
+// named after their values in the standard US keyboard layout.
+//
+// When a window loses focus, it will generate synthetic key release events for
+// all pressed keys. You can tell these events from user-generated events by the
+// fact that the synthetic ones are generated after the window has lost focus,
+// i.e. Focused will be false and the focus callback will have already been
+// called.
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	if w.canvas.Focused() == nil && w.canvas.onKeyDown == nil {
-		return
-	}
-	if action != glfw.Press { // ignore key up
+	focusedObject := w.canvas.Focused()
+	if focusedObject == nil && w.canvas.onKeyDown == nil {
 		return
 	}
 
-	// if key <= glfw.KeyWorld1 { // filter printable characters handled in charModInput
-	// 	return
-	// }
+	if action != glfw.Press { // ignore key up
+		// TODO: handle repeated key
+		return
+	}
 
 	ev := new(fyne.KeyEvent)
 	ev.Name = keyToName(key)
@@ -468,31 +476,45 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		ev.Modifiers |= fyne.AltModifier
 	}
 
-	if w.canvas.Focused() != nil {
-		focusedObject := w.canvas.Focused()
-
-		switch ev.Shortcut() {
-		case fyne.ShortcutPaste:
-			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-				clipboardableObject.OnPaste(&fyne.Clipboard{Window: w})
-			}
-		case fyne.ShortcutCopy:
-			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-				clipboardableObject.OnCopy(&fyne.Clipboard{Window: w})
-			}
-		case fyne.ShortcutCut:
-			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-				clipboardableObject.OnCut(&fyne.Clipboard{Window: w})
-			}
+	// handle shortcut, if any
+	switch ev.Shortcut() {
+	case fyne.ShortcutPaste:
+		if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+			clipboardableObject.OnPaste(w.Clipboard())
+			return
 		}
-
-		go focusedObject.OnKeyDown(ev)
+	case fyne.ShortcutCopy:
+		if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+			clipboardableObject.OnCopy(w.Clipboard())
+			return
+		}
+	case fyne.ShortcutCut:
+		if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+			clipboardableObject.OnCut(w.Clipboard())
+			return
+		}
 	}
+
+	if key <= glfw.KeyWorld1 {
+		// printable characters handled in charModInput
+		return
+	}
+
+	if focusedObject != nil {
+		w.canvas.Focused().OnKeyDown(ev)
+	}
+
 	if w.canvas.onKeyDown != nil {
-		go w.canvas.onKeyDown(ev)
+		w.canvas.onKeyDown(ev)
 	}
 }
 
+// charModInput defines the character with modifiers callback which is called when a
+// Unicode character is input regardless of what modifier keys are used.
+//
+// The character with modifiers callback is intended for implementing custom
+// Unicode character input. Characters do not map 1:1 to physical keys,
+// as a key may produce zero, one or more characters.
 func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.ModifierKey) {
 	if w.canvas.Focused() == nil && w.canvas.onKeyDown == nil {
 		return
@@ -501,12 +523,15 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	ev := new(fyne.KeyEvent)
 	ev.Name = charToName(char)
 	ev.String = string(char)
+
 	if (mods & glfw.ModShift) != 0 {
 		ev.Modifiers |= fyne.ShiftModifier
 	}
+
 	if (mods & glfw.ModControl) != 0 {
 		ev.Modifiers |= fyne.ControlModifier
 	}
+
 	if (mods & glfw.ModAlt) != 0 {
 		ev.Modifiers |= fyne.AltModifier
 	}
@@ -514,6 +539,7 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	if w.canvas.Focused() != nil {
 		w.canvas.Focused().OnKeyDown(ev)
 	}
+
 	if w.canvas.onKeyDown != nil {
 		w.canvas.onKeyDown(ev)
 	}
