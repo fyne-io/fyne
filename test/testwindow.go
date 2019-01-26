@@ -9,7 +9,8 @@ type testWindow struct {
 	padded     bool
 	onClosed   func()
 
-	canvas fyne.Canvas
+	canvas    fyne.Canvas
+	clipboard fyne.Clipboard
 }
 
 var windows = make([]fyne.Window, 0)
@@ -64,11 +65,12 @@ func (w *testWindow) SetOnClosed(closed func()) {
 
 func (w *testWindow) Show() {}
 
-func (w *testWindow) GetClipboardString() (string, error) {
-	return "clipboard content", nil
+func (w *testWindow) Clipboard() fyne.Clipboard {
+	if w.clipboard == nil {
+		w.clipboard = &testClipboard{}
+	}
+	return w.clipboard
 }
-
-func (w *testWindow) SetClipboardString(str string) {}
 
 func (w *testWindow) Hide() {}
 
