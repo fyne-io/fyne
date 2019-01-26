@@ -113,6 +113,7 @@ func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fy
 	points := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
 	texture := getTexture(box, c.newGlRectTexture)
 
+	gl.Disable(gl.BLEND)
 	c.drawTexture(texture, points)
 }
 
@@ -124,6 +125,7 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fram
 	points := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
 	texture := getTexture(rect, c.newGlRectTexture)
 
+	gl.Disable(gl.BLEND)
 	c.drawTexture(texture, points)
 }
 
@@ -137,6 +139,15 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 		return
 	}
 
+	// here we have to choose between blending the image alpha or fading it...
+	// TODO find a way to support both
+	gl.Enable(gl.BLEND)
+	if img.Alpha() != 1 {
+		gl.BlendColor(0, 0, 0, float32(img.Alpha()))
+		gl.BlendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA)
+	} else {
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	}
 	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, img.PixelAspect)
 	c.drawTexture(texture, points)
 }
@@ -162,6 +173,8 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 	points := c.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0)
 	texture := c.newGlTextTexture(text)
 
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	c.drawTexture(texture, points)
 }
 
