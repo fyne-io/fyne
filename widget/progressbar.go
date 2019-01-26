@@ -127,6 +127,8 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // NewProgressBar creates a new progress bar widget.
+// The default Min is 0 and Max is 1, Values set should be between those numbers.
+// The display will convert this to a percentage.
 func NewProgressBar() *ProgressBar {
 	p := &ProgressBar{Min: 0, Max: 1}
 
