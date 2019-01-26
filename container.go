@@ -58,7 +58,6 @@ func (c *Container) MinSize() Size {
 	}
 
 	return minSize
-
 }
 
 // Visible returns true if the container is currently visible, false otherwise.
