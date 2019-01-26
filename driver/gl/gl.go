@@ -93,8 +93,6 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	text := obj.(*canvas.Text)
 	texture := newTexture()
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	textScale := 1
 	if runtime.GOOS == "darwin" {
@@ -137,8 +135,6 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 	var raw *image.RGBA
 	img := obj.(*canvas.Image)
 	texture := newTexture()
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	width := scaleInt(c, img.Size().Width)
 	height := scaleInt(c, img.Size().Height)
@@ -154,7 +150,9 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			file = bytes.NewReader(img.Resource.Content())
 		} else {
 			name = img.File
-			file, _ = os.Open(img.File)
+			handle, _ := os.Open(img.File)
+			defer handle.Close()
+			file = handle
 		}
 
 		if strings.ToLower(filepath.Ext(name)) == ".svg" {
@@ -179,7 +177,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
 			raster := rasterx.NewDasher(width, height, scanner)
 
-			icon.Draw(raster, img.Alpha())
+			icon.Draw(raster, 1)
 		} else {
 			pixels, _, err := image.Decode(file)
 

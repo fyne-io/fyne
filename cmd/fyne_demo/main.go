@@ -4,6 +4,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -92,8 +93,21 @@ func main() {
 				cnf.SetConfirmText("Oh Yes!")
 				cnf.Show()
 			}),
-			widget.NewButton("Custom", func() {
-				dialog.ShowCustom("MyDialog", "Nice", widget.NewCheck("Inside a dialog", func(bool) {}), w)
+			widget.NewButton("Progress", func() {
+				prog := dialog.NewProgress("MyProgress", "Nearly there...", w)
+
+				go func() {
+					num := 0.0
+					for num < 1.0 {
+						time.Sleep(50 * time.Millisecond)
+						prog.SetValue(num)
+						num += 0.01
+					}
+
+					prog.SetValue(1)
+				}()
+
+				prog.Show()
 			}),
 		),
 
