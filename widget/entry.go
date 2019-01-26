@@ -210,17 +210,17 @@ func (e *Entry) Focused() bool {
 }
 
 // OnCopy handles the clipboard copy command
-func (e *Entry) OnCopy(clipboard *fyne.Clipboard) {
+func (e *Entry) OnCopy(clipboard fyne.Clipboard) {
 	log.Println("OnCopy not implemented yet")
 }
 
 // OnCut handles the clipboard cut command
-func (e *Entry) OnCut(clipboard *fyne.Clipboard) {
+func (e *Entry) OnCut(clipboard fyne.Clipboard) {
 	log.Println("OnCut not implemented yet")
 }
 
 // OnPaste handles the clipboard paste command
-func (e *Entry) OnPaste(clipboard *fyne.Clipboard) {
+func (e *Entry) OnPaste(clipboard fyne.Clipboard) {
 	text := clipboard.Content()
 	if !e.MultiLine {
 		// format clipboard content to be compatible with single line entry
