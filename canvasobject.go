@@ -48,7 +48,7 @@ type FocusableObject interface {
 
 // ClipboardableObject describes any CanvasObject that can respond to clipboard commands (cut, copy, and paste).
 type ClipboardableObject interface {
-	OnCopy(*Clipboard)
-	OnPaste(*Clipboard)
-	OnCut(*Clipboard)
+	OnCopy(Clipboard)
+	OnPaste(Clipboard)
+	OnCut(Clipboard)
 }
