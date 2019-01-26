@@ -65,11 +65,10 @@ func (w *window) CenterOnScreen() {
 		// get window dimensions in pixels
 		monitor := getMonitorForWindow(w.viewport)
 		monMode := monitor.GetVideoMode()
-		monWidth := monMode.Width
-		monHeight := monMode.Height
-
-		// get current window dimensions in pixels
+		
+		// get current size of content inside the window
 		winContentSize := w.Content().MinSize()
+		// get current window dimensions in pixels
 		viewWidth, viewHeight := w.viewport.GetSize()
 
 		// take the larger of the window size and the content
@@ -78,8 +77,8 @@ func (w *window) CenterOnScreen() {
 		viewHeight = fyne.Max(winContentSize.Height, viewHeight)
 
 		// math them to the middle
-		newX := (monWidth / 2) - (winContentSize.Width / 2)
-		newY := (monHeight / 2) - (winContentSize.Height / 2)
+		newX := (monMode.Width / 2) - (viewWidth / 2)
+		newY := (monMode.Height / 2) - (viewHeight / 2)
 
 		// set new window coordinates
 		w.viewport.SetPos(newX, newY)
