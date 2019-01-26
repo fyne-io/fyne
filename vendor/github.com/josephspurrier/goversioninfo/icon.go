@@ -3,7 +3,6 @@ package goversioninfo
 import (
 	"bytes"
 	"encoding/binary"
-	"io"
 	"os"
 
 	"github.com/akavel/rsrc/coff"
@@ -81,12 +80,11 @@ func addIcon(coff *coff.Coff, fname string, newID <-chan uint16) error {
 		gid := <-newID
 		for _, icon := range icons {
 			id := <-newID
-			r := io.NewSectionReader(f, int64(icon.ImageOffset), int64(icon.BytesInRes))
-			buffered, err := bufferIcon(r)
+			buff, err := bufferIcon(f, int64(icon.ImageOffset), int(icon.BytesInRes))
 			if err != nil {
 				return err
 			}
-			coff.AddResource(rtIcon, id, buffered)
+			coff.AddResource(rtIcon, id, buff)
 			group.Entries = append(group.Entries, gRPICONDIRENTRY{IconDirEntryCommon: icon.IconDirEntryCommon, ID: id})
 		}
 		coff.AddResource(rtGroupIcon, gid, group)
@@ -95,12 +93,11 @@ func addIcon(coff *coff.Coff, fname string, newID <-chan uint16) error {
 	return nil
 }
 
-func bufferIcon(read *io.SectionReader) (*io.SectionReader, error) {
-	size := read.Size()
+func bufferIcon(f *os.File, offset int64, size int) (coff.Sizer, error) {
 	data := make([]byte, size)
-	_, err := io.ReadFull(read, data)
+	_, err := f.ReadAt(data, offset)
 	if err != nil {
 		return nil, err
 	}
-	return io.NewSectionReader(bytes.NewReader(data), 0, size), nil
+	return bytes.NewReader(data), nil
 }

@@ -74,14 +74,14 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	obj[0].Resize(fyne.NewSize(size.Width, textMin.Height))
 
 	// buttons
-	btnMin := obj[2].MinSize()
+	btnMin := obj[2].MinSize().Union(obj[2].Size())
 	obj[2].Resize(btnMin)
 	obj[2].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), middle+theme.Padding()/2))
 }
 
 func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	textMin := obj[0].MinSize()
-	btnMin := obj[2].MinSize()
+	btnMin := obj[2].MinSize().Union(obj[2].Size())
 
 	return fyne.NewSize(fyne.Max(textMin.Width, btnMin.Width)+64,
 		textMin.Height+btnMin.Height+theme.Padding()+32)

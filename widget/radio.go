@@ -20,8 +20,9 @@ type radioRenderer struct {
 	radio   *Radio
 }
 
-// MinSize calculates the minimum size of a check.
-// This is based on the contained text, the check icon and a standard amount of padding added.
+// MinSize calculates the minimum size of a radio item.
+// This is based on the contained text, the radio icon and a standard amount of padding
+// between each item.
 func (r *radioRenderer) MinSize() fyne.Size {
 	minWidth := 0
 	height := 0
@@ -36,7 +37,7 @@ func (r *radioRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(minWidth, height)
 }
 
-// Layout the components of the check widget
+// Layout the components of the radio widget
 func (r *radioRenderer) Layout(size fyne.Size) {
 	itemHeight := r.radio.itemHeight()
 	y := 0
@@ -165,7 +166,7 @@ func (r *Radio) itemHeight() int {
 	return (r.MinSize().Height / len(r.Options))
 }
 
-// NewRadio creates a new check widget with the set label and change handler
+// NewRadio creates a new radio widget with the set options and change handler
 func NewRadio(options []string, changed func(string)) *Radio {
 	r := &Radio{
 		baseWidget{},
