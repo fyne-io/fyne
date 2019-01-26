@@ -177,7 +177,7 @@ type KeyShortcut int
 
 const (
 	// ShortcutNone represents the key combinations that do not have command associated to
-	ShortcutNone KeyShortcut = 1 << iota
+	ShortcutNone KeyShortcut = iota
 	// ShortcutCopy represents the key combinations used to copy text from the clipboard
 	ShortcutCopy
 	// ShortcutPaste represents the key combinations used to paste text to the clipboard

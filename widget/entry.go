@@ -117,7 +117,6 @@ type Entry struct {
 	CursorRow, CursorColumn int
 
 	focused bool
-	fyne.Window
 }
 
 // Resize sets a new size for a widget.

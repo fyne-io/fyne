@@ -1,6 +1,6 @@
 package fyne
 
-// Clipboard represents a single button in a MouseEvent
+// Clipboard represents the system clipboard
 type Clipboard struct {
 	Window
 }
