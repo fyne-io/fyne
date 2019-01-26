@@ -33,6 +33,8 @@ type window struct {
 	canvas fyne.Canvas
 	icon   fyne.Resource
 
+	clipboard fyne.Clipboard
+
 	master    bool
 	focused   bool
 	fixedSize bool
@@ -160,16 +162,12 @@ func (w *window) ShowAndRun() {
 	runEFL()
 }
 
-//SetClipboardString sets the system clipboard to the specified UTF-8 encoded
-//string.
-func (w *window) SetClipboardString(str string) {
-	log.Println("TODO")
-}
-
-//GetClipboardString returns the contents of the system clipboard, if it
-//contains or is convertible to a UTF-8 encoded string.
-func (w *window) GetClipboardString() (string, error) {
-	return "", nil
+//Clipboard returns the system clipboard
+func (w *window) Clipboard() fyne.Clipboard {
+	if w.clipboard == nil {
+		w.clipboard = &Clipboard{}
+	}
+	return w.clipboard
 }
 
 func (w *window) Content() fyne.CanvasObject {
