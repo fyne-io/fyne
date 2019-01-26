@@ -65,6 +65,9 @@ func (w *window) CenterOnScreen() {
 		// get window dimensions in pixels
 		monitor := getMonitorForWindow(w.viewport)
 		monMode := monitor.GetVideoMode()
+
+		// these come into play when dealing with multiple monitors
+		monX, monY := monitor.GetPos()
 		
 		// get current size of content inside the window
 		winContentSize := w.Content().MinSize()
@@ -77,8 +80,8 @@ func (w *window) CenterOnScreen() {
 		viewHeight = fyne.Max(winContentSize.Height, viewHeight)
 
 		// math them to the middle
-		newX := (monMode.Width / 2) - (viewWidth / 2)
-		newY := (monMode.Height / 2) - (viewHeight / 2)
+		newX := (monMode.Width / 2) - (viewWidth / 2) + monX
+		newY := (monMode.Height / 2) - (viewHeight / 2) + monY
 
 		// set new window coordinates
 		w.viewport.SetPos(newX, newY)
@@ -165,11 +168,21 @@ func scaleForDpi(xdpi int) float32 {
 }
 
 func getMonitorForWindow(win *glfw.Window) *glfw.Monitor {
-	mon := win.GetMonitor()
-	if mon == nil {
-		mon = glfw.GetPrimaryMonitor() // so we have something to return
+	winx, winy := win.GetPos()
+	for _, monitor := range glfw.GetMonitors() {
+		x, y := monitor.GetPos()
+
+		if x > winx || y > winy {
+			continue
+		}
+		if x+monitor.GetVideoMode().Width <= winx || y+monitor.GetVideoMode().Height <= winy {
+			continue
+		}
+
+		return monitor
 	}
-	return mon
+
+	return glfw.GetPrimaryMonitor()
 }
 
 func detectScale(win *glfw.Window) float32 {
