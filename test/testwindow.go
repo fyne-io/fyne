@@ -30,6 +30,10 @@ func (w *testWindow) SetFullScreen(fullScreen bool) {
 	w.fullScreen = fullScreen
 }
 
+func (w *testWindow) CenterOnScreen() {
+	// no-op
+}
+
 func (w *testWindow) Resize(fyne.Size) {
 	// no-op
 }
