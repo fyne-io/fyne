@@ -140,11 +140,21 @@ func scaleForDpi(xdpi int) float32 {
 }
 
 func getMonitorForWindow(win *glfw.Window) *glfw.Monitor {
-	mon := win.GetMonitor()
-	if mon == nil {
-		mon = glfw.GetPrimaryMonitor() // so we have something to return
+	winx, winy := win.GetPos()
+	for _, monitor := range glfw.GetMonitors() {
+		x, y := monitor.GetPos()
+
+		if x > winx || y > winy {
+			continue
+		}
+		if x+monitor.GetVideoMode().Width <= winx || y+monitor.GetVideoMode().Height <= winy {
+			continue
+		}
+
+		return monitor
 	}
-	return mon
+
+	return glfw.GetPrimaryMonitor()
 }
 
 func detectScale(win *glfw.Window) float32 {
