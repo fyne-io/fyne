@@ -171,7 +171,7 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 	}
 
 	points := c.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0)
-	texture := c.newGlTextTexture(text)
+	texture := getTexture(text, c.newGlTextTexture)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
