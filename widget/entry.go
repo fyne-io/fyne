@@ -308,7 +308,13 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		textWidget.insertAt(e.cursorTextPos(), runes)
 		e.CursorColumn += len(runes)
 	default:
-		log.Println("Unhandled key press", key.String)
+		if key.String == "" {
+			log.Println("Unhandled key press", key.String)
+			return
+		}
+		runes := []rune(key.String)
+		textWidget.insertAt(e.cursorTextPos(), runes)
+		e.CursorColumn += len(runes)
 	}
 
 	e.updateText(textWidget.String())
