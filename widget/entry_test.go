@@ -441,3 +441,65 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 	assert.Equal(t, "Hié™שרה", entry.Text)
 	assert.Equal(t, "*******", entry.textWidgetRenderer().texts[0].Text)
 }
+
+func TestEntry_OnPaste(t *testing.T) {
+	clipboard := test.NewClipboard()
+
+	tests := []struct {
+		name             string
+		entry            *Entry
+		clipboardContent string
+		wantText         string
+	}{
+		{
+			name:             "singleline: empty content",
+			entry:            NewEntry(),
+			clipboardContent: "",
+			wantText:         "",
+		},
+		{
+			name:             "singleline: simple text",
+			entry:            NewEntry(),
+			clipboardContent: "clipboard content",
+			wantText:         "clipboard content",
+		},
+		{
+			name:             "singleline: UTF8 text",
+			entry:            NewEntry(),
+			clipboardContent: "Hié™שרה",
+			wantText:         "Hié™שרה",
+		},
+		{
+			name:             "singleline: with new line",
+			entry:            NewEntry(),
+			clipboardContent: "clipboard\ncontent",
+			wantText:         "clipboard content",
+		},
+		{
+			name:             "singleline: with tab",
+			entry:            NewEntry(),
+			clipboardContent: "clipboard\tcontent",
+			wantText:         "clipboard\tcontent",
+		},
+		{
+			name:             "password: with new line",
+			entry:            NewPasswordEntry(),
+			clipboardContent: "3SB=y+)z\nkHGK(hx6 -e_\"1TZu q^bF3^$u H[:e\"1O.",
+			wantText:         `3SB=y+)z kHGK(hx6 -e_"1TZu q^bF3^$u H[:e"1O.`,
+		},
+		{
+			name:             "multiline: with new line",
+			entry:            NewMultiLineEntry(),
+			clipboardContent: "clipboard\ncontent",
+			wantText:         "clipboard\ncontent",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clipboard.SetContent(tt.clipboardContent)
+			tt.entry.OnPaste(clipboard)
+			assert.Equal(t, tt.wantText, tt.entry.Text)
+		})
+	}
+}

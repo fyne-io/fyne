@@ -19,3 +19,15 @@ func TestWindow_SetTitle(t *testing.T) {
 
 	assert.Equal(t, title, w.Title())
 }
+
+func TestWindow_Clipboard(t *testing.T) {
+	d := NewGLDriver()
+	w := d.CreateWindow("Test")
+
+	text := "My content from test window"
+	cb := w.Clipboard()
+	assert.Empty(t, cb.Content())
+
+	cb.SetContent(text)
+	assert.Equal(t, text, cb.Content())
+}
