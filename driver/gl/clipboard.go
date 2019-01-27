@@ -15,7 +15,7 @@ type Clipboard struct {
 func (c *Clipboard) Content() string {
 	content, err := c.window.GetClipboardString()
 	if err != nil {
-		log.Println()
+		log.Printf("unable to get clipboard string: %v", err)
 		return ""
 	}
 	return content
