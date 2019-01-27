@@ -337,15 +337,15 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 		switch ev.Shortcut() {
 		case fyne.ShortcutPaste:
 			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-				clipboardableObject.OnPaste(&fyne.Clipboard{Window: w})
+				clipboardableObject.OnPaste(w.Clipboard())
 			}
 		case fyne.ShortcutCopy:
 			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-				clipboardableObject.OnCopy(&fyne.Clipboard{Window: w})
+				clipboardableObject.OnCopy(w.Clipboard())
 			}
 		case fyne.ShortcutCut:
 			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-				clipboardableObject.OnCut(&fyne.Clipboard{Window: w})
+				clipboardableObject.OnCut(w.Clipboard())
 			}
 		}
 		focusedObject.OnKeyDown(ev)
