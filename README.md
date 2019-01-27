@@ -21,11 +21,11 @@ Fyne is designed to be really easy to code with, here are the steps to your firs
 
 ## Prerequisites
 
-As Fyne uses CGo you will require a C compiler (typically gcc). On Linux the "gcc" package may already be installed, if not your package manager should have it.
-On macOS you should install XCode from the Mac App Store, you will also need to run "xcode-select --install" if you have not used the command line tools before.
-With Windows this can be included by installing TDM-GCC from http://tdm-gcc.tdragon.net/download.
+As Fyne uses CGo you will require a C compiler (typically gcc).
+If you don't have one set up the instructions at [[Compiling]] may help.
 
-By default Fyne uses the [gl golang bindings](https://github.com/go-gl/gl).  Debian/Ubuntu based systems may need to also need to install the `libgl1-mesa-dev` and `xorg-dev` packages.
+By default Fyne uses the [gl golang bindings](https://github.com/go-gl/gl) which means you need a working OpenGL configuration.
+Debian/Ubuntu based systems may need to also need to install the `libgl1-mesa-dev` and `xorg-dev` packages.
 
 Using the standard go tools you can install Fyne's core library using:
 
