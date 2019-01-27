@@ -28,6 +28,8 @@ type window struct {
 
 	mouseX, mouseY float64
 	onClosed       func()
+
+	xpos, ypos int
 }
 
 func (w *window) Title() string {
@@ -46,7 +48,7 @@ func (w *window) FullScreen() bool {
 func (w *window) SetFullScreen(full bool) {
 	runOnMainAsync(func() {
 		w.fullScreen = full
-		monitor := getMonitorForWindow(w.viewport)
+		monitor := w.getMonitorForWindow()
 		mode := monitor.GetVideoMode()
 
 		if full {
@@ -63,21 +65,14 @@ func (w *window) SetFullScreen(full bool) {
 func (w *window) CenterOnScreen() {
 	runOnMainAsync(func() {
 		// get window dimensions in pixels
-		monitor := getMonitorForWindow(w.viewport)
+		monitor := w.getMonitorForWindow()
 		monMode := monitor.GetVideoMode()
 
 		// these come into play when dealing with multiple monitors
 		monX, monY := monitor.GetPos()
 		
-		// get current size of content inside the window
-		winContentSize := w.Content().MinSize()
 		// get current window dimensions in pixels
 		viewWidth, viewHeight := w.viewport.GetSize()
-
-		// take the larger of the window size and the content
-		// if the window is hidden, the content will be larger
-		viewWidth = fyne.Max(winContentSize.Width, viewWidth)
-		viewHeight = fyne.Max(winContentSize.Height, viewHeight)
 
 		// math them to the middle
 		newX := (monMode.Width / 2) - (viewWidth / 2) + monX
@@ -167,25 +162,30 @@ func scaleForDpi(xdpi int) float32 {
 	return float32(1.0)
 }
 
-func getMonitorForWindow(win *glfw.Window) *glfw.Monitor {
-	winx, winy := win.GetPos()
+func (w *window) getMonitorForWindow() *glfw.Monitor {
 	for _, monitor := range glfw.GetMonitors() {
 		x, y := monitor.GetPos()
 
-		if x > winx || y > winy {
+		if x > w.xpos || y > w.ypos {
 			continue
 		}
-		if x+monitor.GetVideoMode().Width <= winx || y+monitor.GetVideoMode().Height <= winy {
+		if x+monitor.GetVideoMode().Width <= w.xpos || y+monitor.GetVideoMode().Height <= w.ypos {
 			continue
 		}
 
 		return monitor
 	}
 
-	return glfw.GetPrimaryMonitor()
+	// try built-in function to detect monitor if above logic didn't succeed
+	// if it doesn't work then return primary monitor as default
+	monitor := w.viewport.GetMonitor()
+	if monitor == nil {
+		monitor = glfw.GetPrimaryMonitor()
+	}
+	return monitor
 }
 
-func detectScale(win *glfw.Window) float32 {
+func (w *window) detectScale() float32 {
 	env := os.Getenv("FYNE_SCALE")
 	if env != "" {
 		scale, err := strconv.ParseFloat(env, 32)
@@ -196,7 +196,7 @@ func detectScale(win *glfw.Window) float32 {
 		}
 	}
 
-	monitor := getMonitorForWindow(win)
+	monitor := w.getMonitorForWindow()
 	widthMm, _ := monitor.GetPhysicalSize()
 	widthPx := monitor.GetVideoMode().Width
 
@@ -242,7 +242,7 @@ func (w *window) resize(size fyne.Size) {
 func (w *window) SetContent(content fyne.CanvasObject) {
 	w.canvas.SetContent(content)
 	min := content.MinSize()
-	w.canvas.SetScale(detectScale(w.viewport))
+	w.canvas.SetScale(w.detectScale())
 
 	if w.Padded() {
 		pad := theme.Padding() * 2
@@ -268,8 +268,10 @@ func (w *window) closed(viewport *glfw.Window) {
 }
 
 func (w *window) moved(viewport *glfw.Window, x, y int) {
+	// save coordinates
+	w.xpos, w.ypos = x, y
 	scale := w.canvas.scale
-	newScale := detectScale(w.viewport)
+	newScale := w.detectScale()
 
 	if scale == newScale {
 		return
