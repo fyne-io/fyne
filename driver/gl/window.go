@@ -70,7 +70,7 @@ func (w *window) CenterOnScreen() {
 
 		// these come into play when dealing with multiple monitors
 		monX, monY := monitor.GetPos()
-		
+
 		// get current window dimensions in pixels
 		viewWidth, viewHeight := w.viewport.GetSize()
 
