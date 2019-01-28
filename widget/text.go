@@ -13,25 +13,32 @@ const (
 	passwordChar = "*"
 )
 
+type textParent interface {
+	textAlign() fyne.TextAlign
+	textStyle() fyne.TextStyle
+	textColor() color.Color
+
+	password() bool
+
+	object() fyne.Widget
+}
+
 // textWidget represents the base element for text based widget.
 type textWidget struct {
 	baseWidget
+	parent textParent
+
 	buffer    []rune
 	rowBounds [][2]int
-	password  bool
-	color     color.Color
-
-	Alignment fyne.TextAlign // The alignment of the Text
-	TextStyle fyne.TextStyle // The style of the label text
 }
 
 // NewText returns a new Text with the given text and default settings.
-func newTextWidget(text string) *textWidget {
-	t := &textWidget{
+func newTextWidget(text string, parent textParent) textWidget {
+	t := textWidget{
 		buffer: []rune(text),
+		parent: parent,
 	}
 	t.updateRowBounds()
-	t.refreshTextRenderer()
 	return t
 }
 
@@ -64,7 +71,14 @@ func (t *textWidget) Hide() {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (t *textWidget) CreateRenderer() fyne.WidgetRenderer {
-	return &textRenderer{textWidget: t}
+	if t.parent == nil {
+		panic("Cannot create a textWidget without a parent")
+	}
+	r := &textRenderer{textWidget: t}
+
+	t.updateRowBounds() // set up the initial text layout etc
+	r.Refresh()
+	return r
 }
 
 // updateRowBounds updates the row bounds used to render properly the text widget.
@@ -98,7 +112,14 @@ func (t *textWidget) updateRowBounds() {
 // t.updateRowBounds()
 // t.refreshTextRenderer()
 func (t *textWidget) refreshTextRenderer() {
-	Renderer(t).(*textRenderer).Refresh()
+	var obj fyne.Widget
+	if t.parent != nil && t.parent.object() != nil {
+		obj = t.parent.object()
+	} else {
+		obj = t
+	}
+
+	Renderer(obj).Refresh()
 }
 
 // SetText sets the text of the widget
@@ -157,10 +178,10 @@ func (t *textWidget) rowLength(row int) int {
 // CharMinSize returns the average char size to use for internal computation
 func (t *textWidget) charMinSize() fyne.Size {
 	defaultChar := "M"
-	if t.password {
+	if t.parent.password() {
 		defaultChar = passwordChar
 	}
-	return textMinSize(defaultChar, theme.TextSize(), t.TextStyle)
+	return textMinSize(defaultChar, theme.TextSize(), t.parent.textStyle())
 }
 
 // Renderer
@@ -208,8 +229,8 @@ func (r *textRenderer) Objects() []fyne.CanvasObject {
 // ApplyTheme is called when the Label may need to update it's look
 func (r *textRenderer) ApplyTheme() {
 	c := theme.TextColor()
-	if r.textWidget.color != nil {
-		c = r.textWidget.color
+	if r.textWidget.parent.textColor() != nil {
+		c = r.textWidget.parent.textColor()
 	}
 	for _, text := range r.texts {
 		text.Color = c
@@ -222,21 +243,25 @@ func (r *textRenderer) Refresh() {
 	for index := 0; index < r.textWidget.rows(); index++ {
 		var line string
 		row := r.textWidget.row(index)
-		if r.textWidget.password {
+		if r.textWidget.parent.password() {
 			line = strings.Repeat(passwordChar, len(row))
 		} else {
 			line = string(row)
 		}
 		textCanvas := canvas.NewText(line, theme.TextColor())
-		textCanvas.Alignment = r.textWidget.Alignment
-		textCanvas.TextStyle = r.textWidget.TextStyle
+		textCanvas.Alignment = r.textWidget.parent.textAlign()
+		textCanvas.TextStyle = r.textWidget.parent.textStyle()
 		r.texts = append(r.texts, textCanvas)
 		r.objects = append(r.objects, textCanvas)
 	}
 
 	r.ApplyTheme()
 	r.Layout(r.textWidget.Size())
-	canvas.Refresh(r.textWidget)
+	if r.textWidget.parent.object() == nil {
+		canvas.Refresh(r.textWidget)
+	} else {
+		canvas.Refresh(r.textWidget.parent.object())
+	}
 }
 
 func (r *textRenderer) BackgroundColor() color.Color {
@@ -253,7 +278,7 @@ func (r *textRenderer) lineSize(col, row int) (size fyne.Size) {
 		col = len(line)
 	}
 	lineCopy := *r.texts[row]
-	if r.textWidget.password {
+	if r.textWidget.parent.password() {
 		lineCopy.Text = strings.Repeat(passwordChar, col)
 	} else {
 		lineCopy.Text = string(line[0:col])

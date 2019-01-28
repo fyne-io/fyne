@@ -5,19 +5,46 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"github.com/stretchr/testify/assert"
 )
 
+func textRenderTexts(p fyne.Widget) []*canvas.Text {
+	return Renderer(p).(*textRenderer).texts
+}
+
+type trailingBoldWhiteText struct {
+	obj fyne.Widget
+}
+
+func (t *trailingBoldWhiteText) textAlign() fyne.TextAlign {
+	return fyne.TextAlignTrailing
+}
+
+func (t *trailingBoldWhiteText) textStyle() fyne.TextStyle {
+	return fyne.TextStyle{Bold: true}
+}
+
+func (t *trailingBoldWhiteText) textColor() color.Color {
+	return color.White
+}
+
+func (t *trailingBoldWhiteText) password() bool {
+	return false
+}
+
+func (t *trailingBoldWhiteText) object() fyne.Widget {
+	return t.obj
+}
+
 func TestText_Alignment(t *testing.T) {
-	text := &textWidget{
-		Alignment: fyne.TextAlignTrailing,
-	}
+	text := &textWidget{parent: &trailingBoldWhiteText{obj: NewLabel("")}}
 	text.SetText("Test")
 	assert.Equal(t, fyne.TextAlignTrailing, Renderer(text).(*textRenderer).texts[0].Alignment)
 }
 
 func TestText_Rows(t *testing.T) {
-	text := textWidget{}
+	text := &textWidget{parent: &trailingBoldWhiteText{}}
 	text.SetText("test")
 	assert.Equal(t, 1, text.rows())
 
@@ -32,7 +59,7 @@ func TestText_Rows(t *testing.T) {
 }
 
 func TestText_RowLength(t *testing.T) {
-	text := textWidget{}
+	text := &textWidget{parent: &trailingBoldWhiteText{}}
 	text.SetText("test")
 
 	rl := text.rowLength(0)
@@ -93,6 +120,7 @@ func TestText_InsertAt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			text := &textWidget{
+				parent: &trailingBoldWhiteText{},
 				buffer: tt.fields.buffer,
 			}
 			text.insertAt(tt.args.pos, tt.args.runes)
@@ -102,7 +130,7 @@ func TestText_InsertAt(t *testing.T) {
 }
 
 func TestText_Insert(t *testing.T) {
-	text := &textWidget{}
+	text := &textWidget{parent: &trailingBoldWhiteText{}}
 	text.insertAt(0, []rune("a"))
 	assert.Equal(t, []rune("a"), text.buffer)
 	text.insertAt(1, []rune("\n"))
@@ -160,6 +188,7 @@ func TestText_DeleteFromTo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			text := &textWidget{
+				parent: &trailingBoldWhiteText{},
 				buffer: tt.fields.buffer,
 			}
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
@@ -170,9 +199,8 @@ func TestText_DeleteFromTo(t *testing.T) {
 }
 
 func TestText_Color(t *testing.T) {
-	text := newTextWidget("test")
-	text.color = color.White
-	renderer := Renderer(text).(*textRenderer)
-	renderer.Refresh()
-	assert.Equal(t, color.White, renderer.texts[0].Color)
+	text := &textWidget{parent: &trailingBoldWhiteText{obj: NewLabel("")}}
+	Renderer(text.parent.object()).Refresh()
+
+	assert.Equal(t, color.White, textRenderTexts(text)[0].Color)
 }

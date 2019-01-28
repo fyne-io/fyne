@@ -84,11 +84,14 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	e.placeholder.Hide()
-	if e.text.len() == 0 {
+	if e.text.len() > 0 {
+		e.placeholder.Hide()
+	} else {
 		e.placeholder.Show()
+		e.placeholder.refreshTextRenderer()
 	}
 
+	e.text.refreshTextRenderer()
 	if e.entry.focused {
 		e.cursor.FillColor = theme.FocusColor()
 	} else {
@@ -154,8 +157,7 @@ func (e *Entry) SetText(text string) {
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
 func (e *Entry) SetPlaceHolder(text string) {
 	e.PlaceHolder = text
-	e.placeholderWidget().SetText(text)
-	Renderer(e).Refresh()
+	e.placeholderWidget().SetText(text) // refreshes
 }
 
 // SetReadOnly sets whether or not the Entry should not be editable
@@ -331,22 +333,65 @@ func (e *Entry) placeholderWidget() *textWidget {
 	return Renderer(e).(*entryRenderer).placeholder
 }
 
-// textWidgetRenderer returns the renderer for the current text widget
-func (e *Entry) textWidgetRenderer() *textRenderer {
-	return Renderer(e.textWidget()).(*textRenderer)
+// textAlign tells the rendering textWidget our alignment
+func (e *Entry) textAlign() fyne.TextAlign {
+	return fyne.TextAlignLeading
+}
+
+// textStyle tells the rendering textWidget our style
+func (e *Entry) textStyle() fyne.TextStyle {
+	return fyne.TextStyle{}
+}
+
+// textColor tells the rendering textWidget our color
+func (e *Entry) textColor() color.Color {
+	return theme.TextColor()
+}
+
+// password tells the rendering textWidget if we are a password field
+func (e *Entry) password() bool {
+	return e.Password
+}
+
+// object returns the root object of the widget so it can be referenced
+func (e *Entry) object() fyne.Widget {
+	return nil
+}
+
+type placeholderParent struct {
+	e *Entry
+}
+
+// textAlign tells the rendering textWidget our alignment
+func (p *placeholderParent) textAlign() fyne.TextAlign {
+	return fyne.TextAlignLeading
+}
+
+// textStyle tells the rendering textWidget our style
+func (p *placeholderParent) textStyle() fyne.TextStyle {
+	return fyne.TextStyle{}
+}
+
+// textColor tells the rendering textWidget our color
+func (p *placeholderParent) textColor() color.Color {
+	return theme.PlaceHolderColor()
+}
+
+// password tells the rendering textWidget if we are a password field
+func (p *placeholderParent) password() bool {
+	return p.e.Password
+}
+
+// object returns the root object of the widget so it can be referenced
+func (p *placeholderParent) object() fyne.Widget {
+	return nil
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
-	text := &textWidget{
-		password: e.Password,
-	}
-	text.SetText(e.Text)
+	text := &textWidget{buffer: []rune(e.Text), parent: e}
+	placeholder := &textWidget{parent: &placeholderParent{e}, buffer: []rune(e.PlaceHolder)}
 
-	placeholder := &textWidget{
-		color: theme.PlaceHolderColor(),
-	}
-	placeholder.SetText(e.PlaceHolder)
 	box := canvas.NewRectangle(theme.BackgroundColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
@@ -358,7 +403,6 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 func NewEntry() *Entry {
 	e := &Entry{}
 
-	Renderer(e).Layout(e.MinSize())
 	Renderer(e).Refresh()
 	return e
 }
@@ -367,7 +411,6 @@ func NewEntry() *Entry {
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
 
-	Renderer(e).Layout(e.MinSize())
 	Renderer(e).Refresh()
 	return e
 }
@@ -376,7 +419,6 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 
-	Renderer(e).Layout(e.MinSize())
 	Renderer(e).Refresh()
 	return e
 }

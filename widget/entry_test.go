@@ -4,11 +4,17 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func entryRenderTexts(e *Entry) []*canvas.Text {
+	textWid := Renderer(e).(*entryRenderer).text
+	return Renderer(textWid).(*textRenderer).texts
+}
 
 func TestEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
@@ -141,8 +147,8 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 	key.String = "o"
 	entry.OnKeyDown(key)
 	assert.Equal(t, "H\noi", entry.textWidget().String())
-	assert.Equal(t, "H", entry.textWidgetRenderer().texts[0].Text)
-	assert.Equal(t, "oi", entry.textWidgetRenderer().texts[1].Text)
+	assert.Equal(t, "H", entryRenderTexts(entry)[0].Text)
+	assert.Equal(t, "oi", entryRenderTexts(entry)[1].Text)
 }
 
 func TestEntry_OnKeyDown_Backspace(t *testing.T) {
@@ -439,5 +445,5 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 	key.String = "Hié™שרה"
 	entry.OnKeyDown(key)
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "*******", entry.textWidgetRenderer().texts[0].Text)
+	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
 }

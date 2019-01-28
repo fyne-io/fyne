@@ -1,7 +1,10 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
 
 // Label widget is a label component with appropriate padding and layout.
@@ -25,27 +28,44 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 		TextStyle: style,
 	}
 
-	Renderer(l).Refresh()
 	return l
 }
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
-	l.textWidget.SetText(text)
-	Renderer(l).Refresh()
+	l.textWidget.SetText(text) // calls refresh
+}
+
+// textAlign tells the rendering textWidget our alignment
+func (l *Label) textAlign() fyne.TextAlign {
+	return l.Alignment
+}
+
+// textStyle tells the rendering textWidget our style
+func (l *Label) textStyle() fyne.TextStyle {
+	return l.TextStyle
+}
+
+// textColor tells the rendering textWidget our color
+func (l *Label) textColor() color.Color {
+	return theme.TextColor()
+}
+
+// password tells the rendering textWidget if we are a password field
+func (l *Label) password() bool {
+	return false
+}
+
+// object returns the root object of the widget so it can be referenced
+func (l *Label) object() fyne.Widget {
+	return l
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
-	l.textWidget = textWidget{
-		Alignment: l.Alignment,
-		TextStyle: l.TextStyle,
-	}
-	l.textWidget.SetText(l.Text)
-	r := l.textWidget.CreateRenderer()
-	r.Refresh()
-	return r
+	l.textWidget = newTextWidget(l.Text, l)
+	return l.textWidget.CreateRenderer()
 }
 
 // Resize sets a new size for a widget.
