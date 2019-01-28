@@ -27,9 +27,10 @@ func TestWindow_Clipboard(t *testing.T) {
 	text := "My content from test window"
 	cb := w.Clipboard()
 
-	if cb.Content() != "" {
-		// Current environment has a "real" value in clipboard,
-		// set to empty string to avoid unwanted error on this edge case
+	cliboardContent := cb.Content()
+	if cliboardContent != "" {
+		// Current environment has some content stored in clipboard,
+		// set temporary to an empty string to allow test and restore later.
 		cb.SetContent("")
 	}
 
@@ -37,4 +38,7 @@ func TestWindow_Clipboard(t *testing.T) {
 
 	cb.SetContent(text)
 	assert.Equal(t, text, cb.Content())
+
+	// Restore cliboardContent, if any
+	cb.SetContent(cliboardContent)
 }

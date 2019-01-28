@@ -171,7 +171,7 @@ func (w *window) ShowAndRun() {
 //Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
 	if w.clipboard == nil {
-		w.clipboard = &Clipboard{}
+		w.clipboard = &clipboard{}
 	}
 	return w.clipboard
 }
@@ -339,23 +339,27 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 
 	if canvas.focused != nil {
 		focusedObject := canvas.focused
+		clipboardableObject, isClipboardable := focusedObject.(fyne.ClipboardableObject)
 
+		// handle shortcut, if none pass event to the focusedObject OnKeyDown callback
 		switch ev.Shortcut() {
 		case fyne.ShortcutPaste:
-			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+			if isClipboardable {
 				clipboardableObject.OnPaste(w.Clipboard())
 			}
 		case fyne.ShortcutCopy:
-			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+			if isClipboardable {
 				clipboardableObject.OnCopy(w.Clipboard())
 			}
 		case fyne.ShortcutCut:
-			if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
+			if isClipboardable {
 				clipboardableObject.OnCut(w.Clipboard())
 			}
+		default:
+			focusedObject.OnKeyDown(ev)
 		}
-		focusedObject.OnKeyDown(ev)
 	}
+	
 	if canvas.onKeyDown != nil {
 		canvas.onKeyDown(ev)
 	}

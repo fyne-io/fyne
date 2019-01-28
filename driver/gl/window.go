@@ -230,7 +230,7 @@ func (w *window) ShowAndRun() {
 //Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
 	if w.clipboard == nil {
-		w.clipboard = &Clipboard{window: w.viewport}
+		w.clipboard = &clipboard{window: w.viewport}
 	}
 	return w.clipboard
 }
@@ -506,36 +506,38 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		ev.Modifiers |= fyne.AltModifier
 	}
 
-	// handle shortcut, if any
-	switch ev.Shortcut() {
-	case fyne.ShortcutPaste:
-		if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-			clipboardableObject.OnPaste(w.Clipboard())
-			return
-		}
-	case fyne.ShortcutCopy:
-		if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-			clipboardableObject.OnCopy(w.Clipboard())
-			return
-		}
-	case fyne.ShortcutCut:
-		if clipboardableObject, ok := focusedObject.(fyne.ClipboardableObject); ok {
-			clipboardableObject.OnCut(w.Clipboard())
-			return
-		}
-	}
-
-	if key <= glfw.KeyWorld1 {
-		// printable characters handled in charModInput
-		return
-	}
-
 	if focusedObject != nil {
-		w.canvas.Focused().OnKeyDown(ev)
+
+		clipboardableObject, isClipboardable := focusedObject.(fyne.ClipboardableObject)
+
+		// handle shortcut
+		switch ev.Shortcut() {
+		case fyne.ShortcutPaste:
+			if isClipboardable {
+				clipboardableObject.OnPaste(w.Clipboard())
+			}
+		case fyne.ShortcutCopy:
+			if isClipboardable {
+				clipboardableObject.OnCopy(w.Clipboard())
+			}
+		case fyne.ShortcutCut:
+			if isClipboardable {
+				clipboardableObject.OnCut(w.Clipboard())
+			}
+		default:
+			// No shortcut detected. Pass the event to the focusedObject
+			// OnKeyDown callback if it is not a printable char
+			if key <= glfw.KeyWorld1 {
+				// printable characters handled in charModInput
+				break
+			}
+
+			go focusedObject.OnKeyDown(ev)
+		}
 	}
 
 	if w.canvas.onKeyDown != nil {
-		w.canvas.onKeyDown(ev)
+		go w.canvas.onKeyDown(ev)
 	}
 }
 
@@ -553,15 +555,12 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	ev := new(fyne.KeyEvent)
 	ev.Name = charToName(char)
 	ev.String = string(char)
-
 	if (mods & glfw.ModShift) != 0 {
 		ev.Modifiers |= fyne.ShiftModifier
 	}
-
 	if (mods & glfw.ModControl) != 0 {
 		ev.Modifiers |= fyne.ControlModifier
 	}
-
 	if (mods & glfw.ModAlt) != 0 {
 		ev.Modifiers |= fyne.AltModifier
 	}

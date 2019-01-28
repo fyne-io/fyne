@@ -4,17 +4,17 @@ import (
 	"log"
 )
 
-// Clipboard represents the system clipboard
-type Clipboard struct {
+// clipboard represents the system clipboard
+type clipboard struct {
 }
 
 // Content returns the clipboard content
-func (c *Clipboard) Content() string {
+func (c *clipboard) Content() string {
 	log.Println("Not implemented")
 	return ""
 }
 
 // SetContent sets the clipboard content
-func (c *Clipboard) SetContent(content string) {
+func (c *clipboard) SetContent(content string) {
 	log.Println("Not implemented")
 }
