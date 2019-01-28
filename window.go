@@ -25,6 +25,10 @@ type Window interface {
 	// size or allow resizing.
 	SetFixedSize(bool)
 
+	// CenterOnScreen places a window at the center of the monitor
+	// the Window object is currently positioned on
+	CenterOnScreen()
+
 	// Padded, normally true, states whether the window should have inner
 	// padding so that components do not touch the window edge.
 	Padded() bool
