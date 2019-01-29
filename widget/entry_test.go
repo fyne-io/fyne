@@ -69,11 +69,7 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 func TestEntry_OnKeyDown(t *testing.T) {
 	entry := NewEntry()
 
-	key := new(fyne.KeyEvent)
-	key.String = "H"
-	entry.OnKeyDown(key)
-	key.String = "i"
-	entry.OnKeyDown(key)
+	test.Type(entry, "Hi")
 
 	assert.Equal(t, "Hi", entry.Text)
 }
@@ -81,17 +77,13 @@ func TestEntry_OnKeyDown(t *testing.T) {
 func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
 	entry := NewEntry()
 
-	key := new(fyne.KeyEvent)
-	key.String = "H"
-	entry.OnKeyDown(key)
+	test.Type(entry, "H")
 	entry.SetReadOnly(true)
-	key.String = "i"
-	entry.OnKeyDown(key)
+	test.Type(entry, "i")
 	assert.Equal(t, "H", entry.Text)
 
 	entry.SetReadOnly(false)
-	key.String = "i"
-	entry.OnKeyDown(key)
+	test.Type(entry, "i")
 	assert.Equal(t, "Hi", entry.Text)
 }
 
@@ -110,18 +102,13 @@ func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
 func TestEntry_OnKeyDown_Insert(t *testing.T) {
 	entry := NewEntry()
 
-	key := new(fyne.KeyEvent)
-	key.String = "H"
-	entry.OnKeyDown(key)
-	key.String = "i"
-	entry.OnKeyDown(key)
+	test.Type(entry, "Hi")
 	assert.Equal(t, "Hi", entry.Text)
 
 	left := &fyne.KeyEvent{Name: fyne.KeyLeft}
 	entry.OnKeyDown(left)
 
-	key.String = "o"
-	entry.OnKeyDown(key)
+	test.Type(entry, "o")
 	assert.Equal(t, "Hoi", entry.Text)
 }
 
@@ -143,9 +130,7 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
 
-	key = new(fyne.KeyEvent)
-	key.String = "o"
-	entry.OnKeyDown(key)
+	test.Type(entry, "o")
 	assert.Equal(t, "H\noi", entry.textProvider().String())
 	assert.Equal(t, "H", entryRenderTexts(entry)[0].Text)
 	assert.Equal(t, "oi", entryRenderTexts(entry)[1].Text)
@@ -199,9 +184,7 @@ func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
 func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
 	entry := NewEntry()
 
-	key := new(fyne.KeyEvent)
-	key.String = "è"
-	entry.OnKeyDown(key)
+	test.Type(entry, "è")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
@@ -441,9 +424,7 @@ func TestPasswordEntry_NewlineIgnored(t *testing.T) {
 func TestPasswordEntry_Obfuscation(t *testing.T) {
 	entry := NewPasswordEntry()
 
-	key := new(fyne.KeyEvent)
-	key.String = "Hié™שרה"
-	entry.OnKeyDown(key)
+	test.Type(entry, "Hié™שרה")
 	assert.Equal(t, "Hié™שרה", entry.Text)
 	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
 }
