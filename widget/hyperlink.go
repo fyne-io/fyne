@@ -33,6 +33,7 @@ func NewHyperlinkWithStyle(text string, sUrl string, alignment fyne.TextAlign, s
 		TextStyle: style,
 	}
 
+	// set promoted field
 	hl.TextType = TextWidgetType_Hyperlink
 
 	Renderer(hl).Refresh()

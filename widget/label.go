@@ -25,6 +25,9 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 		TextStyle: style,
 	}
 
+	// set promoted field
+	l.TextType = TextWidgetType_Label
+
 	Renderer(l).Refresh()
 	return l
 }
@@ -39,6 +42,7 @@ func (l *Label) SetText(text string) {
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.textWidget = textWidget{
+		TextType:  l.TextType,
 		Alignment: l.Alignment,
 		TextStyle: l.TextStyle,
 	}
