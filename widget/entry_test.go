@@ -51,19 +51,19 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	entry := NewEntry()
 
 	assert.Equal(t, 0, len(entry.Text))
-	assert.Equal(t, 0, entry.textWidget().len())
+	assert.Equal(t, 0, entry.textProvider().len())
 
 	entry.SetPlaceHolder("Test")
 	assert.Equal(t, 0, len(entry.Text))
-	assert.Equal(t, 0, entry.textWidget().len())
-	assert.Equal(t, 4, entry.placeholderWidget().len())
-	assert.False(t, entry.placeholderWidget().Hidden)
+	assert.Equal(t, 0, entry.textProvider().len())
+	assert.Equal(t, 4, entry.placeholderProvider().len())
+	assert.False(t, entry.placeholderProvider().Hidden)
 
 	entry.SetText("Hi")
 	assert.Equal(t, 2, len(entry.Text))
-	assert.True(t, entry.placeholderWidget().Hidden)
+	assert.True(t, entry.placeholderProvider().Hidden)
 
-	assert.Equal(t, 2, entry.textWidget().len())
+	assert.Equal(t, 2, entry.textProvider().len())
 }
 
 func TestEntry_OnKeyDown(t *testing.T) {
@@ -146,7 +146,7 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 	key = new(fyne.KeyEvent)
 	key.String = "o"
 	entry.OnKeyDown(key)
-	assert.Equal(t, "H\noi", entry.textWidget().String())
+	assert.Equal(t, "H\noi", entry.textProvider().String())
 	assert.Equal(t, "H", entryRenderTexts(entry)[0].Text)
 	assert.Equal(t, "oi", entryRenderTexts(entry)[1].Text)
 }
