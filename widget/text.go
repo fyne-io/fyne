@@ -11,6 +11,9 @@ import (
 
 const (
 	passwordChar = "*"
+	// for determining what type of text widget this is for theming purposes
+	TextWidgetType_Label     = iota
+	TextWidgetType_Hyperlink = iota
 )
 
 // textWidget represents the base element for text based widget.
@@ -21,6 +24,7 @@ type textWidget struct {
 	password  bool
 	color     color.Color
 
+	TextType  int            // either TextWidgetType_Label or TextWidgetType_Hyperlink
 	Alignment fyne.TextAlign // The alignment of the Text
 	TextStyle fyne.TextStyle // The style of the label text
 }
@@ -207,7 +211,10 @@ func (r *textRenderer) Objects() []fyne.CanvasObject {
 
 // ApplyTheme is called when the Label may need to update it's look
 func (r *textRenderer) ApplyTheme() {
-	c := theme.TextColor()
+	var c color.Color = theme.TextColor()
+	if r.textWidget.TextType == TextWidgetType_Hyperlink {
+		c = theme.HyperlinkColor()
+	}
 	if r.textWidget.color != nil {
 		c = r.textWidget.color
 	}
@@ -219,6 +226,10 @@ func (r *textRenderer) ApplyTheme() {
 func (r *textRenderer) Refresh() {
 	r.texts = []*canvas.Text{}
 	r.objects = []fyne.CanvasObject{}
+	var c color.Color = theme.TextColor()
+	if r.textWidget.TextType == TextWidgetType_Hyperlink {
+		c = theme.HyperlinkColor()
+	}
 	for index := 0; index < r.textWidget.rows(); index++ {
 		var line string
 		row := r.textWidget.row(index)
@@ -227,7 +238,7 @@ func (r *textRenderer) Refresh() {
 		} else {
 			line = string(row)
 		}
-		textCanvas := canvas.NewText(line, theme.TextColor())
+		textCanvas := canvas.NewText(line, c)
 		textCanvas.Alignment = r.textWidget.Alignment
 		textCanvas.TextStyle = r.textWidget.TextStyle
 		r.texts = append(r.texts, textCanvas)

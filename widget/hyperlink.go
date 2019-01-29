@@ -26,15 +26,17 @@ func NewHyperlink(text string, sUrl string) *Hyperlink {
 
 // NewHyperlinkWithStyle creates a new layout widget with the set text content
 func NewHyperlinkWithStyle(text string, sUrl string, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
-	l := &Hyperlink{
+	hl := &Hyperlink{
 		Text:      text,
 		Url:       sUrl,
 		Alignment: alignment,
 		TextStyle: style,
 	}
 
-	Renderer(l).Refresh()
-	return l
+	hl.TextType = TextWidgetType_Hyperlink
+
+	Renderer(hl).Refresh()
+	return hl
 }
 
 // SetText sets the text of the hyperlink
@@ -64,6 +66,7 @@ func (hl *Hyperlink) OnMouseDown(*fyne.MouseEvent) {
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.textWidget = textWidget{
+		TextType:  hl.TextType,
 		Alignment: hl.Alignment,
 		TextStyle: hl.TextStyle,
 	}

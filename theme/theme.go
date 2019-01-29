@@ -15,8 +15,8 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, placeholder, primary           color.Color
-	regular, bold, italic, bolditalic, monospace fyne.Resource
+	button, text, hyperlink, placeholder, primary color.Color
+	regular, bold, italic, bolditalic, monospace  fyne.Resource
 }
 
 var lightBackground = color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
@@ -27,6 +27,7 @@ func LightTheme() fyne.Theme {
 		background:  lightBackground,
 		button:      color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
 		text:        color.RGBA{0x0, 0x0, 0x0, 0xdd},
+		hyperlink:   color.RGBA{0x0, 0x0, 0xff, 0xdd},
 		placeholder: color.RGBA{0x88, 0x88, 0x88, 0xff},
 		primary:     color.RGBA{0x9f, 0xa8, 0xda, 0xff},
 	}
@@ -41,6 +42,7 @@ func DarkTheme() fyne.Theme {
 		background:  color.RGBA{0x42, 0x42, 0x42, 0xff},
 		button:      color.RGBA{0x21, 0x21, 0x21, 0xff},
 		text:        color.RGBA{0xff, 0xff, 0xff, 0xff},
+		hyperlink:   color.RGBA{0x0, 0x0, 0xff, 0xdd},
 		placeholder: color.RGBA{0xb2, 0xb2, 0xb2, 0xff},
 		primary:     color.RGBA{0x1a, 0x23, 0x7e, 0xff},
 	}
@@ -56,6 +58,11 @@ func (t *builtinTheme) BackgroundColor() color.Color {
 // ButtonColor returns the theme's standard button colour
 func (t *builtinTheme) ButtonColor() color.Color {
 	return t.button
+}
+
+// HyperlinkColor returns the theme's standard hyperlink colour
+func (t *builtinTheme) HyperlinkColor() color.Color {
+	return t.hyperlink
 }
 
 // TextColor returns the theme's standard text colour
@@ -171,6 +178,11 @@ func BackgroundColor() color.Color {
 // ButtonColor returns the theme's standard button colour
 func ButtonColor() color.Color {
 	return current().ButtonColor()
+}
+
+// HyperlinkColor returns the theme's standard hyperlink colour
+func HyperlinkColor() color.Color {
+	return current().HyperlinkColor()
 }
 
 // TextColor returns the theme's standard text colour
