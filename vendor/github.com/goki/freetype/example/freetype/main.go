@@ -1,11 +1,11 @@
-// Copyright 2015 The Freetype-Go Authors. All rights reserved.
+// Copyright 2010 The Freetype-Go Authors. All rights reserved.
 // Use of this source code is governed by your choice of either the
 // FreeType License or the GNU General Public License version 2 (or
 // any later version), both of which can be found in the LICENSE file.
 
 // +build example
 //
-// This build tag means that "go install github.com/golang/freetype/..."
+// This build tag means that "go install ..."
 // doesn't install this example program. Use "go run main.go" to run it or "go
 // install -tags=example" to install it.
 
@@ -21,12 +21,10 @@ import (
 	"image/png"
 	"io/ioutil"
 	"log"
-	"math"
 	"os"
 
-	"github.com/golang/freetype/truetype"
+	"github.com/goki/freetype"
 	"golang.org/x/image/font"
-	"golang.org/x/image/math/fixed"
 )
 
 var (
@@ -37,8 +35,6 @@ var (
 	spacing  = flag.Float64("spacing", 1.5, "line spacing (e.g. 2 means double spaced)")
 	wonb     = flag.Bool("whiteonblack", false, "white text on a black background")
 )
-
-const title = "Jabberwocky"
 
 var text = []string{
 	"’Twas brillig, and the slithy toves",
@@ -86,54 +82,50 @@ func main() {
 		log.Println(err)
 		return
 	}
-	f, err := truetype.Parse(fontBytes)
+	f, err := freetype.ParseFont(fontBytes)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	// Draw the background and the guidelines.
+	// Initialize the context.
 	fg, bg := image.Black, image.White
 	ruler := color.RGBA{0xdd, 0xdd, 0xdd, 0xff}
 	if *wonb {
 		fg, bg = image.White, image.Black
 		ruler = color.RGBA{0x22, 0x22, 0x22, 0xff}
 	}
-	const imgW, imgH = 640, 480
-	rgba := image.NewRGBA(image.Rect(0, 0, imgW, imgH))
+	rgba := image.NewRGBA(image.Rect(0, 0, 640, 480))
 	draw.Draw(rgba, rgba.Bounds(), bg, image.ZP, draw.Src)
+	c := freetype.NewContext()
+	c.SetDPI(*dpi)
+	c.SetFont(f)
+	c.SetFontSize(*size)
+	c.SetClip(rgba.Bounds())
+	c.SetDst(rgba)
+	c.SetSrc(fg)
+	switch *hinting {
+	default:
+		c.SetHinting(font.HintingNone)
+	case "full":
+		c.SetHinting(font.HintingFull)
+	}
+
+	// Draw the guidelines.
 	for i := 0; i < 200; i++ {
 		rgba.Set(10, 10+i, ruler)
 		rgba.Set(10+i, 10, ruler)
 	}
 
 	// Draw the text.
-	h := font.HintingNone
-	switch *hinting {
-	case "full":
-		h = font.HintingFull
-	}
-	d := &font.Drawer{
-		Dst: rgba,
-		Src: fg,
-		Face: truetype.NewFace(f, &truetype.Options{
-			Size:    *size,
-			DPI:     *dpi,
-			Hinting: h,
-		}),
-	}
-	y := 10 + int(math.Ceil(*size**dpi/72))
-	dy := int(math.Ceil(*size * *spacing * *dpi / 72))
-	d.Dot = fixed.Point26_6{
-		X: (fixed.I(imgW) - d.MeasureString(title)) / 2,
-		Y: fixed.I(y),
-	}
-	d.DrawString(title)
-	y += dy
+	pt := freetype.Pt(10, 10+int(c.PointToFixed(*size)>>6))
 	for _, s := range text {
-		d.Dot = fixed.P(10, y)
-		d.DrawString(s)
-		y += dy
+		_, err = c.DrawString(s, pt)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		pt.Y += c.PointToFixed(*size * *spacing)
 	}
 
 	// Save that RGBA image to disk.
