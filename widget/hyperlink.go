@@ -3,8 +3,6 @@ package widget
 import (
 	"image/color"
 	"net/url"
-	"os/exec"
-	"runtime"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -20,17 +18,16 @@ type Hyperlink struct {
 	TextStyle fyne.TextStyle // The style of the hyperlink text
 }
 
-// NewHyperlink creates a new layout widget with the set text content
-func NewHyperlink(text string, sUrl string) *Hyperlink {
-	// ignore the error here, we'll continue anyway
-	return NewHyperlinkWithStyle(text, sUrl, fyne.TextAlignLeading, fyne.TextStyle{})
+// NewHyperlink creates a new hyperlink widget with the set text content
+func NewHyperlink(text string, url string) *Hyperlink {
+	return NewHyperlinkWithStyle(text, url, fyne.TextAlignLeading, fyne.TextStyle{})
 }
 
-// NewHyperlinkWithStyle creates a new layout widget with the set text content
-func NewHyperlinkWithStyle(text string, sUrl string, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
+// NewHyperlinkWithStyle creates a new hyperlink widget with the set text content
+func NewHyperlinkWithStyle(text string, url string, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
 	hl := &Hyperlink{
 		Text:      text,
-		Url:       sUrl,
+		Url:       url,
 		Alignment: alignment,
 		TextStyle: style,
 	}
@@ -41,18 +38,17 @@ func NewHyperlinkWithStyle(text string, sUrl string, alignment fyne.TextAlign, s
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
 	hl.Text = text
-	hl.textProvider.SetText(text)
-	Renderer(hl).Refresh()
+	hl.textProvider.SetText(text) // calls refresh
 }
 
 // SetUrl sets the URL of the hyperlink, taking in a string type
-func (hl *Hyperlink) SetUrl(sUrl string) {
-	hl.Url = sUrl
+func (hl *Hyperlink) SetUrl(url string) {
+	hl.Url = url
 }
 
-// SetUrl sets the URL of the hyperlink, taking in a Url type
-func (hl *Hyperlink) SetUrlFromUrl(uUrl *url.URL) {
-	hl.Url = uUrl.String()
+// SetUrl sets the URL of the hyperlink, taking in a URL type
+func (hl *Hyperlink) SetUrlFromUrl(url *url.URL) {
+	hl.Url = url.String()
 }
 
 // textAlign tells the rendering textProvider our alignment
@@ -83,7 +79,7 @@ func (hl *Hyperlink) object() fyne.Widget {
 // OnMouseDown is called when a mouse down event is captured and triggers any change handler
 func (hl *Hyperlink) OnMouseDown(*fyne.MouseEvent) {
 	if hl.Url != "" {
-		open(hl.Url)
+		fyne.CurrentApp().OpenURL(hl.Url)
 	}
 }
 
@@ -118,23 +114,4 @@ func (hl *Hyperlink) Show() {
 // Hide this widget, if it was previously visible
 func (hl *Hyperlink) Hide() {
 	hl.hide(hl)
-}
-
-// taken from https://github.com/icza/gowut/blob/085680a418c9a92dcf2c72d48df2df3cf2a1e88f/gwu/server_start.go#L29
-// open opens the specified URL in the default browser of the user.
-func open(url string) error {
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	return exec.Command(cmd, args...).Start()
 }

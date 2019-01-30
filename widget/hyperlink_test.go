@@ -22,7 +22,7 @@ func TestHyperlink_MinSize(t *testing.T) {
 
 func TestHyperlink_Alignment(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
-	assert.Equal(t, fyne.TextAlignTrailing, Renderer(hyperlink).(*textRenderer).texts[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink)[0].Alignment)
 }
 
 func TestHyperlink_SetText(t *testing.T) {
@@ -47,7 +47,6 @@ func TestHyperlink_SetUrl(t *testing.T) {
 	assert.Equal(t, sUrl, hyperlink.Url)
 	sUrl = "duck.com"
 	uUrl, err := url.Parse(sUrl)
-	assert.Nil(t, err) // should always be nil since we're testing, but good to check in case url changes in the future
 	hyperlink.SetUrlFromUrl(uUrl)
 	assert.Equal(t, sUrl, hyperlink.Url)
 }
