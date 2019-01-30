@@ -84,11 +84,10 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	if e.text.len() > 0 {
-		e.placeholder.Hide()
-	} else {
+	e.placeholder.refreshTextRenderer()
+	e.placeholder.Hide()
+	if e.text.len() == 0 && e.entry.Visible() {
 		e.placeholder.Show()
-		e.placeholder.refreshTextRenderer()
 	}
 
 	e.text.refreshTextRenderer()
@@ -141,6 +140,9 @@ func (e *Entry) MinSize() fyne.Size {
 // Show this widget, if it was previously hidden
 func (e *Entry) Show() {
 	e.show(e)
+	if len(e.Text) != 0 {
+		e.placeholderProvider().Hide()
+	}
 }
 
 // Hide this widget, if it was previously visible
