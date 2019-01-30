@@ -15,7 +15,8 @@
 //
 // To measure a TrueType font in ideal FUnit space, use scale equal to
 // font.FUnitsPerEm().
-package truetype // import "github.com/golang/freetype/truetype"
+
+package truetype
 
 import (
 	"fmt"
@@ -187,6 +188,7 @@ type Font struct {
 	fUnitsPerEm             int32
 	ascent                  int32               // In FUnits.
 	descent                 int32               // In FUnits; typically negative.
+	lineGap                 int32               // In FUnits.
 	bounds                  fixed.Rectangle26_6 // In FUnits.
 	// Values from the maxp section.
 	maxTwilightPoints, maxStorage, maxFunctionDefs, maxStackElements uint16
@@ -294,6 +296,7 @@ func (f *Font) parseHhea() error {
 	}
 	f.ascent = int32(int16(u16(f.hhea, 4)))
 	f.descent = int32(int16(u16(f.hhea, 6)))
+	f.lineGap = int32(int16(u16(f.hhea, 8)))
 	f.nHMetric = int(u16(f.hhea, 34))
 	if 4*f.nHMetric+2*(f.nGlyph-f.nHMetric) != len(f.hmtx) {
 		return FormatError(fmt.Sprintf("bad hmtx length: %d", len(f.hmtx)))
@@ -312,9 +315,10 @@ func (f *Font) parseKern() error {
 	// Since we expect that almost all fonts aim to be Windows-compatible, we only parse the "older" format,
 	// just like the C Freetype implementation.
 	if len(f.kern) == 0 {
-		if f.nKern != 0 {
-			return FormatError("bad kern table length")
-		}
+		// if f.nKern != 0 {
+		// 	return FormatError("bad kern table length")
+		// }
+		f.nKern = 0 // just reset and move on
 		return nil
 	}
 	if len(f.kern) < 18 {
@@ -322,7 +326,9 @@ func (f *Font) parseKern() error {
 	}
 	version, offset := u16(f.kern, 0), 2
 	if version != 0 {
-		return UnsupportedError(fmt.Sprintf("kern version: %d", version))
+		f.nKern = 0
+		return nil
+		// return UnsupportedError(fmt.Sprintf("kern version: %d", version))
 	}
 
 	n, offset := u16(f.kern, offset), offset+2
@@ -346,7 +352,9 @@ func (f *Font) parseKern() error {
 	}
 	f.nKern, offset = int(u16(f.kern, offset)), offset+2
 	if 6*f.nKern != length-14 {
-		return FormatError("bad kern table length")
+		f.nKern = 0
+		return nil
+		// return FormatError("bad kern table length")
 	}
 	return nil
 }

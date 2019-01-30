@@ -6,6 +6,8 @@
 package truetype
 
 import (
+	"fmt"
+
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -175,6 +177,9 @@ func (g *GlyphBuf) load(recursion uint32, i Index, useMyMetrics bool) (err error
 	if recursion >= 32 {
 		return UnsupportedError("excessive compound glyph recursion")
 	}
+	if g.font.loca == nil {
+		return UnsupportedError("no glyph location data")
+	}
 	// Find the relevant slice of g.font.glyf.
 	var g0, g1 uint32
 	if g.font.locaOffsetFormat == locaOffsetFormatShort {
@@ -228,7 +233,11 @@ func (g *GlyphBuf) load(recursion uint32, i Index, useMyMetrics bool) (err error
 		np0, ne0 := len(g.Points), len(g.Ends)
 		program := g.loadSimple(glyf, ne)
 		g.addPhantomsAndScale(np0, np0, true, true)
-		pp1x = g.Points[len(g.Points)-4].X
+		idx := len(g.Points) - 4
+		if idx < 0 {
+			return fmt.Errorf("points out of range error")
+		}
+		pp1x = g.Points[idx].X
 		if g.hinting != font.HintingNone {
 			if len(program) != 0 {
 				err := g.hinter.run(
