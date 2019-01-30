@@ -109,6 +109,10 @@ func (dummyTheme) ButtonColor() color.Color {
 	return color.Black
 }
 
+func (dummyTheme) HyperlinkColor() color.Color {
+	return color.Black
+}
+
 func (dummyTheme) TextColor() color.Color {
 	return color.Black
 }
