@@ -79,6 +79,8 @@ func main() {
 
 		widget.NewHBox(layout.NewSpacer(), cv, layout.NewSpacer()),
 
+		widget.NewHyperlinkWithStyle("fyne.io", "https://fyne.io/", fyne.TextAlignCenter, fyne.TextStyle{}),
+
 		widget.NewGroup("Dialogs",
 			widget.NewButton("Info", func() {
 				dialog.ShowInformation("Information", "You should know this thing...", w)
