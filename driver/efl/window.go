@@ -80,7 +80,11 @@ func (w *window) SetFullScreen(full bool) {
 
 func (w *window) CenterOnScreen() {
 	runOnMain(func() {
-		// TODO
+		var screenW, screenH, winW, winH C.int
+		C.ecore_evas_screen_geometry_get(w.ee, nil, nil, &screenW, &screenH)
+		C.ecore_evas_geometry_get(w.ee, nil, nil, &winW, &winH)
+
+		C.ecore_evas_move(w.ee, screenW/2-winW/2, screenH/2-winH/2)
 	})
 }
 
