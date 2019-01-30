@@ -89,7 +89,7 @@ func (w *window) CenterOnScreen() {
 		newY := (monMode.Height / 2) - (viewHeight / 2) + monY
 
 		// set new window coordinates
-		w.moveToPosition(fyne.NewPos(newX, newY))
+		w.viewport.SetPos(newX, newY)
 	})
 }
 
