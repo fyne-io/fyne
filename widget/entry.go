@@ -228,11 +228,11 @@ func (e *Entry) OnPaste(clipboard fyne.Clipboard) {
 		// format clipboard content to be compatible with single line entry
 		text = strings.Replace(text, "\n", " ", -1)
 	}
-	textWidget := e.textWidget()
+	provider := e.textProvider()
 	runes := []rune(text)
-	textWidget.insertAt(e.cursorTextPos(), runes)
+	provider.insertAt(e.cursorTextPos(), runes)
 	e.CursorColumn += len(runes)
-	e.updateText(textWidget.String())
+	e.updateText(provider.String())
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
