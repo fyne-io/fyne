@@ -26,15 +26,12 @@ func TestHyperlink_Alignment(t *testing.T) {
 }
 
 func TestHyperlink_SetText(t *testing.T) {
-	var text string = "dummy text"
+	hyperlink := &Hyperlink{Text: "Test", Url: "TestUrl"}
+	Renderer(hyperlink).Refresh()
+	hyperlink.SetText("New")
 
-	// test constructor
-	hyperlink := NewHyperlink(text, "")
-	assert.Equal(t, text, hyperlink.Text)
-
-	text = "new dummy text!!"
-	hyperlink.SetText(text)
-	assert.Equal(t, text, hyperlink.Text)
+	assert.Equal(t, "New", hyperlink.Text)
+	assert.Equal(t, "New", textRenderTexts(hyperlink)[0].Text)
 }
 
 func TestHyperlink_SetUrl(t *testing.T) {
