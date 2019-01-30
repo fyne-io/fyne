@@ -9,7 +9,7 @@ import (
 	"image"
 	"math"
 
-	"github.com/golang/freetype/raster"
+	"github.com/goki/freetype/raster"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -66,6 +66,11 @@ type Options struct {
 	//
 	// A zero value means to use 1 sub-pixel location.
 	SubPixelsY int
+
+	// Stroke is the number of pixels that the font glyphs are being stroked.
+	//
+	// A zero values means no stroke.
+	Stroke int
 }
 
 func (o *Options) size() float64 {
@@ -182,6 +187,7 @@ func NewFace(f *Font, opts *Options) font.Face {
 		hinting:    opts.hinting(),
 		scale:      fixed.Int26_6(0.5 + (opts.size() * opts.dpi() * 64 / 72)),
 		glyphCache: make([]glyphCacheEntry, opts.glyphCacheEntries()),
+		stroke:     fixed.I(opts.Stroke * 2),
 	}
 	a.subPixelX, a.subPixelBiasX, a.subPixelMaskX = opts.subPixelsX()
 	a.subPixelY, a.subPixelBiasY, a.subPixelMaskY = opts.subPixelsY()
@@ -207,6 +213,10 @@ func NewFace(f *Font, opts *Options) font.Face {
 	a.r.SetBounds(a.maxw, a.maxh)
 	a.p = facePainter{a}
 
+	if a.stroke != 0 {
+		a.r.UseNonZeroWinding = true
+	}
+
 	return a
 }
 
@@ -220,6 +230,7 @@ type face struct {
 	subPixelY     uint32
 	subPixelBiasY fixed.Int26_6
 	subPixelMaskY fixed.Int26_6
+	stroke        fixed.Int26_6
 	masks         *image.Alpha
 	glyphCache    []glyphCacheEntry
 	r             raster.Rasterizer
@@ -229,6 +240,7 @@ type face struct {
 	maxh          int
 	glyphBuf      GlyphBuf
 	indexCache    [indexCacheLen]indexCacheEntry
+	advanceCache  map[rune]fixed.Int26_6
 
 	// TODO: clip rectangle?
 }
@@ -255,9 +267,12 @@ func (a *face) Metrics() font.Metrics {
 	scale := float64(a.scale)
 	fupe := float64(a.f.FUnitsPerEm())
 	return font.Metrics{
-		Height:  a.scale,
+		Height:  fixed.Int26_6(math.Ceil(scale * float64(a.f.ascent-a.f.descent+a.f.lineGap) / fupe)),
 		Ascent:  fixed.Int26_6(math.Ceil(scale * float64(+a.f.ascent) / fupe)),
 		Descent: fixed.Int26_6(math.Ceil(scale * float64(-a.f.descent) / fupe)),
+		// TODO: Metrics should include LineGap as a separate measure
+		// TODO: Would also be great to include Ex as in the height of an "x" --
+		// used widely for layout
 	}
 }
 
@@ -329,6 +344,10 @@ func (a *face) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.In
 	if xmin > xmax || ymin > ymax {
 		return fixed.Rectangle26_6{}, 0, false
 	}
+	xmin -= a.stroke
+	ymin -= a.stroke
+	xmax += a.stroke
+	ymax += a.stroke
 	return fixed.Rectangle26_6{
 		Min: fixed.Point26_6{
 			X: xmin,
@@ -342,9 +361,17 @@ func (a *face) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.In
 }
 
 func (a *face) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
+	if a.advanceCache == nil {
+		a.advanceCache = make(map[rune]fixed.Int26_6, 1024)
+	}
+	advance, ok = a.advanceCache[r]
+	if ok {
+		return
+	}
 	if err := a.glyphBuf.Load(a.f, a.scale, a.index(r), a.hinting); err != nil {
 		return 0, false
 	}
+	a.advanceCache[r] = a.glyphBuf.AdvanceWidth
 	return a.glyphBuf.AdvanceWidth, true
 }
 
@@ -364,6 +391,10 @@ func (a *face) rasterize(index Index, fx, fy fixed.Int26_6) (v glyphCacheVal, ok
 	if xmin > xmax || ymin > ymax {
 		return glyphCacheVal{}, false
 	}
+	xmin -= int(a.stroke) >> 6
+	ymin -= int(a.stroke) >> 6
+	xmax += int(a.stroke) >> 6
+	ymax += int(a.stroke) >> 6
 	// A TrueType's glyph's nodes can have negative co-ordinates, but the
 	// rasterizer clips anything left of x=0 or above y=0. xmin and ymin are
 	// the pixel offsets, based on the font's FUnit metrics, that let a
@@ -434,7 +465,8 @@ func (a *face) drawContour(ps []Point, dx, dy fixed.Int26_6) {
 			others = ps
 		}
 	}
-	a.r.Start(start)
+	path := raster.Path{}
+	path.Start(start)
 	q0, on0 := start, true
 	for _, p := range others {
 		q := fixed.Point26_6{
@@ -444,9 +476,9 @@ func (a *face) drawContour(ps []Point, dx, dy fixed.Int26_6) {
 		on := p.Flags&0x01 != 0
 		if on {
 			if on0 {
-				a.r.Add1(q)
+				path.Add1(q)
 			} else {
-				a.r.Add2(q0, q)
+				path.Add2(q0, q)
 			}
 		} else {
 			if on0 {
@@ -456,16 +488,22 @@ func (a *face) drawContour(ps []Point, dx, dy fixed.Int26_6) {
 					X: (q0.X + q.X) / 2,
 					Y: (q0.Y + q.Y) / 2,
 				}
-				a.r.Add2(q0, mid)
+				path.Add2(q0, mid)
 			}
 		}
 		q0, on0 = q, on
 	}
 	// Close the curve.
 	if on0 {
-		a.r.Add1(start)
+		path.Add1(start)
 	} else {
-		a.r.Add2(q0, start)
+		path.Add2(q0, start)
+	}
+
+	if a.stroke == 0 {
+		a.r.AddPath(path)
+	} else {
+		a.r.AddStroke(path, a.stroke, raster.ButtCapper, raster.RoundJoiner)
 	}
 }
 

@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
-	"github.com/golang/freetype/truetype"
+	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 )
 

@@ -438,12 +438,20 @@ func (k *stroker) stroke(q Path) {
 	if len(k.r) == 0 {
 		return
 	}
-	// TODO(nigeltao): if q is a closed curve then we should join the first and
-	// last segments instead of capping them.
-	k.cr.Cap(k.p, k.u, q.lastPoint(), pNeg(k.anorm))
+
+	closed := q.firstPoint() == q.lastPoint()
+	if !closed {
+		k.cr.Cap(k.p, k.u, q.lastPoint(), pNeg(k.anorm))
+	} else {
+		pivot := q.firstPoint()
+		k.jr.Join(k.p, &k.r, k.u, pivot, k.anorm, pivot.Sub(fixed.Point26_6{k.r[1], k.r[2]}))
+		k.p.Start(fixed.Point26_6{k.r[len(k.r)-3], k.r[len(k.r)-2]}) // reverse path is now separate
+	}
 	addPathReversed(k.p, k.r)
-	pivot := q.firstPoint()
-	k.cr.Cap(k.p, k.u, pivot, pivot.Sub(fixed.Point26_6{k.r[1], k.r[2]}))
+	if !closed {
+		pivot := q.firstPoint()
+		k.cr.Cap(k.p, k.u, pivot, pivot.Sub(fixed.Point26_6{k.r[1], k.r[2]}))
+	}
 }
 
 // Stroke adds q stroked with the given width to p. The result is typically

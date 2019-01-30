@@ -1,17 +1,19 @@
 package widget
 
 import (
+	"image/color"
 	"net/url"
 	"os/exec"
 	"runtime"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
 
 // Hyperlink widget is a text component with appropriate padding and layout.
 // When clicked, the default web browser should open with a URL
 type Hyperlink struct {
-	textWidget
+	textProvider
 	Text      string
 	Url       string
 	Alignment fyne.TextAlign // The alignment of the Text
@@ -33,17 +35,13 @@ func NewHyperlinkWithStyle(text string, sUrl string, alignment fyne.TextAlign, s
 		TextStyle: style,
 	}
 
-	// set promoted field
-	hl.TextType = TextWidgetType_Hyperlink
-
-	Renderer(hl).Refresh()
 	return hl
 }
 
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
 	hl.Text = text
-	hl.textWidget.SetText(text)
+	hl.textProvider.SetText(text)
 	Renderer(hl).Refresh()
 }
 
@@ -57,6 +55,31 @@ func (hl *Hyperlink) SetUrlFromUrl(uUrl *url.URL) {
 	hl.Url = uUrl.String()
 }
 
+// textAlign tells the rendering textProvider our alignment
+func (hl *Hyperlink) textAlign() fyne.TextAlign {
+	return hl.Alignment
+}
+
+// textStyle tells the rendering textProvider our style
+func (hl *Hyperlink) textStyle() fyne.TextStyle {
+	return hl.TextStyle
+}
+
+// textColor tells the rendering textProvider our color
+func (hl *Hyperlink) textColor() color.Color {
+	return theme.HyperlinkColor()
+}
+
+// password tells the rendering textProvider if we are a password field
+func (hl *Hyperlink) password() bool {
+	return false
+}
+
+// object returns the root object of the widget so it can be referenced
+func (hl *Hyperlink) object() fyne.Widget {
+	return hl
+}
+
 // OnMouseDown is called when a mouse down event is captured and triggers any change handler
 func (hl *Hyperlink) OnMouseDown(*fyne.MouseEvent) {
 	if hl.Url != "" {
@@ -66,15 +89,8 @@ func (hl *Hyperlink) OnMouseDown(*fyne.MouseEvent) {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
-	hl.textWidget = textWidget{
-		TextType:  hl.TextType,
-		Alignment: hl.Alignment,
-		TextStyle: hl.TextStyle,
-	}
-	hl.textWidget.SetText(hl.Text)
-	r := hl.textWidget.CreateRenderer()
-	r.Refresh()
-	return r
+	hl.textProvider = newTextProvider(hl.Text, hl)
+	return hl.textProvider.CreateRenderer()
 }
 
 // Resize sets a new size for a widget.

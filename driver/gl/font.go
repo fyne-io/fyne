@@ -5,7 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
-	"github.com/golang/freetype/truetype"
+	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
