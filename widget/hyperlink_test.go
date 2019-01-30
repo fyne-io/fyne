@@ -47,6 +47,7 @@ func TestHyperlink_SetUrl(t *testing.T) {
 	assert.Equal(t, sUrl, hyperlink.Url)
 	sUrl = "duck.com"
 	uUrl, err := url.Parse(sUrl)
+	assert.Nil(t, err)
 	hyperlink.SetUrlFromUrl(uUrl)
 	assert.Equal(t, sUrl, hyperlink.Url)
 }
