@@ -18,9 +18,39 @@ func TestLabel_MinSize(t *testing.T) {
 	label.SetText("Longer")
 	assert.True(t, label.MinSize().Width > min.Width)
 }
+
+func TestLabel_Text(t *testing.T) {
+	label := &Label{Text: "Test"}
+	Renderer(label).Refresh()
+
+	assert.Equal(t, "Test", label.Text)
+	assert.Equal(t, "Test", textRenderTexts(label)[0].Text)
+}
+
+func TestLabel_SetText(t *testing.T) {
+	label := &Label{Text: "Test"}
+	Renderer(label).Refresh()
+	label.SetText("New")
+
+	assert.Equal(t, "New", label.Text)
+	assert.Equal(t, "New", textRenderTexts(label)[0].Text)
+}
+
 func TestLabel_Alignment(t *testing.T) {
 	label := &Label{Text: "Test", Alignment: fyne.TextAlignTrailing}
-	assert.Equal(t, fyne.TextAlignTrailing, Renderer(label).(*textRenderer).texts[0].Alignment)
+	Renderer(label).Refresh()
+
+	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(label)[0].Alignment)
+}
+
+func TestLabel_Alignment_Later(t *testing.T) {
+	label := &Label{Text: "Test"}
+	Renderer(label).Refresh()
+	assert.Equal(t, fyne.TextAlignLeading, textRenderTexts(label)[0].Alignment)
+
+	label.Alignment = fyne.TextAlignTrailing
+	Renderer(label).Refresh()
+	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(label)[0].Alignment)
 }
 
 func TestText_MinSize_MultiLine(t *testing.T) {

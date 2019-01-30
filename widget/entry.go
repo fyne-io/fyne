@@ -14,8 +14,8 @@ const (
 )
 
 type entryRenderer struct {
-	text        *textWidget
-	placeholder *textWidget
+	text        *textProvider
+	placeholder *textProvider
 	box, cursor *canvas.Rectangle
 
 	objects []fyne.CanvasObject
@@ -84,11 +84,14 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	e.placeholder.Hide()
-	if e.text.len() == 0 {
+	if e.text.len() > 0 {
+		e.placeholder.Hide()
+	} else {
 		e.placeholder.Show()
+		e.placeholder.refreshTextRenderer()
 	}
 
+	e.text.refreshTextRenderer()
 	if e.entry.focused {
 		e.cursor.FillColor = theme.FocusColor()
 	} else {
@@ -147,15 +150,14 @@ func (e *Entry) Hide() {
 
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
-	e.textWidget().SetText(text)
+	e.textProvider().SetText(text)
 	e.updateText(text)
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
 func (e *Entry) SetPlaceHolder(text string) {
 	e.PlaceHolder = text
-	e.placeholderWidget().SetText(text)
-	Renderer(e).Refresh()
+	e.placeholderProvider().SetText(text) // refreshes
 }
 
 // SetReadOnly sets whether or not the Entry should not be editable
@@ -177,9 +179,9 @@ func (e *Entry) updateText(text string) {
 
 func (e *Entry) cursorTextPos() int {
 	pos := 0
-	textWidget := e.textWidget()
+	provider := e.textProvider()
 	for i := 0; i < e.CursorRow; i++ {
-		rowLength := textWidget.rowLength(i)
+		rowLength := provider.rowLength(i)
 		pos += rowLength + 1
 	}
 	pos += e.CursorColumn
@@ -213,17 +215,17 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	if e.ReadOnly {
 		return
 	}
-	textWidget := e.textWidget()
+	provider := e.textProvider()
 	switch key.Name {
 	case fyne.KeyBackspace:
-		if textWidget.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
+		if provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
 			return
 		}
 		pos := e.cursorTextPos()
-		deleted := textWidget.deleteFromTo(pos-1, pos)
+		deleted := provider.deleteFromTo(pos-1, pos)
 		if deleted[0] == '\n' {
 			e.CursorRow--
-			rowLength := textWidget.rowLength(e.CursorRow)
+			rowLength := provider.rowLength(e.CursorRow)
 			e.CursorColumn = rowLength
 			break
 		}
@@ -231,16 +233,16 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 	case fyne.KeyDelete:
 
 		pos := e.cursorTextPos()
-		if textWidget.len() == 0 || pos == textWidget.len() {
+		if provider.len() == 0 || pos == provider.len() {
 			return
 		}
 
-		textWidget.deleteFromTo(pos, pos+1)
+		provider.deleteFromTo(pos, pos+1)
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if !e.MultiLine {
 			return
 		}
-		textWidget.insertAt(e.cursorTextPos(), []rune("\n"))
+		provider.insertAt(e.cursorTextPos(), []rune("\n"))
 		e.CursorColumn = 0
 		e.CursorRow++
 	case fyne.KeyUp:
@@ -252,7 +254,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			e.CursorRow--
 		}
 
-		rowLength := textWidget.rowLength(e.CursorRow)
+		rowLength := provider.rowLength(e.CursorRow)
 		if e.CursorColumn > rowLength {
 			e.CursorColumn = rowLength
 		}
@@ -261,11 +263,11 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			return
 		}
 
-		if e.CursorRow < textWidget.rows()-1 {
+		if e.CursorRow < provider.rows()-1 {
 			e.CursorRow++
 		}
 
-		rowLength := textWidget.rowLength(e.CursorRow)
+		rowLength := provider.rowLength(e.CursorRow)
 		if e.CursorColumn > rowLength {
 			e.CursorColumn = rowLength
 		}
@@ -277,27 +279,27 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 
 		if e.MultiLine && e.CursorRow > 0 {
 			e.CursorRow--
-			rowLength := textWidget.rowLength(e.CursorRow)
+			rowLength := provider.rowLength(e.CursorRow)
 			e.CursorColumn = rowLength
 		}
 	case fyne.KeyRight:
 		if e.MultiLine {
-			rowLength := textWidget.rowLength(e.CursorRow)
+			rowLength := provider.rowLength(e.CursorRow)
 			if e.CursorColumn < rowLength {
 				e.CursorColumn++
 				break
 			}
-			if e.CursorRow < textWidget.rows()-1 {
+			if e.CursorRow < provider.rows()-1 {
 				e.CursorRow++
 				e.CursorColumn = 0
 			}
 			break
 		}
-		if e.CursorColumn < textWidget.len() {
+		if e.CursorColumn < provider.len() {
 			e.CursorColumn++
 		}
 	case fyne.KeyEnd:
-		e.CursorColumn = textWidget.len()
+		e.CursorColumn = provider.len()
 	case fyne.KeyHome:
 		e.CursorColumn = 0
 	case fyne.KeyUnnamed, fyne.KeySpace:
@@ -305,7 +307,7 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			return
 		}
 		runes := []rune(key.String)
-		textWidget.insertAt(e.cursorTextPos(), runes)
+		provider.insertAt(e.cursorTextPos(), runes)
 		e.CursorColumn += len(runes)
 	default:
 		if key.String == "" {
@@ -313,40 +315,83 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 			return
 		}
 		runes := []rune(key.String)
-		textWidget.insertAt(e.cursorTextPos(), runes)
+		provider.insertAt(e.cursorTextPos(), runes)
 		e.CursorColumn += len(runes)
 	}
 
-	e.updateText(textWidget.String())
+	e.updateText(provider.String())
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
-// textWidget returns the current text widget
-func (e *Entry) textWidget() *textWidget {
+// textProvider returns the text handler for this entry
+func (e *Entry) textProvider() *textProvider {
 	return Renderer(e).(*entryRenderer).text
 }
 
-// placeholderWidget returns the current placeholder widget
-func (e *Entry) placeholderWidget() *textWidget {
+// placeholderProvider returns the placeholder text handler for this entry
+func (e *Entry) placeholderProvider() *textProvider {
 	return Renderer(e).(*entryRenderer).placeholder
 }
 
-// textWidgetRenderer returns the renderer for the current text widget
-func (e *Entry) textWidgetRenderer() *textRenderer {
-	return Renderer(e.textWidget()).(*textRenderer)
+// textAlign tells the rendering textProvider our alignment
+func (e *Entry) textAlign() fyne.TextAlign {
+	return fyne.TextAlignLeading
+}
+
+// textStyle tells the rendering textProvider our style
+func (e *Entry) textStyle() fyne.TextStyle {
+	return fyne.TextStyle{}
+}
+
+// textColor tells the rendering textProvider our color
+func (e *Entry) textColor() color.Color {
+	return theme.TextColor()
+}
+
+// password tells the rendering textProvider if we are a password field
+func (e *Entry) password() bool {
+	return e.Password
+}
+
+// object returns the root object of the widget so it can be referenced
+func (e *Entry) object() fyne.Widget {
+	return nil
+}
+
+type placeholderPresenter struct {
+	e *Entry
+}
+
+// textAlign tells the rendering textProvider our alignment
+func (p *placeholderPresenter) textAlign() fyne.TextAlign {
+	return fyne.TextAlignLeading
+}
+
+// textStyle tells the rendering textProvider our style
+func (p *placeholderPresenter) textStyle() fyne.TextStyle {
+	return fyne.TextStyle{}
+}
+
+// textColor tells the rendering textProvider our color
+func (p *placeholderPresenter) textColor() color.Color {
+	return theme.PlaceHolderColor()
+}
+
+// password tells the rendering textProvider if we are a password field
+func (p *placeholderPresenter) password() bool {
+	return p.e.Password
+}
+
+// object returns the root object of the widget so it can be referenced
+func (p *placeholderPresenter) object() fyne.Widget {
+	return nil
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
-	text := &textWidget{
-		password: e.Password,
-	}
-	text.SetText(e.Text)
+	text := &textProvider{buffer: []rune(e.Text), presenter: e}
+	placeholder := &textProvider{presenter: &placeholderPresenter{e}, buffer: []rune(e.PlaceHolder)}
 
-	placeholder := &textWidget{
-		color: theme.PlaceHolderColor(),
-	}
-	placeholder.SetText(e.PlaceHolder)
 	box := canvas.NewRectangle(theme.BackgroundColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
@@ -358,7 +403,6 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 func NewEntry() *Entry {
 	e := &Entry{}
 
-	Renderer(e).Layout(e.MinSize())
 	Renderer(e).Refresh()
 	return e
 }
@@ -367,7 +411,6 @@ func NewEntry() *Entry {
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
 
-	Renderer(e).Layout(e.MinSize())
 	Renderer(e).Refresh()
 	return e
 }
@@ -376,7 +419,6 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 
-	Renderer(e).Layout(e.MinSize())
 	Renderer(e).Refresh()
 	return e
 }
