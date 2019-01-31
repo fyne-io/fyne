@@ -2,8 +2,11 @@
 
 package app
 
-import "os/exec"
+import (
+	"os/exec"
+	"net/url"
+)
 
-func (app *fyneApp) OpenURL(url string) {
-	exec.Command("open", url).Run()
+func (app *fyneApp) OpenURL(url *url.URL) {
+	exec.Command("open", url.String()).Run()
 }

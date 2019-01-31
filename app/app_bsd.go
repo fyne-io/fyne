@@ -4,8 +4,11 @@
 
 package app
 
-import "os/exec"
+import (
+	"os/exec"
+	"net/url"
+)
 
-func (app *fyneApp) OpenURL(url string) {
-	exec.Command("xdg-open", url).Run()
+func (app *fyneApp) OpenURL(url *url.URL) {
+	exec.Command("xdg-open", url.String()).Run()
 }
