@@ -32,7 +32,7 @@ func TestWindow_PixelSize(t *testing.T) {
 	w.Canvas().Refresh(w.Content())
 
 	scale := w.Canvas().Scale()
-	winW, winH := w.(*window).pixelSize()
+	winW, winH := w.(*window).sizeOnScreen()
 	assert.Equal(t, int(100*scale), winW)
 	assert.Equal(t, int(100*scale), winH)
 }
