@@ -3,6 +3,7 @@ package test // import "fyne.io/fyne/test"
 
 import (
 	"image/color"
+	"net/url"
 
 	"fyne.io/fyne"
 )
@@ -29,7 +30,7 @@ func (a *testApp) NewWindow(title string) fyne.Window {
 	return NewWindow(nil)
 }
 
-func (a *testApp) OpenURL(url string) {
+func (a *testApp) OpenURL(url *url.URL) {
 	// no-op
 }
 
