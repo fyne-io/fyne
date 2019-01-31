@@ -63,6 +63,8 @@ func (w *window) SetFullScreen(full bool) {
 }
 
 func (w *window) CenterOnScreen() {
+	viewWidth, viewHeight := w.pixelSize()
+
 	runOnMainAsync(func() {
 		// get window dimensions in pixels
 		monitor := w.getMonitorForWindow()
@@ -71,19 +73,6 @@ func (w *window) CenterOnScreen() {
 		// these come into play when dealing with multiple monitors
 		monX, monY := monitor.GetPos()
 
-		// get current size of content inside the window
-		winContentSize := w.Content().MinSize()
-		// content size can be scaled, so factor that in to determining window size
-		scale := w.canvas.Scale()
-		// get current window dimensions in pixels
-		viewWidth, viewHeight := w.viewport.GetSize()
-
-		// take the larger of the window size and the content
-		// if the window is hidden, the content will be larger
-		// if the window is visible, then it will be at least as large as the scaled content
-		viewWidth = fyne.Max(int(float32(winContentSize.Width)*scale), viewWidth)
-		viewHeight = fyne.Max(int(float32(winContentSize.Height)*scale), viewHeight)
-
 		// math them to the middle
 		newX := (monMode.Width / 2) - (viewWidth / 2) + monX
 		newY := (monMode.Height / 2) - (viewHeight / 2) + monY
@@ -91,6 +80,28 @@ func (w *window) CenterOnScreen() {
 		// set new window coordinates
 		w.viewport.SetPos(newX, newY)
 	})
+}
+
+func (w *window) pixelSize() (int, int) {
+	var viewWidth, viewHeight int
+
+	// get current size of content inside the window
+	winContentSize := w.Content().MinSize()
+	// content size can be scaled, so factor that in to determining window size
+	scale := w.canvas.Scale()
+
+	runOnMain(func() {
+		// get current window dimensions in pixels
+		viewWidth, viewHeight = w.viewport.GetSize()
+	})
+
+	// take the larger of the window size and the content
+	// if the window is hidden, the content will be larger
+	// if the window is visible, then it will be at least as large as the scaled content
+	viewWidth = fyne.Max(int(float32(winContentSize.Width)*scale), viewWidth)
+	viewHeight = fyne.Max(int(float32(winContentSize.Height)*scale), viewHeight)
+
+	return viewWidth, viewHeight
 }
 
 func (w *window) Resize(size fyne.Size) {
@@ -258,7 +269,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 		pad := theme.Padding() * 2
 		min = fyne.NewSize(min.Width+pad, min.Height+pad)
 	}
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		w.fitContent()
 		w.resize(min)
 	})
