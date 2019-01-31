@@ -65,7 +65,7 @@ func (w *window) SetFullScreen(full bool) {
 func (w *window) CenterOnScreen() {
 	viewWidth, viewHeight := w.pixelSize()
 
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		// get window dimensions in pixels
 		monitor := w.getMonitorForWindow()
 		monMode := monitor.GetVideoMode()
