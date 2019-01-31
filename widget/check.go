@@ -108,7 +108,7 @@ func (c *Check) OnMouseDown(*fyne.MouseEvent) {
 	if c.OnChanged != nil {
 		c.OnChanged(c.Checked)
 	}
-	Renderer(c).Refresh()
+	Refresh(c)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

@@ -27,7 +27,7 @@ func TestHyperlink_Alignment(t *testing.T) {
 
 func TestHyperlink_SetText(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Url: "TestUrl"}
-	Renderer(hyperlink).Refresh()
+	Refresh(hyperlink)
 	hyperlink.SetText("New")
 
 	assert.Equal(t, "New", hyperlink.Text)

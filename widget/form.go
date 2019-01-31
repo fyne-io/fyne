@@ -78,7 +78,7 @@ func (f *Form) AppendItem(item *FormItem) {
 	f.itemGrid.AddObject(f.createLabel(item.Text))
 	f.itemGrid.AddObject(item.Widget)
 
-	Renderer(f).Refresh()
+	Refresh(f)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

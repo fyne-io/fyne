@@ -61,7 +61,6 @@ func (r *baseObject) Hide() {
 }
 
 // Refresh instructs the containing canvas to refresh the specified obj.
-// Use of this method directly is not recommended and it may be removed in a future release
 func Refresh(obj fyne.CanvasObject) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
 	if c != nil {

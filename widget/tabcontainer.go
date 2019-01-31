@@ -78,7 +78,7 @@ func (t *TabContainer) SelectTabIndex(index int) {
 	}
 
 	t.current = index
-	Renderer(t).Refresh()
+	Refresh(t)
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.

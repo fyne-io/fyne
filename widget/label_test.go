@@ -21,7 +21,7 @@ func TestLabel_MinSize(t *testing.T) {
 
 func TestLabel_Text(t *testing.T) {
 	label := &Label{Text: "Test"}
-	Renderer(label).Refresh()
+	Refresh(label)
 
 	assert.Equal(t, "Test", label.Text)
 	assert.Equal(t, "Test", textRenderTexts(label)[0].Text)
@@ -29,7 +29,7 @@ func TestLabel_Text(t *testing.T) {
 
 func TestLabel_SetText(t *testing.T) {
 	label := &Label{Text: "Test"}
-	Renderer(label).Refresh()
+	Refresh(label)
 	label.SetText("New")
 
 	assert.Equal(t, "New", label.Text)
@@ -38,18 +38,18 @@ func TestLabel_SetText(t *testing.T) {
 
 func TestLabel_Alignment(t *testing.T) {
 	label := &Label{Text: "Test", Alignment: fyne.TextAlignTrailing}
-	Renderer(label).Refresh()
+	Refresh(label)
 
 	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(label)[0].Alignment)
 }
 
 func TestLabel_Alignment_Later(t *testing.T) {
 	label := &Label{Text: "Test"}
-	Renderer(label).Refresh()
+	Refresh(label)
 	assert.Equal(t, fyne.TextAlignLeading, textRenderTexts(label)[0].Alignment)
 
 	label.Alignment = fyne.TextAlignTrailing
-	Renderer(label).Refresh()
+	Refresh(label)
 	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(label)[0].Alignment)
 }
 

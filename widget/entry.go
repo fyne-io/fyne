@@ -166,7 +166,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 func (e *Entry) SetReadOnly(ro bool) {
 	e.ReadOnly = ro
 
-	Renderer(e).Refresh()
+	Refresh(e)
 }
 
 // updateText updates the internal text to the given value
@@ -176,7 +176,7 @@ func (e *Entry) updateText(text string) {
 		e.OnChanged(text)
 	}
 
-	Renderer(e).Refresh()
+	Refresh(e)
 }
 
 func (e *Entry) cursorTextPos() int {
@@ -197,14 +197,14 @@ func (e *Entry) OnFocusGained() {
 	}
 	e.focused = true
 
-	Renderer(e).Refresh()
+	Refresh(e)
 }
 
 // OnFocusLost is called when the Entry has had focus removed.
 func (e *Entry) OnFocusLost() {
 	e.focused = false
 
-	Renderer(e).Refresh()
+	Refresh(e)
 }
 
 // Focused returns whether or not this Entry has focus.
@@ -405,7 +405,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 func NewEntry() *Entry {
 	e := &Entry{}
 
-	Renderer(e).Refresh()
+	Refresh(e)
 	return e
 }
 
@@ -413,7 +413,7 @@ func NewEntry() *Entry {
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
 
-	Renderer(e).Refresh()
+	Refresh(e)
 	return e
 }
 
@@ -421,6 +421,6 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 
-	Renderer(e).Refresh()
+	Refresh(e)
 	return e
 }

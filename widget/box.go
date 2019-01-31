@@ -55,14 +55,14 @@ func (b *Box) ApplyTheme() {
 func (b *Box) Prepend(object fyne.CanvasObject) {
 	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
 
-	Renderer(b).Refresh()
+	Refresh(b)
 }
 
 // Append adds a new CanvasObject to the end/right of the box
 func (b *Box) Append(object fyne.CanvasObject) {
 	b.Children = append(b.Children, object)
 
-	Renderer(b).Refresh()
+	Refresh(b)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

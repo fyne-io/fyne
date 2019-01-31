@@ -78,3 +78,12 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 
 	return renderer.(fyne.WidgetRenderer)
 }
+
+// Refresh instructs the containing canvas to refresh the specified widget.
+func Refresh(wid fyne.Widget) {
+	render := Renderer(wid)
+
+	if render != nil {
+		render.Refresh()
+	}
+}
