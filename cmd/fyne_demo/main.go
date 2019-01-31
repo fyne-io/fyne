@@ -49,6 +49,14 @@ func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
 }
 
+func showAppDialog(w fyne.Window) {
+	label := widget.NewLabel("Example applications have moved to")
+	link := widget.NewHyperlink("github.com/fyne-io/examples", "https://github.com/fyne-io/examples")
+	content := widget.NewHBox(label, link)
+
+	dialog.ShowCustom("Information", "OK", content, w)
+}
+
 func main() {
 	a := app.New()
 	w := a.NewWindow("Fyne Demo")
@@ -66,7 +74,7 @@ func main() {
 		),
 
 		widget.NewButton("Apps", func() {
-			dialog.ShowInformation("Information", "Example applications have moved to https://github.com/fyne-io/examples", w)
+			showAppDialog(w)
 		}),
 
 		widget.NewGroup("Demos",

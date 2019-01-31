@@ -46,8 +46,9 @@ func (d *dialog) closed() {
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	if d.icon == nil {
-		d.win.SetContent(fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+		d.win.SetContent(fyne.NewContainerWithLayout(d,
 			d.content,
+			&canvas.Image{},
 			buttons,
 		))
 	} else {
@@ -68,10 +69,10 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	obj[1].Resize(fyne.NewSize(size.Height*2, size.Height*2))
 	obj[1].Move(fyne.NewPos(-size.Height*3/4, -size.Height/2))
 
-	// text
+	// content (text)
 	textMin := obj[0].MinSize()
-	obj[0].Move(fyne.NewPos(0, middle-textMin.Height-theme.Padding()/2))
-	obj[0].Resize(fyne.NewSize(size.Width, textMin.Height))
+	obj[0].Move(fyne.NewPos(size.Width/2-(textMin.Width/2), middle-textMin.Height-theme.Padding()/2))
+	obj[0].Resize(fyne.NewSize(textMin.Width, textMin.Height))
 
 	// buttons
 	btnMin := obj[2].MinSize().Union(obj[2].Size())
