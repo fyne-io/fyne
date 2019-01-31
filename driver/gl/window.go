@@ -63,7 +63,7 @@ func (w *window) SetFullScreen(full bool) {
 }
 
 func (w *window) CenterOnScreen() {
-	viewWidth, viewHeight := w.pixelSize()
+	viewWidth, viewHeight := w.sizeOnScreen()
 
 	runOnMain(func() {
 		// get window dimensions in pixels
@@ -82,7 +82,8 @@ func (w *window) CenterOnScreen() {
 	})
 }
 
-func (w *window) pixelSize() (int, int) {
+// sizeOnScreen gets the size of a window content in screen pixels
+func (w *window) sizeOnScreen() (int, int) {
 	var viewWidth, viewHeight int
 
 	// get current size of content inside the window
