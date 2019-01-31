@@ -93,13 +93,6 @@ func (w *window) CenterOnScreen() {
 	})
 }
 
-func (w *window) moveToPosition(p fyne.Position) {
-	runOnMainAsync(func() {
-		// set new window coordinates
-		w.viewport.SetPos(p.X, p.Y)
-	})
-}
-
 func (w *window) Resize(size fyne.Size) {
 	runOnMainAsync(func() {
 		scale := w.canvas.Scale()
