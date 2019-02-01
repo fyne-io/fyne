@@ -3,10 +3,10 @@
 package app
 
 import (
-	"log"
+	"errors"
 	"net/url"
 )
 
 func (app *fyneApp) OpenURL(url *url.URL) {
-	log.Printf("Unable to open url for unknown operating system")
+	return errors.New("Unable to open url for unknown operating system")
 }

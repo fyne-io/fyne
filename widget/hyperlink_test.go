@@ -11,7 +11,10 @@ import (
 )
 
 func TestHyperlink_MinSize(t *testing.T) {
-	hyperlink := NewHyperlink("Test", "url1")
+	u, err := url.Parse("https://fyne.io/")
+	assert.Nil(t, err)
+
+	hyperlink := NewHyperlink("Test", u)
 	min := hyperlink.MinSize()
 
 	assert.True(t, min.Width > theme.Padding()*2)
@@ -26,7 +29,10 @@ func TestHyperlink_Alignment(t *testing.T) {
 }
 
 func TestHyperlink_SetText(t *testing.T) {
-	hyperlink := &Hyperlink{Text: "Test", Url: "TestUrl"}
+	u, err := url.Parse("https://fyne.io/")
+	assert.Nil(t, err)
+
+	hyperlink := &Hyperlink{Text: "Test", Url: u}
 	Refresh(hyperlink)
 	hyperlink.SetText("New")
 
@@ -35,19 +41,22 @@ func TestHyperlink_SetText(t *testing.T) {
 }
 
 func TestHyperlink_SetUrl(t *testing.T) {
-	var sUrl string = "url1"
+	sUrl, err := url.Parse("https://github.com/fyne-io/fyne")
+	assert.Nil(t, err)
 
 	// test constructor
 	hyperlink := NewHyperlink("Test", sUrl)
 	assert.Equal(t, sUrl, hyperlink.Url)
 
 	// test setting functions
-	sUrl = "https://fyne.io"
+	sUrl, err = url.Parse("https://fyne.io")
+	assert.Nil(t, err)
 	hyperlink.SetUrl(sUrl)
 	assert.Equal(t, sUrl, hyperlink.Url)
-	sUrl = "duck.com"
-	uUrl, err := url.Parse(sUrl)
+	sUrl, err = url.Parse("duck.com")
 	assert.Nil(t, err)
-	hyperlink.SetUrlFromUrl(uUrl)
+	uUrl := sUrl //what?
+	assert.Nil(t, err)
+	hyperlink.SetUrl(uUrl)
 	assert.Equal(t, sUrl, hyperlink.Url)
 }

@@ -30,8 +30,9 @@ func (a *testApp) NewWindow(title string) fyne.Window {
 	return NewWindow(nil)
 }
 
-func (a *testApp) OpenURL(url *url.URL) {
+func (a *testApp) OpenURL(url *url.URL) error {
 	// no-op
+	return nil
 }
 
 func (a *testApp) Run() {

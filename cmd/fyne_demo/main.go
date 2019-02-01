@@ -4,6 +4,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 
 	"fyne.io/fyne"
@@ -51,7 +52,11 @@ func confirmCallback(response bool) {
 
 func showAppDialog(w fyne.Window) {
 	label := widget.NewLabel("Example applications have moved to")
-	link := widget.NewHyperlink("github.com/fyne-io/examples", "https://github.com/fyne-io/examples")
+	u, err := url.Parse("https://github.com/fyne-io/examples")
+	if err != nil {
+		panic(err)
+	}
+	link := widget.NewHyperlink("github.com/fyne-io/examples", u)
 	content := widget.NewHBox(label, link)
 
 	dialog.ShowCustom("Information", "OK", content, w)
@@ -63,6 +68,11 @@ func main() {
 
 	cv := canvas.NewImageFromResource(theme.FyneLogo())
 	cv.SetMinSize(fyne.NewSize(64, 64))
+
+	fyneio, err := url.Parse("https://fyne.io/")
+	if err != nil {
+		panic(err)
+	}
 
 	w.SetContent(widget.NewVBox(
 		widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -87,7 +97,7 @@ func main() {
 
 		widget.NewHBox(layout.NewSpacer(), cv, layout.NewSpacer()),
 
-		widget.NewHyperlinkWithStyle("fyne.io", "https://fyne.io/", fyne.TextAlignCenter, fyne.TextStyle{}),
+		widget.NewHyperlinkWithStyle("fyne.io", fyneio, fyne.TextAlignCenter, fyne.TextStyle{}),
 
 		widget.NewGroup("Dialogs",
 			widget.NewButton("Info", func() {
