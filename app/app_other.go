@@ -7,6 +7,6 @@ import (
 	"net/url"
 )
 
-func (app *fyneApp) OpenURL(url *url.URL) {
+func (app *fyneApp) OpenURL(url *url.URL) error {
 	return errors.New("Unable to open url for unknown operating system")
 }
