@@ -44,7 +44,7 @@ func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle)
 	face := cachedFontFace(style, &opts)
 	advance := font.MeasureString(face, text)
 
-	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil()+face.Metrics().Descent.Ceil())
+	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
 }
 
 func (d *gLDriver) Quit() {
