@@ -123,14 +123,20 @@ func main() {
 
 		layout.NewSpacer(),
 
-		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-			widget.NewButton("Dark", func() {
-				a.Settings().SetTheme(theme.DarkTheme())
-			}),
-			widget.NewButton("Light", func() {
-				a.Settings().SetTheme(theme.LightTheme())
+		widget.NewGroup("Theme",
+			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+				widget.NewButton("Dark", func() {
+					a.Settings().SetTheme(theme.DarkTheme())
+				}),
+				widget.NewButton("Light", func() {
+					a.Settings().SetTheme(theme.LightTheme())
+				}),
+			),
+			widget.NewButton("Custom (example)", func() {
+				a.Settings().SetTheme(newCustomTheme())
 			}),
 		),
+
 		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
 			a.Quit()
 		}),
