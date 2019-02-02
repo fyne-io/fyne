@@ -61,7 +61,7 @@ func (d *gLDriver) runGL() {
 			if f.done != nil {
 				f.done <- true
 			}
-		case <- settingsChange:
+		case <-settingsChange:
 			clearFontCache()
 		case object := <-refreshQueue:
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position) {
