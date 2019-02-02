@@ -41,7 +41,7 @@ func (r *radioRenderer) MinSize() fyne.Size {
 func (r *radioRenderer) Layout(size fyne.Size) {
 	itemHeight := r.radio.itemHeight()
 	y := 0
-	labelSize := fyne.NewSize(size.Width-theme.IconInlineSize()+theme.Padding(), itemHeight)
+	labelSize := fyne.NewSize(size.Width-theme.IconInlineSize()-theme.Padding(), itemHeight)
 
 	for _, item := range r.items {
 		item.label.Resize(labelSize)
