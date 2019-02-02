@@ -47,6 +47,9 @@ func (d *gLDriver) runGL() {
 	fps := time.NewTicker(time.Second / 60)
 	running = true
 
+	settingsChange := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+
 	for {
 		select {
 		case <-d.done:
@@ -58,6 +61,8 @@ func (d *gLDriver) runGL() {
 			if f.done != nil {
 				f.done <- true
 			}
+		case <- settingsChange:
+			clearFontCache()
 		case object := <-refreshQueue:
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position) {
 				texture := textures[obj]
