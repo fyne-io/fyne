@@ -53,17 +53,18 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 }
 
 // rectCoords calculates the openGL coordinate space of a rectangle
-func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size, fill canvas.ImageFill, aspect float32) []float32 {
+func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
+	fill canvas.ImageFill, aspect float32, pad int) []float32 {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
 
-	xPos := float32(pos.X) / float32(frame.Width)
+	xPos := float32(pos.X-pad) / float32(frame.Width)
 	x1 := -1 + xPos*2
-	x2Pos := float32(pos.X+size.Width) / float32(frame.Width)
+	x2Pos := float32(pos.X+size.Width+pad) / float32(frame.Width)
 	x2 := -1 + x2Pos*2
 
-	yPos := float32(pos.Y) / float32(frame.Height)
+	yPos := float32(pos.Y-pad) / float32(frame.Height)
 	y1 := 1 - yPos*2
-	y2Pos := float32(pos.Y+size.Height) / float32(frame.Height)
+	y2Pos := float32(pos.Y+size.Height+pad) / float32(frame.Height)
 	y2 := 1 - y2Pos*2
 
 	points := []float32{
@@ -110,7 +111,7 @@ func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fy
 		return
 	}
 
-	points := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
+	points := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(box, c.newGlRectTexture)
 
 	gl.Disable(gl.BLEND)
@@ -122,7 +123,7 @@ func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fy
 		return
 	}
 
-	points := c.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
+	points := c.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(circle, c.newGlCircleTexture)
 
 	gl.Enable(gl.BLEND)
@@ -135,7 +136,7 @@ func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Siz
 		return
 	}
 
-	points := c.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
+	points := c.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(line, c.newGlLineTexture)
 
 	gl.Enable(gl.BLEND)
@@ -162,7 +163,7 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 	} else {
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
-	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, img.PixelAspect)
+	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, img.PixelAspect, 0)
 	c.drawTexture(texture, points)
 }
 
@@ -171,7 +172,7 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fram
 		return
 	}
 
-	points := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
+	points := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(rect, c.newGlRectTexture)
 
 	gl.Disable(gl.BLEND)
@@ -196,7 +197,7 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 		pos = fyne.NewPos(pos.X, pos.Y+(text.Size().Height-text.MinSize().Height)/2)
 	}
 
-	points := c.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0)
+	points := c.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(text, c.newGlTextTexture)
 
 	gl.Enable(gl.BLEND)
