@@ -41,14 +41,19 @@ func (hl *Hyperlink) SetText(text string) {
 	hl.textProvider.SetText(text) // calls refresh
 }
 
-// SetUrl sets the URL of the hyperlink, taking in a URL type
-func (hl *Hyperlink) SetUrl(url *url.URL) {
+// SetURL sets the URL of the hyperlink, taking in a URL type
+func (hl *Hyperlink) SetURL(url *url.URL) {
 	hl.URL = url
 }
 
-// SetUrl sets the URL of the hyperlink, taking in a string type
-func (hl *Hyperlink) SetUrlFromString(u string) {
-	hl.URL, _ = url.Parse(u)
+// SetURLFromString sets the URL of the hyperlink, taking in a string type
+func (hl *Hyperlink) SetURLFromString(str string) error {
+	u, err := url.Parse(str)
+	if err != nil {
+		return err
+	}
+	hl.URL = u
+	return nil
 }
 
 // textAlign tells the rendering textProvider our alignment

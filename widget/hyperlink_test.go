@@ -51,6 +51,6 @@ func TestHyperlink_SetUrl(t *testing.T) {
 	// test setting functions
 	sURL, err = url.Parse("https://fyne.io")
 	assert.Nil(t, err)
-	hyperlink.SetUrl(sURL)
+	hyperlink.SetURL(sURL)
 	assert.Equal(t, sURL, hyperlink.URL)
 }
