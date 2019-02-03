@@ -13,7 +13,7 @@ import (
 type Hyperlink struct {
 	textProvider
 	Text      string
-	Url       *url.URL
+	URL       *url.URL
 	Alignment fyne.TextAlign // The alignment of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
 }
@@ -27,7 +27,7 @@ func NewHyperlink(text string, url *url.URL) *Hyperlink {
 func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
 	hl := &Hyperlink{
 		Text:      text,
-		Url:       url,
+		URL:       url,
 		Alignment: alignment,
 		TextStyle: style,
 	}
@@ -43,12 +43,12 @@ func (hl *Hyperlink) SetText(text string) {
 
 // SetUrl sets the URL of the hyperlink, taking in a URL type
 func (hl *Hyperlink) SetUrl(url *url.URL) {
-	hl.Url = url
+	hl.URL = url
 }
 
 // SetUrl sets the URL of the hyperlink, taking in a string type
 func (hl *Hyperlink) SetUrlFromString(u string) {
-	hl.Url, _ = url.Parse(u)
+	hl.URL, _ = url.Parse(u)
 }
 
 // textAlign tells the rendering textProvider our alignment
@@ -78,8 +78,8 @@ func (hl *Hyperlink) object() fyne.Widget {
 
 // OnMouseDown is called when a mouse down event is captured and triggers any change handler
 func (hl *Hyperlink) OnMouseDown(*fyne.MouseEvent) {
-	if hl.Url != nil {
-		fyne.CurrentApp().OpenURL(hl.Url)
+	if hl.URL != nil {
+		fyne.CurrentApp().OpenURL(hl.URL)
 	}
 }
 

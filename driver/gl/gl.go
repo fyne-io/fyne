@@ -31,21 +31,16 @@ var textures = make(map[fyne.CanvasObject]uint32)
 var refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
-	texture := textures[object]
 
 	img, skipCache := object.(*canvas.Image)
 	if skipCache && img.PixelColor == nil {
 		skipCache = false
 	}
 
-	if texture != 0 {
-		if !skipCache {
-			return texture
-		}
-
-		gl.DeleteTextures(1, &texture)
-		delete(textures, object)
+	if skipCache {
+		return creator(object)
 	}
+	texture := textures[object]
 
 	texture = creator(object)
 	textures[object] = texture

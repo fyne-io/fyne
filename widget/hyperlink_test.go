@@ -32,7 +32,7 @@ func TestHyperlink_SetText(t *testing.T) {
 	u, err := url.Parse("https://fyne.io/")
 	assert.Nil(t, err)
 
-	hyperlink := &Hyperlink{Text: "Test", Url: u}
+	hyperlink := &Hyperlink{Text: "Test", URL: u}
 	Refresh(hyperlink)
 	hyperlink.SetText("New")
 
@@ -41,16 +41,16 @@ func TestHyperlink_SetText(t *testing.T) {
 }
 
 func TestHyperlink_SetUrl(t *testing.T) {
-	sUrl, err := url.Parse("https://github.com/fyne-io/fyne")
+	sURL, err := url.Parse("https://github.com/fyne-io/fyne")
 	assert.Nil(t, err)
 
 	// test constructor
-	hyperlink := NewHyperlink("Test", sUrl)
-	assert.Equal(t, sUrl, hyperlink.Url)
+	hyperlink := NewHyperlink("Test", sURL)
+	assert.Equal(t, sURL, hyperlink.URL)
 
 	// test setting functions
-	sUrl, err = url.Parse("https://fyne.io")
+	sURL, err = url.Parse("https://fyne.io")
 	assert.Nil(t, err)
-	hyperlink.SetUrl(sUrl)
-	assert.Equal(t, sUrl, hyperlink.Url)
+	hyperlink.SetUrl(sURL)
+	assert.Equal(t, sURL, hyperlink.URL)
 }

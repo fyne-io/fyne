@@ -80,6 +80,8 @@ func (app *fyneApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) 
 		}
 		canvas.Refresh(c)
 	}
+
+	canvas.SetContent(content)
 }
 
 func (app *fyneApp) applyTheme() {
