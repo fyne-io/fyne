@@ -318,6 +318,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 
 func (w *window) refresh(viewport *glfw.Window) {
 	updateWinSize(w)
+	w.canvas.setDirty()
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
