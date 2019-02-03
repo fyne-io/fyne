@@ -2,8 +2,11 @@
 
 package app
 
-import "log"
+import (
+	"errors"
+	"net/url"
+)
 
-func (app *fyneApp) OpenURL(url string) {
-	log.Printf("Unable to open url for unknown operating system")
+func (app *fyneApp) OpenURL(url *url.URL) error {
+	return errors.New("Unable to open url for unknown operating system")
 }

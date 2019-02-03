@@ -1,5 +1,7 @@
 package fyne
 
+import "net/url"
+
 // An App is the definition of a graphical application.
 // Apps can have multiple windows, it will exit when the first windows to be
 // shown is closed. You can also cause the app to exit by calling Quit().
@@ -12,7 +14,7 @@ type App interface {
 	NewWindow(title string) Window
 
 	// Open a URL in the default browser application
-	OpenURL(url string)
+	OpenURL(url *url.URL) error
 
 	// Icon returns the application icon, this is used in various ways depending on operating system.
 	// This is also the default icon for new windows.

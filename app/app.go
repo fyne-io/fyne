@@ -111,7 +111,7 @@ func NewAppWithDriver(d fyne.Driver) fyne.App {
 	newApp.Settings().AddChangeListener(listener)
 	go func() {
 		for {
-			_ = <-listener
+			<-listener
 			newApp.applyTheme()
 		}
 	}()

@@ -13,18 +13,18 @@ import (
 type Hyperlink struct {
 	textProvider
 	Text      string
-	URL       string
+	URL       *url.URL
 	Alignment fyne.TextAlign // The alignment of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
-func NewHyperlink(text string, url string) *Hyperlink {
+func NewHyperlink(text string, url *url.URL) *Hyperlink {
 	return NewHyperlinkWithStyle(text, url, fyne.TextAlignLeading, fyne.TextStyle{})
 }
 
 // NewHyperlinkWithStyle creates a new hyperlink widget with the set text content
-func NewHyperlinkWithStyle(text string, url string, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
+func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
 	hl := &Hyperlink{
 		Text:      text,
 		URL:       url,
@@ -41,14 +41,19 @@ func (hl *Hyperlink) SetText(text string) {
 	hl.textProvider.SetText(text) // calls refresh
 }
 
-// SetURL sets the URL of the hyperlink, taking in a string type
-func (hl *Hyperlink) SetURL(url string) {
+// SetURL sets the URL of the hyperlink, taking in a URL type
+func (hl *Hyperlink) SetURL(url *url.URL) {
 	hl.URL = url
 }
 
-// SetURLFromURL sets the URL of the hyperlink, taking in a URL type
-func (hl *Hyperlink) SetURLFromURL(url *url.URL) {
-	hl.URL = url.String()
+// SetURLFromString sets the URL of the hyperlink, taking in a string type
+func (hl *Hyperlink) SetURLFromString(str string) error {
+	u, err := url.Parse(str)
+	if err != nil {
+		return err
+	}
+	hl.URL = u
+	return nil
 }
 
 // textAlign tells the rendering textProvider our alignment
@@ -78,7 +83,7 @@ func (hl *Hyperlink) object() fyne.Widget {
 
 // OnMouseDown is called when a mouse down event is captured and triggers any change handler
 func (hl *Hyperlink) OnMouseDown(*fyne.MouseEvent) {
-	if hl.URL != "" {
+	if hl.URL != nil {
 		fyne.CurrentApp().OpenURL(hl.URL)
 	}
 }

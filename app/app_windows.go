@@ -2,8 +2,14 @@
 
 package app
 
-import "os/exec"
+import (
+	"net/url"
+	"os"
+	"os/exec"
+)
 
-func (app *fyneApp) OpenURL(url string) {
-	exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Run()
+func (app *fyneApp) OpenURL(url *url.URL) error {
+	cmd := exec.Command("rundll32", "url.dll,FileProtocolHandler", url.String())
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
+	return cmd.Run()
 }
