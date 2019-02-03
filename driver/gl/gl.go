@@ -25,6 +25,7 @@ import (
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 )
 
 var textures = make(map[fyne.CanvasObject]uint32)
@@ -57,6 +58,75 @@ func newTexture() uint32 {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+	return texture
+}
+
+func (c *glCanvas) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
+	circle := obj.(*canvas.Circle)
+	texture := newTexture()
+	radius := fyne.Min(circle.Size().Width, circle.Size().Height)/2
+
+	width := scaleInt(c, circle.Size().Width)
+	if width == 0 {
+		width = 1
+	}
+	height := scaleInt(c, circle.Size().Height)
+	if height == 0 {
+		height = 1
+	}
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(circle.Size().Width, circle.Size().Height, raw, raw.Bounds())
+
+	if circle.FillColor != nil {
+		filler := rasterx.NewFiller(width, height, scanner)
+		filler.SetColor(circle.FillColor)
+		rasterx.AddCircle(float64(width/2), float64(height/2), float64(scaleInt(c, radius)), filler)
+		filler.Draw()
+	}
+
+	dasher := rasterx.NewDasher(width, height, scanner)
+	dasher.SetColor(circle.StrokeColor)
+	dasher.SetStroke(fixed.Int26_6(float64(circle.StrokeWidth)*64), 0, nil, nil, nil, 0, nil, 0)
+	rasterx.AddCircle(float64(width/2), float64(height/2), float64(scaleInt(c, radius)), dasher)
+	dasher.Draw()
+
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
+		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(raw.Pix))
+
+	return texture
+}
+
+func (c *glCanvas) newGlLineTexture(obj fyne.CanvasObject) uint32 {
+	line := obj.(*canvas.Line)
+	texture := newTexture()
+
+	col := line.StrokeColor
+	width := scaleInt(c, line.Size().Width)
+	if width == 0 {
+		width = 1
+	}
+	height := scaleInt(c, line.Size().Height)
+	if height == 0 {
+		height = 1
+	}
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(line.Size().Width, line.Size().Height, raw, raw.Bounds())
+	dasher := rasterx.NewDasher(width, height, scanner)
+	dasher.SetColor(col)
+	dasher.SetStroke(fixed.Int26_6(float64(line.StrokeWidth)*64), 0, nil, nil, nil, 0, nil, 0)
+	p1x, p1y := scaleInt(c, line.Position1.X - line.Position().X), scaleInt(c, line.Position1.Y - line.Position().Y)
+	p2x, p2y := scaleInt(c, line.Position2.X - line.Position().X), scaleInt(c, line.Position2.Y - line.Position().Y)
+
+	dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
+	dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))
+	dasher.Stop(true)
+	dasher.Draw()
+
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
+		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(raw.Pix))
 
 	return texture
 }

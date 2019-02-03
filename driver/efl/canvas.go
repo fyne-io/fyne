@@ -119,7 +119,9 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		// TODO - this isnt all there yet, but at least this stops lots of debug output
 		obj = C.evas_object_rectangle_add(c.evas)
 
-		setColor(obj, co.FillColor)
+		if co.FillColor != nil {
+			setColor(obj, co.FillColor)
+		}
 	default:
 		log.Printf("Unrecognised Object %#v\n", o)
 		return nil
@@ -343,7 +345,9 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, int(math.Abs(float64(width))))+1), C.Evas_Coord(scaleInt(c, int(math.Abs(float64(height))))+1))
 	case *canvas.Circle:
-		setColor(obj, co.FillColor)
+		if co.FillColor != nil {
+			setColor(obj, co.FillColor)
+		}
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, pos.X)), C.Evas_Coord(scaleInt(c, pos.Y)),
 			C.Evas_Coord(scaleInt(c, size.Width)), C.Evas_Coord(scaleInt(c, size.Height)))
 	default:

@@ -117,15 +117,29 @@ func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fy
 	c.drawTexture(texture, points)
 }
 
-func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	if !rect.Visible() {
+func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
+	if !circle.Visible() {
 		return
 	}
 
-	points := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
-	texture := getTexture(rect, c.newGlRectTexture)
+	points := c.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
+	texture := getTexture(circle, c.newGlCircleTexture)
 
-	gl.Disable(gl.BLEND)
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	c.drawTexture(texture, points)
+}
+
+func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
+	if !line.Visible() {
+		return
+	}
+
+	points := c.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
+	texture := getTexture(line, c.newGlLineTexture)
+
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	c.drawTexture(texture, points)
 }
 
@@ -149,6 +163,18 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
 	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, img.PixelAspect)
+	c.drawTexture(texture, points)
+}
+
+func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
+	if !rect.Visible() {
+		return
+	}
+
+	points := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0)
+	texture := getTexture(rect, c.newGlRectTexture)
+
+	gl.Disable(gl.BLEND)
 	c.drawTexture(texture, points)
 }
 
@@ -184,10 +210,14 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame f
 	canvasMutex.Unlock()
 	pos := o.Position().Add(offset)
 	switch obj := o.(type) {
-	case *canvas.Rectangle:
-		c.drawRectangle(obj, pos, frame)
+	case *canvas.Circle:
+		c.drawCircle(obj, pos, frame)
+	case *canvas.Line:
+		c.drawLine(obj, pos, frame)
 	case *canvas.Image:
 		c.drawImage(obj, pos, frame)
+	case *canvas.Rectangle:
+		c.drawRectangle(obj, pos, frame)
 	case *canvas.Text:
 		c.drawText(obj, pos, frame)
 	case fyne.Widget:
