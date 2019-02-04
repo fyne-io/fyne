@@ -206,6 +206,10 @@ func scaleByDPI(w *window) float32 {
 		return float32(scale)
 	}
 	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
+	if xdpi > 1000 { // assume that this is a mistake and bail
+		return float32(1.0)
+	}
+
 	if xdpi > 192 {
 		return float32(1.5)
 	} else if xdpi > 144 {

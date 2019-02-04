@@ -173,6 +173,10 @@ func (w *window) SetOnClosed(closed func()) {
 }
 
 func scaleForDpi(xdpi int) float32 {
+	if xdpi > 1000 { // assume that this is a mistake and bail
+		return float32(1.0)
+	}
+
 	if xdpi > 192 {
 		return float32(1.5)
 	} else if xdpi > 144 {
