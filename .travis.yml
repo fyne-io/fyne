@@ -21,6 +21,7 @@ before_script:
   - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
+  - go get github.com/stretchr/testify
 
 script:
   - test -z $(gofmt -s -l $NO_VENDOR)
