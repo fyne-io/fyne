@@ -1,7 +1,7 @@
 package fyne
 
-type MouseButton int
 // MouseButton represents a single button in a PointerEvent
+type MouseButton int // TODO can we make this a pointer intent rather than a mouse button?
 
 const (
 	// LeftMouseButton is the most common mouse button - on some systems the only one
