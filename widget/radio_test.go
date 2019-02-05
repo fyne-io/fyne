@@ -28,7 +28,7 @@ func TestRadioSelected(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, func(sel string) {
 		selected = sel
 	})
-	radio.OnMouseDown(&fyne.MouseEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.OnMouseDown(&fyne.PointerEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.True(t, selected == "Hi")
 }
@@ -39,7 +39,7 @@ func TestRadioUnselected(t *testing.T) {
 		selected = sel
 	})
 	radio.Selected = selected
-	radio.OnMouseDown(&fyne.MouseEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.OnMouseDown(&fyne.PointerEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.True(t, selected == "")
 }
@@ -49,7 +49,7 @@ func TestRadioSelectedOther(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Hi2"}, func(sel string) {
 		selected = sel
 	})
-	radio.OnMouseDown(&fyne.MouseEvent{Position: fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())})
+	radio.OnMouseDown(&fyne.PointerEvent{Position: fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())})
 
 	assert.True(t, selected == "Hi2")
 }

@@ -28,16 +28,21 @@ type ThemedObject interface {
 	ApplyTheme()
 }
 
-// ClickableObject describes any CanvasObject that can also be clicked
-// (i.e. has mouse handlers). This should be implemented by buttons etc that
-// wish to handle pointer interactions.
-type ClickableObject interface {
-	OnMouseDown(*MouseEvent)
+// TappableObject describes any CanvasObject that can also be tapped.
+// This should be implemented by buttons etc that wish to handle pointer interactions.
+type TappableObject interface {
+	OnTap(*PointerEvent)
+}
+
+// ScrollableObject describes any CanvasObject that can also be scrolled.
+// This is mostly used to implement the widget.ScrollContainer.
+type ScrollableObject interface {
+	OnScroll(*ScrollEvent)
 }
 
 // FocusableObject describes any CanvasObject that can respond to being focused.
 // It will receive the OnFocusGained and OnFocusLost events appropriately and,
-// when focussed, it will also have OnKeyDown called as keys are pressed.
+// when focused, it will also have OnKeyDown called as keys are pressed.
 type FocusableObject interface {
 	OnFocusGained()
 	OnFocusLost()

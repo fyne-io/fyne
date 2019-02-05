@@ -3,9 +3,9 @@ package test
 import "fyne.io/fyne"
 
 // Click simulates a mouse click on the specified object
-func Click(obj fyne.ClickableObject) {
-	ev := &fyne.MouseEvent{Button: fyne.LeftMouseButton, Position: fyne.NewPos(1, 1)}
-	obj.OnMouseDown(ev)
+func Click(obj fyne.TappableObject) {
+	ev := &fyne.PointerEvent{Button: fyne.LeftMouseButton, Position: fyne.NewPos(1, 1)}
+	obj.OnTap(ev)
 }
 
 func typeChars(chars string, keyDown func(event *fyne.KeyEvent)) {

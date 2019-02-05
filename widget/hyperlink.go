@@ -81,8 +81,8 @@ func (hl *Hyperlink) object() fyne.Widget {
 	return hl
 }
 
-// OnMouseDown is called when a mouse down event is captured and triggers any change handler
-func (hl *Hyperlink) OnMouseDown(*fyne.MouseEvent) {
+// OnTap is called when a pointer tapped event is captured and triggers any change handler
+func (hl *Hyperlink) OnTap(*fyne.PointerEvent) {
 	if hl.URL != nil {
 		fyne.CurrentApp().OpenURL(hl.URL)
 	}

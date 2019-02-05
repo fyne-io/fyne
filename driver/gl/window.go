@@ -330,10 +330,10 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mouseY = ypos
 }
 
-func findMouseObj(obj fyne.CanvasObject, x, y int) (fyne.CanvasObject, int, int) {
-	found := obj
+func findMouseObj(canvas *glCanvas, x, y int) (fyne.CanvasObject, int, int) {
+	found := canvas.content
 	foundX, foundY := 0, 0
-	walkObjects(obj, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
+	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
 		if x < pos.X || y < pos.Y {
 			return
 		}
@@ -349,10 +349,13 @@ func findMouseObj(obj fyne.CanvasObject, x, y int) (fyne.CanvasObject, int, int)
 		}
 
 		switch walked.(type) {
-		case fyne.ClickableObject:
+		case fyne.TappableObject:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
 		case fyne.FocusableObject:
+			found = walked
+			foundX, foundY = pos.X, pos.Y
+		case fyne.ScrollableObject:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
 		}
@@ -365,9 +368,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	current := w.canvas
 
 	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
-	co, x, y := findMouseObj(w.canvas.content, pos.X, pos.Y)
+	co, x, y := findMouseObj(w.canvas, pos.X, pos.Y)
 
-	ev := new(fyne.MouseEvent)
+	ev := new(fyne.PointerEvent)
 	ev.Position = fyne.NewPos(pos.X-x, pos.Y-y)
 	switch button {
 	case glfw.MouseButtonRight:
@@ -378,13 +381,27 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		ev.Button = fyne.LeftMouseButton
 	}
 
-	switch w := co.(type) {
-	case fyne.ClickableObject:
+	switch wid := co.(type) {
+	case fyne.TappableObject:
 		if action == glfw.Press {
-			go w.OnMouseDown(ev)
+			go wid.OnTap(ev)
 		}
 	case fyne.FocusableObject:
-		current.Focus(w)
+		current.Focus(wid)
+	}
+}
+
+func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
+	current := w.canvas
+	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
+	co, _, _ := findMouseObj(w.canvas, pos.X, pos.Y)
+
+	switch wid := co.(type) {
+	case fyne.ScrollableObject:
+		ev := &fyne.ScrollEvent{}
+		ev.DeltaX = int(xoff)
+		ev.DeltaY = int(yoff)
+		wid.OnScroll(ev)
 	}
 }
 
@@ -583,6 +600,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		win.SetRefreshCallback(ret.refresh)
 		win.SetCursorPosCallback(ret.mouseMoved)
 		win.SetMouseButtonCallback(ret.mouseClicked)
+		win.SetScrollCallback(ret.mouseScrolled)
 		win.SetKeyCallback(ret.keyPressed)
 		win.SetCharModsCallback(ret.charModInput)
 		glfw.DetachCurrentContext()

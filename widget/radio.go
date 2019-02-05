@@ -125,8 +125,8 @@ func (r *Radio) Hide() {
 	r.hide(r)
 }
 
-// OnMouseDown is called when a mouse down event is captured and triggers any change handler
-func (r *Radio) OnMouseDown(event *fyne.MouseEvent) {
+// OnTap is called when a pointer tapped event is captured and triggers any change handler
+func (r *Radio) OnTap(event *fyne.PointerEvent) {
 	index := (event.Position.Y - theme.Padding()) / r.itemHeight()
 	if index < 0 || index >= len(r.Options) { // in the padding
 		return

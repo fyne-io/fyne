@@ -8,9 +8,15 @@ type KeyEvent struct {
 	Modifiers Modifier
 }
 
-// MouseEvent describes a pointer input event. The position is relative to the top-left
+// PointerEvent describes a pointer input event. The position is relative to the top-left
 // of the CanvasObject this is triggered on.
-type MouseEvent struct {
+type PointerEvent struct {
 	Position Position    // The position of the event
-	Button   MouseButton // The mouse button which caused the event
+	Button   MouseButton // The pointer button which caused the event
+}
+
+// ScrollEvent defines the parameters of a pointer or other scroll event.
+// The DeltaX and DeltaY represent how many large the scroll was in two dimensions.
+type ScrollEvent struct {
+	DeltaX, DeltaY int
 }

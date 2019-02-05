@@ -7,7 +7,7 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-func walkObjects(obj fyne.CanvasObject, pos fyne.Position,
+func (c *glCanvas) walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 	f func(object fyne.CanvasObject, pos fyne.Position)) {
 
 	switch co := obj.(type) {
@@ -16,14 +16,32 @@ func walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 		f(obj, offset)
 
 		for _, child := range co.Objects {
-			walkObjects(child, offset, f)
+			c.walkObjects(child, offset, f)
 		}
+	case *widget.ScrollContainer: // TODO should this be somehow not scroll container specific?
+		offset := co.Position().Add(pos)
+
+		scrollX := scaleInt(c, offset.X)
+		scrollY := scaleInt(c, offset.Y)
+		scrollWidth := scaleInt(c, co.Size().Width)
+		scrollHeight := scaleInt(c, co.Size().Height)
+		_, pixHeight := c.window.viewport.GetSize()
+		gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
+		gl.Enable(gl.SCISSOR_TEST)
+
+		f(obj, offset)
+
+		for _, child := range widget.Renderer(co).Objects() {
+			c.walkObjects(child, offset, f)
+		}
+
+		gl.Disable(gl.SCISSOR_TEST)
 	case fyne.Widget:
 		offset := co.Position().Add(pos)
 		f(obj, offset)
 
 		for _, child := range widget.Renderer(co).Objects() {
-			walkObjects(child, offset, f)
+			c.walkObjects(child, offset, f)
 		}
 	default:
 		f(obj, pos)

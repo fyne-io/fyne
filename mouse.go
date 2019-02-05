@@ -1,7 +1,7 @@
 package fyne
 
-// MouseButton represents a single button in a MouseEvent
 type MouseButton int
+// MouseButton represents a single button in a PointerEvent
 
 const (
 	// LeftMouseButton is the most common mouse button - on some systems the only one

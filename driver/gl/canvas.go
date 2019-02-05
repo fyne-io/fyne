@@ -19,6 +19,7 @@ type glCanvas struct {
 	scale   float32
 
 	dirty1, dirty2 bool
+	refreshQueue   chan fyne.CanvasObject
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
@@ -62,7 +63,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 	select {
-	case refreshQueue <- obj:
+	case c.refreshQueue <- obj:
 		// all good
 	default:
 		// queue is full, ignore
@@ -130,7 +131,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
 		c.drawObject(obj, pos, size)
 	}
-	walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
+	c.walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
 }
 
 func (c *glCanvas) setDirty() {
@@ -145,6 +146,7 @@ func (c *glCanvas) isDirty() bool {
 
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
+	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 	c.initOpenGL()
 

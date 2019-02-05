@@ -29,7 +29,6 @@ import (
 )
 
 var textures = make(map[fyne.CanvasObject]uint32)
-var refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 const vectorPad = 10
 

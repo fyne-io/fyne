@@ -101,8 +101,8 @@ func (c *Check) Hide() {
 	c.hide(c)
 }
 
-// OnMouseDown is called when a mouse down event is captured and triggers any change handler
-func (c *Check) OnMouseDown(*fyne.MouseEvent) {
+// OnTap is called when a pointer tapped event is captured and triggers any change handler
+func (c *Check) OnTap(*fyne.PointerEvent) {
 	c.Checked = !c.Checked
 
 	if c.OnChanged != nil {

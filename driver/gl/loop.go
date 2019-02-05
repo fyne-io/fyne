@@ -63,16 +63,6 @@ func (d *gLDriver) runGL() {
 			}
 		case <-settingsChange:
 			clearFontCache()
-		case object := <-refreshQueue:
-			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position) {
-				texture := textures[obj]
-				if texture != 0 {
-					gl.DeleteTextures(1, &texture)
-					delete(textures, obj)
-				}
-			}
-
-			walkObjects(object, fyne.NewPos(0, 0), freeWalked)
 		case <-fps.C:
 			glfw.PollEvents()
 			for i, win := range d.windows {
@@ -80,6 +70,8 @@ func (d *gLDriver) runGL() {
 				viewport.MakeContextCurrent()
 
 				canvas := win.(*window).canvas
+				d.freeDirtyTextures(canvas)
+
 				gl.UseProgram(canvas.program)
 
 				if viewport.ShouldClose() {
@@ -108,6 +100,24 @@ func (d *gLDriver) runGL() {
 				view.viewport.SwapBuffers()
 				glfw.DetachCurrentContext()
 			}
+		}
+	}
+}
+
+func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
+	for {
+		select {
+		case object := <-canvas.refreshQueue:
+			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position) {
+				texture := textures[obj]
+				if texture != 0 {
+					gl.DeleteTextures(1, &texture)
+					delete(textures, obj)
+				}
+			}
+			canvas.walkObjects(object, fyne.NewPos(0, 0), freeWalked)
+		default:
+			return
 		}
 	}
 }
