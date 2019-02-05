@@ -3,7 +3,7 @@ package widget
 import (
 	"testing"
 
-	_ "fyne.io/fyne/test"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +21,7 @@ func TestCheckChecked(t *testing.T) {
 	check := NewCheck("Hi", func(on bool) {
 		checked = on
 	})
-	check.OnMouseDown(nil)
+	test.Click(check)
 
 	assert.True(t, checked)
 }
@@ -32,7 +32,7 @@ func TestCheckUnChecked(t *testing.T) {
 		checked = on
 	})
 	check.Checked = checked
-	check.OnMouseDown(nil)
+	test.Click(check)
 
 	assert.False(t, checked)
 }

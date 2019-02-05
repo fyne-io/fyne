@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	_ "fyne.io/fyne/test"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +23,7 @@ func TestButtonNotify(t *testing.T) {
 		tapped <- true
 	})
 
-	go button.OnMouseDown(nil)
+	go test.Click(button)
 	func() {
 		select {
 		case <-tapped:
