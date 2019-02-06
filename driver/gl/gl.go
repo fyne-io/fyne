@@ -25,7 +25,6 @@ import (
 	"github.com/goki/freetype/truetype"
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
-	"github.com/steveoc64/memdebug"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -219,7 +218,6 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			defer rasterMutex.Unlock()
 			info := rasters[img.Resource]
 			if info == nil || info.w != width || info.h != height || info.alpha != img.Alpha() {
-				memdebug.Print(time.Now(), "is not cached", name)
 				icon, err := oksvg.ReadIconStream(file)
 				if err != nil {
 					log.Println("SVG Load error:", err)
@@ -252,7 +250,6 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 					}
 				}
 			} else {
-				memdebug.Print(time.Now(), "CACHED", name)
 				raw = info.pix
 				info.expires = time.Now().Add(cacheDuration)
 			}
