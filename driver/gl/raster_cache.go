@@ -2,6 +2,7 @@ package gl
 
 import (
 	"image"
+	"os"
 	"sync"
 	"time"
 
@@ -20,24 +21,15 @@ var cacheDuration = (time.Minute * 5)
 var rasters map[fyne.Resource]*rasterInfo
 var rasterMutex sync.RWMutex
 
-// CacheHoldDuration returns the cache hold duration (default 5 mins)
-func CacheDuration() time.Duration {
-	rasterMutex.RLock()
-	defer rasterMutex.RUnlock()
-	return cacheDuration
-}
-
-// SetCacheHoldDuration sets the new cache hold duration
-func SetCacheDuration(t time.Duration) {
-	rasterMutex.Lock()
-	defer rasterMutex.Unlock()
-	memdebug.Print(time.Now(), "cache duration set to", t)
-	cacheDuration = t
-}
-
 func init() {
 	memdebug.Print(time.Now(), "init rasters")
 	rasters = make(map[fyne.Resource]*rasterInfo)
+
+	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
+		t1 := time.Now()
+		memdebug.Print(t1, "parsed duration", t)
+		cacheDuration = t
+	}
 
 	janitor := func() {
 		for {
