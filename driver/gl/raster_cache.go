@@ -27,13 +27,17 @@ func init() {
 
 	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
 		t1 := time.Now()
-		memdebug.Print(t1, "parsed duration", t)
+		memdebug.Print(t1, "parsed duration", os.Getenv("FYNE_CACHE"), t)
 		cacheDuration = t
 	}
 
 	janitor := func() {
+		delay := cacheDuration / 2
+		if delay < time.Second {
+			delay = time.Second
+		}
 		for {
-			time.Sleep(time.Minute)
+			time.Sleep(delay)
 			now := time.Now()
 			memdebug.Print(now, "check exp")
 			rasterMutex.Lock()
