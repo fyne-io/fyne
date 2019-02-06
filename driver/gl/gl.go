@@ -28,7 +28,14 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+type rasterInfo struct {
+	pix   *image.RGBA
+	w, h  int
+	alpha float64
+}
+
 var textures = make(map[fyne.CanvasObject]uint32)
+var rasters = make(map[fyne.Resource]*rasterInfo)
 var refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 const vectorPad = 10
@@ -213,28 +220,34 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		}
 
 		if strings.ToLower(filepath.Ext(name)) == ".svg" {
-			icon, err := oksvg.ReadIconStream(file)
-			if err != nil {
-				log.Println("SVG Load error:", err)
+			info := rasters[img.Resource]
+			if info == nil || info.w != width || info.h != height || info.alpha != img.Alpha() {
+				icon, err := oksvg.ReadIconStream(file)
+				if err != nil {
+					log.Println("SVG Load error:", err)
 
-				return 0
+					return 0
+				}
+				icon.SetTarget(0, 0, float64(width), float64(height))
+
+				w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
+				// this is used by our render code, so let's set it to the file aspect
+				img.PixelAspect = float32(w) / float32(h)
+				// if the image specifies it should be original size we need at least that many pixels on screen
+				if img.FillMode == canvas.ImageFillOriginal {
+					pixSize := fyne.NewSize(unscaleInt(c, w), unscaleInt(c, h))
+					img.SetMinSize(pixSize)
+				}
+
+				raw = image.NewRGBA(image.Rect(0, 0, width, height))
+				scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
+				raster := rasterx.NewDasher(width, height, scanner)
+				icon.Draw(raster, img.Alpha())
+
+				rasters[img.Resource] = &rasterInfo{raw, width, height, img.Alpha()}
+			} else {
+				raw = info.pix
 			}
-			icon.SetTarget(0, 0, float64(width), float64(height))
-
-			w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
-			// this is used by our render code, so let's set it to the file aspect
-			img.PixelAspect = float32(w) / float32(h)
-			// if the image specifies it should be original size we need at least that many pixels on screen
-			if img.FillMode == canvas.ImageFillOriginal {
-				pixSize := fyne.NewSize(unscaleInt(c, w), unscaleInt(c, h))
-				img.SetMinSize(pixSize)
-			}
-
-			raw = image.NewRGBA(image.Rect(0, 0, width, height))
-			scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
-			raster := rasterx.NewDasher(width, height, scanner)
-
-			icon.Draw(raster, 1)
 		} else {
 			pixels, _, err := image.Decode(file)
 
