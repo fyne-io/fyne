@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -24,18 +25,12 @@ import (
 	"github.com/goki/freetype/truetype"
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
+	"github.com/steveoc64/memdebug"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
 
-type rasterInfo struct {
-	pix   *image.RGBA
-	w, h  int
-	alpha float64
-}
-
 var textures = make(map[fyne.CanvasObject]uint32)
-var rasters = make(map[fyne.Resource]*rasterInfo)
 var refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 const vectorPad = 10
@@ -220,8 +215,11 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		}
 
 		if strings.ToLower(filepath.Ext(name)) == ".svg" {
+			rasterMutex.Lock()
+			defer rasterMutex.Unlock()
 			info := rasters[img.Resource]
 			if info == nil || info.w != width || info.h != height || info.alpha != img.Alpha() {
+				memdebug.Print(time.Now(), "is not cached", name)
 				icon, err := oksvg.ReadIconStream(file)
 				if err != nil {
 					log.Println("SVG Load error:", err)
@@ -244,9 +242,19 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 				raster := rasterx.NewDasher(width, height, scanner)
 				icon.Draw(raster, img.Alpha())
 
-				rasters[img.Resource] = &rasterInfo{raw, width, height, img.Alpha()}
+				if cacheDuration > 0 {
+					rasters[img.Resource] = &rasterInfo{
+						pix:     raw,
+						w:       width,
+						h:       height,
+						alpha:   img.Alpha(),
+						expires: time.Now().Add(cacheDuration),
+					}
+				}
 			} else {
+				memdebug.Print(time.Now(), "CACHED", name)
 				raw = info.pix
+				info.expires = time.Now().Add(cacheDuration)
 			}
 		} else {
 			pixels, _, err := image.Decode(file)
