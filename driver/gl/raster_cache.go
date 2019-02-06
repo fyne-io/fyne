@@ -31,6 +31,7 @@ func CacheDuration() time.Duration {
 func SetCacheDuration(t time.Duration) {
 	rasterMutex.Lock()
 	defer rasterMutex.Unlock()
+	memdebug.Print(time.Now(), "cache duration set to", t)
 	cacheDuration = t
 }
 
@@ -40,11 +41,7 @@ func init() {
 
 	janitor := func() {
 		for {
-			if cacheDuration < time.Second {
-				time.Sleep(time.Second)
-			} else {
-				time.Sleep(cacheDuration)
-			}
+			time.Sleep(time.Minute)
 			now := time.Now()
 			memdebug.Print(now, "check exp")
 			rasterMutex.Lock()
