@@ -57,6 +57,12 @@ type ScrollContainer struct {
 func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 	s.Offset.Y -= ev.DeltaY
 
+	if s.Offset.Y < 0 {
+		s.Offset.Y = 0
+	} else if s.Offset.Y+s.Size().Height >= s.Content.Size().Height {
+		s.Offset.Y = s.Content.Size().Height - s.Size().Height
+	}
+
 	Refresh(s)
 }
 
