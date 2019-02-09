@@ -4,7 +4,8 @@ package fyne
 type KeyEvent struct {
 	String string
 
-	Name KeyName
+	Name      KeyName
+	Modifiers Modifier
 }
 
 // PointEvent describes a pointer input event. The position is relative to the top-left
