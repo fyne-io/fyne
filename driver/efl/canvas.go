@@ -43,11 +43,14 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 
 	ev := new(fyne.PointEvent)
 	ev.Position = pos
-	ev.Button = fyne.MouseButton(int(info.button))
 
 	switch w := co.(type) {
 	case fyne.TappableObject:
-		w.OnTap(ev)
+		if int(info.button) == 3 {
+			go w.TappedSecondary(ev)
+		} else {
+			go w.Tapped(ev)
+		}
 	case fyne.FocusableObject:
 		current.Focus(w)
 	}
