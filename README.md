@@ -68,12 +68,17 @@ It should look like this:
   <img src="img/hello-normal.png" alt="Fyne Hello Dark Theme" />
 </p>
 
+> Note that windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
+> To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
+
 # Scaling
 
 Fyne is built entirely using vector graphics which means that applications
 that are written using it will scale to any value beautifully (not just whole number values).
-The default scale value is equated from your screen's DPI - and if you move
-a window to another screen it will re-calculate and adjust the window size accordingly!
+The default scale value is calculated from your screen's DPI - and if you move
+a window to another screen it will re-scale and adjust the window size accordingly!
+We call this "auto scaling" and it is designed to keep an app GUI the same size as you change monitor.
+You can override this behaviour by setting a specific scale using the FYNE_SCALE environment variable.
 
 <table style="text-align: center"><tr>
 <td><img src="img/hello-normal.png" alt="Hello normal size" />
