@@ -2,8 +2,6 @@ package fyne
 
 // KeyEvent describes a keyboard input event.
 type KeyEvent struct {
-	String string
-
 	Name KeyName
 }
 

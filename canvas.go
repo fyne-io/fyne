@@ -13,6 +13,8 @@ type Canvas interface {
 	Scale() float32
 	SetScale(float32)
 
-	OnKeyDown() func(*KeyEvent)
-	SetOnKeyDown(func(*KeyEvent))
+	TypedRune() func(rune)
+	SetTypedRune(func(rune))
+	TypedKey() func(*KeyEvent)
+	SetTypedKey(func(*KeyEvent))
 }

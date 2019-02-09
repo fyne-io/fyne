@@ -42,12 +42,14 @@ type ScrollableObject interface {
 }
 
 // FocusableObject describes any CanvasObject that can respond to being focused.
-// It will receive the OnFocusGained and OnFocusLost events appropriately and,
-// when focused, it will also have OnKeyDown called as keys are pressed.
+// It will receive the OnFocusGained and OnFocusLost events appropriately.
+// When focused it will also have TypedRune called as text is input and
+// TypedKey called when other keys are pressed.
 type FocusableObject interface {
 	OnFocusGained()
 	OnFocusLost()
 	Focused() bool
 
-	OnKeyDown(*KeyEvent)
+	TypedRune(rune)
+	TypedKey(*KeyEvent)
 }
