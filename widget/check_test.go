@@ -21,7 +21,7 @@ func TestCheckChecked(t *testing.T) {
 	check := NewCheck("Hi", func(on bool) {
 		checked = on
 	})
-	test.Click(check)
+	test.Tap(check)
 
 	assert.True(t, checked)
 }
@@ -32,7 +32,7 @@ func TestCheckUnChecked(t *testing.T) {
 		checked = on
 	})
 	check.Checked = checked
-	test.Click(check)
+	test.Tap(check)
 
 	assert.False(t, checked)
 }

@@ -101,14 +101,18 @@ func (c *Check) Hide() {
 	c.hide(c)
 }
 
-// OnTap is called when a pointer tapped event is captured and triggers any change handler
-func (c *Check) OnTap(*fyne.PointerEvent) {
+// Tapped is called when a pointer tapped event is captured and triggers any change handler
+func (c *Check) Tapped(*fyne.PointEvent) {
 	c.Checked = !c.Checked
 
 	if c.OnChanged != nil {
 		c.OnChanged(c.Checked)
 	}
 	Refresh(c)
+}
+
+// TappedSecondary is called when a secondary pointer tapped event is captured
+func (c *Check) TappedSecondary(*fyne.PointEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

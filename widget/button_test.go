@@ -23,7 +23,7 @@ func TestButtonNotify(t *testing.T) {
 		tapped <- true
 	})
 
-	go test.Click(button)
+	go test.Tap(button)
 	func() {
 		select {
 		case <-tapped:

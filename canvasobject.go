@@ -31,13 +31,14 @@ type ThemedObject interface {
 // TappableObject describes any CanvasObject that can also be tapped.
 // This should be implemented by buttons etc that wish to handle pointer interactions.
 type TappableObject interface {
-	OnTap(*PointerEvent)
+	Tapped(*PointEvent)
+	TappedSecondary(*PointEvent)
 }
 
 // ScrollableObject describes any CanvasObject that can also be scrolled.
 // This is mostly used to implement the widget.ScrollContainer.
 type ScrollableObject interface {
-	OnScroll(*ScrollEvent)
+	Scrolled(*ScrollEvent)
 }
 
 // FocusableObject describes any CanvasObject that can respond to being focused.

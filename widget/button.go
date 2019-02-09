@@ -144,11 +144,15 @@ func (b *Button) Hide() {
 	b.hide(b)
 }
 
-// OnTap is called when a pointer tapped event is captured and triggers any tap handler
-func (b *Button) OnTap(*fyne.PointerEvent) {
+// Tapped is called when a pointer tapped event is captured and triggers any tap handler
+func (b *Button) Tapped(*fyne.PointEvent) {
 	if b.OnTapped != nil {
 		b.OnTapped()
 	}
+}
+
+// TappedSecondary is called when a secondary pointer tapped event is captured
+func (b *Button) TappedSecondary(*fyne.PointEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

@@ -370,21 +370,18 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
 	co, x, y := findMouseObj(w.canvas, pos.X, pos.Y)
 
-	ev := new(fyne.PointerEvent)
+	ev := new(fyne.PointEvent)
 	ev.Position = fyne.NewPos(pos.X-x, pos.Y-y)
-	switch button {
-	case glfw.MouseButtonRight:
-		ev.Button = fyne.RightMouseButton
-		//	case glfw.MouseButtonMiddle:
-		//		ev.Button = fyne.middleMouseButton
-	default:
-		ev.Button = fyne.LeftMouseButton
-	}
 
 	switch wid := co.(type) {
 	case fyne.TappableObject:
 		if action == glfw.Press {
-			go wid.OnTap(ev)
+			switch button {
+			case glfw.MouseButtonRight:
+				go wid.TappedSecondary(ev)
+			default:
+				go wid.Tapped(ev)
+			}
 		}
 	case fyne.FocusableObject:
 		current.Focus(wid)
@@ -401,7 +398,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 		ev := &fyne.ScrollEvent{}
 		ev.DeltaX = int(xoff)
 		ev.DeltaY = int(yoff)
-		wid.OnScroll(ev)
+		wid.Scrolled(ev)
 	}
 }
 

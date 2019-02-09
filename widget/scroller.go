@@ -53,8 +53,8 @@ type ScrollContainer struct {
 	Offset  fyne.Position
 }
 
-// OnScroll is called when an input device triggers a scroll event
-func (s *ScrollContainer) OnScroll(ev *fyne.ScrollEvent) {
+// Scrolled is called when an input device triggers a scroll event
+func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 	s.Offset.Y -= ev.DeltaY
 
 	Refresh(s)

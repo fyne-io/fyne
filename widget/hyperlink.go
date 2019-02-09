@@ -81,11 +81,15 @@ func (hl *Hyperlink) object() fyne.Widget {
 	return hl
 }
 
-// OnTap is called when a pointer tapped event is captured and triggers any change handler
-func (hl *Hyperlink) OnTap(*fyne.PointerEvent) {
+// Tapped is called when a pointer tapped event is captured and triggers any change handler
+func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 	if hl.URL != nil {
 		fyne.CurrentApp().OpenURL(hl.URL)
 	}
+}
+
+// TappedSecondary is called when a secondary pointer tapped event is captured
+func (hl *Hyperlink) TappedSecondary(*fyne.PointEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

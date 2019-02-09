@@ -41,7 +41,7 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	C.evas_object_geometry_get(target, &x, &y, nil, nil)
 	pos := fyne.NewPos(unscaleInt(current, int(info.canvas.x-x)), unscaleInt(current, int(info.canvas.y-y)))
 
-	ev := new(fyne.PointerEvent)
+	ev := new(fyne.PointEvent)
 	ev.Position = pos
 	ev.Button = fyne.MouseButton(int(info.button))
 
