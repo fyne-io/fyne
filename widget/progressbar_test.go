@@ -43,3 +43,18 @@ func TestProgressRenderer_Layout_Overflow(t *testing.T) {
 	bar.SetValue(1.2)
 	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
 }
+
+// make sure Infinite flag is set when creating infinite progress bar
+func TestInfiniteProgressBar(t *testing.T) {
+	bar := NewProgressBar()
+	assert.False(t, bar.Infinite)
+	assert.True(t, bar.stopInfiniteLoopChan == nil)
+
+	infiniteBar := NewInfiniteProgressBar()
+	assert.True(t, infiniteBar.Infinite)
+	assert.True(t, infiniteBar.stopInfiniteLoopChan != nil)
+
+	// make sure stopping sets the value to max value
+	infiniteBar.StopInfiniteProgress()
+	assert.Equal(t, infiniteBar.Max, infiniteBar.Value)
+}
