@@ -89,6 +89,12 @@ void onObjectMouseDown_cgo(void *data, Evas *e, Evas_Object *obj, void *event_in
 	onObjectMouseDown(obj, event_info);
 }
 
+void onObjectMouseWheel_cgo(void *data, Evas *e, Evas_Object *obj, void *event_info)
+{
+	void onObjectMouseWheel(Evas_Object*, Evas_Event_Mouse_Wheel*);
+	onObjectMouseWheel(obj, event_info);
+}
+
 void onExit_cgo(Ecore_Event_Signal_Exit *sig)
 {
 	void DoQuit();
