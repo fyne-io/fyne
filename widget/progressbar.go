@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fmt"
+	"log"
 	"image/color"
 	"time"
 
@@ -133,6 +134,11 @@ func (p *ProgressBar) StopInfiniteProgress() {
 // updates the infinite-style progress bar
 // can be exited by calling ProgressBar.StopInfiniteProgress()
 func (p *ProgressBar) infiniteProgressLoop() {
+	if p.stopInfiniteLoopChan == nil {
+		log.Println("No way to stop infinite progress loop, so not allowing to start.")
+		return
+	}
+
 	tickChan := time.NewTicker(infiniteRefreshRate).C
 	var newValue float64
 
