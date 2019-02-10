@@ -110,7 +110,7 @@ func setColor(obj *C.Evas_Object, col color.Color) {
 }
 
 func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, offset fyne.Position,
-		clip *C.Evas_Object) *C.Evas_Object {
+	clip *C.Evas_Object) *C.Evas_Object {
 	var obj *C.Evas_Object
 
 	switch co := o.(type) {
