@@ -74,6 +74,12 @@ type Check struct {
 	OnChanged func(bool) `json:"-"`
 }
 
+// Set the the checked state and refresh
+func (c *Check) SetChecked(checked bool) {
+	c.Checked = checked
+	Refresh(c)
+}
+
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (c *Check) Resize(size fyne.Size) {
