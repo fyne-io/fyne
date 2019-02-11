@@ -76,6 +76,10 @@ type Check struct {
 
 // SetChecked sets the the checked state and refreshes widget
 func (c *Check) SetChecked(checked bool) {
+	if checked == c.Checked {
+		return
+	}
+
 	c.Checked = checked
 
 	if c.OnChanged != nil {
