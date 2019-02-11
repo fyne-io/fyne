@@ -77,6 +77,11 @@ type Check struct {
 // SetChecked sets the the checked state and refreshes widget
 func (c *Check) SetChecked(checked bool) {
 	c.Checked = checked
+
+	if c.OnChanged != nil {
+		c.OnChanged(c.Checked)
+	}
+
 	Refresh(c)
 }
 
@@ -109,12 +114,7 @@ func (c *Check) Hide() {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
-	c.Checked = !c.Checked
-
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
-	}
-	Refresh(c)
+	c.SetChecked(!c.Checked)
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
