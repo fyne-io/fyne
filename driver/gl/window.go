@@ -10,9 +10,20 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
+
+var (
+	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
+)
+
+func initCursors() {
+	defaultCursor = glfw.CreateStandardCursor(glfw.ArrowCursor)
+	entryCursor = glfw.CreateStandardCursor(glfw.IBeamCursor)
+	hyperlinkCursor = glfw.CreateStandardCursor(glfw.HandCursor)
+}
 
 type window struct {
 	viewport *glfw.Window
@@ -26,8 +37,8 @@ type window struct {
 	fixedSize  bool
 	padded     bool
 
-	mouseX, mouseY float64
-	onClosed       func()
+	mousePos fyne.Position
+	onClosed func()
 
 	xpos, ypos int
 }
@@ -325,22 +336,17 @@ func (w *window) refresh(viewport *glfw.Window) {
 	w.canvas.setDirty()
 }
 
-func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
-	w.mouseX = xpos
-	w.mouseY = ypos
-}
-
-func findMouseObj(canvas *glCanvas, x, y int) (fyne.CanvasObject, int, int) {
+func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int, int) {
 	found := canvas.content
 	foundX, foundY := 0, 0
 	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
-		if x < pos.X || y < pos.Y {
+		if mouse.X < pos.X || mouse.Y < pos.Y {
 			return
 		}
 
 		x2 := pos.X + walked.Size().Width
 		y2 := pos.Y + walked.Size().Height
-		if x >= x2 || y >= y2 {
+		if mouse.X >= x2 || mouse.Y >= y2 {
 			return
 		}
 
@@ -364,14 +370,26 @@ func findMouseObj(canvas *glCanvas, x, y int) (fyne.CanvasObject, int, int) {
 	return found, foundX, foundY
 }
 
+func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
+	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
+
+	co, _, _ := findMouseObj(w.canvas, w.mousePos)
+	cursor := defaultCursor
+	switch wid := co.(type) {
+	case *widget.Entry:
+		if !wid.ReadOnly {
+			cursor = entryCursor
+		}
+	case *widget.Hyperlink:
+		cursor = hyperlinkCursor
+	}
+	viewport.SetCursor(cursor)
+}
+
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
-	current := w.canvas
-
-	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
-	co, x, y := findMouseObj(w.canvas, pos.X, pos.Y)
-
+	co, x, y := findMouseObj(w.canvas, w.mousePos)
 	ev := new(fyne.PointEvent)
-	ev.Position = fyne.NewPos(pos.X-x, pos.Y-y)
+	ev.Position = fyne.NewPos(w.mousePos.X-x, w.mousePos.Y-y)
 
 	switch wid := co.(type) {
 	case fyne.TappableObject:
@@ -384,14 +402,12 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			}
 		}
 	case fyne.FocusableObject:
-		current.Focus(wid)
+		w.canvas.Focus(wid)
 	}
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	current := w.canvas
-	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
-	co, _, _ := findMouseObj(w.canvas, pos.X, pos.Y)
+	co, _, _ := findMouseObj(w.canvas, w.mousePos)
 
 	switch wid := co.(type) {
 	case fyne.ScrollableObject:
@@ -561,6 +577,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		master := len(d.windows) == 0
 		if master {
 			glfw.Init()
+			initCursors()
 		}
 
 		// make the window hidden, we will set it up and then show it later
