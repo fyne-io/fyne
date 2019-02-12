@@ -179,6 +179,10 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, target fyne.CanvasO
 	C.evas_object_show(obj)
 	c.native[parent] = obj
 	c.offsets[parent] = offset
+	c.objects[obj] = target
+	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
+		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
+		nil)
 
 	childOffset := offset.Add(pos)
 	for _, child := range objs {
