@@ -11,6 +11,8 @@ package efl
 //
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
 // void onObjectMouseWheel_cgo(Evas_Object *, void *);
+// void onObjectMouseIn_cgo(Evas_Object *, void *);
+// void onObjectMouseOut_cgo(Evas_Object *, void *);
 import "C"
 
 import (
@@ -75,6 +77,20 @@ func onObjectMouseWheel(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Wheel) {
 	case fyne.ScrollableObject:
 		w.Scrolled(ev)
 	}
+}
+
+//export onObjectMouseIn
+func onObjectMouseIn(obj *C.Evas_Object, info *C.Evas_Event_Mouse_In) {
+	co, current, _ := getMouseObject(obj, info.canvas.x, info.canvas.y)
+
+	setCursor(current.(*eflCanvas).window, co)
+}
+
+//export onObjectMouseOut
+func onObjectMouseOut(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Out) {
+	co, current, _ := getMouseObject(obj, info.canvas.x, info.canvas.y)
+
+	unsetCursor(current.(*eflCanvas).window, co)
 }
 
 type eflCanvas struct {
@@ -160,6 +176,12 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 		nil)
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_WHEEL,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseWheel_cgo)),
+		nil)
+	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_IN,
+		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseIn_cgo)),
+		nil)
+	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_OUT,
+		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseOut_cgo)),
 		nil)
 
 	if clip != nil {

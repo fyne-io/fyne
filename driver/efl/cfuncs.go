@@ -95,6 +95,18 @@ void onObjectMouseWheel_cgo(void *data, Evas *e, Evas_Object *obj, void *event_i
 	onObjectMouseWheel(obj, event_info);
 }
 
+void onObjectMouseIn_cgo(void *data, Evas *e, Evas_Object *obj, void *event_info)
+{
+	void onObjectMouseIn(Evas_Object*, Evas_Event_Mouse_In*);
+	onObjectMouseIn(obj, event_info);
+}
+
+void onObjectMouseOut_cgo(void *data, Evas *e, Evas_Object *obj, void *event_info)
+{
+	void onObjectMouseOut(Evas_Object*, Evas_Event_Mouse_Out*);
+	onObjectMouseOut(obj, event_info);
+}
+
 void onExit_cgo(Ecore_Event_Signal_Exit *sig)
 {
 	void DoQuit();

@@ -49,3 +49,9 @@ func oSWindowInit(w *window) {
 		x11WindowInit(w)
 	}
 }
+
+func setCursor(w *window, object fyne.CanvasObject) {
+}
+
+func unsetCursor(w *window, object fyne.CanvasObject) {
+}
