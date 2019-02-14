@@ -9,6 +9,11 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+const (
+	padWidth = 32
+	padHeight = 16
+)
+
 // Dialog is the common API for any dialog window with a single dismiss button
 type Dialog interface {
 	Show()
@@ -63,29 +68,27 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 }
 
 func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
-	middle := size.Height / 2
-
 	// icon
 	obj[1].Resize(fyne.NewSize(size.Height*2, size.Height*2))
 	obj[1].Move(fyne.NewPos(-size.Height*3/4, -size.Height/2))
 
 	// content (text)
 	textMin := obj[0].MinSize()
-	obj[0].Move(fyne.NewPos(size.Width/2-(textMin.Width/2), middle-textMin.Height-theme.Padding()/2))
+	obj[0].Move(fyne.NewPos(size.Width/2-(textMin.Width/2), padHeight))
 	obj[0].Resize(fyne.NewSize(textMin.Width, textMin.Height))
 
 	// buttons
 	btnMin := obj[2].MinSize().Union(obj[2].Size())
 	obj[2].Resize(btnMin)
-	obj[2].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), middle+theme.Padding()/2))
+	obj[2].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height - padHeight - btnMin.Height))
 }
 
 func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	textMin := obj[0].MinSize()
 	btnMin := obj[2].MinSize().Union(obj[2].Size())
 
-	return fyne.NewSize(fyne.Max(textMin.Width, btnMin.Width)+64,
-		textMin.Height+btnMin.Height+theme.Padding()+32)
+	return fyne.NewSize(fyne.Max(textMin.Width, btnMin.Width)+padWidth*2,
+		textMin.Height+btnMin.Height+theme.Padding()+padHeight*2)
 }
 
 func newDialogWin(title string, _ fyne.Window) fyne.Window {
