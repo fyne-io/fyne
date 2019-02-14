@@ -95,23 +95,14 @@ func (w *window) CenterOnScreen() {
 
 // sizeOnScreen gets the size of a window content in screen pixels
 func (w *window) sizeOnScreen() (int, int) {
-	var viewWidth, viewHeight int
-
 	// get current size of content inside the window
 	winContentSize := w.Content().MinSize()
 	// content size can be scaled, so factor that in to determining window size
 	scale := w.canvas.Scale()
 
-	runOnMain(func() {
-		// get current window dimensions in pixels
-		viewWidth, viewHeight = w.viewport.GetSize()
-	})
-
-	// take the larger of the window size and the content
-	// if the window is hidden, the content will be larger
-	// if the window is visible, then it will be at least as large as the scaled content
-	viewWidth = fyne.Max(int(float32(winContentSize.Width)*scale), viewWidth)
-	viewHeight = fyne.Max(int(float32(winContentSize.Height)*scale), viewHeight)
+	// calculate how many pixels will be used at this scale
+	viewWidth := int(float32(winContentSize.Width) * scale)
+	viewHeight := int(float32(winContentSize.Height) * scale)
 
 	return viewWidth, viewHeight
 }
