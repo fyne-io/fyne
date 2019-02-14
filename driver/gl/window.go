@@ -36,6 +36,7 @@ type window struct {
 	fullScreen bool
 	fixedSize  bool
 	padded     bool
+	visible    bool
 
 	mousePos fyne.Position
 	onClosed func()
@@ -57,8 +58,11 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
+	w.fullScreen = full
+	if !w.visible {
+		return
+	}
 	runOnMainAsync(func() {
-		w.fullScreen = full
 		monitor := w.getMonitorForWindow()
 		mode := monitor.GetVideoMode()
 
@@ -234,13 +238,19 @@ func (w *window) detectScale() float32 {
 
 func (w *window) Show() {
 	runOnMainAsync(func() {
+		w.visible = true
 		w.viewport.Show()
+
+		if w.fullScreen {
+			w.SetFullScreen(true)
+		}
 	})
 }
 
 func (w *window) Hide() {
 	runOnMainAsync(func() {
 		w.viewport.Hide()
+		w.visible = false
 	})
 }
 
