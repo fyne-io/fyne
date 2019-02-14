@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	padWidth = 32
+	padWidth  = 32
 	padHeight = 16
 )
 
@@ -80,7 +80,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	// buttons
 	btnMin := obj[2].MinSize().Union(obj[2].Size())
 	obj[2].Resize(btnMin)
-	obj[2].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height - padHeight - btnMin.Height))
+	obj[2].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
 }
 
 func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
