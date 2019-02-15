@@ -21,31 +21,31 @@ type CanvasObject interface {
 	Hide()
 }
 
-// ThemedObject indicates that the associated CanvasObject responds to theme
+// Themeable indicates that the associated CanvasObject responds to theme
 // changes. When the settings detect a theme change the object will be informed
 // through the invocation of ApplyTheme().
-type ThemedObject interface {
+type Themeable interface {
 	ApplyTheme()
 }
 
-// TappableObject describes any CanvasObject that can also be tapped.
+// Tappable describes any CanvasObject that can also be tapped.
 // This should be implemented by buttons etc that wish to handle pointer interactions.
-type TappableObject interface {
+type Tappable interface {
 	Tapped(*PointEvent)
 	TappedSecondary(*PointEvent)
 }
 
-// ScrollableObject describes any CanvasObject that can also be scrolled.
+// Scrollable describes any CanvasObject that can also be scrolled.
 // This is mostly used to implement the widget.ScrollContainer.
-type ScrollableObject interface {
+type Scrollable interface {
 	Scrolled(*ScrollEvent)
 }
 
-// FocusableObject describes any CanvasObject that can respond to being focused.
+// Focusable describes any CanvasObject that can respond to being focused.
 // It will receive the FocusGained and FocusLost events appropriately.
 // When focused it will also have TypedRune called as text is input and
 // TypedKey called when other keys are pressed.
-type FocusableObject interface {
+type Focusable interface {
 	FocusGained()
 	FocusLost()
 	Focused() bool

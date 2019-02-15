@@ -44,7 +44,7 @@ func (a *testApp) Quit() {
 }
 
 func (a *testApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) {
-	if themed, ok := content.(fyne.ThemedObject); ok {
+	if themed, ok := content.(fyne.Themeable); ok {
 		themed.ApplyTheme()
 		canvas.Refresh(content)
 	}

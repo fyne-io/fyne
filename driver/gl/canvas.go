@@ -11,7 +11,7 @@ import (
 type glCanvas struct {
 	window  *window
 	content fyne.CanvasObject
-	focused fyne.FocusableObject
+	focused fyne.Focusable
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -72,16 +72,16 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 	c.setDirty()
 }
 
-func (c *glCanvas) Focus(obj fyne.FocusableObject) {
+func (c *glCanvas) Focus(obj fyne.Focusable) {
 	if c.focused != nil {
-		c.focused.(fyne.FocusableObject).FocusLost()
+		c.focused.(fyne.Focusable).FocusLost()
 	}
 
 	c.focused = obj
 	obj.FocusGained()
 }
 
-func (c *glCanvas) Focused() fyne.FocusableObject {
+func (c *glCanvas) Focused() fyne.Focusable {
 	return c.focused
 }
 

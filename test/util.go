@@ -3,7 +3,7 @@ package test
 import "fyne.io/fyne"
 
 // Tap simulates a mouse click on the specified object
-func Tap(obj fyne.TappableObject) {
+func Tap(obj fyne.Tappable) {
 	ev := &fyne.PointEvent{Position: fyne.NewPos(1, 1)}
 	obj.Tapped(ev)
 }
@@ -17,7 +17,7 @@ func typeChars(chars []rune, keyDown func(rune)) {
 // Type performs a series of key events to simulate typing of a value into the specified object.
 // The focusable object will be focused before typing begins.
 // The chars parameter will be input one rune at a time to the focused object.
-func Type(obj fyne.FocusableObject, chars string) {
+func Type(obj fyne.Focusable, chars string) {
 	obj.FocusGained()
 
 	typeChars([]rune(chars), obj.TypedRune)

@@ -170,7 +170,7 @@ func (t *tabContainerRenderer) ApplyTheme() {
 	Renderer(t.tabBar).ApplyTheme()
 
 	for _, child := range t.container.Items {
-		if wid, ok := child.Content.(fyne.ThemedObject); ok {
+		if wid, ok := child.Content.(fyne.Themeable); ok {
 			wid.ApplyTheme()
 		}
 	}

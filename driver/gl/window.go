@@ -356,13 +356,13 @@ func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int
 		}
 
 		switch walked.(type) {
-		case fyne.TappableObject:
+		case fyne.Tappable:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
-		case fyne.FocusableObject:
+		case fyne.Focusable:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
-		case fyne.ScrollableObject:
+		case fyne.Scrollable:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
 		}
@@ -393,7 +393,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	ev.Position = fyne.NewPos(w.mousePos.X-x, w.mousePos.Y-y)
 
 	switch wid := co.(type) {
-	case fyne.TappableObject:
+	case fyne.Tappable:
 		if action == glfw.Press {
 			switch button {
 			case glfw.MouseButtonRight:
@@ -402,7 +402,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 				go wid.Tapped(ev)
 			}
 		}
-	case fyne.FocusableObject:
+	case fyne.Focusable:
 		w.canvas.Focus(wid)
 	}
 }
@@ -411,7 +411,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	co, _, _ := findMouseObj(w.canvas, w.mousePos)
 
 	switch wid := co.(type) {
-	case fyne.ScrollableObject:
+	case fyne.Scrollable:
 		ev := &fyne.ScrollEvent{}
 		ev.DeltaX = int(xoff)
 		ev.DeltaY = int(yoff)

@@ -54,13 +54,13 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 	ev.Position = pos
 
 	switch w := co.(type) {
-	case fyne.TappableObject:
+	case fyne.Tappable:
 		if int(info.button) == 3 {
 			go w.TappedSecondary(ev)
 		} else {
 			go w.Tapped(ev)
 		}
-	case fyne.FocusableObject:
+	case fyne.Focusable:
 		current.Focus(w)
 	}
 }
@@ -74,7 +74,7 @@ func onObjectMouseWheel(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Wheel) {
 	ev.DeltaY = int(-info.z)
 
 	switch w := co.(type) {
-	case fyne.ScrollableObject:
+	case fyne.Scrollable:
 		w.Scrolled(ev)
 	}
 }
@@ -101,7 +101,7 @@ type eflCanvas struct {
 
 	content fyne.CanvasObject
 	window  *window
-	focused fyne.FocusableObject
+	focused fyne.Focusable
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -242,7 +242,7 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, target fyne.CanvasO
 		}
 	}
 
-	if themed, ok := parent.(fyne.ThemedObject); ok {
+	if themed, ok := parent.(fyne.Themeable); ok {
 		themed.ApplyTheme()
 	}
 }
@@ -517,7 +517,7 @@ func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 	}
 }
 
-func (c *eflCanvas) Focus(obj fyne.FocusableObject) {
+func (c *eflCanvas) Focus(obj fyne.Focusable) {
 	if c.focused != nil {
 		if c.focused == obj {
 			return
@@ -530,7 +530,7 @@ func (c *eflCanvas) Focus(obj fyne.FocusableObject) {
 	obj.FocusGained()
 }
 
-func (c *eflCanvas) Focused() fyne.FocusableObject {
+func (c *eflCanvas) Focused() fyne.Focusable {
 	return c.focused
 }
 
