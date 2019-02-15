@@ -167,13 +167,6 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (t *tabContainerRenderer) ApplyTheme() {
-	Renderer(t.tabBar).ApplyTheme()
-
-	for _, child := range t.container.Items {
-		if wid, ok := child.Content.(fyne.Themeable); ok {
-			wid.ApplyTheme()
-		}
-	}
 }
 
 func (t *tabContainerRenderer) BackgroundColor() color.Color {
