@@ -268,7 +268,7 @@ func onWindowFocusGained(ee *C.Ecore_Evas) {
 	}
 
 	if canFocus, ok := w.canvas.(*eflCanvas); ok && canFocus.focused != nil {
-		canFocus.focused.OnFocusGained()
+		canFocus.focused.FocusGained()
 	}
 }
 
@@ -282,7 +282,7 @@ func onWindowFocusLost(ee *C.Ecore_Evas) {
 	}
 
 	if canFocus, ok := w.canvas.(*eflCanvas); ok && canFocus.focused != nil {
-		canFocus.focused.OnFocusLost()
+		canFocus.focused.FocusLost()
 	}
 }
 
@@ -312,49 +312,32 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	}
 	canvas := w.canvas.(*eflCanvas)
 
-	if canvas.focused == nil && canvas.onKeyDown == nil {
+	if canvas.focused == nil && canvas.onTypedRune == nil && canvas.onTypedKey == nil {
 		return
 	}
 
 	ev := new(fyne.KeyEvent)
-	ev.String = C.GoString(info.string)
-	switch C.GoString(info.keyname) {
-	case "Shift_L":
-		fallthrough
-	case "Shift_R":
-		ev.Name = fyne.KeyShift
-	case "Control_L":
-		fallthrough
-	case "Control_R":
-		ev.Name = fyne.KeyControl
-	case "Alt_L":
-		fallthrough
-	case "Alt_R":
-		ev.Name = fyne.KeyAlt
-	case "Super_L":
-		fallthrough
-	case "Super_R":
-		ev.Name = fyne.KeySuper
-
-	default:
-		ev.Name = fyne.KeyName(C.GoString(info.keyname))
+	str := C.GoString(info.string)
+	if str != "" && []rune(str)[0] < ' ' {
+		str = ""
 	}
-
-	if (info.modifiers & C.ECORE_EVENT_MODIFIER_SHIFT) != 0 {
-		ev.Modifiers |= fyne.ShiftModifier
-	}
-	if (info.modifiers & C.ECORE_EVENT_MODIFIER_CTRL) != 0 {
-		ev.Modifiers |= fyne.ControlModifier
-	}
-	if (info.modifiers & C.ECORE_EVENT_MODIFIER_ALT) != 0 {
-		ev.Modifiers |= fyne.AltModifier
-	}
+	ev.Name = fyne.KeyName(C.GoString(info.keyname))
 
 	if canvas.focused != nil {
-		canvas.focused.OnKeyDown(ev)
+		if str != "" {
+			canvas.focused.TypedRune([]rune(str)[0])
+		} else {
+			canvas.focused.TypedKey(ev)
+		}
 	}
-	if canvas.onKeyDown != nil {
-		canvas.onKeyDown(ev)
+	if str != "" {
+		if canvas.onTypedRune != nil {
+			canvas.onTypedRune([]rune(str)[0])
+		}
+	} else {
+		if canvas.onTypedKey != nil {
+			canvas.onTypedKey(ev)
+		}
 	}
 }
 

@@ -2,10 +2,7 @@ package fyne
 
 // KeyEvent describes a keyboard input event.
 type KeyEvent struct {
-	String string
-
-	Name      KeyName
-	Modifiers Modifier
+	Name KeyName
 }
 
 // PointEvent describes a pointer input event. The position is relative to the top-left

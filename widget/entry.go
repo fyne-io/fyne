@@ -190,8 +190,8 @@ func (e *Entry) cursorTextPos() int {
 	return pos
 }
 
-// OnFocusGained is called when the Entry has been given focus.
-func (e *Entry) OnFocusGained() {
+// FocusGained is called when the Entry has been given focus.
+func (e *Entry) FocusGained() {
 	if e.ReadOnly {
 		return
 	}
@@ -200,8 +200,8 @@ func (e *Entry) OnFocusGained() {
 	Refresh(e)
 }
 
-// OnFocusLost is called when the Entry has had focus removed.
-func (e *Entry) OnFocusLost() {
+// FocusLost is called when the Entry has had focus removed.
+func (e *Entry) FocusLost() {
 	e.focused = false
 
 	Refresh(e)
@@ -212,8 +212,23 @@ func (e *Entry) Focused() bool {
 	return e.focused
 }
 
-// OnKeyDown receives key input events when the Entry widget is focused.
-func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
+// TypedRune receives text input events when the Entry widget is focused.
+func (e *Entry) TypedRune(r rune) {
+	if e.ReadOnly {
+		return
+	}
+	provider := e.textProvider()
+
+	runes := []rune{r}
+	provider.insertAt(e.cursorTextPos(), runes)
+	e.CursorColumn += len(runes)
+
+	e.updateText(provider.String())
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
+// TypedKey receives key input events when the Entry widget is focused.
+func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.ReadOnly {
 		return
 	}
@@ -304,21 +319,9 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		e.CursorColumn = provider.len()
 	case fyne.KeyHome:
 		e.CursorColumn = 0
-	case fyne.KeyUnnamed, fyne.KeySpace:
-		if key.String == "" {
-			return
-		}
-		runes := []rune(key.String)
-		provider.insertAt(e.cursorTextPos(), runes)
-		e.CursorColumn += len(runes)
 	default:
-		if key.String == "" {
-			log.Println("Unhandled key press", key.String)
-			return
-		}
-		runes := []rune(key.String)
-		provider.insertAt(e.cursorTextPos(), runes)
-		e.CursorColumn += len(runes)
+		log.Println("Unhandled key press", key.Name)
+		return
 	}
 
 	e.updateText(provider.String())

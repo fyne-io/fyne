@@ -421,10 +421,6 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 
 func keyToName(key glfw.Key) fyne.KeyName {
 	switch key {
-	// printable
-	case glfw.KeySpace:
-		return fyne.KeySpace
-
 	// non-printable
 	case glfw.KeyEscape:
 		return fyne.KeyEscape
@@ -480,42 +476,14 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	case glfw.KeyF12:
 		return fyne.KeyF12
 
-	case glfw.KeyLeftShift:
-		fallthrough
-	case glfw.KeyRightShift:
-		return fyne.KeyShift
-	case glfw.KeyLeftControl:
-		fallthrough
-	case glfw.KeyRightControl:
-		return fyne.KeyControl
-	case glfw.KeyLeftAlt:
-		fallthrough
-	case glfw.KeyRightAlt:
-		return fyne.KeyAlt
-	case glfw.KeyLeftSuper:
-		fallthrough
-	case glfw.KeyRightSuper:
-		return fyne.KeySuper
-	case glfw.KeyMenu:
-		return fyne.KeyMenu
-
 	case glfw.KeyKPEnter:
 		return fyne.KeyEnter
 	}
 	return ""
 }
 
-func charToName(char rune) fyne.KeyName {
-	switch char {
-	case ' ':
-		return fyne.KeySpace
-
-	}
-	return ""
-}
-
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	if w.canvas.Focused() == nil && w.canvas.onKeyDown == nil {
+	if w.canvas.Focused() == nil && w.canvas.onTypedKey == nil {
 		return
 	}
 	if action != glfw.Press { // ignore key up
@@ -528,47 +496,25 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 
 	ev := new(fyne.KeyEvent)
 	ev.Name = keyToName(key)
-	if (mods & glfw.ModShift) != 0 {
-		ev.Modifiers |= fyne.ShiftModifier
-	}
-	if (mods & glfw.ModControl) != 0 {
-		ev.Modifiers |= fyne.ControlModifier
-	}
-	if (mods & glfw.ModAlt) != 0 {
-		ev.Modifiers |= fyne.AltModifier
-	}
 
 	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().OnKeyDown(ev)
+		go w.canvas.Focused().TypedKey(ev)
 	}
-	if w.canvas.onKeyDown != nil {
-		go w.canvas.onKeyDown(ev)
+	if w.canvas.onTypedKey != nil {
+		go w.canvas.onTypedKey(ev)
 	}
 }
 
 func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.ModifierKey) {
-	if w.canvas.Focused() == nil && w.canvas.onKeyDown == nil {
+	if w.canvas.Focused() == nil && w.canvas.onTypedRune == nil {
 		return
 	}
 
-	ev := new(fyne.KeyEvent)
-	ev.Name = charToName(char)
-	ev.String = string(char)
-	if (mods & glfw.ModShift) != 0 {
-		ev.Modifiers |= fyne.ShiftModifier
-	}
-	if (mods & glfw.ModControl) != 0 {
-		ev.Modifiers |= fyne.ControlModifier
-	}
-	if (mods & glfw.ModAlt) != 0 {
-		ev.Modifiers |= fyne.AltModifier
-	}
-
 	if w.canvas.Focused() != nil {
-		w.canvas.Focused().OnKeyDown(ev)
+		w.canvas.Focused().TypedRune(char)
 	}
-	if w.canvas.onKeyDown != nil {
-		w.canvas.onKeyDown(ev)
+	if w.canvas.onTypedRune != nil {
+		w.canvas.onTypedRune(char)
 	}
 }
 

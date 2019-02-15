@@ -103,7 +103,8 @@ type eflCanvas struct {
 	window  *window
 	focused fyne.FocusableObject
 
-	onKeyDown func(*fyne.KeyEvent)
+	onTypedRune func(rune)
+	onTypedKey  func(*fyne.KeyEvent)
 
 	objects map[*C.Evas_Object]fyne.CanvasObject
 	native  map[fyne.CanvasObject]*C.Evas_Object
@@ -522,11 +523,11 @@ func (c *eflCanvas) Focus(obj fyne.FocusableObject) {
 			return
 		}
 
-		c.focused.OnFocusLost()
+		c.focused.FocusLost()
 	}
 
 	c.focused = obj
-	obj.OnFocusGained()
+	obj.FocusGained()
 }
 
 func (c *eflCanvas) Focused() fyne.FocusableObject {
@@ -628,10 +629,18 @@ func (c *eflCanvas) SetScale(scale float32) {
 	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
 }
 
-func (c *eflCanvas) OnKeyDown() func(*fyne.KeyEvent) {
-	return c.onKeyDown
+func (c *eflCanvas) OnTypedRune() func(rune) {
+	return c.onTypedRune
 }
 
-func (c *eflCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
-	c.onKeyDown = keyDown
+func (c *eflCanvas) SetOnTypedRune(typed func(rune)) {
+	c.onTypedRune = typed
+}
+
+func (c *eflCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+	return c.onTypedKey
+}
+
+func (c *eflCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+	c.onTypedKey = typed
 }

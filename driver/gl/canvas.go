@@ -13,7 +13,8 @@ type glCanvas struct {
 	content fyne.CanvasObject
 	focused fyne.FocusableObject
 
-	onKeyDown func(*fyne.KeyEvent)
+	onTypedRune func(rune)
+	onTypedKey  func(*fyne.KeyEvent)
 
 	program uint32
 	scale   float32
@@ -73,11 +74,11 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 
 func (c *glCanvas) Focus(obj fyne.FocusableObject) {
 	if c.focused != nil {
-		c.focused.(fyne.FocusableObject).OnFocusLost()
+		c.focused.(fyne.FocusableObject).FocusLost()
 	}
 
 	c.focused = obj
-	obj.OnFocusGained()
+	obj.FocusGained()
 }
 
 func (c *glCanvas) Focused() fyne.FocusableObject {
@@ -102,12 +103,20 @@ func (c *glCanvas) SetScale(scale float32) {
 	c.setDirty()
 }
 
-func (c *glCanvas) OnKeyDown() func(*fyne.KeyEvent) {
-	return c.onKeyDown
+func (c *glCanvas) OnTypedRune() func(rune) {
+	return c.onTypedRune
 }
 
-func (c *glCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
-	c.onKeyDown = keyDown
+func (c *glCanvas) SetOnTypedRune(typed func(rune)) {
+	c.onTypedRune = typed
+}
+
+func (c *glCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+	return c.onTypedKey
+}
+
+func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+	c.onTypedKey = typed
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
