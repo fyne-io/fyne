@@ -15,6 +15,15 @@ func TestFormSize(t *testing.T) {
 	assert.Equal(t, 2, len(form.Items))
 }
 
+func TestForm_CreateRenderer(t *testing.T) {
+	form := &Form{Items: []*FormItem{{Text: "test1", Widget: NewEntry()}}}
+	assert.NotNil(t, Renderer(form))
+	assert.Equal(t, 2, len(form.itemGrid.Objects))
+
+	form.Append("test2", NewEntry())
+	assert.Equal(t, 4, len(form.itemGrid.Objects))
+}
+
 func TestForm_Append(t *testing.T) {
 	form := &Form{Items: []*FormItem{{Text: "test1", Widget: NewEntry()}}}
 	assert.Equal(t, 1, len(form.Items))

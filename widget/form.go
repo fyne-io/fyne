@@ -84,6 +84,10 @@ func (f *Form) AppendItem(item *FormItem) {
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ensureGrid()
+	for _, item := range f.Items {
+		f.itemGrid.AddObject(f.createLabel(item.Text))
+		f.itemGrid.AddObject(item.Widget)
+	}
 
 	buttons := NewHBox(layout.NewSpacer())
 	if f.OnCancel != nil {
