@@ -3,24 +3,25 @@ package fyne
 import "net/url"
 
 // An App is the definition of a graphical application.
-// Apps can have multiple windows, it will exit when the first windows to be
+// Apps can have multiple windows, it will exit when the first window to be
 // shown is closed. You can also cause the app to exit by calling Quit().
 // To start an application you need to call Run() somewhere in your main() function.
 // Alternatively use the window.ShowAndRun() function for your main window.
 type App interface {
 	// Create a new window for the application.
 	// The first window to open is considered the "master" and when closed
-	// the application will exit
+	// the application will exit.
 	NewWindow(title string) Window
 
-	// Open a URL in the default browser application
+	// Open a URL in the default browser application.
 	OpenURL(url *url.URL) error
 
-	// Icon returns the application icon, this is used in various ways depending on operating system.
+	// Icon returns the application icon, this is used in various ways
+	// depending on operating system.
 	// This is also the default icon for new windows.
 	Icon() Resource
 
-	// SetIcon sets the icon resource used for this application instance
+	// SetIcon sets the icon resource used for this application instance.
 	SetIcon(Resource)
 
 	// Run the application - this starts the event loop and waits until Quit()
@@ -42,7 +43,7 @@ type App interface {
 
 var app App
 
-// SetCurrentApp is an internal function to set the app instance currently running
+// SetCurrentApp is an internal function to set the app instance currently running.
 func SetCurrentApp(current App) {
 	app = current
 }
