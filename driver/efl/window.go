@@ -142,23 +142,14 @@ func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func (w *window) doShow(warn bool) {
+func (w *window) Show() {
 	runOnMain(func() {
 		C.ecore_evas_show(w.ee)
 	})
 
 	if len(windows) == 1 {
 		w.master = true
-
-		if warn {
-			log.Println("window.Show() no longer blocks to run the application.")
-			log.Println("If this program quit immediately try window.ShowAndRun().")
-		}
 	}
-}
-
-func (w *window) Show() {
-	w.doShow(true)
 }
 
 func (w *window) Hide() {
@@ -181,7 +172,7 @@ func (w *window) Close() {
 }
 
 func (w *window) ShowAndRun() {
-	w.doShow(false)
+	w.Show()
 	runEFL()
 }
 
