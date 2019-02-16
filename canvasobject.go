@@ -59,10 +59,3 @@ type Focusable interface {
 type Shortcutable interface {
 	Shortcut(*ShortcutEvent)
 }
-
-// ClipboardableObject describes any CanvasObject that can respond to clipboard commands (cut, copy, and paste).
-type ClipboardableObject interface {
-	OnCopy(Clipboard)
-	OnPaste(Clipboard)
-	OnCut(Clipboard)
-}
