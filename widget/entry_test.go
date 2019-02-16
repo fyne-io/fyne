@@ -428,3 +428,34 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 	assert.Equal(t, "Hié™שרה", entry.Text)
 	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
 }
+
+func TestEntry_Hide(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("test")
+
+	entry.Hide()
+	assert.Equal(t, entry.Visible(), false)
+
+	for _, child := range Renderer(entry).Objects() {
+		assert.Equal(t, child.Visible(), false)
+	}
+}
+
+func TestEntry_Show(t *testing.T) {
+	entry := NewEntry()
+
+	entry.Hide()
+
+	entry.Show()
+	assert.Equal(t, entry.Visible(), true)
+
+	for _, child := range Renderer(entry).Objects() {
+		assert.Equal(t, child.Visible(), true)
+	}
+
+	// Reperform the test with text and ensure placeholder is not visible
+	entry.SetText("test")
+	entry.Hide()
+	entry.Show()
+	assert.Equal(t, entry.placeholderProvider().Visible(), false)
+}
