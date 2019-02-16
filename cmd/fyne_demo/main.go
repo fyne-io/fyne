@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -46,18 +45,6 @@ func formApp(app fyne.App) {
 
 func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
-}
-
-func showAppDialog(w fyne.Window) {
-	label := widget.NewLabel("Example applications have moved to")
-	u, err := url.Parse("https://github.com/fyne-io/examples")
-	if err != nil {
-		panic(err)
-	}
-	link := widget.NewHyperlink("github.com/fyne-io/examples", u)
-	content := widget.NewHBox(label, link)
-
-	dialog.ShowCustom("Information", "OK", content, w)
 }
 
 func main() {
