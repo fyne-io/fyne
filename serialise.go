@@ -21,7 +21,7 @@ func toFile(res *StaticResource) {
 }
 
 // GoString converts a Resource object to Go code.
-// This is useful if serialising to a go file for compilation into a binary
+// This is useful if serialising to a Go file for compilation into a binary.
 func (r *StaticResource) GoString() string {
 	var buffer bytes.Buffer
 

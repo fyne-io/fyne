@@ -81,9 +81,28 @@ func (w *window) SetFullScreen(full bool) {
 }
 
 func (w *window) CenterOnScreen() {
+	winW, winH := w.sizeOnScreen()
+
 	runOnMain(func() {
-		// TODO
+		var screenW, screenH C.int
+		C.ecore_evas_screen_geometry_get(w.ee, nil, nil, &screenW, &screenH)
+
+		C.ecore_evas_move(w.ee, screenW/2-C.int(winW)/2, screenH/2-C.int(winH)/2)
 	})
+}
+
+// sizeOnScreen gets the size of a window content in screen pixels
+func (w *window) sizeOnScreen() (int, int) {
+	// get current size of content inside the window
+	winContentSize := w.Content().MinSize()
+	// content size can be scaled, so factor that in to determining window size
+	scale := w.canvas.Scale()
+
+	// calculate how many pixels will be used at this scale
+	viewWidth := int(float32(winContentSize.Width) * scale)
+	viewHeight := int(float32(winContentSize.Height) * scale)
+
+	return viewWidth, viewHeight
 }
 
 func (w *window) Resize(size fyne.Size) {
@@ -125,23 +144,14 @@ func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func (w *window) doShow(warn bool) {
+func (w *window) Show() {
 	runOnMain(func() {
 		C.ecore_evas_show(w.ee)
 	})
 
 	if len(windows) == 1 {
 		w.master = true
-
-		if warn {
-			log.Println("window.Show() no longer blocks to run the application.")
-			log.Println("If this program quit immediately try window.ShowAndRun().")
-		}
 	}
-}
-
-func (w *window) Show() {
-	w.doShow(true)
 }
 
 func (w *window) Hide() {
@@ -164,7 +174,7 @@ func (w *window) Close() {
 }
 
 func (w *window) ShowAndRun() {
-	w.doShow(false)
+	w.Show()
 	runEFL()
 }
 
@@ -197,6 +207,10 @@ func scaleByDPI(w *window) float32 {
 		return float32(scale)
 	}
 	C.ecore_evas_screen_dpi_get(w.ee, &xdpi, nil)
+	if xdpi > 1000 { // assume that this is a mistake and bail
+		return float32(1.0)
+	}
+
 	if xdpi > 192 {
 		return float32(1.5)
 	} else if xdpi > 144 {
@@ -255,7 +269,7 @@ func onWindowFocusGained(ee *C.Ecore_Evas) {
 	}
 
 	if canFocus, ok := w.canvas.(*eflCanvas); ok && canFocus.focused != nil {
-		canFocus.focused.OnFocusGained()
+		canFocus.focused.FocusGained()
 	}
 }
 
@@ -269,7 +283,7 @@ func onWindowFocusLost(ee *C.Ecore_Evas) {
 	}
 
 	if canFocus, ok := w.canvas.(*eflCanvas); ok && canFocus.focused != nil {
-		canFocus.focused.OnFocusLost()
+		canFocus.focused.FocusLost()
 	}
 }
 
@@ -299,69 +313,32 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 	}
 	canvas := w.canvas.(*eflCanvas)
 
-	if canvas.focused == nil && canvas.onKeyDown == nil {
+	if canvas.focused == nil && canvas.onTypedRune == nil && canvas.onTypedKey == nil {
 		return
 	}
 
 	ev := new(fyne.KeyEvent)
-	ev.String = C.GoString(info.string)
-	switch C.GoString(info.keyname) {
-	case "Shift_L":
-		fallthrough
-	case "Shift_R":
-		ev.Name = fyne.KeyShift
-	case "Control_L":
-		fallthrough
-	case "Control_R":
-		ev.Name = fyne.KeyControl
-	case "Alt_L":
-		fallthrough
-	case "Alt_R":
-		ev.Name = fyne.KeyAlt
-	case "Super_L":
-		fallthrough
-	case "Super_R":
-		ev.Name = fyne.KeySuper
-
-	default:
-		ev.Name = fyne.KeyName(C.GoString(info.keyname))
+	str := C.GoString(info.string)
+	if str != "" && []rune(str)[0] < ' ' {
+		str = ""
 	}
-
-	if (info.modifiers & C.ECORE_EVENT_MODIFIER_SHIFT) != 0 {
-		ev.Modifiers |= fyne.ShiftModifier
-	}
-	if (info.modifiers & C.ECORE_EVENT_MODIFIER_CTRL) != 0 {
-		ev.Modifiers |= fyne.ControlModifier
-	}
-	if (info.modifiers & C.ECORE_EVENT_MODIFIER_ALT) != 0 {
-		ev.Modifiers |= fyne.AltModifier
-	}
+	ev.Name = fyne.KeyName(C.GoString(info.keyname))
 
 	if canvas.focused != nil {
-		focusedObject := canvas.focused
-		clipboardableObject, isClipboardable := focusedObject.(fyne.ClipboardableObject)
-
-		// handle shortcut, if none pass event to the focusedObject OnKeyDown callback
-		switch ev.Shortcut() {
-		case fyne.ShortcutPaste:
-			if isClipboardable {
-				clipboardableObject.OnPaste(w.Clipboard())
-			}
-		case fyne.ShortcutCopy:
-			if isClipboardable {
-				clipboardableObject.OnCopy(w.Clipboard())
-			}
-		case fyne.ShortcutCut:
-			if isClipboardable {
-				clipboardableObject.OnCut(w.Clipboard())
-			}
-		default:
-			focusedObject.OnKeyDown(ev)
+		if str != "" {
+			canvas.focused.TypedRune([]rune(str)[0])
+		} else {
+			canvas.focused.TypedKey(ev)
 		}
 	}
-	
-	if canvas.onKeyDown != nil {
-		canvas.onKeyDown(ev)
+	if str != "" {
+		if canvas.onTypedRune != nil {
+			canvas.onTypedRune([]rune(str)[0])
+		}
+	} else {
+		if canvas.onTypedKey != nil {
+			canvas.onTypedKey(ev)
+		}
 	}
 }
 

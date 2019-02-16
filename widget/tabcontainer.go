@@ -78,7 +78,7 @@ func (t *TabContainer) SelectTabIndex(index int) {
 	}
 
 	t.current = index
-	Renderer(t).Refresh()
+	Refresh(t)
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
@@ -167,13 +167,6 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (t *tabContainerRenderer) ApplyTheme() {
-	Renderer(t.tabBar).ApplyTheme()
-
-	for _, child := range t.container.Items {
-		if wid, ok := child.Content.(fyne.ThemedObject); ok {
-			wid.ApplyTheme()
-		}
-	}
 }
 
 func (t *tabContainerRenderer) BackgroundColor() color.Color {

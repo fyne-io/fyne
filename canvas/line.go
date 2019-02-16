@@ -21,8 +21,8 @@ type Line struct {
 
 // Size returns the current size of bounding box for this line object
 func (l *Line) Size() fyne.Size {
-	return fyne.NewSize(int(math.Abs(float64(l.Position2.X))-math.Abs(float64(l.Position1.X))),
-		int(math.Abs(float64(l.Position2.Y))-math.Abs(float64(l.Position1.Y))))
+	return fyne.NewSize(int(math.Abs(float64(l.Position2.X)-float64(l.Position1.X))),
+		int(math.Abs(float64(l.Position2.Y)-float64(l.Position1.Y))))
 }
 
 // Resize sets a new bottom-right position for the line object

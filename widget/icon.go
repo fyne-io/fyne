@@ -90,7 +90,7 @@ func (i *Icon) Hide() {
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res
 
-	Renderer(i).Refresh()
+	Refresh(i)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

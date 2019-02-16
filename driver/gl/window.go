@@ -10,9 +10,20 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
+
+var (
+	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
+)
+
+func initCursors() {
+	defaultCursor = glfw.CreateStandardCursor(glfw.ArrowCursor)
+	entryCursor = glfw.CreateStandardCursor(glfw.IBeamCursor)
+	hyperlinkCursor = glfw.CreateStandardCursor(glfw.HandCursor)
+}
 
 type window struct {
 	viewport *glfw.Window
@@ -27,9 +38,10 @@ type window struct {
 	fullScreen bool
 	fixedSize  bool
 	padded     bool
+	visible    bool
 
-	mouseX, mouseY float64
-	onClosed       func()
+	mousePos fyne.Position
+	onClosed func()
 
 	xpos, ypos int
 }
@@ -48,8 +60,11 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
+	w.fullScreen = full
+	if !w.visible {
+		return
+	}
 	runOnMainAsync(func() {
-		w.fullScreen = full
 		monitor := w.getMonitorForWindow()
 		mode := monitor.GetVideoMode()
 
@@ -65,16 +80,15 @@ func (w *window) SetFullScreen(full bool) {
 }
 
 func (w *window) CenterOnScreen() {
-	runOnMainAsync(func() {
+	viewWidth, viewHeight := w.sizeOnScreen()
+
+	runOnMain(func() {
 		// get window dimensions in pixels
 		monitor := w.getMonitorForWindow()
 		monMode := monitor.GetVideoMode()
 
 		// these come into play when dealing with multiple monitors
 		monX, monY := monitor.GetPos()
-
-		// get current window dimensions in pixels
-		viewWidth, viewHeight := w.viewport.GetSize()
 
 		// math them to the middle
 		newX := (monMode.Width / 2) - (viewWidth / 2) + monX
@@ -83,6 +97,20 @@ func (w *window) CenterOnScreen() {
 		// set new window coordinates
 		w.viewport.SetPos(newX, newY)
 	})
+}
+
+// sizeOnScreen gets the size of a window content in screen pixels
+func (w *window) sizeOnScreen() (int, int) {
+	// get current size of content inside the window
+	winContentSize := w.Content().MinSize()
+	// content size can be scaled, so factor that in to determining window size
+	scale := w.canvas.Scale()
+
+	// calculate how many pixels will be used at this scale
+	viewWidth := int(float32(winContentSize.Width) * scale)
+	viewHeight := int(float32(winContentSize.Height) * scale)
+
+	return viewWidth, viewHeight
 }
 
 func (w *window) Resize(size fyne.Size) {
@@ -153,6 +181,10 @@ func (w *window) SetOnClosed(closed func()) {
 }
 
 func scaleForDpi(xdpi int) float32 {
+	if xdpi > 1000 { // assume that this is a mistake and bail
+		return float32(1.0)
+	}
+
 	if xdpi > 192 {
 		return float32(1.5)
 	} else if xdpi > 144 {
@@ -208,13 +240,19 @@ func (w *window) detectScale() float32 {
 
 func (w *window) Show() {
 	runOnMainAsync(func() {
+		w.visible = true
 		w.viewport.Show()
+
+		if w.fullScreen {
+			w.SetFullScreen(true)
+		}
 	})
 }
 
 func (w *window) Hide() {
 	runOnMainAsync(func() {
 		w.viewport.Hide()
+		w.visible = false
 	})
 }
 
@@ -258,7 +296,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 		pad := theme.Padding() * 2
 		min = fyne.NewSize(min.Width+pad, min.Height+pad)
 	}
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		w.fitContent()
 		w.resize(min)
 	})
@@ -306,24 +344,20 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 
 func (w *window) refresh(viewport *glfw.Window) {
 	updateWinSize(w)
+	w.canvas.setDirty()
 }
 
-func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
-	w.mouseX = xpos
-	w.mouseY = ypos
-}
-
-func findMouseObj(obj fyne.CanvasObject, x, y int) (fyne.CanvasObject, int, int) {
-	found := obj
+func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int, int) {
+	found := canvas.content
 	foundX, foundY := 0, 0
-	walkObjects(obj, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
-		if x < pos.X || y < pos.Y {
+	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
+		if mouse.X < pos.X || mouse.Y < pos.Y {
 			return
 		}
 
 		x2 := pos.X + walked.Size().Width
 		y2 := pos.Y + walked.Size().Height
-		if x >= x2 || y >= y2 {
+		if mouse.X >= x2 || mouse.Y >= y2 {
 			return
 		}
 
@@ -332,10 +366,13 @@ func findMouseObj(obj fyne.CanvasObject, x, y int) (fyne.CanvasObject, int, int)
 		}
 
 		switch walked.(type) {
-		case fyne.ClickableObject:
+		case fyne.Tappable:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
-		case fyne.FocusableObject:
+		case fyne.Focusable:
+			found = walked
+			foundX, foundY = pos.X, pos.Y
+		case fyne.Scrollable:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
 		}
@@ -344,45 +381,56 @@ func findMouseObj(obj fyne.CanvasObject, x, y int) (fyne.CanvasObject, int, int)
 	return found, foundX, foundY
 }
 
-func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
-	current := w.canvas
+func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
+	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
 
-	pos := fyne.NewPos(unscaleInt(current, int(w.mouseX)), unscaleInt(current, int(w.mouseY)))
-	co, x, y := findMouseObj(w.canvas.content, pos.X, pos.Y)
-
-	ev := new(fyne.MouseEvent)
-	ev.Position = fyne.NewPos(pos.X-x, pos.Y-y)
-	switch button {
-	case glfw.MouseButtonRight:
-		ev.Button = fyne.RightMouseButton
-		//	case glfw.MouseButtonMiddle:
-		//		ev.Button = fyne.middleMouseButton
-	default:
-		ev.Button = fyne.LeftMouseButton
-	}
-
-	switch w := co.(type) {
-	case fyne.ClickableObject:
-		if action == glfw.Press {
-			go w.OnMouseDown(ev)
+	co, _, _ := findMouseObj(w.canvas, w.mousePos)
+	cursor := defaultCursor
+	switch wid := co.(type) {
+	case *widget.Entry:
+		if !wid.ReadOnly {
+			cursor = entryCursor
 		}
-	case fyne.FocusableObject:
-		current.Focus(w)
+	case *widget.Hyperlink:
+		cursor = hyperlinkCursor
+	}
+	viewport.SetCursor(cursor)
+}
+
+func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
+	co, x, y := findMouseObj(w.canvas, w.mousePos)
+	ev := new(fyne.PointEvent)
+	ev.Position = fyne.NewPos(w.mousePos.X-x, w.mousePos.Y-y)
+
+	switch wid := co.(type) {
+	case fyne.Tappable:
+		if action == glfw.Press {
+			switch button {
+			case glfw.MouseButtonRight:
+				go wid.TappedSecondary(ev)
+			default:
+				go wid.Tapped(ev)
+			}
+		}
+	case fyne.Focusable:
+		w.canvas.Focus(wid)
+	}
+}
+
+func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
+	co, _, _ := findMouseObj(w.canvas, w.mousePos)
+
+	switch wid := co.(type) {
+	case fyne.Scrollable:
+		ev := &fyne.ScrollEvent{}
+		ev.DeltaX = int(xoff)
+		ev.DeltaY = int(yoff)
+		wid.Scrolled(ev)
 	}
 }
 
 func keyToName(key glfw.Key) fyne.KeyName {
 	switch key {
-	// printable
-	case glfw.KeySpace:
-		return fyne.KeySpace
-	case glfw.KeyC:
-		return fyne.KeyC
-	case glfw.KeyV:
-		return fyne.KeyV
-	case glfw.KeyX:
-		return fyne.KeyX
-
 	// non-printable
 	case glfw.KeyEscape:
 		return fyne.KeyEscape
@@ -438,54 +486,14 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	case glfw.KeyF12:
 		return fyne.KeyF12
 
-	case glfw.KeyLeftShift:
-		fallthrough
-	case glfw.KeyRightShift:
-		return fyne.KeyShift
-	case glfw.KeyLeftControl:
-		fallthrough
-	case glfw.KeyRightControl:
-		return fyne.KeyControl
-	case glfw.KeyLeftAlt:
-		fallthrough
-	case glfw.KeyRightAlt:
-		return fyne.KeyAlt
-	case glfw.KeyLeftSuper:
-		fallthrough
-	case glfw.KeyRightSuper:
-		return fyne.KeySuper
-	case glfw.KeyMenu:
-		return fyne.KeyMenu
-
 	case glfw.KeyKPEnter:
 		return fyne.KeyEnter
 	}
 	return ""
 }
 
-func charToName(char rune) fyne.KeyName {
-	switch char {
-	case ' ':
-		return fyne.KeySpace
-
-	}
-	return ""
-}
-
-// keyPressed sets the key callback which is called when a key is pressed,
-// repeated or released.
-//
-// The key functions deal with physical keys, with layout independent key tokens
-// named after their values in the standard US keyboard layout.
-//
-// When a window loses focus, it will generate synthetic key release events for
-// all pressed keys. You can tell these events from user-generated events by the
-// fact that the synthetic ones are generated after the window has lost focus,
-// i.e. Focused will be false and the focus callback will have already been
-// called.
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	focusedObject := w.canvas.Focused()
-	if focusedObject == nil && w.canvas.onKeyDown == nil {
+	if w.canvas.Focused() == nil && w.canvas.onTypedKey == nil {
 		return
 	}
 
@@ -496,48 +504,12 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 
 	ev := new(fyne.KeyEvent)
 	ev.Name = keyToName(key)
-	if (mods & glfw.ModShift) != 0 {
-		ev.Modifiers |= fyne.ShiftModifier
+
+	if w.canvas.Focused() != nil {
+		go w.canvas.Focused().TypedKey(ev)
 	}
-	if (mods & glfw.ModControl) != 0 {
-		ev.Modifiers |= fyne.ControlModifier
-	}
-	if (mods & glfw.ModAlt) != 0 {
-		ev.Modifiers |= fyne.AltModifier
-	}
-
-	if focusedObject != nil {
-
-		clipboardableObject, isClipboardable := focusedObject.(fyne.ClipboardableObject)
-
-		// handle shortcut
-		switch ev.Shortcut() {
-		case fyne.ShortcutPaste:
-			if isClipboardable {
-				clipboardableObject.OnPaste(w.Clipboard())
-			}
-		case fyne.ShortcutCopy:
-			if isClipboardable {
-				clipboardableObject.OnCopy(w.Clipboard())
-			}
-		case fyne.ShortcutCut:
-			if isClipboardable {
-				clipboardableObject.OnCut(w.Clipboard())
-			}
-		default:
-			// No shortcut detected. Pass the event to the focusedObject
-			// OnKeyDown callback if it is not a printable char
-			if key <= glfw.KeyWorld1 {
-				// printable characters handled in charModInput
-				break
-			}
-
-			go focusedObject.OnKeyDown(ev)
-		}
-	}
-
-	if w.canvas.onKeyDown != nil {
-		go w.canvas.onKeyDown(ev)
+	if w.canvas.onTypedKey != nil {
+		go w.canvas.onTypedKey(ev)
 	}
 }
 
@@ -548,29 +520,15 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 // Unicode character input. Characters do not map 1:1 to physical keys,
 // as a key may produce zero, one or more characters.
 func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.ModifierKey) {
-	if w.canvas.Focused() == nil && w.canvas.onKeyDown == nil {
+	if w.canvas.Focused() == nil && w.canvas.onTypedRune == nil {
 		return
 	}
 
-	ev := new(fyne.KeyEvent)
-	ev.Name = charToName(char)
-	ev.String = string(char)
-	if (mods & glfw.ModShift) != 0 {
-		ev.Modifiers |= fyne.ShiftModifier
-	}
-	if (mods & glfw.ModControl) != 0 {
-		ev.Modifiers |= fyne.ControlModifier
-	}
-	if (mods & glfw.ModAlt) != 0 {
-		ev.Modifiers |= fyne.AltModifier
-	}
-
 	if w.canvas.Focused() != nil {
-		w.canvas.Focused().OnKeyDown(ev)
+		w.canvas.Focused().TypedRune(char)
 	}
-
-	if w.canvas.onKeyDown != nil {
-		w.canvas.onKeyDown(ev)
+	if w.canvas.onTypedRune != nil {
+		w.canvas.onTypedRune(char)
 	}
 }
 
@@ -580,6 +538,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		master := len(d.windows) == 0
 		if master {
 			glfw.Init()
+			initCursors()
 		}
 
 		// make the window hidden, we will set it up and then show it later
@@ -616,6 +575,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		win.SetRefreshCallback(ret.refresh)
 		win.SetCursorPosCallback(ret.mouseMoved)
 		win.SetMouseButtonCallback(ret.mouseClicked)
+		win.SetScrollCallback(ret.mouseScrolled)
 		win.SetKeyCallback(ret.keyPressed)
 		win.SetCharModsCallback(ret.charModInput)
 		glfw.DetachCurrentContext()

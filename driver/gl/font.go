@@ -111,3 +111,13 @@ func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 
 	return face
 }
+
+func clearFontCache() {
+	for _, item := range fontCache {
+		for _, face := range item.faces {
+			face.Close()
+		}
+	}
+
+	fontCache = make(map[fyne.TextStyle]*fontCacheItem)
+}

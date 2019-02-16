@@ -3,7 +3,7 @@ package widget
 import (
 	"testing"
 
-	_ "fyne.io/fyne/test"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +21,7 @@ func TestCheckChecked(t *testing.T) {
 	check := NewCheck("Hi", func(on bool) {
 		checked = on
 	})
-	check.OnMouseDown(nil)
+	test.Tap(check)
 
 	assert.True(t, checked)
 }
@@ -32,7 +32,42 @@ func TestCheckUnChecked(t *testing.T) {
 		checked = on
 	})
 	check.Checked = checked
-	check.OnMouseDown(nil)
+	test.Tap(check)
 
 	assert.False(t, checked)
+}
+
+func TestCheckIsDisabledByDefault(t *testing.T) {
+	checkedStateFromCallback := false
+	NewCheck("", func(on bool) {
+		checkedStateFromCallback = on
+	})
+
+	assert.False(t, checkedStateFromCallback)
+}
+
+func TestCheckIsEnabledAfterUpdating(t *testing.T) {
+	checkedStateFromCallback := false
+	check := NewCheck("", func(on bool) {
+		checkedStateFromCallback = on
+	})
+
+	check.SetChecked(true)
+
+	assert.True(t, checkedStateFromCallback)
+}
+
+func TestCheckStateIsCorrectAfterMultipleUpdates(t *testing.T) {
+	checkedStateFromCallback := false
+	check := NewCheck("", func(on bool) {
+		checkedStateFromCallback = on
+	})
+
+	expectedCheckedState := false
+	for i := 0; i < 5; i++ {
+		check.SetChecked(expectedCheckedState)
+		assert.True(t, checkedStateFromCallback == expectedCheckedState)
+
+		expectedCheckedState = !expectedCheckedState
+	}
 }

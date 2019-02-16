@@ -17,9 +17,9 @@
 //   	w.SetContent(widget.NewVBox(
 //   		widget.NewLabel("Hello Fyne!"),
 //   		widget.NewButton("Quit", func() {
-//   			app.Quit()
+//   			a.Quit()
 //   		})))
 //
-//   	w.Show()
+//   	w.ShowAndRun()
 //   }
 package fyne // import "fyne.io/fyne"

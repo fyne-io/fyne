@@ -1,45 +1,11 @@
 package fyne
 
-// KeyName represents the name of a key that has been pressed (or released)
+// KeyName represents the name of a key that has been pressed
 type KeyName string
 
 const (
-	// KeyUnnamed is used when the key does not have a name (check the key string for a printable version)
-	KeyUnnamed = ""
-
-	// Printable keys
-
-	// KeySpace name can also be checked with KeyEvent.String == " "
-	KeySpace = "space"
-	/*
-		Apostrophe
-		Comma
-		Minus
-		Fullstop
-		Slash
-		0
-		..
-		9
-		Semicolon
-		Equal
-		A
-		..
-		Z
-		LeftBracket
-		Backslash
-		RightBracket
-		BackQuote
-	*/
-
-	// Printable keys used in shortcut
-	KeyC = "C"
-	KeyV = "V"
-	KeyX = "X"
-
-	// Non-printable keys
-
 	// KeyEscape is the "esc" key
-	KeyEscape = "Escape"
+	KeyEscape KeyName = "Escape"
 	// KeyReturn is the carriage return (main keyboard)
 	KeyReturn = "Return"
 	// KeyTab is the tab advance key
@@ -66,12 +32,6 @@ const (
 	KeyHome = "Home"
 	// KeyEnd is the line-end key
 	KeyEnd = "End"
-
-	//	CapsLock
-	//	ScrollLock
-	//	NumLock
-	//	PrintScreen
-	//	Pause
 
 	// KeyF1 is the first function key
 	KeyF1 = "F1"
@@ -105,41 +65,4 @@ const (
 
 	// KeyEnter is the enter/ return key (keypad)
 	KeyEnter = "KP_Enter"
-
-	// KeyShift represents the left or right shift key
-	KeyShift = "Shift"
-	// KeyControl represents the left or right control key
-	KeyControl = "Control"
-	// KeyAlt represents the left or right alt key
-	KeyAlt = "Alt"
-	// KeySuper represents the left or right "Windows" key (or "Command" key on macOS)
-	KeySuper = "Super"
-	// KeyMenu represents the left or right menu / application key
-	KeyMenu = "Menu"
-)
-
-// Modifier captures any key modifiers (shift etc) pressed during this key event
-type Modifier int
-
-const (
-	// ShiftModifier represents a shift key being held
-	ShiftModifier Modifier = 1 << iota
-	// ControlModifier represents the ctrl key being held
-	ControlModifier
-	// AltModifier represents either alt keys being held
-	AltModifier
-)
-
-// KeyShortcut reprents the key combination associable to a command (i.e. copy, paste...)
-type KeyShortcut int
-
-const (
-	// ShortcutNone represents the key combinations that do not have command associated to
-	ShortcutNone KeyShortcut = iota
-	// ShortcutCopy represents the key combinations used to copy text from the clipboard
-	ShortcutCopy
-	// ShortcutPaste represents the key combinations used to paste text to the clipboard
-	ShortcutPaste
-	// ShortcutCut represents the key combinations used to cut text to the clipboard
-	ShortcutCut
 )

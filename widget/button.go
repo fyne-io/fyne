@@ -144,11 +144,15 @@ func (b *Button) Hide() {
 	b.hide(b)
 }
 
-// OnMouseDown is called when a mouse down event is captured and triggers any tap handler
-func (b *Button) OnMouseDown(*fyne.MouseEvent) {
+// Tapped is called when a pointer tapped event is captured and triggers any tap handler
+func (b *Button) Tapped(*fyne.PointEvent) {
 	if b.OnTapped != nil {
 		b.OnTapped()
 	}
+}
+
+// TappedSecondary is called when a secondary pointer tapped event is captured
+func (b *Button) TappedSecondary(*fyne.PointEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
@@ -175,14 +179,14 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 func (b *Button) SetText(text string) {
 	b.Text = text
 
-	Renderer(b).Refresh()
+	Refresh(b)
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
 	b.Icon = icon
 
-	Renderer(b).Refresh()
+	Refresh(b)
 }
 
 // NewButton creates a new button widget with the set label and tap handler

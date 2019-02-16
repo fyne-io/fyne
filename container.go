@@ -23,23 +23,23 @@ func (c *Container) layout() {
 	}
 }
 
-// Size returns the current size of this container
+// Size returns the current size of this container.
 func (c *Container) Size() Size {
 	return c.size
 }
 
-// Resize sets a new size for the Container
+// Resize sets a new size for the Container.
 func (c *Container) Resize(size Size) {
 	c.size = size
 	c.layout()
 }
 
-// Position gets the current position of this Container, relative to it's parent
+// Position gets the current position of this Container, relative to its parent.
 func (c *Container) Position() Position {
 	return c.position
 }
 
-// Move the container (and all it's children) to a new position, relative to it's parent
+// Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
 	c.position = pos
 	c.layout()
@@ -65,7 +65,7 @@ func (c *Container) Visible() bool {
 	return !c.Hidden
 }
 
-// Show sets this container, and all it's children, to be visible
+// Show sets this container, and all its children, to be visible.
 func (c *Container) Show() {
 	c.Hidden = false
 	for _, child := range c.Objects {
@@ -73,7 +73,7 @@ func (c *Container) Show() {
 	}
 }
 
-// Hide sets this container, and all it's children, to be not visible
+// Hide sets this container, and all its children, to be not visible.
 func (c *Container) Hide() {
 	c.Hidden = true
 	for _, child := range c.Objects {
@@ -81,13 +81,13 @@ func (c *Container) Hide() {
 	}
 }
 
-// AddObject adds another CanvasObject to the set this Container holds
+// AddObject adds another CanvasObject to the set this Container holds.
 func (c *Container) AddObject(o CanvasObject) {
 	c.Objects = append(c.Objects, o)
 	c.layout()
 }
 
-// NewContainer returns a new Container instance holding the specified CanvasObjects
+// NewContainer returns a new Container instance holding the specified CanvasObjects.
 func NewContainer(objects ...CanvasObject) *Container {
 	ret := &Container{
 		Objects: objects,
@@ -100,7 +100,7 @@ func NewContainer(objects ...CanvasObject) *Container {
 }
 
 // NewContainerWithLayout returns a new Container instance holding the specified
-// CanvasObjects which will be laid out according to the specified Layout
+// CanvasObjects which will be laid out according to the specified Layout.
 func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 	ret := &Container{
 		Objects: objects,

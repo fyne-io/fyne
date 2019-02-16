@@ -85,11 +85,10 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	if e.text.len() > 0 {
-		e.placeholder.Hide()
-	} else {
+	e.placeholder.refreshTextRenderer()
+	e.placeholder.Hide()
+	if e.text.len() == 0 && e.entry.Visible() {
 		e.placeholder.Show()
-		e.placeholder.refreshTextRenderer()
 	}
 
 	e.text.refreshTextRenderer()
@@ -142,6 +141,9 @@ func (e *Entry) MinSize() fyne.Size {
 // Show this widget, if it was previously hidden
 func (e *Entry) Show() {
 	e.show(e)
+	if len(e.Text) != 0 {
+		e.placeholderProvider().Hide()
+	}
 }
 
 // Hide this widget, if it was previously visible
@@ -165,7 +167,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 func (e *Entry) SetReadOnly(ro bool) {
 	e.ReadOnly = ro
 
-	Renderer(e).Refresh()
+	Refresh(e)
 }
 
 // updateText updates the internal text to the given value
@@ -175,7 +177,7 @@ func (e *Entry) updateText(text string) {
 		e.OnChanged(text)
 	}
 
-	Renderer(e).Refresh()
+	Refresh(e)
 }
 
 func (e *Entry) cursorTextPos() int {
@@ -189,21 +191,21 @@ func (e *Entry) cursorTextPos() int {
 	return pos
 }
 
-// OnFocusGained is called when the Entry has been given focus.
-func (e *Entry) OnFocusGained() {
+// FocusGained is called when the Entry has been given focus.
+func (e *Entry) FocusGained() {
 	if e.ReadOnly {
 		return
 	}
 	e.focused = true
 
-	Renderer(e).Refresh()
+	Refresh(e)
 }
 
-// OnFocusLost is called when the Entry has had focus removed.
-func (e *Entry) OnFocusLost() {
+// FocusLost is called when the Entry has had focus removed.
+func (e *Entry) FocusLost() {
 	e.focused = false
 
-	Renderer(e).Refresh()
+	Refresh(e)
 }
 
 // Focused returns whether or not this Entry has focus.
@@ -238,6 +240,23 @@ func (e *Entry) OnPaste(clipboard fyne.Clipboard) {
 
 // OnKeyDown receives key input events when the Entry widget is focused.
 func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
+// TypedRune receives text input events when the Entry widget is focused.
+func (e *Entry) TypedRune(r rune) {
+	if e.ReadOnly {
+		return
+	}
+	provider := e.textProvider()
+
+	runes := []rune{r}
+	provider.insertAt(e.cursorTextPos(), runes)
+	e.CursorColumn += len(runes)
+
+	e.updateText(provider.String())
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
+// TypedKey receives key input events when the Entry widget is focused.
+func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.ReadOnly {
 		return
 	}
@@ -328,21 +347,9 @@ func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 		e.CursorColumn = provider.len()
 	case fyne.KeyHome:
 		e.CursorColumn = 0
-	case fyne.KeyUnnamed, fyne.KeySpace:
-		if key.String == "" {
-			return
-		}
-		runes := []rune(key.String)
-		provider.insertAt(e.cursorTextPos(), runes)
-		e.CursorColumn += len(runes)
 	default:
-		if key.String == "" {
-			log.Println("Unhandled key press", key.String)
-			return
-		}
-		runes := []rune(key.String)
-		provider.insertAt(e.cursorTextPos(), runes)
-		e.CursorColumn += len(runes)
+		log.Println("Unhandled key press", key.Name)
+		return
 	}
 
 	e.updateText(provider.String())
@@ -429,7 +436,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 func NewEntry() *Entry {
 	e := &Entry{}
 
-	Renderer(e).Refresh()
+	Refresh(e)
 	return e
 }
 
@@ -437,7 +444,7 @@ func NewEntry() *Entry {
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
 
-	Renderer(e).Refresh()
+	Refresh(e)
 	return e
 }
 
@@ -445,6 +452,6 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 
-	Renderer(e).Refresh()
+	Refresh(e)
 	return e
 }

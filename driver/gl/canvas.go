@@ -11,14 +11,16 @@ import (
 type glCanvas struct {
 	window  *window
 	content fyne.CanvasObject
-	focused fyne.FocusableObject
+	focused fyne.Focusable
 
-	onKeyDown func(*fyne.KeyEvent)
+	onTypedRune func(rune)
+	onTypedKey  func(*fyne.KeyEvent)
 
 	program uint32
 	scale   float32
 
 	dirty1, dirty2 bool
+	refreshQueue   chan fyne.CanvasObject
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
@@ -62,7 +64,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 	select {
-	case refreshQueue <- obj:
+	case c.refreshQueue <- obj:
 		// all good
 	default:
 		// queue is full, ignore
@@ -70,16 +72,16 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 	c.setDirty()
 }
 
-func (c *glCanvas) Focus(obj fyne.FocusableObject) {
+func (c *glCanvas) Focus(obj fyne.Focusable) {
 	if c.focused != nil {
-		c.focused.(fyne.FocusableObject).OnFocusLost()
+		c.focused.(fyne.Focusable).FocusLost()
 	}
 
 	c.focused = obj
-	obj.OnFocusGained()
+	obj.FocusGained()
 }
 
-func (c *glCanvas) Focused() fyne.FocusableObject {
+func (c *glCanvas) Focused() fyne.Focusable {
 	return c.focused
 }
 
@@ -101,12 +103,20 @@ func (c *glCanvas) SetScale(scale float32) {
 	c.setDirty()
 }
 
-func (c *glCanvas) OnKeyDown() func(*fyne.KeyEvent) {
-	return c.onKeyDown
+func (c *glCanvas) OnTypedRune() func(rune) {
+	return c.onTypedRune
 }
 
-func (c *glCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
-	c.onKeyDown = keyDown
+func (c *glCanvas) SetOnTypedRune(typed func(rune)) {
+	c.onTypedRune = typed
+}
+
+func (c *glCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+	return c.onTypedKey
+}
+
+func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+	c.onTypedKey = typed
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
@@ -130,7 +140,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
 		c.drawObject(obj, pos, size)
 	}
-	walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
+	c.walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
 }
 
 func (c *glCanvas) setDirty() {
@@ -145,6 +155,7 @@ func (c *glCanvas) isDirty() bool {
 
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
+	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 	c.initOpenGL()
 

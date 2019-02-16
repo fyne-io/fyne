@@ -6,13 +6,15 @@ type Canvas interface {
 	Content() CanvasObject
 	SetContent(CanvasObject)
 	Refresh(CanvasObject)
-	Focus(FocusableObject)
-	Focused() FocusableObject
+	Focus(Focusable)
+	Focused() Focusable
 
 	Size() Size
 	Scale() float32
 	SetScale(float32)
 
-	OnKeyDown() func(*KeyEvent)
-	SetOnKeyDown(func(*KeyEvent))
+	OnTypedRune() func(rune)
+	SetOnTypedRune(func(rune))
+	OnTypedKey() func(*KeyEvent)
+	SetOnTypedKey(func(*KeyEvent))
 }

@@ -2,9 +2,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"time"
+	"net/url"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -49,12 +48,29 @@ func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
 }
 
+func showAppDialog(w fyne.Window) {
+	label := widget.NewLabel("Example applications have moved to")
+	u, err := url.Parse("https://github.com/fyne-io/examples")
+	if err != nil {
+		panic(err)
+	}
+	link := widget.NewHyperlink("github.com/fyne-io/examples", u)
+	content := widget.NewHBox(label, link)
+
+	dialog.ShowCustom("Information", "OK", content, w)
+}
+
 func main() {
 	a := app.New()
 	w := a.NewWindow("Fyne Demo")
 
-	cv := canvas.NewImageFromResource(theme.FyneLogo())
-	cv.SetMinSize(fyne.NewSize(64, 64))
+	logo := canvas.NewImageFromResource(theme.FyneLogo())
+	logo.SetMinSize(fyne.NewSize(64, 64))
+
+	fyneio, err := url.Parse("https://fyne.io/")
+	if err != nil {
+		panic(err)
+	}
 
 	w.SetContent(widget.NewVBox(
 		widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -65,62 +81,31 @@ func main() {
 			widget.NewToolbarAction(theme.PasteIcon(), func() { fmt.Println("Paste") }),
 		),
 
-		widget.NewButton("Apps", func() {
-			dialog.ShowInformation("Information", "Example applications have moved to https://github.com/fyne-io/examples", w)
-		}),
-
 		widget.NewGroup("Demos",
 			widget.NewButton("Canvas", func() { Canvas(a) }),
 			widget.NewButton("Icons", func() { Icons(a) }),
 			widget.NewButton("Layout", func() { Layout(a) }),
 			widget.NewButton("Widgets", func() { Widget(a) }),
 			widget.NewButton("Form", func() { formApp(a) }),
+			widget.NewButton("Dialogs", func() { Dialogs(a) }),
 		),
 
-		widget.NewHBox(layout.NewSpacer(), cv, layout.NewSpacer()),
-
-		widget.NewGroup("Dialogs",
-			widget.NewButton("Info", func() {
-				dialog.ShowInformation("Information", "You should know this thing...", w)
-			}),
-			widget.NewButton("Error", func() {
-				err := errors.New("A dummy error message")
-				dialog.ShowError(err, w)
-			}),
-			widget.NewButton("Confirm", func() {
-				cnf := dialog.NewConfirm("Confirmation", "Are you enjoying this demo?", confirmCallback, w)
-				cnf.SetDismissText("Nah")
-				cnf.SetConfirmText("Oh Yes!")
-				cnf.Show()
-			}),
-			widget.NewButton("Progress", func() {
-				prog := dialog.NewProgress("MyProgress", "Nearly there...", w)
-
-				go func() {
-					num := 0.0
-					for num < 1.0 {
-						time.Sleep(50 * time.Millisecond)
-						prog.SetValue(num)
-						num += 0.01
-					}
-
-					prog.SetValue(1)
-				}()
-
-				prog.Show()
-			}),
+		widget.NewGroup("Theme",
+			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+				widget.NewButton("Dark", func() {
+					a.Settings().SetTheme(theme.DarkTheme())
+				}),
+				widget.NewButton("Light", func() {
+					a.Settings().SetTheme(theme.LightTheme())
+				}),
+			),
 		),
 
+		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
+		widget.NewHyperlinkWithStyle("fyne.io", fyneio, fyne.TextAlignCenter, fyne.TextStyle{}),
 		layout.NewSpacer(),
 
-		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-			widget.NewButton("Dark", func() {
-				a.Settings().SetTheme(theme.DarkTheme())
-			}),
-			widget.NewButton("Light", func() {
-				a.Settings().SetTheme(theme.LightTheme())
-			}),
-		),
+		widget.NewButton("Advanced", func() { Advanced(a) }),
 		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
 			a.Quit()
 		}),

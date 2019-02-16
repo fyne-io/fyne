@@ -41,7 +41,7 @@ func (r *radioRenderer) MinSize() fyne.Size {
 func (r *radioRenderer) Layout(size fyne.Size) {
 	itemHeight := r.radio.itemHeight()
 	y := 0
-	labelSize := fyne.NewSize(size.Width-theme.IconInlineSize()+theme.Padding(), itemHeight)
+	labelSize := fyne.NewSize(size.Width-theme.IconInlineSize()-theme.Padding(), itemHeight)
 
 	for _, item := range r.items {
 		item.label.Resize(labelSize)
@@ -125,8 +125,8 @@ func (r *Radio) Hide() {
 	r.hide(r)
 }
 
-// OnMouseDown is called when a mouse down event is captured and triggers any change handler
-func (r *Radio) OnMouseDown(event *fyne.MouseEvent) {
+// Tapped is called when a pointer tapped event is captured and triggers any change handler
+func (r *Radio) Tapped(event *fyne.PointEvent) {
 	index := (event.Position.Y - theme.Padding()) / r.itemHeight()
 	if index < 0 || index >= len(r.Options) { // in the padding
 		return
@@ -143,6 +143,10 @@ func (r *Radio) OnMouseDown(event *fyne.MouseEvent) {
 		r.OnChanged(r.Selected)
 	}
 	Renderer(r).Refresh()
+}
+
+// TappedSecondary is called when a secondary pointer tapped event is captured
+func (r *Radio) TappedSecondary(*fyne.PointEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

@@ -2,10 +2,11 @@ package fyne
 
 import "image/color"
 
-// Theme defines the requirements of any Fyne theme
+// Theme defines the requirements of any Fyne theme.
 type Theme interface {
 	BackgroundColor() color.Color
 	ButtonColor() color.Color
+	HyperlinkColor() color.Color
 	TextColor() color.Color
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color

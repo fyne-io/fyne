@@ -15,12 +15,12 @@ type Label struct {
 	TextStyle fyne.TextStyle // The style of the label text
 }
 
-// NewLabel creates a new layout widget with the set text content
+// NewLabel creates a new label widget with the set text content
 func NewLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{})
 }
 
-// NewLabelWithStyle creates a new layout widget with the set text content
+// NewLabelWithStyle creates a new label widget with the set text content
 func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextStyle) *Label {
 	l := &Label{
 		Text:      text,

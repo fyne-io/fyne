@@ -21,29 +21,37 @@ type CanvasObject interface {
 	Hide()
 }
 
-// ThemedObject indicates that the associated CanvasObject responds to theme
+// Themeable indicates that the associated CanvasObject responds to theme
 // changes. When the settings detect a theme change the object will be informed
 // through the invocation of ApplyTheme().
-type ThemedObject interface {
+type Themeable interface {
 	ApplyTheme()
 }
 
-// ClickableObject describes any CanvasObject that can also be clicked
-// (i.e. has mouse handlers). This should be implemented by buttons etc that
-// wish to handle pointer interactions.
-type ClickableObject interface {
-	OnMouseDown(*MouseEvent)
+// Tappable describes any CanvasObject that can also be tapped.
+// This should be implemented by buttons etc that wish to handle pointer interactions.
+type Tappable interface {
+	Tapped(*PointEvent)
+	TappedSecondary(*PointEvent)
 }
 
-// FocusableObject describes any CanvasObject that can respond to being focused.
-// It will receive the OnFocusGained and OnFocusLost events appropriately and,
-// when focussed, it will also have OnKeyDown called as keys are pressed.
-type FocusableObject interface {
-	OnFocusGained()
-	OnFocusLost()
+// Scrollable describes any CanvasObject that can also be scrolled.
+// This is mostly used to implement the widget.ScrollContainer.
+type Scrollable interface {
+	Scrolled(*ScrollEvent)
+}
+
+// Focusable describes any CanvasObject that can respond to being focused.
+// It will receive the FocusGained and FocusLost events appropriately.
+// When focused it will also have TypedRune called as text is input and
+// TypedKey called when other keys are pressed.
+type Focusable interface {
+	FocusGained()
+	FocusLost()
 	Focused() bool
 
-	OnKeyDown(*KeyEvent)
+	TypedRune(rune)
+	TypedKey(*KeyEvent)
 }
 
 // ClipboardableObject describes any CanvasObject that can respond to clipboard commands (cut, copy, and paste).

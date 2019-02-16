@@ -49,14 +49,14 @@ func (g *Group) Hide() {
 func (g *Group) Prepend(object fyne.CanvasObject) {
 	g.box.Prepend(object)
 
-	Renderer(g).Refresh()
+	Refresh(g)
 }
 
 // Append adds a new CanvasObject to the end of the group
 func (g *Group) Append(object fyne.CanvasObject) {
 	g.box.Append(object)
 
-	Renderer(g).Refresh()
+	Refresh(g)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

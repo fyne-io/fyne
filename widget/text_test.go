@@ -220,7 +220,7 @@ func TestText_DeleteFromTo(t *testing.T) {
 
 func TestText_Color(t *testing.T) {
 	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
-	Renderer(text.presenter.object()).Refresh()
+	Refresh(text.presenter.object())
 
 	assert.Equal(t, color.White, textRenderTexts(text)[0].Color)
 }

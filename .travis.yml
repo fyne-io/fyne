@@ -21,12 +21,13 @@ before_script:
   - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
+  - go get github.com/stretchr/testify
 
 script:
   - test -z $(gofmt -s -l $NO_VENDOR)
   - go test -v -tags ci -race ./...
   - go vet -tags ci -unsafeptr=false ./...
-  - golint -set_exit_status $(go list -tags ci)
+  - golint -set_exit_status $(go list -tags ci ./...) || exit 1
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then exit; fi'
   - go test -tags ci -race -covermode=atomic -coverprofile=coverage.out ./...
   - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN

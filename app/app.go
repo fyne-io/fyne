@@ -62,7 +62,7 @@ func (app *fyneApp) Settings() fyne.Settings {
 }
 
 func (app *fyneApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) {
-	if themed, ok := content.(fyne.ThemedObject); ok {
+	if themed, ok := content.(fyne.Themeable); ok {
 		themed.ApplyTheme()
 		canvas.Refresh(content)
 	}
@@ -84,6 +84,7 @@ func (app *fyneApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) 
 
 func (app *fyneApp) applyTheme() {
 	for _, window := range app.driver.AllWindows() {
+		window.Content().Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 		app.applyThemeTo(window.Content(), window.Canvas())
 	}
 }
@@ -109,7 +110,7 @@ func NewAppWithDriver(d fyne.Driver) fyne.App {
 	newApp.Settings().AddChangeListener(listener)
 	go func() {
 		for {
-			_ = <-listener
+			<-listener
 			newApp.applyTheme()
 		}
 	}()

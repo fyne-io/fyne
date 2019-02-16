@@ -74,6 +74,21 @@ type Check struct {
 	OnChanged func(bool) `json:"-"`
 }
 
+// SetChecked sets the the checked state and refreshes widget
+func (c *Check) SetChecked(checked bool) {
+	if checked == c.Checked {
+		return
+	}
+
+	c.Checked = checked
+
+	if c.OnChanged != nil {
+		c.OnChanged(c.Checked)
+	}
+
+	Refresh(c)
+}
+
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (c *Check) Resize(size fyne.Size) {
@@ -101,14 +116,13 @@ func (c *Check) Hide() {
 	c.hide(c)
 }
 
-// OnMouseDown is called when a mouse down event is captured and triggers any change handler
-func (c *Check) OnMouseDown(*fyne.MouseEvent) {
-	c.Checked = !c.Checked
+// Tapped is called when a pointer tapped event is captured and triggers any change handler
+func (c *Check) Tapped(*fyne.PointEvent) {
+	c.SetChecked(!c.Checked)
+}
 
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
-	}
-	Renderer(c).Refresh()
+// TappedSecondary is called when a secondary pointer tapped event is captured
+func (c *Check) TappedSecondary(*fyne.PointEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
