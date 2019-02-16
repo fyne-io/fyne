@@ -517,12 +517,15 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	ev := new(fyne.KeyEvent)
 	ev.Name = keyToName(key)
 
-	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().TypedKey(ev)
+	if ev.Name <= fyne.KeyF12 {
+		if w.canvas.Focused() != nil {
+			go w.canvas.Focused().TypedKey(ev)
+		}
+		if w.canvas.onTypedKey != nil {
+			go w.canvas.onTypedKey(ev)
+		}
 	}
-	if w.canvas.onTypedKey != nil {
-		go w.canvas.onTypedKey(ev)
-	}
+	// TODO handle desktop keys
 }
 
 func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.ModifierKey) {

@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
@@ -320,11 +319,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.CursorColumn = provider.len()
 	case fyne.KeyHome:
 		e.CursorColumn = 0
-	case desktop.KeyShift:
-	case desktop.KeyControl:
-	case desktop.KeyAlt:
-	case desktop.KeySuper:
-	case desktop.KeyMenu:
 	default:
 		log.Println("Unhandled key press", key.Name)
 		return
