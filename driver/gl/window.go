@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -476,6 +477,25 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	case glfw.KeyF12:
 		return fyne.KeyF12
 
+	case glfw.KeyLeftShift:
+		fallthrough
+	case glfw.KeyRightShift:
+		return desktop.KeyShift
+	case glfw.KeyLeftControl:
+		fallthrough
+	case glfw.KeyRightControl:
+		return desktop.KeyControl
+	case glfw.KeyLeftAlt:
+		fallthrough
+	case glfw.KeyRightAlt:
+		return desktop.KeyAlt
+	case glfw.KeyLeftSuper:
+		fallthrough
+	case glfw.KeyRightSuper:
+		return desktop.KeySuper
+	case glfw.KeyMenu:
+		return desktop.KeyMenu
+
 	case glfw.KeyKPEnter:
 		return fyne.KeyEnter
 	}
@@ -510,12 +530,18 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 		return
 	}
 
-	if w.canvas.Focused() != nil {
-		w.canvas.Focused().TypedRune(char)
+	if mods == 0 || mods == glfw.ModShift {
+		if w.canvas.Focused() != nil {
+			w.canvas.Focused().TypedRune(char)
+		}
+		if w.canvas.onTypedRune != nil {
+			w.canvas.onTypedRune(char)
+		}
+
+		return
 	}
-	if w.canvas.onTypedRune != nil {
-		w.canvas.onTypedRune(char)
-	}
+
+	// TODO handle shortcuts
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
