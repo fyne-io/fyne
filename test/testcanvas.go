@@ -10,6 +10,7 @@ type testCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+	onShortcut  func(*fyne.ShortcutEvent)
 }
 
 func (c *testCanvas) Content() fyne.CanvasObject {
@@ -57,6 +58,14 @@ func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 
 func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
 	c.onTypedKey = handler
+}
+
+func (c *testCanvas) SetOnShortcut(handler func(*fyne.ShortcutEvent)) {
+	c.onShortcut = handler
+}
+
+func (c *testCanvas) OnShortcut() func(*fyne.ShortcutEvent) {
+	return c.onShortcut
 }
 
 // NewCanvas returns a single use in-memory canvas used for testing

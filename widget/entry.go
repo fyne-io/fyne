@@ -213,33 +213,27 @@ func (e *Entry) Focused() bool {
 	return e.focused
 }
 
-// OnCopy handles the clipboard copy command
-func (e *Entry) OnCopy(clipboard fyne.Clipboard) {
-	log.Println("OnCopy not implemented yet")
-}
-
-// OnCut handles the clipboard cut command
-func (e *Entry) OnCut(clipboard fyne.Clipboard) {
-	log.Println("OnCut not implemented yet")
-}
-
-// OnPaste handles the clipboard paste command
-func (e *Entry) OnPaste(clipboard fyne.Clipboard) {
-	text := clipboard.Content()
-	if !e.MultiLine {
-		// format clipboard content to be compatible with single line entry
-		text = strings.Replace(text, "\n", " ", -1)
+// Shortcut handles the shortcut events
+func (e *Entry) Shortcut(se *fyne.ShortcutEvent) {
+	switch se.Name {
+	case fyne.ShortcutPaste:
+		text := se.Clipboard.Content()
+		if !e.MultiLine {
+			// format clipboard content to be compatible with single line entry
+			text = strings.Replace(text, "\n", " ", -1)
+		}
+		provider := e.textProvider()
+		runes := []rune(text)
+		provider.insertAt(e.cursorTextPos(), runes)
+		e.CursorColumn += len(runes)
+		e.updateText(provider.String())
+		Renderer(e).(*entryRenderer).moveCursor()
+	default:
+		log.Println("Unhandled shortucut event", se.Name)
+		return
 	}
-	provider := e.textProvider()
-	runes := []rune(text)
-	provider.insertAt(e.cursorTextPos(), runes)
-	e.CursorColumn += len(runes)
-	e.updateText(provider.String())
-	Renderer(e).(*entryRenderer).moveCursor()
 }
 
-// OnKeyDown receives key input events when the Entry widget is focused.
-func (e *Entry) OnKeyDown(key *fyne.KeyEvent) {
 // TypedRune receives text input events when the Entry widget is focused.
 func (e *Entry) TypedRune(r rune) {
 	if e.ReadOnly {

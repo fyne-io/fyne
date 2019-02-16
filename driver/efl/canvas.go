@@ -105,6 +105,7 @@ type eflCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+	onShortcut  func(*fyne.ShortcutEvent)
 
 	objects map[*C.Evas_Object]fyne.CanvasObject
 	native  map[fyne.CanvasObject]*C.Evas_Object
@@ -643,4 +644,12 @@ func (c *eflCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 
 func (c *eflCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 	c.onTypedKey = typed
+}
+
+func (c *eflCanvas) OnShortcut() func(*fyne.ShortcutEvent) {
+	return c.onShortcut
+}
+
+func (c *eflCanvas) SetOnShortcut(typed func(*fyne.ShortcutEvent)) {
+	c.onShortcut = typed
 }

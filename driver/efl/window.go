@@ -326,14 +326,24 @@ func onWindowKeyDown(ew C.Ecore_Window, info *C.Ecore_Event_Key) {
 
 	if canvas.focused != nil {
 		if str != "" {
-			canvas.focused.TypedRune([]rune(str)[0])
+			if info.modifiers == C.ECORE_EVENT_MODIFIER_CTRL && (str == "v" || str == "V") {
+				sev := &fyne.ShortcutEvent{Name: fyne.ShortcutPaste, Clipboard: w.Clipboard()}
+				canvas.focused.Shortcut(sev)
+			} else {
+				canvas.focused.TypedRune([]rune(str)[0])
+			}
 		} else {
 			canvas.focused.TypedKey(ev)
 		}
 	}
 	if str != "" {
-		if canvas.onTypedRune != nil {
-			canvas.onTypedRune([]rune(str)[0])
+		if canvas.onShortcut != nil && info.modifiers == C.ECORE_EVENT_MODIFIER_CTRL && (str == "v" || str == "V") {
+			sev := &fyne.ShortcutEvent{Name: fyne.ShortcutPaste, Clipboard: w.Clipboard()}
+			canvas.onShortcut(sev)
+		} else {
+			if canvas.onTypedRune != nil {
+				canvas.onTypedRune([]rune(str)[0])
+			}
 		}
 	} else {
 		if canvas.onTypedKey != nil {

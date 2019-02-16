@@ -6,6 +6,7 @@ import (
 	_ "image/png" // for the icon
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 
 	"fyne.io/fyne"
@@ -513,7 +514,7 @@ func keyToName(key glfw.Key) fyne.KeyName {
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	if w.canvas.Focused() == nil && w.canvas.onTypedKey == nil {
+	if w.canvas.Focused() == nil && w.canvas.onTypedKey == nil && w.canvas.onShortcut == nil {
 		return
 	}
 
@@ -522,18 +523,61 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		return
 	}
 
-	ev := new(fyne.KeyEvent)
-	ev.Name = keyToName(key)
-
-	if ev.Name <= fyne.KeyF12 {
+	shortcutName := shortcut(key, mods)
+	sev := &fyne.ShortcutEvent{Name: shortcutName}
+	switch shortcutName {
+	case fyne.ShortcutPaste, fyne.ShortcutCopy, fyne.ShortcutCut:
+		sev.Clipboard = w.Clipboard()
+	case fyne.ShortcutNone:
+		// No shortcut detected, pass down to TypedKey
+		ev := new(fyne.KeyEvent)
+		ev.Name = keyToName(key)
+		if ev.Name > fyne.KeyF12 {
+			return
+		}
 		if w.canvas.Focused() != nil {
 			go w.canvas.Focused().TypedKey(ev)
 		}
 		if w.canvas.onTypedKey != nil {
 			go w.canvas.onTypedKey(ev)
 		}
+		return
 	}
-	// TODO handle desktop keys
+
+	if w.canvas.Focused() != nil {
+		go w.canvas.Focused().Shortcut(sev)
+	}
+	if w.canvas.onShortcut != nil {
+		go w.canvas.onShortcut(sev)
+	}
+}
+
+// shortcut detects the shortcut associated to a combination key, if any
+func shortcut(key glfw.Key, mods glfw.ModifierKey) fyne.Shortcut {
+	if mods == 0 {
+		return fyne.ShortcutNone
+	}
+
+	modCtrl := glfw.ModControl
+	if runtime.GOOS == "darwin" {
+		modCtrl = glfw.ModSuper
+	}
+	switch key {
+	case glfw.KeyV:
+		if mods == modCtrl {
+			return fyne.ShortcutPaste
+		}
+	case glfw.KeyC:
+		if mods == modCtrl {
+			return fyne.ShortcutCopy
+		}
+	case glfw.KeyX:
+		if mods == modCtrl {
+			return fyne.ShortcutCut
+		}
+	}
+
+	return fyne.ShortcutNone
 }
 
 // charModInput defines the character with modifiers callback which is called when a

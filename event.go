@@ -17,3 +17,9 @@ type ScrollEvent struct {
 	PointEvent
 	DeltaX, DeltaY int
 }
+
+// ShortcutEvent describes a shortcut input event.
+type ShortcutEvent struct {
+	Name Shortcut
+	Clipboard
+}
