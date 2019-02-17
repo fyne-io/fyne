@@ -64,7 +64,6 @@ func newTexture() uint32 {
 
 func (c *glCanvas) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
 	circle := obj.(*canvas.Circle)
-	texture := newTexture()
 	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2
 
 	width := scaleInt(c, circle.Size().Width+vectorPad*2)
@@ -87,15 +86,11 @@ func (c *glCanvas) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
 	rasterx.AddCircle(float64(width/2), float64(height/2), float64(scaleInt(c, radius)), dasher)
 	dasher.Draw()
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
-		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(raw.Pix))
-
-	return texture
+	return c.imgToTexture(raw)
 }
 
 func (c *glCanvas) newGlLineTexture(obj fyne.CanvasObject) uint32 {
 	line := obj.(*canvas.Line)
-	texture := newTexture()
 
 	col := line.StrokeColor
 	width := scaleInt(c, line.Size().Width+vectorPad*2)
@@ -115,15 +110,10 @@ func (c *glCanvas) newGlLineTexture(obj fyne.CanvasObject) uint32 {
 	dasher.Stop(true)
 	dasher.Draw()
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
-		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(raw.Pix))
-
-	return texture
+	return c.imgToTexture(raw)
 }
 
 func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
-	texture := newTexture()
-
 	col := theme.BackgroundColor()
 	if wid, ok := rect.(fyne.Widget); ok {
 		widCol := widget.Renderer(wid).BackgroundColor()
@@ -136,18 +126,11 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 		}
 	}
 
-	r, g, b, a := col.RGBA()
-	r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
-	data := []uint8{r8, g8, b8, a8}
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
-		gl.UNSIGNED_BYTE, gl.Ptr(data))
-
-	return texture
+	return c.imgToTexture(image.NewUniform(col))
 }
 
 func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	text := obj.(*canvas.Text)
-	texture := newTexture()
 
 	textScale := 1
 	if runtime.GOOS == "darwin" {
@@ -171,10 +154,7 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(img.Rect.Size().X), int32(img.Rect.Size().Y),
-		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(img.Pix))
-
-	return texture
+	return c.imgToTexture(img)
 }
 
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
@@ -224,7 +204,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 			icon.Draw(raster, 1)
 
-			return c.img2Texture(tex)
+			return c.imgToTexture(tex)
 		}
 
 		pixels, _, err := image.Decode(file)
@@ -246,16 +226,24 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		tex := image.NewRGBA(pixels.Bounds())
 		draw.Draw(tex, pixels.Bounds(), pixels, image.ZP, draw.Src)
 
-		return c.img2Texture(tex)
+		return c.imgToTexture(tex)
 	case img.Raster != nil:
-		return c.img2Texture(img.Raster(width, height))
+		return c.imgToTexture(img.Raster(width, height))
 	default:
-		return c.img2Texture(image.NewRGBA(image.Rect(0, 0, 1, 1)))
+		return c.imgToTexture(image.NewRGBA(image.Rect(0, 0, 1, 1)))
 	}
 }
 
-func (c *glCanvas) img2Texture(img image.Image) uint32 {
+func (c *glCanvas) imgToTexture(img image.Image) uint32 {
 	switch i := img.(type) {
+	case (*image.Uniform):
+		texture := newTexture()
+		r, g, b, a := i.RGBA()
+		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
+		data := []uint8{r8, g8, b8, a8}
+		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
+			gl.UNSIGNED_BYTE, gl.Ptr(data))
+		return texture
 	case (*image.RGBA):
 		var texture uint32
 		texture = newTexture()
@@ -264,7 +252,8 @@ func (c *glCanvas) img2Texture(img image.Image) uint32 {
 		return texture
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-		return c.img2Texture(rgba)
+		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
+		return c.imgToTexture(rgba)
 	}
 }
 
