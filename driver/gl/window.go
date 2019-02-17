@@ -16,6 +16,10 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
+const (
+	scrollSpeed = 10
+)
+
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
 )
@@ -414,8 +418,8 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	switch wid := co.(type) {
 	case fyne.Scrollable:
 		ev := &fyne.ScrollEvent{}
-		ev.DeltaX = int(xoff)
-		ev.DeltaY = int(yoff)
+		ev.DeltaX = int(xoff * scrollSpeed)
+		ev.DeltaY = int(yoff * scrollSpeed)
 		wid.Scrolled(ev)
 	}
 }
