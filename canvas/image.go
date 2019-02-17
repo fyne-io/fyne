@@ -99,6 +99,7 @@ type subImg interface {
 // Images returned from this method will map pixel for pixel to the screen
 // starting img.Bounds().Min pixels from the top left of the canvas object.
 // Truncates rather than scales the image.
+// If smaller than the target space, the image will be padded with zero-pixels to the target size.
 func NewRasterFromImage(img image.Image) *Image {
 	return &Image{
 		Raster: func(w int, h int) image.Image {
@@ -109,12 +110,7 @@ func NewRasterFromImage(img image.Image) *Image {
 			switch {
 			case w == bounds.Max.X && h == bounds.Max.Y:
 				return img
-			case w != bounds.Max.X || h != bounds.Max.Y:
-				if !rect.Overlaps(bounds) {
-					return image.NewUniform(color.RGBA{})
-				}
-				bounds = bounds.Intersect(rect)
-			default:
+			case w >= bounds.Max.X && h >= bounds.Max.Y:
 				// try quickly truncating
 				if sub, ok := img.(subImg); ok {
 					return sub.SubImage(image.Rectangle{
@@ -125,9 +121,12 @@ func NewRasterFromImage(img image.Image) *Image {
 						},
 					})
 				}
+			default:
+				if !rect.Overlaps(bounds) {
+					return image.NewUniform(color.RGBA{})
+				}
+				bounds = bounds.Intersect(rect)
 			}
-
-			// re-draw image as RGBA
 
 			// respect the user's pixel format (if possible)
 			var dst draw.Image
