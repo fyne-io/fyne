@@ -262,6 +262,10 @@ func (c *glCanvas) imgToTexture(img image.Image) uint32 {
 			gl.UNSIGNED_BYTE, gl.Ptr(data))
 		return texture
 	case (*image.RGBA):
+		if len(i.Pix) == 0 { // image is empty
+			return 0
+		}
+
 		var texture uint32
 		texture = newTexture()
 		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(i.Rect.Size().X), int32(i.Rect.Size().Y),
