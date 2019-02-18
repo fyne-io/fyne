@@ -37,8 +37,10 @@ func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasO
 	}
 	texture := textures[object]
 
-	texture = creator(object)
-	textures[object] = texture
+	if texture == 0 {
+		texture = creator(object)
+		textures[object] = texture
+	}
 	return texture
 }
 
