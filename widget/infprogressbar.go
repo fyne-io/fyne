@@ -50,7 +50,7 @@ func (p *infProgressRenderer) updateBar() {
 		barPos.X = 0
 	}
 
-	p.bar.Move(fyne.Position{barPos.X, barPos.Y})
+	p.bar.Move(fyne.Position{X: barPos.X, Y: barPos.Y})
 }
 
 // Layout the components of the progress bar widget
@@ -79,8 +79,8 @@ func (p *infProgressRenderer) Objects() []fyne.CanvasObject {
 	return p.objects
 }
 
-// ProgressBar widget creates a horizontal panel that indicates progress
-// An infinite ProgressBar loops 0% -> 100% until StopInfiniteProgress() is called
+// InfProgressBar widget creates a horizontal panel that indicates waiting indefinitely
+// An infinite progress bar loops 0% -> 100% until Stop() is called
 type InfProgressBar struct {
 	baseWidget
 
@@ -116,13 +116,14 @@ func (p *InfProgressBar) Hide() {
 	p.hide(p)
 }
 
+// Start the infinite progress bar background thread to update it continuously
 func (p *InfProgressBar) Start() {
 	if p.ticker == nil {
 		go p.infiniteProgressLoop()
 	}
 }
 
-// Stops the infinite progress goroutine and sets value to the Max
+// Stop the infinite progress goroutine and sets value to the Max
 func (p *InfProgressBar) Stop() {
 	if p.ticker != nil {
 		p.ticker.Stop()
