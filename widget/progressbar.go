@@ -2,9 +2,7 @@ package widget
 
 import (
 	"fmt"
-	"log"
 	"image/color"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -12,7 +10,6 @@ import (
 )
 
 const defaultText = "%d%%"
-const infiniteRefreshRate = 50 * time.Millisecond
 
 type progressRenderer struct {
 	objects []fyne.CanvasObject
@@ -42,9 +39,7 @@ func (p *progressRenderer) updateBar() {
 	delta := float32(p.progress.Max - p.progress.Min)
 	ratio := float32(p.progress.Value-p.progress.Min) / float32(delta)
 
-	if !p.progress.Infinite {
-		p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
-	}
+	p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
 
 	size := p.progress.Size()
 	p.bar.Resize(fyne.NewSize(int(float32(size.Width)*ratio), size.Height))
@@ -79,13 +74,10 @@ func (p *progressRenderer) Objects() []fyne.CanvasObject {
 }
 
 // ProgressBar widget creates a horizontal panel that indicates progress
-// An infinite ProgressBar loops 0% -> 100% until StopInfiniteProgress() is called
 type ProgressBar struct {
 	baseWidget
 
-	Min, Max, Value      float64
-	Infinite             bool
-	stopInfiniteLoopChan chan bool
+	Min, Max, Value float64
 }
 
 // Resize sets a new size for a widget.
@@ -122,40 +114,6 @@ func (p *ProgressBar) SetValue(v float64) {
 	Renderer(p).Refresh()
 }
 
-// Stops the infinite progress goroutine and sets value to the Max
-func (p *ProgressBar) StopInfiniteProgress() {
-	if p.stopInfiniteLoopChan != nil {
-		p.stopInfiniteLoopChan <- true
-	}
-	p.SetValue(p.Max)
-}
-
-// internal loop called with `go infiniteProgressLoop()`
-// updates the infinite-style progress bar
-// can be exited by calling ProgressBar.StopInfiniteProgress()
-func (p *ProgressBar) infiniteProgressLoop() {
-	if p.stopInfiniteLoopChan == nil {
-		log.Println("No way to stop infinite progress loop, so not allowing to start.")
-		return
-	}
-
-	tickChan := time.NewTicker(infiniteRefreshRate).C
-	var newValue float64
-
-	for {
-		select {
-		case <-tickChan:
-			newValue = p.Value + 0.02
-			if newValue > p.Max {
-				newValue = p.Min
-			}
-			p.SetValue(newValue)
-		case <-p.stopInfiniteLoopChan:
-			return
-		}
-	}
-}
-
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	if p.Min == 0 && p.Max == 0 {
@@ -163,14 +121,8 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	bar := canvas.NewRectangle(theme.PrimaryColor())
-	var defaultText string = "0%"
-	// no string if infinite progress bar
-	if p.Infinite {
-		defaultText = ""
-	}
-	label := canvas.NewText(defaultText, theme.TextColor())
+	label := canvas.NewText("0%", theme.TextColor())
 	label.Alignment = fyne.TextAlignCenter
-
 	return &progressRenderer{[]fyne.CanvasObject{bar, label}, bar, label, p}
 }
 
@@ -181,17 +133,5 @@ func NewProgressBar() *ProgressBar {
 	p := &ProgressBar{Min: 0, Max: 1}
 
 	Renderer(p).Layout(p.MinSize())
-	return p
-}
-
-// NewInfiniteProgressBar creates a new progress bar widget that loops indefinitely from 0% -> 100%
-// SetValue() should not be called when using an infinite progress bar
-// To stop the looping progress and set the progress bar to 100%, call ProgressBar.StopInfiniteProgress()
-func NewInfiniteProgressBar() *ProgressBar {
-	p := &ProgressBar{Min: 0, Max: 1}
-	p.stopInfiniteLoopChan = make(chan bool)
-	p.Infinite = true
-	Renderer(p).Layout(p.MinSize())
-	go p.infiniteProgressLoop()
 	return p
 }
