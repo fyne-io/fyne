@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -35,7 +34,7 @@ const vectorPad = 10
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
 
 	img, skipCache := object.(*canvas.Image)
-	if skipCache && img.PixelColor == nil {
+	if skipCache && img.Raster == nil {
 		skipCache = false
 	}
 
@@ -65,7 +64,6 @@ func newTexture() uint32 {
 
 func (c *glCanvas) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
 	circle := obj.(*canvas.Circle)
-	texture := newTexture()
 	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2
 
 	width := scaleInt(c, circle.Size().Width+vectorPad*2)
@@ -88,15 +86,11 @@ func (c *glCanvas) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
 	rasterx.AddCircle(float64(width/2), float64(height/2), float64(scaleInt(c, radius)), dasher)
 	dasher.Draw()
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
-		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(raw.Pix))
-
-	return texture
+	return c.imgToTexture(raw)
 }
 
 func (c *glCanvas) newGlLineTexture(obj fyne.CanvasObject) uint32 {
 	line := obj.(*canvas.Line)
-	texture := newTexture()
 
 	col := line.StrokeColor
 	width := scaleInt(c, line.Size().Width+vectorPad*2)
@@ -116,15 +110,10 @@ func (c *glCanvas) newGlLineTexture(obj fyne.CanvasObject) uint32 {
 	dasher.Stop(true)
 	dasher.Draw()
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
-		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(raw.Pix))
-
-	return texture
+	return c.imgToTexture(raw)
 }
 
 func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
-	texture := newTexture()
-
 	col := theme.BackgroundColor()
 	if wid, ok := rect.(fyne.Widget); ok {
 		widCol := widget.Renderer(wid).BackgroundColor()
@@ -137,18 +126,11 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 		}
 	}
 
-	r, g, b, a := col.RGBA()
-	r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
-	data := []uint8{r8, g8, b8, a8}
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
-		gl.UNSIGNED_BYTE, gl.Ptr(data))
-
-	return texture
+	return c.imgToTexture(image.NewUniform(col))
 }
 
 func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	text := obj.(*canvas.Text)
-	texture := newTexture()
 
 	textScale := 1
 	if runtime.GOOS == "darwin" {
@@ -172,25 +154,11 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(img.Rect.Size().X), int32(img.Rect.Size().Y),
-		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(img.Pix))
-
-	return texture
-}
-
-func renderGlImagePortion(point image.Point, width, height int,
-	raw draw.Image, pixels image.Image, wg *sync.WaitGroup) {
-
-	defer wg.Done()
-	bounds := image.Rect(point.X, point.Y, point.X+width, point.Y+height)
-
-	draw.Draw(raw, bounds, pixels, point, draw.Src)
+	return c.imgToTexture(img)
 }
 
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
-	var raw *image.RGBA
 	img := obj.(*canvas.Image)
-	texture := newTexture()
 
 	width := scaleInt(c, img.Size().Width)
 	height := scaleInt(c, img.Size().Height)
@@ -198,7 +166,8 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		return 0
 	}
 
-	if img.File != "" || img.Resource != nil {
+	switch {
+	case img.File != "" || img.Resource != nil:
 		var file io.Reader
 		var name string
 		if img.Resource != nil {
@@ -229,56 +198,63 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 				img.SetMinSize(pixSize)
 			}
 
-			raw = image.NewRGBA(image.Rect(0, 0, width, height))
-			scanner := rasterx.NewScannerGV(w, h, raw, raw.Bounds())
+			tex := image.NewRGBA(image.Rect(0, 0, width, height))
+			scanner := rasterx.NewScannerGV(w, h, tex, tex.Bounds())
 			raster := rasterx.NewDasher(width, height, scanner)
 
 			icon.Draw(raster, 1)
-		} else {
-			pixels, _, err := image.Decode(file)
 
-			if err != nil {
-				log.Println("image err", err)
-
-				return 0
-			}
-			origSize := pixels.Bounds().Size()
-			// this is used by our render code, so let's set it to the file aspect
-			img.PixelAspect = float32(origSize.X) / float32(origSize.Y)
-			// if the image specifies it should be original size we need at least that many pixels on screen
-			if img.FillMode == canvas.ImageFillOriginal {
-				pixSize := fyne.NewSize(unscaleInt(c, origSize.X), unscaleInt(c, origSize.Y))
-				img.SetMinSize(pixSize)
-			}
-
-			raw = image.NewRGBA(pixels.Bounds())
-			draw.Draw(raw, pixels.Bounds(), pixels, image.ZP, draw.Src)
+			return c.imgToTexture(tex)
 		}
-	} else if img.PixelColor != nil {
-		raw = image.NewRGBA(image.Rect(0, 0, width, height))
-		pixels := newPixelImage(img, c.Scale())
 
-		halfWidth := raw.Bounds().Size().X / 2
-		halfHeight := raw.Bounds().Size().Y / 2
+		pixels, _, err := image.Decode(file)
 
-		// use a WaitGroup so we don't return our image until it's complete
-		var wg sync.WaitGroup
-		wg.Add(4)
+		if err != nil {
+			log.Println("image err", err)
 
-		go renderGlImagePortion(image.ZP, halfWidth, halfHeight, raw, pixels, &wg)
-		go renderGlImagePortion(image.Pt(0, halfHeight), halfWidth, height-halfHeight, raw, pixels, &wg)
-		go renderGlImagePortion(image.Pt(halfWidth, 0), width-halfWidth, halfHeight, raw, pixels, &wg)
-		go renderGlImagePortion(image.Pt(halfWidth, halfHeight), width-halfWidth, height-halfHeight, raw, pixels, &wg)
+			return 0
+		}
+		origSize := pixels.Bounds().Size()
+		// this is used by our render code, so let's set it to the file aspect
+		img.PixelAspect = float32(origSize.X) / float32(origSize.Y)
+		// if the image specifies it should be original size we need at least that many pixels on screen
+		if img.FillMode == canvas.ImageFillOriginal {
+			pixSize := fyne.NewSize(unscaleInt(c, origSize.X), unscaleInt(c, origSize.Y))
+			img.SetMinSize(pixSize)
+		}
 
-		wg.Wait()
-	} else {
-		raw = image.NewRGBA(image.Rect(0, 0, 1, 1))
+		tex := image.NewRGBA(pixels.Bounds())
+		draw.Draw(tex, pixels.Bounds(), pixels, image.ZP, draw.Src)
+
+		return c.imgToTexture(tex)
+	case img.Raster != nil:
+		return c.imgToTexture(img.Raster(width, height))
+	default:
+		return c.imgToTexture(image.NewRGBA(image.Rect(0, 0, 1, 1)))
 	}
+}
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(raw.Rect.Size().X), int32(raw.Rect.Size().Y),
-		0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(raw.Pix))
-
-	return texture
+func (c *glCanvas) imgToTexture(img image.Image) uint32 {
+	switch i := img.(type) {
+	case (*image.Uniform):
+		texture := newTexture()
+		r, g, b, a := i.RGBA()
+		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
+		data := []uint8{r8, g8, b8, a8}
+		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
+			gl.UNSIGNED_BYTE, gl.Ptr(data))
+		return texture
+	case (*image.RGBA):
+		var texture uint32
+		texture = newTexture()
+		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(i.Rect.Size().X), int32(i.Rect.Size().Y),
+			0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(i.Pix))
+		return texture
+	default:
+		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
+		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
+		return c.imgToTexture(rgba)
+	}
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
@@ -324,7 +300,7 @@ const (
 
     in vec2 fragTexCoord;
     out vec4 frag_colour;
-    
+
     void main() {
         vec4 color = texture(tex, fragTexCoord);
         if(color.a < 0.001)

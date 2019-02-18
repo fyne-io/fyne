@@ -3,6 +3,7 @@ package canvas
 import (
 	"image"
 	"image/color"
+	"image/draw"
 
 	"fyne.io/fyne"
 )
@@ -30,10 +31,10 @@ type Image struct {
 	baseObject
 
 	// one of the following sources will provide our image data
-	File        string                           // Load the image from a file
-	Resource    fyne.Resource                    // Load the image from an in-memory resource
-	PixelColor  func(x, y, w, h int) color.Color // Render the image from code
-	PixelAspect float32                          // Set an aspect ratio for pixel based images
+	File        string                     // Load the image from a file
+	Resource    fyne.Resource              // Load the image from an in-memory resource
+	Raster      func(w, h int) image.Image // Render the image from code
+	PixelAspect float32                    // Set an aspect ratio for pixel based images
 
 	Translucency float64   // Set a translucency value > 0.0 to fade the image
 	FillMode     ImageFill // Specify how the image should scale to fill or fit
@@ -51,18 +52,111 @@ func (i *Image) Alpha() float64 {
 // and height parameters passed to pixelColor.
 func NewRaster(pixelColor func(x, y, w, h int) color.Color) *Image {
 	return &Image{
-		PixelColor: pixelColor,
+		Raster: func(w, h int) image.Image {
+			// raster first pixel, figure out color type
+			var dst draw.Image
+			rect := image.Rect(0, 0, w, h)
+			switch pixelColor(0, 0, w, h).(type) {
+			case color.Alpha:
+				dst = image.NewAlpha(rect)
+			case color.Alpha16:
+				dst = image.NewAlpha16(rect)
+			case color.CMYK:
+				dst = image.NewCMYK(rect)
+			case color.Gray:
+				dst = image.NewGray(rect)
+			case color.Gray16:
+				dst = image.NewGray16(rect)
+			case color.NRGBA:
+				dst = image.NewNRGBA(rect)
+			case color.NRGBA64:
+				dst = image.NewNRGBA64(rect)
+			case color.RGBA:
+				dst = image.NewRGBA(rect)
+			case color.RGBA64:
+				dst = image.NewRGBA64(rect)
+			default:
+				dst = image.NewRGBA(rect)
+			}
+
+			for x := 0; x < w; x++ {
+				for y := 0; y < h; y++ {
+					dst.Set(x, y, pixelColor(x, y, w, h))
+				}
+			}
+
+			return dst
+		},
 	}
+}
+
+type subImg interface {
+	SubImage(r image.Rectangle) image.Image
 }
 
 // NewRasterFromImage returns a new Image instance that is rendered from the Go
 // image.Image passed in.
 // Images returned from this method will map pixel for pixel to the screen
 // starting img.Bounds().Min pixels from the top left of the canvas object.
+// Truncates rather than scales the image.
+// If smaller than the target space, the image will be padded with zero-pixels to the target size.
 func NewRasterFromImage(img image.Image) *Image {
 	return &Image{
-		PixelColor: func(x, y, w, h int) color.Color {
-			return img.At(x, y)
+		Raster: func(w int, h int) image.Image {
+			bounds := img.Bounds()
+
+			rect := image.Rect(0, 0, w, h)
+
+			switch {
+			case w == bounds.Max.X && h == bounds.Max.Y:
+				return img
+			case w >= bounds.Max.X && h >= bounds.Max.Y:
+				// try quickly truncating
+				if sub, ok := img.(subImg); ok {
+					return sub.SubImage(image.Rectangle{
+						Min: bounds.Min,
+						Max: image.Point{
+							X: bounds.Min.X + w,
+							Y: bounds.Min.Y + h,
+						},
+					})
+				}
+			default:
+				if !rect.Overlaps(bounds) {
+					return image.NewUniform(color.RGBA{})
+				}
+				bounds = bounds.Intersect(rect)
+			}
+
+			// respect the user's pixel format (if possible)
+			var dst draw.Image
+			switch i := img.(type) {
+			case (*image.Alpha):
+				dst = image.NewAlpha(rect)
+			case (*image.Alpha16):
+				dst = image.NewAlpha16(rect)
+			case (*image.CMYK):
+				dst = image.NewCMYK(rect)
+			case (*image.Gray):
+				dst = image.NewGray(rect)
+			case (*image.Gray16):
+				dst = image.NewGray16(rect)
+			case (*image.NRGBA):
+				dst = image.NewNRGBA(rect)
+			case (*image.NRGBA64):
+				dst = image.NewNRGBA64(rect)
+			case (*image.Paletted):
+				dst = image.NewPaletted(rect, i.Palette)
+			case (*image.RGBA):
+				dst = image.NewRGBA(rect)
+			case (*image.RGBA64):
+				dst = image.NewRGBA64(rect)
+			default:
+				dst = image.NewRGBA(rect)
+			}
+
+			draw.Draw(dst, bounds, img, bounds.Min, draw.Over)
+			return dst
 		},
 	}
 }
@@ -91,16 +185,8 @@ func NewImageFromResource(res fyne.Resource) *Image {
 // The method for scaling can be set using the Fill field.
 func NewImageFromImage(img image.Image) *Image {
 	ret := &Image{}
-	ret.PixelColor = func(x, y, w, h int) color.Color {
-		size := img.Bounds().Size()
-		if size != image.ZP {
-			ret.PixelAspect = float32(size.X) / float32(size.Y)
-		}
-
-		hScale := float32(size.X) / float32(w)
-		vScale := float32(size.Y) / float32(h)
-
-		return img.At(int(float32(x)*hScale), int(float32(y)*vScale))
+	ret.Raster = func(w, h int) image.Image {
+		return img
 	}
 
 	return ret
