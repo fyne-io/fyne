@@ -32,13 +32,7 @@ var textures = make(map[fyne.CanvasObject]uint32)
 const vectorPad = 10
 
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
-
-	img, skipCache := object.(*canvas.Image)
-	if skipCache && img.Raster == nil {
-		skipCache = false
-	}
-
-	if skipCache {
+	if _, skipCache := object.(*canvas.Raster); skipCache {
 		return creator(object)
 	}
 	texture := textures[object]
@@ -227,11 +221,32 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		draw.Draw(tex, pixels.Bounds(), pixels, image.ZP, draw.Src)
 
 		return c.imgToTexture(tex)
-	case img.Raster != nil:
-		return c.imgToTexture(img.Raster(width, height))
+	case img.Image != nil:
+		origSize := img.Image.Bounds().Size()
+		// this is used by our render code, so let's set it to the file aspect
+		img.PixelAspect = float32(origSize.X) / float32(origSize.Y)
+		// if the image specifies it should be original size we need at least that many pixels on screen
+		if img.FillMode == canvas.ImageFillOriginal {
+			pixSize := fyne.NewSize(unscaleInt(c, origSize.X), unscaleInt(c, origSize.Y))
+			img.SetMinSize(pixSize)
+		}
+
+		tex := image.NewRGBA(img.Image.Bounds())
+		draw.Draw(tex, img.Image.Bounds(), img.Image, image.ZP, draw.Src)
+
+		return c.imgToTexture(tex)
 	default:
 		return c.imgToTexture(image.NewRGBA(image.Rect(0, 0, 1, 1)))
 	}
+}
+
+func (c *glCanvas) newGlRasterTexture(obj fyne.CanvasObject) uint32 {
+	rast := obj.(*canvas.Raster)
+
+	width := scaleInt(c, rast.Size().Width)
+	height := scaleInt(c, rast.Size().Height)
+
+	return c.imgToTexture(rast.Generator(width, height))
 }
 
 func (c *glCanvas) imgToTexture(img image.Image) uint32 {
