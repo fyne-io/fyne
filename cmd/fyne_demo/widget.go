@@ -41,7 +41,6 @@ func makeGroupTab() fyne.Widget {
 		}
 
 		progress.SetValue(1)
-		infProgress.StopInfiniteProgress()
 	}()
 
 	return widget.NewGroup("Grouped",
