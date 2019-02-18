@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/theme"
 )
 
 type scrollRenderer struct {
@@ -14,6 +15,13 @@ type scrollRenderer struct {
 }
 
 func (s *scrollRenderer) updatePosition() {
+	if s.scroll.Content.Size().Height-s.scroll.Offset.Y < s.scroll.Size().Height {
+		if s.scroll.Content.Size().Height <= s.scroll.Size().Height {
+			s.scroll.Offset.Y = 0
+		} else {
+			s.scroll.Offset.Y = s.scroll.Content.Size().Height - s.scroll.Size().Height
+		}
+	}
 	s.scroll.Content.Move(fyne.NewPos(-s.scroll.Offset.X, -s.scroll.Offset.Y))
 	canvas.Refresh(s.scroll.Content)
 }
@@ -37,7 +45,7 @@ func (s *scrollRenderer) ApplyTheme() {
 }
 
 func (s *scrollRenderer) BackgroundColor() color.Color {
-	return color.White //theme.BackgroundColor()
+	return theme.BackgroundColor()
 }
 
 func (s *scrollRenderer) Objects() []fyne.CanvasObject {
@@ -55,6 +63,10 @@ type ScrollContainer struct {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
+	if s.Content.Size().Height <= s.Size().Height {
+		return
+	}
+
 	s.Offset.Y -= ev.DeltaY
 
 	if s.Offset.Y < 0 {

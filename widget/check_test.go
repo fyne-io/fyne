@@ -36,3 +36,38 @@ func TestCheckUnChecked(t *testing.T) {
 
 	assert.False(t, checked)
 }
+
+func TestCheckIsDisabledByDefault(t *testing.T) {
+	checkedStateFromCallback := false
+	NewCheck("", func(on bool) {
+		checkedStateFromCallback = on
+	})
+
+	assert.False(t, checkedStateFromCallback)
+}
+
+func TestCheckIsEnabledAfterUpdating(t *testing.T) {
+	checkedStateFromCallback := false
+	check := NewCheck("", func(on bool) {
+		checkedStateFromCallback = on
+	})
+
+	check.SetChecked(true)
+
+	assert.True(t, checkedStateFromCallback)
+}
+
+func TestCheckStateIsCorrectAfterMultipleUpdates(t *testing.T) {
+	checkedStateFromCallback := false
+	check := NewCheck("", func(on bool) {
+		checkedStateFromCallback = on
+	})
+
+	expectedCheckedState := false
+	for i := 0; i < 5; i++ {
+		check.SetChecked(expectedCheckedState)
+		assert.True(t, checkedStateFromCallback == expectedCheckedState)
+
+		expectedCheckedState = !expectedCheckedState
+	}
+}

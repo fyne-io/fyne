@@ -1,15 +1,15 @@
 package fyne
 
 // TextAlign represents the horizontal alignment of text within a widget or
-// canvas object
+// canvas object.
 type TextAlign int
 
 const (
-	// TextAlignLeading specifies a left alignment for left-to-right languages
+	// TextAlignLeading specifies a left alignment for left-to-right languages.
 	TextAlignLeading TextAlign = iota
-	// TextAlignCenter places the text centrally within the available space
+	// TextAlignCenter places the text centrally within the available space.
 	TextAlignCenter
-	// TextAlignTrailing will align the text right for a left-to-right language
+	// TextAlignTrailing will align the text right for a left-to-right language.
 	TextAlignTrailing
 )
 

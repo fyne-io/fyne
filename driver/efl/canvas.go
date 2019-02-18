@@ -10,6 +10,9 @@ package efl
 // #include <stdlib.h>
 //
 // void onObjectMouseDown_cgo(Evas_Object *, void *);
+// void onObjectMouseWheel_cgo(Evas_Object *, void *);
+// void onObjectMouseIn_cgo(Evas_Object *, void *);
+// void onObjectMouseOut_cgo(Evas_Object *, void *);
 import "C"
 
 import (
@@ -29,8 +32,7 @@ import (
 var canvasMutex sync.RWMutex
 var canvases = make(map[*C.Evas]*eflCanvas)
 
-//export onObjectMouseDown
-func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
+func getMouseObject(obj *C.Evas_Object, cx, cy C.int) (fyne.CanvasObject, fyne.Canvas, fyne.Position) {
 	canvasMutex.RLock()
 	current := canvases[C.evas_object_evas_get(obj)]
 	canvasMutex.RUnlock()
@@ -39,21 +41,56 @@ func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
 
 	var x, y C.int
 	C.evas_object_geometry_get(target, &x, &y, nil, nil)
-	pos := fyne.NewPos(unscaleInt(current, int(info.canvas.x-x)), unscaleInt(current, int(info.canvas.y-y)))
+	pos := fyne.NewPos(unscaleInt(current, int(cx-x)), unscaleInt(current, int(cy-y)))
+
+	return co, current, pos
+}
+
+//export onObjectMouseDown
+func onObjectMouseDown(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Down) {
+	co, current, pos := getMouseObject(obj, info.canvas.x, info.canvas.y)
 
 	ev := new(fyne.PointEvent)
 	ev.Position = pos
 
 	switch w := co.(type) {
-	case fyne.TappableObject:
+	case fyne.Tappable:
 		if int(info.button) == 3 {
 			go w.TappedSecondary(ev)
 		} else {
 			go w.Tapped(ev)
 		}
-	case fyne.FocusableObject:
+	case fyne.Focusable:
 		current.Focus(w)
 	}
+}
+
+//export onObjectMouseWheel
+func onObjectMouseWheel(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Wheel) {
+	co, _, pos := getMouseObject(obj, info.canvas.x, info.canvas.y)
+
+	ev := new(fyne.ScrollEvent)
+	ev.Position = pos
+	ev.DeltaY = int(-info.z)
+
+	switch w := co.(type) {
+	case fyne.Scrollable:
+		w.Scrolled(ev)
+	}
+}
+
+//export onObjectMouseIn
+func onObjectMouseIn(obj *C.Evas_Object, info *C.Evas_Event_Mouse_In) {
+	co, current, _ := getMouseObject(obj, info.canvas.x, info.canvas.y)
+
+	setCursor(current.(*eflCanvas).window, co)
+}
+
+//export onObjectMouseOut
+func onObjectMouseOut(obj *C.Evas_Object, info *C.Evas_Event_Mouse_Out) {
+	co, current, _ := getMouseObject(obj, info.canvas.x, info.canvas.y)
+
+	unsetCursor(current.(*eflCanvas).window, co)
 }
 
 type eflCanvas struct {
@@ -64,9 +101,10 @@ type eflCanvas struct {
 
 	content fyne.CanvasObject
 	window  *window
-	focused fyne.FocusableObject
+	focused fyne.Focusable
 
-	onKeyDown func(*fyne.KeyEvent)
+	onTypedRune func(rune)
+	onTypedKey  func(*fyne.KeyEvent)
 
 	objects map[*C.Evas_Object]fyne.CanvasObject
 	native  map[fyne.CanvasObject]*C.Evas_Object
@@ -88,7 +126,8 @@ func setColor(obj *C.Evas_Object, col color.Color) {
 	C.evas_object_color_set(obj, C.int((uint8)(r)), C.int((uint8)(g)), C.int((uint8)(b)), C.int((uint8)(a)))
 }
 
-func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, offset fyne.Position) *C.Evas_Object {
+func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, offset fyne.Position,
+	clip *C.Evas_Object) *C.Evas_Object {
 	var obj *C.Evas_Object
 
 	switch co := o.(type) {
@@ -136,13 +175,25 @@ func (c *eflCanvas) buildObject(o fyne.CanvasObject, target fyne.CanvasObject, o
 	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
 		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
 		nil)
+	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_WHEEL,
+		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseWheel_cgo)),
+		nil)
+	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_IN,
+		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseIn_cgo)),
+		nil)
+	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_OUT,
+		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseOut_cgo)),
+		nil)
 
+	if clip != nil {
+		C.evas_object_clip_set(obj, clip)
+	}
 	C.evas_object_show(obj)
 	return obj
 }
 
 func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, target fyne.CanvasObject, objs []fyne.CanvasObject,
-	size fyne.Size, pos, offset fyne.Position) {
+	size fyne.Size, pos, offset fyne.Position, clip *C.Evas_Object) {
 
 	obj := C.evas_object_rectangle_add(c.evas)
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -151,20 +202,32 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, target fyne.CanvasO
 	C.evas_object_show(obj)
 	c.native[parent] = obj
 	c.offsets[parent] = offset
+	c.objects[obj] = target
+	C.evas_object_event_callback_add(obj, C.EVAS_CALLBACK_MOUSE_DOWN,
+		(C.Evas_Object_Event_Cb)(unsafe.Pointer(C.onObjectMouseDown_cgo)),
+		nil)
 
 	childOffset := offset.Add(pos)
 	for _, child := range objs {
 		switch co := child.(type) {
 		case *fyne.Container:
 			c.buildContainer(co, co, co.Objects, child.Size(),
-				child.Position(), childOffset)
+				child.Position(), childOffset, clip)
+		case *widget.ScrollContainer:
+			C.evas_object_color_set(obj, 255, 255, 255, 255)
+			click := child
+			if _, ok := parent.(*widget.Entry); ok {
+				click = parent
+			}
+			c.buildContainer(co, click, widget.Renderer(co).Objects(),
+				child.Size(), child.Position(), childOffset, obj)
 		case fyne.Widget:
 			click := child
 			if _, ok := parent.(*widget.Entry); ok {
 				click = parent
 			}
 			c.buildContainer(co, click, widget.Renderer(co).Objects(),
-				child.Size(), child.Position(), childOffset)
+				child.Size(), child.Position(), childOffset, clip)
 		default:
 			if target == nil {
 				target = parent
@@ -174,12 +237,12 @@ func (c *eflCanvas) buildContainer(parent fyne.CanvasObject, target fyne.CanvasO
 			}
 
 			if !ignoreObject(child) {
-				c.buildObject(child, target, childOffset)
+				c.buildObject(child, target, childOffset, clip)
 			}
 		}
 	}
 
-	if themed, ok := parent.(fyne.ThemedObject); ok {
+	if themed, ok := parent.(fyne.Themeable); ok {
 		themed.ApplyTheme()
 	}
 }
@@ -255,7 +318,7 @@ func (c *eflCanvas) refreshObject(o, o2 fyne.CanvasObject) {
 		if ignoreObject(o) {
 			return
 		}
-		obj = c.buildObject(o, o2, c.offsets[o])
+		obj = c.buildObject(o, o2, c.offsets[o], nil)
 	}
 	pos := c.offsets[o].Add(o.Position())
 	size := o.Size()
@@ -371,11 +434,16 @@ func (c *eflCanvas) refreshContainer(objs []fyne.CanvasObject, target fyne.Canva
 	position := c.offsets[target].Add(pos)
 
 	obj := c.native[target]
-	bg := theme.BackgroundColor()
-	if wid, ok := target.(fyne.Widget); ok {
-		bg = widget.Renderer(wid).BackgroundColor()
+	switch target.(type) {
+	case *widget.ScrollContainer:
+		C.evas_object_color_set(obj, 255, 255, 255, 255)
+	default:
+		bg := theme.BackgroundColor()
+		if wid, ok := target.(fyne.Widget); ok {
+			bg = widget.Renderer(wid).BackgroundColor()
+		}
+		setColor(obj, bg)
 	}
-	setColor(obj, bg)
 
 	if target == c.content {
 		C.evas_object_geometry_set(obj, C.Evas_Coord(scaleInt(c, 0)), C.Evas_Coord(scaleInt(c, 0)),
@@ -420,13 +488,13 @@ func (c *eflCanvas) setup(o fyne.CanvasObject, offset fyne.Position) {
 	runOnMain(func() {
 		switch set := o.(type) {
 		case *fyne.Container:
-			c.buildContainer(set, set, set.Objects, set.MinSize(), o.Position(), offset)
+			c.buildContainer(set, set, set.Objects, set.MinSize(), o.Position(), offset, nil)
 		case fyne.Widget:
 			c.buildContainer(set, set, widget.Renderer(set).Objects(),
-				set.MinSize(), o.Position(), offset)
+				set.MinSize(), o.Position(), offset, nil)
 		default:
 			if !ignoreObject(o) {
-				c.buildObject(o, o, offset)
+				c.buildObject(o, o, offset, nil)
 			}
 		}
 	})
@@ -449,20 +517,20 @@ func (c *eflCanvas) doRefresh(o fyne.CanvasObject) {
 	}
 }
 
-func (c *eflCanvas) Focus(obj fyne.FocusableObject) {
+func (c *eflCanvas) Focus(obj fyne.Focusable) {
 	if c.focused != nil {
 		if c.focused == obj {
 			return
 		}
 
-		c.focused.OnFocusLost()
+		c.focused.FocusLost()
 	}
 
 	c.focused = obj
-	obj.OnFocusGained()
+	obj.FocusGained()
 }
 
-func (c *eflCanvas) Focused() fyne.FocusableObject {
+func (c *eflCanvas) Focused() fyne.Focusable {
 	return c.focused
 }
 
@@ -561,10 +629,18 @@ func (c *eflCanvas) SetScale(scale float32) {
 	C.ecore_evas_resize(c.window.ee, C.int(width), C.int(height))
 }
 
-func (c *eflCanvas) OnKeyDown() func(*fyne.KeyEvent) {
-	return c.onKeyDown
+func (c *eflCanvas) OnTypedRune() func(rune) {
+	return c.onTypedRune
 }
 
-func (c *eflCanvas) SetOnKeyDown(keyDown func(*fyne.KeyEvent)) {
-	c.onKeyDown = keyDown
+func (c *eflCanvas) SetOnTypedRune(typed func(rune)) {
+	c.onTypedRune = typed
+}
+
+func (c *eflCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+	return c.onTypedKey
+}
+
+func (c *eflCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+	c.onTypedKey = typed
 }

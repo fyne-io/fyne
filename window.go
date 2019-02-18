@@ -6,17 +6,18 @@ type Window interface {
 	// Title returns the current window title.
 	// This is typically displayed in the window decorations.
 	Title() string
-	// SetTitle updates the current title of the window
+	// SetTitle updates the current title of the window.
 	SetTitle(string)
 
-	// FullScreen returns whether or not this window is currently full screen
+	// FullScreen returns whether or not this window is currently full screen.
 	FullScreen() bool
 	// SetFullScreen changes the requested fullScreen property
 	// true for a fullScreen window and false to unset this.
 	SetFullScreen(bool)
 
 	// Resize this window to the requested content size.
-	// The result may not be exactly as desired due to various desktop or platform constraints.
+	// The result may not be exactly as desired due to various desktop or
+	// platform constraints.
 	Resize(Size)
 
 	// FixedSize returns whether or not this window should disable resizing.
@@ -26,7 +27,7 @@ type Window interface {
 	SetFixedSize(bool)
 
 	// CenterOnScreen places a window at the center of the monitor
-	// the Window object is currently positioned on
+	// the Window object is currently positioned on.
 	CenterOnScreen()
 
 	// Padded, normally true, states whether the window should have inner
@@ -36,8 +37,9 @@ type Window interface {
 	// no inner padding. Useful for fullscreen or graphic based applications.
 	SetPadded(bool)
 
-	// Icon returns the window icon, this is used in various ways depending on operating system.
-	// Most commonly this is displayed on the window border or task switcher
+	// Icon returns the window icon, this is used in various ways
+	// depending on operating system.
+	// Most commonly this is displayed on the window border or task switcher.
 	Icon() Resource
 
 	// SetIcon sets the icon resource used for this window.
@@ -46,7 +48,7 @@ type Window interface {
 
 	SetOnClosed(func())
 
-	// Show the window on screen
+	// Show the window on screen.
 	Show()
 	// Hide the window from the user.
 	// This will not destroy the window or cause the app to exit.
@@ -59,10 +61,11 @@ type Window interface {
 	// This should be called near the end of a main() function as it will block.
 	ShowAndRun()
 
-	// Content returns the content of this window
+	// Content returns the content of this window.
 	Content() CanvasObject
-	// SetContent sets the content of this window
+	// SetContent sets the content of this window.
 	SetContent(CanvasObject)
-	// Canvas returns the canvas context to render in the window
+	// Canvas returns the canvas context to render in the window.
+	// This can be useful to set a key handler for the window, for example.
 	Canvas() Canvas
 }
