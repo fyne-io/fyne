@@ -11,7 +11,7 @@
 
 # About
 
-[Fyne](http://fyne.io) is an easy to use UI toolkit and app API written in Go. We use the EFL render pipeline to provide cross platform graphics.
+[Fyne](http://fyne.io) is an easy to use UI toolkit and app API written in Go. We use OpenGL (through the go-gl and go-glfw projects) to provide cross platform graphics.
 
 This is under heavy development and is not yet capable of supporting a full application
 

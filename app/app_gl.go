@@ -1,4 +1,4 @@
-// +build !ci,!efl
+// +build !ci
 
 package app
 
