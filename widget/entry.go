@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"log"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
