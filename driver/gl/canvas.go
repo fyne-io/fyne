@@ -2,6 +2,7 @@ package gl
 
 import (
 	"math"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -9,6 +10,7 @@ import (
 )
 
 type glCanvas struct {
+	sync.RWMutex
 	window  *window
 	content fyne.CanvasObject
 	focused fyne.Focusable
@@ -42,11 +44,16 @@ func unscaleInt(c fyne.Canvas, v int) int {
 }
 
 func (c *glCanvas) Content() fyne.CanvasObject {
-	return c.content
+	c.RLock()
+	retval := c.content
+	c.RUnlock()
+	return retval
 }
 
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
+	c.Lock()
 	c.content = content
+	c.Unlock()
 
 	var w, h = c.window.viewport.GetSize()
 
