@@ -143,7 +143,7 @@ func (w *window) SetIcon(icon fyne.Resource) {
 }
 
 func (w *window) fitContent() {
-	if w.canvas.content == nil {
+	if w.canvas.Content() == nil {
 		return
 	}
 
