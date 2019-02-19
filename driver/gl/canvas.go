@@ -3,6 +3,7 @@ package gl
 import (
 	"math"
 	"sync"
+	"sync/atomic"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -21,7 +22,7 @@ type glCanvas struct {
 	program uint32
 	scale   float32
 
-	dirty1, dirty2 bool
+	dirty1, dirty2 int32
 	refreshQueue   chan fyne.CanvasObject
 }
 
@@ -127,11 +128,11 @@ func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
-	if c.dirty1 {
-		c.dirty1 = false
+	if atomic.LoadInt32(&c.dirty1) == 1 {
+		atomic.StoreInt32(&c.dirty1, 0)
 	} else {
-		if c.dirty2 {
-			c.dirty2 = false
+		if atomic.LoadInt32(&c.dirty2) == 1 {
+			atomic.StoreInt32(&c.dirty2, 0)
 		}
 	}
 
@@ -152,12 +153,12 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 func (c *glCanvas) setDirty() {
 	// we must set twice as it's double buffered
-	c.dirty1 = true
-	c.dirty2 = true
+	atomic.StoreInt32(&c.dirty1, 1)
+	atomic.StoreInt32(&c.dirty2, 1)
 }
 
 func (c *glCanvas) isDirty() bool {
-	return c.dirty1 || c.dirty2
+	return atomic.LoadInt32(&c.dirty1) == 1 || atomic.LoadInt32(&c.dirty2) == 1
 }
 
 func newCanvas(win *window) *glCanvas {
