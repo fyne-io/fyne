@@ -45,9 +45,9 @@ func init() {
 
 func svgCacheGet(res fyne.Resource, w int, h int) *image.RGBA {
 	rasterMutex.RLock()
+	defer rasterMutex.RUnlock()
 	v, ok := rasters[res]
 	if !ok || v == nil || v.w != w || v.h != h {
-		rasterMutex.RUnlock()
 		return nil
 	}
 	v.expires = time.Now().Add(cacheDuration)
@@ -56,11 +56,11 @@ func svgCacheGet(res fyne.Resource, w int, h int) *image.RGBA {
 
 func svgCachePut(res fyne.Resource, pix *image.RGBA, w int, h int) {
 	rasterMutex.Lock()
+	defer rasterMutex.Unlock()
 	rasters[res] = &rasterInfo{
 		pix:     pix,
 		w:       w,
 		h:       h,
 		expires: time.Now().Add(cacheDuration),
 	}
-	rasterMutex.Unlock()
 }
