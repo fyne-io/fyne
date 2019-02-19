@@ -42,7 +42,7 @@ func Icons(app fyne.App) {
 	b.name = widget.NewLabel(icons[b.current].name)
 	bar := widget.NewHBox(prev, next, b.name, layout.NewSpacer())
 
-	background := canvas.NewRaster(checkerPattern)
+	background := canvas.NewRasterWithPixels(checkerPattern)
 	background.SetMinSize(fyne.NewSize(280, 280))
 	b.icon = widget.NewIcon(icons[b.current].icon)
 

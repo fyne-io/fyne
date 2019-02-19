@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -47,6 +48,15 @@ func makeGroupTab() fyne.Widget {
 		progress)
 }
 
+func makeScrollTab() fyne.Widget {
+	logo := canvas.NewImageFromResource(theme.FyneLogo())
+	logo.SetMinSize(fyne.NewSize(320, 320))
+	scroll := widget.NewScroller(logo)
+	scroll.Resize(fyne.NewSize(200, 200))
+
+	return scroll
+}
+
 // Widget shows a window containing widget demos
 func Widget(app fyne.App) {
 	w := app.NewWindow("Widgets")
@@ -55,6 +65,7 @@ func Widget(app fyne.App) {
 		widget.NewTabItem("Buttons", makeButtonTab()),
 		widget.NewTabItem("Input", makeInputTab()),
 		widget.NewTabItem("Group", makeGroupTab()),
+		widget.NewTabItem("Scroll", makeScrollTab()),
 	))
 
 	w.Show()

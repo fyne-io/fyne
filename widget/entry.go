@@ -2,8 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"log"
-	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -342,7 +340,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyHome:
 		e.CursorColumn = 0
 	default:
-		log.Println("Unhandled key press", key.Name)
 		return
 	}
 

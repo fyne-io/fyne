@@ -17,6 +17,10 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
+const (
+	scrollSpeed = 10
+)
+
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
 )
@@ -425,8 +429,8 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	switch wid := co.(type) {
 	case fyne.Scrollable:
 		ev := &fyne.ScrollEvent{}
-		ev.DeltaX = int(xoff)
-		ev.DeltaY = int(yoff)
+		ev.DeltaX = int(xoff * scrollSpeed)
+		ev.DeltaY = int(yoff * scrollSpeed)
 		wid.Scrolled(ev)
 	}
 }
@@ -523,32 +527,18 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		return
 	}
 
-	shortcutName := shortcut(key, mods)
-	sev := &fyne.ShortcutEvent{Name: shortcutName}
-	switch shortcutName {
-	case fyne.ShortcutPaste, fyne.ShortcutCopy, fyne.ShortcutCut:
-		sev.Clipboard = w.Clipboard()
-	case fyne.ShortcutNone:
-		// No shortcut detected, pass down to TypedKey
-		ev := new(fyne.KeyEvent)
-		ev.Name = keyToName(key)
-		if ev.Name > fyne.KeyF12 {
-			return
-		}
-		if w.canvas.Focused() != nil {
-			go w.canvas.Focused().TypedKey(ev)
-		}
-		if w.canvas.onTypedKey != nil {
-			go w.canvas.onTypedKey(ev)
-		}
+	if key <= glfw.KeyWorld1 { // filter printable characters handled in charModInput
 		return
 	}
 
+	ev := new(fyne.KeyEvent)
+	ev.Name = keyToName(key)
+
 	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().Shortcut(sev)
+		go w.canvas.Focused().TypedKey(ev)
 	}
-	if w.canvas.onShortcut != nil {
-		go w.canvas.onShortcut(sev)
+	if w.canvas.onTypedKey != nil {
+		go w.canvas.onTypedKey(ev)
 	}
 }
 
