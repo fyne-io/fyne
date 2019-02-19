@@ -320,7 +320,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyHome:
 		e.CursorColumn = 0
 	default:
-		log.Println("Unhandled key press", key.Name)
 		return
 	}
 
