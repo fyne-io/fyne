@@ -32,15 +32,6 @@ func (res *ThemedResource) Content() []byte {
 	return res.dark.Content()
 }
 
-// CachePath returns the cachepath of the correct resource for the current theme setting
-func (res *ThemedResource) CachePath() string {
-	if isThemeLight() {
-		return res.light.CachePath()
-	}
-
-	return res.dark.CachePath()
-}
-
 // NewThemedResource creates a resource that adapts to the current theme setting.
 // It is currently a simple pairing of a dark and light variant of the same resource.
 func NewThemedResource(dark, light fyne.Resource) *ThemedResource {

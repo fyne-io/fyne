@@ -7,7 +7,6 @@ package fyne
 type Resource interface {
 	Name() string
 	Content() []byte
-	CachePath() string
 }
 
 // StaticResource is a bundled resource compiled into the application.
@@ -28,18 +27,6 @@ func (r *StaticResource) Name() string {
 // but any compression on the resource is retained.
 func (r *StaticResource) Content() []byte {
 	return r.StaticContent
-}
-
-// CachePath will return the cached location of a resource.
-// If the resource has not previously been written to a cache this operation
-// will block until the data is available at the returned location.
-func (r *StaticResource) CachePath() string {
-	path := cachePath(r.StaticName)
-	if !pathExists(path) {
-		toFile(r)
-	}
-
-	return path
 }
 
 // NewStaticResource returns a new static resource object with the specified
