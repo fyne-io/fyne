@@ -546,8 +546,6 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 
 		return
 	}
-
-	// TODO handle shortcuts
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
