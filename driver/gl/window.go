@@ -522,7 +522,7 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	case glfw.KeyLeftShift:
 		fallthrough
 	case glfw.KeyRightShift:
-		return fyne.KeyShift
+		return desktop.KeyShift
 
 	// desktop keys
 	case glfw.KeyLeftControl:
@@ -540,59 +540,59 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	case glfw.KeyMenu:
 		return desktop.KeyMenu
 	case glfw.KeyEscape:
-		return desktop.KeyEscape
+		return fyne.KeyEscape
 	case glfw.KeyTab:
-		return desktop.KeyTab
+		return fyne.KeyTab
 	case glfw.KeyInsert:
-		return desktop.KeyInsert
+		return fyne.KeyInsert
 	case glfw.KeyDelete:
-		return desktop.KeyDelete
+		return fyne.KeyDelete
 	case glfw.KeyRight:
-		return desktop.KeyRight
+		return fyne.KeyRight
 	case glfw.KeyLeft:
-		return desktop.KeyLeft
+		return fyne.KeyLeft
 	case glfw.KeyDown:
-		return desktop.KeyDown
+		return fyne.KeyDown
 	case glfw.KeyUp:
-		return desktop.KeyUp
+		return fyne.KeyUp
 	case glfw.KeyPageUp:
-		return desktop.KeyPageUp
+		return fyne.KeyPageUp
 	case glfw.KeyPageDown:
-		return desktop.KeyPageDown
+		return fyne.KeyPageDown
 	case glfw.KeyHome:
-		return desktop.KeyHome
+		return fyne.KeyHome
 	case glfw.KeyEnd:
-		return desktop.KeyEnd
+		return fyne.KeyEnd
 
 	case glfw.KeyF1:
-		return desktop.KeyF1
+		return fyne.KeyF1
 	case glfw.KeyF2:
-		return desktop.KeyF2
+		return fyne.KeyF2
 	case glfw.KeyF3:
-		return desktop.KeyF3
+		return fyne.KeyF3
 	case glfw.KeyF4:
-		return desktop.KeyF4
+		return fyne.KeyF4
 	case glfw.KeyF5:
-		return desktop.KeyF5
+		return fyne.KeyF5
 	case glfw.KeyF6:
-		return desktop.KeyF6
+		return fyne.KeyF6
 	case glfw.KeyF7:
-		return desktop.KeyF7
+		return fyne.KeyF7
 	case glfw.KeyF8:
-		return desktop.KeyF8
+		return fyne.KeyF8
 	case glfw.KeyF9:
-		return desktop.KeyF9
+		return fyne.KeyF9
 	case glfw.KeyF10:
-		return desktop.KeyF10
+		return fyne.KeyF10
 	case glfw.KeyF11:
-		return desktop.KeyF11
+		return fyne.KeyF11
 	case glfw.KeyF12:
-		return desktop.KeyF12
+		return fyne.KeyF12
 
 	case glfw.KeyKPEnter:
-		return desktop.KeyEnter
+		return fyne.KeyEnter
 	}
-	return fyne.KeyUnknown
+	return ""
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {

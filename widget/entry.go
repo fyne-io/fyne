@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
@@ -248,7 +247,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			break
 		}
 		e.CursorColumn--
-	case desktop.KeyDelete:
+	case fyne.KeyDelete:
 
 		pos := e.cursorTextPos()
 		if provider.len() == 0 || pos == provider.len() {
@@ -256,14 +255,14 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		}
 
 		provider.deleteFromTo(pos, pos+1)
-	case fyne.KeyReturn, desktop.KeyEnter:
+	case fyne.KeyReturn, fyne.KeyEnter:
 		if !e.MultiLine {
 			return
 		}
 		provider.insertAt(e.cursorTextPos(), []rune("\n"))
 		e.CursorColumn = 0
 		e.CursorRow++
-	case desktop.KeyUp:
+	case fyne.KeyUp:
 		if !e.MultiLine {
 			return
 		}
@@ -276,7 +275,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if e.CursorColumn > rowLength {
 			e.CursorColumn = rowLength
 		}
-	case desktop.KeyDown:
+	case fyne.KeyDown:
 		if !e.MultiLine {
 			return
 		}
@@ -289,7 +288,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if e.CursorColumn > rowLength {
 			e.CursorColumn = rowLength
 		}
-	case desktop.KeyLeft:
+	case fyne.KeyLeft:
 		if e.CursorColumn > 0 {
 			e.CursorColumn--
 			break
@@ -300,7 +299,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			rowLength := provider.rowLength(e.CursorRow)
 			e.CursorColumn = rowLength
 		}
-	case desktop.KeyRight:
+	case fyne.KeyRight:
 		if e.MultiLine {
 			rowLength := provider.rowLength(e.CursorRow)
 			if e.CursorColumn < rowLength {
@@ -316,9 +315,9 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if e.CursorColumn < provider.len() {
 			e.CursorColumn++
 		}
-	case desktop.KeyEnd:
+	case fyne.KeyEnd:
 		e.CursorColumn = provider.len()
-	case desktop.KeyHome:
+	case fyne.KeyHome:
 		e.CursorColumn = 0
 	default:
 		return
