@@ -44,6 +44,7 @@ func (p *infProgressRenderer) updateBar() {
 			// slightly increase width
 			newBoxSize := fyne.Size{Width: barWidth + 2, Height: progressSize.Height}
 			p.bar.Resize(newBoxSize)
+			stepSize -= 2
 		}
 	} else {
 		// we must be on the second half of the progress bar if not on the first half!
@@ -63,7 +64,7 @@ func (p *infProgressRenderer) updateBar() {
 	if barWidth+barPos.X >= progPos.X+progressSize.Width {
 		barPos.X = 0
 		// set box size to 0
-		newBoxSize := fyne.Size{Width: 0, Height: progressSize.Height}
+		newBoxSize := fyne.Size{Width: minBarWidth, Height: progressSize.Height}
 		p.bar.Resize(newBoxSize)
 	}
 
