@@ -6,10 +6,12 @@ import (
 	_ "image/png" // for the icon
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 
 	"fyne.io/fyne"
 
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -438,7 +440,7 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 
 func keyToName(key glfw.Key) fyne.KeyName {
 	switch key {
-	// printable keys
+	// general available keys
 	case glfw.KeyA:
 		return fyne.KeyA
 	case glfw.KeyB:
@@ -511,82 +513,82 @@ func keyToName(key glfw.Key) fyne.KeyName {
 		return fyne.Key8
 	case glfw.Key9:
 		return fyne.Key9
-	// non-printable
-	case glfw.KeyEscape:
-		return fyne.KeyEscape
 	case glfw.KeyEnter:
 		return fyne.KeyReturn
-	case glfw.KeyTab:
-		return fyne.KeyTab
 	case glfw.KeyBackspace:
 		return fyne.KeyBackspace
-	case glfw.KeyInsert:
-		return fyne.KeyInsert
-	case glfw.KeyDelete:
-		return fyne.KeyDelete
-	case glfw.KeyRight:
-		return fyne.KeyRight
-	case glfw.KeyLeft:
-		return fyne.KeyLeft
-	case glfw.KeyDown:
-		return fyne.KeyDown
-	case glfw.KeyUp:
-		return fyne.KeyUp
-	case glfw.KeyPageUp:
-		return fyne.KeyPageUp
-	case glfw.KeyPageDown:
-		return fyne.KeyPageDown
-	case glfw.KeyHome:
-		return fyne.KeyHome
-	case glfw.KeyEnd:
-		return fyne.KeyEnd
-
-	case glfw.KeyF1:
-		return fyne.KeyF1
-	case glfw.KeyF2:
-		return fyne.KeyF2
-	case glfw.KeyF3:
-		return fyne.KeyF3
-	case glfw.KeyF4:
-		return fyne.KeyF4
-	case glfw.KeyF5:
-		return fyne.KeyF5
-	case glfw.KeyF6:
-		return fyne.KeyF6
-	case glfw.KeyF7:
-		return fyne.KeyF7
-	case glfw.KeyF8:
-		return fyne.KeyF8
-	case glfw.KeyF9:
-		return fyne.KeyF9
-	case glfw.KeyF10:
-		return fyne.KeyF10
-	case glfw.KeyF11:
-		return fyne.KeyF11
-	case glfw.KeyF12:
-		return fyne.KeyF12
-
 	case glfw.KeyLeftShift:
 		fallthrough
 	case glfw.KeyRightShift:
 		return fyne.KeyShift
+
+	// desktop keys
 	case glfw.KeyLeftControl:
 		fallthrough
 	case glfw.KeyRightControl:
-		return fyne.KeyControl
+		return desktop.KeyControl
 	case glfw.KeyLeftAlt:
 		fallthrough
 	case glfw.KeyRightAlt:
-		return fyne.KeyAlt
+		return desktop.KeyAlt
 	case glfw.KeyLeftSuper:
 		fallthrough
 	case glfw.KeyRightSuper:
-		return fyne.KeySuper
+		return desktop.KeySuper
 	case glfw.KeyMenu:
-		return fyne.KeyMenu
+		return desktop.KeyMenu
+	case glfw.KeyEscape:
+		return desktop.KeyEscape
+	case glfw.KeyTab:
+		return desktop.KeyTab
+	case glfw.KeyInsert:
+		return desktop.KeyInsert
+	case glfw.KeyDelete:
+		return desktop.KeyDelete
+	case glfw.KeyRight:
+		return desktop.KeyRight
+	case glfw.KeyLeft:
+		return desktop.KeyLeft
+	case glfw.KeyDown:
+		return desktop.KeyDown
+	case glfw.KeyUp:
+		return desktop.KeyUp
+	case glfw.KeyPageUp:
+		return desktop.KeyPageUp
+	case glfw.KeyPageDown:
+		return desktop.KeyPageDown
+	case glfw.KeyHome:
+		return desktop.KeyHome
+	case glfw.KeyEnd:
+		return desktop.KeyEnd
+
+	case glfw.KeyF1:
+		return desktop.KeyF1
+	case glfw.KeyF2:
+		return desktop.KeyF2
+	case glfw.KeyF3:
+		return desktop.KeyF3
+	case glfw.KeyF4:
+		return desktop.KeyF4
+	case glfw.KeyF5:
+		return desktop.KeyF5
+	case glfw.KeyF6:
+		return desktop.KeyF6
+	case glfw.KeyF7:
+		return desktop.KeyF7
+	case glfw.KeyF8:
+		return desktop.KeyF8
+	case glfw.KeyF9:
+		return desktop.KeyF9
+	case glfw.KeyF10:
+		return desktop.KeyF10
+	case glfw.KeyF11:
+		return desktop.KeyF11
+	case glfw.KeyF12:
+		return desktop.KeyF12
 
 	case glfw.KeyKPEnter:
-		return fyne.KeyEnter
+		return desktop.KeyEnter
 	}
 	return fyne.KeyUnknown
 }
@@ -617,7 +619,7 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	case fyne.ShortcutUnknown:
 		// Check for a desktop shortcut not handled by default
 		// Detected a desktop event. Pass down to handler to allow custom handling
-		shortcutEvent = &fyne.ShortcutDesktopEvent{
+		shortcutEvent = &desktop.ShortcutDesktopEvent{
 			ShortcutName: shortcutName,
 			KeyName:      keyName,
 			Modifier:     keyDesktopModifier,
@@ -641,39 +643,52 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	}
 }
 
-func desktopModifier(mods glfw.ModifierKey) fyne.Modifier {
-	var m fyne.Modifier
+func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
+	var m desktop.Modifier
 	if (mods & glfw.ModShift) != 0 {
-		m |= fyne.ShiftModifier
+		m |= desktop.ShiftModifier
 	}
-	//group control key and super key on darwin
-	if (mods&glfw.ModControl) != 0 || (mods&glfw.ModSuper) != 0 {
-		m |= fyne.ControlModifier
+	if (mods & glfw.ModControl) != 0 {
+		m |= desktop.ControlModifier
 	}
 	if (mods & glfw.ModAlt) != 0 {
-		m |= fyne.AltModifier
+		m |= desktop.AltModifier
+	}
+	if (mods & glfw.ModSuper) != 0 {
+		m |= desktop.SuperModifier
 	}
 	return m
 }
 
 // detectShortcut detects the shortcut associated to a combination key, if any
 // TODO: evaluate to make public into the fyne package
-func detectShortcut(key fyne.KeyName, mods fyne.Modifier) fyne.ShortcutName {
-	if mods < fyne.ControlModifier {
+func detectShortcut(key fyne.KeyName, mods desktop.Modifier) fyne.ShortcutName {
+	if mods < desktop.ControlModifier {
 		return fyne.ShortcutNone
 	}
 
+	isMac := runtime.GOOS == "darwin"
+
 	switch key {
 	case fyne.KeyV:
-		if mods == fyne.ControlModifier {
+		if !isMac && mods == desktop.ControlModifier {
+			return fyne.ShortcutPaste
+		}
+		if isMac && mods == desktop.SuperModifier {
 			return fyne.ShortcutPaste
 		}
 	case fyne.KeyC:
-		if mods == fyne.ControlModifier {
+		if !isMac && mods == desktop.ControlModifier {
+			return fyne.ShortcutCopy
+		}
+		if isMac && mods == desktop.SuperModifier {
 			return fyne.ShortcutCopy
 		}
 	case fyne.KeyX:
-		if mods == fyne.ControlModifier {
+		if !isMac && mods == desktop.ControlModifier {
+			return fyne.ShortcutCut
+		}
+		if isMac && mods == desktop.SuperModifier {
 			return fyne.ShortcutCut
 		}
 	}
