@@ -20,6 +20,38 @@ type ScrollEvent struct {
 
 // ShortcutEvent describes a shortcut input event.
 type ShortcutEvent struct {
-	Name Shortcut
+	ShortcutName
+}
+
+// Shortcut returns the shortcut name associated to the event
+func (se *ShortcutEvent) Shortcut() ShortcutName {
+	return se.ShortcutName
+}
+
+// ShortcutClipboardEvent describes a shortcut clipoard event.
+type ShortcutClipboardEvent struct {
+	ShortcutName
 	Clipboard
+}
+
+// Shortcut returns the shortcut name associated to the event
+func (se *ShortcutClipboardEvent) Shortcut() ShortcutName {
+	return se.ShortcutName
+}
+
+// ShortcutDesktopEvent describes a shortcut clipoard event.
+type ShortcutDesktopEvent struct {
+	ShortcutName
+	KeyName
+	Modifier
+}
+
+// Shortcut returns the shortcut name associated to the event
+func (se *ShortcutDesktopEvent) Shortcut() ShortcutName {
+	return se.ShortcutName
+}
+
+// ShortcutEventer describes a shortcut event.
+type ShortcutEventer interface {
+	Shortcut() ShortcutName
 }

@@ -431,7 +431,7 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 
 func TestEntry_OnPaste(t *testing.T) {
 	clipboard := test.NewClipboard()
-	sev := &fyne.ShortcutEvent{Name: fyne.ShortcutPaste, Clipboard: clipboard}
+	sev := &fyne.ShortcutClipboardEvent{ShortcutName: fyne.ShortcutPaste, Clipboard: clipboard}
 	tests := []struct {
 		name             string
 		entry            *Entry
@@ -485,7 +485,7 @@ func TestEntry_OnPaste(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			clipboard.SetContent(tt.clipboardContent)
-			tt.entry.Shortcut(sev)
+			tt.entry.TriggerShortcutHandler(sev)
 			assert.Equal(t, tt.wantText, tt.entry.Text)
 		})
 	}

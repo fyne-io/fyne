@@ -15,7 +15,6 @@ type glCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
-	onShortcut  func(*fyne.ShortcutEvent)
 
 	program uint32
 	scale   float32
@@ -118,14 +117,6 @@ func (c *glCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 
 func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 	c.onTypedKey = typed
-}
-
-func (c *glCanvas) OnShortcut() func(*fyne.ShortcutEvent) {
-	return c.onShortcut
-}
-
-func (c *glCanvas) SetOnShortcut(typed func(*fyne.ShortcutEvent)) {
-	c.onShortcut = typed
 }
 
 func (c *glCanvas) paint(size fyne.Size) {

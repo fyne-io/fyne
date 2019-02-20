@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -106,7 +107,7 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	baseWidget
-
+	fyne.ShortcutDefaultHandler
 	Text        string
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
@@ -209,27 +210,6 @@ func (e *Entry) FocusLost() {
 // Focused returns whether or not this Entry has focus.
 func (e *Entry) Focused() bool {
 	return e.focused
-}
-
-// Shortcut handles the shortcut events
-func (e *Entry) Shortcut(se *fyne.ShortcutEvent) {
-	switch se.Name {
-	case fyne.ShortcutPaste:
-		text := se.Clipboard.Content()
-		if !e.MultiLine {
-			// format clipboard content to be compatible with single line entry
-			text = strings.Replace(text, "\n", " ", -1)
-		}
-		provider := e.textProvider()
-		runes := []rune(text)
-		provider.insertAt(e.cursorTextPos(), runes)
-		e.CursorColumn += len(runes)
-		e.updateText(provider.String())
-		Renderer(e).(*entryRenderer).moveCursor()
-	default:
-		log.Println("Unhandled shortucut event", se.Name)
-		return
-	}
 }
 
 // TypedRune receives text input events when the Entry widget is focused.
@@ -423,10 +403,28 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		[]fyne.CanvasObject{box, placeholder, text, cursor}, e}
 }
 
+func (e *Entry) registerShortcut() {
+	e.RegisterShortcutHandler(fyne.ShortcutPaste, func(se fyne.ShortcutEventer) {
+		if clipboardableEvent, ok := se.(*fyne.ShortcutClipboardEvent); ok {
+			text := clipboardableEvent.Clipboard.Content()
+			if !e.MultiLine {
+				// format clipboard content to be compatible with single line entry
+				text = strings.Replace(text, "\n", " ", -1)
+			}
+			provider := e.textProvider()
+			runes := []rune(text)
+			provider.insertAt(e.cursorTextPos(), runes)
+			e.CursorColumn += len(runes)
+			e.updateText(provider.String())
+			Renderer(e).(*entryRenderer).moveCursor()
+		}
+	})
+}
+
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
 	e := &Entry{}
-
+	e.registerShortcut()
 	Refresh(e)
 	return e
 }
@@ -434,7 +432,7 @@ func NewEntry() *Entry {
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
-
+	e.registerShortcut()
 	Refresh(e)
 	return e
 }
@@ -442,7 +440,7 @@ func NewMultiLineEntry() *Entry {
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
-
+	e.registerShortcut()
 	Refresh(e)
 	return e
 }

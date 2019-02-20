@@ -6,11 +6,10 @@ import (
 	_ "image/png" // for the icon
 	"log"
 	"os"
-	"runtime"
 	"strconv"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
+
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -437,6 +436,79 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 
 func keyToName(key glfw.Key) fyne.KeyName {
 	switch key {
+	// printable keys
+	case glfw.KeyA:
+		return fyne.KeyA
+	case glfw.KeyB:
+		return fyne.KeyB
+	case glfw.KeyC:
+		return fyne.KeyC
+	case glfw.KeyD:
+		return fyne.KeyD
+	case glfw.KeyE:
+		return fyne.KeyE
+	case glfw.KeyF:
+		return fyne.KeyF
+	case glfw.KeyG:
+		return fyne.KeyG
+	case glfw.KeyH:
+		return fyne.KeyH
+	case glfw.KeyI:
+		return fyne.KeyI
+	case glfw.KeyJ:
+		return fyne.KeyJ
+	case glfw.KeyK:
+		return fyne.KeyK
+	case glfw.KeyL:
+		return fyne.KeyL
+	case glfw.KeyM:
+		return fyne.KeyM
+	case glfw.KeyN:
+		return fyne.KeyN
+	case glfw.KeyO:
+		return fyne.KeyO
+	case glfw.KeyP:
+		return fyne.KeyP
+	case glfw.KeyQ:
+		return fyne.KeyQ
+	case glfw.KeyR:
+		return fyne.KeyR
+	case glfw.KeyS:
+		return fyne.KeyS
+	case glfw.KeyT:
+		return fyne.KeyT
+	case glfw.KeyU:
+		return fyne.KeyU
+	case glfw.KeyV:
+		return fyne.KeyV
+	case glfw.KeyW:
+		return fyne.KeyW
+	case glfw.KeyX:
+		return fyne.KeyX
+	case glfw.KeyY:
+		return fyne.KeyY
+	case glfw.KeyZ:
+		return fyne.KeyZ
+	case glfw.Key0:
+		return fyne.Key0
+	case glfw.Key1:
+		return fyne.Key1
+	case glfw.Key2:
+		return fyne.Key2
+	case glfw.Key3:
+		return fyne.Key3
+	case glfw.Key4:
+		return fyne.Key4
+	case glfw.Key5:
+		return fyne.Key5
+	case glfw.Key6:
+		return fyne.Key6
+	case glfw.Key7:
+		return fyne.Key7
+	case glfw.Key8:
+		return fyne.Key8
+	case glfw.Key9:
+		return fyne.Key9
 	// non-printable
 	case glfw.KeyEscape:
 		return fyne.KeyEscape
@@ -495,30 +567,30 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	case glfw.KeyLeftShift:
 		fallthrough
 	case glfw.KeyRightShift:
-		return desktop.KeyShift
+		return fyne.KeyShift
 	case glfw.KeyLeftControl:
 		fallthrough
 	case glfw.KeyRightControl:
-		return desktop.KeyControl
+		return fyne.KeyControl
 	case glfw.KeyLeftAlt:
 		fallthrough
 	case glfw.KeyRightAlt:
-		return desktop.KeyAlt
+		return fyne.KeyAlt
 	case glfw.KeyLeftSuper:
 		fallthrough
 	case glfw.KeyRightSuper:
-		return desktop.KeySuper
+		return fyne.KeySuper
 	case glfw.KeyMenu:
-		return desktop.KeyMenu
+		return fyne.KeyMenu
 
 	case glfw.KeyKPEnter:
 		return fyne.KeyEnter
 	}
-	return ""
+	return fyne.KeyUnknown
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	if w.canvas.Focused() == nil && w.canvas.onTypedKey == nil && w.canvas.onShortcut == nil {
+	if w.canvas.Focused() == nil && w.canvas.onTypedKey == nil {
 		return
 	}
 
@@ -527,47 +599,84 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		return
 	}
 
-	if key <= glfw.KeyWorld1 { // filter printable characters handled in charModInput
+	var shortcutEvent fyne.ShortcutEventer
+
+	keyName := keyToName(key)
+	keyDesktopModifier := desktopModifier(mods)
+
+	shortcutName := detectShortcut(keyName, keyDesktopModifier)
+	switch shortcutName {
+	case fyne.ShortcutPaste, fyne.ShortcutCopy, fyne.ShortcutCut:
+		shortcutEvent = &fyne.ShortcutClipboardEvent{
+			ShortcutName: shortcutName,
+			Clipboard:    w.Clipboard(),
+		}
+
+	case fyne.ShortcutUnknown:
+		// Check for a desktop shortcut not handled by default
+		// Detected a desktop event. Pass down to handler to allow custom handling
+		shortcutEvent = &fyne.ShortcutDesktopEvent{
+			ShortcutName: shortcutName,
+			KeyName:      keyName,
+			Modifier:     keyDesktopModifier,
+		}
+	case fyne.ShortcutNone:
+		// No shortcut detected, pass down to TypedKey and exit
+		keyEvent := &fyne.KeyEvent{Name: keyName}
+		if w.canvas.Focused() != nil {
+			go w.canvas.Focused().TypedKey(keyEvent)
+		}
+		if w.canvas.onTypedKey != nil {
+			go w.canvas.onTypedKey(keyEvent)
+		}
 		return
+	default:
+		shortcutEvent = &fyne.ShortcutEvent{ShortcutName: shortcutName}
 	}
 
-	ev := new(fyne.KeyEvent)
-	ev.Name = keyToName(key)
-
-	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().TypedKey(ev)
-	}
-	if w.canvas.onTypedKey != nil {
-		go w.canvas.onTypedKey(ev)
+	if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
+		go shortcutable.TriggerShortcutHandler(shortcutEvent)
 	}
 }
 
-// shortcut detects the shortcut associated to a combination key, if any
-func shortcut(key glfw.Key, mods glfw.ModifierKey) fyne.Shortcut {
-	if mods == 0 {
+func desktopModifier(mods glfw.ModifierKey) fyne.Modifier {
+	var m fyne.Modifier
+	if (mods & glfw.ModShift) != 0 {
+		m |= fyne.ShiftModifier
+	}
+	//group control key and super key on darwin
+	if (mods&glfw.ModControl) != 0 || (mods&glfw.ModSuper) != 0 {
+		m |= fyne.ControlModifier
+	}
+	if (mods & glfw.ModAlt) != 0 {
+		m |= fyne.AltModifier
+	}
+	return m
+}
+
+// detectShortcut detects the shortcut associated to a combination key, if any
+// TODO: evaluate to make public into the fyne package
+func detectShortcut(key fyne.KeyName, mods fyne.Modifier) fyne.ShortcutName {
+	if mods < fyne.ControlModifier {
 		return fyne.ShortcutNone
 	}
 
-	modCtrl := glfw.ModControl
-	if runtime.GOOS == "darwin" {
-		modCtrl = glfw.ModSuper
-	}
 	switch key {
-	case glfw.KeyV:
-		if mods == modCtrl {
+	case fyne.KeyV:
+		if mods == fyne.ControlModifier {
 			return fyne.ShortcutPaste
 		}
-	case glfw.KeyC:
-		if mods == modCtrl {
+	case fyne.KeyC:
+		if mods == fyne.ControlModifier {
 			return fyne.ShortcutCopy
 		}
-	case glfw.KeyX:
-		if mods == modCtrl {
+	case fyne.KeyX:
+		if mods == fyne.ControlModifier {
 			return fyne.ShortcutCut
 		}
 	}
 
-	return fyne.ShortcutNone
+	return fyne.ShortcutUnknown
 }
 
 // charModInput defines the character with modifiers callback which is called when a
@@ -581,18 +690,12 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 		return
 	}
 
-	if mods == 0 || mods == glfw.ModShift {
-		if w.canvas.Focused() != nil {
-			w.canvas.Focused().TypedRune(char)
-		}
-		if w.canvas.onTypedRune != nil {
-			w.canvas.onTypedRune(char)
-		}
-
-		return
+	if w.canvas.Focused() != nil {
+		w.canvas.Focused().TypedRune(char)
 	}
-
-	// TODO handle shortcuts
+	if w.canvas.onTypedRune != nil {
+		w.canvas.onTypedRune(char)
+	}
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {

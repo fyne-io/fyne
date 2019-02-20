@@ -52,10 +52,10 @@ type Focusable interface {
 
 	TypedRune(rune)
 	TypedKey(*KeyEvent)
-	Shortcut(*ShortcutEvent)
 }
 
 // Shortcutable describes any CanvasObject that can respond to shortcut commands (quit, cut, copy, and paste).
 type Shortcutable interface {
-	Shortcut(*ShortcutEvent)
+	TriggerShortcutHandler(event ShortcutEventer)
+	RegisterShortcutHandler(shortcutName ShortcutName, handler func(ShortcutEventer))
 }
