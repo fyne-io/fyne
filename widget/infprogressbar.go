@@ -30,16 +30,30 @@ func (p *infProgressRenderer) updateBar() {
 	progressSize := p.progress.Size()
 	barWidth := barSize.Width
 	maxBarWidth := progressSize.Width / 5 // 1/5 of bar
+	minBarWidth := progressSize.Width / 20 // 1/20 of bar
 	barPos := p.bar.Position()
 	progPos := p.progress.Position()
 
 	stepSize := (int)(progressSize.Width / 50)
 
 	// check to make sure inner bar is sized correctly
-	if barWidth < maxBarWidth || barSize.Height < progressSize.Height {
-		// set width
-		newBoxSize := fyne.Size{Width: maxBarWidth, Height: progressSize.Height}
-		p.bar.Resize(newBoxSize)
+	// if bar is on the first half of the progress bar, grow it up to (width / 5)
+	// if on the second half of the progress bar width, shrink it down until it gets to (width / 20)
+	if (barPos.X + barWidth < progressSize.Width / 2) {
+		if barWidth < maxBarWidth || barSize.Height < progressSize.Height {
+			// slightly increase width
+			newBoxSize := fyne.Size{Width: barWidth + 2, Height: progressSize.Height}
+			p.bar.Resize(newBoxSize)
+		}
+	} else {
+		// we must be on the second half of the progress bar if not on the first half!
+		// slightly shrink size
+		if barWidth > minBarWidth || barSize.Height < progressSize.Height {
+			// slightly decrease width
+			newBoxSize := fyne.Size{Width: barWidth - 2, Height: progressSize.Height}
+			p.bar.Resize(newBoxSize)
+			stepSize += 2 // since the bar shrinks, it needs a larger forward step to appear moving forwards
+		}
 	}
 
 	// move bar to the right by stepSize
@@ -48,6 +62,9 @@ func (p *infProgressRenderer) updateBar() {
 	// loop around to start when bar goes to end
 	if barWidth+barPos.X >= progPos.X+progressSize.Width {
 		barPos.X = 0
+		// set box size to 0
+		newBoxSize := fyne.Size{Width: 0, Height: progressSize.Height}
+		p.bar.Resize(newBoxSize)
 	}
 
 	p.bar.Move(fyne.Position{X: barPos.X, Y: barPos.Y})
