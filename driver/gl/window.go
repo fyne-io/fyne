@@ -55,7 +55,9 @@ func (w *window) Title() string {
 
 func (w *window) SetTitle(title string) {
 	w.title = title
-	w.viewport.SetTitle(title)
+	runOnMainAsync(func() {
+		w.viewport.SetTitle(title)
+	})
 }
 
 func (w *window) FullScreen() bool {
@@ -279,7 +281,7 @@ func (w *window) resize(size fyne.Size) {
 	}
 
 	w.canvas.content.Resize(size)
-	w.canvas.setDirty()
+	w.canvas.setDirty(true)
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
@@ -339,7 +341,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 
 func (w *window) refresh(viewport *glfw.Window) {
 	updateWinSize(w)
-	w.canvas.setDirty()
+	w.canvas.setDirty(true)
 }
 
 func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int, int) {
@@ -389,7 +391,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	case *widget.Hyperlink:
 		cursor = hyperlinkCursor
 	}
-	viewport.SetCursor(cursor)
+	runOnMainAsync(func() {
+		viewport.SetCursor(cursor)
+	})
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
@@ -544,8 +548,6 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 
 		return
 	}
-
-	// TODO handle shortcuts
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {

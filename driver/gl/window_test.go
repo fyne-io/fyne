@@ -3,6 +3,8 @@
 package gl
 
 import (
+	"os"
+	"runtime"
 	"testing"
 
 	"fyne.io/fyne"
@@ -12,8 +14,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var d = NewGLDriver()
+
+func init() {
+	runtime.LockOSThread()
+}
+
+// TestMain makes sure that our driver is running on the main thread.
+// This must be done for some of our tests to function correctly.
+func TestMain(m *testing.M) {
+	go func() {
+		os.Exit(m.Run())
+	}()
+	d.Run()
+}
+
 func TestWindow_SetTitle(t *testing.T) {
-	d := NewGLDriver()
 	w := d.CreateWindow("Test")
 
 	title := "My title"
@@ -23,7 +39,6 @@ func TestWindow_SetTitle(t *testing.T) {
 }
 
 func TestWindow_PixelSize(t *testing.T) {
-	d := NewGLDriver()
 	w := d.CreateWindow("Test")
 
 	rect := &canvas.Rectangle{}

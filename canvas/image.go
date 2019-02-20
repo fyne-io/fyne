@@ -31,10 +31,9 @@ type Image struct {
 	baseObject
 
 	// one of the following sources will provide our image data
-	File        string        // Load the image from a file
-	Resource    fyne.Resource // Load the image from an in-memory resource
-	Image       image.Image   // Specify a loaded image to use in this canvas object
-	PixelAspect float32       // Set an aspect ratio for pixel based images
+	File     string        // Load the image from a file
+	Resource fyne.Resource // Load the image from an in-memory resource
+	Image    image.Image   // Specify a loaded image to use in this canvas object
 
 	Translucency float64   // Set a translucency value > 0.0 to fade the image
 	FillMode     ImageFill // Specify how the image should scale to fill or fit
