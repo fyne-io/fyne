@@ -2,6 +2,7 @@ package gl
 
 import (
 	"runtime"
+	"sync"
 	"time"
 
 	"fyne.io/fyne"
@@ -16,18 +17,25 @@ type funcData struct {
 
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
-var running = false
+var runFlag = false
+var runMutex = &sync.Mutex{}
 
 // Arrange that main.main runs on main thread.
 func init() {
 	runtime.LockOSThread()
 }
 
+func running() bool {
+	runMutex.Lock()
+	defer runMutex.Unlock()
+	return runFlag
+}
+
 // force a function f to run on the main thread
 func runOnMain(f func()) {
 	// If we are on main just execute - otherwise add it to the main queue and wait.
 	// The "running" variable is normally false when we are on the main thread.
-	if !running {
+	if !running() {
 		f()
 	} else {
 		done := make(chan bool)
@@ -45,7 +53,9 @@ func runOnMainAsync(f func()) {
 
 func (d *gLDriver) runGL() {
 	fps := time.NewTicker(time.Second / 60)
-	running = true
+	runMutex.Lock()
+	runFlag = true
+	runMutex.Unlock()
 
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
@@ -67,18 +77,14 @@ func (d *gLDriver) runGL() {
 			glfw.PollEvents()
 			for i, win := range d.windows {
 				viewport := win.(*window).viewport
-				viewport.MakeContextCurrent()
 
 				canvas := win.(*window).canvas
 				d.freeDirtyTextures(canvas)
-
-				gl.UseProgram(canvas.program)
 
 				if viewport.ShouldClose() {
 					// remove window from window list
 					d.windows = append(d.windows[:i], d.windows[i+1:]...)
 					viewport.Destroy()
-					glfw.DetachCurrentContext()
 
 					if win.(*window).master {
 						close(d.done)
@@ -87,9 +93,10 @@ func (d *gLDriver) runGL() {
 				}
 
 				if !canvas.isDirty() {
-					glfw.DetachCurrentContext()
 					continue
 				}
+				viewport.MakeContextCurrent()
+				gl.UseProgram(canvas.program)
 				win.(*window).fitContent()
 
 				view := win.(*window)

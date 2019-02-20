@@ -59,7 +59,9 @@ func (w *window) Title() string {
 
 func (w *window) SetTitle(title string) {
 	w.title = title
-	w.viewport.SetTitle(title)
+	runOnMainAsync(func() {
+		w.viewport.SetTitle(title)
+	})
 }
 
 func (w *window) FullScreen() bool {
@@ -291,7 +293,7 @@ func (w *window) resize(size fyne.Size) {
 	}
 
 	w.canvas.content.Resize(size)
-	w.canvas.setDirty()
+	w.canvas.setDirty(true)
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
@@ -351,7 +353,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 
 func (w *window) refresh(viewport *glfw.Window) {
 	updateWinSize(w)
-	w.canvas.setDirty()
+	w.canvas.setDirty(true)
 }
 
 func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int, int) {
