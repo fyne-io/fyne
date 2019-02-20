@@ -2,6 +2,7 @@ package gl
 
 import (
 	"math"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -19,8 +20,9 @@ type glCanvas struct {
 	program uint32
 	scale   float32
 
-	dirty1, dirty2 bool
-	refreshQueue   chan fyne.CanvasObject
+	dirty        bool
+	dirtyMutex   *sync.Mutex
+	refreshQueue chan fyne.CanvasObject
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
@@ -59,7 +61,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 	c.content.Resize(fyne.NewSize(width, height))
 	c.content.Move(fyne.NewPos(pad, pad))
-	c.setDirty()
+	c.setDirty(true)
 }
 
 func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
@@ -69,7 +71,7 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 	default:
 		// queue is full, ignore
 	}
-	c.setDirty()
+	c.setDirty(true)
 }
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
@@ -100,7 +102,7 @@ func (c *glCanvas) Scale() float32 {
 
 func (c *glCanvas) SetScale(scale float32) {
 	c.scale = scale
-	c.setDirty()
+	c.setDirty(true)
 }
 
 func (c *glCanvas) OnTypedRune() func(rune) {
@@ -120,22 +122,15 @@ func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
-	if c.dirty1 {
-		c.dirty1 = false
-	} else {
-		if c.dirty2 {
-			c.dirty2 = false
-		}
-	}
-
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	max16bit := float32(255 * 255)
-	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-
 	if c.content == nil {
 		return
 	}
+	c.setDirty(false)
+
+	r, g, b, a := theme.BackgroundColor().RGBA()
+	max16bit := float32(255 * 255)
+	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
 		c.drawObject(obj, pos, size)
@@ -143,19 +138,24 @@ func (c *glCanvas) paint(size fyne.Size) {
 	c.walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
 }
 
-func (c *glCanvas) setDirty() {
-	// we must set twice as it's double buffered
-	c.dirty1 = true
-	c.dirty2 = true
+func (c *glCanvas) setDirty(dirty bool) {
+	c.dirtyMutex.Lock()
+	defer c.dirtyMutex.Unlock()
+
+	c.dirty = dirty
 }
 
 func (c *glCanvas) isDirty() bool {
-	return c.dirty1 || c.dirty2
+	c.dirtyMutex.Lock()
+	defer c.dirtyMutex.Unlock()
+
+	return c.dirty
 }
 
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
+	c.dirtyMutex = &sync.Mutex{}
 
 	c.initOpenGL()
 
