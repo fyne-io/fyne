@@ -39,7 +39,16 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 	bar.Resize(fyne.NewSize(width, 10))
 
 	render := Renderer(bar).(*infProgressRenderer)
-	// width of bar is 1/5 of width
-	assert.Equal(t, width/5, render.bar.Size().Width)
 
+	// width of bar is 1/50 of width after initial creation
+	assert.Equal(t, width/50, render.bar.Size().Width)
+
+	// make sure the inner progress bar grows in size
+	// call updateBar() enough times to grow the inner bar
+	for i := 0; i < (width / 5); i++ {
+		render.updateBar()
+	}
+
+	// width of bar is 1/5 of total width of progress bar
+	assert.Equal(t, width/5, render.bar.Size().Width)
 }
