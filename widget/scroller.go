@@ -34,7 +34,8 @@ func (s *scrollRenderer) Layout(size fyne.Size) {
 }
 
 func (s *scrollRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(25, 25) // TODO consider the smallest useful scroll view?
+	// TODO determine if width or height should be resepected based on a which-way-to-scroll flag
+	return fyne.NewSize(s.scroll.Content.MinSize().Width, 25) // TODO consider the smallest useful scroll view?
 }
 
 func (s *scrollRenderer) Refresh() {
