@@ -389,7 +389,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	case *widget.Hyperlink:
 		cursor = hyperlinkCursor
 	}
-	viewport.SetCursor(cursor)
+	runOnMainAsync(func() {
+		viewport.SetCursor(cursor)
+	})
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
