@@ -17,7 +17,6 @@ func TestInfiniteProgressBar_Creation(t *testing.T) {
 func TestInfiniteProgressBar_Ticker(t *testing.T) {
 	bar := NewInfiniteProgressBar()
 
-	bar.Show()
 	// Show() starts a goroutine, so pause for it to initialize
 	time.Sleep(10 * time.Millisecond)
 	assert.NotNil(t, bar.ticker)
@@ -40,15 +39,16 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 
 	render := Renderer(bar).(*infProgressRenderer)
 
-	// width of bar is 1/50 of width after initial creation
-	assert.Equal(t, width/50, render.bar.Size().Width)
+	// width of bar is one step size because updateBar() will have run once
+	assert.Equal(t, width*progressBarInfiniteStepSizePercent/100, render.bar.Size().Width)
 
 	// make sure the inner progress bar grows in size
 	// call updateBar() enough times to grow the inner bar
-	for i := 0; i < (width / 5); i++ {
+	maxWidth := width * maxProgressBarInfiniteWidthPercent / 100
+	for i := 0; i < maxWidth; i++ {
 		render.updateBar()
 	}
 
 	// width of bar is 1/5 of total width of progress bar
-	assert.Equal(t, width/5, render.bar.Size().Width)
+	assert.Equal(t, maxWidth, render.bar.Size().Width)
 }

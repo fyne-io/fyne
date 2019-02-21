@@ -9,7 +9,12 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const infiniteRefreshRate = 50 * time.Millisecond
+const (
+	infiniteRefreshRate                time.Duration = 50 * time.Millisecond
+	maxProgressBarInfiniteWidthPercent int           = 20 // (1/5)
+	minProgressBarInfiniteWidthPercent int           = 5  // (1/20)
+	progressBarInfiniteStepSizePercent int           = 2  // (1/50)
+)
 
 type infProgressRenderer struct {
 	objects  []fyne.CanvasObject
@@ -30,9 +35,9 @@ func (p *infProgressRenderer) updateBar() {
 	barWidth := p.bar.Size().Width
 	barPos := p.bar.Position()
 
-	maxBarWidth := progressSize.Width / 5  // 1/5 of bar
-	minBarWidth := progressSize.Width / 20 // 1/20 of bar
-	stepSize := (int)(progressSize.Width / 50)
+	maxBarWidth := progressSize.Width * maxProgressBarInfiniteWidthPercent / 100
+	minBarWidth := progressSize.Width * minProgressBarInfiniteWidthPercent / 100
+	stepSize := (int)(progressSize.Width * progressBarInfiniteStepSizePercent / 100)
 
 	// check to make sure inner bar is sized correctly
 	// if bar is on the first half of the progress bar, grow it up to (width / 5)
@@ -63,7 +68,6 @@ func (p *infProgressRenderer) updateBar() {
 	p.bar.Move(barPos)
 }
 
-// Layout the components of the progress bar widget
 func (p *infProgressRenderer) Layout(size fyne.Size) {
 	// set height of progress bar
 	p.updateBar()
@@ -90,7 +94,7 @@ func (p *infProgressRenderer) Objects() []fyne.CanvasObject {
 }
 
 // InfProgressBar widget creates a horizontal panel that indicates waiting indefinitely
-// An infinite progress bar loops 0% -> 100% until Stop() is called
+// An infinite progress bar loops 0% -> 100% repeatedly until Stop() is called
 type InfProgressBar struct {
 	baseWidget
 
@@ -166,5 +170,6 @@ func (p *InfProgressBar) CreateRenderer() fyne.WidgetRenderer {
 func NewInfiniteProgressBar() *InfProgressBar {
 	p := &InfProgressBar{}
 	Renderer(p).Layout(p.MinSize())
+	p.Start()
 	return p
 }
