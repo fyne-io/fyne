@@ -8,14 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInfiniteProgressBar_Creation(t *testing.T) {
-	bar := NewInfiniteProgressBar()
+func TestProgressBarInfinite_Creation(t *testing.T) {
+	bar := NewProgressBarInfinite()
 	// ticker should be nil when created
 	assert.Nil(t, bar.ticker)
 }
 
-func TestInfiniteProgressBar_Ticker(t *testing.T) {
-	bar := NewInfiniteProgressBar()
+func TestProgressBarInfinite_Ticker(t *testing.T) {
+	bar := NewProgressBarInfinite()
 
 	// Show() starts a goroutine, so pause for it to initialize
 	time.Sleep(10 * time.Millisecond)
@@ -33,7 +33,7 @@ func TestInfiniteProgressBar_Ticker(t *testing.T) {
 }
 
 func TestInfiniteProgressRenderer_Layout(t *testing.T) {
-	bar := NewInfiniteProgressBar()
+	bar := NewProgressBarInfinite()
 	width := 100
 	bar.Resize(fyne.NewSize(width, 10))
 

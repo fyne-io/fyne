@@ -31,7 +31,7 @@ func makeInputTab() fyne.Widget {
 
 func makeGroupTab() fyne.Widget {
 	progress := widget.NewProgressBar()
-	infProgress := widget.NewInfiniteProgressBar()
+	infProgress := widget.NewProgressBarInfinite()
 
 	go func() {
 		num := 0.0
