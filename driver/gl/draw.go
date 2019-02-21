@@ -181,7 +181,7 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 	} else {
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
-	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, c.pixelAspect(img), 0)
+	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, c.aspects[img], 0)
 	c.drawTexture(texture, points)
 }
 
