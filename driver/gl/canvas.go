@@ -3,9 +3,9 @@ package gl
 import (
 	"math"
 	"sync"
-	"sync/atomic"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
@@ -21,9 +21,11 @@ type glCanvas struct {
 
 	program uint32
 	scale   float32
+	aspects map[*canvas.Image]float32
 
-	dirty1, dirty2 int32
-	refreshQueue   chan fyne.CanvasObject
+	dirty        bool
+	dirtyMutex   *sync.Mutex
+	refreshQueue chan fyne.CanvasObject
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
@@ -67,7 +69,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 	c.content.Resize(fyne.NewSize(width, height))
 	c.content.Move(fyne.NewPos(pad, pad))
-	c.setDirty()
+	c.setDirty(true)
 }
 
 func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
@@ -77,7 +79,7 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 	default:
 		// queue is full, ignore
 	}
-	c.setDirty()
+	c.setDirty(true)
 }
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
@@ -108,7 +110,7 @@ func (c *glCanvas) Scale() float32 {
 
 func (c *glCanvas) SetScale(scale float32) {
 	c.scale = scale
-	c.setDirty()
+	c.setDirty(true)
 }
 
 func (c *glCanvas) OnTypedRune() func(rune) {
@@ -128,22 +130,15 @@ func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
-	if atomic.LoadInt32(&c.dirty1) == 1 {
-		atomic.StoreInt32(&c.dirty1, 0)
-	} else {
-		if atomic.LoadInt32(&c.dirty2) == 1 {
-			atomic.StoreInt32(&c.dirty2, 0)
-		}
+	if c.Content() == nil {
+		return
 	}
+	c.setDirty(false)
 
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-
-	if c.content == nil {
-		return
-	}
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
 		c.drawObject(obj, pos, size)
@@ -151,19 +146,25 @@ func (c *glCanvas) paint(size fyne.Size) {
 	c.walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
 }
 
-func (c *glCanvas) setDirty() {
-	// we must set twice as it's double buffered
-	atomic.StoreInt32(&c.dirty1, 1)
-	atomic.StoreInt32(&c.dirty2, 1)
+func (c *glCanvas) setDirty(dirty bool) {
+	c.dirtyMutex.Lock()
+	defer c.dirtyMutex.Unlock()
+
+	c.dirty = dirty
 }
 
 func (c *glCanvas) isDirty() bool {
-	return atomic.LoadInt32(&c.dirty1) == 1 || atomic.LoadInt32(&c.dirty2) == 1
+	c.dirtyMutex.Lock()
+	defer c.dirtyMutex.Unlock()
+
+	return c.dirty
 }
 
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
+	c.aspects = make(map[*canvas.Image]float32, 16)
+	c.dirtyMutex = &sync.Mutex{}
 
 	c.initOpenGL()
 

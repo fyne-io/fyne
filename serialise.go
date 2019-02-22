@@ -3,22 +3,7 @@ package fyne
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 )
-
-func fromFile(name string) Resource {
-	data, err := ioutil.ReadFile(cachePath(name))
-
-	if err != nil {
-		return nil
-	}
-
-	return NewStaticResource(name, data)
-}
-
-func toFile(res *StaticResource) {
-	ioutil.WriteFile(cachePath(res.StaticName), res.StaticContent, 0644)
-}
 
 // GoString converts a Resource object to Go code.
 // This is useful if serialising to a Go file for compilation into a binary.

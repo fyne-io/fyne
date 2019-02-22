@@ -25,12 +25,3 @@ func TestIconThemeChangeContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.NotEqual(t, content, cancel.Content())
 }
-
-func TestIconThemeChangePath(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	checked := CheckButtonIcon()
-	path := checked.CachePath()
-
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
-	assert.NotEqual(t, path, checked.CachePath())
-}

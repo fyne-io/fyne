@@ -1,14 +1,16 @@
 package desktop
 
+import "fyne.io/fyne"
+
 const (
 	// KeyShift represents the left or right shift key
-	KeyShift = "Shift"
+	KeyShift fyne.KeyName = "Shift"
 	// KeyControl represents the left or right control key
-	KeyControl = "Control"
+	KeyControl fyne.KeyName = "Control"
 	// KeyAlt represents the left or right alt key
-	KeyAlt = "Alt"
+	KeyAlt fyne.KeyName = "Alt"
 	// KeySuper represents the left or right "Windows" key (or "Command" key on macOS)
-	KeySuper = "Super"
+	KeySuper fyne.KeyName = "Super"
 	// KeyMenu represents the left or right menu / application key
-	KeyMenu = "Menu"
+	KeyMenu fyne.KeyName = "Menu"
 )
