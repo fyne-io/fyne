@@ -24,11 +24,17 @@ func init() {
 		cacheDuration = t
 	}
 
-	go func() {
-		delay := cacheDuration / 2
-		if delay < time.Second {
-			delay = time.Second
-		}
+	svgCacheJanitor()
+}
+
+func svgCacheJanitor() {
+	delay := cacheDuration / 2
+	if delay < time.Second {
+		delay = time.Second
+	}
+
+	onceOnly := sync.Once{}
+	go onceOnly.Do(func() {
 		for {
 			time.Sleep(delay)
 			now := time.Now()
@@ -40,7 +46,7 @@ func init() {
 			}
 			rasterMutex.Unlock()
 		}
-	}()
+	})
 }
 
 func svgCacheGet(res fyne.Resource, w int, h int) *image.RGBA {
