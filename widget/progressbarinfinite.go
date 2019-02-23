@@ -21,6 +21,7 @@ type infProgressRenderer struct {
 	objects  []fyne.CanvasObject
 	bar      *canvas.Rectangle
 	progress *ProgressBarInfinite
+	mutex    sync.Mutex
 }
 
 // MinSize calculates the minimum size of a progress bar.
@@ -32,6 +33,7 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 }
 
 func (p *infProgressRenderer) updateBar() {
+	p.mutex.Lock()
 	progressSize := p.progress.Size()
 	barWidth := p.bar.Size().Width
 	barPos := p.bar.Position()
@@ -65,6 +67,7 @@ func (p *infProgressRenderer) updateBar() {
 	}
 
 	p.bar.Move(barPos)
+	p.mutex.Unlock()
 }
 
 // Layout the components of the infinite progress bar
@@ -180,7 +183,7 @@ func (p *ProgressBarInfinite) infiniteProgressLoop() {
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 
-	return &infProgressRenderer{[]fyne.CanvasObject{bar}, bar, p}
+	return &infProgressRenderer{[]fyne.CanvasObject{bar}, bar, p, sync.Mutex{}}
 }
 
 // NewProgressBarInfinite creates a new progress bar widget that loops indefinitely from 0% -> 100%

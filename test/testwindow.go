@@ -1,6 +1,10 @@
 package test
 
-import "fyne.io/fyne"
+import (
+	"sync"
+
+	"fyne.io/fyne"
+)
 
 type testWindow struct {
 	title      string
@@ -13,6 +17,7 @@ type testWindow struct {
 }
 
 var windows = make([]fyne.Window, 0)
+var windowsMutex = sync.RWMutex{}
 
 func (w *testWindow) Title() string {
 	return w.title
@@ -75,6 +80,7 @@ func (w *testWindow) Close() {
 		w.onClosed()
 	}
 
+	windowsMutex.Lock()
 	i := 0
 	for _, window := range windows {
 		if window == w {
@@ -84,6 +90,7 @@ func (w *testWindow) Close() {
 	}
 
 	windows = append(windows[:i], windows[i+1:]...)
+	windowsMutex.Unlock()
 }
 
 func (w *testWindow) ShowAndRun() {
@@ -108,6 +115,8 @@ func NewWindow(content fyne.CanvasObject) fyne.Window {
 	canvas.SetContent(content)
 	window := &testWindow{canvas: canvas}
 
+	windowsMutex.Lock()
 	windows = append(windows, window)
+	windowsMutex.Unlock()
 	return window
 }
