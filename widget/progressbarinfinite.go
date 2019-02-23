@@ -66,6 +66,7 @@ func (p *infProgressRenderer) updateBar() {
 	p.bar.Move(barPos)
 }
 
+// Layout the components of the infinite progress bar
 func (p *infProgressRenderer) Layout(size fyne.Size) {
 	p.updateBar()
 }
@@ -145,7 +146,6 @@ func (p *ProgressBarInfinite) Stop() {
 // infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
 // the function can be exited by calling Stop()
 func (p *ProgressBarInfinite) infiniteProgressLoop() {
-	defer p.Stop()
 	p.ticker = time.NewTicker(infiniteRefreshRate)
 
 	for range p.ticker.C {
