@@ -581,7 +581,7 @@ func keyToName(key glfw.Key) fyne.KeyName {
 		return desktop.KeyShift
 	case glfw.KeyLeftControl:
 		fallthrough
-	case glfw.KeyRightControl: 
+	case glfw.KeyRightControl:
 		return desktop.KeyControl
 	case glfw.KeyLeftAlt:
 		fallthrough
