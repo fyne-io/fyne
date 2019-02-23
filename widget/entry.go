@@ -107,7 +107,7 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	baseWidget
-	fyne.ShortcutDefaultHandler
+	fyne.ShortcutHandler
 	Text        string
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
@@ -404,20 +404,20 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (e *Entry) registerShortcut() {
-	e.RegisterShortcutHandler(fyne.ShortcutPaste, func(se fyne.ShortcutEventer) {
-		if clipboardableEvent, ok := se.(*fyne.ShortcutClipboardEvent); ok {
-			text := clipboardableEvent.Clipboard.Content()
-			if !e.MultiLine {
-				// format clipboard content to be compatible with single line entry
-				text = strings.Replace(text, "\n", " ", -1)
-			}
-			provider := e.textProvider()
-			runes := []rune(text)
-			provider.insertAt(e.cursorTextPos(), runes)
-			e.CursorColumn += len(runes)
-			e.updateText(provider.String())
-			Renderer(e).(*entryRenderer).moveCursor()
+	scPaste := &fyne.ShortcutPaste{}
+	e.AddShortcut(scPaste, func(se fyne.Shortcuter) {
+		scPaste = se.(*fyne.ShortcutPaste)
+		text := scPaste.Content()
+		if !e.MultiLine {
+			// format clipboard content to be compatible with single line entry
+			text = strings.Replace(text, "\n", " ", -1)
 		}
+		provider := e.textProvider()
+		runes := []rune(text)
+		provider.insertAt(e.cursorTextPos(), runes)
+		e.CursorColumn += len(runes)
+		e.updateText(provider.String())
+		Renderer(e).(*entryRenderer).moveCursor()
 	})
 }
 

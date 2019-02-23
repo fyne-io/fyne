@@ -605,28 +605,10 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		return
 	}
 
-	var shortcutEvent fyne.ShortcutEventer
-
 	keyName := keyToName(key)
 	keyDesktopModifier := desktopModifier(mods)
 
-	shortcutName := detectShortcut(keyName, keyDesktopModifier)
-	switch shortcutName {
-	case fyne.ShortcutPaste, fyne.ShortcutCopy, fyne.ShortcutCut:
-		shortcutEvent = &fyne.ShortcutClipboardEvent{
-			ShortcutName: shortcutName,
-			Clipboard:    w.Clipboard(),
-		}
-
-	case fyne.ShortcutUnknown:
-		// Check for a desktop shortcut not handled by default
-		// Detected a desktop event. Pass down to handler to allow custom handling
-		shortcutEvent = &desktop.ShortcutDesktopEvent{
-			ShortcutName: shortcutName,
-			KeyName:      keyName,
-			Modifier:     keyDesktopModifier,
-		}
-	case fyne.ShortcutNone:
+	if keyDesktopModifier < desktop.ControlModifier {
 		// No shortcut detected, pass down to TypedKey and exit
 		keyEvent := &fyne.KeyEvent{Name: keyName}
 		if w.canvas.Focused() != nil {
@@ -636,12 +618,42 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 			go w.canvas.onTypedKey(keyEvent)
 		}
 		return
+	}
+
+	isMac := runtime.GOOS == "darwin"
+
+	var shortcut fyne.Shortcuter
+	switch keyName {
+	case fyne.KeyV:
+		// detect paste shortcut
+		if (!isMac && keyDesktopModifier == desktop.ControlModifier) || (isMac && keyDesktopModifier == desktop.SuperModifier) {
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: w.Clipboard(),
+			}
+		}
+	case fyne.KeyC:
+		// detect copy shortcut
+		if (!isMac && keyDesktopModifier == desktop.ControlModifier) || (isMac && keyDesktopModifier == desktop.SuperModifier) {
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: w.Clipboard(),
+			}
+		}
+	case fyne.KeyX:
+		// detect cut shortcut
+		if (!isMac && keyDesktopModifier == desktop.ControlModifier) || (isMac && keyDesktopModifier == desktop.SuperModifier) {
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: w.Clipboard(),
+			}
+		}
 	default:
-		shortcutEvent = &fyne.ShortcutEvent{ShortcutName: shortcutName}
+		shortcut = &desktop.CustomShortcut{
+			KeyName:  keyName,
+			Modifier: keyDesktopModifier,
+		}
 	}
 
 	if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-		go shortcutable.TriggerShortcutHandler(shortcutEvent)
+		go shortcutable.HandleShortcut(shortcut)
 	}
 }
 
@@ -660,42 +672,6 @@ func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
 		m |= desktop.SuperModifier
 	}
 	return m
-}
-
-// detectShortcut detects the shortcut associated to a combination key, if any
-// TODO: evaluate to make public into the fyne package
-func detectShortcut(key fyne.KeyName, mods desktop.Modifier) fyne.ShortcutName {
-	if mods < desktop.ControlModifier {
-		return fyne.ShortcutNone
-	}
-
-	isMac := runtime.GOOS == "darwin"
-
-	switch key {
-	case fyne.KeyV:
-		if !isMac && mods == desktop.ControlModifier {
-			return fyne.ShortcutPaste
-		}
-		if isMac && mods == desktop.SuperModifier {
-			return fyne.ShortcutPaste
-		}
-	case fyne.KeyC:
-		if !isMac && mods == desktop.ControlModifier {
-			return fyne.ShortcutCopy
-		}
-		if isMac && mods == desktop.SuperModifier {
-			return fyne.ShortcutCopy
-		}
-	case fyne.KeyX:
-		if !isMac && mods == desktop.ControlModifier {
-			return fyne.ShortcutCut
-		}
-		if isMac && mods == desktop.SuperModifier {
-			return fyne.ShortcutCut
-		}
-	}
-
-	return fyne.ShortcutUnknown
 }
 
 // charModInput defines the character with modifiers callback which is called when a

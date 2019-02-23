@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -431,7 +432,7 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 
 func TestEntry_OnPaste(t *testing.T) {
 	clipboard := test.NewClipboard()
-	sev := &fyne.ShortcutClipboardEvent{ShortcutName: fyne.ShortcutPaste, Clipboard: clipboard}
+	shortuct := &fyne.ShortcutPaste{Clipboard: clipboard}
 	tests := []struct {
 		name             string
 		entry            *Entry
@@ -485,8 +486,24 @@ func TestEntry_OnPaste(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			clipboard.SetContent(tt.clipboardContent)
-			tt.entry.TriggerShortcutHandler(sev)
+			tt.entry.HandleShortcut(shortuct)
 			assert.Equal(t, tt.wantText, tt.entry.Text)
 		})
 	}
+}
+
+func TestEntry_OnCustomDesktop(t *testing.T) {
+	shortcut := &desktop.CustomShortcut{}
+	entry := NewEntry()
+
+	entry.AddShortcut(shortcut, func(s fyne.Shortcuter) {
+		shortcut = s.(*desktop.CustomShortcut)
+		assert.Equal(t, fyne.KeyA, shortcut.KeyName)
+		assert.Equal(t, desktop.ControlModifier, shortcut.Modifier)
+	})
+
+	entry.HandleShortcut(&desktop.CustomShortcut{
+		KeyName:  fyne.KeyA,
+		Modifier: desktop.ControlModifier,
+	})
 }

@@ -4,45 +4,66 @@ import (
 	"sync"
 )
 
-// ShortcutName reprents a particular combination of actions that result in a shortcut.(i.e. copy, paste...)
-type ShortcutName string
-
-const (
-	// ShortcutNone represents a combination of actions that do not have shortcut associated to
-	ShortcutNone ShortcutName = "None"
-	// ShortcutUnknown represents a combination of actions that do not have fyne shortcut associated to
-	ShortcutUnknown ShortcutName = "Unknown"
-	// ShortcutCopy represents a combination of actions used to copy text from the clipboard
-	ShortcutCopy ShortcutName = "Copy"
-	// ShortcutPaste represents a combination of actions used to paste text to the clipboard
-	ShortcutPaste ShortcutName = "Paste"
-	// ShortcutCut represents a combination of actions used to cut text to the clipboard
-	ShortcutCut ShortcutName = "Cut"
-)
-
-// ShortcutDefaultHandler is a default implementation of the shortcut handler
+// ShortcutHandler is a default implementation of the shortcut handler
 // for the canvasObject
-type ShortcutDefaultHandler struct {
+type ShortcutHandler struct {
 	mu    sync.RWMutex
-	entry map[ShortcutName]func(ShortcutEventer)
+	entry map[string]func(Shortcuter)
 }
 
-// TriggerShortcutHandler handle the shortcut registered as ShortcutName passing the ShortcutEvent
-func (sh *ShortcutDefaultHandler) TriggerShortcutHandler(event ShortcutEventer) {
-	if event == nil {
+// HandleShortcut handle the registered shortcut
+func (sh *ShortcutHandler) HandleShortcut(shortcut Shortcuter) {
+	if shortcut == nil {
 		return
 	}
-	if sc, ok := sh.entry[event.Shortcut()]; ok {
-		sc(event)
+	if sc, ok := sh.entry[shortcut.Shortcut()]; ok {
+		sc(shortcut)
 	}
 }
 
-// RegisterShortcutHandler register an handler to be executed when ShortcutName command is triggered
-func (sh *ShortcutDefaultHandler) RegisterShortcutHandler(shortcutName ShortcutName, handler func(ShortcutEventer)) {
+// AddShortcut register an handler to be executed when ShortcutName command is triggered
+func (sh *ShortcutHandler) AddShortcut(shortcut Shortcuter, handler func(shortcut Shortcuter)) {
 	sh.mu.Lock()
 	defer sh.mu.Unlock()
 	if sh.entry == nil {
-		sh.entry = make(map[ShortcutName]func(ShortcutEventer))
+		sh.entry = make(map[string]func(Shortcuter))
 	}
-	sh.entry[shortcutName] = handler
+	sh.entry[shortcut.Shortcut()] = handler
+}
+
+// Shortcuter is the interface implemented by values with a custom formatter.
+// The implementation of Format may call Sprint(f) or Fprint(f) etc.
+// to generate its output.
+type Shortcuter interface {
+	Shortcut() string
+}
+
+// ShortcutPaste describes a shortcut paste action.
+type ShortcutPaste struct {
+	Clipboard
+}
+
+// Shortcut returns the shortcut type
+func (se *ShortcutPaste) Shortcut() string {
+	return "Paste"
+}
+
+// ShortcutCopy describes a shortcut copy action.
+type ShortcutCopy struct {
+	Clipboard
+}
+
+// Shortcut returns the shortcut type
+func (se *ShortcutCopy) Shortcut() string {
+	return "Copy"
+}
+
+// ShortcutCut describes a shortcut cut action.
+type ShortcutCut struct {
+	Clipboard
+}
+
+// Shortcut returns the shortcut type
+func (se *ShortcutCut) Shortcut() string {
+	return "Cut"
 }

@@ -17,29 +17,3 @@ type ScrollEvent struct {
 	PointEvent
 	DeltaX, DeltaY int
 }
-
-// ShortcutEvent describes a shortcut input event.
-type ShortcutEvent struct {
-	ShortcutName
-}
-
-// Shortcut returns the shortcut name associated to the event
-func (se *ShortcutEvent) Shortcut() ShortcutName {
-	return se.ShortcutName
-}
-
-// ShortcutClipboardEvent describes a shortcut clipoard event.
-type ShortcutClipboardEvent struct {
-	ShortcutName
-	Clipboard
-}
-
-// Shortcut returns the shortcut name associated to the event
-func (se *ShortcutClipboardEvent) Shortcut() ShortcutName {
-	return se.ShortcutName
-}
-
-// ShortcutEventer describes a shortcut event.
-type ShortcutEventer interface {
-	Shortcut() ShortcutName
-}
