@@ -18,6 +18,7 @@ type rasterInfo struct {
 var cacheDuration = (time.Minute * 5)
 var rasters = make(map[fyne.Resource]*rasterInfo)
 var rasterMutex sync.RWMutex
+var janitorOnce sync.Once
 
 func init() {
 	if t, err := time.ParseDuration(os.Getenv("FYNE_CACHE")); err == nil {
@@ -33,8 +34,7 @@ func svgCacheJanitor() {
 		delay = time.Second
 	}
 
-	onceOnly := sync.Once{}
-	go onceOnly.Do(func() {
+	go janitorOnce.Do(func() {
 		for {
 			time.Sleep(delay)
 			now := time.Now()
