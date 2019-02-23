@@ -45,14 +45,6 @@ func unscaleInt(c fyne.Canvas, v int) int {
 	}
 }
 
-func (c *glCanvas) pixelAspect(img *canvas.Image) float32 {
-	return c.aspects[img]
-}
-
-func (c *glCanvas) setPixelAspect(img *canvas.Image, aspect float32) {
-	c.aspects[img] = aspect
-}
-
 func (c *glCanvas) Content() fyne.CanvasObject {
 	return c.content
 }
