@@ -13,10 +13,11 @@ func TestProgressBarInfinite_Creation(t *testing.T) {
 	// loop should be started when created
 	time.Sleep(10 * time.Millisecond)
 	assert.True(t, bar.isLoopActive())
-	bar.Stop()
+	bar.Hide()
+	assert.False(t, bar.isLoopActive())
 }
 
-func TestProgressBarInfinite_Ticker(t *testing.T) {
+func TestProgressBarInfinite_Reshown(t *testing.T) {
 	bar := NewProgressBarInfinite()
 
 	// Show() starts a goroutine, so pause for it to initialize
@@ -53,5 +54,5 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 
 	// width of bar is 1/5 of total width of progress bar
 	assert.Equal(t, maxWidth, render.bar.Size().Width)
-	bar.Stop()
+	bar.Hide()
 }

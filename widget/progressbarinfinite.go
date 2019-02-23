@@ -142,6 +142,7 @@ func (p *ProgressBarInfinite) Stop() {
 	p.setLoopState(false)
 }
 
+// isLoopActive returns true if the infiniteProgressLoop() is active, false otherwise
 func (p *ProgressBarInfinite) isLoopActive() bool {
 	var active bool
 	p.activeMutex.RLock()
@@ -150,6 +151,7 @@ func (p *ProgressBarInfinite) isLoopActive() bool {
 	return active
 }
 
+// setLoopState is used internally to set whether infiniteProgressLoop() is active or not
 func (p *ProgressBarInfinite) setLoopState(state bool) {
 	p.activeMutex.Lock()
 	p.loopActive = state
