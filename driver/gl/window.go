@@ -442,7 +442,65 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 
 func keyToName(key glfw.Key) fyne.KeyName {
 	switch key {
-	// general available keys
+	// non-printable
+	case glfw.KeyEscape:
+		return fyne.KeyEscape
+	case glfw.KeyEnter:
+		return fyne.KeyReturn
+	case glfw.KeyTab:
+		return fyne.KeyTab
+	case glfw.KeyBackspace:
+		return fyne.KeyBackspace
+	case glfw.KeyInsert:
+		return fyne.KeyInsert
+	case glfw.KeyDelete:
+		return fyne.KeyDelete
+	case glfw.KeyRight:
+		return fyne.KeyRight
+	case glfw.KeyLeft:
+		return fyne.KeyLeft
+	case glfw.KeyDown:
+		return fyne.KeyDown
+	case glfw.KeyUp:
+		return fyne.KeyUp
+	case glfw.KeyPageUp:
+		return fyne.KeyPageUp
+	case glfw.KeyPageDown:
+		return fyne.KeyPageDown
+	case glfw.KeyHome:
+		return fyne.KeyHome
+	case glfw.KeyEnd:
+		return fyne.KeyEnd
+
+	case glfw.KeyF1:
+		return fyne.KeyF1
+	case glfw.KeyF2:
+		return fyne.KeyF2
+	case glfw.KeyF3:
+		return fyne.KeyF3
+	case glfw.KeyF4:
+		return fyne.KeyF4
+	case glfw.KeyF5:
+		return fyne.KeyF5
+	case glfw.KeyF6:
+		return fyne.KeyF6
+	case glfw.KeyF7:
+		return fyne.KeyF7
+	case glfw.KeyF8:
+		return fyne.KeyF8
+	case glfw.KeyF9:
+		return fyne.KeyF9
+	case glfw.KeyF10:
+		return fyne.KeyF10
+	case glfw.KeyF11:
+		return fyne.KeyF11
+	case glfw.KeyF12:
+		return fyne.KeyF12
+
+	case glfw.KeyKPEnter:
+		return fyne.KeyEnter
+
+	// printable
 	case glfw.KeyA:
 		return fyne.KeyA
 	case glfw.KeyB:
@@ -515,19 +573,15 @@ func keyToName(key glfw.Key) fyne.KeyName {
 		return fyne.Key8
 	case glfw.Key9:
 		return fyne.Key9
-	case glfw.KeyEnter:
-		return fyne.KeyReturn
-	case glfw.KeyBackspace:
-		return fyne.KeyBackspace
+
+	// desktop
 	case glfw.KeyLeftShift:
 		fallthrough
 	case glfw.KeyRightShift:
 		return desktop.KeyShift
-
-	// desktop keys
 	case glfw.KeyLeftControl:
 		fallthrough
-	case glfw.KeyRightControl:
+	case glfw.KeyRightControl: 
 		return desktop.KeyControl
 	case glfw.KeyLeftAlt:
 		fallthrough
@@ -539,58 +593,6 @@ func keyToName(key glfw.Key) fyne.KeyName {
 		return desktop.KeySuper
 	case glfw.KeyMenu:
 		return desktop.KeyMenu
-	case glfw.KeyEscape:
-		return fyne.KeyEscape
-	case glfw.KeyTab:
-		return fyne.KeyTab
-	case glfw.KeyInsert:
-		return fyne.KeyInsert
-	case glfw.KeyDelete:
-		return fyne.KeyDelete
-	case glfw.KeyRight:
-		return fyne.KeyRight
-	case glfw.KeyLeft:
-		return fyne.KeyLeft
-	case glfw.KeyDown:
-		return fyne.KeyDown
-	case glfw.KeyUp:
-		return fyne.KeyUp
-	case glfw.KeyPageUp:
-		return fyne.KeyPageUp
-	case glfw.KeyPageDown:
-		return fyne.KeyPageDown
-	case glfw.KeyHome:
-		return fyne.KeyHome
-	case glfw.KeyEnd:
-		return fyne.KeyEnd
-
-	case glfw.KeyF1:
-		return fyne.KeyF1
-	case glfw.KeyF2:
-		return fyne.KeyF2
-	case glfw.KeyF3:
-		return fyne.KeyF3
-	case glfw.KeyF4:
-		return fyne.KeyF4
-	case glfw.KeyF5:
-		return fyne.KeyF5
-	case glfw.KeyF6:
-		return fyne.KeyF6
-	case glfw.KeyF7:
-		return fyne.KeyF7
-	case glfw.KeyF8:
-		return fyne.KeyF8
-	case glfw.KeyF9:
-		return fyne.KeyF9
-	case glfw.KeyF10:
-		return fyne.KeyF10
-	case glfw.KeyF11:
-		return fyne.KeyF11
-	case glfw.KeyF12:
-		return fyne.KeyF12
-
-	case glfw.KeyKPEnter:
-		return fyne.KeyEnter
 	}
 	return ""
 }
