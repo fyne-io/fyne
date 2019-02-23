@@ -21,10 +21,8 @@ const (
 type Modifier int
 
 const (
-	// NoModifier represents a no modifier key has being held
-	NoModifier Modifier = 1 << iota
 	// ShiftModifier represents a shift key being held
-	ShiftModifier
+	ShiftModifier Modifier = 1 << iota
 	// ControlModifier represents the ctrl key being held
 	ControlModifier
 	// AltModifier represents either alt keys being held
