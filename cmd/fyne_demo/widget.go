@@ -31,6 +31,7 @@ func makeInputTab() fyne.Widget {
 
 func makeGroupTab() fyne.Widget {
 	progress := widget.NewProgressBar()
+	infProgress := widget.NewProgressBarInfinite()
 
 	go func() {
 		num := 0.0
@@ -45,7 +46,8 @@ func makeGroupTab() fyne.Widget {
 
 	return widget.NewGroup("Grouped",
 		widget.NewLabel("Grouped content"),
-		progress)
+		progress,
+		infProgress)
 }
 
 func makeScrollTab() fyne.Widget {
