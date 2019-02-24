@@ -74,7 +74,7 @@ func svgCachePut(res fyne.Resource, pix *image.RGBA, w int, h int) {
 
 func svgCacheReset() {
 	rasterMutex.Lock()
-	for k, _ := range rasters {
+	for k := range rasters {
 		delete(rasters, k)
 	}
 	rasterMutex.Unlock()

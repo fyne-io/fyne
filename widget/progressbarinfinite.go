@@ -175,6 +175,7 @@ func (p *ProgressBarInfinite) Stop() {
 	Renderer(p).(*infProgressRenderer).stop()
 }
 
+// Running returns the current state of the infinite progress animation
 func (p *ProgressBarInfinite) Running() bool {
 	return Renderer(p).(*infProgressRenderer).tickerSafe() != nil
 }
