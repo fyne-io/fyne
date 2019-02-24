@@ -22,7 +22,6 @@ type infProgressRenderer struct {
 	bar       *canvas.Rectangle
 	ticker    *time.Ticker
 	tickMutex *sync.Mutex
-	drawMutex *sync.Mutex
 
 	progress *ProgressBarInfinite
 }
@@ -36,7 +35,6 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 }
 
 func (p *infProgressRenderer) updateBar() {
-	p.drawMutex.Lock()
 	progressSize := p.progress.Size()
 	barWidth := p.bar.Size().Width
 	barPos := p.bar.Position()
@@ -70,7 +68,6 @@ func (p *infProgressRenderer) updateBar() {
 	}
 
 	p.bar.Move(barPos)
-	p.drawMutex.Unlock()
 }
 
 // Layout the components of the infinite progress bar
@@ -189,7 +186,7 @@ func (p *ProgressBarInfinite) Running() bool {
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
-	render := &infProgressRenderer{[]fyne.CanvasObject{bar}, bar, nil, &sync.Mutex{}, &sync.Mutex{}, p}
+	render := &infProgressRenderer{[]fyne.CanvasObject{bar}, bar, nil, &sync.Mutex{}, p}
 	render.start()
 	return render
 }
