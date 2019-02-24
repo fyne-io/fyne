@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"sync"
 	"time"
 
 	"fyne.io/fyne"
@@ -17,8 +18,11 @@ const (
 )
 
 type infProgressRenderer struct {
-	objects  []fyne.CanvasObject
-	bar      *canvas.Rectangle
+	objects   []fyne.CanvasObject
+	bar       *canvas.Rectangle
+	ticker    *time.Ticker
+	tickMutex *sync.Mutex
+
 	progress *ProgressBarInfinite
 }
 
@@ -74,7 +78,6 @@ func (p *infProgressRenderer) Layout(size fyne.Size) {
 // ApplyTheme is called when the infinite progress bar may need to update it's look
 func (p *infProgressRenderer) ApplyTheme() {
 	p.bar.FillColor = theme.PrimaryColor()
-	p.Refresh()
 }
 
 func (p *infProgressRenderer) BackgroundColor() color.Color {
@@ -91,12 +94,46 @@ func (p *infProgressRenderer) Objects() []fyne.CanvasObject {
 	return p.objects
 }
 
+func (p *infProgressRenderer) tickerSafe() *time.Ticker {
+	p.tickMutex.Lock()
+	defer p.tickMutex.Unlock()
+
+	return p.ticker
+}
+
+// Start the infinite progress bar background thread to update it continuously
+func (p *infProgressRenderer) start() {
+	if p.ticker == nil {
+		p.tickMutex.Lock()
+		p.ticker = time.NewTicker(infiniteRefreshRate)
+		p.tickMutex.Unlock()
+
+		go p.infiniteProgressLoop()
+	}
+}
+
+// Stop the infinite progress goroutine and sets value to the Max
+func (p *infProgressRenderer) stop() {
+	if p.tickerSafe() != nil {
+		p.tickMutex.Lock()
+		p.ticker.Stop()
+		p.ticker = nil
+		p.tickMutex.Unlock()
+	}
+}
+
+// infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
+// the function can be exited by calling Stop()
+func (p *infProgressRenderer) infiniteProgressLoop() {
+	for range p.tickerSafe().C {
+		p.Refresh()
+	}
+}
+
 // ProgressBarInfinite widget creates a horizontal panel that indicates waiting indefinitely
 // An infinite progress bar loops 0% -> 100% repeatedly until Stop() is called
 type ProgressBarInfinite struct {
 	baseWidget
-
-	ticker *time.Ticker
 }
 
 // Resize sets a new size for a widget.
@@ -130,34 +167,25 @@ func (p *ProgressBarInfinite) Hide() {
 
 // Start the infinite progress bar background thread to update it continuously
 func (p *ProgressBarInfinite) Start() {
-	if p.ticker == nil {
-		go p.infiniteProgressLoop()
-	}
+	Renderer(p).(*infProgressRenderer).start()
 }
 
 // Stop the infinite progress goroutine and sets value to the Max
 func (p *ProgressBarInfinite) Stop() {
-	if p.ticker != nil {
-		p.ticker.Stop()
-		p.ticker = nil
-	}
+	Renderer(p).(*infProgressRenderer).stop()
 }
 
-// infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
-// the function can be exited by calling Stop()
-func (p *ProgressBarInfinite) infiniteProgressLoop() {
-	p.ticker = time.NewTicker(infiniteRefreshRate)
-
-	for range p.ticker.C {
-		Renderer(p).Refresh()
-	}
+func (p *ProgressBarInfinite) Running() bool {
+	return Renderer(p).(*infProgressRenderer).tickerSafe() != nil
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 
-	return &infProgressRenderer{[]fyne.CanvasObject{bar}, bar, p}
+	render := &infProgressRenderer{[]fyne.CanvasObject{bar}, bar, nil, &sync.Mutex{}, p}
+	render.start()
+	return render
 }
 
 // NewProgressBarInfinite creates a new progress bar widget that loops indefinitely from 0% -> 100%
@@ -166,6 +194,5 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 func NewProgressBarInfinite() *ProgressBarInfinite {
 	p := &ProgressBarInfinite{}
 	Renderer(p).Layout(p.MinSize())
-	p.Start()
 	return p
 }

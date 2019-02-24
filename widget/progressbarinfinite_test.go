@@ -10,26 +10,24 @@ import (
 
 func TestProgressBarInfinite_Creation(t *testing.T) {
 	bar := NewProgressBarInfinite()
-	// ticker should be nil when created
-	assert.Nil(t, bar.ticker)
+	// ticker should start automatically
+	assert.True(t, bar.Running())
 }
 
 func TestProgressBarInfinite_Ticker(t *testing.T) {
 	bar := NewProgressBarInfinite()
 
-	// Show() starts a goroutine, so pause for it to initialize
-	time.Sleep(10 * time.Millisecond)
-	assert.NotNil(t, bar.ticker)
+	assert.True(t, bar.Running())
 	bar.Hide()
-	assert.Nil(t, bar.ticker)
+	assert.False(t, bar.Running())
 
 	// make sure it restarts when re-shown
 	bar.Show()
 	// Show() starts a goroutine, so pause for it to initialize
 	time.Sleep(10 * time.Millisecond)
-	assert.NotNil(t, bar.ticker)
+	assert.True(t, bar.Running())
 	bar.Hide()
-	assert.Nil(t, bar.ticker)
+	assert.False(t, bar.Running())
 }
 
 func TestInfiniteProgressRenderer_Layout(t *testing.T) {
