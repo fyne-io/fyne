@@ -11,6 +11,7 @@ type Theme interface {
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color
 	FocusColor() color.Color
+	ScrollBarColor() color.Color
 
 	TextSize() int
 	TextFont() Resource
@@ -21,4 +22,5 @@ type Theme interface {
 
 	Padding() int
 	IconInlineSize() int
+	ScrollBarSize() int
 }

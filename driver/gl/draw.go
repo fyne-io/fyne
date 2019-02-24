@@ -216,7 +216,7 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fram
 	points := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(rect, c.newGlRectTexture)
 
-	gl.Disable(gl.BLEND)
+	gl.Enable(gl.BLEND) // enable translucency
 	c.drawTexture(texture, points)
 }
 

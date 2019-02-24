@@ -131,7 +131,15 @@ func (dummyTheme) FocusColor() color.Color {
 	return color.Black
 }
 
+func (dummyTheme) ScrollBarColor() color.Color {
+	return color.Black
+}
+
 func (dummyTheme) TextSize() int {
+	return 10
+}
+
+func (dummyTheme) ScrollBarSize() int {
 	return 10
 }
 

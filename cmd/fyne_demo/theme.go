@@ -44,6 +44,10 @@ func (customTheme) FocusColor() color.Color {
 	return orange
 }
 
+func (customTheme) ScrollBarColor() color.Color {
+	return grey
+}
+
 func (customTheme) TextSize() int {
 	return 12
 }
@@ -74,6 +78,10 @@ func (customTheme) Padding() int {
 
 func (customTheme) IconInlineSize() int {
 	return 20
+}
+
+func (customTheme) ScrollBarSize() int {
+	return 10
 }
 
 func newCustomTheme() fyne.Theme {
