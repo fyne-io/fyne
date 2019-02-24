@@ -177,28 +177,34 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		}
 
 		if strings.ToLower(filepath.Ext(name)) == ".svg" {
-			icon, err := oksvg.ReadIconStream(file)
-			if err != nil {
-				log.Println("SVG Load error:", err)
+			tex := svgCacheGet(img.Resource, width, height)
+			if tex == nil {
+				// Not in cache, so load the item and add to cache
 
-				return 0
+				icon, err := oksvg.ReadIconStream(file)
+				if err != nil {
+					log.Println("SVG Load error:", err)
+
+					return 0
+				}
+				icon.SetTarget(0, 0, float64(width), float64(height))
+
+				w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
+				// this is used by our render code, so let's set it to the file aspect
+				c.aspects[img] = float32(w) / float32(h)
+				// if the image specifies it should be original size we need at least that many pixels on screen
+				if img.FillMode == canvas.ImageFillOriginal {
+					pixSize := fyne.NewSize(unscaleInt(c, w), unscaleInt(c, h))
+					img.SetMinSize(pixSize)
+				}
+
+				tex = image.NewRGBA(image.Rect(0, 0, width, height))
+				scanner := rasterx.NewScannerGV(w, h, tex, tex.Bounds())
+				raster := rasterx.NewDasher(width, height, scanner)
+
+				icon.Draw(raster, 1)
+				svgCachePut(img.Resource, tex, width, height)
 			}
-			icon.SetTarget(0, 0, float64(width), float64(height))
-
-			w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
-			// this is used by our render code, so let's set it to the file aspect
-			c.aspects[img] = float32(w) / float32(h)
-			// if the image specifies it should be original size we need at least that many pixels on screen
-			if img.FillMode == canvas.ImageFillOriginal {
-				pixSize := fyne.NewSize(unscaleInt(c, w), unscaleInt(c, h))
-				img.SetMinSize(pixSize)
-			}
-
-			tex := image.NewRGBA(image.Rect(0, 0, width, height))
-			scanner := rasterx.NewScannerGV(w, h, tex, tex.Bounds())
-			raster := rasterx.NewDasher(width, height, scanner)
-
-			icon.Draw(raster, 1)
 
 			return c.imgToTexture(tex)
 		}
