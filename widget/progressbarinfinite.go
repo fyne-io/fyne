@@ -125,8 +125,12 @@ func (p *infProgressRenderer) stop() {
 // infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
 // the function can be exited by calling Stop()
 func (p *infProgressRenderer) infiniteProgressLoop() {
-	for range p.tickerSafe().C {
-		p.Refresh()
+	for p.tickerSafe() != nil {
+		select {
+		case <-p.tickerSafe().C:
+			p.Refresh()
+			break
+		}
 	}
 }
 
@@ -183,7 +187,6 @@ func (p *ProgressBarInfinite) Running() bool {
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
-
 	render := &infProgressRenderer{[]fyne.CanvasObject{bar}, bar, nil, &sync.Mutex{}, p}
 	render.start()
 	return render

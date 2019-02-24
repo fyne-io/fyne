@@ -14,7 +14,7 @@ func TestProgressBarInfinite_Creation(t *testing.T) {
 	assert.True(t, bar.Running())
 }
 
-func TestProgressBarInfinite_Ticker(t *testing.T) {
+func TestProgressBarInfinite_Reshown(t *testing.T) {
 	bar := NewProgressBarInfinite()
 
 	assert.True(t, bar.Running())
@@ -49,4 +49,5 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 
 	// width of bar is 1/5 of total width of progress bar
 	assert.Equal(t, maxWidth, render.bar.Size().Width)
+	bar.Hide()
 }
