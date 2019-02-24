@@ -598,9 +598,6 @@ func keyToName(key glfw.Key) fyne.KeyName {
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	if w.canvas.Focused() == nil && w.canvas.onTypedKey == nil {
-		return
-	}
 
 	if action != glfw.Press { // ignore key up
 		// TODO: handle repeated key
@@ -657,6 +654,8 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
 		go shortcutable.HandleShortcut(shortcut)
 	}
+
+	go w.canvas.HandleShortcut(shortcut)
 }
 
 func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {

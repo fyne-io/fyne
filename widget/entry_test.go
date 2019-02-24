@@ -493,13 +493,15 @@ func TestEntry_OnPaste(t *testing.T) {
 }
 
 func TestEntry_OnCustomDesktop(t *testing.T) {
-	shortcut := &desktop.CustomShortcut{}
 	entry := NewEntry()
-
+	shortcut := &desktop.CustomShortcut{
+		KeyName:  fyne.KeyA,
+		Modifier: desktop.ControlModifier,
+	}
 	entry.AddShortcut(shortcut, func(s fyne.Shortcuter) {
-		shortcut = s.(*desktop.CustomShortcut)
-		assert.Equal(t, fyne.KeyA, shortcut.KeyName)
-		assert.Equal(t, desktop.ControlModifier, shortcut.Modifier)
+		sc := s.(*desktop.CustomShortcut)
+		assert.Equal(t, fyne.KeyA, sc.KeyName)
+		assert.Equal(t, desktop.ControlModifier, sc.Modifier)
 	})
 
 	entry.HandleShortcut(&desktop.CustomShortcut{

@@ -17,6 +17,7 @@ type glCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+	fyne.ShortcutHandler
 
 	program uint32
 	scale   float32

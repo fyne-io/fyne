@@ -1,6 +1,8 @@
 package desktop
 
 import (
+	"strings"
+
 	"fyne.io/fyne"
 )
 
@@ -12,5 +14,10 @@ type CustomShortcut struct {
 
 // Shortcut returns the shortcut name associated to the event
 func (cs *CustomShortcut) Shortcut() string {
-	return "CustomDesktop"
+	id := &strings.Builder{}
+	id.WriteString("CustomDesktop:")
+	id.WriteString(modifierToString(cs.Modifier))
+	id.WriteString("+")
+	id.WriteString(string(cs.KeyName))
+	return id.String()
 }
