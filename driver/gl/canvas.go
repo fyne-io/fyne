@@ -11,6 +11,7 @@ import (
 )
 
 type glCanvas struct {
+	sync.RWMutex
 	window  *window
 	content fyne.CanvasObject
 	focused fyne.Focusable
@@ -46,11 +47,16 @@ func unscaleInt(c fyne.Canvas, v int) int {
 }
 
 func (c *glCanvas) Content() fyne.CanvasObject {
-	return c.content
+	c.RLock()
+	retval := c.content
+	c.RUnlock()
+	return retval
 }
 
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
+	c.Lock()
 	c.content = content
+	c.Unlock()
 
 	var w, h = c.window.viewport.GetSize()
 
@@ -124,7 +130,7 @@ func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
-	if c.content == nil {
+	if c.Content() == nil {
 		return
 	}
 	c.setDirty(false)
