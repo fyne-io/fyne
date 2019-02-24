@@ -52,6 +52,7 @@ func (d *gLDriver) Quit() {
 }
 
 func (d *gLDriver) Run() {
+	go svgCacheMonitorTheme()
 	d.runGL()
 }
 

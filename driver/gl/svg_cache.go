@@ -71,3 +71,23 @@ func svgCachePut(res fyne.Resource, pix *image.RGBA, w int, h int) {
 		expires: time.Now().Add(cacheDuration),
 	}
 }
+
+func svgCacheReset() {
+	rasterMutex.Lock()
+	for k, _ := range rasters {
+		delete(rasters, k)
+	}
+	rasterMutex.Unlock()
+}
+
+func svgCacheMonitorTheme() {
+	listener := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(listener)
+	go func() {
+		for {
+			<-listener
+			svgCacheReset()
+		}
+	}()
+
+}
