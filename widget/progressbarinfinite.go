@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	infiniteRefreshRate                time.Duration = 50 * time.Millisecond
-	maxProgressBarInfiniteWidthPercent int           = 20 // (1/5)
-	minProgressBarInfiniteWidthPercent int           = 5  // (1/20)
-	progressBarInfiniteStepSizePercent int           = 2  // (1/50)
+	infiniteRefreshRate              = 50 * time.Millisecond
+	maxProgressBarInfiniteWidthRatio = 1.0 / 5
+	minProgressBarInfiniteWidthRatio = 1.0 / 20
+	progressBarInfiniteStepSizeRatio = 1.0 / 50
 )
 
 type infProgressRenderer struct {
@@ -35,9 +35,9 @@ func (p *infProgressRenderer) updateBar() {
 	barWidth := p.bar.Size().Width
 	barPos := p.bar.Position()
 
-	maxBarWidth := progressSize.Width * maxProgressBarInfiniteWidthPercent / 100
-	minBarWidth := progressSize.Width * minProgressBarInfiniteWidthPercent / 100
-	stepSize := (int)(progressSize.Width * progressBarInfiniteStepSizePercent / 100)
+	maxBarWidth := int(float64(progressSize.Width) * maxProgressBarInfiniteWidthRatio)
+	minBarWidth := int(float64(progressSize.Width) * minProgressBarInfiniteWidthRatio)
+	stepSize := int(float64(progressSize.Width) * progressBarInfiniteStepSizeRatio)
 
 	// check to make sure inner bar is sized correctly
 	// if bar is on the first half of the progress bar, grow it up to maxProgressBarInfiniteWidthPercent

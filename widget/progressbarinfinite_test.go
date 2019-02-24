@@ -34,17 +34,17 @@ func TestProgressBarInfinite_Ticker(t *testing.T) {
 
 func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 	bar := NewProgressBarInfinite()
-	width := 100
-	bar.Resize(fyne.NewSize(width, 10))
+	width := 100.0
+	bar.Resize(fyne.NewSize(int(width), 10))
 
 	render := Renderer(bar).(*infProgressRenderer)
 
 	// width of bar is one step size because updateBar() will have run once
-	assert.Equal(t, width*progressBarInfiniteStepSizePercent/100, render.bar.Size().Width)
+	assert.Equal(t, int(width*progressBarInfiniteStepSizeRatio), render.bar.Size().Width)
 
 	// make sure the inner progress bar grows in size
 	// call updateBar() enough times to grow the inner bar
-	maxWidth := width * maxProgressBarInfiniteWidthPercent / 100
+	maxWidth := int(width * maxProgressBarInfiniteWidthRatio)
 	for i := 0; i < maxWidth; i++ {
 		render.updateBar()
 	}
