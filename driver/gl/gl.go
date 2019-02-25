@@ -254,7 +254,7 @@ func (c *glCanvas) newGlRasterTexture(obj fyne.CanvasObject) uint32 {
 	width := scaleInt(c, rast.Size().Width)
 	height := scaleInt(c, rast.Size().Height)
 
-	return c.imgToTexture(rast.Generator(width, height))
+	return c.imgToTexture(rast.Generator(width, height, rast))
 }
 
 func (c *glCanvas) imgToTexture(img image.Image) uint32 {
