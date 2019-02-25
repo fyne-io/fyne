@@ -408,7 +408,11 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 	co, x, y := findMouseObj(w.canvas, w.mousePos)
 	ev := new(fyne.PointEvent)
-	ev.Position = fyne.NewPos(w.mousePos.X-x, w.mousePos.Y-y)
+	pad := 0
+	if w.padded {
+		pad = theme.Padding()
+	}
+	ev.Position = fyne.NewPos(w.mousePos.X-pad-x, w.mousePos.Y-pad-y)
 
 	switch wid := co.(type) {
 	case fyne.Tappable:
