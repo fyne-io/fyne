@@ -107,7 +107,12 @@ func (w *window) CenterOnScreen() {
 // sizeOnScreen gets the size of a window content in screen pixels
 func (w *window) sizeOnScreen() (int, int) {
 	// get current size of content inside the window
-	winContentSize := w.Content().MinSize()
+	winContentSize := w.canvas.content.MinSize()
+	// add padding, if required
+	if w.Padded() {
+		pad := theme.Padding() * 2
+		winContentSize = fyne.NewSize(winContentSize.Width+pad, winContentSize.Height+pad)
+	}
 	// content size can be scaled, so factor that in to determining window size
 	scale := w.canvas.Scale()
 
@@ -140,6 +145,16 @@ func (w *window) Padded() bool {
 
 func (w *window) SetPadded(padded bool) {
 	w.padded = padded
+	if w.canvas.content == nil {
+		return
+	}
+
+	if padded {
+		w.canvas.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	} else {
+		w.canvas.content.Move(fyne.NewPos(0, 0))
+	}
+
 	runOnMainAsync(w.fitContent)
 }
 
@@ -161,13 +176,7 @@ func (w *window) fitContent() {
 	}
 
 	runOnMainAsync(func() {
-		min := w.canvas.content.MinSize()
-		if w.Padded() {
-			pad := theme.Padding() * 2
-			min = fyne.NewSize(min.Width+pad, min.Height+pad)
-		}
-		winWidth := scaleInt(w.canvas, min.Width)
-		winHeight := scaleInt(w.canvas, min.Height)
+		winWidth, winHeight := w.sizeOnScreen()
 		if w.fixedSize {
 			w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
 		} else {

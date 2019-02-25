@@ -12,6 +12,8 @@ import (
 	_ "fyne.io/fyne/test"
 
 	"github.com/stretchr/testify/assert"
+	"fyne.io/fyne/theme"
+	"image/color"
 )
 
 var d = NewGLDriver()
@@ -50,4 +52,32 @@ func TestWindow_PixelSize(t *testing.T) {
 	winW, winH := w.(*window).sizeOnScreen()
 	assert.Equal(t, int(100*scale), winW)
 	assert.Equal(t, int(100*scale), winH)
+}
+
+func TestWindow_Padded(t *testing.T) {
+	w := d.CreateWindow("Test")
+	content := canvas.NewRectangle(color.White)
+	w.Canvas().SetScale(1.0)
+	w.SetContent(content)
+
+	width, _ := w.(*window).sizeOnScreen()
+	assert.Equal(t, theme.Padding()*2 + content.MinSize().Width, width)
+	assert.Equal(t, theme.Padding(), content.Position().X)
+}
+
+func TestWindow_SetPadded(t *testing.T) {
+	w := d.CreateWindow("Test")
+	content := canvas.NewRectangle(color.White)
+	w.Canvas().SetScale(1.0)
+	w.SetContent(content)
+	w.SetPadded(false)
+
+	width, _ := w.(*window).sizeOnScreen()
+	assert.Equal(t, content.MinSize().Width, width)
+	assert.Equal(t, 0, content.Position().X)
+
+	w.SetPadded(true)
+	width, _ = w.(*window).sizeOnScreen()
+	assert.Equal(t, theme.Padding()*2 + content.MinSize().Width, width)
+	assert.Equal(t, theme.Padding(), content.Position().X)
 }
