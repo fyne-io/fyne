@@ -6,9 +6,6 @@ import (
 	"image/draw"
 	"os"
 	"runtime/debug"
-	"time"
-
-	"github.com/steveoc64/memdebug"
 )
 
 // Raster describes a raster image area that can render in a Fyne canvas
@@ -43,9 +40,8 @@ func NewRaster(generate func(w, h int, r *Raster) image.Image) *Raster {
 func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 	return &Raster{
 		Generator: func(w, h int, r *Raster) image.Image {
-			memdebug.Print(time.Now(), "in here with", r)
 			if r == nil {
-				memdebug.Print(time.Now(), "r is nil")
+
 				debug.PrintStack()
 				os.Exit(0)
 			}
@@ -76,7 +72,6 @@ func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 					dst = image.NewRGBA(rect)
 				}
 				r.img = dst
-				memdebug.Print(time.Now(), "set to a new img")
 			}
 
 			for x := 0; x < w; x++ {
@@ -156,9 +151,6 @@ func NewRasterFromImage(img image.Image) *Raster {
 					dst = image.NewRGBA(rect)
 				}
 				r.img = dst
-				memdebug.Print(time.Now(), "set r.img", r.img)
-			} else {
-				memdebug.Print(time.Now(), "re-use existing img", r.img)
 			}
 
 			draw.Draw(r.img, bounds, img, bounds.Min, draw.Over)
