@@ -3,6 +3,7 @@
 package gl
 
 import (
+	"image/color"
 	"os"
 	"runtime"
 	"testing"
@@ -10,10 +11,9 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	_ "fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
-	"fyne.io/fyne/theme"
-	"image/color"
 )
 
 var d = NewGLDriver()
@@ -61,7 +61,7 @@ func TestWindow_Padded(t *testing.T) {
 	w.SetContent(content)
 
 	width, _ := w.(*window).sizeOnScreen()
-	assert.Equal(t, theme.Padding()*2 + content.MinSize().Width, width)
+	assert.Equal(t, theme.Padding()*2+content.MinSize().Width, width)
 	assert.Equal(t, theme.Padding(), content.Position().X)
 }
 
@@ -78,6 +78,6 @@ func TestWindow_SetPadded(t *testing.T) {
 
 	w.SetPadded(true)
 	width, _ = w.(*window).sizeOnScreen()
-	assert.Equal(t, theme.Padding()*2 + content.MinSize().Width, width)
+	assert.Equal(t, theme.Padding()*2+content.MinSize().Width, width)
 	assert.Equal(t, theme.Padding(), content.Position().X)
 }
