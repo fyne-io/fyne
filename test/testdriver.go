@@ -6,6 +6,8 @@ type testDriver struct {
 }
 
 func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
+	windowsMutex.RLock()
+	defer windowsMutex.RUnlock()
 	// cheating as we only have a single test window
 	return windows[0].Canvas()
 }
@@ -15,6 +17,8 @@ func (d *testDriver) CreateWindow(string) fyne.Window {
 }
 
 func (d *testDriver) AllWindows() []fyne.Window {
+	windowsMutex.RLock()
+	defer windowsMutex.RUnlock()
 	return windows
 }
 

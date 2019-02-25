@@ -15,8 +15,8 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, hyperlink, placeholder, primary color.Color
-	regular, bold, italic, bolditalic, monospace  fyne.Resource
+	button, text, hyperlink, placeholder, primary, scrollBar color.Color
+	regular, bold, italic, bolditalic, monospace             fyne.Resource
 }
 
 var lightBackground = color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
@@ -30,6 +30,7 @@ func LightTheme() fyne.Theme {
 		hyperlink:   color.RGBA{0x0, 0x0, 0xd9, 0xff},
 		placeholder: color.RGBA{0x88, 0x88, 0x88, 0xff},
 		primary:     color.RGBA{0x9f, 0xa8, 0xda, 0xff},
+		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
 	}
 
 	theme.initFonts()
@@ -45,6 +46,7 @@ func DarkTheme() fyne.Theme {
 		hyperlink:   color.RGBA{0x99, 0x99, 0xff, 0xff},
 		placeholder: color.RGBA{0xb2, 0xb2, 0xb2, 0xff},
 		primary:     color.RGBA{0x1a, 0x23, 0x7e, 0xff},
+		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
 	}
 
 	theme.initFonts()
@@ -83,6 +85,11 @@ func (t *builtinTheme) PrimaryColor() color.Color {
 // FocusColor returns the colour used to highlight a focussed widget
 func (t *builtinTheme) FocusColor() color.Color {
 	return t.primary
+}
+
+// ScrollBarColor returns the color (and translucency) for a scrollBar
+func (t *builtinTheme) ScrollBarColor() color.Color {
+	return t.scrollBar
 }
 
 // TextSize returns the standard text size
@@ -165,6 +172,11 @@ func (t *builtinTheme) IconInlineSize() int {
 	return 20
 }
 
+// ScrollBarSize is the width (or height) of the bars on a ScrollContainer
+func (t *builtinTheme) ScrollBarSize() int {
+	return 16
+}
+
 func current() fyne.Theme {
 	//	if fyne.CurrentApp().Theme() != nil
 	return fyne.CurrentApp().Settings().Theme()
@@ -203,6 +215,11 @@ func PrimaryColor() color.Color {
 // FocusColor returns the colour used to highlight a focussed widget
 func FocusColor() color.Color {
 	return current().FocusColor()
+}
+
+// ScrollBarColor returns the color (and translucency) for a scrollBar
+func ScrollBarColor() color.Color {
+	return current().ScrollBarColor()
 }
 
 // TextSize returns the standard text size
@@ -244,6 +261,11 @@ func Padding() int {
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
 func IconInlineSize() int {
 	return current().IconInlineSize()
+}
+
+// ScrollBarSize is the width (or height) of the bars on a ScrollContainer
+func ScrollBarSize() int {
+	return current().ScrollBarSize()
 }
 
 // DefaultTextFont returns the font path for the built-in regular font style

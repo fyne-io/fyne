@@ -9,7 +9,8 @@ import (
 )
 
 type scrollRenderer struct {
-	scroll *ScrollContainer
+	scroll  *ScrollContainer
+	vertBar *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 }
@@ -24,11 +25,35 @@ func (s *scrollRenderer) updatePosition() {
 	}
 	s.scroll.Content.Move(fyne.NewPos(-s.scroll.Offset.X, -s.scroll.Offset.Y))
 	canvas.Refresh(s.scroll.Content)
+
+	s.updateBarPosition()
+}
+
+func (s *scrollRenderer) updateBarPosition() {
+	barSize := s.barSizeVertical()
+	barRatio := float32(s.scroll.Offset.Y) / float32(s.scroll.Content.Size().Height-s.scroll.Size().Height)
+	barOff := int(float32(s.scroll.size.Height-barSize.Height) * barRatio)
+
+	s.vertBar.Resize(barSize)
+	s.vertBar.Move(fyne.NewPos(s.scroll.size.Width-theme.ScrollBarSize(), barOff))
+}
+
+func (s *scrollRenderer) barSizeVertical() fyne.Size {
+	portion := float32(s.scroll.size.Height) / float32(s.scroll.Content.Size().Height)
+	if portion > 1.0 {
+		portion = 1.0
+	}
+
+	barHeight := int(float32(s.scroll.size.Height) * portion)
+	return fyne.NewSize(theme.ScrollBarSize(), barHeight)
 }
 
 func (s *scrollRenderer) Layout(size fyne.Size) {
 	c := s.scroll.Content
 	c.Resize(c.MinSize())
+
+	s.vertBar.Resize(fyne.NewSize(theme.ScrollBarSize(), size.Height))
+	s.vertBar.Move(fyne.NewPos(size.Width-theme.ScrollBarSize(), 0))
 
 	s.updatePosition()
 }
@@ -43,6 +68,7 @@ func (s *scrollRenderer) Refresh() {
 }
 
 func (s *scrollRenderer) ApplyTheme() {
+	s.vertBar.FillColor = theme.ScrollBarColor()
 }
 
 func (s *scrollRenderer) BackgroundColor() color.Color {
@@ -108,7 +134,8 @@ func (s *ScrollContainer) Hide() {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
-	return &scrollRenderer{scroll: s, objects: []fyne.CanvasObject{s.Content}}
+	bar := canvas.NewRectangle(theme.ScrollBarColor())
+	return &scrollRenderer{scroll: s, vertBar: bar, objects: []fyne.CanvasObject{s.Content, bar}}
 }
 
 // NewScroller creates a scrollable parent wrapping the specified content.
