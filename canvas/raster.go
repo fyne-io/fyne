@@ -43,19 +43,16 @@ func NewRaster(generate func(w, h int, r *Raster) image.Image) *Raster {
 func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 	return &Raster{
 		Generator: func(w, h int, r *Raster) image.Image {
-			memdebug.Print(time.Now(), "in here with", r.img)
+			memdebug.Print(time.Now(), "in here with", r)
 			if r == nil {
-				memdebug.Print(time.Now(), "is nil")
+				memdebug.Print(time.Now(), "r is nil")
 				debug.PrintStack()
 				os.Exit(0)
 			}
-			// raster first pixel, figure out color type
-			var dst draw.Image
-			rect := image.Rect(0, 0, w, h)
-			if r.img.Bounds() == rect {
-				memdebug.Print(time.Now(), "bounds not changed, reuse img", rect)
-				dst = r.img
-			} else {
+			if r.img == nil || r.img.Bounds() != r.img.Bounds() {
+				// raster first pixel, figure out color type
+				var dst draw.Image
+				rect := image.Rect(0, 0, w, h)
 				switch pixelColor(0, 0, w, h).(type) {
 				case color.Alpha:
 					dst = image.NewAlpha(rect)
@@ -78,15 +75,17 @@ func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 				default:
 					dst = image.NewRGBA(rect)
 				}
+				r.img = dst
+				memdebug.Print(time.Now(), "set to a new img")
 			}
 
 			for x := 0; x < w; x++ {
 				for y := 0; y < h; y++ {
-					dst.Set(x, y, pixelColor(x, y, w, h))
+					r.img.Set(x, y, pixelColor(x, y, w, h))
 				}
 			}
 
-			return dst
+			return r.img
 		},
 	}
 }
