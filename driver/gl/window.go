@@ -113,12 +113,10 @@ func (w *window) sizeOnScreen() (int, int) {
 		pad := theme.Padding() * 2
 		winContentSize = fyne.NewSize(winContentSize.Width+pad, winContentSize.Height+pad)
 	}
-	// content size can be scaled, so factor that in to determining window size
-	scale := w.canvas.Scale()
 
 	// calculate how many pixels will be used at this scale
-	viewWidth := int(float32(winContentSize.Width) * scale)
-	viewHeight := int(float32(winContentSize.Height) * scale)
+	viewWidth := scaleInt(w.canvas, winContentSize.Width)
+	viewHeight := scaleInt(w.canvas, winContentSize.Height)
 
 	return viewWidth, viewHeight
 }
@@ -296,7 +294,6 @@ func (w *window) resize(size fyne.Size) {
 func (w *window) SetContent(content fyne.CanvasObject) {
 	w.canvas.SetContent(content)
 	min := content.MinSize()
-	w.canvas.SetScale(w.detectScale())
 
 	if w.Padded() {
 		pad := theme.Padding() * 2
@@ -597,6 +594,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret.canvas = newCanvas(ret)
 		ret.master = master
 		ret.padded = true
+		ret.canvas.SetScale(ret.detectScale())
 		d.windows = append(d.windows, ret)
 
 		win.SetCloseCallback(ret.closed)

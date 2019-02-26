@@ -4,8 +4,6 @@ package gl
 
 import (
 	"image/color"
-	"os"
-	"runtime"
 	"testing"
 
 	"fyne.io/fyne"
@@ -18,19 +16,6 @@ import (
 
 var d = NewGLDriver()
 
-func init() {
-	runtime.LockOSThread()
-}
-
-// TestMain makes sure that our driver is running on the main thread.
-// This must be done for some of our tests to function correctly.
-func TestMain(m *testing.M) {
-	go func() {
-		os.Exit(m.Run())
-	}()
-	d.Run()
-}
-
 func TestWindow_SetTitle(t *testing.T) {
 	w := d.CreateWindow("Test")
 
@@ -42,16 +27,16 @@ func TestWindow_SetTitle(t *testing.T) {
 
 func TestWindow_PixelSize(t *testing.T) {
 	w := d.CreateWindow("Test")
+	w.SetPadded(false)
 
 	rect := &canvas.Rectangle{}
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	w.SetContent(fyne.NewContainer(rect))
 	w.Canvas().Refresh(w.Content())
 
-	scale := w.Canvas().Scale()
 	winW, winH := w.(*window).sizeOnScreen()
-	assert.Equal(t, int(100*scale), winW)
-	assert.Equal(t, int(100*scale), winH)
+	assert.Equal(t, scaleInt(w.Canvas(), 100), winW)
+	assert.Equal(t, scaleInt(w.Canvas(), 100), winH)
 }
 
 func TestWindow_Padded(t *testing.T) {
@@ -67,10 +52,11 @@ func TestWindow_Padded(t *testing.T) {
 
 func TestWindow_SetPadded(t *testing.T) {
 	w := d.CreateWindow("Test")
+	w.SetPadded(false)
+
 	content := canvas.NewRectangle(color.White)
 	w.Canvas().SetScale(1.0)
 	w.SetContent(content)
-	w.SetPadded(false)
 
 	width, _ := w.(*window).sizeOnScreen()
 	assert.Equal(t, content.MinSize().Width, width)
