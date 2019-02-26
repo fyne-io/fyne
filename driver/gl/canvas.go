@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
@@ -21,7 +20,7 @@ type glCanvas struct {
 
 	program uint32
 	scale   float32
-	aspects map[*canvas.Image]float32
+	aspects map[interface{}]float32
 
 	dirty        bool
 	dirtyMutex   *sync.Mutex
@@ -163,7 +162,7 @@ func (c *glCanvas) isDirty() bool {
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
-	c.aspects = make(map[*canvas.Image]float32, 16)
+	c.aspects = make(map[interface{}]float32, 16)
 	c.dirtyMutex = &sync.Mutex{}
 
 	c.initOpenGL()

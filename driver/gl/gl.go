@@ -191,7 +191,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 				w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
 				// this is used by our render code, so let's set it to the file aspect
-				c.aspects[img] = float32(w) / float32(h)
+				c.aspects[img.Resource] = float32(w) / float32(h)
 				// if the image specifies it should be original size we need at least that many pixels on screen
 				if img.FillMode == canvas.ImageFillOriginal {
 					pixSize := fyne.NewSize(unscaleInt(c, w), unscaleInt(c, h))
