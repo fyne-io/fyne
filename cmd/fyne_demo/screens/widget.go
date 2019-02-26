@@ -40,6 +40,7 @@ func makeInputTab() fyne.Widget {
 	return widget.NewVBox(
 		entry,
 		entryReadOnly,
+		widget.NewTextGrid("Some\n  Text"),
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
 		disabledCheck,
