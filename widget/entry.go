@@ -148,6 +148,9 @@ func (e *Entry) Show() {
 
 // Hide this widget, if it was previously visible
 func (e *Entry) Hide() {
+	if e.focused {
+		fyne.CurrentApp().Driver().CanvasForObject(e).Focus(nil)
+	}
 	e.hide(e)
 }
 
