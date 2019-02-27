@@ -23,7 +23,7 @@ func (sh *ShortcutHandler) HandleShortcut(shortcut Shortcut) bool {
 	return false
 }
 
-// AddShortcut register an handler to be executed when ShortcutName command is triggered
+// AddShortcut register an handler to be executed when the shortcut action is triggered
 func (sh *ShortcutHandler) AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut)) {
 	sh.mu.Lock()
 	defer sh.mu.Unlock()
@@ -33,9 +33,7 @@ func (sh *ShortcutHandler) AddShortcut(shortcut Shortcut, handler func(shortcut 
 	sh.entry[shortcut.ShortcutName()] = handler
 }
 
-// Shortcut is the interface implemented by values with a custom formatter.
-// The implementation of Format may call Sprint(f) or Fprint(f) etc.
-// to generate its output.
+// Shortcut is the interface used to describe a shortcut action
 type Shortcut interface {
 	ShortcutName() string
 }
