@@ -8,62 +8,64 @@ import (
 // for the canvasObject
 type ShortcutHandler struct {
 	mu    sync.RWMutex
-	entry map[string]func(Shortcuter)
+	entry map[string]func(Shortcut)
 }
 
 // HandleShortcut handle the registered shortcut
-func (sh *ShortcutHandler) HandleShortcut(shortcut Shortcuter) {
+func (sh *ShortcutHandler) HandleShortcut(shortcut Shortcut) bool {
 	if shortcut == nil {
-		return
+		return false
 	}
-	if sc, ok := sh.entry[shortcut.Shortcut()]; ok {
+	if sc, ok := sh.entry[shortcut.ShortcutName()]; ok {
 		sc(shortcut)
+		return true
 	}
+	return false
 }
 
 // AddShortcut register an handler to be executed when ShortcutName command is triggered
-func (sh *ShortcutHandler) AddShortcut(shortcut Shortcuter, handler func(shortcut Shortcuter)) {
+func (sh *ShortcutHandler) AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut)) {
 	sh.mu.Lock()
 	defer sh.mu.Unlock()
 	if sh.entry == nil {
-		sh.entry = make(map[string]func(Shortcuter))
+		sh.entry = make(map[string]func(Shortcut))
 	}
-	sh.entry[shortcut.Shortcut()] = handler
+	sh.entry[shortcut.ShortcutName()] = handler
 }
 
-// Shortcuter is the interface implemented by values with a custom formatter.
+// Shortcut is the interface implemented by values with a custom formatter.
 // The implementation of Format may call Sprint(f) or Fprint(f) etc.
 // to generate its output.
-type Shortcuter interface {
-	Shortcut() string
+type Shortcut interface {
+	ShortcutName() string
 }
 
 // ShortcutPaste describes a shortcut paste action.
 type ShortcutPaste struct {
-	Clipboard
+	Clipboard Clipboard
 }
 
-// Shortcut returns the shortcut type
-func (se *ShortcutPaste) Shortcut() string {
+// ShortcutName returns the shortcut name
+func (se *ShortcutPaste) ShortcutName() string {
 	return "Paste"
 }
 
 // ShortcutCopy describes a shortcut copy action.
 type ShortcutCopy struct {
-	Clipboard
+	Clipboard Clipboard
 }
 
-// Shortcut returns the shortcut type
-func (se *ShortcutCopy) Shortcut() string {
+// ShortcutName returns the shortcut name
+func (se *ShortcutCopy) ShortcutName() string {
 	return "Copy"
 }
 
 // ShortcutCut describes a shortcut cut action.
 type ShortcutCut struct {
-	Clipboard
+	Clipboard Clipboard
 }
 
-// Shortcut returns the shortcut type
-func (se *ShortcutCut) Shortcut() string {
+// ShortcutName returns the shortcut name
+func (se *ShortcutCut) ShortcutName() string {
 	return "Cut"
 }

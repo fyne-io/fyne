@@ -75,9 +75,6 @@ func (w *testWindow) SetOnClosed(closed func()) {
 func (w *testWindow) Show() {}
 
 func (w *testWindow) Clipboard() fyne.Clipboard {
-	if w.clipboard == nil {
-		w.clipboard = &testClipboard{}
-	}
 	return w.clipboard
 }
 
@@ -122,6 +119,7 @@ func NewWindow(content fyne.CanvasObject) fyne.Window {
 	canvas := NewCanvas()
 	canvas.SetContent(content)
 	window := &testWindow{canvas: canvas}
+	window.clipboard = &testClipboard{}
 
 	windowsMutex.Lock()
 	windows = append(windows, window)

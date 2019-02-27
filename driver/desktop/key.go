@@ -30,17 +30,3 @@ const (
 	// SuperModifier represents either super keys being held
 	SuperModifier
 )
-
-func modifierToString(mods Modifier) string {
-	switch mods {
-	case ShiftModifier:
-		return string(KeyShift)
-	case ControlModifier:
-		return string(KeyControl)
-	case AltModifier:
-		return string(KeyAlt)
-	case SuperModifier:
-		return string(KeySuper)
-	}
-	return ""
-}

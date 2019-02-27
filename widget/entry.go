@@ -410,9 +410,9 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 func (e *Entry) registerShortcut() {
 	scPaste := &fyne.ShortcutPaste{}
-	e.AddShortcut(scPaste, func(se fyne.Shortcuter) {
+	e.AddShortcut(scPaste, func(se fyne.Shortcut) {
 		scPaste = se.(*fyne.ShortcutPaste)
-		text := scPaste.Content()
+		text := scPaste.Clipboard.Content()
 		if !e.MultiLine {
 			// format clipboard content to be compatible with single line entry
 			text = strings.Replace(text, "\n", " ", -1)

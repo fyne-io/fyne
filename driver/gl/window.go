@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"fyne.io/fyne"
-
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -608,9 +607,7 @@ func keyToName(key glfw.Key) fyne.KeyName {
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-
 	if action != glfw.Press { // ignore key up
-		// TODO: handle repeated key
 		return
 	}
 
@@ -629,43 +626,75 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		return
 	}
 
-	isMac := runtime.GOOS == "darwin"
-
-	var shortcut fyne.Shortcuter
-	switch keyName {
-	case fyne.KeyV:
-		// detect paste shortcut
-		if (!isMac && keyDesktopModifier == desktop.ControlModifier) || (isMac && keyDesktopModifier == desktop.SuperModifier) {
-			shortcut = &fyne.ShortcutPaste{
-				Clipboard: w.Clipboard(),
+	var shortcut fyne.Shortcut
+	switch runtime.GOOS {
+	case "darwin":
+		switch keyName {
+		case fyne.KeyV:
+			// detect paste shortcut
+			if keyDesktopModifier == desktop.SuperModifier {
+				shortcut = &fyne.ShortcutPaste{
+					Clipboard: w.Clipboard(),
+				}
 			}
-		}
-	case fyne.KeyC:
-		// detect copy shortcut
-		if (!isMac && keyDesktopModifier == desktop.ControlModifier) || (isMac && keyDesktopModifier == desktop.SuperModifier) {
-			shortcut = &fyne.ShortcutCopy{
-				Clipboard: w.Clipboard(),
+		case fyne.KeyC:
+			// detect copy shortcut
+			if keyDesktopModifier == desktop.SuperModifier {
+				shortcut = &fyne.ShortcutCopy{
+					Clipboard: w.Clipboard(),
+				}
 			}
-		}
-	case fyne.KeyX:
-		// detect cut shortcut
-		if (!isMac && keyDesktopModifier == desktop.ControlModifier) || (isMac && keyDesktopModifier == desktop.SuperModifier) {
-			shortcut = &fyne.ShortcutCut{
-				Clipboard: w.Clipboard(),
+		case fyne.KeyX:
+			// detect cut shortcut
+			if keyDesktopModifier == desktop.SuperModifier {
+				shortcut = &fyne.ShortcutCut{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		default:
+			shortcut = &desktop.CustomShortcut{
+				KeyName:  keyName,
+				Modifier: keyDesktopModifier,
 			}
 		}
 	default:
-		shortcut = &desktop.CustomShortcut{
-			KeyName:  keyName,
-			Modifier: keyDesktopModifier,
+		switch keyName {
+		case fyne.KeyV:
+			// detect paste shortcut
+			if keyDesktopModifier == desktop.ControlModifier {
+				shortcut = &fyne.ShortcutPaste{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		case fyne.KeyC:
+			// detect copy shortcut
+			if keyDesktopModifier == desktop.ControlModifier {
+				shortcut = &fyne.ShortcutCopy{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		case fyne.KeyX:
+			// detect cut shortcut
+			if keyDesktopModifier == desktop.ControlModifier {
+				shortcut = &fyne.ShortcutCut{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		default:
+			shortcut = &desktop.CustomShortcut{
+				KeyName:  keyName,
+				Modifier: keyDesktopModifier,
+			}
 		}
 	}
 
 	if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-		go shortcutable.HandleShortcut(shortcut)
+		if shortcutable.HandleShortcut(shortcut) {
+			return
+		}
 	}
 
-	go w.canvas.HandleShortcut(shortcut)
+	w.canvas.HandleShortcut(shortcut)
 }
 
 func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
