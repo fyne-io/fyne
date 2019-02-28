@@ -6,6 +6,7 @@ import (
 	_ "image/png" // for the icon
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 
 	"fyne.io/fyne"
@@ -36,6 +37,8 @@ type window struct {
 	canvas   *glCanvas
 	title    string
 	icon     fyne.Resource
+
+	clipboard fyne.Clipboard
 
 	master     bool
 	fullScreen bool
@@ -277,6 +280,14 @@ func (w *window) ShowAndRun() {
 	fyne.CurrentApp().Driver().Run()
 }
 
+//Clipboard returns the system clipboard
+func (w *window) Clipboard() fyne.Clipboard {
+	if w.clipboard == nil {
+		w.clipboard = &clipboard{window: w.viewport}
+	}
+	return w.clipboard
+}
+
 func (w *window) Content() fyne.CanvasObject {
 	return w.canvas.content
 }
@@ -495,6 +506,84 @@ func keyToName(key glfw.Key) fyne.KeyName {
 	case glfw.KeyF12:
 		return fyne.KeyF12
 
+	case glfw.KeyKPEnter:
+		return fyne.KeyEnter
+
+	// printable
+	case glfw.KeyA:
+		return fyne.KeyA
+	case glfw.KeyB:
+		return fyne.KeyB
+	case glfw.KeyC:
+		return fyne.KeyC
+	case glfw.KeyD:
+		return fyne.KeyD
+	case glfw.KeyE:
+		return fyne.KeyE
+	case glfw.KeyF:
+		return fyne.KeyF
+	case glfw.KeyG:
+		return fyne.KeyG
+	case glfw.KeyH:
+		return fyne.KeyH
+	case glfw.KeyI:
+		return fyne.KeyI
+	case glfw.KeyJ:
+		return fyne.KeyJ
+	case glfw.KeyK:
+		return fyne.KeyK
+	case glfw.KeyL:
+		return fyne.KeyL
+	case glfw.KeyM:
+		return fyne.KeyM
+	case glfw.KeyN:
+		return fyne.KeyN
+	case glfw.KeyO:
+		return fyne.KeyO
+	case glfw.KeyP:
+		return fyne.KeyP
+	case glfw.KeyQ:
+		return fyne.KeyQ
+	case glfw.KeyR:
+		return fyne.KeyR
+	case glfw.KeyS:
+		return fyne.KeyS
+	case glfw.KeyT:
+		return fyne.KeyT
+	case glfw.KeyU:
+		return fyne.KeyU
+	case glfw.KeyV:
+		return fyne.KeyV
+	case glfw.KeyW:
+		return fyne.KeyW
+	case glfw.KeyX:
+		return fyne.KeyX
+	case glfw.KeyY:
+		return fyne.KeyY
+	case glfw.KeyZ:
+		return fyne.KeyZ
+	case glfw.Key0:
+		return fyne.Key0
+	case glfw.Key1:
+		return fyne.Key1
+	case glfw.Key2:
+		return fyne.Key2
+	case glfw.Key3:
+		return fyne.Key3
+	case glfw.Key4:
+		return fyne.Key4
+	case glfw.Key5:
+		return fyne.Key5
+	case glfw.Key6:
+		return fyne.Key6
+	case glfw.Key7:
+		return fyne.Key7
+	case glfw.Key8:
+		return fyne.Key8
+	case glfw.Key9:
+		return fyne.Key9
+
+	// desktop
 	case glfw.KeyLeftShift:
 		fallthrough
 	case glfw.KeyRightShift:
@@ -513,50 +602,134 @@ func keyToName(key glfw.Key) fyne.KeyName {
 		return desktop.KeySuper
 	case glfw.KeyMenu:
 		return desktop.KeyMenu
-
-	case glfw.KeyKPEnter:
-		return fyne.KeyEnter
 	}
 	return ""
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	if w.canvas.Focused() == nil && w.canvas.onTypedKey == nil {
-		return
-	}
 	if action != glfw.Press { // ignore key up
 		return
 	}
 
-	if key <= glfw.KeyWorld1 { // filter printable characters handled in charModInput
+	keyName := keyToName(key)
+	keyDesktopModifier := desktopModifier(mods)
+
+	if keyDesktopModifier < desktop.ControlModifier {
+		// No shortcut detected, pass down to TypedKey and exit
+		keyEvent := &fyne.KeyEvent{Name: keyName}
+		if w.canvas.Focused() != nil {
+			go w.canvas.Focused().TypedKey(keyEvent)
+		}
+		if w.canvas.onTypedKey != nil {
+			go w.canvas.onTypedKey(keyEvent)
+		}
 		return
 	}
 
-	ev := new(fyne.KeyEvent)
-	ev.Name = keyToName(key)
+	var shortcut fyne.Shortcut
+	switch runtime.GOOS {
+	case "darwin":
+		switch keyName {
+		case fyne.KeyV:
+			// detect paste shortcut
+			if keyDesktopModifier == desktop.SuperModifier {
+				shortcut = &fyne.ShortcutPaste{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		case fyne.KeyC:
+			// detect copy shortcut
+			if keyDesktopModifier == desktop.SuperModifier {
+				shortcut = &fyne.ShortcutCopy{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		case fyne.KeyX:
+			// detect cut shortcut
+			if keyDesktopModifier == desktop.SuperModifier {
+				shortcut = &fyne.ShortcutCut{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		default:
+			shortcut = &desktop.CustomShortcut{
+				KeyName:  keyName,
+				Modifier: keyDesktopModifier,
+			}
+		}
+	default:
+		switch keyName {
+		case fyne.KeyV:
+			// detect paste shortcut
+			if keyDesktopModifier == desktop.ControlModifier {
+				shortcut = &fyne.ShortcutPaste{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		case fyne.KeyC:
+			// detect copy shortcut
+			if keyDesktopModifier == desktop.ControlModifier {
+				shortcut = &fyne.ShortcutCopy{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		case fyne.KeyX:
+			// detect cut shortcut
+			if keyDesktopModifier == desktop.ControlModifier {
+				shortcut = &fyne.ShortcutCut{
+					Clipboard: w.Clipboard(),
+				}
+			}
+		default:
+			shortcut = &desktop.CustomShortcut{
+				KeyName:  keyName,
+				Modifier: keyDesktopModifier,
+			}
+		}
+	}
 
-	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().TypedKey(ev)
+	if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
+		if shortcutable.TypedShortcut(shortcut) {
+			return
+		}
 	}
-	if w.canvas.onTypedKey != nil {
-		go w.canvas.onTypedKey(ev)
-	}
+
+	w.canvas.shortcut.TypedShortcut(shortcut)
 }
 
+func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
+	var m desktop.Modifier
+	if (mods & glfw.ModShift) != 0 {
+		m |= desktop.ShiftModifier
+	}
+	if (mods & glfw.ModControl) != 0 {
+		m |= desktop.ControlModifier
+	}
+	if (mods & glfw.ModAlt) != 0 {
+		m |= desktop.AltModifier
+	}
+	if (mods & glfw.ModSuper) != 0 {
+		m |= desktop.SuperModifier
+	}
+	return m
+}
+
+// charModInput defines the character with modifiers callback which is called when a
+// Unicode character is input regardless of what modifier keys are used.
+//
+// The character with modifiers callback is intended for implementing custom
+// Unicode character input. Characters do not map 1:1 to physical keys,
+// as a key may produce zero, one or more characters.
 func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.ModifierKey) {
 	if w.canvas.Focused() == nil && w.canvas.onTypedRune == nil {
 		return
 	}
 
-	if mods == 0 || mods == glfw.ModShift {
-		if w.canvas.Focused() != nil {
-			w.canvas.Focused().TypedRune(char)
-		}
-		if w.canvas.onTypedRune != nil {
-			w.canvas.onTypedRune(char)
-		}
-
-		return
+	if w.canvas.Focused() != nil {
+		w.canvas.Focused().TypedRune(char)
+	}
+	if w.canvas.onTypedRune != nil {
+		w.canvas.onTypedRune(char)
 	}
 }
 

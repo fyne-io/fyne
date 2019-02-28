@@ -17,6 +17,7 @@ type glCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+	shortcut    fyne.ShortcutHandler
 
 	program uint32
 	scale   float32
@@ -128,6 +129,10 @@ func (c *glCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 
 func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 	c.onTypedKey = typed
+}
+
+func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
+	c.shortcut.AddShortcut(shortcut, handler)
 }
 
 func (c *glCanvas) paint(size fyne.Size) {

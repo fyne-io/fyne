@@ -1,6 +1,8 @@
 package desktop
 
-import "fyne.io/fyne"
+import (
+	"fyne.io/fyne"
+)
 
 const (
 	// KeyShift represents the left or right shift key
@@ -13,4 +15,18 @@ const (
 	KeySuper fyne.KeyName = "Super"
 	// KeyMenu represents the left or right menu / application key
 	KeyMenu fyne.KeyName = "Menu"
+)
+
+// Modifier captures any key modifiers (shift etc) pressed during this key event
+type Modifier int
+
+const (
+	// ShiftModifier represents a shift key being held
+	ShiftModifier Modifier = 1 << iota
+	// ControlModifier represents the ctrl key being held
+	ControlModifier
+	// AltModifier represents either alt keys being held
+	AltModifier
+	// SuperModifier represents either super keys being held
+	SuperModifier
 )

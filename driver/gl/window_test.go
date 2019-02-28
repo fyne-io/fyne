@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -81,4 +82,45 @@ func TestWindow_SetPadded(t *testing.T) {
 	width, _ = w.(*window).sizeOnScreen()
 	assert.Equal(t, theme.Padding()*2+content.MinSize().Width, width)
 	assert.Equal(t, theme.Padding(), content.Position().X)
+}
+
+func TestWindow_Clipboard(t *testing.T) {
+	d := NewGLDriver()
+	w := d.CreateWindow("Test")
+
+	text := "My content from test window"
+	cb := w.Clipboard()
+
+	cliboardContent := cb.Content()
+	if cliboardContent != "" {
+		// Current environment has some content stored in clipboard,
+		// set temporary to an empty string to allow test and restore later.
+		cb.SetContent("")
+	}
+
+	assert.Empty(t, cb.Content())
+
+	cb.SetContent(text)
+	assert.Equal(t, text, cb.Content())
+
+	// Restore cliboardContent, if any
+	cb.SetContent(cliboardContent)
+}
+
+func TestWindow_Shortcut(t *testing.T) {
+	d := NewGLDriver()
+	w := d.CreateWindow("Test")
+
+	shortcutFullScreenWindow := &desktop.CustomShortcut{
+		KeyName: fyne.KeyF12,
+	}
+
+	w.Canvas().AddShortcut(shortcutFullScreenWindow, func(sc fyne.Shortcut) {
+		w.SetFullScreen(true)
+	})
+
+	assert.False(t, w.FullScreen())
+
+	w.Canvas().(*glCanvas).shortcut.TypedShortcut(shortcutFullScreenWindow)
+	assert.True(t, w.FullScreen())
 }

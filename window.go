@@ -68,4 +68,7 @@ type Window interface {
 	// Canvas returns the canvas context to render in the window.
 	// This can be useful to set a key handler for the window, for example.
 	Canvas() Canvas
+
+	//Clipboard returns the system clipboard
+	Clipboard() Clipboard
 }
