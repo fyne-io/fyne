@@ -52,7 +52,7 @@ func makeProgressTab() fyne.Widget {
 func makeScrollTab() fyne.Widget {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
 	logo.SetMinSize(fyne.NewSize(320, 320))
-	scroll := widget.NewScroller(logo)
+	scroll := widget.NewScrollContainer(logo)
 	scroll.Resize(fyne.NewSize(200, 200))
 
 	return scroll
