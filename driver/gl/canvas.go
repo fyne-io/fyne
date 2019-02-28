@@ -17,6 +17,8 @@ type glCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+	onKeyDown   func(*fyne.KeyEvent)
+	onKeyUp     func(*fyne.KeyEvent)
 	shortcut    fyne.ShortcutHandler
 
 	program uint32
@@ -129,6 +131,22 @@ func (c *glCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 
 func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 	c.onTypedKey = typed
+}
+
+func (c *glCanvas) OnKeyDown() func(*fyne.KeyEvent) {
+	return c.onKeyDown
+}
+
+func (c *glCanvas) SetOnKeyDown(typed func(*fyne.KeyEvent)) {
+	c.onKeyDown = typed
+}
+
+func (c *glCanvas) OnKeyUp() func(*fyne.KeyEvent) {
+	return c.onKeyUp
+}
+
+func (c *glCanvas) SetOnKeyUp(typed func(*fyne.KeyEvent)) {
+	c.onKeyUp = typed
 }
 
 func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {

@@ -176,8 +176,9 @@ func (e *Entry) SetReadOnly(ro bool) {
 
 // updateText updates the internal text to the given value
 func (e *Entry) updateText(text string) {
+	changed := e.Text != text
 	e.Text = text
-	if e.OnChanged != nil {
+	if changed && e.OnChanged != nil {
 		e.OnChanged(text)
 	}
 

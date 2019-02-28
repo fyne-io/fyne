@@ -585,21 +585,21 @@ func keyToName(key glfw.Key) fyne.KeyName {
 
 	// desktop
 	case glfw.KeyLeftShift:
-		fallthrough
+		return desktop.KeyShiftLeft
 	case glfw.KeyRightShift:
-		return desktop.KeyShift
+		return desktop.KeyShiftRight
 	case glfw.KeyLeftControl:
-		fallthrough
+		return desktop.KeyControlLeft
 	case glfw.KeyRightControl:
-		return desktop.KeyControl
+		return desktop.KeyControlRight
 	case glfw.KeyLeftAlt:
-		fallthrough
+		return desktop.KeyAltLeft
 	case glfw.KeyRightAlt:
-		return desktop.KeyAlt
+		return desktop.KeyAltRight
 	case glfw.KeyLeftSuper:
-		fallthrough
+		return desktop.KeySuperLeft
 	case glfw.KeyRightSuper:
-		return desktop.KeySuper
+		return desktop.KeySuperRight
 	case glfw.KeyMenu:
 		return desktop.KeyMenu
 	}
@@ -607,25 +607,31 @@ func keyToName(key glfw.Key) fyne.KeyName {
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	if action != glfw.Press { // ignore key up
-		return
-	}
-
 	keyName := keyToName(key)
-	keyDesktopModifier := desktopModifier(mods)
+	keyEvent := &fyne.KeyEvent{Name: keyName}
 
-	if keyDesktopModifier < desktop.ControlModifier {
-		// No shortcut detected, pass down to TypedKey and exit
-		keyEvent := &fyne.KeyEvent{Name: keyName}
+	if action == glfw.Press {
 		if w.canvas.Focused() != nil {
-			go w.canvas.Focused().TypedKey(keyEvent)
+			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
+				go focused.KeyDown(keyEvent)
+			}
+		} else if w.canvas.onKeyDown != nil {
+			go w.canvas.onKeyDown(keyEvent)
 		}
-		if w.canvas.onTypedKey != nil {
-			go w.canvas.onTypedKey(keyEvent)
+	} else { // ignore key up / repeat in core events
+		if action == glfw.Release {
+			if w.canvas.Focused() != nil {
+				if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
+					go focused.KeyUp(keyEvent)
+				}
+			} else if w.canvas.onKeyDown != nil {
+				go w.canvas.onKeyUp(keyEvent)
+			}
 		}
 		return
 	}
 
+	keyDesktopModifier := desktopModifier(mods)
 	var shortcut fyne.Shortcut
 	ctrlMod := desktop.ControlModifier
 	if runtime.GOOS == "darwin" {
@@ -660,9 +666,16 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		if shortcutable.TypedShortcut(shortcut) {
 			return
 		}
+	} else if w.canvas.shortcut.TypedShortcut(shortcut) {
+		return
 	}
 
-	w.canvas.shortcut.TypedShortcut(shortcut)
+	// No shortcut detected, pass down to TypedKey
+	if w.canvas.Focused() != nil {
+		go w.canvas.Focused().TypedKey(keyEvent)
+	} else if w.canvas.onTypedKey != nil {
+		go w.canvas.onTypedKey(keyEvent)
+	}
 }
 
 func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
@@ -695,8 +708,7 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 
 	if w.canvas.Focused() != nil {
 		w.canvas.Focused().TypedRune(char)
-	}
-	if w.canvas.onTypedRune != nil {
+	} else if w.canvas.onTypedRune != nil {
 		w.canvas.onTypedRune(char)
 	}
 }

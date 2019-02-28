@@ -1,6 +1,7 @@
 package desktop
 
 import (
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -25,16 +26,20 @@ func (cs *CustomShortcut) ShortcutName() string {
 func modifierToString(mods Modifier) string {
 	s := []string{}
 	if (mods & ShiftModifier) != 0 {
-		s = append(s, string(KeyShift))
+		s = append(s, string("Shift"))
 	}
 	if (mods & ControlModifier) != 0 {
-		s = append(s, string(KeyControl))
+		s = append(s, string("Control"))
 	}
 	if (mods & AltModifier) != 0 {
-		s = append(s, string(KeyAlt))
+		s = append(s, string("Alt"))
 	}
 	if (mods & SuperModifier) != 0 {
-		s = append(s, string(KeySuper))
+		if runtime.GOOS == "darwin" {
+			s = append(s, string("Command"))
+		} else {
+			s = append(s, string("Super"))
+		}
 	}
 	return strings.Join(s, "+")
 }

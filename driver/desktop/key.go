@@ -5,14 +5,22 @@ import (
 )
 
 const (
-	// KeyShift represents the left or right shift key
-	KeyShift fyne.KeyName = "Shift"
-	// KeyControl represents the left or right control key
-	KeyControl fyne.KeyName = "Control"
-	// KeyAlt represents the left or right alt key
-	KeyAlt fyne.KeyName = "Alt"
-	// KeySuper represents the left or right "Windows" key (or "Command" key on macOS)
-	KeySuper fyne.KeyName = "Super"
+	// KeyShiftLeft represents the left shift key
+	KeyShiftLeft fyne.KeyName = "LeftShift"
+	// KeyShiftRight represents the right shift key
+	KeyShiftRight fyne.KeyName = "RightShift"
+	// KeyControlLeft represents the left control key
+	KeyControlLeft fyne.KeyName = "LeftControl"
+	// KeyControlRight represents the right control key
+	KeyControlRight fyne.KeyName = "RightControl"
+	// KeyAltLeft represents the left alt key
+	KeyAltLeft fyne.KeyName = "LeftAlt"
+	// KeyAltRight represents the right alt key
+	KeyAltRight fyne.KeyName = "RightAlt"
+	// KeySuperLeft represents the left "Windows" key (or "Command" key on macOS)
+	KeySuperLeft fyne.KeyName = "LeftSuper"
+	// KeySuperRight represents the right "Windows" key (or "Command" key on macOS)
+	KeySuperRight fyne.KeyName = "RightSuper"
 	// KeyMenu represents the left or right menu / application key
 	KeyMenu fyne.KeyName = "Menu"
 )
@@ -30,3 +38,12 @@ const (
 	// SuperModifier represents either super keys being held
 	SuperModifier
 )
+
+// Keyable describes any focusable canvas object that can accept desktop key events.
+// This is the traditional key down and up event that is not applicable to all devices.
+type Keyable interface {
+	fyne.Focusable
+
+	KeyDown(*fyne.KeyEvent)
+	KeyUp(*fyne.KeyEvent)
+}
