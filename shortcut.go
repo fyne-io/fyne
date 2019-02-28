@@ -11,8 +11,8 @@ type ShortcutHandler struct {
 	entry map[string]func(Shortcut)
 }
 
-// HandleShortcut handle the registered shortcut
-func (sh *ShortcutHandler) HandleShortcut(shortcut Shortcut) bool {
+// TypedShortcut handle the registered shortcut
+func (sh *ShortcutHandler) TypedShortcut(shortcut Shortcut) bool {
 	if shortcut == nil {
 		return false
 	}

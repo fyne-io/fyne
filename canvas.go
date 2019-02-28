@@ -17,5 +17,5 @@ type Canvas interface {
 	SetOnTypedRune(func(rune))
 	OnTypedKey() func(*KeyEvent)
 	SetOnTypedKey(func(*KeyEvent))
-	Shortcutable
+	AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut))
 }

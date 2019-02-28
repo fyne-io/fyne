@@ -56,6 +56,5 @@ type Focusable interface {
 
 // Shortcutable describes any CanvasObject that can respond to shortcut commands (quit, cut, copy, and paste).
 type Shortcutable interface {
-	HandleShortcut(shortcut Shortcut) bool
-	AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut))
+	TypedShortcut(shortcut Shortcut) bool
 }

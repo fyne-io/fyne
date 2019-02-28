@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -486,28 +485,9 @@ func TestEntry_OnPaste(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			clipboard.SetContent(tt.clipboardContent)
-			handled := tt.entry.HandleShortcut(shortuct)
+			handled := tt.entry.TypedShortcut(shortuct)
 			assert.True(t, handled)
 			assert.Equal(t, tt.wantText, tt.entry.Text)
 		})
 	}
-}
-
-func TestEntry_OnCustomDesktop(t *testing.T) {
-	entry := NewEntry()
-	shortcut := &desktop.CustomShortcut{
-		KeyName:  fyne.KeyA,
-		Modifier: desktop.ControlModifier,
-	}
-	entry.AddShortcut(shortcut, func(s fyne.Shortcut) {
-		sc := s.(*desktop.CustomShortcut)
-		assert.Equal(t, fyne.KeyA, sc.KeyName)
-		assert.Equal(t, desktop.ControlModifier, sc.Modifier)
-	})
-
-	handled := entry.HandleShortcut(&desktop.CustomShortcut{
-		KeyName:  fyne.KeyA,
-		Modifier: desktop.ControlModifier,
-	})
-	assert.True(t, handled)
 }

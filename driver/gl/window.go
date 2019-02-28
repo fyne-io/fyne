@@ -689,12 +689,12 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	}
 
 	if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-		if shortcutable.HandleShortcut(shortcut) {
+		if shortcutable.TypedShortcut(shortcut) {
 			return
 		}
 	}
 
-	w.canvas.HandleShortcut(shortcut)
+	w.canvas.shortcut.TypedShortcut(shortcut)
 }
 
 func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {

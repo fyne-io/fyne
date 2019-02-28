@@ -109,7 +109,7 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	baseWidget
-	fyne.ShortcutHandler
+	shortcut    fyne.ShortcutHandler
 	Text        string
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
@@ -332,6 +332,11 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
+// TypedShortcut implements the Shortcutable interface
+func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) bool {
+	return e.shortcut.TypedShortcut(shortcut)
+}
+
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *textProvider {
 	return Renderer(e).(*entryRenderer).text
@@ -410,7 +415,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 func (e *Entry) registerShortcut() {
 	scPaste := &fyne.ShortcutPaste{}
-	e.AddShortcut(scPaste, func(se fyne.Shortcut) {
+	e.shortcut.AddShortcut(scPaste, func(se fyne.Shortcut) {
 		scPaste = se.(*fyne.ShortcutPaste)
 		text := scPaste.Clipboard.Content()
 		if !e.MultiLine {

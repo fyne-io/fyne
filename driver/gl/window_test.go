@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -104,4 +105,22 @@ func TestWindow_Clipboard(t *testing.T) {
 
 	// Restore cliboardContent, if any
 	cb.SetContent(cliboardContent)
+}
+
+func TestWindow_Shortcut(t *testing.T) {
+	d := NewGLDriver()
+	w := d.CreateWindow("Test")
+
+	shortcutFullScreenWindow := &desktop.CustomShortcut{
+		KeyName: fyne.KeyF12,
+	}
+
+	w.Canvas().AddShortcut(shortcutFullScreenWindow, func(sc fyne.Shortcut) {
+		w.SetFullScreen(true)
+	})
+
+	assert.False(t, w.FullScreen())
+
+	w.Canvas().(*glCanvas).shortcut.TypedShortcut(shortcutFullScreenWindow)
+	assert.True(t, w.FullScreen())
 }
