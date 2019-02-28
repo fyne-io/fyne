@@ -12,14 +12,13 @@ func Input(app fyne.App) {
 	win := app.NewWindow("Input")
 	label := widget.NewLabel("Just type...")
 
-	generic := widget.NewVBox()
-	desk := widget.NewVBox()
+	generic := widget.NewGroupWithScroller("Generic")
+	desk := widget.NewGroupWithScroller("Desktop")
 
 	win.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(label, nil, nil, nil),
 		label,
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-			widget.NewGroup("Generic", widget.NewScroller(generic)),
-			widget.NewGroup("Desktop", widget.NewScroller(desk)),
+			generic, desk,
 		),
 	))
 
@@ -39,6 +38,6 @@ func Input(app fyne.App) {
 	win.Show()
 }
 
-func prependTo(g *widget.Box, s string) {
+func prependTo(g *widget.Group, s string) {
 	g.Prepend(widget.NewLabel(s))
 }
