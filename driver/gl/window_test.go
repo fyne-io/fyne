@@ -4,6 +4,8 @@ package gl
 
 import (
 	"image/color"
+	"os"
+	"runtime"
 	"testing"
 
 	"fyne.io/fyne"
@@ -15,6 +17,19 @@ import (
 )
 
 var d = NewGLDriver()
+
+func init() {
+	runtime.LockOSThread()
+}
+
+// TestMain makes sure that our driver is running on the main thread.
+// This must be done for some of our tests to function correctly.
+func TestMain(m *testing.M) {
+	go func() {
+		os.Exit(m.Run())
+	}()
+	d.Run()
+}
 
 func TestWindow_SetTitle(t *testing.T) {
 	w := d.CreateWindow("Test")
