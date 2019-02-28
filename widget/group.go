@@ -12,8 +12,8 @@ import (
 type Group struct {
 	baseWidget
 
-	Text    string
-	Content fyne.CanvasObject
+	Text string
+	box  *Box
 }
 
 // Resize sets a new size for a widget.
@@ -43,19 +43,33 @@ func (g *Group) Hide() {
 	g.hide(g)
 }
 
+// Prepend inserts a new CanvasObject at the top of the group
+func (g *Group) Prepend(object fyne.CanvasObject) {
+	g.box.Prepend(object)
+
+	Refresh(g)
+}
+
+// Append adds a new CanvasObject to the end of the group
+func (g *Group) Append(object fyne.CanvasObject) {
+	g.box.Append(object)
+
+	Refresh(g)
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	label := NewLabel(g.Text)
 	labelBg := canvas.NewRectangle(theme.BackgroundColor())
 	line := canvas.NewRectangle(theme.ButtonColor())
-	objects := []fyne.CanvasObject{line, labelBg, label, g.Content}
+	objects := []fyne.CanvasObject{line, labelBg, label, g.box}
 	return &groupRenderer{label: label, line: line, labelBg: labelBg,
 		objects: objects, group: g}
 }
 
 // NewGroup creates a new grouped list widget with a title and the specified list of child objects
-func NewGroup(title string, content fyne.CanvasObject) *Group {
-	group := &Group{baseWidget{}, title, content}
+func NewGroup(title string, children ...fyne.CanvasObject) *Group {
+	group := &Group{baseWidget{}, title, NewVBox(children...)}
 
 	Renderer(group).Layout(group.MinSize())
 	return group
@@ -71,7 +85,7 @@ type groupRenderer struct {
 
 func (g *groupRenderer) MinSize() fyne.Size {
 	labelMin := g.label.MinSize()
-	groupMin := g.group.Content.MinSize()
+	groupMin := g.group.box.MinSize()
 
 	return fyne.NewSize(fyne.Max(labelMin.Width, groupMin.Width),
 		labelMin.Height+groupMin.Height+theme.Padding())
@@ -89,14 +103,16 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 	g.label.Move(fyne.NewPos(size.Width/2-labelWidth/2, 0))
 	g.label.Resize(g.label.MinSize())
 
-	g.group.Content.Move(fyne.NewPos(0, labelHeight+theme.Padding()))
-	g.group.Content.Resize(fyne.NewSize(size.Width, size.Height-labelHeight-theme.Padding()))
+	g.group.box.Move(fyne.NewPos(0, labelHeight+theme.Padding()))
+	g.group.box.Resize(fyne.NewSize(size.Width, size.Height-labelHeight-theme.Padding()))
 }
 
 func (g *groupRenderer) ApplyTheme() {
 	Renderer(g.label).ApplyTheme()
 	g.line.FillColor = theme.ButtonColor()
 	g.labelBg.FillColor = theme.BackgroundColor()
+
+	Renderer(g.group.box).ApplyTheme()
 }
 
 func (g *groupRenderer) BackgroundColor() color.Color {
