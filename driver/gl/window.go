@@ -627,58 +627,26 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	}
 
 	var shortcut fyne.Shortcut
-	switch runtime.GOOS {
-	case "darwin":
+	ctrlMod := desktop.ControlModifier
+	if runtime.GOOS == "darwin" {
+		ctrlMod = desktop.SuperModifier
+	}
+	if keyDesktopModifier == ctrlMod {
 		switch keyName {
 		case fyne.KeyV:
 			// detect paste shortcut
-			if keyDesktopModifier == desktop.SuperModifier {
-				shortcut = &fyne.ShortcutPaste{
-					Clipboard: w.Clipboard(),
-				}
+			shortcut = &fyne.ShortcutPaste{
+				Clipboard: w.Clipboard(),
 			}
 		case fyne.KeyC:
 			// detect copy shortcut
-			if keyDesktopModifier == desktop.SuperModifier {
-				shortcut = &fyne.ShortcutCopy{
-					Clipboard: w.Clipboard(),
-				}
+			shortcut = &fyne.ShortcutCopy{
+				Clipboard: w.Clipboard(),
 			}
 		case fyne.KeyX:
 			// detect cut shortcut
-			if keyDesktopModifier == desktop.SuperModifier {
-				shortcut = &fyne.ShortcutCut{
-					Clipboard: w.Clipboard(),
-				}
-			}
-		default:
-			shortcut = &desktop.CustomShortcut{
-				KeyName:  keyName,
-				Modifier: keyDesktopModifier,
-			}
-		}
-	default:
-		switch keyName {
-		case fyne.KeyV:
-			// detect paste shortcut
-			if keyDesktopModifier == desktop.ControlModifier {
-				shortcut = &fyne.ShortcutPaste{
-					Clipboard: w.Clipboard(),
-				}
-			}
-		case fyne.KeyC:
-			// detect copy shortcut
-			if keyDesktopModifier == desktop.ControlModifier {
-				shortcut = &fyne.ShortcutCopy{
-					Clipboard: w.Clipboard(),
-				}
-			}
-		case fyne.KeyX:
-			// detect cut shortcut
-			if keyDesktopModifier == desktop.ControlModifier {
-				shortcut = &fyne.ShortcutCut{
-					Clipboard: w.Clipboard(),
-				}
+			shortcut = &fyne.ShortcutCut{
+				Clipboard: w.Clipboard(),
 			}
 		default:
 			shortcut = &desktop.CustomShortcut{
