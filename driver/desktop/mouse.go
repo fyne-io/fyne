@@ -14,11 +14,13 @@ const (
 	RightMouseButton
 )
 
+// MouseEvent contains data relating to desktop mouse events
 type MouseEvent struct {
 	fyne.PointEvent
 	Button MouseButton
 }
 
+// Mouseable represents desktop mouse events that can be sent to CanvasObjects
 type Mouseable interface {
 	MouseDown(*MouseEvent)
 	MouseUp(*MouseEvent)
