@@ -329,11 +329,7 @@ const (
     out vec4 frag_colour;
 
     void main() {
-        vec4 color = texture(tex, fragTexCoord);
-        if(color.a < 0.001)
-            discard;
-
-        frag_colour = color;
+        frag_colour = texture(tex, fragTexCoord);
     }
 ` + "\x00"
 )

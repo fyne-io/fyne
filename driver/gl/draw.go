@@ -1,6 +1,8 @@
 package gl
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/widget"
@@ -125,7 +127,8 @@ func (c *glCanvas) drawTexture(texture uint32, points []float32) {
 }
 
 func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	if !box.Visible() {
+	backCol := widget.Renderer(box.(fyne.Widget)).BackgroundColor()
+	if !box.Visible() || backCol == color.Transparent {
 		return
 	}
 
