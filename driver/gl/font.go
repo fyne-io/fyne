@@ -45,7 +45,7 @@ func (c *compositeFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance
 
 func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
 	if c.containsGlyph(c.chosenFont, r) {
-		c.chosen.GlyphAdvance(r)
+		return c.chosen.GlyphAdvance(r)
 	}
 	return c.fallback.GlyphAdvance(r)
 }
@@ -58,7 +58,7 @@ func (c *compositeFace) Kern(r0, r1 rune) fixed.Int26_6 {
 }
 
 func (c *compositeFace) Metrics() font.Metrics {
-	return c.fallback.Metrics()
+	return c.chosen.Metrics()
 }
 
 func newFontWithFallback(chosen, fallback font.Face, chosenFont, fallbackFont *truetype.Font) font.Face {
