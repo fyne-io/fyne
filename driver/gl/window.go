@@ -380,7 +380,7 @@ func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int
 		}
 
 		switch walked.(type) {
-		case fyne.Tappable:
+		case fyne.Tappable, desktop.Mouseable:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
 		case fyne.Focusable:
@@ -422,6 +422,17 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 	ev.Position = fyne.NewPos(w.mousePos.X-pad-x, w.mousePos.Y-pad-y)
 
+	if wid, ok := co.(desktop.Mouseable); ok {
+		mev := new(desktop.MouseEvent)
+		mev.Position = ev.Position
+		mev.Button = convertMouseButton(button)
+		if action == glfw.Press {
+			go wid.MouseDown(mev)
+		} else if action == glfw.Release {
+			go wid.MouseUp(mev)
+		}
+	}
+
 	switch wid := co.(type) {
 	case fyne.Tappable:
 		if action == glfw.Press {
@@ -446,6 +457,17 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 		ev.DeltaX = int(xoff * scrollSpeed)
 		ev.DeltaY = int(yoff * scrollSpeed)
 		wid.Scrolled(ev)
+	}
+}
+
+func convertMouseButton(button glfw.MouseButton) desktop.MouseButton {
+	switch button {
+	case glfw.MouseButton1:
+		return desktop.LeftMouseButton
+	case glfw.MouseButton2:
+		return desktop.RightMouseButton
+	default:
+		return 0
 	}
 }
 
