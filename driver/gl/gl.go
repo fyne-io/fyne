@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -128,19 +127,15 @@ func (c *glCanvas) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	text := obj.(*canvas.Text)
 
-	textScale := 1
-	if runtime.GOOS == "darwin" {
-		textScale = 2
-	}
 	bounds := text.MinSize()
-	width := scaleInt(c, bounds.Width*textScale)
-	height := scaleInt(c, bounds.Height*textScale)
+	width := scaleInt(c, bounds.Width)
+	height := scaleInt(c, bounds.Height)
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	var opts truetype.Options
 	fontSize := float64(text.TextSize) * float64(c.Scale())
 	opts.Size = fontSize
-	opts.DPI = float64(textDPI * textScale)
+	opts.DPI = float64(textDPI)
 	face := cachedFontFace(text.TextStyle, &opts)
 
 	d := font.Drawer{}
