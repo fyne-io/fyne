@@ -43,9 +43,8 @@ func scaleInt(c fyne.Canvas, v int) int {
 func textureScaleInt(c *glCanvas, v int) int {
 	if c.scale == 1.0 && c.texScale == 1.0 {
 		return v
-	} else {
-		return int(math.Round(float64(v) * float64(c.scale*c.texScale)))
 	}
+	return int(math.Round(float64(v) * float64(c.scale*c.texScale)))
 }
 
 func unscaleInt(c fyne.Canvas, v int) int {
