@@ -21,9 +21,10 @@ type glCanvas struct {
 	onKeyUp     func(*fyne.KeyEvent)
 	shortcut    fyne.ShortcutHandler
 
-	program uint32
-	scale   float32
-	aspects map[interface{}]float32
+	program  uint32
+	scale    float32
+	texScale float32
+	aspects  map[interface{}]float32
 
 	dirty        bool
 	dirtyMutex   *sync.Mutex
@@ -36,6 +37,14 @@ func scaleInt(c fyne.Canvas, v int) int {
 		return v
 	default:
 		return int(math.Round(float64(v) * float64(c.Scale())))
+	}
+}
+
+func textureScaleInt(c *glCanvas, v int) int {
+	if c.scale == 1.0 && c.texScale == 1.0 {
+		return v
+	} else {
+		return int(math.Round(float64(v) * float64(c.scale*c.texScale)))
 	}
 }
 

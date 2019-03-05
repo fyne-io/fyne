@@ -61,9 +61,9 @@ func (c *glCanvas) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
 	circle := obj.(*canvas.Circle)
 	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2
 
-	width := scaleInt(c, circle.Size().Width+vectorPad*2)
-	height := scaleInt(c, circle.Size().Height+vectorPad*2)
-	stroke := circle.StrokeWidth * c.scale
+	width := textureScaleInt(c, circle.Size().Width+vectorPad*2)
+	height := textureScaleInt(c, circle.Size().Height+vectorPad*2)
+	stroke := circle.StrokeWidth * c.scale * c.texScale
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(circle.Size().Width, circle.Size().Height, raw, raw.Bounds())
@@ -71,14 +71,14 @@ func (c *glCanvas) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
 	if circle.FillColor != nil {
 		filler := rasterx.NewFiller(width, height, scanner)
 		filler.SetColor(circle.FillColor)
-		rasterx.AddCircle(float64(width/2), float64(height/2), float64(scaleInt(c, radius)), filler)
+		rasterx.AddCircle(float64(width/2), float64(height/2), float64(textureScaleInt(c, radius)), filler)
 		filler.Draw()
 	}
 
 	dasher := rasterx.NewDasher(width, height, scanner)
 	dasher.SetColor(circle.StrokeColor)
 	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
-	rasterx.AddCircle(float64(width/2), float64(height/2), float64(scaleInt(c, radius)), dasher)
+	rasterx.AddCircle(float64(width/2), float64(height/2), float64(textureScaleInt(c, radius)), dasher)
 	dasher.Draw()
 
 	return c.imgToTexture(raw)
@@ -88,17 +88,17 @@ func (c *glCanvas) newGlLineTexture(obj fyne.CanvasObject) uint32 {
 	line := obj.(*canvas.Line)
 
 	col := line.StrokeColor
-	width := scaleInt(c, line.Size().Width+vectorPad*2)
-	height := scaleInt(c, line.Size().Height+vectorPad*2)
-	stroke := line.StrokeWidth * c.scale
+	width := textureScaleInt(c, line.Size().Width+vectorPad*2)
+	height := textureScaleInt(c, line.Size().Height+vectorPad*2)
+	stroke := line.StrokeWidth * c.scale * c.texScale
 
 	raw := image.NewRGBA(image.Rect(0, 0, width, height))
 	scanner := rasterx.NewScannerGV(line.Size().Width, line.Size().Height, raw, raw.Bounds())
 	dasher := rasterx.NewDasher(width, height, scanner)
 	dasher.SetColor(col)
 	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
-	p1x, p1y := scaleInt(c, line.Position1.X-line.Position().X+vectorPad), scaleInt(c, line.Position1.Y-line.Position().Y+vectorPad)
-	p2x, p2y := scaleInt(c, line.Position2.X-line.Position().X+vectorPad), scaleInt(c, line.Position2.Y-line.Position().Y+vectorPad)
+	p1x, p1y := textureScaleInt(c, line.Position1.X-line.Position().X+vectorPad), textureScaleInt(c, line.Position1.Y-line.Position().Y+vectorPad)
+	p2x, p2y := textureScaleInt(c, line.Position2.X-line.Position().X+vectorPad), textureScaleInt(c, line.Position2.Y-line.Position().Y+vectorPad)
 
 	dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
 	dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))
@@ -128,14 +128,14 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	text := obj.(*canvas.Text)
 
 	bounds := text.MinSize()
-	width := scaleInt(c, bounds.Width)
-	height := scaleInt(c, bounds.Height)
+	width := textureScaleInt(c, bounds.Width)
+	height := textureScaleInt(c, bounds.Height)
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	var opts truetype.Options
 	fontSize := float64(text.TextSize) * float64(c.Scale())
 	opts.Size = fontSize
-	opts.DPI = float64(textDPI)
+	opts.DPI = float64(textDPI * c.texScale)
 	face := cachedFontFace(text.TextStyle, &opts)
 
 	d := font.Drawer{}
@@ -151,8 +151,8 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 	img := obj.(*canvas.Image)
 
-	width := scaleInt(c, img.Size().Width)
-	height := scaleInt(c, img.Size().Height)
+	width := textureScaleInt(c, img.Size().Width)
+	height := textureScaleInt(c, img.Size().Height)
 	if width <= 0 || height <= 0 {
 		return 0
 	}
@@ -246,8 +246,8 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 func (c *glCanvas) newGlRasterTexture(obj fyne.CanvasObject) uint32 {
 	rast := obj.(*canvas.Raster)
 
-	width := scaleInt(c, rast.Size().Width)
-	height := scaleInt(c, rast.Size().Height)
+	width := textureScaleInt(c, rast.Size().Width)
+	height := textureScaleInt(c, rast.Size().Height)
 
 	return c.imgToTexture(rast.Generator(width, height))
 }
