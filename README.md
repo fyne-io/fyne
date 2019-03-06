@@ -85,7 +85,7 @@ You can override this behaviour by setting a specific scale using the FYNE_SCALE
   <br />Standard size</td>
 <td><img src="img/hello-small.png" width="160" height="169" alt="Hello small size" />
   <br />FYNE_SCALE=0.5</td>
-<td><img src="img/hello-large.png" width="350" height="409" alt="Hello large size" />
+<td><img src="img/hello-large.png" width="350" height="309" alt="Hello large size" />
   <br />FYNE_SCALE=2.5</td>
 </tr></table>
 
