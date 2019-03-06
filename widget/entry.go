@@ -426,7 +426,15 @@ func (e *Entry) registerShortcut() {
 		provider := e.textProvider()
 		runes := []rune(text)
 		provider.insertAt(e.cursorTextPos(), runes)
-		e.CursorColumn += len(runes)
+
+		newlines := strings.Count(text, "\n")
+		if newlines == 0 {
+			e.CursorColumn += len(runes)
+		} else {
+			e.CursorRow += newlines
+			lastNewline := strings.LastIndex(text, "\n")
+			e.CursorColumn = len(runes) - lastNewline - 1
+		}
 		e.updateText(provider.String())
 		Renderer(e).(*entryRenderer).moveCursor()
 	})
