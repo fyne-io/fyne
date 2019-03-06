@@ -96,7 +96,7 @@ which to use with the environment variable ```FYNE_THEME```.
 The default is dark:
 
 <p align="center" markdown="1">
-  <img src="cmd/hello/hello-dark.png" alt="Fyne Hello Dark Theme" />
+  <img src="img/hello-normal.png" alt="Fyne Hello Dark Theme" />
 </p>
 
 If you prefer a light theme then you could run:
@@ -106,7 +106,7 @@ If you prefer a light theme then you could run:
 It should then look like this:
 
 <p align="center" markdown="1">
-  <img src="cmd/hello/hello-light.png" alt="Fyne Hello Light Theme" />
+  <img src="img/hello-light.png" alt="Fyne Hello Light Theme" />
 </p>
 
 # Widget demo
