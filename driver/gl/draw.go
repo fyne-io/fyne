@@ -23,11 +23,11 @@ func (c *glCanvas) walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 	case *widget.ScrollContainer: // TODO should this be somehow not scroll container specific?
 		offset := co.Position().Add(pos)
 
-		scrollX := scaleInt(c, offset.X)
-		scrollY := scaleInt(c, offset.Y)
-		scrollWidth := scaleInt(c, co.Size().Width)
-		scrollHeight := scaleInt(c, co.Size().Height)
-		_, pixHeight := c.window.viewport.GetSize()
+		scrollX := textureScaleInt(c, offset.X)
+		scrollY := textureScaleInt(c, offset.Y)
+		scrollWidth := textureScaleInt(c, co.Size().Width)
+		scrollHeight := textureScaleInt(c, co.Size().Height)
+		_, pixHeight := c.window.viewport.GetFramebufferSize()
 		gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
 		gl.Enable(gl.SCISSOR_TEST)
 
