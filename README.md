@@ -65,7 +65,7 @@ And you can run that simply as:
 It should look like this:
 
 <p align="center" markdown="1">
-  <img src="img/hello-normal.png" alt="Fyne Hello Dark Theme" />
+  <img src="img/hello-normal.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
 </p>
 
 > Note that windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
@@ -81,11 +81,11 @@ We call this "auto scaling" and it is designed to keep an app GUI the same size 
 You can override this behaviour by setting a specific scale using the FYNE_SCALE environment variable.
 
 <table style="text-align: center"><tr>
-<td><img src="img/hello-normal.png" alt="Hello normal size" />
+<td><img src="img/hello-normal.png" width="207" height="204" alt="Hello normal size" />
   <br />Standard size</td>
-<td><img src="img/hello-small.png" alt="Hello small size" />
+<td><img src="img/hello-small.png" width="160" height="169" alt="Hello small size" />
   <br />FYNE_SCALE=0.5</td>
-<td><img src="img/hello-large.png" alt="Hello large size" />
+<td><img src="img/hello-large.png" width="350" height="409" alt="Hello large size" />
   <br />FYNE_SCALE=2.5</td>
 </tr></table>
 
@@ -96,7 +96,7 @@ which to use with the environment variable ```FYNE_THEME```.
 The default is dark:
 
 <p align="center" markdown="1">
-  <img src="img/hello-normal.png" alt="Fyne Hello Dark Theme" />
+  <img src="img/hello-normal.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
 </p>
 
 If you prefer a light theme then you could run:
@@ -106,7 +106,7 @@ If you prefer a light theme then you could run:
 It should then look like this:
 
 <p align="center" markdown="1">
-  <img src="img/hello-light.png" alt="Fyne Hello Light Theme" />
+  <img src="img/hello-light.png" width="207" height="204" alt="Fyne Hello Light Theme" />
 </p>
 
 # Widget demo
