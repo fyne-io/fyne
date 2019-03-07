@@ -30,6 +30,7 @@ type dialog struct {
 
 	response  chan bool
 	responded bool
+	parent    fyne.Window
 }
 
 func (d *dialog) wait() {
@@ -48,7 +49,7 @@ func (d *dialog) closed() {
 		d.callback(false)
 	}
 
-	d.win.RequestFocus()
+	d.parent.RequestFocus()
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
@@ -102,7 +103,7 @@ func newDialogWin(title string, _ fyne.Window) fyne.Window {
 }
 
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
-	d := &dialog{content: newLabel(message), icon: icon}
+	d := &dialog{content: newLabel(message), icon: icon, parent: parent}
 
 	win := newDialogWin(title, parent)
 	win.SetOnClosed(d.closed)
