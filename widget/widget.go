@@ -57,6 +57,8 @@ func (w *baseWidget) show(parent fyne.Widget) {
 	for _, child := range Renderer(parent).Objects() {
 		child.Show()
 	}
+
+	canvas.Refresh(parent)
 }
 
 func (w *baseWidget) hide(parent fyne.Widget) {
@@ -64,6 +66,8 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 	for _, child := range Renderer(parent).Objects() {
 		child.Hide()
 	}
+
+	canvas.Refresh(parent)
 }
 
 var renderers sync.Map
