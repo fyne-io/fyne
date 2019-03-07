@@ -124,6 +124,12 @@ func (w *window) sizeOnScreen() (int, int) {
 	return viewWidth, viewHeight
 }
 
+func (w *window) RequestFocus() {
+	runOnMainAsync(func() {
+		w.viewport.Focus()
+	})
+}
+
 func (w *window) Resize(size fyne.Size) {
 	runOnMainAsync(func() {
 		scale := w.canvas.Scale()

@@ -47,6 +47,8 @@ func (d *dialog) closed() {
 	if !d.responded && d.callback != nil {
 		d.callback(false)
 	}
+
+	d.win.RequestFocus()
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {

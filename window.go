@@ -20,6 +20,11 @@ type Window interface {
 	// platform constraints.
 	Resize(Size)
 
+	// RequestFocus attempts to raise and focus this window.
+	// This should only be called when you are sure the user would want this window
+	// to steal focus from any current focused window.
+	RequestFocus()
+
 	// FixedSize returns whether or not this window should disable resizing.
 	FixedSize() bool
 	// SetFixedSize sets a hint that states whether the window should be a fixed
