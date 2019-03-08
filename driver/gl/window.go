@@ -192,7 +192,7 @@ func (w *window) fitContent() {
 
 		width, height := w.viewport.GetSize()
 		if width < winWidth || height < winHeight {
-			w.viewport.SetSize(winWidth, winHeight)
+			w.viewport.SetSize(fyne.Max(width, winWidth), fyne.Max(height, winHeight))
 		}
 	})
 }
