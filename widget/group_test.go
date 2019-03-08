@@ -31,3 +31,13 @@ func TestGroupAppend(t *testing.T) {
 	assert.True(t, len(group.box.Children) == 2)
 	assert.Equal(t, append, group.box.Children[1])
 }
+
+func TestGroup_Text(t *testing.T) {
+	group := NewGroup("Test")
+	Renderer(group).Refresh()
+
+	group.Text = "World"
+	Renderer(group).Refresh()
+
+	assert.Equal(t, "World", Renderer(group).(*groupRenderer).label.Text)
+}
