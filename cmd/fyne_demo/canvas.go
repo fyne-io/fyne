@@ -27,7 +27,7 @@ func Canvas(app fyne.App) {
 			StrokeWidth: 1},
 		canvas.NewRasterWithPixels(rgbGradient),
 		canvas.NewImageFromResource(theme.FyneLogo()),
-		canvas.NewImageFromResource(theme.CutIcon()),
+		canvas.NewImageFromResource(theme.ContentCutIcon()),
 		&canvas.Line{StrokeColor: color.RGBA{0, 0, 0x80, 0xff}, StrokeWidth: 5},
 		&canvas.Circle{StrokeColor: color.RGBA{0, 0, 0x80, 0xff},
 			FillColor:   color.RGBA{0x30, 0x30, 0x30, 0x60},

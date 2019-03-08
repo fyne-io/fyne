@@ -63,9 +63,9 @@ func main() {
 		widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
 			widget.NewToolbarSeparator(),
 			widget.NewToolbarSpacer(),
-			widget.NewToolbarAction(theme.CutIcon(), func() { fmt.Println("Cut") }),
-			widget.NewToolbarAction(theme.CopyIcon(), func() { fmt.Println("Copy") }),
-			widget.NewToolbarAction(theme.PasteIcon(), func() { fmt.Println("Paste") }),
+			widget.NewToolbarAction(theme.ContentCutIcon(), func() { fmt.Println("Cut") }),
+			widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
+			widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
 		),
 
 		widget.NewGroup("Demos", widget.NewVBox(

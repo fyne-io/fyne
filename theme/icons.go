@@ -41,9 +41,9 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 var (
 	cancel, confirm, delete, search, searchReplace                              *ThemedResource
 	checked, unchecked, radioButton, radioButtonChecked                         *ThemedResource
-	contentCut, contentCopy, contentPaste, contentRedo, contentUndo             *ThemedResource
+	contentAdd, contentRemove, contentCut, contentCopy, contentPaste            *ThemedResource
+	contentRedo, contentUndo, info, question, warning                           *ThemedResource
 	documentCreate, documentPrint, documentSave                                 *ThemedResource
-	info, question, warning                                                     *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp                                 *ThemedResource
 	folder, folderNew, folderOpen, help, home                                   *ThemedResource
@@ -62,6 +62,8 @@ func init() {
 	radioButton = &ThemedResource{radiobuttonDark, radiobuttonLight}
 	radioButtonChecked = &ThemedResource{radiobuttoncheckedDark, radiobuttoncheckedLight}
 
+	contentAdd = &ThemedResource{contentaddDark, contentaddLight}
+	contentRemove = &ThemedResource{contentremoveDark, contentremoveLight}
 	contentCut = &ThemedResource{contentcutDark, contentcutLight}
 	contentCopy = &ThemedResource{contentcopyDark, contentcopyLight}
 	contentPaste = &ThemedResource{contentpasteDark, contentpasteLight}
@@ -151,33 +153,43 @@ func RadioButtonCheckedIcon() fyne.Resource {
 	return radioButtonChecked
 }
 
-// ClearIcon returns a resource containing the standard content clear icon for the current theme
-func ClearIcon() fyne.Resource {
+// ContentAddIcon returns a resource containing the standard content add icon for the current theme
+func ContentAddIcon() fyne.Resource {
+	return contentAdd
+}
+
+// ContentRemoveIcon returns a resource containing the standard content remove icon for the current theme
+func ContentRemoveIcon() fyne.Resource {
+	return contentRemove
+}
+
+// ContentClearIcon returns a resource containing the standard content clear icon for the current theme
+func ContentClearIcon() fyne.Resource {
 	return cancel
 }
 
-// CutIcon returns a resource containing the standard content cut icon for the current theme
-func CutIcon() fyne.Resource {
+// ContentCutIcon returns a resource containing the standard content cut icon for the current theme
+func ContentCutIcon() fyne.Resource {
 	return contentCut
 }
 
-// CopyIcon returns a resource containing the standard content copy icon for the current theme
-func CopyIcon() fyne.Resource {
+// ContentCopyIcon returns a resource containing the standard content copy icon for the current theme
+func ContentCopyIcon() fyne.Resource {
 	return contentCopy
 }
 
-// PasteIcon returns a resource containing the standard content paste icon for the current theme
-func PasteIcon() fyne.Resource {
+// ContentPasteIcon returns a resource containing the standard content paste icon for the current theme
+func ContentPasteIcon() fyne.Resource {
 	return contentPaste
 }
 
-// RedoIcon returns a resource containing the standard content redo icon for the current theme
-func RedoIcon() fyne.Resource {
+// ContentRedoIcon returns a resource containing the standard content redo icon for the current theme
+func ContentRedoIcon() fyne.Resource {
 	return contentRedo
 }
 
-// UndoIcon returns a resource containing the standard content undo icon for the current theme
-func UndoIcon() fyne.Resource {
+// ContentUndoIcon returns a resource containing the standard content undo icon for the current theme
+func ContentUndoIcon() fyne.Resource {
 	return contentUndo
 }
 

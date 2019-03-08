@@ -108,6 +108,8 @@ func main() {
 		bundleIcon("radio-button", theme, f)
 		bundleIcon("radio-button-checked", theme, f)
 
+		bundleIcon("content-add", theme, f)
+		bundleIcon("content-remove", theme, f)
 		bundleIcon("content-cut", theme, f)
 		bundleIcon("content-copy", theme, f)
 		bundleIcon("content-paste", theme, f)
