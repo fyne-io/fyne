@@ -101,6 +101,7 @@ func main() {
 		bundleIcon("check", theme, f)
 		bundleIcon("delete", theme, f)
 		bundleIcon("search", theme, f)
+		bundleIcon("search-replace", theme, f)
 
 		bundleIcon("check-box", theme, f)
 		bundleIcon("check-box-blank", theme, f)
@@ -110,6 +111,12 @@ func main() {
 		bundleIcon("content-cut", theme, f)
 		bundleIcon("content-copy", theme, f)
 		bundleIcon("content-paste", theme, f)
+		bundleIcon("content-redo", theme, f)
+		bundleIcon("content-undo", theme, f)
+
+		bundleIcon("document-create", theme, f)
+		bundleIcon("document-print", theme, f)
+		bundleIcon("document-save", theme, f)
 
 		bundleIcon("info", theme, f)
 		bundleIcon("question", theme, f)
@@ -122,6 +129,7 @@ func main() {
 
 		bundleIcon("folder", theme, f)
 		bundleIcon("folder-new", theme, f)
+		bundleIcon("folder-open", theme, f)
 		bundleIcon("help", theme, f)
 		bundleIcon("home", theme, f)
 
@@ -131,6 +139,12 @@ func main() {
 		bundleIcon("mail-reply", theme, f)
 		bundleIcon("mail-reply_all", theme, f)
 		bundleIcon("mail-send", theme, f)
+
+		bundleIcon("view-fullscreen", theme, f)
+		bundleIcon("view-refresh", theme, f)
+		bundleIcon("view-zoom-fit", theme, f)
+		bundleIcon("view-zoom-in", theme, f)
+		bundleIcon("view-zoom-out", theme, f)
 	}
 	f.Close()
 }

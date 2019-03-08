@@ -39,13 +39,15 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 }
 
 var (
-	cancel, confirm, delete, search                                             *ThemedResource
+	cancel, confirm, delete, search, searchReplace                              *ThemedResource
 	checked, unchecked, radioButton, radioButtonChecked                         *ThemedResource
-	contentCut, contentCopy, contentPaste                                       *ThemedResource
+	contentCut, contentCopy, contentPaste, contentRedo, contentUndo             *ThemedResource
+	documentCreate, documentPrint, documentSave                                 *ThemedResource
 	info, question, warning                                                     *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp                                 *ThemedResource
-	folder, folderNew, help, home                                               *ThemedResource
+	folder, folderNew, folderOpen, help, home                                   *ThemedResource
+	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
 )
 
 func init() {
@@ -53,6 +55,7 @@ func init() {
 	confirm = &ThemedResource{checkDark, checkLight}
 	delete = &ThemedResource{deleteDark, deleteLight}
 	search = &ThemedResource{searchDark, searchLight}
+	searchReplace = &ThemedResource{searchreplaceDark, searchreplaceLight}
 
 	checked = &ThemedResource{checkboxDark, checkboxLight}
 	unchecked = &ThemedResource{checkboxblankDark, checkboxblankLight}
@@ -62,6 +65,12 @@ func init() {
 	contentCut = &ThemedResource{contentcutDark, contentcutLight}
 	contentCopy = &ThemedResource{contentcopyDark, contentcopyLight}
 	contentPaste = &ThemedResource{contentpasteDark, contentpasteLight}
+	contentRedo = &ThemedResource{contentredoDark, contentredoLight}
+	contentUndo = &ThemedResource{contentundoDark, contentundoLight}
+
+	documentCreate = &ThemedResource{documentcreateDark, documentcreateLight}
+	documentPrint = &ThemedResource{documentprintDark, documentprintLight}
+	documentSave = &ThemedResource{documentsaveDark, documentsaveLight}
 
 	info = &ThemedResource{infoDark, infoLight}
 	question = &ThemedResource{questionDark, questionLight}
@@ -81,8 +90,15 @@ func init() {
 
 	folder = &ThemedResource{folderDark, folderLight}
 	folderNew = &ThemedResource{foldernewDark, foldernewLight}
+	folderOpen = &ThemedResource{folderopenDark, folderopenLight}
 	help = &ThemedResource{helpDark, helpLight}
 	home = &ThemedResource{homeDark, homeLight}
+
+	viewFullScreen = &ThemedResource{viewfullscreenDark, viewfullscreenLight}
+	viewRefresh = &ThemedResource{viewrefreshDark, viewrefreshLight}
+	viewZoomFit = &ThemedResource{viewzoomfitDark, viewzoomfitLight}
+	viewZoomIn = &ThemedResource{viewzoominDark, viewzoominLight}
+	viewZoomOut = &ThemedResource{viewzoomoutDark, viewzoomoutLight}
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -110,6 +126,11 @@ func SearchIcon() fyne.Resource {
 	return search
 }
 
+// SearchReplaceIcon returns a resource containing the standard search and replace icon for the current theme
+func SearchReplaceIcon() fyne.Resource {
+	return searchReplace
+}
+
 // CheckButtonIcon returns a resource containing the standard checkbox icon for the current theme
 func CheckButtonIcon() fyne.Resource {
 	return unchecked
@@ -130,6 +151,11 @@ func RadioButtonCheckedIcon() fyne.Resource {
 	return radioButtonChecked
 }
 
+// ClearIcon returns a resource containing the standard content clear icon for the current theme
+func ClearIcon() fyne.Resource {
+	return cancel
+}
+
 // CutIcon returns a resource containing the standard content cut icon for the current theme
 func CutIcon() fyne.Resource {
 	return contentCut
@@ -143,6 +169,31 @@ func CopyIcon() fyne.Resource {
 // PasteIcon returns a resource containing the standard content paste icon for the current theme
 func PasteIcon() fyne.Resource {
 	return contentPaste
+}
+
+// RedoIcon returns a resource containing the standard content redo icon for the current theme
+func RedoIcon() fyne.Resource {
+	return contentRedo
+}
+
+// UndoIcon returns a resource containing the standard content undo icon for the current theme
+func UndoIcon() fyne.Resource {
+	return contentUndo
+}
+
+// DocumentCreateIcon returns a resource containing the standard document create icon for the current theme
+func DocumentCreateIcon() fyne.Resource {
+	return documentCreate
+}
+
+// DocumentPrintIcon returns a resource containing the standard document print icon for the current theme
+func DocumentPrintIcon() fyne.Resource {
+	return documentPrint
+}
+
+// DocumentSaveIcon returns a resource containing the standard document save icon for the current theme
+func DocumentSaveIcon() fyne.Resource {
+	return documentSave
 }
 
 // InfoIcon returns a resource containing the standard dialog info icon for the current theme
@@ -168,6 +219,11 @@ func FolderIcon() fyne.Resource {
 // FolderNewIcon returns a resource containing the standard folder creation icon for the current theme
 func FolderNewIcon() fyne.Resource {
 	return folderNew
+}
+
+// FolderOpenIcon returns a resource containing the standard folder open icon for the current theme
+func FolderOpenIcon() fyne.Resource {
+	return folderOpen
 }
 
 // HelpIcon returns a resource containing the standard help icon for the current theme
@@ -228,4 +284,34 @@ func NavigateBackIcon() fyne.Resource {
 // NavigateNextIcon returns a resource containing the standard forward navigation icon for the current theme
 func NavigateNextIcon() fyne.Resource {
 	return arrowForward
+}
+
+// ViewFullScreenIcon returns a resource containing the standard fullscreen icon for the current theme
+func ViewFullScreenIcon() fyne.Resource {
+	return viewFullScreen
+}
+
+// ViewRestoreIcon returns a resource containing the standard exit fullscreen icon for the current theme
+func ViewRestoreIcon() fyne.Resource {
+	return viewZoomFit
+}
+
+// ViewRefreshIcon returns a resource containing the standard refresh icon for the current theme
+func ViewRefreshIcon() fyne.Resource {
+	return viewRefresh
+}
+
+// ZoomFitIcon returns a resource containing the standard zoom fit icon for the current theme
+func ZoomFitIcon() fyne.Resource {
+	return viewZoomFit
+}
+
+// ZoomInIcon returns a resource containing the standard zoom in icon for the current theme
+func ZoomInIcon() fyne.Resource {
+	return viewZoomIn
+}
+
+// ZoomOutIcon returns a resource containing the standard zoom out icon for the current theme
+func ZoomOutIcon() fyne.Resource {
+	return viewZoomOut
 }

@@ -70,24 +70,45 @@ var icons = []struct {
 	{"ConfirmIcon", theme.ConfirmIcon()},
 	{"DeleteIcon", theme.DeleteIcon()},
 	{"SearchIcon", theme.SearchIcon()},
+	{"SearchReplaceIcon", theme.SearchReplaceIcon()},
 
 	{"CheckButtonIcon", theme.CheckButtonIcon()},
 	{"CheckButtonCheckedIcon", theme.CheckButtonCheckedIcon()},
 	{"RadioButtonIcon", theme.RadioButtonIcon()},
 	{"RadioButtonCheckedIcon", theme.RadioButtonCheckedIcon()},
 
+	{"ClearIcon", theme.ClearIcon()},
 	{"CutIcon", theme.CutIcon()},
 	{"CopyIcon", theme.CopyIcon()},
 	{"PasteIcon", theme.PasteIcon()},
+	{"RedoIcon", theme.RedoIcon()},
+	{"UndoIcon", theme.UndoIcon()},
 
 	{"InfoIcon", theme.InfoIcon()},
 	{"QuestionIcon", theme.QuestionIcon()},
 	{"WarningIcon", theme.WarningIcon()},
 
+	{"DocumentCreateIcon", theme.DocumentCreateIcon()},
+	{"DocumentPrintIcon", theme.DocumentPrintIcon()},
+	{"DocumentSaveIcon", theme.DocumentSaveIcon()},
+
 	{"FolderIcon", theme.FolderIcon()},
 	{"FolderNewIcon", theme.FolderNewIcon()},
+	{"FolderOpenIcon", theme.FolderOpenIcon()},
 	{"HomeIcon", theme.HomeIcon()},
 	{"HelpIcon", theme.HelpIcon()},
+
+	{"ViewFullScreenIcon", theme.ViewFullScreenIcon()},
+	{"ViewRestoreIcon", theme.ViewRestoreIcon()},
+	{"ZoomFitIcon", theme.ZoomFitIcon()},
+	{"ZoomInIcon", theme.ZoomInIcon()},
+	{"ZoomOutIcon", theme.ZoomOutIcon()},
+
+	{"MoveDownIcon", theme.MoveDownIcon()},
+	{"MoveUpIcon", theme.MoveUpIcon()},
+
+	{"NavigateBackIcon", theme.NavigateBackIcon()},
+	{"NavigateNextIcon", theme.NavigateNextIcon()},
 
 	{"MailAttachmentIcon", theme.MailAttachmentIcon()},
 	{"MailComposeIcon", theme.MailComposeIcon()},
@@ -95,10 +116,4 @@ var icons = []struct {
 	{"MailReplyIcon", theme.MailReplyIcon()},
 	{"MailReplyAllIcon", theme.MailReplyAllIcon()},
 	{"MailSendIcon", theme.MailSendIcon()},
-
-	{"MoveDownIcon", theme.MoveDownIcon()},
-	{"MoveUpIcon", theme.MoveUpIcon()},
-
-	{"NavigateBackIcon", theme.NavigateBackIcon()},
-	{"NavigateNextIcon", theme.NavigateNextIcon()},
 }
