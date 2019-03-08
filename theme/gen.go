@@ -100,6 +100,8 @@ func main() {
 		bundleIcon("cancel", theme, f)
 		bundleIcon("check", theme, f)
 		bundleIcon("delete", theme, f)
+		bundleIcon("search", theme, f)
+
 		bundleIcon("check-box", theme, f)
 		bundleIcon("check-box-blank", theme, f)
 		bundleIcon("radio-button", theme, f)
@@ -114,12 +116,21 @@ func main() {
 		bundleIcon("warning", theme, f)
 
 		bundleIcon("arrow-back", theme, f)
+		bundleIcon("arrow-down", theme, f)
 		bundleIcon("arrow-forward", theme, f)
+		bundleIcon("arrow-up", theme, f)
 
+		bundleIcon("folder", theme, f)
+		bundleIcon("folder-new", theme, f)
+		bundleIcon("help", theme, f)
+		bundleIcon("home", theme, f)
+
+		bundleIcon("mail-attachment", theme, f)
 		bundleIcon("mail-compose", theme, f)
 		bundleIcon("mail-forward", theme, f)
 		bundleIcon("mail-reply", theme, f)
 		bundleIcon("mail-reply_all", theme, f)
+		bundleIcon("mail-send", theme, f)
 	}
 	f.Close()
 }

@@ -38,16 +38,22 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 	return &ThemedResource{dark, light}
 }
 
-var cancel, confirm, delete, checked, unchecked, radioButton, radioButtonChecked *ThemedResource
-var contentCut, contentCopy, contentPaste *ThemedResource
-var info, question, warning *ThemedResource
-var mailCompose, mailForward, mailReply, mailReplyAll *ThemedResource
-var arrowBack, arrowForward fyne.Resource
+var (
+	cancel, confirm, delete, search                                             *ThemedResource
+	checked, unchecked, radioButton, radioButtonChecked                         *ThemedResource
+	contentCut, contentCopy, contentPaste                                       *ThemedResource
+	info, question, warning                                                     *ThemedResource
+	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
+	arrowBack, arrowDown, arrowForward, arrowUp                                 *ThemedResource
+	folder, folderNew, help, home                                               *ThemedResource
+)
 
 func init() {
 	cancel = &ThemedResource{cancelDark, cancelLight}
 	confirm = &ThemedResource{checkDark, checkLight}
 	delete = &ThemedResource{deleteDark, deleteLight}
+	search = &ThemedResource{searchDark, searchLight}
+
 	checked = &ThemedResource{checkboxDark, checkboxLight}
 	unchecked = &ThemedResource{checkboxblankDark, checkboxblankLight}
 	radioButton = &ThemedResource{radiobuttonDark, radiobuttonLight}
@@ -61,13 +67,22 @@ func init() {
 	question = &ThemedResource{questionDark, questionLight}
 	warning = &ThemedResource{warningDark, warningLight}
 
+	mailAttachment = &ThemedResource{mailattachmentDark, mailattachmentLight}
 	mailCompose = &ThemedResource{mailcomposeDark, mailcomposeLight}
 	mailForward = &ThemedResource{mailforwardDark, mailforwardLight}
 	mailReply = &ThemedResource{mailreplyDark, mailreplyLight}
 	mailReplyAll = &ThemedResource{mailreplyallDark, mailreplyallLight}
+	mailSend = &ThemedResource{mailsendDark, mailsendLight}
 
 	arrowBack = &ThemedResource{arrowbackDark, arrowbackLight}
+	arrowDown = &ThemedResource{arrowdownDark, arrowdownLight}
 	arrowForward = &ThemedResource{arrowforwardDark, arrowforwardLight}
+	arrowUp = &ThemedResource{arrowupDark, arrowupLight}
+
+	folder = &ThemedResource{folderDark, folderLight}
+	folderNew = &ThemedResource{foldernewDark, foldernewLight}
+	help = &ThemedResource{helpDark, helpLight}
+	home = &ThemedResource{homeDark, homeLight}
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -88,6 +103,11 @@ func ConfirmIcon() fyne.Resource {
 // DeleteIcon returns a resource containing the standard delete icon for the current theme
 func DeleteIcon() fyne.Resource {
 	return delete
+}
+
+// SearchIcon returns a resource containing the standard search icon for the current theme
+func SearchIcon() fyne.Resource {
+	return search
 }
 
 // CheckButtonIcon returns a resource containing the standard checkbox icon for the current theme
@@ -140,6 +160,31 @@ func WarningIcon() fyne.Resource {
 	return warning
 }
 
+// FolderIcon returns a resource containing the standard folder icon for the current theme
+func FolderIcon() fyne.Resource {
+	return folder
+}
+
+// FolderNewIcon returns a resource containing the standard folder creation icon for the current theme
+func FolderNewIcon() fyne.Resource {
+	return folderNew
+}
+
+// HelpIcon returns a resource containing the standard help icon for the current theme
+func HelpIcon() fyne.Resource {
+	return help
+}
+
+// HomeIcon returns a resource containing the standard home folder icon for the current theme
+func HomeIcon() fyne.Resource {
+	return home
+}
+
+// MailAttachmentIcon returns a resource containing the standard mail attachment icon for the current theme
+func MailAttachmentIcon() fyne.Resource {
+	return mailAttachment
+}
+
 // MailComposeIcon returns a resource containing the standard mail compose icon for the current theme
 func MailComposeIcon() fyne.Resource {
 	return mailCompose
@@ -158,6 +203,21 @@ func MailReplyIcon() fyne.Resource {
 // MailReplyAllIcon returns a resource containing the standard mail reply all icon for the current theme
 func MailReplyAllIcon() fyne.Resource {
 	return mailReplyAll
+}
+
+// MailSendIcon returns a resource containing the standard mail send icon for the current theme
+func MailSendIcon() fyne.Resource {
+	return mailSend
+}
+
+// MoveDownIcon returns a resource containing the standard down arrow icon for the current theme
+func MoveDownIcon() fyne.Resource {
+	return arrowDown
+}
+
+// MoveUpIcon returns a resource containing the standard up arrow icon for the current theme
+func MoveUpIcon() fyne.Resource {
+	return arrowUp
 }
 
 // NavigateBackIcon returns a resource containing the standard backward navigation icon for the current theme

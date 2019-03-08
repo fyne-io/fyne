@@ -69,10 +69,12 @@ var icons = []struct {
 	{"CancelIcon", theme.CancelIcon()},
 	{"ConfirmIcon", theme.ConfirmIcon()},
 	{"DeleteIcon", theme.DeleteIcon()},
+	{"SearchIcon", theme.SearchIcon()},
+
 	{"CheckButtonIcon", theme.CheckButtonIcon()},
 	{"CheckButtonCheckedIcon", theme.CheckButtonCheckedIcon()},
-	{"RadioButtonIcon", theme.CheckButtonIcon()},
-	{"RadioButtonCheckedIcon", theme.CheckButtonCheckedIcon()},
+	{"RadioButtonIcon", theme.RadioButtonIcon()},
+	{"RadioButtonCheckedIcon", theme.RadioButtonCheckedIcon()},
 
 	{"CutIcon", theme.CutIcon()},
 	{"CopyIcon", theme.CopyIcon()},
@@ -82,10 +84,20 @@ var icons = []struct {
 	{"QuestionIcon", theme.QuestionIcon()},
 	{"WarningIcon", theme.WarningIcon()},
 
+	{"FolderIcon", theme.FolderIcon()},
+	{"FolderNewIcon", theme.FolderNewIcon()},
+	{"HomeIcon", theme.HomeIcon()},
+	{"HelpIcon", theme.HelpIcon()},
+
+	{"MailAttachmentIcon", theme.MailAttachmentIcon()},
 	{"MailComposeIcon", theme.MailComposeIcon()},
 	{"MailForwardIcon", theme.MailForwardIcon()},
 	{"MailReplyIcon", theme.MailReplyIcon()},
 	{"MailReplyAllIcon", theme.MailReplyAllIcon()},
+	{"MailSendIcon", theme.MailSendIcon()},
+
+	{"MoveDownIcon", theme.MoveDownIcon()},
+	{"MoveUpIcon", theme.MoveUpIcon()},
 
 	{"NavigateBackIcon", theme.NavigateBackIcon()},
 	{"NavigateNextIcon", theme.NavigateNextIcon()},
