@@ -25,3 +25,12 @@ func TestIconThemeChangeContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.NotEqual(t, content, cancel.Content())
 }
+
+func TestNewThemedResource(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	custom := NewThemedResource(mailcomposeDark, mailcomposeLight)
+	content := custom.Content()
+
+	fyne.CurrentApp().Settings().SetTheme(LightTheme())
+	assert.NotEqual(t, content, custom.Content())
+}
