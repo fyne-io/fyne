@@ -70,6 +70,24 @@ func (r *radioRenderer) BackgroundColor() color.Color {
 }
 
 func (r *radioRenderer) Refresh() {
+	if len(r.items) < len(r.radio.Options) {
+		for i := len(r.items); i < len(r.radio.Options); i++ {
+			option := r.radio.Options[i]
+			icon := canvas.NewImageFromResource(theme.RadioButtonIcon())
+
+			text := canvas.NewText(option, theme.TextColor())
+			text.Alignment = fyne.TextAlignCenter
+
+			r.objects = append(r.objects, icon, text)
+			r.items = append(r.items, &radioRenderItem{icon, text})
+		}
+		r.Layout(r.radio.Size())
+	} else if len(r.items) > len(r.radio.Options) {
+		total := len(r.radio.Options)
+		r.items = r.items[:total]
+		r.objects = r.objects[:total*2]
+	}
+
 	for i, item := range r.items {
 		option := r.radio.Options[i]
 		item.label.Text = option
@@ -128,7 +146,7 @@ func (r *Radio) Hide() {
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (r *Radio) Tapped(event *fyne.PointEvent) {
 	index := (event.Position.Y - theme.Padding()) / r.itemHeight()
-	if index < 0 || index >= len(r.Options) { // in the padding
+	if event.Position.Y < theme.Padding() || index >= len(r.Options) { // in the padding
 		return
 	}
 	clicked := r.Options[index]

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRadioSize(t *testing.T) {
+func TestRadio_MinSize(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
 	min := radio.MinSize()
 
@@ -23,7 +23,7 @@ func TestRadioSize(t *testing.T) {
 	assert.True(t, min2.Height > min.Height)
 }
 
-func TestRadioSelected(t *testing.T) {
+func TestRadio_Selected(t *testing.T) {
 	selected := ""
 	radio := NewRadio([]string{"Hi"}, func(sel string) {
 		selected = sel
@@ -33,7 +33,7 @@ func TestRadioSelected(t *testing.T) {
 	assert.Equal(t, "Hi", selected)
 }
 
-func TestRadioUnselected(t *testing.T) {
+func TestRadio_Unselected(t *testing.T) {
 	selected := "Hi"
 	radio := NewRadio([]string{"Hi"}, func(sel string) {
 		selected = sel
@@ -44,7 +44,7 @@ func TestRadioUnselected(t *testing.T) {
 	assert.Equal(t, "", selected)
 }
 
-func TestRadioSelectedOther(t *testing.T) {
+func TestRadio_SelectedOther(t *testing.T) {
 	selected := "Hi"
 	radio := NewRadio([]string{"Hi", "Hi2"}, func(sel string) {
 		selected = sel
@@ -52,4 +52,43 @@ func TestRadioSelectedOther(t *testing.T) {
 	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())})
 
 	assert.Equal(t, "Hi2", selected)
+}
+
+func TestRadio_SelectedNone(t *testing.T) {
+	selected := ""
+	radio := NewRadio([]string{"Hi"}, func(sel string) {
+		selected = sel
+	})
+
+	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, 2)})
+	assert.Equal(t, "", selected)
+
+	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, 25)})
+	assert.Equal(t, "", selected)
+}
+
+func TestRadio_Append(t *testing.T) {
+	radio := NewRadio([]string{"Hi"}, nil)
+
+	assert.Equal(t, 1, len(radio.Options))
+	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
+
+	radio.Options = append(radio.Options, "Another")
+	Refresh(radio)
+
+	assert.Equal(t, 2, len(radio.Options))
+	assert.Equal(t, 2, len(Renderer(radio).(*radioRenderer).items))
+}
+
+func TestRadio_Remove(t *testing.T) {
+	radio := NewRadio([]string{"Hi", "Another"}, nil)
+
+	assert.Equal(t, 2, len(radio.Options))
+	assert.Equal(t, 2, len(Renderer(radio).(*radioRenderer).items))
+
+	radio.Options = radio.Options[:1]
+	Refresh(radio)
+
+	assert.Equal(t, 1, len(radio.Options))
+	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
 }
