@@ -140,10 +140,10 @@ func (d *dialog) SetDismissText(label string) {
 }
 
 // ShowCustom shows a dialog over the specified application using custom
-// content. The button will have th dismiss text set.
+// content. The button will have the dismiss text set.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
-	d := &dialog{content: content, icon: nil}
+	d := &dialog{content: content, icon: nil, parent: parent}
 
 	win := newDialogWin(title, parent)
 	win.SetOnClosed(d.closed)
