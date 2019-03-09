@@ -369,7 +369,7 @@ func (w *window) refresh(viewport *glfw.Window) {
 	w.canvas.setDirty(true)
 }
 
-func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int, int) {
+func findMouseObj(canvas *glCanvas, mouse fyne.Position, scroll bool) (fyne.CanvasObject, int, int) {
 	found := canvas.content
 	foundX, foundY := 0, 0
 	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
@@ -387,14 +387,18 @@ func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int
 			return
 		}
 
+		if scroll {
+			if _, ok := walked.(fyne.Scrollable); ok {
+				found = walked
+				foundX, foundY = pos.X, pos.Y
+			}
+			return
+		}
 		switch walked.(type) {
 		case fyne.Tappable, desktop.Mouseable:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
 		case fyne.Focusable:
-			found = walked
-			foundX, foundY = pos.X, pos.Y
-		case fyne.Scrollable:
 			found = walked
 			foundX, foundY = pos.X, pos.Y
 		}
@@ -406,7 +410,7 @@ func findMouseObj(canvas *glCanvas, mouse fyne.Position) (fyne.CanvasObject, int
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
 
-	co, _, _ := findMouseObj(w.canvas, w.mousePos)
+	co, _, _ := findMouseObj(w.canvas, w.mousePos, false)
 	cursor := defaultCursor
 	switch wid := co.(type) {
 	case *widget.Entry:
@@ -422,7 +426,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
-	co, x, y := findMouseObj(w.canvas, w.mousePos)
+	co, x, y := findMouseObj(w.canvas, w.mousePos, false)
 	ev := new(fyne.PointEvent)
 	pad := 0
 	if w.padded {
@@ -457,7 +461,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	co, _, _ := findMouseObj(w.canvas, w.mousePos)
+	co, _, _ := findMouseObj(w.canvas, w.mousePos, true)
 
 	switch wid := co.(type) {
 	case fyne.Scrollable:
