@@ -64,6 +64,27 @@ func TestScrollContainer_Resize(t *testing.T) {
 	assert.Equal(t, 0, scroll.Offset.Y)
 }
 
+func TestScrollContainer_ResizeOffset(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(80, 80))
+
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -20})
+	scroll.Resize(fyne.NewSize(80, 90))
+	assert.Equal(t, 10, scroll.Offset.Y)
+}
+
+func TestScrollContainer_ResizeExpand(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(120, 140))
+
+	assert.Equal(t, 120, rect.Size().Width)
+	assert.Equal(t, 140, rect.Size().Height)
+}
+
 func TestScrollContainerRenderer_BarSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
@@ -76,4 +97,14 @@ func TestScrollContainerRenderer_BarSize(t *testing.T) {
 	// resize so content is twice our size. Bar should therefore be half again.
 	scroll.Resize(fyne.NewSize(50, 50))
 	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 25), render.barSizeVertical())
+}
+
+func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(120, 120))
+	render := Renderer(scroll).(*scrollRenderer)
+
+	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 120), render.barSizeVertical())
 }

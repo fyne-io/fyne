@@ -50,7 +50,7 @@ func (s *scrollRenderer) barSizeVertical() fyne.Size {
 
 func (s *scrollRenderer) Layout(size fyne.Size) {
 	c := s.scroll.Content
-	c.Resize(c.MinSize())
+	c.Resize(c.MinSize().Union(size))
 
 	s.vertBar.Resize(fyne.NewSize(theme.ScrollBarSize(), size.Height))
 	s.vertBar.Move(fyne.NewPos(size.Width-theme.ScrollBarSize(), 0))
