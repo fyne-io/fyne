@@ -97,7 +97,6 @@ func (d *gLDriver) runGL() {
 				}
 				viewport.MakeContextCurrent()
 				gl.UseProgram(canvas.program)
-				win.(*window).fitContent()
 
 				view := win.(*window)
 				updateGLContext(view)
