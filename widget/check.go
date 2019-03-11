@@ -116,6 +116,10 @@ func (c *Check) Hide() {
 	c.hide(c)
 }
 
+func (c *Check) Destroyed() {
+	c.destroyed(c)
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
 	c.SetChecked(!c.Checked)

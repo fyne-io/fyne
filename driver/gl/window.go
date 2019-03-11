@@ -6,6 +6,7 @@ import (
 	_ "image/png" // for the icon
 	"log"
 	"os"
+	"fmt"
 	"runtime"
 	"strconv"
 
@@ -328,6 +329,10 @@ func (w *window) Canvas() fyne.Canvas {
 
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
+
+	// destroy all elements inside the window
+	fmt.Println("in window.closed(), calling content.Destroyed()")
+	w.canvas.content.Destroyed()
 
 	// trigger callbacks
 	if w.onClosed != nil {

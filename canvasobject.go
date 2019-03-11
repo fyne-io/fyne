@@ -19,6 +19,9 @@ type CanvasObject interface {
 	Visible() bool
 	Show()
 	Hide()
+
+	// life events
+	Destroyed()
 }
 
 // Themeable indicates that the associated CanvasObject responds to theme

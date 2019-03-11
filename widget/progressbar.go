@@ -107,6 +107,11 @@ func (p *ProgressBar) Hide() {
 	p.hide(p)
 }
 
+func (p *ProgressBar) Destroyed() {
+	p.hide(p)
+	p.destroyed(p)
+}
+
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {

@@ -132,6 +132,10 @@ func (s *ScrollContainer) Hide() {
 	s.hide(s)
 }
 
+func (s *ScrollContainer) Destroyed() {
+	s.destroyed(s)
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.ScrollBarColor())

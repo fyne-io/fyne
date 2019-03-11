@@ -46,6 +46,10 @@ func (b *Box) Hide() {
 	b.hide(b)
 }
 
+func (b *Box) Destroyed() {
+	b.destroyed(b)
+}
+
 // ApplyTheme updates this box to match the current theme
 func (b *Box) ApplyTheme() {
 	b.background = theme.BackgroundColor()

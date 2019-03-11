@@ -87,6 +87,10 @@ func (i *Icon) Hide() {
 	i.hide(i)
 }
 
+func (i *Icon) Destroyed() {
+	i.destroyed(i)
+}
+
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res

@@ -44,6 +44,11 @@ func (g *Group) Hide() {
 	g.hide(g)
 }
 
+func (g *Group) Destroyed() {
+	g.destroyed(g)
+}
+
+
 // Prepend inserts a new CanvasObject at the top of the group
 func (g *Group) Prepend(object fyne.CanvasObject) {
 	g.box.Prepend(object)

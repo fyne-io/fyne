@@ -64,6 +64,11 @@ func (l *Circle) Hide() {
 	Refresh(l)
 }
 
+// Destroyed will free resources
+func (l *Circle) Destroyed() {
+	l.Hidden = true
+}
+
 // NewCircle returns a new Circle instance
 func NewCircle(color color.Color) *Circle {
 	return &Circle{

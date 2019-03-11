@@ -52,6 +52,10 @@ func (f *Form) Hide() {
 	f.hide(f)
 }
 
+func (f *Form) Destroyed() {
+	f.destroyed(f)
+}
+
 func (f *Form) createLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }

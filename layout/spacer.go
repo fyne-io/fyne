@@ -69,6 +69,11 @@ func (s *Spacer) Hide() {
 	s.hidden = true
 }
 
+// Destroyed removes this Spacer from layout calculations
+func (s *Spacer) Destroyed() {
+	s.hidden = true
+}
+
 // NewSpacer returns a spacer object which can fill vertical and horizontal
 // space. This is primarily used with a box layout.
 func NewSpacer() fyne.CanvasObject {

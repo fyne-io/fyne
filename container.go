@@ -81,6 +81,13 @@ func (c *Container) Hide() {
 	}
 }
 
+func (c *Container) Destroyed() {
+	for _, child := range c.Objects {
+		child.Destroyed()
+	}
+	c = nil
+}
+
 // AddObject adds another CanvasObject to the set this Container holds.
 func (c *Container) AddObject(o CanvasObject) {
 	c.Objects = append(c.Objects, o)

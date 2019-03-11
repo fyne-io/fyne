@@ -169,6 +169,11 @@ func (p *ProgressBarInfinite) Hide() {
 	p.hide(p)
 }
 
+func (p *ProgressBarInfinite) Destroyed() {
+	p.Stop()
+	p.destroyed(p)
+}
+
 // Start the infinite progress bar background thread to update it continuously
 func (p *ProgressBarInfinite) Start() {
 	Renderer(p).(*infProgressRenderer).start()

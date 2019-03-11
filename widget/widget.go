@@ -2,6 +2,7 @@
 package widget // import "fyne.io/fyne/widget"
 
 import (
+"fmt"
 	"sync"
 
 	"fyne.io/fyne"
@@ -68,6 +69,17 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 	}
 
 	canvas.Refresh(parent)
+}
+
+func (w *baseWidget) destroyed(parent fyne.Widget) {
+	fmt.Println("in baseWidget.destroyed()")
+	for _, child := range Renderer(parent).Objects() {
+		child.Destroyed()
+	}
+	// set renderer and widget to be garbage collected
+	renderers.Delete(parent)
+	parent = nil
+	w = nil
 }
 
 var renderers sync.Map

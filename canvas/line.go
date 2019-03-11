@@ -67,6 +67,11 @@ func (l *Line) Hide() {
 	Refresh(l)
 }
 
+// Destroyed will free resources
+func (l *Line) Destroyed() {
+	l.Hidden = true
+}
+
 // NewLine returns a new Line instance
 func NewLine(color color.Color) *Line {
 	return &Line{

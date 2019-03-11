@@ -143,6 +143,10 @@ func (r *Radio) Hide() {
 	r.hide(r)
 }
 
+func (r *Radio) Destroyed() {
+	r.destroyed(r)
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (r *Radio) Tapped(event *fyne.PointEvent) {
 	index := (event.Position.Y - theme.Padding()) / r.itemHeight()

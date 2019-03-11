@@ -155,6 +155,10 @@ func (e *Entry) Hide() {
 	e.hide(e)
 }
 
+func (e *Entry) Destroyed() {
+	e.destroyed(e)
+}
+
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
 	e.textProvider().SetText(text)

@@ -56,6 +56,10 @@ func (t *TabContainer) Hide() {
 	t.hide(t)
 }
 
+func (t *TabContainer) Destroyed() {
+	t.destroyed(t)
+}
+
 // SelectTab sets the specified TabItem to be selected and it's content visible.
 func (t *TabContainer) SelectTab(item *TabItem) {
 	for i, child := range t.Items {

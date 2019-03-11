@@ -144,6 +144,10 @@ func (b *Button) Hide() {
 	b.hide(b)
 }
 
+func (b *Button) Destroyed() {
+	b.destroyed(b)
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
 	if b.OnTapped != nil {

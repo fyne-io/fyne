@@ -95,6 +95,10 @@ func (t *Toolbar) Hide() {
 	t.hide(t)
 }
 
+func (t *Toolbar) Destroyed() {
+	t.destroyed(t)
+}
+
 func (t *Toolbar) append(item ToolbarItem) {
 	if t.box == nil { // TODO fix smell
 		Renderer(t)
