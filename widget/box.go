@@ -137,3 +137,7 @@ func (b *boxRenderer) Refresh() {
 
 	canvas.Refresh(b.box)
 }
+
+func (b *boxRenderer) Destroy() {
+	b.box = nil
+}

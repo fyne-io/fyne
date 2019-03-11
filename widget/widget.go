@@ -2,7 +2,7 @@
 package widget // import "fyne.io/fyne/widget"
 
 import (
-"fmt"
+	"fmt"
 	"sync"
 
 	"fyne.io/fyne"
@@ -77,6 +77,7 @@ func (w *baseWidget) destroyed(parent fyne.Widget) {
 		child.Destroyed()
 	}
 	// set renderer and widget to be garbage collected
+	Renderer(parent).Destroy()
 	renderers.Delete(parent)
 	parent = nil
 	w = nil

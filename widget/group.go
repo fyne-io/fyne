@@ -48,7 +48,6 @@ func (g *Group) Destroyed() {
 	g.destroyed(g)
 }
 
-
 // Prepend inserts a new CanvasObject at the top of the group
 func (g *Group) Prepend(object fyne.CanvasObject) {
 	g.box.Prepend(object)
@@ -143,4 +142,11 @@ func (g *groupRenderer) Refresh() {
 	g.Layout(g.group.Size())
 
 	canvas.Refresh(g.group)
+}
+
+func (g *groupRenderer) Destroy() {
+	g.label = nil
+	g.line = nil
+	g.labelBg = nil
+	g.group = nil
 }

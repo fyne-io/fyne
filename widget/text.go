@@ -276,6 +276,11 @@ func (r *textRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
+func (r *textRenderer) Destroy() {
+	r.texts = nil
+	r.provider = nil
+}
+
 // lineSize returns the rendered size for the line specified by col and row
 func (r *textRenderer) lineSize(col, row int) (size fyne.Size) {
 	text := r.provider

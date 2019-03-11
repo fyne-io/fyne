@@ -79,6 +79,11 @@ func (s *scrollRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
+func (s *scrollRenderer) Destroy() {
+	s.vertBar = nil
+	s.scroll = nil
+}
+
 // ScrollContainer defines a container that is smaller than the Content.
 // The Offset is used to determine the position of the child widgets within the container.
 type ScrollContainer struct {

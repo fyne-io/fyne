@@ -53,6 +53,10 @@ func (i *iconRenderer) Refresh() {
 	canvas.Refresh(i.image)
 }
 
+func (i *iconRenderer) Destroy() {
+	i.image = nil
+}
+
 // Icon widget is a basic image component that load's its resource to match the theme.
 type Icon struct {
 	baseWidget

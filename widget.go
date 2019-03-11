@@ -22,4 +22,6 @@ type WidgetRenderer interface {
 	ApplyTheme()
 	BackgroundColor() color.Color
 	Objects() []CanvasObject
+
+	Destroy()
 }

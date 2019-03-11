@@ -2,11 +2,11 @@ package gl
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	_ "image/png" // for the icon
 	"log"
 	"os"
-	"fmt"
 	"runtime"
 	"strconv"
 

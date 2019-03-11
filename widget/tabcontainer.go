@@ -210,3 +210,9 @@ func (t *tabContainerRenderer) Refresh() {
 		Renderer(button.(*Button)).Refresh()
 	}
 }
+
+func (t *tabContainerRenderer) Destroy() {
+	t.tabBar = nil
+	t.line = nil
+	t.container = nil
+}
