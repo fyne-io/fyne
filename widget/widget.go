@@ -2,7 +2,6 @@
 package widget // import "fyne.io/fyne/widget"
 
 import (
-	"fmt"
 	"sync"
 
 	"fyne.io/fyne"
@@ -72,7 +71,6 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 }
 
 func (w *baseWidget) destroyed(parent fyne.Widget) {
-	fmt.Println("in baseWidget.destroyed()")
 	for _, child := range Renderer(parent).Objects() {
 		child.Destroyed()
 	}
