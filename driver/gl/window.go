@@ -351,7 +351,15 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	newHeight = int(float32(newHeight) / ratio)
 
 	w.canvas.SetScale(newScale)
-	viewport.SetSize(newWidth, newHeight)
+	runOnMainAsync(func() {
+		if w.fixedSize {
+			w.viewport.SetSizeLimits(newWidth, newHeight, newWidth, newHeight)
+		} else {
+			w.viewport.SetSizeLimits(newWidth, newHeight, glfw.DontCare, glfw.DontCare)
+		}
+
+		viewport.SetSize(newWidth, newHeight)
+	})
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
