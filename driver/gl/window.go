@@ -775,7 +775,11 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 		glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
-		win, _ := glfw.CreateWindow(10, 10, title, nil, nil)
+		win, err := glfw.CreateWindow(10, 10, title, nil, nil)
+		if err != nil {
+			log.Println("Window creation error", err)
+			return
+		}
 		win.MakeContextCurrent()
 
 		iconRes := fyne.CurrentApp().Icon()
