@@ -33,8 +33,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 	c.label.Move(fyne.NewPos(theme.IconInlineSize()+theme.Padding(), 0))
 
 	c.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	c.icon.Move(fyne.NewPos(
-		(size.Width-theme.IconInlineSize()-c.label.MinSize().Width)/2,
+	c.icon.Move(fyne.NewPos(0,
 		(size.Height-theme.IconInlineSize())/2))
 }
 
@@ -130,7 +129,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
 	text := canvas.NewText(c.Text, theme.TextColor())
-	text.Alignment = fyne.TextAlignCenter
+	text.Alignment = fyne.TextAlignLeading
 
 	return &checkRenderer{icon, text, []fyne.CanvasObject{icon, text}, c}
 }

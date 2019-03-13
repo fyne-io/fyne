@@ -48,8 +48,7 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 		item.label.Move(fyne.NewPos(theme.IconInlineSize()+theme.Padding(), y))
 
 		item.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		item.icon.Move(fyne.NewPos(
-			(size.Width-theme.IconInlineSize()-item.label.MinSize().Width)/2,
+		item.icon.Move(fyne.NewPos(0,
 			y+(labelSize.Height-theme.IconInlineSize())/2))
 
 		y += itemHeight
@@ -176,7 +175,7 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 		icon := canvas.NewImageFromResource(theme.RadioButtonIcon())
 
 		text := canvas.NewText(option, theme.TextColor())
-		text.Alignment = fyne.TextAlignCenter
+		text.Alignment = fyne.TextAlignLeading
 
 		objects = append(objects, icon, text)
 		items = append(items, &radioRenderItem{icon, text})
