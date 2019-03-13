@@ -140,7 +140,7 @@ func (c *glCanvas) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 
 	d := font.Drawer{}
 	d.Dst = img
-	d.Src = &image.Uniform{text.Color}
+	d.Src = &image.Uniform{C: text.Color}
 	d.Face = face
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
@@ -254,7 +254,7 @@ func (c *glCanvas) newGlRasterTexture(obj fyne.CanvasObject) uint32 {
 
 func (c *glCanvas) imgToTexture(img image.Image) uint32 {
 	switch i := img.(type) {
-	case (*image.Uniform):
+	case *image.Uniform:
 		texture := newTexture()
 		r, g, b, a := i.RGBA()
 		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
@@ -262,7 +262,7 @@ func (c *glCanvas) imgToTexture(img image.Image) uint32 {
 		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
 			gl.UNSIGNED_BYTE, gl.Ptr(data))
 		return texture
-	case (*image.RGBA):
+	case *image.RGBA:
 		if len(i.Pix) == 0 { // image is empty
 			return 0
 		}
