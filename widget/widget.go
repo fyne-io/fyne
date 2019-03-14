@@ -83,6 +83,14 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 	return renderer.(fyne.WidgetRenderer)
 }
 
+// DestroyRenderer frees a render implementation for a widget.
+// This is typically for internal use only.
+func DestroyRenderer(wid fyne.Widget) {
+	Renderer(wid).Destroy()
+
+	renderers.Delete(wid)
+}
+
 // Refresh instructs the containing canvas to refresh the specified widget.
 func Refresh(wid fyne.Widget) {
 	render := Renderer(wid)

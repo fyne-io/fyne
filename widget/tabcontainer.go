@@ -206,3 +206,6 @@ func (t *tabContainerRenderer) Refresh() {
 		Renderer(button.(*Button)).Refresh()
 	}
 }
+
+func (t *tabContainerRenderer) Destroy() {
+}

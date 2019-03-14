@@ -97,6 +97,9 @@ func (b *buttonRenderer) Objects() []fyne.CanvasObject {
 	return b.objects
 }
 
+func (b *buttonRenderer) Destroy() {
+}
+
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	baseWidget

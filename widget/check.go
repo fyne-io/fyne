@@ -64,6 +64,9 @@ func (c *checkRenderer) Objects() []fyne.CanvasObject {
 	return c.objects
 }
 
+func (c *checkRenderer) Destroy() {
+}
+
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
 type Check struct {
 	baseWidget
