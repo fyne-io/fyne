@@ -304,10 +304,10 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 const (
 	vertexShaderSource = `
-    #version 150
-    in vec3 vert;
-    in vec2 vertTexCoord;
-    out vec2 fragTexCoord;
+    #version 110
+    attribute vec3 vert;
+    attribute vec2 vertTexCoord;
+    varying vec2 fragTexCoord;
 
     void main() {
         fragTexCoord = vertTexCoord;
@@ -317,14 +317,13 @@ const (
 ` + "\x00"
 
 	fragmentShaderSource = `
-    #version 150
+    #version 110
     uniform sampler2D tex;
 
-    in vec2 fragTexCoord;
-    out vec4 frag_colour;
+    varying vec2 fragTexCoord;
 
     void main() {
-        frag_colour = texture(tex, fragTexCoord);
+        gl_FragColor = texture2D(tex, fragTexCoord);
     }
 ` + "\x00"
 )
