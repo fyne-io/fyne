@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
-	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -245,7 +244,7 @@ func (w *window) detectScale() float32 {
 	if env != "" {
 		scale, err := strconv.ParseFloat(env, 32)
 		if err != nil {
-			fyne.Error("Error reading scale", err)
+			fyne.LogError("Error reading scale", err)
 		} else if scale != 0 {
 			return float32(scale)
 		}
@@ -777,7 +776,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 		win, err := glfw.CreateWindow(10, 10, title, nil, nil)
 		if err != nil {
-			fyne.Error("window creation error", err)
+			fyne.LogError("window creation error", err)
 			return
 		}
 		win.MakeContextCurrent()
