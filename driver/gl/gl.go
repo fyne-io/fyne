@@ -8,7 +8,6 @@ import (
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -178,7 +177,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 				icon, err := oksvg.ReadIconStream(file)
 				if err != nil {
-					log.Println("SVG Load error:", err)
+					fyne.LogError("SVG Load error:", err)
 
 					return 0
 				}
@@ -207,7 +206,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		pixels, _, err := image.Decode(file)
 
 		if err != nil {
-			log.Println("image err", err)
+			fyne.LogError("image err", err)
 
 			return 0
 		}

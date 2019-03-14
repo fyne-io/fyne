@@ -245,7 +245,7 @@ func (w *window) detectScale() float32 {
 	if env != "" {
 		scale, err := strconv.ParseFloat(env, 32)
 		if err != nil {
-			log.Println("Error reading scale:", err)
+			fyne.Error("Error reading scale", err)
 		} else if scale != 0 {
 			return float32(scale)
 		}
@@ -777,7 +777,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 		win, err := glfw.CreateWindow(10, 10, title, nil, nil)
 		if err != nil {
-			log.Println("Window creation error", err)
+			fyne.Error("window creation error", err)
 			return
 		}
 		win.MakeContextCurrent()

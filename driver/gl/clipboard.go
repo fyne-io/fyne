@@ -1,8 +1,7 @@
 package gl
 
 import (
-	"log"
-
+	"fyne.io/fyne"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -15,7 +14,7 @@ type clipboard struct {
 func (c *clipboard) Content() string {
 	content, err := c.window.GetClipboardString()
 	if err != nil {
-		log.Printf("unable to get clipboard string: %v", err)
+		fyne.LogError("unable to get clipboard string", err)
 		return ""
 	}
 	return content

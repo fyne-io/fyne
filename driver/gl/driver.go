@@ -3,7 +3,6 @@
 package gl
 
 import (
-	"log"
 	"sync"
 
 	"fyne.io/fyne"
@@ -30,7 +29,7 @@ func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 func loadFont(data fyne.Resource) *truetype.Font {
 	loaded, err := truetype.Parse(data.Content())
 	if err != nil {
-		log.Println("Font load error", err)
+		fyne.LogError("font load error", err)
 	}
 
 	return loaded

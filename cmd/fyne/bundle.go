@@ -22,7 +22,7 @@ type bundler struct {
 func writeResource(file, name string) {
 	bytes, err := ioutil.ReadFile(file)
 	if err != nil {
-		fmt.Println("Unable to load file " + file)
+		fyne.LogError("Unable to load file "+file, err)
 		return
 	}
 
@@ -66,7 +66,7 @@ func doBundle(name, pkg, prefix string, noheader bool, filepath string) {
 func dirBundle(pkg, prefix string, noheader bool, dirpath string) {
 	files, err := ioutil.ReadDir(dirpath)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error reading specified directory", err)
+		fyne.LogError("Error reading specified directory", err)
 		return
 	}
 
@@ -97,13 +97,13 @@ func (b *bundler) printHelp(indent string) {
 
 func (b *bundler) run(args []string) {
 	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "Missing required file or directory parameter after flags")
+		fyne.LogError("Missing required file or directory parameter after flags", nil)
 		return
 	}
 
 	stat, err := os.Stat(args[0])
 	if os.IsNotExist(err) {
-		fmt.Fprintln(os.Stderr, "Specified file could not be found")
+		fyne.LogError("Specified file could not be found", err)
 	} else if stat.IsDir() {
 		dirBundle(b.pkg, b.prefix, b.noheader, args[0])
 	} else {

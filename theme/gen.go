@@ -23,14 +23,14 @@ func formatVariable(name string) string {
 func bundleFile(name string, filepath string, f *os.File) {
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		fmt.Println("Unable to load file " + filepath)
+		fyne.LogError("Unable to load file "+filepath, err)
 		return
 	}
 	res := fyne.NewStaticResource(path.Base(filepath), bytes)
 
 	_, err = f.WriteString(fmt.Sprintf("var %s = %#v\n", formatVariable(name), res))
 	if err != nil {
-		fmt.Println("Unable to write to bundled file")
+		fyne.LogError("Unable to write to bundled file", err)
 	}
 }
 
@@ -62,13 +62,13 @@ func openFile(filename string) *os.File {
 	_, dirname, _, _ := runtime.Caller(0)
 	f, err := os.Create(path.Join(path.Dir(dirname), filename))
 	if err != nil {
-		fmt.Println("Unable to open file " + filename)
+		fyne.LogError("Unable to open file "+filename, err)
 		return nil
 	}
 
 	_, err = f.WriteString("package theme\n\nimport \"fyne.io/fyne\"\n\n")
 	if err != nil {
-		fmt.Println("Unable to write file " + filename)
+		fyne.LogError("Unable to write file "+filename, err)
 		return nil
 	}
 
