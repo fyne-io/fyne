@@ -139,3 +139,6 @@ func (g *groupRenderer) Refresh() {
 
 	canvas.Refresh(g.group)
 }
+
+func (g *groupRenderer) Destroy() {
+}

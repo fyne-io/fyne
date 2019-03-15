@@ -73,6 +73,9 @@ func (p *progressRenderer) Objects() []fyne.CanvasObject {
 	return p.objects
 }
 
+func (p *progressRenderer) Destroy() {
+}
+
 // ProgressBar widget creates a horizontal panel that indicates progress
 type ProgressBar struct {
 	baseWidget

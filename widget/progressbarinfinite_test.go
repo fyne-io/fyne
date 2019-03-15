@@ -14,6 +14,21 @@ func TestProgressBarInfinite_Creation(t *testing.T) {
 	assert.True(t, bar.Running())
 }
 
+func TestProgressBarInfinite_Destroy(t *testing.T) {
+	bar := NewProgressBarInfinite()
+	_, found := renderers.Load(bar)
+	assert.True(t, found)
+	rend := Renderer(bar).(*infProgressRenderer)
+	assert.NotNil(t, rend.ticker)
+
+	// check that it stopped
+	DestroyRenderer(bar)
+	assert.Nil(t, rend.ticker)
+	// and that the cache was removed
+	_, found = renderers.Load(bar)
+	assert.False(t, found)
+}
+
 func TestProgressBarInfinite_Reshown(t *testing.T) {
 	bar := NewProgressBarInfinite()
 

@@ -105,6 +105,9 @@ func (r *radioRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
+func (r *radioRenderer) Destroy() {
+}
+
 // Radio widget has a list of text labels and radio check icons next to each.
 // Changing the selection (only one can be selected) will trigger the changed func.
 type Radio struct {

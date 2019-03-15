@@ -106,6 +106,9 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 	return e.objects
 }
 
+func (e *entryRenderer) Destroy() {
+}
+
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	baseWidget

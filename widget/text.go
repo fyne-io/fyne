@@ -291,6 +291,9 @@ func (r *textRenderer) lineSize(col, row int) (size fyne.Size) {
 	return lineCopy.MinSize()
 }
 
+func (r *textRenderer) Destroy() {
+}
+
 func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	t := canvas.NewText(text, color.Black)
 	t.TextSize = size

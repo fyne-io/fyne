@@ -329,6 +329,13 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
+	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), func(obj fyne.CanvasObject, _ fyne.Position) {
+		switch co := obj.(type) {
+		case fyne.Widget:
+			widget.DestroyRenderer(co)
+		}
+	})
+
 	// trigger callbacks
 	if w.onClosed != nil {
 		w.onClosed()

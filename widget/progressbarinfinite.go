@@ -134,6 +134,10 @@ func (p *infProgressRenderer) infiniteProgressLoop() {
 	}
 }
 
+func (p *infProgressRenderer) Destroy() {
+	p.stop()
+}
+
 // ProgressBarInfinite widget creates a horizontal panel that indicates waiting indefinitely
 // An infinite progress bar loops 0% -> 100% repeatedly until Stop() is called
 type ProgressBarInfinite struct {
