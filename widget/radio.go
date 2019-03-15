@@ -75,7 +75,7 @@ func (r *radioRenderer) Refresh() {
 			icon := canvas.NewImageFromResource(theme.RadioButtonIcon())
 
 			text := canvas.NewText(option, theme.TextColor())
-			text.Alignment = fyne.TextAlignCenter
+			text.Alignment = fyne.TextAlignLeading
 
 			r.objects = append(r.objects, icon, text)
 			r.items = append(r.items, &radioRenderItem{icon, text})
