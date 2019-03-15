@@ -125,7 +125,10 @@ func (w *window) sizeOnScreen() (int, int) {
 
 func (w *window) RequestFocus() {
 	runOnMainAsync(func() {
-		w.viewport.Focus()
+		err := w.viewport.Focus()
+		if err != nil {
+			fyne.LogError("Error requesting focus", err)
+		}
 	})
 }
 
@@ -762,7 +765,12 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	runOnMain(func() {
 		master := len(d.windows) == 0
 		if master {
-			glfw.Init()
+			err := glfw.Init()
+			if err != nil {
+				fyne.LogError("failed to initialise GLFW", err)
+				return
+			}
+
 			initCursors()
 		}
 
@@ -788,7 +796,12 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		}
 
 		if master {
-			gl.Init()
+			err := gl.Init()
+			if err != nil {
+				fyne.LogError("failed to initialise OpenGL", err)
+				return
+			}
+
 			gl.Disable(gl.DEPTH_TEST)
 		}
 		ret = &window{viewport: win, title: title}

@@ -21,7 +21,7 @@ func (c *compositeFace) containsGlyph(font *truetype.Font, r rune) bool {
 
 func (c *compositeFace) Close() error {
 	if c.chosen != nil {
-		c.chosen.Close()
+		_ = c.chosen.Close()
 	}
 
 	return c.fallback.Close()
@@ -115,7 +115,12 @@ func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 func clearFontCache() {
 	for _, item := range fontCache {
 		for _, face := range item.faces {
-			face.Close()
+			err := face.Close()
+
+			if err != nil {
+				fyne.LogError("failed to close font face", err)
+				return
+			}
 		}
 	}
 
