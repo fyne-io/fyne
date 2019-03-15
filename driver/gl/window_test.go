@@ -50,7 +50,7 @@ func TestWindow_PixelSize(t *testing.T) {
 	w.SetContent(fyne.NewContainer(rect))
 	w.Canvas().Refresh(w.Content())
 
-	winW, winH := w.(*window).sizeOnScreen()
+	winW, winH := w.(*window).minSizeOnScreen()
 	assert.Equal(t, scaleInt(w.Canvas(), 100), winW)
 	assert.Equal(t, scaleInt(w.Canvas(), 100), winH)
 }
@@ -61,7 +61,7 @@ func TestWindow_Padded(t *testing.T) {
 	w.Canvas().SetScale(1.0)
 	w.SetContent(content)
 
-	width, _ := w.(*window).sizeOnScreen()
+	width, _ := w.(*window).minSizeOnScreen()
 	assert.Equal(t, theme.Padding()*2+content.MinSize().Width, width)
 	assert.Equal(t, theme.Padding(), content.Position().X)
 }
@@ -74,12 +74,12 @@ func TestWindow_SetPadded(t *testing.T) {
 	w.Canvas().SetScale(1.0)
 	w.SetContent(content)
 
-	width, _ := w.(*window).sizeOnScreen()
+	width, _ := w.(*window).minSizeOnScreen()
 	assert.Equal(t, content.MinSize().Width, width)
 	assert.Equal(t, 0, content.Position().X)
 
 	w.SetPadded(true)
-	width, _ = w.(*window).sizeOnScreen()
+	width, _ = w.(*window).minSizeOnScreen()
 	assert.Equal(t, theme.Padding()*2+content.MinSize().Width, width)
 	assert.Equal(t, theme.Padding(), content.Position().X)
 }

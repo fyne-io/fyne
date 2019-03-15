@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
@@ -49,7 +50,8 @@ type window struct {
 	mousePos fyne.Position
 	onClosed func()
 
-	xpos, ypos int
+	xpos, ypos   int
+	ignoreResize bool
 }
 
 func (w *window) Title() string {
@@ -88,7 +90,7 @@ func (w *window) SetFullScreen(full bool) {
 }
 
 func (w *window) CenterOnScreen() {
-	viewWidth, viewHeight := w.sizeOnScreen()
+	viewWidth, viewHeight := w.minSizeOnScreen()
 
 	runOnMainAsync(func() {
 		// get window dimensions in pixels
@@ -107,8 +109,8 @@ func (w *window) CenterOnScreen() {
 	})
 }
 
-// sizeOnScreen gets the size of a window content in screen pixels
-func (w *window) sizeOnScreen() (int, int) {
+// minSizeOnScreen gets the size of a window content in screen pixels
+func (w *window) minSizeOnScreen() (int, int) {
 	// get current size of content inside the window
 	winContentSize := w.canvas.content.MinSize()
 	// add padding, if required
@@ -182,19 +184,17 @@ func (w *window) fitContent() {
 		return
 	}
 
-	runOnMainAsync(func() {
-		winWidth, winHeight := w.sizeOnScreen()
-		if w.fixedSize {
-			w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
-		} else {
-			w.viewport.SetSizeLimits(winWidth, winHeight, glfw.DontCare, glfw.DontCare)
-		}
+	winWidth, winHeight := w.minSizeOnScreen()
+	if w.fixedSize {
+		w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
+	} else {
+		w.viewport.SetSizeLimits(winWidth, winHeight, glfw.DontCare, glfw.DontCare)
+	}
 
-		width, height := w.viewport.GetSize()
-		if width < winWidth || height < winHeight {
-			w.viewport.SetSize(fyne.Max(width, winWidth), fyne.Max(height, winHeight))
-		}
-	})
+	width, height := w.viewport.GetSize()
+	if width < winWidth || height < winHeight {
+		w.viewport.SetSize(fyne.Max(width, winWidth), fyne.Max(height, winHeight))
+	}
 }
 
 func (w *window) SetOnClosed(closed func()) {
@@ -345,24 +345,41 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 		return
 	}
 
-	ratio := scale / newScale
-	newWidth, newHeight := viewport.GetSize()
-	newWidth = int(float32(newWidth) / ratio)
-	newHeight = int(float32(newHeight) / ratio)
-
+	contentSize := w.canvas.content.Size()
 	w.canvas.SetScale(newScale)
-	runOnMainAsync(func() {
-		if w.fixedSize {
-			w.viewport.SetSizeLimits(newWidth, newHeight, newWidth, newHeight)
-		} else {
-			w.viewport.SetSizeLimits(newWidth, newHeight, glfw.DontCare, glfw.DontCare)
-		}
 
-		viewport.SetSize(newWidth, newHeight)
-	})
+	// this can trigger resize events that we need to ignore
+	w.ignoreResize = true
+	w.fitContent()
+	w.canvas.content.Resize(contentSize)
+	w.canvas.setDirty(true)
+
+	if w.Padded() {
+		pad := theme.Padding() * 2
+		contentSize = fyne.NewSize(contentSize.Width+pad, contentSize.Height+pad)
+	}
+
+	newWidth, newHeight := scaleInt(w.canvas, contentSize.Width),
+		scaleInt(w.canvas, contentSize.Height)
+	w.viewport.SetSize(newWidth, newHeight)
+
+	go func() {
+		// attempt the resizing until it works... (Gnome and others don't support resize whist moving)
+		for ww, wh := viewport.GetSize(); ww != newWidth || wh != newHeight; {
+			time.Sleep(time.Second / 10)
+			runOnMain(func() {
+				w.viewport.SetSize(newWidth, newHeight)
+				ww, wh = viewport.GetSize()
+			})
+		}
+		w.ignoreResize = false
+	}()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
+	if w.ignoreResize {
+		return
+	}
 	w.resize(fyne.NewSize(unscaleInt(w.canvas, width), unscaleInt(w.canvas, height)))
 }
 
