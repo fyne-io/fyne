@@ -696,11 +696,12 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 			shortcut = &fyne.ShortcutCut{
 				Clipboard: w.Clipboard(),
 			}
-		default:
-			shortcut = &desktop.CustomShortcut{
-				KeyName:  keyName,
-				Modifier: keyDesktopModifier,
-			}
+		}
+	}
+	if keyDesktopModifier != 0 {
+		shortcut = &desktop.CustomShortcut{
+			KeyName:  keyName,
+			Modifier: keyDesktopModifier,
 		}
 	}
 
