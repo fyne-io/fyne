@@ -48,6 +48,10 @@ func (app *fyneApp) Run() {
 }
 
 func (app *fyneApp) Quit() {
+	for _, window := range app.driver.AllWindows() {
+		window.Close()
+	}
+
 	app.driver.Quit()
 	app.running = false
 }
