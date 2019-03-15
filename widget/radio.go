@@ -183,8 +183,9 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 
 	return &radioRenderer{items, objects, r}
 }
+
 func (r *Radio) itemHeight() int {
-	return (r.MinSize().Height / len(r.Options))
+	return r.MinSize().Height / len(r.Options)
 }
 
 // NewRadio creates a new radio widget with the set options and change handler

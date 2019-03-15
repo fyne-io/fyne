@@ -15,7 +15,7 @@ type rasterInfo struct {
 	expires time.Time
 }
 
-var cacheDuration = (time.Minute * 5)
+var cacheDuration = time.Minute * 5
 var rasters = make(map[fyne.Resource]*rasterInfo)
 var rasterMutex sync.RWMutex
 var janitorOnce sync.Once
@@ -63,7 +63,10 @@ func svgCacheGet(res fyne.Resource, w int, h int) *image.RGBA {
 func svgCachePut(res fyne.Resource, pix *image.RGBA, w int, h int) {
 	rasterMutex.Lock()
 	defer rasterMutex.Unlock()
-	defer recover()
+	defer func() {
+		recover()
+	}()
+
 	rasters[res] = &rasterInfo{
 		pix:     pix,
 		w:       w,
