@@ -16,6 +16,8 @@ github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526 h1:NfuKjkj/Xc2z1
 github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526/go.mod h1:UQkeMHVoNcyXYq9otUupF7/h/2tmHlhrS2zw7ZVvUqc=
 github.com/jackmordaunt/icns v1.0.0 h1:RYSxplerf/l/DUd09AHtITwckkv/mqjVv4DjYdPmAMQ=
 github.com/jackmordaunt/icns v1.0.0/go.mod h1:7TTQVEuGzVVfOPPlLNHJIkzA6CoV7aH1Dv9dW351oOo=
+github.com/josephspurrier/goversioninfo v0.0.0-20190122232203-2e127a11672c h1:T48SWrqbD1AAXY1ktt23P2diudMWOX4R+FID7Rqjhts=
+github.com/josephspurrier/goversioninfo v0.0.0-20190122232203-2e127a11672c/go.mod h1:eJTEwMjXb7kZ633hO3Ln9mBUCOjX2+FlTljvpl9SYdE=
 github.com/josephspurrier/goversioninfo v0.0.0-20190209210621-63e6d1acd3dd h1:KikNiFwUO3QLyeKyN4k9yBH9Pcu/gU/yficWi61cJIw=
 github.com/josephspurrier/goversioninfo v0.0.0-20190209210621-63e6d1acd3dd/go.mod h1:eJTEwMjXb7kZ633hO3Ln9mBUCOjX2+FlTljvpl9SYdE=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6Oo2LfFZAehjjQMERAvZLEDnQ=

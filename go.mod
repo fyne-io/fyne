@@ -9,7 +9,7 @@ require (
 	github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
-	github.com/josephspurrier/goversioninfo v0.0.0-20190209210621-63e6d1acd3dd
+	github.com/josephspurrier/goversioninfo v0.0.0-20190122232203-2e127a11672c
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/spf13/afero v1.2.1 // indirect
 	github.com/srwiley/oksvg v0.0.0-20190105194046-ccbc7673cdf3
