@@ -6,7 +6,7 @@ require (
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2
-	github.com/go-gl/glfw v0.0.0-20190217072633-93b30450e032
+	github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v1.0.0
 	github.com/josephspurrier/goversioninfo v0.0.0-20190209210621-63e6d1acd3dd
