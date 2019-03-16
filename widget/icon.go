@@ -42,12 +42,12 @@ func (i *iconRenderer) BackgroundColor() color.Color {
 func (i *iconRenderer) Refresh() {
 	i.objects = nil
 
-	var raster *canvas.Image
 	if i.image.Resource != nil {
-		raster = canvas.NewImageFromResource(i.image.Resource)
+		raster := canvas.NewImageFromResource(i.image.Resource)
 		raster.FillMode = canvas.ImageFillContain
+
+		i.objects = append(i.objects, raster)
 	}
-	i.objects = append(i.objects, raster)
 	i.Layout(i.image.Size())
 
 	canvas.Refresh(i.image)

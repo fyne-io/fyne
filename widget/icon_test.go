@@ -21,6 +21,13 @@ func TestNewIcon(t *testing.T) {
 	assert.Equal(t, theme.ConfirmIcon(), img.Resource)
 }
 
+func TestIcon_Nil(t *testing.T) {
+	icon := NewIcon(nil)
+	render := Renderer(icon)
+
+	assert.Equal(t, 0, len(render.Objects()))
+}
+
 func TestIcon_MinSize(t *testing.T) {
 	icon := NewIcon(theme.CancelIcon())
 	min := icon.MinSize()
