@@ -56,7 +56,7 @@ func main() {
 
 	fyneio, err := url.Parse("https://fyne.io/")
 	if err != nil {
-		panic(err)
+		fyne.LogError("Could not parse URL", err)
 	}
 
 	w.SetContent(widget.NewVBox(

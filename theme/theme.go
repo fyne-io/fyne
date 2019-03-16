@@ -4,7 +4,6 @@ package theme // import "fyne.io/fyne/theme"
 import (
 	"image/color"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"strings"
@@ -102,12 +101,12 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 
 	file, err := os.Open(variantPath)
 	if err != nil {
-		log.Println("Error loading specified font", err)
+		fyne.LogError("Error loading specified font", err)
 		return fallback
 	}
 	ret, err2 := ioutil.ReadAll(file)
 	if err2 != nil {
-		log.Println("Error loading specified font", err2)
+		fyne.LogError("Error loading specified font", err2)
 		return fallback
 	}
 

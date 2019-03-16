@@ -7,13 +7,13 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	"fyne.io/fyne"
 	"github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
 	"github.com/josephspurrier/goversioninfo"
@@ -134,20 +134,24 @@ func (p *packager) packageDarwin() {
 
 	img, err := os.Open(p.icon)
 	if err != nil {
-		log.Fatalf("opening source image: %v", err)
+		fyne.LogError("Failed to open source image", err)
+		panic(err)
 	}
 	defer img.Close()
 	srcImg, _, err := image.Decode(img)
 	if err != nil {
-		log.Fatalf("decoding source image: %v", err)
+		fyne.LogError("Faied to decode source image", err)
+		panic(err)
 	}
 	dest, err := os.Create(icnsPath)
 	if err != nil {
-		log.Fatalf("opening destination file: %v", err)
+		fyne.LogError("Failed to open destination file", err)
+		panic(err)
 	}
 	defer dest.Close()
 	if err := icns.Encode(dest, srcImg); err != nil {
-		log.Fatalf("encoding icns: %v", err)
+		fyne.LogError("Failed to encode icns", err)
+		panic(err)
 	}
 }
 
@@ -155,18 +159,21 @@ func (p *packager) packageWindows() {
 	// convert icon
 	img, err := os.Open(p.icon)
 	if err != nil {
-		log.Fatalf("opening source image: %v", err)
+		fyne.LogError("Failed to open source image", err)
+		panic(err)
 	}
 	defer img.Close()
 	srcImg, _, err := image.Decode(img)
 	if err != nil {
-		log.Fatalf("decoding source image: %v", err)
+		fyne.LogError("Failed to decode source image", err)
+		panic(err)
 	}
 
 	icoPath := filepath.Join(p.dir, p.name+".ico")
 	file, err := os.Create(icoPath)
 	if err != nil {
-		log.Fatalf("unable to open image file: %v", err)
+		fyne.LogError("Failed to open image file", err)
+		panic(err)
 	}
 	ico.Encode(file, srcImg)
 	file.Close()
@@ -193,7 +200,7 @@ func (p *packager) packageWindows() {
 
 	os.Remove(icoPath)
 	os.Remove(manifest)
-	log.Println("For windows releases you need to re-run go build to include the changes")
+	fmt.Println("For windows releases you need to re-run go build to include the changes")
 }
 
 func (p *packager) addFlags() {

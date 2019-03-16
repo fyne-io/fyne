@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
-	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -128,7 +127,10 @@ func (w *window) minSizeOnScreen() (int, int) {
 
 func (w *window) RequestFocus() {
 	runOnMainAsync(func() {
-		w.viewport.Focus()
+		err := w.viewport.Focus()
+		if err != nil {
+			fyne.LogError("Error requesting focus", err)
+		}
 	})
 }
 
@@ -245,7 +247,7 @@ func (w *window) detectScale() float32 {
 	if env != "" {
 		scale, err := strconv.ParseFloat(env, 32)
 		if err != nil {
-			log.Println("Error reading scale:", err)
+			fyne.LogError("Error reading scale", err)
 		} else if scale != 0 {
 			return float32(scale)
 		}
@@ -788,7 +790,12 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	runOnMain(func() {
 		master := len(d.windows) == 0
 		if master {
-			glfw.Init()
+			err := glfw.Init()
+			if err != nil {
+				fyne.LogError("failed to initialise GLFW", err)
+				return
+			}
+
 			initCursors()
 		}
 
@@ -800,7 +807,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 		win, err := glfw.CreateWindow(10, 10, title, nil, nil)
 		if err != nil {
-			log.Println("Window creation error", err)
+			fyne.LogError("window creation error", err)
 			return
 		}
 		win.MakeContextCurrent()
@@ -812,7 +819,12 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		}
 
 		if master {
-			gl.Init()
+			err := gl.Init()
+			if err != nil {
+				fyne.LogError("failed to initialise OpenGL", err)
+				return
+			}
+
 			gl.Disable(gl.DEPTH_TEST)
 		}
 		ret = &window{viewport: win, title: title}
