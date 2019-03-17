@@ -15,6 +15,6 @@ require (
 	github.com/srwiley/oksvg v0.0.0-20190105194046-ccbc7673cdf3
 	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
 	github.com/stretchr/testify v1.3.0
-	golang.org/x/image v0.0.0-20190227222117-0694c2d4d067
+	golang.org/x/image v0.0.0-20181116024801-cd38e8056d9b
 	golang.org/x/net v0.0.0-20190313220215-9f648a60d977 // indirect
 )
