@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
 )
 
 // FormItem provides the details for a row in a form
@@ -92,10 +93,10 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 
 	buttons := NewHBox(layout.NewSpacer())
 	if f.OnCancel != nil {
-		buttons.Append(NewButton("Cancel", f.OnCancel))
+		buttons.Append(NewButtonWithIcon("Cancel", theme.CancelIcon(), f.OnCancel))
 	}
 	if f.OnSubmit != nil {
-		submit := NewButton("Submit", f.OnSubmit)
+		submit := NewButtonWithIcon("Submit", theme.ConfirmIcon(), f.OnSubmit)
 		submit.Style = PrimaryButton
 
 		buttons.Append(submit)

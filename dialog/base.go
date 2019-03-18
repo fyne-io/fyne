@@ -174,12 +174,12 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 	d.response = make(chan bool, 1)
 	d.callback = callback
 
-	d.dismiss = &widget.Button{Text: dismiss,
+	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: func() {
 			d.response <- false
 		},
 	}
-	ok := &widget.Button{Text: confirm, Style: widget.PrimaryButton,
+	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
 		OnTapped: func() {
 			d.response <- true
 		},
