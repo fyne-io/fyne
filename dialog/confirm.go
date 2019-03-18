@@ -16,6 +16,7 @@ type ConfirmDialog struct {
 // SetConfirmText allows custom text to be set in the confirmation button
 func (d *ConfirmDialog) SetConfirmText(label string) {
 	d.confirm.SetText(label)
+	d.Layout(d.win.Content().(*fyne.Container).Objects, d.win.Content().MinSize())
 }
 
 // NewConfirm creates a dialog over the specified window for user confirmation.
