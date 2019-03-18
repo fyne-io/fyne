@@ -127,7 +127,7 @@ func (dummyTheme) PlaceHolderColor() color.Color {
 }
 
 func (dummyTheme) PrimaryColor() color.Color {
-	return color.Black
+	return color.White
 }
 
 func (dummyTheme) FocusColor() color.Color {
