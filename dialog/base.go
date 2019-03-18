@@ -2,6 +2,8 @@
 package dialog // import "fyne.io/fyne/dialog"
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
@@ -23,6 +25,7 @@ type Dialog interface {
 type dialog struct {
 	win      fyne.Window
 	callback func(bool)
+	bg       *canvas.Rectangle
 	content  fyne.CanvasObject
 	icon     fyne.Resource
 
@@ -53,45 +56,57 @@ func (d *dialog) closed() {
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
+	d.bg = canvas.NewRectangle(theme.BackgroundColor())
+
 	if d.icon == nil {
 		d.win.SetContent(fyne.NewContainerWithLayout(d,
-			d.content,
 			&canvas.Image{},
+			d.bg,
+			d.content,
 			buttons,
 		))
 	} else {
 		bgIcon := canvas.NewImageFromResource(d.icon)
-		bgIcon.Translucency = 0.9
 		d.win.SetContent(fyne.NewContainerWithLayout(d,
-			d.content,
 			bgIcon,
+			d.bg,
+			d.content,
 			buttons,
 		))
 	}
 }
 
 func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
+	d.ApplyTheme() // we are not really a widget so simulate the applyTheme call
+	d.bg.Move(fyne.NewPos(-theme.Padding(), -theme.Padding()))
+	d.bg.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	// icon
-	obj[1].Resize(fyne.NewSize(size.Height*2, size.Height*2))
-	obj[1].Move(fyne.NewPos(-size.Height*3/4, -size.Height/2))
+	obj[0].Resize(fyne.NewSize(size.Height*2, size.Height*2))
+	obj[0].Move(fyne.NewPos(-size.Height*3/4, -size.Height/2))
 
 	// content (text)
-	textMin := obj[0].MinSize()
-	obj[0].Move(fyne.NewPos(size.Width/2-(textMin.Width/2), padHeight))
-	obj[0].Resize(fyne.NewSize(textMin.Width, textMin.Height))
+	textMin := obj[2].MinSize()
+	obj[2].Move(fyne.NewPos(size.Width/2-(textMin.Width/2), padHeight))
+	obj[2].Resize(fyne.NewSize(textMin.Width, textMin.Height))
 
 	// buttons
-	btnMin := obj[2].MinSize().Union(obj[2].Size())
-	obj[2].Resize(btnMin)
-	obj[2].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
+	btnMin := obj[3].MinSize().Union(obj[3].Size())
+	obj[3].Resize(btnMin)
+	obj[3].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
 }
 
 func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
-	textMin := obj[0].MinSize()
-	btnMin := obj[2].MinSize().Union(obj[2].Size())
+	textMin := obj[2].MinSize()
+	btnMin := obj[3].MinSize().Union(obj[3].Size())
 
 	return fyne.NewSize(fyne.Max(textMin.Width, btnMin.Width)+padWidth*2,
 		textMin.Height+btnMin.Height+theme.Padding()+padHeight*2)
+}
+
+func (d *dialog) ApplyTheme() {
+	r, g, b, _ := theme.BackgroundColor().RGBA()
+	bg := &color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
+	d.bg.FillColor = bg
 }
 
 func newDialogWin(title string, _ fyne.Window) fyne.Window {
