@@ -10,7 +10,7 @@ import (
 func TestRasterFromImage(t *testing.T) {
 	source := image.Rect(2, 2, 4, 4)
 	dest := NewRasterFromImage(source)
-	img := dest.Generator(6, 6, dest)
+	img := dest.Generator(6, 6)
 
 	// image.Rect is a 16 bit colour model
 	_, _, _, a := img.At(0, 0).RGBA()

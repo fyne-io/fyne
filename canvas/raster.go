@@ -4,15 +4,13 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"os"
-	"runtime/debug"
 )
 
 // Raster describes a raster image area that can render in a Fyne canvas
 type Raster struct {
 	baseObject
 
-	Generator func(w, h int, r *Raster) image.Image // Render the raster image from code
+	Generator func(w, h int) image.Image // Render the raster image from code
 
 	Translucency float64 // Set a translucency value > 0.0 to fade the raster
 
@@ -29,8 +27,14 @@ func (r *Raster) Alpha() float64 {
 // the specified generate function.
 // Images returned from this method should draw dynamically to fill the width
 // and height parameters passed to pixelColor.
-func NewRaster(generate func(w, h int, r *Raster) image.Image) *Raster {
+func NewRaster(generate func(w, h int) image.Image) *Raster {
 	return &Raster{Generator: generate}
+}
+
+type pixelRaster struct {
+	r *Raster
+
+	img draw.Image
 }
 
 // NewRasterWithPixels returns a new Image instance that is rendered dynamically
@@ -38,14 +42,10 @@ func NewRaster(generate func(w, h int, r *Raster) image.Image) *Raster {
 // Images returned from this method should draw dynamically to fill the width
 // and height parameters passed to pixelColor.
 func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
-	return &Raster{
-		Generator: func(w, h int, r *Raster) image.Image {
-			if r == nil {
-
-				debug.PrintStack()
-				os.Exit(0)
-			}
-			if r.img == nil || r.img.Bounds() != r.img.Bounds() {
+	pix := &pixelRaster{}
+	pix.r = &Raster{
+		Generator: func(w, h int) image.Image {
+			if pix.img == nil || pix.img.Bounds().Size().X != w || pix.img.Bounds().Size().Y != h {
 				// raster first pixel, figure out color type
 				var dst draw.Image
 				rect := image.Rect(0, 0, w, h)
@@ -71,18 +71,19 @@ func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
 				default:
 					dst = image.NewRGBA(rect)
 				}
-				r.img = dst
+				pix.img = dst
 			}
 
 			for x := 0; x < w; x++ {
 				for y := 0; y < h; y++ {
-					r.img.Set(x, y, pixelColor(x, y, w, h))
+					pix.img.Set(x, y, pixelColor(x, y, w, h))
 				}
 			}
 
-			return r.img
+			return pix.img
 		},
 	}
+	return pix.r
 }
 
 type subImg interface {
@@ -97,7 +98,7 @@ type subImg interface {
 // If smaller than the target space, the image will be padded with zero-pixels to the target size.
 func NewRasterFromImage(img image.Image) *Raster {
 	return &Raster{
-		Generator: func(w int, h int, r *Raster) image.Image {
+		Generator: func(w int, h int) image.Image {
 			bounds := img.Bounds()
 
 			rect := image.Rect(0, 0, w, h)
@@ -124,37 +125,34 @@ func NewRasterFromImage(img image.Image) *Raster {
 			}
 
 			// respect the user's pixel format (if possible)
-			if r.img == nil || r.img.Bounds() != img.Bounds() {
-				var dst draw.Image
-				switch i := img.(type) {
-				case (*image.Alpha):
-					dst = image.NewAlpha(rect)
-				case (*image.Alpha16):
-					dst = image.NewAlpha16(rect)
-				case (*image.CMYK):
-					dst = image.NewCMYK(rect)
-				case (*image.Gray):
-					dst = image.NewGray(rect)
-				case (*image.Gray16):
-					dst = image.NewGray16(rect)
-				case (*image.NRGBA):
-					dst = image.NewNRGBA(rect)
-				case (*image.NRGBA64):
-					dst = image.NewNRGBA64(rect)
-				case (*image.Paletted):
-					dst = image.NewPaletted(rect, i.Palette)
-				case (*image.RGBA):
-					dst = image.NewRGBA(rect)
-				case (*image.RGBA64):
-					dst = image.NewRGBA64(rect)
-				default:
-					dst = image.NewRGBA(rect)
-				}
-				r.img = dst
+			var dst draw.Image
+			switch i := img.(type) {
+			case (*image.Alpha):
+				dst = image.NewAlpha(rect)
+			case (*image.Alpha16):
+				dst = image.NewAlpha16(rect)
+			case (*image.CMYK):
+				dst = image.NewCMYK(rect)
+			case (*image.Gray):
+				dst = image.NewGray(rect)
+			case (*image.Gray16):
+				dst = image.NewGray16(rect)
+			case (*image.NRGBA):
+				dst = image.NewNRGBA(rect)
+			case (*image.NRGBA64):
+				dst = image.NewNRGBA64(rect)
+			case (*image.Paletted):
+				dst = image.NewPaletted(rect, i.Palette)
+			case (*image.RGBA):
+				dst = image.NewRGBA(rect)
+			case (*image.RGBA64):
+				dst = image.NewRGBA64(rect)
+			default:
+				dst = image.NewRGBA(rect)
 			}
 
-			draw.Draw(r.img, bounds, img, bounds.Min, draw.Over)
-			return r.img
+			draw.Draw(dst, bounds, img, bounds.Min, draw.Over)
+			return dst
 		},
 	}
 }
