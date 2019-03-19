@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Generator: Adobe Illustrator 19.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 48 48" style="enable-background:new 0 0 48 48;" xml:space="preserve">
+<g>
+	<rect x="4" y="41" style="fill:#E5D9C5;" width="40" height="2"/>
+	<rect x="4" y="36" style="fill:#E5D9C5;" width="40" height="2"/>
+</g>
+<g>
+	<path style="fill:#FFBA57;" d="M29.5,30c1.933,0,3.5,1.568,3.5,3.5S31.433,37,29.5,37c-1.933,0-3.5-1.568-3.5-3.5
+		S27.567,30,29.5,30"/>
+	<path style="fill:#FFBA57;" d="M42.664,4.891c-0.613-0.918-1.854-1.169-2.773-0.555L24.5,14L9.109,4.336
+		c-0.921-0.614-2.16-0.364-2.773,0.555C5.724,5.81,5.972,7.051,6.891,7.664L20,17.422V42.5c0,0.828,0.672,1.5,1.5,1.5
+		s1.5-0.672,1.5-1.5L24,30l15.171-8.158c0.741-0.371,1.041-1.271,0.671-2.013c-0.37-0.741-1.271-1.04-2.013-0.671L29,22.956v-5.689
+		l13.109-9.603C43.028,7.051,43.276,5.81,42.664,4.891z"/>
+</g>
+<polygon style="fill:#FF754C;" points="23.52,36 24,30 34,24.622 34,20.805 29,22.956 29,17.267 24.5,14 20,17.422 20,36 "/>
+<polygon style="fill:#E64A19;" points="27,18.75 27,23.817 29,23 29,17.417 "/>
+</svg>

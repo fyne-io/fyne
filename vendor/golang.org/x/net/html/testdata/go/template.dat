@@ -1,0 +1,37 @@
+#data
+<body><template><yt-icon-button></yt-icon-button><form><paper-input></paper-input></form><style></style></template>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <template>
+|       content
+|         <yt-icon-button>
+|         <form>
+|           <paper-input>
+|         <style>
+
+#data
+<template><tBody><isindex/action=0>
+#errors
+#document
+| <html>
+|   <head>
+|     <template>
+|       content
+|         <tbody>
+|   <body>
+
+#data
+<math><template><mo><template>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math template>
+|         <math mo>
+|           <template>
+|             content

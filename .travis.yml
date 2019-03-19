@@ -1,26 +1,36 @@
 language: go
 
 go:
-  - "1.10"
+  - "1.10.x"
+  - "1.11.x"
+go_import_path: fyne.io/fyne
+
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    packages:
+      - libgl1-mesa-dev
+      - xorg-dev
+
+gobuild_args: "-v -tags ci"
 
 before_script:
-#  - go get github.com/golang/lint/golint
+  - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
+  - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
+  - go get github.com/stretchr/testify
 
 script:
-  - test -z $(gofmt -s -l .)
-  - go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
-  - go vet ./...
-#  - golint -set_exit_status $(go list ./...)
+  - test -z $(gofmt -s -l $NO_VENDOR)
+  - go test -tags ci ./...
+  - go vet -tags ci -unsafeptr=false ./...
+  - golint -set_exit_status $(go list -tags ci ./...) || exit 1
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then exit; fi'
+  - go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
   - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
-
-notifications:
-  irc:
-    channels:
-      - "irc.freenode.net#fyne"
-    on_success: change
-    template:
-      - "Build %{repository_name}#%{build_number} %{result} (%{branch} %{commit} \"%{commit_subject}\")"
 
 env:
   global:
