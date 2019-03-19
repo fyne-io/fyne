@@ -1,0 +1,5 @@
+.idea
+
+cmd/fyne/fyne
+cmd/fyne_demo/fyne_demo
+cmd/hello/hello

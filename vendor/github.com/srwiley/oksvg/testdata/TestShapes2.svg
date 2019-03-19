@@ -1,0 +1,24 @@
+<svg width="4cm" height="4cm" viewBox="0 0 600 600"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>Example triangle01- simple example of a 'path'</title>
+  <desc>A path that draws a triangle</desc>
+
+ 
+    <path d="M87, 212 C 138, 90,  269, 75, 259, 147 C 254, 71, 104,176, 128, 282z"
+ 		fill="none" stroke="red" stroke-miterlimit="300"  stroke-linecap="cubic" stroke-linejoin="arc" stroke-width="8"/> 
+
+    <path d="M87, 212 C 138, 90,  269, 75, 259, 147 C 254, 71, 104,176, 128, 282z"
+ 		fill="none" stroke="green" stroke-miterlimit="300"  stroke-linecap="cubic" stroke-linejoin="miter" stroke-width="8"/> 
+
+    <path d="M197, 312 C 248, 190,  379, 175, 369, 247 C 364, 171, 214,276, 238, 382z"
+ 		fill="none" stroke="blue" stroke-miterlimit="2"  stroke-linegap="round" stroke-linejoin="miter" stroke-width="18"/>
+
+    <path d="M197, 312 C 248, 190,  379, 175, 369, 247 C 364, 171, 214,276, 238, 382z"
+ 		fill="none" stroke="red" stroke-miterlimit="2"  stroke-linegap="cubic" stroke-linejoin="miter" stroke-width="18"/>
+		
+    <path d="M197, 312 C 248, 190,  379, 175, 369, 247 C 364, 171, 214,276, 238, 382z"
+ 		fill="none" stroke="orange" stroke-miterlimit="2"  stroke-linegap="bevel" stroke-linejoin="miter" stroke-width="18"/> 
+ 		
+		
+
+</svg>

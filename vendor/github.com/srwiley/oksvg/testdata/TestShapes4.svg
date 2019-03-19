@@ -1,0 +1,50 @@
+<svg width="4cm" height="4cm" viewBox="0 0 600 600"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>Test 4</title>
+  <desc>Test line cap miter and arc clip modes, different cap and gap functions</desc>
+
+
+   <path d="M287, 412 C 338, 290,  469, 275, 459, 347 C 454, 271, 260,376, 328, 482z"
+ 		fill="none" stroke="red" stroke-miterlimit="8"  stroke-linegap="cubic" stroke-linejoin="arc-clip" stroke-width="30"/> 
+   <path d="M287, 412 C 338, 290,  469, 275, 459, 347 C 454, 271, 260,376, 328, 482z"
+ 		fill="none" stroke="orange" stroke-miterlimit="4"  stroke-linegap="cubic" stroke-linejoin="arc-clip" stroke-width="30"/> 
+   <path d="M287, 412 C 338, 290,  469, 275, 459, 347 C 454, 271, 260,376, 328, 482z"
+ 		fill="none" stroke="yellow" stroke-miterlimit="2"  stroke-linegap="cubic" stroke-linejoin="arc-clip" stroke-width="30"/> 
+		
+   <path d="M187, 312 C 238, 190,  369, 175, 359, 247 C 354, 171, 160,276, 228, 382z"
+ 		fill="none" stroke="green" stroke-miterlimit="8"  stroke-linegap="round" stroke-linejoin="miter-clip" stroke-width="30"/> 
+   <path d="M187, 312 C 238, 190,  369, 175, 359, 247 C 354, 171, 160,276, 228, 382z"
+ 		fill="none" stroke="lime" stroke-miterlimit="4"  stroke-linegap="round" stroke-linejoin="miter-clip" stroke-width="30"/> 
+   <path d="M187, 312 C 238, 190,  369, 175, 359, 247 C 354, 171, 160,276, 228, 382z"
+ 		fill="none" stroke="blue" stroke-miterlimit="2"  stroke-linegap="round" stroke-linejoin="miter-clip" stroke-width="30"/> 
+
+ 
+   <path d="M87, 212 C 138, 090,  269, 075, 259, 147 C 254, 081, 060,176, 128, 282z"
+ 		fill="none" stroke="green" stroke-miterlimit="20"  stroke-linecap="cubic" stroke-linejoin="miter" stroke-width="30"/> 
+
+    <path d="M87, 212 C 138, 090,  269, 075, 259, 147 C 254, 081, 060,176, 128, 282z"
+ 		fill="none" stroke="red" stroke-miterlimit="20"  stroke-linecap="cubic" stroke-linejoin="arc" stroke-width="30"/> 
+		
+  <path d="M87, 212 C 138, 090,  269, 075, 259, 147 C 254, 081, 060,176, 128, 282z"
+ 		fill="none" stroke="orange" stroke-miterlimit="20"  stroke-linecap="cubic" stroke-linejoin="arc" stroke-width="15"/> 
+		
+   <path d="M87, 212 C 138, 090,  269, 075, 259, 147 C 254, 081, 060,176, 128, 282z"
+ 		fill="none" stroke="yellow" stroke-miterlimit="20"  stroke-linecap="cubic" stroke-linejoin="arc" stroke-width="10"/> 
+ 
+   <path d="M87, 212 C 138, 090,  269, 075, 259, 147 C 254, 081, 060,176, 128, 282z"
+ 		fill="none" stroke="black" stroke-miterlimit="1"  stroke-linecap="cubic" stroke-linejoin="arc" stroke-width="2"/> 
+
+ <path d="M325, 20 L 425, 35,  325, 50 "
+ 		fill="none" stroke="black" stroke-miterlimit="1"  stroke-linecap="round" stroke-linegap="round" stroke-linejoin="miter" stroke-width="20"/> 
+
+  <path d="M325, 75 L 425, 90,  325, 105 "
+ 		fill="none" stroke="black" stroke-miterlimit="1"  stroke-linecap="cubic" stroke-linegap="cubic" stroke-linejoin="miter" stroke-width="20"/> 
+
+ <path d="M325, 130 L 425, 145, 325, 160 "
+ 		fill="none" stroke="black" stroke-miterlimit="1"  stroke-linecap="quadratic" stroke-linegap="quadratic" stroke-linejoin="miter" stroke-width="20"/> 
+
+ <path d="M450, 20 L 574, 35,  450, 50 "
+ 		fill="none" stroke="black" stroke-miterlimit="1"  stroke-linecap="square" stroke-linejoin="miter" stroke-width="20"/> 
+
+
+</svg>

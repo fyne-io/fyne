@@ -1,0 +1,34 @@
+<svg width="4cm" height="4cm" viewBox="0 0 400 400"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>Example triangle01- simple example of a 'path'</title>
+  <desc>A path that draws a triangle</desc>
+
+ <rect x="50" y="150" width="75" height="75"
+        fill="cyan"  />
+  
+  <circle cx="280" cy="170" r="40"
+        fill="#0FF" />
+ 
+  <ellipse cx="150" cy="220" rx="30" ry="20"
+        fill="Lemonchiffon" />
+  <polygon points="220,220,280,220, 280,270, 220,270, 250, 245 "
+        fill="rgb(0,100%,255)"/>
+
+    <polyline points="220,320,280,320, 280,370, 220,370, 250, 345 "
+        fill="none" stroke="springgreen" stroke-width="8"/>
+
+
+ <line x1="340" y1="320" x2="340" y2="380"
+        stroke="goldenrod" stroke-width="8" stroke-linecap="round"/>
+ <line x1="60" y1="320" x2="60" y2="380"
+        stroke="cornflowerblue" stroke-width="8" stroke-linecap="butt"/>
+ <line x1="380" y1="320" x2="380" y2="380"
+        stroke="springgreen" stroke-width="8" stroke-linecap="square" />
+
+ <path d="M190, 120 L190, 109"
+          fill="none" stroke="black" stroke-width="22" stroke-miterlimit="211.2" stroke-linejoin="arc-limit" stroke-linegap="round" stroke-linecap="round" />
+
+	   <path d="m 25,130 c 0,-40 50,-75 100,-75 -35,20 -50,50 -50,75z"
+ 		fill="none" stroke="springgreen" stroke-miterlimit="300"  stroke-linejoin="miter-clip" stroke-width="12"/> 
+ 
+</svg>
