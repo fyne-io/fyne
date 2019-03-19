@@ -1,16 +1,25 @@
 package main
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 )
 
+func makeCell() fyne.CanvasObject {
+	rect := canvas.NewRectangle(&color.RGBA{128, 128, 128, 255})
+	rect.SetMinSize(fyne.NewSize(30, 30))
+	return rect
+}
+
 func makeBorderLayout() *fyne.Container {
-	top := widget.NewEntry()
-	bottom := widget.NewEntry()
-	left := widget.NewEntry()
-	right := widget.NewEntry()
+	top := makeCell()
+	bottom := makeCell()
+	left := makeCell()
+	right := makeCell()
 	middle := widget.NewLabelWithStyle("BorderLayout", fyne.TextAlignCenter, fyne.TextStyle{})
 
 	borderLayout := layout.NewBorderLayout(top, bottom, left, right)
@@ -19,11 +28,11 @@ func makeBorderLayout() *fyne.Container {
 }
 
 func makeBoxLayout() *fyne.Container {
-	top := widget.NewEntry()
-	bottom := widget.NewEntry()
+	top := makeCell()
+	bottom := makeCell()
 	middle := widget.NewLabel("BoxLayout")
-	center := widget.NewEntry()
-	right := widget.NewEntry()
+	center := makeCell()
+	right := makeCell()
 
 	col := fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
 		top, middle, bottom)
@@ -33,20 +42,20 @@ func makeBoxLayout() *fyne.Container {
 }
 
 func makeFixedGridLayout() *fyne.Container {
-	box1 := widget.NewEntry()
+	box1 := makeCell()
 	box2 := widget.NewLabel("FixedGrid")
-	box3 := widget.NewEntry()
-	box4 := widget.NewEntry()
+	box3 := makeCell()
+	box4 := makeCell()
 
 	return fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(75, 75)),
 		box1, box2, box3, box4)
 }
 
 func makeGridLayout() *fyne.Container {
-	box1 := widget.NewEntry()
+	box1 := makeCell()
 	box2 := widget.NewLabel("Grid")
-	box3 := widget.NewEntry()
-	box4 := widget.NewEntry()
+	box3 := makeCell()
+	box4 := makeCell()
 
 	return fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 		box1, box2, box3, box4)
