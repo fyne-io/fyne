@@ -13,6 +13,8 @@ type Raster struct {
 	Generator func(w, h int) image.Image // Render the raster image from code
 
 	Translucency float64 // Set a translucency value > 0.0 to fade the raster
+
+	img draw.Image
 }
 
 // Alpha is a convenience function that returns the alpha value for a raster
@@ -29,48 +31,59 @@ func NewRaster(generate func(w, h int) image.Image) *Raster {
 	return &Raster{Generator: generate}
 }
 
+type pixelRaster struct {
+	r *Raster
+
+	img draw.Image
+}
+
 // NewRasterWithPixels returns a new Image instance that is rendered dynamically
 // by iterating over the specified pixelColor function for each x, y pixel.
 // Images returned from this method should draw dynamically to fill the width
 // and height parameters passed to pixelColor.
 func NewRasterWithPixels(pixelColor func(x, y, w, h int) color.Color) *Raster {
-	return &Raster{
+	pix := &pixelRaster{}
+	pix.r = &Raster{
 		Generator: func(w, h int) image.Image {
-			// raster first pixel, figure out color type
-			var dst draw.Image
-			rect := image.Rect(0, 0, w, h)
-			switch pixelColor(0, 0, w, h).(type) {
-			case color.Alpha:
-				dst = image.NewAlpha(rect)
-			case color.Alpha16:
-				dst = image.NewAlpha16(rect)
-			case color.CMYK:
-				dst = image.NewCMYK(rect)
-			case color.Gray:
-				dst = image.NewGray(rect)
-			case color.Gray16:
-				dst = image.NewGray16(rect)
-			case color.NRGBA:
-				dst = image.NewNRGBA(rect)
-			case color.NRGBA64:
-				dst = image.NewNRGBA64(rect)
-			case color.RGBA:
-				dst = image.NewRGBA(rect)
-			case color.RGBA64:
-				dst = image.NewRGBA64(rect)
-			default:
-				dst = image.NewRGBA(rect)
+			if pix.img == nil || pix.img.Bounds().Size().X != w || pix.img.Bounds().Size().Y != h {
+				// raster first pixel, figure out color type
+				var dst draw.Image
+				rect := image.Rect(0, 0, w, h)
+				switch pixelColor(0, 0, w, h).(type) {
+				case color.Alpha:
+					dst = image.NewAlpha(rect)
+				case color.Alpha16:
+					dst = image.NewAlpha16(rect)
+				case color.CMYK:
+					dst = image.NewCMYK(rect)
+				case color.Gray:
+					dst = image.NewGray(rect)
+				case color.Gray16:
+					dst = image.NewGray16(rect)
+				case color.NRGBA:
+					dst = image.NewNRGBA(rect)
+				case color.NRGBA64:
+					dst = image.NewNRGBA64(rect)
+				case color.RGBA:
+					dst = image.NewRGBA(rect)
+				case color.RGBA64:
+					dst = image.NewRGBA64(rect)
+				default:
+					dst = image.NewRGBA(rect)
+				}
+				pix.img = dst
 			}
 
 			for x := 0; x < w; x++ {
 				for y := 0; y < h; y++ {
-					dst.Set(x, y, pixelColor(x, y, w, h))
+					pix.img.Set(x, y, pixelColor(x, y, w, h))
 				}
 			}
 
-			return dst
+			return pix.img
 		},
 	}
+	return pix.r
 }
 
 type subImg interface {
