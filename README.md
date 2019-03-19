@@ -1,5 +1,6 @@
 <p align="center">
   <a href="https://godoc.org/fyne.io/fyne" title="GoDoc Reference" rel="nofollow"><img src="https://img.shields.io/badge/go-documentation-blue.svg?style=flat" alt="GoDoc Reference"></a>
+  <a href="https://github.com/fyne-io/fyne/releases/tag/v1.0.0" title="1.0.0 Release" rel="nofollow"><img src="https://img.shields.io/badge/version-1.0.0-blue.svg?style=flat" alt="1.0.0 release"></a>
   <a href='https://github.com/avelino/awesome-go'><img src='https://awesome.re/mentioned-badge.svg' alt='Mentioned in Awesome' /></a>
   <a href='http://gophers.slack.com/messages/fyne'><img src='https://img.shields.io/badge/join-us%20on%20slack-gray.svg?longCache=true&logo=slack&colorB=blue' alt='Join us on Slack' /></a>
   <br />
@@ -13,7 +14,7 @@
 
 [Fyne](http://fyne.io) is an easy to use UI toolkit and app API written in Go. We use OpenGL (through the go-gl and go-glfw projects) to provide cross platform graphics.
 
-This is under heavy development and is not yet capable of supporting a full application
+The 1.0 release is now out and we encourage feedback and requests for the next major releae :).
 
 # Getting Started
 

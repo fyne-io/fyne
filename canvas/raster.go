@@ -14,7 +14,7 @@ type Raster struct {
 
 	Translucency float64 // Set a translucency value > 0.0 to fade the raster
 
-	img draw.Image
+	img draw.Image // internal cache for pixel based generator functions
 }
 
 // Alpha is a convenience function that returns the alpha value for a raster

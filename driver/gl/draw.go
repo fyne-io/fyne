@@ -185,9 +185,9 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
 
-	aspect := c.aspects[img.Resource]
+	aspect := aspects[img.Resource]
 	if aspect == 0 {
-		aspect = c.aspects[img]
+		aspect = aspects[img]
 	}
 	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, aspect, 0)
 	c.drawTexture(texture, points)
