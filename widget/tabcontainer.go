@@ -172,7 +172,7 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (t *tabContainerRenderer) ApplyTheme() {
-	t.line.StrokeColor = theme.ButtonColor()
+	t.line.FillColor = theme.ButtonColor()
 }
 
 func (t *tabContainerRenderer) BackgroundColor() color.Color {
