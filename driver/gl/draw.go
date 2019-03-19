@@ -1,6 +1,8 @@
 package gl
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/widget"
@@ -21,11 +23,11 @@ func (c *glCanvas) walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 	case *widget.ScrollContainer: // TODO should this be somehow not scroll container specific?
 		offset := co.Position().Add(pos)
 
-		scrollX := scaleInt(c, offset.X)
-		scrollY := scaleInt(c, offset.Y)
-		scrollWidth := scaleInt(c, co.Size().Width)
-		scrollHeight := scaleInt(c, co.Size().Height)
-		_, pixHeight := c.window.viewport.GetSize()
+		scrollX := textureScaleInt(c, offset.X)
+		scrollY := textureScaleInt(c, offset.Y)
+		scrollWidth := textureScaleInt(c, co.Size().Width)
+		scrollHeight := textureScaleInt(c, co.Size().Height)
+		_, pixHeight := c.window.viewport.GetFramebufferSize()
 		gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
 		gl.Enable(gl.SCISSOR_TEST)
 
@@ -125,7 +127,8 @@ func (c *glCanvas) drawTexture(texture uint32, points []float32) {
 }
 
 func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	if !box.Visible() {
+	backCol := widget.Renderer(box.(fyne.Widget)).BackgroundColor()
+	if !box.Visible() || backCol == color.Transparent {
 		return
 	}
 
@@ -181,7 +184,12 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 	} else {
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
-	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, c.aspects[img], 0)
+
+	aspect := c.aspects[img.Resource]
+	if aspect == 0 {
+		aspect = c.aspects[img]
+	}
+	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, aspect, 0)
 	c.drawTexture(texture, points)
 }
 
@@ -242,7 +250,7 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 	texture := getTexture(text, c.newGlTextTexture)
 
 	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	c.drawTexture(texture, points)
 }
 

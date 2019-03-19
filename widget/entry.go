@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -13,9 +14,9 @@ const (
 )
 
 type entryRenderer struct {
-	text        *textProvider
-	placeholder *textProvider
-	box, cursor *canvas.Rectangle
+	text         *textProvider
+	placeholder  *textProvider
+	line, cursor *canvas.Rectangle
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -25,7 +26,6 @@ type entryRenderer struct {
 // This is based on the contained text with a standard amount of padding added.
 // If MultiLine is true then we will reserve space for at leasts 3 lines
 func (e *entryRenderer) MinSize() fyne.Size {
-
 	minSize := e.placeholder.MinSize()
 
 	if e.text.len() > 0 {
@@ -48,15 +48,15 @@ func (e *entryRenderer) moveCursor() {
 
 	lineHeight := e.text.charMinSize().Height
 	e.cursor.Resize(fyne.NewSize(2, lineHeight))
-	e.cursor.Move(fyne.NewPos(xPos+theme.Padding()*2, yPos+theme.Padding()*2))
+	e.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))
 
 	canvas.Refresh(e.cursor)
 }
 
 // Layout the components of the entry widget.
 func (e *entryRenderer) Layout(size fyne.Size) {
-	e.box.Resize(size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
-	e.box.Move(fyne.NewPos(theme.Padding()/2, theme.Padding()/2))
+	e.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
+	e.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
 
 	e.text.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	e.text.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
@@ -70,16 +70,17 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 // ApplyTheme is called when the Entry may need to update it's look.
 func (e *entryRenderer) ApplyTheme() {
 	Renderer(e.text).ApplyTheme()
-	e.box.FillColor = theme.BackgroundColor()
+	if e.entry.focused {
+		e.line.FillColor = theme.FocusColor()
+	} else {
+		e.line.FillColor = theme.ButtonColor()
+	}
+
 	e.Refresh()
 }
 
 func (e *entryRenderer) BackgroundColor() color.Color {
-	if e.entry.focused {
-		return theme.FocusColor()
-	}
-
-	return theme.ButtonColor()
+	return theme.BackgroundColor()
 }
 
 func (e *entryRenderer) Refresh() {
@@ -92,8 +93,10 @@ func (e *entryRenderer) Refresh() {
 	e.text.refreshTextRenderer()
 	if e.entry.focused {
 		e.cursor.FillColor = theme.FocusColor()
+		e.line.FillColor = theme.FocusColor()
 	} else {
 		e.cursor.FillColor = color.RGBA{0, 0, 0, 0}
+		e.line.FillColor = theme.ButtonColor()
 	}
 
 	canvas.Refresh(e.entry)
@@ -106,7 +109,7 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	baseWidget
-
+	shortcut    fyne.ShortcutHandler
 	Text        string
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
@@ -146,6 +149,9 @@ func (e *Entry) Show() {
 
 // Hide this widget, if it was previously visible
 func (e *Entry) Hide() {
+	if e.focused {
+		fyne.CurrentApp().Driver().CanvasForObject(e).Focus(nil)
+	}
 	e.hide(e)
 }
 
@@ -170,8 +176,9 @@ func (e *Entry) SetReadOnly(ro bool) {
 
 // updateText updates the internal text to the given value
 func (e *Entry) updateText(text string) {
+	changed := e.Text != text
 	e.Text = text
-	if e.OnChanged != nil {
+	if changed && e.OnChanged != nil {
 		e.OnChanged(text)
 	}
 
@@ -326,6 +333,11 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
+// TypedShortcut implements the Shortcutable interface
+func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) bool {
+	return e.shortcut.TypedShortcut(shortcut)
+}
+
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *textProvider {
 	return Renderer(e).(*entryRenderer).text
@@ -395,17 +407,43 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	text := &textProvider{buffer: []rune(e.Text), presenter: e}
 	placeholder := &textProvider{presenter: &placeholderPresenter{e}, buffer: []rune(e.PlaceHolder)}
 
-	box := canvas.NewRectangle(theme.BackgroundColor())
+	line := canvas.NewRectangle(theme.ButtonColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
-	return &entryRenderer{text, placeholder, box, cursor,
-		[]fyne.CanvasObject{box, placeholder, text, cursor}, e}
+	return &entryRenderer{text, placeholder, line, cursor,
+		[]fyne.CanvasObject{line, placeholder, text, cursor}, e}
+}
+
+func (e *Entry) registerShortcut() {
+	scPaste := &fyne.ShortcutPaste{}
+	e.shortcut.AddShortcut(scPaste, func(se fyne.Shortcut) {
+		scPaste = se.(*fyne.ShortcutPaste)
+		text := scPaste.Clipboard.Content()
+		if !e.MultiLine {
+			// format clipboard content to be compatible with single line entry
+			text = strings.Replace(text, "\n", " ", -1)
+		}
+		provider := e.textProvider()
+		runes := []rune(text)
+		provider.insertAt(e.cursorTextPos(), runes)
+
+		newlines := strings.Count(text, "\n")
+		if newlines == 0 {
+			e.CursorColumn += len(runes)
+		} else {
+			e.CursorRow += newlines
+			lastNewline := strings.LastIndex(text, "\n")
+			e.CursorColumn = len(runes) - lastNewline - 1
+		}
+		e.updateText(provider.String())
+		Renderer(e).(*entryRenderer).moveCursor()
+	})
 }
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
 	e := &Entry{}
-
+	e.registerShortcut()
 	Refresh(e)
 	return e
 }
@@ -413,7 +451,7 @@ func NewEntry() *Entry {
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
-
+	e.registerShortcut()
 	Refresh(e)
 	return e
 }
@@ -421,7 +459,7 @@ func NewMultiLineEntry() *Entry {
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
-
+	e.registerShortcut()
 	Refresh(e)
 	return e
 }

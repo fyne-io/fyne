@@ -127,8 +127,9 @@ func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 		contents = append(contents, item.Content)
 	}
 
-	objects := append(contents, buttons)
-	return &tabContainerRenderer{tabBar: buttons, objects: objects, container: t}
+	line := canvas.NewRectangle(theme.ButtonColor())
+	objects := append(contents, line, buttons)
+	return &tabContainerRenderer{tabBar: buttons, line: line, objects: objects, container: t}
 }
 
 // NewTabContainer creates a new tab bar widget that allows the user to choose between different visible containers
@@ -141,6 +142,7 @@ func NewTabContainer(items ...*TabItem) *TabContainer {
 
 type tabContainerRenderer struct {
 	tabBar *Box
+	line   *canvas.Rectangle
 
 	objects   []fyne.CanvasObject
 	container *TabContainer
@@ -154,19 +156,23 @@ func (t *tabContainerRenderer) MinSize() fyne.Size {
 		childMin = childMin.Union(child.Content.MinSize())
 	}
 
-	return fyne.NewSize(fyne.Max(buttonsMin.Width, childMin.Width), buttonsMin.Height+childMin.Height)
+	return fyne.NewSize(fyne.Max(buttonsMin.Width, childMin.Width),
+		buttonsMin.Height+childMin.Height+theme.Padding())
 }
 
 func (t *tabContainerRenderer) Layout(size fyne.Size) {
 	buttonHeight := t.tabBar.MinSize().Height
 	t.tabBar.Resize(fyne.NewSize(size.Width, buttonHeight))
+	t.line.Move(fyne.NewPos(0, buttonHeight))
+	t.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
 
 	child := t.container.Items[t.container.current].Content
-	child.Move(fyne.NewPos(0, buttonHeight))
-	child.Resize(fyne.NewSize(size.Width, size.Height-buttonHeight))
+	child.Move(fyne.NewPos(0, buttonHeight+theme.Padding()))
+	child.Resize(fyne.NewSize(size.Width, size.Height-buttonHeight-theme.Padding()))
 }
 
 func (t *tabContainerRenderer) ApplyTheme() {
+	t.line.StrokeColor = theme.ButtonColor()
 }
 
 func (t *tabContainerRenderer) BackgroundColor() color.Color {

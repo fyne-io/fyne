@@ -68,14 +68,14 @@ func main() {
 			widget.NewToolbarAction(theme.PasteIcon(), func() { fmt.Println("Paste") }),
 		),
 
-		widget.NewGroup("Demos",
+		widget.NewGroup("Demos", widget.NewVBox(
 			widget.NewButton("Canvas", func() { Canvas(a) }),
 			widget.NewButton("Icons", func() { Icons(a) }),
 			widget.NewButton("Layout", func() { Layout(a) }),
 			widget.NewButton("Widgets", func() { Widget(a) }),
 			widget.NewButton("Form", func() { formApp(a) }),
 			widget.NewButton("Dialogs", func() { Dialogs(a) }),
-		),
+		)),
 
 		widget.NewGroup("Theme",
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
@@ -92,6 +92,7 @@ func main() {
 		widget.NewHyperlinkWithStyle("fyne.io", fyneio, fyne.TextAlignCenter, fyne.TextStyle{}),
 		layout.NewSpacer(),
 
+		widget.NewButton("Input", func() { Input(a) }),
 		widget.NewButton("Advanced", func() { Advanced(a) }),
 		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
 			a.Quit()

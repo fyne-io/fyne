@@ -29,7 +29,7 @@ func makeInputTab() fyne.Widget {
 	)
 }
 
-func makeGroupTab() fyne.Widget {
+func makeProgressTab() fyne.Widget {
 	progress := widget.NewProgressBar()
 	infProgress := widget.NewProgressBarInfinite()
 
@@ -44,16 +44,15 @@ func makeGroupTab() fyne.Widget {
 		progress.SetValue(1)
 	}()
 
-	return widget.NewGroup("Grouped",
-		widget.NewLabel("Grouped content"),
-		progress,
-		infProgress)
+	return widget.NewVBox(
+		widget.NewLabel("Percent"), progress,
+		widget.NewLabel("Infinite"), infProgress)
 }
 
 func makeScrollTab() fyne.Widget {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
 	logo.SetMinSize(fyne.NewSize(320, 320))
-	scroll := widget.NewScroller(logo)
+	scroll := widget.NewScrollContainer(logo)
 	scroll.Resize(fyne.NewSize(200, 200))
 
 	return scroll
@@ -66,7 +65,7 @@ func Widget(app fyne.App) {
 	w.SetContent(widget.NewTabContainer(
 		widget.NewTabItem("Buttons", makeButtonTab()),
 		widget.NewTabItem("Input", makeInputTab()),
-		widget.NewTabItem("Group", makeGroupTab()),
+		widget.NewTabItem("Progress", makeProgressTab()),
 		widget.NewTabItem("Scroll", makeScrollTab()),
 	))
 

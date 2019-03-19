@@ -13,7 +13,8 @@ type testWindow struct {
 	padded     bool
 	onClosed   func()
 
-	canvas fyne.Canvas
+	canvas    fyne.Canvas
+	clipboard fyne.Clipboard
 }
 
 var windows = make([]fyne.Window, 0)
@@ -73,6 +74,10 @@ func (w *testWindow) SetOnClosed(closed func()) {
 
 func (w *testWindow) Show() {}
 
+func (w *testWindow) Clipboard() fyne.Clipboard {
+	return w.clipboard
+}
+
 func (w *testWindow) Hide() {}
 
 func (w *testWindow) Close() {
@@ -114,6 +119,7 @@ func NewWindow(content fyne.CanvasObject) fyne.Window {
 	canvas := NewCanvas()
 	canvas.SetContent(content)
 	window := &testWindow{canvas: canvas}
+	window.clipboard = &testClipboard{}
 
 	windowsMutex.Lock()
 	windows = append(windows, window)

@@ -13,7 +13,7 @@ import (
 func TestScrollContainer_Scrolled(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
-	scroll := NewScroller(rect)
+	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 
 	assert.Equal(t, 0, scroll.Offset.Y)
@@ -24,7 +24,7 @@ func TestScrollContainer_Scrolled(t *testing.T) {
 func TestScrollContainer_Scrolled_Limit(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	scroll := NewScroller(rect)
+	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(80, 80))
 
 	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -25})
@@ -34,7 +34,7 @@ func TestScrollContainer_Scrolled_Limit(t *testing.T) {
 func TestScrollContainer_Scrolled_Back(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
-	scroll := NewScroller(rect)
+	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	scroll.Offset.Y = 10
 
@@ -45,7 +45,7 @@ func TestScrollContainer_Scrolled_Back(t *testing.T) {
 func TestScrollContainer_Scrolled_BackLimit(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
-	scroll := NewScroller(rect)
+	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	scroll.Offset.Y = 10
 
@@ -56,7 +56,7 @@ func TestScrollContainer_Scrolled_BackLimit(t *testing.T) {
 func TestScrollContainer_Resize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	scroll := NewScroller(rect)
+	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(80, 80))
 
 	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -20})
@@ -67,7 +67,7 @@ func TestScrollContainer_Resize(t *testing.T) {
 func TestScrollContainerRenderer_BarSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	scroll := NewScroller(rect)
+	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	render := Renderer(scroll).(*scrollRenderer)
 

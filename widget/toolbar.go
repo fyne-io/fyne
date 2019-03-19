@@ -20,7 +20,7 @@ type ToolbarAction struct {
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
-	return NewButtonWithIcon(" ", t.Icon, t.OnActivated)
+	return NewButtonWithIcon("", t.Icon, t.OnActivated)
 }
 
 // NewToolbarAction returns a new push button style ToolbarItem

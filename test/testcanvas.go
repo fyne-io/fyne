@@ -10,6 +10,8 @@ type testCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+
+	fyne.ShortcutHandler
 }
 
 func (c *testCanvas) Content() fyne.CanvasObject {

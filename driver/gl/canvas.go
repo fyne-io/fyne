@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
@@ -18,10 +17,14 @@ type glCanvas struct {
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
+	onKeyDown   func(*fyne.KeyEvent)
+	onKeyUp     func(*fyne.KeyEvent)
+	shortcut    fyne.ShortcutHandler
 
-	program uint32
-	scale   float32
-	aspects map[*canvas.Image]float32
+	program  uint32
+	scale    float32
+	texScale float32
+	aspects  map[interface{}]float32
 
 	dirty        bool
 	dirtyMutex   *sync.Mutex
@@ -35,6 +38,13 @@ func scaleInt(c fyne.Canvas, v int) int {
 	default:
 		return int(math.Round(float64(v) * float64(c.Scale())))
 	}
+}
+
+func textureScaleInt(c *glCanvas, v int) int {
+	if c.scale == 1.0 && c.texScale == 1.0 {
+		return v
+	}
+	return int(math.Round(float64(v) * float64(c.scale*c.texScale)))
 }
 
 func unscaleInt(c fyne.Canvas, v int) int {
@@ -88,7 +98,9 @@ func (c *glCanvas) Focus(obj fyne.Focusable) {
 	}
 
 	c.focused = obj
-	obj.FocusGained()
+	if obj != nil {
+		obj.FocusGained()
+	}
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {
@@ -129,6 +141,26 @@ func (c *glCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 	c.onTypedKey = typed
 }
 
+func (c *glCanvas) OnKeyDown() func(*fyne.KeyEvent) {
+	return c.onKeyDown
+}
+
+func (c *glCanvas) SetOnKeyDown(typed func(*fyne.KeyEvent)) {
+	c.onKeyDown = typed
+}
+
+func (c *glCanvas) OnKeyUp() func(*fyne.KeyEvent) {
+	return c.onKeyUp
+}
+
+func (c *glCanvas) SetOnKeyUp(typed func(*fyne.KeyEvent)) {
+	c.onKeyUp = typed
+}
+
+func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
+	c.shortcut.AddShortcut(shortcut, handler)
+}
+
 func (c *glCanvas) paint(size fyne.Size) {
 	if c.Content() == nil {
 		return
@@ -163,7 +195,7 @@ func (c *glCanvas) isDirty() bool {
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
-	c.aspects = make(map[*canvas.Image]float32, 16)
+	c.aspects = make(map[interface{}]float32, 16)
 	c.dirtyMutex = &sync.Mutex{}
 
 	c.initOpenGL()

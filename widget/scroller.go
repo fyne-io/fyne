@@ -138,8 +138,8 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	return &scrollRenderer{scroll: s, vertBar: bar, objects: []fyne.CanvasObject{s.Content, bar}}
 }
 
-// NewScroller creates a scrollable parent wrapping the specified content.
+// NewScrollContainer creates a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize to be smaller than that of the passed objects.
-func NewScroller(content fyne.CanvasObject) *ScrollContainer {
+func NewScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return &ScrollContainer{Content: content}
 }

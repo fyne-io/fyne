@@ -4,6 +4,7 @@ package test // import "fyne.io/fyne/test"
 import (
 	"image/color"
 	"net/url"
+	"sync"
 
 	"fyne.io/fyne"
 )
@@ -84,7 +85,9 @@ func (a *testApp) Settings() fyne.Settings {
 // NewApp returns a new dummy app used for testing..
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
-	test := &testApp{driver: NewDriver().(*testDriver), settings: &testSettings{}}
+	settings := &testSettings{}
+	settings.listenerMutex = &sync.Mutex{}
+	test := &testApp{driver: NewDriver().(*testDriver), settings: settings}
 	test.Settings().SetTheme(&dummyTheme{})
 	fyne.SetCurrentApp(test)
 
@@ -175,9 +178,12 @@ type testSettings struct {
 	theme fyne.Theme
 
 	changeListeners []chan fyne.Settings
+	listenerMutex   *sync.Mutex
 }
 
 func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
+	s.listenerMutex.Lock()
+	defer s.listenerMutex.Unlock()
 	s.changeListeners = append(s.changeListeners, listener)
 }
 
@@ -192,6 +198,8 @@ func (s *testSettings) Theme() fyne.Theme {
 }
 
 func (s *testSettings) apply() {
+	s.listenerMutex.Lock()
+	defer s.listenerMutex.Unlock()
 	for _, listener := range s.changeListeners {
 		go func(listener chan fyne.Settings) {
 			listener <- s
