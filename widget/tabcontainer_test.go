@@ -3,6 +3,8 @@ package widget
 import (
 	"testing"
 
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,4 +45,14 @@ func TestTabContainer_SelectTabIndex(t *testing.T) {
 
 	tabs.SelectTabIndex(1)
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
+}
+
+func TestTabContainer_ApplyTheme(t *testing.T) {
+	tabs := NewTabContainer(&TabItem{Text: "Test1", Content: NewLabel("Test1")})
+	underline := Renderer(tabs).(*tabContainerRenderer).line
+	barColor := underline.FillColor
+
+	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	Renderer(tabs).ApplyTheme()
+	assert.NotEqual(t, barColor, underline.FillColor)
 }

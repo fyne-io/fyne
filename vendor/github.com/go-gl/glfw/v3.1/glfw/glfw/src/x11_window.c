@@ -119,7 +119,7 @@ static int translateCursorShape(int shape)
         case GLFW_CROSSHAIR_CURSOR:
             return XC_crosshair;
         case GLFW_HAND_CURSOR:
-            return XC_hand1;
+            return XC_hand2;
         case GLFW_HRESIZE_CURSOR:
             return XC_sb_h_double_arrow;
         case GLFW_VRESIZE_CURSOR:

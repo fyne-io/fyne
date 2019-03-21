@@ -17,6 +17,7 @@ type rasterInfo struct {
 
 var cacheDuration = time.Minute * 5
 var rasters = make(map[fyne.Resource]*rasterInfo)
+var aspects = make(map[interface{}]float32, 16)
 var rasterMutex sync.RWMutex
 var janitorOnce sync.Once
 

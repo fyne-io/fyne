@@ -16,6 +16,7 @@ type ConfirmDialog struct {
 // SetConfirmText allows custom text to be set in the confirmation button
 func (d *ConfirmDialog) SetConfirmText(label string) {
 	d.confirm.SetText(label)
+	d.Layout(d.win.Content().(*fyne.Container).Objects, d.win.Content().MinSize())
 }
 
 // NewConfirm creates a dialog over the specified window for user confirmation.
@@ -24,12 +25,12 @@ func (d *ConfirmDialog) SetConfirmText(label string) {
 func NewConfirm(title, message string, callback func(bool), parent fyne.Window) *ConfirmDialog {
 	d := newDialog(title, message, theme.QuestionIcon(), callback, parent)
 
-	d.dismiss = &widget.Button{Text: "No",
+	d.dismiss = &widget.Button{Text: "No", Icon: theme.CancelIcon(),
 		OnTapped: func() {
 			d.response <- false
 		},
 	}
-	confirm := &widget.Button{Text: "Yes", Style: widget.PrimaryButton,
+	confirm := &widget.Button{Text: "Yes", Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
 		OnTapped: func() {
 			d.response <- true
 		},
