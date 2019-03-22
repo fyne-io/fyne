@@ -74,11 +74,11 @@ It should look like this:
 
 # Scaling
 
-Fyne is built entirely using vector graphics which means that applications
-that are written using it will scale to any value beautifully (not just whole number values).
+Fyne is built entirely using vector graphics, which means applications
+written with Fyne will scale to any value beautifully (not just whole number values).
 The default scale value is calculated from your screen's DPI - and if you move
 a window to another screen it will re-scale and adjust the window size accordingly!
-We call this "auto scaling" and it is designed to keep an app GUI the same size as you change monitor.
+We call this "auto scaling", and it is designed to keep an app GUI the same size as you change monitor.
 You can override this behaviour by setting a specific scale using the FYNE_SCALE environment variable.
 
 <table style="text-align: center"><tr>
