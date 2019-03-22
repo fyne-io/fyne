@@ -14,7 +14,6 @@ type clipboard struct {
 func (c *clipboard) Content() string {
 	content, err := c.window.GetClipboardString()
 	if err != nil {
-		fyne.LogError("unable to get clipboard string", err)
 		return ""
 	}
 	return content
