@@ -1,7 +1,6 @@
 package gl
 
 import (
-	"fyne.io/fyne"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
