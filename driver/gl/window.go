@@ -699,14 +699,12 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 			go w.canvas.onKeyDown(keyEvent)
 		}
 	} else if action == glfw.Release { // ignore key up in core events
-		if action == glfw.Release {
-			if w.canvas.Focused() != nil {
-				if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-					go focused.KeyUp(keyEvent)
-				}
-			} else if w.canvas.onKeyDown != nil {
-				go w.canvas.onKeyUp(keyEvent)
+		if w.canvas.Focused() != nil {
+			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
+				go focused.KeyUp(keyEvent)
 			}
+		} else if w.canvas.onKeyDown != nil {
+			go w.canvas.onKeyUp(keyEvent)
 		}
 		return
 	} // key repeat will fall through to TypedKey and TypedShortcut
