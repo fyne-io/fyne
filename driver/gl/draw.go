@@ -148,7 +148,7 @@ func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fy
 	texture := getTexture(circle, c.newGlCircleTexture)
 
 	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	c.drawTexture(texture, points)
 }
 
@@ -161,7 +161,7 @@ func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Siz
 	texture := getTexture(line, c.newGlLineTexture)
 
 	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	c.drawTexture(texture, points)
 }
 
