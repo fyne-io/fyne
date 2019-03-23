@@ -132,7 +132,7 @@ Or if you are using the light theme:
 
 # Declarative API
 
-Fyne also provides a declarative API for those that prefer this style.
+Fyne also provides a declarative API.
 The following is exactly the same as the code above but in a declarative style.
 
 ```go
