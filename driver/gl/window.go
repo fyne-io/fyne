@@ -480,14 +480,14 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 
 	needsfocus := true
-        wid := w.canvas.Focused()
-        if wid != nil {
-                needsfocus = false
-                if wid.(fyne.CanvasObject) != co {
-                           w.canvas.Unfocus()
-                           needsfocus = true
-                }
-        }
+	wid := w.canvas.Focused()
+	if wid != nil {
+		needsfocus = false
+		if wid.(fyne.CanvasObject) != co {
+			w.canvas.Unfocus()
+			needsfocus = true
+		}
+	}
 
 	switch wid := co.(type) {
 	case fyne.Tappable:
@@ -500,7 +500,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			}
 		}
 	case fyne.Focusable:
-		if (needsfocus == true) {
+		if needsfocus == true {
 			w.canvas.Focus(wid)
 		}
 	}
