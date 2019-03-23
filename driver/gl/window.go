@@ -698,7 +698,7 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		} else if w.canvas.onKeyDown != nil {
 			go w.canvas.onKeyDown(keyEvent)
 		}
-	} else { // ignore key up / repeat in core events
+	} else if action == glfw.Release { // ignore key up in core events
 		if action == glfw.Release {
 			if w.canvas.Focused() != nil {
 				if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
@@ -709,7 +709,7 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 			}
 		}
 		return
-	}
+	} // key repeat will fall through to TypedKey and TypedShortcut
 
 	keyDesktopModifier := desktopModifier(mods)
 	var shortcut fyne.Shortcut
