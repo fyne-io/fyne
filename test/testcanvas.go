@@ -30,6 +30,13 @@ func (c *testCanvas) Focus(obj fyne.Focusable) {
 	obj.FocusGained()
 }
 
+func (c *testCanvas) Unfocus() {
+	if c.focused != nil {
+		c.focused.(fyne.Focusable).FocusLost()
+	}
+	c.focused = nil
+}
+
 func (c *testCanvas) Focused() fyne.Focusable {
 	return c.focused
 }
