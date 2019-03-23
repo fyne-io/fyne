@@ -87,7 +87,7 @@ func (d *gLDriver) runGL() {
 					viewport.Destroy()
 
 					if win.(*window).master {
-						close(d.done)
+						d.Quit()
 					}
 					continue
 				}
