@@ -47,6 +47,9 @@ func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle)
 }
 
 func (d *gLDriver) Quit() {
+	defer func() {
+		recover() // we could be called twice - no safe way to check if d.done is closed
+	}()
 	close(d.done)
 }
 

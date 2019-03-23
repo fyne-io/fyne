@@ -102,6 +102,13 @@ func (c *glCanvas) Focus(obj fyne.Focusable) {
 	}
 }
 
+func (c *glCanvas) Unfocus() {
+	if c.focused != nil {
+		c.focused.(fyne.Focusable).FocusLost()
+	}
+	c.focused = nil
+}
+
 func (c *glCanvas) Focused() fyne.Focusable {
 	return c.focused
 }

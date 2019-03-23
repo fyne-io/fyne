@@ -7,6 +7,7 @@ type Canvas interface {
 	SetContent(CanvasObject)
 	Refresh(CanvasObject)
 	Focus(Focusable)
+	Unfocus()
 	Focused() Focusable
 
 	Size() Size

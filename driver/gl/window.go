@@ -479,6 +479,16 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		}
 	}
 
+	needsfocus := true
+	wid := w.canvas.Focused()
+	if wid != nil {
+		needsfocus = false
+		if wid.(fyne.CanvasObject) != co {
+			w.canvas.Unfocus()
+			needsfocus = true
+		}
+	}
+
 	switch wid := co.(type) {
 	case fyne.Tappable:
 		if action == glfw.Press {
@@ -490,7 +500,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			}
 		}
 	case fyne.Focusable:
-		w.canvas.Focus(wid)
+		if needsfocus == true {
+			w.canvas.Focus(wid)
+		}
 	}
 }
 
@@ -686,18 +698,16 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		} else if w.canvas.onKeyDown != nil {
 			go w.canvas.onKeyDown(keyEvent)
 		}
-	} else { // ignore key up / repeat in core events
-		if action == glfw.Release {
-			if w.canvas.Focused() != nil {
-				if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-					go focused.KeyUp(keyEvent)
-				}
-			} else if w.canvas.onKeyDown != nil {
-				go w.canvas.onKeyUp(keyEvent)
+	} else if action == glfw.Release { // ignore key up in core events
+		if w.canvas.Focused() != nil {
+			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
+				go focused.KeyUp(keyEvent)
 			}
+		} else if w.canvas.onKeyDown != nil {
+			go w.canvas.onKeyUp(keyEvent)
 		}
 		return
-	}
+	} // key repeat will fall through to TypedKey and TypedShortcut
 
 	keyDesktopModifier := desktopModifier(mods)
 	var shortcut fyne.Shortcut
