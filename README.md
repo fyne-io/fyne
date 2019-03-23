@@ -14,11 +14,11 @@
 
 [Fyne](http://fyne.io) is an easy to use UI toolkit and app API written in Go. We use OpenGL (through the go-gl and go-glfw projects) to provide cross platform graphics.
 
-The 1.0 release is now out and we encourage feedback and requests for the next major releae :).
+The 1.0 release is now out and we encourage feedback and requests for the next major release :).
 
 # Getting Started
 
-Fyne is designed to be really easy to code with, here are the steps to your first app.
+Fyne is designed to be really easy to code with. Here are the steps to your first app.
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ As Fyne uses CGo you will require a C compiler (typically gcc).
 If you don't have one set up the instructions at [Compiling](https://github.com/fyne-io/fyne/wiki/Compiling) may help.
 
 By default Fyne uses the [gl golang bindings](https://github.com/go-gl/gl) which means you need a working OpenGL configuration.
-Debian/Ubuntu based systems may need to also need to install the `libgl1-mesa-dev` and `xorg-dev` packages.
+Debian/Ubuntu based systems may also need to install the `libgl1-mesa-dev` and `xorg-dev` packages.
 
 Using the standard go tools you can install Fyne's core library using:
 
@@ -69,7 +69,7 @@ It should look like this:
   <img src="img/hello-normal.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
 </p>
 
-> Note that windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
+> Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
 > To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
 
 # Scaling
@@ -112,7 +112,7 @@ It should then look like this:
 
 # Widget demo
 
-To run a showcase of the features of fyne execute the following:
+To run a showcase of the features of Fyne execute the following:
 
     cd $GOPATH/src/fyne.io/fyne/cmd/fyne_demo/
     go build
@@ -132,8 +132,8 @@ Or if you are using the light theme:
 
 # Declarative API
 
-If you prefer a more declarative API then that is provided too.
-The following is exactly the same as the code above but in this different style.
+Fyne also provides a declarative API.
+The following is exactly the same as the code above but in a declarative style.
 
 ```go
 package main
