@@ -84,13 +84,12 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	e.placeholder.refreshTextRenderer()
-	e.placeholder.Hide()
 	if e.text.len() == 0 && e.entry.Visible() {
 		e.placeholder.Show()
+	} else if e.placeholder.Visible() {
+		e.placeholder.Hide()
 	}
 
-	e.text.refreshTextRenderer()
 	if e.entry.focused {
 		e.cursor.FillColor = theme.FocusColor()
 		e.line.FillColor = theme.FocusColor()
