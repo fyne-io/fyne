@@ -101,15 +101,15 @@ func (b *bundler) run(args []string) {
 		return
 	}
 
-	stat, err := os.Stat(args[0])
-	if os.IsNotExist(err) {
+	switch stat, err := os.Stat(args[0]); {
+	case os.IsNotExist(err):
 		fyne.LogError("Specified file could not be found", err)
-	} else if stat.IsDir() {
+	case stat.IsDir():
 		dirBundle(b.pkg, b.prefix, b.noheader, args[0])
-	} else {
-		if b.name != "" {
-			b.prefix = ""
-		}
+	case b.name != "":
+		b.prefix = ""
+		fallthrough
+	default:
 		doBundle(b.name, b.pkg, b.prefix, b.noheader, args[0])
 	}
 }

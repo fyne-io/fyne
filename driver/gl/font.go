@@ -77,10 +77,11 @@ func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 
 	if comp == nil {
 		var f1, f2 *truetype.Font
-		if style.Monospace {
+		switch {
+		case style.Monospace:
 			f1 = loadFont(theme.TextMonospaceFont())
 			f2 = loadFont(theme.DefaultTextMonospaceFont())
-		} else if style.Bold {
+		case style.Bold:
 			if style.Italic {
 				f1 = loadFont(theme.TextBoldItalicFont())
 				f2 = loadFont(theme.DefaultTextBoldItalicFont())
@@ -88,10 +89,10 @@ func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 				f1 = loadFont(theme.TextBoldFont())
 				f2 = loadFont(theme.DefaultTextBoldFont())
 			}
-		} else if style.Italic {
+		case style.Italic:
 			f1 = loadFont(theme.TextItalicFont())
 			f2 = loadFont(theme.DefaultTextItalicFont())
-		} else {
+		default:
 			f1 = loadFont(theme.TextFont())
 			f2 = loadFont(theme.DefaultTextFont())
 		}
