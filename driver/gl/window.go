@@ -204,19 +204,19 @@ func (w *window) SetOnClosed(closed func()) {
 }
 
 func scaleForDpi(xdpi int) float32 {
-	if xdpi > 1000 { // assume that this is a mistake and bail
+	switch {
+	case xdpi > 1000:
+		// assume that this is a mistake and bail
+		return float32(1.0)
+	case xdpi > 192:
+		return float32(1.5)
+	case xdpi > 144:
+		return float32(1.35)
+	case xdpi > 120:
+		return float32(1.2)
+	default:
 		return float32(1.0)
 	}
-
-	if xdpi > 192 {
-		return float32(1.5)
-	} else if xdpi > 144 {
-		return float32(1.35)
-	} else if xdpi > 120 {
-		return float32(1.2)
-	}
-
-	return float32(1.0)
 }
 
 func (w *window) getMonitorForWindow() *glfw.Monitor {
