@@ -41,6 +41,15 @@ func TestWindow_SetTitle(t *testing.T) {
 	assert.Equal(t, title, w.Title())
 }
 
+func TestWindow_SetIcon(t *testing.T) {
+	w := d.CreateWindow("Test")
+	assert.Equal(t, fyne.CurrentApp().Icon(), w.Icon())
+
+	newIcon := theme.CancelIcon()
+	w.SetIcon(newIcon)
+	assert.Equal(t, newIcon, w.Icon())
+}
+
 func TestWindow_PixelSize(t *testing.T) {
 	w := d.CreateWindow("Test")
 	w.SetPadded(false)

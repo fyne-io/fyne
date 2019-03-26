@@ -179,6 +179,21 @@ func (w *window) Icon() fyne.Resource {
 
 func (w *window) SetIcon(icon fyne.Resource) {
 	w.icon = icon
+	if icon == nil {
+		appIcon := fyne.CurrentApp().Icon()
+		if appIcon != nil {
+			w.SetIcon(appIcon)
+		}
+		return
+	}
+
+	pix, _, err := image.Decode(bytes.NewReader(icon.Content()))
+	if err != nil {
+		fyne.LogError("Failed to decode image for window icon", err)
+		return
+	}
+
+	w.viewport.SetIcon([]image.Image{pix})
 }
 
 func (w *window) fitContent() {
@@ -822,12 +837,6 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		}
 		win.MakeContextCurrent()
 
-		iconRes := fyne.CurrentApp().Icon()
-		if iconRes != nil {
-			icon, _, _ := image.Decode(bytes.NewReader(iconRes.Content()))
-			win.SetIcon([]image.Image{icon})
-		}
-
 		if master {
 			err := gl.Init()
 			if err != nil {
@@ -843,6 +852,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret.padded = true
 		ret.canvas.SetScale(ret.detectScale())
 		ret.canvas.texScale = 1.0
+		ret.SetIcon(ret.icon) // if this is nil we will get the app icon
 		d.windows = append(d.windows, ret)
 
 		win.SetCloseCallback(ret.closed)
