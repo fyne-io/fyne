@@ -32,7 +32,7 @@ type textProvider struct {
 
 	buffer    []rune
 	rowBounds [][2]int
-	lock      sync.RWMutex
+	lock      *sync.RWMutex
 }
 
 // newTextProvider returns a new textProvider with the given text and settings from the passed textPresenter.
@@ -43,9 +43,11 @@ func newTextProvider(text string, pres textPresenter) textProvider {
 	t := textProvider{
 		buffer:    []rune(text),
 		presenter: pres,
-		lock:      sync.RWMutex{},
+		lock:      &sync.RWMutex{},
 	}
+	t.lock.Lock()
 	t.updateRowBounds()
+	t.lock.Unlock()
 	return t
 }
 
@@ -81,19 +83,21 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 	if t.presenter == nil {
 		panic("Cannot render a textProvider without a presenter")
 	}
-	r := &textRenderer{provider: t, tLock: sync.RWMutex{}}
+	r := &textRenderer{provider: t, textLock: &sync.RWMutex{}}
 
+	t.lock.Lock()
 	t.updateRowBounds() // set up the initial text layout etc
+	t.lock.Unlock()
 	r.Refresh()
 	return r
 }
 
 // updateRowBounds updates the row bounds used to render properly the text widget.
 // updateRowBounds should be invoked every time t.buffer changes.
+// must be surrounded by calls to t.lock.Lock() and t.lock.Unlock()
+// locking is left up to the caller to atomize the entire update process across multiple functions
 func (t *textProvider) updateRowBounds() {
 	var lowBound, highBound int
-	t.lock.Lock()
-	defer t.lock.Unlock()
 	t.rowBounds = [][2]int{}
 
 	if len(t.buffer) == 0 {
@@ -131,34 +135,50 @@ func (t *textProvider) refreshTextRenderer() {
 
 // SetText sets the text of the widget
 func (t *textProvider) SetText(text string) {
+	t.lock.Lock()
 	t.buffer = []rune(text)
 	t.updateRowBounds()
+	t.lock.Unlock()
 	t.refreshTextRenderer()
 }
 
 // String returns the text widget buffer as string
 func (t *textProvider) String() string {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
 	return string(t.buffer)
 }
 
 // Len returns the text widget buffer length
 func (t *textProvider) len() int {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
 	return len(t.buffer)
 }
 
 // insertAt inserts the text at the specified position
 func (t *textProvider) insertAt(pos int, runes []rune) {
-	t.buffer = append(t.buffer[:pos], append(runes, t.buffer[pos:]...)...)
+	t.lock.Lock()
+	// edge case checking
+	if len(t.buffer) < pos {
+		// append to the end if our position was out of sync
+		t.buffer = append(t.buffer, runes...)
+	} else {
+		t.buffer = append(t.buffer[:pos], append(runes, t.buffer[pos:]...)...)
+	}
 	t.updateRowBounds()
+	t.lock.Unlock()
 	t.refreshTextRenderer()
 }
 
 // deleteFromTo removes the text between the specified positions
 func (t *textProvider) deleteFromTo(lowBound int, highBound int) []rune {
 	deleted := make([]rune, highBound-lowBound)
+	t.lock.Lock()
 	copy(deleted, t.buffer[lowBound:highBound])
 	t.buffer = append(t.buffer[:lowBound], t.buffer[highBound:]...)
 	t.updateRowBounds()
+	t.lock.Unlock()
 	t.refreshTextRenderer()
 	return deleted
 }
@@ -199,8 +219,8 @@ func (t *textProvider) charMinSize() fyne.Size {
 type textRenderer struct {
 	objects []fyne.CanvasObject
 
-	texts []*canvas.Text
-	tLock sync.RWMutex
+	texts    []*canvas.Text
+	textLock *sync.RWMutex
 
 	provider *textProvider
 }
@@ -210,7 +230,7 @@ type textRenderer struct {
 func (r *textRenderer) MinSize() fyne.Size {
 	height := 0
 	width := 0
-	r.tLock.RLock()
+	// r.textLock.RLock()
 	for i := 0; i < len(r.texts); i++ {
 		min := r.texts[i].MinSize()
 		if r.texts[i].Text == "" {
@@ -219,7 +239,7 @@ func (r *textRenderer) MinSize() fyne.Size {
 		height += min.Height
 		width = fyne.Max(width, min.Width)
 	}
-	r.tLock.RUnlock()
+	// r.textLock.RUnlock()
 
 	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 }
@@ -228,17 +248,19 @@ func (r *textRenderer) Layout(size fyne.Size) {
 	yPos := theme.Padding()
 	lineHeight := r.provider.charMinSize().Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
-	r.tLock.RLock()
+	r.textLock.Lock()
 	for i := 0; i < len(r.texts); i++ {
 		text := r.texts[i]
 		text.Resize(lineSize)
 		text.Move(fyne.NewPos(theme.Padding(), yPos))
 		yPos += lineHeight
 	}
-	r.tLock.RUnlock()
+	r.textLock.Unlock()
 }
 
 func (r *textRenderer) Objects() []fyne.CanvasObject {
+	r.textLock.RLock()
+	defer r.textLock.RUnlock()
 	return r.objects
 }
 
@@ -248,15 +270,15 @@ func (r *textRenderer) ApplyTheme() {
 	if r.provider.presenter.textColor() != nil {
 		c = r.provider.presenter.textColor()
 	}
-	r.tLock.RLock()
+	r.textLock.Lock()
 	for _, text := range r.texts {
 		text.Color = c
 	}
-	r.tLock.RUnlock()
+	r.textLock.Unlock()
 }
 
 func (r *textRenderer) Refresh() {
-	r.tLock.Lock()
+	r.textLock.Lock()
 	r.texts = []*canvas.Text{}
 	r.objects = []fyne.CanvasObject{}
 	for index := 0; index < r.provider.rows(); index++ {
@@ -265,7 +287,9 @@ func (r *textRenderer) Refresh() {
 		if r.provider.presenter.password() {
 			line = strings.Repeat(passwordChar, len(row))
 		} else {
+			r.provider.lock.RLock()
 			line = string(row)
+			r.provider.lock.RUnlock()
 		}
 		textCanvas := canvas.NewText(line, theme.TextColor())
 		textCanvas.Alignment = r.provider.presenter.textAlign()
@@ -274,7 +298,7 @@ func (r *textRenderer) Refresh() {
 		r.texts = append(r.texts, textCanvas)
 		r.objects = append(r.objects, textCanvas)
 	}
-	r.tLock.Unlock()
+	r.textLock.Unlock()
 
 	r.ApplyTheme()
 	r.Layout(r.provider.Size())
@@ -298,9 +322,9 @@ func (r *textRenderer) lineSize(col, row int) (size fyne.Size) {
 	if col >= len(line) {
 		col = len(line)
 	}
-	r.tLock.RLock()
+	r.textLock.RLock()
 	lineCopy := *r.texts[row]
-	r.tLock.RUnlock()
+	r.textLock.RUnlock()
 	if r.provider.presenter.password() {
 		lineCopy.Text = strings.Repeat(passwordChar, col)
 	} else {

@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"strings"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -42,9 +43,11 @@ func (e *entryRenderer) MinSize() fyne.Size {
 
 func (e *entryRenderer) moveCursor() {
 	textRenderer := Renderer(e.text).(*textRenderer)
+	e.entry.textLock.RLock()
 	size := textRenderer.lineSize(e.entry.CursorColumn, e.entry.CursorRow)
 	xPos := size.Width
 	yPos := size.Height * e.entry.CursorRow
+	e.entry.textLock.RUnlock()
 
 	lineHeight := e.text.charMinSize().Height
 	e.cursor.Resize(fyne.NewSize(2, lineHeight))
@@ -122,6 +125,8 @@ type Entry struct {
 	CursorRow, CursorColumn int
 
 	focused bool
+
+	textLock *sync.RWMutex
 }
 
 // Resize sets a new size for a widget.
@@ -179,7 +184,9 @@ func (e *Entry) SetReadOnly(ro bool) {
 // updateText updates the internal text to the given value
 func (e *Entry) updateText(text string) {
 	changed := e.Text != text
+	e.textLock.Lock()
 	e.Text = text
+	e.textLock.Unlock()
 	if changed && e.OnChanged != nil {
 		e.OnChanged(text)
 	}
@@ -189,12 +196,14 @@ func (e *Entry) updateText(text string) {
 
 func (e *Entry) cursorTextPos() int {
 	pos := 0
+	e.textLock.RLock()
 	provider := e.textProvider()
 	for i := 0; i < e.CursorRow; i++ {
 		rowLength := provider.rowLength(i)
 		pos += rowLength + 1
 	}
 	pos += e.CursorColumn
+	e.textLock.RUnlock()
 	return pos
 }
 
@@ -229,7 +238,9 @@ func (e *Entry) TypedRune(r rune) {
 
 	runes := []rune{r}
 	provider.insertAt(e.cursorTextPos(), runes)
+	e.textLock.Lock()
 	e.CursorColumn += len(runes)
+	e.textLock.Unlock()
 
 	e.updateText(provider.String())
 	Renderer(e).(*entryRenderer).moveCursor()
@@ -241,12 +252,17 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		return
 	}
 	provider := e.textProvider()
+
 	switch key.Name {
 	case fyne.KeyBackspace:
-		if provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
+		e.textLock.RLock()
+		isEmpty := provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
+		e.textLock.RUnlock()
+		if isEmpty {
 			return
 		}
 		pos := e.cursorTextPos()
+		e.textLock.Lock()
 		deleted := provider.deleteFromTo(pos-1, pos)
 		if deleted[0] == '\n' {
 			e.CursorRow--
@@ -255,8 +271,8 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			break
 		}
 		e.CursorColumn--
+		e.textLock.Unlock()
 	case fyne.KeyDelete:
-
 		pos := e.cursorTextPos()
 		if provider.len() == 0 || pos == provider.len() {
 			return
@@ -268,13 +284,16 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			return
 		}
 		provider.insertAt(e.cursorTextPos(), []rune("\n"))
+		e.textLock.Lock()
 		e.CursorColumn = 0
 		e.CursorRow++
+		e.textLock.Unlock()
 	case fyne.KeyUp:
 		if !e.MultiLine {
 			return
 		}
 
+		e.textLock.Lock()
 		if e.CursorRow > 0 {
 			e.CursorRow--
 		}
@@ -283,11 +302,13 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if e.CursorColumn > rowLength {
 			e.CursorColumn = rowLength
 		}
+		e.textLock.Unlock()
 	case fyne.KeyDown:
 		if !e.MultiLine {
 			return
 		}
 
+		e.textLock.Lock()
 		if e.CursorRow < provider.rows()-1 {
 			e.CursorRow++
 		}
@@ -296,37 +317,42 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if e.CursorColumn > rowLength {
 			e.CursorColumn = rowLength
 		}
+		e.textLock.Unlock()
 	case fyne.KeyLeft:
+		e.textLock.Lock()
 		if e.CursorColumn > 0 {
 			e.CursorColumn--
-			break
-		}
-
-		if e.MultiLine && e.CursorRow > 0 {
+		} else if e.MultiLine && e.CursorRow > 0 {
 			e.CursorRow--
-			rowLength := provider.rowLength(e.CursorRow)
-			e.CursorColumn = rowLength
+			e.CursorColumn = provider.rowLength(e.CursorRow)
 		}
+		e.textLock.Unlock()
 	case fyne.KeyRight:
+		e.textLock.Lock()
 		if e.MultiLine {
 			rowLength := provider.rowLength(e.CursorRow)
 			if e.CursorColumn < rowLength {
 				e.CursorColumn++
-				break
-			}
-			if e.CursorRow < provider.rows()-1 {
+			} else if e.CursorRow < provider.rows()-1 {
 				e.CursorRow++
 				e.CursorColumn = 0
 			}
-			break
-		}
-		if e.CursorColumn < provider.len() {
+		} else if e.CursorColumn < provider.len() {
 			e.CursorColumn++
 		}
+		e.textLock.Unlock()
 	case fyne.KeyEnd:
-		e.CursorColumn = provider.len()
+		e.textLock.Lock()
+		if e.MultiLine {
+			e.CursorColumn = provider.rowLength(e.CursorRow)
+		} else {
+			e.CursorColumn = provider.len()
+		}
+		e.textLock.Unlock()
 	case fyne.KeyHome:
+		e.textLock.Lock()
 		e.CursorColumn = 0
+		e.textLock.Unlock()
 	default:
 		return
 	}
@@ -406,14 +432,14 @@ func (p *placeholderPresenter) object() fyne.Widget {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
-	text := &textProvider{buffer: []rune(e.Text), presenter: e}
-	placeholder := &textProvider{presenter: &placeholderPresenter{e}, buffer: []rune(e.PlaceHolder)}
+	text := newTextProvider(e.Text, e)
+	placeholder := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
 
 	line := canvas.NewRectangle(theme.ButtonColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
-	return &entryRenderer{text, placeholder, line, cursor,
-		[]fyne.CanvasObject{line, placeholder, text, cursor}, e}
+	return &entryRenderer{&text, &placeholder, line, cursor,
+		[]fyne.CanvasObject{line, &placeholder, &text, cursor}, e}
 }
 
 func (e *Entry) registerShortcut() {
@@ -444,7 +470,9 @@ func (e *Entry) registerShortcut() {
 
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
-	e := &Entry{}
+	e := &Entry{
+		textLock: &sync.RWMutex{},
+	}
 	e.registerShortcut()
 	Refresh(e)
 	return e
@@ -452,7 +480,10 @@ func NewEntry() *Entry {
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
-	e := &Entry{MultiLine: true}
+	e := &Entry{
+		MultiLine: true,
+		textLock:  &sync.RWMutex{},
+	}
 	e.registerShortcut()
 	Refresh(e)
 	return e
@@ -460,7 +491,10 @@ func NewMultiLineEntry() *Entry {
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true}
+	e := &Entry{
+		Password: true,
+		textLock: &sync.RWMutex{},
+	}
 	e.registerShortcut()
 	Refresh(e)
 	return e
