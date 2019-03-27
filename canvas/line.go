@@ -45,8 +45,8 @@ func (l *Line) Position() fyne.Position {
 
 // Move the line object to a new position, relative to it's parent / canvas
 func (l *Line) Move(pos fyne.Position) {
-	l.Lock()
 	size := l.Size()
+	l.Lock()
 	l.Position1 = pos
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 	l.Unlock()
