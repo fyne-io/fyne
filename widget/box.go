@@ -57,14 +57,18 @@ func (b *Box) ApplyTheme() {
 
 // Prepend inserts a new CanvasObject at the top/left of the box
 func (b *Box) Prepend(object fyne.CanvasObject) {
+	b.Lock()
 	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
+	b.Unlock()
 
 	Refresh(b)
 }
 
 // Append adds a new CanvasObject to the end/right of the box
 func (b *Box) Append(object fyne.CanvasObject) {
+	b.Lock()
 	b.Children = append(b.Children, object)
+	b.Unlock()
 
 	Refresh(b)
 }
