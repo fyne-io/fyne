@@ -194,6 +194,7 @@ type textRenderer struct {
 	texts      []*canvas.Text
 	provider   *textProvider
 	textsMutex sync.RWMutex
+	objectsMutex sync.RWMutex
 }
 
 // MinSize calculates the minimum size of a label.
@@ -230,7 +231,14 @@ func (r *textRenderer) Layout(size fyne.Size) {
 }
 
 func (r *textRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
+	println("cloning the objects ?")
+	retval := []fyne.CanvasObject{}
+	r.objectsMutex.RLock()
+	defer r.objectsMutex.RUnlock()
+	for _,v := range r.objects {
+		retval = append(retval, v)
+	}
+	return retval
 }
 
 // ApplyTheme is called when the Label may need to update it's look
@@ -248,7 +256,9 @@ func (r *textRenderer) ApplyTheme() {
 
 func (r *textRenderer) Refresh() {
 	r.textsMutex.Lock()
+	r.objectsMutex.Lock()
 	defer r.textsMutex.Unlock()
+	defer r.objectsMutex.Unlock()
 	r.texts = []*canvas.Text{}
 	r.objects = []fyne.CanvasObject{}
 	for index := 0; index < r.provider.rows(); index++ {
