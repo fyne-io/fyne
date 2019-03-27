@@ -59,14 +59,14 @@ func (l *Circle) MinSize() fyne.Size {
 
 // Visible returns true if this circle is visible, false otherwise
 func (l *Circle) Visible() bool {
-	l.RLock())
+	l.RLock()
 	defer l.RUnlock()
 	return !l.Hidden
 }
 
 // Show will set this circle to be visible
 func (l *Circle) Show() {
-	l.Lock())
+	l.Lock()
 	l.Hidden = false
 	l.Unlock()
 
