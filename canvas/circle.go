@@ -42,9 +42,9 @@ func (l *Circle) Position() fyne.Position {
 
 // Move the circle object to a new position, relative to it's parent / canvas
 func (l *Circle) Move(pos fyne.Position) {
+	size := l.Size()
 	l.Lock()
 	defer l.Unlock()
-	size := l.Size()
 	l.Position1 = pos
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }

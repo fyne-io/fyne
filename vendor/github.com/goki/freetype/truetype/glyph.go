@@ -317,6 +317,10 @@ func (g *GlyphBuf) loadSimple(glyf []byte, ne int) (program []byte) {
 
 	// Decode the co-ordinates.
 	var x int16
+	if np1 > len(g.Points) {
+		println("thats not right", np1, len(g.Points))
+		np1 = len(g.Points)
+	}
 	for i := np0; i < np1; i++ {
 		f := g.Points[i].Flags
 		if f&flagXShortVector != 0 {
