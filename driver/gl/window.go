@@ -80,7 +80,7 @@ func (w *window) SetFullScreen(full bool) {
 		if full {
 			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 		} else {
-			min := w.canvas.content.MinSize()
+			min := w.canvas.Content().MinSize()
 			winWidth, winHeight := scaleInt(w.canvas, min.Width), scaleInt(w.canvas, min.Height)
 
 			w.viewport.SetMonitor(nil, 0, 0, winWidth, winHeight, 0) // TODO remember position?
@@ -111,7 +111,7 @@ func (w *window) CenterOnScreen() {
 // minSizeOnScreen gets the size of a window content in screen pixels
 func (w *window) minSizeOnScreen() (int, int) {
 	// get current size of content inside the window
-	winContentSize := w.canvas.content.MinSize()
+	winContentSize := w.canvas.Content().MinSize()
 	// add padding, if required
 	if w.Padded() {
 		pad := theme.Padding() * 2
@@ -156,14 +156,14 @@ func (w *window) Padded() bool {
 
 func (w *window) SetPadded(padded bool) {
 	w.padded = padded
-	if w.canvas.content == nil {
+	if w.canvas.Content() == nil {
 		return
 	}
 
 	if padded {
-		w.canvas.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		w.canvas.Content().Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	} else {
-		w.canvas.content.Move(fyne.NewPos(0, 0))
+		w.canvas.Content().Move(fyne.NewPos(0, 0))
 	}
 
 	runOnMainAsync(w.fitContent)
@@ -197,7 +197,7 @@ func (w *window) SetIcon(icon fyne.Resource) {
 }
 
 func (w *window) fitContent() {
-	if w.canvas.content == nil {
+	if w.canvas.Content() == nil {
 		return
 	}
 
@@ -312,7 +312,7 @@ func (w *window) Clipboard() fyne.Clipboard {
 }
 
 func (w *window) Content() fyne.CanvasObject {
-	return w.canvas.content
+	return w.canvas.Content()
 }
 
 func (w *window) resize(size fyne.Size) {
@@ -321,7 +321,7 @@ func (w *window) resize(size fyne.Size) {
 		size = fyne.NewSize(size.Width-pad, size.Height-pad)
 	}
 
-	w.canvas.content.Resize(size)
+	w.canvas.Content().Resize(size)
 	w.canvas.setDirty(true)
 }
 
@@ -346,7 +346,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), func(obj fyne.CanvasObject, _ fyne.Position) {
+	w.canvas.walkObjects(w.canvas.Content(), fyne.NewPos(0, 0), func(obj fyne.CanvasObject, _ fyne.Position) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
@@ -369,13 +369,13 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 		return
 	}
 
-	contentSize := w.canvas.content.Size()
+	contentSize := w.canvas.Content().Size()
 	w.canvas.SetScale(newScale)
 
 	// this can trigger resize events that we need to ignore
 	w.ignoreResize = true
 	w.fitContent()
-	w.canvas.content.Resize(contentSize)
+	w.canvas.Content().Resize(contentSize)
 	w.canvas.setDirty(true)
 
 	if w.Padded() {
@@ -419,9 +419,9 @@ func (w *window) refresh(viewport *glfw.Window) {
 }
 
 func findMouseObj(canvas *glCanvas, mouse fyne.Position, scroll bool) (fyne.CanvasObject, int, int) {
-	found := canvas.content
+	found := canvas.Content()
 	foundX, foundY := 0, 0
-	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
+	canvas.walkObjects(canvas.Content(), fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
 		if mouse.X < pos.X || mouse.Y < pos.Y {
 			return
 		}
