@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"strings"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -189,16 +190,17 @@ func (t *textProvider) charMinSize() fyne.Size {
 
 // Renderer
 type textRenderer struct {
-	objects []fyne.CanvasObject
-
-	texts []*canvas.Text
-
-	provider *textProvider
+	objects    []fyne.CanvasObject
+	texts      []*canvas.Text
+	provider   *textProvider
+	textsMutex sync.RWMutex
 }
 
 // MinSize calculates the minimum size of a label.
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
+	r.textsMutex.RLock()
+	defer r.textsMutex.RUnlock()
 	height := 0
 	width := 0
 	for i := 0; i < len(r.texts); i++ {
@@ -214,6 +216,8 @@ func (r *textRenderer) MinSize() fyne.Size {
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
+	r.textsMutex.RLock()
+	defer r.textsMutex.RUnlock()
 	yPos := theme.Padding()
 	lineHeight := r.provider.charMinSize().Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
@@ -231,6 +235,8 @@ func (r *textRenderer) Objects() []fyne.CanvasObject {
 
 // ApplyTheme is called when the Label may need to update it's look
 func (r *textRenderer) ApplyTheme() {
+	r.textsMutex.RLock()
+	defer r.textsMutex.RUnlock()
 	c := theme.TextColor()
 	if r.provider.presenter.textColor() != nil {
 		c = r.provider.presenter.textColor()
@@ -241,6 +247,8 @@ func (r *textRenderer) ApplyTheme() {
 }
 
 func (r *textRenderer) Refresh() {
+	r.textsMutex.Lock()
+	defer r.textsMutex.Unlock()
 	r.texts = []*canvas.Text{}
 	r.objects = []fyne.CanvasObject{}
 	for index := 0; index < r.provider.rows(); index++ {
@@ -281,7 +289,9 @@ func (r *textRenderer) lineSize(col, row int) (size fyne.Size) {
 	if col >= len(line) {
 		col = len(line)
 	}
+	r.textsMutex.RLock()
 	lineCopy := *r.texts[row]
+	r.textsMutex.RUnlock()
 	if r.provider.presenter.password() {
 		lineCopy.Text = strings.Repeat(passwordChar, col)
 	} else {
