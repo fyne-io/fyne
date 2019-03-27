@@ -10,6 +10,7 @@ import (
 
 // A base widget class to define the standard widget behaviours.
 type baseWidget struct {
+	sync.RWMutex
 	size     fyne.Size
 	position fyne.Position
 	Hidden   bool
@@ -17,26 +18,34 @@ type baseWidget struct {
 
 // Get the current size of this widget.
 func (w *baseWidget) Size() fyne.Size {
+	w.RLock()
+	defer w.RUnlock()
 	return w.size
 }
 
 // Set a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *baseWidget) resize(size fyne.Size, parent fyne.Widget) {
+	w.Lock()
 	w.size = size
+	w.Unlock()
 
 	Renderer(parent).Layout(size)
 }
 
 // Get the current position of this widget, relative to it's parent.
 func (w *baseWidget) Position() fyne.Position {
+	w.RLock()
+	defer w.RUnlock()
 	return w.position
 }
 
 // Move the widget to a new position, relative to it's parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *baseWidget) move(pos fyne.Position, parent fyne.Widget) {
+	w.Lock()
 	w.position = pos
+	w.Unlock()
 
 	canvas.Refresh(parent)
 }
@@ -49,11 +58,15 @@ func (w *baseWidget) minSize(parent fyne.Widget) fyne.Size {
 }
 
 func (w *baseWidget) Visible() bool {
+	w.RLock()
+	defer w.RUnlock()
 	return !w.Hidden
 }
 
 func (w *baseWidget) show(parent fyne.Widget) {
+	w.Lock()
 	w.Hidden = false
+	w.Unlock()
 	for _, child := range Renderer(parent).Objects() {
 		child.Show()
 	}
@@ -62,7 +75,9 @@ func (w *baseWidget) show(parent fyne.Widget) {
 }
 
 func (w *baseWidget) hide(parent fyne.Widget) {
+	w.Lock()
 	w.Hidden = true
+	w.Unlock()
 	for _, child := range Renderer(parent).Objects() {
 		child.Hide()
 	}
