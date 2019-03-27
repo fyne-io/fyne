@@ -382,6 +382,8 @@ func (a *face) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
 	a.advanceCacheMutex.Lock()
 	a.advanceCache[r] = a.glyphBuf.AdvanceWidth
 	a.advanceCacheMutex.Unlock()
+	a.glyphBuf.RLock()
+	defer a.glyphBuf.RUnlock()
 	return a.glyphBuf.AdvanceWidth, true
 }
 
