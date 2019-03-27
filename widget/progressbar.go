@@ -30,7 +30,7 @@ func (p *progressRenderer) MinSize() fyne.Size {
 }
 
 func (p *progressRenderer) updateBar() {
-	p.progltoheuess.RLock()
+	p.progress.RLock()
 	defer p.progress.RUnlock()
 	if p.progress.Value < p.progress.Min {
 		p.progress.Value = p.progress.Min
