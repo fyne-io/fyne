@@ -119,8 +119,8 @@ type boxRenderer struct {
 
 func (b *boxRenderer) MinSize() fyne.Size {
 	b.RLock()
+	defer b.RUnlock()
 	return b.layout.MinSize(b.objects)
-	b.RUnlock()
 }
 
 func (b *boxRenderer) Layout(size fyne.Size) {
