@@ -1,8 +1,11 @@
 package fyne
 
+import "sync"
+
 // Container is a CanvasObject that contains a collection of child objects.
 // The layout of the children is set by the specified Layout.
 type Container struct {
+	sync.RWMutex
 	size     Size     // The current size of the Container
 	position Position // The current position of the Container
 	Hidden   bool     // Is this Container hidden
@@ -12,6 +15,8 @@ type Container struct {
 }
 
 func (c *Container) layout() {
+	c.RLock()
+	defer c.RUnlock()
 	if c.Layout != nil {
 		c.Layout.Layout(c.Objects, c.size)
 		return
@@ -25,29 +30,39 @@ func (c *Container) layout() {
 
 // Size returns the current size of this container.
 func (c *Container) Size() Size {
+	c.RLock()
+	defer c.RUnlock()
 	return c.size
 }
 
 // Resize sets a new size for the Container.
 func (c *Container) Resize(size Size) {
+	c.Lock()
 	c.size = size
+	c.Unlock()
 	c.layout()
 }
 
 // Position gets the current position of this Container, relative to its parent.
 func (c *Container) Position() Position {
+	c.RLock()
+	defer c.RUnlock()
 	return c.position
 }
 
 // Move the container (and all its children) to a new position, relative to its parent.
 func (c *Container) Move(pos Position) {
+	c.Lock()
 	c.position = pos
+	c.Unlock()
 	c.layout()
 }
 
 // MinSize calculates the minimum size of a Container.
 // This is delegated to the Layout, if specified, otherwise it will mimic MaxLayout.
 func (c *Container) MinSize() Size {
+	c.RLock()
+	defer c.RUnlock()
 	if c.Layout != nil {
 		return c.Layout.MinSize(c.Objects)
 	}
@@ -62,12 +77,18 @@ func (c *Container) MinSize() Size {
 
 // Visible returns true if the container is currently visible, false otherwise.
 func (c *Container) Visible() bool {
+	c.RLock()
+	defer c.RUnlock()
 	return !c.Hidden
 }
 
 // Show sets this container, and all its children, to be visible.
 func (c *Container) Show() {
+	c.Lock()
 	c.Hidden = false
+	c.Unlock()
+	c.RLock()
+	defer c.RUnlock()
 	for _, child := range c.Objects {
 		child.Show()
 	}
@@ -75,7 +96,11 @@ func (c *Container) Show() {
 
 // Hide sets this container, and all its children, to be not visible.
 func (c *Container) Hide() {
+	c.Lock()
 	c.Hidden = true
+	c.Unlock()
+	c.RLock()
+	defer c.RUnlock()
 	for _, child := range c.Objects {
 		child.Hide()
 	}
@@ -83,7 +108,9 @@ func (c *Container) Hide() {
 
 // AddObject adds another CanvasObject to the set this Container holds.
 func (c *Container) AddObject(o CanvasObject) {
+	c.Lock()
 	c.Objects = append(c.Objects, o)
+	c.Unlock()
 	c.layout()
 }
 

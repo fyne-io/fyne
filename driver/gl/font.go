@@ -100,8 +100,8 @@ func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 		fontCache[style] = comp
 	}
 
-	face := comp.faces[*opts]
-	if face == nil {
+	face,ok := comp.faces[*opts]
+	if !ok || face == nil {
 		f1 := truetype.NewFace(comp.font, opts)
 		f2 := truetype.NewFace(comp.fallback, opts)
 		face = newFontWithFallback(f1, f2, comp.font, comp.fallback)

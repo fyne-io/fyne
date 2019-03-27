@@ -297,7 +297,12 @@ func (g *GlyphBuf) loadSimple(glyf []byte, ne int) (program []byte) {
 	}
 
 	np0 := len(g.Points)
-	np1 := np0 + int(g.Ends[len(g.Ends)-1])
+	np1 := np0
+	if len(g.Ends) < 1 {
+		println("ends is empty ??")
+	} else {
+		np1 = np0 + int(g.Ends[len(g.Ends)-1])
+	}
 
 	// Decode the flags.
 	for i := np0; i < np1; {
