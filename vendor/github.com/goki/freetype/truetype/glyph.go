@@ -7,6 +7,7 @@ package truetype
 
 import (
 	"fmt"
+	"sync"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
@@ -26,6 +27,7 @@ type Point struct {
 // A GlyphBuf holds a glyph's contours. A GlyphBuf can be re-used to load a
 // series of glyphs from a Font.
 type GlyphBuf struct {
+	sync.RWMutex
 	// AdvanceWidth is the glyph's advance width.
 	AdvanceWidth fixed.Int26_6
 	// Bounds is the glyph's bounding box.
@@ -85,6 +87,8 @@ const (
 // contours for this GlyphBuf. scale is the number of 26.6 fixed point units in
 // 1 em, i is the glyph index, and h is the hinting policy.
 func (g *GlyphBuf) Load(f *Font, scale fixed.Int26_6, i Index, h font.Hinting) error {
+	g.Lock()
+	defer g.Unlock()
 	g.Points = g.Points[:0]
 	g.Unhinted = g.Unhinted[:0]
 	g.InFontUnits = g.InFontUnits[:0]
