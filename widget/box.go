@@ -110,6 +110,7 @@ func NewVBox(children ...fyne.CanvasObject) *Box {
 }
 
 type boxRenderer struct {
+	sync.RWMutex
 	layout fyne.Layout
 
 	objects []fyne.CanvasObject
@@ -140,8 +141,12 @@ func (b *boxRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (b *boxRenderer) Refresh() {
+	b.box.RLock()
+	b.Lock()
 	b.objects = b.box.Children
+	b.Unlock()
 	b.Layout(b.box.Size())
+	b.box.RUnlock()
 
 	canvas.Refresh(b.box)
 }
