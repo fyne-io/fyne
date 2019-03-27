@@ -231,14 +231,9 @@ func (r *textRenderer) Layout(size fyne.Size) {
 }
 
 func (r *textRenderer) Objects() []fyne.CanvasObject {
-	println("cloning the objects ?")
-	retval := []fyne.CanvasObject{}
 	r.objectsMutex.RLock()
 	defer r.objectsMutex.RUnlock()
-	for _,v := range r.objects {
-		retval = append(retval, v)
-	}
-	return retval
+	return append([]fyne.CanvasObject{}, r.objects...)
 }
 
 // ApplyTheme is called when the Label may need to update it's look
@@ -257,8 +252,6 @@ func (r *textRenderer) ApplyTheme() {
 func (r *textRenderer) Refresh() {
 	r.textsMutex.Lock()
 	r.objectsMutex.Lock()
-	defer r.textsMutex.Unlock()
-	defer r.objectsMutex.Unlock()
 	r.texts = []*canvas.Text{}
 	r.objects = []fyne.CanvasObject{}
 	for index := 0; index < r.provider.rows(); index++ {
@@ -276,6 +269,8 @@ func (r *textRenderer) Refresh() {
 		r.texts = append(r.texts, textCanvas)
 		r.objects = append(r.objects, textCanvas)
 	}
+	r.textsMutex.Unlock()
+	r.objectsMutex.Unlock()
 
 	r.ApplyTheme()
 	r.Layout(r.provider.Size())

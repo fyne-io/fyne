@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"image/color"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -29,6 +30,8 @@ func (p *progressRenderer) MinSize() fyne.Size {
 }
 
 func (p *progressRenderer) updateBar() {
+	p.progltoheuess.RLock()
+	defer p.progress.RUnlock()
 	if p.progress.Value < p.progress.Min {
 		p.progress.Value = p.progress.Min
 	}
@@ -78,6 +81,7 @@ func (p *progressRenderer) Destroy() {
 
 // ProgressBar widget creates a horizontal panel that indicates progress
 type ProgressBar struct {
+	sync.RWMutex
 	baseWidget
 
 	Min, Max, Value float64
@@ -113,6 +117,8 @@ func (p *ProgressBar) Hide() {
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
+	p.Lock()
+	defer p.Unlock()
 	p.Value = v
 	Renderer(p).Refresh()
 }
