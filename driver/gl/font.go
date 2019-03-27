@@ -2,6 +2,7 @@ package gl
 
 import (
 	"image"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -71,8 +72,12 @@ type fontCacheItem struct {
 }
 
 var fontCache = make(map[fyne.TextStyle]*fontCacheItem)
+var fontCacheMutex sync.Mutex // hate to do it as a global var - should refactor this maybe
 
 func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
+	fontCacheMutex.Lock()
+	defer fontCacheMutex.Unlock()
+
 	comp := fontCache[style]
 
 	if comp == nil {
@@ -99,6 +104,7 @@ func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 		comp = &fontCacheItem{font: f1, fallback: f2, faces: make(map[truetype.Options]font.Face)}
 		fontCache[style] = comp
 	}
+
 
 	face,ok := comp.faces[*opts]
 	if !ok || face == nil {

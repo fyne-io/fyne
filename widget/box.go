@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -12,6 +13,7 @@ import (
 // Box widget is a simple list where the child elements are arranged in a single column
 // for vertical or a single row for horizontal arrangement
 type Box struct {
+	sync.RWMutex
 	baseWidget
 	background color.Color
 
@@ -48,7 +50,9 @@ func (b *Box) Hide() {
 
 // ApplyTheme updates this box to match the current theme
 func (b *Box) ApplyTheme() {
+	b.Lock()
 	b.background = theme.BackgroundColor()
+	b.Unlock()
 }
 
 // Prepend inserts a new CanvasObject at the top/left of the box
@@ -67,6 +71,8 @@ func (b *Box) Append(object fyne.CanvasObject) {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (b *Box) CreateRenderer() fyne.WidgetRenderer {
+	b.RLock()
+	defer b.RUnlock()
 	var lay fyne.Layout
 	if b.Horizontal {
 		lay = layout.NewHBoxLayout()
@@ -78,7 +84,9 @@ func (b *Box) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (b *Box) setBackgroundColor(bg color.Color) {
+	b.Lock()
 	b.background = bg
+	b.Unlock()
 }
 
 // NewHBox creates a new horizontally aligned box widget with the specified list of child objects
