@@ -222,6 +222,7 @@ func NewFace(f *Font, opts *Options) font.Face {
 }
 
 type face struct {
+	sync.RWMutex
 	f                 *Font
 	hinting           font.Hinting
 	scale             fixed.Int26_6
@@ -242,7 +243,6 @@ type face struct {
 	glyphBuf          GlyphBuf
 	indexCache        [indexCacheLen]indexCacheEntry
 	advanceCache      map[rune]fixed.Int26_6
-	advanceCacheMutex sync.RWMutex
 
 	// TODO: clip rectangle?
 }
@@ -306,13 +306,17 @@ func (a *face) Glyph(dot fixed.Point26_6, r rune) (
 	cIndex = cIndex*a.subPixelX - uint32(fx/a.subPixelMaskX)
 	cIndex = cIndex*a.subPixelY - uint32(fy/a.subPixelMaskY)
 	cIndex &= uint32(len(a.glyphCache) - 1)
+	a.Lock()
 	a.paintOffset = a.maxh * int(cIndex)
+	a.Unlock()
 	k := glyphCacheKey{
 		index: index,
 		fx:    uint8(fx),
 		fy:    uint8(fy),
 	}
 	var v glyphCacheVal
+	a.RLock()
+	defer a.RUnlock()
 	if a.glyphCache[cIndex].key != k {
 		var ok bool
 		v, ok = a.rasterize(index, fx, fy)
@@ -363,25 +367,19 @@ func (a *face) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.In
 }
 
 func (a *face) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
-	a.advanceCacheMutex.RLock()
+	a.Lock()
+	defer a.Unlock()
 	if a.advanceCache == nil {
-		a.advanceCacheMutex.RUnlock()
-		a.advanceCacheMutex.Lock()
 		a.advanceCache = make(map[rune]fixed.Int26_6, 1024)
-		a.advanceCacheMutex.Unlock()
-		a.advanceCacheMutex.RLock()
 	}
 	advance, ok = a.advanceCache[r]
-	a.advanceCacheMutex.RUnlock()
 	if ok {
 		return
 	}
 	if err := a.glyphBuf.Load(a.f, a.scale, a.index(r), a.hinting); err != nil {
 		return 0, false
 	}
-	a.advanceCacheMutex.Lock()
 	a.advanceCache[r] = a.glyphBuf.AdvanceWidth
-	a.advanceCacheMutex.Unlock()
 	a.glyphBuf.RLock()
 	defer a.glyphBuf.RUnlock()
 	return a.glyphBuf.AdvanceWidth, true
@@ -392,6 +390,8 @@ func (a *face) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
 //
 // The 26.6 fixed point arguments fx and fy must be in the range [0, 1).
 func (a *face) rasterize(index Index, fx, fy fixed.Int26_6) (v glyphCacheVal, ok bool) {
+	a.RLock()
+	defer a.RUnlock()
 	if err := a.glyphBuf.Load(a.f, a.scale, index, a.hinting); err != nil {
 		return glyphCacheVal{}, false
 	}

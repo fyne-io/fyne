@@ -18,8 +18,8 @@ type baseWidget struct {
 
 // Get the current size of this widget.
 func (w *baseWidget) Size() fyne.Size {
-	w.RLock()
-	defer w.RUnlock()
+	//w.RLock()
+	//defer w.RUnlock()
 	return w.size
 }
 
@@ -35,8 +35,8 @@ func (w *baseWidget) resize(size fyne.Size, parent fyne.Widget) {
 
 // Get the current position of this widget, relative to it's parent.
 func (w *baseWidget) Position() fyne.Position {
-	w.RLock()
-	defer w.RUnlock()
+	//w.RLock()
+	//defer w.RUnlock()
 	return w.position
 }
 

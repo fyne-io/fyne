@@ -32,19 +32,19 @@ func (s *scrollRenderer) updatePosition() {
 func (s *scrollRenderer) updateBarPosition() {
 	barSize := s.barSizeVertical()
 	barRatio := float32(s.scroll.Offset.Y) / float32(s.scroll.Content.Size().Height-s.scroll.Size().Height)
-	barOff := int(float32(s.scroll.size.Height-barSize.Height) * barRatio)
+	barOff := int(float32(s.scroll.Size().Height-barSize.Height) * barRatio)
 
 	s.vertBar.Resize(barSize)
-	s.vertBar.Move(fyne.NewPos(s.scroll.size.Width-theme.ScrollBarSize(), barOff))
+	s.vertBar.Move(fyne.NewPos(s.scroll.Size().Width-theme.ScrollBarSize(), barOff))
 }
 
 func (s *scrollRenderer) barSizeVertical() fyne.Size {
-	portion := float32(s.scroll.size.Height) / float32(s.scroll.Content.Size().Height)
+	portion := float32(s.scroll.Size().Height) / float32(s.scroll.Content.Size().Height)
 	if portion > 1.0 {
 		portion = 1.0
 	}
 
-	barHeight := int(float32(s.scroll.size.Height) * portion)
+	barHeight := int(float32(s.scroll.Size().Height) * portion)
 	return fyne.NewSize(theme.ScrollBarSize(), barHeight)
 }
 

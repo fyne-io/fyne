@@ -1,16 +1,13 @@
 package widget
 
 import (
-	"image/color"
-	"sync"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
+	"image/color"
 )
 
 // Label widget is a label component with appropriate padding and layout.
 type Label struct {
-	sync.RWMutex
 	textProvider
 	Text      string
 	Alignment fyne.TextAlign // The alignment of the Text
@@ -35,23 +32,17 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
-	l.Lock()
 	l.Text = text
 	l.textProvider.SetText(text) // calls refresh
-	l.Unlock()
 }
 
 // textAlign tells the rendering textProvider our alignment
 func (l *Label) textAlign() fyne.TextAlign {
-	l.RLock()
-	defer l.RUnlock()
 	return l.Alignment
 }
 
 // textStyle tells the rendering textProvider our style
 func (l *Label) textStyle() fyne.TextStyle {
-	l.RLock()
-	defer l.RUnlock()
 	return l.TextStyle
 }
 
@@ -72,9 +63,7 @@ func (l *Label) object() fyne.Widget {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
-	l.Lock()
 	l.textProvider = newTextProvider(l.Text, l)
-	l.Unlock()
 	return l.textProvider.CreateRenderer()
 }
 

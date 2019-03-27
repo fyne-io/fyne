@@ -143,6 +143,8 @@ func (b *boxRenderer) BackgroundColor() color.Color {
 }
 
 func (b *boxRenderer) Objects() []fyne.CanvasObject {
+	b.RLock()
+	defer b.RUnlock()
 	return b.objects
 }
 
