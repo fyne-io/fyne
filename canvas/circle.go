@@ -52,7 +52,7 @@ func (l *Circle) Move(pos fyne.Position) {
 // MinSize for a Circle simply returns Size{1, 1} as there is no
 // explicit content
 func (l *Circle) MinSize() fyne.Size {
-	l.RLock())
+	l.RLock()
 	defer l.RUnlock()
 	return fyne.NewSize(1, 1)
 }
