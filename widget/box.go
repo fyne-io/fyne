@@ -118,17 +118,23 @@ type boxRenderer struct {
 }
 
 func (b *boxRenderer) MinSize() fyne.Size {
+	b.RLock()
 	return b.layout.MinSize(b.objects)
+	b.RUnlock()
 }
 
 func (b *boxRenderer) Layout(size fyne.Size) {
+	b.RLock()
 	b.layout.Layout(b.objects, size)
+	b.RUnlock()
 }
 
 func (b *boxRenderer) ApplyTheme() {
 }
 
 func (b *boxRenderer) BackgroundColor() color.Color {
+	b.box.RLock()
+	defer b.box.RUnlock()
 	if b.box.background == nil {
 		return theme.BackgroundColor()
 	}
@@ -141,8 +147,8 @@ func (b *boxRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (b *boxRenderer) Refresh() {
-	b.box.RLock()
 	b.Lock()
+	b.box.RLock()
 	b.objects = b.box.Children
 	b.Unlock()
 	b.Layout(b.box.Size())
