@@ -2,6 +2,7 @@ package gl
 
 import (
 	"image"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -13,9 +14,14 @@ import (
 type compositeFace struct {
 	chosen, fallback         font.Face
 	chosenFont, fallbackFont *truetype.Font
+
+	lock sync.Mutex
 }
 
 func (c *compositeFace) containsGlyph(font *truetype.Font, r rune) bool {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	return font != nil && font.Index(r) != 0
 }
 
@@ -29,7 +35,12 @@ func (c *compositeFace) Close() error {
 
 func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
 	dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool) {
-	if c.containsGlyph(c.chosenFont, r) {
+	contains := c.containsGlyph(c.chosenFont, r)
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if contains {
 		return c.chosen.Glyph(dot, r)
 	}
 
@@ -37,32 +48,51 @@ func (c *compositeFace) Glyph(dot fixed.Point26_6, r rune) (
 }
 
 func (c *compositeFace) GlyphBounds(r rune) (bounds fixed.Rectangle26_6, advance fixed.Int26_6, ok bool) {
-	if c.containsGlyph(c.chosenFont, r) {
+	contains := c.containsGlyph(c.chosenFont, r)
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if contains {
 		c.chosen.GlyphBounds(r)
 	}
 	return c.fallback.GlyphBounds(r)
 }
 
 func (c *compositeFace) GlyphAdvance(r rune) (advance fixed.Int26_6, ok bool) {
-	if c.containsGlyph(c.chosenFont, r) {
+	contains := c.containsGlyph(c.chosenFont, r)
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if contains {
 		return c.chosen.GlyphAdvance(r)
 	}
 	return c.fallback.GlyphAdvance(r)
 }
 
 func (c *compositeFace) Kern(r0, r1 rune) fixed.Int26_6 {
-	if c.containsGlyph(c.chosenFont, r0) && c.containsGlyph(c.chosenFont, r1) {
+	contains0 := c.containsGlyph(c.chosenFont, r0)
+	contains1 := c.containsGlyph(c.chosenFont, r1)
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if contains0 && contains1 {
 		return c.chosen.Kern(r0, r1)
 	}
 	return c.fallback.Kern(r0, r1)
 }
 
 func (c *compositeFace) Metrics() font.Metrics {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	return c.chosen.Metrics()
 }
 
 func newFontWithFallback(chosen, fallback font.Face, chosenFont, fallbackFont *truetype.Font) font.Face {
-	return &compositeFace{chosen, fallback, chosenFont, fallbackFont}
+	return &compositeFace{chosen, fallback, chosenFont, fallbackFont, sync.Mutex{}}
 }
 
 type fontCacheItem struct {
