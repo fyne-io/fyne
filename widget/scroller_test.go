@@ -19,7 +19,7 @@ func TestNewScrollContainer(t *testing.T) {
 
 	assert.Equal(t, 0, scroll.Offset.Y)
 	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 100), render.barSizeVertical())
-	assert.Equal(t, fyne.NewPos(100 - theme.ScrollBarSize(), 0), render.vertBar.Position())
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), render.vertBar.Position())
 }
 
 func TestScrollContainer_Scrolled(t *testing.T) {
