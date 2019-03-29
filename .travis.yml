@@ -25,10 +25,10 @@ before_script:
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
   - if [[ "$TRAVIS_GO_VERSION" == 1.12* ]]; then
-      // enable go modules only for 1.12.x
+      # enable go modules only for 1.12.x
       export GO111MODULE=on
       if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        // test vendor folder only on osx
+        # test vendor folder only on osx
         export GOFLAGS=-mod=vendor
       fi
     fi
