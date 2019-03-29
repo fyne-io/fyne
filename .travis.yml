@@ -9,16 +9,27 @@ os:
   - linux
   - osx
 
+matrix:
+  include:
+  - go: "1.12.x" # Testing go modules + vendor on linux
+    os: linux
+    install: true # Disable travis default install step (go get ${gobuild_args} ./...)
+    env: 
+      - GOFLAGS=-mod=vendor
+      - GO111MODULE=on
+  - go: "1.12.x" # Testing only go modules on osx
+    os: osx
+    install: true
+    env: 
+      - GO111MODULE=on
+
 addons:
   apt:
     packages:
       - libgl1-mesa-dev
       - xorg-dev
 
-gobuild_args: "-v -tags ci -mod=vendor"
-
-# Disable travis default install step (go get ${gobuild_args} ./...)
-install: true
+gobuild_args: "-v -tags ci"
 
 before_script:
   - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
@@ -27,14 +38,13 @@ before_script:
 
 script:
   - test -z $(gofmt -s -l $NO_VENDOR)
-  - go test -mod=vendor -tags ci ./...
-  - go vet -mod=vendor -tags ci -unsafeptr=false ./...
+  - go test -tags ci ./...
+  - go vet -tags ci -unsafeptr=false ./...
   - golint -set_exit_status $(go list -tags ci ./...) || exit 1
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then exit; fi'
-  - go test -mod=vendor -tags ci -covermode=atomic -coverprofile=coverage.out ./...
+  - go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
   - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 env:
   global:
-    - GO111MODULE=on
-    - secure: dxsvChfy84dx85yoDA08UQL9/uwuab2St/yzWGfI++tlY1yL+kUNTfaTTY0uiT6Fqwg8rfUdXPA95Z/9bwLPkMJ8p1zwRlxBKjzICTGjB/NDLUYWrZVW+kXOOWrLHEluccrAc5mvWY1/k6KaxqYslanIPOj8j9/7sZJBMsvH8teHjRDGn402sCIBO3SUwthGKktLuAUL5MCiVgo/Eym4mQ2a4OAbZBWqKRQ+7HJunbEzwA/2zOUm/WX3NTy8dg67yyPNLXgMarVsmRXRDYPMlSGfV6Y3kBGizhEGy/u8zXe17KmPjqEKDLWHZZxt0wWYVidERLk1EG2Sm0maIV0i6a+wunCLqQXKHPF8BDwZGftYNbbrED7+4Jnp2h5Y8fS5FlpNAgPZp4YWbOhMpZIhahms3qwGloTGrCj+YvnUu6wnKOnhsvcz2Ibgi+pXr2/3H8lSjAg//P7wRYQN0pvIdacDRD0Vx10bENPAO2IKV7COv/NI0WLrBezDcRS4j60m4EgAdmambKye/mYqERY2P+2e1pMVcn4xaehXxfdyb5MGsZtIh7h0vP9LxVpj+mIVE/WDk36sWPVlTtumVioC5vhr087RrTOj3fNAjHeEMvJa5uiyKxT3UOCx6YORGHkH0i9fz/2QHCA2FBrOdTFv3oe1L2W23iqs9cSx+FxaVCE=
+    secure: dxsvChfy84dx85yoDA08UQL9/uwuab2St/yzWGfI++tlY1yL+kUNTfaTTY0uiT6Fqwg8rfUdXPA95Z/9bwLPkMJ8p1zwRlxBKjzICTGjB/NDLUYWrZVW+kXOOWrLHEluccrAc5mvWY1/k6KaxqYslanIPOj8j9/7sZJBMsvH8teHjRDGn402sCIBO3SUwthGKktLuAUL5MCiVgo/Eym4mQ2a4OAbZBWqKRQ+7HJunbEzwA/2zOUm/WX3NTy8dg67yyPNLXgMarVsmRXRDYPMlSGfV6Y3kBGizhEGy/u8zXe17KmPjqEKDLWHZZxt0wWYVidERLk1EG2Sm0maIV0i6a+wunCLqQXKHPF8BDwZGftYNbbrED7+4Jnp2h5Y8fS5FlpNAgPZp4YWbOhMpZIhahms3qwGloTGrCj+YvnUu6wnKOnhsvcz2Ibgi+pXr2/3H8lSjAg//P7wRYQN0pvIdacDRD0Vx10bENPAO2IKV7COv/NI0WLrBezDcRS4j60m4EgAdmambKye/mYqERY2P+2e1pMVcn4xaehXxfdyb5MGsZtIh7h0vP9LxVpj+mIVE/WDk36sWPVlTtumVioC5vhr087RrTOj3fNAjHeEMvJa5uiyKxT3UOCx6YORGHkH0i9fz/2QHCA2FBrOdTFv3oe1L2W23iqs9cSx+FxaVCE=
