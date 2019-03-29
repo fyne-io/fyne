@@ -9,20 +9,6 @@ os:
   - linux
   - osx
 
-matrix:
-  include:
-  - go: "1.12.x" # Testing go modules + vendor on linux
-    os: linux
-    install: true # Disable travis default install step (go get ${gobuild_args} ./...)
-    env: 
-      - GOFLAGS=-mod=vendor
-      - GO111MODULE=on
-  - go: "1.12.x" # Testing only go modules on osx
-    os: osx
-    install: true
-    env: 
-      - GO111MODULE=on
-
 addons:
   apt:
     packages:
@@ -31,10 +17,21 @@ addons:
 
 gobuild_args: "-v -tags ci"
 
+# Disable travis default install step (go get ${gobuild_args} ./...)
+install: true
+
 before_script:
   - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
+  - if [[ "$TRAVIS_GO_VERSION" == 1.12* ]]; then
+      // enable go modules only for 1.12.x
+      export GO111MODULE=on
+      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        // test vendor folder only on osx
+        export GOFLAGS=-mod=vendor
+      fi
+    fi
 
 script:
   - test -z $(gofmt -s -l $NO_VENDOR)
