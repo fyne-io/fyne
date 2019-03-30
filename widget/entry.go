@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"strings"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -42,9 +43,11 @@ func (e *entryRenderer) MinSize() fyne.Size {
 
 func (e *entryRenderer) moveCursor() {
 	textRenderer := Renderer(e.text).(*textRenderer)
+	e.entry.RLock()
 	size := textRenderer.lineSize(e.entry.CursorColumn, e.entry.CursorRow)
 	xPos := size.Width
 	yPos := size.Height * e.entry.CursorRow
+	e.entry.RUnlock()
 
 	lineHeight := e.text.charMinSize().Height
 	e.cursor.Resize(fyne.NewSize(2, lineHeight))
@@ -112,6 +115,7 @@ func (e *entryRenderer) Destroy() {
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	baseWidget
+	sync.RWMutex
 	shortcut    fyne.ShortcutHandler
 	Text        string
 	PlaceHolder string
@@ -180,7 +184,9 @@ func (e *Entry) SetReadOnly(ro bool) {
 // updateText updates the internal text to the given value
 func (e *Entry) updateText(text string) {
 	changed := e.Text != text
+	e.Lock()
 	e.Text = text
+	e.Unlock()
 	if changed && e.OnChanged != nil {
 		e.OnChanged(text)
 	}
@@ -190,12 +196,14 @@ func (e *Entry) updateText(text string) {
 
 func (e *Entry) cursorTextPos() int {
 	pos := 0
+	e.RLock()
 	provider := e.textProvider()
 	for i := 0; i < e.CursorRow; i++ {
 		rowLength := provider.rowLength(i)
 		pos += rowLength + 1
 	}
 	pos += e.CursorColumn
+	e.RUnlock()
 	return pos
 }
 
@@ -230,8 +238,9 @@ func (e *Entry) TypedRune(r rune) {
 
 	runes := []rune{r}
 	provider.insertAt(e.cursorTextPos(), runes)
+	e.Lock()
 	e.CursorColumn += len(runes)
-
+	e.Unlock()
 	e.updateText(provider.String())
 	Renderer(e).(*entryRenderer).moveCursor()
 }
@@ -244,38 +253,44 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	provider := e.textProvider()
 	switch key.Name {
 	case fyne.KeyBackspace:
-		if provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0) {
+		e.RLock()
+		isEmpty := provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
+		e.RUnlock()
+		if isEmpty {
 			return
 		}
 		pos := e.cursorTextPos()
+		e.Lock()
 		deleted := provider.deleteFromTo(pos-1, pos)
 		if deleted[0] == '\n' {
 			e.CursorRow--
 			rowLength := provider.rowLength(e.CursorRow)
 			e.CursorColumn = rowLength
-			break
+		} else {
+			e.CursorColumn--
 		}
-		e.CursorColumn--
+		e.Unlock()
 	case fyne.KeyDelete:
-
 		pos := e.cursorTextPos()
 		if provider.len() == 0 || pos == provider.len() {
 			return
 		}
-
 		provider.deleteFromTo(pos, pos+1)
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if !e.MultiLine {
 			return
 		}
 		provider.insertAt(e.cursorTextPos(), []rune("\n"))
+		e.Lock()
 		e.CursorColumn = 0
 		e.CursorRow++
+		e.Unlock()
 	case fyne.KeyUp:
 		if !e.MultiLine {
 			return
 		}
 
+		e.Lock()
 		if e.CursorRow > 0 {
 			e.CursorRow--
 		}
@@ -284,11 +299,13 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if e.CursorColumn > rowLength {
 			e.CursorColumn = rowLength
 		}
+		e.Unlock()
 	case fyne.KeyDown:
 		if !e.MultiLine {
 			return
 		}
 
+		e.Lock()
 		if e.CursorRow < provider.rows()-1 {
 			e.CursorRow++
 		}
@@ -297,18 +314,18 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if e.CursorColumn > rowLength {
 			e.CursorColumn = rowLength
 		}
+		e.Unlock()
 	case fyne.KeyLeft:
+		e.Lock()
 		if e.CursorColumn > 0 {
 			e.CursorColumn--
-			break
-		}
-
-		if e.MultiLine && e.CursorRow > 0 {
+		} else if e.MultiLine && e.CursorRow > 0 {
 			e.CursorRow--
-			rowLength := provider.rowLength(e.CursorRow)
-			e.CursorColumn = rowLength
+			e.CursorColumn = provider.rowLength(e.CursorRow)
 		}
+		e.Unlock()
 	case fyne.KeyRight:
+		e.Lock()
 		if e.MultiLine {
 			rowLength := provider.rowLength(e.CursorRow)
 			if e.CursorColumn < rowLength {
@@ -324,10 +341,15 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if e.CursorColumn < provider.len() {
 			e.CursorColumn++
 		}
+		e.Unlock()
 	case fyne.KeyEnd:
+		e.Lock()
 		e.CursorColumn = provider.len()
+		e.Unlock()
 	case fyne.KeyHome:
+		e.Lock()
 		e.CursorColumn = 0
+		e.Unlock()
 	default:
 		return
 	}
