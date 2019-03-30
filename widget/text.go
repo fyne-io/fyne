@@ -144,7 +144,13 @@ func (t *textProvider) len() int {
 
 // insertAt inserts the text at the specified position
 func (t *textProvider) insertAt(pos int, runes []rune) {
-	t.buffer = append(t.buffer[:pos], append(runes, t.buffer[pos:]...)...)
+	// edge case checking
+	if len(t.buffer) < pos {
+		// append to the end if our position was out of sync
+		t.buffer = append(t.buffer, runes...)
+	} else {
+		t.buffer = append(t.buffer[:pos], append(runes, t.buffer[pos:]...)...)
+	}
 	t.updateRowBounds()
 	t.refreshTextRenderer()
 }
