@@ -52,7 +52,9 @@ func (d *dialog) closed() {
 		d.callback(false)
 	}
 
-	d.parent.RequestFocus()
+	if d.parent != nil {
+		d.parent.RequestFocus()
+	}
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
