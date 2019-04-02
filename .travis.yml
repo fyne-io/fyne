@@ -1,7 +1,6 @@
 language: go
 
 go:
-  - "1.10.x"
   - "1.11.x"
   - "1.12.x"
 go_import_path: fyne.io/fyne
@@ -18,14 +17,20 @@ addons:
 
 gobuild_args: "-v -tags ci"
 
+# Disable travis default install step (go get ${gobuild_args} ./...)
+install: true
+
 before_script:
   - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
   - go get golang.org/x/lint/golint
   - go get github.com/mattn/goveralls
-  - go get github.com/stretchr/testify
 
 script:
   - test -z $(gofmt -s -l $NO_VENDOR)
+  # enable go modules only for 1.12.x
+  - if [[ "$TRAVIS_GO_VERSION" == 1.12* ]]; then export GO111MODULE=on; fi
+  # test vendor folder only for 1.12.x on osx
+  - if [[ "$TRAVIS_GO_VERSION" == 1.12* && "$TRAVIS_OS_NAME" == "osx" ]]; then export GOFLAGS=-mod=vendor; fi
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
   - golint -set_exit_status $(go list -tags ci ./...) || exit 1

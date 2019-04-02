@@ -884,27 +884,27 @@ const (
 
 	// CESU8 is the MIB identifier with IANA name CESU-8.
 	//
-	// https://www.unicode.org/unicode/reports/tr26
+	// http://www.unicode.org/unicode/reports/tr26
 	CESU8 MIB = 1016
 
 	// UTF32 is the MIB identifier with IANA name UTF-32.
 	//
-	// https://www.unicode.org/unicode/reports/tr19/
+	// http://www.unicode.org/unicode/reports/tr19/
 	UTF32 MIB = 1017
 
 	// UTF32BE is the MIB identifier with IANA name UTF-32BE.
 	//
-	// https://www.unicode.org/unicode/reports/tr19/
+	// http://www.unicode.org/unicode/reports/tr19/
 	UTF32BE MIB = 1018
 
 	// UTF32LE is the MIB identifier with IANA name UTF-32LE.
 	//
-	// https://www.unicode.org/unicode/reports/tr19/
+	// http://www.unicode.org/unicode/reports/tr19/
 	UTF32LE MIB = 1019
 
 	// BOCU1 is the MIB identifier with IANA name BOCU-1.
 	//
-	// https://www.unicode.org/notes/tn6/
+	// http://www.unicode.org/notes/tn6/
 	BOCU1 MIB = 1020
 
 	// Windows30Latin1 is the MIB identifier with IANA name ISO-8859-1-Windows-3.0-Latin-1.
