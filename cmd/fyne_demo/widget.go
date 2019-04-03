@@ -32,11 +32,6 @@ func makeInputTab() fyne.Widget {
 func makeProgressTab() fyne.Widget {
 	progress := widget.NewProgressBar()
 	infProgress := widget.NewProgressBarInfinite()
-	// If on the first tab, then do this ...
-	// infProgress.Start()
-
-	// if not on the 1st tab, Start() is redundant, because next signal it gets is Hide()
-	// which then stops it
 
 	go func() {
 		num := 0.0
@@ -68,9 +63,10 @@ func Widget(app fyne.App) {
 	w := app.NewWindow("Widgets")
 
 	w.SetContent(widget.NewTabContainer(
+		widget.NewTabItem("Progress Tab 1", makeProgressTab()),
+		widget.NewTabItem("Progress Tab 2", makeProgressTab()),
 		widget.NewTabItem("Buttons", makeButtonTab()),
 		widget.NewTabItem("Input", makeInputTab()),
-		widget.NewTabItem("Progress", makeProgressTab()),
 		widget.NewTabItem("Scroll", makeScrollTab()),
 	))
 
