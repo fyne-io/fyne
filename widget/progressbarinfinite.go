@@ -194,6 +194,7 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 		progress: p,
 	}
 	render.running.Store(false)
+	render.start()
 	// dont start it yet - start it on the first call to Show()
 	return render
 }
