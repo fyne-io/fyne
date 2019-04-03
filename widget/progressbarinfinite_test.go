@@ -11,6 +11,8 @@ import (
 func TestProgressBarInfinite_Creation(t *testing.T) {
 	bar := NewProgressBarInfinite()
 	// ticker should start automatically
+	assert.False(t, bar.Running())
+	bar.Start()
 	assert.True(t, bar.Running())
 }
 
@@ -18,6 +20,7 @@ func TestProgressBarInfinite_Destroy(t *testing.T) {
 	bar := NewProgressBarInfinite()
 	_, found := renderers.Load(bar)
 	assert.True(t, found)
+	bar.Start()
 	assert.True(t, bar.Running())
 
 	// check that it stopped
@@ -31,6 +34,7 @@ func TestProgressBarInfinite_Destroy(t *testing.T) {
 
 func TestProgressBarInfinite_Reshown(t *testing.T) {
 	bar := NewProgressBarInfinite()
+	bar.Start()
 
 	assert.True(t, bar.Running())
 	bar.Hide()
