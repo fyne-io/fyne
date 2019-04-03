@@ -112,7 +112,6 @@ func (p *infProgressRenderer) stop() {
 		p.ticker.Stop()
 		p.tickerStop <- true
 		p.running.Store(false)
-		p.ticker = nil
 	}
 }
 
@@ -182,7 +181,12 @@ func (p *ProgressBarInfinite) Stop() {
 
 // Running returns the current state of the infinite progress animation
 func (p *ProgressBarInfinite) Running() bool {
-	return Renderer(p).(*infProgressRenderer).running.Load().(bool)
+	renderer, ok := renderers.Load(p)
+	if !ok {
+		return false
+	}
+
+	return renderer.(*infProgressRenderer).running.Load().(bool)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
@@ -195,7 +199,6 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	}
 	render.running.Store(false)
 	render.start()
-	// dont start it yet - start it on the first call to Show()
 	return render
 }
 
