@@ -31,6 +31,7 @@ func TestProgressBarInfinite_Destroy(t *testing.T) {
 
 func TestProgressBarInfinite_Reshown(t *testing.T) {
 	bar := NewProgressBarInfinite()
+
 	assert.True(t, bar.Running())
 	bar.Hide()
 	assert.False(t, bar.Running())
