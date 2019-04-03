@@ -87,13 +87,12 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	e.placeholder.refreshTextRenderer()
-	e.placeholder.Hide()
 	if e.text.len() == 0 && e.entry.Visible() {
 		e.placeholder.Show()
+	} else if e.placeholder.Visible() {
+		e.placeholder.Hide()
 	}
 
-	e.text.refreshTextRenderer()
 	if e.entry.focused {
 		e.cursor.FillColor = theme.FocusColor()
 		e.line.FillColor = theme.FocusColor()
@@ -330,21 +329,21 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			rowLength := provider.rowLength(e.CursorRow)
 			if e.CursorColumn < rowLength {
 				e.CursorColumn++
-				break
-			}
-			if e.CursorRow < provider.rows()-1 {
+			} else if e.CursorRow < provider.rows()-1 {
 				e.CursorRow++
 				e.CursorColumn = 0
 			}
-			break
-		}
-		if e.CursorColumn < provider.len() {
+		} else if e.CursorColumn < provider.len() {
 			e.CursorColumn++
 		}
 		e.Unlock()
 	case fyne.KeyEnd:
 		e.Lock()
-		e.CursorColumn = provider.len()
+		if e.MultiLine {
+			e.CursorColumn = provider.rowLength(e.CursorRow)
+		} else {
+			e.CursorColumn = provider.len()
+		}
 		e.Unlock()
 	case fyne.KeyHome:
 		e.Lock()
@@ -429,14 +428,14 @@ func (p *placeholderPresenter) object() fyne.Widget {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
-	text := &textProvider{buffer: []rune(e.Text), presenter: e}
-	placeholder := &textProvider{presenter: &placeholderPresenter{e}, buffer: []rune(e.PlaceHolder)}
+	text := newTextProvider(e.Text, e)
+	placeholder := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
 
 	line := canvas.NewRectangle(theme.ButtonColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
-	return &entryRenderer{text, placeholder, line, cursor,
-		[]fyne.CanvasObject{line, placeholder, text, cursor}, e}
+	return &entryRenderer{&text, &placeholder, line, cursor,
+		[]fyne.CanvasObject{line, &placeholder, &text, cursor}, e}
 }
 
 func (e *Entry) registerShortcut() {
