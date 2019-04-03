@@ -2,7 +2,7 @@ package widget
 
 import (
 	"image/color"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne"
@@ -18,10 +18,11 @@ const (
 )
 
 type infProgressRenderer struct {
-	objects   []fyne.CanvasObject
-	bar       *canvas.Rectangle
-	ticker    *time.Ticker
-	tickMutex *sync.Mutex
+	objects    []fyne.CanvasObject
+	bar        *canvas.Rectangle
+	ticker     *time.Ticker
+	tickerStop chan bool
+	running    atomic.Value
 
 	progress *ProgressBarInfinite
 }
@@ -94,19 +95,12 @@ func (p *infProgressRenderer) Objects() []fyne.CanvasObject {
 	return p.objects
 }
 
-func (p *infProgressRenderer) tickerSafe() *time.Ticker {
-	p.tickMutex.Lock()
-	defer p.tickMutex.Unlock()
-
-	return p.ticker
-}
-
 // Start the infinite progress bar background thread to update it continuously
 func (p *infProgressRenderer) start() {
-	if p.ticker == nil {
-		p.tickMutex.Lock()
+	if !p.running.Load().(bool) {
 		p.ticker = time.NewTicker(infiniteRefreshRate)
-		p.tickMutex.Unlock()
+		p.tickerStop = make(chan bool, 1)
+		p.running.Store(true)
 
 		go p.infiniteProgressLoop()
 	}
@@ -114,22 +108,24 @@ func (p *infProgressRenderer) start() {
 
 // Stop the infinite progress goroutine and sets value to the Max
 func (p *infProgressRenderer) stop() {
-	if p.tickerSafe() != nil {
-		p.tickMutex.Lock()
+	if p.running.Load().(bool) {
 		p.ticker.Stop()
-		p.ticker = nil
-		p.tickMutex.Unlock()
+		p.tickerStop <- true
+		p.running.Store(false)
 	}
 }
 
 // infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
 // the function can be exited by calling Stop()
 func (p *infProgressRenderer) infiniteProgressLoop() {
-	for p.tickerSafe() != nil {
+	for p.running.Load().(bool) {
 		select {
-		case <-p.tickerSafe().C:
+		case <-p.ticker.C:
 			p.Refresh()
 			break
+		case <-p.tickerStop:
+			return // quit the infinite loop
+
 		}
 	}
 }
@@ -185,13 +181,23 @@ func (p *ProgressBarInfinite) Stop() {
 
 // Running returns the current state of the infinite progress animation
 func (p *ProgressBarInfinite) Running() bool {
-	return Renderer(p).(*infProgressRenderer).tickerSafe() != nil
+	renderer, ok := renderers.Load(p)
+	if !ok {
+		return false
+	}
+
+	return renderer.(*infProgressRenderer).running.Load().(bool)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
-	render := &infProgressRenderer{[]fyne.CanvasObject{bar}, bar, nil, &sync.Mutex{}, p}
+	render := &infProgressRenderer{
+		objects:  []fyne.CanvasObject{bar},
+		bar:      bar,
+		progress: p,
+	}
+	render.running.Store(false)
 	render.start()
 	return render
 }
