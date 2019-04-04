@@ -63,10 +63,9 @@ func Widget(app fyne.App) {
 	w := app.NewWindow("Widgets")
 
 	w.SetContent(widget.NewTabContainer(
-		widget.NewTabItem("Progress Tab 1", makeProgressTab()),
-		widget.NewTabItem("Progress Tab 2", makeProgressTab()),
 		widget.NewTabItem("Buttons", makeButtonTab()),
 		widget.NewTabItem("Input", makeInputTab()),
+		widget.NewTabItem("Progress", makeProgressTab()),
 		widget.NewTabItem("Scroll", makeScrollTab()),
 	))
 
