@@ -135,7 +135,7 @@ func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fy
 	points := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(box, c.newGlRectTexture)
 
-	gl.Disable(gl.BLEND)
+	gl.Enable(gl.BLEND)
 	c.drawTexture(texture, points)
 }
 
