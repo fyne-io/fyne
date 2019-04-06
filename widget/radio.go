@@ -145,6 +145,13 @@ func (r *Radio) Hide() {
 	r.hide(r)
 }
 
+// Append adds a new option to the end of a Radio widget.
+func (r *Radio) Append(option string) {
+	r.Options = append(r.Options, option)
+
+	Refresh(r)
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (r *Radio) Tapped(event *fyne.PointEvent) {
 	index := (event.Position.Y - theme.Padding()) / r.itemHeight()
