@@ -75,18 +75,22 @@ func (d *gLDriver) runGL() {
 			clearFontCache()
 		case <-fps.C:
 			glfw.PollEvents()
-			for i, win := range d.windows {
+			newWindows := []fyne.Window{}
+			reassign := false
+			for _, win := range d.windows {
 				viewport := win.(*window).viewport
 
 				if viewport.ShouldClose() {
+					reassign = true
 					// remove window from window list
-					d.windows = append(d.windows[:i], d.windows[i+1:]...)
 					viewport.Destroy()
 
 					if win.(*window).master {
 						d.Quit()
 					}
 					continue
+				} else {
+					newWindows = append(newWindows, win)
 				}
 
 				canvas := win.(*window).canvas
@@ -105,6 +109,9 @@ func (d *gLDriver) runGL() {
 
 				view.viewport.SwapBuffers()
 				glfw.DetachCurrentContext()
+			}
+			if reassign {
+				d.windows = newWindows
 			}
 		}
 	}

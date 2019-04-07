@@ -18,12 +18,12 @@ func TestProgressBarInfinite_Destroy(t *testing.T) {
 	bar := NewProgressBarInfinite()
 	_, found := renderers.Load(bar)
 	assert.True(t, found)
-	rend := Renderer(bar).(*infProgressRenderer)
-	assert.NotNil(t, rend.ticker)
+	assert.True(t, bar.Running())
 
 	// check that it stopped
 	DestroyRenderer(bar)
-	assert.Nil(t, rend.ticker)
+	assert.False(t, bar.Running())
+
 	// and that the cache was removed
 	_, found = renderers.Load(bar)
 	assert.False(t, found)
