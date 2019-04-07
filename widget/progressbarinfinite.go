@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"sync/atomic"
 	"time"
@@ -36,7 +35,6 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 }
 
 func (p *infProgressRenderer) updateBar() {
-	fmt.Println("in updateBar()")
 	progressSize := p.progress.Size()
 	barWidth := p.bar.Size().Width
 	barPos := p.bar.Position()
@@ -108,7 +106,6 @@ func (p *infProgressRenderer) start() {
 
 // Stop the infinite progress goroutine and sets value to the Max
 func (p *infProgressRenderer) stop() {
-	fmt.Println("in infProgressRenderer.stop(), p.running = ", p.running.Load().(bool))
 	p.running.Store(false)
 }
 
@@ -156,7 +153,6 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 
 // Show this widget, if it was previously hidden
 func (p *ProgressBarInfinite) Show() {
-	fmt.Println("in ProgressBarInfinite.Show()")
 	p.Start()
 	p.show(p)
 }

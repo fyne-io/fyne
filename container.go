@@ -1,7 +1,5 @@
 package fyne
 
-import "fmt"
-
 // Container is a CanvasObject that contains a collection of child objects.
 // The layout of the children is set by the specified Layout.
 type Container struct {
@@ -72,7 +70,6 @@ func (c *Container) Show() {
 	if !c.visible {
 		c.visible = true
 		for _, child := range c.Objects {
-			fmt.Println("in container.show, calling child.show()")
 			child.Show()
 		}
 	}

@@ -1,7 +1,6 @@
 package gl
 
 import (
-	"fmt"
 	"math"
 	"sync"
 
@@ -170,7 +169,6 @@ func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyn
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
-	fmt.Println("in canvas.paint()")
 	if c.Content() == nil {
 		return
 	}
