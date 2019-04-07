@@ -325,7 +325,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			e.CursorColumn++
 		}
 	case fyne.KeyEnd:
-		e.CursorColumn = provider.len()
+		e.CursorColumn = provider.rowLength(e.CursorRow)
 	case fyne.KeyHome:
 		e.CursorColumn = 0
 	default:
