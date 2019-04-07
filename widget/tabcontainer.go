@@ -49,6 +49,7 @@ func (t *TabContainer) MinSize() fyne.Size {
 // Show this widget, if it was previously hidden
 func (t *TabContainer) Show() {
 	t.show(t)
+	Renderer(t).Refresh()
 }
 
 // Hide this widget, if it was previously visible

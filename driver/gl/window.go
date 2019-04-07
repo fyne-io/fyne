@@ -284,6 +284,11 @@ func (w *window) Show() {
 		if w.fullScreen {
 			w.SetFullScreen(true)
 		}
+
+		// show top canvas element
+		if w.canvas != nil && w.canvas.content != nil {
+			w.canvas.content.Show()
+		}
 	})
 }
 

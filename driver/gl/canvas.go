@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
@@ -193,9 +192,6 @@ func (c *glCanvas) paint(size fyne.Size) {
 		case fyne.Widget:
 			if co.Visible() {
 				c.drawObject(co, pos, size)
-			} else if box, ok := co.(*widget.Box); ok {
-				c.drawObject(box, pos, size)
-				box.Show()
 			} else {
 				co.Hide()
 			}
