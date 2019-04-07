@@ -8,11 +8,13 @@ import (
 	"fyne.io/fyne/canvas"
 )
 
+var renderers sync.Map
+
 // A base widget class to define the standard widget behaviours.
 type baseWidget struct {
 	size     fyne.Size
 	position fyne.Position
-	Hidden   bool
+	visible   bool
 }
 
 // Get the current size of this widget.
@@ -49,28 +51,30 @@ func (w *baseWidget) minSize(parent fyne.Widget) fyne.Size {
 }
 
 func (w *baseWidget) Visible() bool {
-	return !w.Hidden
+	return w.visible
 }
 
 func (w *baseWidget) show(parent fyne.Widget) {
-	w.Hidden = false
-	for _, child := range Renderer(parent).Objects() {
-		child.Show()
-	}
+	if !w.visible {
+		w.visible = true
+		for _, child := range Renderer(parent).Objects() {
+			child.Show()
+		}
 
-	canvas.Refresh(parent)
+		canvas.Refresh(parent)
+	}
 }
 
 func (w *baseWidget) hide(parent fyne.Widget) {
-	w.Hidden = true
-	for _, child := range Renderer(parent).Objects() {
-		child.Hide()
+	if w.visible {
+		w.visible = false
+		for _, child := range Renderer(parent).Objects() {
+			child.Hide()
+		}
+
+		canvas.Refresh(parent)
 	}
-
-	canvas.Refresh(parent)
 }
-
-var renderers sync.Map
 
 // Renderer looks up the render implementation for a widget
 func Renderer(wid fyne.Widget) fyne.WidgetRenderer {

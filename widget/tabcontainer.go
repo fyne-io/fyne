@@ -120,6 +120,7 @@ func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 		button := t.makeButton(item)
 		if i == t.current {
 			button.Style = PrimaryButton
+			item.Content.Show()
 		} else {
 			item.Content.Hide()
 		}

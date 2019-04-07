@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"sync"
 	"time"
+	"fmt"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -11,7 +12,7 @@ import (
 )
 
 const (
-	infiniteRefreshRate              = 50 * time.Millisecond
+	infiniteRefreshRate              = 100 * time.Millisecond
 	maxProgressBarInfiniteWidthRatio = 1.0 / 5
 	minProgressBarInfiniteWidthRatio = 1.0 / 20
 	progressBarInfiniteStepSizeRatio = 1.0 / 50
@@ -35,6 +36,7 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 }
 
 func (p *infProgressRenderer) updateBar() {
+	fmt.Println("in updateBar()")
 	progressSize := p.progress.Size()
 	barWidth := p.bar.Size().Width
 	barPos := p.bar.Position()
@@ -163,6 +165,7 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 
 // Show this widget, if it was previously hidden
 func (p *ProgressBarInfinite) Show() {
+	fmt.Println("in ProgressBarInfinite.Show()")
 	p.Start()
 	p.show(p)
 }

@@ -75,6 +75,8 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 }
 
 func (b *buttonRenderer) Refresh() {
+	b.label.Show()
+	b.button.Show()
 	b.label.Text = b.button.Text
 
 	if b.button.Icon != nil {
@@ -84,9 +86,9 @@ func (b *buttonRenderer) Refresh() {
 		} else {
 			b.icon.Resource = b.button.Icon
 		}
-		b.icon.Hidden = false
+		b.icon.Show()
 	} else if b.icon != nil {
-		b.icon.Hidden = true
+		b.icon.Hide()
 	}
 
 	b.Layout(b.button.Size())
@@ -137,7 +139,7 @@ func (b *Button) MinSize() fyne.Size {
 	return b.minSize(b)
 }
 
-// Show this widget, if it was previously hidden
+// Show this widget, if it was previously Visible
 func (b *Button) Show() {
 	b.show(b)
 }

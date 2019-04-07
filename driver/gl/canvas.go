@@ -3,9 +3,11 @@ package gl
 import (
 	"math"
 	"sync"
+	"fmt"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
@@ -78,6 +80,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 	c.content.Resize(fyne.NewSize(width, height))
 	c.content.Move(fyne.NewPos(pad, pad))
+
 	c.setDirty(true)
 }
 
@@ -168,6 +171,7 @@ func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyn
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
+	fmt.Println("in canvas.paint()")
 	if c.Content() == nil {
 		return
 	}
@@ -179,7 +183,27 @@ func (c *glCanvas) paint(size fyne.Size) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
-		c.drawObject(obj, pos, size)
+		
+		switch co := obj.(type) {
+		case *fyne.Container:
+			c.drawObject(co, pos, size)
+			if co.Visible() {
+				co.Show()
+			}
+		case fyne.Widget:
+			if co.Visible() {
+				c.drawObject(co, pos, size)
+			} else if box, ok := co.(*widget.Box); ok {
+				c.drawObject(box, pos, size)
+				box.Show()
+			} else {
+				co.Hide()
+			}
+		default:
+			if co.Visible() {
+				c.drawObject(co, pos, size)
+			}
+		}
 	}
 	c.walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
 }

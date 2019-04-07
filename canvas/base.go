@@ -6,7 +6,7 @@ import "fyne.io/fyne"
 type baseObject struct {
 	size     fyne.Size     // The current size of the Rectangle
 	position fyne.Position // The current position of the Rectangle
-	Hidden   bool          // Is this object currently hidden
+	visible   bool          // Is this object currently Visible
 
 	min fyne.Size // The minimum size this object can be
 }
@@ -47,17 +47,17 @@ func (r *baseObject) SetMinSize(size fyne.Size) {
 
 // IsVisible returns true if this object is visible, false otherwise
 func (r *baseObject) Visible() bool {
-	return !r.Hidden
+	return r.visible
 }
 
 // Show will set this object to be visible
 func (r *baseObject) Show() {
-	r.Hidden = false
+	r.visible = true
 }
 
 // Hide will set this object to not be visible
 func (r *baseObject) Hide() {
-	r.Hidden = true
+	r.visible = false
 }
 
 // Refresh instructs the containing canvas to refresh the specified obj.
