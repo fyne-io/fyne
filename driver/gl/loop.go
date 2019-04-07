@@ -78,9 +78,6 @@ func (d *gLDriver) runGL() {
 			for i, win := range d.windows {
 				viewport := win.(*window).viewport
 
-				canvas := win.(*window).canvas
-				d.freeDirtyTextures(canvas)
-
 				if viewport.ShouldClose() {
 					// remove window from window list
 					d.windows = append(d.windows[:i], d.windows[i+1:]...)
@@ -92,9 +89,12 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
+				canvas := win.(*window).canvas
 				if !canvas.isDirty() {
 					continue
 				}
+				d.freeDirtyTextures(canvas)
+
 				viewport.MakeContextCurrent()
 				gl.UseProgram(canvas.program)
 

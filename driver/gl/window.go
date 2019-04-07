@@ -322,7 +322,7 @@ func (w *window) resize(size fyne.Size) {
 	}
 
 	w.canvas.content.Resize(size)
-	w.canvas.setDirty(true)
+	w.canvas.Refresh(w.canvas.content)
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
