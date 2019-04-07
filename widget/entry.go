@@ -165,6 +165,12 @@ func (e *Entry) Hide() {
 func (e *Entry) SetText(text string) {
 	e.textProvider().SetText(text)
 	e.updateText(text)
+
+	if text == "" {
+		e.CursorColumn = 0
+		e.CursorRow = 0
+		Renderer(e).(*entryRenderer).moveCursor()
+	}
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
