@@ -1,9 +1,9 @@
 package gl
 
 import (
+	"fmt"
 	"math"
 	"sync"
-	"fmt"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -182,7 +182,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
-		
+
 		switch co := obj.(type) {
 		case *fyne.Container:
 			c.drawObject(co, pos, size)
@@ -192,8 +192,6 @@ func (c *glCanvas) paint(size fyne.Size) {
 		case fyne.Widget:
 			if co.Visible() {
 				c.drawObject(co, pos, size)
-			} else {
-				co.Hide()
 			}
 		default:
 			if co.Visible() {

@@ -7,7 +7,7 @@ import "fmt"
 type Container struct {
 	size     Size     // The current size of the Container
 	position Position // The current position of the Container
-	visible   bool     // Is this Container visible
+	visible  bool     // Is this Container visible
 
 	Layout  Layout         // The Layout algorithm for arranging child CanvasObjects
 	Objects []CanvasObject // The set of CanvasObjects this container holds

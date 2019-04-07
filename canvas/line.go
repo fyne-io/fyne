@@ -13,7 +13,7 @@ import (
 type Line struct {
 	Position1 fyne.Position // The current top-left position of the Line
 	Position2 fyne.Position // The current bottomright position of the Line
-	visible    bool          // Is this Line currently Visible
+	visible   bool          // Is this Line currently Visible
 
 	StrokeColor color.Color // The line stroke colour
 	StrokeWidth float32     // The stroke width of the line

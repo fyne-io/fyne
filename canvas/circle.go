@@ -10,7 +10,7 @@ import (
 type Circle struct {
 	Position1 fyne.Position // The current top-left position of the Circle
 	Position2 fyne.Position // The current bottomright position of the Circle
-	visible    bool          // Is this circle currently Visible
+	visible   bool          // Is this circle currently Visible
 
 	FillColor   color.Color // The circle fill colour
 	StrokeColor color.Color // The circle stroke colour

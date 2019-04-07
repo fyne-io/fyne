@@ -6,7 +6,7 @@ import "fyne.io/fyne"
 type baseObject struct {
 	size     fyne.Size     // The current size of the Rectangle
 	position fyne.Position // The current position of the Rectangle
-	visible   bool          // Is this object currently Visible
+	visible  bool          // Is this object currently Visible
 
 	min fyne.Size // The minimum size this object can be
 }

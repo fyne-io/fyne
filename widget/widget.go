@@ -14,7 +14,7 @@ var renderers sync.Map
 type baseWidget struct {
 	size     fyne.Size
 	position fyne.Position
-	visible   bool
+	visible  bool
 }
 
 // Get the current size of this widget.
