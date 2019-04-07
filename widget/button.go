@@ -139,7 +139,7 @@ func (b *Button) MinSize() fyne.Size {
 	return b.minSize(b)
 }
 
-// Show this widget, if it was previously Visible
+// Show this widget, if it was previously hidden
 func (b *Button) Show() {
 	b.show(b)
 }

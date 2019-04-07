@@ -26,6 +26,7 @@ func (b *browser) setIcon(index int) {
 
 	b.name.SetText(icons[index].name)
 	b.icon.SetResource(icons[index].icon)
+	b.icon.Show()
 }
 
 // Icons loads a window that shows the various icons available in Fyne

@@ -45,6 +45,9 @@ func (i *iconRenderer) Refresh() {
 	if i.image.Resource != nil {
 		raster := canvas.NewImageFromResource(i.image.Resource)
 		raster.FillMode = canvas.ImageFillContain
+		if i.image.Visible() {
+			raster.Show()
+		}
 
 		i.objects = append(i.objects, raster)
 	}
