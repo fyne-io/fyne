@@ -247,9 +247,8 @@ func (r *textRenderer) ApplyTheme() {
 }
 
 func (r *textRenderer) Refresh() {
-	r.texts = []*canvas.Text{}
-	r.objects = []fyne.CanvasObject{}
-	for index := 0; index < r.provider.rows(); index++ {
+	index := 0
+	for ; index < r.provider.rows(); index++ {
 		var line string
 		row := r.provider.row(index)
 		if r.provider.presenter.password() {
@@ -257,11 +256,31 @@ func (r *textRenderer) Refresh() {
 		} else {
 			line = string(row)
 		}
-		textCanvas := canvas.NewText(line, theme.TextColor())
+
+		var textCanvas *canvas.Text
+		add := false
+		if index >= len(r.texts) {
+			add = true
+			textCanvas = canvas.NewText(line, theme.TextColor())
+		} else {
+			textCanvas = r.texts[index]
+			textCanvas.Text = line
+		}
+
 		textCanvas.Alignment = r.provider.presenter.textAlign()
 		textCanvas.TextStyle = r.provider.presenter.textStyle()
-		r.texts = append(r.texts, textCanvas)
-		r.objects = append(r.objects, textCanvas)
+		if r.provider.Visible() {
+			textCanvas.Show()
+		}
+
+		if add {
+			r.texts = append(r.texts, textCanvas)
+			r.objects = append(r.objects, textCanvas)
+		}
+	}
+
+	for ; index < len(r.texts); index++ {
+		r.texts[index].Text = ""
 	}
 
 	r.ApplyTheme()
