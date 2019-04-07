@@ -10,6 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewScrollContainer(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(10, 10))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+	render := Renderer(scroll).(*scrollRenderer)
+
+	assert.Equal(t, 0, scroll.Offset.Y)
+	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 100), render.barSizeVertical())
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), render.vertBar.Position())
+}
+
 func TestScrollContainer_Scrolled(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))

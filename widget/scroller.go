@@ -31,7 +31,10 @@ func (s *scrollRenderer) updatePosition() {
 
 func (s *scrollRenderer) updateBarPosition() {
 	barSize := s.barSizeVertical()
-	barRatio := float32(s.scroll.Offset.Y) / float32(s.scroll.Content.Size().Height-s.scroll.Size().Height)
+	barRatio := float32(0.0)
+	if s.scroll.Offset.Y != 0 {
+		barRatio = float32(s.scroll.Offset.Y) / float32(s.scroll.Content.Size().Height-s.scroll.Size().Height)
+	}
 	barOff := int(float32(s.scroll.size.Height-barSize.Height) * barRatio)
 
 	s.vertBar.Resize(barSize)

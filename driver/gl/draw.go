@@ -74,7 +74,7 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
-	fill canvas.ImageFill, aspect float32, pad int) []float32 {
+	fill canvas.ImageFill, aspect float32, pad int) ([]float32, uint32, uint32) {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
 
 	xPos := float32(pos.X-pad) / float32(frame.Width)
@@ -116,7 +116,15 @@ func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))
 
-	return points
+	return points, vao, vbo
+}
+
+func (c *glCanvas) freeCoords(vao, vbo uint32) {
+	gl.BindVertexArray(0)
+	gl.DeleteVertexArrays(1, &vao)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.DeleteBuffers(1, &vbo)
 }
 
 func (c *glCanvas) drawTexture(texture uint32, points []float32) {
@@ -132,11 +140,12 @@ func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fy
 		return
 	}
 
-	points := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	points, vao, vbo := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(box, c.newGlRectTexture)
 
-	gl.Disable(gl.BLEND)
+	gl.Enable(gl.BLEND)
 	c.drawTexture(texture, points)
+	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
@@ -144,12 +153,13 @@ func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fy
 		return
 	}
 
-	points := c.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
+	points, vao, vbo := c.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(circle, c.newGlCircleTexture)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	c.drawTexture(texture, points)
+	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
@@ -157,12 +167,13 @@ func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Siz
 		return
 	}
 
-	points := c.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
+	points, vao, vbo := c.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(line, c.newGlLineTexture)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	c.drawTexture(texture, points)
+	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
@@ -189,8 +200,9 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 	if aspect == 0 {
 		aspect = aspects[img]
 	}
-	points := c.rectCoords(img.Size(), pos, frame, img.FillMode, aspect, 0)
+	points, vao, vbo := c.rectCoords(img.Size(), pos, frame, img.FillMode, aspect, 0)
 	c.drawTexture(texture, points)
+	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
@@ -212,8 +224,9 @@ func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.
 	} else {
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
-	points := c.rectCoords(img.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	points, vao, vbo := c.rectCoords(img.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	c.drawTexture(texture, points)
+	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
@@ -221,11 +234,12 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fram
 		return
 	}
 
-	points := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	points, vao, vbo := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(rect, c.newGlRectTexture)
 
 	gl.Enable(gl.BLEND) // enable translucency
 	c.drawTexture(texture, points)
+	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
@@ -246,12 +260,13 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 		pos = fyne.NewPos(pos.X, pos.Y+(text.Size().Height-text.MinSize().Height)/2)
 	}
 
-	points := c.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	points, vao, vbo := c.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(text, c.newGlTextTexture)
 
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	c.drawTexture(texture, points)
+	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame fyne.Size) {
