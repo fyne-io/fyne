@@ -78,7 +78,6 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 	c.content.Resize(fyne.NewSize(width, height))
 	c.content.Move(fyne.NewPos(pad, pad))
-
 	c.setDirty(true)
 }
 
@@ -180,21 +179,8 @@ func (c *glCanvas) paint(size fyne.Size) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
-
-		switch co := obj.(type) {
-		case *fyne.Container:
-			c.drawObject(co, pos, size)
-			if co.Visible() {
-				co.Show()
-			}
-		case fyne.Widget:
-			if co.Visible() {
-				c.drawObject(co, pos, size)
-			}
-		default:
-			if co.Visible() {
-				c.drawObject(co, pos, size)
-			}
+		if obj.Visible() {
+			c.drawObject(obj, pos, size)
 		}
 	}
 	c.walkObjects(c.content, fyne.NewPos(0, 0), paintObj)

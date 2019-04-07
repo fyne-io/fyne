@@ -14,7 +14,7 @@ var renderers sync.Map
 type baseWidget struct {
 	size     fyne.Size
 	position fyne.Position
-	visible  bool
+	Hidden   bool
 }
 
 // Get the current size of this widget.
@@ -51,12 +51,12 @@ func (w *baseWidget) minSize(parent fyne.Widget) fyne.Size {
 }
 
 func (w *baseWidget) Visible() bool {
-	return w.visible
+	return !w.Hidden
 }
 
 func (w *baseWidget) show(parent fyne.Widget) {
-	if !w.visible {
-		w.visible = true
+	if w.Hidden {
+		w.Hidden = false
 		for _, child := range Renderer(parent).Objects() {
 			child.Show()
 		}
@@ -66,8 +66,8 @@ func (w *baseWidget) show(parent fyne.Widget) {
 }
 
 func (w *baseWidget) hide(parent fyne.Widget) {
-	if w.visible {
-		w.visible = false
+	if !w.Hidden {
+		w.Hidden = true
 		for _, child := range Renderer(parent).Objects() {
 			child.Hide()
 		}

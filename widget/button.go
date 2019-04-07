@@ -75,8 +75,6 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 }
 
 func (b *buttonRenderer) Refresh() {
-	b.label.Show()
-	b.button.Show()
 	b.label.Text = b.button.Text
 
 	if b.button.Icon != nil {
@@ -86,9 +84,9 @@ func (b *buttonRenderer) Refresh() {
 		} else {
 			b.icon.Resource = b.button.Icon
 		}
-		b.icon.Show()
+		b.icon.Hidden = false
 	} else if b.icon != nil {
-		b.icon.Hide()
+		b.icon.Hidden = true
 	}
 
 	b.Layout(b.button.Size())

@@ -10,7 +10,7 @@ import (
 type Circle struct {
 	Position1 fyne.Position // The current top-left position of the Circle
 	Position2 fyne.Position // The current bottomright position of the Circle
-	visible   bool          // Is this circle currently Visible
+	Hidden    bool          // Is this circle currently hidden
 
 	FillColor   color.Color // The circle fill colour
 	StrokeColor color.Color // The circle stroke colour
@@ -47,19 +47,19 @@ func (l *Circle) MinSize() fyne.Size {
 
 // Visible returns true if this circle is visible, false otherwise
 func (l *Circle) Visible() bool {
-	return l.visible
+	return !l.Hidden
 }
 
 // Show will set this circle to be visible
 func (l *Circle) Show() {
-	l.visible = true
+	l.Hidden = false
 
 	Refresh(l)
 }
 
 // Hide will set this circle to not be visible
 func (l *Circle) Hide() {
-	l.visible = false
+	l.Hidden = true
 
 	Refresh(l)
 }
