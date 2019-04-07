@@ -167,8 +167,10 @@ func (e *Entry) SetText(text string) {
 	e.updateText(text)
 
 	if text == "" {
+		e.Lock()
 		e.CursorColumn = 0
 		e.CursorRow = 0
+		e.Unlock()
 		Renderer(e).(*entryRenderer).moveCursor()
 	}
 }
