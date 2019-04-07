@@ -703,6 +703,9 @@ func keyToName(key glfw.Key) fyne.KeyName {
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key)
+	if keyName == "" {
+		return
+	}
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 
 	if action == glfw.Press {
