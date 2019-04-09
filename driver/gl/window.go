@@ -43,6 +43,7 @@ type window struct {
 	master     bool
 	fullScreen bool
 	fixedSize  bool
+	centered   bool
 	padded     bool
 	visible    bool
 
@@ -89,9 +90,20 @@ func (w *window) SetFullScreen(full bool) {
 }
 
 func (w *window) CenterOnScreen() {
-	viewWidth, viewHeight := w.minSizeOnScreen()
+	w.centered = true
+	// if window is currently visible, make it centered
+	if w.visible {
+		runOnMainAsync(func() {
+			w.centerOnScreen()
+		})
+	}
+}
 
-	runOnMainAsync(func() {
+// centerOnScreen() needs to be called from within runOnMainAsync()
+func (w *window) centerOnScreen() {
+	if w.centered {
+		viewWidth, viewHeight := w.viewport.GetSize()
+
 		// get window dimensions in pixels
 		monitor := w.getMonitorForWindow()
 		monMode := monitor.GetVideoMode()
@@ -105,13 +117,17 @@ func (w *window) CenterOnScreen() {
 
 		// set new window coordinates
 		w.viewport.SetPos(newX, newY)
-	})
+	} // end if w.centered
 }
 
 // minSizeOnScreen gets the size of a window content in screen pixels
 func (w *window) minSizeOnScreen() (int, int) {
 	// get current size of content inside the window
-	winContentSize := w.canvas.content.MinSize()
+	winContentSize := fyne.NewSize(0, 0)
+	if w.canvas != nil && w.canvas.content != nil {
+		winContentSize = w.canvas.content.MinSize()
+	}
+
 	// add padding, if required
 	if w.Padded() {
 		pad := theme.Padding() * 2
@@ -283,6 +299,8 @@ func (w *window) Show() {
 
 		if w.fullScreen {
 			w.SetFullScreen(true)
+		} else if w.centered {
+			w.centerOnScreen()
 		}
 	})
 }
