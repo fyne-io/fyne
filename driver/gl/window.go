@@ -752,7 +752,7 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 			}
 		}
 	}
-	if keyDesktopModifier != 0 {
+	if shortcut == nil && keyDesktopModifier != 0 {
 		shortcut = &desktop.CustomShortcut{
 			KeyName:  keyName,
 			Modifier: keyDesktopModifier,
