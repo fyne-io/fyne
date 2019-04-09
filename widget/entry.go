@@ -442,8 +442,8 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	line := canvas.NewRectangle(theme.ButtonColor())
 	cursor := canvas.NewRectangle(theme.BackgroundColor())
 
-	return &entryRenderer{&text, &placeholder, line, cursor,
-		[]fyne.CanvasObject{line, &placeholder, &text, cursor}, e}
+	return &entryRenderer{text, placeholder, line, cursor,
+		[]fyne.CanvasObject{line, placeholder, text, cursor}, e}
 }
 
 func (e *Entry) registerShortcut() {

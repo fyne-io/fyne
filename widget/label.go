@@ -64,7 +64,7 @@ func (l *Label) object() fyne.Widget {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
-	l.textProvider = newTextProvider(l.Text, l)
+	l.textProvider = *newTextProvider(l.Text, l)
 	return l.textProvider.CreateRenderer()
 }
 

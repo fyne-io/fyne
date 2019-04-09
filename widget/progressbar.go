@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"image/color"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -29,6 +30,8 @@ func (p *progressRenderer) MinSize() fyne.Size {
 }
 
 func (p *progressRenderer) updateBar() {
+	p.progress.lck.Lock()
+
 	if p.progress.Value < p.progress.Min {
 		p.progress.Value = p.progress.Min
 	}
@@ -42,6 +45,8 @@ func (p *progressRenderer) updateBar() {
 	p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
 
 	size := p.progress.Size()
+	p.progress.lck.Unlock()
+
 	p.bar.Resize(fyne.NewSize(int(float32(size.Width)*ratio), size.Height))
 }
 
@@ -80,6 +85,8 @@ func (p *progressRenderer) Destroy() {
 type ProgressBar struct {
 	baseWidget
 
+	lck sync.RWMutex
+
 	Min, Max, Value float64
 }
 
@@ -113,8 +120,17 @@ func (p *ProgressBar) Hide() {
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
+	p.lck.Lock()
 	p.Value = v
+	p.lck.Unlock()
 	Renderer(p).Refresh()
+}
+
+// GetValue returns the current value of this progress bar.
+func (p *ProgressBar) GetValue() float64 {
+	p.lck.RLock()
+	defer p.lck.RUnlock()
+	return p.Value
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

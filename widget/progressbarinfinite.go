@@ -1,7 +1,10 @@
 package widget
 
 import (
+	"errors"
 	"image/color"
+	"runtime"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -22,7 +25,9 @@ type infProgressRenderer struct {
 	bar        *canvas.Rectangle
 	ticker     *time.Ticker
 	tickerStop chan bool
-	running    atomic.Value
+	running    uint32
+	wg         sync.WaitGroup
+	barLck     sync.Mutex
 
 	progress *ProgressBarInfinite
 }
@@ -36,6 +41,9 @@ func (p *infProgressRenderer) MinSize() fyne.Size {
 }
 
 func (p *infProgressRenderer) updateBar() {
+	p.barLck.Lock()
+	defer p.barLck.Unlock()
+
 	progressSize := p.progress.Size()
 	barWidth := p.bar.Size().Width
 	barPos := p.bar.Position()
@@ -97,35 +105,36 @@ func (p *infProgressRenderer) Objects() []fyne.CanvasObject {
 
 // Start the infinite progress bar background thread to update it continuously
 func (p *infProgressRenderer) start() {
-	if !p.running.Load().(bool) {
+	if atomic.CompareAndSwapUint32(&p.running, 0, 1) {
 		p.ticker = time.NewTicker(infiniteRefreshRate)
 		p.tickerStop = make(chan bool, 1)
-		p.running.Store(true)
 
+		p.wg.Add(1)
 		go p.infiniteProgressLoop()
 	}
 }
 
 // Stop the infinite progress goroutine and sets value to the Max
 func (p *infProgressRenderer) stop() {
-	if p.running.Load().(bool) {
+	if atomic.CompareAndSwapUint32(&p.running, 1, 2) {
 		p.ticker.Stop()
 		p.tickerStop <- true
-		p.running.Store(false)
+		p.wg.Wait()
+		atomic.StoreUint32(&p.running, 0)
 	}
 }
 
 // infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
 // the function can be exited by calling Stop()
 func (p *infProgressRenderer) infiniteProgressLoop() {
-	for p.running.Load().(bool) {
+	defer p.wg.Done()
+	for {
 		select {
 		case <-p.ticker.C:
 			p.Refresh()
 			break
 		case <-p.tickerStop:
 			return // quit the infinite loop
-
 		}
 	}
 }
@@ -186,7 +195,18 @@ func (p *ProgressBarInfinite) Running() bool {
 		return false
 	}
 
-	return renderer.(*infProgressRenderer).running.Load().(bool)
+load:
+	switch atomic.LoadUint32(&renderer.(*infProgressRenderer).running) {
+	case 0:
+		return false
+	case 1:
+		return true
+	case 2:
+		runtime.Gosched()
+		goto load
+	default:
+		panic(errors.New("corrupted running state"))
+	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
@@ -197,7 +217,6 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 		bar:      bar,
 		progress: p,
 	}
-	render.running.Store(false)
 	render.start()
 	return render
 }

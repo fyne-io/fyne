@@ -8,6 +8,7 @@ import "image/color"
 type Widget interface {
 	CanvasObject
 
+	// CreateRenderer must return the same renderer if called twice.
 	CreateRenderer() WidgetRenderer
 }
 

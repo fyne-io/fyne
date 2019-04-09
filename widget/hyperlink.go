@@ -94,7 +94,7 @@ func (hl *Hyperlink) TappedSecondary(*fyne.PointEvent) {
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
-	hl.textProvider = newTextProvider(hl.Text, hl)
+	hl.textProvider = *newTextProvider(hl.Text, hl)
 	return hl.textProvider.CreateRenderer()
 }
 
