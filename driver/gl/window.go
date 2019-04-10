@@ -286,7 +286,7 @@ func (w *window) Show() {
 		}
 
 		// show top canvas element
-		if w.canvas != nil && w.canvas.content != nil {
+		if w.canvas.content != nil {
 			w.canvas.content.Show()
 		}
 	})
@@ -296,6 +296,11 @@ func (w *window) Hide() {
 	runOnMainAsync(func() {
 		w.viewport.Hide()
 		w.visible = false
+
+		// hide top canvas element
+		if w.canvas.Content() != nil {
+			w.canvas.Content().Hide()
+		}
 	})
 }
 
@@ -331,8 +336,17 @@ func (w *window) resize(size fyne.Size) {
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
+	// hide old canvas element
+	if w.visible && w.canvas.Content() != nil {
+		w.canvas.Content().Hide()
+	}
+
 	w.canvas.SetContent(content)
 	min := content.MinSize()
+	// show top canvas element
+	if w.visible && w.canvas.Content() != nil {
+		w.canvas.Content().Show()
+	}
 
 	if w.Padded() {
 		pad := theme.Padding() * 2

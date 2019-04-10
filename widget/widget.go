@@ -55,25 +55,29 @@ func (w *baseWidget) Visible() bool {
 }
 
 func (w *baseWidget) show(parent fyne.Widget) {
-	if w.Hidden {
-		w.Hidden = false
-		for _, child := range Renderer(parent).Objects() {
-			child.Show()
-		}
-
-		canvas.Refresh(parent)
+	if !w.Hidden {
+		return
 	}
+
+	w.Hidden = false
+	for _, child := range Renderer(parent).Objects() {
+		child.Show()
+	}
+
+	canvas.Refresh(parent)
 }
 
 func (w *baseWidget) hide(parent fyne.Widget) {
-	if !w.Hidden {
-		w.Hidden = true
-		for _, child := range Renderer(parent).Objects() {
-			child.Hide()
-		}
-
-		canvas.Refresh(parent)
+	if w.Hidden {
+		return
 	}
+
+	w.Hidden = true
+	for _, child := range Renderer(parent).Objects() {
+		child.Hide()
+	}
+
+	canvas.Refresh(parent)
 }
 
 // Renderer looks up the render implementation for a widget

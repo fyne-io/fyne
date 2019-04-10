@@ -9,7 +9,8 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-// childrenFirst bool dictates whether to fall f() on the obj parameter first,
+// walkObjects will walk an object tree executing the passed function on all objects encountered.
+// The childrenFirst bool dictates whether to call f() on the obj parameter first,
 // or obj's children (if any) first
 func (c *glCanvas) walkObjects(obj fyne.CanvasObject, pos fyne.Position, childrenFirst bool,
 	f func(object fyne.CanvasObject, pos fyne.Position)) {

@@ -67,21 +67,25 @@ func (c *Container) Visible() bool {
 
 // Show sets this container, and all its children, to be visible.
 func (c *Container) Show() {
-	if c.Hidden {
-		c.Hidden = false
-		for _, child := range c.Objects {
-			child.Show()
-		}
+	if !c.Hidden {
+		return
+	}
+
+	c.Hidden = false
+	for _, child := range c.Objects {
+		child.Show()
 	}
 }
 
 // Hide sets this container, and all its children, to be not visible.
 func (c *Container) Hide() {
-	if !c.Hidden {
-		c.Hidden = true
-		for _, child := range c.Objects {
-			child.Hide()
-		}
+	if c.Hidden {
+		return
+	}
+
+	c.Hidden = true
+	for _, child := range c.Objects {
+		child.Hide()
 	}
 }
 
