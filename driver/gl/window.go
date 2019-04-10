@@ -284,6 +284,11 @@ func (w *window) Show() {
 		if w.fullScreen {
 			w.SetFullScreen(true)
 		}
+
+		// show top canvas element
+		if w.canvas != nil && w.canvas.content != nil {
+			w.canvas.content.Show()
+		}
 	})
 }
 
@@ -346,7 +351,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), func(obj fyne.CanvasObject, _ fyne.Position) {
+	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), true, func(obj fyne.CanvasObject, _ fyne.Position) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
@@ -421,7 +426,7 @@ func (w *window) refresh(viewport *glfw.Window) {
 func findMouseObj(canvas *glCanvas, mouse fyne.Position, scroll bool) (fyne.CanvasObject, int, int) {
 	found := canvas.content
 	foundX, foundY := 0, 0
-	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) {
+	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), false, func(walked fyne.CanvasObject, pos fyne.Position) {
 		if mouse.X < pos.X || mouse.Y < pos.Y {
 			return
 		}

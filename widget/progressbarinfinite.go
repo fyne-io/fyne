@@ -18,11 +18,10 @@ const (
 )
 
 type infProgressRenderer struct {
-	objects    []fyne.CanvasObject
-	bar        *canvas.Rectangle
-	ticker     *time.Ticker
-	tickerStop chan bool
-	running    atomic.Value
+	objects []fyne.CanvasObject
+	bar     *canvas.Rectangle
+	ticker  *time.Ticker
+	running atomic.Value
 
 	progress *ProgressBarInfinite
 }
@@ -99,7 +98,6 @@ func (p *infProgressRenderer) Objects() []fyne.CanvasObject {
 func (p *infProgressRenderer) start() {
 	if !p.running.Load().(bool) {
 		p.ticker = time.NewTicker(infiniteRefreshRate)
-		p.tickerStop = make(chan bool, 1)
 		p.running.Store(true)
 
 		go p.infiniteProgressLoop()
@@ -108,11 +106,7 @@ func (p *infProgressRenderer) start() {
 
 // Stop the infinite progress goroutine and sets value to the Max
 func (p *infProgressRenderer) stop() {
-	if p.running.Load().(bool) {
-		p.ticker.Stop()
-		p.tickerStop <- true
-		p.running.Store(false)
-	}
+	p.running.Store(false)
 }
 
 // infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
@@ -123,10 +117,10 @@ func (p *infProgressRenderer) infiniteProgressLoop() {
 		case <-p.ticker.C:
 			p.Refresh()
 			break
-		case <-p.tickerStop:
-			return // quit the infinite loop
-
 		}
+	}
+	if p.ticker != nil {
+		p.ticker.Stop()
 	}
 }
 

@@ -49,6 +49,8 @@ func (t *TabContainer) MinSize() fyne.Size {
 // Show this widget, if it was previously hidden
 func (t *TabContainer) Show() {
 	t.show(t)
+	t.SelectTabIndex(t.current)
+	Renderer(t).Refresh()
 }
 
 // Hide this widget, if it was previously visible
@@ -71,13 +73,22 @@ func (t *TabContainer) CurrentTab() *TabItem {
 	return t.Items[t.current]
 }
 
-// SelectTabIndex sets the TabItem at the specifie index to be selected and it's content visible.
+// SelectTabIndex sets the TabItem at the specific index to be selected and it's content visible.
 func (t *TabContainer) SelectTabIndex(index int) {
 	if index < 0 || index >= len(t.Items) {
 		return
 	}
 
 	t.current = index
+
+	for i, child := range t.Items {
+		if i == t.current {
+			child.Content.Show()
+		} else {
+			child.Content.Hide()
+		}
+	}
+
 	Refresh(t)
 }
 
@@ -186,14 +197,6 @@ func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
 func (t *tabContainerRenderer) Refresh() {
 	Renderer(t.tabBar).Refresh()
 	t.Layout(t.container.Size())
-
-	for i, child := range t.container.Items {
-		if i == t.container.current {
-			child.Content.Show()
-		} else {
-			child.Content.Hide()
-		}
-	}
 
 	canvas.Refresh(t.container)
 
