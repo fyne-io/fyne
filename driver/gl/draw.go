@@ -9,16 +9,24 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
-func (c *glCanvas) walkObjects(obj fyne.CanvasObject, pos fyne.Position,
+// childrenFirst bool dictates whether to fall f() on the obj parameter first,
+// or obj's children (if any) first
+func (c *glCanvas) walkObjects(obj fyne.CanvasObject, pos fyne.Position, childrenFirst bool,
 	f func(object fyne.CanvasObject, pos fyne.Position)) {
 
 	switch co := obj.(type) {
 	case *fyne.Container:
 		offset := co.Position().Add(pos)
-		f(obj, offset)
+		if !childrenFirst {
+			f(obj, offset)
+		}
 
 		for _, child := range co.Objects {
-			c.walkObjects(child, offset, f)
+			c.walkObjects(child, offset, childrenFirst, f)
+		}
+
+		if childrenFirst {
+			f(obj, offset)
 		}
 	case *widget.ScrollContainer: // TODO should this be somehow not scroll container specific?
 		offset := co.Position().Add(pos)
@@ -31,63 +39,32 @@ func (c *glCanvas) walkObjects(obj fyne.CanvasObject, pos fyne.Position,
 		gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
 		gl.Enable(gl.SCISSOR_TEST)
 
-		f(obj, offset)
+		if !childrenFirst {
+			f(obj, offset)
+		}
 
 		for _, child := range widget.Renderer(co).Objects() {
-			c.walkObjects(child, offset, f)
+			c.walkObjects(child, offset, childrenFirst, f)
+		}
+
+		if childrenFirst {
+			f(obj, offset)
 		}
 
 		gl.Disable(gl.SCISSOR_TEST)
 	case fyne.Widget:
 		offset := co.Position().Add(pos)
-		f(obj, offset)
+		if !childrenFirst {
+			f(obj, offset)
+		}
 
 		for _, child := range widget.Renderer(co).Objects() {
-			c.walkObjects(child, offset, f)
-		}
-	default:
-		f(obj, pos)
-	}
-}
-
-func (c *glCanvas) walkObjectsChildrenFirst(obj fyne.CanvasObject, pos fyne.Position,
-	f func(object fyne.CanvasObject, pos fyne.Position)) {
-
-	switch co := obj.(type) {
-	case *fyne.Container:
-		offset := co.Position().Add(pos)
-
-		for _, child := range co.Objects {
-			c.walkObjectsChildrenFirst(child, offset, f)
+			c.walkObjects(child, offset, childrenFirst, f)
 		}
 
-		f(obj, offset)
-	case *widget.ScrollContainer: // TODO should this be somehow not scroll container specific?
-		offset := co.Position().Add(pos)
-
-		scrollX := textureScaleInt(c, offset.X)
-		scrollY := textureScaleInt(c, offset.Y)
-		scrollWidth := textureScaleInt(c, co.Size().Width)
-		scrollHeight := textureScaleInt(c, co.Size().Height)
-		_, pixHeight := c.window.viewport.GetFramebufferSize()
-		gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
-		gl.Enable(gl.SCISSOR_TEST)
-
-		for _, child := range widget.Renderer(co).Objects() {
-			c.walkObjectsChildrenFirst(child, offset, f)
+		if childrenFirst {
+			f(obj, offset)
 		}
-
-		f(obj, offset)
-
-		gl.Disable(gl.SCISSOR_TEST)
-	case fyne.Widget:
-		offset := co.Position().Add(pos)
-
-		for _, child := range widget.Renderer(co).Objects() {
-			c.walkObjectsChildrenFirst(child, offset, f)
-		}
-
-		f(obj, offset)
 	default:
 		f(obj, pos)
 	}

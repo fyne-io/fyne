@@ -183,7 +183,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 			c.drawObject(obj, pos, size)
 		}
 	}
-	c.walkObjects(c.content, fyne.NewPos(0, 0), paintObj)
+	c.walkObjects(c.content, fyne.NewPos(0, 0), false, paintObj)
 }
 
 func (c *glCanvas) setDirty(dirty bool) {

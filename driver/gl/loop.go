@@ -128,7 +128,7 @@ func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
 					delete(textures, obj)
 				}
 			}
-			canvas.walkObjects(object, fyne.NewPos(0, 0), freeWalked)
+			canvas.walkObjects(object, fyne.NewPos(0, 0), false, freeWalked)
 		default:
 			return
 		}
