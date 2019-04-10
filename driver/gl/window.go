@@ -93,15 +93,18 @@ func (w *window) CenterOnScreen() {
 	w.centered = true
 	// if window is currently visible, make it centered
 	if w.visible {
-		runOnMainAsync(func() {
-			w.centerOnScreen()
-		})
+		w.centerOnScreen()
 	}
 }
 
-// centerOnScreen() needs to be called from within runOnMainAsync()
+// centerOnScreen handles the logic for centering a window
 func (w *window) centerOnScreen() {
-	if w.centered {
+	// exit immediately if window is not supposed to be centered
+	if !w.centered {
+		return
+	}
+
+	runOnMainAsync(func() {
 		viewWidth, viewHeight := w.viewport.GetSize()
 
 		// get window dimensions in pixels
@@ -117,7 +120,7 @@ func (w *window) centerOnScreen() {
 
 		// set new window coordinates
 		w.viewport.SetPos(newX, newY)
-	} // end if w.centered
+	}) // end of runOnMainAsync(){}
 }
 
 // minSizeOnScreen gets the size of a window content in screen pixels
