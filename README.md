@@ -16,6 +16,26 @@
 
 The 1.0 release is now out and we encourage feedback and requests for the next major release :).
 
+# Widget demo
+
+To run a showcase of the features of Fyne execute the following:
+
+    cd $GOPATH/src/fyne.io/fyne/cmd/fyne_demo/
+    go build
+    ./fyne_demo
+
+And you should see something like this (after you click a few buttons):
+
+<p align="center" markdown="1" style="max-width: 100%">
+  <img src="img/widgets-dark.png" alt="Fyne Hello Light Theme" style="max-width: 100%" />
+</p>
+
+Or if you are using the light theme:
+
+<p align="center" markdown="1" style="max-width: 100%">
+  <img src="img/widgets-light.png" alt="Fyne Hello Light Theme" />
+</p>
+
 # Getting Started
 
 Fyne is designed to be really easy to code with. Here are the steps to your first app.
@@ -72,94 +92,11 @@ It should look like this:
 > Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
 > To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
 
-# Scaling
+# Documentation
 
-Fyne is built entirely using vector graphics, which means applications
-written with Fyne will scale to any value beautifully (not just whole number values).
-The default scale value is calculated from your screen's DPI - and if you move
-a window to another screen it will re-scale and adjust the window size accordingly!
-We call this "auto scaling", and it is designed to keep an app GUI the same size as you change monitor.
-You can override this behaviour by setting a specific scale using the FYNE_SCALE environment variable.
-
-<table style="text-align: center"><tr>
-<td><img src="img/hello-normal.png" width="207" height="204" alt="Hello normal size" />
-  <br />Standard size</td>
-<td><img src="img/hello-small.png" width="160" height="169" alt="Hello small size" />
-  <br />FYNE_SCALE=0.5</td>
-<td><img src="img/hello-large.png" width="350" height="309" alt="Hello large size" />
-  <br />FYNE_SCALE=2.5</td>
-</tr></table>
-
-# Themes
-
-Fyne ships with two themes by default, "light" and "dark". You can choose
-which to use with the environment variable ```FYNE_THEME```.
-The default is dark:
-
-<p align="center" markdown="1">
-  <img src="img/hello-normal.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
-</p>
-
-If you prefer a light theme then you could run:
-
-    FYNE_THEME=light go run main.go
-
-It should then look like this:
-
-<p align="center" markdown="1">
-  <img src="img/hello-light.png" width="207" height="204" alt="Fyne Hello Light Theme" />
-</p>
-
-# Widget demo
-
-To run a showcase of the features of Fyne execute the following:
-
-    cd $GOPATH/src/fyne.io/fyne/cmd/fyne_demo/
-    go build
-    ./fyne_demo
-
-And you should see something like this (after you click a few buttons):
-
-<p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-dark.png" alt="Fyne Hello Light Theme" style="max-width: 100%" />
-</p>
-
-Or if you are using the light theme:
-
-<p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-light.png" alt="Fyne Hello Light Theme" />
-</p>
-
-# Declarative API
-
-Fyne also provides a declarative API.
-The following is exactly the same as the code above but in a declarative style.
-
-```go
-package main
-
-import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/app"
-	"fyne.io/fyne/widget"
-)
-
-func main() {
-	app := app.New()
-
-	w := app.NewWindow("Hello")
-	w.SetContent(&widget.Box{Children: []fyne.CanvasObject{
-		&widget.Label{Text: "Hello Fyne!"},
-		&widget.Button{Text: "Quit", OnTapped: func() {
-			app.Quit()
-		}},
-	}})
-
-	w.ShowAndRun()
-}
-```
+More documentation is available at the [Fyne developer website](https://fyne.io/develop/) or on [godoc.org](https://godoc.org/fyne.io/fyne).
 
 # Examples
 
-The main examples have been moved - you can find them in their [own repository](https://github.com/fyne-io/examples/).
-
+You can find many example applications in the [examples repository](https://github.com/fyne-io/examples/).
+Alternatively a list of applications using fyne can be found at [our website](https://fyne.io/develop/applist.html)
