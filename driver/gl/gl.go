@@ -30,9 +30,6 @@ var textures = make(map[fyne.CanvasObject]uint32)
 const vectorPad = 10
 
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
-	if _, skipCache := object.(*canvas.Raster); skipCache {
-		return creator(object)
-	}
 	texture := textures[object]
 
 	if texture == 0 {
