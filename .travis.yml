@@ -1,8 +1,8 @@
 language: go
 
 go:
-  - "1.11.6" # a problem with 1.11.7 Cgo on Travis broke the tests
-  - "1.12.1" # same as above
+  - "1.11.x"
+  - "1.12.x"
 go_import_path: fyne.io/fyne
 
 os:
