@@ -220,16 +220,16 @@ func (w *window) fitContent() {
 		return
 	}
 
-	winWidth, winHeight := w.minSizeOnScreen()
+	minWidth, minHeight := w.minSizeOnScreen()
 	if w.fixedSize {
-		w.viewport.SetSizeLimits(winWidth, winHeight, winWidth, winHeight)
+		w.viewport.SetSizeLimits(minWidth, minHeight, minWidth, minHeight)
 	} else {
-		w.viewport.SetSizeLimits(winWidth, winHeight, glfw.DontCare, glfw.DontCare)
+		w.viewport.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
 	}
 
 	width, height := w.viewport.GetSize()
-	if width < winWidth || height < winHeight {
-		w.viewport.SetSize(fyne.Max(width, winWidth), fyne.Max(height, winHeight))
+	if width < minWidth || height < minHeight {
+		w.viewport.SetSize(fyne.Max(width, minWidth), fyne.Max(height, minHeight))
 	}
 }
 
