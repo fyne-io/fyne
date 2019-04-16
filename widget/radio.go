@@ -20,6 +20,20 @@ type radioRenderer struct {
 	radio   *Radio
 }
 
+func removeDuplicatedOptions(options []string) []string {
+	var result []string
+	found := make(map[string]bool)
+
+	for _, option := range options {
+		if _, check := found[option]; !check {
+			found[option] = true
+			result = append(result, option)
+		}
+	}
+
+	return result
+}
+
 // MinSize calculates the minimum size of a radio item.
 // This is based on the contained text, the radio icon and a standard amount of padding
 // between each item.
@@ -69,6 +83,8 @@ func (r *radioRenderer) BackgroundColor() color.Color {
 }
 
 func (r *radioRenderer) Refresh() {
+	r.radio.Options = removeDuplicatedOptions(r.radio.Options)
+
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
 			option := r.radio.Options[i]

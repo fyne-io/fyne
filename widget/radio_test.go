@@ -92,3 +92,12 @@ func TestRadio_Remove(t *testing.T) {
 	assert.Equal(t, 1, len(radio.Options))
 	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
 }
+
+func TestRadio_DuplicatedOptions(t *testing.T) {
+	radio := NewRadio([]string{"Hi", "Hi", "Hi", "Another", "Another"}, nil)
+
+	Refresh(radio)
+
+	assert.Equal(t, 2, len(radio.Options))
+	assert.Equal(t, 2, len(Renderer(radio).(*radioRenderer).items))
+}
