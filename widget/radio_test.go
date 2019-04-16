@@ -92,3 +92,11 @@ func TestRadio_Remove(t *testing.T) {
 	assert.Equal(t, 1, len(radio.Options))
 	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
 }
+
+func TestRadio_SetDefaultOption(t *testing.T) {
+	radio := NewRadio([]string{"Hi", "Another"}, nil)
+
+	radio.SetDefaultOption("Another")
+
+	assert.Equal(t, "Another", radio.Selected)
+}

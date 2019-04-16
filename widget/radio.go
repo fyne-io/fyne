@@ -194,6 +194,13 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	return &radioRenderer{items, objects, r}
 }
 
+// SetDefaultOption sets the default radio option
+func (r *Radio) SetDefaultOption(option string) {
+	r.Selected = option
+
+	Renderer(r).Refresh()
+}
+
 func (r *Radio) itemHeight() int {
 	return r.MinSize().Height / len(r.Options)
 }
