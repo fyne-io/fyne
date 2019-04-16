@@ -53,6 +53,9 @@ func (e *entryRenderer) moveCursor() {
 	e.cursor.Resize(fyne.NewSize(2, lineHeight))
 	e.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))
 
+	if e.entry.OnCursorChanged != nil {
+		e.entry.OnCursorChanged()
+	}
 	canvas.Refresh(e.cursor)
 }
 
@@ -124,6 +127,7 @@ type Entry struct {
 	MultiLine   bool
 
 	CursorRow, CursorColumn int
+	OnCursorChanged         func() `json:"-"`
 
 	focused bool
 }
