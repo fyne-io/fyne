@@ -92,3 +92,33 @@ func TestRadio_Remove(t *testing.T) {
 	assert.Equal(t, 1, len(radio.Options))
 	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
 }
+
+func TestRadio_SetSelected(t *testing.T) {
+	radio := NewRadio([]string{"Hi", "Another"}, nil)
+
+	radio.SetSelected("Another")
+
+	assert.Equal(t, "Another", radio.Selected)
+}
+
+func TestRadio_SetSelectedWithSameOption(t *testing.T) {
+	radio := NewRadio([]string{"Hi", "Another"}, nil)
+
+	radio.Selected = "Another"
+	Refresh(radio)
+
+	radio.SetSelected("Another")
+
+	assert.Equal(t, "Another", radio.Selected)
+}
+
+func TestRadio_SetSelectedEmpty(t *testing.T) {
+	radio := NewRadio([]string{"Hi", "Another"}, nil)
+
+	radio.Selected = "Another"
+	Refresh(radio)
+
+	radio.SetSelected("")
+
+	assert.Equal(t, "", radio.Selected)
+}
