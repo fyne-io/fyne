@@ -100,15 +100,6 @@ func TestRadio_DuplicatedOptions(t *testing.T) {
 	assert.Equal(t, 2, len(Renderer(radio).(*radioRenderer).items))
 }
 
-func TestRadio_AppendDuplicatedOptions(t *testing.T) {
-	radio := NewRadio([]string{"Hi", "Hi"}, nil)
-
-	radio.Options = append(radio.Options, "Hi")
-
-	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
-}
-
 func TestRadio_AppendDuplicate(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
 
