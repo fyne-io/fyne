@@ -20,12 +20,12 @@ type radioRenderer struct {
 	radio   *Radio
 }
 
-func removeDuplicatedOptions(options []string) []string {
+func removeDuplicates(options []string) []string {
 	var result []string
 	found := make(map[string]bool)
 
 	for _, option := range options {
-		if _, check := found[option]; !check {
+		if _, ok := found[option]; !ok {
 			found[option] = true
 			result = append(result, option)
 		}
@@ -83,7 +83,7 @@ func (r *radioRenderer) BackgroundColor() color.Color {
 }
 
 func (r *radioRenderer) Refresh() {
-	r.radio.Options = removeDuplicatedOptions(r.radio.Options)
+	r.radio.removeDuplicateOptions()
 
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
@@ -214,6 +214,10 @@ func (r *Radio) itemHeight() int {
 	return r.MinSize().Height / len(r.Options)
 }
 
+func (r *Radio) removeDuplicateOptions() {
+	r.Options = removeDuplicates(r.Options)
+}
+
 // NewRadio creates a new radio widget with the set options and change handler
 func NewRadio(options []string, changed func(string)) *Radio {
 	r := &Radio{
@@ -222,6 +226,8 @@ func NewRadio(options []string, changed func(string)) *Radio {
 		"",
 		changed,
 	}
+
+	r.removeDuplicateOptions()
 
 	Renderer(r).Layout(r.MinSize())
 	return r

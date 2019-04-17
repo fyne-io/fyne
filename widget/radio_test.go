@@ -16,7 +16,7 @@ func TestRadio_MinSize(t *testing.T) {
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
 
-	radio2 := NewRadio([]string{"Hi", "Hi"}, nil)
+	radio2 := NewRadio([]string{"Hi", "He"}, nil)
 	min2 := radio2.MinSize()
 
 	assert.Equal(t, min.Width, min2.Width)
@@ -96,8 +96,16 @@ func TestRadio_Remove(t *testing.T) {
 func TestRadio_DuplicatedOptions(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Hi", "Hi", "Another", "Another"}, nil)
 
-	Refresh(radio)
-
 	assert.Equal(t, 2, len(radio.Options))
 	assert.Equal(t, 2, len(Renderer(radio).(*radioRenderer).items))
+}
+
+func TestRadio_AppendDuplicatedOptions(t *testing.T) {
+	radio := NewRadio([]string{"Hi"}, nil)
+
+	radio.Options = append(radio.Options, "Hi")
+	Refresh(radio)
+
+	assert.Equal(t, 1, len(radio.Options))
+	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
 }
