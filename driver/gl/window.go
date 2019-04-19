@@ -216,6 +216,8 @@ func (w *window) SetIcon(icon fyne.Resource) {
 }
 
 func (w *window) fitContent() {
+	w.canvas.Lock()
+	defer w.canvas.Unlock()
 	if w.canvas.content == nil {
 		return
 	}

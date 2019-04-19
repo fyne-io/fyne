@@ -101,8 +101,11 @@ type fontCacheItem struct {
 }
 
 var fontCache = make(map[fyne.TextStyle]*fontCacheItem)
+var fontCacheLock = new(sync.Mutex)
 
 func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
+	fontCacheLock.Lock()
+	defer fontCacheLock.Unlock()
 	comp := fontCache[style]
 
 	if comp == nil {
@@ -144,6 +147,8 @@ func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 }
 
 func clearFontCache() {
+	fontCacheLock.Lock()
+	defer fontCacheLock.Unlock()
 	for _, item := range fontCache {
 		for _, face := range item.faces {
 			err := face.Close()

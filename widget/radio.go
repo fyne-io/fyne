@@ -20,6 +20,20 @@ type radioRenderer struct {
 	radio   *Radio
 }
 
+func removeDuplicates(options []string) []string {
+	var result []string
+	found := make(map[string]bool)
+
+	for _, option := range options {
+		if _, ok := found[option]; !ok {
+			found[option] = true
+			result = append(result, option)
+		}
+	}
+
+	return result
+}
+
 // MinSize calculates the minimum size of a radio item.
 // This is based on the contained text, the radio icon and a standard amount of padding
 // between each item.
@@ -69,6 +83,8 @@ func (r *radioRenderer) BackgroundColor() color.Color {
 }
 
 func (r *radioRenderer) Refresh() {
+	r.radio.removeDuplicateOptions()
+
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
 			option := r.radio.Options[i]
@@ -194,8 +210,23 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	return &radioRenderer{items, objects, r}
 }
 
+// SetSelected sets the radio option, it can be used to set a default option.
+func (r *Radio) SetSelected(option string) {
+	if r.Selected == option {
+		return
+	}
+
+	r.Selected = option
+
+	Renderer(r).Refresh()
+}
+
 func (r *Radio) itemHeight() int {
 	return r.MinSize().Height / len(r.Options)
+}
+
+func (r *Radio) removeDuplicateOptions() {
+	r.Options = removeDuplicates(r.Options)
 }
 
 // NewRadio creates a new radio widget with the set options and change handler
@@ -206,6 +237,8 @@ func NewRadio(options []string, changed func(string)) *Radio {
 		"",
 		changed,
 	}
+
+	r.removeDuplicateOptions()
 
 	Renderer(r).Layout(r.MinSize())
 	return r
