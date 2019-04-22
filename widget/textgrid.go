@@ -145,3 +145,6 @@ func (t *textGridRender) BackgroundColor() color.Color {
 func (t *textGridRender) Objects() []fyne.CanvasObject {
 	return t.objects
 }
+
+func (t *textGridRender) Destroy() {
+}
