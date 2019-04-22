@@ -73,17 +73,18 @@ func newTextCell(str string) *canvas.Text {
 	text.TextStyle.Monospace = true
 
 	if str == "·" || str == "→" || str == "↵" {
-		r, g, b, a := theme.PlaceHolderColor().RGBA()
-		text.Color = color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a) / 3}
+		text.Color = theme.PlaceHolderColor()
 	}
 
 	return text
 }
 
 func (t *textGridRender) ensureGrid() {
-	t.cols = 8
+	t.cols = 10
 	t.rows = 3
 
+	t.objects = append(t.objects, newTextCell("1"))
+	t.objects = append(t.objects, newTextCell(""))
 	t.objects = append(t.objects, newTextCell("S"))
 	t.objects = append(t.objects, newTextCell("o"))
 	t.objects = append(t.objects, newTextCell("m"))
@@ -93,6 +94,8 @@ func (t *textGridRender) ensureGrid() {
 	t.objects = append(t.objects, newTextCell(""))
 	t.objects = append(t.objects, newTextCell(""))
 
+	t.objects = append(t.objects, newTextCell("2"))
+	t.objects = append(t.objects, newTextCell(""))
 	t.objects = append(t.objects, newTextCell("·"))
 	t.objects = append(t.objects, newTextCell("·"))
 	t.objects = append(t.objects, newTextCell("T"))
@@ -102,6 +105,8 @@ func (t *textGridRender) ensureGrid() {
 	t.objects = append(t.objects, newTextCell("↵"))
 	t.objects = append(t.objects, newTextCell(""))
 
+	t.objects = append(t.objects, newTextCell("3"))
+	t.objects = append(t.objects, newTextCell(""))
 	t.objects = append(t.objects, newTextCell("→"))
 	t.objects = append(t.objects, newTextCell(""))
 	t.objects = append(t.objects, newTextCell(""))
