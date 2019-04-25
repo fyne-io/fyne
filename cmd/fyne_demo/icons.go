@@ -102,6 +102,7 @@ var icons = []struct {
 
 	{"ViewFullScreenIcon", theme.ViewFullScreenIcon()},
 	{"ViewRestoreIcon", theme.ViewRestoreIcon()},
+	{"ViewRefreshIcon", theme.ViewRefreshIcon()},
 	{"ZoomFitIcon", theme.ZoomFitIcon()},
 	{"ZoomInIcon", theme.ZoomInIcon()},
 	{"ZoomOutIcon", theme.ZoomOutIcon()},

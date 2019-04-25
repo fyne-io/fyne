@@ -12,6 +12,7 @@ func (r *StaticResource) GoString() string {
 
 	buffer.WriteString("&fyne.StaticResource{\n")
 	buffer.WriteString("\tStaticName: \"" + r.StaticName + "\",\n")
+	buffer.WriteString(fmt.Sprintf("\tStaticAdoptIconColor: %v,\n", r.StaticAdoptIconColor))
 	buffer.WriteString("\tStaticContent: []byte{\n\t\t")
 	for i, v := range r.StaticContent {
 		if i > 0 {

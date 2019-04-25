@@ -14,19 +14,20 @@ import (
 )
 
 type bundler struct {
-	name, pkg string
-	prefix    string
-	noheader  bool
+	name, pkg      string
+	prefix         string
+	noheader       bool
+	adoptIconColor bool
 }
 
-func writeResource(file, name string) {
+func writeResource(file, name string, adoptIconColor bool) {
 	bytes, err := ioutil.ReadFile(file)
 	if err != nil {
 		fyne.LogError("Unable to load file "+file, err)
 		return
 	}
 
-	res := fyne.NewStaticResource(path.Base(file), bytes)
+	res := fyne.NewStaticResource(path.Base(file), bytes, adoptIconColor)
 
 	fmt.Printf("var %s = %#v\n", name, res)
 }
@@ -51,7 +52,7 @@ func sanitiseName(file, prefix string) string {
 // (pkg) and the data will be assigned to variable named "name". If you are
 // appending an existing resource file then pass true to noheader as the headers
 // should only be output once per file.
-func doBundle(name, pkg, prefix string, noheader bool, filepath string) {
+func doBundle(name, pkg, prefix string, noheader bool, filepath string, adoptIconColor bool) {
 	if !noheader {
 		writeHeader(pkg)
 	}
@@ -60,10 +61,10 @@ func doBundle(name, pkg, prefix string, noheader bool, filepath string) {
 	if name == "" {
 		name = sanitiseName(path.Base(filepath), prefix)
 	}
-	writeResource(filepath, name)
+	writeResource(filepath, name, adoptIconColor)
 }
 
-func dirBundle(pkg, prefix string, noheader bool, dirpath string) {
+func dirBundle(pkg, prefix string, noheader bool, dirpath string, adoptIconColor bool) {
 	files, err := ioutil.ReadDir(dirpath)
 	if err != nil {
 		fyne.LogError("Error reading specified directory", err)
@@ -77,7 +78,7 @@ func dirBundle(pkg, prefix string, noheader bool, dirpath string) {
 			continue
 		}
 
-		doBundle("", pkg, prefix, omitHeader, path.Join(dirpath, filename))
+		doBundle("", pkg, prefix, omitHeader, path.Join(dirpath, filename), adoptIconColor)
 		omitHeader = true // only output header once at most
 	}
 }
@@ -87,6 +88,7 @@ func (b *bundler) addFlags() {
 	flag.StringVar(&b.pkg, "package", "main", "The package to output in headers (if not appending)")
 	flag.StringVar(&b.prefix, "prefix", "resource", "A prefix for variables (ignored if name is set)")
 	flag.BoolVar(&b.noheader, "append", false, "Append an existing go file (don't output headers)")
+	flag.BoolVar(&b.adoptIconColor, "adoptcolor", false, "Whether the resource should adopt the theme color for icons.")
 }
 
 func (b *bundler) printHelp(indent string) {
@@ -105,11 +107,11 @@ func (b *bundler) run(args []string) {
 	case os.IsNotExist(err):
 		fyne.LogError("Specified file could not be found", err)
 	case stat.IsDir():
-		dirBundle(b.pkg, b.prefix, b.noheader, args[0])
+		dirBundle(b.pkg, b.prefix, b.noheader, args[0], b.adoptIconColor)
 	case b.name != "":
 		b.prefix = ""
 		fallthrough
 	default:
-		doBundle(b.name, b.pkg, b.prefix, b.noheader, args[0])
+		doBundle(b.name, b.pkg, b.prefix, b.noheader, args[0], b.adoptIconColor)
 	}
 }

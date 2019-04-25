@@ -14,18 +14,17 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, hyperlink, placeholder, primary, hover, scrollBar color.Color
-	regular, bold, italic, bolditalic, monospace                    fyne.Resource
+	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar color.Color
+	regular, bold, italic, bolditalic, monospace                          fyne.Resource
 }
-
-var lightBackground = color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
 
 // LightTheme defines the built in light theme colours and sizes
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:  lightBackground,
+		background:  color.RGBA{0xf5, 0xf5, 0xf5, 0xff},
 		button:      color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
 		text:        color.RGBA{0x21, 0x21, 0x21, 0xff},
+		icon:        color.RGBA{0x21, 0x21, 0x21, 0xff},
 		hyperlink:   color.RGBA{0x0, 0x0, 0xd9, 0xff},
 		placeholder: color.RGBA{0x88, 0x88, 0x88, 0xff},
 		primary:     color.RGBA{0x9f, 0xa8, 0xda, 0xff},
@@ -43,11 +42,48 @@ func DarkTheme() fyne.Theme {
 		background:  color.RGBA{0x42, 0x42, 0x42, 0xff},
 		button:      color.RGBA{0x21, 0x21, 0x21, 0xff},
 		text:        color.RGBA{0xff, 0xff, 0xff, 0xff},
+		icon:        color.RGBA{0xff, 0xff, 0xff, 0xff},
 		hyperlink:   color.RGBA{0x99, 0x99, 0xff, 0xff},
 		placeholder: color.RGBA{0xb2, 0xb2, 0xb2, 0xff},
 		primary:     color.RGBA{0x1a, 0x23, 0x7e, 0xff},
 		hover:       color.RGBA{0x31, 0x31, 0x31, 0xff},
 		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
+	}
+
+	theme.initFonts()
+	return theme
+}
+
+// SolarizedDark defines the built in solarized dark theme colours and sizes
+func SolarizedDark() fyne.Theme {
+	theme := &builtinTheme{
+		background:  color.RGBA{0x00, 0x2b, 0x36, 0xff}, // base03
+		button:      color.RGBA{0x07, 0x36, 0x42, 0xff}, // base02
+		scrollBar:   color.RGBA{0x07, 0x36, 0x42, 0xff}, // base02
+		placeholder: color.RGBA{0x58, 0x6e, 0x75, 0xff}, // base01
+		primary:     color.RGBA{0x1f, 0x4a, 0x54, 0xff}, // 1f4a54
+		hover:       color.RGBA{0x1f, 0x4a, 0x54, 0xff}, // 1f4a54
+		text:        color.RGBA{0x93, 0xa1, 0xa1, 0xff}, // base1
+		icon:        color.RGBA{0x93, 0xa1, 0xa1, 0xff}, // base1
+		hyperlink:   color.RGBA{0x26, 0x8b, 0xd2, 0xff}, // blue
+	}
+
+	theme.initFonts()
+	return theme
+}
+
+// SolarizedLight defines the built in solarized light theme colours and sizes
+func SolarizedLight() fyne.Theme {
+	theme := &builtinTheme{
+		background:  color.RGBA{0xfd, 0xf6, 0xe3, 0xff}, // base3
+		button:      color.RGBA{0xee, 0xe8, 0xd5, 0xff}, // base2
+		scrollBar:   color.RGBA{0xee, 0xe8, 0xd5, 0xff}, // base2
+		placeholder: color.RGBA{0x93, 0xa1, 0xa1, 0xff}, // base1
+		primary:     color.RGBA{0xd6, 0xd0, 0xbf, 0xff}, // d6d0bf
+		hover:       color.RGBA{0xd6, 0xd0, 0xbf, 0xff}, // d6d0bf
+		text:        color.RGBA{0x65, 0x7b, 0x83, 0xff}, // base00
+		icon:        color.RGBA{0x65, 0x7b, 0x83, 0xff}, // base00
+		hyperlink:   color.RGBA{0x26, 0x8b, 0xd2, 0xff}, // blue
 	}
 
 	theme.initFonts()
@@ -71,6 +107,11 @@ func (t *builtinTheme) HyperlinkColor() color.Color {
 // TextColor returns the theme's standard text colour
 func (t *builtinTheme) TextColor() color.Color {
 	return t.text
+}
+
+// TextColor returns the theme's standard icon colour
+func (t *builtinTheme) IconColor() color.Color {
+	return t.icon
 }
 
 // PlaceHolderColor returns the theme's placeholder text colour
@@ -206,6 +247,11 @@ func HyperlinkColor() color.Color {
 // TextColor returns the theme's standard text colour
 func TextColor() color.Color {
 	return current().TextColor()
+}
+
+// IconColor returns the theme's standard icon colour
+func IconColor() color.Color {
+	return current().IconColor()
 }
 
 // PlaceHolderColor returns the theme's standard text colour

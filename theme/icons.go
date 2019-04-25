@@ -2,107 +2,6 @@ package theme
 
 import "fyne.io/fyne"
 
-// ThemedResource is a resource wrapper that will return an appropriate resource
-// for the currently selected theme. In this implementation it chooses between a dark
-// and light alternative to match the current setting.
-type ThemedResource struct {
-	dark  fyne.Resource
-	light fyne.Resource
-}
-
-func isThemeLight() bool {
-	return fyne.CurrentApp().Settings().Theme().BackgroundColor() == lightBackground
-}
-
-// Name returns the underlrying resource name (used for caching)
-func (res *ThemedResource) Name() string {
-	if isThemeLight() {
-		return res.light.Name()
-	}
-
-	return res.dark.Name()
-}
-
-// Content returns the underlying content of the correct resource for the current theme
-func (res *ThemedResource) Content() []byte {
-	if isThemeLight() {
-		return res.light.Content()
-	}
-
-	return res.dark.Content()
-}
-
-// NewThemedResource creates a resource that adapts to the current theme setting.
-// It is currently a simple pairing of a dark and light variant of the same resource.
-func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
-	return &ThemedResource{dark, light}
-}
-
-var (
-	cancel, confirm, delete, search, searchReplace                              *ThemedResource
-	checked, unchecked, radioButton, radioButtonChecked                         *ThemedResource
-	contentAdd, contentRemove, contentCut, contentCopy, contentPaste            *ThemedResource
-	contentRedo, contentUndo, info, question, warning                           *ThemedResource
-	documentCreate, documentPrint, documentSave                                 *ThemedResource
-	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
-	arrowBack, arrowDown, arrowForward, arrowUp                                 *ThemedResource
-	folder, folderNew, folderOpen, help, home                                   *ThemedResource
-	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
-)
-
-func init() {
-	cancel = &ThemedResource{cancelDark, cancelLight}
-	confirm = &ThemedResource{checkDark, checkLight}
-	delete = &ThemedResource{deleteDark, deleteLight}
-	search = &ThemedResource{searchDark, searchLight}
-	searchReplace = &ThemedResource{searchreplaceDark, searchreplaceLight}
-
-	checked = &ThemedResource{checkboxDark, checkboxLight}
-	unchecked = &ThemedResource{checkboxblankDark, checkboxblankLight}
-	radioButton = &ThemedResource{radiobuttonDark, radiobuttonLight}
-	radioButtonChecked = &ThemedResource{radiobuttoncheckedDark, radiobuttoncheckedLight}
-
-	contentAdd = &ThemedResource{contentaddDark, contentaddLight}
-	contentRemove = &ThemedResource{contentremoveDark, contentremoveLight}
-	contentCut = &ThemedResource{contentcutDark, contentcutLight}
-	contentCopy = &ThemedResource{contentcopyDark, contentcopyLight}
-	contentPaste = &ThemedResource{contentpasteDark, contentpasteLight}
-	contentRedo = &ThemedResource{contentredoDark, contentredoLight}
-	contentUndo = &ThemedResource{contentundoDark, contentundoLight}
-
-	documentCreate = &ThemedResource{documentcreateDark, documentcreateLight}
-	documentPrint = &ThemedResource{documentprintDark, documentprintLight}
-	documentSave = &ThemedResource{documentsaveDark, documentsaveLight}
-
-	info = &ThemedResource{infoDark, infoLight}
-	question = &ThemedResource{questionDark, questionLight}
-	warning = &ThemedResource{warningDark, warningLight}
-
-	mailAttachment = &ThemedResource{mailattachmentDark, mailattachmentLight}
-	mailCompose = &ThemedResource{mailcomposeDark, mailcomposeLight}
-	mailForward = &ThemedResource{mailforwardDark, mailforwardLight}
-	mailReply = &ThemedResource{mailreplyDark, mailreplyLight}
-	mailReplyAll = &ThemedResource{mailreplyallDark, mailreplyallLight}
-	mailSend = &ThemedResource{mailsendDark, mailsendLight}
-
-	arrowBack = &ThemedResource{arrowbackDark, arrowbackLight}
-	arrowDown = &ThemedResource{arrowdownDark, arrowdownLight}
-	arrowForward = &ThemedResource{arrowforwardDark, arrowforwardLight}
-	arrowUp = &ThemedResource{arrowupDark, arrowupLight}
-
-	folder = &ThemedResource{folderDark, folderLight}
-	folderNew = &ThemedResource{foldernewDark, foldernewLight}
-	folderOpen = &ThemedResource{folderopenDark, folderopenLight}
-	help = &ThemedResource{helpDark, helpLight}
-	home = &ThemedResource{homeDark, homeLight}
-
-	viewFullScreen = &ThemedResource{viewfullscreenDark, viewfullscreenLight}
-	viewRefresh = &ThemedResource{viewrefreshDark, viewrefreshLight}
-	viewZoomFit = &ThemedResource{viewzoomfitDark, viewzoomfitLight}
-	viewZoomIn = &ThemedResource{viewzoominDark, viewzoominLight}
-	viewZoomOut = &ThemedResource{viewzoomoutDark, viewzoomoutLight}
-}
-
 // FyneLogo returns a resource containing the Fyne logo
 func FyneLogo() fyne.Resource {
 	return fynelogo
@@ -120,7 +19,7 @@ func ConfirmIcon() fyne.Resource {
 
 // DeleteIcon returns a resource containing the standard delete icon for the current theme
 func DeleteIcon() fyne.Resource {
-	return delete
+	return deleteIcon
 }
 
 // SearchIcon returns a resource containing the standard search icon for the current theme

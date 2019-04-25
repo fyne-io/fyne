@@ -5,6 +5,7 @@ package app // import "fyne.io/fyne/app"
 
 import (
 	"os"
+	"strings"
 	"sync"
 
 	"fyne.io/fyne"
@@ -96,10 +97,14 @@ func (app *fyneApp) applyTheme() {
 }
 
 func (app *fyneApp) setupTheme() {
-	env := os.Getenv("FYNE_THEME")
-	if env == "light" {
+	switch strings.ToLower(os.Getenv("FYNE_THEME")) {
+	case "light":
 		app.Settings().SetTheme(theme.LightTheme())
-	} else {
+	case "solarizeddark":
+		app.Settings().SetTheme(theme.SolarizedDark())
+	case "solarizedlight":
+		app.Settings().SetTheme(theme.SolarizedLight())
+	default:
 		app.Settings().SetTheme(theme.DarkTheme())
 	}
 }

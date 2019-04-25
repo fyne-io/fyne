@@ -2,12 +2,14 @@ package gl
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"image"
 	"image/draw"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -169,10 +171,36 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 		if strings.ToLower(filepath.Ext(name)) == ".svg" {
 			tex := svgCacheGet(img.Resource, width, height)
-			if tex == nil {
-				// Not in cache, so load the item and add to cache
 
-				icon, err := oksvg.ReadIconStream(file)
+			if tex == nil {
+				// Not in cache, load the item and add to cache
+				var bArray []byte
+				var err error
+				if img.Resource.AdoptIconColor() {
+					// Adopt the theme's icon color
+					iColor := fyne.CurrentApp().Settings().Theme().IconColor()
+					hexColor := theme.ColorToHexString(iColor)
+
+					var svg theme.SVG
+					if err := svg.ReplaceFillColor(file, hexColor); err != nil {
+						fyne.LogError("could not replace icon fill", err)
+						return 0
+					}
+
+					bArray, err = xml.Marshal(svg)
+					if err != nil {
+						fyne.LogError("could not marshal svg xml", err)
+						return 0
+					}
+				} else {
+					bArray, err = ioutil.ReadAll(file)
+					if err != nil {
+						fyne.LogError("could not read file", err)
+						return 0
+					}
+				}
+
+				icon, err := oksvg.ReadIconStream(bytes.NewReader(bArray))
 				if err != nil {
 					fyne.LogError("SVG Load error:", err)
 
