@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
@@ -71,6 +72,9 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 		return theme.PrimaryColor()
 	}
 
+	if b.button.hovered {
+		return theme.HoverColor()
+	}
 	return theme.ButtonColor()
 }
 
@@ -108,6 +112,7 @@ type Button struct {
 	Icon  fyne.Resource
 
 	OnTapped func() `json:"-"`
+	hovered  bool
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -158,6 +163,22 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 func (b *Button) TappedSecondary(*fyne.PointEvent) {
 }
 
+// MouseIn is called when a desktop pointer enters the widget
+func (b *Button) MouseIn(*desktop.MouseEvent) {
+	b.hovered = true
+	Refresh(b)
+}
+
+// MouseOut is called when a desktop pointer exits the widget
+func (b *Button) MouseOut() {
+	b.hovered = false
+	Refresh(b)
+}
+
+// MouseMoved is called when a desktop pointer hovers over the widget
+func (b *Button) MouseMoved(*desktop.MouseEvent) {
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
@@ -194,7 +215,7 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
-	button := &Button{baseWidget{}, label, DefaultButton, nil, tapped}
+	button := &Button{baseWidget{}, label, DefaultButton, nil, tapped, false}
 
 	Renderer(button).Layout(button.MinSize())
 	return button
@@ -203,7 +224,7 @@ func NewButton(label string, tapped func()) *Button {
 // NewButtonWithIcon creates a new button widget with the specified label,
 // themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
-	button := &Button{baseWidget{}, label, DefaultButton, icon, tapped}
+	button := &Button{baseWidget{}, label, DefaultButton, icon, tapped, false}
 
 	Renderer(button).Layout(button.MinSize())
 	return button

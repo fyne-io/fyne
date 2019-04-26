@@ -10,6 +10,7 @@ type Theme interface {
 	TextColor() color.Color
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color
+	HoverColor() color.Color
 	FocusColor() color.Color
 	ScrollBarColor() color.Color
 

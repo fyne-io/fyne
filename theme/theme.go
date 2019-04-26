@@ -14,8 +14,8 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, hyperlink, placeholder, primary, scrollBar color.Color
-	regular, bold, italic, bolditalic, monospace             fyne.Resource
+	button, text, hyperlink, placeholder, primary, hover, scrollBar color.Color
+	regular, bold, italic, bolditalic, monospace                    fyne.Resource
 }
 
 var lightBackground = color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
@@ -29,6 +29,7 @@ func LightTheme() fyne.Theme {
 		hyperlink:   color.RGBA{0x0, 0x0, 0xd9, 0xff},
 		placeholder: color.RGBA{0x88, 0x88, 0x88, 0xff},
 		primary:     color.RGBA{0x9f, 0xa8, 0xda, 0xff},
+		hover:       color.RGBA{0xe7, 0xe7, 0xe7, 0xff},
 		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
 	}
 
@@ -45,6 +46,7 @@ func DarkTheme() fyne.Theme {
 		hyperlink:   color.RGBA{0x99, 0x99, 0xff, 0xff},
 		placeholder: color.RGBA{0xb2, 0xb2, 0xb2, 0xff},
 		primary:     color.RGBA{0x1a, 0x23, 0x7e, 0xff},
+		hover:       color.RGBA{0x31, 0x31, 0x31, 0xff},
 		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
 	}
 
@@ -79,6 +81,11 @@ func (t *builtinTheme) PlaceHolderColor() color.Color {
 // PrimaryColor returns the colour used to highlight primary features
 func (t *builtinTheme) PrimaryColor() color.Color {
 	return t.primary
+}
+
+// HoverColor returns the colour used to highlight interactive elements currently under a cursor
+func (t *builtinTheme) HoverColor() color.Color {
+	return t.hover
 }
 
 // FocusColor returns the colour used to highlight a focussed widget
@@ -209,6 +216,11 @@ func PlaceHolderColor() color.Color {
 // PrimaryColor returns the colour used to highlight primary features
 func PrimaryColor() color.Color {
 	return current().PrimaryColor()
+}
+
+// HoverColor returns the colour used to highlight interactive elements currently under a cursor
+func HoverColor() color.Color {
+	return current().HoverColor()
 }
 
 // FocusColor returns the colour used to highlight a focussed widget

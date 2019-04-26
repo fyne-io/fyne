@@ -130,6 +130,10 @@ func (dummyTheme) PrimaryColor() color.Color {
 	return color.White
 }
 
+func (dummyTheme) HoverColor() color.Color {
+	return color.White
+}
+
 func (dummyTheme) FocusColor() color.Color {
 	return color.Black
 }

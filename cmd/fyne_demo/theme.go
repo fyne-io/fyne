@@ -40,6 +40,10 @@ func (customTheme) PrimaryColor() color.Color {
 	return orange
 }
 
+func (customTheme) HoverColor() color.Color {
+	return color.Black
+}
+
 func (customTheme) FocusColor() color.Color {
 	return orange
 }
