@@ -47,9 +47,10 @@ type window struct {
 	padded     bool
 	visible    bool
 
-	mousePos  fyne.Position
-	mouseOver desktop.Hoverable
-	onClosed  func()
+	mousePos    fyne.Position
+	mouseButton desktop.MouseButton
+	mouseOver   desktop.Hoverable
+	onClosed    func()
 
 	xpos, ypos   int
 	ignoreResize bool
@@ -514,7 +515,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	if drag != nil {
 		ev := new(desktop.MouseEvent)
 		ev.Position = fyne.NewPos(x, y)
-		// TODO add buttons
+		ev.Button = w.mouseButton
 
 		if obj, ok := drag.(desktop.Hoverable); ok {
 			if obj == w.mouseOver {
@@ -549,6 +550,8 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			return true
 		} else if _, ok := object.(desktop.Mouseable); ok {
 			return true
+		} else if _, ok := object.(desktop.Hoverable); ok {
+			return true
 		}
 
 		return false
@@ -577,9 +580,15 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		}
 	}
 
+	if action == glfw.Press {
+		w.mouseButton = convertMouseButton(button)
+	} else if action == glfw.Release {
+		w.mouseButton = 0
+	}
+
 	switch wid := co.(type) {
 	case fyne.Tappable:
-		if action == glfw.Press {
+		if action == glfw.Release {
 			switch button {
 			case glfw.MouseButtonRight:
 				go wid.TappedSecondary(ev)
