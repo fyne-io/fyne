@@ -29,6 +29,6 @@ type Mouseable interface {
 // Hoverable is used when a canvas object wishes to know if a pointer device moves over it.
 type Hoverable interface {
 	MouseIn(*MouseEvent)
-	MouseOut(*MouseEvent)
+	MouseOut()
 	MouseMoved(*MouseEvent)
 }

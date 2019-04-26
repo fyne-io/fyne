@@ -47,8 +47,9 @@ type window struct {
 	padded     bool
 	visible    bool
 
-	mousePos fyne.Position
-	onClosed func()
+	mousePos  fyne.Position
+	mouseOver desktop.Hoverable
+	onClosed  func()
 
 	xpos, ypos   int
 	ignoreResize bool
@@ -511,21 +512,32 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	})
 
 	if drag != nil {
-		// TODO figure how far we dragged...
+		ev := new(desktop.MouseEvent)
+		ev.Position = fyne.NewPos(x, y)
+		// TODO add buttons
 
 		if obj, ok := drag.(desktop.Hoverable); ok {
-			// TODO trigger mouse in and mouse out too
-			ev := new(desktop.MouseEvent)
-			ev.Position = fyne.NewPos(x, y)
-			// TODO add buttons
-			obj.MouseMoved(ev)
+			if obj == w.mouseOver {
+				obj.MouseMoved(ev)
+			} else {
+				if w.mouseOver != nil {
+					w.mouseOver.MouseOut()
+				} else if obj != nil {
+					obj.MouseIn(ev)
+				}
+				w.mouseOver = obj
+			}
 		}
+		// TODO figure how far we dragged...
 		// TODO only if we have a mouse down
 		//if obj, ok := drag.(fyne.Dragable); ok {
 		//	ev := new(fyne.DragEvent)
 		//	ev.Position = fyne.NewPos(x, y)
 		//	obj.Dragged(ev)
 		//}
+	} else if w.mouseOver != nil {
+		w.mouseOver.MouseOut()
+		w.mouseOver = nil
 	}
 }
 
