@@ -17,3 +17,10 @@ type ScrollEvent struct {
 	PointEvent
 	DeltaX, DeltaY int
 }
+
+// DragEvent defines the parameters of a pointer or other drag event.
+// The DraggedX and DraggedY fields show how far the item was dragged since the last event.
+type DragEvent struct {
+	PointEvent
+	DraggedX, DraggedY int
+}

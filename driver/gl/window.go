@@ -47,10 +47,11 @@ type window struct {
 	padded     bool
 	visible    bool
 
-	mousePos    fyne.Position
-	mouseButton desktop.MouseButton
-	mouseOver   desktop.Hoverable
-	onClosed    func()
+	mousePos     fyne.Position
+	mouseDragPos fyne.Position
+	mouseButton  desktop.MouseButton
+	mouseOver    desktop.Hoverable
+	onClosed     func()
 
 	xpos, ypos   int
 	ignoreResize bool
@@ -504,8 +505,9 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			cursor = hyperlinkCursor
 		}
 
+		_, drag := object.(fyne.Draggable)
 		_, hover := object.(desktop.Hoverable)
-		return hover
+		return drag || hover
 	})
 
 	runOnMainAsync(func() {
@@ -529,13 +531,18 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 				w.mouseOver = obj
 			}
 		}
-		// TODO figure how far we dragged...
-		// TODO only if we have a mouse down
-		//if obj, ok := drag.(fyne.Dragable); ok {
-		//	ev := new(fyne.DragEvent)
-		//	ev.Position = fyne.NewPos(x, y)
-		//	obj.Dragged(ev)
-		//}
+
+		if w.mouseButton > 0 {
+			if obj, ok := drag.(fyne.Draggable); ok {
+				ev := new(fyne.DragEvent)
+				ev.Position = fyne.NewPos(x, y)
+				ev.DraggedX = x - w.mouseDragPos.X
+				ev.DraggedY = y - w.mouseDragPos.Y
+				obj.Dragged(ev)
+
+				w.mouseDragPos = ev.Position
+			}
+		}
 	} else if w.mouseOver != nil {
 		w.mouseOver.MouseOut()
 		w.mouseOver = nil
@@ -547,6 +554,8 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		} else if _, ok := object.(fyne.Focusable); ok {
+			return true
+		} else if _, ok := object.(fyne.Draggable); ok {
 			return true
 		} else if _, ok := object.(desktop.Mouseable); ok {
 			return true
@@ -595,6 +604,10 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			default:
 				go wid.Tapped(ev)
 			}
+		}
+	case fyne.Draggable:
+		if action == glfw.Press {
+			w.mouseDragPos = ev.Position
 		}
 	case fyne.Focusable:
 		if needsfocus == true {
