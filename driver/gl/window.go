@@ -460,10 +460,16 @@ func (w *window) refresh(viewport *glfw.Window) {
 	w.canvas.setDirty(true)
 }
 
-func findMouseObj(canvas *glCanvas, mouse fyne.Position, scroll bool) (fyne.CanvasObject, int, int) {
-	found := canvas.content
+func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position,
+	matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, int, int) {
+	var found fyne.CanvasObject
 	foundX, foundY := 0, 0
+
 	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), false, func(walked fyne.CanvasObject, pos fyne.Position) {
+		if !walked.Visible() {
+			return
+		}
+
 		if mouse.X < pos.X || mouse.Y < pos.Y {
 			return
 		}
@@ -474,24 +480,9 @@ func findMouseObj(canvas *glCanvas, mouse fyne.Position, scroll bool) (fyne.Canv
 			return
 		}
 
-		if !walked.Visible() {
-			return
-		}
-
-		if scroll {
-			if _, ok := walked.(fyne.Scrollable); ok {
-				found = walked
-				foundX, foundY = pos.X, pos.Y
-			}
-			return
-		}
-		switch walked.(type) {
-		case fyne.Tappable, desktop.Mouseable:
+		if matches(walked) {
 			found = walked
-			foundX, foundY = pos.X, pos.Y
-		case fyne.Focusable:
-			found = walked
-			foundX, foundY = pos.X, pos.Y
+			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
 		}
 	})
 
@@ -501,29 +492,57 @@ func findMouseObj(canvas *glCanvas, mouse fyne.Position, scroll bool) (fyne.Canv
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
 
-	co, _, _ := findMouseObj(w.canvas, w.mousePos, false)
 	cursor := defaultCursor
-	switch wid := co.(type) {
-	case *widget.Entry:
-		if !wid.ReadOnly {
-			cursor = entryCursor
+	drag, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+		if wid, ok := object.(*widget.Entry); ok {
+			if !wid.ReadOnly {
+				cursor = entryCursor
+			}
+		} else if _, ok := object.(*widget.Hyperlink); ok {
+			cursor = hyperlinkCursor
 		}
-	case *widget.Hyperlink:
-		cursor = hyperlinkCursor
-	}
+
+		_, hover := object.(desktop.Hoverable)
+		return hover
+	})
+
 	runOnMainAsync(func() {
 		viewport.SetCursor(cursor)
 	})
+
+	if drag != nil {
+		// TODO figure how far we dragged...
+
+		if obj, ok := drag.(desktop.Hoverable); ok {
+			// TODO trigger mouse in and mouse out too
+			ev := new(desktop.MouseEvent)
+			ev.Position = fyne.NewPos(x, y)
+			// TODO add buttons
+			obj.MouseMoved(ev)
+		}
+		// TODO only if we have a mouse down
+		//if obj, ok := drag.(fyne.Dragable); ok {
+		//	ev := new(fyne.DragEvent)
+		//	ev.Position = fyne.NewPos(x, y)
+		//	obj.Dragged(ev)
+		//}
+	}
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
-	co, x, y := findMouseObj(w.canvas, w.mousePos, false)
+	co, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		} else if _, ok := object.(fyne.Focusable); ok {
+			return true
+		} else if _, ok := object.(desktop.Mouseable); ok {
+			return true
+		}
+
+		return false
+	})
 	ev := new(fyne.PointEvent)
-	pad := 0
-	if w.padded {
-		pad = theme.Padding()
-	}
-	ev.Position = fyne.NewPos(w.mousePos.X-pad-x, w.mousePos.Y-pad-y)
+	ev.Position = fyne.NewPos(x, y)
 
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
@@ -564,7 +583,10 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	co, _, _ := findMouseObj(w.canvas, w.mousePos, true)
+	co, _, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+		_, ok := object.(fyne.Scrollable)
+		return ok
+	})
 
 	switch wid := co.(type) {
 	case fyne.Scrollable:
