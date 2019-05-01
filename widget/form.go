@@ -91,6 +91,10 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 		f.itemGrid.AddObject(item.Widget)
 	}
 
+	if f.OnCancel == nil && f.OnSubmit == nil {
+		return Renderer(NewVBox(f.itemGrid))
+	}
+
 	buttons := NewHBox(layout.NewSpacer())
 	if f.OnCancel != nil {
 		buttons.Append(NewButtonWithIcon("Cancel", theme.CancelIcon(), f.OnCancel))
