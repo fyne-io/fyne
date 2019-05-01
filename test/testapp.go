@@ -143,6 +143,10 @@ func (dummyTheme) ScrollBarColor() color.Color {
 	return color.Black
 }
 
+func (dummyTheme) ShadowColor() color.Color {
+	return color.Black
+}
+
 func (dummyTheme) TextSize() int {
 	return 10
 }

@@ -93,6 +93,14 @@ func main() {
 		layout.NewSpacer(),
 
 		widget.NewButton("Input", func() { Input(a) }),
+		widget.NewButton("Overlay", func() {
+			ok := widget.NewButton("Dismiss", func() {
+				w.Canvas().SetOverlay(nil)
+			})
+			message := widget.NewVBox(widget.NewLabel("Centered"), ok)
+			overlay := fyne.NewContainerWithLayout(layout.NewCenterLayout(), message)
+			w.Canvas().SetOverlay(fyne.NewContainer(canvas.NewRectangle(theme.ShadowColor()), overlay))
+		}),
 		widget.NewButton("Advanced", func() { Advanced(a) }),
 		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
 			a.Quit()
