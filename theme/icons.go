@@ -39,15 +39,15 @@ func NewThemedResource(dark, light *fyne.StaticResource) *ThemedResource {
 }
 
 var (
-	cancel, confirm, delete, search, searchReplace                              *ThemedResource
-	checked, unchecked, radioButton, radioButtonChecked                         *ThemedResource
-	contentAdd, contentRemove, contentCut, contentCopy, contentPaste            *ThemedResource
-	contentRedo, contentUndo, info, question, warning                           *ThemedResource
-	documentCreate, documentPrint, documentSave                                 *ThemedResource
-	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
-	arrowBack, arrowDown, arrowForward, arrowUp                                 *ThemedResource
-	folder, folderNew, folderOpen, help, home                                   *ThemedResource
-	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
+	cancel, confirm, delete, search, searchReplace                                 *ThemedResource
+	checked, unchecked, radioButton, radioButtonChecked                            *ThemedResource
+	contentAdd, contentRemove, contentCut, contentCopy, contentPaste               *ThemedResource
+	contentRedo, contentUndo, info, question, warning                              *ThemedResource
+	documentCreate, documentPrint, documentSave                                    *ThemedResource
+	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend    *ThemedResource
+	arrowBack, arrowDown, arrowForward, arrowUp                                    *ThemedResource
+	folder, folderNew, folderOpen, help, home                                      *ThemedResource
+	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut              *ThemedResource
 )
 
 func init() {
@@ -98,6 +98,7 @@ func init() {
 
 	viewFullScreen = NewThemedResource(viewfullscreenIconRes, nil)
 	viewRefresh = NewThemedResource(viewrefreshIconRes, nil)
+	viewZoomFit = NewThemedResource(viewzoomfitIconRes, nil)
 	viewZoomIn = NewThemedResource(viewzoominIconRes, nil)
 	viewZoomOut = NewThemedResource(viewzoomoutIconRes, nil)
 }
