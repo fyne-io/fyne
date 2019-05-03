@@ -51,7 +51,7 @@ var (
 )
 
 func init() {
-	cancel = NewThemedResource(cancelIconRes, cancelIconRes)
+	cancel = NewThemedResource(cancelIconRes, nil)
 	confirm = NewThemedResource(checkIconRes, nil)
 	delete = NewThemedResource(deleteIconRes, nil)
 	search = NewThemedResource(searchIconRes, nil)
