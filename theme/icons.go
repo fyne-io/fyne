@@ -20,8 +20,13 @@ func (res *ThemedResource) Content() []byte {
 
 // TODO: unfuck all of this stuff
 // NewThemedResource creates a resource that adapts to the current theme setting.
-func NewThemedResource(res fyne.StaticResource) *ThemedResource {
-	return &ThemedResource{}
+func NewThemedResource(res *fyne.StaticResource) *ThemedResource {
+	dr := &fyne.DynamicResource{
+		BaseResource: res,
+	}
+	return &ThemedResource{
+		source: dr,
+	}
 }
 
 var (
@@ -37,56 +42,224 @@ var (
 )
 
 func init() {
-	cancel = &ThemedResource{cancelDark}
-	confirm = &ThemedResource{checkDark}
-	delete = &ThemedResource{deleteDark}
-	search = &ThemedResource{searchDark}
-	searchReplace = &ThemedResource{searchreplaceDark}
+	cancel = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: cancelIconRes,
+		},
+	}
+	confirm = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: checkIconRes,
+		},
+	}
+	delete = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: deleteIconRes,
+		},
+	}
+	search = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: searchIconRes,
+		},
+	}
+	searchReplace = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: searchreplaceIconRes,
+		},
+	}
 
-	checked = &ThemedResource{checkboxDark}
-	unchecked = &ThemedResource{checkboxblankDark}
-	radioButton = &ThemedResource{radiobuttonDark}
-	radioButtonChecked = &ThemedResource{radiobuttoncheckedDark}
+	checked = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: checkboxIconRes,
+		},
+	}
+	unchecked = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: checkboxblankIconRes,
+		},
+	}
+	radioButton = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: radiobuttonIconRes,
+		},
+	}
+	radioButtonChecked = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: radiobuttoncheckedIconRes,
+		},
+	}
 
-	contentAdd = &ThemedResource{contentaddDark}
-	contentRemove = &ThemedResource{contentremoveDark}
-	contentCut = &ThemedResource{contentcutDark}
-	contentCopy = &ThemedResource{contentcopyDark}
-	contentPaste = &ThemedResource{contentpasteDark}
-	contentRedo = &ThemedResource{contentredoDark}
-	contentUndo = &ThemedResource{contentundoDark}
+	contentAdd = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: contentaddIconRes,
+		},
+	}
+	contentRemove = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: contentremoveIconRes,
+		},
+	}
+	contentCut = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: contentcutIconRes,
+		},
+	}
+	contentCopy = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: contentcopyIconRes,
+		},
+	}
+	contentPaste = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: contentpasteIconRes,
+		},
+	}
+	contentRedo = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: contentredoIconRes,
+		},
+	}
+	contentUndo = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: contentundoIconRes,
+		},
+	}
 
-	documentCreate = &ThemedResource{documentcreateDark}
-	documentPrint = &ThemedResource{documentprintDark}
-	documentSave = &ThemedResource{documentsaveDark}
+	documentCreate = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: documentcreateIconRes,
+		},
+	}
+	documentPrint = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: documentprintIconRes,
+		},
+	}
+	documentSave = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: documentsaveIconRes,
+		},
+	}
 
-	info = &ThemedResource{infoDark}
-	question = &ThemedResource{questionDark}
-	warning = &ThemedResource{warningDark}
+	info = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: infoIconRes,
+		},
+	}
+	question = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: questionIconRes,
+		},
+	}
+	warning = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: warningIconRes,
+		},
+	}
 
-	mailAttachment = &ThemedResource{mailattachmentDark}
-	mailCompose = &ThemedResource{mailcomposeDark}
-	mailForward = &ThemedResource{mailforwardDark}
-	mailReply = &ThemedResource{mailreplyDark}
-	mailReplyAll = &ThemedResource{mailreplyallDark}
-	mailSend = &ThemedResource{mailsendDark}
+	mailAttachment = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: mailattachmentIconRes,
+		},
+	}
+	mailCompose = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: mailcomposeIconRes,
+		},
+	}
+	mailForward = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: mailforwardIconRes,
+		},
+	}
+	mailReply = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: mailreplyIconRes,
+		},
+	}
+	mailReplyAll = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: mailreplyallIconRes,
+		},
+	}
+	mailSend = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: mailsendIconRes,
+		},
+	}
 
-	arrowBack = &ThemedResource{arrowbackDark}
-	arrowDown = &ThemedResource{arrowdownDark}
-	arrowForward = &ThemedResource{arrowforwardDark}
-	arrowUp = &ThemedResource{arrowupDark}
+	arrowBack = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: arrowbackIconRes,
+		},
+	}
+	arrowDown = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: arrowdownIconRes,
+		},
+	}
+	arrowForward = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: arrowforwardIconRes,
+		},
+	}
+	arrowUp = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: arrowupIconRes,
+		},
+	}
 
-	folder = &ThemedResource{folderDark}
-	folderNew = &ThemedResource{foldernewDark}
-	folderOpen = &ThemedResource{folderopenDark}
-	help = &ThemedResource{helpDark}
-	home = &ThemedResource{homeDark}
+	folder = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: folderIconRes,
+		},
+	}
+	folderNew = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: foldernewIconRes,
+		},
+	}
+	folderOpen = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: folderopenIconRes,
+		},
+	}
+	help = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: helpIconRes,
+		},
+	}
+	home = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: homeIconRes,
+		},
+	}
 
-	viewFullScreen = &ThemedResource{viewfullscreenDark}
-	viewRefresh = &ThemedResource{viewrefreshDark}
-	viewZoomFit = &ThemedResource{viewzoomfitDark}
-	viewZoomIn = &ThemedResource{viewzoominDark}
-	viewZoomOut = &ThemedResource{viewzoomoutDark}
+	viewFullScreen = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: viewfullscreenIconRes,
+		},
+	}
+	viewRefresh = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: viewrefreshIconRes,
+		},
+	}
+	viewZoomFit = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: viewzoomfitIconRes,
+		},
+	}
+	viewZoomIn = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: viewzoominIconRes,
+		},
+	}
+	viewZoomOut = &ThemedResource{
+		&fyne.DynamicResource{
+			BaseResource: viewzoomoutIconRes,
+		},
+	}
 }
 
 // FyneLogo returns a resource containing the Fyne logo

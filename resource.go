@@ -72,8 +72,7 @@ func (r *DynamicResource) Name() string {
 // Content returns the bytes of the bundled vector
 func (r *DynamicResource) Content() []byte {
 	rdr := bytes.NewReader(r.BaseResource.Content())
-	// TODO: add support for IconColor
-	clr := CurrentApp().Settings().Theme().TextColor()
+	clr := CurrentApp().Settings().Theme().IconColor()
 	var s svg
 	if err := s.replaceFillColor(rdr, clr); err != nil {
 		LogError("could not replace fill color, falling back to static content:", err)
