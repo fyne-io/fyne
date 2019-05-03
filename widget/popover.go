@@ -1,0 +1,99 @@
+package widget
+
+import (
+	"image/color"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/theme"
+)
+
+// PopOver is a widget that can float above the user interface.
+// It wraps any standard elements with padding and a shadow.
+type PopOver struct {
+	baseWidget
+
+	Content fyne.CanvasObject
+	Canvas  fyne.Canvas
+}
+
+// Hide this widget, if it was previously visible
+func (p *PopOver) Hide() {
+	p.hide(p)
+	p.Canvas.SetOverlay(nil)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (p *PopOver) MinSize() fyne.Size {
+	return p.minSize(p)
+}
+
+// Move the widget to a new position, relative to it's parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (p *PopOver) Move(pos fyne.Position) {
+	p.Content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	p.move(pos, p)
+}
+
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (p *PopOver) Resize(size fyne.Size) {
+	p.resize(p.MinSize(), p)
+}
+
+// Show this widget, if it was previously hidden
+func (p *PopOver) Show() {
+	p.Canvas.SetOverlay(p)
+}
+
+// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+func (p *PopOver) CreateRenderer() fyne.WidgetRenderer {
+	shadow := canvas.NewRectangle(theme.ShadowColor())
+	bg := canvas.NewRectangle(theme.BackgroundColor())
+	objects := []fyne.CanvasObject{shadow, bg, p.Content}
+	return &popoverRenderer{popover: p, shadow: shadow, bg: bg, objects: objects}
+}
+
+// NewPopOver creates a new popover for the specified content and displays it on the passed canvas.
+func NewPopOver(content fyne.CanvasObject, canvas fyne.Canvas) *PopOver {
+	ret := &PopOver{Content: content, Canvas: canvas}
+	ret.Show()
+	return ret
+}
+
+type popoverRenderer struct {
+	popover    *PopOver
+	shadow, bg *canvas.Rectangle
+	objects    []fyne.CanvasObject
+}
+
+func (r *popoverRenderer) Layout(size fyne.Size) {
+	innerSize := r.popover.Content.MinSize()
+	r.popover.Content.Resize(innerSize)
+
+	r.shadow.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	r.shadow.Move(fyne.NewPos(-theme.Padding(), -theme.Padding()))
+
+	r.bg.Resize(size)
+}
+
+func (r *popoverRenderer) MinSize() fyne.Size {
+	return r.popover.Content.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+}
+
+func (r *popoverRenderer) Refresh() {
+}
+
+func (r *popoverRenderer) ApplyTheme() {
+}
+
+func (r *popoverRenderer) BackgroundColor() color.Color {
+	return color.Transparent
+}
+
+func (r *popoverRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *popoverRenderer) Destroy() {
+}

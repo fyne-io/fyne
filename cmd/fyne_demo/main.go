@@ -93,14 +93,23 @@ func main() {
 		layout.NewSpacer(),
 
 		widget.NewButton("Input", func() { Input(a) }),
-		widget.NewButton("Overlay", func() {
-			ok := widget.NewButton("Dismiss", func() {
-				w.Canvas().SetOverlay(nil)
-			})
-			message := widget.NewVBox(widget.NewLabel("Centered"), ok)
-			overlay := fyne.NewContainerWithLayout(layout.NewCenterLayout(), message)
-			w.Canvas().SetOverlay(fyne.NewContainer(canvas.NewRectangle(theme.ShadowColor()), overlay))
-		}),
+		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+			widget.NewButton("PopOver", func() {
+				var pop *widget.PopOver
+				ok := widget.NewButton("Dismiss", func() {
+					pop.Hide()
+				})
+				pop = widget.NewPopOver(ok, w.Canvas())
+				pop.Move(fyne.NewPos(25, 496))
+			}),
+			widget.NewButton("Modal", func() {
+				var pop *widget.ModalPopOver
+				ok := widget.NewButton("Dismiss", func() {
+					pop.Hide()
+				})
+				pop = widget.NewModalPopOver(ok, w.Canvas())
+			}),
+		),
 		widget.NewButton("Advanced", func() { Advanced(a) }),
 		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
 			a.Quit()

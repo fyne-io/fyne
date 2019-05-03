@@ -23,7 +23,7 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 }
 
 func (c *testCanvas) Overlay() fyne.CanvasObject {
-	return c.content
+	return c.overlay
 }
 
 func (c *testCanvas) SetOverlay(overlay fyne.CanvasObject) {
