@@ -1,11 +1,20 @@
 package theme
 
 import (
+	"encoding/hex"
+	"fmt"
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
 	"github.com/stretchr/testify/assert"
 )
+
+func helperColorToHexString(color color.Color) string {
+	r, g, b, _ := color.RGBA()
+	cBytes := []byte{byte(r), byte(g), byte(b)}
+	return fmt.Sprintf("#%s", hex.EncodeToString(cBytes))
+}
 
 // TODO figure how to test the default theme if we are messing with it...
 //func TestThemeDefault(t *testing.T) {
@@ -13,7 +22,7 @@ import (
 //	assert.NotEqual(t, lightBackground, loaded.BackgroundColor())
 //}
 
-func TestThemeChange_Basic(t *testing.T) {
+func TestThemeChange(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	bg := BackgroundColor()
 
@@ -24,92 +33,78 @@ func TestThemeChange_Basic(t *testing.T) {
 func TestTheme_Dark_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	bg := BackgroundColor()
-	hex := ColorToHexString(bg)
-	assert.Equal(t, "#424242", hex, "wrong dark theme background color")
+	hexStr := helperColorToHexString(bg)
+	assert.Equal(t, "#424242", hexStr, "wrong dark theme background color")
 }
 
 func TestTheme_Light_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	bg := BackgroundColor()
-	hex := ColorToHexString(bg)
-	assert.Equal(t, "#f5f5f5", hex, "wrong light theme background color")
-}
-
-func TestTheme_SolarizedLight_ReturnsCorrectBackground(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(SolarizedLight())
-	bg := BackgroundColor()
-	hex := ColorToHexString(bg)
-	assert.Equal(t, "#fdf6e3", hex, "wrong solarized dark background color")
-}
-
-func TestTheme_SolarizedDark_ReturnsCorrectBackground(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(SolarizedDark())
-	bg := BackgroundColor()
-	hex := ColorToHexString(bg)
-	assert.Equal(t, "#002b36", hex, "wrong solarized light background color")
+	hexStr := helperColorToHexString(bg)
+	assert.Equal(t, "#f5f5f5", hexStr, "wrong light theme background color")
 }
 
 func Test_ButtonColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := ButtonColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, "#212121", hex, "wrong button color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, "#212121", hexStr, "wrong button color")
 }
 
 func Test_HyperlinkColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := HyperlinkColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, "#9999ff", hex, "wrong hyperlink color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, "#9999ff", hexStr, "wrong hyperlink color")
 }
 
 func Test_TextColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := TextColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, "#ffffff", hex, "wrong hyperlink color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, "#ffffff", hexStr, "wrong hyperlink color")
 }
 
 func Test_PlaceHolderColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := PlaceHolderColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, "#b2b2b2", hex, "wrong placeholder color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, "#b2b2b2", hexStr, "wrong placeholder color")
 }
 
 func Test_PrimaryColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := PrimaryColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, "#1a237e", hex, "wrong primary color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, "#1a237e", hexStr, "wrong primary color")
 }
 
 func Test_HoverColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := HoverColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, "#313131", hex, "wrong hover color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, "#313131", hexStr, "wrong hover color")
 }
 
 func Test_FocusColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := FocusColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, ColorToHexString(PrimaryColor()), hex, "wrong focus color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, helperColorToHexString(PrimaryColor()), hexStr, "wrong focus color")
 }
 
 func Test_ScrollBarColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := ScrollBarColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, "#000000", hex, "wrong scrollbar color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, "#000000", hexStr, "wrong scrollbar color")
 }
 
 func Test_IconColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := IconColor()
-	hex := ColorToHexString(c)
-	assert.Equal(t, "#ffffff", hex, "wrong icon color")
+	hexStr := helperColorToHexString(c)
+	assert.Equal(t, "#ffffff", hexStr, "wrong icon color")
 }
 
 func Test_TextSize(t *testing.T) {
