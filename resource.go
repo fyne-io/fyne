@@ -1,5 +1,16 @@
 package fyne
 
+import (
+	"bytes"
+	"encoding/hex"
+	"encoding/xml"
+	"fmt"
+	"image/color"
+	"io"
+	"io/ioutil"
+
+)
+
 // Resource represents a single binary resource, such as an image or font.
 // A resource has an identifying name and byte array content.
 // The serialised path of a resource can be obtained which may result in a
@@ -46,4 +57,112 @@ func NewStaticResource(name string, content []byte, adoptIconColor bool) *Static
 		StaticContent:        content,
 		StaticAdoptIconColor: adoptIconColor,
 	}
+}
+
+// DynamicResource is a bundled resource that will adapt its content to match the current theme settings.
+type DynamicResource struct {
+	BaseResource *StaticResource
+}
+
+// Name returns the unique name of this resource, usually matching the file it was generated from.
+func (r *DynamicResource) Name() string {
+	return r.BaseResource.StaticName
+}
+
+// Content returns the bytes of the bundled vector
+func (r *DynamicResource) Content() []byte {
+	rdr := bytes.NewReader(r.BaseResource.Content())
+	// TODO: add support for IconColor
+	clr := CurrentApp().Settings().Theme().TextColor()
+	var s svg
+	if err := s.replaceFillColor(rdr, clr); err != nil {
+		LogError("could not replace fill color, falling back to static content:", err)
+		return r.BaseResource.StaticContent
+	}
+	b, err := xml.Marshal(s)
+	if err != nil {
+		LogError("could not marshal svg, falling back to static content:", err)
+		return r.BaseResource.StaticContent
+	}
+	return b
+}
+
+// TODO: add support for grouped SVG elements
+type svg struct {
+	XMLName  xml.Name   `xml:"svg"`
+	XMLNS    string     `xml:"xmlns,attr"`
+	Width    string     `xml:"width,attr"`
+	Height   string     `xml:"height,attr"`
+	ViewBox  string     `xml:"viewBox,attr"`
+	Paths    []*path    `xml:"path"`
+	Rects    []*rect    `xml:"rect"`
+	Polygons []*polygon `xml:"polygon"`
+}
+
+type path struct {
+	XMLName xml.Name `xml:"path"`
+	Fill    string   `xml:"fill,attr"`
+	D       string   `xml:"d,attr"`
+}
+
+type rect struct {
+	XMLName xml.Name `xml:"rect"`
+	Fill    string   `xml:"fill,attr"`
+	X       string   `xml:"x,attr"`
+	Y       string   `xml:"y,attr"`
+	Width   string   `xml:"width,attr"`
+	Height  string   `xml:"height,attr"`
+}
+
+type polygon struct {
+	XMLName xml.Name `xml:"polygon"`
+	Fill    string   `xml:"fill,attr"`
+	Points  string   `xml:"points,attr"`
+}
+
+func (s *svg) replacePathsFill(hexColor string) {
+	for _, path := range s.Paths {
+		if path.Fill != "none" {
+			path.Fill = hexColor
+		}
+	}
+}
+
+func (s *svg) replaceRectsFill(hexColor string) {
+	for _, rect := range s.Rects {
+		if rect.Fill != "none" {
+			rect.Fill = hexColor
+		}
+	}
+}
+
+func (s *svg) replacePolygonsFill(hexColor string) {
+	for _, poly := range s.Polygons {
+		if poly.Fill != "none" {
+			poly.Fill = hexColor
+		}
+	}
+}
+
+func (s *svg) replaceFillColor(reader io.Reader, color color.Color) error {
+	bSlice, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+
+	if err := xml.Unmarshal(bSlice, &s); err != nil {
+		return err
+	}
+
+	s.replacePathsFill(colorToHexString(color))
+	s.replaceRectsFill(colorToHexString(color))
+	s.replacePolygonsFill(colorToHexString(color))
+
+	return nil
+}
+
+func colorToHexString(color color.Color) string {
+	r, g, b, _ := color.RGBA()
+	cBytes := []byte{byte(r), byte(g), byte(b)}
+	return fmt.Sprintf("#%s", hex.EncodeToString(cBytes))
 }
