@@ -85,7 +85,6 @@ func (r *DynamicResource) Content() []byte {
 	return b
 }
 
-// TODO: add support for grouped SVG elements
 type svg struct {
 	XMLName  xml.Name   `xml:"svg"`
 	XMLNS    string     `xml:"xmlns,attr"`

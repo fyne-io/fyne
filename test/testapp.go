@@ -126,6 +126,10 @@ func (dummyTheme) IconColor() color.Color {
 	return color.Black
 }
 
+func (dummyTheme) IconColor() color.Color {
+	return color.Black
+}
+
 func (dummyTheme) PlaceHolderColor() color.Color {
 	return color.Black
 }

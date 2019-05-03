@@ -19,9 +19,10 @@ func (res *ThemedResource) Content() []byte {
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
-func NewThemedResource(res *fyne.StaticResource) *ThemedResource {
+// TODO: In version 2.0 we need to change this signature to just accept a single StaticResource pointer
+func NewThemedResource(dark *fyne.StaticResource, light *fyne.StaticResource) *ThemedResource {
 	dr := &fyne.DynamicResource{
-		BaseResource: res,
+		BaseResource: dark,
 	}
 	return &ThemedResource{
 		source: dr,
@@ -41,56 +42,56 @@ var (
 )
 
 func init() {
-	cancel = NewThemedResource(cancelIconRes)
-	confirm = NewThemedResource(checkIconRes)
-	delete = NewThemedResource(deleteIconRes)
-	search = NewThemedResource(searchIconRes)
-	searchReplace = NewThemedResource(searchreplaceIconRes)
+	cancel = NewThemedResource(cancelIconRes, nil)
+	confirm = NewThemedResource(checkIconRes, nil)
+	delete = NewThemedResource(deleteIconRes, nil)
+	search = NewThemedResource(searchIconRes, nil)
+	searchReplace = NewThemedResource(searchreplaceIconRes, nil)
 
-	checked = NewThemedResource(checkboxIconRes)
-	unchecked = NewThemedResource(checkboxblankIconRes)
-	radioButton = NewThemedResource(radiobuttonIconRes)
-	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes)
+	checked = NewThemedResource(checkboxIconRes, nil)
+	unchecked = NewThemedResource(checkboxblankIconRes, nil)
+	radioButton = NewThemedResource(radiobuttonIconRes, nil)
+	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes, nil)
 
-	contentAdd = NewThemedResource(contentaddIconRes)
-	contentRemove = NewThemedResource(contentremoveIconRes)
-	contentCut = NewThemedResource(contentcutIconRes)
-	contentCopy = NewThemedResource(contentcopyIconRes)
-	contentPaste = NewThemedResource(contentpasteIconRes)
-	contentRedo = NewThemedResource(contentredoIconRes)
-	contentUndo = NewThemedResource(contentundoIconRes)
+	contentAdd = NewThemedResource(contentaddIconRes, nil)
+	contentRemove = NewThemedResource(contentremoveIconRes, nil)
+	contentCut = NewThemedResource(contentcutIconRes, nil)
+	contentCopy = NewThemedResource(contentcopyIconRes, nil)
+	contentPaste = NewThemedResource(contentpasteIconRes, nil)
+	contentRedo = NewThemedResource(contentredoIconRes, nil)
+	contentUndo = NewThemedResource(contentundoIconRes, nil)
 
-	documentCreate = NewThemedResource(documentcreateIconRes)
-	documentPrint = NewThemedResource(documentprintIconRes)
-	documentSave = NewThemedResource(documentsaveIconRes)
+	documentCreate = NewThemedResource(documentcreateIconRes, nil)
+	documentPrint = NewThemedResource(documentprintIconRes, nil)
+	documentSave = NewThemedResource(documentsaveIconRes, nil)
 
-	info = NewThemedResource(infoIconRes)
-	question = NewThemedResource(questionIconRes)
-	warning = NewThemedResource(warningIconRes)
+	info = NewThemedResource(infoIconRes, nil)
+	question = NewThemedResource(questionIconRes, nil)
+	warning = NewThemedResource(warningIconRes, nil)
 
-	mailAttachment = NewThemedResource(mailattachmentIconRes)
-	mailCompose = NewThemedResource(mailcomposeIconRes)
-	mailForward = NewThemedResource(mailforwardIconRes)
-	mailReply = NewThemedResource(mailreplyIconRes)
-	mailReplyAll = NewThemedResource(mailreplyallIconRes)
-	mailSend = NewThemedResource(mailsendIconRes)
+	mailAttachment = NewThemedResource(mailattachmentIconRes, nil)
+	mailCompose = NewThemedResource(mailcomposeIconRes, nil)
+	mailForward = NewThemedResource(mailforwardIconRes, nil)
+	mailReply = NewThemedResource(mailreplyIconRes, nil)
+	mailReplyAll = NewThemedResource(mailreplyallIconRes, nil)
+	mailSend = NewThemedResource(mailsendIconRes, nil)
 
-	arrowBack = NewThemedResource(arrowbackIconRes)
-	arrowDown = NewThemedResource(arrowdownIconRes)
-	arrowForward = NewThemedResource(arrowforwardIconRes)
-	arrowUp = NewThemedResource(arrowupIconRes)
+	arrowBack = NewThemedResource(arrowbackIconRes, nil)
+	arrowDown = NewThemedResource(arrowdownIconRes, nil)
+	arrowForward = NewThemedResource(arrowforwardIconRes, nil)
+	arrowUp = NewThemedResource(arrowupIconRes, nil)
 
-	folder = NewThemedResource(folderIconRes)
-	folderNew = NewThemedResource(foldernewIconRes)
-	folderOpen = NewThemedResource(folderopenIconRes)
+	folder = NewThemedResource(folderIconRes, nil)
+	folderNew = NewThemedResource(foldernewIconRes, nil)
+	folderOpen = NewThemedResource(folderopenIconRes, nil)
 
-	help = NewThemedResource(helpIconRes)
-	home = NewThemedResource(homeIconRes)
+	help = NewThemedResource(helpIconRes, nil)
+	home = NewThemedResource(homeIconRes, nil)
 
-	viewFullScreen = NewThemedResource(viewfullscreenIconRes)
-	viewRefresh = NewThemedResource(viewrefreshIconRes)
-	viewZoomIn = NewThemedResource(viewzoominIconRes)
-	viewZoomOut = NewThemedResource(viewzoomoutIconRes)
+	viewFullScreen = NewThemedResource(viewfullscreenIconRes, nil)
+	viewRefresh = NewThemedResource(viewrefreshIconRes, nil)
+	viewZoomIn = NewThemedResource(viewzoominIconRes, nil)
+	viewZoomOut = NewThemedResource(viewzoomoutIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
