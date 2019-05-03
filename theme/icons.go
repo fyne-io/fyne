@@ -41,224 +41,56 @@ var (
 )
 
 func init() {
-	cancel = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: cancelIconRes,
-		},
-	}
-	confirm = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: checkIconRes,
-		},
-	}
-	delete = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: deleteIconRes,
-		},
-	}
-	search = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: searchIconRes,
-		},
-	}
-	searchReplace = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: searchreplaceIconRes,
-		},
-	}
+	cancel = NewThemedResource(cancelIconRes)
+	confirm = NewThemedResource(checkIconRes)
+	delete = NewThemedResource(deleteIconRes)
+	search = NewThemedResource(searchIconRes)
+	searchReplace = NewThemedResource(searchreplaceIconRes)
 
-	checked = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: checkboxIconRes,
-		},
-	}
-	unchecked = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: checkboxblankIconRes,
-		},
-	}
-	radioButton = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: radiobuttonIconRes,
-		},
-	}
-	radioButtonChecked = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: radiobuttoncheckedIconRes,
-		},
-	}
+	checked = NewThemedResource(checkboxIconRes)
+	unchecked = NewThemedResource(checkboxblankIconRes)
+	radioButton = NewThemedResource(radiobuttonIconRes)
+	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes)
 
-	contentAdd = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: contentaddIconRes,
-		},
-	}
-	contentRemove = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: contentremoveIconRes,
-		},
-	}
-	contentCut = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: contentcutIconRes,
-		},
-	}
-	contentCopy = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: contentcopyIconRes,
-		},
-	}
-	contentPaste = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: contentpasteIconRes,
-		},
-	}
-	contentRedo = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: contentredoIconRes,
-		},
-	}
-	contentUndo = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: contentundoIconRes,
-		},
-	}
+	contentAdd = NewThemedResource(contentaddIconRes)
+	contentRemove = NewThemedResource(contentremoveIconRes)
+	contentCut = NewThemedResource(contentcutIconRes)
+	contentCopy = NewThemedResource(contentcopyIconRes)
+	contentPaste = NewThemedResource(contentpasteIconRes)
+	contentRedo = NewThemedResource(contentredoIconRes)
+	contentUndo = NewThemedResource(contentundoIconRes)
 
-	documentCreate = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: documentcreateIconRes,
-		},
-	}
-	documentPrint = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: documentprintIconRes,
-		},
-	}
-	documentSave = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: documentsaveIconRes,
-		},
-	}
+	documentCreate = NewThemedResource(documentcreateIconRes)
+	documentPrint = NewThemedResource(documentprintIconRes)
+	documentSave = NewThemedResource(documentsaveIconRes)
 
-	info = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: infoIconRes,
-		},
-	}
-	question = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: questionIconRes,
-		},
-	}
-	warning = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: warningIconRes,
-		},
-	}
+	info = NewThemedResource(infoIconRes)
+	question = NewThemedResource(questionIconRes)
+	warning = NewThemedResource(warningIconRes)
 
-	mailAttachment = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: mailattachmentIconRes,
-		},
-	}
-	mailCompose = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: mailcomposeIconRes,
-		},
-	}
-	mailForward = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: mailforwardIconRes,
-		},
-	}
-	mailReply = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: mailreplyIconRes,
-		},
-	}
-	mailReplyAll = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: mailreplyallIconRes,
-		},
-	}
-	mailSend = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: mailsendIconRes,
-		},
-	}
+	mailAttachment = NewThemedResource(mailattachmentIconRes)
+	mailCompose = NewThemedResource(mailcomposeIconRes)
+	mailForward = NewThemedResource(mailforwardIconRes)
+	mailReply = NewThemedResource(mailreplyIconRes)
+	mailReplyAll = NewThemedResource(mailreplyallIconRes)
+	mailSend = NewThemedResource(mailsendIconRes)
 
-	arrowBack = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: arrowbackIconRes,
-		},
-	}
-	arrowDown = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: arrowdownIconRes,
-		},
-	}
-	arrowForward = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: arrowforwardIconRes,
-		},
-	}
-	arrowUp = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: arrowupIconRes,
-		},
-	}
+	arrowBack = NewThemedResource(arrowbackIconRes)
+	arrowDown = NewThemedResource(arrowdownIconRes)
+	arrowForward = NewThemedResource(arrowforwardIconRes)
+	arrowUp = NewThemedResource(arrowupIconRes)
 
-	folder = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: folderIconRes,
-		},
-	}
-	folderNew = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: foldernewIconRes,
-		},
-	}
-	folderOpen = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: folderopenIconRes,
-		},
-	}
-	help = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: helpIconRes,
-		},
-	}
-	home = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: homeIconRes,
-		},
-	}
+	folder = NewThemedResource(folderIconRes)
+	folderNew = NewThemedResource(foldernewIconRes)
+	folderOpen = NewThemedResource(folderopenIconRes)
 
-	viewFullScreen = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: viewfullscreenIconRes,
-		},
-	}
-	viewRefresh = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: viewrefreshIconRes,
-		},
-	}
-	viewZoomFit = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: viewzoomfitIconRes,
-		},
-	}
-	viewZoomIn = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: viewzoominIconRes,
-		},
-	}
-	viewZoomOut = &ThemedResource{
-		&fyne.DynamicResource{
-			BaseResource: viewzoomoutIconRes,
-		},
-	}
+	help = NewThemedResource(helpIconRes)
+	home = NewThemedResource(homeIconRes)
+
+	viewFullScreen = NewThemedResource(viewfullscreenIconRes)
+	viewRefresh = NewThemedResource(viewrefreshIconRes)
+	viewZoomIn = NewThemedResource(viewzoominIconRes)
+	viewZoomOut = NewThemedResource(viewzoomoutIconRes)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
