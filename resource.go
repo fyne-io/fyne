@@ -8,7 +8,6 @@ import (
 	"image/color"
 	"io"
 	"io/ioutil"
-
 )
 
 // Resource represents a single binary resource, such as an image or font.
@@ -96,6 +95,7 @@ type svg struct {
 	Paths    []*path    `xml:"path"`
 	Rects    []*rect    `xml:"rect"`
 	Polygons []*polygon `xml:"polygon"`
+	Groups   []*group   `xml:"g"`
 }
 
 type path struct {
@@ -119,27 +119,43 @@ type polygon struct {
 	Points  string   `xml:"points,attr"`
 }
 
-func (s *svg) replacePathsFill(hexColor string) {
-	for _, path := range s.Paths {
+type group struct {
+	XMLName  xml.Name   `xml:"g"`
+	Id       string     `xml:"id,attr"`
+	Paths    []*path    `xml:"path"`
+	Rects    []*rect    `xml:"rect"`
+	Polygons []*polygon `xml:"polygon"`
+}
+
+func replacePathsFill(paths []*path, hexColor string) {
+	for _, path := range paths {
 		if path.Fill != "none" {
 			path.Fill = hexColor
 		}
 	}
 }
 
-func (s *svg) replaceRectsFill(hexColor string) {
-	for _, rect := range s.Rects {
+func replaceRectsFill(rects []*rect, hexColor string) {
+	for _, rect := range rects {
 		if rect.Fill != "none" {
 			rect.Fill = hexColor
 		}
 	}
 }
 
-func (s *svg) replacePolygonsFill(hexColor string) {
-	for _, poly := range s.Polygons {
+func replacePolygonsFill(polys []*polygon, hexColor string) {
+	for _, poly := range polys {
 		if poly.Fill != "none" {
 			poly.Fill = hexColor
 		}
+	}
+}
+
+func replaceGroupObjectFill(groups []*group, hexColor string) {
+	for _, grp := range groups {
+		replacePathsFill(grp.Paths, hexColor)
+		replaceRectsFill(grp.Rects, hexColor)
+		replacePolygonsFill(grp.Polygons, hexColor)
 	}
 }
 
@@ -153,9 +169,10 @@ func (s *svg) replaceFillColor(reader io.Reader, color color.Color) error {
 		return err
 	}
 
-	s.replacePathsFill(colorToHexString(color))
-	s.replaceRectsFill(colorToHexString(color))
-	s.replacePolygonsFill(colorToHexString(color))
+	replacePathsFill(s.Paths, colorToHexString(color))
+	replaceRectsFill(s.Rects, colorToHexString(color))
+	replacePolygonsFill(s.Polygons, colorToHexString(color))
+	replaceGroupObjectFill(s.Groups, colorToHexString(color))
 
 	return nil
 }

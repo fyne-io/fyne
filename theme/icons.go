@@ -18,7 +18,6 @@ func (res *ThemedResource) Content() []byte {
 	return res.source.Content()
 }
 
-// TODO: unfuck all of this stuff
 // NewThemedResource creates a resource that adapts to the current theme setting.
 func NewThemedResource(res *fyne.StaticResource) *ThemedResource {
 	dr := &fyne.DynamicResource{
