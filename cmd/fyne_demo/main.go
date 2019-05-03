@@ -103,7 +103,7 @@ func main() {
 				pop.Move(fyne.NewPos(25, 496))
 			}),
 			widget.NewButton("Modal", func() {
-				var pop *widget.ModalPopOver
+				var pop *widget.PopOver
 				ok := widget.NewButton("Dismiss", func() {
 					pop.Hide()
 				})

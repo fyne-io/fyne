@@ -5,16 +5,20 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
 
 // PopOver is a widget that can float above the user interface.
 // It wraps any standard elements with padding and a shadow.
+// If it is modal then the shadow will cover the entire canvas it hovers over and block interactions.
 type PopOver struct {
 	baseWidget
 
 	Content fyne.CanvasObject
 	Canvas  fyne.Canvas
+
+	modal bool
 }
 
 // Hide this widget, if it was previously visible
@@ -31,23 +35,36 @@ func (p *PopOver) MinSize() fyne.Size {
 // Move the widget to a new position, relative to it's parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (p *PopOver) Move(pos fyne.Position) {
-	p.Content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	if !p.modal {
+		p.Content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	}
 	p.move(pos, p)
 }
 
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (p *PopOver) Resize(size fyne.Size) {
-	p.resize(p.MinSize(), p)
+	if p.modal {
+		p.resize(size, p)
+	} else {
+		p.resize(p.MinSize(), p)
+	}
 }
 
 // Show this widget, if it was previously hidden
 func (p *PopOver) Show() {
+	p.show(p)
 	p.Canvas.SetOverlay(p)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (p *PopOver) CreateRenderer() fyne.WidgetRenderer {
+	if p.modal {
+		bg := canvas.NewRectangle(theme.BackgroundColor())
+		return &modalPopoverRenderer{center: layout.NewCenterLayout(), popover: p, bg: bg,
+			objects: []fyne.CanvasObject{bg, p.Content}}
+	}
+
 	shadow := canvas.NewRectangle(theme.ShadowColor())
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 	objects := []fyne.CanvasObject{shadow, bg, p.Content}
@@ -56,7 +73,15 @@ func (p *PopOver) CreateRenderer() fyne.WidgetRenderer {
 
 // NewPopOver creates a new popover for the specified content and displays it on the passed canvas.
 func NewPopOver(content fyne.CanvasObject, canvas fyne.Canvas) *PopOver {
-	ret := &PopOver{Content: content, Canvas: canvas}
+	ret := &PopOver{Content: content, Canvas: canvas, modal: false}
+	ret.Show()
+	return ret
+}
+
+// NewModalPopOver creates a new popover for the specified content and displays it on the passed canvas.
+// A modal PopOver blocks interactions with underlying elements, covered with a semi-transparent overlay.
+func NewModalPopOver(content fyne.CanvasObject, canvas fyne.Canvas) *PopOver {
+	ret := &PopOver{Content: content, Canvas: canvas, modal: true}
 	ret.Show()
 	return ret
 }
@@ -96,4 +121,40 @@ func (r *popoverRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *popoverRenderer) Destroy() {
+}
+
+type modalPopoverRenderer struct {
+	center  fyne.Layout
+	popover *PopOver
+	bg      *canvas.Rectangle
+	objects []fyne.CanvasObject
+}
+
+func (r *modalPopoverRenderer) Layout(size fyne.Size) {
+	r.center.Layout(r.objects, size)
+
+	r.bg.Move(r.popover.Content.Position().Subtract(fyne.NewPos(theme.Padding(), theme.Padding())))
+	r.bg.Resize(r.MinSize())
+}
+
+func (r *modalPopoverRenderer) MinSize() fyne.Size {
+	return r.popover.Content.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+}
+
+func (r *modalPopoverRenderer) Refresh() {
+}
+
+func (r *modalPopoverRenderer) ApplyTheme() {
+	r.bg.FillColor = theme.BackgroundColor()
+}
+
+func (r *modalPopoverRenderer) BackgroundColor() color.Color {
+	return theme.ShadowColor()
+}
+
+func (r *modalPopoverRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *modalPopoverRenderer) Destroy() {
 }
