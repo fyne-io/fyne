@@ -50,8 +50,9 @@ type window struct {
 	mousePos fyne.Position
 	onClosed func()
 
-	xpos, ypos   int
-	ignoreResize bool
+	xpos, ypos    int
+	width, height int
+	ignoreResize  bool
 }
 
 func (w *window) Title() string {
@@ -70,21 +71,21 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	w.fullScreen = full
+	if full {
+		w.fullScreen = true
+	}
 	if !w.visible {
 		return
 	}
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		monitor := w.getMonitorForWindow()
 		mode := monitor.GetVideoMode()
 
 		if full {
 			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 		} else {
-			min := w.canvas.content.MinSize()
-			winWidth, winHeight := scaleInt(w.canvas, min.Width), scaleInt(w.canvas, min.Height)
-
-			w.viewport.SetMonitor(nil, 0, 0, winWidth, winHeight, 0) // TODO remember position?
+			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
+			w.fullScreen = false
 		}
 	})
 }
@@ -123,7 +124,7 @@ func (w *window) centerOnScreen() {
 	}) // end of runOnMainAsync(){}
 }
 
-// minSizeOnScreen gets the size of a window content in screen pixels
+// minSizeOnScreen gets the minimum size of a window content in screen pixels
 func (w *window) minSizeOnScreen() (int, int) {
 	// get current size of content inside the window
 	winContentSize := fyne.NewSize(0, 0)
@@ -154,9 +155,11 @@ func (w *window) RequestFocus() {
 }
 
 func (w *window) Resize(size fyne.Size) {
+	scale := w.canvas.Scale()
+	w.width, w.height = int(float32(size.Width)*scale), int(float32(size.Height)*scale)
 	runOnMainAsync(func() {
-		scale := w.canvas.Scale()
-		w.viewport.SetSize(int(float32(size.Width)*scale), int(float32(size.Height)*scale))
+		w.viewport.SetSize(w.width, w.height)
+		w.fitContent()
 	})
 }
 
@@ -166,7 +169,7 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-	runOnMainAsync(w.fitContent)
+	runOnMain(w.fitContent)
 }
 
 func (w *window) Padded() bool {
@@ -223,15 +226,19 @@ func (w *window) fitContent() {
 	}
 
 	minWidth, minHeight := w.minSizeOnScreen()
+	if w.width < minWidth || w.height < minHeight {
+		if w.width < minWidth {
+			w.width = minWidth
+		}
+		if w.height < minHeight {
+			w.height = minHeight
+		}
+		w.viewport.SetSize(w.width, w.height)
+	}
 	if w.fixedSize {
-		w.viewport.SetSizeLimits(minWidth, minHeight, minWidth, minHeight)
+		w.viewport.SetSizeLimits(w.width, w.height, w.width, w.height)
 	} else {
 		w.viewport.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
-	}
-
-	width, height := w.viewport.GetSize()
-	if width < minWidth || height < minHeight {
-		w.viewport.SetSize(fyne.Max(width, minWidth), fyne.Max(height, minHeight))
 	}
 }
 
@@ -349,6 +356,11 @@ func (w *window) Content() fyne.CanvasObject {
 }
 
 func (w *window) resize(size fyne.Size) {
+	if !w.fullScreen {
+		w.width = scaleInt(w.canvas, size.Width)
+		w.height = scaleInt(w.canvas, size.Height)
+	}
+
 	if w.Padded() {
 		pad := theme.Padding() * 2
 		size = fyne.NewSize(size.Width-pad, size.Height-pad)
