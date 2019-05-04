@@ -26,6 +26,18 @@ func TestBase_Move(t *testing.T) {
 	assert.Equal(t, b.Position(), originPosition)
 	b.Move(targetPosition)
 	assert.Equal(t, b.Position(), targetPosition)
+
+	originPosition = fyne.NewPos(500, 250)
+	assert.Equal(t, originPosition.X, 500)
+	assert.Equal(t, originPosition.Y, 250)
+
+	targetPosition = fyne.NewPos(7000, 10)
+	b = &baseObject{
+		position: originPosition,
+	}
+	assert.Equal(t, b.Position(), originPosition)
+	b.Move(targetPosition)
+	assert.Equal(t, b.Position(), targetPosition)
 }
 
 func TestBase_MinSize(t *testing.T) {
