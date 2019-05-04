@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"io/ioutil"
 	"os"
-	"path"
+	fpath "path"
 	"strings"
 
 	"fyne.io/fyne"
@@ -122,7 +122,7 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 		return fallback
 	}
 
-	name := path.Base(variantPath)
+	name := fpath.Base(variantPath)
 	return &fyne.StaticResource{StaticName: name, StaticContent: ret}
 
 }

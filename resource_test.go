@@ -6,6 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+
+
 func TestNewResource(t *testing.T) {
 	name := "test"
 	content := []byte{1, 2, 3, 4}

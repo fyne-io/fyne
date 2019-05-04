@@ -1,15 +1,44 @@
 package theme
 
 import (
+	"bytes"
+	"encoding/xml"
 	"log"
 
 	"fyne.io/fyne"
 )
 
+// DynamicResource is a bundled resource that will adapt its content to match the current theme settings.
+type DynamicResource struct {
+	BaseResource *fyne.StaticResource
+}
+
+// Name returns the unique name of this resource, usually matching the file it was generated from.
+func (r *DynamicResource) Name() string {
+	return r.BaseResource.StaticName
+}
+
+// Content returns the bytes of the bundled vector
+func (r *DynamicResource) Content() []byte {
+	rdr := bytes.NewReader(r.BaseResource.Content())
+	clr := fyne.CurrentApp().Settings().Theme().IconColor()
+	var s SVG
+	if err := s.ReplaceFillColor(rdr, clr); err != nil {
+		fyne.LogError("could not replace fill color, falling back to static content:", err)
+		return r.BaseResource.StaticContent
+	}
+	b, err := xml.Marshal(s)
+	if err != nil {
+		fyne.LogError("could not marshal svg, falling back to static content:", err)
+		return r.BaseResource.StaticContent
+	}
+	return b
+}
+
 // ThemedResource is a resource wrapper that will return an appropriate resource
 // for the currently selected theme.
 type ThemedResource struct {
-	source *fyne.DynamicResource
+	source *DynamicResource
 }
 
 // Name returns the underlying resource name (used for caching)
@@ -30,7 +59,7 @@ func NewThemedResource(dark, light *fyne.StaticResource) *ThemedResource {
 			"While two resources are still supported to preserve backwards compatibility, only the first resource is rendered.  " +
 			"The resource color is set by the theme's IconColor().")
 	}
-	dr := &fyne.DynamicResource{
+	dr := &DynamicResource{
 		BaseResource: dark,
 	}
 	return &ThemedResource{
