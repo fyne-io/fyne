@@ -86,14 +86,6 @@ func main() {
 					a.Settings().SetTheme(theme.LightTheme())
 				}),
 			),
-			fyne.NewContainerWithLayout(layout.NewGridLayout(1),
-				widget.NewButton("Solarized Dark", func() {
-					a.Settings().SetTheme(theme.SolarizedDark())
-				}),
-				widget.NewButton("Solarized Light", func() {
-					a.Settings().SetTheme(theme.SolarizedLight())
-				}),
-			),
 		),
 
 		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),

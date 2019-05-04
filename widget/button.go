@@ -221,7 +221,8 @@ func NewButton(label string, tapped func()) *Button {
 	return button
 }
 
-// NewButtonWithIcon creates a new button widget with the specified label, themed icon, and tap handler
+// NewButtonWithIcon creates a new button widget with the specified label,
+// themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
 	button := &Button{baseWidget{}, label, DefaultButton, icon, tapped, false}
 

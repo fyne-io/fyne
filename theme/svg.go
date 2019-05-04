@@ -45,7 +45,7 @@ type polygon struct {
 
 type group struct {
 	XMLName  xml.Name   `xml:"g"`
-	ID       string     `xml:"id,attr"`
+	Id       string     `xml:"id,attr"`
 	Paths    []*path    `xml:"path"`
 	Rects    []*rect    `xml:"rect"`
 	Polygons []*polygon `xml:"polygon"`

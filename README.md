@@ -14,7 +14,7 @@
 
 [Fyne](http://fyne.io) is an easy to use UI toolkit and app API written in Go. We use OpenGL (through the go-gl and go-glfw projects) to provide cross platform graphics.
 
-Version 1.0.1 is the current release which was a bugfix and stability release.
+Version 1.0.1 is the current release which was a bugfix and stability releae.
 We are now working towards 1.1 which will add new functionality.
 
 # Widget demo

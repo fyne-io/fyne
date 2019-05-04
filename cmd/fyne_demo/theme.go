@@ -36,10 +36,6 @@ func (customTheme) IconColor() color.Color {
 	return color.White
 }
 
-func (customTheme) IconColor() color.Color {
-	return color.White
-}
-
 func (customTheme) PlaceHolderColor() color.Color {
 	return grey
 }
