@@ -36,25 +36,32 @@ func (p *PopOver) MinSize() fyne.Size {
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (p *PopOver) Move(pos fyne.Position) {
 	if !p.modal {
-		p.Content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		p.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
+		Renderer(p).Layout(p.Size())
 	}
-	p.move(pos, p)
 }
 
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (p *PopOver) Resize(size fyne.Size) {
-	if p.modal {
-		p.resize(size, p)
-	} else {
-		p.resize(p.MinSize(), p)
-	}
+	p.resize(size, p)
 }
 
 // Show this widget, if it was previously hidden
 func (p *PopOver) Show() {
 	p.show(p)
 	p.Canvas.SetOverlay(p)
+}
+
+// Tapped is called when the user taps the popover background - if not modal then dismiss this widget
+func (p *PopOver) Tapped(_ *fyne.PointEvent) {
+	if !p.modal {
+		p.Hide()
+	}
+}
+
+// TappedSecondary is called when the user right/alt taps the background - ignore
+func (p *PopOver) TappedSecondary(_ *fyne.PointEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
@@ -93,13 +100,17 @@ type popoverRenderer struct {
 }
 
 func (r *popoverRenderer) Layout(size fyne.Size) {
+	pos := r.popover.Content.Position()
 	innerSize := r.popover.Content.MinSize()
 	r.popover.Content.Resize(innerSize)
+	r.popover.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 
+	size = innerSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	r.shadow.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-	r.shadow.Move(fyne.NewPos(-theme.Padding(), -theme.Padding()))
+	r.shadow.Move(pos.Subtract(fyne.NewPos(theme.Padding(), theme.Padding())))
 
 	r.bg.Resize(size)
+	r.bg.Move(pos)
 }
 
 func (r *popoverRenderer) MinSize() fyne.Size {
