@@ -1,12 +1,13 @@
 package theme
 
 import (
-	"fyne.io/fyne"
-	_ "fyne.io/fyne/test"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
+
+	"fyne.io/fyne"
+	_ "fyne.io/fyne/test"
+	"github.com/stretchr/testify/assert"
 )
 
 func helperNewStaticResource() *fyne.StaticResource {

@@ -39,5 +39,3 @@ func NewStaticResource(name string, content []byte) *StaticResource {
 		StaticContent: content,
 	}
 }
-
-
