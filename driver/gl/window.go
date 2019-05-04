@@ -897,9 +897,6 @@ func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
 // Unicode character input. Characters do not map 1:1 to physical keys,
 // as a key may produce zero, one or more characters.
 func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.ModifierKey) {
-	if mods != 0 && mods != glfw.ModShift { // don't progress if it's part of a combination
-		return
-	}
 	if w.canvas.Focused() == nil && w.canvas.onTypedRune == nil {
 		return
 	}
