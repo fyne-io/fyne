@@ -174,7 +174,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 
 				icon, err := oksvg.ReadIconStream(file)
 				if err != nil {
-					fyne.LogError("svg Load error:", err)
+					fyne.LogError("SVG Load error:", err)
 
 					return 0
 				}

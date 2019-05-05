@@ -3,9 +3,8 @@ package theme
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
+	"github.com/stretchr/testify/assert"
 )
 
 // TODO figure how to test the default theme if we are messing with it...

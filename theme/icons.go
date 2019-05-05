@@ -11,7 +11,7 @@ import (
 // ThemedResource is a resource wrapper that will return an appropriate resource
 // for the currently selected theme.
 type ThemedResource struct {
-	source *fyne.StaticResource
+	source fyne.Resource
 }
 
 // Name returns the underlying resource name (used for caching)
@@ -42,7 +42,7 @@ func (res *ThemedResource) Content() []byte {
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
 // TODO: In version 2.0 we need to change this signature to just accept a single StaticResource pointer
-func NewThemedResource(dark, light *fyne.StaticResource) *ThemedResource {
+func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 	if light != nil {
 		log.Println("Deprecation Warning: In version 2.0 NewThemedResource() will only accept a single StaticResource.\n" +
 			"While two resources are still supported to preserve backwards compatibility, only the first resource is rendered.  " +
