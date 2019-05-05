@@ -9,8 +9,8 @@ import (
 	"io/ioutil"
 )
 
-// SVG holds the unmarshaled XML from a Scalable Vector Graphic
-type SVG struct {
+// svg holds the unmarshaled XML from a Scalable Vector Graphic
+type svg struct {
 	XMLName  xml.Name      `xml:"svg"`
 	XMLNS    string        `xml:"xmlns,attr"`
 	Width    string        `xml:"width,attr"`
@@ -19,7 +19,7 @@ type SVG struct {
 	Paths    []*pathObj    `xml:"path"`
 	Rects    []*rectObj    `xml:"rect"`
 	Polygons []*polygonObj `xml:"polygon"`
-	Groups   []*group      `xml:"g"`
+	Groups   []*objGroup   `xml:"g"`
 }
 
 type pathObj struct {
@@ -43,7 +43,7 @@ type polygonObj struct {
 	Points  string   `xml:"points,attr"`
 }
 
-type group struct {
+type objGroup struct {
 	XMLName  xml.Name      `xml:"g"`
 	ID       string        `xml:"id,attr"`
 	Paths    []*pathObj    `xml:"path"`
@@ -75,7 +75,7 @@ func replacePolygonsFill(polys []*polygonObj, hexColor string) {
 	}
 }
 
-func replaceGroupObjectFill(groups []*group, hexColor string) {
+func replaceGroupObjectFill(groups []*objGroup, hexColor string) {
 	for _, grp := range groups {
 		replacePathsFill(grp.Paths, hexColor)
 		replaceRectsFill(grp.Rects, hexColor)
@@ -83,25 +83,28 @@ func replaceGroupObjectFill(groups []*group, hexColor string) {
 	}
 }
 
-// ReplaceFillColor alters an SVG objects fill color.  Note that if an SVG with multiple fill
+// replaceFillColor alters an svg objects fill color.  Note that if an svg with multiple fill
 // colors is being operated upon, all fills will be converted to a single color.  Mostly used
 // to recolor Icons to match the theme's IconColor.
-func (s *SVG) ReplaceFillColor(reader io.Reader, color color.Color) error {
-	bSlice, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return err
-	}
-
-	if err := xml.Unmarshal(bSlice, &s); err != nil {
-		return err
-	}
-
+func (s *svg) replaceFillColor(reader io.Reader, color color.Color) error {
 	replacePathsFill(s.Paths, colorToHexString(color))
 	replaceRectsFill(s.Rects, colorToHexString(color))
 	replacePolygonsFill(s.Polygons, colorToHexString(color))
 	replaceGroupObjectFill(s.Groups, colorToHexString(color))
-
 	return nil
+}
+
+func svgFromXML(reader io.Reader) (*svg, error) {
+	var s svg
+	bSlice, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := xml.Unmarshal(bSlice, &s); err != nil {
+		return nil, err
+	}
+	return &s, nil
 }
 
 func colorToHexString(color color.Color) string {

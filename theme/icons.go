@@ -23,15 +23,19 @@ func (res *ThemedResource) Name() string {
 func (res *ThemedResource) Content() []byte {
 	rdr := bytes.NewReader(res.source.Content())
 	clr := fyne.CurrentApp().Settings().Theme().IconColor()
-	var s SVG
-	if err := s.ReplaceFillColor(rdr, clr); err != nil {
+	s, err := svgFromXML(rdr)
+	if err != nil {
+		fyne.LogError("could not load SVG, falling back to static content:", err)
+		return res.source.Content()
+	}
+	if err := s.replaceFillColor(rdr, clr); err != nil {
 		fyne.LogError("could not replace fill color, falling back to static content:", err)
-		return res.source.StaticContent
+		return res.source.Content()
 	}
 	b, err := xml.Marshal(s)
 	if err != nil {
 		fyne.LogError("could not marshal svg, falling back to static content:", err)
-		return res.source.StaticContent
+		return res.source.Content()
 	}
 	return b
 }
