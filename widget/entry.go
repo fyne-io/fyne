@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"math"
 	"strings"
 	"sync"
 
@@ -97,10 +98,10 @@ func (e *entryRenderer) Refresh() {
 	}
 
 	if e.entry.focused {
-		e.cursor.FillColor = theme.FocusColor()
+		e.cursor.Show()
 		e.line.FillColor = theme.FocusColor()
 	} else {
-		e.cursor.FillColor = color.RGBA{0, 0, 0, 0}
+		e.cursor.Hide()
 		e.line.FillColor = theme.ButtonColor()
 	}
 
@@ -238,6 +239,46 @@ func (e *Entry) FocusLost() {
 // Focused returns whether or not this Entry has focus.
 func (e *Entry) Focused() bool {
 	return e.focused
+}
+
+func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
+	for i := 0; i < len(text); i++ {
+		str := string(text[0 : i+1])
+		wid := textMinSize(str, theme.TextSize(), e.textStyle()).Width
+		if wid > pos.X {
+			return i
+		}
+	}
+	return len(text)
+}
+
+// Tapped is called when this entry has been tapped so we should update the cursor position.
+func (e *Entry) Tapped(ev *fyne.PointEvent) {
+	if !e.focused {
+		e.FocusGained()
+	}
+
+	rowHeight := e.textProvider().charMinSize().Height
+	row := int(math.Floor(float64(ev.Position.Y-theme.Padding()) / float64(rowHeight)))
+	col := 0
+	if row < 0 {
+		row = 0
+	} else if row >= e.textProvider().rows() {
+		row = e.textProvider().rows() - 1
+		col = 0
+	} else {
+		col = e.cursorColAt(e.textProvider().row(row), ev.Position)
+	}
+
+	e.Lock()
+	e.CursorRow = row
+	e.CursorColumn = col
+	e.Unlock()
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
+// TappedSecondary is called when right or alternative tap is invoked - this is currently ignored.
+func (e *Entry) TappedSecondary(_ *fyne.PointEvent) {
 }
 
 // TypedRune receives text input events when the Entry widget is focused.
@@ -444,7 +485,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	placeholder := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
 
 	line := canvas.NewRectangle(theme.ButtonColor())
-	cursor := canvas.NewRectangle(theme.BackgroundColor())
+	cursor := canvas.NewRectangle(theme.FocusColor())
 
 	return &entryRenderer{&text, &placeholder, line, cursor,
 		[]fyne.CanvasObject{line, &placeholder, &text, cursor}, e}

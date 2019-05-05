@@ -300,20 +300,64 @@ func TestEntryFocus(t *testing.T) {
 
 func TestEntryWindowFocus(t *testing.T) {
 	entry := NewEntry()
-	canvas := test.Canvas()
 
-	canvas.Focus(entry)
+	test.Canvas().Focus(entry)
 	assert.True(t, entry.Focused())
 }
 
-func TestEntryFocusHighlight(t *testing.T) {
+func TestEntry_Tapped(t *testing.T) {
 	entry := NewEntry()
+	entry.SetText("MMM")
 
-	entry.FocusGained()
-	assert.True(t, entry.focused)
+	test.Tap(entry)
+	assert.True(t, entry.Focused())
 
-	entry.FocusLost()
-	assert.False(t, entry.focused)
+	testCharSize := theme.TextSize()
+	pos := fyne.NewPos(int(float32(testCharSize)*1.5), testCharSize/2) // tap in the middle of the 2nd "M"
+	ev := &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
+
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	pos = fyne.NewPos(int(float32(testCharSize)*2.5), testCharSize/2) // tap in the middle of the 3rd "M"
+	ev = &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
+
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 2, entry.CursorColumn)
+}
+
+func TestEntry_Tapped_AfterCol(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("M")
+
+	test.Tap(entry)
+	assert.True(t, entry.Focused())
+
+	testCharSize := theme.TextSize()
+	pos := fyne.NewPos(testCharSize*2, testCharSize/2) // tap after text
+	ev := &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
+
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+}
+
+func TestEntry_Tapped_AfterRow(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("M\nM\n")
+
+	test.Tap(entry)
+	assert.True(t, entry.Focused())
+
+	testCharSize := theme.TextSize()
+	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
+	ev := &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
+
+	assert.Equal(t, 2, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
 }
 
 func TestEntry_CursorRow(t *testing.T) {
@@ -430,7 +474,7 @@ func checkNewlineIgnored(t *testing.T, entry *Entry) {
 	assert.Equal(t, 0, entry.CursorRow)
 }
 
-func TestSinglelineEntry_NewlineIgnored(t *testing.T) {
+func TestSingleLineEntry_NewlineIgnored(t *testing.T) {
 	entry := &Entry{MultiLine: false}
 	entry.SetText("test")
 
