@@ -67,51 +67,51 @@ func TestNewThemedResource_OneStaticResourceSupport(t *testing.T) {
 	assert.Equal(t, nm, custom.Name())
 }
 
-func TestDynamicResource_Name(t *testing.T) {
+func TestThemedResource_Name(t *testing.T) {
 	sr := fyne.NewStaticResource("cancel_Paths.svg",
 		helperLoadBytes(t, "cancel_Paths.svg"))
-	dr := &DynamicResource{
-		BaseResource: sr,
+	dr := &ThemedResource{
+		source: sr,
 	}
 	assert.Equal(t, sr.Name(), dr.Name())
 }
 
-func TestDynamicResource_Content_NoGroupsFile(t *testing.T) {
+func TestThemedResource_Content_NoGroupsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	sr := fyne.NewStaticResource("cancel_Paths.svg",
 		helperLoadBytes(t, "cancel_Paths.svg"))
-	dr := &DynamicResource{
-		BaseResource: sr,
+	dr := &ThemedResource{
+		source: sr,
 	}
 	assert.NotEqual(t, sr.Content(), dr.Content())
 }
 
-func TestDynamicResource_Content_GroupPathFile(t *testing.T) {
+func TestThemedResource_Content_GroupPathFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	sr := fyne.NewStaticResource("check_GroupPaths.svg",
 		helperLoadBytes(t, "check_GroupPaths.svg"))
-	dr := &DynamicResource{
-		BaseResource: sr,
+	dr := &ThemedResource{
+		source: sr,
 	}
 	assert.NotEqual(t, sr.Content(), dr.Content())
 }
 
-func TestDynamicResource_Content_GroupRectFile(t *testing.T) {
+func TestThemedResource_Content_GroupRectFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	sr := fyne.NewStaticResource("info_GroupRects.svg",
 		helperLoadBytes(t, "info_GroupRects.svg"))
-	dr := &DynamicResource{
-		BaseResource: sr,
+	dr := &ThemedResource{
+		source: sr,
 	}
 	assert.NotEqual(t, sr.Content(), dr.Content())
 }
 
-func TestDynamicResource_Content_GroupPolygonsFile(t *testing.T) {
+func TestThemedResource_Content_GroupPolygonsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	sr := fyne.NewStaticResource("warning_GroupPolygons.svg",
 		helperLoadBytes(t, "warning_GroupPolygons.svg"))
-	dr := &DynamicResource{
-		BaseResource: sr,
+	dr := &ThemedResource{
+		source: sr,
 	}
 	assert.NotEqual(t, sr.Content(), dr.Content())
 }
