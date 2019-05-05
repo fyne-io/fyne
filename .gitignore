@@ -1,5 +1,36 @@
-.idea
-
+### Project Specific
 cmd/fyne/fyne
 cmd/fyne_demo/fyne_demo
 cmd/hello/hello
+
+### Go
+# Output of the coverage tool
+*.out
+
+### macOS
+# General
+.DS_Store
+
+# Thumbnails
+._*
+
+### JetBrains
+.idea
+
+### Vim
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+# Persistent undo
+[._]*.un~

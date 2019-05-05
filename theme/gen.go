@@ -36,7 +36,7 @@ func bundleFile(name string, filepath string, f *os.File) {
 
 func bundleFont(font, name string, f *os.File) {
 	_, dirname, _, _ := runtime.Caller(0)
-	path := path.Join(path.Dir(dirname), "font", font+"-"+name+".ttf")
+	path := path.Join(path.Dir(dirname), "font", fmt.Sprintf("%s-%s.ttf", font, name))
 
 	if name == "Regular" && font != fontFace {
 		name = "Monospace"
@@ -50,10 +50,10 @@ func iconDir() string {
 	return path.Join(path.Dir(dirname), "icons")
 }
 
-func bundleIcon(name, theme string, f *os.File) {
-	path := path.Join(iconDir(), name+"-"+theme+".svg")
+func bundleIcon(name string, f *os.File) {
+	path := path.Join(iconDir(), fmt.Sprintf("%s.svg", name))
 
-	formatted := strings.ToLower(name) + strings.Title(strings.ToLower(theme))
+	formatted := fmt.Sprintf("%sIconRes", strings.ToLower(name))
 	bundleFile(formatted, path, f)
 }
 
@@ -66,7 +66,7 @@ func openFile(filename string) *os.File {
 		return nil
 	}
 
-	_, err = f.WriteString("package theme\n\nimport \"fyne.io/fyne\"\n\n")
+	_, err = f.WriteString("// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //\n\npackage theme\n\nimport \"fyne.io/fyne\"\n\n")
 	if err != nil {
 		fyne.LogError("Unable to write file "+filename, err)
 		return nil
@@ -95,58 +95,56 @@ func main() {
 	icon := path.Join(iconDir(), "fyne.png")
 	bundleFile("fyne-logo", icon, f)
 
-	themes := []string{"dark", "light"}
-	for _, theme := range themes {
-		bundleIcon("cancel", theme, f)
-		bundleIcon("check", theme, f)
-		bundleIcon("delete", theme, f)
-		bundleIcon("search", theme, f)
-		bundleIcon("search-replace", theme, f)
+	bundleIcon("cancel", f)
+	bundleIcon("check", f)
+	bundleIcon("delete", f)
+	bundleIcon("search", f)
+	bundleIcon("search-replace", f)
 
-		bundleIcon("check-box", theme, f)
-		bundleIcon("check-box-blank", theme, f)
-		bundleIcon("radio-button", theme, f)
-		bundleIcon("radio-button-checked", theme, f)
+	bundleIcon("check-box", f)
+	bundleIcon("check-box-blank", f)
+	bundleIcon("radio-button", f)
+	bundleIcon("radio-button-checked", f)
 
-		bundleIcon("content-add", theme, f)
-		bundleIcon("content-remove", theme, f)
-		bundleIcon("content-cut", theme, f)
-		bundleIcon("content-copy", theme, f)
-		bundleIcon("content-paste", theme, f)
-		bundleIcon("content-redo", theme, f)
-		bundleIcon("content-undo", theme, f)
+	bundleIcon("content-add", f)
+	bundleIcon("content-remove", f)
+	bundleIcon("content-cut", f)
+	bundleIcon("content-copy", f)
+	bundleIcon("content-paste", f)
+	bundleIcon("content-redo", f)
+	bundleIcon("content-undo", f)
 
-		bundleIcon("document-create", theme, f)
-		bundleIcon("document-print", theme, f)
-		bundleIcon("document-save", theme, f)
+	bundleIcon("document-create", f)
+	bundleIcon("document-print", f)
+	bundleIcon("document-save", f)
 
-		bundleIcon("info", theme, f)
-		bundleIcon("question", theme, f)
-		bundleIcon("warning", theme, f)
+	bundleIcon("info", f)
+	bundleIcon("question", f)
+	bundleIcon("warning", f)
 
-		bundleIcon("arrow-back", theme, f)
-		bundleIcon("arrow-down", theme, f)
-		bundleIcon("arrow-forward", theme, f)
-		bundleIcon("arrow-up", theme, f)
+	bundleIcon("arrow-back", f)
+	bundleIcon("arrow-down", f)
+	bundleIcon("arrow-forward", f)
+	bundleIcon("arrow-up", f)
 
-		bundleIcon("folder", theme, f)
-		bundleIcon("folder-new", theme, f)
-		bundleIcon("folder-open", theme, f)
-		bundleIcon("help", theme, f)
-		bundleIcon("home", theme, f)
+	bundleIcon("folder", f)
+	bundleIcon("folder-new", f)
+	bundleIcon("folder-open", f)
+	bundleIcon("help", f)
+	bundleIcon("home", f)
 
-		bundleIcon("mail-attachment", theme, f)
-		bundleIcon("mail-compose", theme, f)
-		bundleIcon("mail-forward", theme, f)
-		bundleIcon("mail-reply", theme, f)
-		bundleIcon("mail-reply_all", theme, f)
-		bundleIcon("mail-send", theme, f)
+	bundleIcon("mail-attachment", f)
+	bundleIcon("mail-compose", f)
+	bundleIcon("mail-forward", f)
+	bundleIcon("mail-reply", f)
+	bundleIcon("mail-reply_all", f)
+	bundleIcon("mail-send", f)
 
-		bundleIcon("view-fullscreen", theme, f)
-		bundleIcon("view-refresh", theme, f)
-		bundleIcon("view-zoom-fit", theme, f)
-		bundleIcon("view-zoom-in", theme, f)
-		bundleIcon("view-zoom-out", theme, f)
-	}
+	bundleIcon("view-fullscreen", f)
+	bundleIcon("view-refresh", f)
+	bundleIcon("view-zoom-fit", f)
+	bundleIcon("view-zoom-in", f)
+	bundleIcon("view-zoom-out", f)
+
 	f.Close()
 }

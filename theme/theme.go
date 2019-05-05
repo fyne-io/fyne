@@ -14,18 +14,17 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, hyperlink, placeholder, primary, hover, scrollBar color.Color
-	regular, bold, italic, bolditalic, monospace                    fyne.Resource
+	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar color.Color
+	regular, bold, italic, bolditalic, monospace                          fyne.Resource
 }
-
-var lightBackground = color.RGBA{0xf5, 0xf5, 0xf5, 0xff}
 
 // LightTheme defines the built in light theme colours and sizes
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:  lightBackground,
+		background:  color.RGBA{0xf5, 0xf5, 0xf5, 0xff},
 		button:      color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
 		text:        color.RGBA{0x21, 0x21, 0x21, 0xff},
+		icon:        color.RGBA{0x21, 0x21, 0x21, 0xff},
 		hyperlink:   color.RGBA{0x0, 0x0, 0xd9, 0xff},
 		placeholder: color.RGBA{0x88, 0x88, 0x88, 0xff},
 		primary:     color.RGBA{0x9f, 0xa8, 0xda, 0xff},
@@ -43,6 +42,7 @@ func DarkTheme() fyne.Theme {
 		background:  color.RGBA{0x42, 0x42, 0x42, 0xff},
 		button:      color.RGBA{0x21, 0x21, 0x21, 0xff},
 		text:        color.RGBA{0xff, 0xff, 0xff, 0xff},
+		icon:        color.RGBA{0xff, 0xff, 0xff, 0xff},
 		hyperlink:   color.RGBA{0x99, 0x99, 0xff, 0xff},
 		placeholder: color.RGBA{0xb2, 0xb2, 0xb2, 0xff},
 		primary:     color.RGBA{0x1a, 0x23, 0x7e, 0xff},
@@ -73,6 +73,11 @@ func (t *builtinTheme) TextColor() color.Color {
 	return t.text
 }
 
+// IconColor returns the theme's standard text colour
+func (t *builtinTheme) IconColor() color.Color {
+	return t.icon
+}
+
 // PlaceHolderColor returns the theme's placeholder text colour
 func (t *builtinTheme) PlaceHolderColor() color.Color {
 	return t.placeholder
@@ -88,7 +93,7 @@ func (t *builtinTheme) HoverColor() color.Color {
 	return t.hover
 }
 
-// FocusColor returns the colour used to highlight a focussed widget
+// FocusColor returns the colour used to highlight a focused widget
 func (t *builtinTheme) FocusColor() color.Color {
 	return t.primary
 }
@@ -142,27 +147,27 @@ func (t *builtinTheme) initFonts() {
 	}
 }
 
-// TextFont returns the font path for the regular font style
+// TextFont returns the font resource for the regular font style
 func (t *builtinTheme) TextFont() fyne.Resource {
 	return t.regular
 }
 
-// TextBoldFont retutns the font path for the bold font style
+// TextBoldFont retutns the font resource for the bold font style
 func (t *builtinTheme) TextBoldFont() fyne.Resource {
 	return t.bold
 }
 
-// TextItalicFont returns the font path for the italic font style
+// TextItalicFont returns the font resource for the italic font style
 func (t *builtinTheme) TextItalicFont() fyne.Resource {
 	return t.italic
 }
 
-// TextBoldItalicFont returns the font path for the bold and italic font style
+// TextBoldItalicFont returns the font resource for the bold and italic font style
 func (t *builtinTheme) TextBoldItalicFont() fyne.Resource {
 	return t.bolditalic
 }
 
-// TextMonospaceFont retutns the font path for the monospace font face
+// TextMonospaceFont retutns the font resource for the monospace font face
 func (t *builtinTheme) TextMonospaceFont() fyne.Resource {
 	return t.monospace
 }
@@ -208,6 +213,11 @@ func TextColor() color.Color {
 	return current().TextColor()
 }
 
+// IconColor returns the theme's standard text colour
+func IconColor() color.Color {
+	return current().IconColor()
+}
+
 // PlaceHolderColor returns the theme's standard text colour
 func PlaceHolderColor() color.Color {
 	return current().PlaceHolderColor()
@@ -238,27 +248,27 @@ func TextSize() int {
 	return current().TextSize()
 }
 
-// TextFont returns the font path for the regular font style
+// TextFont returns the font resource for the regular font style
 func TextFont() fyne.Resource {
 	return current().TextFont()
 }
 
-// TextBoldFont retutns the font path for the bold font style
+// TextBoldFont retutns the font resource for the bold font style
 func TextBoldFont() fyne.Resource {
 	return current().TextBoldFont()
 }
 
-// TextItalicFont returns the font path for the italic font style
+// TextItalicFont returns the font resource for the italic font style
 func TextItalicFont() fyne.Resource {
 	return current().TextItalicFont()
 }
 
-// TextBoldItalicFont returns the font path for the bold and italic font style
+// TextBoldItalicFont returns the font resource for the bold and italic font style
 func TextBoldItalicFont() fyne.Resource {
 	return current().TextBoldItalicFont()
 }
 
-// TextMonospaceFont retutns the font path for the monospace font face
+// TextMonospaceFont retutns the font resource for the monospace font face
 func TextMonospaceFont() fyne.Resource {
 	return current().TextMonospaceFont()
 }
@@ -279,27 +289,27 @@ func ScrollBarSize() int {
 	return current().ScrollBarSize()
 }
 
-// DefaultTextFont returns the font path for the built-in regular font style
+// DefaultTextFont returns the font resource for the built-in regular font style
 func DefaultTextFont() fyne.Resource {
 	return regular
 }
 
-// DefaultTextBoldFont retutns the font path for the built-in bold font style
+// DefaultTextBoldFont retutns the font resource for the built-in bold font style
 func DefaultTextBoldFont() fyne.Resource {
 	return bold
 }
 
-// DefaultTextItalicFont returns the font path for the built-in italic font style
+// DefaultTextItalicFont returns the font resource for the built-in italic font style
 func DefaultTextItalicFont() fyne.Resource {
 	return italic
 }
 
-// DefaultTextBoldItalicFont returns the font path for the built-in bold and italic font style
+// DefaultTextBoldItalicFont returns the font resource for the built-in bold and italic font style
 func DefaultTextBoldItalicFont() fyne.Resource {
 	return bolditalic
 }
 
-// DefaultTextMonospaceFont retutns the font path for the built-in monospace font face
+// DefaultTextMonospaceFont retutns the font resource for the built-in monospace font face
 func DefaultTextMonospaceFont() fyne.Resource {
 	return monospace
 }
