@@ -12,9 +12,9 @@ import (
 
 type glCanvas struct {
 	sync.RWMutex
-	window  *window
-	content fyne.CanvasObject
-	focused fyne.Focusable
+	window           *window
+	content, overlay fyne.CanvasObject
+	focused          fyne.Focusable
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -79,6 +79,24 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 	c.content.Resize(fyne.NewSize(width, height))
 	c.content.Move(fyne.NewPos(pad, pad))
+	c.setDirty(true)
+}
+
+func (c *glCanvas) Overlay() fyne.CanvasObject {
+	c.RLock()
+	retval := c.overlay
+	c.RUnlock()
+	return retval
+}
+
+func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
+	c.Lock()
+	c.overlay = overlay
+	c.Unlock()
+
+	if overlay != nil {
+		c.overlay.Resize(c.Size())
+	}
 	c.setDirty(true)
 }
 
@@ -185,6 +203,10 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 	}
 	c.walkObjects(c.content, fyne.NewPos(0, 0), false, paintObj)
+
+	if c.overlay != nil {
+		c.walkObjects(c.overlay, fyne.NewPos(0, 0), false, paintObj)
+	}
 }
 
 func (c *glCanvas) setDirty(dirty bool) {

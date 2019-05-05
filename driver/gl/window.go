@@ -364,12 +364,16 @@ func (w *window) resize(size fyne.Size) {
 		w.height = scaleInt(w.canvas, size.Height)
 	}
 
+	innerSize := size
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		size = fyne.NewSize(size.Width-pad, size.Height-pad)
+		innerSize = fyne.NewSize(size.Width-pad, size.Height-pad)
 	}
 
-	w.canvas.content.Resize(size)
+	w.canvas.content.Resize(innerSize)
+	if w.canvas.overlay != nil {
+		w.canvas.overlay.Resize(size)
+	}
 	w.canvas.Refresh(w.canvas.content)
 }
 
@@ -480,7 +484,11 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	var found fyne.CanvasObject
 	foundX, foundY := 0, 0
 
-	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), false, func(walked fyne.CanvasObject, pos fyne.Position) {
+	content := canvas.content
+	if canvas.overlay != nil {
+		content = canvas.overlay
+	}
+	canvas.walkObjects(content, fyne.NewPos(0, 0), false, func(walked fyne.CanvasObject, pos fyne.Position) {
 		if !walked.Visible() {
 			return
 		}

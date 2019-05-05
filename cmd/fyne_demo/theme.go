@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	purple = &color.RGBA{128, 0, 128, 255}
-	orange = &color.RGBA{198, 123, 0, 255}
-	grey   = &color.Gray{123}
+	purple = &color.RGBA{R: 128, G: 0, B: 128, A: 255}
+	orange = &color.RGBA{R: 198, G: 123, B: 0, A: 255}
+	grey   = &color.Gray{Y: 123}
 )
 
 type customTheme struct {
@@ -53,6 +53,10 @@ func (customTheme) FocusColor() color.Color {
 }
 
 func (customTheme) ScrollBarColor() color.Color {
+	return grey
+}
+
+func (customTheme) ShadowColor() color.Color {
 	return grey
 }
 

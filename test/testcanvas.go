@@ -5,8 +5,8 @@ import "fyne.io/fyne"
 var dummyCanvas fyne.Canvas
 
 type testCanvas struct {
-	content fyne.CanvasObject
-	focused fyne.Focusable
+	content, overlay fyne.CanvasObject
+	focused          fyne.Focusable
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -20,6 +20,17 @@ func (c *testCanvas) Content() fyne.CanvasObject {
 
 func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
+}
+
+func (c *testCanvas) Overlay() fyne.CanvasObject {
+	return c.overlay
+}
+
+func (c *testCanvas) SetOverlay(overlay fyne.CanvasObject) {
+	c.overlay = overlay
+	if overlay != nil {
+		overlay.Resize(c.Size())
+	}
 }
 
 func (c *testCanvas) Refresh(fyne.CanvasObject) {

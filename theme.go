@@ -14,6 +14,7 @@ type Theme interface {
 	HoverColor() color.Color
 	FocusColor() color.Color
 	ScrollBarColor() color.Color
+	ShadowColor() color.Color
 
 	TextSize() int
 	TextFont() Resource

@@ -21,6 +21,13 @@ func TestThemeChange(t *testing.T) {
 	assert.NotEqual(t, bg, BackgroundColor())
 }
 
+func TestBuiltinTheme_ShadowColor(t *testing.T) {
+	shadow := ShadowColor()
+
+	_, _, _, a := shadow.RGBA()
+	assert.NotEqual(t, 255, a)
+}
+
 func TestTheme_Dark_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	bg := BackgroundColor()

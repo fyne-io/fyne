@@ -86,10 +86,11 @@ func (a *testApp) Settings() fyne.Settings {
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
 	settings := &testSettings{}
+	settings.theme = &dummyTheme{}
 	settings.listenerMutex = &sync.Mutex{}
-	test := &testApp{driver: NewDriver().(*testDriver), settings: settings}
-	test.Settings().SetTheme(&dummyTheme{})
+	test := &testApp{settings: settings}
 	fyne.SetCurrentApp(test)
+	test.driver = NewDriver().(*testDriver)
 
 	listener := make(chan fyne.Settings)
 	test.Settings().AddChangeListener(listener)
@@ -143,6 +144,10 @@ func (dummyTheme) FocusColor() color.Color {
 }
 
 func (dummyTheme) ScrollBarColor() color.Color {
+	return color.Black
+}
+
+func (dummyTheme) ShadowColor() color.Color {
 	return color.Black
 }
 

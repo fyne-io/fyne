@@ -14,8 +14,8 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar color.Color
-	regular, bold, italic, bolditalic, monospace                          fyne.Resource
+	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar, shadow color.Color
+	regular, bold, italic, bolditalic, monospace                                  fyne.Resource
 }
 
 // LightTheme defines the built in light theme colours and sizes
@@ -30,6 +30,7 @@ func LightTheme() fyne.Theme {
 		primary:     color.RGBA{0x9f, 0xa8, 0xda, 0xff},
 		hover:       color.RGBA{0xe7, 0xe7, 0xe7, 0xff},
 		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
+		shadow:      color.RGBA{0x0, 0x0, 0x0, 0x99},
 	}
 
 	theme.initFonts()
@@ -48,6 +49,7 @@ func DarkTheme() fyne.Theme {
 		primary:     color.RGBA{0x1a, 0x23, 0x7e, 0xff},
 		hover:       color.RGBA{0x31, 0x31, 0x31, 0xff},
 		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
+		shadow:      color.RGBA{0x0, 0x0, 0x0, 0x99},
 	}
 
 	theme.initFonts()
@@ -101,6 +103,11 @@ func (t *builtinTheme) FocusColor() color.Color {
 // ScrollBarColor returns the color (and translucency) for a scrollBar
 func (t *builtinTheme) ScrollBarColor() color.Color {
 	return t.scrollBar
+}
+
+// ShadowColor returns the color (and translucency) for shadows used for indicating elevation
+func (t *builtinTheme) ShadowColor() color.Color {
+	return t.shadow
 }
 
 // TextSize returns the standard text size
@@ -241,6 +248,11 @@ func FocusColor() color.Color {
 // ScrollBarColor returns the color (and translucency) for a scrollBar
 func ScrollBarColor() color.Color {
 	return current().ScrollBarColor()
+}
+
+// ShadowColor returns the color (and translucency) for shadows used for indicating elevation
+func ShadowColor() color.Color {
+	return current().ShadowColor()
 }
 
 // TextSize returns the standard text size

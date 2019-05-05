@@ -14,6 +14,9 @@ type Canvas interface {
 	Scale() float32
 	SetScale(float32)
 
+	Overlay() CanvasObject
+	SetOverlay(CanvasObject)
+
 	OnTypedRune() func(rune)
 	SetOnTypedRune(func(rune))
 	OnTypedKey() func(*KeyEvent)
