@@ -920,6 +920,18 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	}
 }
 
+func (w *window) focused(viewport *glfw.Window, focused bool) {
+	if w.canvas.focused == nil {
+		return
+	}
+
+	if focused {
+		w.canvas.focused.FocusGained()
+	} else {
+		w.canvas.focused.FocusLost()
+	}
+}
+
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	var ret *window
 	runOnMain(func() {
@@ -975,6 +987,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		win.SetScrollCallback(ret.mouseScrolled)
 		win.SetKeyCallback(ret.keyPressed)
 		win.SetCharModsCallback(ret.charModInput)
+		win.SetFocusCallback(ret.focused)
 		glfw.DetachCurrentContext()
 	})
 	return ret
