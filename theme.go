@@ -8,6 +8,7 @@ type Theme interface {
 	ButtonColor() color.Color
 	HyperlinkColor() color.Color
 	TextColor() color.Color
+	IconColor() color.Color
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color
 	HoverColor() color.Color

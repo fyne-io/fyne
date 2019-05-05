@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
@@ -224,6 +225,7 @@ func (c *glCanvas) isDirty() bool {
 
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
+	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
 	c.dirtyMutex = &sync.Mutex{}
 
