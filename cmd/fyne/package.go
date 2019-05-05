@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
-	ico "github.com/Kodeworks/golang-image-ico"
+	"github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
 	"github.com/josephspurrier/goversioninfo"
 )

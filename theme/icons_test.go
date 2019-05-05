@@ -19,7 +19,7 @@ func helperNewStaticResource() *fyne.StaticResource {
 }
 
 func helperLoadBytes(t *testing.T, name string) []byte {
-	path := filepath.Join("testdata", name) // path relative to this file
+	path := filepath.Join("testdata", name) // pathObj relative to this file
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)

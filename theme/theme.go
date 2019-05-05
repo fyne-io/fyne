@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"io/ioutil"
 	"os"
-	fpath "path"
+	"path"
 	"strings"
 
 	"fyne.io/fyne"
@@ -122,7 +122,7 @@ func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 		return fallback
 	}
 
-	name := fpath.Base(variantPath)
+	name := path.Base(variantPath)
 	return &fyne.StaticResource{StaticName: name, StaticContent: ret}
 
 }
@@ -147,27 +147,27 @@ func (t *builtinTheme) initFonts() {
 	}
 }
 
-// TextFont returns the font path for the regular font style
+// TextFont returns the font pathObj for the regular font style
 func (t *builtinTheme) TextFont() fyne.Resource {
 	return t.regular
 }
 
-// TextBoldFont retutns the font path for the bold font style
+// TextBoldFont retutns the font pathObj for the bold font style
 func (t *builtinTheme) TextBoldFont() fyne.Resource {
 	return t.bold
 }
 
-// TextItalicFont returns the font path for the italic font style
+// TextItalicFont returns the font pathObj for the italic font style
 func (t *builtinTheme) TextItalicFont() fyne.Resource {
 	return t.italic
 }
 
-// TextBoldItalicFont returns the font path for the bold and italic font style
+// TextBoldItalicFont returns the font pathObj for the bold and italic font style
 func (t *builtinTheme) TextBoldItalicFont() fyne.Resource {
 	return t.bolditalic
 }
 
-// TextMonospaceFont retutns the font path for the monospace font face
+// TextMonospaceFont retutns the font pathObj for the monospace font face
 func (t *builtinTheme) TextMonospaceFont() fyne.Resource {
 	return t.monospace
 }
@@ -248,27 +248,27 @@ func TextSize() int {
 	return current().TextSize()
 }
 
-// TextFont returns the font path for the regular font style
+// TextFont returns the font pathObj for the regular font style
 func TextFont() fyne.Resource {
 	return current().TextFont()
 }
 
-// TextBoldFont retutns the font path for the bold font style
+// TextBoldFont retutns the font pathObj for the bold font style
 func TextBoldFont() fyne.Resource {
 	return current().TextBoldFont()
 }
 
-// TextItalicFont returns the font path for the italic font style
+// TextItalicFont returns the font pathObj for the italic font style
 func TextItalicFont() fyne.Resource {
 	return current().TextItalicFont()
 }
 
-// TextBoldItalicFont returns the font path for the bold and italic font style
+// TextBoldItalicFont returns the font pathObj for the bold and italic font style
 func TextBoldItalicFont() fyne.Resource {
 	return current().TextBoldItalicFont()
 }
 
-// TextMonospaceFont retutns the font path for the monospace font face
+// TextMonospaceFont retutns the font pathObj for the monospace font face
 func TextMonospaceFont() fyne.Resource {
 	return current().TextMonospaceFont()
 }
@@ -289,27 +289,27 @@ func ScrollBarSize() int {
 	return current().ScrollBarSize()
 }
 
-// DefaultTextFont returns the font path for the built-in regular font style
+// DefaultTextFont returns the font pathObj for the built-in regular font style
 func DefaultTextFont() fyne.Resource {
 	return regular
 }
 
-// DefaultTextBoldFont retutns the font path for the built-in bold font style
+// DefaultTextBoldFont retutns the font pathObj for the built-in bold font style
 func DefaultTextBoldFont() fyne.Resource {
 	return bold
 }
 
-// DefaultTextItalicFont returns the font path for the built-in italic font style
+// DefaultTextItalicFont returns the font pathObj for the built-in italic font style
 func DefaultTextItalicFont() fyne.Resource {
 	return italic
 }
 
-// DefaultTextBoldItalicFont returns the font path for the built-in bold and italic font style
+// DefaultTextBoldItalicFont returns the font pathObj for the built-in bold and italic font style
 func DefaultTextBoldItalicFont() fyne.Resource {
 	return bolditalic
 }
 
-// DefaultTextMonospaceFont retutns the font path for the built-in monospace font face
+// DefaultTextMonospaceFont retutns the font pathObj for the built-in monospace font face
 func DefaultTextMonospaceFont() fyne.Resource {
 	return monospace
 }

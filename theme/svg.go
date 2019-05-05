@@ -11,24 +11,24 @@ import (
 
 // SVG holds the unmarshaled XML from a Scalable Vector Graphic
 type SVG struct {
-	XMLName  xml.Name   `xml:"svg"`
-	XMLNS    string     `xml:"xmlns,attr"`
-	Width    string     `xml:"width,attr"`
-	Height   string     `xml:"height,attr"`
-	ViewBox  string     `xml:"viewBox,attr"`
-	Paths    []*path    `xml:"path"`
-	Rects    []*rect    `xml:"rect"`
-	Polygons []*polygon `xml:"polygon"`
-	Groups   []*group   `xml:"g"`
+	XMLName  xml.Name      `xml:"svg"`
+	XMLNS    string        `xml:"xmlns,attr"`
+	Width    string        `xml:"width,attr"`
+	Height   string        `xml:"height,attr"`
+	ViewBox  string        `xml:"viewBox,attr"`
+	Paths    []*pathObj    `xml:"path"`
+	Rects    []*rectObj    `xml:"rect"`
+	Polygons []*polygonObj `xml:"polygon"`
+	Groups   []*group      `xml:"g"`
 }
 
-type path struct {
+type pathObj struct {
 	XMLName xml.Name `xml:"path"`
 	Fill    string   `xml:"fill,attr"`
 	D       string   `xml:"d,attr"`
 }
 
-type rect struct {
+type rectObj struct {
 	XMLName xml.Name `xml:"rect"`
 	Fill    string   `xml:"fill,attr"`
 	X       string   `xml:"x,attr"`
@@ -37,21 +37,21 @@ type rect struct {
 	Height  string   `xml:"height,attr"`
 }
 
-type polygon struct {
+type polygonObj struct {
 	XMLName xml.Name `xml:"polygon"`
 	Fill    string   `xml:"fill,attr"`
 	Points  string   `xml:"points,attr"`
 }
 
 type group struct {
-	XMLName  xml.Name   `xml:"g"`
-	ID       string     `xml:"id,attr"`
-	Paths    []*path    `xml:"path"`
-	Rects    []*rect    `xml:"rect"`
-	Polygons []*polygon `xml:"polygon"`
+	XMLName  xml.Name      `xml:"g"`
+	ID       string        `xml:"id,attr"`
+	Paths    []*pathObj    `xml:"path"`
+	Rects    []*rectObj    `xml:"rect"`
+	Polygons []*polygonObj `xml:"polygon"`
 }
 
-func replacePathsFill(paths []*path, hexColor string) {
+func replacePathsFill(paths []*pathObj, hexColor string) {
 	for _, path := range paths {
 		if path.Fill != "none" {
 			path.Fill = hexColor
@@ -59,7 +59,7 @@ func replacePathsFill(paths []*path, hexColor string) {
 	}
 }
 
-func replaceRectsFill(rects []*rect, hexColor string) {
+func replaceRectsFill(rects []*rectObj, hexColor string) {
 	for _, rect := range rects {
 		if rect.Fill != "none" {
 			rect.Fill = hexColor
@@ -67,7 +67,7 @@ func replaceRectsFill(rects []*rect, hexColor string) {
 	}
 }
 
-func replacePolygonsFill(polys []*polygon, hexColor string) {
+func replacePolygonsFill(polys []*polygonObj, hexColor string) {
 	for _, poly := range polys {
 		if poly.Fill != "none" {
 			poly.Fill = hexColor
