@@ -128,272 +128,227 @@ func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 }
 
 // Test Asset Sources
-func Test_FyneLogo(t *testing.T) {
+func Test_FyneLogo_FileSource(t *testing.T) {
 	result := FyneLogo().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "fyne.png", result)
 }
 
-func Test_CancelIcon(t *testing.T) {
+func Test_CancelIcon_FileSource(t *testing.T) {
 	result := CancelIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "cancel.svg", result)
 }
 
-func Test_ConfirmIcon(t *testing.T) {
+func Test_ConfirmIcon_FileSource(t *testing.T) {
 	result := ConfirmIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "check.svg", result)
 }
 
-func Test_DeleteIcon(t *testing.T) {
+func Test_DeleteIcon_FileSource(t *testing.T) {
 	result := DeleteIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "delete.svg", result)
 }
 
-func Test_SearchIcon(t *testing.T) {
+func Test_SearchIcon_FileSource(t *testing.T) {
 	result := SearchIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "search.svg", result)
 }
 
-func Test_SearchReplaceIcon(t *testing.T) {
+func Test_SearchReplaceIcon_FileSource(t *testing.T) {
 	result := SearchReplaceIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "search-replace.svg", result)
 }
 
-func Test_CheckButtonIcon(t *testing.T) {
+func Test_CheckButtonIcon_FileSource(t *testing.T) {
 	result := CheckButtonIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "check-box-blank.svg", result)
 }
 
-func Test_CheckButtonCheckedIcon(t *testing.T) {
+func Test_CheckButtonCheckedIcon_FileSource(t *testing.T) {
 	result := CheckButtonCheckedIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "check-box.svg", result)
 }
 
-func Test_RadioButtonIcon(t *testing.T) {
+func Test_RadioButtonIcon_FileSource(t *testing.T) {
 	result := RadioButtonIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "radio-button.svg", result)
 }
 
-func Test_RadioButtonCheckedIcon(t *testing.T) {
+func Test_RadioButtonCheckedIcon_FileSource(t *testing.T) {
 	result := RadioButtonCheckedIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "radio-button-checked.svg", result)
 }
 
-func Test_ContentAddIcon(t *testing.T) {
+func Test_ContentAddIcon_FileSource(t *testing.T) {
 	result := ContentAddIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "content-add.svg", result)
 }
 
-func Test_ContentRemoveIcon(t *testing.T) {
+func Test_ContentRemoveIcon_FileSource(t *testing.T) {
 	result := ContentRemoveIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "content-remove.svg", result)
 }
 
-func Test_ContentClearIcon(t *testing.T) {
+func Test_ContentClearIcon_FileSource(t *testing.T) {
 	result := ContentClearIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "cancel.svg", result)
 }
 
-func Test_ContentCutIcon(t *testing.T) {
+func Test_ContentCutIcon_FileSource(t *testing.T) {
 	result := ContentCutIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "content-cut.svg", result)
 }
 
-func Test_ContentCopyIcon(t *testing.T) {
+func Test_ContentCopyIcon_FileSource(t *testing.T) {
 	result := ContentCopyIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "content-copy.svg", result)
 }
 
-func Test_ContentPasteIcon(t *testing.T) {
+func Test_ContentPasteIcon_FileSource(t *testing.T) {
 	result := ContentPasteIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "content-paste.svg", result)
 }
 
-func Test_ContentRedoIcon(t *testing.T) {
+func Test_ContentRedoIcon_FileSource(t *testing.T) {
 	result := ContentRedoIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "content-redo.svg", result)
 }
 
-func Test_ContentUndoIcon(t *testing.T) {
+func Test_ContentUndoIcon_FileSource(t *testing.T) {
 	result := ContentUndoIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "content-undo.svg", result)
 }
 
-func Test_DocumentCreateIcon(t *testing.T) {
+func Test_DocumentCreateIcon_FileSource(t *testing.T) {
 	result := DocumentCreateIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "document-create.svg", result)
 }
 
-func Test_DocumentPrintIcon(t *testing.T) {
+func Test_DocumentPrintIcon_FileSource(t *testing.T) {
 	result := DocumentPrintIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "document-print.svg", result)
 }
 
-func Test_DocumentSaveIcon(t *testing.T) {
+func Test_DocumentSaveIcon_FileSource(t *testing.T) {
 	result := DocumentSaveIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "document-save.svg", result)
 }
 
-func Test_InfoIcon(t *testing.T) {
+func Test_InfoIcon_FileSource(t *testing.T) {
 	result := InfoIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "info.svg", result)
 }
 
-func Test_QuestionIcon(t *testing.T) {
+func Test_QuestionIcon_FileSource(t *testing.T) {
 	result := QuestionIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "question.svg", result)
 }
 
-func Test_WarningIcon(t *testing.T) {
+func Test_WarningIcon_FileSource(t *testing.T) {
 	result := WarningIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "warning.svg", result)
 }
 
-func Test_FolderIcon(t *testing.T) {
+func Test_FolderIcon_FileSource(t *testing.T) {
 	result := FolderIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "folder.svg", result)
 }
 
-func Test_FolderNewIcon(t *testing.T) {
+func Test_FolderNewIcon_FileSource(t *testing.T) {
 	result := FolderNewIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "folder-new.svg", result)
 }
 
-func Test_FolderOpenIcon(t *testing.T) {
+func Test_FolderOpenIcon_FileSource(t *testing.T) {
 	result := FolderOpenIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "folder-open.svg", result)
 }
 
-func Test_HelpIcon(t *testing.T) {
+func Test_HelpIcon_FileSource(t *testing.T) {
 	result := HelpIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "help.svg", result)
 }
 
-func Test_HomeIcon(t *testing.T) {
+func Test_HomeIcon_FileSource(t *testing.T) {
 	result := HomeIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "home.svg", result)
 }
 
-func Test_MailAttachmentIcon(t *testing.T) {
+func Test_MailAttachmentIcon_FileSource(t *testing.T) {
 	result := MailAttachmentIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "mail-attachment.svg", result)
 }
 
-func Test_MailComposeIcon(t *testing.T) {
+func Test_MailComposeIcon_FileSource(t *testing.T) {
 	result := MailComposeIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "mail-compose.svg", result)
 }
 
-func Test_MailForwardIcon(t *testing.T) {
+func Test_MailForwardIcon_FileSource(t *testing.T) {
 	result := MailForwardIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "mail-forward.svg", result)
 }
 
-func Test_MailReplyIcon(t *testing.T) {
+func Test_MailReplyIcon_FileSource(t *testing.T) {
 	result := MailReplyIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "mail-reply.svg", result)
 }
 
-func Test_MailReplyAllIcon(t *testing.T) {
+func Test_MailReplyAllIcon_FileSource(t *testing.T) {
 	result := MailReplyAllIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "mail-reply_all.svg", result)
 }
 
-func Test_MailSendIcon(t *testing.T) {
+func Test_MailSendIcon_FileSource(t *testing.T) {
 	result := MailSendIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "mail-send.svg", result)
 }
 
-func Test_MoveDownIcon(t *testing.T) {
+func Test_MoveDownIcon_FileSource(t *testing.T) {
 	result := MoveDownIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "arrow-down.svg", result)
 }
 
-func Test_MoveUpIcon(t *testing.T) {
+func Test_MoveUpIcon_FileSource(t *testing.T) {
 	result := MoveUpIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "arrow-up.svg", result)
 }
 
-func Test_NavigateBackIcon(t *testing.T) {
+func Test_NavigateBackIcon_FileSource(t *testing.T) {
 	result := NavigateBackIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "arrow-back.svg", result)
 }
 
-func Test_NavigateNextIcon(t *testing.T) {
+func Test_NavigateNextIcon_FileSource(t *testing.T) {
 	result := NavigateNextIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "arrow-forward.svg", result)
 }
 
-func Test_ViewFullScreenIcon(t *testing.T) {
+func Test_ViewFullScreenIcon_FileSource(t *testing.T) {
 	result := ViewFullScreenIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "view-fullscreen.svg", result)
 }
 
-func Test_ViewRestoreIcon(t *testing.T) {
+func Test_ViewRestoreIcon_FileSource(t *testing.T) {
 	result := ViewRestoreIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "view-zoom-fit.svg", result)
 }
 
-func Test_ViewRefreshIcon(t *testing.T) {
+func Test_ViewRefreshIcon_FileSource(t *testing.T) {
 	result := ViewRefreshIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "view-refresh.svg", result)
 }
 
-func Test_ZoomFitIcon(t *testing.T) {
+func Test_ZoomFitIcon_FileSource(t *testing.T) {
 	result := ZoomFitIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "view-zoom-fit.svg", result)
 }
 
-func Test_ZoomInIcon(t *testing.T) {
+func Test_ZoomInIcon_FileSource(t *testing.T) {
 	result := ZoomInIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "view-zoom-in.svg", result)
 }
 
-func Test_ZoomOutIcon(t *testing.T) {
+func Test_ZoomOutIcon_FileSource(t *testing.T) {
 	result := ZoomOutIcon().Name()
-	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.Equal(t, "view-zoom-out.svg", result)
 }
