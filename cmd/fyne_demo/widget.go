@@ -24,6 +24,7 @@ func makeInputTab() fyne.Widget {
 
 	return widget.NewVBox(
 		entry,
+		widget.NewSelect([]string{"Option 1", "Option 2"}, func(s string) { fmt.Println("selected", s) }),
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
 		widget.NewRadio([]string{"Item 1", "Item 2"}, func(s string) { fmt.Println("selected", s) }),
 	)

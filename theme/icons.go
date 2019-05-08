@@ -60,7 +60,7 @@ var (
 	contentRedo, contentUndo, info, question, warning                           *ThemedResource
 	documentCreate, documentPrint, documentSave                                 *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
-	arrowBack, arrowDown, arrowForward, arrowUp                                 *ThemedResource
+	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
 	folder, folderNew, folderOpen, help, home                                   *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
 )
@@ -104,6 +104,8 @@ func init() {
 	arrowDown = NewThemedResource(arrowdownIconRes, nil)
 	arrowForward = NewThemedResource(arrowforwardIconRes, nil)
 	arrowUp = NewThemedResource(arrowupIconRes, nil)
+	arrowDropDown = NewThemedResource(arrowdropdownIconRes, nil)
+	arrowDropUp = NewThemedResource(arrowdropupIconRes, nil)
 
 	folder = NewThemedResource(folderIconRes, nil)
 	folderNew = NewThemedResource(foldernewIconRes, nil)
@@ -311,6 +313,16 @@ func NavigateBackIcon() fyne.Resource {
 // NavigateNextIcon returns a resource containing the standard forward navigation icon for the current theme
 func NavigateNextIcon() fyne.Resource {
 	return arrowForward
+}
+
+// MenuDropDownIcon returns a resource containing the standard menu drop down icon for the current theme
+func MenuDropDownIcon() fyne.Resource {
+	return arrowDropDown
+}
+
+// MenuDropUpIcon returns a resource containing the standard menu drop up icon for the current theme
+func MenuDropUpIcon() fyne.Resource {
+	return arrowDropUp
 }
 
 // ViewFullScreenIcon returns a resource containing the standard fullscreen icon for the current theme

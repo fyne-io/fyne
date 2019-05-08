@@ -113,6 +113,9 @@ var icons = []struct {
 	{"NavigateBackIcon", theme.NavigateBackIcon()},
 	{"NavigateNextIcon", theme.NavigateNextIcon()},
 
+	{"MenuDropDown", theme.MenuDropDownIcon()},
+	{"MenuDropUp", theme.MenuDropUpIcon()},
+
 	{"MailAttachmentIcon", theme.MailAttachmentIcon()},
 	{"MailComposeIcon", theme.MailComposeIcon()},
 	{"MailForwardIcon", theme.MailForwardIcon()},
