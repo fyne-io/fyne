@@ -158,7 +158,7 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s)
 	popOverPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height+theme.Padding()))
 
-	if popOverPos.Y + s.popover.Content.Size().Height > c.Size().Height - theme.Padding()*3 {
+	if popOverPos.Y+s.popover.Content.Size().Height > c.Size().Height-theme.Padding()*3 {
 		popOverPos.Y = c.Size().Height - s.popover.Content.Size().Height - theme.Padding()*3
 		if popOverPos.Y < 0 {
 			popOverPos.Y = 0 // TODO here we may need a scroller as it's longer than our canvas
