@@ -26,6 +26,19 @@ func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 	return canvases[obj]
 }
 
+func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
+	var pos fyne.Position
+	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*glCanvas)
+
+	c.walkObjects(c.content, fyne.NewPos(0, 0), false, func(o fyne.CanvasObject, p fyne.Position) {
+		if o == co {
+			pos = p
+		}
+	})
+
+	return pos
+}
+
 func loadFont(data fyne.Resource) *truetype.Font {
 	loaded, err := truetype.Parse(data.Content())
 	if err != nil {

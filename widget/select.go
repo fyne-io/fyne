@@ -155,47 +155,9 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 	}
 
 	s.popover = NewPopOver(options, c)
-	s.popover.Content.Move(getAbsolutePosition(s).Add(fyne.NewPos(0, s.Size().Height+theme.Padding())))
+	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s)
+	s.popover.Content.Move(buttonPos.Add(fyne.NewPos(0, s.Size().Height+theme.Padding())))
 	c.SetOverlay(s.popover)
-}
-
-func getAbsolutePosition(obj fyne.CanvasObject) fyne.Position {
-	var pos fyne.Position
-	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
-	walk(c, func(o fyne.CanvasObject, position fyne.Position) {
-		if o == obj {
-			pos = position
-		}
-	})
-
-	return pos
-}
-
-func walk(c fyne.Canvas, f func(object fyne.CanvasObject, pos fyne.Position)) {
-	walkObjects(c.Content(), fyne.NewPos(0, 0), f)
-}
-
-func walkObjects(obj fyne.CanvasObject, pos fyne.Position,
-	f func(object fyne.CanvasObject, pos fyne.Position)) {
-
-	switch co := obj.(type) {
-	case *fyne.Container:
-		offset := co.Position().Add(pos)
-		f(obj, offset)
-
-		for _, child := range co.Objects {
-			walkObjects(child, offset, f)
-		}
-	case fyne.Widget:
-		offset := co.Position().Add(pos)
-		f(obj, offset)
-
-		for _, child := range Renderer(co).Objects() {
-			walkObjects(child, offset, f)
-		}
-	default:
-		f(obj, pos)
-	}
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured

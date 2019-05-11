@@ -12,6 +12,10 @@ func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	return windows[0].Canvas()
 }
 
+func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
+	return co.Position() // TODO get the real answer
+}
+
 func (d *testDriver) CreateWindow(string) fyne.Window {
 	return NewWindow(nil)
 }
