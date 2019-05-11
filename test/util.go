@@ -4,7 +4,7 @@ import "fyne.io/fyne"
 
 // Tap simulates a mouse click on the specified object
 func Tap(obj fyne.Tappable) {
-	ev := &fyne.PointEvent{Position: fyne.NewPos(1, 1)}
+	ev := &fyne.PointerEvent{Position: fyne.NewPos(1, 1)}
 	obj.Tapped(ev)
 }
 

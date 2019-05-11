@@ -31,8 +31,16 @@ type Themeable interface {
 // Tappable describes any CanvasObject that can also be tapped.
 // This should be implemented by buttons etc that wish to handle pointer interactions.
 type Tappable interface {
-	Tapped(*PointEvent)
-	TappedSecondary(*PointEvent)
+	Tapped(*PointerEvent)
+	TappedSecondary(*PointerEvent)
+}
+
+// Pointable describes any CanvasObject that is interested in receiving
+// pointer device events. Mouse, finger or stylus are considered as pointer devices.
+type Pointable interface {
+	// PointerEvent handles the event of a pointer device
+	// Returns true if the event was handled, false to make it bubble up the hierarchy.
+	PointerEvent(PointerEventPhase, *PointerEvent) bool
 }
 
 // Scrollable describes any CanvasObject that can also be scrolled.

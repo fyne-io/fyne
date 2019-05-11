@@ -169,7 +169,7 @@ func (r *Radio) Append(option string) {
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
-func (r *Radio) Tapped(event *fyne.PointEvent) {
+func (r *Radio) Tapped(event *fyne.PointerEvent) {
 	index := (event.Position.Y - theme.Padding()) / r.itemHeight()
 	if event.Position.Y < theme.Padding() || index >= len(r.Options) { // in the padding
 		return
@@ -189,7 +189,7 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
-func (r *Radio) TappedSecondary(*fyne.PointEvent) {
+func (r *Radio) TappedSecondary(*fyne.PointerEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

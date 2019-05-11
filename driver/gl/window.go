@@ -23,6 +23,13 @@ const (
 
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
+
+	// a single, global mouse pointer for the window
+	mouseEvent = &fyne.PointerEvent{
+		ID:       fyne.PointerIDForPlatformPointerID(fyne.MousePointerDevice, 0),
+		Type:     fyne.MousePointerDevice,
+		Pressure: 0.5, Primary: true, /* we don't expect to handle multiple mice at this time */
+	}
 )
 
 func initCursors() {
@@ -47,7 +54,9 @@ type window struct {
 	padded     bool
 	visible    bool
 
-	mousePos fyne.Position
+	mousePos      fyne.Position
+	objUnderMouse fyne.CanvasObject
+
 	onClosed func()
 
 	xpos, ypos    int
@@ -472,48 +481,62 @@ func (w *window) refresh(viewport *glfw.Window) {
 	w.canvas.setDirty(true)
 }
 
-func findMouseObj(canvas *glCanvas, mouse fyne.Position, scroll bool) (fyne.CanvasObject, int, int) {
-	found := canvas.content
+func (w *window) findMouseObj(mouse fyne.Position, scroll bool) (fyne.CanvasObject, int, int) {
+	found := w.canvas.content
 	foundX, foundY := 0, 0
-	canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), false, func(walked fyne.CanvasObject, pos fyne.Position) {
-		if mouse.X < pos.X || mouse.Y < pos.Y {
-			return
-		}
 
-		x2 := pos.X + walked.Size().Width
-		y2 := pos.Y + walked.Size().Height
-		if mouse.X >= x2 || mouse.Y >= y2 {
-			return
-		}
+	// if there is a capturing target set, use that immediately
+	if capTgt := fyne.GetPointerCapture(mouseEvent.ID); capTgt != nil {
+		found, _ = capTgt.(fyne.CanvasObject)
+		pos := found.Position()
+		foundX, foundY = pos.X, pos.Y
+	} else {
+		w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), false, func(walked fyne.CanvasObject, pos fyne.Position) {
+			if mouse.X < pos.X || mouse.Y < pos.Y {
+				return
+			}
 
-		if !walked.Visible() {
-			return
-		}
+			x2 := pos.X + walked.Size().Width
+			y2 := pos.Y + walked.Size().Height
+			if mouse.X >= x2 || mouse.Y >= y2 {
+				return
+			}
 
-		if scroll {
-			if _, ok := walked.(fyne.Scrollable); ok {
+			if !walked.Visible() {
+				return
+			}
+
+			if scroll {
+				if _, ok := walked.(fyne.Scrollable); ok {
+					found = walked
+					foundX, foundY = pos.X, pos.Y
+				}
+				return
+			}
+			switch walked.(type) {
+			case fyne.Tappable, fyne.Pointable:
+				found = walked
+				foundX, foundY = pos.X, pos.Y
+			case fyne.Focusable:
 				found = walked
 				foundX, foundY = pos.X, pos.Y
 			}
-			return
-		}
-		switch walked.(type) {
-		case fyne.Tappable, desktop.Mouseable:
-			found = walked
-			foundX, foundY = pos.X, pos.Y
-		case fyne.Focusable:
-			found = walked
-			foundX, foundY = pos.X, pos.Y
-		}
-	})
+		})
+	}
 
-	return found, foundX, foundY
+	// apply padding
+	pad := 0
+	if w.padded {
+		pad = theme.Padding()
+	}
+
+	return found, foundX + pad/2, foundY + pad/2
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
 
-	co, _, _ := findMouseObj(w.canvas, w.mousePos, false)
+	co, x, y := w.findMouseObj(w.mousePos, false)
 	cursor := defaultCursor
 	switch wid := co.(type) {
 	case *widget.Entry:
@@ -522,30 +545,61 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		}
 	case *widget.Hyperlink:
 		cursor = hyperlinkCursor
+
 	}
 	runOnMainAsync(func() {
 		viewport.SetCursor(cursor)
 	})
+
+	if w.objUnderMouse != co && w.objUnderMouse != nil {
+		if old, ok := w.objUnderMouse.(fyne.Pointable); ok {
+			fyne.SendPointerEvent(old, fyne.PointerLeft, mouseEvent)
+			w.objUnderMouse = nil
+		}
+	}
+
+	if wid, ok := co.(fyne.Pointable); ok {
+		mouseEvent.Position = fyne.NewPos(w.mousePos.X-x, w.mousePos.Y-y)
+
+		if w.objUnderMouse != co {
+			w.objUnderMouse = co
+			fyne.SendPointerEvent(wid, fyne.PointerEntered, mouseEvent)
+		}
+
+		fyne.SendPointerEvent(wid, fyne.PointerUpdated, mouseEvent)
+	}
+
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
-	co, x, y := findMouseObj(w.canvas, w.mousePos, false)
-	ev := new(fyne.PointEvent)
-	pad := 0
-	if w.padded {
-		pad = theme.Padding()
-	}
-	ev.Position = fyne.NewPos(w.mousePos.X-pad-x, w.mousePos.Y-pad-y)
+	co, x, y := w.findMouseObj(w.mousePos, false)
 
-	if wid, ok := co.(desktop.Mouseable); ok {
-		mev := new(desktop.MouseEvent)
-		mev.Position = ev.Position
-		mev.Button = convertMouseButton(button)
+	if wid, ok := co.(fyne.Pointable); ok {
+		mouseEvent.Position = fyne.NewPos(w.mousePos.X-x, w.mousePos.Y-y)
+		numBtnsPreviouslyPressed := mouseEvent.Buttons.Count()
+		btn := convertMouseButton(button)
+
 		if action == glfw.Press {
-			go wid.MouseDown(mev)
+			mouseEvent.Buttons |= btn
+			mouseEvent.ButtonsChange = btn
 		} else if action == glfw.Release {
-			go wid.MouseUp(mev)
+			mouseEvent.Buttons &^= btn
+			mouseEvent.ButtonsChange = btn
 		}
+
+		if numBtnsPreviouslyPressed > 0 && mouseEvent.Buttons.Count() > 0 {
+			// just chorded button interaction change (second button pressed/released)
+			fyne.SendPointerEvent(wid, fyne.PointerUpdated, mouseEvent)
+		} else {
+			// actual pointer up or down
+			if action == glfw.Press {
+				fyne.SendPointerEvent(wid, fyne.PointerDown, mouseEvent)
+			} else if action == glfw.Release {
+				fyne.SendPointerEvent(wid, fyne.PointerUp, mouseEvent)
+			}
+		}
+
+		mouseEvent.ButtonsChange = fyne.NoButton
 	}
 
 	needsfocus := true
@@ -563,9 +617,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		if action == glfw.Press {
 			switch button {
 			case glfw.MouseButtonRight:
-				go wid.TappedSecondary(ev)
+				go wid.TappedSecondary(mouseEvent)
 			default:
-				go wid.Tapped(ev)
+				go wid.Tapped(mouseEvent)
 			}
 		}
 	case fyne.Focusable:
@@ -575,8 +629,18 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 }
 
+func (w *window) mouseEntered(viewport *glfw.Window, entered bool) {
+	if !entered && w.objUnderMouse != nil {
+		if wid, ok := w.objUnderMouse.(fyne.Pointable); ok {
+			fyne.SendPointerEvent(wid, fyne.PointerLeft, mouseEvent)
+		}
+
+		w.objUnderMouse = nil
+	}
+}
+
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	co, _, _ := findMouseObj(w.canvas, w.mousePos, true)
+	co, _, _ := w.findMouseObj(w.mousePos, true)
 
 	switch wid := co.(type) {
 	case fyne.Scrollable:
@@ -587,14 +651,16 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	}
 }
 
-func convertMouseButton(button glfw.MouseButton) desktop.MouseButton {
+func convertMouseButton(button glfw.MouseButton) fyne.PointerButton {
 	switch button {
-	case glfw.MouseButton1:
-		return desktop.LeftMouseButton
-	case glfw.MouseButton2:
-		return desktop.RightMouseButton
+	case glfw.MouseButtonLeft:
+		return fyne.LeftButton
+	case glfw.MouseButtonMiddle:
+		return fyne.MiddleButton
+	case glfw.MouseButtonRight:
+		return fyne.RightButton
 	default:
-		return 0
+		return fyne.NoButton
 	}
 }
 
@@ -916,6 +982,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		win.SetRefreshCallback(ret.refresh)
 		win.SetCursorPosCallback(ret.mouseMoved)
 		win.SetMouseButtonCallback(ret.mouseClicked)
+		win.SetCursorEnterCallback(ret.mouseEntered)
 		win.SetScrollCallback(ret.mouseScrolled)
 		win.SetKeyCallback(ret.keyPressed)
 		win.SetCharModsCallback(ret.charModInput)

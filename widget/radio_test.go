@@ -28,7 +28,7 @@ func TestRadio_Selected(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, func(sel string) {
 		selected = sel
 	})
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.Tapped(&fyne.PointerEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "Hi", selected)
 }
@@ -39,7 +39,7 @@ func TestRadio_Unselected(t *testing.T) {
 		selected = sel
 	})
 	radio.Selected = selected
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.Tapped(&fyne.PointerEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "", selected)
 }
@@ -49,7 +49,7 @@ func TestRadio_SelectedOther(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Hi2"}, func(sel string) {
 		selected = sel
 	})
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())})
+	radio.Tapped(&fyne.PointerEvent{Position: fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())})
 
 	assert.Equal(t, "Hi2", selected)
 }
@@ -60,10 +60,10 @@ func TestRadio_SelectedNone(t *testing.T) {
 		selected = sel
 	})
 
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, 2)})
+	radio.Tapped(&fyne.PointerEvent{Position: fyne.NewPos(0, 2)})
 	assert.Equal(t, "", selected)
 
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, 25)})
+	radio.Tapped(&fyne.PointerEvent{Position: fyne.NewPos(0, 25)})
 	assert.Equal(t, "", selected)
 }
 
