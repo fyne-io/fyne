@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"math"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -38,34 +39,44 @@ func removeDuplicates(options []string) []string {
 // This is based on the contained text, the radio icon and a standard amount of padding
 // between each item.
 func (r *radioRenderer) MinSize() fyne.Size {
-	minWidth := 0
+	width := 0
 	height := 0
 	for _, item := range r.items {
 		itemMin := item.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 		itemMin = itemMin.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 
-		minWidth = fyne.Max(minWidth, itemMin.Width)
-		height += itemMin.Height
+		if r.radio.Horizontal {
+			height = fyne.Max(height, itemMin.Height)
+			width += itemMin.Width
+		} else {
+			width = fyne.Max(width, itemMin.Width)
+			height += itemMin.Height
+		}
 	}
 
-	return fyne.NewSize(minWidth, height)
+	return fyne.NewSize(width, height)
 }
 
 // Layout the components of the radio widget
 func (r *radioRenderer) Layout(size fyne.Size) {
+	itemWidth := r.radio.itemWidth()
 	itemHeight := r.radio.itemHeight()
-	y := 0
-	labelSize := fyne.NewSize(size.Width-theme.IconInlineSize()-theme.Padding(), itemHeight)
+	labelSize := fyne.NewSize(itemWidth, itemHeight)
 
+	x, y := 0, 0
 	for _, item := range r.items {
 		item.label.Resize(labelSize)
-		item.label.Move(fyne.NewPos(theme.IconInlineSize()+theme.Padding(), y))
+		item.label.Move(fyne.NewPos(x+theme.IconInlineSize()+theme.Padding(), y))
 
 		item.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		item.icon.Move(fyne.NewPos(0,
+		item.icon.Move(fyne.NewPos(x,
 			y+(labelSize.Height-theme.IconInlineSize())/2))
 
-		y += itemHeight
+		if r.radio.Horizontal {
+			x += itemWidth
+		} else {
+			y += itemHeight
+		}
 	}
 }
 
@@ -131,7 +142,8 @@ type Radio struct {
 	Options  []string
 	Selected string
 
-	OnChanged func(string) `json:"-"`
+	OnChanged  func(string) `json:"-"`
+	Horizontal bool
 }
 
 // Resize sets a new size for a widget.
@@ -170,8 +182,14 @@ func (r *Radio) Append(option string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (r *Radio) Tapped(event *fyne.PointEvent) {
-	index := (event.Position.Y - theme.Padding()) / r.itemHeight()
-	if event.Position.Y < theme.Padding() || index >= len(r.Options) { // in the padding
+	index := 0
+	if r.Horizontal {
+		index = int(math.Floor(float64(event.Position.X) / float64(r.itemWidth())))
+	} else {
+		index = int(math.Floor(float64(event.Position.Y) / float64(r.itemHeight())))
+	}
+
+	if index < 0 || index >= len(r.Options) { // in the padding
 		return
 	}
 	clicked := r.Options[index]
@@ -222,7 +240,19 @@ func (r *Radio) SetSelected(option string) {
 }
 
 func (r *Radio) itemHeight() int {
+	if r.Horizontal {
+		return r.MinSize().Height
+	}
+
 	return r.MinSize().Height / len(r.Options)
+}
+
+func (r *Radio) itemWidth() int {
+	if !r.Horizontal {
+		return r.MinSize().Width
+	}
+
+	return r.MinSize().Width / len(r.Options)
 }
 
 func (r *Radio) removeDuplicateOptions() {
@@ -236,6 +266,7 @@ func NewRadio(options []string, changed func(string)) *Radio {
 		options,
 		"",
 		changed,
+		false,
 	}
 
 	r.removeDuplicateOptions()

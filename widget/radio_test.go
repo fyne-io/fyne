@@ -23,6 +23,18 @@ func TestRadio_MinSize(t *testing.T) {
 	assert.True(t, min2.Height > min.Height)
 }
 
+func TestRadio_MinSize_Horizontal(t *testing.T) {
+	radio := NewRadio([]string{"Hi"}, nil)
+	min := radio.MinSize()
+
+	radio2 := NewRadio([]string{"Hi", "He"}, nil)
+	radio2.Horizontal = true
+	min2 := radio2.MinSize()
+
+	assert.True(t, min2.Width > min.Width)
+	assert.Equal(t, min.Height, min2.Height)
+}
+
 func TestRadio_Selected(t *testing.T) {
 	selected := ""
 	radio := NewRadio([]string{"Hi"}, func(sel string) {
@@ -54,13 +66,24 @@ func TestRadio_SelectedOther(t *testing.T) {
 	assert.Equal(t, "Hi2", selected)
 }
 
+func TestRadio_SelectedHorizontal(t *testing.T) {
+	selected := "Hi"
+	radio := NewRadio([]string{"Hi", "Hi2"}, func(sel string) {
+		selected = sel
+	})
+	radio.Horizontal = true
+	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(radio.MinSize().Width-theme.Padding(), theme.Padding())})
+
+	assert.Equal(t, "Hi2", selected)
+}
+
 func TestRadio_SelectedNone(t *testing.T) {
 	selected := ""
 	radio := NewRadio([]string{"Hi"}, func(sel string) {
 		selected = sel
 	})
 
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, 2)})
+	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, -2)})
 	assert.Equal(t, "", selected)
 
 	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, 25)})
