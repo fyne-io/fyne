@@ -35,10 +35,12 @@ func (p *PopOver) MinSize() fyne.Size {
 // Move the widget to a new position, relative to it's parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (p *PopOver) Move(pos fyne.Position) {
-	if !p.modal {
-		p.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
-		Renderer(p).Layout(p.Size())
+	if p.modal {
+		return
 	}
+
+	p.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
+	Renderer(p).Layout(p.Size())
 }
 
 // Resize sets a new size for a widget.
