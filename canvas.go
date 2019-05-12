@@ -1,5 +1,7 @@
 package fyne
 
+import "image"
+
 // Canvas defines a graphical canvas to which a CanvasObject or Container can be added.
 // Each canvas has a scale which is automatically applied during the render process.
 type Canvas interface {
@@ -22,4 +24,6 @@ type Canvas interface {
 	OnTypedKey() func(*KeyEvent)
 	SetOnTypedKey(func(*KeyEvent))
 	AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut))
+
+	Capture() image.Image
 }

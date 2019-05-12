@@ -1,8 +1,18 @@
 package test
 
-import "fyne.io/fyne"
+import (
+	"image"
+	"image/color"
+	"image/draw"
 
-var dummyCanvas fyne.Canvas
+	"fyne.io/fyne"
+)
+
+var (
+	dummyCanvas fyne.Canvas
+
+	testBackground = color.RGBA{R: 255, G: 128, B: 255, A: 255}
+)
 
 type testCanvas struct {
 	content, overlay fyne.CanvasObject
@@ -77,6 +87,16 @@ func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 
 func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
 	c.onTypedKey = handler
+}
+
+func (c *testCanvas) Capture() image.Image {
+	// TODO actually implement rendering
+
+	bounds := image.Rect(0, 0, int(float32(c.Size().Width)*c.Scale()), int(float32(c.Size().Height)*c.Scale()))
+	img := image.NewRGBA(bounds)
+	draw.Draw(img, bounds, image.NewUniform(testBackground), image.ZP, draw.Src)
+
+	return img
 }
 
 // NewCanvas returns a single use in-memory canvas used for testing
