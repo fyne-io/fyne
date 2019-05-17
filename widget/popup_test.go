@@ -9,17 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewPopOver(t *testing.T) {
+func TestNewPopUp(t *testing.T) {
 	label := NewLabel("Hi")
-	pop := NewPopOver(label, test.Canvas())
+	pop := NewPopUp(label, test.Canvas())
 
 	assert.True(t, pop.Visible())
 	assert.Equal(t, pop, test.Canvas().Overlay())
 }
 
-func TestPopOver_Hide(t *testing.T) {
+func TestPopUp_Hide(t *testing.T) {
 	label := NewLabel("Hi")
-	pop := NewPopOver(label, test.Canvas())
+	pop := NewPopUp(label, test.Canvas())
 
 	assert.True(t, pop.Visible())
 	pop.Hide()
@@ -27,9 +27,9 @@ func TestPopOver_Hide(t *testing.T) {
 	assert.Nil(t, test.Canvas().Overlay())
 }
 
-func TestPopOver_MinSize(t *testing.T) {
+func TestPopUp_MinSize(t *testing.T) {
 	label := NewLabel("Hi")
-	pop := NewPopOver(label, test.Canvas())
+	pop := NewPopUp(label, test.Canvas())
 
 	inner := pop.Content.MinSize()
 	assert.Equal(t, label.MinSize().Width, inner.Width)
@@ -40,11 +40,11 @@ func TestPopOver_MinSize(t *testing.T) {
 	assert.Equal(t, label.MinSize().Height+theme.Padding()*2, min.Height)
 }
 
-func TestPopOver_Move(t *testing.T) {
+func TestPopUp_Move(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
 	win.Resize(fyne.NewSize(50, 50))
-	pop := NewPopOver(label, win.Canvas())
+	pop := NewPopUp(label, win.Canvas())
 
 	pos := fyne.NewPos(10, 10)
 	pop.Move(pos)
@@ -54,15 +54,15 @@ func TestPopOver_Move(t *testing.T) {
 	assert.Equal(t, pos.Y+theme.Padding(), innerPos.Y)
 
 	popPos := pop.Position()
-	assert.Equal(t, 0, popPos.X) // these are 0 as the popover must fill our overlay
+	assert.Equal(t, 0, popPos.X) // these are 0 as the popUp must fill our overlay
 	assert.Equal(t, 0, popPos.Y)
 }
 
-func TestPopOver_Move_Constrained(t *testing.T) {
+func TestPopUp_Move_Constrained(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
 	win.Resize(fyne.NewSize(50, 30))
-	pop := NewPopOver(label, win.Canvas())
+	pop := NewPopUp(label, win.Canvas())
 
 	pos := fyne.NewPos(10, 10)
 	pop.Move(pos)
@@ -72,9 +72,9 @@ func TestPopOver_Move_Constrained(t *testing.T) {
 	assert.Equal(t, win.Canvas().Size().Height-pop.Content.Size().Height-theme.Padding(), innerPos.Y)
 }
 
-func TestPopOver_Tapped(t *testing.T) {
+func TestPopUp_Tapped(t *testing.T) {
 	label := NewLabel("Hi")
-	pop := NewPopOver(label, test.Canvas())
+	pop := NewPopUp(label, test.Canvas())
 
 	assert.True(t, pop.Visible())
 	test.Tap(pop)
@@ -82,9 +82,9 @@ func TestPopOver_Tapped(t *testing.T) {
 	assert.Nil(t, test.Canvas().Overlay())
 }
 
-func TestModalPopOver_Tapped(t *testing.T) {
+func TestModalPopUp_Tapped(t *testing.T) {
 	label := NewLabel("Hi")
-	pop := NewModalPopOver(label, test.Canvas())
+	pop := NewModalPopUp(label, test.Canvas())
 
 	assert.True(t, pop.Visible())
 	test.Tap(pop)

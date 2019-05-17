@@ -57,7 +57,7 @@ func TestSelect_Tapped(t *testing.T) {
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 	assert.NotNil(t, over)
 
-	cont := over.(*PopOver).Content
+	cont := over.(*PopUp).Content
 	assert.Equal(t, cont.Position().X, pos.X+theme.Padding())
 	assert.True(t, cont.Position().Y > pos.Y)
 
@@ -74,7 +74,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	over := fyne.CurrentApp().Driver().CanvasForObject(combo).Overlay()
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 
-	cont := over.(*PopOver).Content
+	cont := over.(*PopUp).Content
 	assert.True(t, cont.Position().Y <= pos.Y+theme.Padding()) // window was too small so we render higher up
 	assert.True(t, cont.Position().X > pos.X)                  // but X position is unaffected
 }

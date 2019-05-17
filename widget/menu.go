@@ -9,11 +9,11 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// NewPopUpMenu creates a PopOver widget populated with menu items from the passed menu structure.
+// NewPopUpMenu creates a PopUp widget populated with menu items from the passed menu structure.
 // It will automatically be shown as an overlay on the specified canvas.
-func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopOver {
+func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 	options := NewVBox()
-	pop := NewPopOver(options, c)
+	pop := NewPopUp(options, c)
 	for _, option := range menu.Items {
 		opt := option // capture value
 		options.Append(newTappableLabel(opt.Label, func() {

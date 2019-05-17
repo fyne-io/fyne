@@ -105,20 +105,20 @@ func main() {
 
 		widget.NewButton("Input", func() { Input(a) }),
 		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-			widget.NewButton("PopOver", func() {
-				var pop *widget.PopOver
+			widget.NewButton("PopUp", func() {
+				var pop *widget.PopUp
 				ok := widget.NewButton("Dismiss", func() {
 					pop.Hide()
 				})
-				pop = widget.NewPopOver(ok, w.Canvas())
+				pop = widget.NewPopUp(ok, w.Canvas())
 				pop.Move(fyne.NewPos(25, 525))
 			}),
 			widget.NewButton("Modal", func() {
-				var pop *widget.PopOver
+				var pop *widget.PopUp
 				ok := widget.NewButton("Dismiss", func() {
 					pop.Hide()
 				})
-				pop = widget.NewModalPopOver(ok, w.Canvas())
+				pop = widget.NewModalPopUp(ok, w.Canvas())
 			}),
 		),
 		widget.NewButton("Advanced", func() { Advanced(a) }),

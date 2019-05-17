@@ -84,11 +84,11 @@ func (s *selectRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (s *selectRenderer) Destroy() {
-	if s.combo.popover != nil {
+	if s.combo.popUp != nil {
 		c := fyne.CurrentApp().Driver().CanvasForObject(s.combo)
 		c.SetOverlay(nil)
-		Renderer(s.combo.popover).Destroy()
-		s.combo.popover = nil
+		Renderer(s.combo.popUp).Destroy()
+		s.combo.popUp = nil
 	}
 }
 
@@ -100,7 +100,7 @@ type Select struct {
 
 	OnChanged func(string) `json:"-"`
 	hovered   bool
-	popover   *PopOver
+	popUp     *PopUp
 }
 
 // Resize sets a new size for a widget.
@@ -108,8 +108,8 @@ type Select struct {
 func (s *Select) Resize(size fyne.Size) {
 	s.resize(size, s)
 
-	if s.popover != nil {
-		s.popover.Content.Resize(fyne.NewSize(size.Width, s.popover.MinSize().Height))
+	if s.popUp != nil {
+		s.popUp.Content.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
 	}
 }
 
@@ -136,7 +136,7 @@ func (s *Select) Hide() {
 
 func (s *Select) optionTapped(text string) {
 	s.SetSelected(text)
-	s.popover = nil
+	s.popUp = nil
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
@@ -151,12 +151,12 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		})
 		items = append(items, item)
 	}
-	s.popover = NewPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp = NewPopUpMenu(fyne.NewMenu("", items...), c)
 
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s)
-	popOverPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height))
+	popUpPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height))
 
-	s.popover.Move(popOverPos)
+	s.popUp.Move(popUpPos)
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
