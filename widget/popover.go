@@ -32,8 +32,8 @@ func (p *PopOver) MinSize() fyne.Size {
 	return p.minSize(p)
 }
 
-// Move the widget to a new position, relative to it's parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
+// Move the widget to a new position. A PopOver position is absolute to the top, left of it's canvas.
+// For PopOver this actually moves the content so checking Position() will not return the same value as is set here.
 func (p *PopOver) Move(pos fyne.Position) {
 	if p.modal {
 		return
@@ -43,8 +43,7 @@ func (p *PopOver) Move(pos fyne.Position) {
 	Renderer(p).Layout(p.Size())
 }
 
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
+// Resize sets a new size for a widget. Most PopOver widgets are shown at MinSize.
 func (p *PopOver) Resize(size fyne.Size) {
 	p.resize(size, p)
 }
@@ -102,17 +101,16 @@ type popoverRenderer struct {
 }
 
 func (r *popoverRenderer) Layout(size fyne.Size) {
-	pos := r.popover.Content.Position()
+	pos := r.popover.Content.Position().Subtract(fyne.NewPos(theme.Padding(), theme.Padding()))
 	innerSize := r.popover.Content.MinSize()
 	r.popover.Content.Resize(innerSize)
 	r.popover.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 
 	size = innerSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-	r.shadow.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-	r.shadow.Move(pos.Subtract(fyne.NewPos(theme.Padding(), theme.Padding())))
-
 	r.bg.Resize(size)
 	r.bg.Move(pos)
+	r.shadow.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	r.shadow.Move(pos.Subtract(fyne.NewPos(theme.Padding(), theme.Padding())))
 }
 
 func (r *popoverRenderer) MinSize() fyne.Size {

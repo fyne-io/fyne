@@ -3,7 +3,9 @@ package widget
 import (
 	"testing"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,10 +30,30 @@ func TestPopOver_Hide(t *testing.T) {
 func TestPopOver_MinSize(t *testing.T) {
 	label := NewLabel("Hi")
 	pop := NewPopOver(label, test.Canvas())
-	min := pop.MinSize()
 
-	assert.True(t, min.Width > label.MinSize().Width)
-	assert.True(t, min.Height > label.MinSize().Height)
+	inner := pop.Content.MinSize()
+	assert.Equal(t, label.MinSize().Width, inner.Width)
+	assert.Equal(t, label.MinSize().Height, inner.Height)
+
+	min := pop.MinSize()
+	assert.Equal(t, label.MinSize().Width+theme.Padding()*2, min.Width)
+	assert.Equal(t, label.MinSize().Height+theme.Padding()*2, min.Height)
+}
+
+func TestPopOver_Move(t *testing.T) {
+	label := NewLabel("Hi")
+	pop := NewPopOver(label, test.Canvas())
+
+	pos := fyne.NewPos(10, 10)
+	pop.Move(pos)
+
+	innerPos := pop.Content.Position()
+	assert.Equal(t, pos.X+theme.Padding(), innerPos.X)
+	assert.Equal(t, pos.Y+theme.Padding(), innerPos.Y)
+
+	popPos := pop.Position()
+	assert.Equal(t, 0, popPos.X) // these are 0 as the popover must fill our overlay
+	assert.Equal(t, 0, popPos.Y)
 }
 
 func TestPopOver_Tapped(t *testing.T) {

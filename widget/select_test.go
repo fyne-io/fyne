@@ -58,7 +58,7 @@ func TestSelect_Tapped(t *testing.T) {
 	assert.NotNil(t, over)
 
 	cont := over.(*PopOver).Content
-	assert.True(t, cont.Position().X > pos.X)
+	assert.Equal(t, cont.Position().X, pos.X+theme.Padding())
 	assert.True(t, cont.Position().Y > pos.Y)
 
 	items := cont.(*Box).Children
