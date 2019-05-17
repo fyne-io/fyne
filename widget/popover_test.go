@@ -42,7 +42,9 @@ func TestPopOver_MinSize(t *testing.T) {
 
 func TestPopOver_Move(t *testing.T) {
 	label := NewLabel("Hi")
-	pop := NewPopOver(label, test.Canvas())
+	win := test.NewWindow(NewLabel("OK"))
+	win.Resize(fyne.NewSize(50, 50))
+	pop := NewPopOver(label, win.Canvas())
 
 	pos := fyne.NewPos(10, 10)
 	pop.Move(pos)
@@ -54,6 +56,20 @@ func TestPopOver_Move(t *testing.T) {
 	popPos := pop.Position()
 	assert.Equal(t, 0, popPos.X) // these are 0 as the popover must fill our overlay
 	assert.Equal(t, 0, popPos.Y)
+}
+
+func TestPopOver_Move_Constrained(t *testing.T) {
+	label := NewLabel("Hi")
+	win := test.NewWindow(NewLabel("OK"))
+	win.Resize(fyne.NewSize(50, 30))
+	pop := NewPopOver(label, win.Canvas())
+
+	pos := fyne.NewPos(10, 10)
+	pop.Move(pos)
+
+	innerPos := pop.Content.Position()
+	assert.Equal(t, pos.X+theme.Padding(), innerPos.X)
+	assert.Equal(t, win.Canvas().Size().Height-pop.Content.Size().Height-theme.Padding(), innerPos.Y)
 }
 
 func TestPopOver_Tapped(t *testing.T) {

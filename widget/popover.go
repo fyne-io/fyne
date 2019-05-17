@@ -39,6 +39,13 @@ func (p *PopOver) Move(pos fyne.Position) {
 		return
 	}
 
+	if pos.Y+p.Content.Size().Height > p.Canvas.Size().Height-theme.Padding()*2 {
+		pos.Y = p.Canvas.Size().Height - p.Content.Size().Height - theme.Padding()*2
+		if pos.Y < 0 {
+			pos.Y = 0 // TODO here we may need a scroller as it's longer than our canvas
+		}
+	}
+
 	p.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	Renderer(p).Layout(p.Size())
 }

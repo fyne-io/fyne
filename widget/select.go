@@ -134,38 +134,29 @@ func (s *Select) Hide() {
 	s.hide(s)
 }
 
+func (s *Select) optionTapped(text string) {
+	s.SetSelected(text)
+	s.popover = nil
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (s *Select) Tapped(*fyne.PointEvent) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(s)
-	if s.popover != nil {
-		c.SetOverlay(nil)
-		Renderer(s.popover).Destroy()
-		s.popover = nil
-	}
 
-	options := NewVBox()
+	var items []*fyne.MenuItem
 	for _, option := range s.Options {
-		text := option // capture value
-		options.Append(newTappableLabel(text, func() {
-			s.SetSelected(text)
-			c.SetOverlay(nil)
-			Renderer(options).Destroy()
-			s.popover = nil
-		}))
+		text := option // capture
+		item := fyne.NewMenuItem(option, func() {
+			s.optionTapped(text)
+		})
+		items = append(items, item)
 	}
+	s.popover = NewPopUpMenu(fyne.NewMenu("", items...), c)
 
-	s.popover = NewPopOver(options, c)
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s)
 	popOverPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height))
 
-	if popOverPos.Y+s.popover.Content.Size().Height > c.Size().Height-theme.Padding()*2 {
-		popOverPos.Y = c.Size().Height - s.popover.Content.Size().Height - theme.Padding()*2
-		if popOverPos.Y < 0 {
-			popOverPos.Y = 0 // TODO here we may need a scroller as it's longer than our canvas
-		}
-	}
 	s.popover.Move(popOverPos)
-	c.SetOverlay(s.popover)
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
@@ -226,58 +217,4 @@ func NewSelect(options []string, changed func(string)) *Select {
 
 	Renderer(combo).Layout(combo.MinSize())
 	return combo
-}
-
-type tappableLabel struct {
-	*Label
-	OnTapped func()
-	hovered  bool
-}
-
-func (t *tappableLabel) Tapped(*fyne.PointEvent) {
-	t.OnTapped()
-}
-
-func (t *tappableLabel) TappedSecondary(*fyne.PointEvent) {
-}
-
-func (t *tappableLabel) CreateRenderer() fyne.WidgetRenderer {
-	return &hoverLabelRenderer{t.Label.CreateRenderer().(*textRenderer), t}
-}
-
-// MouseIn is called when a desktop pointer enters the widget
-func (t *tappableLabel) MouseIn(*desktop.MouseEvent) {
-	t.hovered = true
-
-	canvas.Refresh(t)
-}
-
-// MouseOut is called when a desktop pointer exits the widget
-func (t *tappableLabel) MouseOut() {
-	t.hovered = false
-
-	canvas.Refresh(t)
-}
-
-// MouseMoved is called when a desktop pointer hovers over the widget
-func (t *tappableLabel) MouseMoved(*desktop.MouseEvent) {
-}
-
-func newTappableLabel(label string, tapped func()) *tappableLabel {
-	ret := &tappableLabel{NewLabel(label), tapped, false}
-	Renderer(ret).Refresh() // trigger the textProvider to refresh metrics for our MinSize
-	return ret
-}
-
-type hoverLabelRenderer struct {
-	*textRenderer
-	label *tappableLabel
-}
-
-func (h *hoverLabelRenderer) BackgroundColor() color.Color {
-	if h.label.hovered {
-		return theme.HoverColor()
-	}
-
-	return theme.BackgroundColor()
 }
