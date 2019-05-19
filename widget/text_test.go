@@ -14,42 +14,42 @@ func textRenderTexts(p fyne.Widget) []*canvas.Text {
 	return Renderer(p).(*textRenderer).texts
 }
 
-type testTextParent struct {
+type testTextPresenter struct {
 	obj   fyne.Widget
 	fg    color.Color
 	style fyne.TextStyle
 	align fyne.TextAlign
 }
 
-func (t *testTextParent) textAlign() fyne.TextAlign {
+func (t *testTextPresenter) textAlign() fyne.TextAlign {
 	return t.align
 }
 
-func (t *testTextParent) textStyle() fyne.TextStyle {
+func (t *testTextPresenter) textStyle() fyne.TextStyle {
 	return t.style
 }
 
-func (t *testTextParent) textColor() color.Color {
+func (t *testTextPresenter) textColor() color.Color {
 	return t.fg
 }
 
-func (t *testTextParent) password() bool {
+func (t *testTextPresenter) password() bool {
 	return false
 }
 
-func (t *testTextParent) object() fyne.Widget {
+func (t *testTextPresenter) object() fyne.Widget {
 	return t.obj
 }
 
 func newTestTextPresenter() textPresenter {
-	t := &testTextParent{}
+	t := &testTextPresenter{}
 	t.obj = NewLabel("")
 
 	return t
 }
 
 func newTrailingBoldWhiteTextPresenter() textPresenter {
-	t := &testTextParent{}
+	t := &testTextPresenter{}
 	t.style = fyne.TextStyle{Bold: true}
 	t.align = fyne.TextAlignTrailing
 	t.fg = color.White
@@ -74,8 +74,15 @@ func TestText_Row(t *testing.T) {
 	assert.Equal(t, []rune("test"), text.row(0))
 }
 
-func TestText_Rows(t *testing.T) {
-	text := &textProvider{presenter: newTestTextPresenter()}
+func TestText_Color(t *testing.T) {
+	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
+	Refresh(text.presenter.object())
+
+	assert.Equal(t, color.White, textRenderTexts(text)[0].Color)
+}
+
+func TestTextHandler_Rows(t *testing.T) {
+	text := &textHandler{}
 	text.SetText("test")
 	assert.Equal(t, 1, text.rows())
 
@@ -89,8 +96,8 @@ func TestText_Rows(t *testing.T) {
 	assert.Equal(t, text.rows(), 2)
 }
 
-func TestText_RowLength(t *testing.T) {
-	text := &textProvider{presenter: newTestTextPresenter()}
+func TestTextHandler_RowLength(t *testing.T) {
+	text := &textHandler{}
 	text.SetText("test")
 
 	rl := text.rowLength(0)
@@ -115,7 +122,7 @@ func TestText_RowLength(t *testing.T) {
 	assert.Equal(t, 5, rl)
 }
 
-func TestText_InsertAt(t *testing.T) {
+func TestTextHandler_InsertAt(t *testing.T) {
 	type fields struct {
 		buffer []rune
 	}
@@ -150,18 +157,17 @@ func TestText_InsertAt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			text := &textProvider{
-				presenter: newTestTextPresenter(),
-				buffer:    tt.fields.buffer,
-			}
+			text := &textHandler{}
+			text.buffer = tt.fields.buffer
+
 			text.insertAt(tt.args.pos, tt.args.runes)
 			assert.Equal(t, tt.wantBuffer, text.buffer)
 		})
 	}
 }
 
-func TestText_Insert(t *testing.T) {
-	text := &textProvider{presenter: newTestTextPresenter()}
+func TestTextHandler_Insert(t *testing.T) {
+	text := &textHandler{}
 	text.insertAt(0, []rune("a"))
 	assert.Equal(t, []rune("a"), text.buffer)
 	text.insertAt(1, []rune("\n"))
@@ -218,10 +224,9 @@ func TestText_DeleteFromTo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			text := &textProvider{
-				presenter: newTestTextPresenter(),
-				buffer:    tt.fields.buffer,
-			}
+			text := &textHandler{}
+			text.buffer = tt.fields.buffer
+
 			got := text.deleteFromTo(tt.args.lowBound, tt.args.highBound)
 			assert.Equal(t, tt.want, got)
 			assert.Equal(t, tt.wantBuffer, text.buffer)
@@ -229,11 +234,28 @@ func TestText_DeleteFromTo(t *testing.T) {
 	}
 }
 
-func TestText_Color(t *testing.T) {
-	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
-	Refresh(text.presenter.object())
+func TestTextHandler_SetText(t *testing.T) {
+	text := &textHandler{}
+	text.SetText("test")
 
-	assert.Equal(t, color.White, textRenderTexts(text)[0].Color)
+	assert.Equal(t, "test", string(text.buffer))
+	assert.Equal(t, 1, len(text.rowBounds))
+	assert.Equal(t, 0, text.rowBounds[0][0])
+	assert.Equal(t, 4, text.rowBounds[0][1])
+}
+
+func TestTextHandler_String(t *testing.T) {
+	text := &textHandler{}
+	text.SetText("test")
+
+	assert.Equal(t, "test", text.String())
+}
+
+func TestTextHandler_MaxCols(t *testing.T) {
+	text := &textHandler{}
+	text.SetText("test")
+
+	assert.Equal(t, 4, text.maxCols)
 }
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {

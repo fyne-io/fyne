@@ -11,39 +11,21 @@ import (
 // TextGrid is a monospaced grid of characters.
 // This is designed to be used by a text editor or advanced test presentation.
 type TextGrid struct {
-	baseWidget
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (t *TextGrid) Resize(size fyne.Size) {
-	t.resize(size, t)
-}
-
-// Move the widget to a new position, relative to it's parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (t *TextGrid) Move(pos fyne.Position) {
-	t.move(pos, t)
+	BaseWidget
+	textHandler
 }
 
 // MinSize returns the smallest size this widget can shrink to
 func (t *TextGrid) MinSize() fyne.Size {
-	return t.minSize(t)
-}
-
-// Show this widget, if it was previously hidden
-func (t *TextGrid) Show() {
-	t.show(t)
-}
-
-// Hide this widget, if it was previously visible
-func (t *TextGrid) Hide() {
-	t.hide(t)
+	t.ExtendBaseWidget(t)
+	return t.BaseWidget.MinSize()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
+	t.ExtendBaseWidget(t)
 	render := &textGridRender{text: t}
+	t.updateRowBounds()
 	render.ensureGrid()
 
 	cell := canvas.NewText("M", color.White)
@@ -55,7 +37,9 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 
 // NewTextGrid creates a new textgrid widget with the specified string content.
 func NewTextGrid(content string) *TextGrid {
-	grid := &TextGrid{}
+	handler := textHandler{buffer: []rune(content)}
+	grid := &TextGrid{textHandler: handler}
+	grid.ExtendBaseWidget(grid)
 	return grid
 }
 
@@ -80,41 +64,19 @@ func newTextCell(str string) *canvas.Text {
 }
 
 func (t *textGridRender) ensureGrid() {
-	t.cols = 10
-	t.rows = 3
+	t.cols = t.text.maxCols
+	t.rows = t.text.rows()
 
-	t.objects = append(t.objects, newTextCell("1"))
-	t.objects = append(t.objects, newTextCell(""))
-	t.objects = append(t.objects, newTextCell("S"))
-	t.objects = append(t.objects, newTextCell("o"))
-	t.objects = append(t.objects, newTextCell("m"))
-	t.objects = append(t.objects, newTextCell("e"))
-	t.objects = append(t.objects, newTextCell("↵"))
-	t.objects = append(t.objects, newTextCell(""))
-	t.objects = append(t.objects, newTextCell(""))
-	t.objects = append(t.objects, newTextCell(""))
-
-	t.objects = append(t.objects, newTextCell("2"))
-	t.objects = append(t.objects, newTextCell(""))
-	t.objects = append(t.objects, newTextCell("·"))
-	t.objects = append(t.objects, newTextCell("·"))
-	t.objects = append(t.objects, newTextCell("T"))
-	t.objects = append(t.objects, newTextCell("e"))
-	t.objects = append(t.objects, newTextCell("x"))
-	t.objects = append(t.objects, newTextCell("t"))
-	t.objects = append(t.objects, newTextCell("↵"))
-	t.objects = append(t.objects, newTextCell(""))
-
-	t.objects = append(t.objects, newTextCell("3"))
-	t.objects = append(t.objects, newTextCell(""))
-	t.objects = append(t.objects, newTextCell("→"))
-	t.objects = append(t.objects, newTextCell(""))
-	t.objects = append(t.objects, newTextCell(""))
-	t.objects = append(t.objects, newTextCell(""))
-	t.objects = append(t.objects, newTextCell("T"))
-	t.objects = append(t.objects, newTextCell("a"))
-	t.objects = append(t.objects, newTextCell("b"))
-	t.objects = append(t.objects, newTextCell("s"))
+	for _, bound := range t.text.rowBounds {
+		i := 0
+		for j := bound[0]; j < bound[1]; j++ {
+			t.objects = append(t.objects, newTextCell(string(t.text.buffer[j])))
+			i++
+		}
+		for ; i < t.cols; i++ {
+			t.objects = append(t.objects, newTextCell(""))
+		}
+	}
 }
 
 func (t *textGridRender) Layout(size fyne.Size) {

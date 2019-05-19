@@ -17,6 +17,7 @@ func makeButtonTab() fyne.Widget {
 
 	return widget.NewVBox(
 		widget.NewLabel("Text label"),
+		widget.NewTextGrid("TextGrid\n  Content"),
 		widget.NewButton("Text button", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("With icon", theme.ConfirmIcon(), func() { fmt.Println("tapped icon button") }),
 		disabled,
@@ -40,7 +41,6 @@ func makeInputTab() fyne.Widget {
 	return widget.NewVBox(
 		entry,
 		entryReadOnly,
-		widget.NewTextGrid("Some\n  Text"),
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
 		disabledCheck,
