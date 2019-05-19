@@ -35,8 +35,9 @@ func (t *TextGrid) MinSize() fyne.Size {
 func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	render := &textGridRender{text: t}
+	t.updated = render.update
 	t.updateRowBounds()
-	render.ensureGrid()
+	render.update()
 
 	cell := canvas.NewText("M", color.White)
 	cell.TextStyle.Monospace = true
@@ -62,15 +63,25 @@ type textGridRender struct {
 	objects  []fyne.CanvasObject
 }
 
-func newTextCell(str rune) *canvas.Text {
+func (t *textGridRender) appendTextCell(str rune) {
 	text := canvas.NewText(string(str), theme.TextColor())
 	text.TextStyle.Monospace = true
+
+	t.objects = append(t.objects, text)
+}
+
+func (t *textGridRender) setCellRune(str rune, pos int) {
+	text := t.objects[pos].(*canvas.Text)
+	text.Text = string(str)
 
 	if str == textAreaSpaceSymbol || str == textAreaTabSymbol || str == textAreaNewLineSymbol {
 		text.Color = theme.PlaceHolderColor()
 	}
+}
 
-	return text
+func (t *textGridRender) update() {
+	t.ensureGrid()
+	t.refreshGrid()
 }
 
 func (t *textGridRender) ensureGrid() {
@@ -82,37 +93,55 @@ func (t *textGridRender) ensureGrid() {
 		t.cols += t.lineCountWidth() + 1
 	}
 	t.rows = t.text.rows()
+
+	cellCount := t.cols * t.rows
+	if len(t.objects) == cellCount {
+		return
+	}
+	for i := len(t.objects); i < cellCount; i++ {
+		t.appendTextCell(' ')
+	}
+}
+
+func (t *textGridRender) refreshGrid() {
 	line := 1
+	x := 0
 
 	for _, bound := range t.text.rowBounds {
 		i := 0
 		if t.text.LineNumbers {
 			lineStr := []rune(fmt.Sprintf("%d", line))
 			for c := 0; c < len(lineStr); c++ {
-				t.objects = append(t.objects, newTextCell(lineStr[c]))
+				t.setCellRune(lineStr[c], x)
 				i++
+				x++
 			}
 			for ; i < t.lineCountWidth(); i++ {
-				t.objects = append(t.objects, newTextCell(' '))
+				t.setCellRune(' ', x)
+				x++
 			}
 
-			t.objects = append(t.objects, newTextCell(' '))
+			t.setCellRune(' ', x)
 			i++
+			x++
 		}
 		for j := bound[0]; j < bound[1]; j++ {
 			r := t.text.buffer[j]
 			if t.text.Whitespace && r == ' ' {
 				r = textAreaSpaceSymbol
 			}
-			t.objects = append(t.objects, newTextCell(r))
+			t.setCellRune(r, x)
 			i++
+			x++
 		}
 		if t.text.Whitespace {
-			t.objects = append(t.objects, newTextCell(textAreaNewLineSymbol))
+			t.setCellRune(textAreaNewLineSymbol, x)
 			i++
+			x++
 		}
 		for ; i < t.cols; i++ {
-			t.objects = append(t.objects, newTextCell(' '))
+			t.setCellRune(' ', x)
+			x++
 		}
 
 		line++
@@ -144,6 +173,7 @@ func (t *textGridRender) MinSize() fyne.Size {
 }
 
 func (t *textGridRender) Refresh() {
+	t.refreshGrid()
 }
 
 func (t *textGridRender) ApplyTheme() {

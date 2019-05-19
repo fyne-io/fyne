@@ -15,6 +15,14 @@ func TestNewTextGrid(t *testing.T) {
 	assert.Equal(t, 1, grid.maxCols)
 }
 
+func TestTextGrid_SetText(t *testing.T) {
+	grid := NewTextGrid("")
+	grid.SetText("Hello\nthere")
+
+	assert.Equal(t, 2, grid.rows())
+	assert.Equal(t, 5, grid.maxCols)
+}
+
 func TestTextGrid_Rows(t *testing.T) {
 	grid := NewTextGrid("Ab\nC")
 	Renderer(grid).Refresh()
@@ -59,4 +67,14 @@ func TestTextGridRender_Whitespace(t *testing.T) {
 	assert.Equal(t, rend.objects[1].(*canvas.Text).Text, string(textAreaSpaceSymbol))   // col 2 is space
 	assert.Equal(t, rend.objects[3].(*canvas.Text).Text, string(textAreaNewLineSymbol)) // col 4 is newline
 	assert.Equal(t, rend.objects[5].(*canvas.Text).Text, string(textAreaNewLineSymbol)) // col 2 on line 2
+}
+
+func TestTextGridRender_Refresh(t *testing.T) {
+	grid := NewTextGrid("Ab")
+	rend := Renderer(grid).(*textGridRender)
+	rend.Refresh()
+	rend.Refresh()
+	rend.Refresh() // check we are not appending more content
+
+	assert.Equal(t, 2, len(rend.objects))
 }
