@@ -14,10 +14,13 @@ import (
 func makeButtonTab() fyne.Widget {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
+	grid := widget.NewTextGrid("TextGrid\n  Content")
+	grid.LineNumbers = true
+	grid.Whitespace = true
 
 	return widget.NewVBox(
 		widget.NewLabel("Text label"),
-		widget.NewTextGrid("TextGrid\n  Content"),
+		grid,
 		widget.NewButton("Text button", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("With icon", theme.ConfirmIcon(), func() { fmt.Println("tapped icon button") }),
 		disabled,
