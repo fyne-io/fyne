@@ -56,33 +56,6 @@ func unscaleInt(c fyne.Canvas, v int) int {
 	}
 }
 
-func (c *glCanvas) menuBar() fyne.CanvasObject {
-	if c.window.mainmenu == nil {
-		return nil
-	}
-
-	c.RLock()
-	ret := c.menu
-	c.RUnlock()
-	if ret != nil {
-		return ret
-	}
-
-	ret = buildMenuBar(c.window.mainmenu, c.window)
-	c.Lock()
-	c.menu = ret
-	c.Unlock()
-	return ret
-}
-
-func (c *glCanvas) menuHeight() int {
-	if c.window.mainmenu == nil {
-		return 0
-	}
-
-	return c.menuBar().MinSize().Height
-}
-
 func (c *glCanvas) Content() fyne.CanvasObject {
 	c.RLock()
 	retval := c.content

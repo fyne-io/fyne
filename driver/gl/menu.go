@@ -41,3 +41,30 @@ func showMenu(menu *fyne.Menu, pos fyne.Position, c fyne.Canvas) {
 	pop := widget.NewPopUpMenu(fyne.NewMenu("", menu.Items...), c)
 	pop.Move(pos)
 }
+
+func (c *glCanvas) menuBar() fyne.CanvasObject {
+	if c.window.mainmenu == nil || hasNativeMenu() { // on darwin we use the macOS menu system
+		return nil
+	}
+
+	c.RLock()
+	ret := c.menu
+	c.RUnlock()
+	if ret != nil {
+		return ret
+	}
+
+	ret = buildMenuBar(c.window.mainmenu, c.window)
+	c.Lock()
+	c.menu = ret
+	c.Unlock()
+	return ret
+}
+
+func (c *glCanvas) menuHeight() int {
+	if c.window.mainmenu == nil || hasNativeMenu() { // reserve no height for a macOS menu
+		return 0
+	}
+
+	return c.menuBar().MinSize().Height
+}
