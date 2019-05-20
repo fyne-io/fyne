@@ -21,12 +21,12 @@ func (r *baseObject) Resize(size fyne.Size) {
 	r.size = size
 }
 
-// CurrentPosition gets the current position of this rectangle object, relative to it's parent / canvas
+// CurrentPosition gets the current position of this rectangle object, relative to its parent / canvas
 func (r *baseObject) Position() fyne.Position {
 	return r.position
 }
 
-// Move the rectangle object to a new position, relative to it's parent / canvas
+// Move the rectangle object to a new position, relative to its parent / canvas
 func (r *baseObject) Move(pos fyne.Position) {
 	r.position = pos
 }

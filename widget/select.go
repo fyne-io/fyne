@@ -48,7 +48,7 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 		(size.Height-theme.IconInlineSize())/2))
 }
 
-// ApplyTheme is called when the Button may need to update it's look
+// ApplyTheme is called when the Button may need to update its look
 func (s *selectRenderer) ApplyTheme() {
 	s.label.Color = theme.TextColor()
 
@@ -113,7 +113,7 @@ func (s *Select) Resize(size fyne.Size) {
 	}
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (s *Select) Move(pos fyne.Position) {
 	s.move(pos, s)
@@ -188,7 +188,7 @@ func (s *Select) MouseOut() {
 func (s *Select) MouseMoved(*desktop.MouseEvent) {
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	icon := NewIcon(theme.MenuDropDownIcon())
 

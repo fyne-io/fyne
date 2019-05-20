@@ -38,8 +38,8 @@ func (g *boxLayout) isSpacer(obj fyne.CanvasObject) bool {
 }
 
 // Layout is called to pack all child objects into a specified size.
-// For an VBoxLayout this will pack objects into a single column where each item
-// is full width but the it's height is the minimum required.
+// For a VBoxLayout this will pack objects into a single column where each item
+// is full width but the height is the minimum required.
 // Any spacers added will pad the view, sharing the space if there are two or more.
 func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	spacers := make([]fyne.CanvasObject, 0)

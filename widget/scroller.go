@@ -117,7 +117,7 @@ func (s *ScrollContainer) Resize(size fyne.Size) {
 	s.resize(size, s)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (s *ScrollContainer) Move(pos fyne.Position) {
 	s.move(pos, s)
@@ -138,7 +138,7 @@ func (s *ScrollContainer) Hide() {
 	s.hide(s)
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.ScrollBarColor())
 	return &scrollRenderer{scroll: s, vertBar: bar, objects: []fyne.CanvasObject{s.Content, bar}}

@@ -32,7 +32,7 @@ func (p *PopOver) MinSize() fyne.Size {
 	return p.minSize(p)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (p *PopOver) Move(pos fyne.Position) {
 	if p.modal {
@@ -66,7 +66,7 @@ func (p *PopOver) Tapped(_ *fyne.PointEvent) {
 func (p *PopOver) TappedSecondary(_ *fyne.PointEvent) {
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *PopOver) CreateRenderer() fyne.WidgetRenderer {
 	if p.modal {
 		bg := canvas.NewRectangle(theme.BackgroundColor())

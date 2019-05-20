@@ -80,7 +80,7 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 	}
 }
 
-// ApplyTheme is called when the Radio may need to update it's look
+// ApplyTheme is called when the Radio may need to update its look
 func (r *radioRenderer) ApplyTheme() {
 	for _, item := range r.items {
 		item.label.Color = theme.TextColor()
@@ -152,7 +152,7 @@ func (r *Radio) Resize(size fyne.Size) {
 	r.resize(size, r)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (r *Radio) Move(pos fyne.Position) {
 	r.move(pos, r)
@@ -210,7 +210,7 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 func (r *Radio) TappedSecondary(*fyne.PointEvent) {
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	var items []*radioRenderItem
 	var objects []fyne.CanvasObject

@@ -20,7 +20,7 @@ type Text struct {
 	TextStyle fyne.TextStyle // The style of the text content
 }
 
-// MinSize returns the minimum size of this text objet based on it's font size and content.
+// MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
 	return fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle)

@@ -69,7 +69,7 @@ func (i *Icon) Resize(size fyne.Size) {
 	i.resize(size, i)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (i *Icon) Move(pos fyne.Position) {
 	i.move(pos, i)
@@ -97,7 +97,7 @@ func (i *Icon) SetResource(res fyne.Resource) {
 	Refresh(i)
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	render := &iconRenderer{image: i}
 

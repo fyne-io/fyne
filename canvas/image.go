@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne"
 )
 
-// ImageFill defines the different type of ways an image can stretch to fill it's space.
+// ImageFill defines the different type of ways an image can stretch to fill its space.
 type ImageFill int
 
 const (
@@ -40,7 +40,7 @@ type Image struct {
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
-// based on it's Translucency value. The result is 1.0 - Translucency.
+// based on its Translucency value. The result is 1.0 - Translucency.
 func (i *Image) Alpha() float64 {
 	return 1.0 - i.Translucency
 }
