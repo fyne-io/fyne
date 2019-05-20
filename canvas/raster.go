@@ -18,7 +18,7 @@ type Raster struct {
 }
 
 // Alpha is a convenience function that returns the alpha value for a raster
-// based on it's Translucency value. The result is 1.0 - Translucency.
+// based on its Translucency value. The result is 1.0 - Translucency.
 func (r *Raster) Alpha() float64 {
 	return 1.0 - r.Translucency
 }

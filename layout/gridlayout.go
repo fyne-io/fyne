@@ -16,15 +16,15 @@ func (g *gridLayout) countRows(objects []fyne.CanvasObject) int {
 }
 
 // Get the leading (top or left) edge of a grid cell.
-// size is the ideal cell size and the offset is which col or row it's on.
+// size is the ideal cell size and the offset is which col or row its on.
 func getLeading(size float64, offset int) int {
 	ret := (size + float64(theme.Padding())) * float64(offset)
 
 	return int(math.Round(ret))
 }
 
-// Get theh trailing (bottom or right) edge of a grid cell.
-// size is the ideal cell size and the offset is which col or row it's on.
+// Get the trailing (bottom or right) edge of a grid cell.
+// size is the ideal cell size and the offset is which col or row its on.
 func getTrailing(size float64, offset int) int {
 	return getLeading(size, offset+1) - theme.Padding()
 }

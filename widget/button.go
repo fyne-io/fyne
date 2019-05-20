@@ -60,7 +60,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 	}
 }
 
-// ApplyTheme is called when the Button may need to update it's look
+// ApplyTheme is called when the Button may need to update its look
 func (b *buttonRenderer) ApplyTheme() {
 	b.label.Color = theme.TextColor()
 
@@ -131,7 +131,7 @@ func (b *Button) Resize(size fyne.Size) {
 	b.resize(size, b)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (b *Button) Move(pos fyne.Position) {
 	b.move(pos, b)
@@ -179,7 +179,7 @@ func (b *Button) MouseOut() {
 func (b *Button) MouseMoved(*desktop.MouseEvent) {
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
 	if b.Icon != nil {

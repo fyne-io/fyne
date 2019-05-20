@@ -35,7 +35,7 @@ func (t *TabContainer) Resize(size fyne.Size) {
 	t.resize(size, t)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (t *TabContainer) Move(pos fyne.Position) {
 	t.move(pos, t)
@@ -58,7 +58,7 @@ func (t *TabContainer) Hide() {
 	t.hide(t)
 }
 
-// SelectTab sets the specified TabItem to be selected and it's content visible.
+// SelectTab sets the specified TabItem to be selected and its content visible.
 func (t *TabContainer) SelectTab(item *TabItem) {
 	for i, child := range t.Items {
 		if child == item {
@@ -73,7 +73,7 @@ func (t *TabContainer) CurrentTab() *TabItem {
 	return t.Items[t.current]
 }
 
-// SelectTabIndex sets the TabItem at the specific index to be selected and it's content visible.
+// SelectTabIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *TabContainer) SelectTabIndex(index int) {
 	if index < 0 || index >= len(t.Items) {
 		return
@@ -122,7 +122,7 @@ func (t *TabContainer) Append(item TabItem) {
 }
 */
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 	var contents []fyne.CanvasObject
 
