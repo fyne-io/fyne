@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -55,4 +56,53 @@ func TestTabContainer_ApplyTheme(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 	Renderer(tabs).ApplyTheme()
 	assert.NotEqual(t, barColor, underline.FillColor)
+}
+
+func TestTabContainerRenderer_Layout(t *testing.T) {
+	tabs := NewTabContainer(
+		NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+		NewTabItemWithIcon("Text2", theme.ConfirmIcon(), canvas.NewCircle(theme.BackgroundColor())),
+	)
+
+	r := Renderer(tabs)
+	r.Layout(fyne.NewSize(100, 100))
+
+	images, texts := collectImagesAndTexts(r.Objects(), fyne.NewPos(0, 0))
+
+	if assert.Len(t, images, 2) && assert.Len(t, texts, 2) {
+		img1 := images[0]
+		img2 := images[1]
+		if img1.Position().X > img2.Position().X {
+			img2, img1 = img1, img2
+		}
+		text1 := texts[0]
+		text2 := texts[1]
+		if text1.Position().X > text2.Position().X {
+			text2, text1 = text1, text2
+		}
+
+		assert.GreaterOrEqual(t, text1.Position().X, img1.Position().X+img1.Size().Width)
+		assert.Greater(t, img2.Position().X, text1.Position().X+text1.Size().Width)
+		assert.GreaterOrEqual(t, text2.Position().X, img2.Position().X+img2.Size().Width)
+	}
+}
+
+func collectImagesAndTexts(objects []fyne.CanvasObject, offset fyne.Position) ([]*canvas.Image, []*canvas.Text) {
+	images := []*canvas.Image{}
+	texts := []*canvas.Text{}
+	for _, o := range objects {
+		switch o.(type) {
+		case fyne.Widget:
+			i, l := collectImagesAndTexts(Renderer(o.(fyne.Widget)).Objects(), o.Position())
+			images = append(images, i...)
+			texts = append(texts, l...)
+		case *canvas.Image:
+			o.Move(o.Position().Add(offset))
+			images = append(images, o.(*canvas.Image))
+		case *canvas.Text:
+			o.Move(o.Position().Add(offset))
+			texts = append(texts, o.(*canvas.Text))
+		}
+	}
+	return images, texts
 }
