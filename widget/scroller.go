@@ -64,6 +64,9 @@ func (s *scrollRenderer) MinSize() fyne.Size {
 }
 
 func (s *scrollRenderer) Refresh() {
+	c := s.scroll.Content
+	c.Resize(c.MinSize().Union(s.scroll.Size()))
+
 	s.updatePosition()
 }
 
