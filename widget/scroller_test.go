@@ -15,11 +15,12 @@ func TestNewScrollContainer(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(10, 10))
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
-	render := Renderer(scroll).(*scrollRenderer)
+	scrollBar := Renderer(scroll).(*scrollRenderer).vertBar
+	render := Renderer(scrollBar).(*scrollBarRenderer)
 
 	assert.Equal(t, 0, scroll.Offset.Y)
 	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 100), render.barSizeVertical())
-	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), render.vertBar.Position())
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), render.scrollBar.Position())
 }
 
 func TestScrollContainer_Refresh(t *testing.T) {
@@ -112,12 +113,13 @@ func TestScrollContainer_ResizeExpand(t *testing.T) {
 	assert.Equal(t, 140, rect.Size().Height)
 }
 
-func TestScrollContainerRenderer_BarSize(t *testing.T) {
+func TestScrollBarRenderer_BarSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
-	render := Renderer(scroll).(*scrollRenderer)
+	scrollBar := Renderer(scroll).(*scrollRenderer).vertBar
+	render := Renderer(scrollBar).(*scrollBarRenderer)
 
 	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 100), render.barSizeVertical())
 
@@ -131,7 +133,8 @@ func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(100, 100))
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(120, 120))
-	render := Renderer(scroll).(*scrollRenderer)
+	scrollBar := Renderer(scroll).(*scrollRenderer).vertBar
+	render := Renderer(scrollBar).(*scrollBarRenderer)
 
 	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 120), render.barSizeVertical())
 }
