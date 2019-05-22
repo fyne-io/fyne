@@ -2,7 +2,9 @@ package gl
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/widget"
+	"image/color"
 )
 
 type menuBarAction struct {
@@ -43,7 +45,7 @@ func showMenu(menu *fyne.Menu, pos fyne.Position, c fyne.Canvas) {
 }
 
 func (c *glCanvas) menuBar() fyne.CanvasObject {
-	if c.window.mainmenu == nil || hasNativeMenu() { // on darwin we use the macOS menu system
+	if c.window.mainmenu == nil {
 		return nil
 	}
 
@@ -54,7 +56,13 @@ func (c *glCanvas) menuBar() fyne.CanvasObject {
 		return ret
 	}
 
-	ret = buildMenuBar(c.window.mainmenu, c.window)
+	if hasNativeMenu() {
+		setupNativeMenu(c.window.mainmenu)
+
+		ret = canvas.NewRectangle(color.Transparent) // just a dummy value really
+	} else {
+		ret = buildMenuBar(c.window.mainmenu, c.window)
+	}
 	c.Lock()
 	c.menu = ret
 	c.Unlock()
@@ -62,9 +70,11 @@ func (c *glCanvas) menuBar() fyne.CanvasObject {
 }
 
 func (c *glCanvas) menuHeight() int {
-	if c.window.mainmenu == nil || hasNativeMenu() { // reserve no height for a macOS menu
+	bar := c.menuBar()
+
+	if bar == nil { // reserve no height for a native menus or windows with no menu
 		return 0
 	}
 
-	return c.menuBar().MinSize().Height
+	return bar.MinSize().Height
 }
