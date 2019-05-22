@@ -13,7 +13,7 @@ require (
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/srwiley/oksvg v0.0.0-20190105194046-ccbc7673cdf3
 	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
 	golang.org/x/image v0.0.0-20181116024801-cd38e8056d9b
 	golang.org/x/net v0.0.0-20181220203305-927f97764cc3 // indirect
 )

@@ -9,15 +9,21 @@ import (
 )
 
 // TabItem represents a single view in a TabContainer.
-// The Text is used for the tab button and the Content is shown when the corresponding tab is active.
+// The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
 type TabItem struct {
 	Text    string
+	Icon    fyne.Resource
 	Content fyne.CanvasObject
 }
 
-// NewTabItem creates a new item for a tabbed widget - each item specifies the content an a label for it's tab.
+// NewTabItem creates a new item for a tabbed widget - each item specifies the content and a label for its tab.
 func NewTabItem(text string, content fyne.CanvasObject) *TabItem {
 	return &TabItem{Text: text, Content: content}
+}
+
+// NewTabItemWithIcon creates a new item for a tabbed widget - each item specifies the content and a label with an icon for its tab.
+func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObject) *TabItem {
+	return &TabItem{Text: text, Icon: icon, Content: content}
 }
 
 // TabContainer widget allows switching visible content from a list of TabItems.
@@ -99,7 +105,7 @@ func (t *TabContainer) CurrentTabIndex() int {
 
 func (t *TabContainer) makeButton(item *TabItem) *Button {
 	it := item
-	return NewButton(item.Text, func() { t.SelectTab(it) })
+	return NewButtonWithIcon(item.Text, item.Icon, func() { t.SelectTab(it) })
 }
 
 /*
