@@ -16,6 +16,10 @@ func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Positi
 	return co.Position() // TODO get the real answer
 }
 
+func (d *testDriver) AncestorsForObject(co fyne.CanvasObject) []fyne.CanvasObject {
+	return []fyne.CanvasObject{}
+}
+
 func (d *testDriver) CreateWindow(string) fyne.Window {
 	return NewWindow(nil)
 }

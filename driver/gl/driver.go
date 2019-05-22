@@ -41,6 +41,21 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 	return pos
 }
 
+func (d *gLDriver) AncestorsForObject(co fyne.CanvasObject) []fyne.CanvasObject {
+	ancestors := []fyne.CanvasObject{}
+	c := d.CanvasForObject(co).(*glCanvas)
+	detectObj := func(o fyne.CanvasObject, _ fyne.Position) bool {
+		return o == co
+	}
+	collectObj := func(o fyne.CanvasObject, _ fyne.Position, collect bool) {
+		if collect {
+			ancestors = append(ancestors, o)
+		}
+	}
+	c.walkObjects(c.content, fyne.NewPos(0, 0), detectObj, collectObj)
+	return ancestors
+}
+
 func loadFont(data fyne.Resource) *truetype.Font {
 	loaded, err := truetype.Parse(data.Content())
 	if err != nil {

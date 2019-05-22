@@ -16,6 +16,7 @@ type Driver interface {
 	CanvasForObject(CanvasObject) Canvas
 	// Get the position of a given CanvasObject relative to the top/left of a canvas.
 	AbsolutePositionForObject(CanvasObject) Position
+	AncestorsForObject(CanvasObject) []CanvasObject
 
 	// Start the main event loop of the driver.
 	Run()
