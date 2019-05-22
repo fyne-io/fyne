@@ -30,11 +30,13 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 	var pos fyne.Position
 	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*glCanvas)
 
-	c.walkObjects(c.content, fyne.NewPos(0, 0), false, func(o fyne.CanvasObject, p fyne.Position) {
+	c.walkObjects(c.content, fyne.NewPos(0, 0), func(o fyne.CanvasObject, p fyne.Position) bool {
 		if o == co {
 			pos = p
+			return true
 		}
-	})
+		return false
+	}, nil)
 
 	return pos
 }
