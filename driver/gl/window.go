@@ -407,7 +407,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), true, func(obj fyne.CanvasObject, _ fyne.Position) {
+	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), nil, func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
@@ -488,26 +488,28 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	if canvas.overlay != nil {
 		content = canvas.overlay
 	}
-	canvas.walkObjects(content, fyne.NewPos(0, 0), false, func(walked fyne.CanvasObject, pos fyne.Position) {
+	canvas.walkObjects(content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) bool {
 		if !walked.Visible() {
-			return
+			return false
 		}
 
 		if mouse.X < pos.X || mouse.Y < pos.Y {
-			return
+			return false
 		}
 
 		x2 := pos.X + walked.Size().Width
 		y2 := pos.Y + walked.Size().Height
 		if mouse.X >= x2 || mouse.Y >= y2 {
-			return
+			return false
 		}
 
 		if matches(walked) {
 			found = walked
 			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
+			return true
 		}
-	})
+		return false
+	}, nil)
 
 	return found, foundX, foundY
 }
