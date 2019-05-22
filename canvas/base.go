@@ -62,8 +62,14 @@ func (r *baseObject) Hide() {
 
 // Refresh instructs the containing canvas to refresh the specified obj.
 func Refresh(obj fyne.CanvasObject) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
+	d := fyne.CurrentApp().Driver()
+	c := d.CanvasForObject(obj)
 	if c != nil {
 		c.Refresh(obj)
+		if obj.Size() != fyne.NewSize(0, 0) && obj.MinSize().Union(obj.Size()) != obj.Size() {
+			for _, o := range d.AncestorsForObject(obj) {
+				c.Refresh(o)
+			}
+		}
 	}
 }
