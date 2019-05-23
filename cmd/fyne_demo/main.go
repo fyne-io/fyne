@@ -61,9 +61,7 @@ func main() {
 
 	w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("File",
 		fyne.NewMenuItem("New", func() { fmt.Println("Menu New") }),
-		fyne.NewMenuItem("Quit", func() {
-			a.Quit()
-		}),
+		// a quit item will be appended to our first menu
 	), fyne.NewMenu("Edit",
 		fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") }),
 		fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") }),

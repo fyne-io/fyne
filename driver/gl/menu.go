@@ -30,17 +30,31 @@ func newMenuBarAction(menu *fyne.Menu, w fyne.Window) widget.ToolbarItem {
 	return &menuBarAction{menu.Label, menu, w.Canvas()}
 }
 
+func newMenuBarActionWithQuit(menu *fyne.Menu, w fyne.Window) widget.ToolbarItem {
+	if menu.Items[len(menu.Items)-1].Label != "Quit" { // make sure the first menu always has a quit option
+		// TODO append a separator as well
+		menu.Items = append(menu.Items, fyne.NewMenuItem("Quit", func() {
+			fyne.CurrentApp().Quit()
+		}))
+	}
+	return &menuBarAction{menu.Label, menu, w.Canvas()}
+}
+
 func buildMenuBar(menus *fyne.MainMenu, w fyne.Window) *widget.Toolbar {
 	var items []widget.ToolbarItem
 
-	for _, menu := range menus.Items {
-		items = append(items, newMenuBarAction(menu, w))
+	for i, menu := range menus.Items {
+		if i == 0 {
+			items = append(items, newMenuBarActionWithQuit(menu, w))
+		} else {
+			items = append(items, newMenuBarAction(menu, w))
+		}
 	}
 	return widget.NewToolbar(items...)
 }
 
 func showMenu(menu *fyne.Menu, pos fyne.Position, c fyne.Canvas) {
-	pop := widget.NewPopUpMenu(fyne.NewMenu("", menu.Items...), c)
+	pop := widget.NewPopUpMenu(menu, c)
 	pop.Move(pos)
 }
 
