@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -407,7 +408,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), nil, func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
+	driver.WalkObjectTree(w.canvas.content, fyne.NewPos(0, 0), nil, func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
@@ -488,7 +489,7 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	if canvas.overlay != nil {
 		content = canvas.overlay
 	}
-	canvas.walkObjects(content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) bool {
+	driver.WalkObjectTree(content, fyne.NewPos(0, 0), func(walked fyne.CanvasObject, pos fyne.Position) bool {
 		if !walked.Visible() {
 			return false
 		}

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/driver"
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 )
@@ -30,7 +31,7 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 	var pos fyne.Position
 	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*glCanvas)
 
-	c.walkObjects(c.content, fyne.NewPos(0, 0), func(o fyne.CanvasObject, p fyne.Position) bool {
+	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), func(o fyne.CanvasObject, p fyne.Position) bool {
 		if o == co {
 			pos = p
 			return true

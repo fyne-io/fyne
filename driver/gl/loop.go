@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/driver"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
@@ -129,7 +130,7 @@ func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
 				}
 				return false
 			}
-			canvas.walkObjects(object, fyne.NewPos(0, 0), freeWalked, nil)
+			driver.WalkObjectTree(object, fyne.NewPos(0, 0), freeWalked, nil)
 		default:
 			return
 		}

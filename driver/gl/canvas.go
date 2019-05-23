@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -220,10 +221,10 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 	}
 
-	c.walkObjects(c.content, fyne.NewPos(0, 0), paint, afterPaint)
+	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), paint, afterPaint)
 
 	if c.overlay != nil {
-		c.walkObjects(c.overlay, fyne.NewPos(0, 0), paint, afterPaint)
+		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), paint, afterPaint)
 	}
 }
 
