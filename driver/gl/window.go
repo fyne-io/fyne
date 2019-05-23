@@ -507,7 +507,7 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 		if matches(walked) {
 			found = walked
 			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
-			return true
+			return false
 		}
 		return false
 	}, nil)
