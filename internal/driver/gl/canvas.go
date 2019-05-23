@@ -198,6 +198,14 @@ func (c *glCanvas) paint(size fyne.Size) {
 	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+	ensureMinSize := func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
+		if obj.Visible() {
+			expectedSize := obj.MinSize().Union(obj.Size())
+			if expectedSize != obj.Size() {
+				obj.Resize(expectedSize)
+			}
+		}
+	}
 	paint := func(obj fyne.CanvasObject, pos fyne.Position) bool {
 		// TODO should this be somehow not scroll container specific?
 		if _, ok := obj.(*widget.ScrollContainer); ok {
@@ -220,11 +228,14 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 	}
 
+	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), nil, ensureMinSize)
 	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), paint, afterPaint)
 	if c.menu != nil {
+		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), nil, ensureMinSize)
 		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), paint, afterPaint)
 	}
 	if c.overlay != nil {
+		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), nil, ensureMinSize)
 		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), paint, afterPaint)
 	}
 }
