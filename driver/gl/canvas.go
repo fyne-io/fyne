@@ -6,7 +6,9 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
@@ -200,18 +202,31 @@ func (c *glCanvas) paint(size fyne.Size) {
 	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-	paintObj := func(obj fyne.CanvasObject, pos fyne.Position) {
+	paint := func(obj fyne.CanvasObject, pos fyne.Position) bool {
+		// TODO should this be somehow not scroll container specific?
+		if _, ok := obj.(*widget.ScrollContainer); ok {
+			scrollX := textureScaleInt(c, pos.X)
+			scrollY := textureScaleInt(c, pos.Y)
+			scrollWidth := textureScaleInt(c, obj.Size().Width)
+			scrollHeight := textureScaleInt(c, obj.Size().Height)
+			_, pixHeight := c.window.viewport.GetFramebufferSize()
+			gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
+			gl.Enable(gl.SCISSOR_TEST)
+		}
 		if obj.Visible() {
 			c.drawObject(obj, pos, size)
 		}
+		return false
 	}
-	c.walkObjects(c.content, fyne.NewPos(0, 0), false, paintObj)
-	if c.menu != nil {
-		c.walkObjects(c.menu, fyne.NewPos(0, 0), false, paintObj)
+	afterPaint := func(obj fyne.CanvasObject, pos fyne.Position, _ bool) {
+		if _, ok := obj.(*widget.ScrollContainer); ok {
+			gl.Disable(gl.SCISSOR_TEST)
+		}
 	}
 
-	if c.overlay != nil {
-		c.walkObjects(c.overlay, fyne.NewPos(0, 0), false, paintObj)
+	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), paint, afterPaint)
+	if c.menu != nil {
+		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), paint, afterPaint)
 	}
 }
 

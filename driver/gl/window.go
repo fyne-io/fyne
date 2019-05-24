@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -424,7 +425,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), true, func(obj fyne.CanvasObject, _ fyne.Position) {
+	driver.WalkObjectTree(w.canvas.content, fyne.NewPos(0, 0), nil, func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
@@ -501,35 +502,36 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	var found fyne.CanvasObject
 	foundX, foundY := 0, 0
 
-	findFunc := func(walked fyne.CanvasObject, pos fyne.Position) {
+	findFunc := func(walked fyne.CanvasObject, pos fyne.Position) bool {
 		if !walked.Visible() {
-			return
+			return false
 		}
 
 		if mouse.X < pos.X || mouse.Y < pos.Y {
-			return
+			return false
 		}
 
 		x2 := pos.X + walked.Size().Width
 		y2 := pos.Y + walked.Size().Height
 		if mouse.X >= x2 || mouse.Y >= y2 {
-			return
+			return false
 		}
 
 		if matches(walked) {
 			found = walked
 			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
 		}
+		return false
 	}
 
 	if canvas.overlay != nil {
-		canvas.walkObjects(canvas.overlay, fyne.NewPos(0, 0), false, findFunc)
+		driver.WalkObjectTree(canvas.overlay, fyne.NewPos(0, 0), findFunc, nil)
 	} else {
 		if canvas.menu != nil {
-			canvas.walkObjects(canvas.menu, fyne.NewPos(0, 0), false, findFunc)
+			driver.WalkObjectTree(canvas.menu, fyne.NewPos(0, 0), findFunc, nil)
 		}
 		if found == nil {
-			canvas.walkObjects(canvas.content, fyne.NewPos(0, 0), false, findFunc)
+			driver.WalkObjectTree(canvas.content, fyne.NewPos(0, 0), findFunc, nil)
 		}
 	}
 
