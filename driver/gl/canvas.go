@@ -12,9 +12,9 @@ import (
 
 type glCanvas struct {
 	sync.RWMutex
-	window           *window
-	content, overlay fyne.CanvasObject
-	focused          fyne.Focusable
+	window                 *window
+	content, overlay, menu fyne.CanvasObject
+	focused                fyne.Focusable
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -70,15 +70,18 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 	var w, h = c.window.viewport.GetSize()
 
-	pad := theme.Padding()
+	xpad := theme.Padding()
+	ypad := theme.Padding()
 	if !c.window.Padded() {
-		pad = 0
+		xpad = 0
+		ypad = 0
 	}
-	width := unscaleInt(c, int(w)) - pad*2
-	height := unscaleInt(c, int(h)) - pad*2
+	menu := c.menuHeight()
+	width := unscaleInt(c, int(w)) - xpad*2
+	height := unscaleInt(c, int(h+menu)) - ypad*2
 
 	c.content.Resize(fyne.NewSize(width, height))
-	c.content.Move(fyne.NewPos(pad, pad))
+	c.content.Move(fyne.NewPos(xpad, ypad+menu))
 	c.setDirty(true)
 }
 
@@ -203,6 +206,9 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 	}
 	c.walkObjects(c.content, fyne.NewPos(0, 0), false, paintObj)
+	if c.menu != nil {
+		c.walkObjects(c.menu, fyne.NewPos(0, 0), false, paintObj)
+	}
 
 	if c.overlay != nil {
 		c.walkObjects(c.overlay, fyne.NewPos(0, 0), false, paintObj)
