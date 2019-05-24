@@ -15,6 +15,8 @@ var (
 )
 
 type testCanvas struct {
+	size fyne.Size
+
 	content, overlay fyne.CanvasObject
 	focused          fyne.Focusable
 
@@ -63,7 +65,11 @@ func (c *testCanvas) Focused() fyne.Focusable {
 }
 
 func (c *testCanvas) Size() fyne.Size {
-	return fyne.NewSize(10, 10)
+	return c.size
+}
+
+func (c *testCanvas) Resize(size fyne.Size) {
+	c.size = size
 }
 
 func (c *testCanvas) Scale() float32 {
@@ -101,7 +107,7 @@ func (c *testCanvas) Capture() image.Image {
 
 // NewCanvas returns a single use in-memory canvas used for testing
 func NewCanvas() fyne.Canvas {
-	return &testCanvas{}
+	return &testCanvas{size: fyne.NewSize(10, 10)}
 }
 
 // Canvas returns a reusable in-memory canvas used for testing

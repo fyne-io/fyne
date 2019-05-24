@@ -16,6 +16,7 @@ type testWindow struct {
 
 	canvas    fyne.Canvas
 	clipboard fyne.Clipboard
+	menu      *fyne.MainMenu
 }
 
 var windows = make([]fyne.Window, 0)
@@ -41,8 +42,8 @@ func (w *testWindow) CenterOnScreen() {
 	// no-op
 }
 
-func (w *testWindow) Resize(fyne.Size) {
-	// no-op
+func (w *testWindow) Resize(size fyne.Size) {
+	w.canvas.(*testCanvas).Resize(size)
 }
 
 func (w *testWindow) RequestFocus() {
@@ -75,6 +76,14 @@ func (w *testWindow) Icon() fyne.Resource {
 
 func (w *testWindow) SetIcon(icon fyne.Resource) {
 	// no-op
+}
+
+func (w *testWindow) MainMenu() *fyne.MainMenu {
+	return w.menu
+}
+
+func (w *testWindow) SetMainMenu(menu *fyne.MainMenu) {
+	w.menu = menu
 }
 
 func (w *testWindow) SetOnClosed(closed func()) {

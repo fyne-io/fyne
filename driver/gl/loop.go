@@ -98,9 +98,11 @@ func (d *gLDriver) runGL() {
 				if !canvas.isDirty() {
 					continue
 				}
-				d.freeDirtyTextures(canvas)
 
 				viewport.MakeContextCurrent()
+
+				d.freeDirtyTextures(canvas)
+
 				gl.UseProgram(canvas.program)
 
 				view := win.(*window)

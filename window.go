@@ -51,6 +51,13 @@ type Window interface {
 	// If none is set should return the application icon.
 	SetIcon(Resource)
 
+	// MainMenu gets the content of the window's top level menu.
+	MainMenu() *MainMenu
+
+	// SetMainMenu adds a top level menu to this window.
+	// The way this is rendered will depend on the loaded driver.
+	SetMainMenu(*MainMenu)
+
 	SetOnClosed(func())
 
 	// Show the window on screen.
