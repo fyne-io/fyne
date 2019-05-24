@@ -32,8 +32,16 @@ func (customTheme) TextColor() color.Color {
 	return color.White
 }
 
+func (customTheme) DisabledTextColor() color.Color {
+	return color.Black
+}
+
 func (customTheme) IconColor() color.Color {
 	return color.White
+}
+
+func (customTheme) DisabledIconColor() color.Color {
+	return color.Black
 }
 
 func (customTheme) PlaceHolderColor() color.Color {

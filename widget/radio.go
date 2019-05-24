@@ -1,12 +1,11 @@
 package widget
 
 import (
-	"image/color"
-	"math"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
+	"image/color"
+	"math"
 )
 
 type radioRenderItem struct {
@@ -84,6 +83,9 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 func (r *radioRenderer) ApplyTheme() {
 	for _, item := range r.items {
 		item.label.Color = theme.TextColor()
+		if r.radio.disabled {
+			item.label.Color = theme.DisabledTextColor()
+		}
 	}
 
 	r.Refresh()
@@ -120,8 +122,14 @@ func (r *radioRenderer) Refresh() {
 
 		if r.radio.Selected == option {
 			item.icon.Resource = theme.RadioButtonCheckedIcon()
+			if r.radio.disabled {
+				item.icon.Resource = theme.NewDisabledResource(theme.RadioButtonCheckedIcon())
+			}
 		} else {
 			item.icon.Resource = theme.RadioButtonIcon()
+			if r.radio.disabled {
+				item.icon.Resource = theme.NewDisabledResource(theme.RadioButtonIcon())
+			}
 		}
 	}
 
@@ -173,6 +181,18 @@ func (r *Radio) Hide() {
 	r.hide(r)
 }
 
+// Enable this widget, if it was previously disabled
+func (r *Radio) Enable() {
+	r.enable(r)
+	Renderer(r).ApplyTheme()
+}
+
+// Disable this widget, if it was previously enabled
+func (r *Radio) Disable() {
+	r.disable(r)
+	Renderer(r).ApplyTheme()
+}
+
 // Append adds a new option to the end of a Radio widget.
 func (r *Radio) Append(option string) {
 	r.Options = append(r.Options, option)
@@ -182,28 +202,30 @@ func (r *Radio) Append(option string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (r *Radio) Tapped(event *fyne.PointEvent) {
-	index := 0
-	if r.Horizontal {
-		index = int(math.Floor(float64(event.Position.X) / float64(r.itemWidth())))
-	} else {
-		index = int(math.Floor(float64(event.Position.Y) / float64(r.itemHeight())))
-	}
+	if r.Enabled() {
+		index := 0
+		if r.Horizontal {
+			index = int(math.Floor(float64(event.Position.X) / float64(r.itemWidth())))
+		} else {
+			index = int(math.Floor(float64(event.Position.Y) / float64(r.itemHeight())))
+		}
 
-	if index < 0 || index >= len(r.Options) { // in the padding
-		return
-	}
-	clicked := r.Options[index]
+		if index < 0 || index >= len(r.Options) { // in the padding
+			return
+		}
+		clicked := r.Options[index]
 
-	if r.Selected == clicked {
-		r.Selected = ""
-	} else {
-		r.Selected = clicked
-	}
+		if r.Selected == clicked {
+			r.Selected = ""
+		} else {
+			r.Selected = clicked
+		}
 
-	if r.OnChanged != nil {
-		r.OnChanged(r.Selected)
+		if r.OnChanged != nil {
+			r.OnChanged(r.Selected)
+		}
+		Renderer(r).Refresh()
 	}
-	Renderer(r).Refresh()
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured

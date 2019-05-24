@@ -123,8 +123,16 @@ func (dummyTheme) TextColor() color.Color {
 	return color.Black
 }
 
+func (dummyTheme) DisabledTextColor() color.Color {
+	return color.White
+}
+
 func (dummyTheme) IconColor() color.Color {
 	return color.Black
+}
+
+func (dummyTheme) DisabledIconColor() color.Color {
+	return color.White
 }
 
 func (dummyTheme) PlaceHolderColor() color.Color {

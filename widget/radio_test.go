@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"testing"
 
 	"fyne.io/fyne"
@@ -21,6 +22,13 @@ func TestRadio_MinSize(t *testing.T) {
 
 	assert.Equal(t, min.Width, min2.Width)
 	assert.True(t, min2.Height > min.Height)
+}
+
+func TestRadio_BackgroundStyle(t *testing.T) {
+	radio := NewRadio([]string{"Hi"}, nil)
+	bg := Renderer(radio).BackgroundColor()
+
+	assert.Equal(t, bg, theme.BackgroundColor())
 }
 
 func TestRadio_MinSize_Horizontal(t *testing.T) {
@@ -54,6 +62,31 @@ func TestRadio_Unselected(t *testing.T) {
 	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "", selected)
+}
+
+func TestRadio_DisableWhenSelected(t *testing.T) {
+	radio := NewRadio([]string{"Hi"}, nil)
+	radio.SetSelected("Hi")
+	render := Renderer(radio).(*radioRenderer)
+	resName := render.items[0].icon.Resource.Name()
+
+	assert.Equal(t, resName, theme.RadioButtonCheckedIcon().Name())
+
+	radio.Disable()
+	resName = render.items[0].icon.Resource.Name()
+	assert.Equal(t, resName, fmt.Sprintf("disabled_%v", theme.RadioButtonCheckedIcon().Name()))
+}
+
+func TestRadio_DisableWhenNotSelected(t *testing.T) {
+	radio := NewRadio([]string{"Hi"}, nil)
+	render := Renderer(radio).(*radioRenderer)
+	resName := render.items[0].icon.Resource.Name()
+
+	assert.Equal(t, resName, theme.RadioButtonIcon().Name())
+
+	radio.Disable()
+	resName = render.items[0].icon.Resource.Name()
+	assert.Equal(t, resName, fmt.Sprintf("disabled_%v", theme.RadioButtonIcon().Name()))
 }
 
 func TestRadio_SelectedOther(t *testing.T) {
@@ -160,4 +193,31 @@ func TestRadio_AppendDuplicate(t *testing.T) {
 
 	assert.Equal(t, 1, len(radio.Options))
 	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
+}
+
+func TestRadio_Disable(t *testing.T) {
+	selected := ""
+	radio := NewRadio([]string{"Hi"}, func(sel string) {
+		selected = sel
+	})
+
+	radio.Disable()
+	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+
+	assert.Equal(t, "", selected, "Radio should have been disabled.")
+}
+
+func TestRadio_Enable(t *testing.T) {
+	selected := ""
+	radio := NewRadio([]string{"Hi"}, func(sel string) {
+		selected = sel
+	})
+
+	radio.Disable()
+	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	assert.Equal(t, "", selected, "Radio should have been disabled.")
+
+	radio.Enable()
+	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
 }

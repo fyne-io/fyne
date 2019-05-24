@@ -3,6 +3,8 @@ package theme
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
+	"image/color"
 	"log"
 
 	"fyne.io/fyne"
@@ -21,23 +23,8 @@ func (res *ThemedResource) Name() string {
 
 // Content returns the underlying content of the correct resource for the current theme
 func (res *ThemedResource) Content() []byte {
-	rdr := bytes.NewReader(res.source.Content())
 	clr := fyne.CurrentApp().Settings().Theme().IconColor()
-	s, err := svgFromXML(rdr)
-	if err != nil {
-		fyne.LogError("could not load SVG, falling back to static content:", err)
-		return res.source.Content()
-	}
-	if err := s.replaceFillColor(rdr, clr); err != nil {
-		fyne.LogError("could not replace fill color, falling back to static content:", err)
-		return res.source.Content()
-	}
-	b, err := xml.Marshal(s)
-	if err != nil {
-		fyne.LogError("could not marshal svg, falling back to static content:", err)
-		return res.source.Content()
-	}
-	return b
+	return colorizeResource(res.source, clr)
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
@@ -51,6 +38,49 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source: dark,
 	}
+}
+
+// DisabledResource is a resource wrapper that will return an appropriate resource colorized by
+// the current theme's `DisabledIconColor` color.
+type DisabledResource struct {
+	source fyne.Resource
+}
+
+// Name returns the resource source name prefixed with `disabled_` (used for caching)
+func (res *DisabledResource) Name() string {
+	return fmt.Sprintf("disabled_%s", res.source.Name())
+}
+
+// Content returns the disabled style content of the correct resource for the current theme
+func (res *DisabledResource) Content() []byte {
+	clr := fyne.CurrentApp().Settings().Theme().DisabledIconColor()
+	return colorizeResource(res.source, clr)
+}
+
+// NewDisabledResource creates a resource that adapts to the current theme's DisabledIconColor setting.
+func NewDisabledResource(res fyne.Resource) *DisabledResource {
+	return &DisabledResource{
+		source: res,
+	}
+}
+
+func colorizeResource(res fyne.Resource, clr color.Color) []byte {
+	rdr := bytes.NewReader(res.Content())
+	s, err := svgFromXML(rdr)
+	if err != nil {
+		fyne.LogError("could not load SVG, falling back to static content:", err)
+		return res.Content()
+	}
+	if err := s.replaceFillColor(rdr, clr); err != nil {
+		fyne.LogError("could not replace fill color, falling back to static content:", err)
+		return res.Content()
+	}
+	b, err := xml.Marshal(s)
+	if err != nil {
+		fyne.LogError("could not marshal svg, falling back to static content:", err)
+		return res.Content()
+	}
+	return b
 }
 
 var (

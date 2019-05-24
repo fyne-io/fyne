@@ -35,6 +35,13 @@ type Tappable interface {
 	TappedSecondary(*PointEvent)
 }
 
+// Disableable describes any CanvasObject that can be disabled.
+// This is primarily used with objects that also implement the Tappable interface.
+type Disableable interface {
+	Enable()
+	Disable()
+}
+
 // Scrollable describes any CanvasObject that can also be scrolled.
 // This is mostly used to implement the widget.ScrollContainer.
 type Scrollable interface {

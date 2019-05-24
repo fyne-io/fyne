@@ -16,21 +16,24 @@ type builtinTheme struct {
 
 	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar, shadow color.Color
 	regular, bold, italic, bolditalic, monospace                                  fyne.Resource
+	disabledIcon, disabledText                                                    color.Color
 }
 
 // LightTheme defines the built in light theme colours and sizes
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:  color.RGBA{0xf5, 0xf5, 0xf5, 0xff},
-		button:      color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
-		text:        color.RGBA{0x21, 0x21, 0x21, 0xff},
-		icon:        color.RGBA{0x21, 0x21, 0x21, 0xff},
-		hyperlink:   color.RGBA{0x0, 0x0, 0xd9, 0xff},
-		placeholder: color.RGBA{0x88, 0x88, 0x88, 0xff},
-		primary:     color.RGBA{0x9f, 0xa8, 0xda, 0xff},
-		hover:       color.RGBA{0xe7, 0xe7, 0xe7, 0xff},
-		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
-		shadow:      color.RGBA{0x0, 0x0, 0x0, 0x99},
+		background:   color.RGBA{0xf5, 0xf5, 0xf5, 0xff},
+		button:       color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
+		text:         color.RGBA{0x21, 0x21, 0x21, 0xff},
+		disabledText: color.RGBA{0x00, 0xff, 0x00, 0xff},
+		icon:         color.RGBA{0x21, 0x21, 0x21, 0xff},
+		disabledIcon: color.RGBA{0xff, 0x00, 0x00, 0xff},
+		hyperlink:    color.RGBA{0x0, 0x0, 0xd9, 0xff},
+		placeholder:  color.RGBA{0x88, 0x88, 0x88, 0xff},
+		primary:      color.RGBA{0x9f, 0xa8, 0xda, 0xff},
+		hover:        color.RGBA{0xe7, 0xe7, 0xe7, 0xff},
+		scrollBar:    color.RGBA{0x0, 0x0, 0x0, 0x99},
+		shadow:       color.RGBA{0x0, 0x0, 0x0, 0x99},
 	}
 
 	theme.initFonts()
@@ -40,16 +43,18 @@ func LightTheme() fyne.Theme {
 // DarkTheme defines the built in dark theme colours and sizes
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:  color.RGBA{0x42, 0x42, 0x42, 0xff},
-		button:      color.RGBA{0x21, 0x21, 0x21, 0xff},
-		text:        color.RGBA{0xff, 0xff, 0xff, 0xff},
-		icon:        color.RGBA{0xff, 0xff, 0xff, 0xff},
-		hyperlink:   color.RGBA{0x99, 0x99, 0xff, 0xff},
-		placeholder: color.RGBA{0xb2, 0xb2, 0xb2, 0xff},
-		primary:     color.RGBA{0x1a, 0x23, 0x7e, 0xff},
-		hover:       color.RGBA{0x31, 0x31, 0x31, 0xff},
-		scrollBar:   color.RGBA{0x0, 0x0, 0x0, 0x99},
-		shadow:      color.RGBA{0x0, 0x0, 0x0, 0x99},
+		background:   color.RGBA{0x42, 0x42, 0x42, 0xff},
+		button:       color.RGBA{0x21, 0x21, 0x21, 0xff},
+		text:         color.RGBA{0xff, 0xff, 0xff, 0xff},
+		disabledText: color.RGBA{0x60, 0x60, 0x60, 0xff},
+		icon:         color.RGBA{0xff, 0xff, 0xff, 0xff},
+		disabledIcon: color.RGBA{0x60, 0x60, 0x60, 0xff},
+		hyperlink:    color.RGBA{0x99, 0x99, 0xff, 0xff},
+		placeholder:  color.RGBA{0xb2, 0xb2, 0xb2, 0xff},
+		primary:      color.RGBA{0x1a, 0x23, 0x7e, 0xff},
+		hover:        color.RGBA{0x31, 0x31, 0x31, 0xff},
+		scrollBar:    color.RGBA{0x0, 0x0, 0x0, 0x99},
+		shadow:       color.RGBA{0x0, 0x0, 0x0, 0x99},
 	}
 
 	theme.initFonts()
@@ -75,9 +80,19 @@ func (t *builtinTheme) TextColor() color.Color {
 	return t.text
 }
 
+// DisabledIconColor returns the color for a disabledIcon UI element
+func (t *builtinTheme) DisabledTextColor() color.Color {
+	return t.disabledText
+}
+
 // IconColor returns the theme's standard text colour
 func (t *builtinTheme) IconColor() color.Color {
 	return t.icon
+}
+
+// DisabledIconColor returns the color for a disabledIcon UI element
+func (t *builtinTheme) DisabledIconColor() color.Color {
+	return t.disabledIcon
 }
 
 // PlaceHolderColor returns the theme's placeholder text colour
@@ -220,9 +235,19 @@ func TextColor() color.Color {
 	return current().TextColor()
 }
 
+// DisabledTextColor returns the color for a disabledIcon UI element
+func DisabledTextColor() color.Color {
+	return current().DisabledTextColor()
+}
+
 // IconColor returns the theme's standard text colour
 func IconColor() color.Color {
 	return current().IconColor()
+}
+
+// DisabledIconColor returns the color for a disabledIcon UI element
+func DisabledIconColor() color.Color {
+	return current().DisabledIconColor()
 }
 
 // PlaceHolderColor returns the theme's standard text colour
