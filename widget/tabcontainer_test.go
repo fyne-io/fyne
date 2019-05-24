@@ -81,9 +81,17 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 			text2, text1 = text1, text2
 		}
 
-		assert.GreaterOrEqual(t, text1.Position().X, img1.Position().X+img1.Size().Width)
-		assert.Greater(t, img2.Position().X, text1.Position().X+text1.Size().Width)
-		assert.GreaterOrEqual(t, text2.Position().X, img2.Position().X+img2.Size().Width)
+		text1Left := text1.Position().X
+		img1Right := img1.Position().X + img1.Size().Width
+		assert.Equal(t, img1Right, text1Left)
+
+		text1Right := text1Left + text1.Size().Width
+		img2Left := img2.Position().X
+		assert.Equal(t, 20, img2Left-text1Right)
+
+		img2Right := img2Left + img2.Size().Width
+		text2Left := text2.Position().X
+		assert.Equal(t, img2Right, text2Left)
 	}
 }
 
