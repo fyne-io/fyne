@@ -3,7 +3,28 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 1.1 - (in progress)
 
+### Added
+
+* Menubar and PopUpMenu (#41)
+* PopUp widgets (regular and modal) and canvas overlay support (#242)
+* canvas.Capture() to save the content of a canvas
+* Horizontal layout for widget.Radio
+* Select widget (#21)
+* Support for changing icon color (#246)
+* Button hover effect
+* Pointer drag event to main API
+* support for desktop mouse move events
+
+### Changed
+
+* Don't add a button bar to a form if it has no buttons
+
+### Fixed
+
+* Unicode char input with Option key on macOS (#247)
+* Resizng fixed size windows (#248)
 
 
 ## 1.0.1 - 20 April 2019
@@ -33,6 +54,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Setting window icon when different from app icon.
 * Possible panic on app.Quit() (#175)
 * Various caches and race condition issues (#194, #217, #209).
+
 
 ## 1.0 19 - March 2019
 
