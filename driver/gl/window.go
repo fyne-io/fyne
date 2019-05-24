@@ -863,7 +863,7 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
 				go focused.KeyUp(keyEvent)
 			}
-		} else if w.canvas.onKeyDown != nil {
+		} else if w.canvas.onKeyUp != nil {
 			go w.canvas.onKeyUp(keyEvent)
 		}
 		return
