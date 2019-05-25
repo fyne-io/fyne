@@ -1,11 +1,12 @@
 package widget
 
 import (
+	"image/color"
+	"math"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
-	"image/color"
-	"math"
 )
 
 type radioRenderItem struct {
