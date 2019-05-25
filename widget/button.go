@@ -1,12 +1,12 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
+	"image/color"
+	"strings"
 )
 
 type buttonRenderer struct {
@@ -92,7 +92,13 @@ func (b *buttonRenderer) Refresh() {
 			b.objects = append(b.objects, b.icon)
 		} else {
 			if b.button.disabled {
-				b.icon.Resource = b.button.disabledIcon
+				// if the icon has changed, create a new disabled version
+				// if we could be sure that button.Icon is only ever set through the button.SetIcon method, we could remove this
+				if !strings.HasSuffix(b.button.disabledIcon.Name(), b.button.Icon.Name()){
+					b.icon.Resource = theme.NewDisabledResource(b.button.Icon)
+				} else {
+					b.icon.Resource = b.button.disabledIcon
+				}
 			} else {
 				b.icon.Resource = b.button.Icon
 			}
@@ -231,6 +237,12 @@ func (b *Button) SetText(text string) {
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
 	b.Icon = icon
+
+	if icon != nil {
+		b.disabledIcon = theme.NewDisabledResource(icon)
+	} else {
+		b.disabledIcon = nil
+	}
 
 	Refresh(b)
 }

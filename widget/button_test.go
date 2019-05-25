@@ -69,6 +69,46 @@ func TestButton_DisabledIcon(t *testing.T) {
 
 	button.Enable()
 	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
+}
+
+func TestButton_DisabledIconChangeUsingSetIcon(t *testing.T) {
+	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
+	render := Renderer(button).(*buttonRenderer)
+	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
+
+	// assert we are using the disabled original icon
+	button.Disable()
+	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.CancelIcon().Name()))
+
+	// re-enable, then change the icon
+	button.Enable()
+	button.SetIcon(theme.SearchIcon())
+	assert.Equal(t, render.icon.Resource.Name(), theme.SearchIcon().Name())
+
+	// assert we are using the disabled new icon
+	button.Disable()
+	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.SearchIcon().Name()))
+
+}
+
+func TestButton_DisabledIconChangedDirectly(t *testing.T) {
+	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
+	render := Renderer(button).(*buttonRenderer)
+	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
+
+	// assert we are using the disabled original icon
+	button.Disable()
+	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.CancelIcon().Name()))
+
+	// re-enable, then change the icon
+	button.Enable()
+	button.Icon = theme.SearchIcon()
+	render.Refresh()
+	assert.Equal(t, render.icon.Resource.Name(), theme.SearchIcon().Name())
+
+	// assert we are using the disabled new icon
+	button.Disable()
+	assert.Equal(t, render.icon.Resource.Name(), fmt.Sprintf("disabled_%v", theme.SearchIcon().Name()))
 
 }
 
