@@ -50,110 +50,110 @@ func TestNewThemedResource_TwoStaticResourceSupport(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	custom := NewThemedResource(helperNewStaticResource(), helperNewStaticResource())
 	content := custom.Content()
-	nm := custom.Name()
+	name := custom.Name()
 
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.NotEqual(t, content, custom.Content())
-	assert.Equal(t, nm, custom.Name())
+	assert.Equal(t, name, custom.Name())
 }
 
 func TestNewThemedResource_OneStaticResourceSupport(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	custom := NewThemedResource(helperNewStaticResource(), nil)
 	content := custom.Content()
-	nm := custom.Name()
+	name := custom.Name()
 
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	assert.NotEqual(t, content, custom.Content())
-	assert.Equal(t, nm, custom.Name())
+	assert.Equal(t, name, custom.Name())
 }
 
 func TestNewDisabledResource(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	src := helperNewStaticResource()
-	custom := NewDisabledResource(src)
-	nm := custom.Name()
+	source := helperNewStaticResource()
+	custom := NewDisabledResource(source)
+	name := custom.Name()
 
-	assert.Equal(t, nm, fmt.Sprintf("disabled_%v", src.Name()))
+	assert.Equal(t, name, fmt.Sprintf("disabled_%v", source.Name()))
 }
 
 func TestThemedResource_Name(t *testing.T) {
-	sr := fyne.NewStaticResource("cancel_Paths.svg",
+	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
 		helperLoadBytes(t, "cancel_Paths.svg"))
-	dr := &ThemedResource{
-		source: sr,
+	themedResource := &ThemedResource{
+		source: staticResource,
 	}
-	assert.Equal(t, sr.Name(), dr.Name())
+	assert.Equal(t, staticResource.Name(), themedResource.Name())
 }
 
 func TestThemedResource_Content_NoGroupsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	sr := fyne.NewStaticResource("cancel_Paths.svg",
+	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
 		helperLoadBytes(t, "cancel_Paths.svg"))
-	dr := &ThemedResource{
-		source: sr,
+	themedResource := &ThemedResource{
+		source: staticResource,
 	}
-	assert.NotEqual(t, sr.Content(), dr.Content())
+	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
 }
 
 func TestThemedResource_Content_GroupPathFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	sr := fyne.NewStaticResource("check_GroupPaths.svg",
+	staticResource := fyne.NewStaticResource("check_GroupPaths.svg",
 		helperLoadBytes(t, "check_GroupPaths.svg"))
-	dr := &ThemedResource{
-		source: sr,
+	themedResource := &ThemedResource{
+		source: staticResource,
 	}
-	assert.NotEqual(t, sr.Content(), dr.Content())
+	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
 }
 
 func TestThemedResource_Content_GroupRectFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	sr := fyne.NewStaticResource("info_GroupRects.svg",
+	staticResource := fyne.NewStaticResource("info_GroupRects.svg",
 		helperLoadBytes(t, "info_GroupRects.svg"))
-	dr := &ThemedResource{
-		source: sr,
+	themedResource := &ThemedResource{
+		source: staticResource,
 	}
-	assert.NotEqual(t, sr.Content(), dr.Content())
+	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
 }
 
 func TestThemedResource_Content_GroupPolygonsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	sr := fyne.NewStaticResource("warning_GroupPolygons.svg",
+	staticResource := fyne.NewStaticResource("warning_GroupPolygons.svg",
 		helperLoadBytes(t, "warning_GroupPolygons.svg"))
-	dr := &ThemedResource{
-		source: sr,
+	themedResource := &ThemedResource{
+		source: staticResource,
 	}
-	assert.NotEqual(t, sr.Content(), dr.Content())
+	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
 }
 
 // a black svg object omits the fill tag, this checks it it still properly updated
 func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	sr := fyne.NewStaticResource("cancel_PathsBlackFill.svg",
+	staticResource := fyne.NewStaticResource("cancel_PathsBlackFill.svg",
 		helperLoadBytes(t, "cancel_PathsBlackFill.svg"))
-	dr := &ThemedResource{
-		source: sr,
+	themedResource := &ThemedResource{
+		source: staticResource,
 	}
-	assert.NotEqual(t, sr.Content(), dr.Content())
+	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
 }
 
 func TestDisabledResource_Name(t *testing.T) {
-	sr := fyne.NewStaticResource("cancel_Paths.svg",
+	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
 		helperLoadBytes(t, "cancel_Paths.svg"))
-	dr := &DisabledResource{
-		source: sr,
+	disabledResource := &DisabledResource{
+		source: staticResource,
 	}
-	assert.Equal(t, fmt.Sprintf("disabled_%v", sr.Name()), dr.Name())
+	assert.Equal(t, fmt.Sprintf("disabled_%v", staticResource.Name()), disabledResource.Name())
 }
 
 func TestDisabledResource_Content_NoGroupsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	sr := fyne.NewStaticResource("cancel_Paths.svg",
+	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
 		helperLoadBytes(t, "cancel_Paths.svg"))
-	dr := &DisabledResource{
-		source: sr,
+	disabledResource := &DisabledResource{
+		source: staticResource,
 	}
-	assert.NotEqual(t, sr.Content(), dr.Content())
+	assert.NotEqual(t, staticResource.Content(), disabledResource.Content())
 }
 
 // Test Asset Sources
