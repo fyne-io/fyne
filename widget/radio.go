@@ -203,30 +203,32 @@ func (r *Radio) Append(option string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (r *Radio) Tapped(event *fyne.PointEvent) {
-	if r.Enabled() {
-		index := 0
-		if r.Horizontal {
-			index = int(math.Floor(float64(event.Position.X) / float64(r.itemWidth())))
-		} else {
-			index = int(math.Floor(float64(event.Position.Y) / float64(r.itemHeight())))
-		}
-
-		if index < 0 || index >= len(r.Options) { // in the padding
-			return
-		}
-		clicked := r.Options[index]
-
-		if r.Selected == clicked {
-			r.Selected = ""
-		} else {
-			r.Selected = clicked
-		}
-
-		if r.OnChanged != nil {
-			r.OnChanged(r.Selected)
-		}
-		Renderer(r).Refresh()
+	if !r.Enabled() {
+		return
 	}
+
+	index := 0
+	if r.Horizontal {
+		index = int(math.Floor(float64(event.Position.X) / float64(r.itemWidth())))
+	} else {
+		index = int(math.Floor(float64(event.Position.Y) / float64(r.itemHeight())))
+	}
+
+	if index < 0 || index >= len(r.Options) { // in the padding
+		return
+	}
+	clicked := r.Options[index]
+
+	if r.Selected == clicked {
+		r.Selected = ""
+	} else {
+		r.Selected = clicked
+	}
+
+	if r.OnChanged != nil {
+		r.OnChanged(r.Selected)
+	}
+	Renderer(r).Refresh()
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
