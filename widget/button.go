@@ -176,7 +176,7 @@ func (b *Button) Disable() {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
-	if b.OnTapped != nil && b.Enabled() {
+	if b.OnTapped != nil && !b.disabled {
 		b.OnTapped()
 	}
 }

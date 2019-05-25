@@ -203,7 +203,7 @@ func (r *Radio) Append(option string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (r *Radio) Tapped(event *fyne.PointEvent) {
-	if !r.Enabled() {
+	if r.disabled {
 		return
 	}
 

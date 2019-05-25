@@ -81,10 +81,6 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 	canvas.Refresh(parent)
 }
 
-func (w *baseWidget) Enabled() bool {
-	return !w.disabled
-}
-
 func (w *baseWidget) enable(parent fyne.Widget) {
 	if !w.disabled {
 		return
