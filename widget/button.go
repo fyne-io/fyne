@@ -1,12 +1,13 @@
 package widget
 
 import (
+	"image/color"
+	"strings"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
-	"image/color"
-	"strings"
 )
 
 type buttonRenderer struct {
