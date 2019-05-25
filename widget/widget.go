@@ -15,6 +15,7 @@ type baseWidget struct {
 	size     fyne.Size
 	position fyne.Position
 	Hidden   bool
+	disabled bool
 }
 
 // Get the current size of this widget.
@@ -77,6 +78,24 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 		child.Hide()
 	}
 
+	canvas.Refresh(parent)
+}
+
+func (w *baseWidget) enable(parent fyne.Widget) {
+	if !w.disabled {
+		return
+	}
+
+	w.disabled = false
+	canvas.Refresh(parent)
+}
+
+func (w *baseWidget) disable(parent fyne.Widget) {
+	if w.disabled {
+		return
+	}
+
+	w.disabled = true
 	canvas.Refresh(parent)
 }
 

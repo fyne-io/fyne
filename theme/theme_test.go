@@ -55,7 +55,13 @@ func Test_HyperlinkColor(t *testing.T) {
 func Test_TextColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := TextColor()
-	assert.Equal(t, DarkTheme().TextColor(), c, "wrong hyperlink color")
+	assert.Equal(t, DarkTheme().TextColor(), c, "wrong text color")
+}
+
+func Test_DisabledTextColor(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	c := DisabledTextColor()
+	assert.Equal(t, DarkTheme().DisabledTextColor(), c, "wrong disabled text color")
 }
 
 func Test_PlaceHolderColor(t *testing.T) {
@@ -92,6 +98,12 @@ func Test_IconColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := IconColor()
 	assert.Equal(t, DarkTheme().IconColor(), c, "wrong icon color")
+}
+
+func Test_DisabledIconColor(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	c := DisabledIconColor()
+	assert.Equal(t, DarkTheme().DisabledIconColor(), c, "wrong disabled icon color")
 }
 
 func Test_TextSize(t *testing.T) {

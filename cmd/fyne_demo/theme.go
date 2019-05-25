@@ -24,6 +24,10 @@ func (customTheme) ButtonColor() color.Color {
 	return color.Black
 }
 
+func (customTheme) DisabledButtonColor() color.Color {
+	return color.White
+}
+
 func (customTheme) HyperlinkColor() color.Color {
 	return orange
 }
@@ -32,8 +36,16 @@ func (customTheme) TextColor() color.Color {
 	return color.White
 }
 
+func (customTheme) DisabledTextColor() color.Color {
+	return color.Black
+}
+
 func (customTheme) IconColor() color.Color {
 	return color.White
+}
+
+func (customTheme) DisabledIconColor() color.Color {
+	return color.Black
 }
 
 func (customTheme) PlaceHolderColor() color.Color {

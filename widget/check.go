@@ -40,6 +40,9 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 // ApplyTheme is called when the Check may need to update its look
 func (c *checkRenderer) ApplyTheme() {
 	c.label.Color = theme.TextColor()
+	if c.check.disabled{
+		c.label.Color = theme.DisabledTextColor()
+	}
 
 	c.Refresh()
 }
@@ -53,8 +56,14 @@ func (c *checkRenderer) Refresh() {
 
 	if c.check.Checked {
 		c.icon.Resource = theme.CheckButtonCheckedIcon()
+		if c.check.disabled {
+			c.icon.Resource = theme.NewDisabledResource(theme.CheckButtonCheckedIcon())
+		}
 	} else {
 		c.icon.Resource = theme.CheckButtonIcon()
+		if c.check.disabled {
+			c.icon.Resource = theme.NewDisabledResource(theme.CheckButtonIcon())
+		}
 	}
 
 	canvas.Refresh(c.check)
@@ -118,9 +127,23 @@ func (c *Check) Hide() {
 	c.hide(c)
 }
 
+// Enable this widget, if it was previously disabled
+func (c *Check) Enable() {
+	c.enable(c)
+	Renderer(c).ApplyTheme()
+}
+
+// Disable this widget, if it was previously enabled
+func (c *Check) Disable() {
+	c.disable(c)
+	Renderer(c).ApplyTheme()
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
-	c.SetChecked(!c.Checked)
+	if !c.disabled {
+		c.SetChecked(!c.Checked)
+	}
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured

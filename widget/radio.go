@@ -84,6 +84,9 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 func (r *radioRenderer) ApplyTheme() {
 	for _, item := range r.items {
 		item.label.Color = theme.TextColor()
+		if r.radio.disabled {
+			item.label.Color = theme.DisabledTextColor()
+		}
 	}
 
 	r.Refresh()
@@ -120,8 +123,14 @@ func (r *radioRenderer) Refresh() {
 
 		if r.radio.Selected == option {
 			item.icon.Resource = theme.RadioButtonCheckedIcon()
+			if r.radio.disabled {
+				item.icon.Resource = theme.NewDisabledResource(theme.RadioButtonCheckedIcon())
+			}
 		} else {
 			item.icon.Resource = theme.RadioButtonIcon()
+			if r.radio.disabled {
+				item.icon.Resource = theme.NewDisabledResource(theme.RadioButtonIcon())
+			}
 		}
 	}
 
@@ -173,6 +182,18 @@ func (r *Radio) Hide() {
 	r.hide(r)
 }
 
+// Enable this widget, if it was previously disabled
+func (r *Radio) Enable() {
+	r.enable(r)
+	Renderer(r).ApplyTheme()
+}
+
+// Disable this widget, if it was previously enabled
+func (r *Radio) Disable() {
+	r.disable(r)
+	Renderer(r).ApplyTheme()
+}
+
 // Append adds a new option to the end of a Radio widget.
 func (r *Radio) Append(option string) {
 	r.Options = append(r.Options, option)
@@ -182,6 +203,10 @@ func (r *Radio) Append(option string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (r *Radio) Tapped(event *fyne.PointEvent) {
+	if r.disabled {
+		return
+	}
+
 	index := 0
 	if r.Horizontal {
 		index = int(math.Floor(float64(event.Position.X) / float64(r.itemWidth())))
