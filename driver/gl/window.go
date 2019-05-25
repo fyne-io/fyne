@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -37,6 +38,7 @@ type window struct {
 	canvas   *glCanvas
 	title    string
 	icon     fyne.Resource
+	mainmenu *fyne.MainMenu
 
 	clipboard fyne.Clipboard
 
@@ -129,16 +131,20 @@ func (w *window) centerOnScreen() {
 
 // minSizeOnScreen gets the minimum size of a window content in screen pixels
 func (w *window) minSizeOnScreen() (int, int) {
+	w.canvas.RLock()
+	content := w.canvas.content
+	w.canvas.RUnlock()
+
 	// get current size of content inside the window
 	winContentSize := fyne.NewSize(0, 0)
-	if w.canvas != nil && w.canvas.content != nil {
-		winContentSize = w.canvas.content.MinSize()
+	if content != nil {
+		winContentSize = content.MinSize()
 	}
 
 	// add padding, if required
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		winContentSize = fyne.NewSize(winContentSize.Width+pad, winContentSize.Height+pad)
+		winContentSize = fyne.NewSize(winContentSize.Width+pad, winContentSize.Height+pad+w.canvas.menuHeight())
 	}
 
 	// calculate how many pixels will be used at this scale
@@ -186,7 +192,7 @@ func (w *window) SetPadded(padded bool) {
 	}
 
 	if padded {
-		w.canvas.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		w.canvas.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()+w.canvas.menuHeight()))
 	} else {
 		w.canvas.content.Move(fyne.NewPos(0, 0))
 	}
@@ -221,10 +227,19 @@ func (w *window) SetIcon(icon fyne.Resource) {
 	w.viewport.SetIcon([]image.Image{pix})
 }
 
+func (w *window) MainMenu() *fyne.MainMenu {
+	return w.mainmenu
+}
+
+func (w *window) SetMainMenu(menu *fyne.MainMenu) {
+	w.mainmenu = menu
+}
+
 func (w *window) fitContent() {
-	w.canvas.Lock()
-	defer w.canvas.Unlock()
-	if w.canvas.content == nil {
+	w.canvas.RLock()
+	content := w.canvas.content
+	w.canvas.RUnlock()
+	if content == nil {
 		return
 	}
 
@@ -367,12 +382,15 @@ func (w *window) resize(size fyne.Size) {
 	innerSize := size
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		innerSize = fyne.NewSize(size.Width-pad, size.Height-pad)
+		innerSize = fyne.NewSize(size.Width-pad, size.Height-pad-w.canvas.menuHeight())
 	}
 
 	w.canvas.content.Resize(innerSize)
 	if w.canvas.overlay != nil {
 		w.canvas.overlay.Resize(size)
+	}
+	if w.canvas.menu != nil {
+		w.canvas.menu.Resize(fyne.NewSize(size.Width, w.canvas.menu.MinSize().Height))
 	}
 	w.canvas.Refresh(w.canvas.content)
 }
@@ -392,7 +410,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		min = fyne.NewSize(min.Width+pad, min.Height+pad)
+		min = fyne.NewSize(min.Width+pad, min.Height+pad+w.canvas.menuHeight())
 	}
 	runOnMain(func() {
 		w.fitContent()
@@ -407,7 +425,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	w.canvas.walkObjects(w.canvas.content, fyne.NewPos(0, 0), true, func(obj fyne.CanvasObject, _ fyne.Position) {
+	driver.WalkObjectTree(w.canvas.content, fyne.NewPos(0, 0), nil, func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
@@ -441,7 +459,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		contentSize = fyne.NewSize(contentSize.Width+pad, contentSize.Height+pad)
+		contentSize = fyne.NewSize(contentSize.Width+pad, contentSize.Height+pad+w.canvas.menuHeight())
 	}
 
 	newWidth, newHeight := scaleInt(w.canvas, contentSize.Width),
@@ -484,30 +502,38 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	var found fyne.CanvasObject
 	foundX, foundY := 0, 0
 
-	content := canvas.content
-	if canvas.overlay != nil {
-		content = canvas.overlay
-	}
-	canvas.walkObjects(content, fyne.NewPos(0, 0), false, func(walked fyne.CanvasObject, pos fyne.Position) {
+	findFunc := func(walked fyne.CanvasObject, pos fyne.Position) bool {
 		if !walked.Visible() {
-			return
+			return false
 		}
 
 		if mouse.X < pos.X || mouse.Y < pos.Y {
-			return
+			return false
 		}
 
 		x2 := pos.X + walked.Size().Width
 		y2 := pos.Y + walked.Size().Height
 		if mouse.X >= x2 || mouse.Y >= y2 {
-			return
+			return false
 		}
 
 		if matches(walked) {
 			found = walked
 			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
 		}
-	})
+		return false
+	}
+
+	if canvas.overlay != nil {
+		driver.WalkObjectTree(canvas.overlay, fyne.NewPos(0, 0), findFunc, nil)
+	} else {
+		if canvas.menu != nil {
+			driver.WalkObjectTree(canvas.menu, fyne.NewPos(0, 0), findFunc, nil)
+		}
+		if found == nil {
+			driver.WalkObjectTree(canvas.content, fyne.NewPos(0, 0), findFunc, nil)
+		}
+	}
 
 	return found, foundX, foundY
 }
@@ -839,7 +865,7 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
 				go focused.KeyUp(keyEvent)
 			}
-		} else if w.canvas.onKeyDown != nil {
+		} else if w.canvas.onKeyUp != nil {
 			go w.canvas.onKeyUp(keyEvent)
 		}
 		return

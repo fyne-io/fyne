@@ -27,12 +27,12 @@ func (l *Circle) Resize(size fyne.Size) {
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }
 
-// Position gets the current top-left position of this circle object, relative to it's parent / canvas
+// Position gets the current top-left position of this circle object, relative to its parent / canvas
 func (l *Circle) Position() fyne.Position {
 	return l.Position1
 }
 
-// Move the circle object to a new position, relative to it's parent / canvas
+// Move the circle object to a new position, relative to its parent / canvas
 func (l *Circle) Move(pos fyne.Position) {
 	size := l.Size()
 	l.Position1 = pos

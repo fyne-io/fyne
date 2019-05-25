@@ -30,12 +30,12 @@ func (l *Line) Resize(size fyne.Size) {
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
 }
 
-// Position gets the current top-left position of this line object, relative to it's parent / canvas
+// Position gets the current top-left position of this line object, relative to its parent / canvas
 func (l *Line) Position() fyne.Position {
 	return fyne.NewPos(fyne.Min(l.Position1.X, l.Position2.X), fyne.Min(l.Position1.Y, l.Position2.Y))
 }
 
-// Move the line object to a new position, relative to it's parent / canvas
+// Move the line object to a new position, relative to its parent / canvas
 func (l *Line) Move(pos fyne.Position) {
 	size := l.Size()
 	l.Position1 = pos

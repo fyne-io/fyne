@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/driver"
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
@@ -97,9 +98,11 @@ func (d *gLDriver) runGL() {
 				if !canvas.isDirty() {
 					continue
 				}
-				d.freeDirtyTextures(canvas)
 
 				viewport.MakeContextCurrent()
+
+				d.freeDirtyTextures(canvas)
+
 				gl.UseProgram(canvas.program)
 
 				view := win.(*window)
@@ -121,14 +124,15 @@ func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
 	for {
 		select {
 		case object := <-canvas.refreshQueue:
-			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position) {
+			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position) bool {
 				texture := textures[obj]
 				if texture != 0 {
 					gl.DeleteTextures(1, &texture)
 					delete(textures, obj)
 				}
+				return false
 			}
-			canvas.walkObjects(object, fyne.NewPos(0, 0), false, freeWalked)
+			driver.WalkObjectTree(object, fyne.NewPos(0, 0), freeWalked, nil)
 		default:
 			return
 		}

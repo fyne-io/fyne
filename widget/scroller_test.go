@@ -22,6 +22,21 @@ func TestNewScrollContainer(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), render.vertBar.Position())
 }
 
+func TestScrollContainer_Refresh(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(1000, 1000))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -1000})
+
+	assert.Equal(t, 900, scroll.Offset.Y)
+	assert.Equal(t, fyne.NewSize(1000, 1000), rect.Size())
+	rect.SetMinSize(fyne.NewSize(1000, 500))
+	Refresh(scroll)
+	assert.Equal(t, 400, scroll.Offset.Y)
+	assert.Equal(t, fyne.NewSize(1000, 500), rect.Size())
+}
+
 func TestScrollContainer_Scrolled(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))

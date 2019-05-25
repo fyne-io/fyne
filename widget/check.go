@@ -37,7 +37,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 		(size.Height-theme.IconInlineSize())/2))
 }
 
-// ApplyTheme is called when the Check may need to update it's look
+// ApplyTheme is called when the Check may need to update its look
 func (c *checkRenderer) ApplyTheme() {
 	c.label.Color = theme.TextColor()
 
@@ -97,7 +97,7 @@ func (c *Check) Resize(size fyne.Size) {
 	c.resize(size, c)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (c *Check) Move(pos fyne.Position) {
 	c.move(pos, c)
@@ -127,7 +127,7 @@ func (c *Check) Tapped(*fyne.PointEvent) {
 func (c *Check) TappedSecondary(*fyne.PointEvent) {
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 

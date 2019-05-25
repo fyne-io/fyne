@@ -55,18 +55,18 @@ func (s *scrollRenderer) Layout(size fyne.Size) {
 	c := s.scroll.Content
 	c.Resize(c.MinSize().Union(size))
 
-	s.vertBar.Resize(fyne.NewSize(theme.ScrollBarSize(), size.Height))
-	s.vertBar.Move(fyne.NewPos(size.Width-theme.ScrollBarSize(), 0))
-
 	s.updatePosition()
 }
 
 func (s *scrollRenderer) MinSize() fyne.Size {
-	// TODO determine if width or height should be resepected based on a which-way-to-scroll flag
+	// TODO determine if width or height should be respected based on a which-way-to-scroll flag
 	return fyne.NewSize(s.scroll.Content.MinSize().Width, 25) // TODO consider the smallest useful scroll view?
 }
 
 func (s *scrollRenderer) Refresh() {
+	c := s.scroll.Content
+	c.Resize(c.MinSize().Union(s.scroll.Size()))
+
 	s.updatePosition()
 }
 
@@ -117,7 +117,7 @@ func (s *ScrollContainer) Resize(size fyne.Size) {
 	s.resize(size, s)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (s *ScrollContainer) Move(pos fyne.Position) {
 	s.move(pos, s)
@@ -138,7 +138,7 @@ func (s *ScrollContainer) Hide() {
 	s.hide(s)
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.ScrollBarColor())
 	return &scrollRenderer{scroll: s, vertBar: bar, objects: []fyne.CanvasObject{s.Content, bar}}

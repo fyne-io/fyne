@@ -30,12 +30,12 @@ func (w *baseWidget) resize(size fyne.Size, parent fyne.Widget) {
 	Renderer(parent).Layout(size)
 }
 
-// Get the current position of this widget, relative to it's parent.
+// Get the current position of this widget, relative to its parent.
 func (w *baseWidget) Position() fyne.Position {
 	return w.position
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *baseWidget) move(pos fyne.Position, parent fyne.Widget) {
 	w.position = pos
