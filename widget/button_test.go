@@ -56,7 +56,7 @@ func TestButton_DisabledColor(t *testing.T) {
 
 	button.Disable()
 	bg = Renderer(button).BackgroundColor()
-	assert.Equal(t, bg, theme.HoverColor())
+	assert.Equal(t, bg, theme.DisabledButtonColor())
 }
 
 func TestButton_DisabledIcon(t *testing.T) {

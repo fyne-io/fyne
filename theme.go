@@ -6,6 +6,7 @@ import "image/color"
 type Theme interface {
 	BackgroundColor() color.Color
 	ButtonColor() color.Color
+	DisabledButtonColor() color.Color
 	HyperlinkColor() color.Color
 	TextColor() color.Color
 	DisabledTextColor() color.Color

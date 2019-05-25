@@ -74,10 +74,10 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 	if b.button.Style == PrimaryButton && !b.button.disabled {
 		return theme.PrimaryColor()
 	} else if b.button.disabled {
-		return theme.HoverColor()
+		return theme.DisabledButtonColor()
 	}
 
-	if b.button.hovered {
+	if b.button.hovered && !b.button.disabled {
 		return theme.HoverColor()
 	}
 	return theme.ButtonColor()
