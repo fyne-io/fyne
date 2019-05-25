@@ -228,6 +228,9 @@ func (c *glCanvas) paint(size fyne.Size) {
 	if c.menu != nil {
 		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), paint, afterPaint)
 	}
+	if c.overlay != nil {
+		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), paint, afterPaint)
+	}
 }
 
 func (c *glCanvas) setDirty(dirty bool) {
