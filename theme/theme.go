@@ -16,7 +16,7 @@ type builtinTheme struct {
 
 	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar, shadow color.Color
 	regular, bold, italic, bolditalic, monospace                                  fyne.Resource
-	disabledButton, disabledIcon, disabledText                                                    color.Color
+	disabledButton, disabledIcon, disabledText                                    color.Color
 }
 
 // LightTheme defines the built in light theme colours and sizes

@@ -95,7 +95,7 @@ func (b *buttonRenderer) Refresh() {
 			if b.button.disabled {
 				// if the icon has changed, create a new disabled version
 				// if we could be sure that button.Icon is only ever set through the button.SetIcon method, we could remove this
-				if !strings.HasSuffix(b.button.disabledIcon.Name(), b.button.Icon.Name()){
+				if !strings.HasSuffix(b.button.disabledIcon.Name(), b.button.Icon.Name()) {
 					b.icon.Resource = theme.NewDisabledResource(b.button.Icon)
 				} else {
 					b.icon.Resource = b.button.disabledIcon
@@ -123,9 +123,9 @@ func (b *buttonRenderer) Destroy() {
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	baseWidget
-	Text  string
-	Style ButtonStyle
-	Icon  fyne.Resource
+	Text         string
+	Style        ButtonStyle
+	Icon         fyne.Resource
 	disabledIcon fyne.Resource
 
 	OnTapped func() `json:"-"`
