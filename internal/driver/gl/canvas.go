@@ -187,9 +187,9 @@ func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyn
 	c.shortcut.AddShortcut(shortcut, handler)
 }
 
-func (c *glCanvas) paint(size fyne.Size) {
+func (c *glCanvas) paint(size fyne.Size) bool {
 	if c.Content() == nil {
-		return
+		return false
 	}
 	c.setDirty(false)
 
@@ -228,6 +228,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 	}
 
+	oldSize := c.content.Size()
 	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), nil, ensureMinSize)
 	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), paint, afterPaint)
 	if c.menu != nil {
@@ -238,6 +239,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), nil, ensureMinSize)
 		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), paint, afterPaint)
 	}
+	return oldSize != c.content.Size()
 }
 
 func (c *glCanvas) setDirty(dirty bool) {

@@ -220,14 +220,12 @@ func (w *window) SetPadded(padded bool) {
 
 	w.canvas.content.Move(w.contentPos())
 
-	w.resizeToContent()
+	runOnMain(w.resizeToContent)
 }
 
 func (w *window) resizeToContent() {
-	runOnMain(func() {
-		w.fitContent()
-		w.viewport.SetSize(w.screenSize(w.Canvas().Content().Size()))
-	})
+	w.fitContent()
+	w.viewport.SetSize(w.screenSize(w.Canvas().Content().Size()))
 }
 
 func (w *window) Icon() fyne.Resource {
