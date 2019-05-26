@@ -20,6 +20,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Changed
 
 * Don't add a button bar to a form if it has no buttons
+* Moved driver/gl package to internal/driver/gl
 
 ### Fixed
 
