@@ -30,6 +30,7 @@ github.com/srwiley/oksvg
 github.com/srwiley/rasterx
 # github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
 # golang.org/x/image v0.0.0-20181116024801-cd38e8056d9b
 golang.org/x/image/font
 golang.org/x/image/math/fixed
