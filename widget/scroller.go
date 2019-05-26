@@ -16,9 +16,6 @@ type scrollBarRenderer struct {
 }
 
 func (s *scrollBarRenderer) Layout(size fyne.Size) {
-	// Positions the bar on the far right of the container
-	s.scrollBar.Move(fyne.NewPos(size.Width-theme.ScrollBarSize(), 0))
-
 	s.updateBarPosition()
 	canvas.Refresh(s.bar)
 }
@@ -75,6 +72,27 @@ type scrollBar struct {
 	scroll *ScrollContainer
 }
 
+func (s *scrollBar) Dragged(ev *fyne.DragEvent) {
+	render := Renderer(s).(*scrollBarRenderer)
+	barHeight := render.barSizeVertical().Height
+	barTop := render.bar.Position().Y
+	barBottom := barTop + barHeight
+
+	// The point clicked is outside the bar rectangle
+	if ev.Position.Y < barTop || ev.Position.Y > barBottom {
+		return
+	}
+
+	dragRatio := float32(ev.DraggedY) / float32(s.scroll.size.Height-barHeight)
+	addiotionalOffset := int(dragRatio * float32(s.scroll.Content.Size().Height-s.scroll.Size().Height))
+	s.scroll.Offset.Y = s.scroll.Offset.Y + addiotionalOffset
+	if s.scroll.Offset.Y < 0 {
+		s.scroll.Offset.Y = 0
+	}
+
+	Refresh(s.scroll)
+}
+
 func (s *scrollBar) Resize(size fyne.Size) {
 	s.resize(size, s)
 }
@@ -128,9 +146,10 @@ func (s *scrollRenderer) updatePosition() {
 func (s *scrollRenderer) Layout(size fyne.Size) {
 	c := s.scroll.Content
 	c.Resize(c.MinSize().Union(size))
-	// The scroll bar needs to be resized too
-	bar := s.vertBar
-	bar.Resize(bar.MinSize().Union(size))
+	// The scroll bar needs to be resized and moved on the far right
+	scrollBar := s.vertBar
+	scrollBar.Resize(fyne.NewSize(scrollBar.MinSize().Width, size.Height))
+	scrollBar.Move(fyne.NewPos(s.scroll.Size().Width-scrollBar.Size().Width, 0))
 
 	s.updatePosition()
 }
@@ -148,7 +167,6 @@ func (s *scrollRenderer) Refresh() {
 }
 
 func (s *scrollRenderer) ApplyTheme() {
-	Renderer(s.vertBar).ApplyTheme()
 }
 
 func (s *scrollRenderer) BackgroundColor() color.Color {
