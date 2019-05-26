@@ -11,7 +11,7 @@ import (
 // - the obj's children are traversed by calling walkObjects on each of them
 // - afterChildren is called for the obj after traversing the obj's children
 // The walk can be aborted by returning true in one of the functions:
-// - if beforeChildren returns true, further traversing is stopped immediatly, the after function
+// - if beforeChildren returns true, further traversing is stopped immediately, the after function
 //   will not be called for the obj where the walk stopped, however, it will be called for all its
 //   parents
 // - if a walk has been stopped, the after function is called with the third argument set to true
