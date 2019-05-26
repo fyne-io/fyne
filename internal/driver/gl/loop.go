@@ -79,14 +79,15 @@ func (d *gLDriver) runGL() {
 			newWindows := []fyne.Window{}
 			reassign := false
 			for _, win := range d.windows {
-				viewport := win.(*window).viewport
+				w := win.(*window)
+				viewport := w.viewport
 
 				if viewport.ShouldClose() {
 					reassign = true
 					// remove window from window list
 					viewport.Destroy()
 
-					if win.(*window).master {
+					if w.master {
 						d.Quit()
 					}
 					continue
@@ -94,7 +95,7 @@ func (d *gLDriver) runGL() {
 					newWindows = append(newWindows, win)
 				}
 
-				canvas := win.(*window).canvas
+				canvas := w.canvas
 				if !canvas.isDirty() {
 					continue
 				}
@@ -105,12 +106,11 @@ func (d *gLDriver) runGL() {
 
 				gl.UseProgram(canvas.program)
 
-				view := win.(*window)
-				updateGLContext(view)
+				updateGLContext(w)
 				size := canvas.Size()
 				canvas.paint(size)
 
-				view.viewport.SwapBuffers()
+				w.viewport.SwapBuffers()
 				glfw.DetachCurrentContext()
 			}
 			if reassign {
