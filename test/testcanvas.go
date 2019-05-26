@@ -49,13 +49,24 @@ func (c *testCanvas) Refresh(fyne.CanvasObject) {
 }
 
 func (c *testCanvas) Focus(obj fyne.Focusable) {
+	if obj == c.focused {
+		return
+	}
+
+	if c.focused != nil {
+		c.focused.FocusLost()
+	}
+
 	c.focused = obj
-	obj.FocusGained()
+
+	if obj != nil {
+		obj.FocusGained()
+	}
 }
 
 func (c *testCanvas) Unfocus() {
 	if c.focused != nil {
-		c.focused.(fyne.Focusable).FocusLost()
+		c.focused.FocusLost()
 	}
 	c.focused = nil
 }

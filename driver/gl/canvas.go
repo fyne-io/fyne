@@ -19,6 +19,7 @@ type glCanvas struct {
 	window                 *window
 	content, overlay, menu fyne.CanvasObject
 	focused                fyne.Focusable
+	focusMgr               *app.FocusManager
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -267,6 +268,7 @@ func (c *glCanvas) setupThemeListener() {
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
 	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
+	c.focusMgr = app.NewFocusManager(c)
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
 	c.dirtyMutex = &sync.Mutex{}
 

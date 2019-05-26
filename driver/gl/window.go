@@ -851,7 +851,21 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		return
 	}
 	keyEvent := &fyne.KeyEvent{Name: keyName}
+	keyDesktopModifier := desktopModifier(mods)
 
+	if keyName == fyne.KeyTab {
+		if keyDesktopModifier == 0 {
+			if action != glfw.Release {
+				w.canvas.focusMgr.FocusNext(w.canvas.focused)
+			}
+			return
+		} else if keyDesktopModifier == desktop.ShiftModifier {
+			if action != glfw.Release {
+				w.canvas.focusMgr.FocusPrevious(w.canvas.focused)
+			}
+			return
+		}
+	}
 	if action == glfw.Press {
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
@@ -871,7 +885,6 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		return
 	} // key repeat will fall through to TypedKey and TypedShortcut
 
-	keyDesktopModifier := desktopModifier(mods)
 	var shortcut fyne.Shortcut
 	ctrlMod := desktop.ControlModifier
 	if runtime.GOOS == "darwin" {
