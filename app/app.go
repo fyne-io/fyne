@@ -8,8 +8,8 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	helper "fyne.io/fyne/internal/app"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 )
 
 type fyneApp struct {
@@ -65,36 +65,6 @@ func (app *fyneApp) Settings() fyne.Settings {
 	return app.settings
 }
 
-func (app *fyneApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) {
-	if themed, ok := content.(fyne.Themeable); ok {
-		themed.ApplyTheme()
-		canvas.Refresh(content)
-	}
-	if wid, ok := content.(fyne.Widget); ok {
-		widget.Renderer(wid).ApplyTheme()
-		canvas.Refresh(content)
-
-		for _, o := range widget.Renderer(wid).Objects() {
-			app.applyThemeTo(o, canvas)
-		}
-	}
-	if c, ok := content.(*fyne.Container); ok {
-		for _, o := range c.Objects {
-			app.applyThemeTo(o, canvas)
-		}
-		canvas.Refresh(c)
-	}
-}
-
-func (app *fyneApp) applyTheme() {
-	for _, window := range app.driver.AllWindows() {
-		if window.Padded() {
-			window.Content().Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-		}
-		app.applyThemeTo(window.Content(), window.Canvas())
-	}
-}
-
 func (app *fyneApp) setupTheme() {
 	env := os.Getenv("FYNE_THEME")
 	if env == "light" {
@@ -117,7 +87,7 @@ func NewAppWithDriver(d fyne.Driver) fyne.App {
 	go func() {
 		for {
 			<-listener
-			newApp.applyTheme()
+			helper.ApplyTheme(newApp)
 		}
 	}()
 

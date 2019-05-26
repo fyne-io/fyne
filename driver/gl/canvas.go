@@ -6,9 +6,11 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/app"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
@@ -247,6 +249,21 @@ func (c *glCanvas) isDirty() bool {
 	return c.dirty
 }
 
+func (c *glCanvas) setupThemeListener() {
+	listener := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(listener)
+	go func() {
+		for {
+			<-listener
+			if bar, ok := c.menu.(*widget.Toolbar); ok {
+				app.ApplyThemeTo(bar, c) // Ensure our menu gets the theme change message as it's out-of-tree
+			}
+
+			c.window.SetPadded(c.window.padded) // refresh the padding for potential theme differences
+		}
+	}()
+}
+
 func newCanvas(win *window) *glCanvas {
 	c := &glCanvas{window: win, scale: 1.0}
 	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
@@ -254,6 +271,7 @@ func newCanvas(win *window) *glCanvas {
 	c.dirtyMutex = &sync.Mutex{}
 
 	c.initOpenGL()
+	c.setupThemeListener()
 
 	return c
 }
