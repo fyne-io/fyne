@@ -15,22 +15,25 @@ func makeCell() fyne.CanvasObject {
 	return rect
 }
 
-func makeBorderLayout() *fyne.Container {
+func makeBorderLayout(o fyne.CanvasObject) *fyne.Container {
 	top := makeCell()
 	bottom := makeCell()
 	left := makeCell()
 	right := makeCell()
-	middle := widget.NewLabelWithStyle("BorderLayout", fyne.TextAlignCenter, fyne.TextStyle{})
+	middle := widget.NewVBox(
+		widget.NewLabelWithStyle("BorderLayout", fyne.TextAlignCenter, fyne.TextStyle{}),
+		o,
+	)
 
 	borderLayout := layout.NewBorderLayout(top, bottom, left, right)
 	return fyne.NewContainerWithLayout(borderLayout,
 		top, bottom, left, right, middle)
 }
 
-func makeBoxLayout() *fyne.Container {
+func makeBoxLayout(o fyne.CanvasObject) *fyne.Container {
 	top := makeCell()
 	bottom := makeCell()
-	middle := widget.NewLabel("BoxLayout")
+	middle := widget.NewVBox(widget.NewLabel("BoxLayout"), o)
 	center := makeCell()
 	right := makeCell()
 
@@ -41,9 +44,9 @@ func makeBoxLayout() *fyne.Container {
 		col, center, right)
 }
 
-func makeFixedGridLayout() *fyne.Container {
+func makeFixedGridLayout(o fyne.CanvasObject) *fyne.Container {
 	box1 := makeCell()
-	box2 := widget.NewLabel("FixedGrid")
+	box2 := widget.NewVBox(widget.NewLabel("FixedGrid"), o)
 	box3 := makeCell()
 	box4 := makeCell()
 
@@ -51,9 +54,9 @@ func makeFixedGridLayout() *fyne.Container {
 		box1, box2, box3, box4)
 }
 
-func makeGridLayout() *fyne.Container {
+func makeGridLayout(o fyne.CanvasObject) *fyne.Container {
 	box1 := makeCell()
-	box2 := widget.NewLabel("Grid")
+	box2 := widget.NewVBox(widget.NewLabel("Grid"), o)
 	box3 := makeCell()
 	box4 := makeCell()
 
@@ -65,12 +68,37 @@ func makeGridLayout() *fyne.Container {
 func Layout(app fyne.App) {
 	w := app.NewWindow("Layout")
 
-	w.SetContent(widget.NewTabContainer(
-		widget.NewTabItem("Border", makeBorderLayout()),
-		widget.NewTabItem("Box", makeBoxLayout()),
-		widget.NewTabItem("Fixed Grid", makeFixedGridLayout()),
-		widget.NewTabItem("Grid", makeGridLayout()),
-	))
+	borderButton := widget.NewButton("Move Tabs", nil)
+	boxButton := widget.NewButton("Move Tabs", nil)
+	fixedGridButton := widget.NewButton("Move Tabs", nil)
+	gridButton := widget.NewButton("Move Tabs", nil)
+
+	t := widget.NewTabContainer(
+		widget.NewTabItem("Border", makeBorderLayout(borderButton)),
+		widget.NewTabItem("Box", makeBoxLayout(boxButton)),
+		widget.NewTabItem("Fixed Grid", makeFixedGridLayout(fixedGridButton)),
+		widget.NewTabItem("Grid", makeGridLayout(gridButton)),
+	)
+	w.SetContent(t)
+
+	l := widget.TabLocationTop
+	onTapped := func() {
+		switch l {
+		case widget.TabLocationTop:
+			l = widget.TabLocationLeft
+		case widget.TabLocationLeft:
+			l = widget.TabLocationBottom
+		case widget.TabLocationBottom:
+			l = widget.TabLocationRight
+		default:
+			l = widget.TabLocationTop
+		}
+		t.SetTabLocation(l)
+	}
+	borderButton.OnTapped = onTapped
+	boxButton.OnTapped = onTapped
+	fixedGridButton.OnTapped = onTapped
+	gridButton.OnTapped = onTapped
 
 	w.Show()
 }
