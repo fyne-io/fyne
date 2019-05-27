@@ -23,16 +23,16 @@ func (g *Gradient) Alpha() float64 {
 	return 1.0 - g.Translucency
 }
 
-// GradientColor ...
-type GradientColor struct {
+// LinearGradientColor defines start and end color
+type LinearGradientColor struct {
 	Start color.Color
 	End   color.Color
 }
 
-func (gc *GradientColor) linearGradient(w, h, x, y int) *color.RGBA64 {
-	//d := float64(x) / float64(w) // horizontal
+func (gc *LinearGradientColor) linearGradient(w, h, x, y int) *color.RGBA64 {
+	d := float64(x) / float64(w) // horizontal
 	//d := float64(w) / float64(x)
-	d := float64(y) / float64(h) // top down
+	//d := float64(y) / float64(h) // top down
 
 	// fetch RGBA values
 	aR, aG, aB, aA := gc.Start.RGBA()
@@ -61,11 +61,11 @@ type pixelGradient struct {
 	img draw.Image
 }
 
-// NewRectangleGradient returns a new Image instance that dynamically
-// renders a rectangular gradient
-func NewRectangleGradient(start color.Color, end color.Color) *Gradient {
+// NewRectangleLinearGradient returns a new Image instance that dynamically
+// renders a rectangular linear gradient
+func NewRectangleLinearGradient(start color.Color, end color.Color) *Gradient {
 
-	gc := &GradientColor{
+	gc := &LinearGradientColor{
 		Start: start,
 		End:   end,
 	}
