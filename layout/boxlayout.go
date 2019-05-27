@@ -5,6 +5,9 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// Declare conformity with Layout interface
+var _ fyne.Layout = (*boxLayout)(nil)
+
 type boxLayout struct {
 	horizontal bool
 }

@@ -3,6 +3,9 @@ package layout // import "fyne.io/fyne/layout"
 
 import "fyne.io/fyne"
 
+// Declare conformity with Layout interface
+var _ fyne.Layout = (*maxLayout)(nil)
+
 type maxLayout struct {
 }
 

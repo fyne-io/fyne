@@ -9,6 +9,9 @@ import (
 
 const formLayoutCols = 2
 
+// Declare conformity with Layout interface
+var _ fyne.Layout = (*formLayout)(nil)
+
 // formLayout is two column grid where each row has a label and a widget.
 type formLayout struct {
 }
