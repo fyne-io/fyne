@@ -22,6 +22,9 @@ type Dialog interface {
 	SetDismissText(label string)
 }
 
+// Declare confirmity to Dialog interface
+var _ Dialog = (*dialog)(nil)
+
 type dialog struct {
 	win      fyne.Window
 	callback func(bool)
