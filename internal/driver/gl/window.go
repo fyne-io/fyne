@@ -154,6 +154,17 @@ func (w *window) minSizeOnScreen() (int, int) {
 	return viewWidth, viewHeight
 }
 
+func (w *window) screenSize(size fyne.Size) (int, int) {
+	c := w.canvas
+	size = size.Add(fyne.NewSize(0, c.menuHeight()))
+	if w.Padded() {
+		pad := theme.Padding() * 2
+		size = size.Add(fyne.NewSize(pad, pad))
+	}
+
+	return scaleInt(c, size.Width), scaleInt(c, size.Height)
+}
+
 func (w *window) RequestFocus() {
 	runOnMainAsync(func() {
 		err := w.viewport.Focus()
@@ -194,10 +205,17 @@ func (w *window) SetPadded(padded bool) {
 	if padded {
 		w.canvas.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()+w.canvas.menuHeight()))
 	} else {
-		w.canvas.content.Move(fyne.NewPos(0, 0))
+		w.canvas.content.Move(fyne.NewPos(0, w.canvas.menuHeight()))
 	}
 
-	runOnMainAsync(w.fitContent)
+	w.resizeToContent()
+}
+
+func (w *window) resizeToContent() {
+	runOnMain(func() {
+		w.fitContent()
+		w.viewport.SetSize(w.screenSize(w.Canvas().Content().Size()))
+	})
 }
 
 func (w *window) Icon() fyne.Resource {
@@ -380,10 +398,10 @@ func (w *window) resize(size fyne.Size) {
 		w.height = scaleInt(w.canvas, size.Height)
 	}
 
-	innerSize := size
+	innerSize := fyne.NewSize(size.Width, size.Height-w.canvas.menuHeight())
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		innerSize = fyne.NewSize(size.Width-pad, size.Height-pad-w.canvas.menuHeight())
+		innerSize = innerSize.Subtract(fyne.NewSize(pad, pad))
 	}
 
 	w.canvas.content.Resize(innerSize)

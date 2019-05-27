@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -76,21 +77,75 @@ func TestWindow_Padded(t *testing.T) {
 }
 
 func TestWindow_SetPadded(t *testing.T) {
-	w := d.CreateWindow("Test")
-	w.SetPadded(false)
+	// w := d.CreateWindow("Test")
+	// content := canvas.NewRectangle(color.White)
+	// w.Canvas().SetScale(1.0)
+	// w.SetContent(content)
 
-	content := canvas.NewRectangle(color.White)
-	w.Canvas().SetScale(1.0)
-	w.SetContent(content)
+	// w.SetPadded(false)
+	// width, _ := w.(*window).minSizeOnScreen()
+	// assert.Equal(t, width, content.MinSize().Width)
+	// assert.Equal(t, 0, content.Position().X)
 
-	width, _ := w.(*window).minSizeOnScreen()
-	assert.Equal(t, content.MinSize().Width, width)
-	assert.Equal(t, 0, content.Position().X)
+	// w.SetPadded(true)
+	// width, _ = w.(*window).minSizeOnScreen()
+	// assert.Equal(t, width, theme.Padding()*2+content.MinSize().Width)
+	// assert.Equal(t, theme.Padding(), content.Position().X)
+	var menuHeight int
+	if hasNativeMenu() {
+		menuHeight = 0
+	} else {
+		menuHeight = 22
+	}
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	tests := []struct {
+		name               string
+		padding            bool
+		menu               bool
+		expectedPad        int
+		expectedMenuHeight int
+	}{
+		{"window without padding", false, false, 0, 0},
+		{"window with padding", true, false, 4, 0},
+		{"window with menu without padding", false, true, 0, menuHeight},
+		{"window with menu and padding", true, true, 4, menuHeight},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := d.CreateWindow("Test").(*window)
+			w.Canvas().SetScale(1)
+			w.SetPadded(!tt.padding)
+			if tt.menu {
+				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
+			}
+			content := canvas.NewRectangle(color.White)
+			w.SetContent(content)
+			oldCanvasSize := fyne.NewSize(100, 100)
+			w.Resize(oldCanvasSize)
 
-	w.SetPadded(true)
-	width, _ = w.(*window).minSizeOnScreen()
-	assert.Equal(t, theme.Padding()*2+content.MinSize().Width, width)
-	assert.Equal(t, theme.Padding(), content.Position().X)
+			// wait for canvas to get its size right
+			for s := w.Canvas().Size(); s != oldCanvasSize; s = w.Canvas().Size() {
+				time.Sleep(time.Millisecond * 10)
+			}
+			contentSize := content.Size()
+
+			w.SetPadded(tt.padding)
+			// wait (max 0.1s) for canvas resize
+			for i := 0; i < 10; i++ {
+				if w.Canvas().Size() != oldCanvasSize {
+					break
+				}
+				time.Sleep(time.Millisecond * 10)
+			}
+
+			assert.Equal(t, contentSize, content.Size())
+			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), content.Position())
+			expectedCanvasSize := contentSize.
+				Add(fyne.NewSize(2*tt.expectedPad, 2*tt.expectedPad)).
+				Add(fyne.NewSize(0, tt.expectedMenuHeight))
+			assert.Equal(t, expectedCanvasSize, w.Canvas().Size())
+		})
+	}
 }
 
 func TestWindow_Clipboard(t *testing.T) {
