@@ -35,11 +35,10 @@ script:
   - go vet -tags ci -unsafeptr=false ./...
   - golint -set_exit_status $(go list -tags ci ./...)
   - |
-    if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then exit; fi
     set -e
-    go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
-    if [ -n "$COVERALLS_TOKEN" ]
+    if [ "$TRAVIS_PULL_REQUEST" == "false" && -n "$COVERALLS_TOKEN" ]
     then
+      go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
       $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
     fi
 
