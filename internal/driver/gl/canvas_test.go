@@ -4,12 +4,13 @@ package gl
 
 import (
 	"image/color"
-	"sync"
 	"testing"
+	"time"
+
+	"fyne.io/fyne/theme"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,8 +33,9 @@ func Test_glCanvas_SetContent(t *testing.T) {
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
-		menuHeight = 12
+		menuHeight = 22
 	}
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tests := []struct {
 		name               string
 		padding            bool
@@ -49,33 +51,28 @@ func Test_glCanvas_SetContent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := d.CreateWindow("Test").(*window)
-			var wg sync.WaitGroup
-			wg.Add(2)
-			hookIntoResizedCallback(w, &wg)
+			w.Canvas().SetScale(1)
 			w.SetPadded(tt.padding)
 			if tt.menu {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
 			}
-			w.SetContent(canvas.NewCircle(color.Black))
+			content := canvas.NewCircle(color.Black)
+			w.SetContent(content)
 			w.Resize(fyne.NewSize(100, 100))
 			c := w.Canvas()
-			wg.Wait()
+			canvasSize := 100
+
+			// wait for canvas to get its size right
+			for s := w.canvas.Size().Width; s != canvasSize; s = w.canvas.Size().Width {
+				time.Sleep(time.Millisecond * 10)
+			}
 
 			newContent := canvas.NewCircle(color.White)
 			assert.Equal(t, fyne.NewPos(0, 0), newContent.Position())
 			assert.Equal(t, fyne.NewSize(0, 0), newContent.Size())
 			c.SetContent(newContent)
-			canvasSize := 99
 			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), newContent.Position())
 			assert.Equal(t, fyne.NewSize(canvasSize-2*tt.expectedPad, canvasSize-2*tt.expectedPad-tt.expectedMenuHeight), newContent.Size())
 		})
 	}
-}
-
-func hookIntoResizedCallback(w *window, wg *sync.WaitGroup) {
-	var prev glfw.SizeCallback
-	prev = w.viewport.SetSizeCallback(func(viewport *glfw.Window, width, height int) {
-		prev(viewport, width, height)
-		wg.Done()
-	})
 }
