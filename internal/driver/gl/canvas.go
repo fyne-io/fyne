@@ -1,7 +1,6 @@
 package gl
 
 import (
-	"image/color"
 	"math"
 	"sync"
 
@@ -266,39 +265,38 @@ func (c *glCanvas) setupThemeListener() {
 	}()
 }
 
-func (c *glCanvas) menuBar() fyne.CanvasObject {
-	if c.window.mainmenu == nil {
-		return nil
+func (c *glCanvas) buildMenuBar(m *fyne.MainMenu) {
+	c.setMenuBar(nil)
+	if m == nil {
+		return
 	}
-
-	c.RLock()
-	ret := c.menu
-	c.RUnlock()
-	if ret != nil {
-		return ret
-	}
-
 	if hasNativeMenu() {
-		setupNativeMenu(c.window.mainmenu)
-
-		ret = canvas.NewRectangle(color.Transparent) // just a dummy value really
+		setupNativeMenu(m)
 	} else {
-		ret = buildMenuBar(c.window.mainmenu, c.window)
+		c.setMenuBar(buildMenuBar(m, c.window))
 	}
+}
+
+func (c *glCanvas) setMenuBar(b fyne.CanvasObject) {
 	c.Lock()
-	c.menu = ret
+	c.menu = b
 	c.Unlock()
-	return ret
+}
+
+func (c *glCanvas) menuBar() fyne.CanvasObject {
+	c.RLock()
+	defer c.RUnlock()
+	return c.menu
 }
 
 func (c *glCanvas) menuHeight() int {
-	bar := c.menuBar()
-
-	if bar == nil { // reserve no height for a native menus or windows with no menu
+	switch c.menuBar() {
+	case nil:
+		// no menu or native menu -> does not consume space on the canvas
 		return 0
+	default:
+		return c.menuBar().MinSize().Height
 	}
-
-	return bar.MinSize().Height
 }
 
 func newCanvas(win *window) *glCanvas {
