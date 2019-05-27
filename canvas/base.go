@@ -3,6 +3,9 @@ package canvas // import "fyne.io/fyne/canvas"
 
 import "fyne.io/fyne"
 
+// Declare conformity with CanvasObject interface
+var _ fyne.CanvasObject = (*baseObject)(nil)
+
 type baseObject struct {
 	size     fyne.Size     // The current size of the Rectangle
 	position fyne.Position // The current position of the Rectangle
