@@ -1,8 +1,12 @@
 package gl
 
 import (
+	"fyne.io/fyne"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
+
+// Declare conformity with Clipboard interface
+var _ fyne.Clipboard = (*clipboard)(nil)
 
 // clipboard represents the system clipboard
 type clipboard struct {
