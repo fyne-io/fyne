@@ -33,10 +33,14 @@ script:
   - if [[ "$TRAVIS_GO_VERSION" == 1.12* && "$TRAVIS_OS_NAME" == "osx" ]]; then export GOFLAGS=-mod=vendor; fi
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
-  - golint -set_exit_status $(go list -tags ci ./...) || exit 1
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then exit; fi'
-  - go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
-  - $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - golint -set_exit_status $(go list -tags ci ./...)
+  - |
+    set -e
+    if [ "$TRAVIS_PULL_REQUEST" == "false" && -n "$COVERALLS_TOKEN" ]
+    then
+      go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
+      $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+    fi
 
 env:
   global:
