@@ -188,6 +188,30 @@ func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.
 	c.freeCoords(vao, vbo)
 }
 
+func (c *glCanvas) drawGradient(img *canvas.Gradient, pos fyne.Position, frame fyne.Size) {
+	if !img.Visible() {
+		return
+	}
+
+	texture := getTexture(img, c.newGlGradientTexture)
+	if texture == 0 {
+		return
+	}
+
+	// here we have to choose between blending the image alpha or fading it...
+	// TODO find a way to support both
+	gl.Enable(gl.BLEND)
+	if img.Alpha() != 1 {
+		gl.BlendColor(0, 0, 0, float32(img.Alpha()))
+		gl.BlendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA)
+	} else {
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	}
+	points, vao, vbo := c.rectCoords(img.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	c.drawTexture(texture, points)
+	c.freeCoords(vao, vbo)
+}
+
 func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
 	if !rect.Visible() {
 		return
@@ -246,6 +270,8 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame f
 		c.drawRectangle(obj, pos, frame)
 	case *canvas.Text:
 		c.drawText(obj, pos, frame)
+	case *canvas.Gradient:
+		c.drawGradient(obj, pos, frame)
 	case fyne.Widget:
 		c.drawWidget(obj, offset, frame)
 	}
