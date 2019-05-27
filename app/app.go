@@ -12,6 +12,9 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// Declare conformity with App interface
+var _ fyne.App = (*fyneApp)(nil)
+
 type fyneApp struct {
 	driver fyne.Driver
 	icon   fyne.Resource

@@ -6,6 +6,9 @@ import (
 	"fyne.io/fyne"
 )
 
+// Declare conformity with Settings interface
+var _ fyne.Settings = (*settings)(nil)
+
 type settings struct {
 	themeLock sync.RWMutex
 	theme     fyne.Theme
