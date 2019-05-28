@@ -4,6 +4,9 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"math"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // Gradient describes a gradient between two colors
@@ -25,15 +28,13 @@ func (g *Gradient) Alpha() float64 {
 
 // LinearGradientColor defines start and end color
 type LinearGradientColor struct {
-	Start color.Color
-	End   color.Color
+	Start       color.Color
+	End         color.Color
+	GradientFnc func(x, y, w, h int) float64
 }
 
-func (gc *LinearGradientColor) linearGradient(w, h, x, y int) *color.RGBA64 {
-	d := float64(x) / float64(w) // horizontal
-	//d := float64(w) / float64(x)
-	//d := float64(y) / float64(h) // top down
-
+func (gc *LinearGradientColor) gradient(w, h, x, y int) *color.RGBA64 {
+	d := gc.GradientFnc(x, y, w, h)
 	// fetch RGBA values
 	aR, aG, aB, aA := gc.Start.RGBA()
 	bR, bG, bB, bA := gc.End.RGBA()
@@ -53,7 +54,6 @@ func (gc *LinearGradientColor) linearGradient(w, h, x, y int) *color.RGBA64 {
 	}
 
 	return pixel
-
 }
 
 type pixelGradient struct {
@@ -61,30 +61,111 @@ type pixelGradient struct {
 	img draw.Image
 }
 
-// NewRectangleLinearGradient returns a new Image instance that dynamically
-// renders a rectangular linear gradient
-func NewRectangleLinearGradient(start color.Color, end color.Color) *Gradient {
-
-	gc := &LinearGradientColor{
-		Start: start,
-		End:   end,
+// NewRectangleGradient returns a new Image instance that dynamically
+// renders a gradient based off of options
+func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
+	options := &GradientOptions{}
+	for _, opt := range optFnc {
+		opt(options)
 	}
+
+	l := LinearGradientColor{
+		Start: options.StartColor,
+		End:   options.EndColor,
+	}
+
 	pix := &pixelGradient{}
+
+	spew.Dump(options)
+
+	switch options.Direction {
+	case HORIZONTAL:
+		l.GradientFnc = linearHorizontal
+	case VERTICAL:
+		l.GradientFnc = linearVertical
+	case CIRCULAR:
+		l.GradientFnc = linearCircular
+	}
+
 	pix.g = &Gradient{
 		Generator: func(w, h int) image.Image {
-
 			if pix.img == nil || pix.img.Bounds().Size().X != w || pix.img.Bounds().Size().Y != h {
 				rect := image.Rect(0, 0, w, h)
 				pix.img = image.NewRGBA(rect)
 			}
-
 			for x := 0; x < w; x++ {
 				for y := 0; y < h; y++ {
-					pix.img.Set(x, y, gc.linearGradient(w, h, x, y))
+					pix.img.Set(x, y, l.gradient(w, h, x, y))
 				}
 			}
 			return pix.img
 		},
 	}
+
 	return pix.g
+}
+
+// GradientDirection defines a starting or stopping location
+type GradientDirection int
+
+// Our cardinal Targets
+const (
+	VERTICAL GradientDirection = iota
+	HORIZONTAL
+	CIRCULAR
+)
+
+// GradientOptions options for configuring a new LinearGradient
+type GradientOptions struct {
+	Direction   GradientDirection
+	StartColor  color.Color
+	EndColor    color.Color
+	GradientFnc func(x, y, w, h int) float64
+}
+
+// GradientOption API for configuring a new gradient
+type GradientOption func(*GradientOptions)
+
+// GradientAlignment attachs a start position
+func GradientAlignment(dir GradientDirection) GradientOption {
+	return func(opt *GradientOptions) {
+		opt.Direction = dir
+	}
+}
+
+// GradientStartColor attaches a starting color
+func GradientStartColor(start color.Color) GradientOption {
+	return func(opt *GradientOptions) {
+		opt.StartColor = start
+	}
+}
+
+// GradientEndColor attaches an ending color
+func GradientEndColor(end color.Color) GradientOption {
+	return func(opt *GradientOptions) {
+		opt.EndColor = end
+	}
+}
+
+// GradientFunction attaches a function to determine gradiation
+func GradientFunction(fnc func(x, y, w, h int) float64) GradientOption {
+	return func(opt *GradientOptions) {
+		opt.GradientFnc = fnc
+	}
+}
+
+func linearHorizontal(x, y, w, h int) float64 {
+	return float64(x) / float64(w)
+}
+
+func linearVertical(x, y, w, h int) float64 {
+	return float64(y) / float64(h)
+}
+
+func linearCircular(x, y, w, h int) float64 {
+	centerX := w / 2
+	centerY := h / 2
+	dx, dy := float64(centerX-x), float64(centerY-y)
+	d := math.Sqrt(dx*dx + dy*dy)
+	return d / 255
 }
