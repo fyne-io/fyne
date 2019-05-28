@@ -1,7 +1,6 @@
 package canvas
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -40,10 +39,6 @@ func gradient(gradientFnc func(x, y, ox, oy, w, h int) float64, start color.Colo
 	dG := (float64(bG) - float64(aG))
 	dB := (float64(bB) - float64(aB))
 	dA := (float64(bA) - float64(aA))
-
-	if fmt.Sprintf("%v", gradientFnc) == fmt.Sprintf("%v", linearCircular) {
-		fmt.Printf("[%d][%d] - Alpha: %v-%v\n", x, y, aA, d*dA)
-	}
 
 	// Apply graduation
 	pixel := &color.RGBA64{
@@ -191,12 +186,5 @@ func linearCircular(x, y, ox, oy, w, h int) float64 {
 	if d > rx {
 		return 1
 	}
-	fmt.Println("circ grad", x, y, w, h, "->", rx/d)
 	return d / rx
 }
-
-/*
-    private float distance(float x1, float y1, float x2, float y2) {
-       return (float)(Math.Sqrt(Math.Pow(Math.Abs(x1 - x2), 2) + Math.Pow(Math.Abs(y1 - y2), 2) ));
-	}
-*/
