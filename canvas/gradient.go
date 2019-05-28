@@ -5,8 +5,6 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 // Gradient describes a gradient between two colors
@@ -33,6 +31,8 @@ type LinearGradientColor struct {
 	GradientFnc func(x, y, w, h int) float64
 }
 
+// gradient generates a pixel using the defined
+// gradient function by using the w, h, and current x,y  of this pixel
 func (gc *LinearGradientColor) gradient(w, h, x, y int) *color.RGBA64 {
 	d := gc.GradientFnc(x, y, w, h)
 	// fetch RGBA values
@@ -45,7 +45,7 @@ func (gc *LinearGradientColor) gradient(w, h, x, y int) *color.RGBA64 {
 	dB := (float64(bB) - float64(aB))
 	dA := (float64(bA) - float64(aA))
 
-	// Return with applied gradiation
+	// Apply graduation
 	pixel := &color.RGBA64{
 		R: uint16(float64(aR) + d*dR),
 		B: uint16(float64(aB) + d*dB),
@@ -53,7 +53,7 @@ func (gc *LinearGradientColor) gradient(w, h, x, y int) *color.RGBA64 {
 		A: uint16(float64(aA) + d*dA),
 	}
 
-	// Prevent rendering dead space
+	// Prevent rendering dead space - transparent corners
 	if d > 1 {
 		pixel.A = uint16(0)
 	}
@@ -68,6 +68,7 @@ type pixelGradient struct {
 
 // NewRectangleGradient returns a new Image instance that dynamically
 // renders a gradient based off of options
+// Accepts
 func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
 	options := &GradientOptions{}
 	for _, opt := range optFnc {
@@ -81,8 +82,7 @@ func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
 
 	pix := &pixelGradient{}
 
-	spew.Dump(options)
-
+	// Select linear function for appropriate type of gradient
 	switch options.Direction {
 	case HORIZONTAL:
 		l.GradientFnc = linearHorizontal
@@ -90,6 +90,8 @@ func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
 		l.GradientFnc = linearVertical
 	case CIRCULAR:
 		l.GradientFnc = linearCircular
+	default:
+		l.GradientFnc = linearHorizontal
 	}
 
 	pix.g = &Gradient{
@@ -98,9 +100,11 @@ func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
 				rect := image.Rect(0, 0, w, h)
 				pix.img = image.NewRGBA(rect)
 			}
+
 			for x := 0; x < w; x++ {
 				for y := 0; y < h; y++ {
 					pix.img.Set(x, y, l.gradient(w, h, x, y))
+
 				}
 			}
 			return pix.img
@@ -122,10 +126,9 @@ const (
 
 // GradientOptions options for configuring a new LinearGradient
 type GradientOptions struct {
-	Direction   GradientDirection
-	StartColor  color.Color
-	EndColor    color.Color
-	GradientFnc func(x, y, w, h int) float64
+	Direction  GradientDirection
+	StartColor color.Color
+	EndColor   color.Color
 }
 
 // GradientOption API for configuring a new gradient
@@ -152,21 +155,19 @@ func GradientEndColor(end color.Color) GradientOption {
 	}
 }
 
-// GradientFunction attaches a function to determine gradiation
-func GradientFunction(fnc func(x, y, w, h int) float64) GradientOption {
-	return func(opt *GradientOptions) {
-		opt.GradientFnc = fnc
-	}
-}
-
+// Linear horizontal gradiant
 func linearHorizontal(x, y, w, h int) float64 {
 	return float64(x) / float64(w)
 }
 
+// Linear vertical gradiant
 func linearVertical(x, y, w, h int) float64 {
 	return float64(y) / float64(h)
 }
 
+// Linear circular gradient
+// Note: This tends to need a bit more space around it
+// or it will clip the edges (it's noticeable on round objects)
 func linearCircular(x, y, w, h int) float64 {
 	centerX := w / 2
 	centerY := h / 2
