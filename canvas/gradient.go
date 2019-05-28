@@ -1,10 +1,13 @@
 package canvas
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"math"
+
+	"fyne.io/fyne"
 )
 
 // Gradient describes a gradient between two colors
@@ -26,8 +29,8 @@ func (g *Gradient) Alpha() float64 {
 
 // gradient generates a pixel using the defined gradient
 // function by using the w, h, and current x,y  of this pixel
-func gradient(gradientFnc func(x, y, w, h int) float64, start color.Color, end color.Color, w, h, x, y int) *color.RGBA64 {
-	d := gradientFnc(x, y, w, h)
+func gradient(gradientFnc func(x, y, ox, oy, w, h int) float64, start color.Color, end color.Color, w, h, ox, oy, x, y int) *color.RGBA64 {
+	d := gradientFnc(x, y, ox, oy, w, h)
 	// fetch RGBA values
 	aR, aG, aB, aA := start.RGBA()
 	bR, bG, bB, bA := end.RGBA()
@@ -37,6 +40,10 @@ func gradient(gradientFnc func(x, y, w, h int) float64, start color.Color, end c
 	dG := (float64(bG) - float64(aG))
 	dB := (float64(bB) - float64(aB))
 	dA := (float64(bA) - float64(aA))
+
+	if fmt.Sprintf("%v", gradientFnc) == fmt.Sprintf("%v", linearCircular) {
+		fmt.Printf("[%d][%d] - Alpha: %v-%v\n", x, y, aA, d*dA)
+	}
 
 	// Apply graduation
 	pixel := &color.RGBA64{
@@ -70,7 +77,7 @@ func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
 
 	pix := &pixelGradient{}
 
-	var gradFnc func(x, y, w, h int) float64
+	var gradFnc func(x, y, ox, oy, w, h int) float64
 
 	// Select linear function for appropriate type of gradient
 	switch options.Direction {
@@ -93,7 +100,7 @@ func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
 
 			for x := 0; x < w; x++ {
 				for y := 0; y < h; y++ {
-					pix.img.Set(x, y, gradient(gradFnc, options.StartColor, options.EndColor, w, h, x, y))
+					pix.img.Set(x, y, gradient(gradFnc, options.StartColor, options.EndColor, w, h, options.Offset.X, options.Offset.Y, x, y))
 
 				}
 			}
@@ -119,6 +126,7 @@ type GradientOptions struct {
 	Direction  GradientDirection
 	StartColor color.Color
 	EndColor   color.Color
+	Offset     fyne.Position
 }
 
 // GradientOption API for configuring a new gradient
@@ -145,24 +153,50 @@ func GradientEndColor(end color.Color) GradientOption {
 	}
 }
 
+// GradientOffset adds an offset for gradient start point
+func GradientOffset(p fyne.Position) GradientOption {
+	return func(opt *GradientOptions) {
+		opt.Offset = p
+	}
+}
+
 // Linear horizontal gradiant
-func linearHorizontal(x, y, w, h int) float64 {
+func linearHorizontal(x, y, ox, oy, w, h int) float64 {
 	return float64(x) / float64(w)
 }
 
 // Linear vertical gradiant
-func linearVertical(x, y, w, h int) float64 {
+func linearVertical(x, y, ox, oy, w, h int) float64 {
 	return float64(y) / float64(h)
 }
 
-// Linear circular gradient
-// Note: This tends to need a bit more space around it
-// or it will clip the edges (it's noticeable on round objects)
-func linearCircular(x, y, w, h int) float64 {
-	centerX := w / 2
-	centerY := h / 2
-	dx, dy := float64(centerX-x), float64(centerY-y)
+// Linear circular gradient - function/math thanks to Tilo Prützs
+func linearCircular(x, y, ox, oy, w, h int) float64 {
+	centerX := float64(w)/2 + float64(ox)
+	centerY := float64(h)/2 + float64(oy)
+	var rx, ry float64
+	if ox < 0 {
+		rx = float64(w) - centerX
+	} else {
+		rx = centerX
+	}
+	if oy < 0 {
+		ry = float64(h) - centerY
+	} else {
+		ry = centerY
+	}
+	_ = ry
+	dx, dy := centerX-float64(x), centerY-float64(y)
 	d := math.Sqrt(dx*dx + dy*dy)
-	return d / 255
-
+	if d > rx {
+		return 1
+	}
+	fmt.Println("circ grad", x, y, w, h, "->", rx/d)
+	return d / rx
 }
+
+/*
+    private float distance(float x1, float y1, float x2, float y2) {
+       return (float)(Math.Sqrt(Math.Pow(Math.Abs(x1 - x2), 2) + Math.Pow(Math.Abs(y1 - y2), 2) ));
+	}
+*/
