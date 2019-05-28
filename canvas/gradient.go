@@ -24,20 +24,13 @@ func (g *Gradient) Alpha() float64 {
 	return 1.0 - g.Translucency
 }
 
-// LinearGradientColor defines start and end color
-type LinearGradientColor struct {
-	Start       color.Color
-	End         color.Color
-	GradientFnc func(x, y, w, h int) float64
-}
-
-// gradient generates a pixel using the defined
-// gradient function by using the w, h, and current x,y  of this pixel
-func (gc *LinearGradientColor) gradient(w, h, x, y int) *color.RGBA64 {
-	d := gc.GradientFnc(x, y, w, h)
+// gradient generates a pixel using the defined gradient
+// function by using the w, h, and current x,y  of this pixel
+func gradient(gradientFnc func(x, y, w, h int) float64, start color.Color, end color.Color, w, h, x, y int) *color.RGBA64 {
+	d := gradientFnc(x, y, w, h)
 	// fetch RGBA values
-	aR, aG, aB, aA := gc.Start.RGBA()
-	bR, bG, bB, bA := gc.End.RGBA()
+	aR, aG, aB, aA := start.RGBA()
+	bR, bG, bB, bA := end.RGBA()
 
 	// Get difference
 	dR := (float64(bR) - float64(aR))
@@ -75,23 +68,20 @@ func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
 		opt(options)
 	}
 
-	l := LinearGradientColor{
-		Start: options.StartColor,
-		End:   options.EndColor,
-	}
-
 	pix := &pixelGradient{}
+
+	var gradFnc func(x, y, w, h int) float64
 
 	// Select linear function for appropriate type of gradient
 	switch options.Direction {
 	case HORIZONTAL:
-		l.GradientFnc = linearHorizontal
+		gradFnc = linearHorizontal
 	case VERTICAL:
-		l.GradientFnc = linearVertical
+		gradFnc = linearVertical
 	case CIRCULAR:
-		l.GradientFnc = linearCircular
+		gradFnc = linearCircular
 	default:
-		l.GradientFnc = linearHorizontal
+		gradFnc = linearHorizontal
 	}
 
 	pix.g = &Gradient{
@@ -103,7 +93,7 @@ func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
 
 			for x := 0; x < w; x++ {
 				for y := 0; y < h; y++ {
-					pix.img.Set(x, y, l.gradient(w, h, x, y))
+					pix.img.Set(x, y, gradient(gradFnc, options.StartColor, options.EndColor, w, h, x, y))
 
 				}
 			}
