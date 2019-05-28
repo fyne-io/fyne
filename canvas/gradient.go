@@ -53,6 +53,11 @@ func (gc *LinearGradientColor) gradient(w, h, x, y int) *color.RGBA64 {
 		A: uint16(float64(aA) + d*dA),
 	}
 
+	// Prevent rendering dead space
+	if d > 1 {
+		pixel.A = uint16(0)
+	}
+
 	return pixel
 }
 
@@ -168,4 +173,5 @@ func linearCircular(x, y, w, h int) float64 {
 	dx, dy := float64(centerX-x), float64(centerY-y)
 	d := math.Sqrt(dx*dx + dy*dy)
 	return d / 255
+
 }
