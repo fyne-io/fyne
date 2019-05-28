@@ -25,7 +25,7 @@ func TestCircle_FillColor(t *testing.T) {
 	assert.Equal(t, c, circle.FillColor)
 }
 
-func TestCircle_ReSize(t *testing.T) {
+func TestCircle_Resize(t *testing.T) {
 	targetWidth := 50
 	targetHeight := 50
 	circle := NewCircle(color.White)
