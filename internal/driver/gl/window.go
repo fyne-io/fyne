@@ -32,6 +32,9 @@ func initCursors() {
 	hyperlinkCursor = glfw.CreateStandardCursor(glfw.HandCursor)
 }
 
+// Declare conformity to Window interface
+var _ fyne.Window = (*window)(nil)
+
 type window struct {
 	viewport *glfw.Window
 	painted  int // part of the macOS GL fix, updated GLFW should fix this

@@ -7,6 +7,9 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// Declare conformity with Layout interface
+var _ fyne.Layout = (*fixedGridLayout)(nil)
+
 type fixedGridLayout struct {
 	CellSize fyne.Size
 }

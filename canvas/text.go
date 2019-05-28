@@ -7,6 +7,9 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// Declare conformity with CanvasObject interface
+var _ fyne.CanvasObject = (*Text)(nil)
+
 // Text describes a text primitive in a Fyne canvas.
 // A text object can have a style set which will apply to the whole string.
 // No formatting or text parsing will be performed

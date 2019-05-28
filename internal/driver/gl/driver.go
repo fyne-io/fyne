@@ -16,6 +16,9 @@ var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
 
 const textDPI = 78
 
+// Declare conformity with Driver
+var _ fyne.Driver = (*gLDriver)(nil)
+
 type gLDriver struct {
 	windows []fyne.Window
 	done    chan interface{}

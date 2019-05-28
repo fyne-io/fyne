@@ -13,6 +13,9 @@ import (
 	"fyne.io/fyne"
 )
 
+// Declare conformity to command interface
+var _ command = (*bundler)(nil)
+
 type bundler struct {
 	name, pkg string
 	prefix    string

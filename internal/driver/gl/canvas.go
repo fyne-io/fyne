@@ -14,6 +14,9 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
+// Declare conformity with Canvas interface
+var _ fyne.Canvas = (*glCanvas)(nil)
+
 type glCanvas struct {
 	sync.RWMutex
 	window                 *window
