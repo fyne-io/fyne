@@ -59,6 +59,15 @@ func main() {
 		fyne.LogError("Could not parse URL", err)
 	}
 
+	w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("File",
+		fyne.NewMenuItem("New", func() { fmt.Println("Menu New") }),
+		// a quit item will be appended to our first menu
+	), fyne.NewMenu("Edit",
+		fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") }),
+		fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") }),
+		fyne.NewMenuItem("Paste", func() { fmt.Println("Menu Paste") }),
+	)))
+
 	w.SetContent(widget.NewVBox(
 		widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
 			widget.NewToolbarSeparator(),
@@ -93,6 +102,23 @@ func main() {
 		layout.NewSpacer(),
 
 		widget.NewButton("Input", func() { Input(a) }),
+		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+			widget.NewButton("PopUp", func() {
+				var pop *widget.PopUp
+				ok := widget.NewButton("Dismiss", func() {
+					pop.Hide()
+				})
+				pop = widget.NewPopUp(ok, w.Canvas())
+				pop.Move(fyne.NewPos(25, 525))
+			}),
+			widget.NewButton("Modal", func() {
+				var pop *widget.PopUp
+				ok := widget.NewButton("Dismiss", func() {
+					pop.Hide()
+				})
+				pop = widget.NewModalPopUp(ok, w.Canvas())
+			}),
+		),
 		widget.NewButton("Advanced", func() { Advanced(a) }),
 		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
 			a.Quit()

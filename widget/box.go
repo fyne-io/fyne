@@ -25,7 +25,7 @@ func (b *Box) Resize(size fyne.Size) {
 	b.resize(size, b)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (b *Box) Move(pos fyne.Position) {
 	b.move(pos, b)
@@ -65,7 +65,7 @@ func (b *Box) Append(object fyne.CanvasObject) {
 	Refresh(b)
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Box) CreateRenderer() fyne.WidgetRenderer {
 	var lay fyne.Layout
 	if b.Horizontal {

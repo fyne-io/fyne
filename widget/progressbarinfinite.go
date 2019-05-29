@@ -75,7 +75,7 @@ func (p *infProgressRenderer) Layout(size fyne.Size) {
 	p.updateBar()
 }
 
-// ApplyTheme is called when the infinite progress bar may need to update it's look
+// ApplyTheme is called when the infinite progress bar may need to update its look
 func (p *infProgressRenderer) ApplyTheme() {
 	p.bar.FillColor = theme.PrimaryColor()
 }
@@ -140,7 +140,7 @@ func (p *ProgressBarInfinite) Resize(size fyne.Size) {
 	p.resize(size, p)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (p *ProgressBarInfinite) Move(pos fyne.Position) {
 	p.move(pos, p)
@@ -183,7 +183,7 @@ func (p *ProgressBarInfinite) Running() bool {
 	return renderer.(*infProgressRenderer).running.Load().(bool)
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	render := &infProgressRenderer{

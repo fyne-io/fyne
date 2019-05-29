@@ -19,7 +19,7 @@ func (p *ProgressDialog) SetValue(v float64) {
 }
 
 // NewProgress creates a progress dialog and returns the handle.
-// Using the returned type you should call Show() and then set it's value through SetValue().
+// Using the returned type you should call Show() and then set its value through SetValue().
 func NewProgress(title, message string, parent fyne.Window) *ProgressDialog {
 	d := newDialog(title, message, theme.InfoIcon(), nil /*cancel?*/, parent)
 	bar := widget.NewProgressBar()

@@ -15,6 +15,7 @@ type baseWidget struct {
 	size     fyne.Size
 	position fyne.Position
 	Hidden   bool
+	disabled bool
 }
 
 // Get the current size of this widget.
@@ -30,12 +31,12 @@ func (w *baseWidget) resize(size fyne.Size, parent fyne.Widget) {
 	Renderer(parent).Layout(size)
 }
 
-// Get the current position of this widget, relative to it's parent.
+// Get the current position of this widget, relative to its parent.
 func (w *baseWidget) Position() fyne.Position {
 	return w.position
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *baseWidget) move(pos fyne.Position, parent fyne.Widget) {
 	w.position = pos
@@ -77,6 +78,24 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 		child.Hide()
 	}
 
+	canvas.Refresh(parent)
+}
+
+func (w *baseWidget) enable(parent fyne.Widget) {
+	if !w.disabled {
+		return
+	}
+
+	w.disabled = false
+	canvas.Refresh(parent)
+}
+
+func (w *baseWidget) disable(parent fyne.Widget) {
+	if w.disabled {
+		return
+	}
+
+	w.disabled = true
 	canvas.Refresh(parent)
 }
 

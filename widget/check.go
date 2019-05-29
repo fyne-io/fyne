@@ -37,9 +37,12 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 		(size.Height-theme.IconInlineSize())/2))
 }
 
-// ApplyTheme is called when the Check may need to update it's look
+// ApplyTheme is called when the Check may need to update its look
 func (c *checkRenderer) ApplyTheme() {
 	c.label.Color = theme.TextColor()
+	if c.check.disabled {
+		c.label.Color = theme.DisabledTextColor()
+	}
 
 	c.Refresh()
 }
@@ -53,8 +56,14 @@ func (c *checkRenderer) Refresh() {
 
 	if c.check.Checked {
 		c.icon.Resource = theme.CheckButtonCheckedIcon()
+		if c.check.disabled {
+			c.icon.Resource = theme.NewDisabledResource(theme.CheckButtonCheckedIcon())
+		}
 	} else {
 		c.icon.Resource = theme.CheckButtonIcon()
+		if c.check.disabled {
+			c.icon.Resource = theme.NewDisabledResource(theme.CheckButtonIcon())
+		}
 	}
 
 	canvas.Refresh(c.check)
@@ -97,7 +106,7 @@ func (c *Check) Resize(size fyne.Size) {
 	c.resize(size, c)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (c *Check) Move(pos fyne.Position) {
 	c.move(pos, c)
@@ -118,16 +127,30 @@ func (c *Check) Hide() {
 	c.hide(c)
 }
 
+// Enable this widget, if it was previously disabled
+func (c *Check) Enable() {
+	c.enable(c)
+	Renderer(c).ApplyTheme()
+}
+
+// Disable this widget, if it was previously enabled
+func (c *Check) Disable() {
+	c.disable(c)
+	Renderer(c).ApplyTheme()
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
-	c.SetChecked(!c.Checked)
+	if !c.disabled {
+		c.SetChecked(!c.Checked)
+	}
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
 func (c *Check) TappedSecondary(*fyne.PointEvent) {
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 

@@ -74,7 +74,7 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.moveCursor()
 }
 
-// ApplyTheme is called when the Entry may need to update it's look.
+// ApplyTheme is called when the Entry may need to update its look.
 func (e *entryRenderer) ApplyTheme() {
 	Renderer(e.text).ApplyTheme()
 	if e.entry.focused {
@@ -139,7 +139,7 @@ func (e *Entry) Resize(size fyne.Size) {
 	e.resize(size, e)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (e *Entry) Move(pos fyne.Position) {
 	e.move(pos, e)
@@ -479,7 +479,7 @@ func (p *placeholderPresenter) object() fyne.Widget {
 	return nil
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	text := newTextProvider(e.Text, e)
 	placeholder := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})

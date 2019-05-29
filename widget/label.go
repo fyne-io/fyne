@@ -62,7 +62,7 @@ func (l *Label) object() fyne.Widget {
 	return l
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.textProvider = newTextProvider(l.Text, l)
 	return l.textProvider.CreateRenderer()
@@ -74,7 +74,7 @@ func (l *Label) Resize(size fyne.Size) {
 	l.resize(size, l)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (l *Label) Move(pos fyne.Position) {
 	l.move(pos, l)

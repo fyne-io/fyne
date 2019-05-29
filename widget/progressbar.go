@@ -51,7 +51,7 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 	p.updateBar()
 }
 
-// ApplyTheme is called when the progress bar may need to update it's look
+// ApplyTheme is called when the progress bar may need to update its look
 func (p *progressRenderer) ApplyTheme() {
 	p.bar.FillColor = theme.PrimaryColor()
 	p.label.Color = theme.TextColor()
@@ -89,7 +89,7 @@ func (p *ProgressBar) Resize(size fyne.Size) {
 	p.resize(size, p)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (p *ProgressBar) Move(pos fyne.Position) {
 	p.move(pos, p)
@@ -117,7 +117,7 @@ func (p *ProgressBar) SetValue(v float64) {
 	Renderer(p).Refresh()
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	if p.Min == 0 && p.Max == 0 {
 		p.Max = 1.0

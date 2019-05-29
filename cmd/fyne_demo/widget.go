@@ -11,10 +11,14 @@ import (
 )
 
 func makeButtonTab() fyne.Widget {
+	disabled := widget.NewButton("Disabled", func() {})
+	disabled.Disable()
+
 	return widget.NewVBox(
 		widget.NewLabel("Text label"),
 		widget.NewButton("Text button", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("With icon", theme.ConfirmIcon(), func() { fmt.Println("tapped icon button") }),
+		disabled,
 	)
 }
 
@@ -22,10 +26,20 @@ func makeInputTab() fyne.Widget {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Entry")
 
+	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
+	disabledCheck.Disable()
+	radio := widget.NewRadio([]string{"Radio Item 1", "Radio Item 2"}, func(s string) { fmt.Println("selected", s) })
+	radio.Horizontal = true
+	disabledRadio := widget.NewRadio([]string{"Disabled radio"}, func(string) {})
+	disabledRadio.Disable()
+
 	return widget.NewVBox(
 		entry,
+		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
-		widget.NewRadio([]string{"Item 1", "Item 2"}, func(s string) { fmt.Println("selected", s) }),
+		disabledCheck,
+		radio,
+		disabledRadio,
 	)
 }
 
@@ -63,8 +77,8 @@ func Widget(app fyne.App) {
 	w := app.NewWindow("Widgets")
 
 	w.SetContent(widget.NewTabContainer(
-		widget.NewTabItem("Buttons", makeButtonTab()),
-		widget.NewTabItem("Input", makeInputTab()),
+		widget.NewTabItemWithIcon("Buttons", theme.InfoIcon(), makeButtonTab()),
+		widget.NewTabItemWithIcon("Input", theme.CheckButtonCheckedIcon(), makeInputTab()),
 		widget.NewTabItem("Progress", makeProgressTab()),
 		widget.NewTabItem("Scroll", makeScrollTab()),
 	))

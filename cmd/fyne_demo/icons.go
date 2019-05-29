@@ -102,6 +102,7 @@ var icons = []struct {
 
 	{"ViewFullScreenIcon", theme.ViewFullScreenIcon()},
 	{"ViewRestoreIcon", theme.ViewRestoreIcon()},
+	{"ViewRefreshIcon", theme.ViewRefreshIcon()},
 	{"ZoomFitIcon", theme.ZoomFitIcon()},
 	{"ZoomInIcon", theme.ZoomInIcon()},
 	{"ZoomOutIcon", theme.ZoomOutIcon()},
@@ -111,6 +112,9 @@ var icons = []struct {
 
 	{"NavigateBackIcon", theme.NavigateBackIcon()},
 	{"NavigateNextIcon", theme.NavigateNextIcon()},
+
+	{"MenuDropDown", theme.MenuDropDownIcon()},
+	{"MenuDropUp", theme.MenuDropUpIcon()},
 
 	{"MailAttachmentIcon", theme.MailAttachmentIcon()},
 	{"MailComposeIcon", theme.MailComposeIcon()},

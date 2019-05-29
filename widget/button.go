@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -60,19 +61,24 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 	}
 }
 
-// ApplyTheme is called when the Button may need to update it's look
+// ApplyTheme is called when the Button may need to update its look
 func (b *buttonRenderer) ApplyTheme() {
 	b.label.Color = theme.TextColor()
+	if b.button.disabled {
+		b.label.Color = theme.DisabledTextColor()
+	}
 
 	b.Refresh()
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
-	if b.button.Style == PrimaryButton {
+	if b.button.Style == PrimaryButton && !b.button.disabled {
 		return theme.PrimaryColor()
+	} else if b.button.disabled {
+		return theme.DisabledButtonColor()
 	}
 
-	if b.button.hovered {
+	if b.button.hovered && !b.button.disabled {
 		return theme.HoverColor()
 	}
 	return theme.ButtonColor()
@@ -86,7 +92,17 @@ func (b *buttonRenderer) Refresh() {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
 			b.objects = append(b.objects, b.icon)
 		} else {
-			b.icon.Resource = b.button.Icon
+			if b.button.disabled {
+				// if the icon has changed, create a new disabled version
+				// if we could be sure that button.Icon is only ever set through the button.SetIcon method, we could remove this
+				if !strings.HasSuffix(b.button.disabledIcon.Name(), b.button.Icon.Name()) {
+					b.icon.Resource = theme.NewDisabledResource(b.button.Icon)
+				} else {
+					b.icon.Resource = b.button.disabledIcon
+				}
+			} else {
+				b.icon.Resource = b.button.Icon
+			}
 		}
 		b.icon.Hidden = false
 	} else if b.icon != nil {
@@ -107,9 +123,10 @@ func (b *buttonRenderer) Destroy() {
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	baseWidget
-	Text  string
-	Style ButtonStyle
-	Icon  fyne.Resource
+	Text         string
+	Style        ButtonStyle
+	Icon         fyne.Resource
+	disabledIcon fyne.Resource
 
 	OnTapped func() `json:"-"`
 	hovered  bool
@@ -131,7 +148,7 @@ func (b *Button) Resize(size fyne.Size) {
 	b.resize(size, b)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (b *Button) Move(pos fyne.Position) {
 	b.move(pos, b)
@@ -152,9 +169,21 @@ func (b *Button) Hide() {
 	b.hide(b)
 }
 
+// Enable this widget, if it was previously disabled
+func (b *Button) Enable() {
+	b.enable(b)
+	Renderer(b).ApplyTheme()
+}
+
+// Disable this widget, if it was previously enabled
+func (b *Button) Disable() {
+	b.disable(b)
+	Renderer(b).ApplyTheme()
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
-	if b.OnTapped != nil {
+	if b.OnTapped != nil && !b.disabled {
 		b.OnTapped()
 	}
 }
@@ -179,7 +208,7 @@ func (b *Button) MouseOut() {
 func (b *Button) MouseMoved(*desktop.MouseEvent) {
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
 	if b.Icon != nil {
@@ -210,21 +239,26 @@ func (b *Button) SetText(text string) {
 func (b *Button) SetIcon(icon fyne.Resource) {
 	b.Icon = icon
 
+	if icon != nil {
+		b.disabledIcon = theme.NewDisabledResource(icon)
+	} else {
+		b.disabledIcon = nil
+	}
+
 	Refresh(b)
 }
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
-	button := &Button{baseWidget{}, label, DefaultButton, nil, tapped, false}
+	button := &Button{baseWidget{}, label, DefaultButton, nil, nil, tapped, false}
 
 	Renderer(button).Layout(button.MinSize())
 	return button
 }
 
-// NewButtonWithIcon creates a new button widget with the specified label,
-// themed icon and tap handler
+// NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
-	button := &Button{baseWidget{}, label, DefaultButton, icon, tapped, false}
+	button := &Button{baseWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon), tapped, false}
 
 	Renderer(button).Layout(button.MinSize())
 	return button

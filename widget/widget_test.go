@@ -36,6 +36,14 @@ func (m *myWidget) Hide() {
 	m.hide(m)
 }
 
+func (m *myWidget) Enable() {
+	m.enable(m)
+}
+
+func (m *myWidget) Disable() {
+	m.disable(m)
+}
+
 func (m *myWidget) ApplyTheme() {
 	m.applied <- true
 }
