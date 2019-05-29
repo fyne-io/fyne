@@ -9,30 +9,56 @@ import (
 	"fyne.io/fyne"
 )
 
-// Gradient describes a gradient between two colors
+const (
+	// GradientDirectionVertical defines a vertically traveling gradient
+	GradientDirectionVertical GradientDirection = iota
+	// GradientDirectionHorizontal defines a horizontally traveling gradient
+	GradientDirectionHorizontal
+	// GradientDirectionCircular defines a gradient traveling radially from a center point outward
+	GradientDirectionCircular
+)
+
+// GradientDirection defines a starting or stopping location
+type GradientDirection int
+
+// Gradient describes a gradient fade between two colors
 type Gradient struct {
 	baseObject
 
 	Generator func(w, h int) image.Image
 
-	Translucency float64 // Set a translucency value > 0.0 to fade the raster
+	direction GradientDirection // The direction of the gradient.
+	start     color.Color       // The beginning RGBA color of the gradient
+	end       color.Color       // The end RGBA color of the gradient
+	offset    fyne.Position     // The offest for generation of the gradient
 
-	img draw.Image // internal cache for pixel generator
+	gradientFnc func(x, y, w, h int, ox, oy float64) float64 // The function for calculating the gradient
+
+	img draw.Image // internal cache for pixel generator - may be superfluous
 }
 
-// Alpha is a convenience function that returns the alpha value for a raster
-// based on its Translucency value. The result is 1.0 - Translucency.
-func (g *Gradient) Alpha() float64 {
-	return 1.0 - g.Translucency
+// Offset returns the offset of the  gradient
+func (g *Gradient) Offset() fyne.Position {
+	return g.offset
 }
 
-// gradient generates a pixel using the defined gradient
-// function by using the w, h, and current x,y  of this pixel
-func gradient(gradientFnc func(x, y, ox, oy, w, h int) float64, start color.Color, end color.Color, w, h, ox, oy, x, y int) *color.RGBA64 {
-	d := gradientFnc(x, y, ox, oy, w, h)
+// SetOffset sets the gradient offset.
+// Should be set before generation
+func (g *Gradient) SetOffset(pos fyne.Position) {
+	g.offset = pos
+}
+
+// calculatePixel uses the gradientFnc to caculate the pixel
+// at x, y as a gradient between start and end
+// using w and h to determine rate of graduation
+// returns a color.RGBA64
+func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
+	ox, oy := float64(g.offset.X), float64(g.offset.Y)
+	d := g.gradientFnc(x, y, w, h, ox, oy)
+
 	// fetch RGBA values
-	aR, aG, aB, aA := start.RGBA()
-	bR, bG, bB, bA := end.RGBA()
+	aR, aG, aB, aA := g.start.RGBA()
+	bR, bG, bB, bA := g.end.RGBA()
 
 	// Get difference
 	dR := (float64(bR) - float64(aR))
@@ -54,137 +80,92 @@ func gradient(gradientFnc func(x, y, ox, oy, w, h int) float64, start color.Colo
 	}
 
 	return pixel
+
 }
 
+// pixelGradient is used during construction
 type pixelGradient struct {
 	g   *Gradient
-	img draw.Image
+	img draw.Image // image cache during generator run
 }
 
-// NewRectangleGradient returns a new Image instance that dynamically
-// renders a gradient based off of options
-// Accepts
-func NewRectangleGradient(optFnc ...GradientOption) *Gradient {
-	options := &GradientOptions{}
-	for _, opt := range optFnc {
-		opt(options)
-	}
-
+// NewLinearGradient returns a new Image instance that dynamically
+// renders a gradient of type GradientDirection
+func NewLinearGradient(start color.Color, end color.Color, direction GradientDirection) *Gradient {
 	pix := &pixelGradient{}
 
-	var gradFnc func(x, y, ox, oy, w, h int) float64
-
-	// Select linear function for appropriate type of gradient
-	switch options.Direction {
-	case HORIZONTAL:
-		gradFnc = linearHorizontal
-	case VERTICAL:
-		gradFnc = linearVertical
-	case CIRCULAR:
-		gradFnc = linearCircular
-	default:
-		gradFnc = linearHorizontal
-	}
-
 	pix.g = &Gradient{
-		Generator: func(w, h int) image.Image {
-			if pix.img == nil || pix.img.Bounds().Size().X != w || pix.img.Bounds().Size().Y != h {
-				rect := image.Rect(0, 0, w, h)
-				pix.img = image.NewRGBA(rect)
-			}
-
-			for x := 0; x < w; x++ {
-				for y := 0; y < h; y++ {
-					pix.img.Set(x, y, gradient(gradFnc, options.StartColor, options.EndColor, w, h, options.Offset.X, options.Offset.Y, x, y))
-
-				}
-			}
-			return pix.img
-		},
+		start:  start,
+		end:    end,
+		offset: fyne.NewPos(0, 0),
 	}
 
+	switch direction {
+	case GradientDirectionHorizontal:
+		pix.g.gradientFnc = linearHorizontal
+	case GradientDirectionVertical:
+		pix.g.gradientFnc = linearVertical
+	case GradientDirectionCircular:
+		pix.g.gradientFnc = linearCircular
+	default:
+		pix.g.gradientFnc = linearHorizontal
+	}
+
+	pix.g.Generator = func(w, h int) image.Image {
+		if pix.img == nil || pix.img.Bounds().Size().X != w || pix.img.Bounds().Size().Y != h {
+			rect := image.Rect(0, 0, w, h)
+			pix.img = image.NewRGBA(rect)
+		}
+
+		for x := 0; x < w; x++ {
+			for y := 0; y < h; y++ {
+				pix.img.Set(x, y, pix.g.calculatePixel(w, h, x, y))
+
+			}
+		}
+		return pix.img
+	}
 	return pix.g
 }
 
-// GradientDirection defines a starting or stopping location
-type GradientDirection int
-
-// Our cardinal Targets
-const (
-	VERTICAL GradientDirection = iota
-	HORIZONTAL
-	CIRCULAR
-)
-
-// GradientOptions options for configuring a new LinearGradient
-type GradientOptions struct {
-	Direction  GradientDirection
-	StartColor color.Color
-	EndColor   color.Color
-	Offset     fyne.Position
-}
-
-// GradientOption API for configuring a new gradient
-type GradientOption func(*GradientOptions)
-
-// GradientAlignment attachs a start position
-func GradientAlignment(dir GradientDirection) GradientOption {
-	return func(opt *GradientOptions) {
-		opt.Direction = dir
-	}
-}
-
-// GradientStartColor attaches a starting color
-func GradientStartColor(start color.Color) GradientOption {
-	return func(opt *GradientOptions) {
-		opt.StartColor = start
-	}
-}
-
-// GradientEndColor attaches an ending color
-func GradientEndColor(end color.Color) GradientOption {
-	return func(opt *GradientOptions) {
-		opt.EndColor = end
-	}
-}
-
-// GradientOffset adds an offset for gradient start point
-func GradientOffset(p fyne.Position) GradientOption {
-	return func(opt *GradientOptions) {
-		opt.Offset = p
-	}
-}
+/*
+	Gradient multiplier calculations
+*/
 
 // Linear horizontal gradiant
-func linearHorizontal(x, y, ox, oy, w, h int) float64 {
+func linearHorizontal(x, y, w, h int, ox, oy float64) float64 {
 	return float64(x) / float64(w)
 }
 
 // Linear vertical gradiant
-func linearVertical(x, y, ox, oy, w, h int) float64 {
+func linearVertical(x, y, w, h int, ox, oy float64) float64 {
 	return float64(y) / float64(h)
 }
 
 // Linear circular gradient - function/math thanks to Tilo Prützs
-func linearCircular(x, y, ox, oy, w, h int) float64 {
-	centerX := float64(w)/2 + float64(ox)
-	centerY := float64(h)/2 + float64(oy)
-	var rx, ry float64
+func linearCircular(x, y, w, h int, ox, oy float64) float64 {
+	// define center plus offset
+	centerX := float64(w)/2 + ox
+	centerY := float64(h)/2 + oy
+
+	// handle negative offsets
+	var a, b float64
 	if ox < 0 {
-		rx = float64(w) - centerX
+		a = float64(w) - centerX
 	} else {
-		rx = centerX
+		a = centerX
 	}
 	if oy < 0 {
-		ry = float64(h) - centerY
+		b = float64(h) - centerY
 	} else {
-		ry = centerY
+		b = centerY
 	}
-	_ = ry
+
+	// calculate distance from center for gradient multiplier
 	dx, dy := centerX-float64(x), centerY-float64(y)
-	d := math.Sqrt(dx*dx + dy*dy)
-	if d > rx {
+	da := math.Sqrt(dx*dx + dy*dy*a*a/b/b)
+	if da > a {
 		return 1
 	}
-	return d / rx
+	return da / a
 }
