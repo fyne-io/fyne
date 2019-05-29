@@ -10,7 +10,10 @@ import (
 
 func TestNewLinearGradient(t *testing.T) {
 	// Horizontal
-	horizontal := NewLinearGradient(color.Black, color.Transparent, GradientDirectionHorizontal)
+	horizontal, err := NewLinearGradient(color.Black, color.Transparent, GradientDirectionHorizontal)
+	if err != nil {
+		t.Errorf("Expected no error but received: %v", err)
+	}
 	assert.Equal(t, horizontal.Offset(), fyne.NewPos(0, 0))
 
 	img := horizontal.Generator(50, 5)
@@ -23,7 +26,10 @@ func TestNewLinearGradient(t *testing.T) {
 	assert.Equal(t, horizontal.Offset(), fyne.NewPos(3, 3))
 
 	// Vertical
-	vertical := NewLinearGradient(color.Black, color.Transparent, GradientDirectionVertical)
+	vertical, err := NewLinearGradient(color.Black, color.Transparent, GradientDirectionVertical)
+	if err != nil {
+		t.Errorf("Expected no error but received: %v", err)
+	}
 	imgVert := vertical.Generator(5, 50)
 	assert.Equal(t, imgVert.At(0, 0), color.RGBA{0, 0, 0, 0xff})
 	for i := 0; i < 5; i++ {
@@ -32,7 +38,10 @@ func TestNewLinearGradient(t *testing.T) {
 	assert.Equal(t, imgVert.At(50, 0), color.RGBA{0, 0, 0, 0x00})
 
 	// Radial and offsets
-	circle := NewLinearGradient(color.Black, color.Transparent, GradientDirectionCircular)
+	circle, err := NewLinearGradient(color.Black, color.Transparent, GradientDirectionCircular)
+	if err != nil {
+		t.Errorf("Expected no error but received: %v", err)
+	}
 	imgCircle := circle.Generator(10, 10)
 	assert.Equal(t, imgCircle.At(5, 5), color.RGBA{0, 0, 0, 0xff})
 	assert.Equal(t, imgCircle.At(4, 5), color.RGBA{0, 0, 0, 0xcc})
@@ -55,4 +64,10 @@ func TestNewLinearGradient(t *testing.T) {
 	assert.Equal(t, imgCircleOffset.At(3, 5), color.RGBA{0, 0, 0, 0xc3})
 	assert.Equal(t, imgCircleOffset.At(2, 5), color.RGBA{0, 0, 0, 0xa0})
 	assert.Equal(t, imgCircleOffset.At(1, 5), color.RGBA{0, 0, 0, 0x79})
+
+	// Test error response
+	_, err = NewLinearGradient(nil, nil, GradientDirectionCircular)
+	if err == nil {
+		t.Error("Expected an error but received none")
+	}
 }

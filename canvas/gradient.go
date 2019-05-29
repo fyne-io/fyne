@@ -1,6 +1,7 @@
 package canvas
 
 import (
+	"errors"
 	"image"
 	"image/color"
 	"image/draw"
@@ -91,7 +92,11 @@ type pixelGradient struct {
 
 // NewLinearGradient returns a new Image instance that dynamically
 // renders a gradient of type GradientDirection
-func NewLinearGradient(start color.Color, end color.Color, direction GradientDirection) *Gradient {
+func NewLinearGradient(start color.Color, end color.Color, direction GradientDirection) (*Gradient, error) {
+	if start == nil || end == nil {
+		return nil, errors.New("start and end colors are required for a gradient")
+	}
+
 	pix := &pixelGradient{}
 
 	pix.g = &Gradient{
@@ -125,7 +130,7 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 		}
 		return pix.img
 	}
-	return pix.g
+	return pix.g, nil
 }
 
 /*
