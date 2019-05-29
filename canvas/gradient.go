@@ -38,14 +38,14 @@ type Gradient struct {
 	img draw.Image // internal cache for pixel generator - may be superfluous
 }
 
-// Offset returns the offset of the  gradient
-func (g *Gradient) Offset() fyne.Position {
+// Center returns the center of the gradient
+func (g *Gradient) Center() fyne.Position {
 	return g.offset
 }
 
-// SetOffset sets the gradient offset.
-// Should be set before generation
-func (g *Gradient) SetOffset(pos fyne.Position) {
+// SetCenter sets the gradient center.
+// Should be set before generation. Only used by Circular
+func (g *Gradient) SetCenter(pos fyne.Position) {
 	g.offset = pos
 }
 
