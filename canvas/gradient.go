@@ -31,22 +31,51 @@ type Gradient struct {
 	direction GradientDirection // The direction of the gradient.
 	start     color.Color       // The beginning RGBA color of the gradient
 	end       color.Color       // The end RGBA color of the gradient
-	offset    fyne.Position     // The offest for generation of the gradient
+	center    fyne.Position     // The offest for generation of the gradient
 
 	gradientFnc func(x, y, w, h int, ox, oy float64) float64 // The function for calculating the gradient
 
 	img draw.Image // internal cache for pixel generator - may be superfluous
 }
 
+// Resize sets a new size for the gradient object
+func (g *Gradient) Resize(size fyne.Size) {
+	g.size = size
+	newCenter := g.scaleCenter()
+	g.SetCenter(newCenter)
+}
+
 // Center returns the center of the gradient
 func (g *Gradient) Center() fyne.Position {
-	return g.offset
+	return g.center
 }
 
 // SetCenter sets the gradient center.
 // Should be set before generation. Only used by Circular
 func (g *Gradient) SetCenter(pos fyne.Position) {
-	g.offset = pos
+	g.center = pos
+}
+
+// recenter returns an adjusted center for the width and height
+func (g *Gradient) scaleCenter() fyne.Position {
+	centerX := g.center.X
+	centerY := g.center.Y
+	if centerX != 0 {
+		w := g.Size().Width
+		if w != 0 {
+			ratioX := centerX / w
+			centerX = w * ratioX
+		}
+	}
+	if centerY != 0 {
+		h := g.Size().Height
+		if h != 0 {
+			ratioY := centerY / h
+			centerY = h * ratioY
+		}
+	}
+
+	return fyne.NewPos(centerX, centerY)
 }
 
 // calculatePixel uses the gradientFnc to caculate the pixel
@@ -54,7 +83,7 @@ func (g *Gradient) SetCenter(pos fyne.Position) {
 // using w and h to determine rate of graduation
 // returns a color.RGBA64
 func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
-	ox, oy := float64(g.offset.X), float64(g.offset.Y)
+	ox, oy := float64(g.center.X), float64(g.center.Y)
 	d := g.gradientFnc(x, y, w, h, ox, oy)
 
 	// fetch RGBA values
@@ -100,9 +129,8 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 	pix := &pixelGradient{}
 
 	pix.g = &Gradient{
-		start:  start,
-		end:    end,
-		offset: fyne.NewPos(0, 0),
+		start: start,
+		end:   end,
 	}
 
 	switch direction {
