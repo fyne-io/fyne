@@ -16,10 +16,11 @@ import (
 
 type glCanvas struct {
 	sync.RWMutex
-	window                 *window
-	content, overlay, menu fyne.CanvasObject
-	focused                fyne.Focusable
-	focusMgr               *app.FocusManager
+	window           *window
+	content, overlay fyne.CanvasObject
+	menu             *widget.Toolbar
+	focused          fyne.Focusable
+	focusMgr         *app.FocusManager
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -255,8 +256,8 @@ func (c *glCanvas) setupThemeListener() {
 	go func() {
 		for {
 			<-listener
-			if bar, ok := c.menu.(*widget.Toolbar); ok {
-				app.ApplyThemeTo(bar, c) // Ensure our menu gets the theme change message as it's out-of-tree
+			if c.menu != nil {
+				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
 			}
 
 			c.window.SetPadded(c.window.padded) // refresh the padding for potential theme differences
@@ -276,13 +277,13 @@ func (c *glCanvas) buildMenuBar(m *fyne.MainMenu) {
 	}
 }
 
-func (c *glCanvas) setMenuBar(b fyne.CanvasObject) {
+func (c *glCanvas) setMenuBar(b *widget.Toolbar) {
 	c.Lock()
 	c.menu = b
 	c.Unlock()
 }
 
-func (c *glCanvas) menuBar() fyne.CanvasObject {
+func (c *glCanvas) menuBar() *widget.Toolbar {
 	c.RLock()
 	defer c.RUnlock()
 	return c.menu
