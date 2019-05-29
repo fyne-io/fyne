@@ -61,7 +61,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	require.Len(t, buttons, 3)
 	content := tabs.Items[0].Content
 
-	tabs.SetTabLocation(TabLocationLeft)
+	tabs.SetTabLocation(TabLocationLeading)
 	assert.Equal(t, fyne.NewPos(0, 0), r.tabBar.Position())
 	assert.False(t, r.tabBar.Horizontal)
 	assert.Equal(t, fyne.NewPos(r.tabBar.MinSize().Width+theme.Padding(), 0), content.Position())
@@ -87,7 +87,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 		x += theme.Padding()
 	}
 
-	tabs.SetTabLocation(TabLocationRight)
+	tabs.SetTabLocation(TabLocationTrailing)
 	assert.Equal(t, fyne.NewPos(content.Size().Width+theme.Padding(), 0), r.tabBar.Position())
 	assert.False(t, r.tabBar.Horizontal)
 	assert.Equal(t, fyne.NewPos(0, 0), content.Position())

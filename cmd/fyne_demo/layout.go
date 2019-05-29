@@ -85,11 +85,11 @@ func Layout(app fyne.App) {
 	onTapped := func() {
 		switch l {
 		case widget.TabLocationTop:
-			l = widget.TabLocationLeft
-		case widget.TabLocationLeft:
+			l = widget.TabLocationLeading
+		case widget.TabLocationLeading:
 			l = widget.TabLocationBottom
 		case widget.TabLocationBottom:
-			l = widget.TabLocationRight
+			l = widget.TabLocationTrailing
 		default:
 			l = widget.TabLocationTop
 		}

@@ -32,9 +32,9 @@ type TabLocation int
 // TabLocation values
 const (
 	TabLocationTop TabLocation = iota
-	TabLocationLeft
+	TabLocationLeading
 	TabLocationBottom
-	TabLocationRight
+	TabLocationTrailing
 )
 
 // TabContainer widget allows switching visible content from a list of TabItems.
@@ -162,7 +162,7 @@ func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *Box {
 	var tabBar *Box
 	switch t.tabLocation {
-	case TabLocationLeft, TabLocationRight:
+	case TabLocationLeading, TabLocationTrailing:
 		tabBar = NewVBox()
 	default:
 		tabBar = NewHBox()
@@ -209,7 +209,7 @@ func (t *tabContainerRenderer) MinSize() fyne.Size {
 	}
 
 	switch t.container.tabLocation {
-	case TabLocationLeft, TabLocationRight:
+	case TabLocationLeading, TabLocationTrailing:
 		return fyne.NewSize(buttonsMin.Width+childMin.Width+theme.Padding(),
 			fyne.Max(buttonsMin.Height, childMin.Height))
 	default:
@@ -231,7 +231,7 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 		barHeight := buttonHeight + theme.Padding()
 		child.Move(fyne.NewPos(0, barHeight))
 		child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
-	case TabLocationLeft:
+	case TabLocationLeading:
 		buttonWidth := t.tabBar.MinSize().Width
 		t.tabBar.Move(fyne.NewPos(0, 0))
 		t.tabBar.Resize(fyne.NewSize(buttonWidth, size.Height))
@@ -253,7 +253,7 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 		child := t.container.Items[t.container.current].Content
 		child.Move(fyne.NewPos(0, 0))
 		child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
-	case TabLocationRight:
+	case TabLocationTrailing:
 		buttonWidth := t.tabBar.MinSize().Width
 		t.tabBar.Move(fyne.NewPos(size.Width-buttonWidth, 0))
 		t.tabBar.Resize(fyne.NewSize(buttonWidth, size.Height))
