@@ -1,4 +1,4 @@
-// +build !darwin
+// +build !darwin no_native_menus
 
 package gl
 

@@ -19,10 +19,11 @@ var _ fyne.Canvas = (*glCanvas)(nil)
 
 type glCanvas struct {
 	sync.RWMutex
-	window                 *window
-	content, overlay, menu fyne.CanvasObject
-	focused                fyne.Focusable
-	focusMgr               *app.FocusManager
+	window           *window
+	content, overlay fyne.CanvasObject
+	menu             *widget.Toolbar
+	focused          fyne.Focusable
+	focusMgr         *app.FocusManager
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -76,20 +77,9 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 	c.Unlock()
 
-	var w, h = c.window.viewport.GetSize()
+	c.content.Resize(c.window.contentSize(c.Size()))
+	c.content.Move(c.window.contentPos())
 
-	xpad := theme.Padding()
-	ypad := theme.Padding()
-	if !c.window.Padded() {
-		xpad = 0
-		ypad = 0
-	}
-	menu := c.menuHeight()
-	width := unscaleInt(c, int(w)) - xpad*2
-	height := unscaleInt(c, int(h+menu)) - ypad*2
-
-	c.content.Resize(fyne.NewSize(width, height))
-	c.content.Move(fyne.NewPos(xpad, ypad+menu))
 	c.setDirty(true)
 }
 
@@ -259,13 +249,47 @@ func (c *glCanvas) setupThemeListener() {
 	go func() {
 		for {
 			<-listener
-			if bar, ok := c.menu.(*widget.Toolbar); ok {
-				app.ApplyThemeTo(bar, c) // Ensure our menu gets the theme change message as it's out-of-tree
+			if c.menu != nil {
+				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
 			}
 
 			c.window.SetPadded(c.window.padded) // refresh the padding for potential theme differences
 		}
 	}()
+}
+
+func (c *glCanvas) buildMenuBar(m *fyne.MainMenu) {
+	c.setMenuBar(nil)
+	if m == nil {
+		return
+	}
+	if hasNativeMenu() {
+		setupNativeMenu(m)
+	} else {
+		c.setMenuBar(buildMenuBar(m, c.window))
+	}
+}
+
+func (c *glCanvas) setMenuBar(b *widget.Toolbar) {
+	c.Lock()
+	c.menu = b
+	c.Unlock()
+}
+
+func (c *glCanvas) menuBar() *widget.Toolbar {
+	c.RLock()
+	defer c.RUnlock()
+	return c.menu
+}
+
+func (c *glCanvas) menuHeight() int {
+	switch c.menuBar() {
+	case nil:
+		// no menu or native menu -> does not consume space on the canvas
+		return 0
+	default:
+		return c.menuBar().MinSize().Height
+	}
 }
 
 func newCanvas(win *window) *glCanvas {

@@ -1,3 +1,5 @@
+// +build !no_native_menus
+
 package gl
 
 import (

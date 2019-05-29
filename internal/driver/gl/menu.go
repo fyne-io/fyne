@@ -2,9 +2,7 @@ package gl
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/widget"
-	"image/color"
 )
 
 type menuBarAction struct {
@@ -56,39 +54,4 @@ func buildMenuBar(menus *fyne.MainMenu, w fyne.Window) *widget.Toolbar {
 func showMenu(menu *fyne.Menu, pos fyne.Position, c fyne.Canvas) {
 	pop := widget.NewPopUpMenu(menu, c)
 	pop.Move(pos)
-}
-
-func (c *glCanvas) menuBar() fyne.CanvasObject {
-	if c.window.mainmenu == nil {
-		return nil
-	}
-
-	c.RLock()
-	ret := c.menu
-	c.RUnlock()
-	if ret != nil {
-		return ret
-	}
-
-	if hasNativeMenu() {
-		setupNativeMenu(c.window.mainmenu)
-
-		ret = canvas.NewRectangle(color.Transparent) // just a dummy value really
-	} else {
-		ret = buildMenuBar(c.window.mainmenu, c.window)
-	}
-	c.Lock()
-	c.menu = ret
-	c.Unlock()
-	return ret
-}
-
-func (c *glCanvas) menuHeight() int {
-	bar := c.menuBar()
-
-	if bar == nil { // reserve no height for a native menus or windows with no menu
-		return 0
-	}
-
-	return bar.MinSize().Height
 }
