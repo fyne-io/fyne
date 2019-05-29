@@ -6,6 +6,8 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+
+	"fyne.io/fyne"
 )
 
 const (
@@ -26,27 +28,25 @@ type Gradient struct {
 
 	Generator func(w, h int) image.Image
 
-	direction     GradientDirection // The direction of the gradient.
-	start         color.Color       // The beginning RGBA color of the gradient
-	end           color.Color       // The end RGBA color of the gradient
-	radialOffsetX float64           // The offest for generation of the gradient
-	radialOffsetY float64           // The offest for generation of the gradient
+	direction GradientDirection // The direction of the gradient.
+	start     color.Color       // The beginning RGBA color of the gradient
+	end       color.Color       // The end RGBA color of the gradient
+	offset    fyne.Position     // The offest for generation of the gradient
 
 	gradientFnc func(x, y, w, h int, ox, oy float64) float64 // The function for calculating the gradient
 
 	img draw.Image // internal cache for pixel generator - may be superfluous
 }
 
-// RadialOffset returns the offset of the radial gradient
-func (g *Gradient) RadialOffset() (float64, float64) {
-	return g.radialOffsetX, g.radialOffsetY
+// Offset returns the offset of the  gradient
+func (g *Gradient) Offset() fyne.Position {
+	return g.offset
 }
 
-// SetRadialOffset sets the radial gradient offset.
+// SetOffset sets the gradient offset.
 // Should be set before generation
-func (g *Gradient) SetRadialOffset(oX float64, oY float64) {
-	g.radialOffsetX = oX
-	g.radialOffsetY = oY
+func (g *Gradient) SetOffset(pos fyne.Position) {
+	g.offset = pos
 }
 
 // calculatePixel uses the gradientFnc to caculate the pixel
@@ -54,7 +54,8 @@ func (g *Gradient) SetRadialOffset(oX float64, oY float64) {
 // using w and h to determine rate of graduation
 // returns a color.RGBA64
 func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
-	d := g.gradientFnc(x, y, w, h, g.radialOffsetX, g.radialOffsetY)
+	ox, oy := float64(g.offset.X), float64(g.offset.Y)
+	d := g.gradientFnc(x, y, w, h, ox, oy)
 
 	// fetch RGBA values
 	aR, aG, aB, aA := g.start.RGBA()
@@ -99,10 +100,9 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 	pix := &pixelGradient{}
 
 	pix.g = &Gradient{
-		start:         start,
-		end:           end,
-		radialOffsetX: 0,
-		radialOffsetY: 0,
+		start:  start,
+		end:    end,
+		offset: fyne.NewPos(0, 0),
 	}
 
 	switch direction {
