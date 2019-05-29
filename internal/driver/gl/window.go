@@ -131,9 +131,7 @@ func (w *window) centerOnScreen() {
 
 // minSizeOnScreen gets the minimum size of a window content in screen pixels
 func (w *window) minSizeOnScreen() (int, int) {
-	w.canvas.RLock()
-	content := w.canvas.content
-	w.canvas.RUnlock()
+	content := w.canvas.Content()
 
 	// get current size of content inside the window
 	winContentSize := fyne.NewSize(0, 0)
@@ -141,28 +139,43 @@ func (w *window) minSizeOnScreen() (int, int) {
 		winContentSize = content.MinSize()
 	}
 
-	// add padding, if required
-	if w.Padded() {
-		pad := theme.Padding() * 2
-		winContentSize = fyne.NewSize(winContentSize.Width+pad, winContentSize.Height+pad+w.canvas.menuHeight())
-	}
-
-	// calculate how many pixels will be used at this scale
-	viewWidth := scaleInt(w.canvas, winContentSize.Width)
-	viewHeight := scaleInt(w.canvas, winContentSize.Height)
-
-	return viewWidth, viewHeight
+	return w.screenSize(winContentSize)
 }
 
-func (w *window) screenSize(size fyne.Size) (int, int) {
-	c := w.canvas
-	size = size.Add(fyne.NewSize(0, c.menuHeight()))
+// screenSize computes the minimum size of the given content size in screen pixels
+func (w *window) screenSize(contentSize fyne.Size) (int, int) {
+	screenSize := w.canvasSize(contentSize)
+	return scaleInt(w.canvas, screenSize.Width), scaleInt(w.canvas, screenSize.Height)
+}
+
+// canvasSize computes the needed canvas size for the given content size
+func (w *window) canvasSize(contentSize fyne.Size) fyne.Size {
+	canvasSize := contentSize.Add(fyne.NewSize(0, w.canvas.menuHeight()))
 	if w.Padded() {
 		pad := theme.Padding() * 2
-		size = size.Add(fyne.NewSize(pad, pad))
+		canvasSize = canvasSize.Add(fyne.NewSize(pad, pad))
 	}
+	return canvasSize
+}
 
-	return scaleInt(c, size.Width), scaleInt(c, size.Height)
+func (w *window) contentSize(canvasSize fyne.Size) fyne.Size {
+	contentSize := fyne.NewSize(canvasSize.Width, canvasSize.Height-w.canvas.menuHeight())
+	if w.Padded() {
+		pad := theme.Padding() * 2
+		contentSize = contentSize.Subtract(fyne.NewSize(pad, pad))
+	}
+	if contentSize.Width < 0 || contentSize.Height < 0 {
+		contentSize = fyne.NewSize(fyne.Max(contentSize.Width, 0), fyne.Max(contentSize.Height, 0))
+	}
+	return contentSize
+}
+
+func (w *window) contentPos() fyne.Position {
+	contentPos := fyne.NewPos(0, w.canvas.menuHeight())
+	if w.Padded() {
+		contentPos = contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
+	}
+	return contentPos
 }
 
 func (w *window) RequestFocus() {
@@ -202,11 +215,7 @@ func (w *window) SetPadded(padded bool) {
 		return
 	}
 
-	if padded {
-		w.canvas.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()+w.canvas.menuHeight()))
-	} else {
-		w.canvas.content.Move(fyne.NewPos(0, w.canvas.menuHeight()))
-	}
+	w.canvas.content.Move(w.contentPos())
 
 	w.resizeToContent()
 }
@@ -398,13 +407,7 @@ func (w *window) resize(size fyne.Size) {
 		w.height = scaleInt(w.canvas, size.Height)
 	}
 
-	innerSize := fyne.NewSize(size.Width, size.Height-w.canvas.menuHeight())
-	if w.Padded() {
-		pad := theme.Padding() * 2
-		innerSize = innerSize.Subtract(fyne.NewSize(pad, pad))
-	}
-
-	w.canvas.content.Resize(innerSize)
+	w.canvas.content.Resize(w.contentSize(size))
 	if w.canvas.overlay != nil {
 		w.canvas.overlay.Resize(size)
 	}
@@ -421,16 +424,12 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	}
 
 	w.canvas.SetContent(content)
-	min := content.MinSize()
+	min := w.canvasSize(content.MinSize())
 	// show top canvas element
 	if w.visible && w.canvas.Content() != nil {
 		w.canvas.Content().Show()
 	}
 
-	if w.Padded() {
-		pad := theme.Padding() * 2
-		min = fyne.NewSize(min.Width+pad, min.Height+pad+w.canvas.menuHeight())
-	}
 	runOnMain(func() {
 		w.fitContent()
 		w.resize(min)
@@ -476,13 +475,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	w.canvas.content.Resize(contentSize)
 	w.canvas.setDirty(true)
 
-	if w.Padded() {
-		pad := theme.Padding() * 2
-		contentSize = fyne.NewSize(contentSize.Width+pad, contentSize.Height+pad+w.canvas.menuHeight())
-	}
-
-	newWidth, newHeight := scaleInt(w.canvas, contentSize.Width),
-		scaleInt(w.canvas, contentSize.Height)
+	newWidth, newHeight := w.screenSize(contentSize)
 	w.viewport.SetSize(newWidth, newHeight)
 
 	go func() {

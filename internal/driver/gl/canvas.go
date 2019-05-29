@@ -74,18 +74,8 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 	c.Unlock()
 
-	contentSize := c.Size().Subtract(fyne.NewSize(0, c.menuHeight()))
-	if contentSize.Height < 0 {
-		contentSize.Height = 0
-	}
-	contentPos := fyne.NewPos(0, c.menuHeight())
-	if c.window.Padded() {
-		contentSize = contentSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-		contentPos = contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
-	}
-
-	c.content.Resize(contentSize)
-	c.content.Move(contentPos)
+	c.content.Resize(c.window.contentSize(c.Size()))
+	c.content.Move(c.window.contentPos())
 
 	c.setDirty(true)
 }
