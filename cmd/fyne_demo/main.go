@@ -21,6 +21,7 @@ func formApp(app fyne.App) {
 	email := widget.NewEntry()
 	email.SetPlaceHolder("test@example.com")
 	password := widget.NewPasswordEntry()
+	password.SetPlaceHolder("Password")
 	largeText := widget.NewMultiLineEntry()
 
 	form := &widget.Form{

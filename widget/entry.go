@@ -470,8 +470,9 @@ func (p *placeholderPresenter) textColor() color.Color {
 }
 
 // password tells the rendering textProvider if we are a password field
+// placeholder text is not obfuscated, returning false
 func (p *placeholderPresenter) password() bool {
-	return p.e.Password
+	return false
 }
 
 // object returns the root object of the widget so it can be referenced
