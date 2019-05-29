@@ -9,9 +9,11 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Menubar and PopUpMenu (#41)
 * PopUp widgets (regular and modal) and canvas overlay support (#242)
+* Support moving through inputs with Tab / Shift-Tab (#82)
 * canvas.Capture() to save the content of a canvas
 * Horizontal layout for widget.Radio
 * Select widget (#21)
+* Add support for disabling widgets (#234)
 * Support for changing icon color (#246)
 * Button hover effect
 * Pointer drag event to main API
@@ -19,13 +21,17 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Changed
 
+* TabContainer tab location can now be set with SetTabLocation()
 * Don't add a button bar to a form if it has no buttons
 * Moved driver/gl package to internal/driver/gl
+* Clicking/Tapping in an entry will position the cursor
 
 ### Fixed
 
+* Allow scrollbars to be dragged (#133)
 * Unicode char input with Option key on macOS (#247)
 * Resizng fixed size windows (#248)
+* Fixed various bugs in window sizing and padding
 
 
 ## 1.0.1 - 20 April 2019

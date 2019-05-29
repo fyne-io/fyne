@@ -4,6 +4,12 @@ import "fyne.io/fyne"
 
 // Tap simulates a mouse click on the specified object
 func Tap(obj fyne.Tappable) {
+	if focus, ok := obj.(fyne.Focusable); ok {
+		if focus != Canvas().Focused() {
+			Canvas().Focus(focus)
+		}
+	}
+
 	ev := &fyne.PointEvent{Position: fyne.NewPos(1, 1)}
 	obj.Tapped(ev)
 }

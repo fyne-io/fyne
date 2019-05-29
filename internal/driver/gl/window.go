@@ -656,8 +656,13 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		w.mouseButton = 0
 	}
 
-	switch wid := co.(type) {
-	case fyne.Tappable:
+	// we cannot switch here as objects may respond to multiple cases
+	if wid, ok := co.(fyne.Focusable); ok {
+		if needsfocus == true {
+			w.canvas.Focus(wid)
+		}
+	}
+	if wid, ok := co.(fyne.Tappable); ok {
 		if action == glfw.Release {
 			switch button {
 			case glfw.MouseButtonRight:
@@ -666,13 +671,10 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 				go wid.Tapped(ev)
 			}
 		}
-	case fyne.Draggable:
+	}
+	if _, ok := co.(fyne.Draggable); ok {
 		if action == glfw.Press {
 			w.mouseDragPos = ev.Position
-		}
-	case fyne.Focusable:
-		if needsfocus == true {
-			w.canvas.Focus(wid)
 		}
 	}
 }
@@ -982,6 +984,18 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	}
 }
 
+func (w *window) focused(viewport *glfw.Window, focused bool) {
+	if w.canvas.focused == nil {
+		return
+	}
+
+	if focused {
+		w.canvas.focused.FocusGained()
+	} else {
+		w.canvas.focused.FocusLost()
+	}
+}
+
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	var ret *window
 	runOnMain(func() {
@@ -1037,6 +1051,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		win.SetScrollCallback(ret.mouseScrolled)
 		win.SetKeyCallback(ret.keyPressed)
 		win.SetCharModsCallback(ret.charModInput)
+		win.SetFocusCallback(ret.focused)
 		glfw.DetachCurrentContext()
 	})
 	return ret
