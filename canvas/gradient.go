@@ -38,13 +38,6 @@ type Gradient struct {
 	img draw.Image // internal cache for pixel generator - may be superfluous
 }
 
-// Resize sets a new size for the gradient object
-func (g *Gradient) Resize(size fyne.Size) {
-	g.size = size
-	newCenter := g.scaleCenter()
-	g.SetCenter(newCenter)
-}
-
 // Center returns the center of the gradient
 func (g *Gradient) Center() fyne.Position {
 	return g.center
@@ -54,28 +47,6 @@ func (g *Gradient) Center() fyne.Position {
 // Should be set before generation. Only used by Circular
 func (g *Gradient) SetCenter(pos fyne.Position) {
 	g.center = pos
-}
-
-// recenter returns an adjusted center for the width and height
-func (g *Gradient) scaleCenter() fyne.Position {
-	centerX := g.center.X
-	centerY := g.center.Y
-	if centerX != 0 {
-		w := g.Size().Width
-		if w != 0 {
-			ratioX := centerX / w
-			centerX = w * ratioX
-		}
-	}
-	if centerY != 0 {
-		h := g.Size().Height
-		if h != 0 {
-			ratioY := centerY / h
-			centerY = h * ratioY
-		}
-	}
-
-	return fyne.NewPos(centerX, centerY)
 }
 
 // calculatePixel uses the gradientFnc to caculate the pixel
@@ -133,6 +104,7 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 		end:   end,
 	}
 
+	pix.g.direction = direction
 	switch direction {
 	case GradientDirectionHorizontal:
 		pix.g.gradientFnc = linearHorizontal
