@@ -26,13 +26,25 @@ func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObje
 	return &TabItem{Text: text, Icon: icon, Content: content}
 }
 
+// TabLocation ist the location where the tabs of a tab container should be rendered
+type TabLocation int
+
+// TabLocation values
+const (
+	TabLocationTop TabLocation = iota
+	TabLocationLeading
+	TabLocationBottom
+	TabLocationTrailing
+)
+
 // TabContainer widget allows switching visible content from a list of TabItems.
 // Each item is represented by a button at the top of the widget.
 type TabContainer struct {
 	baseWidget
 
-	Items   []*TabItem
-	current int
+	Items       []*TabItem
+	current     int
+	tabLocation TabLocation
 }
 
 // Resize sets a new size for a widget.
@@ -130,9 +142,7 @@ func (t *TabContainer) Append(item TabItem) {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
-	var contents []fyne.CanvasObject
-
-	buttons := NewHBox()
+	var buttons, objects []fyne.CanvasObject
 	for i, item := range t.Items {
 		button := t.makeButton(item)
 		if i == t.current {
@@ -140,18 +150,43 @@ func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 		} else {
 			item.Content.Hide()
 		}
-		buttons.Append(button)
-		contents = append(contents, item.Content)
+		buttons = append(buttons, button)
+		objects = append(objects, item.Content)
 	}
-
+	tabBar := t.buildTabBar(buttons)
 	line := canvas.NewRectangle(theme.ButtonColor())
-	objects := append(contents, line, buttons)
-	return &tabContainerRenderer{tabBar: buttons, line: line, objects: objects, container: t}
+	objects = append(objects, line, tabBar)
+	return &tabContainerRenderer{tabBar: tabBar, line: line, objects: objects, container: t}
+}
+
+func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *Box {
+	var tabBar *Box
+	switch t.tabLocation {
+	case TabLocationLeading, TabLocationTrailing:
+		tabBar = NewVBox()
+	default:
+		tabBar = NewHBox()
+	}
+	for _, button := range buttons {
+		tabBar.Append(button)
+	}
+	return tabBar
+}
+
+// SetTabLocation sets the location of the tab bar
+func (t *TabContainer) SetTabLocation(l TabLocation) {
+	t.tabLocation = l
+	r := Renderer(t).(*tabContainerRenderer)
+	buttons := r.tabBar.Children
+	r.tabBar.Children = nil
+	r.tabBar = t.buildTabBar(buttons)
+	r.objects[len(r.objects)-1] = r.tabBar
+	r.Refresh()
 }
 
 // NewTabContainer creates a new tab bar widget that allows the user to choose between different visible containers
 func NewTabContainer(items ...*TabItem) *TabContainer {
-	tabs := &TabContainer{baseWidget{}, items, 0}
+	tabs := &TabContainer{baseWidget: baseWidget{}, Items: items}
 
 	Renderer(tabs).Layout(tabs.MinSize())
 	return tabs
@@ -173,19 +208,63 @@ func (t *tabContainerRenderer) MinSize() fyne.Size {
 		childMin = childMin.Union(child.Content.MinSize())
 	}
 
-	return fyne.NewSize(fyne.Max(buttonsMin.Width, childMin.Width),
-		buttonsMin.Height+childMin.Height+theme.Padding())
+	switch t.container.tabLocation {
+	case TabLocationLeading, TabLocationTrailing:
+		return fyne.NewSize(buttonsMin.Width+childMin.Width+theme.Padding(),
+			fyne.Max(buttonsMin.Height, childMin.Height))
+	default:
+		return fyne.NewSize(fyne.Max(buttonsMin.Width, childMin.Width),
+			buttonsMin.Height+childMin.Height+theme.Padding())
+	}
 }
 
 func (t *tabContainerRenderer) Layout(size fyne.Size) {
-	buttonHeight := t.tabBar.MinSize().Height
-	t.tabBar.Resize(fyne.NewSize(size.Width, buttonHeight))
-	t.line.Move(fyne.NewPos(0, buttonHeight))
-	t.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
+	switch t.container.tabLocation {
+	case TabLocationTop:
+		buttonHeight := t.tabBar.MinSize().Height
+		t.tabBar.Move(fyne.NewPos(0, 0))
+		t.tabBar.Resize(fyne.NewSize(size.Width, buttonHeight))
+		t.line.Move(fyne.NewPos(0, buttonHeight))
+		t.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
 
-	child := t.container.Items[t.container.current].Content
-	child.Move(fyne.NewPos(0, buttonHeight+theme.Padding()))
-	child.Resize(fyne.NewSize(size.Width, size.Height-buttonHeight-theme.Padding()))
+		child := t.container.Items[t.container.current].Content
+		barHeight := buttonHeight + theme.Padding()
+		child.Move(fyne.NewPos(0, barHeight))
+		child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
+	case TabLocationLeading:
+		buttonWidth := t.tabBar.MinSize().Width
+		t.tabBar.Move(fyne.NewPos(0, 0))
+		t.tabBar.Resize(fyne.NewSize(buttonWidth, size.Height))
+		t.line.Move(fyne.NewPos(buttonWidth, 0))
+		t.line.Resize(fyne.NewSize(theme.Padding(), size.Height))
+
+		child := t.container.Items[t.container.current].Content
+		barWidth := buttonWidth + theme.Padding()
+		child.Move(fyne.NewPos(barWidth, 0))
+		child.Resize(fyne.NewSize(size.Width-barWidth, size.Height))
+	case TabLocationBottom:
+		buttonHeight := t.tabBar.MinSize().Height
+		t.tabBar.Move(fyne.NewPos(0, size.Height-buttonHeight))
+		t.tabBar.Resize(fyne.NewSize(size.Width, buttonHeight))
+		barHeight := buttonHeight + theme.Padding()
+		t.line.Move(fyne.NewPos(0, size.Height-barHeight))
+		t.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
+
+		child := t.container.Items[t.container.current].Content
+		child.Move(fyne.NewPos(0, 0))
+		child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
+	case TabLocationTrailing:
+		buttonWidth := t.tabBar.MinSize().Width
+		t.tabBar.Move(fyne.NewPos(size.Width-buttonWidth, 0))
+		t.tabBar.Resize(fyne.NewSize(buttonWidth, size.Height))
+		barWidth := buttonWidth + theme.Padding()
+		t.line.Move(fyne.NewPos(size.Width-barWidth, 0))
+		t.line.Resize(fyne.NewSize(theme.Padding(), size.Height))
+
+		child := t.container.Items[t.container.current].Content
+		child.Move(fyne.NewPos(0, 0))
+		child.Resize(fyne.NewSize(size.Width-barWidth, size.Height))
+	}
 }
 
 func (t *tabContainerRenderer) ApplyTheme() {
@@ -202,7 +281,7 @@ func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
 
 func (t *tabContainerRenderer) Refresh() {
 	Renderer(t.tabBar).Refresh()
-	t.Layout(t.container.Size())
+	t.Layout(t.container.Size().Union(t.container.MinSize()))
 
 	canvas.Refresh(t.container)
 

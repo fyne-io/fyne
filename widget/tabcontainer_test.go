@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTabContainer_CurrentTabIndex(t *testing.T) {
@@ -48,6 +49,71 @@ func TestTabContainer_SelectTabIndex(t *testing.T) {
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
 }
 
+func TestTabContainer_SetTabLocation(t *testing.T) {
+	tab1 := NewTabItem("Test1", NewLabel("Test1"))
+	tab2 := NewTabItem("Test2", NewLabel("Test2"))
+	tab3 := NewTabItem("Test3", NewLabel("Test3"))
+	tabs := NewTabContainer(tab1, tab2, tab3)
+
+	r := Renderer(tabs).(*tabContainerRenderer)
+
+	buttons := r.tabBar.Children
+	require.Len(t, buttons, 3)
+	content := tabs.Items[0].Content
+
+	tabs.SetTabLocation(TabLocationLeading)
+	assert.Equal(t, fyne.NewPos(0, 0), r.tabBar.Position())
+	assert.False(t, r.tabBar.Horizontal)
+	assert.Equal(t, fyne.NewPos(r.tabBar.MinSize().Width+theme.Padding(), 0), content.Position())
+	assert.Equal(t, fyne.NewPos(r.tabBar.MinSize().Width, 0), r.line.Position())
+	assert.Equal(t, fyne.NewSize(theme.Padding(), tabs.MinSize().Height), r.line.Size())
+	y := 0
+	for _, button := range buttons {
+		assert.Equal(t, fyne.NewPos(0, y), button.Position())
+		y += button.Size().Height
+		y += theme.Padding()
+	}
+
+	tabs.SetTabLocation(TabLocationBottom)
+	assert.Equal(t, fyne.NewPos(0, content.MinSize().Height+theme.Padding()), r.tabBar.Position())
+	assert.True(t, r.tabBar.Horizontal)
+	assert.Equal(t, fyne.NewPos(0, 0), content.Position())
+	assert.Equal(t, fyne.NewPos(0, content.Size().Height), r.line.Position())
+	assert.Equal(t, fyne.NewSize(tabs.MinSize().Width, theme.Padding()), r.line.Size())
+	x := 0
+	for _, button := range buttons {
+		assert.Equal(t, fyne.NewPos(x, 0), button.Position())
+		x += button.Size().Width
+		x += theme.Padding()
+	}
+
+	tabs.SetTabLocation(TabLocationTrailing)
+	assert.Equal(t, fyne.NewPos(content.Size().Width+theme.Padding(), 0), r.tabBar.Position())
+	assert.False(t, r.tabBar.Horizontal)
+	assert.Equal(t, fyne.NewPos(0, 0), content.Position())
+	assert.Equal(t, fyne.NewPos(content.Size().Width, 0), r.line.Position())
+	assert.Equal(t, fyne.NewSize(theme.Padding(), tabs.MinSize().Height), r.line.Size())
+	y = 0
+	for _, button := range buttons {
+		assert.Equal(t, fyne.NewPos(0, y), button.Position())
+		y += button.Size().Height
+		y += theme.Padding()
+	}
+
+	tabs.SetTabLocation(TabLocationTop)
+	assert.Equal(t, fyne.NewPos(0, 0), r.tabBar.Position())
+	assert.True(t, r.tabBar.Horizontal)
+	assert.Equal(t, fyne.NewPos(0, r.tabBar.MinSize().Height+theme.Padding()), content.Position())
+	assert.Equal(t, fyne.NewPos(0, r.tabBar.MinSize().Height), r.line.Position())
+	assert.Equal(t, fyne.NewSize(tabs.MinSize().Width, theme.Padding()), r.line.Size())
+	x = 0
+	for _, button := range buttons {
+		assert.Equal(t, fyne.NewPos(x, 0), button.Position())
+		x += button.Size().Width
+		x += theme.Padding()
+	}
+}
+
 func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
 	tabs := NewTabContainer(&TabItem{Text: "Test1", Content: NewLabel("Test1")})
 	underline := Renderer(tabs).(*tabContainerRenderer).line
@@ -67,8 +133,7 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 	r := Renderer(tabs).(*tabContainerRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
-	if assert.Len(t, r.tabBar.Children, 2) {
-		assert.Equal(t, theme.CancelIcon(), r.tabBar.Children[0].(*Button).Icon)
-		assert.Equal(t, theme.ConfirmIcon(), r.tabBar.Children[1].(*Button).Icon)
-	}
+	require.Len(t, r.tabBar.Children, 2)
+	assert.Equal(t, theme.CancelIcon(), r.tabBar.Children[0].(*Button).Icon)
+	assert.Equal(t, theme.ConfirmIcon(), r.tabBar.Children[1].(*Button).Icon)
 }
