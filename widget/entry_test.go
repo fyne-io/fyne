@@ -16,6 +16,11 @@ func entryRenderTexts(e *Entry) []*canvas.Text {
 	return Renderer(textWid).(*textRenderer).texts
 }
 
+func entryRenderPlaceholderTexts(e *Entry) []*canvas.Text {
+	textWid := Renderer(e).(*entryRenderer).placeholder
+	return Renderer(textWid).(*textRenderer).texts
+}
+
 func TestEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
 	min := entry.MinSize()
@@ -574,4 +579,12 @@ func TestEntry_OnPaste(t *testing.T) {
 			assert.Equal(t, tt.wantCol, tt.entry.CursorColumn)
 		})
 	}
+}
+
+func TestPasswordEntry_Placeholder(t *testing.T) {
+	entry := NewPasswordEntry()
+	entry.SetPlaceHolder("Password")
+
+	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry)[0].Text)
+	assert.False(t, entry.placeholderProvider().presenter.password())
 }
