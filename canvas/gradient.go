@@ -39,7 +39,7 @@ type Gradient struct {
 
 // calculatePixel uses the gradientFnc to caculate the pixel
 // at x, y as a gradient between start and end
-// using w and h to determine rate of graduation
+// using w and h to determine rate of gradation
 // returns a color.RGBA64
 func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
 	ox, oy := float64(g.Center.X), float64(g.Center.Y)
@@ -55,7 +55,7 @@ func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
 	dB := (float64(bB) - float64(aB))
 	dA := (float64(bA) - float64(aA))
 
-	// Apply graduation
+	// Apply gradations
 	pixel := &color.RGBA64{
 		R: uint16(float64(aR) + d*dR),
 		B: uint16(float64(aB) + d*dB),
