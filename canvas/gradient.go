@@ -24,7 +24,7 @@ type GradientDirection int
 // Gradient describes a gradient fade between two colors
 type Gradient struct {
 	baseObject
-
+	// Generator is a func used by driver to generate and render. Inadvisable  to use directly.
 	Generator func(w, h int) image.Image
 
 	Direction  GradientDirection // The direction of the gradient.
