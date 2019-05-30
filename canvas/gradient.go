@@ -1,7 +1,6 @@
 package canvas
 
 import (
-	"errors"
 	"image"
 	"image/color"
 	"image/draw"
@@ -28,25 +27,14 @@ type Gradient struct {
 
 	Generator func(w, h int) image.Image
 
-	direction GradientDirection // The direction of the gradient.
-	start     color.Color       // The beginning RGBA color of the gradient
-	end       color.Color       // The end RGBA color of the gradient
-	center    fyne.Position     // The offest for generation of the gradient
+	Direction  GradientDirection // The direction of the gradient.
+	StartColor color.Color       // The beginning RGBA color of the gradient
+	EndColor   color.Color       // The end RGBA color of the gradient
+	Center     fyne.Position     // The offest for generation of the gradient
 
 	gradientFnc func(x, y, w, h int, ox, oy float64) float64 // The function for calculating the gradient
 
 	img draw.Image // internal cache for pixel generator - may be superfluous
-}
-
-// Center returns the center of the gradient
-func (g *Gradient) Center() fyne.Position {
-	return g.center
-}
-
-// SetCenter sets the gradient center.
-// Should be set before generation. Only used by Circular
-func (g *Gradient) SetCenter(pos fyne.Position) {
-	g.center = pos
 }
 
 // calculatePixel uses the gradientFnc to caculate the pixel
@@ -54,12 +42,12 @@ func (g *Gradient) SetCenter(pos fyne.Position) {
 // using w and h to determine rate of graduation
 // returns a color.RGBA64
 func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
-	ox, oy := float64(g.center.X), float64(g.center.Y)
+	ox, oy := float64(g.Center.X), float64(g.Center.Y)
 	d := g.gradientFnc(x, y, w, h, ox, oy)
 
 	// fetch RGBA values
-	aR, aG, aB, aA := g.start.RGBA()
-	bR, bG, bB, bA := g.end.RGBA()
+	aR, aG, aB, aA := g.StartColor.RGBA()
+	bR, bG, bB, bA := g.EndColor.RGBA()
 
 	// Get difference
 	dR := (float64(bR) - float64(aR))
@@ -75,11 +63,6 @@ func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
 		A: uint16(float64(aA) + d*dA),
 	}
 
-	// Prevent rendering dead space - transparent corners
-	if d > 1 {
-		pixel.A = uint16(0)
-	}
-
 	return pixel
 
 }
@@ -92,19 +75,15 @@ type pixelGradient struct {
 
 // NewLinearGradient returns a new Image instance that dynamically
 // renders a gradient of type GradientDirection
-func NewLinearGradient(start color.Color, end color.Color, direction GradientDirection) (*Gradient, error) {
-	if start == nil || end == nil {
-		return nil, errors.New("start and end colors are required for a gradient")
-	}
-
+func NewLinearGradient(start color.Color, end color.Color, direction GradientDirection) *Gradient {
 	pix := &pixelGradient{}
 
 	pix.g = &Gradient{
-		start: start,
-		end:   end,
+		StartColor: start,
+		EndColor:   end,
 	}
 
-	pix.g.direction = direction
+	pix.g.Direction = direction
 	switch direction {
 	case GradientDirectionHorizontal:
 		pix.g.gradientFnc = linearHorizontal
@@ -122,6 +101,14 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 			pix.img = image.NewRGBA(rect)
 		}
 
+		if pix.g.StartColor == nil && pix.g.EndColor == nil {
+			return pix.img
+		} else if pix.g.StartColor == nil {
+			pix.g.StartColor = color.Transparent
+		} else if pix.g.EndColor == nil {
+			pix.g.EndColor = color.Transparent
+		}
+
 		for x := 0; x < w; x++ {
 			for y := 0; y < h; y++ {
 				pix.img.Set(x, y, pix.g.calculatePixel(w, h, x, y))
@@ -130,7 +117,7 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 		}
 		return pix.img
 	}
-	return pix.g, nil
+	return pix.g
 }
 
 /*
