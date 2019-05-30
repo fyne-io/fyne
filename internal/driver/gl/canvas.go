@@ -187,17 +187,10 @@ func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyn
 	c.shortcut.AddShortcut(shortcut, handler)
 }
 
-func (c *glCanvas) paint(size fyne.Size) bool {
+func (c *glCanvas) ensureMinSize() bool {
 	if c.Content() == nil {
 		return false
 	}
-	c.setDirty(false)
-
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	max16bit := float32(255 * 255)
-	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
 	ensureMinSize := func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
 		if obj.Visible() {
 			expectedSize := obj.MinSize().Union(obj.Size())
@@ -206,6 +199,22 @@ func (c *glCanvas) paint(size fyne.Size) bool {
 			}
 		}
 	}
+	oldSize := c.content.Size()
+	c.walkTree(nil, ensureMinSize)
+	return oldSize != c.content.Size()
+}
+
+func (c *glCanvas) paint(size fyne.Size) {
+	if c.Content() == nil {
+		return
+	}
+	c.setDirty(false)
+
+	r, g, b, a := theme.BackgroundColor().RGBA()
+	max16bit := float32(255 * 255)
+	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
 	paint := func(obj fyne.CanvasObject, pos fyne.Position) bool {
 		// TODO should this be somehow not scroll container specific?
 		if _, ok := obj.(*widget.ScrollContainer); ok {
@@ -228,18 +237,20 @@ func (c *glCanvas) paint(size fyne.Size) bool {
 		}
 	}
 
-	oldSize := c.content.Size()
-	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), nil, ensureMinSize)
-	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), paint, afterPaint)
+	c.walkTree(paint, afterPaint)
+}
+
+func (c *glCanvas) walkTree(
+	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
+	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
+) {
+	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), beforeChildren, afterChildren)
 	if c.menu != nil {
-		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), nil, ensureMinSize)
-		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), paint, afterPaint)
+		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), beforeChildren, afterChildren)
 	}
 	if c.overlay != nil {
-		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), nil, ensureMinSize)
-		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), paint, afterPaint)
+		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), beforeChildren, afterChildren)
 	}
-	return oldSize != c.content.Size()
 }
 
 func (c *glCanvas) setDirty(dirty bool) {

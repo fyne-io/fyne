@@ -107,9 +107,10 @@ func (d *gLDriver) runGL() {
 				gl.UseProgram(canvas.program)
 
 				updateGLContext(w)
-				if canvas.paint(canvas.Size()) {
+				if canvas.ensureMinSize() {
 					w.resizeToContent()
 				}
+				canvas.paint(canvas.Size())
 
 				w.viewport.SwapBuffers()
 				glfw.DetachCurrentContext()
