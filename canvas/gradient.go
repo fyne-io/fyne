@@ -65,14 +65,14 @@ func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
 
 }
 
-func (g *Gradient) calculateGradient(w, h, x, y int, ox, oy float64) float64 {
+func (g *Gradient) calculateGradient(x, y, w, h int, ox, oy float64) float64 {
 	switch g.Direction {
 	case GradientDirectionVertical:
-		return linearVertical(w, h, x, y, ox, oy)
+		return linearVertical(x, y, w, h, ox, oy)
 	case GradientDirectionCircular:
-		return linearCircular(w, h, x, y, ox, oy)
+		return linearCircular(x, y, w, h, ox, oy)
 	default:
-		return linearHorizontal(w, h, x, y, ox, oy)
+		return linearHorizontal(x, y, w, h, ox, oy)
 	}
 }
 
