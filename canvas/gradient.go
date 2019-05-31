@@ -27,10 +27,10 @@ type Gradient struct {
 	// Generator is a func used by driver to generate and render. Inadvisable to use directly.
 	Generator func(w, h int) image.Image
 
-	Direction  GradientDirection // The direction of the gradient.
-	StartColor color.Color       // The beginning RGBA color of the gradient
-	EndColor   color.Color       // The end RGBA color of the gradient
-	Center     fyne.Position     // The offest for generation of the gradient
+	Direction    GradientDirection // The direction of the gradient.
+	StartColor   color.Color       // The beginning RGBA color of the gradient
+	EndColor     color.Color       // The end RGBA color of the gradient
+	CenterOffset fyne.Position     // The offset for generation of the gradient
 
 	gradientFnc func(x, y, w, h int, ox, oy float64) float64 // The function for calculating the gradient
 
@@ -42,7 +42,7 @@ type Gradient struct {
 // using w and h to determine rate of gradation
 // returns a color.RGBA64
 func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
-	ox, oy := float64(g.Center.X), float64(g.Center.Y)
+	ox, oy := float64(g.CenterOffset.X), float64(g.CenterOffset.Y)
 	d := g.gradientFnc(x, y, w, h, ox, oy)
 
 	// fetch RGBA values
