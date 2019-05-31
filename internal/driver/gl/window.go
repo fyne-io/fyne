@@ -584,7 +584,8 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			} else {
 				if w.mouseOver != nil {
 					w.mouseOver.MouseOut()
-				} else if obj != nil {
+				}
+				if obj != nil {
 					obj.MouseIn(ev)
 				}
 				w.mouseOver = obj
