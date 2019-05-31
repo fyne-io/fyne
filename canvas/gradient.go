@@ -24,7 +24,7 @@ type GradientDirection int
 // Gradient describes a gradient fade between two colors
 type Gradient struct {
 	baseObject
-	// Generator is a func used by driver to generate and render. Inadvisable  to use directly.
+	// Generator is a func used by driver to generate and render. Inadvisable to use directly.
 	Generator func(w, h int) image.Image
 
 	Direction  GradientDirection // The direction of the gradient.
@@ -37,7 +37,7 @@ type Gradient struct {
 	img draw.Image // internal cache for pixel generator - may be superfluous
 }
 
-// calculatePixel uses the gradientFnc to caculate the pixel
+// calculatePixel uses the gradientFnc to calculate the pixel
 // at x, y as a gradient between start and end
 // using w and h to determine rate of gradation
 // returns a color.RGBA64
@@ -50,10 +50,10 @@ func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
 	bR, bG, bB, bA := g.EndColor.RGBA()
 
 	// Get difference
-	dR := (float64(bR) - float64(aR))
-	dG := (float64(bG) - float64(aG))
-	dB := (float64(bB) - float64(aB))
-	dA := (float64(bA) - float64(aA))
+	dR := float64(bR) - float64(aR)
+	dG := float64(bG) - float64(aG)
+	dB := float64(bB) - float64(aB)
+	dA := float64(bA) - float64(aA)
 
 	// Apply gradations
 	pixel := &color.RGBA64{
@@ -124,13 +124,13 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 	Gradient multiplier calculations
 */
 
-// Linear horizontal gradiant
-func linearHorizontal(x, y, w, h int, ox, oy float64) float64 {
+// Linear horizontal gradient
+func linearHorizontal(x, _, w, _ int, _, _ float64) float64 {
 	return float64(x) / float64(w)
 }
 
-// Linear vertical gradiant
-func linearVertical(x, y, w, h int, ox, oy float64) float64 {
+// Linear vertical gradient
+func linearVertical(_, y, _, h int, _, _ float64) float64 {
 	return float64(y) / float64(h)
 }
 
