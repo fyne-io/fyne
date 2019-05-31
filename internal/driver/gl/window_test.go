@@ -77,20 +77,6 @@ func TestWindow_Padded(t *testing.T) {
 }
 
 func TestWindow_SetPadded(t *testing.T) {
-	// w := d.CreateWindow("Test")
-	// content := canvas.NewRectangle(color.White)
-	// w.Canvas().SetScale(1.0)
-	// w.SetContent(content)
-
-	// w.SetPadded(false)
-	// width, _ := w.(*window).minSizeOnScreen()
-	// assert.Equal(t, width, content.MinSize().Width)
-	// assert.Equal(t, 0, content.Position().X)
-
-	// w.SetPadded(true)
-	// width, _ = w.(*window).minSizeOnScreen()
-	// assert.Equal(t, width, theme.Padding()*2+content.MinSize().Width)
-	// assert.Equal(t, theme.Padding(), content.Position().X)
 	var menuHeight int
 	if hasNativeMenu() {
 		menuHeight = 0
