@@ -57,7 +57,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 		}
 	} else {
 		b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		b.icon.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		b.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
 	}
 }
 

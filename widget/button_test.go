@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -135,6 +136,18 @@ func TestButtonRenderer_Layout(t *testing.T) {
 	assert.True(t, render.icon.Position().X < render.label.Position().X)
 	assert.Equal(t, theme.Padding()*2, render.icon.Position().X)
 	assert.Equal(t, theme.Padding()*2, render.MinSize().Width-render.label.Position().X-render.label.Size().Width)
+}
+
+func TestButtonRenderer_Layout_NoText(t *testing.T) {
+	button := NewButtonWithIcon("", theme.CancelIcon(), nil)
+	render := Renderer(button).(*buttonRenderer)
+
+	width := button.MinSize().Width + 20
+	height := button.MinSize().Height + 20
+	button.Resize(fyne.NewSize(width, height))
+
+	assert.Equal(t, theme.Padding()+10, render.icon.Position().X)
+	assert.Equal(t, theme.Padding()+10, render.icon.Position().Y)
 }
 
 func TestButton_Disable(t *testing.T) {
