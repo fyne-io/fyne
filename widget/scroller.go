@@ -144,13 +144,12 @@ func (s *scrollRenderer) updatePosition() {
 }
 
 func (s *scrollRenderer) Layout(size fyne.Size) {
-	c := s.scroll.Content
-	c.Resize(c.MinSize().Union(size))
 	// The scroll bar needs to be resized and moved on the far right
 	scrollBar := s.vertBar
 	scrollBar.Resize(fyne.NewSize(scrollBar.MinSize().Width, size.Height))
 	scrollBar.Move(fyne.NewPos(s.scroll.Size().Width-scrollBar.Size().Width, 0))
 
+	s.layoutContent(size)
 	s.updatePosition()
 }
 
@@ -160,10 +159,13 @@ func (s *scrollRenderer) MinSize() fyne.Size {
 }
 
 func (s *scrollRenderer) Refresh() {
-	c := s.scroll.Content
-	c.Resize(c.MinSize().Union(s.scroll.Size()))
-
+	s.layoutContent(s.scroll.Size())
 	s.updatePosition()
+}
+
+func (s *scrollRenderer) layoutContent(size fyne.Size) {
+	c := s.scroll.Content
+	c.Resize(c.MinSize().Union(size))
 }
 
 func (s *scrollRenderer) ApplyTheme() {
