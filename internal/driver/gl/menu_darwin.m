@@ -18,9 +18,7 @@ extern void menu_callback(int);
 
 NSMenu* nativeMainMenu() {
     NSApplication* app = [NSApplication sharedApplication];
-    NSMenu* menu = [app mainMenu];//[[NSMenu alloc] initWithTitle:@"Fyne1"];
-
-    return menu;
+    return [app mainMenu];
 }
 
 NSMenu* menu;
@@ -28,16 +26,19 @@ NSMenu* menu;
 void createDarwinMenu(const char* label) {
     menu = [[NSMenu alloc] initWithTitle:[NSString stringWithUTF8String:label]];
 
+    // the menu is released at the end of the completeDarwinMenu() function
 }
 
 void addDarwinMenuItem(const char* label, int id) {
-    MenuItem* tapper = [[MenuItem alloc] init];
+    MenuItem* tapper = [[MenuItem alloc] init]; // we cannot release this or the menu does not function...
 
     NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:label]
         action:@selector(tapped:) keyEquivalent:@""];
     [item setTarget:tapper];
     [item setTag:id];
+
     [menu addItem:item];
+    [item release];
 }
 
 void completeDarwinMenu() {
@@ -46,4 +47,6 @@ void completeDarwinMenu() {
     NSMenuItem* top = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
     [main addItem:top];
     [main setSubmenu:menu forItem:top];
+    [menu release]; // release the menu created in createDarwinMenu() function
+    menu = Nil;
 }
