@@ -32,8 +32,6 @@ type Gradient struct {
 	EndColor     color.Color       // The end RGBA color of the gradient
 	CenterOffset fyne.Position     // The offset for generation of the gradient
 
-	gradientFnc func(x, y, w, h int, ox, oy float64) float64 // The function for calculating the gradient
-
 	img draw.Image // internal cache for pixel generator - may be superfluous
 }
 
@@ -43,7 +41,7 @@ type Gradient struct {
 // returns a color.RGBA64
 func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
 	ox, oy := float64(g.CenterOffset.X), float64(g.CenterOffset.Y)
-	d := g.gradientFnc(x, y, w, h, ox, oy)
+	d := g.calculateGradient(x, y, w, h, ox, oy)
 
 	// fetch RGBA values
 	aR, aG, aB, aA := g.StartColor.RGBA()
@@ -67,6 +65,17 @@ func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
 
 }
 
+func (g *Gradient) calculateGradient(w, h, x, y int, ox, oy float64) float64 {
+	switch g.Direction {
+	case GradientDirectionVertical:
+		return linearVertical(w, h, x, y, ox, oy)
+	case GradientDirectionCircular:
+		return linearCircular(w, h, x, y, ox, oy)
+	default:
+		return linearHorizontal(w, h, x, y, ox, oy)
+	}
+}
+
 // pixelGradient is used during construction
 type pixelGradient struct {
 	g   *Gradient
@@ -81,18 +90,7 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 	pix.g = &Gradient{
 		StartColor: start,
 		EndColor:   end,
-	}
-
-	pix.g.Direction = direction
-	switch direction {
-	case GradientDirectionHorizontal:
-		pix.g.gradientFnc = linearHorizontal
-	case GradientDirectionVertical:
-		pix.g.gradientFnc = linearVertical
-	case GradientDirectionCircular:
-		pix.g.gradientFnc = linearCircular
-	default:
-		pix.g.gradientFnc = linearHorizontal
+		Direction:  direction,
 	}
 
 	pix.g.Generator = func(w, h int) image.Image {
