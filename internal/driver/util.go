@@ -17,39 +17,35 @@ import (
 // - if a walk has been stopped, the after function is called with the third argument set to true
 func WalkObjectTree(
 	obj fyne.CanvasObject,
-	pos fyne.Position,
+	offset fyne.Position,
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
 	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
 ) bool {
 	var children []fyne.CanvasObject
-	var offset fyne.Position
 	switch co := obj.(type) {
 	case *fyne.Container:
-		offset = co.Position().Add(pos)
 		children = co.Objects
 	case fyne.Widget:
-		offset = co.Position().Add(pos)
 		children = widget.Renderer(co).Objects()
-	default:
-		offset = pos
 	}
 
+	pos := obj.Position().Add(offset)
 	if beforeChildren != nil {
-		if beforeChildren(obj, offset) {
+		if beforeChildren(obj, pos) {
 			return true
 		}
 	}
 
 	cancelled := false
 	for _, child := range children {
-		if WalkObjectTree(child, offset, beforeChildren, afterChildren) {
+		if WalkObjectTree(child, pos, beforeChildren, afterChildren) {
 			cancelled = true
 			break
 		}
 	}
 
 	if afterChildren != nil {
-		afterChildren(obj, offset, cancelled)
+		afterChildren(obj, pos, cancelled)
 	}
 	return cancelled
 }

@@ -14,8 +14,10 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var d = NewGLDriver()
@@ -31,6 +33,47 @@ func TestMain(m *testing.M) {
 		os.Exit(m.Run())
 	}()
 	d.Run()
+}
+
+func TestWindow_HandleHoverable(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	h1 := &hoverable{Rectangle: canvas.NewRectangle(color.White)}
+	h1.SetMinSize(fyne.NewSize(10, 10))
+	h2 := &hoverable{Rectangle: canvas.NewRectangle(color.Black)}
+	h2.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(widget.NewHBox(h1, h2))
+
+	// wait for canvas to get its size right
+	for s := w.Canvas().Size(); s != fyne.NewSize(32, 18); s = w.Canvas().Size() {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	require.Equal(t, fyne.NewPos(0, 0), h1.Position())
+	require.Equal(t, fyne.NewPos(14, 0), h2.Position())
+
+	w.mouseMoved(w.viewport, 9, 9)
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5)}}, h1.mouseIn)
+	assert.Equal(t, (*desktop.MouseEvent)(nil), h1.mouseMoved)
+	assert.False(t, h1.mouseOut)
+
+	w.mouseMoved(w.viewport, 9, 8)
+	assert.Equal(t, (*desktop.MouseEvent)(nil), h1.mouseIn)
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 4)}}, h1.mouseMoved)
+	assert.False(t, h1.mouseOut)
+
+	w.mouseMoved(w.viewport, 19, 9)
+	assert.Equal(t, (*desktop.MouseEvent)(nil), h1.mouseIn)
+	assert.Equal(t, (*desktop.MouseEvent)(nil), h1.mouseMoved)
+	assert.True(t, h1.mouseOut)
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 5)}}, h2.mouseIn)
+	assert.Equal(t, (*desktop.MouseEvent)(nil), h2.mouseMoved)
+	assert.False(t, h2.mouseOut)
+
+	w.mouseMoved(w.viewport, 19, 8)
+	assert.Equal(t, (*desktop.MouseEvent)(nil), h2.mouseIn)
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 4)}}, h2.mouseMoved)
+	assert.False(t, h2.mouseOut)
 }
 
 func TestWindow_SetTitle(t *testing.T) {
@@ -77,20 +120,6 @@ func TestWindow_Padded(t *testing.T) {
 }
 
 func TestWindow_SetPadded(t *testing.T) {
-	// w := d.CreateWindow("Test")
-	// content := canvas.NewRectangle(color.White)
-	// w.Canvas().SetScale(1.0)
-	// w.SetContent(content)
-
-	// w.SetPadded(false)
-	// width, _ := w.(*window).minSizeOnScreen()
-	// assert.Equal(t, width, content.MinSize().Width)
-	// assert.Equal(t, 0, content.Position().X)
-
-	// w.SetPadded(true)
-	// width, _ = w.(*window).minSizeOnScreen()
-	// assert.Equal(t, width, theme.Padding()*2+content.MinSize().Width)
-	// assert.Equal(t, theme.Padding(), content.Position().X)
 	var menuHeight int
 	if hasNativeMenu() {
 		menuHeight = 0
@@ -187,4 +216,27 @@ func TestWindow_Shortcut(t *testing.T) {
 
 	w.Canvas().(*glCanvas).shortcut.TypedShortcut(shortcutFullScreenWindow)
 	assert.True(t, w.FullScreen())
+}
+
+type hoverable struct {
+	*canvas.Rectangle
+	mouseIn    *desktop.MouseEvent
+	mouseOut   bool
+	mouseMoved *desktop.MouseEvent
+}
+
+func (h *hoverable) MouseIn(e *desktop.MouseEvent) {
+	h.mouseMoved = nil
+	h.mouseOut = false
+	h.mouseIn = e
+}
+func (h *hoverable) MouseOut() {
+	h.mouseIn = nil
+	h.mouseMoved = nil
+	h.mouseOut = true
+}
+func (h *hoverable) MouseMoved(e *desktop.MouseEvent) {
+	h.mouseIn = nil
+	h.mouseOut = false
+	h.mouseMoved = e
 }

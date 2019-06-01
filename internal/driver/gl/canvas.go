@@ -231,7 +231,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 		return false
 	}
-	afterPaint := func(obj fyne.CanvasObject, pos fyne.Position, _ bool) {
+	afterPaint := func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
 		if _, ok := obj.(*widget.ScrollContainer); ok {
 			gl.Disable(gl.SCISSOR_TEST)
 		}

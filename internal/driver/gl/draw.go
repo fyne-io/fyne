@@ -247,11 +247,10 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 	c.freeCoords(vao, vbo)
 }
 
-func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame fyne.Size) {
+func (c *glCanvas) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
 	canvasMutex.Lock()
 	canvases[o] = c
 	canvasMutex.Unlock()
-	pos := o.Position().Add(offset)
 	switch obj := o.(type) {
 	case *canvas.Circle:
 		c.drawCircle(obj, pos, frame)
@@ -268,6 +267,6 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, offset fyne.Position, frame f
 	case *canvas.Gradient:
 		c.drawGradient(obj, pos, frame)
 	case fyne.Widget:
-		c.drawWidget(obj, offset, frame)
+		c.drawWidget(obj, pos, frame)
 	}
 }
