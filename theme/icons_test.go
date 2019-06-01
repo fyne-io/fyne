@@ -156,6 +156,34 @@ func TestDisabledResource_Content_NoGroupsFile(t *testing.T) {
 	assert.NotEqual(t, staticResource.Content(), disabledResource.Content())
 }
 
+func TestNewFocusedResource(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	source := helperNewStaticResource()
+	custom := NewFocusedResource(source)
+	name := custom.Name()
+
+	assert.Equal(t, name, fmt.Sprintf("focused_%v", source.Name()))
+}
+
+func TestFocusedResource_Name(t *testing.T) {
+	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
+		helperLoadBytes(t, "cancel_Paths.svg"))
+	focusedResource := &FocusedResource{
+		source: staticResource,
+	}
+	assert.Equal(t, fmt.Sprintf("focused_%v", staticResource.Name()), focusedResource.Name())
+}
+
+func TestFocusedResource_Content_NoGroupsFile(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
+		helperLoadBytes(t, "cancel_Paths.svg"))
+	focusedResource := &FocusedResource{
+		source: staticResource,
+	}
+	assert.NotEqual(t, staticResource.Content(), focusedResource.Content())
+}
+
 // Test Asset Sources
 func Test_FyneLogo_FileSource(t *testing.T) {
 	result := FyneLogo().Name()

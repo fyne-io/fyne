@@ -127,3 +127,38 @@ func TestCheck_Enable(t *testing.T) {
 	test.Tap(check)
 	assert.True(t, checked, "Check box should have been re-enabled.")
 }
+
+func TestCheck_Focused(t *testing.T) {
+	check := NewCheck("Test", func(on bool) {})
+	assert.False(t, check.Focused())
+
+	check.SetChecked(true)
+	assert.False(t, check.Focused())
+
+	test.Tap(check)
+	assert.True(t, check.Focused())
+
+	check.Disable()
+	assert.False(t, check.Focused())
+
+	check.Enable()
+	assert.True(t, check.Focused())
+
+	check.Hide()
+	assert.False(t, check.Focused())
+
+	check.Show()
+	assert.False(t, check.Focused())
+}
+
+func TestCheck_TypedRune(t *testing.T) {
+	check := NewCheck("Test", func(on bool) {})
+	assert.False(t, check.Checked)
+
+	test.Tap(check)
+	assert.True(t, check.Focused())
+	assert.True(t, check.Checked)
+
+	test.Type(check, " ")
+	assert.False(t, check.Checked)
+}

@@ -54,18 +54,18 @@ func (c *checkRenderer) BackgroundColor() color.Color {
 func (c *checkRenderer) Refresh() {
 	c.label.Text = c.check.Text
 
+	res := theme.CheckButtonIcon()
 	if c.check.Checked {
-		c.icon.Resource = theme.CheckButtonCheckedIcon()
-		if c.check.disabled {
-			c.icon.Resource = theme.NewDisabledResource(theme.CheckButtonCheckedIcon())
-		}
-	} else {
-		c.icon.Resource = theme.CheckButtonIcon()
-		if c.check.disabled {
-			c.icon.Resource = theme.NewDisabledResource(theme.CheckButtonIcon())
-		}
+		res = theme.CheckButtonCheckedIcon()
+	}
+	if c.check.disabled {
+		res = theme.NewDisabledResource(res)
+	}
+	if c.check.focused && !c.check.disabled {
+		res = theme.NewFocusedResource(res)
 	}
 
+	c.icon.Resource = res
 	canvas.Refresh(c.check)
 }
 
@@ -83,6 +83,8 @@ type Check struct {
 	Checked bool
 
 	OnChanged func(bool) `json:"-"`
+
+	focused bool
 }
 
 // SetChecked sets the the checked state and refreshes widget
@@ -124,6 +126,10 @@ func (c *Check) Show() {
 
 // Hide this widget, if it was previously visible
 func (c *Check) Hide() {
+	if c.focused {
+		c.focused = false
+		fyne.CurrentApp().Driver().CanvasForObject(c).Focus(nil)
+	}
 	c.hide(c)
 }
 
@@ -141,6 +147,9 @@ func (c *Check) Disable() {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
+	if !c.focused {
+		c.FocusGained()
+	}
 	if !c.disabled {
 		c.SetChecked(!c.Checked)
 	}
@@ -167,8 +176,44 @@ func NewCheck(label string, changed func(bool)) *Check {
 		label,
 		false,
 		changed,
+		false,
 	}
 
 	Renderer(c).Layout(c.MinSize())
 	return c
 }
+
+// FocusGained is called when the Check has been given focus.
+func (c *Check) FocusGained() {
+	if c.disabled {
+		return
+	}
+	c.focused = true
+
+	Refresh(c)
+}
+
+// FocusLost is called when the Check has had focus removed.
+func (c *Check) FocusLost() {
+	c.focused = false
+
+	Refresh(c)
+}
+
+// Focused returns whether or not this Check has focus.
+func (c *Check) Focused() bool {
+	if c.disabled {
+		return false
+	}
+	return c.focused
+}
+
+// TypedRune receives text input events when the Check is focused.
+func (c *Check) TypedRune(r rune) {
+	if r == 32 { //space
+		c.SetChecked(!c.Checked)
+	}
+}
+
+// TypedKey receives key input events when the Check is focused.
+func (c *Check) TypedKey(key *fyne.KeyEvent) {}
