@@ -304,7 +304,7 @@ func (e *Entry) updateText(text string) {
 	Refresh(e)
 }
 
-// Returns the first text position of the span of text covered by the selection highlight
+// SelectionStart returns the first text position of the span of text covered by the selection highlight
 // eg: "T e s[t i]n g" == 3 (whitespace for clarity)
 func (e *Entry) SelectionStart() int {
 	e.RLock()
@@ -330,7 +330,7 @@ func (e *Entry) SelectionStart() int {
 	return e.textPosFromRowCol(row, col)
 }
 
-// Returns the last text position of the span of text covered by the selection highlight
+// SelectionEnd returns the last text position of the span of text covered by the selection highlight
 // eg: "T e s[t i]n g" == 5 (whitespace for clarity)
 func (e *Entry) SelectionEnd() int {
 	e.RLock()
@@ -481,6 +481,7 @@ func (e *Entry) TypedRune(r rune) {
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
+// KeyDown handler for keypress events - used to store shift modifier state for text selection
 func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 	// For keyboard cursor controlled selection we now need to store shift key state and selection "start"
 	// Note: selection start is where the highlight started (if the user moves the selection up or left then
@@ -495,6 +496,7 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 	}
 }
 
+// KeyUp handler for key release events - used to reset shift modifier state for text selection
 func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	// Handle shift release for keyboard selection
 	// Note: if shift is released then the user may repress it without moving to adjust their old selection
