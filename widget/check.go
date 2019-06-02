@@ -60,8 +60,7 @@ func (c *checkRenderer) Refresh() {
 	}
 	if c.check.disabled {
 		res = theme.NewDisabledResource(res)
-	}
-	if c.check.focused && !c.check.disabled {
+	} else if c.check.focused {
 		res = theme.NewFocusedResource(res)
 	}
 
@@ -210,7 +209,7 @@ func (c *Check) Focused() bool {
 
 // TypedRune receives text input events when the Check is focused.
 func (c *Check) TypedRune(r rune) {
-	if r == 32 { //space
+	if r == ' ' {
 		c.SetChecked(!c.Checked)
 	}
 }
