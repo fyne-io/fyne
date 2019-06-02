@@ -209,6 +209,9 @@ func (c *Check) Focused() bool {
 
 // TypedRune receives text input events when the Check is focused.
 func (c *Check) TypedRune(r rune) {
+	if c.disabled {
+		return
+	}
 	if r == ' ' {
 		c.SetChecked(!c.Checked)
 	}
