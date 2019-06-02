@@ -191,7 +191,7 @@ func (c *glCanvas) ensureMinSize() bool {
 	if c.Content() == nil {
 		return false
 	}
-	ensureMinSize := func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
+	ensureMinSize := func(obj fyne.CanvasObject) {
 		if obj.Visible() {
 			expectedSize := obj.MinSize().Union(obj.Size())
 			if expectedSize != obj.Size() {
@@ -231,7 +231,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 		return false
 	}
-	afterPaint := func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
+	afterPaint := func(obj fyne.CanvasObject) {
 		if _, ok := obj.(*widget.ScrollContainer); ok {
 			gl.Disable(gl.SCISSOR_TEST)
 		}
@@ -242,7 +242,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 func (c *glCanvas) walkTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
-	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
+	afterChildren func(fyne.CanvasObject),
 ) {
 	driver.WalkObjectTree(c.content, beforeChildren, afterChildren)
 	if c.menu != nil {

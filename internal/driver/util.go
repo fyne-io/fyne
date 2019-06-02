@@ -14,11 +14,10 @@ import (
 // - if beforeChildren returns true, further traversing is stopped immediately, the after function
 //   will not be called for the obj where the walk stopped, however, it will be called for all its
 //   parents
-// - if a walk has been stopped, the after function is called with the third argument set to true
 func WalkObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
-	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
+	afterChildren func(fyne.CanvasObject),
 ) bool {
 	return walkObjectTree(obj, fyne.NewPos(0, 0), beforeChildren, afterChildren)
 }
@@ -27,7 +26,7 @@ func walkObjectTree(
 	obj fyne.CanvasObject,
 	offset fyne.Position,
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
-	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
+	afterChildren func(fyne.CanvasObject),
 ) bool {
 	var children []fyne.CanvasObject
 	switch co := obj.(type) {
@@ -53,7 +52,7 @@ func walkObjectTree(
 	}
 
 	if afterChildren != nil {
-		afterChildren(obj, pos, cancelled)
+		afterChildren(obj)
 	}
 	return cancelled
 }

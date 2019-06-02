@@ -444,7 +444,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	driver.WalkObjectTree(w.canvas.content, nil, func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
+	driver.WalkObjectTree(w.canvas.content, nil, func(obj fyne.CanvasObject) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
