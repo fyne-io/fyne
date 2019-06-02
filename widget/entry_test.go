@@ -591,7 +591,9 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 }
 
 var tap = func(e *Entry, k *fyne.KeyEvent) {
-	e.KeyDown(k); e.TypedKey(k); e.KeyUp(k)
+	e.KeyDown(k)
+	e.TypedKey(k)
+	e.KeyUp(k)
 }
 
 var right = func(e *Entry) {
@@ -609,7 +611,8 @@ var down = func(e *Entry) {
 
 var shiftDown = func(e *Entry) {
 	k := &fyne.KeyEvent{Name: desktop.KeyShiftLeft}
-	e.KeyDown(k); e.TypedKey(k)
+	e.KeyDown(k)
+	e.TypedKey(k)
 }
 
 var shiftUp = func(e *Entry) {
@@ -619,7 +622,7 @@ var shiftUp = func(e *Entry) {
 
 func TestEntry_SweetSweetCoverage(t *testing.T) {
 	e := NewEntry()
-	row,col := e.rowColFromTextPos(1)
+	row, col := e.rowColFromTextPos(1)
 	assert.Equal(t, 0, row)
 	assert.Equal(t, 0, col)
 }
@@ -629,7 +632,12 @@ func TestEntry_BasicSelect(t *testing.T) {
 	// SeletionStart/SelectionEnd documentation example
 	r := NewEntry()
 	r.SetText("Testing")
-	right(r); right(r); right(r); shiftDown(r); right(r); right(r)
+	right(r)
+	right(r)
+	right(r)
+	shiftDown(r)
+	right(r)
+	right(r)
 	assert.Equal(t, 3, r.SelectionStart())
 	assert.Equal(t, 5, r.SelectionEnd())
 
@@ -637,7 +645,10 @@ func TestEntry_BasicSelect(t *testing.T) {
 	e.SetText("Testing")
 
 	// move right, press & hold shift and move right
-	right(e); shiftDown(e); right(e); right(e)
+	right(e)
+	shiftDown(e)
+	right(e)
+	right(e)
 	assert.Equal(t, 1, e.SelectionStart())
 	assert.Equal(t, 3, e.SelectionEnd())
 
@@ -647,18 +658,22 @@ func TestEntry_BasicSelect(t *testing.T) {
 	assert.Equal(t, 3, e.SelectionEnd())
 
 	// press shift and move
-	shiftDown(e); right(e)
+	shiftDown(e)
+	right(e)
 	assert.Equal(t, 1, e.SelectionStart())
 	assert.Equal(t, 4, e.SelectionEnd())
 
 	// release shift and move right
-	shiftUp(e); right(e)
+	shiftUp(e)
+	right(e)
 	assert.Equal(t, -1, e.SelectionStart())
 	assert.Equal(t, -1, e.SelectionEnd())
 
 	// press shift and move left
 	e.CursorColumn = 4 // we should be here already thanks to snapping
-	shiftDown(e); left(e); left(e)
+	shiftDown(e)
+	left(e)
+	left(e)
 	assert.Equal(t, 2, e.SelectionStart())
 	assert.Equal(t, 4, e.SelectionEnd())
 }
@@ -672,7 +687,10 @@ var setup = func() *Entry {
 	e.SetText("Testing\nTesting\nTesting")
 	e.CursorRow = 1
 	e.CursorColumn = 2
-	shiftDown(e); right(e); right(e); right(e)
+	shiftDown(e)
+	right(e)
+	right(e)
+	right(e)
 	return e
 }
 
@@ -685,7 +703,10 @@ var setupReverse = func() *Entry {
 	e.SetText("Testing\nTesting\nTesting")
 	e.CursorRow = 1
 	e.CursorColumn = 5
-	shiftDown(e); left(e); left(e); left(e)
+	shiftDown(e)
+	left(e)
+	left(e)
+	left(e)
 	return e
 }
 
@@ -706,7 +727,8 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 
 	// home after releasing shift
 	e = setup()
-	shiftUp(e); tap(e, home)
+	shiftUp(e)
+	tap(e, home)
 	assert.Equal(t, 1, e.CursorRow)
 	assert.Equal(t, 0, e.CursorColumn)
 	assert.Equal(t, -1, e.SelectionStart())
@@ -714,7 +736,8 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 
 	// end after releasing shift
 	e = setup()
-	shiftUp(e); tap(e, end)
+	shiftUp(e)
+	tap(e, end)
 	assert.Equal(t, 1, e.CursorRow)
 	assert.Equal(t, 7, e.CursorColumn)
 	assert.Equal(t, -1, e.SelectionStart())
@@ -745,7 +768,6 @@ func TestEntry_MultilineSelect(t *testing.T) {
 	assert.Equal(t, 10, e.SelectionEnd())
 }
 
-
 func TestEntry_SelectSnapping(t *testing.T) {
 
 	e := setup()
@@ -761,7 +783,8 @@ func TestEntry_SelectSnapping(t *testing.T) {
 	assert.Equal(t, -1, e.SelectionEnd())
 
 	e = setup()
-	shiftUp(e); left(e)
+	shiftUp(e)
+	left(e)
 	assert.Equal(t, 1, e.CursorRow)
 	assert.Equal(t, 2, e.CursorColumn)
 	assert.Equal(t, -1, e.SelectionStart())
@@ -769,14 +792,16 @@ func TestEntry_SelectSnapping(t *testing.T) {
 
 	// up and down snap to start/end respectively, but they also move
 	e = setup()
-	shiftUp(e); down(e)
+	shiftUp(e)
+	down(e)
 	assert.Equal(t, 2, e.CursorRow)
 	assert.Equal(t, 5, e.CursorColumn)
 	assert.Equal(t, -1, e.SelectionStart())
 	assert.Equal(t, -1, e.SelectionEnd())
 
 	e = setup()
-	shiftUp(e); up(e)
+	shiftUp(e)
+	up(e)
 	assert.Equal(t, 0, e.CursorRow)
 	assert.Equal(t, 2, e.CursorColumn)
 	assert.Equal(t, -1, e.SelectionStart())
@@ -795,12 +820,14 @@ func TestEntry_SelectDelete(t *testing.T) {
 	assert.Equal(t, -1, e.SelectionEnd())
 
 	e = setup()
-	down(e); tap(e, del)
+	down(e)
+	tap(e, del)
 	assert.Equal(t, "Testing\nTeng", e.Text)
 	assert.Equal(t, 12, len(e.Text))
 
 	e = setupReverse()
-	down(e); tap(e, del)
+	down(e)
+	tap(e, del)
 	assert.Equal(t, "Testing\nTestisting", e.Text)
 	assert.Equal(t, 18, len(e.Text))
 
@@ -808,7 +835,8 @@ func TestEntry_SelectDelete(t *testing.T) {
 		// After pressing delete we should be able to press down to get a new selection
 		// as we're still holding delete
 		e = setup()
-		tap(e, del); down(e)
+		tap(e, del)
+		down(e)
 		// T e s t i n g
 		// T e[n g
 		// T e]s t i n g
@@ -816,7 +844,8 @@ func TestEntry_SelectDelete(t *testing.T) {
 		assert.Equal(t, 15, e.SelectionEnd())
 
 		e = setupReverse()
-		tap(e, del); down(e)
+		tap(e, del)
+		down(e)
 		assert.Equal(t, 10, e.SelectionStart())
 		assert.Equal(t, 15, e.SelectionEnd())
 	}
@@ -826,7 +855,8 @@ func TestEntry_SelectDelete(t *testing.T) {
 		//  a) delete the selection
 		//  b) move the selection start point
 		e = setup()
-		tap(e, del); up(e)
+		tap(e, del)
+		up(e)
 		// T e[s t i n g
 		// T e]n g
 		// T e s t i n g
@@ -834,7 +864,8 @@ func TestEntry_SelectDelete(t *testing.T) {
 		assert.Equal(t, 10, e.SelectionEnd())
 
 		e = setupReverse()
-		tap(e, del); up(e)
+		tap(e, del)
+		up(e)
 		assert.Equal(t, 2, e.SelectionStart())
 		assert.Equal(t, 10, e.SelectionEnd())
 	}
