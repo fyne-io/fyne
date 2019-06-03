@@ -64,7 +64,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 // ApplyTheme is called when the Button may need to update its look
 func (b *buttonRenderer) ApplyTheme() {
 	b.label.Color = theme.TextColor()
-	if b.button.disabled {
+	if b.button.Disabled() {
 		b.label.Color = theme.DisabledTextColor()
 	}
 
@@ -72,13 +72,13 @@ func (b *buttonRenderer) ApplyTheme() {
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
-	if b.button.Style == PrimaryButton && !b.button.disabled {
+	if b.button.Style == PrimaryButton && !b.button.Disabled() {
 		return theme.PrimaryColor()
-	} else if b.button.disabled {
+	} else if b.button.Disabled() {
 		return theme.DisabledButtonColor()
 	}
 
-	if b.button.hovered && !b.button.disabled {
+	if b.button.hovered && !b.button.Disabled() {
 		return theme.HoverColor()
 	}
 	return theme.ButtonColor()
@@ -92,7 +92,7 @@ func (b *buttonRenderer) Refresh() {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
 			b.objects = append(b.objects, b.icon)
 		} else {
-			if b.button.disabled {
+			if b.button.Disabled() {
 				// if the icon has changed, create a new disabled version
 				// if we could be sure that button.Icon is only ever set through the button.SetIcon method, we could remove this
 				if !strings.HasSuffix(b.button.disabledIcon.Name(), b.button.Icon.Name()) {
@@ -183,7 +183,7 @@ func (b *Button) Disable() {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
-	if b.OnTapped != nil && !b.disabled {
+	if b.OnTapped != nil && !b.Disabled() {
 		b.OnTapped()
 	}
 }

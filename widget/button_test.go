@@ -193,3 +193,12 @@ func TestButton_Enable(t *testing.T) {
 		}
 	}()
 }
+
+func TestButton_Disabled(t *testing.T) {
+	button := NewButton("Test", func() {})
+	assert.False(t, button.Disabled())
+	button.Disable()
+	assert.True(t, button.Disabled())
+	button.Enable()
+	assert.False(t, button.Disabled())
+}

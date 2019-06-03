@@ -127,3 +127,12 @@ func TestCheck_Enable(t *testing.T) {
 	test.Tap(check)
 	assert.True(t, checked, "Check box should have been re-enabled.")
 }
+
+func TestCheck_Disabled(t *testing.T) {
+	check := NewCheck("Test", func(bool) {})
+	assert.False(t, check.Disabled())
+	check.Disable()
+	assert.True(t, check.Disabled())
+	check.Enable()
+	assert.False(t, check.Disabled())
+}

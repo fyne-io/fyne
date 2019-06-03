@@ -99,6 +99,11 @@ func (w *baseWidget) disable(parent fyne.Widget) {
 	canvas.Refresh(parent)
 }
 
+// Disabled returns true if the widget is disabled
+func (w *baseWidget) Disabled() bool {
+	return w.disabled
+}
+
 // Renderer looks up the render implementation for a widget
 func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 	renderer, ok := renderers.Load(wid)
