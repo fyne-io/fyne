@@ -869,3 +869,22 @@ func TestEntry_SelectEnter(t *testing.T) {
 	assert.Equal(t, 10, e.SelectionStart()) // Hmm, maybe these should be -1 and -1
 	assert.Equal(t, 11, e.SelectionEnd())
 }
+
+func TestEntry_SelectReplace(t *testing.T) {
+	e := setup()
+	test.Type(e, "hello")
+	assert.Equal(t, "Testing\nTehellong\nTesting", e.Text)
+
+	e = setupReverse()
+	test.Type(e, "hello")
+	assert.Equal(t, "Testing\nTehellong\nTesting", e.Text)
+}
+
+func TestEntry_EraseSelection(t *testing.T) {
+	e := setup()
+	e.eraseSelection()
+	e.updateText(e.textProvider().String())
+	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
+	assert.Equal(t, -1, e.SelectionStart())
+	assert.Equal(t, -1, e.SelectionEnd())
+}

@@ -469,8 +469,11 @@ func (e *Entry) TypedRune(r rune) {
 	}
 	provider := e.textProvider()
 
-	// if we've typed a character then you better believe that's a paddling
-	e.selecting = false
+	// if we've typed a character and we're selecting then replace the selection with the character
+	if e.selecting {
+		e.eraseSelection()
+		e.selecting = false
+	}
 
 	runes := []rune{r}
 	provider.insertAt(e.cursorTextPos(), runes)
@@ -509,6 +512,25 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	}
 }
 
+// eraseSelection removes the current selected region and moves the cursor
+func (e *Entry) eraseSelection() {
+	if e.ReadOnly {
+		return
+	}
+
+	provider := e.textProvider()
+	posA := e.SelectionStart()
+	posB := e.SelectionEnd()
+	e.Lock()
+
+	provider.deleteFromTo(posA, posB)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
+	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
+	e.Unlock()
+
+	// e.selecting = false
+}
+
 // TypedKey receives key input events when the Entry widget is focused.
 func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.ReadOnly {
@@ -516,17 +538,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 
 	provider := e.textProvider()
-
-	// discard the old selected text - used by: backspace, delete, and enter
-	eraseSelection := func() {
-		posA := e.SelectionStart()
-		posB := e.SelectionEnd()
-		e.Lock()
-		provider.deleteFromTo(posA, posB)
-		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
-		e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
-		e.Unlock()
-	}
 
 	// seeks to the start/end of the selection - used by: up, down, left, right
 	seekSelection := func(start bool) {
@@ -545,7 +556,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	switch key.Name {
 	case fyne.KeyBackspace:
 		if e.selecting {
-			eraseSelection() // clears the current selection (exactly like delete)
+			e.eraseSelection() // clears the current selection (exactly like delete)
 		} else {
 			e.RLock()
 			isEmpty := provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
@@ -567,7 +578,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		}
 	case fyne.KeyDelete:
 		if e.selecting {
-			eraseSelection() // clears the selection (exactly like backspace)
+			e.eraseSelection() // clears the selection (exactly like backspace)
 		} else {
 			pos := e.cursorTextPos()
 			if provider.len() == 0 || pos == provider.len() {
@@ -580,7 +591,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			return
 		}
 		if e.selecting {
-			eraseSelection() // clear the selection and fallthrough to add the newline
+			e.eraseSelection() // clear the selection and fallthrough to add the newline
 		}
 		provider.insertAt(e.cursorTextPos(), []rune("\n"))
 		e.Lock()
