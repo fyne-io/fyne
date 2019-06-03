@@ -125,15 +125,65 @@ func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
 }
 
 func TestTabContainerRenderer_Layout(t *testing.T) {
-	tabs := NewTabContainer(
-		NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
-		NewTabItemWithIcon("Text2", theme.ConfirmIcon(), canvas.NewCircle(theme.BackgroundColor())),
-	)
+	textWidth := canvas.NewText("Text0", theme.TextColor()).MinSize().Width
+	contentHeight := fyne.Max(theme.IconInlineSize(), theme.TextSize())
+	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	textSize := fyne.NewSize(textWidth, contentHeight)
 
-	r := Renderer(tabs).(*tabContainerRenderer)
-	r.Layout(fyne.NewSize(100, 100))
+	tests := []struct {
+		name           string
+		item           *TabItem
+		wantButtonSize fyne.Size
+		wantIconPos    fyne.Position
+		wantIconSize   fyne.Size
+		wantTextPos    fyne.Position
+		wantTextSize   fyne.Size
+	}{
+		{
+			name:           "tab with icon and text",
+			item:           NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			wantButtonSize: fyne.NewSize(theme.Padding()*5+theme.IconInlineSize()+textWidth, theme.Padding()*2+contentHeight),
+			wantIconPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
+			wantIconSize:   iconSize,
+			wantTextPos:    fyne.NewPos(3*theme.Padding()+theme.IconInlineSize(), theme.Padding()),
+			wantTextSize:   textSize,
+		},
+		{
+			name:           "tab with text only",
+			item:           NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
+			wantButtonSize: fyne.NewSize(theme.Padding()*4+textWidth, theme.Padding()*2+contentHeight),
+			wantTextPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
+			wantTextSize:   textSize,
+		},
+		{
+			name:           "tab with icon only",
+			item:           NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			wantButtonSize: fyne.NewSize(theme.Padding()*2+theme.IconInlineSize(), theme.Padding()*2+contentHeight),
+			wantIconPos:    fyne.NewPos(theme.Padding(), theme.Padding()),
+			wantIconSize:   iconSize,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tabs := NewTabContainer(tt.item)
+			r := Renderer(tabs).(*tabContainerRenderer)
+			require.Len(t, r.tabBar.Children, 1)
+			tabs.SetTabLocation(TabLocationTop)
+			r.Layout(fyne.NewSize(100, 100))
 
-	require.Len(t, r.tabBar.Children, 2)
-	assert.Equal(t, theme.CancelIcon(), r.tabBar.Children[0].(*Button).Icon)
-	assert.Equal(t, theme.ConfirmIcon(), r.tabBar.Children[1].(*Button).Icon)
+			b := r.tabBar.Children[0].(*Button)
+			assert.Equal(t, tt.wantButtonSize, b.Size())
+			br := Renderer(b).(*buttonRenderer)
+			if tt.item.Icon != nil {
+				assert.Equal(t, tt.item.Icon, br.icon.Resource)
+				assert.Equal(t, tt.wantIconSize, br.icon.Size())
+				assert.Equal(t, tt.wantIconPos, br.icon.Position())
+			} else {
+				assert.Nil(t, br.icon)
+			}
+			assert.Equal(t, tt.item.Text, br.label.Text)
+			assert.Equal(t, tt.wantTextSize, br.label.Size())
+			assert.Equal(t, tt.wantTextPos, br.label.Position())
+		})
+	}
 }

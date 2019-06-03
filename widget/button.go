@@ -34,7 +34,8 @@ func (b *buttonRenderer) MinSize() fyne.Size {
 	min := b.padding()
 
 	if b.button.Text != "" {
-		min = min.Add(b.label.MinSize())
+		textSize := b.label.MinSize()
+		min = min.Add(fyne.NewSize(textSize.Width, fyne.Max(textSize.Height, theme.IconInlineSize())))
 		if b.icon != nil {
 			min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 		}
