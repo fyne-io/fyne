@@ -537,8 +537,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		return
 	}
 
-	provider := e.textProvider()
-
 	// seeks to the start/end of the selection - used by: up, down, left, right
 	seekSelection := func(start bool) {
 		var pos int
@@ -553,45 +551,70 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.selecting = false
 	}
 
+	provider := e.textProvider()
+
+	if e.selecting {
+
+		processKey := true
+		switch key.Name {
+		case fyne.KeyBackspace, fyne.KeyDelete:
+			// clears the selection
+			e.eraseSelection()
+			processKey = false
+		case fyne.KeyReturn, fyne.KeyEnter:
+			e.eraseSelection() // clear the selection and fallthrough to add the newline
+		}
+
+		if e.selectKeyDown == false {
+			switch key.Name {
+			case fyne.KeyUp, fyne.KeyDown:
+				// seek to the start/end of the selection and fallthrough to move up/down
+				seekSelection(key.Name == fyne.KeyUp)
+			case fyne.KeyLeft, fyne.KeyRight:
+				// seek to the start/end of the selection (no fallthrough)
+				seekSelection(key.Name == fyne.KeyLeft)
+				processKey = false
+			case fyne.KeyEnd, fyne.KeyHome:
+				// if the user pressed home or end and isn't holding shift then end selection (fallthrough)
+				e.selecting = false
+			}
+		}
+
+		if !processKey {
+			e.updateText(provider.String())
+			Renderer(e).(*entryRenderer).moveCursor()
+			return
+		}
+	}
+
 	switch key.Name {
 	case fyne.KeyBackspace:
-		if e.selecting {
-			e.eraseSelection() // clears the current selection (exactly like delete)
-		} else {
-			e.RLock()
-			isEmpty := provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
-			e.RUnlock()
-			if isEmpty {
-				return
-			}
-			pos := e.cursorTextPos()
-			e.Lock()
-			deleted := provider.deleteFromTo(pos-1, pos)
-			if deleted[0] == '\n' {
-				e.CursorRow--
-				rowLength := provider.rowLength(e.CursorRow)
-				e.CursorColumn = rowLength
-			} else {
-				e.CursorColumn--
-			}
-			e.Unlock()
+		e.RLock()
+		isEmpty := provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
+		e.RUnlock()
+		if isEmpty {
+			return
 		}
+		pos := e.cursorTextPos()
+		e.Lock()
+		deleted := provider.deleteFromTo(pos-1, pos)
+		if deleted[0] == '\n' {
+			e.CursorRow--
+			rowLength := provider.rowLength(e.CursorRow)
+			e.CursorColumn = rowLength
+		} else {
+			e.CursorColumn--
+		}
+		e.Unlock()
 	case fyne.KeyDelete:
-		if e.selecting {
-			e.eraseSelection() // clears the selection (exactly like backspace)
-		} else {
-			pos := e.cursorTextPos()
-			if provider.len() == 0 || pos == provider.len() {
-				return
-			}
-			provider.deleteFromTo(pos, pos+1)
+		pos := e.cursorTextPos()
+		if provider.len() == 0 || pos == provider.len() {
+			return
 		}
+		provider.deleteFromTo(pos, pos+1)
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if !e.MultiLine {
 			return
-		}
-		if e.selecting {
-			e.eraseSelection() // clear the selection and fallthrough to add the newline
 		}
 		provider.insertAt(e.cursorTextPos(), []rune("\n"))
 		e.Lock()
@@ -601,10 +624,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyUp:
 		if !e.MultiLine {
 			return
-		}
-
-		if e.selecting && e.selectKeyDown == false {
-			seekSelection(true) // seek to the start of the selection and fallthrough to move up
 		}
 
 		e.Lock()
@@ -621,9 +640,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if !e.MultiLine {
 			return
 		}
-		if e.selecting && e.selectKeyDown == false {
-			seekSelection(false) // seek to the end of the selection and fallthrough to move down
-		}
 
 		e.Lock()
 		if e.CursorRow < provider.rows()-1 {
@@ -636,42 +652,30 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		}
 		e.Unlock()
 	case fyne.KeyLeft:
-		if e.selecting && e.selectKeyDown == false {
-			seekSelection(true) // seek to the start of the selection (no fallthrough)
-		} else {
-			e.Lock()
-			if e.CursorColumn > 0 {
-				e.CursorColumn--
-			} else if e.MultiLine && e.CursorRow > 0 {
-				e.CursorRow--
-				e.CursorColumn = provider.rowLength(e.CursorRow)
-			}
-			e.Unlock()
+		e.Lock()
+		if e.CursorColumn > 0 {
+			e.CursorColumn--
+		} else if e.MultiLine && e.CursorRow > 0 {
+			e.CursorRow--
+			e.CursorColumn = provider.rowLength(e.CursorRow)
 		}
+		e.Unlock()
 	case fyne.KeyRight:
-		if e.selecting && e.selectKeyDown == false {
-			seekSelection(false) // seek to the end of the selection (no fallthrough)
-		} else {
-			e.Lock()
-			if e.MultiLine {
-				rowLength := provider.rowLength(e.CursorRow)
-				if e.CursorColumn < rowLength {
-					e.CursorColumn++
-				} else if e.CursorRow < provider.rows()-1 {
-					e.CursorRow++
-					e.CursorColumn = 0
-				}
-			} else if e.CursorColumn < provider.len() {
+		e.Lock()
+		if e.MultiLine {
+			rowLength := provider.rowLength(e.CursorRow)
+			if e.CursorColumn < rowLength {
 				e.CursorColumn++
+			} else if e.CursorRow < provider.rows()-1 {
+				e.CursorRow++
+				e.CursorColumn = 0
 			}
-			e.Unlock()
+		} else if e.CursorColumn < provider.len() {
+			e.CursorColumn++
 		}
+		e.Unlock()
 	case fyne.KeyEnd:
 		e.Lock()
-		// if the user pressed end and isn't holding shift then end selection (fallthrough)
-		if e.selecting && e.selectKeyDown == false {
-			e.selecting = false
-		}
 		if e.MultiLine {
 			e.CursorColumn = provider.rowLength(e.CursorRow)
 		} else {
@@ -680,10 +684,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.Unlock()
 	case fyne.KeyHome:
 		e.Lock()
-		// if the user pressed home and isn't holding shift then end selection (fallthrough)
-		if e.selecting && e.selectKeyDown == false {
-			e.selecting = false
-		}
 		e.CursorColumn = 0
 		e.Unlock()
 	default:
