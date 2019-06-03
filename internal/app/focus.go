@@ -14,10 +14,9 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 	var first, next fyne.Focusable
 	found := current == nil // if we have no starting point then pretend we matched already
 	driver.WalkObjectTree(f.canvas.Content(), fyne.NewPos(0, 0), func(obj fyne.CanvasObject, _ fyne.Position) bool {
-		if w, ok := obj.(fyne.Disableable); ok {
-			if w.Disabled() { // disabled widget cannot receive focus
-				return false
-			}
+		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
+			// disabled widget cannot receive focus
+			return false
 		}
 
 		focus, ok := obj.(fyne.Focusable)
@@ -50,10 +49,9 @@ func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
 	var last, previous fyne.Focusable
 	found := false
 	driver.WalkObjectTree(f.canvas.Content(), fyne.NewPos(0, 0), func(obj fyne.CanvasObject, _ fyne.Position) bool {
-		if w, ok := obj.(fyne.Disableable); ok {
-			if w.Disabled() { // disabled widget cannot receive focus
-				return false
-			}
+		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
+			// disabled widget cannot receive focus
+			return false
 		}
 
 		focus, ok := obj.(fyne.Focusable)
