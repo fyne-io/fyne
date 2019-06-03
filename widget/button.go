@@ -181,6 +181,11 @@ func (b *Button) Disable() {
 	Renderer(b).ApplyTheme()
 }
 
+// Disabled returns true if the widget is disabled
+func (b *Button) Disabled() bool {
+	return b.disabled
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
 	if b.OnTapped != nil && !b.Disabled() {

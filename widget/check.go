@@ -139,6 +139,11 @@ func (c *Check) Disable() {
 	Renderer(c).ApplyTheme()
 }
 
+// Disabled returns true if the widget is disabled
+func (c *Check) Disabled() bool {
+	return c.disabled
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
 	if !c.Disabled() {

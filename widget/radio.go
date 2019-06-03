@@ -194,6 +194,11 @@ func (r *Radio) Disable() {
 	Renderer(r).ApplyTheme()
 }
 
+// Disabled returns true if the widget is disabled
+func (r *Radio) Disabled() bool {
+	return r.disabled
+}
+
 // Append adds a new option to the end of a Radio widget.
 func (r *Radio) Append(option string) {
 	r.Options = append(r.Options, option)
