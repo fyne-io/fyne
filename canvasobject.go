@@ -40,6 +40,7 @@ type Tappable interface {
 type Disableable interface {
 	Enable()
 	Disable()
+	Disabled() bool
 }
 
 // Scrollable describes any CanvasObject that can also be scrolled.
