@@ -17,16 +17,17 @@ import (
 func WalkObjectTree(
 	obj fyne.CanvasObject,
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
-	afterChildren func(fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) bool {
-	return walkObjectTree(obj, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+	return walkObjectTree(obj, nil, fyne.NewPos(0, 0), beforeChildren, afterChildren)
 }
 
 func walkObjectTree(
 	obj fyne.CanvasObject,
+	parent fyne.CanvasObject,
 	offset fyne.Position,
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
-	afterChildren func(fyne.CanvasObject),
+	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) bool {
 	var children []fyne.CanvasObject
 	switch co := obj.(type) {
@@ -45,14 +46,14 @@ func walkObjectTree(
 
 	cancelled := false
 	for _, child := range children {
-		if walkObjectTree(child, pos, beforeChildren, afterChildren) {
+		if walkObjectTree(child, obj, pos, beforeChildren, afterChildren) {
 			cancelled = true
 			break
 		}
 	}
 
 	if afterChildren != nil {
-		afterChildren(obj)
+		afterChildren(obj, parent)
 	}
 	return cancelled
 }
