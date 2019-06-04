@@ -19,12 +19,10 @@ type buttonRenderer struct {
 }
 
 func (b *buttonRenderer) padding() fyne.Size {
-	if b.button.Text != "" {
-		return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
-	} else if b.icon != nil {
+	if b.button.Text == "" {
 		return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 	}
-	return fyne.NewSize(0, 0)
+	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 }
 
 // MinSize calculates the minimum size of a button.
