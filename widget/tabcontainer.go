@@ -115,9 +115,8 @@ func (t *TabContainer) CurrentTabIndex() int {
 	return t.current
 }
 
-func (t *TabContainer) makeButton(item *TabItem) *Button {
-	it := item
-	return NewButtonWithIcon(item.Text, item.Icon, func() { t.SelectTab(it) })
+func (t *TabContainer) makeButton(item *TabItem) *tabButton {
+	return &tabButton{Text: item.Text, Icon: item.Icon, OnTap: func() { t.SelectTab(item) }}
 }
 
 /*
@@ -178,6 +177,16 @@ func (t *TabContainer) SetTabLocation(l TabLocation) {
 	t.tabLocation = l
 	r := Renderer(t).(*tabContainerRenderer)
 	buttons := r.tabBar.Children
+	switch l {
+	case TabLocationLeading, TabLocationTrailing:
+		for _, b := range buttons {
+			b.(*tabButton).IconPosition = buttonIconTop
+		}
+	default:
+		for _, b := range buttons {
+			b.(*tabButton).IconPosition = buttonIconInline
+		}
+	}
 	r.tabBar.Children = nil
 	r.tabBar = t.buildTabBar(buttons)
 	r.objects[len(r.objects)-1] = r.tabBar
@@ -287,13 +296,180 @@ func (t *tabContainerRenderer) Refresh() {
 
 	for i, button := range t.tabBar.Children {
 		if i == t.container.current {
-			button.(*Button).Style = PrimaryButton
+			button.(*tabButton).Style = PrimaryButton
 		} else {
-			button.(*Button).Style = DefaultButton
+			button.(*tabButton).Style = DefaultButton
 		}
-		Renderer(button.(*Button)).Refresh()
+		Renderer(button.(*tabButton)).Refresh()
 	}
 }
 
 func (t *tabContainerRenderer) Destroy() {
+}
+
+type buttonIconPosition int
+
+const (
+	buttonIconInline buttonIconPosition = iota
+	buttonIconTop
+)
+
+var _ fyne.Widget = (*tabButton)(nil)
+var _ fyne.Tappable = (*tabButton)(nil)
+
+type tabButton struct {
+	baseWidget
+	Icon         fyne.Resource
+	IconPosition buttonIconPosition
+	OnTap        func()
+	Style        ButtonStyle
+	Text         string
+}
+
+func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
+	var icon *canvas.Image
+	if b.Icon != nil {
+		icon = canvas.NewImageFromResource(b.Icon)
+	}
+
+	label := canvas.NewText(b.Text, theme.TextColor())
+	label.Alignment = fyne.TextAlignCenter
+
+	objects := []fyne.CanvasObject{label}
+	if icon != nil {
+		objects = append(objects, icon)
+	}
+
+	return &tabButtonRenderer{
+		button:  b,
+		icon:    icon,
+		label:   label,
+		objects: objects,
+	}
+}
+
+func (b *tabButton) Hide() {
+	b.hide(b)
+}
+
+func (b *tabButton) MinSize() fyne.Size {
+	return b.minSize(b)
+}
+
+func (b *tabButton) Move(pos fyne.Position) {
+	b.move(pos, b)
+}
+
+func (b *tabButton) Resize(size fyne.Size) {
+	b.resize(size, b)
+}
+
+func (b *tabButton) Show() {
+	b.show(b)
+}
+
+func (b *tabButton) Tapped(e *fyne.PointEvent) {
+}
+
+func (b *tabButton) TappedSecondary(e *fyne.PointEvent) {
+}
+
+type tabButtonRenderer struct {
+	button  *tabButton
+	icon    *canvas.Image
+	label   *canvas.Text
+	objects []fyne.CanvasObject
+}
+
+func (r *tabButtonRenderer) ApplyTheme() {
+}
+
+func (r *tabButtonRenderer) BackgroundColor() color.Color {
+	return theme.ButtonColor()
+}
+
+func (r *tabButtonRenderer) Destroy() {
+}
+
+func (r *tabButtonRenderer) Layout(size fyne.Size) {
+	padding := r.padding()
+	innerSize := size.Subtract(padding)
+	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
+	labelShift := 0
+	if r.icon != nil {
+		var iconOffset fyne.Position
+		if r.button.IconPosition == buttonIconTop {
+			iconOffset = fyne.NewPos((innerSize.Width-r.iconSize())/2, 0)
+		} else {
+			iconOffset = fyne.NewPos(0, (innerSize.Height-r.iconSize())/2)
+		}
+		r.icon.Resize(fyne.NewSize(r.iconSize(), r.iconSize()))
+		r.icon.Move(innerOffset.Add(iconOffset))
+		labelShift = r.iconSize() + theme.Padding()
+	}
+	if r.label.Text != "" {
+		var labelOffset fyne.Position
+		var labelSize fyne.Size
+		if r.button.IconPosition == buttonIconTop {
+			labelOffset = fyne.NewPos(theme.Padding(), labelShift)
+			labelSize = fyne.NewSize(innerSize.Width-2*theme.Padding(), r.label.MinSize().Height)
+		} else {
+			labelOffset = fyne.NewPos(labelShift, 0)
+			labelSize = fyne.NewSize(innerSize.Width-labelShift, innerSize.Height)
+		}
+		r.label.Resize(labelSize)
+		r.label.Move(innerOffset.Add(labelOffset))
+	}
+}
+
+func (r *tabButtonRenderer) MinSize() fyne.Size {
+	var contentWidth, contentHeight int
+	textSize := r.label.MinSize()
+	if r.button.IconPosition == buttonIconTop {
+		contentWidth = fyne.Max(textSize.Width+2*theme.Padding(), r.iconSize())
+		if r.icon != nil {
+			contentHeight += r.iconSize()
+		}
+		if r.label.Text != "" {
+			if r.icon != nil {
+				contentHeight += theme.Padding()
+			}
+			contentHeight += textSize.Height
+		}
+	} else {
+		contentHeight = fyne.Max(textSize.Height, r.iconSize())
+		if r.icon != nil {
+			contentWidth += r.iconSize()
+		}
+		if r.label.Text != "" {
+			if r.icon != nil {
+				contentWidth += theme.Padding()
+			}
+			contentWidth += textSize.Width
+		}
+	}
+	return fyne.NewSize(contentWidth, contentHeight).Add(r.padding())
+}
+
+func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *tabButtonRenderer) Refresh() {
+}
+
+func (r *tabButtonRenderer) padding() fyne.Size {
+	if r.label.Text != "" && r.button.IconPosition == buttonIconInline {
+		return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+	}
+	return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+}
+
+func (r *tabButtonRenderer) iconSize() int {
+	switch r.button.IconPosition {
+	case buttonIconTop:
+		return 2 * theme.IconInlineSize()
+	default:
+		return theme.IconInlineSize()
+	}
 }
