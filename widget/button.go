@@ -29,19 +29,18 @@ func (b *buttonRenderer) padding() fyne.Size {
 // This is based on the contained text, any icon that is set and a standard
 // amount of padding added.
 func (b *buttonRenderer) MinSize() fyne.Size {
-	min := b.padding()
-
-	if b.button.Text != "" {
-		textSize := b.label.MinSize()
-		min = min.Add(fyne.NewSize(textSize.Width, fyne.Max(textSize.Height, theme.IconInlineSize())))
-		if b.icon != nil {
-			min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
-		}
-	} else if b.icon != nil {
-		min = min.Add(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+	contentHeight := fyne.Max(theme.TextSize(), theme.IconInlineSize())
+	contentWidth := 0
+	if b.icon != nil {
+		contentWidth += theme.IconInlineSize()
 	}
-
-	return min
+	if b.button.Text != "" {
+		if b.icon != nil {
+			contentWidth += theme.Padding()
+		}
+		contentWidth += b.label.MinSize().Width
+	}
+	return fyne.NewSize(contentWidth, contentHeight).Add(b.padding())
 }
 
 // Layout the components of the button widget
