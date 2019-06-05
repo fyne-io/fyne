@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
@@ -74,8 +75,8 @@ func Layout(app fyne.App) {
 	gridButton := widget.NewButton("Move Tabs", nil)
 
 	t := widget.NewTabContainer(
-		widget.NewTabItem("Border", makeBorderLayout(borderButton)),
-		widget.NewTabItem("Box", makeBoxLayout(boxButton)),
+		widget.NewTabItemWithIcon("Border", theme.ConfirmIcon(), makeBorderLayout(borderButton)),
+		widget.NewTabItemWithIcon("Box", theme.FolderIcon(), makeBoxLayout(boxButton)),
 		widget.NewTabItem("Fixed Grid", makeFixedGridLayout(fixedGridButton)),
 		widget.NewTabItem("Grid", makeGridLayout(gridButton)),
 	)
