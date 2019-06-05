@@ -80,16 +80,16 @@ func (b *buttonRenderer) ApplyTheme() {
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
-	if b.button.Style == PrimaryButton && !b.button.Disabled() {
-		return theme.PrimaryColor()
-	} else if b.button.Disabled() {
+	switch {
+	case b.button.disabled:
 		return theme.DisabledButtonColor()
-	}
-
-	if b.button.hovered && !b.button.Disabled() {
+	case b.button.Style == PrimaryButton:
+		return theme.PrimaryColor()
+	case b.button.hovered:
 		return theme.HoverColor()
+	default:
+		return theme.ButtonColor()
 	}
-	return theme.ButtonColor()
 }
 
 func (b *buttonRenderer) Refresh() {

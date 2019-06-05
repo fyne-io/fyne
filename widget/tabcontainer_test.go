@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -114,6 +115,48 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	}
 }
 
+func Test_tabContainer_Tapped(t *testing.T) {
+	tabs := NewTabContainer(
+		NewTabItem("Test1", NewLabel("Test1")),
+		NewTabItem("Test2", NewLabel("Test2")),
+		NewTabItem("Test3", NewLabel("Test3")),
+	)
+	r := Renderer(tabs).(*tabContainerRenderer)
+
+	tab1 := r.tabBar.Children[0].(*tabButton)
+	tab2 := r.tabBar.Children[1].(*tabButton)
+	tab3 := r.tabBar.Children[2].(*tabButton)
+	require.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
+
+	tab2.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 1, tabs.CurrentTabIndex())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab2).BackgroundColor())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab3).BackgroundColor())
+	assert.False(t, tabs.Items[0].Content.Visible())
+	assert.True(t, tabs.Items[1].Content.Visible())
+	assert.False(t, tabs.Items[2].Content.Visible())
+
+	tab3.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 2, tabs.CurrentTabIndex())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab2).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab3).BackgroundColor())
+	assert.False(t, tabs.Items[0].Content.Visible())
+	assert.False(t, tabs.Items[1].Content.Visible())
+	assert.True(t, tabs.Items[2].Content.Visible())
+
+	tab1.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab2).BackgroundColor())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab3).BackgroundColor())
+	assert.True(t, tabs.Items[0].Content.Visible())
+	assert.False(t, tabs.Items[1].Content.Visible())
+	assert.False(t, tabs.Items[2].Content.Visible())
+}
+
 func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
 	tabs := NewTabContainer(&TabItem{Text: "Test1", Content: NewLabel("Test1")})
 	underline := Renderer(tabs).(*tabContainerRenderer).line
@@ -125,14 +168,27 @@ func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
 }
 
 func TestTabContainerRenderer_Layout(t *testing.T) {
-	textWidth := canvas.NewText("Text0", theme.TextColor()).MinSize().Width
-	contentHeight := fyne.Max(theme.IconInlineSize(), theme.TextSize())
-	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-	textSize := fyne.NewSize(textWidth, contentHeight)
+	textSize := canvas.NewText("Text0", theme.TextColor()).MinSize()
+	textWidth := textSize.Width
+	textHeight := textSize.Height
+	horizontalContentHeight := fyne.Max(theme.IconInlineSize(), textHeight)
+	horizontalIconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	horizontalTextSize := fyne.NewSize(textWidth, horizontalContentHeight)
+	verticalIconSize := fyne.NewSize(2*theme.IconInlineSize(), 2*theme.IconInlineSize())
+	verticalTextSize := fyne.NewSize(textWidth, textHeight)
+	verticalMixedWidth := fyne.Max(verticalIconSize.Width, textWidth)
+	verticalMixedIconOffset := 0
+	verticalMixedTextOffset := 0
+	if verticalMixedWidth > verticalIconSize.Width {
+		verticalMixedIconOffset = (verticalMixedWidth - verticalIconSize.Width) / 2
+	} else {
+		verticalMixedTextOffset = (verticalMixedWidth - textWidth) / 2
+	}
 
 	tests := []struct {
 		name           string
 		item           *TabItem
+		location       TabLocation
 		wantButtonSize fyne.Size
 		wantIconPos    fyne.Position
 		wantIconSize   fyne.Size
@@ -140,27 +196,108 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 		wantTextSize   fyne.Size
 	}{
 		{
-			name:           "tab with icon and text",
+			name:           "top: tab with icon and text",
 			item:           NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
-			wantButtonSize: fyne.NewSize(theme.Padding()*5+theme.IconInlineSize()+textWidth, theme.Padding()*2+contentHeight),
+			location:       TabLocationTop,
+			wantButtonSize: fyne.NewSize(theme.Padding()*5+theme.IconInlineSize()+textWidth, theme.Padding()*2+horizontalContentHeight),
 			wantIconPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
-			wantIconSize:   iconSize,
+			wantIconSize:   horizontalIconSize,
 			wantTextPos:    fyne.NewPos(3*theme.Padding()+theme.IconInlineSize(), theme.Padding()),
-			wantTextSize:   textSize,
+			wantTextSize:   horizontalTextSize,
 		},
 		{
-			name:           "tab with text only",
+			name:           "top: tab with text only",
 			item:           NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
-			wantButtonSize: fyne.NewSize(theme.Padding()*4+textWidth, theme.Padding()*2+contentHeight),
+			location:       TabLocationTop,
+			wantButtonSize: fyne.NewSize(theme.Padding()*4+textWidth, theme.Padding()*2+horizontalContentHeight),
 			wantTextPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
-			wantTextSize:   textSize,
+			wantTextSize:   horizontalTextSize,
 		},
 		{
-			name:           "tab with icon only",
+			name:           "top: tab with icon only",
 			item:           NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
-			wantButtonSize: fyne.NewSize(theme.Padding()*2+theme.IconInlineSize(), theme.Padding()*2+contentHeight),
+			location:       TabLocationTop,
+			wantButtonSize: fyne.NewSize(theme.Padding()*2+theme.IconInlineSize(), theme.Padding()*2+horizontalContentHeight),
 			wantIconPos:    fyne.NewPos(theme.Padding(), theme.Padding()),
-			wantIconSize:   iconSize,
+			wantIconSize:   horizontalIconSize,
+		},
+		{
+			name:           "bottom: tab with icon and text",
+			item:           NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationBottom,
+			wantButtonSize: fyne.NewSize(theme.Padding()*5+theme.IconInlineSize()+textWidth, theme.Padding()*2+horizontalContentHeight),
+			wantIconPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
+			wantIconSize:   horizontalIconSize,
+			wantTextPos:    fyne.NewPos(3*theme.Padding()+theme.IconInlineSize(), theme.Padding()),
+			wantTextSize:   horizontalTextSize,
+		},
+		{
+			name:           "bottom: tab with text only",
+			item:           NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationBottom,
+			wantButtonSize: fyne.NewSize(theme.Padding()*4+textWidth, theme.Padding()*2+horizontalContentHeight),
+			wantTextPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
+			wantTextSize:   horizontalTextSize,
+		},
+		{
+			name:           "bottom: tab with icon only",
+			item:           NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationBottom,
+			wantButtonSize: fyne.NewSize(theme.Padding()*2+theme.IconInlineSize(), theme.Padding()*2+horizontalContentHeight),
+			wantIconPos:    fyne.NewPos(theme.Padding(), theme.Padding()),
+			wantIconSize:   horizontalIconSize,
+		},
+		{
+			name:           "leading: tab with icon and text",
+			item:           NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationLeading,
+			wantButtonSize: fyne.NewSize(theme.Padding()*4+verticalMixedWidth, theme.Padding()*3+verticalIconSize.Height+textHeight),
+			wantIconPos:    fyne.NewPos(2*theme.Padding()+verticalMixedIconOffset, theme.Padding()),
+			wantIconSize:   verticalIconSize,
+			wantTextPos:    fyne.NewPos(2*theme.Padding()+verticalMixedTextOffset, 2*theme.Padding()+verticalIconSize.Height),
+			wantTextSize:   verticalTextSize,
+		},
+		{
+			name:           "leading: tab with text only",
+			item:           NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationLeading,
+			wantButtonSize: fyne.NewSize(theme.Padding()*4+textWidth, theme.Padding()*2+textHeight),
+			wantTextPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
+			wantTextSize:   verticalTextSize,
+		},
+		{
+			name:           "leading: tab with icon only",
+			item:           NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationLeading,
+			wantButtonSize: verticalIconSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)),
+			wantIconPos:    fyne.NewPos(theme.Padding(), theme.Padding()),
+			wantIconSize:   verticalIconSize,
+		},
+		{
+			name:           "trailing: tab with icon and text",
+			item:           NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationTrailing,
+			wantButtonSize: fyne.NewSize(theme.Padding()*4+verticalMixedWidth, theme.Padding()*3+verticalIconSize.Height+textHeight),
+			wantIconPos:    fyne.NewPos(2*theme.Padding()+verticalMixedIconOffset, theme.Padding()),
+			wantIconSize:   verticalIconSize,
+			wantTextPos:    fyne.NewPos(2*theme.Padding()+verticalMixedTextOffset, 2*theme.Padding()+verticalIconSize.Height),
+			wantTextSize:   verticalTextSize,
+		},
+		{
+			name:           "trailing: tab with text only",
+			item:           NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationTrailing,
+			wantButtonSize: fyne.NewSize(theme.Padding()*4+textWidth, theme.Padding()*2+textHeight),
+			wantTextPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
+			wantTextSize:   verticalTextSize,
+		},
+		{
+			name:           "trailing: tab with icon only",
+			item:           NewTabItemWithIcon("", theme.InfoIcon(), canvas.NewCircle(theme.BackgroundColor())),
+			location:       TabLocationTrailing,
+			wantButtonSize: verticalIconSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)),
+			wantIconPos:    fyne.NewPos(theme.Padding(), theme.Padding()),
+			wantIconSize:   verticalIconSize,
 		},
 	}
 	for _, tt := range tests {
@@ -168,12 +305,12 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 			tabs := NewTabContainer(tt.item)
 			r := Renderer(tabs).(*tabContainerRenderer)
 			require.Len(t, r.tabBar.Children, 1)
-			tabs.SetTabLocation(TabLocationTop)
+			tabs.SetTabLocation(tt.location)
 			r.Layout(fyne.NewSize(100, 100))
 
-			b := r.tabBar.Children[0].(*Button)
+			b := r.tabBar.Children[0].(*tabButton)
 			assert.Equal(t, tt.wantButtonSize, b.Size())
-			br := Renderer(b).(*buttonRenderer)
+			br := Renderer(b).(*tabButtonRenderer)
 			if tt.item.Icon != nil {
 				assert.Equal(t, tt.item.Icon, br.icon.Resource)
 				assert.Equal(t, tt.wantIconSize, br.icon.Size())
@@ -186,4 +323,20 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 			assert.Equal(t, tt.wantTextPos, br.label.Position())
 		})
 	}
+}
+
+func Test_tabButton_Hovered(t *testing.T) {
+	b := &tabButton{}
+	r := Renderer(b)
+	require.Equal(t, theme.ButtonColor(), r.BackgroundColor())
+
+	b.MouseIn(&desktop.MouseEvent{})
+	assert.Equal(t, theme.HoverColor(), r.BackgroundColor())
+	b.MouseOut()
+	assert.Equal(t, theme.ButtonColor(), r.BackgroundColor())
+}
+
+func Test_tabButtonRenderer_BackgroundColor(t *testing.T) {
+	r := Renderer(&tabButton{})
+	assert.Equal(t, theme.ButtonColor(), r.BackgroundColor())
 }
