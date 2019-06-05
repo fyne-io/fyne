@@ -59,8 +59,9 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 			b.label.Resize(labelSize)
 			b.label.Move(innerOffset.Add(labelOffset))
 
+			iconOffsetX := (innerSize.Width - b.label.MinSize().Width-theme.IconInlineSize()-theme.Padding())/2
 			b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-			b.icon.Move(fyne.NewPos(innerOffset.X, (size.Height-theme.IconInlineSize())/2))
+			b.icon.Move(fyne.NewPos(innerOffset.X + iconOffsetX, (size.Height-theme.IconInlineSize())/2))
 		}
 	} else {
 		b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))

@@ -138,6 +138,15 @@ func TestButtonRenderer_Layout(t *testing.T) {
 	assert.Equal(t, theme.Padding()*2, render.MinSize().Width-render.label.Position().X-render.label.Size().Width)
 }
 
+func TestButtonRenderer_Layout_Stretch(t *testing.T) {
+	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
+	button.Resize(fyne.NewSize(100, button.MinSize().Height))
+	render := Renderer(button).(*buttonRenderer)
+
+	assert.True(t, render.label.Position().X > theme.Padding()*2)
+	assert.Equal(t, (button.Size().Width - render.label.MinSize().Width- theme.IconInlineSize() - theme.Padding())/2 , render.icon.Position().X)
+}
+
 func TestButtonRenderer_Layout_NoText(t *testing.T) {
 	button := NewButtonWithIcon("", theme.CancelIcon(), nil)
 	render := Renderer(button).(*buttonRenderer)
