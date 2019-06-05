@@ -144,7 +144,7 @@ func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 	render := Renderer(button).(*buttonRenderer)
 
 	assert.True(t, render.label.Position().X > theme.Padding()*2)
-	assert.Equal(t, (button.Size().Width - render.label.MinSize().Width- theme.IconInlineSize() - theme.Padding())/2 , render.icon.Position().X)
+	assert.Equal(t, (button.Size().Width-render.label.MinSize().Width-theme.IconInlineSize()-theme.Padding())/2, render.icon.Position().X)
 }
 
 func TestButtonRenderer_Layout_NoText(t *testing.T) {
