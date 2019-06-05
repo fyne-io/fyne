@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -112,6 +113,48 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 		x += button.Size().Width
 		x += theme.Padding()
 	}
+}
+
+func Test_tabContainer_Tapped(t *testing.T) {
+	tabs := NewTabContainer(
+		NewTabItem("Test1", NewLabel("Test1")),
+		NewTabItem("Test2", NewLabel("Test2")),
+		NewTabItem("Test3", NewLabel("Test3")),
+	)
+	r := Renderer(tabs).(*tabContainerRenderer)
+
+	tab1 := r.tabBar.Children[0].(*tabButton)
+	tab2 := r.tabBar.Children[1].(*tabButton)
+	tab3 := r.tabBar.Children[2].(*tabButton)
+	require.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
+
+	tab2.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 1, tabs.CurrentTabIndex())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab2).BackgroundColor())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab3).BackgroundColor())
+	assert.False(t, tabs.Items[0].Content.Visible())
+	assert.True(t, tabs.Items[1].Content.Visible())
+	assert.False(t, tabs.Items[2].Content.Visible())
+
+	tab3.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 2, tabs.CurrentTabIndex())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab2).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab3).BackgroundColor())
+	assert.False(t, tabs.Items[0].Content.Visible())
+	assert.False(t, tabs.Items[1].Content.Visible())
+	assert.True(t, tabs.Items[2].Content.Visible())
+
+	tab1.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab2).BackgroundColor())
+	require.Equal(t, theme.ButtonColor(), Renderer(tab3).BackgroundColor())
+	assert.True(t, tabs.Items[0].Content.Visible())
+	assert.False(t, tabs.Items[1].Content.Visible())
+	assert.False(t, tabs.Items[2].Content.Visible())
 }
 
 func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
@@ -282,6 +325,18 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 	}
 }
 
+func Test_tabButton_Hovered(t *testing.T) {
+	b := &tabButton{}
+	r := Renderer(b)
+	require.Equal(t, theme.ButtonColor(), r.BackgroundColor())
+
+	b.MouseIn(&desktop.MouseEvent{})
+	assert.Equal(t, theme.HoverColor(), r.BackgroundColor())
+	b.MouseOut()
+	assert.Equal(t, theme.ButtonColor(), r.BackgroundColor())
+}
+
 func Test_tabButtonRenderer_BackgroundColor(t *testing.T) {
-	assert.Equal(t, theme.ButtonColor(), (&tabButtonRenderer{}).BackgroundColor())
+	r := Renderer(&tabButton{})
+	assert.Equal(t, theme.ButtonColor(), r.BackgroundColor())
 }

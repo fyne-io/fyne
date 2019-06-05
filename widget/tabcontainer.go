@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
@@ -316,9 +317,11 @@ const (
 
 var _ fyne.Widget = (*tabButton)(nil)
 var _ fyne.Tappable = (*tabButton)(nil)
+var _ desktop.Hoverable = (*tabButton)(nil)
 
 type tabButton struct {
 	baseWidget
+	hovered      bool
 	Icon         fyne.Resource
 	IconPosition buttonIconPosition
 	OnTap        func()
@@ -356,6 +359,19 @@ func (b *tabButton) MinSize() fyne.Size {
 	return b.minSize(b)
 }
 
+func (b *tabButton) MouseIn(e *desktop.MouseEvent) {
+	b.hovered = true
+	canvas.Refresh(b)
+}
+
+func (b *tabButton) MouseMoved(e *desktop.MouseEvent) {
+}
+
+func (b *tabButton) MouseOut() {
+	b.hovered = false
+	canvas.Refresh(b)
+}
+
 func (b *tabButton) Move(pos fyne.Position) {
 	b.move(pos, b)
 }
@@ -369,6 +385,7 @@ func (b *tabButton) Show() {
 }
 
 func (b *tabButton) Tapped(e *fyne.PointEvent) {
+	b.OnTap()
 }
 
 func (b *tabButton) TappedSecondary(e *fyne.PointEvent) {
@@ -385,7 +402,14 @@ func (r *tabButtonRenderer) ApplyTheme() {
 }
 
 func (r *tabButtonRenderer) BackgroundColor() color.Color {
-	return theme.ButtonColor()
+	switch {
+	case r.button.Style == PrimaryButton:
+		return theme.PrimaryColor()
+	case r.button.hovered:
+		return theme.HoverColor()
+	default:
+		return theme.ButtonColor()
+	}
 }
 
 func (r *tabButtonRenderer) Destroy() {
