@@ -313,14 +313,14 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 			br := Renderer(b).(*tabButtonRenderer)
 			if tt.item.Icon != nil {
 				assert.Equal(t, tt.item.Icon, br.icon.Resource)
-				assert.Equal(t, tt.wantIconSize, br.icon.Size())
-				assert.Equal(t, tt.wantIconPos, br.icon.Position())
+				assert.Equal(t, tt.wantIconSize, br.icon.Size(), "icon size")
+				assert.Equal(t, tt.wantIconPos, br.icon.Position(), "icon position")
 			} else {
 				assert.Nil(t, br.icon)
 			}
 			assert.Equal(t, tt.item.Text, br.label.Text)
-			assert.Equal(t, tt.wantTextSize, br.label.Size())
-			assert.Equal(t, tt.wantTextPos, br.label.Position())
+			assert.Equal(t, tt.wantTextSize, br.label.Size(), "label size")
+			assert.Equal(t, tt.wantTextPos, br.label.Position(), "label position")
 		})
 	}
 }
