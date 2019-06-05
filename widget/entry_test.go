@@ -858,16 +858,16 @@ func TestEntry_SelectEnter(t *testing.T) {
 	// "Testing\nTeng\nTesting"
 	assert.Equal(t, "Testing\nTe\nng\nTesting", e.Text)
 	assert.Equal(t, 21, len(e.Text))
-	assert.Equal(t, 10, e.SelectionStart()) // Hmm, maybe these should be -1 and -1
-	assert.Equal(t, 11, e.SelectionEnd())
+	assert.Equal(t, -1, e.SelectionStart())
+	assert.Equal(t, -1, e.SelectionEnd())
 
 	e = setupReverse()
 	typeKeys(e, fyne.KeyEnter)
 	// "Testing\nTeng\nTesting"
 	assert.Equal(t, "Testing\nTe\nng\nTesting", e.Text)
 	assert.Equal(t, 21, len(e.Text))
-	assert.Equal(t, 10, e.SelectionStart()) // Hmm, maybe these should be -1 and -1
-	assert.Equal(t, 11, e.SelectionEnd())
+	assert.Equal(t, -1, e.SelectionStart())
+	assert.Equal(t, -1, e.SelectionEnd())
 }
 
 func TestEntry_SelectReplace(t *testing.T) {
@@ -885,6 +885,36 @@ func TestEntry_EraseSelection(t *testing.T) {
 	e.eraseSelection()
 	e.updateText(e.textProvider().String())
 	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
+	assert.Equal(t, -1, e.SelectionStart())
+	assert.Equal(t, -1, e.SelectionEnd())
+}
+
+func TestEntry_EraseEmptySelection(t *testing.T) {
+	e := setup()
+	// clear empty selection
+	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, fyne.KeyDelete)
+	assert.Equal(t, "Testing\nTeting\nTesting", e.Text)
+	assert.Equal(t, -1, e.SelectionStart())
+	assert.Equal(t, -1, e.SelectionEnd())
+
+	e = setup()
+	// clear empty selection while shift is held
+	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyDelete)
+	assert.Equal(t, "Testing\nTeting\nTesting", e.Text)
+	assert.Equal(t, -1, e.SelectionStart())
+	assert.Equal(t, -1, e.SelectionEnd())
+
+	// ensure that backspace doesn't leave a selection start at the old cursor position
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyBackspace)
+	assert.Equal(t, "Testing\nTsting\nTesting", e.Text)
+	assert.Equal(t, -1, e.SelectionStart())
+	assert.Equal(t, -1, e.SelectionEnd())
+
+	// clear selection, select a character and while holding shift issue two backspaces
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyBackspace, fyne.KeyBackspace)
+	assert.Equal(t, "Testing\nTeing\nTesting", e.Text)
 	assert.Equal(t, -1, e.SelectionStart())
 	assert.Equal(t, -1, e.SelectionEnd())
 }

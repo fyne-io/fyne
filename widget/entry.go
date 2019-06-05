@@ -20,9 +20,10 @@ type entryRenderer struct {
 	text         *textProvider
 	placeholder  *textProvider
 	line, cursor *canvas.Rectangle
-	selection    []*canvas.Rectangle
+	selection    []fyne.CanvasObject
 
-	entry *Entry
+	objects []fyne.CanvasObject
+	entry   *Entry
 }
 
 // MinSize calculates the minimum size of an entry widget.
@@ -194,12 +195,10 @@ func (e *entryRenderer) Refresh() {
 
 func (e *entryRenderer) Objects() []fyne.CanvasObject {
 	// Objects are generated dynamically force selection rectangles to appear underneath the text
-	objs := []fyne.CanvasObject{}
-	for _, o := range e.selection {
-		objs = append(objs, o)
+	if e.entry.selecting {
+		return append(e.selection, e.objects...)
 	}
-	objs = append(objs, e.line, e.placeholder, e.text, e.cursor)
-	return objs
+	return e.objects
 }
 
 func (e *entryRenderer) Destroy() {
@@ -435,6 +434,9 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	if !e.focused {
 		e.FocusGained()
 	}
+	if e.selectKeyDown {
+		e.selecting = true
+	}
 	if e.selecting && e.selectKeyDown == false {
 		e.selecting = false
 	}
@@ -494,7 +496,6 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 			e.selectRow = e.CursorRow
 			e.selectColumn = e.CursorColumn
 		}
-		e.selecting = true
 		e.selectKeyDown = true
 	}
 }
@@ -521,14 +522,18 @@ func (e *Entry) eraseSelection() {
 	provider := e.textProvider()
 	posA := e.SelectionStart()
 	posB := e.SelectionEnd()
+
+	if posA == posB {
+		return
+	}
+
 	e.Lock()
 
 	provider.deleteFromTo(posA, posB)
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.Unlock()
-
-	// e.selecting = false
+	e.selecting = false
 }
 
 // TypedKey receives key input events when the Entry widget is focused.
@@ -552,6 +557,16 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 
 	provider := e.textProvider()
+
+	if e.selectKeyDown && e.selecting == false {
+		switch key.Name {
+		case fyne.KeyUp, fyne.KeyDown,
+			fyne.KeyLeft, fyne.KeyRight,
+			fyne.KeyEnd, fyne.KeyHome,
+			fyne.KeyPageUp, fyne.KeyPageDown:
+			e.selecting = true
+		}
+	}
 
 	if e.selecting {
 
@@ -772,7 +787,8 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	line := canvas.NewRectangle(theme.ButtonColor())
 	cursor := canvas.NewRectangle(theme.FocusColor())
 
-	return &entryRenderer{&text, &placeholder, line, cursor, nil, e}
+	return &entryRenderer{&text, &placeholder, line, cursor, []fyne.CanvasObject{},
+		[]fyne.CanvasObject{line, &placeholder, &text, cursor}, e}
 }
 
 func (e *Entry) registerShortcut() {
