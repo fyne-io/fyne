@@ -149,6 +149,7 @@ func TestButtonRenderer_Layout_NoText(t *testing.T) {
 	assert.Equal(t, theme.Padding()+10, render.icon.Position().X)
 	assert.Equal(t, theme.Padding()+10, render.icon.Position().Y)
 }
+<<<<<<< HEAD
 
 func TestButton_Disable(t *testing.T) {
 	tapped := make(chan bool)
@@ -202,3 +203,5 @@ func TestButton_Disabled(t *testing.T) {
 	button.Enable()
 	assert.False(t, button.Disabled())
 }
+=======
+>>>>>>> a1fa0c10fcf1eef7a376f0bec951b662e65d9c92
