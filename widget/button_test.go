@@ -146,8 +146,13 @@ func TestButtonRenderer_Layout_NoText(t *testing.T) {
 	height := button.MinSize().Height + 20
 	button.Resize(fyne.NewSize(width, height))
 
+	iconOffset := 0
+	if theme.IconInlineSize() < theme.TextSize() {
+		iconOffset = (theme.TextSize() - theme.IconInlineSize()) / 2
+	}
+
 	assert.Equal(t, theme.Padding()+10, render.icon.Position().X)
-	assert.Equal(t, theme.Padding()+10, render.icon.Position().Y)
+	assert.Equal(t, theme.Padding()+10+iconOffset, render.icon.Position().Y)
 }
 
 func TestButton_Disable(t *testing.T) {

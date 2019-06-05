@@ -18,42 +18,49 @@ type buttonRenderer struct {
 	button  *Button
 }
 
+func (b *buttonRenderer) padding() fyne.Size {
+	if b.button.Text == "" {
+		return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	}
+	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+}
+
 // MinSize calculates the minimum size of a button.
 // This is based on the contained text, any icon that is set and a standard
 // amount of padding added.
 func (b *buttonRenderer) MinSize() fyne.Size {
-	var min fyne.Size
-
-	if b.button.Text != "" {
-		min = b.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-		if b.icon != nil {
-			min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
-		}
-	} else if b.icon != nil {
-		min = fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, theme.IconInlineSize()+theme.Padding()*2)
+	contentHeight := fyne.Max(theme.TextSize(), theme.IconInlineSize())
+	contentWidth := 0
+	if b.icon != nil {
+		contentWidth += theme.IconInlineSize()
 	}
-
-	return min
+	if b.button.Text != "" {
+		if b.icon != nil {
+			contentWidth += theme.Padding()
+		}
+		contentWidth += b.label.MinSize().Width
+	}
+	return fyne.NewSize(contentWidth, contentHeight).Add(b.padding())
 }
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
 	if b.button.Text != "" {
-		inner := size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
+		padding := b.padding()
+		innerSize := size.Subtract(padding)
+		innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
 
 		if b.button.Icon == nil {
-			b.label.Resize(inner)
-			b.label.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()))
+			b.label.Resize(innerSize)
+			b.label.Move(innerOffset)
 		} else {
-			offset := fyne.NewSize(theme.IconInlineSize(), 0)
-			labelSize := inner.Subtract(offset)
+			labelOffset := fyne.NewPos(theme.IconInlineSize()+theme.Padding(), 0)
+			labelSize := innerSize.Subtract(fyne.NewSize(labelOffset.X, 0))
 			b.label.Resize(labelSize)
-			b.label.Move(fyne.NewPos(theme.IconInlineSize()+theme.Padding()*2, theme.Padding()))
+			b.label.Move(innerOffset.Add(labelOffset))
 
 			b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-			b.icon.Move(fyne.NewPos(
-				(size.Width-theme.IconInlineSize()-b.label.MinSize().Width-theme.Padding())/2,
-				(size.Height-theme.IconInlineSize())/2))
+			b.icon.Move(fyne.NewPos(innerOffset.X, (size.Height-theme.IconInlineSize())/2))
 		}
 	} else {
 		b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
