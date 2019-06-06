@@ -143,7 +143,7 @@ func TestWindow_SetPadded(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			w := d.CreateWindow("Test").(*window)
 			w.Canvas().SetScale(1)
-			w.SetPadded(!tt.padding)
+			w.SetPadded(tt.padding)
 			if tt.menu {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
 			}
