@@ -25,6 +25,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Don't add a button bar to a form if it has no buttons
 * Moved driver/gl package to internal/driver/gl
 * Clicking/Tapping in an entry will position the cursor
+* A container with no layout will not change the position or size of it's content
 
 ### Fixed
 
