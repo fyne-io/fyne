@@ -146,7 +146,7 @@ func (d *dialog) Hide() {
 // SetDismissText allows custom text to be set in the confirmation button
 func (d *dialog) SetDismissText(label string) {
 	d.dismiss.SetText(label)
-//	d.Layout(d.win.Content().(*fyne.Container).Objects, d.win.Content().MinSize())
+	widget.Refresh(d.win)
 }
 
 // ShowCustom shows a dialog over the specified application using custom
