@@ -44,6 +44,10 @@ func (m *myWidget) Disable() {
 	m.disable(m)
 }
 
+func (m *myWidget) Disabled() bool {
+	return m.disabled
+}
+
 func (m *myWidget) ApplyTheme() {
 	m.applied <- true
 }

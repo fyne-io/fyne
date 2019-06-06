@@ -221,3 +221,12 @@ func TestRadio_Enable(t *testing.T) {
 	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 	assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
 }
+
+func TestRadio_Disabled(t *testing.T) {
+	radio := NewRadio([]string{"Hi"}, func(string) {})
+	assert.False(t, radio.Disabled())
+	radio.Disable()
+	assert.True(t, radio.Disabled())
+	radio.Enable()
+	assert.False(t, radio.Disabled())
+}

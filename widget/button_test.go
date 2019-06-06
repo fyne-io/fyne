@@ -2,10 +2,12 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -138,6 +140,24 @@ func TestButtonRenderer_Layout(t *testing.T) {
 	assert.Equal(t, theme.Padding()*2, render.MinSize().Width-render.label.Position().X-render.label.Size().Width)
 }
 
+func TestButtonRenderer_Layout_Stretch(t *testing.T) {
+	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
+	button.Resize(button.MinSize().Add(fyne.NewSize(100, 100)))
+	render := Renderer(button).(*buttonRenderer)
+
+	iconYOffset, labelYOffset := 0, 0
+	textHeight := render.label.MinSize().Height
+	if theme.IconInlineSize() > textHeight {
+		labelYOffset = (theme.IconInlineSize() - textHeight) / 2
+	} else {
+		iconYOffset = (textHeight - theme.IconInlineSize()) / 2
+	}
+	assert.Equal(t, fyne.NewPos(50+theme.Padding()*2, 50+theme.Padding()+iconYOffset), render.icon.Position(), "icon position")
+	assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), render.icon.Size(), "icon size")
+	assert.Equal(t, fyne.NewPos(50+theme.Padding()*3+theme.IconInlineSize(), 50+theme.Padding()+labelYOffset), render.label.Position(), "label position")
+	assert.Equal(t, render.label.MinSize(), render.label.Size(), "label size")
+}
+
 func TestButtonRenderer_Layout_NoText(t *testing.T) {
 	button := NewButtonWithIcon("", theme.CancelIcon(), nil)
 	render := Renderer(button).(*buttonRenderer)
@@ -146,8 +166,13 @@ func TestButtonRenderer_Layout_NoText(t *testing.T) {
 	height := button.MinSize().Height + 20
 	button.Resize(fyne.NewSize(width, height))
 
+	iconOffset := 0
+	if theme.IconInlineSize() < theme.TextSize() {
+		iconOffset = (canvas.NewText("", color.White).MinSize().Height - theme.IconInlineSize()) / 2
+	}
+
 	assert.Equal(t, theme.Padding()+10, render.icon.Position().X)
-	assert.Equal(t, theme.Padding()+10, render.icon.Position().Y)
+	assert.Equal(t, theme.Padding()+10+iconOffset, render.icon.Position().Y)
 }
 
 func TestButton_Disable(t *testing.T) {
@@ -192,4 +217,13 @@ func TestButton_Enable(t *testing.T) {
 			assert.Fail(t, "Button should have been re-enabled")
 		}
 	}()
+}
+
+func TestButton_Disabled(t *testing.T) {
+	button := NewButton("Test", func() {})
+	assert.False(t, button.Disabled())
+	button.Disable()
+	assert.True(t, button.Disabled())
+	button.Enable()
+	assert.False(t, button.Disabled())
 }

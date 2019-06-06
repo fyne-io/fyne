@@ -108,59 +108,59 @@ type dummyTheme struct {
 }
 
 func (dummyTheme) BackgroundColor() color.Color {
-	return color.White
+	return color.Gray16{Y: 10}
 }
 
 func (dummyTheme) ButtonColor() color.Color {
-	return color.Black
+	return color.Gray16{Y: 20}
 }
 
 func (dummyTheme) DisabledButtonColor() color.Color {
-	return color.White
+	return color.Gray16{Y: 30}
 }
 
 func (dummyTheme) HyperlinkColor() color.Color {
-	return color.Black
+	return color.Gray16{Y: 40}
 }
 
 func (dummyTheme) TextColor() color.Color {
-	return color.Black
+	return color.Gray16{Y: 50}
 }
 
 func (dummyTheme) DisabledTextColor() color.Color {
-	return color.White
+	return color.Gray16{Y: 60}
 }
 
 func (dummyTheme) IconColor() color.Color {
-	return color.Black
+	return color.Gray16{Y: 70}
 }
 
 func (dummyTheme) DisabledIconColor() color.Color {
-	return color.White
+	return color.Gray16{Y: 80}
 }
 
 func (dummyTheme) PlaceHolderColor() color.Color {
-	return color.Black
+	return color.Gray16{Y: 90}
 }
 
 func (dummyTheme) PrimaryColor() color.Color {
-	return color.White
+	return color.Gray16{Y: 100}
 }
 
 func (dummyTheme) HoverColor() color.Color {
-	return color.White
+	return color.Gray16{Y: 110}
 }
 
 func (dummyTheme) FocusColor() color.Color {
-	return color.Black
+	return color.Gray16{Y: 120}
 }
 
 func (dummyTheme) ScrollBarColor() color.Color {
-	return color.Black
+	return color.Gray16{Y: 130}
 }
 
 func (dummyTheme) ShadowColor() color.Color {
-	return color.Black
+	return color.Gray16{Y: 140}
 }
 
 func (dummyTheme) TextSize() int {

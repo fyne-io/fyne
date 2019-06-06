@@ -166,3 +166,12 @@ func TestCheck_TypedRune(t *testing.T) {
 	test.Type(check, " ")
 	assert.False(t, check.Checked)
 }
+
+func TestCheck_Disabled(t *testing.T) {
+	check := NewCheck("Test", func(bool) {})
+	assert.False(t, check.Disabled())
+	check.Disable()
+	assert.True(t, check.Disabled())
+	check.Enable()
+	assert.False(t, check.Disabled())
+}

@@ -18,43 +18,51 @@ type buttonRenderer struct {
 	button  *Button
 }
 
+func (b *buttonRenderer) padding() fyne.Size {
+	if b.button.Text == "" {
+		return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	}
+	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+}
+
 // MinSize calculates the minimum size of a button.
 // This is based on the contained text, any icon that is set and a standard
 // amount of padding added.
 func (b *buttonRenderer) MinSize() fyne.Size {
-	var min fyne.Size
-
-	if b.button.Text != "" {
-		min = b.label.MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-		if b.icon != nil {
-			min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
-		}
-	} else if b.icon != nil {
-		min = fyne.NewSize(theme.IconInlineSize()+theme.Padding()*2, theme.IconInlineSize()+theme.Padding()*2)
+	labelSize := b.label.MinSize()
+	contentHeight := fyne.Max(labelSize.Height, theme.IconInlineSize())
+	contentWidth := 0
+	if b.icon != nil {
+		contentWidth += theme.IconInlineSize()
 	}
-
-	return min
+	if b.button.Text != "" {
+		if b.icon != nil {
+			contentWidth += theme.Padding()
+		}
+		contentWidth += labelSize.Width
+	}
+	return fyne.NewSize(contentWidth, contentHeight).Add(b.padding())
 }
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
 	if b.button.Text != "" {
-		inner := size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
+		padding := b.padding()
+		innerSize := size.Subtract(padding)
+		innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
 
-		if b.button.Icon == nil {
-			b.label.Resize(inner)
-			b.label.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()))
-		} else {
-			offset := fyne.NewSize(theme.IconInlineSize(), 0)
-			labelSize := inner.Subtract(offset)
-			b.label.Resize(labelSize)
-			b.label.Move(fyne.NewPos(theme.IconInlineSize()+theme.Padding()*2, theme.Padding()))
+		labelSize := b.label.MinSize()
+		contentWidth := labelSize.Width
 
+		if b.button.Icon != nil {
+			contentWidth += theme.Padding() + theme.IconInlineSize()
+			iconOffset := fyne.NewPos((innerSize.Width-contentWidth)/2, (innerSize.Height-theme.IconInlineSize())/2)
 			b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-			b.icon.Move(fyne.NewPos(
-				(size.Width-theme.IconInlineSize()-b.label.MinSize().Width-theme.Padding())/2,
-				(size.Height-theme.IconInlineSize())/2))
+			b.icon.Move(innerOffset.Add(iconOffset))
 		}
+		labelOffset := fyne.NewPos((innerSize.Width+contentWidth)/2-labelSize.Width, (innerSize.Height-labelSize.Height)/2)
+		b.label.Resize(labelSize)
+		b.label.Move(innerOffset.Add(labelOffset))
 	} else {
 		b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 		b.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
@@ -64,7 +72,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 // ApplyTheme is called when the Button may need to update its look
 func (b *buttonRenderer) ApplyTheme() {
 	b.label.Color = theme.TextColor()
-	if b.button.disabled {
+	if b.button.Disabled() {
 		b.label.Color = theme.DisabledTextColor()
 	}
 
@@ -72,27 +80,27 @@ func (b *buttonRenderer) ApplyTheme() {
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
-	if b.button.Style == PrimaryButton && !b.button.disabled {
-		return theme.PrimaryColor()
-	} else if b.button.disabled {
+	switch {
+	case b.button.disabled:
 		return theme.DisabledButtonColor()
-	}
-
-	if b.button.hovered && !b.button.disabled {
+	case b.button.Style == PrimaryButton:
+		return theme.PrimaryColor()
+	case b.button.hovered:
 		return theme.HoverColor()
+	default:
+		return theme.ButtonColor()
 	}
-	return theme.ButtonColor()
 }
 
 func (b *buttonRenderer) Refresh() {
 	b.label.Text = b.button.Text
 
-	if b.button.Icon != nil {
+	if b.button.Icon != nil && b.button.Visible() {
 		if b.icon == nil {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
 			b.objects = append(b.objects, b.icon)
 		} else {
-			if b.button.disabled {
+			if b.button.Disabled() {
 				// if the icon has changed, create a new disabled version
 				// if we could be sure that button.Icon is only ever set through the button.SetIcon method, we could remove this
 				if !strings.HasSuffix(b.button.disabledIcon.Name(), b.button.Icon.Name()) {
@@ -181,9 +189,14 @@ func (b *Button) Disable() {
 	Renderer(b).ApplyTheme()
 }
 
+// Disabled returns true if the widget is disabled
+func (b *Button) Disabled() bool {
+	return b.disabled
+}
+
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
-	if b.OnTapped != nil && !b.disabled {
+	if b.OnTapped != nil && !b.Disabled() {
 		b.OnTapped()
 	}
 }
