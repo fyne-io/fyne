@@ -19,14 +19,15 @@ const (
 // Dialog is the common API for any dialog window with a single dismiss button
 type Dialog interface {
 	Show()
+	Hide()
 	SetDismissText(label string)
 }
 
-// Declare confirmity to Dialog interface
+// Declare conformity to Dialog interface
 var _ Dialog = (*dialog)(nil)
 
 type dialog struct {
-	win      fyne.Window
+	win      *widget.PopUp
 	callback func(bool)
 	bg       *canvas.Rectangle
 	content  fyne.CanvasObject
@@ -43,42 +44,35 @@ func (d *dialog) wait() {
 	select {
 	case response := <-d.response:
 		d.responded = true
-		d.win.Close()
+		d.win.Hide()
 		if d.callback != nil {
 			d.callback(response)
 		}
 	}
 }
 
-func (d *dialog) closed() {
-	if !d.responded && d.callback != nil {
-		d.callback(false)
-	}
-
-	if d.parent != nil {
-		d.parent.RequestFocus()
-	}
-}
-
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	d.bg = canvas.NewRectangle(theme.BackgroundColor())
 
+	var content fyne.CanvasObject
 	if d.icon == nil {
-		d.win.SetContent(fyne.NewContainerWithLayout(d,
+		content = fyne.NewContainerWithLayout(d,
 			&canvas.Image{},
 			d.bg,
 			d.content,
 			buttons,
-		))
+		)
 	} else {
 		bgIcon := canvas.NewImageFromResource(d.icon)
-		d.win.SetContent(fyne.NewContainerWithLayout(d,
+		content = fyne.NewContainerWithLayout(d,
 			bgIcon,
 			d.bg,
 			d.content,
 			buttons,
-		))
+		)
 	}
+
+	d.win = widget.NewModalPopUp(content, d.parent.Canvas())
 }
 
 func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
@@ -86,8 +80,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	d.bg.Move(fyne.NewPos(-theme.Padding(), -theme.Padding()))
 	d.bg.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	// icon
-	obj[0].Resize(fyne.NewSize(size.Height*2, size.Height*2))
-	obj[0].Move(fyne.NewPos(-size.Height*3/4, -size.Height/2))
+	obj[0].Resize(fyne.NewSize(size.Height, size.Height))
 
 	// content (text)
 	textMin := obj[2].MinSize()
@@ -114,21 +107,9 @@ func (d *dialog) ApplyTheme() {
 	d.bg.FillColor = bg
 }
 
-func newDialogWin(title string, _ fyne.Window) fyne.Window {
-	win := fyne.CurrentApp().Driver().CreateWindow(title)
-	win.SetFixedSize(true)
-	//	win.SetParent(parent)
-
-	return win
-}
-
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newLabel(message), icon: icon, parent: parent}
 
-	win := newDialogWin(title, parent)
-	win.SetOnClosed(d.closed)
-
-	d.win = win
 	d.response = make(chan bool, 1)
 	d.callback = callback
 
@@ -154,10 +135,18 @@ func (d *dialog) Show() {
 	d.win.Show()
 }
 
+func (d *dialog) Hide() {
+	d.win.Hide()
+
+	if !d.responded && d.callback != nil {
+		d.callback(false)
+	}
+}
+
 // SetDismissText allows custom text to be set in the confirmation button
 func (d *dialog) SetDismissText(label string) {
 	d.dismiss.SetText(label)
-	d.Layout(d.win.Content().(*fyne.Container).Objects, d.win.Content().MinSize())
+//	d.Layout(d.win.Content().(*fyne.Container).Objects, d.win.Content().MinSize())
 }
 
 // ShowCustom shows a dialog over the specified application using custom
@@ -165,10 +154,6 @@ func (d *dialog) SetDismissText(label string) {
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
 	d := &dialog{content: content, icon: nil, parent: parent}
-
-	win := newDialogWin(title, parent)
-	win.SetOnClosed(d.closed)
-	d.win = win
 	d.response = make(chan bool, 1)
 
 	d.dismiss = &widget.Button{Text: dismiss,
@@ -188,10 +173,6 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	callback func(bool), parent fyne.Window) {
 	d := &dialog{content: content, icon: nil, parent: parent}
-
-	win := newDialogWin(title, parent)
-	win.SetOnClosed(d.closed)
-	d.win = win
 	d.response = make(chan bool, 1)
 	d.callback = callback
 
