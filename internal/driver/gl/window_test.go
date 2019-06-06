@@ -124,7 +124,7 @@ func TestWindow_SetPadded(t *testing.T) {
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
-		menuHeight = 22
+		menuHeight = widget.NewToolbar(widget.NewToolbarAction(theme.ContentCutIcon(), func() {})).MinSize().Height
 	}
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tests := []struct {
@@ -153,17 +153,14 @@ func TestWindow_SetPadded(t *testing.T) {
 			w.Resize(oldCanvasSize)
 
 			// wait for canvas to get its size right
-			for s := w.Canvas().Size(); s != oldCanvasSize; s = w.Canvas().Size() {
+			for w.Canvas().Size() == oldCanvasSize {
 				time.Sleep(time.Millisecond * 10)
 			}
 			contentSize := content.Size()
 
 			w.SetPadded(tt.padding)
-			// wait (max 0.1s) for canvas resize
-			for i := 0; i < 10; i++ {
-				if w.Canvas().Size() != oldCanvasSize {
-					break
-				}
+			// wait for canvas resize
+			for w.Canvas().Size() == oldCanvasSize {
 				time.Sleep(time.Millisecond * 10)
 			}
 
