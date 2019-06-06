@@ -156,6 +156,9 @@ func (e *Entry) Show() {
 	if len(e.Text) != 0 {
 		e.placeholderProvider().Hide()
 	}
+	if !e.Focused() {
+		Renderer(e).(*entryRenderer).cursor.Hide()
+	}
 }
 
 // Hide this widget, if it was previously visible
