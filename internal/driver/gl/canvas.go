@@ -192,7 +192,7 @@ func (c *glCanvas) ensureMinSize() bool {
 	if c.Content() == nil {
 		return false
 	}
-	var objToBeLayouted fyne.CanvasObject
+	var objToLayout fyne.CanvasObject
 	ensureMinSize := func(obj fyne.CanvasObject, parent fyne.CanvasObject) {
 		if !obj.Visible() {
 			return
@@ -200,11 +200,11 @@ func (c *glCanvas) ensureMinSize() bool {
 		expectedSize := obj.MinSize().Union(obj.Size())
 		if expectedSize != obj.Size() {
 			if parent != nil {
-				objToBeLayouted = parent
+				objToLayout = parent
 			} else {
 				obj.Resize(expectedSize)
 			}
-		} else if obj == objToBeLayouted {
+		} else if obj == objToLayout {
 			switch cont := obj.(type) {
 			case *fyne.Container:
 				if cont.Layout != nil {
