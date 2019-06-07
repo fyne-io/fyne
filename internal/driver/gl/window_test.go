@@ -153,22 +153,21 @@ func TestWindow_SetPadded(t *testing.T) {
 			w.Resize(oldCanvasSize)
 
 			// wait for canvas to get its size right
-			for w.Canvas().Size() == oldCanvasSize {
+			for w.Canvas().Size() != oldCanvasSize {
 				time.Sleep(time.Millisecond * 10)
 			}
 			contentSize := content.Size()
-
-			w.SetPadded(tt.padding)
-			// wait for canvas resize
-			for w.Canvas().Size() == oldCanvasSize {
-				time.Sleep(time.Millisecond * 10)
-			}
-
-			assert.Equal(t, contentSize, content.Size())
-			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), content.Position())
 			expectedCanvasSize := contentSize.
 				Add(fyne.NewSize(2*tt.expectedPad, 2*tt.expectedPad)).
 				Add(fyne.NewSize(0, tt.expectedMenuHeight))
+
+			w.SetPadded(tt.padding)
+			// wait for canvas resize
+			for w.Canvas().Size() != expectedCanvasSize {
+				time.Sleep(time.Millisecond * 10)
+			}
+			assert.Equal(t, contentSize, content.Size())
+			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), content.Position())
 			assert.Equal(t, expectedCanvasSize, w.Canvas().Size())
 		})
 	}

@@ -1,6 +1,7 @@
 package gl
 
 import (
+	"fmt"
 	"math"
 	"sync"
 
@@ -191,11 +192,28 @@ func (c *glCanvas) ensureMinSize() bool {
 	if c.Content() == nil {
 		return false
 	}
-	ensureMinSize := func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
-		if obj.Visible() {
-			expectedSize := obj.MinSize().Union(obj.Size())
-			if expectedSize != obj.Size() {
+	var objToLayout fyne.CanvasObject
+	ensureMinSize := func(obj fyne.CanvasObject, parent fyne.CanvasObject) {
+		if !obj.Visible() {
+			return
+		}
+		expectedSize := obj.MinSize().Union(obj.Size())
+		if expectedSize != obj.Size() {
+			if parent != nil {
+				objToLayout = parent
+			} else {
 				obj.Resize(expectedSize)
+			}
+		} else if obj == objToLayout {
+			switch cont := obj.(type) {
+			case *fyne.Container:
+				if cont.Layout != nil {
+					cont.Layout.Layout(cont.Objects, cont.Size())
+				}
+			case fyne.Widget:
+				widget.Renderer(cont).Layout(cont.Size())
+			default:
+				fmt.Printf("implementation error - unknown container type: %T", cont)
 			}
 		}
 	}
@@ -231,7 +249,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 		return false
 	}
-	afterPaint := func(obj fyne.CanvasObject, _ fyne.Position, _ bool) {
+	afterPaint := func(obj, _ fyne.CanvasObject) {
 		if _, ok := obj.(*widget.ScrollContainer); ok {
 			gl.Disable(gl.SCISSOR_TEST)
 		}
@@ -242,14 +260,14 @@ func (c *glCanvas) paint(size fyne.Size) {
 
 func (c *glCanvas) walkTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
-	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
+	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
-	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+	driver.WalkObjectTree(c.content, beforeChildren, afterChildren)
 	if c.menu != nil {
-		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+		driver.WalkObjectTree(c.menu, beforeChildren, afterChildren)
 	}
 	if c.overlay != nil {
-		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+		driver.WalkObjectTree(c.overlay, beforeChildren, afterChildren)
 	}
 }
 
