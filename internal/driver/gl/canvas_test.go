@@ -64,7 +64,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 			canvasSize := 100
 
 			// wait for canvas to get its size right
-			for w.canvas.Size().Width == canvasSize {
+			for w.canvas.Size().Width != canvasSize {
 				time.Sleep(time.Millisecond * 10)
 			}
 
