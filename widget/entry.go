@@ -221,12 +221,16 @@ type Entry struct {
 
 	focused bool
 
-	// Selection start/end are private as they represent where the selection started, which
-	// could be confused with the "start of the selection"
-	// The API user should use SelectionStart and SelectionEnd
+	// selectRow and selectColumn represent the selection start location
+	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
+	// position may occur before or after the select start position in the text.
 	selectRow, selectColumn int
-	selectKeyDown           bool
-	selecting               bool
+
+	// selectKeyDown indicates whether left shift or right shift is currently held down
+	selectKeyDown bool
+
+	// selecting indicates whether the cursor has moved since it was at the selection start location
+	selecting bool
 	// TODO: Add OnSelectChanged
 }
 
@@ -303,57 +307,35 @@ func (e *Entry) updateText(text string) {
 	Refresh(e)
 }
 
-// SelectionStart returns the first text position of the span of text covered by the selection highlight
-// eg: "T e s[t i]n g" == 3 (whitespace for clarity)
-func (e *Entry) SelectionStart() int {
+// GetSelection returns the start and end text positions for the selected span of text
+// Note: this functionality depends on the relationship between the selection start row/col and
+// the current cursor row/column.
+// eg: (whitespace for clarity, '_' denotes cursor)
+//   "T  e  s [t  i]_n  g" == 3, 5
+//   "T  e  s_[t  i] n  g" == 3, 5
+//   "T  e_[s  t  i] n  g" == 2, 5
+func (e *Entry) GetSelection() (int, int) {
 	e.RLock()
 	defer e.RUnlock()
 
 	if e.selecting == false {
-		return -1
+		return -1, -1
+	}
+	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
+		return -1, -1
 	}
 
-	row := e.CursorRow
-	col := e.CursorColumn
-	if row == e.selectRow && col == e.selectColumn {
-		return -1
+	// Find the selection start
+	rowA, colA := e.CursorRow, e.CursorColumn
+	rowB, colB := e.selectRow, e.selectColumn
+	// Reposition if the cursors row is more than select start row, or if the row is the same and
+	// the cursors col is more that the select start column
+	if rowA > e.selectRow || (rowA == e.selectRow && colA > e.selectColumn) {
+		rowA, colA = e.selectRow, e.selectColumn
+		rowB, colB = e.CursorRow, e.CursorColumn
 	}
 
-	if row > e.selectRow {
-		row = e.selectRow
-		col = e.selectColumn
-	} else if row == e.selectRow && col > e.selectColumn {
-		row = e.selectRow
-		col = e.selectColumn
-	}
-	return e.textPosFromRowCol(row, col)
-}
-
-// SelectionEnd returns the last text position of the span of text covered by the selection highlight
-// eg: "T e s[t i]n g" == 5 (whitespace for clarity)
-func (e *Entry) SelectionEnd() int {
-	e.RLock()
-	defer e.RUnlock()
-
-	if e.selecting == false {
-		return -1
-	}
-
-	row := e.CursorRow
-	col := e.CursorColumn
-	if row == e.selectRow && col == e.selectColumn {
-		return -1
-	}
-
-	if row < e.selectRow {
-		row = e.selectRow
-		col = e.selectColumn
-	} else if row == e.selectRow && col < e.selectColumn {
-		row = e.selectRow
-		col = e.selectColumn
-	}
-
-	return e.textPosFromRowCol(row, col)
+	return e.textPosFromRowCol(rowA, colA), e.textPosFromRowCol(rowB, colB)
 }
 
 // Obtains row,col from a given textual position
@@ -520,8 +502,7 @@ func (e *Entry) eraseSelection() {
 	}
 
 	provider := e.textProvider()
-	posA := e.SelectionStart()
-	posB := e.SelectionEnd()
+	posA, posB := e.GetSelection()
 
 	if posA == posB {
 		return
@@ -544,14 +525,15 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 	// seeks to the start/end of the selection - used by: up, down, left, right
 	seekSelection := func(start bool) {
-		var pos int
-		if start {
-			pos = e.SelectionStart()
-		} else {
-			pos = e.SelectionEnd()
-		}
+
+		selectStart, selectEnd := e.GetSelection()
+
 		e.Lock()
-		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos)
+		if start {
+			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
+		} else {
+			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
+		}
 		e.Unlock()
 		e.selecting = false
 	}
