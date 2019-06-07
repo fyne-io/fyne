@@ -77,7 +77,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 	}
 }
 
-func Test_glCanvas_GrowingMinSize(t *testing.T) {
+func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	c := w.Canvas()
 	c.SetScale(1)
@@ -85,35 +85,21 @@ func Test_glCanvas_GrowingMinSize(t *testing.T) {
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
 	leftObj2.SetMinSize(fyne.NewSize(50, 50))
-	leftObj3 := canvas.NewRectangle(color.Black)
-	leftObj3.SetMinSize(fyne.NewSize(50, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2, leftObj3)
-	middleObj1 := canvas.NewRectangle(color.Black)
-	middleObj1.SetMinSize(fyne.NewSize(50, 50))
-	middleObj2 := canvas.NewRectangle(color.Black)
-	middleObj2.SetMinSize(fyne.NewSize(50, 50))
-	middleObj3 := canvas.NewRectangle(color.Black)
-	middleObj3.SetMinSize(fyne.NewSize(50, 50))
-	middleCol := widget.NewVBox(middleObj1, middleObj2, middleObj3)
-	middleColScroll := widget.NewScrollContainer(middleCol)
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
 	rightObj1 := canvas.NewRectangle(color.Black)
 	rightObj1.SetMinSize(fyne.NewSize(50, 50))
 	rightObj2 := canvas.NewRectangle(color.Black)
 	rightObj2.SetMinSize(fyne.NewSize(50, 50))
-	rightObj3 := canvas.NewRectangle(color.Black)
-	rightObj3.SetMinSize(fyne.NewSize(50, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2, rightObj3)
-	rightColScroll := widget.NewScrollContainer(rightCol)
-	content := widget.NewHBox(leftCol, middleColScroll, rightColScroll)
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	content := widget.NewHBox(leftCol, rightCol)
 	w.SetContent(content)
 
-	oldCanvasSize := fyne.NewSize(150+4*theme.Padding(), 150+4*theme.Padding())
+	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
 	// wait for canvas to get its size right
 	for c.Size() != oldCanvasSize {
 		time.Sleep(time.Millisecond * 10)
 	}
 
-	// child size change affects ancestors up to root
 	leftObj1.SetMinSize(fyne.NewSize(60, 60))
 	canvas.Refresh(leftObj1)
 	for c.Size() == oldCanvasSize {
@@ -122,6 +108,31 @@ func Test_glCanvas_GrowingMinSize(t *testing.T) {
 
 	expectedCanvasSize := oldCanvasSize.Add(fyne.NewSize(10, 10))
 	assert.Equal(t, expectedCanvasSize, c.Size())
+}
+
+func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	c := w.Canvas()
+	c.SetScale(1)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(50, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(50, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(50, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(50, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	rightColScroll := widget.NewScrollContainer(rightCol)
+	content := widget.NewHBox(leftCol, rightColScroll)
+	w.SetContent(content)
+
+	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
+	// wait for canvas to get its size right
+	for c.Size() != oldCanvasSize {
+		time.Sleep(time.Millisecond * 10)
+	}
 
 	// child size change affects ancestors up to scroll
 	oldCanvasSize = c.Size()
@@ -135,27 +146,55 @@ func Test_glCanvas_GrowingMinSize(t *testing.T) {
 
 	assert.Equal(t, oldCanvasSize, c.Size())
 	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
-	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 40))
+	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 50))
 	assert.Equal(t, expectedRightColSize, rightCol.Size())
+}
 
-	// 1st child size change affects ancestors up to root
-	// and is not hidden by 2nd child change which affects ancestors up to scroll
-	oldMiddleColSize := middleCol.Size()
-	oldMiddleScrollSize := middleColScroll.Size()
-	oldRightColSize = rightCol.Size()
-	middleObj2.SetMinSize(fyne.NewSize(50, 100))
+func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	c := w.Canvas()
+	c.SetScale(1)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(50, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(50, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	leftColScroll := widget.NewScrollContainer(leftCol)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(50, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(50, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	rightColScroll := widget.NewScrollContainer(rightCol)
+	content := widget.NewHBox(leftColScroll, rightColScroll)
+	w.SetContent(content)
+
+	oldCanvasSize := fyne.NewSize(
+		2*leftColScroll.MinSize().Width+3*theme.Padding(),
+		leftColScroll.MinSize().Height+2*theme.Padding(),
+	)
+	// wait for canvas to get its size right
+	for c.Size() != oldCanvasSize {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	oldLeftColSize := leftCol.Size()
+	oldLeftScrollSize := leftColScroll.Size()
+	oldRightColSize := rightCol.Size()
+	oldRightScrollSize := rightColScroll.Size()
+	leftObj2.SetMinSize(fyne.NewSize(50, 100))
 	rightObj2.SetMinSize(fyne.NewSize(50, 200))
-	canvas.Refresh(middleObj2)
+	canvas.Refresh(leftObj2)
 	canvas.Refresh(rightObj2)
-	for middleCol.Size() == oldMiddleColSize || rightCol.Size() == oldRightColSize {
+	for leftCol.Size() == oldLeftColSize || rightCol.Size() == oldRightColSize {
 		time.Sleep(time.Millisecond * 10)
 	}
 
 	assert.Equal(t, oldCanvasSize, c.Size())
-	assert.Equal(t, oldMiddleScrollSize, middleColScroll.Size())
+	assert.Equal(t, oldLeftScrollSize, leftColScroll.Size())
 	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
-	expectedMiddleColSize := oldMiddleColSize.Add(fyne.NewSize(0, 40))
-	assert.Equal(t, expectedMiddleColSize, middleCol.Size())
-	expectedRightColSize = oldRightColSize.Add(fyne.NewSize(0, 150))
+	expectedLeftColSize := oldLeftColSize.Add(fyne.NewSize(0, 50))
+	assert.Equal(t, expectedLeftColSize, leftCol.Size())
+	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 150))
 	assert.Equal(t, expectedRightColSize, rightCol.Size())
 }
