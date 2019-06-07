@@ -72,13 +72,16 @@ func (c *checkRenderer) Refresh() {
 
 	c.icon.Resource = res
 
-	if c.check.Focused() {
+	if c.check.Disabled() {
+		c.focusIndicator.FillColor = theme.BackgroundColor()
+	} else if c.check.Focused() {
+		c.focusIndicator.FillColor = theme.FocusColor()
+	} else if c.check.hovered {
 		c.focusIndicator.FillColor = theme.HoverColor()
 	} else {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
 	}
 
-	canvas.Refresh(c.focusIndicator)
 	canvas.Refresh(c.check)
 }
 
@@ -98,6 +101,7 @@ type Check struct {
 	OnChanged func(bool) `json:"-"`
 
 	focused bool
+	hovered bool
 }
 
 // SetChecked sets the the checked state and refreshes widget
@@ -165,13 +169,16 @@ func (c *Check) Disabled() bool {
 
 // MouseIn is called when a desktop pointer enters the widget
 func (c *Check) MouseIn(*desktop.MouseEvent) {
-	c.FocusGained()
+	if c.Disabled() {
+		return
+	}
+	c.hovered = true
 	Refresh(c)
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (c *Check) MouseOut() {
-	c.FocusLost()
+	c.hovered = false
 	Refresh(c)
 }
 
@@ -211,6 +218,7 @@ func NewCheck(label string, changed func(bool)) *Check {
 		label,
 		false,
 		changed,
+		false,
 		false,
 	}
 

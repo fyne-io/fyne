@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -130,16 +131,22 @@ func TestCheck_Enable(t *testing.T) {
 
 func TestCheck_Focused(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
+	render := Renderer(check).(*checkRenderer)
+
 	assert.False(t, check.Focused())
+	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
 
 	check.SetChecked(true)
 	assert.False(t, check.Focused())
+	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
 
 	test.Tap(check)
 	assert.True(t, check.Focused())
+	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
 
 	check.Disable()
 	assert.False(t, check.Focused())
+	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
 
 	check.Enable()
 	assert.True(t, check.Focused())
@@ -149,6 +156,40 @@ func TestCheck_Focused(t *testing.T) {
 
 	check.Show()
 	assert.False(t, check.Focused())
+}
+
+func TestCheck_Hovered(t *testing.T) {
+	check := NewCheck("Test", func(on bool) {})
+	render := Renderer(check).(*checkRenderer)
+
+	check.SetChecked(true)
+	assert.False(t, check.hovered)
+	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+
+	check.MouseIn(&desktop.MouseEvent{})
+	assert.True(t, check.hovered)
+	assert.Equal(t, theme.HoverColor(), render.focusIndicator.FillColor)
+
+	test.Tap(check)
+	assert.True(t, check.hovered)
+	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+
+	check.Disable()
+	assert.False(t, check.Focused())
+	assert.True(t, check.hovered)
+	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
+
+	check.Enable()
+	assert.True(t, check.hovered)
+	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+
+	check.MouseOut()
+	assert.False(t, check.hovered)
+	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
+
+	check.FocusLost()
+	assert.False(t, check.hovered)
+	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
 }
 
 func TestCheck_TypedRune(t *testing.T) {
