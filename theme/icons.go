@@ -40,30 +40,6 @@ func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
 	}
 }
 
-// FocusedResource is a resource wrapper that will return an appropriate resource colorized by
-// the current theme's `FocusColor` color.
-type FocusedResource struct {
-	source fyne.Resource
-}
-
-// Name returns the resource source name prefixed with `focused_` (used for caching)
-func (res *FocusedResource) Name() string {
-	return fmt.Sprintf("focused_%s", res.source.Name())
-}
-
-// Content returns the disabled style content of the correct resource for the current theme
-func (res *FocusedResource) Content() []byte {
-	clr := fyne.CurrentApp().Settings().Theme().FocusColor()
-	return colorizeResource(res.source, clr)
-}
-
-// NewFocusedResource creates a resource that adapts to the current theme's FocusColor setting.
-func NewFocusedResource(res fyne.Resource) *FocusedResource {
-	return &FocusedResource{
-		source: res,
-	}
-}
-
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
 // the current theme's `DisabledIconColor` color.
 type DisabledResource struct {
