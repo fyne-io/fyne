@@ -17,6 +17,14 @@ import (
 // - if a walk has been stopped, the after function is called with the third argument set to true
 func WalkObjectTree(
 	obj fyne.CanvasObject,
+	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
+	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
+) bool {
+	return walkObjectTree(obj, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+}
+
+func walkObjectTree(
+	obj fyne.CanvasObject,
 	offset fyne.Position,
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
 	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
@@ -38,7 +46,7 @@ func WalkObjectTree(
 
 	cancelled := false
 	for _, child := range children {
-		if WalkObjectTree(child, pos, beforeChildren, afterChildren) {
+		if walkObjectTree(child, pos, beforeChildren, afterChildren) {
 			cancelled = true
 			break
 		}

@@ -244,12 +244,12 @@ func (c *glCanvas) walkTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
 	afterChildren func(fyne.CanvasObject, fyne.Position, bool),
 ) {
-	driver.WalkObjectTree(c.content, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+	driver.WalkObjectTree(c.content, beforeChildren, afterChildren)
 	if c.menu != nil {
-		driver.WalkObjectTree(c.menu, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+		driver.WalkObjectTree(c.menu, beforeChildren, afterChildren)
 	}
 	if c.overlay != nil {
-		driver.WalkObjectTree(c.overlay, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+		driver.WalkObjectTree(c.overlay, beforeChildren, afterChildren)
 	}
 }
 

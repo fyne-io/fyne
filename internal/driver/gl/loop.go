@@ -134,7 +134,7 @@ func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
 				}
 				return false
 			}
-			driver.WalkObjectTree(object, fyne.NewPos(0, 0), freeWalked, nil)
+			driver.WalkObjectTree(object, freeWalked, nil)
 		default:
 			return
 		}
