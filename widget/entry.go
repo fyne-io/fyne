@@ -54,15 +54,18 @@ func (e *entryRenderer) MinSize() fyne.Size {
 func (e *entryRenderer) buildSelection() {
 
 	e.entry.RLock()
-	curRow := e.entry.CursorRow
-	curCol := e.entry.CursorColumn
-	selRow := -1
-	selCol := -1
+	cursorRow, cursorCol := e.entry.CursorRow, e.entry.CursorColumn
+	selectRow, selectCol := -1, -1
 	if e.entry.selecting {
-		selRow = e.entry.selectRow
-		selCol = e.entry.selectColumn
+		selectRow = e.entry.selectRow
+		selectCol = e.entry.selectColumn
 	}
 	e.entry.RUnlock()
+
+	if selectRow == -1 {
+		e.selection = e.selection[:0]
+		return
+	}
 
 	textRenderer := Renderer(e.text).(*textRenderer)
 
@@ -74,53 +77,55 @@ func (e *entryRenderer) buildSelection() {
 
 	lineHeight := e.text.charMinSize().Height
 
-	// if we have a selection then we should calculate the set of boxes and add them to e.selection
-	if selRow != -1 {
+	minmax := func(a, b int) (int, int) {
+		if a < b {
+			return a, b
+		}
+		return b, a
+	}
 
-		minmax := func(a, b int) (int, int) {
-			if a < b {
-				return a, b
-			}
-			return b, a
+	// The remainder of the function calculates the set of boxes and add them to e.selection
+
+	selectStartRow, selectEndRow := minmax(selectRow, cursorRow)
+	selectStartCol, selectEndCol := minmax(selectCol, cursorCol)
+	if selectRow < cursorRow {
+		selectStartCol, selectEndCol = selectCol, cursorCol
+	}
+	if selectRow > cursorRow {
+		selectStartCol, selectEndCol = cursorCol, selectCol
+	}
+	rowCount := selectEndRow - selectStartRow + 1
+
+	// trim e.selection to remove unwanted old rectangles
+	if len(e.selection) > rowCount {
+		e.selection = e.selection[:rowCount]
+	}
+
+	// build a rectangle for each row and add it to e.selection
+	for i := 0; i < rowCount; i++ {
+		if len(e.selection) <= i {
+			box := canvas.NewRectangle(theme.ButtonColor())
+			e.selection = append(e.selection, box)
 		}
 
-		ssRow, seRow := minmax(selRow, curRow)
-		ssCol, seCol := minmax(selCol, curCol)
-		if selRow < curRow {
-			ssCol, seCol = selCol, curCol
+		// determine starting/ending columns for this rectangle
+		row := selectStartRow + i
+		startCol, endCol := selectStartCol, selectEndCol
+		if selectStartRow < row {
+			startCol = 0
 		}
-		if selRow > curRow {
-			ssCol, seCol = curCol, selCol
-		}
-		rows := seRow - ssRow + 1
-
-		if len(e.selection) > rows {
-			e.selection = e.selection[:rows]
+		if selectEndRow > row {
+			endCol = textRenderer.provider.rowLength(row)
 		}
 
-		for i := 0; i < rows; i++ {
-			if len(e.selection) <= i {
-				box := canvas.NewRectangle(theme.ButtonColor())
-				e.selection = append(e.selection, box)
-			}
+		// translate columns and row into draw coordinates
+		x1, y1 := getCoordinates(startCol, row)
+		x2, _ := getCoordinates(endCol, row)
 
-			row := ssRow + i
-			ss, se := ssCol, seCol
-			if ssRow < row {
-				ss = 0
-			}
-			if seRow > row {
-				se = textRenderer.provider.rowLength(row)
-			}
-			x1, y1 := getCoordinates(ss, row)
-			x2, _ := getCoordinates(se, row)
-
-			e.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
-			e.selection[i].Move(fyne.NewPos(x1-1, y1))
-			e.selection[i].Show()
-		}
-	} else {
-		e.selection = e.selection[:0]
+		// resize and reposition each rectangle
+		e.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
+		e.selection[i].Move(fyne.NewPos(x1-1, y1))
+		e.selection[i].Show()
 	}
 }
 
