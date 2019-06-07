@@ -548,7 +548,6 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
 		}
 		e.Unlock()
-		e.selecting = false
 	}
 
 	switch key.Name {
@@ -567,10 +566,12 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		case fyne.KeyUp, fyne.KeyDown:
 			// seek to the start/end of the selection -- return unhandled to move up/down
 			setCursorFromSelection(key.Name == fyne.KeyUp)
+			e.selecting = false
 			return false
 		case fyne.KeyLeft, fyne.KeyRight:
 			// seek to the start/end of the selection -- return handled
 			setCursorFromSelection(key.Name == fyne.KeyLeft)
+			e.selecting = false
 			return true
 		case fyne.KeyEnd, fyne.KeyHome:
 			// if the user pressed home or end and isn't holding shift then end selection -- return unhandled
