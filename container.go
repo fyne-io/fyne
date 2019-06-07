@@ -19,11 +19,6 @@ func (c *Container) layout() {
 		c.Layout.Layout(c.Objects, c.size)
 		return
 	}
-
-	for _, child := range c.Objects {
-		child.Resize(c.size)
-		child.Move(c.position)
-	}
 }
 
 // Size returns the current size of this container.

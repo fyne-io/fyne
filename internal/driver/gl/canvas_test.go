@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -33,7 +34,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
-		menuHeight = 22
+		menuHeight = widget.NewToolbar(widget.NewToolbarAction(theme.ContentCutIcon(), func() {})).MinSize().Height
 	}
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tests := []struct {
@@ -63,7 +64,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 			canvasSize := 100
 
 			// wait for canvas to get its size right
-			for s := w.canvas.Size().Width; s != canvasSize; s = w.canvas.Size().Width {
+			for w.canvas.Size().Width == canvasSize {
 				time.Sleep(time.Millisecond * 10)
 			}
 

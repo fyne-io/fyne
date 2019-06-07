@@ -29,20 +29,24 @@ func TestMove(t *testing.T) {
 	pos = NewPos(10, 10)
 	container.Move(pos)
 	assert.Equal(t, pos, container.Position())
+	assert.Equal(t, NewPos(0, 0), box.Position())
+
+	box.Move(pos)
 	assert.Equal(t, pos, box.Position())
 }
 
-func TestDefaultLayout(t *testing.T) {
+func TestNilLayout(t *testing.T) {
 	box := new(dummyObject)
+	boxSize := box.size
 	container := NewContainer(box)
 
 	size := NewSize(100, 100)
 	container.Resize(size)
 	assert.Equal(t, size, container.Size())
-	assert.Equal(t, size, box.Size())
+	assert.Equal(t, boxSize, box.Size())
 
 	container.AddObject(box)
-	assert.Equal(t, size, box.Size())
+	assert.Equal(t, boxSize, box.Size())
 }
 
 type customLayout struct {

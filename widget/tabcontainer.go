@@ -399,6 +399,7 @@ type tabButtonRenderer struct {
 }
 
 func (r *tabButtonRenderer) ApplyTheme() {
+	r.label.Color = theme.TextColor()
 }
 
 func (r *tabButtonRenderer) BackgroundColor() color.Color {

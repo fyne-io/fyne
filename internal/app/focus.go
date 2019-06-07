@@ -3,6 +3,7 @@ package app
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/widget"
 )
 
 // FocusManager represents a standard manager of input focus for a canvas
@@ -17,6 +18,9 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 			// disabled widget cannot receive focus
 			return false
+		}
+		if e, ok := obj.(*widget.Entry); ok && e.ReadOnly {
+			return false // TODO can we handle this in a more generic way? Focusable.ReadOnly() perhaps?
 		}
 
 		focus, ok := obj.(fyne.Focusable)
