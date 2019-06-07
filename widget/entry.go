@@ -493,10 +493,6 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	// Note: if shift is released then the user may repress it without moving to adjust their old selection
 	if key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight {
 		e.selectKeyDown = false
-	} else {
-		if e.selectKeyDown == false {
-			e.selecting = false
-		}
 	}
 }
 
@@ -522,15 +518,27 @@ func (e *Entry) eraseSelection() {
 	e.selecting = false
 }
 
-// TypedKey receives key input events when the Entry widget is focused.
-func (e *Entry) TypedKey(key *fyne.KeyEvent) {
-	if e.ReadOnly {
-		return
+// selectingKeyHandler performs keypress action in the scenario that a selection
+// is either a) in progress or b) about to start
+// returns true if the keypress has been fully handled
+func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
+
+	if e.selectKeyDown && e.selecting == false {
+		switch key.Name {
+		case fyne.KeyUp, fyne.KeyDown,
+			fyne.KeyLeft, fyne.KeyRight,
+			fyne.KeyEnd, fyne.KeyHome,
+			fyne.KeyPageUp, fyne.KeyPageDown:
+			e.selecting = true
+		}
+	}
+
+	if e.selecting == false {
+		return false
 	}
 
 	// seeks to the start/end of the selection - used by: up, down, left, right
-	seekSelection := func(start bool) {
-
+	setCursorFromSelection := func(start bool) {
 		selectStart, selectEnd := e.GetSelection()
 
 		e.Lock()
@@ -543,46 +551,47 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		e.selecting = false
 	}
 
-	provider := e.textProvider()
+	switch key.Name {
+	case fyne.KeyBackspace, fyne.KeyDelete:
+		// clears the selection -- return handled
+		e.eraseSelection()
+		return true
+	case fyne.KeyReturn, fyne.KeyEnter:
+		// clear the selection -- return unhandled to add the newline
+		e.eraseSelection()
+		return false
+	}
 
-	if e.selectKeyDown && e.selecting == false {
+	if e.selectKeyDown == false {
 		switch key.Name {
-		case fyne.KeyUp, fyne.KeyDown,
-			fyne.KeyLeft, fyne.KeyRight,
-			fyne.KeyEnd, fyne.KeyHome,
-			fyne.KeyPageUp, fyne.KeyPageDown:
-			e.selecting = true
+		case fyne.KeyUp, fyne.KeyDown:
+			// seek to the start/end of the selection -- return unhandled to move up/down
+			setCursorFromSelection(key.Name == fyne.KeyUp)
+			return false
+		case fyne.KeyLeft, fyne.KeyRight:
+			// seek to the start/end of the selection -- return handled
+			setCursorFromSelection(key.Name == fyne.KeyLeft)
+			return true
+		case fyne.KeyEnd, fyne.KeyHome:
+			// if the user pressed home or end and isn't holding shift then end selection -- return unhandled
+			e.selecting = false
+			return false
 		}
 	}
 
-	if e.selecting {
+	return false
+}
 
-		processKey := true
-		switch key.Name {
-		case fyne.KeyBackspace, fyne.KeyDelete:
-			// clears the selection
-			e.eraseSelection()
-			processKey = false
-		case fyne.KeyReturn, fyne.KeyEnter:
-			e.eraseSelection() // clear the selection and fallthrough to add the newline
-		}
+// TypedKey receives key input events when the Entry widget is focused.
+func (e *Entry) TypedKey(key *fyne.KeyEvent) {
+	if e.ReadOnly {
+		return
+	}
 
-		if e.selectKeyDown == false {
-			switch key.Name {
-			case fyne.KeyUp, fyne.KeyDown:
-				// seek to the start/end of the selection and fallthrough to move up/down
-				seekSelection(key.Name == fyne.KeyUp)
-			case fyne.KeyLeft, fyne.KeyRight:
-				// seek to the start/end of the selection (no fallthrough)
-				seekSelection(key.Name == fyne.KeyLeft)
-				processKey = false
-			case fyne.KeyEnd, fyne.KeyHome:
-				// if the user pressed home or end and isn't holding shift then end selection (fallthrough)
-				e.selecting = false
-			}
-		}
+	provider := e.textProvider()
 
-		if !processKey {
+	if e.selectKeyDown || e.selecting {
+		if e.selectingKeyHandler(key) {
 			e.updateText(provider.String())
 			Renderer(e).(*entryRenderer).moveCursor()
 			return
