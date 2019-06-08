@@ -556,19 +556,6 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		return false
 	}
 
-	// seeks to the start/end of the selection - used by: up, down, left, right
-	setCursorFromSelection := func(start bool) {
-		selectStart, selectEnd := e.selection()
-
-		e.Lock()
-		if start {
-			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
-		} else {
-			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
-		}
-		e.Unlock()
-	}
-
 	switch key.Name {
 	case fyne.KeyBackspace, fyne.KeyDelete:
 		// clears the selection -- return handled
@@ -582,18 +569,24 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 
 	if e.selectKeyDown == false {
 		switch key.Name {
-		case fyne.KeyUp, fyne.KeyDown:
-			// seek to the start/end of the selection -- return unhandled to move up/down
-			setCursorFromSelection(key.Name == fyne.KeyUp)
-			e.selecting = false
-			return false
-		case fyne.KeyLeft, fyne.KeyRight:
-			// seek to the start/end of the selection -- return handled
-			setCursorFromSelection(key.Name == fyne.KeyLeft)
+		case fyne.KeyLeft:
+			// seek to the start of the selection -- return handled
+			selectStart, _ := e.selection()
+			e.Lock()
+			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
+			e.Unlock()
 			e.selecting = false
 			return true
-		case fyne.KeyEnd, fyne.KeyHome:
-			// if the user pressed home or end and isn't holding shift then end selection -- return unhandled
+		case fyne.KeyRight:
+			// seek to the end of the selection -- return handled
+			_, selectEnd := e.selection()
+			e.Lock()
+			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
+			e.Unlock()
+			e.selecting = false
+			return true
+		case fyne.KeyUp, fyne.KeyDown, fyne.KeyEnd, fyne.KeyHome:
+			// cursor movement without left or right shift -- clear selection and return unhandled
 			e.selecting = false
 			return false
 		}
