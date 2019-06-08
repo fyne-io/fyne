@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -587,4 +588,363 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 
 	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry)[0].Text)
 	assert.False(t, entry.placeholderProvider().presenter.password())
+}
+
+const (
+	keyShiftLeftDown  fyne.KeyName = "LeftShiftDown"
+	keyShiftLeftUp    fyne.KeyName = "LeftShiftUp"
+	keyShiftRightDown fyne.KeyName = "RightShiftDown"
+	keyShiftRightUp   fyne.KeyName = "RightShiftUp"
+)
+
+var typeKeys = func(e *Entry, keys ...fyne.KeyName) {
+	var keyDown = func(key *fyne.KeyEvent) {
+		e.KeyDown(key)
+		e.TypedKey(key)
+	}
+
+	for _, key := range keys {
+		switch key {
+		case keyShiftLeftDown:
+			keyDown(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+		case keyShiftLeftUp:
+			e.KeyUp(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+		case keyShiftRightDown:
+			keyDown(&fyne.KeyEvent{Name: desktop.KeyShiftRight})
+		case keyShiftRightUp:
+			e.KeyUp(&fyne.KeyEvent{Name: desktop.KeyShiftRight})
+		default:
+			keyDown(&fyne.KeyEvent{Name: key})
+			e.KeyUp(&fyne.KeyEvent{Name: key})
+		}
+	}
+}
+
+func TestEntry_SweetSweetCoverage(t *testing.T) {
+	e := NewEntry()
+	row, col := e.rowColFromTextPos(1)
+	assert.Equal(t, 0, row)
+	assert.Equal(t, 0, col)
+}
+
+func TestEntry_BasicSelect(t *testing.T) {
+
+	// SeletionStart/SelectionEnd documentation example
+	r := NewEntry()
+	r.SetText("Testing")
+	typeKeys(r, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight)
+	a, b := r.GetSelection()
+	assert.Equal(t, 3, a)
+	assert.Equal(t, 5, b)
+
+	e := NewEntry()
+	e.SetText("Testing")
+
+	// move right, press & hold shift and move right
+	typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight)
+	a, b = e.GetSelection()
+	assert.Equal(t, 1, a)
+	assert.Equal(t, 3, b)
+
+	// release shift
+	typeKeys(e, keyShiftLeftUp)
+	a, b = e.GetSelection()
+	assert.Equal(t, 1, a)
+	assert.Equal(t, 3, b)
+
+	// press shift and move
+	typeKeys(e, keyShiftLeftDown, fyne.KeyRight)
+	a, b = e.GetSelection()
+	assert.Equal(t, 1, a)
+	assert.Equal(t, 4, b)
+
+	// release shift and move right
+	typeKeys(e, keyShiftLeftUp, fyne.KeyRight)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	// press shift and move left
+	e.CursorColumn = 4 // we should be here already thanks to snapping
+	typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft)
+	a, b = e.GetSelection()
+	assert.Equal(t, 2, a)
+	assert.Equal(t, 4, b)
+}
+
+// Selects "sti" on line 2 of a new multiline
+// T e s t i n g
+// T e[s t i]n g
+// T e s t i n g
+var setup = func() *Entry {
+	e := NewMultiLineEntry()
+	e.SetText("Testing\nTesting\nTesting")
+	e.CursorRow = 1
+	e.CursorColumn = 2
+	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+	return e
+}
+
+// Selects "sti" on line 2 of a new multiline (but in reverse)
+// T e s t i n g
+// T e]s t i[n g
+// T e s t i n g
+var setupReverse = func() *Entry {
+	e := NewMultiLineEntry()
+	e.SetText("Testing\nTesting\nTesting")
+	e.CursorRow = 1
+	e.CursorColumn = 5
+	typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft)
+	return e
+}
+
+func TestEntry_SelectHomeEnd(t *testing.T) {
+
+	// T e[s t i] n g -> end -> // T e[s t i n g]
+	e := setup()
+	typeKeys(e, fyne.KeyEnd)
+	a, b := e.GetSelection()
+	assert.Equal(t, 10, a)
+	assert.Equal(t, 15, b)
+
+	// T e s[t i n g] -> home -> ]T e[s t i n g
+	typeKeys(e, fyne.KeyHome)
+	a, b = e.GetSelection()
+	assert.Equal(t, 8, a)
+	assert.Equal(t, 10, b)
+
+	// home after releasing shift
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyHome)
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 0, e.CursorColumn)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	// end after releasing shift
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyEnd)
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 7, e.CursorColumn)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+}
+
+func TestEntry_MultilineSelect(t *testing.T) {
+	e := setup()
+
+	// Extend the selection down one row
+	assert.Equal(t, 1, e.CursorRow)
+	typeKeys(e, fyne.KeyDown)
+	assert.Equal(t, 2, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+	a, b := e.GetSelection()
+	assert.Equal(t, 10, a)
+	assert.Equal(t, 21, b)
+
+	typeKeys(e, fyne.KeyUp)
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+	a, b = e.GetSelection()
+	assert.Equal(t, 10, a)
+	assert.Equal(t, 13, b)
+
+	typeKeys(e, fyne.KeyUp)
+	assert.Equal(t, 0, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+	a, b = e.GetSelection()
+	assert.Equal(t, 5, a)
+	assert.Equal(t, 10, b)
+}
+
+func TestEntry_SelectSnapping(t *testing.T) {
+
+	e := setup()
+	typeKeys(e, keyShiftLeftUp)
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+
+	typeKeys(e, fyne.KeyRight)
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+	a, b := e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft)
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 2, e.CursorColumn)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	// up and down snap to start/end respectively, but they also move
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyDown)
+	assert.Equal(t, 2, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyUp)
+	assert.Equal(t, 0, e.CursorRow)
+	assert.Equal(t, 2, e.CursorColumn)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+}
+
+func TestEntry_SelectDelete(t *testing.T) {
+
+	e := setup()
+	typeKeys(e, fyne.KeyDelete)
+	// "Testing\nTeng\nTesting"
+	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
+	assert.Equal(t, 20, len(e.Text))
+	a, b := e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	e = setup()
+	typeKeys(e, fyne.KeyDown, fyne.KeyDelete)
+	assert.Equal(t, "Testing\nTeng", e.Text)
+	assert.Equal(t, 12, len(e.Text))
+
+	e = setupReverse()
+	typeKeys(e, fyne.KeyDown, fyne.KeyDelete)
+	assert.Equal(t, "Testing\nTestisting", e.Text)
+	assert.Equal(t, 18, len(e.Text))
+
+	{
+		// After pressing delete we should be able to press down to get a new selection
+		// as we're still holding delete
+		e = setup()
+		typeKeys(e, fyne.KeyDelete, fyne.KeyDown)
+		// T e s t i n g
+		// T e[n g
+		// T e]s t i n g
+		a, b = e.GetSelection()
+		assert.Equal(t, 10, a)
+		assert.Equal(t, 15, b)
+
+		e = setupReverse()
+		typeKeys(e, fyne.KeyDelete, fyne.KeyDown)
+		a, b = e.GetSelection()
+		assert.Equal(t, 10, a)
+		assert.Equal(t, 15, b)
+	}
+
+	{
+		// Pressing up after delete should
+		//  a) delete the selection
+		//  b) move the selection start point
+		e = setup()
+		typeKeys(e, fyne.KeyDelete, fyne.KeyUp)
+		// T e[s t i n g
+		// T e]n g
+		// T e s t i n g
+		a, b = e.GetSelection()
+		assert.Equal(t, 2, a)
+		assert.Equal(t, 10, b)
+
+		e = setupReverse()
+		typeKeys(e, fyne.KeyDelete, fyne.KeyUp)
+		a, b = e.GetSelection()
+		assert.Equal(t, 2, a)
+		assert.Equal(t, 10, b)
+	}
+}
+
+func TestEntry_SelectBackspace(t *testing.T) {
+
+	// AFAIK the backspace on selection behaviour should be identical to delete
+	e := setup()
+	typeKeys(e, fyne.KeyBackspace)
+	// "Testing\nTeng\nTesting"
+	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
+	assert.Equal(t, 20, len(e.Text))
+	a, b := e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+}
+
+func TestEntry_SelectEnter(t *testing.T) {
+
+	// Erase the selection and add a newline at selection start
+	e := setup()
+	typeKeys(e, fyne.KeyEnter)
+	// "Testing\nTeng\nTesting"
+	assert.Equal(t, "Testing\nTe\nng\nTesting", e.Text)
+	assert.Equal(t, 21, len(e.Text))
+	a, b := e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	e = setupReverse()
+	typeKeys(e, fyne.KeyEnter)
+	// "Testing\nTeng\nTesting"
+	assert.Equal(t, "Testing\nTe\nng\nTesting", e.Text)
+	assert.Equal(t, 21, len(e.Text))
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+}
+
+func TestEntry_SelectReplace(t *testing.T) {
+	e := setup()
+	test.Type(e, "hello")
+	assert.Equal(t, "Testing\nTehellong\nTesting", e.Text)
+
+	e = setupReverse()
+	test.Type(e, "hello")
+	assert.Equal(t, "Testing\nTehellong\nTesting", e.Text)
+}
+
+func TestEntry_EraseSelection(t *testing.T) {
+	e := setup()
+	e.eraseSelection()
+	e.updateText(e.textProvider().String())
+	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
+	a, b := e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+}
+
+func TestEntry_EraseEmptySelection(t *testing.T) {
+	e := setup()
+	// clear empty selection
+	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, fyne.KeyDelete)
+	assert.Equal(t, "Testing\nTeting\nTesting", e.Text)
+	a, b := e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	e = setup()
+	// clear empty selection while shift is held
+	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyDelete)
+	assert.Equal(t, "Testing\nTeting\nTesting", e.Text)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	// ensure that backspace doesn't leave a selection start at the old cursor position
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyBackspace)
+	assert.Equal(t, "Testing\nTsting\nTesting", e.Text)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
+
+	// clear selection, select a character and while holding shift issue two backspaces
+	e = setup()
+	typeKeys(e, keyShiftLeftUp, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyBackspace, fyne.KeyBackspace)
+	assert.Equal(t, "Testing\nTeing\nTesting", e.Text)
+	a, b = e.GetSelection()
+	assert.Equal(t, -1, a)
+	assert.Equal(t, -1, b)
 }
