@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewScrollContainer(t *testing.T) {
@@ -111,6 +112,42 @@ func TestScrollContainer_ResizeExpand(t *testing.T) {
 
 	assert.Equal(t, 120, rect.Size().Width)
 	assert.Equal(t, 140, rect.Size().Height)
+}
+
+func TestScrollContainer_ScrollBarForSmallContentIsHidden(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 200))
+
+	r := Renderer(scroll).(*scrollRenderer)
+	assert.False(t, r.vertBar.Visible())
+}
+
+func TestScrollContainer_ShowHiddenScrollBarIfContentGrows(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 200))
+	r := Renderer(scroll).(*scrollRenderer)
+	require.False(t, r.vertBar.Visible())
+
+	rect.SetMinSize(fyne.NewSize(100, 300))
+	r.Layout(scroll.Size())
+	assert.True(t, r.vertBar.Visible())
+}
+
+func TestScrollContainer_HideScrollBarIfContentShrinks(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 300))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 200))
+	r := Renderer(scroll).(*scrollRenderer)
+	require.True(t, r.vertBar.Visible())
+
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	r.Layout(scroll.Size())
+	assert.False(t, r.vertBar.Visible())
 }
 
 func TestScrollBarRenderer_BarSize(t *testing.T) {

@@ -130,11 +130,15 @@ type scrollRenderer struct {
 }
 
 func (s *scrollRenderer) updatePosition() {
-	if s.scroll.Content.Size().Height-s.scroll.Offset.Y < s.scroll.Size().Height {
-		if s.scroll.Content.Size().Height <= s.scroll.Size().Height {
-			s.scroll.Offset.Y = 0
-		} else {
-			s.scroll.Offset.Y = s.scroll.Content.Size().Height - s.scroll.Size().Height
+	scrollHeight := s.scroll.Size().Height
+	contentHeight := s.scroll.Content.Size().Height
+	if contentHeight <= scrollHeight {
+		s.scroll.Offset.Y = 0
+		s.vertBar.Hide()
+	} else {
+		s.vertBar.Show()
+		if contentHeight-s.scroll.Offset.Y < scrollHeight {
+			s.scroll.Offset.Y = contentHeight - scrollHeight
 		}
 	}
 	s.scroll.Content.Move(fyne.NewPos(-s.scroll.Offset.X, -s.scroll.Offset.Y))
