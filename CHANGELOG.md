@@ -9,6 +9,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Menubar and PopUpMenu (#41)
 * PopUp widgets (regular and modal) and canvas overlay support (#242)
+* Text can now be selected (#67)
 * Support moving through inputs with Tab / Shift-Tab (#82)
 * canvas.Capture() to save the content of a canvas
 * Horizontal layout for widget.Radio

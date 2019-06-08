@@ -350,6 +350,17 @@ func (e *Entry) selection() (int, int) {
 	return e.textPosFromRowCol(rowA, colA), e.textPosFromRowCol(rowB, colB)
 }
 
+// selectedText returns the text currently selected in this Entry.
+// If there is no selection it will return the empty string.
+func (e *Entry) selectedText() string {
+	if e.selecting == false {
+		return ""
+	}
+
+	start, stop := e.selection()
+	return string(e.textProvider().buffer[start:stop])
+}
+
 // Obtains row,col from a given textual position
 // expects a read or write lock to be held by the caller
 func (e *Entry) rowColFromTextPos(pos int) (int, int) {
@@ -522,6 +533,7 @@ func (e *Entry) eraseSelection() {
 	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
 	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
 	e.Unlock()
+	e.updateText(provider.String())
 	e.selecting = false
 }
 
@@ -796,10 +808,25 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (e *Entry) registerShortcut() {
-	scPaste := &fyne.ShortcutPaste{}
-	e.shortcut.AddShortcut(scPaste, func(se fyne.Shortcut) {
-		scPaste = se.(*fyne.ShortcutPaste)
-		text := scPaste.Clipboard.Content()
+	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
+		cut := se.(*fyne.ShortcutCut)
+		text := e.selectedText()
+		e.eraseSelection()
+
+		cut.Clipboard.SetContent(text)
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutCopy{}, func(se fyne.Shortcut) {
+		copy := se.(*fyne.ShortcutCopy)
+		text := e.selectedText()
+
+		copy.Clipboard.SetContent(text)
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutPaste{}, func(se fyne.Shortcut) {
+		if e.selecting {
+			e.eraseSelection()
+		}
+		paste := se.(*fyne.ShortcutPaste)
+		text := paste.Clipboard.Content()
 		if !e.MultiLine {
 			// format clipboard content to be compatible with single line entry
 			text = strings.Replace(text, "\n", " ", -1)

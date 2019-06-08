@@ -502,6 +502,34 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
 }
 
+func TestEntry_OnCut(t *testing.T) {
+	e := NewEntry()
+	e.SetText("Testing")
+	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+
+	clipboard := test.NewClipboard()
+	shortcut := &fyne.ShortcutCut{Clipboard: clipboard}
+	handled := e.TypedShortcut(shortcut)
+
+	assert.True(t, handled)
+	assert.Equal(t, "sti", clipboard.Content())
+	assert.Equal(t, "Teng", e.Text)
+}
+
+func TestEntry_OnCopy(t *testing.T) {
+	e := NewEntry()
+	e.SetText("Testing")
+	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+
+	clipboard := test.NewClipboard()
+	shortcut := &fyne.ShortcutCopy{Clipboard: clipboard}
+	handled := e.TypedShortcut(shortcut)
+
+	assert.True(t, handled)
+	assert.Equal(t, "sti", clipboard.Content())
+	assert.Equal(t, "Testing", e.Text)
+}
+
 func TestEntry_OnPaste(t *testing.T) {
 	clipboard := test.NewClipboard()
 	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
@@ -582,6 +610,21 @@ func TestEntry_OnPaste(t *testing.T) {
 	}
 }
 
+func TestEntry_PasteOverSelection(t *testing.T) {
+	e := NewEntry()
+	e.SetText("Testing")
+	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+
+	clipboard := test.NewClipboard()
+	clipboard.SetContent("Insert")
+	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
+	handled := e.TypedShortcut(shortcut)
+
+	assert.True(t, handled)
+	assert.Equal(t, "Insert", clipboard.Content())
+	assert.Equal(t, "TeInsertng", e.Text)
+}
+
 func TestPasswordEntry_Placeholder(t *testing.T) {
 	entry := NewPasswordEntry()
 	entry.SetPlaceHolder("Password")
@@ -636,6 +679,7 @@ func TestEntry_BasicSelect(t *testing.T) {
 	a, b := r.selection()
 	assert.Equal(t, 3, a)
 	assert.Equal(t, 5, b)
+	assert.Equal(t, "ti", r.selectedText())
 
 	e := NewEntry()
 	e.SetText("Testing")
@@ -645,6 +689,7 @@ func TestEntry_BasicSelect(t *testing.T) {
 	a, b = e.selection()
 	assert.Equal(t, 1, a)
 	assert.Equal(t, 3, b)
+	assert.Equal(t, "es", e.selectedText())
 
 	// release shift
 	typeKeys(e, keyShiftLeftUp)
@@ -663,6 +708,7 @@ func TestEntry_BasicSelect(t *testing.T) {
 	a, b = e.selection()
 	assert.Equal(t, -1, a)
 	assert.Equal(t, -1, b)
+	assert.Equal(t, "", e.selectedText())
 
 	// press shift and move left
 	e.CursorColumn = 4 // we should be here already thanks to snapping
@@ -670,6 +716,7 @@ func TestEntry_BasicSelect(t *testing.T) {
 	a, b = e.selection()
 	assert.Equal(t, 2, a)
 	assert.Equal(t, 4, b)
+	assert.Equal(t, "st", e.selectedText())
 }
 
 // Selects "sti" on line 2 of a new multiline
