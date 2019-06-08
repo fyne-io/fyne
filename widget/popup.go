@@ -74,14 +74,14 @@ func (p *PopUp) TappedSecondary(_ *fyne.PointEvent) {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
+	bg := canvas.NewRectangle(theme.BackgroundColor())
+
 	if p.modal {
-		bg := canvas.NewRectangle(theme.BackgroundColor())
 		return &modalPopUpRenderer{center: layout.NewCenterLayout(), popUp: p, bg: bg,
 			objects: []fyne.CanvasObject{bg, p.Content}}
 	}
 
 	shadow := canvas.NewRectangle(theme.ShadowColor())
-	bg := canvas.NewRectangle(theme.BackgroundColor())
 	objects := []fyne.CanvasObject{shadow, bg, p.Content}
 	return &popUpRenderer{popUp: p, shadow: shadow, bg: bg, objects: objects}
 }
@@ -128,6 +128,7 @@ func (r *popUpRenderer) Refresh() {
 }
 
 func (r *popUpRenderer) ApplyTheme() {
+	r.bg.FillColor = theme.BackgroundColor()
 }
 
 func (r *popUpRenderer) BackgroundColor() color.Color {
