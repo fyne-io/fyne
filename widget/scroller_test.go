@@ -150,6 +150,22 @@ func TestScrollContainer_HideScrollBarIfContentShrinks(t *testing.T) {
 	assert.False(t, r.vertBar.Visible())
 }
 
+func TestScrollContainer_ShowShadowOnTopIfContentIsScrolled(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 500))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+	r := Renderer(scroll).(*scrollRenderer)
+
+	assert.False(t, r.shadow.Visible())
+
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -1})
+	assert.True(t, r.shadow.Visible())
+
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 1})
+	assert.False(t, r.shadow.Visible())
+}
+
 func TestScrollBarRenderer_BarSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
