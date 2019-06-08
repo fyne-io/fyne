@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
@@ -21,7 +22,11 @@ func (s *scrollBarRenderer) Layout(size fyne.Size) {
 }
 
 func (s *scrollBarRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.ScrollBarSize(), theme.ScrollBarSize())
+	return fyne.NewSize(s.minWidth(), theme.ScrollBarSize())
+}
+
+func (s *scrollBarRenderer) minWidth() int {
+	return s.scrollBar.minWidth
 }
 
 func (s *scrollBarRenderer) Refresh() {
@@ -51,7 +56,7 @@ func (s *scrollBarRenderer) barSizeVertical() fyne.Size {
 	}
 
 	barHeight := int(float32(s.scrollBar.size.Height) * portion)
-	return fyne.NewSize(theme.ScrollBarSize(), barHeight)
+	return fyne.NewSize(s.minWidth(), barHeight)
 }
 
 func (s *scrollBarRenderer) updateBarPosition() {
@@ -66,10 +71,13 @@ func (s *scrollBarRenderer) updateBarPosition() {
 	s.bar.Move(fyne.NewPos(0, barOff))
 }
 
+var _ desktop.Hoverable = (*scrollBar)(nil)
+
 type scrollBar struct {
 	baseWidget
 
-	scroll *ScrollContainer
+	minWidth int
+	scroll   *ScrollContainer
 }
 
 func (s *scrollBar) Dragged(ev *fyne.DragEvent) {
@@ -118,8 +126,21 @@ func (s *scrollBar) CreateRenderer() fyne.WidgetRenderer {
 	return &scrollBarRenderer{scrollBar: s, bar: bar, objects: []fyne.CanvasObject{bar}}
 }
 
+func (s *scrollBar) MouseIn(*desktop.MouseEvent) {
+	s.minWidth = theme.ScrollBarSize()
+	Refresh(s.scroll)
+}
+
+func (s *scrollBar) MouseMoved(*desktop.MouseEvent) {
+}
+
+func (s *scrollBar) MouseOut() {
+	s.minWidth = theme.ScrollBarSmallSize()
+	Refresh(s.scroll)
+}
+
 func newScrollBar(scroll *ScrollContainer) *scrollBar {
-	return &scrollBar{scroll: scroll}
+	return &scrollBar{scroll: scroll, minWidth: theme.ScrollBarSmallSize()}
 }
 
 type scrollRenderer struct {
@@ -153,7 +174,9 @@ func (s *scrollRenderer) Layout(size fyne.Size) {
 	scrollBar.Resize(fyne.NewSize(scrollBar.MinSize().Width, size.Height))
 	scrollBar.Move(fyne.NewPos(s.scroll.Size().Width-scrollBar.Size().Width, 0))
 
-	s.layoutContent(size)
+	c := s.scroll.Content
+	c.Resize(c.MinSize().Union(size))
+
 	s.updatePosition()
 }
 
@@ -163,13 +186,7 @@ func (s *scrollRenderer) MinSize() fyne.Size {
 }
 
 func (s *scrollRenderer) Refresh() {
-	s.layoutContent(s.scroll.Size())
-	s.updatePosition()
-}
-
-func (s *scrollRenderer) layoutContent(size fyne.Size) {
-	c := s.scroll.Content
-	c.Resize(c.MinSize().Union(size))
+	s.Layout(s.scroll.Size())
 }
 
 func (s *scrollRenderer) ApplyTheme() {

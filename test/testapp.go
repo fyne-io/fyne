@@ -171,6 +171,10 @@ func (dummyTheme) ScrollBarSize() int {
 	return 10
 }
 
+func (dummyTheme) ScrollBarSmallSize() int {
+	return 3
+}
+
 func (dummyTheme) TextFont() fyne.Resource {
 	return nil
 }

@@ -29,4 +29,5 @@ type Theme interface {
 	Padding() int
 	IconInlineSize() int
 	ScrollBarSize() int
+	ScrollBarSmallSize() int
 }

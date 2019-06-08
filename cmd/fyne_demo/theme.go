@@ -108,6 +108,10 @@ func (customTheme) ScrollBarSize() int {
 	return 10
 }
 
+func (customTheme) ScrollBarSmallSize() int {
+	return 5
+}
+
 func newCustomTheme() fyne.Theme {
 	return &customTheme{}
 }

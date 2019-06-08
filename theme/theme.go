@@ -217,6 +217,11 @@ func (t *builtinTheme) ScrollBarSize() int {
 	return 16
 }
 
+// ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer
+func (t *builtinTheme) ScrollBarSmallSize() int {
+	return 3
+}
+
 func current() fyne.Theme {
 	//	if fyne.CurrentApp().Theme() != nil
 	return fyne.CurrentApp().Settings().Theme()
@@ -336,6 +341,11 @@ func IconInlineSize() int {
 // ScrollBarSize is the width (or height) of the bars on a ScrollContainer
 func ScrollBarSize() int {
 	return current().ScrollBarSize()
+}
+
+// ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer
+func ScrollBarSmallSize() int {
+	return current().ScrollBarSmallSize()
 }
 
 // DefaultTextFont returns the font resource for the built-in regular font style
