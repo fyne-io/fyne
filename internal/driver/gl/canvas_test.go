@@ -198,3 +198,59 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 150))
 	assert.Equal(t, expectedRightColSize, rightCol.Size())
 }
+
+func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	c := w.Canvas()
+	c.SetScale(1)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(50, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(50, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(50, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(50, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	content := widget.NewHBox(leftCol, rightCol)
+	w.SetContent(content)
+
+	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
+	// wait for canvas to get its size right
+	for c.Size() != oldCanvasSize {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	oldLeftObj1Size := leftObj1.Size()
+	oldRightObj1Size := rightObj1.Size()
+	oldRightObj2Size := rightObj2.Size()
+	oldRightColSize := rightCol.Size()
+	leftObj1.SetMinSize(fyne.NewSize(40, 40))
+	rightObj1.SetMinSize(fyne.NewSize(30, 30))
+	rightObj2.SetMinSize(fyne.NewSize(30, 20))
+	canvas.Refresh(leftObj1)
+	canvas.Refresh(rightObj1)
+	canvas.Refresh(rightObj2)
+	ch := make(chan bool, 1)
+	go func() {
+		for rightCol.Size() == oldRightColSize || leftObj1.Size() == oldLeftObj1Size ||
+			rightObj1.Size() == oldRightObj1Size || rightObj2.Size() == oldRightObj2Size {
+			time.Sleep(time.Millisecond * 10)
+		}
+		ch <- true
+	}()
+	select {
+	case _ = <-ch:
+		// all elements resized
+	case <-time.After(3 * time.Second):
+		t.Error("waiting for obj size change timed out")
+	}
+
+	assert.Equal(t, oldCanvasSize, c.Size())
+	expectedRightColSize := oldRightColSize.Subtract(fyne.NewSize(20, 0))
+	assert.Equal(t, expectedRightColSize, rightCol.Size())
+	assert.Equal(t, fyne.NewSize(50, 40), leftObj1.Size())
+	assert.Equal(t, fyne.NewSize(30, 30), rightObj1.Size())
+	assert.Equal(t, fyne.NewSize(30, 20), rightObj2.Size())
+}
