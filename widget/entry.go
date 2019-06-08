@@ -319,14 +319,14 @@ func (e *Entry) updateText(text string) {
 	Refresh(e)
 }
 
-// GetSelection returns the start and end text positions for the selected span of text
+// selection returns the start and end text positions for the selected span of text
 // Note: this functionality depends on the relationship between the selection start row/col and
 // the current cursor row/column.
 // eg: (whitespace for clarity, '_' denotes cursor)
 //   "T  e  s [t  i]_n  g" == 3, 5
 //   "T  e  s_[t  i] n  g" == 3, 5
 //   "T  e_[s  t  i] n  g" == 2, 5
-func (e *Entry) GetSelection() (int, int) {
+func (e *Entry) selection() (int, int) {
 	e.RLock()
 	defer e.RUnlock()
 
@@ -510,7 +510,7 @@ func (e *Entry) eraseSelection() {
 	}
 
 	provider := e.textProvider()
-	posA, posB := e.GetSelection()
+	posA, posB := e.selection()
 
 	if posA == posB {
 		return
@@ -546,7 +546,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 
 	// seeks to the start/end of the selection - used by: up, down, left, right
 	setCursorFromSelection := func(start bool) {
-		selectStart, selectEnd := e.GetSelection()
+		selectStart, selectEnd := e.selection()
 
 		e.Lock()
 		if start {
