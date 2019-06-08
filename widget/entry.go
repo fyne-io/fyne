@@ -104,7 +104,7 @@ func (e *entryRenderer) buildSelection() {
 	// build a rectangle for each row and add it to e.selection
 	for i := 0; i < rowCount; i++ {
 		if len(e.selection) <= i {
-			box := canvas.NewRectangle(theme.ButtonColor())
+			box := canvas.NewRectangle(theme.FocusColor())
 			e.selection = append(e.selection, box)
 		}
 
@@ -171,6 +171,10 @@ func (e *entryRenderer) ApplyTheme() {
 		e.line.FillColor = theme.FocusColor()
 	} else {
 		e.line.FillColor = theme.ButtonColor()
+	}
+
+	for _, selection := range e.selection {
+		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
 	e.Refresh()
