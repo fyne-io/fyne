@@ -132,6 +132,7 @@ func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
 					gl.DeleteTextures(1, &texture)
 					delete(textures, obj)
 				}
+				delete(canvas.minSizes, obj)
 				return false
 			}
 			driver.WalkObjectTree(object, freeWalked, nil)

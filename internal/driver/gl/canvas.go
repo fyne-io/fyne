@@ -38,6 +38,7 @@ type glCanvas struct {
 
 	dirty        bool
 	dirtyMutex   *sync.Mutex
+	minSizes     map[fyne.CanvasObject]fyne.Size
 	refreshQueue chan fyne.CanvasObject
 }
 
@@ -78,8 +79,9 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 	c.Unlock()
 
-	c.content.Resize(c.window.contentSize(c.Size()))
-	c.content.Move(c.window.contentPos())
+	content.Resize(c.window.contentSize(c.Size()))
+	content.Move(c.window.contentPos())
+	c.minSizes = map[fyne.CanvasObject]fyne.Size{}
 
 	c.setDirty(true)
 }
@@ -193,18 +195,27 @@ func (c *glCanvas) ensureMinSize() bool {
 		return false
 	}
 	var objToLayout fyne.CanvasObject
+	windowNeedsMinSizeUpdate := false
 	ensureMinSize := func(obj fyne.CanvasObject, parent fyne.CanvasObject) {
 		if !obj.Visible() {
 			return
 		}
-		expectedSize := obj.MinSize().Union(obj.Size())
-		if expectedSize != obj.Size() {
+		minSize := obj.MinSize()
+		minSizeChanged := c.minSizes[obj] != minSize
+		if minSizeChanged {
 			if parent != nil {
 				objToLayout = parent
 			} else {
-				obj.Resize(expectedSize)
+				windowNeedsMinSizeUpdate = true
+				size := obj.Size()
+				expectedSize := minSize.Union(size)
+				if expectedSize != size {
+					objToLayout = nil
+					obj.Resize(expectedSize)
+				}
 			}
-		} else if obj == objToLayout {
+		}
+		if obj == objToLayout {
 			switch cont := obj.(type) {
 			case *fyne.Container:
 				if cont.Layout != nil {
@@ -213,13 +224,12 @@ func (c *glCanvas) ensureMinSize() bool {
 			case fyne.Widget:
 				widget.Renderer(cont).Layout(cont.Size())
 			default:
-				fmt.Printf("implementation error - unknown container type: %T", cont)
+				fmt.Printf("implementation error - unknown container type: %T\n", cont)
 			}
 		}
 	}
-	oldSize := c.content.Size()
 	c.walkTree(nil, ensureMinSize)
-	return oldSize != c.content.Size()
+	return windowNeedsMinSizeUpdate
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
