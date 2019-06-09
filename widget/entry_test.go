@@ -840,7 +840,7 @@ func TestEntry_SelectSnapping(t *testing.T) {
 	e = setup()
 	typeKeys(e, keyShiftLeftUp, fyne.KeyUp)
 	assert.Equal(t, 0, e.CursorRow)
-	assert.Equal(t, 2, e.CursorColumn)
+	assert.Equal(t, 5, e.CursorColumn)
 	a, b = e.selection()
 	assert.Equal(t, -1, a)
 	assert.Equal(t, -1, b)
