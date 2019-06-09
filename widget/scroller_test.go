@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,8 +21,8 @@ func TestNewScrollContainer(t *testing.T) {
 	render := Renderer(scrollBar).(*scrollBarRenderer)
 
 	assert.Equal(t, 0, scroll.Offset.Y)
-	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 100), render.barSizeVertical())
-	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), render.scrollBar.Position())
+	assert.Equal(t, fyne.NewSize(theme.ScrollBarSmallSize(), 100), render.barSizeVertical())
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize(), 0), render.scrollBar.Position())
 }
 
 func TestScrollContainer_Refresh(t *testing.T) {
@@ -150,6 +151,41 @@ func TestScrollContainer_HideScrollBarIfContentShrinks(t *testing.T) {
 	assert.False(t, r.vertBar.Visible())
 }
 
+func TestScrollContainer_ScrollBarIsSmall(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 500))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+	r := Renderer(scroll).(*scrollRenderer)
+	require.True(t, r.vertBar.Visible())
+	require.Less(t, theme.ScrollBarSmallSize(), theme.ScrollBarSize())
+
+	assert.Equal(t, theme.ScrollBarSmallSize(), r.vertBar.Size().Width)
+	assert.Equal(t, theme.ScrollBarSmallSize(), Renderer(r.vertBar).(*scrollBarRenderer).barSizeVertical().Width)
+}
+
+func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 500))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+	sr := Renderer(scroll).(*scrollRenderer)
+	bar := sr.vertBar
+	br := Renderer(sr.vertBar).(*scrollBarRenderer)
+	require.True(t, sr.vertBar.Visible())
+	require.Less(t, theme.ScrollBarSmallSize(), theme.ScrollBarSize())
+	require.Equal(t, theme.ScrollBarSmallSize(), sr.vertBar.Size().Width)
+	require.Equal(t, theme.ScrollBarSmallSize(), br.barSizeVertical().Width)
+
+	bar.MouseIn(&desktop.MouseEvent{})
+	assert.Equal(t, theme.ScrollBarSize(), sr.vertBar.Size().Width)
+	assert.Equal(t, theme.ScrollBarSize(), br.barSizeVertical().Width)
+
+	bar.MouseOut()
+	assert.Equal(t, theme.ScrollBarSmallSize(), sr.vertBar.Size().Width)
+	assert.Equal(t, theme.ScrollBarSmallSize(), br.barSizeVertical().Width)
+}
+
 func TestScrollBarRenderer_BarSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
@@ -158,11 +194,11 @@ func TestScrollBarRenderer_BarSize(t *testing.T) {
 	scrollBar := Renderer(scroll).(*scrollRenderer).vertBar
 	render := Renderer(scrollBar).(*scrollBarRenderer)
 
-	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 100), render.barSizeVertical())
+	assert.Equal(t, fyne.NewSize(theme.ScrollBarSmallSize(), 100), render.barSizeVertical())
 
 	// resize so content is twice our size. Bar should therefore be half again.
 	scroll.Resize(fyne.NewSize(50, 50))
-	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 25), render.barSizeVertical())
+	assert.Equal(t, fyne.NewSize(theme.ScrollBarSmallSize(), 25), render.barSizeVertical())
 }
 
 func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
@@ -173,7 +209,7 @@ func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
 	scrollBar := Renderer(scroll).(*scrollRenderer).vertBar
 	render := Renderer(scrollBar).(*scrollBarRenderer)
 
-	assert.Equal(t, fyne.NewSize(theme.ScrollBarSize(), 120), render.barSizeVertical())
+	assert.Equal(t, fyne.NewSize(theme.ScrollBarSmallSize(), 120), render.barSizeVertical())
 }
 
 func TestScrollBar_Dragged_ClickedInside(t *testing.T) {
