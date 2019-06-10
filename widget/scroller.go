@@ -144,9 +144,9 @@ func newScrollBar(scroll *ScrollContainer) *scrollBar {
 }
 
 type scrollRenderer struct {
-	scroll  *ScrollContainer
-	vertBar *scrollBar
-	shadow  fyne.CanvasObject
+	scroll                  *ScrollContainer
+	vertBar                 *scrollBar
+	topShadow, bottomShadow fyne.CanvasObject
 
 	objects []fyne.CanvasObject
 }
@@ -167,20 +167,28 @@ func (s *scrollRenderer) updatePosition() {
 	canvas.Refresh(s.scroll.Content)
 
 	if s.scroll.Offset.Y > 0 {
-		s.shadow.Show()
+		s.topShadow.Show()
 	} else {
-		s.shadow.Hide()
+		s.topShadow.Hide()
+	}
+	if s.scroll.Offset.Y < contentHeight - scrollHeight {
+		s.bottomShadow.Show()
+	} else {
+		s.bottomShadow.Hide()
 	}
 
 	Renderer(s.vertBar).Layout(s.scroll.size)
 }
 
 func (s *scrollRenderer) Layout(size fyne.Size) {
+	twicePad := theme.Padding()*2
 	// The scroll bar needs to be resized and moved on the far right
 	scrollBar := s.vertBar
 	scrollBar.Resize(fyne.NewSize(scrollBar.MinSize().Width, size.Height))
 	scrollBar.Move(fyne.NewPos(s.scroll.Size().Width-scrollBar.Size().Width, 0))
-	s.shadow.Resize(fyne.NewSize(size.Width, theme.Padding()*2))
+	s.topShadow.Resize(fyne.NewSize(size.Width, twicePad))
+	s.bottomShadow.Resize(fyne.NewSize(size.Width, twicePad))
+	s.bottomShadow.Move(fyne.NewPos(0, s.scroll.size.Height-twicePad))
 
 	c := s.scroll.Content
 	c.Resize(c.MinSize().Union(size))
@@ -267,16 +275,22 @@ func (s *ScrollContainer) Hide() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	bar := newScrollBar(s)
-	shadow := canvas.NewLinearGradient(
+	topShadow := canvas.NewLinearGradient(
 		color.RGBA{R: 0, G: 0, B: 0, A: 50},
 		color.Transparent,
 		canvas.GradientDirectionVertical,
 	)
+	bottomShadow := canvas.NewLinearGradient(
+		color.Transparent,
+		color.RGBA{R: 0, G: 0, B: 0, A: 50},
+		canvas.GradientDirectionVertical,
+	)
 	return &scrollRenderer{
-		objects: []fyne.CanvasObject{s.Content, bar, shadow},
-		scroll:  s,
-		vertBar: bar,
-		shadow:  shadow,
+		objects:      []fyne.CanvasObject{s.Content, bar, topShadow, bottomShadow},
+		scroll:       s,
+		vertBar:      bar,
+		topShadow:    topShadow,
+		bottomShadow: bottomShadow,
 	}
 }
 

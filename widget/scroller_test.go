@@ -192,13 +192,30 @@ func TestScrollContainer_ShowShadowOnTopIfContentIsScrolled(t *testing.T) {
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	r := Renderer(scroll).(*scrollRenderer)
-	assert.False(t, r.shadow.Visible())
+	assert.False(t, r.topShadow.Visible())
+	assert.Equal(t, fyne.NewPos(0, 0), r.topShadow.Position())
 
 	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -1})
-	assert.True(t, r.shadow.Visible())
+	assert.True(t, r.topShadow.Visible())
 
 	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 1})
-	assert.False(t, r.shadow.Visible())
+	assert.False(t, r.topShadow.Visible())
+}
+
+func TestScrollContainer_ShowShadowOnBottomIfContentCanScroll(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(100, 500))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+	r := Renderer(scroll).(*scrollRenderer)
+	assert.True(t, r.bottomShadow.Visible())
+	assert.Equal(t, scroll.size.Height, r.bottomShadow.Position().Y + r.bottomShadow.Size().Height)
+
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -400})
+	assert.False(t, r.bottomShadow.Visible())
+
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 100})
+	assert.True(t, r.bottomShadow.Visible())
 }
 
 func TestScrollBarRenderer_BarSize(t *testing.T) {
