@@ -146,6 +146,7 @@ func newScrollBar(scroll *ScrollContainer) *scrollBar {
 type scrollRenderer struct {
 	scroll  *ScrollContainer
 	vertBar *scrollBar
+	shadow  fyne.CanvasObject
 
 	objects []fyne.CanvasObject
 }
@@ -165,6 +166,12 @@ func (s *scrollRenderer) updatePosition() {
 	s.scroll.Content.Move(fyne.NewPos(-s.scroll.Offset.X, -s.scroll.Offset.Y))
 	canvas.Refresh(s.scroll.Content)
 
+	if s.scroll.Offset.Y > 0 {
+		s.shadow.Show()
+	} else {
+		s.shadow.Hide()
+	}
+
 	Renderer(s.vertBar).Layout(s.scroll.size)
 }
 
@@ -173,6 +180,7 @@ func (s *scrollRenderer) Layout(size fyne.Size) {
 	scrollBar := s.vertBar
 	scrollBar.Resize(fyne.NewSize(scrollBar.MinSize().Width, size.Height))
 	scrollBar.Move(fyne.NewPos(s.scroll.Size().Width-scrollBar.Size().Width, 0))
+	s.shadow.Resize(fyne.NewSize(size.Width, theme.Padding()*2))
 
 	c := s.scroll.Content
 	c.Resize(c.MinSize().Union(size))
@@ -259,7 +267,17 @@ func (s *ScrollContainer) Hide() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	bar := newScrollBar(s)
-	return &scrollRenderer{scroll: s, vertBar: bar, objects: []fyne.CanvasObject{s.Content, bar}}
+	shadow := canvas.NewLinearGradient(
+		color.RGBA{R: 0, G: 0, B: 0, A: 50},
+		color.Transparent,
+		canvas.GradientDirectionVertical,
+	)
+	return &scrollRenderer{
+		objects: []fyne.CanvasObject{s.Content, bar, shadow},
+		scroll:  s,
+		vertBar: bar,
+		shadow:  shadow,
+	}
 }
 
 // NewScrollContainer creates a scrollable parent wrapping the specified content.
