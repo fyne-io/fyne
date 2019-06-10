@@ -35,6 +35,11 @@ type Tappable interface {
 	TappedSecondary(*PointEvent)
 }
 
+// DoubleTappable describes any CanvasObject that can also be double tapped.
+type DoubleTappable interface {
+	DoubleTapped(*PointEvent)
+}
+
 // Disableable describes any CanvasObject that can be disabled.
 // This is primarily used with objects that also implement the Tappable interface.
 type Disableable interface {

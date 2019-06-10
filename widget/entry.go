@@ -426,7 +426,7 @@ func (e *Entry) Focused() bool {
 func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
 	for i := 0; i < len(text); i++ {
 		str := string(text[0 : i+1])
-		wid := textMinSize(str, theme.TextSize(), e.textStyle()).Width
+		wid := textMinSize(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
 		if wid > pos.X {
 			return i
 		}
@@ -434,16 +434,32 @@ func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
 	return len(text)
 }
 
-// Tapped is called when this entry has been tapped so we should update the cursor position.
-func (e *Entry) Tapped(ev *fyne.PointEvent) {
-	if !e.focused {
-		e.FocusGained()
-	}
+// MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
+// update the existing selection (if shift is held), or start a selection dragging operation.
+func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	if e.selectKeyDown {
 		e.selecting = true
 	}
 	if e.selecting && e.selectKeyDown == false {
 		e.selecting = false
+	}
+	e.updateMousePointer(&m.PointEvent, e.selecting == false)
+}
+
+// MouseUp called on mouse release (ignored)
+func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+}
+
+// Dragged is called when the pointer moves while a button is held down
+func (e *Entry) Dragged(d *fyne.DragEvent) {
+	e.selecting = true
+	e.updateMousePointer(&d.PointEvent, false)
+}
+
+func (e *Entry) updateMousePointer(ev *fyne.PointEvent, startSelect bool) {
+
+	if !e.focused {
+		e.FocusGained()
 	}
 
 	rowHeight := e.textProvider().charMinSize().Height
@@ -461,12 +477,66 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	e.Lock()
 	e.CursorRow = row
 	e.CursorColumn = col
+	if startSelect {
+		e.selectRow = row
+		e.selectColumn = col
+	}
 	e.Unlock()
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
-// TappedSecondary is called when right or alternative tap is invoked - this is currently ignored.
-func (e *Entry) TappedSecondary(_ *fyne.PointEvent) {
+// DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
+func (e *Entry) DoubleTapped(ev *fyne.PointEvent) {
+	row := e.textProvider().row(e.CursorRow)
+	start, end := e.CursorColumn, e.CursorColumn+1
+	if start >= len(row) {
+		start = len(row) - 1
+	}
+	if end >= len(row) {
+		end = len(row) - 1
+	}
+
+	if row[start] == ' ' || row[start] == '\t' {
+		// whitespace clicked, select all whitespace (search in both directions for non-whitespace)
+		for ; start > 0; start-- {
+			if row[start-1] != ' ' && row[start-1] != '\t' {
+				break
+			}
+		}
+		for ; end < len(row); end++ {
+			// find first non-whitespace rune
+			if row[end] != ' ' && row[end] != '\t' {
+				break
+			}
+		}
+	} else {
+		// text clicked, select all text (search in both directions for whitespace)
+		for ; start > 0; start-- {
+			if row[start-1] == ' ' || row[start-1] == '\t' {
+				break
+			}
+		}
+		for ; end < len(row); end++ {
+			if row[end] == ' ' || row[end] == '\t' || row[end] == '\r' || row[end] == '\n' {
+				break
+			}
+		}
+	}
+
+	e.Lock()
+	if e.selectKeyDown == false {
+		e.selectRow = e.CursorRow
+		e.selectColumn = start
+	}
+	// Always aim to maximise the selected region
+	if e.selectRow > e.CursorRow || (e.selectRow == e.CursorRow && e.selectColumn > e.CursorColumn) {
+		e.CursorColumn = start
+	} else {
+		e.CursorColumn = end
+	}
+	e.selecting = true
+	e.Unlock()
+	Renderer(e).(*entryRenderer).moveCursor()
 }
 
 // TypedRune receives text input events when the Entry widget is focused.
