@@ -26,7 +26,7 @@ before_script:
   - go get github.com/mattn/goveralls
 
 script:
-  - test -z $(gofmt -s -l $NO_VENDOR)
+  - test -z $(gofmt -s -e -d $NO_VENDOR | tee /dev/stderr)
   # enable go modules only for 1.12.x
   - if [[ "$TRAVIS_GO_VERSION" == 1.12* ]]; then export GO111MODULE=on; fi
   # test vendor folder only for 1.12.x on osx

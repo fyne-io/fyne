@@ -171,7 +171,7 @@ func (s *scrollRenderer) updatePosition() {
 	} else {
 		s.topShadow.Hide()
 	}
-	if s.scroll.Offset.Y < contentHeight - scrollHeight {
+	if s.scroll.Offset.Y < contentHeight-scrollHeight {
 		s.bottomShadow.Show()
 	} else {
 		s.bottomShadow.Hide()
@@ -181,14 +181,13 @@ func (s *scrollRenderer) updatePosition() {
 }
 
 func (s *scrollRenderer) Layout(size fyne.Size) {
-	twicePad := theme.Padding()*2
 	// The scroll bar needs to be resized and moved on the far right
 	scrollBar := s.vertBar
 	scrollBar.Resize(fyne.NewSize(scrollBar.MinSize().Width, size.Height))
 	scrollBar.Move(fyne.NewPos(s.scroll.Size().Width-scrollBar.Size().Width, 0))
-	s.topShadow.Resize(fyne.NewSize(size.Width, twicePad))
-	s.bottomShadow.Resize(fyne.NewSize(size.Width, twicePad))
-	s.bottomShadow.Move(fyne.NewPos(0, s.scroll.size.Height-twicePad))
+	s.topShadow.Resize(fyne.NewSize(size.Width, 0))
+	s.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
+	s.bottomShadow.Move(fyne.NewPos(0, s.scroll.size.Height))
 
 	c := s.scroll.Content
 	c.Resize(c.MinSize().Union(size))
@@ -275,16 +274,8 @@ func (s *ScrollContainer) Hide() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	bar := newScrollBar(s)
-	topShadow := canvas.NewLinearGradient(
-		color.RGBA{R: 0, G: 0, B: 0, A: 50},
-		color.Transparent,
-		canvas.GradientDirectionVertical,
-	)
-	bottomShadow := canvas.NewLinearGradient(
-		color.Transparent,
-		color.RGBA{R: 0, G: 0, B: 0, A: 50},
-		canvas.GradientDirectionVertical,
-	)
+	topShadow := newShadow(shadowBottom)
+	bottomShadow := newShadow(shadowTop)
 	return &scrollRenderer{
 		objects:      []fyne.CanvasObject{s.Content, bar, topShadow, bottomShadow},
 		scroll:       s,
