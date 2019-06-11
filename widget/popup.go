@@ -80,7 +80,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 			objects: []fyne.CanvasObject{bg, p.Content}}
 	}
 
-	shadow := canvas.NewRectangle(theme.ShadowColor())
+	shadow := newShadow(shadowAround)
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 	objects := []fyne.CanvasObject{shadow, bg, p.Content}
 	return &popUpRenderer{popUp: p, shadow: shadow, bg: bg, objects: objects}
@@ -102,9 +102,10 @@ func NewModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 }
 
 type popUpRenderer struct {
-	popUp      *PopUp
-	shadow, bg *canvas.Rectangle
-	objects    []fyne.CanvasObject
+	popUp   *PopUp
+	shadow  fyne.CanvasObject
+	bg      *canvas.Rectangle
+	objects []fyne.CanvasObject
 }
 
 func (r *popUpRenderer) Layout(size fyne.Size) {
@@ -116,8 +117,8 @@ func (r *popUpRenderer) Layout(size fyne.Size) {
 	size = innerSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	r.bg.Resize(size)
 	r.bg.Move(pos)
-	r.shadow.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-	r.shadow.Move(pos.Subtract(fyne.NewPos(theme.Padding(), theme.Padding())))
+	r.shadow.Resize(size)
+	r.shadow.Move(pos)
 }
 
 func (r *popUpRenderer) MinSize() fyne.Size {
