@@ -409,7 +409,7 @@ func (r *tabButtonRenderer) BackgroundColor() color.Color {
 	case r.button.hovered:
 		return theme.HoverColor()
 	default:
-		return theme.ButtonColor()
+		return theme.BackgroundColor()
 	}
 }
 
@@ -436,8 +436,8 @@ func (r *tabButtonRenderer) Layout(size fyne.Size) {
 		var labelOffset fyne.Position
 		var labelSize fyne.Size
 		if r.button.IconPosition == buttonIconTop {
-			labelOffset = fyne.NewPos(theme.Padding(), labelShift)
-			labelSize = fyne.NewSize(innerSize.Width-2*theme.Padding(), r.label.MinSize().Height)
+			labelOffset = fyne.NewPos(0, labelShift)
+			labelSize = fyne.NewSize(innerSize.Width, r.label.MinSize().Height)
 		} else {
 			labelOffset = fyne.NewPos(labelShift, 0)
 			labelSize = fyne.NewSize(innerSize.Width-labelShift, innerSize.Height)
@@ -451,7 +451,7 @@ func (r *tabButtonRenderer) MinSize() fyne.Size {
 	var contentWidth, contentHeight int
 	textSize := r.label.MinSize()
 	if r.button.IconPosition == buttonIconTop {
-		contentWidth = fyne.Max(textSize.Width+2*theme.Padding(), r.iconSize())
+		contentWidth = fyne.Max(textSize.Width, r.iconSize())
 		if r.icon != nil {
 			contentHeight += r.iconSize()
 		}
