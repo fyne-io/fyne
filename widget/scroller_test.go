@@ -209,7 +209,7 @@ func TestScrollContainer_ShowShadowOnBottomIfContentCanScroll(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	r := Renderer(scroll).(*scrollRenderer)
 	assert.True(t, r.bottomShadow.Visible())
-	assert.Equal(t, scroll.size.Height, r.bottomShadow.Position().Y + r.bottomShadow.Size().Height)
+	assert.Equal(t, scroll.size.Height, r.bottomShadow.Position().Y+r.bottomShadow.Size().Height)
 
 	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -400})
 	assert.False(t, r.bottomShadow.Visible())
