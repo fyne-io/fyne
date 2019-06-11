@@ -131,17 +131,17 @@ func Test_tabContainer_Tapped(t *testing.T) {
 
 	tab2.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
-	require.Equal(t, theme.ButtonColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab1).BackgroundColor())
 	require.Equal(t, theme.PrimaryColor(), Renderer(tab2).BackgroundColor())
-	require.Equal(t, theme.ButtonColor(), Renderer(tab3).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab3).BackgroundColor())
 	assert.False(t, tabs.Items[0].Content.Visible())
 	assert.True(t, tabs.Items[1].Content.Visible())
 	assert.False(t, tabs.Items[2].Content.Visible())
 
 	tab3.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 2, tabs.CurrentTabIndex())
-	require.Equal(t, theme.ButtonColor(), Renderer(tab1).BackgroundColor())
-	require.Equal(t, theme.ButtonColor(), Renderer(tab2).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab2).BackgroundColor())
 	require.Equal(t, theme.PrimaryColor(), Renderer(tab3).BackgroundColor())
 	assert.False(t, tabs.Items[0].Content.Visible())
 	assert.False(t, tabs.Items[1].Content.Visible())
@@ -150,8 +150,8 @@ func Test_tabContainer_Tapped(t *testing.T) {
 	tab1.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 0, tabs.CurrentTabIndex())
 	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
-	require.Equal(t, theme.ButtonColor(), Renderer(tab2).BackgroundColor())
-	require.Equal(t, theme.ButtonColor(), Renderer(tab3).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab2).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab3).BackgroundColor())
 	assert.True(t, tabs.Items[0].Content.Visible())
 	assert.False(t, tabs.Items[1].Content.Visible())
 	assert.False(t, tabs.Items[2].Content.Visible())
@@ -251,18 +251,18 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 			name:           "leading: tab with icon and text",
 			item:           NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location:       TabLocationLeading,
-			wantButtonSize: fyne.NewSize(theme.Padding()*4+verticalMixedWidth, theme.Padding()*3+verticalIconSize.Height+textHeight),
-			wantIconPos:    fyne.NewPos(2*theme.Padding()+verticalMixedIconOffset, theme.Padding()),
+			wantButtonSize: fyne.NewSize(theme.Padding()*2+verticalMixedWidth, theme.Padding()*3+verticalIconSize.Height+textHeight),
+			wantIconPos:    fyne.NewPos(theme.Padding()+verticalMixedIconOffset, theme.Padding()),
 			wantIconSize:   verticalIconSize,
-			wantTextPos:    fyne.NewPos(2*theme.Padding()+verticalMixedTextOffset, 2*theme.Padding()+verticalIconSize.Height),
+			wantTextPos:    fyne.NewPos(theme.Padding()+verticalMixedTextOffset, 2*theme.Padding()+verticalIconSize.Height),
 			wantTextSize:   verticalTextSize,
 		},
 		{
 			name:           "leading: tab with text only",
 			item:           NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
 			location:       TabLocationLeading,
-			wantButtonSize: fyne.NewSize(theme.Padding()*4+textWidth, theme.Padding()*2+textHeight),
-			wantTextPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
+			wantButtonSize: fyne.NewSize(theme.Padding()*2+textWidth, theme.Padding()*2+textHeight),
+			wantTextPos:    fyne.NewPos(theme.Padding(), theme.Padding()),
 			wantTextSize:   verticalTextSize,
 		},
 		{
@@ -277,18 +277,18 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 			name:           "trailing: tab with icon and text",
 			item:           NewTabItemWithIcon("Text1", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())),
 			location:       TabLocationTrailing,
-			wantButtonSize: fyne.NewSize(theme.Padding()*4+verticalMixedWidth, theme.Padding()*3+verticalIconSize.Height+textHeight),
-			wantIconPos:    fyne.NewPos(2*theme.Padding()+verticalMixedIconOffset, theme.Padding()),
+			wantButtonSize: fyne.NewSize(theme.Padding()*2+verticalMixedWidth, theme.Padding()*3+verticalIconSize.Height+textHeight),
+			wantIconPos:    fyne.NewPos(theme.Padding()+verticalMixedIconOffset, theme.Padding()),
 			wantIconSize:   verticalIconSize,
-			wantTextPos:    fyne.NewPos(2*theme.Padding()+verticalMixedTextOffset, 2*theme.Padding()+verticalIconSize.Height),
+			wantTextPos:    fyne.NewPos(theme.Padding()+verticalMixedTextOffset, theme.Padding()*2+verticalIconSize.Height),
 			wantTextSize:   verticalTextSize,
 		},
 		{
 			name:           "trailing: tab with text only",
 			item:           NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor())),
 			location:       TabLocationTrailing,
-			wantButtonSize: fyne.NewSize(theme.Padding()*4+textWidth, theme.Padding()*2+textHeight),
-			wantTextPos:    fyne.NewPos(2*theme.Padding(), theme.Padding()),
+			wantButtonSize: fyne.NewSize(theme.Padding()*2+textWidth, theme.Padding()*2+textHeight),
+			wantTextPos:    fyne.NewPos(theme.Padding(), theme.Padding()),
 			wantTextSize:   verticalTextSize,
 		},
 		{
@@ -306,7 +306,7 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 			r := Renderer(tabs).(*tabContainerRenderer)
 			require.Len(t, r.tabBar.Children, 1)
 			tabs.SetTabLocation(tt.location)
-			r.Layout(fyne.NewSize(100, 100))
+			r.Layout(r.MinSize())
 
 			b := r.tabBar.Children[0].(*tabButton)
 			assert.Equal(t, tt.wantButtonSize, b.Size())
@@ -328,15 +328,15 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 func Test_tabButton_Hovered(t *testing.T) {
 	b := &tabButton{}
 	r := Renderer(b)
-	require.Equal(t, theme.ButtonColor(), r.BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
 
 	b.MouseIn(&desktop.MouseEvent{})
 	assert.Equal(t, theme.HoverColor(), r.BackgroundColor())
 	b.MouseOut()
-	assert.Equal(t, theme.ButtonColor(), r.BackgroundColor())
+	assert.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
 }
 
 func Test_tabButtonRenderer_BackgroundColor(t *testing.T) {
 	r := Renderer(&tabButton{})
-	assert.Equal(t, theme.ButtonColor(), r.BackgroundColor())
+	assert.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
 }
