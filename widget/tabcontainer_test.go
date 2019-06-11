@@ -158,6 +158,7 @@ func Test_tabContainer_Tapped(t *testing.T) {
 }
 
 func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tabs := NewTabContainer(&TabItem{Text: "Test1", Content: NewLabel("Test1")})
 	underline := Renderer(tabs).(*tabContainerRenderer).line
 	barColor := underline.FillColor
