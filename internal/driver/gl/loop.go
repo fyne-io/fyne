@@ -108,7 +108,7 @@ func (d *gLDriver) runGL() {
 
 				updateGLContext(w)
 				if canvas.ensureMinSize() {
-					w.resizeToContent()
+					w.fitContent()
 				}
 				canvas.paint(canvas.Size())
 

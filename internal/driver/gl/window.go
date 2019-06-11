@@ -132,20 +132,18 @@ func (w *window) centerOnScreen() {
 	}) // end of runOnMainAsync(){}
 }
 
-// minSizeOnScreen gets the minimum size of a window content in screen pixels
+// minSizeOnScreen gets thpaddede minimum size of a window content in screen pixels
 func (w *window) minSizeOnScreen() (int, int) {
 	content := w.canvas.Content()
-
-	// get current size of content inside the window
-	winContentSize := fyne.NewSize(0, 0)
-	if content != nil {
-		winContentSize = content.MinSize()
+	if content == nil {
+		return 0, 0
 	}
 
-	return w.screenSize(winContentSize)
+	// get minimum size of content inside the window
+	return w.screenSize(content.MinSize())
 }
 
-// screenSize computes the minimum size of the given content size in screen pixels
+// screenSize computes the actual output size of the given content size in screen pixels
 func (w *window) screenSize(contentSize fyne.Size) (int, int) {
 	screenSize := w.canvasSize(contentSize)
 	return scaleInt(w.canvas, screenSize.Width), scaleInt(w.canvas, screenSize.Height)
@@ -220,12 +218,7 @@ func (w *window) SetPadded(padded bool) {
 
 	w.canvas.content.Move(w.contentPos())
 
-	runOnMain(w.resizeToContent)
-}
-
-func (w *window) resizeToContent() {
-	w.fitContent()
-	w.viewport.SetSize(w.screenSize(w.Canvas().Content().Size()))
+	runOnMain(w.fitContent)
 }
 
 func (w *window) Icon() fyne.Resource {
@@ -402,18 +395,18 @@ func (w *window) Content() fyne.CanvasObject {
 	return w.canvas.content
 }
 
-func (w *window) resize(size fyne.Size) {
+func (w *window) resize(canvasSize fyne.Size) {
 	if !w.fullScreen {
-		w.width = scaleInt(w.canvas, size.Width)
-		w.height = scaleInt(w.canvas, size.Height)
+		w.width = scaleInt(w.canvas, canvasSize.Width)
+		w.height = scaleInt(w.canvas, canvasSize.Height)
 	}
 
-	w.canvas.content.Resize(w.contentSize(size))
+	w.canvas.content.Resize(w.contentSize(canvasSize))
 	if w.canvas.overlay != nil {
-		w.canvas.overlay.Resize(size)
+		w.canvas.overlay.Resize(canvasSize)
 	}
 	if w.canvas.menu != nil {
-		w.canvas.menu.Resize(fyne.NewSize(size.Width, w.canvas.menu.MinSize().Height))
+		w.canvas.menu.Resize(fyne.NewSize(canvasSize.Width, w.canvas.menu.MinSize().Height))
 	}
 	w.canvas.Refresh(w.canvas.content)
 }
