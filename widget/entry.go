@@ -5,6 +5,7 @@ import (
 	"math"
 	"strings"
 	"sync"
+	"unicode"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -434,6 +435,15 @@ func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
 	return len(text)
 }
 
+// Tapped is called when this entry has been tapped so we should update the cursor position.
+func (e *Entry) Tapped(ev *fyne.PointEvent) {
+	e.updateMousePointer(ev, false)
+}
+
+// TappedSecondary is called when right or alternative tap is invoked - this is currently ignored.
+func (e *Entry) TappedSecondary(_ *fyne.PointEvent) {
+}
+
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
 // update the existing selection (if shift is held), or start a selection dragging operation.
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
@@ -485,42 +495,51 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, startSelect bool) {
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
+// getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
+// and expanding to the start and end of the whitespace or text underneat the specified position.
+func getTextWhitespaceRegion(row []rune, col int) (int, int) {
+	if len(row) == 0 || col >= len(row) || col < 0 {
+		return -1, -1
+	}
+
+	// maps: " fish 日本語本語日  \t "
+	// into: " ---- ------   "
+	space := func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return ' '
+		}
+		return '-'
+	}
+	toks := strings.Map(space, string(row))
+
+	c := byte(' ')
+	if toks[col] == ' ' {
+		c = byte('-')
+	}
+
+	// LastIndexByte + 1 ensures that the position of the unwanted character 'c' is excluded
+	// +1 also has the added side effect whereby if 'c' isn't found then -1 is snapped to 0
+	start := strings.LastIndexByte(toks[:col], c) + 1
+
+	// IndexByte will find the position of the next unwanted character, this is to be the end
+	// marker for the selection
+	end := strings.IndexByte(toks[col:], c)
+
+	if end == -1 {
+		end = len(toks) // snap end to len(toks) if it results in -1
+	} else {
+		end += col // otherwise include the text slice position
+	}
+	return start, end
+}
+
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
 func (e *Entry) DoubleTapped(ev *fyne.PointEvent) {
 	row := e.textProvider().row(e.CursorRow)
-	start, end := e.CursorColumn, e.CursorColumn+1
-	if start >= len(row) {
-		start = len(row) - 1
-	}
-	if end >= len(row) {
-		end = len(row) - 1
-	}
 
-	if row[start] == ' ' || row[start] == '\t' {
-		// whitespace clicked, select all whitespace (search in both directions for non-whitespace)
-		for ; start > 0; start-- {
-			if row[start-1] != ' ' && row[start-1] != '\t' {
-				break
-			}
-		}
-		for ; end < len(row); end++ {
-			// find first non-whitespace rune
-			if row[end] != ' ' && row[end] != '\t' {
-				break
-			}
-		}
-	} else {
-		// text clicked, select all text (search in both directions for whitespace)
-		for ; start > 0; start-- {
-			if row[start-1] == ' ' || row[start-1] == '\t' {
-				break
-			}
-		}
-		for ; end < len(row); end++ {
-			if row[end] == ' ' || row[end] == '\t' || row[end] == '\r' || row[end] == '\n' {
-				break
-			}
-		}
+	start, end := getTextWhitespaceRegion(row, e.CursorColumn)
+	if start == -1 || end == -1 {
+		return
 	}
 
 	e.Lock()

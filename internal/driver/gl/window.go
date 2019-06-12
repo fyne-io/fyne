@@ -21,7 +21,7 @@ import (
 
 const (
 	scrollSpeed      = 10
-	doubleClickDelay = 500 // ms (minimum interval between clicks for double click detection)
+	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
 )
 
 var (
@@ -631,23 +631,23 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	ev := new(fyne.PointEvent)
 	ev.Position = fyne.NewPos(x, y)
 
-	// Prevent async mouse functions from arriving out of order
-	var mouseWG sync.WaitGroup
+	// Prevent async events from arriving out of order
+	var eventSignal sync.WaitGroup
 
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position
 		mev.Button = convertMouseButton(button)
 		if action == glfw.Press {
-			mouseWG.Add(1)
+			eventSignal.Add(1)
 			go func() {
-				defer mouseWG.Done()
+				defer eventSignal.Done()
 				wid.MouseDown(mev)
 			}()
 		} else if action == glfw.Release {
-			mouseWG.Add(1)
+			eventSignal.Add(1)
 			go func() {
-				defer mouseWG.Done()
+				defer eventSignal.Done()
 				wid.MouseUp(mev)
 			}()
 		}
@@ -676,16 +676,18 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		}
 	}
 
-	// Check for double click on mouse left release
+	// Check for double click/tap
+	doubleTapped := false
 	if action == glfw.Release && button == glfw.MouseButtonLeft {
 		now := time.Now()
 		// we can safely subtract the first "zero" time as it'll be much larger than doubleClickDelay
 		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
 			if wid, ok := co.(fyne.DoubleTappable); ok {
-				mouseWG.Wait() // wait for any mouse events to finish
-				mouseWG.Add(1)
+				doubleTapped = true
+				eventSignal.Wait() // wait for any other events to finish
+				eventSignal.Add(1)
 				go func() {
-					defer mouseWG.Done()
+					defer eventSignal.Done()
 					wid.DoubleTapped(ev)
 				}()
 			}
@@ -693,9 +695,10 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		w.mouseClickTime = now
 	}
 
-	if wid, ok := co.(fyne.Tappable); ok {
+	// Prevent Tapped from triggering if DoubleTapped has been sent
+	if wid, ok := co.(fyne.Tappable); ok && doubleTapped == false {
 		if action == glfw.Release {
-			mouseWG.Wait() // wait for any mouse events to finish
+			eventSignal.Wait() // wait for any other events to finish
 			switch button {
 			case glfw.MouseButtonRight:
 				go wid.TappedSecondary(ev)

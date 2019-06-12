@@ -315,21 +315,20 @@ func TestEntry_Tapped(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("MMM")
 
-	ev := new(desktop.MouseEvent)
-	ev.Button = desktop.LeftMouseButton
-	ev.Position = fyne.NewPos(1, 1)
-	entry.MouseDown(ev)
+	test.Tap(entry)
 	assert.True(t, entry.Focused())
 
 	testCharSize := theme.TextSize()
-	ev.Position = fyne.NewPos(int(float32(testCharSize)*1.5), testCharSize/2) // tap in the middle of the 2nd "M"
-	entry.MouseDown(ev)
+	pos := fyne.NewPos(int(float32(testCharSize)*1.5), testCharSize/2) // tap in the middle of the 2nd "M"
+	ev := &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
 
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
-	ev.Position = fyne.NewPos(int(float32(testCharSize)*2.5), testCharSize/2) // tap in the middle of the 3rd "M"
-	entry.MouseDown(ev)
+	pos = fyne.NewPos(int(float32(testCharSize)*2.5), testCharSize/2) // tap in the middle of the 3rd "M"
+	ev = &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
 
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 2, entry.CursorColumn)
@@ -339,15 +338,13 @@ func TestEntry_Tapped_AfterCol(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("M")
 
-	ev := new(desktop.MouseEvent)
-	ev.Button = desktop.LeftMouseButton
-	ev.Position = fyne.NewPos(1, 1)
-	entry.MouseDown(ev)
+	test.Tap(entry)
 	assert.True(t, entry.Focused())
 
 	testCharSize := theme.TextSize()
-	ev.Position = fyne.NewPos(testCharSize*2, testCharSize/2) // tap after text
-	entry.MouseDown(ev)
+	pos := fyne.NewPos(testCharSize*2, testCharSize/2) // tap after text
+	ev := &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
 
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
@@ -357,18 +354,112 @@ func TestEntry_Tapped_AfterRow(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("M\nM\n")
 
-	ev := new(desktop.MouseEvent)
-	ev.Button = desktop.LeftMouseButton
-	ev.Position = fyne.NewPos(1, 1)
-	entry.MouseDown(ev)
+	test.Tap(entry)
 	assert.True(t, entry.Focused())
 
 	testCharSize := theme.TextSize()
-	ev.Position = fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	entry.MouseDown(ev)
+	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
+	ev := &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
 
 	assert.Equal(t, 2, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
+}
+
+func getClickPosition(e *Entry, str string, row int) *fyne.PointEvent {
+	x := textMinSize(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
+
+	rowHeight := e.textProvider().charMinSize().Height
+	y := theme.Padding() + row*rowHeight + rowHeight/2
+
+	pos := fyne.NewPos(x, y)
+	return &fyne.PointEvent{Position: pos}
+}
+
+func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
+	str := []rune(" fish 日本語日  \t  test 本日本 moose  \t")
+
+	// select invalid (before start)
+	start, end := getTextWhitespaceRegion(str, -1)
+	assert.Equal(t, -1, start)
+	assert.Equal(t, -1, end)
+
+	// select invalid (after end)
+	start, end = getTextWhitespaceRegion(str, len(str))
+	assert.Equal(t, -1, start)
+	assert.Equal(t, -1, end)
+
+	// select the whitespace
+	start, end = getTextWhitespaceRegion(str, 0)
+	assert.Equal(t, 0, start)
+	assert.Equal(t, 1, end)
+
+	// select "fish"
+	start, end = getTextWhitespaceRegion(str, 1)
+	assert.Equal(t, 1, start)
+	assert.Equal(t, 5, end)
+	start, end = getTextWhitespaceRegion(str, 4)
+	assert.Equal(t, 1, start)
+	assert.Equal(t, 5, end)
+
+	// select "日本語日"
+	start, end = getTextWhitespaceRegion(str, 6)
+	assert.Equal(t, 6, start)
+	assert.Equal(t, 10, end)
+	start, end = getTextWhitespaceRegion(str, 9)
+	assert.Equal(t, 6, start)
+	assert.Equal(t, 10, end)
+
+	// select "  \t  "
+	start, end = getTextWhitespaceRegion(str, 10)
+	assert.Equal(t, 10, start)
+	assert.Equal(t, 15, end)
+
+	// select "  \t"
+	start, end = getTextWhitespaceRegion(str, 30)
+	assert.Equal(t, 29, start)
+	assert.Equal(t, len(str), end)
+}
+
+func TestEntry_DoubleTapped(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
+
+	// select the word 'quick'
+	ev := getClickPosition(entry, "The qui", 0)
+	entry.Tapped(ev)
+	entry.DoubleTapped(ev)
+	assert.Equal(t, "quick", entry.selectedText())
+
+	// select the whitespace after 'quick'
+	ev = getClickPosition(entry, "The quick", 0)
+	// add half a ' ' character
+	ev.Position.X += textMinSize(" ", theme.TextSize(), entry.textStyle()).Width / 2
+	entry.Tapped(ev)
+	entry.DoubleTapped(ev)
+	assert.Equal(t, " ", entry.selectedText())
+
+	// select all whitespace after 'jumped'
+	ev = getClickPosition(entry, "jumped  ", 1)
+	entry.Tapped(ev)
+	entry.DoubleTapped(ev)
+	assert.Equal(t, "    ", entry.selectedText())
+}
+
+func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("A\nB\n")
+
+	test.Tap(entry)
+	assert.True(t, entry.Focused())
+
+	testCharSize := theme.TextSize()
+	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
+	ev := &fyne.PointEvent{Position: pos}
+	entry.Tapped(ev)
+	entry.DoubleTapped(ev)
+
+	assert.Equal(t, "", entry.selectedText())
 }
 
 func TestEntry_CursorRow(t *testing.T) {
