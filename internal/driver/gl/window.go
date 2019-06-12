@@ -52,11 +52,13 @@ type window struct {
 	padded     bool
 	visible    bool
 
-	mousePos     fyne.Position
-	mouseDragPos fyne.Position
-	mouseButton  desktop.MouseButton
-	mouseOver    desktop.Hoverable
-	onClosed     func()
+	mousePos        fyne.Position
+	mouseDragged    fyne.Draggable
+	mouseDragOffset fyne.Position
+	mouseDragPos    fyne.Position
+	mouseButton     desktop.MouseButton
+	mouseOver       desktop.Hoverable
+	onClosed        func()
 
 	xpos, ypos    int
 	width, height int
@@ -548,7 +550,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
 
 	cursor := defaultCursor
-	drag, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	obj, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if wid, ok := object.(*widget.Entry); ok {
 			if !wid.ReadOnly {
 				cursor = entryCursor
@@ -557,52 +559,53 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			cursor = hyperlinkCursor
 		}
 
-		_, drag := object.(fyne.Draggable)
 		_, hover := object.(desktop.Hoverable)
-		return drag || hover
+		return hover
 	})
 
 	runOnMainAsync(func() {
 		viewport.SetCursor(cursor)
 	})
 
-	if drag != nil {
+	if obj != nil {
 		ev := new(desktop.MouseEvent)
 		ev.Position = fyne.NewPos(x, y)
 		ev.Button = w.mouseButton
 
-		if obj, ok := drag.(desktop.Hoverable); ok {
-			if obj == w.mouseOver {
-				obj.MouseMoved(ev)
+		if hovered, ok := obj.(desktop.Hoverable); ok {
+			if hovered == w.mouseOver {
+				hovered.MouseMoved(ev)
 			} else {
 				if w.mouseOver != nil {
 					w.mouseOver.MouseOut()
 				}
-				if obj != nil {
-					obj.MouseIn(ev)
+				if hovered != nil {
+					hovered.MouseIn(ev)
 				}
-				w.mouseOver = obj
-			}
-		}
-
-		if w.mouseButton > 0 {
-			if obj, ok := drag.(fyne.Draggable); ok {
-				ev := new(fyne.DragEvent)
-				ev.Position = fyne.NewPos(x, y)
-				ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
-				ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
-				obj.Dragged(ev)
-
-				w.mouseDragPos = w.mousePos
+				w.mouseOver = hovered
 			}
 		}
 	} else if w.mouseOver != nil {
 		w.mouseOver.MouseOut()
 		w.mouseOver = nil
 	}
+
+	if w.mouseDragged != nil {
+		if w.mouseButton > 0 {
+			ev := new(fyne.DragEvent)
+			ev.Position = w.mousePos.Subtract(w.mouseDragOffset)
+			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
+			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
+			w.mouseDragged.Dragged(ev)
+
+			w.mouseDragPos = w.mousePos
+		} else {
+			w.mouseDragged = nil
+		}
+	}
 }
 
-func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
+func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
 	co, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
@@ -664,9 +667,11 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			}
 		}
 	}
-	if _, ok := co.(fyne.Draggable); ok {
+	if wid, ok := co.(fyne.Draggable); ok {
 		if action == glfw.Press {
+			w.mouseDragOffset = w.mousePos.Subtract(ev.Position)
 			w.mouseDragPos = w.mousePos
+			w.mouseDragged = wid
 		}
 	}
 }
