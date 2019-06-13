@@ -51,7 +51,7 @@ type scrollBar struct {
 }
 
 func (s *scrollBar) Dragged(ev *fyne.DragEvent) {
-	s.area.moveBar(ev.DraggedY)
+	s.area.moveBar(ev.DraggedTotal.Y + ev.ElementStartPos.Y)
 }
 
 func (s *scrollBar) CreateRenderer() fyne.WidgetRenderer {
@@ -187,16 +187,22 @@ func (s *scrollBarArea) Move(pos fyne.Position) {
 
 }
 
-func (s *scrollBarArea) moveBar(dy int) {
+func (s *scrollBarArea) moveBar(y int) {
 	render := Renderer(s).(*scrollBarAreaRenderer)
 	barHeight := render.barSizeVertical().Height
 	scrollHeight := s.scroll.Size().Height
 	maxY := scrollHeight - barHeight
 
-	ratio := float32(-dy) / float32(maxY)
-	s.scroll.Scrolled(&fyne.ScrollEvent{
-		DeltaY: int(ratio * float32(s.scroll.Content.Size().Height-scrollHeight)),
-	})
+	if y < 0 {
+		y = 0
+	} else if y > maxY {
+		y = maxY
+	}
+
+	ratio := float32(y) / float32(maxY)
+	s.scroll.Offset.Y = int(ratio * float32(s.scroll.Content.Size().Height-scrollHeight))
+
+	Refresh(s.scroll)
 }
 
 func (s *scrollBarArea) MinSize() fyne.Size {
