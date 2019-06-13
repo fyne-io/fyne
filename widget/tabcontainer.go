@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/theme"
 )
 
@@ -194,11 +195,33 @@ func (t *TabContainer) SetTabLocation(l TabLocation) {
 	r.Refresh()
 }
 
+func (t *TabContainer) mismatchedContent() bool {
+	var hasText, hasIcon bool
+	for _, tab := range t.Items {
+		hasText = hasText || tab.Text != ""
+		hasIcon = hasIcon || tab.Icon != nil
+	}
+
+	mismatch := false
+	for _, tab := range t.Items {
+		if (hasText && tab.Text == "") || (hasIcon && tab.Icon == nil) {
+			mismatch = true
+			break
+		}
+	}
+
+	return mismatch
+}
+
 // NewTabContainer creates a new tab bar widget that allows the user to choose between different visible containers
 func NewTabContainer(items ...*TabItem) *TabContainer {
 	tabs := &TabContainer{baseWidget: baseWidget{}, Items: items}
 
 	Renderer(tabs).Layout(tabs.MinSize())
+	if tabs.mismatchedContent() {
+		internal.LogHint("TabContainer items should all have the same type of content (text, icons or both)")
+	}
+
 	return tabs
 }
 
