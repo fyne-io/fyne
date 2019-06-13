@@ -589,11 +589,11 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			if obj, ok := drag.(fyne.Draggable); ok {
 				ev := new(fyne.DragEvent)
 				ev.Position = fyne.NewPos(x, y)
-				ev.DraggedX = x - w.mouseDragPos.X
-				ev.DraggedY = y - w.mouseDragPos.Y
+				ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
+				ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
 				obj.Dragged(ev)
 
-				w.mouseDragPos = ev.Position
+				w.mouseDragPos = w.mousePos
 			}
 		}
 	} else if w.mouseOver != nil {
@@ -666,7 +666,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 	if _, ok := co.(fyne.Draggable); ok {
 		if action == glfw.Press {
-			w.mouseDragPos = ev.Position
+			w.mouseDragPos = w.mousePos
 		}
 	}
 }
