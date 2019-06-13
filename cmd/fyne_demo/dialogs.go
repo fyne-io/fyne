@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"fyne.io/fyne"
@@ -12,6 +13,7 @@ import (
 // Dialogs loads a window that lists the dialog windows that can be tested.
 func Dialogs(app fyne.App) {
 	win := app.NewWindow("Dialogs")
+	win.Resize(fyne.NewSize(400, 300))
 
 	win.SetContent(widget.NewVBox(
 		widget.NewButton("Info", func() {
@@ -39,9 +41,18 @@ func Dialogs(app fyne.App) {
 				}
 
 				prog.SetValue(1)
+				prog.Hide()
 			}()
 
 			prog.Show()
+		}),
+		widget.NewButton("Custom", func() {
+			content := widget.NewEntry()
+			content.SetPlaceHolder("Type something here")
+			content.OnChanged = func(text string) {
+				fmt.Println("Entered", text)
+			}
+			dialog.ShowCustom("Custom dialog", "Done", content, win)
 		}),
 	))
 	win.Show()

@@ -129,6 +129,7 @@ func (r *popUpRenderer) Refresh() {
 }
 
 func (r *popUpRenderer) ApplyTheme() {
+	r.bg.FillColor = theme.BackgroundColor()
 }
 
 func (r *popUpRenderer) BackgroundColor() color.Color {
