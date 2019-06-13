@@ -157,7 +157,7 @@ func (w *window) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
 	scale := w.canvas.Scale()
 	w.width, w.height = int(float32(size.Width)*scale), int(float32(size.Height)*scale)
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		w.viewport.SetSize(w.width, w.height)
 		w.fitContent()
 	})
