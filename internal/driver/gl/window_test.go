@@ -107,7 +107,12 @@ func TestWindow_HandleDragging(t *testing.T) {
 	// drag event with pressed mouse button
 	w.mouseMoved(w.viewport, 8, 8)
 	assert.Equal(t,
-		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)}, DraggedX: -1, DraggedY: -1},
+		&fyne.DragEvent{
+			PointEvent:   fyne.PointEvent{Position: fyne.NewPos(4, 4)},
+			DraggedTotal: fyne.NewPos(-1, -1),
+			DraggedX:     -1,
+			DraggedY:     -1,
+		},
 		d1.popDragEvent(),
 	)
 	assert.Nil(t, d2.popDragEvent())
@@ -115,7 +120,12 @@ func TestWindow_HandleDragging(t *testing.T) {
 	// drag event going outside the widget's area
 	w.mouseMoved(w.viewport, 16, 8)
 	assert.Equal(t,
-		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4)}, DraggedX: 8, DraggedY: 0},
+		&fyne.DragEvent{
+			PointEvent:   fyne.PointEvent{Position: fyne.NewPos(12, 4)},
+			DraggedTotal: fyne.NewPos(7, -1),
+			DraggedX:     8,
+			DraggedY:     0,
+		},
 		d1.popDragEvent(),
 	)
 	assert.Nil(t, d2.popDragEvent())
@@ -123,7 +133,12 @@ func TestWindow_HandleDragging(t *testing.T) {
 	// drag event entering a _different_ widget's area still for the widget dragged initially
 	w.mouseMoved(w.viewport, 22, 5)
 	assert.Equal(t,
-		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(18, 1)}, DraggedX: 6, DraggedY: -3},
+		&fyne.DragEvent{
+			PointEvent:   fyne.PointEvent{Position: fyne.NewPos(18, 1)},
+			DraggedTotal: fyne.NewPos(13, -4),
+			DraggedX:     6,
+			DraggedY:     -3,
+		},
 		d1.popDragEvent(),
 	)
 	assert.Nil(t, d2.popDragEvent())
@@ -147,7 +162,12 @@ func TestWindow_HandleDragging(t *testing.T) {
 	w.mouseMoved(w.viewport, 22, 7)
 	assert.Nil(t, d1.popDragEvent())
 	assert.Equal(t,
-		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 3)}, DraggedX: 0, DraggedY: 1},
+		&fyne.DragEvent{
+			PointEvent:   fyne.PointEvent{Position: fyne.NewPos(4, 3)},
+			DraggedTotal: fyne.NewPos(0, 1),
+			DraggedX:     0,
+			DraggedY:     1,
+		},
 		d2.popDragEvent(),
 	)
 }
@@ -179,7 +199,12 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	// drag event going outside the widget's area
 	w.mouseMoved(w.viewport, 16, 8)
 	assert.Equal(t,
-		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4)}, DraggedX: 8, DraggedY: 0},
+		&fyne.DragEvent{
+			PointEvent:   fyne.PointEvent{Position: fyne.NewPos(12, 4)},
+			DraggedTotal: fyne.NewPos(8, 0),
+			DraggedX:     8,
+			DraggedY:     0,
+		},
 		dh.popDragEvent(),
 	)
 	assert.Nil(t, dh.popMouseMovedEvent())

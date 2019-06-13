@@ -23,4 +23,5 @@ type ScrollEvent struct {
 type DragEvent struct {
 	PointEvent
 	DraggedX, DraggedY int
+	DraggedTotal Position
 }
