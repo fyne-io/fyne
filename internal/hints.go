@@ -7,6 +7,7 @@ import (
 	"runtime"
 )
 
+// LogHint reports a developer hint that should be followed to improve their app.
 func LogHint(reason string) {
 	log.Println("Fyne hint: ", reason)
 
