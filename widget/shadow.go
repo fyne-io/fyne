@@ -16,15 +16,16 @@ const (
 	shadowTop
 )
 
-func newShadow(typ shadowType) *shadow {
-	return &shadow{typ: typ}
+func newShadow(typ shadowType, depth int) *shadow {
+	return &shadow{typ: typ, depth: depth}
 }
 
 var _ fyne.Widget = (*shadow)(nil)
 
 type shadow struct {
 	baseWidget
-	typ shadowType
+	typ   shadowType
+	depth int
 }
 
 func (s *shadow) CreateRenderer() fyne.WidgetRenderer {
@@ -138,36 +139,36 @@ func (r *shadowRenderer) Destroy() {
 
 func (r *shadowRenderer) Layout(size fyne.Size) {
 	if r.tl != nil {
-		r.tl.Resize(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-		r.tl.Move(fyne.NewPos(-theme.Padding()*2, -theme.Padding()*2))
+		r.tl.Resize(fyne.NewSize(r.s.depth, r.s.depth))
+		r.tl.Move(fyne.NewPos(-r.s.depth, -r.s.depth))
 	}
 	if r.t != nil {
-		r.t.Resize(fyne.NewSize(size.Width, theme.Padding()*2))
-		r.t.Move(fyne.NewPos(0, -theme.Padding()*2))
+		r.t.Resize(fyne.NewSize(size.Width, r.s.depth))
+		r.t.Move(fyne.NewPos(0, -r.s.depth))
 	}
 	if r.tr != nil {
-		r.tr.Resize(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-		r.tr.Move(fyne.NewPos(size.Width, -theme.Padding()*2))
+		r.tr.Resize(fyne.NewSize(r.s.depth, r.s.depth))
+		r.tr.Move(fyne.NewPos(size.Width, -r.s.depth))
 	}
 	if r.r != nil {
-		r.r.Resize(fyne.NewSize(theme.Padding()*2, size.Height))
+		r.r.Resize(fyne.NewSize(r.s.depth, size.Height))
 		r.r.Move(fyne.NewPos(size.Width, 0))
 	}
 	if r.br != nil {
-		r.br.Resize(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+		r.br.Resize(fyne.NewSize(r.s.depth, r.s.depth))
 		r.br.Move(fyne.NewPos(size.Width, size.Height))
 	}
 	if r.b != nil {
-		r.b.Resize(fyne.NewSize(size.Width, theme.Padding()*2))
+		r.b.Resize(fyne.NewSize(size.Width, r.s.depth))
 		r.b.Move(fyne.NewPos(0, size.Height))
 	}
 	if r.bl != nil {
-		r.bl.Resize(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-		r.bl.Move(fyne.NewPos(-theme.Padding()*2, size.Height))
+		r.bl.Resize(fyne.NewSize(r.s.depth, r.s.depth))
+		r.bl.Move(fyne.NewPos(-r.s.depth, size.Height))
 	}
 	if r.l != nil {
-		r.l.Resize(fyne.NewSize(theme.Padding()*2, size.Height))
-		r.l.Move(fyne.NewPos(-theme.Padding()*2, 0))
+		r.l.Resize(fyne.NewSize(r.s.depth, size.Height))
+		r.l.Move(fyne.NewPos(-r.s.depth, 0))
 	}
 }
 

@@ -80,7 +80,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 			objects: []fyne.CanvasObject{bg, p.Content}}
 	}
 
-	shadow := newShadow(shadowAround)
+	shadow := newShadow(shadowAround, theme.Padding()*2)
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 	objects := []fyne.CanvasObject{shadow, bg, p.Content}
 	return &popUpRenderer{popUp: p, shadow: shadow, bg: bg, objects: objects}

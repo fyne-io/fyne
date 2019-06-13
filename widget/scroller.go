@@ -274,8 +274,8 @@ func (s *ScrollContainer) Hide() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	bar := newScrollBar(s)
-	topShadow := newShadow(shadowBottom)
-	bottomShadow := newShadow(shadowTop)
+	topShadow := newShadow(shadowBottom, theme.Padding()*2)
+	bottomShadow := newShadow(shadowTop, theme.Padding()*2)
 	return &scrollRenderer{
 		objects:      []fyne.CanvasObject{s.Content, bar, topShadow, bottomShadow},
 		scroll:       s,

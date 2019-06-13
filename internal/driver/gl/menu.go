@@ -15,6 +15,7 @@ type menuBarAction struct {
 // ToolbarObject gets a button to render this ToolbarAction
 func (m *menuBarAction) ToolbarObject() fyne.CanvasObject {
 	button := widget.NewButton(m.Label, nil)
+	button.HideShadow = true
 
 	button.OnTapped = func() {
 		pos := button.Position().Add(fyne.NewPos(0, button.Size().Height))
