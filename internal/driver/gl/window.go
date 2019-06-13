@@ -567,7 +567,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		viewport.SetCursor(cursor)
 	})
 
-	if obj != nil {
+	if obj != nil && !w.objIsDragged(obj) {
 		ev := new(desktop.MouseEvent)
 		ev.Position = fyne.NewPos(x, y)
 		ev.Button = w.mouseButton
@@ -576,18 +576,12 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			if hovered == w.mouseOver {
 				hovered.MouseMoved(ev)
 			} else {
-				if w.mouseOver != nil {
-					w.mouseOver.MouseOut()
-				}
-				if hovered != nil {
-					hovered.MouseIn(ev)
-				}
-				w.mouseOver = hovered
+				w.mouseOut()
+				w.mouseIn(hovered, ev)
 			}
 		}
-	} else if w.mouseOver != nil {
-		w.mouseOver.MouseOut()
-		w.mouseOver = nil
+	} else if w.mouseOver != nil && !w.objIsDragged(w.mouseOver) {
+		w.mouseOut()
 	}
 
 	if w.mouseDragged != nil {
@@ -599,9 +593,29 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			w.mouseDragged.Dragged(ev)
 
 			w.mouseDragPos = w.mousePos
-		} else {
-			w.mouseDragged = nil
 		}
+	}
+}
+
+func (w *window) objIsDragged(obj interface{}) bool {
+	if w.mouseDragged != nil && obj != nil {
+		draggedObj, _ := obj.(fyne.Draggable)
+		return draggedObj == w.mouseDragged
+	}
+	return false
+}
+
+func (w *window) mouseIn(obj desktop.Hoverable, ev *desktop.MouseEvent) {
+	if obj != nil {
+		obj.MouseIn(ev)
+	}
+	w.mouseOver = obj
+}
+
+func (w *window) mouseOut() {
+	if w.mouseOver != nil {
+		w.mouseOver.MouseOut()
+		w.mouseOver = nil
 	}
 }
 
@@ -673,6 +687,12 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			w.mouseDragPos = w.mousePos
 			w.mouseDragged = wid
 		}
+	}
+	if action == glfw.Release {
+		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(co) {
+			w.mouseOut()
+		}
+		w.mouseDragged = nil
 	}
 }
 

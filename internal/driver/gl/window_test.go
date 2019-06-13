@@ -152,6 +152,62 @@ func TestWindow_HandleDragging(t *testing.T) {
 	)
 }
 
+func TestWindow_HoverableOnDragging(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
+	dh.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(dh)
+
+	// wait for canvas to get its size right
+	for s := w.Canvas().Size(); s != fyne.NewSize(18, 18); s = w.Canvas().Size() {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	w.mouseMoved(w.viewport, 8, 8)
+	assert.Equal(t,
+		&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)}},
+		dh.popMouseInEvent(),
+	)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 8, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)}, DraggedX: 0, DraggedY: 0},
+		dh.popDragEvent(),
+	)
+
+	// drag event going outside the widget's area
+	w.mouseMoved(w.viewport, 16, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4)}, DraggedX: 8, DraggedY: 0},
+		dh.popDragEvent(),
+	)
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+
+	// drag event going inside the widget's area again
+	w.mouseMoved(w.viewport, 8, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)}, DraggedX: -8, DraggedY: 0},
+		dh.popDragEvent(),
+	)
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+
+	// no hover events on end of drag event
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+
+	// mouseOut on mouse release after dragging out of area
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 8, 8)
+	w.mouseMoved(w.viewport, 16, 8)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	assert.NotNil(t, dh.popMouseOutEvent())
+}
+
 func TestWindow_SetTitle(t *testing.T) {
 	w := d.CreateWindow("Test")
 
@@ -348,6 +404,12 @@ func (d *draggable) Dragged(e *fyne.DragEvent) {
 func (d *draggable) popDragEvent() (e interface{}) {
 	e, d.events = pop(d.events)
 	return
+}
+
+type draggableHoverableObject struct {
+	*canvas.Rectangle
+	draggable
+	hoverable
 }
 
 func pop(s []interface{}) (interface{}, []interface{}) {
