@@ -54,6 +54,7 @@ type window struct {
 
 	mousePos             fyne.Position
 	mouseDragged         fyne.Draggable
+	mouseDraggedStartPos fyne.Position
 	mouseDragStartPos    fyne.Position
 	mouseDragStartRelPos fyne.Position
 	mouseDragPos         fyne.Position
@@ -592,6 +593,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			ev.Position = w.mouseDragStartRelPos.Add(ev.DraggedTotal)
 			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
 			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
+			ev.ElementStartPos = w.mouseDraggedStartPos
 			w.mouseDragged.Dragged(ev)
 
 			w.mouseDragPos = w.mousePos
@@ -689,6 +691,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			w.mouseDragStartRelPos = ev.Position
 			w.mouseDragPos = w.mousePos
 			w.mouseDragged = wid
+			w.mouseDraggedStartPos = co.Position()
 		}
 	}
 	if action == glfw.Release {

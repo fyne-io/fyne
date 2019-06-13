@@ -163,10 +163,11 @@ func TestWindow_HandleDragging(t *testing.T) {
 	assert.Nil(t, d1.popDragEvent())
 	assert.Equal(t,
 		&fyne.DragEvent{
-			PointEvent:   fyne.PointEvent{Position: fyne.NewPos(4, 3)},
-			DraggedTotal: fyne.NewPos(0, 1),
-			DraggedX:     0,
-			DraggedY:     1,
+			PointEvent:      fyne.PointEvent{Position: fyne.NewPos(4, 3)},
+			DraggedTotal:    fyne.NewPos(0, 1),
+			DraggedX:        0,
+			DraggedY:        1,
+			ElementStartPos: fyne.NewPos(14, 0),
 		},
 		d2.popDragEvent(),
 	)
@@ -192,7 +193,12 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 8, 8)
 	assert.Equal(t,
-		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)}, DraggedX: 0, DraggedY: 0},
+		&fyne.DragEvent{
+			PointEvent:      fyne.PointEvent{Position: fyne.NewPos(4, 4)},
+			DraggedX:        0,
+			DraggedY:        0,
+			ElementStartPos: fyne.NewPos(4, 4),
+		},
 		dh.popDragEvent(),
 	)
 
@@ -200,10 +206,11 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	w.mouseMoved(w.viewport, 16, 8)
 	assert.Equal(t,
 		&fyne.DragEvent{
-			PointEvent:   fyne.PointEvent{Position: fyne.NewPos(12, 4)},
-			DraggedTotal: fyne.NewPos(8, 0),
-			DraggedX:     8,
-			DraggedY:     0,
+			PointEvent:      fyne.PointEvent{Position: fyne.NewPos(12, 4)},
+			DraggedTotal:    fyne.NewPos(8, 0),
+			DraggedX:        8,
+			DraggedY:        0,
+			ElementStartPos: fyne.NewPos(4, 4),
 		},
 		dh.popDragEvent(),
 	)
@@ -213,7 +220,12 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	// drag event going inside the widget's area again
 	w.mouseMoved(w.viewport, 8, 8)
 	assert.Equal(t,
-		&fyne.DragEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)}, DraggedX: -8, DraggedY: 0},
+		&fyne.DragEvent{
+			PointEvent:      fyne.PointEvent{Position: fyne.NewPos(4, 4)},
+			DraggedX:        -8,
+			DraggedY:        0,
+			ElementStartPos: fyne.NewPos(4, 4),
+		},
 		dh.popDragEvent(),
 	)
 	assert.Nil(t, dh.popMouseInEvent())
