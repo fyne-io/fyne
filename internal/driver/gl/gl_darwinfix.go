@@ -15,8 +15,6 @@ import "C"
 
 import (
 	"unsafe"
-
-	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
 // This fixes the initially blank window on macOS Mojave
@@ -31,12 +29,9 @@ func updateGLContext(w *window) {
 
 // This forces a redraw of the window as we resize
 func updateWinSize(w *window) {
-	w.viewport.MakeContextCurrent()
+	w.runWithContext(func() {
+		w.canvas.paint(w.canvas.Size())
 
-	size := w.canvas.Size()
-	w.canvas.paint(size)
-
-	w.viewport.SwapBuffers()
-	glfw.DetachCurrentContext()
-
+		w.viewport.SwapBuffers()
+	})
 }

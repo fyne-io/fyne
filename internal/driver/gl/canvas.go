@@ -20,9 +20,10 @@ var _ fyne.Canvas = (*glCanvas)(nil)
 
 type glCanvas struct {
 	sync.RWMutex
-	window           *window
 	content, overlay fyne.CanvasObject
 	menu             *widget.Toolbar
+	padded           bool
+	size             fyne.Size
 	focused          fyne.Focusable
 	focusMgr         *app.FocusManager
 
@@ -40,6 +41,7 @@ type glCanvas struct {
 	dirtyMutex   *sync.Mutex
 	minSizes     map[fyne.CanvasObject]fyne.Size
 	refreshQueue chan fyne.CanvasObject
+	context      withContext
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
@@ -79,8 +81,8 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 	c.Unlock()
 
-	content.Resize(c.window.contentSize(c.Size()))
-	content.Move(c.window.contentPos())
+	newSize := c.size.Union(c.canvasSize(c.content.MinSize()))
+	c.Resize(newSize)
 	c.minSizes = map[fyne.CanvasObject]fyne.Size{}
 
 	c.setDirty(true)
@@ -102,6 +104,16 @@ func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
 		c.overlay.Resize(c.Size())
 	}
 	c.setDirty(true)
+}
+
+func (c *glCanvas) Padded() bool {
+	return c.padded
+}
+
+func (c *glCanvas) SetPadded(padded bool) {
+	c.padded = padded
+
+	c.content.Move(c.contentPos())
 }
 
 func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
@@ -136,13 +148,26 @@ func (c *glCanvas) Focused() fyne.Focusable {
 	return c.focused
 }
 
+func (c *glCanvas) Resize(size fyne.Size) {
+	c.size = size
+	c.content.Resize(c.contentSize(size))
+	c.content.Move(c.contentPos())
+
+	if c.overlay != nil {
+		c.overlay.Resize(size)
+	}
+	if c.menu != nil {
+		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
+	}
+	c.Refresh(c.content)
+}
+
 func (c *glCanvas) Size() fyne.Size {
-	var w, h = c.window.viewport.GetSize()
+	return c.size
+}
 
-	width := unscaleInt(c, int(w))
-	height := unscaleInt(c, int(h))
-
-	return fyne.NewSize(width, height)
+func (c *glCanvas) MinSize() fyne.Size {
+	return c.canvasSize(c.content.MinSize())
 }
 
 func (c *glCanvas) Scale() float32 {
@@ -250,7 +275,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 			scrollY := textureScaleInt(c, pos.Y)
 			scrollWidth := textureScaleInt(c, obj.Size().Width)
 			scrollHeight := textureScaleInt(c, obj.Size().Height)
-			_, pixHeight := c.window.viewport.GetFramebufferSize()
+			pixHeight := textureScaleInt(c, c.size.Height)
 			gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
 			gl.Enable(gl.SCISSOR_TEST)
 		}
@@ -305,7 +330,7 @@ func (c *glCanvas) setupThemeListener() {
 				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
 			}
 
-			c.window.SetPadded(c.window.padded) // refresh the padding for potential theme differences
+			c.SetPadded(c.padded) // refresh the padding for potential theme differences
 		}
 	}()
 }
@@ -318,7 +343,7 @@ func (c *glCanvas) buildMenuBar(m *fyne.MainMenu) {
 	if hasNativeMenu() {
 		setupNativeMenu(m)
 	} else {
-		c.setMenuBar(buildMenuBar(m, c.window))
+		c.setMenuBar(buildMenuBar(m, c))
 	}
 }
 
@@ -344,9 +369,38 @@ func (c *glCanvas) menuHeight() int {
 	}
 }
 
-func newCanvas(win *window) *glCanvas {
-	c := &glCanvas{window: win, scale: 1.0}
+// canvasSize computes the needed canvas size for the given content size
+func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
+	canvasSize := contentSize.Add(fyne.NewSize(0, c.menuHeight()))
+	if c.Padded() {
+		pad := theme.Padding() * 2
+		canvasSize = canvasSize.Add(fyne.NewSize(pad, pad))
+	}
+	return canvasSize
+}
+
+func (c *glCanvas) contentSize(canvasSize fyne.Size) fyne.Size {
+	contentSize := fyne.NewSize(canvasSize.Width, canvasSize.Height-c.menuHeight())
+	if c.Padded() {
+		pad := theme.Padding() * 2
+		contentSize = contentSize.Subtract(fyne.NewSize(pad, pad))
+	}
+	return contentSize
+}
+
+func (c *glCanvas) contentPos() fyne.Position {
+	contentPos := fyne.NewPos(0, c.menuHeight())
+	if c.Padded() {
+		contentPos = contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
+	}
+	return contentPos
+}
+
+func newCanvas() *glCanvas {
+	c := &glCanvas{scale: 1.0}
 	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
+	c.padded = true
+
 	c.focusMgr = app.NewFocusManager(c)
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
 	c.dirtyMutex = &sync.Mutex{}

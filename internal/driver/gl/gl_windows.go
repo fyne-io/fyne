@@ -2,7 +2,6 @@ package gl
 
 import (
 	"github.com/go-gl/gl/v3.2-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
 func updateGLContext(w *window) {
@@ -17,12 +16,10 @@ func updateGLContext(w *window) {
 
 // This forces a redraw of the window as we resize
 func updateWinSize(w *window) {
-	w.viewport.MakeContextCurrent()
-	updateGLContext(w)
+	w.runWithContext(func() {
+		updateGLContext(w)
 
-	size := w.canvas.Size()
-	w.canvas.paint(size)
-
-	w.viewport.SwapBuffers()
-	glfw.DetachCurrentContext()
+		w.canvas.paint(w.canvas.Size())
+		w.viewport.SwapBuffers()
+	})
 }

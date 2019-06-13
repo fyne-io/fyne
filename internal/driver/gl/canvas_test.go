@@ -29,13 +29,13 @@ func TestGlCanvas_NilContent(t *testing.T) {
 }
 
 func Test_glCanvas_SetContent(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	var menuHeight int
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
 		menuHeight = widget.NewToolbar(widget.NewToolbarAction(theme.ContentCutIcon(), func() {})).MinSize().Height
 	}
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tests := []struct {
 		name               string
 		padding            bool
@@ -44,9 +44,9 @@ func Test_glCanvas_SetContent(t *testing.T) {
 		expectedMenuHeight int
 	}{
 		{"window without padding", false, false, 0, 0},
-		{"window with padding", true, false, 4, 0},
+		{"window with padding", true, false, theme.Padding(), 0},
 		{"window with menu without padding", false, true, 0, menuHeight},
-		{"window with menu and padding", true, true, 4, menuHeight},
+		{"window with menu and padding", true, true, theme.Padding(), menuHeight},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,15 +57,10 @@ func Test_glCanvas_SetContent(t *testing.T) {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
 			}
 			content := canvas.NewCircle(color.Black)
-			w.SetContent(content)
-			w.Resize(fyne.NewSize(100, 100))
-			c := w.Canvas()
 			canvasSize := 100
-
-			// wait for canvas to get its size right
-			for w.canvas.Size().Width != canvasSize {
-				time.Sleep(time.Millisecond * 10)
-			}
+			w.SetContent(content)
+			w.Resize(fyne.NewSize(canvasSize, canvasSize))
+			c := w.Canvas()
 
 			newContent := canvas.NewCircle(color.White)
 			assert.Equal(t, fyne.NewPos(0, 0), newContent.Position())
@@ -129,10 +124,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
-	// wait for canvas to get its size right
-	for c.Size() != oldCanvasSize {
-		time.Sleep(time.Millisecond * 10)
-	}
+	w.Resize(oldCanvasSize)
 
 	// child size change affects ancestors up to scroll
 	oldCanvasSize = c.Size()
@@ -173,10 +165,7 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 		2*leftColScroll.MinSize().Width+3*theme.Padding(),
 		leftColScroll.MinSize().Height+2*theme.Padding(),
 	)
-	// wait for canvas to get its size right
-	for c.Size() != oldCanvasSize {
-		time.Sleep(time.Millisecond * 10)
-	}
+	w.Resize(oldCanvasSize)
 
 	oldLeftColSize := leftCol.Size()
 	oldLeftScrollSize := leftColScroll.Size()
@@ -201,8 +190,8 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 
 func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
+	w.ignoreResize = true // for some reason the test is causing a WM resize event
 	c := w.Canvas()
-	c.SetScale(1)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -217,10 +206,7 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
-	// wait for canvas to get its size right
-	for c.Size() != oldCanvasSize {
-		time.Sleep(time.Millisecond * 10)
-	}
+	assert.Equal(t, oldCanvasSize, c.Size())
 
 	oldLeftObj1Size := leftObj1.Size()
 	oldRightObj1Size := rightObj1.Size()
