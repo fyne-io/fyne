@@ -7,7 +7,6 @@ import (
 	"os"
 	"runtime"
 	"strconv"
-	"sync"
 	"time"
 
 	"fyne.io/fyne"
@@ -631,25 +630,14 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	ev := new(fyne.PointEvent)
 	ev.Position = fyne.NewPos(x, y)
 
-	// Prevent async events from arriving out of order
-	var eventSignal sync.WaitGroup
-
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position
 		mev.Button = convertMouseButton(button)
 		if action == glfw.Press {
-			eventSignal.Add(1)
-			go func() {
-				defer eventSignal.Done()
-				wid.MouseDown(mev)
-			}()
+			go wid.MouseDown(mev)
 		} else if action == glfw.Release {
-			eventSignal.Add(1)
-			go func() {
-				defer eventSignal.Done()
-				wid.MouseUp(mev)
-			}()
+			go wid.MouseUp(mev)
 		}
 	}
 
@@ -684,12 +672,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
 			if wid, ok := co.(fyne.DoubleTappable); ok {
 				doubleTapped = true
-				eventSignal.Wait() // wait for any other events to finish
-				eventSignal.Add(1)
-				go func() {
-					defer eventSignal.Done()
-					wid.DoubleTapped(ev)
-				}()
+				go wid.DoubleTapped(ev)
 			}
 		}
 		w.mouseClickTime = now
@@ -698,7 +681,6 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	// Prevent Tapped from triggering if DoubleTapped has been sent
 	if wid, ok := co.(fyne.Tappable); ok && doubleTapped == false {
 		if action == glfw.Release {
-			eventSignal.Wait() // wait for any other events to finish
 			switch button {
 			case glfw.MouseButtonRight:
 				go wid.TappedSecondary(ev)
