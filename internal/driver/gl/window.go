@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	scrollSpeed = 10
+	scrollSpeed      = 10
+	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
 )
 
 var (
@@ -52,11 +53,12 @@ type window struct {
 	padded     bool
 	visible    bool
 
-	mousePos     fyne.Position
-	mouseDragPos fyne.Position
-	mouseButton  desktop.MouseButton
-	mouseOver    desktop.Hoverable
-	onClosed     func()
+	mousePos       fyne.Position
+	mouseDragPos   fyne.Position
+	mouseButton    desktop.MouseButton
+	mouseOver      desktop.Hoverable
+	mouseClickTime time.Time
+	onClosed       func()
 
 	xpos, ypos    int
 	width, height int
@@ -654,7 +656,23 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			w.canvas.Focus(wid)
 		}
 	}
-	if wid, ok := co.(fyne.Tappable); ok {
+
+	// Check for double click/tap
+	doubleTapped := false
+	if action == glfw.Release && button == glfw.MouseButtonLeft {
+		now := time.Now()
+		// we can safely subtract the first "zero" time as it'll be much larger than doubleClickDelay
+		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
+			if wid, ok := co.(fyne.DoubleTappable); ok {
+				doubleTapped = true
+				go wid.DoubleTapped(ev)
+			}
+		}
+		w.mouseClickTime = now
+	}
+
+	// Prevent Tapped from triggering if DoubleTapped has been sent
+	if wid, ok := co.(fyne.Tappable); ok && doubleTapped == false {
 		if action == glfw.Release {
 			switch button {
 			case glfw.MouseButtonRight:
