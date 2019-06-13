@@ -75,10 +75,10 @@ func Layout(app fyne.App) {
 	gridButton := widget.NewButton("Move Tabs", nil)
 
 	t := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Border", theme.ConfirmIcon(), makeBorderLayout(borderButton)),
+		widget.NewTabItemWithIcon("Border", theme.ViewFullScreenIcon(), makeBorderLayout(borderButton)),
 		widget.NewTabItemWithIcon("Box", theme.FolderIcon(), makeBoxLayout(boxButton)),
-		widget.NewTabItem("Fixed Grid", makeFixedGridLayout(fixedGridButton)),
-		widget.NewTabItem("Grid", makeGridLayout(gridButton)),
+		widget.NewTabItemWithIcon("Fixed Grid", theme.ContentAddIcon(), makeFixedGridLayout(fixedGridButton)),
+		widget.NewTabItemWithIcon("Grid", theme.ViewRestoreIcon(), makeGridLayout(gridButton)),
 	)
 	w.SetContent(t)
 
