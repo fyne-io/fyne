@@ -287,7 +287,7 @@ func TestScrollBar_Dragged_Limit(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	scrollBar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
-	// Scroll over limit
+	// Drag over limit
 	dragEvent := fyne.DragEvent{DraggedY: 2000}
 	dragEvent.Position = fyne.NewPos(10, 10)
 
@@ -295,7 +295,7 @@ func TestScrollBar_Dragged_Limit(t *testing.T) {
 	scrollBar.Dragged(&dragEvent)
 	assert.Equal(t, 900, scroll.Offset.Y)
 
-	// Scroll again
+	// Drag again
 	dragEvent = fyne.DragEvent{DraggedY: 100}
 	dragEvent.Position = fyne.NewPos(10, 90)
 
@@ -312,7 +312,7 @@ func TestScrollBar_Dragged_BackLimit(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	scrollBar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
-	// Scroll over back limit
+	// Drag over back limit
 	dragEvent := fyne.DragEvent{DraggedY: -1000}
 	dragEvent.Position = fyne.NewPos(10, 10)
 
