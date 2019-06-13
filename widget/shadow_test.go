@@ -11,25 +11,27 @@ import (
 )
 
 func TestShadow_TopShadow(t *testing.T) {
-	s := newShadow(shadowTop)
+	shadowWidth := 2 * theme.Padding()
+	s := newShadow(shadowTop, shadowWidth)
 	r := Renderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
 	assert.Equal(t, []fyne.CanvasObject{r.t}, r.Objects())
-	assert.Equal(t, fyne.NewSize(100, 2*theme.Padding()), r.t.Size())
-	assert.Equal(t, fyne.NewPos(0, -2*theme.Padding()), r.t.Position())
+	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.t.Size())
+	assert.Equal(t, fyne.NewPos(0, -shadowWidth), r.t.Position())
 	assert.Equal(t, canvas.GradientDirectionVertical, r.t.Direction)
 	assert.Equal(t, color.Transparent, r.t.StartColor)
 	assert.Equal(t, theme.ShadowColor(), r.t.EndColor)
 }
 
 func TestShadow_BottomShadow(t *testing.T) {
-	s := newShadow(shadowBottom)
+	shadowWidth := 2 * theme.Padding()
+	s := newShadow(shadowBottom, shadowWidth)
 	r := Renderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
 	assert.Equal(t, []fyne.CanvasObject{r.b}, r.Objects())
-	assert.Equal(t, fyne.NewSize(100, 2*theme.Padding()), r.b.Size())
+	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.b.Size())
 	assert.Equal(t, fyne.NewPos(0, 100), r.b.Position())
 	assert.Equal(t, canvas.GradientDirectionVertical, r.b.Direction)
 	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
@@ -37,13 +39,13 @@ func TestShadow_BottomShadow(t *testing.T) {
 }
 
 func TestShadow_AroundShadow(t *testing.T) {
-	s := newShadow(shadowAround)
+	shadowWidth := 2 * theme.Padding()
+	s := newShadow(shadowAround, shadowWidth)
 	r := Renderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
 	assert.Equal(t, []fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l}, r.Objects())
 
-	shadowWidth := 2 * theme.Padding()
 	cornerSize := fyne.NewSize(shadowWidth, shadowWidth)
 	horizontalSize := fyne.NewSize(100, shadowWidth)
 	verticalSize := fyne.NewSize(shadowWidth, 100)
@@ -102,8 +104,9 @@ func TestShadow_AroundShadow(t *testing.T) {
 }
 
 func TestShadow_ApplyTheme(t *testing.T) {
+	shadowWidth := 2 * theme.Padding()
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-	s := newShadow(shadowAround)
+	s := newShadow(shadowAround, shadowWidth)
 	r := Renderer(s).(*shadowRenderer)
 	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
 
@@ -113,9 +116,9 @@ func TestShadow_ApplyTheme(t *testing.T) {
 }
 
 func TestShadow_BackgroundColor(t *testing.T) {
-	assert.Equal(t, color.Transparent, Renderer(newShadow(shadowAround)).BackgroundColor())
+	assert.Equal(t, color.Transparent, Renderer(newShadow(shadowAround, theme.Padding())).BackgroundColor())
 }
 
 func TestShadow_MinSize(t *testing.T) {
-	assert.Equal(t, fyne.NewSize(0, 0), newShadow(shadowAround).MinSize())
+	assert.Equal(t, fyne.NewSize(0, 0), newShadow(shadowAround, theme.Padding()).MinSize())
 }
