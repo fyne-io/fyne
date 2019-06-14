@@ -422,18 +422,6 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 
 	newWidth, newHeight := w.screenSize(w.canvas.size)
 	w.viewport.SetSize(newWidth, newHeight)
-
-	go func() {
-		// attempt the resizing until it works... (Gnome and others don't support resize whist moving)
-		for ww, wh := viewport.GetSize(); ww != newWidth || wh != newHeight; {
-			time.Sleep(time.Second / 10)
-			runOnMain(func() {
-				w.viewport.SetSize(newWidth, newHeight)
-				ww, wh = viewport.GetSize()
-			})
-		}
-		w.ignoreResize = false
-	}()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
