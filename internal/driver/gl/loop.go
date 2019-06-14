@@ -50,12 +50,6 @@ func runOnMain(f func()) {
 	}
 }
 
-func runOnMainAsync(f func()) {
-	go func() {
-		funcQueue <- funcData{f: f, done: nil}
-	}()
-}
-
 func (d *gLDriver) runGL() {
 	fps := time.NewTicker(time.Second / 60)
 	runMutex.Lock()

@@ -70,7 +70,7 @@ func (w *window) Title() string {
 
 func (w *window) SetTitle(title string) {
 	w.title = title
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		w.viewport.SetTitle(title)
 	})
 }
@@ -114,7 +114,7 @@ func (w *window) centerOnScreen() {
 		return
 	}
 
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		viewWidth, viewHeight := w.viewport.GetSize()
 
 		// get window dimensions in pixels
@@ -145,7 +145,7 @@ func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
 }
 
 func (w *window) RequestFocus() {
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		err := w.viewport.Focus()
 		if err != nil {
 			fyne.LogError("Error requesting focus", err)
@@ -158,7 +158,9 @@ func (w *window) Resize(size fyne.Size) {
 	scale := w.canvas.Scale()
 	w.width, w.height = int(float32(size.Width)*scale), int(float32(size.Height)*scale)
 	runOnMain(func() {
+		w.ignoreResize = true
 		w.viewport.SetSize(w.width, w.height)
+		w.ignoreResize = false
 		w.fitContent()
 	})
 }
@@ -226,6 +228,7 @@ func (w *window) fitContent() {
 		return
 	}
 
+	w.ignoreResize = true
 	minWidth, minHeight := w.minSizeOnScreen()
 	if w.width < minWidth || w.height < minHeight {
 		if w.width < minWidth {
@@ -241,6 +244,7 @@ func (w *window) fitContent() {
 	} else {
 		w.viewport.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
 	}
+	w.ignoreResize = false
 }
 
 func (w *window) SetOnClosed(closed func()) {
@@ -306,7 +310,7 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) Show() {
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		w.visible = true
 		w.viewport.Show()
 
@@ -324,7 +328,7 @@ func (w *window) Show() {
 }
 
 func (w *window) Hide() {
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		w.viewport.Hide()
 		w.visible = false
 
@@ -373,7 +377,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 
 	w.canvas.SetContent(content)
 	// show top canvas element
-	if w.visible && w.canvas.Content() != nil {
+	if w.visible {
 		w.canvas.Content().Show()
 	}
 
@@ -417,7 +421,6 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	w.canvas.SetScale(newScale)
 
 	// this can trigger resize events that we need to ignore
-	w.ignoreResize = true
 	w.fitContent()
 
 	newWidth, newHeight := w.screenSize(w.canvas.size)
@@ -501,7 +504,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		return drag || hover
 	})
 
-	runOnMainAsync(func() {
+	runOnMain(func() {
 		viewport.SetCursor(cursor)
 	})
 
