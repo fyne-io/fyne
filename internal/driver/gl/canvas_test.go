@@ -74,7 +74,6 @@ func Test_glCanvas_SetContent(t *testing.T) {
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	c := w.Canvas()
-	c.SetScale(1)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -87,12 +86,10 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	rightCol := widget.NewVBox(rightObj1, rightObj2)
 	content := widget.NewHBox(leftCol, rightCol)
 	w.SetContent(content)
+	w.ignoreResize = true
 
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
-	// wait for canvas to get its size right
-	for c.Size() != oldCanvasSize {
-		time.Sleep(time.Millisecond * 10)
-	}
+	assert.Equal(t, oldCanvasSize, c.Size())
 
 	leftObj1.SetMinSize(fyne.NewSize(60, 60))
 	canvas.Refresh(leftObj1)
@@ -102,6 +99,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 
 	expectedCanvasSize := oldCanvasSize.Add(fyne.NewSize(10, 10))
 	assert.Equal(t, expectedCanvasSize, c.Size())
+	w.ignoreResize = false
 }
 
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {

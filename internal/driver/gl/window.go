@@ -504,10 +504,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		return drag || hover
 	})
 
-	runOnMain(func() {
-		viewport.SetCursor(cursor)
-	})
-
+	viewport.SetCursor(cursor)
 	if drag != nil {
 		ev := new(desktop.MouseEvent)
 		ev.Position = fyne.NewPos(x, y)
