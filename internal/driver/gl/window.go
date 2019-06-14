@@ -410,6 +410,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	newScale := w.detectScale()
 
 	if scale == newScale {
+		forceWindowRefresh(w)
 		return
 	}
 
@@ -449,7 +450,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-	updateWinSize(w)
+	forceWindowRefresh(w)
 	w.canvas.setDirty(true)
 }
 

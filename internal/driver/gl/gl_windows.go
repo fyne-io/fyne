@@ -14,8 +14,8 @@ func updateGLContext(w *window) {
 	gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
 }
 
-// This forces a redraw of the window as we resize
-func updateWinSize(w *window) {
+// This forces a redraw of the window as we resize or move
+func forceWindowRefresh(w *window) {
 	w.runWithContext(func() {
 		updateGLContext(w)
 
