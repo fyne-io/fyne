@@ -10,8 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var shadowWidth = 5
+
 func TestShadow_TopShadow(t *testing.T) {
-	shadowWidth := 2 * theme.Padding()
 	s := newShadow(shadowTop, shadowWidth)
 	r := Renderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
@@ -25,7 +26,6 @@ func TestShadow_TopShadow(t *testing.T) {
 }
 
 func TestShadow_BottomShadow(t *testing.T) {
-	shadowWidth := 2 * theme.Padding()
 	s := newShadow(shadowBottom, shadowWidth)
 	r := Renderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
@@ -39,7 +39,6 @@ func TestShadow_BottomShadow(t *testing.T) {
 }
 
 func TestShadow_AroundShadow(t *testing.T) {
-	shadowWidth := 2 * theme.Padding()
 	s := newShadow(shadowAround, shadowWidth)
 	r := Renderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
@@ -53,7 +52,8 @@ func TestShadow_AroundShadow(t *testing.T) {
 	assert.Equal(t, cornerSize, r.tl.Size())
 	assert.Equal(t, fyne.NewPos(-shadowWidth, -shadowWidth), r.tl.Position())
 	assert.Equal(t, canvas.GradientDirectionCircular, r.tl.Direction)
-	assert.Equal(t, fyne.NewPos(shadowWidth/2, shadowWidth/2), r.tl.CenterOffset)
+	assert.Equal(t, 0.5, r.tl.CenterOffsetX)
+	assert.Equal(t, 0.5, r.tl.CenterOffsetY)
 	assert.Equal(t, theme.ShadowColor(), r.tl.StartColor)
 	assert.Equal(t, color.Transparent, r.tl.EndColor)
 
@@ -66,7 +66,8 @@ func TestShadow_AroundShadow(t *testing.T) {
 	assert.Equal(t, cornerSize, r.tr.Size())
 	assert.Equal(t, fyne.NewPos(100, -shadowWidth), r.tr.Position())
 	assert.Equal(t, canvas.GradientDirectionCircular, r.tr.Direction)
-	assert.Equal(t, fyne.NewPos(-shadowWidth/2, shadowWidth/2), r.tr.CenterOffset)
+	assert.Equal(t, -0.5, r.tr.CenterOffsetX)
+	assert.Equal(t, 0.5, r.tr.CenterOffsetY)
 	assert.Equal(t, theme.ShadowColor(), r.tr.StartColor)
 	assert.Equal(t, color.Transparent, r.tr.EndColor)
 
@@ -79,7 +80,8 @@ func TestShadow_AroundShadow(t *testing.T) {
 	assert.Equal(t, cornerSize, r.br.Size())
 	assert.Equal(t, fyne.NewPos(100, 100), r.br.Position())
 	assert.Equal(t, canvas.GradientDirectionCircular, r.br.Direction)
-	assert.Equal(t, fyne.NewPos(-shadowWidth/2, -shadowWidth/2), r.br.CenterOffset)
+	assert.Equal(t, -0.5, r.br.CenterOffsetX)
+	assert.Equal(t, -0.5, r.br.CenterOffsetY)
 	assert.Equal(t, theme.ShadowColor(), r.br.StartColor)
 	assert.Equal(t, color.Transparent, r.br.EndColor)
 
@@ -92,7 +94,8 @@ func TestShadow_AroundShadow(t *testing.T) {
 	assert.Equal(t, cornerSize, r.bl.Size())
 	assert.Equal(t, fyne.NewPos(-shadowWidth, 100), r.bl.Position())
 	assert.Equal(t, canvas.GradientDirectionCircular, r.bl.Direction)
-	assert.Equal(t, fyne.NewPos(shadowWidth/2, -shadowWidth/2), r.bl.CenterOffset)
+	assert.Equal(t, 0.5, r.bl.CenterOffsetX)
+	assert.Equal(t, -0.5, r.bl.CenterOffsetY)
 	assert.Equal(t, theme.ShadowColor(), r.bl.StartColor)
 	assert.Equal(t, color.Transparent, r.bl.EndColor)
 
@@ -104,7 +107,6 @@ func TestShadow_AroundShadow(t *testing.T) {
 }
 
 func TestShadow_ApplyTheme(t *testing.T) {
-	shadowWidth := 2 * theme.Padding()
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	s := newShadow(shadowAround, shadowWidth)
 	r := Renderer(s).(*shadowRenderer)
