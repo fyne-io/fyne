@@ -157,7 +157,7 @@ func (s *scrollRenderer) updatePosition() {
 	if contentHeight <= scrollHeight {
 		s.scroll.Offset.Y = 0
 		s.vertBar.Hide()
-	} else {
+	} else if s.scroll.Visible() {
 		s.vertBar.Show()
 		if contentHeight-s.scroll.Offset.Y < scrollHeight {
 			s.scroll.Offset.Y = contentHeight - scrollHeight
@@ -166,12 +166,12 @@ func (s *scrollRenderer) updatePosition() {
 	s.scroll.Content.Move(fyne.NewPos(-s.scroll.Offset.X, -s.scroll.Offset.Y))
 	canvas.Refresh(s.scroll.Content)
 
-	if s.scroll.Offset.Y > 0 {
+	if s.scroll.Offset.Y > 0 && s.scroll.Visible() {
 		s.topShadow.Show()
 	} else {
 		s.topShadow.Hide()
 	}
-	if s.scroll.Offset.Y < contentHeight-scrollHeight {
+	if s.scroll.Offset.Y < contentHeight-scrollHeight && s.scroll.Visible() {
 		s.bottomShadow.Show()
 	} else {
 		s.bottomShadow.Hide()
