@@ -366,6 +366,46 @@ func TestEntry_Tapped_AfterRow(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 }
 
+func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("A\nB\n")
+
+	testCharSize := theme.TextSize()
+	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
+	ev := &fyne.PointEvent{Position: pos}
+
+	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.LeftMouseButton}
+	entry.MouseDown(me)
+	de := &fyne.DragEvent{PointEvent: *ev, DraggedX: 1, DraggedY: 0}
+	entry.Dragged(de)
+	entry.MouseUp(me)
+	assert.False(t, entry.selecting)
+}
+
+func TestEntry_DragSelect(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
+
+	// get position after the letter 'e' on the second row
+	ev1 := getClickPosition(entry, "ove", 1)
+	// get position after the letter 'z' on the second row
+	ev2 := getClickPosition(entry, "over the laz", 1)
+	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
+	ev2.Position.X += 2
+
+	// mouse down and drag from 'r' to 'z'
+	me := &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.LeftMouseButton}
+	entry.MouseDown(me)
+	for ; ev1.Position.X < ev2.Position.X; ev1.Position.X++ {
+		de := &fyne.DragEvent{PointEvent: *ev1, DraggedX: 1, DraggedY: 0}
+		entry.Dragged(de)
+	}
+	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.LeftMouseButton}
+	entry.MouseUp(me)
+
+	assert.Equal(t, "r the laz", entry.selectedText())
+}
+
 func getClickPosition(e *Entry, str string, row int) *fyne.PointEvent {
 	x := textMinSize(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
 

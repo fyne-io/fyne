@@ -456,8 +456,14 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	e.updateMousePointer(&m.PointEvent, e.selecting == false)
 }
 
-// MouseUp called on mouse release (ignored)
+// MouseUp called on mouse release
+// If a mouse drag event has completed then check to see if it has resulted in an empty selection,
+// if so, and if a text select key isn't held, then disable selecting
 func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+	start, _ := e.selection()
+	if start == -1 && e.selecting && e.selectKeyDown == false {
+		e.selecting = false
+	}
 }
 
 // Dragged is called when the pointer moves while a button is held down
