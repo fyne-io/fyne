@@ -73,7 +73,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	c := w.Canvas()
+	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -87,12 +87,15 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	content := widget.NewHBox(leftCol, rightCol)
 	w.SetContent(content)
 	w.ignoreResize = true
+	for c.isDirty() {
+		time.Sleep(time.Millisecond * 10)
+	}
 
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
 	assert.Equal(t, oldCanvasSize, c.Size())
 
 	leftObj1.SetMinSize(fyne.NewSize(60, 60))
-	canvas.Refresh(leftObj1)
+	c.Refresh(leftObj1)
 	for c.Size() == oldCanvasSize {
 		time.Sleep(time.Millisecond * 10)
 	}
@@ -104,7 +107,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	c := w.Canvas()
+	c := w.Canvas().(*glCanvas)
 	c.SetScale(1)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
@@ -123,13 +126,16 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
 	w.Resize(oldCanvasSize)
 	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
+	for c.isDirty() {
+		time.Sleep(time.Millisecond * 10)
+	}
 
 	// child size change affects ancestors up to scroll
 	oldCanvasSize = c.Size()
 	oldRightScrollSize := rightColScroll.Size()
 	oldRightColSize := rightCol.Size()
 	rightObj1.SetMinSize(fyne.NewSize(50, 100))
-	canvas.Refresh(rightObj1)
+	c.Refresh(rightObj1)
 	for rightCol.Size() == oldRightColSize {
 		time.Sleep(time.Millisecond * 10)
 	}
@@ -143,7 +149,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 
 func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	c := w.Canvas()
+	c := w.Canvas().(*glCanvas)
 	c.SetScale(1)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
@@ -166,6 +172,9 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 	)
 	w.Resize(oldCanvasSize)
 	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
+	for c.isDirty() {
+		time.Sleep(time.Millisecond * 10)
+	}
 
 	oldLeftColSize := leftCol.Size()
 	oldLeftScrollSize := leftColScroll.Size()
@@ -173,8 +182,8 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 	oldRightScrollSize := rightColScroll.Size()
 	leftObj2.SetMinSize(fyne.NewSize(50, 100))
 	rightObj2.SetMinSize(fyne.NewSize(50, 200))
-	canvas.Refresh(leftObj2)
-	canvas.Refresh(rightObj2)
+	c.Refresh(leftObj2)
+	c.Refresh(rightObj2)
 	for leftCol.Size() == oldLeftColSize || rightCol.Size() == oldRightColSize {
 		time.Sleep(time.Millisecond * 10)
 	}
@@ -192,7 +201,7 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	w.ignoreResize = true // for some reason the test is causing a WM resize event
-	c := w.Canvas()
+	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -209,6 +218,9 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
 	assert.Equal(t, oldCanvasSize, c.Size())
 	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
+	for c.isDirty() {
+		time.Sleep(time.Millisecond * 10)
+	}
 
 	oldLeftObj1Size := leftObj1.Size()
 	oldRightObj1Size := rightObj1.Size()
@@ -217,9 +229,9 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	leftObj1.SetMinSize(fyne.NewSize(40, 40))
 	rightObj1.SetMinSize(fyne.NewSize(30, 30))
 	rightObj2.SetMinSize(fyne.NewSize(30, 20))
-	canvas.Refresh(leftObj1)
-	canvas.Refresh(rightObj1)
-	canvas.Refresh(rightObj2)
+	c.Refresh(leftObj1)
+	c.Refresh(rightObj1)
+	c.Refresh(rightObj2)
 	ch := make(chan bool, 1)
 	go func() {
 		for rightCol.Size() == oldRightColSize || leftObj1.Size() == oldLeftObj1Size ||
