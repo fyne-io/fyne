@@ -1,4 +1,4 @@
-package main
+package screens
 
 import (
 	"image/color"
@@ -13,6 +13,7 @@ var (
 	grey   = &color.Gray{Y: 123}
 )
 
+// customTheme is a simple demonstration of a bespoke theme loaded by a Fyne app.
 type customTheme struct {
 }
 
@@ -57,7 +58,7 @@ func (customTheme) PrimaryColor() color.Color {
 }
 
 func (customTheme) HoverColor() color.Color {
-	return color.Black
+	return orange
 }
 
 func (customTheme) FocusColor() color.Color {
@@ -69,7 +70,7 @@ func (customTheme) ScrollBarColor() color.Color {
 }
 
 func (customTheme) ShadowColor() color.Color {
-	return grey
+	return &color.RGBA{0xcc, 0xcc, 0xcc, 0xcc}
 }
 
 func (customTheme) TextSize() int {

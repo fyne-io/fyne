@@ -91,7 +91,7 @@ var (
 	documentCreate, documentPrint, documentSave                                 *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
-	folder, folderNew, folderOpen, help, home                                   *ThemedResource
+	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
 )
 
@@ -142,6 +142,7 @@ func init() {
 	folderOpen = NewThemedResource(folderopenIconRes, nil)
 	help = NewThemedResource(helpIconRes, nil)
 	home = NewThemedResource(homeIconRes, nil)
+	settings = NewThemedResource(settingsIconRes, nil)
 
 	viewFullScreen = NewThemedResource(viewfullscreenIconRes, nil)
 	viewRefresh = NewThemedResource(viewrefreshIconRes, nil)
@@ -293,6 +294,11 @@ func HelpIcon() fyne.Resource {
 // HomeIcon returns a resource containing the standard home folder icon for the current theme
 func HomeIcon() fyne.Resource {
 	return home
+}
+
+// SettingsIcon returns a resource containing the standard settings icon for the current theme
+func SettingsIcon() fyne.Resource {
+	return settings
 }
 
 // MailAttachmentIcon returns a resource containing the standard mail attachment icon for the current theme

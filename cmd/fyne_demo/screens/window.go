@@ -1,4 +1,4 @@
-package main
+package screens
 
 import (
 	"errors"
@@ -7,15 +7,17 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/dialog"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 )
 
-// Dialogs loads a window that lists the dialog windows that can be tested.
-func Dialogs(app fyne.App) {
-	win := app.NewWindow("Dialogs")
-	win.Resize(fyne.NewSize(400, 300))
+func confirmCallback(response bool) {
+	fmt.Println("Responded with", response)
+}
 
-	win.SetContent(widget.NewVBox(
+// DialogScreen loads a panel that lists the dialog windows that can be tested.
+func DialogScreen(win fyne.Window) fyne.CanvasObject {
+	dialogs := widget.NewGroup("Dialogs",
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
 		}),
@@ -54,6 +56,22 @@ func Dialogs(app fyne.App) {
 			}
 			dialog.ShowCustom("Custom dialog", "Done", content, win)
 		}),
-	))
-	win.Show()
+	)
+
+	windows := widget.NewVBox(dialogs, widget.NewGroup("Windows",
+		widget.NewButton("New window", func() {
+			w := fyne.CurrentApp().NewWindow("Hello")
+			w.SetContent(widget.NewLabel("Hello World!"))
+			w.Show()
+		}),
+		widget.NewButton("Fixed size window", func() {
+			w := fyne.CurrentApp().NewWindow("Hello")
+			w.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), widget.NewLabel("Hello World!")))
+
+			w.Resize(fyne.NewSize(240, 180))
+			w.SetFixedSize(true)
+			w.Show()
+		})))
+
+	return fyne.NewContainerWithLayout(layout.NewGridLayout(2), windows, LayoutPanel())
 }

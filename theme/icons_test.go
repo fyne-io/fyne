@@ -302,6 +302,11 @@ func Test_HomeIcon_FileSource(t *testing.T) {
 	assert.Equal(t, "home.svg", result)
 }
 
+func Test_SettingsIcon_FileSource(t *testing.T) {
+	result := SettingsIcon().Name()
+	assert.Equal(t, "settings.svg", result)
+}
+
 func Test_MailAttachmentIcon_FileSource(t *testing.T) {
 	result := MailAttachmentIcon().Name()
 	assert.Equal(t, "mail-attachment.svg", result)
