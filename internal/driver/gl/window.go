@@ -52,15 +52,13 @@ type window struct {
 	padded     bool
 	visible    bool
 
-	mousePos             fyne.Position
-	mouseDragged         fyne.Draggable
-	mouseDraggedStartPos fyne.Position
-	mouseDragStartPos    fyne.Position
-	mouseDragStartRelPos fyne.Position
-	mouseDragPos         fyne.Position
-	mouseButton          desktop.MouseButton
-	mouseOver            desktop.Hoverable
-	onClosed             func()
+	mousePos           fyne.Position
+	mouseDragged       fyne.Draggable
+	mouseDraggedOffset fyne.Position
+	mouseDragPos       fyne.Position
+	mouseButton        desktop.MouseButton
+	mouseOver          desktop.Hoverable
+	onClosed           func()
 
 	xpos, ypos    int
 	width, height int
@@ -588,12 +586,11 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	if w.mouseDragged != nil {
 		if w.mouseButton > 0 {
+			draggedObjPos := w.mouseDragged.(fyne.CanvasObject).Position()
 			ev := new(fyne.DragEvent)
-			ev.DraggedTotal = w.mousePos.Subtract(w.mouseDragStartPos)
-			ev.Position = w.mouseDragStartRelPos.Add(ev.DraggedTotal)
+			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
 			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
 			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
-			ev.ElementStartPos = w.mouseDraggedStartPos
 			w.mouseDragged.Dragged(ev)
 
 			w.mouseDragPos = w.mousePos
@@ -687,14 +684,13 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 	if wid, ok := co.(fyne.Draggable); ok {
 		if action == glfw.Press {
-			w.mouseDragStartPos = w.mousePos
-			w.mouseDragStartRelPos = ev.Position
 			w.mouseDragPos = w.mousePos
 			w.mouseDragged = wid
-			w.mouseDraggedStartPos = co.Position()
+			w.mouseDraggedOffset = w.mousePos.Subtract(co.Position()).Subtract(ev.Position)
 		}
 	}
-	if action == glfw.Release {
+	if action == glfw.Release && w.mouseDragged != nil {
+		w.mouseDragged.DragEnd()
 		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(co) {
 			w.mouseOut()
 		}

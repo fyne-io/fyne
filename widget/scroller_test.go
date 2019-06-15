@@ -251,7 +251,7 @@ func TestScrollBar_Dragged_ClickedInside(t *testing.T) {
 	scrollBar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	// Create drag event with starting position inside scroll rectangle area
-	dragEvent := fyne.DragEvent{DraggedY: 20, DraggedTotal: fyne.NewPos(0, 20)}
+	dragEvent := fyne.DragEvent{DraggedY: 20}
 
 	assert.Equal(t, 0, scroll.Offset.Y)
 	scrollBar.Dragged(&dragEvent)
@@ -266,11 +266,11 @@ func TestScrollBar_DraggedBack_ClickedInside(t *testing.T) {
 	scrollBar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	// Drag forward
-	dragEvent := fyne.DragEvent{DraggedY: 20, DraggedTotal: fyne.NewPos(0, 20)}
+	dragEvent := fyne.DragEvent{DraggedY: 20}
 	scrollBar.Dragged(&dragEvent)
 
 	// Drag back
-	dragEvent = fyne.DragEvent{DraggedY: -10, DraggedTotal: fyne.NewPos(0, 10)}
+	dragEvent = fyne.DragEvent{DraggedY: -10}
 
 	assert.Equal(t, 200, scroll.Offset.Y)
 	scrollBar.Dragged(&dragEvent)
@@ -285,14 +285,14 @@ func TestScrollBar_Dragged_Limit(t *testing.T) {
 	scrollBar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	// Drag over limit
-	dragEvent := fyne.DragEvent{DraggedY: 2000, DraggedTotal: fyne.NewPos(0, 2000)}
+	dragEvent := fyne.DragEvent{DraggedY: 2000}
 
 	assert.Equal(t, 0, scroll.Offset.Y)
 	scrollBar.Dragged(&dragEvent)
 	assert.Equal(t, 900, scroll.Offset.Y)
 
 	// Drag again
-	dragEvent = fyne.DragEvent{DraggedY: 100, DraggedTotal: fyne.NewPos(0, 2100)}
+	dragEvent = fyne.DragEvent{DraggedY: 100}
 
 	// Offset doesn't go over limit
 	assert.Equal(t, 900, scroll.Offset.Y)
@@ -300,12 +300,12 @@ func TestScrollBar_Dragged_Limit(t *testing.T) {
 	assert.Equal(t, 900, scroll.Offset.Y)
 
 	// Drag back (still outside limit)
-	dragEvent = fyne.DragEvent{DraggedY: -1000, DraggedTotal: fyne.NewPos(0, 1100)}
+	dragEvent = fyne.DragEvent{DraggedY: -1000}
 	scrollBar.Dragged(&dragEvent)
 	assert.Equal(t, 900, scroll.Offset.Y)
 
 	// Drag back (inside limit)
-	dragEvent = fyne.DragEvent{DraggedY: -1040, DraggedTotal: fyne.NewPos(0, 60)}
+	dragEvent = fyne.DragEvent{DraggedY: -1040}
 	scrollBar.Dragged(&dragEvent)
 	assert.Equal(t, 600, scroll.Offset.Y)
 }
@@ -318,7 +318,7 @@ func TestScrollBar_Dragged_BackLimit(t *testing.T) {
 	scrollBar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	// Drag over back limit
-	dragEvent := fyne.DragEvent{DraggedY: -1000, DraggedTotal: fyne.NewPos(0, -1000)}
+	dragEvent := fyne.DragEvent{DraggedY: -1000}
 
 	// Offset doesn't go over limit
 	assert.Equal(t, 0, scroll.Offset.Y)
@@ -326,12 +326,12 @@ func TestScrollBar_Dragged_BackLimit(t *testing.T) {
 	assert.Equal(t, 0, scroll.Offset.Y)
 
 	// Drag (still outside limit)
-	dragEvent = fyne.DragEvent{DraggedY: 500, DraggedTotal: fyne.NewPos(0, -500)}
+	dragEvent = fyne.DragEvent{DraggedY: 500}
 	scrollBar.Dragged(&dragEvent)
 	assert.Equal(t, 0, scroll.Offset.Y)
 
 	// Drag (inside limit)
-	dragEvent = fyne.DragEvent{DraggedY: 520, DraggedTotal: fyne.NewPos(0, 20)}
+	dragEvent = fyne.DragEvent{DraggedY: 520}
 	scrollBar.Dragged(&dragEvent)
 	assert.Equal(t, 200, scroll.Offset.Y)
 }
@@ -343,18 +343,14 @@ func TestScrollBar_DraggedWithNonZeroStartPosition(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	scrollBar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
-	dragEvent := fyne.DragEvent{DraggedY: 50, DraggedTotal: fyne.NewPos(0, 50)}
+	dragEvent := fyne.DragEvent{DraggedY: 50}
 
 	assert.Equal(t, 0, scroll.Offset.Y)
 	scrollBar.Dragged(&dragEvent)
 	assert.Equal(t, 500, scroll.Offset.Y)
 
 	// Drag again (after releasing mouse button)
-	dragEvent = fyne.DragEvent{
-		DraggedY:        20,
-		DraggedTotal:    fyne.NewPos(0, 20),
-		ElementStartPos: fyne.NewPos(0, 50),
-	}
+	dragEvent = fyne.DragEvent{DraggedY: 20}
 	scrollBar.Dragged(&dragEvent)
 	assert.Equal(t, 700, scroll.Offset.Y)
 }

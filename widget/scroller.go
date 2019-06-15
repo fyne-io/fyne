@@ -47,17 +47,29 @@ var _ fyne.Draggable = (*scrollBar)(nil)
 
 type scrollBar struct {
 	baseWidget
-	area *scrollBarArea
-}
-
-func (s *scrollBar) Dragged(ev *fyne.DragEvent) {
-	s.area.moveBar(ev.DraggedTotal.Y + ev.ElementStartPos.Y)
+	area            *scrollBarArea
+	draggedDistance int
+	dragStart       int
+	isDragged       bool
 }
 
 func (s *scrollBar) CreateRenderer() fyne.WidgetRenderer {
 	r := &scrollBarRenderer{scrollBar: s}
 	r.ApplyTheme()
 	return r
+}
+
+func (s *scrollBar) DragEnd() {
+}
+
+func (s *scrollBar) Dragged(e *fyne.DragEvent) {
+	if !s.isDragged {
+		s.isDragged = true
+		s.dragStart = s.Position().Y
+		s.draggedDistance = 0
+	}
+	s.draggedDistance += e.DraggedY
+	s.area.moveBar(s.draggedDistance + s.dragStart)
 }
 
 func (s *scrollBar) Hide() {
