@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -229,4 +230,68 @@ func TestRadio_Disabled(t *testing.T) {
 	assert.True(t, radio.Disabled())
 	radio.Enable()
 	assert.False(t, radio.Disabled())
+}
+
+func TestRadio_Hovered(t *testing.T) {
+
+	tests := []struct {
+		name         string
+		options      []string
+		isHorizontal bool
+	}{
+		{
+			name:         "Horizontal",
+			options:      []string{"Hi", "Another"},
+			isHorizontal: true,
+		},
+		{
+			name:         "Vertical",
+			options:      []string{"Hi", "Another"},
+			isHorizontal: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			radio := NewRadio(tt.options, nil)
+			radio.Horizontal = tt.isHorizontal
+			render := Renderer(radio).(*radioRenderer)
+			assert.Equal(t, noRadioItemIndex, radio.hoveredItemIndex)
+			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+
+			radio.SetSelected("Hi")
+			assert.Equal(t, theme.FocusColor(), render.items[0].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+
+			radio.SetSelected("Another")
+			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
+			assert.Equal(t, theme.FocusColor(), render.items[1].focusIndicator.FillColor)
+
+			radio.MouseIn(&desktop.MouseEvent{
+				PointEvent: fyne.PointEvent{
+					Position: fyne.NewPos(theme.Padding(), theme.Padding()),
+				},
+			})
+			assert.Equal(t, 0, radio.hoveredItemIndex)
+			assert.Equal(t, theme.HoverColor(), render.items[0].focusIndicator.FillColor)
+			assert.Equal(t, theme.FocusColor(), render.items[1].focusIndicator.FillColor)
+
+			var mouseMove fyne.Position
+			if tt.isHorizontal {
+				mouseMove = fyne.NewPos(radio.MinSize().Width-theme.Padding(), theme.Padding())
+			} else {
+				mouseMove = fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())
+			}
+
+			radio.MouseMoved(&desktop.MouseEvent{
+				PointEvent: fyne.PointEvent{
+					Position: mouseMove,
+				},
+			})
+			assert.Equal(t, 1, radio.hoveredItemIndex)
+			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
+			assert.Equal(t, theme.FocusColor(), render.items[1].focusIndicator.FillColor)
+		})
+	}
 }
