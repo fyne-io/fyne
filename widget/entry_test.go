@@ -366,6 +366,22 @@ func TestEntry_Tapped_AfterRow(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 }
 
+func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("A\nB\n")
+
+	testCharSize := theme.TextSize()
+	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
+	ev := &fyne.PointEvent{Position: pos}
+
+	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.LeftMouseButton}
+	entry.MouseDown(me)
+	de := &fyne.DragEvent{PointEvent: *ev, DraggedX: 1, DraggedY: 0}
+	entry.Dragged(de)
+	entry.MouseUp(me)
+	assert.False(t, entry.selecting)
+}
+
 func getClickPosition(e *Entry, str string, row int) *fyne.PointEvent {
 	x := textMinSize(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
 

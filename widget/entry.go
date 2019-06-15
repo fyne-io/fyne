@@ -458,6 +458,9 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 
 // MouseUp called on mouse release (ignored)
 func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+	if e.selecting && e.selectKeyDown == false {
+		e.selecting = false
+	}
 }
 
 // Dragged is called when the pointer moves while a button is held down
