@@ -52,12 +52,14 @@ type window struct {
 	centered   bool
 	visible    bool
 
-	mousePos       fyne.Position
-	mouseDragPos   fyne.Position
-	mouseButton    desktop.MouseButton
-	mouseOver      desktop.Hoverable
-	mouseClickTime time.Time
-	onClosed       func()
+	mousePos           fyne.Position
+	mouseDragged       fyne.Draggable
+	mouseDraggedOffset fyne.Position
+	mouseDragPos       fyne.Position
+	mouseButton        desktop.MouseButton
+	mouseOver          desktop.Hoverable
+	mouseClickTime     time.Time
+	onClosed           func()
 
 	xpos, ypos    int
 	width, height int
@@ -490,7 +492,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
 
 	cursor := defaultCursor
-	drag, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	obj, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if wid, ok := object.(*widget.Entry); ok {
 			if !wid.ReadOnly {
 				cursor = entryCursor
@@ -499,49 +501,65 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			cursor = hyperlinkCursor
 		}
 
-		_, drag := object.(fyne.Draggable)
 		_, hover := object.(desktop.Hoverable)
-		return drag || hover
+		return hover
 	})
 
 	viewport.SetCursor(cursor)
-	if drag != nil {
+	if obj != nil && !w.objIsDragged(obj) {
 		ev := new(desktop.MouseEvent)
 		ev.Position = fyne.NewPos(x, y)
 		ev.Button = w.mouseButton
 
-		if obj, ok := drag.(desktop.Hoverable); ok {
-			if obj == w.mouseOver {
-				obj.MouseMoved(ev)
+		if hovered, ok := obj.(desktop.Hoverable); ok {
+			if hovered == w.mouseOver {
+				hovered.MouseMoved(ev)
 			} else {
-				if w.mouseOver != nil {
-					w.mouseOver.MouseOut()
-				}
-				if obj != nil {
-					obj.MouseIn(ev)
-				}
-				w.mouseOver = obj
+				w.mouseOut()
+				w.mouseIn(hovered, ev)
 			}
 		}
+	} else if w.mouseOver != nil && !w.objIsDragged(w.mouseOver) {
+		w.mouseOut()
+	}
 
+	if w.mouseDragged != nil {
 		if w.mouseButton > 0 {
-			if obj, ok := drag.(fyne.Draggable); ok {
-				ev := new(fyne.DragEvent)
-				ev.Position = fyne.NewPos(x, y)
-				ev.DraggedX = x - w.mouseDragPos.X
-				ev.DraggedY = y - w.mouseDragPos.Y
-				obj.Dragged(ev)
+			draggedObjPos := w.mouseDragged.(fyne.CanvasObject).Position()
+			ev := new(fyne.DragEvent)
+			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
+			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
+			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
+			w.mouseDragged.Dragged(ev)
 
-				w.mouseDragPos = ev.Position
-			}
+			w.mouseDragPos = w.mousePos
 		}
-	} else if w.mouseOver != nil {
+	}
+}
+
+func (w *window) objIsDragged(obj interface{}) bool {
+	if w.mouseDragged != nil && obj != nil {
+		draggedObj, _ := obj.(fyne.Draggable)
+		return draggedObj == w.mouseDragged
+	}
+	return false
+}
+
+func (w *window) mouseIn(obj desktop.Hoverable, ev *desktop.MouseEvent) {
+	if obj != nil {
+		obj.MouseIn(ev)
+	}
+	w.mouseOver = obj
+}
+
+func (w *window) mouseOut() {
+	if w.mouseOver != nil {
 		w.mouseOver.MouseOut()
 		w.mouseOver = nil
 	}
 }
 
-func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
+func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
 	co, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
@@ -619,10 +637,19 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			}
 		}
 	}
-	if _, ok := co.(fyne.Draggable); ok {
+	if wid, ok := co.(fyne.Draggable); ok {
 		if action == glfw.Press {
-			w.mouseDragPos = ev.Position
+			w.mouseDragPos = w.mousePos
+			w.mouseDragged = wid
+			w.mouseDraggedOffset = w.mousePos.Subtract(co.Position()).Subtract(ev.Position)
 		}
+	}
+	if action == glfw.Release && w.mouseDragged != nil {
+		w.mouseDragged.DragEnd()
+		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(co) {
+			w.mouseOut()
+		}
+		w.mouseDragged = nil
 	}
 }
 

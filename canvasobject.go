@@ -58,6 +58,7 @@ type Scrollable interface {
 // This is used for any item that the user has indicated should be moved across the screen.
 type Draggable interface {
 	Dragged(*DragEvent)
+	DragEnd()
 }
 
 // Focusable describes any CanvasObject that can respond to being focused.

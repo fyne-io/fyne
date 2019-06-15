@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,9 +39,9 @@ func TestMain(m *testing.M) {
 func TestWindow_HandleHoverable(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	w.Canvas().SetScale(1.0)
-	h1 := &hoverable{Rectangle: canvas.NewRectangle(color.White)}
+	h1 := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	h1.SetMinSize(fyne.NewSize(10, 10))
-	h2 := &hoverable{Rectangle: canvas.NewRectangle(color.Black)}
+	h2 := &hoverableObject{Rectangle: canvas.NewRectangle(color.Black)}
 	h2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(h1, h2))
 
@@ -53,27 +54,232 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	require.Equal(t, fyne.NewPos(14, 0), h2.Position())
 
 	w.mouseMoved(w.viewport, 9, 9)
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5)}}, h1.mouseIn)
-	assert.Equal(t, (*desktop.MouseEvent)(nil), h1.mouseMoved)
-	assert.False(t, h1.mouseOut)
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5)}}, h1.popMouseInEvent())
+	assert.Nil(t, h1.popMouseMovedEvent())
+	assert.Nil(t, h1.popMouseOutEvent())
 
 	w.mouseMoved(w.viewport, 9, 8)
-	assert.Equal(t, (*desktop.MouseEvent)(nil), h1.mouseIn)
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 4)}}, h1.mouseMoved)
-	assert.False(t, h1.mouseOut)
+	assert.Nil(t, h1.popMouseInEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 4)}}, h1.popMouseMovedEvent())
+	assert.Nil(t, h1.popMouseOutEvent())
 
 	w.mouseMoved(w.viewport, 19, 9)
-	assert.Equal(t, (*desktop.MouseEvent)(nil), h1.mouseIn)
-	assert.Equal(t, (*desktop.MouseEvent)(nil), h1.mouseMoved)
-	assert.True(t, h1.mouseOut)
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 5)}}, h2.mouseIn)
-	assert.Equal(t, (*desktop.MouseEvent)(nil), h2.mouseMoved)
-	assert.False(t, h2.mouseOut)
+	assert.Nil(t, h1.popMouseInEvent())
+	assert.Nil(t, h1.popMouseMovedEvent())
+	assert.NotNil(t, h1.popMouseOutEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 5)}}, h2.popMouseInEvent())
+	assert.Nil(t, h2.popMouseMovedEvent())
+	assert.Nil(t, h2.popMouseOutEvent())
 
 	w.mouseMoved(w.viewport, 19, 8)
-	assert.Equal(t, (*desktop.MouseEvent)(nil), h2.mouseIn)
-	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 4)}}, h2.mouseMoved)
-	assert.False(t, h2.mouseOut)
+	assert.Nil(t, h2.popMouseInEvent())
+	assert.Equal(t, &desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(1, 4)}}, h2.popMouseMovedEvent())
+	assert.Nil(t, h2.popMouseOutEvent())
+}
+
+func TestWindow_HandleDragging(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	d1 := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d1.SetMinSize(fyne.NewSize(10, 10))
+	d2 := &draggableObject{Rectangle: canvas.NewRectangle(color.Black)}
+	d2.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(widget.NewHBox(d1, d2))
+
+	// wait for canvas to get its size right
+	for s := w.Canvas().Size(); s != fyne.NewSize(32, 18); s = w.Canvas().Size() {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
+	require.Equal(t, fyne.NewPos(14, 0), d2.Position())
+
+	// no drag event in simple move
+	w.mouseMoved(w.viewport, 9, 9)
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// no drag event on mouseDown
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// drag start and drag event with pressed mouse button
+	w.mouseMoved(w.viewport, 8, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)},
+			DraggedX:   -1,
+			DraggedY:   -1,
+		},
+		d1.popDragEvent(),
+	)
+	assert.Nil(t, d1.popDragEndEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// drag event going outside the widget's area
+	w.mouseMoved(w.viewport, 16, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4)},
+			DraggedX:   8,
+			DraggedY:   0,
+		},
+		d1.popDragEvent(),
+	)
+	assert.Nil(t, d1.popDragEndEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// drag event entering a _different_ widget's area still for the widget dragged initially
+	w.mouseMoved(w.viewport, 22, 5)
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(18, 1)},
+			DraggedX:   6,
+			DraggedY:   -3,
+		},
+		d1.popDragEvent(),
+	)
+	assert.Nil(t, d2.popDragEvent())
+
+	// drag end event on mouseUp
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	assert.Nil(t, d1.popDragEvent())
+	assert.NotNil(t, d1.popDragEndEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// no drag event on further mouse move
+	w.mouseMoved(w.viewport, 22, 6)
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// no drag event on mouseDown
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	assert.Nil(t, d1.popDragEvent())
+	assert.Nil(t, d2.popDragEvent())
+
+	// drag event for other widget
+	w.mouseMoved(w.viewport, 22, 7)
+	assert.Nil(t, d1.popDragEvent())
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 3)},
+			DraggedX:   0,
+			DraggedY:   1,
+		},
+		d2.popDragEvent(),
+	)
+}
+
+func TestWindow_DragObjectThatMoves(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	d1 := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d1.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(widget.NewHBox(d1))
+
+	// wait for canvas to get its size right
+	for s := w.Canvas().Size(); s != fyne.NewSize(18, 18); s = w.Canvas().Size() {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
+
+	// drag -1,-1
+	w.mouseMoved(w.viewport, 9, 9)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 8, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)},
+			DraggedX:   -1,
+			DraggedY:   -1,
+		},
+		d1.popDragEvent(),
+	)
+	assert.Nil(t, d1.popDragEndEvent())
+
+	// element follows
+	d1.Move(fyne.NewPos(-1, -1))
+
+	// drag again -> position is relative to new element position
+	w.mouseMoved(w.viewport, 10, 10)
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(7, 7)},
+			DraggedX:   2,
+			DraggedY:   2,
+		},
+		d1.popDragEvent(),
+	)
+}
+
+func TestWindow_HoverableOnDragging(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
+	dh.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(dh)
+
+	// wait for canvas to get its size right
+	for s := w.Canvas().Size(); s != fyne.NewSize(18, 18); s = w.Canvas().Size() {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	w.mouseMoved(w.viewport, 8, 8)
+	assert.Equal(t,
+		&desktop.MouseEvent{PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)}},
+		dh.popMouseInEvent(),
+	)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 8, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)},
+			DraggedX:   0,
+			DraggedY:   0,
+		},
+		dh.popDragEvent(),
+	)
+
+	// drag event going outside the widget's area
+	w.mouseMoved(w.viewport, 16, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(12, 4)},
+			DraggedX:   8,
+			DraggedY:   0,
+		},
+		dh.popDragEvent(),
+	)
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+
+	// drag event going inside the widget's area again
+	w.mouseMoved(w.viewport, 8, 8)
+	assert.Equal(t,
+		&fyne.DragEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(4, 4)},
+			DraggedX:   -8,
+			DraggedY:   0,
+		},
+		dh.popDragEvent(),
+	)
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+
+	// no hover events on end of drag event
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	assert.Nil(t, dh.popMouseInEvent())
+	assert.Nil(t, dh.popMouseMovedEvent())
+	assert.Nil(t, dh.popMouseOutEvent())
+
+	// mouseOut on mouse release after dragging out of area
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 8, 8)
+	w.mouseMoved(w.viewport, 16, 8)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	assert.NotNil(t, dh.popMouseOutEvent())
 }
 
 func TestWindow_SetTitle(t *testing.T) {
@@ -214,25 +420,85 @@ func TestWindow_Shortcut(t *testing.T) {
 	assert.True(t, w.FullScreen())
 }
 
-type hoverable struct {
+type hoverableObject struct {
 	*canvas.Rectangle
-	mouseIn    *desktop.MouseEvent
-	mouseOut   bool
-	mouseMoved *desktop.MouseEvent
+	hoverable
+}
+
+var _ desktop.Hoverable = (*hoverable)(nil)
+
+type hoverable struct {
+	mouseInEvents    []interface{}
+	mouseOutEvents   []interface{}
+	mouseMovedEvents []interface{}
 }
 
 func (h *hoverable) MouseIn(e *desktop.MouseEvent) {
-	h.mouseMoved = nil
-	h.mouseOut = false
-	h.mouseIn = e
+	h.mouseInEvents = append(h.mouseInEvents, e)
 }
-func (h *hoverable) MouseOut() {
-	h.mouseIn = nil
-	h.mouseMoved = nil
-	h.mouseOut = true
-}
+
 func (h *hoverable) MouseMoved(e *desktop.MouseEvent) {
-	h.mouseIn = nil
-	h.mouseOut = false
-	h.mouseMoved = e
+	h.mouseMovedEvents = append(h.mouseMovedEvents, e)
+}
+
+func (h *hoverable) MouseOut() {
+	h.mouseOutEvents = append(h.mouseOutEvents, true)
+}
+
+func (h *hoverable) popMouseInEvent() (e interface{}) {
+	e, h.mouseInEvents = pop(h.mouseInEvents)
+	return
+}
+
+func (h *hoverable) popMouseMovedEvent() (e interface{}) {
+	e, h.mouseMovedEvents = pop(h.mouseMovedEvents)
+	return
+}
+
+func (h *hoverable) popMouseOutEvent() (e interface{}) {
+	e, h.mouseOutEvents = pop(h.mouseOutEvents)
+	return
+}
+
+type draggableObject struct {
+	*canvas.Rectangle
+	draggable
+}
+
+var _ fyne.Draggable = (*draggable)(nil)
+
+type draggable struct {
+	events    []interface{}
+	endEvents []interface{}
+}
+
+func (d *draggable) Dragged(e *fyne.DragEvent) {
+	d.events = append(d.events, e)
+}
+
+func (d *draggable) DragEnd() {
+	d.endEvents = append(d.endEvents, true)
+}
+
+func (d *draggable) popDragEvent() (e interface{}) {
+	e, d.events = pop(d.events)
+	return
+}
+
+func (d *draggable) popDragEndEvent() (e interface{}) {
+	e, d.endEvents = pop(d.endEvents)
+	return
+}
+
+type draggableHoverableObject struct {
+	*canvas.Rectangle
+	draggable
+	hoverable
+}
+
+func pop(s []interface{}) (interface{}, []interface{}) {
+	if len(s) == 0 {
+		return nil, s
+	}
+	return s[0], s[1:]
 }
