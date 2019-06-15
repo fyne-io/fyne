@@ -29,13 +29,13 @@ func TestGlCanvas_NilContent(t *testing.T) {
 }
 
 func Test_glCanvas_SetContent(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	var menuHeight int
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
 		menuHeight = widget.NewToolbar(widget.NewToolbarAction(theme.ContentCutIcon(), func() {})).MinSize().Height
 	}
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tests := []struct {
 		name               string
 		padding            bool
@@ -44,9 +44,9 @@ func Test_glCanvas_SetContent(t *testing.T) {
 		expectedMenuHeight int
 	}{
 		{"window without padding", false, false, 0, 0},
-		{"window with padding", true, false, 4, 0},
+		{"window with padding", true, false, theme.Padding(), 0},
 		{"window with menu without padding", false, true, 0, menuHeight},
-		{"window with menu and padding", true, true, 4, menuHeight},
+		{"window with menu and padding", true, true, theme.Padding(), menuHeight},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,20 +57,14 @@ func Test_glCanvas_SetContent(t *testing.T) {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
 			}
 			content := canvas.NewCircle(color.Black)
-			w.SetContent(content)
-			w.Resize(fyne.NewSize(100, 100))
-			c := w.Canvas()
 			canvasSize := 100
-
-			// wait for canvas to get its size right
-			for w.canvas.Size().Width != canvasSize {
-				time.Sleep(time.Millisecond * 10)
-			}
+			w.SetContent(content)
+			w.Resize(fyne.NewSize(canvasSize, canvasSize))
 
 			newContent := canvas.NewCircle(color.White)
 			assert.Equal(t, fyne.NewPos(0, 0), newContent.Position())
 			assert.Equal(t, fyne.NewSize(0, 0), newContent.Size())
-			c.SetContent(newContent)
+			w.SetContent(newContent)
 			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), newContent.Position())
 			assert.Equal(t, fyne.NewSize(canvasSize-2*tt.expectedPad, canvasSize-2*tt.expectedPad-tt.expectedMenuHeight), newContent.Size())
 		})
@@ -79,8 +73,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	c := w.Canvas()
-	c.SetScale(1)
+	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -93,26 +86,28 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	rightCol := widget.NewVBox(rightObj1, rightObj2)
 	content := widget.NewHBox(leftCol, rightCol)
 	w.SetContent(content)
-
-	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
-	// wait for canvas to get its size right
-	for c.Size() != oldCanvasSize {
+	w.ignoreResize = true
+	for c.isDirty() {
 		time.Sleep(time.Millisecond * 10)
 	}
 
+	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
+	assert.Equal(t, oldCanvasSize, c.Size())
+
 	leftObj1.SetMinSize(fyne.NewSize(60, 60))
-	canvas.Refresh(leftObj1)
+	c.Refresh(leftObj1)
 	for c.Size() == oldCanvasSize {
 		time.Sleep(time.Millisecond * 10)
 	}
 
 	expectedCanvasSize := oldCanvasSize.Add(fyne.NewSize(10, 10))
 	assert.Equal(t, expectedCanvasSize, c.Size())
+	w.ignoreResize = false
 }
 
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	c := w.Canvas()
+	c := w.Canvas().(*glCanvas)
 	c.SetScale(1)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
@@ -129,8 +124,9 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
-	// wait for canvas to get its size right
-	for c.Size() != oldCanvasSize {
+	w.Resize(oldCanvasSize)
+	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
+	for c.isDirty() {
 		time.Sleep(time.Millisecond * 10)
 	}
 
@@ -139,7 +135,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	oldRightScrollSize := rightColScroll.Size()
 	oldRightColSize := rightCol.Size()
 	rightObj1.SetMinSize(fyne.NewSize(50, 100))
-	canvas.Refresh(rightObj1)
+	c.Refresh(rightObj1)
 	for rightCol.Size() == oldRightColSize {
 		time.Sleep(time.Millisecond * 10)
 	}
@@ -148,11 +144,12 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
 	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 50))
 	assert.Equal(t, expectedRightColSize, rightCol.Size())
+	w.ignoreResize = false
 }
 
 func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	c := w.Canvas()
+	c := w.Canvas().(*glCanvas)
 	c.SetScale(1)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
@@ -173,8 +170,9 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 		2*leftColScroll.MinSize().Width+3*theme.Padding(),
 		leftColScroll.MinSize().Height+2*theme.Padding(),
 	)
-	// wait for canvas to get its size right
-	for c.Size() != oldCanvasSize {
+	w.Resize(oldCanvasSize)
+	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
+	for c.isDirty() {
 		time.Sleep(time.Millisecond * 10)
 	}
 
@@ -184,8 +182,8 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 	oldRightScrollSize := rightColScroll.Size()
 	leftObj2.SetMinSize(fyne.NewSize(50, 100))
 	rightObj2.SetMinSize(fyne.NewSize(50, 200))
-	canvas.Refresh(leftObj2)
-	canvas.Refresh(rightObj2)
+	c.Refresh(leftObj2)
+	c.Refresh(rightObj2)
 	for leftCol.Size() == oldLeftColSize || rightCol.Size() == oldRightColSize {
 		time.Sleep(time.Millisecond * 10)
 	}
@@ -197,12 +195,13 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 	assert.Equal(t, expectedLeftColSize, leftCol.Size())
 	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 150))
 	assert.Equal(t, expectedRightColSize, rightCol.Size())
+	w.ignoreResize = false
 }
 
 func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	c := w.Canvas()
-	c.SetScale(1)
+	w.ignoreResize = true // for some reason the test is causing a WM resize event
+	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -217,8 +216,9 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	w.SetContent(content)
 
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
-	// wait for canvas to get its size right
-	for c.Size() != oldCanvasSize {
+	assert.Equal(t, oldCanvasSize, c.Size())
+	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
+	for c.isDirty() {
 		time.Sleep(time.Millisecond * 10)
 	}
 
@@ -229,9 +229,9 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	leftObj1.SetMinSize(fyne.NewSize(40, 40))
 	rightObj1.SetMinSize(fyne.NewSize(30, 30))
 	rightObj2.SetMinSize(fyne.NewSize(30, 20))
-	canvas.Refresh(leftObj1)
-	canvas.Refresh(rightObj1)
-	canvas.Refresh(rightObj2)
+	c.Refresh(leftObj1)
+	c.Refresh(rightObj1)
+	c.Refresh(rightObj2)
 	ch := make(chan bool, 1)
 	go func() {
 		for rightCol.Size() == oldRightColSize || leftObj1.Size() == oldLeftObj1Size ||
@@ -253,4 +253,5 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	assert.Equal(t, fyne.NewSize(50, 40), leftObj1.Size())
 	assert.Equal(t, fyne.NewSize(30, 30), rightObj1.Size())
 	assert.Equal(t, fyne.NewSize(30, 20), rightObj2.Size())
+	w.ignoreResize = false
 }

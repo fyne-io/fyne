@@ -15,5 +15,5 @@ func updateGLContext(w *window) {
 	gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
 }
 
-func updateWinSize(_ *window) {
+func forceWindowRefresh(_ *window) {
 }

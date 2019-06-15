@@ -83,7 +83,8 @@ func (r *shadowRenderer) createShadows() {
 			color.Transparent,
 			canvas.GradientDirectionCircular,
 		)
-		r.tl.CenterOffset = fyne.NewPos(theme.Padding(), theme.Padding())
+		r.tl.CenterOffsetX = 0.5
+		r.tl.CenterOffsetY = 0.5
 		r.t = canvas.NewLinearGradient(
 			color.Transparent,
 			theme.ShadowColor(),
@@ -94,7 +95,8 @@ func (r *shadowRenderer) createShadows() {
 			color.Transparent,
 			canvas.GradientDirectionCircular,
 		)
-		r.tr.CenterOffset = fyne.NewPos(-theme.Padding(), theme.Padding())
+		r.tr.CenterOffsetX = -0.5
+		r.tr.CenterOffsetY = 0.5
 		r.r = canvas.NewLinearGradient(
 			theme.ShadowColor(),
 			color.Transparent,
@@ -105,7 +107,8 @@ func (r *shadowRenderer) createShadows() {
 			color.Transparent,
 			canvas.GradientDirectionCircular,
 		)
-		r.br.CenterOffset = fyne.NewPos(-theme.Padding(), -theme.Padding())
+		r.br.CenterOffsetX = -0.5
+		r.br.CenterOffsetY = -0.5
 		r.b = canvas.NewLinearGradient(
 			theme.ShadowColor(),
 			color.Transparent,
@@ -116,7 +119,8 @@ func (r *shadowRenderer) createShadows() {
 			color.Transparent,
 			canvas.GradientDirectionCircular,
 		)
-		r.bl.CenterOffset = fyne.NewPos(theme.Padding(), -theme.Padding())
+		r.bl.CenterOffsetX = 0.5
+		r.bl.CenterOffsetY = -0.5
 		r.l = canvas.NewLinearGradient(
 			color.Transparent,
 			theme.ShadowColor(),

@@ -16,6 +16,10 @@ type funcData struct {
 	done chan bool
 }
 
+type withContext interface {
+	runWithContext(f func())
+}
+
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var runFlag = false
@@ -44,12 +48,6 @@ func runOnMain(f func()) {
 		funcQueue <- funcData{f: f, done: done}
 		<-done
 	}
-}
-
-func runOnMainAsync(f func()) {
-	go func() {
-		funcQueue <- funcData{f: f, done: nil}
-	}()
 }
 
 func (d *gLDriver) runGL() {
@@ -100,20 +98,19 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
-				viewport.MakeContextCurrent()
+				w.runWithContext(func() {
+					d.freeDirtyTextures(canvas)
 
-				d.freeDirtyTextures(canvas)
+					gl.UseProgram(canvas.program)
 
-				gl.UseProgram(canvas.program)
+					updateGLContext(w)
+					if canvas.ensureMinSize() {
+						w.fitContent()
+					}
+					canvas.paint(canvas.Size())
 
-				updateGLContext(w)
-				if canvas.ensureMinSize() {
-					w.fitContent()
-				}
-				canvas.paint(canvas.Size())
-
-				w.viewport.SwapBuffers()
-				glfw.DetachCurrentContext()
+					w.viewport.SwapBuffers()
+				})
 			}
 			if reassign {
 				d.windows = newWindows

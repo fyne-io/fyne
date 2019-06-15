@@ -1,4 +1,4 @@
-package main
+package screens
 
 import (
 	"image/color"
@@ -11,7 +11,6 @@ import (
 )
 
 type browser struct {
-	canvas  fyne.Canvas
 	current int
 
 	name *widget.Label
@@ -28,10 +27,9 @@ func (b *browser) setIcon(index int) {
 	b.icon.SetResource(icons[index].icon)
 }
 
-// Icons loads a window that shows the various icons available in Fyne
-func Icons(app fyne.App) {
-	win := app.NewWindow("Icons")
-	b := &browser{canvas: win.Canvas()}
+// IconsPanel loads a panel that shows the various icons available in Fyne
+func IconsPanel() fyne.CanvasObject {
+	b := &browser{}
 
 	prev := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
 		b.setIcon(b.current - 1)
@@ -46,9 +44,8 @@ func Icons(app fyne.App) {
 	background.SetMinSize(fyne.NewSize(280, 280))
 	b.icon = widget.NewIcon(icons[b.current].icon)
 
-	win.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(
-		bar, nil, nil, nil), bar, background, b.icon))
-	win.Show()
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(
+		bar, nil, nil, nil), bar, background, b.icon)
 }
 
 func checkerPattern(x, y, _, _ int) color.Color {
@@ -99,6 +96,7 @@ var icons = []struct {
 	{"FolderOpenIcon", theme.FolderOpenIcon()},
 	{"HomeIcon", theme.HomeIcon()},
 	{"HelpIcon", theme.HelpIcon()},
+	{"SettingsIcon", theme.SettingsIcon()},
 
 	{"ViewFullScreenIcon", theme.ViewFullScreenIcon()},
 	{"ViewRestoreIcon", theme.ViewRestoreIcon()},

@@ -134,6 +134,7 @@ func main() {
 	bundleIcon("folder-open", f)
 	bundleIcon("help", f)
 	bundleIcon("home", f)
+	bundleIcon("settings", f)
 
 	bundleIcon("mail-attachment", f)
 	bundleIcon("mail-compose", f)

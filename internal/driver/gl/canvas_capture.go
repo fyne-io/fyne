@@ -5,7 +5,6 @@ import (
 	"image/color"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
 type captureImage struct {
@@ -32,14 +31,11 @@ func (c *glCanvas) Capture() image.Image {
 	pixels := make([]uint8, width*height*4)
 
 	runOnMain(func() {
-		viewport := c.window.viewport
-		viewport.MakeContextCurrent()
+		c.context.runWithContext(func() {
+			gl.ReadBuffer(gl.FRONT)
+			gl.ReadPixels(0, 0, int32(width), int32(height), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
 
-		gl.ReadBuffer(gl.FRONT)
-		gl.ReadPixels(0, 0, int32(width), int32(height), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
-
-		glfw.DetachCurrentContext()
-
+		})
 	})
 
 	return &captureImage{

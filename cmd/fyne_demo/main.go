@@ -8,84 +8,27 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/cmd/fyne_demo/screens"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
-func formApp(app fyne.App) {
-	w := app.NewWindow("Form")
-
-	name := widget.NewEntry()
-	name.SetPlaceHolder("John Smith")
-	email := widget.NewEntry()
-	email.SetPlaceHolder("test@example.com")
-	password := widget.NewPasswordEntry()
-	password.SetPlaceHolder("Password")
-	largeText := widget.NewMultiLineEntry()
-
-	form := &widget.Form{
-		OnCancel: func() {
-			w.Close()
-		},
-		OnSubmit: func() {
-			fmt.Println("Form submitted")
-			fmt.Println("Name:", name.Text)
-			fmt.Println("Email:", email.Text)
-			fmt.Println("Password:", password.Text)
-			fmt.Println("Message:", largeText.Text)
-		},
-	}
-	form.Append("Name", name)
-	form.Append("Email", email)
-	form.Append("Password", password)
-	form.Append("Message", largeText)
-	w.SetContent(form)
-	w.Show()
-}
-
-func confirmCallback(response bool) {
-	fmt.Println("Responded with", response)
-}
-
-func main() {
-	a := app.New()
-	w := a.NewWindow("Fyne Demo")
-
+func welcomeScreen(a fyne.App) fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
-	logo.SetMinSize(fyne.NewSize(64, 64))
+	logo.SetMinSize(fyne.NewSize(128, 128))
 
-	fyneio, err := url.Parse("https://fyne.io/")
+	link, err := url.Parse("https://fyne.io/")
 	if err != nil {
 		fyne.LogError("Could not parse URL", err)
 	}
 
-	w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("File",
-		fyne.NewMenuItem("New", func() { fmt.Println("Menu New") }),
-		// a quit item will be appended to our first menu
-	), fyne.NewMenu("Edit",
-		fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") }),
-		fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") }),
-		fyne.NewMenuItem("Paste", func() { fmt.Println("Menu Paste") }),
-	)))
-
-	w.SetContent(widget.NewVBox(
-		widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
-			widget.NewToolbarSeparator(),
-			widget.NewToolbarSpacer(),
-			widget.NewToolbarAction(theme.ContentCutIcon(), func() { fmt.Println("Cut") }),
-			widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
-			widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
-		),
-
-		widget.NewGroup("Demos", widget.NewVBox(
-			widget.NewButton("Canvas", func() { Canvas(a) }),
-			widget.NewButton("Icons", func() { Icons(a) }),
-			widget.NewButton("Layout", func() { Layout(a) }),
-			widget.NewButton("Widgets", func() { Widget(a) }),
-			widget.NewButton("Form", func() { formApp(a) }),
-			widget.NewButton("Dialogs", func() { Dialogs(a) }),
-		)),
+	return widget.NewVBox(
+		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		layout.NewSpacer(),
+		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
+		widget.NewHyperlinkWithStyle("fyne.io", link, fyne.TextAlignCenter, fyne.TextStyle{}),
+		layout.NewSpacer(),
 
 		widget.NewGroup("Theme",
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
@@ -97,33 +40,29 @@ func main() {
 				}),
 			),
 		),
+	)
+}
 
-		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
-		widget.NewHyperlinkWithStyle("fyne.io", fyneio, fyne.TextAlignCenter, fyne.TextStyle{}),
-		layout.NewSpacer(),
+func main() {
+	a := app.New()
+	w := a.NewWindow("Fyne Demo")
+	w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("File",
+		fyne.NewMenuItem("New", func() { fmt.Println("Menu New") }),
+		// a quit item will be appended to our first menu
+	), fyne.NewMenu("Edit",
+		fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") }),
+		fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") }),
+		fyne.NewMenuItem("Paste", func() { fmt.Println("Menu Paste") }),
+	)))
 
-		widget.NewButton("Input", func() { Input(a) }),
-		fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-			widget.NewButton("PopUp", func() {
-				var pop *widget.PopUp
-				ok := widget.NewButton("Dismiss", func() {
-					pop.Hide()
-				})
-				pop = widget.NewPopUp(ok, w.Canvas())
-				pop.Move(fyne.NewPos(25, 525))
-			}),
-			widget.NewButton("Modal", func() {
-				var pop *widget.PopUp
-				ok := widget.NewButton("Dismiss", func() {
-					pop.Hide()
-				})
-				pop = widget.NewModalPopUp(ok, w.Canvas())
-			}),
-		),
-		widget.NewButton("Advanced", func() { Advanced(a) }),
-		widget.NewButtonWithIcon("Quit", theme.CancelIcon(), func() {
-			a.Quit()
-		}),
-	))
+	tabs := widget.NewTabContainer(
+		widget.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
+		widget.NewTabItemWithIcon("Widgets", theme.ContentCopyIcon(), screens.WidgetScreen()),
+		widget.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
+		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)),
+		widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
+	tabs.SetTabLocation(widget.TabLocationLeading)
+	w.SetContent(tabs)
+
 	w.ShowAndRun()
 }

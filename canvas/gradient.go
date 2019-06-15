@@ -5,8 +5,6 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
-
-	"fyne.io/fyne"
 )
 
 const (
@@ -27,10 +25,13 @@ type Gradient struct {
 	// Generator is a func used by driver to generate and render. Inadvisable to use directly.
 	Generator func(w, h int) image.Image
 
-	Direction    GradientDirection // The direction of the gradient.
-	StartColor   color.Color       // The beginning RGBA color of the gradient
-	EndColor     color.Color       // The end RGBA color of the gradient
-	CenterOffset fyne.Position     // The offset for generation of the gradient
+	Direction  GradientDirection // The direction of the gradient.
+	StartColor color.Color       // The beginning RGBA color of the gradient
+	EndColor   color.Color       // The end RGBA color of the gradient
+	// The offset of the center for generation of the gradient.
+	// This is not a DP measure but relates to the width/height.
+	// A value of 0.5 would move the center by the half width/height.
+	CenterOffsetX, CenterOffsetY float64
 
 	img draw.Image // internal cache for pixel generator - may be superfluous
 }
@@ -39,9 +40,8 @@ type Gradient struct {
 // at x, y as a gradient between start and end
 // using w and h to determine rate of gradation
 // returns a color.RGBA64
-func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
-	ox, oy := float64(g.CenterOffset.X), float64(g.CenterOffset.Y)
-	d := g.calculateGradient(x, y, w, h, ox, oy)
+func (g *Gradient) calculatePixel(w, h, x, y float64) *color.RGBA64 {
+	d := g.calculateGradient(x, y, w, h, g.CenterOffsetX, g.CenterOffsetY)
 
 	// fetch RGBA values
 	aR, aG, aB, aA := g.StartColor.RGBA()
@@ -65,7 +65,7 @@ func (g *Gradient) calculatePixel(w, h, x, y int) *color.RGBA64 {
 
 }
 
-func (g *Gradient) calculateGradient(x, y, w, h int, ox, oy float64) float64 {
+func (g *Gradient) calculateGradient(x, y, w, h, ox, oy float64) float64 {
 	switch g.Direction {
 	case GradientDirectionVertical:
 		return linearVertical(x, y, w, h, ox, oy)
@@ -109,8 +109,7 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 
 		for x := 0; x < w; x++ {
 			for y := 0; y < h; y++ {
-				pix.img.Set(x, y, pix.g.calculatePixel(w, h, x, y))
-
+				pix.img.Set(x, y, pix.g.calculatePixel(float64(w), float64(h), float64(x), float64(y)))
 			}
 		}
 		return pix.img
@@ -123,36 +122,36 @@ func NewLinearGradient(start color.Color, end color.Color, direction GradientDir
 */
 
 // Linear horizontal gradient
-func linearHorizontal(x, _, w, _ int, _, _ float64) float64 {
-	return float64(x) / float64(w)
+func linearHorizontal(x, _, w, _, _, _ float64) float64 {
+	return x / w
 }
 
 // Linear vertical gradient
-func linearVertical(_, y, _, h int, _, _ float64) float64 {
-	return float64(y) / float64(h)
+func linearVertical(_, y, _, h, _, _ float64) float64 {
+	return y / h
 }
 
 // Linear circular gradient - function/math thanks to Tilo Prützs
-func linearCircular(x, y, w, h int, ox, oy float64) float64 {
+func linearCircular(x, y, w, h, ox, oy float64) float64 {
 	// define center plus offset
-	centerX := float64(w)/2 + ox
-	centerY := float64(h)/2 + oy
+	centerX := w/2 + w*ox
+	centerY := h/2 + h*oy
 
 	// handle negative offsets
 	var a, b float64
 	if ox < 0 {
-		a = float64(w) - centerX
+		a = w - centerX
 	} else {
 		a = centerX
 	}
 	if oy < 0 {
-		b = float64(h) - centerY
+		b = h - centerY
 	} else {
 		b = centerY
 	}
 
 	// calculate distance from center for gradient multiplier
-	dx, dy := centerX-float64(x), centerY-float64(y)
+	dx, dy := centerX-x, centerY-y
 	da := math.Sqrt(dx*dx + dy*dy*a*a/b/b)
 	if da > a {
 		return 1
