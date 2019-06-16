@@ -123,7 +123,10 @@ func (s *scrollBarAreaRenderer) MinSize() fyne.Size {
 }
 
 func (s *scrollBarAreaRenderer) minWidth() int {
-	return s.area.minWidth
+	if s.area.isWide {
+		return theme.ScrollBarSize()
+	}
+	return theme.ScrollBarSmallSize()
 }
 
 func (s *scrollBarAreaRenderer) Refresh() {
@@ -172,9 +175,8 @@ var _ desktop.Hoverable = (*scrollBarArea)(nil)
 type scrollBarArea struct {
 	baseWidget
 
-	// TODO manage state (wide/small) not render details (width)
-	minWidth int
-	scroll   *ScrollContainer
+	isWide bool
+	scroll *ScrollContainer
 }
 
 func (s *scrollBarArea) Resize(size fyne.Size) {
@@ -182,7 +184,7 @@ func (s *scrollBarArea) Resize(size fyne.Size) {
 }
 
 func (s *scrollBarArea) MouseIn(*desktop.MouseEvent) {
-	s.minWidth = theme.ScrollBarSize()
+	s.isWide = true
 	Refresh(s.scroll)
 }
 
@@ -190,7 +192,7 @@ func (s *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (s *scrollBarArea) MouseOut() {
-	s.minWidth = theme.ScrollBarSmallSize()
+	s.isWide = false
 	Refresh(s.scroll)
 }
 
@@ -235,7 +237,7 @@ func (s *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func newScrollBarArea(scroll *ScrollContainer) *scrollBarArea {
-	return &scrollBarArea{scroll: scroll, minWidth: theme.ScrollBarSmallSize()}
+	return &scrollBarArea{scroll: scroll}
 }
 
 type scrollRenderer struct {
