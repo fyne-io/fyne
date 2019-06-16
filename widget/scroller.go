@@ -121,16 +121,6 @@ func (s *scrollBarAreaRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-func (s *scrollBarAreaRenderer) barSizeVertical() fyne.Size {
-	portion := float32(s.area.size.Height) / float32(s.area.scroll.Content.Size().Height)
-	if portion > 1.0 {
-		portion = 1.0
-	}
-
-	barHeight := int(float32(s.area.size.Height) * portion)
-	return fyne.NewSize(s.minWidth(), barHeight)
-}
-
 func (s *scrollBarAreaRenderer) Destroy() {
 }
 
@@ -139,14 +129,13 @@ func (s *scrollBarAreaRenderer) Layout(size fyne.Size) {
 }
 
 func (s *scrollBarAreaRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(s.minWidth(), theme.ScrollBarSize())
-}
-
-func (s *scrollBarAreaRenderer) minWidth() int {
+	var minWidth int
 	if s.area.isWide {
-		return theme.ScrollBarSize()
+		minWidth = theme.ScrollBarSize()
+	} else {
+		minWidth = theme.ScrollBarSmallSize() * 2
 	}
-	return theme.ScrollBarSmallSize()
+	return fyne.NewSize(minWidth, theme.ScrollBarSize())
 }
 
 func (s *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
@@ -159,15 +148,32 @@ func (s *scrollBarAreaRenderer) Refresh() {
 }
 
 func (s *scrollBarAreaRenderer) updateBarPosition() {
-	barSize := s.barSizeVertical()
+	barHeight := s.verticalBarHeight()
 	barRatio := float32(0.0)
 	if s.area.scroll.Offset.Y != 0 {
 		barRatio = float32(s.area.scroll.Offset.Y) / float32(s.area.scroll.Content.Size().Height-s.area.scroll.Size().Height)
 	}
-	barOff := int(float32(s.area.scroll.size.Height-barSize.Height) * barRatio)
+	barY := int(float32(s.area.scroll.size.Height-barHeight) * barRatio)
 
-	s.bar.Resize(barSize)
-	s.bar.Move(fyne.NewPos(0, barOff))
+	var barX, barWidth int
+	if s.area.isWide {
+		barWidth = theme.ScrollBarSize()
+	} else {
+		barX = theme.ScrollBarSmallSize()
+		barWidth = theme.ScrollBarSmallSize()
+	}
+
+	s.bar.Resize(fyne.NewSize(barWidth, barHeight))
+	s.bar.Move(fyne.NewPos(barX, barY))
+}
+
+func (s *scrollBarAreaRenderer) verticalBarHeight() int {
+	portion := float32(s.area.size.Height) / float32(s.area.scroll.Content.Size().Height)
+	if portion > 1.0 {
+		portion = 1.0
+	}
+
+	return int(float32(s.area.size.Height) * portion)
 }
 
 var _ desktop.Hoverable = (*scrollBarArea)(nil)
@@ -212,7 +218,7 @@ func (s *scrollBarArea) Move(pos fyne.Position) {
 
 func (s *scrollBarArea) moveBar(y int) {
 	render := Renderer(s).(*scrollBarAreaRenderer)
-	barHeight := render.barSizeVertical().Height
+	barHeight := render.verticalBarHeight()
 	scrollHeight := s.scroll.Size().Height
 	maxY := scrollHeight - barHeight
 
