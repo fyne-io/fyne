@@ -31,6 +31,19 @@ func TestFocusManager_nextInChain_Nil(t *testing.T) {
 	assert.Equal(t, entry1, next)
 }
 
+func TestFocusManager_nextInChain_Hidden(t *testing.T) {
+	c := test.NewCanvas()
+	entry1 := widget.NewEntry()
+	check := widget.NewCheck("test", func(bool) {})
+	check.Hide()
+	entry2 := widget.NewEntry()
+	c.SetContent(widget.NewVBox(entry1, check, entry2))
+
+	manager := NewFocusManager(c)
+	next := manager.nextInChain(entry1)
+	assert.Equal(t, entry2, next)
+}
+
 func TestFocusManager_nextInChain_Disableable(t *testing.T) {
 	c := test.NewCanvas()
 	entry1 := widget.NewEntry()
@@ -78,6 +91,19 @@ func TestFocusManager_previousInChain_Nil(t *testing.T) {
 	manager := NewFocusManager(c)
 	previous := manager.previousInChain(nil)
 	assert.Equal(t, entry2, previous)
+}
+
+func TestFocusManager_previousInChain_Hidden(t *testing.T) {
+	c := test.NewCanvas()
+	entry1 := widget.NewEntry()
+	check := widget.NewCheck("test", func(bool) {})
+	check.Hide()
+	entry2 := widget.NewEntry()
+	c.SetContent(widget.NewVBox(entry1, check, entry2))
+
+	manager := NewFocusManager(c)
+	next := manager.previousInChain(entry2)
+	assert.Equal(t, entry1, next)
 }
 
 func TestFocusManager_previousInChain_Disableable(t *testing.T) {
