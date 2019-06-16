@@ -452,8 +452,16 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	var found fyne.CanvasObject
 	foundX, foundY := 0, 0
 
-	findFunc := func(walked fyne.CanvasObject, pos fyne.Position) bool {
+	findFunc := func(walked fyne.CanvasObject, pos fyne.Position, clipPos fyne.Position, clipSize fyne.Size) bool {
 		if !walked.Visible() {
+			return false
+		}
+
+		if mouse.X < clipPos.X || mouse.Y < clipPos.Y {
+			return false
+		}
+
+		if mouse.X >= clipPos.X+clipSize.Width || mouse.Y >= clipPos.Y+clipSize.Height {
 			return false
 		}
 
@@ -461,9 +469,7 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 			return false
 		}
 
-		x2 := pos.X + walked.Size().Width
-		y2 := pos.Y + walked.Size().Height
-		if mouse.X >= x2 || mouse.Y >= y2 {
+		if mouse.X >= pos.X+walked.Size().Width || mouse.Y >= pos.Y+walked.Size().Height {
 			return false
 		}
 

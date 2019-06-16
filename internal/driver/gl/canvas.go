@@ -271,7 +271,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-	paint := func(obj fyne.CanvasObject, pos fyne.Position) bool {
+	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		// TODO should this be somehow not scroll container specific?
 		if _, ok := obj.(*widget.ScrollContainer); ok {
 			scrollX := textureScaleInt(c, pos.X)
@@ -297,7 +297,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 }
 
 func (c *glCanvas) walkTree(
-	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
 	driver.WalkObjectTree(c.content, beforeChildren, afterChildren)
