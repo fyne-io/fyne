@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
-	"github.com/go-gl/gl/v3.2-core/gl"
+	gl "github.com/go-gl/gl/v3.1/gles2"
 )
 
 // Declare conformity with Canvas interface

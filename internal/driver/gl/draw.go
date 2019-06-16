@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/widget"
-	"github.com/go-gl/gl/v3.2-core/gl"
+	gl "github.com/go-gl/gl/v3.1/gles2"
 )
 
 func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {

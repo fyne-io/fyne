@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/go-gl/gl/v3.2-core/gl"
+	gl "github.com/go-gl/gl/v3.1/gles2"
 )
 
 type captureImage struct {

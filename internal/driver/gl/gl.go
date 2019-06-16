@@ -16,7 +16,8 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-	"github.com/go-gl/gl/v3.2-core/gl"
+
+	gl "github.com/go-gl/gl/v3.1/gles2"
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"github.com/srwiley/oksvg"
@@ -309,10 +310,10 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 const (
 	vertexShaderSource = `
-    #version 110
+    #version 100
     attribute vec3 vert;
     attribute vec2 vertTexCoord;
-    varying vec2 fragTexCoord;
+    varying highp vec2 fragTexCoord;
 
     void main() {
         fragTexCoord = vertTexCoord;
@@ -322,10 +323,10 @@ const (
 ` + "\x00"
 
 	fragmentShaderSource = `
-    #version 110
+    #version 100
     uniform sampler2D tex;
 
-    varying vec2 fragTexCoord;
+    varying highp vec2 fragTexCoord;
 
     void main() {
         gl_FragColor = texture2D(tex, fragTexCoord);

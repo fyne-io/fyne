@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/widget"
 
-	"github.com/go-gl/gl/v3.2-core/gl"
+	gl "github.com/go-gl/gl/v3.1/gles2"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -995,6 +995,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, 0)
 
+		glfw.WindowHint(glfw.ClientAPI, glfw.OpenGLESAPI)
 		glfw.WindowHint(glfw.ContextVersionMajor, 2)
 		glfw.WindowHint(glfw.ContextVersionMinor, 0)
 

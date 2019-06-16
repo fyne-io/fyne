@@ -7,7 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
-	"github.com/go-gl/gl/v3.2-core/gl"
+	gl "github.com/go-gl/gl/v3.1/gles2"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 

@@ -1,8 +1,6 @@
 package gl
 
-import (
-	"github.com/go-gl/gl/v3.2-core/gl"
-)
+import gl "github.com/go-gl/gl/v3.1/gles2"
 
 func updateGLContext(w *window) {
 	canvas := w.Canvas()
