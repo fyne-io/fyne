@@ -18,11 +18,13 @@ func TestNewScrollContainer(t *testing.T) {
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	barArea := Renderer(scroll).(*scrollRenderer).vertArea
-	render := Renderer(barArea).(*scrollBarAreaRenderer)
+	bar := Renderer(barArea).(*scrollBarAreaRenderer).bar
 
 	assert.Equal(t, 0, scroll.Offset.Y)
-	assert.Equal(t, fyne.NewSize(theme.ScrollBarSmallSize(), 100), render.barSizeVertical())
-	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize(), 0), barArea.Position())
+	assert.Equal(t, theme.ScrollBarSmallSize()*2, barArea.Size().Width)
+	assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Width)
+	assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().X)
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), barArea.Position())
 }
 
 func TestScrollContainer_Refresh(t *testing.T) {
@@ -156,12 +158,15 @@ func TestScrollContainer_ScrollBarIsSmall(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(100, 500))
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
-	r := Renderer(scroll).(*scrollRenderer)
-	require.True(t, r.vertArea.Visible())
+	area := Renderer(scroll).(*scrollRenderer).vertArea
+	bar := Renderer(area).(*scrollBarAreaRenderer).bar
+	require.True(t, area.Visible())
 	require.Less(t, theme.ScrollBarSmallSize(), theme.ScrollBarSize())
 
-	assert.Equal(t, theme.ScrollBarSmallSize(), r.vertArea.Size().Width)
-	assert.Equal(t, theme.ScrollBarSmallSize(), Renderer(r.vertArea).(*scrollBarAreaRenderer).barSizeVertical().Width)
+	assert.Equal(t, theme.ScrollBarSmallSize()*2, area.Size().Width)
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), area.Position())
+	assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Width)
+	assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().X)
 }
 
 func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing.T) {
@@ -170,21 +175,25 @@ func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	area := Renderer(scroll).(*scrollRenderer).vertArea
-	ar := Renderer(area).(*scrollBarAreaRenderer)
-	bar := ar.bar
+	bar := Renderer(area).(*scrollBarAreaRenderer).bar
 	require.True(t, bar.Visible())
 	require.Less(t, theme.ScrollBarSmallSize(), theme.ScrollBarSize())
+	require.Equal(t, theme.ScrollBarSmallSize()*2, area.Size().Width)
+	require.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), area.Position())
 	require.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Width)
-	require.Equal(t, theme.ScrollBarSmallSize(), area.Size().Width)
-	require.Equal(t, theme.ScrollBarSmallSize(), ar.barSizeVertical().Width)
+	require.Equal(t, theme.ScrollBarSmallSize(), bar.Position().X)
 
 	bar.MouseIn(&desktop.MouseEvent{})
+	assert.Equal(t, theme.ScrollBarSize(), area.Size().Width)
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSize(), 0), area.Position())
 	assert.Equal(t, theme.ScrollBarSize(), bar.Size().Width)
-	assert.Equal(t, theme.ScrollBarSize(), ar.barSizeVertical().Width)
+	assert.Equal(t, 0, bar.Position().X)
 
 	bar.MouseOut()
+	assert.Equal(t, theme.ScrollBarSmallSize()*2, area.Size().Width)
+	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), area.Position())
 	assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Width)
-	assert.Equal(t, theme.ScrollBarSmallSize(), ar.barSizeVertical().Width)
+	assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().X)
 }
 
 func TestScrollContainer_ShowShadowOnTopIfContentIsScrolled(t *testing.T) {
@@ -226,11 +235,11 @@ func TestScrollBarRenderer_BarSize(t *testing.T) {
 	scroll.Resize(fyne.NewSize(100, 100))
 	ar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer)
 
-	assert.Equal(t, fyne.NewSize(theme.ScrollBarSmallSize(), 100), ar.barSizeVertical())
+	assert.Equal(t, 100, ar.verticalBarHeight())
 
 	// resize so content is twice our size. Bar should therefore be half again.
 	scroll.Resize(fyne.NewSize(50, 50))
-	assert.Equal(t, fyne.NewSize(theme.ScrollBarSmallSize(), 25), ar.barSizeVertical())
+	assert.Equal(t, 25, ar.verticalBarHeight())
 }
 
 func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
@@ -240,7 +249,7 @@ func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
 	scroll.Resize(fyne.NewSize(120, 120))
 	ar := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer)
 
-	assert.Equal(t, fyne.NewSize(theme.ScrollBarSmallSize(), 120), ar.barSizeVertical())
+	assert.Equal(t, 120, ar.verticalBarHeight())
 }
 
 func TestScrollBar_Dragged_ClickedInside(t *testing.T) {
