@@ -142,9 +142,7 @@ func (r *radioRenderer) Refresh() {
 		}
 		item.icon.Resource = res
 
-		if r.radio.Selected == option {
-			item.focusIndicator.FillColor = theme.FocusColor()
-		} else if r.radio.Disabled() {
+		if r.radio.Disabled() {
 			item.focusIndicator.FillColor = theme.BackgroundColor()
 		} else if r.radio.hoveredItemIndex == i {
 			item.focusIndicator.FillColor = theme.HoverColor()
