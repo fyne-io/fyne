@@ -261,12 +261,12 @@ func TestRadio_Hovered(t *testing.T) {
 			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
 
 			radio.SetSelected("Hi")
-			assert.Equal(t, theme.FocusColor(), render.items[0].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
 			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
 
 			radio.SetSelected("Another")
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.FocusColor(), render.items[1].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
 
 			radio.MouseIn(&desktop.MouseEvent{
 				PointEvent: fyne.PointEvent{
@@ -275,7 +275,7 @@ func TestRadio_Hovered(t *testing.T) {
 			})
 			assert.Equal(t, 0, radio.hoveredItemIndex)
 			assert.Equal(t, theme.HoverColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.FocusColor(), render.items[1].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
 
 			var mouseMove fyne.Position
 			if tt.isHorizontal {
@@ -291,7 +291,7 @@ func TestRadio_Hovered(t *testing.T) {
 			})
 			assert.Equal(t, 1, radio.hoveredItemIndex)
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.FocusColor(), render.items[1].focusIndicator.FillColor)
+			assert.Equal(t, theme.HoverColor(), render.items[1].focusIndicator.FillColor)
 		})
 	}
 }
