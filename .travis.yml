@@ -12,7 +12,7 @@ os:
 addons:
   apt:
     packages:
-      - libgl1-mesa-dev
+      - libegl1-mesa-dev
       - xorg-dev
 
 gobuild_args: "-v -tags ci"
