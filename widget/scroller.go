@@ -114,6 +114,26 @@ type scrollBarAreaRenderer struct {
 	objects []fyne.CanvasObject
 }
 
+func (s *scrollBarAreaRenderer) ApplyTheme() {
+}
+
+func (s *scrollBarAreaRenderer) BackgroundColor() color.Color {
+	return color.Transparent
+}
+
+func (s *scrollBarAreaRenderer) barSizeVertical() fyne.Size {
+	portion := float32(s.area.size.Height) / float32(s.area.scroll.Content.Size().Height)
+	if portion > 1.0 {
+		portion = 1.0
+	}
+
+	barHeight := int(float32(s.area.size.Height) * portion)
+	return fyne.NewSize(s.minWidth(), barHeight)
+}
+
+func (s *scrollBarAreaRenderer) Destroy() {
+}
+
 func (s *scrollBarAreaRenderer) Layout(size fyne.Size) {
 	s.updateBarPosition()
 }
@@ -129,33 +149,13 @@ func (s *scrollBarAreaRenderer) minWidth() int {
 	return theme.ScrollBarSmallSize()
 }
 
-func (s *scrollBarAreaRenderer) Refresh() {
-	s.updateBarPosition()
-	canvas.Refresh(s.bar)
-}
-
-func (s *scrollBarAreaRenderer) ApplyTheme() {
-}
-
-func (s *scrollBarAreaRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 func (s *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s *scrollBarAreaRenderer) Destroy() {
-}
-
-func (s *scrollBarAreaRenderer) barSizeVertical() fyne.Size {
-	portion := float32(s.area.size.Height) / float32(s.area.scroll.Content.Size().Height)
-	if portion > 1.0 {
-		portion = 1.0
-	}
-
-	barHeight := int(float32(s.area.size.Height) * portion)
-	return fyne.NewSize(s.minWidth(), barHeight)
+func (s *scrollBarAreaRenderer) Refresh() {
+	s.updateBarPosition()
+	canvas.Refresh(s.bar)
 }
 
 func (s *scrollBarAreaRenderer) updateBarPosition() {
@@ -179,8 +179,17 @@ type scrollBarArea struct {
 	scroll *ScrollContainer
 }
 
-func (s *scrollBarArea) Resize(size fyne.Size) {
-	s.resize(size, s)
+func (s *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
+	bar := newScrollBar(s)
+	return &scrollBarAreaRenderer{area: s, bar: bar, objects: []fyne.CanvasObject{bar}}
+}
+
+func (s *scrollBarArea) Hide() {
+	s.hide(s)
+}
+
+func (s *scrollBarArea) MinSize() fyne.Size {
+	return s.minSize(s)
 }
 
 func (s *scrollBarArea) MouseIn(*desktop.MouseEvent) {
@@ -219,21 +228,12 @@ func (s *scrollBarArea) moveBar(y int) {
 	Refresh(s.scroll)
 }
 
-func (s *scrollBarArea) MinSize() fyne.Size {
-	return s.minSize(s)
+func (s *scrollBarArea) Resize(size fyne.Size) {
+	s.resize(size, s)
 }
 
 func (s *scrollBarArea) Show() {
 	s.show(s)
-}
-
-func (s *scrollBarArea) Hide() {
-	s.hide(s)
-}
-
-func (s *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
-	bar := newScrollBar(s)
-	return &scrollBarAreaRenderer{area: s, bar: bar, objects: []fyne.CanvasObject{bar}}
 }
 
 func newScrollBarArea(scroll *ScrollContainer) *scrollBarArea {
