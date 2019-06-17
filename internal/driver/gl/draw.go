@@ -93,14 +93,13 @@ func (c *glCanvas) drawTexture(texture uint32, points []float32) {
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
 }
 
-func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	backCol := widget.Renderer(box.(fyne.Widget)).BackgroundColor()
-	if !box.Visible() || backCol == color.Transparent {
+func (c *glCanvas) drawWidget(wid fyne.Widget, pos fyne.Position, frame fyne.Size) {
+	if widget.Renderer(wid).BackgroundColor() == color.Transparent {
 		return
 	}
 
-	points, vao, vbo := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	texture := getTexture(box, c.newGlRectTexture)
+	points, vao, vbo := c.rectCoords(wid.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	texture := getTexture(wid, c.newGlRectTexture)
 
 	gl.Enable(gl.BLEND)
 	c.drawTexture(texture, points)
@@ -108,10 +107,6 @@ func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fy
 }
 
 func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	if !circle.Visible() {
-		return
-	}
-
 	points, vao, vbo := c.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(circle, c.newGlCircleTexture)
 
@@ -122,10 +117,6 @@ func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fy
 }
 
 func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
-	if !line.Visible() {
-		return
-	}
-
 	points, vao, vbo := c.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(line, c.newGlLineTexture)
 
@@ -136,10 +127,6 @@ func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Siz
 }
 
 func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
-	if !img.Visible() {
-		return
-	}
-
 	texture := getTexture(img, c.newGlImageTexture)
 	if texture == 0 {
 		return
@@ -165,10 +152,6 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 }
 
 func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
-	if !img.Visible() {
-		return
-	}
-
 	texture := getTexture(img, c.newGlRasterTexture)
 	if texture == 0 {
 		return
@@ -189,10 +172,6 @@ func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.
 }
 
 func (c *glCanvas) drawGradient(g canvas.Gradient, pos fyne.Position, frame fyne.Size) {
-	if !g.Visible() {
-		return
-	}
-
 	texture := getTexture(g, c.newGlGradientTexture)
 	if texture == 0 {
 		return
@@ -208,10 +187,6 @@ func (c *glCanvas) drawGradient(g canvas.Gradient, pos fyne.Position, frame fyne
 }
 
 func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	if !rect.Visible() {
-		return
-	}
-
 	points, vao, vbo := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(rect, c.newGlRectTexture)
 
@@ -221,7 +196,7 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fram
 }
 
 func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
-	if !text.Visible() || text.Text == "" {
+	if text.Text == "" {
 		return
 	}
 
@@ -248,6 +223,9 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 }
 
 func (c *glCanvas) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+	if !o.Visible() {
+		return
+	}
 	canvasMutex.Lock()
 	canvases[o] = c
 	canvasMutex.Unlock()
