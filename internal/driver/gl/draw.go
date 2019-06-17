@@ -171,8 +171,8 @@ func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.
 	c.freeCoords(vao, vbo)
 }
 
-func (c *glCanvas) drawGradient(g canvas.Gradient, pos fyne.Position, frame fyne.Size) {
-	texture := getTexture(g, c.newGlGradientTexture)
+func (c *glCanvas) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasObject) uint32, pos fyne.Position, frame fyne.Size) {
+	texture := getTexture(o, texCreator)
 	if texture == 0 {
 		return
 	}
@@ -181,7 +181,7 @@ func (c *glCanvas) drawGradient(g canvas.Gradient, pos fyne.Position, frame fyne
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	points, vao, vbo := c.rectCoords(g.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	points, vao, vbo := c.rectCoords(o.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	c.drawTexture(texture, points)
 	c.freeCoords(vao, vbo)
 }
@@ -242,8 +242,10 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne
 		c.drawRectangle(obj, pos, frame)
 	case *canvas.Text:
 		c.drawText(obj, pos, frame)
-	case canvas.Gradient:
-		c.drawGradient(obj, pos, frame)
+	case *canvas.LinearGradient:
+		c.drawGradient(obj, c.newGlLinearGradientTexture, pos, frame)
+	case *canvas.RadialGradient:
+		c.drawGradient(obj, c.newGlRadialGradientTexture, pos, frame)
 	case fyne.Widget:
 		c.drawWidget(obj, pos, frame)
 	}

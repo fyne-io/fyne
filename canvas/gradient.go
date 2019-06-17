@@ -4,97 +4,79 @@ import (
 	"image"
 	"image/color"
 	"math"
-
-	"fyne.io/fyne"
 )
-
-// Gradient describes a gradient fade between two colors.
-type Gradient interface {
-	fyne.CanvasObject
-	calculateGradient(x, y, w, h float64) float64
-	Compute(w, h int) image.Image
-}
-
-type baseGradient struct {
-	baseObject
-
-	StartColor color.Color // The beginning RGBA color of the gradient
-	EndColor   color.Color // The end RGBA color of the gradient
-}
-
-var _ Gradient = (*LinearGradient)(nil)
-var _ Gradient = (*RadialGradient)(nil)
 
 // LinearGradient defines a Gradient travelling straight at a given angle.
 // The only supported values for the angle are `0.0` (vertical) and `90.0` (horizontal), currently.
 type LinearGradient struct {
-	baseGradient
+	baseObject
 
-	Angle float64 // The angle of the gradient (0/180 for vertical; 90/270 for horizontal)
-}
-
-func (g *LinearGradient) calculateGradient(x, y, w, h float64) float64 {
-	if g.Angle == 90 {
-		// horizontal
-		return x / w
-	}
-	// vertical
-	return y / h
+	StartColor color.Color // The beginning RGBA color of the gradient
+	EndColor   color.Color // The end RGBA color of the gradient
+	Angle      float64     // The angle of the gradient (0/180 for vertical; 90/270 for horizontal)
 }
 
 // Compute calculates an image of the gradient with the specified width and height.
 func (g *LinearGradient) Compute(w, h int) image.Image {
-	return computeGradient(g, w, h, g.StartColor, g.EndColor)
+	var generator func(x, y, w, h float64) float64
+	if g.Angle == 90 {
+		// horizontal
+		generator = func(x, _, w, _ float64) float64 {
+			return x / w
+		}
+	} else {
+		// vertical
+		generator = func(_, y, _, h float64) float64 {
+			return y / h
+		}
+	}
+	return computeGradient(generator, w, h, g.StartColor, g.EndColor)
 }
 
 // RadialGradient defines a Gradient travelling radially from a center point outward.
 type RadialGradient struct {
-	baseGradient
+	baseObject
 
+	StartColor color.Color // The beginning RGBA color of the gradient
+	EndColor   color.Color // The end RGBA color of the gradient
 	// The offset of the center for generation of the gradient.
 	// This is not a DP measure but relates to the width/height.
 	// A value of 0.5 would move the center by the half width/height.
 	CenterOffsetX, CenterOffsetY float64
 }
 
-func (g *RadialGradient) calculateGradient(x, y, w, h float64) float64 {
-	// define center plus offset
-	centerX := w/2 + w*g.CenterOffsetX
-	centerY := h/2 + h*g.CenterOffsetY
-
-	// handle negative offsets
-	var a, b float64
-	if g.CenterOffsetX < 0 {
-		a = w - centerX
-	} else {
-		a = centerX
-	}
-	if g.CenterOffsetY < 0 {
-		b = h - centerY
-	} else {
-		b = centerY
-	}
-
-	// calculate distance from center for gradient multiplier
-	dx, dy := centerX-x, centerY-y
-	da := math.Sqrt(dx*dx + dy*dy*a*a/b/b)
-	if da > a {
-		return 1
-	}
-	return da / a
-}
-
 // Compute calculates an image of the gradient with the specified width and height.
 func (g *RadialGradient) Compute(w, h int) image.Image {
-	return computeGradient(g, w, h, g.StartColor, g.EndColor)
+	generator := func(x, y, w, h float64) float64 {
+		// define center plus offset
+		centerX := w/2 + w*g.CenterOffsetX
+		centerY := h/2 + h*g.CenterOffsetY
+
+		// handle negative offsets
+		var a, b float64
+		if g.CenterOffsetX < 0 {
+			a = w - centerX
+		} else {
+			a = centerX
+		}
+		if g.CenterOffsetY < 0 {
+			b = h - centerY
+		} else {
+			b = centerY
+		}
+
+		// calculate distance from center for gradient multiplier
+		dx, dy := centerX-x, centerY-y
+		da := math.Sqrt(dx*dx + dy*dy*a*a/b/b)
+		if da > a {
+			return 1
+		}
+		return da / a
+	}
+	return computeGradient(generator, w, h, g.StartColor, g.EndColor)
 }
 
-// calculatePixel calculates the pixel at x, y as a gradient between start and end
-// using w and h to determine rate of gradation
-// returns a color.RGBA64
-func calculatePixel(g Gradient, w, h, x, y float64, startColor, endColor color.Color) *color.RGBA64 {
-	d := g.calculateGradient(x, y, w, h)
-
+func calculatePixel(d float64, startColor, endColor color.Color) *color.RGBA64 {
 	// fetch RGBA values
 	aR, aG, aB, aA := startColor.RGBA()
 	bR, bG, bB, bA := endColor.RGBA()
@@ -116,7 +98,7 @@ func calculatePixel(g Gradient, w, h, x, y float64, startColor, endColor color.C
 	return pixel
 }
 
-func computeGradient(g Gradient, w, h int, startColor, endColor color.Color) image.Image {
+func computeGradient(generator func(x, y, w, h float64) float64, w, h int, startColor, endColor color.Color) image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 
 	if startColor == nil && endColor == nil {
@@ -129,7 +111,8 @@ func computeGradient(g Gradient, w, h int, startColor, endColor color.Color) ima
 
 	for x := 0; x < w; x++ {
 		for y := 0; y < h; y++ {
-			img.Set(x, y, calculatePixel(g, float64(w), float64(h), float64(x), float64(y), startColor, endColor))
+			distance := generator(float64(x), float64(y), float64(w), float64(h))
+			img.Set(x, y, calculatePixel(distance, startColor, endColor))
 		}
 	}
 	return img
@@ -137,17 +120,17 @@ func computeGradient(g Gradient, w, h int, startColor, endColor color.Color) ima
 
 // NewHorizontalGradient creates a new horiziontally travelling linear gradient.
 func NewHorizontalGradient(start color.Color, end color.Color) *LinearGradient {
-	g := &LinearGradient{baseGradient: baseGradient{StartColor: start, EndColor: end}}
+	g := &LinearGradient{StartColor: start, EndColor: end}
 	g.Angle = 90
 	return g
 }
 
 // NewRadialGradient creates a new radial gradient.
 func NewRadialGradient(start color.Color, end color.Color) *RadialGradient {
-	return &RadialGradient{baseGradient: baseGradient{StartColor: start, EndColor: end}}
+	return &RadialGradient{StartColor: start, EndColor: end}
 }
 
 // NewVerticalGradient creates a new vertically travelling linear gradient.
 func NewVerticalGradient(start color.Color, end color.Color) *LinearGradient {
-	return &LinearGradient{baseGradient: baseGradient{StartColor: start, EndColor: end}}
+	return &LinearGradient{StartColor: start, EndColor: end}
 }
