@@ -207,7 +207,7 @@ type textRenderer struct {
 func (r *textRenderer) MinSize() fyne.Size {
 	height := 0
 	width := 0
-	for i := 0; i < len(r.texts); i++ {
+	for i := 0; i < fyne.Min(len(r.texts), r.provider.rows()); i++ {
 		min := r.texts[i].MinSize()
 		if r.texts[i].Text == "" {
 			min = r.provider.charMinSize()
