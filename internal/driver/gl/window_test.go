@@ -16,6 +16,7 @@ import (
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
+	"fyne.io/fyne/layout"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -280,6 +281,48 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	w.mouseMoved(w.viewport, 16, 8)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	assert.NotNil(t, dh.popMouseOutEvent())
+}
+
+func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	rect := canvas.NewRectangle(color.White)
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	tapped := make(chan bool, 1)
+	button := widget.NewButton("Tap", func() {
+		tapped <- true
+	})
+	rect2 := canvas.NewRectangle(color.Black)
+	rect2.SetMinSize(fyne.NewSize(100, 100))
+	child := fyne.NewContainerWithLayout(layout.NewGridLayout(1), button, rect2)
+	scroll := widget.NewScrollContainer(child)
+	scroll.Offset = fyne.NewPos(0, 50)
+
+	base := fyne.NewContainerWithLayout(layout.NewGridLayout(1), rect, scroll)
+	w.SetContent(base)
+
+	w.mousePos = fyne.NewPos(10, 80)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	select {
+	case _ = <-tapped:
+		t.Error("Tapped button that was clipped")
+	case <-time.After(100 * time.Millisecond):
+		// didn't tap in a decent time
+	}
+
+	w.mousePos = fyne.NewPos(10, 120)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	select {
+	case _ = <-tapped:
+		// button tapped
+	case <-time.After(3 * time.Second):
+		t.Error("waiting for button to be tapped")
+	}
 }
 
 func TestWindow_SetTitle(t *testing.T) {
