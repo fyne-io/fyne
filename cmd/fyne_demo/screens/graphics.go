@@ -19,7 +19,7 @@ func rgbGradient(x, y, w, h int) color.Color {
 
 // GraphicsScreen loads a graphics example panel for the demo app
 func GraphicsScreen() fyne.CanvasObject {
-	content := fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(93, 93)),
+	content := fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(90, 90)),
 		&canvas.Rectangle{FillColor: color.RGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.RGBA{0xff, 0xff, 0xff, 0xff},
 			StrokeWidth: 1},
@@ -30,8 +30,9 @@ func GraphicsScreen() fyne.CanvasObject {
 			StrokeWidth: 2},
 		canvas.NewText("Text", color.RGBA{0, 0x80, 0, 0xff}),
 		canvas.NewRasterWithPixels(rgbGradient),
-		canvas.NewLinearGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0x80, 0, 0xff}, canvas.GradientDirectionHorizontal),
-		canvas.NewLinearGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0, 0x80, 0xff}, canvas.GradientDirectionCircular),
+		canvas.NewHorizontalGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0x80, 0, 0xff}),
+		canvas.NewVerticalGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0, 0x80, 0xff}),
+		canvas.NewRadialGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0x80, 0x80, 0xff}),
 	)
 
 	headings := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
