@@ -65,11 +65,18 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			w.Show()
 		}),
 		widget.NewButton("Fixed size window", func() {
-			w := fyne.CurrentApp().NewWindow("Hello")
+			w := fyne.CurrentApp().NewWindow("Fixed")
 			w.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), widget.NewLabel("Hello World!")))
 
 			w.Resize(fyne.NewSize(240, 180))
 			w.SetFixedSize(true)
+			w.Show()
+		}),
+		widget.NewButton("Centered window", func() {
+			w := fyne.CurrentApp().NewWindow("Central")
+			w.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), widget.NewLabel("Hello World!")))
+
+			w.CenterOnScreen()
 			w.Show()
 		})))
 

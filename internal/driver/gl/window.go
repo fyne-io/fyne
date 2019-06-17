@@ -132,7 +132,7 @@ func (w *window) centerOnScreen() {
 
 		// set new window coordinates
 		w.viewport.SetPos(newX, newY)
-	}) // end of runOnMainAsync(){}
+	}) // end of runOnMain(){}
 }
 
 // minSizeOnScreen gets thpaddede minimum size of a window content in screen pixels
@@ -316,17 +316,17 @@ func (w *window) Show() {
 		w.visible = true
 		w.viewport.Show()
 
-		if w.fullScreen {
-			w.SetFullScreen(true)
-		} else if w.centered {
-			w.centerOnScreen()
-		}
-
 		// show top canvas element
 		if w.canvas.content != nil {
 			w.canvas.content.Show()
 		}
 	})
+
+	if w.fullScreen {
+		w.SetFullScreen(true)
+	} else if w.centered {
+		w.centerOnScreen()
+	}
 }
 
 func (w *window) Hide() {
