@@ -312,20 +312,20 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) Show() {
-	runOnMain(func() {
-		w.visible = true
-		w.viewport.Show()
-
-		// show top canvas element
-		if w.canvas.content != nil {
-			w.canvas.content.Show()
-		}
-	})
-
 	if w.fullScreen {
 		w.SetFullScreen(true)
 	} else if w.centered {
 		w.centerOnScreen()
+	}
+
+	runOnMain(func() {
+		w.visible = true
+		w.viewport.Show()
+	})
+
+	// show top canvas element
+	if w.canvas.content != nil {
+		w.canvas.content.Show()
 	}
 }
 
