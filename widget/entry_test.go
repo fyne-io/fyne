@@ -12,6 +12,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestEntry_InterfaceCompatibilityTest(t *testing.T) {
+	entry := fyne.Widget(NewEntry())
+	var ok bool
+
+	_, ok = entry.(fyne.Draggable)
+	assert.True(t, ok, "Unable to accept drag events")
+	_, ok = entry.(fyne.Tappable)
+	assert.True(t, ok, "Unable to accept tap events")
+	_, ok = entry.(desktop.Mouseable)
+	assert.True(t, ok, "Unable to accept mouse events")
+	_, ok = entry.(desktop.Keyable)
+	assert.True(t, ok, "Unable to accept keyboard events")
+}
+
 func entryRenderTexts(e *Entry) []*canvas.Text {
 	textWid := Renderer(e).(*entryRenderer).text
 	return Renderer(textWid).(*textRenderer).texts

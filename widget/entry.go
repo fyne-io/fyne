@@ -472,6 +472,10 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 	e.updateMousePointer(&d.PointEvent, false)
 }
 
+// DragEnd is called at end of a drag event - currently ignored
+func (e *Entry) DragEnd() {
+}
+
 func (e *Entry) updateMousePointer(ev *fyne.PointEvent, startSelect bool) {
 
 	if !e.focused {
