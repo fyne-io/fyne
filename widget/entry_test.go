@@ -459,6 +459,12 @@ func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
 	start, end = getTextWhitespaceRegion(str, 30)
 	assert.Equal(t, 29, start)
 	assert.Equal(t, len(str), end)
+
+	// select "is_a"
+	str = []rune("This-is_a-test")
+	start, end = getTextWhitespaceRegion(str, 6)
+	assert.Equal(t, 5, start)
+	assert.Equal(t, 9, end)
 }
 
 func TestEntry_DoubleTapped(t *testing.T) {

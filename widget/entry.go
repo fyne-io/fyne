@@ -508,10 +508,14 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 		return -1, -1
 	}
 
-	// maps: " fish 日本語本語日  \t "
-	// into: " ---- ------   "
+	// maps: " fi-sh 日本語本語日  \t "
+	// into: " -- -- ------   "
 	space := func(r rune) rune {
 		if unicode.IsSpace(r) {
+			return ' '
+		}
+		// If this rune is a typical word separator then classify it as whitespace
+		if strings.ContainsRune("`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?", r) {
 			return ' '
 		}
 		return '-'
