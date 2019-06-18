@@ -185,8 +185,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 				aspects[img.Resource] = float32(w) / float32(h)
 				// if the image specifies it should be original size we need at least that many pixels on screen
 				if img.FillMode == canvas.ImageFillOriginal {
-					pixSize := fyne.NewSize(unscaleInt(c, w), unscaleInt(c, h))
-					img.SetMinSize(pixSize)
+					c.checkImageMinSize(img, w, h)
 				}
 
 				tex = image.NewRGBA(image.Rect(0, 0, width, height))
@@ -212,8 +211,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		aspects[img] = float32(origSize.X) / float32(origSize.Y)
 		// if the image specifies it should be original size we need at least that many pixels on screen
 		if img.FillMode == canvas.ImageFillOriginal {
-			pixSize := fyne.NewSize(unscaleInt(c, origSize.X), unscaleInt(c, origSize.Y))
-			img.SetMinSize(pixSize)
+			c.checkImageMinSize(img, origSize.X, origSize.Y)
 		}
 
 		tex := image.NewRGBA(pixels.Bounds())
@@ -226,8 +224,7 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		aspects[img] = float32(origSize.X) / float32(origSize.Y)
 		// if the image specifies it should be original size we need at least that many pixels on screen
 		if img.FillMode == canvas.ImageFillOriginal {
-			pixSize := fyne.NewSize(unscaleInt(c, origSize.X), unscaleInt(c, origSize.Y))
-			img.SetMinSize(pixSize)
+			c.checkImageMinSize(img, origSize.X, origSize.Y)
 		}
 
 		tex := image.NewRGBA(img.Image.Bounds())
@@ -236,6 +233,15 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		return c.imgToTexture(tex)
 	default:
 		return c.imgToTexture(image.NewRGBA(image.Rect(0, 0, 1, 1)))
+	}
+}
+
+func (c *glCanvas) checkImageMinSize(img *canvas.Image, pixX, pixY int) {
+	pixSize := fyne.NewSize(unscaleInt(c, pixX), unscaleInt(c, pixY))
+
+	if img.MinSize() != pixSize {
+		img.SetMinSize(pixSize)
+		canvas.Refresh(img) // force the initial size to be respected
 	}
 }
 
