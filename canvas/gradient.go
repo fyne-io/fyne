@@ -16,8 +16,8 @@ type LinearGradient struct {
 	Angle      float64     // The angle of the gradient (0/180 for vertical; 90/270 for horizontal)
 }
 
-// Compute calculates an image of the gradient with the specified width and height.
-func (g *LinearGradient) Compute(w, h int) image.Image {
+// Generate calculates an image of the gradient with the specified width and height.
+func (g *LinearGradient) Generate(w, h int) image.Image {
 	var generator func(x, y, w, h float64) float64
 	if g.Angle == 90 {
 		// horizontal
@@ -45,8 +45,8 @@ type RadialGradient struct {
 	CenterOffsetX, CenterOffsetY float64
 }
 
-// Compute calculates an image of the gradient with the specified width and height.
-func (g *RadialGradient) Compute(w, h int) image.Image {
+// Generate calculates an image of the gradient with the specified width and height.
+func (g *RadialGradient) Generate(w, h int) image.Image {
 	generator := func(x, y, w, h float64) float64 {
 		// define center plus offset
 		centerX := w/2 + w*g.CenterOffsetX

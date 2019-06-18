@@ -254,7 +254,7 @@ func (c *glCanvas) newGlLinearGradientTexture(obj fyne.CanvasObject) uint32 {
 	width := textureScaleInt(c, gradient.Size().Width)
 	height := textureScaleInt(c, gradient.Size().Height)
 
-	return c.imgToTexture(gradient.Compute(width, height))
+	return c.imgToTexture(gradient.Generate(width, height))
 }
 
 func (c *glCanvas) newGlRadialGradientTexture(obj fyne.CanvasObject) uint32 {
@@ -263,7 +263,7 @@ func (c *glCanvas) newGlRadialGradientTexture(obj fyne.CanvasObject) uint32 {
 	width := textureScaleInt(c, gradient.Size().Width)
 	height := textureScaleInt(c, gradient.Size().Height)
 
-	return c.imgToTexture(gradient.Compute(width, height))
+	return c.imgToTexture(gradient.Generate(width, height))
 }
 
 func (c *glCanvas) imgToTexture(img image.Image) uint32 {
