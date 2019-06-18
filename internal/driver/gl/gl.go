@@ -248,13 +248,22 @@ func (c *glCanvas) newGlRasterTexture(obj fyne.CanvasObject) uint32 {
 	return c.imgToTexture(rast.Generator(width, height))
 }
 
-func (c *glCanvas) newGlGradientTexture(obj fyne.CanvasObject) uint32 {
-	rast := obj.(*canvas.Gradient)
+func (c *glCanvas) newGlLinearGradientTexture(obj fyne.CanvasObject) uint32 {
+	gradient := obj.(*canvas.LinearGradient)
 
-	width := textureScaleInt(c, rast.Size().Width)
-	height := textureScaleInt(c, rast.Size().Height)
+	width := textureScaleInt(c, gradient.Size().Width)
+	height := textureScaleInt(c, gradient.Size().Height)
 
-	return c.imgToTexture(rast.Generator(width, height))
+	return c.imgToTexture(gradient.Generate(width, height))
+}
+
+func (c *glCanvas) newGlRadialGradientTexture(obj fyne.CanvasObject) uint32 {
+	gradient := obj.(*canvas.LinearGradient)
+
+	width := textureScaleInt(c, gradient.Size().Width)
+	height := textureScaleInt(c, gradient.Size().Height)
+
+	return c.imgToTexture(gradient.Generate(width, height))
 }
 
 func (c *glCanvas) imgToTexture(img image.Image) uint32 {
