@@ -464,7 +464,7 @@ func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
 func TestEntry_ExpandSelectionWithWordSeparators(t *testing.T) {
 	// select "is_a"
 	str := []rune("This-is_a-test")
-	start, end = getTextWhitespaceRegion(str, 6)
+	start, end := getTextWhitespaceRegion(str, 6)
 	assert.Equal(t, 5, start)
 	assert.Equal(t, 9, end)
 }
