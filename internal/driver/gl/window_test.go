@@ -325,6 +325,47 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	}
 }
 
+func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	tapped := make(chan int, 1)
+	b1 := widget.NewButton("Tap", func() { tapped <- 1 })
+	b2 := widget.NewButton("Tap", func() { tapped <- 2 })
+	w.SetContent(widget.NewVBox(b1, b2))
+
+	w.mouseMoved(w.viewport, 10, 20)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	select {
+	case b := <-tapped:
+		assert.Equal(t, 1, b, "button 1 should be tapped")
+	case <-time.After(1 * time.Second):
+		t.Error("waiting for button to be tapped")
+	}
+
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 10, 40)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	select {
+	case b := <-tapped:
+		t.Error("button was tapped without mouse press & release on it:", b)
+	case <-time.After(100 * time.Millisecond):
+		// didn't tap in a decent time
+	}
+
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	select {
+	case b := <-tapped:
+		assert.Equal(t, 2, b, "button 2 should be tapped")
+	case <-time.After(1 * time.Second):
+		t.Error("waiting for button to be tapped")
+	}
+}
+
 func TestWindow_SetTitle(t *testing.T) {
 	w := d.CreateWindow("Test")
 

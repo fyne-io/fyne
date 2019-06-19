@@ -59,6 +59,7 @@ type window struct {
 	mouseButton        desktop.MouseButton
 	mouseOver          desktop.Hoverable
 	mouseClickTime     time.Time
+	mousePressed       fyne.Tappable
 	onClosed           func()
 
 	xpos, ypos    int
@@ -634,13 +635,18 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 
 	// Prevent Tapped from triggering if DoubleTapped has been sent
 	if wid, ok := co.(fyne.Tappable); ok && doubleTapped == false {
-		if action == glfw.Release {
-			switch button {
-			case glfw.MouseButtonRight:
-				go wid.TappedSecondary(ev)
-			default:
-				go wid.Tapped(ev)
+		if action == glfw.Press {
+			w.mousePressed = wid
+		} else if action == glfw.Release {
+			if wid == w.mousePressed {
+				switch button {
+				case glfw.MouseButtonRight:
+					go wid.TappedSecondary(ev)
+				default:
+					go wid.Tapped(ev)
+				}
 			}
+			w.mousePressed = nil
 		}
 	}
 	if wid, ok := co.(fyne.Draggable); ok {
