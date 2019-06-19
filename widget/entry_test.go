@@ -461,6 +461,14 @@ func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
 	assert.Equal(t, len(str), end)
 }
 
+func TestEntry_ExpandSelectionWithWordSeparators(t *testing.T) {
+	// select "is_a"
+	str := []rune("This-is_a-test")
+	start, end := getTextWhitespaceRegion(str, 6)
+	assert.Equal(t, 5, start)
+	assert.Equal(t, 9, end)
+}
+
 func TestEntry_DoubleTapped(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
