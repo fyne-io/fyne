@@ -54,7 +54,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 			b.shadow.Resize(size)
 		}
 	}
-	if b.button.Text != "" {
+	if b.label != nil {
 		padding := b.padding()
 		innerSize := size.Subtract(padding)
 		innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
@@ -62,7 +62,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 		labelSize := b.label.MinSize()
 		contentWidth := labelSize.Width
 
-		if b.button.Icon != nil {
+		if b.icon != nil {
 			contentWidth += theme.Padding() + theme.IconInlineSize()
 			iconOffset := fyne.NewPos((innerSize.Width-contentWidth)/2, (innerSize.Height-theme.IconInlineSize())/2)
 			b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
@@ -71,7 +71,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 		labelOffset := fyne.NewPos((innerSize.Width+contentWidth)/2-labelSize.Width, (innerSize.Height-labelSize.Height)/2)
 		b.label.Resize(labelSize)
 		b.label.Move(innerOffset.Add(labelOffset))
-	} else {
+	} else if b.icon != nil {
 		b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 		b.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
 	}
