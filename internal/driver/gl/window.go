@@ -65,6 +65,8 @@ type window struct {
 	xpos, ypos    int
 	width, height int
 	ignoreResize  bool
+
+	serialEvents chan func()
 }
 
 func (w *window) Title() string {
@@ -408,6 +410,12 @@ func (w *window) closed(viewport *glfw.Window) {
 	if w.onClosed != nil {
 		w.onClosed()
 	}
+
+	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
+	if w.serialEvents != nil {
+		close(w.serialEvents)
+		w.serialEvents = nil
+	}
 }
 
 func (w *window) moved(viewport *glfw.Window, x, y int) {
@@ -590,9 +598,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		mev.Position = ev.Position
 		mev.Button = convertMouseButton(button)
 		if action == glfw.Press {
-			go wid.MouseDown(mev)
+			w.dispatchSerialEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
-			go wid.MouseUp(mev)
+			w.dispatchSerialEvent(func() { wid.MouseUp(mev) })
 		}
 	}
 
@@ -627,7 +635,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
 			if wid, ok := co.(fyne.DoubleTappable); ok {
 				doubleTapped = true
-				go wid.DoubleTapped(ev)
+				w.dispatchSerialEvent(func() { wid.DoubleTapped(ev) })
 			}
 		}
 		w.mouseClickTime = now
@@ -641,9 +649,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			if wid == w.mousePressed {
 				switch button {
 				case glfw.MouseButtonRight:
-					go wid.TappedSecondary(ev)
+					w.dispatchSerialEvent(func() { wid.TappedSecondary(ev) })
 				default:
-					go wid.Tapped(ev)
+					w.dispatchSerialEvent(func() { wid.Tapped(ev) })
 				}
 			}
 			w.mousePressed = nil
@@ -872,18 +880,18 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	if action == glfw.Press {
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				go focused.KeyDown(keyEvent)
+				w.dispatchSerialEvent(func() { focused.KeyDown(keyEvent) })
 			}
 		} else if w.canvas.onKeyDown != nil {
-			go w.canvas.onKeyDown(keyEvent)
+			w.dispatchSerialEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
 	} else if action == glfw.Release { // ignore key up in core events
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				go focused.KeyUp(keyEvent)
+				w.dispatchSerialEvent(func() { focused.KeyUp(keyEvent) })
 			}
 		} else if w.canvas.onKeyUp != nil {
-			go w.canvas.onKeyUp(keyEvent)
+			w.dispatchSerialEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
 		return
 	} // key repeat will fall through to TypedKey and TypedShortcut
@@ -929,9 +937,9 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 
 	// No shortcut detected, pass down to TypedKey
 	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().TypedKey(keyEvent)
+		w.dispatchSerialEvent(func() { w.canvas.Focused().TypedKey(keyEvent) })
 	} else if w.canvas.onTypedKey != nil {
-		go w.canvas.onTypedKey(keyEvent)
+		w.dispatchSerialEvent(func() { w.canvas.onTypedKey(keyEvent) })
 	}
 }
 
@@ -990,6 +998,18 @@ func (w *window) runWithContext(f func()) {
 	glfw.DetachCurrentContext()
 }
 
+func (w *window) dispatchSerialEvent(fn func()) {
+	w.serialEvents <- fn
+}
+
+func (w *window) runSerialEvents() {
+	fyne.LogError("running serial events", nil)
+	for fn := range w.serialEvents {
+		fn()
+	}
+	fyne.LogError("closing serial events", nil)
+}
+
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	var ret *window
 	runOnMain(func() {
@@ -1027,6 +1047,13 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 			gl.Disable(gl.DEPTH_TEST)
 		}
 		ret = &window{viewport: win, title: title, master: master}
+
+		// Some events we want to always process in order, such as keyboard events.
+		// So we set up a queue, and dispatch a goroutine to call the event handlers.
+		// This channel will be closed when the window is closed.
+		ret.serialEvents = make(chan func(), 64)
+		go ret.runSerialEvents()
+
 		canvas := newCanvas()
 		canvas.context = ret
 		canvas.SetScale(ret.detectScale())
