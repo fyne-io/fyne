@@ -254,7 +254,7 @@ func (c *glCanvas) ensureMinSize() bool {
 		}
 	}
 	c.walkTree(nil, ensureMinSize)
-	if windowNeedsMinSizeUpdate {
+	if windowNeedsMinSizeUpdate && (c.size.Width < c.MinSize().Width || c.size.Height < c.MinSize().Height) {
 		c.Resize(c.Size().Union(c.MinSize()))
 	}
 	return windowNeedsMinSizeUpdate
