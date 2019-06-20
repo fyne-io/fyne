@@ -1003,11 +1003,9 @@ func (w *window) dispatchSerialEvent(fn func()) {
 }
 
 func (w *window) runSerialEvents() {
-	fyne.LogError("running serial events", nil)
 	for fn := range w.serialEvents {
 		fn()
 	}
-	fyne.LogError("closing serial events", nil)
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
