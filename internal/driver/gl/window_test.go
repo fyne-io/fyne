@@ -366,6 +366,50 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	}
 }
 
+func TestWindow_SupportDifferentKindsOfMouseEventsOnDifferentWidgets(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	tapped := make(chan bool, 1)
+	b := widget.NewButton("Tap", func() { tapped <- true })
+	d := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
+	f := &focusableObject{Rectangle: canvas.NewRectangle(color.White)}
+	m := &mouseableObject{
+		Rectangle: canvas.NewRectangle(color.White),
+		mouseable: mouseable{
+			down: make(chan *desktop.MouseEvent, 1),
+			up:   make(chan *desktop.MouseEvent, 1),
+		},
+	}
+	c := fyne.NewContainer(b, d, f, m)
+	w.SetContent(c)
+	for _, o := range c.Objects {
+		o.Resize(fyne.NewSize(50, 50))
+	}
+	require.False(t, f.Focused())
+
+	w.mouseMoved(w.viewport, 10, 10)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	assert.True(t, f.Focused())
+	select {
+	case _ = <-m.down:
+	case <-time.After(100 * time.Millisecond):
+		t.Error("mouseable did not receive MouseDown:", m)
+	}
+
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
+	assert.NotNil(t, d.popDragEndEvent())
+	select {
+	case _ = <-m.up:
+	case <-time.After(100 * time.Millisecond):
+		t.Error("mouseable did not receive MouseUp:", m)
+	}
+	select {
+	case _ = <-tapped:
+	case <-time.After(100 * time.Millisecond):
+		t.Error("button did not receive Tapped:", b)
+	}
+}
+
 func TestWindow_SetTitle(t *testing.T) {
 	w := d.CreateWindow("Test")
 
@@ -588,4 +632,53 @@ func pop(s []interface{}) (interface{}, []interface{}) {
 		return nil, s
 	}
 	return s[0], s[1:]
+}
+
+var _ fyne.Focusable = (*focusableObject)(nil)
+
+type focusableObject struct {
+	*canvas.Rectangle
+	focusable
+}
+
+type focusable struct {
+	focused bool
+}
+
+func (f *focusable) Focused() bool {
+	return f.focused
+}
+
+func (f *focusable) FocusGained() {
+	f.focused = true
+}
+
+func (f *focusable) FocusLost() {
+	f.focused = false
+}
+
+func (f *focusable) TypedKey(*fyne.KeyEvent) {
+}
+
+func (f *focusable) TypedRune(rune) {
+}
+
+var _ desktop.Mouseable = (*mouseableObject)(nil)
+
+type mouseableObject struct {
+	*canvas.Rectangle
+	mouseable
+}
+
+type mouseable struct {
+	down chan *desktop.MouseEvent
+	up   chan *desktop.MouseEvent
+}
+
+func (m *mouseable) MouseDown(e *desktop.MouseEvent) {
+	m.down <- e
+}
+
+func (m *mouseable) MouseUp(e *desktop.MouseEvent) {
+	m.up <- e
 }

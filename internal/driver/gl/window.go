@@ -448,11 +448,8 @@ func (w *window) refresh(viewport *glfw.Window) {
 	w.canvas.setDirty(true)
 }
 
-func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position,
-	matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, int, int) {
-	var found fyne.CanvasObject
-	foundX, foundY := 0, 0
-
+func (w *window) walkObjectsAtPositionMatching(canvas *glCanvas, mouse fyne.Position,
+	callback func(fyne.CanvasObject, fyne.Position)) {
 	findFunc := func(walked fyne.CanvasObject, pos fyne.Position, clipPos fyne.Position, clipSize fyne.Size) bool {
 		if !walked.Visible() {
 			return false
@@ -474,32 +471,27 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 			return false
 		}
 
-		if matches(walked) {
-			found = walked
-			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
-		}
+		callback(walked, pos)
 		return false
 	}
 
 	if canvas.overlay != nil {
 		driver.WalkObjectTree(canvas.overlay, findFunc, nil)
 	} else {
+		driver.WalkObjectTree(canvas.content, findFunc, nil)
 		if canvas.menu != nil {
 			driver.WalkObjectTree(canvas.menu, findFunc, nil)
 		}
-		if found == nil {
-			driver.WalkObjectTree(canvas.content, findFunc, nil)
-		}
 	}
-
-	return found, foundX, foundY
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
-
 	cursor := defaultCursor
-	obj, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+
+	var hovered desktop.Hoverable
+	var evPos fyne.Position
+	w.walkObjectsAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject, pos fyne.Position) {
 		if wid, ok := object.(*widget.Entry); ok {
 			if !wid.ReadOnly {
 				cursor = entryCursor
@@ -508,23 +500,23 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			cursor = hyperlinkCursor
 		}
 
-		_, hover := object.(desktop.Hoverable)
-		return hover
+		var ok bool
+		if hovered, ok = object.(desktop.Hoverable); ok {
+			evPos = w.mousePos.Subtract(pos)
+		}
 	})
 
 	viewport.SetCursor(cursor)
-	if obj != nil && !w.objIsDragged(obj) {
+	if hovered != nil && !w.objIsDragged(hovered) {
 		ev := new(desktop.MouseEvent)
-		ev.Position = fyne.NewPos(x, y)
+		ev.Position = evPos
 		ev.Button = w.mouseButton
 
-		if hovered, ok := obj.(desktop.Hoverable); ok {
-			if hovered == w.mouseOver {
-				hovered.MouseMoved(ev)
-			} else {
-				w.mouseOut()
-				w.mouseIn(hovered, ev)
-			}
+		if hovered == w.mouseOver {
+			hovered.MouseMoved(ev)
+		} else {
+			w.mouseOut()
+			w.mouseIn(hovered, ev)
 		}
 	} else if w.mouseOver != nil && !w.objIsDragged(w.mouseOver) {
 		w.mouseOut()
@@ -532,7 +524,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	if w.mouseDragged != nil {
 		if w.mouseButton > 0 {
-			draggedObjPos := w.mouseDragged.(fyne.CanvasObject).Position()
+			draggedObjPos := w.mouseDragged.Position()
 			ev := new(fyne.DragEvent)
 			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
 			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
@@ -567,44 +559,32 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
-	co, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		} else if _, ok := object.(fyne.Focusable); ok {
-			return true
-		} else if _, ok := object.(fyne.Draggable); ok {
-			return true
-		} else if _, ok := object.(desktop.Mouseable); ok {
-			return true
-		} else if _, ok := object.(desktop.Hoverable); ok {
-			return true
+	var dragged fyne.Draggable
+	var focused fyne.Focusable
+	var hovered desktop.Hoverable
+	var moused desktop.Mouseable
+	var tapped fyne.Tappable
+	var dragPos, mousePos, tapPos fyne.Position
+	w.walkObjectsAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject, pos fyne.Position) {
+		if d, ok := object.(fyne.Draggable); ok {
+			dragged = d
+			dragPos = pos
 		}
-
-		return false
+		if f, ok := object.(fyne.Focusable); ok {
+			focused = f
+		}
+		if h, ok := object.(desktop.Hoverable); ok {
+			hovered = h
+		}
+		if m, ok := object.(desktop.Mouseable); ok {
+			moused = m
+			mousePos = pos
+		}
+		if t, ok := object.(fyne.Tappable); ok {
+			tapped = t
+			tapPos = pos
+		}
 	})
-	ev := new(fyne.PointEvent)
-	ev.Position = fyne.NewPos(x, y)
-
-	if wid, ok := co.(desktop.Mouseable); ok {
-		mev := new(desktop.MouseEvent)
-		mev.Position = ev.Position
-		mev.Button = convertMouseButton(button)
-		if action == glfw.Press {
-			go wid.MouseDown(mev)
-		} else if action == glfw.Release {
-			go wid.MouseUp(mev)
-		}
-	}
-
-	needsfocus := true
-	wid := w.canvas.Focused()
-	if wid != nil {
-		needsfocus = false
-		if wid.(fyne.CanvasObject) != co {
-			w.canvas.Unfocus()
-			needsfocus = true
-		}
-	}
 
 	if action == glfw.Press {
 		w.mouseButton = convertMouseButton(button)
@@ -612,53 +592,68 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		w.mouseButton = 0
 	}
 
-	// we cannot switch here as objects may respond to multiple cases
-	if wid, ok := co.(fyne.Focusable); ok {
-		if needsfocus == true {
-			w.canvas.Focus(wid)
-		}
-	}
-
-	// Check for double click/tap
-	doubleTapped := false
-	if action == glfw.Release && button == glfw.MouseButtonLeft {
-		now := time.Now()
-		// we can safely subtract the first "zero" time as it'll be much larger than doubleClickDelay
-		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
-			if wid, ok := co.(fyne.DoubleTappable); ok {
-				doubleTapped = true
-				go wid.DoubleTapped(ev)
-			}
-		}
-		w.mouseClickTime = now
-	}
-
-	// Prevent Tapped from triggering if DoubleTapped has been sent
-	if wid, ok := co.(fyne.Tappable); ok && doubleTapped == false {
+	if moused != nil {
+		mev := new(desktop.MouseEvent)
+		mev.Position = w.mousePos.Subtract(mousePos)
+		mev.Button = w.mouseButton
 		if action == glfw.Press {
-			w.mousePressed = wid
+			go moused.MouseDown(mev)
 		} else if action == glfw.Release {
-			if wid == w.mousePressed {
-				switch button {
-				case glfw.MouseButtonRight:
-					go wid.TappedSecondary(ev)
-				default:
-					go wid.Tapped(ev)
+			go moused.MouseUp(mev)
+		}
+	}
+
+	// we cannot switch here as objects may respond to multiple cases
+	if focused != w.canvas.Focused() {
+		w.canvas.Focus(focused)
+	}
+
+	if tapped != nil {
+		tev := new(fyne.PointEvent)
+		tev.Position = w.mousePos.Subtract(tapPos)
+		// Check for double click/tap
+		var doubleTapped bool
+		if action == glfw.Release && button == glfw.MouseButtonLeft {
+			now := time.Now()
+			// we can safely subtract the first "zero" time as it'll be much larger than doubleClickDelay
+			if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
+				if wid, ok := tapped.(fyne.DoubleTappable); ok {
+					doubleTapped = true
+					go wid.DoubleTapped(tev)
 				}
 			}
-			w.mousePressed = nil
+			w.mouseClickTime = now
+		}
+
+		// Prevent Tapped from triggering if DoubleTapped has been sent
+		if !doubleTapped {
+			if action == glfw.Press {
+				w.mousePressed = tapped
+			} else if action == glfw.Release {
+				if tapped == w.mousePressed {
+					switch button {
+					case glfw.MouseButtonRight:
+						go tapped.TappedSecondary(tev)
+					default:
+						go tapped.Tapped(tev)
+					}
+				}
+				w.mousePressed = nil
+			}
 		}
 	}
-	if wid, ok := co.(fyne.Draggable); ok {
+
+	if dragged != nil {
+		dragPos = w.mousePos.Subtract(dragPos)
 		if action == glfw.Press {
 			w.mouseDragPos = w.mousePos
-			w.mouseDragged = wid
-			w.mouseDraggedOffset = w.mousePos.Subtract(co.Position()).Subtract(ev.Position)
+			w.mouseDragged = dragged
+			w.mouseDraggedOffset = w.mousePos.Subtract(dragged.Position()).Subtract(dragPos)
 		}
 	}
 	if action == glfw.Release && w.mouseDragged != nil {
 		w.mouseDragged.DragEnd()
-		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(co) {
+		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(hovered) {
 			w.mouseOut()
 		}
 		w.mouseDragged = nil
@@ -666,17 +661,16 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	co, _, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
-		_, ok := object.(fyne.Scrollable)
-		return ok
+	var scrolled fyne.Scrollable
+	w.walkObjectsAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject, _ fyne.Position) {
+		scrolled, _ = object.(fyne.Scrollable)
 	})
 
-	switch wid := co.(type) {
-	case fyne.Scrollable:
+	if scrolled != nil {
 		ev := &fyne.ScrollEvent{}
 		ev.DeltaX = int(xoff * scrollSpeed)
 		ev.DeltaY = int(yoff * scrollSpeed)
-		wid.Scrolled(ev)
+		scrolled.Scrolled(ev)
 	}
 }
 
