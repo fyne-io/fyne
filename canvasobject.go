@@ -25,12 +25,14 @@ type CanvasObject interface {
 // changes. When the settings detect a theme change the object will be informed
 // through the invocation of ApplyTheme().
 type Themeable interface {
+	CanvasObject
 	ApplyTheme()
 }
 
 // Tappable describes any CanvasObject that can also be tapped.
 // This should be implemented by buttons etc that wish to handle pointer interactions.
 type Tappable interface {
+	CanvasObject
 	Tapped(*PointEvent)
 	TappedSecondary(*PointEvent)
 }
@@ -44,6 +46,7 @@ type DoubleTappable interface {
 // Disableable describes any CanvasObject that can be disabled.
 // This is primarily used with objects that also implement the Tappable interface.
 type Disableable interface {
+	CanvasObject
 	Enable()
 	Disable()
 	Disabled() bool
@@ -52,12 +55,14 @@ type Disableable interface {
 // Scrollable describes any CanvasObject that can also be scrolled.
 // This is mostly used to implement the widget.ScrollContainer.
 type Scrollable interface {
+	CanvasObject
 	Scrolled(*ScrollEvent)
 }
 
 // Draggable indicates that a CanvasObject can be dragged.
 // This is used for any item that the user has indicated should be moved across the screen.
 type Draggable interface {
+	CanvasObject
 	Dragged(*DragEvent)
 	DragEnd()
 }
@@ -67,6 +72,7 @@ type Draggable interface {
 // When focused it will also have TypedRune called as text is input and
 // TypedKey called when other keys are pressed.
 type Focusable interface {
+	CanvasObject
 	FocusGained()
 	FocusLost()
 	Focused() bool
@@ -77,5 +83,6 @@ type Focusable interface {
 
 // Shortcutable describes any CanvasObject that can respond to shortcut commands (quit, cut, copy, and paste).
 type Shortcutable interface {
+	CanvasObject
 	TypedShortcut(shortcut Shortcut) bool
 }

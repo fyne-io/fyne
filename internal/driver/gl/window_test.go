@@ -504,12 +504,12 @@ func TestWindow_Shortcut(t *testing.T) {
 	assert.True(t, w.FullScreen())
 }
 
+var _ desktop.Hoverable = (*hoverableObject)(nil)
+
 type hoverableObject struct {
 	*canvas.Rectangle
 	hoverable
 }
-
-var _ desktop.Hoverable = (*hoverable)(nil)
 
 type hoverable struct {
 	mouseInEvents    []interface{}
@@ -544,12 +544,12 @@ func (h *hoverable) popMouseOutEvent() (e interface{}) {
 	return
 }
 
+var _ fyne.Draggable = (*draggableObject)(nil)
+
 type draggableObject struct {
 	*canvas.Rectangle
 	draggable
 }
-
-var _ fyne.Draggable = (*draggable)(nil)
 
 type draggable struct {
 	events    []interface{}
@@ -573,6 +573,9 @@ func (d *draggable) popDragEndEvent() (e interface{}) {
 	e, d.endEvents = pop(d.endEvents)
 	return
 }
+
+var _ fyne.Draggable = (*draggableHoverableObject)(nil)
+var _ desktop.Hoverable = (*draggableHoverableObject)(nil)
 
 type draggableHoverableObject struct {
 	*canvas.Rectangle

@@ -22,12 +22,14 @@ type MouseEvent struct {
 
 // Mouseable represents desktop mouse events that can be sent to CanvasObjects
 type Mouseable interface {
+	fyne.CanvasObject
 	MouseDown(*MouseEvent)
 	MouseUp(*MouseEvent)
 }
 
 // Hoverable is used when a canvas object wishes to know if a pointer device moves over it.
 type Hoverable interface {
+	fyne.CanvasObject
 	MouseIn(*MouseEvent)
 	MouseOut()
 	MouseMoved(*MouseEvent)
