@@ -1,6 +1,8 @@
 package driver
 
 import (
+	"math"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
 )
@@ -19,7 +21,8 @@ func WalkObjectTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) bool {
-	return walkObjectTree(obj, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), obj.Size(), beforeChildren, afterChildren)
+	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
+	return walkObjectTree(obj, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren)
 }
 
 func walkObjectTree(
