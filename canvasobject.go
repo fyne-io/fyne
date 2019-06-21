@@ -37,6 +37,7 @@ type Tappable interface {
 
 // DoubleTappable describes any CanvasObject that can also be double tapped.
 type DoubleTappable interface {
+	Tappable
 	DoubleTapped(*PointEvent)
 }
 
