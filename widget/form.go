@@ -32,7 +32,7 @@ func (f *Form) Resize(size fyne.Size) {
 	f.resize(size, f)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (f *Form) Move(pos fyne.Position) {
 	f.move(pos, f)
@@ -83,12 +83,16 @@ func (f *Form) AppendItem(item *FormItem) {
 	Refresh(f)
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ensureGrid()
 	for _, item := range f.Items {
 		f.itemGrid.AddObject(f.createLabel(item.Text))
 		f.itemGrid.AddObject(item.Widget)
+	}
+
+	if f.OnCancel == nil && f.OnSubmit == nil {
+		return Renderer(NewVBox(f.itemGrid))
 	}
 
 	buttons := NewHBox(layout.NewSpacer())

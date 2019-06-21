@@ -1,41 +1,86 @@
 package theme
 
-import "fyne.io/fyne"
+import (
+	"bytes"
+	"encoding/xml"
+	"fmt"
+	"image/color"
+	"log"
+
+	"fyne.io/fyne"
+)
 
 // ThemedResource is a resource wrapper that will return an appropriate resource
-// for the currently selected theme. In this implementation it chooses between a dark
-// and light alternative to match the current setting.
+// for the currently selected theme.
 type ThemedResource struct {
-	dark  fyne.Resource
-	light fyne.Resource
+	source fyne.Resource
 }
 
-func isThemeLight() bool {
-	return fyne.CurrentApp().Settings().Theme().BackgroundColor() == lightBackground
-}
-
-// Name returns the underlrying resource name (used for caching)
+// Name returns the underlying resource name (used for caching)
 func (res *ThemedResource) Name() string {
-	if isThemeLight() {
-		return res.light.Name()
-	}
-
-	return res.dark.Name()
+	return res.source.Name()
 }
 
 // Content returns the underlying content of the correct resource for the current theme
 func (res *ThemedResource) Content() []byte {
-	if isThemeLight() {
-		return res.light.Content()
-	}
-
-	return res.dark.Content()
+	clr := fyne.CurrentApp().Settings().Theme().IconColor()
+	return colorizeResource(res.source, clr)
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
-// It is currently a simple pairing of a dark and light variant of the same resource.
+// TODO: In version 2.0 we need to change this signature to just accept a single StaticResource pointer
 func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
-	return &ThemedResource{dark, light}
+	if light != nil {
+		log.Println("Deprecation Warning: In version 2.0 NewThemedResource() will only accept a single StaticResource.\n" +
+			"While two resources are still supported to preserve backwards compatibility, only the first resource is rendered.  " +
+			"The resource color is set by the theme's IconColor().")
+	}
+	return &ThemedResource{
+		source: dark,
+	}
+}
+
+// DisabledResource is a resource wrapper that will return an appropriate resource colorized by
+// the current theme's `DisabledIconColor` color.
+type DisabledResource struct {
+	source fyne.Resource
+}
+
+// Name returns the resource source name prefixed with `disabled_` (used for caching)
+func (res *DisabledResource) Name() string {
+	return fmt.Sprintf("disabled_%s", res.source.Name())
+}
+
+// Content returns the disabled style content of the correct resource for the current theme
+func (res *DisabledResource) Content() []byte {
+	clr := fyne.CurrentApp().Settings().Theme().DisabledIconColor()
+	return colorizeResource(res.source, clr)
+}
+
+// NewDisabledResource creates a resource that adapts to the current theme's DisabledIconColor setting.
+func NewDisabledResource(res fyne.Resource) *DisabledResource {
+	return &DisabledResource{
+		source: res,
+	}
+}
+
+func colorizeResource(res fyne.Resource, clr color.Color) []byte {
+	rdr := bytes.NewReader(res.Content())
+	s, err := svgFromXML(rdr)
+	if err != nil {
+		fyne.LogError("could not load SVG, falling back to static content:", err)
+		return res.Content()
+	}
+	if err := s.replaceFillColor(rdr, clr); err != nil {
+		fyne.LogError("could not replace fill color, falling back to static content:", err)
+		return res.Content()
+	}
+	b, err := xml.Marshal(s)
+	if err != nil {
+		fyne.LogError("could not marshal svg, falling back to static content:", err)
+		return res.Content()
+	}
+	return b
 }
 
 var (
@@ -45,62 +90,65 @@ var (
 	contentRedo, contentUndo, info, question, warning                           *ThemedResource
 	documentCreate, documentPrint, documentSave                                 *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
-	arrowBack, arrowDown, arrowForward, arrowUp                                 *ThemedResource
-	folder, folderNew, folderOpen, help, home                                   *ThemedResource
+	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
+	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
 )
 
 func init() {
-	cancel = &ThemedResource{cancelDark, cancelLight}
-	confirm = &ThemedResource{checkDark, checkLight}
-	delete = &ThemedResource{deleteDark, deleteLight}
-	search = &ThemedResource{searchDark, searchLight}
-	searchReplace = &ThemedResource{searchreplaceDark, searchreplaceLight}
+	cancel = NewThemedResource(cancelIconRes, nil)
+	confirm = NewThemedResource(checkIconRes, nil)
+	delete = NewThemedResource(deleteIconRes, nil)
+	search = NewThemedResource(searchIconRes, nil)
+	searchReplace = NewThemedResource(searchreplaceIconRes, nil)
 
-	checked = &ThemedResource{checkboxDark, checkboxLight}
-	unchecked = &ThemedResource{checkboxblankDark, checkboxblankLight}
-	radioButton = &ThemedResource{radiobuttonDark, radiobuttonLight}
-	radioButtonChecked = &ThemedResource{radiobuttoncheckedDark, radiobuttoncheckedLight}
+	checked = NewThemedResource(checkboxIconRes, nil)
+	unchecked = NewThemedResource(checkboxblankIconRes, nil)
+	radioButton = NewThemedResource(radiobuttonIconRes, nil)
+	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes, nil)
 
-	contentAdd = &ThemedResource{contentaddDark, contentaddLight}
-	contentRemove = &ThemedResource{contentremoveDark, contentremoveLight}
-	contentCut = &ThemedResource{contentcutDark, contentcutLight}
-	contentCopy = &ThemedResource{contentcopyDark, contentcopyLight}
-	contentPaste = &ThemedResource{contentpasteDark, contentpasteLight}
-	contentRedo = &ThemedResource{contentredoDark, contentredoLight}
-	contentUndo = &ThemedResource{contentundoDark, contentundoLight}
+	contentAdd = NewThemedResource(contentaddIconRes, nil)
+	contentRemove = NewThemedResource(contentremoveIconRes, nil)
+	contentCut = NewThemedResource(contentcutIconRes, nil)
+	contentCopy = NewThemedResource(contentcopyIconRes, nil)
+	contentPaste = NewThemedResource(contentpasteIconRes, nil)
+	contentRedo = NewThemedResource(contentredoIconRes, nil)
+	contentUndo = NewThemedResource(contentundoIconRes, nil)
 
-	documentCreate = &ThemedResource{documentcreateDark, documentcreateLight}
-	documentPrint = &ThemedResource{documentprintDark, documentprintLight}
-	documentSave = &ThemedResource{documentsaveDark, documentsaveLight}
+	documentCreate = NewThemedResource(documentcreateIconRes, nil)
+	documentPrint = NewThemedResource(documentprintIconRes, nil)
+	documentSave = NewThemedResource(documentsaveIconRes, nil)
 
-	info = &ThemedResource{infoDark, infoLight}
-	question = &ThemedResource{questionDark, questionLight}
-	warning = &ThemedResource{warningDark, warningLight}
+	info = NewThemedResource(infoIconRes, nil)
+	question = NewThemedResource(questionIconRes, nil)
+	warning = NewThemedResource(warningIconRes, nil)
 
-	mailAttachment = &ThemedResource{mailattachmentDark, mailattachmentLight}
-	mailCompose = &ThemedResource{mailcomposeDark, mailcomposeLight}
-	mailForward = &ThemedResource{mailforwardDark, mailforwardLight}
-	mailReply = &ThemedResource{mailreplyDark, mailreplyLight}
-	mailReplyAll = &ThemedResource{mailreplyallDark, mailreplyallLight}
-	mailSend = &ThemedResource{mailsendDark, mailsendLight}
+	mailAttachment = NewThemedResource(mailattachmentIconRes, nil)
+	mailCompose = NewThemedResource(mailcomposeIconRes, nil)
+	mailForward = NewThemedResource(mailforwardIconRes, nil)
+	mailReply = NewThemedResource(mailreplyIconRes, nil)
+	mailReplyAll = NewThemedResource(mailreplyallIconRes, nil)
+	mailSend = NewThemedResource(mailsendIconRes, nil)
 
-	arrowBack = &ThemedResource{arrowbackDark, arrowbackLight}
-	arrowDown = &ThemedResource{arrowdownDark, arrowdownLight}
-	arrowForward = &ThemedResource{arrowforwardDark, arrowforwardLight}
-	arrowUp = &ThemedResource{arrowupDark, arrowupLight}
+	arrowBack = NewThemedResource(arrowbackIconRes, nil)
+	arrowDown = NewThemedResource(arrowdownIconRes, nil)
+	arrowForward = NewThemedResource(arrowforwardIconRes, nil)
+	arrowUp = NewThemedResource(arrowupIconRes, nil)
+	arrowDropDown = NewThemedResource(arrowdropdownIconRes, nil)
+	arrowDropUp = NewThemedResource(arrowdropupIconRes, nil)
 
-	folder = &ThemedResource{folderDark, folderLight}
-	folderNew = &ThemedResource{foldernewDark, foldernewLight}
-	folderOpen = &ThemedResource{folderopenDark, folderopenLight}
-	help = &ThemedResource{helpDark, helpLight}
-	home = &ThemedResource{homeDark, homeLight}
+	folder = NewThemedResource(folderIconRes, nil)
+	folderNew = NewThemedResource(foldernewIconRes, nil)
+	folderOpen = NewThemedResource(folderopenIconRes, nil)
+	help = NewThemedResource(helpIconRes, nil)
+	home = NewThemedResource(homeIconRes, nil)
+	settings = NewThemedResource(settingsIconRes, nil)
 
-	viewFullScreen = &ThemedResource{viewfullscreenDark, viewfullscreenLight}
-	viewRefresh = &ThemedResource{viewrefreshDark, viewrefreshLight}
-	viewZoomFit = &ThemedResource{viewzoomfitDark, viewzoomfitLight}
-	viewZoomIn = &ThemedResource{viewzoominDark, viewzoominLight}
-	viewZoomOut = &ThemedResource{viewzoomoutDark, viewzoomoutLight}
+	viewFullScreen = NewThemedResource(viewfullscreenIconRes, nil)
+	viewRefresh = NewThemedResource(viewrefreshIconRes, nil)
+	viewZoomFit = NewThemedResource(viewzoomfitIconRes, nil)
+	viewZoomIn = NewThemedResource(viewzoominIconRes, nil)
+	viewZoomOut = NewThemedResource(viewzoomoutIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -248,6 +296,11 @@ func HomeIcon() fyne.Resource {
 	return home
 }
 
+// SettingsIcon returns a resource containing the standard settings icon for the current theme
+func SettingsIcon() fyne.Resource {
+	return settings
+}
+
 // MailAttachmentIcon returns a resource containing the standard mail attachment icon for the current theme
 func MailAttachmentIcon() fyne.Resource {
 	return mailAttachment
@@ -296,6 +349,16 @@ func NavigateBackIcon() fyne.Resource {
 // NavigateNextIcon returns a resource containing the standard forward navigation icon for the current theme
 func NavigateNextIcon() fyne.Resource {
 	return arrowForward
+}
+
+// MenuDropDownIcon returns a resource containing the standard menu drop down icon for the current theme
+func MenuDropDownIcon() fyne.Resource {
+	return arrowDropDown
+}
+
+// MenuDropUpIcon returns a resource containing the standard menu drop up icon for the current theme
+func MenuDropUpIcon() fyne.Resource {
+	return arrowDropUp
 }
 
 // ViewFullScreenIcon returns a resource containing the standard fullscreen icon for the current theme

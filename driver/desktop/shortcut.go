@@ -7,6 +7,9 @@ import (
 	"fyne.io/fyne"
 )
 
+// Declare conformity with Shortcut interface
+var _ fyne.Shortcut = (*CustomShortcut)(nil)
+
 // CustomShortcut describes a shortcut desktop event.
 type CustomShortcut struct {
 	fyne.KeyName

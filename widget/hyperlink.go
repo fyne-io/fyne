@@ -92,7 +92,7 @@ func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 func (hl *Hyperlink) TappedSecondary(*fyne.PointEvent) {
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.textProvider = newTextProvider(hl.Text, hl)
 	return hl.textProvider.CreateRenderer()
@@ -104,7 +104,7 @@ func (hl *Hyperlink) Resize(size fyne.Size) {
 	hl.resize(size, hl)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (hl *Hyperlink) Move(pos fyne.Position) {
 	hl.move(pos, hl)

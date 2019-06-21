@@ -1,5 +1,8 @@
 package fyne
 
+// Declare conformity to CanvasObject
+var _ CanvasObject = (*Container)(nil)
+
 // Container is a CanvasObject that contains a collection of child objects.
 // The layout of the children is set by the specified Layout.
 type Container struct {
@@ -15,11 +18,6 @@ func (c *Container) layout() {
 	if c.Layout != nil {
 		c.Layout.Layout(c.Objects, c.size)
 		return
-	}
-
-	for _, child := range c.Objects {
-		child.Resize(c.size)
-		child.Move(c.position)
 	}
 }
 

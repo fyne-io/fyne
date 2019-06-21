@@ -6,12 +6,18 @@ import "image/color"
 type Theme interface {
 	BackgroundColor() color.Color
 	ButtonColor() color.Color
+	DisabledButtonColor() color.Color
 	HyperlinkColor() color.Color
 	TextColor() color.Color
+	DisabledTextColor() color.Color
+	IconColor() color.Color
+	DisabledIconColor() color.Color
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color
+	HoverColor() color.Color
 	FocusColor() color.Color
 	ScrollBarColor() color.Color
+	ShadowColor() color.Color
 
 	TextSize() int
 	TextFont() Resource
@@ -23,4 +29,5 @@ type Theme interface {
 	Padding() int
 	IconInlineSize() int
 	ScrollBarSize() int
+	ScrollBarSmallSize() int
 }

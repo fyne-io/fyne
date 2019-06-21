@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
-	"github.com/Kodeworks/golang-image-ico"
+	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
 	"github.com/josephspurrier/goversioninfo"
 )
@@ -64,6 +64,9 @@ func copyFileMode(src, tgt string, perm os.FileMode) error {
 	_, err = io.Copy(target, source)
 	return err
 }
+
+// Declare conformity to command interface
+var _ command = (*packager)(nil)
 
 type packager struct {
 	os, name, dir, exe, icon string

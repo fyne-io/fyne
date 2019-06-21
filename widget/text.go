@@ -52,7 +52,7 @@ func (t *textProvider) Resize(size fyne.Size) {
 	t.resize(size, t)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (t *textProvider) Move(pos fyne.Position) {
 	t.move(pos, t)
@@ -73,7 +73,7 @@ func (t *textProvider) Hide() {
 	t.hide(t)
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 	if t.presenter == nil {
 		panic("Cannot render a textProvider without a presenter")
@@ -207,7 +207,7 @@ type textRenderer struct {
 func (r *textRenderer) MinSize() fyne.Size {
 	height := 0
 	width := 0
-	for i := 0; i < len(r.texts); i++ {
+	for i := 0; i < fyne.Min(len(r.texts), r.provider.rows()); i++ {
 		min := r.texts[i].MinSize()
 		if r.texts[i].Text == "" {
 			min = r.provider.charMinSize()
@@ -235,7 +235,7 @@ func (r *textRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-// ApplyTheme is called when the Label may need to update it's look
+// ApplyTheme is called when the Label may need to update its look
 func (r *textRenderer) ApplyTheme() {
 	c := theme.TextColor()
 	if r.provider.presenter.textColor() != nil {

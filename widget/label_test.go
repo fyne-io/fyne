@@ -69,3 +69,16 @@ func TestText_MinSize_MultiLine(t *testing.T) {
 		yPos = text.Position().Y
 	}
 }
+
+func TestText_MinSizeAdjustsWithContent(t *testing.T) {
+	text := NewLabel("Line 1\nLine 2\n")
+	initialMin := text.MinSize()
+
+	text.SetText("Line 1\nLine 2\nLonger Line\n")
+	assert.Greater(t, text.MinSize().Width, initialMin.Width)
+	assert.Greater(t, text.MinSize().Height, initialMin.Height)
+
+	text.SetText("Line 1\nLine 2\n")
+	assert.Equal(t, initialMin, text.MinSize())
+	assert.Equal(t, initialMin, text.textProvider.MinSize())
+}

@@ -5,84 +5,320 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
-type scrollRenderer struct {
-	scroll  *ScrollContainer
-	vertBar *canvas.Rectangle
+type scrollBarRenderer struct {
+	scrollBar *scrollBar
+
+	color   color.Color
+	minSize fyne.Size
+	objects []fyne.CanvasObject
+}
+
+func (r *scrollBarRenderer) ApplyTheme() {
+	r.color = theme.ScrollBarColor()
+}
+
+func (r *scrollBarRenderer) BackgroundColor() color.Color {
+	return r.color
+}
+
+func (r *scrollBarRenderer) Destroy() {
+}
+
+func (r *scrollBarRenderer) Layout(size fyne.Size) {
+}
+
+func (r *scrollBarRenderer) MinSize() fyne.Size {
+	return r.minSize
+}
+
+func (r *scrollBarRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *scrollBarRenderer) Refresh() {
+}
+
+var _ desktop.Hoverable = (*scrollBar)(nil)
+var _ fyne.Draggable = (*scrollBar)(nil)
+
+type scrollBar struct {
+	baseWidget
+	area            *scrollBarArea
+	draggedDistance int
+	dragStart       int
+	isDragged       bool
+}
+
+func (s *scrollBar) CreateRenderer() fyne.WidgetRenderer {
+	r := &scrollBarRenderer{scrollBar: s}
+	r.ApplyTheme()
+	return r
+}
+
+func (s *scrollBar) DragEnd() {
+}
+
+func (s *scrollBar) Dragged(e *fyne.DragEvent) {
+	if !s.isDragged {
+		s.isDragged = true
+		s.dragStart = s.Position().Y
+		s.draggedDistance = 0
+	}
+	s.draggedDistance += e.DraggedY
+	s.area.moveBar(s.draggedDistance + s.dragStart)
+}
+
+func (s *scrollBar) Hide() {
+	s.hide(s)
+}
+
+func (s *scrollBar) MinSize() fyne.Size {
+	return s.minSize(s)
+}
+
+func (s *scrollBar) MouseIn(e *desktop.MouseEvent) {
+	s.area.MouseIn(e)
+}
+
+func (s *scrollBar) MouseMoved(*desktop.MouseEvent) {
+}
+
+func (s *scrollBar) MouseOut() {
+	s.area.MouseOut()
+}
+
+func (s *scrollBar) Move(pos fyne.Position) {
+	s.move(pos, s)
+}
+
+func (s *scrollBar) Resize(size fyne.Size) {
+	s.resize(size, s)
+}
+
+func (s *scrollBar) Show() {
+	s.show(s)
+}
+
+func newScrollBar(area *scrollBarArea) *scrollBar {
+	return &scrollBar{area: area}
+}
+
+type scrollBarAreaRenderer struct {
+	area *scrollBarArea
+	bar  *scrollBar
 
 	objects []fyne.CanvasObject
 }
 
-func (s *scrollRenderer) updatePosition() {
-	if s.scroll.Content.Size().Height-s.scroll.Offset.Y < s.scroll.Size().Height {
-		if s.scroll.Content.Size().Height <= s.scroll.Size().Height {
-			s.scroll.Offset.Y = 0
-		} else {
-			s.scroll.Offset.Y = s.scroll.Content.Size().Height - s.scroll.Size().Height
-		}
-	}
-	s.scroll.Content.Move(fyne.NewPos(-s.scroll.Offset.X, -s.scroll.Offset.Y))
-	canvas.Refresh(s.scroll.Content)
+func (s *scrollBarAreaRenderer) ApplyTheme() {
+}
 
+func (s *scrollBarAreaRenderer) BackgroundColor() color.Color {
+	return color.Transparent
+}
+
+func (s *scrollBarAreaRenderer) Destroy() {
+}
+
+func (s *scrollBarAreaRenderer) Layout(size fyne.Size) {
 	s.updateBarPosition()
 }
 
-func (s *scrollRenderer) updateBarPosition() {
-	barSize := s.barSizeVertical()
-	barRatio := float32(0.0)
-	if s.scroll.Offset.Y != 0 {
-		barRatio = float32(s.scroll.Offset.Y) / float32(s.scroll.Content.Size().Height-s.scroll.Size().Height)
+func (s *scrollBarAreaRenderer) MinSize() fyne.Size {
+	var minWidth int
+	if s.area.isWide {
+		minWidth = theme.ScrollBarSize()
+	} else {
+		minWidth = theme.ScrollBarSmallSize() * 2
 	}
-	barOff := int(float32(s.scroll.size.Height-barSize.Height) * barRatio)
-
-	s.vertBar.Resize(barSize)
-	s.vertBar.Move(fyne.NewPos(s.scroll.size.Width-theme.ScrollBarSize(), barOff))
+	return fyne.NewSize(minWidth, theme.ScrollBarSize())
 }
 
-func (s *scrollRenderer) barSizeVertical() fyne.Size {
-	portion := float32(s.scroll.size.Height) / float32(s.scroll.Content.Size().Height)
+func (s *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
+	return s.objects
+}
+
+func (s *scrollBarAreaRenderer) Refresh() {
+	s.updateBarPosition()
+	canvas.Refresh(s.bar)
+}
+
+func (s *scrollBarAreaRenderer) updateBarPosition() {
+	barHeight := s.verticalBarHeight()
+	barRatio := float32(0.0)
+	if s.area.scroll.Offset.Y != 0 {
+		barRatio = float32(s.area.scroll.Offset.Y) / float32(s.area.scroll.Content.Size().Height-s.area.scroll.Size().Height)
+	}
+	barY := int(float32(s.area.scroll.size.Height-barHeight) * barRatio)
+
+	var barX, barWidth int
+	if s.area.isWide {
+		barWidth = theme.ScrollBarSize()
+	} else {
+		barX = theme.ScrollBarSmallSize()
+		barWidth = theme.ScrollBarSmallSize()
+	}
+
+	s.bar.Resize(fyne.NewSize(barWidth, barHeight))
+	s.bar.Move(fyne.NewPos(barX, barY))
+}
+
+func (s *scrollBarAreaRenderer) verticalBarHeight() int {
+	portion := float32(s.area.size.Height) / float32(s.area.scroll.Content.Size().Height)
 	if portion > 1.0 {
 		portion = 1.0
 	}
 
-	barHeight := int(float32(s.scroll.size.Height) * portion)
-	return fyne.NewSize(theme.ScrollBarSize(), barHeight)
+	return int(float32(s.area.size.Height) * portion)
 }
 
-func (s *scrollRenderer) Layout(size fyne.Size) {
-	c := s.scroll.Content
-	c.Resize(c.MinSize().Union(size))
+var _ desktop.Hoverable = (*scrollBarArea)(nil)
 
-	s.vertBar.Resize(fyne.NewSize(theme.ScrollBarSize(), size.Height))
-	s.vertBar.Move(fyne.NewPos(size.Width-theme.ScrollBarSize(), 0))
+type scrollBarArea struct {
+	baseWidget
 
-	s.updatePosition()
+	isWide bool
+	scroll *ScrollContainer
 }
 
-func (s *scrollRenderer) MinSize() fyne.Size {
-	// TODO determine if width or height should be resepected based on a which-way-to-scroll flag
-	return fyne.NewSize(s.scroll.Content.MinSize().Width, 25) // TODO consider the smallest useful scroll view?
+func (s *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
+	bar := newScrollBar(s)
+	return &scrollBarAreaRenderer{area: s, bar: bar, objects: []fyne.CanvasObject{bar}}
 }
 
-func (s *scrollRenderer) Refresh() {
-	s.updatePosition()
+func (s *scrollBarArea) Hide() {
+	s.hide(s)
+}
+
+func (s *scrollBarArea) MinSize() fyne.Size {
+	return s.minSize(s)
+}
+
+func (s *scrollBarArea) MouseIn(*desktop.MouseEvent) {
+	s.isWide = true
+	Refresh(s.scroll)
+}
+
+func (s *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
+}
+
+func (s *scrollBarArea) MouseOut() {
+	s.isWide = false
+	Refresh(s.scroll)
+}
+
+func (s *scrollBarArea) Move(pos fyne.Position) {
+	s.move(pos, s)
+
+}
+
+func (s *scrollBarArea) moveBar(y int) {
+	render := Renderer(s).(*scrollBarAreaRenderer)
+	barHeight := render.verticalBarHeight()
+	scrollHeight := s.scroll.Size().Height
+	maxY := scrollHeight - barHeight
+
+	if y < 0 {
+		y = 0
+	} else if y > maxY {
+		y = maxY
+	}
+
+	ratio := float32(y) / float32(maxY)
+	s.scroll.Offset.Y = int(ratio * float32(s.scroll.Content.Size().Height-scrollHeight))
+
+	Refresh(s.scroll)
+}
+
+func (s *scrollBarArea) Resize(size fyne.Size) {
+	s.resize(size, s)
+}
+
+func (s *scrollBarArea) Show() {
+	s.show(s)
+}
+
+func newScrollBarArea(scroll *ScrollContainer) *scrollBarArea {
+	return &scrollBarArea{scroll: scroll}
+}
+
+type scrollRenderer struct {
+	scroll                  *ScrollContainer
+	vertArea                *scrollBarArea
+	topShadow, bottomShadow fyne.CanvasObject
+
+	objects []fyne.CanvasObject
 }
 
 func (s *scrollRenderer) ApplyTheme() {
-	s.vertBar.FillColor = theme.ScrollBarColor()
 }
 
 func (s *scrollRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
 
+func (s *scrollRenderer) Destroy() {
+}
+
+func (s *scrollRenderer) Layout(size fyne.Size) {
+	// The scroll bar needs to be resized and moved on the far right
+	scrollBarArea := s.vertArea
+	scrollBarArea.Resize(fyne.NewSize(scrollBarArea.MinSize().Width, size.Height))
+	scrollBarArea.Move(fyne.NewPos(s.scroll.Size().Width-scrollBarArea.Size().Width, 0))
+	s.topShadow.Resize(fyne.NewSize(size.Width, 0))
+	s.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
+	s.bottomShadow.Move(fyne.NewPos(0, s.scroll.size.Height))
+
+	c := s.scroll.Content
+	c.Resize(c.MinSize().Union(size))
+
+	s.updatePosition()
+}
+
+func (s *scrollRenderer) MinSize() fyne.Size {
+	// TODO determine if width or height should be respected based on a which-way-to-scroll flag
+	return fyne.NewSize(s.scroll.Content.MinSize().Width, 25) // TODO consider the smallest useful scroll view?
+}
+
 func (s *scrollRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s *scrollRenderer) Destroy() {
+func (s *scrollRenderer) Refresh() {
+	s.Layout(s.scroll.Size())
+}
+
+func (s *scrollRenderer) updatePosition() {
+	scrollHeight := s.scroll.Size().Height
+	contentHeight := s.scroll.Content.Size().Height
+	if contentHeight <= scrollHeight {
+		s.scroll.Offset.Y = 0
+		s.vertArea.Hide()
+	} else if s.scroll.Visible() {
+		s.vertArea.Show()
+		if contentHeight-s.scroll.Offset.Y < scrollHeight {
+			s.scroll.Offset.Y = contentHeight - scrollHeight
+		}
+	}
+	s.scroll.Content.Move(fyne.NewPos(-s.scroll.Offset.X, -s.scroll.Offset.Y))
+	canvas.Refresh(s.scroll.Content)
+
+	if s.scroll.Offset.Y > 0 && s.scroll.Visible() {
+		s.topShadow.Show()
+	} else {
+		s.topShadow.Hide()
+	}
+	if s.scroll.Offset.Y < contentHeight-scrollHeight && s.scroll.Visible() {
+		s.bottomShadow.Show()
+	} else {
+		s.bottomShadow.Hide()
+	}
+
+	Renderer(s.vertArea).Layout(s.scroll.size)
 }
 
 // ScrollContainer defines a container that is smaller than the Content.
@@ -92,6 +328,42 @@ type ScrollContainer struct {
 
 	Content fyne.CanvasObject
 	Offset  fyne.Position
+}
+
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
+	bar := newScrollBarArea(s)
+	topShadow := newShadow(shadowBottom, theme.Padding()*2)
+	bottomShadow := newShadow(shadowTop, theme.Padding()*2)
+	return &scrollRenderer{
+		objects:      []fyne.CanvasObject{s.Content, bar, topShadow, bottomShadow},
+		scroll:       s,
+		vertArea:     bar,
+		topShadow:    topShadow,
+		bottomShadow: bottomShadow,
+	}
+}
+
+// Hide this widget, if it was previously visible
+func (s *ScrollContainer) Hide() {
+	s.hide(s)
+}
+
+// MinSize returns the smallest size this widget can shrink to
+func (s *ScrollContainer) MinSize() fyne.Size {
+	return s.minSize(s)
+}
+
+// Move the widget to a new position, relative to its parent.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (s *ScrollContainer) Move(pos fyne.Position) {
+	s.move(pos, s)
+}
+
+// Resize sets a new size for a widget.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (s *ScrollContainer) Resize(size fyne.Size) {
+	s.resize(size, s)
 }
 
 // Scrolled is called when an input device triggers a scroll event
@@ -111,37 +383,9 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 	Refresh(s)
 }
 
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (s *ScrollContainer) Resize(size fyne.Size) {
-	s.resize(size, s)
-}
-
-// Move the widget to a new position, relative to it's parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (s *ScrollContainer) Move(pos fyne.Position) {
-	s.move(pos, s)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (s *ScrollContainer) MinSize() fyne.Size {
-	return s.minSize(s)
-}
-
 // Show this widget, if it was previously hidden
 func (s *ScrollContainer) Show() {
 	s.show(s)
-}
-
-// Hide this widget, if it was previously visible
-func (s *ScrollContainer) Hide() {
-	s.hide(s)
-}
-
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
-func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
-	bar := canvas.NewRectangle(theme.ScrollBarColor())
-	return &scrollRenderer{scroll: s, vertBar: bar, objects: []fyne.CanvasObject{s.Content, bar}}
 }
 
 // NewScrollContainer creates a scrollable parent wrapping the specified content.

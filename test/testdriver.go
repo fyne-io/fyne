@@ -12,6 +12,10 @@ func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	return windows[0].Canvas()
 }
 
+func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
+	return co.Position() // TODO get the real answer
+}
+
 func (d *testDriver) CreateWindow(string) fyne.Window {
 	return NewWindow(nil)
 }
@@ -23,7 +27,9 @@ func (d *testDriver) AllWindows() []fyne.Window {
 }
 
 func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
-	return fyne.NewSize(len(text)*size, size)
+	// The real text height differs from the requested text size.
+	// We simulate this behaviour here.
+	return fyne.NewSize(len(text)*size, size*13/10+1)
 }
 
 func (d *testDriver) Run() {

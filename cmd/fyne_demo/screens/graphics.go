@@ -1,0 +1,42 @@
+package screens
+
+import (
+	"image/color"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
+)
+
+func rgbGradient(x, y, w, h int) color.Color {
+	g := int(float32(x) / float32(w) * float32(255))
+	b := int(float32(y) / float32(h) * float32(255))
+
+	return color.RGBA{uint8(255 - b), uint8(g), uint8(b), 0xff}
+}
+
+// GraphicsScreen loads a graphics example panel for the demo app
+func GraphicsScreen() fyne.CanvasObject {
+	content := fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(90, 90)),
+		&canvas.Rectangle{FillColor: color.RGBA{0x80, 0, 0, 0xff},
+			StrokeColor: color.RGBA{0xff, 0xff, 0xff, 0xff},
+			StrokeWidth: 1},
+		canvas.NewImageFromResource(theme.FyneLogo()),
+		&canvas.Line{StrokeColor: color.RGBA{0, 0, 0x80, 0xff}, StrokeWidth: 5},
+		&canvas.Circle{StrokeColor: color.RGBA{0, 0, 0x80, 0xff},
+			FillColor:   color.RGBA{0x30, 0x30, 0x30, 0x60},
+			StrokeWidth: 2},
+		canvas.NewText("Text", color.RGBA{0, 0x80, 0, 0xff}),
+		canvas.NewRasterWithPixels(rgbGradient),
+		canvas.NewHorizontalGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0x80, 0, 0xff}),
+		canvas.NewVerticalGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0, 0x80, 0xff}),
+		canvas.NewRadialGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0x80, 0x80, 0xff}),
+	)
+
+	headings := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+		widget.NewGroup("Canvas objects"), widget.NewGroup("Theme icons"))
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(headings, nil, nil, nil), headings,
+		fyne.NewContainerWithLayout(layout.NewGridLayout(2), content, IconsPanel()))
+}

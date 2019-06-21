@@ -23,7 +23,7 @@ func (g *Group) Resize(size fyne.Size) {
 	g.resize(size, g)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (g *Group) Move(pos fyne.Position) {
 	g.move(pos, g)
@@ -36,11 +36,13 @@ func (g *Group) MinSize() fyne.Size {
 
 // Show this widget, if it was previously hidden
 func (g *Group) Show() {
+	g.content.Show()
 	g.show(g)
 }
 
 // Hide this widget, if it was previously visible
 func (g *Group) Hide() {
+	g.content.Hide()
 	g.hide(g)
 }
 
@@ -58,7 +60,7 @@ func (g *Group) Append(object fyne.CanvasObject) {
 	Refresh(g)
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	label := NewLabel(g.Text)
 	labelBg := canvas.NewRectangle(theme.BackgroundColor())

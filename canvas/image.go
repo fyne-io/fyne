@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne"
 )
 
-// ImageFill defines the different type of ways an image can stretch to fill it's space.
+// ImageFill defines the different type of ways an image can stretch to fill its space.
 type ImageFill int
 
 const (
@@ -24,6 +24,9 @@ const (
 	ImageFillOriginal
 )
 
+// Declare conformity with CanvasObject interface
+var _ fyne.CanvasObject = (*Image)(nil)
+
 // Image describes a drawable image area that can render in a Fyne canvas
 // The image may be a vector or a bitmap representation and it will fill the area.
 // The fill mode can be changed by setting FillMode to a different ImageFill.
@@ -40,7 +43,7 @@ type Image struct {
 }
 
 // Alpha is a convenience function that returns the alpha value for an image
-// based on it's Translucency value. The result is 1.0 - Translucency.
+// based on its Translucency value. The result is 1.0 - Translucency.
 func (i *Image) Alpha() float64 {
 	return 1.0 - i.Translucency
 }

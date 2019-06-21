@@ -14,6 +14,8 @@ type Driver interface {
 
 	// Get the canvas that is associated with a given CanvasObject.
 	CanvasForObject(CanvasObject) Canvas
+	// Get the position of a given CanvasObject relative to the top/left of a canvas.
+	AbsolutePositionForObject(CanvasObject) Position
 
 	// Start the main event loop of the driver.
 	Run()

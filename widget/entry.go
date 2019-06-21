@@ -2,22 +2,27 @@ package widget
 
 import (
 	"image/color"
+	"math"
 	"strings"
 	"sync"
+	"unicode"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
 const (
-	multiLineRows = 3
+	multiLineRows            = 3
+	doubleClickWordSeperator = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 )
 
 type entryRenderer struct {
 	text         *textProvider
 	placeholder  *textProvider
 	line, cursor *canvas.Rectangle
+	selection    []fyne.CanvasObject
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -41,6 +46,91 @@ func (e *entryRenderer) MinSize() fyne.Size {
 	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 }
 
+// This process builds a slice of rectangles:
+// - one entry per row of text
+// - ordered by row order as they occur in multiline text
+// This process could be optimized in the scenario where the user is selecting upwards:
+// If the upwards case instead produces an order-reversed slice then only the newest rectangle would
+// require movement and resizing. The existing solution creates a new rectangle and then moves/resizes
+// all rectangles to comply with the occurance order as stated above.
+func (e *entryRenderer) buildSelection() {
+
+	e.entry.RLock()
+	cursorRow, cursorCol := e.entry.CursorRow, e.entry.CursorColumn
+	selectRow, selectCol := -1, -1
+	if e.entry.selecting {
+		selectRow = e.entry.selectRow
+		selectCol = e.entry.selectColumn
+	}
+	e.entry.RUnlock()
+
+	if selectRow == -1 {
+		e.selection = e.selection[:0]
+		return
+	}
+
+	textRenderer := Renderer(e.text).(*textRenderer)
+
+	// Convert column, row into x,y
+	getCoordinates := func(column int, row int) (int, int) {
+		sz := textRenderer.lineSize(column, row)
+		return sz.Width + theme.Padding()*2, sz.Height*row + theme.Padding()*2
+	}
+
+	lineHeight := e.text.charMinSize().Height
+
+	minmax := func(a, b int) (int, int) {
+		if a < b {
+			return a, b
+		}
+		return b, a
+	}
+
+	// The remainder of the function calculates the set of boxes and add them to e.selection
+
+	selectStartRow, selectEndRow := minmax(selectRow, cursorRow)
+	selectStartCol, selectEndCol := minmax(selectCol, cursorCol)
+	if selectRow < cursorRow {
+		selectStartCol, selectEndCol = selectCol, cursorCol
+	}
+	if selectRow > cursorRow {
+		selectStartCol, selectEndCol = cursorCol, selectCol
+	}
+	rowCount := selectEndRow - selectStartRow + 1
+
+	// trim e.selection to remove unwanted old rectangles
+	if len(e.selection) > rowCount {
+		e.selection = e.selection[:rowCount]
+	}
+
+	// build a rectangle for each row and add it to e.selection
+	for i := 0; i < rowCount; i++ {
+		if len(e.selection) <= i {
+			box := canvas.NewRectangle(theme.FocusColor())
+			e.selection = append(e.selection, box)
+		}
+
+		// determine starting/ending columns for this rectangle
+		row := selectStartRow + i
+		startCol, endCol := selectStartCol, selectEndCol
+		if selectStartRow < row {
+			startCol = 0
+		}
+		if selectEndRow > row {
+			endCol = textRenderer.provider.rowLength(row)
+		}
+
+		// translate columns and row into draw coordinates
+		x1, y1 := getCoordinates(startCol, row)
+		x2, _ := getCoordinates(endCol, row)
+
+		// resize and reposition each rectangle
+		e.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
+		e.selection[i].Move(fyne.NewPos(x1-1, y1))
+		e.selection[i].Show()
+	}
+}
+
 func (e *entryRenderer) moveCursor() {
 	textRenderer := Renderer(e.text).(*textRenderer)
 	e.entry.RLock()
@@ -48,6 +138,9 @@ func (e *entryRenderer) moveCursor() {
 	xPos := size.Width
 	yPos := size.Height * e.entry.CursorRow
 	e.entry.RUnlock()
+
+	// build e.selection[] if the user has made a selection
+	e.buildSelection()
 
 	lineHeight := e.text.charMinSize().Height
 	e.cursor.Resize(fyne.NewSize(2, lineHeight))
@@ -73,13 +166,17 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.moveCursor()
 }
 
-// ApplyTheme is called when the Entry may need to update it's look.
+// ApplyTheme is called when the Entry may need to update its look.
 func (e *entryRenderer) ApplyTheme() {
 	Renderer(e.text).ApplyTheme()
 	if e.entry.focused {
 		e.line.FillColor = theme.FocusColor()
 	} else {
 		e.line.FillColor = theme.ButtonColor()
+	}
+
+	for _, selection := range e.selection {
+		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
 	e.Refresh()
@@ -97,10 +194,10 @@ func (e *entryRenderer) Refresh() {
 	}
 
 	if e.entry.focused {
-		e.cursor.FillColor = theme.FocusColor()
+		e.cursor.Show()
 		e.line.FillColor = theme.FocusColor()
 	} else {
-		e.cursor.FillColor = color.RGBA{0, 0, 0, 0}
+		e.cursor.Hide()
 		e.line.FillColor = theme.ButtonColor()
 	}
 
@@ -108,11 +205,21 @@ func (e *entryRenderer) Refresh() {
 }
 
 func (e *entryRenderer) Objects() []fyne.CanvasObject {
+	// Objects are generated dynamically force selection rectangles to appear underneath the text
+	if e.entry.selecting {
+		return append(e.selection, e.objects...)
+	}
 	return e.objects
 }
 
 func (e *entryRenderer) Destroy() {
 }
+
+// Declare conformity with interfaces
+var _ fyne.Draggable = (*Entry)(nil)
+var _ fyne.Tappable = (*Entry)(nil)
+var _ desktop.Mouseable = (*Entry)(nil)
+var _ desktop.Keyable = (*Entry)(nil)
 
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
@@ -130,6 +237,18 @@ type Entry struct {
 	OnCursorChanged         func() `json:"-"`
 
 	focused bool
+
+	// selectRow and selectColumn represent the selection start location
+	// The selection will span from selectRow/Column to CursorRow/Column -- note that the cursor
+	// position may occur before or after the select start position in the text.
+	selectRow, selectColumn int
+
+	// selectKeyDown indicates whether left shift or right shift is currently held down
+	selectKeyDown bool
+
+	// selecting indicates whether the cursor has moved since it was at the selection start location
+	selecting bool
+	// TODO: Add OnSelectChanged
 }
 
 // Resize sets a new size for a widget.
@@ -138,7 +257,7 @@ func (e *Entry) Resize(size fyne.Size) {
 	e.resize(size, e)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (e *Entry) Move(pos fyne.Position) {
 	e.move(pos, e)
@@ -154,6 +273,9 @@ func (e *Entry) Show() {
 	e.show(e)
 	if len(e.Text) != 0 {
 		e.placeholderProvider().Hide()
+	}
+	if !e.Focused() {
+		Renderer(e).(*entryRenderer).cursor.Hide()
 	}
 }
 
@@ -205,6 +327,75 @@ func (e *Entry) updateText(text string) {
 	Refresh(e)
 }
 
+// selection returns the start and end text positions for the selected span of text
+// Note: this functionality depends on the relationship between the selection start row/col and
+// the current cursor row/column.
+// eg: (whitespace for clarity, '_' denotes cursor)
+//   "T  e  s [t  i]_n  g" == 3, 5
+//   "T  e  s_[t  i] n  g" == 3, 5
+//   "T  e_[s  t  i] n  g" == 2, 5
+func (e *Entry) selection() (int, int) {
+	e.RLock()
+	defer e.RUnlock()
+
+	if e.selecting == false {
+		return -1, -1
+	}
+	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
+		return -1, -1
+	}
+
+	// Find the selection start
+	rowA, colA := e.CursorRow, e.CursorColumn
+	rowB, colB := e.selectRow, e.selectColumn
+	// Reposition if the cursors row is more than select start row, or if the row is the same and
+	// the cursors col is more that the select start column
+	if rowA > e.selectRow || (rowA == e.selectRow && colA > e.selectColumn) {
+		rowA, colA = e.selectRow, e.selectColumn
+		rowB, colB = e.CursorRow, e.CursorColumn
+	}
+
+	return e.textPosFromRowCol(rowA, colA), e.textPosFromRowCol(rowB, colB)
+}
+
+// selectedText returns the text currently selected in this Entry.
+// If there is no selection it will return the empty string.
+func (e *Entry) selectedText() string {
+	if e.selecting == false {
+		return ""
+	}
+
+	start, stop := e.selection()
+	return string(e.textProvider().buffer[start:stop])
+}
+
+// Obtains row,col from a given textual position
+// expects a read or write lock to be held by the caller
+func (e *Entry) rowColFromTextPos(pos int) (int, int) {
+	provider := e.textProvider()
+	for i := 0; i < provider.rows(); i++ {
+		rowLength := provider.rowLength(i)
+		if rowLength+1 > pos {
+			return i, pos
+		}
+		pos -= rowLength + 1 // +1 for newline
+	}
+	return 0, 0
+}
+
+// Obtains textual position from a given row and col
+// expects a read or write lock to be held by the caller
+func (e *Entry) textPosFromRowCol(row, col int) int {
+	pos := 0
+	provider := e.textProvider()
+	for i := 0; i < row; i++ {
+		rowLength := provider.rowLength(i)
+		pos += rowLength + 1
+	}
+	pos += col
+	return pos
+}
+
 func (e *Entry) cursorTextPos() int {
 	pos := 0
 	e.RLock()
@@ -240,12 +431,166 @@ func (e *Entry) Focused() bool {
 	return e.focused
 }
 
+func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
+	for i := 0; i < len(text); i++ {
+		str := string(text[0 : i+1])
+		wid := textMinSize(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
+		if wid > pos.X {
+			return i
+		}
+	}
+	return len(text)
+}
+
+// Tapped is called when this entry has been tapped so we should update the cursor position.
+func (e *Entry) Tapped(ev *fyne.PointEvent) {
+	e.updateMousePointer(ev, false)
+}
+
+// TappedSecondary is called when right or alternative tap is invoked - this is currently ignored.
+func (e *Entry) TappedSecondary(_ *fyne.PointEvent) {
+}
+
+// MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
+// update the existing selection (if shift is held), or start a selection dragging operation.
+func (e *Entry) MouseDown(m *desktop.MouseEvent) {
+	if e.selectKeyDown {
+		e.selecting = true
+	}
+	if e.selecting && e.selectKeyDown == false {
+		e.selecting = false
+	}
+	e.updateMousePointer(&m.PointEvent, e.selecting == false)
+}
+
+// MouseUp called on mouse release
+// If a mouse drag event has completed then check to see if it has resulted in an empty selection,
+// if so, and if a text select key isn't held, then disable selecting
+func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+	start, _ := e.selection()
+	if start == -1 && e.selecting && e.selectKeyDown == false {
+		e.selecting = false
+	}
+}
+
+// Dragged is called when the pointer moves while a button is held down
+func (e *Entry) Dragged(d *fyne.DragEvent) {
+	e.selecting = true
+	e.updateMousePointer(&d.PointEvent, false)
+}
+
+// DragEnd is called at end of a drag event - currently ignored
+func (e *Entry) DragEnd() {
+}
+
+func (e *Entry) updateMousePointer(ev *fyne.PointEvent, startSelect bool) {
+
+	if !e.focused {
+		e.FocusGained()
+	}
+
+	rowHeight := e.textProvider().charMinSize().Height
+	row := int(math.Floor(float64(ev.Position.Y-theme.Padding()) / float64(rowHeight)))
+	col := 0
+	if row < 0 {
+		row = 0
+	} else if row >= e.textProvider().rows() {
+		row = e.textProvider().rows() - 1
+		col = 0
+	} else {
+		col = e.cursorColAt(e.textProvider().row(row), ev.Position)
+	}
+
+	e.Lock()
+	e.CursorRow = row
+	e.CursorColumn = col
+	if startSelect {
+		e.selectRow = row
+		e.selectColumn = col
+	}
+	e.Unlock()
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
+// getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
+// and expanding to the start and end of the whitespace or text underneat the specified position.
+func getTextWhitespaceRegion(row []rune, col int) (int, int) {
+	if len(row) == 0 || col >= len(row) || col < 0 {
+		return -1, -1
+	}
+
+	// maps: " fi-sh 日本語本語日  \t "
+	// into: " -- -- ------   "
+	space := func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return ' '
+		}
+		// If this rune is a typical word separator then classify it as whitespace
+		if strings.ContainsRune(doubleClickWordSeperator, r) {
+			return ' '
+		}
+		return '-'
+	}
+	toks := strings.Map(space, string(row))
+
+	c := byte(' ')
+	if toks[col] == ' ' {
+		c = byte('-')
+	}
+
+	// LastIndexByte + 1 ensures that the position of the unwanted character 'c' is excluded
+	// +1 also has the added side effect whereby if 'c' isn't found then -1 is snapped to 0
+	start := strings.LastIndexByte(toks[:col], c) + 1
+
+	// IndexByte will find the position of the next unwanted character, this is to be the end
+	// marker for the selection
+	end := strings.IndexByte(toks[col:], c)
+
+	if end == -1 {
+		end = len(toks) // snap end to len(toks) if it results in -1
+	} else {
+		end += col // otherwise include the text slice position
+	}
+	return start, end
+}
+
+// DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
+func (e *Entry) DoubleTapped(ev *fyne.PointEvent) {
+	row := e.textProvider().row(e.CursorRow)
+
+	start, end := getTextWhitespaceRegion(row, e.CursorColumn)
+	if start == -1 || end == -1 {
+		return
+	}
+
+	e.Lock()
+	if e.selectKeyDown == false {
+		e.selectRow = e.CursorRow
+		e.selectColumn = start
+	}
+	// Always aim to maximise the selected region
+	if e.selectRow > e.CursorRow || (e.selectRow == e.CursorRow && e.selectColumn > e.CursorColumn) {
+		e.CursorColumn = start
+	} else {
+		e.CursorColumn = end
+	}
+	e.selecting = true
+	e.Unlock()
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
 // TypedRune receives text input events when the Entry widget is focused.
 func (e *Entry) TypedRune(r rune) {
 	if e.ReadOnly {
 		return
 	}
 	provider := e.textProvider()
+
+	// if we've typed a character and we're selecting then replace the selection with the character
+	if e.selecting {
+		e.eraseSelection()
+		e.selecting = false
+	}
 
 	runes := []rune{r}
 	provider.insertAt(e.cursorTextPos(), runes)
@@ -256,12 +601,126 @@ func (e *Entry) TypedRune(r rune) {
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
+// KeyDown handler for keypress events - used to store shift modifier state for text selection
+func (e *Entry) KeyDown(key *fyne.KeyEvent) {
+	// For keyboard cursor controlled selection we now need to store shift key state and selection "start"
+	// Note: selection start is where the highlight started (if the user moves the selection up or left then
+	// the selectRow/Column will not match SelectionStart)
+	if key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight {
+		if e.selecting == false {
+			e.selectRow = e.CursorRow
+			e.selectColumn = e.CursorColumn
+		}
+		e.selectKeyDown = true
+	}
+}
+
+// KeyUp handler for key release events - used to reset shift modifier state for text selection
+func (e *Entry) KeyUp(key *fyne.KeyEvent) {
+	// Handle shift release for keyboard selection
+	// Note: if shift is released then the user may repress it without moving to adjust their old selection
+	if key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight {
+		e.selectKeyDown = false
+	}
+}
+
+// eraseSelection removes the current selected region and moves the cursor
+func (e *Entry) eraseSelection() {
+	if e.ReadOnly {
+		return
+	}
+
+	provider := e.textProvider()
+	posA, posB := e.selection()
+
+	if posA == posB {
+		return
+	}
+
+	e.Lock()
+
+	provider.deleteFromTo(posA, posB)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
+	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
+	e.Unlock()
+	e.updateText(provider.String())
+	e.selecting = false
+}
+
+// selectingKeyHandler performs keypress action in the scenario that a selection
+// is either a) in progress or b) about to start
+// returns true if the keypress has been fully handled
+func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
+
+	if e.selectKeyDown && e.selecting == false {
+		switch key.Name {
+		case fyne.KeyUp, fyne.KeyDown,
+			fyne.KeyLeft, fyne.KeyRight,
+			fyne.KeyEnd, fyne.KeyHome,
+			fyne.KeyPageUp, fyne.KeyPageDown:
+			e.selecting = true
+		}
+	}
+
+	if e.selecting == false {
+		return false
+	}
+
+	switch key.Name {
+	case fyne.KeyBackspace, fyne.KeyDelete:
+		// clears the selection -- return handled
+		e.eraseSelection()
+		return true
+	case fyne.KeyReturn, fyne.KeyEnter:
+		// clear the selection -- return unhandled to add the newline
+		e.eraseSelection()
+		return false
+	}
+
+	if e.selectKeyDown == false {
+		switch key.Name {
+		case fyne.KeyLeft:
+			// seek to the start of the selection -- return handled
+			selectStart, _ := e.selection()
+			e.Lock()
+			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
+			e.Unlock()
+			e.selecting = false
+			return true
+		case fyne.KeyRight:
+			// seek to the end of the selection -- return handled
+			_, selectEnd := e.selection()
+			e.Lock()
+			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
+			e.Unlock()
+			e.selecting = false
+			return true
+		case fyne.KeyUp, fyne.KeyDown, fyne.KeyEnd, fyne.KeyHome:
+			// cursor movement without left or right shift -- clear selection and return unhandled
+			e.selecting = false
+			return false
+		}
+	}
+
+	return false
+}
+
 // TypedKey receives key input events when the Entry widget is focused.
 func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.ReadOnly {
 		return
 	}
+
 	provider := e.textProvider()
+
+	if e.selectKeyDown || e.selecting {
+		if e.selectingKeyHandler(key) {
+			e.updateText(provider.String())
+			Renderer(e).(*entryRenderer).moveCursor()
+			return
+		}
+	}
+
 	switch key.Name {
 	case fyne.KeyBackspace:
 		e.RLock()
@@ -429,8 +888,9 @@ func (p *placeholderPresenter) textColor() color.Color {
 }
 
 // password tells the rendering textProvider if we are a password field
+// placeholder text is not obfuscated, returning false
 func (p *placeholderPresenter) password() bool {
-	return p.e.Password
+	return false
 }
 
 // object returns the root object of the widget so it can be referenced
@@ -438,23 +898,38 @@ func (p *placeholderPresenter) object() fyne.Widget {
 	return nil
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	text := newTextProvider(e.Text, e)
 	placeholder := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
 
 	line := canvas.NewRectangle(theme.ButtonColor())
-	cursor := canvas.NewRectangle(theme.BackgroundColor())
+	cursor := canvas.NewRectangle(theme.FocusColor())
 
-	return &entryRenderer{&text, &placeholder, line, cursor,
+	return &entryRenderer{&text, &placeholder, line, cursor, []fyne.CanvasObject{},
 		[]fyne.CanvasObject{line, &placeholder, &text, cursor}, e}
 }
 
 func (e *Entry) registerShortcut() {
-	scPaste := &fyne.ShortcutPaste{}
-	e.shortcut.AddShortcut(scPaste, func(se fyne.Shortcut) {
-		scPaste = se.(*fyne.ShortcutPaste)
-		text := scPaste.Clipboard.Content()
+	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
+		cut := se.(*fyne.ShortcutCut)
+		text := e.selectedText()
+		e.eraseSelection()
+
+		cut.Clipboard.SetContent(text)
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutCopy{}, func(se fyne.Shortcut) {
+		copy := se.(*fyne.ShortcutCopy)
+		text := e.selectedText()
+
+		copy.Clipboard.SetContent(text)
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutPaste{}, func(se fyne.Shortcut) {
+		if e.selecting {
+			e.eraseSelection()
+		}
+		paste := se.(*fyne.ShortcutPaste)
+		text := paste.Clipboard.Content()
 		if !e.MultiLine {
 			// format clipboard content to be compatible with single line entry
 			text = strings.Replace(text, "\n", " ", -1)

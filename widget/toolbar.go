@@ -20,7 +20,10 @@ type ToolbarAction struct {
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
-	return NewButtonWithIcon("", t.Icon, t.OnActivated)
+	button := NewButtonWithIcon("", t.Icon, t.OnActivated)
+	button.HideShadow = true
+
+	return button
 }
 
 // NewToolbarAction returns a new push button style ToolbarItem
@@ -74,7 +77,7 @@ func (t *Toolbar) Resize(size fyne.Size) {
 	t.resize(size, t)
 }
 
-// Move the widget to a new position, relative to it's parent.
+// Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (t *Toolbar) Move(pos fyne.Position) {
 	t.move(pos, t)
@@ -111,7 +114,7 @@ func (t *Toolbar) prepend(item ToolbarItem) {
 	t.box.Prepend(item.ToolbarObject())
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to it's renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	t.box = NewHBox()
 	t.box.setBackgroundColor(theme.ButtonColor())
