@@ -972,9 +972,9 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	}
 
 	if w.canvas.Focused() != nil {
-		w.canvas.Focused().TypedRune(char)
+		w.queueEvent(func() { w.canvas.Focused().TypedRune(char) })
 	} else if w.canvas.onTypedRune != nil {
-		w.canvas.onTypedRune(char)
+		w.queueEvent(func() { w.canvas.onTypedRune(char) })
 	}
 }
 
