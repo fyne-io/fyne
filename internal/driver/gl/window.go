@@ -65,6 +65,8 @@ type window struct {
 	xpos, ypos    int
 	width, height int
 	ignoreResize  bool
+
+	eventQueue chan func()
 }
 
 func (w *window) Title() string {
@@ -408,6 +410,12 @@ func (w *window) closed(viewport *glfw.Window) {
 	if w.onClosed != nil {
 		w.onClosed()
 	}
+
+	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
+	if w.eventQueue != nil {
+		close(w.eventQueue)
+		w.eventQueue = nil
+	}
 }
 
 func (w *window) moved(viewport *glfw.Window, x, y int) {
@@ -590,9 +598,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		mev.Position = ev.Position
 		mev.Button = convertMouseButton(button)
 		if action == glfw.Press {
-			go wid.MouseDown(mev)
+			w.queueEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
-			go wid.MouseUp(mev)
+			w.queueEvent(func() { wid.MouseUp(mev) })
 		}
 	}
 
@@ -627,7 +635,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
 			if wid, ok := co.(fyne.DoubleTappable); ok {
 				doubleTapped = true
-				go wid.DoubleTapped(ev)
+				w.queueEvent(func() { wid.DoubleTapped(ev) })
 			}
 		}
 		w.mouseClickTime = now
@@ -641,9 +649,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			if wid == w.mousePressed {
 				switch button {
 				case glfw.MouseButtonRight:
-					go wid.TappedSecondary(ev)
+					w.queueEvent(func() { wid.TappedSecondary(ev) })
 				default:
-					go wid.Tapped(ev)
+					w.queueEvent(func() { wid.Tapped(ev) })
 				}
 			}
 			w.mousePressed = nil
@@ -872,18 +880,18 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	if action == glfw.Press {
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				go focused.KeyDown(keyEvent)
+				w.queueEvent(func() { focused.KeyDown(keyEvent) })
 			}
 		} else if w.canvas.onKeyDown != nil {
-			go w.canvas.onKeyDown(keyEvent)
+			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
 	} else if action == glfw.Release { // ignore key up in core events
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				go focused.KeyUp(keyEvent)
+				w.queueEvent(func() { focused.KeyUp(keyEvent) })
 			}
 		} else if w.canvas.onKeyUp != nil {
-			go w.canvas.onKeyUp(keyEvent)
+			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
 		return
 	} // key repeat will fall through to TypedKey and TypedShortcut
@@ -929,9 +937,9 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 
 	// No shortcut detected, pass down to TypedKey
 	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().TypedKey(keyEvent)
+		w.queueEvent(func() { w.canvas.Focused().TypedKey(keyEvent) })
 	} else if w.canvas.onTypedKey != nil {
-		go w.canvas.onTypedKey(keyEvent)
+		w.queueEvent(func() { w.canvas.onTypedKey(keyEvent) })
 	}
 }
 
@@ -964,9 +972,9 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	}
 
 	if w.canvas.Focused() != nil {
-		w.canvas.Focused().TypedRune(char)
+		w.queueEvent(func() { w.canvas.Focused().TypedRune(char) })
 	} else if w.canvas.onTypedRune != nil {
-		w.canvas.onTypedRune(char)
+		w.queueEvent(func() { w.canvas.onTypedRune(char) })
 	}
 }
 
@@ -988,6 +996,18 @@ func (w *window) runWithContext(f func()) {
 	f()
 
 	glfw.DetachCurrentContext()
+}
+
+// Use this method to queue up a callback that handles an event. This ensures
+// user interaction events for a given window are processed in order.
+func (w *window) queueEvent(fn func()) {
+	w.eventQueue <- fn
+}
+
+func (w *window) runEventQueue() {
+	for fn := range w.eventQueue {
+		fn()
+	}
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
@@ -1027,6 +1047,11 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 			gl.Disable(gl.DEPTH_TEST)
 		}
 		ret = &window{viewport: win, title: title, master: master}
+
+		// This channel will be closed when the window is closed.
+		ret.eventQueue = make(chan func(), 64)
+		go ret.runEventQueue()
+
 		canvas := newCanvas()
 		canvas.context = ret
 		canvas.SetScale(ret.detectScale())
