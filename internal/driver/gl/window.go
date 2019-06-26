@@ -66,7 +66,7 @@ type window struct {
 	width, height int
 	ignoreResize  bool
 
-	serialEvents chan func()
+	eventQueue chan func()
 }
 
 func (w *window) Title() string {
@@ -412,9 +412,9 @@ func (w *window) closed(viewport *glfw.Window) {
 	}
 
 	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
-	if w.serialEvents != nil {
-		close(w.serialEvents)
-		w.serialEvents = nil
+	if w.eventQueue != nil {
+		close(w.eventQueue)
+		w.eventQueue = nil
 	}
 }
 
@@ -598,9 +598,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		mev.Position = ev.Position
 		mev.Button = convertMouseButton(button)
 		if action == glfw.Press {
-			w.dispatchSerialEvent(func() { wid.MouseDown(mev) })
+			w.queueEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
-			w.dispatchSerialEvent(func() { wid.MouseUp(mev) })
+			w.queueEvent(func() { wid.MouseUp(mev) })
 		}
 	}
 
@@ -635,7 +635,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
 			if wid, ok := co.(fyne.DoubleTappable); ok {
 				doubleTapped = true
-				w.dispatchSerialEvent(func() { wid.DoubleTapped(ev) })
+				w.queueEvent(func() { wid.DoubleTapped(ev) })
 			}
 		}
 		w.mouseClickTime = now
@@ -649,9 +649,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 			if wid == w.mousePressed {
 				switch button {
 				case glfw.MouseButtonRight:
-					w.dispatchSerialEvent(func() { wid.TappedSecondary(ev) })
+					w.queueEvent(func() { wid.TappedSecondary(ev) })
 				default:
-					w.dispatchSerialEvent(func() { wid.Tapped(ev) })
+					w.queueEvent(func() { wid.Tapped(ev) })
 				}
 			}
 			w.mousePressed = nil
@@ -880,18 +880,18 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	if action == glfw.Press {
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				w.dispatchSerialEvent(func() { focused.KeyDown(keyEvent) })
+				w.queueEvent(func() { focused.KeyDown(keyEvent) })
 			}
 		} else if w.canvas.onKeyDown != nil {
-			w.dispatchSerialEvent(func() { w.canvas.onKeyDown(keyEvent) })
+			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
 	} else if action == glfw.Release { // ignore key up in core events
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				w.dispatchSerialEvent(func() { focused.KeyUp(keyEvent) })
+				w.queueEvent(func() { focused.KeyUp(keyEvent) })
 			}
 		} else if w.canvas.onKeyUp != nil {
-			w.dispatchSerialEvent(func() { w.canvas.onKeyUp(keyEvent) })
+			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
 		return
 	} // key repeat will fall through to TypedKey and TypedShortcut
@@ -937,9 +937,9 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 
 	// No shortcut detected, pass down to TypedKey
 	if w.canvas.Focused() != nil {
-		w.dispatchSerialEvent(func() { w.canvas.Focused().TypedKey(keyEvent) })
+		w.queueEvent(func() { w.canvas.Focused().TypedKey(keyEvent) })
 	} else if w.canvas.onTypedKey != nil {
-		w.dispatchSerialEvent(func() { w.canvas.onTypedKey(keyEvent) })
+		w.queueEvent(func() { w.canvas.onTypedKey(keyEvent) })
 	}
 }
 
@@ -998,12 +998,14 @@ func (w *window) runWithContext(f func()) {
 	glfw.DetachCurrentContext()
 }
 
-func (w *window) dispatchSerialEvent(fn func()) {
-	w.serialEvents <- fn
+// Use this method to queue up a callback that handles an event. This ensures
+// user interaction events for a given window are processed in order.
+func (w *window) queueEvent(fn func()) {
+	w.eventQueue <- fn
 }
 
-func (w *window) runSerialEvents() {
-	for fn := range w.serialEvents {
+func (w *window) runEventQueue() {
+	for fn := range w.eventQueue {
 		fn()
 	}
 }
@@ -1046,11 +1048,9 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		}
 		ret = &window{viewport: win, title: title, master: master}
 
-		// Some events we want to always process in order, such as keyboard events.
-		// So we set up a queue, and dispatch a goroutine to call the event handlers.
 		// This channel will be closed when the window is closed.
-		ret.serialEvents = make(chan func(), 64)
-		go ret.runSerialEvents()
+		ret.eventQueue = make(chan func(), 64)
+		go ret.runEventQueue()
 
 		canvas := newCanvas()
 		canvas.context = ret
