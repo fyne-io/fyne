@@ -22,12 +22,12 @@ func (g *LinearGradient) Generate(w, h int) image.Image {
 	if g.Angle == 90 {
 		// horizontal
 		generator = func(x, _, w, _ float64) float64 {
-			return x / w
+			return x / (w-1)
 		}
 	} else {
 		// vertical
 		generator = func(_, y, _, h float64) float64 {
-			return y / h
+			return y / (h-1)
 		}
 	}
 	return computeGradient(generator, w, h, g.StartColor, g.EndColor)

@@ -10,7 +10,7 @@ import (
 func TestNewHorizontalGradient(t *testing.T) {
 	horizontal := NewHorizontalGradient(color.Black, color.Transparent)
 
-	img := horizontal.Generate(50, 5)
+	img := horizontal.Generate(51, 5)
 	assert.Equal(t, color.RGBA{0, 0, 0, 0xff}, img.At(0, 0))
 	for i := 0; i < 5; i++ {
 		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(25, i))
@@ -20,12 +20,13 @@ func TestNewHorizontalGradient(t *testing.T) {
 
 func TestNewVerticalGradient(t *testing.T) {
 	vertical := NewVerticalGradient(color.Black, color.Transparent)
-	imgVert := vertical.Generate(5, 50)
+
+	imgVert := vertical.Generate(5, 51)
 	assert.Equal(t, color.RGBA{0, 0, 0, 0xff}, imgVert.At(0, 0))
 	for i := 0; i < 5; i++ {
 		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x00}, imgVert.At(50, 0))
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x00}, imgVert.At(0, 50))
 }
 
 func TestNewRadialGradient(t *testing.T) {
