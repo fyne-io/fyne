@@ -118,15 +118,15 @@ func computeGradient(generator func(x, y, w, h float64) float64, w, h int, start
 	return img
 }
 
-// NewHorizontalGradient creates a new horiziontally travelling linear gradient.
-func NewHorizontalGradient(start color.Color, end color.Color) *LinearGradient {
+// NewHorizontalGradient creates a new horizontally travelling linear gradient.
+func NewHorizontalGradient(start, end color.Color) *LinearGradient {
 	g := &LinearGradient{StartColor: start, EndColor: end}
 	g.Angle = 90
 	return g
 }
 
 // NewRadialGradient creates a new radial gradient.
-func NewRadialGradient(start color.Color, end color.Color) *RadialGradient {
+func NewRadialGradient(start, end color.Color) *RadialGradient {
 	return &RadialGradient{StartColor: start, EndColor: end}
 }
 
