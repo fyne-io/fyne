@@ -13,7 +13,7 @@ import (
 type browser struct {
 	current int
 
-	name *widget.Label
+	name *widget.Select
 	icon *widget.Icon
 }
 
@@ -23,7 +23,7 @@ func (b *browser) setIcon(index int) {
 	}
 	b.current = index
 
-	b.name.SetText(icons[index].name)
+	b.name.SetSelected(icons[index].name)
 	b.icon.SetResource(icons[index].icon)
 }
 
@@ -37,7 +37,17 @@ func IconsPanel() fyne.CanvasObject {
 	next := widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
 		b.setIcon(b.current + 1)
 	})
-	b.name = widget.NewLabel(icons[b.current].name)
+	b.name = widget.NewSelect(iconList(), func(name string) {
+		for i, icon := range icons {
+			if icon.name == name {
+				if b.current != i {
+					b.setIcon(i)
+				}
+				break
+			}
+		}
+	})
+	b.name.SetSelected(icons[b.current].name)
 	bar := widget.NewHBox(prev, next, b.name)
 
 	background := canvas.NewRasterWithPixels(checkerPattern)
@@ -57,6 +67,15 @@ func checkerPattern(x, y, _, _ int) color.Color {
 	}
 
 	return theme.ButtonColor()
+}
+
+func iconList() []string {
+	var ret []string
+	for _, icon := range icons {
+		ret = append(ret, icon.name)
+	}
+
+	return ret
 }
 
 var icons = []struct {
