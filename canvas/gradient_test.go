@@ -53,6 +53,32 @@ func TestNewVerticalGradient_Flipped(t *testing.T) {
 	assert.Equal(t, color.RGBA{0, 0, 0, 0xff}, imgVert.At(0, 50))
 }
 
+func TestNewLinearGradient_45(t *testing.T) {
+	positive := NewLinearGradient(color.Black, color.Transparent, 45.0)
+
+	img := positive.Generate(51, 51)
+	assert.Equal(t, color.RGBA{0, 0, 0, 0xff}, img.At(50, 0))
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x00}, img.At(0, 50))
+	for i := 0; i < 5; i++ {
+		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(i, i))
+	}
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(0, 0))
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50, 50))
+}
+
+func TestNewLinearGradient_315(t *testing.T) {
+	negative := NewLinearGradient(color.Black, color.Transparent, 315.0)
+
+	img := negative.Generate(51, 51)
+	assert.Equal(t, color.RGBA{0, 0, 0, 0xff}, img.At(0, 0))
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x00}, img.At(50, 50))
+	for i := 0; i < 5; i++ {
+		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50-i, i))
+	}
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50, 0))
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(0, 50))
+}
+
 func TestNewRadialGradient(t *testing.T) {
 	circle := NewRadialGradient(color.Black, color.Transparent)
 	imgCircle := circle.Generate(10, 10)

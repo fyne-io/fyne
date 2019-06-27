@@ -22,22 +22,42 @@ func (g *LinearGradient) Generate(w, h int) image.Image {
 	if g.Angle == 90 {
 		// horizontal flipped
 		generator = func(x, _, w, _ float64) float64 {
-			return ((w-1) - x) / (w-1)
+			return ((w - 1) - x) / (w - 1)
 		}
 	} else if g.Angle == 270 {
 		// horizontal
 		generator = func(x, _, w, _ float64) float64 {
-			return x / (w-1)
+			return x / (w - 1)
+		}
+	} else if g.Angle == 45 {
+		// diagonal negative flipped
+		generator = func(x, y, w, h float64) float64 {
+			return math.Abs(((w-1)+(h-1))-(x+((h-1)-y))) / math.Abs((w-1)+(h-1))
+		}
+	} else if g.Angle == 225 {
+		// diagonal negative
+		generator = func(x, y, w, h float64) float64 {
+			return math.Abs(x+((h-1)-y)) / math.Abs((w-1)+(h-1))
+		}
+	} else if g.Angle == 135 {
+		// diagonal positive flipped
+		generator = func(x, y, w, h float64) float64 {
+			return math.Abs(((w-1)+(h-1))-(x+y)) / math.Abs((w-1)+(h-1))
+		}
+	} else if g.Angle == 315 {
+		// diagonal positive
+		generator = func(x, y, w, h float64) float64 {
+			return math.Abs(x+y) / math.Abs((w-1)+(h-1))
 		}
 	} else if g.Angle == 180 {
 		// vertical flipped
 		generator = func(_, y, _, h float64) float64 {
-			return ((h-1) - y) / (h-1)
+			return ((h - 1) - y) / (h - 1)
 		}
 	} else {
 		// vertical
 		generator = func(_, y, _, h float64) float64 {
-			return y / (h-1)
+			return y / (h - 1)
 		}
 	}
 	return computeGradient(generator, w, h, g.StartColor, g.EndColor)
@@ -129,9 +149,19 @@ func computeGradient(generator func(x, y, w, h float64) float64, w, h int, start
 }
 
 // NewHorizontalGradient creates a new horizontally travelling linear gradient.
+// The start color will be at the left of the gradient and the end color will be at the right.
 func NewHorizontalGradient(start, end color.Color) *LinearGradient {
 	g := &LinearGradient{StartColor: start, EndColor: end}
 	g.Angle = 270
+	return g
+}
+
+// NewLinearGradient creates a linear gradient at a the specified angle.
+// The angle parameter is the degree angle along which the gradient is calculated.
+// A NewHorizontalGradient uses 270 degrees and NewVerticalGradient is 0 degrees.
+func NewLinearGradient(start, end color.Color, angle float64) *LinearGradient {
+	g := &LinearGradient{StartColor: start, EndColor: end}
+	g.Angle = angle
 	return g
 }
 
@@ -141,6 +171,7 @@ func NewRadialGradient(start, end color.Color) *RadialGradient {
 }
 
 // NewVerticalGradient creates a new vertically travelling linear gradient.
+// The start color will be at the top of the gradient and the end color will be at the bottom.
 func NewVerticalGradient(start color.Color, end color.Color) *LinearGradient {
 	return &LinearGradient{StartColor: start, EndColor: end}
 }
