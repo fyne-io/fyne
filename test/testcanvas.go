@@ -29,6 +29,14 @@ func (c *testCanvas) Content() fyne.CanvasObject {
 
 func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
+
+	if content == nil {
+		return
+	}
+
+	theme := fyne.CurrentApp().Settings().Theme()
+	padding := fyne.NewSize(theme.Padding(), theme.Padding())
+	c.Resize(content.MinSize().Add(padding))
 }
 
 func (c *testCanvas) Overlay() fyne.CanvasObject {
@@ -116,7 +124,9 @@ func (c *testCanvas) Capture() image.Image {
 
 // NewCanvas returns a single use in-memory canvas used for testing
 func NewCanvas() fyne.Canvas {
-	return &testCanvas{size: fyne.NewSize(10, 10)}
+	theme := fyne.CurrentApp().Settings().Theme()
+	padding := fyne.NewSize(theme.Padding(), theme.Padding())
+	return &testCanvas{size: padding}
 }
 
 // Canvas returns a reusable in-memory canvas used for testing
