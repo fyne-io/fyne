@@ -2,7 +2,6 @@ package test
 
 import (
 	"image"
-	"image/color"
 	"image/draw"
 
 	"fyne.io/fyne"
@@ -10,8 +9,6 @@ import (
 
 var (
 	dummyCanvas fyne.Canvas
-
-	testBackground = color.RGBA{R: 255, G: 128, B: 255, A: 255}
 )
 
 type testCanvas struct {
@@ -107,11 +104,12 @@ func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
 }
 
 func (c *testCanvas) Capture() image.Image {
+	theme := fyne.CurrentApp().Settings().Theme()
 	// TODO actually implement rendering
 
 	bounds := image.Rect(0, 0, int(float32(c.Size().Width)*c.Scale()), int(float32(c.Size().Height)*c.Scale()))
 	img := image.NewRGBA(bounds)
-	draw.Draw(img, bounds, image.NewUniform(testBackground), image.ZP, draw.Src)
+	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
 	return img
 }
