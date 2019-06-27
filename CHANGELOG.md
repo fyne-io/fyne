@@ -3,6 +3,21 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 1.2 (in progress)
+
+### Added
+
+* Support for diagonal gradients
+
+### Changed
+
+* Input events now execute one at a time to maintain the correct order
+
+### Fixed
+
+* Correct the colour of Entry widget cursor if theme changes
+
+
 ## 1.1
 
 ### Added
