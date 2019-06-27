@@ -70,7 +70,7 @@ func TestShadow_AroundShadow(t *testing.T) {
 
 	assert.Equal(t, verticalSize, r.r.Size())
 	assert.Equal(t, fyne.NewPos(100, 0), r.r.Position())
-	assert.Equal(t, 90.0, r.r.Angle)
+	assert.Equal(t, 270.0, r.r.Angle)
 	assert.Equal(t, theme.ShadowColor(), r.r.StartColor)
 	assert.Equal(t, color.Transparent, r.r.EndColor)
 
@@ -96,7 +96,7 @@ func TestShadow_AroundShadow(t *testing.T) {
 
 	assert.Equal(t, verticalSize, r.l.Size())
 	assert.Equal(t, fyne.NewPos(-shadowWidth, 0), r.l.Position())
-	assert.Equal(t, 90.0, r.l.Angle)
+	assert.Equal(t, 270.0, r.l.Angle)
 	assert.Equal(t, color.Transparent, r.l.StartColor)
 	assert.Equal(t, theme.ShadowColor(), r.l.EndColor)
 }

@@ -18,6 +18,18 @@ func TestNewHorizontalGradient(t *testing.T) {
 	assert.Equal(t, color.RGBA{0, 0, 0, 0x00}, img.At(50, 0))
 }
 
+func TestNewHorizontalGradient_Flipped(t *testing.T) {
+	horizontal := NewHorizontalGradient(color.Black, color.Transparent)
+	horizontal.Angle -= 180
+
+	img := horizontal.Generate(51, 5)
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x00}, img.At(0, 0))
+	for i := 0; i < 5; i++ {
+		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(25, i))
+	}
+	assert.Equal(t, color.RGBA{0, 0, 0, 0xff}, img.At(50, 0))
+}
+
 func TestNewVerticalGradient(t *testing.T) {
 	vertical := NewVerticalGradient(color.Black, color.Transparent)
 
@@ -27,6 +39,18 @@ func TestNewVerticalGradient(t *testing.T) {
 		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
 	}
 	assert.Equal(t, color.RGBA{0, 0, 0, 0x00}, imgVert.At(0, 50))
+}
+
+func TestNewVerticalGradient_Flipped(t *testing.T) {
+	vertical := NewVerticalGradient(color.Black, color.Transparent)
+	vertical.Angle += 180
+
+	imgVert := vertical.Generate(5, 51)
+	assert.Equal(t, color.RGBA{0, 0, 0, 0x00}, imgVert.At(0, 0))
+	for i := 0; i < 5; i++ {
+		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
+	}
+	assert.Equal(t, color.RGBA{0, 0, 0, 0xff}, imgVert.At(0, 50))
 }
 
 func TestNewRadialGradient(t *testing.T) {

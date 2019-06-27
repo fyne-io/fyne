@@ -20,9 +20,19 @@ type LinearGradient struct {
 func (g *LinearGradient) Generate(w, h int) image.Image {
 	var generator func(x, y, w, h float64) float64
 	if g.Angle == 90 {
+		// horizontal flipped
+		generator = func(x, _, w, _ float64) float64 {
+			return ((w-1) - x) / (w-1)
+		}
+	} else if g.Angle == 270 {
 		// horizontal
 		generator = func(x, _, w, _ float64) float64 {
 			return x / (w-1)
+		}
+	} else if g.Angle == 180 {
+		// vertical flipped
+		generator = func(_, y, _, h float64) float64 {
+			return ((h-1) - y) / (h-1)
 		}
 	} else {
 		// vertical
@@ -121,7 +131,7 @@ func computeGradient(generator func(x, y, w, h float64) float64, w, h int, start
 // NewHorizontalGradient creates a new horizontally travelling linear gradient.
 func NewHorizontalGradient(start, end color.Color) *LinearGradient {
 	g := &LinearGradient{StartColor: start, EndColor: end}
-	g.Angle = 90
+	g.Angle = 270
 	return g
 }
 
