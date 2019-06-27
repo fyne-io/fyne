@@ -175,6 +175,7 @@ func (e *entryRenderer) ApplyTheme() {
 		e.line.FillColor = theme.ButtonColor()
 	}
 
+	e.cursor.FillColor = theme.FocusColor()
 	for _, selection := range e.selection {
 		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
