@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"os"
 	"runtime"
+	"sync"
 	"testing"
 	"time"
 
@@ -224,6 +225,9 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	d2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1, d2))
 
+	// setup the waitgroup in d1 to accept 2 events
+	d1.wg.Add(2)
+
 	// wait for canvas to get its size right
 	for s := w.Canvas().Size(); s != fyne.NewSize(32, 18); s = w.Canvas().Size() {
 		time.Sleep(time.Millisecond * 10)
@@ -236,6 +240,19 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 19, 9)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	// wait for two mouse events on d1 to bubble up
+	done := make(chan struct{})
+	go func() {
+		d1.wg.Wait()
+		d1.wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(200 * time.Millisecond): // give up after 200ms
+	}
 
 	// we should only have 2 mouse events on d1
 	assert.Equal(t,
@@ -636,14 +653,17 @@ type dragableMouseableObject struct {
 	*canvas.Rectangle
 	draggable
 	mouseEvents []interface{}
+	wg          sync.WaitGroup
 }
 
 func (d *dragableMouseableObject) MouseDown(e *desktop.MouseEvent) {
 	d.mouseEvents = append(d.mouseEvents, e)
+	d.wg.Done()
 }
 
 func (d *dragableMouseableObject) MouseUp(e *desktop.MouseEvent) {
 	d.mouseEvents = append(d.mouseEvents, e)
+	d.wg.Done()
 }
 
 func (d *dragableMouseableObject) popMouseEvent() (e interface{}) {

@@ -593,6 +593,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	ev := new(fyne.PointEvent)
 	ev.Position = fyne.NewPos(x, y)
 
+	coMouse := co
 	// Switch the mouse target to the dragging object if one is set
 	if w.mouseDragged != nil && !w.objIsDragged(co) {
 		co, _ = w.mouseDragged.(fyne.CanvasObject)
@@ -672,7 +673,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 	if action == glfw.Release && w.mouseDragged != nil {
 		w.mouseDragged.DragEnd()
-		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(co) {
+		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(coMouse) {
 			w.mouseOut()
 		}
 		w.mouseDragged = nil
