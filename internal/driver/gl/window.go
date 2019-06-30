@@ -593,6 +593,12 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	ev := new(fyne.PointEvent)
 	ev.Position = fyne.NewPos(x, y)
 
+	// Switch the mouse target to the dragging object if one is set
+	if w.mouseDragged != nil && !w.objIsDragged(co) {
+		co, _ = w.mouseDragged.(fyne.CanvasObject)
+		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
+	}
+
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position

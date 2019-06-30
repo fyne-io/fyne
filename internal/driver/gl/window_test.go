@@ -215,6 +215,49 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 	)
 }
 
+func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	d1 := &dragableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d1.SetMinSize(fyne.NewSize(10, 10))
+	d2 := &dragableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d2.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(widget.NewHBox(d1, d2))
+
+	// wait for canvas to get its size right
+	for s := w.Canvas().Size(); s != fyne.NewSize(32, 18); s = w.Canvas().Size() {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
+
+	// drag from d1 into d2
+	w.mouseMoved(w.viewport, 9, 9)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 19, 9)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	// we should only have 2 mouse events on d1
+	assert.Equal(t,
+		&desktop.MouseEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5)},
+			Button:     desktop.LeftMouseButton,
+		},
+		d1.popMouseEvent(),
+	)
+	assert.Equal(t,
+		&desktop.MouseEvent{
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 5)},
+			Button:     desktop.LeftMouseButton,
+		},
+		d1.popMouseEvent(),
+	)
+	assert.Nil(t, d1.popMouseEvent())
+
+	// we should have no mouse events on d2
+	assert.Nil(t, d2.popMouseEvent())
+}
+
 func TestWindow_HoverableOnDragging(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	w.Canvas().SetScale(1.0)
@@ -585,4 +628,25 @@ func pop(s []interface{}) (interface{}, []interface{}) {
 		return nil, s
 	}
 	return s[0], s[1:]
+}
+
+var _ desktop.Mouseable = (*dragableMouseableObject)(nil)
+
+type dragableMouseableObject struct {
+	*canvas.Rectangle
+	draggable
+	mouseEvents []interface{}
+}
+
+func (d *dragableMouseableObject) MouseDown(e *desktop.MouseEvent) {
+	d.mouseEvents = append(d.mouseEvents, e)
+}
+
+func (d *dragableMouseableObject) MouseUp(e *desktop.MouseEvent) {
+	d.mouseEvents = append(d.mouseEvents, e)
+}
+
+func (d *dragableMouseableObject) popMouseEvent() (e interface{}) {
+	e, d.mouseEvents = pop(d.mouseEvents)
+	return
 }
