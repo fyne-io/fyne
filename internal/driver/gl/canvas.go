@@ -11,8 +11,6 @@ import (
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-
-	gl "github.com/go-gl/gl/v3.1/gles2"
 )
 
 // Declare conformity with Canvas interface
@@ -265,11 +263,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		return
 	}
 	c.setDirty(false)
-
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	max16bit := float32(255 * 255)
-	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	c.glClearBuffer()
 
 	paint := func(obj fyne.CanvasObject, pos fyne.Position) bool {
 		// TODO should this be somehow not scroll container specific?
@@ -279,8 +273,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 			scrollWidth := textureScaleInt(c, obj.Size().Width)
 			scrollHeight := textureScaleInt(c, obj.Size().Height)
 			pixHeight := textureScaleInt(c, c.size.Height)
-			gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
-			gl.Enable(gl.SCISSOR_TEST)
+			c.glScissorOpen(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
 		}
 		if obj.Visible() {
 			c.drawObject(obj, pos, size)
@@ -289,7 +282,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 	}
 	afterPaint := func(obj, _ fyne.CanvasObject) {
 		if _, ok := obj.(*widget.ScrollContainer); ok {
-			gl.Disable(gl.SCISSOR_TEST)
+			c.glScissorClose()
 		}
 	}
 

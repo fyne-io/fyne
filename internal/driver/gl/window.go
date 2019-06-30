@@ -14,7 +14,6 @@ import (
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/widget"
 
-	gl "github.com/go-gl/gl/v3.1/gles2"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -439,7 +438,7 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 	winWidth, _ := w.viewport.GetSize()
 	w.canvas.texScale = float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	gl.Viewport(0, 0, int32(width), int32(height))
+	setViewport(width, height)
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
@@ -994,10 +993,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, 0)
-
-		glfw.WindowHint(glfw.ClientAPI, glfw.OpenGLESAPI)
-		glfw.WindowHint(glfw.ContextVersionMajor, 2)
-		glfw.WindowHint(glfw.ContextVersionMinor, 0)
+		initWindowHints()
 
 		win, err := glfw.CreateWindow(10, 10, title, nil, nil)
 		if err != nil {
@@ -1007,13 +1003,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		win.MakeContextCurrent()
 
 		if master {
-			err := gl.Init()
-			if err != nil {
-				fyne.LogError("failed to initialise OpenGL", err)
-				return
-			}
-
-			gl.Disable(gl.DEPTH_TEST)
+			glInit()
 		}
 		ret = &window{viewport: win, title: title, master: master}
 		canvas := newCanvas()

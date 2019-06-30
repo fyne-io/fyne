@@ -3,8 +3,6 @@ package gl
 import (
 	"image"
 	"image/color"
-
-	gl "github.com/go-gl/gl/v3.1/gles2"
 )
 
 type captureImage struct {
@@ -32,9 +30,7 @@ func (c *glCanvas) Capture() image.Image {
 
 	runOnMain(func() {
 		c.context.runWithContext(func() {
-			gl.ReadBuffer(gl.FRONT)
-			gl.ReadPixels(0, 0, int32(width), int32(height), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
-
+			c.glCapture(int32(width), int32(height), &pixels)
 		})
 	})
 
