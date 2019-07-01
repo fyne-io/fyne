@@ -889,8 +889,21 @@ var setupReverse = func() *Entry {
 	return e
 }
 
-func TestEntry_SelectHomeEnd(t *testing.T) {
+func TestEntry_SelectionHides(t *testing.T) {
+	e := setup()
+	selection := Renderer(e).(*entryRenderer).selection[0]
 
+	e.FocusGained()
+	assert.True(t, selection.Visible())
+
+	e.FocusLost()
+	assert.False(t, selection.Visible())
+
+	e.FocusGained()
+	assert.True(t, selection.Visible())
+}
+
+func TestEntry_SelectHomeEnd(t *testing.T) {
 	// T e[s t i] n g -> end -> // T e[s t i n g]
 	e := setup()
 	typeKeys(e, fyne.KeyEnd)

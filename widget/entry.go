@@ -127,7 +127,6 @@ func (e *entryRenderer) buildSelection() {
 		// resize and reposition each rectangle
 		e.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
 		e.selection[i].Move(fyne.NewPos(x1-1, y1))
-		e.selection[i].Show()
 	}
 }
 
@@ -200,6 +199,10 @@ func (e *entryRenderer) Refresh() {
 	} else {
 		e.cursor.Hide()
 		e.line.FillColor = theme.ButtonColor()
+	}
+
+	for _, selection := range e.selection {
+		selection.(*canvas.Rectangle).Hidden = !e.entry.focused
 	}
 
 	canvas.Refresh(e.entry)
