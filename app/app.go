@@ -5,6 +5,7 @@ package app // import "fyne.io/fyne/app"
 
 import (
 	"os"
+	"os/exec"
 	"sync"
 
 	"fyne.io/fyne"
@@ -22,6 +23,7 @@ type fyneApp struct {
 	settings fyne.Settings
 	running  bool
 	runMutex sync.Mutex
+	exec     func(name string, arg ...string) *exec.Cmd
 }
 
 func (app *fyneApp) Icon() fyne.Resource {
@@ -81,7 +83,7 @@ func (app *fyneApp) setupTheme() {
 // driver and returns a handle to that App.
 // Built in drivers are provided in the "driver" package.
 func NewAppWithDriver(d fyne.Driver) fyne.App {
-	newApp := &fyneApp{driver: d, icon: theme.FyneLogo(), settings: loadSettings()}
+	newApp := &fyneApp{driver: d, icon: theme.FyneLogo(), settings: loadSettings(), exec: exec.Command}
 	fyne.SetCurrentApp(newApp)
 	newApp.setupTheme()
 
