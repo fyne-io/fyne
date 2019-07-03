@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"fyne.io/fyne"
@@ -67,6 +68,7 @@ type window struct {
 	ignoreResize  bool
 
 	eventQueue chan func()
+	eventWait  sync.WaitGroup
 }
 
 func (w *window) Title() string {
@@ -528,7 +530,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 		if hovered, ok := obj.(desktop.Hoverable); ok {
 			if hovered == w.mouseOver {
-				hovered.MouseMoved(ev)
+				w.queueEvent(func() { hovered.MouseMoved(ev) })
 			} else {
 				w.mouseOut()
 				w.mouseIn(hovered, ev)
@@ -545,7 +547,8 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
 			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
 			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
-			w.mouseDragged.Dragged(ev)
+			wd := w.mouseDragged
+			w.queueEvent(func() { wd.Dragged(ev) })
 
 			w.mouseDragPos = w.mousePos
 		}
@@ -561,17 +564,21 @@ func (w *window) objIsDragged(obj interface{}) bool {
 }
 
 func (w *window) mouseIn(obj desktop.Hoverable, ev *desktop.MouseEvent) {
-	if obj != nil {
-		obj.MouseIn(ev)
-	}
-	w.mouseOver = obj
+	w.queueEvent(func() {
+		if obj != nil {
+			obj.MouseIn(ev)
+		}
+		w.mouseOver = obj
+	})
 }
 
 func (w *window) mouseOut() {
-	if w.mouseOver != nil {
-		w.mouseOver.MouseOut()
-		w.mouseOver = nil
-	}
+	w.queueEvent(func() {
+		if w.mouseOver != nil {
+			w.mouseOver.MouseOut()
+			w.mouseOver = nil
+		}
+	})
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
@@ -1008,13 +1015,19 @@ func (w *window) runWithContext(f func()) {
 // Use this method to queue up a callback that handles an event. This ensures
 // user interaction events for a given window are processed in order.
 func (w *window) queueEvent(fn func()) {
+	w.eventWait.Add(1)
 	w.eventQueue <- fn
 }
 
 func (w *window) runEventQueue() {
 	for fn := range w.eventQueue {
 		fn()
+		w.eventWait.Done()
 	}
+}
+
+func (w *window) waitForEvents() {
+	w.eventWait.Wait()
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
