@@ -1,4 +1,4 @@
-// +build !gles
+// +build !gles,!arm,!arm64
 
 package gl
 
