@@ -1,10 +1,29 @@
 package app
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
+
+	"github.com/fsnotify/fsnotify"
 )
+
+// SettingsSchema is used for loading and storing global settings
+type SettingsSchema struct {
+	// these items are used for global settings load
+	ThemeName         string `json:"theme"`
+	FontPath          string `json:"font_path"`
+	MonospaceFontPath string `json:"font_monospace_path"`
+}
+
+// StoragePath returns the location of the settings storage
+func (sc *SettingsSchema) StoragePath() string {
+	return filepath.Join(rootConfigDir(), "settings.json")
+}
 
 // Declare conformity with Settings interface
 var _ fyne.Settings = (*settings)(nil)
@@ -15,6 +34,8 @@ type settings struct {
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
+
+	schema SettingsSchema
 }
 
 func (s *settings) Theme() fyne.Theme {
@@ -50,8 +71,74 @@ func (s *settings) apply() {
 	}
 }
 
+func (s *settings) load() {
+	err := s.loadFromFile(s.schema.StoragePath())
+	if err != nil {
+		fyne.LogError("Settings load error:", err)
+	}
+
+	s.setupTheme()
+}
+
+func (s *settings) loadFromFile(path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			os.MkdirAll(filepath.Dir(path), 0700)
+			return nil
+		}
+		return err
+	}
+	decode := json.NewDecoder(file)
+
+	return decode.Decode(&s.schema)
+}
+
+func (s *settings) setupTheme() {
+	name := s.schema.ThemeName
+	env := os.Getenv("FYNE_THEME")
+	if env != "" {
+		name = env
+	}
+	if name == "light" {
+		s.SetTheme(theme.LightTheme())
+	} else {
+		s.SetTheme(theme.DarkTheme())
+	}
+}
+
+func (s *settings) watchSettings() {
+	watcher, err := fsnotify.NewWatcher()
+
+	go func() {
+		for event := range watcher.Events {
+			s.load()
+			s.apply()
+
+			if event.Op&fsnotify.Remove != 0 {
+				err = watcher.Add(filepath.Dir(s.schema.StoragePath()))
+				if err != nil {
+					fyne.LogError("Settings watch error:", err)
+				}
+			}
+		}
+
+		err = watcher.Close()
+		if err != nil {
+			fyne.LogError("Settings un-watch error:", err)
+		}
+	}()
+
+	err = watcher.Add(filepath.Dir(s.schema.StoragePath()))
+	if err != nil {
+		fyne.LogError("Settings watch error:", err)
+	}
+}
+
 func loadSettings() *settings {
 	s := &settings{}
+	s.load()
 
+	s.watchSettings()
 	return s
 }

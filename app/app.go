@@ -4,7 +4,6 @@
 package app // import "fyne.io/fyne/app"
 
 import (
-	"os"
 	"os/exec"
 	"sync"
 
@@ -70,22 +69,12 @@ func (app *fyneApp) Settings() fyne.Settings {
 	return app.settings
 }
 
-func (app *fyneApp) setupTheme() {
-	env := os.Getenv("FYNE_THEME")
-	if env == "light" {
-		app.Settings().SetTheme(theme.LightTheme())
-	} else {
-		app.Settings().SetTheme(theme.DarkTheme())
-	}
-}
-
 // NewAppWithDriver initialises a new Fyne application using the specified
 // driver and returns a handle to that App.
 // Built in drivers are provided in the "driver" package.
 func NewAppWithDriver(d fyne.Driver) fyne.App {
 	newApp := &fyneApp{driver: d, icon: theme.FyneLogo(), settings: loadSettings(), exec: exec.Command}
 	fyne.SetCurrentApp(newApp)
-	newApp.setupTheme()
 
 	listener := make(chan fyne.Settings)
 	newApp.Settings().AddChangeListener(listener)
