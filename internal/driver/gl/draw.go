@@ -61,24 +61,19 @@ func (c *glCanvas) freeCoords(vao, vbo uint32) {
 	c.glFreeBuffer(vao, vbo)
 }
 
-func (c *glCanvas) drawWidget(box fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
-	backCol := widget.Renderer(box.(fyne.Widget)).BackgroundColor()
-	if !box.Visible() || backCol == color.Transparent {
+func (c *glCanvas) drawWidget(wid fyne.Widget, pos fyne.Position, frame fyne.Size) {
+	if widget.Renderer(wid).BackgroundColor() == color.Transparent {
 		return
 	}
 
-	points, vao, vbo := c.rectCoords(box.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	texture := getTexture(box, c.newGlRectTexture)
+	points, vao, vbo := c.rectCoords(wid.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	texture := getTexture(wid, c.newGlRectTexture)
 
 	c.glDrawTexture(texture, points, 1.0)
 	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	if !circle.Visible() {
-		return
-	}
-
 	points, vao, vbo := c.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(circle, c.newGlCircleTexture)
 
@@ -87,10 +82,6 @@ func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fy
 }
 
 func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
-	if !line.Visible() {
-		return
-	}
-
 	points, vao, vbo := c.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(line, c.newGlLineTexture)
 
@@ -99,10 +90,6 @@ func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Siz
 }
 
 func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
-	if !img.Visible() {
-		return
-	}
-
 	texture := getTexture(img, c.newGlImageTexture)
 	if texture == 0 {
 		return
@@ -118,10 +105,6 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 }
 
 func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
-	if !img.Visible() {
-		return
-	}
-
 	texture := getTexture(img, c.newGlRasterTexture)
 	if texture == 0 {
 		return
@@ -132,26 +115,18 @@ func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.
 	c.freeCoords(vao, vbo)
 }
 
-func (c *glCanvas) drawGradient(img *canvas.Gradient, pos fyne.Position, frame fyne.Size) {
-	if !img.Visible() {
-		return
-	}
-
-	texture := getTexture(img, c.newGlGradientTexture)
+func (c *glCanvas) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasObject) uint32, pos fyne.Position, frame fyne.Size) {
+	texture := getTexture(o, texCreator)
 	if texture == 0 {
 		return
 	}
 
-	points, vao, vbo := c.rectCoords(img.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
+	points, vao, vbo := c.rectCoords(o.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	c.glDrawTexture(texture, points, 1.0)
 	c.freeCoords(vao, vbo)
 }
 
 func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	if !rect.Visible() {
-		return
-	}
-
 	points, vao, vbo := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(rect, c.newGlRectTexture)
 
@@ -160,7 +135,7 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fram
 }
 
 func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
-	if !text.Visible() || text.Text == "" {
+	if text.Text == "" {
 		return
 	}
 
@@ -185,6 +160,9 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 }
 
 func (c *glCanvas) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+	if !o.Visible() {
+		return
+	}
 	canvasMutex.Lock()
 	canvases[o] = c
 	canvasMutex.Unlock()
@@ -201,8 +179,10 @@ func (c *glCanvas) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne
 		c.drawRectangle(obj, pos, frame)
 	case *canvas.Text:
 		c.drawText(obj, pos, frame)
-	case *canvas.Gradient:
-		c.drawGradient(obj, pos, frame)
+	case *canvas.LinearGradient:
+		c.drawGradient(obj, c.newGlLinearGradientTexture, pos, frame)
+	case *canvas.RadialGradient:
+		c.drawGradient(obj, c.newGlRadialGradientTexture, pos, frame)
 	case fyne.Widget:
 		c.drawWidget(obj, pos, frame)
 	}

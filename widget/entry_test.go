@@ -461,6 +461,14 @@ func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
 	assert.Equal(t, len(str), end)
 }
 
+func TestEntry_ExpandSelectionWithWordSeparators(t *testing.T) {
+	// select "is_a"
+	str := []rune("This-is_a-test")
+	start, end := getTextWhitespaceRegion(str, 6)
+	assert.Equal(t, 5, start)
+	assert.Equal(t, 9, end)
+}
+
 func TestEntry_DoubleTapped(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
@@ -881,8 +889,21 @@ var setupReverse = func() *Entry {
 	return e
 }
 
-func TestEntry_SelectHomeEnd(t *testing.T) {
+func TestEntry_SelectionHides(t *testing.T) {
+	e := setup()
+	selection := Renderer(e).(*entryRenderer).selection[0]
 
+	e.FocusGained()
+	assert.True(t, selection.Visible())
+
+	e.FocusLost()
+	assert.False(t, selection.Visible())
+
+	e.FocusGained()
+	assert.True(t, selection.Visible())
+}
+
+func TestEntry_SelectHomeEnd(t *testing.T) {
 	// T e[s t i] n g -> end -> // T e[s t i n g]
 	e := setup()
 	typeKeys(e, fyne.KeyEnd)

@@ -14,7 +14,7 @@ type FocusManager struct {
 func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 	var first, next fyne.Focusable
 	found := current == nil // if we have no starting point then pretend we matched already
-	driver.WalkObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position) bool {
+	driver.WalkObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if !obj.Visible() {
 			return false
 		}
@@ -55,7 +55,7 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
 	var last, previous fyne.Focusable
 	found := false
-	driver.WalkObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position) bool {
+	driver.WalkObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if !obj.Visible() {
 			return false
 		}

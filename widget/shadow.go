@@ -55,77 +55,38 @@ func (s *shadow) Show() {
 }
 
 type shadowRenderer struct {
-	b, bl, br, l, r, t, tl, tr *canvas.Gradient
-	minSize                    fyne.Size
-	objects                    []fyne.CanvasObject
-	s                          *shadow
+	b, l, r, t     *canvas.LinearGradient
+	bl, br, tl, tr *canvas.RadialGradient
+	minSize        fyne.Size
+	objects        []fyne.CanvasObject
+	s              *shadow
 }
 
 func (r *shadowRenderer) createShadows() {
 	switch r.s.typ {
 	case shadowBottom:
-		r.b = canvas.NewLinearGradient(
-			theme.ShadowColor(),
-			color.Transparent,
-			canvas.GradientDirectionVertical,
-		)
+		r.b = canvas.NewVerticalGradient(theme.ShadowColor(), color.Transparent)
 		r.objects = []fyne.CanvasObject{r.b}
 	case shadowTop:
-		r.t = canvas.NewLinearGradient(
-			color.Transparent,
-			theme.ShadowColor(),
-			canvas.GradientDirectionVertical,
-		)
+		r.t = canvas.NewVerticalGradient(color.Transparent, theme.ShadowColor())
 		r.objects = []fyne.CanvasObject{r.t}
 	case shadowAround:
-		r.tl = canvas.NewLinearGradient(
-			theme.ShadowColor(),
-			color.Transparent,
-			canvas.GradientDirectionCircular,
-		)
+		r.tl = canvas.NewRadialGradient(theme.ShadowColor(), color.Transparent)
 		r.tl.CenterOffsetX = 0.5
 		r.tl.CenterOffsetY = 0.5
-		r.t = canvas.NewLinearGradient(
-			color.Transparent,
-			theme.ShadowColor(),
-			canvas.GradientDirectionVertical,
-		)
-		r.tr = canvas.NewLinearGradient(
-			theme.ShadowColor(),
-			color.Transparent,
-			canvas.GradientDirectionCircular,
-		)
+		r.t = canvas.NewVerticalGradient(color.Transparent, theme.ShadowColor())
+		r.tr = canvas.NewRadialGradient(theme.ShadowColor(), color.Transparent)
 		r.tr.CenterOffsetX = -0.5
 		r.tr.CenterOffsetY = 0.5
-		r.r = canvas.NewLinearGradient(
-			theme.ShadowColor(),
-			color.Transparent,
-			canvas.GradientDirectionHorizontal,
-		)
-		r.br = canvas.NewLinearGradient(
-			theme.ShadowColor(),
-			color.Transparent,
-			canvas.GradientDirectionCircular,
-		)
+		r.r = canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
+		r.br = canvas.NewRadialGradient(theme.ShadowColor(), color.Transparent)
 		r.br.CenterOffsetX = -0.5
 		r.br.CenterOffsetY = -0.5
-		r.b = canvas.NewLinearGradient(
-			theme.ShadowColor(),
-			color.Transparent,
-			canvas.GradientDirectionVertical,
-		)
-		r.bl = canvas.NewLinearGradient(
-			theme.ShadowColor(),
-			color.Transparent,
-			canvas.GradientDirectionCircular,
-		)
+		r.b = canvas.NewVerticalGradient(theme.ShadowColor(), color.Transparent)
+		r.bl = canvas.NewRadialGradient(theme.ShadowColor(), color.Transparent)
 		r.bl.CenterOffsetX = 0.5
 		r.bl.CenterOffsetY = -0.5
-		r.l = canvas.NewLinearGradient(
-			color.Transparent,
-			theme.ShadowColor(),
-			canvas.GradientDirectionHorizontal,
-		)
+		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
 		r.objects = []fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l}
 	}
 

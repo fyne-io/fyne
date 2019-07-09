@@ -252,7 +252,7 @@ func (c *glCanvas) ensureMinSize() bool {
 		}
 	}
 	c.walkTree(nil, ensureMinSize)
-	if windowNeedsMinSizeUpdate {
+	if windowNeedsMinSizeUpdate && (c.size.Width < c.MinSize().Width || c.size.Height < c.MinSize().Height) {
 		c.Resize(c.Size().Union(c.MinSize()))
 	}
 	return windowNeedsMinSizeUpdate
@@ -265,7 +265,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 	c.setDirty(false)
 	c.glClearBuffer()
 
-	paint := func(obj fyne.CanvasObject, pos fyne.Position) bool {
+	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		// TODO should this be somehow not scroll container specific?
 		if _, ok := obj.(*widget.ScrollContainer); ok {
 			scrollX := textureScaleInt(c, pos.X)
@@ -290,7 +290,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 }
 
 func (c *glCanvas) walkTree(
-	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
 	driver.WalkObjectTree(c.content, beforeChildren, afterChildren)

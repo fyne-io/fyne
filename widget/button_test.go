@@ -171,7 +171,7 @@ func TestButtonRenderer_Layout_NoText(t *testing.T) {
 		iconOffset = (canvas.NewText("", color.White).MinSize().Height - theme.IconInlineSize()) / 2
 	}
 
-	assert.Equal(t, theme.Padding()+10, render.icon.Position().X)
+	assert.Equal(t, theme.Padding()+10-(theme.IconInlineSize()/2), render.icon.Position().X)
 	assert.Equal(t, theme.Padding()+10+iconOffset, render.icon.Position().Y)
 }
 

@@ -3,12 +3,28 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 1.1 - (in progress)
+## 1.2 (in progress)
+
+### Added
+
+* Support for diagonal gradients
+
+### Changed
+
+* Input events now execute one at a time to maintain the correct order
+
+### Fixed
+
+* Correct the colour of Entry widget cursor if theme changes
+
+
+## 1.1
 
 ### Added
 
 * Menubar and PopUpMenu (#41)
 * PopUp widgets (regular and modal) and canvas overlay support (#242)
+* Add gradient (linear and radial) to canvas
 * Add shadow support for overlays, buttons and scrollcontainer
 * Text can now be selected (#67)
 * Support moving through inputs with Tab / Shift-Tab (#82)
@@ -30,6 +46,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Moved driver/gl package to internal/driver/gl
 * Clicking/Tapping in an entry will position the cursor
 * A container with no layout will not change the position or size of it's content
+* Update the fyne_demo app to reflect the expanding feature set
 
 ### Fixed
 

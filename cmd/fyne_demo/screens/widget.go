@@ -100,28 +100,15 @@ func makeFormTab() fyne.Widget {
 func makeScrollTab() fyne.Widget {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
 	logo.SetMinSize(fyne.NewSize(320, 320))
-	scroll := widget.NewScrollContainer(widget.NewVBox(
-		widget.NewLabel("Line 1"),
-		widget.NewLabel("Line 2"),
-		widget.NewLabel("Line 3"),
-		widget.NewLabel("Line 4"),
-		widget.NewLabel("Line 5"),
-		widget.NewLabel("Line 6"),
-		widget.NewLabel("Line 7"),
-		widget.NewLabel("Line 8"),
-		widget.NewLabel("Line 9"),
-		widget.NewLabel("Line 10"),
-		widget.NewLabel("Line 11"),
-		widget.NewLabel("Line 12"),
-		widget.NewLabel("Line 13"),
-		widget.NewLabel("Line 14"),
-		widget.NewLabel("Line 15"),
-		widget.NewLabel("Line 16"),
-		widget.NewLabel("Line 17"),
-		widget.NewLabel("Line 18"),
-		widget.NewLabel("Line 19"),
-		widget.NewLabel("Line 20"),
-	))
+	list := widget.NewVBox()
+	for i := 1; i <= 20; i++ {
+		index := i // capture
+		list.Append(widget.NewButton(fmt.Sprintf("Button %d", index), func() {
+			fmt.Println("Tapped", index)
+		}))
+	}
+
+	scroll := widget.NewScrollContainer(list)
 	scroll.Resize(fyne.NewSize(200, 200))
 
 	return scroll

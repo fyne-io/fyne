@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	multiLineRows = 3
+	multiLineRows            = 3
+	doubleClickWordSeperator = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 )
 
 type entryRenderer struct {
@@ -126,7 +127,6 @@ func (e *entryRenderer) buildSelection() {
 		// resize and reposition each rectangle
 		e.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
 		e.selection[i].Move(fyne.NewPos(x1-1, y1))
-		e.selection[i].Show()
 	}
 }
 
@@ -174,6 +174,7 @@ func (e *entryRenderer) ApplyTheme() {
 		e.line.FillColor = theme.ButtonColor()
 	}
 
+	e.cursor.FillColor = theme.FocusColor()
 	for _, selection := range e.selection {
 		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
@@ -200,6 +201,10 @@ func (e *entryRenderer) Refresh() {
 		e.line.FillColor = theme.ButtonColor()
 	}
 
+	for _, selection := range e.selection {
+		selection.(*canvas.Rectangle).Hidden = !e.entry.focused
+	}
+
 	canvas.Refresh(e.entry)
 }
 
@@ -213,6 +218,12 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 
 func (e *entryRenderer) Destroy() {
 }
+
+// Declare conformity with interfaces
+var _ fyne.Draggable = (*Entry)(nil)
+var _ fyne.Tappable = (*Entry)(nil)
+var _ desktop.Mouseable = (*Entry)(nil)
+var _ desktop.Keyable = (*Entry)(nil)
 
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
@@ -472,6 +483,10 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 	e.updateMousePointer(&d.PointEvent, false)
 }
 
+// DragEnd is called at end of a drag event - currently ignored
+func (e *Entry) DragEnd() {
+}
+
 func (e *Entry) updateMousePointer(ev *fyne.PointEvent, startSelect bool) {
 
 	if !e.focused {
@@ -508,10 +523,14 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 		return -1, -1
 	}
 
-	// maps: " fish 日本語本語日  \t "
-	// into: " ---- ------   "
+	// maps: " fi-sh 日本語本語日  \t "
+	// into: " -- -- ------   "
 	space := func(r rune) rune {
 		if unicode.IsSpace(r) {
+			return ' '
+		}
+		// If this rune is a typical word separator then classify it as whitespace
+		if strings.ContainsRune(doubleClickWordSeperator, r) {
 			return ' '
 		}
 		return '-'

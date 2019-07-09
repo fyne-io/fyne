@@ -1,6 +1,8 @@
 package driver
 
 import (
+	"math"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
 )
@@ -16,37 +18,45 @@ import (
 //   parents
 func WalkObjectTree(
 	obj fyne.CanvasObject,
-	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) bool {
-	return walkObjectTree(obj, nil, fyne.NewPos(0, 0), beforeChildren, afterChildren)
+	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
+	return walkObjectTree(obj, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren)
 }
 
 func walkObjectTree(
 	obj fyne.CanvasObject,
 	parent fyne.CanvasObject,
-	offset fyne.Position,
-	beforeChildren func(fyne.CanvasObject, fyne.Position) bool,
+	offset, clipPos fyne.Position,
+	clipSize fyne.Size,
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) bool {
+	pos := obj.Position().Add(offset)
+
 	var children []fyne.CanvasObject
 	switch co := obj.(type) {
 	case *fyne.Container:
 		children = co.Objects
 	case fyne.Widget:
 		children = widget.Renderer(co).Objects()
+
+		if scroll, ok := obj.(*widget.ScrollContainer); ok {
+			clipPos = pos
+			clipSize = scroll.Size()
+		}
 	}
 
-	pos := obj.Position().Add(offset)
 	if beforeChildren != nil {
-		if beforeChildren(obj, pos) {
+		if beforeChildren(obj, pos, clipPos, clipSize) {
 			return true
 		}
 	}
 
 	cancelled := false
 	for _, child := range children {
-		if walkObjectTree(child, obj, pos, beforeChildren, afterChildren) {
+		if walkObjectTree(child, obj, pos, clipPos, clipSize, beforeChildren, afterChildren) {
 			cancelled = true
 			break
 		}

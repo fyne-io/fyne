@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"fyne.io/fyne"
@@ -58,11 +59,15 @@ type window struct {
 	mouseButton        desktop.MouseButton
 	mouseOver          desktop.Hoverable
 	mouseClickTime     time.Time
+	mousePressed       fyne.Tappable
 	onClosed           func()
 
 	xpos, ypos    int
 	width, height int
 	ignoreResize  bool
+
+	eventQueue chan func()
+	eventWait  sync.WaitGroup
 }
 
 func (w *window) Title() string {
@@ -131,7 +136,7 @@ func (w *window) centerOnScreen() {
 
 		// set new window coordinates
 		w.viewport.SetPos(newX, newY)
-	}) // end of runOnMainAsync(){}
+	}) // end of runOnMain(){}
 }
 
 // minSizeOnScreen gets thpaddede minimum size of a window content in screen pixels
@@ -311,21 +316,21 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) Show() {
+	if w.fullScreen {
+		w.SetFullScreen(true)
+	} else if w.centered {
+		w.centerOnScreen()
+	}
+
 	runOnMain(func() {
 		w.visible = true
 		w.viewport.Show()
-
-		if w.fullScreen {
-			w.SetFullScreen(true)
-		} else if w.centered {
-			w.centerOnScreen()
-		}
-
-		// show top canvas element
-		if w.canvas.content != nil {
-			w.canvas.content.Show()
-		}
 	})
+
+	// show top canvas element
+	if w.canvas.content != nil {
+		w.canvas.content.Show()
+	}
 }
 
 func (w *window) Hide() {
@@ -406,6 +411,12 @@ func (w *window) closed(viewport *glfw.Window) {
 	if w.onClosed != nil {
 		w.onClosed()
 	}
+
+	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
+	if w.eventQueue != nil {
+		close(w.eventQueue)
+		w.eventQueue = nil
+	}
 }
 
 func (w *window) moved(viewport *glfw.Window, x, y int) {
@@ -451,8 +462,16 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	var found fyne.CanvasObject
 	foundX, foundY := 0, 0
 
-	findFunc := func(walked fyne.CanvasObject, pos fyne.Position) bool {
+	findFunc := func(walked fyne.CanvasObject, pos fyne.Position, clipPos fyne.Position, clipSize fyne.Size) bool {
 		if !walked.Visible() {
+			return false
+		}
+
+		if mouse.X < clipPos.X || mouse.Y < clipPos.Y {
+			return false
+		}
+
+		if mouse.X >= clipPos.X+clipSize.Width || mouse.Y >= clipPos.Y+clipSize.Height {
 			return false
 		}
 
@@ -460,9 +479,7 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 			return false
 		}
 
-		x2 := pos.X + walked.Size().Width
-		y2 := pos.Y + walked.Size().Height
-		if mouse.X >= x2 || mouse.Y >= y2 {
+		if mouse.X >= pos.X+walked.Size().Width || mouse.Y >= pos.Y+walked.Size().Height {
 			return false
 		}
 
@@ -512,7 +529,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 		if hovered, ok := obj.(desktop.Hoverable); ok {
 			if hovered == w.mouseOver {
-				hovered.MouseMoved(ev)
+				w.queueEvent(func() { hovered.MouseMoved(ev) })
 			} else {
 				w.mouseOut()
 				w.mouseIn(hovered, ev)
@@ -529,7 +546,8 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
 			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
 			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
-			w.mouseDragged.Dragged(ev)
+			wd := w.mouseDragged
+			w.queueEvent(func() { wd.Dragged(ev) })
 
 			w.mouseDragPos = w.mousePos
 		}
@@ -545,17 +563,21 @@ func (w *window) objIsDragged(obj interface{}) bool {
 }
 
 func (w *window) mouseIn(obj desktop.Hoverable, ev *desktop.MouseEvent) {
-	if obj != nil {
-		obj.MouseIn(ev)
-	}
-	w.mouseOver = obj
+	w.queueEvent(func() {
+		if obj != nil {
+			obj.MouseIn(ev)
+		}
+		w.mouseOver = obj
+	})
 }
 
 func (w *window) mouseOut() {
-	if w.mouseOver != nil {
-		w.mouseOver.MouseOut()
-		w.mouseOver = nil
-	}
+	w.queueEvent(func() {
+		if w.mouseOver != nil {
+			w.mouseOver.MouseOut()
+			w.mouseOver = nil
+		}
+	})
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
@@ -577,14 +599,21 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	ev := new(fyne.PointEvent)
 	ev.Position = fyne.NewPos(x, y)
 
+	coMouse := co
+	// Switch the mouse target to the dragging object if one is set
+	if w.mouseDragged != nil && !w.objIsDragged(co) {
+		co, _ = w.mouseDragged.(fyne.CanvasObject)
+		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
+	}
+
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position
 		mev.Button = convertMouseButton(button)
 		if action == glfw.Press {
-			go wid.MouseDown(mev)
+			w.queueEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
-			go wid.MouseUp(mev)
+			w.queueEvent(func() { wid.MouseUp(mev) })
 		}
 	}
 
@@ -619,7 +648,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
 			if wid, ok := co.(fyne.DoubleTappable); ok {
 				doubleTapped = true
-				go wid.DoubleTapped(ev)
+				w.queueEvent(func() { wid.DoubleTapped(ev) })
 			}
 		}
 		w.mouseClickTime = now
@@ -627,13 +656,18 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 
 	// Prevent Tapped from triggering if DoubleTapped has been sent
 	if wid, ok := co.(fyne.Tappable); ok && doubleTapped == false {
-		if action == glfw.Release {
-			switch button {
-			case glfw.MouseButtonRight:
-				go wid.TappedSecondary(ev)
-			default:
-				go wid.Tapped(ev)
+		if action == glfw.Press {
+			w.mousePressed = wid
+		} else if action == glfw.Release {
+			if wid == w.mousePressed {
+				switch button {
+				case glfw.MouseButtonRight:
+					w.queueEvent(func() { wid.TappedSecondary(ev) })
+				default:
+					w.queueEvent(func() { wid.Tapped(ev) })
+				}
 			}
+			w.mousePressed = nil
 		}
 	}
 	if wid, ok := co.(fyne.Draggable); ok {
@@ -645,7 +679,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 	if action == glfw.Release && w.mouseDragged != nil {
 		w.mouseDragged.DragEnd()
-		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(co) {
+		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(coMouse) {
 			w.mouseOut()
 		}
 		w.mouseDragged = nil
@@ -859,18 +893,18 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	if action == glfw.Press {
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				go focused.KeyDown(keyEvent)
+				w.queueEvent(func() { focused.KeyDown(keyEvent) })
 			}
 		} else if w.canvas.onKeyDown != nil {
-			go w.canvas.onKeyDown(keyEvent)
+			w.queueEvent(func() { w.canvas.onKeyDown(keyEvent) })
 		}
 	} else if action == glfw.Release { // ignore key up in core events
 		if w.canvas.Focused() != nil {
 			if focused, ok := w.canvas.Focused().(desktop.Keyable); ok {
-				go focused.KeyUp(keyEvent)
+				w.queueEvent(func() { focused.KeyUp(keyEvent) })
 			}
 		} else if w.canvas.onKeyUp != nil {
-			go w.canvas.onKeyUp(keyEvent)
+			w.queueEvent(func() { w.canvas.onKeyUp(keyEvent) })
 		}
 		return
 	} // key repeat will fall through to TypedKey and TypedShortcut
@@ -916,9 +950,9 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 
 	// No shortcut detected, pass down to TypedKey
 	if w.canvas.Focused() != nil {
-		go w.canvas.Focused().TypedKey(keyEvent)
+		w.queueEvent(func() { w.canvas.Focused().TypedKey(keyEvent) })
 	} else if w.canvas.onTypedKey != nil {
-		go w.canvas.onTypedKey(keyEvent)
+		w.queueEvent(func() { w.canvas.onTypedKey(keyEvent) })
 	}
 }
 
@@ -951,9 +985,9 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 	}
 
 	if w.canvas.Focused() != nil {
-		w.canvas.Focused().TypedRune(char)
+		w.queueEvent(func() { w.canvas.Focused().TypedRune(char) })
 	} else if w.canvas.onTypedRune != nil {
-		w.canvas.onTypedRune(char)
+		w.queueEvent(func() { w.canvas.onTypedRune(char) })
 	}
 }
 
@@ -975,6 +1009,24 @@ func (w *window) runWithContext(f func()) {
 	f()
 
 	glfw.DetachCurrentContext()
+}
+
+// Use this method to queue up a callback that handles an event. This ensures
+// user interaction events for a given window are processed in order.
+func (w *window) queueEvent(fn func()) {
+	w.eventWait.Add(1)
+	w.eventQueue <- fn
+}
+
+func (w *window) runEventQueue() {
+	for fn := range w.eventQueue {
+		fn()
+		w.eventWait.Done()
+	}
+}
+
+func (w *window) waitForEvents() {
+	w.eventWait.Wait()
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
@@ -1006,6 +1058,11 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 			glInit()
 		}
 		ret = &window{viewport: win, title: title, master: master}
+
+		// This channel will be closed when the window is closed.
+		ret.eventQueue = make(chan func(), 64)
+		go ret.runEventQueue()
+
 		canvas := newCanvas()
 		canvas.context = ret
 		canvas.SetScale(ret.detectScale())

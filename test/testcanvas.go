@@ -2,7 +2,6 @@ package test
 
 import (
 	"image"
-	"image/color"
 	"image/draw"
 
 	"fyne.io/fyne"
@@ -10,8 +9,6 @@ import (
 
 var (
 	dummyCanvas fyne.Canvas
-
-	testBackground = color.RGBA{R: 255, G: 128, B: 255, A: 255}
 )
 
 type testCanvas struct {
@@ -32,6 +29,14 @@ func (c *testCanvas) Content() fyne.CanvasObject {
 
 func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
+
+	if content == nil {
+		return
+	}
+
+	theme := fyne.CurrentApp().Settings().Theme()
+	padding := fyne.NewSize(theme.Padding(), theme.Padding())
+	c.Resize(content.MinSize().Add(padding))
 }
 
 func (c *testCanvas) Overlay() fyne.CanvasObject {
@@ -107,18 +112,21 @@ func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
 }
 
 func (c *testCanvas) Capture() image.Image {
+	theme := fyne.CurrentApp().Settings().Theme()
 	// TODO actually implement rendering
 
 	bounds := image.Rect(0, 0, int(float32(c.Size().Width)*c.Scale()), int(float32(c.Size().Height)*c.Scale()))
 	img := image.NewRGBA(bounds)
-	draw.Draw(img, bounds, image.NewUniform(testBackground), image.ZP, draw.Src)
+	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
 	return img
 }
 
 // NewCanvas returns a single use in-memory canvas used for testing
 func NewCanvas() fyne.Canvas {
-	return &testCanvas{size: fyne.NewSize(10, 10)}
+	theme := fyne.CurrentApp().Settings().Theme()
+	padding := fyne.NewSize(theme.Padding(), theme.Padding())
+	return &testCanvas{size: padding}
 }
 
 // Canvas returns a reusable in-memory canvas used for testing
