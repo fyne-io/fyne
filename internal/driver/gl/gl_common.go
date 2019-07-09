@@ -2,7 +2,6 @@ package gl
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/draw"
 	_ "image/jpeg" // avoid users having to import when using image widget
@@ -16,7 +15,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-	"github.com/go-gl/gl/v3.2-core/gl"
+
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"github.com/srwiley/oksvg"
@@ -36,20 +35,6 @@ func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasO
 		texture = creator(object)
 		textures[object] = texture
 	}
-	return texture
-}
-
-func newTexture() uint32 {
-	var texture uint32
-
-	gl.GenTextures(1, &texture)
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, texture)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
 	return texture
 }
 
@@ -270,98 +255,4 @@ func (c *glCanvas) newGlRadialGradientTexture(obj fyne.CanvasObject) uint32 {
 	height := textureScaleInt(c, gradient.Size().Height)
 
 	return c.imgToTexture(gradient.Generate(width, height))
-}
-
-func (c *glCanvas) imgToTexture(img image.Image) uint32 {
-	switch i := img.(type) {
-	case *image.Uniform:
-		texture := newTexture()
-		r, g, b, a := i.RGBA()
-		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
-		data := []uint8{r8, g8, b8, a8}
-		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA,
-			gl.UNSIGNED_BYTE, gl.Ptr(data))
-		return texture
-	case *image.RGBA:
-		if len(i.Pix) == 0 { // image is empty
-			return 0
-		}
-
-		var texture uint32
-		texture = newTexture()
-		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(i.Rect.Size().X), int32(i.Rect.Size().Y),
-			0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(i.Pix))
-		return texture
-	default:
-		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
-		return c.imgToTexture(rgba)
-	}
-}
-
-func compileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	csources, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csources, nil)
-	free()
-	gl.CompileShader(shader)
-
-	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		info := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(info))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, info)
-	}
-
-	return shader, nil
-}
-
-const (
-	vertexShaderSource = `
-    #version 110
-    attribute vec3 vert;
-    attribute vec2 vertTexCoord;
-    varying vec2 fragTexCoord;
-
-    void main() {
-        fragTexCoord = vertTexCoord;
-
-        gl_Position = vec4(vert, 1);
-    }
-` + "\x00"
-
-	fragmentShaderSource = `
-    #version 110
-    uniform sampler2D tex;
-
-    varying vec2 fragTexCoord;
-
-    void main() {
-        gl_FragColor = texture2D(tex, fragTexCoord);
-    }
-` + "\x00"
-)
-
-func (c *glCanvas) initOpenGL() {
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		panic(err)
-	}
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		panic(err)
-	}
-
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.AttachShader(prog, fragmentShader)
-	gl.LinkProgram(prog)
-
-	c.program = prog
 }

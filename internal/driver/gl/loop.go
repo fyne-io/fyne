@@ -7,7 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
-	"github.com/go-gl/gl/v3.2-core/gl"
+
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -101,8 +101,6 @@ func (d *gLDriver) runGL() {
 				w.runWithContext(func() {
 					d.freeDirtyTextures(canvas)
 
-					gl.UseProgram(canvas.program)
-
 					updateGLContext(w)
 					if canvas.ensureMinSize() {
 						w.fitContent()
@@ -124,11 +122,7 @@ func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
 		select {
 		case object := <-canvas.refreshQueue:
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-				texture := textures[obj]
-				if texture != 0 {
-					gl.DeleteTextures(1, &texture)
-					delete(textures, obj)
-				}
+				freeTexture(obj)
 				delete(canvas.minSizes, obj)
 				return false
 			}
