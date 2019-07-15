@@ -5,6 +5,7 @@ import (
 	"image/draw"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
 
 var (
