@@ -5,7 +5,6 @@ import (
 	"image/draw"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
 )
 
 var (
@@ -89,6 +88,7 @@ func (c *testCanvas) Size() fyne.Size {
 func (c *testCanvas) Resize(size fyne.Size) {
 	c.size = size
 
+	theme := fyne.CurrentApp().Settings().Theme()
 	c.content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 }
