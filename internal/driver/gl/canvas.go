@@ -79,11 +79,11 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.Lock()
 	c.content = content
+	c.minSizes = map[fyne.CanvasObject]fyne.Size{}
 	c.Unlock()
 
 	newSize := c.size.Union(c.canvasSize(c.content.MinSize()))
 	c.Resize(newSize)
-	c.minSizes = map[fyne.CanvasObject]fyne.Size{}
 
 	c.setDirty(true)
 }
@@ -228,6 +228,7 @@ func (c *glCanvas) ensureMinSize() bool {
 		minSize := obj.MinSize()
 		minSizeChanged := c.minSizes[obj] != minSize
 		if minSizeChanged {
+			c.minSizes[obj] = minSize
 			if parent != nil {
 				objToLayout = parent
 			} else {
@@ -402,6 +403,7 @@ func (c *glCanvas) contentPos() fyne.Position {
 func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0}
 	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
+	c.minSizes = map[fyne.CanvasObject]fyne.Size{}
 	c.padded = true
 
 	c.focusMgr = app.NewFocusManager(c)
