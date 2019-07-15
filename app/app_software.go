@@ -1,4 +1,4 @@
-// +build ci
+// +build ci nacl
 
 package app
 
