@@ -12,7 +12,8 @@ var (
 )
 
 type testCanvas struct {
-	size fyne.Size
+	size  fyne.Size
+	scale float32
 
 	content, overlay fyne.CanvasObject
 	focused          fyne.Focusable
@@ -35,7 +36,7 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	}
 
 	theme := fyne.CurrentApp().Settings().Theme()
-	padding := fyne.NewSize(theme.Padding(), theme.Padding())
+	padding := fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 	c.Resize(content.MinSize().Add(padding))
 }
 
@@ -86,13 +87,17 @@ func (c *testCanvas) Size() fyne.Size {
 
 func (c *testCanvas) Resize(size fyne.Size) {
 	c.size = size
+
+	c.content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 }
 
 func (c *testCanvas) Scale() float32 {
-	return 1.0
+	return c.scale
 }
 
-func (c *testCanvas) SetScale(float32) {
+func (c *testCanvas) SetScale(scale float32) {
+	c.scale = scale
 }
 
 func (c *testCanvas) OnTypedRune() func(rune) {
@@ -126,7 +131,7 @@ func (c *testCanvas) Capture() image.Image {
 func NewCanvas() fyne.Canvas {
 	theme := fyne.CurrentApp().Settings().Theme()
 	padding := fyne.NewSize(theme.Padding(), theme.Padding())
-	return &testCanvas{size: padding}
+	return &testCanvas{size: padding, scale: 1.0}
 }
 
 // Canvas returns a reusable in-memory canvas used for testing
