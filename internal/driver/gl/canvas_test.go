@@ -255,3 +255,66 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	assert.Equal(t, fyne.NewSize(30, 20), rightObj2.Size())
 	w.ignoreResize = false
 }
+
+func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.ignoreResize = true // for some reason the test is causing a WM resize event
+	c := w.Canvas().(*glCanvas)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(50, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(50, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(50, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(50, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	content := fyne.NewContainer(leftCol, rightCol)
+	layout := &recordingLayout{}
+	content.Layout = layout
+	w.SetContent(content)
+
+	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
+	for c.isDirty() {
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	// there is a small gap between the canvas get marked as clean and the actual layout run
+	time.Sleep(20 * time.Millisecond)
+	// clear the recorded layouts
+	for layout.popLayoutEvent() != nil {
+	}
+	assert.Nil(t, layout.popLayoutEvent())
+
+	leftObj1.FillColor = color.White
+	rightObj1.FillColor = color.White
+	rightObj2.FillColor = color.White
+	c.Refresh(leftObj1)
+	c.Refresh(rightObj1)
+	c.Refresh(rightObj2)
+
+	time.Sleep(100 * time.Millisecond)
+	assert.Nil(t, layout.popLayoutEvent())
+
+	w.ignoreResize = false
+}
+
+var _ fyne.Layout = (*recordingLayout)(nil)
+
+type recordingLayout struct {
+	layoutEvents []interface{}
+}
+
+func (l *recordingLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	l.layoutEvents = append(l.layoutEvents, size)
+}
+
+func (l *recordingLayout) MinSize([]fyne.CanvasObject) fyne.Size {
+	return fyne.NewSize(6, 9)
+}
+
+func (l *recordingLayout) popLayoutEvent() (e interface{}) {
+	e, l.layoutEvents = pop(l.layoutEvents)
+	return
+}
