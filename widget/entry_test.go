@@ -424,10 +424,13 @@ func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
 	assert.Equal(t, -1, start)
 	assert.Equal(t, -1, end)
 
-	// select invalid (after end)
+	// select whitespace at the end of text
 	start, end = getTextWhitespaceRegion(str, len(str))
-	assert.Equal(t, -1, start)
-	assert.Equal(t, -1, end)
+	assert.Equal(t, 29, start)
+	assert.Equal(t, 32, end)
+	start, end = getTextWhitespaceRegion(str, len(str)+100)
+	assert.Equal(t, 29, start)
+	assert.Equal(t, 32, end)
 
 	// select the whitespace
 	start, end = getTextWhitespaceRegion(str, 0)

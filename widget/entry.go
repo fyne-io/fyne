@@ -519,8 +519,14 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, startSelect bool) {
 // getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
 // and expanding to the start and end of the whitespace or text underneat the specified position.
 func getTextWhitespaceRegion(row []rune, col int) (int, int) {
-	if len(row) == 0 || col >= len(row) || col < 0 {
+
+	if len(row) == 0 || col < 0 {
 		return -1, -1
+	}
+
+	// If the click position exceeds the length of text then snap it to the end
+	if col >= len(row) {
+		col = len(row) - 1
 	}
 
 	// maps: " fi-sh 日本語本語日  \t "
