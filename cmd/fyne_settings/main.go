@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"image/color"
 	"os"
 	"path/filepath"
 
@@ -100,8 +99,7 @@ func main() {
 		top, bottom, preview)
 
 	tabs := widget.NewTabContainer(
-		&widget.TabItem{Text: "Appearance", Icon: theme.NewThemedResource(appearanceIcon, nil), Content: appearance},
-		&widget.TabItem{Text: "Language", Icon: theme.NewThemedResource(languageIcon, nil), Content: &canvas.Rectangle{FillColor: color.White}})
+		&widget.TabItem{Text: "Appearance", Icon: theme.NewThemedResource(appearanceIcon, nil), Content: appearance})
 	tabs.SetTabLocation(widget.TabLocationLeading)
 	w.SetContent(tabs)
 
