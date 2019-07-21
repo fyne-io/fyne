@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne/theme"
 )
 
 func TestSettingsLoad(t *testing.T) {
@@ -40,4 +42,29 @@ func TestSettingsLoad(t *testing.T) {
 	}
 
 	assert.Equal(t, "dark", settings.schema.ThemeName)
+}
+
+func TestOverrideTheme(t *testing.T) {
+	set := &settings{}
+	set.setupTheme()
+	assert.Equal(t, theme.DarkTheme(), set.Theme())
+
+	set.schema.ThemeName = "light"
+	set.setupTheme()
+	assert.Equal(t, theme.LightTheme(), set.Theme())
+
+	set = &settings{}
+	set.setupTheme()
+	assert.Equal(t, theme.DarkTheme(), set.Theme())
+
+	err := os.Setenv("FYNE_THEME", "light")
+	if err != nil {
+		t.Error(err)
+	}
+	set.setupTheme()
+	assert.Equal(t, theme.LightTheme(), set.Theme())
+	err = os.Setenv("FYNE_THEME", "")
+	if err != nil {
+		t.Error(err)
+	}
 }

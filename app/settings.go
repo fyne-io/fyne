@@ -96,10 +96,10 @@ func (s *settings) loadFromFile(path string) error {
 
 func (s *settings) setupTheme() {
 	name := s.schema.ThemeName
-	env := os.Getenv("FYNE_THEME")
-	if env != "" {
+	if env := os.Getenv("FYNE_THEME"); env != "" {
 		name = env
 	}
+
 	if name == "light" {
 		s.SetTheme(theme.LightTheme())
 	} else {

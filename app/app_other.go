@@ -8,7 +8,7 @@ import (
 )
 
 func rootConfigDir() string {
-	return "/tmp/"
+	return "/tmp/fyne-test/"
 }
 
 func (app *fyneApp) OpenURL(url *url.URL) error {
