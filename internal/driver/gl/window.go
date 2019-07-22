@@ -138,7 +138,7 @@ func (w *window) centerOnScreen() {
 	}) // end of runOnMain(){}
 }
 
-// minSizeOnScreen gets thpaddede minimum size of a window content in screen pixels
+// minSizeOnScreen gets the padded minimum size of a window content in screen pixels
 func (w *window) minSizeOnScreen() (int, int) {
 	// get minimum size of content inside the window
 	return w.screenSize(w.canvas.MinSize())
