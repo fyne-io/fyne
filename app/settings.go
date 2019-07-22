@@ -99,6 +99,11 @@ func (s *settings) loadFromFile(path string) error {
 	return decode.Decode(&s.schema)
 }
 
+func (s *settings) fileChanged() {
+	s.load()
+	s.apply()
+}
+
 func (s *settings) setupTheme() {
 	name := s.schema.ThemeName
 	if env := os.Getenv("FYNE_THEME"); env != "" {
@@ -112,19 +117,22 @@ func (s *settings) setupTheme() {
 	}
 }
 
+func (s *settings) watchSettingsFile(watcher *fsnotify.Watcher, path string) {
+	err := watcher.Add(filepath.Dir(path))
+	if err != nil {
+		fyne.LogError("Settings watch error:", err)
+	}
+}
+
 func (s *settings) watchSettings() {
 	watcher, err := fsnotify.NewWatcher()
 
 	go func() {
 		for event := range watcher.Events {
-			s.load()
-			s.apply()
+			s.fileChanged()
 
 			if event.Op&fsnotify.Remove != 0 {
-				err = watcher.Add(filepath.Dir(s.schema.StoragePath()))
-				if err != nil {
-					fyne.LogError("Settings watch error:", err)
-				}
+				s.watchSettingsFile(watcher, s.schema.StoragePath())
 			}
 		}
 
@@ -134,10 +142,7 @@ func (s *settings) watchSettings() {
 		}
 	}()
 
-	err = watcher.Add(filepath.Dir(s.schema.StoragePath()))
-	if err != nil {
-		fyne.LogError("Settings watch error:", err)
-	}
+	s.watchSettingsFile(watcher, s.schema.StoragePath())
 }
 
 func loadSettings() *settings {

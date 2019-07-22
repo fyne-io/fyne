@@ -4,9 +4,11 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
 )
 
@@ -50,5 +52,19 @@ func TestOverrideTheme(t *testing.T) {
 	err = os.Setenv("FYNE_THEME", "")
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestSettingsWatch(t *testing.T) {
+	settings := &settings{}
+	listener := make(chan fyne.Settings)
+	settings.AddChangeListener(listener)
+
+	settings.fileChanged() // simulate the settings file changing
+
+	select {
+	case _ = <-listener:
+	case <-time.After(100 * time.Millisecond):
+		t.Error("Settings listener was not called")
 	}
 }
