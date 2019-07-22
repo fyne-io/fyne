@@ -301,9 +301,14 @@ func (w *window) detectScale() float32 {
 		scale, err := strconv.ParseFloat(env, 32)
 		if err != nil {
 			fyne.LogError("Error reading scale", err)
-		} else if scale != 0 {
+		} else if float32(scale) != fyne.SettingsScaleAuto {
 			return float32(scale)
 		}
+	}
+
+	setting := fyne.CurrentApp().Settings().Scale()
+	if setting != fyne.SettingsScaleAuto {
+		return setting
 	}
 
 	monitor := w.getMonitorForWindow()
@@ -311,7 +316,8 @@ func (w *window) detectScale() float32 {
 	widthPx := monitor.GetVideoMode().Width
 
 	dpi := float32(widthPx) / (float32(widthMm) / 25.4)
-	return scaleForDpi(int(dpi))
+	w.canvas.detectedScale = scaleForDpi(int(dpi))
+	return w.canvas.detectedScale
 }
 
 func (w *window) Show() {
@@ -385,11 +391,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	if w.visible {
 		w.canvas.Content().Show()
 	}
-
-	runOnMain(func() {
-		w.fitContent()
-		w.resize(w.canvas.size)
-	})
+	w.rescaleContext()
 }
 
 func (w *window) Canvas() fyne.Canvas {
@@ -430,12 +432,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	}
 
 	w.canvas.SetScale(newScale)
-
-	// this can trigger resize events that we need to ignore
-	w.fitContent()
-
-	newWidth, newHeight := w.screenSize(w.canvas.size)
-	w.viewport.SetSize(newWidth, newHeight)
+	w.rescaleContext()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -998,6 +995,16 @@ func (w *window) runWithContext(f func()) {
 	glfw.DetachCurrentContext()
 }
 
+func (w *window) rescaleContext() {
+	runOnMain(func() {
+		w.fitContent()
+
+		size := w.canvas.size.Union(w.canvas.MinSize())
+		newWidth, newHeight := w.screenSize(size)
+		w.viewport.SetSize(newWidth, newHeight)
+	})
+}
+
 // Use this method to queue up a callback that handles an event. This ensures
 // user interaction events for a given window are processed in order.
 func (w *window) queueEvent(fn func()) {
@@ -1052,11 +1059,11 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret.eventQueue = make(chan func(), 64)
 		go ret.runEventQueue()
 
-		canvas := newCanvas()
-		canvas.context = ret
-		canvas.SetScale(ret.detectScale())
-		canvas.texScale = 1.0
-		ret.canvas = canvas
+		ret.canvas = newCanvas()
+		ret.canvas.context = ret
+		ret.canvas.detectedScale = ret.detectScale()
+		ret.canvas.scale = ret.canvas.detectedScale
+		ret.canvas.texScale = 1.0
 		ret.SetIcon(ret.icon) // if this is nil we will get the app icon
 		d.windows = append(d.windows, ret)
 

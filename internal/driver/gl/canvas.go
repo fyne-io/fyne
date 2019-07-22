@@ -33,9 +33,9 @@ type glCanvas struct {
 	onKeyUp     func(*fyne.KeyEvent)
 	shortcut    fyne.ShortcutHandler
 
-	program  uint32
-	scale    float32
-	texScale float32
+	scale, detectedScale float32
+	texScale             float32
+	program              uint32
 
 	dirty        bool
 	dirtyMutex   *sync.Mutex
@@ -175,8 +175,14 @@ func (c *glCanvas) Scale() float32 {
 }
 
 func (c *glCanvas) SetScale(scale float32) {
-	c.scale = scale
+	if scale == fyne.SettingsScaleAuto {
+		c.scale = c.detectedScale
+	} else {
+		c.scale = scale
+	}
 	c.setDirty(true)
+
+	c.context.rescaleContext()
 }
 
 func (c *glCanvas) OnTypedRune() func(rune) {

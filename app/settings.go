@@ -15,9 +15,8 @@ import (
 // SettingsSchema is used for loading and storing global settings
 type SettingsSchema struct {
 	// these items are used for global settings load
-	ThemeName         string `json:"theme"`
-	FontPath          string `json:"font_path"`
-	MonospaceFontPath string `json:"font_monospace_path"`
+	ThemeName string  `json:"theme"`
+	Scale     float32 `json:"scale"`
 }
 
 // StoragePath returns the location of the settings storage
@@ -49,6 +48,12 @@ func (s *settings) SetTheme(theme fyne.Theme) {
 	defer s.themeLock.Unlock()
 	s.theme = theme
 	s.apply()
+}
+
+func (s *settings) Scale() float32 {
+	s.themeLock.RLock()
+	defer s.themeLock.RUnlock()
+	return s.schema.Scale
 }
 
 func (s *settings) AddChangeListener(listener chan fyne.Settings) {

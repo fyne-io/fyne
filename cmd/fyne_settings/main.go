@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -15,6 +18,8 @@ import (
 
 type settings struct {
 	fyneSettings app.SettingsSchema
+
+	preview *canvas.Image
 }
 
 func (s *settings) save() error {
@@ -63,7 +68,30 @@ func (s *settings) loadFromFile(path string) error {
 	return decode.Decode(&s.fyneSettings)
 }
 
-var preview *canvas.Image
+func (s *settings) chooseTheme(name string) {
+	s.fyneSettings.ThemeName = name
+
+	switch name {
+	case "light":
+		s.preview.Resource = themeLightPreview
+	default:
+		s.preview.Resource = themeDarkPreview
+	}
+	canvas.Refresh(s.preview)
+}
+
+func (s *settings) chooseScale(value string) {
+	if value == "" {
+		s.fyneSettings.Scale = fyne.SettingsScaleAuto
+		return
+	}
+
+	scale, err := strconv.ParseFloat(value, 32)
+	if err != nil {
+		log.Println("Cannot set scale to:", value)
+	}
+	s.fyneSettings.Scale = float32(scale)
+}
 
 func main() {
 	s := &settings{}
@@ -72,23 +100,21 @@ func main() {
 	a := app.New()
 	w := a.NewWindow("Fyne Settings")
 
-	preview = canvas.NewImageFromResource(themeDarkPreview)
-	preview.FillMode = canvas.ImageFillContain
+	s.preview = canvas.NewImageFromResource(themeDarkPreview)
+	s.preview.FillMode = canvas.ImageFillContain
 
-	themes := widget.NewSelect([]string{"light", "dark"}, func(name string) {
-		s.fyneSettings.ThemeName = name
+	def := s.fyneSettings.ThemeName
+	themes := widget.NewSelect([]string{"dark", "light"}, s.chooseTheme)
+	themes.SetSelected(def)
+	scale := widget.NewEntry()
+	scale.OnChanged = s.chooseScale
+	scale.SetPlaceHolder("Auto")
+	if s.fyneSettings.Scale != fyne.SettingsScaleAuto {
+		scale.SetText(fmt.Sprintf("%.2f", s.fyneSettings.Scale))
+	}
 
-		switch name {
-		case "light":
-			preview.Resource = themeLightPreview
-		default:
-			preview.Resource = themeDarkPreview
-		}
-		canvas.Refresh(preview)
-	})
-	themes.SetSelected("dark")
 	top := widget.NewForm(
-		&widget.FormItem{Text: "Scale", Widget: widget.NewSelect([]string{"Auto"}, func(string) {})},
+		&widget.FormItem{Text: "Scale", Widget: scale},
 		&widget.FormItem{Text: "Theme", Widget: themes})
 	bottom := widget.NewHBox(layout.NewSpacer(),
 		&widget.Button{Text: "Apply", Style: widget.PrimaryButton, OnTapped: func() {
@@ -96,7 +122,7 @@ func main() {
 		}})
 
 	appearance := fyne.NewContainerWithLayout(layout.NewBorderLayout(top, bottom, nil, nil),
-		top, bottom, preview)
+		top, bottom, s.preview)
 
 	tabs := widget.NewTabContainer(
 		&widget.TabItem{Text: "Appearance", Icon: theme.NewThemedResource(appearanceIcon, nil), Content: appearance})

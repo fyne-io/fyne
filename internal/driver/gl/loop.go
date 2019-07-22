@@ -18,6 +18,7 @@ type funcData struct {
 
 type withContext interface {
 	runWithContext(f func())
+	rescaleContext()
 }
 
 // channel for queuing functions on the main thread
