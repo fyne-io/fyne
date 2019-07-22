@@ -1,6 +1,6 @@
 // +build !ci
 
-// +build linux openbsd freebsd netbsd
+// +build linux,!android openbsd freebsd netbsd
 
 package app
 
