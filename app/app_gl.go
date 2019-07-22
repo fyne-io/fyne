@@ -1,4 +1,4 @@
-// +build !ci,!nacl,cgo
+// +build !ci,!nacl
 
 package app
 
