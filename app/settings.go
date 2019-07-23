@@ -117,22 +117,22 @@ func (s *settings) setupTheme() {
 	}
 }
 
-func (s *settings) watchSettingsFile(watcher *fsnotify.Watcher, path string) {
+func watchFileAddTarget(watcher *fsnotify.Watcher, path string) {
 	err := watcher.Add(filepath.Dir(path))
 	if err != nil {
 		fyne.LogError("Settings watch error:", err)
 	}
 }
 
-func (s *settings) watchSettings() {
+func watchFile(path string, callback func()) {
 	watcher, err := fsnotify.NewWatcher()
 
 	go func() {
 		for event := range watcher.Events {
-			s.fileChanged()
-
-			if event.Op&fsnotify.Remove != 0 {
-				s.watchSettingsFile(watcher, s.schema.StoragePath())
+			if event.Op&fsnotify.Remove != 0 { // if it was deleted then watch again
+				watchFileAddTarget(watcher, path)
+			} else {
+				callback()
 			}
 		}
 
@@ -142,7 +142,11 @@ func (s *settings) watchSettings() {
 		}
 	}()
 
-	s.watchSettingsFile(watcher, s.schema.StoragePath())
+	watchFileAddTarget(watcher, path)
+}
+
+func (s *settings) watchSettings() {
+	watchFile(s.schema.StoragePath(), s.fileChanged)
 }
 
 func loadSettings() *settings {
