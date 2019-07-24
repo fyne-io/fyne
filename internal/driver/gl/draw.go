@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/widget"
-	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {
@@ -54,43 +53,12 @@ func (c *glCanvas) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size
 		x2, y1, 0, 1.0, 0.0, // bottom right
 	}
 
-	var vao uint32
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
-	gl.EnableVertexAttribArray(0)
-
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
-
-	textureUniform := gl.GetUniformLocation(c.program, gl.Str("tex\x00"))
-	gl.Uniform1i(textureUniform, 0)
-
-	vertAttrib := uint32(gl.GetAttribLocation(c.program, gl.Str("vert\x00")))
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
-
-	texCoordAttrib := uint32(gl.GetAttribLocation(c.program, gl.Str("vertTexCoord\x00")))
-	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))
-
+	vao, vbo := c.glCreateBuffer(points)
 	return points, vao, vbo
 }
 
 func (c *glCanvas) freeCoords(vao, vbo uint32) {
-	gl.BindVertexArray(0)
-	gl.DeleteVertexArrays(1, &vao)
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.DeleteBuffers(1, &vbo)
-}
-
-func (c *glCanvas) drawTexture(texture uint32, points []float32) {
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, texture)
-
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
+	c.glFreeBuffer(vao, vbo)
 }
 
 func (c *glCanvas) drawWidget(wid fyne.Widget, pos fyne.Position, frame fyne.Size) {
@@ -101,8 +69,7 @@ func (c *glCanvas) drawWidget(wid fyne.Widget, pos fyne.Position, frame fyne.Siz
 	points, vao, vbo := c.rectCoords(wid.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(wid, c.newGlRectTexture)
 
-	gl.Enable(gl.BLEND)
-	c.drawTexture(texture, points)
+	c.glDrawTexture(texture, points, 1.0)
 	c.freeCoords(vao, vbo)
 }
 
@@ -110,9 +77,7 @@ func (c *glCanvas) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fy
 	points, vao, vbo := c.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(circle, c.newGlCircleTexture)
 
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	c.drawTexture(texture, points)
+	c.glDrawTexture(texture, points, 1.0)
 	c.freeCoords(vao, vbo)
 }
 
@@ -120,9 +85,7 @@ func (c *glCanvas) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Siz
 	points, vao, vbo := c.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
 	texture := getTexture(line, c.newGlLineTexture)
 
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	c.drawTexture(texture, points)
+	c.glDrawTexture(texture, points, 1.0)
 	c.freeCoords(vao, vbo)
 }
 
@@ -132,22 +95,12 @@ func (c *glCanvas) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Si
 		return
 	}
 
-	// here we have to choose between blending the image alpha or fading it...
-	// TODO find a way to support both
-	gl.Enable(gl.BLEND)
-	if img.Alpha() != 1 {
-		gl.BlendColor(0, 0, 0, float32(img.Alpha()))
-		gl.BlendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA)
-	} else {
-		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	}
-
 	aspect := aspects[img.Resource]
 	if aspect == 0 {
 		aspect = aspects[img]
 	}
 	points, vao, vbo := c.rectCoords(img.Size(), pos, frame, img.FillMode, aspect, 0)
-	c.drawTexture(texture, points)
+	c.glDrawTexture(texture, points, float32(img.Alpha()))
 	c.freeCoords(vao, vbo)
 }
 
@@ -157,17 +110,8 @@ func (c *glCanvas) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.
 		return
 	}
 
-	// here we have to choose between blending the image alpha or fading it...
-	// TODO find a way to support both
-	gl.Enable(gl.BLEND)
-	if img.Alpha() != 1 {
-		gl.BlendColor(0, 0, 0, float32(img.Alpha()))
-		gl.BlendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA)
-	} else {
-		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	}
 	points, vao, vbo := c.rectCoords(img.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	c.drawTexture(texture, points)
+	c.glDrawTexture(texture, points, float32(img.Alpha()))
 	c.freeCoords(vao, vbo)
 }
 
@@ -177,12 +121,8 @@ func (c *glCanvas) drawGradient(o fyne.CanvasObject, texCreator func(fyne.Canvas
 		return
 	}
 
-	//  Alpha is defined by the gradient colors
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
 	points, vao, vbo := c.rectCoords(o.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	c.drawTexture(texture, points)
+	c.glDrawTexture(texture, points, 1.0)
 	c.freeCoords(vao, vbo)
 }
 
@@ -190,8 +130,7 @@ func (c *glCanvas) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, fram
 	points, vao, vbo := c.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(rect, c.newGlRectTexture)
 
-	gl.Enable(gl.BLEND) // enable translucency
-	c.drawTexture(texture, points)
+	c.glDrawTexture(texture, points, 1.0)
 	c.freeCoords(vao, vbo)
 }
 
@@ -216,9 +155,7 @@ func (c *glCanvas) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Siz
 	points, vao, vbo := c.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0, 0)
 	texture := getTexture(text, c.newGlTextTexture)
 
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	c.drawTexture(texture, points)
+	c.glDrawTexture(texture, points, 1.0)
 	c.freeCoords(vao, vbo)
 }
 

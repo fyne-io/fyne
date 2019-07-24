@@ -11,8 +11,6 @@ import (
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-
-	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 // Declare conformity with Canvas interface
@@ -79,11 +77,11 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.Lock()
 	c.content = content
+	c.minSizes = map[fyne.CanvasObject]fyne.Size{}
 	c.Unlock()
 
 	newSize := c.size.Union(c.canvasSize(c.content.MinSize()))
 	c.Resize(newSize)
-	c.minSizes = map[fyne.CanvasObject]fyne.Size{}
 
 	c.setDirty(true)
 }
@@ -234,6 +232,7 @@ func (c *glCanvas) ensureMinSize() bool {
 		minSize := obj.MinSize()
 		minSizeChanged := c.minSizes[obj] != minSize
 		if minSizeChanged {
+			c.minSizes[obj] = minSize
 			if parent != nil {
 				objToLayout = parent
 			} else {
@@ -271,11 +270,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		return
 	}
 	c.setDirty(false)
-
-	r, g, b, a := theme.BackgroundColor().RGBA()
-	max16bit := float32(255 * 255)
-	gl.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	c.glClearBuffer()
 
 	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		// TODO should this be somehow not scroll container specific?
@@ -285,8 +280,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 			scrollWidth := textureScaleInt(c, obj.Size().Width)
 			scrollHeight := textureScaleInt(c, obj.Size().Height)
 			pixHeight := textureScaleInt(c, c.size.Height)
-			gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
-			gl.Enable(gl.SCISSOR_TEST)
+			c.glScissorOpen(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
 		}
 		if obj.Visible() {
 			c.drawObject(obj, pos, size)
@@ -295,7 +289,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 	}
 	afterPaint := func(obj, _ fyne.CanvasObject) {
 		if _, ok := obj.(*widget.ScrollContainer); ok {
-			gl.Disable(gl.SCISSOR_TEST)
+			c.glScissorClose()
 		}
 	}
 
@@ -408,6 +402,7 @@ func (c *glCanvas) contentPos() fyne.Position {
 func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0}
 	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
+	c.minSizes = map[fyne.CanvasObject]fyne.Size{}
 	c.padded = true
 
 	c.focusMgr = app.NewFocusManager(c)

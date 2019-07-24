@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"fyne.io/fyne"
@@ -14,7 +15,6 @@ import (
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/widget"
 
-	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
@@ -67,6 +67,7 @@ type window struct {
 	ignoreResize  bool
 
 	eventQueue chan func()
+	eventWait  sync.WaitGroup
 }
 
 func (w *window) Title() string {
@@ -445,7 +446,7 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 	winWidth, _ := w.viewport.GetSize()
 	w.canvas.texScale = float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	gl.Viewport(0, 0, int32(width), int32(height))
+	setViewport(width, height)
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
@@ -525,7 +526,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 		if hovered, ok := obj.(desktop.Hoverable); ok {
 			if hovered == w.mouseOver {
-				hovered.MouseMoved(ev)
+				w.queueEvent(func() { hovered.MouseMoved(ev) })
 			} else {
 				w.mouseOut()
 				w.mouseIn(hovered, ev)
@@ -542,7 +543,8 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(draggedObjPos)
 			ev.DraggedX = w.mousePos.X - w.mouseDragPos.X
 			ev.DraggedY = w.mousePos.Y - w.mouseDragPos.Y
-			w.mouseDragged.Dragged(ev)
+			wd := w.mouseDragged
+			w.queueEvent(func() { wd.Dragged(ev) })
 
 			w.mouseDragPos = w.mousePos
 		}
@@ -558,17 +560,21 @@ func (w *window) objIsDragged(obj interface{}) bool {
 }
 
 func (w *window) mouseIn(obj desktop.Hoverable, ev *desktop.MouseEvent) {
-	if obj != nil {
-		obj.MouseIn(ev)
-	}
-	w.mouseOver = obj
+	w.queueEvent(func() {
+		if obj != nil {
+			obj.MouseIn(ev)
+		}
+		w.mouseOver = obj
+	})
 }
 
 func (w *window) mouseOut() {
-	if w.mouseOver != nil {
-		w.mouseOver.MouseOut()
-		w.mouseOver = nil
-	}
+	w.queueEvent(func() {
+		if w.mouseOver != nil {
+			w.mouseOver.MouseOut()
+			w.mouseOver = nil
+		}
+	})
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
@@ -589,6 +595,13 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	})
 	ev := new(fyne.PointEvent)
 	ev.Position = fyne.NewPos(x, y)
+
+	coMouse := co
+	// Switch the mouse target to the dragging object if one is set
+	if w.mouseDragged != nil && !w.objIsDragged(co) {
+		co, _ = w.mouseDragged.(fyne.CanvasObject)
+		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
+	}
 
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
@@ -663,7 +676,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 	if action == glfw.Release && w.mouseDragged != nil {
 		w.mouseDragged.DragEnd()
-		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(co) {
+		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(coMouse) {
 			w.mouseOut()
 		}
 		w.mouseDragged = nil
@@ -1008,13 +1021,19 @@ func (w *window) rescaleContext() {
 // Use this method to queue up a callback that handles an event. This ensures
 // user interaction events for a given window are processed in order.
 func (w *window) queueEvent(fn func()) {
+	w.eventWait.Add(1)
 	w.eventQueue <- fn
 }
 
 func (w *window) runEventQueue() {
 	for fn := range w.eventQueue {
 		fn()
+		w.eventWait.Done()
 	}
+}
+
+func (w *window) waitForEvents() {
+	w.eventWait.Wait()
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
@@ -1033,9 +1052,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, 0)
-
-		glfw.WindowHint(glfw.ContextVersionMajor, 2)
-		glfw.WindowHint(glfw.ContextVersionMinor, 0)
+		initWindowHints()
 
 		win, err := glfw.CreateWindow(10, 10, title, nil, nil)
 		if err != nil {
@@ -1045,13 +1062,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		win.MakeContextCurrent()
 
 		if master {
-			err := gl.Init()
-			if err != nil {
-				fyne.LogError("failed to initialise OpenGL", err)
-				return
-			}
-
-			gl.Disable(gl.DEPTH_TEST)
+			glInit()
 		}
 		ret = &window{viewport: win, title: title, master: master}
 
