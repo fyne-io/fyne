@@ -11,6 +11,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// TextDPI is a global constant that determines how text scales to interface sizes
 const TextDPI = 78
 
 func loadFont(data fyne.Resource) *truetype.Font {
@@ -22,6 +23,7 @@ func loadFont(data fyne.Resource) *truetype.Font {
 	return loaded
 }
 
+// RenderedTextSize looks up how bit a string would be if drawn on screen
 func RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	var opts truetype.Options
 	opts.Size = float64(size)
@@ -125,6 +127,7 @@ type fontCacheItem struct {
 var fontCache = make(map[fyne.TextStyle]*fontCacheItem)
 var fontCacheLock = new(sync.Mutex)
 
+// CachedFontFace returns a font face held in memory. These are loaded from the current theme.
 func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 	fontCacheLock.Lock()
 	defer fontCacheLock.Unlock()
@@ -168,6 +171,7 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 	return face
 }
 
+// ClearFontCache is used to remove cached fonts in the case that we wish to re-load font faces
 func ClearFontCache() {
 	fontCacheLock.Lock()
 	defer fontCacheLock.Unlock()

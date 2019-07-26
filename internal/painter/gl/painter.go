@@ -1,3 +1,4 @@
+// Package gl provides a full Fyne render implementation using system OpenGL libraries.
 package gl
 
 import (
@@ -9,6 +10,7 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+// Painter defines the functionality of our OpenGL based renderer
 type Painter interface {
 	SetOutputSize(int, int)
 	SetFrameBufferScale(float32)
@@ -78,6 +80,8 @@ func unscaleInt(c fyne.Canvas, v int) int {
 	}
 }
 
+// NewPainter creates a new GL based renderer for the provided canvas.
+// If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext, master bool) Painter {
 	p := &glPainter{canvas: c, context: ctx}
 	p.texScale = 1.0
