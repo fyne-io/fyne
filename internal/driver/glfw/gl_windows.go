@@ -1,4 +1,4 @@
-package gl
+package glfw
 
 func updateGLContext(w *window) {
 	canvas := w.Canvas()
@@ -7,7 +7,7 @@ func updateGLContext(w *window) {
 	winWidth := scaleInt(canvas, size.Width)
 	winHeight := scaleInt(canvas, size.Height)
 
-	setViewport(winWidth, winHeight)
+	w.canvas.painter.SetOutputSize(winWidth, winHeight)
 }
 
 // This forces a redraw of the window as we resize or move

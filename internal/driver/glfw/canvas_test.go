@@ -1,6 +1,6 @@
 // +build !ci
 
-package gl
+package glfw
 
 import (
 	"image/color"

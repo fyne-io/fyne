@@ -1,4 +1,4 @@
-package gl
+package glfw
 
 import (
 	"bytes"
@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/widget"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -392,7 +393,7 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	if w.visible {
 		w.canvas.Content().Show()
 	}
-	w.rescaleContext()
+	w.RescaleContext()
 }
 
 func (w *window) Canvas() fyne.Canvas {
@@ -433,7 +434,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	}
 
 	w.canvas.SetScale(newScale)
-	w.rescaleContext()
+	w.RescaleContext()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -445,8 +446,9 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 	winWidth, _ := w.viewport.GetSize()
-	w.canvas.texScale = float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	setViewport(width, height)
+	texScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
+	w.canvas.painter.SetFrameBufferScale(texScale)
+	w.canvas.painter.SetOutputSize(width, height)
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
@@ -1000,7 +1002,7 @@ func (w *window) focused(viewport *glfw.Window, focused bool) {
 	}
 }
 
-func (w *window) runWithContext(f func()) {
+func (w *window) RunWithContext(f func()) {
 	w.viewport.MakeContextCurrent()
 
 	f()
@@ -1008,7 +1010,7 @@ func (w *window) runWithContext(f func()) {
 	glfw.DetachCurrentContext()
 }
 
-func (w *window) rescaleContext() {
+func (w *window) RescaleContext() {
 	runOnMain(func() {
 		w.fitContent()
 
@@ -1041,13 +1043,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	runOnMain(func() {
 		master := len(d.windows) == 0
 		if master {
-			err := glfw.Init()
-			if err != nil {
-				fyne.LogError("failed to initialise GLFW", err)
-				return
-			}
-
-			initCursors()
+			d.initGLFW()
 		}
 
 		// make the window hidden, we will set it up and then show it later
@@ -1061,9 +1057,6 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		}
 		win.MakeContextCurrent()
 
-		if master {
-			glInit()
-		}
 		ret = &window{viewport: win, title: title, master: master}
 
 		// This channel will be closed when the window is closed.
@@ -1071,10 +1064,10 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		go ret.runEventQueue()
 
 		ret.canvas = newCanvas()
+		ret.canvas.painter = gl.NewPainter(ret.canvas, ret, master)
 		ret.canvas.context = ret
 		ret.canvas.detectedScale = ret.detectScale()
 		ret.canvas.scale = ret.canvas.detectedScale
-		ret.canvas.texScale = 1.0
 		ret.SetIcon(ret.icon) // if this is nil we will get the app icon
 		d.windows = append(d.windows, ret)
 

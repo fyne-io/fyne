@@ -1,7 +1,8 @@
-package gl
+package glfw
 
 import (
 	"fmt"
+	"image"
 	"math"
 	"sync"
 
@@ -9,6 +10,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/app"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -32,14 +34,13 @@ type glCanvas struct {
 	shortcut    fyne.ShortcutHandler
 
 	scale, detectedScale float32
-	texScale             float32
-	program              uint32
+	painter              gl.Painter
 
 	dirty        bool
 	dirtyMutex   *sync.Mutex
 	minSizes     map[fyne.CanvasObject]fyne.Size
 	refreshQueue chan fyne.CanvasObject
-	context      withContext
+	context      driver.WithContext
 }
 
 func scaleInt(c fyne.Canvas, v int) int {
@@ -51,13 +52,6 @@ func scaleInt(c fyne.Canvas, v int) int {
 	}
 }
 
-func textureScaleInt(c *glCanvas, v int) int {
-	if c.scale == 1.0 && c.texScale == 1.0 {
-		return v
-	}
-	return int(math.Round(float64(v) * float64(c.scale*c.texScale)))
-}
-
 func unscaleInt(c fyne.Canvas, v int) int {
 	switch c.Scale() {
 	case 1.0:
@@ -65,6 +59,14 @@ func unscaleInt(c fyne.Canvas, v int) int {
 	default:
 		return int(float32(v) / c.Scale())
 	}
+}
+
+func (c *glCanvas) Capture() image.Image {
+	var img image.Image
+	runOnMain(func() {
+		img = c.painter.Capture(c)
+	})
+	return img
 }
 
 func (c *glCanvas) Content() fyne.CanvasObject {
@@ -180,7 +182,7 @@ func (c *glCanvas) SetScale(scale float32) {
 	}
 	c.setDirty(true)
 
-	c.context.rescaleContext()
+	c.context.RescaleContext()
 }
 
 func (c *glCanvas) OnTypedRune() func(rune) {
@@ -226,6 +228,10 @@ func (c *glCanvas) ensureMinSize() bool {
 	var objToLayout fyne.CanvasObject
 	windowNeedsMinSizeUpdate := false
 	ensureMinSize := func(obj fyne.CanvasObject, parent fyne.CanvasObject) {
+		canvasMutex.Lock()
+		canvases[obj] = c
+		canvasMutex.Unlock()
+
 		if !obj.Visible() {
 			return
 		}
@@ -270,30 +276,14 @@ func (c *glCanvas) paint(size fyne.Size) {
 		return
 	}
 	c.setDirty(false)
-	c.glClearBuffer()
 
-	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		// TODO should this be somehow not scroll container specific?
-		if _, ok := obj.(*widget.ScrollContainer); ok {
-			scrollX := textureScaleInt(c, pos.X)
-			scrollY := textureScaleInt(c, pos.Y)
-			scrollWidth := textureScaleInt(c, obj.Size().Width)
-			scrollHeight := textureScaleInt(c, obj.Size().Height)
-			pixHeight := textureScaleInt(c, c.size.Height)
-			c.glScissorOpen(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
-		}
-		if obj.Visible() {
-			c.drawObject(obj, pos, size)
-		}
-		return false
+	c.painter.Paint(c.content, c, size)
+	if c.menu != nil {
+		c.painter.Paint(c.menu, c, size)
 	}
-	afterPaint := func(obj, _ fyne.CanvasObject) {
-		if _, ok := obj.(*widget.ScrollContainer); ok {
-			c.glScissorClose()
-		}
+	if c.overlay != nil {
+		c.painter.Paint(c.overlay, c, size)
 	}
-
-	c.walkTree(paint, afterPaint)
 }
 
 func (c *glCanvas) walkTree(
@@ -409,7 +399,6 @@ func newCanvas() *glCanvas {
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
 	c.dirtyMutex = &sync.Mutex{}
 
-	c.initOpenGL()
 	c.setupThemeListener()
 
 	return c

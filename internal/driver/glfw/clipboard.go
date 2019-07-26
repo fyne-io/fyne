@@ -1,4 +1,4 @@
-package gl
+package glfw
 
 import (
 	"fyne.io/fyne"

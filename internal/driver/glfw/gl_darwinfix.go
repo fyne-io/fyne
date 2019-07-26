@@ -1,6 +1,6 @@
 // +build darwin,!arm,!arm64
 
-package gl
+package glfw
 
 /*
 #cgo CFLAGS: -x objective-c

@@ -1,4 +1,4 @@
-package gl
+package painter
 
 import (
 	"image"
@@ -10,6 +10,28 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
+
+const TextDPI = 78
+
+func loadFont(data fyne.Resource) *truetype.Font {
+	loaded, err := truetype.Parse(data.Content())
+	if err != nil {
+		fyne.LogError("font load error", err)
+	}
+
+	return loaded
+}
+
+func RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+	var opts truetype.Options
+	opts.Size = float64(size)
+	opts.DPI = TextDPI
+
+	face := CachedFontFace(style, &opts)
+	advance := font.MeasureString(face, text)
+
+	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
+}
 
 type compositeFace struct {
 	sync.Mutex
@@ -103,7 +125,7 @@ type fontCacheItem struct {
 var fontCache = make(map[fyne.TextStyle]*fontCacheItem)
 var fontCacheLock = new(sync.Mutex)
 
-func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
+func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 	fontCacheLock.Lock()
 	defer fontCacheLock.Unlock()
 	comp := fontCache[style]
@@ -146,7 +168,7 @@ func cachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 	return face
 }
 
-func clearFontCache() {
+func ClearFontCache() {
 	fontCacheLock.Lock()
 	defer fontCacheLock.Unlock()
 	for _, item := range fontCache {

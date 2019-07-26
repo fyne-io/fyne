@@ -1,4 +1,4 @@
-package gl
+package glfw
 
 import (
 	"runtime"
@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
@@ -14,11 +15,6 @@ import (
 type funcData struct {
 	f    func()
 	done chan bool
-}
-
-type withContext interface {
-	runWithContext(f func())
-	rescaleContext()
 }
 
 // channel for queuing functions on the main thread
@@ -51,6 +47,16 @@ func runOnMain(f func()) {
 	}
 }
 
+func (d *gLDriver) initGLFW() {
+	err := glfw.Init()
+	if err != nil {
+		fyne.LogError("failed to initialise GLFW", err)
+		return
+	}
+
+	initCursors()
+}
+
 func (d *gLDriver) runGL() {
 	fps := time.NewTicker(time.Second / 60)
 	runMutex.Lock()
@@ -59,6 +65,7 @@ func (d *gLDriver) runGL() {
 
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+	d.initGLFW()
 
 	for {
 		select {
@@ -72,7 +79,7 @@ func (d *gLDriver) runGL() {
 				f.done <- true
 			}
 		case <-settingsChange:
-			clearFontCache()
+			painter.ClearFontCache()
 		case <-fps.C:
 			glfw.PollEvents()
 			newWindows := []fyne.Window{}
@@ -99,7 +106,7 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
-				w.runWithContext(func() {
+				w.RunWithContext(func() {
 					d.freeDirtyTextures(canvas)
 
 					updateGLContext(w)
@@ -123,7 +130,7 @@ func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
 		select {
 		case object := <-canvas.refreshQueue:
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-				freeTexture(obj)
+				canvas.painter.Free(obj)
 				delete(canvas.minSizes, obj)
 				return false
 			}

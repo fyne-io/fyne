@@ -1,7 +1,7 @@
 // +build !darwin arm arm64
 // +build !windows
 
-package gl
+package glfw
 
 func updateGLContext(w *window) {
 	canvas := w.Canvas()
@@ -10,7 +10,7 @@ func updateGLContext(w *window) {
 	winWidth := scaleInt(canvas, size.Width)
 	winHeight := scaleInt(canvas, size.Height)
 
-	setViewport(winWidth, winHeight)
+	w.canvas.painter.SetOutputSize(winWidth, winHeight)
 }
 
 func forceWindowRefresh(_ *window) {

@@ -1,6 +1,6 @@
 // +build !no_native_menus
 
-package gl
+package glfw
 
 import (
 	"fyne.io/fyne"

@@ -1,4 +1,4 @@
-// +build gles arm arm64
+// +build !gles,!arm,!arm64
 
 package gl
 
@@ -8,8 +8,7 @@ import (
 	"image/draw"
 	"strings"
 
-	gl "github.com/go-gl/gl/v3.1/gles2"
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/gl/v3.2-core/gl"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -29,7 +28,7 @@ func newTexture() uint32 {
 	return texture
 }
 
-func (c *glCanvas) imgToTexture(img image.Image) uint32 {
+func (p *glPainter) imgToTexture(img image.Image) uint32 {
 	switch i := img.(type) {
 	case *image.Uniform:
 		texture := newTexture()
@@ -52,11 +51,11 @@ func (c *glCanvas) imgToTexture(img image.Image) uint32 {
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
 		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
-		return c.imgToTexture(rgba)
+		return p.imgToTexture(rgba)
 	}
 }
 
-func setViewport(width, height int) {
+func (p *glPainter) SetOutputSize(width, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
@@ -66,12 +65,6 @@ func freeTexture(obj fyne.CanvasObject) {
 		gl.DeleteTextures(1, &texture)
 		delete(textures, obj)
 	}
-}
-
-func initWindowHints() {
-	glfw.WindowHint(glfw.ClientAPI, glfw.OpenGLESAPI)
-	glfw.WindowHint(glfw.ContextVersionMajor, 2)
-	glfw.WindowHint(glfw.ContextVersionMinor, 0)
 }
 
 func glInit() {
@@ -109,10 +102,10 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 
 const (
 	vertexShaderSource = `
-    #version 100
+    #version 110
     attribute vec3 vert;
     attribute vec2 vertTexCoord;
-    varying highp vec2 fragTexCoord;
+    varying vec2 fragTexCoord;
 
     void main() {
         fragTexCoord = vertTexCoord;
@@ -122,10 +115,10 @@ const (
 ` + "\x00"
 
 	fragmentShaderSource = `
-    #version 100
+    #version 110
     uniform sampler2D tex;
 
-    varying highp vec2 fragTexCoord;
+    varying vec2 fragTexCoord;
 
     void main() {
         gl_FragColor = texture2D(tex, fragTexCoord);
@@ -133,7 +126,7 @@ const (
 ` + "\x00"
 )
 
-func (c *glCanvas) initOpenGL() {
+func (p *glPainter) initOpenGL() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
@@ -148,11 +141,11 @@ func (c *glCanvas) initOpenGL() {
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
 
-	c.program = prog
+	p.program = prog
 }
 
-func (c *glCanvas) glClearBuffer() {
-	gl.UseProgram(c.program)
+func (p *glPainter) glClearBuffer() {
+	gl.UseProgram(p.program)
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
@@ -160,16 +153,16 @@ func (c *glCanvas) glClearBuffer() {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
-func (c *glCanvas) glScissorOpen(x, y, w, h int32) {
+func (p *glPainter) glScissorOpen(x, y, w, h int32) {
 	gl.Scissor(x, y, w, h)
 	gl.Enable(gl.SCISSOR_TEST)
 }
 
-func (c *glCanvas) glScissorClose() {
+func (p *glPainter) glScissorClose() {
 	gl.Disable(gl.SCISSOR_TEST)
 }
 
-func (c *glCanvas) glCreateBuffer(points []float32) (uint32, uint32) {
+func (p *glPainter) glCreateBuffer(points []float32) (uint32, uint32) {
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
@@ -180,21 +173,21 @@ func (c *glCanvas) glCreateBuffer(points []float32) (uint32, uint32) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 
-	textureUniform := gl.GetUniformLocation(c.program, gl.Str("tex\x00"))
+	textureUniform := gl.GetUniformLocation(p.program, gl.Str("tex\x00"))
 	gl.Uniform1i(textureUniform, 0)
 
-	vertAttrib := uint32(gl.GetAttribLocation(c.program, gl.Str("vert\x00")))
+	vertAttrib := uint32(gl.GetAttribLocation(p.program, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
 
-	texCoordAttrib := uint32(gl.GetAttribLocation(c.program, gl.Str("vertTexCoord\x00")))
+	texCoordAttrib := uint32(gl.GetAttribLocation(p.program, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))
 
 	return vao, vbo
 }
 
-func (c *glCanvas) glFreeBuffer(vao, vbo uint32) {
+func (p *glPainter) glFreeBuffer(vao, vbo uint32) {
 	gl.BindVertexArray(0)
 	gl.DeleteVertexArrays(1, &vao)
 
@@ -202,7 +195,7 @@ func (c *glCanvas) glFreeBuffer(vao, vbo uint32) {
 	gl.DeleteBuffers(1, &vbo)
 }
 
-func (c *glCanvas) glDrawTexture(texture uint32, points []float32, alpha float32) {
+func (p *glPainter) glDrawTexture(texture uint32, points []float32, alpha float32) {
 	gl.Enable(gl.BLEND)
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
@@ -219,7 +212,7 @@ func (c *glCanvas) glDrawTexture(texture uint32, points []float32, alpha float32
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
 }
 
-func (c *glCanvas) glCapture(width, height int32, pixels *[]uint8) {
+func (p *glPainter) glCapture(width, height int32, pixels *[]uint8) {
 	gl.ReadBuffer(gl.FRONT)
 	gl.ReadPixels(0, 0, int32(width), int32(height), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(*pixels))
 }
