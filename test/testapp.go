@@ -205,6 +205,7 @@ func (dummyTheme) IconInlineSize() int {
 
 type testSettings struct {
 	theme fyne.Theme
+	scale float32
 
 	changeListeners []chan fyne.Settings
 	listenerMutex   *sync.Mutex
@@ -224,6 +225,10 @@ func (s *testSettings) SetTheme(theme fyne.Theme) {
 
 func (s *testSettings) Theme() fyne.Theme {
 	return s.theme
+}
+
+func (s *testSettings) Scale() float32 {
+	return s.scale
 }
 
 func (s *testSettings) apply() {
