@@ -12,7 +12,7 @@ func updateGLContext(w *window) {
 
 // This forces a redraw of the window as we resize or move
 func forceWindowRefresh(w *window) {
-	w.runWithContext(func() {
+	w.RunWithContext(func() {
 		updateGLContext(w)
 
 		w.canvas.paint(w.canvas.Size())
