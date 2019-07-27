@@ -24,10 +24,10 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 	}
 
 	return widget.NewVBox(
-		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}, fyne.TextWrap{}),
 		layout.NewSpacer(),
 		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
-		widget.NewHyperlinkWithStyle("fyne.io", link, fyne.TextAlignCenter, fyne.TextStyle{}),
+		widget.NewHyperlinkWithStyle("fyne.io", link, fyne.TextAlignCenter, fyne.TextStyle{}, fyne.TextWrap{}),
 		layout.NewSpacer(),
 
 		widget.NewGroup("Theme",

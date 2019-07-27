@@ -104,14 +104,16 @@ func (t *textProvider) updateRowBounds() {
 			/* Truncating mode */
 			for i, r := range t.buffer {
 				highBound = i
-				if r != '\n' {
-					continue
-				}
 				if highBound-lowBound > wrap.Length {
 					highBound = lowBound + wrap.Length
 				}
+				if r != '\n' {
+					continue
+				}
+
 				t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
-				lowBound = i + 1
+				highBound = i + 1
+				lowBound = highBound
 			}
 		} else {
 			/* Soft wrapping mode*/
