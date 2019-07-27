@@ -18,6 +18,7 @@ type testTextParent struct {
 	fg    color.Color
 	style fyne.TextStyle
 	align fyne.TextAlign
+	wrap  fyne.TextWrap
 }
 
 func (t *testTextParent) textAlign() fyne.TextAlign {
@@ -26,6 +27,10 @@ func (t *testTextParent) textAlign() fyne.TextAlign {
 
 func (t *testTextParent) textStyle() fyne.TextStyle {
 	return t.style
+}
+
+func (t *testTextParent) textWrap() fyne.TextWrap {
+	return t.wrap
 }
 
 func (t *testTextParent) textColor() color.Color {

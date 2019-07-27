@@ -66,6 +66,11 @@ func (hl *Hyperlink) textStyle() fyne.TextStyle {
 	return hl.TextStyle
 }
 
+// textWrap tells the rendering textProvider our wrapping
+func (hl *Hyperlink) textWrap() fyne.TextWrap {
+	return fyne.TextWrap{}
+}
+
 // textColor tells the rendering textProvider our color
 func (hl *Hyperlink) textColor() color.Color {
 	return theme.HyperlinkColor()

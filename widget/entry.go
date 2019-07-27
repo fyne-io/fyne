@@ -863,6 +863,11 @@ func (e *Entry) textStyle() fyne.TextStyle {
 	return fyne.TextStyle{}
 }
 
+// textWrap tells the rendering textProvider our wrapping
+func (e *Entry) textWrap() fyne.TextWrap {
+	return fyne.TextWrap{Length: 80, Truncate: false}
+}
+
 // textColor tells the rendering textProvider our color
 func (e *Entry) textColor() color.Color {
 	return theme.TextColor()
@@ -890,6 +895,11 @@ func (p *placeholderPresenter) textAlign() fyne.TextAlign {
 // textStyle tells the rendering textProvider our style
 func (p *placeholderPresenter) textStyle() fyne.TextStyle {
 	return fyne.TextStyle{}
+}
+
+// textWrap tells the rendering textProvider our wrapping
+func (p *placeholderPresenter) textWrap() fyne.TextWrap {
+	return fyne.TextWrap{Length: 80, Truncate: false}
 }
 
 // textColor tells the rendering textProvider our color

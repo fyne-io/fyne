@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"strings"
+	"unicode"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -17,6 +18,7 @@ const (
 type textPresenter interface {
 	textAlign() fyne.TextAlign
 	textStyle() fyne.TextStyle
+	textWrap() fyne.TextWrap
 	textColor() color.Color
 
 	password() bool
@@ -88,21 +90,60 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 // updateRowBounds updates the row bounds used to render properly the text widget.
 // updateRowBounds should be invoked every time t.buffer changes.
 func (t *textProvider) updateRowBounds() {
-	var lowBound, highBound int
+	var lowBound, spaceSeenAt, highBound int
 	t.rowBounds = [][2]int{}
 
 	if len(t.buffer) == 0 {
 		t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
 		return
 	}
-
-	for i, r := range t.buffer {
-		highBound = i
-		if r != '\n' {
-			continue
+	wrap := t.presenter.textWrap()
+	if wrap.Length > 0 {
+		/* Wrapping is ON */
+		if wrap.Truncate {
+			/* Truncating mode */
+			for i, r := range t.buffer {
+				highBound = i
+				if r != '\n' {
+					continue
+				}
+				if highBound-lowBound > wrap.Length {
+					highBound = lowBound + wrap.Length
+				}
+				t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+				lowBound = i + 1
+			}
+		} else {
+			/* Soft wrapping mode*/
+			for i, r := range t.buffer {
+				highBound = i
+				if unicode.IsSpace(r) {
+					spaceSeenAt = i
+				}
+				if highBound-lowBound < wrap.Length {
+					if r != '\n' {
+						continue
+					}
+				} else {
+					if (highBound-lowBound)/2 > highBound-spaceSeenAt {
+						highBound = spaceSeenAt
+					}
+				}
+				t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+				lowBound = highBound + 1
+				spaceSeenAt = lowBound
+			}
 		}
-		t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
-		lowBound = i + 1
+	} else {
+		/* Wrapping is OFF */
+		for i, r := range t.buffer {
+			highBound = i
+			if r != '\n' {
+				continue
+			}
+			t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+			lowBound = i + 1
+		}
 	}
 	//first or last line, increase the highBound index to include the last char
 	highBound++

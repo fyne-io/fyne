@@ -20,3 +20,12 @@ type TextStyle struct {
 	Italic    bool // Should text be italic
 	Monospace bool // Use the system monospace font instead of regular
 }
+
+// TextWrap represents text wrapping properties that can be applied to a text
+// canvas object or text based widget. When Length = 0 doesn't do anything.
+// When Length > 0 each line is split (Truncate=False)
+// or truncated(Truncate=True, only for display!) to Length
+type TextWrap struct {
+	Length   int
+	Truncate bool
+}

@@ -47,6 +47,11 @@ func (l *Label) textStyle() fyne.TextStyle {
 	return l.TextStyle
 }
 
+// textWrap tells the rendering textProvider our wrapping
+func (l *Label) textWrap() fyne.TextWrap {
+	return fyne.TextWrap{}
+}
+
 // textColor tells the rendering textProvider our color
 func (l *Label) textColor() color.Color {
 	return theme.TextColor()
