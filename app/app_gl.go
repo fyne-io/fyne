@@ -1,4 +1,4 @@
-// +build !ci,!android
+// +build !ci,!android,!mobile
 
 package app
 

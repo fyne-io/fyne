@@ -12,6 +12,7 @@ import (
 
 // Painter defines the functionality of our OpenGL based renderer
 type Painter interface {
+	Init()
 	SetOutputSize(int, int)
 	SetFrameBufferScale(float32)
 	Paint(fyne.CanvasObject, fyne.Canvas, fyne.Size)
@@ -19,10 +20,13 @@ type Painter interface {
 	Capture(fyne.Canvas) image.Image
 }
 
+// Declare conformity to Painter interface
+var _ Painter = (*glPainter)(nil)
+
 type glPainter struct {
 	canvas   fyne.Canvas
 	context  driver.WithContext
-	program  uint32
+	program  Program
 	texScale float32
 }
 
@@ -61,7 +65,7 @@ func (p *glPainter) Paint(co fyne.CanvasObject, c fyne.Canvas, size fyne.Size) {
 }
 
 func (p *glPainter) Free(obj fyne.CanvasObject) {
-	freeTexture(obj)
+	p.freeTexture(obj)
 }
 
 func (p *glPainter) textureScaleInt(v int) int {
@@ -82,14 +86,11 @@ func unscaleInt(c fyne.Canvas, v int) int {
 
 // NewPainter creates a new GL based renderer for the provided canvas.
 // If it is a master painter it will also initialise OpenGL
-func NewPainter(c fyne.Canvas, ctx driver.WithContext, master bool) Painter {
+func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &glPainter{canvas: c, context: ctx}
 	p.texScale = 1.0
 	go svgCacheMonitorTheme()
 
-	if master {
-		glInit()
-	}
-	p.initOpenGL()
+	glInit()
 	return p
 }

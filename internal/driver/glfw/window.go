@@ -1020,6 +1020,10 @@ func (w *window) RescaleContext() {
 	})
 }
 
+func (w *window) Context() interface{} {
+	return nil
+}
+
 // Use this method to queue up a callback that handles an event. This ensures
 // user interaction events for a given window are processed in order.
 func (w *window) queueEvent(fn func()) {
@@ -1064,7 +1068,8 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		go ret.runEventQueue()
 
 		ret.canvas = newCanvas()
-		ret.canvas.painter = gl.NewPainter(ret.canvas, ret, master)
+		ret.canvas.painter = gl.NewPainter(ret.canvas, ret)
+		ret.canvas.painter.Init()
 		ret.canvas.context = ret
 		ret.canvas.detectedScale = ret.detectScale()
 		ret.canvas.scale = ret.canvas.detectedScale

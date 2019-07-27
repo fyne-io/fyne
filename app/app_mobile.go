@@ -1,15 +1,16 @@
 // +build !ci
 
-// +build linux,android
+// +build linux,android mobile
 
 package app
 
 import (
 	"net/url"
 	"os"
+	"path/filepath"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/driver/android"
+	"fyne.io/fyne/internal/driver/gomobile"
 )
 
 func (app *fyneApp) OpenURL(url *url.URL) error {
@@ -18,7 +19,14 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	return cmd.Run()
 }
 
+func rootConfigDir() string {
+	homeDir := "/data" //, _ := os.UserHomeDir()
+
+	desktopConfig := filepath.Join(homeDir, "data")
+	return filepath.Join(desktopConfig, "fyne")
+}
+
 // New returns a new app instance using the OpenGL driver.
 func New() fyne.App {
-	return NewAppWithDriver(android.NewAndroidDriver())
+	return NewAppWithDriver(gomobile.NewGoMobileDriver())
 }

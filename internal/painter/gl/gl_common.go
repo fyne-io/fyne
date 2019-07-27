@@ -25,21 +25,21 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-var textures = make(map[fyne.CanvasObject]uint32)
+var textures = make(map[fyne.CanvasObject]Texture)
 
 const vectorPad = 10
 
-func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) uint32) uint32 {
-	texture := textures[object]
+func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) Texture {
+	texture, ok := textures[object]
 
-	if texture == 0 {
+	if !ok {
 		texture = creator(object)
 		textures[object] = texture
 	}
 	return texture
 }
 
-func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
+func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	circle := obj.(*canvas.Circle)
 	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2
 
@@ -66,7 +66,7 @@ func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) uint32 {
 	return p.imgToTexture(raw)
 }
 
-func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) uint32 {
+func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	line := obj.(*canvas.Line)
 
 	col := line.StrokeColor
@@ -90,7 +90,7 @@ func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) uint32 {
 	return p.imgToTexture(raw)
 }
 
-func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) uint32 {
+func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
 	col := theme.BackgroundColor()
 	if wid, ok := rect.(fyne.Widget); ok {
 		widCol := widget.Renderer(wid).BackgroundColor()
@@ -106,7 +106,7 @@ func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) uint32 {
 	return p.imgToTexture(image.NewUniform(col))
 }
 
-func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) uint32 {
+func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	text := obj.(*canvas.Text)
 
 	bounds := text.MinSize()
@@ -130,13 +130,13 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) uint32 {
 	return p.imgToTexture(img)
 }
 
-func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) uint32 {
+func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 	img := obj.(*canvas.Image)
 
 	width := p.textureScaleInt(img.Size().Width)
 	height := p.textureScaleInt(img.Size().Height)
 	if width <= 0 || height <= 0 {
-		return 0
+		return NoTexture
 	}
 
 	switch {
@@ -162,7 +162,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 				if err != nil {
 					fyne.LogError("SVG Load error:", err)
 
-					return 0
+					return NoTexture
 				}
 				icon.SetTarget(0, 0, float64(width), float64(height))
 
@@ -190,7 +190,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 		if err != nil {
 			fyne.LogError("image err", err)
 
-			return 0
+			return NoTexture
 		}
 		origSize := pixels.Bounds().Size()
 		// this is used by our render code, so let's set it to the file aspect
@@ -231,7 +231,7 @@ func (p *glPainter) checkImageMinSize(img *canvas.Image, pixX, pixY int) {
 	}
 }
 
-func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) uint32 {
+func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	rast := obj.(*canvas.Raster)
 
 	width := p.textureScaleInt(rast.Size().Width)
@@ -240,7 +240,7 @@ func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) uint32 {
 	return p.imgToTexture(rast.Generator(width, height))
 }
 
-func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) uint32 {
+func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.LinearGradient)
 
 	width := p.textureScaleInt(gradient.Size().Width)
@@ -249,7 +249,7 @@ func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) uint32 {
 	return p.imgToTexture(gradient.Generate(width, height))
 }
 
-func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) uint32 {
+func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
 	gradient := obj.(*canvas.RadialGradient)
 
 	width := p.textureScaleInt(gradient.Size().Width)

@@ -1,4 +1,4 @@
-// +build !gles,!arm,!arm64,!android
+// +build !gles,!arm,!arm64,!android,!mobile
 
 package gl
 
@@ -14,7 +14,17 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func newTexture() uint32 {
+// Buffer represents a GL buffer
+type Buffer uint32
+// Program represents a compiled GL program
+type Program uint32
+// Texture represents an uploaded GL texture
+type Texture uint32
+
+// NoTexture is the zero value for a Texture
+var NoTexture = Texture(0)
+
+func newTexture() Texture {
 	var texture uint32
 
 	gl.GenTextures(1, &texture)
@@ -25,10 +35,10 @@ func newTexture() uint32 {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
-	return texture
+	return Texture(texture)
 }
 
-func (p *glPainter) imgToTexture(img image.Image) uint32 {
+func (p *glPainter) imgToTexture(img image.Image) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
 		texture := newTexture()
@@ -43,8 +53,7 @@ func (p *glPainter) imgToTexture(img image.Image) uint32 {
 			return 0
 		}
 
-		var texture uint32
-		texture = newTexture()
+		texture := newTexture()
 		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(i.Rect.Size().X), int32(i.Rect.Size().Y),
 			0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(i.Pix))
 		return texture
@@ -59,10 +68,11 @@ func (p *glPainter) SetOutputSize(width, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
-func freeTexture(obj fyne.CanvasObject) {
+func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
 	texture := textures[obj]
 	if texture != 0 {
-		gl.DeleteTextures(1, &texture)
+		tex := uint32(texture)
+		gl.DeleteTextures(1, &tex)
 		delete(textures, obj)
 	}
 }
@@ -126,7 +136,7 @@ const (
 ` + "\x00"
 )
 
-func (p *glPainter) initOpenGL() {
+func (p *glPainter) Init() {
 	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
@@ -141,11 +151,11 @@ func (p *glPainter) initOpenGL() {
 	gl.AttachShader(prog, fragmentShader)
 	gl.LinkProgram(prog)
 
-	p.program = prog
+	p.program = Program(prog)
 }
 
 func (p *glPainter) glClearBuffer() {
-	gl.UseProgram(p.program)
+	gl.UseProgram(uint32(p.program))
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
@@ -162,40 +172,33 @@ func (p *glPainter) glScissorClose() {
 	gl.Disable(gl.SCISSOR_TEST)
 }
 
-func (p *glPainter) glCreateBuffer(points []float32) (uint32, uint32) {
-	var vao uint32
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
-	gl.EnableVertexAttribArray(0)
-
+func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 
-	textureUniform := gl.GetUniformLocation(p.program, gl.Str("tex\x00"))
+	textureUniform := gl.GetUniformLocation(uint32(p.program), gl.Str("tex\x00"))
 	gl.Uniform1i(textureUniform, 0)
 
-	vertAttrib := uint32(gl.GetAttribLocation(p.program, gl.Str("vert\x00")))
+	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.program), gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
 
-	texCoordAttrib := uint32(gl.GetAttribLocation(p.program, gl.Str("vertTexCoord\x00")))
+	texCoordAttrib := uint32(gl.GetAttribLocation(uint32(p.program), gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))
 
-	return vao, vbo
+	return Buffer(vbo)
 }
 
-func (p *glPainter) glFreeBuffer(vao, vbo uint32) {
-	gl.BindVertexArray(0)
-	gl.DeleteVertexArrays(1, &vao)
-
+func (p *glPainter) glFreeBuffer(vbo Buffer) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.DeleteBuffers(1, &vbo)
+	buf := uint32(vbo)
+	gl.DeleteBuffers(1, &buf)
 }
 
-func (p *glPainter) glDrawTexture(texture uint32, points []float32, alpha float32) {
+func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	gl.Enable(gl.BLEND)
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
@@ -207,9 +210,9 @@ func (p *glPainter) glDrawTexture(texture uint32, points []float32, alpha float3
 	}
 
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.BindTexture(gl.TEXTURE_2D, uint32(texture))
 
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, int32(len(points)/5))
+	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 }
 
 func (p *glPainter) glCapture(width, height int32, pixels *[]uint8) {
