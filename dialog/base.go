@@ -54,7 +54,7 @@ func (d *dialog) wait() {
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	d.bg = canvas.NewRectangle(theme.BackgroundColor())
-	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}, fyne.TextWrap{})
 
 	var content fyne.CanvasObject
 	if d.icon == nil {
@@ -125,7 +125,7 @@ func newDialog(title, message string, icon fyne.Resource, callback func(bool), p
 }
 
 func newLabel(message string) fyne.CanvasObject {
-	return widget.NewLabelWithStyle(message, fyne.TextAlignCenter, fyne.TextStyle{})
+	return widget.NewLabelWithStyle(message, fyne.TextAlignCenter, fyne.TextStyle{}, fyne.TextWrap{})
 }
 
 func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {

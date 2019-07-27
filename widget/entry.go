@@ -229,14 +229,14 @@ var _ desktop.Keyable = (*Entry)(nil)
 type Entry struct {
 	baseWidget
 	sync.RWMutex
-	shortcut    fyne.ShortcutHandler
-	Text        string
-	PlaceHolder string
-	OnChanged   func(string) `json:"-"`
-	Password    bool
-	ReadOnly    bool
-	MultiLine   bool
-
+	shortcut                fyne.ShortcutHandler
+	Text                    string
+	PlaceHolder             string
+	OnChanged               func(string) `json:"-"`
+	Password                bool
+	ReadOnly                bool
+	MultiLine               bool
+	TextWrap                fyne.TextWrap
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
 
@@ -603,9 +603,10 @@ func (e *Entry) TypedRune(r rune) {
 	}
 
 	runes := []rune{r}
-	provider.insertAt(e.cursorTextPos(), runes)
+	pos := e.cursorTextPos()
+	provider.insertAt(pos, runes)
 	e.Lock()
-	e.CursorColumn += len(runes)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 	e.Unlock()
 	e.updateText(provider.String())
 	Renderer(e).(*entryRenderer).moveCursor()
@@ -741,14 +742,8 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		}
 		pos := e.cursorTextPos()
 		e.Lock()
-		deleted := provider.deleteFromTo(pos-1, pos)
-		if deleted[0] == '\n' {
-			e.CursorRow--
-			rowLength := provider.rowLength(e.CursorRow)
-			e.CursorColumn = rowLength
-		} else {
-			e.CursorColumn--
-		}
+		provider.deleteFromTo(pos-1, pos)
+		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
 		e.Unlock()
 	case fyne.KeyDelete:
 		pos := e.cursorTextPos()
@@ -863,9 +858,9 @@ func (e *Entry) textStyle() fyne.TextStyle {
 	return fyne.TextStyle{}
 }
 
-// textWrap tells the rendering textProvider our wrapping
+// textWrap tells the rendering textProvider our TextWrap
 func (e *Entry) textWrap() fyne.TextWrap {
-	return fyne.TextWrap{Length: 80, Truncate: false}
+	return e.TextWrap
 }
 
 // textColor tells the rendering textProvider our color
@@ -897,9 +892,9 @@ func (p *placeholderPresenter) textStyle() fyne.TextStyle {
 	return fyne.TextStyle{}
 }
 
-// textWrap tells the rendering textProvider our wrapping
+// textWrap tells the rendering textProvider our TextWrap
 func (p *placeholderPresenter) textWrap() fyne.TextWrap {
-	return fyne.TextWrap{Length: 80, Truncate: false}
+	return p.e.TextWrap
 }
 
 // textColor tells the rendering textProvider our color
@@ -982,6 +977,15 @@ func NewEntry() *Entry {
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
+	e.registerShortcut()
+	Refresh(e)
+	return e
+}
+
+// NewMultiLineWrappedEntry creates a new entry that
+// allows multiple lines and have word wrap
+func NewMultiLineWrappedEntry(wrap fyne.TextWrap) *Entry {
+	e := &Entry{MultiLine: true, TextWrap: wrap}
 	e.registerShortcut()
 	Refresh(e)
 	return e

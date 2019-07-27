@@ -16,20 +16,23 @@ type Hyperlink struct {
 	URL       *url.URL
 	Alignment fyne.TextAlign // The alignment of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
+	TextWrap  fyne.TextWrap  // The wrapping or length-limiting of the hyperlink text
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
 func NewHyperlink(text string, url *url.URL) *Hyperlink {
-	return NewHyperlinkWithStyle(text, url, fyne.TextAlignLeading, fyne.TextStyle{})
+	return NewHyperlinkWithStyle(text, url, fyne.TextAlignLeading, fyne.TextStyle{}, fyne.TextWrap{})
 }
 
 // NewHyperlinkWithStyle creates a new hyperlink widget with the set text content
-func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
+func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign,
+	style fyne.TextStyle, wrap fyne.TextWrap) *Hyperlink {
 	hl := &Hyperlink{
 		Text:      text,
 		URL:       url,
 		Alignment: alignment,
 		TextStyle: style,
+		TextWrap:  wrap,
 	}
 
 	return hl
@@ -68,7 +71,7 @@ func (hl *Hyperlink) textStyle() fyne.TextStyle {
 
 // textWrap tells the rendering textProvider our wrapping
 func (hl *Hyperlink) textWrap() fyne.TextWrap {
-	return fyne.TextWrap{}
+	return hl.TextWrap
 }
 
 // textColor tells the rendering textProvider our color

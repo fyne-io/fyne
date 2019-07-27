@@ -13,19 +13,21 @@ type Label struct {
 	Text      string
 	Alignment fyne.TextAlign // The alignment of the Text
 	TextStyle fyne.TextStyle // The style of the label text
+	TextWrap  fyne.TextWrap  // The wrapping or length-limiting of the label text
 }
 
 // NewLabel creates a new label widget with the set text content
 func NewLabel(text string) *Label {
-	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{})
+	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{}, fyne.TextWrap{})
 }
 
 // NewLabelWithStyle creates a new label widget with the set text content
-func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextStyle) *Label {
+func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextStyle, wrap fyne.TextWrap) *Label {
 	l := &Label{
 		Text:      text,
 		Alignment: alignment,
 		TextStyle: style,
+		TextWrap:  wrap,
 	}
 
 	return l
@@ -49,7 +51,7 @@ func (l *Label) textStyle() fyne.TextStyle {
 
 // textWrap tells the rendering textProvider our wrapping
 func (l *Label) textWrap() fyne.TextWrap {
-	return fyne.TextWrap{}
+	return l.TextWrap
 }
 
 // textColor tells the rendering textProvider our color
