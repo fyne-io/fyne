@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	"fyne.io/fyne"
@@ -89,7 +90,6 @@ func (s *settings) loadFromFile(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.MkdirAll(filepath.Dir(path), 0700)
 			return nil
 		}
 		return err
@@ -153,6 +153,8 @@ func loadSettings() *settings {
 	s := &settings{}
 	s.load()
 
-	s.watchSettings()
+	if runtime.GOOS != "android" {
+		s.watchSettings()
+	}
 	return s
 }
