@@ -42,7 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Reset vendor content using 'go mod version'")
+	fmt.Println("Reset vendor content using 'go mod vendor'")
 	cmd := exec.Command("go", "mod", "vendor", "-v")
 	err := cmd.Run()
 	if err != nil {

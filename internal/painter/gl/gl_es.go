@@ -17,8 +17,10 @@ import (
 
 // Buffer represents a GL buffer
 type Buffer uint32
+
 // Program represents a compiled GL program
 type Program uint32
+
 // Texture represents an uploaded GL texture
 type Texture uint32
 

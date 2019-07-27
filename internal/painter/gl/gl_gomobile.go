@@ -17,8 +17,10 @@ import (
 
 // Buffer represents a GL buffer
 type Buffer gl.Buffer
+
 // Program represents a compiled GL program
 type Program gl.Program
+
 // Texture represents an uploaded GL texture
 type Texture gl.Texture
 
