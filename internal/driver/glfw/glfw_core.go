@@ -1,4 +1,4 @@
-// +build !gles,!arm,!arm64,!android
+// +build !gles,!arm,!arm64
 
 package glfw
 

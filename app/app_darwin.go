@@ -1,5 +1,7 @@
 // +build !ci
 
+// +build !mobile
+
 package app
 
 import (

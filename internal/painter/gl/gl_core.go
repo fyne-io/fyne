@@ -1,4 +1,4 @@
-// +build !gles,!arm,!arm64,!android,!mobile
+// +build !gles,!arm,!arm64,!android,!ios,!mobile
 
 package gl
 

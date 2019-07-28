@@ -1,4 +1,4 @@
-// +build android mobile
+// +build android ios mobile
 
 package gl
 
