@@ -276,6 +276,7 @@ func (c *glCanvas) paint(size fyne.Size) {
 		return
 	}
 	c.setDirty(false)
+	c.painter.Clear()
 
 	c.painter.Paint(c.content, c, size)
 	if c.menu != nil {
