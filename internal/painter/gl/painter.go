@@ -12,11 +12,19 @@ import (
 
 // Painter defines the functionality of our OpenGL based renderer
 type Painter interface {
+	// Init tell a new painter to initialise, usually called after a context is available
 	Init()
+	// SetOutputSize is used to change the resolution of our output viewport
 	SetOutputSize(int, int)
+	// SetFrameBufferScale tells us when we have more than 1 framebuffer pixel for each output pixel
 	SetFrameBufferScale(float32)
+	// Paint is the main render method for this painter
 	Paint(fyne.CanvasObject, fyne.Canvas, fyne.Size)
+	// Clear tells our painter to prepare a fresh paint
+	Clear()
+	// Free is used to indicate that a certain canvas object is no longer needed
 	Free(fyne.CanvasObject)
+	// Capture requests that the specified canvas be drawn to an in-memory image
 	Capture(fyne.Canvas) image.Image
 }
 
@@ -34,11 +42,14 @@ func (p *glPainter) SetFrameBufferScale(scale float32) {
 	p.texScale = scale
 }
 
+func (p *glPainter) Clear() {
+	p.glClearBuffer()
+}
+
 func (p *glPainter) Paint(co fyne.CanvasObject, c fyne.Canvas, size fyne.Size) {
 	if co == nil {
 		return
 	}
-	p.glClearBuffer()
 
 	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		// TODO should this be somehow not scroll container specific?
