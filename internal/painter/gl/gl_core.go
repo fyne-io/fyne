@@ -180,9 +180,6 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, 4*len(points), gl.Ptr(points), gl.STATIC_DRAW)
 
-	textureUniform := gl.GetUniformLocation(uint32(p.program), gl.Str("tex\x00"))
-	gl.Uniform1i(textureUniform, 0)
-
 	vertAttrib := uint32(gl.GetAttribLocation(uint32(p.program), gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))

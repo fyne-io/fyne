@@ -56,7 +56,7 @@ func (p *glPainter) imgToTexture(img image.Image) Texture {
 		return texture
 	case *image.RGBA:
 		if len(i.Pix) == 0 { // image is empty
-			return Texture(gl.Texture{0})
+			return NoTexture
 		}
 
 		texture := p.newTexture()
@@ -123,6 +123,8 @@ const (
 )
 
 func (p *glPainter) Init() {
+	p.glctx().Disable(gl.DEPTH_TEST)
+
 	vertexShader, err := p.compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
@@ -141,8 +143,6 @@ func (p *glPainter) Init() {
 }
 
 func (p *glPainter) glClearBuffer() {
-	p.glctx().UseProgram(gl.Program(p.program))
-
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	p.glctx().ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
@@ -165,9 +165,6 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	ctx.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	ctx.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
 
-	//textureUniform := ctx.GetUniformLocation(p.program, "tex")
-	//ctx.Uniform1i(textureUniform, 0)
-
 	vertAttrib := ctx.GetAttribLocation(gl.Program(p.program), "vert")
 	ctx.EnableVertexAttribArray(vertAttrib)
 	ctx.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
@@ -188,7 +185,10 @@ func (p *glPainter) glFreeBuffer(vbo Buffer) {
 
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
+
+	ctx.UseProgram(gl.Program(p.program))
 	ctx.Enable(gl.BLEND)
+
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
 	if alpha != 1.0 {

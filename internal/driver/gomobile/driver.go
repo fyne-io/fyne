@@ -98,8 +98,6 @@ func (d *driver) Run() {
 }
 
 func (d *driver) onStart() {
-	// TODO move this to init?
-	d.glctx.Disable(gl.DEPTH_TEST)
 	for _, win := range d.AllWindows() {
 		win.Canvas().(*canvas).painter.Init() // we cannot init until the context is set above
 	}
