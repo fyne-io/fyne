@@ -61,6 +61,7 @@ func (d *driver) Quit() {
 func (d *driver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
+		quit := false
 
 		var sz size.Event
 		for e := range a.Events() {
@@ -74,6 +75,9 @@ func (d *driver) Run() {
 				case lifecycle.CrossOff:
 					d.onStop()
 					d.glctx = nil
+				}
+				if e.Crosses(lifecycle.StageVisible) == lifecycle.CrossOff {
+					quit = true
 				}
 			case size.Event:
 				sz = e
@@ -92,6 +96,10 @@ func (d *driver) Run() {
 				a.Send(paint.Event{})
 			case touch.Event:
 				// TODO handle input
+			}
+
+			if quit {
+				break
 			}
 		}
 	})
