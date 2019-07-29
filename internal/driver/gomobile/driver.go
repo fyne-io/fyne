@@ -58,7 +58,7 @@ func (d *driver) AbsolutePositionForObject(fyne.CanvasObject) fyne.Position {
 
 func (d *driver) Quit() {
 	// TODO? often mobile apps should not allow this...
-	d.app.Send(lifecycle.Event{lifecycle.StageVisible, lifecycle.StageDead, nil})
+	d.app.Send(lifecycle.Event{From: lifecycle.StageVisible, To: lifecycle.StageDead, DrawContext: nil})
 }
 
 func (d *driver) scheduleFrames(a app.App) {
