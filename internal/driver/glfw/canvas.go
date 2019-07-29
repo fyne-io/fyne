@@ -3,7 +3,6 @@ package glfw
 import (
 	"fmt"
 	"image"
-	"math"
 	"sync"
 
 	"fyne.io/fyne"
@@ -41,24 +40,6 @@ type glCanvas struct {
 	minSizes     map[fyne.CanvasObject]fyne.Size
 	refreshQueue chan fyne.CanvasObject
 	context      driver.WithContext
-}
-
-func scaleInt(c fyne.Canvas, v int) int {
-	switch c.Scale() {
-	case 1.0:
-		return v
-	default:
-		return int(math.Round(float64(v) * float64(c.Scale())))
-	}
-}
-
-func unscaleInt(c fyne.Canvas, v int) int {
-	switch c.Scale() {
-	case 1.0:
-		return v
-	default:
-		return int(float32(v) / c.Scale())
-	}
 }
 
 func (c *glCanvas) Capture() image.Image {

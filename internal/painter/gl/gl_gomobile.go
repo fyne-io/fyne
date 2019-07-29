@@ -76,7 +76,7 @@ func (p *glPainter) SetOutputSize(width, height int) {
 
 func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
 	texture, ok := textures[obj]
-	if !ok {
+	if ok {
 		p.glctx().DeleteTexture(gl.Texture(texture))
 		delete(textures, obj)
 	}

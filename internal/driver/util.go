@@ -67,3 +67,73 @@ func walkObjectTree(
 	}
 	return cancelled
 }
+
+// ScaleInt converts a fyne coordinate into a device specific output value using the canvas scale
+func ScaleInt(c fyne.Canvas, v int) int {
+	switch c.Scale() {
+	case 1.0:
+		return v
+	default:
+		return int(math.Round(float64(v) * float64(c.Scale())))
+	}
+}
+
+// UnscaleInt converts a device specific output value into a fyne coordinate using the canvas scale
+func UnscaleInt(c fyne.Canvas, v int) int {
+	switch c.Scale() {
+	case 1.0:
+		return v
+	default:
+		return int(float32(v) / c.Scale())
+	}
+}
+
+// FindObjectAtPositionMatching is used to find an object in a canvas at the specified position.
+// The matches function determines of the type of object that is found at this position is of a suitable type.
+// The various canvas roots and overlays that can be searched are also passed in.
+func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.CanvasObject) bool,
+	overlay fyne.CanvasObject, roots ...fyne.CanvasObject) (fyne.CanvasObject, int, int) {
+	var found fyne.CanvasObject
+	foundX, foundY := 0, 0
+
+	findFunc := func(walked fyne.CanvasObject, pos fyne.Position, clipPos fyne.Position, clipSize fyne.Size) bool {
+		if !walked.Visible() {
+			return false
+		}
+
+		if mouse.X < clipPos.X || mouse.Y < clipPos.Y {
+			return false
+		}
+
+		if mouse.X >= clipPos.X+clipSize.Width || mouse.Y >= clipPos.Y+clipSize.Height {
+			return false
+		}
+
+		if mouse.X < pos.X || mouse.Y < pos.Y {
+			return false
+		}
+
+		if mouse.X >= pos.X+walked.Size().Width || mouse.Y >= pos.Y+walked.Size().Height {
+			return false
+		}
+
+		if matches(walked) {
+			found = walked
+			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
+		}
+		return false
+	}
+
+	if overlay != nil {
+		WalkObjectTree(overlay, findFunc, nil)
+	} else {
+		for _, root := range roots {
+			WalkObjectTree(root, findFunc, nil)
+			if found != nil {
+				break
+			}
+		}
+	}
+
+	return found, foundX, foundY
+}

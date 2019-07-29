@@ -2,6 +2,7 @@ package gomobile
 
 import (
 	"log"
+	"time"
 
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/event/lifecycle"
@@ -11,6 +12,7 @@ import (
 	"golang.org/x/mobile/gl"
 
 	"fyne.io/fyne"
+	util "fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
 	pgl "fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
@@ -24,7 +26,7 @@ type driver struct {
 }
 
 func (d *driver) CreateWindow(title string) fyne.Window {
-	canvas := &canvas{scale: 2} // TODO detect scale
+	canvas := NewCanvas().(*canvas) // silence lint
 	ret := &window{title: title, canvas: canvas, padded: true}
 	canvas.painter = pgl.NewPainter(canvas, ret)
 
@@ -56,12 +58,26 @@ func (d *driver) AbsolutePositionForObject(fyne.CanvasObject) fyne.Position {
 
 func (d *driver) Quit() {
 	// TODO? often mobile apps should not allow this...
+	d.app.Send(lifecycle.Event{lifecycle.StageVisible, lifecycle.StageDead, nil})
+}
+
+func (d *driver) scheduleFrames(a app.App) {
+	fps := time.NewTicker(time.Second / 60)
+	go func() {
+		for {
+			select {
+			case <-fps.C:
+				a.Send(paint.Event{})
+			}
+		}
+	}()
 }
 
 func (d *driver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
 		quit := false
+		d.scheduleFrames(a)
 
 		var sz size.Event
 		for e := range a.Events() {
@@ -82,20 +98,24 @@ func (d *driver) Run() {
 			case size.Event:
 				sz = e
 			case paint.Event:
-				if d.glctx == nil || e.External {
-					// As we are actively painting as fast as
-					// we can (usually 60 FPS), skip any paint
-					// events sent by the system.
-					continue
+				if len(d.AllWindows()) == 0 {
+					break
 				}
+				canvas := d.AllWindows()[0].Canvas().(*canvas)
 
-				d.onPaint(sz)
-				a.Publish()
-				// Drive the animation by preparing to paint the next frame
-				// after this one is shown.
-				a.Send(paint.Event{})
+				if canvas.dirty && d.glctx != nil {
+					d.freeDirtyTextures(canvas)
+
+					d.onPaint(sz)
+					a.Publish()
+					canvas.dirty = false
+				}
 			case touch.Event:
-				// TODO handle input
+				switch e.Type {
+				case touch.TypeBegin:
+				case touch.TypeEnd:
+					d.onTapEnd(e.X, e.Y)
+				}
 			}
 
 			if quit {
@@ -125,6 +145,54 @@ func (d *driver) onPaint(sz size.Event) {
 		newSize := fyne.NewSize(int(float32(sz.WidthPx)/canvas.scale), int(float32(sz.HeightPx)/canvas.scale))
 		canvas.Resize(newSize)
 		canvas.painter.Paint(canvas.content, canvas, canvas.Size())
+		if canvas.overlay != nil {
+			canvas.painter.Paint(canvas.overlay, canvas, canvas.Size())
+		}
+	}
+}
+
+func (d *driver) onTapEnd(x, y float32) {
+	if len(d.AllWindows()) == 0 {
+		return
+	}
+
+	canvas := d.AllWindows()[0].Canvas().(*canvas)
+	tapX := util.UnscaleInt(canvas, int(x))
+	tapY := util.UnscaleInt(canvas, int(y))
+	pos := fyne.NewPos(tapX, tapY)
+
+	co, objX, objY := util.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		} else if _, ok := object.(fyne.Focusable); ok {
+			return true
+		}
+
+		return false
+	}, canvas.overlay, canvas.content)
+
+	ev := new(fyne.PointEvent)
+	ev.Position = fyne.NewPos(tapX-objX, tapY-objY)
+
+	if wid, ok := co.(fyne.Tappable); ok {
+		// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })
+		go wid.Tapped(ev)
+	}
+}
+
+func (d *driver) freeDirtyTextures(canvas *canvas) {
+	for {
+		select {
+		case object := <-canvas.refreshQueue:
+			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+				canvas.painter.Free(obj)
+				log.Println("Free", obj)
+				return false
+			}
+			util.WalkObjectTree(object, freeWalked, nil)
+		default:
+			return
+		}
 	}
 }
 

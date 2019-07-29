@@ -148,7 +148,7 @@ func (w *window) minSizeOnScreen() (int, int) {
 
 // screenSize computes the actual output size of the given content size in screen pixels
 func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
-	return scaleInt(w.canvas, canvasSize.Width), scaleInt(w.canvas, canvasSize.Height)
+	return driver.ScaleInt(w.canvas, canvasSize.Width), driver.ScaleInt(w.canvas, canvasSize.Height)
 }
 
 func (w *window) RequestFocus() {
@@ -375,8 +375,8 @@ func (w *window) Content() fyne.CanvasObject {
 
 func (w *window) resize(canvasSize fyne.Size) {
 	if !w.fullScreen {
-		w.width = scaleInt(w.canvas, canvasSize.Width)
-		w.height = scaleInt(w.canvas, canvasSize.Height)
+		w.width = driver.ScaleInt(w.canvas, canvasSize.Width)
+		w.height = driver.ScaleInt(w.canvas, canvasSize.Height)
 	}
 
 	w.canvas.Resize(canvasSize)
@@ -441,7 +441,7 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 	if w.ignoreResize {
 		return
 	}
-	w.resize(fyne.NewSize(unscaleInt(w.canvas, width), unscaleInt(w.canvas, height)))
+	w.resize(fyne.NewSize(driver.UnscaleInt(w.canvas, width), driver.UnscaleInt(w.canvas, height)))
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
@@ -458,53 +458,17 @@ func (w *window) refresh(viewport *glfw.Window) {
 
 func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position,
 	matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, int, int) {
-	var found fyne.CanvasObject
-	foundX, foundY := 0, 0
+	roots := []fyne.CanvasObject{canvas.content}
 
-	findFunc := func(walked fyne.CanvasObject, pos fyne.Position, clipPos fyne.Position, clipSize fyne.Size) bool {
-		if !walked.Visible() {
-			return false
-		}
-
-		if mouse.X < clipPos.X || mouse.Y < clipPos.Y {
-			return false
-		}
-
-		if mouse.X >= clipPos.X+clipSize.Width || mouse.Y >= clipPos.Y+clipSize.Height {
-			return false
-		}
-
-		if mouse.X < pos.X || mouse.Y < pos.Y {
-			return false
-		}
-
-		if mouse.X >= pos.X+walked.Size().Width || mouse.Y >= pos.Y+walked.Size().Height {
-			return false
-		}
-
-		if matches(walked) {
-			found = walked
-			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
-		}
-		return false
+	if canvas.menu != nil {
+		roots = []fyne.CanvasObject{canvas.menu, canvas.content}
 	}
 
-	if canvas.overlay != nil {
-		driver.WalkObjectTree(canvas.overlay, findFunc, nil)
-	} else {
-		if canvas.menu != nil {
-			driver.WalkObjectTree(canvas.menu, findFunc, nil)
-		}
-		if found == nil {
-			driver.WalkObjectTree(canvas.content, findFunc, nil)
-		}
-	}
-
-	return found, foundX, foundY
+	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.overlay, roots...)
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
-	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
+	w.mousePos = fyne.NewPos(driver.UnscaleInt(w.canvas, int(xpos)), driver.UnscaleInt(w.canvas, int(ypos)))
 
 	cursor := defaultCursor
 	obj, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {

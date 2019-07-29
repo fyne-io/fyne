@@ -1,11 +1,13 @@
 package glfw
 
+import "fyne.io/fyne/internal/driver"
+
 func updateGLContext(w *window) {
 	canvas := w.Canvas()
 	size := canvas.Size()
 
-	winWidth := scaleInt(canvas, size.Width)
-	winHeight := scaleInt(canvas, size.Height)
+	winWidth := driver.ScaleInt(canvas, size.Width)
+	winHeight := driver.ScaleInt(canvas, size.Height)
 
 	w.canvas.painter.SetOutputSize(winWidth, winHeight)
 }

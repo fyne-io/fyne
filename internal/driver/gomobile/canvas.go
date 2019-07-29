@@ -13,6 +13,9 @@ type canvas struct {
 	painter          gl.Painter
 	scale            float32
 	size             fyne.Size
+
+	dirty        bool
+	refreshQueue chan fyne.CanvasObject
 }
 
 func (c *canvas) Content() fyne.CanvasObject {
@@ -26,8 +29,14 @@ func (c *canvas) SetContent(content fyne.CanvasObject) {
 	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 }
 
-func (c *canvas) Refresh(fyne.CanvasObject) {
-	//	panic("implement me")
+func (c *canvas) Refresh(obj fyne.CanvasObject) {
+	select {
+	case c.refreshQueue <- obj:
+		// all good
+	default:
+		// queue is full, ignore
+	}
+	c.dirty = true
 }
 
 func (c *canvas) Resize(size fyne.Size) {
@@ -61,7 +70,14 @@ func (c *canvas) Scale() float32 {
 }
 
 func (c *canvas) SetScale(scale float32) {
+	if scale == fyne.SettingsScaleAuto {
+		scale = c.detectScale()
+	}
 	c.scale = scale
+}
+
+func (c *canvas) detectScale() float32 {
+	return 2 // TODO real detection
 }
 
 func (c *canvas) Overlay() fyne.CanvasObject {
@@ -94,4 +110,13 @@ func (c *canvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.
 
 func (c *canvas) Capture() image.Image {
 	return c.painter.Capture(c)
+}
+
+// NewCanvas creates a new gomobile canvas. This is a canvas that will render on a mobile device using OpenGL.
+func NewCanvas() fyne.Canvas {
+	ret := &canvas{}
+	ret.scale = ret.detectScale()
+	ret.refreshQueue = make(chan fyne.CanvasObject, 1024)
+
+	return ret
 }

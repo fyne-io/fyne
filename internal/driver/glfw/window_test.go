@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/driver"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -459,8 +460,8 @@ func TestWindow_PixelSize(t *testing.T) {
 	w.Canvas().Refresh(w.Content())
 
 	winW, winH := w.(*window).minSizeOnScreen()
-	assert.Equal(t, scaleInt(w.Canvas(), 100), winW)
-	assert.Equal(t, scaleInt(w.Canvas(), 100), winH)
+	assert.Equal(t, driver.ScaleInt(w.Canvas(), 100), winW)
+	assert.Equal(t, driver.ScaleInt(w.Canvas(), 100), winH)
 }
 
 func TestWindow_Padded(t *testing.T) {
