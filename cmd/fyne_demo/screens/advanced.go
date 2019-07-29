@@ -38,12 +38,14 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 	win.Canvas().SetOnTypedKey(func(ev *fyne.KeyEvent) {
 		prependTo(generic, "Key : "+string(ev.Name))
 	})
-	win.Canvas().(desktop.Canvas).SetOnKeyDown(func(ev *fyne.KeyEvent) {
-		prependTo(desk, "KeyDown: "+string(ev.Name))
-	})
-	win.Canvas().(desktop.Canvas).SetOnKeyUp(func(ev *fyne.KeyEvent) {
-		prependTo(desk, "KeyUp  : "+string(ev.Name))
-	})
+	if deskCanvas, ok := win.Canvas().(desktop.Canvas); ok {
+		deskCanvas.SetOnKeyDown(func(ev *fyne.KeyEvent) {
+			prependTo(desk, "KeyDown: "+string(ev.Name))
+		})
+		deskCanvas.SetOnKeyUp(func(ev *fyne.KeyEvent) {
+			prependTo(desk, "KeyUp  : "+string(ev.Name))
+		})
+	}
 
 	return widget.NewHBox(widget.NewVBox(screen,
 		widget.NewButton("Custom Theme", func() {
