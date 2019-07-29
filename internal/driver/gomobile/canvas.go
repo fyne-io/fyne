@@ -47,6 +47,10 @@ func (c *canvas) Resize(size fyne.Size) {
 	c.size = size
 	c.content.Resize(c.Size().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+
+	if c.overlay != nil {
+		c.overlay.Resize(size)
+	}
 }
 
 func (c *canvas) Focus(fyne.Focusable) {
@@ -86,6 +90,10 @@ func (c *canvas) Overlay() fyne.CanvasObject {
 
 func (c *canvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.overlay = overlay
+
+	if c.overlay != nil {
+		c.overlay.Resize(c.size)
+	}
 }
 
 func (c *canvas) OnTypedRune() func(rune) {

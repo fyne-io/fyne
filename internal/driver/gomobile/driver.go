@@ -1,7 +1,6 @@
 package gomobile
 
 import (
-	"log"
 	"time"
 
 	"golang.org/x/mobile/app"
@@ -38,6 +37,16 @@ func (d *driver) AllWindows() []fyne.Window {
 	return d.windows
 }
 
+// currentWindow returns the most recently opened window - we can only show one at a time.
+func (d *driver) currentWindow() fyne.Window {
+	if len(d.windows) == 0 {
+		return nil
+	}
+
+	// TODO ensure we remove new windows once closed
+	return d.windows[len(d.windows)-1]
+}
+
 func (d *driver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	return painter.RenderedTextSize(text, size, style)
 }
@@ -48,12 +57,22 @@ func (d *driver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	}
 
 	// TODO figure out how we handle multiple windows...
-	return d.windows[0].Canvas()
+	return d.currentWindow().Canvas()
 }
 
-func (d *driver) AbsolutePositionForObject(fyne.CanvasObject) fyne.Position {
-	log.Println("TODO - absolute position!")
-	return fyne.NewPos(0, 0)
+func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
+	var pos fyne.Position
+	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*canvas)
+
+	util.WalkObjectTree(c.content, func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+		if o == co {
+			pos = p
+			return true
+		}
+		return false
+	}, nil)
+
+	return pos
 }
 
 func (d *driver) Quit() {
@@ -98,10 +117,11 @@ func (d *driver) Run() {
 			case size.Event:
 				sz = e
 			case paint.Event:
-				if len(d.AllWindows()) == 0 {
+				current := d.currentWindow()
+				if current == nil {
 					break
 				}
-				canvas := d.AllWindows()[0].Canvas().(*canvas)
+				canvas := current.Canvas().(*canvas)
 
 				if canvas.dirty && d.glctx != nil {
 					d.freeDirtyTextures(canvas)
@@ -140,23 +160,27 @@ func (d *driver) onPaint(sz size.Event) {
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
 
-	if len(d.AllWindows()) > 0 {
-		canvas := d.AllWindows()[0].Canvas().(*canvas)
-		newSize := fyne.NewSize(int(float32(sz.WidthPx)/canvas.scale), int(float32(sz.HeightPx)/canvas.scale))
-		canvas.Resize(newSize)
-		canvas.painter.Paint(canvas.content, canvas, canvas.Size())
-		if canvas.overlay != nil {
-			canvas.painter.Paint(canvas.overlay, canvas, canvas.Size())
-		}
+	current := d.currentWindow()
+	if current == nil {
+		return
+	}
+
+	canvas := current.Canvas().(*canvas)
+	newSize := fyne.NewSize(int(float32(sz.WidthPx)/canvas.scale), int(float32(sz.HeightPx)/canvas.scale))
+	canvas.Resize(newSize)
+	canvas.painter.Paint(canvas.content, canvas, canvas.Size())
+	if canvas.overlay != nil {
+		canvas.painter.Paint(canvas.overlay, canvas, canvas.Size())
 	}
 }
 
 func (d *driver) onTapEnd(x, y float32) {
-	if len(d.AllWindows()) == 0 {
+	current := d.currentWindow()
+	if current == nil {
 		return
 	}
 
-	canvas := d.AllWindows()[0].Canvas().(*canvas)
+	canvas := current.Canvas().(*canvas)
 	tapX := util.UnscaleInt(canvas, int(x))
 	tapY := util.UnscaleInt(canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)
@@ -186,7 +210,6 @@ func (d *driver) freeDirtyTextures(canvas *canvas) {
 		case object := <-canvas.refreshQueue:
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 				canvas.painter.Free(obj)
-				log.Println("Free", obj)
 				return false
 			}
 			util.WalkObjectTree(object, freeWalked, nil)
