@@ -18,7 +18,7 @@ import (
 )
 
 // This fixes the initially blank window on macOS Mojave
-// We can remove this (and the gl_other.go) once GLFW 3.3 arrives in go_gl
+// We can remove this once GLFW 3.3 arrives in go_gl
 func updateGLContext(w *window) {
 	if w.painted < 2 {
 		ctx := w.viewport.GetNSGLContext()
