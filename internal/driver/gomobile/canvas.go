@@ -14,8 +14,8 @@ type canvas struct {
 	scale            float32
 	size             fyne.Size
 
-	dirty        bool
-	refreshQueue chan fyne.CanvasObject
+	inited, dirty bool
+	refreshQueue  chan fyne.CanvasObject
 }
 
 func (c *canvas) Content() fyne.CanvasObject {

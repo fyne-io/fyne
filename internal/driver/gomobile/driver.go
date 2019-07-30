@@ -126,6 +126,10 @@ func (d *driver) Run() {
 					break
 				}
 				canvas := current.Canvas().(*canvas)
+				if !canvas.inited && d.glctx != nil {
+					canvas.inited = true
+					canvas.painter.Init() // we cannot init until the context is set above
+				}
 
 				if canvas.dirty && d.glctx != nil {
 					d.freeDirtyTextures(canvas)
