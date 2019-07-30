@@ -11,7 +11,7 @@ package app
 #include <stdlib.h>
 
 void openURL(char *urlStr);
- */
+*/
 import "C"
 import (
 	"net/url"
