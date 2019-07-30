@@ -5,7 +5,14 @@ package app
 import (
 	"errors"
 	"net/url"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
+
+func defaultTheme() fyne.Theme {
+	return theme.DarkTheme()
+}
 
 func rootConfigDir() string {
 	return "/tmp/fyne-test/"

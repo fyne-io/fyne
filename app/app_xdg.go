@@ -9,7 +9,14 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
+
+func defaultTheme() fyne.Theme {
+	return theme.DarkTheme()
+}
 
 func (app *fyneApp) OpenURL(url *url.URL) error {
 	cmd := app.exec("xdg-open", url.String())

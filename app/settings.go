@@ -112,8 +112,10 @@ func (s *settings) setupTheme() {
 
 	if name == "light" {
 		s.SetTheme(theme.LightTheme())
-	} else {
+	} else if name == "dark" {
 		s.SetTheme(theme.DarkTheme())
+	} else {
+		s.SetTheme(defaultTheme())
 	}
 }
 
