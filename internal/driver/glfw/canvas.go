@@ -109,7 +109,7 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
 	if c.focused != nil {
-		c.focused.(fyne.Focusable).FocusLost()
+		c.focused.FocusLost()
 	}
 
 	c.focused = obj
@@ -120,7 +120,7 @@ func (c *glCanvas) Focus(obj fyne.Focusable) {
 
 func (c *glCanvas) Unfocus() {
 	if c.focused != nil {
-		c.focused.(fyne.Focusable).FocusLost()
+		c.focused.FocusLost()
 	}
 	c.focused = nil
 }

@@ -14,6 +14,8 @@ type canvas struct {
 	scale            float32
 	size             fyne.Size
 
+	focused fyne.Focusable
+
 	inited, dirty bool
 	refreshQueue  chan fyne.CanvasObject
 }
@@ -53,16 +55,26 @@ func (c *canvas) Resize(size fyne.Size) {
 	}
 }
 
-func (c *canvas) Focus(fyne.Focusable) {
-	panic("implement me")
+func (c *canvas) Focus(obj fyne.Focusable) {
+	if c.focused != nil {
+		c.focused.FocusLost()
+	}
+
+	c.focused = obj
+	if obj != nil {
+		obj.FocusGained()
+	}
 }
 
 func (c *canvas) Unfocus() {
-	panic("implement me")
+	if c.focused != nil {
+		c.focused.FocusLost()
+	}
+	c.focused = nil
 }
 
 func (c *canvas) Focused() fyne.Focusable {
-	panic("implement me")
+	return c.focused
 }
 
 func (c *canvas) Size() fyne.Size {
