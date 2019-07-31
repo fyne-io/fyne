@@ -6,6 +6,8 @@ github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
+# github.com/fsnotify/fsnotify v1.4.7
+github.com/fsnotify/fsnotify
 # github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f
 # github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 github.com/go-gl/gl/v3.1/gles2
@@ -41,6 +43,8 @@ golang.org/x/image/vector
 golang.org/x/net/html/charset
 golang.org/x/net/html
 golang.org/x/net/html/atom
+# golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb
+golang.org/x/sys/unix
 # golang.org/x/text v0.3.0
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap

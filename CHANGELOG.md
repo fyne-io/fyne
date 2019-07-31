@@ -8,10 +8,12 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Added
 
 * Support for diagonal gradients
+* GLobal settings are now saved and can be set using the new fyne_settings app
 
 ### Changed
 
 * Input events now execute one at a time to maintain the correct order
+* FYNE_THEME and FYNE_SCALE are now overrides to the global configuration
 
 ### Fixed
 
