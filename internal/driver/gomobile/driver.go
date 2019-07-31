@@ -81,7 +81,7 @@ func (d *driver) Quit() {
 	}
 
 	// TODO? often mobile apps should not allow this...
-	d.app.Send(lifecycle.Event{From: lifecycle.StageVisible, To: lifecycle.StageDead, DrawContext: nil})
+	d.app.Send(lifecycle.Event{From: lifecycle.StageAlive, To: lifecycle.StageDead, DrawContext: nil})
 }
 
 func (d *driver) scheduleFrames(a app.App) {
@@ -115,7 +115,7 @@ func (d *driver) Run() {
 					d.onStop()
 					d.glctx = nil
 				}
-				if e.Crosses(lifecycle.StageVisible) == lifecycle.CrossOff {
+				if e.Crosses(lifecycle.StageAlive) == lifecycle.CrossOff {
 					quit = true
 				}
 			case size.Event:
