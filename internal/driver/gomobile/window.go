@@ -5,10 +5,10 @@ import (
 )
 
 type window struct {
-	title           string
-	padded, visible bool
+	title   string
+	visible bool
 
-	canvas fyne.Canvas
+	canvas *canvas
 }
 
 func (w *window) Title() string {
@@ -48,11 +48,11 @@ func (w *window) CenterOnScreen() {
 }
 
 func (w *window) Padded() bool {
-	return w.padded
+	return w.canvas.padded
 }
 
 func (w *window) SetPadded(padded bool) {
-	w.padded = padded
+	w.canvas.padded = padded
 }
 
 func (w *window) Icon() fyne.Resource {

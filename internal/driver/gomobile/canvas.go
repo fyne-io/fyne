@@ -15,6 +15,7 @@ type canvas struct {
 	size             fyne.Size
 
 	focused fyne.Focusable
+	padded  bool
 
 	inited, dirty bool
 	refreshQueue  chan fyne.CanvasObject
@@ -27,8 +28,13 @@ func (c *canvas) Content() fyne.CanvasObject {
 func (c *canvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 
-	content.Resize(c.Size().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	if c.padded {
+		content.Resize(c.Size().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	} else {
+		content.Resize(c.Size())
+		content.Move(fyne.NewPos(0, 0))
+	}
 }
 
 func (c *canvas) Refresh(obj fyne.CanvasObject) {
@@ -47,8 +53,13 @@ func (c *canvas) Resize(size fyne.Size) {
 	}
 
 	c.size = size
-	c.content.Resize(c.Size().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-	c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	if c.padded {
+		c.content.Resize(c.Size().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	} else {
+		c.content.Resize(c.Size())
+		c.content.Move(fyne.NewPos(0, 0))
+	}
 
 	if c.overlay != nil {
 		c.overlay.Resize(size)
@@ -134,7 +145,7 @@ func (c *canvas) Capture() image.Image {
 
 // NewCanvas creates a new gomobile canvas. This is a canvas that will render on a mobile device using OpenGL.
 func NewCanvas() fyne.Canvas {
-	ret := &canvas{}
+	ret := &canvas{padded: true}
 	ret.scale = ret.detectScale()
 	ret.refreshQueue = make(chan fyne.CanvasObject, 1024)
 

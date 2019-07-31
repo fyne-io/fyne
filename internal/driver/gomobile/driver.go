@@ -26,7 +26,7 @@ type driver struct {
 
 func (d *driver) CreateWindow(title string) fyne.Window {
 	canvas := NewCanvas().(*canvas) // silence lint
-	ret := &window{title: title, canvas: canvas, padded: true}
+	ret := &window{title: title, canvas: canvas}
 	canvas.painter = pgl.NewPainter(canvas, ret)
 
 	d.windows = append(d.windows, ret)
