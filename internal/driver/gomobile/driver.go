@@ -204,7 +204,7 @@ func (d *driver) onTapEnd(x, y float32) {
 	}, canvas.overlay, canvas.content)
 
 	ev := new(fyne.PointEvent)
-	ev.Position = fyne.NewPos(tapX-objX, tapY-objY)
+	ev.Position = fyne.NewPos(objX, objY)
 
 	if wid, ok := co.(fyne.Tappable); ok {
 		// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })
