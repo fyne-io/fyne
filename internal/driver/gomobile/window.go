@@ -5,8 +5,9 @@ import (
 )
 
 type window struct {
-	title   string
-	visible bool
+	title    string
+	visible  bool
+	onClosed func()
 
 	canvas *canvas
 }
@@ -71,8 +72,8 @@ func (w *window) SetMainMenu(*fyne.MainMenu) {
 	//	panic("implement me")
 }
 
-func (w *window) SetOnClosed(func()) {
-	panic("implement me")
+func (w *window) SetOnClosed(callback func()) {
+	w.onClosed = callback
 }
 
 func (w *window) Show() {
@@ -84,6 +85,9 @@ func (w *window) Hide() {
 }
 
 func (w *window) Close() {
+	if w.onClosed != nil {
+		w.onClosed()
+	}
 	//	d := fyne.CurrentApp().Driver().(*driver)
 
 	// TODO remove from d.windows
