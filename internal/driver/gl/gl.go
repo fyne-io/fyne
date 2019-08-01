@@ -214,8 +214,8 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			c.checkImageMinSize(img, origSize.X, origSize.Y)
 		}
 
-		tex := image.NewRGBA(pixels.Bounds())
-		draw.Draw(tex, pixels.Bounds(), pixels, image.ZP, draw.Src)
+		tex := image.NewRGBA(image.Rect(0, 0, pixels.Bounds().Dx(), pixels.Bounds().Dy()))
+		draw.Draw(tex, tex.Bounds(), pixels, pixels.Bounds().Min, draw.Src)
 
 		return c.imgToTexture(tex)
 	case img.Image != nil:
@@ -227,8 +227,8 @@ func (c *glCanvas) newGlImageTexture(obj fyne.CanvasObject) uint32 {
 			c.checkImageMinSize(img, origSize.X, origSize.Y)
 		}
 
-		tex := image.NewRGBA(img.Image.Bounds())
-		draw.Draw(tex, img.Image.Bounds(), img.Image, image.ZP, draw.Src)
+		tex := image.NewRGBA(image.Rect(0, 0, origSize.X, origSize.Y))
+		draw.Draw(tex, tex.Bounds(), img.Image, img.Image.Bounds().Min, draw.Src)
 
 		return c.imgToTexture(tex)
 	default:
