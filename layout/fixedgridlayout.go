@@ -44,10 +44,10 @@ func (g *fixedGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 // MinSize finds the smallest size that satisfies all the child objects.
 // For a FixedGridLayout this is simply the specified cellsize as a single column
-// layout has no padding. The returned sie does not take into account the number
-// of child objects as this layout re-flows dynamically.
+// layout has no padding. The returned size does not take into account the number
+// of columns as this layout re-flows dynamically.
 func (g *fixedGridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return fyne.NewSize(((g.CellSize.Width * g.colCount) + (g.colCount * theme.Padding())),
+	return fyne.NewSize((g.CellSize.Width + theme.Padding()),
 		((g.CellSize.Height * g.rowCount) + (g.rowCount * theme.Padding())))
 }
 
