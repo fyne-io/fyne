@@ -663,6 +663,20 @@ func TestEntry_OnCut(t *testing.T) {
 	assert.Equal(t, "Teng", e.Text)
 }
 
+func TestEntry_OnCut_Password(t *testing.T) {
+	e := NewPasswordEntry()
+	e.SetText("Testing")
+	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+
+	clipboard := test.NewClipboard()
+	shortcut := &fyne.ShortcutCut{Clipboard: clipboard}
+	handled := e.TypedShortcut(shortcut)
+
+	assert.True(t, handled)
+	assert.Equal(t, "", clipboard.Content())
+	assert.Equal(t, "Testing", e.Text)
+}
+
 func TestEntry_OnCopy(t *testing.T) {
 	e := NewEntry()
 	e.SetText("Testing")
@@ -674,6 +688,20 @@ func TestEntry_OnCopy(t *testing.T) {
 
 	assert.True(t, handled)
 	assert.Equal(t, "sti", clipboard.Content())
+	assert.Equal(t, "Testing", e.Text)
+}
+
+func TestEntry_OnCopy_Password(t *testing.T) {
+	e := NewPasswordEntry()
+	e.SetText("Testing")
+	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+
+	clipboard := test.NewClipboard()
+	shortcut := &fyne.ShortcutCopy{Clipboard: clipboard}
+	handled := e.TypedShortcut(shortcut)
+
+	assert.True(t, handled)
+	assert.Equal(t, "", clipboard.Content())
 	assert.Equal(t, "Testing", e.Text)
 }
 
