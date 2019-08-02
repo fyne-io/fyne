@@ -922,6 +922,10 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
+		if e.Password {
+			return
+		}
+
 		cut := se.(*fyne.ShortcutCut)
 		text := e.selectedText()
 		e.eraseSelection()
@@ -929,6 +933,10 @@ func (e *Entry) registerShortcut() {
 		cut.Clipboard.SetContent(text)
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCopy{}, func(se fyne.Shortcut) {
+		if e.Password {
+			return
+		}
+
 		copy := se.(*fyne.ShortcutCopy)
 		text := e.selectedText()
 
