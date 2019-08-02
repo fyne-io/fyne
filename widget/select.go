@@ -12,8 +12,9 @@ import (
 const noSelection = "(Select one)"
 
 type selectRenderer struct {
-	icon  *Icon
-	label *canvas.Text
+	icon   *Icon
+	label  *canvas.Text
+	shadow fyne.CanvasObject
 
 	objects []fyne.CanvasObject
 	combo   *Select
@@ -35,6 +36,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
+	s.shadow.Resize(size)
 	inner := size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 
 	offset := fyne.NewSize(theme.IconInlineSize(), 0)
@@ -189,11 +191,12 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	}
 	text.Alignment = fyne.TextAlignLeading
 
+	shadow := newShadow(shadowAround, theme.Padding()/2)
 	objects := []fyne.CanvasObject{
-		text, icon,
+		text, icon, shadow,
 	}
 
-	return &selectRenderer{icon, text, objects, s}
+	return &selectRenderer{icon, text, shadow, objects, s}
 }
 
 // SetSelected sets the current option of the select widget
