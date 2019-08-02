@@ -48,7 +48,7 @@ func (g *fixedGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // of columns as this layout re-flows dynamically.
 func (g *fixedGridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize((g.CellSize.Width),
-		((g.CellSize.Height * g.rowCount) + (g.rowCount * theme.Padding())))
+		((g.CellSize.Height * g.rowCount) + ((g.rowCount - 1) * theme.Padding())))
 }
 
 // NewFixedGridLayout returns a new FixedGridLayout instance
