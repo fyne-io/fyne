@@ -35,6 +35,8 @@ func TestFixedGridLayout(t *testing.T) {
 func TestFixedGridLayoutMinSize(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 	minSize := cellSize
+	minSize.Width = cellSize.Width + theme.Padding()
+	minSize.Height = cellSize.Height + theme.Padding()
 
 	container := fyne.NewContainer(canvas.NewRectangle(color.RGBA{0, 0, 0, 0}))
 	layout := NewFixedGridLayout(cellSize)
