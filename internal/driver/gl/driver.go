@@ -34,7 +34,7 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 	var pos fyne.Position
 	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*glCanvas)
 
-	driver.WalkObjectTree(c.content, func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	driver.WalkCompleteObjectTree(c.content, func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if o == co {
 			pos = p
 			return true
