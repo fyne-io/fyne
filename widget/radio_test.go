@@ -256,6 +256,7 @@ func TestRadio_Hovered(t *testing.T) {
 			radio := NewRadio(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
 			render := Renderer(radio).(*radioRenderer)
+
 			assert.Equal(t, noRadioItemIndex, radio.hoveredItemIndex)
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
 			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
@@ -292,6 +293,50 @@ func TestRadio_Hovered(t *testing.T) {
 			assert.Equal(t, 1, radio.hoveredItemIndex)
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
 			assert.Equal(t, theme.HoverColor(), render.items[1].focusIndicator.FillColor)
+		})
+	}
+}
+
+func TestRadio_FocusIndicator_Centered_Vertically(t *testing.T) {
+	focusIndicatorSize := theme.IconInlineSize() + theme.Padding()*2
+
+	tests := []struct {
+		name         string
+		options      []string
+		isHorizontal bool
+	}{
+		{
+			name:         "Horizontal",
+			options:      []string{"Hi", "Another"},
+			isHorizontal: true,
+		},
+		{
+			name:         "Vertical",
+			options:      []string{"Hi", "Another"},
+			isHorizontal: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			radio := NewRadio(tt.options, nil)
+			radio.Horizontal = tt.isHorizontal
+			render := Renderer(radio).(*radioRenderer)
+			render.Layout(radio.MinSize())
+
+			heightCenterOffset := (radio.itemHeight() - focusIndicatorSize) / 2
+
+			for i, item := range render.items {
+				x, y := 0, heightCenterOffset
+
+				if tt.isHorizontal {
+					x = i * radio.itemWidth()
+				} else {
+					y = i*radio.itemHeight() + heightCenterOffset
+				}
+
+				assert.Equal(t, fyne.NewPos(x, y), item.focusIndicator.Position1)
+			}
 		})
 	}
 }
