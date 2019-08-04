@@ -67,7 +67,7 @@ func (p *glPainter) Paint(co fyne.CanvasObject, c fyne.Canvas, size fyne.Size) {
 		}
 	}
 
-	driver.WalkObjectTree(co, paint, afterPaint)
+	driver.WalkVisibleObjectTree(co, paint, afterPaint)
 }
 
 func (p *glPainter) Free(obj fyne.CanvasObject) {
