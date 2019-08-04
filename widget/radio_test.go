@@ -256,6 +256,8 @@ func TestRadio_Hovered(t *testing.T) {
 			radio := NewRadio(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
 			render := Renderer(radio).(*radioRenderer)
+			render.Layout(radio.MinSize())
+
 			assert.Equal(t, noRadioItemIndex, radio.hoveredItemIndex)
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
 			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
@@ -292,6 +294,22 @@ func TestRadio_Hovered(t *testing.T) {
 			assert.Equal(t, 1, radio.hoveredItemIndex)
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
 			assert.Equal(t, theme.HoverColor(), render.items[1].focusIndicator.FillColor)
+
+			// Focus indicators should be centered vertically and aligned left horizontally
+			// In other words it should be cenetered on theme's icon
+			for i, item := range render.items {
+				focusIndicatorSize := theme.IconInlineSize() + theme.Padding()*2
+				iconMiddleOffset := (radio.itemHeight() - focusIndicatorSize) / 2
+
+				x, y := 0, iconMiddleOffset
+				if tt.isHorizontal {
+					x = i * radio.itemWidth()
+				} else {
+					y = i*radio.itemHeight() + iconMiddleOffset
+				}
+
+				assert.Equal(t, fyne.NewPos(x, y), item.focusIndicator.Position1)
+			}
 		})
 	}
 }
