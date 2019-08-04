@@ -254,22 +254,6 @@ func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func scaleForDpi(xdpi int) float32 {
-	switch {
-	case xdpi > 1000:
-		// assume that this is a mistake and bail
-		return float32(1.0)
-	case xdpi > 192:
-		return float32(1.5)
-	case xdpi > 144:
-		return float32(1.35)
-	case xdpi > 120:
-		return float32(1.2)
-	default:
-		return float32(1.0)
-	}
-}
-
 func (w *window) getMonitorForWindow() *glfw.Monitor {
 	for _, monitor := range glfw.GetMonitors() {
 		x, y := monitor.GetPos()
@@ -309,7 +293,7 @@ func (w *window) detectScale() float32 {
 	widthPx := monitor.GetVideoMode().Width
 
 	dpi := float32(widthPx) / (float32(widthMm) / 25.4)
-	return scaleForDpi(int(dpi))
+	return float32(dpi) / 144.0
 }
 
 func (w *window) Show() {
