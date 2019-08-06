@@ -3,7 +3,7 @@
 package app
 
 import (
-	"filepath"
+	"path/filepath"
 	"net/url"
 	"os"
 )
