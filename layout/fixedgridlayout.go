@@ -29,6 +29,10 @@ func (g *fixedGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 	x, y := 0, 0
 	for i, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		child.Move(fyne.NewPos(x, y))
 		child.Resize(g.CellSize)
 
