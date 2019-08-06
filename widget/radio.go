@@ -71,9 +71,8 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 
 	x, y := 0, 0
 	for _, item := range r.items {
-
 		item.focusIndicator.Resize(focusIndicatorSize)
-		item.focusIndicator.Move(fyne.NewPos(x, y+(size.Height-focusIndicatorSize.Height)/2))
+		item.focusIndicator.Move(fyne.NewPos(x, y+(itemHeight-focusIndicatorSize.Height)/2))
 
 		item.label.Resize(labelSize)
 		item.label.Move(fyne.NewPos(x+focusIndicatorSize.Width+theme.Padding(), y))
