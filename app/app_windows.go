@@ -3,9 +3,9 @@
 package app
 
 import (
-	"path/filepath"
 	"net/url"
 	"os"
+	"path/filepath"
 )
 
 func rootConfigDir() string {
