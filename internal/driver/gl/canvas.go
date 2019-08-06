@@ -283,9 +283,8 @@ func (c *glCanvas) paint(size fyne.Size) {
 			gl.Scissor(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
 			gl.Enable(gl.SCISSOR_TEST)
 		}
-		if obj.Visible() {
-			c.drawObject(obj, pos, size)
-		}
+
+		c.drawObject(obj, pos, size)
 		return false
 	}
 	afterPaint := func(obj, _ fyne.CanvasObject) {
@@ -301,12 +300,12 @@ func (c *glCanvas) walkTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
-	driver.WalkObjectTree(c.content, beforeChildren, afterChildren)
+	driver.WalkVisibleObjectTree(c.content, beforeChildren, afterChildren)
 	if c.menu != nil {
-		driver.WalkObjectTree(c.menu, beforeChildren, afterChildren)
+		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
 	}
 	if c.overlay != nil {
-		driver.WalkObjectTree(c.overlay, beforeChildren, afterChildren)
+		driver.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
 	}
 }
 

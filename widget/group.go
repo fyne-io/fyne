@@ -36,13 +36,11 @@ func (g *Group) MinSize() fyne.Size {
 
 // Show this widget, if it was previously hidden
 func (g *Group) Show() {
-	g.content.Show()
 	g.show(g)
 }
 
 // Hide this widget, if it was previously visible
 func (g *Group) Hide() {
-	g.content.Hide()
 	g.hide(g)
 }
 
