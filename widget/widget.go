@@ -61,6 +61,10 @@ func (w *baseWidget) show(parent fyne.Widget) {
 	}
 
 	w.Hidden = false
+	for _, child := range Renderer(parent).Objects() {
+		child.Show()
+	}
+
 	canvas.Refresh(parent)
 }
 
@@ -70,6 +74,10 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 	}
 
 	w.Hidden = true
+	for _, child := range Renderer(parent).Objects() {
+		child.Hide()
+	}
+
 	canvas.Refresh(parent)
 }
 

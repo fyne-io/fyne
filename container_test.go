@@ -80,11 +80,9 @@ func TestContainer_Hide(t *testing.T) {
 	box := new(dummyObject)
 	container := NewContainer(box)
 
-	assert.True(t, container.Visible())
 	assert.True(t, box.Visible())
 	container.Hide()
-	assert.False(t, container.Visible())
-	assert.True(t, box.Visible())
+	assert.False(t, box.Visible())
 }
 
 func TestContainer_Show(t *testing.T) {
@@ -92,7 +90,7 @@ func TestContainer_Show(t *testing.T) {
 	container := NewContainer(box)
 
 	container.Hide()
-	assert.True(t, box.Visible())
+	assert.False(t, box.Visible())
 	assert.False(t, container.Visible())
 
 	container.Show()

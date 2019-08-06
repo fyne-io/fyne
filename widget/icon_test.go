@@ -38,9 +38,11 @@ func TestIcon_MinSize(t *testing.T) {
 
 func TestIconRenderer_ApplyTheme(t *testing.T) {
 	icon := NewIcon(theme.CancelIcon())
+	icon.Hide()
 	render := Renderer(icon).(*iconRenderer)
-	visible := render.objects[0].Visible()
+
+	assert.False(t, render.objects[0].Visible())
 
 	render.ApplyTheme()
-	assert.Equal(t, visible, render.objects[0].Visible())
+	assert.False(t, render.objects[0].Visible())
 }

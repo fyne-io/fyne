@@ -397,7 +397,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	driver.WalkCompleteObjectTree(w.canvas.content, nil, func(obj, _ fyne.CanvasObject) {
+	driver.WalkObjectTree(w.canvas.content, nil, func(obj, _ fyne.CanvasObject) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
@@ -482,13 +482,13 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	}
 
 	if canvas.overlay != nil {
-		driver.WalkVisibleObjectTree(canvas.overlay, findFunc, nil)
+		driver.WalkObjectTree(canvas.overlay, findFunc, nil)
 	} else {
 		if canvas.menu != nil {
-			driver.WalkVisibleObjectTree(canvas.menu, findFunc, nil)
+			driver.WalkObjectTree(canvas.menu, findFunc, nil)
 		}
 		if found == nil {
-			driver.WalkVisibleObjectTree(canvas.content, findFunc, nil)
+			driver.WalkObjectTree(canvas.content, findFunc, nil)
 		}
 	}
 
