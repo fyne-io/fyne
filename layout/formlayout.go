@@ -39,6 +39,9 @@ func (f *formLayout) tableCellsSize(objects []fyne.CanvasObject, containerWidth 
 	contentCellMaxWidth := 0
 	for row := 0; row < rows; row++ {
 		currentRow := objects[lowBound:highBound]
+		if !currentRow[0].Visible() && !currentRow[1].Visible() {
+			continue
+		}
 
 		labelCell := currentRow[0].MinSize()
 		labelCellMaxWidth = fyne.Max(labelCellMaxWidth, labelCell.Width)

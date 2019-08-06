@@ -48,6 +48,10 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	spacers := make([]fyne.CanvasObject, 0)
 	total := 0
 	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		if g.isSpacer(child) {
 			spacers = append(spacers, child)
 			continue
@@ -72,6 +76,10 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 
 	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		width := child.MinSize().Width
 		height := child.MinSize().Height
 
@@ -102,6 +110,10 @@ func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	spacerCount := 0
 	minSize := fyne.NewSize(0, 0)
 	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		if g.isSpacer(child) {
 			spacerCount++
 			continue
