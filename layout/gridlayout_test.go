@@ -55,12 +55,25 @@ func TestGridLayoutRounding(t *testing.T) {
 	assert.Equal(t, fyne.NewSize(33, 50), obj3.Size())
 }
 
-func TestGridLayoutMinSize(t *testing.T) {
+func TestGridLayout_MinSize(t *testing.T) {
 	text1 := canvas.NewText("Large Text", color.RGBA{0xff, 0, 0, 0})
 	text2 := canvas.NewText("small", color.RGBA{0xff, 0, 0, 0})
-	minSize := text1.MinSize().Add(fyne.NewSize(0, text1.MinSize().Height+theme.Padding()))
+	minSize := text1.MinSize().Add(fyne.NewSize(0, text2.MinSize().Height+theme.Padding()))
 
 	container := fyne.NewContainer(text1, text2)
+	layoutMin := NewGridLayout(1).MinSize(container.Objects)
+
+	assert.Equal(t, minSize, layoutMin)
+}
+
+func TestGridLayout_MinSize_HiddenItem(t *testing.T) {
+	text1 := canvas.NewText("Large Text", color.RGBA{0xff, 0, 0, 0})
+	text2 := canvas.NewText("hidden", color.RGBA{0xff, 0, 0, 0})
+	text2.Hide()
+	text3 := canvas.NewText("small", color.RGBA{0xff, 0, 0, 0})
+	minSize := text1.MinSize().Add(fyne.NewSize(0, text3.MinSize().Height+theme.Padding()))
+
+	container := fyne.NewContainer(text1, text2, text3)
 	layoutMin := NewGridLayout(1).MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
