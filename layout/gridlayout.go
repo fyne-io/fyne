@@ -52,7 +52,8 @@ func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	cellHeight := float64(size.Height-padHeight) / float64(rows)
 
 	row, col := 0, 0
-	for i, child := range objects {
+	i := 0
+	for _, child := range objects {
 		if !child.Visible() {
 			continue
 		}
@@ -71,6 +72,7 @@ func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		} else {
 			col++
 		}
+		i++
 	}
 }
 
