@@ -7,23 +7,26 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/widget"
 )
 
 // Painter defines the functionality of our OpenGL based renderer
 type Painter interface {
-	// SetOutputSize is used to change the resolution of our output viewport
-	SetOutputSize(int, int)
-	// SetFrameBufferScale tells us when we have more than 1 framebuffer pixel for each output pixel
-	SetFrameBufferScale(float32)
-	// Paint is the main render method for this painter
-	Paint(fyne.CanvasObject, fyne.Canvas, fyne.Size)
+	// Capture requests that the specified canvas be drawn to an in-memory image
+	Capture(fyne.Canvas) image.Image
 	// Clear tells our painter to prepare a fresh paint
 	Clear()
 	// Free is used to indicate that a certain canvas object is no longer needed
 	Free(fyne.CanvasObject)
-	// Capture requests that the specified canvas be drawn to an in-memory image
-	Capture(fyne.Canvas) image.Image
+	// Paint a single fyne.CanvasObject but not its children.
+	Paint(fyne.CanvasObject, fyne.Position, fyne.Size)
+	// SetFrameBufferScale tells us when we have more than 1 framebuffer pixel for each output pixel
+	SetFrameBufferScale(float32)
+	// SetOutputSize is used to change the resolution of our output viewport
+	SetOutputSize(int, int)
+	// StartClipping tells us that the following paint actions should be clipped to the specified area.
+	StartClipping(fyne.Position, fyne.Size)
+	// StopClipping stops clipping paint actions.
+	StopClipping()
 }
 
 type glPainter struct {
@@ -41,33 +44,22 @@ func (p *glPainter) Clear() {
 	p.glClearBuffer()
 }
 
-func (p *glPainter) Paint(co fyne.CanvasObject, c fyne.Canvas, size fyne.Size) {
-	if co == nil {
-		return
-	}
+func (p *glPainter) StartClipping(pos fyne.Position, size fyne.Size) {
+	x := p.textureScaleInt(pos.X)
+	y := p.textureScaleInt(pos.Y)
+	w := p.textureScaleInt(size.Width)
+	h := p.textureScaleInt(size.Height)
+	p.glScissorOpen(int32(x), int32(y), int32(w), int32(h))
+}
 
-	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		// TODO should this be somehow not scroll container specific?
-		if _, ok := obj.(*widget.ScrollContainer); ok {
-			scrollX := p.textureScaleInt(pos.X)
-			scrollY := p.textureScaleInt(pos.Y)
-			scrollWidth := p.textureScaleInt(obj.Size().Width)
-			scrollHeight := p.textureScaleInt(obj.Size().Height)
-			pixHeight := p.textureScaleInt(co.Size().Height)
-			p.glScissorOpen(int32(scrollX), int32(pixHeight-scrollY-scrollHeight), int32(scrollWidth), int32(scrollHeight))
-		}
-		if obj.Visible() {
-			p.drawObject(obj, pos, size)
-		}
-		return false
-	}
-	afterPaint := func(obj, _ fyne.CanvasObject) {
-		if _, ok := obj.(*widget.ScrollContainer); ok {
-			p.glScissorClose()
-		}
-	}
+func (p *glPainter) StopClipping() {
+	p.glScissorClose()
+}
 
-	driver.WalkVisibleObjectTree(co, paint, afterPaint)
+func (p *glPainter) Paint(obj fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {
+	if obj.Visible() {
+		p.drawObject(obj, pos, frame)
+	}
 }
 
 func (p *glPainter) Free(obj fyne.CanvasObject) {
