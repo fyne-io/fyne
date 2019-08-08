@@ -381,7 +381,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	assert.True(t, entry.Focused())
 
 	entry.TappedSecondary(nil)
-	entry.rightClickPaste()
+	entry.pasteFromClipboard(clipboard)
 
 	assert.Equal(t, entry.Text, testContent)
 }
