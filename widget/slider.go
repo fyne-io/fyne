@@ -10,17 +10,12 @@ import (
 )
 
 const (
-	SLIDER_MAX_DECIMALS = uint8(12)
+	maxSliderDecimals = uint8(12)
 )
 
 var _ fyne.Draggable = (*Slider)(nil)
 
-type SliderOptions struct {
-	Vertical  bool
-	Precision uint8
-	Drag      func()
-}
-
+// Slider if a widget that can slide between two fixed values.
 type Slider struct {
 	baseWidget
 
@@ -29,6 +24,16 @@ type Slider struct {
 	Max   float64
 
 	opts SliderOptions
+}
+
+// SliderOptions are a set of optional features to slider.
+// Vertical  - if the slider should be vertical
+// Precision - how many decimal places are relevant
+// Drag      - callback slot for user defined behavior
+type SliderOptions struct {
+	Vertical  bool
+	Precision uint8
+	Drag      func()
 }
 
 // Resize sets a new size for a widget.
@@ -56,9 +61,11 @@ func (s *Slider) Move(pos fyne.Position) {
 	s.move(pos, s)
 }
 
+// DragEnd function
 func (s *Slider) DragEnd() {
 }
 
+// Dragged function
 func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ok, pos, max := s.wasSliderEvent(&(e.PointEvent))
 
@@ -219,8 +226,8 @@ func (s *sliderRenderer) moveSlide(diameter int) (int, int) {
 }
 
 func clampPrecision(p uint8) uint8 {
-	if p > SLIDER_MAX_DECIMALS {
-		return SLIDER_MAX_DECIMALS
+	if p > maxSliderDecimals {
+		return maxSliderDecimals
 	}
 	return p
 }
@@ -234,8 +241,8 @@ func checkMinMax(val, min, max float64) (float64, float64) {
 		max = val
 	}
 	if min == max {
-		min -= 1
-		max += 1
+		min--
+		max++
 	}
 	if min > max {
 		return max, min
