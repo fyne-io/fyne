@@ -25,14 +25,14 @@ func TestSlider_MinMax(t *testing.T) {
 
 func TestSlider_PrecisionClamp(t *testing.T) {
 	precision := uint8(255)
-	assert.Greater(t, precision, SLIDER_MAX_DECIMALS)
+	assert.Greater(t, precision, maxSliderDecimals)
 
 	slider := NewSliderWithOptions(5, 0, 10,
 		SliderOptions{
 			Precision: precision,
 		})
 
-	assert.Equal(t, slider.opts.Precision, SLIDER_MAX_DECIMALS)
+	assert.Equal(t, slider.opts.Precision, maxSliderDecimals)
 }
 
 func TestSlider_HorizontalLayout(t *testing.T) {
