@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFixedGridLayout(t *testing.T) {
+func TestFixedGridLayout_Layout(t *testing.T) {
 	gridSize := fyne.NewSize(125, 125)
 	cellSize := fyne.NewSize(50, 50)
 
@@ -32,7 +32,28 @@ func TestFixedGridLayout(t *testing.T) {
 	assert.Equal(t, obj3.Position(), cell3Pos)
 }
 
-func TestFixedGridLayoutMinSize(t *testing.T) {
+func TestFixedGridLayout_Layout_HiddenItem(t *testing.T) {
+	gridSize := fyne.NewSize(125, 125)
+	cellSize := fyne.NewSize(50, 50)
+
+	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj2.Hide()
+	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+
+	container := &fyne.Container{
+		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
+	}
+	container.Resize(gridSize)
+
+	NewFixedGridLayout(cellSize).Layout(container.Objects, gridSize)
+
+	assert.Equal(t, obj1.Size(), cellSize)
+	cell3Pos := fyne.NewPos(50+theme.Padding(), 0)
+	assert.Equal(t, obj3.Position(), cell3Pos)
+}
+
+func TestFixedGridLayout_MinSize(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 	minSize := cellSize
 

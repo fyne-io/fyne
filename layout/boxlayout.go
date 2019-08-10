@@ -48,6 +48,10 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	spacers := make([]fyne.CanvasObject, 0)
 	total := 0
 	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		if g.isSpacer(child) {
 			spacers = append(spacers, child)
 			continue
@@ -72,6 +76,10 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 
 	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		width := child.MinSize().Width
 		height := child.MinSize().Height
 
@@ -101,7 +109,12 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	spacerCount := 0
 	minSize := fyne.NewSize(0, 0)
+	added := false
 	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		if g.isSpacer(child) {
 			spacerCount++
 			continue
@@ -110,16 +123,20 @@ func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		if g.horizontal {
 			minSize = minSize.Add(fyne.NewSize(child.MinSize().Width, 0))
 			minSize.Height = fyne.Max(child.MinSize().Height, minSize.Height)
+			if added {
+				minSize.Width += theme.Padding()
+			}
 		} else {
 			minSize = minSize.Add(fyne.NewSize(0, child.MinSize().Height))
 			minSize.Width = fyne.Max(child.MinSize().Width, minSize.Width)
+			if added {
+				minSize.Height += theme.Padding()
+			}
 		}
+		added = true
 	}
 
-	if g.horizontal {
-		return minSize.Add(fyne.NewSize(theme.Padding()*(len(objects)-1-spacerCount), 0))
-	}
-	return minSize.Add(fyne.NewSize(0, theme.Padding()*(len(objects)-1-spacerCount)))
+	return minSize
 }
 
 // NewHBoxLayout returns a horizontal box layout for stacking a number of child

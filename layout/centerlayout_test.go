@@ -26,7 +26,7 @@ func TestCenterLayout(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(45, 45), obj.Position())
 }
 
-func TestCenterLayoutMinSize(t *testing.T) {
+func TestCenterLayout_MinSize(t *testing.T) {
 	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
@@ -34,6 +34,17 @@ func TestCenterLayoutMinSize(t *testing.T) {
 	layoutMin := NewCenterLayout().MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
+}
+
+func TestCenterLayout_MinSize_Hidden(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text1.Hide()
+	text2 := canvas.NewText("1\n2", color.RGBA{0, 0xff, 0, 0})
+
+	container := fyne.NewContainer(text1, text2)
+	layoutMin := NewCenterLayout().MinSize(container.Objects)
+
+	assert.Equal(t, text2.MinSize(), layoutMin)
 }
 
 func TestContainerCenterLayoutMinSize(t *testing.T) {
