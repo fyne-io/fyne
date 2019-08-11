@@ -11,6 +11,8 @@ import (
 
 const (
 	maxSliderDecimals = uint8(12)
+	standardScale     = 6
+	minLongSide       = 150
 )
 
 var _ fyne.Draggable = (*Slider)(nil)
@@ -84,8 +86,8 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 func (s *Slider) wasSliderEvent(e *fyne.PointEvent) (ok bool, pos, max int) {
 	render := Renderer(s).(*sliderRenderer)
 
-	hp := render.handle.Position()
-	hs := render.handle.Size()
+	tp := render.thumb.Position()
+	ts := render.thumb.Size()
 
 	pad := theme.Padding()
 
@@ -93,14 +95,14 @@ func (s *Slider) wasSliderEvent(e *fyne.PointEvent) (ok bool, pos, max int) {
 	y := e.Position.Y
 
 	if s.opts.Vertical {
-		if x > (hp.X-pad) && x < (hp.X+hs.Width+pad) {
+		if x > (tp.X-pad) && x < (tp.X+ts.Width+pad) {
 			// if the cursor was inside the slider area
-			return true, y, render.rail.Size().Height
+			return true, y, render.track.Size().Height
 		}
 	} else {
-		if y > (hp.Y-pad) && y < (hp.Y+hs.Height+pad) {
+		if y > (tp.Y-pad) && y < (tp.Y+ts.Height+pad) {
 			// if the cursor was inside the slider area
-			return true, x, render.rail.Size().Width
+			return true, x, render.track.Size().Width
 		}
 	}
 	return false, 0, 0
@@ -127,22 +129,21 @@ func (s *Slider) updateValue(ratio float64) {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
-	rail := canvas.NewRectangle(theme.ButtonColor())
-	fill := canvas.NewRectangle(theme.PrimaryColor())
-	handle := &canvas.Circle{
-		StrokeColor: color.RGBA{0x00, 0x00, 0x00, 0xff},
-		FillColor:   color.RGBA{0x80, 0x80, 0x80, 0xff},
-		StrokeWidth: 1}
+	track := canvas.NewRectangle(theme.DisabledButtonColor())
+	active := canvas.NewRectangle(theme.ButtonColor())
+	thumb := &canvas.Circle{
+		FillColor:   theme.ButtonColor(),
+		StrokeWidth: 0}
 
-	objects := []fyne.CanvasObject{rail, fill, handle}
+	objects := []fyne.CanvasObject{track, active, thumb}
 
-	return &sliderRenderer{rail, fill, handle, objects, s}
+	return &sliderRenderer{track, active, thumb, objects, s}
 }
 
 type sliderRenderer struct {
-	rail   *canvas.Rectangle
-	fill   *canvas.Rectangle
-	handle *canvas.Circle
+	track  *canvas.Rectangle
+	active *canvas.Rectangle
+	thumb  *canvas.Circle
 
 	objects []fyne.CanvasObject
 	slider  *Slider
@@ -150,8 +151,8 @@ type sliderRenderer struct {
 
 // ApplyTheme is called when the Slider may need to update its look
 func (s *sliderRenderer) ApplyTheme() {
-	s.rail.FillColor = theme.ButtonColor()
-	s.handle.FillColor = theme.PrimaryColor()
+	s.track.FillColor = theme.DisabledButtonColor()
+	s.thumb.FillColor = theme.ButtonColor()
 	s.Refresh()
 }
 
@@ -163,39 +164,44 @@ func (s *sliderRenderer) Refresh() {
 
 // Layout the components of the slider widget
 func (s *sliderRenderer) Layout(size fyne.Size) {
-	sq := theme.Padding() * 4
-	d1, d2 := s.moveSlide(sq)
+	padLen := theme.Padding()
+	sideLen := padLen * standardScale
+	activeOffset, thumbOffset := s.moveSlide(sideLen)
 
-	var rp, fp, hp fyne.Position
-	var rs, fs fyne.Size
+	var trackPos, activePos, thumbPos fyne.Position
+	var trackSize, activeSize fyne.Size
 
 	if s.slider.opts.Vertical {
-		rp = fyne.NewPos(size.Width/2, 0)
-		fp = fyne.NewPos(rp.X, d1)
-		hp = fyne.NewPos(rp.X-theme.Padding(), d2)
-		rs = fyne.NewSize(sq/2, size.Height)
-		fs = fyne.NewSize(sq/2, rs.Height-d1)
+		trackPos = fyne.NewPos(size.Width/2, 0)
+		activePos = fyne.NewPos(trackPos.X, activeOffset)
+
+		trackSize = fyne.NewSize(padLen, size.Height)
+		activeSize = fyne.NewSize(padLen, trackSize.Height-activeOffset)
+
+		thumbPos = fyne.NewPos(trackPos.X-(sideLen-trackSize.Width)/2, thumbOffset)
 	} else {
-		rp = fyne.NewPos(0, size.Height/2)
-		fp = rp
-		rs = fyne.NewSize(size.Width, sq/2)
-		fs = fyne.NewSize(d1, sq/2)
-		hp = fyne.NewPos(d2, rp.Y-theme.Padding())
+		trackPos = fyne.NewPos(0, size.Height/2)
+		activePos = trackPos
+
+		trackSize = fyne.NewSize(size.Width, padLen)
+		activeSize = fyne.NewSize(activeOffset, padLen)
+
+		thumbPos = fyne.NewPos(thumbOffset, trackPos.Y-(sideLen-trackSize.Height)/2)
 	}
 
-	s.rail.Move(rp)
-	s.rail.Resize(rs)
+	s.track.Move(trackPos)
+	s.track.Resize(trackSize)
 
-	s.fill.Move(fp)
-	s.fill.Resize(fs)
+	s.active.Move(activePos)
+	s.active.Resize(activeSize)
 
-	s.handle.Move(hp)
-	s.handle.Resize(fyne.NewSize(sq, sq))
+	s.thumb.Move(thumbPos)
+	s.thumb.Resize(fyne.NewSize(sideLen, sideLen))
 }
 
 // MinSize calculates the minimum size of a slider widget
 func (s *sliderRenderer) MinSize() fyne.Size {
-	s1, s2 := 100, theme.Padding()*6
+	s1, s2 := minLongSide, theme.Padding()*standardScale
 	if s.slider.opts.Vertical {
 		return fyne.NewSize(s2, s1)
 	}
@@ -215,13 +221,13 @@ func (s *sliderRenderer) Objects() []fyne.CanvasObject {
 
 func (s *sliderRenderer) moveSlide(diameter int) (int, int) {
 	w := s.slider
-	r := s.rail.Size()
+	t := s.track.Size()
 	ratio := (w.Value - w.Min) / (w.Max - w.Min)
 	if w.opts.Vertical {
-		y := float64(r.Height) - (ratio * float64(r.Height))
+		y := float64(t.Height) - (ratio * float64(t.Height))
 		return int(y), int(y) - int((1-ratio)*float64(diameter))
 	}
-	x := ratio * float64(r.Width)
+	x := ratio * float64(t.Width)
 	return int(x), int(x) - int(ratio*float64(diameter))
 }
 
