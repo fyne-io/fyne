@@ -42,16 +42,16 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	render := Renderer(slider).(*sliderRenderer)
 
 	wSize := render.slider.Size()
-	rSize := render.rail.Size()
-	fSize := render.fill.Size()
+	tSize := render.track.Size()
+	aSize := render.active.Size()
 
 	assert.Greater(t, wSize.Width, wSize.Height)
 
-	assert.Equal(t, wSize.Width, rSize.Width)
-	assert.Greater(t, wSize.Height, rSize.Height)
+	assert.Equal(t, wSize.Width, tSize.Width)
+	assert.Greater(t, wSize.Height, tSize.Height)
 
-	assert.Greater(t, wSize.Width, fSize.Width)
-	assert.Greater(t, wSize.Height, fSize.Height)
+	assert.Greater(t, wSize.Width, aSize.Width)
+	assert.Greater(t, wSize.Height, aSize.Height)
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
@@ -64,14 +64,14 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	render := Renderer(slider).(*sliderRenderer)
 
 	wSize := render.slider.Size()
-	rSize := render.rail.Size()
-	fSize := render.fill.Size()
+	tSize := render.track.Size()
+	aSize := render.active.Size()
 
 	assert.Greater(t, wSize.Height, wSize.Width)
 
-	assert.Equal(t, wSize.Height, rSize.Height)
-	assert.Greater(t, wSize.Width, rSize.Width)
+	assert.Equal(t, wSize.Height, tSize.Height)
+	assert.Greater(t, wSize.Width, tSize.Width)
 
-	assert.Greater(t, wSize.Height, fSize.Height)
-	assert.Greater(t, wSize.Width, fSize.Width)
+	assert.Greater(t, wSize.Height, aSize.Height)
+	assert.Greater(t, wSize.Width, aSize.Width)
 }
