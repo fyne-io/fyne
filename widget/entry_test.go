@@ -366,7 +366,7 @@ func TestEntry_Tapped_AfterRow(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 }
 
-func TestEntry_TappedSecondary(t *testing.T) {
+func TestEntry_PasteFromClipboard(t *testing.T) {
 	entry := NewEntry()
 
 	w := test.NewApp().NewWindow("")
@@ -380,7 +380,6 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	test.Tap(entry)
 	assert.True(t, entry.Focused())
 
-	entry.TappedSecondary(nil)
 	entry.pasteFromClipboard(clipboard)
 
 	assert.Equal(t, entry.Text, testContent)
