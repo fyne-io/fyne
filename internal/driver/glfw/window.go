@@ -432,10 +432,8 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 		return
 	}
 
-	go func() { // these functions will capture the main thread, avoid deadlock with goroutine
-		w.canvas.SetScale(newScale)
-		w.RescaleContext()
-	}()
+	w.canvas.setScaleValues(newScale)
+	w.rescaleOnMain()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -1013,12 +1011,15 @@ func (w *window) RunWithContext(f func()) {
 
 func (w *window) RescaleContext() {
 	runOnMain(func() {
-		w.fitContent()
-
-		size := w.canvas.size.Union(w.canvas.MinSize())
-		newWidth, newHeight := w.screenSize(size)
-		w.viewport.SetSize(newWidth, newHeight)
+		w.rescaleOnMain()
 	})
+}
+
+func (w *window) rescaleOnMain() {
+	w.fitContent()
+	size := w.canvas.size.Union(w.canvas.MinSize())
+	newWidth, newHeight := w.screenSize(size)
+	w.viewport.SetSize(newWidth, newHeight)
 }
 
 // Use this method to queue up a callback that handles an event. This ensures
