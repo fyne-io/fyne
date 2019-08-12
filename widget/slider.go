@@ -15,7 +15,12 @@ const (
 	minLongSide       = 150
 )
 
-var _ fyne.Draggable = (*Slider)(nil)
+var (
+	_ fyne.Draggable = (*Slider)(nil)
+
+	activeTrackColor color.Color
+	trackColor       color.Color
+)
 
 // Slider if a widget that can slide between two fixed values.
 type Slider struct {
@@ -25,17 +30,9 @@ type Slider struct {
 	Min   float64
 	Max   float64
 
-	opts SliderOptions
-}
-
-// SliderOptions are a set of optional features to slider.
-// Vertical  - if the slider should be vertical
-// Precision - how many decimal places are relevant
-// Drag      - callback slot for user defined behavior
-type SliderOptions struct {
 	Vertical  bool
 	Precision uint8
-	Drag      func()
+	OnChanged func()
 }
 
 // Resize sets a new size for a widget.
@@ -94,7 +91,7 @@ func (s *Slider) wasSliderEvent(e *fyne.PointEvent) (ok bool, pos, max int) {
 	x := e.Position.X
 	y := e.Position.Y
 
-	if s.opts.Vertical {
+	if s.Vertical {
 		if x > (tp.X-pad) && x < (tp.X+ts.Width+pad) {
 			// if the cursor was inside the slider area
 			return true, y, render.track.Size().Height
@@ -113,26 +110,26 @@ func (s *Slider) fireTrigger(pos, max int) {
 	s.updateValue(float64(pos) / float64(max))
 	Refresh(s)
 
-	if s.opts.Drag != nil {
-		s.opts.Drag()
+	if s.OnChanged != nil {
+		s.OnChanged()
 	}
 }
 
 func (s *Slider) updateValue(ratio float64) {
-	if s.opts.Vertical {
+	if s.Vertical {
 		ratio = 1 - ratio
 	}
 	v := s.Min + ratio*(s.Max-s.Min)
-	p := math.Pow(10, float64(s.opts.Precision))
+	p := math.Pow(10, float64(s.Precision))
 	s.Value = float64(int(v*p)) / p
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
-	track := canvas.NewRectangle(theme.DisabledButtonColor())
-	active := canvas.NewRectangle(theme.ButtonColor())
+	track := canvas.NewRectangle(trackColor)
+	active := canvas.NewRectangle(activeTrackColor)
 	thumb := &canvas.Circle{
-		FillColor:   theme.ButtonColor(),
+		FillColor:   activeTrackColor,
 		StrokeWidth: 0}
 
 	objects := []fyne.CanvasObject{track, active, thumb}
@@ -151,8 +148,9 @@ type sliderRenderer struct {
 
 // ApplyTheme is called when the Slider may need to update its look
 func (s *sliderRenderer) ApplyTheme() {
-	s.track.FillColor = theme.DisabledButtonColor()
-	s.thumb.FillColor = theme.ButtonColor()
+	s.track.FillColor = trackColor
+	s.thumb.FillColor = activeTrackColor
+	s.active.FillColor = activeTrackColor
 	s.Refresh()
 }
 
@@ -171,7 +169,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	var trackPos, activePos, thumbPos fyne.Position
 	var trackSize, activeSize fyne.Size
 
-	if s.slider.opts.Vertical {
+	if s.slider.Vertical {
 		trackPos = fyne.NewPos(size.Width/2, 0)
 		activePos = fyne.NewPos(trackPos.X, activeOffset)
 
@@ -202,7 +200,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 // MinSize calculates the minimum size of a slider widget
 func (s *sliderRenderer) MinSize() fyne.Size {
 	s1, s2 := minLongSide, theme.Padding()*standardScale
-	if s.slider.opts.Vertical {
+	if s.slider.Vertical {
 		return fyne.NewSize(s2, s1)
 	}
 	return fyne.NewSize(s1, s2)
@@ -223,7 +221,7 @@ func (s *sliderRenderer) moveSlide(diameter int) (int, int) {
 	w := s.slider
 	t := s.track.Size()
 	ratio := (w.Value - w.Min) / (w.Max - w.Min)
-	if w.opts.Vertical {
+	if w.Vertical {
 		y := float64(t.Height) - (ratio * float64(t.Height))
 		return int(y), int(y) - int((1-ratio)*float64(diameter))
 	}
@@ -258,27 +256,18 @@ func checkMinMax(val, min, max float64) (float64, float64) {
 
 // NewSlider returns a basic horizontal slider with
 // a default precision of zero.
-func NewSlider(value, min, max float64) *Slider {
+func NewSlider(value, min, max float64, precision uint8) *Slider {
 	// sanitize values
 	min, max = checkMinMax(value, min, max)
+	precision = clampPrecision(precision)
+
+	trackColor = theme.ButtonColor()
+	activeTrackColor = theme.TextColor()
+
 	slider := &Slider{
 		baseWidget{},
 		value, min, max,
-		SliderOptions{false, 0, nil},
-	}
-	Renderer(slider).Layout(slider.MinSize())
-	return slider
-}
-
-// NewSliderWithOptions returns a slider with the specified options.
-// Options include setting the slider layout to vertical, up to 12
-// decimal places of precision, and a callback function to allow custom
-// behavior when the slider is dragged.
-func NewSliderWithOptions(value, min, max float64, opts SliderOptions) *Slider {
-	// sanitize values
-	min, max = checkMinMax(value, min, max)
-	opts.Precision = clampPrecision(opts.Precision)
-	slider := &Slider{baseWidget{}, value, min, max, opts}
+		false, precision, nil}
 	Renderer(slider).Layout(slider.MinSize())
 	return slider
 }
