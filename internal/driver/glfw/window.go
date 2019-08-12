@@ -374,7 +374,7 @@ func (w *window) Content() fyne.CanvasObject {
 }
 
 func (w *window) resize(canvasSize fyne.Size) {
-	if !w.fullScreen {
+	if !w.fullScreen && !w.fixedSize {
 		w.width = scaleInt(w.canvas, canvasSize.Width)
 		w.height = scaleInt(w.canvas, canvasSize.Height)
 	}
