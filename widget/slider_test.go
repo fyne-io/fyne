@@ -8,7 +8,7 @@ import (
 )
 
 func TestSlider_MinMax(t *testing.T) {
-	slider := NewSlider(5, 0, 10)
+	slider := NewSlider(5, 0, 10, 0)
 
 	assert.Equal(t, 0.0, slider.Min)
 	assert.Equal(t, 10.0, slider.Max)
@@ -16,7 +16,7 @@ func TestSlider_MinMax(t *testing.T) {
 
 	assert.Greater(t, slider.Max, slider.Min)
 
-	slider = NewSlider(5, 10, 0)
+	slider = NewSlider(5, 10, 0, 0)
 
 	assert.Greater(t, slider.Max, slider.Min)
 	assert.Greater(t, slider.Max, slider.Value)
@@ -27,16 +27,13 @@ func TestSlider_PrecisionClamp(t *testing.T) {
 	precision := uint8(255)
 	assert.Greater(t, precision, maxSliderDecimals)
 
-	slider := NewSliderWithOptions(5, 0, 10,
-		SliderOptions{
-			Precision: precision,
-		})
+	slider := NewSlider(5, 0, 10, precision)
 
-	assert.Equal(t, slider.opts.Precision, maxSliderDecimals)
+	assert.Equal(t, slider.Precision, maxSliderDecimals)
 }
 
 func TestSlider_HorizontalLayout(t *testing.T) {
-	slider := NewSlider(5, 0, 10)
+	slider := NewSlider(5, 0, 10, 0)
 	slider.Resize(fyne.NewSize(100, 10))
 
 	render := Renderer(slider).(*sliderRenderer)
@@ -55,10 +52,9 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
-	slider := NewSliderWithOptions(5, 0, 10,
-		SliderOptions{
-			Vertical: true,
-		})
+	slider := NewSlider(5, 0, 10, 0)
+	slider.Vertical = true
+
 	slider.Resize(fyne.NewSize(10, 100))
 
 	render := Renderer(slider).(*sliderRenderer)
