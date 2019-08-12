@@ -427,14 +427,15 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	w.xpos, w.ypos = x, y
 	scale := w.canvas.scale
 	newScale := w.detectScale()
-
 	if scale == newScale {
 		forceWindowRefresh(w)
 		return
 	}
 
-	w.canvas.SetScale(newScale)
-	w.RescaleContext()
+	go func() { // these functions will capture the main thread, avoid deadlock with goroutine
+		w.canvas.SetScale(newScale)
+		w.RescaleContext()
+	}()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
