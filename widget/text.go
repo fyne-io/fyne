@@ -116,9 +116,6 @@ func (t *textProvider) updateRowBounds() {
 // t.updateRowBounds()
 // t.refreshTextRenderer()
 func (t *textProvider) refreshTextRenderer() {
-	if t.presenter == nil {
-		return // not yet shown
-	}
 	obj := t.presenter.object()
 	if obj == nil {
 		obj = t

@@ -29,7 +29,6 @@ func TestLabel_Text(t *testing.T) {
 
 func TestLabel_SetText(t *testing.T) {
 	label := &Label{Text: "Test"}
-	label.SetText("Crashy")
 	Refresh(label)
 	label.SetText("New")
 

@@ -20,7 +20,7 @@ func (d *ConfirmDialog) SetConfirmText(label string) {
 }
 
 // NewConfirm creates a dialog over the specified window for user confirmation.
-// The title is used for the dialog window and message is the content.
+// The title is used for the ialog window and message is the content.
 // The callback is executed when the user decides. After creation you should call Show().
 func NewConfirm(title, message string, callback func(bool), parent fyne.Window) *ConfirmDialog {
 	d := newDialog(title, message, theme.QuestionIcon(), callback, parent)
