@@ -12,14 +12,11 @@ import (
 const (
 	maxSliderDecimals = uint8(12)
 	standardScale     = 6
-	minLongSide       = 150
+	minLongSide       = 50
 )
 
 var (
 	_ fyne.Draggable = (*Slider)(nil)
-
-	activeTrackColor color.Color
-	trackColor       color.Color
 )
 
 // Slider if a widget that can slide between two fixed values.
@@ -126,10 +123,10 @@ func (s *Slider) updateValue(ratio float64) {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
-	track := canvas.NewRectangle(trackColor)
-	active := canvas.NewRectangle(activeTrackColor)
+	track := canvas.NewRectangle(theme.ButtonColor())
+	active := canvas.NewRectangle(theme.TextColor())
 	thumb := &canvas.Circle{
-		FillColor:   activeTrackColor,
+		FillColor:   theme.TextColor(),
 		StrokeWidth: 0}
 
 	objects := []fyne.CanvasObject{track, active, thumb}
@@ -148,9 +145,9 @@ type sliderRenderer struct {
 
 // ApplyTheme is called when the Slider may need to update its look
 func (s *sliderRenderer) ApplyTheme() {
-	s.track.FillColor = trackColor
-	s.thumb.FillColor = activeTrackColor
-	s.active.FillColor = activeTrackColor
+	s.track.FillColor = theme.ButtonColor()
+	s.thumb.FillColor = theme.TextColor()
+	s.active.FillColor = theme.TextColor()
 	s.Refresh()
 }
 
@@ -260,10 +257,6 @@ func NewSlider(value, min, max float64, precision uint8) *Slider {
 	// sanitize values
 	min, max = checkMinMax(value, min, max)
 	precision = clampPrecision(precision)
-
-	trackColor = theme.ButtonColor()
-	activeTrackColor = theme.TextColor()
-
 	slider := &Slider{
 		baseWidget{},
 		value, min, max,
