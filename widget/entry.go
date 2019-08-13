@@ -481,7 +481,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 // TappedSecondary is called when right or alternative tap is invoked.
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
-func (e *Entry) TappedSecondary(_ *fyne.PointEvent) {
+func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
 	item := fyne.NewMenuItem("Paste", func() {
@@ -491,7 +491,7 @@ func (e *Entry) TappedSecondary(_ *fyne.PointEvent) {
 	popUp := NewPopUpMenu(fyne.NewMenu("", item), c)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
-	popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height))
+	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, e.Size().Height))
 
 	popUp.Move(popUpPos)
 }
