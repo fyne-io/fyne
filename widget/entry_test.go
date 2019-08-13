@@ -366,6 +366,38 @@ func TestEntry_Tapped_AfterRow(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 }
 
+func TestEntry_PasteFromClipboard(t *testing.T) {
+	entry := NewEntry()
+
+	w := test.NewApp().NewWindow("")
+	w.SetContent(entry)
+
+	testContent := "test"
+
+	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	clipboard.SetContent(testContent)
+
+	entry.pasteFromClipboard(clipboard)
+
+	assert.Equal(t, entry.Text, testContent)
+}
+
+func TestEntry_TappedSecondary(t *testing.T) {
+	entry := NewEntry()
+	test.TapSecondary(entry)
+
+	over := fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
+	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
+	assert.NotNil(t, over)
+
+	cont := over.(*PopUp).Content
+	assert.Equal(t, cont.Position().X, pos.X+theme.Padding())
+	assert.True(t, cont.Position().Y > pos.Y)
+
+	items := cont.(*Box).Children
+	assert.Equal(t, 1, len(items)) // Paste
+}
+
 func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
