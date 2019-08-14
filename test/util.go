@@ -15,14 +15,13 @@ func Tap(obj fyne.Tappable) {
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
-func TapSecondary(obj fyne.Tappable) {
+func TapSecondary(obj fyne.Tappable, ev *fyne.PointEvent) {
 	if focus, ok := obj.(fyne.Focusable); ok {
 		if focus != Canvas().Focused() {
 			Canvas().Focus(focus)
 		}
 	}
 
-	ev := &fyne.PointEvent{Position: fyne.NewPos(1, 1)}
 	obj.TappedSecondary(ev)
 }
 
