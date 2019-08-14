@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	maxSliderDecimals = uint8(12)
+	maxSliderDecimals = 12
 	standardScale     = 6
 	minLongSide       = 50
 )
@@ -28,7 +28,7 @@ type Slider struct {
 	Max   float64
 
 	Vertical  bool
-	Precision uint8
+	Precision int
 	OnChanged func()
 }
 
@@ -226,11 +226,13 @@ func (s *sliderRenderer) moveSlide(diameter int) (int, int) {
 	return int(x), int(x) - int(ratio*float64(diameter))
 }
 
-func clampPrecision(p uint8) uint8 {
-	if p > maxSliderDecimals {
-		return maxSliderDecimals
+func clampPrecision(p *int) {
+	if *p > maxSliderDecimals {
+		*p = maxSliderDecimals
 	}
-	return p
+	if *p < (-maxSliderDecimals) {
+		*p = (-maxSliderDecimals)
+	}
 }
 
 func checkMinMax(val, min, max float64) (float64, float64) {
@@ -251,12 +253,11 @@ func checkMinMax(val, min, max float64) (float64, float64) {
 	return min, max
 }
 
-// NewSlider returns a basic horizontal slider with
-// a default precision of zero.
-func NewSlider(value, min, max float64, precision uint8) *Slider {
+// NewSlider returns a basic horizontal slider
+func NewSlider(value, min, max float64, precision int) *Slider {
 	// sanitize values
 	min, max = checkMinMax(value, min, max)
-	precision = clampPrecision(precision)
+	clampPrecision(&precision)
 	slider := &Slider{
 		baseWidget{},
 		value, min, max,
