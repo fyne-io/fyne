@@ -1,80 +1,121 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSlider_MinMax(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 0)
+var shadowWidth = 5
 
-	assert.Equal(t, 0.0, slider.Min)
-	assert.Equal(t, 10.0, slider.Max)
-	assert.Equal(t, 5.0, slider.Value)
+func TestShadow_TopShadow(t *testing.T) {
+	s := newShadow(shadowTop, shadowWidth)
+	r := Renderer(s).(*shadowRenderer)
+	r.Layout(fyne.NewSize(100, 100))
 
-	assert.Greater(t, slider.Max, slider.Min)
-
-	slider = NewSlider(5, 10, 0, 0)
-
-	assert.Greater(t, slider.Max, slider.Min)
-	assert.Greater(t, slider.Max, slider.Value)
-	assert.Greater(t, slider.Value, slider.Min)
+	assert.Equal(t, []fyne.CanvasObject{r.t}, r.Objects())
+	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.t.Size())
+	assert.Equal(t, fyne.NewPos(0, -shadowWidth), r.t.Position())
+	assert.Equal(t, 0.0, r.t.Angle)
+	assert.Equal(t, color.Transparent, r.t.StartColor)
+	assert.Equal(t, theme.ShadowColor(), r.t.EndColor)
 }
 
-func TestSlider_PrecisionClamp(t *testing.T) {
-	precision := 255
-	assert.Greater(t, precision, maxSliderDecimals)
+func TestShadow_BottomShadow(t *testing.T) {
+	s := newShadow(shadowBottom, shadowWidth)
+	r := Renderer(s).(*shadowRenderer)
+	r.Layout(fyne.NewSize(100, 100))
 
-	slider := NewSlider(5, 0, 10, precision)
-
-	assert.Equal(t, slider.Precision, maxSliderDecimals)
-
-	precision = -255
-	assert.Greater(t, -maxSliderDecimals, precision)
-
-	slider = NewSlider(5, 0, 10, precision)
-
-	assert.Equal(t, slider.Precision, -maxSliderDecimals)
+	assert.Equal(t, []fyne.CanvasObject{r.b}, r.Objects())
+	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.b.Size())
+	assert.Equal(t, fyne.NewPos(0, 100), r.b.Position())
+	assert.Equal(t, 0.0, r.b.Angle)
+	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
+	assert.Equal(t, color.Transparent, r.b.EndColor)
 }
 
-func TestSlider_HorizontalLayout(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 0)
-	slider.Resize(fyne.NewSize(100, 10))
+func TestShadow_AroundShadow(t *testing.T) {
+	s := newShadow(shadowAround, shadowWidth)
+	r := Renderer(s).(*shadowRenderer)
+	r.Layout(fyne.NewSize(100, 100))
 
-	render := Renderer(slider).(*sliderRenderer)
+	assert.Equal(t, []fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l}, r.Objects())
 
-	wSize := render.slider.Size()
-	tSize := render.track.Size()
-	aSize := render.active.Size()
+	cornerSize := fyne.NewSize(shadowWidth, shadowWidth)
+	horizontalSize := fyne.NewSize(100, shadowWidth)
+	verticalSize := fyne.NewSize(shadowWidth, 100)
 
-	assert.Greater(t, wSize.Width, wSize.Height)
+	assert.Equal(t, cornerSize, r.tl.Size())
+	assert.Equal(t, fyne.NewPos(-shadowWidth, -shadowWidth), r.tl.Position())
+	assert.Equal(t, 0.5, r.tl.CenterOffsetX)
+	assert.Equal(t, 0.5, r.tl.CenterOffsetY)
+	assert.Equal(t, theme.ShadowColor(), r.tl.StartColor)
+	assert.Equal(t, color.Transparent, r.tl.EndColor)
 
-	assert.Equal(t, wSize.Width, tSize.Width)
-	assert.Greater(t, wSize.Height, tSize.Height)
+	assert.Equal(t, horizontalSize, r.t.Size())
+	assert.Equal(t, fyne.NewPos(0, -shadowWidth), r.t.Position())
+	assert.Equal(t, 0.0, r.t.Angle)
+	assert.Equal(t, color.Transparent, r.t.StartColor)
+	assert.Equal(t, theme.ShadowColor(), r.t.EndColor)
 
-	assert.Greater(t, wSize.Width, aSize.Width)
-	assert.Greater(t, wSize.Height, aSize.Height)
+	assert.Equal(t, cornerSize, r.tr.Size())
+	assert.Equal(t, fyne.NewPos(100, -shadowWidth), r.tr.Position())
+	assert.Equal(t, -0.5, r.tr.CenterOffsetX)
+	assert.Equal(t, 0.5, r.tr.CenterOffsetY)
+	assert.Equal(t, theme.ShadowColor(), r.tr.StartColor)
+	assert.Equal(t, color.Transparent, r.tr.EndColor)
+
+	assert.Equal(t, verticalSize, r.r.Size())
+	assert.Equal(t, fyne.NewPos(100, 0), r.r.Position())
+	assert.Equal(t, 270.0, r.r.Angle)
+	assert.Equal(t, theme.ShadowColor(), r.r.StartColor)
+	assert.Equal(t, color.Transparent, r.r.EndColor)
+
+	assert.Equal(t, cornerSize, r.br.Size())
+	assert.Equal(t, fyne.NewPos(100, 100), r.br.Position())
+	assert.Equal(t, -0.5, r.br.CenterOffsetX)
+	assert.Equal(t, -0.5, r.br.CenterOffsetY)
+	assert.Equal(t, theme.ShadowColor(), r.br.StartColor)
+	assert.Equal(t, color.Transparent, r.br.EndColor)
+
+	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.b.Size())
+	assert.Equal(t, fyne.NewPos(0, 100), r.b.Position())
+	assert.Equal(t, 0.0, r.b.Angle)
+	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
+	assert.Equal(t, color.Transparent, r.b.EndColor)
+
+	assert.Equal(t, cornerSize, r.bl.Size())
+	assert.Equal(t, fyne.NewPos(-shadowWidth, 100), r.bl.Position())
+	assert.Equal(t, 0.5, r.bl.CenterOffsetX)
+	assert.Equal(t, -0.5, r.bl.CenterOffsetY)
+	assert.Equal(t, theme.ShadowColor(), r.bl.StartColor)
+	assert.Equal(t, color.Transparent, r.bl.EndColor)
+
+	assert.Equal(t, verticalSize, r.l.Size())
+	assert.Equal(t, fyne.NewPos(-shadowWidth, 0), r.l.Position())
+	assert.Equal(t, 270.0, r.l.Angle)
+	assert.Equal(t, color.Transparent, r.l.StartColor)
+	assert.Equal(t, theme.ShadowColor(), r.l.EndColor)
 }
 
-func TestSlider_VerticalLayout(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 0)
-	slider.Vertical = true
+func TestShadow_ApplyTheme(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	s := newShadow(shadowAround, shadowWidth)
+	r := Renderer(s).(*shadowRenderer)
+	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
 
-	slider.Resize(fyne.NewSize(10, 100))
+	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	r.ApplyTheme()
+	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
+}
 
-	render := Renderer(slider).(*sliderRenderer)
+func TestShadow_BackgroundColor(t *testing.T) {
+	assert.Equal(t, color.Transparent, Renderer(newShadow(shadowAround, theme.Padding())).BackgroundColor())
+}
 
-	wSize := render.slider.Size()
-	tSize := render.track.Size()
-	aSize := render.active.Size()
-
-	assert.Greater(t, wSize.Height, wSize.Width)
-
-	assert.Equal(t, wSize.Height, tSize.Height)
-	assert.Greater(t, wSize.Width, tSize.Width)
-
-	assert.Greater(t, wSize.Height, aSize.Height)
-	assert.Greater(t, wSize.Width, aSize.Width)
+func TestShadow_MinSize(t *testing.T) {
+	assert.Equal(t, fyne.NewSize(0, 0), newShadow(shadowAround, theme.Padding()).MinSize())
 }
