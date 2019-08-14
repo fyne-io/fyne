@@ -485,7 +485,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	if e.ReadOnly {
 		return
 	}
-	
+
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
 	item := fyne.NewMenuItem("Paste", func() {

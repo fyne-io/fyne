@@ -384,7 +384,8 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 
 func TestEntry_TappedSecondary(t *testing.T) {
 	entry := NewEntry()
-	pointEv := test.TapSecondary(entry)
+	pointEv := &fyne.PointEvent{Position: fyne.NewPos(1, 1)}
+	test.TapSecondary(entry, pointEv)
 
 	over := fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
