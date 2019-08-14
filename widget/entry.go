@@ -482,6 +482,10 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
+	if e.ReadOnly {
+		return
+	}
+	
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
 	item := fyne.NewMenuItem("Paste", func() {
