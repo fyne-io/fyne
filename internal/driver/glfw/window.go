@@ -12,6 +12,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	util "fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/widget"
@@ -148,7 +149,7 @@ func (w *window) minSizeOnScreen() (int, int) {
 
 // screenSize computes the actual output size of the given content size in screen pixels
 func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
-	return scaleInt(w.canvas, canvasSize.Width), scaleInt(w.canvas, canvasSize.Height)
+	return util.ScaleInt(w.canvas, canvasSize.Width), util.ScaleInt(w.canvas, canvasSize.Height)
 }
 
 func (w *window) RequestFocus() {
@@ -375,8 +376,8 @@ func (w *window) Content() fyne.CanvasObject {
 
 func (w *window) resize(canvasSize fyne.Size) {
 	if !w.fullScreen {
-		w.width = scaleInt(w.canvas, canvasSize.Width)
-		w.height = scaleInt(w.canvas, canvasSize.Height)
+		w.width = util.ScaleInt(w.canvas, canvasSize.Width)
+		w.height = util.ScaleInt(w.canvas, canvasSize.Height)
 	}
 
 	w.canvas.Resize(canvasSize)
@@ -441,7 +442,7 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 	if w.ignoreResize {
 		return
 	}
-	w.resize(fyne.NewSize(unscaleInt(w.canvas, width), unscaleInt(w.canvas, height)))
+	w.resize(fyne.NewSize(util.UnscaleInt(w.canvas, width), util.UnscaleInt(w.canvas, height)))
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
@@ -504,7 +505,7 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
-	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
+	w.mousePos = fyne.NewPos(util.UnscaleInt(w.canvas, int(xpos)), util.UnscaleInt(w.canvas, int(ypos)))
 
 	cursor := defaultCursor
 	obj, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {

@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/widget"
 )
 
@@ -95,7 +96,7 @@ func unscaleInt(c fyne.Canvas, v int) int {
 func NewPainter(c fyne.Canvas, ctx driver.WithContext, master bool) Painter {
 	p := &glPainter{canvas: c, context: ctx}
 	p.texScale = 1.0
-	go svgCacheMonitorTheme()
+	go painter.SvgCacheMonitorTheme()
 
 	if master {
 		glInit()

@@ -4,7 +4,6 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
 )
 
 // Declare conformity with CanvasObject interface
@@ -34,6 +33,6 @@ func NewText(text string, color color.Color) *Text {
 	return &Text{
 		Color:    color,
 		Text:     text,
-		TextSize: theme.TextSize(),
+		TextSize: fyne.CurrentApp().Settings().Theme().TextSize(),
 	}
 }

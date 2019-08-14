@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/widget"
 )
 
@@ -95,10 +96,7 @@ func (p *glPainter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.S
 		return
 	}
 
-	aspect := aspects[img.Resource]
-	if aspect == 0 {
-		aspect = aspects[img]
-	}
+	aspect := painter.GetAspect(img)
 	points, vao, vbo := p.rectCoords(img.Size(), pos, frame, img.FillMode, aspect, 0)
 	p.glDrawTexture(texture, points, float32(img.Alpha()))
 	p.freeCoords(vao, vbo)
