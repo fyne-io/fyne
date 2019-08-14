@@ -301,7 +301,7 @@ func (w *window) detectScale() float32 {
 	widthPx := monitor.GetVideoMode().Width
 
 	dpi := float32(widthPx) / (float32(widthMm) / 25.4)
-	w.canvas.detectedScale = float32(dpi)/144.0
+	w.canvas.detectedScale = float32(dpi) / 144.0
 	return w.canvas.detectedScale
 }
 
