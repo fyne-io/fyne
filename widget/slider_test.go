@@ -25,7 +25,7 @@ func TestSlider_MinMax(t *testing.T) {
 
 func TestSlider_Step(t *testing.T) {
 	// for testing with "go test -v ."
-	NewSlider(-1.5, -3, -2, -1)
+	NewSlider(-2.5, -3, -2, -1)
 }
 
 func TestSlider_HorizontalLayout(t *testing.T) {
