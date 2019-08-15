@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	maxSliderDecimals = 12
+	maxOffset         = 0.00000000001
 	standardScale     = 6
 	minLongSide       = 50
 )
@@ -26,9 +26,9 @@ type Slider struct {
 	Value float64
 	Min   float64
 	Max   float64
+	Step  float64
 
 	Vertical  bool
-	Precision int
 	OnChanged func()
 }
 
@@ -77,7 +77,9 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	}
 }
 
-func (s *Slider) wasSliderEvent(e *fyne.PointEvent) (ok bool, pos, max int) {
+func (s *Slider) wasSliderEvent(e *fyne.PointEvent) (
+	ok bool, pos, max int) {
+
 	render := Renderer(s).(*sliderRenderer)
 
 	tp := render.thumb.Position()
@@ -117,11 +119,20 @@ func (s *Slider) updateValue(ratio float64) {
 		ratio = 1 - ratio
 	}
 	v := s.Min + ratio*(s.Max-s.Min)
-	p := math.Pow(10, float64(s.Precision))
-	s.Value = float64(int(v*p)) / p
+
+	i := -(math.Log10(s.Step))
+	p := math.Pow(10, i)
+
+	// hack to deal with asymptotic effect for decimal increments
+	if s.Step < 1 && math.Abs(v) > (s.Max-maxOffset) {
+		s.Value = float64(int(math.Ceil(v*p)) / int(p))
+	} else {
+		s.Value = float64(int(v*p)) / p
+	}
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
+// CreateRenderer is a private method to Fyne which links
+// this widget to its renderer
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	track := canvas.NewRectangle(theme.ButtonColor())
 	active := canvas.NewRectangle(theme.TextColor())
@@ -173,7 +184,8 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 		trackSize = fyne.NewSize(padLen, size.Height)
 		activeSize = fyne.NewSize(padLen, trackSize.Height-activeOffset)
 
-		thumbPos = fyne.NewPos(trackPos.X-(sideLen-trackSize.Width)/2, thumbOffset)
+		thumbPos = fyne.NewPos(
+			trackPos.X-(sideLen-trackSize.Width)/2, thumbOffset)
 	} else {
 		trackPos = fyne.NewPos(0, size.Height/2)
 		activePos = trackPos
@@ -181,7 +193,8 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 		trackSize = fyne.NewSize(size.Width, padLen)
 		activeSize = fyne.NewSize(activeOffset, padLen)
 
-		thumbPos = fyne.NewPos(thumbOffset, trackPos.Y-(sideLen-trackSize.Height)/2)
+		thumbPos = fyne.NewPos(
+			thumbOffset, trackPos.Y-(sideLen-trackSize.Height)/2)
 	}
 
 	s.track.Move(trackPos)
@@ -226,42 +239,52 @@ func (s *sliderRenderer) moveSlide(diameter int) (int, int) {
 	return int(x), int(x) - int(ratio*float64(diameter))
 }
 
-func clampPrecision(p *int) {
-	if *p > maxSliderDecimals {
-		*p = maxSliderDecimals
+func checkStep(s, max float64) {
+	// make sure there is a positive step and it is less than
+	// the maximum value
+	if s <= 0 {
+		fyne.LogError("Step is less than or equal to zero.", nil)
 	}
-	if *p < (-maxSliderDecimals) {
-		*p = (-maxSliderDecimals)
+	if s > max {
+		fyne.LogError("Step is greater than maximum value.", nil)
 	}
 }
 
 func checkMinMax(val, min, max float64) (float64, float64) {
 	// sort the values to ensure correct order
 	if val < min {
+		fyne.LogError("Value is less minimum value.", nil)
 		min = val
 	}
 	if val > max {
+		fyne.LogError("Value is greater than maximum value.", nil)
 		max = val
 	}
 	if min == max {
+		fyne.LogError("Minimum value equals maximum value.", nil)
 		min--
 		max++
 	}
 	if min > max {
+		fyne.LogError("Minimum value is greater than maximum value.", nil)
 		return max, min
 	}
 	return min, max
 }
 
-// NewSlider returns a basic horizontal slider
-func NewSlider(value, min, max float64, precision int) *Slider {
+// NewSlider returns a basic slider.
+// value - the initial slider value
+// min   - the minimum value in the range
+// max   - the maximum value in the range
+// step  - the incremental step count (needs to be positive and < max)
+func NewSlider(value, min, max, step float64) *Slider {
 	// sanitize values
 	min, max = checkMinMax(value, min, max)
-	clampPrecision(&precision)
+	checkStep(step, max)
 	slider := &Slider{
 		baseWidget{},
-		value, min, max,
-		false, precision, nil}
+		value, min, max, step,
+		false, nil}
 	Renderer(slider).Layout(slider.MinSize())
 	return slider
 }
