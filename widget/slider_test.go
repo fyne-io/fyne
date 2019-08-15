@@ -1,4 +1,4 @@
-ppackage widget
+package widget
 
 import (
 	"testing"
