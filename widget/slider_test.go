@@ -1,4 +1,4 @@
-package widget
+ppackage widget
 
 import (
 	"testing"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestSlider_MinMax(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 0)
+	slider := NewSlider(5, 0, 10, 1)
 
 	assert.Equal(t, 0.0, slider.Min)
 	assert.Equal(t, 10.0, slider.Max)
@@ -16,31 +16,20 @@ func TestSlider_MinMax(t *testing.T) {
 
 	assert.Greater(t, slider.Max, slider.Min)
 
-	slider = NewSlider(5, 10, 0, 0)
+	slider = NewSlider(5, 10, 0, 1)
 
 	assert.Greater(t, slider.Max, slider.Min)
 	assert.Greater(t, slider.Max, slider.Value)
 	assert.Greater(t, slider.Value, slider.Min)
 }
 
-func TestSlider_PrecisionClamp(t *testing.T) {
-	precision := 255
-	assert.Greater(t, precision, maxSliderDecimals)
-
-	slider := NewSlider(5, 0, 10, precision)
-
-	assert.Equal(t, slider.Precision, maxSliderDecimals)
-
-	precision = -255
-	assert.Greater(t, -maxSliderDecimals, precision)
-
-	slider = NewSlider(5, 0, 10, precision)
-
-	assert.Equal(t, slider.Precision, -maxSliderDecimals)
+func TestSlider_Step(t *testing.T) {
+	// for testing with "go test -v ."
+	NewSlider(-1.5, -3, -2, -1)
 }
 
 func TestSlider_HorizontalLayout(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 0)
+	slider := NewSlider(5, 0, 10, 1)
 	slider.Resize(fyne.NewSize(100, 10))
 
 	render := Renderer(slider).(*sliderRenderer)
@@ -59,7 +48,7 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 0)
+	slider := NewSlider(5, 0, 10, 1)
 	slider.Vertical = true
 
 	slider.Resize(fyne.NewSize(10, 100))
