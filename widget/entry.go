@@ -217,6 +217,12 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (e *entryRenderer) Destroy() {
+	if e.entry.popUp != nil {
+		c := fyne.CurrentApp().Driver().CanvasForObject(e.entry)
+		c.SetOverlay(nil)
+		Renderer(e.entry.popUp).Destroy()
+		e.entry.popUp = nil
+	}
 }
 
 // Declare conformity with interfaces
@@ -252,6 +258,9 @@ type Entry struct {
 
 	// selecting indicates whether the cursor has moved since it was at the selection start location
 	selecting bool
+
+	// popUp for the right click paste feature.
+	popUp *PopUp
 	// TODO: Add OnSelectChanged
 }
 
@@ -287,6 +296,9 @@ func (e *Entry) Show() {
 func (e *Entry) Hide() {
 	if e.focused {
 		fyne.CurrentApp().Driver().CanvasForObject(e).Focus(nil)
+	}
+	if e.popUp != nil {
+		e.popUp.Hide()
 	}
 	e.hide(e)
 }
@@ -425,6 +437,12 @@ func (e *Entry) FocusGained() {
 
 // FocusLost is called when the Entry has had focus removed.
 func (e *Entry) FocusLost() {
+	if e.popUp != nil {
+		if e.popUp.Hovered() {
+			return
+		}
+		e.popUp.Hide()
+	}
 	e.focused = false
 
 	Refresh(e)
@@ -492,12 +510,12 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.pasteFromClipboard(clipboard)
 	})
-	popUp := NewPopUpMenu(fyne.NewMenu("", item), c)
+	e.popUp = NewPopUpMenu(fyne.NewMenu("", item), c)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, e.Size().Height))
 
-	popUp.Move(popUpPos)
+	e.popUp.Move(popUpPos)
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
@@ -639,6 +657,9 @@ func (e *Entry) TypedRune(r rune) {
 	if e.ReadOnly {
 		return
 	}
+	if e.popUp != nil {
+		e.popUp.Hide()
+	}
 	provider := e.textProvider()
 
 	// if we've typed a character and we're selecting then replace the selection with the character
@@ -764,6 +785,9 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.ReadOnly {
 		return
+	}
+	if e.popUp != nil {
+		e.popUp.Hide()
 	}
 
 	provider := e.textProvider()

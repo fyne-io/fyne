@@ -399,6 +399,36 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	assert.Equal(t, 1, len(items)) // Paste
 }
 
+func TestEntry_PopUp(t *testing.T) {
+	entry := NewEntry()
+	pointEv := &fyne.PointEvent{Position: fyne.NewPos(1, 1)}
+
+	// entry stays focused if popUp hovered
+	test.TapSecondary(entry, pointEv)
+	entry.popUp.MouseOut()
+	entry.FocusLost()
+	assert.True(t, entry.Focused())
+	assert.False(t, entry.popUp.Hidden)
+
+	entry = NewEntry()
+	// entry loses the focus if popUp is not hovered
+	test.TapSecondary(entry, pointEv)
+	entry.popUp.MouseIn(nil)
+	entry.FocusLost()
+	assert.False(t, entry.Focused())
+	assert.True(t, entry.popUp.Hidden)
+
+	entry = NewEntry()
+	test.TapSecondary(entry, pointEv)
+	entry.TypedRune(' ')
+	assert.True(t, entry.popUp.Hidden)
+
+	entry = NewEntry()
+	test.TapSecondary(entry, pointEv)
+	entry.TypedKey(&fyne.KeyEvent{})
+	assert.True(t, entry.popUp.Hidden)
+}
+
 func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
