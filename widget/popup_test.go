@@ -3,6 +3,8 @@ package widget
 import (
 	"testing"
 
+	"fyne.io/fyne/driver/desktop"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -110,4 +112,15 @@ func TestModalPopUp_TappedSecondary(t *testing.T) {
 	test.TapSecondary(pop)
 	assert.True(t, pop.Visible())
 	assert.Equal(t, pop, test.Canvas().Overlay())
+}
+
+func TestPopUp_Hovered(t *testing.T) {
+	c := test.NewCanvas()
+	popUp := NewPopUp(NewLabel("Test"), c)
+
+	popUp.MouseIn(&desktop.MouseEvent{})
+	assert.False(t, popUp.Hovered())
+
+	popUp.MouseOut()
+	assert.True(t, popUp.Hovered())
 }

@@ -2,9 +2,11 @@ package widget
 
 import (
 	"image/color"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -19,6 +21,9 @@ type PopUp struct {
 	Canvas  fyne.Canvas
 
 	modal bool
+
+	sync.RWMutex
+	hovered bool
 }
 
 // Hide this widget, if it was previously visible
@@ -87,6 +92,34 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 	objects := []fyne.CanvasObject{shadow, bg, p.Content}
 	return &popUpRenderer{popUp: p, shadow: shadow, bg: bg, objects: objects}
+}
+
+// MouseIn is called when a desktop pointer enters the widget.
+func (p *PopUp) MouseIn(_ *desktop.MouseEvent) {
+	p.Lock()
+	p.hovered = false
+	p.Unlock()
+
+	Refresh(p)
+}
+
+// MouseOut is called when a desktop pointer exits the widget.
+func (p *PopUp) MouseOut() {
+	p.Lock()
+	p.hovered = true
+	p.Unlock()
+
+	Refresh(p)
+}
+
+// MouseMoved is called when a desktop pointer hovers over the widget.
+func (p *PopUp) MouseMoved(_ *desktop.MouseEvent) {}
+
+// Hovered returns whether or not this PopUp is hovered.
+func (p *PopUp) Hovered() bool {
+	p.RLock()
+	defer p.RUnlock()
+	return p.hovered
 }
 
 // NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
