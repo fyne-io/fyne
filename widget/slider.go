@@ -10,9 +10,8 @@ import (
 )
 
 const (
-	maxOffset         = 0.00000000001
-	standardScale     = 6
-	minLongSide       = 50
+	standardScale = 6
+	minLongSide   = 50
 )
 
 var (
@@ -124,7 +123,7 @@ func (s *Slider) updateValue(ratio float64) {
 	p := math.Pow(10, i)
 
 	// hack to deal with asymptotic effect for decimal increments
-	if s.Step < 1 && math.Abs(v) > (s.Max-maxOffset) {
+	if s.Step < 1 && math.Abs(v) == math.Abs(s.Max) {
 		s.Value = float64(int(math.Ceil(v*p)) / int(p))
 	} else {
 		s.Value = float64(int(v*p)) / p
@@ -239,14 +238,14 @@ func (s *sliderRenderer) moveSlide(diameter int) (int, int) {
 	return int(x), int(x) - int(ratio*float64(diameter))
 }
 
-func checkStep(s, max float64) {
+func checkStep(s, max, min float64) {
 	// make sure there is a positive step and it is less than
 	// the maximum value
 	if s <= 0 {
 		fyne.LogError("Step is less than or equal to zero.", nil)
 	}
-	if s > max {
-		fyne.LogError("Step is greater than maximum value.", nil)
+	if s*s >= (max-min)*(max-min) {
+		fyne.LogError("Step is greater than or equal to range.", nil)
 	}
 }
 
@@ -280,7 +279,7 @@ func checkMinMax(val, min, max float64) (float64, float64) {
 func NewSlider(value, min, max, step float64) *Slider {
 	// sanitize values
 	min, max = checkMinMax(value, min, max)
-	checkStep(step, max)
+	checkStep(step, max, min)
 	slider := &Slider{
 		baseWidget{},
 		value, min, max, step,
