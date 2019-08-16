@@ -70,9 +70,6 @@ func (c *Container) Show() {
 	}
 
 	c.Hidden = false
-	for _, child := range c.Objects {
-		child.Show()
-	}
 }
 
 // Hide sets this container, and all its children, to be not visible.
@@ -82,9 +79,6 @@ func (c *Container) Hide() {
 	}
 
 	c.Hidden = true
-	for _, child := range c.Objects {
-		child.Hide()
-	}
 }
 
 // AddObject adds another CanvasObject to the set this Container holds.
