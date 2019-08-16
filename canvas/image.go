@@ -66,6 +66,21 @@ func NewImageFromResource(res fyne.Resource) *Image {
 	}
 }
 
+// NewImageFromURL creates a new image by downloading it from the specified URL.
+// Images returned from this method will scale to fit the canvas object.
+// The method for scaling can be set using the Fill field.
+func NewImageFromURL(urlStr string) *Image {
+	res, err := fyne.LoadResourceFromURL(urlStr)
+	if err != nil {
+		fyne.LogError("Error loading image from URL", err)
+		return nil
+	}
+
+	return &Image{
+		Resource: res,
+	}
+}
+
 // NewImageFromImage returns a new Image instance that is rendered from the Go
 // image.Image passed in.
 // Images returned from this method will scale to fit the canvas object.
