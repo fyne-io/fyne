@@ -68,11 +68,8 @@ func (p *PopUp) Tapped(_ *fyne.PointEvent) {
 	}
 }
 
-// TappedSecondary is called when the user right/alt taps the background - if not modal then dismiss this widget
+// TappedSecondary is called when the user right/alt taps the background - ignore
 func (p *PopUp) TappedSecondary(_ *fyne.PointEvent) {
-	if !p.modal {
-		p.Hide()
-	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
