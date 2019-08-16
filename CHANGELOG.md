@@ -3,7 +3,27 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 1.1
+## 1.1.1 - 17 August 2019
+
+### Added
+
+* Add support for custom Windows manifest files in fyne package
+
+### Changed
+
+* Don't propagate show/hide in the model - allowing children of tabs to remain hidden
+* Disable cut/copy for password fields
+* Correctly calculate grid layout minsize as width changes
+* Select text at end of line when double tapping beyond width
+
+### Fixed
+
+* Hover effect of radio widget too low (#383)
+* Missing shadow on Select widget
+* Incorrect rendering of subimages within Image object
+* Size calculation caches could be skipped causing degraded performance
+
+## 1.1 - 1 July 2019
 
 ### Added
 
@@ -71,7 +91,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Various caches and race condition issues (#194, #217, #209).
 
 
-## 1.0 19 - March 2019
+## 1.0 - 19 March 2019
 
 The first major release of the Fyne toolkit delivers a stable release of the
 main functionality required to build basic GUI applications across multiple
