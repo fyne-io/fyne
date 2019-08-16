@@ -8,7 +8,7 @@ import (
 )
 
 func TestSlider_HorizontalLayout(t *testing.T) {
-	slider := NewSlider(Horizontal)
+	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
 
 	render := Renderer(slider).(*sliderRenderer)
@@ -27,7 +27,8 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
-	slider := NewSlider(Vertical)
+	slider := NewSlider(0, 1)
+	slider.Orientation = Vertical
 
 	slider.Resize(fyne.NewSize(10, 100))
 

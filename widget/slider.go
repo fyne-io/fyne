@@ -34,13 +34,13 @@ type Slider struct {
 }
 
 // NewSlider returns a basic slider.
-func NewSlider(orientation Orientation) *Slider {
+func NewSlider(min, max float64) *Slider {
 	slider := &Slider{
 		Value:       0,
-		Min:         0,
-		Max:         10,
+		Min:         min,
+		Max:         max,
 		Step:        1,
-		Orientation: orientation,
+		Orientation: Horizontal,
 	}
 	Renderer(slider).Layout(slider.MinSize())
 	return slider
