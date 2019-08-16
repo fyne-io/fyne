@@ -7,29 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSlider_MinMax(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 1)
-
-	assert.Equal(t, 0.0, slider.Min)
-	assert.Equal(t, 10.0, slider.Max)
-	assert.Equal(t, 5.0, slider.Value)
-
-	assert.Greater(t, slider.Max, slider.Min)
-
-	slider = NewSlider(5, 10, 0, 1)
-
-	assert.Greater(t, slider.Max, slider.Min)
-	assert.Greater(t, slider.Max, slider.Value)
-	assert.Greater(t, slider.Value, slider.Min)
-}
-
-func TestSlider_Step(t *testing.T) {
-	// for testing with "go test -v ."
-	NewSlider(-2.5, -3, -2, -1)
-}
-
 func TestSlider_HorizontalLayout(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 1)
+	slider := NewSlider(Horizontal)
 	slider.Resize(fyne.NewSize(100, 10))
 
 	render := Renderer(slider).(*sliderRenderer)
@@ -48,8 +27,7 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
-	slider := NewSlider(5, 0, 10, 1)
-	slider.Vertical = true
+	slider := NewSlider(Vertical)
 
 	slider.Resize(fyne.NewSize(10, 100))
 
