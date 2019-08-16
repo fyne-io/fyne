@@ -4,24 +4,35 @@ import "fyne.io/fyne"
 
 // Tap simulates a left mouse click on the specified object.
 func Tap(obj fyne.Tappable) {
+	TapAt(obj, fyne.NewPos(1, 1))
+}
+
+// TapAt simulates a left mouse click on the passed object at a specified place within it.
+func TapAt(obj fyne.Tappable, pos fyne.Position) {
 	if focus, ok := obj.(fyne.Focusable); ok {
 		if focus != Canvas().Focused() {
 			Canvas().Focus(focus)
 		}
 	}
 
-	ev := &fyne.PointEvent{Position: fyne.NewPos(1, 1)}
+	ev := &fyne.PointEvent{Position: pos}
 	obj.Tapped(ev)
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
-func TapSecondary(obj fyne.Tappable, ev *fyne.PointEvent) {
+func TapSecondary(obj fyne.Tappable) {
+	TapSecondaryAt(obj, fyne.NewPos(1, 1))
+}
+
+// TapSecondaryAt simulates a right mouse click on the passed object at a specified place within it.
+func TapSecondaryAt(obj fyne.Tappable, pos fyne.Position) {
 	if focus, ok := obj.(fyne.Focusable); ok {
 		if focus != Canvas().Focused() {
 			Canvas().Focus(focus)
 		}
 	}
 
+	ev := &fyne.PointEvent{Position: pos}
 	obj.TappedSecondary(ev)
 }
 

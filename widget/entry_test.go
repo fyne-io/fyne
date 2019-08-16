@@ -384,15 +384,15 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 
 func TestEntry_TappedSecondary(t *testing.T) {
 	entry := NewEntry()
-	pointEv := &fyne.PointEvent{Position: fyne.NewPos(1, 1)}
-	test.TapSecondary(entry, pointEv)
+	tapPos := fyne.NewPos(1, 1)
+	test.TapSecondaryAt(entry, tapPos)
 
 	over := fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 	assert.NotNil(t, over)
 
 	cont := over.(*PopUp).Content
-	assert.Equal(t, cont.Position().X, pos.X+theme.Padding()+pointEv.Position.X)
+	assert.Equal(t, cont.Position().X, pos.X+theme.Padding()+tapPos.X)
 	assert.True(t, cont.Position().Y > pos.Y)
 
 	items := cont.(*Box).Children
