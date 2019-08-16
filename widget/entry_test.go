@@ -387,6 +387,8 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	tapPos := fyne.NewPos(1, 1)
 	test.TapSecondaryAt(entry, tapPos)
 
+	assert.True(t, entry.Focused())
+
 	over := fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 	assert.NotNil(t, over)

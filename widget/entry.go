@@ -489,6 +489,9 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
 	item := fyne.NewMenuItem("Paste", func() {
+		// re-focus the entry
+		fyne.CurrentApp().Driver().CanvasForObject(e).Focus(e)
+
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.pasteFromClipboard(clipboard)
 	})
