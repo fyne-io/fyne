@@ -12,6 +12,7 @@ import (
 // Orientation controls the horizontal/vertical layout of a widget
 type Orientation int
 
+// Orientation constants to control widget layout
 const (
 	Horizontal Orientation = 0
 	Vertical   Orientation = 1
@@ -236,7 +237,7 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 		return fyne.NewSize(s1, s2)
 	}
 
-	return fyne.Size{0, 0}
+	return fyne.Size{Width: 0, Height: 0}
 }
 
 func (s *sliderRenderer) BackgroundColor() color.Color {
