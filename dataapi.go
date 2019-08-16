@@ -18,7 +18,7 @@ type DataItem interface {
 type DataMap interface {
   DataItem
   Get(string) DataItem
-  AddListener(func(DataMap))
+  //AddListener(func(DataMap))
 }
 
 // DataSource
