@@ -11,7 +11,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Changed
 
-* Only measure visible objects in layouts and minSize calculations
+* Only measure visible objects in layouts and minSize calculations (#343)
 * Don't propagate show/hide in the model - allowing children of tabs to remain hidden
 * Disable cut/copy for password fields
 * Correctly calculate grid layout minsize as width changes
@@ -19,6 +19,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
+* Window with fixed size changes size when un-minimized on Windows (#300)
 * Multiple Entry widgets could have selections simultaneously (#341)
 * Hover effect of radio widget too low (#383)
 * Missing shadow on Select widget
