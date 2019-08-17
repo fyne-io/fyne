@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
+	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -1012,7 +1013,11 @@ func (w *window) rescaleOnMain() {
 // user interaction events for a given window are processed in order.
 func (w *window) queueEvent(fn func()) {
 	w.eventWait.Add(1)
-	w.eventQueue <- fn
+	select {
+	case w.eventQueue <- fn:
+	default:
+		log.Println("Fyne Error: eventQueue full")
+	}
 }
 
 func (w *window) runEventQueue() {
@@ -1048,7 +1053,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret = &window{viewport: win, title: title, master: master}
 
 		// This channel will be closed when the window is closed.
-		ret.eventQueue = make(chan func(), 64)
+		ret.eventQueue = make(chan func(), 1024)
 		go ret.runEventQueue()
 
 		ret.canvas = newCanvas()
