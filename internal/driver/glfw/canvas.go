@@ -255,6 +255,7 @@ func (c *glCanvas) ensureMinSize() bool {
 				}
 			}
 		}
+
 		if obj == objToLayout {
 			switch cont := obj.(type) {
 			case *fyne.Container:
