@@ -66,7 +66,7 @@ func (w *testWindow) Padded() bool {
 }
 
 func (w *testWindow) SetPadded(padded bool) {
-	w.SetPadded(padded)
+	w.canvas.SetPadded(padded)
 }
 
 func (w *testWindow) Icon() fyne.Resource {
