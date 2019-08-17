@@ -11,6 +11,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Changed
 
+* Dismiss non-modal popovers on secondary tap
 * Only measure visible objects in layouts and minSize calculations (#343)
 * Don't propagate show/hide in the model - allowing children of tabs to remain hidden
 * Disable cut/copy for password fields
