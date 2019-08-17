@@ -13,7 +13,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	util "fyne.io/fyne/internal"
+	"fyne.io/fyne/internal"
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
 )
@@ -108,7 +108,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 }
 
 func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) {
-	pixSize := fyne.NewSize(util.UnscaleInt(c, pixX), util.UnscaleInt(c, pixY))
+	pixSize := fyne.NewSize(internal.UnscaleInt(c, pixX), internal.UnscaleInt(c, pixY))
 
 	if img.MinSize() != pixSize {
 		img.SetMinSize(pixSize)
