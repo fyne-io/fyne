@@ -226,21 +226,23 @@ func (c *glCanvas) ensureMinSize() bool {
 			return
 		}
 		minSize := obj.MinSize()
-		minSizeChanged := c.minSizes[obj] != minSize
-		if minSizeChanged {
-			c.minSizes[obj] = minSize
-			if parent != nil {
-				objToLayout = parent
-			} else {
-				windowNeedsMinSizeUpdate = true
-				size := obj.Size()
-				expectedSize := minSize.Union(size)
-				if expectedSize != size {
-					objToLayout = nil
-					obj.Resize(expectedSize)
-				}
+		if c.minSizes[obj] == minSize {
+			return
+		}
+
+		c.minSizes[obj] = minSize
+		if parent != nil {
+			objToLayout = parent
+		} else {
+			windowNeedsMinSizeUpdate = true
+			size := obj.Size()
+			expectedSize := minSize.Union(size)
+			if expectedSize != size {
+				objToLayout = nil
+				obj.Resize(expectedSize)
 			}
 		}
+
 		if obj == objToLayout {
 			switch cont := obj.(type) {
 			case *fyne.Container:
