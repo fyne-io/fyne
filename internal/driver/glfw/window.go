@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
-	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -1016,7 +1015,7 @@ func (w *window) queueEvent(fn func()) {
 	select {
 	case w.eventQueue <- fn:
 	default:
-		log.Println("Fyne Error: eventQueue full")
+		fyne.LogError("EventQueue full", nil)
 	}
 }
 
