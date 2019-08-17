@@ -82,12 +82,32 @@ func TestPopUp_Tapped(t *testing.T) {
 	assert.Nil(t, test.Canvas().Overlay())
 }
 
+func TestPopUp_TappedSecondary(t *testing.T) {
+	label := NewLabel("Hi")
+	pop := NewPopUp(label, test.Canvas())
+
+	assert.True(t, pop.Visible())
+	test.TapSecondary(pop)
+	assert.False(t, pop.Visible())
+	assert.Nil(t, test.Canvas().Overlay())
+}
+
 func TestModalPopUp_Tapped(t *testing.T) {
 	label := NewLabel("Hi")
 	pop := NewModalPopUp(label, test.Canvas())
 
 	assert.True(t, pop.Visible())
 	test.Tap(pop)
+	assert.True(t, pop.Visible())
+	assert.Equal(t, pop, test.Canvas().Overlay())
+}
+
+func TestModalPopUp_TappedSecondary(t *testing.T) {
+	label := NewLabel("Hi")
+	pop := NewModalPopUp(label, test.Canvas())
+
+	assert.True(t, pop.Visible())
+	test.TapSecondary(pop)
 	assert.True(t, pop.Visible())
 	assert.Equal(t, pop, test.Canvas().Overlay())
 }

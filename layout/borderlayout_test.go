@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBorderLayoutEmpty(t *testing.T) {
+func TestBorderLayout_Size_Empty(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 
 	obj := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
@@ -24,7 +24,7 @@ func TestBorderLayoutEmpty(t *testing.T) {
 	assert.Equal(t, obj.Size(), size)
 }
 
-func TestBorderLayoutTopBottom(t *testing.T) {
+func TestBorderLayout_Size_TopBottom(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 
 	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
@@ -45,7 +45,7 @@ func TestBorderLayoutTopBottom(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(0, obj1.Size().Height+theme.Padding()), obj3.Position())
 }
 
-func TestBorderLayoutLeftRight(t *testing.T) {
+func TestBorderLayout_Size_LeftRight(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 
 	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
@@ -66,7 +66,7 @@ func TestBorderLayoutLeftRight(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(obj1.Size().Width+theme.Padding(), 0), obj3.Position())
 }
 
-func TestBorderCenterLayoutMinSize(t *testing.T) {
+func TestBorderLayout_MinSize_Center(t *testing.T) {
 	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
@@ -76,7 +76,7 @@ func TestBorderCenterLayoutMinSize(t *testing.T) {
 	assert.Equal(t, minSize, layoutMin)
 }
 
-func TestBorderTopBottomLayoutMinSize(t *testing.T) {
+func TestBorderLayout_MinSize_TopBottom(t *testing.T) {
 	text1 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	text2 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	text3 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
@@ -88,7 +88,20 @@ func TestBorderTopBottomLayoutMinSize(t *testing.T) {
 	assert.Equal(t, minSize, layoutMin)
 }
 
-func TestBorderTopOnlyLayoutMinSize(t *testing.T) {
+func TestBorderLayout_MinSize_TopBottomHidden(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text1.Hide()
+	text2 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text2.Hide()
+	text3 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+
+	container := fyne.NewContainer(text1, text2, text3)
+	layoutMin := NewBorderLayout(text1, text2, nil, nil).MinSize(container.Objects)
+
+	assert.Equal(t, text1.MinSize(), layoutMin)
+}
+
+func TestBorderLayout_MinSize_TopOnly(t *testing.T) {
 	text1 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	minSize := fyne.NewSize(text1.MinSize().Width, text1.MinSize().Height+theme.Padding())
 
@@ -98,7 +111,7 @@ func TestBorderTopOnlyLayoutMinSize(t *testing.T) {
 	assert.Equal(t, minSize, layoutMin)
 }
 
-func TestBorderLeftRightLayoutMinSize(t *testing.T) {
+func TestBorderLayout_MinSize_LeftRight(t *testing.T) {
 	text1 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	text2 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	text3 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
@@ -110,7 +123,20 @@ func TestBorderLeftRightLayoutMinSize(t *testing.T) {
 	assert.Equal(t, minSize, layoutMin)
 }
 
-func TestBorderLeftOnlyLayoutMinSize(t *testing.T) {
+func TestBorderLayout_MinSize_LeftRightHidden(t *testing.T) {
+	text1 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text1.Hide()
+	text2 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text2.Hide()
+	text3 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+
+	container := fyne.NewContainer(text1, text2, text3)
+	layoutMin := NewBorderLayout(nil, nil, text1, text2).MinSize(container.Objects)
+
+	assert.Equal(t, text3.MinSize(), layoutMin)
+}
+
+func TestBorderLayout_MinSize_LeftOnly(t *testing.T) {
 	text1 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
 	minSize := fyne.NewSize(text1.MinSize().Width+theme.Padding(), text1.MinSize().Height)
 

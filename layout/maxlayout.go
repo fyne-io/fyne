@@ -22,6 +22,10 @@ func (m *maxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 func (m *maxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
 	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		minSize = minSize.Union(child.MinSize())
 	}
 

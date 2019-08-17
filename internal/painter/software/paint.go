@@ -38,7 +38,7 @@ func (*softwarePainter) Paint(c fyne.Canvas) image.Image {
 		return false
 	}
 
-	driver.WalkObjectTree(c.Content(), paint, nil)
+	driver.WalkVisibleObjectTree(c.Content(), paint, nil)
 	return base
 }
 

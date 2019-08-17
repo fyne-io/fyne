@@ -451,8 +451,53 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	e.updateMousePointer(ev, false)
 }
 
-// TappedSecondary is called when right or alternative tap is invoked - this is currently ignored.
-func (e *Entry) TappedSecondary(_ *fyne.PointEvent) {
+// pasteFromClipboard inserts text from the clipboard content,
+// starting from the cursor position.
+func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
+	if e.selecting {
+		e.eraseSelection()
+	}
+	text := clipboard.Content()
+	if !e.MultiLine {
+		// format clipboard content to be compatible with single line entry
+		text = strings.Replace(text, "\n", " ", -1)
+	}
+	provider := e.textProvider()
+	runes := []rune(text)
+	provider.insertAt(e.cursorTextPos(), runes)
+
+	newlines := strings.Count(text, "\n")
+	if newlines == 0 {
+		e.CursorColumn += len(runes)
+	} else {
+		e.CursorRow += newlines
+		lastNewline := strings.LastIndex(text, "\n")
+		e.CursorColumn = len(runes) - lastNewline - 1
+	}
+	e.updateText(provider.String())
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
+// TappedSecondary is called when right or alternative tap is invoked.
+//
+// Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
+func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
+	if e.ReadOnly {
+		return
+	}
+
+	c := fyne.CurrentApp().Driver().CanvasForObject(e)
+
+	item := fyne.NewMenuItem("Paste", func() {
+		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+		e.pasteFromClipboard(clipboard)
+	})
+	popUp := NewPopUpMenu(fyne.NewMenu("", item), c)
+
+	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
+	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, e.Size().Height))
+
+	popUp.Move(popUpPos)
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
@@ -922,6 +967,10 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
+		if e.Password {
+			return
+		}
+
 		cut := se.(*fyne.ShortcutCut)
 		text := e.selectedText()
 		e.eraseSelection()
@@ -929,35 +978,18 @@ func (e *Entry) registerShortcut() {
 		cut.Clipboard.SetContent(text)
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCopy{}, func(se fyne.Shortcut) {
+		if e.Password {
+			return
+		}
+
 		copy := se.(*fyne.ShortcutCopy)
 		text := e.selectedText()
 
 		copy.Clipboard.SetContent(text)
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutPaste{}, func(se fyne.Shortcut) {
-		if e.selecting {
-			e.eraseSelection()
-		}
 		paste := se.(*fyne.ShortcutPaste)
-		text := paste.Clipboard.Content()
-		if !e.MultiLine {
-			// format clipboard content to be compatible with single line entry
-			text = strings.Replace(text, "\n", " ", -1)
-		}
-		provider := e.textProvider()
-		runes := []rune(text)
-		provider.insertAt(e.cursorTextPos(), runes)
-
-		newlines := strings.Count(text, "\n")
-		if newlines == 0 {
-			e.CursorColumn += len(runes)
-		} else {
-			e.CursorRow += newlines
-			lastNewline := strings.LastIndex(text, "\n")
-			e.CursorColumn = len(runes) - lastNewline - 1
-		}
-		e.updateText(provider.String())
-		Renderer(e).(*entryRenderer).moveCursor()
+		e.pasteFromClipboard(paste.Clipboard)
 	})
 }
 

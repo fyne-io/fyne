@@ -156,14 +156,18 @@ func (c *glCanvas) Scale() float32 {
 }
 
 func (c *glCanvas) SetScale(scale float32) {
+	c.setScaleValue(scale)
+
+	c.context.RescaleContext()
+}
+
+func (c *glCanvas) setScaleValue(scale float32) {
 	if scale == fyne.SettingsScaleAuto {
 		c.scale = c.detectedScale
 	} else {
 		c.scale = scale
 	}
 	c.setDirty(true)
-
-	c.context.RescaleContext()
 }
 
 func (c *glCanvas) OnTypedRune() func(rune) {
@@ -232,6 +236,7 @@ func (c *glCanvas) ensureMinSize() bool {
 				}
 			}
 		}
+
 		if obj == objToLayout {
 			switch cont := obj.(type) {
 			case *fyne.Container:
@@ -259,25 +264,36 @@ func (c *glCanvas) paint(size fyne.Size) {
 	c.setDirty(false)
 	c.painter.Clear()
 
-	c.painter.Paint(c.content, c, size)
-	if c.menu != nil {
-		c.painter.Paint(c.menu, c, size)
+	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+		// TODO should this be somehow not scroll container specific?
+		if _, ok := obj.(*widget.ScrollContainer); ok {
+			c.painter.StartClipping(
+				fyne.NewPos(pos.X, c.Size().Height-pos.Y-obj.Size().Height),
+				obj.Size(),
+			)
+		}
+		c.painter.Paint(obj, pos, size)
+		return false
 	}
-	if c.overlay != nil {
-		c.painter.Paint(c.overlay, c, size)
+	afterPaint := func(obj, _ fyne.CanvasObject) {
+		if _, ok := obj.(*widget.ScrollContainer); ok {
+			c.painter.StopClipping()
+		}
 	}
+
+	c.walkTree(paint, afterPaint)
 }
 
 func (c *glCanvas) walkTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
-	driver.WalkObjectTree(c.content, beforeChildren, afterChildren)
+	driver.WalkVisibleObjectTree(c.content, beforeChildren, afterChildren)
 	if c.menu != nil {
-		driver.WalkObjectTree(c.menu, beforeChildren, afterChildren)
+		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
 	}
 	if c.overlay != nil {
-		driver.WalkObjectTree(c.overlay, beforeChildren, afterChildren)
+		driver.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
 	}
 }
 

@@ -163,8 +163,7 @@ func (w *window) RequestFocus() {
 
 func (w *window) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
-	scale := w.canvas.Scale()
-	w.width, w.height = int(float32(size.Width)*scale), int(float32(size.Height)*scale)
+	w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
 	runOnMain(func() {
 		w.ignoreResize = true
 		w.viewport.SetSize(w.width, w.height)
@@ -259,22 +258,6 @@ func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func scaleForDpi(xdpi int) float32 {
-	switch {
-	case xdpi > 1000:
-		// assume that this is a mistake and bail
-		return float32(1.0)
-	case xdpi > 192:
-		return float32(1.5)
-	case xdpi > 144:
-		return float32(1.35)
-	case xdpi > 120:
-		return float32(1.2)
-	default:
-		return float32(1.0)
-	}
-}
-
 func (w *window) getMonitorForWindow() *glfw.Monitor {
 	for _, monitor := range glfw.GetMonitors() {
 		x, y := monitor.GetPos()
@@ -319,7 +302,10 @@ func (w *window) detectScale() float32 {
 	widthPx := monitor.GetVideoMode().Width
 
 	dpi := float32(widthPx) / (float32(widthMm) / 25.4)
-	w.canvas.detectedScale = scaleForDpi(int(dpi))
+	if dpi > 1000 || dpi < 10 {
+		dpi = 96
+	}
+	w.canvas.detectedScale = float32(dpi) / 144.0
 	return w.canvas.detectedScale
 }
 
@@ -375,7 +361,7 @@ func (w *window) Content() fyne.CanvasObject {
 }
 
 func (w *window) resize(canvasSize fyne.Size) {
-	if !w.fullScreen {
+	if !w.fullScreen && !w.fixedSize {
 		w.width = internal.ScaleInt(w.canvas, canvasSize.Width)
 		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
 	}
@@ -404,7 +390,7 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
-	driver.WalkObjectTree(w.canvas.content, nil, func(obj, _ fyne.CanvasObject) {
+	driver.WalkCompleteObjectTree(w.canvas.content, nil, func(obj, _ fyne.CanvasObject) {
 		switch co := obj.(type) {
 		case fyne.Widget:
 			widget.DestroyRenderer(co)
@@ -428,14 +414,13 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	w.xpos, w.ypos = x, y
 	scale := w.canvas.scale
 	newScale := w.detectScale()
-
 	if scale == newScale {
 		forceWindowRefresh(w)
 		return
 	}
 
-	w.canvas.SetScale(newScale)
-	w.RescaleContext()
+	w.canvas.setScaleValue(newScale)
+	w.rescaleOnMain()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -491,13 +476,13 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	}
 
 	if canvas.overlay != nil {
-		driver.WalkObjectTree(canvas.overlay, findFunc, nil)
+		driver.WalkVisibleObjectTree(canvas.overlay, findFunc, nil)
 	} else {
 		if canvas.menu != nil {
-			driver.WalkObjectTree(canvas.menu, findFunc, nil)
+			driver.WalkVisibleObjectTree(canvas.menu, findFunc, nil)
 		}
 		if found == nil {
-			driver.WalkObjectTree(canvas.content, findFunc, nil)
+			driver.WalkVisibleObjectTree(canvas.content, findFunc, nil)
 		}
 	}
 
@@ -1013,19 +998,26 @@ func (w *window) RunWithContext(f func()) {
 
 func (w *window) RescaleContext() {
 	runOnMain(func() {
-		w.fitContent()
-
-		size := w.canvas.size.Union(w.canvas.MinSize())
-		newWidth, newHeight := w.screenSize(size)
-		w.viewport.SetSize(newWidth, newHeight)
+		w.rescaleOnMain()
 	})
+}
+
+func (w *window) rescaleOnMain() {
+	w.fitContent()
+	size := w.canvas.size.Union(w.canvas.MinSize())
+	newWidth, newHeight := w.screenSize(size)
+	w.viewport.SetSize(newWidth, newHeight)
 }
 
 // Use this method to queue up a callback that handles an event. This ensures
 // user interaction events for a given window are processed in order.
 func (w *window) queueEvent(fn func()) {
 	w.eventWait.Add(1)
-	w.eventQueue <- fn
+	select {
+	case w.eventQueue <- fn:
+	default:
+		fyne.LogError("EventQueue full", nil)
+	}
 }
 
 func (w *window) runEventQueue() {
@@ -1061,7 +1053,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret = &window{viewport: win, title: title, master: master}
 
 		// This channel will be closed when the window is closed.
-		ret.eventQueue = make(chan func(), 64)
+		ret.eventQueue = make(chan func(), 1024)
 		go ret.runEventQueue()
 
 		ret.canvas = newCanvas()
