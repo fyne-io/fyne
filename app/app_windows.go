@@ -5,7 +5,6 @@ package app
 import (
 	"net/url"
 	"os"
-	"path/filepath"
 )
 
 func (app *fyneApp) OpenURL(url *url.URL) error {
