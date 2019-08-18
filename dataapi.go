@@ -23,8 +23,8 @@ type DataItemFunc func(DataItem)
 // AddMapListener fires when the number of map elements change.
 type DataMap interface {
   Get(string) (DataItem,bool)
-  AddMapListener(DataMapFunc) ListenerHandle
-  DeleteMapListener(ListenerHandle)
+  AddListener(DataMapFunc) ListenerHandle
+  DeleteListener(ListenerHandle)
 }
 
 type DataMapFunc func(DataMap)
