@@ -288,13 +288,21 @@ func (c *glCanvas) walkTrees(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
-	driver.WalkVisibleObjectTree(c.content, beforeChildren, afterChildren)
+	c.walkTree(c.content, beforeChildren, afterChildren)
 	if c.menu != nil {
-		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
+		c.walkTree(c.menu, beforeChildren, afterChildren)
 	}
 	if c.overlay != nil {
-		driver.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
+		c.walkTree(c.overlay, beforeChildren, afterChildren)
 	}
+}
+
+func (c *glCanvas) walkTree(
+	obj fyne.CanvasObject,
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
+	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+) {
+	driver.WalkVisibleObjectTree(obj, beforeChildren, afterChildren)
 }
 
 func (c *glCanvas) setDirty(dirty bool) {
