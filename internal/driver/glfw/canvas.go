@@ -250,7 +250,7 @@ func (c *glCanvas) ensureMinSize() bool {
 			}
 		}
 	}
-	c.walkTree(nil, ensureMinSize)
+	c.walkTrees(nil, ensureMinSize)
 	if windowNeedsMinSizeUpdate && (c.size.Width < c.MinSize().Width || c.size.Height < c.MinSize().Height) {
 		c.Resize(c.Size().Union(c.MinSize()))
 	}
@@ -281,10 +281,10 @@ func (c *glCanvas) paint(size fyne.Size) {
 		}
 	}
 
-	c.walkTree(paint, afterPaint)
+	c.walkTrees(paint, afterPaint)
 }
 
-func (c *glCanvas) walkTree(
+func (c *glCanvas) walkTrees(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
