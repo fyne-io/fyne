@@ -2,6 +2,7 @@ package painter
 
 import (
 	"bytes"
+	"errors"
 	"image"
 	"image/draw"
 	_ "image/jpeg" // avoid users having to import when using image widget
@@ -46,7 +47,6 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 				icon, err := oksvg.ReadIconStream(file)
 				if err != nil {
 					fyne.LogError("SVG Load error:", err)
-
 					return nil
 				}
 				icon.SetTarget(0, 0, float64(width), float64(height))
@@ -63,7 +63,11 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 				scanner := rasterx.NewScannerGV(w, h, tex, tex.Bounds())
 				raster := rasterx.NewDasher(width, height, scanner)
 
-				icon.Draw(raster, 1)
+				err = drawSVGSafely(icon, raster)
+				if err != nil {
+					fyne.LogError("SVG Render error:", err)
+					return nil
+				}
 				svgCachePut(img.Resource, tex, width, height)
 			}
 
@@ -105,6 +109,18 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 	default:
 		return image.NewRGBA(image.Rect(0, 0, 1, 1))
 	}
+}
+
+func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("Crash when rendering SVG")
+		}
+	}()
+	icon.Draw(raster, 1)
+
+	return err
 }
 
 func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) {
