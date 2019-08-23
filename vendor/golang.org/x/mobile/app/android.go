@@ -40,6 +40,7 @@ EGLSurface surface;
 
 char* createEGLSurface(ANativeWindow* window);
 char* destroyEGLSurface();
+void terminate();
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 */
 import "C"
@@ -134,6 +135,7 @@ func onCreate(activity *C.ANativeActivity) {
 
 //export onDestroy
 func onDestroy(activity *C.ANativeActivity) {
+	activityDestroyed <- struct{}{}
 }
 
 //export onWindowFocusChanged
@@ -256,6 +258,7 @@ var (
 	windowRedrawNeeded = make(chan *C.ANativeWindow)
 	windowRedrawDone   = make(chan struct{})
 	windowConfigChange = make(chan windowConfig)
+	activityDestroyed  = make(chan struct{})
 )
 
 func init() {
@@ -279,6 +282,11 @@ func main(f func(App)) {
 }
 
 var mainUserFn func(App)
+
+var DisplayMetrics struct{
+	WidthPx int
+	HeightPx int
+}
 
 func mainUI(vm, jniEnv, ctx uintptr) error {
 	workAvailable := theApp.worker.WorkAvailable()
@@ -304,6 +312,8 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				if errStr := C.createEGLSurface(w); errStr != nil {
 					return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
 				}
+				DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
+				DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
 			}
 			theApp.sendLifecycle(lifecycle.StageFocused)
 			widthPx := int(C.ANativeWindow_getWidth(w))
@@ -325,6 +335,9 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			}
 			C.surface = nil
 			theApp.sendLifecycle(lifecycle.StageAlive)
+		case <-activityDestroyed:
+			C.terminate()
+			theApp.sendLifecycle(lifecycle.StageDead)
 		case <-workAvailable:
 			theApp.worker.DoWork()
 		case <-theApp.publish:

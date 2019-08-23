@@ -134,6 +134,7 @@ static const EGLint RGB_888[] = {
 
 EGLDisplay display = NULL;
 EGLSurface surface = NULL;
+EGLContext context = NULL;
 
 static char* initEGLDisplay() {
 	display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -147,7 +148,6 @@ char* createEGLSurface(ANativeWindow* window) {
 	char* err;
 	EGLint numConfigs, format;
 	EGLConfig config;
-	EGLContext context;
 
 	if (display == 0) {
 		if ((err = initEGLDisplay()) != NULL) {
@@ -172,8 +172,10 @@ char* createEGLSurface(ANativeWindow* window) {
 		return "EGL create surface failed";
 	}
 
-	const EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-	context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs);
+    if (context == NULL) {
+        const EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+        context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs);
+    }
 
 	if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
 		return "eglMakeCurrent failed";
@@ -186,6 +188,22 @@ char* destroyEGLSurface() {
 		return "EGL destroy surface failed";
 	}
 	return NULL;
+}
+
+void terminate() {
+    if(display != NULL){
+        eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
+        if (context != NULL) {
+            eglDestroyContext(display, context );
+        }
+        if (surface != NULL) {
+            eglDestroySurface(display, surface );
+        }
+        eglTerminate( display );
+    }
+    display = NULL;
+    context = NULL;
+    surface = NULL;
 }
 
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e) {

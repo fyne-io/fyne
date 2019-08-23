@@ -29,6 +29,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"golang.org/x/mobile/event/lifecycle"
 	"golang.org/x/mobile/event/paint"
@@ -52,9 +53,9 @@ func init() {
 }
 
 func main(f func(App)) {
-	if tid := uint64(C.threadID()); tid != initThreadID {
-		log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
-	}
+	//if tid := uint64(C.threadID()); tid != initThreadID {
+	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
+	//}
 
 	go func() {
 		f(theApp)
@@ -66,6 +67,17 @@ func main(f func(App)) {
 
 var pixelsPerPt float32
 var screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
+
+var DisplayMetrics struct{
+	WidthPx int
+	HeightPx int
+}
+
+//export setDisplayMetrics
+func setDisplayMetrics(width, height int, scale int) {
+	DisplayMetrics.WidthPx = width * scale
+	DisplayMetrics.HeightPx = height * scale
+}
 
 //export setScreen
 func setScreen(scale int) {
@@ -178,6 +190,24 @@ func lifecycleVisible() { theApp.sendLifecycle(lifecycle.StageVisible) }
 
 //export lifecycleFocused
 func lifecycleFocused() { theApp.sendLifecycle(lifecycle.StageFocused) }
+
+//export drawloop
+func drawloop() {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	for workAvailable := theApp.worker.WorkAvailable();;{
+		select {
+		case <-workAvailable:
+			theApp.worker.DoWork()
+		case <-theApp.publish:
+			theApp.publishResult <- PublishResult{}
+			return
+		case <-time.After(100 * time.Millisecond): // incase the method blocked!!
+			return
+		}
+	}
+}
 
 //export startloop
 func startloop(ctx C.GLintptr) {
