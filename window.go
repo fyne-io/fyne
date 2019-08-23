@@ -31,6 +31,10 @@ type Window interface {
 	// size or allow resizing.
 	SetFixedSize(bool)
 
+	// SetScale sets fixed scale for this window, overrides FYNE_SCALE and disables auto scaling
+	// (setting this value to "0" re-enables auto scaling)
+	SetScale(float32)
+
 	// CenterOnScreen places a window at the center of the monitor
 	// the Window object is currently positioned on.
 	CenterOnScreen()
