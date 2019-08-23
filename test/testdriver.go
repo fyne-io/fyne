@@ -3,7 +3,11 @@ package test
 import "fyne.io/fyne"
 
 type testDriver struct {
+	device *device
 }
+
+// Declare conformity with Driver
+var _ fyne.Driver = (*testDriver)(nil)
 
 func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	windowsMutex.RLock()
@@ -30,6 +34,13 @@ func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyl
 	// The real text height differs from the requested text size.
 	// We simulate this behaviour here.
 	return fyne.NewSize(len(text)*size, size*13/10+1)
+}
+
+func (d *testDriver) Device() fyne.Device {
+	if d.device == nil {
+		d.device = &device{}
+	}
+	return d.device
 }
 
 func (d *testDriver) Run() {

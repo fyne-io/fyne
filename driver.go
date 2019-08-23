@@ -17,6 +17,8 @@ type Driver interface {
 	// Get the position of a given CanvasObject relative to the top/left of a canvas.
 	AbsolutePositionForObject(CanvasObject) Position
 
+	// Get the device that the application is currently running on
+	Device() Device
 	// Start the main event loop of the driver.
 	Run()
 	// Close the driver and open windows then exit the application.

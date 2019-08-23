@@ -18,6 +18,7 @@ var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
 	windows []fyne.Window
+	device  *glDevice
 	done    chan interface{}
 }
 
@@ -44,6 +45,14 @@ func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position
 	}, nil)
 
 	return pos
+}
+
+func (d *gLDriver) Device() fyne.Device {
+	if d.device == nil {
+		d.device = &glDevice{}
+	}
+
+	return d.device
 }
 
 func (d *gLDriver) Quit() {

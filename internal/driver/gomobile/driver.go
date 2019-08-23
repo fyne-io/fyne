@@ -22,7 +22,11 @@ type driver struct {
 	glctx gl.Context
 
 	windows []fyne.Window
+	device  fyne.Device
 }
+
+// Declare conformity with Driver
+var _ fyne.Driver = (*driver)(nil)
 
 func (d *driver) CreateWindow(title string) fyne.Window {
 	canvas := NewCanvas().(*canvas) // silence lint
@@ -163,6 +167,8 @@ func (d *driver) onStop() {
 }
 
 func (d *driver) onPaint(sz size.Event) {
+	currentOrientation = sz.Orientation
+
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
@@ -225,6 +231,14 @@ func (d *driver) freeDirtyTextures(canvas *canvas) {
 			return
 		}
 	}
+}
+
+func (d *driver) Device() fyne.Device {
+	if d.device == nil {
+		d.device = &device{}
+	}
+
+	return d.device
 }
 
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
