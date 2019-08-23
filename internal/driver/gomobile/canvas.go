@@ -17,6 +17,10 @@ type canvas struct {
 	focused fyne.Focusable
 	padded  bool
 
+	typedRune func(rune)
+	typedKey  func(event *fyne.KeyEvent)
+	shortcut  fyne.ShortcutHandler
+
 	inited, dirty bool
 	refreshQueue  chan fyne.CanvasObject
 }
@@ -120,23 +124,23 @@ func (c *canvas) SetOverlay(overlay fyne.CanvasObject) {
 }
 
 func (c *canvas) OnTypedRune() func(rune) {
-	panic("implement me")
+	return c.typedRune
 }
 
-func (c *canvas) SetOnTypedRune(func(rune)) {
-	//	panic("implement me")
+func (c *canvas) SetOnTypedRune(typed func(rune)) {
+	c.typedRune = typed
 }
 
 func (c *canvas) OnTypedKey() func(*fyne.KeyEvent) {
-	panic("implement me")
+	return c.typedKey
 }
 
-func (c *canvas) SetOnTypedKey(func(*fyne.KeyEvent)) {
-	//	panic("implement me")
+func (c *canvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+	c.typedKey = typed
 }
 
 func (c *canvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
-	panic("implement me")
+	c.shortcut.AddShortcut(shortcut, handler)
 }
 
 func (c *canvas) Capture() image.Image {

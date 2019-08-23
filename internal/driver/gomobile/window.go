@@ -9,7 +9,9 @@ type window struct {
 	visible  bool
 	onClosed func()
 
-	canvas *canvas
+	clipboard fyne.Clipboard
+	canvas    *canvas
+	icon      fyne.Resource
 }
 
 func (w *window) Title() string {
@@ -33,7 +35,7 @@ func (w *window) Resize(fyne.Size) {
 }
 
 func (w *window) RequestFocus() {
-	panic("implement me")
+	// no-op - we cannot change which window is focused
 }
 
 func (w *window) FixedSize() bool {
@@ -41,7 +43,7 @@ func (w *window) FixedSize() bool {
 }
 
 func (w *window) SetFixedSize(bool) {
-	// no-op
+	// no-op - all windows are fixed size
 }
 
 func (w *window) CenterOnScreen() {
@@ -57,19 +59,24 @@ func (w *window) SetPadded(padded bool) {
 }
 
 func (w *window) Icon() fyne.Resource {
-	panic("implement me")
+	if w.icon == nil {
+		return fyne.CurrentApp().Icon()
+	}
+
+	return w.icon
 }
 
-func (w *window) SetIcon(fyne.Resource) {
-	//	panic("implement me")
+func (w *window) SetIcon(icon fyne.Resource) {
+	w.icon = icon
 }
 
 func (w *window) MainMenu() *fyne.MainMenu {
-	panic("implement me")
+	// TODO add mainmenu support for mobile (burger and sidebar?)
+	return nil
 }
 
 func (w *window) SetMainMenu(*fyne.MainMenu) {
-	//	panic("implement me")
+	// TODO add mainmenu support for mobile (burger and sidebar?)
 }
 
 func (w *window) SetOnClosed(callback func()) {
@@ -111,7 +118,11 @@ func (w *window) Canvas() fyne.Canvas {
 }
 
 func (w *window) Clipboard() fyne.Clipboard {
-	panic("implement me")
+	//if w.clipboard == nil {
+	//	w.clipboard = &mobileClipboard{window: w.viewport}
+	//}
+	// TODO add clipboard support
+	return w.clipboard
 }
 
 func (w *window) RunWithContext(f func()) {
