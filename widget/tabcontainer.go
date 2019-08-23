@@ -1,13 +1,13 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
+	"image/color"
 )
 
 // TabItem represents a single view in a TabContainer.
@@ -160,16 +160,19 @@ func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 	return &tabContainerRenderer{tabBar: tabBar, line: line, objects: objects, container: t}
 }
 
-func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *Box {
-	var tabBar *Box
-	switch t.tabLocation {
-	case TabLocationLeading, TabLocationTrailing:
-		tabBar = NewVBox()
-	default:
-		tabBar = NewHBox()
+func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container {
+	var lay fyne.Layout
+	if fyne.CurrentDevice().IsMobile() {
+		lay = layout.NewGridLayout(len(buttons))
+	} else if t.tabLocation == TabLocationLeading || t.tabLocation == TabLocationTrailing {
+		lay = layout.NewVBoxLayout()
+	} else {
+		lay = layout.NewHBoxLayout()
 	}
+
+	tabBar := fyne.NewContainerWithLayout(lay)
 	for _, button := range buttons {
-		tabBar.Append(button)
+		tabBar.AddObject(button)
 	}
 	return tabBar
 }
@@ -178,18 +181,17 @@ func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *Box {
 func (t *TabContainer) SetTabLocation(l TabLocation) {
 	t.tabLocation = l
 	r := Renderer(t).(*tabContainerRenderer)
-	buttons := r.tabBar.Children
-	switch l {
-	case TabLocationLeading, TabLocationTrailing:
+	buttons := r.tabBar.Objects
+	if fyne.CurrentDevice().IsMobile() || l == TabLocationLeading || l == TabLocationTrailing {
 		for _, b := range buttons {
 			b.(*tabButton).IconPosition = buttonIconTop
 		}
-	default:
+	} else {
 		for _, b := range buttons {
 			b.(*tabButton).IconPosition = buttonIconInline
 		}
 	}
-	r.tabBar.Children = nil
+	r.tabBar.Objects = nil
 	r.tabBar = t.buildTabBar(buttons)
 	r.objects[len(r.objects)-1] = r.tabBar
 	r.Refresh()
@@ -226,7 +228,7 @@ func NewTabContainer(items ...*TabItem) *TabContainer {
 }
 
 type tabContainerRenderer struct {
-	tabBar *Box
+	tabBar *fyne.Container
 	line   *canvas.Rectangle
 
 	objects   []fyne.CanvasObject
@@ -241,7 +243,11 @@ func (t *tabContainerRenderer) MinSize() fyne.Size {
 		childMin = childMin.Union(child.Content.MinSize())
 	}
 
-	switch t.container.tabLocation {
+	tabLocation := t.container.tabLocation
+	if fyne.CurrentDevice().IsMobile() {
+		tabLocation = TabLocationBottom
+	}
+	switch tabLocation {
 	case TabLocationLeading, TabLocationTrailing:
 		return fyne.NewSize(buttonsMin.Width+childMin.Width+theme.Padding(),
 			fyne.Max(buttonsMin.Height, childMin.Height))
@@ -252,7 +258,12 @@ func (t *tabContainerRenderer) MinSize() fyne.Size {
 }
 
 func (t *tabContainerRenderer) Layout(size fyne.Size) {
-	switch t.container.tabLocation {
+	tabLocation := t.container.tabLocation
+	if fyne.CurrentDevice().IsMobile() && (tabLocation == TabLocationLeading || tabLocation == TabLocationTrailing) {
+		tabLocation = TabLocationBottom
+	}
+
+	switch tabLocation {
 	case TabLocationTop:
 		buttonHeight := t.tabBar.MinSize().Height
 		t.tabBar.Move(fyne.NewPos(0, 0))
@@ -313,12 +324,11 @@ func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (t *tabContainerRenderer) Refresh() {
-	Renderer(t.tabBar).Refresh()
 	t.Layout(t.container.Size().Union(t.container.MinSize()))
 
 	canvas.Refresh(t.container)
 
-	for i, button := range t.tabBar.Children {
+	for i, button := range t.tabBar.Objects {
 		if i == t.container.current {
 			button.(*tabButton).Style = PrimaryButton
 		} else {

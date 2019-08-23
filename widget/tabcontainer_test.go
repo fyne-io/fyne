@@ -58,13 +58,12 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 
 	r := Renderer(tabs).(*tabContainerRenderer)
 
-	buttons := r.tabBar.Children
+	buttons := r.tabBar.Objects
 	require.Len(t, buttons, 3)
 	content := tabs.Items[0].Content
 
 	tabs.SetTabLocation(TabLocationLeading)
 	assert.Equal(t, fyne.NewPos(0, 0), r.tabBar.Position())
-	assert.False(t, r.tabBar.Horizontal)
 	assert.Equal(t, fyne.NewPos(r.tabBar.MinSize().Width+theme.Padding(), 0), content.Position())
 	assert.Equal(t, fyne.NewPos(r.tabBar.MinSize().Width, 0), r.line.Position())
 	assert.Equal(t, fyne.NewSize(theme.Padding(), tabs.MinSize().Height), r.line.Size())
@@ -77,7 +76,6 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 
 	tabs.SetTabLocation(TabLocationBottom)
 	assert.Equal(t, fyne.NewPos(0, content.MinSize().Height+theme.Padding()), r.tabBar.Position())
-	assert.True(t, r.tabBar.Horizontal)
 	assert.Equal(t, fyne.NewPos(0, 0), content.Position())
 	assert.Equal(t, fyne.NewPos(0, content.Size().Height), r.line.Position())
 	assert.Equal(t, fyne.NewSize(tabs.MinSize().Width, theme.Padding()), r.line.Size())
@@ -90,7 +88,6 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 
 	tabs.SetTabLocation(TabLocationTrailing)
 	assert.Equal(t, fyne.NewPos(content.Size().Width+theme.Padding(), 0), r.tabBar.Position())
-	assert.False(t, r.tabBar.Horizontal)
 	assert.Equal(t, fyne.NewPos(0, 0), content.Position())
 	assert.Equal(t, fyne.NewPos(content.Size().Width, 0), r.line.Position())
 	assert.Equal(t, fyne.NewSize(theme.Padding(), tabs.MinSize().Height), r.line.Size())
@@ -103,7 +100,6 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 
 	tabs.SetTabLocation(TabLocationTop)
 	assert.Equal(t, fyne.NewPos(0, 0), r.tabBar.Position())
-	assert.True(t, r.tabBar.Horizontal)
 	assert.Equal(t, fyne.NewPos(0, r.tabBar.MinSize().Height+theme.Padding()), content.Position())
 	assert.Equal(t, fyne.NewPos(0, r.tabBar.MinSize().Height), r.line.Position())
 	assert.Equal(t, fyne.NewSize(tabs.MinSize().Width, theme.Padding()), r.line.Size())
@@ -123,9 +119,9 @@ func Test_tabContainer_Tapped(t *testing.T) {
 	)
 	r := Renderer(tabs).(*tabContainerRenderer)
 
-	tab1 := r.tabBar.Children[0].(*tabButton)
-	tab2 := r.tabBar.Children[1].(*tabButton)
-	tab3 := r.tabBar.Children[2].(*tabButton)
+	tab1 := r.tabBar.Objects[0].(*tabButton)
+	tab2 := r.tabBar.Objects[1].(*tabButton)
+	tab3 := r.tabBar.Objects[2].(*tabButton)
 	require.Equal(t, 0, tabs.CurrentTabIndex())
 	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
 
@@ -305,11 +301,11 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tabs := NewTabContainer(tt.item)
 			r := Renderer(tabs).(*tabContainerRenderer)
-			require.Len(t, r.tabBar.Children, 1)
+			require.Len(t, r.tabBar.Objects, 1)
 			tabs.SetTabLocation(tt.location)
 			r.Layout(r.MinSize())
 
-			b := r.tabBar.Children[0].(*tabButton)
+			b := r.tabBar.Objects[0].(*tabButton)
 			assert.Equal(t, tt.wantButtonSize, b.Size())
 			br := Renderer(b).(*tabButtonRenderer)
 			if tt.item.Icon != nil {
