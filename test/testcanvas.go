@@ -5,6 +5,7 @@ import (
 	"image/draw"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal"
 )
 
 var (
@@ -151,7 +152,7 @@ func (c *testCanvas) Capture() image.Image {
 	}
 	theme := fyne.CurrentApp().Settings().Theme()
 
-	bounds := image.Rect(0, 0, int(float32(c.Size().Width)*c.Scale()), int(float32(c.Size().Height)*c.Scale()))
+	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	img := image.NewRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
