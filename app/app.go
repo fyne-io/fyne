@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal"
 	helper "fyne.io/fyne/internal/app"
 	"fyne.io/fyne/theme"
 )
@@ -16,10 +17,12 @@ import (
 var _ fyne.App = (*fyneApp)(nil)
 
 type fyneApp struct {
-	driver fyne.Driver
-	icon   fyne.Resource
+	driver   fyne.Driver
+	icon     fyne.Resource
+	uniqueID string
 
 	settings *settings
+	prefs    fyne.Preferences
 	running  bool
 	runMutex sync.Mutex
 	exec     func(name string, arg ...string) *exec.Cmd
@@ -31,6 +34,10 @@ func (app *fyneApp) Icon() fyne.Resource {
 
 func (app *fyneApp) SetIcon(icon fyne.Resource) {
 	app.icon = icon
+}
+
+func (app *fyneApp) UniqueID() string {
+	return app.uniqueID
 }
 
 func (app *fyneApp) NewWindow(title string) fyne.Window {
@@ -70,11 +77,22 @@ func (app *fyneApp) Settings() fyne.Settings {
 	return app.settings
 }
 
+func (app *fyneApp) Preferences() fyne.Preferences {
+	return app.prefs
+}
+
+// New returns a new application instance with the default driver and no unique ID
+func New() fyne.App {
+	internal.LogHint("Applications should be created with a unique ID using app.NewWithID()")
+	return NewWithID("")
+}
+
 // NewAppWithDriver initialises a new Fyne application using the specified
-// driver and returns a handle to that App.
+// driver and returns a handle to that App. The id should be globally unique to this app
 // Built in drivers are provided in the "driver" package.
-func NewAppWithDriver(d fyne.Driver) fyne.App {
-	newApp := &fyneApp{driver: d, icon: theme.FyneLogo(), settings: loadSettings(), exec: exec.Command}
+func NewAppWithDriver(d fyne.Driver, id string) fyne.App {
+	newApp := &fyneApp{driver: d, icon: theme.FyneLogo(), settings: loadSettings(),
+		prefs: loadPreferences(id), exec: exec.Command}
 	fyne.SetCurrentApp(newApp)
 
 	listener := make(chan fyne.Settings)

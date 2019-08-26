@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal"
 )
 
 // ensure we have a dummy app loaded and ready to test
@@ -17,6 +18,7 @@ func init() {
 type testApp struct {
 	driver   *testDriver
 	settings fyne.Settings
+	prefs    fyne.Preferences
 }
 
 func (a *testApp) Icon() fyne.Resource {
@@ -42,6 +44,10 @@ func (a *testApp) Run() {
 
 func (a *testApp) Quit() {
 	// no-op
+}
+
+func (a *testApp) UniqueID() string {
+	return "testApp" // TODO should this be randomised?
 }
 
 func (a *testApp) applyThemeTo(content fyne.CanvasObject, canvas fyne.Canvas) {
@@ -82,13 +88,18 @@ func (a *testApp) Settings() fyne.Settings {
 	return a.settings
 }
 
+func (a *testApp) Preferences() fyne.Preferences {
+	return a.prefs
+}
+
 // NewApp returns a new dummy app used for testing..
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
 	settings := &testSettings{}
 	settings.theme = &dummyTheme{}
 	settings.listenerMutex = &sync.Mutex{}
-	test := &testApp{settings: settings}
+	prefs := internal.NewInMemoryPreferences()
+	test := &testApp{settings: settings, prefs: prefs}
 	fyne.SetCurrentApp(test)
 	test.driver = NewDriver().(*testDriver)
 

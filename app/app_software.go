@@ -8,7 +8,8 @@ import (
 	"fyne.io/fyne/test"
 )
 
-// New returns a new app instance using the test (headless) driver.
-func New() fyne.App {
+// NewWithID returns a new app instance using the test (headless) driver.
+// The ID string should be globally unique to this app.
+func NewWithID(id string) fyne.App {
 	return NewAppWithDriver(test.NewDriverWithPainter(software.NewPainter()))
 }
