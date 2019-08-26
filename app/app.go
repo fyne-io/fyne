@@ -19,7 +19,7 @@ type fyneApp struct {
 	driver fyne.Driver
 	icon   fyne.Resource
 
-	settings fyne.Settings
+	settings *settings
 	running  bool
 	runMutex sync.Mutex
 	exec     func(name string, arg ...string) *exec.Cmd
