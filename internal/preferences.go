@@ -23,9 +23,14 @@ func (p *InMemoryPreferences) fireChange() {
 
 // Bool looks up a boolean value for the key
 func (p *InMemoryPreferences) Bool(key string) bool {
+	return p.BoolWithFallback(key, false)
+}
+
+// BoolWithFallback looks up a boolean value and returns the given fallback if not found
+func (p *InMemoryPreferences) BoolWithFallback(key string, fallback bool) bool {
 	value, ok := p.Values[key]
 	if !ok {
-		return false
+		return fallback
 	}
 
 	return value.(bool)
@@ -39,9 +44,14 @@ func (p *InMemoryPreferences) SetBool(key string, value bool) {
 
 // Float looks up a float64 value for the key
 func (p *InMemoryPreferences) Float(key string) float64 {
+	return p.FloatWithFallback(key, 0.0)
+}
+
+// FloatWithFallback looks up a float64 value and returns the given fallback if not found
+func (p *InMemoryPreferences) FloatWithFallback(key string, fallback float64) float64 {
 	value, ok := p.Values[key]
 	if !ok {
-		return 0.0
+		return fallback
 	}
 
 	return value.(float64)
@@ -55,9 +65,14 @@ func (p *InMemoryPreferences) SetFloat(key string, value float64) {
 
 // Int looks up an integer value for the key
 func (p *InMemoryPreferences) Int(key string) int {
+	return p.IntWithFallback(key, 0)
+}
+
+// IntWithFallback looks up an integer value and returns the given fallback if not found
+func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
 	value, ok := p.Values[key]
 	if !ok {
-		return 0
+		return fallback
 	}
 
 	// integers can be de-serialised as floats, so support both
@@ -75,9 +90,14 @@ func (p *InMemoryPreferences) SetInt(key string, value int) {
 
 // String looks up a string value for the key
 func (p *InMemoryPreferences) String(key string) string {
+	return p.StringWithFallback(key, "")
+}
+
+// StringWithFallback looks up a string value and returns the given fallback if not found
+func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
 	value, ok := p.Values[key]
 	if !ok {
-		return ""
+		return fallback
 	}
 
 	return value.(string)

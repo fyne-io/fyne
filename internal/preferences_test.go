@@ -20,6 +20,14 @@ func TestPrefs_Bool(t *testing.T) {
 	assert.Equal(t, true, p.Bool("testBool"))
 }
 
+func TestPrefs_BoolWithFallback(t *testing.T) {
+	p := NewInMemoryPreferences()
+
+	assert.Equal(t, true, p.BoolWithFallback("testBool", true))
+	p.SetBool("testBool", false)
+	assert.Equal(t, false, p.BoolWithFallback("testBool", true))
+}
+
 func TestPrefs_Bool_Zero(t *testing.T) {
 	p := NewInMemoryPreferences()
 
@@ -38,6 +46,14 @@ func TestPrefs_Float(t *testing.T) {
 	p.Values["testFloat"] = 1.2
 
 	assert.Equal(t, 1.2, p.Float("testFloat"))
+}
+
+func TestPrefs_FloatWithFallback(t *testing.T) {
+	p := NewInMemoryPreferences()
+
+	assert.Equal(t, 1.0, p.FloatWithFallback("testFloat", 1.0))
+	p.Values["testFloat"] = 1.2
+	assert.Equal(t, 1.2, p.FloatWithFallback("testFloat", 1.0))
 }
 
 func TestPrefs_Float_Zero(t *testing.T) {
@@ -60,6 +76,14 @@ func TestPrefs_Int(t *testing.T) {
 	assert.Equal(t, 5, p.Int("testInt"))
 }
 
+func TestPrefs_IntWithFallback(t *testing.T) {
+	p := NewInMemoryPreferences()
+
+	assert.Equal(t, 2, p.IntWithFallback("testInt", 2))
+	p.Values["testInt"] = 5
+	assert.Equal(t, 5, p.IntWithFallback("testInt", 2))
+}
+
 func TestPrefs_Int_Zero(t *testing.T) {
 	p := NewInMemoryPreferences()
 
@@ -78,6 +102,14 @@ func TestPrefs_String(t *testing.T) {
 	p.Values["test"] = "value"
 
 	assert.Equal(t, "value", p.String("test"))
+}
+
+func TestPrefs_StringWithFallback(t *testing.T) {
+	p := NewInMemoryPreferences()
+
+	assert.Equal(t, "default", p.StringWithFallback("test", "default"))
+	p.Values["test"] = "value"
+	assert.Equal(t, "value", p.StringWithFallback("test", "default"))
 }
 
 func TestPrefs_String_Zero(t *testing.T) {
