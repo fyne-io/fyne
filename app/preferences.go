@@ -2,8 +2,10 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
@@ -24,7 +26,7 @@ func (p *preferences) uniqueID() string {
 	}
 
 	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
-	p.appID = "TODO" // TODO generate a unique ID
+	p.appID = fmt.Sprintf("missing-id-%d", time.Now().Unix()) // This is a fake unique - it just has to not be reused...
 	return p.appID
 }
 
