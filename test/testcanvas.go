@@ -5,22 +5,36 @@ import (
 	"image/draw"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal"
 )
 
 var (
 	dummyCanvas fyne.Canvas
 )
 
+// WindowlessCanvas provides functionality for a canvas to operate without a window
+type WindowlessCanvas interface {
+	fyne.Canvas
+
+	Resize(fyne.Size)
+
+	Padded() bool
+	SetPadded(bool)
+}
+
 type testCanvas struct {
-	size fyne.Size
+	size  fyne.Size
+	scale float32
 
 	content, overlay fyne.CanvasObject
 	focused          fyne.Focusable
+	padded           bool
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
 
 	fyne.ShortcutHandler
+	painter SoftwarePainter
 }
 
 func (c *testCanvas) Content() fyne.CanvasObject {
@@ -35,7 +49,7 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	}
 
 	theme := fyne.CurrentApp().Settings().Theme()
-	padding := fyne.NewSize(theme.Padding(), theme.Padding())
+	padding := fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 	c.Resize(content.MinSize().Add(padding))
 }
 
@@ -86,13 +100,25 @@ func (c *testCanvas) Size() fyne.Size {
 
 func (c *testCanvas) Resize(size fyne.Size) {
 	c.size = size
+	if c.content == nil {
+		return
+	}
+
+	if c.padded {
+		theme := fyne.CurrentApp().Settings().Theme()
+		c.content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	} else {
+		c.content.Resize(size)
+	}
 }
 
 func (c *testCanvas) Scale() float32 {
-	return 1.0
+	return c.scale
 }
 
-func (c *testCanvas) SetScale(float32) {
+func (c *testCanvas) SetScale(scale float32) {
+	c.scale = scale
 }
 
 func (c *testCanvas) OnTypedRune() func(rune) {
@@ -111,11 +137,22 @@ func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
 	c.onTypedKey = handler
 }
 
-func (c *testCanvas) Capture() image.Image {
-	theme := fyne.CurrentApp().Settings().Theme()
-	// TODO actually implement rendering
+func (c *testCanvas) Padded() bool {
+	return c.padded
+}
 
-	bounds := image.Rect(0, 0, int(float32(c.Size().Width)*c.Scale()), int(float32(c.Size().Height)*c.Scale()))
+func (c *testCanvas) SetPadded(padded bool) {
+	c.padded = padded
+	c.Resize(c.Size())
+}
+
+func (c *testCanvas) Capture() image.Image {
+	if c.painter != nil {
+		return c.painter.Paint(c)
+	}
+	theme := fyne.CurrentApp().Settings().Theme()
+
+	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	img := image.NewRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
@@ -123,10 +160,18 @@ func (c *testCanvas) Capture() image.Image {
 }
 
 // NewCanvas returns a single use in-memory canvas used for testing
-func NewCanvas() fyne.Canvas {
-	theme := fyne.CurrentApp().Settings().Theme()
-	padding := fyne.NewSize(theme.Padding(), theme.Padding())
-	return &testCanvas{size: padding}
+func NewCanvas() WindowlessCanvas {
+	padding := fyne.NewSize(10, 10)
+	return &testCanvas{size: padding, padded: true, scale: 1.0}
+}
+
+// NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
+// The painter will be used to render in the Capture() call.
+func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
+	canvas := NewCanvas().(*testCanvas)
+	canvas.painter = painter
+
+	return canvas
 }
 
 // Canvas returns a reusable in-memory canvas used for testing

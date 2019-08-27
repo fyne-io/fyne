@@ -19,7 +19,7 @@ type fyneApp struct {
 	driver fyne.Driver
 	icon   fyne.Resource
 
-	settings fyne.Settings
+	settings *settings
 	running  bool
 	runMutex sync.Mutex
 	exec     func(name string, arg ...string) *exec.Cmd
@@ -57,6 +57,7 @@ func (app *fyneApp) Quit() {
 	}
 
 	app.driver.Quit()
+	app.settings.stopWatching()
 	app.running = false
 }
 
@@ -84,6 +85,7 @@ func NewAppWithDriver(d fyne.Driver) fyne.App {
 			helper.ApplySettings(set, newApp)
 		}
 	}()
+	newApp.settings.watchSettings()
 
 	return newApp
 }

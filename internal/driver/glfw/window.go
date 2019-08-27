@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
-	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -13,6 +12,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/widget"
@@ -149,7 +149,7 @@ func (w *window) minSizeOnScreen() (int, int) {
 
 // screenSize computes the actual output size of the given content size in screen pixels
 func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
-	return scaleInt(w.canvas, canvasSize.Width), scaleInt(w.canvas, canvasSize.Height)
+	return internal.ScaleInt(w.canvas, canvasSize.Width), internal.ScaleInt(w.canvas, canvasSize.Height)
 }
 
 func (w *window) RequestFocus() {
@@ -163,7 +163,7 @@ func (w *window) RequestFocus() {
 
 func (w *window) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
-	w.width, w.height = scaleInt(w.canvas, size.Width), scaleInt(w.canvas, size.Height)
+	w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
 	runOnMain(func() {
 		w.ignoreResize = true
 		w.viewport.SetSize(w.width, w.height)
@@ -362,8 +362,8 @@ func (w *window) Content() fyne.CanvasObject {
 
 func (w *window) resize(canvasSize fyne.Size) {
 	if !w.fullScreen && !w.fixedSize {
-		w.width = scaleInt(w.canvas, canvasSize.Width)
-		w.height = scaleInt(w.canvas, canvasSize.Height)
+		w.width = internal.ScaleInt(w.canvas, canvasSize.Width)
+		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
 	}
 
 	w.canvas.Resize(canvasSize)
@@ -427,7 +427,7 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 	if w.ignoreResize {
 		return
 	}
-	w.resize(fyne.NewSize(unscaleInt(w.canvas, width), unscaleInt(w.canvas, height)))
+	w.resize(fyne.NewSize(internal.UnscaleInt(w.canvas, width), internal.UnscaleInt(w.canvas, height)))
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
@@ -490,7 +490,7 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
-	w.mousePos = fyne.NewPos(unscaleInt(w.canvas, int(xpos)), unscaleInt(w.canvas, int(ypos)))
+	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
 	cursor := defaultCursor
 	obj, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
@@ -1016,7 +1016,7 @@ func (w *window) queueEvent(fn func()) {
 	select {
 	case w.eventQueue <- fn:
 	default:
-		log.Println("Fyne Error: eventQueue full")
+		fyne.LogError("EventQueue full", nil)
 	}
 }
 

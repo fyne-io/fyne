@@ -10,11 +10,10 @@ type testWindow struct {
 	title      string
 	fullScreen bool
 	fixedSize  bool
-	padded     bool
 	focused    bool
 	onClosed   func()
 
-	canvas    fyne.Canvas
+	canvas    *testCanvas
 	clipboard fyne.Clipboard
 	menu      *fyne.MainMenu
 }
@@ -43,7 +42,7 @@ func (w *testWindow) CenterOnScreen() {
 }
 
 func (w *testWindow) Resize(size fyne.Size) {
-	w.canvas.(*testCanvas).Resize(size)
+	w.canvas.Resize(size)
 }
 
 func (w *testWindow) RequestFocus() {
@@ -63,11 +62,11 @@ func (w *testWindow) SetFixedSize(fixed bool) {
 }
 
 func (w *testWindow) Padded() bool {
-	return w.padded
+	return w.canvas.Padded()
 }
 
 func (w *testWindow) SetPadded(padded bool) {
-	w.padded = padded
+	w.canvas.SetPadded(padded)
 }
 
 func (w *testWindow) Icon() fyne.Resource {
@@ -139,8 +138,16 @@ func (w *testWindow) Canvas() fyne.Canvas {
 
 // NewWindow creates and registers a new window for test purposes
 func NewWindow(content fyne.CanvasObject) fyne.Window {
-	canvas := NewCanvas()
+	canvas := NewCanvas().(*testCanvas)
 	canvas.SetContent(content)
+	if fyne.CurrentApp() != nil {
+		if driver, ok := fyne.CurrentApp().Driver().(*testDriver); ok {
+			if driver != nil {
+				canvas.painter = driver.painter
+			}
+		}
+	}
+
 	window := &testWindow{canvas: canvas}
 	window.clipboard = &testClipboard{}
 

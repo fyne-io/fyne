@@ -1,4 +1,4 @@
-package gl
+package painter
 
 import (
 	"image"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 )
 
 type rasterInfo struct {
@@ -27,6 +28,16 @@ func init() {
 	}
 
 	svgCacheJanitor()
+}
+
+// GetAspect looks up an aspect ratio of an image
+func GetAspect(img *canvas.Image) float32 {
+	aspect := aspects[img.Resource]
+	if aspect == 0 {
+		aspect = aspects[img]
+	}
+
+	return aspect
 }
 
 func svgCacheJanitor() {
@@ -84,7 +95,8 @@ func svgCacheReset() {
 	rasterMutex.Unlock()
 }
 
-func svgCacheMonitorTheme() {
+// SvgCacheMonitorTheme hooks up the SVG cache to listen for theme changes and resets the cache
+func SvgCacheMonitorTheme() {
 	listener := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(listener)
 	go func() {

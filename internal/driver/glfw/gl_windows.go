@@ -4,8 +4,8 @@ func updateGLContext(w *window) {
 	canvas := w.Canvas()
 	size := canvas.Size()
 
-	winWidth := scaleInt(canvas, size.Width)
-	winHeight := scaleInt(canvas, size.Height)
+	winWidth := internal.ScaleInt(canvas, size.Width)
+	winHeight := internal.ScaleInt(canvas, size.Height)
 
 	w.canvas.painter.SetOutputSize(winWidth, winHeight)
 }
