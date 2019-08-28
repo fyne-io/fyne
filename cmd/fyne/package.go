@@ -85,7 +85,7 @@ func (p *packager) packageLinux() {
 		"Type=Application\n"+
 		"Name="+p.name+"\n"+
 		"Exec="+filepath.Base(p.exe)+"\n"+
-		"Icon="+filepath.Base(iconName)+"\n")
+		"Icon="+iconName+"\n")
 
 	binDir := ensureSubDir(prefixDir, "bin")
 	binName := filepath.Join(binDir, filepath.Base(p.exe))
