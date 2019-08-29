@@ -11,10 +11,10 @@ import (
 
 func TestPreferences_Save(t *testing.T) {
 	p := loadPreferences("dummy")
-	p.Values["keyString"] = "value"
-	p.Values["keyInt"] = 4
-	p.Values["keyFloat"] = 3.5
-	p.Values["keyBool"] = true
+	p.Values()["keyString"] = "value"
+	p.Values()["keyInt"] = 4
+	p.Values()["keyFloat"] = 3.5
+	p.Values()["keyBool"] = true
 
 	path := filepath.Join(os.TempDir(), "fynePrefs.json")
 	defer os.Remove(path)

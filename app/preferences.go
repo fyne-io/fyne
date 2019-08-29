@@ -57,7 +57,8 @@ func (p *preferences) saveToFile(path string) error {
 	}
 	encode := json.NewEncoder(file)
 
-	return encode.Encode(&p.InMemoryPreferences.Values)
+	values := p.InMemoryPreferences.Values()
+	return encode.Encode(&values)
 }
 
 func (p *preferences) load() {
@@ -78,7 +79,8 @@ func (p *preferences) loadFromFile(path string) error {
 	}
 	decode := json.NewDecoder(file)
 
-	return decode.Decode(&p.InMemoryPreferences.Values)
+	values := p.InMemoryPreferences.Values()
+	return decode.Decode(&values)
 }
 
 func newPreferences() *preferences {
