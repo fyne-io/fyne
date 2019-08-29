@@ -178,6 +178,14 @@ func (t *textProvider) rows() int {
 // The row parameter should be between 0 and t.Rows()-1.
 func (t *textProvider) row(row int) []rune {
 	bounds := t.rowBounds[row]
+	from := bounds[0]
+	to := bounds[1]
+	if to < from {
+		return nil
+	}
+	if to < len(t.buffer) {
+		to = len(t.buffer)
+	}
 	return t.buffer[bounds[0]:bounds[1]]
 }
 
