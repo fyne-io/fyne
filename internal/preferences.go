@@ -32,6 +32,7 @@ func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
 	return v, err
 }
 
+// Values provides access to the underlying value map - for internal use only...
 func (p *InMemoryPreferences) Values() map[string]interface{} {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
