@@ -18,9 +18,10 @@ var _ fyne.Preferences = (*InMemoryPreferences)(nil)
 
 func (p *InMemoryPreferences) set(key string, value interface{}) {
 	p.lock.Lock()
-	defer p.lock.Unlock()
 
 	p.values[key] = value
+	p.lock.Unlock()
+
 	p.fireChange()
 }
 
