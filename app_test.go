@@ -34,7 +34,15 @@ func (dummyApp) Driver() Driver {
 	return nil
 }
 
+func (dummyApp) UniqueID() string {
+	return "dummy"
+}
+
 func (dummyApp) Settings() Settings {
+	return nil
+}
+
+func (dummyApp) Preferences() Preferences {
 	return nil
 }
 

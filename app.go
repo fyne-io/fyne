@@ -37,8 +37,15 @@ type App interface {
 	// Typically not needed for day to day work, mostly internal functionality.
 	Driver() Driver
 
-	// Settings return the application settings, determining theme and so on.
+	// UniqueID returns the application unique identifier, if set.
+	// This must be set for use of the Preferences() functions... see NewWithId(string)
+	UniqueID() string
+
+	// Settings return the globally set settings, determining theme and so on.
 	Settings() Settings
+
+	// Preferences returns the application preferences, used for storing configuration and state
+	Preferences() Preferences
 }
 
 var app App

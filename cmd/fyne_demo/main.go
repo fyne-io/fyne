@@ -14,6 +14,8 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+const preferenceCurrentTab = "currentTab"
+
 func welcomeScreen(a fyne.App) fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
 	logo.SetMinSize(fyne.NewSize(128, 128))
@@ -44,7 +46,7 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 }
 
 func main() {
-	a := app.New()
+	a := app.NewWithID("io.fyne.demo")
 	w := a.NewWindow("Fyne Demo")
 	w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("File",
 		fyne.NewMenuItem("New", func() { fmt.Println("Menu New") }),
@@ -62,7 +64,9 @@ func main() {
 		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)),
 		widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
 	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs.SelectTabIndex(a.Preferences().Int(preferenceCurrentTab))
 	w.SetContent(tabs)
 
 	w.ShowAndRun()
+	a.Preferences().SetInt(preferenceCurrentTab, tabs.CurrentTabIndex())
 }
