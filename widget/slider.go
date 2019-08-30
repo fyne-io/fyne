@@ -77,11 +77,7 @@ func (s *Slider) DragEnd() {
 
 // Dragged function.
 func (s *Slider) Dragged(e *fyne.DragEvent) {
-	ok, ratio := s.getRatio(&(e.PointEvent))
-
-	if !ok {
-		return
-	}
+	ratio := s.getRatio(&(e.PointEvent))
 
 	s.updateValue(ratio)
 	Refresh(s)
@@ -91,43 +87,39 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	}
 }
 
-func (s *Slider) getRatio(e *fyne.PointEvent) (bool, float64) {
-	render := Renderer(s).(*sliderRenderer)
+func (s *Slider) buttonDiameter() int {
+	return theme.Padding() * standardScale
+}
 
-	tp := render.thumb.Position()
-	ts := render.thumb.Size()
+func (s *Slider) endOffset() int {
+	return s.buttonDiameter()/2 + theme.Padding()
+}
 
-	t := render.track.Size()
-
-	pad := theme.Padding()
+func (s *Slider) getRatio(e *fyne.PointEvent) float64 {
+	pad := s.endOffset()
 
 	x := e.Position.X
 	y := e.Position.Y
 
 	switch s.Orientation {
 	case Vertical:
-		if x > (tp.X-pad) && x < (tp.X+ts.Width+pad) {
-			if y > t.Height {
-				return true, 0.0
-			} else if y < 0 {
-				return true, 1.0
-			} else {
-				return true, 1 - float64(y)/float64(t.Height)
-			}
+		if y > s.size.Height-pad {
+			return 0.0
+		} else if y < pad {
+			return 1.0
+		} else {
+			return 1 - float64(y-pad)/float64(s.size.Height-pad*2)
 		}
 	case Horizontal:
-		if y > (tp.Y-pad) && y < (tp.Y+ts.Height+pad) {
-			if x > t.Width {
-				return true, 1.0
-			} else if x < 0 {
-				return true, 0.0
-			} else {
-				return true, float64(x) / float64(t.Width)
-			}
+		if x > s.size.Width-pad {
+			return 1.0
+		} else if x < pad {
+			return 0.0
+		} else {
+			return float64(x-pad) / float64(s.size.Width-pad*2)
 		}
 	}
-
-	return false, 0.0
+	return 0.0
 }
 
 func (s *Slider) updateValue(ratio float64) {
@@ -159,7 +151,7 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 }
 
 const (
-	standardScale = 6
+	standardScale = 4
 	minLongSide   = 50
 )
 
@@ -188,32 +180,33 @@ func (s *sliderRenderer) Refresh() {
 
 // Layout the components of the widget.
 func (s *sliderRenderer) Layout(size fyne.Size) {
-	pad := theme.Padding()
-	diameter := pad * standardScale
-	activeOffset, thumbOffset := s.getOffsets(diameter)
+	trackWidth := theme.Padding()
+	diameter := s.slider.buttonDiameter()
+	activeOffset := s.getOffset()
+	endPad := s.slider.endOffset()
 
 	var trackPos, activePos, thumbPos fyne.Position
 	var trackSize, activeSize fyne.Size
 
 	switch s.slider.Orientation {
 	case Vertical:
-		trackPos = fyne.NewPos(size.Width/2, 0)
+		trackPos = fyne.NewPos(size.Width/2, endPad)
 		activePos = fyne.NewPos(trackPos.X, activeOffset)
 
-		trackSize = fyne.NewSize(pad, size.Height)
-		activeSize = fyne.NewSize(pad, trackSize.Height-activeOffset)
+		trackSize = fyne.NewSize(trackWidth, size.Height-endPad*2)
+		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset-endPad)
 
 		thumbPos = fyne.NewPos(
-			trackPos.X-(diameter-trackSize.Width)/2, thumbOffset)
+			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-((diameter-theme.Padding())/2))
 	case Horizontal:
-		trackPos = fyne.NewPos(0, size.Height/2)
+		trackPos = fyne.NewPos(endPad, size.Height/2)
 		activePos = trackPos
 
-		trackSize = fyne.NewSize(size.Width, pad)
-		activeSize = fyne.NewSize(activeOffset, pad)
+		trackSize = fyne.NewSize(size.Width-endPad*2, trackWidth)
+		activeSize = fyne.NewSize(activeOffset-endPad, trackWidth)
 
 		thumbPos = fyne.NewPos(
-			thumbOffset, trackPos.Y-(diameter-trackSize.Height)/2)
+			activeOffset-((diameter-theme.Padding())/2), trackPos.Y-(diameter-trackSize.Height)/2)
 	}
 
 	s.track.Move(trackPos)
@@ -228,7 +221,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 
 // MinSize calculates the minimum size of a widget.
 func (s *sliderRenderer) MinSize() fyne.Size {
-	s1, s2 := minLongSide, theme.Padding()*standardScale
+	s1, s2 := minLongSide, s.slider.buttonDiameter()
 
 	switch s.slider.Orientation {
 	case Vertical:
@@ -251,19 +244,20 @@ func (s *sliderRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s *sliderRenderer) getOffsets(diameter int) (int, int) {
+func (s *sliderRenderer) getOffset() int {
 	w := s.slider
-	t := s.track.Size()
+	size := s.track.Size()
 	ratio := (w.Value - w.Min) / (w.Max - w.Min)
+	endPad := s.slider.endOffset()
 
 	switch w.Orientation {
 	case Vertical:
-		y := float64(t.Height) - (ratio * float64(t.Height))
-		return int(y), int(y) - int((1-ratio)*float64(diameter))
+		y := int(float64(size.Height)-ratio*float64(size.Height)) + endPad
+		return y
 	case Horizontal:
-		x := ratio * float64(t.Width)
-		return int(x), int(x) - int(ratio*float64(diameter))
+		x := int(ratio*float64(size.Width)) + endPad
+		return x
 	}
 
-	return 0, 0
+	return endPad
 }
