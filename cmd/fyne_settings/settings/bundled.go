@@ -1,6 +1,6 @@
 // **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
 
-package main
+package settings
 
 import "fyne.io/fyne"
 
