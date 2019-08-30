@@ -86,16 +86,17 @@ func (p *preferences) loadFromFile(path string) error {
 func newPreferences() *preferences {
 	p := &preferences{}
 	p.InMemoryPreferences = internal.NewInMemoryPreferences()
+
+	p.OnChange = func() {
+		p.save()
+	}
 	return p
 }
 
 func loadPreferences(id string) *preferences {
 	p := newPreferences()
 	p.appID = id
-	p.OnChange = func() {
-		p.save()
-	}
-	p.load()
 
+	p.load()
 	return p
 }
