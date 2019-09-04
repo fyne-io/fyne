@@ -411,22 +411,22 @@ func Test_glCanvas_walkTree(t *testing.T) {
 	})
 
 	assert.Equal(t, []nodeInfo{
-		nodeInfo{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
-		nodeInfo{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
-		nodeInfo{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
-		nodeInfo{obj: leftObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 6},
-		nodeInfo{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 13},
-		nodeInfo{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
-		nodeInfo{obj: rightObj2, lastBeforeCallIndex: 11, lastAfterCallIndex: 12},
+		{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
+		{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
+		{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
+		{obj: leftObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 6},
+		{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 13},
+		{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
+		{obj: rightObj2, lastBeforeCallIndex: 11, lastAfterCallIndex: 12},
 	}, secondRunBeforePainterData, "second run uses cached nodes")
 	assert.Equal(t, []nodeInfo{
-		nodeInfo{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
-		nodeInfo{obj: leftObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 6},
-		nodeInfo{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
-		nodeInfo{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
-		nodeInfo{obj: rightObj2, lastBeforeCallIndex: 11, lastAfterCallIndex: 12},
-		nodeInfo{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 13},
-		nodeInfo{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
+		{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
+		{obj: leftObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 6},
+		{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
+		{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
+		{obj: rightObj2, lastBeforeCallIndex: 11, lastAfterCallIndex: 12},
+		{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 13},
+		{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
 	}, secondRunAfterPainterData, "second run uses cached nodes")
 	leftObj1Node := nodes[2]
 	leftObj2Node := nodes[3]
@@ -462,22 +462,22 @@ func Test_glCanvas_walkTree(t *testing.T) {
 	})
 
 	assert.Equal(t, []nodeInfo{
-		nodeInfo{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
-		nodeInfo{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
-		nodeInfo{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
-		nodeInfo{obj: leftNewObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 0}, // new node for replaced obj
-		nodeInfo{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 13},
-		nodeInfo{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
-		nodeInfo{obj: thirdCol, lastBeforeCallIndex: 12, lastAfterCallIndex: 0}, // new node for third column
+		{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
+		{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
+		{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
+		{obj: leftNewObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 0}, // new node for replaced obj
+		{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 13},
+		{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
+		{obj: thirdCol, lastBeforeCallIndex: 12, lastAfterCallIndex: 0}, // new node for third column
 	}, thirdRunBeforePainterData, "third run uses cached nodes if possible")
 	assert.Equal(t, []nodeInfo{
-		nodeInfo{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
-		nodeInfo{obj: leftNewObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 6}, // new node for replaced obj
-		nodeInfo{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
-		nodeInfo{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
-		nodeInfo{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 11},
-		nodeInfo{obj: thirdCol, lastBeforeCallIndex: 12, lastAfterCallIndex: 13}, // new node for third column
-		nodeInfo{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
+		{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
+		{obj: leftNewObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 6}, // new node for replaced obj
+		{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
+		{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
+		{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 11},
+		{obj: thirdCol, lastBeforeCallIndex: 12, lastAfterCallIndex: 13}, // new node for third column
+		{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
 	}, thirdRunAfterPainterData, "third run uses cached nodes if possible")
 	assert.NotEqual(t, leftObj2Node, leftObj1Node.nextSibling, "new node for replaced object")
 	assert.Nil(t, rightObj1Node.nextSibling, "node for removed object has been removed, too")
@@ -508,26 +508,26 @@ func Test_glCanvas_walkTree(t *testing.T) {
 	})
 
 	assert.Equal(t, []nodeInfo{
-		nodeInfo{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
-		nodeInfo{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
-		nodeInfo{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
-		nodeInfo{obj: leftNewObj2a, lastBeforeCallIndex: 5, lastAfterCallIndex: 0}, // new node for inserted obj
-		nodeInfo{obj: leftNewObj2, lastBeforeCallIndex: 7, lastAfterCallIndex: 0},  // new node because of tail cut
-		nodeInfo{obj: rightCol, lastBeforeCallIndex: 10, lastAfterCallIndex: 11},
-		nodeInfo{obj: rightNewObj0, lastBeforeCallIndex: 11, lastAfterCallIndex: 0}, // new node for inserted obj
-		nodeInfo{obj: rightObj1, lastBeforeCallIndex: 13, lastAfterCallIndex: 0},    // new node because of tail cut
-		nodeInfo{obj: thirdCol, lastBeforeCallIndex: 16, lastAfterCallIndex: 13},
+		{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
+		{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
+		{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
+		{obj: leftNewObj2a, lastBeforeCallIndex: 5, lastAfterCallIndex: 0}, // new node for inserted obj
+		{obj: leftNewObj2, lastBeforeCallIndex: 7, lastAfterCallIndex: 0},  // new node because of tail cut
+		{obj: rightCol, lastBeforeCallIndex: 10, lastAfterCallIndex: 11},
+		{obj: rightNewObj0, lastBeforeCallIndex: 11, lastAfterCallIndex: 0}, // new node for inserted obj
+		{obj: rightObj1, lastBeforeCallIndex: 13, lastAfterCallIndex: 0},    // new node because of tail cut
+		{obj: thirdCol, lastBeforeCallIndex: 16, lastAfterCallIndex: 13},
 	}, fourthRunBeforePainterData, "fourth run uses cached nodes if possible")
 	assert.Equal(t, []nodeInfo{
-		nodeInfo{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
-		nodeInfo{obj: leftNewObj2a, lastBeforeCallIndex: 5, lastAfterCallIndex: 6},
-		nodeInfo{obj: leftNewObj2, lastBeforeCallIndex: 7, lastAfterCallIndex: 8},
-		nodeInfo{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 9},
-		nodeInfo{obj: rightNewObj0, lastBeforeCallIndex: 11, lastAfterCallIndex: 12},
-		nodeInfo{obj: rightObj1, lastBeforeCallIndex: 13, lastAfterCallIndex: 14},
-		nodeInfo{obj: rightCol, lastBeforeCallIndex: 10, lastAfterCallIndex: 15},
-		nodeInfo{obj: thirdCol, lastBeforeCallIndex: 16, lastAfterCallIndex: 17},
-		nodeInfo{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 18},
+		{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
+		{obj: leftNewObj2a, lastBeforeCallIndex: 5, lastAfterCallIndex: 6},
+		{obj: leftNewObj2, lastBeforeCallIndex: 7, lastAfterCallIndex: 8},
+		{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 9},
+		{obj: rightNewObj0, lastBeforeCallIndex: 11, lastAfterCallIndex: 12},
+		{obj: rightObj1, lastBeforeCallIndex: 13, lastAfterCallIndex: 14},
+		{obj: rightCol, lastBeforeCallIndex: 10, lastAfterCallIndex: 15},
+		{obj: thirdCol, lastBeforeCallIndex: 16, lastAfterCallIndex: 17},
+		{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 18},
 	}, fourthRunAfterPainterData, "fourth run uses cached nodes if possible")
 	// check cache tree integrity
 	// content node
@@ -590,22 +590,22 @@ func Test_glCanvas_walkTree(t *testing.T) {
 	})
 
 	assert.Equal(t, []nodeInfo{
-		nodeInfo{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 18},
-		nodeInfo{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 9},
-		nodeInfo{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
-		nodeInfo{obj: leftNewObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 0}, // new node because of tail cut
-		nodeInfo{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 15},
-		nodeInfo{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 0}, // new node because of tail cut
-		nodeInfo{obj: thirdCol, lastBeforeCallIndex: 12, lastAfterCallIndex: 17},
+		{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 18},
+		{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 9},
+		{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
+		{obj: leftNewObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 0}, // new node because of tail cut
+		{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 15},
+		{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 0}, // new node because of tail cut
+		{obj: thirdCol, lastBeforeCallIndex: 12, lastAfterCallIndex: 17},
 	}, fifthRunBeforePainterData, "fifth run uses cached nodes if possible")
 	assert.Equal(t, []nodeInfo{
-		nodeInfo{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
-		nodeInfo{obj: leftNewObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 6},
-		nodeInfo{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
-		nodeInfo{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
-		nodeInfo{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 11},
-		nodeInfo{obj: thirdCol, lastBeforeCallIndex: 12, lastAfterCallIndex: 13},
-		nodeInfo{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
+		{obj: leftObj1, lastBeforeCallIndex: 3, lastAfterCallIndex: 4},
+		{obj: leftNewObj2, lastBeforeCallIndex: 5, lastAfterCallIndex: 6},
+		{obj: leftCol, lastBeforeCallIndex: 2, lastAfterCallIndex: 7},
+		{obj: rightObj1, lastBeforeCallIndex: 9, lastAfterCallIndex: 10},
+		{obj: rightCol, lastBeforeCallIndex: 8, lastAfterCallIndex: 11},
+		{obj: thirdCol, lastBeforeCallIndex: 12, lastAfterCallIndex: 13},
+		{obj: content, lastBeforeCallIndex: 1, lastAfterCallIndex: 14},
 	}, fifthRunAfterPainterData, "fifth run uses cached nodes if possible")
 	// check cache tree integrity
 	// content node
