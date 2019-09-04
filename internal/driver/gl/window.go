@@ -112,11 +112,6 @@ func (w *window) CenterOnScreen() {
 
 // centerOnScreen handles the logic for centering a window
 func (w *window) centerOnScreen() {
-	// exit immediately if window is not supposed to be centered
-	if !w.centered {
-		return
-	}
-
 	runOnMain(func() {
 		viewWidth, viewHeight := w.viewport.GetSize()
 
@@ -297,9 +292,7 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) Show() {
-	if w.fullScreen {
-		w.SetFullScreen(true)
-	} else if w.centered {
+	if w.centered {
 		w.centerOnScreen()
 	}
 
@@ -307,6 +300,10 @@ func (w *window) Show() {
 		w.visible = true
 		w.viewport.Show()
 	})
+
+	if w.fullScreen { // this does not work if called before viewport.Show()...
+		w.SetFullScreen(true)
+	}
 
 	// show top canvas element
 	if w.canvas.content != nil {
