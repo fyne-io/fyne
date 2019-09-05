@@ -399,6 +399,17 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	assert.Equal(t, 1, len(items)) // Paste
 }
 
+func TestEntry_FocusWithPopUp(t *testing.T) {
+	entry := NewEntry()
+	tapPos := fyne.NewPos(1, 1)
+	test.TapSecondaryAt(entry, tapPos)
+
+	assert.NotNil(t, entry.popUp)
+
+	test.Tap(entry.popUp)
+	assert.True(t, entry.Focused())
+}
+
 func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
