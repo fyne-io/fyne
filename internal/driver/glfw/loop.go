@@ -131,7 +131,6 @@ func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
 		case object := <-canvas.refreshQueue:
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 				canvas.painter.Free(obj)
-				delete(canvas.minSizes, obj)
 				return false
 			}
 			driver.WalkCompleteObjectTree(object, freeWalked, nil)
