@@ -646,9 +646,14 @@ func (e *Entry) DoubleTapped(ev *fyne.PointEvent) {
 
 // TypedRune receives text input events when the Entry widget is focused.
 func (e *Entry) TypedRune(r rune) {
-	if e.ReadOnly || e.popUp != nil {
+	if e.ReadOnly {
 		return
 	}
+
+	if e.popUp != nil {
+		e.popUp.Hide()
+	}
+
 	provider := e.textProvider()
 
 	// if we've typed a character and we're selecting then replace the selection with the character
