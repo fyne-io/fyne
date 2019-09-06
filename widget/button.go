@@ -79,6 +79,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 
 // ApplyTheme is called when the Button may need to update its look
 func (b *buttonRenderer) ApplyTheme() {
+	b.label.TextSize = theme.TextSize()
 	b.label.Color = theme.TextColor()
 	if b.button.Disabled() {
 		b.label.Color = theme.DisabledTextColor()

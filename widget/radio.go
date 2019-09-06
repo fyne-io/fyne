@@ -93,6 +93,7 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 func (r *radioRenderer) ApplyTheme() {
 	for _, item := range r.items {
 		item.label.Color = theme.TextColor()
+		item.label.TextSize = theme.TextSize()
 		if r.radio.Disabled() {
 			item.label.Color = theme.DisabledTextColor()
 		}
