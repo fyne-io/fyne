@@ -284,7 +284,6 @@ func (r *textRenderer) Refresh() {
 
 		textCanvas.Alignment = r.provider.presenter.textAlign()
 		textCanvas.TextStyle = r.provider.presenter.textStyle()
-		textCanvas.Hidden = r.provider.Hidden
 
 		if add {
 			r.texts = append(r.texts, textCanvas)
