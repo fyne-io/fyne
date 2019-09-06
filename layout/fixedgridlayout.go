@@ -36,7 +36,7 @@ func (g *fixedGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		child.Move(fyne.NewPos(x, y))
 		child.Resize(g.CellSize)
 
-		if (i+1)%g.colCount == 0 {
+		if i > 0 && (i+1)%g.colCount == 0 {
 			x = 0
 			y += g.CellSize.Height + theme.Padding()
 			g.rowCount++
@@ -51,8 +51,8 @@ func (g *fixedGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // layout has no padding. The returned size does not take into account the number
 // of columns as this layout re-flows dynamically.
 func (g *fixedGridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return fyne.NewSize((g.CellSize.Width),
-		((g.CellSize.Height * g.rowCount) + ((g.rowCount - 1) * theme.Padding())))
+	return fyne.NewSize(g.CellSize.Width,
+		(g.CellSize.Height*g.rowCount)+((g.rowCount-1)*theme.Padding()))
 }
 
 // NewFixedGridLayout returns a new FixedGridLayout instance
