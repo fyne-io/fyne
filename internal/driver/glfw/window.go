@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
+	"math"
 	"os"
 	"runtime"
 	"strconv"
@@ -305,7 +306,7 @@ func (w *window) detectScale() float32 {
 	if dpi > 1000 || dpi < 10 {
 		dpi = 96
 	}
-	w.canvas.detectedScale = float32(dpi) / 96.0
+	w.canvas.detectedScale = float32(math.Round(float64(dpi)/96.0*10.0)) / 10.0
 	return w.canvas.detectedScale
 }
 
