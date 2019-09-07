@@ -3,6 +3,7 @@ package gomobile
 import (
 	"time"
 
+	"fyne.io/fyne/widget"
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/event/lifecycle"
 	"golang.org/x/mobile/event/paint"
@@ -182,10 +183,25 @@ func (d *driver) onPaint(sz size.Event) {
 	canvas := current.Canvas().(*canvas)
 	newSize := fyne.NewSize(int(float32(sz.WidthPx)/canvas.scale), int(float32(sz.HeightPx)/canvas.scale))
 	canvas.Resize(newSize)
-	canvas.painter.Paint(canvas.content, canvas, canvas.Size())
-	if canvas.overlay != nil {
-		canvas.painter.Paint(canvas.overlay, canvas, canvas.Size())
+
+	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+		// TODO should this be somehow not scroll container specific?
+		if _, ok := obj.(*widget.ScrollContainer); ok {
+			canvas.painter.StartClipping(
+				fyne.NewPos(pos.X, canvas.Size().Height-pos.Y-obj.Size().Height),
+				obj.Size(),
+			)
+		}
+		canvas.painter.Paint(obj, pos, newSize)
+		return false
 	}
+	afterPaint := func(obj, _ fyne.CanvasObject) {
+		if _, ok := obj.(*widget.ScrollContainer); ok {
+			canvas.painter.StopClipping()
+		}
+	}
+
+	canvas.walkTree(paint, afterPaint)
 }
 
 func (d *driver) onTapEnd(x, y float32) {

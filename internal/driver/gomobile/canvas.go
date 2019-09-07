@@ -4,6 +4,7 @@ import (
 	"image"
 
 	"fyne.io/fyne"
+	util "fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
 )
@@ -145,6 +146,19 @@ func (c *canvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.
 
 func (c *canvas) Capture() image.Image {
 	return c.painter.Capture(c)
+}
+
+func (c *canvas) walkTree(
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
+	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+) {
+	util.WalkVisibleObjectTree(c.content, beforeChildren, afterChildren)
+	//if c.menu != nil {
+	//	driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
+	//}
+	if c.overlay != nil {
+		util.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
+	}
 }
 
 // NewCanvas creates a new gomobile canvas. This is a canvas that will render on a mobile device using OpenGL.
