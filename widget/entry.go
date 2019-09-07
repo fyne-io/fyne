@@ -649,6 +649,11 @@ func (e *Entry) TypedRune(r rune) {
 	if e.ReadOnly {
 		return
 	}
+
+	if e.popUp != nil {
+		e.popUp.Hide()
+	}
+
 	provider := e.textProvider()
 
 	// if we've typed a character and we're selecting then replace the selection with the character
