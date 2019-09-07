@@ -156,14 +156,18 @@ func (c *glCanvas) Scale() float32 {
 }
 
 func (c *glCanvas) SetScale(scale float32) {
+	c.setScaleValues(scale)
+
+	c.context.RescaleContext()
+}
+
+func (c *glCanvas) setScaleValues(scale float32) {
 	if scale == fyne.SettingsScaleAuto {
 		c.scale = c.detectedScale
 	} else {
 		c.scale = scale
 	}
 	c.setDirty(true)
-
-	c.context.RescaleContext()
 }
 
 func (c *glCanvas) OnTypedRune() func(rune) {

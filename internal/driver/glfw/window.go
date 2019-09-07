@@ -427,14 +427,13 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	w.xpos, w.ypos = x, y
 	scale := w.canvas.scale
 	newScale := w.detectScale()
-
 	if scale == newScale {
 		forceWindowRefresh(w)
 		return
 	}
 
-	w.canvas.SetScale(newScale)
-	w.RescaleContext()
+	w.canvas.setScaleValues(newScale)
+	w.rescaleOnMain()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -976,12 +975,15 @@ func (w *window) RunWithContext(f func()) {
 
 func (w *window) RescaleContext() {
 	runOnMain(func() {
-		w.fitContent()
-
-		size := w.canvas.size.Union(w.canvas.MinSize())
-		newWidth, newHeight := w.screenSize(size)
-		w.viewport.SetSize(newWidth, newHeight)
+		w.rescaleOnMain()
 	})
+}
+
+func (w *window) rescaleOnMain() {
+	w.fitContent()
+	size := w.canvas.size.Union(w.canvas.MinSize())
+	newWidth, newHeight := w.screenSize(size)
+	w.viewport.SetSize(newWidth, newHeight)
 }
 
 func (w *window) Context() interface{} {
