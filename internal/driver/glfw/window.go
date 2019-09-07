@@ -162,8 +162,7 @@ func (w *window) RequestFocus() {
 
 func (w *window) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
-	scale := w.canvas.Scale()
-	w.width, w.height = int(float32(size.Width)*scale), int(float32(size.Height)*scale)
+	w.width, w.height = driver.ScaleInt(w.canvas, size.Width), driver.ScaleInt(w.canvas, size.Height)
 	runOnMain(func() {
 		w.ignoreResize = true
 		w.viewport.SetSize(w.width, w.height)
@@ -258,22 +257,6 @@ func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func scaleForDpi(xdpi int) float32 {
-	switch {
-	case xdpi > 1000:
-		// assume that this is a mistake and bail
-		return float32(1.0)
-	case xdpi > 192:
-		return float32(1.5)
-	case xdpi > 144:
-		return float32(1.35)
-	case xdpi > 120:
-		return float32(1.2)
-	default:
-		return float32(1.0)
-	}
-}
-
 func (w *window) getMonitorForWindow() *glfw.Monitor {
 	for _, monitor := range glfw.GetMonitors() {
 		x, y := monitor.GetPos()
@@ -318,7 +301,10 @@ func (w *window) detectScale() float32 {
 	widthPx := monitor.GetVideoMode().Width
 
 	dpi := float32(widthPx) / (float32(widthMm) / 25.4)
-	w.canvas.detectedScale = scaleForDpi(int(dpi))
+	if dpi > 1000 || dpi < 10 {
+		dpi = 96
+	}
+	w.canvas.detectedScale = float32(dpi) / 144.0
 	return w.canvas.detectedScale
 }
 
@@ -374,7 +360,7 @@ func (w *window) Content() fyne.CanvasObject {
 }
 
 func (w *window) resize(canvasSize fyne.Size) {
-	if !w.fullScreen {
+	if !w.fullScreen && !w.fixedSize {
 		w.width = driver.ScaleInt(w.canvas, canvasSize.Width)
 		w.height = driver.ScaleInt(w.canvas, canvasSize.Height)
 	}
@@ -432,7 +418,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 		return
 	}
 
-	w.canvas.setScaleValues(newScale)
+	w.canvas.setScaleValue(newScale)
 	w.rescaleOnMain()
 }
 
