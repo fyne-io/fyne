@@ -1029,8 +1029,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret.canvas.painter = gl.NewPainter(ret.canvas, ret)
 		ret.canvas.painter.Init()
 		ret.canvas.context = ret
-		ret.canvas.detectedScale = ret.detectScale()
-		ret.canvas.scale = ret.canvas.detectedScale
+		ret.canvas.scale = ret.detectScale()
 		ret.SetIcon(ret.icon) // if this is nil we will get the app icon
 		d.windows = append(d.windows, ret)
 
