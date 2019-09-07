@@ -95,7 +95,7 @@ func (w *window) Close() {
 	if w.onClosed != nil {
 		w.onClosed()
 	}
-	//	d := fyne.CurrentApp().Driver().(*driver)
+	//	d := fyne.CurrentApp().Driver().(*mobileDriver)
 
 	// TODO remove from d.windows
 }
@@ -136,5 +136,5 @@ func (w *window) RescaleContext() {
 }
 
 func (w *window) Context() interface{} {
-	return fyne.CurrentApp().Driver().(*driver).glctx
+	return fyne.CurrentApp().Driver().(*mobileDriver).glctx
 }

@@ -4,7 +4,7 @@ import (
 	"image"
 
 	"fyne.io/fyne"
-	util "fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
 )
@@ -152,12 +152,12 @@ func (c *canvas) walkTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
-	util.WalkVisibleObjectTree(c.content, beforeChildren, afterChildren)
+	driver.WalkVisibleObjectTree(c.content, beforeChildren, afterChildren)
 	//if c.menu != nil {
 	//	driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
 	//}
 	if c.overlay != nil {
-		util.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
+		driver.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
 	}
 }
 
