@@ -15,7 +15,14 @@ type gridLayout struct {
 }
 
 func (g *gridLayout) countRows(objects []fyne.CanvasObject) int {
-	return int(math.Ceil(float64(len(objects)) / float64(g.Cols)))
+	count := 0
+	for _, child := range objects {
+		if child.Visible() {
+			count++
+		}
+	}
+
+	return int(math.Ceil(float64(count) / float64(g.Cols)))
 }
 
 // Get the leading (top or left) edge of a grid cell.
@@ -45,7 +52,12 @@ func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	cellHeight := float64(size.Height-padHeight) / float64(rows)
 
 	row, col := 0, 0
-	for i, child := range objects {
+	i := 0
+	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		x1 := getLeading(cellWidth, col)
 		y1 := getLeading(cellHeight, row)
 		x2 := getTrailing(cellWidth, col)
@@ -57,11 +69,10 @@ func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		if (i+1)%g.Cols == 0 {
 			row++
 			col = 0
-
 		} else {
 			col++
-
 		}
+		i++
 	}
 }
 
@@ -73,6 +84,10 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	rows := g.countRows(objects)
 	minSize := fyne.NewSize(0, 0)
 	for _, child := range objects {
+		if !child.Visible() {
+			continue
+		}
+
 		minSize = minSize.Union(child.MinSize())
 	}
 

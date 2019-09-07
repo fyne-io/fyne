@@ -68,7 +68,7 @@ func (d *driver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	var pos fyne.Position
 	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*canvas)
 
-	util.WalkObjectTree(c.content, func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	util.WalkVisibleObjectTree(c.content, func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if o == co {
 			pos = p
 			return true
@@ -226,7 +226,7 @@ func (d *driver) freeDirtyTextures(canvas *canvas) {
 				canvas.painter.Free(obj)
 				return false
 			}
-			util.WalkObjectTree(object, freeWalked, nil)
+			util.WalkCompleteObjectTree(object, freeWalked, nil)
 		default:
 			return
 		}

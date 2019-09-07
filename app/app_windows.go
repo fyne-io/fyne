@@ -5,6 +5,7 @@ package app
 import (
 	"net/url"
 	"os"
+	"path/filepath"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
