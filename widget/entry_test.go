@@ -410,6 +410,18 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 	assert.True(t, entry.Focused())
 }
 
+func TestEntry_HidePopUpOnEntry(t *testing.T) {
+	entry := NewEntry()
+	tapPos := fyne.NewPos(1, 1)
+
+	test.TapSecondaryAt(entry, tapPos)
+	test.Type(entry, "KJGFD")
+
+	assert.NotNil(t, entry.popUp)
+	assert.Equal(t, "KJGFD", entry.Text)
+	assert.Equal(t, true, entry.popUp.Hidden)
+}
+
 func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
