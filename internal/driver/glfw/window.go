@@ -305,7 +305,7 @@ func (w *window) detectScale() float32 {
 	if dpi > 1000 || dpi < 10 {
 		dpi = 96
 	}
-	w.canvas.detectedScale = float32(dpi) / 144.0
+	w.canvas.detectedScale = float32(dpi) / 96.0
 	return w.canvas.detectedScale
 }
 
