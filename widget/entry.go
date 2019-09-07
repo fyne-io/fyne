@@ -217,6 +217,12 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (e *entryRenderer) Destroy() {
+	if e.entry.popUp != nil {
+		c := fyne.CurrentApp().Driver().CanvasForObject(e.entry)
+		c.SetOverlay(nil)
+		Renderer(e.entry.popUp).Destroy()
+		e.entry.popUp = nil
+	}
 }
 
 // Declare conformity with interfaces
@@ -252,6 +258,7 @@ type Entry struct {
 
 	// selecting indicates whether the cursor has moved since it was at the selection start location
 	selecting bool
+	popUp     *PopUp
 	// TODO: Add OnSelectChanged
 }
 
@@ -287,6 +294,9 @@ func (e *Entry) Show() {
 func (e *Entry) Hide() {
 	if e.focused {
 		fyne.CurrentApp().Driver().CanvasForObject(e).Focus(nil)
+	}
+	if e.popUp != nil {
+		e.popUp.Hide()
 	}
 	e.hide(e)
 }
@@ -481,19 +491,23 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 // TappedSecondary is called when right or alternative tap is invoked.
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
-func (e *Entry) TappedSecondary(_ *fyne.PointEvent) {
+func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
+	if e.ReadOnly {
+		return
+	}
+
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
 	item := fyne.NewMenuItem("Paste", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.pasteFromClipboard(clipboard)
 	})
-	popUp := NewPopUpMenu(fyne.NewMenu("", item), c)
+	e.popUp = NewPopUpMenu(fyne.NewMenu("", item), c)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
-	popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height))
+	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, e.Size().Height))
 
-	popUp.Move(popUpPos)
+	e.popUp.Move(popUpPos)
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,

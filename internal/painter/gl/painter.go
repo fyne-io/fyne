@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter"
 )
 
 // Painter defines the functionality of our OpenGL based renderer
@@ -78,21 +79,12 @@ func (p *glPainter) textureScaleInt(v int) int {
 	return int(math.Round(float64(v) * float64(p.canvas.Scale()*p.texScale)))
 }
 
-func unscaleInt(c fyne.Canvas, v int) int {
-	switch c.Scale() {
-	case 1.0:
-		return v
-	default:
-		return int(float32(v) / c.Scale())
-	}
-}
-
 // NewPainter creates a new GL based renderer for the provided canvas.
 // If it is a master painter it will also initialise OpenGL
 func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p := &glPainter{canvas: c, context: ctx}
 	p.texScale = 1.0
-	go svgCacheMonitorTheme()
+	go painter.SvgCacheMonitorTheme()
 
 	glInit()
 	return p

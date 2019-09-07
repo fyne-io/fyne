@@ -384,18 +384,30 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 
 func TestEntry_TappedSecondary(t *testing.T) {
 	entry := NewEntry()
-	test.TapSecondary(entry)
+	tapPos := fyne.NewPos(1, 1)
+	test.TapSecondaryAt(entry, tapPos)
 
 	over := fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 	assert.NotNil(t, over)
 
 	cont := over.(*PopUp).Content
-	assert.Equal(t, cont.Position().X, pos.X+theme.Padding())
+	assert.Equal(t, cont.Position().X, pos.X+theme.Padding()+tapPos.X)
 	assert.True(t, cont.Position().Y > pos.Y)
 
 	items := cont.(*Box).Children
 	assert.Equal(t, 1, len(items)) // Paste
+}
+
+func TestEntry_FocusWithPopUp(t *testing.T) {
+	entry := NewEntry()
+	tapPos := fyne.NewPos(1, 1)
+	test.TapSecondaryAt(entry, tapPos)
+
+	assert.NotNil(t, entry.popUp)
+
+	test.Tap(entry.popUp)
+	assert.True(t, entry.Focused())
 }
 
 func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {

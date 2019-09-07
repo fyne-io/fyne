@@ -78,12 +78,14 @@ func (p *packager) packageLinux() {
 
 	appsDir := ensureSubDir(shareDir, "applications")
 	desktop := filepath.Join(appsDir, p.name+".desktop")
+	iconBase := filepath.Base(p.icon)
+	iconName := iconBase[0 : len(iconBase)-len(filepath.Ext(iconBase))]
 	deskFile, _ := os.Create(desktop)
 	io.WriteString(deskFile, "[Desktop Entry]\n"+
 		"Type=Application\n"+
 		"Name="+p.name+"\n"+
 		"Exec="+filepath.Base(p.exe)+"\n"+
-		"Icon="+filepath.Base(p.icon)+"\n")
+		"Icon="+iconName+"\n")
 
 	binDir := ensureSubDir(prefixDir, "bin")
 	binName := filepath.Join(binDir, filepath.Base(p.exe))
@@ -183,11 +185,15 @@ func (p *packager) packageWindows() {
 
 	// write manifest
 	manifest := p.exe + ".manifest"
-	manifestFile, _ := os.Create(manifest)
-	io.WriteString(manifestFile, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"+
-		"<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\" xmlns:asmv3=\"urn:schemas-microsoft-com:asm.v3\">\n"+
-		"<assemblyIdentity version=\"1.0.0.0\" processorArchitecture=\"*\" name=\""+p.name+"\" type=\"win32\"/>\n"+
-		"</assembly>")
+	manifestGenerated := false
+	if _, err := os.Stat(manifest); os.IsNotExist(err) {
+		manifestGenerated = true
+		manifestFile, _ := os.Create(manifest)
+		io.WriteString(manifestFile, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"+
+			"<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\" xmlns:asmv3=\"urn:schemas-microsoft-com:asm.v3\">\n"+
+			"<assemblyIdentity version=\"1.0.0.0\" processorArchitecture=\"*\" name=\""+p.name+"\" type=\"win32\"/>\n"+
+			"</assembly>")
+	}
 
 	// launch rsrc to generate the object file
 	outPath := filepath.Join(p.dir, "fyne.syso")
@@ -202,7 +208,9 @@ func (p *packager) packageWindows() {
 	vi.WriteSyso(outPath, runtime.GOARCH)
 
 	os.Remove(icoPath)
-	os.Remove(manifest)
+	if manifestGenerated {
+		os.Remove(manifest)
+	}
 	fmt.Println("For windows releases you need to re-run go build to include the changes")
 }
 

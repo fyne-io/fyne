@@ -1,4 +1,4 @@
-// +build !ci,!android,!ios,!mobile
+// +build !ci,!nacl,!android,!ios,!mobile
 
 package app
 
@@ -7,7 +7,8 @@ import (
 	"fyne.io/fyne/internal/driver/glfw"
 )
 
-// New returns a new app instance using the OpenGL driver.
-func New() fyne.App {
-	return NewAppWithDriver(glfw.NewGLDriver())
+// NewWithID returns a new app instance using the OpenGL driver.
+// The ID string should be globally unique to this app.
+func NewWithID(id string) fyne.App {
+	return NewAppWithDriver(glfw.NewGLDriver(), id)
 }

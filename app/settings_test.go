@@ -99,9 +99,15 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 	defer os.Remove(path)
 
 	called := make(chan interface{})
-	watchFile(path, func() {
+	watcher := watchFile(path, func() {
 		called <- true
 	})
+	if watcher == nil {
+		assert.Fail(t, "Could not start watcher")
+		return
+	}
+
+	defer watcher.Close()
 	os.Remove(path)
 	os.Create(path)
 

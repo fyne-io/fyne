@@ -45,7 +45,7 @@ func openFile(filename string) *os.File {
 }
 
 func main() {
-	f := openFile(path.Join("..", "bundled.go"))
+	f := openFile(path.Join("..", "settings", "bundled.go"))
 	if f == nil {
 		return
 	}

@@ -1,9 +1,19 @@
 package test
 
-import "fyne.io/fyne"
+import (
+	"image"
+
+	"fyne.io/fyne"
+)
+
+// SoftwarePainter describes a simple type that can render canvases
+type SoftwarePainter interface {
+	Paint(fyne.Canvas) image.Image
+}
 
 type testDriver struct {
-	device *device
+	device  *device
+	painter SoftwarePainter
 }
 
 // Declare conformity with Driver
@@ -56,6 +66,15 @@ func NewDriver() fyne.Driver {
 	driver := new(testDriver)
 	// make a single dummy window for rendering tests
 	NewWindow(nil)
+
+	return driver
+}
+
+// NewDriverWithPainter creates a new dummy driver that will pass the given
+// painter to all canvases created
+func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
+	driver := new(testDriver)
+	driver.painter = painter
 
 	return driver
 }
