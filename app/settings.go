@@ -52,8 +52,6 @@ func (s *settings) SetTheme(theme fyne.Theme) {
 }
 
 func (s *settings) Scale() float32 {
-	s.themeLock.RLock()
-	defer s.themeLock.RUnlock()
 	return s.schema.Scale
 }
 
