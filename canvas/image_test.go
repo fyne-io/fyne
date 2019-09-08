@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -34,6 +35,9 @@ func TestNewImageFromURL(t *testing.T) {
 
 	img := NewImageFromURL(urlStr)
 	assert.NotNil(t, img)
+	// simulate the time it might take to download (uncached)
+	assert.Nil(t, img.Resource)
+	time.Sleep(time.Millisecond * 300)
 	assert.NotNil(t, img.Resource)
 	assert.Equal(t, img.Resource.Name(), filepath.Base(urlStr))
 }
