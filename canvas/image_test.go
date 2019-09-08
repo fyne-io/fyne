@@ -28,12 +28,3 @@ func TestNewImageFromFile(t *testing.T) {
 	assert.NotNil(t, img)
 	assert.Equal(t, img.File, path)
 }
-
-func TestNewImageFromURL(t *testing.T) {
-	urlStr := "https://fyne.io/img/favicon.png"
-
-	img := NewImageFromURL(urlStr)
-	assert.NotNil(t, img)
-	assert.NotNil(t, img.Resource)
-	assert.Equal(t, img.Resource.Name(), filepath.Base(urlStr))
-}

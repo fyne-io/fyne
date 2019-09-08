@@ -57,8 +57,8 @@ func LoadResourceFromPath(path string) (Resource, error) {
 	return NewStaticResource(name, bytes), nil
 }
 
-// LoadResourceFromURL creates a new StaticResource in memory using the body of the specified URL.
-func LoadResourceFromURL(urlStr string) (Resource, error) {
+// LoadResourceFromURLString creates a new StaticResource in memory using the body of the specified URL.
+func LoadResourceFromURLString(urlStr string) (Resource, error) {
 	res, err := http.Get(urlStr)
 	if err != nil {
 		return nil, err
