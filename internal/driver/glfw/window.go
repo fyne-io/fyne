@@ -27,6 +27,7 @@ const (
 
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
+	initOnce = &sync.Once{}
 )
 
 func initCursors() {
@@ -216,6 +217,10 @@ func (w *window) SetIcon(icon fyne.Resource) {
 	}
 
 	w.viewport.SetIcon([]image.Image{pix})
+}
+
+func (w *window) SetMaster() {
+	w.master = true
 }
 
 func (w *window) MainMenu() *fyne.MainMenu {
@@ -1002,10 +1007,7 @@ func (w *window) waitForEvents() {
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
 	var ret *window
 	runOnMain(func() {
-		master := len(d.windows) == 0
-		if master {
-			d.initGLFW()
-		}
+		initOnce.Do(d.initGLFW)
 
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, 0)
@@ -1018,7 +1020,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		}
 		win.MakeContextCurrent()
 
-		ret = &window{viewport: win, title: title, master: master}
+		ret = &window{viewport: win, title: title}
 
 		// This channel will be closed when the window is closed.
 		ret.eventQueue = make(chan func(), 1024)

@@ -77,6 +77,10 @@ func (w *testWindow) SetIcon(icon fyne.Resource) {
 	// no-op
 }
 
+func (w *testWindow) SetMaster() {
+	// no-op
+}
+
 func (w *testWindow) MainMenu() *fyne.MainMenu {
 	return w.menu
 }

@@ -56,6 +56,7 @@ func main() {
 		fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") }),
 		fyne.NewMenuItem("Paste", func() { fmt.Println("Menu Paste") }),
 	)))
+	w.SetMaster()
 
 	tabs := widget.NewTabContainer(
 		widget.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),

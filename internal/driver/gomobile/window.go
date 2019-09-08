@@ -70,6 +70,10 @@ func (w *window) SetIcon(icon fyne.Resource) {
 	w.icon = icon
 }
 
+func (w *window) SetMaster() {
+	// no-op on mobile
+}
+
 func (w *window) MainMenu() *fyne.MainMenu {
 	// TODO add mainmenu support for mobile (burger and sidebar?)
 	return nil
