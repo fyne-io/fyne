@@ -93,9 +93,7 @@ func (d *gLDriver) runGL() {
 					// remove window from window list
 					viewport.Destroy()
 
-					if w.master {
-						d.Quit()
-					}
+					go w.destroy(d)
 					continue
 				} else {
 					newWindows = append(newWindows, win)

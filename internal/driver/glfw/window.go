@@ -27,7 +27,7 @@ const (
 
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
-	initOnce = &sync.Once{}
+	initOnce                                    = &sync.Once{}
 )
 
 func initCursors() {
@@ -404,13 +404,22 @@ func (w *window) closed(viewport *glfw.Window) {
 
 	// trigger callbacks
 	if w.onClosed != nil {
-		w.onClosed()
+		w.queueEvent(w.onClosed)
 	}
 
+}
+
+// destroy this window and, if it's the last window quit the app
+func (w *window) destroy(d *gLDriver) {
 	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
 	if w.eventQueue != nil {
+		w.waitForEvents()
 		close(w.eventQueue)
 		w.eventQueue = nil
+	}
+
+	if w.master || len(d.windows) == 0 {
+		d.Quit()
 	}
 }
 
