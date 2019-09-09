@@ -53,6 +53,7 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 // ApplyTheme is called when the Button may need to update its look
 func (s *selectRenderer) ApplyTheme() {
 	s.label.Color = theme.TextColor()
+	s.label.TextSize = theme.TextSize()
 
 	s.Refresh()
 }

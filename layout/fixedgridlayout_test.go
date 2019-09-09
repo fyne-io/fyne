@@ -62,4 +62,9 @@ func TestFixedGridLayout_MinSize(t *testing.T) {
 
 	layoutMin := layout.MinSize(container.Objects)
 	assert.Equal(t, minSize, layoutMin)
+
+	// This has a dynamic minSize so we need to check again after layout!
+	layout.Layout(container.Objects, minSize)
+	layoutMin = layout.MinSize(container.Objects)
+	assert.Equal(t, minSize, layoutMin)
 }

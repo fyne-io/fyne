@@ -224,3 +224,21 @@ func TestText_Color(t *testing.T) {
 
 	assert.Equal(t, color.White, textRenderTexts(text)[0].Color)
 }
+
+func TestTextRenderer_ApplyTheme(t *testing.T) {
+	label := NewLabel("Test\nLine2")
+	render := Renderer(label).(*textRenderer)
+
+	text1 := render.objects[0].(*canvas.Text)
+	text2 := render.objects[0].(*canvas.Text)
+	customTextSize1 := text1.TextSize
+	customTextSize2 := text2.TextSize
+	withTestTheme(func() {
+		render.ApplyTheme()
+		customTextSize1 = text1.TextSize
+		customTextSize2 = text2.TextSize
+	})
+
+	assert.Equal(t, testTextSize, customTextSize1)
+	assert.Equal(t, testTextSize, customTextSize2)
+}

@@ -227,3 +227,17 @@ func TestButton_Disabled(t *testing.T) {
 	button.Enable()
 	assert.False(t, button.Disabled())
 }
+
+func TestButtonRenderer_ApplyTheme(t *testing.T) {
+	button := &Button{}
+	render := Renderer(button).(*buttonRenderer)
+
+	textSize := render.label.TextSize
+	customTextSize := textSize
+	withTestTheme(func() {
+		render.ApplyTheme()
+		customTextSize = render.label.TextSize
+	})
+
+	assert.NotEqual(t, textSize, customTextSize)
+}

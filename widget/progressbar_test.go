@@ -43,3 +43,17 @@ func TestProgressRenderer_Layout_Overflow(t *testing.T) {
 	bar.SetValue(1.2)
 	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
 }
+
+func TestProgressRenderer_ApplyTheme(t *testing.T) {
+	bar := NewProgressBar()
+	render := Renderer(bar).(*progressRenderer)
+
+	textSize := render.label.TextSize
+	customTextSize := textSize
+	withTestTheme(func() {
+		render.ApplyTheme()
+		customTextSize = render.label.TextSize
+	})
+
+	assert.NotEqual(t, textSize, customTextSize)
+}

@@ -216,3 +216,17 @@ func TestCheck_Disabled(t *testing.T) {
 	check.Enable()
 	assert.False(t, check.Disabled())
 }
+
+func TestCheckRenderer_ApplyTheme(t *testing.T) {
+	check := &Check{}
+	render := Renderer(check).(*checkRenderer)
+
+	textSize := render.label.TextSize
+	customTextSize := textSize
+	withTestTheme(func() {
+		render.ApplyTheme()
+		customTextSize = render.label.TextSize
+	})
+
+	assert.NotEqual(t, textSize, customTextSize)
+}

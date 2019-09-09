@@ -340,3 +340,18 @@ func TestRadio_FocusIndicator_Centered_Vertically(t *testing.T) {
 		})
 	}
 }
+
+func TestRadioRenderer_ApplyTheme(t *testing.T) {
+	radio := NewRadio([]string{"Test"}, func(string) {})
+	render := Renderer(radio).(*radioRenderer)
+
+	item := render.items[0]
+	textSize := item.label.TextSize
+	customTextSize := textSize
+	withTestTheme(func() {
+		render.ApplyTheme()
+		customTextSize = item.label.TextSize
+	})
+
+	assert.NotEqual(t, textSize, customTextSize)
+}

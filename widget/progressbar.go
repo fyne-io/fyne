@@ -55,6 +55,7 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 func (p *progressRenderer) ApplyTheme() {
 	p.bar.FillColor = theme.PrimaryColor()
 	p.label.Color = theme.TextColor()
+	p.label.TextSize = theme.TextSize()
 
 	p.Refresh()
 }
