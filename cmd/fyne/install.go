@@ -28,16 +28,6 @@ func (i *installer) printHelp(indent string) {
 	fmt.Println(indent, "Command usage: fyne install [parameters]")
 }
 
-func (i *installer) installLinux(pkg string) error {
-
-	return nil
-}
-
-func (i *installer) installWindows(pkg string) error {
-
-	return nil
-}
-
 func (i *installer) install() error {
 	p := &packager{os: runtime.GOOS, install: true}
 	err := p.validate()
@@ -53,6 +43,7 @@ func (i *installer) install() error {
 			i.installDir = "/" // the tarball contains the structure starting at usr/local
 		case "windows":
 			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), p.name)
+			runAsAdminWindows("mkdir", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
 		default:
 			return errors.New("Unsupported terget operating system \"" + p.os + "\"")
 		}

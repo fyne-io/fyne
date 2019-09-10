@@ -65,6 +65,16 @@ func copyFileMode(src, tgt string, perm os.FileMode) error {
 	return err
 }
 
+func runAsAdminWindows(args ...string) error {
+	cmd := "\"/c\""
+
+	for _, arg := range args {
+		cmd += ",\"" + arg + "\""
+	}
+
+	return exec.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
+}
+
 // Declare conformity to command interface
 var _ command = (*packager)(nil)
 
@@ -212,6 +222,9 @@ func (p *packager) packageWindows() error {
 		os.Remove(manifest)
 	}
 
+	if p.install {
+		runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
+	}
 	return nil
 }
 
@@ -248,7 +261,7 @@ func (p *packager) run(_ []string) {
 func (p *packager) validate() error {
 	baseDir, err := os.Getwd()
 	if err != nil {
-		return errors.Wrap(err,"Unable to get the current directory, needed to find main executable")
+		return errors.Wrap(err, "Unable to get the current directory, needed to find main executable")
 	}
 	if p.dir == "" {
 		p.dir = baseDir
@@ -286,6 +299,6 @@ func (p *packager) doPackage() error {
 	case "windows":
 		return p.packageWindows()
 	default:
-		return errors.New("Unsupported terget operating system \""+p.os+"\"")
+		return errors.New("Unsupported terget operating system \"" + p.os + "\"")
 	}
 }
