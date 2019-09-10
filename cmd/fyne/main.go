@@ -50,6 +50,7 @@ func loadCommands() {
 
 	commands["bundle"] = &bundler{}
 	commands["package"] = &packager{}
+	commands["install"] = &installer{}
 }
 
 func main() {

@@ -13,10 +13,10 @@ import (
 	"runtime"
 	"strings"
 
-	"fyne.io/fyne"
-	ico "github.com/Kodeworks/golang-image-ico"
+	"github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
 	"github.com/josephspurrier/goversioninfo"
+	"github.com/pkg/errors"
 )
 
 func exists(path string) bool {
@@ -70,9 +70,10 @@ var _ command = (*packager)(nil)
 
 type packager struct {
 	os, name, dir, exe, icon string
+	install                  bool
 }
 
-func (p *packager) packageLinux() {
+func (p *packager) packageLinux() error {
 	prefixDir := ensureSubDir(ensureSubDir(p.dir, "usr"), "local")
 	shareDir := ensureSubDir(prefixDir, "share")
 
@@ -91,14 +92,18 @@ func (p *packager) packageLinux() {
 
 	iconThemeDir := ensureSubDir(ensureSubDir(shareDir, "icons"), "hicolor")
 	iconDir := ensureSubDir(ensureSubDir(iconThemeDir, "512x512"), "apps")
-	iconPath := filepath.Join(iconDir, p.name + filepath.Ext(p.icon))
+	iconPath := filepath.Join(iconDir, p.name+filepath.Ext(p.icon))
 	copyFile(p.icon, iconPath)
 
-	tarCmd := exec.Command("tar", "cf", p.name+".tar.gz", "usr")
-	tarCmd.Run()
+	if !p.install {
+		tarCmd := exec.Command("tar", "cf", p.name+".tar.gz", "usr")
+		tarCmd.Run()
+	}
+
+	return nil
 }
 
-func (p *packager) packageDarwin() {
+func (p *packager) packageDarwin() error {
 	appDir := ensureSubDir(p.dir, p.name+".app")
 	exeName := filepath.Base(p.exe)
 
@@ -137,46 +142,43 @@ func (p *packager) packageDarwin() {
 
 	img, err := os.Open(p.icon)
 	if err != nil {
-		fyne.LogError("Failed to open source image", err)
-		panic(err)
+		return errors.Wrapf(err, "Failed to open source image \"%s\"", p.icon)
 	}
 	defer img.Close()
 	srcImg, _, err := image.Decode(img)
 	if err != nil {
-		fyne.LogError("Faied to decode source image", err)
-		panic(err)
+		return errors.Wrapf(err, "Failed to decode source image")
 	}
 	dest, err := os.Create(icnsPath)
 	if err != nil {
-		fyne.LogError("Failed to open destination file", err)
-		panic(err)
+		return errors.Wrap(err, "Failed to open destination file")
 	}
 	defer dest.Close()
 	if err := icns.Encode(dest, srcImg); err != nil {
-		fyne.LogError("Failed to encode icns", err)
-		panic(err)
+		return errors.Wrap(err, "Failed to encode icns")
 	}
+
+	return nil
 }
 
-func (p *packager) packageWindows() {
+func (p *packager) packageWindows() error {
+	exePath := filepath.Dir(p.exe)
+
 	// convert icon
 	img, err := os.Open(p.icon)
 	if err != nil {
-		fyne.LogError("Failed to open source image", err)
-		panic(err)
+		return errors.Wrap(err, "Failed to open source image")
 	}
 	defer img.Close()
 	srcImg, _, err := image.Decode(img)
 	if err != nil {
-		fyne.LogError("Failed to decode source image", err)
-		panic(err)
+		return errors.Wrap(err, "Failed to decode source image")
 	}
 
-	icoPath := filepath.Join(p.dir, p.name+".ico")
+	icoPath := filepath.Join(exePath, p.name+".ico")
 	file, err := os.Create(icoPath)
 	if err != nil {
-		fyne.LogError("Failed to open image file", err)
-		panic(err)
+		return errors.Wrap(err, "Failed to open image file")
 	}
 	ico.Encode(file, srcImg)
 	file.Close()
@@ -194,7 +196,7 @@ func (p *packager) packageWindows() {
 	}
 
 	// launch rsrc to generate the object file
-	outPath := filepath.Join(p.dir, "fyne.syso")
+	outPath := filepath.Join(exePath, "fyne.syso")
 
 	vi := &goversioninfo.VersionInfo{}
 	vi.ProductName = p.name
@@ -209,14 +211,15 @@ func (p *packager) packageWindows() {
 	if manifestGenerated {
 		os.Remove(manifest)
 	}
-	fmt.Println("For windows releases you need to re-run go build to include the changes")
+
+	return nil
 }
 
 func (p *packager) addFlags() {
 	flag.StringVar(&p.os, "os", runtime.GOOS, "The operating system to target (like GOOS)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
-	flag.StringVar(&p.icon, "icon", "", "The name of the application icon file")
+	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
 }
 
 func (*packager) printHelp(indent string) {
@@ -226,43 +229,63 @@ func (*packager) printHelp(indent string) {
 }
 
 func (p *packager) run(_ []string) {
-	dir, err := os.Getwd()
+	err := p.validate()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Unable to get the current directory, needed to find main executable")
+		fmt.Fprint(os.Stderr, err.Error())
+		os.Exit(1)
 	}
-	p.dir = dir
+
+	err = p.doPackage()
+	if err != nil {
+		fmt.Fprint(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+	if runtime.GOOS == "windows" {
+		fmt.Println("For windows releases you need to re-run go build to include the changes")
+	}
+}
+
+func (p *packager) validate() error {
+	baseDir, err := os.Getwd()
+	if err != nil {
+		return errors.Wrap(err,"Unable to get the current directory, needed to find main executable")
+	}
+	if p.dir == "" {
+		p.dir = baseDir
+	}
 
 	if p.exe == "" {
-		exeName := filepath.Base(dir)
+		exeName := filepath.Base(baseDir)
 		if p.os == "windows" {
 			exeName = exeName + ".exe"
 		}
 
-		p.exe = filepath.Join(dir, exeName)
+		p.exe = filepath.Join(baseDir, exeName)
+	}
+	if !exists(p.exe) {
+		return fmt.Errorf("Executable %s could not be found\nYou may not have run \"go build\" for the target os", p.exe)
 	}
 
-	if !exists(p.exe) {
-		fmt.Fprintln(os.Stderr, "Executable", p.exe, "could not be found")
-		fmt.Fprintln(os.Stderr, "You may not have run \"go build\" for the target os")
-		os.Exit(1)
-	}
 	if p.name == "" {
 		name := filepath.Base(p.exe)
 		p.name = strings.TrimSuffix(name, filepath.Ext(name))
 	}
 	if p.icon == "" {
-		fmt.Fprintln(os.Stderr, "The -icon parameter is required for packaging")
-		os.Exit(1)
+		p.icon = filepath.Join(baseDir, "Icon.png")
 	}
 
+	return nil
+}
+
+func (p *packager) doPackage() error {
 	switch p.os {
-	case "linux":
-		p.packageLinux()
 	case "darwin":
-		p.packageDarwin()
+		return p.packageDarwin()
+	case "linux":
+		return p.packageLinux()
 	case "windows":
-		p.packageWindows()
+		return p.packageWindows()
 	default:
-		fmt.Fprintln(os.Stderr, "Unsupported os parameter,", p.os)
+		return errors.New("Unsupported terget operating system \""+p.os+"\"")
 	}
 }
