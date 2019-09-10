@@ -78,14 +78,12 @@ func (p *packager) packageLinux() {
 
 	appsDir := ensureSubDir(shareDir, "applications")
 	desktop := filepath.Join(appsDir, p.name+".desktop")
-	iconBase := filepath.Base(p.icon)
-	iconName := iconBase[0 : len(iconBase)-len(filepath.Ext(iconBase))]
 	deskFile, _ := os.Create(desktop)
 	io.WriteString(deskFile, "[Desktop Entry]\n"+
 		"Type=Application\n"+
 		"Name="+p.name+"\n"+
 		"Exec="+filepath.Base(p.exe)+"\n"+
-		"Icon="+iconName+"\n")
+		"Icon="+p.name+"\n")
 
 	binDir := ensureSubDir(prefixDir, "bin")
 	binName := filepath.Join(binDir, filepath.Base(p.exe))
@@ -93,7 +91,7 @@ func (p *packager) packageLinux() {
 
 	iconThemeDir := ensureSubDir(ensureSubDir(shareDir, "icons"), "hicolor")
 	iconDir := ensureSubDir(ensureSubDir(iconThemeDir, "512x512"), "apps")
-	iconPath := filepath.Join(iconDir, filepath.Base(p.icon))
+	iconPath := filepath.Join(iconDir, p.name + filepath.Ext(p.icon))
 	copyFile(p.icon, iconPath)
 
 	tarCmd := exec.Command("tar", "cf", p.name+".tar.gz", "usr")
