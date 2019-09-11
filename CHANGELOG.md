@@ -8,7 +8,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Added
 
 * Support for diagonal gradients
-* GLobal settings are now saved and can be set using the new fyne_settings app
+* Global settings are now saved and can be set using the new fyne_settings app
+* Support rendering in Go playground using playground.Render() helpers
 
 ### Changed
 

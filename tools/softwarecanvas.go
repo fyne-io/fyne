@@ -1,4 +1,4 @@
-package util
+package tools
 
 import (
 	"fyne.io/fyne/internal/painter/software"
