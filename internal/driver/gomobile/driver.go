@@ -3,6 +3,7 @@ package gomobile
 import (
 	"time"
 
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/widget"
 	"golang.org/x/mobile/app"
 	"golang.org/x/mobile/event/lifecycle"
@@ -211,8 +212,8 @@ func (d *mobileDriver) onTapEnd(x, y float32) {
 	}
 
 	canvas := current.Canvas().(*canvas)
-	tapX := driver.UnscaleInt(canvas, int(x))
-	tapY := driver.UnscaleInt(canvas, int(y))
+	tapX := internal.UnscaleInt(canvas, int(x))
+	tapY := internal.UnscaleInt(canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)
 
 	co, objX, objY := driver.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {

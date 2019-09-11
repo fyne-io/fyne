@@ -90,26 +90,6 @@ func walkObjectTree(
 	return cancelled
 }
 
-// ScaleInt converts a fyne coordinate into a device specific output value using the canvas scale
-func ScaleInt(c fyne.Canvas, v int) int {
-	switch c.Scale() {
-	case 1.0:
-		return v
-	default:
-		return int(math.Round(float64(v) * float64(c.Scale())))
-	}
-}
-
-// UnscaleInt converts a device specific output value into a fyne coordinate using the canvas scale
-func UnscaleInt(c fyne.Canvas, v int) int {
-	switch c.Scale() {
-	case 1.0:
-		return v
-	default:
-		return int(float32(v) / c.Scale())
-	}
-}
-
 // FindObjectAtPositionMatching is used to find an object in a canvas at the specified position.
 // The matches function determines of the type of object that is found at this position is of a suitable type.
 // The various canvas roots and overlays that can be searched are also passed in.
