@@ -176,6 +176,9 @@ func (c *glCanvas) Scale() float32 {
 	return c.scale
 }
 
+// SetScale sets the render scale for this specific canvas
+//
+// Deprecated: SetScale will be replaced by system wide settings in the future
 func (c *glCanvas) SetScale(scale float32) {
 	c.setScaleValue(scale)
 
