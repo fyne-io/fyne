@@ -20,7 +20,7 @@ func createTextDialog(title, message string, icon fyne.Resource, parent fyne.Win
 }
 
 // NewInformation creates a dialog over the specified window for user information.
-// The title is used for the ialog window and message is the content.
+// The title is used for the dialog window and message is the content.
 // After creation you should call Show().
 func NewInformation(title, message string, parent fyne.Window) Dialog {
 	return createTextDialog(title, message, theme.InfoIcon(), parent)
