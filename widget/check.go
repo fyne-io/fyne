@@ -48,6 +48,7 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 // ApplyTheme is called when the Check may need to update its look
 func (c *checkRenderer) ApplyTheme() {
 	c.label.Color = theme.TextColor()
+	c.label.TextSize = theme.TextSize()
 	if c.check.Disabled() {
 		c.label.Color = theme.DisabledTextColor()
 	}

@@ -246,6 +246,7 @@ func (r *textRenderer) ApplyTheme() {
 	}
 	for _, text := range r.texts {
 		text.Color = c
+		text.TextSize = theme.TextSize()
 	}
 }
 

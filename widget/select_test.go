@@ -78,3 +78,17 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	assert.True(t, cont.Position().Y <= pos.Y+theme.Padding()) // window was too small so we render higher up
 	assert.True(t, cont.Position().X > pos.X)                  // but X position is unaffected
 }
+
+func TestSelectRenderer_ApplyTheme(t *testing.T) {
+	sel := &Select{}
+	render := Renderer(sel).(*selectRenderer)
+
+	textSize := render.label.TextSize
+	customTextSize := textSize
+	withTestTheme(func() {
+		render.ApplyTheme()
+		customTextSize = render.label.TextSize
+	})
+
+	assert.NotEqual(t, textSize, customTextSize)
+}

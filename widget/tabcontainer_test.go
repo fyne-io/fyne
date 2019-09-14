@@ -341,3 +341,19 @@ func Test_tabButtonRenderer_BackgroundColor(t *testing.T) {
 	r := Renderer(&tabButton{})
 	assert.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
 }
+
+func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
+	item := &TabItem{Text: "Test", Content: NewLabel("Content")}
+	tabs := NewTabContainer(item)
+	tabButton := tabs.makeButton(item)
+	render := Renderer(tabButton).(*tabButtonRenderer)
+
+	textSize := render.label.TextSize
+	customTextSize := textSize
+	withTestTheme(func() {
+		render.ApplyTheme()
+		customTextSize = render.label.TextSize
+	})
+
+	assert.NotEqual(t, textSize, customTextSize)
+}
