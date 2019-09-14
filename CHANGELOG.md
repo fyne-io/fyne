@@ -3,6 +3,17 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 1.1.2 - ongoing
+
+### Added
+
+### Changed
+
+* Default scale value for canvases is now 1.0 instead of Auto (DPI based)
+
+### Fixed
+
+
 ## 1.1.1 - 17 August 2019
 
 ### Added

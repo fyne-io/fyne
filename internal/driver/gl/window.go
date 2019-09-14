@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
+	"math"
 	"os"
 	"runtime"
 	"strconv"
@@ -274,13 +275,16 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 
 func (w *window) detectScale() float32 {
 	env := os.Getenv("FYNE_SCALE")
-	if env != "" {
-		scale, err := strconv.ParseFloat(env, 32)
-		if err != nil {
-			fyne.LogError("Error reading scale", err)
-		} else if scale != 0 {
-			return float32(scale)
-		}
+	if env == "" {
+		return 1.0
+	}
+
+	scale, err := strconv.ParseFloat(env, 32)
+	if err == nil && scale != 0 {
+		return float32(scale)
+	}
+	if err != nil && env != "auto" { // ignore auto, otherwise report error
+		fyne.LogError("Error reading scale", err)
 	}
 
 	monitor := w.getMonitorForWindow()
@@ -288,7 +292,7 @@ func (w *window) detectScale() float32 {
 	widthPx := monitor.GetVideoMode().Width
 
 	dpi := float32(widthPx) / (float32(widthMm) / 25.4)
-	return float32(dpi) / 144.0
+	return float32(math.Round(float64(dpi)/144.0*10.0)) / 10.0
 }
 
 func (w *window) Show() {
