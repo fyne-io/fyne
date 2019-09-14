@@ -3,6 +3,19 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 1.1.2 - ongoing
+
+### Added
+
+### Changed
+
+### Fixed
+
+* Correct icon name in linux packages
+* Fullscreen before showing a window works again
+* Incorrect MinSize of FixedGrid layout in some situations
+
+
 ## 1.1.1 - 17 August 2019
 
 ### Added
