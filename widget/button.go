@@ -263,6 +263,12 @@ func (b *Button) SetText(text string) {
 	Refresh(b)
 }
 
+func (b *Button) SetOnTapped(onTapped func()) {
+	b.OnTapped = onTapped
+
+	Refresh(b)
+}
+
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
 	b.Icon = icon
