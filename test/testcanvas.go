@@ -162,7 +162,7 @@ func (c *testCanvas) Capture() image.Image {
 // NewCanvas returns a single use in-memory canvas used for testing
 func NewCanvas() WindowlessCanvas {
 	padding := fyne.NewSize(10, 10)
-	return &testCanvas{size: padding, padded: true, scale: 1.0}
+	return &testCanvas{size: fyne.NewSize(100, 100).Add(padding).Add(padding), padded: true, scale: 1.0}
 }
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
