@@ -14,6 +14,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Correct icon name in linux packages
 * Fullscreen before showing a window works again
 * Incorrect MinSize of FixedGrid layout in some situations
+* Default scale value for canvases is now 1.0 instead of Auto (DPI based)
 
 
 ## 1.1.1 - 17 August 2019
