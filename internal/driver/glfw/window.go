@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	_ "image/png" // for the icon
+	"math"
 	"os"
 	"runtime"
 	"strconv"
@@ -283,13 +284,16 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 
 func (w *window) detectScale() float32 {
 	env := os.Getenv("FYNE_SCALE")
-	if env != "" {
-		scale, err := strconv.ParseFloat(env, 32)
-		if err != nil {
-			fyne.LogError("Error reading scale", err)
-		} else if float32(scale) != fyne.SettingsScaleAuto {
-			return float32(scale)
-		}
+	if env == "" {
+		return 1.0
+	}
+
+	scale, err := strconv.ParseFloat(env, 32)
+	if err == nil && scale != 0 {
+		return float32(scale)
+	}
+	if err != nil && env != "auto" { // ignore auto, otherwise report error
+		fyne.LogError("Error reading scale", err)
 	}
 
 	setting := fyne.CurrentApp().Settings().Scale()
@@ -305,7 +309,7 @@ func (w *window) detectScale() float32 {
 	if dpi > 1000 || dpi < 10 {
 		dpi = 96
 	}
-	w.canvas.detectedScale = float32(dpi) / 144.0
+	w.canvas.detectedScale = float32(math.Round(float64(dpi)/144.0*10.0)) / 10.0
 	return w.canvas.detectedScale
 }
 
