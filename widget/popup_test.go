@@ -64,12 +64,28 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 	win.Resize(fyne.NewSize(50, 30))
 	pop := NewPopUp(label, win.Canvas())
 
-	pos := fyne.NewPos(10, 10)
+	pos := fyne.NewPos(20, 10)
 	pop.Move(pos)
 
 	innerPos := pop.Content.Position()
-	assert.Equal(t, pos.X+theme.Padding(), innerPos.X)
-	assert.Equal(t, win.Canvas().Size().Height-pop.Content.Size().Height-theme.Padding(), innerPos.Y)
+	assert.Equal(t, win.Canvas().Size().Width-pop.Content.Size().Width-theme.Padding(), innerPos.X,
+		"content X position is adjusted to keep the content inside the window")
+	assert.Equal(t, win.Canvas().Size().Height-pop.Content.Size().Height-theme.Padding(), innerPos.Y,
+		"content Y position is adjusted to keep the content inside the window")
+}
+
+func TestPopUp_Move_ConstrainedWindowToSmall(t *testing.T) {
+	label := NewLabel("Hi")
+	win := test.NewWindow(NewLabel("OK"))
+	win.Resize(fyne.NewSize(10, 5))
+	pop := NewPopUp(label, win.Canvas())
+
+	pos := fyne.NewPos(20, 10)
+	pop.Move(pos)
+
+	innerPos := pop.Content.Position()
+	assert.Equal(t, theme.Padding(), innerPos.X, "content X position is adjusted but the window is too small")
+	assert.Equal(t, theme.Padding(), innerPos.Y, "content Y position is adjusted but the window is too small")
 }
 
 func TestPopUp_Tapped(t *testing.T) {
