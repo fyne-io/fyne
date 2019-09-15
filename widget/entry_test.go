@@ -393,7 +393,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 
 	cont := over.(*PopUp).Content
 	assert.Equal(t, cont.Position().X, pos.X+theme.Padding()+tapPos.X)
-	assert.True(t, cont.Position().Y > pos.Y)
+	assert.Greater(t, cont.Position().Y, pos.Y)
 
 	items := cont.(*Box).Children
 	assert.Equal(t, 1, len(items)) // Paste
