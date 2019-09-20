@@ -34,7 +34,7 @@ func NewSize(w int, h int) Size {
 // Position describes a generic X, Y coordinate relative to a parent Canvas
 // or CanvasObject.
 type Position struct {
-	X int // The position from the parent' left edge
+	X int // The position from the parent's left edge
 	Y int // The position from the parent's top edge
 }
 
