@@ -54,7 +54,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 			b.shadow.Resize(size)
 		}
 	}
-	if b.label != nil {
+	if b.button.Text != "" {
 		padding := b.padding()
 		innerSize := size.Subtract(padding)
 		innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)

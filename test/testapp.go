@@ -200,7 +200,7 @@ func (dummyTheme) Padding() int {
 }
 
 func (dummyTheme) IconInlineSize() int {
-	return 5
+	return 8
 }
 
 type testSettings struct {
