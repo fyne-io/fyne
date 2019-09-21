@@ -1,4 +1,4 @@
-package tools
+package playground
 
 import (
 	"fyne.io/fyne/internal/painter/software"
