@@ -63,6 +63,16 @@ func TestText_Alignment(t *testing.T) {
 	assert.Equal(t, fyne.TextAlignTrailing, Renderer(text).(*textRenderer).texts[0].Alignment)
 }
 
+func TestText_Row(t *testing.T) {
+	text := &textProvider{presenter: newTestTextPresenter()}
+	text.SetText("test")
+
+	assert.Nil(t, text.row(-1))
+	assert.Nil(t, text.row(1))
+
+	assert.Equal(t, []rune("test"), text.row(0))
+}
+
 func TestText_Rows(t *testing.T) {
 	text := &textProvider{presenter: newTestTextPresenter()}
 	text.SetText("test")
@@ -241,4 +251,13 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 
 	assert.Equal(t, testTextSize, customTextSize1)
 	assert.Equal(t, testTextSize, customTextSize2)
+}
+
+func TestTextRenderer_LineSizeToColumn(t *testing.T) {
+	label := NewLabel("Test")
+	render := Renderer(label).(*textRenderer)
+
+	fullSize := render.lineSizeToColumn(4, 0)
+	assert.Equal(t, fullSize, render.lineSizeToColumn(10, 0))
+	assert.Greater(t, fullSize.Width, render.lineSizeToColumn(2, 0).Width)
 }
