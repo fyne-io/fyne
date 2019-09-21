@@ -7,9 +7,12 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
-	_ "fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	fyne.SetCurrentApp(&themedApp{})
+}
 
 func helperNewStaticResource() *fyne.StaticResource {
 	return &fyne.StaticResource{

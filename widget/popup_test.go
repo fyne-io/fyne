@@ -61,7 +61,7 @@ func TestPopUp_Move(t *testing.T) {
 func TestPopUp_Move_Constrained(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
-	win.Resize(fyne.NewSize(50, 30))
+	win.Resize(fyne.NewSize(60, 40))
 	pop := NewPopUp(label, win.Canvas())
 
 	pos := fyne.NewPos(10, 10)
