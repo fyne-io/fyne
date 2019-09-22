@@ -555,7 +555,7 @@ func (w *window) mouseOut() {
 	})
 }
 
-func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
+func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	co, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
@@ -585,6 +585,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position
 		mev.Button = convertMouseButton(button)
+		mev.Modifier = desktopModifier(mods)
 		if action == glfw.Press {
 			w.queueEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
