@@ -234,9 +234,9 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	w.Canvas().SetScale(1.0)
-	d1 := &dragableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d1 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(10, 10))
-	d2 := &dragableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d2 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1, d2))
 
@@ -653,23 +653,23 @@ func pop(s []interface{}) (interface{}, []interface{}) {
 	return s[0], s[1:]
 }
 
-var _ desktop.Mouseable = (*dragableMouseableObject)(nil)
+var _ desktop.Mouseable = (*draggableMouseableObject)(nil)
 
-type dragableMouseableObject struct {
+type draggableMouseableObject struct {
 	*canvas.Rectangle
 	draggable
 	mouseEvents []interface{}
 }
 
-func (d *dragableMouseableObject) MouseDown(e *desktop.MouseEvent) {
+func (d *draggableMouseableObject) MouseDown(e *desktop.MouseEvent) {
 	d.mouseEvents = append(d.mouseEvents, e)
 }
 
-func (d *dragableMouseableObject) MouseUp(e *desktop.MouseEvent) {
+func (d *draggableMouseableObject) MouseUp(e *desktop.MouseEvent) {
 	d.mouseEvents = append(d.mouseEvents, e)
 }
 
-func (d *dragableMouseableObject) popMouseEvent() (e interface{}) {
+func (d *draggableMouseableObject) popMouseEvent() (e interface{}) {
 	e, d.mouseEvents = pop(d.mouseEvents)
 	return
 }
