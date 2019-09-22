@@ -284,21 +284,28 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 
 func (w *window) detectScale() float32 {
 	env := os.Getenv("FYNE_SCALE")
-	if env == "" {
-		return 1.0
-	}
 
-	scale, err := strconv.ParseFloat(env, 32)
-	if err == nil && scale != 0 {
-		return float32(scale)
-	}
-	if err != nil && env != "auto" { // ignore auto, otherwise report error
+	if env != "" && env != "auto" {
+		scale, err := strconv.ParseFloat(env, 32)
+		if err == nil && scale != 0 {
+			return float32(scale)
+		}
 		fyne.LogError("Error reading scale", err)
 	}
 
-	setting := fyne.CurrentApp().Settings().Scale()
-	if setting != fyne.SettingsScaleAuto {
-		return setting
+	if env != "auto" {
+		setting := fyne.CurrentApp().Settings().Scale()
+		switch setting {
+		case fyne.SettingsScaleAuto:
+			// fall through
+		case 0.0:
+			if env == "" {
+				return 1.0
+			}
+			// fall through
+		default:
+			return setting
+		}
 	}
 
 	monitor := w.getMonitorForWindow()

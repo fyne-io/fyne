@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -82,7 +83,7 @@ func (s *Settings) chooseTheme(name string) {
 }
 
 func (s *Settings) chooseScale(value string) {
-	if value == "" {
+	if value == "" || strings.EqualFold(value, "auto") {
 		s.fyneSettings.Scale = fyne.SettingsScaleAuto
 		return
 	}
@@ -104,7 +105,7 @@ func (s *Settings) LoadAppearanceScreen() fyne.CanvasObject {
 	themes.SetSelected(def)
 	scale := widget.NewEntry()
 	scale.OnChanged = s.chooseScale
-	scale.SetPlaceHolder("Auto")
+	scale.SetText("Auto")
 	if s.fyneSettings.Scale != fyne.SettingsScaleAuto {
 		scale.SetText(fmt.Sprintf("%.2f", s.fyneSettings.Scale))
 	}
