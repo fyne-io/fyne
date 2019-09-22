@@ -157,6 +157,22 @@ func Test_tabContainer_Tapped(t *testing.T) {
 	assert.False(t, tabs.Items[2].Content.Visible())
 }
 
+func TestTabContainer_Hidden_AsChild(t *testing.T) {
+	c1 := NewLabel("Tab 1 content")
+	c2 := NewLabel("Tab 2 content\nTab 2 content\nTab 2 content")
+	ti1 := NewTabItem("Tab 1", c1)
+	ti2 := NewTabItem("Tab 2", c2)
+	tabs := NewTabContainer(ti1, ti2)
+	Renderer(tabs)
+
+	assert.True(t, c1.Visible())
+	assert.False(t, c2.Visible())
+
+	tabs.SelectTabIndex(1)
+	assert.False(t, c1.Visible())
+	assert.True(t, c2.Visible())
+}
+
 func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tabs := NewTabContainer(&TabItem{Text: "Test1", Content: NewLabel("Test1")})
