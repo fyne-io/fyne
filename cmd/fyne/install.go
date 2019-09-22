@@ -15,7 +15,8 @@ import (
 var _ command = (*installer)(nil)
 
 type installer struct {
-	installDir string
+	installDir, srcDir string
+	packager           *packager
 }
 
 func (i *installer) addFlags() {
@@ -28,12 +29,13 @@ func (i *installer) printHelp(indent string) {
 	fmt.Println(indent, "Command usage: fyne install [parameters]")
 }
 
-func (i *installer) packager() *packager {
-	return &packager{os: runtime.GOOS, install: true}
+func (i *installer) validate() error {
+	i.packager = &packager{os: runtime.GOOS, install: true, srcDir: i.srcDir}
+	return i.packager.validate()
 }
 
 func (i *installer) install() error {
-	p := i.packager()
+	p := i.packager
 
 	if i.installDir == "" {
 		switch runtime.GOOS {
@@ -59,7 +61,7 @@ func (i *installer) run(args []string) {
 		return
 	}
 
-	err := i.packager().validate()
+	err := i.validate()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)

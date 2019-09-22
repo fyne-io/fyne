@@ -49,6 +49,7 @@ func loadCommands() {
 	commands = make(map[string]command)
 
 	commands["bundle"] = &bundler{}
+	commands["get"] = &getter{}
 	commands["package"] = &packager{}
 	commands["install"] = &installer{}
 }

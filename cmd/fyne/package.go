@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
@@ -79,7 +78,7 @@ func runAsAdminWindows(args ...string) error {
 var _ command = (*packager)(nil)
 
 type packager struct {
-	os, name, srcdir, dir, exe, icon string
+	os, name, srcDir, dir, exe, icon string
 	install                          bool
 }
 
@@ -236,7 +235,7 @@ func (p *packager) packageWindows() error {
 func (p *packager) addFlags() {
 	flag.StringVar(&p.os, "os", runtime.GOOS, "The operating system to target (like GOOS)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
-	flag.StringVar(&p.srcdir, "sourceDir", "", "The directory to package, if executable is not set")
+	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
 }
@@ -250,7 +249,7 @@ func (*packager) printHelp(indent string) {
 func (p *packager) buildPackage() error {
 	b := &builder{
 		os:     p.os,
-		srcdir: p.srcdir,
+		srcdir: p.srcDir,
 	}
 
 	return b.build()
@@ -278,25 +277,23 @@ func (p *packager) validate() error {
 	if p.dir == "" {
 		p.dir = baseDir
 	}
-	if p.srcdir == "" {
-		p.srcdir = baseDir
+	if p.srcDir == "" {
+		p.srcDir = baseDir
 	}
 
+	exeName := filepath.Base(p.srcDir)
+	if p.os == "windows" {
+		exeName = exeName + ".exe"
+	}
 	if p.exe == "" {
-		exeName := filepath.Base(p.srcdir)
-		if p.os == "windows" {
-			exeName = exeName + ".exe"
-		}
-
-		p.exe = filepath.Join(p.srcdir, exeName)
+		p.exe = filepath.Join(p.srcDir, exeName)
 	}
 
 	if p.name == "" {
-		name := filepath.Base(p.exe)
-		p.name = strings.TrimSuffix(name, filepath.Ext(name))
+		p.name = exeName
 	}
 	if p.icon == "" || p.icon == "Icon.png" {
-		p.icon = filepath.Join(p.srcdir, "Icon.png")
+		p.icon = filepath.Join(p.srcDir, "Icon.png")
 	}
 	if !exists(p.icon) {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
@@ -312,7 +309,7 @@ func (p *packager) doPackage() error {
 			return errors.Wrap(err, "Error building application")
 		}
 		if !exists(p.exe) {
-			return errors.New("Unable to build directory to expected executable")
+			return fmt.Errorf("Unable to build directory to expected executable, %s" + p.exe)
 		}
 	}
 

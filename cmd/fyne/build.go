@@ -18,13 +18,14 @@ func (b *builder) build() error {
 	}
 
 	cmd := exec.Command("go", "build", b.srcdir)
+	cmd.Dir = b.srcdir
 	env := os.Environ()
 	env = append(env, "GOOS=", goos)
 	cmd.Env = env
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Fprint(os.Stderr, out)
+		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
 }
