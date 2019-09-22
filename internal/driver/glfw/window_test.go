@@ -570,6 +570,10 @@ func TestWindow_Shortcut(t *testing.T) {
 	assert.True(t, w.FullScreen())
 }
 
+//
+// Test structs
+//
+
 type hoverableObject struct {
 	*canvas.Rectangle
 	hoverable
@@ -646,13 +650,6 @@ type draggableHoverableObject struct {
 	hoverable
 }
 
-func pop(s []interface{}) (interface{}, []interface{}) {
-	if len(s) == 0 {
-		return nil, s
-	}
-	return s[0], s[1:]
-}
-
 var _ desktop.Mouseable = (*draggableMouseableObject)(nil)
 
 type draggableMouseableObject struct {
@@ -672,4 +669,15 @@ func (d *draggableMouseableObject) MouseUp(e *desktop.MouseEvent) {
 func (d *draggableMouseableObject) popMouseEvent() (e interface{}) {
 	e, d.mouseEvents = pop(d.mouseEvents)
 	return
+}
+
+//
+// Test helper
+//
+
+func pop(s []interface{}) (interface{}, []interface{}) {
+	if len(s) == 0 {
+		return nil, s
+	}
+	return s[0], s[1:]
 }
