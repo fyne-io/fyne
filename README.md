@@ -14,7 +14,7 @@
 
 [Fyne](http://fyne.io) is an easy to use UI toolkit and app API written in Go. We use OpenGL (through the go-gl and go-glfw projects) to provide cross platform graphics.
 
-Version 1.1 is the current release which added lots of new functionality
+Version 1.1.1 is the current release which added lots of new functionality
 including gradients, shadows and new widgets.
 We are now working towards 1.2 which will complete the basic UI toolkit
 phase of development.
@@ -45,6 +45,7 @@ Fyne is designed to be really easy to code with. Here are the steps to your firs
 
 ## Prerequisites
 
+You will need Go version 1.12 or later.
 As Fyne uses CGo you will require a C compiler (typically gcc).
 If you don't have one set up the instructions at [Compiling](https://github.com/fyne-io/fyne/wiki/Compiling) may help.
 
