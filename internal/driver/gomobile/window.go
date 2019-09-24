@@ -89,10 +89,18 @@ func (w *window) SetOnClosed(callback func()) {
 
 func (w *window) Show() {
 	w.visible = true
+
+	if w.Content() != nil {
+		w.Content().Show()
+	}
 }
 
 func (w *window) Hide() {
 	w.visible = false
+
+	if w.Content() != nil {
+		w.Content().Hide()
+	}
 }
 
 func (w *window) Close() {

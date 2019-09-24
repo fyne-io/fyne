@@ -126,6 +126,11 @@ func (d *mobileDriver) Run() {
 				}
 			case size.Event:
 				sz = e
+				current := d.currentWindow()
+				if current == nil {
+					break
+				}
+				current.Canvas().(*canvas).dirty = true
 			case paint.Event:
 				current := d.currentWindow()
 				if current == nil {
@@ -139,10 +144,10 @@ func (d *mobileDriver) Run() {
 
 				if canvas.dirty && d.glctx != nil {
 					d.freeDirtyTextures(canvas)
-
-					d.onPaint(sz)
-					a.Publish()
 					canvas.dirty = false
+
+					d.onPaint(canvas, sz)
+					a.Publish()
 				}
 			case touch.Event:
 				switch e.Type {
@@ -168,7 +173,7 @@ func (d *mobileDriver) onStart() {
 func (d *mobileDriver) onStop() {
 }
 
-func (d *mobileDriver) onPaint(sz size.Event) {
+func (d *mobileDriver) onPaint(canvas *canvas, sz size.Event) {
 	currentOrientation = sz.Orientation
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -176,12 +181,6 @@ func (d *mobileDriver) onPaint(sz size.Event) {
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
 
-	current := d.currentWindow()
-	if current == nil {
-		return
-	}
-
-	canvas := current.Canvas().(*canvas)
 	newSize := fyne.NewSize(int(float32(sz.WidthPx)/canvas.scale), int(float32(sz.HeightPx)/canvas.scale))
 	canvas.Resize(newSize)
 
