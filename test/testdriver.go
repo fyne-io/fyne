@@ -2,6 +2,7 @@ package test
 
 import (
 	"image"
+	"sync"
 
 	"fyne.io/fyne"
 )
@@ -12,18 +13,20 @@ type SoftwarePainter interface {
 }
 
 type testDriver struct {
-	device  *device
-	painter SoftwarePainter
+	device       *device
+	painter      SoftwarePainter
+	windows      []fyne.Window
+	windowsMutex sync.RWMutex
 }
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*testDriver)(nil)
 
 func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
-	windowsMutex.RLock()
-	defer windowsMutex.RUnlock()
+	d.windowsMutex.RLock()
+	defer d.windowsMutex.RUnlock()
 	// cheating as we only have a single test window
-	return windows[0].Canvas()
+	return d.windows[0].Canvas()
 }
 
 func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
@@ -31,13 +34,28 @@ func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Positi
 }
 
 func (d *testDriver) CreateWindow(string) fyne.Window {
-	return NewWindow(nil)
+	canvas := NewCanvas().(*testCanvas)
+	if fyne.CurrentApp() != nil {
+		if driver, ok := fyne.CurrentApp().Driver().(*testDriver); ok {
+			if driver != nil {
+				canvas.painter = driver.painter
+			}
+		}
+	}
+
+	window := &testWindow{canvas: canvas, driver: d}
+	window.clipboard = &testClipboard{}
+
+	d.windowsMutex.Lock()
+	d.windows = append(d.windows, window)
+	d.windowsMutex.Unlock()
+	return window
 }
 
 func (d *testDriver) AllWindows() []fyne.Window {
-	windowsMutex.RLock()
-	defer windowsMutex.RUnlock()
-	return windows
+	d.windowsMutex.RLock()
+	defer d.windowsMutex.RUnlock()
+	return d.windows
 }
 
 func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
@@ -61,11 +79,25 @@ func (d *testDriver) Quit() {
 	// no-op
 }
 
+func (d *testDriver) removeWindow(w *testWindow) {
+	d.windowsMutex.Lock()
+	i := 0
+	for _, window := range d.windows {
+		if window == w {
+			break
+		}
+		i++
+	}
+
+	d.windows = append(d.windows[:i], d.windows[i+1:]...)
+	d.windowsMutex.Unlock()
+}
+
 // NewDriver sets up and registers a new dummy driver for test purpose
 func NewDriver() fyne.Driver {
 	driver := new(testDriver)
 	// make a single dummy window for rendering tests
-	NewWindow(nil)
+	driver.CreateWindow("")
 
 	return driver
 }
@@ -75,6 +107,9 @@ func NewDriver() fyne.Driver {
 func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
 	driver := new(testDriver)
 	driver.painter = painter
+
+	driver.windows = make([]fyne.Window, 0)
+	driver.windowsMutex = sync.RWMutex{}
 
 	return driver
 }

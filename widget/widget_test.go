@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -60,7 +59,8 @@ func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{applied: make(chan bool)}
 
-	window := test.NewWindow(widget)
+	window := fyne.CurrentApp().NewWindow("")
+	window.SetContent(widget)
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 
 	func() {
@@ -79,7 +79,8 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	child := &myWidget{applied: make(chan bool)}
 	parent := NewVBox(child)
 
-	window := test.NewWindow(parent)
+	window := fyne.CurrentApp().NewWindow("")
+	window.SetContent(parent)
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 	func() {
 		select {
