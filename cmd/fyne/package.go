@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
@@ -79,8 +78,8 @@ func runAsAdminWindows(args ...string) error {
 var _ command = (*packager)(nil)
 
 type packager struct {
-	os, name, dir, exe, icon string
-	install                  bool
+	os, name, srcDir, dir, exe, icon string
+	install                          bool
 }
 
 func (p *packager) packageLinux() error {
@@ -222,6 +221,11 @@ func (p *packager) packageWindows() error {
 		os.Remove(manifest)
 	}
 
+	err = p.buildPackage()
+	if err != nil {
+		return errors.Wrap(err, "Failed to rebuild after adding metadata")
+	}
+
 	if p.install {
 		runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
 	}
@@ -231,14 +235,24 @@ func (p *packager) packageWindows() error {
 func (p *packager) addFlags() {
 	flag.StringVar(&p.os, "os", runtime.GOOS, "The operating system to target (like GOOS)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
+	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
 }
 
 func (*packager) printHelp(indent string) {
 	fmt.Println(indent, "The package command prepares an application for distribution.")
-	fmt.Println(indent, "Before running this command you must to build the application for release.")
+	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
 	fmt.Println(indent, "Command usage: fyne package [parameters]")
+}
+
+func (p *packager) buildPackage() error {
+	b := &builder{
+		os:     p.os,
+		srcdir: p.srcDir,
+	}
+
+	return b.build()
 }
 
 func (p *packager) run(_ []string) {
@@ -250,11 +264,8 @@ func (p *packager) run(_ []string) {
 
 	err = p.doPackage()
 	if err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
-	}
-	if runtime.GOOS == "windows" {
-		fmt.Println("For windows releases you need to re-run go build to include the changes")
 	}
 }
 
@@ -266,31 +277,42 @@ func (p *packager) validate() error {
 	if p.dir == "" {
 		p.dir = baseDir
 	}
-
-	if p.exe == "" {
-		exeName := filepath.Base(baseDir)
-		if p.os == "windows" {
-			exeName = exeName + ".exe"
-		}
-
-		p.exe = filepath.Join(baseDir, exeName)
+	if p.srcDir == "" {
+		p.srcDir = baseDir
 	}
-	if !exists(p.exe) {
-		return fmt.Errorf("Executable %s could not be found\nYou may not have run \"go build\" for the target os", p.exe)
+
+	exeName := filepath.Base(p.srcDir)
+	if p.os == "windows" {
+		exeName = exeName + ".exe"
+	}
+	if p.exe == "" {
+		p.exe = filepath.Join(p.srcDir, exeName)
 	}
 
 	if p.name == "" {
-		name := filepath.Base(p.exe)
-		p.name = strings.TrimSuffix(name, filepath.Ext(name))
+		p.name = exeName
 	}
-	if p.icon == "" {
-		p.icon = filepath.Join(baseDir, "Icon.png")
+	if p.icon == "" || p.icon == "Icon.png" {
+		p.icon = filepath.Join(p.srcDir, "Icon.png")
+	}
+	if !exists(p.icon) {
+		return errors.New("Missing application icon at \"" + p.icon + "\"")
 	}
 
 	return nil
 }
 
 func (p *packager) doPackage() error {
+	if !exists(p.exe) {
+		err := p.buildPackage()
+		if err != nil {
+			return errors.Wrap(err, "Error building application")
+		}
+		if !exists(p.exe) {
+			return fmt.Errorf("Unable to build directory to expected executable, %s" + p.exe)
+		}
+	}
+
 	switch p.os {
 	case "darwin":
 		return p.packageDarwin()

@@ -5,6 +5,8 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"github.com/goki/freetype/truetype"
+	"golang.org/x/image/font"
 )
 
 // SoftwarePainter describes a simple type that can render canvases
@@ -58,10 +60,22 @@ func (d *testDriver) AllWindows() []fyne.Window {
 	return d.windows
 }
 
+// RenderedTextSize looks up how bit a string would be if drawn on screen
 func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
-	// The real text height differs from the requested text size.
-	// We simulate this behaviour here.
-	return fyne.NewSize(len(text)*size, size*13/10+1)
+	var opts truetype.Options
+	opts.Size = float64(size)
+	opts.DPI = 78 // TODO move this?
+
+	theme := fyne.CurrentApp().Settings().Theme()
+	// TODO check style
+	f, err := truetype.Parse(theme.TextFont().Content())
+	if err != nil {
+		fyne.LogError("Unable to load theme font", err)
+	}
+	face := truetype.NewFace(f, &opts)
+	advance := font.MeasureString(face, text)
+
+	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
 }
 
 func (d *testDriver) Device() fyne.Device {

@@ -282,25 +282,36 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 	return monitor
 }
 
-func (w *window) detectScale() float32 {
+func (w *window) selectScale() float32 {
 	env := os.Getenv("FYNE_SCALE")
-	if env == "" {
-		return 1.0
-	}
 
-	scale, err := strconv.ParseFloat(env, 32)
-	if err == nil && scale != 0 {
-		return float32(scale)
-	}
-	if err != nil && env != "auto" { // ignore auto, otherwise report error
+	if env != "" && env != "auto" {
+		scale, err := strconv.ParseFloat(env, 32)
+		if err == nil && scale != 0 {
+			return float32(scale)
+		}
 		fyne.LogError("Error reading scale", err)
 	}
 
-	setting := fyne.CurrentApp().Settings().Scale()
-	if setting != fyne.SettingsScaleAuto {
-		return setting
+	if env != "auto" {
+		setting := fyne.CurrentApp().Settings().Scale()
+		switch setting {
+		case fyne.SettingsScaleAuto:
+			// fall through
+		case 0.0:
+			if env == "" {
+				return 1.0
+			}
+			// fall through
+		default:
+			return setting
+		}
 	}
 
+	return w.detectScale()
+}
+
+func (w *window) detectScale() float32 {
 	monitor := w.getMonitorForWindow()
 	widthMm, _ := monitor.GetPhysicalSize()
 	widthPx := monitor.GetVideoMode().Width
@@ -309,8 +320,7 @@ func (w *window) detectScale() float32 {
 	if dpi > 1000 || dpi < 10 {
 		dpi = 96
 	}
-	w.canvas.detectedScale = float32(math.Round(float64(dpi)/144.0*10.0)) / 10.0
-	return w.canvas.detectedScale
+	return float32(math.Round(float64(dpi)/144.0*10.0)) / 10.0
 }
 
 func (w *window) Show() {
@@ -382,10 +392,6 @@ func (w *window) SetContent(content fyne.CanvasObject) {
 	}
 
 	w.canvas.SetContent(content)
-	// show top canvas element
-	if w.visible {
-		w.canvas.Content().Show()
-	}
 	w.RescaleContext()
 }
 
@@ -425,6 +431,10 @@ func (w *window) destroy(d *gLDriver) {
 }
 
 func (w *window) moved(viewport *glfw.Window, x, y int) {
+	if w.canvas.scale != w.canvas.detectedScale {
+		return
+	}
+
 	// save coordinates
 	w.xpos, w.ypos = x, y
 	scale := w.canvas.scale
@@ -434,6 +444,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 		return
 	}
 
+	w.canvas.detectedScale = newScale
 	w.canvas.setScaleValue(newScale)
 	w.rescaleOnMain()
 }
@@ -544,7 +555,7 @@ func (w *window) mouseOut() {
 	})
 }
 
-func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
+func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	co, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
@@ -574,6 +585,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position
 		mev.Button = convertMouseButton(button)
+		mev.Modifier = desktopModifier(mods)
 		if action == glfw.Press {
 			w.queueEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
@@ -1041,7 +1053,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret.canvas.painter.Init()
 		ret.canvas.context = ret
 		ret.canvas.detectedScale = ret.detectScale()
-		ret.canvas.scale = ret.canvas.detectedScale
+		ret.canvas.scale = ret.selectScale()
 		ret.SetIcon(ret.icon) // if this is nil we will get the app icon
 		d.windows = append(d.windows, ret)
 

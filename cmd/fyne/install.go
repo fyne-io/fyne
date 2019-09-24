@@ -15,7 +15,8 @@ import (
 var _ command = (*installer)(nil)
 
 type installer struct {
-	installDir string
+	installDir, srcDir string
+	packager           *packager
 }
 
 func (i *installer) addFlags() {
@@ -28,12 +29,13 @@ func (i *installer) printHelp(indent string) {
 	fmt.Println(indent, "Command usage: fyne install [parameters]")
 }
 
+func (i *installer) validate() error {
+	i.packager = &packager{os: runtime.GOOS, install: true, srcDir: i.srcDir}
+	return i.packager.validate()
+}
+
 func (i *installer) install() error {
-	p := &packager{os: runtime.GOOS, install: true}
-	err := p.validate()
-	if err != nil {
-		return err
-	}
+	p := i.packager
 
 	if i.installDir == "" {
 		switch runtime.GOOS {
@@ -50,8 +52,7 @@ func (i *installer) install() error {
 	}
 
 	p.dir = i.installDir
-	err = p.doPackage()
-	return err
+	return p.doPackage()
 }
 
 func (i *installer) run(args []string) {
@@ -60,7 +61,13 @@ func (i *installer) run(args []string) {
 		return
 	}
 
-	err := i.install()
+	err := i.validate()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
+	}
+
+	err = i.install()
 	if err != nil {
 		fyne.LogError("Unable to install application", err)
 		os.Exit(1)
