@@ -29,10 +29,8 @@ before_script:
 
 script:
   - test -z $(gofmt -s -e -d $NO_VENDOR | tee /dev/stderr)
-  # enable go modules only for 1.12.x
-  - if [[ "$TRAVIS_GO_VERSION" == 1.12* ]]; then export GO111MODULE=on; fi
-  # test vendor folder only for 1.12.x on osx
-  - if [[ "$TRAVIS_GO_VERSION" == 1.12* && "$TRAVIS_OS_NAME" == "osx" ]]; then export GOFLAGS=-mod=vendor; fi
+  # test vendor folder only on osx
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then export GOFLAGS=-mod=vendor; fi
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
   - golint -set_exit_status $(go list -tags ci ./...)
@@ -46,4 +44,5 @@ script:
 
 env:
   global:
-    secure: dxsvChfy84dx85yoDA08UQL9/uwuab2St/yzWGfI++tlY1yL+kUNTfaTTY0uiT6Fqwg8rfUdXPA95Z/9bwLPkMJ8p1zwRlxBKjzICTGjB/NDLUYWrZVW+kXOOWrLHEluccrAc5mvWY1/k6KaxqYslanIPOj8j9/7sZJBMsvH8teHjRDGn402sCIBO3SUwthGKktLuAUL5MCiVgo/Eym4mQ2a4OAbZBWqKRQ+7HJunbEzwA/2zOUm/WX3NTy8dg67yyPNLXgMarVsmRXRDYPMlSGfV6Y3kBGizhEGy/u8zXe17KmPjqEKDLWHZZxt0wWYVidERLk1EG2Sm0maIV0i6a+wunCLqQXKHPF8BDwZGftYNbbrED7+4Jnp2h5Y8fS5FlpNAgPZp4YWbOhMpZIhahms3qwGloTGrCj+YvnUu6wnKOnhsvcz2Ibgi+pXr2/3H8lSjAg//P7wRYQN0pvIdacDRD0Vx10bENPAO2IKV7COv/NI0WLrBezDcRS4j60m4EgAdmambKye/mYqERY2P+2e1pMVcn4xaehXxfdyb5MGsZtIh7h0vP9LxVpj+mIVE/WDk36sWPVlTtumVioC5vhr087RrTOj3fNAjHeEMvJa5uiyKxT3UOCx6YORGHkH0i9fz/2QHCA2FBrOdTFv3oe1L2W23iqs9cSx+FxaVCE=
+    - secure: dxsvChfy84dx85yoDA08UQL9/uwuab2St/yzWGfI++tlY1yL+kUNTfaTTY0uiT6Fqwg8rfUdXPA95Z/9bwLPkMJ8p1zwRlxBKjzICTGjB/NDLUYWrZVW+kXOOWrLHEluccrAc5mvWY1/k6KaxqYslanIPOj8j9/7sZJBMsvH8teHjRDGn402sCIBO3SUwthGKktLuAUL5MCiVgo/Eym4mQ2a4OAbZBWqKRQ+7HJunbEzwA/2zOUm/WX3NTy8dg67yyPNLXgMarVsmRXRDYPMlSGfV6Y3kBGizhEGy/u8zXe17KmPjqEKDLWHZZxt0wWYVidERLk1EG2Sm0maIV0i6a+wunCLqQXKHPF8BDwZGftYNbbrED7+4Jnp2h5Y8fS5FlpNAgPZp4YWbOhMpZIhahms3qwGloTGrCj+YvnUu6wnKOnhsvcz2Ibgi+pXr2/3H8lSjAg//P7wRYQN0pvIdacDRD0Vx10bENPAO2IKV7COv/NI0WLrBezDcRS4j60m4EgAdmambKye/mYqERY2P+2e1pMVcn4xaehXxfdyb5MGsZtIh7h0vP9LxVpj+mIVE/WDk36sWPVlTtumVioC5vhr087RrTOj3fNAjHeEMvJa5uiyKxT3UOCx6YORGHkH0i9fz/2QHCA2FBrOdTFv3oe1L2W23iqs9cSx+FxaVCE=
+    - GO111MODULE=on
