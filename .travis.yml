@@ -26,6 +26,8 @@ before_script:
   - GO111MODULE=off go get github.com/mattn/goveralls
 
 script:
+  # For some reason `git diff-index HEAD` does not work properly if the following line is missing.
+  - git diff
   # check that go mod tidy does not change go.mod/go.sum
   - go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
   - test -z $(gofmt -s -e -d $NO_VENDOR | tee /dev/stderr)
