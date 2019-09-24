@@ -23,6 +23,7 @@ type canvas struct {
 	shortcut  fyne.ShortcutHandler
 
 	inited, dirty bool
+	lastTapDown   int64
 	refreshQueue  chan fyne.CanvasObject
 }
 
