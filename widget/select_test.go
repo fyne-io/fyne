@@ -66,8 +66,15 @@ func TestSelect_Tapped(t *testing.T) {
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
+	// fresh app for this test
+	test.NewApp()
+	// don't let our app hang around for too long
+	defer test.NewApp()
+
 	combo := NewSelect([]string{"1", "2"}, func(s string) {})
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
+	canvas.(test.WindowlessCanvas).Resize(fyne.NewSize(100, 100))
+
 	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))
 	test.Tap(combo)
 

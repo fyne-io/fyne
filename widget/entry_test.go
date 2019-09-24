@@ -383,7 +383,14 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 }
 
 func TestEntry_TappedSecondary(t *testing.T) {
+	// fresh app for this test
+	test.NewApp()
+	// don't let our app hang around for too long
+	defer test.NewApp()
+
 	entry := NewEntry()
+	fyne.CurrentApp().Driver().CanvasForObject(entry).(test.WindowlessCanvas).Resize(fyne.NewSize(100, 100))
+
 	tapPos := fyne.NewPos(1, 1)
 	test.TapSecondaryAt(entry, tapPos)
 
