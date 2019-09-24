@@ -234,9 +234,9 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	w.Canvas().SetScale(1.0)
-	d1 := &dragableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d1 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(10, 10))
-	d2 := &dragableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d2 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1, d2))
 
@@ -432,6 +432,97 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	}
 }
 
+func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	m := &mouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	m.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(m)
+
+	w.mouseMoved(w.viewport, 5, 5)
+	w.waitForEvents()
+
+	tests := map[string]struct {
+		modifier              glfw.ModifierKey
+		expectedEventModifier desktop.Modifier
+	}{
+		"no modifier key": {
+			modifier:              0,
+			expectedEventModifier: 0,
+		},
+		"shift": {
+			modifier:              glfw.ModShift,
+			expectedEventModifier: desktop.ShiftModifier,
+		},
+		"ctrl": {
+			modifier:              glfw.ModControl,
+			expectedEventModifier: desktop.ControlModifier,
+		},
+		"alt": {
+			modifier:              glfw.ModAlt,
+			expectedEventModifier: desktop.AltModifier,
+		},
+		"super": {
+			modifier:              glfw.ModSuper,
+			expectedEventModifier: desktop.SuperModifier,
+		},
+		"shift+ctrl": {
+			modifier:              glfw.ModShift | glfw.ModControl,
+			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier,
+		},
+		"shift+alt": {
+			modifier:              glfw.ModShift | glfw.ModAlt,
+			expectedEventModifier: desktop.ShiftModifier | desktop.AltModifier,
+		},
+		"shift+super": {
+			modifier:              glfw.ModShift | glfw.ModSuper,
+			expectedEventModifier: desktop.ShiftModifier | desktop.SuperModifier,
+		},
+		"ctrl+alt": {
+			modifier:              glfw.ModControl | glfw.ModAlt,
+			expectedEventModifier: desktop.ControlModifier | desktop.AltModifier,
+		},
+		"ctrl+super": {
+			modifier:              glfw.ModControl | glfw.ModSuper,
+			expectedEventModifier: desktop.ControlModifier | desktop.SuperModifier,
+		},
+		"alt+super": {
+			modifier:              glfw.ModAlt | glfw.ModSuper,
+			expectedEventModifier: desktop.AltModifier | desktop.SuperModifier,
+		},
+		"shift+ctrl+alt": {
+			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt,
+			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.AltModifier,
+		},
+		"shift+ctrl+super": {
+			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModSuper,
+			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.SuperModifier,
+		},
+		"shift+alt+super": {
+			modifier:              glfw.ModShift | glfw.ModAlt | glfw.ModSuper,
+			expectedEventModifier: desktop.ShiftModifier | desktop.AltModifier | desktop.SuperModifier,
+		},
+		"ctrl+alt+super": {
+			modifier:              glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
+			expectedEventModifier: desktop.ControlModifier | desktop.AltModifier | desktop.SuperModifier,
+		},
+		"shift+ctrl+alt+super": {
+			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
+			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.AltModifier | desktop.SuperModifier,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			require.Nil(t, m.popMouseEvent(), "no initial mouse event")
+			w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, tt.modifier)
+			w.waitForEvents()
+			me, _ := m.popMouseEvent().(*desktop.MouseEvent)
+			if assert.NotNil(t, me, "mouse event triggered") {
+				assert.Equal(t, tt.expectedEventModifier, me.Modifier, "expect modifier to be correct")
+			}
+		})
+	}
+}
+
 func TestWindow_SetTitle(t *testing.T) {
 	w := d.CreateWindow("Test")
 
@@ -570,6 +661,10 @@ func TestWindow_Shortcut(t *testing.T) {
 	assert.True(t, w.FullScreen())
 }
 
+//
+// Test structs
+//
+
 type hoverableObject struct {
 	*canvas.Rectangle
 	hoverable
@@ -646,30 +741,43 @@ type draggableHoverableObject struct {
 	hoverable
 }
 
+type mouseableObject struct {
+	*canvas.Rectangle
+	mouseable
+}
+
+var _ desktop.Mouseable = (*mouseable)(nil)
+
+type mouseable struct {
+	mouseEvents []interface{}
+}
+
+func (m *mouseable) MouseDown(e *desktop.MouseEvent) {
+	m.mouseEvents = append(m.mouseEvents, e)
+}
+
+func (m *mouseable) MouseUp(e *desktop.MouseEvent) {
+	m.mouseEvents = append(m.mouseEvents, e)
+}
+
+func (m *mouseable) popMouseEvent() (e interface{}) {
+	e, m.mouseEvents = pop(m.mouseEvents)
+	return
+}
+
+type draggableMouseableObject struct {
+	*canvas.Rectangle
+	draggable
+	mouseable
+}
+
+//
+// Test helper
+//
+
 func pop(s []interface{}) (interface{}, []interface{}) {
 	if len(s) == 0 {
 		return nil, s
 	}
 	return s[0], s[1:]
-}
-
-var _ desktop.Mouseable = (*dragableMouseableObject)(nil)
-
-type dragableMouseableObject struct {
-	*canvas.Rectangle
-	draggable
-	mouseEvents []interface{}
-}
-
-func (d *dragableMouseableObject) MouseDown(e *desktop.MouseEvent) {
-	d.mouseEvents = append(d.mouseEvents, e)
-}
-
-func (d *dragableMouseableObject) MouseUp(e *desktop.MouseEvent) {
-	d.mouseEvents = append(d.mouseEvents, e)
-}
-
-func (d *dragableMouseableObject) popMouseEvent() (e interface{}) {
-	e, d.mouseEvents = pop(d.mouseEvents)
-	return
 }
