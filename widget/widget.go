@@ -61,7 +61,7 @@ func (w *baseWidget) show(parent fyne.Widget) {
 	}
 
 	w.Hidden = false
-	canvas.Refresh(parent)
+	Refresh(parent)
 }
 
 func (w *baseWidget) hide(parent fyne.Widget) {
@@ -70,7 +70,7 @@ func (w *baseWidget) hide(parent fyne.Widget) {
 	}
 
 	w.Hidden = true
-	canvas.Refresh(parent)
+	Refresh(parent)
 }
 
 func (w *baseWidget) enable(parent fyne.Widget) {
@@ -79,7 +79,7 @@ func (w *baseWidget) enable(parent fyne.Widget) {
 	}
 
 	w.disabled = false
-	canvas.Refresh(parent)
+	Refresh(parent)
 }
 
 func (w *baseWidget) disable(parent fyne.Widget) {
@@ -88,7 +88,7 @@ func (w *baseWidget) disable(parent fyne.Widget) {
 	}
 
 	w.disabled = true
-	canvas.Refresh(parent)
+	Refresh(parent)
 }
 
 // Renderer looks up the render implementation for a widget

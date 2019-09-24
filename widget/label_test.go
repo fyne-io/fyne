@@ -83,3 +83,13 @@ func TestText_MinSizeAdjustsWithContent(t *testing.T) {
 	assert.Equal(t, initialMin, text.MinSize())
 	assert.Equal(t, initialMin, text.textProvider.MinSize())
 }
+
+func TestLabel_ApplyTheme(t *testing.T) {
+	text := NewLabel("Line 1")
+	text.Hide()
+
+	render := Renderer(text).(*textRenderer)
+	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+	text.Show()
+	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+}
