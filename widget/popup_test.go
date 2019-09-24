@@ -66,10 +66,14 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 	win.Resize(fyne.NewSize(60, 40))
 	pop := NewPopUp(label, win.Canvas())
 
-	pos := fyne.NewPos(20, 10)
+	pos := fyne.NewPos(30, 20)
 	pop.Move(pos)
 
 	innerPos := pop.Content.Position()
+	assert.Less(t, innerPos.X-theme.Padding(), pos.X,
+		"content X position is adjusted to keep the content inside the window")
+	assert.Less(t, innerPos.Y-theme.Padding(), pos.Y,
+		"content Y position is adjusted to keep the content inside the window")
 	assert.Equal(t, win.Canvas().Size().Width-pop.Content.Size().Width-theme.Padding(), innerPos.X,
 		"content X position is adjusted to keep the content inside the window")
 	assert.Equal(t, win.Canvas().Size().Height-pop.Content.Size().Height-theme.Padding(), innerPos.Y,
