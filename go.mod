@@ -11,7 +11,7 @@ require (
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20190124120936-8611f5a5ff3f
-	github.com/pkg/errors v0.8.1 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/srwiley/oksvg v0.0.0-20190105194046-ccbc7673cdf3
 	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
 	github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
