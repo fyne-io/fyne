@@ -66,17 +66,22 @@ func TestSelect_Tapped(t *testing.T) {
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
+	// fresh app for this test
+	test.NewApp()
+	// don't let our app hang around for too long
+	defer test.NewApp()
+
 	combo := NewSelect([]string{"1", "2"}, func(s string) {})
-	win := test.NewWindow(combo)
-	win.Resize(fyne.NewSize(20, 20))
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
+	canvas.(test.WindowlessCanvas).Resize(fyne.NewSize(100, 100))
+
+	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))
 	test.Tap(combo)
 
-	over := fyne.CurrentApp().Driver().CanvasForObject(combo).Overlay()
-	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
-
-	cont := over.(*PopUp).Content
-	assert.True(t, cont.Position().Y <= pos.Y+theme.Padding()) // window was too small so we render higher up
-	assert.True(t, cont.Position().X > pos.X)                  // but X position is unaffected
+	comboPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(combo)
+	cont := canvas.Overlay().(*PopUp).Content
+	assert.Less(t, cont.Position().Y, comboPos.Y, "window too small so we render higher up")
+	assert.Less(t, cont.Position().X, comboPos.X, "window too small so we render to the left")
 }
 
 func TestSelectRenderer_ApplyTheme(t *testing.T) {

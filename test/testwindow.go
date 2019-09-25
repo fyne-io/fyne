@@ -1,8 +1,6 @@
 package test
 
 import (
-	"sync"
-
 	"fyne.io/fyne"
 )
 
@@ -15,11 +13,9 @@ type testWindow struct {
 
 	canvas    *testCanvas
 	clipboard fyne.Clipboard
+	driver    *testDriver
 	menu      *fyne.MainMenu
 }
-
-var windows = make([]fyne.Window, 0)
-var windowsMutex = sync.RWMutex{}
 
 func (w *testWindow) Title() string {
 	return w.title
@@ -46,7 +42,7 @@ func (w *testWindow) Resize(size fyne.Size) {
 }
 
 func (w *testWindow) RequestFocus() {
-	for _, win := range windows {
+	for _, win := range w.driver.AllWindows() {
 		win.(*testWindow).focused = false
 	}
 
@@ -110,18 +106,7 @@ func (w *testWindow) Close() {
 		w.onClosed()
 	}
 	w.focused = false
-
-	windowsMutex.Lock()
-	i := 0
-	for _, window := range windows {
-		if window == w {
-			break
-		}
-		i++
-	}
-
-	windows = append(windows[:i], windows[i+1:]...)
-	windowsMutex.Unlock()
+	w.driver.removeWindow(w)
 }
 
 func (w *testWindow) ShowAndRun() {
@@ -142,21 +127,7 @@ func (w *testWindow) Canvas() fyne.Canvas {
 
 // NewWindow creates and registers a new window for test purposes
 func NewWindow(content fyne.CanvasObject) fyne.Window {
-	canvas := NewCanvas().(*testCanvas)
-	canvas.SetContent(content)
-	if fyne.CurrentApp() != nil {
-		if driver, ok := fyne.CurrentApp().Driver().(*testDriver); ok {
-			if driver != nil {
-				canvas.painter = driver.painter
-			}
-		}
-	}
-
-	window := &testWindow{canvas: canvas}
-	window.clipboard = &testClipboard{}
-
-	windowsMutex.Lock()
-	windows = append(windows, window)
-	windowsMutex.Unlock()
+	window := fyne.CurrentApp().NewWindow("")
+	window.SetContent(content)
 	return window
 }

@@ -30,7 +30,7 @@ func (a *testApp) SetIcon(fyne.Resource) {
 }
 
 func (a *testApp) NewWindow(title string) fyne.Window {
-	return NewWindow(nil)
+	return a.driver.CreateWindow(title)
 }
 
 func (a *testApp) OpenURL(url *url.URL) error {
@@ -92,7 +92,7 @@ func (a *testApp) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
-// NewApp returns a new dummy app used for testing..
+// NewApp returns a new dummy app used for testing.
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
 	settings := &testSettings{}
