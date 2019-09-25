@@ -23,6 +23,7 @@ type canvas struct {
 	shortcut  fyne.ShortcutHandler
 
 	inited, dirty bool
+	lastTapDown   int64
 	refreshQueue  chan fyne.CanvasObject
 }
 
@@ -57,17 +58,22 @@ func (c *canvas) Resize(size fyne.Size) {
 		return
 	}
 
+	devicePadTop := int(16 * c.scale) // probably android specific
+	innerSize := size.Subtract(fyne.NewSize(0, devicePadTop))
+	topLeft := fyne.NewPos(0, devicePadTop)
+
 	c.size = size
 	if c.padded {
-		c.content.Resize(c.Size().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		c.content.Resize(innerSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		c.content.Move(topLeft.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	} else {
-		c.content.Resize(c.Size())
-		c.content.Move(fyne.NewPos(0, 0))
+		c.content.Resize(innerSize)
+		c.content.Move(topLeft)
 	}
 
 	if c.overlay != nil {
-		c.overlay.Resize(size)
+		c.overlay.Resize(innerSize)
+		c.overlay.Move(topLeft)
 	}
 }
 

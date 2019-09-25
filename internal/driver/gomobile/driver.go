@@ -19,6 +19,8 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+const tapSecondaryDelay = 300000000 // nanoseconds
+
 type mobileDriver struct {
 	app   app.App
 	glctx gl.Context
@@ -108,8 +110,14 @@ func (d *mobileDriver) Run() {
 		quit := false
 		d.scheduleFrames(a)
 
-		var sz size.Event
+		var currentSize size.Event
 		for e := range a.Events() {
+			current := d.currentWindow()
+			if current == nil {
+				break
+			}
+			canvas := current.Canvas().(*canvas)
+
 			switch e := a.Filter(e).(type) {
 			case lifecycle.Event:
 				switch e.Crosses(lifecycle.StageVisible) {
@@ -125,13 +133,9 @@ func (d *mobileDriver) Run() {
 					quit = true
 				}
 			case size.Event:
-				sz = e
+				currentSize = e
+				canvas.dirty = true
 			case paint.Event:
-				current := d.currentWindow()
-				if current == nil {
-					break
-				}
-				canvas := current.Canvas().(*canvas)
 				if !canvas.inited && d.glctx != nil {
 					canvas.inited = true
 					canvas.painter.Init() // we cannot init until the context is set above
@@ -139,16 +143,17 @@ func (d *mobileDriver) Run() {
 
 				if canvas.dirty && d.glctx != nil {
 					d.freeDirtyTextures(canvas)
-
-					d.onPaint(sz)
-					a.Publish()
 					canvas.dirty = false
+
+					d.paintCanvas(canvas, currentSize)
+					a.Publish()
 				}
 			case touch.Event:
 				switch e.Type {
 				case touch.TypeBegin:
+					d.tapDownCanvas(canvas, e.X, e.Y)
 				case touch.TypeEnd:
-					d.onTapEnd(e.X, e.Y)
+					d.tapUpCanvas(canvas, e.X, e.Y)
 				}
 			}
 
@@ -168,7 +173,7 @@ func (d *mobileDriver) onStart() {
 func (d *mobileDriver) onStop() {
 }
 
-func (d *mobileDriver) onPaint(sz size.Event) {
+func (d *mobileDriver) paintCanvas(canvas *canvas, sz size.Event) {
 	currentOrientation = sz.Orientation
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -176,12 +181,6 @@ func (d *mobileDriver) onPaint(sz size.Event) {
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
 
-	current := d.currentWindow()
-	if current == nil {
-		return
-	}
-
-	canvas := current.Canvas().(*canvas)
 	newSize := fyne.NewSize(int(float32(sz.WidthPx)/canvas.scale), int(float32(sz.HeightPx)/canvas.scale))
 	canvas.Resize(newSize)
 
@@ -205,16 +204,15 @@ func (d *mobileDriver) onPaint(sz size.Event) {
 	canvas.walkTree(paint, afterPaint)
 }
 
-func (d *mobileDriver) onTapEnd(x, y float32) {
-	current := d.currentWindow()
-	if current == nil {
-		return
-	}
+func (d *mobileDriver) tapDownCanvas(canvas *canvas, x, y float32) {
+	canvas.lastTapDown = time.Now().UnixNano()
+}
 
-	canvas := current.Canvas().(*canvas)
+func (d *mobileDriver) tapUpCanvas(canvas *canvas, x, y float32) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)
+	duration := time.Now().UnixNano() - canvas.lastTapDown
 
 	co, objX, objY := driver.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
@@ -231,7 +229,11 @@ func (d *mobileDriver) onTapEnd(x, y float32) {
 
 	if wid, ok := co.(fyne.Tappable); ok {
 		// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })
-		go wid.Tapped(ev)
+		if duration < tapSecondaryDelay {
+			go wid.Tapped(ev)
+		} else {
+			go wid.TappedSecondary(ev)
+		}
 	}
 }
 

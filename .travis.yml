@@ -1,13 +1,6 @@
 language: go
 
-go:
-  - "1.12.x"
-  - "1.13.x"
 go_import_path: fyne.io/fyne
-
-os:
-  - linux
-  - osx
 
 addons:
   apt:
@@ -24,15 +17,19 @@ install: true
 
 before_script:
   - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
-  - go get golang.org/x/lint/golint
-  - go get github.com/mattn/goveralls
+  - GO111MODULE=off go get golang.org/x/lint/golint
+  - GO111MODULE=off go get github.com/mattn/goveralls
 
 script:
+  - |
+    if [ "$GO111MODULE" == "on" ]
+    then
+      # For some reason `git diff-index HEAD` does not work properly if the following line is missing.
+      git diff
+      # check that go mod tidy does not change go.mod/go.sum
+      go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
+    fi
   - test -z $(gofmt -s -e -d $NO_VENDOR | tee /dev/stderr)
-  # enable go modules only for 1.12.x
-  - if [[ "$TRAVIS_GO_VERSION" == 1.12* ]]; then export GO111MODULE=on; fi
-  # test vendor folder only for 1.12.x on osx
-  - if [[ "$TRAVIS_GO_VERSION" == 1.12* && "$TRAVIS_OS_NAME" == "osx" ]]; then export GOFLAGS=-mod=vendor; fi
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
   - golint -set_exit_status $(go list -tags ci ./...)
@@ -46,4 +43,19 @@ script:
 
 env:
   global:
-    secure: dxsvChfy84dx85yoDA08UQL9/uwuab2St/yzWGfI++tlY1yL+kUNTfaTTY0uiT6Fqwg8rfUdXPA95Z/9bwLPkMJ8p1zwRlxBKjzICTGjB/NDLUYWrZVW+kXOOWrLHEluccrAc5mvWY1/k6KaxqYslanIPOj8j9/7sZJBMsvH8teHjRDGn402sCIBO3SUwthGKktLuAUL5MCiVgo/Eym4mQ2a4OAbZBWqKRQ+7HJunbEzwA/2zOUm/WX3NTy8dg67yyPNLXgMarVsmRXRDYPMlSGfV6Y3kBGizhEGy/u8zXe17KmPjqEKDLWHZZxt0wWYVidERLk1EG2Sm0maIV0i6a+wunCLqQXKHPF8BDwZGftYNbbrED7+4Jnp2h5Y8fS5FlpNAgPZp4YWbOhMpZIhahms3qwGloTGrCj+YvnUu6wnKOnhsvcz2Ibgi+pXr2/3H8lSjAg//P7wRYQN0pvIdacDRD0Vx10bENPAO2IKV7COv/NI0WLrBezDcRS4j60m4EgAdmambKye/mYqERY2P+2e1pMVcn4xaehXxfdyb5MGsZtIh7h0vP9LxVpj+mIVE/WDk36sWPVlTtumVioC5vhr087RrTOj3fNAjHeEMvJa5uiyKxT3UOCx6YORGHkH0i9fz/2QHCA2FBrOdTFv3oe1L2W23iqs9cSx+FxaVCE=
+    - secure: dxsvChfy84dx85yoDA08UQL9/uwuab2St/yzWGfI++tlY1yL+kUNTfaTTY0uiT6Fqwg8rfUdXPA95Z/9bwLPkMJ8p1zwRlxBKjzICTGjB/NDLUYWrZVW+kXOOWrLHEluccrAc5mvWY1/k6KaxqYslanIPOj8j9/7sZJBMsvH8teHjRDGn402sCIBO3SUwthGKktLuAUL5MCiVgo/Eym4mQ2a4OAbZBWqKRQ+7HJunbEzwA/2zOUm/WX3NTy8dg67yyPNLXgMarVsmRXRDYPMlSGfV6Y3kBGizhEGy/u8zXe17KmPjqEKDLWHZZxt0wWYVidERLk1EG2Sm0maIV0i6a+wunCLqQXKHPF8BDwZGftYNbbrED7+4Jnp2h5Y8fS5FlpNAgPZp4YWbOhMpZIhahms3qwGloTGrCj+YvnUu6wnKOnhsvcz2Ibgi+pXr2/3H8lSjAg//P7wRYQN0pvIdacDRD0Vx10bENPAO2IKV7COv/NI0WLrBezDcRS4j60m4EgAdmambKye/mYqERY2P+2e1pMVcn4xaehXxfdyb5MGsZtIh7h0vP9LxVpj+mIVE/WDk36sWPVlTtumVioC5vhr087RrTOj3fNAjHeEMvJa5uiyKxT3UOCx6YORGHkH0i9fz/2QHCA2FBrOdTFv3oe1L2W23iqs9cSx+FxaVCE=
+
+matrix:
+  include:
+    - go: 1.12.x
+      os: linux
+      env: GO111MODULE=on GOFLAGS=
+    - go: 1.12.x
+      os: osx
+      env: GO111MODULE=off GOFLAGS=
+    - go: 1.13.x
+      os: linux
+      env: GO111MODULE=off GOFLAGS=
+    - go: 1.13.x
+      os: osx
+      env: GO111MODULE=on GOFLAGS=-mod=vendor
