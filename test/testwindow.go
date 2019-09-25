@@ -124,3 +124,10 @@ func (w *testWindow) SetContent(obj fyne.CanvasObject) {
 func (w *testWindow) Canvas() fyne.Canvas {
 	return w.canvas
 }
+
+// NewWindow creates and registers a new window for test purposes
+func NewWindow(content fyne.CanvasObject) fyne.Window {
+	window := fyne.CurrentApp().NewWindow("")
+	window.SetContent(content)
+	return window
+}
