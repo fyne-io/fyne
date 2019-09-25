@@ -37,13 +37,7 @@ func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Positi
 
 func (d *testDriver) CreateWindow(string) fyne.Window {
 	canvas := NewCanvas().(*testCanvas)
-	if fyne.CurrentApp() != nil {
-		if driver, ok := fyne.CurrentApp().Driver().(*testDriver); ok {
-			if driver != nil {
-				canvas.painter = driver.painter
-			}
-		}
-	}
+	canvas.painter = d.painter
 
 	window := &testWindow{canvas: canvas, driver: d}
 	window.clipboard = &testClipboard{}
