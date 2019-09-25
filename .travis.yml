@@ -49,7 +49,7 @@ matrix:
   include:
     - go: 1.12.x
       os: linux
-      env: GO111MODULE=off GOFLAGS=
+      env: GO111MODULE=on GOFLAGS=
     - go: 1.12.x
       os: osx
       env: GO111MODULE=off GOFLAGS=
