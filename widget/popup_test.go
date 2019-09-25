@@ -42,8 +42,7 @@ func TestPopUp_MinSize(t *testing.T) {
 
 func TestPopUp_Move(t *testing.T) {
 	label := NewLabel("Hi")
-	win := fyne.CurrentApp().NewWindow("")
-	win.SetContent(NewLabel("OK"))
+	win := test.NewWindow(NewLabel("OK"))
 	win.Resize(fyne.NewSize(50, 50))
 	pop := NewPopUp(label, win.Canvas())
 
@@ -61,8 +60,7 @@ func TestPopUp_Move(t *testing.T) {
 
 func TestPopUp_Move_Constrained(t *testing.T) {
 	label := NewLabel("Hi")
-	win := fyne.CurrentApp().NewWindow("")
-	win.SetContent(NewLabel("OK"))
+	win := test.NewWindow(NewLabel("OK"))
 	win.Resize(fyne.NewSize(60, 40))
 	pop := NewPopUp(label, win.Canvas())
 
@@ -82,8 +80,7 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 
 func TestPopUp_Move_ConstrainedWindowToSmall(t *testing.T) {
 	label := NewLabel("Hi")
-	win := fyne.CurrentApp().NewWindow("")
-	win.SetContent(NewLabel("OK"))
+	win := test.NewWindow(NewLabel("OK"))
 	win.Resize(fyne.NewSize(10, 5))
 	pop := NewPopUp(label, win.Canvas())
 
