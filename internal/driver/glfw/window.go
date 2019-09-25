@@ -469,7 +469,7 @@ func (w *window) refresh(viewport *glfw.Window) {
 }
 
 func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position,
-	matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, int, int) {
+	matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
 	roots := []fyne.CanvasObject{canvas.content}
 
 	if canvas.menu != nil {
@@ -483,7 +483,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
 	cursor := defaultCursor
-	obj, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if wid, ok := object.(*widget.Entry); ok {
 			if !wid.ReadOnly {
 				cursor = entryCursor
@@ -499,7 +499,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	viewport.SetCursor(cursor)
 	if obj != nil && !w.objIsDragged(obj) {
 		ev := new(desktop.MouseEvent)
-		ev.Position = fyne.NewPos(x, y)
+		ev.Position = pos
 		ev.Button = w.mouseButton
 
 		if hovered, ok := obj.(desktop.Hoverable); ok {
@@ -556,7 +556,7 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-	co, x, y := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	co, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		} else if _, ok := object.(fyne.Focusable); ok {
@@ -572,7 +572,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		return false
 	})
 	ev := new(fyne.PointEvent)
-	ev.Position = fyne.NewPos(x, y)
+	ev.Position = pos
 
 	coMouse := co
 	// Switch the mouse target to the dragging object if one is set
@@ -663,7 +663,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	co, _, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	co, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	})

@@ -177,7 +177,7 @@ func (c *canvas) tapUp(pos fyne.Position,
 	tapAltCallback func(fyne.Tappable, *fyne.PointEvent)) {
 	duration := time.Now().UnixNano() - c.lastTapDown
 
-	co, objX, objY := driver.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+	co, objPos := driver.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		} else if _, ok := object.(fyne.Focusable); ok {
@@ -188,7 +188,7 @@ func (c *canvas) tapUp(pos fyne.Position,
 	}, c.overlay, c.content)
 
 	ev := new(fyne.PointEvent)
-	ev.Position = fyne.NewPos(objX, objY)
+	ev.Position = objPos
 
 	if wid, ok := co.(fyne.Tappable); ok {
 		// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })

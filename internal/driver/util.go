@@ -94,9 +94,9 @@ func walkObjectTree(
 // The matches function determines of the type of object that is found at this position is of a suitable type.
 // The various canvas roots and overlays that can be searched are also passed in.
 func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.CanvasObject) bool,
-	overlay fyne.CanvasObject, roots ...fyne.CanvasObject) (fyne.CanvasObject, int, int) {
+	overlay fyne.CanvasObject, roots ...fyne.CanvasObject) (fyne.CanvasObject, fyne.Position) {
 	var found fyne.CanvasObject
-	foundX, foundY := 0, 0
+	var foundPos fyne.Position
 
 	findFunc := func(walked fyne.CanvasObject, pos fyne.Position, clipPos fyne.Position, clipSize fyne.Size) bool {
 		if !walked.Visible() {
@@ -121,7 +121,7 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 
 		if matches(walked) {
 			found = walked
-			foundX, foundY = mouse.X-pos.X, mouse.Y-pos.Y
+			foundPos = fyne.NewPos(mouse.X-pos.X, mouse.Y-pos.Y)
 		}
 		return false
 	}
@@ -137,5 +137,5 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 		}
 	}
 
-	return found, foundX, foundY
+	return found, foundPos
 }
