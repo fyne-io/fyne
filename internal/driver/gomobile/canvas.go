@@ -2,6 +2,7 @@ package gomobile
 
 import (
 	"image"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
@@ -164,6 +165,38 @@ func (c *canvas) walkTree(
 	//}
 	if c.overlay != nil {
 		driver.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
+	}
+}
+
+func (c *canvas) tapDown(pos fyne.Position) {
+	c.lastTapDown = time.Now().UnixNano()
+}
+
+func (c *canvas) tapUp(pos fyne.Position,
+	tapCallback func(fyne.Tappable, *fyne.PointEvent),
+	tapAltCallback func(fyne.Tappable, *fyne.PointEvent)) {
+	duration := time.Now().UnixNano() - c.lastTapDown
+
+	co, objX, objY := driver.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		} else if _, ok := object.(fyne.Focusable); ok {
+			return true
+		}
+
+		return false
+	}, c.overlay, c.content)
+
+	ev := new(fyne.PointEvent)
+	ev.Position = fyne.NewPos(objX, objY)
+
+	if wid, ok := co.(fyne.Tappable); ok {
+		// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })
+		if duration < tapSecondaryDelay {
+			tapCallback(wid, ev)
+		} else {
+			tapAltCallback(wid, ev)
+		}
 	}
 }
 

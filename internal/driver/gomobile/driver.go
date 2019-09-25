@@ -205,36 +205,23 @@ func (d *mobileDriver) paintCanvas(canvas *canvas, sz size.Event) {
 }
 
 func (d *mobileDriver) tapDownCanvas(canvas *canvas, x, y float32) {
-	canvas.lastTapDown = time.Now().UnixNano()
+	tapX := internal.UnscaleInt(canvas, int(x))
+	tapY := internal.UnscaleInt(canvas, int(y))
+	pos := fyne.NewPos(tapX, tapY)
+
+	canvas.tapDown(pos)
 }
 
 func (d *mobileDriver) tapUpCanvas(canvas *canvas, x, y float32) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)
-	duration := time.Now().UnixNano() - canvas.lastTapDown
 
-	co, objX, objY := driver.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		} else if _, ok := object.(fyne.Focusable); ok {
-			return true
-		}
-
-		return false
-	}, canvas.overlay, canvas.content)
-
-	ev := new(fyne.PointEvent)
-	ev.Position = fyne.NewPos(objX, objY)
-
-	if wid, ok := co.(fyne.Tappable); ok {
-		// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })
-		if duration < tapSecondaryDelay {
-			go wid.Tapped(ev)
-		} else {
-			go wid.TappedSecondary(ev)
-		}
-	}
+	canvas.tapUp(pos, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		go wid.Tapped(ev)
+	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+		go wid.TappedSecondary(ev)
+	})
 }
 
 func (d *mobileDriver) freeDirtyTextures(canvas *canvas) {
