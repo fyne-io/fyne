@@ -39,6 +39,7 @@ func main(f func(App)) {
 	runtime.LockOSThread()
 
 	workAvailable := theApp.worker.WorkAvailable()
+	heartbeat := time.NewTicker(time.Second / 60)
 
 	C.createWindow()
 
@@ -64,6 +65,8 @@ func main(f func(App)) {
 		select {
 		case <-donec:
 			return
+		case <-heartbeat.C:
+			C.processEvents()
 		case <-workAvailable:
 			theApp.worker.DoWork()
 		case <-theApp.publish:
@@ -73,7 +76,6 @@ func main(f func(App)) {
 			tc = nil
 			theApp.publishResult <- PublishResult{}
 		}
-		C.processEvents()
 	}
 }
 
