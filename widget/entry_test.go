@@ -95,6 +95,30 @@ func TestEntry_SetTextEmptyString(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 }
 
+func TestEntry_SetText_Overflow(t *testing.T) {
+	entry := NewEntry()
+
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	test.Type(entry, "test")
+	assert.Equal(t, 4, entry.CursorColumn)
+
+	entry.SetText("x")
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	key := &fyne.KeyEvent{Name: fyne.KeyDelete}
+	entry.TypedKey(key)
+
+	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, "x", entry.Text)
+
+	key = &fyne.KeyEvent{Name: fyne.KeyBackspace}
+	entry.TypedKey(key)
+
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, "", entry.Text)
+}
+
 func TestEntry_OnKeyDown(t *testing.T) {
 	entry := NewEntry()
 
