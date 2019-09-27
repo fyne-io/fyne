@@ -1,5 +1,11 @@
 package fyne
 
+import (
+	"io/ioutil"
+	"net/http"
+	"path/filepath"
+)
+
 // Resource represents a single binary resource, such as an image or font.
 // A resource has an identifying name and byte array content.
 // The serialised path of a resource can be obtained which may result in a
@@ -38,4 +44,31 @@ func NewStaticResource(name string, content []byte) *StaticResource {
 		StaticName:    name,
 		StaticContent: content,
 	}
+}
+
+// LoadResourceFromPath creates a new StaticResource in memory using the contents of the specified file.
+func LoadResourceFromPath(path string) (Resource, error) {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	name := filepath.Base(path)
+	return NewStaticResource(name, bytes), nil
+}
+
+// LoadResourceFromURLString creates a new StaticResource in memory using the body of the specified URL.
+func LoadResourceFromURLString(urlStr string) (Resource, error) {
+	res, err := http.Get(urlStr)
+	if err != nil {
+		return nil, err
+	}
+
+	bytes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	name := filepath.Base(urlStr)
+	return NewStaticResource(name, bytes), nil
 }
