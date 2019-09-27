@@ -302,6 +302,15 @@ func (e *Entry) SetText(text string) {
 		e.CursorRow = 0
 		e.Unlock()
 		Renderer(e).(*entryRenderer).moveCursor()
+	} else {
+		provider := e.textProvider()
+		if e.CursorRow >= provider.rows() {
+			e.CursorRow = provider.rows() - 1
+		}
+		rowLength := provider.rowLength(e.CursorRow)
+		if e.CursorColumn >= rowLength {
+			e.CursorColumn = rowLength
+		}
 	}
 }
 
