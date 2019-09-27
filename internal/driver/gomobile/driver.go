@@ -152,6 +152,8 @@ func (d *mobileDriver) Run() {
 				switch e.Type {
 				case touch.TypeBegin:
 					d.tapDownCanvas(canvas, e.X, e.Y)
+				case touch.TypeMove:
+					d.tapMoveCanvas(canvas, e.X, e.Y)
 				case touch.TypeEnd:
 					d.tapUpCanvas(canvas, e.X, e.Y)
 				}
@@ -212,6 +214,16 @@ func (d *mobileDriver) tapDownCanvas(canvas *canvas, x, y float32) {
 	canvas.tapDown(pos)
 }
 
+func (d *mobileDriver) tapMoveCanvas(canvas *canvas, x, y float32) {
+	tapX := internal.UnscaleInt(canvas, int(x))
+	tapY := internal.UnscaleInt(canvas, int(y))
+	pos := fyne.NewPos(tapX, tapY)
+
+	canvas.tapMove(pos, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		go wid.Dragged(ev)
+	})
+}
+
 func (d *mobileDriver) tapUpCanvas(canvas *canvas, x, y float32) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
@@ -221,6 +233,8 @@ func (d *mobileDriver) tapUpCanvas(canvas *canvas, x, y float32) {
 		go wid.Tapped(ev)
 	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		go wid.TappedSecondary(ev)
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		go wid.DragEnd()
 	})
 }
 

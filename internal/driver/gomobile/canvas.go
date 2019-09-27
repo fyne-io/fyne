@@ -23,9 +23,11 @@ type canvas struct {
 	typedKey  func(event *fyne.KeyEvent)
 	shortcut  fyne.ShortcutHandler
 
-	inited, dirty bool
-	lastTapDown   int64
-	refreshQueue  chan fyne.CanvasObject
+	inited, dirty  bool
+	lastTapDown    int64
+	lastTapDownPos fyne.Position
+	dragging       fyne.Draggable
+	refreshQueue   chan fyne.CanvasObject
 }
 
 func (c *canvas) Content() fyne.CanvasObject {
@@ -170,11 +172,51 @@ func (c *canvas) walkTree(
 
 func (c *canvas) tapDown(pos fyne.Position) {
 	c.lastTapDown = time.Now().UnixNano()
+	c.lastTapDownPos = pos
+	c.dragging = nil
+}
+
+func (c *canvas) tapMove(pos fyne.Position,
+	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
+
+	if c.dragging == nil {
+		co, _ := driver.FindObjectAtPositionMatching(c.lastTapDownPos, func(object fyne.CanvasObject) bool {
+			if _, ok := object.(fyne.Draggable); ok {
+				return true
+			}
+
+			return false
+		}, c.overlay, c.content)
+
+		if drag, ok := co.(fyne.Draggable); ok {
+			c.dragging = drag
+		} else {
+			return
+		}
+	}
+	deltaX := pos.X - c.lastTapDownPos.X
+	deltaY := pos.Y - c.lastTapDownPos.Y
+	objPos := pos.Subtract(c.dragging.(fyne.CanvasObject).Position())
+
+	ev := new(fyne.DragEvent)
+	ev.Position = objPos
+	ev.DraggedX = deltaX
+	ev.DraggedY = deltaY
+
+	dragCallback(c.dragging, ev)
+	c.lastTapDownPos = pos
 }
 
 func (c *canvas) tapUp(pos fyne.Position,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
-	tapAltCallback func(fyne.Tappable, *fyne.PointEvent)) {
+	tapAltCallback func(fyne.Tappable, *fyne.PointEvent),
+	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
+	if c.dragging != nil {
+		c.dragging.DragEnd()
+
+		c.dragging = nil
+	}
+
 	duration := time.Now().UnixNano() - c.lastTapDown
 
 	co, objPos := driver.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
