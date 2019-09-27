@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -21,12 +20,11 @@ func formatVariable(name string) string {
 }
 
 func bundleFile(name string, filepath string, f *os.File) {
-	bytes, err := ioutil.ReadFile(filepath)
+	res, err := fyne.LoadResourceFromPath(filepath)
 	if err != nil {
 		fyne.LogError("Unable to load file "+filepath, err)
 		return
 	}
-	res := fyne.NewStaticResource(path.Base(filepath), bytes)
 
 	_, err = f.WriteString(fmt.Sprintf("var %s = %#v\n", formatVariable(name), res))
 	if err != nil {
