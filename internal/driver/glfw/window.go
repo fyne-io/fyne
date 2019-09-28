@@ -658,7 +658,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		}
 	}
 	if action == glfw.Release && w.mouseDragged != nil {
-		w.mouseDragged.DragEnd()
+		w.queueEvent(w.mouseDragged.DragEnd)
 		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(coMouse) {
 			w.mouseOut()
 		}
