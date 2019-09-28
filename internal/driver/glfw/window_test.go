@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -256,6 +257,31 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 
 	// we should have no mouse events on d2
 	assert.Nil(t, d2.popMouseEvent())
+}
+
+func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	d := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	d.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(d)
+
+	// wait for canvas to get its size right
+	for s := w.Canvas().Size(); s != fyne.NewSize(18, 18); s = w.Canvas().Size() {
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	require.Equal(t, fyne.NewPos(4, 4), d.Position())
+
+	w.mouseMoved(w.viewport, 9, 9)
+	// mouse down (potential drag)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	// mouse release without move (not really a drag)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.waitForEvents()
+
+	assert.Nil(t, d.popDragEvent(), "no drag event without move")
+	assert.Nil(t, d.popDragEndEvent(), "no drag end event without drag event")
 }
 
 func TestWindow_HoverableOnDragging(t *testing.T) {
