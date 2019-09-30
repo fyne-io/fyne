@@ -13,6 +13,7 @@ import (
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
+	"github.com/nfnt/resize"
 	"golang.org/x/image/font"
 )
 
@@ -21,6 +22,12 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
 	tex := painter.PaintImage(img, c, width, height)
+
+	if img.FillMode == canvas.ImageFillStretch {
+		width = internal.ScaleInt(c, img.Size().Width)
+		height = internal.ScaleInt(c, img.Size().Height)
+		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
+	} // TODO support contain
 
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
