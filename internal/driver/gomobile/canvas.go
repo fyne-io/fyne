@@ -37,13 +37,7 @@ func (c *canvas) Content() fyne.CanvasObject {
 func (c *canvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 
-	if c.padded {
-		content.Resize(c.Size().Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	} else {
-		content.Resize(c.Size())
-		content.Move(fyne.NewPos(0, 0))
-	}
+	c.sizeContent(c.Size())
 }
 
 func (c *canvas) Refresh(obj fyne.CanvasObject) {
@@ -56,14 +50,10 @@ func (c *canvas) Refresh(obj fyne.CanvasObject) {
 	c.dirty = true
 }
 
-func (c *canvas) Resize(size fyne.Size) {
-	if size == c.size {
-		return
-	}
-
-	devicePadTop := int(16 * c.scale) // probably android specific
-	innerSize := size.Subtract(fyne.NewSize(0, devicePadTop))
-	topLeft := fyne.NewPos(0, devicePadTop)
+func (c *canvas) sizeContent(size fyne.Size) {
+	devicePadTopLeft, devicePadBottomRight := devicePadding()
+	innerSize := size.Subtract(devicePadTopLeft).Subtract(devicePadBottomRight)
+	topLeft := fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height)
 
 	c.size = size
 	if c.padded {
@@ -78,6 +68,14 @@ func (c *canvas) Resize(size fyne.Size) {
 		c.overlay.Resize(innerSize)
 		c.overlay.Move(topLeft)
 	}
+}
+
+func (c *canvas) Resize(size fyne.Size) {
+	if size == c.size {
+		return
+	}
+
+	c.sizeContent(size)
 }
 
 func (c *canvas) Focus(obj fyne.Focusable) {
@@ -118,7 +116,7 @@ func (c *canvas) SetScale(scale float32) {
 }
 
 func (c *canvas) detectScale() float32 {
-	return 2 // TODO real detection
+	return deviceScale()
 }
 
 func (c *canvas) Overlay() fyne.CanvasObject {
