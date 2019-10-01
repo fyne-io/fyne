@@ -2,6 +2,7 @@ package gomobile
 
 import (
 	"image"
+	"math"
 	"time"
 
 	"fyne.io/fyne"
@@ -109,14 +110,7 @@ func (c *canvas) Scale() float32 {
 }
 
 func (c *canvas) SetScale(scale float32) {
-	if scale == fyne.SettingsScaleAuto {
-		scale = c.detectScale()
-	}
 	c.scale = scale
-}
-
-func (c *canvas) detectScale() float32 {
-	return deviceScale()
 }
 
 func (c *canvas) Overlay() fyne.CanvasObject {
@@ -176,6 +170,12 @@ func (c *canvas) tapDown(pos fyne.Position) {
 
 func (c *canvas) tapMove(pos fyne.Position,
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
+	deltaX := pos.X - c.lastTapDownPos.X
+	deltaY := pos.Y - c.lastTapDownPos.Y
+
+	if math.Abs(float64(deltaX)) < 3 && math.Abs(float64(deltaY)) < 3 {
+		return
+	}
 
 	if c.dragging == nil {
 		co, _ := driver.FindObjectAtPositionMatching(c.lastTapDownPos, func(object fyne.CanvasObject) bool {
@@ -192,8 +192,6 @@ func (c *canvas) tapMove(pos fyne.Position,
 			return
 		}
 	}
-	deltaX := pos.X - c.lastTapDownPos.X
-	deltaY := pos.Y - c.lastTapDownPos.Y
 	objPos := pos.Subtract(c.dragging.(fyne.CanvasObject).Position())
 
 	ev := new(fyne.DragEvent)
@@ -243,7 +241,7 @@ func (c *canvas) tapUp(pos fyne.Position,
 // NewCanvas creates a new gomobile canvas. This is a canvas that will render on a mobile device using OpenGL.
 func NewCanvas() fyne.Canvas {
 	ret := &canvas{padded: true}
-	ret.scale = ret.detectScale()
+	ret.scale = deviceScale()
 	ret.refreshQueue = make(chan fyne.CanvasObject, 1024)
 
 	return ret
