@@ -11,9 +11,10 @@ Install gomobile (the go compiler for mobile apps)
 
 Get and install the Andoid Native Development Kit (**NDK**). This is platform dependent and may be packaged 
 with various tools that you might already have installed (like Android Studio)
-Once installed run:
+Once installed set up the appropriate path, the directory you reference should contain `ndk-build`,
+`platforms` and `toolchains`.
 
-`gomobile init -ndk /<path to>/android-ndk`
+`export ANDROID_NDK_HOME=/<path to>/android-ndk`
 
 ## iOS
 
