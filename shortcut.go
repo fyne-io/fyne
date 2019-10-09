@@ -67,3 +67,11 @@ type ShortcutCut struct {
 func (se *ShortcutCut) ShortcutName() string {
 	return "Cut"
 }
+
+// ShortcutSelectAll describes a shortcut selectAll action.
+type ShortcutSelectAll struct{}
+
+// ShortcutName returns the shortcut name
+func (se *ShortcutSelectAll) ShortcutName() string {
+	return "SelectAll"
+}

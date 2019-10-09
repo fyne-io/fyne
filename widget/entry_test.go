@@ -1081,6 +1081,18 @@ func TestEntry_MultilineSelect(t *testing.T) {
 	assert.Equal(t, 10, b)
 }
 
+func TestEntry_SelectAll(t *testing.T) {
+	e := NewMultiLineEntry()
+	e.SetText("First Row\nSecond Row\nThird Row")
+	e.selectAll()
+	a, b := e.selection()
+
+	assert.Equal(t, 0, a)
+	assert.Equal(t, 30, b)
+	assert.Equal(t, 2, e.CursorRow)
+	assert.Equal(t, 9, e.CursorColumn)
+}
+
 func TestEntry_SelectSnapping(t *testing.T) {
 
 	e := setup()
