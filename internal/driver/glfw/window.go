@@ -907,6 +907,9 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 			shortcut = &fyne.ShortcutCut{
 				Clipboard: w.Clipboard(),
 			}
+		case fyne.KeyA:
+			// detect selectAll shortcut
+			shortcut = &fyne.ShortcutSelectAll{}
 		}
 	}
 	if shortcut == nil && keyDesktopModifier != 0 {

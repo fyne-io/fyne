@@ -427,7 +427,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	assert.Greater(t, cont.Position().Y, pos.Y)
 
 	items := cont.(*Box).Children
-	assert.Equal(t, 1, len(items)) // Paste
+	assert.Equal(t, 2, len(items)) // Paste
 }
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
@@ -1079,6 +1079,18 @@ func TestEntry_MultilineSelect(t *testing.T) {
 	a, b = e.selection()
 	assert.Equal(t, 5, a)
 	assert.Equal(t, 10, b)
+}
+
+func TestEntry_SelectAll(t *testing.T) {
+	e := NewMultiLineEntry()
+	e.SetText("First Row\nSecond Row\nThird Row")
+	e.selectAll()
+	a, b := e.selection()
+
+	assert.Equal(t, 0, a)
+	assert.Equal(t, 30, b)
+	assert.Equal(t, 2, e.CursorRow)
+	assert.Equal(t, 9, e.CursorColumn)
 }
 
 func TestEntry_SelectSnapping(t *testing.T) {

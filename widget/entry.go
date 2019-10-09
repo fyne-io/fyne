@@ -497,6 +497,21 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 	Renderer(e).(*entryRenderer).moveCursor()
 }
 
+// selectAll selects all text in entry
+func (e *Entry) selectAll() {
+	e.Lock()
+	e.selectRow = 0
+	e.selectColumn = 0
+
+	lastRow := e.textProvider().rows() - 1
+	e.CursorColumn = e.textProvider().rowLength(lastRow)
+	e.CursorRow = lastRow
+	e.selecting = true
+	e.Unlock()
+
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
 // TappedSecondary is called when right or alternative tap is invoked.
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
@@ -507,11 +522,12 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
-	item := fyne.NewMenuItem("Paste", func() {
+	pasteItem := fyne.NewMenuItem("Paste", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.pasteFromClipboard(clipboard)
 	})
-	e.popUp = NewPopUpMenu(fyne.NewMenu("", item), c)
+	selectAllItem := fyne.NewMenuItem("Select all", e.selectAll)
+	e.popUp = NewPopUpMenu(fyne.NewMenu("", pasteItem, selectAllItem), c)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, e.Size().Height))
@@ -1014,6 +1030,9 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutPaste{}, func(se fyne.Shortcut) {
 		paste := se.(*fyne.ShortcutPaste)
 		e.pasteFromClipboard(paste.Clipboard)
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(se fyne.Shortcut) {
+		e.selectAll()
 	})
 }
 
