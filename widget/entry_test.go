@@ -427,7 +427,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	assert.Greater(t, cont.Position().Y, pos.Y)
 
 	items := cont.(*Box).Children
-	assert.Equal(t, 1, len(items)) // Paste
+	assert.Equal(t, 2, len(items)) // Paste
 }
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
