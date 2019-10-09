@@ -27,7 +27,7 @@ github.com/nfnt/resize
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/srwiley/oksvg v0.0.0-20190105194046-ccbc7673cdf3
+# github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e
 github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
 github.com/srwiley/rasterx

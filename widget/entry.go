@@ -73,7 +73,7 @@ func (e *entryRenderer) buildSelection() {
 
 	// Convert column, row into x,y
 	getCoordinates := func(column int, row int) (int, int) {
-		sz := textRenderer.lineSize(column, row)
+		sz := textRenderer.lineSizeToColumn(column, row)
 		return sz.Width + theme.Padding()*2, sz.Height*row + theme.Padding()*2
 	}
 
@@ -133,7 +133,7 @@ func (e *entryRenderer) buildSelection() {
 func (e *entryRenderer) moveCursor() {
 	textRenderer := Renderer(e.text).(*textRenderer)
 	e.entry.RLock()
-	size := textRenderer.lineSize(e.entry.CursorColumn, e.entry.CursorRow)
+	size := textRenderer.lineSizeToColumn(e.entry.CursorColumn, e.entry.CursorRow)
 	xPos := size.Width
 	yPos := size.Height * e.entry.CursorRow
 	e.entry.RUnlock()
@@ -312,6 +312,15 @@ func (e *Entry) SetText(text string) {
 		e.CursorRow = 0
 		e.Unlock()
 		Renderer(e).(*entryRenderer).moveCursor()
+	} else {
+		provider := e.textProvider()
+		if e.CursorRow >= provider.rows() {
+			e.CursorRow = provider.rows() - 1
+		}
+		rowLength := provider.rowLength(e.CursorRow)
+		if e.CursorColumn >= rowLength {
+			e.CursorColumn = rowLength
+		}
 	}
 }
 
