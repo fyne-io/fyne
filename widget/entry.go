@@ -456,6 +456,22 @@ func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
 	return len(text)
 }
 
+func (e *Entry) selectAll() {
+	e.Lock()
+	if e.selectKeyDown == false {
+		e.selectRow = 0
+		e.selectColumn = 0
+	}
+
+	lastRow := e.textProvider().rows() - 1
+	e.CursorColumn = e.textProvider().rowLength(lastRow)
+	e.CursorRow = lastRow
+	e.selecting = true
+	e.Unlock()
+
+	Renderer(e).(*entryRenderer).moveCursor()
+}
+
 // Tapped is called when this entry has been tapped so we should update the cursor position.
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	e.updateMousePointer(ev, false)
@@ -1005,6 +1021,9 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutPaste{}, func(se fyne.Shortcut) {
 		paste := se.(*fyne.ShortcutPaste)
 		e.pasteFromClipboard(paste.Clipboard)
+	})
+	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(se fyne.Shortcut) {
+		e.selectAll()
 	})
 }
 
