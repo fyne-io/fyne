@@ -500,10 +500,8 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 // selectAll selects all text in entry
 func (e *Entry) selectAll() {
 	e.Lock()
-	if e.selectKeyDown == false {
-		e.selectRow = 0
-		e.selectColumn = 0
-	}
+	e.selectRow = 0
+	e.selectColumn = 0
 
 	lastRow := e.textProvider().rows() - 1
 	e.CursorColumn = e.textProvider().rowLength(lastRow)
@@ -528,9 +526,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.pasteFromClipboard(clipboard)
 	})
-	selectAllItem := fyne.NewMenuItem("Select all", func() {
-		e.selectAll()
-	})
+	selectAllItem := fyne.NewMenuItem("Select all", e.selectAll)
 	e.popUp = NewPopUpMenu(fyne.NewMenu("", pasteItem, selectAllItem), c)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
