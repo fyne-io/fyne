@@ -100,7 +100,7 @@ func (d *gLDriver) runGL() {
 				}
 
 				canvas := w.canvas
-				if !canvas.isDirty() {
+				if !canvas.isDirty() || !w.visible {
 					continue
 				}
 

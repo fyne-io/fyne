@@ -457,6 +457,10 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
+	if !w.visible || width == 0 || height == 0 {
+		return
+	}
+
 	winWidth, _ := w.viewport.GetSize()
 	texScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
 	w.canvas.painter.SetFrameBufferScale(texScale)
