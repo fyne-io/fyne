@@ -50,6 +50,30 @@ func TestTabContainer_SelectTabIndex(t *testing.T) {
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
 }
 
+func TestTabItem_Content(t *testing.T) {
+	item1 := &TabItem{Text: "Test1", Content: NewLabel("Test1")}
+	item2 := &TabItem{Text: "Test2", Content: NewLabel("Test2")}
+	tabs := NewTabContainer(item1, item2)
+	r := Renderer(tabs).(*tabContainerRenderer)
+
+	assert.Equal(t, 2, len(tabs.Items))
+	assert.Equal(t, item1.Content, r.objects[0])
+
+	newContent := NewLabel("Test3")
+	item1.Content = newContent
+	r.Refresh()
+
+	assert.Equal(t, newContent, r.objects[0])
+	assert.True(t, newContent.Visible())
+
+	newUnselected := NewLabel("Test4")
+	item2.Content = newUnselected
+	r.Refresh()
+
+	assert.Equal(t, newUnselected, r.objects[1])
+	assert.False(t, newUnselected.Visible())
+}
+
 func TestTabContainer_SetTabLocation(t *testing.T) {
 	tab1 := NewTabItem("Test1", NewLabel("Test1"))
 	tab2 := NewTabItem("Test2", NewLabel("Test2"))

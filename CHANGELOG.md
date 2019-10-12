@@ -24,19 +24,23 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Correct the colour of Entry widget cursor if theme changes
 
 
-## 1.1.2 - ongoing
+## 1.1.2 - 12 October 2019
 
 ### Added
 
 ### Changed
+
+* Default scale value for canvases is now 1.0 instead of Auto (DPI based)
 
 ### Fixed
 
 * Correct icon name in linux packages
 * Fullscreen before showing a window works again
 * Incorrect MinSize of FixedGrid layout in some situations
-* Default scale value for canvases is now 1.0 instead of Auto (DPI based)
-
+* Update text size on theme change
+* Text handling crashes (#411, #484, #485)
+* Layout of image only buttons
+* TabItem.Content changes are reflected when refreshing TabContainer (#456)
 
 ## 1.1.1 - 17 August 2019
 

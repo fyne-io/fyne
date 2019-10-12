@@ -326,6 +326,21 @@ func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
 func (t *tabContainerRenderer) Refresh() {
 	t.Layout(t.container.Size().Union(t.container.MinSize()))
 
+	for i, child := range t.container.Items {
+		old := t.objects[i]
+
+		if old == child.Content {
+			continue
+		}
+
+		old.Hide()
+		t.objects[i] = child.Content
+		if i == t.container.current {
+			child.Content.Show()
+		} else {
+			child.Content.Hide()
+		}
+	}
 	canvas.Refresh(t.container)
 
 	for i, button := range t.tabBar.Objects {
