@@ -530,7 +530,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	e.popUp = NewPopUpMenu(fyne.NewMenu("", pasteItem, selectAllItem), c)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
-	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, e.Size().Height))
+	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
 
 	e.popUp.Move(popUpPos)
 }
