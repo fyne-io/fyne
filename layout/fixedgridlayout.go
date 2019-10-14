@@ -24,7 +24,7 @@ func (g *fixedGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	g.rowCount = 1
 
 	if size.Width > g.CellSize.Width {
-		g.colCount = int(math.Floor(float64(size.Width) / float64(g.CellSize.Width+theme.Padding())))
+		g.colCount = int(math.Floor(float64(size.Width+theme.Padding()) / float64(g.CellSize.Width+theme.Padding())))
 	}
 
 	x, y := 0, 0
@@ -36,10 +36,12 @@ func (g *fixedGridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		child.Move(fyne.NewPos(x, y))
 		child.Resize(g.CellSize)
 
-		if i > 0 && (i+1)%g.colCount == 0 {
+		if (i+1)%g.colCount == 0 {
 			x = 0
 			y += g.CellSize.Height + theme.Padding()
-			g.rowCount++
+			if i > 0 {
+				g.rowCount++
+			}
 		} else {
 			x += g.CellSize.Width + theme.Padding()
 		}
