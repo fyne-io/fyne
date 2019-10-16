@@ -541,10 +541,10 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	if e.selectKeyDown {
 		e.selecting = true
 	}
-	if e.selecting && e.selectKeyDown == false {
+	if e.selecting && e.selectKeyDown == false && m.Button == desktop.LeftMouseButton {
 		e.selecting = false
 	}
-	e.updateMousePointer(&m.PointEvent, e.selecting == false)
+	e.updateMousePointer(&m.PointEvent, m.Button == desktop.RightMouseButton)
 }
 
 // MouseUp called on mouse release
@@ -567,7 +567,7 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 func (e *Entry) DragEnd() {
 }
 
-func (e *Entry) updateMousePointer(ev *fyne.PointEvent, startSelect bool) {
+func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 
 	if !e.focused {
 		e.FocusGained()
@@ -586,9 +586,12 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, startSelect bool) {
 	}
 
 	e.Lock()
-	e.CursorRow = row
-	e.CursorColumn = col
-	if startSelect {
+	if !rightClick || !e.selecting {
+		e.CursorRow = row
+		e.CursorColumn = col
+	}
+
+	if !e.selecting {
 		e.selectRow = row
 		e.selectColumn = col
 	}
