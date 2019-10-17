@@ -453,6 +453,28 @@ func TestEntry_HidePopUpOnEntry(t *testing.T) {
 	assert.Equal(t, true, entry.popUp.Hidden)
 }
 
+func TestEntry_MouseDownOnSelect(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("Ahnj\nBuki\n")
+	entry.selectAll()
+
+	testCharSize := theme.TextSize()
+	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
+	ev := &fyne.PointEvent{Position: pos}
+
+	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.RightMouseButton}
+	entry.MouseDown(me)
+	entry.MouseUp(me)
+
+	assert.Equal(t, entry.selectedText(), "Ahnj\nBuki\n")
+
+	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.LeftMouseButton}
+	entry.MouseDown(me)
+	entry.MouseUp(me)
+
+	assert.Equal(t, entry.selectedText(), "")
+}
+
 func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
