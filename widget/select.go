@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const noSelection = "(Select one)"
+var Selection = "(Select one)"
 
 type selectRenderer struct {
 	icon   *Icon
@@ -23,7 +23,7 @@ type selectRenderer struct {
 // MinSize calculates the minimum size of a select button.
 // This is based on the selected text, the drop icon and a standard amount of padding added.
 func (s *selectRenderer) MinSize() fyne.Size {
-	min := textMinSize(noSelection, s.label.TextSize, s.label.TextStyle)
+	min := textMinSize(Selection, s.label.TextSize, s.label.TextStyle)
 
 	for _, option := range s.combo.Options {
 		optionMin := textMinSize(option, s.label.TextSize, s.label.TextStyle)
@@ -67,7 +67,7 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 
 func (s *selectRenderer) Refresh() {
 	if s.combo.Selected == "" {
-		s.label.Text = noSelection
+		s.label.Text = Selection
 	} else {
 		s.label.Text = s.combo.Selected
 	}
@@ -188,7 +188,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	text := canvas.NewText(s.Selected, theme.TextColor())
 	if s.Selected == "" {
-		text.Text = noSelection
+		text.Text = Selection
 	}
 	text.Alignment = fyne.TextAlignLeading
 
