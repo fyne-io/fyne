@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// Selection sets a text for a select widget
 var Selection = "(Select one)"
 
 type selectRenderer struct {
