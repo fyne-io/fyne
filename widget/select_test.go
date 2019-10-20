@@ -17,6 +17,25 @@ func TestNewSelect(t *testing.T) {
 	assert.Equal(t, "", combo.Selected)
 }
 
+func TestEmptySelect(t *testing.T) {
+	combo := NewSelect([]string{}, func(string) {})
+
+	assert.Equal(t, 0, len(combo.Options))
+	assert.Equal(t, "(Select one)", combo.NoSelectionMessage)
+	assert.Equal(t, "", combo.Selected)
+}
+
+func TestSelect_SetNoSelectionMessage(t *testing.T) {
+	combo := NewSelect([]string{}, func(string) {})
+
+	assert.Equal(t, 0, len(combo.Options))
+	assert.Equal(t, "(Select one)", combo.NoSelectionMessage)
+	assert.Equal(t, "", combo.Selected)
+	combo.NoSelectionMessage = "Please Choose Something!"
+	assert.Equal(t, "Please Choose Something!", combo.NoSelectionMessage)
+
+}
+
 func TestSelect_SetSelected(t *testing.T) {
 	combo := NewSelect([]string{"1", "2"}, func(string) {})
 	combo.SetSelected("2")
@@ -66,22 +85,17 @@ func TestSelect_Tapped(t *testing.T) {
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
-	// fresh app for this test
-	test.NewApp()
-	// don't let our app hang around for too long
-	defer test.NewApp()
-
 	combo := NewSelect([]string{"1", "2"}, func(s string) {})
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
-	canvas.(test.WindowlessCanvas).Resize(fyne.NewSize(100, 100))
-
-	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))
+	win := test.NewWindow(combo)
+	win.Resize(fyne.NewSize(20, 20))
 	test.Tap(combo)
 
-	comboPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(combo)
-	cont := canvas.Overlay().(*PopUp).Content
-	assert.Less(t, cont.Position().Y, comboPos.Y, "window too small so we render higher up")
-	assert.Less(t, cont.Position().X, comboPos.X, "window too small so we render to the left")
+	over := fyne.CurrentApp().Driver().CanvasForObject(combo).Overlay()
+	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
+
+	cont := over.(*PopUp).Content
+	assert.True(t, cont.Position().Y <= pos.Y+theme.Padding()) // window was too small so we render higher up
+	assert.True(t, cont.Position().X > pos.X)                  // but X position is unaffected
 }
 
 func TestSelectRenderer_ApplyTheme(t *testing.T) {
