@@ -9,9 +9,6 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// PlaceHolder sets a text for a select widget.
-var PlaceHolder string = "(Select one)"
-
 type selectRenderer struct {
 	icon   *Icon
 	label  *canvas.Text
@@ -24,7 +21,7 @@ type selectRenderer struct {
 // MinSize calculates the minimum size of a select button.
 // This is based on the selected text, the drop icon and a standard amount of padding added.
 func (s *selectRenderer) MinSize() fyne.Size {
-	min := textMinSize(PlaceHolder, s.label.TextSize, s.label.TextStyle)
+	min := textMinSize(s.combo.PlaceHolder, s.label.TextSize, s.label.TextStyle)
 
 	for _, option := range s.combo.Options {
 		optionMin := textMinSize(option, s.label.TextSize, s.label.TextStyle)
@@ -68,7 +65,7 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 
 func (s *selectRenderer) Refresh() {
 	if s.combo.Selected == "" {
-		s.label.Text = PlaceHolder
+		s.label.Text = s.combo.PlaceHolder
 	} else {
 		s.label.Text = s.combo.Selected
 	}
@@ -99,12 +96,14 @@ func (s *selectRenderer) Destroy() {
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
 	baseWidget
-	Selected string
-	Options  []string
 
-	OnChanged func(string) `json:"-"`
-	hovered   bool
-	popUp     *PopUp
+	Selected    string
+	Options     []string
+	PlaceHolder string
+	OnChanged   func(string) `json:"-"`
+
+	hovered bool
+	popUp   *PopUp
 }
 
 // Resize sets a new size for a widget.
@@ -189,7 +188,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 
 	text := canvas.NewText(s.Selected, theme.TextColor())
 	if s.Selected == "" {
-		text.Text = PlaceHolder
+		text.Text = s.PlaceHolder
 	}
 	text.Alignment = fyne.TextAlignLeading
 
@@ -218,7 +217,7 @@ func (s *Select) SetSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	combo := &Select{baseWidget{}, "", options, changed, false, nil}
+	combo := &Select{baseWidget{}, "", options, "Select one", changed, false, nil}
 
 	Renderer(combo).Layout(combo.MinSize())
 	return combo
