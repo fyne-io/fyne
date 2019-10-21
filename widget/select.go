@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+const defaultPlaceHolder string = "(Select one)"
+
 type selectRenderer struct {
 	icon   *Icon
 	label  *canvas.Text
@@ -70,7 +72,7 @@ func (s *selectRenderer) Refresh() {
 		s.label.Text = s.combo.Selected
 	}
 
-	if false { //s.combo.down {
+	if false { // s.combo.down {
 		s.icon.Resource = theme.MenuDropUpIcon()
 	} else {
 		s.icon.Resource = theme.MenuDropDownIcon()
@@ -185,8 +187,11 @@ func (s *Select) MouseMoved(*desktop.MouseEvent) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	icon := NewIcon(theme.MenuDropDownIcon())
-
 	text := canvas.NewText(s.Selected, theme.TextColor())
+
+	if s.PlaceHolder == "" {
+		s.PlaceHolder = defaultPlaceHolder
+	}
 	if s.Selected == "" {
 		text.Text = s.PlaceHolder
 	}
@@ -217,7 +222,7 @@ func (s *Select) SetSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	combo := &Select{baseWidget{}, "", options, "Select one", changed, false, nil}
+	combo := &Select{baseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
 
 	Renderer(combo).Layout(combo.MinSize())
 	return combo
