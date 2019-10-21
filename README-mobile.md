@@ -20,7 +20,7 @@ Once installed set up the appropriate path, the directory you reference should c
 
 Install **XCode** from the app store and sign up for an [Apple Developer](https://developer.apple.com) account.
 Before compiling you will need to add a device ID to your account, create a development certificate and
-then a providioning profile.
+then a provisioning profile.
 
 # Compilation
 
