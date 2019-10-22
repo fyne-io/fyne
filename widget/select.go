@@ -66,6 +66,10 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 }
 
 func (s *selectRenderer) Refresh() {
+	if s.combo.PlaceHolder == "" {
+		s.combo.PlaceHolder = defaultPlaceHolder
+	}
+
 	if s.combo.Selected == "" {
 		s.label.Text = s.combo.PlaceHolder
 	} else {
