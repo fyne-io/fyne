@@ -5,7 +5,6 @@ package glfw
 import (
 	"image/color"
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -87,18 +86,14 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 	content := widget.NewHBox(leftCol, rightCol)
 	w.SetContent(content)
 	w.ignoreResize = true
-	for c.isDirty() {
-		time.Sleep(time.Millisecond * 10)
-	}
+	d.(*gLDriver).repaintWindow(w)
 
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
 	assert.Equal(t, oldCanvasSize, c.Size())
 
 	leftObj1.SetMinSize(fyne.NewSize(60, 60))
 	c.Refresh(leftObj1)
-	for c.Size() == oldCanvasSize {
-		time.Sleep(time.Millisecond * 10)
-	}
+	d.(*gLDriver).repaintWindow(w)
 
 	expectedCanvasSize := oldCanvasSize.Add(fyne.NewSize(10, 10))
 	assert.Equal(t, expectedCanvasSize, c.Size())
@@ -126,9 +121,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
 	w.Resize(oldCanvasSize)
 	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
-	for c.isDirty() {
-		time.Sleep(time.Millisecond * 10)
-	}
+	d.(*gLDriver).repaintWindow(w)
 
 	// child size change affects ancestors up to scroll
 	oldCanvasSize = c.Size()
@@ -136,9 +129,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	oldRightColSize := rightCol.Size()
 	rightObj1.SetMinSize(fyne.NewSize(50, 100))
 	c.Refresh(rightObj1)
-	for rightCol.Size() == oldRightColSize {
-		time.Sleep(time.Millisecond * 10)
-	}
+	d.(*gLDriver).repaintWindow(w)
 
 	assert.Equal(t, oldCanvasSize, c.Size())
 	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
@@ -172,9 +163,7 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 	)
 	w.Resize(oldCanvasSize)
 	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
-	for c.isDirty() {
-		time.Sleep(time.Millisecond * 10)
-	}
+	d.(*gLDriver).repaintWindow(w)
 
 	oldLeftColSize := leftCol.Size()
 	oldLeftScrollSize := leftColScroll.Size()
@@ -184,9 +173,7 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 	rightObj2.SetMinSize(fyne.NewSize(50, 200))
 	c.Refresh(leftObj2)
 	c.Refresh(rightObj2)
-	for leftCol.Size() == oldLeftColSize || rightCol.Size() == oldRightColSize {
-		time.Sleep(time.Millisecond * 10)
-	}
+	d.(*gLDriver).repaintWindow(w)
 
 	assert.Equal(t, oldCanvasSize, c.Size())
 	assert.Equal(t, oldLeftScrollSize, leftColScroll.Size())
@@ -218,13 +205,8 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	oldCanvasSize := fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding())
 	assert.Equal(t, oldCanvasSize, c.Size())
 	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
-	for c.isDirty() {
-		time.Sleep(time.Millisecond * 10)
-	}
+	d.(*gLDriver).repaintWindow(w)
 
-	oldLeftObj1Size := leftObj1.Size()
-	oldRightObj1Size := rightObj1.Size()
-	oldRightObj2Size := rightObj2.Size()
 	oldRightColSize := rightCol.Size()
 	leftObj1.SetMinSize(fyne.NewSize(40, 40))
 	rightObj1.SetMinSize(fyne.NewSize(30, 30))
@@ -232,20 +214,7 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	c.Refresh(leftObj1)
 	c.Refresh(rightObj1)
 	c.Refresh(rightObj2)
-	ch := make(chan bool, 1)
-	go func() {
-		for rightCol.Size() == oldRightColSize || leftObj1.Size() == oldLeftObj1Size ||
-			rightObj1.Size() == oldRightObj1Size || rightObj2.Size() == oldRightObj2Size {
-			time.Sleep(time.Millisecond * 10)
-		}
-		ch <- true
-	}()
-	select {
-	case _ = <-ch:
-		// all elements resized
-	case <-time.After(3 * time.Second):
-		t.Error("waiting for obj size change timed out")
-	}
+	d.(*gLDriver).repaintWindow(w)
 
 	assert.Equal(t, oldCanvasSize, c.Size())
 	expectedRightColSize := oldRightColSize.Subtract(fyne.NewSize(20, 0))
@@ -275,13 +244,7 @@ func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) 
 	content.Layout = layout
 	w.SetContent(content)
 
-	w.ignoreResize = true // for some reason the window manager is intercepting and setting strange values in tests
-	for c.isDirty() {
-		time.Sleep(10 * time.Millisecond)
-	}
-
-	// there is a small gap between the canvas get marked as clean and the actual layout run
-	time.Sleep(20 * time.Millisecond)
+	d.(*gLDriver).repaintWindow(w)
 	// clear the recorded layouts
 	for layout.popLayoutEvent() != nil {
 	}
@@ -294,9 +257,7 @@ func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) 
 	c.Refresh(rightObj1)
 	c.Refresh(rightObj2)
 
-	time.Sleep(100 * time.Millisecond)
 	assert.Nil(t, layout.popLayoutEvent())
-
 	w.ignoreResize = false
 }
 

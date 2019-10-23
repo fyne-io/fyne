@@ -7,7 +7,6 @@ import (
 	"os"
 	"runtime"
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -47,11 +46,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	h2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(h1, h2))
 
-	// wait for canvas to get its size right
-	for s := w.Canvas().Size(); s != fyne.NewSize(32, 18); s = w.Canvas().Size() {
-		time.Sleep(time.Millisecond * 10)
-	}
-
+	d.(*gLDriver).repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), h1.Position())
 	require.Equal(t, fyne.NewPos(14, 0), h2.Position())
 
@@ -92,11 +87,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	d2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1, d2))
 
-	// wait for canvas to get its size right
-	for s := w.Canvas().Size(); s != fyne.NewSize(32, 18); s = w.Canvas().Size() {
-		time.Sleep(time.Millisecond * 10)
-	}
-
+	d.(*gLDriver).repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
 	require.Equal(t, fyne.NewPos(14, 0), d2.Position())
 
@@ -193,11 +184,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1))
 
-	// wait for canvas to get its size right
-	for s := w.Canvas().Size(); s != fyne.NewSize(18, 18); s = w.Canvas().Size() {
-		time.Sleep(time.Millisecond * 10)
-	}
-
+	d.(*gLDriver).repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
 
 	// drag -1,-1
@@ -240,11 +227,7 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	d2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1, d2))
 
-	// wait for canvas to get its size right
-	for s := w.Canvas().Size(); s != fyne.NewSize(32, 18); s = w.Canvas().Size() {
-		time.Sleep(time.Millisecond * 10)
-	}
-
+	d.(*gLDriver).repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
 
 	// drag from d1 into d2
@@ -282,11 +265,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	dh.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(dh)
 
-	// wait for canvas to get its size right
-	for s := w.Canvas().Size(); s != fyne.NewSize(18, 18); s = w.Canvas().Size() {
-		time.Sleep(time.Millisecond * 10)
-	}
-
+	d.(*gLDriver).repaintWindow(w)
 	w.mouseMoved(w.viewport, 8, 8)
 	w.waitForEvents()
 	assert.Equal(t,
@@ -355,9 +334,9 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	tapped := make(chan bool, 1)
+	tapped := false
 	button := widget.NewButton("Tap", func() {
-		tapped <- true
+		tapped = true
 	})
 	rect2 := canvas.NewRectangle(color.Black)
 	rect2.SetMinSize(fyne.NewSize(100, 100))
@@ -372,64 +351,45 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	select {
-	case _ = <-tapped:
-		t.Error("Tapped button that was clipped")
-	case <-time.After(100 * time.Millisecond):
-		// didn't tap in a decent time
-	}
+	w.waitForEvents()
+	assert.False(t, tapped, "Tapped button that was clipped")
 
 	w.mousePos = fyne.NewPos(10, 120)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	select {
-	case _ = <-tapped:
-		// button tapped
-	case <-time.After(3 * time.Second):
-		t.Error("waiting for button to be tapped")
-	}
+	w.waitForEvents()
+	assert.True(t, tapped, "Tapped button that was clipped")
 }
 
 func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	w.Canvas().SetScale(1.0)
-	tapped := make(chan int, 1)
-	b1 := widget.NewButton("Tap", func() { tapped <- 1 })
-	b2 := widget.NewButton("Tap", func() { tapped <- 2 })
+	tapped := 0
+	b1 := widget.NewButton("Tap", func() { tapped = 1 })
+	b2 := widget.NewButton("Tap", func() { tapped = 2 })
 	w.SetContent(widget.NewVBox(b1, b2))
 
 	w.mouseMoved(w.viewport, 10, 20)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	select {
-	case b := <-tapped:
-		assert.Equal(t, 1, b, "button 1 should be tapped")
-	case <-time.After(1 * time.Second):
-		t.Error("waiting for button to be tapped")
-	}
+	w.waitForEvents()
+	assert.Equal(t, 1, tapped, "Button 1 should be tapped")
+	tapped = 0
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 10, 40)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	select {
-	case b := <-tapped:
-		t.Error("button was tapped without mouse press & release on it:", b)
-	case <-time.After(100 * time.Millisecond):
-		// didn't tap in a decent time
-	}
+	w.waitForEvents()
+	assert.Equal(t, 0, tapped, "button was tapped without mouse press & release on it %d", tapped)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
-	select {
-	case b := <-tapped:
-		assert.Equal(t, 2, b, "button 2 should be tapped")
-	case <-time.After(1 * time.Second):
-		t.Error("waiting for button to be tapped")
-	}
+	w.waitForEvents()
+	assert.Equal(t, 2, tapped, "Button 2 should be tapped")
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
@@ -599,20 +559,14 @@ func TestWindow_SetPadded(t *testing.T) {
 			oldCanvasSize := fyne.NewSize(100, 100)
 			w.Resize(oldCanvasSize)
 
-			// wait for canvas to get its size right
-			for w.Canvas().Size() != oldCanvasSize {
-				time.Sleep(time.Millisecond * 10)
-			}
+			d.(*gLDriver).repaintWindow(w)
 			contentSize := content.Size()
 			expectedCanvasSize := contentSize.
 				Add(fyne.NewSize(2*tt.expectedPad, 2*tt.expectedPad)).
 				Add(fyne.NewSize(0, tt.expectedMenuHeight))
 
 			w.SetPadded(tt.padding)
-			// wait for canvas resize
-			for w.Canvas().Size() != expectedCanvasSize {
-				time.Sleep(time.Millisecond * 10)
-			}
+			d.(*gLDriver).repaintWindow(w)
 			assert.Equal(t, contentSize, content.Size())
 			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), content.Position())
 			assert.Equal(t, expectedCanvasSize, w.Canvas().Size())

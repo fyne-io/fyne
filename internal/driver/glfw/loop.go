@@ -104,23 +104,28 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
-				w.RunWithContext(func() {
-					d.freeDirtyTextures(canvas)
-
-					updateGLContext(w)
-					if canvas.ensureMinSize() {
-						w.fitContent()
-					}
-					canvas.paint(canvas.Size())
-
-					w.viewport.SwapBuffers()
-				})
+				d.repaintWindow(w)
 			}
 			if reassign {
 				d.windows = newWindows
 			}
 		}
 	}
+}
+
+func (d *gLDriver) repaintWindow(w *window) {
+	canvas := w.canvas
+	w.RunWithContext(func() {
+		d.freeDirtyTextures(canvas)
+
+		updateGLContext(w)
+		if canvas.ensureMinSize() {
+			w.fitContent()
+		}
+		canvas.paint(canvas.Size())
+
+		w.viewport.SwapBuffers()
+	})
 }
 
 func (d *gLDriver) freeDirtyTextures(canvas *glCanvas) {
