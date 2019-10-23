@@ -233,6 +233,30 @@ func (p *packager) packageWindows() error {
 	return nil
 }
 
+func (p *packager) packageAndroid() error {
+	if _, err := exec.LookPath("gomobile"); err != nil {
+		return errors.New("Could not find gomobile for building")
+	}
+
+	cmd := exec.Command("gomobile", "build", "-target", "android")
+	cmd.Dir = p.srcDir
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
+func (p *packager) packageIOS() error {
+	if _, err := exec.LookPath("gomobile"); err != nil {
+		return errors.New("Could not find gomobile for building")
+	}
+
+	cmd := exec.Command("gomobile", "build", "-target", "ios", "-bundleid", p.appID)
+	cmd.Dir = p.srcDir
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
+}
+
 func (p *packager) addFlags() {
 	flag.StringVar(&p.os, "os", "", "The operating system to target (android, darwin, ios, linux, windows)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
@@ -304,10 +328,12 @@ func (p *packager) validate() error {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
 	}
 
-	// only used for macOS
+	// only used for iOS and macOS
 	if p.appID == "" {
 		if p.os == "darwin" {
 			p.appID = "com.example." + p.name
+		} else if p.os == "ios" {
+			return errors.New("Missing appID parameter for ios package")
 		}
 	}
 
@@ -332,6 +358,10 @@ func (p *packager) doPackage() error {
 		return p.packageLinux()
 	case "windows":
 		return p.packageWindows()
+	case "android":
+		return p.packageAndroid()
+	case "ios":
+		return p.packageIOS()
 	default:
 		return errors.New("Unsupported terget operating system \"" + p.os + "\"")
 	}
