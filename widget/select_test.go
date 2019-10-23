@@ -17,6 +17,14 @@ func TestNewSelect(t *testing.T) {
 	assert.Equal(t, "", combo.Selected)
 }
 
+func TestSelect_PlaceHolder(t *testing.T) {
+	combo := NewSelect([]string{"1", "2"}, func(string) {})
+	assert.NotEmpty(t, combo.PlaceHolder)
+
+	combo.PlaceHolder = "changed!"
+	assert.Equal(t, "changed!", combo.PlaceHolder)
+}
+
 func TestSelect_SetSelected(t *testing.T) {
 	combo := NewSelect([]string{"1", "2"}, func(string) {})
 	combo.SetSelected("2")
