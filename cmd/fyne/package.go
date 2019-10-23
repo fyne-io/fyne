@@ -78,8 +78,9 @@ func runAsAdminWindows(args ...string) error {
 var _ command = (*packager)(nil)
 
 type packager struct {
-	os, name, srcDir, dir, exe, icon string
-	install                          bool
+	name, srcDir, dir, exe, icon string
+	os, appID                    string
+	install                      bool
 }
 
 func (p *packager) packageLinux() error {
@@ -128,7 +129,7 @@ func (p *packager) packageDarwin() error {
 		"<key>CFBundleExecutable</key>\n"+
 		"<string>"+exeName+"</string>\n"+
 		"<key>CFBundleIdentifier</key>\n"+
-		"<string>com.example."+p.name+"</string>\n"+
+		"<string>"+p.appID+"</string>\n"+
 		"<key>CFBundleIconFile</key>\n"+
 		"<string>icon.icns</string>\n"+
 		"<key>CFBundleShortVersionString</key>\n"+
@@ -233,11 +234,12 @@ func (p *packager) packageWindows() error {
 }
 
 func (p *packager) addFlags() {
-	flag.StringVar(&p.os, "os", runtime.GOOS, "The operating system to target (like GOOS)")
+	flag.StringVar(&p.os, "os", "", "The operating system to target (android, darwin, ios, linux, windows)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
+	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
 }
 
 func (*packager) printHelp(indent string) {
@@ -258,7 +260,7 @@ func (p *packager) buildPackage() error {
 func (p *packager) run(_ []string) {
 	err := p.validate()
 	if err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 
@@ -270,6 +272,9 @@ func (p *packager) run(_ []string) {
 }
 
 func (p *packager) validate() error {
+	if p.os == "" {
+		p.os = runtime.GOOS
+	}
 	baseDir, err := os.Getwd()
 	if err != nil {
 		return errors.Wrap(err, "Unable to get the current directory, needed to find main executable")
@@ -297,6 +302,13 @@ func (p *packager) validate() error {
 	}
 	if !exists(p.icon) {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
+	}
+
+	// only used for macOS
+	if p.appID == "" {
+		if p.os == "darwin" {
+			p.appID = "com.example." + p.name
+		}
 	}
 
 	return nil
