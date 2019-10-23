@@ -19,6 +19,19 @@ including gradients, shadows and new widgets.
 We are now working towards 1.2 which will complete the basic UI toolkit
 phase of development.
 
+# Prerequisites
+
+You will need Go version 1.12 or later.
+As Fyne uses CGo you will require a C compiler (typically gcc).
+If you don't have one set up the instructions at [Compiling](https://github.com/fyne-io/fyne/wiki/Compiling) may help.
+
+By default Fyne uses the [gl golang bindings](https://github.com/go-gl/gl) which means you need a working OpenGL configuration (or GLES for ARM or mobile devices).
+Debian/Ubuntu based systems may also need to install the `libegl1-mesa-dev` and `xorg-dev` packages.
+
+Using the standard go tools you can install Fyne's core library using:
+
+    go get fyne.io/fyne
+
 # Widget demo
 
 To run a showcase of the features of Fyne execute the following:
@@ -41,23 +54,11 @@ Or if you are using the light theme:
 
 # Getting Started
 
-Fyne is designed to be really easy to code with. Here are the steps to your first app.
+Fyne is designed to be really easy to code with.
+If you have followed the prerequisite steps above then all you need is a
+Go IDE (or a text editor). 
 
-## Prerequisites
-
-As Fyne uses CGo you will require a C compiler (typically gcc).
-If you don't have one set up the instructions at [Compiling](https://github.com/fyne-io/fyne/wiki/Compiling) may help.
-
-By default Fyne uses the [gl golang bindings](https://github.com/go-gl/gl) which means you need a working OpenGL configuration.
-Debian/Ubuntu based systems may also need to install the `libgl1-mesa-dev` and `xorg-dev` packages.
-
-Using the standard go tools you can install Fyne's core library using:
-
-    go get fyne.io/fyne
-
-## Code
-
-And then you're ready to write your first app!
+Open a new file and you're ready to write your first app!
 
 ```go
 package main
