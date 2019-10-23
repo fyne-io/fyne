@@ -130,6 +130,9 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 		WalkVisibleObjectTree(overlay, findFunc, nil)
 	} else {
 		for _, root := range roots {
+			if root == nil {
+				continue
+			}
 			WalkVisibleObjectTree(root, findFunc, nil)
 			if found != nil {
 				break

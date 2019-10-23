@@ -2,12 +2,16 @@ package gomobile
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 type window struct {
 	title    string
 	visible  bool
 	onClosed func()
+	isChild  bool
 
 	clipboard fyne.Clipboard
 	canvas    *canvas
@@ -30,8 +34,8 @@ func (w *window) SetFullScreen(bool) {
 	// no-op
 }
 
-func (w *window) Resize(fyne.Size) {
-	// no-op
+func (w *window) Resize(size fyne.Size) {
+	w.Canvas().(*canvas).resize(size)
 }
 
 func (w *window) RequestFocus() {
@@ -88,6 +92,17 @@ func (w *window) SetOnClosed(callback func()) {
 }
 
 func (w *window) Show() {
+	if w.isChild {
+		exit := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
+			w.Close()
+		})
+		title := widget.NewLabel(w.title)
+		title.Alignment = fyne.TextAlignCenter
+		w.canvas.windowHead = widget.NewHBox(exit,
+			layout.NewSpacer(), title, layout.NewSpacer())
+
+		w.canvas.resize(w.canvas.size)
+	}
 	w.visible = true
 
 	if w.Content() != nil {
@@ -104,12 +119,27 @@ func (w *window) Hide() {
 }
 
 func (w *window) Close() {
+	d := fyne.CurrentApp().Driver().(*mobileDriver)
+	pos := -1
+	for i, win := range d.windows {
+		if win == w {
+			pos = i
+		}
+	}
+	if pos != -1 {
+		d.windows = append(d.windows[:pos], d.windows[pos+1:]...)
+	}
+
+	w.canvas.walkTree(nil, func(obj, _ fyne.CanvasObject) {
+		switch co := obj.(type) {
+		case fyne.Widget:
+			widget.DestroyRenderer(co)
+		}
+	})
+
 	if w.onClosed != nil {
 		w.onClosed()
 	}
-	//	d := fyne.CurrentApp().Driver().(*mobileDriver)
-
-	// TODO remove from d.windows
 }
 
 func (w *window) ShowAndRun() {

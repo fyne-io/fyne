@@ -34,7 +34,7 @@ var _ fyne.Driver = (*mobileDriver)(nil)
 
 func (d *mobileDriver) CreateWindow(title string) fyne.Window {
 	canvas := NewCanvas().(*canvas) // silence lint
-	ret := &window{title: title, canvas: canvas}
+	ret := &window{title: title, canvas: canvas, isChild: len(d.windows) > 0}
 	canvas.painter = pgl.NewPainter(canvas, ret)
 
 	d.windows = append(d.windows, ret)
@@ -51,7 +51,6 @@ func (d *mobileDriver) currentWindow() fyne.Window {
 		return nil
 	}
 
-	// TODO ensure we remove new windows once closed
 	return d.windows[len(d.windows)-1]
 }
 
@@ -145,7 +144,7 @@ func (d *mobileDriver) Run() {
 					d.freeDirtyTextures(canvas)
 					canvas.dirty = false
 
-					d.paintCanvas(canvas, currentSize)
+					d.paintWindow(current, currentSize)
 					a.Publish()
 				}
 			case touch.Event:
@@ -175,7 +174,8 @@ func (d *mobileDriver) onStart() {
 func (d *mobileDriver) onStop() {
 }
 
-func (d *mobileDriver) paintCanvas(canvas *canvas, sz size.Event) {
+func (d *mobileDriver) paintWindow(window fyne.Window, sz size.Event) {
+	canvas := window.Canvas().(*canvas)
 	currentOrientation = sz.Orientation
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -184,7 +184,7 @@ func (d *mobileDriver) paintCanvas(canvas *canvas, sz size.Event) {
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
 
 	newSize := fyne.NewSize(int(float32(sz.WidthPx)/canvas.scale), int(float32(sz.HeightPx)/canvas.scale))
-	canvas.Resize(newSize)
+	window.Resize(newSize)
 
 	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		// TODO should this be somehow not scroll container specific?

@@ -13,6 +13,7 @@ import (
 
 type canvas struct {
 	content, overlay fyne.CanvasObject
+	windowHead       fyne.CanvasObject
 	painter          gl.Painter
 	scale            float32
 	size             fyne.Size
@@ -52,9 +53,16 @@ func (c *canvas) Refresh(obj fyne.CanvasObject) {
 }
 
 func (c *canvas) sizeContent(size fyne.Size) {
+	offset := fyne.NewPos(0, 0)
+	if c.windowHead != nil {
+		topHeight := c.windowHead.MinSize().Height
+		offset = fyne.NewPos(0, topHeight)
+		c.windowHead.Resize(fyne.NewSize(size.Width, topHeight))
+	}
+
 	devicePadTopLeft, devicePadBottomRight := devicePadding()
 	innerSize := size.Subtract(devicePadTopLeft).Subtract(devicePadBottomRight)
-	topLeft := fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height)
+	topLeft := offset.Add(fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height))
 
 	c.size = size
 	if c.padded {
@@ -71,7 +79,7 @@ func (c *canvas) sizeContent(size fyne.Size) {
 	}
 }
 
-func (c *canvas) Resize(size fyne.Size) {
+func (c *canvas) resize(size fyne.Size) {
 	if size == c.size {
 		return
 	}
@@ -160,6 +168,9 @@ func (c *canvas) walkTree(
 	if c.overlay != nil {
 		driver.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
 	}
+	if c.windowHead != nil {
+		driver.WalkVisibleObjectTree(c.windowHead, beforeChildren, afterChildren)
+	}
 }
 
 func (c *canvas) tapDown(pos fyne.Position) {
@@ -184,7 +195,7 @@ func (c *canvas) tapMove(pos fyne.Position,
 			}
 
 			return false
-		}, c.overlay, c.content)
+		}, c.overlay, c.content, c.windowHead)
 
 		if drag, ok := co.(fyne.Draggable); ok {
 			c.dragging = drag
@@ -223,7 +234,7 @@ func (c *canvas) tapUp(pos fyne.Position,
 		}
 
 		return false
-	}, c.overlay, c.content)
+	}, c.overlay, c.content, c.windowHead)
 
 	ev := new(fyne.PointEvent)
 	ev.Position = objPos
