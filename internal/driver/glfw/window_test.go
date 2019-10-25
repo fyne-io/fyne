@@ -7,7 +7,6 @@ import (
 	"os"
 	"runtime"
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -266,11 +265,7 @@ func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 	do.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(do)
 
-	// wait for canvas to get its size right
-	for s := w.Canvas().Size(); s != fyne.NewSize(18, 18); s = w.Canvas().Size() {
-		time.Sleep(time.Millisecond * 10)
-	}
-
+	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(4, 4), do.Position())
 
 	w.mouseMoved(w.viewport, 9, 9)
