@@ -559,7 +559,7 @@ func (w *window) mouseOut() {
 	})
 }
 
-func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	co, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
@@ -585,11 +585,12 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
 	}
 
+	button, modifiers := convertMouseButton(btn, mods)
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position
-		mev.Button = convertMouseButton(button)
-		mev.Modifier = desktopModifier(mods)
+		mev.Button = button
+		mev.Modifier = modifiers
 		if action == glfw.Press {
 			w.queueEvent(func() { wid.MouseDown(mev) })
 		} else if action == glfw.Release {
@@ -608,7 +609,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 	}
 
 	if action == glfw.Press {
-		w.mouseButton = convertMouseButton(button)
+		w.mouseButton = button
 	} else if action == glfw.Release {
 		w.mouseButton = 0
 	}
@@ -622,7 +623,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 
 	// Check for double click/tap
 	doubleTapped := false
-	if action == glfw.Release && button == glfw.MouseButtonLeft {
+	if action == glfw.Release && button == desktop.LeftMouseButton {
 		now := time.Now()
 		// we can safely subtract the first "zero" time as it'll be much larger than doubleClickDelay
 		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
@@ -641,7 +642,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, button glfw.MouseButton, ac
 		} else if action == glfw.Release {
 			if wid == w.mousePressed {
 				switch button {
-				case glfw.MouseButtonRight:
+				case desktop.RightMouseButton:
 					w.queueEvent(func() { wid.TappedSecondary(ev) })
 				default:
 					w.queueEvent(func() { wid.Tapped(ev) })
@@ -681,15 +682,31 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	}
 }
 
-func convertMouseButton(button glfw.MouseButton) desktop.MouseButton {
-	switch button {
-	case glfw.MouseButton1:
-		return desktop.LeftMouseButton
-	case glfw.MouseButton2:
-		return desktop.RightMouseButton
-	default:
-		return 0
+func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.MouseButton, desktop.Modifier) {
+	modifier := desktopModifier(mods)
+	var button desktop.MouseButton
+	rightClick := false
+	if runtime.GOOS == "darwin" {
+		if modifier&desktop.ControlModifier != 0 {
+			rightClick = true
+			modifier -= desktop.ControlModifier
+		}
+		if modifier&desktop.SuperModifier != 0 {
+			modifier |= desktop.ControlModifier
+			modifier -= desktop.SuperModifier
+		}
 	}
+	switch btn {
+	case glfw.MouseButton1:
+		if rightClick {
+			button = desktop.RightMouseButton
+		} else {
+			button = desktop.LeftMouseButton
+		}
+	case glfw.MouseButton2:
+		button = desktop.RightMouseButton
+	}
+	return button, modifier
 }
 
 func keyToName(key glfw.Key) fyne.KeyName {
