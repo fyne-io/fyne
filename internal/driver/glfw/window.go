@@ -689,11 +689,11 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 	if runtime.GOOS == "darwin" {
 		if modifier&desktop.ControlModifier != 0 {
 			rightClick = true
-			modifier -= desktop.ControlModifier
+			modifier &^= desktop.ControlModifier
 		}
 		if modifier&desktop.SuperModifier != 0 {
 			modifier |= desktop.ControlModifier
-			modifier -= desktop.SuperModifier
+			modifier &^= desktop.SuperModifier
 		}
 	}
 	switch btn {
