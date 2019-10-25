@@ -53,9 +53,6 @@ func (b *Box) ApplyTheme() {
 
 // Prepend inserts a new CanvasObject at the top/left of the box
 func (b *Box) Prepend(object fyne.CanvasObject) {
-	if b.Hidden && object.Visible() {
-		object.Hide()
-	}
 	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
 
 	Refresh(b)
@@ -63,9 +60,6 @@ func (b *Box) Prepend(object fyne.CanvasObject) {
 
 // Append adds a new CanvasObject to the end/right of the box
 func (b *Box) Append(object fyne.CanvasObject) {
-	if b.Hidden && object.Visible() {
-		object.Hide()
-	}
 	b.Children = append(b.Children, object)
 
 	Refresh(b)
