@@ -1,8 +1,6 @@
 package test
 
 import (
-	"sync"
-
 	"fyne.io/fyne"
 )
 
@@ -10,17 +8,14 @@ type testWindow struct {
 	title      string
 	fullScreen bool
 	fixedSize  bool
-	padded     bool
 	focused    bool
 	onClosed   func()
 
-	canvas    fyne.Canvas
+	canvas    *testCanvas
 	clipboard fyne.Clipboard
+	driver    *testDriver
 	menu      *fyne.MainMenu
 }
-
-var windows = make([]fyne.Window, 0)
-var windowsMutex = sync.RWMutex{}
 
 func (w *testWindow) Title() string {
 	return w.title
@@ -43,11 +38,11 @@ func (w *testWindow) CenterOnScreen() {
 }
 
 func (w *testWindow) Resize(size fyne.Size) {
-	w.canvas.(*testCanvas).Resize(size)
+	w.canvas.Resize(size)
 }
 
 func (w *testWindow) RequestFocus() {
-	for _, win := range windows {
+	for _, win := range w.driver.AllWindows() {
 		win.(*testWindow).focused = false
 	}
 
@@ -63,11 +58,11 @@ func (w *testWindow) SetFixedSize(fixed bool) {
 }
 
 func (w *testWindow) Padded() bool {
-	return w.padded
+	return w.canvas.Padded()
 }
 
 func (w *testWindow) SetPadded(padded bool) {
-	w.padded = padded
+	w.canvas.SetPadded(padded)
 }
 
 func (w *testWindow) Icon() fyne.Resource {
@@ -75,6 +70,10 @@ func (w *testWindow) Icon() fyne.Resource {
 }
 
 func (w *testWindow) SetIcon(icon fyne.Resource) {
+	// no-op
+}
+
+func (w *testWindow) SetMaster() {
 	// no-op
 }
 
@@ -107,18 +106,7 @@ func (w *testWindow) Close() {
 		w.onClosed()
 	}
 	w.focused = false
-
-	windowsMutex.Lock()
-	i := 0
-	for _, window := range windows {
-		if window == w {
-			break
-		}
-		i++
-	}
-
-	windows = append(windows[:i], windows[i+1:]...)
-	windowsMutex.Unlock()
+	w.driver.removeWindow(w)
 }
 
 func (w *testWindow) ShowAndRun() {
@@ -139,13 +127,7 @@ func (w *testWindow) Canvas() fyne.Canvas {
 
 // NewWindow creates and registers a new window for test purposes
 func NewWindow(content fyne.CanvasObject) fyne.Window {
-	canvas := NewCanvas()
-	canvas.SetContent(content)
-	window := &testWindow{canvas: canvas}
-	window.clipboard = &testClipboard{}
-
-	windowsMutex.Lock()
-	windows = append(windows, window)
-	windowsMutex.Unlock()
+	window := fyne.CurrentApp().NewWindow("")
+	window.SetContent(content)
 	return window
 }

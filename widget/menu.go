@@ -14,9 +14,13 @@ import (
 func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 	options := NewVBox()
 	pop := NewPopUp(options, c)
+	focused := c.Focused()
 	for _, option := range menu.Items {
 		opt := option // capture value
 		options.Append(newTappableLabel(opt.Label, func() {
+			if c.Focused() == nil {
+				c.Focus(focused)
+			}
 			c.SetOverlay(nil)
 			Renderer(pop).Destroy()
 

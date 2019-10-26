@@ -51,6 +51,9 @@ type Window interface {
 	// If none is set should return the application icon.
 	SetIcon(Resource)
 
+	// SetMaster indicates that closing this window should exit the app
+	SetMaster()
+
 	// MainMenu gets the content of the window's top level menu.
 	MainMenu() *MainMenu
 

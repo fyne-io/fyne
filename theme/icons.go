@@ -28,15 +28,17 @@ func (res *ThemedResource) Content() []byte {
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
-// TODO: In version 2.0 we need to change this signature to just accept a single StaticResource pointer
-func NewThemedResource(dark, light fyne.Resource) *ThemedResource {
-	if light != nil {
+//
+// Deprecated: NewThemedResource() will be replaced with a single parameter version in a future release
+// usage of this method will break, but using the first parameter only will be a trivial change.
+func NewThemedResource(src, ignored fyne.Resource) *ThemedResource {
+	if ignored != nil {
 		log.Println("Deprecation Warning: In version 2.0 NewThemedResource() will only accept a single StaticResource.\n" +
-			"While two resources are still supported to preserve backwards compatibility, only the first resource is rendered.  " +
+			"While two resources are still supported to preserve backwards compatibility, only the first resource is rendered.\n" +
 			"The resource color is set by the theme's IconColor().")
 	}
 	return &ThemedResource{
-		source: dark,
+		source: src,
 	}
 }
 

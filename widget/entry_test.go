@@ -63,11 +63,11 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	assert.Equal(t, 0, len(entry.Text))
 	assert.Equal(t, 0, entry.textProvider().len())
 	assert.Equal(t, 4, entry.placeholderProvider().len())
-	assert.False(t, entry.placeholderProvider().Hidden)
+	assert.True(t, entry.placeholderProvider().Visible())
 
 	entry.SetText("Hi")
 	assert.Equal(t, 2, len(entry.Text))
-	assert.True(t, entry.placeholderProvider().Hidden)
+	assert.False(t, entry.placeholderProvider().Visible())
 
 	assert.Equal(t, 2, entry.textProvider().len())
 }
@@ -388,6 +388,69 @@ func TestEntry_Tapped_AfterRow(t *testing.T) {
 
 	assert.Equal(t, 2, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
+}
+
+func TestEntry_PasteFromClipboard(t *testing.T) {
+	entry := NewEntry()
+
+	w := test.NewApp().NewWindow("")
+	w.SetContent(entry)
+
+	testContent := "test"
+
+	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	clipboard.SetContent(testContent)
+
+	entry.pasteFromClipboard(clipboard)
+
+	assert.Equal(t, entry.Text, testContent)
+}
+
+func TestEntry_TappedSecondary(t *testing.T) {
+	// fresh app for this test
+	test.NewApp()
+	// don't let our app hang around for too long
+	defer test.NewApp()
+
+	entry := NewEntry()
+	fyne.CurrentApp().Driver().CanvasForObject(entry).(test.WindowlessCanvas).Resize(fyne.NewSize(100, 100))
+
+	tapPos := fyne.NewPos(1, 1)
+	test.TapSecondaryAt(entry, tapPos)
+
+	over := fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
+	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
+	assert.NotNil(t, over)
+
+	cont := over.(*PopUp).Content
+	assert.Equal(t, cont.Position().X, pos.X+theme.Padding()+tapPos.X)
+	assert.Equal(t, cont.Position().Y, pos.Y+theme.Padding()+tapPos.Y)
+
+	items := cont.(*Box).Children
+	assert.Equal(t, 2, len(items)) // Paste
+}
+
+func TestEntry_FocusWithPopUp(t *testing.T) {
+	entry := NewEntry()
+	tapPos := fyne.NewPos(1, 1)
+	test.TapSecondaryAt(entry, tapPos)
+
+	assert.NotNil(t, entry.popUp)
+
+	test.Tap(entry.popUp)
+	assert.True(t, entry.Focused())
+}
+
+func TestEntry_HidePopUpOnEntry(t *testing.T) {
+	entry := NewEntry()
+	tapPos := fyne.NewPos(1, 1)
+
+	test.TapSecondaryAt(entry, tapPos)
+	test.Type(entry, "KJGFD")
+
+	assert.NotNil(t, entry.popUp)
+	assert.Equal(t, "KJGFD", entry.Text)
+	assert.Equal(t, true, entry.popUp.Hidden)
 }
 
 func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
@@ -1016,6 +1079,18 @@ func TestEntry_MultilineSelect(t *testing.T) {
 	a, b = e.selection()
 	assert.Equal(t, 5, a)
 	assert.Equal(t, 10, b)
+}
+
+func TestEntry_SelectAll(t *testing.T) {
+	e := NewMultiLineEntry()
+	e.SetText("First Row\nSecond Row\nThird Row")
+	e.selectAll()
+	a, b := e.selection()
+
+	assert.Equal(t, 0, a)
+	assert.Equal(t, 30, b)
+	assert.Equal(t, 2, e.CursorRow)
+	assert.Equal(t, 9, e.CursorColumn)
 }
 
 func TestEntry_SelectSnapping(t *testing.T) {

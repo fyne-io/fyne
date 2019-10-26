@@ -12,6 +12,11 @@ type FormItem struct {
 	Widget fyne.CanvasObject
 }
 
+// NewFormItem creates a new form item with the specified label text and input widget
+func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
+	return &FormItem{text, widget}
+}
+
 // Form widget is two column grid where each row has a label and a widget (usually an input).
 // The last row of the grid will contain the appropriate form control buttons if any should be shown.
 // Setting OnSubmit will set the submit button to be visible and call back the function when tapped.

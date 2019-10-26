@@ -39,6 +39,13 @@ func (p *PopUp) Move(pos fyne.Position) {
 		return
 	}
 
+	if pos.X+p.Content.Size().Width > p.Canvas.Size().Width-theme.Padding()*2 {
+		pos.X = p.Canvas.Size().Width - p.Content.Size().Width - theme.Padding()*2
+		if pos.X < 0 {
+			pos.X = 0 // TODO here we may need a scroller as it's wider than our canvas
+		}
+	}
+
 	if pos.Y+p.Content.Size().Height > p.Canvas.Size().Height-theme.Padding()*2 {
 		pos.Y = p.Canvas.Size().Height - p.Content.Size().Height - theme.Padding()*2
 		if pos.Y < 0 {

@@ -45,6 +45,7 @@ func makeInputTab() fyne.Widget {
 		disabledCheck,
 		radio,
 		disabledRadio,
+		widget.NewSlider(0, 100),
 	)
 }
 

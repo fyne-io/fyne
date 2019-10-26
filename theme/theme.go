@@ -3,9 +3,7 @@ package theme // import "fyne.io/fyne/theme"
 
 import (
 	"image/color"
-	"io/ioutil"
 	"os"
-	"path"
 	"strings"
 
 	"fyne.io/fyne"
@@ -140,20 +138,13 @@ func (t *builtinTheme) TextSize() int {
 func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
 	variantPath := strings.Replace(env, "Regular", variant, 0)
 
-	file, err := os.Open(variantPath)
+	res, err := fyne.LoadResourceFromPath(variantPath)
 	if err != nil {
 		fyne.LogError("Error loading specified font", err)
 		return fallback
 	}
-	ret, err2 := ioutil.ReadAll(file)
-	if err2 != nil {
-		fyne.LogError("Error loading specified font", err2)
-		return fallback
-	}
 
-	name := path.Base(variantPath)
-	return &fyne.StaticResource{StaticName: name, StaticContent: ret}
-
+	return res
 }
 
 func (t *builtinTheme) initFonts() {

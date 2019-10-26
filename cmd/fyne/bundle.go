@@ -23,13 +23,11 @@ type bundler struct {
 }
 
 func writeResource(file, name string) {
-	bytes, err := ioutil.ReadFile(file)
+	res, err := fyne.LoadResourceFromPath(file)
 	if err != nil {
 		fyne.LogError("Unable to load file "+file, err)
 		return
 	}
-
-	res := fyne.NewStaticResource(path.Base(file), bytes)
 
 	fmt.Printf("var %s = %#v\n", name, res)
 }

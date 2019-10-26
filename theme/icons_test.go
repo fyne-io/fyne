@@ -2,14 +2,16 @@ package theme
 
 import (
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 	"testing"
 
 	"fyne.io/fyne"
-	_ "fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
+
+func init() {
+	fyne.SetCurrentApp(&themedApp{})
+}
 
 func helperNewStaticResource() *fyne.StaticResource {
 	return &fyne.StaticResource{
@@ -19,13 +21,13 @@ func helperNewStaticResource() *fyne.StaticResource {
 	}
 }
 
-func helperLoadBytes(t *testing.T, name string) []byte {
+func helperLoadRes(t *testing.T, name string) fyne.Resource {
 	path := filepath.Join("testdata", name) // pathObj relative to this file
-	bytes, err := ioutil.ReadFile(path)
+	res, err := fyne.LoadResourceFromPath(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return bytes
+	return res
 }
 
 func TestIconThemeChangeDoesNotChangeName(t *testing.T) {
@@ -78,8 +80,7 @@ func TestNewDisabledResource(t *testing.T) {
 }
 
 func TestThemedResource_Name(t *testing.T) {
-	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
-		helperLoadBytes(t, "cancel_Paths.svg"))
+	staticResource := helperLoadRes(t, "cancel_Paths.svg")
 	themedResource := &ThemedResource{
 		source: staticResource,
 	}
@@ -88,8 +89,7 @@ func TestThemedResource_Name(t *testing.T) {
 
 func TestThemedResource_Content_NoGroupsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
-		helperLoadBytes(t, "cancel_Paths.svg"))
+	staticResource := helperLoadRes(t, "cancel_Paths.svg")
 	themedResource := &ThemedResource{
 		source: staticResource,
 	}
@@ -98,8 +98,7 @@ func TestThemedResource_Content_NoGroupsFile(t *testing.T) {
 
 func TestThemedResource_Content_GroupPathFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	staticResource := fyne.NewStaticResource("check_GroupPaths.svg",
-		helperLoadBytes(t, "check_GroupPaths.svg"))
+	staticResource := helperLoadRes(t, "check_GroupPaths.svg")
 	themedResource := &ThemedResource{
 		source: staticResource,
 	}
@@ -108,8 +107,7 @@ func TestThemedResource_Content_GroupPathFile(t *testing.T) {
 
 func TestThemedResource_Content_GroupRectFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	staticResource := fyne.NewStaticResource("info_GroupRects.svg",
-		helperLoadBytes(t, "info_GroupRects.svg"))
+	staticResource := helperLoadRes(t, "info_GroupRects.svg")
 	themedResource := &ThemedResource{
 		source: staticResource,
 	}
@@ -118,8 +116,7 @@ func TestThemedResource_Content_GroupRectFile(t *testing.T) {
 
 func TestThemedResource_Content_GroupPolygonsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	staticResource := fyne.NewStaticResource("warning_GroupPolygons.svg",
-		helperLoadBytes(t, "warning_GroupPolygons.svg"))
+	staticResource := helperLoadRes(t, "warning_GroupPolygons.svg")
 	themedResource := &ThemedResource{
 		source: staticResource,
 	}
@@ -129,8 +126,7 @@ func TestThemedResource_Content_GroupPolygonsFile(t *testing.T) {
 // a black svg object omits the fill tag, this checks it it still properly updated
 func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	staticResource := fyne.NewStaticResource("cancel_PathsBlackFill.svg",
-		helperLoadBytes(t, "cancel_PathsBlackFill.svg"))
+	staticResource := helperLoadRes(t, "cancel_PathsBlackFill.svg")
 	themedResource := &ThemedResource{
 		source: staticResource,
 	}
@@ -138,8 +134,7 @@ func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 }
 
 func TestDisabledResource_Name(t *testing.T) {
-	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
-		helperLoadBytes(t, "cancel_Paths.svg"))
+	staticResource := helperLoadRes(t, "cancel_Paths.svg")
 	disabledResource := &DisabledResource{
 		source: staticResource,
 	}
@@ -148,8 +143,7 @@ func TestDisabledResource_Name(t *testing.T) {
 
 func TestDisabledResource_Content_NoGroupsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	staticResource := fyne.NewStaticResource("cancel_Paths.svg",
-		helperLoadBytes(t, "cancel_Paths.svg"))
+	staticResource := helperLoadRes(t, "cancel_Paths.svg")
 	disabledResource := &DisabledResource{
 		source: staticResource,
 	}

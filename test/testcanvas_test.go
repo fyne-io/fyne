@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne"
 )
 
 func TestTestCanvas_Capture(t *testing.T) {
@@ -14,7 +16,8 @@ func TestTestCanvas_Capture(t *testing.T) {
 	assert.True(t, img.Bounds().Size().X > 0)
 	assert.True(t, img.Bounds().Size().Y > 0)
 
-	r1, g1, b1, a1 := testBackground.RGBA()
+	theme := fyne.CurrentApp().Settings().Theme()
+	r1, g1, b1, a1 := theme.BackgroundColor().RGBA()
 	r2, g2, b2, a2 := img.At(1, 1).RGBA()
 	assert.Equal(t, r1, r2)
 	assert.Equal(t, g1, g2)
