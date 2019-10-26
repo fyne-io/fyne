@@ -401,6 +401,17 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 	w.mouseMoved(w.viewport, 5, 5)
 	w.waitForEvents()
 
+	// On OS X a Ctrl+Click is normally translated into a Right-Click.
+	// The well-known Ctrl+Click for extending a selection is a Cmd+Click there.
+	var superModifier, ctrlModifier desktop.Modifier
+	if runtime.GOOS == "darwin" {
+		superModifier = desktop.ControlModifier
+		ctrlModifier = 0
+	} else {
+		superModifier = desktop.SuperModifier
+		ctrlModifier = desktop.ControlModifier
+	}
+
 	tests := map[string]struct {
 		modifier              glfw.ModifierKey
 		expectedEventModifier desktop.Modifier
@@ -415,7 +426,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"ctrl": {
 			modifier:              glfw.ModControl,
-			expectedEventModifier: desktop.ControlModifier,
+			expectedEventModifier: ctrlModifier,
 		},
 		"alt": {
 			modifier:              glfw.ModAlt,
@@ -423,11 +434,11 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"super": {
 			modifier:              glfw.ModSuper,
-			expectedEventModifier: desktop.SuperModifier,
+			expectedEventModifier: superModifier,
 		},
 		"shift+ctrl": {
 			modifier:              glfw.ModShift | glfw.ModControl,
-			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier,
+			expectedEventModifier: desktop.ShiftModifier | ctrlModifier,
 		},
 		"shift+alt": {
 			modifier:              glfw.ModShift | glfw.ModAlt,
@@ -435,39 +446,39 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"shift+super": {
 			modifier:              glfw.ModShift | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.ShiftModifier | superModifier,
 		},
 		"ctrl+alt": {
 			modifier:              glfw.ModControl | glfw.ModAlt,
-			expectedEventModifier: desktop.ControlModifier | desktop.AltModifier,
+			expectedEventModifier: ctrlModifier | desktop.AltModifier,
 		},
 		"ctrl+super": {
 			modifier:              glfw.ModControl | glfw.ModSuper,
-			expectedEventModifier: desktop.ControlModifier | desktop.SuperModifier,
+			expectedEventModifier: ctrlModifier | superModifier,
 		},
 		"alt+super": {
 			modifier:              glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.AltModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.AltModifier | superModifier,
 		},
 		"shift+ctrl+alt": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt,
-			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.AltModifier,
+			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | desktop.AltModifier,
 		},
 		"shift+ctrl+super": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | superModifier,
 		},
 		"shift+alt+super": {
 			modifier:              glfw.ModShift | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.AltModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.ShiftModifier | desktop.AltModifier | superModifier,
 		},
 		"ctrl+alt+super": {
 			modifier:              glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.ControlModifier | desktop.AltModifier | desktop.SuperModifier,
+			expectedEventModifier: ctrlModifier | desktop.AltModifier | superModifier,
 		},
 		"shift+ctrl+alt+super": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.AltModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | desktop.AltModifier | superModifier,
 		},
 	}
 	for name, tt := range tests {
