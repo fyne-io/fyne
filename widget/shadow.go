@@ -89,12 +89,6 @@ func (r *shadowRenderer) createShadows() {
 		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
 		r.objects = []fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l}
 	}
-
-	if r.s.Hidden {
-		for _, shadow := range r.objects {
-			shadow.Hide()
-		}
-	}
 }
 
 func (r *shadowRenderer) ApplyTheme() {

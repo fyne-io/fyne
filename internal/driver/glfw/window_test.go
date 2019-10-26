@@ -47,7 +47,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	h2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(h1, h2))
 
-	d.(*gLDriver).repaintWindow(w)
+	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), h1.Position())
 	require.Equal(t, fyne.NewPos(14, 0), h2.Position())
 
@@ -88,7 +88,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	d2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1, d2))
 
-	d.(*gLDriver).repaintWindow(w)
+	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
 	require.Equal(t, fyne.NewPos(14, 0), d2.Position())
 
@@ -185,7 +185,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1))
 
-	d.(*gLDriver).repaintWindow(w)
+	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
 
 	// drag -1,-1
@@ -228,7 +228,7 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	d2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1, d2))
 
-	d.(*gLDriver).repaintWindow(w)
+	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), d1.Position())
 
 	// drag from d1 into d2
@@ -291,7 +291,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	dh.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(dh)
 
-	d.(*gLDriver).repaintWindow(w)
+	repaintWindow(w)
 	w.mouseMoved(w.viewport, 8, 8)
 	w.waitForEvents()
 	assert.Equal(t,
@@ -427,6 +427,17 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 	w.mouseMoved(w.viewport, 5, 5)
 	w.waitForEvents()
 
+	// On OS X a Ctrl+Click is normally translated into a Right-Click.
+	// The well-known Ctrl+Click for extending a selection is a Cmd+Click there.
+	var superModifier, ctrlModifier desktop.Modifier
+	if runtime.GOOS == "darwin" {
+		superModifier = desktop.ControlModifier
+		ctrlModifier = 0
+	} else {
+		superModifier = desktop.SuperModifier
+		ctrlModifier = desktop.ControlModifier
+	}
+
 	tests := map[string]struct {
 		modifier              glfw.ModifierKey
 		expectedEventModifier desktop.Modifier
@@ -441,7 +452,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"ctrl": {
 			modifier:              glfw.ModControl,
-			expectedEventModifier: desktop.ControlModifier,
+			expectedEventModifier: ctrlModifier,
 		},
 		"alt": {
 			modifier:              glfw.ModAlt,
@@ -449,11 +460,11 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"super": {
 			modifier:              glfw.ModSuper,
-			expectedEventModifier: desktop.SuperModifier,
+			expectedEventModifier: superModifier,
 		},
 		"shift+ctrl": {
 			modifier:              glfw.ModShift | glfw.ModControl,
-			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier,
+			expectedEventModifier: desktop.ShiftModifier | ctrlModifier,
 		},
 		"shift+alt": {
 			modifier:              glfw.ModShift | glfw.ModAlt,
@@ -461,39 +472,39 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 		},
 		"shift+super": {
 			modifier:              glfw.ModShift | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.ShiftModifier | superModifier,
 		},
 		"ctrl+alt": {
 			modifier:              glfw.ModControl | glfw.ModAlt,
-			expectedEventModifier: desktop.ControlModifier | desktop.AltModifier,
+			expectedEventModifier: ctrlModifier | desktop.AltModifier,
 		},
 		"ctrl+super": {
 			modifier:              glfw.ModControl | glfw.ModSuper,
-			expectedEventModifier: desktop.ControlModifier | desktop.SuperModifier,
+			expectedEventModifier: ctrlModifier | superModifier,
 		},
 		"alt+super": {
 			modifier:              glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.AltModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.AltModifier | superModifier,
 		},
 		"shift+ctrl+alt": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt,
-			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.AltModifier,
+			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | desktop.AltModifier,
 		},
 		"shift+ctrl+super": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | superModifier,
 		},
 		"shift+alt+super": {
 			modifier:              glfw.ModShift | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.AltModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.ShiftModifier | desktop.AltModifier | superModifier,
 		},
 		"ctrl+alt+super": {
 			modifier:              glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.ControlModifier | desktop.AltModifier | desktop.SuperModifier,
+			expectedEventModifier: ctrlModifier | desktop.AltModifier | superModifier,
 		},
 		"shift+ctrl+alt+super": {
 			modifier:              glfw.ModShift | glfw.ModControl | glfw.ModAlt | glfw.ModSuper,
-			expectedEventModifier: desktop.ShiftModifier | desktop.ControlModifier | desktop.AltModifier | desktop.SuperModifier,
+			expectedEventModifier: desktop.ShiftModifier | ctrlModifier | desktop.AltModifier | superModifier,
 		},
 	}
 	for name, tt := range tests {
@@ -585,14 +596,14 @@ func TestWindow_SetPadded(t *testing.T) {
 			oldCanvasSize := fyne.NewSize(100, 100)
 			w.Resize(oldCanvasSize)
 
-			d.(*gLDriver).repaintWindow(w)
+			repaintWindow(w)
 			contentSize := content.Size()
 			expectedCanvasSize := contentSize.
 				Add(fyne.NewSize(2*tt.expectedPad, 2*tt.expectedPad)).
 				Add(fyne.NewSize(0, tt.expectedMenuHeight))
 
 			w.SetPadded(tt.padding)
-			d.(*gLDriver).repaintWindow(w)
+			repaintWindow(w)
 			assert.Equal(t, contentSize, content.Size())
 			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), content.Position())
 			assert.Equal(t, expectedCanvasSize, w.Canvas().Size())

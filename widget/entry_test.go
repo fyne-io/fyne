@@ -63,11 +63,11 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 	assert.Equal(t, 0, len(entry.Text))
 	assert.Equal(t, 0, entry.textProvider().len())
 	assert.Equal(t, 4, entry.placeholderProvider().len())
-	assert.False(t, entry.placeholderProvider().Hidden)
+	assert.True(t, entry.placeholderProvider().Visible())
 
 	entry.SetText("Hi")
 	assert.Equal(t, 2, len(entry.Text))
-	assert.True(t, entry.placeholderProvider().Hidden)
+	assert.False(t, entry.placeholderProvider().Visible())
 
 	assert.Equal(t, 2, entry.textProvider().len())
 }
