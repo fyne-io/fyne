@@ -258,6 +258,27 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	assert.Nil(t, d2.popMouseEvent())
 }
 
+func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.Canvas().SetScale(1.0)
+	do := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
+	do.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(do)
+
+	repaintWindow(w)
+	require.Equal(t, fyne.NewPos(4, 4), do.Position())
+
+	w.mouseMoved(w.viewport, 9, 9)
+	// mouse down (potential drag)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	// mouse release without move (not really a drag)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.waitForEvents()
+
+	assert.Nil(t, do.popDragEvent(), "no drag event without move")
+	assert.Nil(t, do.popDragEndEvent(), "no drag end event without drag event")
+}
+
 func TestWindow_HoverableOnDragging(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	w.Canvas().SetScale(1.0)

@@ -60,6 +60,7 @@ type window struct {
 	mouseDragged       fyne.Draggable
 	mouseDraggedOffset fyne.Position
 	mouseDragPos       fyne.Position
+	mouseDragStarted   bool
 	mouseButton        desktop.MouseButton
 	mouseOver          desktop.Hoverable
 	mouseClickTime     time.Time
@@ -528,6 +529,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			wd := w.mouseDragged
 			w.queueEvent(func() { wd.Dragged(ev) })
 
+			w.mouseDragStarted = true
 			w.mouseDragPos = w.mousePos
 		}
 	}
@@ -659,7 +661,10 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 		}
 	}
 	if action == glfw.Release && w.mouseDragged != nil {
-		w.mouseDragged.DragEnd()
+		if w.mouseDragStarted {
+			w.queueEvent(w.mouseDragged.DragEnd)
+			w.mouseDragStarted = false
+		}
 		if w.objIsDragged(w.mouseOver) && !w.objIsDragged(coMouse) {
 			w.mouseOut()
 		}
