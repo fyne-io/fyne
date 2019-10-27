@@ -1,4 +1,4 @@
-package data
+package dataapi
 
 // DataItem
 // The DataItem interface that embeds the fmt.Stringer interface should allow to handle complex
@@ -6,11 +6,14 @@ package data
 // opportunity to hook in to be informed of change events so that widgets can update accordingly.
 type DataItem interface {
 	String() string
-	AddListener(DataItemFunc) int
+	AddListener(func(DataItem)) int
 	DeleteListener(int)
 }
 
-type DataItemFunc func(DataItem)
+// Settable - if the data item is settable then changes to the widget will update the data item
+type Settable interface {
+	Set(string, int)
+}
 
 // DataMap
 // The DataMap interface is like a DataItem except that it has many items each with a name.
@@ -18,12 +21,10 @@ type DataItemFunc func(DataItem)
 // The change listener is called when an item (or multiple) within the map is changed.
 // AddMapListener fires when the number of map elements change.
 type DataMap interface {
-	Get(string) (DataItem,bool)
-	AddListener(DataMapFunc) int
+	Get(string) (DataItem, bool)
+	AddListener(func(DataMap)) int
 	DeleteListener(int)
 }
-
-type DataMapFunc func(DataMap)
 
 // DataSource
 // The DataSource interface defines an interface that returns multiple DataItems
@@ -33,9 +34,6 @@ type DataMapFunc func(DataMap)
 type DataSource interface {
 	Count() int
 	Get(int) DataItem
-	AddListener(DataSourceFunc) int
+	AddListener(func(DataSource)) int
 	DeleteListener(int)
 }
-
-type DataSourceFunc func(DataSource)
-
