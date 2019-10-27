@@ -10,16 +10,6 @@ type DataItem interface {
 	DeleteListener(int)
 }
 
-// Settable - if the data item is settable using a string then changes to the widget will update the data item
-type Settable interface {
-	Set(string, int)
-}
-
-// SettableBool - if the data item is settable using a bool then changes to the widget will update the data item
-type SettableBool interface {
-	SetBool(bool, int)
-}
-
 // DataMap
 // The DataMap interface is like a DataItem except that it has many items each with a name.
 // It extends DataItem so that anything returning an item can also return a map.

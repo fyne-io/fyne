@@ -9,8 +9,9 @@ type dataModel struct {
 	Name         *dataapi.String
 	Time         *dataapi.Clock
 	IsAvailable  *dataapi.Bool
-	Size         size
-	DeliveryTime int
+	Size         *dataapi.Int
+	OnSale       *dataapi.String
+	DeliveryTime *dataapi.Float
 	NumWindows   int
 }
 
@@ -27,8 +28,9 @@ func NewDataModel() *dataModel {
 		Name:         dataapi.NewString(""),
 		Time:         dataapi.NewClock(),
 		IsAvailable:  dataapi.NewBool(false),
-		Size:         SizeSmall,
-		DeliveryTime: 50,
+		Size:         dataapi.NewInt(int(SizeSmall)),
+		OnSale:       dataapi.NewString("false"),
+		DeliveryTime: dataapi.NewFloat(50.0),
 		NumWindows:   0,
 	}
 }

@@ -7,8 +7,9 @@ func NewEntry(data DataItem) *widget.Entry {
 
 	// create the base widget
 	w := widget.NewEntry()
+	w.SetText(data.String())
 
-	i := data.AddListener(func(d DataItem) {
+	maskID := data.AddListener(func(d DataItem) {
 		w.SetText(d.String())
 	})
 
@@ -16,7 +17,7 @@ func NewEntry(data DataItem) *widget.Entry {
 		// The DataItem is settable, so add an onchange handler
 		// to the widget to trigger the set function on the dataItem
 		w.OnChanged = func(txt string) {
-			s.Set(txt, i)
+			s.Set(txt, maskID)
 		}
 	}
 	return w

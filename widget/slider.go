@@ -46,6 +46,14 @@ func NewSlider(min, max float64) *Slider {
 	return slider
 }
 
+// Set sets the value in the slider and repaints it
+func (s *Slider) Set(value float64) {
+	if value >= s.Min && value <= s.Max {
+		s.Value = value
+		Refresh(s)
+	}
+}
+
 // Resize sets a new size for a widget.
 func (s *Slider) Resize(size fyne.Size) {
 	s.resize(size, s)

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	_ "image/png"
+
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/dataapi"
-	_ "image/png"
 
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
@@ -42,10 +43,19 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 				func(checked bool) {
 					println("clicked on the avail button", checked)
 				})),
-			widget.NewFormItem("", widget.NewRadio([]string{"Small", "Medium", "Large"}, func(value string) {
-				println("Radio button changed to", value)
-			})),
-			widget.NewFormItem("Delivery", widget.NewSlider(0.0, 100.0)),
+
+			widget.NewFormItem("", dataapi.NewRadio(data.Size,
+				[]string{"Small", "Medium", "Large"},
+				func(value string) {
+					println("Radio button changed to", value)
+				})),
+			widget.NewFormItem("Delivery", dataapi.NewSlider(data.DeliveryTime, 0.0, 100.0)),
+			widget.NewFormItem("", dataapi.NewCheck(data.OnSale,
+				"On Sale",
+				func(checked bool) {
+					println("clicked on the on sale button", checked)
+				})),
+			widget.NewFormItem("Is On Sale ?", dataapi.NewLabel(data.OnSale)),
 			widget.NewFormItem("Quit Cleanly", widget.NewButton("Quit", func() {
 				data.Time.DeleteListener(myWindowID)
 				v.w.Close()
