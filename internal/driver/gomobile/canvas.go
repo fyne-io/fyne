@@ -39,7 +39,7 @@ func (c *canvas) Content() fyne.CanvasObject {
 func (c *canvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 
-	c.sizeContent(c.Size())
+	c.sizeContent(c.Size().Union(content.MinSize()))
 }
 
 func (c *canvas) Refresh(obj fyne.CanvasObject) {
@@ -118,7 +118,13 @@ func (c *canvas) Scale() float32 {
 }
 
 func (c *canvas) SetScale(scale float32) {
-	c.scale = scale
+	if scale == fyne.SettingsScaleAuto {
+		c.scale = deviceScale()
+	} else if scale == 0 { // not set in the config
+		return
+	} else {
+		c.scale = scale
+	}
 }
 
 func (c *canvas) Overlay() fyne.CanvasObject {

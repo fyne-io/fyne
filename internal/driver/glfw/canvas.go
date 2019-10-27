@@ -188,6 +188,8 @@ func (c *glCanvas) SetScale(scale float32) {
 func (c *glCanvas) setScaleValue(scale float32) {
 	if scale == fyne.SettingsScaleAuto {
 		c.scale = c.detectedScale
+	} else if scale == 0 {
+		return
 	} else {
 		c.scale = scale
 	}
