@@ -7,7 +7,7 @@ import (
 // This is the dataModel - a single instance of this is used by all the views in the app
 type dataModel struct {
 	Name         *dataapi.String
-	Time         *dataapi.Clock
+	Clock        *dataapi.Clock
 	IsAvailable  *dataapi.Bool
 	Size         *dataapi.Int
 	OnSale       *dataapi.String
@@ -26,7 +26,7 @@ const (
 func NewDataModel() *dataModel {
 	return &dataModel{
 		Name:         dataapi.NewString(""),
-		Time:         dataapi.NewClock(),
+		Clock:        dataapi.NewClock(),
 		IsAvailable:  dataapi.NewBool(false),
 		Size:         dataapi.NewInt(int(SizeSmall)),
 		OnSale:       dataapi.NewString("false"),

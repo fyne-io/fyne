@@ -37,7 +37,7 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 		layout.NewSpacer(),
 		widget.NewForm(
 			// A label bound to a Clock dataItem (a Clock is a string that auto-mutates every second)
-			widget.NewFormItem("Time", dataapi.NewLabel(data.Time)),
+			widget.NewFormItem("Time", dataapi.NewLabel(data.Clock)),
 			// An entry widget bound to a String dataItem
 			widget.NewFormItem("Name", dataapi.NewEntry(data.Name)),
 			// A checkbox bound to a Bool dataItem
@@ -66,7 +66,7 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 			// Need a quit handler here to correctly deregister all the handlers
 			// TODO - correctly clean up, else resource leaks
 			widget.NewFormItem("Quit Cleanly", widget.NewButton("Quit", func() {
-				data.Time.DeleteListener(myWindowID)
+				data.Clock.DeleteListener(myWindowID)
 				v.w.Close()
 			})),
 		),
