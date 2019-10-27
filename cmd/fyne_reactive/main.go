@@ -65,7 +65,7 @@ func main() {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
 	logo.SetMinSize(fyne.NewSize(320, 128))
 	diag := canvas.NewImageFromResource(resourceReactiveDataPng)
-	diag.SetMinSize(fyne.NewSize(586, 470))
+	diag.SetMinSize(fyne.NewSize(400, 350))
 
 	data := NewDataModel()
 	a := app.NewWithID("io.fyne.reactive")
