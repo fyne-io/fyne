@@ -12,7 +12,7 @@ package dataapi
 // When the source data is changed, the checkbox is updated.
 //
 // When the checkbox is toggled, AND the dataItem is of type
-// bool, then it will update the dataItem
+// SettableBool, then it will update the dataItem
 
 // Settable - if the data item is settable using a string
 type Settable interface {
