@@ -1,4 +1,5 @@
 package main
+
 //go:generate fyne bundle reactive-data.png > image.go
 
 import (
@@ -12,17 +13,17 @@ import (
 
 const preferenceCurrentTab = "currentTab"
 
-func welcomeScreen(a fyne.App, data *dataModel, diag,logo *canvas.Image) fyne.CanvasObject {
+func welcomeScreen(a fyne.App, data *dataModel, diag, logo *canvas.Image) fyne.CanvasObject {
 	return widget.NewVBox(
 		widget.NewLabelWithStyle("Fyne Reactive Data Update Demo", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		layout.NewSpacer(),
 		widget.NewHBox(layout.NewSpacer(), diag, layout.NewSpacer()),
-		widget.NewLabel(`This demo has a single instance of a data model as described above.
+		widget.NewLabel(`This demo has a single instance of a dataapi model as described above.
 
-Each window subscribes to the data model, and is automatically updated
+Each window subscribes to the dataapi model, and is automatically updated
 when the model changes.
 
-Changes to the data in the view are committed to the central data model,
+Changes to the dataapi in the view are committed to the central dataapi model,
 which in turn triggers a repaint on the other subscribed views.`),
 		layout.NewSpacer(),
 
@@ -34,7 +35,7 @@ which in turn triggers a repaint on the other subscribed views.`),
 					newView(a, data, logo)
 				}),
 				layout.NewSpacer(),
-				widget.NewButtonWithIcon()
+				widget.NewButton("Close", func() { a.Quit() }),
 			),
 		),
 	)
@@ -42,11 +43,11 @@ which in turn triggers a repaint on the other subscribed views.`),
 
 func main() {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
-	logo.SetMinSize(fyne.NewSize(128, 128))
+	logo.SetMinSize(fyne.NewSize(320, 128))
 	diag := canvas.NewImageFromResource(resourceReactiveDataPng)
-	diag.SetMinSize(fyne.NewSize(586,470))
+	diag.SetMinSize(fyne.NewSize(586, 470))
 
-	data := &dataModel{}
+	data := NewDataModel()
 	a := app.NewWithID("io.fyne.reactive")
 	w := a.NewWindow("Fyne Reactive Demo")
 	w.SetMaster()
@@ -55,4 +56,3 @@ func main() {
 
 	w.ShowAndRun()
 }
-
