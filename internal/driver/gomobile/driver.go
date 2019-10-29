@@ -1,11 +1,13 @@
 package gomobile
 
 import (
+	"strconv"
 	"time"
 
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/widget"
 	"golang.org/x/mobile/app"
+	"golang.org/x/mobile/event/key"
 	"golang.org/x/mobile/event/lifecycle"
 	"golang.org/x/mobile/event/paint"
 	"golang.org/x/mobile/event/size"
@@ -156,6 +158,12 @@ func (d *mobileDriver) Run() {
 				case touch.TypeEnd:
 					d.tapUpCanvas(canvas, e.X, e.Y)
 				}
+			case key.Event:
+				if e.Direction == key.DirPress {
+					d.typeDownCanvas(canvas, e.Rune, e.Code)
+				} else if e.Direction == key.DirRelease {
+					d.typeUpCanvas(canvas, e.Rune, e.Code)
+				}
 			}
 
 			if quit {
@@ -236,6 +244,191 @@ func (d *mobileDriver) tapUpCanvas(canvas *canvas, x, y float32) {
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		go wid.DragEnd()
 	})
+}
+
+func keyToName(code key.Code) fyne.KeyName {
+	switch code {
+	// non-printable
+	case key.CodeEscape:
+		return fyne.KeyEscape
+	case key.CodeReturnEnter:
+		return fyne.KeyReturn
+	case key.CodeTab:
+		return fyne.KeyTab
+	case key.CodeDeleteBackspace:
+		return fyne.KeyBackspace
+	case key.CodeInsert:
+		return fyne.KeyInsert
+	case key.CodePageUp:
+		return fyne.KeyPageUp
+	case key.CodePageDown:
+		return fyne.KeyPageDown
+	case key.CodeHome:
+		return fyne.KeyHome
+	case key.CodeEnd:
+		return fyne.KeyEnd
+
+	case key.CodeF1:
+		return fyne.KeyF1
+	case key.CodeF2:
+		return fyne.KeyF2
+	case key.CodeF3:
+		return fyne.KeyF3
+	case key.CodeF4:
+		return fyne.KeyF4
+	case key.CodeF5:
+		return fyne.KeyF5
+	case key.CodeF6:
+		return fyne.KeyF6
+	case key.CodeF7:
+		return fyne.KeyF7
+	case key.CodeF8:
+		return fyne.KeyF8
+	case key.CodeF9:
+		return fyne.KeyF9
+	case key.CodeF10:
+		return fyne.KeyF10
+	case key.CodeF11:
+		return fyne.KeyF11
+	case key.CodeF12:
+		return fyne.KeyF12
+
+	case key.CodeKeypadEnter:
+		return fyne.KeyEnter
+
+	// printable
+	case key.CodeA:
+		return fyne.KeyA
+	case key.CodeB:
+		return fyne.KeyB
+	case key.CodeC:
+		return fyne.KeyC
+	case key.CodeD:
+		return fyne.KeyD
+	case key.CodeE:
+		return fyne.KeyE
+	case key.CodeF:
+		return fyne.KeyF
+	case key.CodeG:
+		return fyne.KeyG
+	case key.CodeH:
+		return fyne.KeyH
+	case key.CodeI:
+		return fyne.KeyI
+	case key.CodeJ:
+		return fyne.KeyJ
+	case key.CodeK:
+		return fyne.KeyK
+	case key.CodeL:
+		return fyne.KeyL
+	case key.CodeM:
+		return fyne.KeyM
+	case key.CodeN:
+		return fyne.KeyN
+	case key.CodeO:
+		return fyne.KeyO
+	case key.CodeP:
+		return fyne.KeyP
+	case key.CodeQ:
+		return fyne.KeyQ
+	case key.CodeR:
+		return fyne.KeyR
+	case key.CodeS:
+		return fyne.KeyS
+	case key.CodeT:
+		return fyne.KeyT
+	case key.CodeU:
+		return fyne.KeyU
+	case key.CodeV:
+		return fyne.KeyV
+	case key.CodeW:
+		return fyne.KeyW
+	case key.CodeX:
+		return fyne.KeyX
+	case key.CodeY:
+		return fyne.KeyY
+	case key.CodeZ:
+		return fyne.KeyZ
+	case key.Code0, key.CodeKeypad0:
+		return fyne.Key0
+	case key.Code1, key.CodeKeypad1:
+		return fyne.Key1
+	case key.Code2, key.CodeKeypad2:
+		return fyne.Key2
+	case key.Code3, key.CodeKeypad3:
+		return fyne.Key3
+	case key.Code4, key.CodeKeypad4:
+		return fyne.Key4
+	case key.Code5, key.CodeKeypad5:
+		return fyne.Key5
+	case key.Code6, key.CodeKeypad6:
+		return fyne.Key6
+	case key.Code7, key.CodeKeypad7:
+		return fyne.Key7
+	case key.Code8, key.CodeKeypad8:
+		return fyne.Key8
+	case key.Code9, key.CodeKeypad9:
+		return fyne.Key9
+
+	case key.CodeSemicolon:
+		return fyne.KeySemicolon
+	case key.CodeEqualSign:
+		return fyne.KeyEqual
+
+	case key.CodeSpacebar:
+		return fyne.KeySpace
+	case key.CodeApostrophe:
+		return fyne.KeyApostrophe
+	case key.CodeComma:
+		return fyne.KeyComma
+	case key.CodeHyphenMinus, key.CodeKeypadHyphenMinus:
+		return fyne.KeyMinus
+	case key.CodeFullStop, key.CodeKeypadFullStop:
+		return fyne.KeyPeriod
+	case key.CodeSlash:
+		return fyne.KeySlash
+	case key.CodeLeftSquareBracket:
+		return fyne.KeyLeftBracket
+	case key.CodeBackslash:
+		return fyne.KeyBackslash
+	case key.CodeRightSquareBracket:
+		return fyne.KeyRightBracket
+	}
+	return ""
+}
+
+func runeToPrintable(r rune) rune {
+	if strconv.IsPrint(r) {
+		return r
+	}
+
+	return 0
+}
+
+func (d *mobileDriver) typeDownCanvas(canvas *canvas, r rune, code key.Code) {
+	keyName := keyToName(code)
+	r = runeToPrintable(r)
+	keyEvent := &fyne.KeyEvent{Name: keyName}
+
+	if canvas.Focused() != nil {
+		if keyName != "" {
+			canvas.Focused().TypedKey(keyEvent)
+		}
+		if r > 0 {
+			canvas.Focused().TypedRune(r)
+		}
+	} else if canvas.onTypedKey != nil {
+		if keyName != "" {
+			canvas.onTypedKey(keyEvent)
+		}
+		if r > 0 {
+			canvas.onTypedRune(r)
+		}
+	}
+}
+
+func (d *mobileDriver) typeUpCanvas(canvas *canvas, r rune, code key.Code) {
+
 }
 
 func (d *mobileDriver) freeDirtyTextures(canvas *canvas) {

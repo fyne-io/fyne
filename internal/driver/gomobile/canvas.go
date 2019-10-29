@@ -21,9 +21,9 @@ type canvas struct {
 	focused fyne.Focusable
 	padded  bool
 
-	typedRune func(rune)
-	typedKey  func(event *fyne.KeyEvent)
-	shortcut  fyne.ShortcutHandler
+	onTypedRune func(rune)
+	onTypedKey  func(event *fyne.KeyEvent)
+	shortcut    fyne.ShortcutHandler
 
 	inited, dirty  bool
 	lastTapDown    int64
@@ -140,19 +140,19 @@ func (c *canvas) SetOverlay(overlay fyne.CanvasObject) {
 }
 
 func (c *canvas) OnTypedRune() func(rune) {
-	return c.typedRune
+	return c.onTypedRune
 }
 
 func (c *canvas) SetOnTypedRune(typed func(rune)) {
-	c.typedRune = typed
+	c.onTypedRune = typed
 }
 
 func (c *canvas) OnTypedKey() func(*fyne.KeyEvent) {
-	return c.typedKey
+	return c.onTypedKey
 }
 
 func (c *canvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
-	c.typedKey = typed
+	c.onTypedKey = typed
 }
 
 func (c *canvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
@@ -183,6 +183,27 @@ func (c *canvas) tapDown(pos fyne.Position) {
 	c.lastTapDown = time.Now().UnixNano()
 	c.lastTapDownPos = pos
 	c.dragging = nil
+
+	co, _ := driver.FindObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Focusable); ok {
+			return true
+		}
+
+		return false
+	}, c.overlay, c.content, c.windowHead)
+
+	needsFocus := true
+	wid := c.Focused()
+	if wid != nil {
+		if wid.(fyne.CanvasObject) != co {
+			c.Unfocus()
+		} else {
+			needsFocus = false
+		}
+	}
+	if wid, ok := co.(fyne.Focusable); ok && needsFocus {
+		c.Focus(wid)
+	}
 }
 
 func (c *canvas) tapMove(pos fyne.Position,

@@ -138,4 +138,27 @@ const (
 	KeyY KeyName = "Y"
 	// KeyZ represents the key Z
 	KeyZ KeyName = "Z"
+
+	// KeySpace is the space key
+	KeySpace KeyName = "Space"
+	// KeyApostrophe is the key "'"
+	KeyApostrophe KeyName = "'"
+	// KeyComma is the key ","
+	KeyComma KeyName = ","
+	// KeyMinus is the key "-"
+	KeyMinus KeyName = "-"
+	// KeyPeriod is the key "." (full stop)
+	KeyPeriod KeyName = "."
+	// KeySlash is the key "/"
+	KeySlash KeyName = "/"
+	// KeyBackslash is the key "\"
+	KeyBackslash KeyName = "\\"
+	// KeyLeftBracket is the key "["
+	KeyLeftBracket KeyName = "["
+	// KeyRightBracket is the key "]"
+	KeyRightBracket KeyName = "]"
+	// KeySemicolon is the key ";"
+	KeySemicolon KeyName = ";"
+	// KeyEqual is the key "="
+	KeyEqual KeyName = "="
 )

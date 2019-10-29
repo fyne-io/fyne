@@ -1,5 +1,6 @@
 package glfw
 
+import "C"
 import (
 	"bytes"
 	"image"
@@ -603,10 +604,10 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 	needsfocus := true
 	wid := w.canvas.Focused()
 	if wid != nil {
-		needsfocus = false
 		if wid.(fyne.CanvasObject) != co {
 			w.canvas.Unfocus()
-			needsfocus = true
+		} else {
+			needsfocus = false
 		}
 	}
 
@@ -617,10 +618,8 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 	}
 
 	// we cannot switch here as objects may respond to multiple cases
-	if wid, ok := co.(fyne.Focusable); ok {
-		if needsfocus == true {
-			w.canvas.Focus(wid)
-		}
+	if wid, ok := co.(fyne.Focusable); ok && needsfocus {
+		w.canvas.Focus(wid)
 	}
 
 	// Check for double click/tap
@@ -775,6 +774,44 @@ func keyToName(key glfw.Key) fyne.KeyName {
 		return fyne.KeyEnter
 
 	// printable
+	case glfw.KeySpace:
+		return fyne.KeySpace
+	case glfw.KeyApostrophe:
+		return fyne.KeyApostrophe
+	case glfw.KeyComma:
+		return fyne.KeyComma
+	case glfw.KeyMinus:
+		return fyne.KeyMinus
+	case glfw.KeyPeriod:
+		return fyne.KeyPeriod
+	case glfw.KeySlash:
+		return fyne.KeySlash
+
+	case glfw.Key0:
+		return fyne.Key0
+	case glfw.Key1:
+		return fyne.Key1
+	case glfw.Key2:
+		return fyne.Key2
+	case glfw.Key3:
+		return fyne.Key3
+	case glfw.Key4:
+		return fyne.Key4
+	case glfw.Key5:
+		return fyne.Key5
+	case glfw.Key6:
+		return fyne.Key6
+	case glfw.Key7:
+		return fyne.Key7
+	case glfw.Key8:
+		return fyne.Key8
+	case glfw.Key9:
+		return fyne.Key9
+	case glfw.KeySemicolon:
+		return fyne.KeySemicolon
+	case glfw.KeyEqual:
+		return fyne.KeyEqual
+
 	case glfw.KeyA:
 		return fyne.KeyA
 	case glfw.KeyB:
@@ -827,26 +864,13 @@ func keyToName(key glfw.Key) fyne.KeyName {
 		return fyne.KeyY
 	case glfw.KeyZ:
 		return fyne.KeyZ
-	case glfw.Key0:
-		return fyne.Key0
-	case glfw.Key1:
-		return fyne.Key1
-	case glfw.Key2:
-		return fyne.Key2
-	case glfw.Key3:
-		return fyne.Key3
-	case glfw.Key4:
-		return fyne.Key4
-	case glfw.Key5:
-		return fyne.Key5
-	case glfw.Key6:
-		return fyne.Key6
-	case glfw.Key7:
-		return fyne.Key7
-	case glfw.Key8:
-		return fyne.Key8
-	case glfw.Key9:
-		return fyne.Key9
+
+	case glfw.KeyLeftBracket:
+		return fyne.KeyLeftBracket
+	case glfw.KeyBackslash:
+		return fyne.KeyBackslash
+	case glfw.KeyRightBracket:
+		return fyne.KeyRightBracket
 
 	// desktop
 	case glfw.KeyLeftShift:
