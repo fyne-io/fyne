@@ -28,7 +28,7 @@ func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObje
 	return &TabItem{Text: text, Icon: icon, Content: content}
 }
 
-// TabLocation ist the location where the tabs of a tab container should be rendered
+// TabLocation is the location where the tabs of a tab container should be rendered
 type TabLocation int
 
 // TabLocation values
