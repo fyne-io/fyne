@@ -49,8 +49,9 @@ golang.org/x/image/math/fixed
 golang.org/x/image/colornames
 golang.org/x/image/vector
 golang.org/x/image/math/f64
-# golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 => github.com/fyne-io/mobile v0.0.0-20190823160611-9aa562349ac8
+# golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 => github.com/fyne-io/mobile v0.0.0-20191029170159-c6aabffe7bba
 golang.org/x/mobile/app
+golang.org/x/mobile/event/key
 golang.org/x/mobile/event/lifecycle
 golang.org/x/mobile/event/paint
 golang.org/x/mobile/event/size
@@ -58,7 +59,6 @@ golang.org/x/mobile/event/touch
 golang.org/x/mobile/gl
 golang.org/x/mobile/exp/f32
 golang.org/x/mobile/app/internal/callfn
-golang.org/x/mobile/event/key
 golang.org/x/mobile/event/mouse
 golang.org/x/mobile/geom
 golang.org/x/mobile/internal/mobileinit
