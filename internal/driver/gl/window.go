@@ -423,7 +423,7 @@ func (w *window) resized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
-	if !w.visible || width == 0 || height == 0 {
+	if width == 0 || height == 0 {
 		return
 	}
 
