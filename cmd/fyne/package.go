@@ -254,7 +254,14 @@ func (p *packager) packageIOS() error {
 	cmd.Dir = p.srcDir
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	appDir := filepath.Join(p.dir, p.name+".app")
+	iconPath := filepath.Join(appDir, "Icon.png")
+	return copyFile(p.icon, iconPath)
 }
 
 func (p *packager) addFlags() {
