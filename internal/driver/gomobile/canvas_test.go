@@ -17,7 +17,7 @@ func TestCanvas_Tapped(t *testing.T) {
 	button := widget.NewButton("Test", func() {
 		buttonTap = true
 	})
-	c := &canvas{content: button}
+	c := &mobileCanvas{content: button}
 	c.resize(fyne.NewSize(36, 24))
 
 	tapPos := fyne.NewPos(6, 6)
@@ -43,7 +43,7 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 	button := widget.NewButton("Test", func() {
 		buttonTap = false
 	})
-	c := &canvas{content: button}
+	c := &mobileCanvas{content: button}
 	c.resize(fyne.NewSize(36, 24))
 
 	tapPos := fyne.NewPos(6, 6)
@@ -68,7 +68,7 @@ func TestCanvas_Dragged(t *testing.T) {
 	dragged := false
 	var draggedObj fyne.Draggable
 	scroll := widget.NewScrollContainer(widget.NewLabel("Hi\nHi\nHi"))
-	c := &canvas{content: scroll}
+	c := &mobileCanvas{content: scroll}
 	c.resize(fyne.NewSize(36, 24))
 	assert.Equal(t, 0, scroll.Offset.Y)
 

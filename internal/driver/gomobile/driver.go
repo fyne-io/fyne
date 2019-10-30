@@ -35,7 +35,7 @@ type mobileDriver struct {
 var _ fyne.Driver = (*mobileDriver)(nil)
 
 func (d *mobileDriver) CreateWindow(title string) fyne.Window {
-	canvas := NewCanvas().(*canvas) // silence lint
+	canvas := NewCanvas().(*mobileCanvas) // silence lint
 	ret := &window{title: title, canvas: canvas, isChild: len(d.windows) > 0}
 	canvas.painter = pgl.NewPainter(canvas, ret)
 
@@ -71,7 +71,7 @@ func (d *mobileDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 
 func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	var pos fyne.Position
-	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*canvas)
+	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*mobileCanvas)
 
 	driver.WalkVisibleObjectTree(c.content, func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if o == co {
@@ -117,7 +117,7 @@ func (d *mobileDriver) Run() {
 			if current == nil {
 				break
 			}
-			canvas := current.Canvas().(*canvas)
+			canvas := current.Canvas().(*mobileCanvas)
 
 			switch e := a.Filter(e).(type) {
 			case lifecycle.Event:
@@ -175,7 +175,7 @@ func (d *mobileDriver) Run() {
 
 func (d *mobileDriver) onStart() {
 	for _, win := range d.AllWindows() {
-		win.Canvas().(*canvas).painter.Init() // we cannot init until the context is set above
+		win.Canvas().(*mobileCanvas).painter.Init() // we cannot init until the context is set above
 	}
 }
 
@@ -183,7 +183,7 @@ func (d *mobileDriver) onStop() {
 }
 
 func (d *mobileDriver) paintWindow(window fyne.Window, sz size.Event) {
-	canvas := window.Canvas().(*canvas)
+	canvas := window.Canvas().(*mobileCanvas)
 	currentOrientation = sz.Orientation
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
@@ -214,7 +214,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, sz size.Event) {
 	canvas.walkTree(paint, afterPaint)
 }
 
-func (d *mobileDriver) tapDownCanvas(canvas *canvas, x, y float32) {
+func (d *mobileDriver) tapDownCanvas(canvas *mobileCanvas, x, y float32) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)
@@ -222,7 +222,7 @@ func (d *mobileDriver) tapDownCanvas(canvas *canvas, x, y float32) {
 	canvas.tapDown(pos)
 }
 
-func (d *mobileDriver) tapMoveCanvas(canvas *canvas, x, y float32) {
+func (d *mobileDriver) tapMoveCanvas(canvas *mobileCanvas, x, y float32) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)
@@ -232,7 +232,7 @@ func (d *mobileDriver) tapMoveCanvas(canvas *canvas, x, y float32) {
 	})
 }
 
-func (d *mobileDriver) tapUpCanvas(canvas *canvas, x, y float32) {
+func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32) {
 	tapX := internal.UnscaleInt(canvas, int(x))
 	tapY := internal.UnscaleInt(canvas, int(y))
 	pos := fyne.NewPos(tapX, tapY)
@@ -405,7 +405,7 @@ func runeToPrintable(r rune) rune {
 	return 0
 }
 
-func (d *mobileDriver) typeDownCanvas(canvas *canvas, r rune, code key.Code) {
+func (d *mobileDriver) typeDownCanvas(canvas *mobileCanvas, r rune, code key.Code) {
 	keyName := keyToName(code)
 	r = runeToPrintable(r)
 	keyEvent := &fyne.KeyEvent{Name: keyName}
@@ -427,11 +427,11 @@ func (d *mobileDriver) typeDownCanvas(canvas *canvas, r rune, code key.Code) {
 	}
 }
 
-func (d *mobileDriver) typeUpCanvas(canvas *canvas, r rune, code key.Code) {
+func (d *mobileDriver) typeUpCanvas(canvas *mobileCanvas, r rune, code key.Code) {
 
 }
 
-func (d *mobileDriver) freeDirtyTextures(canvas *canvas) {
+func (d *mobileDriver) freeDirtyTextures(canvas *mobileCanvas) {
 	for {
 		select {
 		case object := <-canvas.refreshQueue:

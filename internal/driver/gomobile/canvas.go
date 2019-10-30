@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-type canvas struct {
+type mobileCanvas struct {
 	content, overlay fyne.CanvasObject
 	windowHead       fyne.CanvasObject
 	painter          gl.Painter
@@ -32,17 +32,17 @@ type canvas struct {
 	refreshQueue   chan fyne.CanvasObject
 }
 
-func (c *canvas) Content() fyne.CanvasObject {
+func (c *mobileCanvas) Content() fyne.CanvasObject {
 	return c.content
 }
 
-func (c *canvas) SetContent(content fyne.CanvasObject) {
+func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 
 	c.sizeContent(c.Size().Union(content.MinSize()))
 }
 
-func (c *canvas) Refresh(obj fyne.CanvasObject) {
+func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 	select {
 	case c.refreshQueue <- obj:
 		// all good
@@ -52,7 +52,7 @@ func (c *canvas) Refresh(obj fyne.CanvasObject) {
 	c.dirty = true
 }
 
-func (c *canvas) sizeContent(size fyne.Size) {
+func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	offset := fyne.NewPos(0, 0)
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height
@@ -79,7 +79,7 @@ func (c *canvas) sizeContent(size fyne.Size) {
 	}
 }
 
-func (c *canvas) resize(size fyne.Size) {
+func (c *mobileCanvas) resize(size fyne.Size) {
 	if size == c.size {
 		return
 	}
@@ -87,7 +87,7 @@ func (c *canvas) resize(size fyne.Size) {
 	c.sizeContent(size)
 }
 
-func (c *canvas) Focus(obj fyne.Focusable) {
+func (c *mobileCanvas) Focus(obj fyne.Focusable) {
 	if c.focused != nil {
 		c.focused.FocusLost()
 	}
@@ -98,26 +98,26 @@ func (c *canvas) Focus(obj fyne.Focusable) {
 	}
 }
 
-func (c *canvas) Unfocus() {
+func (c *mobileCanvas) Unfocus() {
 	if c.focused != nil {
 		c.focused.FocusLost()
 	}
 	c.focused = nil
 }
 
-func (c *canvas) Focused() fyne.Focusable {
+func (c *mobileCanvas) Focused() fyne.Focusable {
 	return c.focused
 }
 
-func (c *canvas) Size() fyne.Size {
+func (c *mobileCanvas) Size() fyne.Size {
 	return c.size
 }
 
-func (c *canvas) Scale() float32 {
+func (c *mobileCanvas) Scale() float32 {
 	return c.scale
 }
 
-func (c *canvas) SetScale(scale float32) {
+func (c *mobileCanvas) SetScale(scale float32) {
 	if scale == fyne.SettingsScaleAuto {
 		c.scale = deviceScale()
 	} else if scale == 0 { // not set in the config
@@ -127,11 +127,11 @@ func (c *canvas) SetScale(scale float32) {
 	}
 }
 
-func (c *canvas) Overlay() fyne.CanvasObject {
+func (c *mobileCanvas) Overlay() fyne.CanvasObject {
 	return c.overlay
 }
 
-func (c *canvas) SetOverlay(overlay fyne.CanvasObject) {
+func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.overlay = overlay
 
 	if c.overlay != nil {
@@ -139,31 +139,31 @@ func (c *canvas) SetOverlay(overlay fyne.CanvasObject) {
 	}
 }
 
-func (c *canvas) OnTypedRune() func(rune) {
+func (c *mobileCanvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
 
-func (c *canvas) SetOnTypedRune(typed func(rune)) {
+func (c *mobileCanvas) SetOnTypedRune(typed func(rune)) {
 	c.onTypedRune = typed
 }
 
-func (c *canvas) OnTypedKey() func(*fyne.KeyEvent) {
+func (c *mobileCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 	return c.onTypedKey
 }
 
-func (c *canvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
+func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 	c.onTypedKey = typed
 }
 
-func (c *canvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
+func (c *mobileCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
 	c.shortcut.AddShortcut(shortcut, handler)
 }
 
-func (c *canvas) Capture() image.Image {
+func (c *mobileCanvas) Capture() image.Image {
 	return c.painter.Capture(c)
 }
 
-func (c *canvas) walkTree(
+func (c *mobileCanvas) walkTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) {
@@ -179,7 +179,7 @@ func (c *canvas) walkTree(
 	}
 }
 
-func (c *canvas) tapDown(pos fyne.Position) {
+func (c *mobileCanvas) tapDown(pos fyne.Position) {
 	c.lastTapDown = time.Now().UnixNano()
 	c.lastTapDownPos = pos
 	c.dragging = nil
@@ -206,7 +206,7 @@ func (c *canvas) tapDown(pos fyne.Position) {
 	}
 }
 
-func (c *canvas) tapMove(pos fyne.Position,
+func (c *mobileCanvas) tapMove(pos fyne.Position,
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
 	deltaX := pos.X - c.lastTapDownPos.X
 	deltaY := pos.Y - c.lastTapDownPos.Y
@@ -241,7 +241,7 @@ func (c *canvas) tapMove(pos fyne.Position,
 	c.lastTapDownPos = pos
 }
 
-func (c *canvas) tapUp(pos fyne.Position,
+func (c *mobileCanvas) tapUp(pos fyne.Position,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.Tappable, *fyne.PointEvent),
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
@@ -278,7 +278,7 @@ func (c *canvas) tapUp(pos fyne.Position,
 
 // NewCanvas creates a new gomobile canvas. This is a canvas that will render on a mobile device using OpenGL.
 func NewCanvas() fyne.Canvas {
-	ret := &canvas{padded: true}
+	ret := &mobileCanvas{padded: true}
 	ret.scale = deviceScale()
 	ret.refreshQueue = make(chan fyne.CanvasObject, 1024)
 
