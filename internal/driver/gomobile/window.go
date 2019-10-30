@@ -16,6 +16,7 @@ type window struct {
 	clipboard fyne.Clipboard
 	canvas    *mobileCanvas
 	icon      fyne.Resource
+	menu      *fyne.MainMenu
 }
 
 func (w *window) Title() string {
@@ -79,29 +80,50 @@ func (w *window) SetMaster() {
 }
 
 func (w *window) MainMenu() *fyne.MainMenu {
-	// TODO add mainmenu support for mobile (burger and sidebar?)
-	return nil
+	return w.menu
 }
 
-func (w *window) SetMainMenu(*fyne.MainMenu) {
-	// TODO add mainmenu support for mobile (burger and sidebar?)
+func (w *window) SetMainMenu(menu *fyne.MainMenu) {
+	w.menu = menu
 }
 
 func (w *window) SetOnClosed(callback func()) {
 	w.onClosed = callback
 }
 
+func findMenu() *fyne.MainMenu {
+	d := fyne.CurrentApp().Driver().(*mobileDriver)
+	for x := len(d.windows) - 1; x >= 0; x-- {
+		w := d.windows[x]
+		if w.(*window).menu != nil {
+			return w.(*window).menu
+		}
+	}
+
+	return nil
+}
+
 func (w *window) Show() {
+	menu := findMenu()
+	menuButton := widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
+		w.canvas.showMenu(menu)
+	})
+	if menu == nil {
+		menuButton.Hide()
+	}
+
 	if w.isChild {
 		exit := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
 			w.Close()
 		})
 		title := widget.NewLabel(w.title)
 		title.Alignment = fyne.TextAlignCenter
-		w.canvas.windowHead = widget.NewHBox(exit,
-			layout.NewSpacer(), title, layout.NewSpacer())
+		w.canvas.windowHead = widget.NewHBox(menuButton,
+			layout.NewSpacer(), title, layout.NewSpacer(), exit)
 
 		w.canvas.resize(w.canvas.size)
+	} else {
+		w.canvas.windowHead = widget.NewHBox(menuButton)
 	}
 	w.visible = true
 
