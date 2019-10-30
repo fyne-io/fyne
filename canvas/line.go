@@ -15,7 +15,7 @@ var _ fyne.CanvasObject = (*Line)(nil)
 // an inverse slope (i.e. slope up vs down).
 type Line struct {
 	Position1 fyne.Position // The current top-left position of the Line
-	Position2 fyne.Position // The current bottomright position of the Line
+	Position2 fyne.Position // The current bottom-right position of the Line
 	Hidden    bool          // Is this Line currently hidden
 
 	StrokeColor color.Color // The line stroke colour
