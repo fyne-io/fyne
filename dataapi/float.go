@@ -40,3 +40,7 @@ func (i *Float) SetFloat(newfloat float64, mask int) {
 	}
 	i.locked = false
 }
+
+func (f *Float) Value() float64 {
+	return f.value
+}

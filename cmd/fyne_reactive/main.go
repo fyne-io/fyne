@@ -54,6 +54,12 @@ which in turn triggers a repaint on the other subscribed views.`),
 				widget.NewButton("+ Viewer Window", func() {
 					newView(a, data, logo)
 				}),
+				widget.NewButton("Fx1", func() {
+					newFx(a, data)
+				}),
+				widget.NewButton("Fx2", func() {
+					newPic(a, data)
+				}),
 				layout.NewSpacer(),
 				widget.NewButton("Close", func() { a.Quit() }),
 			),
