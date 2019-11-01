@@ -5,13 +5,14 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
 type menuLabel struct {
-	*widget.Label
+	*widget.Box
+	label *widget.Label
 
 	menu   *fyne.Menu
 	canvas fyne.Canvas
@@ -19,18 +20,22 @@ type menuLabel struct {
 
 func (m *menuLabel) Tapped(*fyne.PointEvent) {
 	p := widget.NewPopUpMenu(m.menu, m.canvas)
-	p.Move(fyne.NewPos(m.Label.Size().Width, m.Label.Position().Y))
+	p.Move(fyne.NewPos(m.Size().Width, m.Position().Y))
 }
 
 func (m *menuLabel) TappedSecondary(*fyne.PointEvent) {
 }
 
 func (m *menuLabel) CreateRenderer() fyne.WidgetRenderer {
-	return widget.Renderer(m.Label)
+	return widget.Renderer(m.Box)
 }
 
 func newMenuLabel(item *fyne.Menu, c *mobileCanvas) *menuLabel {
-	return &menuLabel{widget.NewLabel(item.Label), item, c}
+	label := widget.NewLabel(item.Label)
+	box := widget.NewHBox(layout.NewSpacer(), label, layout.NewSpacer(), widget.NewIcon(theme.MenuExpandIcon()))
+
+	m := &menuLabel{box, label, item, c}
+	return m
 }
 
 func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
@@ -45,7 +50,7 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	}
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
 	c.menu = fyne.NewContainer(panel, shadow)
-	panel.Resize(fyne.NewSize(panel.MinSize().Width+internal.ScaleInt(c, theme.Padding()), c.size.Height))
-	shadow.Resize(fyne.NewSize(internal.ScaleInt(c, theme.Padding())/2, c.size.Height))
+	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), c.size.Height))
+	shadow.Resize(fyne.NewSize(theme.Padding()/2, c.size.Height))
 	shadow.Move(fyne.NewPos(panel.Size().Width, 0))
 }
