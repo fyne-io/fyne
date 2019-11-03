@@ -586,7 +586,7 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 	}
 
 	e.Lock()
-	if !rightClick || !e.selecting {
+	if !rightClick || rightClick && !e.selecting {
 		e.CursorRow = row
 		e.CursorColumn = col
 	}
