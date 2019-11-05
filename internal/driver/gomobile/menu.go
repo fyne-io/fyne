@@ -54,3 +54,26 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	shadow.Resize(fyne.NewSize(theme.Padding()/2, c.size.Height))
 	shadow.Move(fyne.NewPos(panel.Size().Width, 0))
 }
+
+func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {
+	if win.menu != nil {
+		return win.menu
+	}
+
+	matched := false
+	for x := len(d.windows) - 1; x >= 0; x-- {
+		w := d.windows[x]
+		if !matched {
+			if w == win {
+				matched = true
+			}
+			continue
+		}
+
+		if w.(*window).menu != nil {
+			return w.(*window).menu
+		}
+	}
+
+	return nil
+}

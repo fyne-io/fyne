@@ -91,20 +91,8 @@ func (w *window) SetOnClosed(callback func()) {
 	w.onClosed = callback
 }
 
-func findMenu() *fyne.MainMenu {
-	d := fyne.CurrentApp().Driver().(*mobileDriver)
-	for x := len(d.windows) - 1; x >= 0; x-- {
-		w := d.windows[x]
-		if w.(*window).menu != nil {
-			return w.(*window).menu
-		}
-	}
-
-	return nil
-}
-
 func (w *window) Show() {
-	menu := findMenu()
+	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
 	menuButton := widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
 		w.canvas.showMenu(menu)
 	})
