@@ -32,16 +32,23 @@ func TestMobileCanvas_Menu(t *testing.T) {
 	}
 }
 
+func dummyWin(d *mobileDriver, title string) *window {
+	ret := &window{title: title}
+	d.windows = append(d.windows, ret)
+
+	return ret
+}
+
 func TestMobileDriver_FindMenu(t *testing.T) {
 	m1 := fyne.NewMainMenu(fyne.NewMenu("1"))
 	m2 := fyne.NewMainMenu(fyne.NewMenu("2"))
 
 	d := NewGoMobileDriver().(*mobileDriver)
-	w1 := d.CreateWindow("top").(*window)
+	w1 := dummyWin(d, "top")
 	w1.SetMainMenu(m1)
 	assert.Equal(t, m1, d.findMenu(w1))
 
-	w2 := d.CreateWindow("child").(*window)
+	w2 := dummyWin(d, "child")
 	assert.Equal(t, m1, d.findMenu(w2))
 
 	w2.SetMainMenu(m2)
