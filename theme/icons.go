@@ -86,7 +86,7 @@ func colorizeResource(res fyne.Resource, clr color.Color) []byte {
 }
 
 var (
-	cancel, confirm, delete, search, searchReplace                              *ThemedResource
+	cancel, confirm, delete, search, searchReplace, menu, menuExpand            *ThemedResource
 	checked, unchecked, radioButton, radioButtonChecked                         *ThemedResource
 	contentAdd, contentRemove, contentCut, contentCopy, contentPaste            *ThemedResource
 	contentRedo, contentUndo, info, question, warning                           *ThemedResource
@@ -103,6 +103,8 @@ func init() {
 	delete = NewThemedResource(deleteIconRes, nil)
 	search = NewThemedResource(searchIconRes, nil)
 	searchReplace = NewThemedResource(searchreplaceIconRes, nil)
+	menu = NewThemedResource(menuIconRes, nil)
+	menuExpand = NewThemedResource(menuexpandIconRes, nil)
 
 	checked = NewThemedResource(checkboxIconRes, nil)
 	unchecked = NewThemedResource(checkboxblankIconRes, nil)
@@ -181,6 +183,16 @@ func SearchIcon() fyne.Resource {
 // SearchReplaceIcon returns a resource containing the standard search and replace icon for the current theme
 func SearchReplaceIcon() fyne.Resource {
 	return searchReplace
+}
+
+// MenuIcon returns a resource containing the standard (mobile) menu icon for the current theme
+func MenuIcon() fyne.Resource {
+	return menu
+}
+
+// MenuExpandIcon returns a resource containing the standard (mobile) expand "submenu icon for the current theme
+func MenuExpandIcon() fyne.Resource {
+	return menuExpand
 }
 
 // CheckButtonIcon returns a resource containing the standard checkbox icon for the current theme

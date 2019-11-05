@@ -98,6 +98,8 @@ func main() {
 	bundleIcon("delete", f)
 	bundleIcon("search", f)
 	bundleIcon("search-replace", f)
+	bundleIcon("menu", f)
+	bundleIcon("menu-expand", f)
 
 	bundleIcon("check-box", f)
 	bundleIcon("check-box-blank", f)
