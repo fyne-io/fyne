@@ -59,7 +59,10 @@ func (p *PopUp) Move(pos fyne.Position) {
 
 // Resize sets a new size for a widget. Most PopUp widgets are shown at MinSize.
 func (p *PopUp) Resize(size fyne.Size) {
-	p.resize(size, p)
+	p.resize(p.Canvas.Size(), p)
+
+	p.Content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	Renderer(p).Layout(p.Size())
 }
 
 // Show this widget, if it was previously hidden
@@ -120,7 +123,7 @@ type popUpRenderer struct {
 
 func (r *popUpRenderer) Layout(size fyne.Size) {
 	pos := r.popUp.Content.Position().Subtract(fyne.NewPos(theme.Padding(), theme.Padding()))
-	innerSize := r.popUp.Content.MinSize()
+	innerSize := r.popUp.Content.MinSize().Union(r.popUp.Content.Size())
 	r.popUp.Content.Resize(innerSize)
 	r.popUp.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 
