@@ -59,9 +59,6 @@ func (c *testCanvas) Overlay() fyne.CanvasObject {
 
 func (c *testCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.overlay = overlay
-	if overlay != nil {
-		overlay.Resize(c.Size())
-	}
 }
 
 func (c *testCanvas) Refresh(fyne.CanvasObject) {

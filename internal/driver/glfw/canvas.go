@@ -155,9 +155,6 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	c.content.Resize(c.contentSize(size))
 	c.content.Move(c.contentPos())
 
-	if c.overlay != nil {
-		c.overlay.Resize(size)
-	}
 	if c.menu != nil {
 		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
 	}

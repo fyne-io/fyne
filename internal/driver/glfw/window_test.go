@@ -45,6 +45,7 @@ func TestWindow_HandleHoverable(t *testing.T) {
 	h2 := &hoverableObject{Rectangle: canvas.NewRectangle(color.Black)}
 	h2.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(h1, h2))
+	w.Resize(fyne.NewSize(20, 10))
 
 	repaintWindow(w)
 	require.Equal(t, fyne.NewPos(0, 0), h1.Position())
