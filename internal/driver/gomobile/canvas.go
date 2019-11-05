@@ -186,33 +186,28 @@ func (c *mobileCanvas) walkTree(
 	}
 }
 
+func (c *mobileCanvas) findObjectMatching(test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
+	if c.menu != nil && c.overlay == nil {
+		return driver.FindObjectAtPositionMatching(c.lastTapDownPos, test, c.menu)
+	} else {
+		return driver.FindObjectAtPositionMatching(c.lastTapDownPos, test, c.overlay, c.windowHead, c.content)
+	}
+}
+
 func (c *mobileCanvas) tapDown(pos fyne.Position) {
 	c.lastTapDown = time.Now().UnixNano()
 	c.lastTapDownPos = pos
 	c.dragging = nil
 
-	var co fyne.CanvasObject
-	if c.menu != nil {
-		co, _ = driver.FindObjectAtPositionMatching(c.lastTapDownPos, func(object fyne.CanvasObject) bool {
-			if _, ok := object.(fyne.Tappable); ok {
-				return true
-			} else if _, ok := object.(fyne.Focusable); ok {
-				return true
-			}
+	co, _ := c.findObjectMatching(func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		} else if _, ok := object.(fyne.Focusable); ok {
+			return true
+		}
 
-			return false
-		}, c.menu)
-	} else {
-		co, _ = driver.FindObjectAtPositionMatching(c.lastTapDownPos, func(object fyne.CanvasObject) bool {
-			if _, ok := object.(fyne.Tappable); ok {
-				return true
-			} else if _, ok := object.(fyne.Focusable); ok {
-				return true
-			}
-
-			return false
-		}, c.overlay, c.windowHead, c.content)
-	}
+		return false
+	})
 
 	needsFocus := true
 	wid := c.Focused()
@@ -238,24 +233,13 @@ func (c *mobileCanvas) tapMove(pos fyne.Position,
 	}
 
 	if c.dragging == nil {
-		var co fyne.CanvasObject
-		if c.menu != nil {
-			co, _ = driver.FindObjectAtPositionMatching(c.lastTapDownPos, func(object fyne.CanvasObject) bool {
-				if _, ok := object.(fyne.Draggable); ok {
-					return true
-				}
+		co, _ := c.findObjectMatching(func(object fyne.CanvasObject) bool {
+			if _, ok := object.(fyne.Draggable); ok {
+				return true
+			}
 
-				return false
-			}, c.menu)
-		} else {
-			co, _ = driver.FindObjectAtPositionMatching(c.lastTapDownPos, func(object fyne.CanvasObject) bool {
-				if _, ok := object.(fyne.Draggable); ok {
-					return true
-				}
-
-				return false
-			}, c.overlay, c.windowHead, c.content)
-		}
+			return false
+		})
 
 		if drag, ok := co.(fyne.Draggable); ok {
 			c.dragging = drag
@@ -286,34 +270,21 @@ func (c *mobileCanvas) tapUp(pos fyne.Position,
 
 	duration := time.Now().UnixNano() - c.lastTapDown
 
-	var co fyne.CanvasObject
-	var objPos fyne.Position
-	if c.menu != nil && c.overlay == nil {
-		if pos.X > c.menu.Size().Width {
-			c.menu.Hide()
-			c.menu = nil
-			return
-		}
-		co, objPos = driver.FindObjectAtPositionMatching(c.lastTapDownPos, func(object fyne.CanvasObject) bool {
-			if _, ok := object.(fyne.Tappable); ok {
-				return true
-			} else if _, ok := object.(fyne.Focusable); ok {
-				return true
-			}
-
-			return false
-		}, c.menu)
-	} else {
-		co, objPos = driver.FindObjectAtPositionMatching(c.lastTapDownPos, func(object fyne.CanvasObject) bool {
-			if _, ok := object.(fyne.Tappable); ok {
-				return true
-			} else if _, ok := object.(fyne.Focusable); ok {
-				return true
-			}
-
-			return false
-		}, c.overlay, c.windowHead, c.content)
+	if c.menu != nil && c.overlay == nil && pos.X > c.menu.Size().Width {
+		c.menu.Hide()
+		c.menu = nil
+		return
 	}
+
+	co, objPos := c.findObjectMatching(func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		} else if _, ok := object.(fyne.Focusable); ok {
+			return true
+		}
+
+		return false
+	})
 
 	ev := new(fyne.PointEvent)
 	ev.Position = objPos
