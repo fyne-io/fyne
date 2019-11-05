@@ -2,6 +2,7 @@ package gomobile
 
 import (
 	"image/color"
+	"log"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -20,7 +21,10 @@ type menuLabel struct {
 
 func (m *menuLabel) Tapped(*fyne.PointEvent) {
 	p := widget.NewPopUpMenu(m.menu, m.canvas)
-	p.Move(fyne.NewPos(m.Size().Width, m.Position().Y))
+
+	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(m)
+	log.Println(pos)
+	p.Move(fyne.NewPos(pos.X+m.Size().Width, pos.Y))
 }
 
 func (m *menuLabel) TappedSecondary(*fyne.PointEvent) {
@@ -50,9 +54,13 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	}
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
 	c.menu = fyne.NewContainer(panel, shadow)
-	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), c.size.Height))
-	shadow.Resize(fyne.NewSize(theme.Padding()/2, c.size.Height))
-	shadow.Move(fyne.NewPos(panel.Size().Width, 0))
+
+	devicePadTopLeft, devicePadBottomRight := devicePadding()
+	padY := devicePadTopLeft.Height + devicePadBottomRight.Height
+	panel.Move(fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height))
+	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), c.size.Height-padY))
+	shadow.Resize(fyne.NewSize(theme.Padding()/2, c.size.Height-padY))
+	shadow.Move(fyne.NewPos(panel.Size().Width+devicePadTopLeft.Width, devicePadTopLeft.Height))
 }
 
 func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {

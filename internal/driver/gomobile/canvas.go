@@ -56,18 +56,20 @@ func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	offset := fyne.NewPos(0, 0)
+	devicePadTopLeft, devicePadBottomRight := devicePadding()
+
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height
 
 		if len(c.windowHead.(*widget.Box).Children) > 1 {
-			c.windowHead.Resize(fyne.NewSize(size.Width, topHeight))
+			c.windowHead.Resize(fyne.NewSize(size.Width-devicePadTopLeft.Width-devicePadBottomRight.Width, topHeight))
 			offset = fyne.NewPos(0, topHeight)
 		} else {
 			c.windowHead.Resize(c.windowHead.MinSize())
 		}
+		c.windowHead.Move(fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height))
 	}
 
-	devicePadTopLeft, devicePadBottomRight := devicePadding()
 	innerSize := size.Subtract(devicePadTopLeft).Subtract(devicePadBottomRight)
 	topLeft := offset.Add(fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height))
 
@@ -184,9 +186,9 @@ func (c *mobileCanvas) walkTree(
 func (c *mobileCanvas) findObjectMatching(test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
 	if c.menu != nil && c.overlay == nil {
 		return driver.FindObjectAtPositionMatching(c.lastTapDownPos, test, c.menu)
-	} else {
-		return driver.FindObjectAtPositionMatching(c.lastTapDownPos, test, c.overlay, c.windowHead, c.content)
 	}
+
+	return driver.FindObjectAtPositionMatching(c.lastTapDownPos, test, c.overlay, c.windowHead, c.content)
 }
 
 func (c *mobileCanvas) tapDown(pos fyne.Position) {
