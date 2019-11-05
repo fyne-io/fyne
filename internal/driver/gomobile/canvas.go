@@ -79,11 +79,6 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 		c.content.Resize(innerSize)
 		c.content.Move(topLeft)
 	}
-
-	if c.overlay != nil {
-		c.overlay.Resize(innerSize)
-		c.overlay.Move(topLeft)
-	}
 }
 
 func (c *mobileCanvas) resize(size fyne.Size) {
