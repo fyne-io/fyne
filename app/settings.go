@@ -8,8 +8,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
-
-	"github.com/fsnotify/fsnotify"
 )
 
 // SettingsSchema is used for loading and storing global settings
@@ -33,7 +31,7 @@ type settings struct {
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
-	watcher         *fsnotify.Watcher
+	watcher         interface{} // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
 }
@@ -117,52 +115,6 @@ func (s *settings) setupTheme() {
 	} else {
 		s.SetTheme(defaultTheme())
 	}
-}
-
-func watchFileAddTarget(watcher *fsnotify.Watcher, path string) {
-	err := watcher.Add(filepath.Dir(path))
-	if err != nil {
-		fyne.LogError("Settings watch error:", err)
-	}
-}
-
-func watchFile(path string, callback func()) *fsnotify.Watcher {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		fyne.LogError("Failed to watch settings file:", err)
-		return nil
-	}
-
-	go func() {
-		for event := range watcher.Events {
-			if event.Op&fsnotify.Remove != 0 { // if it was deleted then watch again
-				watcher.Remove(path)
-				watchFileAddTarget(watcher, path)
-			} else {
-				callback()
-			}
-		}
-
-		err = watcher.Close()
-		if err != nil {
-			fyne.LogError("Settings un-watch error:", err)
-		}
-	}()
-
-	watchFileAddTarget(watcher, path)
-	return watcher
-}
-
-func (s *settings) watchSettings() {
-	s.watcher = watchFile(s.schema.StoragePath(), s.fileChanged)
-}
-
-func (s *settings) stopWatching() {
-	if s.watcher == nil {
-		return
-	}
-
-	s.watcher.Close()
 }
 
 func loadSettings() *settings {
