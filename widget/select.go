@@ -166,6 +166,7 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 	popUpPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height))
 
 	s.popUp.Move(popUpPos)
+	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.Content.MinSize().Height))
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
