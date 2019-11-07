@@ -22,6 +22,10 @@ func (b *Bool) String() string {
 	return "false"
 }
 
+func (b *Bool) Value() bool {
+	return b.value
+}
+
 // SetBool - makes the Bool dataItem implement 2 way binding
 // pass a newvalue to set the dataItem, and set mask to ignore
 // the callback with the masked ID.  Pass a mask of 0 to trigger

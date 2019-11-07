@@ -27,7 +27,7 @@ func newFx(app fyne.App, data *dataModel) *fractal {
 	window.Canvas().SetOnTypedKey(fractal.fractalKey)
 	window.Show()
 
-	data.DeliveryTime.AddListener(fractal.ChangeTransparency)
+	fractal.dataid = data.DeliveryTime.AddListener(fractal.ChangeTransparency)
 	return fractal
 }
 
@@ -40,11 +40,13 @@ type fractal struct {
 	canvas fyne.CanvasObject
 
 	transparency float64
+	dataid int
 }
 
 func (f *fractal) ChangeTransparency(value dataapi.DataItem) {
 	if vv,ok := value.(*dataapi.Float); ok {
 		f.transparency = vv.Value()
+		f.currScale = 10/(f.transparency+1)
 		println("transparency is now", f.transparency)
 		f.refresh()
 	}
@@ -122,6 +124,8 @@ func (f *fractal) fractalRune(r rune) {
 		f.currScale *= 1.1
 	}
 
+	f.transparency = (10/f.currScale) - 1
+	f.data.DeliveryTime.SetFloat(f.transparency, f.dataid)
 	f.refresh()
 }
 
@@ -135,6 +139,9 @@ func (f *fractal) fractalKey(ev *fyne.KeyEvent) {
 		f.currX += delta
 	} else if ev.Name == fyne.KeyRight {
 		f.currX -= delta
+	} else if ev.Name == fyne.KeyEscape {
+			f.data.DeliveryTime.DeleteListener(f.dataid)
+			println("Deregistering listener")
 	}
 
 	f.refresh()
