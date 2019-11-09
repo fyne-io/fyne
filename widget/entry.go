@@ -205,6 +205,7 @@ func (e *entryRenderer) Refresh() {
 		selection.(*canvas.Rectangle).Hidden = !e.entry.focused
 	}
 
+	Refresh(e.text)
 	canvas.Refresh(e.entry)
 }
 
