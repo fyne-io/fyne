@@ -1314,10 +1314,8 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 	// Reveal password that should be obfuscated until it is refreshed
 	entry.Password = false
-	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
-
 	Refresh(entry)
+
 	assert.Equal(t, "Hié™שרה", entry.Text)
 	assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
 }
