@@ -1304,3 +1304,18 @@ func TestEntry_EraseEmptySelection(t *testing.T) {
 	assert.Equal(t, -1, a)
 	assert.Equal(t, -1, b)
 }
+
+func TestPasswordEntry_Reveal(t *testing.T) {
+	entry := NewPasswordEntry()
+
+	test.Type(entry, "Hié™שרה")
+	assert.Equal(t, "Hié™שרה", entry.Text)
+	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+
+	// Reveal password that should be obfuscated until it is refreshed
+	entry.Password = false
+	Refresh(entry)
+
+	assert.Equal(t, "Hié™שרה", entry.Text)
+	assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
+}
