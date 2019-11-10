@@ -794,7 +794,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 			e.Unlock()
 			e.selecting = false
 			return true
-		case fyne.KeyUp, fyne.KeyDown, fyne.KeyEnd, fyne.KeyHome:
+		case fyne.KeyUp, fyne.KeyDown, fyne.KeyEnd, fyne.KeyHome, fyne.KeyPageUp, fyne.KeyPageDown:
 			// cursor movement without left or right shift -- clear selection and return unhandled
 			e.selecting = false
 			return false
@@ -918,6 +918,22 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	case fyne.KeyHome:
 		e.Lock()
 		e.CursorColumn = 0
+		e.Unlock()
+	case fyne.KeyPageUp:
+		e.Lock()
+		if e.MultiLine {
+			e.CursorRow = 0
+		}
+		e.CursorColumn = 0
+		e.Unlock()
+	case fyne.KeyPageDown:
+		e.Lock()
+		if e.MultiLine {
+			e.CursorRow = provider.rows() - 1
+			e.CursorColumn = provider.rowLength(e.CursorRow)
+		} else {
+			e.CursorColumn = provider.len()
+		}
 		e.Unlock()
 	default:
 		return
