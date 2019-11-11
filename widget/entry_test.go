@@ -1319,3 +1319,57 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 	assert.Equal(t, "Hié™שרה", entry.Text)
 	assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
 }
+
+func TestEntry_PageUpDown(t *testing.T) {
+	t.Run("single line", func(*testing.T) {
+		e := NewEntry()
+		e.SetText("Testing")
+		// move right, press & hold shift and pagedown
+		typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyPageDown)
+		a, b := e.selection()
+		assert.Equal(t, 1, a)
+		assert.Equal(t, 7, b)
+		assert.Equal(t, "esting", e.selectedText())
+		assert.Equal(t, 0, e.CursorRow)
+		assert.Equal(t, 7, e.CursorColumn)
+		// while shift is held press pageup
+		typeKeys(e, fyne.KeyPageUp)
+		a, b = e.selection()
+		assert.Equal(t, 0, a)
+		assert.Equal(t, 1, b)
+		assert.Equal(t, "T", e.selectedText())
+		assert.Equal(t, 0, e.CursorRow)
+		assert.Equal(t, 0, e.CursorColumn)
+		// release shift and press pagedown
+		typeKeys(e, keyShiftLeftUp, fyne.KeyPageDown)
+		assert.Equal(t, "", e.selectedText())
+		assert.Equal(t, 0, e.CursorRow)
+		assert.Equal(t, 7, e.CursorColumn)
+	})
+
+	t.Run("page down single line", func(*testing.T) {
+		e := NewMultiLineEntry()
+		e.SetText("Testing\nTesting\nTesting")
+		// move right, press & hold shift and pagedown
+		typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyPageDown)
+		a, b := e.selection()
+		assert.Equal(t, 1, a)
+		assert.Equal(t, 23, b)
+		assert.Equal(t, "esting\nTesting\nTesting", e.selectedText())
+		assert.Equal(t, 2, e.CursorRow)
+		assert.Equal(t, 7, e.CursorColumn)
+		// while shift is held press pageup
+		typeKeys(e, fyne.KeyPageUp)
+		a, b = e.selection()
+		assert.Equal(t, 0, a)
+		assert.Equal(t, 1, b)
+		assert.Equal(t, "T", e.selectedText())
+		assert.Equal(t, 0, e.CursorRow)
+		assert.Equal(t, 0, e.CursorColumn)
+		// release shift and press pagedown
+		typeKeys(e, keyShiftLeftUp, fyne.KeyPageDown)
+		assert.Equal(t, "", e.selectedText())
+		assert.Equal(t, 2, e.CursorRow)
+		assert.Equal(t, 7, e.CursorColumn)
+	})
+}
