@@ -95,6 +95,7 @@ var (
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
 	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
+	visibility, visibilityOff                                                   *ThemedResource
 )
 
 func init() {
@@ -153,6 +154,9 @@ func init() {
 	viewZoomFit = NewThemedResource(viewzoomfitIconRes, nil)
 	viewZoomIn = NewThemedResource(viewzoominIconRes, nil)
 	viewZoomOut = NewThemedResource(viewzoomoutIconRes, nil)
+
+	visibility = NewThemedResource(visibilityIconRes, nil)
+	visibilityOff = NewThemedResource(visibilityoffIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -403,4 +407,14 @@ func ZoomInIcon() fyne.Resource {
 // ZoomOutIcon returns a resource containing the standard zoom out icon for the current theme
 func ZoomOutIcon() fyne.Resource {
 	return viewZoomOut
+}
+
+// VisibilityIcon returns a resource containing the standard visibity icon for the current theme
+func VisibilityIcon() fyne.Resource {
+	return visibility
+}
+
+// VisibilityOffIcon returns a resource containing the standard visibity off icon for the current theme
+func VisibilityOffIcon() fyne.Resource {
+	return visibilityOff
 }

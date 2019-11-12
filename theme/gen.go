@@ -149,5 +149,8 @@ func main() {
 	bundleIcon("view-zoom-in", f)
 	bundleIcon("view-zoom-out", f)
 
+	bundleIcon("visibility", f)
+	bundleIcon("visibility-off", f)
+
 	f.Close()
 }
