@@ -239,6 +239,7 @@ func (p *packager) packageAndroid() error {
 	}
 
 	cmd := exec.Command("gomobile", "build", "-target", "android")
+	cmd.Env = append(os.Environ(), "GO111MODULE=off")
 	cmd.Dir = p.srcDir
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
@@ -251,6 +252,7 @@ func (p *packager) packageIOS() error {
 	}
 
 	cmd := exec.Command("gomobile", "build", "-target", "ios", "-bundleid", p.appID)
+	cmd.Env = append(os.Environ(), "GO111MODULE=off")
 	cmd.Dir = p.srcDir
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
