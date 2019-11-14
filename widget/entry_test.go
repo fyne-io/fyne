@@ -138,6 +138,10 @@ func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
 	entry.SetReadOnly(false)
 	test.Type(entry, "i")
 	assert.Equal(t, "Hi", entry.Text)
+
+	backspace := &fyne.KeyEvent{Name: fyne.KeyBackspace}
+	entry.TypedKey(backspace)
+	assert.Equal(t, "H", entry.Text)
 }
 
 func TestEntry_SetReadOnly_PasteFromClipboard(t *testing.T) {

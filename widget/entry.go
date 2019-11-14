@@ -815,6 +815,9 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 	switch key.Name {
 	case fyne.KeyBackspace:
+		if e.ReadOnly {
+			return
+		}
 		e.RLock()
 		isEmpty := provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
 		e.RUnlock()
@@ -839,7 +842,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		}
 		provider.deleteFromTo(pos, pos+1)
 	case fyne.KeyReturn, fyne.KeyEnter:
-		if !e.MultiLine {
+		if !e.MultiLine || e.ReadOnly {
 			return
 		}
 		provider.insertAt(e.cursorTextPos(), []rune("\n"))
