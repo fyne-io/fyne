@@ -140,16 +140,17 @@ func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
 	assert.Equal(t, "Hi", entry.Text)
 }
 
-func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
+func TestEntry_SetReadOnly_PasteFromClipboard(t *testing.T) {
 	entry := NewEntry()
 	entry.SetReadOnly(true)
 
-	entry.FocusGained()
-	assert.False(t, entry.Focused())
+	content := "This is a test"
+	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+	clipboard.SetContent(content)
 
-	entry.SetReadOnly(false)
-	entry.FocusGained()
-	assert.True(t, entry.Focused())
+	entry.pasteFromClipboard(clipboard)
+
+	assert.NotEqual(t, entry.Text, content)
 }
 
 func TestEntry_OnKeyDown_Insert(t *testing.T) {

@@ -435,9 +435,6 @@ func (e *Entry) cursorTextPos() int {
 
 // FocusGained is called when the Entry has been given focus.
 func (e *Entry) FocusGained() {
-	if e.ReadOnly {
-		return
-	}
 	e.focused = true
 
 	Refresh(e)
@@ -474,6 +471,10 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 // pasteFromClipboard inserts text from the clipboard content,
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
+	if e.ReadOnly {
+		return
+	}
+
 	if e.selecting {
 		e.eraseSelection()
 	}
@@ -517,10 +518,6 @@ func (e *Entry) selectAll() {
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
-	if e.ReadOnly {
-		return
-	}
-
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
 	pasteItem := fyne.NewMenuItem("Paste", func() {
@@ -806,10 +803,6 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 
 // TypedKey receives key input events when the Entry widget is focused.
 func (e *Entry) TypedKey(key *fyne.KeyEvent) {
-	if e.ReadOnly {
-		return
-	}
-
 	provider := e.textProvider()
 
 	if e.selectKeyDown || e.selecting {
