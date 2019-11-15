@@ -28,7 +28,7 @@ type mobileCanvas struct {
 	shortcut    fyne.ShortcutHandler
 
 	inited, dirty  bool
-	lastTapDown    int64
+	lastTapDown    time.Time
 	lastTapDownPos fyne.Position
 	dragging       fyne.Draggable
 	refreshQueue   chan fyne.CanvasObject
@@ -192,7 +192,7 @@ func (c *mobileCanvas) findObjectMatching(test func(object fyne.CanvasObject) bo
 }
 
 func (c *mobileCanvas) tapDown(pos fyne.Position) {
-	c.lastTapDown = time.Now().UnixNano()
+	c.lastTapDown = time.Now()
 	c.lastTapDownPos = pos
 	c.dragging = nil
 
@@ -265,7 +265,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position,
 		c.dragging = nil
 	}
 
-	duration := time.Now().UnixNano() - c.lastTapDown
+	duration := time.Since(c.lastTapDown)
 
 	if c.menu != nil && c.overlay == nil && pos.X > c.menu.Size().Width {
 		c.menu.Hide()
