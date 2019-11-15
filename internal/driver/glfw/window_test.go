@@ -12,11 +12,11 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/layout"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
-	"fyne.io/fyne/layout"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -348,6 +348,26 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.waitForEvents()
 	assert.NotNil(t, dh.popMouseOutEvent())
+}
+
+func TestWindow_Tapped(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	rect := canvas.NewRectangle(color.White)
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	o.SetMinSize(fyne.NewSize(100, 100))
+	w.SetContent(widget.NewVBox(rect, o))
+
+	w.mousePos = fyne.NewPos(50, 160)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.waitForEvents()
+
+	assert.Nil(t, o.popSecondaryTapEvent(), "no secondary tap")
+	if e, _ := o.popTapEvent().(*fyne.PointEvent); assert.NotNil(t, e, "tapped") {
+		assert.Equal(t, fyne.NewPos(50, 160), e.AbsolutePosition)
+		assert.Equal(t, fyne.NewPos(46, 52), e.Position)
+	}
 }
 
 func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
@@ -756,6 +776,36 @@ type draggableMouseableObject struct {
 	*canvas.Rectangle
 	draggable
 	mouseable
+}
+
+type tappableObject struct {
+	*canvas.Rectangle
+	tappable
+}
+
+var _ fyne.Tappable = (*tappable)(nil)
+
+type tappable struct {
+	tapEvents          []interface{}
+	secondaryTapEvents []interface{}
+}
+
+func (t *tappable) Tapped(e *fyne.PointEvent) {
+	t.tapEvents = append(t.tapEvents, e)
+}
+
+func (t *tappable) TappedSecondary(e *fyne.PointEvent) {
+	t.secondaryTapEvents = append(t.secondaryTapEvents, e)
+}
+
+func (t *tappable) popTapEvent() (e interface{}) {
+	e, t.tapEvents = pop(t.tapEvents)
+	return
+}
+
+func (t *tappable) popSecondaryTapEvent() (e interface{}) {
+	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
+	return
 }
 
 //

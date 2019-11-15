@@ -580,6 +580,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 	})
 	ev := new(fyne.PointEvent)
 	ev.Position = pos
+	ev.AbsolutePosition = w.mousePos
 
 	coMouse := co
 	// Switch the mouse target to the dragging object if one is set

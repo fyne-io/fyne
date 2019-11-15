@@ -285,6 +285,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position,
 
 	ev := new(fyne.PointEvent)
 	ev.Position = objPos
+	ev.AbsolutePosition = pos
 
 	if wid, ok := co.(fyne.Tappable); ok {
 		// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })
