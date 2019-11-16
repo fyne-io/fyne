@@ -21,7 +21,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const tapSecondaryDelay = 300000000 // nanoseconds
+const tapSecondaryDelay = 300 * time.Millisecond
 
 type mobileDriver struct {
 	app   app.App
