@@ -803,6 +803,9 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 
 // TypedKey receives key input events when the Entry widget is focused.
 func (e *Entry) TypedKey(key *fyne.KeyEvent) {
+	if e.ReadOnly {
+		return
+	}
 	provider := e.textProvider()
 
 	if e.selectKeyDown || e.selecting {
@@ -815,9 +818,6 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 	switch key.Name {
 	case fyne.KeyBackspace:
-		if e.ReadOnly {
-			return
-		}
 		e.RLock()
 		isEmpty := provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
 		e.RUnlock()
@@ -842,7 +842,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		}
 		provider.deleteFromTo(pos, pos+1)
 	case fyne.KeyReturn, fyne.KeyEnter:
-		if !e.MultiLine || e.ReadOnly {
+		if !e.MultiLine {
 			return
 		}
 		provider.insertAt(e.cursorTextPos(), []rune("\n"))
