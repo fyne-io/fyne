@@ -19,43 +19,36 @@ type LinearGradient struct {
 // Generate calculates an image of the gradient with the specified width and height.
 func (g *LinearGradient) Generate(w, h int) image.Image {
 	var generator func(x, y, w, h float64) float64
-	if g.Angle == 90 {
-		// horizontal flipped
+	switch g.Angle {
+	case 90: // horizontal flipped
 		generator = func(x, _, w, _ float64) float64 {
 			return ((w - 1) - x) / (w - 1)
 		}
-	} else if g.Angle == 270 {
-		// horizontal
+	case 270: // horizontal
 		generator = func(x, _, w, _ float64) float64 {
 			return x / (w - 1)
 		}
-	} else if g.Angle == 45 {
-		// diagonal negative flipped
+	case 45: // diagonal negative flipped
 		generator = func(x, y, w, h float64) float64 {
 			return math.Abs(((w-1)+(h-1))-(x+((h-1)-y))) / math.Abs((w-1)+(h-1))
 		}
-	} else if g.Angle == 225 {
-		// diagonal negative
+	case 225: // diagonal negative
 		generator = func(x, y, w, h float64) float64 {
 			return math.Abs(x+((h-1)-y)) / math.Abs((w-1)+(h-1))
 		}
-	} else if g.Angle == 135 {
-		// diagonal positive flipped
+	case 135: // diagonal positive flipped
 		generator = func(x, y, w, h float64) float64 {
 			return math.Abs(((w-1)+(h-1))-(x+y)) / math.Abs((w-1)+(h-1))
 		}
-	} else if g.Angle == 315 {
-		// diagonal positive
+	case 315: // diagonal positive
 		generator = func(x, y, w, h float64) float64 {
 			return math.Abs(x+y) / math.Abs((w-1)+(h-1))
 		}
-	} else if g.Angle == 180 {
-		// vertical flipped
+	case 180: // vertical flipped
 		generator = func(_, y, _, h float64) float64 {
 			return ((h - 1) - y) / (h - 1)
 		}
-	} else {
-		// vertical
+	default: // vertical
 		generator = func(_, y, _, h float64) float64 {
 			return y / (h - 1)
 		}
