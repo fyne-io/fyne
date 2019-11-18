@@ -95,7 +95,7 @@ func (c *checkRenderer) Destroy() {
 
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
 type Check struct {
-	baseWidget
+	BaseWidget
 	Text    string
 	Checked bool
 
@@ -120,35 +120,14 @@ func (c *Check) SetChecked(checked bool) {
 	Refresh(c)
 }
 
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (c *Check) Resize(size fyne.Size) {
-	c.resize(size, c)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (c *Check) Move(pos fyne.Position) {
-	c.move(pos, c)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (c *Check) MinSize() fyne.Size {
-	return c.minSize(c)
-}
-
-// Show this widget, if it was previously hidden
-func (c *Check) Show() {
-	c.show(c)
-}
-
 // Hide this widget, if it was previously visible
 func (c *Check) Hide() {
 	if c.Focused() {
 		c.FocusLost()
 		fyne.CurrentApp().Driver().CanvasForObject(c).Focus(nil)
 	}
-	c.hide(c)
+
+	c.BaseWidget.Hide()
 }
 
 // Enable this widget, if it was previously disabled
@@ -201,8 +180,15 @@ func (c *Check) Tapped(*fyne.PointEvent) {
 func (c *Check) TappedSecondary(*fyne.PointEvent) {
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (c *Check) MinSize() fyne.Size {
+	c.ExtendBaseWidget(c)
+	return c.BaseWidget.MinSize()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
+	c.ExtendBaseWidget(c)
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
 	text := canvas.NewText(c.Text, theme.TextColor())
@@ -215,7 +201,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
 	c := &Check{
-		baseWidget{},
+		BaseWidget{},
 		label,
 		false,
 		changed,

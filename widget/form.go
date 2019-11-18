@@ -22,40 +22,13 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 // Setting OnSubmit will set the submit button to be visible and call back the function when tapped.
 // Setting OnCancel will do the same for a cancel button.
 type Form struct {
-	baseWidget
+	BaseWidget
 
 	Items    []*FormItem
 	OnSubmit func()
 	OnCancel func()
 
 	itemGrid *fyne.Container
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (f *Form) Resize(size fyne.Size) {
-	f.resize(size, f)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (f *Form) Move(pos fyne.Position) {
-	f.move(pos, f)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (f *Form) MinSize() fyne.Size {
-	return f.minSize(f)
-}
-
-// Show this widget, if it was previously hidden
-func (f *Form) Show() {
-	f.show(f)
-}
-
-// Hide this widget, if it was previously visible
-func (f *Form) Hide() {
-	f.hide(f)
 }
 
 func (f *Form) createLabel(text string) *Label {
@@ -88,8 +61,15 @@ func (f *Form) AppendItem(item *FormItem) {
 	Refresh(f)
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (f *Form) MinSize() fyne.Size {
+	f.ExtendBaseWidget(f)
+	return f.BaseWidget.MinSize()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
+	f.ExtendBaseWidget(f)
 	f.ensureGrid()
 	for _, item := range f.Items {
 		f.itemGrid.AddObject(f.createLabel(item.Text))
@@ -116,7 +96,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 // NewForm creates a new form widget with the specified rows of form items
 // and (if any of them should be shown) a form controls row at the bottom
 func NewForm(items ...*FormItem) *Form {
-	form := &Form{baseWidget: baseWidget{}, Items: items}
+	form := &Form{BaseWidget: BaseWidget{}, Items: items}
 
 	Renderer(form).Layout(form.MinSize())
 	return form

@@ -12,29 +12,9 @@ import (
 )
 
 type myWidget struct {
-	baseWidget
+	BaseWidget
 
 	applied chan bool
-}
-
-func (m *myWidget) Resize(size fyne.Size) {
-	m.resize(size, m)
-}
-
-func (m *myWidget) Move(pos fyne.Position) {
-	m.move(pos, m)
-}
-
-func (m *myWidget) MinSize() fyne.Size {
-	return m.minSize(m)
-}
-
-func (m *myWidget) Show() {
-	m.show(m)
-}
-
-func (m *myWidget) Hide() {
-	m.hide(m)
 }
 
 func (m *myWidget) Enable() {
@@ -54,6 +34,7 @@ func (m *myWidget) ApplyTheme() {
 }
 
 func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
+	m.ExtendBaseWidget(m)
 	return (&Box{}).CreateRenderer()
 }
 

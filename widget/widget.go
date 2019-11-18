@@ -11,69 +11,100 @@ import (
 var renderers sync.Map
 
 // A base widget class to define the standard widget behaviours.
-type baseWidget struct {
+type BaseWidget struct {
 	size     fyne.Size
 	position fyne.Position
 	Hidden   bool
 	disabled bool
+
+	impl fyne.Widget
+}
+
+// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
+func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
+	if w.impl != nil {
+		return
+	}
+
+	w.impl = wid
 }
 
 // Get the current size of this widget.
-func (w *baseWidget) Size() fyne.Size {
+func (w *BaseWidget) Size() fyne.Size {
 	return w.size
 }
 
-// Set a new size for a widget.
+// Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
-func (w *baseWidget) resize(size fyne.Size, parent fyne.Widget) {
+func (w *BaseWidget) Resize(size fyne.Size) {
 	w.size = size
 
-	Renderer(parent).Layout(size)
+	if w.impl == nil {
+		return
+	}
+	Renderer(w.impl).Layout(size)
 }
 
-// Get the current position of this widget, relative to its parent.
-func (w *baseWidget) Position() fyne.Position {
+// Position gets the current position of this widget, relative to its parent.
+func (w *BaseWidget) Position() fyne.Position {
 	return w.position
 }
 
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
-func (w *baseWidget) move(pos fyne.Position, parent fyne.Widget) {
+func (w *BaseWidget) Move(pos fyne.Position) {
 	w.position = pos
 
-	canvas.Refresh(parent)
+	if w.impl == nil {
+		return
+	}
+	canvas.Refresh(w.impl)
 }
 
-func (w *baseWidget) minSize(parent fyne.Widget) fyne.Size {
-	if Renderer(parent) == nil {
+// MinSize for the widget - it should never be resized below this value.
+func (w *BaseWidget) MinSize() fyne.Size {
+	if w.impl == nil || Renderer(w.impl) == nil {
+	//	fyne.LogError("Renderer not configured, perhaps missing call to ExtendBaseWidget()?", nil)
 		return fyne.NewSize(0, 0)
 	}
-	return Renderer(parent).MinSize()
+	return Renderer(w.impl).MinSize()
 }
 
-func (w *baseWidget) Visible() bool {
+func (w *BaseWidget) CreateRenderer() fyne.WidgetRenderer {
+	return nil
+}
+
+func (w *BaseWidget) Visible() bool {
 	return !w.Hidden
 }
 
-func (w *baseWidget) show(parent fyne.Widget) {
+// Show this widget so it becomes visible
+func (w *BaseWidget) Show() {
 	if !w.Hidden {
 		return
 	}
 
 	w.Hidden = false
-	Refresh(parent)
+	if w.impl == nil {
+		return
+	}
+	Refresh(w.impl)
 }
 
-func (w *baseWidget) hide(parent fyne.Widget) {
+// Hide this widget so it is no lonver visible
+func (w *BaseWidget) Hide() {
 	if w.Hidden {
 		return
 	}
 
 	w.Hidden = true
-	Refresh(parent)
+	if w.impl == nil {
+		return
+	}
+	Refresh(w.impl)
 }
 
-func (w *baseWidget) enable(parent fyne.Widget) {
+func (w *BaseWidget) enable(parent fyne.Widget) {
 	if !w.disabled {
 		return
 	}
@@ -82,7 +113,7 @@ func (w *baseWidget) enable(parent fyne.Widget) {
 	Refresh(parent)
 }
 
-func (w *baseWidget) disable(parent fyne.Widget) {
+func (w *BaseWidget) disable(parent fyne.Widget) {
 	if w.disabled {
 		return
 	}
@@ -91,8 +122,22 @@ func (w *baseWidget) disable(parent fyne.Widget) {
 	Refresh(parent)
 }
 
+func (b *BaseWidget) super() fyne.Widget {
+	return b.impl
+}
+
+type isBaseWidget interface {
+	ExtendBaseWidget(fyne.Widget)
+	super() fyne.Widget
+}
+
 // Renderer looks up the render implementation for a widget
 func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
+	if wd, ok := wid.(isBaseWidget); ok {
+		if wd.super() != nil {
+			wid = wd.super()
+		}
+	}
 	renderer, ok := renderers.Load(wid)
 	if !ok {
 		renderer = wid.CreateRenderer()

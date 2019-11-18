@@ -253,11 +253,12 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 	assert.Equal(t, testTextSize, customTextSize2)
 }
 
-func TestTextRenderer_LineSizeToColumn(t *testing.T) {
+func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	label := NewLabel("Test")
-	render := Renderer(label).(*textRenderer)
+	label.CreateRenderer() // TODO make this a simple refresh call once it's in
+	provider := label.textProvider
 
-	fullSize := render.lineSizeToColumn(4, 0)
-	assert.Equal(t, fullSize, render.lineSizeToColumn(10, 0))
-	assert.Greater(t, fullSize.Width, render.lineSizeToColumn(2, 0).Width)
+	fullSize := provider.lineSizeToColumn(4, 0)
+	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
+	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0).Width)
 }

@@ -12,38 +12,11 @@ import (
 // Box widget is a simple list where the child elements are arranged in a single column
 // for vertical or a single row for horizontal arrangement
 type Box struct {
-	baseWidget
+	BaseWidget
 	background color.Color
 
 	Horizontal bool
 	Children   []fyne.CanvasObject
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (b *Box) Resize(size fyne.Size) {
-	b.resize(size, b)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (b *Box) Move(pos fyne.Position) {
-	b.move(pos, b)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (b *Box) MinSize() fyne.Size {
-	return b.minSize(b)
-}
-
-// Show this widget, if it was previously hidden
-func (b *Box) Show() {
-	b.show(b)
-}
-
-// Hide this widget, if it was previously visible
-func (b *Box) Hide() {
-	b.hide(b)
 }
 
 // ApplyTheme updates this box to match the current theme
@@ -65,8 +38,15 @@ func (b *Box) Append(object fyne.CanvasObject) {
 	Refresh(b)
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (b *Box) MinSize() fyne.Size {
+	b.ExtendBaseWidget(b)
+	return b.BaseWidget.MinSize()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Box) CreateRenderer() fyne.WidgetRenderer {
+	b.ExtendBaseWidget(b)
 	var lay fyne.Layout
 	if b.Horizontal {
 		lay = layout.NewHBoxLayout()
@@ -83,7 +63,7 @@ func (b *Box) setBackgroundColor(bg color.Color) {
 
 // NewHBox creates a new horizontally aligned box widget with the specified list of child objects
 func NewHBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{baseWidget: baseWidget{}, Horizontal: true, Children: children}
+	box := &Box{BaseWidget: BaseWidget{}, Horizontal: true, Children: children}
 
 	Renderer(box).Layout(box.MinSize())
 	return box
@@ -91,7 +71,7 @@ func NewHBox(children ...fyne.CanvasObject) *Box {
 
 // NewVBox creates a new vertically aligned box widget with the specified list of child objects
 func NewVBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{baseWidget: baseWidget{}, Horizontal: false, Children: children}
+	box := &Box{BaseWidget: BaseWidget{}, Horizontal: false, Children: children}
 
 	Renderer(box).Layout(box.MinSize())
 	return box

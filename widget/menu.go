@@ -46,6 +46,7 @@ func (t *menuItemWidget) TappedSecondary(*fyne.PointEvent) {
 }
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
+	t.ExtendBaseWidget(t)
 	return &hoverLabelRenderer{t.Label.CreateRenderer().(*textRenderer), t}
 }
 
@@ -69,7 +70,6 @@ func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 
 func newTappableLabel(label string, tapped func()) *menuItemWidget {
 	ret := &menuItemWidget{NewLabel(label), tapped, false}
-	Renderer(ret).Refresh() // trigger the textProvider to refresh metrics for our MinSize
 	return ret
 }
 

@@ -23,35 +23,21 @@ func newShadow(typ shadowType, depth int) *shadow {
 var _ fyne.Widget = (*shadow)(nil)
 
 type shadow struct {
-	baseWidget
+	BaseWidget
 	typ   shadowType
 	depth int
 }
 
+func (s *shadow) MinSize() fyne.Size {
+	s.ExtendBaseWidget(s)
+	return s.BaseWidget.MinSize()
+}
+
 func (s *shadow) CreateRenderer() fyne.WidgetRenderer {
+	s.ExtendBaseWidget(s)
 	r := &shadowRenderer{s: s}
 	r.createShadows()
 	return r
-}
-
-func (s *shadow) Hide() {
-	s.hide(s)
-}
-
-func (s *shadow) MinSize() fyne.Size {
-	return s.minSize(s)
-}
-
-func (s *shadow) Move(p fyne.Position) {
-	s.move(p, s)
-}
-
-func (s *shadow) Resize(size fyne.Size) {
-	s.resize(size, s)
-}
-
-func (s *shadow) Show() {
-	s.show(s)
 }
 
 type shadowRenderer struct {

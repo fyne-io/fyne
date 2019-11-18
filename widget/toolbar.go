@@ -64,38 +64,11 @@ func NewToolbarSeparator() ToolbarItem {
 
 // Toolbar widget creates a horizontal list of tool buttons
 type Toolbar struct {
-	baseWidget
+	BaseWidget
 
 	Items []ToolbarItem
 
 	box *Box
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (t *Toolbar) Resize(size fyne.Size) {
-	t.resize(size, t)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (t *Toolbar) Move(pos fyne.Position) {
-	t.move(pos, t)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (t *Toolbar) MinSize() fyne.Size {
-	return t.minSize(t)
-}
-
-// Show this widget, if it was previously hidden
-func (t *Toolbar) Show() {
-	t.show(t)
-}
-
-// Hide this widget, if it was previously visible
-func (t *Toolbar) Hide() {
-	t.hide(t)
 }
 
 func (t *Toolbar) append(item ToolbarItem) {
@@ -116,6 +89,7 @@ func (t *Toolbar) prepend(item ToolbarItem) {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
+	t.ExtendBaseWidget(t)
 	t.box = NewHBox()
 	t.box.setBackgroundColor(theme.ButtonColor())
 	for _, item := range t.Items {

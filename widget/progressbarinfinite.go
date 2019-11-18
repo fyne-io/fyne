@@ -131,36 +131,19 @@ func (p *infProgressRenderer) Destroy() {
 // ProgressBarInfinite widget creates a horizontal panel that indicates waiting indefinitely
 // An infinite progress bar loops 0% -> 100% repeatedly until Stop() is called
 type ProgressBarInfinite struct {
-	baseWidget
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (p *ProgressBarInfinite) Resize(size fyne.Size) {
-	p.resize(size, p)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (p *ProgressBarInfinite) Move(pos fyne.Position) {
-	p.move(pos, p)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (p *ProgressBarInfinite) MinSize() fyne.Size {
-	return p.minSize(p)
+	BaseWidget
 }
 
 // Show this widget, if it was previously hidden
 func (p *ProgressBarInfinite) Show() {
 	p.Start()
-	p.show(p)
+	p.BaseWidget.Show()
 }
 
 // Hide this widget, if it was previously visible
 func (p *ProgressBarInfinite) Hide() {
 	p.Stop()
-	p.hide(p)
+	p.BaseWidget.Hide()
 }
 
 // Start the infinite progress bar background thread to update it continuously
@@ -183,8 +166,15 @@ func (p *ProgressBarInfinite) Running() bool {
 	return renderer.(*infProgressRenderer).running.Load().(bool)
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (p *ProgressBarInfinite) MinSize() fyne.Size {
+	p.ExtendBaseWidget(p)
+	return p.BaseWidget.MinSize()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
+	p.ExtendBaseWidget(p)
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	render := &infProgressRenderer{
 		objects:  []fyne.CanvasObject{bar},

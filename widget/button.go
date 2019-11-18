@@ -139,7 +139,7 @@ func (b *buttonRenderer) Destroy() {
 
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
-	baseWidget
+	BaseWidget
 	Text         string
 	Style        ButtonStyle
 	Icon         fyne.Resource
@@ -159,33 +159,6 @@ const (
 	// PrimaryButton that should be more prominent to the user
 	PrimaryButton
 )
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (b *Button) Resize(size fyne.Size) {
-	b.resize(size, b)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (b *Button) Move(pos fyne.Position) {
-	b.move(pos, b)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (b *Button) MinSize() fyne.Size {
-	return b.minSize(b)
-}
-
-// Show this widget, if it was previously hidden
-func (b *Button) Show() {
-	b.show(b)
-}
-
-// Hide this widget, if it was previously visible
-func (b *Button) Hide() {
-	b.hide(b)
-}
 
 // Enable this widget, if it was previously disabled
 func (b *Button) Enable() {
@@ -231,8 +204,15 @@ func (b *Button) MouseOut() {
 func (b *Button) MouseMoved(*desktop.MouseEvent) {
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (b *Button) MinSize() fyne.Size {
+	b.ExtendBaseWidget(b)
+	return b.BaseWidget.MinSize()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Button) CreateRenderer() fyne.WidgetRenderer {
+	b.ExtendBaseWidget(b)
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
@@ -278,7 +258,7 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
-	button := &Button{baseWidget{}, label, DefaultButton, nil, nil,
+	button := &Button{BaseWidget{}, label, DefaultButton, nil, nil,
 		tapped, false, false}
 
 	Renderer(button).Layout(button.MinSize())
@@ -287,7 +267,7 @@ func NewButton(label string, tapped func()) *Button {
 
 // NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
-	button := &Button{baseWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
+	button := &Button{BaseWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
 		tapped, false, false}
 
 	Renderer(button).Layout(button.MinSize())

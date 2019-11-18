@@ -46,14 +46,20 @@ var _ desktop.Hoverable = (*scrollBar)(nil)
 var _ fyne.Draggable = (*scrollBar)(nil)
 
 type scrollBar struct {
-	baseWidget
+	BaseWidget
 	area            *scrollBarArea
 	draggedDistance int
 	dragStart       int
 	isDragged       bool
 }
 
+func (s *scrollBar) MinSize() fyne.Size {
+	s.ExtendBaseWidget(s)
+	return s.BaseWidget.MinSize()
+}
+
 func (s *scrollBar) CreateRenderer() fyne.WidgetRenderer {
+	s.ExtendBaseWidget(s)
 	r := &scrollBarRenderer{scrollBar: s}
 	r.ApplyTheme()
 	return r
@@ -72,14 +78,6 @@ func (s *scrollBar) Dragged(e *fyne.DragEvent) {
 	s.area.moveBar(s.draggedDistance + s.dragStart)
 }
 
-func (s *scrollBar) Hide() {
-	s.hide(s)
-}
-
-func (s *scrollBar) MinSize() fyne.Size {
-	return s.minSize(s)
-}
-
 func (s *scrollBar) MouseIn(e *desktop.MouseEvent) {
 	s.area.MouseIn(e)
 }
@@ -89,18 +87,6 @@ func (s *scrollBar) MouseMoved(*desktop.MouseEvent) {
 
 func (s *scrollBar) MouseOut() {
 	s.area.MouseOut()
-}
-
-func (s *scrollBar) Move(pos fyne.Position) {
-	s.move(pos, s)
-}
-
-func (s *scrollBar) Resize(size fyne.Size) {
-	s.resize(size, s)
-}
-
-func (s *scrollBar) Show() {
-	s.show(s)
 }
 
 func newScrollBar(area *scrollBarArea) *scrollBar {
@@ -179,23 +165,21 @@ func (s *scrollBarAreaRenderer) verticalBarHeight() int {
 var _ desktop.Hoverable = (*scrollBarArea)(nil)
 
 type scrollBarArea struct {
-	baseWidget
+	BaseWidget
 
 	isWide bool
 	scroll *ScrollContainer
 }
 
 func (s *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
+	s.ExtendBaseWidget(s)
 	bar := newScrollBar(s)
 	return &scrollBarAreaRenderer{area: s, bar: bar, objects: []fyne.CanvasObject{bar}}
 }
 
-func (s *scrollBarArea) Hide() {
-	s.hide(s)
-}
-
 func (s *scrollBarArea) MinSize() fyne.Size {
-	return s.minSize(s)
+	s.ExtendBaseWidget(s)
+	return s.BaseWidget.MinSize()
 }
 
 func (s *scrollBarArea) MouseIn(*desktop.MouseEvent) {
@@ -209,11 +193,6 @@ func (s *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 func (s *scrollBarArea) MouseOut() {
 	s.isWide = false
 	Refresh(s.scroll)
-}
-
-func (s *scrollBarArea) Move(pos fyne.Position) {
-	s.move(pos, s)
-
 }
 
 func (s *scrollBarArea) moveBar(y int) {
@@ -232,14 +211,6 @@ func (s *scrollBarArea) moveBar(y int) {
 	s.scroll.Offset.Y = int(ratio * float32(s.scroll.Content.Size().Height-scrollHeight))
 
 	Refresh(s.scroll)
-}
-
-func (s *scrollBarArea) Resize(size fyne.Size) {
-	s.resize(size, s)
-}
-
-func (s *scrollBarArea) Show() {
-	s.show(s)
 }
 
 func newScrollBarArea(scroll *ScrollContainer) *scrollBarArea {
@@ -324,7 +295,7 @@ func (s *scrollRenderer) updatePosition() {
 // ScrollContainer defines a container that is smaller than the Content.
 // The Offset is used to determine the position of the child widgets within the container.
 type ScrollContainer struct {
-	baseWidget
+	BaseWidget
 
 	Content fyne.CanvasObject
 	Offset  fyne.Position
@@ -332,6 +303,7 @@ type ScrollContainer struct {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
+	s.impl = s
 	bar := newScrollBarArea(s)
 	topShadow := newShadow(shadowBottom, theme.Padding()*2)
 	bottomShadow := newShadow(shadowTop, theme.Padding()*2)
@@ -344,26 +316,9 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-// Hide this widget, if it was previously visible
-func (s *ScrollContainer) Hide() {
-	s.hide(s)
-}
-
-// MinSize returns the smallest size this widget can shrink to
 func (s *ScrollContainer) MinSize() fyne.Size {
-	return s.minSize(s)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (s *ScrollContainer) Move(pos fyne.Position) {
-	s.move(pos, s)
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (s *ScrollContainer) Resize(size fyne.Size) {
-	s.resize(size, s)
+	s.ExtendBaseWidget(s)
+	return s.BaseWidget.MinSize()
 }
 
 // Scrolled is called when an input device triggers a scroll event
@@ -383,13 +338,10 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 	Refresh(s)
 }
 
-// Show this widget, if it was previously hidden
-func (s *ScrollContainer) Show() {
-	s.show(s)
-}
-
 // NewScrollContainer creates a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize to be smaller than that of the passed objects.
 func NewScrollContainer(content fyne.CanvasObject) *ScrollContainer {
-	return &ScrollContainer{Content: content}
+	s := &ScrollContainer{Content: content}
+	s.ExtendBaseWidget(s)
+	return s
 }

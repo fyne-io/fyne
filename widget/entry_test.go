@@ -13,12 +13,12 @@ import (
 )
 
 func entryRenderTexts(e *Entry) []*canvas.Text {
-	textWid := Renderer(e).(*entryRenderer).text
+	textWid := e.text
 	return Renderer(textWid).(*textRenderer).texts
 }
 
 func entryRenderPlaceholderTexts(e *Entry) []*canvas.Text {
-	textWid := Renderer(e).(*entryRenderer).placeholder
+	textWid := e.placeholder
 	return Renderer(textWid).(*textRenderer).texts
 }
 

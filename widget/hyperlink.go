@@ -95,32 +95,12 @@ func (hl *Hyperlink) TappedSecondary(*fyne.PointEvent) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.textProvider = newTextProvider(hl.Text, hl)
+	hl.ExtendBaseWidget(hl)
 	return hl.textProvider.CreateRenderer()
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (hl *Hyperlink) Resize(size fyne.Size) {
-	hl.resize(size, hl)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (hl *Hyperlink) Move(pos fyne.Position) {
-	hl.move(pos, hl)
 }
 
 // MinSize returns the smallest size this widget can shrink to
 func (hl *Hyperlink) MinSize() fyne.Size {
-	return hl.minSize(hl)
-}
-
-// Show this widget, if it was previously hidden
-func (hl *Hyperlink) Show() {
-	hl.show(hl)
-}
-
-// Hide this widget, if it was previously visible
-func (hl *Hyperlink) Hide() {
-	hl.hide(hl)
+	hl.ExtendBaseWidget(hl)
+	return hl.BaseWidget.MinSize()
 }
