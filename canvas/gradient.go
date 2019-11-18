@@ -17,43 +17,44 @@ type LinearGradient struct {
 }
 
 // Generate calculates an image of the gradient with the specified width and height.
-func (g *LinearGradient) Generate(w, h int) image.Image {
-	var generator func(x, y, w, h float64) float64
+func (g *LinearGradient) Generate(iw, ih int) image.Image {
+	w, h := float64(iw), float64(ih)
+	var generator func(x, y float64) float64
 	switch g.Angle {
 	case 90: // horizontal flipped
-		generator = func(x, _, w, _ float64) float64 {
+		generator = func(x, _ float64) float64 {
 			return ((w - 1) - x) / (w - 1)
 		}
 	case 270: // horizontal
-		generator = func(x, _, w, _ float64) float64 {
+		generator = func(x, _ float64) float64 {
 			return x / (w - 1)
 		}
 	case 45: // diagonal negative flipped
-		generator = func(x, y, w, h float64) float64 {
+		generator = func(x, y float64) float64 {
 			return math.Abs(((w-1)+(h-1))-(x+((h-1)-y))) / math.Abs((w-1)+(h-1))
 		}
 	case 225: // diagonal negative
-		generator = func(x, y, w, h float64) float64 {
+		generator = func(x, y float64) float64 {
 			return math.Abs(x+((h-1)-y)) / math.Abs((w-1)+(h-1))
 		}
 	case 135: // diagonal positive flipped
-		generator = func(x, y, w, h float64) float64 {
+		generator = func(x, y float64) float64 {
 			return math.Abs(((w-1)+(h-1))-(x+y)) / math.Abs((w-1)+(h-1))
 		}
 	case 315: // diagonal positive
-		generator = func(x, y, w, h float64) float64 {
+		generator = func(x, y float64) float64 {
 			return math.Abs(x+y) / math.Abs((w-1)+(h-1))
 		}
 	case 180: // vertical flipped
-		generator = func(_, y, _, h float64) float64 {
+		generator = func(_, y float64) float64 {
 			return ((h - 1) - y) / (h - 1)
 		}
 	default: // vertical
-		generator = func(_, y, _, h float64) float64 {
+		generator = func(_, y float64) float64 {
 			return y / (h - 1)
 		}
 	}
-	return computeGradient(generator, w, h, g.StartColor, g.EndColor)
+	return computeGradient(generator, iw, ih, g.StartColor, g.EndColor)
 }
 
 // RadialGradient defines a Gradient travelling radially from a center point outward.
@@ -69,25 +70,26 @@ type RadialGradient struct {
 }
 
 // Generate calculates an image of the gradient with the specified width and height.
-func (g *RadialGradient) Generate(w, h int) image.Image {
-	generator := func(x, y, w, h float64) float64 {
-		// define center plus offset
-		centerX := w/2 + w*g.CenterOffsetX
-		centerY := h/2 + h*g.CenterOffsetY
+func (g *RadialGradient) Generate(iw, ih int) image.Image {
+	w, h := float64(iw), float64(ih)
+	// define center plus offset
+	centerX := w/2 + w*g.CenterOffsetX
+	centerY := h/2 + h*g.CenterOffsetY
 
-		// handle negative offsets
-		var a, b float64
-		if g.CenterOffsetX < 0 {
-			a = w - centerX
-		} else {
-			a = centerX
-		}
-		if g.CenterOffsetY < 0 {
-			b = h - centerY
-		} else {
-			b = centerY
-		}
+	// handle negative offsets
+	var a, b float64
+	if g.CenterOffsetX < 0 {
+		a = w - centerX
+	} else {
+		a = centerX
+	}
+	if g.CenterOffsetY < 0 {
+		b = h - centerY
+	} else {
+		b = centerY
+	}
 
+	generator := func(x, y float64) float64 {
 		// calculate distance from center for gradient multiplier
 		dx, dy := centerX-x, centerY-y
 		da := math.Sqrt(dx*dx + dy*dy*a*a/b/b)
@@ -96,7 +98,7 @@ func (g *RadialGradient) Generate(w, h int) image.Image {
 		}
 		return da / a
 	}
-	return computeGradient(generator, w, h, g.StartColor, g.EndColor)
+	return computeGradient(generator, iw, ih, g.StartColor, g.EndColor)
 }
 
 func calculatePixel(d float64, startColor, endColor color.Color) *color.RGBA64 {
@@ -121,7 +123,7 @@ func calculatePixel(d float64, startColor, endColor color.Color) *color.RGBA64 {
 	return pixel
 }
 
-func computeGradient(generator func(x, y, w, h float64) float64, w, h int, startColor, endColor color.Color) image.Image {
+func computeGradient(generator func(x, y float64) float64, w, h int, startColor, endColor color.Color) image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 
 	if startColor == nil && endColor == nil {
@@ -134,7 +136,7 @@ func computeGradient(generator func(x, y, w, h float64) float64, w, h int, start
 
 	for x := 0; x < w; x++ {
 		for y := 0; y < h; y++ {
-			distance := generator(float64(x), float64(y), float64(w), float64(h))
+			distance := generator(float64(x), float64(y))
 			img.Set(x, y, calculatePixel(distance, startColor, endColor))
 		}
 	}
