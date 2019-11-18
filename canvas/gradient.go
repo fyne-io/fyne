@@ -23,35 +23,35 @@ func (g *LinearGradient) Generate(iw, ih int) image.Image {
 	switch g.Angle {
 	case 90: // horizontal flipped
 		generator = func(x, _ float64) float64 {
-			return ((w - 1) - x) / (w - 1)
+			return (w - x) / w
 		}
 	case 270: // horizontal
 		generator = func(x, _ float64) float64 {
-			return x / (w - 1)
+			return x / w
 		}
 	case 45: // diagonal negative flipped
 		generator = func(x, y float64) float64 {
-			return math.Abs(((w-1)+(h-1))-(x+((h-1)-y))) / math.Abs((w-1)+(h-1))
+			return math.Abs((w+h)-(x+h-y)) / math.Abs(w+h)
 		}
 	case 225: // diagonal negative
 		generator = func(x, y float64) float64 {
-			return math.Abs(x+((h-1)-y)) / math.Abs((w-1)+(h-1))
+			return math.Abs(x+h-y) / math.Abs(w+h)
 		}
 	case 135: // diagonal positive flipped
 		generator = func(x, y float64) float64 {
-			return math.Abs(((w-1)+(h-1))-(x+y)) / math.Abs((w-1)+(h-1))
+			return math.Abs((w+h)-(x+y)) / math.Abs(w+h)
 		}
 	case 315: // diagonal positive
 		generator = func(x, y float64) float64 {
-			return math.Abs(x+y) / math.Abs((w-1)+(h-1))
+			return math.Abs(x+y) / math.Abs(w+h)
 		}
 	case 180: // vertical flipped
 		generator = func(_, y float64) float64 {
-			return ((h - 1) - y) / (h - 1)
+			return (h - y) / h
 		}
 	default: // vertical
 		generator = func(_, y float64) float64 {
-			return y / (h - 1)
+			return y / h
 		}
 	}
 	return computeGradient(generator, iw, ih, g.StartColor, g.EndColor)
@@ -136,7 +136,7 @@ func computeGradient(generator func(x, y float64) float64, w, h int, startColor,
 
 	for x := 0; x < w; x++ {
 		for y := 0; y < h; y++ {
-			distance := generator(float64(x), float64(y))
+			distance := generator(float64(x)+0.5, float64(y)+0.5)
 			img.Set(x, y, calculatePixel(distance, startColor, endColor))
 		}
 	}
