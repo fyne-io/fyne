@@ -139,6 +139,7 @@ func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 	return &tabContainerRenderer{tabBar: tabBar, line: line, objects: objects, container: t}
 }
 
+// MinSize returns the size that this widget should not shrink below
 func (t *TabContainer) MinSize() fyne.Size {
 	t.ExtendBaseWidget(t)
 	return t.BaseWidget.MinSize()
@@ -362,9 +363,9 @@ type tabButton struct {
 	Text         string
 }
 
-func (t *tabButton) MinSize() fyne.Size {
-	t.ExtendBaseWidget(t)
-	return t.BaseWidget.MinSize()
+func (b *tabButton) MinSize() fyne.Size {
+	b.ExtendBaseWidget(b)
+	return b.BaseWidget.MinSize()
 }
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {

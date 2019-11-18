@@ -187,8 +187,8 @@ func (t *textProvider) charMinSize() fyne.Size {
 }
 
 // lineSizeToColumn returns the rendered size for the line specified by row up to the col position
-func (r *textProvider) lineSizeToColumn(col, row int) (size fyne.Size) {
-	line := r.row(row)
+func (t *textProvider) lineSizeToColumn(col, row int) (size fyne.Size) {
+	line := t.row(row)
 	if line == nil {
 		return fyne.NewSize(0, 0)
 	}
@@ -198,12 +198,12 @@ func (r *textProvider) lineSizeToColumn(col, row int) (size fyne.Size) {
 	}
 
 	measureText := string(line[0:col])
-	if r.presenter.password() {
+	if t.presenter.password() {
 		measureText = strings.Repeat(passwordChar, col)
 	}
 
 	label := canvas.NewText(measureText, theme.TextColor())
-	label.TextStyle = r.presenter.textStyle()
+	label.TextStyle = t.presenter.textStyle()
 	return label.MinSize()
 }
 

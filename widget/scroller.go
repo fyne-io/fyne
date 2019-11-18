@@ -177,6 +177,7 @@ func (s *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	return &scrollBarAreaRenderer{area: s, bar: bar, objects: []fyne.CanvasObject{bar}}
 }
 
+// MinSize returns the size that this widget should not shrink below
 func (s *scrollBarArea) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
 	return s.BaseWidget.MinSize()
@@ -316,6 +317,7 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+// MinSize returns the size that this widget should not shrink below
 func (s *ScrollContainer) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
 	return s.BaseWidget.MinSize()

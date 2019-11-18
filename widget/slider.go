@@ -112,6 +112,7 @@ func (s *Slider) updateValue(ratio float64) {
 	}
 }
 
+// MinSize returns the size that this widget should not shrink below
 func (s *Slider) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
 	return s.BaseWidget.MinSize()

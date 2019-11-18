@@ -10,7 +10,7 @@ import (
 
 var renderers sync.Map
 
-// A base widget class to define the standard widget behaviours.
+// BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
 	size     fyne.Size
 	position fyne.Position
@@ -29,7 +29,7 @@ func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
 	w.impl = wid
 }
 
-// Get the current size of this widget.
+// Size gets the current size of this widget.
 func (w *BaseWidget) Size() fyne.Size {
 	return w.size
 }
@@ -64,16 +64,19 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
 	if w.impl == nil || Renderer(w.impl) == nil {
-	//	fyne.LogError("Renderer not configured, perhaps missing call to ExtendBaseWidget()?", nil)
+		//	fyne.LogError("Renderer not configured, perhaps missing call to ExtendBaseWidget()?", nil)
 		return fyne.NewSize(0, 0)
 	}
 	return Renderer(w.impl).MinSize()
 }
 
+// CreateRenderer of BaseWidget does nothing, it must be overridden
 func (w *BaseWidget) CreateRenderer() fyne.WidgetRenderer {
 	return nil
 }
 
+// Visible returns whether or not this widget should be visible.
+// Note that this may not mean it is currently visible if a parent has been hidden.
 func (w *BaseWidget) Visible() bool {
 	return !w.Hidden
 }
@@ -122,8 +125,8 @@ func (w *BaseWidget) disable(parent fyne.Widget) {
 	Refresh(parent)
 }
 
-func (b *BaseWidget) super() fyne.Widget {
-	return b.impl
+func (w *BaseWidget) super() fyne.Widget {
+	return w.impl
 }
 
 type isBaseWidget interface {

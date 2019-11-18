@@ -71,6 +71,7 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	return l.textProvider.CreateRenderer()
 }
 
+// MinSize returns the size that this widget should not shrink below
 func (l *Label) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
 	return l.BaseWidget.MinSize()

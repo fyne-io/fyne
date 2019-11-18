@@ -168,6 +168,7 @@ func (s *Select) MouseOut() {
 func (s *Select) MouseMoved(*desktop.MouseEvent) {
 }
 
+// MinSize returns the size that this widget should not shrink below
 func (s *Select) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
 	return s.BaseWidget.MinSize()

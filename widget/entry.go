@@ -1059,7 +1059,7 @@ func NewEntry() *Entry {
 	e := &Entry{}
 	e.ExtendBaseWidget(e)
 	e.registerShortcut()
-//	Refresh(e)
+	//	Refresh(e)
 	return e
 }
 
