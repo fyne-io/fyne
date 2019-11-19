@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/cache"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,17 +17,15 @@ func TestProgressBarInfinite_Creation(t *testing.T) {
 
 func TestProgressBarInfinite_Destroy(t *testing.T) {
 	bar := NewProgressBarInfinite()
-	_, found := renderers.Load(bar)
-	assert.True(t, found)
+	assert.True(t, cache.IsRendered(bar))
 	assert.True(t, bar.Running())
 
 	// check that it stopped
-	DestroyRenderer(bar)
+	cache.DestroyRenderer(bar)
 	assert.False(t, bar.Running())
 
 	// and that the cache was removed
-	_, found = renderers.Load(bar)
-	assert.False(t, found)
+	assert.False(t, cache.IsRendered(bar))
 }
 
 func TestProgressBarInfinite_Reshown(t *testing.T) {

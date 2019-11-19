@@ -19,6 +19,8 @@ type CanvasObject interface {
 	Visible() bool
 	Show()
 	Hide()
+
+	Refresh()
 }
 
 // Themeable indicates that the associated CanvasObject responds to theme

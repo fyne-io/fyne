@@ -137,3 +137,6 @@ func (d *dummyObject) Show() {
 func (d *dummyObject) Hide() {
 	d.hidden = true
 }
+
+func (d *dummyObject) Refresh() {
+}

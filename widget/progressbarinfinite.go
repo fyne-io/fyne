@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -148,22 +149,21 @@ func (p *ProgressBarInfinite) Hide() {
 
 // Start the infinite progress bar background thread to update it continuously
 func (p *ProgressBarInfinite) Start() {
-	Renderer(p).(*infProgressRenderer).start()
+	cache.Renderer(p).(*infProgressRenderer).start()
 }
 
 // Stop the infinite progress goroutine and sets value to the Max
 func (p *ProgressBarInfinite) Stop() {
-	Renderer(p).(*infProgressRenderer).stop()
+	cache.Renderer(p).(*infProgressRenderer).stop()
 }
 
 // Running returns the current state of the infinite progress animation
 func (p *ProgressBarInfinite) Running() bool {
-	renderer, ok := renderers.Load(p)
-	if !ok {
+	if !cache.IsRendered(p) {
 		return false
 	}
 
-	return renderer.(*infProgressRenderer).running.Load().(bool)
+	return cache.Renderer(p).(*infProgressRenderer).running.Load().(bool)
 }
 
 // MinSize returns the size that this widget should not shrink below

@@ -57,13 +57,18 @@ func (l *Circle) Visible() bool {
 func (l *Circle) Show() {
 	l.Hidden = false
 
-	Refresh(l)
+	l.Refresh()
 }
 
 // Hide will set this circle to not be visible
 func (l *Circle) Hide() {
 	l.Hidden = true
 
+	l.Refresh()
+}
+
+// Refresh causes this object to be redrawn in it's current state
+func (l *Circle) Refresh() {
 	Refresh(l)
 }
 

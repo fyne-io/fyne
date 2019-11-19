@@ -109,6 +109,9 @@ func (b *boxRenderer) Objects() []fyne.CanvasObject {
 
 func (b *boxRenderer) Refresh() {
 	b.objects = b.box.Children
+	for _, child := range b.objects {
+		child.Refresh()
+	}
 	b.Layout(b.box.Size())
 
 	canvas.Refresh(b.box)

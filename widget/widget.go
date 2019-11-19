@@ -2,13 +2,10 @@
 package widget // import "fyne.io/fyne/widget"
 
 import (
-	"sync"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 )
-
-var renderers sync.Map
 
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
@@ -125,44 +122,44 @@ func (w *BaseWidget) disable(parent fyne.Widget) {
 	Refresh(parent)
 }
 
+// Refresh causes this widget to be redrawn in it's current state
+func (w *BaseWidget) Refresh() {
+	if w.impl == nil {
+		return
+	}
+
+	w.refresh(w.impl)
+}
+
+func (w *BaseWidget) refresh(wid fyne.Widget) {
+	cache.Renderer(wid).Refresh()
+	cache.Renderer(wid).Layout(w.impl.Size())
+
+	c := fyne.CurrentApp().Driver().CanvasForObject(wid)
+	if c != nil {
+		c.Refresh(wid)
+	}
+}
+
 func (w *BaseWidget) super() fyne.Widget {
 	return w.impl
 }
 
-type isBaseWidget interface {
-	ExtendBaseWidget(fyne.Widget)
-	super() fyne.Widget
-}
-
 // Renderer looks up the render implementation for a widget
+// Deprecated: Access to widget renderers is being removed, render details should be private to a WidgetRenderer.
 func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
-	if wd, ok := wid.(isBaseWidget); ok {
-		if wd.super() != nil {
-			wid = wd.super()
-		}
-	}
-	renderer, ok := renderers.Load(wid)
-	if !ok {
-		renderer = wid.CreateRenderer()
-		renderers.Store(wid, renderer)
-	}
-
-	return renderer.(fyne.WidgetRenderer)
+	return cache.Renderer(wid)
 }
 
 // DestroyRenderer frees a render implementation for a widget.
 // This is typically for internal use only.
+// Deprecated: Access to widget renderers is being removed, render details should be private to a WidgetRenderer.
 func DestroyRenderer(wid fyne.Widget) {
-	Renderer(wid).Destroy()
-
-	renderers.Delete(wid)
+	cache.DestroyRenderer(wid)
 }
 
 // Refresh instructs the containing canvas to refresh the specified widget.
+// Deprecated: Call Widget.Refresh() instead.
 func Refresh(wid fyne.Widget) {
-	render := Renderer(wid)
-
-	if render != nil {
-		render.Refresh()
-	}
+	wid.Refresh()
 }

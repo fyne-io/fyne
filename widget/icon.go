@@ -66,8 +66,7 @@ type Icon struct {
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res
-
-	Refresh(i)
+	i.refresh(i)
 }
 
 // MinSize returns the size that this widget should not shrink below

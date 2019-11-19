@@ -2,6 +2,7 @@ package gomobile
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -143,7 +144,7 @@ func (w *window) Close() {
 	w.canvas.walkTree(nil, func(obj, _ fyne.CanvasObject) {
 		switch co := obj.(type) {
 		case fyne.Widget:
-			widget.DestroyRenderer(co)
+			cache.DestroyRenderer(co)
 		}
 	})
 

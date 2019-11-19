@@ -1059,7 +1059,6 @@ func NewEntry() *Entry {
 	e := &Entry{}
 	e.ExtendBaseWidget(e)
 	e.registerShortcut()
-	//	Refresh(e)
 	return e
 }
 
@@ -1067,7 +1066,7 @@ func NewEntry() *Entry {
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
 	e.registerShortcut()
-	Refresh(e)
+	e.ExtendBaseWidget(e)
 	return e
 }
 
@@ -1075,6 +1074,6 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 	e.registerShortcut()
-	Refresh(e)
+	e.ExtendBaseWidget(e)
 	return e
 }

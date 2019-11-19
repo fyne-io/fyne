@@ -63,6 +63,11 @@ func (g *LinearGradient) Generate(w, h int) image.Image {
 	return computeGradient(generator, w, h, g.StartColor, g.EndColor)
 }
 
+// Refresh causes this object to be redrawn in it's current state
+func (g *LinearGradient) Refresh() {
+	Refresh(g)
+}
+
 // RadialGradient defines a Gradient travelling radially from a center point outward.
 type RadialGradient struct {
 	baseObject
@@ -104,6 +109,11 @@ func (g *RadialGradient) Generate(w, h int) image.Image {
 		return da / a
 	}
 	return computeGradient(generator, w, h, g.StartColor, g.EndColor)
+}
+
+// Refresh causes this object to be redrawn in it's current state
+func (g *RadialGradient) Refresh() {
+	Refresh(g)
 }
 
 func calculatePixel(d float64, startColor, endColor color.Color) *color.RGBA64 {
