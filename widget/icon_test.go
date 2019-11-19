@@ -41,6 +41,6 @@ func TestIconRenderer_ApplyTheme(t *testing.T) {
 	render := Renderer(icon).(*iconRenderer)
 	visible := render.objects[0].Visible()
 
-	render.ApplyTheme()
+	render.Refresh()
 	assert.Equal(t, visible, render.objects[0].Visible())
 }

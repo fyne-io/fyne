@@ -14,7 +14,7 @@ import (
 type myWidget struct {
 	BaseWidget
 
-	applied chan bool
+	refreshed chan bool
 }
 
 func (m *myWidget) Enable() {
@@ -29,8 +29,8 @@ func (m *myWidget) Disabled() bool {
 	return m.disabled
 }
 
-func (m *myWidget) ApplyTheme() {
-	m.applied <- true
+func (m *myWidget) Refresh() {
+	m.refreshed <- true
 }
 
 func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
@@ -39,38 +39,38 @@ func (m *myWidget) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func TestApplyThemeCalled(t *testing.T) {
-	widget := &myWidget{applied: make(chan bool)}
+	widget := &myWidget{refreshed: make(chan bool)}
 
 	window := test.NewWindow(widget)
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 
 	func() {
 		select {
-		case <-widget.applied:
+		case <-widget.refreshed:
 		case <-time.After(1 * time.Second):
 			assert.Fail(t, "Timed out waiting for theme apply")
 		}
 	}()
 
-	close(widget.applied)
+	close(widget.refreshed)
 	window.Close()
 }
 
 func TestApplyThemeCalledChild(t *testing.T) {
-	child := &myWidget{applied: make(chan bool)}
+	child := &myWidget{refreshed: make(chan bool)}
 	parent := NewVBox(child)
 
 	window := test.NewWindow(parent)
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 	func() {
 		select {
-		case <-child.applied:
+		case <-child.refreshed:
 		case <-time.After(1 * time.Second):
 			assert.Fail(t, "Timed out waiting for child theme apply")
 		}
 	}()
 
-	close(child.applied)
+	close(child.refreshed)
 	window.Close()
 }
 

@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
@@ -68,46 +70,25 @@ type Toolbar struct {
 
 	Items []ToolbarItem
 
-	box *Box
+	objs []fyne.CanvasObject
 }
 
 func (t *Toolbar) append(item ToolbarItem) {
-	if t.box == nil { // TODO fix smell
-		Renderer(t)
-	}
-
-	t.box.Append(item.ToolbarObject())
+	t.objs = append(t.objs, item.ToolbarObject())
 }
 
 func (t *Toolbar) prepend(item ToolbarItem) {
-	if t.box == nil { // TODO fix smell
-		Renderer(t)
-	}
-
-	t.box.Prepend(item.ToolbarObject())
+	t.objs = append([]fyne.CanvasObject{item.ToolbarObject()}, t.objs...)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	t.box = NewHBox()
-	t.box.setBackgroundColor(theme.ButtonColor())
 	for _, item := range t.Items {
 		t.append(item)
 	}
-	return Renderer(t.box)
-}
 
-// ApplyTheme updates this widget's visuals to reflect the current theme
-func (t *Toolbar) ApplyTheme() {
-	t.box.setBackgroundColor(theme.ButtonColor())
-
-	for i, item := range t.Items {
-		if _, ok := item.(*ToolbarSeparator); ok {
-			rect := Renderer(t).(*boxRenderer).objects[i].(*canvas.Rectangle)
-			rect.FillColor = theme.TextColor()
-		}
-	}
+	return &toolbarRenderer{toolbar: t, layout: layout.NewHBoxLayout()}
 }
 
 // Append a new ToolbarItem to the end of this Toolbar
@@ -130,4 +111,43 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 
 	Renderer(t).Layout(t.MinSize())
 	return t
+}
+
+type toolbarRenderer struct {
+	layout fyne.Layout
+
+	objects []fyne.CanvasObject
+	toolbar *Toolbar
+}
+
+func (r *toolbarRenderer) MinSize() fyne.Size {
+	return r.layout.MinSize(r.objects)
+}
+
+func (r *toolbarRenderer) Layout(size fyne.Size) {
+	r.layout.Layout(r.objects, size)
+}
+
+func (r *toolbarRenderer) BackgroundColor() color.Color {
+	return theme.ButtonColor()
+}
+
+func (r *toolbarRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *toolbarRenderer) Refresh() {
+	r.objects = r.toolbar.objs
+
+	for i, item := range r.toolbar.Items {
+		if _, ok := item.(*ToolbarSeparator); ok {
+			rect := r.objects[i].(*canvas.Rectangle)
+			rect.FillColor = theme.TextColor()
+		}
+	}
+
+	r.Layout(r.toolbar.Size())
+}
+
+func (r *toolbarRenderer) Destroy() {
 }

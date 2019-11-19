@@ -50,14 +50,6 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 		(size.Height-theme.IconInlineSize())/2))
 }
 
-// ApplyTheme is called when the Button may need to update its look
-func (s *selectRenderer) ApplyTheme() {
-	s.label.Color = theme.TextColor()
-	s.label.TextSize = theme.TextSize()
-
-	s.Refresh()
-}
-
 func (s *selectRenderer) BackgroundColor() color.Color {
 	if s.combo.hovered {
 		return theme.HoverColor()
@@ -66,6 +58,9 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 }
 
 func (s *selectRenderer) Refresh() {
+	s.label.Color = theme.TextColor()
+	s.label.TextSize = theme.TextSize()
+
 	if s.combo.PlaceHolder == "" {
 		s.combo.PlaceHolder = defaultPlaceHolder
 	}

@@ -45,15 +45,13 @@ func (c *checkRenderer) Layout(size fyne.Size) {
 	c.icon.Move(fyne.NewPos(theme.Padding(), (size.Height-theme.IconInlineSize())/2))
 }
 
-// ApplyTheme is called when the Check may need to update its look
-func (c *checkRenderer) ApplyTheme() {
+// applyTheme updates this Check to the current theme
+func (c *checkRenderer) applyTheme() {
 	c.label.Color = theme.TextColor()
 	c.label.TextSize = theme.TextSize()
 	if c.check.Disabled() {
 		c.label.Color = theme.DisabledTextColor()
 	}
-
-	c.Refresh()
 }
 
 func (c *checkRenderer) BackgroundColor() color.Color {
@@ -61,6 +59,7 @@ func (c *checkRenderer) BackgroundColor() color.Color {
 }
 
 func (c *checkRenderer) Refresh() {
+	c.applyTheme()
 	c.label.Text = c.check.Text
 
 	res := theme.CheckButtonIcon()
@@ -133,13 +132,13 @@ func (c *Check) Hide() {
 // Enable this widget, if it was previously disabled
 func (c *Check) Enable() {
 	c.enable(c)
-	Renderer(c).ApplyTheme()
+	c.refresh(c)
 }
 
 // Disable this widget, if it was previously enabled
 func (c *Check) Disable() {
 	c.disable(c)
-	Renderer(c).ApplyTheme()
+	c.refresh(c)
 }
 
 // Disabled returns true if the widget is disabled

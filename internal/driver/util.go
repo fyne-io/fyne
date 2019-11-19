@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/widget"
 )
 
@@ -62,7 +63,7 @@ func walkObjectTree(
 	case *fyne.Container:
 		children = co.Objects
 	case fyne.Widget:
-		children = widget.Renderer(co).Objects()
+		children = cache.Renderer(co).Objects()
 
 		if scroll, ok := obj.(*widget.ScrollContainer); ok {
 			clipPos = pos

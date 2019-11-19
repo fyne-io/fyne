@@ -77,15 +77,13 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 	}
 }
 
-// ApplyTheme is called when the Button may need to update its look
-func (b *buttonRenderer) ApplyTheme() {
+// applyTheme updates this button to match the current theme
+func (b *buttonRenderer) applyTheme() {
 	b.label.TextSize = theme.TextSize()
 	b.label.Color = theme.TextColor()
 	if b.button.Disabled() {
 		b.label.Color = theme.DisabledTextColor()
 	}
-
-	b.Refresh()
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
@@ -102,6 +100,7 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 }
 
 func (b *buttonRenderer) Refresh() {
+	b.applyTheme()
 	b.label.Text = b.button.Text
 
 	if b.button.Icon != nil && b.button.Visible() {
@@ -163,13 +162,13 @@ const (
 // Enable this widget, if it was previously disabled
 func (b *Button) Enable() {
 	b.enable(b)
-	Renderer(b).ApplyTheme()
+	b.refresh(b)
 }
 
 // Disable this widget, if it was previously enabled
 func (b *Button) Disable() {
 	b.disable(b)
-	Renderer(b).ApplyTheme()
+	b.refresh(b)
 }
 
 // Disabled returns true if the widget is disabled

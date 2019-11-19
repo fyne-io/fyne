@@ -200,7 +200,7 @@ func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
 	barColor := underline.FillColor
 
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
-	Renderer(tabs).ApplyTheme()
+	Renderer(tabs).Refresh()
 	assert.NotEqual(t, barColor, underline.FillColor)
 }
 
@@ -387,7 +387,7 @@ func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
 	textSize := render.label.TextSize
 	customTextSize := textSize
 	withTestTheme(func() {
-		render.ApplyTheme()
+		render.Refresh()
 		customTextSize = render.label.TextSize
 	})
 

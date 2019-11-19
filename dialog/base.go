@@ -77,10 +77,10 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	}
 
 	d.win = widget.NewModalPopUp(content, d.parent.Canvas())
+	d.applyTheme()
 }
 
 func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
-	d.ApplyTheme() // we are not really a widget so simulate the applyTheme call
 	d.bg.Move(fyne.NewPos(-theme.Padding(), -theme.Padding()))
 	d.bg.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 
@@ -109,7 +109,7 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 		textMin.Height+btnMin.Height+d.label.MinSize().Height+theme.Padding()+padHeight*2)
 }
 
-func (d *dialog) ApplyTheme() {
+func (d *dialog) applyTheme() {
 	r, g, b, _ := theme.BackgroundColor().RGBA()
 	bg := &color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
 	d.bg.FillColor = bg

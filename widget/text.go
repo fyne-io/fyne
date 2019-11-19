@@ -249,8 +249,8 @@ func (r *textRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-// ApplyTheme is called when the Label may need to update its look
-func (r *textRenderer) ApplyTheme() {
+// applyTheme updates the label to match the current theme.
+func (r *textRenderer) applyTheme() {
 	c := theme.TextColor()
 	if r.provider.presenter.textColor() != nil {
 		c = r.provider.presenter.textColor()
@@ -296,7 +296,7 @@ func (r *textRenderer) Refresh() {
 		r.texts[index].Text = ""
 	}
 
-	r.ApplyTheme()
+	r.applyTheme()
 	r.Layout(r.provider.Size())
 	if r.provider.presenter.object() == nil {
 		canvas.Refresh(r.provider)

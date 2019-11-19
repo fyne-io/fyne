@@ -88,7 +88,7 @@ func (w *BaseWidget) Show() {
 	if w.impl == nil {
 		return
 	}
-	Refresh(w.impl)
+	w.impl.Refresh()
 }
 
 // Hide this widget so it is no lonver visible
@@ -101,7 +101,7 @@ func (w *BaseWidget) Hide() {
 	if w.impl == nil {
 		return
 	}
-	Refresh(w.impl)
+	w.impl.Refresh()
 }
 
 func (w *BaseWidget) enable(parent fyne.Widget) {
@@ -110,7 +110,7 @@ func (w *BaseWidget) enable(parent fyne.Widget) {
 	}
 
 	w.disabled = false
-	Refresh(parent)
+	parent.Refresh()
 }
 
 func (w *BaseWidget) disable(parent fyne.Widget) {
@@ -119,7 +119,7 @@ func (w *BaseWidget) disable(parent fyne.Widget) {
 	}
 
 	w.disabled = true
-	Refresh(parent)
+	parent.Refresh()
 }
 
 // Refresh causes this widget to be redrawn in it's current state
@@ -132,13 +132,17 @@ func (w *BaseWidget) Refresh() {
 }
 
 func (w *BaseWidget) refresh(wid fyne.Widget) {
-	cache.Renderer(wid).Refresh()
-	cache.Renderer(wid).Layout(w.impl.Size())
-
-	c := fyne.CurrentApp().Driver().CanvasForObject(wid)
-	if c != nil {
-		c.Refresh(wid)
+	render := cache.Renderer(wid)
+	render.Refresh()
+	for _, child := range render.Objects() {
+		child.Refresh()
 	}
+	render.Layout(w.impl.Size())
+	//
+	//c := fyne.CurrentApp().Driver().CanvasForObject(wid)
+	//if c != nil {
+	//	c.Refresh(wid)
+	//}
 }
 
 func (w *BaseWidget) super() fyne.Widget {

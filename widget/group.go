@@ -99,12 +99,6 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 	g.group.content.Resize(fyne.NewSize(size.Width, size.Height-labelHeight-theme.Padding()))
 }
 
-func (g *groupRenderer) ApplyTheme() {
-	Renderer(g.label).ApplyTheme()
-	g.line.FillColor = theme.ButtonColor()
-	g.labelBg.FillColor = theme.BackgroundColor()
-}
-
 func (g *groupRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
@@ -114,6 +108,9 @@ func (g *groupRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (g *groupRenderer) Refresh() {
+	g.line.FillColor = theme.ButtonColor()
+	g.labelBg.FillColor = theme.BackgroundColor()
+
 	g.label.SetText(g.group.Text)
 	g.Layout(g.group.Size())
 

@@ -17,10 +17,6 @@ type scrollBarRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (r *scrollBarRenderer) ApplyTheme() {
-	r.color = theme.ScrollBarColor()
-}
-
 func (r *scrollBarRenderer) BackgroundColor() color.Color {
 	return r.color
 }
@@ -40,6 +36,7 @@ func (r *scrollBarRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *scrollBarRenderer) Refresh() {
+	r.color = theme.ScrollBarColor()
 }
 
 var _ desktop.Hoverable = (*scrollBar)(nil)
@@ -60,9 +57,7 @@ func (s *scrollBar) MinSize() fyne.Size {
 
 func (s *scrollBar) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	r := &scrollBarRenderer{scrollBar: s}
-	r.ApplyTheme()
-	return r
+	return &scrollBarRenderer{scrollBar: s}
 }
 
 func (s *scrollBar) DragEnd() {
@@ -98,9 +93,6 @@ type scrollBarAreaRenderer struct {
 	bar  *scrollBar
 
 	objects []fyne.CanvasObject
-}
-
-func (s *scrollBarAreaRenderer) ApplyTheme() {
 }
 
 func (s *scrollBarAreaRenderer) BackgroundColor() color.Color {
@@ -224,9 +216,6 @@ type scrollRenderer struct {
 	topShadow, bottomShadow fyne.CanvasObject
 
 	objects []fyne.CanvasObject
-}
-
-func (s *scrollRenderer) ApplyTheme() {
 }
 
 func (s *scrollRenderer) BackgroundColor() color.Color {

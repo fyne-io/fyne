@@ -19,9 +19,11 @@ type Box struct {
 	Children   []fyne.CanvasObject
 }
 
-// ApplyTheme updates this box to match the current theme
-func (b *Box) ApplyTheme() {
+// Refresh updates this box to match the current theme
+func (b *Box) Refresh() {
 	b.background = theme.BackgroundColor()
+
+	b.BaseWidget.refresh(b)
 }
 
 // Prepend inserts a new CanvasObject at the top/left of the box
@@ -71,10 +73,7 @@ func NewHBox(children ...fyne.CanvasObject) *Box {
 
 // NewVBox creates a new vertically aligned box widget with the specified list of child objects
 func NewVBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{BaseWidget: BaseWidget{}, Horizontal: false, Children: children}
-
-	Renderer(box).Layout(box.MinSize())
-	return box
+	return &Box{BaseWidget: BaseWidget{}, Horizontal: false, Children: children}
 }
 
 type boxRenderer struct {
@@ -90,9 +89,6 @@ func (b *boxRenderer) MinSize() fyne.Size {
 
 func (b *boxRenderer) Layout(size fyne.Size) {
 	b.layout.Layout(b.objects, size)
-}
-
-func (b *boxRenderer) ApplyTheme() {
 }
 
 func (b *boxRenderer) BackgroundColor() color.Color {

@@ -89,8 +89,8 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 	}
 }
 
-// ApplyTheme is called when the Radio may need to update its look
-func (r *radioRenderer) ApplyTheme() {
+// applyTheme updates this Radio to match the current system theme
+func (r *radioRenderer) applyTheme() {
 	for _, item := range r.items {
 		item.label.Color = theme.TextColor()
 		item.label.TextSize = theme.TextSize()
@@ -98,8 +98,6 @@ func (r *radioRenderer) ApplyTheme() {
 			item.label.Color = theme.DisabledTextColor()
 		}
 	}
-
-	r.Refresh()
 }
 
 func (r *radioRenderer) BackgroundColor() color.Color {
@@ -107,6 +105,7 @@ func (r *radioRenderer) BackgroundColor() color.Color {
 }
 
 func (r *radioRenderer) Refresh() {
+	r.applyTheme()
 	r.radio.removeDuplicateOptions()
 
 	if len(r.items) < len(r.radio.Options) {
@@ -177,13 +176,13 @@ type Radio struct {
 // Enable this widget, if it was previously disabled
 func (r *Radio) Enable() {
 	r.enable(r)
-	Renderer(r).ApplyTheme()
+	r.refresh(r)
 }
 
 // Disable this widget, if it was previously enabled
 func (r *Radio) Disable() {
 	r.disable(r)
-	Renderer(r).ApplyTheme()
+	r.refresh(r)
 }
 
 // Disabled returns true if the widget is disabled

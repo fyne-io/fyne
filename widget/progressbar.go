@@ -51,13 +51,11 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 	p.updateBar()
 }
 
-// ApplyTheme is called when the progress bar may need to update its look
-func (p *progressRenderer) ApplyTheme() {
+// applyTheme updates the progress bar to match the current theme
+func (p *progressRenderer) applyTheme() {
 	p.bar.FillColor = theme.PrimaryColor()
 	p.label.Color = theme.TextColor()
 	p.label.TextSize = theme.TextSize()
-
-	p.Refresh()
 }
 
 func (p *progressRenderer) BackgroundColor() color.Color {
@@ -65,6 +63,7 @@ func (p *progressRenderer) BackgroundColor() color.Color {
 }
 
 func (p *progressRenderer) Refresh() {
+	p.applyTheme()
 	p.updateBar()
 
 	canvas.Refresh(p.progress)
@@ -88,7 +87,7 @@ type ProgressBar struct {
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
 	p.Value = v
-	Renderer(p).Refresh()
+	p.refresh(p)
 }
 
 // MinSize returns the size that this widget should not shrink below

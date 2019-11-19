@@ -244,7 +244,7 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 	customTextSize1 := text1.TextSize
 	customTextSize2 := text2.TextSize
 	withTestTheme(func() {
-		render.ApplyTheme()
+		render.applyTheme()
 		customTextSize1 = text1.TextSize
 		customTextSize2 = text2.TextSize
 	})

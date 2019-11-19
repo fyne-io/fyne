@@ -144,9 +144,6 @@ func (r *popUpRenderer) MinSize() fyne.Size {
 }
 
 func (r *popUpRenderer) Refresh() {
-}
-
-func (r *popUpRenderer) ApplyTheme() {
 	r.bg.FillColor = theme.BackgroundColor()
 }
 
@@ -180,9 +177,6 @@ func (r *modalPopUpRenderer) MinSize() fyne.Size {
 }
 
 func (r *modalPopUpRenderer) Refresh() {
-}
-
-func (r *modalPopUpRenderer) ApplyTheme() {
 	r.bg.FillColor = theme.BackgroundColor()
 }
 

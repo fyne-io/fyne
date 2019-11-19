@@ -23,13 +23,6 @@ type CanvasObject interface {
 	Refresh()
 }
 
-// Themeable indicates that the associated CanvasObject responds to theme
-// changes. When the settings detect a theme change the object will be informed
-// through the invocation of ApplyTheme().
-type Themeable interface {
-	ApplyTheme()
-}
-
 // Tappable describes any CanvasObject that can also be tapped.
 // This should be implemented by buttons etc that wish to handle pointer interactions.
 type Tappable interface {

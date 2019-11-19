@@ -77,10 +77,6 @@ func (r *shadowRenderer) createShadows() {
 	}
 }
 
-func (r *shadowRenderer) ApplyTheme() {
-	r.createShadows()
-}
-
 func (r *shadowRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
@@ -132,4 +128,5 @@ func (r *shadowRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *shadowRenderer) Refresh() {
+	r.createShadows()
 }

@@ -146,16 +146,12 @@ type sliderRenderer struct {
 	slider  *Slider
 }
 
-// ApplyTheme is called when the Slider may need to update its look.
-func (s *sliderRenderer) ApplyTheme() {
+// Refresh updates the widget state for drawing.
+func (s *sliderRenderer) Refresh() {
 	s.track.FillColor = theme.ButtonColor()
 	s.thumb.FillColor = theme.TextColor()
 	s.active.FillColor = theme.TextColor()
-	s.Refresh()
-}
 
-// Refresh updates the widget state for drawing.
-func (s *sliderRenderer) Refresh() {
 	s.Layout(s.slider.Size())
 	canvas.Refresh(s.slider)
 }

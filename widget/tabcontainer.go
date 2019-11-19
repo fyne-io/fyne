@@ -1,13 +1,14 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
-	"image/color"
 )
 
 // TabItem represents a single view in a TabContainer.
@@ -53,7 +54,7 @@ type TabContainer struct {
 func (t *TabContainer) Show() {
 	t.BaseWidget.Show()
 	t.SelectTabIndex(t.current)
-	Renderer(t).Refresh()
+	t.refresh(t)
 }
 
 // SelectTab sets the specified TabItem to be selected and its content visible.
@@ -87,7 +88,7 @@ func (t *TabContainer) SelectTabIndex(index int) {
 		}
 	}
 
-	Refresh(t)
+	t.refresh(t)
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
@@ -205,7 +206,6 @@ func NewTabContainer(items ...*TabItem) *TabContainer {
 	tabs := &TabContainer{BaseWidget: BaseWidget{}, Items: items}
 	tabs.ExtendBaseWidget(tabs)
 
-	Renderer(tabs).Layout(tabs.MinSize())
 	if tabs.mismatchedContent() {
 		internal.LogHint("TabContainer items should all have the same type of content (text, icons or both)")
 	}
@@ -297,10 +297,6 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 	}
 }
 
-func (t *tabContainerRenderer) ApplyTheme() {
-	t.line.FillColor = theme.ButtonColor()
-}
-
 func (t *tabContainerRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
@@ -310,6 +306,8 @@ func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (t *tabContainerRenderer) Refresh() {
+	t.line.FillColor = theme.ButtonColor()
+
 	t.Layout(t.container.Size().Union(t.container.MinSize()))
 
 	for i, child := range t.container.Items {
@@ -335,7 +333,6 @@ func (t *tabContainerRenderer) Refresh() {
 		} else {
 			button.(*tabButton).Style = DefaultButton
 		}
-		Renderer(button.(*tabButton)).Refresh()
 	}
 }
 
@@ -418,11 +415,6 @@ type tabButtonRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (r *tabButtonRenderer) ApplyTheme() {
-	r.label.Color = theme.TextColor()
-	r.label.TextSize = theme.TextSize()
-}
-
 func (r *tabButtonRenderer) BackgroundColor() color.Color {
 	switch {
 	case r.button.Style == PrimaryButton:
@@ -502,6 +494,8 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabButtonRenderer) Refresh() {
+	r.label.Color = theme.TextColor()
+	r.label.TextSize = theme.TextSize()
 }
 
 func (r *tabButtonRenderer) padding() fyne.Size {

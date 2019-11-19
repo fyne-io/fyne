@@ -76,9 +76,8 @@ func (p *infProgressRenderer) Layout(size fyne.Size) {
 	p.updateBar()
 }
 
-// ApplyTheme is called when the infinite progress bar may need to update its look
-func (p *infProgressRenderer) ApplyTheme() {
-	p.bar.FillColor = theme.PrimaryColor()
+// applyTheme updates the infinite progress bar to match the current theme
+func (p *infProgressRenderer) applyTheme() {
 }
 
 func (p *infProgressRenderer) BackgroundColor() color.Color {
@@ -87,6 +86,8 @@ func (p *infProgressRenderer) BackgroundColor() color.Color {
 
 // Refresh updates the size and position of the horizontal scrolling infinite progress bar
 func (p *infProgressRenderer) Refresh() {
+	p.bar.FillColor = theme.PrimaryColor()
+
 	p.updateBar()
 	canvas.Refresh(p.progress)
 }

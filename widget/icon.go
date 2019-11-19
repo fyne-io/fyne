@@ -31,10 +31,6 @@ func (i *iconRenderer) Objects() []fyne.CanvasObject {
 	return i.objects
 }
 
-func (i *iconRenderer) ApplyTheme() {
-	i.Refresh()
-}
-
 func (i *iconRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }

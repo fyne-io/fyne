@@ -161,9 +161,11 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.moveCursor()
 }
 
-// ApplyTheme is called when the Entry may need to update its look.
-func (e *entryRenderer) ApplyTheme() {
-	Renderer(e.entry.text).ApplyTheme()
+func (e *entryRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+func (e *entryRenderer) Refresh() {
 	if e.entry.focused {
 		e.line.FillColor = theme.FocusColor()
 	} else {
@@ -171,18 +173,7 @@ func (e *entryRenderer) ApplyTheme() {
 	}
 
 	e.cursor.FillColor = theme.FocusColor()
-	for _, selection := range e.selection {
-		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
-	}
 
-	e.Refresh()
-}
-
-func (e *entryRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (e *entryRenderer) Refresh() {
 	if e.entry.textProvider().len() == 0 && e.entry.Visible() {
 		e.entry.placeholderProvider().Show()
 	} else if e.entry.placeholderProvider().Visible() {
@@ -199,9 +190,10 @@ func (e *entryRenderer) Refresh() {
 
 	for _, selection := range e.selection {
 		selection.(*canvas.Rectangle).Hidden = !e.entry.focused
+		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
-	Refresh(e.entry.text)
+	e.entry.text.Refresh()
 	canvas.Refresh(e.entry)
 }
 
