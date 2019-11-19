@@ -103,7 +103,7 @@ func (t *textProvider) refreshTextRenderer() {
 		obj = t
 	}
 
-	Refresh(obj)
+	obj.Refresh()
 }
 
 // SetText sets the text of the widget

@@ -61,7 +61,6 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
 	if w.impl == nil || Renderer(w.impl) == nil {
-		//	fyne.LogError("Renderer not configured, perhaps missing call to ExtendBaseWidget()?", nil)
 		return fyne.NewSize(0, 0)
 	}
 	return Renderer(w.impl).MinSize()
@@ -138,11 +137,6 @@ func (w *BaseWidget) refresh(wid fyne.Widget) {
 		child.Refresh()
 	}
 	render.Layout(w.impl.Size())
-	//
-	//c := fyne.CurrentApp().Driver().CanvasForObject(wid)
-	//if c != nil {
-	//	c.Refresh(wid)
-	//}
 }
 
 func (w *BaseWidget) super() fyne.Widget {

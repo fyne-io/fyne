@@ -105,11 +105,18 @@ func (t *Toolbar) Prepend(item ToolbarItem) {
 	t.prepend(item)
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (t *Toolbar) MinSize() fyne.Size {
+	t.ExtendBaseWidget(t)
+	return t.BaseWidget.MinSize()
+}
+
 // NewToolbar creates a new toolbar widget.
 func NewToolbar(items ...ToolbarItem) *Toolbar {
 	t := &Toolbar{Items: items}
+	t.ExtendBaseWidget(t)
 
-	Renderer(t).Layout(t.MinSize())
+	t.Refresh()
 	return t
 }
 

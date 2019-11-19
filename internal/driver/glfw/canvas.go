@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/app"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
@@ -156,6 +157,7 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	c.content.Move(c.contentPos())
 
 	if c.menu != nil {
+		c.menu.Refresh()
 		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
 	}
 	c.Refresh(c.content)
@@ -268,7 +270,7 @@ func (c *glCanvas) ensureMinSize() bool {
 					cont.Layout.Layout(cont.Objects, cont.Size())
 				}
 			case fyne.Widget:
-				widget.Renderer(cont).Layout(cont.Size())
+				cache.Renderer(cont).Layout(cont.Size())
 			default:
 				fmt.Printf("implementation error - unknown container type: %T\n", cont)
 			}
@@ -397,6 +399,7 @@ func (c *glCanvas) setupThemeListener() {
 			<-listener
 			if c.menu != nil {
 				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
+				c.Refresh(c.menu)
 			}
 
 			c.SetPadded(c.padded) // refresh the padding for potential theme differences

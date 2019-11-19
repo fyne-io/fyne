@@ -30,14 +30,14 @@ func (b *Box) Refresh() {
 func (b *Box) Prepend(object fyne.CanvasObject) {
 	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
 
-	Refresh(b)
+	b.refresh(b)
 }
 
 // Append adds a new CanvasObject to the end/right of the box
 func (b *Box) Append(object fyne.CanvasObject) {
 	b.Children = append(b.Children, object)
 
-	Refresh(b)
+	b.refresh(b)
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -65,10 +65,7 @@ func (b *Box) setBackgroundColor(bg color.Color) {
 
 // NewHBox creates a new horizontally aligned box widget with the specified list of child objects
 func NewHBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{BaseWidget: BaseWidget{}, Horizontal: true, Children: children}
-
-	Renderer(box).Layout(box.MinSize())
-	return box
+	return &Box{BaseWidget: BaseWidget{}, Horizontal: true, Children: children}
 }
 
 // NewVBox creates a new vertically aligned box widget with the specified list of child objects
