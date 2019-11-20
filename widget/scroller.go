@@ -328,20 +328,47 @@ type ScrollContainer struct {
 
 	Content fyne.CanvasObject
 	Offset  fyne.Position
+	draggedDistance int
+	vbar *scrollBarArea
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
-	bar := newScrollBarArea(s)
+	s.vbar = newScrollBarArea(s)
 	topShadow := newShadow(shadowBottom, theme.Padding()*2)
 	bottomShadow := newShadow(shadowTop, theme.Padding()*2)
 	return &scrollRenderer{
-		objects:      []fyne.CanvasObject{s.Content, bar, topShadow, bottomShadow},
+		objects:      []fyne.CanvasObject{s.Content, s.vbar, topShadow, bottomShadow},
 		scroll:       s,
-		vertArea:     bar,
+		vertArea:     s.vbar,
 		topShadow:    topShadow,
 		bottomShadow: bottomShadow,
 	}
+}
+
+// DragEnd will stop scrolling on mobile has stopped
+func (s *ScrollContainer) DragEnd() {
+}
+
+// Dragged will scroll on any drag - bar or otherwise - for mobile
+func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
+	if !fyne.CurrentDevice().IsMobile() {
+		return
+	}
+
+	render := Renderer(s.vbar).(*scrollBarAreaRenderer)
+	barHeight := render.verticalBarHeight()
+	scrollHeight := s.Size().Height
+	maxY := scrollHeight - barHeight
+
+	s.draggedDistance += e.DraggedY
+	if s.draggedDistance > maxY {
+		s.draggedDistance = maxY
+	}
+	if s.draggedDistance < 0 {
+		s.draggedDistance = 0
+	}
+	s.vbar.moveBar(s.vbar.position.Y+s.draggedDistance)
 }
 
 // Hide this widget, if it was previously visible
