@@ -171,10 +171,9 @@ func (w *window) Canvas() fyne.Canvas {
 }
 
 func (w *window) Clipboard() fyne.Clipboard {
-	//if w.clipboard == nil {
-	//	w.clipboard = &mobileClipboard{window: w.viewport}
-	//}
-	// TODO add clipboard support
+	if w.clipboard == nil {
+		w.clipboard = &mobileClipboard{}
+	}
 	return w.clipboard
 }
 
