@@ -1047,7 +1047,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
 		cut := se.(*fyne.ShortcutCut)
-		e.copyToClipboard(cut.Clipboard)
+		e.cutToClipboard(cut.Clipboard)
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCopy{}, func(se fyne.Shortcut) {
 		cpy := se.(*fyne.ShortcutCopy)
