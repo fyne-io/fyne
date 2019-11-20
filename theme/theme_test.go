@@ -21,6 +21,16 @@ func TestThemeChange(t *testing.T) {
 	assert.NotEqual(t, bg, BackgroundColor())
 }
 
+func TestTheme_Bootstrapping(t *testing.T) {
+	current := fyne.CurrentApp().Settings().Theme()
+	fyne.CurrentApp().Settings().SetTheme(nil)
+
+	// this should not crash
+	BackgroundColor()
+
+	fyne.CurrentApp().Settings().SetTheme(current)
+}
+
 func TestBuiltinTheme_ShadowColor(t *testing.T) {
 	shadow := ShadowColor()
 

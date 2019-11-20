@@ -214,7 +214,10 @@ func (t *builtinTheme) ScrollBarSmallSize() int {
 }
 
 func current() fyne.Theme {
-	//	if fyne.CurrentApp().Theme() != nil
+	if fyne.CurrentApp() == nil || fyne.CurrentApp().Settings().Theme() == nil {
+		return DarkTheme()
+	}
+
 	return fyne.CurrentApp().Settings().Theme()
 }
 
