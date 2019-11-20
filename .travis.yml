@@ -16,7 +16,7 @@ gobuild_args: "-v -tags ci"
 install: true
 
 before_script:
-  - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/)
+  - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/ | grep -v /cmd/fyne/internal/mobile/)
   - GO111MODULE=off go get golang.org/x/lint/golint
   - GO111MODULE=off go get github.com/mattn/goveralls
 
@@ -32,7 +32,7 @@ script:
   - test -z $(gofmt -s -e -d $NO_VENDOR | tee /dev/stderr)
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
-  - golint -set_exit_status $(go list -tags ci ./...)
+  - golint -set_exit_status $(go list -tags ci ./... | grep -v /cmd/fyne/internal/mobile/)
   - |
     set -e
     if [[ "$TRAVIS_PULL_REQUEST" == "false" && -n "$COVERALLS_TOKEN" ]]
