@@ -462,14 +462,8 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 	if !fyne.CurrentDevice().IsMobile() {
 		return
 	}
-
-	render := Renderer(s.vbar).(*scrollBarAreaRenderer)
-	barWidth := render.horizontalBarWidth()
-	barHeight := render.verticalBarHeight()
-	scrollWidth := s.Size().Width
-	scrollHeight := s.Size().Height
-	maxX := scrollWidth - barWidth
-	maxY := scrollHeight - barHeight
+	maxX := s.Content.Size().Width
+	maxY := s.Content.Size().Height
 
 	s.horizontalDraggedDistance -= e.DraggedX
 	s.verticalDraggedDistance -= e.DraggedY
