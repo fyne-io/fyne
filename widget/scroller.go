@@ -485,8 +485,9 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 	} else if s.verticalDraggedDistance < 0 {
 		s.verticalDraggedDistance = 0
 	}
-	s.hbar.moveHorizontalBar(s.hbar.position.X + s.horizontalDraggedDistance)
-	s.vbar.moveVerticalBar(s.vbar.position.Y + s.verticalDraggedDistance)
+	s.Offset.X = s.horizontalDraggedDistance
+	s.Offset.Y = s.verticalDraggedDistance
+	s.Refresh()
 
 }
 
