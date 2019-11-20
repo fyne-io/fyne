@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var modes = []ScrollMode{ScrollModeHorizontal, ScrollModeVertical, ScrollModeBoth}
+var directions = []ScrollDirection{ScrollDirectionHorizontal, ScrollDirectionVertical, ScrollDirectionBoth}
 
 func TestNewScrollContainer(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
@@ -29,14 +29,14 @@ func TestNewScrollContainer(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), barArea.Position())
 }
 
-func TestNewScrollContainerWithMode(t *testing.T) {
-	for _, mode := range modes {
+func TestNewScrollContainerWithDirection(t *testing.T) {
+	for _, direction := range directions {
 		rect := canvas.NewRectangle(color.Black)
 		rect.SetMinSize(fyne.NewSize(10, 10))
-		scroll := NewScrollContainerWithMode(rect, mode)
+		scroll := NewScrollContainerWithDirection(rect, direction)
 		scroll.Resize(fyne.NewSize(100, 100))
-		switch mode {
-		case ScrollModeHorizontal:
+		switch direction {
+		case ScrollDirectionHorizontal:
 			barArea := Renderer(scroll).(*scrollRenderer).horizArea
 			bar := Renderer(barArea).(*scrollBarAreaRenderer).bar
 			assert.Equal(t, 0, scroll.Offset.X)
@@ -44,7 +44,7 @@ func TestNewScrollContainerWithMode(t *testing.T) {
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Height)
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().Y)
 			assert.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSmallSize()*2), barArea.Position())
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			barArea := Renderer(scroll).(*scrollRenderer).vertArea
 			bar := Renderer(barArea).(*scrollBarAreaRenderer).bar
 			assert.Equal(t, 0, scroll.Offset.Y)
@@ -52,7 +52,7 @@ func TestNewScrollContainerWithMode(t *testing.T) {
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Width)
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().X)
 			assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), barArea.Position())
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			barArea := Renderer(scroll).(*scrollRenderer).vertArea
 			barArea2 := Renderer(scroll).(*scrollRenderer).horizArea
 			bar := Renderer(barArea).(*scrollBarAreaRenderer).bar
@@ -73,11 +73,11 @@ func TestNewScrollContainerWithMode(t *testing.T) {
 
 func TestScrollContainer_Refresh(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		switch mode {
-		case ScrollModeHorizontal:
+	for _, direction := range directions {
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -1000})
 			assert.Equal(t, 900, scroll.Offset.X)
@@ -85,9 +85,9 @@ func TestScrollContainer_Refresh(t *testing.T) {
 			rect.SetMinSize(fyne.NewSize(500, 500))
 			Refresh(scroll)
 			assert.Equal(t, 400, scroll.Offset.X)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -1000})
 			assert.Equal(t, 900, scroll.Offset.Y)
@@ -95,9 +95,9 @@ func TestScrollContainer_Refresh(t *testing.T) {
 			rect.SetMinSize(fyne.NewSize(500, 500))
 			Refresh(scroll)
 			assert.Equal(t, 400, scroll.Offset.Y)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -1000, DeltaY: -1000})
 			assert.Equal(t, 900, scroll.Offset.X)
@@ -113,25 +113,25 @@ func TestScrollContainer_Refresh(t *testing.T) {
 
 func TestScrollContainer_Scrolled(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		switch mode {
-		case ScrollModeHorizontal:
+	for _, direction := range directions {
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			assert.Equal(t, 0, scroll.Offset.X)
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -10})
 			assert.Equal(t, 10, scroll.Offset.X)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			assert.Equal(t, 0, scroll.Offset.Y)
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -10})
 			assert.Equal(t, 10, scroll.Offset.Y)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			assert.Equal(t, 0, scroll.Offset.X)
 			assert.Equal(t, 0, scroll.Offset.Y)
@@ -145,17 +145,17 @@ func TestScrollContainer_Scrolled(t *testing.T) {
 func TestScrollContainer_Scrolled_Limit(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	for _, mode := range modes {
-		scroll := NewScrollContainerWithMode(rect, mode)
+	for _, direction := range directions {
+		scroll := NewScrollContainerWithDirection(rect, direction)
 		scroll.Resize(fyne.NewSize(80, 80))
-		switch mode {
-		case ScrollModeHorizontal:
+		switch direction {
+		case ScrollDirectionHorizontal:
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -25})
 			assert.Equal(t, 20, scroll.Offset.X)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -25})
 			assert.Equal(t, 20, scroll.Offset.Y)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -25, DeltaY: -25})
 			assert.Equal(t, 20, scroll.Offset.X)
 			assert.Equal(t, 20, scroll.Offset.Y)
@@ -165,25 +165,25 @@ func TestScrollContainer_Scrolled_Limit(t *testing.T) {
 
 func TestScrollContainer_Scrolled_Back(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		switch mode {
-		case ScrollModeHorizontal:
+	for _, direction := range directions {
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Offset.X = 10
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 10})
 			assert.Equal(t, 0, scroll.Offset.Y)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Offset.Y = 10
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 10})
 			assert.Equal(t, 0, scroll.Offset.Y)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
-			scroll := NewScrollContainerWithMode(rect, mode)
+			scroll := NewScrollContainerWithDirection(rect, direction)
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Offset.X = 10
 			scroll.Offset.Y = 10
@@ -196,22 +196,22 @@ func TestScrollContainer_Scrolled_Back(t *testing.T) {
 
 func TestScrollContainer_Scrolled_BackLimit(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		scroll := NewScrollContainerWithMode(rect, mode)
-		switch mode {
-		case ScrollModeHorizontal:
+	for _, direction := range directions {
+		scroll := NewScrollContainerWithDirection(rect, direction)
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Offset.X = 10
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 20})
 			assert.Equal(t, 0, scroll.Offset.X)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Offset.Y = 10
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 20})
 			assert.Equal(t, 0, scroll.Offset.Y)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(1000, 1000))
 			scroll.Resize(fyne.NewSize(100, 100))
 			scroll.Offset.X = 10
@@ -225,22 +225,22 @@ func TestScrollContainer_Scrolled_BackLimit(t *testing.T) {
 
 func TestScrollContainer_Resize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		scroll := NewScrollContainerWithMode(rect, mode)
-		switch mode {
-		case ScrollModeHorizontal:
+	for _, direction := range directions {
+		scroll := NewScrollContainerWithDirection(rect, direction)
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(80, 80))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -20})
 			scroll.Resize(fyne.NewSize(100, 80))
 			assert.Equal(t, 0, scroll.Offset.X)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(80, 80))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -20})
 			scroll.Resize(fyne.NewSize(80, 100))
 			assert.Equal(t, 0, scroll.Offset.Y)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(80, 80))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -20, DeltaY: -20})
@@ -253,22 +253,22 @@ func TestScrollContainer_Resize(t *testing.T) {
 
 func TestScrollContainer_ResizeOffset(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		scroll := NewScrollContainerWithMode(rect, mode)
-		switch mode {
-		case ScrollModeHorizontal:
+	for _, direction := range directions {
+		scroll := NewScrollContainerWithDirection(rect, direction)
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(80, 80))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -20})
 			scroll.Resize(fyne.NewSize(90, 80))
 			assert.Equal(t, 10, scroll.Offset.X)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(80, 80))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -20})
 			scroll.Resize(fyne.NewSize(80, 90))
 			assert.Equal(t, 10, scroll.Offset.Y)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(80, 80))
 			scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -20, DeltaY: -20})
@@ -302,25 +302,25 @@ func TestScrollContainer_ScrollBarForSmallContentIsHidden(t *testing.T) {
 
 func TestScrollContainer_ShowHiddenScrollBarIfContentGrows(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		scroll := NewScrollContainerWithMode(rect, mode)
+	for _, direction := range directions {
+		scroll := NewScrollContainerWithDirection(rect, direction)
 		r := Renderer(scroll).(*scrollRenderer)
-		switch mode {
-		case ScrollModeHorizontal:
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(200, 100))
 			require.False(t, r.horizArea.Visible())
 			rect.SetMinSize(fyne.NewSize(300, 100))
 			r.Layout(scroll.Size())
 			assert.True(t, r.horizArea.Visible())
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(100, 200))
 			require.False(t, r.vertArea.Visible())
 			rect.SetMinSize(fyne.NewSize(100, 300))
 			r.Layout(scroll.Size())
 			assert.True(t, r.vertArea.Visible())
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(100, 100))
 			scroll.Resize(fyne.NewSize(200, 200))
 			require.False(t, r.horizArea.Visible())
@@ -335,25 +335,25 @@ func TestScrollContainer_ShowHiddenScrollBarIfContentGrows(t *testing.T) {
 
 func TestScrollContainer_HideScrollBarIfContentShrinks(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		scroll := NewScrollContainerWithMode(rect, mode)
+	for _, direction := range directions {
+		scroll := NewScrollContainerWithDirection(rect, direction)
 		r := Renderer(scroll).(*scrollRenderer)
-		switch mode {
-		case ScrollModeHorizontal:
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(300, 300))
 			scroll.Resize(fyne.NewSize(200, 300))
 			require.True(t, r.horizArea.Visible())
 			rect.SetMinSize(fyne.NewSize(200, 300))
 			r.Layout(scroll.Size())
 			assert.False(t, r.horizArea.Visible())
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(300, 300))
 			scroll.Resize(fyne.NewSize(300, 200))
 			require.True(t, r.vertArea.Visible())
 			rect.SetMinSize(fyne.NewSize(300, 200))
 			r.Layout(scroll.Size())
 			assert.False(t, r.vertArea.Visible())
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(300, 300))
 			scroll.Resize(fyne.NewSize(200, 200))
 			require.True(t, r.horizArea.Visible())
@@ -368,10 +368,10 @@ func TestScrollContainer_HideScrollBarIfContentShrinks(t *testing.T) {
 
 func TestScrollContainer_ScrollBarIsSmall(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		scroll := NewScrollContainerWithMode(rect, mode)
-		switch mode {
-		case ScrollModeHorizontal:
+	for _, direction := range directions {
+		scroll := NewScrollContainerWithDirection(rect, direction)
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(500, 500))
 			scroll.Resize(fyne.NewSize(100, 100))
 			area := Renderer(scroll).(*scrollRenderer).horizArea
@@ -383,7 +383,7 @@ func TestScrollContainer_ScrollBarIsSmall(t *testing.T) {
 			assert.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSmallSize()*2), area.Position())
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Height)
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().Y)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(500, 500))
 			scroll.Resize(fyne.NewSize(100, 100))
 			area := Renderer(scroll).(*scrollRenderer).vertArea
@@ -395,7 +395,7 @@ func TestScrollContainer_ScrollBarIsSmall(t *testing.T) {
 			assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), area.Position())
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Width)
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().X)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(500, 500))
 			scroll.Resize(fyne.NewSize(100, 100))
 			areaHoriz := Renderer(scroll).(*scrollRenderer).horizArea
@@ -420,10 +420,10 @@ func TestScrollContainer_ScrollBarIsSmall(t *testing.T) {
 
 func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	for _, mode := range modes {
-		scroll := NewScrollContainerWithMode(rect, mode)
-		switch mode {
-		case ScrollModeHorizontal:
+	for _, direction := range directions {
+		scroll := NewScrollContainerWithDirection(rect, direction)
+		switch direction {
+		case ScrollDirectionHorizontal:
 			rect.SetMinSize(fyne.NewSize(500, 500))
 			scroll.Resize(fyne.NewSize(100, 100))
 			area := Renderer(scroll).(*scrollRenderer).horizArea
@@ -446,7 +446,7 @@ func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing
 			assert.Equal(t, fyne.NewPos(0, 100-theme.ScrollBarSmallSize()*2), area.Position())
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Height)
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().Y)
-		case ScrollModeVertical:
+		case ScrollDirectionVertical:
 			rect.SetMinSize(fyne.NewSize(500, 500))
 			scroll.Resize(fyne.NewSize(100, 100))
 			area := Renderer(scroll).(*scrollRenderer).vertArea
@@ -469,7 +469,7 @@ func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing
 			assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), area.Position())
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Size().Width)
 			assert.Equal(t, theme.ScrollBarSmallSize(), bar.Position().X)
-		case ScrollModeBoth:
+		case ScrollDirectionBoth:
 			rect.SetMinSize(fyne.NewSize(500, 500))
 			scroll.Resize(fyne.NewSize(100, 100))
 			areaHoriz := Renderer(scroll).(*scrollRenderer).horizArea
@@ -520,7 +520,7 @@ func TestScrollContainer_ScrollBarGrowsAndShrinksOnMouseInAndMouseOut(t *testing
 func TestScrollContainer_ShowShadowOnLeftIfContentIsScrolled(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(500, 100))
-	scroll := NewScrollContainerWithMode(rect, ScrollModeHorizontal)
+	scroll := NewScrollContainerWithDirection(rect, ScrollDirectionHorizontal)
 	scroll.Resize(fyne.NewSize(100, 100))
 	r := Renderer(scroll).(*scrollRenderer)
 	assert.False(t, r.leftShadow.Visible())
@@ -536,7 +536,7 @@ func TestScrollContainer_ShowShadowOnLeftIfContentIsScrolled(t *testing.T) {
 func TestScrollContainer_ShowShadowOnRightIfContentCanScroll(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(500, 100))
-	scroll := NewScrollContainerWithMode(rect, ScrollModeHorizontal)
+	scroll := NewScrollContainerWithDirection(rect, ScrollDirectionHorizontal)
 	scroll.Resize(fyne.NewSize(100, 100))
 	r := Renderer(scroll).(*scrollRenderer)
 	assert.True(t, r.rightShadow.Visible())
@@ -584,7 +584,7 @@ func TestScrollContainer_ShowShadowOnBottomIfContentCanScroll(t *testing.T) {
 func TestScrollBarRenderer_BarSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(100, 100))
-	scroll := NewScrollContainerWithMode(rect, ScrollModeBoth)
+	scroll := NewScrollContainerWithDirection(rect, ScrollDirectionBoth)
 	scroll.Resize(fyne.NewSize(100, 100))
 	areaHoriz := Renderer(Renderer(scroll).(*scrollRenderer).horizArea).(*scrollBarAreaRenderer)
 	areaVert := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer)
@@ -613,7 +613,7 @@ func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
 func TestScrollBar_Dragged_ClickedInside(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
-	scroll := NewScrollContainerWithMode(rect, ScrollModeBoth)
+	scroll := NewScrollContainerWithDirection(rect, ScrollDirectionBoth)
 	scroll.Resize(fyne.NewSize(100, 100))
 	scrollBarHoriz := Renderer(Renderer(scroll).(*scrollRenderer).horizArea).(*scrollBarAreaRenderer).bar
 	scrollBarVert := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
@@ -633,7 +633,7 @@ func TestScrollBar_Dragged_ClickedInside(t *testing.T) {
 func TestScrollBar_DraggedBack_ClickedInside(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
-	scroll := NewScrollContainerWithMode(rect, ScrollModeBoth)
+	scroll := NewScrollContainerWithDirection(rect, ScrollDirectionBoth)
 	scroll.Resize(fyne.NewSize(100, 100))
 	scrollBarHoriz := Renderer(Renderer(scroll).(*scrollRenderer).horizArea).(*scrollBarAreaRenderer).bar
 	scrollBarVert := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar
@@ -710,7 +710,7 @@ func TestScrollBar_Dragged_Limit(t *testing.T) {
 func TestScrollBar_Dragged_BackLimit(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
-	scroll := NewScrollContainerWithMode(rect, ScrollModeBoth)
+	scroll := NewScrollContainerWithDirection(rect, ScrollDirectionBoth)
 	scroll.Resize(fyne.NewSize(100, 100))
 	scrollBarHoriz := Renderer(Renderer(scroll).(*scrollRenderer).horizArea).(*scrollBarAreaRenderer).bar
 	scrollBarVert := Renderer(Renderer(scroll).(*scrollRenderer).vertArea).(*scrollBarAreaRenderer).bar

@@ -121,10 +121,10 @@ func makeScrollTab() fyne.CanvasObject {
 		}))
 	}
 
-	scroll := widget.NewScrollContainerWithMode(list, widget.ScrollModeHorizontal)
+	scroll := widget.NewScrollContainerWithDirection(list, widget.ScrollDirectionHorizontal)
 	scroll.Resize(fyne.NewSize(200, 300))
 
-	scroll2 := widget.NewScrollContainerWithMode(list2, widget.ScrollModeVertical)
+	scroll2 := widget.NewScrollContainerWithDirection(list2, widget.ScrollDirectionVertical)
 	scroll2.Resize(fyne.NewSize(200, 100))
 
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(scroll, nil, nil, nil), scroll, scroll2)
@@ -134,7 +134,7 @@ func makeScrollBothTab() fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
 	logo.SetMinSize(fyne.NewSize(800, 800))
 
-	scroll := widget.NewScrollContainerWithMode(logo, widget.ScrollModeBoth)
+	scroll := widget.NewScrollContainerWithDirection(logo, widget.ScrollDirectionBoth)
 	scroll.Resize(fyne.NewSize(400, 400))
 
 	return scroll
