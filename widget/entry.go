@@ -444,6 +444,27 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	e.updateMousePointer(ev, false)
 }
 
+// copyToClipboard copies the current selection to a given clipboard and then removes the selected text.
+// This does nothing if it is a password entry.
+func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
+	if !e.selecting || e.Password {
+		return
+	}
+
+	e.copyToClipboard(clipboard)
+	e.eraseSelection()
+}
+
+// copyToClipboard copies the current selection to a given clipboard.
+// This does nothing if it is a password entry.
+func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
+	if !e.selecting || e.Password {
+		return
+	}
+
+	clipboard.SetContent(e.selectedText())
+}
+
 // pasteFromClipboard inserts text from the clipboard content,
 // starting from the cursor position.
 func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
@@ -496,12 +517,20 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
+	cutItem := fyne.NewMenuItem("Cut", func() {
+		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+		e.cutToClipboard(clipboard)
+	})
+	copyItem := fyne.NewMenuItem("Copy", func() {
+		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+		e.copyToClipboard(clipboard)
+	})
 	pasteItem := fyne.NewMenuItem("Paste", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.pasteFromClipboard(clipboard)
 	})
 	selectAllItem := fyne.NewMenuItem("Select all", e.selectAll)
-	e.popUp = NewPopUpMenu(fyne.NewMenu("", pasteItem, selectAllItem), c)
+	e.popUp = NewPopUpMenu(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
@@ -1017,25 +1046,12 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
-		if e.Password {
-			return
-		}
-
 		cut := se.(*fyne.ShortcutCut)
-		text := e.selectedText()
-		e.eraseSelection()
-
-		cut.Clipboard.SetContent(text)
+		e.copyToClipboard(cut.Clipboard)
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutCopy{}, func(se fyne.Shortcut) {
-		if e.Password {
-			return
-		}
-
-		copy := se.(*fyne.ShortcutCopy)
-		text := e.selectedText()
-
-		copy.Clipboard.SetContent(text)
+		cpy := se.(*fyne.ShortcutCopy)
+		e.copyToClipboard(cpy.Clipboard)
 	})
 	e.shortcut.AddShortcut(&fyne.ShortcutPaste{}, func(se fyne.Shortcut) {
 		paste := se.(*fyne.ShortcutPaste)
