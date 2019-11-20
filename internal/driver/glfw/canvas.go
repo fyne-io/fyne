@@ -396,7 +396,6 @@ func (c *glCanvas) setupThemeListener() {
 			<-listener
 			if c.menu != nil {
 				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
-				c.Refresh(c.menu)
 			}
 
 			c.SetPadded(c.padded) // refresh the padding for potential theme differences
