@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"fyne.io/fyne/cmd/fyne/internal/mobile"
 	"github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
 	"github.com/josephspurrier/goversioninfo"
@@ -234,29 +235,11 @@ func (p *packager) packageWindows() error {
 }
 
 func (p *packager) packageAndroid() error {
-	if _, err := exec.LookPath("gomobile"); err != nil {
-		return errors.New("Could not find gomobile for building")
-	}
-
-	cmd := exec.Command("gomobile", "build", "-target", "android")
-	cmd.Env = append(os.Environ(), "GO111MODULE=off")
-	cmd.Dir = p.srcDir
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
+	return mobile.RunNewBuild("android", "")
 }
 
 func (p *packager) packageIOS() error {
-	if _, err := exec.LookPath("gomobile"); err != nil {
-		return errors.New("Could not find gomobile for building")
-	}
-
-	cmd := exec.Command("gomobile", "build", "-target", "ios", "-bundleid", p.appID)
-	cmd.Env = append(os.Environ(), "GO111MODULE=off")
-	cmd.Dir = p.srcDir
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
+	err := mobile.RunNewBuild("ios", p.appID)
 	if err != nil {
 		return err
 	}

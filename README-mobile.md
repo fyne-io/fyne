@@ -3,11 +3,7 @@ We should wrap this into our current tooling before release!
 
 # Pre-requisites
 
-Install gomobile (the go compiler for mobile apps)
-
-`go get golang.org/x/mobile/cmd/gomobile`
-
-Also ensure that your fyne install is the latest development version (both library and "fyne" command line tool).
+Please ensure that your fyne install is the latest development version (both library and "fyne" command line tool).
 
 ## Android
 
