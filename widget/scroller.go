@@ -145,13 +145,12 @@ func (s *scrollBarAreaRenderer) MinSize() fyne.Size {
 			min = theme.ScrollBarSmallSize() * 2
 		}
 		return fyne.NewSize(theme.ScrollBarSize(), min)
-	case scrollBarOrientationVertical:
+	default:
 		if !s.area.isWide {
 			min = theme.ScrollBarSmallSize() * 2
 		}
 		return fyne.NewSize(min, theme.ScrollBarSize())
 	}
-	return fyne.NewSize(min, theme.ScrollBarSize())
 }
 
 func (s *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
@@ -162,8 +161,6 @@ func (s *scrollBarAreaRenderer) Refresh() {
 	switch s.orientation {
 	case scrollBarOrientationHorizontal:
 		s.updateHorizontalBarPosition()
-	case scrollBarOrientationVertical:
-		s.updateVerticalBarPosition()
 	default:
 		s.updateVerticalBarPosition()
 	}
