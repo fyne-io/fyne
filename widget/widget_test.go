@@ -52,7 +52,6 @@ func TestApplyThemeCalled(t *testing.T) {
 		}
 	}()
 
-	close(widget.refreshed)
 	window.Close()
 }
 
@@ -70,7 +69,6 @@ func TestApplyThemeCalledChild(t *testing.T) {
 		}
 	}()
 
-	close(child.refreshed)
 	window.Close()
 }
 
