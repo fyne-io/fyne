@@ -233,10 +233,10 @@ func TestScrollContainer_ShowShadowOnLeftIfContentIsScrolled(t *testing.T) {
 	assert.False(t, r.leftShadow.Visible())
 	assert.Equal(t, fyne.NewPos(0, 0), r.leftShadow.Position())
 
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -1})
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -1})
 	assert.True(t, r.leftShadow.Visible())
 
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 1})
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 1})
 	assert.False(t, r.leftShadow.Visible())
 }
 
@@ -249,10 +249,10 @@ func TestScrollContainer_ShowShadowOnRightIfContentCanScroll(t *testing.T) {
 	assert.True(t, r.rightShadow.Visible())
 	assert.Equal(t, scroll.size.Width, r.rightShadow.Position().X+r.rightShadow.Size().Width)
 
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -400})
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -400})
 	assert.False(t, r.rightShadow.Visible())
 
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 100})
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 100})
 	assert.True(t, r.rightShadow.Visible())
 }
 

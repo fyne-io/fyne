@@ -82,8 +82,6 @@ func (s *scrollBar) Dragged(e *fyne.DragEvent) {
 			s.dragStartHoriz = s.Position().X
 		case scrollBarOrientationVertical:
 			s.dragStartVert = s.Position().Y
-		default:
-			s.dragStartVert = s.Position().Y
 		}
 		s.draggedDistanceHoriz = 0
 		s.draggedDistanceVert = 0
@@ -94,9 +92,6 @@ func (s *scrollBar) Dragged(e *fyne.DragEvent) {
 		s.draggedDistanceHoriz += e.DraggedX
 		s.area.moveHorizontalBar(s.draggedDistanceHoriz + s.dragStartHoriz)
 	case scrollBarOrientationVertical:
-		s.draggedDistanceVert += e.DraggedY
-		s.area.moveVerticalBar(s.draggedDistanceVert + s.dragStartVert)
-	default:
 		s.draggedDistanceVert += e.DraggedY
 		s.area.moveVerticalBar(s.draggedDistanceVert + s.dragStartVert)
 	}
@@ -113,8 +108,8 @@ func (s *scrollBar) MouseOut() {
 	s.area.MouseOut()
 }
 
-func newScrollBar(area *scrollBarArea, orientation scrollBarOrientation) *scrollBar {
-	return &scrollBar{area: area, orientation: orientation}
+func newScrollBar(area *scrollBarArea) *scrollBar {
+	return &scrollBar{area: area, orientation: area.orientation}
 }
 
 type scrollBarAreaRenderer struct {
@@ -138,8 +133,6 @@ func (s *scrollBarAreaRenderer) Layout(size fyne.Size) {
 		s.updateHorizontalBarPosition()
 	case scrollBarOrientationVertical:
 		s.updateVerticalBarPosition()
-	default:
-		s.updateVerticalBarPosition()
 	}
 }
 
@@ -157,12 +150,8 @@ func (s *scrollBarAreaRenderer) MinSize() fyne.Size {
 			min = theme.ScrollBarSmallSize() * 2
 		}
 		return fyne.NewSize(min, theme.ScrollBarSize())
-	default:
-		if !s.area.isWide {
-			min = theme.ScrollBarSmallSize() * 2
-		}
-		return fyne.NewSize(min, theme.ScrollBarSize())
 	}
+	return fyne.NewSize(min, theme.ScrollBarSize())
 }
 
 func (s *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
@@ -252,7 +241,7 @@ type scrollBarArea struct {
 
 func (s *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	bar := newScrollBar(s, s.orientation)
+	bar := newScrollBar(s)
 	return &scrollBarAreaRenderer{area: s, bar: bar, orientation: s.orientation, objects: []fyne.CanvasObject{bar}}
 }
 
@@ -268,8 +257,6 @@ func (s *scrollBarArea) MouseIn(*desktop.MouseEvent) {
 		s.isTall = true
 	case scrollBarOrientationVertical:
 		s.isWide = true
-	default:
-		s.isWide = true
 	}
 	Refresh(s.scroll)
 }
@@ -282,8 +269,6 @@ func (s *scrollBarArea) MouseOut() {
 	case scrollBarOrientationHorizontal:
 		s.isTall = false
 	case scrollBarOrientationVertical:
-		s.isWide = false
-	default:
 		s.isWide = false
 	}
 	Refresh(s.scroll)
@@ -486,8 +471,8 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 	maxX := scrollWidth - barWidth
 	maxY := scrollHeight - barHeight
 
-	s.horizontalDraggedDistance += e.DraggedX
-	s.verticalDraggedDistance += e.DraggedY
+	s.horizontalDraggedDistance -= e.DraggedX
+	s.verticalDraggedDistance -= e.DraggedY
 
 	if s.horizontalDraggedDistance > maxX {
 		s.horizontalDraggedDistance = maxX
@@ -517,9 +502,13 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 		s.Content.Size().Height <= s.Size().Height {
 		return
 	}
-
-	s.Offset.X -= ev.DeltaX
-	s.Offset.Y -= ev.DeltaY
+	if s.hbar.Visible() && !s.vbar.Visible() {
+		s.Offset.X -= ev.DeltaY
+		s.Offset.Y -= ev.DeltaX
+	} else {
+		s.Offset.X -= ev.DeltaX
+		s.Offset.Y -= ev.DeltaY
+	}
 	if s.Offset.X < 0 {
 		s.Offset.X = 0
 	} else if s.Offset.X+s.Size().Width >= s.Content.Size().Width {

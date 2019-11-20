@@ -678,7 +678,6 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	})
-
 	switch wid := co.(type) {
 	case fyne.Scrollable:
 		ev := &fyne.ScrollEvent{}

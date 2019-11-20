@@ -127,7 +127,7 @@ func makeScrollTab() fyne.CanvasObject {
 	scroll2 := widget.NewScrollContainer(list2)
 	scroll2.Resize(fyne.NewSize(200, 100))
 
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(scroll, nil, nil, nil), scroll, scroll2)
+	return fyne.NewContainerWithLayout(layout.NewGridLayout(1), scroll, scroll2)
 }
 
 func makeScrollBothTab() fyne.CanvasObject {
