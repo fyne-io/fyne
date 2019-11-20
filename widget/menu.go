@@ -9,11 +9,11 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// NewPopUpMenu creates a PopUp widget populated with menu items from the passed menu structure.
-// It will automatically be shown as an overlay on the specified canvas.
-func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
+// NewPopUpMenuAtPosition creates a PopUp widget populated with menu items from the passed menu structure.
+// It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
+func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *PopUp {
+	var pop *PopUp
 	options := NewVBox()
-	pop := NewPopUp(options, c)
 	focused := c.Focused()
 	for _, option := range menu.Items {
 		opt := option // capture value
@@ -28,8 +28,15 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 		}))
 	}
 
-	options.Resize(options.MinSize()) // make sure we have updated after appending
+	pop = NewPopUpAtPosition(options, c, pos)
+	pop.Move(pos)
 	return pop
+}
+
+// NewPopUpMenu creates a PopUp widget populated with menu items from the passed menu structure.
+// It will automatically be shown as an overlay on the specified canvas.
+func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
+	return NewPopUpMenuAtPosition(menu, c, fyne.NewPos(0, 0))
 }
 
 type menuItemWidget struct {

@@ -137,10 +137,6 @@ func (c *mobileCanvas) Overlay() fyne.CanvasObject {
 
 func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.overlay = overlay
-
-	if c.overlay != nil {
-		c.overlay.Resize(c.size)
-	}
 }
 
 func (c *mobileCanvas) OnTypedRune() func(rune) {

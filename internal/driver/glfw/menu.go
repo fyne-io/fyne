@@ -53,6 +53,5 @@ func buildMenuBar(menus *fyne.MainMenu, c fyne.Canvas) *widget.Toolbar {
 }
 
 func showMenu(menu *fyne.Menu, pos fyne.Position, c fyne.Canvas) {
-	pop := widget.NewPopUpMenu(menu, c)
-	pop.Move(pos)
+	widget.NewPopUpMenuAtPosition(menu, c, pos)
 }

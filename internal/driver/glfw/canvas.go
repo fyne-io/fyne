@@ -103,9 +103,6 @@ func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.overlayTree = &renderCacheTree{root: &renderCacheNode{obj: c.overlay}}
 	c.Unlock()
 
-	if overlay != nil {
-		c.overlay.Resize(c.Size())
-	}
 	c.setDirty(true)
 }
 

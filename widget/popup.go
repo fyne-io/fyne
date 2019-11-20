@@ -102,12 +102,19 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	return &popUpRenderer{popUp: p, shadow: shadow, bg: bg, objects: objects}
 }
 
-// NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
-func NewPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
+// NewPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
+// It will then display the popup it on the passed canvas.
+func NewPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) *PopUp {
 	ret := &PopUp{Content: content, Canvas: canvas, modal: false}
 	ret.ExtendBaseWidget(ret)
+	ret.Move(pos)
 	ret.Show()
 	return ret
+}
+
+// NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
+func NewPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
+	return NewPopUpAtPosition(content, canvas, fyne.NewPos(0, 0))
 }
 
 // NewModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
