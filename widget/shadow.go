@@ -12,6 +12,8 @@ type shadowType int
 
 const (
 	shadowAround shadowType = iota
+	shadowLeft
+	shadowRight
 	shadowBottom
 	shadowTop
 )
@@ -50,6 +52,12 @@ type shadowRenderer struct {
 
 func (r *shadowRenderer) createShadows() {
 	switch r.s.typ {
+	case shadowLeft:
+		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
+		r.objects = []fyne.CanvasObject{r.l}
+	case shadowRight:
+		r.r = canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
+		r.objects = []fyne.CanvasObject{r.r}
 	case shadowBottom:
 		r.b = canvas.NewVerticalGradient(theme.ShadowColor(), color.Transparent)
 		r.objects = []fyne.CanvasObject{r.b}

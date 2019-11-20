@@ -105,19 +105,37 @@ func makeFormTab() fyne.Widget {
 	return form
 }
 
-func makeScrollTab() fyne.Widget {
+func makeScrollTab() fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
 	logo.SetMinSize(fyne.NewSize(320, 320))
-	list := widget.NewVBox()
+	list := widget.NewHBox()
+	list2 := widget.NewVBox()
+
 	for i := 1; i <= 20; i++ {
 		index := i // capture
 		list.Append(widget.NewButton(fmt.Sprintf("Button %d", index), func() {
 			fmt.Println("Tapped", index)
 		}))
+		list2.Append(widget.NewButton(fmt.Sprintf("Button %d", index), func() {
+			fmt.Println("Tapped", index)
+		}))
 	}
 
 	scroll := widget.NewScrollContainer(list)
-	scroll.Resize(fyne.NewSize(200, 200))
+	scroll.Resize(fyne.NewSize(200, 300))
+
+	scroll2 := widget.NewScrollContainer(list2)
+	scroll2.Resize(fyne.NewSize(200, 100))
+
+	return fyne.NewContainerWithLayout(layout.NewGridLayout(1), scroll, scroll2)
+}
+
+func makeScrollBothTab() fyne.CanvasObject {
+	logo := canvas.NewImageFromResource(theme.FyneLogo())
+	logo.SetMinSize(fyne.NewSize(800, 800))
+
+	scroll := widget.NewScrollContainer(logo)
+	scroll.Resize(fyne.NewSize(400, 400))
 
 	return scroll
 }
@@ -140,6 +158,7 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Progress", makeProgressTab()),
 			widget.NewTabItem("Form", makeFormTab()),
 			widget.NewTabItem("Scroll", makeScrollTab()),
+			widget.NewTabItem("Full Scroll", makeScrollBothTab()),
 		),
 	)
 }
