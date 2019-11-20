@@ -19,7 +19,6 @@ type WidgetRenderer interface {
 	MinSize() Size
 
 	Refresh()
-	ApplyTheme()
 	BackgroundColor() color.Color
 	Objects() []CanvasObject
 	Destroy()

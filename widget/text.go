@@ -26,7 +26,7 @@ type textPresenter interface {
 
 // textProvider represents the base element for text based widget.
 type textProvider struct {
-	baseWidget
+	BaseWidget
 	presenter textPresenter
 
 	buffer    []rune
@@ -46,37 +46,16 @@ func newTextProvider(text string, pres textPresenter) textProvider {
 	return t
 }
 
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (t *textProvider) Resize(size fyne.Size) {
-	t.resize(size, t)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (t *textProvider) Move(pos fyne.Position) {
-	t.move(pos, t)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (t *textProvider) MinSize() fyne.Size {
-	return t.minSize(t)
-}
-
-// Show this widget, if it was previously hidden
-func (t *textProvider) Show() {
-	t.show(t)
-}
-
-// Hide this widget, if it was previously visible
-func (t *textProvider) Hide() {
-	t.hide(t)
-}
-
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 	if t.presenter == nil {
 		panic("Cannot render a textProvider without a presenter")
+	}
+
+	if t.presenter.object() == nil {
+		t.ExtendBaseWidget(t)
+	} else {
+		t.ExtendBaseWidget(t.presenter.object())
 	}
 	r := &textRenderer{provider: t}
 
@@ -124,7 +103,7 @@ func (t *textProvider) refreshTextRenderer() {
 		obj = t
 	}
 
-	Refresh(obj)
+	obj.Refresh()
 }
 
 // SetText sets the text of the widget
@@ -207,6 +186,27 @@ func (t *textProvider) charMinSize() fyne.Size {
 	return textMinSize(defaultChar, theme.TextSize(), t.presenter.textStyle())
 }
 
+// lineSizeToColumn returns the rendered size for the line specified by row up to the col position
+func (t *textProvider) lineSizeToColumn(col, row int) (size fyne.Size) {
+	line := t.row(row)
+	if line == nil {
+		return fyne.NewSize(0, 0)
+	}
+
+	if col >= len(line) {
+		col = len(line)
+	}
+
+	measureText := string(line[0:col])
+	if t.presenter.password() {
+		measureText = strings.Repeat(passwordChar, col)
+	}
+
+	label := canvas.NewText(measureText, theme.TextColor())
+	label.TextStyle = t.presenter.textStyle()
+	return label.MinSize()
+}
+
 // Renderer
 type textRenderer struct {
 	objects []fyne.CanvasObject
@@ -249,8 +249,8 @@ func (r *textRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-// ApplyTheme is called when the Label may need to update its look
-func (r *textRenderer) ApplyTheme() {
+// applyTheme updates the label to match the current theme.
+func (r *textRenderer) applyTheme() {
 	c := theme.TextColor()
 	if r.provider.presenter.textColor() != nil {
 		c = r.provider.presenter.textColor()
@@ -296,7 +296,7 @@ func (r *textRenderer) Refresh() {
 		r.texts[index].Text = ""
 	}
 
-	r.ApplyTheme()
+	r.applyTheme()
 	r.Layout(r.provider.Size())
 	if r.provider.presenter.object() == nil {
 		canvas.Refresh(r.provider)
@@ -307,29 +307,6 @@ func (r *textRenderer) Refresh() {
 
 func (r *textRenderer) BackgroundColor() color.Color {
 	return color.Transparent
-}
-
-// lineSizeToColumn returns the rendered size for the line specified by row up to the col position
-func (r *textRenderer) lineSizeToColumn(col, row int) (size fyne.Size) {
-	text := r.provider
-
-	line := text.row(row)
-	if line == nil {
-		return fyne.NewSize(0, 0)
-	}
-
-	if col >= len(line) {
-		col = len(line)
-	}
-
-	measureText := string(line[0:col])
-	if r.provider.presenter.password() {
-		measureText = strings.Repeat(passwordChar, col)
-	}
-
-	label := canvas.NewText(measureText, theme.TextColor())
-	label.TextStyle = r.provider.presenter.textStyle()
-	return label.MinSize()
 }
 
 func (r *textRenderer) Destroy() {

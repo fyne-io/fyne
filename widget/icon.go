@@ -31,10 +31,6 @@ func (i *iconRenderer) Objects() []fyne.CanvasObject {
 	return i.objects
 }
 
-func (i *iconRenderer) ApplyTheme() {
-	i.Refresh()
-}
-
 func (i *iconRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
@@ -58,47 +54,26 @@ func (i *iconRenderer) Destroy() {
 
 // Icon widget is a basic image component that load's its resource to match the theme.
 type Icon struct {
-	baseWidget
+	BaseWidget
 
 	Resource fyne.Resource // The resource for this icon
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (i *Icon) Resize(size fyne.Size) {
-	i.resize(size, i)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (i *Icon) Move(pos fyne.Position) {
-	i.move(pos, i)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (i *Icon) MinSize() fyne.Size {
-	return i.minSize(i)
-}
-
-// Show this widget, if it was previously hidden
-func (i *Icon) Show() {
-	i.show(i)
-}
-
-// Hide this widget, if it was previously visible
-func (i *Icon) Hide() {
-	i.hide(i)
 }
 
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res
+	i.refresh(i)
+}
 
-	Refresh(i)
+// MinSize returns the size that this widget should not shrink below
+func (i *Icon) MinSize() fyne.Size {
+	i.ExtendBaseWidget(i)
+	return i.BaseWidget.MinSize()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
+	i.ExtendBaseWidget(i)
 	render := &iconRenderer{image: i}
 
 	render.objects = []fyne.CanvasObject{}

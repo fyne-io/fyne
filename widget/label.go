@@ -64,35 +64,15 @@ func (l *Label) object() fyne.Widget {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
+	l.ExtendBaseWidget(l)
 	hidden := l.Hidden
 	l.textProvider = newTextProvider(l.Text, l)
 	l.textProvider.Hidden = hidden
 	return l.textProvider.CreateRenderer()
 }
 
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (l *Label) Resize(size fyne.Size) {
-	l.resize(size, l)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (l *Label) Move(pos fyne.Position) {
-	l.move(pos, l)
-}
-
-// MinSize returns the smallest size this widget can shrink to
+// MinSize returns the size that this widget should not shrink below
 func (l *Label) MinSize() fyne.Size {
-	return l.minSize(l)
-}
-
-// Show this widget, if it was previously hidden
-func (l *Label) Show() {
-	l.show(l)
-}
-
-// Hide this widget, if it was previously visible
-func (l *Label) Hide() {
-	l.hide(l)
+	l.ExtendBaseWidget(l)
+	return l.BaseWidget.MinSize()
 }

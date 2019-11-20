@@ -19,13 +19,8 @@ type CanvasObject interface {
 	Visible() bool
 	Show()
 	Hide()
-}
 
-// Themeable indicates that the associated CanvasObject responds to theme
-// changes. When the settings detect a theme change the object will be informed
-// through the invocation of ApplyTheme().
-type Themeable interface {
-	ApplyTheme()
+	Refresh()
 }
 
 // Tappable describes any CanvasObject that can also be tapped.

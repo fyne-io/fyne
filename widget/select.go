@@ -50,14 +50,6 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 		(size.Height-theme.IconInlineSize())/2))
 }
 
-// ApplyTheme is called when the Button may need to update its look
-func (s *selectRenderer) ApplyTheme() {
-	s.label.Color = theme.TextColor()
-	s.label.TextSize = theme.TextSize()
-
-	s.Refresh()
-}
-
 func (s *selectRenderer) BackgroundColor() color.Color {
 	if s.combo.hovered {
 		return theme.HoverColor()
@@ -66,6 +58,9 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 }
 
 func (s *selectRenderer) Refresh() {
+	s.label.Color = theme.TextColor()
+	s.label.TextSize = theme.TextSize()
+
 	if s.combo.PlaceHolder == "" {
 		s.combo.PlaceHolder = defaultPlaceHolder
 	}
@@ -101,7 +96,7 @@ func (s *selectRenderer) Destroy() {
 
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
-	baseWidget
+	BaseWidget
 
 	Selected    string
 	Options     []string
@@ -115,32 +110,11 @@ type Select struct {
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (s *Select) Resize(size fyne.Size) {
-	s.resize(size, s)
+	s.BaseWidget.Resize(size)
 
 	if s.popUp != nil {
 		s.popUp.Content.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
 	}
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (s *Select) Move(pos fyne.Position) {
-	s.move(pos, s)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (s *Select) MinSize() fyne.Size {
-	return s.minSize(s)
-}
-
-// Show this widget, if it was previously hidden
-func (s *Select) Show() {
-	s.show(s)
-}
-
-// Hide this widget, if it was previously visible
-func (s *Select) Hide() {
-	s.hide(s)
 }
 
 func (s *Select) optionTapped(text string) {
@@ -189,8 +163,15 @@ func (s *Select) MouseOut() {
 func (s *Select) MouseMoved(*desktop.MouseEvent) {
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (s *Select) MinSize() fyne.Size {
+	s.ExtendBaseWidget(s)
+	return s.BaseWidget.MinSize()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
+	s.ExtendBaseWidget(s)
 	icon := NewIcon(theme.MenuDropDownIcon())
 	text := canvas.NewText(s.Selected, theme.TextColor())
 
@@ -227,7 +208,7 @@ func (s *Select) SetSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	combo := &Select{baseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	combo := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
 
 	Renderer(combo).Layout(combo.MinSize())
 	return combo

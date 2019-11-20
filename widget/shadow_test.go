@@ -108,7 +108,7 @@ func TestShadow_ApplyTheme(t *testing.T) {
 	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
 
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
-	r.ApplyTheme()
+	r.Refresh()
 	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
 }
 

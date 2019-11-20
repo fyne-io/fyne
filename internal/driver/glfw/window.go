@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/widget"
@@ -407,7 +408,7 @@ func (w *window) closed(viewport *glfw.Window) {
 	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
 		switch co := node.obj.(type) {
 		case fyne.Widget:
-			widget.DestroyRenderer(co)
+			cache.DestroyRenderer(co)
 		}
 	})
 

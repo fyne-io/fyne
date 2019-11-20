@@ -12,61 +12,43 @@ import (
 // Box widget is a simple list where the child elements are arranged in a single column
 // for vertical or a single row for horizontal arrangement
 type Box struct {
-	baseWidget
+	BaseWidget
 	background color.Color
 
 	Horizontal bool
 	Children   []fyne.CanvasObject
 }
 
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (b *Box) Resize(size fyne.Size) {
-	b.resize(size, b)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (b *Box) Move(pos fyne.Position) {
-	b.move(pos, b)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (b *Box) MinSize() fyne.Size {
-	return b.minSize(b)
-}
-
-// Show this widget, if it was previously hidden
-func (b *Box) Show() {
-	b.show(b)
-}
-
-// Hide this widget, if it was previously visible
-func (b *Box) Hide() {
-	b.hide(b)
-}
-
-// ApplyTheme updates this box to match the current theme
-func (b *Box) ApplyTheme() {
+// Refresh updates this box to match the current theme
+func (b *Box) Refresh() {
 	b.background = theme.BackgroundColor()
+
+	b.BaseWidget.refresh(b)
 }
 
 // Prepend inserts a new CanvasObject at the top/left of the box
 func (b *Box) Prepend(object fyne.CanvasObject) {
 	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
 
-	Refresh(b)
+	b.refresh(b)
 }
 
 // Append adds a new CanvasObject to the end/right of the box
 func (b *Box) Append(object fyne.CanvasObject) {
 	b.Children = append(b.Children, object)
 
-	Refresh(b)
+	b.refresh(b)
+}
+
+// MinSize returns the size that this widget should not shrink below
+func (b *Box) MinSize() fyne.Size {
+	b.ExtendBaseWidget(b)
+	return b.BaseWidget.MinSize()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (b *Box) CreateRenderer() fyne.WidgetRenderer {
+	b.ExtendBaseWidget(b)
 	var lay fyne.Layout
 	if b.Horizontal {
 		lay = layout.NewHBoxLayout()
@@ -83,18 +65,12 @@ func (b *Box) setBackgroundColor(bg color.Color) {
 
 // NewHBox creates a new horizontally aligned box widget with the specified list of child objects
 func NewHBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{baseWidget: baseWidget{}, Horizontal: true, Children: children}
-
-	Renderer(box).Layout(box.MinSize())
-	return box
+	return &Box{BaseWidget: BaseWidget{}, Horizontal: true, Children: children}
 }
 
 // NewVBox creates a new vertically aligned box widget with the specified list of child objects
 func NewVBox(children ...fyne.CanvasObject) *Box {
-	box := &Box{baseWidget: baseWidget{}, Horizontal: false, Children: children}
-
-	Renderer(box).Layout(box.MinSize())
-	return box
+	return &Box{BaseWidget: BaseWidget{}, Horizontal: false, Children: children}
 }
 
 type boxRenderer struct {
@@ -112,9 +88,6 @@ func (b *boxRenderer) Layout(size fyne.Size) {
 	b.layout.Layout(b.objects, size)
 }
 
-func (b *boxRenderer) ApplyTheme() {
-}
-
 func (b *boxRenderer) BackgroundColor() color.Color {
 	if b.box.background == nil {
 		return theme.BackgroundColor()
@@ -129,6 +102,9 @@ func (b *boxRenderer) Objects() []fyne.CanvasObject {
 
 func (b *boxRenderer) Refresh() {
 	b.objects = b.box.Children
+	for _, child := range b.objects {
+		child.Refresh()
+	}
 	b.Layout(b.box.Size())
 
 	canvas.Refresh(b.box)

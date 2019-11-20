@@ -224,7 +224,7 @@ func TestCheckRenderer_ApplyTheme(t *testing.T) {
 	textSize := render.label.TextSize
 	customTextSize := textSize
 	withTestTheme(func() {
-		render.ApplyTheme()
+		render.applyTheme()
 		customTextSize = render.label.TextSize
 	})
 

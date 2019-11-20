@@ -51,13 +51,11 @@ func (p *progressRenderer) Layout(size fyne.Size) {
 	p.updateBar()
 }
 
-// ApplyTheme is called when the progress bar may need to update its look
-func (p *progressRenderer) ApplyTheme() {
+// applyTheme updates the progress bar to match the current theme
+func (p *progressRenderer) applyTheme() {
 	p.bar.FillColor = theme.PrimaryColor()
 	p.label.Color = theme.TextColor()
 	p.label.TextSize = theme.TextSize()
-
-	p.Refresh()
 }
 
 func (p *progressRenderer) BackgroundColor() color.Color {
@@ -65,6 +63,7 @@ func (p *progressRenderer) BackgroundColor() color.Color {
 }
 
 func (p *progressRenderer) Refresh() {
+	p.applyTheme()
 	p.updateBar()
 
 	canvas.Refresh(p.progress)
@@ -79,47 +78,27 @@ func (p *progressRenderer) Destroy() {
 
 // ProgressBar widget creates a horizontal panel that indicates progress
 type ProgressBar struct {
-	baseWidget
+	BaseWidget
 
 	Min, Max, Value float64
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (p *ProgressBar) Resize(size fyne.Size) {
-	p.resize(size, p)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (p *ProgressBar) Move(pos fyne.Position) {
-	p.move(pos, p)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (p *ProgressBar) MinSize() fyne.Size {
-	return p.minSize(p)
-}
-
-// Show this widget, if it was previously hidden
-func (p *ProgressBar) Show() {
-	p.show(p)
-}
-
-// Hide this widget, if it was previously visible
-func (p *ProgressBar) Hide() {
-	p.hide(p)
 }
 
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
 	p.Value = v
-	Renderer(p).Refresh()
+	p.refresh(p)
+}
+
+// MinSize returns the size that this widget should not shrink below
+func (p *ProgressBar) MinSize() fyne.Size {
+	p.ExtendBaseWidget(p)
+	return p.BaseWidget.MinSize()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
+	p.ExtendBaseWidget(p)
 	if p.Min == 0 && p.Max == 0 {
 		p.Max = 1.0
 	}

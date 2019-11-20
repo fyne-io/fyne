@@ -89,8 +89,8 @@ func (r *radioRenderer) Layout(size fyne.Size) {
 	}
 }
 
-// ApplyTheme is called when the Radio may need to update its look
-func (r *radioRenderer) ApplyTheme() {
+// applyTheme updates this Radio to match the current system theme
+func (r *radioRenderer) applyTheme() {
 	for _, item := range r.items {
 		item.label.Color = theme.TextColor()
 		item.label.TextSize = theme.TextSize()
@@ -98,8 +98,6 @@ func (r *radioRenderer) ApplyTheme() {
 			item.label.Color = theme.DisabledTextColor()
 		}
 	}
-
-	r.Refresh()
 }
 
 func (r *radioRenderer) BackgroundColor() color.Color {
@@ -107,6 +105,7 @@ func (r *radioRenderer) BackgroundColor() color.Color {
 }
 
 func (r *radioRenderer) Refresh() {
+	r.applyTheme()
 	r.radio.removeDuplicateOptions()
 
 	if len(r.items) < len(r.radio.Options) {
@@ -164,7 +163,7 @@ func (r *radioRenderer) Destroy() {
 // Radio widget has a list of text labels and radio check icons next to each.
 // Changing the selection (only one can be selected) will trigger the changed func.
 type Radio struct {
-	baseWidget
+	BaseWidget
 	Options  []string
 	Selected string
 
@@ -174,43 +173,16 @@ type Radio struct {
 	hoveredItemIndex int
 }
 
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (r *Radio) Resize(size fyne.Size) {
-	r.resize(size, r)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (r *Radio) Move(pos fyne.Position) {
-	r.move(pos, r)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (r *Radio) MinSize() fyne.Size {
-	return r.minSize(r)
-}
-
-// Show this widget, if it was previously hidden
-func (r *Radio) Show() {
-	r.show(r)
-}
-
-// Hide this widget, if it was previously visible
-func (r *Radio) Hide() {
-	r.hide(r)
-}
-
 // Enable this widget, if it was previously disabled
 func (r *Radio) Enable() {
 	r.enable(r)
-	Renderer(r).ApplyTheme()
+	r.refresh(r)
 }
 
 // Disable this widget, if it was previously enabled
 func (r *Radio) Disable() {
 	r.disable(r)
-	Renderer(r).ApplyTheme()
+	r.refresh(r)
 }
 
 // Disabled returns true if the widget is disabled
@@ -294,8 +266,15 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 func (r *Radio) TappedSecondary(*fyne.PointEvent) {
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (r *Radio) MinSize() fyne.Size {
+	r.ExtendBaseWidget(r)
+	return r.BaseWidget.MinSize()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
+	r.ExtendBaseWidget(r)
 	var items []*radioRenderItem
 	var objects []fyne.CanvasObject
 
@@ -348,7 +327,7 @@ func (r *Radio) removeDuplicateOptions() {
 // NewRadio creates a new radio widget with the set options and change handler
 func NewRadio(options []string, changed func(string)) *Radio {
 	r := &Radio{
-		baseWidget{},
+		BaseWidget{},
 		options,
 		"",
 		changed,

@@ -69,6 +69,10 @@ func (s *Spacer) Hide() {
 	s.hidden = true
 }
 
+// Refresh does nothing for a spacer but is part of the CanvasObject definition
+func (s *Spacer) Refresh() {
+}
+
 // NewSpacer returns a spacer object which can fill vertical and horizontal
 // space. This is primarily used with a box layout.
 func NewSpacer() fyne.CanvasObject {

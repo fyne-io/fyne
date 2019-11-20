@@ -23,35 +23,21 @@ func newShadow(typ shadowType, depth int) *shadow {
 var _ fyne.Widget = (*shadow)(nil)
 
 type shadow struct {
-	baseWidget
+	BaseWidget
 	typ   shadowType
 	depth int
 }
 
+func (s *shadow) MinSize() fyne.Size {
+	s.ExtendBaseWidget(s)
+	return s.BaseWidget.MinSize()
+}
+
 func (s *shadow) CreateRenderer() fyne.WidgetRenderer {
+	s.ExtendBaseWidget(s)
 	r := &shadowRenderer{s: s}
 	r.createShadows()
 	return r
-}
-
-func (s *shadow) Hide() {
-	s.hide(s)
-}
-
-func (s *shadow) MinSize() fyne.Size {
-	return s.minSize(s)
-}
-
-func (s *shadow) Move(p fyne.Position) {
-	s.move(p, s)
-}
-
-func (s *shadow) Resize(size fyne.Size) {
-	s.resize(size, s)
-}
-
-func (s *shadow) Show() {
-	s.show(s)
 }
 
 type shadowRenderer struct {
@@ -89,10 +75,6 @@ func (r *shadowRenderer) createShadows() {
 		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
 		r.objects = []fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l}
 	}
-}
-
-func (r *shadowRenderer) ApplyTheme() {
-	r.createShadows()
 }
 
 func (r *shadowRenderer) BackgroundColor() color.Color {
@@ -146,4 +128,5 @@ func (r *shadowRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *shadowRenderer) Refresh() {
+	r.createShadows()
 }

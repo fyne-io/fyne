@@ -349,7 +349,7 @@ func TestRadioRenderer_ApplyTheme(t *testing.T) {
 	textSize := item.label.TextSize
 	customTextSize := textSize
 	withTestTheme(func() {
-		render.ApplyTheme()
+		render.applyTheme()
 		customTextSize = item.label.TextSize
 	})
 

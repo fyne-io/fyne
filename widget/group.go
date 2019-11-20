@@ -10,38 +10,11 @@ import (
 
 // Group widget is list of widgets that contains a visual border around the list and a group title at the top.
 type Group struct {
-	baseWidget
+	BaseWidget
 
 	Text    string
 	box     *Box
 	content fyne.CanvasObject
-}
-
-// Resize sets a new size for a widget.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (g *Group) Resize(size fyne.Size) {
-	g.resize(size, g)
-}
-
-// Move the widget to a new position, relative to its parent.
-// Note this should not be used if the widget is being managed by a Layout within a Container.
-func (g *Group) Move(pos fyne.Position) {
-	g.move(pos, g)
-}
-
-// MinSize returns the smallest size this widget can shrink to
-func (g *Group) MinSize() fyne.Size {
-	return g.minSize(g)
-}
-
-// Show this widget, if it was previously hidden
-func (g *Group) Show() {
-	g.show(g)
-}
-
-// Hide this widget, if it was previously visible
-func (g *Group) Hide() {
-	g.hide(g)
 }
 
 // Prepend inserts a new CanvasObject at the top of the group
@@ -58,8 +31,15 @@ func (g *Group) Append(object fyne.CanvasObject) {
 	Refresh(g)
 }
 
+// MinSize returns the size that this widget should not shrink below
+func (g *Group) MinSize() fyne.Size {
+	g.ExtendBaseWidget(g)
+	return g.BaseWidget.MinSize()
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (g *Group) CreateRenderer() fyne.WidgetRenderer {
+	g.ExtendBaseWidget(g)
 	label := NewLabel(g.Text)
 	labelBg := canvas.NewRectangle(theme.BackgroundColor())
 	line := canvas.NewRectangle(theme.ButtonColor())
@@ -71,7 +51,7 @@ func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 // NewGroup creates a new grouped list widget with a title and the specified list of child objects.
 func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
-	group := &Group{baseWidget{}, title, box, box}
+	group := &Group{BaseWidget{}, title, box, box}
 
 	Renderer(group).Layout(group.MinSize())
 	return group
@@ -81,7 +61,7 @@ func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 // This group will scroll when the available space is less than needed to display the items it contains.
 func NewGroupWithScroller(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
-	group := &Group{baseWidget{}, title, box, NewScrollContainer(box)}
+	group := &Group{BaseWidget{}, title, box, NewScrollContainer(box)}
 
 	Renderer(group).Layout(group.MinSize())
 	return group
@@ -119,12 +99,6 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 	g.group.content.Resize(fyne.NewSize(size.Width, size.Height-labelHeight-theme.Padding()))
 }
 
-func (g *groupRenderer) ApplyTheme() {
-	Renderer(g.label).ApplyTheme()
-	g.line.FillColor = theme.ButtonColor()
-	g.labelBg.FillColor = theme.BackgroundColor()
-}
-
 func (g *groupRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
@@ -134,6 +108,9 @@ func (g *groupRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (g *groupRenderer) Refresh() {
+	g.line.FillColor = theme.ButtonColor()
+	g.labelBg.FillColor = theme.BackgroundColor()
+
 	g.label.SetText(g.group.Text)
 	g.Layout(g.group.Size())
 

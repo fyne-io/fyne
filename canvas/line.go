@@ -60,13 +60,18 @@ func (l *Line) Visible() bool {
 func (l *Line) Show() {
 	l.Hidden = false
 
-	Refresh(l)
+	l.Refresh()
 }
 
 // Hide will set this line to not be visible
 func (l *Line) Hide() {
 	l.Hidden = true
 
+	l.Refresh()
+}
+
+// Refresh causes this object to be redrawn in it's current state
+func (l *Line) Refresh() {
 	Refresh(l)
 }
 
