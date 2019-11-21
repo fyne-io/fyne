@@ -380,3 +380,13 @@ func Test_ZoomOutIcon_FileSource(t *testing.T) {
 	result := ZoomOutIcon().Name()
 	assert.Equal(t, "view-zoom-out.svg", result)
 }
+
+func Test_VisibilityIcon_FileSource(t *testing.T) {
+	result := VisibilityIcon().Name()
+	assert.Equal(t, "visibility.svg", result)
+}
+
+func Test_VisibilityOffIcon_FileSource(t *testing.T) {
+	result := VisibilityOffIcon().Name()
+	assert.Equal(t, "visibility-off.svg", result)
+}
