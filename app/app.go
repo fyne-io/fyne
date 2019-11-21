@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
 	helper "fyne.io/fyne/internal/app"
-	"fyne.io/fyne/theme"
 )
 
 // Declare conformity with App interface
@@ -97,7 +96,7 @@ func NewAppWithDriver(d fyne.Driver, id string) fyne.App {
 	} else {
 		prefs = loadPreferences(id)
 	}
-	newApp := &fyneApp{driver: d, icon: theme.FyneLogo(), settings: loadSettings(),
+	newApp := &fyneApp{driver: d, settings: loadSettings(),
 		prefs: prefs, exec: exec.Command}
 	fyne.SetCurrentApp(newApp)
 

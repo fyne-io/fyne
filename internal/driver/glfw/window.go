@@ -1108,7 +1108,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret.canvas.context = ret
 		ret.canvas.detectedScale = ret.detectScale()
 		ret.canvas.scale = ret.selectScale()
-		ret.SetIcon(ret.icon) // if this is nil we will get the app icon
+		ret.SetIcon(ret.icon)
 		d.windows = append(d.windows, ret)
 
 		win.SetCloseCallback(ret.closed)
