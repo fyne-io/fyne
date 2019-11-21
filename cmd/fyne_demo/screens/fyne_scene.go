@@ -2,6 +2,7 @@ package screens
 
 import "fyne.io/fyne"
 
+// FyneScene is our new logo with background, looks good in a demo :)
 var FyneScene = &fyne.StaticResource{
 	StaticName: "fyne_scene.png",
 	StaticContent: []byte{
