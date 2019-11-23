@@ -51,6 +51,9 @@ func (a *testApp) UniqueID() string {
 }
 
 func (a *testApp) applyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
+	if content == nil {
+		return
+	}
 	content.Refresh()
 
 	if wid, ok := content.(fyne.Widget); ok {
