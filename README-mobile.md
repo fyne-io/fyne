@@ -4,6 +4,9 @@ We should wrap this into our current tooling before release!
 # Pre-requisites
 
 Please ensure that your fyne install is the latest development version (both library and "fyne" command line tool).
+```
+go get -u fyne.io/fyne fyne.io/fyne/cmd/fyne
+```
 
 ## Android
 
