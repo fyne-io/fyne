@@ -125,8 +125,11 @@ func (b *buttonRenderer) Refresh() {
 		b.icon.Hidden = true
 	}
 
+	b.label.Refresh()
+	b.icon.Refresh()
+	b.shadow.Refresh()
+
 	b.Layout(b.button.Size())
-	canvas.Refresh(b.button)
 }
 
 func (b *buttonRenderer) Objects() []fyne.CanvasObject {

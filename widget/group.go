@@ -114,7 +114,8 @@ func (g *groupRenderer) Refresh() {
 	g.label.SetText(g.group.Text)
 	g.Layout(g.group.Size())
 
-	canvas.Refresh(g.group)
+	g.line.Refresh()
+	g.labelBg.Refresh()
 }
 
 func (g *groupRenderer) Destroy() {

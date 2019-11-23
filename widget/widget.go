@@ -133,9 +133,6 @@ func (w *BaseWidget) Refresh() {
 func (w *BaseWidget) refresh(wid fyne.Widget) {
 	render := cache.Renderer(wid)
 	render.Refresh()
-	for _, child := range render.Objects() {
-		child.Refresh()
-	}
 	render.Layout(w.impl.Size())
 }
 
