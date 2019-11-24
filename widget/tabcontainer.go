@@ -500,8 +500,7 @@ func (r *tabButtonRenderer) Refresh() {
 	r.label.Color = theme.TextColor()
 	r.label.TextSize = theme.TextSize()
 
-	r.label.Refresh()
-	r.icon.Refresh()
+	canvas.Refresh(r.button)
 }
 
 func (r *tabButtonRenderer) padding() fyne.Size {

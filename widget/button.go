@@ -120,16 +120,13 @@ func (b *buttonRenderer) Refresh() {
 				b.icon.Resource = b.button.Icon
 			}
 		}
-		b.icon.Hidden = false
+		b.icon.Show()
 	} else if b.icon != nil {
-		b.icon.Hidden = true
+		b.icon.Hide()
 	}
 
-	b.label.Refresh()
-	b.icon.Refresh()
-	b.shadow.Refresh()
-
 	b.Layout(b.button.Size())
+	canvas.Refresh(b.button)
 }
 
 func (b *buttonRenderer) Objects() []fyne.CanvasObject {
