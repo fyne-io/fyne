@@ -58,51 +58,51 @@ type scrollBar struct {
 	orientation          scrollBarOrientation
 }
 
-func (s *scrollBar) MinSize() fyne.Size {
-	s.ExtendBaseWidget(s)
-	return s.BaseWidget.MinSize()
+func (b *scrollBar) MinSize() fyne.Size {
+	b.ExtendBaseWidget(b)
+	return b.BaseWidget.MinSize()
 }
 
-func (s *scrollBar) CreateRenderer() fyne.WidgetRenderer {
-	s.ExtendBaseWidget(s)
-	return &scrollBarRenderer{scrollBar: s}
+func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
+	b.ExtendBaseWidget(b)
+	return &scrollBarRenderer{scrollBar: b}
 }
 
-func (s *scrollBar) DragEnd() {
+func (b *scrollBar) DragEnd() {
 }
 
-func (s *scrollBar) Dragged(e *fyne.DragEvent) {
-	if !s.isDragged {
-		s.isDragged = true
-		switch s.orientation {
+func (b *scrollBar) Dragged(e *fyne.DragEvent) {
+	if !b.isDragged {
+		b.isDragged = true
+		switch b.orientation {
 		case scrollBarOrientationHorizontal:
-			s.dragStartHoriz = s.Position().X
+			b.dragStartHoriz = b.Position().X
 		case scrollBarOrientationVertical:
-			s.dragStartVert = s.Position().Y
+			b.dragStartVert = b.Position().Y
 		}
-		s.draggedDistanceHoriz = 0
-		s.draggedDistanceVert = 0
+		b.draggedDistanceHoriz = 0
+		b.draggedDistanceVert = 0
 	}
 
-	switch s.orientation {
+	switch b.orientation {
 	case scrollBarOrientationHorizontal:
-		s.draggedDistanceHoriz += e.DraggedX
-		s.area.moveHorizontalBar(s.draggedDistanceHoriz + s.dragStartHoriz)
+		b.draggedDistanceHoriz += e.DraggedX
+		b.area.moveHorizontalBar(b.draggedDistanceHoriz + b.dragStartHoriz)
 	case scrollBarOrientationVertical:
-		s.draggedDistanceVert += e.DraggedY
-		s.area.moveVerticalBar(s.draggedDistanceVert + s.dragStartVert)
+		b.draggedDistanceVert += e.DraggedY
+		b.area.moveVerticalBar(b.draggedDistanceVert + b.dragStartVert)
 	}
 }
 
-func (s *scrollBar) MouseIn(e *desktop.MouseEvent) {
-	s.area.MouseIn(e)
+func (b *scrollBar) MouseIn(e *desktop.MouseEvent) {
+	b.area.MouseIn(e)
 }
 
-func (s *scrollBar) MouseMoved(*desktop.MouseEvent) {
+func (b *scrollBar) MouseMoved(*desktop.MouseEvent) {
 }
 
-func (s *scrollBar) MouseOut() {
-	s.area.MouseOut()
+func (b *scrollBar) MouseOut() {
+	b.area.MouseOut()
 }
 
 func newScrollBar(area *scrollBarArea) *scrollBar {
