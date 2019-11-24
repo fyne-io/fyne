@@ -308,7 +308,7 @@ func newScrollBarArea(scroll *ScrollContainer, orientation scrollBarOrientation)
 	return &scrollBarArea{scroll: scroll, orientation: orientation}
 }
 
-type scrollRenderer struct {
+type scrollContainerRenderer struct {
 	scroll                  *ScrollContainer
 	vertArea                *scrollBarArea
 	horizArea               *scrollBarArea
@@ -318,14 +318,14 @@ type scrollRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (s *scrollRenderer) BackgroundColor() color.Color {
+func (s *scrollContainerRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
 
-func (s *scrollRenderer) Destroy() {
+func (s *scrollContainerRenderer) Destroy() {
 }
 
-func (s *scrollRenderer) Layout(size fyne.Size) {
+func (s *scrollContainerRenderer) Layout(size fyne.Size) {
 	// The scroll bar needs to be resized and moved on the far right
 	s.horizArea.Resize(fyne.NewSize(size.Width, s.horizArea.MinSize().Height))
 	s.vertArea.Resize(fyne.NewSize(s.vertArea.MinSize().Width, size.Height))
@@ -347,19 +347,19 @@ func (s *scrollRenderer) Layout(size fyne.Size) {
 	s.updatePosition()
 }
 
-func (s *scrollRenderer) MinSize() fyne.Size {
+func (s *scrollContainerRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(25, 25) // TODO consider the smallest useful scroll view?
 }
 
-func (s *scrollRenderer) Objects() []fyne.CanvasObject {
+func (s *scrollContainerRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s *scrollRenderer) Refresh() {
+func (s *scrollContainerRenderer) Refresh() {
 	s.Layout(s.scroll.Size())
 }
 
-func (s *scrollRenderer) calculateScrollPosition(contentSize int, scrollSize int, offset int, area *scrollBarArea) {
+func (s *scrollContainerRenderer) calculateScrollPosition(contentSize int, scrollSize int, offset int, area *scrollBarArea) {
 	if contentSize <= scrollSize {
 		if area == s.horizArea {
 			s.scroll.Offset.X = 0
@@ -379,7 +379,7 @@ func (s *scrollRenderer) calculateScrollPosition(contentSize int, scrollSize int
 	}
 }
 
-func (s *scrollRenderer) calculateShadows(offset int, contentSize int, scrollSize int, shadowStart fyne.CanvasObject, shadowEnd fyne.CanvasObject) {
+func (s *scrollContainerRenderer) calculateShadows(offset int, contentSize int, scrollSize int, shadowStart fyne.CanvasObject, shadowEnd fyne.CanvasObject) {
 	if !s.scroll.Visible() {
 		return
 	}
@@ -395,7 +395,7 @@ func (s *scrollRenderer) calculateShadows(offset int, contentSize int, scrollSiz
 	}
 }
 
-func (s *scrollRenderer) updatePosition() {
+func (s *scrollContainerRenderer) updatePosition() {
 	scrollWidth := s.scroll.Size().Width
 	contentWidth := s.scroll.Content.Size().Width
 	scrollHeight := s.scroll.Size().Height
@@ -435,7 +435,7 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	rightShadow := newShadow(shadowLeft, theme.Padding()*2)
 	topShadow := newShadow(shadowBottom, theme.Padding()*2)
 	bottomShadow := newShadow(shadowTop, theme.Padding()*2)
-	return &scrollRenderer{
+	return &scrollContainerRenderer{
 		objects:      []fyne.CanvasObject{s.Content, s.hbar, s.vbar, topShadow, bottomShadow},
 		scroll:       s,
 		horizArea:    s.hbar,
