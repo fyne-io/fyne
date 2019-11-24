@@ -233,45 +233,45 @@ type scrollBarArea struct {
 	orientation scrollBarOrientation
 }
 
-func (s *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
-	s.ExtendBaseWidget(s)
-	bar := newScrollBar(s)
-	return &scrollBarAreaRenderer{area: s, bar: bar, orientation: s.orientation, objects: []fyne.CanvasObject{bar}}
+func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
+	a.ExtendBaseWidget(a)
+	bar := newScrollBar(a)
+	return &scrollBarAreaRenderer{area: a, bar: bar, orientation: a.orientation, objects: []fyne.CanvasObject{bar}}
 }
 
 // MinSize returns the size that this widget should not shrink below
-func (s *scrollBarArea) MinSize() fyne.Size {
-	s.ExtendBaseWidget(s)
-	return s.BaseWidget.MinSize()
+func (a *scrollBarArea) MinSize() fyne.Size {
+	a.ExtendBaseWidget(a)
+	return a.BaseWidget.MinSize()
 }
 
-func (s *scrollBarArea) MouseIn(*desktop.MouseEvent) {
-	switch s.orientation {
+func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
+	switch a.orientation {
 	case scrollBarOrientationHorizontal:
-		s.isTall = true
+		a.isTall = true
 	case scrollBarOrientationVertical:
-		s.isWide = true
+		a.isWide = true
 	}
-	s.Refresh()
+	a.Refresh()
 }
 
-func (s *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
+func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 }
 
-func (s *scrollBarArea) MouseOut() {
-	switch s.orientation {
+func (a *scrollBarArea) MouseOut() {
+	switch a.orientation {
 	case scrollBarOrientationHorizontal:
-		s.isTall = false
+		a.isTall = false
 	case scrollBarOrientationVertical:
-		s.isWide = false
+		a.isWide = false
 	}
-	s.Refresh()
+	a.Refresh()
 }
 
-func (s *scrollBarArea) moveHorizontalBar(x int) {
-	render := Renderer(s).(*scrollBarAreaRenderer)
+func (a *scrollBarArea) moveHorizontalBar(x int) {
+	render := Renderer(a).(*scrollBarAreaRenderer)
 	barWidth := render.horizontalBarWidth()
-	scrollWidth := s.scroll.Size().Width
+	scrollWidth := a.scroll.Size().Width
 	maxX := scrollWidth - barWidth
 
 	if x < 0 {
@@ -281,15 +281,15 @@ func (s *scrollBarArea) moveHorizontalBar(x int) {
 	}
 
 	ratio := float32(x) / float32(maxX)
-	s.scroll.Offset.X = int(ratio * float32(s.scroll.Content.Size().Width-scrollWidth))
+	a.scroll.Offset.X = int(ratio * float32(a.scroll.Content.Size().Width-scrollWidth))
 
-	Refresh(s.scroll)
+	Refresh(a.scroll)
 }
 
-func (s *scrollBarArea) moveVerticalBar(y int) {
-	render := Renderer(s).(*scrollBarAreaRenderer)
+func (a *scrollBarArea) moveVerticalBar(y int) {
+	render := Renderer(a).(*scrollBarAreaRenderer)
 	barHeight := render.verticalBarHeight()
-	scrollHeight := s.scroll.Size().Height
+	scrollHeight := a.scroll.Size().Height
 	maxY := scrollHeight - barHeight
 
 	if y < 0 {
@@ -299,9 +299,9 @@ func (s *scrollBarArea) moveVerticalBar(y int) {
 	}
 
 	ratio := float32(y) / float32(maxY)
-	s.scroll.Offset.Y = int(ratio * float32(s.scroll.Content.Size().Height-scrollHeight))
+	a.scroll.Offset.Y = int(ratio * float32(a.scroll.Content.Size().Height-scrollHeight))
 
-	Refresh(s.scroll)
+	Refresh(a.scroll)
 }
 
 func newScrollBarArea(scroll *ScrollContainer, orientation scrollBarOrientation) *scrollBarArea {
