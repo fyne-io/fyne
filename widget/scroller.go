@@ -117,109 +117,109 @@ type scrollBarAreaRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (s *scrollBarAreaRenderer) BackgroundColor() color.Color {
+func (r *scrollBarAreaRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-func (s *scrollBarAreaRenderer) Destroy() {
+func (r *scrollBarAreaRenderer) Destroy() {
 }
 
-func (s *scrollBarAreaRenderer) Layout(size fyne.Size) {
-	switch s.orientation {
+func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
+	switch r.orientation {
 	case scrollBarOrientationHorizontal:
-		s.updateHorizontalBarPosition()
+		r.updateHorizontalBarPosition()
 	case scrollBarOrientationVertical:
-		s.updateVerticalBarPosition()
+		r.updateVerticalBarPosition()
 	}
 }
 
-func (s *scrollBarAreaRenderer) MinSize() fyne.Size {
+func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 	var min int
 	min = theme.ScrollBarSize()
-	switch s.orientation {
+	switch r.orientation {
 	case scrollBarOrientationHorizontal:
-		if !s.area.isTall {
+		if !r.area.isTall {
 			min = theme.ScrollBarSmallSize() * 2
 		}
 		return fyne.NewSize(theme.ScrollBarSize(), min)
 	default:
-		if !s.area.isWide {
+		if !r.area.isWide {
 			min = theme.ScrollBarSmallSize() * 2
 		}
 		return fyne.NewSize(min, theme.ScrollBarSize())
 	}
 }
 
-func (s *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
-	return s.objects
+func (r *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
 }
 
-func (s *scrollBarAreaRenderer) Refresh() {
-	switch s.orientation {
+func (r *scrollBarAreaRenderer) Refresh() {
+	switch r.orientation {
 	case scrollBarOrientationHorizontal:
-		s.updateHorizontalBarPosition()
+		r.updateHorizontalBarPosition()
 	default:
-		s.updateVerticalBarPosition()
+		r.updateVerticalBarPosition()
 	}
-	canvas.Refresh(s.bar)
+	canvas.Refresh(r.bar)
 }
 
-func (s *scrollBarAreaRenderer) updateHorizontalBarPosition() {
-	barWidth := s.horizontalBarWidth()
+func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
+	barWidth := r.horizontalBarWidth()
 	barRatio := float32(0.0)
-	if s.area.scroll.Offset.X != 0 {
-		barRatio = float32(s.area.scroll.Offset.X) / float32(s.area.scroll.Content.Size().Width-s.area.scroll.Size().Width)
+	if r.area.scroll.Offset.X != 0 {
+		barRatio = float32(r.area.scroll.Offset.X) / float32(r.area.scroll.Content.Size().Width-r.area.scroll.Size().Width)
 	}
-	barX := int(float32(s.area.scroll.size.Width-barWidth) * barRatio)
+	barX := int(float32(r.area.scroll.size.Width-barWidth) * barRatio)
 
 	var barY, barHeight int
-	if s.area.isTall {
+	if r.area.isTall {
 		barHeight = theme.ScrollBarSize()
 	} else {
 		barY = theme.ScrollBarSmallSize()
 		barHeight = theme.ScrollBarSmallSize()
 	}
 
-	s.bar.Resize(fyne.NewSize(barWidth, barHeight))
-	s.bar.Move(fyne.NewPos(barX, barY))
+	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
+	r.bar.Move(fyne.NewPos(barX, barY))
 }
 
-func (s *scrollBarAreaRenderer) updateVerticalBarPosition() {
-	barHeight := s.verticalBarHeight()
+func (r *scrollBarAreaRenderer) updateVerticalBarPosition() {
+	barHeight := r.verticalBarHeight()
 	barRatio := float32(0.0)
-	if s.area.scroll.Offset.Y != 0 {
-		barRatio = float32(s.area.scroll.Offset.Y) / float32(s.area.scroll.Content.Size().Height-s.area.scroll.Size().Height)
+	if r.area.scroll.Offset.Y != 0 {
+		barRatio = float32(r.area.scroll.Offset.Y) / float32(r.area.scroll.Content.Size().Height-r.area.scroll.Size().Height)
 	}
-	barY := int(float32(s.area.scroll.size.Height-barHeight) * barRatio)
+	barY := int(float32(r.area.scroll.size.Height-barHeight) * barRatio)
 
 	var barX, barWidth int
-	if s.area.isWide {
+	if r.area.isWide {
 		barWidth = theme.ScrollBarSize()
 	} else {
 		barX = theme.ScrollBarSmallSize()
 		barWidth = theme.ScrollBarSmallSize()
 	}
 
-	s.bar.Resize(fyne.NewSize(barWidth, barHeight))
-	s.bar.Move(fyne.NewPos(barX, barY))
+	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
+	r.bar.Move(fyne.NewPos(barX, barY))
 }
 
-func (s *scrollBarAreaRenderer) horizontalBarWidth() int {
-	portion := float32(s.area.size.Width) / float32(s.area.scroll.Content.Size().Width)
+func (r *scrollBarAreaRenderer) horizontalBarWidth() int {
+	portion := float32(r.area.size.Width) / float32(r.area.scroll.Content.Size().Width)
 	if portion > 1.0 {
 		portion = 1.0
 	}
 
-	return int(float32(s.area.size.Width) * portion)
+	return int(float32(r.area.size.Width) * portion)
 }
 
-func (s *scrollBarAreaRenderer) verticalBarHeight() int {
-	portion := float32(s.area.size.Height) / float32(s.area.scroll.Content.Size().Height)
+func (r *scrollBarAreaRenderer) verticalBarHeight() int {
+	portion := float32(r.area.size.Height) / float32(r.area.scroll.Content.Size().Height)
 	if portion > 1.0 {
 		portion = 1.0
 	}
 
-	return int(float32(s.area.size.Height) * portion)
+	return int(float32(r.area.size.Height) * portion)
 }
 
 var _ desktop.Hoverable = (*scrollBarArea)(nil)
