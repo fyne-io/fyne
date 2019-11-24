@@ -318,69 +318,69 @@ type scrollContainerRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (s *scrollContainerRenderer) BackgroundColor() color.Color {
+func (r *scrollContainerRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
 
-func (s *scrollContainerRenderer) Destroy() {
+func (r *scrollContainerRenderer) Destroy() {
 }
 
-func (s *scrollContainerRenderer) Layout(size fyne.Size) {
+func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 	// The scroll bar needs to be resized and moved on the far right
-	s.horizArea.Resize(fyne.NewSize(size.Width, s.horizArea.MinSize().Height))
-	s.vertArea.Resize(fyne.NewSize(s.vertArea.MinSize().Width, size.Height))
+	r.horizArea.Resize(fyne.NewSize(size.Width, r.horizArea.MinSize().Height))
+	r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
 
-	s.horizArea.Move(fyne.NewPos(0, s.scroll.Size().Height-s.horizArea.Size().Height))
-	s.vertArea.Move(fyne.NewPos(s.scroll.Size().Width-s.vertArea.Size().Width, 0))
+	r.horizArea.Move(fyne.NewPos(0, r.scroll.Size().Height-r.horizArea.Size().Height))
+	r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
 
-	s.leftShadow.Resize(fyne.NewSize(0, size.Height))
-	s.rightShadow.Resize(fyne.NewSize(0, size.Height))
-	s.topShadow.Resize(fyne.NewSize(size.Width, 0))
-	s.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
+	r.leftShadow.Resize(fyne.NewSize(0, size.Height))
+	r.rightShadow.Resize(fyne.NewSize(0, size.Height))
+	r.topShadow.Resize(fyne.NewSize(size.Width, 0))
+	r.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
 
-	s.rightShadow.Move(fyne.NewPos(s.scroll.size.Width, 0))
-	s.bottomShadow.Move(fyne.NewPos(0, s.scroll.size.Height))
+	r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
+	r.bottomShadow.Move(fyne.NewPos(0, r.scroll.size.Height))
 
-	c := s.scroll.Content
+	c := r.scroll.Content
 	c.Resize(c.MinSize().Union(size))
 
-	s.updatePosition()
+	r.updatePosition()
 }
 
-func (s *scrollContainerRenderer) MinSize() fyne.Size {
+func (r *scrollContainerRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(25, 25) // TODO consider the smallest useful scroll view?
 }
 
-func (s *scrollContainerRenderer) Objects() []fyne.CanvasObject {
-	return s.objects
+func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
 }
 
-func (s *scrollContainerRenderer) Refresh() {
-	s.Layout(s.scroll.Size())
+func (r *scrollContainerRenderer) Refresh() {
+	r.Layout(r.scroll.Size())
 }
 
-func (s *scrollContainerRenderer) calculateScrollPosition(contentSize int, scrollSize int, offset int, area *scrollBarArea) {
+func (r *scrollContainerRenderer) calculateScrollPosition(contentSize int, scrollSize int, offset int, area *scrollBarArea) {
 	if contentSize <= scrollSize {
-		if area == s.horizArea {
-			s.scroll.Offset.X = 0
+		if area == r.horizArea {
+			r.scroll.Offset.X = 0
 		} else {
-			s.scroll.Offset.Y = 0
+			r.scroll.Offset.Y = 0
 		}
 		area.Hide()
-	} else if s.scroll.Visible() {
+	} else if r.scroll.Visible() {
 		area.Show()
 		if contentSize-offset < scrollSize {
-			if area == s.horizArea {
-				s.scroll.Offset.X = contentSize - scrollSize
+			if area == r.horizArea {
+				r.scroll.Offset.X = contentSize - scrollSize
 			} else {
-				s.scroll.Offset.Y = contentSize - scrollSize
+				r.scroll.Offset.Y = contentSize - scrollSize
 			}
 		}
 	}
 }
 
-func (s *scrollContainerRenderer) calculateShadows(offset int, contentSize int, scrollSize int, shadowStart fyne.CanvasObject, shadowEnd fyne.CanvasObject) {
-	if !s.scroll.Visible() {
+func (r *scrollContainerRenderer) calculateShadows(offset int, contentSize int, scrollSize int, shadowStart fyne.CanvasObject, shadowEnd fyne.CanvasObject) {
+	if !r.scroll.Visible() {
 		return
 	}
 	if offset > 0 {
@@ -395,22 +395,22 @@ func (s *scrollContainerRenderer) calculateShadows(offset int, contentSize int, 
 	}
 }
 
-func (s *scrollContainerRenderer) updatePosition() {
-	scrollWidth := s.scroll.Size().Width
-	contentWidth := s.scroll.Content.Size().Width
-	scrollHeight := s.scroll.Size().Height
-	contentHeight := s.scroll.Content.Size().Height
-	s.calculateScrollPosition(contentWidth, scrollWidth, s.scroll.Offset.X, s.horizArea)
-	s.calculateScrollPosition(contentHeight, scrollHeight, s.scroll.Offset.Y, s.vertArea)
+func (r *scrollContainerRenderer) updatePosition() {
+	scrollWidth := r.scroll.Size().Width
+	contentWidth := r.scroll.Content.Size().Width
+	scrollHeight := r.scroll.Size().Height
+	contentHeight := r.scroll.Content.Size().Height
+	r.calculateScrollPosition(contentWidth, scrollWidth, r.scroll.Offset.X, r.horizArea)
+	r.calculateScrollPosition(contentHeight, scrollHeight, r.scroll.Offset.Y, r.vertArea)
 
-	s.scroll.Content.Move(fyne.NewPos(-s.scroll.Offset.X, -s.scroll.Offset.Y))
-	canvas.Refresh(s.scroll.Content)
+	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
+	canvas.Refresh(r.scroll.Content)
 
-	s.calculateShadows(s.scroll.Offset.X, contentWidth, scrollWidth, s.leftShadow, s.rightShadow)
-	s.calculateShadows(s.scroll.Offset.Y, contentHeight, scrollHeight, s.topShadow, s.bottomShadow)
+	r.calculateShadows(r.scroll.Offset.X, contentWidth, scrollWidth, r.leftShadow, r.rightShadow)
+	r.calculateShadows(r.scroll.Offset.Y, contentHeight, scrollHeight, r.topShadow, r.bottomShadow)
 
-	Renderer(s.vertArea).Layout(s.scroll.size)
-	Renderer(s.horizArea).Layout(s.scroll.size)
+	Renderer(r.vertArea).Layout(r.scroll.size)
+	Renderer(r.horizArea).Layout(r.scroll.size)
 }
 
 // ScrollContainer defines a container that is smaller than the Content.
