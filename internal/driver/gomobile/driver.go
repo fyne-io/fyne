@@ -94,7 +94,7 @@ func (d *mobileDriver) Quit() {
 }
 
 func (d *mobileDriver) scheduleFrames(a app.App) {
-	fps := time.NewTicker(time.Second / 60)
+	fps := time.NewTicker(time.Second / 6) // TODO we want to get this up to 60 when we can find why this grinds to a halt
 	go func() {
 		for {
 			select {
