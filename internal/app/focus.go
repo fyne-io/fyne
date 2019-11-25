@@ -19,8 +19,8 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 			// disabled widget cannot receive focus
 			return false
 		}
-		if e, ok := obj.(*widget.Entry); ok && e.ReadOnly {
-			return false // TODO can we handle this in a more generic way? Focusable.ReadOnly() perhaps?
+		if e, ok := obj.(*widget.Entry); ok && e.ReadOnly { // TODO remove once ReadOnly is gone
+			return false
 		}
 
 		focus, ok := obj.(fyne.Focusable)

@@ -88,7 +88,7 @@ func (b *buttonRenderer) applyTheme() {
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
 	switch {
-	case b.button.disabled:
+	case b.button.Disabled():
 		return theme.DisabledButtonColor()
 	case b.button.Style == PrimaryButton:
 		return theme.PrimaryColor()
@@ -138,7 +138,7 @@ func (b *buttonRenderer) Destroy() {
 
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
-	BaseWidget
+	DisableableWidget
 	Text         string
 	Style        ButtonStyle
 	Icon         fyne.Resource
@@ -158,23 +158,6 @@ const (
 	// PrimaryButton that should be more prominent to the user
 	PrimaryButton
 )
-
-// Enable this widget, if it was previously disabled
-func (b *Button) Enable() {
-	b.enable(b)
-	b.refresh(b)
-}
-
-// Disable this widget, if it was previously enabled
-func (b *Button) Disable() {
-	b.disable(b)
-	b.refresh(b)
-}
-
-// Disabled returns true if the widget is disabled
-func (b *Button) Disabled() bool {
-	return b.disabled
-}
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
@@ -257,18 +240,18 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
-	button := &Button{BaseWidget{}, label, DefaultButton, nil, nil,
+	button := &Button{DisableableWidget{}, label, DefaultButton, nil, nil,
 		tapped, false, false}
 
-	Renderer(button).Layout(button.MinSize())
+	button.ExtendBaseWidget(button)
 	return button
 }
 
 // NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
-	button := &Button{BaseWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
+	button := &Button{DisableableWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
 		tapped, false, false}
 
-	Renderer(button).Layout(button.MinSize())
+	button.ExtendBaseWidget(button)
 	return button
 }

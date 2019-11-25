@@ -163,7 +163,7 @@ func (r *radioRenderer) Destroy() {
 // Radio widget has a list of text labels and radio check icons next to each.
 // Changing the selection (only one can be selected) will trigger the changed func.
 type Radio struct {
-	BaseWidget
+	DisableableWidget
 	Options  []string
 	Selected string
 
@@ -171,23 +171,6 @@ type Radio struct {
 	Horizontal bool
 
 	hoveredItemIndex int
-}
-
-// Enable this widget, if it was previously disabled
-func (r *Radio) Enable() {
-	r.enable(r)
-	r.refresh(r)
-}
-
-// Disable this widget, if it was previously enabled
-func (r *Radio) Disable() {
-	r.disable(r)
-	r.refresh(r)
-}
-
-// Disabled returns true if the widget is disabled
-func (r *Radio) Disabled() bool {
-	return r.disabled
 }
 
 // indexByPosition returns the item index for a specified position or noRadioItemIndex if any
@@ -327,7 +310,7 @@ func (r *Radio) removeDuplicateOptions() {
 // NewRadio creates a new radio widget with the set options and change handler
 func NewRadio(options []string, changed func(string)) *Radio {
 	r := &Radio{
-		BaseWidget{},
+		DisableableWidget{},
 		options,
 		"",
 		changed,
@@ -336,7 +319,6 @@ func NewRadio(options []string, changed func(string)) *Radio {
 	}
 
 	r.removeDuplicateOptions()
-
-	Renderer(r).Layout(r.MinSize())
+	r.ExtendBaseWidget(r)
 	return r
 }

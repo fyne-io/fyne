@@ -132,6 +132,7 @@ func TestButton_Tapped(t *testing.T) {
 func TestButtonRenderer_Layout(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
 	render := Renderer(button).(*buttonRenderer)
+	render.Layout(render.MinSize())
 
 	assert.True(t, render.icon.Position().X < render.label.Position().X)
 	assert.Equal(t, theme.Padding()*2, render.icon.Position().X)

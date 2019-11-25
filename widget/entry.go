@@ -166,26 +166,23 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
-	if e.entry.focused {
-		e.line.FillColor = theme.FocusColor()
-	} else {
-		e.line.FillColor = theme.ButtonColor()
-	}
-
-	e.cursor.FillColor = theme.FocusColor()
-
 	if e.entry.textProvider().len() == 0 && e.entry.Visible() {
 		e.entry.placeholderProvider().Show()
 	} else if e.entry.placeholderProvider().Visible() {
 		e.entry.placeholderProvider().Hide()
 	}
 
+	e.cursor.FillColor = theme.FocusColor()
 	if e.entry.focused {
 		e.cursor.Show()
 		e.line.FillColor = theme.FocusColor()
 	} else {
 		e.cursor.Hide()
-		e.line.FillColor = theme.ButtonColor()
+		if e.entry.Disabled() {
+			e.line.FillColor = theme.DisabledButtonColor()
+		} else {
+			e.line.FillColor = theme.ButtonColor()
+		}
 	}
 
 	for _, selection := range e.selection {
@@ -222,14 +219,14 @@ var _ desktop.Keyable = (*Entry)(nil)
 
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
-	BaseWidget
+	DisableableWidget
 	sync.RWMutex
 	shortcut    fyne.ShortcutHandler
 	Text        string
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 	Password    bool
-	ReadOnly    bool
+	ReadOnly    bool // Deprecated: Use Disable() instead
 	MultiLine   bool
 
 	CursorRow, CursorColumn int
@@ -305,10 +302,13 @@ func (e *Entry) SetPlaceHolder(text string) {
 }
 
 // SetReadOnly sets whether or not the Entry should not be editable
+// Deprecated: Use Disable() instead.
 func (e *Entry) SetReadOnly(ro bool) {
-	e.ReadOnly = ro
-
-	Refresh(e)
+	if ro {
+		e.Disable()
+	} else {
+		e.Enable()
+	}
 }
 
 // updateText updates the internal text to the given value
@@ -408,7 +408,7 @@ func (e *Entry) cursorTextPos() int {
 
 // FocusGained is called when the Entry has been given focus.
 func (e *Entry) FocusGained() {
-	if e.ReadOnly {
+	if e.Disabled() {
 		return
 	}
 	e.focused = true
@@ -511,7 +511,7 @@ func (e *Entry) selectAll() {
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
-	if e.ReadOnly {
+	if e.Disabled() {
 		return
 	}
 
@@ -677,7 +677,7 @@ func (e *Entry) DoubleTapped(ev *fyne.PointEvent) {
 
 // TypedRune receives text input events when the Entry widget is focused.
 func (e *Entry) TypedRune(r rune) {
-	if e.ReadOnly {
+	if e.Disabled() {
 		return
 	}
 
@@ -727,7 +727,7 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 
 // eraseSelection removes the current selected region and moves the cursor
 func (e *Entry) eraseSelection() {
-	if e.ReadOnly {
+	if e.Disabled() {
 		return
 	}
 
@@ -808,7 +808,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 
 // TypedKey receives key input events when the Entry widget is focused.
 func (e *Entry) TypedKey(key *fyne.KeyEvent) {
-	if e.ReadOnly {
+	if e.Disabled() {
 		return
 	}
 
@@ -984,6 +984,9 @@ func (e *Entry) textStyle() fyne.TextStyle {
 
 // textColor tells the rendering textProvider our color
 func (e *Entry) textColor() color.Color {
+	if e.Disabled() {
+		return theme.DisabledTextColor()
+	}
 	return theme.TextColor()
 }
 
