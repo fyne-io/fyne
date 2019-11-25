@@ -124,6 +124,8 @@ func (w *BaseWidget) super() fyne.Widget {
 	return w.impl
 }
 
+// DisableableWidget describes an extension to BaseWidget which can be disabled.
+// Disabled widgets should have a visually distinct style when disabled, normally using theme.DisabledButtonColor.
 type DisableableWidget struct {
 	BaseWidget
 
