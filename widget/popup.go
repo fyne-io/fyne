@@ -123,6 +123,7 @@ func NewPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 func NewModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 	ret := &PopUp{Content: content, Canvas: canvas, modal: true}
 	ret.ExtendBaseWidget(ret)
+	ret.Resize(ret.MinSize())
 	ret.Show()
 	return ret
 }
