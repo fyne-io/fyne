@@ -29,7 +29,6 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 	}
 
 	pop = NewPopUpAtPosition(options, c, pos)
-	pop.Move(pos)
 	return pop
 }
 
@@ -53,7 +52,6 @@ func (t *menuItemWidget) TappedSecondary(*fyne.PointEvent) {
 }
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
-	t.ExtendBaseWidget(t)
 	return &hoverLabelRenderer{t.Label.CreateRenderer().(*textRenderer), t}
 }
 
@@ -77,6 +75,7 @@ func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 
 func newTappableLabel(label string, tapped func()) *menuItemWidget {
 	ret := &menuItemWidget{NewLabel(label), tapped, false}
+	ret.ExtendBaseWidget(ret)
 	return ret
 }
 

@@ -39,7 +39,7 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 	if w.impl == nil {
 		return
 	}
-	Renderer(w.impl).Layout(size)
+	cache.Renderer(w.impl).Layout(size)
 }
 
 // Position gets the current position of this widget, relative to its parent.

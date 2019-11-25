@@ -19,7 +19,9 @@ const (
 )
 
 func newShadow(typ shadowType, depth int) *shadow {
-	return &shadow{typ: typ, depth: depth}
+	s := &shadow{typ: typ, depth: depth}
+	s.ExtendBaseWidget(s)
+	return s
 }
 
 var _ fyne.Widget = (*shadow)(nil)

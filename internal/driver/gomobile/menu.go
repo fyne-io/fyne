@@ -2,7 +2,6 @@ package gomobile
 
 import (
 	"image/color"
-	"log"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -20,11 +19,8 @@ type menuLabel struct {
 }
 
 func (m *menuLabel) Tapped(*fyne.PointEvent) {
-	p := widget.NewPopUpMenu(m.menu, m.canvas)
-
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(m)
-	log.Println(pos)
-	p.Move(fyne.NewPos(pos.X+m.Size().Width, pos.Y))
+	widget.NewPopUpMenuAtPosition(m.menu, m.canvas, fyne.NewPos(pos.X+m.Size().Width, pos.Y))
 }
 
 func (m *menuLabel) TappedSecondary(*fyne.PointEvent) {
