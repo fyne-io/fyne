@@ -130,6 +130,7 @@ type DisableableWidget struct {
 	disabled bool
 }
 
+// Enable this widget, updating any style or features appropriately.
 func (w *DisableableWidget) Enable() {
 	if !w.disabled {
 		return
@@ -139,6 +140,7 @@ func (w *DisableableWidget) Enable() {
 	w.Refresh()
 }
 
+// Disable this widget so that it cannot be interacted with, updating any style appropriately.
 func (w *DisableableWidget) Disable() {
 	if w.disabled {
 		return
@@ -148,6 +150,7 @@ func (w *DisableableWidget) Disable() {
 	w.Refresh()
 }
 
+// Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
 func (w *DisableableWidget) Disabled() bool {
 	return w.disabled
 }
