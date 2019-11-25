@@ -235,11 +235,11 @@ func (p *packager) packageWindows() error {
 }
 
 func (p *packager) packageAndroid() error {
-	return mobile.RunNewBuild("android", "")
+	return mobile.RunNewBuild("android", "", p.icon)
 }
 
 func (p *packager) packageIOS() error {
-	err := mobile.RunNewBuild("ios", p.appID)
+	err := mobile.RunNewBuild("ios", p.appID, p.icon)
 	if err != nil {
 		return err
 	}

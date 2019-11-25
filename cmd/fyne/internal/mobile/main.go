@@ -171,12 +171,13 @@ var commands = []*command{
 }
 
 type command struct {
-	run   func(*command) error
-	Flag  flag.FlagSet
-	Name  string
-	Usage string
-	Short string
-	Long  string
+	run      func(*command) error
+	Flag     flag.FlagSet
+	Name     string
+	Usage    string
+	Short    string
+	Long     string
+	IconPath string
 }
 
 func (cmd *command) usage() {

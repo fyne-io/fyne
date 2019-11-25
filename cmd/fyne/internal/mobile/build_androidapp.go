@@ -24,7 +24,7 @@ import (
 	"fyne.io/fyne/cmd/fyne/internal/mobile/binres"
 )
 
-func goAndroidBuild(pkg *build.Package, androidArchs []string) (map[string]bool, error) {
+func goAndroidBuild(pkg *build.Package, androidArchs []string, iconPath string) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err
@@ -183,6 +183,7 @@ func goAndroidBuild(pkg *build.Package, androidArchs []string) (map[string]bool,
 	var arsc struct {
 		iconPath string
 	}
+	arsc.iconPath = iconPath
 	assetsDir := filepath.Join(pkg.Dir, "assets")
 	assetsDirExists := true
 	fi, err := os.Stat(assetsDir)
