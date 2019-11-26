@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/cmd/fyne_demo/data"
 	"fyne.io/fyne/cmd/fyne_demo/screens"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -17,8 +18,8 @@ import (
 const preferenceCurrentTab = "currentTab"
 
 func welcomeScreen(a fyne.App) fyne.CanvasObject {
-	logo := canvas.NewImageFromResource(screens.FyneScene)
-	logo.SetMinSize(fyne.NewSize(200, 147))
+	logo := canvas.NewImageFromResource(data.FyneScene)
+	logo.SetMinSize(fyne.NewSize(228, 167))
 
 	link, err := url.Parse("https://fyne.io/")
 	if err != nil {
