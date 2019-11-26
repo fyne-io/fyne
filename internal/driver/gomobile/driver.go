@@ -93,23 +93,10 @@ func (d *mobileDriver) Quit() {
 	d.app.Send(lifecycle.Event{From: lifecycle.StageAlive, To: lifecycle.StageDead, DrawContext: nil})
 }
 
-func (d *mobileDriver) scheduleFrames(a app.App) {
-	fps := time.NewTicker(time.Second / 60)
-	go func() {
-		for {
-			select {
-			case <-fps.C:
-				a.Send(paint.Event{})
-			}
-		}
-	}()
-}
-
 func (d *mobileDriver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
 		quit := false
-		d.scheduleFrames(a)
 
 		var currentSize size.Event
 		for e := range a.Events() {
@@ -135,20 +122,19 @@ func (d *mobileDriver) Run() {
 				}
 			case size.Event:
 				currentSize = e
-				canvas.dirty = true
 			case paint.Event:
-				if !canvas.inited && d.glctx != nil {
+				if d.glctx == nil || e.External {
+					continue
+				}
+				if !canvas.inited {
 					canvas.inited = true
 					canvas.painter.Init() // we cannot init until the context is set above
 				}
 
-				if canvas.dirty && d.glctx != nil {
-					d.freeDirtyTextures(canvas)
-					canvas.dirty = false
-
-					d.paintWindow(current, currentSize)
-					a.Publish()
-				}
+				d.freeDirtyTextures(canvas)
+				d.paintWindow(current, currentSize)
+				a.Publish()
+				a.Send(paint.Event{})
 			case touch.Event:
 				switch e.Type {
 				case touch.TypeBegin:

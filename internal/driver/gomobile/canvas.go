@@ -27,7 +27,7 @@ type mobileCanvas struct {
 	onTypedKey  func(event *fyne.KeyEvent)
 	shortcut    fyne.ShortcutHandler
 
-	inited, dirty  bool
+	inited         bool
 	lastTapDown    time.Time
 	lastTapDownPos fyne.Position
 	dragging       fyne.Draggable
@@ -51,7 +51,6 @@ func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 	default:
 		// queue is full, ignore
 	}
-	c.dirty = true
 }
 
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
