@@ -7,7 +7,6 @@ package mobile
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,12 +19,6 @@ var (
 	goarch = runtime.GOARCH
 )
 
-var commonPkgs = []string{
-	"golang.org/x/mobile/gl",
-	"golang.org/x/mobile/app",
-	"golang.org/x/mobile/exp/app/debug",
-}
-
 func mkdir(dir string) error {
 	if buildX || buildN {
 		printcmd("mkdir -p %s", dir)
@@ -34,61 +27,6 @@ func mkdir(dir string) error {
 		return nil
 	}
 	return os.MkdirAll(dir, 0755)
-}
-
-func symlink(src, dst string) error {
-	if buildX || buildN {
-		printcmd("ln -s %s %s", src, dst)
-	}
-	if buildN {
-		return nil
-	}
-	if goos == "windows" {
-		return doCopyAll(dst, src)
-	}
-	return os.Symlink(src, dst)
-}
-
-func rm(name string) error {
-	if buildX || buildN {
-		printcmd("rm %s", name)
-	}
-	if buildN {
-		return nil
-	}
-	return os.Remove(name)
-}
-
-func doCopyAll(dst, src string) error {
-	return filepath.Walk(src, func(path string, info os.FileInfo, errin error) (err error) {
-		if errin != nil {
-			return errin
-		}
-		prefixLen := len(src)
-		if len(path) > prefixLen {
-			prefixLen++ // file separator
-		}
-		outpath := filepath.Join(dst, path[prefixLen:])
-		if info.IsDir() {
-			return os.Mkdir(outpath, 0755)
-		}
-		in, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer in.Close()
-		out, err := os.OpenFile(outpath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, info.Mode())
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if errc := out.Close(); err == nil {
-				err = errc
-			}
-		}()
-		_, err = io.Copy(out, in)
-		return err
-	})
 }
 
 func removeAll(path string) error {
