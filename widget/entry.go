@@ -530,12 +530,10 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		e.pasteFromClipboard(clipboard)
 	})
 	selectAllItem := fyne.NewMenuItem("Select all", e.selectAll)
-	e.popUp = NewPopUpMenu(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c)
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
-
-	e.popUp.Move(popUpPos)
+	e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c, popUpPos)
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,

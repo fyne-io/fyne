@@ -50,6 +50,7 @@ func (p *PopUp) Move(pos fyne.Position) {
 	}
 
 	p.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
+	p.Refresh()
 }
 
 // Resize sets a new size for a widget. Most PopUp widgets are shown at MinSize.
