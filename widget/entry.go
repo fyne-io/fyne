@@ -311,6 +311,20 @@ func (e *Entry) SetReadOnly(ro bool) {
 	}
 }
 
+// Enable this widget, updating any style or features appropriately.
+func (e *Entry) Enable() { // TODO remove this override after ReadOnly is removed
+	e.ReadOnly = false
+
+	e.DisableableWidget.Enable()
+}
+
+// Disable this widget so that it cannot be interacted with, updating any style appropriately.
+func (e *Entry) Disable() { // TODO remove this override after ReadOnly is removed
+	e.ReadOnly = true
+
+	e.DisableableWidget.Disable()
+}
+
 // updateText updates the internal text to the given value
 func (e *Entry) updateText(text string) {
 	changed := e.Text != text
