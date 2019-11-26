@@ -30,6 +30,9 @@ func Renderer(wid fyne.Widget) fyne.WidgetRenderer {
 		renderers.Store(wid, renderer)
 	}
 
+	if renderer == nil {
+		return nil
+	}
 	return renderer.(fyne.WidgetRenderer)
 }
 

@@ -12,21 +12,9 @@ import (
 )
 
 type myWidget struct {
-	BaseWidget
+	DisableableWidget
 
 	refreshed chan bool
-}
-
-func (m *myWidget) Enable() {
-	m.enable(m)
-}
-
-func (m *myWidget) Disable() {
-	m.disable(m)
-}
-
-func (m *myWidget) Disabled() bool {
-	return m.disabled
 }
 
 func (m *myWidget) Refresh() {

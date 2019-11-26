@@ -94,7 +94,7 @@ func (c *checkRenderer) Destroy() {
 
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
 type Check struct {
-	BaseWidget
+	DisableableWidget
 	Text    string
 	Checked bool
 
@@ -127,23 +127,6 @@ func (c *Check) Hide() {
 	}
 
 	c.BaseWidget.Hide()
-}
-
-// Enable this widget, if it was previously disabled
-func (c *Check) Enable() {
-	c.enable(c)
-	c.refresh(c)
-}
-
-// Disable this widget, if it was previously enabled
-func (c *Check) Disable() {
-	c.disable(c)
-	c.refresh(c)
-}
-
-// Disabled returns true if the widget is disabled
-func (c *Check) Disabled() bool {
-	return c.disabled
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -200,7 +183,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
 	c := &Check{
-		BaseWidget{},
+		DisableableWidget{},
 		label,
 		false,
 		changed,
@@ -208,7 +191,7 @@ func NewCheck(label string, changed func(bool)) *Check {
 		false,
 	}
 
-	Renderer(c).Layout(c.MinSize())
+	c.ExtendBaseWidget(c)
 	return c
 }
 

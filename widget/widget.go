@@ -12,7 +12,6 @@ type BaseWidget struct {
 	size     fyne.Size
 	position fyne.Position
 	Hidden   bool
-	disabled bool
 
 	impl fyne.Widget
 }
@@ -106,24 +105,6 @@ func (w *BaseWidget) Hide() {
 	w.impl.Refresh()
 }
 
-func (w *BaseWidget) enable(parent fyne.Widget) {
-	if !w.disabled {
-		return
-	}
-
-	w.disabled = false
-	parent.Refresh()
-}
-
-func (w *BaseWidget) disable(parent fyne.Widget) {
-	if w.disabled {
-		return
-	}
-
-	w.disabled = true
-	parent.Refresh()
-}
-
 // Refresh causes this widget to be redrawn in it's current state
 func (w *BaseWidget) Refresh() {
 	if w.impl == nil {
@@ -141,6 +122,39 @@ func (w *BaseWidget) refresh(wid fyne.Widget) {
 
 func (w *BaseWidget) super() fyne.Widget {
 	return w.impl
+}
+
+// DisableableWidget describes an extension to BaseWidget which can be disabled.
+// Disabled widgets should have a visually distinct style when disabled, normally using theme.DisabledButtonColor.
+type DisableableWidget struct {
+	BaseWidget
+
+	disabled bool
+}
+
+// Enable this widget, updating any style or features appropriately.
+func (w *DisableableWidget) Enable() {
+	if !w.disabled {
+		return
+	}
+
+	w.disabled = false
+	w.Refresh()
+}
+
+// Disable this widget so that it cannot be interacted with, updating any style appropriately.
+func (w *DisableableWidget) Disable() {
+	if w.disabled {
+		return
+	}
+
+	w.disabled = true
+	w.Refresh()
+}
+
+// Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
+func (w *DisableableWidget) Disabled() bool {
+	return w.disabled
 }
 
 // Renderer looks up the render implementation for a widget

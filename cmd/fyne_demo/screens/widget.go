@@ -27,8 +27,8 @@ func makeInputTab() fyne.Widget {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Entry")
 	entryReadOnly := widget.NewEntry()
-	entryReadOnly.SetPlaceHolder("Entry (read only)")
-	entryReadOnly.ReadOnly = true
+	entryReadOnly.SetText("Entry (disabled)")
+	entryReadOnly.Disable()
 
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
 	disabledCheck.Disable()
