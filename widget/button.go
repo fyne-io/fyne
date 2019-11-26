@@ -120,9 +120,9 @@ func (b *buttonRenderer) Refresh() {
 				b.icon.Resource = b.button.Icon
 			}
 		}
-		b.icon.Hidden = false
+		b.icon.Show()
 	} else if b.icon != nil {
-		b.icon.Hidden = true
+		b.icon.Hide()
 	}
 
 	b.Layout(b.button.Size())

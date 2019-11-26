@@ -307,6 +307,7 @@ func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
 
 func (t *tabContainerRenderer) Refresh() {
 	t.line.FillColor = theme.ButtonColor()
+	t.line.Refresh()
 
 	t.Layout(t.container.Size().Union(t.container.MinSize()))
 
@@ -333,6 +334,8 @@ func (t *tabContainerRenderer) Refresh() {
 		} else {
 			button.(*tabButton).Style = DefaultButton
 		}
+
+		button.Refresh()
 	}
 }
 
@@ -496,6 +499,8 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 func (r *tabButtonRenderer) Refresh() {
 	r.label.Color = theme.TextColor()
 	r.label.TextSize = theme.TextSize()
+
+	canvas.Refresh(r.button)
 }
 
 func (r *tabButtonRenderer) padding() fyne.Size {

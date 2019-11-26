@@ -28,6 +28,10 @@ func (c *Container) Size() Size {
 
 // Resize sets a new size for the Container.
 func (c *Container) Resize(size Size) {
+	if c.size == size {
+		return
+	}
+
 	c.size = size
 	c.layout()
 }

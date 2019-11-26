@@ -34,6 +34,9 @@ func (w *BaseWidget) Size() fyne.Size {
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Resize(size fyne.Size) {
+	if w.size == size {
+		return
+	}
 	w.size = size
 
 	if w.impl == nil {
@@ -133,9 +136,6 @@ func (w *BaseWidget) Refresh() {
 func (w *BaseWidget) refresh(wid fyne.Widget) {
 	render := cache.Renderer(wid)
 	render.Refresh()
-	for _, child := range render.Objects() {
-		child.Refresh()
-	}
 	render.Layout(w.impl.Size())
 }
 

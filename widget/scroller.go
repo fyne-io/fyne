@@ -20,13 +20,11 @@ const (
 type scrollBarRenderer struct {
 	scrollBar *scrollBar
 
-	color   color.Color
 	minSize fyne.Size
-	objects []fyne.CanvasObject
 }
 
 func (r *scrollBarRenderer) BackgroundColor() color.Color {
-	return r.color
+	return theme.ScrollBarColor()
 }
 
 func (r *scrollBarRenderer) Destroy() {
@@ -40,11 +38,10 @@ func (r *scrollBarRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollBarRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
+	return nil
 }
 
 func (r *scrollBarRenderer) Refresh() {
-	r.color = theme.ScrollBarColor()
 }
 
 var _ desktop.Hoverable = (*scrollBar)(nil)

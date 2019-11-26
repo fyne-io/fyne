@@ -2,11 +2,23 @@ package app
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/widget"
 )
 
 // ApplyThemeTo ensures that the specified canvasobject and all widgets and themeable objects will
 // be updated for the current theme.
-func ApplyThemeTo(content fyne.CanvasObject, _ fyne.Canvas) {
+func ApplyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
+	if wid, ok := content.(fyne.Widget); ok {
+		for _, o := range widget.Renderer(wid).Objects() {
+			ApplyThemeTo(o, canv)
+		}
+	}
+	if c, ok := content.(*fyne.Container); ok {
+		for _, o := range c.Objects {
+			ApplyThemeTo(o, canv)
+		}
+	}
+
 	content.Refresh()
 }
 
