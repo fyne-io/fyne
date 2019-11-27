@@ -7,10 +7,16 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Added
 
+* Mobile support - iOS and Android, including "fyne package" command
+* Support for OpenGL ES and embedded linux
+* New BaseWidget for building custom widgets
 * Support for diagonal gradients
 * Global settings are now saved and can be set using the new fyne_settings app
 * Support rendering in Go playground using playground.Render() helpers
 * "fyne install" command to package and install apps on the local computer
+* Add horizontal scrolling to ScrollContainer
+* Add preferences API
+
 
 ### Changed
 
@@ -18,10 +24,13 @@ More detailed release notes can be found on the [releases page](https://github.c
 * FYNE_THEME and FYNE_SCALE are now overrides to the global configuration
 * The first opened window no longer exits the app when closed (unless none others are open or Window.SetMaster() is called)
 * "fyne package" now defaults icon to "Icon.png" so the parameter is optional
+* Calling ExtendBaseWidget() sets up the renderer for extended widgets
 
 ### Fixed
 
 * Correct the colour of Entry widget cursor if theme changes
+* Error where widgets created before main() function could crash (#490)
+* App.Run apnics if called without a window (#527)
 
 
 ## 1.1.2 - 12 October 2019
