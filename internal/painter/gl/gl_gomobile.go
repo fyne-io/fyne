@@ -179,13 +179,6 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	return Buffer(sharedBuffer)
 }
 
-func (p *glPainter) glFreeBuffer(vbo Buffer) {
-	ctx := p.glctx()
-
-	ctx.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer(vbo))
-	ctx.DeleteBuffer(gl.Buffer(vbo))
-}
-
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
 	ctx.Enable(gl.BLEND)
