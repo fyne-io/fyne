@@ -15,12 +15,13 @@ import (
 var _ command = (*installer)(nil)
 
 type installer struct {
-	installDir, srcDir string
-	packager           *packager
+	installDir, srcDir, icon string
+	packager                 *packager
 }
 
 func (i *installer) addFlags() {
 	flag.StringVar(&i.installDir, "installDir", "", "A specific location to install to, rather than the OS default")
+	flag.StringVar(&i.icon, "icon", "Icon.png", "The name of the application icon file")
 }
 
 func (i *installer) printHelp(indent string) {
@@ -31,6 +32,7 @@ func (i *installer) printHelp(indent string) {
 
 func (i *installer) validate() error {
 	i.packager = &packager{os: runtime.GOOS, install: true, srcDir: i.srcDir}
+	i.packager.icon = i.icon
 	return i.packager.validate()
 }
 
