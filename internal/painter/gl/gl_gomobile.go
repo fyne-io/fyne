@@ -27,6 +27,8 @@ type Texture gl.Texture
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(gl.Texture{0})
 
+var sharedBuffer gl.Buffer
+
 func (p *glPainter) glctx() gl.Context {
 	return p.context.Context().(gl.Context)
 }
@@ -124,6 +126,7 @@ const (
 
 func (p *glPainter) Init() {
 	p.glctx().Disable(gl.DEPTH_TEST)
+	sharedBuffer = p.glctx().CreateBuffer()
 
 	vertexShader, err := p.compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
@@ -140,6 +143,7 @@ func (p *glPainter) Init() {
 	p.glctx().LinkProgram(prog)
 
 	p.program = Program(prog)
+	p.glctx().UseProgram(gl.Program(p.program))
 }
 
 func (p *glPainter) glClearBuffer() {
@@ -161,9 +165,8 @@ func (p *glPainter) glScissorClose() {
 func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	ctx := p.glctx()
 
-	vbo := ctx.CreateBuffer()
-	ctx.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	ctx.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.STATIC_DRAW)
+	ctx.BindBuffer(gl.ARRAY_BUFFER, sharedBuffer)
+	ctx.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.DYNAMIC_DRAW)
 
 	vertAttrib := ctx.GetAttribLocation(gl.Program(p.program), "vert")
 	ctx.EnableVertexAttribArray(vertAttrib)
@@ -173,7 +176,7 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	ctx.EnableVertexAttribArray(texCoordAttrib)
 	ctx.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
 
-	return Buffer(vbo)
+	return Buffer(sharedBuffer)
 }
 
 func (p *glPainter) glFreeBuffer(vbo Buffer) {
@@ -185,8 +188,6 @@ func (p *glPainter) glFreeBuffer(vbo Buffer) {
 
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
-
-	ctx.UseProgram(gl.Program(p.program))
 	ctx.Enable(gl.BLEND)
 
 	// here we have to choose between blending the image alpha or fading it...
