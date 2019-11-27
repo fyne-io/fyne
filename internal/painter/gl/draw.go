@@ -5,8 +5,8 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
-	"fyne.io/fyne/widget"
 )
 
 func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, aspect float32) (fyne.Size, fyne.Position) {
@@ -33,7 +33,7 @@ func rectInnerCoords(size fyne.Size, pos fyne.Position, fill canvas.ImageFill, a
 
 // rectCoords calculates the openGL coordinate space of a rectangle
 func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Size,
-	fill canvas.ImageFill, aspect float32, pad int) Buffer {
+	fill canvas.ImageFill, aspect float32, pad int) []float32 {
 	size, pos = rectInnerCoords(size, pos, fill, aspect)
 
 	xPos := float32(pos.X-pad) / float32(frame.Width)
@@ -46,89 +46,61 @@ func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Siz
 	y2Pos := float32(pos.Y+size.Height+pad) / float32(frame.Height)
 	y2 := 1 - y2Pos*2
 
-	points := []float32{
+	return []float32{
 		// coord x, y, z texture x, y
 		x1, y2, 0, 0.0, 1.0, // top left
 		x1, y1, 0, 0.0, 0.0, // bottom left
 		x2, y2, 0, 1.0, 1.0, // top right
 		x2, y1, 0, 1.0, 0.0, // bottom right
 	}
-
-	return p.glCreateBuffer(points)
 }
 
-func (p *glPainter) freeCoords(vbo Buffer) {
+func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
+	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect float32, pad int) {
+
+	texture := getTexture(o, creator)
+	if texture == NoTexture {
+		return
+	}
+
+	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
+	vbo := p.glCreateBuffer(points)
+
+	p.glDrawTexture(texture, alpha)
 	p.glFreeBuffer(vbo)
 }
 
 func (p *glPainter) drawWidget(wid fyne.Widget, pos fyne.Position, frame fyne.Size) {
-	if widget.Renderer(wid).BackgroundColor() == color.Transparent {
+	if cache.Renderer(wid).BackgroundColor() == color.Transparent {
 		return
 	}
 
-	vbo := p.rectCoords(wid.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	texture := getTexture(wid, p.newGlRectTexture)
-
-	p.glDrawTexture(texture, 1.0)
-	p.freeCoords(vbo)
+	p.drawTextureWithDetails(wid, p.newGlRectTexture, pos, wid.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, 0)
 }
 
 func (p *glPainter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	vbo := p.rectCoords(circle.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
-	texture := getTexture(circle, p.newGlCircleTexture)
-
-	p.glDrawTexture(texture, 1.0)
-	p.freeCoords(vbo)
+	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, vectorPad)
 }
 
 func (p *glPainter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
-	vbo := p.rectCoords(line.Size(), pos, frame, canvas.ImageFillStretch, 0.0, vectorPad)
-	texture := getTexture(line, p.newGlLineTexture)
-
-	p.glDrawTexture(texture, 1.0)
-	p.freeCoords(vbo)
+	p.drawTextureWithDetails(line, p.newGlLineTexture, pos, line.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, vectorPad)
 }
 
 func (p *glPainter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
-	texture := getTexture(img, p.newGlImageTexture)
-	if texture == NoTexture {
-		return
-	}
-
 	aspect := painter.GetAspect(img)
-	vbo := p.rectCoords(img.Size(), pos, frame, img.FillMode, aspect, 0)
-	p.glDrawTexture(texture, float32(img.Alpha()))
-	p.freeCoords(vbo)
+	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), aspect, 0)
 }
 
 func (p *glPainter) drawRaster(img *canvas.Raster, pos fyne.Position, frame fyne.Size) {
-	texture := getTexture(img, p.newGlRasterTexture)
-	if texture == NoTexture {
-		return
-	}
-
-	vbo := p.rectCoords(img.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	p.glDrawTexture(texture, float32(img.Alpha()))
-	p.freeCoords(vbo)
+	p.drawTextureWithDetails(img, p.newGlRasterTexture, pos, img.Size(), frame, canvas.ImageFillStretch, float32(img.Alpha()), 0.0, 0)
 }
 
 func (p *glPainter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.CanvasObject) Texture, pos fyne.Position, frame fyne.Size) {
-	texture := getTexture(o, texCreator)
-	if texture == NoTexture {
-		return
-	}
-
-	vbo := p.rectCoords(o.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	p.glDrawTexture(texture, 1.0)
-	p.freeCoords(vbo)
+	p.drawTextureWithDetails(o, texCreator, pos, o.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, 0)
 }
 
 func (p *glPainter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	vbo := p.rectCoords(rect.Size(), pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	texture := getTexture(rect, p.newGlRectTexture)
-
-	p.glDrawTexture(texture, 1.0)
-	p.freeCoords(vbo)
+	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, 0)
 }
 
 func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {
@@ -149,11 +121,7 @@ func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Si
 		pos = fyne.NewPos(pos.X, pos.Y+(text.Size().Height-text.MinSize().Height)/2)
 	}
 
-	vbo := p.rectCoords(size, pos, frame, canvas.ImageFillStretch, 0.0, 0)
-	texture := getTexture(text, p.newGlTextTexture)
-
-	p.glDrawTexture(texture, 1.0)
-	p.freeCoords(vbo)
+	p.drawTextureWithDetails(text, p.newGlTextTexture, pos, size, frame, canvas.ImageFillStretch, 1.0, 0.0, 0)
 }
 
 func (p *glPainter) drawObject(o fyne.CanvasObject, pos fyne.Position, frame fyne.Size) {

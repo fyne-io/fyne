@@ -16,7 +16,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-var textures = make(map[fyne.CanvasObject]Texture)
+var textures = make(map[fyne.CanvasObject]Texture, 1024)
 
 const vectorPad = 10
 
