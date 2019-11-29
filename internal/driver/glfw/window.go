@@ -970,17 +970,20 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		}
 	}
 
-	if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-		if shortcutable.TypedShortcut(shortcut) {
+	if shortcut != nil {
+		if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
+			if shortcutable.TypedShortcut(shortcut) {
+				return
+			}
+		} else if w.canvas.shortcut.TypedShortcut(shortcut) {
 			return
 		}
-	} else if w.canvas.shortcut.TypedShortcut(shortcut) {
-		return
 	}
 
 	// No shortcut detected, pass down to TypedKey
-	if w.canvas.Focused() != nil {
-		w.queueEvent(func() { w.canvas.Focused().TypedKey(keyEvent) })
+	focused := w.canvas.Focused()
+	if focused != nil {
+		w.queueEvent(func() { focused.TypedKey(keyEvent) })
 	} else if w.canvas.onTypedKey != nil {
 		w.queueEvent(func() { w.canvas.onTypedKey(keyEvent) })
 	}
@@ -1014,8 +1017,9 @@ func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.Modifi
 		return
 	}
 
-	if w.canvas.Focused() != nil {
-		w.queueEvent(func() { w.canvas.Focused().TypedRune(char) })
+	focused := w.canvas.Focused()
+	if focused != nil {
+		w.queueEvent(func() { focused.TypedRune(char) })
 	} else if w.canvas.onTypedRune != nil {
 		w.queueEvent(func() { w.canvas.onTypedRune(char) })
 	}

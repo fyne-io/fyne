@@ -627,6 +627,30 @@ func TestWindow_SetPadded(t *testing.T) {
 	}
 }
 
+func TestWindow_Focus(t *testing.T) {
+	d := NewGLDriver()
+	w := d.CreateWindow("Test").(*window)
+
+	e1 := widget.NewEntry()
+	e2 := widget.NewEntry()
+
+	w.SetContent(widget.NewVBox(e1, e2))
+	w.Canvas().Focus(e1)
+
+	w.charModInput(w.viewport, 'a', 0)
+	w.charModInput(w.viewport, 'b', 0)
+	w.charModInput(w.viewport, 'c', 0)
+	w.charModInput(w.viewport, 'd', 0)
+	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Press, 0)
+	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Release, 0)
+	w.charModInput(w.viewport, 'e', 0)
+	w.charModInput(w.viewport, 'f', 0)
+
+	w.waitForEvents()
+	assert.Equal(t, "abcd", e1.Text)
+	assert.Equal(t, "ef", e2.Text)
+}
+
 func TestWindow_Clipboard(t *testing.T) {
 	d := NewGLDriver()
 	w := d.CreateWindow("Test")
