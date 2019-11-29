@@ -250,28 +250,6 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 }
 
-// Show this widget, if it was previously hidden
-func (e *Entry) Show() {
-	e.BaseWidget.Show()
-	if len(e.Text) != 0 {
-		e.placeholderProvider().Hide()
-	}
-	if !e.Focused() {
-		Renderer(e).(*entryRenderer).cursor.Hide()
-	}
-}
-
-// Hide this widget, if it was previously visible
-func (e *Entry) Hide() {
-	if e.focused {
-		fyne.CurrentApp().Driver().CanvasForObject(e).Focus(nil)
-	}
-	if e.popUp != nil {
-		e.popUp.Hide()
-	}
-	e.BaseWidget.Hide()
-}
-
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
 	e.textProvider().SetText(text)
@@ -1054,6 +1032,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	line := canvas.NewRectangle(theme.ButtonColor())
 	cursor := canvas.NewRectangle(theme.FocusColor())
+	cursor.Hide()
 
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{},
 		[]fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}, e}
