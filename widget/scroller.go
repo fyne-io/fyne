@@ -436,7 +436,7 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	topShadow := newShadow(shadowBottom, theme.Padding()*2)
 	bottomShadow := newShadow(shadowTop, theme.Padding()*2)
 	return &scrollContainerRenderer{
-		objects:      []fyne.CanvasObject{s.Content, s.hbar, s.vbar, topShadow, bottomShadow},
+		objects:      []fyne.CanvasObject{s.Content, s.hbar, s.vbar, topShadow, bottomShadow, leftShadow, rightShadow},
 		scroll:       s,
 		horizArea:    s.hbar,
 		vertArea:     s.vbar,
