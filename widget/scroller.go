@@ -252,7 +252,7 @@ func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
 	case scrollBarOrientationVertical:
 		a.isWide = true
 	}
-	a.Refresh()
+	a.scroll.Refresh()
 }
 
 func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
@@ -265,7 +265,7 @@ func (a *scrollBarArea) MouseOut() {
 	case scrollBarOrientationVertical:
 		a.isWide = false
 	}
-	a.Refresh()
+	a.scroll.Refresh()
 }
 
 func (a *scrollBarArea) moveHorizontalBar(x int) {
