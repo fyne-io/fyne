@@ -26,6 +26,11 @@ func (s1 Size) Union(s2 Size) Size {
 	return NewSize(maxW, maxH)
 }
 
+// FitsInto returns whether the current Size fits into another Size or not.
+func (s1 Size) FitsInto(s2 Size) bool {
+	return s1.Width <= s2.Width && s1.Height <= s2.Height
+}
+
 // NewSize returns a newly allocated Size of the specified dimensions.
 func NewSize(w int, h int) Size {
 	return Size{w, h}

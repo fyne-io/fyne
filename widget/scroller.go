@@ -487,8 +487,7 @@ func (s *ScrollContainer) MinSize() fyne.Size {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
-	if s.Content.Size().Width <= s.Size().Width &&
-		s.Content.Size().Height <= s.Size().Height {
+	if s.Content.Size().FitsInto(s.Size()) {
 		return
 	}
 
