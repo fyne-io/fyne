@@ -1,6 +1,7 @@
 package gomobile
 
 import (
+	"runtime"
 	"strconv"
 	"time"
 
@@ -33,6 +34,10 @@ type mobileDriver struct {
 
 // Declare conformity with Driver
 var _ fyne.Driver = (*mobileDriver)(nil)
+
+func init() {
+	runtime.LockOSThread()
+}
 
 func (d *mobileDriver) CreateWindow(title string) fyne.Window {
 	canvas := NewCanvas().(*mobileCanvas) // silence lint
@@ -102,7 +107,7 @@ func (d *mobileDriver) Run() {
 		for e := range a.Events() {
 			current := d.currentWindow()
 			if current == nil {
-				break
+				continue
 			}
 			canvas := current.Canvas().(*mobileCanvas)
 

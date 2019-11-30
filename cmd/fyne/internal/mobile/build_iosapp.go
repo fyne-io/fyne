@@ -32,8 +32,7 @@ func goIOSBuild(pkg *build.Package, bundleID string, archs []string) (map[string
 
 	infoplist := new(bytes.Buffer)
 	if err := infoplistTmpl.Execute(infoplist, infoplistTmplData{
-		// TODO: better bundle id.
-		BundleID: bundleID + "." + productName,
+		BundleID: bundleID,
 		Name:     strings.Title(path.Base(pkg.ImportPath)),
 	}); err != nil {
 		return nil, err
@@ -426,6 +425,7 @@ const projPbxproj = `// !$*UTF8*$!
         SDKROOT = iphoneos;
         TARGETED_DEVICE_FAMILY = "1,2";
         VALIDATE_PRODUCT = YES;
+        ENABLE_BITCODE = NO;
       };
       name = Release;
     };
