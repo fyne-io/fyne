@@ -491,25 +491,29 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 		s.Content.Size().Height <= s.Size().Height {
 		return
 	}
+
+	var deltaX, deltaY int
 	if s.hbar.Visible() && !s.vbar.Visible() {
-		s.Offset.X -= ev.DeltaY
-		s.Offset.Y -= ev.DeltaX
+		deltaX = ev.DeltaY
+		deltaY = ev.DeltaX
 	} else {
-		s.Offset.X -= ev.DeltaX
-		s.Offset.Y -= ev.DeltaY
+		deltaX = ev.DeltaX
+		deltaY = ev.DeltaY
 	}
-	if s.Offset.X < 0 {
-		s.Offset.X = 0
-	} else if s.Offset.X+s.Size().Width >= s.Content.Size().Width {
-		s.Offset.X = s.Content.Size().Width - s.Size().Width
-	}
-	if s.Offset.Y < 0 {
-		s.Offset.Y = 0
-	} else if s.Offset.Y+s.Size().Height >= s.Content.Size().Height {
-		s.Offset.Y = s.Content.Size().Height - s.Size().Height
-	}
+	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.Size().Width)
+	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.Size().Height)
 
 	Refresh(s)
+}
+
+func computeOffset(start, delta, outerWidth, innerWidth int) int {
+	offset := start + delta
+	if offset < 0 {
+		offset = 0
+	} else if offset+outerWidth >= innerWidth {
+		offset = innerWidth - outerWidth
+	}
+	return offset
 }
 
 // NewScrollContainer creates a scrollable parent wrapping the specified content.
