@@ -428,7 +428,7 @@ type ScrollContainer struct {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
-	s.impl = s
+	s.ExtendBaseWidget(s)
 	s.hbar = newScrollBarArea(s, scrollBarOrientationHorizontal)
 	s.vbar = newScrollBarArea(s, scrollBarOrientationVertical)
 	leftShadow := newShadow(shadowRight, theme.Padding()*2)
@@ -503,7 +503,7 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.Size().Width)
 	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.Size().Height)
 
-	Refresh(s)
+	s.Refresh()
 }
 
 func computeOffset(start, delta, outerWidth, innerWidth int) int {
