@@ -233,10 +233,10 @@ func TestScrollContainer_ShowShadowOnLeftIfContentIsScrolled(t *testing.T) {
 	assert.False(t, r.leftShadow.Visible())
 	assert.Equal(t, fyne.NewPos(0, 0), r.leftShadow.Position())
 
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -1})
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -1})
 	assert.True(t, r.leftShadow.Visible())
 
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 1})
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 1})
 	assert.False(t, r.leftShadow.Visible())
 }
 
@@ -249,10 +249,10 @@ func TestScrollContainer_ShowShadowOnRightIfContentCanScroll(t *testing.T) {
 	assert.True(t, r.rightShadow.Visible())
 	assert.Equal(t, scroll.size.Width, r.rightShadow.Position().X+r.rightShadow.Size().Width)
 
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: -400})
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -400})
 	assert.False(t, r.rightShadow.Visible())
 
-	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 100})
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 100})
 	assert.True(t, r.rightShadow.Visible())
 }
 
@@ -286,6 +286,42 @@ func TestScrollContainer_ShowShadowOnBottomIfContentCanScroll(t *testing.T) {
 
 	scroll.Scrolled(&fyne.ScrollEvent{DeltaY: 100})
 	assert.True(t, r.bottomShadow.Visible())
+}
+
+func TestScrollContainer_ScrollHorizontallyWithVerticalMouseScroll(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(1000, 50))
+	scroll := NewScrollContainer(rect)
+	scroll.Resize(fyne.NewSize(100, 100))
+	assert.Equal(t, 0, scroll.Offset.X)
+	assert.Equal(t, 0, scroll.Offset.Y)
+	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 0, DeltaY: -10})
+	assert.Equal(t, 10, scroll.Offset.X)
+	assert.Equal(t, 0, scroll.Offset.Y)
+
+	t.Run("not if scroll event includes horizontal offset", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(1000, 50))
+		scroll := NewScrollContainer(rect)
+		scroll.Resize(fyne.NewSize(100, 100))
+		assert.Equal(t, 0, scroll.Offset.X)
+		assert.Equal(t, 0, scroll.Offset.Y)
+		scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -20, DeltaY: -40})
+		assert.Equal(t, 20, scroll.Offset.X)
+		assert.Equal(t, 0, scroll.Offset.Y)
+	})
+
+	t.Run("not if content is vertically scrollable", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(1000, 1000))
+		scroll := NewScrollContainer(rect)
+		scroll.Resize(fyne.NewSize(100, 100))
+		assert.Equal(t, 0, scroll.Offset.X)
+		assert.Equal(t, 0, scroll.Offset.Y)
+		scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 0, DeltaY: -10})
+		assert.Equal(t, 0, scroll.Offset.X)
+		assert.Equal(t, 10, scroll.Offset.Y)
+	})
 }
 
 func TestScrollBarRenderer_BarSize(t *testing.T) {

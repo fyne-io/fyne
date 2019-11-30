@@ -492,7 +492,7 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 	}
 
 	var deltaX, deltaY int
-	if s.hbar.Visible() && !s.vbar.Visible() {
+	if s.hbar.Visible() && !s.vbar.Visible() && ev.DeltaX == 0 {
 		deltaX = ev.DeltaY
 		deltaY = ev.DeltaX
 	} else {
