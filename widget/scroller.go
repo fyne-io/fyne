@@ -184,15 +184,8 @@ type scrollBarArea struct {
 }
 
 func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
-	a.ExtendBaseWidget(a)
 	bar := newScrollBar(a)
 	return &scrollBarAreaRenderer{area: a, bar: bar, objects: []fyne.CanvasObject{bar}}
-}
-
-// MinSize returns the size that this widget should not shrink below
-func (a *scrollBarArea) MinSize() fyne.Size {
-	a.ExtendBaseWidget(a)
-	return a.BaseWidget.MinSize()
 }
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
@@ -231,7 +224,9 @@ func (a *scrollBarArea) computeScrollOffset(length, offset, scrollLength, conten
 }
 
 func newScrollBarArea(scroll *ScrollContainer, orientation scrollBarOrientation) *scrollBarArea {
-	return &scrollBarArea{scroll: scroll, orientation: orientation}
+	a := &scrollBarArea{scroll: scroll, orientation: orientation}
+	a.ExtendBaseWidget(a)
+	return a
 }
 
 type scrollContainerRenderer struct {
