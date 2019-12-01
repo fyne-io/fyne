@@ -418,12 +418,10 @@ func (r *scrollContainerRenderer) updatePosition() {
 type ScrollContainer struct {
 	BaseWidget
 
-	Content                   fyne.CanvasObject
-	Offset                    fyne.Position
-	horizontalDraggedDistance int
-	verticalDraggedDistance   int
-	hbar                      *scrollBarArea
-	vbar                      *scrollBarArea
+	Content fyne.CanvasObject
+	Offset  fyne.Position
+	hbar    *scrollBarArea
+	vbar    *scrollBarArea
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -456,27 +454,8 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 	if !fyne.CurrentDevice().IsMobile() {
 		return
 	}
-	maxX := s.Content.Size().Width
-	maxY := s.Content.Size().Height
 
-	s.horizontalDraggedDistance -= e.DraggedX
-	s.verticalDraggedDistance -= e.DraggedY
-
-	if s.horizontalDraggedDistance > maxX {
-		s.horizontalDraggedDistance = maxX
-	} else if s.horizontalDraggedDistance < 0 {
-		s.horizontalDraggedDistance = 0
-	}
-
-	if s.verticalDraggedDistance > maxY {
-		s.verticalDraggedDistance = maxY
-	} else if s.verticalDraggedDistance < 0 {
-		s.verticalDraggedDistance = 0
-	}
-	s.Offset.X = s.horizontalDraggedDistance
-	s.Offset.Y = s.verticalDraggedDistance
-	s.Refresh()
-
+	s.updateOffset(e.DraggedX, e.DraggedY)
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -487,21 +466,20 @@ func (s *ScrollContainer) MinSize() fyne.Size {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
+	if s.hbar.Visible() && !s.vbar.Visible() && ev.DeltaX == 0 {
+		s.updateOffset(ev.DeltaY, ev.DeltaX)
+	} else {
+		s.updateOffset(ev.DeltaX, ev.DeltaY)
+	}
+}
+
+func (s *ScrollContainer) updateOffset(deltaX, deltaY int) {
 	if s.Content.Size().FitsInto(s.Size()) {
 		return
 	}
 
-	var deltaX, deltaY int
-	if s.hbar.Visible() && !s.vbar.Visible() && ev.DeltaX == 0 {
-		deltaX = ev.DeltaY
-		deltaY = ev.DeltaX
-	} else {
-		deltaX = ev.DeltaX
-		deltaY = ev.DeltaY
-	}
 	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.Size().Width)
 	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.Size().Height)
-
 	s.Refresh()
 }
 
