@@ -107,9 +107,8 @@ func newScrollBar(area *scrollBarArea) *scrollBar {
 }
 
 type scrollBarAreaRenderer struct {
-	area        *scrollBarArea
-	bar         *scrollBar
-	orientation scrollBarOrientation
+	area *scrollBarArea
+	bar  *scrollBar
 
 	objects []fyne.CanvasObject
 }
@@ -122,7 +121,7 @@ func (r *scrollBarAreaRenderer) Destroy() {
 }
 
 func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
-	switch r.orientation {
+	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
 		r.updateHorizontalBarPosition()
 	case scrollBarOrientationVertical:
@@ -133,16 +132,13 @@ func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
 func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 	var min int
 	min = theme.ScrollBarSize()
-	switch r.orientation {
+	if !r.area.isLarge {
+		min = theme.ScrollBarSmallSize() * 2
+	}
+	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
-		if !r.area.isTall {
-			min = theme.ScrollBarSmallSize() * 2
-		}
 		return fyne.NewSize(theme.ScrollBarSize(), min)
 	default:
-		if !r.area.isWide {
-			min = theme.ScrollBarSmallSize() * 2
-		}
 		return fyne.NewSize(min, theme.ScrollBarSize())
 	}
 }
@@ -152,7 +148,7 @@ func (r *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *scrollBarAreaRenderer) Refresh() {
-	switch r.orientation {
+	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
 		r.updateHorizontalBarPosition()
 	default:
@@ -170,7 +166,7 @@ func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
 	barX := int(float32(r.area.scroll.size.Width-barWidth) * barRatio)
 
 	var barY, barHeight int
-	if r.area.isTall {
+	if r.area.isLarge {
 		barHeight = theme.ScrollBarSize()
 	} else {
 		barY = theme.ScrollBarSmallSize()
@@ -190,7 +186,7 @@ func (r *scrollBarAreaRenderer) updateVerticalBarPosition() {
 	barY := int(float32(r.area.scroll.size.Height-barHeight) * barRatio)
 
 	var barX, barWidth int
-	if r.area.isWide {
+	if r.area.isLarge {
 		barWidth = theme.ScrollBarSize()
 	} else {
 		barX = theme.ScrollBarSmallSize()
@@ -224,8 +220,7 @@ var _ desktop.Hoverable = (*scrollBarArea)(nil)
 type scrollBarArea struct {
 	BaseWidget
 
-	isWide      bool
-	isTall      bool
+	isLarge     bool
 	scroll      *ScrollContainer
 	orientation scrollBarOrientation
 }
@@ -233,7 +228,7 @@ type scrollBarArea struct {
 func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	a.ExtendBaseWidget(a)
 	bar := newScrollBar(a)
-	return &scrollBarAreaRenderer{area: a, bar: bar, orientation: a.orientation, objects: []fyne.CanvasObject{bar}}
+	return &scrollBarAreaRenderer{area: a, bar: bar, objects: []fyne.CanvasObject{bar}}
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -243,12 +238,7 @@ func (a *scrollBarArea) MinSize() fyne.Size {
 }
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
-	switch a.orientation {
-	case scrollBarOrientationHorizontal:
-		a.isTall = true
-	case scrollBarOrientationVertical:
-		a.isWide = true
-	}
+	a.isLarge = true
 	a.scroll.Refresh()
 }
 
@@ -256,12 +246,7 @@ func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (a *scrollBarArea) MouseOut() {
-	switch a.orientation {
-	case scrollBarOrientationHorizontal:
-		a.isTall = false
-	case scrollBarOrientationVertical:
-		a.isWide = false
-	}
+	a.isLarge = false
 	a.scroll.Refresh()
 }
 
