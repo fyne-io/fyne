@@ -160,15 +160,7 @@ func (r *scrollBarAreaRenderer) Refresh() {
 func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
 	barWidth := r.horizontalBarWidth()
 	barX := computeBarPosition(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width, barWidth)
-
-	var barY, barHeight int
-	if r.area.isLarge {
-		barHeight = theme.ScrollBarSize()
-	} else {
-		barY = theme.ScrollBarSmallSize()
-		barHeight = theme.ScrollBarSmallSize()
-	}
-
+	barHeight, barY := r.barThicknessAndPositionOffset()
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
 }
@@ -176,15 +168,7 @@ func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
 func (r *scrollBarAreaRenderer) updateVerticalBarPosition() {
 	barHeight := r.verticalBarHeight()
 	barY := computeBarPosition(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height, barHeight)
-
-	var barX, barWidth int
-	if r.area.isLarge {
-		barWidth = theme.ScrollBarSize()
-	} else {
-		barX = theme.ScrollBarSmallSize()
-		barWidth = theme.ScrollBarSmallSize()
-	}
-
+	barWidth, barX := r.barThicknessAndPositionOffset()
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
 }
@@ -194,6 +178,15 @@ func computeBarPosition(offset, contentSize, scrollSize, barSize int) int {
 		return 0
 	}
 	return int(float64(scrollSize-barSize) * (float64(offset) / float64(contentSize-scrollSize)))
+}
+
+func (r *scrollBarAreaRenderer) barThicknessAndPositionOffset() (thickness int, offset int) {
+	if r.area.isLarge {
+		thickness = theme.ScrollBarSize()
+	} else {
+		offset = theme.ScrollBarSmallSize()
+		thickness = theme.ScrollBarSmallSize()
+	}
 }
 
 func (r *scrollBarAreaRenderer) horizontalBarWidth() int {
