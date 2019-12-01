@@ -56,13 +56,7 @@ type scrollBar struct {
 	orientation     scrollBarOrientation
 }
 
-func (b *scrollBar) MinSize() fyne.Size {
-	b.ExtendBaseWidget(b)
-	return b.BaseWidget.MinSize()
-}
-
 func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
-	b.ExtendBaseWidget(b)
 	return &scrollBarRenderer{scrollBar: b}
 }
 
@@ -102,7 +96,9 @@ func (b *scrollBar) MouseOut() {
 }
 
 func newScrollBar(area *scrollBarArea) *scrollBar {
-	return &scrollBar{area: area, orientation: area.orientation}
+	b := &scrollBar{area: area, orientation: area.orientation}
+	b.ExtendBaseWidget(b)
+	return b
 }
 
 type scrollBarAreaRenderer struct {
