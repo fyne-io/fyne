@@ -159,11 +159,7 @@ func (r *scrollBarAreaRenderer) Refresh() {
 
 func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
 	barWidth := r.horizontalBarWidth()
-	barRatio := float32(0.0)
-	if r.area.scroll.Offset.X != 0 {
-		barRatio = float32(r.area.scroll.Offset.X) / float32(r.area.scroll.Content.Size().Width-r.area.scroll.Size().Width)
-	}
-	barX := int(float32(r.area.scroll.size.Width-barWidth) * barRatio)
+	barX := computeBarPosition(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width, barWidth)
 
 	var barY, barHeight int
 	if r.area.isLarge {
@@ -179,11 +175,7 @@ func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
 
 func (r *scrollBarAreaRenderer) updateVerticalBarPosition() {
 	barHeight := r.verticalBarHeight()
-	barRatio := float32(0.0)
-	if r.area.scroll.Offset.Y != 0 {
-		barRatio = float32(r.area.scroll.Offset.Y) / float32(r.area.scroll.Content.Size().Height-r.area.scroll.Size().Height)
-	}
-	barY := int(float32(r.area.scroll.size.Height-barHeight) * barRatio)
+	barY := computeBarPosition(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height, barHeight)
 
 	var barX, barWidth int
 	if r.area.isLarge {
@@ -195,6 +187,13 @@ func (r *scrollBarAreaRenderer) updateVerticalBarPosition() {
 
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
+}
+
+func computeBarPosition(offset, contentSize, scrollSize, barSize int) int {
+	if offset == 0 {
+		return 0
+	}
+	return int(float64(scrollSize-barSize) * (float64(offset) / float64(contentSize-scrollSize)))
 }
 
 func (r *scrollBarAreaRenderer) horizontalBarWidth() int {
