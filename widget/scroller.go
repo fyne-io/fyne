@@ -239,38 +239,26 @@ func (a *scrollBarArea) MouseOut() {
 
 func (a *scrollBarArea) moveHorizontalBar(x int) {
 	render := Renderer(a).(*scrollBarAreaRenderer)
-	barWidth := render.horizontalBarWidth()
-	scrollWidth := a.scroll.Size().Width
-	maxX := scrollWidth - barWidth
-
-	if x < 0 {
-		x = 0
-	} else if x > maxX {
-		x = maxX
-	}
-
-	ratio := float32(x) / float32(maxX)
-	a.scroll.Offset.X = int(ratio * float32(a.scroll.Content.Size().Width-scrollWidth))
-
+	a.scroll.Offset.X = a.computeScrollOffset(render.horizontalBarWidth(), x, a.scroll.Size().Width, a.scroll.Content.Size().Width)
 	Refresh(a.scroll)
 }
 
 func (a *scrollBarArea) moveVerticalBar(y int) {
 	render := Renderer(a).(*scrollBarAreaRenderer)
-	barHeight := render.verticalBarHeight()
-	scrollHeight := a.scroll.Size().Height
-	maxY := scrollHeight - barHeight
-
-	if y < 0 {
-		y = 0
-	} else if y > maxY {
-		y = maxY
-	}
-
-	ratio := float32(y) / float32(maxY)
-	a.scroll.Offset.Y = int(ratio * float32(a.scroll.Content.Size().Height-scrollHeight))
-
+	a.scroll.Offset.Y = a.computeScrollOffset(render.verticalBarHeight(), y, a.scroll.Size().Height, a.scroll.Content.Size().Height)
 	Refresh(a.scroll)
+}
+
+func (a *scrollBarArea) computeScrollOffset(length, offset, scrollLength, contentLength int) int {
+	maxOffset := scrollLength - length
+	if offset < 0 {
+		offset = 0
+	} else if offset > maxOffset {
+		offset = maxOffset
+	}
+	ratio := float32(offset) / float32(maxOffset)
+	scrollOffset := int(ratio * float32(contentLength-scrollLength))
+	return scrollOffset
 }
 
 func newScrollBarArea(scroll *ScrollContainer, orientation scrollBarOrientation) *scrollBarArea {
