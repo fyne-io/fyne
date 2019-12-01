@@ -14,9 +14,10 @@ type Spacer struct {
 	FixHorizontal bool
 	FixVertical   bool
 
-	size   fyne.Size
-	pos    fyne.Position
-	hidden bool
+	size                fyne.Size
+	pos                 fyne.Position
+	hidden              bool
+	RefreshDuringResize bool
 }
 
 // ExpandVertical returns whether or not this spacer expands on the vertical axis
@@ -71,6 +72,12 @@ func (s *Spacer) Hide() {
 
 // Refresh does nothing for a spacer but is part of the CanvasObject definition
 func (s *Spacer) Refresh() {
+}
+
+// SkipRefreshDuringResize returns whether we should skip updating
+// textures while the containing window is being actively resized
+func (s *Spacer) SkipRefreshDuringResize() bool {
+	return !s.RefreshDuringResize
 }
 
 // NewSpacer returns a spacer object which can fill vertical and horizontal

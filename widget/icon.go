@@ -41,6 +41,7 @@ func (i *iconRenderer) Refresh() {
 	if i.image.Resource != nil {
 		raster := canvas.NewImageFromResource(i.image.Resource)
 		raster.FillMode = canvas.ImageFillContain
+		raster.RefreshDuringResize = i.image.RefreshDuringResize
 
 		i.objects = append(i.objects, raster)
 	}
@@ -84,6 +85,16 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 // NewIcon returns a new icon widget that displays a themed icon resource
 func NewIcon(res fyne.Resource) *Icon {
 	icon := &Icon{}
+	icon.SetResource(res) // force the image conversion
+
+	return icon
+}
+
+// NewIconRefreshDuringResize returns a new icon widget that displays a themed icon resource
+// and will be refreshed while window is being resized
+func NewIconRefreshDuringResize(res fyne.Resource) *Icon {
+	icon := &Icon{}
+	icon.RefreshDuringResize = true
 	icon.SetResource(res) // force the image conversion
 
 	return icon

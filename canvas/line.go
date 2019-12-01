@@ -14,9 +14,10 @@ var _ fyne.CanvasObject = (*Line)(nil)
 // Lines are special as they can have a negative width or height to indicate
 // an inverse slope (i.e. slope up vs down).
 type Line struct {
-	Position1 fyne.Position // The current top-left position of the Line
-	Position2 fyne.Position // The current bottomright position of the Line
-	Hidden    bool          // Is this Line currently hidden
+	Position1           fyne.Position // The current top-left position of the Line
+	Position2           fyne.Position // The current bottomright position of the Line
+	Hidden              bool          // Is this Line currently hidden
+	RefreshDuringResize bool          // Should this line have texture refreshed during resize
 
 	StrokeColor color.Color // The line stroke colour
 	StrokeWidth float32     // The stroke width of the line
@@ -73,6 +74,12 @@ func (l *Line) Hide() {
 // Refresh causes this object to be redrawn in it's current state
 func (l *Line) Refresh() {
 	Refresh(l)
+}
+
+// SkipRefreshDuringResize returns whether we should skip updating
+// textures while the containing window is being actively resized
+func (l *Line) SkipRefreshDuringResize() bool {
+	return !l.RefreshDuringResize
 }
 
 // NewLine returns a new Line instance

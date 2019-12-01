@@ -100,6 +100,12 @@ func (c *Container) Refresh() {
 	}
 }
 
+// SkipRefreshDuringResize returns whether we should skip updating
+// textures while the containing window is being actively resized
+func (c *Container) SkipRefreshDuringResize() bool {
+	return true // Always true because a container isn't itself rendered
+}
+
 // NewContainer returns a new Container instance holding the specified CanvasObjects.
 func NewContainer(objects ...CanvasObject) *Container {
 	ret := &Container{

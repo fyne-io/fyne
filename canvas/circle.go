@@ -11,9 +11,10 @@ var _ fyne.CanvasObject = (*Circle)(nil)
 
 // Circle describes a coloured circle primitive in a Fyne canvas
 type Circle struct {
-	Position1 fyne.Position // The current top-left position of the Circle
-	Position2 fyne.Position // The current bottomright position of the Circle
-	Hidden    bool          // Is this circle currently hidden
+	Position1           fyne.Position // The current top-left position of the Circle
+	Position2           fyne.Position // The current bottomright position of the Circle
+	Hidden              bool          // Is this circle currently hidden
+	RefreshDuringResize bool          // Should textures be refreshed during resize
 
 	FillColor   color.Color // The circle fill colour
 	StrokeColor color.Color // The circle stroke colour
@@ -70,6 +71,12 @@ func (l *Circle) Hide() {
 // Refresh causes this object to be redrawn in it's current state
 func (l *Circle) Refresh() {
 	Refresh(l)
+}
+
+// SkipRefreshDuringResize returns whether we should skip updating
+// textures while the containing window is being actively resized
+func (l *Circle) SkipRefreshDuringResize() bool {
+	return !l.RefreshDuringResize
 }
 
 // NewCircle returns a new Circle instance

@@ -4,9 +4,10 @@ package canvas // import "fyne.io/fyne/canvas"
 import "fyne.io/fyne"
 
 type baseObject struct {
-	size     fyne.Size     // The current size of the Rectangle
-	position fyne.Position // The current position of the Rectangle
-	Hidden   bool          // Is this object currently hidden
+	size                fyne.Size     // The current size of the Rectangle
+	position            fyne.Position // The current position of the Rectangle
+	Hidden              bool          // Is this object currently hidden
+	RefreshDuringResize bool          // Should object have texture refreshed during resize
 
 	min fyne.Size // The minimum size this object can be
 }
@@ -58,6 +59,12 @@ func (r *baseObject) Show() {
 // Hide will set this object to not be visible
 func (r *baseObject) Hide() {
 	r.Hidden = true
+}
+
+// SkipRefreshDuringResize returns whether we should skip updating
+// textures while the containing window is being actively resized
+func (r *baseObject) SkipRefreshDuringResize() bool {
+	return !r.RefreshDuringResize
 }
 
 // Refresh instructs the containing canvas to refresh the specified obj.

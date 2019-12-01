@@ -52,7 +52,7 @@ func IconsPanel() fyne.CanvasObject {
 
 	background := canvas.NewRasterWithPixels(checkerPattern)
 	background.SetMinSize(fyne.NewSize(280, 280))
-	b.icon = widget.NewIcon(icons[b.current].icon)
+	b.icon = widget.NewIconRefreshDuringResize(icons[b.current].icon)
 
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(
 		bar, nil, nil, nil), bar, background, b.icon)

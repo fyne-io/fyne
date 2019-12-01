@@ -472,7 +472,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 
 func (w *window) refresh(viewport *glfw.Window) {
 	w.RunWithContext(func() {
-		freeDirtyTextures(w.canvas)
+		freeDirtyTextures(w.canvas, true)
 	})
 	forceWindowRefresh(w)
 	w.canvas.setDirty(true)

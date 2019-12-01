@@ -21,6 +21,7 @@ type CanvasObject interface {
 	Hide()
 
 	Refresh()
+	SkipRefreshDuringResize() bool
 }
 
 // Tappable describes any CanvasObject that can also be tapped.

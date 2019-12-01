@@ -9,9 +9,10 @@ import (
 
 // BaseWidget provides a helper that handles basic widget behaviours.
 type BaseWidget struct {
-	size     fyne.Size
-	position fyne.Position
-	Hidden   bool
+	size                fyne.Size
+	position            fyne.Position
+	Hidden              bool
+	RefreshDuringResize bool
 
 	impl fyne.Widget
 }
@@ -112,6 +113,12 @@ func (w *BaseWidget) Refresh() {
 	}
 
 	w.refresh(w.impl)
+}
+
+// SkipRefreshDuringResize returns whether we should skip updating
+// textures while the containing window is being actively resized
+func (w *BaseWidget) SkipRefreshDuringResize() bool {
+	return !w.RefreshDuringResize
 }
 
 func (w *BaseWidget) refresh(wid fyne.Widget) {

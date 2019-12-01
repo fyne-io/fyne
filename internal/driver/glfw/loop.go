@@ -116,7 +116,7 @@ func (d *gLDriver) runGL() {
 func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
-		freeDirtyTextures(canvas)
+		freeDirtyTextures(canvas, false)
 
 		updateGLContext(w)
 		if canvas.ensureMinSize() {
@@ -128,17 +128,30 @@ func (d *gLDriver) repaintWindow(w *window) {
 	})
 }
 
-func freeDirtyTextures(canvas *glCanvas) {
+func freeDirtyTextures(canvas *glCanvas, resizing bool) {
+	skipped := make(map[fyne.CanvasObject]struct{})
+OuterLoop:
 	for {
 		select {
 		case object := <-canvas.refreshQueue:
+			skippedAny := false
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-				canvas.painter.Free(obj)
+				if !resizing || !obj.SkipRefreshDuringResize() {
+					canvas.painter.Free(obj)
+				} else {
+					skippedAny = true
+				}
 				return false
 			}
 			driver.WalkCompleteObjectTree(object, freeWalked, nil)
+			if skippedAny {
+				skipped[object] = struct{}{}
+			}
 		default:
-			return
+			break OuterLoop
 		}
+	}
+	for obj := range skipped {
+		canvas.Refresh(obj)
 	}
 }
