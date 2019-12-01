@@ -420,24 +420,22 @@ type ScrollContainer struct {
 
 	Content fyne.CanvasObject
 	Offset  fyne.Position
-	hbar    *scrollBarArea
-	vbar    *scrollBarArea
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	s.hbar = newScrollBarArea(s, scrollBarOrientationHorizontal)
-	s.vbar = newScrollBarArea(s, scrollBarOrientationVertical)
+	hbar := newScrollBarArea(s, scrollBarOrientationHorizontal)
+	vbar := newScrollBarArea(s, scrollBarOrientationVertical)
 	leftShadow := newShadow(shadowRight, theme.Padding()*2)
 	rightShadow := newShadow(shadowLeft, theme.Padding()*2)
 	topShadow := newShadow(shadowBottom, theme.Padding()*2)
 	bottomShadow := newShadow(shadowTop, theme.Padding()*2)
 	return &scrollContainerRenderer{
-		objects:      []fyne.CanvasObject{s.Content, s.hbar, s.vbar, topShadow, bottomShadow, leftShadow, rightShadow},
+		objects:      []fyne.CanvasObject{s.Content, hbar, vbar, topShadow, bottomShadow, leftShadow, rightShadow},
 		scroll:       s,
-		horizArea:    s.hbar,
-		vertArea:     s.vbar,
+		horizArea:    hbar,
+		vertArea:     vbar,
 		leftShadow:   leftShadow,
 		rightShadow:  rightShadow,
 		topShadow:    topShadow,
@@ -466,7 +464,7 @@ func (s *ScrollContainer) MinSize() fyne.Size {
 
 // Scrolled is called when an input device triggers a scroll event
 func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
-	if s.hbar.Visible() && !s.vbar.Visible() && ev.DeltaX == 0 {
+	if s.Size().Width < s.Content.Size().Width && s.Size().Height >= s.Content.Size().Height && ev.DeltaX == 0 {
 		s.updateOffset(ev.DeltaY, ev.DeltaX)
 	} else {
 		s.updateOffset(ev.DeltaX, ev.DeltaY)
