@@ -211,19 +211,10 @@ func (a *scrollBarArea) MouseOut() {
 func (a *scrollBarArea) moveBar(offset int, barSize fyne.Size) {
 	switch a.orientation {
 	case scrollBarOrientationHorizontal:
-		a.moveHorizontalBar(offset, barSize.Width)
+		a.scroll.Offset.X = a.computeScrollOffset(barSize.Width, offset, a.scroll.Size().Width, a.scroll.Content.Size().Width)
 	default:
-		a.moveVerticalBar(offset, barSize.Height)
+		a.scroll.Offset.Y = a.computeScrollOffset(barSize.Height, offset, a.scroll.Size().Height, a.scroll.Content.Size().Height)
 	}
-}
-
-func (a *scrollBarArea) moveHorizontalBar(x, barLength int) {
-	a.scroll.Offset.X = a.computeScrollOffset(barLength, x, a.scroll.Size().Width, a.scroll.Content.Size().Width)
-	a.scroll.refreshWithoutOffsetUpdate()
-}
-
-func (a *scrollBarArea) moveVerticalBar(y int, barLength int) {
-	a.scroll.Offset.Y = a.computeScrollOffset(barLength, y, a.scroll.Size().Height, a.scroll.Content.Size().Height)
 	a.scroll.refreshWithoutOffsetUpdate()
 }
 
