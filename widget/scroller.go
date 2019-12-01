@@ -84,11 +84,10 @@ func (b *scrollBar) Dragged(e *fyne.DragEvent) {
 	switch b.orientation {
 	case scrollBarOrientationHorizontal:
 		b.draggedDistance += e.DraggedX
-		b.area.moveHorizontalBar(b.draggedDistance+b.dragStart, b.Size().Width)
 	case scrollBarOrientationVertical:
 		b.draggedDistance += e.DraggedY
-		b.area.moveVerticalBar(b.draggedDistance+b.dragStart, b.Size().Height)
 	}
+	b.area.moveBar(b.draggedDistance+b.dragStart, b.Size())
 }
 
 func (b *scrollBar) MouseIn(e *desktop.MouseEvent) {
@@ -207,6 +206,15 @@ func (a *scrollBarArea) MouseMoved(*desktop.MouseEvent) {
 func (a *scrollBarArea) MouseOut() {
 	a.isLarge = false
 	a.scroll.Refresh()
+}
+
+func (a *scrollBarArea) moveBar(offset int, barSize fyne.Size) {
+	switch a.orientation {
+	case scrollBarOrientationHorizontal:
+		a.moveHorizontalBar(offset, barSize.Width)
+	default:
+		a.moveVerticalBar(offset, barSize.Height)
+	}
 }
 
 func (a *scrollBarArea) moveHorizontalBar(x, barLength int) {
