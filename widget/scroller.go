@@ -49,13 +49,11 @@ var _ fyne.Draggable = (*scrollBar)(nil)
 
 type scrollBar struct {
 	BaseWidget
-	area                 *scrollBarArea
-	draggedDistanceHoriz int
-	draggedDistanceVert  int
-	dragStartHoriz       int
-	dragStartVert        int
-	isDragged            bool
-	orientation          scrollBarOrientation
+	area            *scrollBarArea
+	draggedDistance int
+	dragStart       int
+	isDragged       bool
+	orientation     scrollBarOrientation
 }
 
 func (b *scrollBar) MinSize() fyne.Size {
@@ -76,21 +74,20 @@ func (b *scrollBar) Dragged(e *fyne.DragEvent) {
 		b.isDragged = true
 		switch b.orientation {
 		case scrollBarOrientationHorizontal:
-			b.dragStartHoriz = b.Position().X
+			b.dragStart = b.Position().X
 		case scrollBarOrientationVertical:
-			b.dragStartVert = b.Position().Y
+			b.dragStart = b.Position().Y
 		}
-		b.draggedDistanceHoriz = 0
-		b.draggedDistanceVert = 0
+		b.draggedDistance = 0
 	}
 
 	switch b.orientation {
 	case scrollBarOrientationHorizontal:
-		b.draggedDistanceHoriz += e.DraggedX
-		b.area.moveHorizontalBar(b.draggedDistanceHoriz + b.dragStartHoriz)
+		b.draggedDistance += e.DraggedX
+		b.area.moveHorizontalBar(b.draggedDistance + b.dragStart)
 	case scrollBarOrientationVertical:
-		b.draggedDistanceVert += e.DraggedY
-		b.area.moveVerticalBar(b.draggedDistanceVert + b.dragStartVert)
+		b.draggedDistance += e.DraggedY
+		b.area.moveVerticalBar(b.draggedDistance + b.dragStart)
 	}
 }
 
