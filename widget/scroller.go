@@ -121,12 +121,15 @@ func (r *scrollBarAreaRenderer) Destroy() {
 }
 
 func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
+	var barHeight, barWidth, barX, barY int
 	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
-		r.updateHorizontalBarPosition()
-	case scrollBarOrientationVertical:
-		r.updateVerticalBarPosition()
+		barWidth, barHeight, barX, barY = r.barSizeAndOffset(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width)
+	default:
+		barHeight, barWidth, barY, barX = r.barSizeAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height)
 	}
+	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
+	r.bar.Move(fyne.NewPos(barX, barY))
 }
 
 func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
@@ -148,25 +151,8 @@ func (r *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *scrollBarAreaRenderer) Refresh() {
-	switch r.area.orientation {
-	case scrollBarOrientationHorizontal:
-		r.updateHorizontalBarPosition()
-	default:
-		r.updateVerticalBarPosition()
-	}
+	r.Layout(r.area.Size())
 	canvas.Refresh(r.bar)
-}
-
-func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
-	barWidth, barHeight, barX, barY := r.barSizeAndOffset(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width)
-	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
-	r.bar.Move(fyne.NewPos(barX, barY))
-}
-
-func (r *scrollBarAreaRenderer) updateVerticalBarPosition() {
-	barHeight, barWidth, barY, barX := r.barSizeAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height)
-	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
-	r.bar.Move(fyne.NewPos(barX, barY))
 }
 
 func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, scrollLength int) (length, width, lengthOffset, widthOffset int) {
