@@ -422,7 +422,9 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 		return
 	}
 
-	s.updateOffset(e.DraggedX, e.DraggedY)
+	if s.updateOffset(e.DraggedX, e.DraggedY) {
+		s.Refresh()
+	}
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -431,23 +433,38 @@ func (s *ScrollContainer) MinSize() fyne.Size {
 	return s.BaseWidget.MinSize()
 }
 
-// Scrolled is called when an input device triggers a scroll event
-func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
-	if s.Size().Width < s.Content.Size().Width && s.Size().Height >= s.Content.Size().Height && ev.DeltaX == 0 {
-		s.updateOffset(ev.DeltaY, ev.DeltaX)
-	} else {
-		s.updateOffset(ev.DeltaX, ev.DeltaY)
+// Resize sets a new size for the scroll container.
+func (s *ScrollContainer) Resize(size fyne.Size) {
+	if size != s.size {
+		s.size = size
+		s.updateOffset(0, 0)
+		s.Refresh()
 	}
 }
 
-func (s *ScrollContainer) updateOffset(deltaX, deltaY int) {
-	if s.Content.Size().FitsInto(s.Size()) {
-		return
+// Scrolled is called when an input device triggers a scroll event
+func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
+	dx, dy := ev.DeltaX, ev.DeltaY
+	if s.Size().Width < s.Content.Size().Width && s.Size().Height >= s.Content.Size().Height && dx == 0 {
+		dx, dy = dy, dx
 	}
+	if s.updateOffset(dx, dy) {
+		s.Refresh()
+	}
+}
 
+func (s *ScrollContainer) updateOffset(deltaX, deltaY int) bool {
+	if s.Content.Size().FitsInto(s.Size()) {
+		if s.Offset.X != 0 || s.Offset.Y != 0 {
+			s.Offset.X = 0
+			s.Offset.Y = 0
+			return true
+		}
+		return false
+	}
 	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.Size().Width)
 	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.Size().Height)
-	s.Refresh()
+	return true
 }
 
 func computeOffset(start, delta, outerWidth, innerWidth int) int {
