@@ -31,6 +31,7 @@ func TestScrollContainer_Refresh(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
+	assert.Equal(t, fyne.NewSize(1000, 1000), rect.Size())
 	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: -1000, DeltaY: -1000})
 	assert.Equal(t, 900, scroll.Offset.X)
 	assert.Equal(t, 900, scroll.Offset.Y)
@@ -38,6 +39,7 @@ func TestScrollContainer_Refresh(t *testing.T) {
 	rect.SetMinSize(fyne.NewSize(500, 500))
 	Refresh(scroll)
 	assert.Equal(t, 400, scroll.Offset.X)
+	assert.Equal(t, fyne.NewSize(500, 500), rect.Size())
 }
 
 func TestScrollContainer_Scrolled(t *testing.T) {

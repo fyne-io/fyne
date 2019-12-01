@@ -328,27 +328,15 @@ func (r *scrollContainerRenderer) Refresh() {
 	r.Layout(r.scroll.Size())
 }
 
-func (r *scrollContainerRenderer) calculateScrollPosition(contentSize int, scrollSize int, offset int, area *scrollBarArea) {
+func (r *scrollContainerRenderer) handleAreaVisibility(contentSize int, scrollSize int, area *scrollBarArea) {
 	if contentSize <= scrollSize {
-		if area == r.horizArea {
-			r.scroll.Offset.X = 0
-		} else {
-			r.scroll.Offset.Y = 0
-		}
 		area.Hide()
 	} else if r.scroll.Visible() {
 		area.Show()
-		if contentSize-offset < scrollSize {
-			if area == r.horizArea {
-				r.scroll.Offset.X = contentSize - scrollSize
-			} else {
-				r.scroll.Offset.Y = contentSize - scrollSize
-			}
-		}
 	}
 }
 
-func (r *scrollContainerRenderer) calculateShadows(offset int, contentSize int, scrollSize int, shadowStart fyne.CanvasObject, shadowEnd fyne.CanvasObject) {
+func (r *scrollContainerRenderer) handleShadowVisibility(offset int, contentSize int, scrollSize int, shadowStart fyne.CanvasObject, shadowEnd fyne.CanvasObject) {
 	if !r.scroll.Visible() {
 		return
 	}
@@ -369,14 +357,14 @@ func (r *scrollContainerRenderer) updatePosition() {
 	contentWidth := r.scroll.Content.Size().Width
 	scrollHeight := r.scroll.Size().Height
 	contentHeight := r.scroll.Content.Size().Height
-	r.calculateScrollPosition(contentWidth, scrollWidth, r.scroll.Offset.X, r.horizArea)
-	r.calculateScrollPosition(contentHeight, scrollHeight, r.scroll.Offset.Y, r.vertArea)
+	r.handleAreaVisibility(contentWidth, scrollWidth, r.horizArea)
+	r.handleAreaVisibility(contentHeight, scrollHeight, r.vertArea)
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
 	canvas.Refresh(r.scroll.Content)
 
-	r.calculateShadows(r.scroll.Offset.X, contentWidth, scrollWidth, r.leftShadow, r.rightShadow)
-	r.calculateShadows(r.scroll.Offset.Y, contentHeight, scrollHeight, r.topShadow, r.bottomShadow)
+	r.handleShadowVisibility(r.scroll.Offset.X, contentWidth, scrollWidth, r.leftShadow, r.rightShadow)
+	r.handleShadowVisibility(r.scroll.Offset.Y, contentHeight, scrollHeight, r.topShadow, r.bottomShadow)
 
 	Renderer(r.vertArea).Layout(r.scroll.size)
 	Renderer(r.horizArea).Layout(r.scroll.size)
@@ -423,7 +411,7 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 	}
 
 	if s.updateOffset(e.DraggedX, e.DraggedY) {
-		s.Refresh()
+		s.refreshWithoutOffsetUpdate()
 	}
 }
 
@@ -433,11 +421,20 @@ func (s *ScrollContainer) MinSize() fyne.Size {
 	return s.BaseWidget.MinSize()
 }
 
+// Refresh causes this widget to be redrawn in it's current state
+func (s *ScrollContainer) Refresh() {
+	s.updateOffset(0, 0)
+	s.refreshWithoutOffsetUpdate()
+}
+
+func (s *ScrollContainer) refreshWithoutOffsetUpdate() {
+	s.BaseWidget.Refresh()
+}
+
 // Resize sets a new size for the scroll container.
 func (s *ScrollContainer) Resize(size fyne.Size) {
 	if size != s.size {
 		s.size = size
-		s.updateOffset(0, 0)
 		s.Refresh()
 	}
 }
@@ -445,11 +442,11 @@ func (s *ScrollContainer) Resize(size fyne.Size) {
 // Scrolled is called when an input device triggers a scroll event
 func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 	dx, dy := ev.DeltaX, ev.DeltaY
-	if s.Size().Width < s.Content.Size().Width && s.Size().Height >= s.Content.Size().Height && dx == 0 {
+	if s.Size().Width < s.Content.MinSize().Width && s.Size().Height >= s.Content.MinSize().Height && dx == 0 {
 		dx, dy = dy, dx
 	}
 	if s.updateOffset(dx, dy) {
-		s.Refresh()
+		s.refreshWithoutOffsetUpdate()
 	}
 }
 
@@ -462,17 +459,18 @@ func (s *ScrollContainer) updateOffset(deltaX, deltaY int) bool {
 		}
 		return false
 	}
-	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.Size().Width)
-	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.Size().Height)
+	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.MinSize().Width)
+	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.MinSize().Height)
 	return true
 }
 
 func computeOffset(start, delta, outerWidth, innerWidth int) int {
 	offset := start + delta
+	if offset+outerWidth >= innerWidth {
+		offset = innerWidth - outerWidth
+	}
 	if offset < 0 {
 		offset = 0
-	} else if offset+outerWidth >= innerWidth {
-		offset = innerWidth - outerWidth
 	}
 	return offset
 }
