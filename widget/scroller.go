@@ -84,10 +84,10 @@ func (b *scrollBar) Dragged(e *fyne.DragEvent) {
 	switch b.orientation {
 	case scrollBarOrientationHorizontal:
 		b.draggedDistance += e.DraggedX
-		b.area.moveHorizontalBar(b.draggedDistance + b.dragStart)
+		b.area.moveHorizontalBar(b.draggedDistance+b.dragStart, b.Size().Width)
 	case scrollBarOrientationVertical:
 		b.draggedDistance += e.DraggedY
-		b.area.moveVerticalBar(b.draggedDistance + b.dragStart)
+		b.area.moveVerticalBar(b.draggedDistance+b.dragStart, b.Size().Height)
 	}
 }
 
@@ -237,15 +237,13 @@ func (a *scrollBarArea) MouseOut() {
 	a.scroll.Refresh()
 }
 
-func (a *scrollBarArea) moveHorizontalBar(x int) {
-	render := Renderer(a).(*scrollBarAreaRenderer)
-	a.scroll.Offset.X = a.computeScrollOffset(render.horizontalBarWidth(), x, a.scroll.Size().Width, a.scroll.Content.Size().Width)
+func (a *scrollBarArea) moveHorizontalBar(x, barLength int) {
+	a.scroll.Offset.X = a.computeScrollOffset(barLength, x, a.scroll.Size().Width, a.scroll.Content.Size().Width)
 	a.scroll.refreshWithoutOffsetUpdate()
 }
 
-func (a *scrollBarArea) moveVerticalBar(y int) {
-	render := Renderer(a).(*scrollBarAreaRenderer)
-	a.scroll.Offset.Y = a.computeScrollOffset(render.verticalBarHeight(), y, a.scroll.Size().Height, a.scroll.Content.Size().Height)
+func (a *scrollBarArea) moveVerticalBar(y int, barLength int) {
+	a.scroll.Offset.Y = a.computeScrollOffset(barLength, y, a.scroll.Size().Height, a.scroll.Content.Size().Height)
 	a.scroll.refreshWithoutOffsetUpdate()
 }
 
