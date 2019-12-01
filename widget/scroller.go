@@ -159,34 +159,29 @@ func (r *scrollBarAreaRenderer) Refresh() {
 
 func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
 	barWidth := r.horizontalBarWidth()
-	barX := computeBarPosition(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width, barWidth)
-	barHeight, barY := r.barThicknessAndPositionOffset()
+	barHeight, barX, barY := r.barWidthAndOffset(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width, barWidth)
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
 }
 
 func (r *scrollBarAreaRenderer) updateVerticalBarPosition() {
 	barHeight := r.verticalBarHeight()
-	barY := computeBarPosition(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height, barHeight)
-	barWidth, barX := r.barThicknessAndPositionOffset()
+	barWidth, barY, barX := r.barWidthAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height, barHeight)
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
 }
 
-func computeBarPosition(offset, contentSize, scrollSize, barSize int) int {
-	if offset == 0 {
-		return 0
+func (r *scrollBarAreaRenderer) barWidthAndOffset(contentOffset, contentLength, scrollLength, length int) (width, lengthOffset, widthOffset int) {
+	if contentOffset != 0 {
+		lengthOffset = int(float64(scrollLength-length) * (float64(contentOffset) / float64(contentLength-scrollLength)))
 	}
-	return int(float64(scrollSize-barSize) * (float64(offset) / float64(contentSize-scrollSize)))
-}
-
-func (r *scrollBarAreaRenderer) barThicknessAndPositionOffset() (thickness int, offset int) {
 	if r.area.isLarge {
-		thickness = theme.ScrollBarSize()
+		width = theme.ScrollBarSize()
 	} else {
-		offset = theme.ScrollBarSmallSize()
-		thickness = theme.ScrollBarSmallSize()
+		widthOffset = theme.ScrollBarSmallSize()
+		width = theme.ScrollBarSmallSize()
 	}
+	return
 }
 
 func (r *scrollBarAreaRenderer) horizontalBarWidth() int {
