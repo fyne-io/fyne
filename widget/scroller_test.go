@@ -334,13 +334,13 @@ func TestScrollBarRenderer_BarSize(t *testing.T) {
 	areaHoriz := Renderer(Renderer(scroll).(*scrollContainerRenderer).horizArea).(*scrollBarAreaRenderer)
 	areaVert := Renderer(Renderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer)
 
-	assert.Equal(t, 100, areaHoriz.horizontalBarWidth())
-	assert.Equal(t, 100, areaVert.verticalBarHeight())
+	assert.Equal(t, 100, areaHoriz.bar.Size().Width)
+	assert.Equal(t, 100, areaVert.bar.Size().Height)
 
 	// resize so content is twice our size. Bar should therefore be half again.
 	scroll.Resize(fyne.NewSize(50, 50))
-	assert.Equal(t, 25, areaHoriz.horizontalBarWidth())
-	assert.Equal(t, 25, areaVert.verticalBarHeight())
+	assert.Equal(t, 25, areaHoriz.bar.Size().Width)
+	assert.Equal(t, 25, areaVert.bar.Size().Height)
 }
 
 func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
@@ -351,8 +351,8 @@ func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
 	areaHoriz := Renderer(Renderer(scroll).(*scrollContainerRenderer).horizArea).(*scrollBarAreaRenderer)
 	areaVert := Renderer(Renderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer)
 
-	assert.Equal(t, 120, areaHoriz.horizontalBarWidth())
-	assert.Equal(t, 120, areaVert.verticalBarHeight())
+	assert.Equal(t, 120, areaHoriz.bar.Size().Width)
+	assert.Equal(t, 120, areaVert.bar.Size().Height)
 }
 
 func TestScrollBar_Dragged_ClickedInside(t *testing.T) {

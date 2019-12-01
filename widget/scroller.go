@@ -158,20 +158,24 @@ func (r *scrollBarAreaRenderer) Refresh() {
 }
 
 func (r *scrollBarAreaRenderer) updateHorizontalBarPosition() {
-	barWidth := r.horizontalBarWidth()
-	barHeight, barX, barY := r.barWidthAndOffset(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width, barWidth)
+	barWidth, barHeight, barX, barY := r.barSizeAndOffset(r.area.scroll.Offset.X, r.area.scroll.Content.Size().Width, r.area.scroll.Size().Width)
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
 }
 
 func (r *scrollBarAreaRenderer) updateVerticalBarPosition() {
-	barHeight := r.verticalBarHeight()
-	barWidth, barY, barX := r.barWidthAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height, barHeight)
+	barHeight, barWidth, barY, barX := r.barSizeAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height)
 	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
 }
 
-func (r *scrollBarAreaRenderer) barWidthAndOffset(contentOffset, contentLength, scrollLength, length int) (width, lengthOffset, widthOffset int) {
+func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, scrollLength int) (length, width, lengthOffset, widthOffset int) {
+	if scrollLength < contentLength {
+		portion := float64(scrollLength) / float64(contentLength)
+		length = int(float64(scrollLength) * portion)
+	} else {
+		length = scrollLength
+	}
 	if contentOffset != 0 {
 		lengthOffset = int(float64(scrollLength-length) * (float64(contentOffset) / float64(contentLength-scrollLength)))
 	}
@@ -182,24 +186,6 @@ func (r *scrollBarAreaRenderer) barWidthAndOffset(contentOffset, contentLength, 
 		width = theme.ScrollBarSmallSize()
 	}
 	return
-}
-
-func (r *scrollBarAreaRenderer) horizontalBarWidth() int {
-	portion := float32(r.area.size.Width) / float32(r.area.scroll.Content.Size().Width)
-	if portion > 1.0 {
-		portion = 1.0
-	}
-
-	return int(float32(r.area.size.Width) * portion)
-}
-
-func (r *scrollBarAreaRenderer) verticalBarHeight() int {
-	portion := float32(r.area.size.Height) / float32(r.area.scroll.Content.Size().Height)
-	if portion > 1.0 {
-		portion = 1.0
-	}
-
-	return int(float32(r.area.size.Height) * portion)
 }
 
 var _ desktop.Hoverable = (*scrollBarArea)(nil)
