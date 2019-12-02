@@ -144,7 +144,6 @@ func (e *entryRenderer) moveCursor() {
 	if e.entry.OnCursorChanged != nil {
 		e.entry.OnCursorChanged()
 	}
-	canvas.Refresh(e.cursor)
 }
 
 // Layout the components of the entry widget.
@@ -186,7 +185,6 @@ func (e *entryRenderer) Refresh() {
 	}
 
 	for _, selection := range e.selection {
-		selection.(*canvas.Rectangle).Hidden = !e.entry.focused
 		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
@@ -503,10 +501,6 @@ func (e *Entry) selectAll() {
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
-	if e.Disabled() {
-		return
-	}
-
 	c := fyne.CurrentApp().Driver().CanvasForObject(e)
 
 	cutItem := fyne.NewMenuItem("Cut", func() {
@@ -525,7 +519,12 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
-	e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c, popUpPos)
+
+	if e.Disabled() {
+		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", copyItem, selectAllItem), c, popUpPos)
+	} else {
+		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c, popUpPos)
+	}
 }
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
@@ -561,8 +560,7 @@ func (e *Entry) DragEnd() {
 }
 
 func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
-
-	if !e.focused {
+	if !e.focused && !e.Disabled() {
 		e.FocusGained()
 	}
 
@@ -590,6 +588,7 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 	}
 	e.Unlock()
 	Renderer(e).(*entryRenderer).moveCursor()
+	e.Refresh()
 }
 
 // getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
@@ -663,6 +662,7 @@ func (e *Entry) DoubleTapped(ev *fyne.PointEvent) {
 	e.selecting = true
 	e.Unlock()
 	Renderer(e).(*entryRenderer).moveCursor()
+	e.Refresh()
 }
 
 // TypedRune receives text input events when the Entry widget is focused.

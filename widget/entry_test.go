@@ -428,6 +428,17 @@ func TestEntry_TappedSecondary(t *testing.T) {
 
 	items := cont.(*Box).Children
 	assert.Equal(t, 4, len(items)) // Cut, Copy, Paste, Select All
+	test.Tap(entry.popUp)
+
+	entry.Disable()
+
+	test.TapSecondaryAt(entry, tapPos)
+	over = fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
+	assert.NotNil(t, over)
+
+	cont = over.(*PopUp).Content
+	items = cont.(*Box).Children
+	assert.Equal(t, 2, len(items)) // Copy, Select All
 }
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
