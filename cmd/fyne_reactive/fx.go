@@ -5,14 +5,13 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/theme"
-	"github.com/fyne-io/examples/img/icon"
 	"image/color"
 	"math"
 )
 
 func newFx(app fyne.App, data *dataModel) *fractal {
 	window := app.NewWindow("Fractal")
-	window.SetIcon(icon.FractalBitmap)
+	window.SetIcon(theme.DocumentCreateIcon())
 	window.SetPadded(false)
 	fractal := &fractal{data: data, window: window}
 	fractal.canvas = canvas.NewRasterWithPixels(fractal.mandelbrot)
@@ -32,7 +31,7 @@ func newFx(app fyne.App, data *dataModel) *fractal {
 }
 
 type fractal struct {
-	data *dataModel
+	data                    *dataModel
 	currIterations          uint
 	currScale, currX, currY float64
 
@@ -40,13 +39,13 @@ type fractal struct {
 	canvas fyne.CanvasObject
 
 	transparency float64
-	dataid int
+	dataid       int
 }
 
 func (f *fractal) ChangeTransparency(value dataapi.DataItem) {
-	if vv,ok := value.(*dataapi.Float); ok {
+	if vv, ok := value.(*dataapi.Float); ok {
 		f.transparency = vv.Value()
-		f.currScale = 10/(f.transparency+1)
+		f.currScale = 10 / (f.transparency + 1)
 		println("transparency is now", f.transparency)
 		f.refresh()
 	}
@@ -85,7 +84,7 @@ func (f *fractal) scaleColor(c float64, start, end color.Color) color.Color {
 		f.scaleChannel(c, r1, r2),
 		f.scaleChannel(c, g1, g2),
 		f.scaleChannel(c, b1, b2),
-		uint8(255 * f.transparency/100),
+		uint8(255 * f.transparency / 100),
 	}
 }
 
@@ -124,7 +123,7 @@ func (f *fractal) fractalRune(r rune) {
 		f.currScale *= 1.1
 	}
 
-	f.transparency = (10/f.currScale) - 1
+	f.transparency = (10 / f.currScale) - 1
 	f.data.DeliveryTime.SetFloat(f.transparency, f.dataid)
 	f.refresh()
 }
@@ -140,8 +139,8 @@ func (f *fractal) fractalKey(ev *fyne.KeyEvent) {
 	} else if ev.Name == fyne.KeyRight {
 		f.currX -= delta
 	} else if ev.Name == fyne.KeyEscape {
-			f.data.DeliveryTime.DeleteListener(f.dataid)
-			println("Deregistering listener")
+		f.data.DeliveryTime.DeleteListener(f.dataid)
+		println("Deregistering listener")
 	}
 
 	f.refresh()
