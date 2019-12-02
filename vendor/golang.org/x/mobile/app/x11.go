@@ -128,5 +128,5 @@ func ShowVirtualKeyboard() {
 }
 
 // HideVirtualKeyboard does nothing on desktop
-func HideKeyboard() {
+func HideVirtualKeyboard() {
 }

@@ -251,6 +251,6 @@ func ShowVirtualKeyboard() {
 }
 
 // HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func HideKeyboard() {
+func HideVirtualKeyboard() {
 	// TODO iOS Keyboard handling
 }
