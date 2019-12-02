@@ -211,7 +211,9 @@ func (c *mobileCanvas) tapDown(pos fyne.Position) {
 		}
 	}
 	if wid, ok := co.(fyne.Focusable); ok && needsFocus {
-		c.Focus(wid)
+		if dis, ok := wid.(fyne.Disableable); !ok || !dis.Disabled() {
+			c.Focus(wid)
+		}
 	}
 }
 

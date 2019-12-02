@@ -621,7 +621,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 
 	// we cannot switch here as objects may respond to multiple cases
 	if wid, ok := co.(fyne.Focusable); ok && needsfocus {
-		w.canvas.Focus(wid)
+		if dis, ok := wid.(fyne.Disableable); !ok || !dis.Disabled() {
+			w.canvas.Focus(wid)
+		}
 	}
 
 	// Check for double click/tap
