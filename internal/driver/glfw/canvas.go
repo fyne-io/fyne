@@ -180,6 +180,9 @@ func (c *glCanvas) Scale() float32 {
 //
 // Deprecated: SetScale will be replaced by system wide settings in the future
 func (c *glCanvas) SetScale(scale float32) {
+	if scale == 0.0 {
+		return
+	}
 	c.setScaleValue(scale)
 
 	c.context.RescaleContext()

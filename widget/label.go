@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fyne.io/fyne/dataapi"
 	"image/color"
 
 	"fyne.io/fyne"
@@ -20,6 +21,18 @@ func NewLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{})
 }
 
+
+// NewLabel returns a new *widget.Label that reacts to changes in that item
+func NewLabelWithData(data dataapi.DataItem) *Label {
+	// create the base widget
+	w := NewLabel(data.String())
+	// we are only interested in input changes
+	data.AddListener(func(d dataapi.DataItem) {
+		w.SetText(d.String())
+	})
+	return w
+}
+
 // NewLabelWithStyle creates a new label widget with the set text content
 func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextStyle) *Label {
 	l := &Label{
@@ -30,6 +43,22 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 
 	return l
 }
+
+// NewLabelWithStyle creates a new label widget with the set text content
+func NewLabelWithDataAndStyle(data dataapi.DataItem, text string, alignment fyne.TextAlign, style fyne.TextStyle) *Label {
+	l := &Label{
+		Text:      text,
+		Alignment: alignment,
+		TextStyle: style,
+	}
+
+	// we are only interested in input changes
+	data.AddListener(func(d dataapi.DataItem) {
+		l.SetText(d.String())
+	})
+	return l
+}
+
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {

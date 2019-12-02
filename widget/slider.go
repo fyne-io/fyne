@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fyne.io/fyne/dataapi"
 	"image/color"
 	"math"
 
@@ -44,6 +45,39 @@ func NewSlider(min, max float64) *Slider {
 	}
 	Renderer(slider).Layout(slider.MinSize())
 	return slider
+}
+
+// NewSlider returns a slider control that is 2-way bound to the dataItem
+func NewSliderWithData(data dataapi.DataItem, min, max float64) *Slider {
+
+	// create the base widget
+	w := NewSlider(min, max)
+	if ii, ok := data.(*dataapi.Float); ok {
+		w.Set(ii.Value())
+	}
+
+	maskID := data.AddListener(func(i dataapi.DataItem) {
+		if ii, ok := i.(*dataapi.Float); ok {
+			w.Set(ii.Value())
+		}
+	})
+
+	if s, ok := data.(dataapi.SettableFloat); ok {
+		// The DataItem is settable, so add an onchange handler
+		// to the widget to trigger the set function on the dataItem
+		w.OnChanged = func(v float64) {
+			s.SetFloat(v, maskID)
+		}
+	}
+	return w
+}
+
+// Set sets the value in the slider and repaints it
+func (s *Slider) Set(value float64) {
+	if value >= s.Min && value <= s.Max {
+		s.Value = value
+		Refresh(s)
+	}
 }
 
 // Resize sets a new size for a widget.
