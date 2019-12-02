@@ -122,3 +122,11 @@ func onStop() {
 	theApp.sendLifecycle(lifecycle.StageDead)
 	theApp.eventsIn <- stopPumping{}
 }
+
+// ShowVirtualKeyboard does nothing on desktop
+func ShowVirtualKeyboard() {
+}
+
+// HideVirtualKeyboard does nothing on desktop
+func HideKeyboard() {
+}

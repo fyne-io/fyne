@@ -68,3 +68,11 @@ func convertEvent(e interface{}) interface{} {
 	}
 	return e
 }
+
+// ShowVirtualKeyboard does nothing on desktop
+func ShowVirtualKeyboard() {
+}
+
+// HideVirtualKeyboard does nothing on desktop
+func HideKeyboard() {
+}

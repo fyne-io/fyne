@@ -48,6 +48,8 @@ static jmethodID find_static_method(JNIEnv *env, jclass clazz, const char *name,
 }
 
 static jmethodID key_rune_method;
+static jmethodID show_keyboard_method;
+static jmethodID hide_keyboard_method;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	JNIEnv* env;
@@ -76,6 +78,8 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		current_class = (*env)->GetObjectClass(env, activity->clazz);
 		current_class = (*env)->NewGlobalRef(env, current_class);
 		key_rune_method = find_static_method(env, current_class, "getRune", "(III)I");
+		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "()V");
+		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -214,5 +218,21 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e) {
 		AInputEvent_getDeviceId(e),
 		AKeyEvent_getKeyCode(e),
 		AKeyEvent_getMetaState(e)
+	);
+}
+
+void ShowKeyboard(JNIEnv* env) {
+	(*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		show_keyboard_method
+	);
+}
+
+void HideKeyboard(JNIEnv* env) {
+	(*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		hide_keyboard_method
 	);
 }

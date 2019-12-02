@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyCharacterMap;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
@@ -20,6 +22,26 @@ public class GoNativeActivity extends NativeActivity {
 	String getTmpdir() {
 		return getCacheDir().getAbsolutePath();
 	}
+
+    static void showKeyboard() {
+        goNativeActivity.doShowKeyboard();
+    }
+
+    void doShowKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        View view = findViewById(android.R.id.content).getRootView();
+        imm.showSoftInput(view, 0);
+    }
+
+    static void hideKeyboard() {
+        goNativeActivity.doHideKeyboard();
+    }
+
+    void doHideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        View view = findViewById(android.R.id.content).getRootView();
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
 
 	static int getRune(int deviceId, int keyCode, int metaState) {
 		try {

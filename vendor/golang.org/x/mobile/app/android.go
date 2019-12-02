@@ -42,6 +42,9 @@ char* createEGLSurface(ANativeWindow* window);
 char* destroyEGLSurface();
 void terminate();
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
+
+void ShowKeyboard(JNIEnv* env);
+void HideKeyboard(JNIEnv* env);
 */
 import "C"
 import (
@@ -279,6 +282,32 @@ func main(f func(App)) {
 	if err := mobileinit.RunOnJVM(mainUI); err != nil {
 		log.Fatalf("app: %v", err)
 	}
+}
+
+// ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
+func ShowVirtualKeyboard() {
+	if err := mobileinit.RunOnJVM(showSoftInput); err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+func showSoftInput(vm, jniEnv, ctx uintptr) error {
+	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+	C.ShowKeyboard(env)
+	return nil
+}
+
+// HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
+func HideVirtualKeyboard() {
+	if err := mobileinit.RunOnJVM(hideSoftInput); err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+func hideSoftInput(vm, jniEnv, ctx uintptr) error {
+	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+	C.HideKeyboard(env)
+	return nil
 }
 
 var mainUserFn func(App)

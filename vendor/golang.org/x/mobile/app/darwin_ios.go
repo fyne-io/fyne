@@ -244,3 +244,13 @@ func (a *app) loop(ctx C.GLintptr) {
 		}
 	}
 }
+
+// ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
+func ShowVirtualKeyboard() {
+	// TODO iOS Keyboard handling
+}
+
+// HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
+func HideKeyboard() {
+	// TODO iOS Keyboard handling
+}
