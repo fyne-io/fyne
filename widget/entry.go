@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
@@ -1042,6 +1043,25 @@ func NewEntry() *Entry {
 	e.registerShortcut()
 	Refresh(e)
 	return e
+}
+
+// NewEntry returns an entry widget that is 2-way bound to the dataItem
+func NewEntryWithData(data dataapi.DataItem) *Entry {
+	w := NewEntry()
+	w.SetText(data.String())
+
+	maskID := data.AddListener(func(d dataapi.DataItem) {
+		w.SetText(d.String())
+	})
+
+	if s, ok := data.(dataapi.Settable); ok {
+		// The DataItem is settable, so add an onchange handler
+		// to the widget to trigger the set function on the dataItem
+		w.OnChanged = func(txt string) {
+			s.Set(txt, maskID)
+		}
+	}
+	return w
 }
 
 // NewMultiLineEntry creates a new entry that allows multiple lines

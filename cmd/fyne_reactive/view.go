@@ -5,8 +5,6 @@ import (
 	_ "image/png"
 
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/dataapi"
-
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 
@@ -37,32 +35,32 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 		layout.NewSpacer(),
 		widget.NewForm(
 			// A label bound to a Clock dataItem (a Clock is a string that auto-mutates every second)
-			widget.NewFormItem("Time", dataapi.NewLabel(data.Clock)),
+			widget.NewFormItem("Time", widget.NewLabelWithData(data.Clock)),
 			// An entry widget bound to a String dataItem
-			widget.NewFormItem("Name", dataapi.NewEntry(data.Name)),
+			widget.NewFormItem("Name", widget.NewEntryWithData(data.Name)),
 			// A checkbox bound to a Bool dataItem
-			widget.NewFormItem("", dataapi.NewCheck(data.IsAvailable,
+			widget.NewFormItem("", widget.NewCheckWithData(data.IsAvailable,
 				"Avail",
 				func(checked bool) {
 					println("clicked on the avail button", checked)
 				})),
 
 			// A radioButton bound to an Int dataItem
-			widget.NewFormItem("", dataapi.NewRadio(data.Size,
+			widget.NewFormItem("", widget.NewRadioWithData(data.Size,
 				[]string{"Small", "Medium", "Large"},
 				func(value string) {
 					println("Radio button changed to", value)
 				})),
 			// A slider widget bound to a Float dataItem
-			widget.NewFormItem("Delivery", dataapi.NewSlider(data.DeliveryTime, 0.0, 100.0)),
+			widget.NewFormItem("Delivery", widget.NewSliderWithData(data.DeliveryTime, 0.0, 100.0)),
 			// A checkbox widget bound to a String dataItem  (ie - sets it true/false)
-			widget.NewFormItem("", dataapi.NewCheck(data.OnSale,
+			widget.NewFormItem("", widget.NewCheckWithData(data.OnSale,
 				"On Sale",
 				func(checked bool) {
 					println("clicked on the on sale button", checked)
 				})),
 			// A label widget bound to the same String dataItem as above (ie - true/false)
-			widget.NewFormItem("Is On Sale ?", dataapi.NewLabel(data.OnSale)),
+			widget.NewFormItem("Is On Sale ?", widget.NewLabelWithData(data.OnSale)),
 			// Need a quit handler here to correctly deregister all the handlers
 			// TODO - correctly clean up, else resource leaks
 			widget.NewFormItem("Quit Cleanly", widget.NewButton("Quit", func() {

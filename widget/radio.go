@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fyne.io/fyne/dataapi"
 	"image/color"
 	"math"
 
@@ -361,3 +362,49 @@ func NewRadio(options []string, changed func(string)) *Radio {
 	Renderer(r).Layout(r.MinSize())
 	return r
 }
+
+// NewRadioWithData returns a radio button widget that is 2-way bound to the dataItem
+func NewRadioWithData(data dataapi.DataItem, labels []string, callback func(string)) *Radio {
+
+	// safely get the string value based on a number
+	getValue := func(i int) string {
+		if i < 0 || i >= len(labels) {
+			return ""
+		}
+		return labels[i]
+	}
+
+	getIndex := func(lbl string) int {
+		for k, v := range labels {
+			if v == lbl {
+				return k
+			}
+		}
+		return 0
+	}
+
+	// create the base widget
+	w := NewRadio(labels, callback)
+	if ii, ok := data.(*dataapi.Int); ok {
+		w.SetSelected(getValue(ii.Value()))
+	}
+
+	maskID := data.AddListener(func(i dataapi.DataItem) {
+		if ii, ok := i.(*dataapi.Int); ok {
+			lbl := getValue(ii.Value())
+			w.SetSelected(lbl)
+			callback(lbl)
+		}
+	})
+
+	if s, ok := data.(dataapi.SettableInt); ok {
+		// The DataItem is settable, so add an onchange handler
+		// to the widget to trigger the set function on the dataItem
+		w.OnChanged = func(value string) {
+			ii := getIndex(value)
+			s.SetInt(ii, maskID)
+		}
+	}
+	return w
+}
+

@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -34,17 +33,17 @@ which in turn triggers a repaint on the other subscribed views.`),
 		widget.NewGroup("Data Model Internals",
 			fyne.NewContainerWithLayout(layout.NewGridLayout(4),
 				widget.NewLabel("Clock"),
-				dataapi.NewLabel(data.Clock),
+				widget.NewLabelWithData(data.Clock),
 				widget.NewLabel("Name (String)"),
-				dataapi.NewLabel(data.Name),
+				widget.NewLabelWithData(data.Name),
 				widget.NewLabel("Avail (Bool)"),
-				dataapi.NewLabel(data.IsAvailable),
+				widget.NewLabelWithData(data.IsAvailable),
 				widget.NewLabel("OnSale (String)"),
-				dataapi.NewLabel(data.OnSale),
+				widget.NewLabelWithData(data.OnSale),
 				widget.NewLabel("Size (Int)"),
-				dataapi.NewLabel(data.Size),
+				widget.NewLabelWithData(data.Size),
 				widget.NewLabel("Deliv Time (Float)"),
-				dataapi.NewLabel(data.DeliveryTime),
+				widget.NewLabelWithData(data.DeliveryTime),
 			),
 		),
 		widget.NewGroup("Launch New Viewer",
