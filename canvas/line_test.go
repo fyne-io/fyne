@@ -33,3 +33,10 @@ func TestLine_StrokeColor(t *testing.T) {
 
 	assert.Equal(t, c, line.StrokeColor)
 }
+
+func TestLine_RefreshDuringResize(t *testing.T) {
+	line := NewLine(color.Black)
+	assert.True(t, line.SkipRefreshDuringResize())
+	line.RefreshDuringResize = true
+	assert.False(t, line.SkipRefreshDuringResize())
+}

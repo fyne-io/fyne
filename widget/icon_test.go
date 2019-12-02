@@ -10,6 +10,19 @@ import (
 
 func TestNewIcon(t *testing.T) {
 	icon := NewIcon(theme.ConfirmIcon())
+	assert.True(t, icon.SkipRefreshDuringResize())
+	assert.True(t, Renderer(icon).Objects()[0].SkipRefreshDuringResize())
+	testNewIcon(t, icon)
+}
+
+func TestNewIconRefreshDuringResize(t *testing.T) {
+	icon := NewIconRefreshDuringResize(theme.ConfirmIcon())
+	assert.False(t, icon.SkipRefreshDuringResize())
+	assert.False(t, Renderer(icon).Objects()[0].SkipRefreshDuringResize())
+	testNewIcon(t, icon)
+}
+
+func testNewIcon(t *testing.T, icon *Icon) {
 	render := Renderer(icon)
 
 	assert.Equal(t, 1, len(render.Objects()))

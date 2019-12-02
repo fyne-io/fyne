@@ -44,3 +44,10 @@ func TestBase_HideShow(t *testing.T) {
 	base.Show()
 	assert.True(t, base.Visible())
 }
+
+func TestBase_RefreshDuringResize(t *testing.T) {
+	base := &baseObject{}
+	assert.True(t, base.SkipRefreshDuringResize())
+	base.RefreshDuringResize = true
+	assert.False(t, base.SkipRefreshDuringResize())
+}

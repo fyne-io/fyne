@@ -60,6 +60,13 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	window.Close()
 }
 
+func TestBaseWidget_RefreshDuringResize(t *testing.T) {
+	base := &BaseWidget{}
+	assert.True(t, base.SkipRefreshDuringResize())
+	base.RefreshDuringResize = true
+	assert.False(t, base.SkipRefreshDuringResize())
+}
+
 var (
 	red   = &color.RGBA{R: 255, G: 0, B: 0, A: 255}
 	green = &color.RGBA{R: 0, G: 255, B: 0, A: 255}

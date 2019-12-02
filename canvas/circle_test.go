@@ -50,3 +50,10 @@ func TestCircle_Move(t *testing.T) {
 	circle.Move(target)
 	assert.True(t, circle.Position() == target)
 }
+
+func TestCircle_RefreshDuringResize(t *testing.T) {
+	circle := NewCircle(color.White)
+	assert.True(t, circle.SkipRefreshDuringResize())
+	circle.RefreshDuringResize = true
+	assert.False(t, circle.SkipRefreshDuringResize())
+}

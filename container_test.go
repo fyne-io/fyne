@@ -100,6 +100,12 @@ func TestContainer_Show(t *testing.T) {
 	assert.True(t, container.Visible())
 }
 
+func TestContainer_RefreshDuringResize(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainer(box)
+	assert.True(t, container.SkipRefreshDuringResize())
+}
+
 type dummyObject struct {
 	size   Size
 	pos    Position
@@ -139,4 +145,8 @@ func (d *dummyObject) Hide() {
 }
 
 func (d *dummyObject) Refresh() {
+}
+
+func (d *dummyObject) SkipRefreshDuringResize() bool {
+	return true
 }
