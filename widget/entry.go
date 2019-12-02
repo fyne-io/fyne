@@ -185,6 +185,7 @@ func (e *entryRenderer) Refresh() {
 	}
 
 	for _, selection := range e.selection {
+		selection.(*canvas.Rectangle).Hidden = !e.entry.focused && !e.entry.disabled
 		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
