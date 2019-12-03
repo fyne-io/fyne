@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -51,6 +52,7 @@ func (p *PopUp) Move(pos fyne.Position) {
 
 	p.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	p.Refresh()
+	cache.Renderer(p).Layout(p.Size())
 }
 
 // Resize sets a new size for a widget. Most PopUp widgets are shown at MinSize.
@@ -136,13 +138,13 @@ type popUpRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (r *popUpRenderer) Layout(size fyne.Size) {
+func (r *popUpRenderer) Layout(_ fyne.Size) {
 	pos := r.popUp.Content.Position().Subtract(fyne.NewPos(theme.Padding(), theme.Padding()))
 	innerSize := r.popUp.Content.MinSize().Union(r.popUp.Content.Size())
 	r.popUp.Content.Resize(innerSize)
 	r.popUp.Content.Move(pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 
-	size = innerSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	size := innerSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	r.bg.Resize(size)
 	r.bg.Move(pos)
 	r.shadow.Resize(size)
