@@ -521,8 +521,14 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
 
+	if e.Disabled() && e.Password {
+		return // no popup options for a disabled password field
+	}
+
 	if e.Disabled() {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", copyItem, selectAllItem), c, popUpPos)
+	} else if e.Password {
+		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", pasteItem, selectAllItem), c, popUpPos)
 	} else {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c, popUpPos)
 	}

@@ -439,6 +439,23 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	cont = over.(*PopUp).Content
 	items = cont.(*Box).Children
 	assert.Equal(t, 2, len(items)) // Copy, Select All
+	firstDisabled := items[0]
+	test.Tap(entry.popUp)
+
+	entry.Password = true
+	test.TapSecondaryAt(entry, tapPos)
+	over = fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
+	assert.Nil(t, over) // No popup for disabled password
+
+	entry.Enable()
+	test.TapSecondaryAt(entry, tapPos)
+	over = fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
+	assert.NotNil(t, over)
+
+	cont = over.(*PopUp).Content
+	items = cont.(*Box).Children
+	assert.Equal(t, 2, len(items)) // Paste, Select All
+	assert.NotEqual(t, firstDisabled, items[0])
 }
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
