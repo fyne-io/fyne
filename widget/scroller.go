@@ -399,7 +399,7 @@ func (s *ScrollContainer) Scrolled(ev *fyne.ScrollEvent) {
 }
 
 func (s *ScrollContainer) updateOffset(deltaX, deltaY int) bool {
-	if s.Content.Size().FitsInto(s.Size()) {
+	if s.Content.Size().Width <= s.Size().Width && s.Content.Size().Height <= s.Size().Height {
 		if s.Offset.X != 0 || s.Offset.Y != 0 {
 			s.Offset.X = 0
 			s.Offset.Y = 0
