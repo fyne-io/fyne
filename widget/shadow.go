@@ -32,13 +32,7 @@ type shadow struct {
 	depth int
 }
 
-func (s *shadow) MinSize() fyne.Size {
-	s.ExtendBaseWidget(s)
-	return s.BaseWidget.MinSize()
-}
-
 func (s *shadow) CreateRenderer() fyne.WidgetRenderer {
-	s.ExtendBaseWidget(s)
 	r := &shadowRenderer{s: s}
 	r.createShadows()
 	return r
