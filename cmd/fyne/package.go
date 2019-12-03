@@ -235,7 +235,7 @@ func (p *packager) packageWindows() error {
 }
 
 func (p *packager) packageAndroid() error {
-	return mobile.RunNewBuild("android", "", p.icon)
+	return mobile.RunNewBuild("android", p.appID, p.icon)
 }
 
 func (p *packager) packageIOS() error {

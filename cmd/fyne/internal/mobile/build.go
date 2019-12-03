@@ -112,6 +112,9 @@ func runBuild(cmd *command) (err error) {
 	if pkg.Name != "main" && buildO != "" {
 		return fmt.Errorf("cannot set -o when building non-main package")
 	}
+	if buildBundleID == "" {
+		return fmt.Errorf("value for -appID is required for a mobile package")
+	}
 
 	var nmpkgs map[string]bool
 	switch targetOS {
@@ -125,7 +128,7 @@ func runBuild(cmd *command) (err error) {
 			}
 			return nil
 		}
-		nmpkgs, err = goAndroidBuild(pkg, targetArchs, cmd.IconPath)
+		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath)
 		if err != nil {
 			return err
 		}
@@ -141,9 +144,6 @@ func runBuild(cmd *command) (err error) {
 				}
 			}
 			return nil
-		}
-		if buildBundleID == "" {
-			return fmt.Errorf("-target=ios requires -bundleid set")
 		}
 		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs)
 		if err != nil {

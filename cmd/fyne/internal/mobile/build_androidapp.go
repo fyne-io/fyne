@@ -24,7 +24,7 @@ import (
 	"fyne.io/fyne/cmd/fyne/internal/mobile/binres"
 )
 
-func goAndroidBuild(pkg *build.Package, androidArchs []string, iconPath string) (map[string]bool, error) {
+func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, iconPath string) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err
@@ -41,8 +41,7 @@ func goAndroidBuild(pkg *build.Package, androidArchs []string, iconPath string) 
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
 		err := manifestTmpl.Execute(buf, manifestTmplData{
-			// TODO(crawshaw): a better package path.
-			JavaPkgPath: "org.golang.todo." + libName,
+			JavaPkgPath: bundleID,
 			Name:        strings.Title(appName),
 			LibName:     libName,
 		})
