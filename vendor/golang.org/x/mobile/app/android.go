@@ -327,7 +327,6 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 	}()
 
 	var pixelsPerPt float32
-	var orientation size.Orientation
 
 	for {
 		select {
@@ -335,7 +334,6 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			return nil
 		case cfg := <-windowConfigChange:
 			pixelsPerPt = cfg.pixelsPerPt
-			orientation = cfg.orientation
 		case w := <-windowRedrawNeeded:
 			if C.surface == nil {
 				if errStr := C.createEGLSurface(w); errStr != nil {
@@ -353,7 +351,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 				WidthPt:     geom.Pt(float32(widthPx) / pixelsPerPt),
 				HeightPt:    geom.Pt(float32(heightPx) / pixelsPerPt),
 				PixelsPerPt: pixelsPerPt,
-				Orientation: orientation,
+				Orientation: screenOrientation(widthPx, heightPx), // we are guessing orientation here as it was not always working
 			}
 			theApp.eventsIn <- paint.Event{External: true}
 		case <-windowDestroyed:

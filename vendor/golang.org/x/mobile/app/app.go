@@ -211,3 +211,11 @@ func (a *app) registerGLViewportFilter() {
 		return e
 	})
 }
+
+func screenOrientation(width, height int) size.Orientation {
+	if width > height {
+		return size.OrientationLandscape
+	}
+
+	return size.OrientationPortrait
+}

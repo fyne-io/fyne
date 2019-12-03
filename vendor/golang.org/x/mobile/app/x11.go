@@ -90,6 +90,7 @@ func onResize(w, h int) {
 		WidthPt:     geom.Pt(w),
 		HeightPt:    geom.Pt(h),
 		PixelsPerPt: pixelsPerPt,
+		Orientation: screenOrientation(w, h),
 	}
 }
 

@@ -137,6 +137,7 @@ func setGeom(pixelsPerPt float32, widthPx, heightPx int) {
 		WidthPt:     geom.Pt(float32(widthPx) / pixelsPerPt),
 		HeightPt:    geom.Pt(float32(heightPx) / pixelsPerPt),
 		PixelsPerPt: pixelsPerPt,
+		Orientation: screenOrientation(widthPx, heightPx),
 	}
 }
 
