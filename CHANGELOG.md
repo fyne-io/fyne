@@ -21,17 +21,19 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Changed
 
 * New Logo! Thanks to Storm for his work on this :)
+* Applications no longer have a default (Fyne logo) icon
 * Input events now execute one at a time to maintain the correct order
 * FYNE_THEME and FYNE_SCALE are now overrides to the global configuration
 * The first opened window no longer exits the app when closed (unless none others are open or Window.SetMaster() is called)
 * "fyne package" now defaults icon to "Icon.png" so the parameter is optional
 * Calling ExtendBaseWidget() sets up the renderer for extended widgets
+* Entry widget now has a visible Disabled state, ReadOnly has been deprecated
 
 ### Fixed
 
 * Correct the colour of Entry widget cursor if theme changes
 * Error where widgets created before main() function could crash (#490)
-* App.Run apnics if called without a window (#527)
+* App.Run panics if called without a window (#527)
 
 
 ## 1.1.2 - 12 October 2019
