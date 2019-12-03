@@ -49,7 +49,6 @@ func NewSlider(min, max float64) *Slider {
 
 // NewSlider returns a slider control that is 2-way bound to the dataItem
 func NewSliderWithData(data dataapi.DataItem, min, max float64) *Slider {
-
 	// create the base widget
 	w := NewSlider(min, max)
 	if ii, ok := data.(*dataapi.Float); ok {
