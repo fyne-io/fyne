@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-// Clock - an implementation of a simple string DataItem that changes every second
+// BaseDataItem
 type BaseDataItem struct {
 	sync.RWMutex
 	callbacks map[int]func(item DataItem)
