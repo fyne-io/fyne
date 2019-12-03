@@ -18,6 +18,9 @@ struct utsname sysInfo;
 @interface GoAppAppController : GLKViewController<UIContentContainer, GLKViewDelegate>
 @end
 
+@interface GoInputView : UITextField<UITextFieldDelegate>
+@end
+
 @interface GoAppAppDelegate : UIResponder<UIApplicationDelegate>
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) GoAppAppController *controller;
@@ -60,6 +63,7 @@ struct utsname sysInfo;
 @interface GoAppAppController ()
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKView *glview;
+@property (strong, nonatomic) GoInputView *inputView;
 @end
 
 @implementation GoAppAppController
@@ -73,6 +77,11 @@ struct utsname sysInfo;
 - (void)viewDidLoad {
 	[super viewDidLoad];
 	self.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+	self.inputView = [[GoInputView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+	self.inputView.delegate = self.inputView;
+	self.inputView.autocapitalizationType = UITextAutocapitalizationTypeNone;
+	self.inputView.autocorrectionType = UITextAutocorrectionTypeNo;
+	[self.view addSubview:self.inputView];
 	self.glview = (GLKView*)self.view;
 	self.glview.drawableDepthFormat = GLKViewDrawableDepthFormat24;
 	self.glview.multipleTouchEnabled = true; // TODO expose setting to user.
@@ -146,6 +155,23 @@ static void sendTouches(int change, NSSet* touches) {
 }
 @end
 
+@implementation GoInputView
+
+- (BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+- (void)deleteBackward {
+    keyboardDelete();
+}
+
+-(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    keyboardTyped([string UTF8String]);
+    return NO;
+}
+
+@end
+
 void runApp(void) {
 	char * argv[] = {};
 	@autoreleasepool {
@@ -175,4 +201,22 @@ uint64_t threadID() {
 		abort();
 	}
 	return id;
+}
+
+void showKeyboard() {
+    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+    GoInputView *view = appDelegate.controller.inputView;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        BOOL ret = [view becomeFirstResponder];
+    });
+}
+
+void hideKeyboard() {
+    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+    GoInputView *view = appDelegate.controller.inputView;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [view resignFirstResponder];
+    });
 }
