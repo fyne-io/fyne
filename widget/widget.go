@@ -3,6 +3,7 @@ package widget // import "fyne.io/fyne/widget"
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
 )
 
@@ -52,10 +53,6 @@ func (w *BaseWidget) Position() fyne.Position {
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Move(pos fyne.Position) {
 	w.position = pos
-
-	if w.impl == nil {
-		return
-	}
 }
 
 // MinSize for the widget - it should never be resized below this value.
@@ -97,6 +94,10 @@ func (w *BaseWidget) Hide() {
 	}
 
 	w.Hidden = true
+	if w.impl == nil {
+		return
+	}
+	canvas.Refresh(w.impl)
 }
 
 // Refresh causes this widget to be redrawn in it's current state
