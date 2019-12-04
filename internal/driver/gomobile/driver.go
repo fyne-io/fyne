@@ -237,14 +237,6 @@ func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32) {
 	})
 }
 
-func showVirtualKeyboard() {
-	app.ShowVirtualKeyboard()
-}
-
-func hideVirtualKeyboard() {
-	app.HideVirtualKeyboard()
-}
-
 func keyToName(code key.Code) fyne.KeyName {
 	switch code {
 	// non-printable

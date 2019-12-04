@@ -227,12 +227,12 @@ func lifecycleVisible() {
 //export lifecycleFocused
 func lifecycleFocused() { theApp.sendLifecycle(lifecycle.StageFocused) }
 
-// ShowVirtualKeyboard does nothing on desktop
-func ShowVirtualKeyboard() {
+// driverShowVirtualKeyboard does nothing on desktop
+func driverShowVirtualKeyboard() {
 }
 
-// HideVirtualKeyboard does nothing on desktop
-func HideVirtualKeyboard() {
+// driverHideVirtualKeyboard does nothing on desktop
+func driverHideVirtualKeyboard() {
 }
 
 // convRune marks the Carbon/Cocoa private-range unicode rune representing

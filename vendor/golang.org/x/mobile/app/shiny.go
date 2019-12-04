@@ -14,10 +14,10 @@ func main(f func(a App)) {
 	fmt.Errorf("Running mobile simulation mode does not currently work on Windows.")
 }
 
-// ShowVirtualKeyboard does nothing on desktop
-func ShowVirtualKeyboard() {
+// driverShowVirtualKeyboard does nothing on desktop
+func driverShowVirtualKeyboard() {
 }
 
-// HideVirtualKeyboard does nothing on desktop
-func HideVirtualKeyboard() {
+// driverHideVirtualKeyboard does nothing on desktop
+func driverHideVirtualKeyboard() {
 }

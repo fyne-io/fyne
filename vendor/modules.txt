@@ -39,7 +39,7 @@ golang.org/x/image/font
 golang.org/x/image/math/fixed
 golang.org/x/image/colornames
 golang.org/x/image/vector
-# golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 => github.com/fyne-io/mobile v0.0.0-20191204090250-185ea173dd54
+# golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 => github.com/fyne-io/mobile v0.0.0-20191204153723-f14fb9562406
 golang.org/x/mobile/app
 golang.org/x/mobile/event/key
 golang.org/x/mobile/event/lifecycle

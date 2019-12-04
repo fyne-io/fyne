@@ -21,4 +21,4 @@ require (
 	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb // indirect
 )
 
-replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20191204090250-185ea173dd54
+replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20191204153723-f14fb9562406

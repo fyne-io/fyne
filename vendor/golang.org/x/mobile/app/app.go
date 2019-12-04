@@ -51,6 +51,9 @@ type App interface {
 	// but the function can also return its argument unchanged, where its purpose
 	// is to trigger a side effect rather than modify the event.
 	RegisterFilter(f func(interface{}) interface{})
+
+	ShowVirtualKeyboard()
+	HideVirtualKeyboard()
 }
 
 // PublishResult is the result of an App.Publish call.
@@ -128,6 +131,15 @@ func (a *app) Filter(event interface{}) interface{} {
 func (a *app) RegisterFilter(f func(interface{}) interface{}) {
 	a.filters = append(a.filters, f)
 }
+
+func (a *app) ShowVirtualKeyboard() {
+	driverShowVirtualKeyboard()
+}
+
+func (a *app) HideVirtualKeyboard() {
+	driverHideVirtualKeyboard()
+}
+
 
 type stopPumping struct{}
 

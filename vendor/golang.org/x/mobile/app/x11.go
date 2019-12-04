@@ -124,10 +124,10 @@ func onStop() {
 	theApp.eventsIn <- stopPumping{}
 }
 
-// ShowVirtualKeyboard does nothing on desktop
-func ShowVirtualKeyboard() {
+// driverShowVirtualKeyboard does nothing on desktop
+func driverShowVirtualKeyboard() {
 }
 
-// HideVirtualKeyboard does nothing on desktop
-func HideVirtualKeyboard() {
+// driverHideVirtualKeyboard does nothing on desktop
+func driverHideVirtualKeyboard() {
 }

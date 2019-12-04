@@ -33,6 +33,7 @@ uint64 threadID() {
 
 @implementation MobileGLView
 - (void)prepareOpenGL {
+	[super prepareOpenGL];
 	[self setWantsBestResolutionOpenGLSurface:YES];
 	GLint swapInt = 1;
 

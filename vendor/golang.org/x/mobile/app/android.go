@@ -284,8 +284,8 @@ func main(f func(App)) {
 	}
 }
 
-// ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func ShowVirtualKeyboard() {
+// driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
+func driverShowVirtualKeyboard() {
 	if err := mobileinit.RunOnJVM(showSoftInput); err != nil {
 		log.Fatalf("app: %v", err)
 	}
@@ -297,8 +297,8 @@ func showSoftInput(vm, jniEnv, ctx uintptr) error {
 	return nil
 }
 
-// HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func HideVirtualKeyboard() {
+// driverHideVirtualKeyboard requests the driver to hide any visible virtual keyboard
+func driverHideVirtualKeyboard() {
 	if err := mobileinit.RunOnJVM(hideSoftInput); err != nil {
 		log.Fatalf("app: %v", err)
 	}
