@@ -18,5 +18,6 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
 	github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
-	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb // indirect
+	golang.org/x/net v0.0.0-20191204025024-5ee1b9f4859a // indirect
+	golang.org/x/sys v0.0.0-20191204072324-ce4227a45e2e // indirect
 )
