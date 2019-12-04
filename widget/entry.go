@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
 
@@ -1079,10 +1080,52 @@ func NewMultiLineEntry() *Entry {
 	return e
 }
 
+// PasswordEntry represents an entry password widget allows to copy
+// and reveal the password value using buttons.
+type PasswordEntry struct {
+	BaseWidget
+
+	*Entry
+}
+
 // NewPasswordEntry creates a new entry password widget
-func NewPasswordEntry() *Entry {
+func NewPasswordEntry() *PasswordEntry {
 	e := &Entry{Password: true}
 	e.registerShortcut()
 	e.ExtendBaseWidget(e)
-	return e
+
+	p := &PasswordEntry{Entry: e}
+	p.ExtendBaseWidget(p)
+	return p
+}
+
+// MinSize returns the size that this widget should not shrink below
+func (p *PasswordEntry) MinSize() fyne.Size {
+	p.ExtendBaseWidget(p)
+	return p.BaseWidget.MinSize()
+}
+
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (p *PasswordEntry) CreateRenderer() fyne.WidgetRenderer {
+	var revealButton *Button
+	revealButton = NewButtonWithIcon("", theme.VisibilityOffIcon(), func() {
+		p.Entry.Lock()
+		p.Entry.Password = !p.Entry.Password
+		p.Entry.Unlock()
+		if p.Entry.Password {
+			revealButton.SetIcon(theme.VisibilityOffIcon())
+		} else {
+			revealButton.SetIcon(theme.VisibilityIcon())
+		}
+		p.Entry.Refresh()
+	})
+	copyButton := NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
+		clipboard.SetContent(p.Entry.Text)
+	})
+
+	b := NewHBox(revealButton, copyButton)
+	borderLayout := layout.NewBorderLayout(nil, nil, nil, b)
+	c := fyne.NewContainerWithLayout(borderLayout, b, p.Entry)
+	return NewVBox(c).CreateRenderer()
 }

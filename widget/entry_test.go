@@ -775,7 +775,7 @@ func TestPasswordEntry_NewlineIgnored(t *testing.T) {
 	entry := NewPasswordEntry()
 	entry.SetText("test")
 
-	checkNewlineIgnored(t, entry)
+	checkNewlineIgnored(t, entry.Entry)
 }
 
 func TestPasswordEntry_Obfuscation(t *testing.T) {
@@ -783,7 +783,7 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 
 	test.Type(entry, "Hié™שרה")
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+	assert.Equal(t, "*******", entryRenderTexts(entry.Entry)[0].Text)
 }
 
 func TestEntry_OnCut(t *testing.T) {
@@ -803,7 +803,7 @@ func TestEntry_OnCut(t *testing.T) {
 func TestEntry_OnCut_Password(t *testing.T) {
 	e := NewPasswordEntry()
 	e.SetText("Testing")
-	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+	typeKeys(e.Entry, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
 	clipboard := test.NewClipboard()
 	shortcut := &fyne.ShortcutCut{Clipboard: clipboard}
@@ -831,7 +831,7 @@ func TestEntry_OnCopy(t *testing.T) {
 func TestEntry_OnCopy_Password(t *testing.T) {
 	e := NewPasswordEntry()
 	e.SetText("Testing")
-	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+	typeKeys(e.Entry, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
 	clipboard := test.NewClipboard()
 	shortcut := &fyne.ShortcutCopy{Clipboard: clipboard}
@@ -894,7 +894,7 @@ func TestEntry_OnPaste(t *testing.T) {
 		},
 		{
 			name:             "password: with new line",
-			entry:            NewPasswordEntry(),
+			entry:            NewPasswordEntry().Entry,
 			clipboardContent: "3SB=y+)z\nkHGK(hx6 -e_\"1TZu q^bF3^$u H[:e\"1O.",
 			wantText:         `3SB=y+)z kHGK(hx6 -e_"1TZu q^bF3^$u H[:e"1O.`,
 			wantRow:          0,
@@ -941,7 +941,7 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 	entry := NewPasswordEntry()
 	entry.SetPlaceHolder("Password")
 
-	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry)[0].Text)
+	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry.Entry)[0].Text)
 	assert.False(t, entry.placeholderProvider().presenter.password())
 }
 
@@ -1338,14 +1338,14 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 	test.Type(entry, "Hié™שרה")
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+	assert.Equal(t, "*******", entryRenderTexts(entry.Entry)[0].Text)
 
 	// Reveal password that should be obfuscated until it is refreshed
 	entry.Password = false
 	Refresh(entry)
 
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
+	assert.Equal(t, "Hié™שרה", entryRenderTexts(entry.Entry)[0].Text)
 }
 
 func TestEntry_PageUpDown(t *testing.T) {
