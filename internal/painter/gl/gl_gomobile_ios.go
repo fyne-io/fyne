@@ -2,7 +2,7 @@
 
 package gl
 
-import "github.com/fyne-io/mobile/gl"
+import "golang.org/x/mobile/gl"
 
 func (p *glPainter) glFreeBuffer(vbo Buffer) {
 	ctx := p.glctx()

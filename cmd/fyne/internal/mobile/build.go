@@ -151,18 +151,18 @@ func runBuild(cmd *command) (err error) {
 		}
 	}
 
-	if !nmpkgs["github.com/fyne-io/mobile/app"] {
-		return fmt.Errorf(`%s does not import "fyne.io/fyne/app"`, pkg.ImportPath)
+	if !nmpkgs["golang.org/x/mobile/app"] {
+		return fmt.Errorf(`%s does not import "golang.org/x/mobile/app"`, pkg.ImportPath)
 	}
 
 	return nil
 }
 
-var nmRE = regexp.MustCompile(`[0-9a-f]{8} t (?:.*/vendor/)?(github.com/fyne-io/mobile.*/[^.]*)`)
+var nmRE = regexp.MustCompile(`[0-9a-f]{8} t (?:.*/vendor/)?(golang.org/x.*/[^.]*)`)
 
 func extractPkgs(nm string, path string) (map[string]bool, error) {
 	if buildN {
-		return map[string]bool{"github.com/fyne-io/mobile/app": true}, nil
+		return map[string]bool{"golang.org/x/mobile/app": true}, nil
 	}
 	r, w := io.Pipe()
 	cmd := exec.Command(nm, path)
@@ -195,11 +195,11 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 func importsApp(pkg *build.Package) error {
 	// Building a program, make sure it is appropriate for mobile.
 	for _, path := range pkg.Imports {
-		if path == "github.com/fyne-io/mobile/app" {
+		if path == "golang.org/x/mobile/app" {
 			return nil
 		}
 	}
-	return fmt.Errorf(`%s does not import "github.com/fyne-io/mobile/app"`, pkg.ImportPath)
+	return fmt.Errorf(`%s does not import "golang.org/x/mobile/app"`, pkg.ImportPath)
 }
 
 var xout io.Writer = os.Stderr
