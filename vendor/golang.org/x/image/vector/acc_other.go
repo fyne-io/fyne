@@ -6,7 +6,8 @@
 
 package vector
 
-const haveAccumulateSIMD = false
+const haveFixedAccumulateSIMD = false
+const haveFloatingAccumulateSIMD = false
 
 func fixedAccumulateOpOverSIMD(dst []uint8, src []uint32)     {}
 func fixedAccumulateOpSrcSIMD(dst []uint8, src []uint32)      {}

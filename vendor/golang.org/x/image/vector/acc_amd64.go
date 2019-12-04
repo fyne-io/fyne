@@ -10,7 +10,9 @@ package vector
 
 func haveSSE4_1() bool
 
-var haveAccumulateSIMD = haveSSE4_1()
+var haveFixedAccumulateSIMD = haveSSE4_1()
+
+const haveFloatingAccumulateSIMD = true
 
 //go:noescape
 func fixedAccumulateOpOverSIMD(dst []uint8, src []uint32)
