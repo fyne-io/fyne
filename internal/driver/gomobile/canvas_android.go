@@ -9,5 +9,5 @@ func devicePadding() (topLeft, bottomRight fyne.Size) {
 }
 
 func deviceScale() float32 {
-	return 2
+	return 3 // TODO detect device DPI and pick from 1, 1.5, 2, 3 and 4
 }
