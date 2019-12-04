@@ -8,8 +8,8 @@ import (
 	"image"
 	"image/draw"
 
-	"golang.org/x/mobile/exp/f32"
-	"golang.org/x/mobile/gl"
+	"github.com/fyne-io/mobile/exp/f32"
+	"github.com/fyne-io/mobile/gl"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
