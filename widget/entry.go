@@ -24,6 +24,8 @@ type entryRenderer struct {
 
 	objects []fyne.CanvasObject
 	entry   *Entry
+
+	rph *passwordRevealer
 }
 
 // MinSize calculates the minimum size of an entry widget.
@@ -151,10 +153,18 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
 	e.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
 
-	e.entry.text.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	revealIconSize := fyne.NewSize(0, 0)
+	if e.entry.allowPasswordReveal {
+		revealIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		e.rph.Resize(revealIconSize)
+		e.rph.Move(fyne.NewPos(size.Width-revealIconSize.Width-theme.Padding(), theme.Padding()*2))
+	}
+
+	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-revealIconSize.Width, theme.Padding()*2))
+	e.entry.text.Resize(entrySize)
 	e.entry.text.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
-	e.entry.placeholder.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	e.entry.placeholder.Resize(entrySize)
 	e.entry.placeholder.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
 	e.moveCursor()
@@ -247,6 +257,8 @@ type Entry struct {
 	selecting bool
 	popUp     *PopUp
 	// TODO: Add OnSelectChanged
+
+	allowPasswordReveal bool
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -1030,7 +1042,13 @@ func (p *placeholderPresenter) object() fyne.Widget {
 // MinSize returns the size that this widget should not shrink below
 func (e *Entry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
-	return e.BaseWidget.MinSize()
+
+	min := e.BaseWidget.MinSize()
+	if e.allowPasswordReveal {
+		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+	}
+
+	return min
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -1041,8 +1059,19 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	cursor := canvas.NewRectangle(theme.FocusColor())
 	cursor.Hide()
 
-	return &entryRenderer{line, cursor, []fyne.CanvasObject{},
-		[]fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}, e}
+	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
+
+	var rph *passwordRevealer
+	if e.allowPasswordReveal {
+		rph = &passwordRevealer{
+			icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
+			entry: e,
+		}
+		rph.ExtendBaseWidget(rph)
+		objects = append(objects, rph)
+	}
+
+	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e, rph}
 }
 
 func (e *Entry) registerShortcut() {
@@ -1085,4 +1114,67 @@ func NewPasswordEntry() *Entry {
 	e.registerShortcut()
 	e.ExtendBaseWidget(e)
 	return e
+}
+
+// NewPasswordRevealEntry creates a new entry password widget
+// with an additionally button allows to reveal/conceal the password value
+func NewPasswordRevealEntry() *Entry {
+	e := &Entry{Password: true, allowPasswordReveal: true}
+	e.registerShortcut()
+	e.ExtendBaseWidget(e)
+	return e
+}
+
+type passwordRevealerRenderer struct {
+	icon *canvas.Image
+}
+
+func (prr *passwordRevealerRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+}
+
+func (prr *passwordRevealerRenderer) Layout(size fyne.Size) {
+	prr.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+	prr.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
+}
+
+func (prr *passwordRevealerRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+func (prr *passwordRevealerRenderer) Refresh() {
+	canvas.Refresh(prr.icon)
+}
+
+func (prr *passwordRevealerRenderer) Destroy() {
+}
+
+func (prr *passwordRevealerRenderer) Objects() []fyne.CanvasObject {
+	return []fyne.CanvasObject{prr.icon}
+}
+
+type passwordRevealer struct {
+	BaseWidget
+
+	icon  *canvas.Image
+	entry *Entry
+}
+
+func (pr *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
+	return &passwordRevealerRenderer{icon: pr.icon}
+}
+
+func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
+	pr.entry.Lock()
+	pr.entry.Password = !pr.entry.Password
+	pr.entry.Unlock()
+	if pr.entry.Password {
+		pr.icon.Resource = theme.VisibilityOffIcon()
+	} else {
+		pr.icon.Resource = theme.VisibilityIcon()
+	}
+	pr.entry.Refresh()
+}
+
+func (pr *passwordRevealer) TappedSecondary(*fyne.PointEvent) {
 }
