@@ -1119,13 +1119,8 @@ func (p *PasswordEntry) CreateRenderer() fyne.WidgetRenderer {
 		}
 		p.Entry.Refresh()
 	})
-	copyButton := NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
-		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
-		clipboard.SetContent(p.Entry.Text)
-	})
 
-	b := NewHBox(revealButton, copyButton)
-	borderLayout := layout.NewBorderLayout(nil, nil, nil, b)
-	c := fyne.NewContainerWithLayout(borderLayout, b, p.Entry)
+	borderLayout := layout.NewBorderLayout(nil, nil, nil, revealButton)
+	c := fyne.NewContainerWithLayout(borderLayout, revealButton, p.Entry)
 	return NewVBox(c).CreateRenderer()
 }
