@@ -11,7 +11,7 @@ func main() {
 
 	w := a.NewWindow("Hello")
 	w.SetContent(widget.NewVBox(
-		widget.NewPasswordRevealEntry(),
+		widget.NewLabel("Hello Fyne!"),
 		widget.NewButton("Quit", func() {
 			a.Quit()
 		}),
