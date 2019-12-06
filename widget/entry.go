@@ -154,7 +154,7 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
 
 	revealIconSize := fyne.NewSize(0, 0)
-	if e.entry.allowPasswordReveal {
+	if e.entry.actionIcon {
 		revealIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 		e.rph.Resize(revealIconSize)
 		e.rph.Move(fyne.NewPos(size.Width-revealIconSize.Width-theme.Padding(), theme.Padding()*2))
@@ -258,7 +258,11 @@ type Entry struct {
 	popUp     *PopUp
 	// TODO: Add OnSelectChanged
 
-	allowPasswordReveal bool
+	// PasswordEntry fields
+	// actionIcon defines is the actionIcon must be displayed
+	actionIcon bool
+	// revealPassword defines is the password entry value must be revealed
+	revealPassword bool
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -450,7 +454,7 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 // copyToClipboard copies the current selection to a given clipboard and then removes the selected text.
 // This does nothing if it is a password entry.
 func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
-	if !e.selecting || e.Password {
+	if !e.selecting || e.password() {
 		return
 	}
 
@@ -461,7 +465,7 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 // copyToClipboard copies the current selection to a given clipboard.
 // This does nothing if it is a password entry.
 func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
-	if !e.selecting || e.Password {
+	if !e.selecting || e.password() {
 		return
 	}
 
@@ -533,13 +537,13 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
 
-	if e.Disabled() && e.Password {
+	if e.Disabled() && e.password() {
 		return // no popup options for a disabled password field
 	}
 
 	if e.Disabled() {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", copyItem, selectAllItem), c, popUpPos)
-	} else if e.Password {
+	} else if e.password() {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", pasteItem, selectAllItem), c, popUpPos)
 	} else {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c, popUpPos)
@@ -1001,6 +1005,9 @@ func (e *Entry) textColor() color.Color {
 
 // password tells the rendering textProvider if we are a password field
 func (e *Entry) password() bool {
+	if e.actionIcon {
+		return !e.revealPassword
+	}
 	return e.Password
 }
 
@@ -1044,7 +1051,7 @@ func (e *Entry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
 
 	min := e.BaseWidget.MinSize()
-	if e.allowPasswordReveal {
+	if e.actionIcon {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
 
@@ -1062,7 +1069,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
 
 	var rph *passwordRevealer
-	if e.allowPasswordReveal {
+	if e.actionIcon {
 		rph = &passwordRevealer{
 			icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
 			entry: e,
@@ -1110,7 +1117,7 @@ func NewMultiLineEntry() *Entry {
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true, allowPasswordReveal: true}
+	e := &Entry{actionIcon: true, revealPassword: false}
 	e.registerShortcut()
 	e.ExtendBaseWidget(e)
 	return e
@@ -1157,12 +1164,12 @@ func (pr *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 
 func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
 	pr.entry.Lock()
-	pr.entry.Password = !pr.entry.Password
+	pr.entry.revealPassword = !pr.entry.revealPassword
 	pr.entry.Unlock()
-	if pr.entry.Password {
-		pr.icon.Resource = theme.VisibilityOffIcon()
-	} else {
+	if pr.entry.revealPassword {
 		pr.icon.Resource = theme.VisibilityIcon()
+	} else {
+		pr.icon.Resource = theme.VisibilityOffIcon()
 	}
 	fyne.CurrentApp().Driver().CanvasForObject(pr).Focus(pr.entry)
 }

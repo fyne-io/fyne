@@ -1340,12 +1340,20 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 	assert.Equal(t, "Hié™שרה", entry.Text)
 	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
 
-	// Reveal password that should be obfuscated until it is refreshed
+	// The Password field is ignored when using the PasswordEntry constructor
 	entry.Password = false
 	Refresh(entry)
 
 	assert.Equal(t, "Hié™שרה", entry.Text)
+	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+
+	actionIcon := Renderer(entry).(*entryRenderer).rph
+
+	test.Tap(actionIcon)
+
+	assert.Equal(t, "Hié™שרה", entry.Text)
 	assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
+	assert.True(t, entry.Focused())
 }
 
 func TestEntry_PageUpDown(t *testing.T) {
