@@ -1110,15 +1110,6 @@ func NewMultiLineEntry() *Entry {
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true}
-	e.registerShortcut()
-	e.ExtendBaseWidget(e)
-	return e
-}
-
-// NewPasswordRevealEntry creates a new entry password widget
-// with an additionally button allows to reveal/conceal the password value
-func NewPasswordRevealEntry() *Entry {
 	e := &Entry{Password: true, allowPasswordReveal: true}
 	e.registerShortcut()
 	e.ExtendBaseWidget(e)

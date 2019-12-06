@@ -74,7 +74,7 @@ func makeFormTab() fyne.Widget {
 	name.SetPlaceHolder("John Smith")
 	email := widget.NewEntry()
 	email.SetPlaceHolder("test@example.com")
-	password := widget.NewPasswordRevealEntry()
+	password := widget.NewPasswordEntry()
 	password.SetPlaceHolder("Password")
 	largeText := widget.NewMultiLineEntry()
 
