@@ -1164,7 +1164,7 @@ func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
 	} else {
 		pr.icon.Resource = theme.VisibilityIcon()
 	}
-	pr.entry.Refresh()
+	fyne.CurrentApp().Driver().CanvasForObject(pr).Focus(pr.entry)
 }
 
 func (pr *passwordRevealer) TappedSecondary(*fyne.PointEvent) {
