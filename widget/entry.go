@@ -7,6 +7,8 @@ import (
 	"sync"
 	"unicode"
 
+	"fyne.io/fyne/dataapi"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -219,11 +221,13 @@ var _ desktop.Keyable = (*Entry)(nil)
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	DisableableWidget
+	DataListener
 	sync.RWMutex
 	shortcut    fyne.ShortcutHandler
 	Text        string
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
+	OnBind      func(string) `json:"-"`
 	Password    bool
 	ReadOnly    bool // Deprecated: Use Disable() instead
 	MultiLine   bool
@@ -308,11 +312,15 @@ func (e *Entry) updateText(text string) {
 	e.Lock()
 	e.Text = text
 	e.Unlock()
-	if changed && e.OnChanged != nil {
-		e.OnChanged(text)
+	if changed {
+		if e.OnChanged != nil {
+			e.OnChanged(text)
+		}
+		if e.OnBind != nil {
+			e.OnBind(text)
+		}
 	}
-
-	Refresh(e)
+	e.Refresh()
 }
 
 // selection returns the start and end text positions for the selected span of text
@@ -1069,6 +1077,17 @@ func NewEntry() *Entry {
 	e.ExtendBaseWidget(e)
 	e.registerShortcut()
 	return e
+}
+
+// Bind will Bind this widget to the given DataItem
+func (e *Entry) Bind(data dataapi.DataItem) *Entry {
+	e.DataListener.Bind(data, e)
+	return e
+}
+
+// SetFromData is called on the Entry when the bound data changes
+func (e *Entry) SetFromData(data dataapi.DataItem) {
+	e.SetText(data.String())
 }
 
 // NewMultiLineEntry creates a new entry that allows multiple lines

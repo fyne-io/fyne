@@ -318,3 +318,4 @@ func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	t.TextStyle = style
 	return t.MinSize()
 }
+

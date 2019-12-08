@@ -118,3 +118,5 @@ func NewProgressBar() *ProgressBar {
 	Renderer(p).Layout(p.MinSize())
 	return p
 }
+
+// TODO - Bind the progress bar to an Integer

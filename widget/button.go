@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
@@ -139,6 +140,7 @@ func (b *buttonRenderer) Destroy() {
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	DisableableWidget
+	DataListener
 	Text         string
 	Style        ButtonStyle
 	Icon         fyne.Resource
@@ -173,13 +175,13 @@ func (b *Button) TappedSecondary(*fyne.PointEvent) {
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
-	Refresh(b)
+	b.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (b *Button) MouseOut() {
 	b.hovered = false
-	Refresh(b)
+	b.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -222,7 +224,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 func (b *Button) SetText(text string) {
 	b.Text = text
 
-	Refresh(b)
+	b.Refresh()
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -235,23 +237,36 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 		b.disabledIcon = nil
 	}
 
-	Refresh(b)
+	b.Refresh()
 }
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
-	button := &Button{DisableableWidget{}, label, DefaultButton, nil, nil,
+	button := &Button{DisableableWidget{}, DataListener{}, label, DefaultButton, nil, nil,
 		tapped, false, false}
 
 	button.ExtendBaseWidget(button)
 	return button
+}
+
+// Bind will Bind this widget to the given DataItem
+func (b *Button) Bind(data dataapi.DataItem) *Button {
+	b.DataListener.Bind(data, b)
+	return b
+}
+
+// SetFromData is called when the bound data changes
+func (b *Button) SetFromData(data dataapi.DataItem) {
+	b.SetText(data.String())
 }
 
 // NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
-	button := &Button{DisableableWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
+	button := &Button{DisableableWidget{}, DataListener{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
 		tapped, false, false}
 
 	button.ExtendBaseWidget(button)
 	return button
 }
+
+// TODO - Bind the button to a string, update the button view when the string changes

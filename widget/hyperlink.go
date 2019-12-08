@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/theme"
 )
 
@@ -12,6 +13,7 @@ import (
 // When clicked, the default web browser should open with a URL
 type Hyperlink struct {
 	textProvider
+	DataListener
 	Text      string
 	URL       *url.URL
 	Alignment fyne.TextAlign // The alignment of the Text
@@ -23,9 +25,21 @@ func NewHyperlink(text string, url *url.URL) *Hyperlink {
 	return NewHyperlinkWithStyle(text, url, fyne.TextAlignLeading, fyne.TextStyle{})
 }
 
+// Bind will link the dataitem to the contents of the URL
+func (hl *Hyperlink) Bind(data dataapi.DataItem) *Hyperlink {
+	hl.DataListener.Bind(data, hl)
+	return hl
+}
+
+// SetFromData updates the hyperlink from the bound data
+func (hl *Hyperlink) SetFromData(data dataapi.DataItem) {
+	hl.SetText(data.String())
+}
+
 // NewHyperlinkWithStyle creates a new hyperlink widget with the set text content
 func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
 	hl := &Hyperlink{
+		DataListener: DataListener{},
 		Text:      text,
 		URL:       url,
 		Alignment: alignment,

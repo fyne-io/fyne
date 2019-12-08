@@ -13,7 +13,7 @@ type BaseWidget struct {
 	position fyne.Position
 	Hidden   bool
 
-	impl fyne.Widget
+	impl       fyne.Widget
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.

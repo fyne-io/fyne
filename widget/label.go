@@ -4,12 +4,14 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/theme"
 )
 
 // Label widget is a label component with appropriate padding and layout.
 type Label struct {
 	textProvider
+	DataListener
 	Text      string
 	Alignment fyne.TextAlign // The alignment of the Text
 	TextStyle fyne.TextStyle // The style of the label text
@@ -18,6 +20,17 @@ type Label struct {
 // NewLabel creates a new label widget with the set text content
 func NewLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{})
+}
+
+// Bind will Bind this widget to the given DataItem
+func (l *Label) Bind(data dataapi.DataItem) *Label {
+	l.DataListener.Bind(data, l)
+	return l
+}
+
+// SetFromData is called when the bound data changes
+func (l *Label) SetFromData(data dataapi.DataItem) {
+	l.SetText(data.String())
 }
 
 // NewLabelWithStyle creates a new label widget with the set text content

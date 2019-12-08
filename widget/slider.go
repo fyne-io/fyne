@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/theme"
 )
 
@@ -23,6 +24,7 @@ var _ fyne.Draggable = (*Slider)(nil)
 // Slider if a widget that can slide between two fixed values.
 type Slider struct {
 	BaseWidget
+	DataListener
 
 	Value float64
 	Min   float64
@@ -31,6 +33,7 @@ type Slider struct {
 
 	Orientation Orientation
 	OnChanged   func(float64)
+	OnBind   func(float64)
 }
 
 // NewSlider returns a basic slider.
@@ -46,6 +49,27 @@ func NewSlider(min, max float64) *Slider {
 	return slider
 }
 
+// SetFloat sets the value in the slider and repaints it
+func (s *Slider) SetFloat(value float64) {
+	if value >= s.Min && value <= s.Max {
+		s.Value = value
+		s.Refresh()
+	}
+}
+
+// Bind will Bind this widget to the given DataItem
+func (s *Slider) Bind(data dataapi.DataItem) *Slider {
+	s.DataListener.Bind(data, s)
+	return s
+}
+
+// SetFromData is called when the bound data changes
+func (s *Slider) SetFromData(data dataapi.DataItem) {
+	if ii, ok := data.(*dataapi.Float); ok {
+		s.SetFloat(ii.Value())
+	}
+}
+
 // DragEnd function.
 func (s *Slider) DragEnd() {
 }
@@ -55,11 +79,12 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ratio := s.getRatio(&(e.PointEvent))
 
 	s.updateValue(ratio)
-	Refresh(s)
+	s.Refresh()
 
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
 	}
+	if s.OnBind != nil { s.OnBind(s.Value) }
 }
 
 func (s *Slider) buttonDiameter() int {

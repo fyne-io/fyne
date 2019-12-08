@@ -2,9 +2,11 @@ package widget
 
 import (
 	"image/color"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
@@ -95,10 +97,12 @@ func (c *checkRenderer) Destroy() {
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
 type Check struct {
 	DisableableWidget
+	DataListener
 	Text    string
 	Checked bool
 
 	OnChanged func(bool) `json:"-"`
+	OnBind    func(bool) `json:"-"`
 
 	focused bool
 	hovered bool
@@ -112,11 +116,9 @@ func (c *Check) SetChecked(checked bool) {
 
 	c.Checked = checked
 
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
-	}
-
-	Refresh(c)
+	if c.OnChanged != nil { c.OnChanged(c.Checked) }
+	if c.OnBind != nil { c.OnBind(c.Checked) }
+	c.Refresh()
 }
 
 // Hide this widget, if it was previously visible
@@ -135,13 +137,13 @@ func (c *Check) MouseIn(*desktop.MouseEvent) {
 		return
 	}
 	c.hovered = true
-	Refresh(c)
+	c.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (c *Check) MouseOut() {
 	c.hovered = false
-	Refresh(c)
+	c.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -184,8 +186,10 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 func NewCheck(label string, changed func(bool)) *Check {
 	c := &Check{
 		DisableableWidget{},
+		DataListener{},
 		label,
 		false,
+		changed,
 		changed,
 		false,
 		false,
@@ -195,21 +199,49 @@ func NewCheck(label string, changed func(bool)) *Check {
 	return c
 }
 
+// Bind will Bind this widget to the given DataItem
+func (c *Check) Bind(data dataapi.DataItem) *Check {
+	c.DataListener.Bind(data, c)
+	return c
+}
+
+// SetFromData is called when the bound data changes
+func (c *Check) SetFromData(data dataapi.DataItem) {
+	// Bound to a bool, so set the field based on the truth value of the data
+	if v, ok := data.(*dataapi.Bool); ok {
+		c.SetChecked(v.Value())
+		return
+	}
+	// Bound to a number, so set the field based on 0 = false, else true
+	if v, ok := data.(*dataapi.Int); ok {
+		value := v.Value() > 0
+		c.SetChecked(value)
+		return
+	}
+	// dataItem is not a bool or number, get the value and test
+	// vs the string value
+	switch strings.ToLower(data.String()) {
+	case "true", "1", "ok", "yes", "on":
+		c.SetChecked(true)
+	default:
+		c.SetChecked(false)
+		c.SetChecked(false)
+	}
+}
+
 // FocusGained is called when the Check has been given focus.
 func (c *Check) FocusGained() {
 	if c.Disabled() {
 		return
 	}
 	c.focused = true
-
-	Refresh(c)
+	c.Refresh()
 }
 
 // FocusLost is called when the Check has had focus removed.
 func (c *Check) FocusLost() {
 	c.focused = false
-
-	Refresh(c)
+	c.Refresh()
 }
 
 // Focused returns whether or not this Check has focus.

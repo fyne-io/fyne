@@ -212,3 +212,8 @@ func NewSelect(options []string, changed func(string)) *Select {
 	Renderer(combo).Layout(combo.MinSize())
 	return combo
 }
+
+// TODO - add Bind() to the select widget
+// Bind to - a string
+// Bind to - an int value, being the selected option
+// Bind to - a slice of strings, if the select is multi

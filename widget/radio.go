@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
@@ -164,10 +165,12 @@ func (r *radioRenderer) Destroy() {
 // Changing the selection (only one can be selected) will trigger the changed func.
 type Radio struct {
 	DisableableWidget
+	DataListener
 	Options  []string
 	Selected string
 
 	OnChanged  func(string) `json:"-"`
+	OnBind  func(string) `json:"-"`
 	Horizontal bool
 
 	hoveredItemIndex int
@@ -242,7 +245,8 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	if r.OnChanged != nil {
 		r.OnChanged(r.Selected)
 	}
-	Renderer(r).Refresh()
+	if r.OnBind != nil { r.OnBind(r.Selected) }
+	r.Refresh()
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
@@ -311,8 +315,10 @@ func (r *Radio) removeDuplicateOptions() {
 func NewRadio(options []string, changed func(string)) *Radio {
 	r := &Radio{
 		DisableableWidget{},
+		DataListener{},
 		options,
 		"",
+		changed,
 		changed,
 		false,
 		noRadioItemIndex,
@@ -321,4 +327,37 @@ func NewRadio(options []string, changed func(string)) *Radio {
 	r.removeDuplicateOptions()
 	r.ExtendBaseWidget(r)
 	return r
+}
+// Bind will Bind this widget to the given DataItem
+func (r *Radio) Bind(data dataapi.DataItem) *Radio {
+	r.DataListener.Bind(data, r)
+	return r
+}
+
+// SetFromData is called whenever the bound data changes
+func (r *Radio) SetFromData(data dataapi.DataItem) {
+	// If we are bound to an int, then use that as the index into the values
+	if ii, ok := data.(*dataapi.Int); ok {
+		// safely get the string value based on a number
+		getValue := func(i int) string {
+			if i < 0 || i >= len(r.Options) {
+				return ""
+			}
+			return r.Options[i]
+		}
+		r.SetSelected(getValue(ii.Value()))
+		return
+	}
+	// else we are bound to the string value
+	r.SetSelected(data.String())
+}
+
+// AsInt gets the index value of the given string, or 0 if not found
+func (r *Radio) AsInt(txt string) int {
+	for k,v := range r.Options {
+		if v == txt {
+			return k
+		}
+	}
+	return 0
 }

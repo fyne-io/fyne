@@ -195,3 +195,5 @@ func NewProgressBarInfinite() *ProgressBarInfinite {
 	Renderer(p).Layout(p.MinSize())
 	return p
 }
+
+// TODO - Bind the ProgressBarInfinite to a float ?
