@@ -24,8 +24,6 @@ type entryRenderer struct {
 
 	objects []fyne.CanvasObject
 	entry   *Entry
-
-	rph *passwordRevealer
 }
 
 // MinSize calculates the minimum size of an entry widget.
@@ -154,10 +152,10 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
 
 	revealIconSize := fyne.NewSize(0, 0)
-	if e.entry.actionIcon {
+	if e.entry.passwordRevealer != nil {
 		revealIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-		e.rph.Resize(revealIconSize)
-		e.rph.Move(fyne.NewPos(size.Width-revealIconSize.Width-theme.Padding(), theme.Padding()*2))
+		e.entry.passwordRevealer.Resize(revealIconSize)
+		e.entry.passwordRevealer.Move(fyne.NewPos(size.Width-revealIconSize.Width-theme.Padding(), theme.Padding()*2))
 	}
 
 	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-revealIconSize.Width, theme.Padding()*2))
@@ -200,8 +198,8 @@ func (e *entryRenderer) Refresh() {
 	}
 
 	e.entry.text.Refresh()
-	if e.rph != nil {
-		e.rph.Refresh()
+	if e.entry.passwordRevealer != nil {
+		e.entry.passwordRevealer.Refresh()
 	}
 	canvas.Refresh(e.entry)
 }
@@ -261,9 +259,8 @@ type Entry struct {
 	popUp     *PopUp
 	// TODO: Add OnSelectChanged
 
-	// PasswordEntry fields
-	// actionIcon defines if the actionIcon must be displayed
-	actionIcon bool
+	// passwordRevealer represents the passwordRevealer widget
+	passwordRevealer *passwordRevealer
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -1049,7 +1046,7 @@ func (e *Entry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
 
 	min := e.BaseWidget.MinSize()
-	if e.actionIcon {
+	if e.passwordRevealer != nil {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
 
@@ -1066,17 +1063,10 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
 
-	var rph *passwordRevealer
-	if e.actionIcon {
-		rph = &passwordRevealer{
-			icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
-			entry: e,
-		}
-		rph.ExtendBaseWidget(rph)
-		objects = append(objects, rph)
+	if e.passwordRevealer != nil {
+		objects = append(objects, e.passwordRevealer)
 	}
-
-	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e, rph}
+	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
 
 func (e *Entry) registerShortcut() {
@@ -1115,9 +1105,17 @@ func NewMultiLineEntry() *Entry {
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{Password: true, actionIcon: true}
-	e.registerShortcut()
+	e := &Entry{Password: true}
 	e.ExtendBaseWidget(e)
+	e.registerShortcut()
+
+	pr := &passwordRevealer{
+		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
+		entry: e,
+	}
+	pr.ExtendBaseWidget(pr)
+
+	e.passwordRevealer = pr
 	return e
 }
 
