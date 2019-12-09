@@ -180,7 +180,8 @@ func (t *TabContainer) SetTabLocation(l TabLocation) {
 	r.tabBar.Objects = nil
 	r.tabBar = t.buildTabBar(buttons)
 	r.objects[len(r.objects)-1] = r.tabBar
-	r.Refresh()
+
+	r.Layout(t.size)
 }
 
 func (t *TabContainer) mismatchedContent() bool {
@@ -309,8 +310,6 @@ func (t *tabContainerRenderer) Refresh() {
 	t.line.FillColor = theme.ButtonColor()
 	t.line.Refresh()
 
-	t.Layout(t.container.Size().Union(t.container.MinSize()))
-
 	for i, child := range t.container.Items {
 		old := t.objects[i]
 
@@ -326,7 +325,6 @@ func (t *tabContainerRenderer) Refresh() {
 			child.Content.Hide()
 		}
 	}
-	canvas.Refresh(t.container)
 
 	for i, button := range t.tabBar.Objects {
 		if i == t.container.current {
@@ -337,6 +335,7 @@ func (t *tabContainerRenderer) Refresh() {
 
 		button.Refresh()
 	}
+	canvas.Refresh(t.container)
 }
 
 func (t *tabContainerRenderer) Destroy() {

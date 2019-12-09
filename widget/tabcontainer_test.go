@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -79,14 +80,14 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	tab2 := NewTabItem("Test2", NewLabel("Test2"))
 	tab3 := NewTabItem("Test3", NewLabel("Test3"))
 	tabs := NewTabContainer(tab1, tab2, tab3)
-
-	r := Renderer(tabs).(*tabContainerRenderer)
+	r := cache.Renderer(tabs).(*tabContainerRenderer)
 
 	buttons := r.tabBar.Objects
 	require.Len(t, buttons, 3)
 	content := tabs.Items[0].Content
 
 	tabs.SetTabLocation(TabLocationLeading)
+	tabs.Resize(r.MinSize())
 	assert.Equal(t, fyne.NewPos(0, 0), r.tabBar.Position())
 	assert.Equal(t, fyne.NewPos(r.tabBar.MinSize().Width+theme.Padding(), 0), content.Position())
 	assert.Equal(t, fyne.NewPos(r.tabBar.MinSize().Width, 0), r.line.Position())
@@ -99,6 +100,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	}
 
 	tabs.SetTabLocation(TabLocationBottom)
+	tabs.Resize(r.MinSize())
 	assert.Equal(t, fyne.NewPos(0, content.MinSize().Height+theme.Padding()), r.tabBar.Position())
 	assert.Equal(t, fyne.NewPos(0, 0), content.Position())
 	assert.Equal(t, fyne.NewPos(0, content.Size().Height), r.line.Position())
@@ -111,6 +113,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	}
 
 	tabs.SetTabLocation(TabLocationTrailing)
+	tabs.Resize(r.MinSize())
 	assert.Equal(t, fyne.NewPos(content.Size().Width+theme.Padding(), 0), r.tabBar.Position())
 	assert.Equal(t, fyne.NewPos(0, 0), content.Position())
 	assert.Equal(t, fyne.NewPos(content.Size().Width, 0), r.line.Position())
@@ -123,6 +126,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	}
 
 	tabs.SetTabLocation(TabLocationTop)
+	tabs.Resize(r.MinSize())
 	assert.Equal(t, fyne.NewPos(0, 0), r.tabBar.Position())
 	assert.Equal(t, fyne.NewPos(0, r.tabBar.MinSize().Height+theme.Padding()), content.Position())
 	assert.Equal(t, fyne.NewPos(0, r.tabBar.MinSize().Height), r.line.Position())
