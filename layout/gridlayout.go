@@ -117,10 +117,10 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	if g.horizontal() {
 		minContentSize := fyne.NewSize(minSize.Width*g.Cols, minSize.Height*rows)
 		return minContentSize.Add(fyne.NewSize(theme.Padding()*(g.Cols-1), theme.Padding()*(rows-1)))
-	} else {
-		minContentSize := fyne.NewSize(minSize.Width*rows, minSize.Height*g.Cols)
-		return minContentSize.Add(fyne.NewSize(theme.Padding()*(rows-1), theme.Padding()*(g.Cols-1)))
 	}
+
+	minContentSize := fyne.NewSize(minSize.Width*rows, minSize.Height*g.Cols)
+	return minContentSize.Add(fyne.NewSize(theme.Padding()*(rows-1), theme.Padding()*(g.Cols-1)))
 }
 
 // NewGridLayout returns a new GridLayout instance
