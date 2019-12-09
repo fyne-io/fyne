@@ -123,8 +123,8 @@ func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
 	default:
 		barHeight, barWidth, barY, barX = r.barSizeAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height)
 	}
-	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
+	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 }
 
 func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
@@ -309,8 +309,6 @@ func (r *scrollContainerRenderer) updatePosition() {
 	r.handleAreaVisibility(contentHeight, scrollHeight, r.vertArea)
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
-	canvas.Refresh(r.scroll.Content)
-
 	r.handleShadowVisibility(r.scroll.Offset.X, contentWidth, scrollWidth, r.leftShadow, r.rightShadow)
 	r.handleShadowVisibility(r.scroll.Offset.Y, contentHeight, scrollHeight, r.topShadow, r.bottomShadow)
 
