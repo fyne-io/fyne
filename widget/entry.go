@@ -200,6 +200,9 @@ func (e *entryRenderer) Refresh() {
 	}
 
 	e.entry.text.Refresh()
+	if e.rph != nil {
+		e.rph.Refresh()
+	}
 	canvas.Refresh(e.entry)
 }
 
@@ -259,10 +262,8 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 
 	// PasswordEntry fields
-	// actionIcon defines is the actionIcon must be displayed
+	// actionIcon defines if the actionIcon must be displayed
 	actionIcon bool
-	// revealPassword defines is the password entry value must be revealed
-	revealPassword bool
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -1005,9 +1006,6 @@ func (e *Entry) textColor() color.Color {
 
 // password tells the rendering textProvider if we are a password field
 func (e *Entry) password() bool {
-	if e.actionIcon {
-		return !e.revealPassword
-	}
 	return e.Password
 }
 
@@ -1117,14 +1115,15 @@ func NewMultiLineEntry() *Entry {
 
 // NewPasswordEntry creates a new entry password widget
 func NewPasswordEntry() *Entry {
-	e := &Entry{actionIcon: true, revealPassword: false}
+	e := &Entry{Password: true, actionIcon: true}
 	e.registerShortcut()
 	e.ExtendBaseWidget(e)
 	return e
 }
 
 type passwordRevealerRenderer struct {
-	icon *canvas.Image
+	entry *Entry
+	icon  *canvas.Image
 }
 
 func (prr *passwordRevealerRenderer) MinSize() fyne.Size {
@@ -1141,6 +1140,14 @@ func (prr *passwordRevealerRenderer) BackgroundColor() color.Color {
 }
 
 func (prr *passwordRevealerRenderer) Refresh() {
+	prr.entry.Lock()
+	revealPassword := !prr.entry.Password
+	prr.entry.Unlock()
+	if revealPassword {
+		prr.icon.Resource = theme.VisibilityIcon()
+	} else {
+		prr.icon.Resource = theme.VisibilityOffIcon()
+	}
 	canvas.Refresh(prr.icon)
 }
 
@@ -1159,18 +1166,14 @@ type passwordRevealer struct {
 }
 
 func (pr *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
-	return &passwordRevealerRenderer{icon: pr.icon}
+	return &passwordRevealerRenderer{icon: pr.icon, entry: pr.entry}
 }
 
 func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
 	pr.entry.Lock()
-	pr.entry.revealPassword = !pr.entry.revealPassword
+	pr.entry.Password = !pr.entry.Password
 	pr.entry.Unlock()
-	if pr.entry.revealPassword {
-		pr.icon.Resource = theme.VisibilityIcon()
-	} else {
-		pr.icon.Resource = theme.VisibilityOffIcon()
-	}
+	pr.Refresh()
 	fyne.CurrentApp().Driver().CanvasForObject(pr).Focus(pr.entry)
 }
 
