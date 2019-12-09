@@ -80,5 +80,5 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			w.Show()
 		})))
 
-	return fyne.NewContainerWithLayout(layout.NewGridLayout(2), windows, LayoutPanel())
+	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), windows, LayoutPanel())
 }
