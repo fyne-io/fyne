@@ -27,6 +27,21 @@ func TestGlCanvas_NilContent(t *testing.T) {
 	assert.NotNil(t, w.Content()) // never a nil canvas so we have a sensible fallback
 }
 
+func TestGlCanvas_Resize(t *testing.T) {
+	w := d.CreateWindow("Test")
+	w.SetPadded(false)
+
+	content := widget.NewLabel("Content")
+	over := widget.NewLabel("Over")
+	w.SetContent(content)
+	w.Canvas().SetOverlay(over)
+
+	size := fyne.NewSize(100, 100)
+	w.Resize(size)
+	assert.Equal(t, size, content.Size())
+	assert.Equal(t, size, over.Size())
+}
+
 func Test_glCanvas_SetContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	var menuHeight int
