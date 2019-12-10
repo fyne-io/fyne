@@ -11,7 +11,16 @@ import (
 var _ fyne.Layout = (*gridLayout)(nil)
 
 type gridLayout struct {
-	Cols int
+	Cols            int
+	vertical, adapt bool
+}
+
+func (g *gridLayout) horizontal() bool {
+	if g.adapt {
+		return fyne.IsHorizontal(fyne.CurrentDevice().Orientation())
+	}
+
+	return !g.vertical
 }
 
 func (g *gridLayout) countRows(objects []fyne.CanvasObject) int {
@@ -47,9 +56,14 @@ func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 
 	padWidth := (g.Cols - 1) * theme.Padding()
 	padHeight := (rows - 1) * theme.Padding()
-
 	cellWidth := float64(size.Width-padWidth) / float64(g.Cols)
 	cellHeight := float64(size.Height-padHeight) / float64(rows)
+
+	if !g.horizontal() {
+		padWidth, padHeight = padHeight, padWidth
+		cellWidth = float64(size.Width-padWidth) / float64(rows)
+		cellHeight = float64(size.Height-padHeight) / float64(g.Cols)
+	}
 
 	row, col := 0, 0
 	i := 0
@@ -66,11 +80,20 @@ func (g *gridLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		child.Move(fyne.NewPos(x1, y1))
 		child.Resize(fyne.NewSize(x2-x1, y2-y1))
 
-		if (i+1)%g.Cols == 0 {
-			row++
-			col = 0
+		if g.horizontal() {
+			if (i+1)%g.Cols == 0 {
+				row++
+				col = 0
+			} else {
+				col++
+			}
 		} else {
-			col++
+			if (i+1)%g.Cols == 0 {
+				col++
+				row = 0
+			} else {
+				row++
+			}
 		}
 		i++
 	}
@@ -91,11 +114,32 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		minSize = minSize.Union(child.MinSize())
 	}
 
-	minContentSize := fyne.NewSize(minSize.Width*g.Cols, minSize.Height*rows)
-	return minContentSize.Add(fyne.NewSize(theme.Padding()*(g.Cols-1), theme.Padding()*(rows-1)))
+	if g.horizontal() {
+		minContentSize := fyne.NewSize(minSize.Width*g.Cols, minSize.Height*rows)
+		return minContentSize.Add(fyne.NewSize(theme.Padding()*(g.Cols-1), theme.Padding()*(rows-1)))
+	}
+
+	minContentSize := fyne.NewSize(minSize.Width*rows, minSize.Height*g.Cols)
+	return minContentSize.Add(fyne.NewSize(theme.Padding()*(rows-1), theme.Padding()*(g.Cols-1)))
 }
 
-// NewGridLayout returns a new GridLayout instance
+// NewGridLayout returns a grid layout arranged in a specified number of coulmns.
+// The number of rows will depend on how many children are in the container that uses this layout.
 func NewGridLayout(cols int) fyne.Layout {
-	return &gridLayout{cols}
+	return NewGridLayoutWithColumns(cols)
+}
+
+// NewGridLayoutWithColumns returns a new grid layout that specifies a column count and wrap to new rows when needed.
+func NewGridLayoutWithColumns(cols int) fyne.Layout {
+	return &gridLayout{Cols: cols}
+}
+
+// NewGridLayoutWithRows returns a new grid layout that specifies a row count that creates new columns as required.
+func NewGridLayoutWithRows(rows int) fyne.Layout {
+	return &gridLayout{Cols: rows, vertical: true}
+}
+
+// NewAdaptiveGridLayout returns a new grid layout which uses columns when horizontal but rows when vertical.
+func NewAdaptiveGridLayout(rowcols int) fyne.Layout {
+	return &gridLayout{Cols: rowcols, adapt: true}
 }

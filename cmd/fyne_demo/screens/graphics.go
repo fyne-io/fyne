@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 )
 
 func rgbGradient(x, y, w, h int) color.Color {
@@ -47,8 +46,5 @@ func GraphicsScreen() fyne.CanvasObject {
 		canvas.NewRadialGradient(color.RGBA{0x80, 0, 0, 0xff}, color.RGBA{0, 0x80, 0x80, 0xff}),
 	)
 
-	headings := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-		widget.NewGroup("Canvas objects"), widget.NewGroup("Theme icons"))
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(headings, nil, nil, nil), headings,
-		fyne.NewContainerWithLayout(layout.NewGridLayout(2), content, IconsPanel()))
+	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), content, IconsPanel())
 }

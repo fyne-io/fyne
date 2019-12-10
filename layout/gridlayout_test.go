@@ -55,6 +55,28 @@ func TestGridLayoutRounding(t *testing.T) {
 	assert.Equal(t, fyne.NewSize(33, 50), obj3.Size())
 }
 
+func TestGridLayout_Vertical(t *testing.T) {
+	gridSize := fyne.NewSize(100+theme.Padding(), 100+theme.Padding())
+	cellSize := fyne.NewSize(50, 50)
+
+	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+
+	container := &fyne.Container{
+		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
+	}
+	container.Resize(gridSize)
+
+	NewGridLayoutWithRows(2).Layout(container.Objects, gridSize)
+
+	assert.Equal(t, obj1.Size(), cellSize)
+	cell2Pos := fyne.NewPos(0, 50+theme.Padding())
+	assert.Equal(t, cell2Pos, obj2.Position())
+	cell3Pos := fyne.NewPos(50+theme.Padding(), 0)
+	assert.Equal(t, cell3Pos, obj3.Position())
+}
+
 func TestGridLayout_MinSize(t *testing.T) {
 	text1 := canvas.NewText("Large Text", color.RGBA{0xff, 0, 0, 0})
 	text2 := canvas.NewText("small", color.RGBA{0xff, 0, 0, 0})
@@ -62,6 +84,17 @@ func TestGridLayout_MinSize(t *testing.T) {
 
 	container := fyne.NewContainer(text1, text2)
 	layoutMin := NewGridLayout(1).MinSize(container.Objects)
+
+	assert.Equal(t, minSize, layoutMin)
+}
+
+func TestGridLayout_MinSize_Vertical(t *testing.T) {
+	text1 := canvas.NewText("Text", color.RGBA{0xff, 0, 0, 0})
+	text2 := canvas.NewText("Text", color.RGBA{0xff, 0, 0, 0})
+	minSize := text1.MinSize().Add(fyne.NewSize(text2.MinSize().Width+theme.Padding(), 0))
+
+	container := fyne.NewContainer(text1, text2)
+	layoutMin := NewGridLayoutWithRows(1).MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
 }
