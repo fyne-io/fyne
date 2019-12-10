@@ -123,17 +123,18 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return minContentSize.Add(fyne.NewSize(theme.Padding()*(rows-1), theme.Padding()*(g.Cols-1)))
 }
 
-// NewGridLayout returns a new GridLayout instance
+// NewGridLayout returns a grid layout arranged in a specified number of coulmns.
+// The number of rows will depend on how many children are in the container that uses this layout.
 func NewGridLayout(cols int) fyne.Layout {
 	return NewGridLayoutWithColumns(cols)
 }
 
-// NewGridLayoutWithColumns returns a new grid layout that specifies a row count instead of columns
+// NewGridLayoutWithColumns returns a new grid layout that specifies a column count and wrap to new rows when needed.
 func NewGridLayoutWithColumns(cols int) fyne.Layout {
 	return &gridLayout{Cols: cols}
 }
 
-// NewGridLayoutWithRows returns a new grid layout that specifies a row count instead of columns
+// NewGridLayoutWithRows returns a new grid layout that specifies a row count that creates new columns as required.
 func NewGridLayoutWithRows(rows int) fyne.Layout {
 	return &gridLayout{Cols: rows, vertical: true}
 }
