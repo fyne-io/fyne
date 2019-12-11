@@ -510,6 +510,7 @@ func (e *Entry) selectAll() {
 	e.Unlock()
 
 	Renderer(e).(*entryRenderer).moveCursor()
+	e.Refresh()
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
