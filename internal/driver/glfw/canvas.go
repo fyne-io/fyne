@@ -1,7 +1,6 @@
 package glfw
 
 import (
-	"fmt"
 	"image"
 	"sync"
 
@@ -267,7 +266,7 @@ func (c *glCanvas) ensureMinSize() bool {
 			}
 		}
 
-		if obj == objToLayout {
+		if objToLayout != nil {
 			switch cont := obj.(type) {
 			case *fyne.Container:
 				if cont.Layout != nil {
@@ -275,8 +274,6 @@ func (c *glCanvas) ensureMinSize() bool {
 				}
 			case fyne.Widget:
 				cache.Renderer(cont).Layout(cont.Size())
-			default:
-				fmt.Printf("implementation error - unknown container type: %T\n", cont)
 			}
 		}
 	}
