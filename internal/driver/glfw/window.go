@@ -594,6 +594,7 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
 		mev.Position = ev.Position
+		mev.AbsolutePosition = w.mousePos
 		mev.Button = button
 		mev.Modifier = modifiers
 		if action == glfw.Press {
