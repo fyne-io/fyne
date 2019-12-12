@@ -12,12 +12,14 @@
 
 # About
 
-[Fyne](http://fyne.io) is an easy to use UI toolkit and app API written in Go. We use OpenGL (through the go-gl and go-glfw projects) to provide cross platform graphics.
+[Fyne](http://fyne.io) is an easy to use UI toolkit and app API written in Go.
+It is designed to build applications that run on desktop and mobile devices with a
+single codebase.
 
-Version 1.1.2 is the current release which added lots of new functionality
-including gradients, shadows and new widgets.
-We are now working towards 1.2 which will complete the basic UI toolkit
-phase of development.
+Version 1.2 is the current release which added support for iOS and Android devices
+as well as providing much simpler ways to write custom widgets.
+We are now working towards 1.3 which will add data binding and some more advanced
+widgets such as tables and lists.
 
 # Prerequisites
 
@@ -36,8 +38,7 @@ Using the standard go tools you can install Fyne's core library using:
 
 To run a showcase of the features of Fyne execute the following:
 
-    cd $GOPATH/src/fyne.io/fyne/cmd/fyne_demo/
-    go build
+    go get fyne.io/fyne/cmd/fyne_demo/
     ./fyne_demo
 
 And you should see something like this (after you click a few buttons):
