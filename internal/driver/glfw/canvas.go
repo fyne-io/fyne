@@ -2,6 +2,7 @@ package glfw
 
 import (
 	"image"
+	"log"
 	"sync"
 
 	"fyne.io/fyne"
@@ -238,7 +239,7 @@ func (c *glCanvas) ensureMinSize() bool {
 	if c.Content() == nil {
 		return false
 	}
-	var objToLayout fyne.CanvasObject
+
 	windowNeedsMinSizeUpdate := false
 	ensureMinSize := func(node *renderCacheNode) {
 		obj := node.obj
@@ -252,6 +253,7 @@ func (c *glCanvas) ensureMinSize() bool {
 		minSize := obj.MinSize()
 		minSizeChanged := node.minSize != minSize
 		if minSizeChanged {
+			objToLayout := obj
 			node.minSize = minSize
 			if node.parent != nil {
 				objToLayout = node.parent.obj
@@ -264,15 +266,15 @@ func (c *glCanvas) ensureMinSize() bool {
 					obj.Resize(expectedSize)
 				}
 			}
-		}
 
-		if objToLayout != nil {
-			switch cont := obj.(type) {
+			switch cont := objToLayout.(type) {
 			case *fyne.Container:
+				log.Println("re-lay container")
 				if cont.Layout != nil {
 					cont.Layout.Layout(cont.Objects, cont.Size())
 				}
 			case fyne.Widget:
+				log.Println("re-lay widget")
 				cache.Renderer(cont).Layout(cont.Size())
 			}
 		}
