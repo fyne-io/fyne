@@ -2,7 +2,6 @@ package glfw
 
 import (
 	"image"
-	"log"
 	"sync"
 
 	"fyne.io/fyne"
@@ -269,12 +268,10 @@ func (c *glCanvas) ensureMinSize() bool {
 
 			switch cont := objToLayout.(type) {
 			case *fyne.Container:
-				log.Println("re-lay container")
 				if cont.Layout != nil {
 					cont.Layout.Layout(cont.Objects, cont.Size())
 				}
 			case fyne.Widget:
-				log.Println("re-lay widget")
 				cache.Renderer(cont).Layout(cont.Size())
 			}
 		}
