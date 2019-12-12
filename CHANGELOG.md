@@ -3,7 +3,7 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 1.2 (in progress)
+## 1.2 - 12 December 2019
 
 ### Added
 
@@ -41,6 +41,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Error where widgets created before main() function could crash (#490)
 * App.Run panics if called without a window (#527)
 * Support context menu for disabled entry widgets (#488)
+* Fix issue where images using fyne.ImageFillOriginal may not show initially (#558)
 
 
 ## 1.1.2 - 12 October 2019
