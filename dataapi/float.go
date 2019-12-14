@@ -35,9 +35,9 @@ func (f *Float) SetFloat(newfloat float64, mask int) {
 	defer f.Unlock()
 	f.locked = true
 	f.value = newfloat
-	for k, f := range f.callbacks {
+	for k, v := range f.callbacks {
 		if k != mask {
-			f(f)
+			v(f)
 		}
 	}
 	f.locked = false
