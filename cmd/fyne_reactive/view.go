@@ -53,6 +53,9 @@ func newView(app fyne.App, data *DataModel, logo *canvas.Image) *View {
 				"Avail",
 				func(checked bool) {
 					println("clicked on the avail button", checked)
+					if checked {
+						data.Image.Set(FyneAvatarAvail, 0)
+					}
 				}).Bind(data.IsAvailable)),
 
 			// A radioButton bound to an Int dataItem
@@ -61,6 +64,16 @@ func newView(app fyne.App, data *DataModel, logo *canvas.Image) *View {
 				func(value string) {
 					println("Radio button changed to", value)
 					data.URL.Set("http://myurl.com/"+value, 0)
+					switch value {
+					case "Small":
+						data.Image.Set(FyneAvatarSm, 0)
+					case "Medium":
+						data.Image.Set(FyneAvatarMd, 0)
+					case "Large":
+						data.Image.Set(FyneAvatarLg, 0)
+					default:
+						data.Image.Set(FyneAvatar, 0)
+					}
 				}).Bind(data.Size)),
 			// A slider widget bound to a Float dataItem
 			widget.NewFormItem("Delivery", widget.NewSlider(0.0, 100.0).Bind(data.DeliveryTime)),
@@ -69,6 +82,9 @@ func newView(app fyne.App, data *DataModel, logo *canvas.Image) *View {
 				"On Sale",
 				func(checked bool) {
 					println("clicked on the on sale button", checked)
+					if checked {
+						data.Image.Set(FyneAvatarOnSale, 0)
+					}
 				}).Bind(data.OnSale)),
 			// A label widget bound to the same String dataItem as above (ie - true/false)
 			widget.NewFormItem("Is On Sale ?", widget.NewLabel("").Bind(data.OnSale)),

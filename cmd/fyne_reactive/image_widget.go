@@ -20,21 +20,28 @@ type ImageWidget struct {
 	widget.DataListener
 	urlStr  string
 	imgRes  fyne.Resource
+	img     *canvas.Image
 	LoadErr error
+	OnBind  func(string)
 }
 
 // NewImageWidget returns a new ImageWidget
 func NewImageWidget(urlStr string) *ImageWidget {
-	img, err := fyne.LoadResourceFromURLString(urlStr)
+	var img *canvas.Image
+	imgRes, err := fyne.LoadResourceFromURLString(urlStr)
 	if err != nil {
+		img = canvas.NewImageFromResource(theme.CancelIcon())
 		println("Failed to load", urlStr, err.Error())
+	} else {
+		img = canvas.NewImageFromResource(imgRes)
 	}
 	return &ImageWidget{
 		BaseWidget:   widget.BaseWidget{},
 		DataListener: widget.DataListener{},
 		urlStr:       urlStr,
-		imgRes:       img,
+		imgRes:       imgRes,
 		LoadErr:      err,
+		img:          img,
 	}
 }
 
@@ -48,18 +55,31 @@ func (w *ImageWidget) Bind(data dataapi.DataItem) *ImageWidget {
 func (w *ImageWidget) SetFromData(data dataapi.DataItem) {
 	w.urlStr = data.String()
 	w.imgRes, w.LoadErr = fyne.LoadResourceFromURLString(w.urlStr)
+	if w.LoadErr != nil {
+		w.img.Resource = theme.CancelIcon()
+	} else {
+		w.img.Resource = w.imgRes
+	}
 	w.Refresh()
 }
 
 // CreateRenderer creates and returns the renderer for this widget type
 func (w *ImageWidget) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)
-	img := canvas.NewImageFromResource(w.imgRes)
+	if w.img == nil {
+		w.img = canvas.NewImageFromResource(theme.CancelIcon())
+	}
 	return &imageWidgetRenderer{
 		imageWidget: w,
-		img:         img,
-		objects:     []fyne.CanvasObject{img},
+		objects:     []fyne.CanvasObject{w.img},
 	}
+}
+
+func (w *ImageWidget) Img() *canvas.Image {
+	if w == nil {
+		return nil
+	}
+	return w.img
 }
 
 /*  Renderer Implementation must
@@ -77,23 +97,36 @@ type WidgetRenderer interface {
 
 type imageWidgetRenderer struct {
 	imageWidget *ImageWidget
-	img         *canvas.Image
 	objects     []fyne.CanvasObject
+}
+
+func (r *imageWidgetRenderer) setImg(img *canvas.Image) {
+	r.objects[0] = img
 }
 
 // Layout for the renderer
 func (r *imageWidgetRenderer) Layout(size fyne.Size) {
 	// dont need to do anything here ? we just have 1 image
+	if size.Width > 320 {
+		size.Width = 320
+	}
+	if size.Height > 200 {
+		size.Height = 200
+	}
+
+	r.imageWidget.img.Resize(size)
 }
 
 // MinSize that this widget can be
 func (r *imageWidgetRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(100, 100)
+	return fyne.NewSize(320, 200)
 }
 
 // Refresh the canvas
 func (r *imageWidgetRenderer) Refresh() {
-	canvas.Refresh(r.img)
+	if i := r.imageWidget.Img(); i != nil {
+		canvas.Refresh(i)
+	}
 }
 
 // BackgroundColor for this rendererr
