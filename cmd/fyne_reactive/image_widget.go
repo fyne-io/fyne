@@ -26,22 +26,11 @@ type ImageWidget struct {
 }
 
 // NewImageWidget returns a new ImageWidget
-func NewImageWidget(urlStr string) *ImageWidget {
-	var img *canvas.Image
-	imgRes, err := fyne.LoadResourceFromURLString(urlStr)
-	if err != nil {
-		img = canvas.NewImageFromResource(theme.CancelIcon())
-		println("Failed to load", urlStr, err.Error())
-	} else {
-		img = canvas.NewImageFromResource(imgRes)
-	}
+func NewImageWidget() *ImageWidget {
 	return &ImageWidget{
 		BaseWidget:   widget.BaseWidget{},
 		DataListener: widget.DataListener{},
-		urlStr:       urlStr,
-		imgRes:       imgRes,
-		LoadErr:      err,
-		img:          img,
+		img:          canvas.NewImageFromResource(theme.FyneLogo()),
 	}
 }
 

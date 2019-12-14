@@ -25,7 +25,7 @@ func welcomeScreen(a fyne.App, data *DataModel, diag, logo *canvas.Image) fyne.C
 		),
 		widget.NewHBox(
 			layout.NewSpacer(),
-			NewImageWidget(FyneAvatar).Bind(data.Image),
+			NewImageWidget().Bind(data.Image),
 			layout.NewSpacer(),
 		),
 		widget.NewLabel(`This demo has a single instance of a dataapi model as described above.
