@@ -1,4 +1,5 @@
 package dataapi
+
 // This Clock package will be removed shortly - it belongs in a fyne/x type package
 
 import (

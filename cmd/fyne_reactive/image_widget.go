@@ -6,11 +6,12 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 
+	_ "image/jpeg"
+	_ "image/png"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/widget"
-	_ "image/jpeg"
-	_ "image/png"
 )
 
 // ImageWidget is a custom widget demo
@@ -87,7 +88,7 @@ func (r *imageWidgetRenderer) Layout(size fyne.Size) {
 
 // MinSize that this widget can be
 func (r *imageWidgetRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(100,100)
+	return fyne.NewSize(100, 100)
 }
 
 // Refresh the canvas

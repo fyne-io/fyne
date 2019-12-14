@@ -23,31 +23,22 @@ type DataModel struct {
 	FyneImage    *canvas.Image
 }
 
-type size int
-
-// Constants for the value in the radio box
-const (
-	SizeSmall size = iota + 1
-	SizeMedium
-	SizeLarge
-)
-
 // Images for the custom image widget
 const (
 	//FyneAvatar = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Loch_Fyne_from_Tighcladich.jpg/2880px-Loch_Fyne_from_Tighcladich.jpg"
 	FyneAvatar = "https://avatars3.githubusercontent.com/u/36045855?s=200&v=4"
-	FyneAvatarMd = "https://avatars3.githubusercontent.com/u/36045855?s=400&v=4"
-	FyneAvatarLg = "https://avatars3.githubusercontent.com/u/36045855?s=600&v=4"
+	//FyneAvatarMd = "https://avatars3.githubusercontent.com/u/36045855?s=400&v=4"
+	//FyneAvatarLg = "https://avatars3.githubusercontent.com/u/36045855?s=600&v=4"
 )
 
 // NewDataModel returns a new dataModel
 func NewDataModel() *DataModel {
-	img,_ := fyne.LoadResourceFromURLString(FyneAvatar)
+	img, _ := fyne.LoadResourceFromURLString(FyneAvatar)
 	return &DataModel{
 		Name:         dataapi.NewString(""),
 		Clock:        dataapi.NewClock(),
 		IsAvailable:  dataapi.NewBool(false),
-		Size:         dataapi.NewInt(int(SizeSmall)),
+		Size:         dataapi.NewInt(1),
 		OnSale:       dataapi.NewString("false"),
 		DeliveryTime: dataapi.NewFloat(50.0),
 		URL:          dataapi.NewString("http://myurl.com"),

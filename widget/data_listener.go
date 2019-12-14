@@ -88,13 +88,13 @@ func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 					println("inside the injected float handler")
 					return nil
 				}))
-			} else if s,ok := data.(dataapi.SettableInt); ok {
+			} else if s, ok := data.(dataapi.SettableInt); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
 					s.SetInt(int(in[0].Float()), d.listenerID)
 					println("inside the injected float handler")
 					return nil
 				}))
-			} else if s,ok := data.(dataapi.Settable); ok {
+			} else if s, ok := data.(dataapi.Settable); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
 					s.Set(fmt.Sprintf("%v", in[0].Float()), d.listenerID)
 					println("inside the injected float handler")

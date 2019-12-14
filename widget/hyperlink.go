@@ -40,10 +40,10 @@ func (hl *Hyperlink) SetFromData(data dataapi.DataItem) {
 func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, style fyne.TextStyle) *Hyperlink {
 	hl := &Hyperlink{
 		DataListener: DataListener{},
-		Text:      text,
-		URL:       url,
-		Alignment: alignment,
-		TextStyle: style,
+		Text:         text,
+		URL:          url,
+		Alignment:    alignment,
+		TextStyle:    style,
 	}
 
 	return hl
@@ -98,7 +98,7 @@ func (hl *Hyperlink) object() fyne.Widget {
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 	if hl.URL != nil {
-		fyne.CurrentApp().OpenURL(hl.URL)
+		_ = fyne.CurrentApp().OpenURL(hl.URL)
 	}
 }
 
