@@ -1,4 +1,5 @@
 package main
+
 // This whole section will be removed - its a test harness to try out databinding ideas
 // Will move this to a separate repo shortly
 
@@ -13,9 +14,7 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-const preferenceCurrentTab = "currentTab"
-
-func welcomeScreen(a fyne.App, data *dataModel, diag, logo *canvas.Image) fyne.CanvasObject {
+func welcomeScreen(a fyne.App, data *DataModel, diag, logo *canvas.Image) fyne.CanvasObject {
 	return widget.NewVBox(
 		widget.NewLabelWithStyle("Fyne Reactive Data Update Demo", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		layout.NewSpacer(),
@@ -53,9 +52,6 @@ which in turn triggers a repaint on the other subscribed views.`),
 				}),
 				widget.NewButton("Fx1", func() {
 					newFx(a, data)
-				}),
-				widget.NewButton("Fx2", func() {
-					newPic(a, data)
 				}),
 				layout.NewSpacer(),
 				widget.NewButton("Close", func() { a.Quit() }),
