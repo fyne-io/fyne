@@ -71,19 +71,6 @@ func (w *ImageWidget) Img() *canvas.Image {
 	return w.img
 }
 
-/*  Renderer Implementation must
-
-type WidgetRenderer interface {
-	Layout(Size)
-	MinSize() Size
-
-	Refresh()
-	BackgroundColor() color.Color
-	Objects() []CanvasObject
-	Destroy()
-}
-*/
-
 type imageWidgetRenderer struct {
 	imageWidget *ImageWidget
 	objects     []fyne.CanvasObject
@@ -95,14 +82,6 @@ func (r *imageWidgetRenderer) setImg(img *canvas.Image) {
 
 // Layout for the renderer
 func (r *imageWidgetRenderer) Layout(size fyne.Size) {
-	// dont need to do anything here ? we just have 1 image
-	if size.Width > 320 {
-		size.Width = 320
-	}
-	if size.Height > 200 {
-		size.Height = 200
-	}
-
 	r.imageWidget.img.Resize(size)
 }
 

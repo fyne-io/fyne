@@ -1,6 +1,7 @@
 package fyne
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -62,6 +63,9 @@ func LoadResourceFromURLString(urlStr string) (Resource, error) {
 	res, err := http.Get(urlStr)
 	if err != nil {
 		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(res.Status)
 	}
 
 	bytes, err := ioutil.ReadAll(res.Body)
