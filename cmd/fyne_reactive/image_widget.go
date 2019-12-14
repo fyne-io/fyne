@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 
 	_ "image/jpeg"
@@ -23,6 +24,7 @@ type ImageWidget struct {
 	img     *canvas.Image
 	LoadErr error
 	OnBind  func(string)
+	hovered bool
 }
 
 // NewImageWidget returns a new ImageWidget
@@ -43,13 +45,58 @@ func (w *ImageWidget) Bind(data dataapi.DataItem) *ImageWidget {
 // SetFromData updates the hyperlink from the bound data
 func (w *ImageWidget) SetFromData(data dataapi.DataItem) {
 	w.urlStr = data.String()
-	w.imgRes, w.LoadErr = fyne.LoadResourceFromURLString(w.urlStr)
-	if w.LoadErr != nil {
-		w.img.Resource = theme.CancelIcon()
-	} else {
-		w.img.Resource = w.imgRes
+	w.load()
+}
+
+func (w *ImageWidget) load() {
+	if !w.BaseWidget.Hidden {
+		w.imgRes, w.LoadErr = fyne.LoadResourceFromURLString(w.urlStr)
+		if w.LoadErr != nil {
+			w.img.Resource = theme.CancelIcon()
+		} else {
+			w.img.Resource = w.imgRes
+		}
+		w.Refresh()
 	}
+}
+
+// SetURL updates the url, and propogates the change to the bound data
+func (w *ImageWidget) SetURL(urlStr string) {
+	w.urlStr = urlStr
+	if w.OnBind != nil {
+		w.OnBind(urlStr)
+	}
+	w.load()
+}
+
+// MouseIn is called when a desktop pointer enters the widget
+func (w *ImageWidget) MouseIn(*desktop.MouseEvent) {
+	w.hovered = true
+	println("mouse in")
 	w.Refresh()
+}
+
+// MouseOut is called when a desktop pointer exits the widget
+func (w *ImageWidget) MouseOut() {
+	w.hovered = false
+	println("mouse out")
+	w.Refresh()
+}
+
+// MouseMoved is called when a desktop pointer hovers over the widget
+func (w *ImageWidget) MouseMoved(ev *desktop.MouseEvent) {
+}
+
+// Tapped for clicks with the main button
+func (w *ImageWidget) Tapped(ev *fyne.PointEvent) {
+	println("tapped main")
+	w.SetURL(FyneAvatarKangaroo)
+}
+
+// TappedSecondary for clicks with the other button
+func (w *ImageWidget) TappedSecondary(ev *fyne.PointEvent) {
+	println("tapped 2nd")
+	w.SetURL("invalid")
 }
 
 // CreateRenderer creates and returns the renderer for this widget type

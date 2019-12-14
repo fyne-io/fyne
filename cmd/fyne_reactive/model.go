@@ -26,12 +26,13 @@ type DataModel struct {
 // Images for the custom image widget
 const (
 	//FyneAvatar = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Loch_Fyne_from_Tighcladich.jpg/2880px-Loch_Fyne_from_Tighcladich.jpg"
-	FyneAvatar       = "https://avatars3.githubusercontent.com/u/36045855?s=200&v=4"
-	FyneAvatarAvail  = "https://live.staticflickr.com/65535/49146531652_a12decc3af_n.jpg"
-	FyneAvatarOnSale = "https://live.staticflickr.com/65535/49216625968_aca175e6b7_z.jpg"
-	FyneAvatarSm     = "https://live.staticflickr.com/1726/28754161578_89dc92ce2c_n.jpg"
-	FyneAvatarMd     = "https://live.staticflickr.com/4764/26212824798_3c3866eb7a_m.jpg"
-	FyneAvatarLg     = "https://live.staticflickr.com/4177/34609667836_97ceefb52a_m.jpg"
+	FyneAvatar         = "https://avatars3.githubusercontent.com/u/36045855?s=200&v=4"
+	FyneAvatarAvail    = "https://live.staticflickr.com/65535/49146531652_a12decc3af_n.jpg"
+	FyneAvatarOnSale   = "https://live.staticflickr.com/65535/49216625968_aca175e6b7_z.jpg"
+	FyneAvatarKangaroo = "https://live.staticflickr.com/65535/49145737868_41f6e87032_w.jpg"
+	FyneAvatarSm       = "https://live.staticflickr.com/1726/28754161578_89dc92ce2c_n.jpg"
+	FyneAvatarMd       = "https://live.staticflickr.com/4764/26212824798_3c3866eb7a_m.jpg"
+	FyneAvatarLg       = "https://live.staticflickr.com/4177/34609667836_97ceefb52a_m.jpg"
 )
 
 // NewDataModel returns a new dataModel
