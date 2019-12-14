@@ -1,4 +1,5 @@
 package main
+
 // This whole section will be removed - its a test harness to try out databinding ideas
 // Will move this to a separate repo shortly
 
@@ -17,11 +18,11 @@ import (
 // View is a window with reactive elements
 type View struct {
 	app  fyne.App
-	data *dataModel
+	data *DataModel
 	w    fyne.Window
 }
 
-func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
+func newView(app fyne.App, data *DataModel, logo *canvas.Image) *View {
 	data.NumWindows++
 	title := fmt.Sprintf("View #%d", data.NumWindows)
 
@@ -33,7 +34,7 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 
 	myWindowID := data.NumWindows
 
-	myURL,err := url.Parse(data.URL.String())
+	myURL, err := url.Parse(data.URL.String())
 	if err != nil {
 		println("URL parse error:", err.Error())
 	}
@@ -59,7 +60,7 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 				[]string{"Small", "Medium", "Large"},
 				func(value string) {
 					println("Radio button changed to", value)
-					data.URL.Set("http://myurl.com/"+value,0)
+					data.URL.Set("http://myurl.com/"+value, 0)
 				}).Bind(data.Size)),
 			// A slider widget bound to a Float dataItem
 			widget.NewFormItem("Delivery", widget.NewSlider(0.0, 100.0).Bind(data.DeliveryTime)),
@@ -71,8 +72,8 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 				}).Bind(data.OnSale)),
 			// A label widget bound to the same String dataItem as above (ie - true/false)
 			widget.NewFormItem("Is On Sale ?", widget.NewLabel("").Bind(data.OnSale)),
-			widget.NewFormItem("MyLink",widget.NewHyperlink("MyLink", myURL).Bind(data.URL)),
-			widget.NewFormItem("Link Button",widget.NewButton("MyLink",func() {
+			widget.NewFormItem("MyLink", widget.NewHyperlink("MyLink", myURL).Bind(data.URL)),
+			widget.NewFormItem("Link Button", widget.NewButton("MyLink", func() {
 				println("Button pressed -> goto", data.URL.String())
 			}).Bind(data.URL)),
 			// Need a quit handler here to correctly deregister all the handlers
