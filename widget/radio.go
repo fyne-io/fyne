@@ -170,7 +170,7 @@ type Radio struct {
 	Selected string
 
 	OnChanged  func(string) `json:"-"`
-	OnBind  func(string) `json:"-"`
+	OnBind     func(string) `json:"-"`
 	Horizontal bool
 
 	hoveredItemIndex int
@@ -197,13 +197,13 @@ func (r *Radio) MouseIn(event *desktop.MouseEvent) {
 	}
 
 	r.hoveredItemIndex = r.indexByPosition(event.Position)
-	Refresh(r)
+	r.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (r *Radio) MouseOut() {
 	r.hoveredItemIndex = noRadioItemIndex
-	Refresh(r)
+	r.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -213,14 +213,14 @@ func (r *Radio) MouseMoved(event *desktop.MouseEvent) {
 	}
 
 	r.hoveredItemIndex = r.indexByPosition(event.Position)
-	Refresh(r)
+	r.Refresh()
 }
 
 // Append adds a new option to the end of a Radio widget.
 func (r *Radio) Append(option string) {
 	r.Options = append(r.Options, option)
 
-	Refresh(r)
+	r.Refresh()
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
@@ -245,7 +245,9 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	if r.OnChanged != nil {
 		r.OnChanged(r.Selected)
 	}
-	if r.OnBind != nil { r.OnBind(r.Selected) }
+	if r.OnBind != nil {
+		r.OnBind(r.Selected)
+	}
 	r.Refresh()
 }
 
@@ -328,6 +330,7 @@ func NewRadio(options []string, changed func(string)) *Radio {
 	r.ExtendBaseWidget(r)
 	return r
 }
+
 // Bind will Bind this widget to the given DataItem
 func (r *Radio) Bind(data dataapi.DataItem) *Radio {
 	r.DataListener.Bind(data, r)
@@ -354,7 +357,7 @@ func (r *Radio) SetFromData(data dataapi.DataItem) {
 
 // AsInt gets the index value of the given string, or 0 if not found
 func (r *Radio) AsInt(txt string) int {
-	for k,v := range r.Options {
+	for k, v := range r.Options {
 		if v == txt {
 			return k
 		}
