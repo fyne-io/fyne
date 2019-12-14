@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+// ImageCache is a simple sync map of URL name to contents
 type ImageCache struct {
 	res sync.Map
 }
@@ -23,6 +24,7 @@ func newImageCache() *ImageCache {
 	return &ImageCache{}
 }
 
+// Get fetches the given resource from the URL, with caching
 func (c *ImageCache) Get(urlStr string) (fyne.Resource, error) {
 	// if there, return it
 	if v, ok := c.res.Load(urlStr); ok {
@@ -114,6 +116,7 @@ func (w *ImageWidget) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+// Img safely returns the image for the renderer to use
 func (w *ImageWidget) Img() *canvas.Image {
 	if w == nil {
 		return nil
