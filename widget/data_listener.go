@@ -43,7 +43,6 @@ func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 
 	if f, ok := getFunction(setter, "OnBind"); ok {
 		ftype := f.Type().String()
-		println("ftype is", ftype)
 		switch ftype {
 		case "func(string)":
 			if s, ok := data.(dataapi.Settable); ok {

@@ -8,7 +8,6 @@ import (
 	_ "image/png"
 	"net/url"
 
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 
@@ -22,7 +21,7 @@ type View struct {
 	w    fyne.Window
 }
 
-func newView(app fyne.App, data *DataModel, logo *canvas.Image) *View {
+func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 	data.NumWindows++
 	title := fmt.Sprintf("View #%d", data.NumWindows)
 
@@ -41,7 +40,7 @@ func newView(app fyne.App, data *DataModel, logo *canvas.Image) *View {
 
 	v.w.SetContent(widget.NewVBox(
 		widget.NewLabelWithStyle("Reactive Data", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-		logo,
+		NewImageWidget(cache).Bind(data.Image),
 		layout.NewSpacer(),
 		widget.NewForm(
 			// A label bound to a Clock dataItem (a Clock is a string that auto-mutates every second)

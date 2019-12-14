@@ -2,9 +2,9 @@ package main
 
 import (
 	"image/color"
+	"sync"
 
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 
 	_ "image/jpeg"
@@ -15,10 +15,34 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+type ImageCache struct {
+	res sync.Map
+}
+
+func newImageCache() *ImageCache {
+	return &ImageCache{}
+}
+
+func (c *ImageCache) Get(urlStr string) (fyne.Resource, error) {
+	// if there, return it
+	if v, ok := c.res.Load(urlStr); ok {
+		return v.(fyne.Resource), nil
+	}
+	// get it over the network
+	img, err := fyne.LoadResourceFromURLString(urlStr)
+	if err != nil {
+		return theme.CancelIcon(), err
+	}
+	// save it
+	c.res.Store(urlStr, img)
+	return img, nil
+}
+
 // ImageWidget is a custom widget demo
 type ImageWidget struct {
 	widget.BaseWidget
 	widget.DataListener
+	cache   *ImageCache
 	urlStr  string
 	imgRes  fyne.Resource
 	img     *canvas.Image
@@ -28,10 +52,11 @@ type ImageWidget struct {
 }
 
 // NewImageWidget returns a new ImageWidget
-func NewImageWidget() *ImageWidget {
+func NewImageWidget(cache *ImageCache) *ImageWidget {
 	return &ImageWidget{
 		BaseWidget:   widget.BaseWidget{},
 		DataListener: widget.DataListener{},
+		cache:        cache,
 		img:          canvas.NewImageFromResource(theme.FyneLogo()),
 	}
 }
@@ -50,12 +75,8 @@ func (w *ImageWidget) SetFromData(data dataapi.DataItem) {
 
 func (w *ImageWidget) load() {
 	if !w.BaseWidget.Hidden {
-		w.imgRes, w.LoadErr = fyne.LoadResourceFromURLString(w.urlStr)
-		if w.LoadErr != nil {
-			w.img.Resource = theme.CancelIcon()
-		} else {
-			w.img.Resource = w.imgRes
-		}
+		w.imgRes, w.LoadErr = w.cache.Get(w.urlStr)
+		w.img.Resource = w.imgRes
 		w.Refresh()
 	}
 }
@@ -67,24 +88,6 @@ func (w *ImageWidget) SetURL(urlStr string) {
 		w.OnBind(urlStr)
 	}
 	w.load()
-}
-
-// MouseIn is called when a desktop pointer enters the widget
-func (w *ImageWidget) MouseIn(*desktop.MouseEvent) {
-	w.hovered = true
-	println("mouse in")
-	w.Refresh()
-}
-
-// MouseOut is called when a desktop pointer exits the widget
-func (w *ImageWidget) MouseOut() {
-	w.hovered = false
-	println("mouse out")
-	w.Refresh()
-}
-
-// MouseMoved is called when a desktop pointer hovers over the widget
-func (w *ImageWidget) MouseMoved(ev *desktop.MouseEvent) {
 }
 
 // Tapped for clicks with the main button

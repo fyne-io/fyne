@@ -10,11 +10,11 @@ import (
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
-func welcomeScreen(a fyne.App, data *DataModel, diag, logo *canvas.Image) fyne.CanvasObject {
+func welcomeScreen(a fyne.App, data *DataModel, diag *canvas.Image) fyne.CanvasObject {
+	cache := newImageCache()
 	return widget.NewVBox(
 		widget.NewLabelWithStyle("Fyne Reactive Data Update Demo", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		layout.NewSpacer(),
@@ -25,7 +25,7 @@ func welcomeScreen(a fyne.App, data *DataModel, diag, logo *canvas.Image) fyne.C
 		),
 		widget.NewHBox(
 			layout.NewSpacer(),
-			NewImageWidget().Bind(data.Image),
+			NewImageWidget(cache).Bind(data.Image),
 			layout.NewSpacer(),
 		),
 		widget.NewLabel(`This demo has a single instance of a dataapi model as described above.
@@ -53,7 +53,7 @@ which in turn triggers a repaint on the other subscribed views.`),
 				layout.NewSpacer(),
 				layout.NewSpacer(),
 				widget.NewButton("+ Viewer Window", func() {
-					newView(a, data, logo)
+					newView(a, data, cache)
 				}),
 				widget.NewButton("Fx1", func() {
 					newFx(a, data)
@@ -66,8 +66,8 @@ which in turn triggers a repaint on the other subscribed views.`),
 }
 
 func main() {
-	logo := canvas.NewImageFromResource(theme.FyneLogo())
-	logo.SetMinSize(fyne.NewSize(320, 128))
+	//logo := canvas.NewImageFromResource(theme.FyneLogo())
+	//logo.SetMinSize(fyne.NewSize(320, 128))
 	diag := canvas.NewImageFromResource(resourceReactiveDataPng)
 	diag.SetMinSize(fyne.NewSize(400, 350))
 
@@ -76,7 +76,7 @@ func main() {
 	w := a.NewWindow("Fyne Reactive Demo")
 	w.SetMaster()
 
-	w.SetContent(welcomeScreen(a, data, diag, logo))
+	w.SetContent(welcomeScreen(a, data, diag))
 
 	w.ShowAndRun()
 }
