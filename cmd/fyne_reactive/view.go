@@ -33,7 +33,7 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 
 	myWindowID := data.NumWindows
 
-	myUrl,err := url.Parse(data.URL.String())
+	myURL,err := url.Parse(data.URL.String())
 	if err != nil {
 		println("URL parse error:", err.Error())
 	}
@@ -71,7 +71,7 @@ func newView(app fyne.App, data *dataModel, logo *canvas.Image) *View {
 				}).Bind(data.OnSale)),
 			// A label widget bound to the same String dataItem as above (ie - true/false)
 			widget.NewFormItem("Is On Sale ?", widget.NewLabel("").Bind(data.OnSale)),
-			widget.NewFormItem("MyLink",widget.NewHyperlink("MyLink", myUrl).Bind(data.URL)),
+			widget.NewFormItem("MyLink",widget.NewHyperlink("MyLink", myURL).Bind(data.URL)),
 			widget.NewFormItem("Link Button",widget.NewButton("MyLink",func() {
 				println("Button pressed -> goto", data.URL.String())
 			}).Bind(data.URL)),

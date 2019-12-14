@@ -13,6 +13,7 @@ import (
 	_ "image/png"
 )
 
+// ImageWidget is a custom widget demo
 type ImageWidget struct {
 	widget.BaseWidget
 	widget.DataListener
@@ -21,6 +22,7 @@ type ImageWidget struct {
 	LoadErr error
 }
 
+// NewImageWidget returns a new ImageWidget
 func NewImageWidget(urlStr string) *ImageWidget {
 	img, err := fyne.LoadResourceFromURLString(urlStr)
 	if err != nil {
@@ -48,6 +50,7 @@ func (w *ImageWidget) SetFromData(data dataapi.DataItem) {
 	w.Refresh()
 }
 
+// CreateRenderer creates and returns the renderer for this widget type
 func (w *ImageWidget) CreateRenderer() fyne.WidgetRenderer {
 	w.ExtendBaseWidget(w)
 	img := canvas.NewImageFromResource(w.imgRes)
@@ -77,25 +80,31 @@ type imageWidgetRenderer struct {
 	objects     []fyne.CanvasObject
 }
 
+// Layout for the renderer
 func (r *imageWidgetRenderer) Layout(size fyne.Size) {
 	// dont need to do anything here ? we just have 1 image
 }
 
+// MinSize that this widget can be
 func (r *imageWidgetRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(100,100)
 }
 
+// Refresh the canvas
 func (r *imageWidgetRenderer) Refresh() {
 	canvas.Refresh(r.img)
 }
 
+// BackgroundColor for this rendererr
 func (r *imageWidgetRenderer) BackgroundColor() color.Color {
 	return theme.PrimaryColor()
 	//return theme.BackgroundColor()
 }
 
+// Objects list for this renderer
 func (r *imageWidgetRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
+// Destroy this renderer
 func (r *imageWidgetRenderer) Destroy() {}

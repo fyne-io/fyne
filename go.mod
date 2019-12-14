@@ -5,7 +5,6 @@ go 1.12
 require (
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
 	github.com/anthonynsimon/bild v0.11.1
-	github.com/davecgh/go-spew v1.1.1
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/fyne-io/examples v0.0.0-20191128143609-6aa1dd8d6546
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7

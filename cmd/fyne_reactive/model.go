@@ -9,8 +9,8 @@ import (
 	"fyne.io/fyne/dataapi"
 )
 
-// This is the dataModel - a single instance of this is used by all the views in the app
-type dataModel struct {
+// DataModel - a single instance of this is used by all the views in the app
+type DataModel struct {
 	Name         *dataapi.String
 	Clock        *dataapi.Clock
 	IsAvailable  *dataapi.Bool
@@ -25,12 +25,14 @@ type dataModel struct {
 
 type size int
 
+// Constants for the value in the radio box
 const (
 	SizeSmall size = iota + 1
 	SizeMedium
 	SizeLarge
 )
 
+// Images for the custom image widget
 const (
 	//FyneAvatar = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Loch_Fyne_from_Tighcladich.jpg/2880px-Loch_Fyne_from_Tighcladich.jpg"
 	FyneAvatar = "https://avatars3.githubusercontent.com/u/36045855?s=200&v=4"
@@ -38,9 +40,10 @@ const (
 	FyneAvatarLg = "https://avatars3.githubusercontent.com/u/36045855?s=600&v=4"
 )
 
-func NewDataModel() *dataModel {
+// NewDataModel returns a new dataModel
+func NewDataModel() *DataModel {
 	img,_ := fyne.LoadResourceFromURLString(FyneAvatar)
-	return &dataModel{
+	return &DataModel{
 		Name:         dataapi.NewString(""),
 		Clock:        dataapi.NewClock(),
 		IsAvailable:  dataapi.NewBool(false),
