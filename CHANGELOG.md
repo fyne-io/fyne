@@ -11,7 +11,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Changed
 
-* Upgraded underlying GLFW library to fix various issues (#183)
+* Upgraded underlying GLFW library to fix various issues (#183, #61)
 
 
 ### Fixed
