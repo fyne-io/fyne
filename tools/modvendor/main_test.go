@@ -11,8 +11,8 @@ import (
 func Test_pkgModPath(t *testing.T) {
 	const mockModulesTxt = `# github.com/go-gl/gl v0.0.0-20181026044259-55b76b7df9d2
 github.com/go-gl/gl/v3.2-core/gl
-# github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f
-github.com/go-gl/glfw/v3.2/glfw
+# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20181213070059-819e8ce5125f
+github.com/go-gl/glfw/v3.3/glfw
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 `
 	type args struct {
@@ -40,7 +40,7 @@ github.com/go-gl/glfw/v3.2/glfw
 				r:      strings.NewReader(mockModulesTxt),
 				module: glwfMod,
 			},
-			want:    filepath.Join(build.Default.GOPATH, "pkg/mod/github.com/go-gl/glfw@v0.0.0-20181213070059-819e8ce5125f"),
+			want:    filepath.Join(build.Default.GOPATH, "pkg/mod/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20181213070059-819e8ce5125f"),
 			wantErr: false,
 		},
 	}

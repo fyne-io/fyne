@@ -28,9 +28,9 @@ const (
 	// goModVendorFile is the vendor module file
 	goModVendorFile = "vendor/modules.txt"
 	// glwfMod is the glfw module
-	glwfMod = "github.com/go-gl/glfw"
+	glwfMod = "github.com/go-gl/glfw/v3.3/glfw"
 	// glwfModSrcDir is the glfw dir containing the c source code to copy
-	glwfModSrcDir = "v3.2/glfw/glfw"
+	glwfModSrcDir = "glfw"
 )
 
 func main() {
@@ -64,16 +64,16 @@ func main() {
 		os.Exit(1)
 	}
 	if glwfModPath == "" {
-		fmt.Printf("Cannot found module %s in %s\n", glwfMod, goModVendorFile)
+		fmt.Printf("Cannot find module %s in %s\n", glwfMod, goModVendorFile)
 		os.Exit(1)
 	}
 	fmt.Printf("Package module path: %s\n", glwfModPath)
 
 	// glwfModSrc is the path containing glfw c source code
-	// $GOPATH/pkg/mod/github.com/go-gl/glfw@v...../v3.2/glfw/glfw
+	// $GOPATH/pkg/mod/github.com/go-gl/glfw@v...../v3.3/glfw/glfw
 	glwfModSrc := filepath.Join(glwfModPath, glwfModSrcDir)
 	// glwfModTarget is the path under the vendor folder where glfw c source code will be copied
-	// vendor/github.com/go-gl/v3.2/glfw/glfw
+	// vendor/github.com/go-gl/v3.3/glfw/glfw
 	glwfModTarget := filepath.Join(wd, "vendor", glwfMod, glwfModSrcDir)
 	fmt.Printf("Copying glwf c source code: %s -> %s\n", glwfModSrc, glwfModTarget)
 	err = recursiveCopy(glwfModSrc, glwfModTarget)

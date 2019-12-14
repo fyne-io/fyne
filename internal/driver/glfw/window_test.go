@@ -17,7 +17,7 @@ import (
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -670,7 +670,7 @@ func TestWindow_Clipboard(t *testing.T) {
 	cb.SetContent(text)
 	assert.Equal(t, text, cb.Content())
 
-	// Restore cliboardContent, if any
+	// Restore clipboardContent, if any
 	cb.SetContent(cliboardContent)
 }
 

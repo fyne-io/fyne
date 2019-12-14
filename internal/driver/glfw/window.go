@@ -20,7 +20,7 @@ import (
 	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/widget"
 
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 const (
@@ -153,12 +153,7 @@ func (w *window) screenSize(canvasSize fyne.Size) (int, int) {
 }
 
 func (w *window) RequestFocus() {
-	runOnMain(func() {
-		err := w.viewport.Focus()
-		if err != nil {
-			fyne.LogError("Error requesting focus", err)
-		}
-	})
+	runOnMain(w.viewport.Focus)
 }
 
 func (w *window) Resize(size fyne.Size) {
