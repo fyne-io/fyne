@@ -1,17 +1,19 @@
 package main
+
 // This whole section will be removed - its a test harness to try out databinding ideas
 // Will move this to a separate repo shortly
 
 import (
+	"image/color"
+	"math"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/dataapi"
 	"fyne.io/fyne/theme"
-	"image/color"
-	"math"
 )
 
-func newFx(app fyne.App, data *dataModel) *fractal {
+func newFx(app fyne.App, data *DataModel) *fractal {
 	window := app.NewWindow("Fractal")
 	window.SetIcon(theme.DocumentCreateIcon())
 	window.SetPadded(false)
@@ -33,7 +35,7 @@ func newFx(app fyne.App, data *dataModel) *fractal {
 }
 
 type fractal struct {
-	data                    *dataModel
+	data                    *DataModel
 	currIterations          uint
 	currScale, currX, currY float64
 
@@ -65,7 +67,7 @@ func (f *fractal) refresh() {
 	if f.currScale >= 1.0 {
 		f.currIterations = 100
 	} else {
-		f.currIterations = uint(100 * (1 + math.Pow((math.Log10(1/f.currScale)), 1.25)))
+		f.currIterations = uint(100 * (1 + math.Pow(math.Log10(1/f.currScale), 1.25)))
 	}
 
 	f.window.Canvas().Refresh(f.canvas)
@@ -92,7 +94,7 @@ func (f *fractal) scaleColor(c float64, start, end color.Color) color.Color {
 
 func (f *fractal) mandelbrot(px, py, w, h int) color.Color {
 	drawScale := 3.5 * f.currScale
-	aspect := (float64(h) / float64(w))
+	aspect := float64(h) / float64(w)
 	cRe := ((float64(px)/float64(w))-0.5)*drawScale + f.currX
 	cIm := ((float64(py)/float64(w))-(0.5*aspect))*drawScale - f.currY
 
@@ -112,7 +114,7 @@ func (f *fractal) mandelbrot(px, py, w, h int) color.Color {
 		return theme.BackgroundColor()
 	}
 
-	mu := (float64(i) / float64(f.currIterations))
+	mu := float64(i) / float64(f.currIterations)
 	c := math.Sin((mu / 2) * math.Pi)
 
 	return f.scaleColor(c, theme.PrimaryColor(), theme.TextColor())
