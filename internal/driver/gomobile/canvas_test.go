@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/mobile"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
 
@@ -131,4 +132,45 @@ func TestCanvas_Dragged(t *testing.T) {
 		wid.Dragged(ev)
 		dragged = true
 	})
+}
+
+func TestCanvas_Tappable(t *testing.T) {
+	content := &touchableLabel{Label: widget.NewLabel("Hi\nHi\nHi")}
+	content.ExtendBaseWidget(content)
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(content)
+	c.resize(fyne.NewSize(36, 24))
+	content.Resize(fyne.NewSize(24, 24))
+
+	c.tapDown(fyne.NewPos(15, 15), 0)
+	assert.True(t, content.down)
+
+	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	})
+	assert.True(t, content.up)
+
+	c.tapDown(fyne.NewPos(15, 15), 0)
+	c.tapMove(fyne.NewPos(35, 15), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		wid.Dragged(ev)
+	})
+	assert.True(t, content.cancel)
+}
+
+type touchableLabel struct {
+	*widget.Label
+	down, up, cancel bool
+}
+
+func (t *touchableLabel) TouchDown(event *mobile.TouchEvent) {
+	t.down = true
+}
+
+func (t *touchableLabel) TouchUp(event *mobile.TouchEvent) {
+	t.up = true
+}
+
+func (t *touchableLabel) TouchCancel(event *mobile.TouchEvent) {
+	t.cancel = true
 }
