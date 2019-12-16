@@ -28,8 +28,8 @@ type mobileCanvas struct {
 	shortcut    fyne.ShortcutHandler
 
 	inited         bool
-	lastTapDown    time.Time
-	lastTapDownPos fyne.Position
+	lastTapDown    map[int]time.Time
+	lastTapDownPos map[int]fyne.Position
 	dragging       fyne.Draggable
 	refreshQueue   chan fyne.CanvasObject
 }
@@ -183,20 +183,20 @@ func (c *mobileCanvas) walkTree(
 	}
 }
 
-func (c *mobileCanvas) findObjectMatching(test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
+func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
 	if c.menu != nil && c.overlay == nil {
-		return driver.FindObjectAtPositionMatching(c.lastTapDownPos, test, c.menu)
+		return driver.FindObjectAtPositionMatching(pos, test, c.menu)
 	}
 
-	return driver.FindObjectAtPositionMatching(c.lastTapDownPos, test, c.overlay, c.windowHead, c.content)
+	return driver.FindObjectAtPositionMatching(pos, test, c.overlay, c.windowHead, c.content)
 }
 
-func (c *mobileCanvas) tapDown(pos fyne.Position) {
-	c.lastTapDown = time.Now()
-	c.lastTapDownPos = pos
+func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
+	c.lastTapDown[tapID] = time.Now()
+	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
 
-	co, _ := c.findObjectMatching(func(object fyne.CanvasObject) bool {
+	co, objPos := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		} else if _, ok := object.(fyne.Focusable); ok {
@@ -222,31 +222,35 @@ func (c *mobileCanvas) tapDown(pos fyne.Position) {
 	}
 }
 
-func (c *mobileCanvas) tapMove(pos fyne.Position,
+func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
-	deltaX := pos.X - c.lastTapDownPos.X
-	deltaY := pos.Y - c.lastTapDownPos.Y
+	deltaX := pos.X - c.lastTapDownPos[tapID].X
+	deltaY := pos.Y - c.lastTapDownPos[tapID].Y
 
 	if math.Abs(float64(deltaX)) < 3 && math.Abs(float64(deltaY)) < 3 {
 		return
 	}
+	c.lastTapDownPos[tapID] = pos
+
+	co, objPos := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Draggable); ok {
+			return true
+		} else if _, ok := object.(mobile.Touchable); ok {
+			return true
+		}
+
+		return false
+	})
+
 
 	if c.dragging == nil {
-		co, _ := c.findObjectMatching(func(object fyne.CanvasObject) bool {
-			if _, ok := object.(fyne.Draggable); ok {
-				return true
-			}
-
-			return false
-		})
-
 		if drag, ok := co.(fyne.Draggable); ok {
 			c.dragging = drag
 		} else {
 			return
 		}
 	}
-	objPos := pos.Subtract(c.dragging.(fyne.CanvasObject).Position())
+	objPos = pos.Subtract(c.dragging.(fyne.CanvasObject).Position())
 
 	ev := new(fyne.DragEvent)
 	ev.Position = objPos
@@ -254,10 +258,9 @@ func (c *mobileCanvas) tapMove(pos fyne.Position,
 	ev.DraggedY = deltaY
 
 	dragCallback(c.dragging, ev)
-	c.lastTapDownPos = pos
 }
 
-func (c *mobileCanvas) tapUp(pos fyne.Position,
+func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.Tappable, *fyne.PointEvent),
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
@@ -267,7 +270,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position,
 		c.dragging = nil
 	}
 
-	duration := time.Since(c.lastTapDown)
+	duration := time.Since(c.lastTapDown[tapID])
 
 	if c.menu != nil && c.overlay == nil && pos.X > c.menu.Size().Width {
 		c.menu.Hide()
@@ -275,7 +278,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position,
 		return
 	}
 
-	co, objPos := c.findObjectMatching(func(object fyne.CanvasObject) bool {
+	co, objPos := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		} else if _, ok := object.(fyne.Focusable); ok {
@@ -320,6 +323,8 @@ func NewCanvas() fyne.Canvas {
 	ret := &mobileCanvas{padded: true}
 	ret.scale = deviceScale()
 	ret.refreshQueue = make(chan fyne.CanvasObject, 1024)
+	ret.lastTapDownPos = make(map[int]fyne.Position)
+	ret.lastTapDown = make(map[int]time.Time)
 
 	ret.setupThemeListener()
 

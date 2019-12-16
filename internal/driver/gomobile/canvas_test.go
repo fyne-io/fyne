@@ -25,8 +25,8 @@ func TestCanvas_Tapped(t *testing.T) {
 	button.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
-	c.tapDown(tapPos)
-	c.tapUp(tapPos, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	c.tapDown(tapPos, 0)
+	c.tapUp(tapPos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		tapped = true
 		tappedObj = wid
 		pointEvent = ev
@@ -47,6 +47,27 @@ func TestCanvas_Tapped(t *testing.T) {
 	}
 }
 
+func TestCanvas_Tapped_Multi(t *testing.T) {
+	buttonTap := false
+	button := widget.NewButton("Test", func() {
+		buttonTap = true
+	})
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(button)
+	c.resize(fyne.NewSize(36, 24))
+	button.Move(fyne.NewPos(3, 3))
+
+	tapPos := fyne.NewPos(6, 6)
+	c.tapDown(tapPos, 0)
+	c.tapUp(tapPos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) { // different tapID
+		wid.Tapped(ev)
+	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	})
+
+	assert.False(t, buttonTap, "button should not be tapped")
+}
+
 func TestCanvas_TappedSecondary(t *testing.T) {
 	tapped := false
 	altTapped := false
@@ -56,14 +77,15 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 	button := widget.NewButton("Test", func() {
 		buttonTap = false
 	})
-	c := &mobileCanvas{content: button}
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(button)
 	c.resize(fyne.NewSize(36, 24))
 	button.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
-	c.tapDown(tapPos)
+	c.tapDown(tapPos, 0)
 	time.Sleep(310 * time.Millisecond)
-	c.tapUp(tapPos, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	c.tapUp(tapPos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		tapped = true
 		wid.Tapped(ev)
 	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
@@ -88,12 +110,13 @@ func TestCanvas_Dragged(t *testing.T) {
 	dragged := false
 	var draggedObj fyne.Draggable
 	scroll := widget.NewScrollContainer(widget.NewLabel("Hi\nHi\nHi"))
-	c := &mobileCanvas{content: scroll}
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(scroll)
 	c.resize(fyne.NewSize(36, 24))
 	assert.Equal(t, 0, scroll.Offset.Y)
 
-	c.tapDown(fyne.NewPos(35, 3))
-	c.tapMove(fyne.NewPos(35, 10), func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapDown(fyne.NewPos(35, 3), 0)
+	c.tapMove(fyne.NewPos(35, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 		dragged = true
 		draggedObj = wid
@@ -104,7 +127,7 @@ func TestCanvas_Dragged(t *testing.T) {
 	assert.NotNil(t, draggedObj)
 	assert.Greater(t, offset, 0)
 
-	c.tapMove(fyne.NewPos(35, 5), func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapMove(fyne.NewPos(35, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 	})
 	assert.Less(t, scroll.Offset.Y, offset)
