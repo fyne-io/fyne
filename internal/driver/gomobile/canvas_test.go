@@ -20,7 +20,8 @@ func TestCanvas_Tapped(t *testing.T) {
 	button := widget.NewButton("Test", func() {
 		buttonTap = true
 	})
-	c := &mobileCanvas{content: button}
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(button)
 	c.resize(fyne.NewSize(36, 24))
 	button.Move(fyne.NewPos(3, 3))
 
