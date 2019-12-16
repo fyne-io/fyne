@@ -123,13 +123,12 @@ func TestCanvas_Dragged(t *testing.T) {
 		draggedObj = wid
 	})
 
-	offset := scroll.Offset.Y
 	assert.True(t, dragged)
-	assert.NotNil(t, draggedObj)
-	assert.Greater(t, offset, 0)
-
+	assert.Equal(t, scroll, draggedObj)
+	// TODO find a way to get the test driver to report as mobile
+	dragged = false
 	c.tapMove(fyne.NewPos(35, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
+		dragged = true
 	})
-	assert.Less(t, scroll.Offset.Y, offset)
 }
