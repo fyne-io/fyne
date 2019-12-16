@@ -1004,13 +1004,11 @@ func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
 	return m
 }
 
-// charModInput defines the character with modifiers callback which is called when a
-// Unicode character is input regardless of what modifier keys are used.
+// charInput defines the character with modifiers callback which is called when a
+// Unicode character is input.
 //
-// The character with modifiers callback is intended for implementing custom
-// Unicode character input. Characters do not map 1:1 to physical keys,
-// as a key may produce zero, one or more characters.
-func (w *window) charModInput(viewport *glfw.Window, char rune, mods glfw.ModifierKey) {
+// Characters do not map 1:1 to physical keys, as a key may produce zero, one or more characters.
+func (w *window) charInput(viewport *glfw.Window, char rune) {
 	if w.canvas.Focused() == nil && w.canvas.onTypedRune == nil {
 		return
 	}
@@ -1122,7 +1120,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		win.SetMouseButtonCallback(ret.mouseClicked)
 		win.SetScrollCallback(ret.mouseScrolled)
 		win.SetKeyCallback(ret.keyPressed)
-		win.SetCharModsCallback(ret.charModInput)
+		win.SetCharCallback(ret.charInput)
 		win.SetFocusCallback(ret.focused)
 		glfw.DetachCurrentContext()
 	})
