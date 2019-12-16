@@ -113,11 +113,11 @@ func TestCanvas_Dragged(t *testing.T) {
 	scroll := widget.NewScrollContainer(widget.NewLabel("Hi\nHi\nHi"))
 	c := NewCanvas().(*mobileCanvas)
 	c.SetContent(scroll)
-	c.resize(fyne.NewSize(36, 24))
+	c.resize(fyne.NewSize(40, 24))
 	assert.Equal(t, 0, scroll.Offset.Y)
 
-	c.tapDown(fyne.NewPos(35, 3), 0)
-	c.tapMove(fyne.NewPos(35, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapDown(fyne.NewPos(32, 3), 0)
+	c.tapMove(fyne.NewPos(32, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 		dragged = true
 		draggedObj = wid
@@ -127,7 +127,7 @@ func TestCanvas_Dragged(t *testing.T) {
 	assert.Equal(t, scroll, draggedObj)
 	// TODO find a way to get the test driver to report as mobile
 	dragged = false
-	c.tapMove(fyne.NewPos(35, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 		dragged = true
 	})
