@@ -366,6 +366,24 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 	}
 }
 
+func TestTabContainer_DynamicTabs(t *testing.T) {
+	item := NewTabItem("Text1", canvas.NewCircle(theme.BackgroundColor()))
+	tabs := NewTabContainer(item)
+	r := Renderer(tabs).(*tabContainerRenderer)
+
+	appendedItem := NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor()))
+
+	tabs.Append(appendedItem)
+	assert.Equal(t, len(tabs.Items), 2)
+	assert.Equal(t, len(r.tabBar.Objects), 2)
+	assert.Equal(t, tabs.Items[1].Text, appendedItem.Text)
+
+	tabs.Remove(1)
+	assert.Equal(t, len(tabs.Items), 1)
+	assert.Equal(t, len(r.tabBar.Objects), 1)
+	assert.Equal(t, tabs.Items[0].Text, item.Text)
+}
+
 func Test_tabButton_Hovered(t *testing.T) {
 	b := &tabButton{}
 	r := Renderer(b)
@@ -397,3 +415,4 @@ func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
 
 	assert.NotEqual(t, textSize, customTextSize)
 }
+
