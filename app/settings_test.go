@@ -74,7 +74,7 @@ func TestWatchSettings(t *testing.T) {
 }
 
 func TestWatchFile(t *testing.T) {
-	path := filepath.Join(os.TempDir(), "fyne-temp-watch.txt")
+	path := filepath.Join(rootConfigDir(), "fyne-temp-watch.txt")
 	os.Create(path)
 	defer os.Remove(path)
 
@@ -94,7 +94,7 @@ func TestWatchFile(t *testing.T) {
 }
 
 func TestFileWatcher_FileDeleted(t *testing.T) {
-	path := filepath.Join(os.TempDir(), "fyne-temp-watch.txt")
+	path := filepath.Join(rootConfigDir(), "fyne-temp-watch.txt")
 	os.Create(path)
 	defer os.Remove(path)
 
