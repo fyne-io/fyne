@@ -166,6 +166,25 @@ func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container 
 	return tabBar
 }
 
+
+// Append adds a new CanvasObject to the end of the group
+func (t *TabContainer) Append(item *TabItem) {
+	r := Renderer(t).(*tabContainerRenderer)
+	t.Items = append(t.Items, item)
+	r.tabBar.Objects = append(r.tabBar.Objects, t.makeButton(item))
+
+	t.CreateRenderer().Refresh()
+}
+
+// Remove tab by index
+func (t *TabContainer) Remove(index int) {
+	r := Renderer(t).(*tabContainerRenderer)
+	t.Items = append(t.Items[:index], t.Items[index+1:]...)
+	r.tabBar.Objects = append(r.tabBar.Objects[:index], r.tabBar.Objects[index+1:]...)
+
+	t.CreateRenderer().Refresh()
+}
+
 // SetTabLocation sets the location of the tab bar
 func (t *TabContainer) SetTabLocation(l TabLocation) {
 	t.tabLocation = l
