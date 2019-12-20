@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -88,6 +89,8 @@ func (t *TabContainer) SelectTabIndex(index int) {
 		}
 	}
 
+	r := cache.Renderer(t).(*tabContainerRenderer)
+	r.Layout(t.size)
 	t.refresh(t)
 }
 
@@ -166,7 +169,7 @@ func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container 
 // SetTabLocation sets the location of the tab bar
 func (t *TabContainer) SetTabLocation(l TabLocation) {
 	t.tabLocation = l
-	r := Renderer(t).(*tabContainerRenderer)
+	r := cache.Renderer(t).(*tabContainerRenderer)
 	buttons := r.tabBar.Objects
 	if fyne.CurrentDevice().IsMobile() || l == TabLocationLeading || l == TabLocationTrailing {
 		for _, b := range buttons {
