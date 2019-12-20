@@ -378,10 +378,16 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 	assert.Equal(t, len(r.tabBar.Objects), 2)
 	assert.Equal(t, tabs.Items[1].Text, appendedItem.Text)
 
-	tabs.Remove(1)
+	tabs.RemoveIndex(1)
 	assert.Equal(t, len(tabs.Items), 1)
 	assert.Equal(t, len(r.tabBar.Objects), 1)
 	assert.Equal(t, tabs.Items[0].Text, item.Text)
+
+	tabs.Append(appendedItem)
+	tabs.Remove(tabs.Items[0])
+	assert.Equal(t, len(tabs.Items), 1)
+	assert.Equal(t, len(r.tabBar.Objects), 1)
+	assert.Equal(t, tabs.Items[0].Text, appendedItem.Text)
 }
 
 func Test_tabButton_Hovered(t *testing.T) {
@@ -415,4 +421,3 @@ func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
 
 	assert.NotEqual(t, textSize, customTextSize)
 }
-
