@@ -167,7 +167,7 @@ func (t *TabContainer) Remove(item *TabItem) {
 	t.Refresh()
 }
 
-// Remove tab by index
+// RemoveIndex removes tab by index
 func (t *TabContainer) RemoveIndex(index int) {
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	t.Items = append(t.Items[:index], t.Items[index+1:]...)
