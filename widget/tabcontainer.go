@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -100,26 +101,6 @@ func (t *TabContainer) makeButton(item *TabItem) *tabButton {
 	return &tabButton{Text: item.Text, Icon: item.Icon, OnTap: func() { t.SelectTab(item) }}
 }
 
-/*
-// Prepend inserts a new CanvasObject at the top of the group
-func (t *TabContainer) Prepend(object fyne.CanvasObject) {
-	t.Items = append(t.Items, item)
-	t.tabBar.Append(t.makeButton(item))
-	t.children = append(t.children, item.Content)
-
-	t.CreateRenderer().Refresh()}
-}
-
-// Append adds a new CanvasObject to the end of the group
-func (t *TabContainer) Append(item TabItem) {
-	t.Items = append(t.Items, item)
-//	t.tabBar.Append(t.makeButton(item))
-//	t.children = append(t.children, item.Content)
-
-	t.CreateRenderer().Refresh()
-}
-*/
-
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
@@ -163,29 +144,42 @@ func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container 
 	return tabBar
 }
 
-
 // Append adds a new CanvasObject to the end of the group
 func (t *TabContainer) Append(item *TabItem) {
-	r := Renderer(t).(*tabContainerRenderer)
+	r := cache.Renderer(t).(*tabContainerRenderer)
 	t.Items = append(t.Items, item)
 	r.tabBar.Objects = append(r.tabBar.Objects, t.makeButton(item))
 
-	t.CreateRenderer().Refresh()
+	t.Refresh()
+}
+
+// Remove tab by value
+func (t *TabContainer) Remove(item *TabItem) {
+	r := cache.Renderer(t).(*tabContainerRenderer)
+
+	for index, existingItem := range t.Items {
+		if existingItem == item {
+			t.Items = append(t.Items[:index], t.Items[index+1:]...)
+			r.tabBar.Objects = append(r.tabBar.Objects[:index], r.tabBar.Objects[index+1:]...)
+		}
+	}
+
+	t.Refresh()
 }
 
 // Remove tab by index
-func (t *TabContainer) Remove(index int) {
-	r := Renderer(t).(*tabContainerRenderer)
+func (t *TabContainer) RemoveIndex(index int) {
+	r := cache.Renderer(t).(*tabContainerRenderer)
 	t.Items = append(t.Items[:index], t.Items[index+1:]...)
 	r.tabBar.Objects = append(r.tabBar.Objects[:index], r.tabBar.Objects[index+1:]...)
 
-	t.CreateRenderer().Refresh()
+	t.Refresh()
 }
 
 // SetTabLocation sets the location of the tab bar
 func (t *TabContainer) SetTabLocation(l TabLocation) {
 	t.tabLocation = l
-	r := Renderer(t).(*tabContainerRenderer)
+	r := cache.Renderer(t).(*tabContainerRenderer)
 	buttons := r.tabBar.Objects
 	if fyne.CurrentDevice().IsMobile() || l == TabLocationLeading || l == TabLocationTrailing {
 		for _, b := range buttons {
