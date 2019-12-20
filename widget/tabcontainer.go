@@ -144,7 +144,7 @@ func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container 
 	return tabBar
 }
 
-// Append adds a new CanvasObject to the end of the group
+// Append adds a new TabItem to the rightmost side of the tab panel
 func (t *TabContainer) Append(item *TabItem) {
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	t.Items = append(t.Items, item)
@@ -155,16 +155,12 @@ func (t *TabContainer) Append(item *TabItem) {
 
 // Remove tab by value
 func (t *TabContainer) Remove(item *TabItem) {
-	r := cache.Renderer(t).(*tabContainerRenderer)
-
 	for index, existingItem := range t.Items {
 		if existingItem == item {
-			t.Items = append(t.Items[:index], t.Items[index+1:]...)
-			r.tabBar.Objects = append(r.tabBar.Objects[:index], r.tabBar.Objects[index+1:]...)
+			t.RemoveIndex(index)
+			break
 		}
 	}
-
-	t.Refresh()
 }
 
 // RemoveIndex removes tab by index
