@@ -104,4 +104,4 @@ More documentation is available at the [Fyne developer website](https://fyne.io/
 # Examples
 
 You can find many example applications in the [examples repository](https://github.com/fyne-io/examples/).
-Alternatively a list of applications using fyne can be found at [our website](https://fyne.io/develop/applist.html)
+Alternatively a list of applications using fyne can be found at [our website](https://apps.fyne.io/)
