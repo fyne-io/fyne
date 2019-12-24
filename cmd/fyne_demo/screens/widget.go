@@ -114,13 +114,12 @@ func makeScrollTab() fyne.CanvasObject {
 		}))
 	}
 
-	scroll := widget.NewScrollContainer(list)
-	scroll.Resize(fyne.NewSize(200, 300))
+	horiz := widget.NewScrollContainer(list)
+	vert := widget.NewScrollContainer(list2)
 
-	scroll2 := widget.NewScrollContainer(list2)
-	scroll2.Resize(fyne.NewSize(200, 100))
-
-	return fyne.NewContainerWithLayout(layout.NewGridLayout(1), scroll, scroll2)
+	scrolls := fyne.NewContainerWithLayout(layout.NewBorderLayout(horiz, nil, nil, nil),
+		horiz, vert)
+	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), scrolls, makeScrollBothTab())
 }
 
 func makeScrollBothTab() fyne.CanvasObject {
@@ -151,7 +150,6 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Progress", makeProgressTab()),
 			widget.NewTabItem("Form", makeFormTab()),
 			widget.NewTabItem("Scroll", makeScrollTab()),
-			widget.NewTabItem("Full Scroll", makeScrollBothTab()),
 		),
 	)
 }

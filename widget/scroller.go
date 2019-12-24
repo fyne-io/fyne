@@ -265,7 +265,7 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (r *scrollContainerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(25, 25) // TODO consider the smallest useful scroll view?
+	return fyne.NewSize(32, 32) // TODO consider the smallest useful scroll view?
 }
 
 func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
