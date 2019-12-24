@@ -17,6 +17,23 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Fixed
 
 
+## 1.2.1 - 24 December 2019
+
+### Added
+
+* Add TouchDown, TouchUp and TouchCancel API in driver/mobile for device specific events
+* Add support for adding and removing tabs from a tab container (#444)
+
+### Fixed
+
+* Issues when settings changes may not be monitored (#576)
+* Layout of hidden tab container contents on mobile (#578)
+* Mobile apps would not quit when Quit() was called (#580)
+* Shadows disappeared when theme changes (#589)
+* iOS apps could stop rendering after many refreshes (#584)
+* Fyne package could fail on Windows (#586)
+* Horizontal only scroll container may not refresh using scroll wheel
+
 
 ## 1.2 - 12 December 2019
 
@@ -41,6 +58,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * New Logo! Thanks to Storm for his work on this :)
 * Applications no longer have a default (Fyne logo) icon
 * Input events now execute one at a time to maintain the correct order
+* Button and other widget callbacks no longer launch new goroutines
 * FYNE_THEME and FYNE_SCALE are now overrides to the global configuration
 * The first opened window no longer exits the app when closed (unless none others are open or Window.SetMaster() is called)
 * "fyne package" now defaults icon to "Icon.png" so the parameter is optional

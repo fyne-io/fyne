@@ -229,8 +229,8 @@ type scrollContainerRenderer struct {
 	scroll                  *ScrollContainer
 	vertArea                *scrollBarArea
 	horizArea               *scrollBarArea
-	leftShadow, rightShadow fyne.CanvasObject
-	topShadow, bottomShadow fyne.CanvasObject
+	leftShadow, rightShadow *shadow
+	topShadow, bottomShadow *shadow
 
 	objects []fyne.CanvasObject
 }
@@ -265,7 +265,7 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (r *scrollContainerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(25, 25) // TODO consider the smallest useful scroll view?
+	return fyne.NewSize(32, 32) // TODO consider the smallest useful scroll view?
 }
 
 func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
@@ -273,6 +273,11 @@ func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
+	r.leftShadow.depth = theme.Padding() * 2
+	r.rightShadow.depth = theme.Padding() * 2
+	r.topShadow.depth = theme.Padding() * 2
+	r.bottomShadow.depth = theme.Padding() * 2
+
 	r.Layout(r.scroll.Size())
 }
 
@@ -315,7 +320,8 @@ func (r *scrollContainerRenderer) updatePosition() {
 	Renderer(r.vertArea).Layout(r.scroll.size)
 	Renderer(r.horizArea).Layout(r.scroll.size)
 
-	canvas.Refresh(r.vertArea) // this is required to force the canvas to update, we have no "Redraw()"
+	canvas.Refresh(r.vertArea)  // this is required to force the canvas to update, we have no "Redraw()"
+	canvas.Refresh(r.horizArea) // this is required like above but if we are horizontal
 }
 
 // ScrollContainer defines a container that is smaller than the Content.

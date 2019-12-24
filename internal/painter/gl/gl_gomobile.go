@@ -126,6 +126,7 @@ const (
 
 func (p *glPainter) Init() {
 	p.glctx().Disable(gl.DEPTH_TEST)
+	p.glctx().Enable(gl.BLEND)
 	sharedBuffer = p.glctx().CreateBuffer()
 
 	vertexShader, err := p.compileShader(vertexShaderSource, gl.VERTEX_SHADER)
@@ -179,9 +180,12 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	return Buffer(sharedBuffer)
 }
 
+func (p *glPainter) glFreeBuffer(_ Buffer) {
+	// we don't free a shared buffer!
+}
+
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
-	ctx.Enable(gl.BLEND)
 
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both

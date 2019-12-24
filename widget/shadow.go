@@ -81,6 +81,45 @@ func (r *shadowRenderer) createShadows() {
 	}
 }
 
+func updateShadowStart(g *canvas.LinearGradient) {
+	if g == nil {
+		return
+	}
+
+	g.StartColor = theme.ShadowColor()
+	g.Refresh()
+}
+
+func updateShadowEnd(g *canvas.LinearGradient) {
+	if g == nil {
+		return
+	}
+
+	g.EndColor = theme.ShadowColor()
+	g.Refresh()
+}
+
+func updateShadowRadial(g *canvas.RadialGradient) {
+	if g == nil {
+		return
+	}
+
+	g.StartColor = theme.ShadowColor()
+	g.Refresh()
+}
+
+func (r *shadowRenderer) refreshShadows() {
+	updateShadowEnd(r.l)
+	updateShadowStart(r.r)
+	updateShadowStart(r.b)
+	updateShadowEnd(r.t)
+
+	updateShadowRadial(r.tl)
+	updateShadowRadial(r.tr)
+	updateShadowRadial(r.bl)
+	updateShadowRadial(r.br)
+}
+
 func (r *shadowRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
@@ -132,5 +171,5 @@ func (r *shadowRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *shadowRenderer) Refresh() {
-	r.createShadows()
+	r.refreshShadows()
 }

@@ -89,6 +89,8 @@ func (t *TabContainer) SelectTabIndex(index int) {
 		}
 	}
 
+	r := cache.Renderer(t).(*tabContainerRenderer)
+	r.Layout(t.size)
 	t.refresh(t)
 }
 
