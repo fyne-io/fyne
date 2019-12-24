@@ -366,6 +366,30 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 	}
 }
 
+func TestTabContainer_DynamicTabs(t *testing.T) {
+	item := NewTabItem("Text1", canvas.NewCircle(theme.BackgroundColor()))
+	tabs := NewTabContainer(item)
+	r := Renderer(tabs).(*tabContainerRenderer)
+
+	appendedItem := NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor()))
+
+	tabs.Append(appendedItem)
+	assert.Equal(t, len(tabs.Items), 2)
+	assert.Equal(t, len(r.tabBar.Objects), 2)
+	assert.Equal(t, tabs.Items[1].Text, appendedItem.Text)
+
+	tabs.RemoveIndex(1)
+	assert.Equal(t, len(tabs.Items), 1)
+	assert.Equal(t, len(r.tabBar.Objects), 1)
+	assert.Equal(t, tabs.Items[0].Text, item.Text)
+
+	tabs.Append(appendedItem)
+	tabs.Remove(tabs.Items[0])
+	assert.Equal(t, len(tabs.Items), 1)
+	assert.Equal(t, len(r.tabBar.Objects), 1)
+	assert.Equal(t, tabs.Items[0].Text, appendedItem.Text)
+}
+
 func Test_tabButton_Hovered(t *testing.T) {
 	b := &tabButton{}
 	r := Renderer(b)

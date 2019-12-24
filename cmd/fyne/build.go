@@ -17,10 +17,15 @@ func (b *builder) build() error {
 		goos = runtime.GOOS
 	}
 
-	cmd := exec.Command("go", "build", b.srcdir)
+	var cmd *exec.Cmd
+	if goos == "windows" {
+		cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", ".")
+	} else {
+		cmd = exec.Command("go", "build", ".")
+	}
 	cmd.Dir = b.srcdir
 	env := os.Environ()
-	env = append(env, "GOOS=", goos)
+	env = append(env, "GOOS="+goos)
 	cmd.Env = env
 
 	out, err := cmd.CombinedOutput()

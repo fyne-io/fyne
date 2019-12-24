@@ -88,6 +88,7 @@ func glInit() {
 	}
 
 	gl.Disable(gl.DEPTH_TEST)
+	gl.Enable(gl.BLEND)
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
@@ -199,7 +200,6 @@ func (p *glPainter) glFreeBuffer(vbo Buffer) {
 }
 
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
-	gl.Enable(gl.BLEND)
 	// here we have to choose between blending the image alpha or fading it...
 	// TODO find a way to support both
 	if alpha != 1.0 {

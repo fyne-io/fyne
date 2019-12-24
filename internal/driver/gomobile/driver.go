@@ -1,6 +1,7 @@
 package gomobile
 
 import (
+	"fmt"
 	"runtime"
 	"strconv"
 	"time"
@@ -26,6 +27,7 @@ const tapSecondaryDelay = 300 * time.Millisecond
 
 type mobileDriver struct {
 	app   app.App
+	quit  bool
 	glctx gl.Context
 
 	windows []fyne.Window
@@ -70,7 +72,7 @@ func (d *mobileDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 		return nil
 	}
 
-	// TODO figure out how we handle multiple windows...
+	// TODO don't just assume it refers to the topmost window
 	return d.currentWindow().Canvas()
 }
 
@@ -94,14 +96,13 @@ func (d *mobileDriver) Quit() {
 		return
 	}
 
-	// TODO? often mobile apps should not allow this...
-	d.app.Send(lifecycle.Event{From: lifecycle.StageAlive, To: lifecycle.StageDead, DrawContext: nil})
+	// TODO should this be disabled for iOS?
+	d.quit = true
 }
 
 func (d *mobileDriver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
-		quit := false
 
 		var currentSize size.Event
 		for e := range a.Events() {
@@ -123,7 +124,7 @@ func (d *mobileDriver) Run() {
 					d.glctx = nil
 				}
 				if e.Crosses(lifecycle.StageAlive) == lifecycle.CrossOff {
-					quit = true
+					d.quit = true
 				}
 			case size.Event:
 				currentSize = e
@@ -136,9 +137,17 @@ func (d *mobileDriver) Run() {
 					canvas.painter.Init() // we cannot init until the context is set above
 				}
 
-				d.freeDirtyTextures(canvas)
-				d.paintWindow(current, currentSize)
-				a.Publish()
+				if d.freeDirtyTextures(canvas) {
+					d.paintWindow(current, currentSize)
+					a.Publish()
+
+					err := d.glctx.GetError()
+					if err != 0 {
+						fyne.LogError(fmt.Sprintf("OpenGL Error: %d", err), nil)
+					}
+				}
+
+				time.Sleep(time.Millisecond * 10)
 				a.Send(paint.Event{})
 			case touch.Event:
 				switch e.Type {
@@ -157,7 +166,7 @@ func (d *mobileDriver) Run() {
 				}
 			}
 
-			if quit {
+			if d.quit {
 				break
 			}
 		}
@@ -165,9 +174,6 @@ func (d *mobileDriver) Run() {
 }
 
 func (d *mobileDriver) onStart() {
-	for _, win := range d.AllWindows() {
-		win.Canvas().(*mobileCanvas).painter.Init() // we cannot init until the context is set above
-	}
 }
 
 func (d *mobileDriver) onStop() {
@@ -422,17 +428,19 @@ func (d *mobileDriver) typeUpCanvas(canvas *mobileCanvas, r rune, code key.Code)
 
 }
 
-func (d *mobileDriver) freeDirtyTextures(canvas *mobileCanvas) {
+func (d *mobileDriver) freeDirtyTextures(canvas *mobileCanvas) bool {
+	freed := false
 	for {
 		select {
 		case object := <-canvas.refreshQueue:
+			freed = true
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 				canvas.painter.Free(obj)
 				return false
 			}
 			driver.WalkCompleteObjectTree(object, freeWalked, nil)
 		default:
-			return
+			return freed
 		}
 	}
 }
@@ -448,7 +456,5 @@ func (d *mobileDriver) Device() fyne.Device {
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
-	driver := new(mobileDriver)
-
-	return driver
+	return new(mobileDriver)
 }
