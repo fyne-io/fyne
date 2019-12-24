@@ -320,7 +320,8 @@ func (r *scrollContainerRenderer) updatePosition() {
 	Renderer(r.vertArea).Layout(r.scroll.size)
 	Renderer(r.horizArea).Layout(r.scroll.size)
 
-	canvas.Refresh(r.vertArea) // this is required to force the canvas to update, we have no "Redraw()"
+	canvas.Refresh(r.vertArea)  // this is required to force the canvas to update, we have no "Redraw()"
+	canvas.Refresh(r.horizArea) // this is required like above but if we are horizontal
 }
 
 // ScrollContainer defines a container that is smaller than the Content.
