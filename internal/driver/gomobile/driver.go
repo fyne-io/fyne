@@ -1,6 +1,7 @@
 package gomobile
 
 import (
+	"fmt"
 	"runtime"
 	"strconv"
 	"time"
@@ -139,6 +140,11 @@ func (d *mobileDriver) Run() {
 				if d.freeDirtyTextures(canvas) {
 					d.paintWindow(current, currentSize)
 					a.Publish()
+
+					err := d.glctx.GetError()
+					if err != 0 {
+						fyne.LogError(fmt.Sprintf("OpenGL Error: %d", err), nil)
+					}
 				}
 
 				time.Sleep(time.Millisecond * 10)
