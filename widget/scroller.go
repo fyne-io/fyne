@@ -229,8 +229,8 @@ type scrollContainerRenderer struct {
 	scroll                  *ScrollContainer
 	vertArea                *scrollBarArea
 	horizArea               *scrollBarArea
-	leftShadow, rightShadow fyne.CanvasObject
-	topShadow, bottomShadow fyne.CanvasObject
+	leftShadow, rightShadow *shadow
+	topShadow, bottomShadow *shadow
 
 	objects []fyne.CanvasObject
 }
@@ -273,6 +273,11 @@ func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
+	r.leftShadow.depth = theme.Padding() * 2
+	r.rightShadow.depth = theme.Padding() * 2
+	r.topShadow.depth = theme.Padding() * 2
+	r.bottomShadow.depth = theme.Padding() * 2
+
 	r.Layout(r.scroll.Size())
 }
 
