@@ -136,9 +136,12 @@ func (d *mobileDriver) Run() {
 					canvas.painter.Init() // we cannot init until the context is set above
 				}
 
-				d.freeDirtyTextures(canvas)
-				d.paintWindow(current, currentSize)
-				a.Publish()
+				if d.freeDirtyTextures(canvas) {
+					d.paintWindow(current, currentSize)
+					a.Publish()
+				}
+
+				time.Sleep(time.Millisecond * 10)
 				a.Send(paint.Event{})
 			case touch.Event:
 				switch e.Type {
@@ -165,9 +168,6 @@ func (d *mobileDriver) Run() {
 }
 
 func (d *mobileDriver) onStart() {
-	for _, win := range d.AllWindows() {
-		win.Canvas().(*mobileCanvas).painter.Init() // we cannot init until the context is set above
-	}
 }
 
 func (d *mobileDriver) onStop() {
@@ -422,17 +422,19 @@ func (d *mobileDriver) typeUpCanvas(canvas *mobileCanvas, r rune, code key.Code)
 
 }
 
-func (d *mobileDriver) freeDirtyTextures(canvas *mobileCanvas) {
+func (d *mobileDriver) freeDirtyTextures(canvas *mobileCanvas) bool {
+	freed := false
 	for {
 		select {
 		case object := <-canvas.refreshQueue:
+			freed = true
 			freeWalked := func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 				canvas.painter.Free(obj)
 				return false
 			}
 			driver.WalkCompleteObjectTree(object, freeWalked, nil)
 		default:
-			return
+			return freed
 		}
 	}
 }
@@ -448,7 +450,5 @@ func (d *mobileDriver) Device() fyne.Device {
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
-	driver := new(mobileDriver)
-
-	return driver
+	return new(mobileDriver)
 }

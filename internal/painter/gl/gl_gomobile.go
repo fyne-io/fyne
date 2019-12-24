@@ -179,6 +179,10 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	return Buffer(sharedBuffer)
 }
 
+func (p *glPainter) glFreeBuffer(_ Buffer) {
+	// we don't free a shared buffer!
+}
+
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
 	ctx := p.glctx()
 	ctx.Enable(gl.BLEND)
