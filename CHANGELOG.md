@@ -14,6 +14,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * Issues when settings changes may not be monitored (#576)
 * Layout of hidden tab container contents on mobile (#578)
+* Mobile apps would not quit when Quit() was called (#580)
 
 
 ## 1.2 - 12 December 2019
