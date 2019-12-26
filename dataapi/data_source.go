@@ -11,7 +11,7 @@ type BaseDataSource struct {
 	id        int
 }
 
-// NewNullDataSource returns a new BaseDataSource
+// NewBaseDataSource returns a new BaseDataSource
 func NewBaseDataSource() *BaseDataSource {
 	return &BaseDataSource{
 		callbacks: make(map[int]func(DataItem)),
