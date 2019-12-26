@@ -1,7 +1,6 @@
 package glfw
 
 import (
-	"fmt"
 	"image"
 	"sync"
 
@@ -153,6 +152,13 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	c.content.Resize(c.contentSize(size))
 	c.content.Move(c.contentPos())
 
+	if c.overlay != nil {
+		if _, ok := c.overlay.(*widget.PopUp); ok {
+			c.overlay.Resize(c.Overlay().MinSize())
+		} else {
+			c.overlay.Resize(size)
+		}
+	}
 	if c.menu != nil {
 		c.menu.Refresh()
 		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
@@ -232,7 +238,7 @@ func (c *glCanvas) ensureMinSize() bool {
 	if c.Content() == nil {
 		return false
 	}
-	var objToLayout fyne.CanvasObject
+
 	windowNeedsMinSizeUpdate := false
 	ensureMinSize := func(node *renderCacheNode) {
 		obj := node.obj
@@ -246,6 +252,7 @@ func (c *glCanvas) ensureMinSize() bool {
 		minSize := obj.MinSize()
 		minSizeChanged := node.minSize != minSize
 		if minSizeChanged {
+			objToLayout := obj
 			node.minSize = minSize
 			if node.parent != nil {
 				objToLayout = node.parent.obj
@@ -258,18 +265,14 @@ func (c *glCanvas) ensureMinSize() bool {
 					obj.Resize(expectedSize)
 				}
 			}
-		}
 
-		if obj == objToLayout {
-			switch cont := obj.(type) {
+			switch cont := objToLayout.(type) {
 			case *fyne.Container:
 				if cont.Layout != nil {
 					cont.Layout.Layout(cont.Objects, cont.Size())
 				}
 			case fyne.Widget:
 				cache.Renderer(cont).Layout(cont.Size())
-			default:
-				fmt.Printf("implementation error - unknown container type: %T\n", cont)
 			}
 		}
 	}

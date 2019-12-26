@@ -88,6 +88,9 @@ func (p *glPainter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Si
 
 func (p *glPainter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
 	aspect := painter.GetAspect(img)
+	if aspect == 0 {
+		aspect = 1
+	}
 	p.drawTextureWithDetails(img, p.newGlImageTexture, pos, img.Size(), frame, img.FillMode, float32(img.Alpha()), aspect, 0)
 }
 

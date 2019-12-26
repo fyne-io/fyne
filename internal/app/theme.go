@@ -2,16 +2,17 @@ package app
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/internal/cache"
 )
 
 // ApplyThemeTo ensures that the specified canvasobject and all widgets and themeable objects will
 // be updated for the current theme.
 func ApplyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
 	if wid, ok := content.(fyne.Widget); ok {
-		for _, o := range widget.Renderer(wid).Objects() {
+		for _, o := range cache.Renderer(wid).Objects() {
 			ApplyThemeTo(o, canv)
 		}
+		cache.Renderer(wid).Layout(wid.Size()) // theme can cause sizing changes
 	}
 	if c, ok := content.(*fyne.Container); ok {
 		for _, o := range c.Objects {

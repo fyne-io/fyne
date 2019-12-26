@@ -123,8 +123,8 @@ func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
 	default:
 		barHeight, barWidth, barY, barX = r.barSizeAndOffset(r.area.scroll.Offset.Y, r.area.scroll.Content.Size().Height, r.area.scroll.Size().Height)
 	}
-	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 	r.bar.Move(fyne.NewPos(barX, barY))
+	r.bar.Resize(fyne.NewSize(barWidth, barHeight))
 }
 
 func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
@@ -229,8 +229,8 @@ type scrollContainerRenderer struct {
 	scroll                  *ScrollContainer
 	vertArea                *scrollBarArea
 	horizArea               *scrollBarArea
-	leftShadow, rightShadow fyne.CanvasObject
-	topShadow, bottomShadow fyne.CanvasObject
+	leftShadow, rightShadow *shadow
+	topShadow, bottomShadow *shadow
 
 	objects []fyne.CanvasObject
 }
@@ -265,7 +265,7 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (r *scrollContainerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(25, 25) // TODO consider the smallest useful scroll view?
+	return fyne.NewSize(32, 32) // TODO consider the smallest useful scroll view?
 }
 
 func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
@@ -273,6 +273,11 @@ func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
+	r.leftShadow.depth = theme.Padding() * 2
+	r.rightShadow.depth = theme.Padding() * 2
+	r.topShadow.depth = theme.Padding() * 2
+	r.bottomShadow.depth = theme.Padding() * 2
+
 	r.Layout(r.scroll.Size())
 }
 
@@ -309,13 +314,14 @@ func (r *scrollContainerRenderer) updatePosition() {
 	r.handleAreaVisibility(contentHeight, scrollHeight, r.vertArea)
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
-	canvas.Refresh(r.scroll.Content)
-
 	r.handleShadowVisibility(r.scroll.Offset.X, contentWidth, scrollWidth, r.leftShadow, r.rightShadow)
 	r.handleShadowVisibility(r.scroll.Offset.Y, contentHeight, scrollHeight, r.topShadow, r.bottomShadow)
 
 	Renderer(r.vertArea).Layout(r.scroll.size)
 	Renderer(r.horizArea).Layout(r.scroll.size)
+
+	canvas.Refresh(r.vertArea)  // this is required to force the canvas to update, we have no "Redraw()"
+	canvas.Refresh(r.horizArea) // this is required like above but if we are horizontal
 }
 
 // ScrollContainer defines a container that is smaller than the Content.

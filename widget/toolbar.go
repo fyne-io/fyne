@@ -153,7 +153,7 @@ func (r *toolbarRenderer) Refresh() {
 		}
 	}
 
-	r.Layout(r.toolbar.Size())
+	canvas.Refresh(r.toolbar)
 }
 
 func (r *toolbarRenderer) Destroy() {

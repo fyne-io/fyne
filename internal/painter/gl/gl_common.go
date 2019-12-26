@@ -5,10 +5,9 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
-
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"github.com/srwiley/rasterx"
@@ -84,7 +83,7 @@ func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
 	col := theme.BackgroundColor()
 	if wid, ok := rect.(fyne.Widget); ok {
-		widCol := widget.Renderer(wid).BackgroundColor()
+		widCol := cache.Renderer(wid).BackgroundColor()
 		if widCol != nil {
 			col = widCol
 		}

@@ -17,7 +17,7 @@ import (
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -241,14 +241,14 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	// we should only have 2 mouse events on d1
 	assert.Equal(t,
 		&desktop.MouseEvent{
-			PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5)},
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(5, 5), AbsolutePosition: fyne.NewPos(9, 9)},
 			Button:     desktop.LeftMouseButton,
 		},
 		d1.popMouseEvent(),
 	)
 	assert.Equal(t,
 		&desktop.MouseEvent{
-			PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 5)},
+			PointEvent: fyne.PointEvent{Position: fyne.NewPos(15, 5), AbsolutePosition: fyne.NewPos(19, 9)},
 			Button:     desktop.LeftMouseButton,
 		},
 		d1.popMouseEvent(),
@@ -637,14 +637,14 @@ func TestWindow_Focus(t *testing.T) {
 	w.SetContent(widget.NewVBox(e1, e2))
 	w.Canvas().Focus(e1)
 
-	w.charModInput(w.viewport, 'a', 0)
-	w.charModInput(w.viewport, 'b', 0)
-	w.charModInput(w.viewport, 'c', 0)
-	w.charModInput(w.viewport, 'd', 0)
+	w.charInput(w.viewport, 'a')
+	w.charInput(w.viewport, 'b')
+	w.charInput(w.viewport, 'c')
+	w.charInput(w.viewport, 'd')
 	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Press, 0)
 	w.keyPressed(w.viewport, glfw.KeyTab, 0, glfw.Release, 0)
-	w.charModInput(w.viewport, 'e', 0)
-	w.charModInput(w.viewport, 'f', 0)
+	w.charInput(w.viewport, 'e')
+	w.charInput(w.viewport, 'f')
 
 	w.waitForEvents()
 	assert.Equal(t, "abcd", e1.Text)
@@ -670,7 +670,7 @@ func TestWindow_Clipboard(t *testing.T) {
 	cb.SetContent(text)
 	assert.Equal(t, text, cb.Content())
 
-	// Restore cliboardContent, if any
+	// Restore clipboardContent, if any
 	cb.SetContent(cliboardContent)
 }
 

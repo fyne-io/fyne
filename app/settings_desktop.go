@@ -3,6 +3,7 @@
 package app
 
 import (
+	"os"
 	"path/filepath"
 
 	"fyne.io/fyne"
@@ -10,9 +11,23 @@ import (
 )
 
 func watchFileAddTarget(watcher *fsnotify.Watcher, path string) {
-	err := watcher.Add(filepath.Dir(path))
+	dir := filepath.Dir(path)
+	ensureDirExists(dir)
+
+	err := watcher.Add(dir)
 	if err != nil {
 		fyne.LogError("Settings watch error:", err)
+	}
+}
+
+func ensureDirExists(dir string) {
+	if stat, err := os.Stat(dir); err == nil && stat.IsDir() {
+		return
+	}
+
+	err := os.Mkdir(dir, 0700)
+	if err != nil {
+		fyne.LogError("Unable to create settings storage:", err)
 	}
 }
 

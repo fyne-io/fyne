@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -118,4 +119,21 @@ func TestShadow_BackgroundColor(t *testing.T) {
 
 func TestShadow_MinSize(t *testing.T) {
 	assert.Equal(t, fyne.NewSize(0, 0), newShadow(shadowAround, theme.Padding()).MinSize())
+}
+
+func TestShadow_Theme(t *testing.T) {
+	shadow := newShadow(shadowAround, theme.Padding())
+	light := theme.LightTheme()
+	fyne.CurrentApp().Settings().SetTheme(light)
+	shadow.Refresh()
+	assert.Equal(t, light.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).l.EndColor)
+	assert.Equal(t, light.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).r.StartColor)
+	assert.Equal(t, light.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).tr.StartColor)
+
+	dark := theme.DarkTheme()
+	fyne.CurrentApp().Settings().SetTheme(dark)
+	shadow.Refresh()
+	assert.Equal(t, dark.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).r.StartColor)
+	assert.Equal(t, dark.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).r.StartColor)
+	assert.Equal(t, dark.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).tr.StartColor)
 }

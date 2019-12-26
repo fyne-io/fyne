@@ -1334,18 +1334,58 @@ func TestEntry_EraseEmptySelection(t *testing.T) {
 }
 
 func TestPasswordEntry_Reveal(t *testing.T) {
-	entry := NewPasswordEntry()
+	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
+		entry := NewPasswordEntry()
+		actionIcon := Renderer(entry).(*entryRenderer).entry.passwordRevealer
 
-	test.Type(entry, "Hié™שרה")
-	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+		test.Type(entry, "Hié™שרה")
+		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+		assert.Equal(t, theme.VisibilityOffIcon(), actionIcon.icon.Resource)
 
-	// Reveal password that should be obfuscated until it is refreshed
-	entry.Password = false
-	Refresh(entry)
+		// update the Password field
+		entry.Password = false
+		Refresh(entry)
 
-	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
+		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
+		assert.True(t, entry.Focused())
+		assert.Equal(t, theme.VisibilityIcon(), actionIcon.icon.Resource)
+
+		// tap on action icon
+		test.Tap(actionIcon)
+
+		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+		assert.True(t, entry.Focused())
+		assert.Equal(t, theme.VisibilityOffIcon(), actionIcon.icon.Resource)
+	})
+
+	// This test cover backward compatibility use case when on an Entry widget
+	// the Password field is set to true.
+	// In this case the action item should not be diplayed
+	t.Run("Entry with Password field", func(t *testing.T) {
+		entry := NewEntry()
+		entry.Password = true
+		entry.Refresh()
+
+		// action icon is not displayed
+		actionIcon := Renderer(entry).(*entryRenderer).entry.passwordRevealer
+		assert.Nil(t, actionIcon)
+
+		test.Type(entry, "Hié™שרה")
+		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+
+		// update the Password field
+		entry.Password = false
+		Refresh(entry)
+
+		assert.Equal(t, "Hié™שרה", entry.Text)
+		assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
+		assert.True(t, entry.Focused())
+		assert.Nil(t, actionIcon)
+	})
 }
 
 func TestEntry_PageUpDown(t *testing.T) {

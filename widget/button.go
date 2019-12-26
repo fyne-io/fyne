@@ -14,7 +14,7 @@ import (
 type buttonRenderer struct {
 	icon   *canvas.Image
 	label  *canvas.Text
-	shadow fyne.CanvasObject
+	shadow *shadow
 
 	objects []fyne.CanvasObject
 	button  *Button
@@ -126,6 +126,10 @@ func (b *buttonRenderer) Refresh() {
 		b.icon.Hide()
 	}
 
+	if b.shadow != nil {
+		b.shadow.depth = theme.Padding() / 2
+	}
+
 	b.Layout(b.button.Size())
 	canvas.Refresh(b.button)
 }
@@ -208,7 +212,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{
 		text,
 	}
-	var shadow fyne.CanvasObject
+	var shadow *shadow
 	if !b.HideShadow {
 		shadow = newShadow(shadowAround, theme.Padding()/2)
 		objects = append(objects, shadow)

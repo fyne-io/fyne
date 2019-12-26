@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/mobile"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
 
@@ -20,13 +21,14 @@ func TestCanvas_Tapped(t *testing.T) {
 	button := widget.NewButton("Test", func() {
 		buttonTap = true
 	})
-	c := &mobileCanvas{content: button}
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(button)
 	c.resize(fyne.NewSize(36, 24))
 	button.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
-	c.tapDown(tapPos)
-	c.tapUp(tapPos, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	c.tapDown(tapPos, 0)
+	c.tapUp(tapPos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		tapped = true
 		tappedObj = wid
 		pointEvent = ev
@@ -47,6 +49,27 @@ func TestCanvas_Tapped(t *testing.T) {
 	}
 }
 
+func TestCanvas_Tapped_Multi(t *testing.T) {
+	buttonTap := false
+	button := widget.NewButton("Test", func() {
+		buttonTap = true
+	})
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(button)
+	c.resize(fyne.NewSize(36, 24))
+	button.Move(fyne.NewPos(3, 3))
+
+	tapPos := fyne.NewPos(6, 6)
+	c.tapDown(tapPos, 0)
+	c.tapUp(tapPos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) { // different tapID
+		wid.Tapped(ev)
+	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	})
+
+	assert.False(t, buttonTap, "button should not be tapped")
+}
+
 func TestCanvas_TappedSecondary(t *testing.T) {
 	tapped := false
 	altTapped := false
@@ -56,14 +79,15 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 	button := widget.NewButton("Test", func() {
 		buttonTap = false
 	})
-	c := &mobileCanvas{content: button}
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(button)
 	c.resize(fyne.NewSize(36, 24))
 	button.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
-	c.tapDown(tapPos)
+	c.tapDown(tapPos, 0)
 	time.Sleep(310 * time.Millisecond)
-	c.tapUp(tapPos, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	c.tapUp(tapPos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		tapped = true
 		wid.Tapped(ev)
 	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
@@ -88,24 +112,65 @@ func TestCanvas_Dragged(t *testing.T) {
 	dragged := false
 	var draggedObj fyne.Draggable
 	scroll := widget.NewScrollContainer(widget.NewLabel("Hi\nHi\nHi"))
-	c := &mobileCanvas{content: scroll}
-	c.resize(fyne.NewSize(36, 24))
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(scroll)
+	c.resize(fyne.NewSize(40, 24))
 	assert.Equal(t, 0, scroll.Offset.Y)
 
-	c.tapDown(fyne.NewPos(35, 3))
-	c.tapMove(fyne.NewPos(35, 10), func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	c.tapDown(fyne.NewPos(32, 3), 0)
+	c.tapMove(fyne.NewPos(32, 10), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 		dragged = true
 		draggedObj = wid
 	})
 
-	offset := scroll.Offset.Y
 	assert.True(t, dragged)
-	assert.NotNil(t, draggedObj)
-	assert.Greater(t, offset, 0)
+	assert.Equal(t, scroll, draggedObj)
+	// TODO find a way to get the test driver to report as mobile
+	dragged = false
+	c.tapMove(fyne.NewPos(32, 5), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+		wid.Dragged(ev)
+		dragged = true
+	})
+}
 
-	c.tapMove(fyne.NewPos(35, 5), func(wid fyne.Draggable, ev *fyne.DragEvent) {
+func TestCanvas_Tappable(t *testing.T) {
+	content := &touchableLabel{Label: widget.NewLabel("Hi\nHi\nHi")}
+	content.ExtendBaseWidget(content)
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(content)
+	c.resize(fyne.NewSize(36, 24))
+	content.Resize(fyne.NewSize(24, 24))
+
+	c.tapDown(fyne.NewPos(15, 15), 0)
+	assert.True(t, content.down)
+
+	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
+	})
+	assert.True(t, content.up)
+
+	c.tapDown(fyne.NewPos(15, 15), 0)
+	c.tapMove(fyne.NewPos(35, 15), 0, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		wid.Dragged(ev)
 	})
-	assert.Less(t, scroll.Offset.Y, offset)
+	assert.True(t, content.cancel)
+}
+
+type touchableLabel struct {
+	*widget.Label
+	down, up, cancel bool
+}
+
+func (t *touchableLabel) TouchDown(event *mobile.TouchEvent) {
+	t.down = true
+}
+
+func (t *touchableLabel) TouchUp(event *mobile.TouchEvent) {
+	t.up = true
+}
+
+func (t *touchableLabel) TouchCancel(event *mobile.TouchEvent) {
+	t.cancel = true
 }
