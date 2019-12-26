@@ -20,19 +20,24 @@ func welcomeScreen(data *DataModel) fyne.CanvasObject {
 
 	return fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 		widget.NewVBox(
-			widget.NewLabelWithStyle("Fyne Reactive Data Select Country Demo", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-			layout.NewSpacer(),
+			widget.NewLabelWithStyle(
+				"Fyne Reactive Data Select Country Demo",
+				fyne.TextAlignCenter,
+				fyne.TextStyle{Bold: true},
+			),
 			widget.NewForm(
-				// A label bound to a Clock dataItem (a Clock is a string that auto-mutates every second)
-				widget.NewFormItem("Time", widget.NewLabel("").Bind(data.Clock)),
+				widget.NewFormItem("Time", widget.NewLabel("").
+					Bind(data.Clock)),
 				widget.NewFormItem("Country", widget.NewSelect(nil, setCountry).
 					Source(data.CountriesList).
 					Bind(data.SelectedCountry)),
 				widget.NewFormItem("State", widget.NewSelect(nil, nil).
 					Source(data.StatesList).
 					Bind(data.SelectedState)),
-				widget.NewFormItem("Selected Country", widget.NewLabel("").Bind(data.SelectedCountry)),
-				widget.NewFormItem("Selected State", widget.NewLabel("").Bind(data.SelectedState)),
+				widget.NewFormItem("Selected Country", widget.NewLabel("").
+					Bind(data.SelectedCountry)),
+				widget.NewFormItem("Selected State", widget.NewLabel("").
+					Bind(data.SelectedState)),
 				widget.NewFormItem("Edit Country", eCountry),
 				widget.NewFormItem("Edit State", eState),
 			),
