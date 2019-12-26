@@ -26,7 +26,8 @@ type DataMap interface {
 // advanced features like paging. The change listener is notified if the number if
 // items in the source changes - an addition or deletion - but not if items within it change.
 type DataSource interface {
-	DataItem
+	AddListener(func(DataSource)) int
+	DeleteListener(int)
 	Count() int
 	Get(int) (DataItem, bool)
 }

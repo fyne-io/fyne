@@ -234,14 +234,14 @@ type Entry struct {
 	DisableableWidget
 	DataListener
 	sync.RWMutex
-	shortcut    fyne.ShortcutHandler
-	Text        string
-	PlaceHolder string
-	OnChanged   func(string) `json:"-"`
-	OnBind      func(string) `json:"-"`
-	Password    bool
-	ReadOnly    bool // Deprecated: Use Disable() instead
-	MultiLine   bool
+	shortcut      fyne.ShortcutHandler
+	Text          string
+	PlaceHolder   string
+	OnChanged     func(string) `json:"-"`
+	UpdateBinding func(string) `json:"-"`
+	Password      bool
+	ReadOnly      bool // Deprecated: Use Disable() instead
+	MultiLine     bool
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -330,8 +330,8 @@ func (e *Entry) updateText(text string) {
 		if e.OnChanged != nil {
 			e.OnChanged(text)
 		}
-		if e.OnBind != nil {
-			e.OnBind(text)
+		if e.UpdateBinding != nil {
+			e.UpdateBinding(text)
 		}
 	}
 	e.Refresh()
@@ -426,14 +426,14 @@ func (e *Entry) FocusGained() {
 	}
 	e.focused = true
 
-	Refresh(e)
+	e.Refresh()
 }
 
 // FocusLost is called when the Entry has had focus removed.
 func (e *Entry) FocusLost() {
 	e.focused = false
 
-	Refresh(e)
+	e.Refresh()
 }
 
 // Focused returns whether or not this Entry has focus.

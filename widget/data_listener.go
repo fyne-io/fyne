@@ -17,9 +17,15 @@ type DataMapSetter interface {
 	SetFromData(dataapi.DataMap)
 }
 
+// DataSourceSetter interface, for things that can be set from a source
+type DataSourceSetter interface {
+	SetFromSource(source dataapi.DataSource)
+}
+
 // DataListener is a base struct that all DataAPI aware widgets can embed
 type DataListener struct {
 	data       dataapi.DataItem
+	source     dataapi.DataSource
 	onChanged  reflect.Value
 	listenerID int
 }
@@ -46,7 +52,7 @@ func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 	d.listenerID = data.AddListener(setter.SetFromData)
 	setter.SetFromData(data)
 
-	if f, ok := getFunction(setter, "UpdateBoundData"); ok {
+	if f, ok := getFunction(setter, "UpdateBinding"); ok {
 		ftype := f.Type().String()
 		switch ftype {
 		case "func(string)":
@@ -99,4 +105,11 @@ func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 			}
 		}
 	}
+}
+
+// Source will connect this listener to a DataSource, which is a 1 way binding
+func (d *DataListener) Source(src dataapi.DataSource, setter DataSourceSetter) {
+	d.source = src
+	d.listenerID = src.AddListener(setter.SetFromSource)
+	setter.SetFromSource(src)
 }

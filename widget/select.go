@@ -3,6 +3,8 @@ package widget
 import (
 	"image/color"
 
+	"fyne.io/fyne/dataapi"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -97,14 +99,17 @@ func (s *selectRenderer) Destroy() {
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
 	BaseWidget
+	DataListener              // the selected item goes in here
+	source       DataListener // the options to select from come from here
 
-	Selected    string
-	Options     []string
-	PlaceHolder string
-	OnChanged   func(string) `json:"-"`
-
-	hovered bool
-	popUp   *PopUp
+	Selected        string
+	Options         []string
+	PlaceHolder     string
+	OnChanged       func(string)             `json:"-"`
+	UpdateBinding   func(string)             `json:"-"`
+	OnSourceChanged func(dataapi.DataSource) `json:"-"`
+	hovered         bool
+	popUp           *PopUp
 }
 
 // Resize sets a new size for a widget.
@@ -149,13 +154,13 @@ func (s *Select) TappedSecondary(*fyne.PointEvent) {
 // MouseIn is called when a desktop pointer enters the widget
 func (s *Select) MouseIn(*desktop.MouseEvent) {
 	s.hovered = true
-	Refresh(s)
+	s.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (s *Select) MouseOut() {
 	s.hovered = false
-	Refresh(s)
+	s.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -201,19 +206,62 @@ func (s *Select) SetSelected(text string) {
 	if s.OnChanged != nil {
 		s.OnChanged(text)
 	}
+	if s.UpdateBinding != nil {
+		s.UpdateBinding(text)
+	}
 
-	Refresh(s)
+	s.Refresh()
 }
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	combo := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	combo := &Select{
+		BaseWidget:  BaseWidget{},
+		Selected:    "",
+		Options:     options,
+		PlaceHolder: defaultPlaceHolder,
+		OnChanged:   changed,
+	}
 
 	Renderer(combo).Layout(combo.MinSize())
 	return combo
 }
 
-// TODO - add Bind() to the select widget
-// Bind to - a string
-// Bind to - an int value, being the selected option
-// Bind to - a slice of strings, if the select is multi
+// Source sets the dataSource for the select widget
+func (s *Select) Source(source dataapi.DataSource) *Select {
+	s.source.Source(source, s)
+	return s
+}
+
+// Bind will Bind this widget to the given DataItem
+func (s *Select) Bind(data dataapi.DataItem) *Select {
+	s.DataListener.Bind(data, s)
+	return s
+}
+
+// SetFromData is called when the data that denotes the selected item is changed
+func (s *Select) SetFromData(data dataapi.DataItem) {
+	defer s.Refresh()
+
+	// confirm that selected exists
+	str := data.String()
+	s.Selected = ""
+	for _, v := range s.Options {
+		if str == v {
+			s.Selected = v
+			return
+		}
+	}
+}
+
+// SetFromSource is called when the source of the options is changed
+func (s *Select) SetFromSource(src dataapi.DataSource) {
+	count := src.Count()
+	s.Options = make([]string, 0, count)
+	for i := 0; i < count; i++ {
+		if data, ok := src.Get(i); ok {
+			s.Options = append(s.Options, data.String())
+		}
+	}
+	s.Refresh()
+}

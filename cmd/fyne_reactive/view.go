@@ -66,7 +66,7 @@ func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 						vv = vv + "no longer Available :("
 					}
 					data.ActionMap.SetString(kk, vv)
-					data.Actions.AppendItem(dataapi.NewString(kk + ":" + vv))
+					data.Actions.Append(dataapi.NewString(kk + ":" + vv))
 				}).Bind(data.IsAvailable)),
 
 			// A radioButton bound to an Int dataItem
@@ -88,7 +88,7 @@ func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 					kk := time.Now().Format("03:04:05")
 					vv := "Item size is now " + value
 					data.ActionMap.SetString(kk, vv)
-					data.Actions.AppendItem(dataapi.NewString(kk + ":" + vv))
+					data.Actions.Append(dataapi.NewString(kk + ":" + vv))
 				}).Bind(data.Size)),
 			// A slider widget bound to a Float dataItem
 			widget.NewFormItem("Delivery", widget.NewSlider(0.0, 100.0).Bind(data.DeliveryTime)),

@@ -44,13 +44,13 @@ func (c *ImageCache) Get(urlStr string) (fyne.Resource, error) {
 type ImageWidget struct {
 	widget.BaseWidget
 	widget.DataListener
-	cache   *ImageCache
-	urlStr  string
-	imgRes  fyne.Resource
-	img     *canvas.Image
-	LoadErr error
-	OnBind  func(string)
-	hovered bool
+	cache         *ImageCache
+	urlStr        string
+	imgRes        fyne.Resource
+	img           *canvas.Image
+	LoadErr       error
+	UpdateBinding func(string)
+	hovered       bool
 }
 
 // NewImageWidget returns a new ImageWidget
@@ -86,8 +86,8 @@ func (w *ImageWidget) load() {
 // SetURL updates the url, and propogates the change to the bound data
 func (w *ImageWidget) SetURL(urlStr string) {
 	w.urlStr = urlStr
-	if w.OnBind != nil {
-		w.OnBind(urlStr)
+	if w.UpdateBinding != nil {
+		w.UpdateBinding(urlStr)
 	}
 	w.load()
 }

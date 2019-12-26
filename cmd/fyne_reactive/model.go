@@ -20,7 +20,7 @@ type DataModel struct {
 	URL          *dataapi.String
 	Image        *dataapi.String
 	ActionMap    *dataapi.DataItemMap
-	Actions      *dataapi.BaseDataSource
+	Actions      *dataapi.SliceDataSource
 
 	NumWindows int
 	FyneImage  *canvas.Image
@@ -53,6 +53,6 @@ func NewDataModel() *DataModel {
 		NumWindows:   0,
 		FyneImage:    canvas.NewImageFromResource(img),
 		ActionMap:    dataapi.NewDataItemMap(),
-		Actions:      dataapi.NewBaseDataSource(),
+		Actions:      dataapi.NewSliceDataSource(),
 	}
 }

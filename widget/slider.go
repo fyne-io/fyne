@@ -31,9 +31,9 @@ type Slider struct {
 	Max   float64
 	Step  float64
 
-	Orientation Orientation
-	OnChanged   func(float64)
-	OnBind      func(float64)
+	Orientation   Orientation
+	OnChanged     func(float64)
+	UpdateBinding func(float64)
 }
 
 // NewSlider returns a basic slider.
@@ -84,8 +84,8 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
 	}
-	if s.OnBind != nil {
-		s.OnBind(s.Value)
+	if s.UpdateBinding != nil {
+		s.UpdateBinding(s.Value)
 	}
 }
 

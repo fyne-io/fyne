@@ -169,9 +169,9 @@ type Radio struct {
 	Options  []string
 	Selected string
 
-	OnChanged  func(string) `json:"-"`
-	OnBind     func(string) `json:"-"`
-	Horizontal bool
+	OnChanged     func(string) `json:"-"`
+	UpdateBinding func(string) `json:"-"`
+	Horizontal    bool
 
 	hoveredItemIndex int
 }
@@ -245,8 +245,8 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	if r.OnChanged != nil {
 		r.OnChanged(r.Selected)
 	}
-	if r.OnBind != nil {
-		r.OnBind(r.Selected)
+	if r.UpdateBinding != nil {
+		r.UpdateBinding(r.Selected)
 	}
 	r.Refresh()
 }
