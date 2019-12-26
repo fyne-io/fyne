@@ -8,8 +8,7 @@ import (
 )
 
 func welcomeScreen(data *DataModel) fyne.CanvasObject {
-	eCountry := widget.NewEntry().Bind(data.SelectedCountry)
-	eState := widget.NewEntry().Bind(data.SelectedState)
+	eCountry := widget.NewEntry()
 
 	setCountry := func(country string) {
 		data.StatesList.SetFromStringSlice(data.CountryAndState.GetStates(country))
@@ -38,8 +37,10 @@ func welcomeScreen(data *DataModel) fyne.CanvasObject {
 					Bind(data.SelectedCountry)),
 				widget.NewFormItem("Selected State", widget.NewLabel("").
 					Bind(data.SelectedState)),
-				widget.NewFormItem("Edit Country", eCountry),
-				widget.NewFormItem("Edit State", eState),
+				widget.NewFormItem("Edit Country", eCountry.
+					Bind(data.SelectedCountry)),
+				widget.NewFormItem("Edit State", widget.NewEntry().
+					Bind(data.SelectedState)),
 			),
 		),
 	)
