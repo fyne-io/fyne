@@ -101,8 +101,8 @@ type Check struct {
 	Text    string
 	Checked bool
 
-	OnChanged func(bool) `json:"-"`
-	OnBind    func(bool) `json:"-"`
+	OnChanged       func(bool) `json:"-"`
+	UpdateBoundData func(bool) `json:"-"`
 
 	focused bool
 	hovered bool
@@ -119,8 +119,8 @@ func (c *Check) SetChecked(checked bool) {
 	if c.OnChanged != nil {
 		c.OnChanged(c.Checked)
 	}
-	if c.OnBind != nil {
-		c.OnBind(c.Checked)
+	if c.UpdateBoundData != nil {
+		c.UpdateBoundData(c.Checked)
 	}
 	c.Refresh()
 }

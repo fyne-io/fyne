@@ -19,6 +19,7 @@ type DataModel struct {
 	DeliveryTime *dataapi.Float
 	URL          *dataapi.String
 	Image        *dataapi.String
+	Actions      *dataapi.DataItemMap
 	NumWindows   int
 	FyneImage    *canvas.Image
 }
@@ -49,5 +50,6 @@ func NewDataModel() *DataModel {
 		Image:        dataapi.NewString(FyneAvatar),
 		NumWindows:   0,
 		FyneImage:    canvas.NewImageFromResource(img),
+		Actions:      dataapi.NewDataItemMap(),
 	}
 }

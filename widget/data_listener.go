@@ -12,6 +12,11 @@ type DataSetter interface {
 	SetFromData(dataapi.DataItem)
 }
 
+// DataMapSetter interface
+type DataMapSetter interface {
+	SetFromData(dataapi.DataMap)
+}
+
 // DataListener is a base struct that all DataAPI aware widgets can embed
 type DataListener struct {
 	data       dataapi.DataItem
@@ -34,14 +39,14 @@ func getFunction(obj interface{}, name string) (reflect.Value, bool) {
 
 // Bind will Bind this widget to the given DataItem
 // It takes a DataItem, and an object that can be set from a DataItem
-// It sets the OnBind() callback function on the setter object passed in
+// It sets the UpdateBoundData() callback function on the setter object passed in
 // to a new function that correctly handles the type of the DataItem
 func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 	d.data = data
 	d.listenerID = data.AddListener(setter.SetFromData)
 	setter.SetFromData(data)
 
-	if f, ok := getFunction(setter, "OnBind"); ok {
+	if f, ok := getFunction(setter, "UpdateBoundData"); ok {
 		ftype := f.Type().String()
 		switch ftype {
 		case "func(string)":

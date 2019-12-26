@@ -16,6 +16,7 @@ type DataItem interface {
 // The change listener is called when an item (or multiple) within the map is changed.
 // AddMapListener fires when the number of map elements change.
 type DataMap interface {
+	String() string
 	Get(string) (DataItem, bool)
 	AddListener(func(DataMap)) int
 	DeleteListener(int)
