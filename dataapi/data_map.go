@@ -49,6 +49,7 @@ func (b *DataItemMap) UpdateItem(key string, data DataItem) {
 	b.update()
 }
 
+// SetString sets a map value given a string
 func (b *DataItemMap) SetString(key, value string) {
 	b.Lock()
 	b.data[key] = NewString(value)

@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"time"
 
+	"fyne.io/fyne/dataapi"
+
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 
@@ -56,11 +58,15 @@ func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 					if checked {
 						data.Image.Set(FyneAvatarAvail, 0)
 					}
+					kk := time.Now().Format("03:04:05")
+					vv := "Item size is "
 					if checked {
-						data.Actions.SetString(time.Now().Format("03:04:05"), "Item Is Now Available :)")
+						vv = vv + "Now Available       :)"
 					} else {
-						data.Actions.SetString(time.Now().Format("03:04:05"), "Item Is no longer Available :(")
+						vv = vv + "no longer Available :("
 					}
+					data.ActionMap.SetString(kk, vv)
+					data.Actions.AppendItem(dataapi.NewString(kk + ":" + vv))
 				}).Bind(data.IsAvailable)),
 
 			// A radioButton bound to an Int dataItem
@@ -79,7 +85,10 @@ func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 					default:
 						data.Image.Set(FyneAvatar, 0)
 					}
-					data.Actions.SetString(time.Now().Format("03:04:05"), "Item size is now "+value)
+					kk := time.Now().Format("03:04:05")
+					vv := "Item size is now " + value
+					data.ActionMap.SetString(kk, vv)
+					data.Actions.AppendItem(dataapi.NewString(kk + ":" + vv))
 				}).Bind(data.Size)),
 			// A slider widget bound to a Float dataItem
 			widget.NewFormItem("Delivery", widget.NewSlider(0.0, 100.0).Bind(data.DeliveryTime)),
