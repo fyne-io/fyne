@@ -58,5 +58,7 @@ func (c *CountryAndStateDB) Keys() []string {
 }
 
 func (c *CountryAndStateDB) GetStates(country string) []string {
-	return c.data[country]
+	data := c.data[country]
+	sort.Strings(data)
+	return data
 }
