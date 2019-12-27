@@ -19,6 +19,7 @@ type DataModel struct {
 	Clock           *dataapi.Clock
 }
 
+// NewDataModel returns a new DataModel
 func NewDataModel() *DataModel {
 	cs := NewCountryAndStateDB(
 		map[string][]string{
@@ -39,10 +40,12 @@ func NewDataModel() *DataModel {
 	}
 }
 
+// CountryAndStateDB is a map of all the states available in each country
 type CountryAndStateDB struct {
 	data map[string][]string
 }
 
+// NewCountryAndStateDB returns a new CountryAndStateDB
 func NewCountryAndStateDB(data map[string][]string) *CountryAndStateDB {
 	return &CountryAndStateDB{data: data}
 }
@@ -57,6 +60,7 @@ func (c *CountryAndStateDB) Keys() []string {
 	return data
 }
 
+// GetStates returns all the states for a given country
 func (c *CountryAndStateDB) GetStates(country string) []string {
 	data := c.data[country]
 	sort.Strings(data)
