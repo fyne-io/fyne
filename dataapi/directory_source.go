@@ -15,6 +15,7 @@ type FileInfo struct {
 	fileInfo os.FileInfo
 }
 
+// NewFileInfo returns a new FileInfo dataItem
 func NewFileInfo(f os.FileInfo) *FileInfo {
 	return &FileInfo{
 		DataItem: NewBaseDataItem(),
