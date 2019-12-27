@@ -68,7 +68,6 @@ which in turn triggers a repaint on the other subscribed views.`),
 		widget.NewScrollContainer(
 			fyne.NewContainerWithLayout(layout.NewGridLayout(1),
 				widget.NewMultiLineEntry().Bind(data.ActionMap),
-				widget.NewMultiLineEntry().Bind(data.Actions),
 			),
 		),
 	)
