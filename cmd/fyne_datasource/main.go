@@ -17,7 +17,7 @@ func welcomeScreen(data *DataModel) fyne.CanvasObject {
 
 	eCountry.OnChanged = setCountry
 
-	return fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+	return fyne.NewContainerWithLayout(layout.NewGridLayout(1),
 		widget.NewVBox(
 			widget.NewLabelWithStyle(
 				"Fyne Reactive Data Select Country Demo",
@@ -51,8 +51,6 @@ func main() {
 	a := app.NewWithID("io.fyne.reactive_select")
 	w := a.NewWindow("Fyne Reactive Select Demo")
 	w.SetMaster()
-
 	w.SetContent(welcomeScreen(data))
-
 	w.ShowAndRun()
 }
