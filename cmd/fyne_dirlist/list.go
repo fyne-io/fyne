@@ -8,17 +8,18 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-// List is a custom widget to list the contents of a set of files
+// FileList is a custom widget to list the contents of a set of files
 type FileList struct {
 	widget.Box
 	widget.DataListener
 }
 
+// NewFileList returns a new FileList
 func NewFileList() *FileList {
 	return &FileList{}
 }
 
-// Bind will link the selected file to the dataItem
+// Source sets the dataSource for the file list
 func (w *FileList) Source(data dataapi.DataSource) *FileList {
 	w.DataListener.Source(data, w)
 	return w
