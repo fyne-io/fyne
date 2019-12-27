@@ -3,6 +3,7 @@ package widget
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"fyne.io/fyne/dataapi"
 )
@@ -68,6 +69,12 @@ func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 						return nil
 					}))
 				}
+			} else if s, ok := data.(dataapi.SettableFloat); ok {
+				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
+					vv, _ := strconv.ParseFloat(in[0].String(), 64)
+					s.SetFloat(vv, d.listenerID)
+					return nil
+				}))
 			}
 		case "func(bool)":
 			if s, ok := data.(dataapi.SettableBool); ok {

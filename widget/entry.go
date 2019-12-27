@@ -313,6 +313,12 @@ func (e *Entry) Enable() { // TODO remove this override after ReadOnly is remove
 	e.DisableableWidget.Enable()
 }
 
+// SetOnChanged sets the onChanged and returns the entry to allow chaining
+func (e *Entry) SetOnChanged(f func(string)) *Entry {
+	e.OnChanged = f
+	return e
+}
+
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 func (e *Entry) Disable() { // TODO remove this override after ReadOnly is removed
 	e.ReadOnly = true
@@ -327,11 +333,11 @@ func (e *Entry) updateText(text string) {
 	e.Text = text
 	e.Unlock()
 	if changed {
-		if e.OnChanged != nil {
-			e.OnChanged(text)
-		}
 		if e.UpdateBinding != nil {
 			e.UpdateBinding(text)
+		}
+		if e.OnChanged != nil {
+			e.OnChanged(text)
 		}
 	}
 	e.Refresh()

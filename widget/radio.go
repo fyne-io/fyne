@@ -242,11 +242,11 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 		r.Selected = clicked
 	}
 
-	if r.OnChanged != nil {
-		r.OnChanged(r.Selected)
-	}
 	if r.UpdateBinding != nil {
 		r.UpdateBinding(r.Selected)
+	}
+	if r.OnChanged != nil {
+		r.OnChanged(r.Selected)
 	}
 	r.Refresh()
 }

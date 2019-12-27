@@ -60,8 +60,3 @@ func (w *FileList) Tapped(ev *fyne.PointEvent) {
 func (w *FileList) TappedSecondary(ev *fyne.PointEvent) {
 	println("tapped 2nd")
 }
-
-// MinSize returns the minimum size for this list
-func (w *FileList) MinSize() fyne.Size {
-	return fyne.Size{800, 800}
-}

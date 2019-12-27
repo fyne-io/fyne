@@ -203,11 +203,11 @@ func (s *Select) SetSelected(text string) {
 		}
 	}
 
-	if s.OnChanged != nil {
-		s.OnChanged(text)
-	}
 	if s.UpdateBinding != nil {
 		s.UpdateBinding(text)
+	}
+	if s.OnChanged != nil {
+		s.OnChanged(text)
 	}
 
 	s.Refresh()

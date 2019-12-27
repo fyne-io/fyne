@@ -65,9 +65,19 @@ func (s *Slider) Bind(data dataapi.DataItem) *Slider {
 
 // SetFromData is called when the bound data changes
 func (s *Slider) SetFromData(data dataapi.DataItem) {
-	if ii, ok := data.(*dataapi.Float); ok {
-		s.SetFloat(ii.Value())
+	if ff, ok := data.(*dataapi.Float); ok {
+		s.SetFloat(ff.Value())
+		return
 	}
+	if ii, ok := data.(*dataapi.Int); ok {
+		s.SetFloat(float64(ii.Value()))
+	}
+}
+
+// SetOnChanged sets the onChanged and returns the entry to allow chaining
+func (s *Slider) SetOnChanged(f func(float64)) *Slider {
+	s.OnChanged = f
+	return s
 }
 
 // DragEnd function.
@@ -81,11 +91,11 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	s.updateValue(ratio)
 	s.Refresh()
 
-	if s.OnChanged != nil {
-		s.OnChanged(s.Value)
-	}
 	if s.UpdateBinding != nil {
 		s.UpdateBinding(s.Value)
+	}
+	if s.OnChanged != nil {
+		s.OnChanged(s.Value)
 	}
 }
 
@@ -266,3 +276,4 @@ func (s *sliderRenderer) getOffset() int {
 
 	return endPad
 }
+
