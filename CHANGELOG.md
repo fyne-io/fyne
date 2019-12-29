@@ -3,6 +3,13 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 1.2.2 - Ongoing
+
+### Fixed
+
+* Entries that are extended would crash on right click.
+
+
 ## 1.2.1 - 24 December 2019
 
 ### Added
