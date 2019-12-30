@@ -1371,7 +1371,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 		// action icon is not displayed
 		actionIcon := Renderer(entry).(*entryRenderer).entry.passwordRevealer
-		assert.Nil(t, actionIcon)
+		assert.NotNil(t, actionIcon)
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
@@ -1384,7 +1384,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
 		assert.True(t, entry.Focused())
-		assert.Nil(t, actionIcon)
+		assert.NotNil(t, actionIcon)
 	})
 }
 
