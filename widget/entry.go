@@ -491,8 +491,13 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 		e.CursorColumn += len(runes)
 	} else {
 		e.CursorRow += newlines
-		lastNewline := strings.LastIndex(text, "\n")
-		e.CursorColumn = len(runes) - lastNewline - 1
+		lastNewlineIndex := 0
+		for i, r := range runes {
+			if r == '\n' {
+				lastNewlineIndex = i
+			}
+		}
+		e.CursorColumn = len(runes) - lastNewlineIndex - 1
 	}
 	e.updateText(provider.String())
 	cache.Renderer(e).(*entryRenderer).moveCursor()
