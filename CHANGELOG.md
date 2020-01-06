@@ -8,6 +8,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Fixed
 
 * Entries that are extended would crash on right click.
+* PasswordEntry created from Entry with Password = true has no revealer
+* Pasting unicode characters could panic (#597)
 
 
 ## 1.2.1 - 24 December 2019
