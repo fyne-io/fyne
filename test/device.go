@@ -19,3 +19,7 @@ func (d *device) IsMobile() bool {
 func (d *device) HasKeyboard() bool {
 	return false
 }
+
+func (d *device) SystemScale() float32 {
+	return 1
+}

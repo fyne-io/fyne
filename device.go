@@ -29,6 +29,7 @@ type Device interface {
 	Orientation() DeviceOrientation
 	IsMobile() bool
 	HasKeyboard() bool
+	SystemScale() float32
 }
 
 // CurrentDevice returns the device information for the current hardware (via the driver)
