@@ -127,14 +127,9 @@ func (c *mobileCanvas) Scale() float32 {
 	return c.scale
 }
 
-func (c *mobileCanvas) SetScale(scale float32) {
-	if scale == fyne.SettingsScaleAuto {
-		c.scale = fyne.CurrentDevice().SystemScale()
-	} else if scale == 0 { // not set in the config
-		return
-	} else {
-		c.scale = fyne.CurrentDevice().SystemScale() * scale
-	}
+// Deprecated: Settings are now calculated solely on the user configuration and system setup.
+func (c *mobileCanvas) SetScale(_ float32) {
+	c.scale = fyne.CurrentDevice().SystemScale()
 }
 
 func (c *mobileCanvas) Overlay() fyne.CanvasObject {
