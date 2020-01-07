@@ -301,18 +301,19 @@ func (w *window) userScale() float32 {
 	return 1.0 // user preference for auto is now passed as 1 so the system auto is picked up
 }
 
-func (w *window) selectScale() float32 {
-	user := w.userScale()
+func calculateScale(user, system, detected float32) float32 {
 	if user == fyne.SettingsScaleAuto {
 		user = 1.0
 	}
 
-	system := fyne.CurrentDevice().SystemScale()
 	if system == fyne.SettingsScaleAuto {
-		system = w.detectScale()
+		system = detected
 	}
 
 	return system * user
+}
+func (w *window) calculatedScale() float32 {
+	return calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(), w.detectScale())
 }
 
 func (w *window) detectScale() float32 {
@@ -443,7 +444,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	}
 
 	w.canvas.detectedScale = w.detectScale()
-	w.canvas.SetScale(w.selectScale())
+	w.canvas.SetScale(fyne.SettingsScaleAuto) // scale is ignored
 	w.rescaleOnMain()
 }
 
@@ -1107,7 +1108,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret.canvas.painter.Init()
 		ret.canvas.context = ret
 		ret.canvas.detectedScale = ret.detectScale()
-		ret.canvas.scale = ret.selectScale()
+		ret.canvas.scale = ret.calculatedScale()
 		ret.SetIcon(ret.icon)
 		d.windows = append(d.windows, ret)
 
