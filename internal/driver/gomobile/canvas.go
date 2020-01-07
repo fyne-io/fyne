@@ -129,11 +129,11 @@ func (c *mobileCanvas) Scale() float32 {
 
 func (c *mobileCanvas) SetScale(scale float32) {
 	if scale == fyne.SettingsScaleAuto {
-		c.scale = deviceScale()
+		c.scale = fyne.CurrentDevice().SystemScale()
 	} else if scale == 0 { // not set in the config
 		return
 	} else {
-		c.scale = scale
+		c.scale = fyne.CurrentDevice().SystemScale() * scale
 	}
 }
 
@@ -352,7 +352,7 @@ func (c *mobileCanvas) setupThemeListener() {
 // NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.
 func NewCanvas() fyne.Canvas {
 	ret := &mobileCanvas{padded: true}
-	ret.scale = deviceScale()
+	ret.scale = fyne.CurrentDevice().SystemScale()
 	ret.refreshQueue = make(chan fyne.CanvasObject, 1024)
 	ret.touched = make(map[int]mobile.Touchable)
 	ret.lastTapDownPos = make(map[int]fyne.Position)

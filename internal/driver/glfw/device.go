@@ -1,6 +1,10 @@
 package glfw
 
-import "fyne.io/fyne"
+import (
+	"runtime"
+
+	"fyne.io/fyne"
+)
 
 type glDevice struct {
 }
@@ -18,4 +22,12 @@ func (*glDevice) IsMobile() bool {
 
 func (*glDevice) HasKeyboard() bool {
 	return true // TODO actually check - we could be in tablet mode
+}
+
+func (*glDevice) SystemScale() float32 {
+	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+		return 1.0
+	}
+
+	return fyne.SettingsScaleAuto
 }
