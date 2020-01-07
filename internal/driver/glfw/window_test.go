@@ -568,6 +568,32 @@ func TestWindow_PixelSize(t *testing.T) {
 	assert.Equal(t, internal.ScaleInt(w.Canvas(), 100), winH)
 }
 
+var scaleTests = []struct {
+	user, system, detected, expected float32
+	name                             string
+}{
+	{1.0, 1.0, 1.0, 1.0, "Windows with user setting 1.0"},
+	{fyne.SettingsScaleAuto, 1.0, 1.0, 1.0, "Windows with user legacy setting auto"},
+	{1.5, 1.0, 1.0, 1.5, "Windows with user setting 1.5"},
+
+	{1.0, fyne.SettingsScaleAuto, 1.0, 1.0, "Linux lowDPI with user setting 1.0"},
+	{fyne.SettingsScaleAuto, fyne.SettingsScaleAuto, 1.0, 1.0, "Linux lowDPI with user legacy setting auto"},
+	{1.5, fyne.SettingsScaleAuto, 1.0, 1.5, "Linux lowDPI with user setting 1.5"},
+
+	{1.0, fyne.SettingsScaleAuto, 2.0, 2.0, "Linux highDPI with user setting 1.0"},
+	{fyne.SettingsScaleAuto, fyne.SettingsScaleAuto, 2.0, 2.0, "Linux highDPI with user legacy setting auto"},
+	{1.5, fyne.SettingsScaleAuto, 2.0, 3.0, "Linux highDPI with user setting 1.5"},
+}
+
+func TestWindow_calculateScale(t *testing.T) {
+	for _, tt := range scaleTests {
+		t.Run(tt.name, func(t *testing.T) {
+			calculated := calculateScale(tt.user, tt.system, tt.detected)
+			assert.Equal(t, tt.expected, calculated)
+		})
+	}
+}
+
 func TestWindow_Padded(t *testing.T) {
 	w := d.CreateWindow("Test")
 	content := canvas.NewRectangle(color.White)
