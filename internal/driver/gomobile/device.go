@@ -14,7 +14,7 @@ var currentOrientation size.Orientation
 // Declare conformity with Device
 var _ fyne.Device = (*device)(nil)
 
-func (device) Orientation() fyne.DeviceOrientation {
+func (*device) Orientation() fyne.DeviceOrientation {
 	switch currentOrientation {
 	case size.OrientationLandscape:
 		return fyne.OrientationHorizontalLeft
@@ -23,10 +23,10 @@ func (device) Orientation() fyne.DeviceOrientation {
 	}
 }
 
-func (device) IsMobile() bool {
+func (*device) IsMobile() bool {
 	return true
 }
 
-func (device) HasKeyboard() bool {
+func (*device) HasKeyboard() bool {
 	return false
 }
