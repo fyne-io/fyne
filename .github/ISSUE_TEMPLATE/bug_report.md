@@ -7,21 +7,32 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+### Describe the bug:
+<!-- A clear and concise description of what the bug is. -->
 
-**To Reproduce**
-Steps to reproduce the behavior:
+
+### To Reproduce:
+Steps to reproduce the behaviour:
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+### Screenshots:
+<!-- If applicable, add screenshots to help explain your problem. -->
 
-**Device (please complete the following information):**
- - OS: [e.g. Linux, iOS]
- - Version [e.g. 22]
- - Go version [e.g. 1.12]
- - Fyne version [e.g. 1.1 or git SHA]
+
+### Example code:
+<!-- If applicable, add a short code snippet to help exaplain and simplify reproduction of the problem. -->
+<!-- Please write the code inside a code block with go syntax, like this:
+```go
+Write your code here.
+```
+-->
+
+
+### Device (please complete the following information):
+ - OS: [e.g. Linux, MacOS or iOS]
+ - Version: [e.g. 22]
+ - Go version: [e.g. 1.12.3]
+ - Fyne version: [e.g. 1.2.0 or git SHA]
