@@ -33,6 +33,8 @@ func writeResource(file, name string) {
 }
 
 func writeHeader(pkg string) {
+	fmt.Println("// auto-generated")
+	fmt.Println()
 	fmt.Println("package", pkg)
 	fmt.Println()
 	fmt.Println("import \"fyne.io/fyne\"")
