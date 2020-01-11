@@ -124,7 +124,7 @@ func (s *Select) optionTapped(text string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (s *Select) Tapped(*fyne.PointEvent) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(s)
+	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
 
 	var items []*fyne.MenuItem
 	for _, option := range s.Options {
@@ -135,7 +135,7 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		items = append(items, item)
 	}
 
-	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s)
+	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
 	popUpPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height))
 
 	s.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, popUpPos)
@@ -202,7 +202,7 @@ func (s *Select) SetSelected(text string) {
 		s.OnChanged(text)
 	}
 
-	Refresh(s)
+	s.Refresh()
 }
 
 // NewSelect creates a new select widget with the set list of options and changes handler
