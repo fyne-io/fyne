@@ -444,7 +444,7 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	}
 
 	w.canvas.detectedScale = w.detectScale()
-	w.canvas.SetScale(fyne.SettingsScaleAuto) // scale is ignored
+	go w.canvas.SetScale(fyne.SettingsScaleAuto) // scale is ignored
 	w.rescaleOnMain()
 }
 
