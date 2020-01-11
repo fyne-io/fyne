@@ -51,7 +51,7 @@ func (e *entryRenderer) MinSize() fyne.Size {
 // This process could be optimized in the scenario where the user is selecting upwards:
 // If the upwards case instead produces an order-reversed slice then only the newest rectangle would
 // require movement and resizing. The existing solution creates a new rectangle and then moves/resizes
-// all rectangles to comply with the occurance order as stated above.
+// all rectangles to comply with the occurrence order as stated above.
 func (e *entryRenderer) buildSelection() {
 	e.entry.RLock()
 	cursorRow, cursorCol := e.entry.CursorRow, e.entry.CursorColumn
