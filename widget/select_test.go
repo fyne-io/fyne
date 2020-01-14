@@ -94,7 +94,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 
 func TestSelectRenderer_ApplyTheme(t *testing.T) {
 	sel := &Select{}
-	render := Renderer(sel).(*selectRenderer)
+	render := test.WidgetRenderer(sel).(*selectRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize

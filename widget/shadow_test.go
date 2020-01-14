@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +14,7 @@ var shadowWidth = 5
 
 func TestShadow_TopShadow(t *testing.T) {
 	s := newShadow(shadowTop, shadowWidth)
-	r := Renderer(s).(*shadowRenderer)
+	r := test.WidgetRenderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
 	assert.Equal(t, []fyne.CanvasObject{r.t}, r.Objects())
@@ -27,7 +27,7 @@ func TestShadow_TopShadow(t *testing.T) {
 
 func TestShadow_BottomShadow(t *testing.T) {
 	s := newShadow(shadowBottom, shadowWidth)
-	r := Renderer(s).(*shadowRenderer)
+	r := test.WidgetRenderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
 	assert.Equal(t, []fyne.CanvasObject{r.b}, r.Objects())
@@ -40,7 +40,7 @@ func TestShadow_BottomShadow(t *testing.T) {
 
 func TestShadow_AroundShadow(t *testing.T) {
 	s := newShadow(shadowAround, shadowWidth)
-	r := Renderer(s).(*shadowRenderer)
+	r := test.WidgetRenderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
 	assert.Equal(t, []fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l}, r.Objects())
@@ -105,7 +105,7 @@ func TestShadow_AroundShadow(t *testing.T) {
 func TestShadow_ApplyTheme(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	s := newShadow(shadowAround, shadowWidth)
-	r := Renderer(s).(*shadowRenderer)
+	r := test.WidgetRenderer(s).(*shadowRenderer)
 	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
 
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
@@ -114,7 +114,7 @@ func TestShadow_ApplyTheme(t *testing.T) {
 }
 
 func TestShadow_BackgroundColor(t *testing.T) {
-	assert.Equal(t, color.Transparent, Renderer(newShadow(shadowAround, theme.Padding())).BackgroundColor())
+	assert.Equal(t, color.Transparent, test.WidgetRenderer(newShadow(shadowAround, theme.Padding())).BackgroundColor())
 }
 
 func TestShadow_MinSize(t *testing.T) {
@@ -126,14 +126,14 @@ func TestShadow_Theme(t *testing.T) {
 	light := theme.LightTheme()
 	fyne.CurrentApp().Settings().SetTheme(light)
 	shadow.Refresh()
-	assert.Equal(t, light.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).l.EndColor)
-	assert.Equal(t, light.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).r.StartColor)
-	assert.Equal(t, light.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).tr.StartColor)
+	assert.Equal(t, light.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).l.EndColor)
+	assert.Equal(t, light.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).r.StartColor)
+	assert.Equal(t, light.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).tr.StartColor)
 
 	dark := theme.DarkTheme()
 	fyne.CurrentApp().Settings().SetTheme(dark)
 	shadow.Refresh()
-	assert.Equal(t, dark.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).r.StartColor)
-	assert.Equal(t, dark.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).r.StartColor)
-	assert.Equal(t, dark.ShadowColor(), cache.Renderer(shadow).(*shadowRenderer).tr.StartColor)
+	assert.Equal(t, dark.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).r.StartColor)
+	assert.Equal(t, dark.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).r.StartColor)
+	assert.Equal(t, dark.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).tr.StartColor)
 }

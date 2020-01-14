@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/test"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -64,7 +65,7 @@ func TestText_MinSize_MultiLine(t *testing.T) {
 	assert.True(t, min2.Height > min.Height)
 
 	yPos := -1
-	for _, text := range Renderer(text).(*textRenderer).texts {
+	for _, text := range test.WidgetRenderer(text).(*textRenderer).texts {
 		assert.True(t, text.Size().Height < min2.Height)
 		assert.True(t, text.Position().Y > yPos)
 		yPos = text.Position().Y
@@ -88,7 +89,7 @@ func TestLabel_ApplyTheme(t *testing.T) {
 	text := NewLabel("Line 1")
 	text.Hide()
 
-	render := Renderer(text).(*textRenderer)
+	render := test.WidgetRenderer(text).(*textRenderer)
 	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
 	text.Show()
 	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
