@@ -71,5 +71,5 @@ type Focusable interface {
 
 // Shortcutable describes any CanvasObject that can respond to shortcut commands (quit, cut, copy, and paste).
 type Shortcutable interface {
-	TypedShortcut(shortcut Shortcut) bool
+	TypedShortcut(Shortcut)
 }
