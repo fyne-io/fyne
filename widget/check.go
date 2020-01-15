@@ -116,11 +116,11 @@ func (c *Check) SetChecked(checked bool) {
 
 	c.Checked = checked
 
-	if c.OnChanged != nil {
-		c.OnChanged(c.Checked)
-	}
 	if c.UpdateBoundData != nil {
 		c.UpdateBoundData(c.Checked)
+	}
+	if c.OnChanged != nil {
+		c.OnChanged(c.Checked)
 	}
 	c.Refresh()
 }

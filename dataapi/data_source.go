@@ -18,7 +18,7 @@ type SliceDataSource struct {
 // NewSliceDataSource returns a new SliceDataSource
 func NewSliceDataSource(data []DataItem) *SliceDataSource {
 	return &SliceDataSource{
-		Data: data,
+		Data:      data,
 		callbacks: make(map[int]func(DataSource)),
 	}
 }
