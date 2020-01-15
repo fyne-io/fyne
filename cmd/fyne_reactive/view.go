@@ -74,7 +74,7 @@ func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 				[]string{"Small", "Medium", "Large"},
 				func(value string) {
 					println("Radio button changed to", value)
-					data.URL.SetString("http://myurl.com/"+value)
+					data.URL.SetString("http://myurl.com/" + value)
 					switch value {
 					case "Small":
 						data.Image.SetString(FyneAvatarSm)
