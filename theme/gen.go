@@ -14,6 +14,9 @@ import (
 
 const fontFace = "NotoSans"
 
+const fileHeader = "// auto-generated\n" + // to exclude this file in goreportcard
+	"// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //"
+
 func formatVariable(name string) string {
 	str := strings.Replace(name, "-", "", -1)
 	return strings.Replace(str, "_", "", -1)
@@ -64,7 +67,7 @@ func openFile(filename string) *os.File {
 		return nil
 	}
 
-	_, err = f.WriteString("// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //\n\npackage theme\n\nimport \"fyne.io/fyne\"\n\n")
+	_, err = f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne\"\n\n")
 	if err != nil {
 		fyne.LogError("Unable to write file "+filename, err)
 		return nil

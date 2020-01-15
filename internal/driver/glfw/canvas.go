@@ -180,22 +180,12 @@ func (c *glCanvas) Scale() float32 {
 
 // SetScale sets the render scale for this specific canvas
 //
-// Deprecated: SetScale will be replaced by system wide settings in the future
-func (c *glCanvas) SetScale(scale float32) {
-	c.setScaleValue(scale)
+// Deprecated: Settings are now calculated solely on the user configuration and system setup.
+func (c *glCanvas) SetScale(_ float32) {
+	c.scale = c.context.(*window).calculatedScale()
+	c.setDirty(true)
 
 	c.context.RescaleContext()
-}
-
-func (c *glCanvas) setScaleValue(scale float32) {
-	if scale == fyne.SettingsScaleAuto {
-		c.scale = c.detectedScale
-	} else if scale == 0 {
-		return
-	} else {
-		c.scale = scale
-	}
-	c.setDirty(true)
 }
 
 func (c *glCanvas) OnTypedRune() func(rune) {

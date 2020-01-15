@@ -1371,7 +1371,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 		// action icon is not displayed
 		actionIcon := Renderer(entry).(*entryRenderer).entry.passwordRevealer
-		assert.Nil(t, actionIcon)
+		assert.NotNil(t, actionIcon)
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
@@ -1384,7 +1384,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
 		assert.True(t, entry.Focused())
-		assert.Nil(t, actionIcon)
+		assert.NotNil(t, actionIcon)
 	})
 }
 
@@ -1440,4 +1440,22 @@ func TestEntry_PageUpDown(t *testing.T) {
 		assert.Equal(t, 2, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
 	})
+}
+
+func TestEntry_PasteUnicode(t *testing.T) {
+	e := NewMultiLineEntry()
+	e.SetText("line")
+	e.CursorColumn = 4
+
+	clipboard := test.NewClipboard()
+	clipboard.SetContent("thing {\n\titem: 'val测试'\n}")
+	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
+	handled := e.TypedShortcut(shortcut)
+
+	assert.True(t, handled)
+	assert.Equal(t, "thing {\n\titem: 'val测试'\n}", clipboard.Content())
+	assert.Equal(t, "linething {\n\titem: 'val测试'\n}", e.Text)
+
+	assert.Equal(t, 2, e.CursorRow)
+	assert.Equal(t, 1, e.CursorColumn)
 }

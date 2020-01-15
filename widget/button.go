@@ -130,7 +130,7 @@ func (b *buttonRenderer) Refresh() {
 	}
 
 	b.Layout(b.button.Size())
-	canvas.Refresh(b.button)
+	canvas.Refresh(b.button.super())
 }
 
 func (b *buttonRenderer) Objects() []fyne.CanvasObject {
@@ -177,13 +177,13 @@ func (b *Button) TappedSecondary(*fyne.PointEvent) {
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
-	Refresh(b)
+	b.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (b *Button) MouseOut() {
 	b.hovered = false
-	Refresh(b)
+	b.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -226,7 +226,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 func (b *Button) SetText(text string) {
 	b.Text = text
 
-	Refresh(b)
+	Refresh(b.super())
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -239,7 +239,7 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 		b.disabledIcon = nil
 	}
 
-	Refresh(b)
+	Refresh(b.super())
 }
 
 // NewButton creates a new button widget with the set label and tap handler

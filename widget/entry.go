@@ -50,7 +50,7 @@ func (e *entryRenderer) MinSize() fyne.Size {
 // This process could be optimized in the scenario where the user is selecting upwards:
 // If the upwards case instead produces an order-reversed slice then only the newest rectangle would
 // require movement and resizing. The existing solution creates a new rectangle and then moves/resizes
-// all rectangles to comply with the occurance order as stated above.
+// all rectangles to comply with the occurrence order as stated above.
 func (e *entryRenderer) buildSelection() {
 	e.entry.RLock()
 	cursorRow, cursorCol := e.entry.CursorRow, e.entry.CursorColumn
@@ -490,8 +490,13 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 		e.CursorColumn += len(runes)
 	} else {
 		e.CursorRow += newlines
-		lastNewline := strings.LastIndex(text, "\n")
-		e.CursorColumn = len(runes) - lastNewline - 1
+		lastNewlineIndex := 0
+		for i, r := range runes {
+			if r == '\n' {
+				lastNewlineIndex = i
+			}
+		}
+		e.CursorColumn = len(runes) - lastNewlineIndex - 1
 	}
 	e.updateText(provider.String())
 	Renderer(e).(*entryRenderer).moveCursor()
@@ -1063,6 +1068,18 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	cursor.Hide()
 
 	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
+
+	if e.Password && e.passwordRevealer == nil {
+		// An entry widget has been created via struct setting manually
+		// the Password field to true. Going to enable the password revealer.
+		pr := &passwordRevealer{
+			icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
+			entry: e,
+		}
+		pr.ExtendBaseWidget(pr)
+
+		e.passwordRevealer = pr
+	}
 
 	if e.passwordRevealer != nil {
 		objects = append(objects, e.passwordRevealer)

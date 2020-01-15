@@ -114,7 +114,13 @@ func (w *BaseWidget) refresh(wid fyne.Widget) {
 	render.Refresh()
 }
 
+// super will return the actual object that this represents.
+// If extended then this is the extending widget, otherwise it is self.
 func (w *BaseWidget) super() fyne.Widget {
+	if w.impl == nil {
+		return w
+	}
+
 	return w.impl
 }
 

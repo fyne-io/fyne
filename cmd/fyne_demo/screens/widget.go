@@ -99,8 +99,6 @@ func makeFormTab() fyne.Widget {
 }
 
 func makeScrollTab() fyne.CanvasObject {
-	logo := canvas.NewImageFromResource(theme.FyneLogo())
-	logo.SetMinSize(fyne.NewSize(320, 320))
 	list := widget.NewHBox()
 	list2 := widget.NewVBox()
 

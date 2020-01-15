@@ -10,7 +10,7 @@ import (
 	"path"
 )
 
-// MinSDK is the targetted sdk version for support by package binres.
+// MinSDK is the targeted sdk version for support by package binres.
 const MinSDK = 15
 
 // Requires environment variable ANDROID_HOME to be set.
