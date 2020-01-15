@@ -1,4 +1,4 @@
-// Package glfw provides a full Fyne desktop driver that uses tje system OpenGL libraries.
+// Package glfw provides a full Fyne desktop driver that uses the system OpenGL libraries.
 // This supports Windows, Mac OS X and Linux using the gl and glfw packages from go-gl.
 package glfw
 

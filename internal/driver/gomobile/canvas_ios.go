@@ -14,6 +14,6 @@ func devicePadding() (topLeft, bottomRight fyne.Size) {
 	}
 }
 
-func deviceScale() float32 {
+func (*device) SystemScale() float32 {
 	return 3 // TODO return 2 for < iPhone X, Xs but 3 for Plus/Max size
 }

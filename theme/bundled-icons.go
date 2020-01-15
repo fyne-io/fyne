@@ -1,3 +1,4 @@
+// auto-generated
 // **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
 
 package theme

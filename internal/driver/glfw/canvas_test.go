@@ -65,7 +65,6 @@ func Test_glCanvas_SetContent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := d.CreateWindow("Test").(*window)
-			w.Canvas().SetScale(1)
 			w.SetPadded(tt.padding)
 			if tt.menu {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))
@@ -118,7 +117,6 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
-	c.SetScale(1)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)
@@ -156,7 +154,6 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
-	c.SetScale(1)
 	leftObj1 := canvas.NewRectangle(color.Black)
 	leftObj1.SetMinSize(fyne.NewSize(50, 50))
 	leftObj2 := canvas.NewRectangle(color.Black)

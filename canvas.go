@@ -19,7 +19,7 @@ type Canvas interface {
 	Scale() float32
 	// SetScale sets ths scale for this canvas only, overriding system and user settings.
 	//
-	// Deprecated: SetScale will be replaced by system wide settings in the future
+	// Deprecated: Settings are now calculated solely on the user configuration and system setup.
 	SetScale(float32)
 
 	Overlay() CanvasObject
