@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -78,7 +79,7 @@ func (s *selectRenderer) Refresh() {
 	}
 
 	s.Layout(s.combo.Size())
-	canvas.Refresh(s.combo)
+	canvas.Refresh(s.combo.super())
 }
 
 func (s *selectRenderer) Objects() []fyne.CanvasObject {
@@ -89,7 +90,7 @@ func (s *selectRenderer) Destroy() {
 	if s.combo.popUp != nil {
 		c := fyne.CurrentApp().Driver().CanvasForObject(s.combo)
 		c.SetOverlay(nil)
-		Renderer(s.combo.popUp).Destroy()
+		cache.Renderer(s.combo.popUp).Destroy()
 		s.combo.popUp = nil
 	}
 }
@@ -149,13 +150,13 @@ func (s *Select) TappedSecondary(*fyne.PointEvent) {
 // MouseIn is called when a desktop pointer enters the widget
 func (s *Select) MouseIn(*desktop.MouseEvent) {
 	s.hovered = true
-	Refresh(s)
+	s.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (s *Select) MouseOut() {
 	s.hovered = false
-	Refresh(s)
+	s.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -207,8 +208,5 @@ func (s *Select) SetSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	combo := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
-
-	Renderer(combo).Layout(combo.MinSize())
-	return combo
+	return &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
 }
