@@ -227,6 +227,12 @@ func NewSelect(options []string, changed func(string)) *Select {
 	return combo
 }
 
+// SetOnChanged to set the onChanged handler using chaining
+func (s *Select) SetOnChanged(f func(string)) *Select {
+	s.OnChanged = f
+	return s
+}
+
 // Source sets the dataSource for the select widget
 func (s *Select) Source(source dataapi.DataSource) *Select {
 	s.source.Source(source, s)

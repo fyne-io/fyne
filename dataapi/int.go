@@ -28,11 +28,11 @@ func (i *Int) Value() int {
 	return i.value
 }
 
-// SetInt - makes the Int dataItem implement 2 way binding
+// SetIntWithMask - makes the Int dataItem implement 2 way binding
 // pass a newInt to set the dataItem, and set mask to ignore
 // the callback with the masked ID.  Pass a mask of 0 to trigger
 // all callbacks.
-func (i *Int) SetInt(newint int, mask int) {
+func (i *Int) SetIntWithMask(newint int, mask int) {
 	if i.locked {
 		return
 	}
@@ -46,4 +46,9 @@ func (i *Int) SetInt(newint int, mask int) {
 		}
 	}
 	i.locked = false
+}
+
+// SetInt sets the value with mask 0
+func (i *Int) SetInt(newint int) {
+	i.SetIntWithMask(newint, 0)
 }

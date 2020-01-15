@@ -18,14 +18,17 @@ func NewString(s string) *String {
 
 // String returns the string representation of the String dataItem
 func (s *String) String() string {
+	if s == nil {
+		return ""
+	}
 	return s.value
 }
 
-// Set - makes the String dataItem implement 2 way binding
+// SetStringWithMask - makes the String dataItem implement 2 way binding
 // pass a newstring to set the dataItem, and set mask to ignore
 // the callback with the masked ID.  Pass a mask of 0 to trigger
 // all callbacks.
-func (s *String) Set(newstring string, mask int) {
+func (s *String) SetStringWithMask(newstring string, mask int) {
 	if s.locked {
 		return
 	}
@@ -39,4 +42,9 @@ func (s *String) Set(newstring string, mask int) {
 		}
 	}
 	s.locked = false
+}
+
+// SetString sets the value with mask 0
+func (s *String) SetString(newstring string) {
+	s.SetStringWithMask(newstring, 0)
 }
