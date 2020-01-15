@@ -1,6 +1,9 @@
 package test
 
-import "fyne.io/fyne"
+import (
+	"fyne.io/fyne"
+	"fyne.io/fyne/internal/cache"
+)
 
 // Tap simulates a left mouse click on the specified object.
 func Tap(obj fyne.Tappable) {
@@ -55,4 +58,10 @@ func Type(obj fyne.Focusable, chars string) {
 // rather than a focusable widget.
 func TypeOnCanvas(c fyne.Canvas, chars string) {
 	typeChars([]rune(chars), c.OnTypedRune())
+}
+
+// WidgetRenderer allows test scripts to gain access to the current renderer for a widget.
+// This can be used for verifying correctness of rendered components for a widget in unit tests.
+func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
+	return cache.Renderer(wid)
 }

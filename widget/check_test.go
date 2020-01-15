@@ -20,7 +20,7 @@ func TestCheckSize(t *testing.T) {
 
 func TestCheck_BackgroundStyle(t *testing.T) {
 	check := NewCheck("Hi", nil)
-	bg := Renderer(check).BackgroundColor()
+	bg := test.WidgetRenderer(check).BackgroundColor()
 
 	assert.Equal(t, bg, theme.BackgroundColor())
 }
@@ -49,7 +49,7 @@ func TestCheckUnChecked(t *testing.T) {
 func TestCheck_DisabledWhenChecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
 	check.SetChecked(true)
-	render := Renderer(check).(*checkRenderer)
+	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	assert.Equal(t, render.icon.Resource.Name(), theme.CheckButtonCheckedIcon().Name())
 
@@ -59,7 +59,7 @@ func TestCheck_DisabledWhenChecked(t *testing.T) {
 
 func TestCheck_DisabledWhenUnchecked(t *testing.T) {
 	check := NewCheck("Hi", nil)
-	render := Renderer(check).(*checkRenderer)
+	render := test.WidgetRenderer(check).(*checkRenderer)
 	assert.Equal(t, render.icon.Resource.Name(), theme.CheckButtonIcon().Name())
 
 	check.Disable()
@@ -131,7 +131,7 @@ func TestCheck_Enable(t *testing.T) {
 
 func TestCheck_Focused(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
-	render := Renderer(check).(*checkRenderer)
+	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	assert.False(t, check.Focused())
 	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
@@ -160,7 +160,7 @@ func TestCheck_Focused(t *testing.T) {
 
 func TestCheck_Hovered(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
-	render := Renderer(check).(*checkRenderer)
+	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	check.SetChecked(true)
 	assert.False(t, check.hovered)
@@ -219,7 +219,7 @@ func TestCheck_Disabled(t *testing.T) {
 
 func TestCheckRenderer_ApplyTheme(t *testing.T) {
 	check := &Check{}
-	render := Renderer(check).(*checkRenderer)
+	render := test.WidgetRenderer(check).(*checkRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize

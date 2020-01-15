@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,7 +61,7 @@ func newTrailingBoldWhiteTextPresenter() textPresenter {
 func TestText_Alignment(t *testing.T) {
 	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
 	text.SetText("Test")
-	assert.Equal(t, fyne.TextAlignTrailing, Renderer(text).(*textRenderer).texts[0].Alignment)
+	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(text).(*textRenderer).texts[0].Alignment)
 }
 
 func TestText_Row(t *testing.T) {
@@ -237,7 +238,7 @@ func TestText_Color(t *testing.T) {
 
 func TestTextRenderer_ApplyTheme(t *testing.T) {
 	label := NewLabel("Test\nLine2")
-	render := Renderer(label).(*textRenderer)
+	render := test.WidgetRenderer(label).(*textRenderer)
 
 	text1 := render.objects[0].(*canvas.Text)
 	text2 := render.objects[0].(*canvas.Text)

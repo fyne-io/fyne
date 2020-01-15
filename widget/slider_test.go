@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,7 +13,7 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
 
-	render := Renderer(slider).(*sliderRenderer)
+	render := test.WidgetRenderer(slider).(*sliderRenderer)
 	diameter := slider.buttonDiameter()
 	wSize := render.slider.Size()
 	tSize := render.track.Size()
@@ -32,7 +33,7 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	slider.Orientation = Vertical
 	slider.Resize(fyne.NewSize(10, 100))
 
-	render := Renderer(slider).(*sliderRenderer)
+	render := test.WidgetRenderer(slider).(*sliderRenderer)
 	diameter := slider.buttonDiameter()
 	wSize := render.slider.Size()
 	tSize := render.track.Size()

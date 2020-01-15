@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/test"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,7 @@ func TestRadio_MinSize(t *testing.T) {
 
 func TestRadio_BackgroundStyle(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
-	bg := Renderer(radio).BackgroundColor()
+	bg := test.WidgetRenderer(radio).BackgroundColor()
 
 	assert.Equal(t, bg, theme.BackgroundColor())
 }
@@ -68,7 +69,7 @@ func TestRadio_Unselected(t *testing.T) {
 func TestRadio_DisableWhenSelected(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
 	radio.SetSelected("Hi")
-	render := Renderer(radio).(*radioRenderer)
+	render := test.WidgetRenderer(radio).(*radioRenderer)
 	resName := render.items[0].icon.Resource.Name()
 
 	assert.Equal(t, resName, theme.RadioButtonCheckedIcon().Name())
@@ -80,7 +81,7 @@ func TestRadio_DisableWhenSelected(t *testing.T) {
 
 func TestRadio_DisableWhenNotSelected(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
-	render := Renderer(radio).(*radioRenderer)
+	render := test.WidgetRenderer(radio).(*radioRenderer)
 	resName := render.items[0].icon.Resource.Name()
 
 	assert.Equal(t, resName, theme.RadioButtonIcon().Name())
@@ -128,26 +129,26 @@ func TestRadio_Append(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
 
 	assert.Equal(t, 1, len(radio.Options))
-	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
+	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 
 	radio.Options = append(radio.Options, "Another")
 	Refresh(radio)
 
 	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 2, len(Renderer(radio).(*radioRenderer).items))
+	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 }
 
 func TestRadio_Remove(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Another"}, nil)
 
 	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 2, len(Renderer(radio).(*radioRenderer).items))
+	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 
 	radio.Options = radio.Options[:1]
 	Refresh(radio)
 
 	assert.Equal(t, 1, len(radio.Options))
-	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
+	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 }
 
 func TestRadio_SetSelected(t *testing.T) {
@@ -184,7 +185,7 @@ func TestRadio_DuplicatedOptions(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Hi", "Hi", "Another", "Another"}, nil)
 
 	assert.Equal(t, 2, len(radio.Options))
-	assert.Equal(t, 2, len(Renderer(radio).(*radioRenderer).items))
+	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 }
 
 func TestRadio_AppendDuplicate(t *testing.T) {
@@ -193,7 +194,7 @@ func TestRadio_AppendDuplicate(t *testing.T) {
 	radio.Append("Hi")
 
 	assert.Equal(t, 1, len(radio.Options))
-	assert.Equal(t, 1, len(Renderer(radio).(*radioRenderer).items))
+	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 }
 
 func TestRadio_Disable(t *testing.T) {
@@ -255,7 +256,7 @@ func TestRadio_Hovered(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			radio := NewRadio(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
-			render := Renderer(radio).(*radioRenderer)
+			render := test.WidgetRenderer(radio).(*radioRenderer)
 
 			assert.Equal(t, noRadioItemIndex, radio.hoveredItemIndex)
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
@@ -321,7 +322,7 @@ func TestRadio_FocusIndicator_Centered_Vertically(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			radio := NewRadio(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
-			render := Renderer(radio).(*radioRenderer)
+			render := test.WidgetRenderer(radio).(*radioRenderer)
 			render.Layout(radio.MinSize())
 
 			heightCenterOffset := (radio.itemHeight() - focusIndicatorSize) / 2
@@ -343,7 +344,7 @@ func TestRadio_FocusIndicator_Centered_Vertically(t *testing.T) {
 
 func TestRadioRenderer_ApplyTheme(t *testing.T) {
 	radio := NewRadio([]string{"Test"}, func(string) {})
-	render := Renderer(radio).(*radioRenderer)
+	render := test.WidgetRenderer(radio).(*radioRenderer)
 
 	item := render.items[0]
 	textSize := item.label.TextSize

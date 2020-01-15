@@ -14,12 +14,12 @@ import (
 
 func entryRenderTexts(e *Entry) []*canvas.Text {
 	textWid := e.text
-	return Renderer(textWid).(*textRenderer).texts
+	return test.WidgetRenderer(textWid).(*textRenderer).texts
 }
 
 func entryRenderPlaceholderTexts(e *Entry) []*canvas.Text {
 	textWid := e.placeholder
-	return Renderer(textWid).(*textRenderer).texts
+	return test.WidgetRenderer(textWid).(*textRenderer).texts
 }
 
 func TestEntry_MinSize(t *testing.T) {
@@ -1053,7 +1053,7 @@ var setupReverse = func() *Entry {
 
 func TestEntry_SelectionHides(t *testing.T) {
 	e := setup()
-	selection := Renderer(e).(*entryRenderer).selection[0]
+	selection := test.WidgetRenderer(e).(*entryRenderer).selection[0]
 
 	e.FocusGained()
 	assert.True(t, selection.Visible())
@@ -1330,7 +1330,7 @@ func TestEntry_EraseEmptySelection(t *testing.T) {
 func TestPasswordEntry_Reveal(t *testing.T) {
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := NewPasswordEntry()
-		actionIcon := Renderer(entry).(*entryRenderer).entry.passwordRevealer
+		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.passwordRevealer
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
@@ -1364,7 +1364,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		entry.Refresh()
 
 		// action icon is not displayed
-		actionIcon := Renderer(entry).(*entryRenderer).entry.passwordRevealer
+		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.passwordRevealer
 		assert.NotNil(t, actionIcon)
 
 		test.Type(entry, "Hié™שרה")

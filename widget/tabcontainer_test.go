@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -55,7 +55,7 @@ func TestTabItem_Content(t *testing.T) {
 	item1 := &TabItem{Text: "Test1", Content: NewLabel("Test1")}
 	item2 := &TabItem{Text: "Test2", Content: NewLabel("Test2")}
 	tabs := NewTabContainer(item1, item2)
-	r := Renderer(tabs).(*tabContainerRenderer)
+	r := test.WidgetRenderer(tabs).(*tabContainerRenderer)
 
 	assert.Equal(t, 2, len(tabs.Items))
 	assert.Equal(t, item1.Content, r.objects[0])
@@ -80,7 +80,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	tab2 := NewTabItem("Test2", NewLabel("Test2"))
 	tab3 := NewTabItem("Test3", NewLabel("Test3"))
 	tabs := NewTabContainer(tab1, tab2, tab3)
-	r := cache.Renderer(tabs).(*tabContainerRenderer)
+	r := test.WidgetRenderer(tabs).(*tabContainerRenderer)
 
 	buttons := r.tabBar.Objects
 	require.Len(t, buttons, 3)
@@ -145,37 +145,37 @@ func Test_tabContainer_Tapped(t *testing.T) {
 		NewTabItem("Test2", NewLabel("Test2")),
 		NewTabItem("Test3", NewLabel("Test3")),
 	)
-	r := Renderer(tabs).(*tabContainerRenderer)
+	r := test.WidgetRenderer(tabs).(*tabContainerRenderer)
 
 	tab1 := r.tabBar.Objects[0].(*tabButton)
 	tab2 := r.tabBar.Objects[1].(*tabButton)
 	tab3 := r.tabBar.Objects[2].(*tabButton)
 	require.Equal(t, 0, tabs.CurrentTabIndex())
-	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab1).BackgroundColor())
 
 	tab2.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
-	require.Equal(t, theme.BackgroundColor(), Renderer(tab1).BackgroundColor())
-	require.Equal(t, theme.PrimaryColor(), Renderer(tab2).BackgroundColor())
-	require.Equal(t, theme.BackgroundColor(), Renderer(tab3).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), test.WidgetRenderer(tab1).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab2).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), test.WidgetRenderer(tab3).BackgroundColor())
 	assert.False(t, tabs.Items[0].Content.Visible())
 	assert.True(t, tabs.Items[1].Content.Visible())
 	assert.False(t, tabs.Items[2].Content.Visible())
 
 	tab3.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 2, tabs.CurrentTabIndex())
-	require.Equal(t, theme.BackgroundColor(), Renderer(tab1).BackgroundColor())
-	require.Equal(t, theme.BackgroundColor(), Renderer(tab2).BackgroundColor())
-	require.Equal(t, theme.PrimaryColor(), Renderer(tab3).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), test.WidgetRenderer(tab1).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), test.WidgetRenderer(tab2).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab3).BackgroundColor())
 	assert.False(t, tabs.Items[0].Content.Visible())
 	assert.False(t, tabs.Items[1].Content.Visible())
 	assert.True(t, tabs.Items[2].Content.Visible())
 
 	tab1.Tapped(&fyne.PointEvent{})
 	assert.Equal(t, 0, tabs.CurrentTabIndex())
-	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
-	require.Equal(t, theme.BackgroundColor(), Renderer(tab2).BackgroundColor())
-	require.Equal(t, theme.BackgroundColor(), Renderer(tab3).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab1).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), test.WidgetRenderer(tab2).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), test.WidgetRenderer(tab3).BackgroundColor())
 	assert.True(t, tabs.Items[0].Content.Visible())
 	assert.False(t, tabs.Items[1].Content.Visible())
 	assert.False(t, tabs.Items[2].Content.Visible())
@@ -187,7 +187,7 @@ func TestTabContainer_Hidden_AsChild(t *testing.T) {
 	ti1 := NewTabItem("Tab 1", c1)
 	ti2 := NewTabItem("Tab 2", c2)
 	tabs := NewTabContainer(ti1, ti2)
-	Renderer(tabs)
+	tabs.Refresh()
 
 	assert.True(t, c1.Visible())
 	assert.False(t, c2.Visible())
@@ -200,11 +200,11 @@ func TestTabContainer_Hidden_AsChild(t *testing.T) {
 func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	tabs := NewTabContainer(&TabItem{Text: "Test1", Content: NewLabel("Test1")})
-	underline := Renderer(tabs).(*tabContainerRenderer).line
+	underline := test.WidgetRenderer(tabs).(*tabContainerRenderer).line
 	barColor := underline.FillColor
 
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
-	Renderer(tabs).Refresh()
+	tabs.Refresh()
 	assert.NotEqual(t, barColor, underline.FillColor)
 }
 
@@ -344,14 +344,14 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tabs := NewTabContainer(tt.item)
-			r := Renderer(tabs).(*tabContainerRenderer)
+			r := test.WidgetRenderer(tabs).(*tabContainerRenderer)
 			require.Len(t, r.tabBar.Objects, 1)
 			tabs.SetTabLocation(tt.location)
 			r.Layout(r.MinSize())
 
 			b := r.tabBar.Objects[0].(*tabButton)
 			assert.Equal(t, tt.wantButtonSize, b.Size())
-			br := Renderer(b).(*tabButtonRenderer)
+			br := test.WidgetRenderer(b).(*tabButtonRenderer)
 			if tt.item.Icon != nil {
 				assert.Equal(t, tt.item.Icon, br.icon.Resource)
 				assert.Equal(t, tt.wantIconSize, br.icon.Size(), "icon size")
@@ -369,7 +369,7 @@ func TestTabContainerRenderer_Layout(t *testing.T) {
 func TestTabContainer_DynamicTabs(t *testing.T) {
 	item := NewTabItem("Text1", canvas.NewCircle(theme.BackgroundColor()))
 	tabs := NewTabContainer(item)
-	r := Renderer(tabs).(*tabContainerRenderer)
+	r := test.WidgetRenderer(tabs).(*tabContainerRenderer)
 
 	appendedItem := NewTabItem("Text2", canvas.NewCircle(theme.BackgroundColor()))
 
@@ -392,7 +392,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 
 func Test_tabButton_Hovered(t *testing.T) {
 	b := &tabButton{}
-	r := Renderer(b)
+	r := test.WidgetRenderer(b)
 	require.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
 
 	b.MouseIn(&desktop.MouseEvent{})
@@ -402,7 +402,7 @@ func Test_tabButton_Hovered(t *testing.T) {
 }
 
 func Test_tabButtonRenderer_BackgroundColor(t *testing.T) {
-	r := Renderer(&tabButton{})
+	r := test.WidgetRenderer(&tabButton{})
 	assert.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
 }
 
@@ -410,7 +410,7 @@ func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
 	item := &TabItem{Text: "Test", Content: NewLabel("Content")}
 	tabs := NewTabContainer(item)
 	tabButton := tabs.makeButton(item)
-	render := Renderer(tabButton).(*tabButtonRenderer)
+	render := test.WidgetRenderer(tabButton).(*tabButtonRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
