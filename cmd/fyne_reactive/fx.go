@@ -128,7 +128,7 @@ func (f *fractal) fractalRune(r rune) {
 	}
 
 	f.transparency = (10 / f.currScale) - 1
-	f.data.DeliveryTime.SetFloat(f.transparency, f.dataid)
+	f.data.DeliveryTime.SetFloatWithMask(f.transparency, f.dataid)
 	f.refresh()
 }
 

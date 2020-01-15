@@ -56,7 +56,7 @@ func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 				func(checked bool) {
 					println("clicked on the avail button", checked)
 					if checked {
-						data.Image.Set(FyneAvatarAvail, 0)
+						data.Image.SetString(FyneAvatarAvail)
 					}
 					kk := time.Now().Format("03:04:05")
 					vv := "Item size is "
@@ -74,16 +74,16 @@ func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 				[]string{"Small", "Medium", "Large"},
 				func(value string) {
 					println("Radio button changed to", value)
-					data.URL.Set("http://myurl.com/"+value, 0)
+					data.URL.SetString("http://myurl.com/"+value)
 					switch value {
 					case "Small":
-						data.Image.Set(FyneAvatarSm, 0)
+						data.Image.SetString(FyneAvatarSm)
 					case "Medium":
-						data.Image.Set(FyneAvatarMd, 0)
+						data.Image.SetString(FyneAvatarMd)
 					case "Large":
-						data.Image.Set(FyneAvatarLg, 0)
+						data.Image.SetString(FyneAvatarLg)
 					default:
-						data.Image.Set(FyneAvatar, 0)
+						data.Image.SetString(FyneAvatar)
 					}
 					kk := time.Now().Format("03:04:05")
 					vv := "Item size is now " + value
@@ -98,7 +98,7 @@ func newView(app fyne.App, data *DataModel, cache *ImageCache) *View {
 				func(checked bool) {
 					println("clicked on the on sale button", checked)
 					if checked {
-						data.Image.Set(FyneAvatarOnSale, 0)
+						data.Image.SetString(FyneAvatarOnSale)
 					}
 				}).Bind(data.OnSale)),
 			// A label widget bound to the same String dataItem as above (ie - true/false)

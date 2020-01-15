@@ -12,7 +12,7 @@ func welcomeScreen(data *DataModel) fyne.CanvasObject {
 
 	setCountry := func(country string) {
 		data.StatesList.SetFromStringSlice(data.CountryAndState.GetStates(country))
-		data.SelectedState.Set("", 0)
+		data.SelectedState.SetString("")
 	}
 
 	eCountry.OnChanged = setCountry

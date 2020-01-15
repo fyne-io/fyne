@@ -23,11 +23,11 @@ func (f *Float) String() string {
 	return fmt.Sprintf("%v", f.value)
 }
 
-// SetFloat - makes the Float dataItem implement 2 way binding
+// SetFloatWithMask - makes the Float dataItem implement 2 way binding
 // pass a newInt to set the dataItem, and set mask to ignore
 // the callback with the masked ID.  Pass a mask of 0 to trigger
 // all callbacks.
-func (f *Float) SetFloat(newfloat float64, mask int) {
+func (f *Float) SetFloatWithMask(newfloat float64, mask int) {
 	if f.locked {
 		return
 	}
@@ -41,6 +41,11 @@ func (f *Float) SetFloat(newfloat float64, mask int) {
 		}
 	}
 	f.locked = false
+}
+
+// SetFloat sets the value with a mask of 0
+func (f *Float) SetFloat(newfloat float64) {
+	f.SetFloatWithMask(newfloat, 0)
 }
 
 // Value returns the float64 value of the Float dataItem

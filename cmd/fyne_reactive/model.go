@@ -53,6 +53,6 @@ func NewDataModel() *DataModel {
 		NumWindows:   0,
 		FyneImage:    canvas.NewImageFromResource(img),
 		ActionMap:    dataapi.NewDataItemMap(),
-		Actions:      dataapi.NewSliceDataSource(),
+		Actions:      dataapi.NewSliceDataSource(nil),
 	}
 }

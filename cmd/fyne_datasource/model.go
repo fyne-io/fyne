@@ -32,8 +32,8 @@ func NewDataModel() *DataModel {
 	)
 	return &DataModel{
 		CountryAndState: cs,
-		CountriesList:   dataapi.NewSliceDataSource().SetFromStringSlice(cs.Keys()),
-		StatesList:      dataapi.NewSliceDataSource(),
+		CountriesList:   dataapi.NewSliceDataSource(nil).SetFromStringSlice(cs.Keys()),
+		StatesList:      dataapi.NewSliceDataSource(nil),
 		SelectedCountry: dataapi.NewString(""),
 		SelectedState:   dataapi.NewString(""),
 		Clock:           dataapi.NewClock(),
