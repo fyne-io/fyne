@@ -793,9 +793,8 @@ func TestEntry_OnCut(t *testing.T) {
 
 	clipboard := test.NewClipboard()
 	shortcut := &fyne.ShortcutCut{Clipboard: clipboard}
-	handled := e.TypedShortcut(shortcut)
+	e.TypedShortcut(shortcut)
 
-	assert.True(t, handled)
 	assert.Equal(t, "sti", clipboard.Content())
 	assert.Equal(t, "Teng", e.Text)
 }
@@ -807,9 +806,8 @@ func TestEntry_OnCut_Password(t *testing.T) {
 
 	clipboard := test.NewClipboard()
 	shortcut := &fyne.ShortcutCut{Clipboard: clipboard}
-	handled := e.TypedShortcut(shortcut)
+	e.TypedShortcut(shortcut)
 
-	assert.True(t, handled)
 	assert.Equal(t, "", clipboard.Content())
 	assert.Equal(t, "Testing", e.Text)
 }
@@ -821,9 +819,8 @@ func TestEntry_OnCopy(t *testing.T) {
 
 	clipboard := test.NewClipboard()
 	shortcut := &fyne.ShortcutCopy{Clipboard: clipboard}
-	handled := e.TypedShortcut(shortcut)
+	e.TypedShortcut(shortcut)
 
-	assert.True(t, handled)
 	assert.Equal(t, "sti", clipboard.Content())
 	assert.Equal(t, "Testing", e.Text)
 }
@@ -835,9 +832,8 @@ func TestEntry_OnCopy_Password(t *testing.T) {
 
 	clipboard := test.NewClipboard()
 	shortcut := &fyne.ShortcutCopy{Clipboard: clipboard}
-	handled := e.TypedShortcut(shortcut)
+	e.TypedShortcut(shortcut)
 
-	assert.True(t, handled)
 	assert.Equal(t, "", clipboard.Content())
 	assert.Equal(t, "Testing", e.Text)
 }
@@ -913,8 +909,7 @@ func TestEntry_OnPaste(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			clipboard.SetContent(tt.clipboardContent)
-			handled := tt.entry.TypedShortcut(shortcut)
-			assert.True(t, handled)
+			tt.entry.TypedShortcut(shortcut)
 			assert.Equal(t, tt.wantText, tt.entry.Text)
 			assert.Equal(t, tt.wantRow, tt.entry.CursorRow)
 			assert.Equal(t, tt.wantCol, tt.entry.CursorColumn)
@@ -930,9 +925,8 @@ func TestEntry_PasteOverSelection(t *testing.T) {
 	clipboard := test.NewClipboard()
 	clipboard.SetContent("Insert")
 	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
-	handled := e.TypedShortcut(shortcut)
+	e.TypedShortcut(shortcut)
 
-	assert.True(t, handled)
 	assert.Equal(t, "Insert", clipboard.Content())
 	assert.Equal(t, "TeInsertng", e.Text)
 }
@@ -1450,9 +1444,8 @@ func TestEntry_PasteUnicode(t *testing.T) {
 	clipboard := test.NewClipboard()
 	clipboard.SetContent("thing {\n\titem: 'val测试'\n}")
 	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
-	handled := e.TypedShortcut(shortcut)
+	e.TypedShortcut(shortcut)
 
-	assert.True(t, handled)
 	assert.Equal(t, "thing {\n\titem: 'val测试'\n}", clipboard.Content())
 	assert.Equal(t, "linething {\n\titem: 'val测试'\n}", e.Text)
 

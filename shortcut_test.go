@@ -29,19 +29,10 @@ func TestShortcutHandler_HandleShortcut(t *testing.T) {
 		pasteCalled = true
 	})
 
-	assert.True(t, handle.TypedShortcut(&ShortcutCut{}))
+	handle.TypedShortcut(&ShortcutCut{})
 	assert.True(t, cutCalled)
-	assert.True(t, handle.TypedShortcut(&ShortcutCopy{}))
+	handle.TypedShortcut(&ShortcutCopy{})
 	assert.True(t, copyCalled)
-	assert.True(t, handle.TypedShortcut(&ShortcutPaste{}))
+	handle.TypedShortcut(&ShortcutPaste{})
 	assert.True(t, pasteCalled)
-}
-
-func TestShortcutHandler_HandleShortcut_Failures(t *testing.T) {
-	handle := &ShortcutHandler{}
-	handle.AddShortcut(&ShortcutPaste{}, func(shortcut Shortcut) {})
-
-	assert.False(t, handle.TypedShortcut(nil))
-	assert.False(t, handle.TypedShortcut(&ShortcutCut{}))
-
 }

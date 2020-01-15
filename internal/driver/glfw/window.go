@@ -974,13 +974,13 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	}
 
 	if shortcut != nil {
-		if shortcutable, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
-			if shortcutable.TypedShortcut(shortcut) {
-				return
-			}
-		} else if w.canvas.shortcut.TypedShortcut(shortcut) {
+		if focused, ok := w.canvas.Focused().(fyne.Shortcutable); ok {
+			w.queueEvent(func() { focused.TypedShortcut(shortcut) })
 			return
 		}
+
+		w.queueEvent(func() { w.canvas.shortcut.TypedShortcut(shortcut) })
+		return
 	}
 
 	// No shortcut detected, pass down to TypedKey

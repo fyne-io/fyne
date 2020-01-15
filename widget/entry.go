@@ -964,8 +964,8 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 }
 
 // TypedShortcut implements the Shortcutable interface
-func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) bool {
-	return e.shortcut.TypedShortcut(shortcut)
+func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
+	e.shortcut.TypedShortcut(shortcut)
 }
 
 // textProvider returns the text handler for this entry
