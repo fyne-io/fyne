@@ -59,7 +59,7 @@ func (l *Label) password() bool {
 
 // object returns the root object of the widget so it can be referenced
 func (l *Label) object() fyne.Widget {
-	return l
+	return l.super()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
