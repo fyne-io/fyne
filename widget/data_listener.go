@@ -59,27 +59,27 @@ func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 		case "func(string)":
 			if s, ok := data.(dataapi.Settable); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
-					s.Set(in[0].String(), d.listenerID)
+					s.SetStringWithMask(in[0].String(), d.listenerID)
 					return nil
 				}))
 			} else if s, ok := data.(dataapi.SettableInt); ok {
 				if ss, ok := setter.(StringToInter); ok {
 					f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
-						s.SetInt(ss.AsInt(in[0].String()), d.listenerID)
+						s.SetIntWithMask(ss.AsInt(in[0].String()), d.listenerID)
 						return nil
 					}))
 				}
 			} else if s, ok := data.(dataapi.SettableFloat); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
 					vv, _ := strconv.ParseFloat(in[0].String(), 64)
-					s.SetFloat(vv, d.listenerID)
+					s.SetFloatWithMask(vv, d.listenerID)
 					return nil
 				}))
 			}
 		case "func(bool)":
 			if s, ok := data.(dataapi.SettableBool); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
-					s.SetBool(in[0].Bool(), d.listenerID)
+					s.SetBoolWithMask(in[0].Bool(), d.listenerID)
 					return []reflect.Value{}
 				}))
 			} else if s, ok := data.(dataapi.Settable); ok {
@@ -89,24 +89,24 @@ func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 					if bb {
 						ss = "true"
 					}
-					s.Set(ss, d.listenerID)
+					s.SetStringWithMask(ss, d.listenerID)
 					return nil
 				}))
 			}
 		case "func(float64)":
 			if s, ok := data.(dataapi.SettableFloat); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
-					s.SetFloat(in[0].Float(), d.listenerID)
+					s.SetFloatWithMask(in[0].Float(), d.listenerID)
 					return nil
 				}))
 			} else if s, ok := data.(dataapi.SettableInt); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
-					s.SetInt(int(in[0].Float()), d.listenerID)
+					s.SetIntWithMask(int(in[0].Float()), d.listenerID)
 					return nil
 				}))
 			} else if s, ok := data.(dataapi.Settable); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
-					s.Set(fmt.Sprintf("%v", in[0].Float()), d.listenerID)
+					s.SetStringWithMask(fmt.Sprintf("%v", in[0].Float()), d.listenerID)
 					return nil
 				}))
 			}

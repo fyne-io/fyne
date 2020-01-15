@@ -16,20 +16,20 @@ package dataapi
 
 // Settable - if the data item is settable using a string
 type Settable interface {
-	Set(string, int)
+	SetStringWithMask(string, int)
 }
 
 // SettableBool - if the data item is settable using a bool
 type SettableBool interface {
-	SetBool(bool, int)
+	SetBoolWithMask(bool, int)
 }
 
 // SettableInt - if the data item is settable using an int
 type SettableInt interface {
-	SetInt(int, int)
+	SetIntWithMask(int, int)
 }
 
 // SettableFloat - if the data item is settable using a float
 type SettableFloat interface {
-	SetFloat(float64, int)
+	SetFloatWithMask(float64, int)
 }

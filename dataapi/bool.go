@@ -29,11 +29,11 @@ func (b *Bool) Value() bool {
 	return b.value
 }
 
-// SetBool - makes the Bool dataItem implement 2 way binding
+// SetBoolWithMask - makes the Bool dataItem implement 2 way binding
 // pass a newvalue to set the dataItem, and set mask to ignore
 // the callback with the masked ID.  Pass a mask of 0 to trigger
 // all callbacks.
-func (b *Bool) SetBool(newvalue bool, mask int) {
+func (b *Bool) SetBoolWithMask(newvalue bool, mask int) {
 	if b.locked {
 		return
 	}
@@ -47,4 +47,9 @@ func (b *Bool) SetBool(newvalue bool, mask int) {
 		}
 	}
 	b.locked = false
+}
+
+// SetBool updates the value with a mask of 0
+func (b *Bool) SetBool(newvalue bool) {
+	b.SetBoolWithMask(newvalue, 0)
 }
