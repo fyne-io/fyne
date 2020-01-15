@@ -276,4 +276,3 @@ func (s *sliderRenderer) getOffset() int {
 
 	return endPad
 }
-
