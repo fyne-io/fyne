@@ -1,9 +1,10 @@
 package dialog
 
 import (
+	"testing"
+
 	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestDialog_MinSize(t *testing.T) {
