@@ -105,8 +105,10 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	textMin := obj[2].MinSize()
 	btnMin := obj[3].MinSize().Union(obj[3].Size())
 
-	return fyne.NewSize(fyne.Max(textMin.Width, btnMin.Width)+padWidth*2,
-		textMin.Height+btnMin.Height+d.label.MinSize().Height+theme.Padding()+padHeight*2)
+	width := fyne.Max(fyne.Max(textMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth*2
+	height := textMin.Height + btnMin.Height + d.label.MinSize().Height + theme.Padding() + padHeight*2
+
+	return fyne.NewSize(width, height)
 }
 
 func (d *dialog) applyTheme() {
