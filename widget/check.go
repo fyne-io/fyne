@@ -82,7 +82,7 @@ func (c *checkRenderer) Refresh() {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
 	}
 
-	canvas.Refresh(c.check)
+	canvas.Refresh(c.check.super())
 }
 
 func (c *checkRenderer) Objects() []fyne.CanvasObject {
@@ -116,7 +116,7 @@ func (c *Check) SetChecked(checked bool) {
 		c.OnChanged(c.Checked)
 	}
 
-	Refresh(c)
+	c.Refresh()
 }
 
 // Hide this widget, if it was previously visible
@@ -135,13 +135,13 @@ func (c *Check) MouseIn(*desktop.MouseEvent) {
 		return
 	}
 	c.hovered = true
-	Refresh(c)
+	c.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (c *Check) MouseOut() {
 	c.hovered = false
-	Refresh(c)
+	c.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -202,14 +202,14 @@ func (c *Check) FocusGained() {
 	}
 	c.focused = true
 
-	Refresh(c)
+	c.Refresh()
 }
 
 // FocusLost is called when the Check has had focus removed.
 func (c *Check) FocusLost() {
 	c.focused = false
 
-	Refresh(c)
+	c.Refresh()
 }
 
 // Focused returns whether or not this Check has focus.
