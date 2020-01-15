@@ -226,7 +226,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 func (b *Button) SetText(text string) {
 	b.Text = text
 
-	Refresh(b.super())
+	b.Refresh()
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -239,7 +239,7 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 		b.disabledIcon = nil
 	}
 
-	Refresh(b.super())
+	b.Refresh()
 }
 
 // NewButton creates a new button widget with the set label and tap handler
