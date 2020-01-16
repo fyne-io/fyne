@@ -360,9 +360,9 @@ func (e *Entry) selection() (int, int) {
 	return e.textPosFromRowCol(rowA, colA), e.textPosFromRowCol(rowB, colB)
 }
 
-// selectedText returns the text currently selected in this Entry.
+// SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
-func (e *Entry) selectedText() string {
+func (e *Entry) SelectedText() string {
 	if e.selecting == false {
 		return ""
 	}
@@ -467,7 +467,7 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 		return
 	}
 
-	clipboard.SetContent(e.selectedText())
+	clipboard.SetContent(e.SelectedText())
 }
 
 // pasteFromClipboard inserts text from the clipboard content,

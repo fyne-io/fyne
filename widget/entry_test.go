@@ -494,13 +494,13 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
-	assert.Equal(t, entry.selectedText(), "Ahnj\nBuki\n")
+	assert.Equal(t, entry.SelectedText(), "Ahnj\nBuki\n")
 
 	me = &desktop.MouseEvent{PointEvent: *ev, Button: desktop.LeftMouseButton}
 	entry.MouseDown(me)
 	entry.MouseUp(me)
 
-	assert.Equal(t, entry.selectedText(), "")
+	assert.Equal(t, entry.SelectedText(), "")
 }
 
 func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
@@ -540,7 +540,7 @@ func TestEntry_DragSelect(t *testing.T) {
 	me = &desktop.MouseEvent{PointEvent: *ev1, Button: desktop.LeftMouseButton}
 	entry.MouseUp(me)
 
-	assert.Equal(t, "r the laz", entry.selectedText())
+	assert.Equal(t, "r the laz", entry.SelectedText())
 }
 
 func getClickPosition(e *Entry, str string, row int) *fyne.PointEvent {
@@ -617,7 +617,7 @@ func TestEntry_DoubleTapped(t *testing.T) {
 	ev := getClickPosition(entry, "The qui", 0)
 	entry.Tapped(ev)
 	entry.DoubleTapped(ev)
-	assert.Equal(t, "quick", entry.selectedText())
+	assert.Equal(t, "quick", entry.SelectedText())
 
 	// select the whitespace after 'quick'
 	ev = getClickPosition(entry, "The quick", 0)
@@ -625,13 +625,13 @@ func TestEntry_DoubleTapped(t *testing.T) {
 	ev.Position.X += textMinSize(" ", theme.TextSize(), entry.textStyle()).Width / 2
 	entry.Tapped(ev)
 	entry.DoubleTapped(ev)
-	assert.Equal(t, " ", entry.selectedText())
+	assert.Equal(t, " ", entry.SelectedText())
 
 	// select all whitespace after 'jumped'
 	ev = getClickPosition(entry, "jumped  ", 1)
 	entry.Tapped(ev)
 	entry.DoubleTapped(ev)
-	assert.Equal(t, "    ", entry.selectedText())
+	assert.Equal(t, "    ", entry.SelectedText())
 }
 
 func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
@@ -647,7 +647,7 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry.Tapped(ev)
 	entry.DoubleTapped(ev)
 
-	assert.Equal(t, "", entry.selectedText())
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_CursorRow(t *testing.T) {
@@ -976,16 +976,14 @@ func TestEntry_SweetSweetCoverage(t *testing.T) {
 	assert.Equal(t, 0, col)
 }
 
-func TestEntry_BasicSelect(t *testing.T) {
-
-	// SeletionStart/SelectionEnd documentation example
+func TestEntry_SelectedText(t *testing.T) {
 	r := NewEntry()
 	r.SetText("Testing")
 	typeKeys(r, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight)
 	a, b := r.selection()
 	assert.Equal(t, 3, a)
 	assert.Equal(t, 5, b)
-	assert.Equal(t, "ti", r.selectedText())
+	assert.Equal(t, "ti", r.SelectedText())
 
 	e := NewEntry()
 	e.SetText("Testing")
@@ -995,7 +993,7 @@ func TestEntry_BasicSelect(t *testing.T) {
 	a, b = e.selection()
 	assert.Equal(t, 1, a)
 	assert.Equal(t, 3, b)
-	assert.Equal(t, "es", e.selectedText())
+	assert.Equal(t, "es", e.SelectedText())
 
 	// release shift
 	typeKeys(e, keyShiftLeftUp)
@@ -1014,7 +1012,7 @@ func TestEntry_BasicSelect(t *testing.T) {
 	a, b = e.selection()
 	assert.Equal(t, -1, a)
 	assert.Equal(t, -1, b)
-	assert.Equal(t, "", e.selectedText())
+	assert.Equal(t, "", e.SelectedText())
 
 	// press shift and move left
 	e.CursorColumn = 4 // we should be here already thanks to snapping
@@ -1022,7 +1020,7 @@ func TestEntry_BasicSelect(t *testing.T) {
 	a, b = e.selection()
 	assert.Equal(t, 2, a)
 	assert.Equal(t, 4, b)
-	assert.Equal(t, "st", e.selectedText())
+	assert.Equal(t, "st", e.SelectedText())
 }
 
 // Selects "sti" on line 2 of a new multiline
@@ -1391,7 +1389,7 @@ func TestEntry_PageUpDown(t *testing.T) {
 		a, b := e.selection()
 		assert.Equal(t, 1, a)
 		assert.Equal(t, 7, b)
-		assert.Equal(t, "esting", e.selectedText())
+		assert.Equal(t, "esting", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
 		// while shift is held press pageup
@@ -1399,12 +1397,12 @@ func TestEntry_PageUpDown(t *testing.T) {
 		a, b = e.selection()
 		assert.Equal(t, 0, a)
 		assert.Equal(t, 1, b)
-		assert.Equal(t, "T", e.selectedText())
+		assert.Equal(t, "T", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 0, e.CursorColumn)
 		// release shift and press pagedown
 		typeKeys(e, keyShiftLeftUp, fyne.KeyPageDown)
-		assert.Equal(t, "", e.selectedText())
+		assert.Equal(t, "", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
 	})
@@ -1417,7 +1415,7 @@ func TestEntry_PageUpDown(t *testing.T) {
 		a, b := e.selection()
 		assert.Equal(t, 1, a)
 		assert.Equal(t, 23, b)
-		assert.Equal(t, "esting\nTesting\nTesting", e.selectedText())
+		assert.Equal(t, "esting\nTesting\nTesting", e.SelectedText())
 		assert.Equal(t, 2, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
 		// while shift is held press pageup
@@ -1425,12 +1423,12 @@ func TestEntry_PageUpDown(t *testing.T) {
 		a, b = e.selection()
 		assert.Equal(t, 0, a)
 		assert.Equal(t, 1, b)
-		assert.Equal(t, "T", e.selectedText())
+		assert.Equal(t, "T", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 0, e.CursorColumn)
 		// release shift and press pagedown
 		typeKeys(e, keyShiftLeftUp, fyne.KeyPageDown)
-		assert.Equal(t, "", e.selectedText())
+		assert.Equal(t, "", e.SelectedText())
 		assert.Equal(t, 2, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
 	})
