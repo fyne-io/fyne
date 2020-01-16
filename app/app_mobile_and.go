@@ -5,11 +5,12 @@
 package app
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
 
 func defaultTheme() fyne.Theme {
