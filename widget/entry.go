@@ -1106,18 +1106,26 @@ func (e *Entry) registerShortcut() {
 	})
 }
 
+// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
+func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
+	if e.BaseWidget.impl != nil {
+		return
+	}
+
+	e.BaseWidget.impl = wid
+	e.registerShortcut()
+}
+
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
 	e := &Entry{}
 	e.ExtendBaseWidget(e)
-	e.registerShortcut()
 	return e
 }
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
-	e.registerShortcut()
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -1126,7 +1134,6 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 	e.ExtendBaseWidget(e)
-	e.registerShortcut()
 
 	pr := &passwordRevealer{
 		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
