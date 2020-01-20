@@ -216,7 +216,13 @@ func (s *Select) SetSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	return &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	return &Select{
+		BaseWidget:  BaseWidget{},
+		Selected:    "",
+		Options:     options,
+		PlaceHolder: defaultPlaceHolder,
+		OnChanged:   changed,
+	}
 }
 
 // SetOnChanged to set the onChanged handler using chaining
