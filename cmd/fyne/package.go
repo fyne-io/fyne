@@ -107,7 +107,7 @@ func (p *packager) packageLinux() error {
 	copyFile(p.icon, iconPath)
 
 	if !p.install {
-		tarCmd := exec.Command("tar", "cf", p.name+".tar.gz", "usr")
+		tarCmd := exec.Command("tar", "zcf", p.name+".tar.gz", "usr")
 		tarCmd.Run()
 	}
 
