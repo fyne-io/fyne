@@ -150,7 +150,7 @@ func (r *radioRenderer) Refresh() {
 		}
 	}
 
-	canvas.Refresh(r.radio)
+	canvas.Refresh(r.radio.super())
 }
 
 func (r *radioRenderer) Objects() []fyne.CanvasObject {
@@ -194,13 +194,13 @@ func (r *Radio) MouseIn(event *desktop.MouseEvent) {
 	}
 
 	r.hoveredItemIndex = r.indexByPosition(event.Position)
-	Refresh(r)
+	r.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (r *Radio) MouseOut() {
 	r.hoveredItemIndex = noRadioItemIndex
-	Refresh(r)
+	r.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -210,14 +210,14 @@ func (r *Radio) MouseMoved(event *desktop.MouseEvent) {
 	}
 
 	r.hoveredItemIndex = r.indexByPosition(event.Position)
-	Refresh(r)
+	r.Refresh()
 }
 
 // Append adds a new option to the end of a Radio widget.
 func (r *Radio) Append(option string) {
 	r.Options = append(r.Options, option)
 
-	Refresh(r)
+	r.Refresh()
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
@@ -242,7 +242,7 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	if r.OnChanged != nil {
 		r.OnChanged(r.Selected)
 	}
-	Renderer(r).Refresh()
+	r.Refresh()
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
@@ -284,7 +284,7 @@ func (r *Radio) SetSelected(option string) {
 
 	r.Selected = option
 
-	Renderer(r).Refresh()
+	r.Refresh()
 }
 
 func (r *Radio) itemHeight() int {
@@ -292,7 +292,11 @@ func (r *Radio) itemHeight() int {
 		return r.MinSize().Height
 	}
 
-	return r.MinSize().Height / len(r.Options)
+	count := 1
+	if r.Options != nil {
+		count = len(r.Options)
+	}
+	return r.MinSize().Height / count
 }
 
 func (r *Radio) itemWidth() int {
