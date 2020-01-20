@@ -68,6 +68,12 @@ func (d *DataListener) Bind(data dataapi.DataItem, setter DataSetter) {
 						s.SetIntWithMask(ss.AsInt(in[0].String()), d.listenerID)
 						return nil
 					}))
+				} else {
+					f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
+						vv, _ := strconv.Atoi(in[0].String())
+						s.SetIntWithMask(vv, d.listenerID)
+						return nil
+					}))
 				}
 			} else if s, ok := data.(dataapi.SettableFloat); ok {
 				f.Set(reflect.MakeFunc(f.Type(), func(in []reflect.Value) []reflect.Value {
