@@ -13,7 +13,7 @@ import (
 	"runtime"
 
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
-	"github.com/Kodeworks/golang-image-ico"
+	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
 	"github.com/josephspurrier/goversioninfo"
 	"github.com/pkg/errors"

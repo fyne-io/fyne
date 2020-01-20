@@ -43,26 +43,26 @@ func TestButton_MinSize_Icon(t *testing.T) {
 
 func TestButton_Style(t *testing.T) {
 	button := NewButton("Test", nil)
-	bg := Renderer(button).BackgroundColor()
+	bg := test.WidgetRenderer(button).BackgroundColor()
 
 	button.Style = PrimaryButton
-	assert.NotEqual(t, bg, Renderer(button).BackgroundColor())
+	assert.NotEqual(t, bg, test.WidgetRenderer(button).BackgroundColor())
 }
 
 func TestButton_DisabledColor(t *testing.T) {
 	button := NewButton("Test", nil)
-	bg := Renderer(button).BackgroundColor()
+	bg := test.WidgetRenderer(button).BackgroundColor()
 	button.Style = DefaultButton
 	assert.Equal(t, bg, theme.ButtonColor())
 
 	button.Disable()
-	bg = Renderer(button).BackgroundColor()
+	bg = test.WidgetRenderer(button).BackgroundColor()
 	assert.Equal(t, bg, theme.DisabledButtonColor())
 }
 
 func TestButton_DisabledIcon(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
-	render := Renderer(button).(*buttonRenderer)
+	render := test.WidgetRenderer(button).(*buttonRenderer)
 	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
 
 	button.Disable()
@@ -74,7 +74,7 @@ func TestButton_DisabledIcon(t *testing.T) {
 
 func TestButton_DisabledIconChangeUsingSetIcon(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
-	render := Renderer(button).(*buttonRenderer)
+	render := test.WidgetRenderer(button).(*buttonRenderer)
 	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
 
 	// assert we are using the disabled original icon
@@ -94,7 +94,7 @@ func TestButton_DisabledIconChangeUsingSetIcon(t *testing.T) {
 
 func TestButton_DisabledIconChangedDirectly(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
-	render := Renderer(button).(*buttonRenderer)
+	render := test.WidgetRenderer(button).(*buttonRenderer)
 	assert.Equal(t, render.icon.Resource.Name(), theme.CancelIcon().Name())
 
 	// assert we are using the disabled original icon
@@ -131,7 +131,7 @@ func TestButton_Tapped(t *testing.T) {
 
 func TestButtonRenderer_Layout(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
-	render := Renderer(button).(*buttonRenderer)
+	render := test.WidgetRenderer(button).(*buttonRenderer)
 	render.Layout(render.MinSize())
 
 	assert.True(t, render.icon.Position().X < render.label.Position().X)
@@ -142,7 +142,7 @@ func TestButtonRenderer_Layout(t *testing.T) {
 func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 	button := NewButtonWithIcon("Test", theme.CancelIcon(), nil)
 	button.Resize(button.MinSize().Add(fyne.NewSize(100, 100)))
-	render := Renderer(button).(*buttonRenderer)
+	render := test.WidgetRenderer(button).(*buttonRenderer)
 
 	iconYOffset, labelYOffset := 0, 0
 	textHeight := render.label.MinSize().Height
@@ -159,7 +159,7 @@ func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 
 func TestButtonRenderer_Layout_NoText(t *testing.T) {
 	button := NewButtonWithIcon("", theme.CancelIcon(), nil)
-	render := Renderer(button).(*buttonRenderer)
+	render := test.WidgetRenderer(button).(*buttonRenderer)
 
 	button.Resize(fyne.NewSize(100, 100))
 
@@ -222,7 +222,7 @@ func TestButton_Disabled(t *testing.T) {
 
 func TestButtonRenderer_ApplyTheme(t *testing.T) {
 	button := &Button{}
-	render := Renderer(button).(*buttonRenderer)
+	render := test.WidgetRenderer(button).(*buttonRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize

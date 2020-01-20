@@ -84,7 +84,7 @@ func (c *checkRenderer) Refresh() {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
 	}
 
-	canvas.Refresh(c.check)
+	canvas.Refresh(c.check.super())
 }
 
 func (c *checkRenderer) Objects() []fyne.CanvasObject {

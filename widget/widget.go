@@ -57,10 +57,12 @@ func (w *BaseWidget) Move(pos fyne.Position) {
 
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
-	if w.impl == nil || cache.Renderer(w.impl) == nil {
+	r := cache.Renderer(w.impl)
+	if r == nil {
 		return fyne.NewSize(0, 0)
 	}
-	return cache.Renderer(w.impl).MinSize()
+
+	return r.MinSize()
 }
 
 // CreateRenderer of BaseWidget does nothing, it must be overridden

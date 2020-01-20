@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -166,8 +167,6 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 
 	e.entry.placeholder.Resize(entrySize)
 	e.entry.placeholder.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-
-	e.moveCursor()
 }
 
 func (e *entryRenderer) BackgroundColor() color.Color {
@@ -193,6 +192,7 @@ func (e *entryRenderer) Refresh() {
 			e.line.FillColor = theme.ButtonColor()
 		}
 	}
+	e.moveCursor()
 
 	for _, selection := range e.selection {
 		selection.(*canvas.Rectangle).Hidden = !e.entry.focused && !e.entry.disabled
@@ -203,7 +203,7 @@ func (e *entryRenderer) Refresh() {
 	if e.entry.passwordRevealer != nil {
 		e.entry.passwordRevealer.Refresh()
 	}
-	canvas.Refresh(e.entry)
+	canvas.Refresh(e.entry.super())
 }
 
 func (e *entryRenderer) Objects() []fyne.CanvasObject {
@@ -218,7 +218,7 @@ func (e *entryRenderer) Destroy() {
 	if e.entry.popUp != nil {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.entry)
 		c.SetOverlay(nil)
-		Renderer(e.entry.popUp).Destroy()
+		cache.Renderer(e.entry.popUp).Destroy()
 		e.entry.popUp = nil
 	}
 }
@@ -277,7 +277,7 @@ func (e *Entry) SetText(text string) {
 		e.CursorColumn = 0
 		e.CursorRow = 0
 		e.Unlock()
-		Renderer(e).(*entryRenderer).moveCursor()
+		e.Refresh()
 	} else {
 		provider := e.textProvider()
 		if e.CursorRow >= provider.rows() {
@@ -374,9 +374,9 @@ func (e *Entry) selection() (int, int) {
 	return e.textPosFromRowCol(rowA, colA), e.textPosFromRowCol(rowB, colB)
 }
 
-// selectedText returns the text currently selected in this Entry.
+// SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
-func (e *Entry) selectedText() string {
+func (e *Entry) SelectedText() string {
 	if e.selecting == false {
 		return ""
 	}
@@ -481,7 +481,7 @@ func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
 		return
 	}
 
-	clipboard.SetContent(e.selectedText())
+	clipboard.SetContent(e.SelectedText())
 }
 
 // pasteFromClipboard inserts text from the clipboard content,
@@ -513,7 +513,7 @@ func (e *Entry) pasteFromClipboard(clipboard fyne.Clipboard) {
 		e.CursorColumn = len(runes) - lastNewlineIndex - 1
 	}
 	e.updateText(provider.String())
-	Renderer(e).(*entryRenderer).moveCursor()
+	e.Refresh()
 }
 
 // selectAll selects all text in entry
@@ -528,7 +528,6 @@ func (e *Entry) selectAll() {
 	e.selecting = true
 	e.Unlock()
 
-	Renderer(e).(*entryRenderer).moveCursor()
 	e.Refresh()
 }
 
@@ -628,7 +627,6 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 		e.selectColumn = col
 	}
 	e.Unlock()
-	Renderer(e).(*entryRenderer).moveCursor()
 	e.Refresh()
 }
 
@@ -702,7 +700,6 @@ func (e *Entry) DoubleTapped(ev *fyne.PointEvent) {
 	}
 	e.selecting = true
 	e.Unlock()
-	Renderer(e).(*entryRenderer).moveCursor()
 	e.Refresh()
 }
 
@@ -730,7 +727,7 @@ func (e *Entry) TypedRune(r rune) {
 	e.CursorColumn += len(runes)
 	e.Unlock()
 	e.updateText(provider.String())
-	Renderer(e.impl).(*entryRenderer).moveCursor()
+	e.Refresh()
 }
 
 // KeyDown handler for keypress events - used to store shift modifier state for text selection
@@ -847,8 +844,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 	if e.selectKeyDown || e.selecting {
 		if e.selectingKeyHandler(key) {
-			e.updateText(provider.String())
-			Renderer(e).(*entryRenderer).moveCursor()
+			e.Refresh()
 			return
 		}
 	}
@@ -973,12 +969,12 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 
 	e.updateText(provider.String())
-	Renderer(e).(*entryRenderer).moveCursor()
+	e.Refresh()
 }
 
 // TypedShortcut implements the Shortcutable interface
-func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) bool {
-	return e.shortcut.TypedShortcut(shortcut)
+func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
+	e.shortcut.TypedShortcut(shortcut)
 }
 
 // textProvider returns the text handler for this entry
@@ -1119,11 +1115,20 @@ func (e *Entry) registerShortcut() {
 	})
 }
 
+// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
+func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
+	if e.BaseWidget.impl != nil {
+		return
+	}
+
+	e.BaseWidget.impl = wid
+	e.registerShortcut()
+}
+
 // NewEntry creates a new single line entry widget.
 func NewEntry() *Entry {
 	e := &Entry{}
 	e.ExtendBaseWidget(e)
-	e.registerShortcut()
 	return e
 }
 
@@ -1141,7 +1146,6 @@ func (e *Entry) SetFromData(data dataapi.DataItem) {
 // NewMultiLineEntry creates a new entry that allows multiple lines
 func NewMultiLineEntry() *Entry {
 	e := &Entry{MultiLine: true}
-	e.registerShortcut()
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -1150,7 +1154,6 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 	e.ExtendBaseWidget(e)
-	e.registerShortcut()
 
 	pr := &passwordRevealer{
 		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),

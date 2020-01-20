@@ -30,3 +30,11 @@ func (*device) IsMobile() bool {
 func (*device) HasKeyboard() bool {
 	return false
 }
+
+func (*device) ShowVirtualKeyboard() {
+	showVirtualKeyboard()
+}
+
+func (*device) HideVirtualKeyboard() {
+	hideVirtualKeyboard()
+}
