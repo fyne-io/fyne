@@ -23,13 +23,9 @@ widgets such as tables and lists.
 
 # Prerequisites
 
-You will need Go version 1.12 or later.
-As Fyne uses CGo you will require a C compiler (typically gcc).
-If you don't have one set up the instructions at [Compiling](https://github.com/fyne-io/fyne/wiki/Compiling) may help.
-
-By default Fyne uses the [gl golang bindings](https://github.com/go-gl/gl) which means you need a working OpenGL configuration (or GLES for ARM or mobile devices).
-Debian/Ubuntu based systems may also need to install the `xorg-dev` package
-and `libgl1-mesa-dev` (or `libegl1-mesa-dev` for arm / embedded devices).
+To develop apps using Fyne you will need Go version 1.12 or later, a C compiler and your system's development tools.
+If you're not sure if that's all installed or you don't know how then check out our
+[Getting Started](https://fyne.io/develop/) document.
 
 Using the standard go tools you can install Fyne's core library using:
 
