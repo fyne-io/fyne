@@ -10,12 +10,13 @@ go get -u fyne.io/fyne fyne.io/fyne/cmd/fyne
 
 ## Android
 
-Get and install the Andoid Native Development Kit (**NDK**). This is platform dependent and may be packaged 
-with various tools that you might already have installed (like Android Studio)
-Once installed set up the appropriate path, the directory you reference should contain `ndk-build`,
-`platforms` and `toolchains`.
+Get and install both the Android Software Development Kit (**SDK**) the Andoid Native Development Kit (**NDK**). This is platform dependent and may be packaged with various tools that you might already have installed (like Android Studio). The recommended approch is to simply install [Android Studio](https://developer.android.com/studio/index.html) and then install the the **NDK** by going to **Tools > SDK Manager** and from **SDK Tools** install the `NDK (Side by side)` package.
 
-`export ANDROID_NDK_HOME=/<path to>/android-ndk`
+Once installed, the appropriate path to the **NDK** need to be set up. The directory you reference should contain `ndk-build`, `platforms` and `toolchains`. The default on Linux is `$HOME/Android/Sdk/ndk/version_of_your_installed_ndk`.
+
+```bash
+export ANDROID_NDK_HOME=/<path to>/android-ndk
+```
 
 ## iOS
 
