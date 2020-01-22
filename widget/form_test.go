@@ -3,7 +3,6 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,7 +17,7 @@ func TestFormSize(t *testing.T) {
 
 func TestForm_CreateRenderer(t *testing.T) {
 	form := &Form{Items: []*FormItem{{Text: "test1", Widget: NewEntry()}}}
-	assert.NotNil(t, test.WidgetRenderer(form))
+	assert.NotNil(t, Renderer(form))
 	assert.Equal(t, 2, len(form.itemGrid.Objects))
 
 	form.Append("test2", NewEntry())
@@ -36,4 +35,15 @@ func TestForm_Append(t *testing.T) {
 	form.AppendItem(item)
 	assert.True(t, len(form.Items) == 3)
 	assert.Equal(t, item, form.Items[2])
+}
+
+func TestForm_ButtonsText(t *testing.T) {
+	form := &Form{}
+	assert.Equal(t, "Submit", form.GetSubmitText())
+	assert.Equal(t, "Cancel", form.GetCancelText())
+
+	form.SetCancelText("Close")
+	form.SetSubmitText("Apply")
+	assert.Equal(t, "Apply", form.GetSubmitText())
+	assert.Equal(t, "Close", form.GetCancelText())
 }
