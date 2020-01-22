@@ -29,6 +29,7 @@ func (f *Float) String() string {
 // all callbacks.
 func (f *Float) SetFloatWithMask(newfloat float64, mask int) {
 	if f.locked {
+		f.value = newfloat
 		return
 	}
 	f.Lock()

@@ -35,6 +35,7 @@ func (b *Bool) Value() bool {
 // all callbacks.
 func (b *Bool) SetBoolWithMask(newvalue bool, mask int) {
 	if b.locked {
+		b.value = newvalue
 		return
 	}
 	b.Lock()

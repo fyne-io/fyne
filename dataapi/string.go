@@ -30,6 +30,7 @@ func (s *String) String() string {
 // all callbacks.
 func (s *String) SetStringWithMask(newstring string, mask int) {
 	if s.locked {
+		s.value = newstring
 		return
 	}
 	s.Lock()

@@ -34,6 +34,7 @@ func (i *Int) Value() int {
 // all callbacks.
 func (i *Int) SetIntWithMask(newint int, mask int) {
 	if i.locked {
+		i.value = newint
 		return
 	}
 	i.Lock()
