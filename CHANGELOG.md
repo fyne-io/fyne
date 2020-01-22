@@ -12,13 +12,15 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Changed
 
+* Scale calculations are now relative to system scale - the default "1" matches the system
+* Update scale on Linux to be "auto" by default (and numbers are relative to 96DPI standard) (#595)
 * bundled files now have a standard header to optimise some tools like go report card
 * Shortcuts are now handled by the event queue - fixed possible deadlock
 
 ### Fixed
 
-* Corrected visual behaviour of extended widgets including Entry, Select, Check and Radio
-* Entries that are extended would crash on right click.
+* Corrected visual behaviour of extended widgets including Entry, Select, Check and Radio (#615)
+* Entries and Selects that are extended would crash on right click.
 * PasswordEntry created from Entry with Password = true has no revealer
 * Dialog width not always sufficient for title
 * Pasting unicode characters could panic (#597)
