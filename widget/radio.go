@@ -143,7 +143,7 @@ func (r *radioRenderer) Refresh() {
 
 		if r.radio.Disabled() {
 			item.focusIndicator.FillColor = theme.BackgroundColor()
-		} else if r.radio.hoveredItemIndex == i {
+		} else if r.radio.hovered && r.radio.hoveredItemIndex == i {
 			item.focusIndicator.FillColor = theme.HoverColor()
 		} else {
 			item.focusIndicator.FillColor = theme.BackgroundColor()
@@ -171,6 +171,7 @@ type Radio struct {
 	Horizontal bool
 
 	hoveredItemIndex int
+	hovered          bool
 }
 
 // indexByPosition returns the item index for a specified position or noRadioItemIndex if any
@@ -194,12 +195,14 @@ func (r *Radio) MouseIn(event *desktop.MouseEvent) {
 	}
 
 	r.hoveredItemIndex = r.indexByPosition(event.Position)
+	r.hovered = true
 	r.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (r *Radio) MouseOut() {
 	r.hoveredItemIndex = noRadioItemIndex
+	r.hovered = false
 	r.Refresh()
 }
 
@@ -210,6 +213,7 @@ func (r *Radio) MouseMoved(event *desktop.MouseEvent) {
 	}
 
 	r.hoveredItemIndex = r.indexByPosition(event.Position)
+	r.hovered = true
 	r.Refresh()
 }
 
@@ -228,7 +232,7 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 
 	index := r.indexByPosition(event.Position)
 
-	if index == noRadioItemIndex { // in the padding
+	if index < 0 || index >= len(r.Options) { // in the padding
 		return
 	}
 	clicked := r.Options[index]
@@ -314,12 +318,9 @@ func (r *Radio) removeDuplicateOptions() {
 // NewRadio creates a new radio widget with the set options and change handler
 func NewRadio(options []string, changed func(string)) *Radio {
 	r := &Radio{
-		DisableableWidget{},
-		options,
-		"",
-		changed,
-		false,
-		noRadioItemIndex,
+		DisableableWidget: DisableableWidget{},
+		Options:           options,
+		OnChanged:         changed,
 	}
 
 	r.removeDuplicateOptions()
