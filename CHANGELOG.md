@@ -19,6 +19,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
+* Updating text and calling refresh for widget doesn't work (#607)
 * Corrected visual behaviour of extended widgets including Entry, Select, Check and Radio (#615)
 * Entries and Selects that are extended would crash on right click.
 * PasswordEntry created from Entry with Password = true has no revealer
