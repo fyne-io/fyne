@@ -318,7 +318,10 @@ func calculateScale(user, system, detected float32) float32 {
 	return system * user
 }
 func (w *window) calculatedScale() float32 {
-	return calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(), w.detectScale())
+	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(), w.detectScale())
+	val = float32(math.Round(float64(val*10.0))) / 10.0
+
+	return val
 }
 
 func (w *window) detectScale() float32 {
@@ -330,7 +333,7 @@ func (w *window) detectScale() float32 {
 	if dpi > 1000 || dpi < 10 {
 		dpi = 96
 	}
-	return float32(math.Round(float64(dpi)/96.0*10.0)) / 10.0
+	return float32(float64(dpi) / 96.0)
 }
 
 func (w *window) Show() {
