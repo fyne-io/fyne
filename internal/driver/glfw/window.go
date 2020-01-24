@@ -1060,6 +1060,15 @@ func (w *window) RescaleContext() {
 
 func (w *window) rescaleOnMain() {
 	w.fitContent()
+	if w.fullScreen {
+		w.width, w.height = w.viewport.GetSize()
+		scaledFull := fyne.NewSize(
+			internal.ScaleInt(w.canvas, w.width),
+			internal.ScaleInt(w.canvas, w.height))
+		w.canvas.Resize(scaledFull)
+		return
+	}
+
 	size := w.canvas.size.Union(w.canvas.MinSize())
 	newWidth, newHeight := w.screenSize(size)
 	w.viewport.SetSize(newWidth, newHeight)
