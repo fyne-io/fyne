@@ -679,6 +679,11 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	})
 	switch wid := co.(type) {
 	case fyne.Scrollable:
+		if runtime.GOOS != "darwin" && xoff == 0 &&
+			(viewport.GetKey(glfw.KeyLeftShift) == glfw.Press ||
+				viewport.GetKey(glfw.KeyRightShift) == glfw.Press) {
+			xoff, yoff = yoff, xoff
+		}
 		ev := &fyne.ScrollEvent{}
 		ev.DeltaX = int(xoff * scrollSpeed)
 		ev.DeltaY = int(yoff * scrollSpeed)
