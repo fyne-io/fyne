@@ -182,6 +182,10 @@ func (c *glCanvas) Scale() float32 {
 //
 // Deprecated: Settings are now calculated solely on the user configuration and system setup.
 func (c *glCanvas) SetScale(_ float32) {
+	if !c.context.(*window).visible {
+		return
+	}
+
 	c.scale = c.context.(*window).calculatedScale()
 	c.setDirty(true)
 
