@@ -48,6 +48,16 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 
 			prog.Show()
 		}),
+		widget.NewButton("ProgressInfinite", func() {
+			prog := dialog.NewProgressInfinite("MyProgress", "Closes after 5 seconds...", win)
+
+			go func() {
+				time.Sleep(time.Second * 5)
+				prog.Hide()
+			}()
+
+			prog.Show()
+		}),
 		widget.NewButton("Custom", func() {
 			content := widget.NewEntry()
 			content.SetPlaceHolder("Type something here")
