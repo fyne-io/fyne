@@ -263,13 +263,16 @@ func (w *window) SetOnClosed(closed func()) {
 }
 
 func (w *window) getMonitorForWindow() *glfw.Monitor {
+	xOff := w.xpos + (w.width/2)
+	yOff := w.ypos + (w.height/2)
+
 	for _, monitor := range glfw.GetMonitors() {
 		x, y := monitor.GetPos()
 
-		if x > w.xpos || y > w.ypos {
+		if x > xOff || y > yOff {
 			continue
 		}
-		if x+monitor.GetVideoMode().Width <= w.xpos || y+monitor.GetVideoMode().Height <= w.ypos {
+		if x+monitor.GetVideoMode().Width <= xOff || y+monitor.GetVideoMode().Height <= yOff {
 			continue
 		}
 
@@ -447,11 +450,12 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 	// save coordinates
 	w.xpos, w.ypos = x, y
 
-	if w.canvas.detectedScale == w.detectScale() {
+	newDetected := w.detectScale()
+	if w.canvas.detectedScale == newDetected {
 		return
 	}
 
-	w.canvas.detectedScale = w.detectScale()
+	w.canvas.detectedScale = newDetected
 	go w.canvas.SetScale(fyne.SettingsScaleAuto) // scale value is ignored
 }
 
