@@ -27,6 +27,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * PasswordEntry created from Entry with Password = true has no revealer
 * Dialog width not always sufficient for title
 * Pasting unicode characters could panic (#597)
+* Setting theme before application start panics on macOS (#626)
 
 
 ## 1.2.1 - 24 December 2019
