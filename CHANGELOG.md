@@ -28,6 +28,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Dialog width not always sufficient for title
 * Pasting unicode characters could panic (#597)
 * Setting theme before application start panics on macOS (#626)
+* MenuItem type conflicts with other projecta (#632)
 
 
 ## 1.2.1 - 24 December 2019
