@@ -24,13 +24,13 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 type Form struct {
 	BaseWidget
 
-	Items    []*FormItem
-	OnSubmit func()
-	OnCancel func()
+	Items        []*FormItem
+	SubmitButton *Button
+	CancelButton *Button
+	OnSubmit     func()
+	OnCancel     func()
 
-	itemGrid     *fyne.Container
-	submitButton *Button
-	cancelButton *Button
+	itemGrid *fyne.Container
 }
 
 func (f *Form) createLabel(text string) *Label {
@@ -84,55 +84,20 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 
 	buttons := NewHBox(layout.NewSpacer())
 	if f.OnCancel != nil {
-		if f.cancelButton == nil {
-			f.cancelButton = NewButtonWithIcon("Cancel", theme.CancelIcon(), f.OnCancel)
+		if f.CancelButton == nil {
+			f.CancelButton = NewButtonWithIcon("Cancel", theme.CancelIcon(), f.OnCancel)
 		}
-		buttons.Append(f.cancelButton)
+		buttons.Append(f.CancelButton)
 	}
 	if f.OnSubmit != nil {
-		if f.cancelButton == nil {
-			f.submitButton = NewButtonWithIcon("Submit", theme.ConfirmIcon(), f.OnSubmit)
-			f.submitButton.Style = PrimaryButton
+		if f.CancelButton == nil {
+			f.SubmitButton = NewButtonWithIcon("Submit", theme.ConfirmIcon(), f.OnSubmit)
+			f.SubmitButton.Style = PrimaryButton
 		}
 
-		buttons.Append(f.submitButton)
+		buttons.Append(f.SubmitButton)
 	}
 	return Renderer(NewVBox(f.itemGrid, buttons))
-}
-
-//SetSubmitText is set text for Submit button
-func (f *Form) SetSubmitText(text string) {
-	if f.submitButton != nil {
-		f.submitButton.SetText(text)
-	} else {
-		f.submitButton = NewButtonWithIcon(text, theme.ConfirmIcon(), f.OnSubmit)
-		f.submitButton.Style = PrimaryButton
-	}
-}
-
-//GetSubmitText returns text of Submit button
-func (f *Form) GetSubmitText() string {
-	if f.submitButton != nil {
-		return f.submitButton.Text
-	}
-	return "Submit"
-}
-
-//SetCancelText is set text for Cancel button
-func (f *Form) SetCancelText(text string) {
-	if f.cancelButton != nil {
-		f.cancelButton.SetText(text)
-	} else {
-		f.cancelButton = NewButtonWithIcon(text, theme.CancelIcon(), f.OnCancel)
-	}
-}
-
-//GetCancelText returns text of Cancel button
-func (f *Form) GetCancelText() string {
-	if f.cancelButton != nil {
-		return f.cancelButton.Text
-	}
-	return "Cancel"
 }
 
 // NewForm creates a new form widget with the specified rows of form items
