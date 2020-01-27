@@ -3,7 +3,6 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,10 +38,13 @@ func TestForm_Append(t *testing.T) {
 }
 
 func TestForm_CustomButtonsText(t *testing.T) {
-	form := &Form{}
-	form.SubmitButton = NewButtonWithIcon("Apply", theme.ConfirmIcon(), form.OnSubmit)
-	form.SubmitButton.Style = PrimaryButton
-	form.CancelButton = NewButtonWithIcon("Close", theme.CancelIcon(), form.OnCancel)
-	assert.Equal(t, "Apply", form.SubmitButton.Text)
-	assert.Equal(t, "Close", form.CancelButton.Text)
+	form := &Form{OnSubmit: func() {}, OnCancel: func() {}}
+	form.Append("test", NewEntry())
+	assert.Equal(t, "Submit", form.SubmitText)
+	assert.Equal(t, "Cancel", form.CancelText)
+
+	form = &Form{OnSubmit: func() {}, SubmitText: "Apply",
+		OnCancel: func() {}, CancelText: "Close"}
+	assert.Equal(t, "Apply", form.SubmitText)
+	assert.Equal(t, "Close", form.CancelText)
 }

@@ -24,11 +24,11 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 type Form struct {
 	BaseWidget
 
-	Items        []*FormItem
-	SubmitButton *Button
-	CancelButton *Button
-	OnSubmit     func()
-	OnCancel     func()
+	Items      []*FormItem
+	OnSubmit   func()
+	OnCancel   func()
+	SubmitText string
+	CancelText string
 
 	itemGrid *fyne.Container
 }
@@ -84,18 +84,20 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 
 	buttons := NewHBox(layout.NewSpacer())
 	if f.OnCancel != nil {
-		if f.CancelButton == nil {
-			f.CancelButton = NewButtonWithIcon("Cancel", theme.CancelIcon(), f.OnCancel)
-		}
-		buttons.Append(f.CancelButton)
-	}
-	if f.OnSubmit != nil {
-		if f.CancelButton == nil {
-			f.SubmitButton = NewButtonWithIcon("Submit", theme.ConfirmIcon(), f.OnSubmit)
-			f.SubmitButton.Style = PrimaryButton
+		if f.CancelText == "" {
+			f.CancelText = "Cancel"
 		}
 
-		buttons.Append(f.SubmitButton)
+		buttons.Append(NewButtonWithIcon(f.CancelText, theme.CancelIcon(), f.OnCancel))
+	}
+	if f.OnSubmit != nil {
+		if f.SubmitText == "" {
+			f.SubmitText = "Submit"
+		}
+
+		submitButton := NewButtonWithIcon(f.SubmitText, theme.ConfirmIcon(), f.OnSubmit)
+		submitButton.Style = PrimaryButton
+		buttons.Append(submitButton)
 	}
 	return Renderer(NewVBox(f.itemGrid, buttons))
 }
