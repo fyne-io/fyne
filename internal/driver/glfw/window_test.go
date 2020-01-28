@@ -41,6 +41,7 @@ func TestGLDriver_CreateWindow(t *testing.T) {
 	w := NewGLDriver().CreateWindow("Test").(*window)
 
 	assert.Equal(t, 1, w.viewport.GetAttrib(glfw.Decorated))
+	assert.True(t, w.Padded())
 	assert.False(t, w.centered)
 }
 
@@ -49,6 +50,7 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	w := d.CreateSplashWindow().(*window)
 
 	assert.Equal(t, 0, w.viewport.GetAttrib(glfw.Decorated))
+	assert.False(t, w.Padded())
 	assert.True(t, w.centered)
 }
 
