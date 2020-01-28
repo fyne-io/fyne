@@ -1087,12 +1087,21 @@ func (w *window) waitForEvents() {
 }
 
 func (d *gLDriver) CreateWindow(title string) fyne.Window {
+	return d.createWindow(title, true)
+}
+
+func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	var ret *window
 	runOnMain(func() {
 		initOnce.Do(d.initGLFW)
 
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, 0)
+		if decorate {
+			glfw.WindowHint(glfw.Decorated, 1)
+		} else {
+			glfw.WindowHint(glfw.Decorated, 0)
+		}
 		initWindowHints()
 
 		win, err := glfw.CreateWindow(10, 10, title, nil, nil)
@@ -1131,6 +1140,12 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		glfw.DetachCurrentContext()
 	})
 	return ret
+}
+
+func (d *gLDriver) CreateSplashWindow() fyne.Window {
+	win := d.createWindow("", false)
+	win.CenterOnScreen()
+	return win
 }
 
 func (d *gLDriver) AllWindows() []fyne.Window {

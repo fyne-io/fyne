@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/dialog"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 )
@@ -58,7 +59,7 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 		}),
 	)
 
-	windows := widget.NewVBox(dialogs, widget.NewGroup("Windows",
+	windowGroup := widget.NewGroup("Windows",
 		widget.NewButton("New window", func() {
 			w := fyne.CurrentApp().NewWindow("Hello")
 			w.SetContent(widget.NewLabel("Hello World!"))
@@ -78,7 +79,24 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 
 			w.CenterOnScreen()
 			w.Show()
-		})))
+		}))
+
+	drv := fyne.CurrentApp().Driver()
+	if drv, ok := drv.(desktop.Driver); ok {
+		windowGroup.Append(
+			widget.NewButton("Splash Window (only use on start)", func() {
+				w := drv.CreateSplashWindow()
+				w.SetContent(widget.NewLabelWithStyle("Hello World!\n\nMake a splash!",
+					fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+				w.Show()
+
+				go func() {
+					time.Sleep(time.Second * 3)
+					w.Close()
+				}()
+			}))
+	}
+	windows := widget.NewVBox(dialogs, windowGroup)
 
 	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), windows, LayoutPanel())
 }
