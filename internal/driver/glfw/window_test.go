@@ -37,6 +37,21 @@ func TestMain(m *testing.M) {
 	d.Run()
 }
 
+func TestGLDriver_CreateWindow(t *testing.T) {
+	w := NewGLDriver().CreateWindow("Test").(*window)
+
+	assert.Equal(t, 1, w.viewport.GetAttrib(glfw.Decorated))
+	assert.False(t, w.centered)
+}
+
+func TestGLDriver_CreateSplashWindow(t *testing.T) {
+	d := NewGLDriver().(desktop.Driver)
+	w := d.CreateSplashWindow().(*window)
+
+	assert.Equal(t, 0, w.viewport.GetAttrib(glfw.Decorated))
+	assert.True(t, w.centered)
+}
+
 func TestWindow_HandleHoverable(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	h1 := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
