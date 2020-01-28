@@ -1144,6 +1144,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 
 func (d *gLDriver) CreateSplashWindow() fyne.Window {
 	win := d.createWindow("", false)
+	win.SetPadded(false)
 	win.CenterOnScreen()
 	return win
 }
