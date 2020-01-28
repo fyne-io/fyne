@@ -604,7 +604,6 @@ func TestWindow_calculateScale(t *testing.T) {
 func TestWindow_Padded(t *testing.T) {
 	w := d.CreateWindow("Test")
 	content := canvas.NewRectangle(color.White)
-	w.Canvas().SetScale(1.0)
 	w.SetContent(content)
 
 	width, _ := w.(*window).minSizeOnScreen()
