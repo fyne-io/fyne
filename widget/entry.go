@@ -172,6 +172,9 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
+	if e.entry.Text != string(e.entry.textProvider().buffer) {
+		e.entry.textProvider().SetText(e.entry.Text)
+	}
 	if e.entry.textProvider().len() == 0 && e.entry.Visible() {
 		e.entry.placeholderProvider().Show()
 	} else if e.entry.placeholderProvider().Visible() {

@@ -273,6 +273,13 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 								},
 								Value: fmt.Sprintf("%v", MinSDK),
 							},
+							{
+								Name: xml.Name{
+									Space: androidSchema,
+									Local: "targetSdkVersion",
+								},
+								Value: "28",
+							},
 						},
 					}
 					e := xml.EndElement{Name: xml.Name{Local: "uses-sdk"}}

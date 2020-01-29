@@ -257,7 +257,7 @@ func TestRadio_Hovered(t *testing.T) {
 			radio.Horizontal = tt.isHorizontal
 			render := Renderer(radio).(*radioRenderer)
 
-			assert.Equal(t, noRadioItemIndex, radio.hoveredItemIndex)
+			assert.Equal(t, false, radio.hovered)
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
 			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
 
@@ -291,6 +291,7 @@ func TestRadio_Hovered(t *testing.T) {
 				},
 			})
 			assert.Equal(t, 1, radio.hoveredItemIndex)
+			assert.Equal(t, true, radio.hovered)
 			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
 			assert.Equal(t, theme.HoverColor(), render.items[1].focusIndicator.FillColor)
 		})

@@ -39,7 +39,6 @@ func TestMain(m *testing.M) {
 
 func TestWindow_HandleHoverable(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	w.Canvas().SetScale(1.0)
 	h1 := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	h1.SetMinSize(fyne.NewSize(10, 10))
 	h2 := &hoverableObject{Rectangle: canvas.NewRectangle(color.Black)}
@@ -81,7 +80,6 @@ func TestWindow_HandleHoverable(t *testing.T) {
 
 func TestWindow_HandleDragging(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	w.Canvas().SetScale(1.0)
 	d1 := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	d2 := &draggableObject{Rectangle: canvas.NewRectangle(color.Black)}
@@ -180,7 +178,6 @@ func TestWindow_HandleDragging(t *testing.T) {
 
 func TestWindow_DragObjectThatMoves(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	w.Canvas().SetScale(1.0)
 	d1 := &draggableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(widget.NewHBox(d1))
@@ -221,7 +218,6 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 
 func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	w.Canvas().SetScale(1.0)
 	d1 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	d1.SetMinSize(fyne.NewSize(10, 10))
 	d2 := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
@@ -261,7 +257,6 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 
 func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	w.Canvas().SetScale(1.0)
 	do := &draggableMouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	do.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(do)
@@ -282,7 +277,6 @@ func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 
 func TestWindow_HoverableOnDragging(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	w.Canvas().SetScale(1.0)
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
 	dh.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(dh)
@@ -372,7 +366,6 @@ func TestWindow_Tapped(t *testing.T) {
 
 func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	w.Canvas().SetScale(1.0)
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	rect := canvas.NewRectangle(color.White)
 	rect.SetMinSize(fyne.NewSize(100, 100))
@@ -406,7 +399,6 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 
 func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
-	w.Canvas().SetScale(1.0)
 	tapped := 0
 	b1 := widget.NewButton("Tap", func() { tapped = 1 })
 	b2 := widget.NewButton("Tap", func() { tapped = 2 })
@@ -568,6 +560,32 @@ func TestWindow_PixelSize(t *testing.T) {
 	assert.Equal(t, internal.ScaleInt(w.Canvas(), 100), winH)
 }
 
+var scaleTests = []struct {
+	user, system, detected, expected float32
+	name                             string
+}{
+	{1.0, 1.0, 1.0, 1.0, "Windows with user setting 1.0"},
+	{fyne.SettingsScaleAuto, 1.0, 1.0, 1.0, "Windows with user legacy setting auto"},
+	{1.5, 1.0, 1.0, 1.5, "Windows with user setting 1.5"},
+
+	{1.0, fyne.SettingsScaleAuto, 1.0, 1.0, "Linux lowDPI with user setting 1.0"},
+	{fyne.SettingsScaleAuto, fyne.SettingsScaleAuto, 1.0, 1.0, "Linux lowDPI with user legacy setting auto"},
+	{1.5, fyne.SettingsScaleAuto, 1.0, 1.5, "Linux lowDPI with user setting 1.5"},
+
+	{1.0, fyne.SettingsScaleAuto, 2.0, 2.0, "Linux highDPI with user setting 1.0"},
+	{fyne.SettingsScaleAuto, fyne.SettingsScaleAuto, 2.0, 2.0, "Linux highDPI with user legacy setting auto"},
+	{1.5, fyne.SettingsScaleAuto, 2.0, 3.0, "Linux highDPI with user setting 1.5"},
+}
+
+func TestWindow_calculateScale(t *testing.T) {
+	for _, tt := range scaleTests {
+		t.Run(tt.name, func(t *testing.T) {
+			calculated := calculateScale(tt.user, tt.system, tt.detected)
+			assert.Equal(t, tt.expected, calculated)
+		})
+	}
+}
+
 func TestWindow_Padded(t *testing.T) {
 	w := d.CreateWindow("Test")
 	content := canvas.NewRectangle(color.White)
@@ -602,7 +620,6 @@ func TestWindow_SetPadded(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := d.CreateWindow("Test").(*window)
-			w.Canvas().SetScale(1)
 			w.SetPadded(tt.padding)
 			if tt.menu {
 				w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Test", func() {}))))

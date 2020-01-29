@@ -263,13 +263,16 @@ func (w *window) SetOnClosed(closed func()) {
 }
 
 func (w *window) getMonitorForWindow() *glfw.Monitor {
+	xOff := w.xpos + (w.width / 2)
+	yOff := w.ypos + (w.height / 2)
+
 	for _, monitor := range glfw.GetMonitors() {
 		x, y := monitor.GetPos()
 
-		if x > w.xpos || y > w.ypos {
+		if x > xOff || y > yOff {
 			continue
 		}
-		if x+monitor.GetVideoMode().Width <= w.xpos || y+monitor.GetVideoMode().Height <= w.ypos {
+		if x+monitor.GetVideoMode().Width <= xOff || y+monitor.GetVideoMode().Height <= yOff {
 			continue
 		}
 
@@ -285,7 +288,7 @@ func (w *window) getMonitorForWindow() *glfw.Monitor {
 	return monitor
 }
 
-func (w *window) selectScale() float32 {
+func (w *window) userScale() float32 {
 	env := os.Getenv("FYNE_SCALE")
 
 	if env != "" && env != "auto" {
@@ -298,20 +301,30 @@ func (w *window) selectScale() float32 {
 
 	if env != "auto" {
 		setting := fyne.CurrentApp().Settings().Scale()
-		switch setting {
-		case fyne.SettingsScaleAuto:
-			// fall through
-		case 0.0:
-			if env == "" {
-				return 1.0
-			}
-			// fall through
-		default:
+		if setting != fyne.SettingsScaleAuto && setting != 0.0 {
 			return setting
 		}
 	}
 
-	return w.detectScale()
+	return 1.0 // user preference for auto is now passed as 1 so the system auto is picked up
+}
+
+func calculateScale(user, system, detected float32) float32 {
+	if user == fyne.SettingsScaleAuto {
+		user = 1.0
+	}
+
+	if system == fyne.SettingsScaleAuto {
+		system = detected
+	}
+
+	return system * user
+}
+func (w *window) calculatedScale() float32 {
+	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(), w.detectScale())
+	val = float32(math.Round(float64(val*10.0))) / 10.0
+
+	return val
 }
 
 func (w *window) detectScale() float32 {
@@ -323,7 +336,7 @@ func (w *window) detectScale() float32 {
 	if dpi > 1000 || dpi < 10 {
 		dpi = 96
 	}
-	return float32(math.Round(float64(dpi)/144.0*10.0)) / 10.0
+	return float32(float64(dpi) / 96.0)
 }
 
 func (w *window) Show() {
@@ -434,22 +447,16 @@ func (w *window) destroy(d *gLDriver) {
 }
 
 func (w *window) moved(viewport *glfw.Window, x, y int) {
-	if w.canvas.scale != w.canvas.detectedScale {
-		return
-	}
-
 	// save coordinates
 	w.xpos, w.ypos = x, y
-	scale := w.canvas.scale
-	newScale := w.detectScale()
-	if scale == newScale {
-		forceWindowRefresh(w)
+
+	newDetected := w.detectScale()
+	if w.canvas.detectedScale == newDetected {
 		return
 	}
 
-	w.canvas.detectedScale = newScale
-	w.canvas.setScaleValue(newScale)
-	w.rescaleOnMain()
+	w.canvas.detectedScale = newDetected
+	go w.canvas.SetScale(fyne.SettingsScaleAuto) // scale value is ignored
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -683,6 +690,11 @@ func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64
 	})
 	switch wid := co.(type) {
 	case fyne.Scrollable:
+		if runtime.GOOS != "darwin" && xoff == 0 &&
+			(viewport.GetKey(glfw.KeyLeftShift) == glfw.Press ||
+				viewport.GetKey(glfw.KeyRightShift) == glfw.Press) {
+			xoff, yoff = yoff, xoff
+		}
 		ev := &fyne.ScrollEvent{}
 		ev.DeltaX = int(xoff * scrollSpeed)
 		ev.DeltaY = int(yoff * scrollSpeed)
@@ -1056,6 +1068,15 @@ func (w *window) RescaleContext() {
 
 func (w *window) rescaleOnMain() {
 	w.fitContent()
+	if w.fullScreen {
+		w.width, w.height = w.viewport.GetSize()
+		scaledFull := fyne.NewSize(
+			internal.UnscaleInt(w.canvas, w.width),
+			internal.UnscaleInt(w.canvas, w.height))
+		w.canvas.Resize(scaledFull)
+		return
+	}
+
 	size := w.canvas.size.Union(w.canvas.MinSize())
 	newWidth, newHeight := w.screenSize(size)
 	w.viewport.SetSize(newWidth, newHeight)
@@ -1114,7 +1135,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		ret.canvas.painter.Init()
 		ret.canvas.context = ret
 		ret.canvas.detectedScale = ret.detectScale()
-		ret.canvas.scale = ret.selectScale()
+		ret.canvas.scale = ret.calculatedScale()
 		ret.SetIcon(ret.icon)
 		d.windows = append(d.windows, ret)
 

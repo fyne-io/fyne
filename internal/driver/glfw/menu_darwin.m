@@ -5,12 +5,12 @@
 
 extern void menu_callback(int);
 
-@interface MenuItem : NSObject {
+@interface FyneMenuItem : NSObject {
 
 }
 @end
 
-@implementation MenuItem
+@implementation FyneMenuItem
 - (void) tapped:(id) sender {
     menu_callback([sender tag]);
 }
@@ -30,7 +30,7 @@ void createDarwinMenu(const char* label) {
 }
 
 void addDarwinMenuItem(const char* label, int id) {
-    MenuItem* tapper = [[MenuItem alloc] init]; // we cannot release this or the menu does not function...
+    FyneMenuItem* tapper = [[FyneMenuItem alloc] init]; // we cannot release this or the menu does not function...
 
     NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:label]
         action:@selector(tapped:) keyEquivalent:@""];
