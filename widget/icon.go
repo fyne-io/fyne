@@ -46,7 +46,7 @@ func (i *iconRenderer) Refresh() {
 	}
 	i.Layout(i.image.Size())
 
-	canvas.Refresh(i.image)
+	canvas.Refresh(i.image.super())
 }
 
 func (i *iconRenderer) Destroy() {
@@ -62,7 +62,7 @@ type Icon struct {
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res
-	i.refresh(i)
+	i.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -84,6 +84,7 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 // NewIcon returns a new icon widget that displays a themed icon resource
 func NewIcon(res fyne.Resource) *Icon {
 	icon := &Icon{}
+	icon.ExtendBaseWidget(icon)
 	icon.SetResource(res) // force the image conversion
 
 	return icon

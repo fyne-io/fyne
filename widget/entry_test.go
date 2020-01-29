@@ -119,6 +119,16 @@ func TestEntry_SetText_Overflow(t *testing.T) {
 	assert.Equal(t, "", entry.Text)
 }
 
+func TestEntry_SetText_Manual(t *testing.T) {
+	entry := NewEntry()
+	provider := entry.textProvider()
+	assert.Equal(t, "", string(provider.buffer))
+
+	entry.Text = "Test"
+	entry.Refresh()
+	assert.Equal(t, "Test", string(provider.buffer))
+}
+
 func TestEntry_OnKeyDown(t *testing.T) {
 	entry := NewEntry()
 

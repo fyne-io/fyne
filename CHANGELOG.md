@@ -17,6 +17,34 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Fixed
 
 
+## 1.2.2 - 29 January 2020
+
+### Added
+
+* Add SelectedText() function to Entry widget
+* New mobile.Device interface exposing ShowVirtualKeyboard() (and Hide...)
+
+### Changed
+
+* Scale calculations are now relative to system scale - the default "1" matches the system
+* Update scale on Linux to be "auto" by default (and numbers are relative to 96DPI standard) (#595)
+* When auto scaling check the monitor in the middle of the window, not top left
+* bundled files now have a standard header to optimise some tools like go report card
+* Shortcuts are now handled by the event queue - fixed possible deadlock
+
+### Fixed
+
+* Scroll horizontally when holding shift key (#579)
+* Updating text and calling refresh for widget doesn't work (#607)
+* Corrected visual behaviour of extended widgets including Entry, Select, Check, Radio and Icon (#615)
+* Entries and Selects that are extended would crash on right click.
+* PasswordEntry created from Entry with Password = true has no revealer
+* Dialog width not always sufficient for title
+* Pasting unicode characters could panic (#597)
+* Setting theme before application start panics on macOS (#626)
+* MenuItem type conflicts with other projects (#632)
+
+
 ## 1.2.1 - 24 December 2019
 
 ### Added

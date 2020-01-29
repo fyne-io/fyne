@@ -258,13 +258,16 @@ func (w *window) SetOnClosed(closed func()) {
 }
 
 func (w *window) getMonitorForWindow() *glfw.Monitor {
+	xOff := w.xpos + (w.width / 2)
+	yOff := w.ypos + (w.height / 2)
+
 	for _, monitor := range glfw.GetMonitors() {
 		x, y := monitor.GetPos()
 
-		if x > w.xpos || y > w.ypos {
+		if x > xOff || y > yOff {
 			continue
 		}
-		if x+monitor.GetVideoMode().Width <= w.xpos || y+monitor.GetVideoMode().Height <= w.ypos {
+		if x+monitor.GetVideoMode().Width <= xOff || y+monitor.GetVideoMode().Height <= yOff {
 			continue
 		}
 
@@ -313,7 +316,10 @@ func calculateScale(user, system, detected float32) float32 {
 	return system * user
 }
 func (w *window) calculatedScale() float32 {
-	return calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(), w.detectScale())
+	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(), w.detectScale())
+	val = float32(math.Round(float64(val*10.0))) / 10.0
+
+	return val
 }
 
 func (w *window) detectScale() float32 {
@@ -325,7 +331,8 @@ func (w *window) detectScale() float32 {
 	if dpi > 1000 || dpi < 10 {
 		dpi = 96
 	}
-	return float32(math.Round(float64(dpi)/96.0*10.0)) / 10.0
+
+	return float32(float64(dpi) / 96.0)
 }
 
 func (w *window) Show() {
@@ -1055,6 +1062,15 @@ func (w *window) RescaleContext() {
 
 func (w *window) rescaleOnMain() {
 	w.fitContent()
+	if w.fullScreen {
+		w.width, w.height = w.viewport.GetSize()
+		scaledFull := fyne.NewSize(
+			internal.UnscaleInt(w.canvas, w.width),
+			internal.UnscaleInt(w.canvas, w.height))
+		w.canvas.Resize(scaledFull)
+		return
+	}
+
 	size := w.canvas.size.Union(w.canvas.MinSize())
 	newWidth, newHeight := w.screenSize(size)
 	w.viewport.SetSize(newWidth, newHeight)

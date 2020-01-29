@@ -49,7 +49,7 @@ func (i *installer) install() error {
 			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), p.name)
 			runAsAdminWindows("mkdir", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
 		default:
-			return errors.New("Unsupported terget operating system \"" + p.os + "\"")
+			return errors.New("Unsupported target operating system \"" + p.os + "\"")
 		}
 	}
 

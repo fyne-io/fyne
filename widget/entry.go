@@ -172,6 +172,9 @@ func (e *entryRenderer) BackgroundColor() color.Color {
 }
 
 func (e *entryRenderer) Refresh() {
+	if e.entry.Text != string(e.entry.textProvider().buffer) {
+		e.entry.textProvider().SetText(e.entry.Text)
+	}
 	if e.entry.textProvider().len() == 0 && e.entry.Visible() {
 		e.entry.placeholderProvider().Show()
 	} else if e.entry.placeholderProvider().Visible() {
@@ -214,7 +217,7 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 
 func (e *entryRenderer) Destroy() {
 	if e.entry.popUp != nil {
-		c := fyne.CurrentApp().Driver().CanvasForObject(e.entry)
+		c := fyne.CurrentApp().Driver().CanvasForObject(e.entry.super())
 		c.SetOverlay(nil)
 		cache.Renderer(e.entry.popUp).Destroy()
 		e.entry.popUp = nil
@@ -521,8 +524,6 @@ func (e *Entry) selectAll() {
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(e)
-
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.cutToClipboard(clipboard)
@@ -537,8 +538,10 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	})
 	selectAllItem := fyne.NewMenuItem("Select all", e.selectAll)
 
-	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e)
+	super := e.super()
+	entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(super)
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
+	c := fyne.CurrentApp().Driver().CanvasForObject(super)
 
 	if e.Disabled() && e.password() {
 		return // no popup options for a disabled password field
