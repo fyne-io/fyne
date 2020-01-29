@@ -119,7 +119,6 @@ func (t *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 	}
 	tabBar := t.buildTabBar(buttons)
 	line := canvas.NewRectangle(theme.ButtonColor())
-	objects = append(objects, line, tabBar)
 	return &tabContainerRenderer{tabBar: tabBar, line: line, objects: objects, container: t}
 }
 
@@ -150,6 +149,7 @@ func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container 
 func (t *TabContainer) Append(item *TabItem) {
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	t.Items = append(t.Items, item)
+	r.objects = append(r.objects, item.Content)
 	r.tabBar.Objects = append(r.tabBar.Objects, t.makeButton(item))
 
 	t.Refresh()
@@ -169,6 +169,7 @@ func (t *TabContainer) Remove(item *TabItem) {
 func (t *TabContainer) RemoveIndex(index int) {
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	t.Items = append(t.Items[:index], t.Items[index+1:]...)
+	r.objects = append(r.objects[:index], r.objects[index+1:]...)
 	r.tabBar.Objects = append(r.tabBar.Objects[:index], r.tabBar.Objects[index+1:]...)
 
 	t.Refresh()
@@ -188,9 +189,7 @@ func (t *TabContainer) SetTabLocation(l TabLocation) {
 			b.(*tabButton).IconPosition = buttonIconInline
 		}
 	}
-	r.tabBar.Objects = nil
 	r.tabBar = t.buildTabBar(buttons)
-	r.objects[len(r.objects)-1] = r.tabBar
 
 	r.Layout(t.size)
 }
@@ -229,6 +228,7 @@ type tabContainerRenderer struct {
 	tabBar *fyne.Container
 	line   *canvas.Rectangle
 
+	// objects holds only the CanvasObject of the tabs' content
 	objects   []fyne.CanvasObject
 	container *TabContainer
 }
@@ -314,7 +314,7 @@ func (t *tabContainerRenderer) BackgroundColor() color.Color {
 }
 
 func (t *tabContainerRenderer) Objects() []fyne.CanvasObject {
-	return t.objects
+	return append(t.objects, t.tabBar, t.line)
 }
 
 func (t *tabContainerRenderer) Refresh() {
