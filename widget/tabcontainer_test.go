@@ -388,6 +388,18 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 	assert.Equal(t, len(tabs.Items), 1)
 	assert.Equal(t, len(r.tabBar.Objects), 1)
 	assert.Equal(t, tabs.Items[0].Text, appendedItem.Text)
+
+	appendedItem3 := NewTabItem("Text3", canvas.NewCircle(theme.BackgroundColor()))
+	appendedItem4 := NewTabItem("Text4", canvas.NewCircle(theme.BackgroundColor()))
+	appendedItem5 := NewTabItem("Text5", canvas.NewCircle(theme.BackgroundColor()))
+	tabs.Append(appendedItem3)
+	tabs.Append(appendedItem4)
+	tabs.Append(appendedItem5)
+	assert.Equal(t, 4, len(tabs.Items))
+	assert.Equal(t, 4, len(r.tabBar.Objects))
+	assert.Equal(t, "Text3", tabs.Items[1].Text)
+	assert.Equal(t, "Text4", tabs.Items[2].Text)
+	assert.Equal(t, "Text5", tabs.Items[3].Text)
 }
 
 func Test_tabButton_Hovered(t *testing.T) {
