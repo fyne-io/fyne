@@ -65,11 +65,15 @@ func (d *gLDriver) runGL() {
 
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-	d.initGLFW()
+	initOnce.Do(d.initGLFW) 
 
 	for {
 		select {
 		case <-d.done:
+			runMutex.Lock()
+			runFlag = false
+			initOnce = &sync.Once{}
+			runMutex.Unlock()
 			fps.Stop()
 			glfw.Terminate()
 			return
