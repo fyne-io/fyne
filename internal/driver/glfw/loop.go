@@ -65,7 +65,7 @@ func (d *gLDriver) runGL() {
 
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
-	initOnce.Do(d.initGLFW) 
+	initOnce.Do(d.initGLFW)
 
 	for {
 		select {
