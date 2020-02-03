@@ -19,6 +19,13 @@ More detailed release notes can be found on the [releases page](https://github.c
 *
 
 
+## 1.2.3 - Ongoing
+
+### Fixed
+
+ * App.UniqueID() did not return current app ID
+
+
 ## 1.2.2 - 29 January 2020
 
 ### Added

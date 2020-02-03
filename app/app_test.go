@@ -23,6 +23,13 @@ func TestCurrentApp(t *testing.T) {
 	assert.Equal(t, app, fyne.CurrentApp())
 }
 
+func TestFyneApp_UniqueID(t *testing.T) {
+	appID := "io.fyne.test"
+	app := NewWithID(appID)
+
+	assert.Equal(t, appID, app.UniqueID())
+}
+
 func TestFyneApp_OpenURL(t *testing.T) {
 	opened := ""
 	app := NewWithID("io.fyne.test")
