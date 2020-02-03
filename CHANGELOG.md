@@ -3,6 +3,13 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 1.2.3 - Ongoing
+
+### Fixed
+
+ * App.UniqueID() did not return current app ID
+
+
 ## 1.2.2 - 29 January 2020
 
 ### Added
