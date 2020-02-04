@@ -26,7 +26,7 @@ func (b *builder) build() error {
 	cmd.Dir = b.srcdir
 	env := os.Environ()
 	if goos != "ios" && goos != "android" {
-		env = append(env, "GOOS=", goos)
+		env = append(env, "GOOS="+goos)
 	}
 	cmd.Env = env
 
