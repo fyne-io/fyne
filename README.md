@@ -29,14 +29,14 @@ If you're not sure if that's all installed or you don't know how then check out 
 
 Using the standard go tools you can install Fyne's core library using:
 
-    go get fyne.io/fyne
+    $ go get fyne.io/fyne
 
 # Widget demo
 
 To run a showcase of the features of Fyne execute the following:
 
-    go get fyne.io/fyne/cmd/fyne_demo/
-    ./fyne_demo
+    $ go get fyne.io/fyne/cmd/fyne_demo/
+    $ fyne_demo
 
 And you should see something like this (after you click a few buttons):
 
