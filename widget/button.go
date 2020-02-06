@@ -148,9 +148,10 @@ type Button struct {
 	Icon         fyne.Resource
 	disabledIcon fyne.Resource
 
-	OnTapped   func() `json:"-"`
-	hovered    bool
-	HideShadow bool
+	OnTapped          func() `json:"-"`
+	OnSecondaryTapped func() `json:"-"`
+	hovered           bool
+	HideShadow        bool
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -172,6 +173,9 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
 func (b *Button) TappedSecondary(*fyne.PointEvent) {
+	if b.OnSecondaryTapped != nil && !b.Disabled() {
+		b.OnSecondaryTapped()
+	}
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -245,7 +249,7 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
 	button := &Button{DisableableWidget{}, label, DefaultButton, nil, nil,
-		tapped, false, false}
+		tapped, nil, false, false}
 
 	button.ExtendBaseWidget(button)
 	return button
@@ -254,7 +258,7 @@ func NewButton(label string, tapped func()) *Button {
 // NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
 	button := &Button{DisableableWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
-		tapped, false, false}
+		tapped, nil, false, false}
 
 	button.ExtendBaseWidget(button)
 	return button
