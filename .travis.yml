@@ -16,7 +16,7 @@ gobuild_args: "-v -tags ci"
 install: true
 
 before_script:
-  - NO_VENDOR=$(find . -iname '*.go' -type f | grep -v /vendor/ | grep -v /cmd/fyne/internal/mobile)
+  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/ | grep -v /cmd/fyne/internal/mobile)
   - GO111MODULE=off go get golang.org/x/tools/cmd/goimports
   - GO111MODULE=off go get github.com/fzipp/gocyclo
   - GO111MODULE=off go get golang.org/x/lint/golint
@@ -31,7 +31,7 @@ script:
       # check that go mod tidy does not change go.mod/go.sum
       go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
     fi
-  - test -z "$(goimports -e -d $NO_VENDOR | tee /dev/stderr)"
+  - test -z "$(goimports -e -d $GO_FILES | tee /dev/stderr)"
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
   - golint -set_exit_status $(go list -tags ci ./... | grep -v /cmd/fyne/internal/mobile)
