@@ -12,6 +12,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCanvas_PixelCoordinateAtPosition(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+
+	pos := fyne.NewPos(4, 4)
+	c.scale = 2.5
+	x, y := c.PixelCoordinateForPosition(pos)
+	assert.Equal(t, 10, x)
+	assert.Equal(t, 10, y)
+}
+
 func TestCanvas_Tapped(t *testing.T) {
 	tapped := false
 	altTapped := false

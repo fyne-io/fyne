@@ -118,6 +118,10 @@ func (c *testCanvas) SetScale(scale float32) {
 	c.scale = scale
 }
 
+func (c *testCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+}
+
 func (c *testCanvas) OnTypedRune() func(rune) {
 	return c.onTypedRune
 }
