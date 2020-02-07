@@ -235,11 +235,11 @@ func (p *packager) packageWindows() error {
 }
 
 func (p *packager) packageAndroid() error {
-	return mobile.RunNewBuild("android", p.appID, p.icon)
+	return mobile.RunNewBuild("android", p.appID, p.icon, p.name)
 }
 
 func (p *packager) packageIOS() error {
-	err := mobile.RunNewBuild("ios", p.appID, p.icon)
+	err := mobile.RunNewBuild("ios", p.appID, p.icon, p.name)
 	if err != nil {
 		return err
 	}
@@ -360,6 +360,6 @@ func (p *packager) doPackage() error {
 	case "ios":
 		return p.packageIOS()
 	default:
-		return errors.New("Unsupported terget operating system \"" + p.os + "\"")
+		return errors.New("Unsupported target operating system \"" + p.os + "\"")
 	}
 }
