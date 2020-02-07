@@ -17,19 +17,17 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne/cmd/fyne/internal/mobile/binres"
 )
 
-func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, iconPath string) (map[string]bool, error) {
+func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, iconPath, appName string) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err
 	}
-	appName := path.Base(pkg.ImportPath)
 	libName := androidPkgName(appName)
 	manifestPath := filepath.Join(pkg.Dir, "AndroidManifest.xml")
 	manifestData, err := ioutil.ReadFile(manifestPath)
@@ -96,7 +94,7 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 	}
 
 	if buildO == "" {
-		buildO = androidPkgName(filepath.Base(pkg.Dir)) + ".apk"
+		buildO = androidPkgName(appName) + ".apk"
 	}
 	if !strings.HasSuffix(buildO, ".apk") {
 		return nil, fmt.Errorf("output file name %q does not end in '.apk'", buildO)

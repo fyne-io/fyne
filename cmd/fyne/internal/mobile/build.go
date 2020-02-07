@@ -128,7 +128,7 @@ func runBuild(cmd *command) (err error) {
 			}
 			return nil
 		}
-		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath)
+		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName)
 		if err != nil {
 			return err
 		}
@@ -145,7 +145,7 @@ func runBuild(cmd *command) (err error) {
 			}
 			return nil
 		}
-		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs)
+		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName)
 		if err != nil {
 			return err
 		}
@@ -242,13 +242,14 @@ var (
 	buildAndroidAPI int    // -androidapi
 )
 
-func RunNewBuild(target, appID, icon string) error {
+func RunNewBuild(target, appID, icon, name string) error {
 	buildTarget = target
 	buildBundleID = appID
 
 	cmd := cmdBuild
 	cmd.Flag = flag.FlagSet{}
 	cmd.IconPath = icon
+	cmd.AppName = name
 	return runBuild(cmd)
 }
 

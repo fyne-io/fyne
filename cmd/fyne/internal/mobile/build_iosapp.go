@@ -19,21 +19,14 @@ import (
 	"text/template"
 )
 
-func goIOSBuild(pkg *build.Package, bundleID string, archs []string) (map[string]bool, error) {
+func goIOSBuild(pkg *build.Package, bundleID string, archs []string, appName string) (map[string]bool, error) {
 	src := pkg.ImportPath
-	if buildO != "" && !strings.HasSuffix(buildO, ".app") {
-		return nil, fmt.Errorf("-o must have an .app for -target=ios")
-	}
-
-	productName := rfc1034Label(path.Base(pkg.ImportPath))
-	if productName == "" {
-		productName = "ProductName" // like xcode.
-	}
+	buildO = rfc1034Label(appName) + ".app"
 
 	infoplist := new(bytes.Buffer)
 	if err := infoplistTmpl.Execute(infoplist, infoplistTmplData{
 		BundleID: bundleID,
-		Name:     strings.Title(path.Base(pkg.ImportPath)),
+		Name:     strings.Title(appName),
 	}); err != nil {
 		return nil, err
 	}

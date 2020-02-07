@@ -36,7 +36,8 @@ type command struct {
 	Usage    string
 	Short    string
 	Long     string
-	IconPath string
+
+	IconPath, AppName string
 }
 
 func (cmd *command) usage() {
