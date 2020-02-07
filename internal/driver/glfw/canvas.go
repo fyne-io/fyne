@@ -2,6 +2,7 @@ package glfw
 
 import (
 	"image"
+	"math"
 	"sync"
 
 	"fyne.io/fyne"
@@ -32,8 +33,8 @@ type glCanvas struct {
 	onKeyUp     func(*fyne.KeyEvent)
 	shortcut    fyne.ShortcutHandler
 
-	scale, detectedScale float32
-	painter              gl.Painter
+	scale, detectedScale, texScale float32
+	painter                        gl.Painter
 
 	dirty                              bool
 	dirtyMutex                         *sync.Mutex
@@ -190,6 +191,21 @@ func (c *glCanvas) SetScale(_ float32) {
 	c.setDirty(true)
 
 	c.context.RescaleContext()
+}
+
+func (c *glCanvas) setTextureScale(scale float32) {
+	c.texScale = scale
+	c.painter.SetFrameBufferScale(scale)
+}
+
+func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+	texScale := c.texScale
+	multiple := float64(c.Scale() * texScale)
+	scaleInt := func(x int) int {
+		return int(math.Round(float64(x) * multiple))
+	}
+
+	return scaleInt(pos.X), scaleInt(pos.Y)
 }
 
 func (c *glCanvas) OnTypedRune() func(rune) {
@@ -463,7 +479,7 @@ func (c *glCanvas) contentPos() fyne.Position {
 }
 
 func newCanvas() *glCanvas {
-	c := &glCanvas{scale: 1.0}
+	c := &glCanvas{scale: 1.0, texScale: 1.0}
 	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
 	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
 	c.padded = true
