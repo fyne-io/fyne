@@ -300,6 +300,9 @@ func (p *packager) validate() error {
 	}
 	if p.srcDir == "" {
 		p.srcDir = baseDir
+	} else if p.os == "ios" || p.os == "android" {
+		return errors.New("Parameter -sourceDir is currently not supported for mobile builds.\n" +
+			"Change directory to the main package and try again.")
 	}
 
 	exeName := filepath.Base(p.srcDir)
@@ -308,6 +311,8 @@ func (p *packager) validate() error {
 	}
 	if p.exe == "" {
 		p.exe = filepath.Join(p.srcDir, exeName)
+	} else if p.os == "ios" || p.os == "android" {
+		_, _ = fmt.Fprint(os.Stderr, "Parameter -executable is ignored for mobile builds.\n")
 	}
 
 	if p.name == "" {
@@ -324,8 +329,8 @@ func (p *packager) validate() error {
 	if p.appID == "" {
 		if p.os == "darwin" {
 			p.appID = "com.example." + p.name
-		} else if p.os == "ios" {
-			return errors.New("Missing appID parameter for ios package")
+		} else if p.os == "ios" || p.os == "android" {
+			return errors.New("Missing appID parameter for mobile package")
 		}
 	}
 
