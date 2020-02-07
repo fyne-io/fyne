@@ -24,3 +24,13 @@ func TestTestCanvas_Capture(t *testing.T) {
 	assert.Equal(t, b1, b2)
 	assert.Equal(t, a1, a2)
 }
+
+func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
+	c := NewCanvas().(*testCanvas)
+
+	pos := fyne.NewPos(4, 4)
+	c.scale = 2.5
+	x, y := c.PixelCoordinateForPosition(pos)
+	assert.Equal(t, 10, x)
+	assert.Equal(t, 10, y)
+}

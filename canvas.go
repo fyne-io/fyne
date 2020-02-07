@@ -32,4 +32,8 @@ type Canvas interface {
 	AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut))
 
 	Capture() image.Image
+
+	// PixelCoordinateForPosition returns the x and y pixel coordinate for a given position on this canvas.
+	// This can be used to find absolute pixel positions or pixel offsets relative to an object top left.
+	PixelCoordinateForPosition(Position) (int, int)
 }

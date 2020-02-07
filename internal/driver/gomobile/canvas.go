@@ -132,6 +132,10 @@ func (c *mobileCanvas) SetScale(_ float32) {
 	c.scale = fyne.CurrentDevice().SystemScale()
 }
 
+func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+}
+
 func (c *mobileCanvas) Overlay() fyne.CanvasObject {
 	return c.overlay
 }
