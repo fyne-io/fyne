@@ -146,11 +146,24 @@ func main() {
 	bundleIcon("mail-reply_all", f)
 	bundleIcon("mail-send", f)
 
+	bundleIcon("media-fast-forward", f)
+	bundleIcon("media-fast-rewind", f)
+	bundleIcon("media-pause", f)
+	bundleIcon("media-play", f)
+	bundleIcon("media-record", f)
+	bundleIcon("media-replay", f)
+	bundleIcon("media-skip-next", f)
+	bundleIcon("media-skip-previous", f)
+
 	bundleIcon("view-fullscreen", f)
 	bundleIcon("view-refresh", f)
 	bundleIcon("view-zoom-fit", f)
 	bundleIcon("view-zoom-in", f)
 	bundleIcon("view-zoom-out", f)
+
+	bundleIcon("volume-down", f)
+	bundleIcon("volume-mute", f)
+	bundleIcon("volume-up", f)
 
 	bundleIcon("visibility", f)
 	bundleIcon("visibility-off", f)

@@ -18,6 +18,7 @@ type svg struct {
 	ViewBox  string        `xml:"viewBox,attr"`
 	Paths    []*pathObj    `xml:"path"`
 	Rects    []*rectObj    `xml:"rect"`
+	Circles  []*circleObj  `xml:"circle"`
 	Polygons []*polygonObj `xml:"polygon"`
 	Groups   []*objGroup   `xml:"g"`
 }
@@ -35,6 +36,14 @@ type rectObj struct {
 	Y       string   `xml:"y,attr"`
 	Width   string   `xml:"width,attr"`
 	Height  string   `xml:"height,attr"`
+}
+
+type circleObj struct {
+	XMLName xml.Name `xml:"circle"`
+	Fill    string   `xml:"fill,attr"`
+	CX      string   `xml:"cx,attr"`
+	CY      string   `xml:"cy,attr"`
+	R       string   `xml:"r,attr"`
 }
 
 type polygonObj struct {
@@ -67,6 +76,14 @@ func replaceRectsFill(rects []*rectObj, hexColor string) {
 	}
 }
 
+func replaceCirclesFill(circles []*circleObj, hexColor string) {
+	for _, circle := range circles {
+		if circle.Fill != "none" {
+			circle.Fill = hexColor
+		}
+	}
+}
+
 func replacePolygonsFill(polys []*polygonObj, hexColor string) {
 	for _, poly := range polys {
 		if poly.Fill != "none" {
@@ -89,6 +106,7 @@ func replaceGroupObjectFill(groups []*objGroup, hexColor string) {
 func (s *svg) replaceFillColor(reader io.Reader, color color.Color) error {
 	replacePathsFill(s.Paths, colorToHexString(color))
 	replaceRectsFill(s.Rects, colorToHexString(color))
+	replaceCirclesFill(s.Circles, colorToHexString(color))
 	replacePolygonsFill(s.Polygons, colorToHexString(color))
 	replaceGroupObjectFill(s.Groups, colorToHexString(color))
 	return nil

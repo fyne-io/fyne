@@ -92,10 +92,12 @@ var (
 	contentRedo, contentUndo, info, question, warning                           *ThemedResource
 	documentCreate, documentPrint, documentSave                                 *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
+	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                    *ThemedResource
+	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                  *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
 	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
-	visibility, visibilityOff                                                   *ThemedResource
+	visibility, visibilityOff, volumeDown, volumeMute, volumeUp                 *ThemedResource
 )
 
 func init() {
@@ -135,6 +137,15 @@ func init() {
 	mailReplyAll = NewThemedResource(mailreplyallIconRes, nil)
 	mailSend = NewThemedResource(mailsendIconRes, nil)
 
+	mediaFastForward = NewThemedResource(mediafastforwardIconRes, nil)
+	mediaFastRewind = NewThemedResource(mediafastrewindIconRes, nil)
+	mediaPause = NewThemedResource(mediapauseIconRes, nil)
+	mediaPlay = NewThemedResource(mediaplayIconRes, nil)
+	mediaRecord = NewThemedResource(mediarecordIconRes, nil)
+	mediaReplay = NewThemedResource(mediareplayIconRes, nil)
+	mediaSkipNext = NewThemedResource(mediaskipnextIconRes, nil)
+	mediaSkipPrevious = NewThemedResource(mediaskippreviousIconRes, nil)
+
 	arrowBack = NewThemedResource(arrowbackIconRes, nil)
 	arrowDown = NewThemedResource(arrowdownIconRes, nil)
 	arrowForward = NewThemedResource(arrowforwardIconRes, nil)
@@ -157,6 +168,10 @@ func init() {
 
 	visibility = NewThemedResource(visibilityIconRes, nil)
 	visibilityOff = NewThemedResource(visibilityoffIconRes, nil)
+
+	volumeDown = NewThemedResource(volumedownIconRes, nil)
+	volumeMute = NewThemedResource(volumemuteIconRes, nil)
+	volumeUp = NewThemedResource(volumeupIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -349,6 +364,46 @@ func MailSendIcon() fyne.Resource {
 	return mailSend
 }
 
+// MediaFastForwardIcon returns a resource containing the standard media fast-forward icon for the current theme
+func MediaFastForwardIcon() fyne.Resource {
+	return mediaFastForward
+}
+
+// MediaFastRewindIcon returns a resource containing the standard media fast-rewind icon for the current theme
+func MediaFastRewindIcon() fyne.Resource {
+	return mediaFastRewind
+}
+
+// MediaPauseIcon returns a resource containing the standard media pause icon for the current theme
+func MediaPauseIcon() fyne.Resource {
+	return mediaPause
+}
+
+// MediaPlayIcon returns a resource containing the standard media play icon for the current theme
+func MediaPlayIcon() fyne.Resource {
+	return mediaPlay
+}
+
+// MediaRecordIcon returns a resource containing the standard media record icon for the current theme
+func MediaRecordIcon() fyne.Resource {
+	return mediaRecord
+}
+
+// MediaReplayIcon returns a resource containing the standard media replay icon for the current theme
+func MediaReplayIcon() fyne.Resource {
+	return mediaReplay
+}
+
+// MediaSkipNextIcon returns a resource containing the standard media skip next icon for the current theme
+func MediaSkipNextIcon() fyne.Resource {
+	return mediaSkipNext
+}
+
+// MediaSkipPreviousIcon returns a resource containing the standard media skip previous icon for the current theme
+func MediaSkipPreviousIcon() fyne.Resource {
+	return mediaSkipPrevious
+}
+
 // MoveDownIcon returns a resource containing the standard down arrow icon for the current theme
 func MoveDownIcon() fyne.Resource {
 	return arrowDown
@@ -417,4 +472,19 @@ func VisibilityIcon() fyne.Resource {
 // VisibilityOffIcon returns a resource containing the standard visibity off icon for the current theme
 func VisibilityOffIcon() fyne.Resource {
 	return visibilityOff
+}
+
+// VolumeDownIcon returns a resource containing the standard volume down icon for the current theme
+func VolumeDownIcon() fyne.Resource {
+	return volumeDown
+}
+
+// VolumeMuteIcon returns a resource containing the standard volume mute icon for the current theme
+func VolumeMuteIcon() fyne.Resource {
+	return volumeMute
+}
+
+// VolumeUpIcon returns a resource containing the standard volume up icon for the current theme
+func VolumeUpIcon() fyne.Resource {
+	return volumeUp
 }
