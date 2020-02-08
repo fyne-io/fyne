@@ -30,12 +30,12 @@ const documentationHeader = `// Copyright 2015 The Go Authors.  All rights reser
 `
 
 type command struct {
-	run      func(*command) error
-	Flag     flag.FlagSet
-	Name     string
-	Usage    string
-	Short    string
-	Long     string
+	run   func(*command) error
+	Flag  flag.FlagSet
+	Name  string
+	Usage string
+	Short string
+	Long  string
 
 	IconPath, AppName string
 }
