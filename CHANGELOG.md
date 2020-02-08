@@ -5,9 +5,21 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ## 1.2.3 - Ongoing
 
+### Added
+
+ * Add media and volume icons to default themes (#649)
+ * Add Canvas.PixelCoordinateForPosition to find pixel locations if required
+ * Add ProgressInfinite dialog
+
+### Changed
+
+ * Warn if -executable or -sourceDir flags are used for package on mobile (#652)
+
 ### Fixed
 
  * App.UniqueID() did not return current app ID
+ * Fyne package ignored -name flag for ios and android builds (#657)
+ * Possible crash when appending tabs to TabContainer
 
 
 ## 1.2.2 - 29 January 2020
