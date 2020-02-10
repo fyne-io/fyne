@@ -42,17 +42,28 @@ func (v *versioner) doVersion() error {
 	if e != nil {
 		return e
 	}
-	// p.PkgObj =~ /home/ser/go/pkg/mod/fyne.io/fyne@v1.2.2/pkg/li
-	ps := strings.Split(p.PkgObj, "@")
-	if len(ps) < 2 {
-		return errors.New(fmt.Sprintf("Malformed package info %s; not using modules?", p.PkgObj))
+	ve, e := parsePkgString(p.PkgObj)
+	if e != nil {
+		return e
 	}
-	vs := strings.Split(ps[1], "/")
-	if len(vs) < 2 {
-		return errors.New(fmt.Sprintf("Missing version information %s; not using modules?", p.PkgObj))
-	}
-	fmt.Println(vs[0])
+	fmt.Println(ve)
 	return nil
+}
+
+func parsePkgString(s string) (string, error) {
+	// @ separates the package path from the version
+	ps := strings.Split(s, "@")
+	if len(ps) < 2 {
+		return "", errors.New(fmt.Sprintf("No version information in %s; not using modules?", s))
+	}
+	// PkgObj contains some junk after the version -- "junk," in this case,
+	// meaning some internal information I don't understand. It's not part of
+	// the version, in any case.
+	vs := strings.Split(ps[1], "/")
+	if len(vs) < 1 {
+		return "", errors.New(fmt.Sprintf("Missing version information %s; not using modules?", s))
+	}
+	return vs[0], nil
 }
 
 func (v *versioner) printHelp(indent string) {
