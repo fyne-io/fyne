@@ -11,7 +11,6 @@ require (
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20190124120936-8611f5a5ff3f
-	github.com/lucor/fyne-cross v1.3.2 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/errors v0.8.1
 	github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e
