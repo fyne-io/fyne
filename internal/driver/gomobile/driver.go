@@ -140,7 +140,7 @@ func (d *mobileDriver) Run() {
 			case paint.Event:
                                 // this is a fix to prevent the window to appear as a "blank screen" on android
                                 // on some android phones, we may get a 0x0 size
-                                if currentSize.WidthPx<10 {
+                                if currentSize.WidthPx==0 {
                                     continue
                                 }
 				if d.glctx == nil || e.External {
