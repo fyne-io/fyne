@@ -18,6 +18,8 @@ github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526 h1:NfuKjkj/Xc2z1
 github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526/go.mod h1:UQkeMHVoNcyXYq9otUupF7/h/2tmHlhrS2zw7ZVvUqc=
 github.com/josephspurrier/goversioninfo v0.0.0-20190124120936-8611f5a5ff3f h1:wBb8/KQrr2tWYffdugrpxOdWyOPSBRNzAR76aF9Nn3Y=
 github.com/josephspurrier/goversioninfo v0.0.0-20190124120936-8611f5a5ff3f/go.mod h1:eJTEwMjXb7kZ633hO3Ln9mBUCOjX2+FlTljvpl9SYdE=
+github.com/lucor/fyne-cross v1.3.2 h1:MSgO34dTFCkZmFJ3eJWzsd3WlVgsX3DwUFN106seaWw=
+github.com/lucor/fyne-cross v1.3.2/go.mod h1:luTlWLxUFrARevSkxfHzF0MvZJtsKedelq1nqcTS104=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6Oo2LfFZAehjjQMERAvZLEDnQ=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

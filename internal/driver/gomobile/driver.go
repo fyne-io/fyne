@@ -118,6 +118,13 @@ func (d *mobileDriver) Run() {
 				case lifecycle.CrossOn:
 					d.glctx, _ = e.DrawContext.(gl.Context)
 					d.onStart()
+
+                                        // this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
+                                        canvas.walkTree(func(o fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+                                            canvas.Refresh(o)
+                                            return true
+                                        }, nil)
+
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
 					d.onStop()
@@ -128,7 +135,14 @@ func (d *mobileDriver) Run() {
 				}
 			case size.Event:
 				currentSize = e
+				time.Sleep(time.Millisecond * 10)
+				a.Send(paint.Event{})
 			case paint.Event:
+                                // this is a fix to prevent the window to appear as a "blank screen" on android
+                                // on some android phones, we may get a 0x0 size
+                                if currentSize.WidthPx<10 {
+                                    continue
+                                }
 				if d.glctx == nil || e.External {
 					continue
 				}
