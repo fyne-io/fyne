@@ -238,8 +238,8 @@ func (p *packager) packageWindows() error {
 	return nil
 }
 
-func (p *packager) packageAndroid() error {
-	return mobile.RunNewBuild("android", p.appID, p.icon, p.name, p.release)
+func (p *packager) packageAndroid(arch string) error {
+	return mobile.RunNewBuild(arch, p.appID, p.icon, p.name, p.release)
 }
 
 func (p *packager) packageIOS() error {
@@ -379,8 +379,12 @@ func (p *packager) doPackage() error {
 		return p.packageLinux()
 	case "windows":
 		return p.packageWindows()
+	case "android/arm":
+		fallthrough
+	case "android/386":
+		return p.packageAndroid(p.os)
 	case "android":
-		return p.packageAndroid()
+		return p.packageAndroid(p.os)
 	case "ios":
 		return p.packageIOS()
 	default:
@@ -389,5 +393,5 @@ func (p *packager) doPackage() error {
 }
 
 func (p *packager) isMobile() bool {
-	return p.os == "ios" || p.os == "android"
+	return p.os == "ios" || p.os[0:7] == "android"
 }
