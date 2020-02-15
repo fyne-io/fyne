@@ -263,7 +263,7 @@ type Entry struct {
 	// TODO: Add OnSelectChanged
 
 	// passwordRevealer represents the passwordRevealer widget
-	passwordRevealer *passwordRevealer
+	passwordRevealer fyne.CanvasObject
 }
 
 // SetText manually sets the text of the Entry to the given text value.
