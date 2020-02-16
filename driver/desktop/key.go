@@ -39,6 +39,15 @@ const (
 	SuperModifier
 )
 
+// Action represents the change of state of a key or mouse button event
+type Action int
+
+const (
+	Release Action = 0
+	Press   Action = 1
+	Repeat  Action = 2
+)
+
 // Keyable describes any focusable canvas object that can accept desktop key events.
 // This is the traditional key down and up event that is not applicable to all devices.
 type Keyable interface {
