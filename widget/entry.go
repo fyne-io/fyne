@@ -152,14 +152,14 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
 	e.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
 
-	revealIconSize := fyne.NewSize(0, 0)
-	if e.entry.passwordRevealer != nil {
-		revealIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-		e.entry.passwordRevealer.Resize(revealIconSize)
-		e.entry.passwordRevealer.Move(fyne.NewPos(size.Width-revealIconSize.Width-theme.Padding(), theme.Padding()*2))
+	actionIconSize := fyne.NewSize(0, 0)
+	if e.entry.actionItem != nil {
+		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		e.entry.actionItem.Resize(actionIconSize)
+		e.entry.actionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-theme.Padding(), theme.Padding()*2))
 	}
 
-	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-revealIconSize.Width, theme.Padding()*2))
+	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
 	e.entry.text.Resize(entrySize)
 	e.entry.text.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 
@@ -201,8 +201,8 @@ func (e *entryRenderer) Refresh() {
 	}
 
 	e.entry.text.Refresh()
-	if e.entry.passwordRevealer != nil {
-		e.entry.passwordRevealer.Refresh()
+	if e.entry.actionItem != nil {
+		e.entry.actionItem.Refresh()
 	}
 	canvas.Refresh(e.entry.super())
 }
@@ -262,8 +262,8 @@ type Entry struct {
 	popUp     *PopUp
 	// TODO: Add OnSelectChanged
 
-	// passwordRevealer represents the passwordRevealer widget
-	passwordRevealer fyne.CanvasObject
+	// actionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
+	actionItem fyne.CanvasObject
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -1051,7 +1051,7 @@ func (e *Entry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
 
 	min := e.BaseWidget.MinSize()
-	if e.passwordRevealer != nil {
+	if e.actionItem != nil {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
 
@@ -1068,7 +1068,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
 
-	if e.Password && e.passwordRevealer == nil {
+	if e.Password && e.actionItem == nil {
 		// An entry widget has been created via struct setting manually
 		// the Password field to true. Going to enable the password revealer.
 		pr := &passwordRevealer{
@@ -1077,11 +1077,11 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		}
 		pr.ExtendBaseWidget(pr)
 
-		e.passwordRevealer = pr
+		e.actionItem = pr
 	}
 
-	if e.passwordRevealer != nil {
-		objects = append(objects, e.passwordRevealer)
+	if e.actionItem != nil {
+		objects = append(objects, e.actionItem)
 	}
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
@@ -1139,7 +1139,7 @@ func NewPasswordEntry() *Entry {
 	}
 	pr.ExtendBaseWidget(pr)
 
-	e.passwordRevealer = pr
+	e.actionItem = pr
 	return e
 }
 

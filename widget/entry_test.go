@@ -1338,7 +1338,7 @@ func TestEntry_EraseEmptySelection(t *testing.T) {
 func TestPasswordEntry_Reveal(t *testing.T) {
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := NewPasswordEntry()
-		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.passwordRevealer.(*passwordRevealer)
+		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.actionItem.(*passwordRevealer)
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
@@ -1372,7 +1372,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		entry.Refresh()
 
 		// action icon is not displayed
-		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.passwordRevealer
+		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.actionItem
 		assert.NotNil(t, actionIcon)
 
 		test.Type(entry, "Hié™שרה")
