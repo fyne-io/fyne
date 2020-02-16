@@ -33,7 +33,7 @@ func (t *testTextParent) textColor() color.Color {
 	return t.fg
 }
 
-func (t *testTextParent) password() bool {
+func (t *testTextParent) concealed() bool {
 	return false
 }
 

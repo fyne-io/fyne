@@ -453,9 +453,9 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 }
 
 // copyToClipboard copies the current selection to a given clipboard and then removes the selected text.
-// This does nothing if it is a password entry.
+// This does nothing if it is a concealed entry.
 func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
-	if !e.selecting || e.password() {
+	if !e.selecting || e.concealed() {
 		return
 	}
 
@@ -464,9 +464,9 @@ func (e *Entry) cutToClipboard(clipboard fyne.Clipboard) {
 }
 
 // copyToClipboard copies the current selection to a given clipboard.
-// This does nothing if it is a password entry.
+// This does nothing if it is a concealed entry.
 func (e *Entry) copyToClipboard(clipboard fyne.Clipboard) {
-	if !e.selecting || e.password() {
+	if !e.selecting || e.concealed() {
 		return
 	}
 
@@ -543,13 +543,13 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
 	c := fyne.CurrentApp().Driver().CanvasForObject(super)
 
-	if e.Disabled() && e.password() {
-		return // no popup options for a disabled password field
+	if e.Disabled() && e.concealed() {
+		return // no popup options for a disabled concealed field
 	}
 
 	if e.Disabled() {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", copyItem, selectAllItem), c, popUpPos)
-	} else if e.password() {
+	} else if e.concealed() {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", pasteItem, selectAllItem), c, popUpPos)
 	} else {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c, popUpPos)
@@ -1006,8 +1006,8 @@ func (e *Entry) textColor() color.Color {
 	return theme.TextColor()
 }
 
-// password tells the rendering textProvider if we are a password field
-func (e *Entry) password() bool {
+// concealed tells the rendering textProvider if we are a concealed field
+func (e *Entry) concealed() bool {
 	return e.Password
 }
 
@@ -1035,9 +1035,9 @@ func (p *placeholderPresenter) textColor() color.Color {
 	return theme.PlaceHolderColor()
 }
 
-// password tells the rendering textProvider if we are a password field
+// concealed tells the rendering textProvider if we are a concealed field
 // placeholder text is not obfuscated, returning false
-func (p *placeholderPresenter) password() bool {
+func (p *placeholderPresenter) concealed() bool {
 	return false
 }
 

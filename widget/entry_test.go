@@ -455,7 +455,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	entry.Password = true
 	test.TapSecondaryAt(entry, tapPos)
 	over = fyne.CurrentApp().Driver().CanvasForObject(entry).Overlay()
-	assert.Nil(t, over) // No popup for disabled password
+	assert.Nil(t, over) // No popup for disabled concealed
 
 	entry.Enable()
 	test.TapSecondaryAt(entry, tapPos)
@@ -946,7 +946,7 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 	entry.SetPlaceHolder("Password")
 
 	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry)[0].Text)
-	assert.False(t, entry.placeholderProvider().presenter.password())
+	assert.False(t, entry.placeholderProvider().presenter.concealed())
 }
 
 const (
