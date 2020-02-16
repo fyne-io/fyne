@@ -219,6 +219,7 @@ func (e *entryRenderer) Destroy() {
 
 // Declare conformity with interfaces
 var _ fyne.Draggable = (*Entry)(nil)
+var _ fyne.Focusable = (*Entry)(nil)
 var _ fyne.Tappable = (*Entry)(nil)
 var _ fyne.Widget = (*Entry)(nil)
 var _ desktop.Mouseable = (*Entry)(nil)
