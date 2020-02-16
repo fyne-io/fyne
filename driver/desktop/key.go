@@ -46,6 +46,18 @@ const (
 	SuperModifier
 )
 
+// Action represents the change of state of a key or mouse button event
+type Action int
+
+const (
+	// Release Keyboard button was released
+	Release Action = 0
+	// Press Keyboard button was pressed
+	Press Action = 1
+	// Repeat Keyboard button was hold pressed for long enough that it trigger a repeat
+	Repeat Action = 2
+)
+
 // Keyable describes any focusable canvas object that can accept desktop key events.
 // This is the traditional key down and up event that is not applicable to all devices.
 type Keyable interface {
