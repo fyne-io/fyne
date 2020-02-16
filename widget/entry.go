@@ -1071,13 +1071,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	if e.Password && e.actionItem == nil {
 		// An entry widget has been created via struct setting manually
 		// the Password field to true. Going to enable the password revealer.
-		pr := &passwordRevealer{
-			icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
-			entry: e,
-		}
-		pr.ExtendBaseWidget(pr)
-
-		e.actionItem = pr
+		e.actionItem = newPasswordRevealer(e)
 	}
 
 	if e.actionItem != nil {
@@ -1132,14 +1126,7 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 	e.ExtendBaseWidget(e)
-
-	pr := &passwordRevealer{
-		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
-		entry: e,
-	}
-	pr.ExtendBaseWidget(pr)
-
-	e.actionItem = pr
+	e.actionItem = newPasswordRevealer(e)
 	return e
 }
 
@@ -1200,4 +1187,13 @@ func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
 }
 
 func (pr *passwordRevealer) TappedSecondary(*fyne.PointEvent) {
+}
+
+func newPasswordRevealer(e *Entry) *passwordRevealer {
+	pr := &passwordRevealer{
+		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
+		entry: e,
+	}
+	pr.ExtendBaseWidget(pr)
+	return pr
 }
