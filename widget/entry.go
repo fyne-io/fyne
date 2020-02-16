@@ -153,10 +153,10 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	e.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
 
 	actionIconSize := fyne.NewSize(0, 0)
-	if e.entry.actionItem != nil {
+	if e.entry.ActionItem != nil {
 		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-		e.entry.actionItem.Resize(actionIconSize)
-		e.entry.actionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-theme.Padding(), theme.Padding()*2))
+		e.entry.ActionItem.Resize(actionIconSize)
+		e.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-theme.Padding(), theme.Padding()*2))
 	}
 
 	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
@@ -201,8 +201,8 @@ func (e *entryRenderer) Refresh() {
 	}
 
 	e.entry.text.Refresh()
-	if e.entry.actionItem != nil {
-		e.entry.actionItem.Refresh()
+	if e.entry.ActionItem != nil {
+		e.entry.ActionItem.Refresh()
 	}
 	canvas.Refresh(e.entry.super())
 }
@@ -262,8 +262,8 @@ type Entry struct {
 	popUp     *PopUp
 	// TODO: Add OnSelectChanged
 
-	// actionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
-	actionItem fyne.CanvasObject
+	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
+	ActionItem fyne.CanvasObject
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -1051,7 +1051,7 @@ func (e *Entry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
 
 	min := e.BaseWidget.MinSize()
-	if e.actionItem != nil {
+	if e.ActionItem != nil {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
 
@@ -1068,14 +1068,14 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
 
-	if e.Password && e.actionItem == nil {
+	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
 		// the Password field to true. Going to enable the password revealer.
-		e.actionItem = newPasswordRevealer(e)
+		e.ActionItem = newPasswordRevealer(e)
 	}
 
-	if e.actionItem != nil {
-		objects = append(objects, e.actionItem)
+	if e.ActionItem != nil {
+		objects = append(objects, e.ActionItem)
 	}
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
@@ -1126,7 +1126,7 @@ func NewMultiLineEntry() *Entry {
 func NewPasswordEntry() *Entry {
 	e := &Entry{Password: true}
 	e.ExtendBaseWidget(e)
-	e.actionItem = newPasswordRevealer(e)
+	e.ActionItem = newPasswordRevealer(e)
 	return e
 }
 
