@@ -114,7 +114,7 @@ func (s *Select) Resize(size fyne.Size) {
 	s.BaseWidget.Resize(size)
 
 	if s.popUp != nil {
-		s.popUp.Content.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
+		s.popUp.Content.Resize(fyne.NewSize(size.Width-theme.Padding()*2, s.popUp.Content.MinSize().Height))
 	}
 }
 
