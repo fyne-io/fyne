@@ -234,8 +234,8 @@ func (p *packager) packageWindows() error {
 	return nil
 }
 
-func (p *packager) packageAndroid() error {
-	return mobile.RunNewBuild("android", p.appID, p.icon, p.name)
+func (p *packager) packageAndroid(arch string) error {
+	return mobile.RunNewBuild(arch, p.appID, p.icon)
 }
 
 func (p *packager) packageIOS() error {
@@ -355,8 +355,10 @@ func (p *packager) doPackage() error {
 		return p.packageLinux()
 	case "windows":
 		return p.packageWindows()
-	case "android":
-		return p.packageAndroid()
+	case "android/arm":
+		return p.packageAndroid(p.os)
+        case "android":
+		return p.packageAndroid(p.os)
 	case "ios":
 		return p.packageIOS()
 	default:

@@ -363,7 +363,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			C.surface = nil
 			theApp.sendLifecycle(lifecycle.StageAlive)
 		case <-activityDestroyed:
-			C.terminate()
+			// C.terminate()
 			theApp.sendLifecycle(lifecycle.StageDead)
 		case <-workAvailable:
 			theApp.worker.DoWork()
