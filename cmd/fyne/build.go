@@ -8,7 +8,7 @@ import (
 )
 
 type builder struct {
-	os, srcdir string
+	os, srcdir, target string
 }
 
 func (b *builder) build() error {
@@ -19,9 +19,17 @@ func (b *builder) build() error {
 
 	var cmd *exec.Cmd
 	if goos == "windows" {
-		cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", ".")
+		if b.target == "" {
+			cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", ".")
+		} else {
+			cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", "-o", b.target, ".")
+		}
 	} else {
-		cmd = exec.Command("go", "build", ".")
+		if b.target == "" {
+			cmd = exec.Command("go", "build", ".")
+		} else {
+			cmd = exec.Command("go","build", "-o", b.target, ".")
+		}
 	}
 	cmd.Dir = b.srcdir
 	env := os.Environ()
@@ -29,6 +37,10 @@ func (b *builder) build() error {
 
 	if goos != "ios" && goos != "android" {
 		env = append(env, "GOOS="+goos)
+	}
+	if goos == "wasm" {
+		env = append(env, "GOARCH=wasm")
+		env = append(env, "GOOS=js")
 	}
 	cmd.Env = env
 

@@ -89,7 +89,7 @@ var _ command = (*packager)(nil)
 type packager struct {
 	name, srcDir, dir, exe, icon string
 	os, appID                    string
-	install, release             bool
+	install, release, debug      bool
 }
 
 func (p *packager) packageLinux() error {
@@ -297,14 +297,92 @@ func (p *packager) packageIOS() error {
 	return copyFile(p.icon, iconPath)
 }
 
+func (p *packager) packageWasm() error {
+	appDir := ensureSubDir(p.dir, "wasm")
+
+	index := filepath.Join(appDir, "index.html")
+	indexFile, err := os.Create(index)
+	if err != nil {
+		return err
+	}
+
+	io.WriteString(indexFile, "<!DOCTYPE html>\n" +
+		"<html>\n" +
+		"\t<head>\n" +
+		"\t\t<meta charset=\"utf-8\">\n" +
+		"\t\t<link rel=\"icon\" type=\"image/png\" href=\"icon.png\">\n" +
+		"\t\t<script src=\"wasm_exec.js\"></script>\n")
+	if p.debug {
+		io.WriteString(indexFile, "\t\t<script src=\"webgl-debug.js\"></script>\n")
+	}
+	io.WriteString(indexFile, "\t\t<script>\n" +
+		"\t\t\tfunction webgl_support () {\n" +
+		"\t\t\t\ttry {\n" +
+		"\t\t\t\t\tvar canvas = document.createElement('canvas');\n" +
+		"\t\t\t\t\treturn !!window.WebGLRenderingContext &&\n" +
+		"\t\t\t\t\t\t(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));\n" +
+		"\t\t\t\t} catch(e) {\n" +
+		"\t\t\t\t\treturn false;\n" +
+		"\t\t\t\t}\n" +
+		"\t\t\t}\n" +
+		"\n" +
+		"\t\t\tif (webgl_support() && WebAssembly) {\n" +
+		"\t\t\t\t// WebAssembly.instantiateStreaming is not currently available in Safari\n" +
+		"\t\t\t\tif (WebAssembly && !WebAssembly.instantiateStreaming) { // polyfill\n" +
+		"\t\t\t\t\tWebAssembly.instantiateStreaming = async (resp, importObject) => {\n" +
+		"\t\t\t\t\t\tconst source = await (await resp).arrayBuffer();\n" +
+		"\t\t\t\t\t\treturn await WebAssembly.instantiate(source, importObject);\n" +
+		"\t\t\t\t\t};\n" +
+		"\t\t\t\t}\n" +
+		"\n" +
+		"\t\t\t\tconst go = new Go();\n" +
+		"\t\t\t\tWebAssembly.instantiateStreaming(fetch(\"" + p.name + "\"), go.importObject).then((result) => {\n" +
+		"\t\t\t\t\tgo.run(result.instance);\n" +
+		"\t\t\t\t});\n" +
+		"\t\t\t} else {\n" +
+		"\t\t\t\tconsole.log(\"WebAssembly and WebGL are not supported in your browser\")\n" +
+		"\t\t\t\tvar main = document.querySelector('#main');\n" +
+		"\t\t\t\tmain.innerHTML = \"WebAssembly and WebGL are not supported in your browser\";" +
+		"\t\t\t}\n" +
+		"\n" +
+		"\t\t</script>\n" +
+		"\t</head>\n" +
+		"\t<body>\n" +
+		"\t\t<main id=\"wasm\"></main>\n" +
+		"\t</body>\n" +
+		"</html>\n")
+
+	iconDst := filepath.Join(appDir, "icon.png")
+	err = copyFile(p.icon, iconDst)
+	if err != nil {
+		return err
+	}
+
+	wasmExecSrc := filepath.Join(runtime.GOROOT(), "misc", "wasm", "wasm_exec.js")
+	wasmExecDst := filepath.Join(appDir, "wasm_exec.js")
+	err = copyFile(wasmExecSrc, wasmExecDst)
+	if err != nil {
+		return err
+	}
+
+	exeDst := filepath.Join(appDir, p.name)
+	err = copyFile(p.exe, exeDst)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *packager) addFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, darwin, ios, linux, windows)")
+	flag.StringVar(&p.os, "os", "", "The operating system to target (android, darwin, ios, linux, windows, wasm)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
 	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
 	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
+	flag.BoolVar(&p.debug, "debug", false, "Define if a debugging package should be generated")
 }
 
 func (*packager) printHelp(indent string) {
@@ -317,6 +395,7 @@ func (p *packager) buildPackage() error {
 	b := &builder{
 		os:     p.os,
 		srcdir: p.srcDir,
+		target: p.exe,
 	}
 
 	return b.build()
@@ -401,6 +480,8 @@ func calculateExeName(sourceDir, os string) string {
 
 	if os == "windows" {
 		exeName = exeName + ".exe"
+	} else if os == "wasm" {
+		exeName = exeName + ".wasm"
 	}
 
 	return exeName
@@ -428,6 +509,8 @@ func (p *packager) doPackage() error {
 		return p.packageAndroid()
 	case "ios":
 		return p.packageIOS()
+	case "wasm":
+		return p.packageWasm()
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
