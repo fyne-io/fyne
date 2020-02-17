@@ -243,155 +243,104 @@ func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID tou
 	})
 }
 
-func keyToName(code key.Code) fyne.KeyName {
-	switch code {
+var keyCodeMap = map[key.Code]fyne.KeyName{
 	// non-printable
-	case key.CodeEscape:
-		return fyne.KeyEscape
-	case key.CodeReturnEnter:
-		return fyne.KeyReturn
-	case key.CodeTab:
-		return fyne.KeyTab
-	case key.CodeDeleteBackspace:
-		return fyne.KeyBackspace
-	case key.CodeInsert:
-		return fyne.KeyInsert
-	case key.CodePageUp:
-		return fyne.KeyPageUp
-	case key.CodePageDown:
-		return fyne.KeyPageDown
-	case key.CodeHome:
-		return fyne.KeyHome
-	case key.CodeEnd:
-		return fyne.KeyEnd
+	key.CodeEscape:          fyne.KeyEscape,
+	key.CodeReturnEnter:     fyne.KeyReturn,
+	key.CodeTab:             fyne.KeyTab,
+	key.CodeDeleteBackspace: fyne.KeyBackspace,
+	key.CodeInsert:          fyne.KeyInsert,
+	key.CodePageUp:          fyne.KeyPageUp,
+	key.CodePageDown:        fyne.KeyPageDown,
+	key.CodeHome:            fyne.KeyHome,
+	key.CodeEnd:             fyne.KeyEnd,
 
-	case key.CodeF1:
-		return fyne.KeyF1
-	case key.CodeF2:
-		return fyne.KeyF2
-	case key.CodeF3:
-		return fyne.KeyF3
-	case key.CodeF4:
-		return fyne.KeyF4
-	case key.CodeF5:
-		return fyne.KeyF5
-	case key.CodeF6:
-		return fyne.KeyF6
-	case key.CodeF7:
-		return fyne.KeyF7
-	case key.CodeF8:
-		return fyne.KeyF8
-	case key.CodeF9:
-		return fyne.KeyF9
-	case key.CodeF10:
-		return fyne.KeyF10
-	case key.CodeF11:
-		return fyne.KeyF11
-	case key.CodeF12:
-		return fyne.KeyF12
+	key.CodeF1:  fyne.KeyF1,
+	key.CodeF2:  fyne.KeyF2,
+	key.CodeF3:  fyne.KeyF3,
+	key.CodeF4:  fyne.KeyF4,
+	key.CodeF5:  fyne.KeyF5,
+	key.CodeF6:  fyne.KeyF6,
+	key.CodeF7:  fyne.KeyF7,
+	key.CodeF8:  fyne.KeyF8,
+	key.CodeF9:  fyne.KeyF9,
+	key.CodeF10: fyne.KeyF10,
+	key.CodeF11: fyne.KeyF11,
+	key.CodeF12: fyne.KeyF12,
 
-	case key.CodeKeypadEnter:
-		return fyne.KeyEnter
+	key.CodeKeypadEnter: fyne.KeyEnter,
 
 	// printable
-	case key.CodeA:
-		return fyne.KeyA
-	case key.CodeB:
-		return fyne.KeyB
-	case key.CodeC:
-		return fyne.KeyC
-	case key.CodeD:
-		return fyne.KeyD
-	case key.CodeE:
-		return fyne.KeyE
-	case key.CodeF:
-		return fyne.KeyF
-	case key.CodeG:
-		return fyne.KeyG
-	case key.CodeH:
-		return fyne.KeyH
-	case key.CodeI:
-		return fyne.KeyI
-	case key.CodeJ:
-		return fyne.KeyJ
-	case key.CodeK:
-		return fyne.KeyK
-	case key.CodeL:
-		return fyne.KeyL
-	case key.CodeM:
-		return fyne.KeyM
-	case key.CodeN:
-		return fyne.KeyN
-	case key.CodeO:
-		return fyne.KeyO
-	case key.CodeP:
-		return fyne.KeyP
-	case key.CodeQ:
-		return fyne.KeyQ
-	case key.CodeR:
-		return fyne.KeyR
-	case key.CodeS:
-		return fyne.KeyS
-	case key.CodeT:
-		return fyne.KeyT
-	case key.CodeU:
-		return fyne.KeyU
-	case key.CodeV:
-		return fyne.KeyV
-	case key.CodeW:
-		return fyne.KeyW
-	case key.CodeX:
-		return fyne.KeyX
-	case key.CodeY:
-		return fyne.KeyY
-	case key.CodeZ:
-		return fyne.KeyZ
-	case key.Code0, key.CodeKeypad0:
-		return fyne.Key0
-	case key.Code1, key.CodeKeypad1:
-		return fyne.Key1
-	case key.Code2, key.CodeKeypad2:
-		return fyne.Key2
-	case key.Code3, key.CodeKeypad3:
-		return fyne.Key3
-	case key.Code4, key.CodeKeypad4:
-		return fyne.Key4
-	case key.Code5, key.CodeKeypad5:
-		return fyne.Key5
-	case key.Code6, key.CodeKeypad6:
-		return fyne.Key6
-	case key.Code7, key.CodeKeypad7:
-		return fyne.Key7
-	case key.Code8, key.CodeKeypad8:
-		return fyne.Key8
-	case key.Code9, key.CodeKeypad9:
-		return fyne.Key9
+	key.CodeA:       fyne.KeyA,
+	key.CodeB:       fyne.KeyB,
+	key.CodeC:       fyne.KeyC,
+	key.CodeD:       fyne.KeyD,
+	key.CodeE:       fyne.KeyE,
+	key.CodeF:       fyne.KeyF,
+	key.CodeG:       fyne.KeyG,
+	key.CodeH:       fyne.KeyH,
+	key.CodeI:       fyne.KeyI,
+	key.CodeJ:       fyne.KeyJ,
+	key.CodeK:       fyne.KeyK,
+	key.CodeL:       fyne.KeyL,
+	key.CodeM:       fyne.KeyM,
+	key.CodeN:       fyne.KeyN,
+	key.CodeO:       fyne.KeyO,
+	key.CodeP:       fyne.KeyP,
+	key.CodeQ:       fyne.KeyQ,
+	key.CodeR:       fyne.KeyR,
+	key.CodeS:       fyne.KeyS,
+	key.CodeT:       fyne.KeyT,
+	key.CodeU:       fyne.KeyU,
+	key.CodeV:       fyne.KeyV,
+	key.CodeW:       fyne.KeyW,
+	key.CodeX:       fyne.KeyX,
+	key.CodeY:       fyne.KeyY,
+	key.CodeZ:       fyne.KeyZ,
+	key.Code0:       fyne.Key0,
+	key.CodeKeypad0: fyne.Key0,
+	key.Code1:       fyne.Key1,
+	key.CodeKeypad1: fyne.Key1,
+	key.Code2:       fyne.Key2,
+	key.CodeKeypad2: fyne.Key2,
+	key.Code3:       fyne.Key3,
+	key.CodeKeypad3: fyne.Key3,
+	key.Code4:       fyne.Key4,
+	key.CodeKeypad4: fyne.Key4,
+	key.Code5:       fyne.Key5,
+	key.CodeKeypad5: fyne.Key5,
+	key.Code6:       fyne.Key6,
+	key.CodeKeypad6: fyne.Key6,
+	key.Code7:       fyne.Key7,
+	key.CodeKeypad7: fyne.Key7,
+	key.Code8:       fyne.Key8,
+	key.CodeKeypad8: fyne.Key8,
+	key.Code9:       fyne.Key9,
+	key.CodeKeypad9: fyne.Key9,
 
-	case key.CodeSemicolon:
-		return fyne.KeySemicolon
-	case key.CodeEqualSign:
-		return fyne.KeyEqual
+	key.CodeSemicolon: fyne.KeySemicolon,
+	key.CodeEqualSign: fyne.KeyEqual,
 
-	case key.CodeSpacebar:
-		return fyne.KeySpace
-	case key.CodeApostrophe:
-		return fyne.KeyApostrophe
-	case key.CodeComma:
-		return fyne.KeyComma
-	case key.CodeHyphenMinus, key.CodeKeypadHyphenMinus:
-		return fyne.KeyMinus
-	case key.CodeFullStop, key.CodeKeypadFullStop:
-		return fyne.KeyPeriod
-	case key.CodeSlash:
-		return fyne.KeySlash
-	case key.CodeLeftSquareBracket:
-		return fyne.KeyLeftBracket
-	case key.CodeBackslash:
-		return fyne.KeyBackslash
-	case key.CodeRightSquareBracket:
-		return fyne.KeyRightBracket
+	key.CodeSpacebar:           fyne.KeySpace,
+	key.CodeApostrophe:         fyne.KeyApostrophe,
+	key.CodeComma:              fyne.KeyComma,
+	key.CodeHyphenMinus:        fyne.KeyMinus,
+	key.CodeKeypadHyphenMinus:  fyne.KeyMinus,
+	key.CodeFullStop:           fyne.KeyPeriod,
+	key.CodeKeypadFullStop:     fyne.KeyPeriod,
+	key.CodeSlash:              fyne.KeySlash,
+	key.CodeLeftSquareBracket:  fyne.KeyLeftBracket,
+	key.CodeBackslash:          fyne.KeyBackslash,
+	key.CodeRightSquareBracket: fyne.KeyRightBracket,
+}
+
+func keyToName(code key.Code) fyne.KeyName {
+	ret, ok := keyCodeMap[code]
+	if !ok {
+		return ""
 	}
-	return ""
+
+	return ret
 }
 
 func runeToPrintable(r rune) rune {
