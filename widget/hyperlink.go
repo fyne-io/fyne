@@ -71,8 +71,8 @@ func (hl *Hyperlink) textColor() color.Color {
 	return theme.HyperlinkColor()
 }
 
-// password tells the rendering textProvider if we are a password field
-func (hl *Hyperlink) password() bool {
+// concealed tells the rendering textProvider if we are a concealed field
+func (hl *Hyperlink) concealed() bool {
 	return false
 }
 
