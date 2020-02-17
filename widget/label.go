@@ -52,8 +52,8 @@ func (l *Label) textColor() color.Color {
 	return theme.TextColor()
 }
 
-// password tells the rendering textProvider if we are a password field
-func (l *Label) password() bool {
+// concealed tells the rendering textProvider if we are a concealed field
+func (l *Label) concealed() bool {
 	return false
 }
 

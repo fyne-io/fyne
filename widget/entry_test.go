@@ -946,7 +946,7 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 	entry.SetPlaceHolder("Password")
 
 	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry)[0].Text)
-	assert.False(t, entry.placeholderProvider().presenter.password())
+	assert.False(t, entry.placeholderProvider().presenter.concealed())
 }
 
 const (
@@ -1338,7 +1338,7 @@ func TestEntry_EraseEmptySelection(t *testing.T) {
 func TestPasswordEntry_Reveal(t *testing.T) {
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := NewPasswordEntry()
-		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.passwordRevealer
+		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.ActionItem.(*passwordRevealer)
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
@@ -1372,7 +1372,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		entry.Refresh()
 
 		// action icon is not displayed
-		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.passwordRevealer
+		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.ActionItem
 		assert.NotNil(t, actionIcon)
 
 		test.Type(entry, "Hié™שרה")
