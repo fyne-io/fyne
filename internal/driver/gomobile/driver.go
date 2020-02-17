@@ -119,9 +119,7 @@ func (d *mobileDriver) Run() {
 					d.glctx, _ = e.DrawContext.(gl.Context)
 					d.onStart()
 					// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
-					no := 0
 					canvas.walkTree(func(o fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-						no++
 						canvas.Refresh(o)
 						return true
 					}, nil)
