@@ -140,7 +140,6 @@ func (a *app) HideVirtualKeyboard() {
 	driverHideVirtualKeyboard()
 }
 
-
 type stopPumping struct{}
 
 // pump returns a channel src such that sending on src will eventually send on

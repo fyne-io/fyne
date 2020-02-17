@@ -312,8 +312,8 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 
 var mainUserFn func(App)
 
-var DisplayMetrics struct{
-	WidthPx int
+var DisplayMetrics struct {
+	WidthPx  int
 	HeightPx int
 }
 

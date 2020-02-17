@@ -357,7 +357,7 @@ func (p *packager) doPackage() error {
 		return p.packageWindows()
 	case "android/arm":
 		return p.packageAndroid(p.os)
-        case "android":
+	case "android":
 		return p.packageAndroid(p.os)
 	case "ios":
 		return p.packageIOS()
