@@ -71,11 +71,11 @@ func (d *gLDriver) runGL() {
 		select {
 		case <-d.done:
 			runMutex.Lock()
+			fps.Stop()
+			glfw.Terminate()
 			runFlag = false
 			initOnce = &sync.Once{}
 			runMutex.Unlock()
-			fps.Stop()
-			glfw.Terminate()
 			return
 		case f := <-funcQueue:
 			f.f()
