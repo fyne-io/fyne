@@ -6,8 +6,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
-github.com/fyne-io/mobile v0.0.0-20191204153723-f14fb9562406 h1:hPlyLwTtVZdcq9+N3Sdv8d9DJVfieq8Cfl8rC2D/LMw=
-github.com/fyne-io/mobile v0.0.0-20191204153723-f14fb9562406/go.mod h1:HhyeqDET1gM7/EpVmvg/NWEaljaiP7HvoEldAUaoxOw=
+github.com/fyne-io/mobile v0.0.0-20200218100723-2a24c20a57c6 h1:Fk8kH4jY7e/hFzJALd24+Dp8ECJ6XTtpPjAX1Bv+WBU=
+github.com/fyne-io/mobile v0.0.0-20200218100723-2a24c20a57c6/go.mod h1:HhyeqDET1gM7/EpVmvg/NWEaljaiP7HvoEldAUaoxOw=
 github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7 h1:SCYMcCJ89LjRGwEa0tRluNRiMjZHalQZrVrvTbPh+qw=
 github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7/go.mod h1:482civXOzJJCPzJ4ZOX/pwvXBWSnzD4OKMdH4ClKGbk=
 github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f h1:7MsFMbSn8Lcw0blK4+NEOf8DuHoOBDhJsHz04yh13pM=
