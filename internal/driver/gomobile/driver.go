@@ -128,6 +128,9 @@ func (d *mobileDriver) Run() {
 				}
 			case size.Event:
 				currentSize = e
+				currentOrientation = e.Orientation
+				currentDPI = e.PixelsPerPt * 72
+				canvas.SetScale(0) // value is ignored
 			case paint.Event:
 				if d.glctx == nil || e.External {
 					continue
@@ -181,7 +184,6 @@ func (d *mobileDriver) onStop() {
 
 func (d *mobileDriver) paintWindow(window fyne.Window, sz size.Event) {
 	canvas := window.Canvas().(*mobileCanvas)
-	currentOrientation = sz.Orientation
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
