@@ -37,6 +37,11 @@ func TestMain(m *testing.M) {
 	d.Run()
 }
 
+func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
+	w := NewGLDriver().CreateWindow("").(*window)
+	assert.Equal(t, w.Title(), "Fyne Application")
+}
+
 func TestWindow_HandleHoverable(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	h1 := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
