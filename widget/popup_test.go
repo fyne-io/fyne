@@ -3,10 +3,12 @@ package widget
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNewPopUp(t *testing.T) {
@@ -48,6 +50,7 @@ func TestPopUp_Move(t *testing.T) {
 
 	pos := fyne.NewPos(10, 10)
 	pop.Move(pos)
+	cache.Renderer(pop).Layout(pop.Size())
 
 	innerPos := pop.Content.Position()
 	assert.Equal(t, pos.X+theme.Padding(), innerPos.X)
@@ -66,6 +69,7 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 
 	pos := fyne.NewPos(30, 20)
 	pop.Move(pos)
+	cache.Renderer(pop).Layout(pop.Size())
 
 	innerPos := pop.Content.Position()
 	assert.Less(t, innerPos.X-theme.Padding(), pos.X,
@@ -86,6 +90,7 @@ func TestPopUp_Move_ConstrainedWindowToSmall(t *testing.T) {
 
 	pos := fyne.NewPos(20, 10)
 	pop.Move(pos)
+	cache.Renderer(pop).Layout(pop.Size())
 
 	innerPos := pop.Content.Position()
 	assert.Equal(t, theme.Padding(), innerPos.X, "content X position is adjusted but the window is too small")
