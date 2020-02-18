@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -216,17 +215,12 @@ func (e *entryRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (e *entryRenderer) Destroy() {
-	if e.entry.popUp != nil {
-		c := fyne.CurrentApp().Driver().CanvasForObject(e.entry.super())
-		c.SetOverlay(nil)
-		cache.Renderer(e.entry.popUp).Destroy()
-		e.entry.popUp = nil
-	}
 }
 
 // Declare conformity with interfaces
 var _ fyne.Draggable = (*Entry)(nil)
 var _ fyne.Tappable = (*Entry)(nil)
+var _ fyne.Widget = (*Entry)(nil)
 var _ desktop.Mouseable = (*Entry)(nil)
 var _ desktop.Keyable = (*Entry)(nil)
 
@@ -317,6 +311,22 @@ func (e *Entry) Disable() { // TODO remove this override after ReadOnly is remov
 	e.ReadOnly = true
 
 	e.DisableableWidget.Disable()
+}
+
+// Hide satisfies the fyne.CanvasObject interface.
+func (e *Entry) Hide() {
+	if e.popUp != nil {
+		e.popUp.Hide()
+	}
+	e.DisableableWidget.Hide()
+}
+
+// Show satisfies the fyne.CanvasObject interface.
+func (e *Entry) Show() {
+	if e.popUp != nil {
+		e.popUp.Show()
+	}
+	e.DisableableWidget.Show()
 }
 
 // updateText updates the internal text to the given value
