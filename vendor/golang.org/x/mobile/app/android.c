@@ -194,22 +194,6 @@ char* destroyEGLSurface() {
 	return NULL;
 }
 
-void terminate() {
-    if(display != NULL){
-        eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
-        if (context != NULL) {
-            eglDestroyContext(display, context );
-        }
-        if (surface != NULL) {
-            eglDestroySurface(display, surface );
-        }
-        eglTerminate( display );
-    }
-    display = NULL;
-    context = NULL;
-    surface = NULL;
-}
-
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e) {
 	return (int32_t)(*env)->CallStaticIntMethod(
 		env,
