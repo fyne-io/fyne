@@ -31,6 +31,7 @@ const (
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
 	initOnce                                    = &sync.Once{}
+	defaultTitle                                = "Fyne Application"
 )
 
 func initCursors() {
@@ -1031,6 +1032,9 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	var ret *window
+	if title == "" {
+		title = defaultTitle
+	}
 	runOnMain(func() {
 		initOnce.Do(d.initGLFW)
 
