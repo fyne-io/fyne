@@ -25,7 +25,7 @@ func (*glDevice) HasKeyboard() bool {
 }
 
 func (*glDevice) SystemScale() float32 {
-	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+	if  runtime.GOOS == "darwin" {
 		return 1.0
 	}
 
