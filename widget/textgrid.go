@@ -186,7 +186,7 @@ func (t *textGridRender) ApplyTheme() {
 }
 
 func (t *textGridRender) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
+	return color.Transparent
 }
 
 func (t *textGridRender) Objects() []fyne.CanvasObject {
