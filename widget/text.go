@@ -98,6 +98,10 @@ func (t *textHandler) SetText(text string) {
 	}
 }
 
+func (t *textHandler) Text() string {
+	return string(t.buffer)
+}
+
 // updateRowBounds updates the row bounds used to render properly the text widget.
 // updateRowBounds should be invoked every time t.buffer changes.
 func (t *textHandler) updateRowBounds() {

@@ -76,6 +76,8 @@ func (t *textGridRender) setCellRune(str rune, pos int) {
 
 	if str == textAreaSpaceSymbol || str == textAreaTabSymbol || str == textAreaNewLineSymbol {
 		text.Color = theme.PlaceHolderColor()
+	} else {
+		text.Color = theme.TextColor()
 	}
 }
 
@@ -146,6 +148,10 @@ func (t *textGridRender) refreshGrid() {
 
 		line++
 	}
+	for ; x < len(t.objects); x++ {
+		t.setCellRune(' ', x)
+	}
+	canvas.Refresh(t.text)
 }
 
 func (t *textGridRender) lineCountWidth() int {
