@@ -97,7 +97,6 @@ func (d *mobileDriver) Quit() {
 func (d *mobileDriver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
-		quit := false
 
 		var currentSize size.Event
 		for e := range a.Events() {
@@ -113,15 +112,19 @@ func (d *mobileDriver) Run() {
 				case lifecycle.CrossOn:
 					d.glctx, _ = e.DrawContext.(gl.Context)
 					d.onStart()
+
+					// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
+					canvas.Content().Refresh()
+
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
 					d.onStop()
 					d.glctx = nil
 				}
-				if e.Crosses(lifecycle.StageAlive) == lifecycle.CrossOff {
-					quit = true
-				}
 			case size.Event:
+				if e.WidthPx <= 0 {
+					continue
+				}
 				currentSize = e
 				currentOrientation = e.Orientation
 				currentDPI = e.PixelsPerPt * 72
@@ -162,10 +165,6 @@ func (d *mobileDriver) Run() {
 				} else if e.Direction == key.DirRelease {
 					d.typeUpCanvas(canvas, e.Rune, e.Code)
 				}
-			}
-
-			if quit {
-				break
 			}
 		}
 	})
