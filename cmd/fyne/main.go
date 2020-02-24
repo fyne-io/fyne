@@ -52,6 +52,7 @@ func loadCommands() {
 	commands["get"] = &getter{}
 	commands["package"] = &packager{}
 	commands["install"] = &installer{}
+	commands["vendor"] = &vendor{}
 }
 
 func main() {
