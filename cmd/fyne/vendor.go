@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"fyne.io/fyne"
@@ -19,10 +20,12 @@ const (
 	goModFile = "go.mod"
 	// goModVendorFile is the vendor module file
 	goModVendorFile = "vendor/modules.txt"
-	// glwfMod is the glfw module
-	glwfMod = "github.com/go-gl/glfw/v3.3/glfw"
-	// glwfModSrcDir is the glfw dir containing the c source code to copy
-	glwfModSrcDir = "glfw"
+	// glfwModNew is the glfw module regexp for 3.3+
+	glfwModNew = "github.com/go-gl/glfw/(v(\\d+\\.)?(\\*|\\d)?(\\*|\\d+))/glfw"
+	// glfwModOld is the glfw module regexp for 3.2
+	glfwModOld = "github.com/go-gl/glfw"
+	// glfwModSrcDir is the glfw dir containing the c source code to copy
+	glfwModSrcDir = "glfw"
 )
 
 // Declare conformity to command interface
@@ -35,32 +38,43 @@ func (v *vendor) addFlags() {
 }
 
 func (v *vendor) printHelp(indent string) {
-	// TODO fix
 	fmt.Println(indent, "The vendor command packages an application's dependencies and all the extra")
-	fmt.Println(indent, "files required into it's vendor folder. Your project must have a " + goModFile + " file.")
+	fmt.Println(indent, "files required into it's vendor folder. Your project must have a "+goModFile+" file.")
 	fmt.Println(indent, "Command usage: fyne vendor")
 }
 
-// cacheModPath returns the cache path for a module
-func cacheModPath(r io.Reader, module string) (string, error) {
+// cacheModPath returns the cache path and target directory for the GLFW module
+func cacheModPath(r io.Reader) (string, string, error) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		s := strings.Split(scanner.Text(), " ")
 		if len(s) != 3 {
 			continue
 		}
-		if s[1] != module {
-			continue
+
+		moduleVersion := ""
+		moduleTarget := ""
+		r, _ := regexp.Compile(glfwModNew)
+		if r.Match([]byte(s[1])) {
+			moduleVersion = s[1] + "@" + s[2]
+			moduleTarget = s[1]
+		} else {
+			r, _ := regexp.Compile(glfwModOld)
+			if r.Match([]byte(s[1])) {
+				moduleVersion = s[1] + "@" + s[2] + "/v3.2/glfw"
+				moduleTarget = s[1] + "/v3.2/glfw"
+			} else {
+				continue
+			}
 		}
 
-		moduleVersion := module + "@" + s[2]
-		return filepath.Join(build.Default.GOPATH, "pkg/mod", moduleVersion), nil
+		return filepath.Join(build.Default.GOPATH, "pkg/mod", moduleVersion), moduleTarget, nil
 	}
 
 	if err := scanner.Err(); err != nil {
-		return "", fmt.Errorf("Cannot read content: %v", err)
+		return "", "", fmt.Errorf("Cannot read content: %v", err)
 	}
-	return "", nil
+	return "", "", nil
 }
 
 func recursiveCopy(src, target string) error {
@@ -118,7 +132,7 @@ func (v *vendor) main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Parsing %s to detect dependency module path for %s\n", goModVendorFile, glwfMod)
+	fmt.Printf("Parsing %s to detect dependency module path for GLFW\n", goModVendorFile)
 	f, err := os.Open(filepath.Join(wd, goModVendorFile))
 	if err != nil {
 		fmt.Printf("Cannot open %s: %v\n", goModVendorFile, err)
@@ -126,23 +140,23 @@ func (v *vendor) main() {
 	}
 	defer f.Close()
 
-	glwfModPath, err := cacheModPath(f, glwfMod)
+	glwfModPath, glfwModDest, err := cacheModPath(f)
 	if err != nil {
 		fmt.Printf("Cannot read %s: %v\n", goModVendorFile, err)
 		os.Exit(1)
 	}
 	if glwfModPath == "" {
-		fmt.Printf("Cannot find module %s in %s\n", glwfMod, goModVendorFile)
+		fmt.Printf("Cannot find GLFW module in %s\n", goModVendorFile)
 		os.Exit(1)
 	}
 	fmt.Printf("Package module path: %s\n", glwfModPath)
 
 	// glwfModSrc is the path containing glfw c source code
 	// $GOPATH/pkg/mod/github.com/go-gl/glfw@v...../v3.3/glfw/glfw
-	glwfModSrc := filepath.Join(glwfModPath, glwfModSrcDir)
+	glwfModSrc := filepath.Join(glwfModPath, glfwModSrcDir)
 	// glwfModTarget is the path under the vendor folder where glfw c source code will be copied
 	// vendor/github.com/go-gl/v3.3/glfw/glfw
-	glwfModTarget := filepath.Join(wd, "vendor", glwfMod, glwfModSrcDir)
+	glwfModTarget := filepath.Join(wd, "vendor", glfwModDest, glfwModSrcDir)
 	fmt.Printf("Copying glwf c source code: %s -> %s\n", glwfModSrc, glwfModTarget)
 	err = recursiveCopy(glwfModSrc, glwfModTarget)
 	if err != nil {
