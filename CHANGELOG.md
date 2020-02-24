@@ -14,12 +14,18 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Changed
 
  * Warn if -executable or -sourceDir flags are used for package on mobile (#652)
+ * Update scale based on device for mobile apps
+ * Windows without a title will now be named "Fyne Application"
 
 ### Fixed
 
  * App.UniqueID() did not return current app ID
  * Fyne package ignored -name flag for ios and android builds (#657)
  * Possible crash when appending tabs to TabContainer
+ * FixedSize windows not rescaling when dragged between monitors (#654)
+ * Fix issues where older Android devices may not background or rotate
+ * Crash when setting theme before window content set (#688)
+ * Correct form extend behaviour (#694)
 
 
 ## 1.2.2 - 29 January 2020
