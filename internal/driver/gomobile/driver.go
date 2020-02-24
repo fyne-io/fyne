@@ -27,7 +27,6 @@ const tapSecondaryDelay = 300 * time.Millisecond
 
 type mobileDriver struct {
 	app   app.App
-	quit  bool
 	glctx gl.Context
 
 	windows []fyne.Window
@@ -72,7 +71,7 @@ func (d *mobileDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 		return nil
 	}
 
-	// TODO don't just assume it refers to the topmost window
+	// TODO figure out how we handle multiple windows...
 	return d.currentWindow().Canvas()
 }
 
@@ -92,17 +91,13 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 }
 
 func (d *mobileDriver) Quit() {
-	if d.app == nil {
-		return
-	}
-
-	// TODO should this be disabled for iOS?
-	d.quit = true
+	// Android and iOS guidelines say this should not be allowed!
 }
 
 func (d *mobileDriver) Run() {
 	app.Main(func(a app.App) {
 		d.app = a
+		quit := false
 
 		var currentSize size.Event
 		for e := range a.Events() {
@@ -124,7 +119,7 @@ func (d *mobileDriver) Run() {
 					d.glctx = nil
 				}
 				if e.Crosses(lifecycle.StageAlive) == lifecycle.CrossOff {
-					d.quit = true
+					quit = true
 				}
 			case size.Event:
 				currentSize = e
@@ -169,7 +164,7 @@ func (d *mobileDriver) Run() {
 				}
 			}
 
-			if d.quit {
+			if quit {
 				break
 			}
 		}

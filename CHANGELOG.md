@@ -17,6 +17,8 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Update scale based on device for mobile apps
  * Windows without a title will now be named "Fyne Application"
 
+* REVERT: Mobile apps would not quit when Quit() was called (#580)
+
 ### Fixed
 
  * App.UniqueID() did not return current app ID
