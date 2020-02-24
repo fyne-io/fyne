@@ -17,12 +17,17 @@ func textRenderTexts(p fyne.Widget) []*canvas.Text {
 type testTextParent struct {
 	obj   fyne.Widget
 	fg    color.Color
-	style fyne.TextStyle
 	align fyne.TextAlign
+	wrap  fyne.TextWrap
+	style fyne.TextStyle
 }
 
 func (t *testTextParent) textAlign() fyne.TextAlign {
 	return t.align
+}
+
+func (t *testTextParent) textWrap() fyne.TextWrap {
+	return t.wrap
 }
 
 func (t *testTextParent) textStyle() fyne.TextStyle {
@@ -84,6 +89,9 @@ func TestText_Rows(t *testing.T) {
 
 	text.SetText("test\ntest\ntest")
 	assert.Equal(t, text.rows(), 3)
+
+	text.SetText("test\ntest\ntest\n")
+	assert.Equal(t, text.rows(), 4)
 
 	text.SetText("\n")
 	assert.Equal(t, text.rows(), 2)

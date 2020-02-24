@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -16,6 +17,7 @@ const (
 // textPresenter provides the widget specific information to a generic text provider
 type textPresenter interface {
 	textAlign() fyne.TextAlign
+	textWrap() fyne.TextWrap
 	textStyle() fyne.TextStyle
 	textColor() color.Color
 
@@ -64,28 +66,33 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// updateRowBounds updates the row bounds used to render properly the text widget.
-// updateRowBounds should be invoked every time t.buffer changes.
-func (t *textProvider) updateRowBounds() {
-	var lowBound, highBound int
-	t.rowBounds = [][2]int{}
-
-	if len(t.buffer) == 0 {
-		t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+func (t *textProvider) Resize(size fyne.Size) {
+	if t.size == size {
 		return
 	}
-
-	for i, r := range t.buffer {
-		highBound = i
-		if r != '\n' {
-			continue
-		}
-		t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
-		lowBound = i + 1
+	t.size = size
+	t.updateRowBounds()
+	if t.presenter != nil {
+		t.refreshTextRenderer()
+		cache.Renderer(t).Layout(size)
 	}
-	//first or last line, increase the highBound index to include the last char
-	highBound++
-	t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+}
+
+// updateRowBounds updates the row bounds used to render properly the text widget.
+// updateRowBounds should be invoked every time t.buffer or viewport changes.
+func (t *textProvider) updateRowBounds() {
+	if t.presenter == nil {
+		t.rowBounds = [][2]int{}
+		return // not yet shown
+	}
+	textWrap := t.presenter.textWrap()
+	textStyle := t.presenter.textStyle()
+	textSize := theme.TextSize()
+	maxWidth := t.Size().Width
+
+	t.rowBounds = fyne.LineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
+		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	})
 }
 
 // refreshTextRenderer refresh the textRenderer canvas objects
@@ -171,6 +178,15 @@ func (t *textProvider) row(row int) []rune {
 	return t.buffer[from:to]
 }
 
+// RowBoundary returns the boundary of the row specified.
+// The row parameter should be between 0 and t.Rows()-1.
+func (t *textProvider) rowBoundary(row int) [2]int {
+	if row < 0 || row >= t.rows() {
+		return [2]int{0, 0}
+	}
+	return t.rowBounds[row]
+}
+
 // RowLength returns the number of visible characters in the row specified.
 // The row parameter should be between 0 and t.Rows()-1.
 func (t *textProvider) rowLength(row int) int {
@@ -183,11 +199,11 @@ func (t *textProvider) charMinSize() fyne.Size {
 	if t.presenter.concealed() {
 		defaultChar = passwordChar
 	}
-	return textMinSize(defaultChar, theme.TextSize(), t.presenter.textStyle())
+	return fyne.MeasureText(defaultChar, theme.TextSize(), t.presenter.textStyle())
 }
 
 // lineSizeToColumn returns the rendered size for the line specified by row up to the col position
-func (t *textProvider) lineSizeToColumn(col, row int) (size fyne.Size) {
+func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 	line := t.row(row)
 	if line == nil {
 		return fyne.NewSize(0, 0)
@@ -219,15 +235,20 @@ type textRenderer struct {
 // MinSize calculates the minimum size of a label.
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
+	wrap := r.provider.presenter.textWrap()
+	charMinSize := r.provider.charMinSize()
 	height := 0
 	width := 0
-	for i := 0; i < fyne.Min(len(r.texts), r.provider.rows()); i++ {
+	i := 0
+	for ; i < fyne.Min(len(r.texts), r.provider.rows()); i++ {
 		min := r.texts[i].MinSize()
 		if r.texts[i].Text == "" {
-			min = r.provider.charMinSize()
+			min = charMinSize
+		}
+		if wrap == fyne.TextWrapOff {
+			width = fyne.Max(width, min.Width)
 		}
 		height += min.Height
-		width = fyne.Max(width, min.Width)
 	}
 
 	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
@@ -310,11 +331,4 @@ func (r *textRenderer) BackgroundColor() color.Color {
 }
 
 func (r *textRenderer) Destroy() {
-}
-
-func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
-	t := canvas.NewText(text, color.Black)
-	t.TextSize = size
-	t.TextStyle = style
-	return t.MinSize()
 }

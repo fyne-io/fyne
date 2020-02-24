@@ -12,6 +12,7 @@ type Label struct {
 	textProvider
 	Text      string
 	Alignment fyne.TextAlign // The alignment of the Text
+	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the label text
 }
 
@@ -49,6 +50,11 @@ func (l *Label) SetText(text string) {
 // textAlign tells the rendering textProvider our alignment
 func (l *Label) textAlign() fyne.TextAlign {
 	return l.Alignment
+}
+
+// textWrap tells the rendering textProvider our wrapping
+func (l *Label) textWrap() fyne.TextWrap {
+	return l.Wrapping
 }
 
 // textStyle tells the rendering textProvider our style

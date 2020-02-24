@@ -15,6 +15,7 @@ type Hyperlink struct {
 	Text      string
 	URL       *url.URL
 	Alignment fyne.TextAlign // The alignment of the Text
+	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
 }
 
@@ -59,6 +60,11 @@ func (hl *Hyperlink) SetURLFromString(str string) error {
 // textAlign tells the rendering textProvider our alignment
 func (hl *Hyperlink) textAlign() fyne.TextAlign {
 	return hl.Alignment
+}
+
+// textWrap tells the rendering textProvider our wrapping
+func (hl *Hyperlink) textWrap() fyne.TextWrap {
+	return hl.Wrapping
 }
 
 // textStyle tells the rendering textProvider our style
