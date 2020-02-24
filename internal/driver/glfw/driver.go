@@ -34,15 +34,34 @@ func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 
 func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	var pos fyne.Position
-	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*glCanvas)
+	found := false
+	c := d.CanvasForObject(co)
+	if c == nil {
+		return pos
+	}
 
-	driver.WalkCompleteObjectTree(c.content, func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	glc := c.(*glCanvas)
+	findPos := func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if o == co {
 			pos = p
+			found = true
 			return true
 		}
 		return false
-	}, nil)
+	}
+
+	driver.WalkVisibleObjectTree(glc.content, findPos, nil)
+	if !found && glc.menu != nil {
+		driver.WalkVisibleObjectTree(glc.menu, findPos, nil)
+	}
+	if !found {
+		for _, overlay := range glc.Overlays().List() {
+			driver.WalkVisibleObjectTree(overlay, findPos, nil)
+			if found {
+				break
+			}
+		}
+	}
 
 	return pos
 }
