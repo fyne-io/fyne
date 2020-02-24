@@ -16,8 +16,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Warn if -executable or -sourceDir flags are used for package on mobile (#652)
  * Update scale based on device for mobile apps
  * Windows without a title will now be named "Fyne Application"
-
-* REVERT: Mobile apps would not quit when Quit() was called (#580)
+ * Revert fix to quit mobile apps - this is not allowed in guidelines
 
 ### Fixed
 
@@ -25,7 +24,7 @@ More detailed release notes can be found on the [releases page](https://github.c
  * Fyne package ignored -name flag for ios and android builds (#657)
  * Possible crash when appending tabs to TabContainer
  * FixedSize windows not rescaling when dragged between monitors (#654)
- * Fix issues where older Android devices may not background or rotate
+ * Fix issues where older Android devices may not background or rotate (#677)
  * Crash when setting theme before window content set (#688)
  * Correct form extend behaviour (#694)
 
