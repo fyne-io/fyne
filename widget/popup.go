@@ -36,6 +36,7 @@ func (p *PopUp) Move(pos fyne.Position) {
 		return
 	}
 	p.innerPos = pos
+	p.Refresh()
 }
 
 // Resize satisfies the fyne.CanvasObject interface.
@@ -156,7 +157,7 @@ func (r *popUpRenderer) MinSize() fyne.Size {
 
 func (r *popUpRenderer) Refresh() {
 	r.bg.FillColor = theme.BackgroundColor()
-	if r.bg.Size() != r.popUp.innerSize {
+	if r.bg.Size() != r.popUp.innerSize || r.bg.Position() != r.popUp.innerPos {
 		r.Layout(r.popUp.Size())
 	}
 }
