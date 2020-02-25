@@ -54,13 +54,13 @@ func cacheModPath(r io.Reader) (string, string, error) {
 
 		r, _ := regexp.Compile(glfwModNew)
 		if r.Match([]byte(s[1])) {
-			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1] + "@" + s[2]), s[1], nil
+			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1]+"@"+s[2]), s[1], nil
 		}
 
 		r, _ = regexp.Compile(glfwModOld)
 		if r.Match([]byte(s[1])) {
 			extra := "/v3.2/glfw"
-			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1] + "@" + s[2] + extra), s[1] + extra, nil
+			return filepath.Join(build.Default.GOPATH, "pkg/mod", s[1]+"@"+s[2]+extra), s[1] + extra, nil
 		}
 	}
 
