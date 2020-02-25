@@ -31,6 +31,7 @@ const (
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
 	initOnce                                    = &sync.Once{}
+	defaultTitle                                = "Fyne Application"
 )
 
 func initCursors() {
@@ -66,6 +67,7 @@ type window struct {
 	mouseButton        desktop.MouseButton
 	mouseOver          desktop.Hoverable
 	mouseClickTime     time.Time
+	mouseLastClick     fyne.CanvasObject
 	mousePressed       fyne.Tappable
 	onClosed           func()
 
@@ -635,13 +637,14 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 	if action == glfw.Release && button == desktop.LeftMouseButton {
 		now := time.Now()
 		// we can safely subtract the first "zero" time as it'll be much larger than doubleClickDelay
-		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay {
+		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay && w.mouseLastClick == co {
 			if wid, ok := co.(fyne.DoubleTappable); ok {
 				doubleTapped = true
 				w.queueEvent(func() { wid.DoubleTapped(ev) })
 			}
 		}
 		w.mouseClickTime = now
+		w.mouseLastClick = co
 	}
 
 	// Prevent Tapped from triggering if DoubleTapped has been sent
@@ -1031,6 +1034,9 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 
 func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 	var ret *window
+	if title == "" {
+		title = defaultTitle
+	}
 	runOnMain(func() {
 		initOnce.Do(d.initGLFW)
 

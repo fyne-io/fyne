@@ -45,6 +45,11 @@ func TestGLDriver_CreateWindow(t *testing.T) {
 	assert.False(t, w.centered)
 }
 
+func TestGLDriver_CreateWindow_EmptyTitle(t *testing.T) {
+	w := NewGLDriver().CreateWindow("").(*window)
+	assert.Equal(t, w.Title(), "Fyne Application")
+}
+
 func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	d := NewGLDriver().(desktop.Driver)
 	w := d.CreateSplashWindow().(*window)

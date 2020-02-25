@@ -40,7 +40,6 @@ EGLSurface surface;
 
 char* createEGLSurface(ANativeWindow* window);
 char* destroyEGLSurface();
-void terminate();
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
 void ShowKeyboard(JNIEnv* env);
@@ -363,7 +362,6 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			C.surface = nil
 			theApp.sendLifecycle(lifecycle.StageAlive)
 		case <-activityDestroyed:
-			C.terminate()
 			theApp.sendLifecycle(lifecycle.StageDead)
 		case <-workAvailable:
 			theApp.worker.DoWork()

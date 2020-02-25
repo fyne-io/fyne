@@ -9,7 +9,10 @@ import (
 type device struct {
 }
 
-var currentOrientation size.Orientation
+var (
+	currentOrientation size.Orientation
+	currentDPI         float32
+)
 
 // Declare conformity with Device
 var _ fyne.Device = (*device)(nil)
