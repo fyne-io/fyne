@@ -114,7 +114,7 @@ func (s *Select) Resize(size fyne.Size) {
 	s.BaseWidget.Resize(size)
 
 	if s.popUp != nil {
-		s.popUp.Content.Resize(fyne.NewSize(size.Width-theme.Padding()*2, s.popUp.Content.MinSize().Height))
+		s.popUp.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
 	}
 }
 
@@ -140,7 +140,7 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 	popUpPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height))
 
 	s.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, popUpPos)
-	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.Content.MinSize().Height))
+	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured

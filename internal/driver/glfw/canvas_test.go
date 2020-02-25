@@ -32,7 +32,7 @@ func TestGlCanvas_Resize(t *testing.T) {
 	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
-	over := widget.NewLabel("Over")
+	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
 	w.SetContent(content)
 	w.Canvas().SetOverlay(over)
 
