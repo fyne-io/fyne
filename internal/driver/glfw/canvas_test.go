@@ -297,6 +297,29 @@ func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) 
 	w.ignoreResize = false
 }
 
+func Test_glCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.ignoreResize = true
+	c := w.Canvas().(*glCanvas)
+	c.Resize(fyne.NewSize(100, 100))
+	popUpContent := canvas.NewRectangle(color.Black)
+	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
+	popUp := widget.NewPopUp(popUpContent, c)
+
+	// This is because of a bug in PopUp size handling that will be fixed later.
+	// This line will vanish then.
+	popUp.Resize(popUpContent.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+
+	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
+	assert.Equal(t, fyne.NewSize(1000, 10).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), popUp.MinSize())
+	assert.Equal(t, fyne.NewSize(100, 100), popUp.Size())
+
+	repaintWindow(w)
+
+	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
+	assert.Equal(t, fyne.NewSize(100, 100), popUp.Size())
+}
+
 func Test_glCanvas_walkTree(t *testing.T) {
 	leftObj1 := canvas.NewRectangle(color.Gray16{Y: 1})
 	leftObj2 := canvas.NewRectangle(color.Gray16{Y: 2})
