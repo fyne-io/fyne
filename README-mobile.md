@@ -42,12 +42,17 @@ store or marketplace takes more work which has not yet been automated.
 
 ## Android
 
-To release your app needs to have debugging turned off. The easiest way to do this is to
-provide your own AndroidManifest.xml that disables it, as:
+To release your app needs to have debugging turned off. If you are using a custom manifest file then
+you should add the following to AndroidManifest.xml:
 
 `<application android:label="..." android:debuggable="false">`
 
 This file should be placed in the `main` package, where you are running your builds from.
+If you have not set up a manifest file then fyne can make the changes for you by 
+adding a `-release` parameter to your package build:
+
+`$ fyne package -os "android" -release ...`
+
 You may also need to correct the alignment of the APK file before uploading it to the 
 Play Store, the following command should work:
 

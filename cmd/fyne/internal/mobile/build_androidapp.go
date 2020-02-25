@@ -41,6 +41,7 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 		err := manifestTmpl.Execute(buf, manifestTmplData{
 			JavaPkgPath: bundleID,
 			Name:        strings.Title(appName),
+			Debug:       !buildRelease,
 			LibName:     libName,
 		})
 		if err != nil {
