@@ -3,11 +3,11 @@ package widget
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewPopUp(t *testing.T) {
