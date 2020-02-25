@@ -270,7 +270,7 @@ func (c *glCanvas) ensureMinSize() bool {
 				windowNeedsMinSizeUpdate = true
 				size := obj.Size()
 				expectedSize := minSize.Union(size)
-				if expectedSize != size {
+				if expectedSize != size && size != c.size {
 					objToLayout = nil
 					obj.Resize(expectedSize)
 				}
