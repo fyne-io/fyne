@@ -77,7 +77,8 @@ func makeFormTab() fyne.Widget {
 	password := widget.NewPasswordEntry()
 	password.SetPlaceHolder("Password")
 	largeText := widget.NewMultiLineEntry()
-
+	age := widget.NewIntegralSpinner(0, 100, 1)
+	weight := widget.NewSpinner(0.0, 100.0, 0.25)
 	form := &widget.Form{
 		OnCancel: func() {
 			fmt.Println("Cancelled")
@@ -88,13 +89,16 @@ func makeFormTab() fyne.Widget {
 			fmt.Println("Email:", email.Text)
 			fmt.Println("Password:", password.Text)
 			fmt.Println("Message:", largeText.Text)
+			fmt.Println("Age:", age.GetValue())
+			fmt.Println("Weight:", weight.GetValue())
 		},
 	}
 	form.Append("Name", name)
 	form.Append("Email", email)
 	form.Append("Password", password)
 	form.Append("Message", largeText)
-
+	form.Append("Age", age)
+	form.Append("Weight", weight)
 	return form
 }
 
