@@ -40,6 +40,21 @@ The compiled applications above can be tested locally and even shared with
 developers that are part of your team. To deliver the applications to an app
 store or marketplace takes more work which has not yet been automated.
 
+## Android
+
+To release your app needs to have debugging turned off. The easiest way to do this is to
+provide your own AndroidManifest.xml that disables it, as:
+
+`<application android:label="..." android:debuggable="false">`
+
+This file should be placed in the `main` package, where you are running your builds from.
+You may also need to correct the alignment of the APK file before uploading it to the 
+Play Store, the following command should work:
+
+`${ANDROID_HOME}/build-tools/zipalign 4 myapp.apk aligned.apk`
+
+The aligned file can then be uploaded for distribution.
+
 ## iOS
 
 The above steps will create a .app folder that can be installed to your
