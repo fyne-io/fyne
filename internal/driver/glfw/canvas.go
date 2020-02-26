@@ -152,9 +152,13 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	c.size = size
 
 	if c.overlay != nil {
-		// “Notifies” the overlay of the canvas size change.
-		// Overlays which take the whole canvas size (like widget.PopUp) will adjust their size.
-		c.overlay.Resize(c.overlay.Size())
+		if p, ok := c.overlay.(*widget.PopUp); ok {
+			// TODO: remove this when #707 is being addressed.
+			// “Notifies” the PopUp of the canvas size change.
+			c.overlay.Resize(p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		} else {
+			c.overlay.Resize(size)
+		}
 	}
 
 	c.content.Resize(c.contentSize(size))
