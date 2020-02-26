@@ -90,6 +90,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.setDirty(true)
 }
 
+// Deprecated: Use Overlays() instead.
 func (c *glCanvas) Overlay() fyne.CanvasObject {
 	c.RLock()
 	retval := c.overlay
@@ -97,6 +98,46 @@ func (c *glCanvas) Overlay() fyne.CanvasObject {
 	return retval
 }
 
+func (c *glCanvas) Overlays() []fyne.CanvasObject {
+	c.RLock()
+	defer c.RUnlock()
+	if c.overlay == nil {
+		return nil
+	}
+	return []fyne.CanvasObject{c.overlay}
+}
+
+func (c *glCanvas) PopOverlay() fyne.CanvasObject {
+	c.Lock()
+	defer c.Unlock()
+	overlay := c.overlay
+	c.overlay = nil
+	return overlay
+}
+
+func (c *glCanvas) PushOverlay(overlay fyne.CanvasObject) {
+	if overlay == nil {
+		return
+	}
+	c.Lock()
+	defer c.Unlock()
+	c.overlay = overlay
+	c.overlayTree = &renderCacheTree{root: &renderCacheNode{obj: c.overlay}}
+	c.setDirty(true)
+}
+
+func (c *glCanvas) RemoveOverlay(overlay fyne.CanvasObject) {
+	c.Lock()
+	defer c.Unlock()
+	if c.overlay != overlay {
+		return
+	}
+	c.overlay = nil
+	c.overlayTree = nil
+	c.setDirty(true)
+}
+
+// Deprecated: Use PushOverlay() instead.
 func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.Lock()
 	c.overlay = overlay
@@ -104,6 +145,12 @@ func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.Unlock()
 
 	c.setDirty(true)
+}
+
+func (c *glCanvas) TopOverlay() fyne.CanvasObject {
+	c.RLock()
+	defer c.RUnlock()
+	return c.overlay
 }
 
 func (c *glCanvas) Padded() bool {
@@ -151,13 +198,13 @@ func (c *glCanvas) Focused() fyne.Focusable {
 func (c *glCanvas) Resize(size fyne.Size) {
 	c.size = size
 
-	if c.overlay != nil {
-		if p, ok := c.overlay.(*widget.PopUp); ok {
+	for _, overlay := range c.Overlays() {
+		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
-			c.overlay.Resize(p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+			p.Resize(p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		} else {
-			c.overlay.Resize(size)
+			overlay.Resize(size)
 		}
 	}
 
@@ -332,8 +379,10 @@ func (c *glCanvas) walkTrees(
 	if c.menu != nil {
 		c.walkTree(c.menuTree, beforeChildren, afterChildren)
 	}
-	if c.overlay != nil {
-		c.walkTree(c.overlayTree, beforeChildren, afterChildren)
+	for _, overlay := range c.Overlays() {
+		if overlay != nil {
+			c.walkTree(c.overlayTree, beforeChildren, afterChildren)
+		}
 	}
 }
 

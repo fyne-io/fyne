@@ -53,12 +53,45 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	c.Resize(content.MinSize().Add(padding))
 }
 
+// Deprecated
 func (c *testCanvas) Overlay() fyne.CanvasObject {
-	return c.overlay
+	panic("deprecated method should not be used")
 }
 
-func (c *testCanvas) SetOverlay(overlay fyne.CanvasObject) {
+func (c *testCanvas) Overlays() []fyne.CanvasObject {
+	if c.overlay == nil {
+		return nil
+	}
+	return []fyne.CanvasObject{c.overlay}
+}
+
+func (c *testCanvas) PopOverlay() fyne.CanvasObject {
+	overlay := c.overlay
+	c.overlay = nil
+	return overlay
+}
+
+func (c *testCanvas) PushOverlay(overlay fyne.CanvasObject) {
+	if overlay == nil {
+		return
+	}
 	c.overlay = overlay
+}
+
+func (c *testCanvas) RemoveOverlay(overlay fyne.CanvasObject) {
+	if c.overlay != overlay {
+		return
+	}
+	c.overlay = nil
+}
+
+// Deprecated
+func (c *testCanvas) SetOverlay(_ fyne.CanvasObject) {
+	panic("deprecated method should not be used")
+}
+
+func (c *testCanvas) TopOverlay() fyne.CanvasObject {
+	return c.overlay
 }
 
 func (c *testCanvas) Refresh(fyne.CanvasObject) {

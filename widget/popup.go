@@ -26,7 +26,7 @@ type PopUp struct {
 // Hide this widget, if it was previously visible
 func (p *PopUp) Hide() {
 	p.BaseWidget.Hide()
-	p.Canvas.SetOverlay(nil)
+	p.Canvas.RemoveOverlay(p)
 }
 
 // Move the widget to a new position. A PopUp position is absolute to the top, left of its canvas.
@@ -53,7 +53,7 @@ func (p *PopUp) Resize(size fyne.Size) {
 // Show this widget, if it was previously hidden
 func (p *PopUp) Show() {
 	p.BaseWidget.Show()
-	p.Canvas.SetOverlay(p)
+	p.Canvas.PushOverlay(p)
 }
 
 // Tapped is called when the user taps the popUp background - if not modal then dismiss this widget

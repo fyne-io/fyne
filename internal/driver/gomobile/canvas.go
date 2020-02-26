@@ -136,12 +136,45 @@ func (c *mobileCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) 
 	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
 }
 
+// Deprecated: Use Overlays() instead.
 func (c *mobileCanvas) Overlay() fyne.CanvasObject {
 	return c.overlay
 }
 
+func (c *mobileCanvas) Overlays() []fyne.CanvasObject {
+	if c.overlay == nil {
+		return nil
+	}
+	return []fyne.CanvasObject{c.overlay}
+}
+
+func (c *mobileCanvas) PopOverlay() fyne.CanvasObject {
+	overlay := c.overlay
+	c.overlay = nil
+	return overlay
+}
+
+func (c *mobileCanvas) PushOverlay(overlay fyne.CanvasObject) {
+	if overlay == nil {
+		return
+	}
+	c.overlay = overlay
+}
+
+func (c *mobileCanvas) RemoveOverlay(overlay fyne.CanvasObject) {
+	if c.overlay != overlay {
+		return
+	}
+	c.overlay = nil
+}
+
+// Deprecated: Use PushOverlay() instead.
 func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.overlay = overlay
+}
+
+func (c *mobileCanvas) TopOverlay() fyne.CanvasObject {
+	return c.overlay
 }
 
 func (c *mobileCanvas) OnTypedRune() func(rune) {
@@ -179,17 +212,19 @@ func (c *mobileCanvas) walkTree(
 	if c.menu != nil {
 		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
 	}
-	if c.overlay != nil {
-		driver.WalkVisibleObjectTree(c.overlay, beforeChildren, afterChildren)
+	for _, overlay := range c.Overlays() {
+		if overlay != nil {
+			driver.WalkVisibleObjectTree(overlay, beforeChildren, afterChildren)
+		}
 	}
 }
 
 func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
-	if c.menu != nil && c.overlay == nil {
+	if c.menu != nil && len(c.Overlays()) == 0 {
 		return driver.FindObjectAtPositionMatching(pos, test, c.menu)
 	}
 
-	return driver.FindObjectAtPositionMatching(pos, test, c.overlay, c.windowHead, c.content)
+	return driver.FindObjectAtPositionMatching(pos, test, c.TopOverlay(), c.windowHead, c.content)
 }
 
 func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
@@ -292,7 +327,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 	duration := time.Since(c.lastTapDown[tapID])
 
-	if c.menu != nil && c.overlay == nil && pos.X > c.menu.Size().Width {
+	if c.menu != nil && len(c.Overlays()) == 0 && pos.X > c.menu.Size().Width {
 		c.menu.Hide()
 		c.menu = nil
 		return

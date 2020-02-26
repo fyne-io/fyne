@@ -21,8 +21,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 			if c.Focused() == nil {
 				c.Focus(focused)
 			}
-			c.SetOverlay(nil)
-			Renderer(pop).Destroy()
+			c.PopOverlay()
 
 			opt.Action()
 		}))

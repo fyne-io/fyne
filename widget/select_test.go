@@ -61,9 +61,10 @@ func TestSelect_Tapped(t *testing.T) {
 	combo := NewSelect([]string{"1", "2"}, func(s string) {})
 	test.Tap(combo)
 
-	over := fyne.CurrentApp().Driver().CanvasForObject(combo).Overlay()
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
+	assert.Equal(t, 1, len(canvas.Overlays()))
+	over := canvas.Overlays()[0]
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
-	assert.NotNil(t, over)
 
 	cont := over.(*PopUp).Content
 	assert.Equal(t, cont.Position().X, pos.X+theme.Padding())
@@ -88,7 +89,8 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	test.Tap(combo)
 
 	comboPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(combo)
-	cont := canvas.Overlay().(*PopUp).Content
+	assert.Equal(t, 1, len(canvas.Overlays()))
+	cont := canvas.Overlays()[0].(*PopUp).Content
 	assert.Less(t, cont.Position().Y, comboPos.Y, "window too small so we render higher up")
 	assert.Less(t, cont.Position().X, comboPos.X, "window too small so we render to the left")
 }
