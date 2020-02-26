@@ -31,6 +31,14 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 	return l
 }
 
+func (l *Label) Refresh() {
+	if l.Text != string(l.buffer) {
+		l.textProvider.SetText(l.Text)
+	}
+
+	l.BaseWidget.Refresh()
+}
+
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
