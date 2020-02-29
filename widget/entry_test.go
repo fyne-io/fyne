@@ -1301,6 +1301,29 @@ func TestEntry_EraseSelection(t *testing.T) {
 	assert.Equal(t, -1, b)
 }
 
+func TestEntry_EmptySelection(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("text")
+
+	// trying to select at the edge
+	typeKeys(entry, keyShiftLeftDown, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "", entry.SelectedText())
+
+	typeKeys(entry, fyne.KeyRight)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	// stop selecting at the edge when nothing is selected
+	typeKeys(entry, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "", entry.SelectedText())
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	// check that the selection has been removed
+	typeKeys(entry, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "", entry.SelectedText())
+	assert.Equal(t, false, entry.selecting)
+	assert.Equal(t, 1, entry.CursorColumn)
+}
+
 func TestEntry_EraseEmptySelection(t *testing.T) {
 	e := setup()
 	// clear empty selection

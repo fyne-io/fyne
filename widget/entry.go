@@ -958,6 +958,11 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	}
 
 	e.updateText(provider.String())
+
+	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
+		e.selecting = false
+	}
+
 	e.Refresh()
 }
 
