@@ -151,7 +151,7 @@ func Test_TextBoldItalicFont(t *testing.T) {
 
 func Test_TextMonospaceFont(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	expect := "NotoMono-Regular.ttf"
+	expect := "DeJaVuSansMono-Powerline.ttf"
 	result := TextMonospaceFont().Name()
 	assert.Equal(t, expect, result, "wrong monospace font")
 }
@@ -201,7 +201,7 @@ func Test_DefaultTextItalicFont(t *testing.T) {
 
 func Test_DefaultTextMonospaceFont(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	expect := "NotoMono-Regular.ttf"
+	expect := "DeJaVuSansMono-Powerline.ttf"
 	result := DefaultTextMonospaceFont().Name()
 	assert.Equal(t, expect, result, "wrong default monospace font")
 }
