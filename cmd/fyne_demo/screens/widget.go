@@ -14,7 +14,7 @@ import (
 func makeButtonTab() fyne.Widget {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
-	grid := widget.NewTextGrid("TextGrid\n  Content")
+	grid := widget.NewTextGridFromString("TextGrid\n  Content")
 	grid.LineNumbers = true
 	grid.Whitespace = true
 
