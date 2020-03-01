@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/app"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
@@ -19,13 +20,15 @@ import (
 var _ fyne.Canvas = (*glCanvas)(nil)
 
 type glCanvas struct {
+	internal.OverlayStack
 	sync.RWMutex
-	content, overlay fyne.CanvasObject
-	menu             *widget.Toolbar
-	padded           bool
-	size             fyne.Size
-	focused          fyne.Focusable
-	focusMgr         *app.FocusManager
+
+	content  fyne.CanvasObject
+	menu     *widget.Toolbar
+	padded   bool
+	size     fyne.Size
+	focused  fyne.Focusable
+	focusMgr *app.FocusManager
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -93,46 +96,34 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 // Deprecated: Use Overlays() instead.
 func (c *glCanvas) Overlay() fyne.CanvasObject {
 	c.RLock()
-	retval := c.overlay
-	c.RUnlock()
-	return retval
+	defer c.RUnlock()
+	return c.OverlayStack.Overlay()
 }
 
 func (c *glCanvas) Overlays() []fyne.CanvasObject {
 	c.RLock()
 	defer c.RUnlock()
-	if c.overlay == nil {
-		return nil
-	}
-	return []fyne.CanvasObject{c.overlay}
+	return c.OverlayStack.Overlays()
 }
 
 func (c *glCanvas) PopOverlay() fyne.CanvasObject {
 	c.Lock()
 	defer c.Unlock()
-	overlay := c.overlay
-	c.overlay = nil
-	return overlay
+	return c.OverlayStack.PopOverlay()
 }
 
 func (c *glCanvas) PushOverlay(overlay fyne.CanvasObject) {
-	if overlay == nil {
-		return
-	}
 	c.Lock()
 	defer c.Unlock()
-	c.overlay = overlay
-	c.overlayTree = &renderCacheTree{root: &renderCacheNode{obj: c.overlay}}
+	c.OverlayStack.PushOverlay(overlay)
+	c.overlayTree = &renderCacheTree{root: &renderCacheNode{obj: overlay}}
 	c.setDirty(true)
 }
 
 func (c *glCanvas) RemoveOverlay(overlay fyne.CanvasObject) {
 	c.Lock()
 	defer c.Unlock()
-	if c.overlay != overlay {
-		return
-	}
-	c.overlay = nil
+	c.OverlayStack.RemoveOverlay(overlay)
 	c.overlayTree = nil
 	c.setDirty(true)
 }
@@ -140,17 +131,16 @@ func (c *glCanvas) RemoveOverlay(overlay fyne.CanvasObject) {
 // Deprecated: Use PushOverlay() instead.
 func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.Lock()
-	c.overlay = overlay
-	c.overlayTree = &renderCacheTree{root: &renderCacheNode{obj: c.overlay}}
-	c.Unlock()
-
+	defer c.Unlock()
+	c.OverlayStack.SetOverlay(overlay)
+	c.overlayTree = &renderCacheTree{root: &renderCacheNode{obj: overlay}}
 	c.setDirty(true)
 }
 
 func (c *glCanvas) TopOverlay() fyne.CanvasObject {
 	c.RLock()
 	defer c.RUnlock()
-	return c.overlay
+	return c.OverlayStack.TopOverlay()
 }
 
 func (c *glCanvas) Padded() bool {

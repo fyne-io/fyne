@@ -23,12 +23,14 @@ type WindowlessCanvas interface {
 }
 
 type testCanvas struct {
+	internal.OverlayStack
+
 	size  fyne.Size
 	scale float32
 
-	content, overlay fyne.CanvasObject
-	focused          fyne.Focusable
-	padded           bool
+	content fyne.CanvasObject
+	focused fyne.Focusable
+	padded  bool
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -58,40 +60,9 @@ func (c *testCanvas) Overlay() fyne.CanvasObject {
 	panic("deprecated method should not be used")
 }
 
-func (c *testCanvas) Overlays() []fyne.CanvasObject {
-	if c.overlay == nil {
-		return nil
-	}
-	return []fyne.CanvasObject{c.overlay}
-}
-
-func (c *testCanvas) PopOverlay() fyne.CanvasObject {
-	overlay := c.overlay
-	c.overlay = nil
-	return overlay
-}
-
-func (c *testCanvas) PushOverlay(overlay fyne.CanvasObject) {
-	if overlay == nil {
-		return
-	}
-	c.overlay = overlay
-}
-
-func (c *testCanvas) RemoveOverlay(overlay fyne.CanvasObject) {
-	if c.overlay != overlay {
-		return
-	}
-	c.overlay = nil
-}
-
 // Deprecated
 func (c *testCanvas) SetOverlay(_ fyne.CanvasObject) {
 	panic("deprecated method should not be used")
-}
-
-func (c *testCanvas) TopOverlay() fyne.CanvasObject {
-	return c.overlay
 }
 
 func (c *testCanvas) Refresh(fyne.CanvasObject) {
