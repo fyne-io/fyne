@@ -317,16 +317,9 @@ func (e *Entry) Disable() { // TODO remove this override after ReadOnly is remov
 func (e *Entry) Hide() {
 	if e.popUp != nil {
 		e.popUp.Hide()
+		e.popUp = nil
 	}
 	e.DisableableWidget.Hide()
-}
-
-// Show satisfies the fyne.CanvasObject interface.
-func (e *Entry) Show() {
-	if e.popUp != nil {
-		e.popUp.Show()
-	}
-	e.DisableableWidget.Show()
 }
 
 // updateText updates the internal text to the given value
