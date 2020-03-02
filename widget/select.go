@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -87,12 +86,6 @@ func (s *selectRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (s *selectRenderer) Destroy() {
-	if s.combo.popUp != nil {
-		c := fyne.CurrentApp().Driver().CanvasForObject(s.combo)
-		c.SetOverlay(nil)
-		cache.Renderer(s.combo.popUp).Destroy()
-		s.combo.popUp = nil
-	}
 }
 
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
@@ -106,6 +99,24 @@ type Select struct {
 
 	hovered bool
 	popUp   *PopUp
+}
+
+var _ fyne.Widget = (*Select)(nil)
+
+// Hide satisfies the fyne.CanvasObject interface.
+func (s *Select) Hide() {
+	if s.popUp != nil {
+		s.popUp.Hide()
+	}
+	s.BaseWidget.Hide()
+}
+
+// Show satisfies the fyne.CanvasObject interface.
+func (s *Select) Show() {
+	if s.popUp != nil {
+		s.popUp.Show()
+	}
+	s.BaseWidget.Show()
 }
 
 // Resize sets a new size for a widget.
