@@ -107,16 +107,9 @@ var _ fyne.Widget = (*Select)(nil)
 func (s *Select) Hide() {
 	if s.popUp != nil {
 		s.popUp.Hide()
+		s.popUp = nil
 	}
 	s.BaseWidget.Hide()
-}
-
-// Show satisfies the fyne.CanvasObject interface.
-func (s *Select) Show() {
-	if s.popUp != nil {
-		s.popUp.Show()
-	}
-	s.BaseWidget.Show()
 }
 
 // Resize sets a new size for a widget.
