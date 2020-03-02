@@ -17,7 +17,9 @@ type CanvasObject interface {
 
 	// visibility
 	Visible() bool
+	// Show shows this object.
 	Show()
+	// Hide hides this object.
 	Hide()
 
 	Refresh()

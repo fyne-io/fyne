@@ -51,6 +51,7 @@ func manifestLibName(data []byte) (string, error) {
 type manifestTmplData struct {
 	JavaPkgPath string
 	Name        string
+	Debug       bool
 	LibName     string
 }
 
@@ -61,7 +62,7 @@ var manifestTmpl = template.Must(template.New("manifest").Parse(`
 	android:versionCode="1"
 	android:versionName="1.0">
 
-	<application android:label="{{.Name}}" android:debuggable="true">
+	<application android:label="{{.Name}}" android:debuggable="{{.Debug}}">
 	<activity android:name="org.golang.app.GoNativeActivity"
 		android:label="{{.Name}}"
 		android:configChanges="orientation|keyboardHidden">

@@ -81,7 +81,7 @@ var _ command = (*packager)(nil)
 type packager struct {
 	name, srcDir, dir, exe, icon string
 	os, appID                    string
-	install                      bool
+	install, release             bool
 }
 
 func (p *packager) packageLinux() error {
@@ -235,11 +235,11 @@ func (p *packager) packageWindows() error {
 }
 
 func (p *packager) packageAndroid() error {
-	return mobile.RunNewBuild("android", p.appID, p.icon, p.name)
+	return mobile.RunNewBuild("android", p.appID, p.icon, p.name, p.release)
 }
 
 func (p *packager) packageIOS() error {
-	err := mobile.RunNewBuild("ios", p.appID, p.icon, p.name)
+	err := mobile.RunNewBuild("ios", p.appID, p.icon, p.name, p.release)
 	if err != nil {
 		return err
 	}
@@ -256,6 +256,7 @@ func (p *packager) addFlags() {
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
 	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
 }
 
 func (*packager) printHelp(indent string) {

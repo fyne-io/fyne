@@ -19,7 +19,7 @@ type textPresenter interface {
 	textStyle() fyne.TextStyle
 	textColor() color.Color
 
-	password() bool
+	concealed() bool
 
 	object() fyne.Widget
 }
@@ -207,7 +207,7 @@ func (t *textHandler) rowLength(row int) int {
 // CharMinSize returns the average char size to use for internal computation
 func (t *textProvider) charMinSize() fyne.Size {
 	defaultChar := "M"
-	if t.presenter.password() {
+	if t.presenter.concealed() {
 		defaultChar = passwordChar
 	}
 	return textMinSize(defaultChar, theme.TextSize(), t.presenter.textStyle())
@@ -225,7 +225,7 @@ func (t *textProvider) lineSizeToColumn(col, row int) (size fyne.Size) {
 	}
 
 	measureText := string(line[0:col])
-	if t.presenter.password() {
+	if t.presenter.concealed() {
 		measureText = strings.Repeat(passwordChar, col)
 	}
 
@@ -293,7 +293,7 @@ func (r *textRenderer) Refresh() {
 	for ; index < r.provider.rows(); index++ {
 		var line string
 		row := r.provider.row(index)
-		if r.provider.presenter.password() {
+		if r.provider.presenter.concealed() {
 			line = strings.Repeat(passwordChar, len(row))
 		} else {
 			line = string(row)

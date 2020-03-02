@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,14 +33,54 @@ func TestGlCanvas_Resize(t *testing.T) {
 	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
-	over := widget.NewLabel("Over")
+	w.SetContent(content)
+
+	size := fyne.NewSize(100, 100)
+	assert.NotEqual(t, size, content.Size())
+
+	w.Resize(size)
+	assert.Equal(t, size, content.Size())
+}
+
+func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
+	w := d.CreateWindow("Test")
+	w.SetPadded(false)
+
+	content := widget.NewLabel("Content")
+	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
 	w.SetContent(content)
 	w.Canvas().SetOverlay(over)
 
 	size := fyne.NewSize(100, 100)
+	overContentSize := over.Content.Size()
+	assert.NotEqual(t, size, content.Size())
+	assert.NotEqual(t, size, over.Size())
+	assert.NotEqual(t, size, overContentSize)
+
 	w.Resize(size)
-	assert.Equal(t, size, content.Size())
-	assert.Equal(t, size, over.Size())
+	assert.Equal(t, size, content.Size(), "canvas content is resized")
+	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
+	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
+}
+
+func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
+	w := d.CreateWindow("Test")
+	w.SetPadded(false)
+
+	content := widget.NewLabel("Content")
+	over := widget.NewLabel("Over")
+	w.SetContent(content)
+	w.Canvas().SetOverlay(over)
+	// TODO: address #707; overlays should always be canvas size
+	over.Resize(w.Canvas().Size())
+
+	size := fyne.NewSize(100, 100)
+	assert.NotEqual(t, size, content.Size())
+	assert.NotEqual(t, size, over.Size())
+
+	w.Resize(size)
+	assert.Equal(t, size, content.Size(), "canvas content is resized")
+	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
 }
 
 func TestGlCanvas_Scale(t *testing.T) {
@@ -295,6 +336,29 @@ func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) 
 
 	assert.Nil(t, layout.popLayoutEvent())
 	w.ignoreResize = false
+}
+
+func Test_glCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	w.ignoreResize = true
+	c := w.Canvas().(*glCanvas)
+	c.Resize(fyne.NewSize(100, 100))
+	popUpContent := canvas.NewRectangle(color.Black)
+	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
+	popUp := widget.NewPopUp(popUpContent, c)
+
+	// This is because of a bug in PopUp size handling that will be fixed later.
+	// This line will vanish then.
+	popUp.Resize(popUpContent.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+
+	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
+	assert.Equal(t, fyne.NewSize(1000, 10).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), popUp.MinSize())
+	assert.Equal(t, fyne.NewSize(100, 100), popUp.Size())
+
+	repaintWindow(w)
+
+	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
+	assert.Equal(t, fyne.NewSize(100, 100), popUp.Size())
 }
 
 func Test_glCanvas_walkTree(t *testing.T) {

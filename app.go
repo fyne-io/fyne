@@ -31,8 +31,8 @@ type App interface {
 
 	// Calling Quit on the application will cause the application to exit
 	// cleanly, closing all open windows.
-	// This should be used with caution, many platforms discourage exiting an application
-	// from within the code and some mobile systems do not allow it.
+	// This function does no thing on a mobile device as the application lifecycle is
+	// managed by the operating system.
 	Quit()
 
 	// Driver returns the driver that is rendering this application.

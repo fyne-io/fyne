@@ -15,5 +15,10 @@ func devicePadding() (topLeft, bottomRight fyne.Size) {
 }
 
 func (*device) SystemScale() float32 {
-	return 3 // TODO return 2 for < iPhone X, Xs but 3 for Plus/Max size
+	if currentDPI >= 450 {
+		return 3
+	} else if currentDPI >= 340 {
+		return 2.5
+	}
+	return 2
 }

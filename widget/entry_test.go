@@ -946,7 +946,7 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 	entry.SetPlaceHolder("Password")
 
 	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry)[0].Text)
-	assert.False(t, entry.placeholderProvider().presenter.password())
+	assert.False(t, entry.placeholderProvider().presenter.concealed())
 }
 
 const (
@@ -1301,6 +1301,29 @@ func TestEntry_EraseSelection(t *testing.T) {
 	assert.Equal(t, -1, b)
 }
 
+func TestEntry_EmptySelection(t *testing.T) {
+	entry := NewEntry()
+	entry.SetText("text")
+
+	// trying to select at the edge
+	typeKeys(entry, keyShiftLeftDown, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "", entry.SelectedText())
+
+	typeKeys(entry, fyne.KeyRight)
+	assert.Equal(t, 1, entry.CursorColumn)
+
+	// stop selecting at the edge when nothing is selected
+	typeKeys(entry, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "", entry.SelectedText())
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	// check that the selection has been removed
+	typeKeys(entry, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftUp)
+	assert.Equal(t, "", entry.SelectedText())
+	assert.Equal(t, false, entry.selecting)
+	assert.Equal(t, 1, entry.CursorColumn)
+}
+
 func TestEntry_EraseEmptySelection(t *testing.T) {
 	e := setup()
 	// clear empty selection
@@ -1338,7 +1361,7 @@ func TestEntry_EraseEmptySelection(t *testing.T) {
 func TestPasswordEntry_Reveal(t *testing.T) {
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := NewPasswordEntry()
-		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.passwordRevealer
+		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.ActionItem.(*passwordRevealer)
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
@@ -1372,7 +1395,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		entry.Refresh()
 
 		// action icon is not displayed
-		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.passwordRevealer
+		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.ActionItem
 		assert.NotNil(t, actionIcon)
 
 		test.Type(entry, "Hié™שרה")

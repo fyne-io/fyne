@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -87,12 +86,6 @@ func (s *selectRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (s *selectRenderer) Destroy() {
-	if s.combo.popUp != nil {
-		c := fyne.CurrentApp().Driver().CanvasForObject(s.combo)
-		c.SetOverlay(nil)
-		cache.Renderer(s.combo.popUp).Destroy()
-		s.combo.popUp = nil
-	}
 }
 
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
@@ -108,13 +101,31 @@ type Select struct {
 	popUp   *PopUp
 }
 
+var _ fyne.Widget = (*Select)(nil)
+
+// Hide satisfies the fyne.CanvasObject interface.
+func (s *Select) Hide() {
+	if s.popUp != nil {
+		s.popUp.Hide()
+	}
+	s.BaseWidget.Hide()
+}
+
+// Show satisfies the fyne.CanvasObject interface.
+func (s *Select) Show() {
+	if s.popUp != nil {
+		s.popUp.Show()
+	}
+	s.BaseWidget.Show()
+}
+
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (s *Select) Resize(size fyne.Size) {
 	s.BaseWidget.Resize(size)
 
 	if s.popUp != nil {
-		s.popUp.Content.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
+		s.popUp.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
 	}
 }
 
@@ -140,7 +151,7 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 	popUpPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height))
 
 	s.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, popUpPos)
-	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.Content.MinSize().Height))
+	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured

@@ -31,6 +31,15 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 	return l
 }
 
+// Refresh checks if the text content should be updated then refreshes the graphical context
+func (l *Label) Refresh() {
+	if l.Text != string(l.buffer) {
+		l.textProvider.SetText(l.Text)
+	}
+
+	l.BaseWidget.Refresh()
+}
+
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
@@ -52,8 +61,8 @@ func (l *Label) textColor() color.Color {
 	return theme.TextColor()
 }
 
-// password tells the rendering textProvider if we are a password field
-func (l *Label) password() bool {
+// concealed tells the rendering textProvider if we are a concealed field
+func (l *Label) concealed() bool {
 	return false
 }
 

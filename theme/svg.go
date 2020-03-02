@@ -24,40 +24,66 @@ type svg struct {
 }
 
 type pathObj struct {
-	XMLName xml.Name `xml:"path"`
-	Fill    string   `xml:"fill,attr"`
-	D       string   `xml:"d,attr"`
+	XMLName         xml.Name `xml:"path"`
+	Fill            string   `xml:"fill,attr,omitempty"`
+	Stroke          string   `xml:"stroke,attr,omitempty"`
+	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
+	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
+	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
+	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
+	D               string   `xml:"d,attr"`
 }
 
 type rectObj struct {
-	XMLName xml.Name `xml:"rect"`
-	Fill    string   `xml:"fill,attr"`
-	X       string   `xml:"x,attr"`
-	Y       string   `xml:"y,attr"`
-	Width   string   `xml:"width,attr"`
-	Height  string   `xml:"height,attr"`
+	XMLName         xml.Name `xml:"rect"`
+	Fill            string   `xml:"fill,attr,omitempty"`
+	Stroke          string   `xml:"stroke,attr,omitempty"`
+	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
+	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
+	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
+	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
+	X               string   `xml:"x,attr"`
+	Y               string   `xml:"y,attr"`
+	Width           string   `xml:"width,attr"`
+	Height          string   `xml:"height,attr"`
 }
 
 type circleObj struct {
-	XMLName xml.Name `xml:"circle"`
-	Fill    string   `xml:"fill,attr"`
-	CX      string   `xml:"cx,attr"`
-	CY      string   `xml:"cy,attr"`
-	R       string   `xml:"r,attr"`
+	XMLName         xml.Name `xml:"circle"`
+	Fill            string   `xml:"fill,attr,omitempty"`
+	Stroke          string   `xml:"stroke,attr,omitempty"`
+	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
+	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
+	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
+	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
+	CX              string   `xml:"cx,attr"`
+	CY              string   `xml:"cy,attr"`
+	R               string   `xml:"r,attr"`
 }
 
 type polygonObj struct {
-	XMLName xml.Name `xml:"polygon"`
-	Fill    string   `xml:"fill,attr"`
-	Points  string   `xml:"points,attr"`
+	XMLName         xml.Name `xml:"polygon"`
+	Fill            string   `xml:"fill,attr,omitempty"`
+	Stroke          string   `xml:"stroke,attr,omitempty"`
+	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
+	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
+	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
+	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
+	Points          string   `xml:"points,attr"`
 }
 
 type objGroup struct {
-	XMLName  xml.Name      `xml:"g"`
-	ID       string        `xml:"id,attr"`
-	Paths    []*pathObj    `xml:"path"`
-	Rects    []*rectObj    `xml:"rect"`
-	Polygons []*polygonObj `xml:"polygon"`
+	XMLName         xml.Name      `xml:"g"`
+	ID              string        `xml:"id,attr,omitempty"`
+	Fill            string        `xml:"fill,attr,omitempty"`
+	Stroke          string        `xml:"stroke,attr,omitempty"`
+	StrokeWidth     string        `xml:"stroke-width,attr,omitempty"`
+	StrokeLineCap   string        `xml:"stroke-linecap,attr,omitempty"`
+	StrokeLineJoin  string        `xml:"stroke-linejoin,attr,omitempty"`
+	StrokeDashArray string        `xml:"stroke-dasharray,attr,omitempty"`
+	Paths           []*pathObj    `xml:"path"`
+	Rects           []*rectObj    `xml:"rect"`
+	Polygons        []*polygonObj `xml:"polygon"`
 }
 
 func replacePathsFill(paths []*pathObj, hexColor string) {

@@ -150,16 +150,20 @@ func (c *glCanvas) Focused() fyne.Focusable {
 
 func (c *glCanvas) Resize(size fyne.Size) {
 	c.size = size
-	c.content.Resize(c.contentSize(size))
-	c.content.Move(c.contentPos())
 
 	if c.overlay != nil {
-		if _, ok := c.overlay.(*widget.PopUp); ok {
-			c.overlay.Resize(c.Overlay().MinSize())
+		if p, ok := c.overlay.(*widget.PopUp); ok {
+			// TODO: remove this when #707 is being addressed.
+			// “Notifies” the PopUp of the canvas size change.
+			c.overlay.Resize(p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		} else {
 			c.overlay.Resize(size)
 		}
 	}
+
+	c.content.Resize(c.contentSize(size))
+	c.content.Move(c.contentPos())
+
 	if c.menu != nil {
 		c.menu.Refresh()
 		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
@@ -270,7 +274,7 @@ func (c *glCanvas) ensureMinSize() bool {
 				windowNeedsMinSizeUpdate = true
 				size := obj.Size()
 				expectedSize := minSize.Union(size)
-				if expectedSize != size {
+				if expectedSize != size && size != c.size {
 					objToLayout = nil
 					obj.Resize(expectedSize)
 				}
