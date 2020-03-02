@@ -248,6 +248,9 @@ func (w *window) fitContent() {
 		w.viewport.SetSize(w.width, w.height)
 	}
 	if w.fixedSize {
+		w.width = internal.ScaleInt(w.canvas, w.Canvas().Size().Width)
+		w.height = internal.ScaleInt(w.canvas, w.Canvas().Size().Height)
+
 		w.viewport.SetSizeLimits(w.width, w.height, w.width, w.height)
 	} else {
 		w.viewport.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)

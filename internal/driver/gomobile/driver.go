@@ -27,7 +27,6 @@ const tapSecondaryDelay = 300 * time.Millisecond
 
 type mobileDriver struct {
 	app   app.App
-	quit  bool
 	glctx gl.Context
 
 	windows []fyne.Window
@@ -72,7 +71,7 @@ func (d *mobileDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 		return nil
 	}
 
-	// TODO don't just assume it refers to the topmost window
+	// TODO figure out how we handle multiple windows...
 	return d.currentWindow().Canvas()
 }
 
@@ -92,12 +91,7 @@ func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Posi
 }
 
 func (d *mobileDriver) Quit() {
-	if d.app == nil {
-		return
-	}
-
-	// TODO should this be disabled for iOS?
-	d.quit = true
+	// Android and iOS guidelines say this should not be allowed!
 }
 
 func (d *mobileDriver) Run() {
@@ -118,19 +112,25 @@ func (d *mobileDriver) Run() {
 				case lifecycle.CrossOn:
 					d.glctx, _ = e.DrawContext.(gl.Context)
 					d.onStart()
+
+					// this is a fix for some android phone to prevent the app from being drawn as a blank screen after being pushed in the background
+					canvas.Content().Refresh()
+
 					a.Send(paint.Event{})
 				case lifecycle.CrossOff:
 					d.onStop()
 					d.glctx = nil
 				}
-				if e.Crosses(lifecycle.StageAlive) == lifecycle.CrossOff {
-					d.quit = true
-				}
 			case size.Event:
+				if e.WidthPx <= 0 {
+					continue
+				}
 				currentSize = e
 				currentOrientation = e.Orientation
 				currentDPI = e.PixelsPerPt * 72
 				canvas.SetScale(0) // value is ignored
+				// make sure that we paint on the next frame
+				canvas.Content().Refresh()
 			case paint.Event:
 				if d.glctx == nil || e.External {
 					continue
@@ -167,10 +167,6 @@ func (d *mobileDriver) Run() {
 				} else if e.Direction == key.DirRelease {
 					d.typeUpCanvas(canvas, e.Rune, e.Code)
 				}
-			}
-
-			if d.quit {
-				break
 			}
 		}
 	})

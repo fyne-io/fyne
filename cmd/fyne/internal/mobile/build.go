@@ -234,6 +234,7 @@ var (
 	buildO          string // -o
 	buildGcflags    string // -gcflags
 	buildLdflags    string // -ldflags
+	buildRelease    bool   // -release
 	buildTarget     string // -target
 	buildTrimpath   bool   // -trimpath
 	buildWork       bool   // -work
@@ -242,9 +243,10 @@ var (
 	buildAndroidAPI int    // -androidapi
 )
 
-func RunNewBuild(target, appID, icon, name string) error {
+func RunNewBuild(target, appID, icon, name string, release bool) error {
 	buildTarget = target
 	buildBundleID = appID
+	buildRelease = release
 
 	cmd := cmdBuild
 	cmd.Flag = flag.FlagSet{}

@@ -61,6 +61,14 @@ type circleObj struct {
 	R               string   `xml:"r,attr"`
 }
 
+type circleObj struct {
+	XMLName xml.Name `xml:"circle"`
+	Fill    string   `xml:"fill,attr"`
+	CX      string   `xml:"cx,attr"`
+	CY      string   `xml:"cy,attr"`
+	R       string   `xml:"r,attr"`
+}
+
 type polygonObj struct {
 	XMLName         xml.Name `xml:"polygon"`
 	Fill            string   `xml:"fill,attr,omitempty"`

@@ -107,6 +107,30 @@ func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	assert.Equal(t, 20, y)
 }
 
+func TestGlCanvas_Scale(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+
+	c.scale = 2.5
+	assert.Equal(t, 5, int(2*c.Scale()))
+}
+
+func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+
+	pos := fyne.NewPos(4, 4)
+	c.scale = 2.5
+	x, y := c.PixelCoordinateForPosition(pos)
+	assert.Equal(t, 10, x)
+	assert.Equal(t, 10, y)
+
+	c.texScale = 2.0
+	x, y = c.PixelCoordinateForPosition(pos)
+	assert.Equal(t, 20, x)
+	assert.Equal(t, 20, y)
+}
+
 func Test_glCanvas_SetContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	var menuHeight int
