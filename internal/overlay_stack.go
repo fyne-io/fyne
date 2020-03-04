@@ -7,13 +7,15 @@ type OverlayStack struct {
 	overlay fyne.CanvasObject
 }
 
+var _ fyne.OverlayStack = (*OverlayStack)(nil)
+
 // Overlay satisfies the fyne.Canvas interface.
 // Deprecated: Use Overlays() instead.
 func (s *OverlayStack) Overlay() fyne.CanvasObject {
 	return s.overlay
 }
 
-// Overlays satisfies the fyne.Canvas interface.
+// Overlays satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) Overlays() []fyne.CanvasObject {
 	if s.overlay == nil {
 		return nil
@@ -21,14 +23,14 @@ func (s *OverlayStack) Overlays() []fyne.CanvasObject {
 	return []fyne.CanvasObject{s.overlay}
 }
 
-// PopOverlay satisfies the fyne.Canvas interface.
+// PopOverlay satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) PopOverlay() fyne.CanvasObject {
 	overlay := s.overlay
 	s.overlay = nil
 	return overlay
 }
 
-// PushOverlay satisfies the fyne.Canvas interface.
+// PushOverlay satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) PushOverlay(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
@@ -36,7 +38,7 @@ func (s *OverlayStack) PushOverlay(overlay fyne.CanvasObject) {
 	s.overlay = overlay
 }
 
-// RemoveOverlay satisfies the fyne.Canvas interface.
+// RemoveOverlay satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) RemoveOverlay(overlay fyne.CanvasObject) {
 	if s.overlay != overlay {
 		return
@@ -50,7 +52,7 @@ func (s *OverlayStack) SetOverlay(overlay fyne.CanvasObject) {
 	s.overlay = overlay
 }
 
-// TopOverlay satisfies the fyne.Canvas interface.
+// TopOverlay satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) TopOverlay() fyne.CanvasObject {
 	return s.overlay
 }
