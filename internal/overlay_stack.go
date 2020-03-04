@@ -2,18 +2,12 @@ package internal
 
 import "fyne.io/fyne"
 
-// OverlayStack is a mix-in for providing an overlay stack to canvases.
+// OverlayStack implements fyne.OverlayStack
 type OverlayStack struct {
 	overlay fyne.CanvasObject
 }
 
 var _ fyne.OverlayStack = (*OverlayStack)(nil)
-
-// Overlay satisfies the fyne.Canvas interface.
-// Deprecated: Use Overlays() instead.
-func (s *OverlayStack) Overlay() fyne.CanvasObject {
-	return s.overlay
-}
 
 // Overlays satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) Overlays() []fyne.CanvasObject {
@@ -44,12 +38,6 @@ func (s *OverlayStack) RemoveOverlay(overlay fyne.CanvasObject) {
 		return
 	}
 	s.overlay = nil
-}
-
-// SetOverlay satisfies the fyne.Canvas interface.
-// Deprecated: Use PushOverlay() instead.
-func (s *OverlayStack) SetOverlay(overlay fyne.CanvasObject) {
-	s.overlay = overlay
 }
 
 // TopOverlay satisfies the fyne.OverlayStack interface.

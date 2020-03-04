@@ -16,10 +16,9 @@ import (
 )
 
 type mobileCanvas struct {
-	internal.OverlayStack
-
 	content          fyne.CanvasObject
 	windowHead, menu fyne.CanvasObject
+	overlays         *internal.OverlayStack
 	painter          gl.Painter
 	scale            float32
 	size             fyne.Size
@@ -47,6 +46,23 @@ func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 
 	c.sizeContent(c.Size().Union(content.MinSize()))
+}
+
+// Deprecated: Use Overlays() instead.
+func (c *mobileCanvas) Overlay() fyne.CanvasObject {
+	return c.overlays.TopOverlay()
+}
+
+func (c *mobileCanvas) Overlays() fyne.OverlayStack {
+	return c.overlays
+}
+
+// Deprecated: Use Overlays() instead.
+func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
+	if len(c.overlays.Overlays()) > 0 {
+		c.overlays.RemoveOverlay(c.overlays.Overlays()[0])
+	}
+	c.overlays.PushOverlay(overlay)
 }
 
 func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
@@ -174,7 +190,7 @@ func (c *mobileCanvas) walkTree(
 	if c.menu != nil {
 		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
 	}
-	for _, overlay := range c.Overlays() {
+	for _, overlay := range c.overlays.Overlays() {
 		if overlay != nil {
 			driver.WalkVisibleObjectTree(overlay, beforeChildren, afterChildren)
 		}
@@ -182,11 +198,11 @@ func (c *mobileCanvas) walkTree(
 }
 
 func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
-	if c.menu != nil && len(c.Overlays()) == 0 {
+	if c.menu != nil && c.overlays.TopOverlay() == nil {
 		return driver.FindObjectAtPositionMatching(pos, test, c.menu)
 	}
 
-	return driver.FindObjectAtPositionMatching(pos, test, c.TopOverlay(), c.windowHead, c.content)
+	return driver.FindObjectAtPositionMatching(pos, test, c.overlays.TopOverlay(), c.windowHead, c.content)
 }
 
 func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
@@ -289,7 +305,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 	duration := time.Since(c.lastTapDown[tapID])
 
-	if c.menu != nil && len(c.Overlays()) == 0 && pos.X > c.menu.Size().Width {
+	if c.menu != nil && c.overlays.TopOverlay() == nil && pos.X > c.menu.Size().Width {
 		c.menu.Hide()
 		c.menu = nil
 		return
@@ -353,6 +369,7 @@ func NewCanvas() fyne.Canvas {
 	ret.touched = make(map[int]mobile.Touchable)
 	ret.lastTapDownPos = make(map[int]fyne.Position)
 	ret.lastTapDown = make(map[int]time.Time)
+	ret.overlays = &internal.OverlayStack{}
 
 	ret.setupThemeListener()
 

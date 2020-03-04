@@ -488,7 +488,7 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 		roots = []fyne.CanvasObject{canvas.menu, canvas.content}
 	}
 
-	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.TopOverlay(), roots...)
+	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().TopOverlay(), roots...)
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {

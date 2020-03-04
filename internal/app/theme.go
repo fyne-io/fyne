@@ -33,7 +33,7 @@ func ApplySettings(set fyne.Settings, app fyne.App) {
 		ApplyThemeTo(window.Content(), window.Canvas())
 		window.Canvas().SetScale(set.Scale())
 
-		for _, overlay := range window.Canvas().Overlays() {
+		for _, overlay := range window.Canvas().Overlays().Overlays() {
 			ApplyThemeTo(overlay, window.Canvas())
 		}
 	}

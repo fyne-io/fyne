@@ -28,22 +28,14 @@ type Canvas interface {
 	// This method returns the top of the overlay stack.
 	// Use Overlays() instead.
 	Overlay() CanvasObject
-	// Overlays returns the overlays currently on the overlay stack.
-	Overlays() []CanvasObject
-	// PopOverlay removes the top-most object of the overlay stack and returns it.
-	PopOverlay() CanvasObject
-	// PushOverlay pushes an overlay on the top of the overlay stack.
-	PushOverlay(CanvasObject)
-	// RemoveOverlay removes the given object and all objects above it from the overlay stack.
-	RemoveOverlay(CanvasObject)
+	// Overlays returns the overlay stack.
+	Overlays() OverlayStack
 	// SetOverlay sets the overlay for the canvas.
 	//
 	// Deprecated: Overlays are stacked now.
 	// This method replaces the whole stack by the given overlay.
-	// Use PushOverlay() instead.
+	// Use Overlays() instead.
 	SetOverlay(CanvasObject)
-	// TopOverlay returns the top-most object of the overlay stack.
-	TopOverlay() CanvasObject
 
 	OnTypedRune() func(rune)
 	SetOnTypedRune(func(rune))

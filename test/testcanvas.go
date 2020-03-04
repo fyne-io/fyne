@@ -23,14 +23,13 @@ type WindowlessCanvas interface {
 }
 
 type testCanvas struct {
-	internal.OverlayStack
-
 	size  fyne.Size
 	scale float32
 
-	content fyne.CanvasObject
-	focused fyne.Focusable
-	padded  bool
+	content  fyne.CanvasObject
+	overlays *internal.OverlayStack
+	focused  fyne.Focusable
+	padded   bool
 
 	onTypedRune func(rune)
 	onTypedKey  func(*fyne.KeyEvent)
@@ -58,6 +57,10 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 // Deprecated
 func (c *testCanvas) Overlay() fyne.CanvasObject {
 	panic("deprecated method should not be used")
+}
+
+func (c *testCanvas) Overlays() fyne.OverlayStack {
+	return c.overlays
 }
 
 // Deprecated
@@ -167,7 +170,7 @@ func (c *testCanvas) Capture() image.Image {
 // NewCanvas returns a single use in-memory canvas used for testing
 func NewCanvas() WindowlessCanvas {
 	padding := fyne.NewSize(10, 10)
-	return &testCanvas{size: padding, padded: true, scale: 1.0}
+	return &testCanvas{size: padding, padded: true, scale: 1.0, overlays: &internal.OverlayStack{}}
 }
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.

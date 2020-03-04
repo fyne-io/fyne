@@ -13,9 +13,9 @@ func TestNewPopUpMenu(t *testing.T) {
 	menu := fyne.NewMenu("Foo", fyne.NewMenuItem("Bar", func() {}))
 
 	pop := NewPopUpMenu(menu, c)
-	assert.Equal(t, 1, len(c.Overlays()))
-	assert.Equal(t, pop, c.Overlays()[0])
+	assert.Equal(t, 1, len(c.Overlays().Overlays()))
+	assert.Equal(t, pop, c.Overlays().Overlays()[0])
 
 	pop.Hide()
-	assert.Equal(t, 0, len(c.Overlays()))
+	assert.Equal(t, 0, len(c.Overlays().Overlays()))
 }
