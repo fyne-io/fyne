@@ -281,6 +281,7 @@ func (c *glCanvas) ensureMinSize() bool {
 	if c.Content() == nil {
 		return false
 	}
+	var lastParent fyne.CanvasObject
 
 	windowNeedsMinSizeUpdate := false
 	ensureMinSize := func(node *renderCacheNode) {
@@ -309,13 +310,9 @@ func (c *glCanvas) ensureMinSize() bool {
 				}
 			}
 
-			switch cont := objToLayout.(type) {
-			case *fyne.Container:
-				if cont.Layout != nil {
-					cont.Layout.Layout(cont.Objects, cont.Size())
-				}
-			case fyne.Widget:
-				cache.Renderer(cont).Layout(cont.Size())
+			if objToLayout != lastParent {
+				updateLayout(lastParent)
+				lastParent = objToLayout
 			}
 		}
 	}
@@ -323,7 +320,22 @@ func (c *glCanvas) ensureMinSize() bool {
 	if windowNeedsMinSizeUpdate && (c.size.Width < c.MinSize().Width || c.size.Height < c.MinSize().Height) {
 		c.Resize(c.Size().Union(c.MinSize()))
 	}
+
+	if lastParent != nil {
+		updateLayout(lastParent)
+	}
 	return windowNeedsMinSizeUpdate
+}
+
+func updateLayout(objToLayout fyne.CanvasObject) {
+	switch cont := objToLayout.(type) {
+	case *fyne.Container:
+		if cont.Layout != nil {
+			cont.Layout.Layout(cont.Objects, cont.Size())
+		}
+	case fyne.Widget:
+		cache.Renderer(cont).Layout(cont.Size())
+	}
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
