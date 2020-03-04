@@ -84,6 +84,10 @@ func (w *window) Title() string {
 
 func (w *window) SetTitle(title string) {
 	w.title = title
+	if !w.visible {
+		return
+	}
+
 	runOnMain(func() {
 		w.viewport.SetTitle(title)
 	})
@@ -350,6 +354,7 @@ func (w *window) Show() {
 
 	runOnMain(func() {
 		w.visible = true
+		w.viewport.SetTitle(w.title)
 		w.viewport.Show()
 	})
 
