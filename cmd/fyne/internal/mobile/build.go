@@ -14,7 +14,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path"
 	"regexp"
 	"strings"
 
@@ -97,7 +96,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {	cleanup, err := bui
 	case 0:
 		buildPath = "."
 	case 1:
-		buildPath = path.Clean(args[0])
+		buildPath = args[0]
 	default:
 		cmd.usage()
 		os.Exit(1)
@@ -126,10 +125,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {	cleanup, err := bui
 	case "android":
 		if pkg.Name != "main" {
 			for _, arch := range targetArchs {
-				env := androidEnv[arch]
-				// gomobile-build does not support Go modules yet.
-				env = append(env, "GO111MODULE=off")
-				if err := goBuild(pkg.PkgPath, env); err != nil {
+				if err := goBuild(pkg.PkgPath, androidEnv[arch]); err != nil {
 					return nil, err
 				}
 			}
@@ -149,10 +145,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {	cleanup, err := bui
 
 		if pkg.Name != "main" {
 			for _, arch := range targetArchs {
-				env := darwinEnv[arch]
-				// gomobile-build does not support Go modules yet.
-				env = append(env, "GO111MODULE=off")
-				if err := goBuild(pkg.PkgPath, env); err != nil {
+				if err := goBuild(pkg.PkgPath, darwinEnv[arch]); err != nil {
 					return nil, err
 				}
 			}
