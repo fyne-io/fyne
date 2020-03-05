@@ -19,7 +19,6 @@ import (
 )
 
 var ctx = build.Default
-var pkg *build.Package // TODO(crawshaw): remove global pkg variable
 var tmpdir string
 
 var cmdBuild = &command{
@@ -72,9 +71,15 @@ const (
 )
 
 func runBuild(cmd *command) (err error) {
-	cleanup, err := buildEnvInit()
+	_, err = runBuildImpl(cmd)
+	return
+}
+
+// runBuildImpl builds a package for mobiles based on the given commands.
+// runBuildImpl returns a built package information and an error if exists.
+func runBuildImpl(cmd *command) (*build.Package, error) {	cleanup, err := buildEnvInit()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer cleanup()
 
@@ -82,7 +87,7 @@ func runBuild(cmd *command) (err error) {
 
 	targetOS, targetArchs, err := parseBuildTarget(buildTarget)
 	if err != nil {
-		return fmt.Errorf(`invalid -target=%q: %v`, buildTarget, err)
+		return nil, fmt.Errorf(`invalid -target=%q: %v`, buildTarget, err)
 	}
 
 	oldCtx := ctx
@@ -94,8 +99,14 @@ func runBuild(cmd *command) (err error) {
 
 	if ctx.GOOS == "darwin" {
 		ctx.BuildTags = append(ctx.BuildTags, "ios")
+
+		if buildRelease {
+			targetArchs = []string{"arm", "arm64"}
+			ctx.GOARCH = targetArchs[0]
+		}
 	}
 
+	var pkg *build.Package
 	switch len(args) {
 	case 0:
 		pkg, err = ctx.ImportDir(cwd, build.ImportComment)
@@ -106,14 +117,14 @@ func runBuild(cmd *command) (err error) {
 		os.Exit(1)
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if pkg.Name != "main" && buildO != "" {
-		return fmt.Errorf("cannot set -o when building non-main package")
+		return nil, fmt.Errorf("cannot set -o when building non-main package")
 	}
 	if buildBundleID == "" {
-		return fmt.Errorf("value for -appID is required for a mobile package")
+		return nil, fmt.Errorf("value for -appID is required for a mobile package")
 	}
 
 	var nmpkgs map[string]bool
@@ -123,39 +134,39 @@ func runBuild(cmd *command) (err error) {
 			for _, arch := range targetArchs {
 				env := androidEnv[arch]
 				if err := goBuild(pkg.ImportPath, env); err != nil {
-					return err
+					return nil, err
 				}
 			}
-			return nil
+			return pkg, nil
 		}
 		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	case "darwin":
 		if !xcodeAvailable() {
-			return fmt.Errorf("-target=ios requires XCode")
+			return nil, fmt.Errorf("-target=ios requires XCode")
 		}
 		if pkg.Name != "main" {
 			for _, arch := range targetArchs {
 				env := darwinEnv[arch]
 				if err := goBuild(pkg.ImportPath, env); err != nil {
-					return err
+					return nil, err
 				}
 			}
-			return nil
+			return pkg, nil
 		}
 		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	if !nmpkgs["golang.org/x/mobile/app"] {
-		return fmt.Errorf(`%s does not import "golang.org/x/mobile/app"`, pkg.ImportPath)
+		return nil, fmt.Errorf(`%s does not import "golang.org/x/mobile/app"`, pkg.ImportPath)
 	}
 
-	return nil
+	return pkg, nil
 }
 
 var nmRE = regexp.MustCompile(`[0-9a-f]{8} t (?:.*/vendor/)?(golang.org/x.*/[^.]*)`)
