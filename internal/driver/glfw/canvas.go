@@ -72,13 +72,8 @@ type overlayStack struct {
 	renderCache *renderCacheTree
 }
 
-func (o *overlayStack) PopOverlay() fyne.CanvasObject {
-	o.renderCache = nil
-	return o.OverlayStack.PopOverlay()
-}
-
-func (o *overlayStack) PushOverlay(overlay fyne.CanvasObject) {
-	o.OverlayStack.PushOverlay(overlay)
+func (o *overlayStack) AddOverlay(overlay fyne.CanvasObject) {
+	o.OverlayStack.AddOverlay(overlay)
 	o.renderCache = &renderCacheTree{root: &renderCacheNode{obj: overlay}}
 }
 
@@ -136,7 +131,7 @@ func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	if len(c.overlays.Overlays()) > 0 {
 		c.overlays.RemoveOverlay(c.overlays.Overlays()[0])
 	}
-	c.overlays.PushOverlay(overlay)
+	c.overlays.AddOverlay(overlay)
 	c.setDirty(true)
 }
 

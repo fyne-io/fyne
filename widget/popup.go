@@ -53,7 +53,7 @@ func (p *PopUp) Resize(size fyne.Size) {
 // Show this widget, if it was previously hidden
 func (p *PopUp) Show() {
 	p.BaseWidget.Show()
-	p.Canvas.Overlays().PushOverlay(p)
+	p.Canvas.Overlays().AddOverlay(p)
 }
 
 // Tapped is called when the user taps the popUp background - if not modal then dismiss this widget

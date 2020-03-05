@@ -62,7 +62,7 @@ func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	if len(c.overlays.Overlays()) > 0 {
 		c.overlays.RemoveOverlay(c.overlays.Overlays()[0])
 	}
-	c.overlays.PushOverlay(overlay)
+	c.overlays.AddOverlay(overlay)
 }
 
 func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
