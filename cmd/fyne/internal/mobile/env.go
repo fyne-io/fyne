@@ -23,6 +23,8 @@ var (
 	darwinArmNM  string
 
 	allArchs = []string{"arm", "arm64", "386", "amd64"}
+
+	bitcodeEnabled bool
 )
 
 func buildEnvInit() (cleanup func(), err error) {
@@ -73,6 +75,15 @@ func buildEnvInit() (cleanup func(), err error) {
 }
 
 func envInit() (err error) {
+	// Check the current Go version by go-list.
+	out, err := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`).Output()
+	if err != nil {
+		return err
+	}
+	if len(strings.TrimSpace(string(out))) > 0 {
+		bitcodeEnabled = true
+	}
+
 	// Setup the cross-compiler environments.
 	if ndkRoot, err := ndkRoot(); err == nil {
 		androidEnv = make(map[string][]string)
@@ -135,6 +146,10 @@ func envInit() (err error) {
 		}
 		if err != nil {
 			return err
+		}
+
+		if bitcodeEnabled {
+			cflags += " -fembed-bitcode"
 		}
 		env = append(env,
 			"GOOS=darwin",
