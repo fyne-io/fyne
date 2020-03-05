@@ -19,6 +19,7 @@ require (
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 	golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028
 	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb // indirect
+	golang.org/x/tools v0.0.0-20200117012304-6edc0a871e69
 )
 
 replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20200218100723-2a24c20a57c6
