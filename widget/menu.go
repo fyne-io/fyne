@@ -12,22 +12,24 @@ import (
 // NewPopUpMenuAtPosition creates a PopUp widget populated with menu items from the passed menu structure.
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
 func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *PopUp {
-	var pop *PopUp
 	options := NewVBox()
-	focused := c.Focused()
 	for _, option := range menu.Items {
 		opt := option // capture value
-		options.Append(newTappableLabel(opt.Label, func() {
+		options.Append(newTappableLabel(opt.Label))
+	}
+	pop := NewPopUpAtPosition(options, c, pos)
+	focused := c.Focused()
+	for i, o := range options.Children {
+		label := o.(*menuItemWidget)
+		item := menu.Items[i]
+		label.OnTapped = func() {
 			if c.Focused() == nil {
 				c.Focus(focused)
 			}
-			c.Overlays().PopOverlay()
-
-			opt.Action()
-		}))
+			pop.Hide()
+			item.Action()
+		}
 	}
-
-	pop = NewPopUpAtPosition(options, c, pos)
 	return pop
 }
 
@@ -72,8 +74,8 @@ func (t *menuItemWidget) MouseOut() {
 func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 }
 
-func newTappableLabel(label string, tapped func()) *menuItemWidget {
-	ret := &menuItemWidget{NewLabel(label), tapped, false}
+func newTappableLabel(label string) *menuItemWidget {
+	ret := &menuItemWidget{Label: NewLabel(label)}
 	ret.ExtendBaseWidget(ret)
 	return ret
 }
