@@ -339,13 +339,13 @@ func (p *packager) validate() error {
 }
 
 func (p *packager) doPackage() error {
-	if !exists(p.exe) {
+	if !exists(p.exe) && !p.isMobile() {
 		err := p.buildPackage()
 		if err != nil {
 			return errors.Wrap(err, "Error building application")
 		}
 		if !exists(p.exe) {
-			return fmt.Errorf("Unable to build directory to expected executable, %s" + p.exe)
+			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
 	}
 
@@ -361,6 +361,10 @@ func (p *packager) doPackage() error {
 	case "ios":
 		return p.packageIOS()
 	default:
-		return errors.New("Unsupported target operating system \"" + p.os + "\"")
+		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
+}
+
+func (p *packager) isMobile() bool {
+	return p.os == "ios" || p.os == "android"
 }
