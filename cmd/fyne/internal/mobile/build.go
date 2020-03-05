@@ -78,7 +78,8 @@ func runBuild(cmd *command) (err error) {
 
 // runBuildImpl builds a package for mobiles based on the given commands.
 // runBuildImpl returns a built package information and an error if exists.
-func runBuildImpl(cmd *command) (*packages.Package, error) {	cleanup, err := buildEnvInit()
+func runBuildImpl(cmd *command) (*packages.Package, error) {
+	cleanup, err := buildEnvInit()
 	if err != nil {
 		return nil, err
 	}
@@ -250,6 +251,7 @@ var (
 	buildTags       stringsFlag // -tags
 )
 
+// RunNewBuild executes a new mobile build for the specified configuration
 func RunNewBuild(target, appID, icon, name string, release bool) error {
 	buildTarget = target
 	buildBundleID = appID
