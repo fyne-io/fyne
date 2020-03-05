@@ -13,7 +13,6 @@ import (
 
 // General mobile build environment. Initialized by envInit.
 var (
-	cwd          string
 	gomobilepath string // $GOPATH/pkg/gomobile
 
 	androidEnv map[string][]string // android arch -> []string
@@ -74,12 +73,6 @@ func buildEnvInit() (cleanup func(), err error) {
 }
 
 func envInit() (err error) {
-	// TODO(crawshaw): cwd only used by ctx.Import, which can take "."
-	cwd, err = os.Getwd()
-	if err != nil {
-		return err
-	}
-
 	// Setup the cross-compiler environments.
 	if ndkRoot, err := ndkRoot(); err == nil {
 		androidEnv = make(map[string][]string)

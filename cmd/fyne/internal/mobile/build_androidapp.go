@@ -12,7 +12,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"go/build"
 	"io"
 	"io/ioutil"
 	"log"
@@ -21,15 +20,21 @@ import (
 	"strings"
 
 	"fyne.io/fyne/cmd/fyne/internal/mobile/binres"
+	"golang.org/x/tools/go/packages"
 )
 
-func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, iconPath, appName string) (map[string]bool, error) {
+func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string, iconPath, appName string) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err
 	}
 	libName := androidPkgName(appName)
-	manifestPath := filepath.Join(pkg.Dir, "AndroidManifest.xml")
+
+	// TODO(hajimehoshi): This works only with Go tools that assume all source files are in one directory.
+	// Fix this to work with other Go tools.
+	dir := filepath.Dir(pkg.GoFiles[0])
+
+	manifestPath := filepath.Join(dir, "AndroidManifest.xml")
 	manifestData, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -70,7 +75,7 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 			return nil, err
 		}
 		err = goBuild(
-			pkg.ImportPath,
+			pkg.PkgPath,
 			env,
 			"-buildmode=c-shared",
 			"-o", libAbsPath,
@@ -182,7 +187,7 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 		iconPath string
 	}
 	arsc.iconPath = iconPath
-	assetsDir := filepath.Join(pkg.Dir, "assets")
+	assetsDir := filepath.Join(dir, "assets")
 	assetsDirExists := true
 	fi, err := os.Stat(assetsDir)
 	if err != nil {

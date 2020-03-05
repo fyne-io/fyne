@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"go/build"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -17,10 +16,12 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"golang.org/x/tools/go/packages"
 )
 
-func goIOSBuild(pkg *build.Package, bundleID string, archs []string, appName string) (map[string]bool, error) {
-	src := pkg.ImportPath
+func goIOSBuild(pkg *packages.Package, bundleID string, archs []string, appName string) (map[string]bool, error) {
+	src := pkg.PkgPath
 	buildO = rfc1034Label(appName) + ".app"
 
 	infoplist := new(bytes.Buffer)
@@ -108,7 +109,7 @@ func goIOSBuild(pkg *build.Package, bundleID string, archs []string, appName str
 
 	// TODO(jbd): Fallback to copying if renaming fails.
 	if buildO == "" {
-		n := pkg.ImportPath
+		n := pkg.PkgPath
 		if n == "." {
 			// use cwd name
 			cwd, err := os.Getwd()
@@ -168,13 +169,15 @@ func detectTeamID() (string, error) {
 	return cert.Subject.OrganizationalUnit[0], nil
 }
 
-func iosCopyAssets(pkg *build.Package, xcodeProjDir string) error {
+func iosCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
 	dstAssets := xcodeProjDir + "/main/assets"
 	if err := mkdir(dstAssets); err != nil {
 		return err
 	}
 
-	srcAssets := filepath.Join(pkg.Dir, "assets")
+	// TODO(hajimehoshi): This works only with Go tools that assume all source files are in one directory.
+	// Fix this to work with other Go tools.
+	srcAssets := filepath.Join(filepath.Dir(pkg.GoFiles[0]), "assets")
 	fi, err := os.Stat(srcAssets)
 	if err != nil {
 		if os.IsNotExist(err) {

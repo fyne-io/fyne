@@ -10,6 +10,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // ctx, pkg, tmpdir in build.go
@@ -60,4 +63,13 @@ func writeFile(filename string, generate func(io.Writer) error) error {
 	}()
 
 	return generate(f)
+}
+
+func packagesConfig(targetOS string) *packages.Config {
+	config := &packages.Config{}
+	config.Env = append(os.Environ(), "GOARCH=arm", "GOOS="+targetOS)
+	if len(ctx.BuildTags) > 0 {
+		config.BuildFlags = []string{"-tags=" + strings.Join(ctx.BuildTags, ",")}
+	}
+	return config
 }
