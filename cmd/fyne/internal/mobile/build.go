@@ -303,11 +303,15 @@ func goBuild(src string, env []string, args ...string) error {
 	return goCmd("build", []string{src}, env, args...)
 }
 
-func goInstall(srcs []string, env []string, args ...string) error {
-	return goCmd("install", srcs, env, args...)
+func goBuildAt(at string, src string, env []string, args ...string) error {
+	return goCmdAt(at, "build", []string{src}, env, args...)
 }
 
 func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
+	return goCmdAt("", subcmd, srcs, env, args...)
+}
+
+func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...string) error {
 	cmd := exec.Command(
 		goBin(),
 		subcmd,
@@ -349,6 +353,7 @@ func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
 	cmd.Env = append([]string{}, env...)
 	// gomobile does not support modules yet.
 	cmd.Env = append(cmd.Env, "GO111MODULE=off")
+	cmd.Dir = at
 	return runCmd(cmd)
 }
 
