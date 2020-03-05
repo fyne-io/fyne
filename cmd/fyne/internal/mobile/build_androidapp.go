@@ -68,6 +68,8 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 
 	for _, arch := range androidArchs {
 		env := androidEnv[arch]
+		// gomobile-build does not support Go modules yet.
+		env = append(env, "GO111MODULE=off")
 		toolchain := ndk.Toolchain(arch)
 		libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
 		libAbsPath := filepath.Join(tmpdir, libPath)
