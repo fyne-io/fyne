@@ -109,7 +109,7 @@ func envInit() (err error) {
 				for _, tool := range tools {
 					_, err = os.Stat(tool)
 					if err != nil {
-						return fmt.Errorf("No compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it.", arch, tool)
+						return fmt.Errorf("No compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it", arch, tool)
 					}
 				}
 			}
