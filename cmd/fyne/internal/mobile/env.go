@@ -76,7 +76,9 @@ func buildEnvInit() (cleanup func(), err error) {
 
 func envInit() (err error) {
 	// Check the current Go version by go-list.
-	out, err := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`).Output()
+	cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`)
+	cmd.Stderr = os.Stderr
+	out, err := cmd.Output()
 	if err != nil {
 		return err
 	}
