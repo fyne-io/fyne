@@ -76,7 +76,10 @@ func buildEnvInit() (cleanup func(), err error) {
 
 func envInit() (err error) {
 	// Check the current Go version by go-list.
-	cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`)
+	// An arbitrary standard package ('runtime' here) is given to go-list.
+	// This is because go-list tries to analyze the module at the current directory if no packages are given,
+	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
+	cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
 	cmd.Stderr = os.Stderr
 	out, err := cmd.Output()
 	if err != nil {
