@@ -7,16 +7,20 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
 	"github.com/josephspurrier/goversioninfo"
 	"github.com/pkg/errors"
+	"golang.org/x/mod/modfile"
+	"golang.org/x/mod/module"
 )
 
 func exists(path string) bool {
@@ -307,6 +311,18 @@ func (p *packager) validate() error {
 	}
 
 	exeName := filepath.Base(p.srcDir)
+	if data, err := ioutil.ReadFile(filepath.Join(p.srcDir, "go.mod")); err == nil {
+		modulePath := modfile.ModulePath(data)
+		moduleName, _, ok := module.SplitPathVersion(modulePath)
+		if ok {
+			paths := strings.Split(moduleName, "/")
+			name := paths[len(paths)-1]
+			if name != "" {
+				exeName = name
+			}
+		}
+	}
+
 	if p.os == "windows" {
 		exeName = exeName + ".exe"
 	}
