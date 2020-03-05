@@ -65,7 +65,10 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string, appName 
 	for _, arch := range archs {
 		path := filepath.Join(tmpdir, arch)
 		// Disable DWARF; see golang.org/issues/25148.
-		if err := goBuild(src, darwinEnv[arch], "-ldflags=-w", "-o="+path); err != nil {
+		env := darwinEnv[arch]
+		// gomobile-build does not support Go modules yet.
+		env = append(env, "GO111MODULE=off")
+		if err := goBuild(src, env, "-ldflags=-w", "-o="+path); err != nil {
 			return nil, err
 		}
 		if nmpkgs == nil {

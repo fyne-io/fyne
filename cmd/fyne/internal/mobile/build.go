@@ -127,6 +127,8 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {	cleanup, err := bui
 		if pkg.Name != "main" {
 			for _, arch := range targetArchs {
 				env := androidEnv[arch]
+				// gomobile-build does not support Go modules yet.
+				env = append(env, "GO111MODULE=off")
 				if err := goBuild(pkg.PkgPath, env); err != nil {
 					return nil, err
 				}
@@ -148,6 +150,8 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {	cleanup, err := bui
 		if pkg.Name != "main" {
 			for _, arch := range targetArchs {
 				env := darwinEnv[arch]
+				// gomobile-build does not support Go modules yet.
+				env = append(env, "GO111MODULE=off")
 				if err := goBuild(pkg.PkgPath, env); err != nil {
 					return nil, err
 				}
@@ -351,8 +355,6 @@ func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...stri
 	cmd.Args = append(cmd.Args, args...)
 	cmd.Args = append(cmd.Args, srcs...)
 	cmd.Env = append([]string{}, env...)
-	// gomobile does not support modules yet.
-	cmd.Env = append(cmd.Env, "GO111MODULE=off")
 	cmd.Dir = at
 	return runCmd(cmd)
 }
