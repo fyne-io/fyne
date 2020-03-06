@@ -199,19 +199,19 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 // clearing the current option, the Select widget's PlaceHolder will
 // be displayed.
 func (s *Select) ClearSelected() {
-	s.updateSelect("")
+	s.updateSelected("")
 }
 
 // SetSelected sets the current option of the select widget
 func (s *Select) SetSelected(text string) {
 	for _, option := range s.Options {
 		if text == option {
-			s.updateSelect(text)
+			s.updateSelected(text)
 		}
 	}
 }
 
-func (s *Select) updateSelect(text string) {
+func (s *Select) updateSelected(text string) {
 	s.Selected = text
 
 	if s.OnChanged != nil {

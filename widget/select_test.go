@@ -97,6 +97,50 @@ func TestSelect_SetSelected_Callback(t *testing.T) {
 	assert.Equal(t, "2", selected)
 }
 
+func TestSelect_SetSelected_InvalidNoCallback(t *testing.T) {
+	var triggered bool
+	combo := NewSelect([]string{"1", "2"}, func(string) {
+		triggered = true
+	})
+	combo.SetSelected("")
+
+	assert.False(t, triggered)
+}
+
+func TestSelect_updateSelected(t *testing.T) {
+	const (
+		opt1 = "1"
+		opt2 = "2"
+	)
+
+	combo := NewSelect([]string{opt1, opt2}, func(string) {})
+
+	combo.updateSelected(opt2)
+
+	assert.Equal(t, opt2, combo.Selected)
+}
+
+func TestSelect_updateSelected_Callback(t *testing.T) {
+	const (
+		opt1 = "1"
+		opt2 = "2"
+	)
+	var (
+		triggered      bool
+		triggeredValue string
+	)
+
+	combo := NewSelect([]string{opt1, opt2}, func(s string) {
+		triggered = true
+		triggeredValue = s
+	})
+
+	combo.updateSelected(opt2)
+
+	assert.True(t, triggered)
+	assert.Equal(t, opt2, triggeredValue)
+}
+
 func TestSelect_Tapped(t *testing.T) {
 	combo := NewSelect([]string{"1", "2"}, func(s string) {})
 	test.Tap(combo)
