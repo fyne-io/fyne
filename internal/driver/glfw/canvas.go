@@ -69,19 +69,20 @@ type renderCacheNode struct {
 type overlayStack struct {
 	internal.OverlayStack
 
-	renderCache *renderCacheTree
+	renderCaches []*renderCacheTree
 }
 
 func (o *overlayStack) Add(overlay fyne.CanvasObject) {
+	if overlay == nil {
+		return
+	}
 	o.OverlayStack.Add(overlay)
-	o.renderCache = &renderCacheTree{root: &renderCacheNode{obj: overlay}}
+	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &renderCacheNode{obj: overlay}})
 }
 
 func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
-	if o.Top() == nil {
-		o.renderCache = nil
-	}
+	o.renderCaches = o.renderCaches[:len(o.List())]
 }
 
 func (c *glCanvas) Capture() image.Image {
@@ -379,13 +380,15 @@ func (c *glCanvas) walkTrees(
 	beforeChildren func(*renderCacheNode, fyne.Position),
 	afterChildren func(*renderCacheNode),
 ) {
+	c.RLock()
+	defer c.RUnlock()
 	c.walkTree(c.contentTree, beforeChildren, afterChildren)
 	if c.menu != nil {
 		c.walkTree(c.menuTree, beforeChildren, afterChildren)
 	}
-	for _, overlay := range c.overlays.List() {
-		if overlay != nil {
-			c.walkTree(c.overlays.renderCache, beforeChildren, afterChildren)
+	for _, tree := range c.overlays.renderCaches {
+		if tree != nil {
+			c.walkTree(tree, beforeChildren, afterChildren)
 		}
 	}
 }

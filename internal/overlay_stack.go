@@ -4,7 +4,7 @@ import "fyne.io/fyne"
 
 // OverlayStack implements fyne.OverlayStack
 type OverlayStack struct {
-	overlay fyne.CanvasObject
+	overlays []fyne.CanvasObject
 }
 
 var _ fyne.OverlayStack = (*OverlayStack)(nil)
@@ -14,26 +14,28 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
-	s.overlay = overlay
+	s.overlays = append(s.overlays, overlay)
 }
 
 // List satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) List() []fyne.CanvasObject {
-	if s.overlay == nil {
-		return nil
-	}
-	return []fyne.CanvasObject{s.overlay}
+	return s.overlays
 }
 
 // Remove satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
-	if s.overlay != overlay {
-		return
+	for i, o := range s.overlays {
+		if o == overlay {
+			s.overlays = s.overlays[:i]
+			break
+		}
 	}
-	s.overlay = nil
 }
 
 // Top satisfies the fyne.OverlayStack interface.
 func (s *OverlayStack) Top() fyne.CanvasObject {
-	return s.overlay
+	if len(s.overlays) == 0 {
+		return nil
+	}
+	return s.overlays[len(s.overlays)-1]
 }
