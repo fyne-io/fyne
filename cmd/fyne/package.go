@@ -310,22 +310,8 @@ func (p *packager) validate() error {
 			"Change directory to the main package and try again.")
 	}
 
-	exeName := filepath.Base(p.srcDir)
-	if data, err := ioutil.ReadFile(filepath.Join(p.srcDir, "go.mod")); err == nil {
-		modulePath := modfile.ModulePath(data)
-		moduleName, _, ok := module.SplitPathVersion(modulePath)
-		if ok {
-			paths := strings.Split(moduleName, "/")
-			name := paths[len(paths)-1]
-			if name != "" {
-				exeName = name
-			}
-		}
-	}
+	exeName := calculateExeName(p.srcDir, p.os)
 
-	if p.os == "windows" {
-		exeName = exeName + ".exe"
-	}
 	if p.exe == "" {
 		p.exe = filepath.Join(p.srcDir, exeName)
 	} else if p.os == "ios" || p.os == "android" {
@@ -352,6 +338,27 @@ func (p *packager) validate() error {
 	}
 
 	return nil
+}
+
+func calculateExeName(sourceDir, os string) string {
+	exeName := filepath.Base(sourceDir)
+	if data, err := ioutil.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
+		modulePath := modfile.ModulePath(data)
+		moduleName, _, ok := module.SplitPathVersion(modulePath)
+		if ok {
+			paths := strings.Split(moduleName, "/")
+			name := paths[len(paths)-1]
+			if name != "" {
+				exeName = name
+			}
+		}
+	}
+
+	if os == "windows" {
+		exeName = exeName + ".exe"
+	}
+
+	return exeName
 }
 
 func (p *packager) doPackage() error {
