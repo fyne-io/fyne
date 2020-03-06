@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewSelect(t *testing.T) {
@@ -108,4 +109,26 @@ func TestSelectRenderer_ApplyTheme(t *testing.T) {
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)
+}
+
+func TestSelect_Move(t *testing.T) {
+	// fresh app for this test
+	app := test.NewApp()
+	// don't let our app hang around for too long
+	defer test.NewApp()
+
+	combo := NewSelect([]string{"1", "2"}, nil)
+	canvas := app.Driver().CanvasForObject(combo)
+	canvas.(test.WindowlessCanvas).Resize(fyne.NewSize(100, 100))
+	canvas.SetContent(combo)
+
+	combo.Resize(combo.MinSize())
+	combo.Move(fyne.NewPos(10, 10))
+	require.Equal(t, fyne.NewPos(10, 10), combo.Position())
+
+	combo.Tapped(&fyne.PointEvent{})
+	require.Equal(t, fyne.NewPos(10, 39), combo.popUp.innerPos)
+
+	combo.Move(fyne.NewPos(20, 20))
+	assert.Equal(t, fyne.NewPos(20, 49), combo.popUp.innerPos)
 }
