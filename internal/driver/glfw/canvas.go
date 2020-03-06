@@ -277,6 +277,16 @@ func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyn
 	c.shortcut.AddShortcut(shortcut, handler)
 }
 
+func (c *glCanvas) objectTrees() []fyne.CanvasObject {
+	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+2)
+	trees = append(trees, c.content)
+	if c.menu != nil {
+		trees = append(trees, c.menu)
+	}
+	trees = append(trees, c.Overlays().List()...)
+	return trees
+}
+
 func (c *glCanvas) ensureMinSize() bool {
 	if c.Content() == nil {
 		return false

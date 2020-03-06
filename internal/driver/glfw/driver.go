@@ -33,37 +33,13 @@ func (d *gLDriver) CanvasForObject(obj fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *gLDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
-	var pos fyne.Position
-	found := false
 	c := d.CanvasForObject(co)
 	if c == nil {
-		return pos
+		return fyne.NewPos(0, 0)
 	}
 
 	glc := c.(*glCanvas)
-	findPos := func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		if o == co {
-			pos = p
-			found = true
-			return true
-		}
-		return false
-	}
-
-	driver.WalkVisibleObjectTree(glc.content, findPos, nil)
-	if !found && glc.menu != nil {
-		driver.WalkVisibleObjectTree(glc.menu, findPos, nil)
-	}
-	if !found {
-		for _, overlay := range glc.Overlays().List() {
-			driver.WalkVisibleObjectTree(overlay, findPos, nil)
-			if found {
-				break
-			}
-		}
-	}
-
-	return pos
+	return driver.AbsolutePositionForObject(co, glc.objectTrees())
 }
 
 func (d *gLDriver) Device() fyne.Device {

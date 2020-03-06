@@ -83,6 +83,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	combo := NewSelect([]string{"1", "2"}, func(s string) {})
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
 	canvas.(test.WindowlessCanvas).Resize(fyne.NewSize(100, 100))
+	canvas.SetContent(combo)
 
 	combo.Resize(combo.MinSize())
 	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))

@@ -5,6 +5,8 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/driver"
+
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
 )
@@ -32,7 +34,13 @@ func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
-	return co.Position() // TODO get the real answer
+	c := d.CanvasForObject(co)
+	if c == nil {
+		return fyne.NewPos(0, 0)
+	}
+
+	tc := c.(*testCanvas)
+	return driver.AbsolutePositionForObject(co, tc.objectTrees())
 }
 
 func (d *testDriver) CreateWindow(string) fyne.Window {
