@@ -76,18 +76,13 @@ func (d *mobileDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
-	var pos fyne.Position
-	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*mobileCanvas)
+	c := d.CanvasForObject(co)
+	if c == nil {
+		return fyne.NewPos(0, 0)
+	}
 
-	c.walkTree(func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		if o == co {
-			pos = p
-			return true
-		}
-		return false
-	}, nil)
-
-	return pos
+	mc := c.(*mobileCanvas)
+	return driver.AbsolutePositionForObject(co, mc.objectTrees())
 }
 
 func (d *mobileDriver) Quit() {

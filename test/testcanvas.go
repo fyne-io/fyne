@@ -167,6 +167,15 @@ func (c *testCanvas) Capture() image.Image {
 	return img
 }
 
+func (c *testCanvas) objectTrees() []fyne.CanvasObject {
+	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+1)
+	if c.content != nil {
+		trees = append(trees, c.content)
+	}
+	trees = append(trees, c.Overlays().List()...)
+	return trees
+}
+
 // NewCanvas returns a single use in-memory canvas used for testing
 func NewCanvas() WindowlessCanvas {
 	padding := fyne.NewSize(10, 10)

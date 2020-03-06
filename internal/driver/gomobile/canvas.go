@@ -179,6 +179,16 @@ func (c *mobileCanvas) Capture() image.Image {
 	return c.painter.Capture(c)
 }
 
+func (c *mobileCanvas) objectTrees() []fyne.CanvasObject {
+	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+2)
+	trees = append(trees, c.content)
+	if c.menu != nil {
+		trees = append(trees, c.menu)
+	}
+	trees = append(trees, c.Overlays().List()...)
+	return trees
+}
+
 func (c *mobileCanvas) walkTree(
 	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),

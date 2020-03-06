@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/widget"
 )
 
 // WalkVisibleObjectTree will walk an object tree for all visible objects executing the passed functions following
@@ -65,9 +64,9 @@ func walkObjectTree(
 	case fyne.Widget:
 		children = cache.Renderer(co).Objects()
 
-		if scroll, ok := obj.(*widget.ScrollContainer); ok {
+		if _, ok := obj.(fyne.Scrollable); ok {
 			clipPos = pos
-			clipSize = scroll.Size()
+			clipSize = obj.Size()
 		}
 	}
 
@@ -142,4 +141,23 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 	}
 
 	return found, foundPos
+}
+
+// AbsolutePositionForObject returns the absolute position of an object in a set of object trees.
+// If the object is not part of any of the trees, the position (0,0) is returned.
+func AbsolutePositionForObject(object fyne.CanvasObject, trees []fyne.CanvasObject) fyne.Position {
+	var pos fyne.Position
+	findPos := func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+		if o == object {
+			pos = p
+			return true
+		}
+		return false
+	}
+	for _, tree := range trees {
+		if WalkVisibleObjectTree(tree, findPos, nil) {
+			break
+		}
+	}
+	return pos
 }

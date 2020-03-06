@@ -112,6 +112,15 @@ func (s *Select) Hide() {
 	s.BaseWidget.Hide()
 }
 
+// Move satisfies the fyne.CanvasObject interface.
+func (s *Select) Move(pos fyne.Position) {
+	s.BaseWidget.Move(pos)
+
+	if s.popUp != nil {
+		s.popUp.Move(s.popUpPos())
+	}
+}
+
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (s *Select) Resize(size fyne.Size) {
@@ -140,11 +149,13 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		items = append(items, item)
 	}
 
-	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
-	popUpPos := buttonPos.Add(fyne.NewPos(0, s.Size().Height))
-
-	s.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, popUpPos)
+	s.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
+}
+
+func (s *Select) popUpPos() fyne.Position {
+	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
+	return buttonPos.Add(fyne.NewPos(0, s.Size().Height))
 }
 
 // TappedSecondary is called when a secondary pointer tapped event is captured
