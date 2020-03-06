@@ -429,7 +429,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	tapPos := fyne.NewPos(1, 1)
 	test.TapSecondaryAt(entry, tapPos)
 
-	assert.Equal(t, 1, len(canvas.Overlays().All()))
+	assert.Equal(t, 1, len(canvas.Overlays().List()))
 	over := canvas.Overlays().Top()
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 
@@ -444,7 +444,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	entry.Disable()
 
 	test.TapSecondaryAt(entry, tapPos)
-	assert.Equal(t, 1, len(canvas.Overlays().All()))
+	assert.Equal(t, 1, len(canvas.Overlays().List()))
 	over = canvas.Overlays().Top()
 
 	cont = over.(*PopUp).Content
@@ -459,7 +459,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 
 	entry.Enable()
 	test.TapSecondaryAt(entry, tapPos)
-	assert.Equal(t, 1, len(canvas.Overlays().All()))
+	assert.Equal(t, 1, len(canvas.Overlays().List()))
 	over = canvas.Overlays().Top()
 	assert.NotNil(t, over)
 

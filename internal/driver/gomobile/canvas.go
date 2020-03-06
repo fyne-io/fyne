@@ -59,8 +59,8 @@ func (c *mobileCanvas) Overlays() fyne.OverlayStack {
 
 // Deprecated: Use Overlays() instead.
 func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
-	if len(c.overlays.All()) > 0 {
-		c.overlays.Remove(c.overlays.All()[0])
+	if len(c.overlays.List()) > 0 {
+		c.overlays.Remove(c.overlays.List()[0])
 	}
 	c.overlays.Add(overlay)
 }
@@ -190,7 +190,7 @@ func (c *mobileCanvas) walkTree(
 	if c.menu != nil {
 		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
 	}
-	for _, overlay := range c.overlays.All() {
+	for _, overlay := range c.overlays.List() {
 		if overlay != nil {
 			driver.WalkVisibleObjectTree(overlay, beforeChildren, afterChildren)
 		}

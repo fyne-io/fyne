@@ -17,8 +17,8 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	s.overlay = overlay
 }
 
-// All satisfies the fyne.OverlayStack interface.
-func (s *OverlayStack) All() []fyne.CanvasObject {
+// List satisfies the fyne.OverlayStack interface.
+func (s *OverlayStack) List() []fyne.CanvasObject {
 	if s.overlay == nil {
 		return nil
 	}

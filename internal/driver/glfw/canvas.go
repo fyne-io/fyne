@@ -128,8 +128,8 @@ func (c *glCanvas) Overlays() fyne.OverlayStack {
 func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.Lock()
 	defer c.Unlock()
-	if len(c.overlays.All()) > 0 {
-		c.overlays.Remove(c.overlays.All()[0])
+	if len(c.overlays.List()) > 0 {
+		c.overlays.Remove(c.overlays.List()[0])
 	}
 	c.overlays.Add(overlay)
 	c.setDirty(true)
@@ -180,7 +180,7 @@ func (c *glCanvas) Focused() fyne.Focusable {
 func (c *glCanvas) Resize(size fyne.Size) {
 	c.size = size
 
-	for _, overlay := range c.overlays.All() {
+	for _, overlay := range c.overlays.List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
@@ -361,7 +361,7 @@ func (c *glCanvas) walkTrees(
 	if c.menu != nil {
 		c.walkTree(c.menuTree, beforeChildren, afterChildren)
 	}
-	for _, overlay := range c.overlays.All() {
+	for _, overlay := range c.overlays.List() {
 		if overlay != nil {
 			c.walkTree(c.overlays.renderCache, beforeChildren, afterChildren)
 		}
