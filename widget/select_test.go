@@ -47,7 +47,6 @@ func TestSelect_ClearSelected(t *testing.T) {
 	assert.Equal(t, optClear, combo.Selected)
 	assert.True(t, triggered)
 	assert.Equal(t, optClear, triggeredValue)
-
 }
 
 func TestSelect_SetSelected(t *testing.T) {
