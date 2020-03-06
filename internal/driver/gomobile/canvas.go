@@ -50,7 +50,7 @@ func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 
 // Deprecated: Use Overlays() instead.
 func (c *mobileCanvas) Overlay() fyne.CanvasObject {
-	return c.overlays.TopOverlay()
+	return c.overlays.Top()
 }
 
 func (c *mobileCanvas) Overlays() fyne.OverlayStack {
@@ -59,10 +59,10 @@ func (c *mobileCanvas) Overlays() fyne.OverlayStack {
 
 // Deprecated: Use Overlays() instead.
 func (c *mobileCanvas) SetOverlay(overlay fyne.CanvasObject) {
-	if len(c.overlays.Overlays()) > 0 {
-		c.overlays.RemoveOverlay(c.overlays.Overlays()[0])
+	if len(c.overlays.All()) > 0 {
+		c.overlays.Remove(c.overlays.All()[0])
 	}
-	c.overlays.AddOverlay(overlay)
+	c.overlays.Add(overlay)
 }
 
 func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
@@ -190,7 +190,7 @@ func (c *mobileCanvas) walkTree(
 	if c.menu != nil {
 		driver.WalkVisibleObjectTree(c.menu, beforeChildren, afterChildren)
 	}
-	for _, overlay := range c.overlays.Overlays() {
+	for _, overlay := range c.overlays.All() {
 		if overlay != nil {
 			driver.WalkVisibleObjectTree(overlay, beforeChildren, afterChildren)
 		}
@@ -198,11 +198,11 @@ func (c *mobileCanvas) walkTree(
 }
 
 func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
-	if c.menu != nil && c.overlays.TopOverlay() == nil {
+	if c.menu != nil && c.overlays.Top() == nil {
 		return driver.FindObjectAtPositionMatching(pos, test, c.menu)
 	}
 
-	return driver.FindObjectAtPositionMatching(pos, test, c.overlays.TopOverlay(), c.windowHead, c.content)
+	return driver.FindObjectAtPositionMatching(pos, test, c.overlays.Top(), c.windowHead, c.content)
 }
 
 func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
@@ -305,7 +305,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 	duration := time.Since(c.lastTapDown[tapID])
 
-	if c.menu != nil && c.overlays.TopOverlay() == nil && pos.X > c.menu.Size().Width {
+	if c.menu != nil && c.overlays.Top() == nil && pos.X > c.menu.Size().Width {
 		c.menu.Hide()
 		c.menu = nil
 		return

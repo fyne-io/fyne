@@ -429,8 +429,8 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	tapPos := fyne.NewPos(1, 1)
 	test.TapSecondaryAt(entry, tapPos)
 
-	assert.Equal(t, 1, len(canvas.Overlays().Overlays()))
-	over := canvas.Overlays().TopOverlay()
+	assert.Equal(t, 1, len(canvas.Overlays().All()))
+	over := canvas.Overlays().Top()
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 
 	cont := over.(*PopUp).Content
@@ -444,8 +444,8 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	entry.Disable()
 
 	test.TapSecondaryAt(entry, tapPos)
-	assert.Equal(t, 1, len(canvas.Overlays().Overlays()))
-	over = canvas.Overlays().TopOverlay()
+	assert.Equal(t, 1, len(canvas.Overlays().All()))
+	over = canvas.Overlays().Top()
 
 	cont = over.(*PopUp).Content
 	items = cont.(*Box).Children
@@ -455,12 +455,12 @@ func TestEntry_TappedSecondary(t *testing.T) {
 
 	entry.Password = true
 	test.TapSecondaryAt(entry, tapPos)
-	assert.Nil(t, canvas.Overlays().TopOverlay()) // No popup for disabled password
+	assert.Nil(t, canvas.Overlays().Top()) // No popup for disabled password
 
 	entry.Enable()
 	test.TapSecondaryAt(entry, tapPos)
-	assert.Equal(t, 1, len(canvas.Overlays().Overlays()))
-	over = canvas.Overlays().TopOverlay()
+	assert.Equal(t, 1, len(canvas.Overlays().All()))
+	over = canvas.Overlays().Top()
 	assert.NotNil(t, over)
 
 	cont = over.(*PopUp).Content

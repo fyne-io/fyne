@@ -72,14 +72,14 @@ type overlayStack struct {
 	renderCache *renderCacheTree
 }
 
-func (o *overlayStack) AddOverlay(overlay fyne.CanvasObject) {
-	o.OverlayStack.AddOverlay(overlay)
+func (o *overlayStack) Add(overlay fyne.CanvasObject) {
+	o.OverlayStack.Add(overlay)
 	o.renderCache = &renderCacheTree{root: &renderCacheNode{obj: overlay}}
 }
 
-func (o *overlayStack) RemoveOverlay(overlay fyne.CanvasObject) {
-	o.OverlayStack.RemoveOverlay(overlay)
-	if o.TopOverlay() == nil {
+func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
+	o.OverlayStack.Remove(overlay)
+	if o.Top() == nil {
 		o.renderCache = nil
 	}
 }
@@ -115,7 +115,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 func (c *glCanvas) Overlay() fyne.CanvasObject {
 	c.RLock()
 	defer c.RUnlock()
-	return c.overlays.TopOverlay()
+	return c.overlays.Top()
 }
 
 func (c *glCanvas) Overlays() fyne.OverlayStack {
@@ -128,10 +128,10 @@ func (c *glCanvas) Overlays() fyne.OverlayStack {
 func (c *glCanvas) SetOverlay(overlay fyne.CanvasObject) {
 	c.Lock()
 	defer c.Unlock()
-	if len(c.overlays.Overlays()) > 0 {
-		c.overlays.RemoveOverlay(c.overlays.Overlays()[0])
+	if len(c.overlays.All()) > 0 {
+		c.overlays.Remove(c.overlays.All()[0])
 	}
-	c.overlays.AddOverlay(overlay)
+	c.overlays.Add(overlay)
 	c.setDirty(true)
 }
 
@@ -180,7 +180,7 @@ func (c *glCanvas) Focused() fyne.Focusable {
 func (c *glCanvas) Resize(size fyne.Size) {
 	c.size = size
 
-	for _, overlay := range c.overlays.Overlays() {
+	for _, overlay := range c.overlays.All() {
 		if p, ok := overlay.(*widget.PopUp); ok {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
@@ -361,7 +361,7 @@ func (c *glCanvas) walkTrees(
 	if c.menu != nil {
 		c.walkTree(c.menuTree, beforeChildren, afterChildren)
 	}
-	for _, overlay := range c.overlays.Overlays() {
+	for _, overlay := range c.overlays.All() {
 		if overlay != nil {
 			c.walkTree(c.overlays.renderCache, beforeChildren, afterChildren)
 		}

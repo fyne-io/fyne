@@ -9,31 +9,31 @@ type OverlayStack struct {
 
 var _ fyne.OverlayStack = (*OverlayStack)(nil)
 
-// AddOverlay satisfies the fyne.OverlayStack interface.
-func (s *OverlayStack) AddOverlay(overlay fyne.CanvasObject) {
+// Add satisfies the fyne.OverlayStack interface.
+func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
 	s.overlay = overlay
 }
 
-// Overlays satisfies the fyne.OverlayStack interface.
-func (s *OverlayStack) Overlays() []fyne.CanvasObject {
+// All satisfies the fyne.OverlayStack interface.
+func (s *OverlayStack) All() []fyne.CanvasObject {
 	if s.overlay == nil {
 		return nil
 	}
 	return []fyne.CanvasObject{s.overlay}
 }
 
-// RemoveOverlay satisfies the fyne.OverlayStack interface.
-func (s *OverlayStack) RemoveOverlay(overlay fyne.CanvasObject) {
+// Remove satisfies the fyne.OverlayStack interface.
+func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 	if s.overlay != overlay {
 		return
 	}
 	s.overlay = nil
 }
 
-// TopOverlay satisfies the fyne.OverlayStack interface.
-func (s *OverlayStack) TopOverlay() fyne.CanvasObject {
+// Top satisfies the fyne.OverlayStack interface.
+func (s *OverlayStack) Top() fyne.CanvasObject {
 	return s.overlay
 }
