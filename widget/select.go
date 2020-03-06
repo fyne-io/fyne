@@ -195,16 +195,27 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	return &selectRenderer{icon, text, shadow, objects, s}
 }
 
+// ClearSelected clears the current option of the select widget.  After
+// clearing the current option, the Select widget's PlaceHolder will
+// be displayed.
+func (s *Select) ClearSelected() {
+	s.updateSelected("")
+}
+
 // SetSelected sets the current option of the select widget
 func (s *Select) SetSelected(text string) {
 	for _, option := range s.Options {
 		if text == option {
-			s.Selected = text
+			s.updateSelected(text)
 		}
 	}
+}
+
+func (s *Select) updateSelected(text string) {
+	s.Selected = text
 
 	if s.OnChanged != nil {
-		s.OnChanged(text)
+		s.OnChanged(s.Selected)
 	}
 
 	s.Refresh()
