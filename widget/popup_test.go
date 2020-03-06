@@ -15,7 +15,8 @@ func TestNewPopUp(t *testing.T) {
 	pop := NewPopUp(label, test.Canvas())
 
 	assert.True(t, pop.Visible())
-	assert.Equal(t, pop, test.Canvas().Overlay())
+	assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+	assert.Equal(t, pop, test.Canvas().Overlays().List()[0])
 }
 
 func TestPopUp_Hide(t *testing.T) {
@@ -25,7 +26,7 @@ func TestPopUp_Hide(t *testing.T) {
 	assert.True(t, pop.Visible())
 	pop.Hide()
 	assert.False(t, pop.Visible())
-	assert.Nil(t, test.Canvas().Overlay())
+	assert.Equal(t, 0, len(test.Canvas().Overlays().List()))
 }
 
 func TestPopUp_MinSize(t *testing.T) {
@@ -118,7 +119,7 @@ func TestPopUp_Tapped(t *testing.T) {
 	assert.True(t, pop.Visible())
 	test.Tap(pop)
 	assert.False(t, pop.Visible())
-	assert.Nil(t, test.Canvas().Overlay())
+	assert.Equal(t, 0, len(test.Canvas().Overlays().List()))
 }
 
 func TestPopUp_TappedSecondary(t *testing.T) {
@@ -128,7 +129,7 @@ func TestPopUp_TappedSecondary(t *testing.T) {
 	assert.True(t, pop.Visible())
 	test.TapSecondary(pop)
 	assert.False(t, pop.Visible())
-	assert.Nil(t, test.Canvas().Overlay())
+	assert.Equal(t, 0, len(test.Canvas().Overlays().List()))
 }
 
 func TestModalPopUp_Tapped(t *testing.T) {
@@ -138,7 +139,8 @@ func TestModalPopUp_Tapped(t *testing.T) {
 	assert.True(t, pop.Visible())
 	test.Tap(pop)
 	assert.True(t, pop.Visible())
-	assert.Equal(t, pop, test.Canvas().Overlay())
+	assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+	assert.Equal(t, pop, test.Canvas().Overlays().List()[0])
 }
 
 func TestModalPopUp_TappedSecondary(t *testing.T) {
@@ -148,5 +150,6 @@ func TestModalPopUp_TappedSecondary(t *testing.T) {
 	assert.True(t, pop.Visible())
 	test.TapSecondary(pop)
 	assert.True(t, pop.Visible())
-	assert.Equal(t, pop, test.Canvas().Overlay())
+	assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+	assert.Equal(t, pop, test.Canvas().Overlays().List()[0])
 }

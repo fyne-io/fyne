@@ -22,7 +22,19 @@ type Canvas interface {
 	// Deprecated: Settings are now calculated solely on the user configuration and system setup.
 	SetScale(float32)
 
+	// Overlay returns the current overlay.
+	//
+	// Deprecated: Overlays are stacked now.
+	// This method returns the top of the overlay stack.
+	// Use Overlays() instead.
 	Overlay() CanvasObject
+	// Overlays returns the overlay stack.
+	Overlays() OverlayStack
+	// SetOverlay sets the overlay for the canvas.
+	//
+	// Deprecated: Overlays are stacked now.
+	// This method replaces the whole stack by the given overlay.
+	// Use Overlays() instead.
 	SetOverlay(CanvasObject)
 
 	OnTypedRune() func(rune)
