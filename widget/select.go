@@ -196,7 +196,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // ClearSelected clears the current option of the select widget.  After
-// clearing the current option, the Select widgets PlaceHolder will
+// clearing the current option, the Select widget's PlaceHolder will
 // be displayed.
 func (s *Select) ClearSelected() {
 	s.Selected = ""
