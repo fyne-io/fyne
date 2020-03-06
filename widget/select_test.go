@@ -37,15 +37,39 @@ func TestSelect_ClearSelected(t *testing.T) {
 	combo.SetSelected(opt1)
 	assert.Equal(t, opt1, combo.Selected)
 
+	var triggered bool
+	var triggeredValue string
+	combo.OnChanged = func(s string) {
+		triggered = true
+		triggeredValue = s
+	}
 	combo.ClearSelected()
 	assert.Equal(t, optClear, combo.Selected)
+	assert.True(t, triggered)
+	assert.Equal(t, optClear, triggeredValue)
+
 }
 
 func TestSelect_SetSelected(t *testing.T) {
-	combo := NewSelect([]string{"1", "2"}, func(string) {})
+	var triggered bool
+	var triggeredValue string
+	combo := NewSelect([]string{"1", "2"}, func(s string) {
+		triggered = true
+		triggeredValue = s
+	})
 	combo.SetSelected("2")
 
 	assert.Equal(t, "2", combo.Selected)
+	assert.True(t, triggered)
+	assert.Equal(t, "2", triggeredValue)
+}
+
+func TestSelect_SetSelected_NoChangeOnEmpty(t *testing.T) {
+	var triggered bool
+	combo := NewSelect([]string{"1", "2"}, func(string) { triggered = true })
+	combo.SetSelected("")
+
+	assert.False(t, triggered)
 }
 
 func TestSelect_SetSelected_Invalid(t *testing.T) {
