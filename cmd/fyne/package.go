@@ -7,16 +7,20 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
 	"github.com/josephspurrier/goversioninfo"
 	"github.com/pkg/errors"
+	"golang.org/x/mod/modfile"
+	"golang.org/x/mod/module"
 )
 
 func exists(path string) bool {
@@ -306,10 +310,8 @@ func (p *packager) validate() error {
 			"Change directory to the main package and try again.")
 	}
 
-	exeName := filepath.Base(p.srcDir)
-	if p.os == "windows" {
-		exeName = exeName + ".exe"
-	}
+	exeName := calculateExeName(p.srcDir, p.os)
+
 	if p.exe == "" {
 		p.exe = filepath.Join(p.srcDir, exeName)
 	} else if p.os == "ios" || p.os == "android" {
@@ -336,6 +338,27 @@ func (p *packager) validate() error {
 	}
 
 	return nil
+}
+
+func calculateExeName(sourceDir, os string) string {
+	exeName := filepath.Base(sourceDir)
+	if data, err := ioutil.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
+		modulePath := modfile.ModulePath(data)
+		moduleName, _, ok := module.SplitPathVersion(modulePath)
+		if ok {
+			paths := strings.Split(moduleName, "/")
+			name := paths[len(paths)-1]
+			if name != "" {
+				exeName = name
+			}
+		}
+	}
+
+	if os == "windows" {
+		exeName = exeName + ".exe"
+	}
+
+	return exeName
 }
 
 func (p *packager) doPackage() error {
