@@ -794,7 +794,7 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 
 	test.Type(entry, "Hié™שרה")
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+	assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
 }
 
 func TestEntry_OnCut(t *testing.T) {
@@ -1366,7 +1366,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+		assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
 		assert.Equal(t, theme.VisibilityOffIcon(), actionIcon.icon.Resource)
 
 		// update the Password field
@@ -1382,7 +1382,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		test.Tap(actionIcon)
 
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+		assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
 		assert.True(t, entry.Focused())
 		assert.Equal(t, theme.VisibilityOffIcon(), actionIcon.icon.Resource)
 	})
@@ -1401,7 +1401,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		assert.Equal(t, "*******", entryRenderTexts(entry)[0].Text)
+		assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
 
 		// update the Password field
 		entry.Password = false
