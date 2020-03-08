@@ -3,8 +3,6 @@ package widget_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
@@ -12,6 +10,7 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSelectEntry_MinSize(t *testing.T) {
