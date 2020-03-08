@@ -3,6 +3,7 @@ package test
 import (
 	"image"
 	"image/draw"
+	"reflect"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
@@ -165,6 +166,32 @@ func (c *testCanvas) Capture() image.Image {
 	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
 	return img
+}
+
+// CanvasItem is a part of a canvas and returned by InspectCanvasItems().
+type CanvasItem struct {
+	Type   string
+	Object fyne.CanvasObject
+}
+
+// InspectCanvasItems returns all CanvasItems starting at the given CanvasObject which is laid out with the given size.
+func InspectCanvasItems(o fyne.CanvasObject, size fyne.Size) (objects []CanvasItem) {
+	if o != nil {
+		objects = inspect(objects, o, size)
+	}
+	return objects
+}
+
+func inspect(objects []CanvasItem, o fyne.CanvasObject, size fyne.Size) []CanvasItem {
+	objects = append(objects, CanvasItem{reflect.TypeOf(o).String(), o})
+	if w, ok := o.(fyne.Widget); ok {
+		r := w.CreateRenderer()
+		r.Layout(size)
+		for _, child := range r.Objects() {
+			objects = inspect(objects, child, child.Size())
+		}
+	}
+	return objects
 }
 
 func (c *testCanvas) objectTrees() []fyne.CanvasObject {
