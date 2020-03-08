@@ -35,6 +35,10 @@ func TestEntry_MinSize(t *testing.T) {
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
+
+	min = entry.MinSize()
+	entry.ActionItem = newPasswordRevealer(entry)
+	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
