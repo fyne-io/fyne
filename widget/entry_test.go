@@ -954,6 +954,16 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 	assert.False(t, entry.placeholderProvider().presenter.concealed())
 }
 
+func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
+	e := NewEntry()
+	b := NewButton("", func() {})
+	b.Icon = theme.CancelIcon()
+	e.ActionItem = b
+	test.WidgetRenderer(e).Layout(e.MinSize())
+	assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), b.Size())
+	assert.Equal(t, fyne.NewPos(e.MinSize().Width-2*theme.Padding()-b.Size().Width, 2*theme.Padding()), b.Position())
+}
+
 const (
 	keyShiftLeftDown  fyne.KeyName = "LeftShiftDown"
 	keyShiftLeftUp    fyne.KeyName = "LeftShiftUp"

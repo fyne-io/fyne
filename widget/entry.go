@@ -155,7 +155,7 @@ func (e *entryRenderer) Layout(size fyne.Size) {
 	if e.entry.ActionItem != nil {
 		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 		e.entry.ActionItem.Resize(actionIconSize)
-		e.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-theme.Padding(), theme.Padding()*2))
+		e.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
 	}
 
 	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
