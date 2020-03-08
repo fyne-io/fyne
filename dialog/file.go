@@ -116,6 +116,10 @@ func (f *fileDialog) refreshDir(dir string) {
 	}
 
 	var icons []fyne.CanvasObject
+	parent := path.Dir(dir)
+	if parent != dir {
+		icons = append(icons, f.newFileIcon(theme.FolderOpenIcon(), path.Dir(dir), f.setFileDir))
+	}
 	for _, file := range files {
 		if len(file.Name()) == 0 || file.Name()[0] == '.' {
 			continue

@@ -59,6 +59,10 @@ func fileParts(path string) (name, ext string) {
 
 func (f *fileDialog) newFileIcon(icon fyne.Resource, path string, tap func(*fileIcon)) *fileIcon {
 	name, ext := fileParts(path)
+	if icon == theme.FolderOpenIcon() {
+		name = "(Parent)"
+		ext = ""
+	}
 
 	ret := &fileIcon{
 		parent: f,
