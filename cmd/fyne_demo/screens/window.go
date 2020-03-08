@@ -68,9 +68,7 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, func(o string) {
 				fmt.Println("Selected", o)
 			})
-			selEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
-			selEntry.PlaceHolder = "Type or select"
-			content := widget.NewVBox(entry, sel, selEntry)
+			content := widget.NewVBox(entry, sel)
 			dialog.ShowCustom("Custom dialog", "Done", content, win)
 		}),
 	)
