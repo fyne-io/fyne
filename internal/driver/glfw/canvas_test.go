@@ -42,6 +42,7 @@ func TestGlCanvas_Resize(t *testing.T) {
 	assert.Equal(t, size, content.Size())
 }
 
+// TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	w := d.CreateWindow("Test")
 	w.SetPadded(false)
@@ -63,6 +64,7 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
 }
 
+// TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	w := d.CreateWindow("Test")
 	w.SetPadded(false)
@@ -81,6 +83,38 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	w.Resize(size)
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
+}
+
+func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
+	w := d.CreateWindow("Test")
+	w.SetPadded(false)
+
+	content := widget.NewLabel("Content")
+	o1 := widget.NewLabel("o1")
+	o2 := widget.NewLabel("o2")
+	o3 := widget.NewLabel("o3")
+	w.SetContent(content)
+	w.Canvas().Overlays().Add(o1)
+	// TODO: address #707; overlays should always be canvas size
+	o1.Resize(w.Canvas().Size())
+	w.Canvas().Overlays().Add(o2)
+	// TODO: address #707; overlays should always be canvas size
+	o2.Resize(w.Canvas().Size())
+	w.Canvas().Overlays().Add(o3)
+	// TODO: address #707; overlays should always be canvas size
+	o3.Resize(w.Canvas().Size())
+
+	size := fyne.NewSize(100, 100)
+	assert.NotEqual(t, size, content.Size())
+	assert.NotEqual(t, size, o1.Size())
+	assert.NotEqual(t, size, o2.Size())
+	assert.NotEqual(t, size, o3.Size())
+
+	w.Resize(size)
+	assert.Equal(t, size, content.Size(), "canvas content is resized")
+	assert.Equal(t, size, o1.Size(), "canvas overlay 1 is resized")
+	assert.Equal(t, size, o2.Size(), "canvas overlay 2 is resized")
+	assert.Equal(t, size, o3.Size(), "canvas overlay 3 is resized")
 }
 
 func TestGlCanvas_Scale(t *testing.T) {
