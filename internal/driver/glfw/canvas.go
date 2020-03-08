@@ -69,6 +69,7 @@ type renderCacheNode struct {
 type overlayStack struct {
 	internal.OverlayStack
 
+	onChange     func()
 	renderCaches []*renderCacheTree
 }
 
@@ -78,11 +79,13 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	}
 	o.OverlayStack.Add(overlay)
 	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &renderCacheNode{obj: overlay}})
+	o.onChange()
 }
 
 func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	o.renderCaches = o.renderCaches[:len(o.List())]
+	o.onChange()
 }
 
 func (c *glCanvas) Capture() image.Image {
@@ -544,7 +547,7 @@ func newCanvas() *glCanvas {
 	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
 	c.padded = true
 
-	c.overlays = &overlayStack{}
+	c.overlays = &overlayStack{onChange: func() { c.setDirty(true) }}
 
 	c.focusMgr = app.NewFocusManager(c)
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
