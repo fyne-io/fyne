@@ -89,7 +89,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 	canvasItems := test.InspectCanvasItems(c.Content(), c.Size())
 	var dropDownSwitch fyne.Tappable
 	for _, item := range canvasItems {
-		if item.Type == "*widget.dropDownSwitch" {
+		if item.Type == "*widget.Button" {
 			dropDownSwitch = item.Object.(fyne.Tappable)
 			break
 		}

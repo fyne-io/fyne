@@ -1,10 +1,7 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 )
 
@@ -48,7 +45,7 @@ func (e *SelectEntry) SetOptions(options []string) {
 		items = append(items, fyne.NewMenuItem(option, func() { e.SetText(option) }))
 	}
 	e.dropDown = fyne.NewMenu("", items...)
-	e.ActionItem = newDropDownSwitch(func() {
+	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
 		entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
@@ -57,61 +54,6 @@ func (e *SelectEntry) SetOptions(options []string) {
 		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, popUpPos)
 		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
-}
-
-type dropDownSwitch struct {
-	BaseWidget
-	icon    *canvas.Image
-	onClick func()
-}
-
-var _ fyne.Tappable = (*dropDownSwitch)(nil)
-
-func newDropDownSwitch(onClick func()) *dropDownSwitch {
-	s := &dropDownSwitch{
-		icon:    canvas.NewImageFromResource(theme.MenuDropDownIcon()),
-		onClick: onClick,
-	}
-	s.ExtendBaseWidget(s)
-	return s
-}
-
-func (s *dropDownSwitch) CreateRenderer() fyne.WidgetRenderer {
-	return &dropDownSwitchRenderer{icon: s.icon}
-}
-
-func (s *dropDownSwitch) Tapped(*fyne.PointEvent) {
-	s.onClick()
-}
-
-func (s *dropDownSwitch) TappedSecondary(*fyne.PointEvent) {
-}
-
-type dropDownSwitchRenderer struct {
-	icon *canvas.Image
-}
-
-var _ fyne.WidgetRenderer = (*dropDownSwitchRenderer)(nil)
-
-func (r *dropDownSwitchRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-}
-
-func (r *dropDownSwitchRenderer) Layout(size fyne.Size) {
-	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
-}
-
-func (r *dropDownSwitchRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (r *dropDownSwitchRenderer) Refresh() {
-}
-
-func (r *dropDownSwitchRenderer) Destroy() {
-}
-
-func (r *dropDownSwitchRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{r.icon}
+	dropDownButton.SetIcon(theme.MenuDropDownIcon())
+	e.ActionItem = dropDownButton
 }
