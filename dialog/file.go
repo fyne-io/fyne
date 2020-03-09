@@ -110,7 +110,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
 	home, _ := os.UserHomeDir()
-	return []fyne.CanvasObject{
+	places := []fyne.CanvasObject{
 		widget.NewButton("Home", func() {
 			f.setDirectory(home)
 		}),
@@ -121,6 +121,9 @@ func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
 			f.setDirectory(filepath.Join(home, "Downloads"))
 		}),
 	}
+
+	places = append(places, f.loadPlaces()...)
+	return places
 }
 
 func (f *fileDialog) setFileDir(dir *fileIcon) {
@@ -140,8 +143,11 @@ func (f *fileDialog) setDirectory(dir string) {
 			}
 			buildDir = "/"
 			d = "/"
-		} else {
+		} else if i > 0 {
 			buildDir = filepath.Join(buildDir, d)
+		} else {
+			d = buildDir
+			buildDir = d + string(os.PathSeparator)
 		}
 
 		newDir := buildDir
@@ -170,7 +176,7 @@ func (f *fileDialog) refreshDir(dir string) {
 		icons = append(icons, f.newFileIcon(theme.FolderOpenIcon(), filepath.Dir(dir), f.setFileDir))
 	}
 	for _, file := range files {
-		if len(file.Name()) == 0 || file.Name()[0] == '.' {
+		if isHidden(file, dir) {
 			continue
 		}
 
