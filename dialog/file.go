@@ -176,7 +176,7 @@ func (f *fileDialog) refreshDir(dir string) {
 		icons = append(icons, f.newFileIcon(theme.FolderOpenIcon(), filepath.Dir(dir), f.setFileDir))
 	}
 	for _, file := range files {
-		if isHidden(file, dir) {
+		if isHidden(file.Name(), dir) {
 			continue
 		}
 

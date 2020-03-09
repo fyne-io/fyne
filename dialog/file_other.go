@@ -3,8 +3,6 @@
 package dialog
 
 import (
-	"os"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
 )
@@ -15,6 +13,6 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 	})}
 }
 
-func isHidden(file os.FileInfo, dir string) bool {
-	return len(file.Name()) == 0 || file.Name()[0] == '.'
+func isHidden(file, _ string) bool {
+	return len(file) == 0 || file[0] == '.'
 }

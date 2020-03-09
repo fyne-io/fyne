@@ -56,8 +56,8 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 	return places
 }
 
-func isHidden(file os.FileInfo, dir string) bool {
-	path := filepath.Join(dir, file.Name())
+func isHidden(file, dir string) bool {
+	path := filepath.Join(dir, file)
 
 	point, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
