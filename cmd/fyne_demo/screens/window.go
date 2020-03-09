@@ -62,7 +62,20 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 		}),
 		widget.NewButton("File Open", func() {
 			dialog.ShowFileOpen(func(path string) {
-				log.Println("Got file", path)
+				if path == "" {
+					log.Println("Cancelled")
+				} else {
+					log.Println("Open file", path)
+				}
+			}, win)
+		}),
+		widget.NewButton("File Save", func() {
+			dialog.ShowFileSave(func(path string) {
+				if path == "" {
+					log.Println("Cancelled")
+				} else {
+					log.Println("Save to file", path)
+				}
 			}, win)
 		}),
 		widget.NewButton("Custom", func() {

@@ -3,7 +3,6 @@ package dialog
 import (
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -14,30 +13,77 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+type textWidget interface {
+	fyne.Widget
+	SetText(string)
+}
+
 type fileDialog struct {
-	fileName   *widget.Label
+	fileName   textWidget
 	open       *widget.Button
 	breadcrumb *widget.Box
 	files      *fyne.Container
+	parent     fyne.Window
 
 	win      *widget.PopUp
 	current  *fileIcon
 	callback func(string)
+	dir      string
+	save     bool
 }
 
 func (f *fileDialog) makeUI() fyne.CanvasObject {
-	fav := widget.NewGroup("Favourites", f.loadFavourites()...)
+	if f.save {
+		saveName := widget.NewEntry()
+		saveName.OnChanged = func(s string) {
+			if s == "" {
+				f.open.Disable()
+			} else {
+				f.open.Enable()
+			}
+		}
+		f.fileName = saveName
+	} else {
+		f.fileName = widget.NewLabel("")
+	}
 
-	f.fileName = widget.NewLabel("")
-	f.open = widget.NewButton("Open", func() {
+	label := "Open"
+	if f.save {
+		label = "Save"
+	}
+	f.open = widget.NewButton(label, func() {
 		f.win.Hide()
-		if f.callback != nil && f.current != nil {
+		if f.callback == nil {
+			return
+		}
+
+		if f.save {
+			name := f.fileName.(*widget.Entry).Text
+			path := filepath.Join(f.dir, name)
+
+			if _, err := os.Stat(path); os.IsNotExist(err) {
+				f.callback(path)
+				return
+			}
+
+			ShowConfirm("Overwrite?", "Are you sure you want to overwrite the file\n"+name+"?",
+				func(ok bool) {
+					if !ok {
+						// TODO stack this above once we merge the stack code
+						f.callback("")
+						return
+					}
+
+					f.callback(path)
+					f.win.Hide()
+				}, f.parent)
+		} else if f.current != nil {
 			f.callback(f.current.path)
 		}
 	})
 	f.open.Style = widget.PrimaryButton
 	f.open.Disable()
-	footer := widget.NewHBox(f.fileName, layout.NewSpacer(),
+	buttons := widget.NewHBox(
 		widget.NewButton("Cancel", func() {
 			f.win.Hide()
 			if f.callback != nil {
@@ -45,19 +91,21 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 		}),
 		f.open)
-
-	f.breadcrumb = widget.NewHBox()
+	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
+		buttons, f.fileName)
 
 	f.files = fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(fileIconSize+16,
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
 
+	f.breadcrumb = widget.NewHBox()
 	scrollBread := widget.NewScrollContainer(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, widget.NewScrollContainer(f.files))
-	header := widget.NewLabelWithStyle("Open File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, fav, nil),
-		fav, header, footer, body)
+	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	favourites := widget.NewGroup("Favourites", f.loadFavourites()...)
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favourites, nil),
+		favourites, header, footer, body)
 }
 
 func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
@@ -67,10 +115,10 @@ func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
 			f.setDirectory(home)
 		}),
 		widget.NewButton("Documents", func() {
-			f.setDirectory(path.Join(home, "Documents"))
+			f.setDirectory(filepath.Join(home, "Documents"))
 		}),
 		widget.NewButton("Downloads", func() {
-			f.setDirectory(path.Join(home, "Downloads"))
+			f.setDirectory(filepath.Join(home, "Downloads"))
 		}),
 	}
 }
@@ -81,6 +129,7 @@ func (f *fileDialog) setFileDir(dir *fileIcon) {
 
 func (f *fileDialog) setDirectory(dir string) {
 	f.setFile(nil)
+	f.dir = dir
 
 	f.breadcrumb.Children = nil
 	buildDir := filepath.VolumeName(dir)
@@ -116,16 +165,16 @@ func (f *fileDialog) refreshDir(dir string) {
 	}
 
 	var icons []fyne.CanvasObject
-	parent := path.Dir(dir)
+	parent := filepath.Dir(dir)
 	if parent != dir {
-		icons = append(icons, f.newFileIcon(theme.FolderOpenIcon(), path.Dir(dir), f.setFileDir))
+		icons = append(icons, f.newFileIcon(theme.FolderOpenIcon(), filepath.Dir(dir), f.setFileDir))
 	}
 	for _, file := range files {
 		if len(file.Name()) == 0 || file.Name()[0] == '.' {
 			continue
 		}
 
-		itemPath := path.Join(dir, file.Name())
+		itemPath := filepath.Join(dir, file.Name())
 		if file.IsDir() {
 			icons = append(icons, f.newFileIcon(theme.FolderIcon(), itemPath, f.setFileDir))
 		} else {
@@ -148,15 +197,13 @@ func (f *fileDialog) setFile(file *fileIcon) {
 		f.fileName.SetText("")
 		f.open.Disable()
 	} else {
-		f.fileName.SetText(path.Base(file.path))
+		f.fileName.SetText(filepath.Base(file.path))
 		f.open.Enable()
 	}
 }
 
-// ShowFileOpen shows a file dialog allowing the user to choose a file to open.
-// The dialog will appear over the window specified.
-func ShowFileOpen(callback func(string), parent fyne.Window) {
-	d := &fileDialog{callback: callback}
+func showFileDialog(save bool, callback func(string), parent fyne.Window) {
+	d := &fileDialog{callback: callback, save: save, parent: parent}
 	ui := d.makeUI()
 	dir, err := os.UserHomeDir()
 	if err != nil {
@@ -171,4 +218,17 @@ func ShowFileOpen(callback func(string), parent fyne.Window) {
 	d.win = widget.NewModalPopUp(content, parent.Canvas())
 
 	d.win.Show()
+}
+
+// ShowFileOpen shows a file dialog allowing the user to choose a file to open.
+// The dialog will appear over the window specified.
+func ShowFileOpen(callback func(string), parent fyne.Window) {
+	showFileDialog(false, callback, parent)
+}
+
+// ShowFileSave shows a file dialog allowing the user to choose a file to save to (new or overwrite).
+// If the user chooses an existing file they will be asked if they are sure.
+// The dialog will appear over the window specified.
+func ShowFileSave(callback func(string), parent fyne.Window) {
+	showFileDialog(true, callback, parent)
 }
