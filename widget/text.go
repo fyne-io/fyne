@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	passwordChar = "*"
+	passwordChar = "•"
 )
 
 // textPresenter provides the widget specific information to a generic text provider
