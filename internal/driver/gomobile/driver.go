@@ -229,7 +229,7 @@ func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID tou
 
 	canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		go wid.Tapped(ev)
-	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 		go wid.TappedSecondary(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		go wid.DragEnd()

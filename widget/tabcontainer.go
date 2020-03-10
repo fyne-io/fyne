@@ -418,9 +418,6 @@ func (b *tabButton) Tapped(e *fyne.PointEvent) {
 	b.OnTap()
 }
 
-func (b *tabButton) TappedSecondary(e *fyne.PointEvent) {
-}
-
 type tabButtonRenderer struct {
 	button  *tabButton
 	icon    *canvas.Image

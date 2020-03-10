@@ -158,10 +158,6 @@ func (c *Check) Tapped(*fyne.PointEvent) {
 	}
 }
 
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (c *Check) TappedSecondary(*fyne.PointEvent) {
-}
-
 // MinSize returns the size that this widget should not shrink below
 func (c *Check) MinSize() fyne.Size {
 	c.ExtendBaseWidget(c)

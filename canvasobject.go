@@ -29,6 +29,9 @@ type CanvasObject interface {
 // This should be implemented by buttons etc that wish to handle pointer interactions.
 type Tappable interface {
 	Tapped(*PointEvent)
+}
+
+type SecondaryTappable interface {
 	TappedSecondary(*PointEvent)
 }
 

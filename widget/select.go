@@ -158,10 +158,6 @@ func (s *Select) popUpPos() fyne.Position {
 	return buttonPos.Add(fyne.NewPos(0, s.Size().Height))
 }
 
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (s *Select) TappedSecondary(*fyne.PointEvent) {
-}
-
 // MouseIn is called when a desktop pointer enters the widget
 func (s *Select) MouseIn(*desktop.MouseEvent) {
 	s.hovered = true

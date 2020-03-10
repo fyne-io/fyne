@@ -43,7 +43,7 @@ func TestCanvas_Tapped(t *testing.T) {
 		tappedObj = wid
 		pointEvent = ev
 		wid.Tapped(ev)
-	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 		altTapped = true
 		wid.TappedSecondary(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
@@ -73,7 +73,7 @@ func TestCanvas_Tapped_Multi(t *testing.T) {
 	c.tapDown(tapPos, 0)
 	c.tapUp(tapPos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) { // different tapID
 		wid.Tapped(ev)
-	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 
@@ -85,7 +85,7 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 	altTapped := false
 	buttonTap := false
 	var pointEvent *fyne.PointEvent
-	var altTappedObj fyne.Tappable
+	var altTappedObj fyne.SecondaryTappable
 	button := widget.NewButton("Test", func() {
 		buttonTap = false
 	})
@@ -100,7 +100,7 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 	c.tapUp(tapPos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		tapped = true
 		wid.Tapped(ev)
-	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 		altTapped = true
 		altTappedObj = wid
 		pointEvent = ev
@@ -156,7 +156,7 @@ func TestCanvas_Tappable(t *testing.T) {
 	assert.True(t, content.down)
 
 	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 	assert.True(t, content.up)
