@@ -52,8 +52,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		label = "Save"
 	}
 	f.open = widget.NewButton(label, func() {
-		f.win.Hide()
 		if f.callback == nil {
+			f.win.Hide()
 			return
 		}
 
@@ -62,6 +62,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			path := filepath.Join(f.dir, name)
 
 			if _, err := os.Stat(path); os.IsNotExist(err) {
+				f.win.Hide()
 				f.callback(path)
 				return
 			}
@@ -69,7 +70,6 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			ShowConfirm("Overwrite?", "Are you sure you want to overwrite the file\n"+name+"?",
 				func(ok bool) {
 					if !ok {
-						// TODO stack this above once we merge the stack code
 						f.callback("")
 						return
 					}
@@ -78,6 +78,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 					f.win.Hide()
 				}, f.parent)
 		} else if f.current != nil {
+			f.win.Hide()
 			f.callback(f.current.path)
 		}
 	})
