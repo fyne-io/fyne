@@ -65,7 +65,6 @@ type Draggable interface {
 type Focusable interface {
 	FocusGained()
 	FocusLost()
-	Focused() bool
 
 	TypedRune(rune)
 	TypedKey(*KeyEvent)
