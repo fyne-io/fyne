@@ -81,37 +81,32 @@ func TestCanvas_Tapped_Multi(t *testing.T) {
 }
 
 func TestCanvas_TappedSecondary(t *testing.T) {
-	tapped := false
-	altTapped := false
-	buttonTap := false
 	var pointEvent *fyne.PointEvent
 	var altTappedObj fyne.SecondaryTappable
-	button := widget.NewButton("Test", func() {
-		buttonTap = false
-	})
+	obj := &tappableLabel{}
+	obj.ExtendBaseWidget(obj)
 	c := NewCanvas().(*mobileCanvas)
-	c.SetContent(button)
+	c.SetContent(obj)
 	c.resize(fyne.NewSize(36, 24))
-	button.Move(fyne.NewPos(3, 3))
+	obj.Move(fyne.NewPos(3, 3))
 
 	tapPos := fyne.NewPos(6, 6)
 	c.tapDown(tapPos, 0)
 	time.Sleep(310 * time.Millisecond)
 	c.tapUp(tapPos, 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
-		tapped = true
+		obj.tap = true
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-		altTapped = true
+		obj.altTap = true
 		altTappedObj = wid
 		pointEvent = ev
 		wid.TappedSecondary(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 
-	assert.False(t, tapped, "don't tap primary")
-	assert.True(t, altTapped, "tap secondary")
-	assert.False(t, buttonTap, "button should not be tapped (primary)")
-	assert.Equal(t, button, altTappedObj)
+	assert.False(t, obj.tap, "don't tap primary")
+	assert.True(t, obj.altTap, "tap secondary")
+	assert.Equal(t, obj, altTappedObj)
 	if assert.NotNil(t, pointEvent) {
 		assert.Equal(t, fyne.NewPos(6, 6), pointEvent.AbsolutePosition)
 		assert.Equal(t, fyne.NewPos(3, 3), pointEvent.Position)
@@ -183,4 +178,17 @@ func (t *touchableLabel) TouchUp(event *mobile.TouchEvent) {
 
 func (t *touchableLabel) TouchCancel(event *mobile.TouchEvent) {
 	t.cancel = true
+}
+
+type tappableLabel struct {
+	widget.Label
+	tap, altTap bool
+}
+
+func (t *tappableLabel) Tapped(_ *fyne.PointEvent) {
+	t.tap = true
+}
+
+func (t *tappableLabel) TappedSecondary(_ *fyne.PointEvent) {
+	t.altTap = true
 }
