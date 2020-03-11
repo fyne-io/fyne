@@ -434,6 +434,12 @@ func (e *Entry) FocusLost() {
 	e.Refresh()
 }
 
+// Focused returns whether or not this Entry has focus.
+// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
+func (e *Entry) Focused() bool {
+	return e.focused
+}
+
 func (e *Entry) cursorColAt(text []rune, pos fyne.Position) int {
 	for i := 0; i < len(text); i++ {
 		str := string(text[0 : i+1])
