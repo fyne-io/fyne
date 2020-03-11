@@ -1,6 +1,7 @@
 package widget_test
 
 import (
+	"reflect"
 	"testing"
 
 	"fyne.io/fyne"
@@ -86,11 +87,10 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	assert.Nil(t, c.Overlays().Top())
 
-	canvasItems := test.InspectCanvasItems(c.Content())
 	var dropDownSwitch fyne.Tappable
-	for _, item := range canvasItems {
-		if item.Type == "*widget.Button" {
-			dropDownSwitch = item.Object.(fyne.Tappable)
+	for _, o := range test.LaidOutObjects(c.Content()) {
+		if reflect.TypeOf(o).String() == "*widget.Button" {
+			dropDownSwitch = o.(fyne.Tappable)
 			break
 		}
 	}
@@ -143,9 +143,9 @@ func optionsMinSize(options []string) fyne.Size {
 
 func popUpOptions(popUp *widget.PopUp) []string {
 	var texts []string
-	for _, item := range test.InspectCanvasItems(popUp.Content) {
-		if item.Type == "*canvas.Text" {
-			texts = append(texts, item.Object.(*canvas.Text).Text)
+	for _, o := range test.LaidOutObjects(popUp.Content) {
+		if reflect.TypeOf(o).String() == "*canvas.Text" {
+			texts = append(texts, o.(*canvas.Text).Text)
 		}
 	}
 	return texts
@@ -153,8 +153,8 @@ func popUpOptions(popUp *widget.PopUp) []string {
 
 func tapPopUpItem(p *widget.PopUp, i int) {
 	var items []fyne.Tappable
-	for _, item := range test.InspectCanvasItems(p.Content) {
-		if t, ok := item.Object.(fyne.Tappable); ok {
+	for _, o := range test.LaidOutObjects(p.Content) {
+		if t, ok := o.(fyne.Tappable); ok {
 			items = append(items, t)
 		}
 	}

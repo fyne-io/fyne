@@ -3,7 +3,6 @@ package test
 import (
 	"image"
 	"image/draw"
-	"reflect"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
@@ -168,27 +167,21 @@ func (c *testCanvas) Capture() image.Image {
 	return img
 }
 
-// CanvasItem is a part of a canvas and returned by InspectCanvasItems().
-type CanvasItem struct {
-	Type   string
-	Object fyne.CanvasObject
-}
-
-// InspectCanvasItems returns all CanvasItems starting at the given CanvasObject which is laid out with the given size.
-func InspectCanvasItems(o fyne.CanvasObject) (objects []CanvasItem) {
+// LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out with the given size.
+func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 	if o != nil {
-		objects = inspect(objects, o, o.MinSize())
+		objects = layoutAndCollect(objects, o, o.MinSize())
 	}
 	return objects
 }
 
-func inspect(objects []CanvasItem, o fyne.CanvasObject, size fyne.Size) []CanvasItem {
-	objects = append(objects, CanvasItem{reflect.TypeOf(o).String(), o})
+func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyne.Size) []fyne.CanvasObject {
+	objects = append(objects, o)
 	if w, ok := o.(fyne.Widget); ok {
 		r := w.CreateRenderer()
 		r.Layout(size)
 		for _, child := range r.Objects() {
-			objects = inspect(objects, child, child.Size())
+			objects = layoutAndCollect(objects, child, child.Size())
 		}
 	}
 	return objects
