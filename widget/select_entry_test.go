@@ -86,7 +86,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	assert.Nil(t, c.Overlays().Top())
 
-	canvasItems := test.InspectCanvasItems(c.Content(), c.Size())
+	canvasItems := test.InspectCanvasItems(c.Content())
 	var dropDownSwitch fyne.Tappable
 	for _, item := range canvasItems {
 		if item.Type == "*widget.Button" {
@@ -143,7 +143,7 @@ func optionsMinSize(options []string) fyne.Size {
 
 func popUpOptions(popUp *widget.PopUp) []string {
 	var texts []string
-	for _, item := range test.InspectCanvasItems(popUp.Content, popUp.Content.Size()) {
+	for _, item := range test.InspectCanvasItems(popUp.Content) {
 		if item.Type == "*canvas.Text" {
 			texts = append(texts, item.Object.(*canvas.Text).Text)
 		}
@@ -153,7 +153,7 @@ func popUpOptions(popUp *widget.PopUp) []string {
 
 func tapPopUpItem(p *widget.PopUp, i int) {
 	var items []fyne.Tappable
-	for _, item := range test.InspectCanvasItems(p.Content, p.Content.Size()) {
+	for _, item := range test.InspectCanvasItems(p.Content) {
 		if t, ok := item.Object.(fyne.Tappable); ok {
 			items = append(items, t)
 		}

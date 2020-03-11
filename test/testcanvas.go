@@ -175,9 +175,9 @@ type CanvasItem struct {
 }
 
 // InspectCanvasItems returns all CanvasItems starting at the given CanvasObject which is laid out with the given size.
-func InspectCanvasItems(o fyne.CanvasObject, size fyne.Size) (objects []CanvasItem) {
+func InspectCanvasItems(o fyne.CanvasObject) (objects []CanvasItem) {
 	if o != nil {
-		objects = inspect(objects, o, size)
+		objects = inspect(objects, o, o.MinSize())
 	}
 	return objects
 }
