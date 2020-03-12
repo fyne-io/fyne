@@ -210,6 +210,9 @@ func (f *fileDialog) setFile(file *fileIcon) {
 }
 
 func showFileDialog(save bool, callback func(string), parent fyne.Window) {
+	if fileOSOverride(save, callback, parent) {
+		return
+	}
 	d := &fileDialog{callback: callback, save: save, parent: parent}
 	ui := d.makeUI()
 	dir, err := os.UserHomeDir()
