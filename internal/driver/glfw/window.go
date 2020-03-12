@@ -579,7 +579,7 @@ func (w *window) mouseOut() {
 	})
 }
 
-func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	co, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
@@ -668,10 +668,9 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 			w.mousePressed = co
 		} else if action == glfw.Release {
 			if co == w.mousePressed {
-				switch button {
-				case desktop.RightMouseButton:
+				if button == desktop.RightMouseButton && altTap {
 					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
-				default:
+				} else if button == desktop.LeftMouseButton && tap {
 					w.queueEvent(func() { co.(fyne.Tappable).Tapped(ev) })
 				}
 			}
