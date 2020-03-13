@@ -88,10 +88,6 @@ func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 	}
 }
 
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (hl *Hyperlink) TappedSecondary(*fyne.PointEvent) {
-}
-
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 	hl.textProvider = newTextProvider(hl.Text, hl)

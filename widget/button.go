@@ -170,10 +170,6 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 }
 
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (b *Button) TappedSecondary(*fyne.PointEvent) {
-}
-
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true

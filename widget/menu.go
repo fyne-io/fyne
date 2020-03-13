@@ -49,9 +49,6 @@ func (t *menuItemWidget) Tapped(*fyne.PointEvent) {
 	t.OnTapped()
 }
 
-func (t *menuItemWidget) TappedSecondary(*fyne.PointEvent) {
-}
-
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
 	return &hoverLabelRenderer{t.Label.CreateRenderer().(*textRenderer), t}
 }

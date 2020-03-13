@@ -68,7 +68,7 @@ type window struct {
 	mouseOver          desktop.Hoverable
 	mouseClickTime     time.Time
 	mouseLastClick     fyne.CanvasObject
-	mousePressed       fyne.Tappable
+	mousePressed       fyne.CanvasObject
 	onClosed           func()
 
 	xpos, ypos    int
@@ -579,9 +579,11 @@ func (w *window) mouseOut() {
 	})
 }
 
-func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	co, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		} else if _, ok := object.(fyne.SecondaryTappable); ok {
 			return true
 		} else if _, ok := object.(fyne.Focusable); ok {
 			return true
@@ -658,17 +660,18 @@ func (w *window) mouseClicked(viewport *glfw.Window, btn glfw.MouseButton, actio
 		w.mouseLastClick = co
 	}
 
+	_, tap := co.(fyne.Tappable)
+	_, altTap := co.(fyne.SecondaryTappable)
 	// Prevent Tapped from triggering if DoubleTapped has been sent
-	if wid, ok := co.(fyne.Tappable); ok && doubleTapped == false {
+	if (tap || altTap) && doubleTapped == false {
 		if action == glfw.Press {
-			w.mousePressed = wid
+			w.mousePressed = co
 		} else if action == glfw.Release {
-			if wid == w.mousePressed {
-				switch button {
-				case desktop.RightMouseButton:
-					w.queueEvent(func() { wid.TappedSecondary(ev) })
-				default:
-					w.queueEvent(func() { wid.Tapped(ev) })
+			if co == w.mousePressed {
+				if button == desktop.RightMouseButton && altTap {
+					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
+				} else if button == desktop.LeftMouseButton && tap {
+					w.queueEvent(func() { co.(fyne.Tappable).Tapped(ev) })
 				}
 			}
 			w.mousePressed = nil

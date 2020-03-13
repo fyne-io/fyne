@@ -386,6 +386,44 @@ func TestWindow_Tapped(t *testing.T) {
 	}
 }
 
+func TestWindow_TappedSecondary(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
+	o.SetMinSize(fyne.NewSize(100, 100))
+	w.SetContent(o)
+
+	w.mousePos = fyne.NewPos(50, 60)
+	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+	w.waitForEvents()
+
+	assert.Nil(t, o.popTapEvent(), "no primary tap")
+	if e, _ := o.popSecondaryTapEvent().(*fyne.PointEvent); assert.NotNil(t, e, "tapped secondary") {
+		assert.Equal(t, fyne.NewPos(50, 60), e.AbsolutePosition)
+		assert.Equal(t, fyne.NewPos(46, 56), e.Position)
+	}
+}
+
+func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	tapped := false
+	o := widget.NewButton("Test", func() {
+		tapped = true
+	})
+	w.SetContent(o)
+
+	w.mousePos = fyne.NewPos(10, 25)
+	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+	w.waitForEvents()
+	assert.False(t, tapped)
+
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.waitForEvents()
+	assert.True(t, tapped)
+}
+
 func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())

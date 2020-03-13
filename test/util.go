@@ -23,12 +23,12 @@ func TapAt(obj fyne.Tappable, pos fyne.Position) {
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
-func TapSecondary(obj fyne.Tappable) {
+func TapSecondary(obj fyne.SecondaryTappable) {
 	TapSecondaryAt(obj, fyne.NewPos(1, 1))
 }
 
 // TapSecondaryAt simulates a right mouse click on the passed object at a specified place within it.
-func TapSecondaryAt(obj fyne.Tappable, pos fyne.Position) {
+func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
 	if focus, ok := obj.(fyne.Focusable); ok {
 		if focus != Canvas().Focused() {
 			Canvas().Focus(focus)

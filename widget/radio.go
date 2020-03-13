@@ -249,10 +249,6 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	r.Refresh()
 }
 
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (r *Radio) TappedSecondary(*fyne.PointEvent) {
-}
-
 // MinSize returns the size that this widget should not shrink below
 func (r *Radio) MinSize() fyne.Size {
 	r.ExtendBaseWidget(r)

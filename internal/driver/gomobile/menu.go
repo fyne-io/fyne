@@ -23,9 +23,6 @@ func (m *menuLabel) Tapped(*fyne.PointEvent) {
 	widget.NewPopUpMenuAtPosition(m.menu, m.canvas, fyne.NewPos(pos.X+m.Size().Width, pos.Y))
 }
 
-func (m *menuLabel) TappedSecondary(*fyne.PointEvent) {
-}
-
 func (m *menuLabel) CreateRenderer() fyne.WidgetRenderer {
 	return widget.Renderer(m.Box)
 }

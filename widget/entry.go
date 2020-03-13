@@ -1195,9 +1195,6 @@ func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
 	fyne.CurrentApp().Driver().CanvasForObject(pr).Focus(pr.entry)
 }
 
-func (pr *passwordRevealer) TappedSecondary(*fyne.PointEvent) {
-}
-
 func newPasswordRevealer(e *Entry) *passwordRevealer {
 	pr := &passwordRevealer{
 		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
