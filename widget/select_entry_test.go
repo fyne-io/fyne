@@ -1,7 +1,6 @@
 package widget_test
 
 import (
-	"reflect"
 	"testing"
 
 	"fyne.io/fyne"
@@ -89,8 +88,8 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	var dropDownSwitch fyne.Tappable
 	for _, o := range test.LaidOutObjects(c.Content()) {
-		if reflect.TypeOf(o).String() == "*widget.Button" {
-			dropDownSwitch = o.(fyne.Tappable)
+		if b, ok := o.(*widget.Button); ok {
+			dropDownSwitch = b
 			break
 		}
 	}
@@ -144,8 +143,8 @@ func optionsMinSize(options []string) fyne.Size {
 func popUpOptions(popUp *widget.PopUp) []string {
 	var texts []string
 	for _, o := range test.LaidOutObjects(popUp.Content) {
-		if reflect.TypeOf(o).String() == "*canvas.Text" {
-			texts = append(texts, o.(*canvas.Text).Text)
+		if t, ok := o.(*canvas.Text); ok {
+			texts = append(texts, t.Text)
 		}
 	}
 	return texts
