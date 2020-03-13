@@ -6,8 +6,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
-github.com/fyne-io/mobile v0.0.0-20200313201146-8e5b0c968448 h1:HikMEohflvYBcDJV9Ca+kjBO7Q9okMaS04ssG268LX8=
-github.com/fyne-io/mobile v0.0.0-20200313201146-8e5b0c968448/go.mod h1:HhyeqDET1gM7/EpVmvg/NWEaljaiP7HvoEldAUaoxOw=
+github.com/fyne-io/mobile v0.0.0-20200313204317-b97e3cad9468 h1:+yQ3W4+LcjEmdZnfI4/t7gZvaVaSd4a1+WyerORFXGU=
+github.com/fyne-io/mobile v0.0.0-20200313204317-b97e3cad9468/go.mod h1:HhyeqDET1gM7/EpVmvg/NWEaljaiP7HvoEldAUaoxOw=
 github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7 h1:SCYMcCJ89LjRGwEa0tRluNRiMjZHalQZrVrvTbPh+qw=
 github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7/go.mod h1:482civXOzJJCPzJ4ZOX/pwvXBWSnzD4OKMdH4ClKGbk=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72 h1:b+9H1GAsx5RsjvDFLoS5zkNBzIQMuVKUYQDmxU3N5XE=

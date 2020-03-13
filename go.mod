@@ -23,4 +23,4 @@ require (
 	golang.org/x/tools v0.0.0-20200117012304-6edc0a871e69
 )
 
-replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20200313201146-8e5b0c968448
+replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20200313204317-b97e3cad9468
