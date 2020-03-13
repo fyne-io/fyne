@@ -17,16 +17,46 @@ const (
 	textAreaNewLineSymbol = '↵'
 )
 
+var (
+	// TextGridStyleDefault is a default style for test grid cells
+	TextGridStyleDefault TextGridStyle
+	// TextGridStyleWhitespace is the style used for whitespace characters, if enabled
+	TextGridStyleWhitespace TextGridStyle
+)
+
+// define the types seperately to the var definition so the custom style API is not leaked in their instances.
+func init() {
+	TextGridStyleDefault = &CustomTextGridStyle{}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.ButtonColor()}
+}
+
 // TextGridCell represents a single cell in a text grid.
 // It has a rune for the text content and a style associated with it.
 type TextGridCell struct {
-	Rune      rune
-	TextColor color.Color
+	Rune  rune
+	Style TextGridStyle
 }
 
-var (
-	whitespaceColor = theme.ButtonColor()
-)
+// TextGridStyle defines a style that can be applied to a TextGrid cell.
+type TextGridStyle interface {
+	TextColor() color.Color
+	BackgroundColor() color.Color
+}
+
+// CustomTextGridStyle is a utility type for those not wanting to define their own style types.
+type CustomTextGridStyle struct {
+	FGColor, BGColor color.Color
+}
+
+// TextColor is the color a cell should use for the text.
+func (c *CustomTextGridStyle) TextColor() color.Color {
+	return c.FGColor
+}
+
+// BackgroundColor is the color a cell should use for the background.
+func (c *CustomTextGridStyle) BackgroundColor() color.Color {
+	return c.BGColor
+}
 
 // TextGrid is a monospaced grid of characters.
 // This is designed to be used by a text editor, code preview or terminal emulator.
@@ -109,6 +139,49 @@ func (t *TextGrid) SetRow(row int, content []TextGridCell) {
 	t.Refresh()
 }
 
+// SetStyle sets a grid style to the cell at named row and column
+func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
+	if row < 0 || col < 0 {
+		return
+	}
+	for len(t.Content) <= row {
+		t.Content = append(t.Content, []TextGridCell{})
+	}
+	content := t.Content[row]
+
+	for len(content) <= col {
+		content = append(content, TextGridCell{})
+	}
+	content[col].Style = style
+}
+
+// SetStyleRange sets a grid style to all the cells between the start row and column through to the end row and column.
+func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style TextGridStyle) {
+	if startRow == endRow {
+		for col := startCol; col <= endCol; col++ {
+			t.SetStyle(startRow, col, style)
+		}
+		return
+	}
+
+	// first row
+	for col := startCol; col < len(t.Content[startRow]); col++ {
+		t.SetStyle(startRow, col, style)
+	}
+
+	// possible middle rows
+	for rowNum := startRow + 1; rowNum < endRow-1; rowNum++ {
+		for col := 0; col < len(t.Content[rowNum]); col++ {
+			t.SetStyle(rowNum, col, style)
+		}
+	}
+
+	// last row
+	for col := 0; col <= endCol; col++ {
+		t.SetStyle(endRow, col, style)
+	}
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
@@ -148,11 +221,13 @@ func (t *textGridRender) appendTextCell(str rune) {
 	text := canvas.NewText(string(str), theme.TextColor())
 	text.TextStyle.Monospace = true
 
-	t.objects = append(t.objects, text)
+	bg := canvas.NewRectangle(color.Transparent)
+	t.objects = append(t.objects, bg, text)
 }
 
-func (t *textGridRender) setCellRune(str rune, pos int, cellFG color.Color) {
-	text := t.objects[pos].(*canvas.Text)
+func (t *textGridRender) setCellRune(str rune, pos int, style TextGridStyle) {
+	rect := t.objects[pos*2].(*canvas.Rectangle)
+	text := t.objects[pos*2+1].(*canvas.Text)
 	if str == 0 {
 		text.Text = " "
 	} else {
@@ -160,19 +235,24 @@ func (t *textGridRender) setCellRune(str rune, pos int, cellFG color.Color) {
 	}
 
 	fg := theme.TextColor()
-	if cellFG != nil {
-		fg = cellFG
+	if style != nil && style.TextColor() != nil {
+		fg = style.TextColor()
 	}
-
 	text.Color = fg
+
+	bg := color.Color(color.Transparent)
+	if style != nil && style.BackgroundColor() != nil {
+		bg = style.BackgroundColor()
+	}
+	rect.FillColor = bg
 }
 
 func (t *textGridRender) ensureGrid() {
 	cellCount := t.cols * t.rows
-	if len(t.objects) == cellCount {
+	if len(t.objects) == cellCount*2 {
 		return
 	}
-	for i := len(t.objects); i < cellCount; i++ {
+	for i := len(t.objects); i < cellCount*2; i += 2 {
 		t.appendTextCell(' ')
 	}
 }
@@ -189,16 +269,16 @@ func (t *textGridRender) refreshGrid() {
 		if t.text.LineNumbers {
 			lineStr := []rune(fmt.Sprintf("%d", line))
 			for c := 0; c < len(lineStr); c++ {
-				t.setCellRune(lineStr[c], x, whitespaceColor) // line numbers
+				t.setCellRune(lineStr[c], x, TextGridStyleWhitespace) // line numbers
 				i++
 				x++
 			}
 			for ; i < t.lineCountWidth(); i++ {
-				t.setCellRune(' ', x, whitespaceColor) // padding space
+				t.setCellRune(' ', x, TextGridStyleWhitespace) // padding space
 				x++
 			}
 
-			t.setCellRune('|', x, whitespaceColor) // last space
+			t.setCellRune('|', x, TextGridStyleWhitespace) // last space
 			i++
 			x++
 		}
@@ -207,27 +287,33 @@ func (t *textGridRender) refreshGrid() {
 				continue
 			}
 			if t.text.Whitespace && r.Rune == ' ' {
-				t.setCellRune(textAreaSpaceSymbol, x, whitespaceColor) // whitespace char
+				if r.Style != nil && r.Style.BackgroundColor() != nil {
+					whitespaceBG := &CustomTextGridStyle{FGColor: TextGridStyleWhitespace.TextColor(),
+						BGColor: r.Style.BackgroundColor()}
+					t.setCellRune(textAreaSpaceSymbol, x, whitespaceBG) // whitespace char
+				} else {
+					t.setCellRune(textAreaSpaceSymbol, x, TextGridStyleWhitespace) // whitespace char
+				}
 			} else {
-				t.setCellRune(r.Rune, x, r.TextColor) // regular char
+				t.setCellRune(r.Rune, x, r.Style) // regular char
 			}
 			i++
 			x++
 		}
 		if t.text.Whitespace && i < t.cols && rowIndex < len(t.text.Content)-1 {
-			t.setCellRune(textAreaNewLineSymbol, x, whitespaceColor) // newline
+			t.setCellRune(textAreaNewLineSymbol, x, TextGridStyleWhitespace) // newline
 			i++
 			x++
 		}
 		for ; i < t.cols; i++ {
-			t.setCellRune(' ', x, nil) // blanks
+			t.setCellRune(' ', x, TextGridStyleDefault) // blanks
 			x++
 		}
 
 		line++
 	}
-	for ; x < len(t.objects); x++ {
-		t.setCellRune(' ', x, nil) // blank lines?
+	for ; x < len(t.objects)/2; x++ {
+		t.setCellRune(' ', x, TextGridStyleDefault) // blank lines?
 	}
 	canvas.Refresh(t.text)
 }
@@ -264,8 +350,10 @@ func (t *textGridRender) Layout(size fyne.Size) {
 	cellPos := fyne.NewPos(0, 0)
 	for y := 0; y < t.rows; y++ {
 		for x := 0; x < t.cols; x++ {
-			t.objects[i].Move(cellPos)
+			t.objects[i*2+1].Move(cellPos)
 
+			t.objects[i*2].Resize(t.cellSize)
+			t.objects[i*2].Move(cellPos)
 			cellPos.X += t.cellSize.Width
 			i++
 		}
