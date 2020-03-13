@@ -30,7 +30,7 @@ import (
 	"path/filepath"
 )
 
-var outfile = flag.String("o", "", "result will be written file")
+var outfile = flag.String("o", "dex.go", "result will be written file")
 
 var tmpdir string
 

@@ -4,6 +4,7 @@ package dialog
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/driver/gomobile"
 )
 
 func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
@@ -17,12 +18,13 @@ func isHidden(file, _ string) bool {
 func fileOSOverride(save bool, callback func(string), parent fyne.Window) bool {
 	if save {
 		ShowInformation("File Save", "File save not available on mobile", parent)
+
+		if callback != nil {
+			callback("")
+		}
 	} else {
-		ShowInformation("File Open", "File open not available on mobile", parent)
+		gomobile.ShowFileOpenPicker(callback)
 	}
 
-	if callback != nil {
-		callback("")
-	}
 	return true
 }
