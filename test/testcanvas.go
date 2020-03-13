@@ -167,6 +167,26 @@ func (c *testCanvas) Capture() image.Image {
 	return img
 }
 
+// LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
+func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
+	if o != nil {
+		objects = layoutAndCollect(objects, o, o.MinSize().Union(o.Size()))
+	}
+	return objects
+}
+
+func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyne.Size) []fyne.CanvasObject {
+	objects = append(objects, o)
+	if w, ok := o.(fyne.Widget); ok {
+		r := w.CreateRenderer()
+		r.Layout(size)
+		for _, child := range r.Objects() {
+			objects = layoutAndCollect(objects, child, child.Size())
+		}
+	}
+	return objects
+}
+
 func (c *testCanvas) objectTrees() []fyne.CanvasObject {
 	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+1)
 	if c.content != nil {

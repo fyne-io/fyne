@@ -29,8 +29,8 @@ var _ fyne.Driver = (*testDriver)(nil)
 func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	d.windowsMutex.RLock()
 	defer d.windowsMutex.RUnlock()
-	// cheating as we only have a single test window
-	return d.windows[0].Canvas()
+	// cheating: probably the last created window is meant
+	return d.windows[len(d.windows)-1].Canvas()
 }
 
 func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {

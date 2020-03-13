@@ -9,7 +9,9 @@ import (
 )
 
 func TestProgressInfiniteDialog_MinSize(t *testing.T) {
-	d := NewProgressInfinite("title", "message", test.NewWindow(nil))
+	window := test.NewWindow(nil)
+	defer window.Close()
+	d := NewProgressInfinite("title", "message", window)
 
 	dialogContent := d.win.Content.MinSize()
 	progressBar := d.bar.MinSize()
@@ -21,14 +23,18 @@ func TestProgressInfiniteDialog_Content(t *testing.T) {
 	title := "title"
 	message := "message"
 
-	d := NewProgressInfinite(title, message, test.NewWindow(nil))
+	window := test.NewWindow(nil)
+	defer window.Close()
+	d := NewProgressInfinite(title, message, window)
 
 	assert.Equal(t, d.title, title)
 	assert.Equal(t, d.content.(*widget.Label).Text, message)
 }
 
 func TestProgressInfiniteDialog_Show(t *testing.T) {
-	d := NewProgressInfinite("title", "message", test.NewWindow(nil))
+	window := test.NewWindow(nil)
+	defer window.Close()
+	d := NewProgressInfinite("title", "message", window)
 
 	d.Show()
 

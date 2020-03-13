@@ -35,6 +35,10 @@ func TestEntry_MinSize(t *testing.T) {
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
+
+	min = entry.MinSize()
+	entry.ActionItem = newPasswordRevealer(entry)
+	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
@@ -948,6 +952,16 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 
 	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry)[0].Text)
 	assert.False(t, entry.placeholderProvider().presenter.concealed())
+}
+
+func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
+	e := NewEntry()
+	b := NewButton("", func() {})
+	b.Icon = theme.CancelIcon()
+	e.ActionItem = b
+	test.WidgetRenderer(e).Layout(e.MinSize())
+	assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), b.Size())
+	assert.Equal(t, fyne.NewPos(e.MinSize().Width-2*theme.Padding()-b.Size().Width, 2*theme.Padding()), b.Position())
 }
 
 const (

@@ -30,6 +30,9 @@ func makeInputTab() fyne.Widget {
 	entryReadOnly.SetText("Entry (disabled)")
 	entryReadOnly.Disable()
 
+	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
+	selectEntry.PlaceHolder = "Type or select"
+
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
 	disabledCheck.Disable()
 	radio := widget.NewRadio([]string{"Radio Item 1", "Radio Item 2"}, func(s string) { fmt.Println("selected", s) })
@@ -41,6 +44,7 @@ func makeInputTab() fyne.Widget {
 		entry,
 		entryReadOnly,
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
+		selectEntry,
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
 		disabledCheck,
 		radio,

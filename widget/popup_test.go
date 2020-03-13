@@ -47,6 +47,7 @@ func TestPopUp_MinSize(t *testing.T) {
 func TestPopUp_Move(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
+	defer win.Close()
 	win.Resize(fyne.NewSize(50, 50))
 	pop := NewPopUp(label, win.Canvas())
 	defer test.Canvas().Overlays().Remove(pop)
@@ -66,6 +67,7 @@ func TestPopUp_Move(t *testing.T) {
 func TestPopUp_Move_Constrained(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
+	defer win.Close()
 	win.Resize(fyne.NewSize(60, 40))
 	pop := NewPopUp(label, win.Canvas())
 	defer test.Canvas().Overlays().Remove(pop)
@@ -87,6 +89,7 @@ func TestPopUp_Move_Constrained(t *testing.T) {
 func TestPopUp_Move_ConstrainedWindowToSmall(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
+	defer win.Close()
 	win.Resize(fyne.NewSize(10, 5))
 	pop := NewPopUp(label, win.Canvas())
 	defer test.Canvas().Overlays().Remove(pop)
@@ -102,6 +105,7 @@ func TestPopUp_Move_ConstrainedWindowToSmall(t *testing.T) {
 func TestPopUp_Resize(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
+	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
 	pop := NewPopUp(label, win.Canvas())
 	defer test.Canvas().Overlays().Remove(pop)
