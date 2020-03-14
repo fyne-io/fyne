@@ -13,7 +13,7 @@ require (
 	github.com/josephspurrier/goversioninfo v0.0.0-20190124120936-8611f5a5ff3f
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/errors v0.8.1
-	github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e
+	github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
 	github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
