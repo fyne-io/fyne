@@ -328,6 +328,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 // The Offset is used to determine the position of the child widgets within the container.
 type ScrollContainer struct {
 	BaseWidget
+	minSize fyne.Size
 
 	Content fyne.CanvasObject
 	Offset  fyne.Position
@@ -371,8 +372,18 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 
 // MinSize returns the smallest size this widget can shrink to
 func (s *ScrollContainer) MinSize() fyne.Size {
+	if s.minSize.Width > 0 && s.minSize.Height > 0 {
+		return s.minSize
+	}
 	s.ExtendBaseWidget(s)
 	return s.BaseWidget.MinSize()
+}
+
+// SetMinSize specifies a minimum size for this scroll container.
+// If the specified size is larger than the content size then scrolling will not be enabled
+// This can be helpful to set scrolling in only 1 direction.
+func (s *ScrollContainer) SetMinSize(size fyne.Size) {
+	s.minSize = size
 }
 
 // Refresh causes this widget to be redrawn in it's current state

@@ -27,6 +27,18 @@ func TestNewScrollContainer(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), barArea.Position())
 }
 
+func TestScrollContainer_MinSize(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(500, 50))
+	scroll := NewScrollContainer(rect)
+	scroll.SetMinSize(fyne.NewSize(100, 100))
+	test.WidgetRenderer(scroll).Layout(scroll.minSize)
+
+	assert.Equal(t, fyne.NewSize(500, 100), rect.Size())
+	assert.Equal(t, 0, scroll.Offset.X)
+	assert.Equal(t, 0, scroll.Offset.Y)
+}
+
 func TestScrollContainer_Refresh(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
