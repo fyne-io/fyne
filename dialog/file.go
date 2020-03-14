@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -26,7 +25,7 @@ type fileDialog struct {
 	parent     fyne.Window
 
 	win      *widget.PopUp
-	current  *fileIcon
+	selected *fileDialogIcon
 	callback func(string)
 	dir      string
 	save     bool
@@ -61,9 +60,14 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			name := f.fileName.(*widget.Entry).Text
 			path := filepath.Join(f.dir, name)
 
-			if _, err := os.Stat(path); os.IsNotExist(err) {
+			info, err := os.Stat(path)
+			if os.IsNotExist(err) {
 				f.win.Hide()
 				f.callback(path)
+				return
+			} else if info.IsDir() {
+				ShowInformation("Cannot overwrite",
+					"Files cannot replace a directory,\ncheck the file name and try again", f.parent)
 				return
 			}
 
@@ -77,9 +81,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 					f.callback(path)
 					f.win.Hide()
 				}, f.parent)
-		} else if f.current != nil {
+		} else if f.selected != nil {
 			f.win.Hide()
-			f.callback(f.current.path)
+			f.callback(f.selected.path)
 		}
 	})
 	f.open.Style = widget.PrimaryButton
@@ -95,14 +99,18 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
 		buttons, f.fileName)
 
-	f.files = fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(fileIconSize+16,
+	f.files = fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(fileIconCellWidth,
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
+	fileScroll := widget.NewScrollContainer(f.files)
+	verticalExtra := int(float64(fileIconSize) * 0.25)
+	fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*4+theme.Padding()*3,
+		(fileIconSize+fileTextSize)*2+theme.Padding()*4+verticalExtra))
 
 	f.breadcrumb = widget.NewHBox()
 	scrollBread := widget.NewScrollContainer(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
-		scrollBread, widget.NewScrollContainer(f.files))
+		scrollBread, fileScroll)
 	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	favourites := widget.NewGroup("Favourites", f.loadFavourites()...)
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favourites, nil),
@@ -127,12 +135,39 @@ func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
 	return places
 }
 
-func (f *fileDialog) setFileDir(dir *fileIcon) {
-	f.setDirectory(dir.path)
+func (f *fileDialog) refreshDir(dir string) {
+	f.files.Objects = nil
+
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		fyne.LogError("Unable to read path "+dir, err)
+		return
+	}
+
+	var icons []fyne.CanvasObject
+	parent := filepath.Dir(dir)
+	if parent != dir {
+		icons = append(icons, f.newFileIcon(theme.FolderOpenIcon(), filepath.Dir(dir)))
+	}
+	for _, file := range files {
+		if isHidden(file.Name(), dir) {
+			continue
+		}
+
+		itemPath := filepath.Join(dir, file.Name())
+		if file.IsDir() {
+			icons = append(icons, f.newFileIcon(theme.FolderIcon(), itemPath))
+		} else {
+			icons = append(icons, f.newFileIcon(theme.FileIcon(), itemPath))
+		}
+	}
+
+	f.files.Objects = icons
+	f.files.Refresh()
 }
 
 func (f *fileDialog) setDirectory(dir string) {
-	f.setFile(nil)
+	f.setSelected(nil)
 	f.dir = dir
 
 	f.breadcrumb.Children = nil
@@ -162,48 +197,22 @@ func (f *fileDialog) setDirectory(dir string) {
 	f.refreshDir(dir)
 }
 
-func (f *fileDialog) refreshDir(dir string) {
-	f.files.Objects = nil
-
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		fyne.LogError("Unable to read path "+dir, err)
+func (f *fileDialog) setSelected(file *fileDialogIcon) {
+	if f.selected != nil {
+		f.selected.isCurrent = false
+		f.selected.Refresh()
+	}
+	if file != nil && file.isDirectory() {
+		f.setDirectory(file.path)
 		return
 	}
-
-	var icons []fyne.CanvasObject
-	parent := filepath.Dir(dir)
-	if parent != dir {
-		icons = append(icons, f.newFileIcon(theme.FolderOpenIcon(), filepath.Dir(dir), f.setFileDir))
-	}
-	for _, file := range files {
-		if isHidden(file.Name(), dir) {
-			continue
-		}
-
-		itemPath := filepath.Join(dir, file.Name())
-		if file.IsDir() {
-			icons = append(icons, f.newFileIcon(theme.FolderIcon(), itemPath, f.setFileDir))
-		} else {
-			icons = append(icons, f.newFileIcon(theme.FileIcon(), itemPath, f.setFile))
-		}
-	}
-
-	f.files.Objects = icons
-	f.files.Refresh()
-}
-
-func (f *fileDialog) setFile(file *fileIcon) {
-	if f.current != nil {
-		f.current.current = false
-		f.current.Refresh()
-	}
-	f.current = file
+	f.selected = file
 
 	if file == nil || file.path == "" {
 		f.fileName.SetText("")
 		f.open.Disable()
 	} else {
+		file.isCurrent = true
 		f.fileName.SetText(filepath.Base(file.path))
 		f.open.Enable()
 	}
@@ -222,11 +231,7 @@ func showFileDialog(save bool, callback func(string), parent fyne.Window) {
 	}
 	d.setDirectory(dir)
 
-	spacer := canvas.NewRectangle(theme.BackgroundColor())
-	spacer.SetMinSize(fyne.NewSize(436, 300))
-	content := fyne.NewContainerWithLayout(layout.NewMaxLayout(), spacer, ui)
-	d.win = widget.NewModalPopUp(content, parent.Canvas())
-
+	d.win = widget.NewModalPopUp(ui, parent.Canvas())
 	d.win.Show()
 }
 

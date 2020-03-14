@@ -19,11 +19,11 @@ func TestShowFileOpen(t *testing.T) {
 		chosen = file
 	}, win)
 
-	popup := win.Canvas().Overlays().Top().(*widget.PopUp).Content
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.(*fyne.Container).Objects[1].(*fyne.Container)
+	ui := popup.Content.(*fyne.Container)
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
 
@@ -34,14 +34,14 @@ func TestShowFileOpen(t *testing.T) {
 	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
-	fileName := files.Objects[0].(*fileIcon).name
+	fileName := files.Objects[0].(*fileDialogIcon).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.True(t, open.Disabled())
 
-	var target *fileIcon
+	var target *fileDialogIcon
 	for _, icon := range files.Objects {
-		if icon.(*fileIcon).icon == theme.FileIcon() {
-			target = icon.(*fileIcon)
+		if icon.(*fileDialogIcon).icon == theme.FileIcon() {
+			target = icon.(*fileDialogIcon)
 		}
 	}
 
@@ -57,6 +57,7 @@ func TestShowFileOpen(t *testing.T) {
 	assert.False(t, open.Disabled())
 
 	test.Tap(open)
+	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Equal(t, target.path, chosen)
 }
 
@@ -67,11 +68,11 @@ func TestShowFileSave(t *testing.T) {
 		chosen = file
 	}, win)
 
-	popup := win.Canvas().Overlays().Top().(*widget.PopUp).Content
+	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
 	defer win.Canvas().Overlays().Remove(popup)
 	assert.NotNil(t, popup)
 
-	ui := popup.(*fyne.Container).Objects[1].(*fyne.Container)
+	ui := popup.Content.(*fyne.Container)
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Save File", title.Text)
 
@@ -82,14 +83,14 @@ func TestShowFileSave(t *testing.T) {
 	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
-	fileName := files.Objects[0].(*fileIcon).name
+	fileName := files.Objects[0].(*fileDialogIcon).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.True(t, save.Disabled())
 
-	var target *fileIcon
+	var target *fileDialogIcon
 	for _, icon := range files.Objects {
-		if icon.(*fileIcon).icon == theme.FileIcon() {
-			target = icon.(*fileIcon)
+		if icon.(*fileDialogIcon).icon == theme.FileIcon() {
+			target = icon.(*fileDialogIcon)
 		}
 	}
 
@@ -113,5 +114,6 @@ func TestShowFileSave(t *testing.T) {
 	// give the file a unique name and it will callback fine
 	test.Type(nameEntry, "v2_")
 	test.Tap(save)
+	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Equal(t, filepath.Join(filepath.Dir(target.path), "v2_"+filepath.Base(target.path)), chosen)
 }

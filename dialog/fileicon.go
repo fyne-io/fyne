@@ -11,39 +11,41 @@ import (
 )
 
 const (
-	fileIconSize = 64
-	fileTextSize = 24
+	fileIconSize      = 64
+	fileTextSize      = 24
+	fileIconCellWidth = fileIconSize * 1.25
 )
 
-type fileIcon struct {
+type fileDialogIcon struct {
 	widget.BaseWidget
-	parent  *fileDialog
-	current bool
+	picker    *fileDialog
+	isCurrent bool
 
 	path      string
 	icon      fyne.Resource
 	name, ext string
-	onTap     func(*fileIcon)
 }
 
-func (s *fileIcon) Tapped(_ *fyne.PointEvent) {
-	s.onTap(s)
-	s.current = true
-	s.Refresh()
+func (i *fileDialogIcon) Tapped(_ *fyne.PointEvent) {
+	i.picker.setSelected(i)
+	i.Refresh()
 }
 
-func (s *fileIcon) TappedSecondary(_ *fyne.PointEvent) {
-
+func (i *fileDialogIcon) TappedSecondary(_ *fyne.PointEvent) {
 }
 
-func (s *fileIcon) CreateRenderer() fyne.WidgetRenderer {
-	img := canvas.NewImageFromResource(s.icon)
-	text := widget.NewLabelWithStyle(s.name, fyne.TextAlignCenter, fyne.TextStyle{})
-	extText := canvas.NewText(s.ext, theme.BackgroundColor())
+func (i *fileDialogIcon) CreateRenderer() fyne.WidgetRenderer {
+	img := canvas.NewImageFromResource(i.icon)
+	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
+	extText := canvas.NewText(i.ext, theme.BackgroundColor())
 	extText.Alignment = fyne.TextAlignCenter
 	extText.TextSize = theme.TextSize()
-	return &fileIconRenderer{icon: s,
+	return &fileIconRenderer{icon: i,
 		img: img, text: text, ext: extText, objects: []fyne.CanvasObject{img, text, extText}}
+}
+
+func (i *fileDialogIcon) isDirectory() bool {
+	return i.icon == theme.FolderIcon() || i.icon == theme.FolderOpenIcon()
 }
 
 func fileParts(path string) (name, ext string) {
@@ -57,27 +59,26 @@ func fileParts(path string) (name, ext string) {
 	return
 }
 
-func (f *fileDialog) newFileIcon(icon fyne.Resource, path string, tap func(*fileIcon)) *fileIcon {
+func (f *fileDialog) newFileIcon(icon fyne.Resource, path string) *fileDialogIcon {
 	name, ext := fileParts(path)
 	if icon == theme.FolderOpenIcon() {
 		name = "(Parent)"
 		ext = ""
 	}
 
-	ret := &fileIcon{
-		parent: f,
+	ret := &fileDialogIcon{
+		picker: f,
 		icon:   icon,
 		name:   name,
 		ext:    ext,
 		path:   path,
-		onTap:  tap,
 	}
 	ret.ExtendBaseWidget(ret)
 	return ret
 }
 
 type fileIconRenderer struct {
-	icon *fileIcon
+	icon *fileDialogIcon
 
 	ext     *canvas.Text
 	img     *canvas.Image
@@ -106,7 +107,7 @@ func (s fileIconRenderer) Refresh() {
 }
 
 func (s fileIconRenderer) BackgroundColor() color.Color {
-	if s.icon.current {
+	if s.icon.isCurrent {
 		return theme.PrimaryColor()
 	}
 	return theme.BackgroundColor()
