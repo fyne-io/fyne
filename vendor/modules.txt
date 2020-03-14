@@ -14,9 +14,9 @@ github.com/go-gl/gl/v3.2-core/gl
 # github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72
 github.com/go-gl/glfw/v3.3/glfw
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
+github.com/goki/freetype/truetype
 github.com/goki/freetype
 github.com/goki/freetype/raster
-github.com/goki/freetype/truetype
 # github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 github.com/jackmordaunt/icns
 # github.com/josephspurrier/goversioninfo v0.0.0-20190124120936-8611f5a5ff3f
@@ -27,7 +27,7 @@ github.com/nfnt/resize
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e
+# github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 github.com/srwiley/oksvg
 # github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
 github.com/srwiley/rasterx
@@ -35,58 +35,58 @@ github.com/srwiley/rasterx
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # golang.org/x/image v0.0.0-20190802002840-cff245a6509b
-golang.org/x/image/colornames
 golang.org/x/image/font
 golang.org/x/image/math/fixed
+golang.org/x/image/colornames
 golang.org/x/image/vector
 # golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 => github.com/fyne-io/mobile v0.0.0-20200218100723-2a24c20a57c6
 golang.org/x/mobile/app
-golang.org/x/mobile/app/internal/callfn
 golang.org/x/mobile/event/key
 golang.org/x/mobile/event/lifecycle
 golang.org/x/mobile/event/paint
 golang.org/x/mobile/event/size
 golang.org/x/mobile/event/touch
-golang.org/x/mobile/exp/f32
-golang.org/x/mobile/geom
 golang.org/x/mobile/gl
+golang.org/x/mobile/exp/f32
+golang.org/x/mobile/app/internal/callfn
+golang.org/x/mobile/geom
 golang.org/x/mobile/internal/mobileinit
 # golang.org/x/mod v0.1.1-0.20191105210325-c90efee705ee
-golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
+golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/semver
 # golang.org/x/net v0.0.0-20190620200207-3b0461eec859
+golang.org/x/net/html/charset
 golang.org/x/net/html
 golang.org/x/net/html/atom
-golang.org/x/net/html/charset
 # golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb
 golang.org/x/sys/unix
 # golang.org/x/text v0.3.0
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
-golang.org/x/text/encoding/internal
+golang.org/x/text/transform
 golang.org/x/text/encoding/internal/identifier
+golang.org/x/text/encoding/internal
 golang.org/x/text/encoding/japanese
 golang.org/x/text/encoding/korean
 golang.org/x/text/encoding/simplifiedchinese
 golang.org/x/text/encoding/traditionalchinese
 golang.org/x/text/encoding/unicode
-golang.org/x/text/internal/tag
-golang.org/x/text/internal/utf8internal
 golang.org/x/text/language
+golang.org/x/text/internal/utf8internal
 golang.org/x/text/runes
-golang.org/x/text/transform
+golang.org/x/text/internal/tag
 # golang.org/x/tools v0.0.0-20200117012304-6edc0a871e69
-golang.org/x/tools/go/gcexportdata
-golang.org/x/tools/go/internal/gcimporter
-golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/go/packages
-golang.org/x/tools/internal/fastwalk
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/packagesinternal
 golang.org/x/tools/internal/semver
+golang.org/x/tools/go/internal/gcimporter
+golang.org/x/tools/internal/fastwalk
 # golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
 golang.org/x/xerrors
 golang.org/x/xerrors/internal
