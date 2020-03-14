@@ -57,6 +57,16 @@ func (d *gLDriver) initGLFW() {
 	initCursors()
 }
 
+func (d *gLDriver) tryPollEvents() {
+	defer func() {
+		if r := recover(); r != nil {
+			fyne.LogError("GLFW poll event error (details above)", nil)
+		}
+	}()
+
+	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
+}
+
 func (d *gLDriver) runGL() {
 	fps := time.NewTicker(time.Second / 60)
 	runMutex.Lock()
@@ -81,7 +91,7 @@ func (d *gLDriver) runGL() {
 		case <-settingsChange:
 			painter.ClearFontCache()
 		case <-fps.C:
-			glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
+			d.tryPollEvents()
 			newWindows := []fyne.Window{}
 			reassign := false
 			for _, win := range d.windows {

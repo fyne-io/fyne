@@ -26,6 +26,12 @@ func (c *clipboard) Content() string {
 // SetContent sets the clipboard content
 func (c *clipboard) SetContent(content string) {
 	runOnMain(func() {
+		defer func() {
+			if r := recover(); r != nil {
+				fyne.LogError("GLFW clipboard error (details above)", nil)
+			}
+		}()
+
 		glfw.SetClipboardString(content)
 	})
 }
