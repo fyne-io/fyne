@@ -372,7 +372,7 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 
 // MinSize returns the smallest size this widget can shrink to
 func (s *ScrollContainer) MinSize() fyne.Size {
-	if s.minSize.Width > 0 && s.minSize.Height > 0 {
+	if s.minSize != fyne.Size{} {
 		return s.minSize
 	}
 	s.ExtendBaseWidget(s)
