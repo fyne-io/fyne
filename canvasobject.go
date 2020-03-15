@@ -69,7 +69,7 @@ type Draggable interface {
 type Focusable interface {
 	FocusGained()
 	FocusLost()
-	Focused() bool
+	Focused() bool // Deprecated: this is an internal detail, canvas tracks current focused object
 
 	TypedRune(rune)
 	TypedKey(*KeyEvent)

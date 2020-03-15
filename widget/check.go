@@ -74,7 +74,7 @@ func (c *checkRenderer) Refresh() {
 
 	if c.check.Disabled() {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
-	} else if c.check.Focused() {
+	} else if c.check.focused {
 		c.focusIndicator.FillColor = theme.FocusColor()
 	} else if c.check.hovered {
 		c.focusIndicator.FillColor = theme.HoverColor()
@@ -121,7 +121,7 @@ func (c *Check) SetChecked(checked bool) {
 
 // Hide this widget, if it was previously visible
 func (c *Check) Hide() {
-	if c.Focused() {
+	if c.focused {
 		c.FocusLost()
 		fyne.CurrentApp().Driver().CanvasForObject(c).Focus(nil)
 	}
@@ -150,7 +150,7 @@ func (c *Check) MouseMoved(*desktop.MouseEvent) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
-	if !c.Focused() {
+	if !c.focused {
 		c.FocusGained()
 	}
 	if !c.Disabled() {
@@ -209,6 +209,7 @@ func (c *Check) FocusLost() {
 }
 
 // Focused returns whether or not this Check has focus.
+// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
 func (c *Check) Focused() bool {
 	if c.Disabled() {
 		return false

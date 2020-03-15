@@ -436,6 +436,7 @@ func (e *Entry) FocusLost() {
 }
 
 // Focused returns whether or not this Entry has focus.
+// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
 func (e *Entry) Focused() bool {
 	return e.focused
 }

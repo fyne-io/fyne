@@ -159,11 +159,11 @@ func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
 	entry.SetReadOnly(true)
 
 	entry.FocusGained()
-	assert.False(t, entry.Focused())
+	assert.False(t, entry.focused)
 
 	entry.SetReadOnly(false)
 	entry.FocusGained()
-	assert.True(t, entry.Focused())
+	assert.True(t, entry.focused)
 }
 
 func TestEntry_OnKeyDown_Insert(t *testing.T) {
@@ -336,17 +336,17 @@ func TestEntryFocus(t *testing.T) {
 	entry := NewEntry()
 
 	entry.FocusGained()
-	assert.True(t, entry.Focused())
+	assert.True(t, entry.focused)
 
 	entry.FocusLost()
-	assert.False(t, entry.Focused())
+	assert.False(t, entry.focused)
 }
 
 func TestEntryWindowFocus(t *testing.T) {
 	entry := NewEntry()
 
 	test.Canvas().Focus(entry)
-	assert.True(t, entry.Focused())
+	assert.True(t, entry.focused)
 }
 
 func TestEntry_Tapped(t *testing.T) {
@@ -354,7 +354,7 @@ func TestEntry_Tapped(t *testing.T) {
 	entry.SetText("MMM")
 
 	test.Tap(entry)
-	assert.True(t, entry.Focused())
+	assert.True(t, entry.focused)
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(int(float32(testCharSize)*1.5), testCharSize/2) // tap in the middle of the 2nd "M"
@@ -377,7 +377,7 @@ func TestEntry_Tapped_AfterCol(t *testing.T) {
 	entry.SetText("M")
 
 	test.Tap(entry)
-	assert.True(t, entry.Focused())
+	assert.True(t, entry.focused)
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize*2, testCharSize/2) // tap after text
@@ -393,7 +393,7 @@ func TestEntry_Tapped_AfterRow(t *testing.T) {
 	entry.SetText("M\nM\n")
 
 	test.Tap(entry)
-	assert.True(t, entry.Focused())
+	assert.True(t, entry.focused)
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
@@ -481,7 +481,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 	assert.NotNil(t, entry.popUp)
 
 	test.Tap(entry.popUp)
-	assert.True(t, entry.Focused())
+	assert.True(t, entry.focused)
 }
 
 func TestEntry_HidePopUpOnEntry(t *testing.T) {
@@ -654,7 +654,7 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry.SetText("A\nB\n")
 
 	test.Tap(entry)
-	assert.True(t, entry.Focused())
+	assert.True(t, entry.focused)
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
@@ -1389,7 +1389,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
-		assert.True(t, entry.Focused())
+		assert.True(t, entry.focused)
 		assert.Equal(t, theme.VisibilityIcon(), actionIcon.icon.Resource)
 
 		// tap on action icon
@@ -1397,13 +1397,13 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
-		assert.True(t, entry.Focused())
+		assert.True(t, entry.focused)
 		assert.Equal(t, theme.VisibilityOffIcon(), actionIcon.icon.Resource)
 	})
 
 	// This test cover backward compatibility use case when on an Entry widget
 	// the Password field is set to true.
-	// In this case the action item should not be diplayed
+	// In this case the action item should not be displayed
 	t.Run("Entry with Password field", func(t *testing.T) {
 		entry := NewEntry()
 		entry.Password = true
@@ -1423,7 +1423,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
-		assert.True(t, entry.Focused())
+		assert.True(t, entry.focused)
 		assert.NotNil(t, actionIcon)
 	})
 }

@@ -133,29 +133,29 @@ func TestCheck_Focused(t *testing.T) {
 	check := NewCheck("Test", func(on bool) {})
 	render := test.WidgetRenderer(check).(*checkRenderer)
 
-	assert.False(t, check.Focused())
+	assert.False(t, check.focused)
 	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
 
 	check.SetChecked(true)
-	assert.False(t, check.Focused())
+	assert.False(t, check.focused)
 	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
 
 	test.Tap(check)
-	assert.True(t, check.Focused())
+	assert.True(t, check.focused)
 	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
 
 	check.Disable()
-	assert.False(t, check.Focused())
+	assert.True(t, check.disabled)
 	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
 
 	check.Enable()
-	assert.True(t, check.Focused())
+	assert.True(t, check.focused)
 
 	check.Hide()
-	assert.False(t, check.Focused())
+	assert.False(t, check.focused)
 
 	check.Show()
-	assert.False(t, check.Focused())
+	assert.False(t, check.focused)
 }
 
 func TestCheck_Hovered(t *testing.T) {
@@ -175,7 +175,7 @@ func TestCheck_Hovered(t *testing.T) {
 	assert.Equal(t, theme.FocusColor(), render.focusIndicator.FillColor)
 
 	check.Disable()
-	assert.False(t, check.Focused())
+	assert.True(t, check.disabled)
 	assert.True(t, check.hovered)
 	assert.Equal(t, theme.BackgroundColor(), render.focusIndicator.FillColor)
 
@@ -197,7 +197,7 @@ func TestCheck_TypedRune(t *testing.T) {
 	assert.False(t, check.Checked)
 
 	test.Tap(check)
-	assert.True(t, check.Focused())
+	assert.True(t, check.focused)
 	assert.True(t, check.Checked)
 
 	test.Type(check, " ")
