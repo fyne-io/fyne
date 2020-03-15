@@ -507,10 +507,10 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	cursor := defaultCursor
 	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
-		if wid, ok := object.(*widget.Entry); ok {
-			if !wid.Disabled() {
-				cursor = entryCursor
-			}
+		entry, entOk := object.(*widget.Entry)
+		_, selOk := object.(*widget.SelectEntry)
+		if (entOk && !entry.Disabled()) || selOk {
+			cursor = entryCursor
 		} else if _, ok := object.(*widget.Hyperlink); ok {
 			cursor = hyperlinkCursor
 		}
