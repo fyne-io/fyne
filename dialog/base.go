@@ -3,6 +3,7 @@ package dialog // import "fyne.io/fyne/dialog"
 
 import (
 	"image/color"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -37,19 +38,33 @@ type dialog struct {
 	dismiss        *widget.Button
 
 	response  chan bool
+	mu        sync.Mutex
 	responded bool
 	parent    fyne.Window
 }
 
 func (d *dialog) wait() {
-	select {
-	case response := <-d.response:
-		d.responded = true
-		d.win.Hide()
-		if d.callback != nil {
-			d.callback(response)
-		}
+	d.mu.Lock()
+	if d.response != nil {
+		// Already waiting
+		d.mu.Unlock()
+		return
 	}
+	d.response = make(chan bool)
+	d.mu.Unlock()
+	go func() {
+		select {
+		case response := <-d.response:
+			d.responded = true
+			d.win.Hide()
+			if d.callback != nil {
+				d.callback(response)
+			}
+		}
+
+		close(d.response)
+		d.response = nil
+	}()
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
@@ -120,7 +135,6 @@ func (d *dialog) applyTheme() {
 func newDialog(title, message string, icon fyne.Resource, callback func(bool), parent fyne.Window) *dialog {
 	d := &dialog{content: newLabel(message), title: title, icon: icon, parent: parent}
 
-	d.response = make(chan bool, 1)
 	d.callback = callback
 
 	return d
@@ -141,16 +155,16 @@ func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 }
 
 func (d *dialog) Show() {
-	go d.wait()
+	d.wait()
 	d.win.Show()
 }
 
 func (d *dialog) Hide() {
-	d.win.Hide()
-
-	if !d.responded && d.callback != nil {
-		d.callback(false)
+	if d.response == nil {
+		// Already hidden
+		return
 	}
+	d.response <- false
 }
 
 // SetDismissText allows custom text to be set in the confirmation button
@@ -162,18 +176,16 @@ func (d *dialog) SetDismissText(label string) {
 // ShowCustom shows a dialog over the specified application using custom
 // content. The button will have the dismiss text set.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
-func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
+func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
-	d.response = make(chan bool, 1)
 
 	d.dismiss = &widget.Button{Text: dismiss,
-		OnTapped: func() {
-			d.response <- false
-		},
+		OnTapped: d.Hide,
 	}
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
 	d.Show()
+	return d
 }
 
 // ShowCustomConfirm shows a dialog over the specified application using custom
@@ -181,15 +193,12 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 // the confirm text. The response callback is called on user action.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
-	callback func(bool), parent fyne.Window) {
+	callback func(bool), parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
-	d.response = make(chan bool, 1)
 	d.callback = callback
 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
-		OnTapped: func() {
-			d.response <- false
-		},
+		OnTapped: d.Hide,
 	}
 	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
 		OnTapped: func() {
@@ -199,4 +208,5 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
 	d.Show()
+	return d
 }
