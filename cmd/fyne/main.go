@@ -85,8 +85,9 @@ func main() {
 
 	if command == "help" {
 		if len(args) >= 2 {
-			provider = getCommand(args[1])
-			provider.addFlags()
+			if provider = getCommand(args[1]); provider != nil {
+				provider.addFlags()
+			}
 		}
 		help()
 	} else {
