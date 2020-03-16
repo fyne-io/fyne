@@ -31,9 +31,13 @@ func TestScrollContainer_MinSize(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(500, 50))
 	scroll := NewScrollContainer(rect)
-	scroll.SetMinSize(fyne.NewSize(100, 100))
+	assert.Equal(t, fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize), scroll.MinSize())
+
+	scrollMin := fyne.NewSize(100, 100)
+	scroll.SetMinSize(scrollMin)
 	test.WidgetRenderer(scroll).Layout(scroll.minSize)
 
+	assert.Equal(t, scrollMin, scroll.MinSize())
 	assert.Equal(t, fyne.NewSize(500, 100), rect.Size())
 	assert.Equal(t, 0, scroll.Offset.X)
 	assert.Equal(t, 0, scroll.Offset.Y)
