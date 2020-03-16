@@ -28,12 +28,16 @@ func NewInformation(title, message string, parent fyne.Window) Dialog {
 
 // ShowInformation shows a dialog over the specified window for user
 // information. The title is used for the dialog window and message is the content.
-func ShowInformation(title, message string, parent fyne.Window) {
-	NewInformation(title, message, parent).Show()
+func ShowInformation(title, message string, parent fyne.Window) Dialog {
+	d := NewInformation(title, message, parent)
+	d.Show()
+	return d
 }
 
 // ShowError shows a dialog over the specified window for an application
 // error. The title and message are extracted from the provided error.
-func ShowError(err error, parent fyne.Window) {
-	createTextDialog("Error", err.Error(), theme.WarningIcon(), parent).Show()
+func ShowError(err error, parent fyne.Window) Dialog {
+	d := createTextDialog("Error", err.Error(), theme.WarningIcon(), parent)
+	d.Show()
+	return d
 }

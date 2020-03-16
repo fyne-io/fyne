@@ -43,6 +43,8 @@ func NewConfirm(title, message string, callback func(bool), parent fyne.Window) 
 // ShowConfirm shows a dialog over the specified window for a user
 // confirmation. The title is used for the dialog window and message is the content.
 // The callback is executed when the user decides.
-func ShowConfirm(title, message string, callback func(bool), parent fyne.Window) {
-	NewConfirm(title, message, callback, parent).Show()
+func ShowConfirm(title, message string, callback func(bool), parent fyne.Window) *ConfirmDialog {
+	d := NewConfirm(title, message, callback, parent)
+	d.Show()
+	return d
 }
