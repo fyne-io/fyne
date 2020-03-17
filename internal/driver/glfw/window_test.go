@@ -59,6 +59,34 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
+func cursorForObject(obj fyne.CanvasObject) *glfw.Cursor {
+	if wid, ok := obj.(*widget.Entry); ok {
+		if !wid.Disabled() {
+			return entryCursor
+		}
+	} else if _, ok := obj.(*widget.Hyperlink); ok {
+		return hyperlinkCursor
+	} else if _, ok := obj.(*widget.SelectEntry); ok {
+		return entryCursor
+	}
+
+	return defaultCursor
+}
+
+func TestWindow_Cursor(t *testing.T) {
+	d.CreateWindow("Test")
+
+	assert.Same(t, defaultCursor, cursorForObject(widget.NewLabel("")))
+
+	entry := widget.NewEntry()
+	assert.Same(t, entryCursor, cursorForObject(entry))
+	entry.Disable()
+	assert.Same(t, defaultCursor, cursorForObject(entry))
+
+	selectEntry := widget.NewSelectEntry([]string{"A", "B", "C"})
+	assert.Same(t, entryCursor, cursorForObject(selectEntry))
+}
+
 func TestWindow_HandleHoverable(t *testing.T) {
 	w := d.CreateWindow("Test").(*window)
 	h1 := &hoverableObject{Rectangle: canvas.NewRectangle(color.White)}
