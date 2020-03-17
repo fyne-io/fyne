@@ -25,7 +25,7 @@ type fileDialog struct {
 	parent     fyne.Window
 
 	win      *widget.PopUp
-	selected *fileDialogIcon
+	selected *fileDialogItem
 	callback func(string)
 	dir      string
 	save     bool
@@ -197,7 +197,7 @@ func (f *fileDialog) setDirectory(dir string) {
 	f.refreshDir(dir)
 }
 
-func (f *fileDialog) setSelected(file *fileDialogIcon) {
+func (f *fileDialog) setSelected(file *fileDialogItem) {
 	if f.selected != nil {
 		f.selected.isCurrent = false
 		f.selected.Refresh()

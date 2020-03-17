@@ -15,7 +15,7 @@ type scrollBarOrientation int
 const (
 	scrollBarOrientationVertical   scrollBarOrientation = 0
 	scrollBarOrientationHorizontal scrollBarOrientation = 1
-	scrollContainerMinSize = 32 // TODO consider the smallest useful scroll view?
+	scrollContainerMinSize                              = 32 // TODO consider the smallest useful scroll view?
 )
 
 type scrollBarRenderer struct {

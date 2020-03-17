@@ -34,14 +34,14 @@ func TestShowFileOpen(t *testing.T) {
 	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
-	fileName := files.Objects[0].(*fileDialogIcon).name
+	fileName := files.Objects[0].(*fileDialogItem).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.True(t, open.Disabled())
 
-	var target *fileDialogIcon
+	var target *fileDialogItem
 	for _, icon := range files.Objects {
-		if icon.(*fileDialogIcon).icon == theme.FileIcon() {
-			target = icon.(*fileDialogIcon)
+		if icon.(*fileDialogItem).icon == theme.FileIcon() {
+			target = icon.(*fileDialogItem)
 		}
 	}
 
@@ -83,14 +83,14 @@ func TestShowFileSave(t *testing.T) {
 	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
-	fileName := files.Objects[0].(*fileDialogIcon).name
+	fileName := files.Objects[0].(*fileDialogItem).name
 	assert.Equal(t, "(Parent)", fileName)
 	assert.True(t, save.Disabled())
 
-	var target *fileDialogIcon
+	var target *fileDialogItem
 	for _, icon := range files.Objects {
-		if icon.(*fileDialogIcon).icon == theme.FileIcon() {
-			target = icon.(*fileDialogIcon)
+		if icon.(*fileDialogItem).icon == theme.FileIcon() {
+			target = icon.(*fileDialogItem)
 		}
 	}
 

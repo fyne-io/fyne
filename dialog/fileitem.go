@@ -16,7 +16,7 @@ const (
 	fileIconCellWidth = fileIconSize * 1.25
 )
 
-type fileDialogIcon struct {
+type fileDialogItem struct {
 	widget.BaseWidget
 	picker    *fileDialog
 	isCurrent bool
@@ -26,15 +26,15 @@ type fileDialogIcon struct {
 	name, ext string
 }
 
-func (i *fileDialogIcon) Tapped(_ *fyne.PointEvent) {
+func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
 	i.picker.setSelected(i)
 	i.Refresh()
 }
 
-func (i *fileDialogIcon) TappedSecondary(_ *fyne.PointEvent) {
+func (i *fileDialogItem) TappedSecondary(_ *fyne.PointEvent) {
 }
 
-func (i *fileDialogIcon) CreateRenderer() fyne.WidgetRenderer {
+func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	img := canvas.NewImageFromResource(i.icon)
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
 	extText := canvas.NewText(i.ext, theme.BackgroundColor())
@@ -44,7 +44,7 @@ func (i *fileDialogIcon) CreateRenderer() fyne.WidgetRenderer {
 		img: img, text: text, ext: extText, objects: []fyne.CanvasObject{img, text, extText}}
 }
 
-func (i *fileDialogIcon) isDirectory() bool {
+func (i *fileDialogItem) isDirectory() bool {
 	return i.icon == theme.FolderIcon() || i.icon == theme.FolderOpenIcon()
 }
 
@@ -59,14 +59,14 @@ func fileParts(path string) (name, ext string) {
 	return
 }
 
-func (f *fileDialog) newFileIcon(icon fyne.Resource, path string) *fileDialogIcon {
+func (f *fileDialog) newFileIcon(icon fyne.Resource, path string) *fileDialogItem {
 	name, ext := fileParts(path)
 	if icon == theme.FolderOpenIcon() {
 		name = "(Parent)"
 		ext = ""
 	}
 
-	ret := &fileDialogIcon{
+	ret := &fileDialogItem{
 		picker: f,
 		icon:   icon,
 		name:   name,
@@ -78,7 +78,7 @@ func (f *fileDialog) newFileIcon(icon fyne.Resource, path string) *fileDialogIco
 }
 
 type fileIconRenderer struct {
-	icon *fileDialogIcon
+	icon *fileDialogItem
 
 	ext     *canvas.Text
 	img     *canvas.Image
