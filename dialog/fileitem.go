@@ -40,7 +40,7 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	extText := canvas.NewText(i.ext, theme.BackgroundColor())
 	extText.Alignment = fyne.TextAlignCenter
 	extText.TextSize = theme.TextSize()
-	return &fileIconRenderer{icon: i,
+	return &fileItemRenderer{item: i,
 		img: img, text: text, ext: extText, objects: []fyne.CanvasObject{img, text, extText}}
 }
 
@@ -59,7 +59,7 @@ func fileParts(path string) (name, ext string) {
 	return
 }
 
-func (f *fileDialog) newFileIcon(icon fyne.Resource, path string) *fileDialogItem {
+func (f *fileDialog) newFileItem(icon fyne.Resource, path string) *fileDialogItem {
 	name, ext := fileParts(path)
 	if icon == theme.FolderOpenIcon() {
 		name = "(Parent)"
@@ -77,8 +77,8 @@ func (f *fileDialog) newFileIcon(icon fyne.Resource, path string) *fileDialogIte
 	return ret
 }
 
-type fileIconRenderer struct {
-	icon *fileDialogItem
+type fileItemRenderer struct {
+	item *fileDialogItem
 
 	ext     *canvas.Text
 	img     *canvas.Image
@@ -86,7 +86,7 @@ type fileIconRenderer struct {
 	objects []fyne.CanvasObject
 }
 
-func (s fileIconRenderer) Layout(size fyne.Size) {
+func (s fileItemRenderer) Layout(size fyne.Size) {
 	iconAlign := (size.Width - fileIconSize) / 2
 	s.img.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 	s.img.Move(fyne.NewPos(iconAlign, 0))
@@ -98,24 +98,24 @@ func (s fileIconRenderer) Layout(size fyne.Size) {
 	s.text.Move(fyne.NewPos(0, fileIconSize+theme.Padding()))
 }
 
-func (s fileIconRenderer) MinSize() fyne.Size {
+func (s fileItemRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize+theme.Padding())
 }
 
-func (s fileIconRenderer) Refresh() {
-	canvas.Refresh(s.icon)
+func (s fileItemRenderer) Refresh() {
+	canvas.Refresh(s.item)
 }
 
-func (s fileIconRenderer) BackgroundColor() color.Color {
-	if s.icon.isCurrent {
+func (s fileItemRenderer) BackgroundColor() color.Color {
+	if s.item.isCurrent {
 		return theme.PrimaryColor()
 	}
 	return theme.BackgroundColor()
 }
 
-func (s fileIconRenderer) Objects() []fyne.CanvasObject {
+func (s fileItemRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s fileIconRenderer) Destroy() {
+func (s fileItemRenderer) Destroy() {
 }

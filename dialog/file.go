@@ -147,7 +147,7 @@ func (f *fileDialog) refreshDir(dir string) {
 	var icons []fyne.CanvasObject
 	parent := filepath.Dir(dir)
 	if parent != dir {
-		icons = append(icons, f.newFileIcon(theme.FolderOpenIcon(), filepath.Dir(dir)))
+		icons = append(icons, f.newFileItem(theme.FolderOpenIcon(), filepath.Dir(dir)))
 	}
 	for _, file := range files {
 		if isHidden(file.Name(), dir) {
@@ -156,9 +156,9 @@ func (f *fileDialog) refreshDir(dir string) {
 
 		itemPath := filepath.Join(dir, file.Name())
 		if file.IsDir() {
-			icons = append(icons, f.newFileIcon(theme.FolderIcon(), itemPath))
+			icons = append(icons, f.newFileItem(theme.FolderIcon(), itemPath))
 		} else {
-			icons = append(icons, f.newFileIcon(theme.FileIcon(), itemPath))
+			icons = append(icons, f.newFileItem(theme.FileIcon(), itemPath))
 		}
 	}
 
