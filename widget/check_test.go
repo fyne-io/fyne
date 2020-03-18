@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -16,6 +17,13 @@ func TestCheckSize(t *testing.T) {
 
 	assert.True(t, min.Width > theme.Padding()*2)
 	assert.True(t, min.Height > theme.Padding()*2)
+}
+
+func TestCheck_Cursor(t *testing.T) {
+	check := NewCheck("Hi", nil)
+	check.SetCursor(fyne.TextCursor)
+
+	assert.Equal(t, fyne.TextCursor, check.Cursor())
 }
 
 func TestCheck_BackgroundStyle(t *testing.T) {

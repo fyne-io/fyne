@@ -23,6 +23,17 @@ func TestHyperlink_MinSize(t *testing.T) {
 	assert.True(t, hyperlink.MinSize().Width > min.Width)
 }
 
+func TestHyperlink_Cursor(t *testing.T) {
+	u, err := url.Parse("https://fyne.io/")
+	hyperlink := NewHyperlink("Test", u)
+
+	assert.Nil(t, err)
+	assert.Equal(t, fyne.PointerCursor, hyperlink.Cursor())
+
+	hyperlink.SetCursor(fyne.DefaultCursor)
+	assert.Equal(t, fyne.DefaultCursor, hyperlink.Cursor())
+}
+
 func TestHyperlink_Alignment(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink)[0].Alignment)

@@ -19,6 +19,13 @@ func TestButton_MinSize(t *testing.T) {
 	assert.True(t, min.Height > theme.Padding()*2)
 }
 
+func TestButton_Cursor(t *testing.T) {
+	button := NewButton("Hi", nil)
+	button.SetCursor(fyne.PointerCursor)
+
+	assert.Equal(t, fyne.PointerCursor, button.Cursor())
+}
+
 func TestButton_SetText(t *testing.T) {
 	button := NewButton("Hi", nil)
 	min1 := button.MinSize()

@@ -560,6 +560,19 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 }
 
+// Cursor returns the cursor type of this widget
+func (e *Entry) Cursor() fyne.Cursor {
+	if e.BaseWidget.cursor == "" {
+		return fyne.TextCursor
+	}
+	return e.BaseWidget.cursor
+}
+
+// SetCursor sets the cursor type of this widget when it is hovered
+func (e *Entry) SetCursor(cursor fyne.Cursor) {
+	e.BaseWidget.cursor = cursor
+}
+
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
 // update the existing selection (if shift is held), or start a selection dragging operation.
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
@@ -1185,6 +1198,15 @@ type passwordRevealer struct {
 
 func (pr *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 	return &passwordRevealerRenderer{icon: pr.icon, entry: pr.entry}
+}
+
+// Cursor returns the cursor type of this widget
+func (pr *passwordRevealer) Cursor() fyne.Cursor {
+	return fyne.DefaultCursor
+}
+
+// SetCursor sets the cursor type of this widget when it is hovered
+func (pr *passwordRevealer) SetCursor(cursor fyne.Cursor) {
 }
 
 func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {

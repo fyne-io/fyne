@@ -188,6 +188,16 @@ func (r *Radio) indexByPosition(pos fyne.Position) int {
 	return index
 }
 
+// Cursor returns the cursor type of this widget
+func (r *Radio) Cursor() fyne.Cursor {
+	return r.BaseWidget.cursor
+}
+
+// SetCursor sets the cursor type of this widget when it is hovered
+func (r *Radio) SetCursor(cursor fyne.Cursor) {
+	r.BaseWidget.cursor = cursor
+}
+
 // MouseIn is called when a desktop pointer enters the widget
 func (r *Radio) MouseIn(event *desktop.MouseEvent) {
 	if r.Disabled() {

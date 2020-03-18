@@ -46,6 +46,16 @@ func NewSlider(min, max float64) *Slider {
 	return slider
 }
 
+// Cursor returns the cursor type of this widget
+func (s *Slider) Cursor() fyne.Cursor {
+	return s.BaseWidget.cursor
+}
+
+// SetCursor sets the cursor type of this widget when it is hovered
+func (s *Slider) SetCursor(cursor fyne.Cursor) {
+	s.BaseWidget.cursor = cursor
+}
+
 // DragEnd function.
 func (s *Slider) DragEnd() {
 }

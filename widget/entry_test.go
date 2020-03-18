@@ -41,6 +41,14 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
+func TestEntry_Cursor(t *testing.T) {
+	entry := NewEntry()
+	assert.Equal(t, fyne.TextCursor, entry.Cursor())
+
+	entry.SetCursor(fyne.DefaultCursor)
+	assert.Equal(t, fyne.DefaultCursor, entry.Cursor())
+}
+
 func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
 	entry.MinSize()

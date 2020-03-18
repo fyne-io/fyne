@@ -35,6 +35,19 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 	return hl
 }
 
+// Cursor returns the cursor type of this widget
+func (hl *Hyperlink) Cursor() fyne.Cursor {
+	if hl.BaseWidget.cursor == "" {
+		return fyne.PointerCursor
+	}
+	return hl.BaseWidget.cursor
+}
+
+// SetCursor sets the cursor type of this widget when it is hovered
+func (hl *Hyperlink) SetCursor(cursor fyne.Cursor) {
+	hl.BaseWidget.cursor = cursor
+}
+
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
 	hl.Text = text
