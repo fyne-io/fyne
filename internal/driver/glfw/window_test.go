@@ -59,32 +59,26 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
-func cursorForObject(obj fyne.CanvasObject) *glfw.Cursor {
-	if wid, ok := obj.(*widget.Entry); ok {
-		if !wid.Disabled() {
-			return entryCursor
-		}
-	} else if _, ok := obj.(*widget.Hyperlink); ok {
-		return hyperlinkCursor
-	} else if _, ok := obj.(*widget.SelectEntry); ok {
-		return entryCursor
+func cursorForObject(obj fyne.CanvasObject) fyne.Cursor {
+	cursor := fyne.DefaultCursor
+	if cursorable, ok := obj.(fyne.Cursorable); ok {
+		cursor = cursorable.Cursor()
 	}
-
-	return defaultCursor
+	return cursor
 }
 
 func TestWindow_Cursor(t *testing.T) {
 	d.CreateWindow("Test")
 
-	assert.Same(t, defaultCursor, cursorForObject(widget.NewLabel("")))
+	assert.Equal(t, fyne.DefaultCursor, cursorForObject(widget.NewLabel("")))
 
 	entry := widget.NewEntry()
-	assert.Same(t, entryCursor, cursorForObject(entry))
+	assert.Equal(t, fyne.TextCursor, cursorForObject(entry))
 	entry.Disable()
-	assert.Same(t, defaultCursor, cursorForObject(entry))
+	assert.Equal(t, fyne.TextCursor, cursorForObject(entry))
 
 	selectEntry := widget.NewSelectEntry([]string{"A", "B", "C"})
-	assert.Same(t, entryCursor, cursorForObject(selectEntry))
+	assert.Equal(t, fyne.TextCursor, cursorForObject(selectEntry))
 }
 
 func TestWindow_HandleHoverable(t *testing.T) {

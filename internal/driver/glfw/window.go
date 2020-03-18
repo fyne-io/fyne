@@ -18,7 +18,6 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
-	"fyne.io/fyne/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -29,16 +28,9 @@ const (
 )
 
 var (
-	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
-	initOnce                                    = &sync.Once{}
-	defaultTitle                                = "Fyne Application"
+	initOnce     = &sync.Once{}
+	defaultTitle = "Fyne Application"
 )
-
-func initCursors() {
-	defaultCursor = glfw.CreateStandardCursor(glfw.ArrowCursor)
-	entryCursor = glfw.CreateStandardCursor(glfw.IBeamCursor)
-	hyperlinkCursor = glfw.CreateStandardCursor(glfw.HandCursor)
-}
 
 // Declare conformity to Window interface
 var _ fyne.Window = (*window)(nil)
@@ -502,17 +494,31 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), roots...)
 }
 
+var cursorMap = map[fyne.Cursor]glfw.StandardCursor{
+	fyne.DefaultCursor:   glfw.ArrowCursor,
+	fyne.TextCursor:      glfw.IBeamCursor,
+	fyne.CrosshairCursor: glfw.CrosshairCursor,
+	fyne.PointerCursor:   glfw.HandCursor,
+	fyne.HResizeCursor:   glfw.HResizeCursor,
+	fyne.VResizeCursor:   glfw.VResizeCursor,
+}
+
+func cursorToName(cursor fyne.Cursor) *glfw.Cursor {
+	cur, ok := cursorMap[cursor]
+	if !ok {
+		return glfw.CreateStandardCursor(glfw.ArrowCursor)
+	}
+	return glfw.CreateStandardCursor(cur)
+}
+
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
-	cursor := defaultCursor
+	cursor := cursorToName(fyne.DefaultCursor)
 	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
-		entry, entOk := object.(*widget.Entry)
-		_, selOk := object.(*widget.SelectEntry)
-		if (entOk && !entry.Disabled()) || selOk {
-			cursor = entryCursor
-		} else if _, ok := object.(*widget.Hyperlink); ok {
-			cursor = hyperlinkCursor
+		if cursorable, ok := object.(fyne.Cursorable); ok {
+			fyneCursor := cursorable.Cursor()
+			cursor = cursorToName(fyneCursor)
 		}
 
 		_, hover := object.(desktop.Hoverable)
