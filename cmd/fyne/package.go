@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"fyne.io/fyne"
@@ -22,6 +23,10 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
+)
+
+const (
+	defaultAppVersion = "1.0"
 )
 
 func exists(path string) bool {
@@ -83,13 +88,59 @@ func runAsAdminWindows(args ...string) error {
 	return exec.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
 }
 
+func parseNumericVersion(vers string) ([]int, error) {
+	parts := strings.Split(vers, ".")
+	if len(parts) == 0 {
+		return nil, errors.New("version is empty")
+	}
+	numbers := make([]int, len(parts))
+	for ii, v := range parts {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing component %q in version %q: %v", v, vers, err)
+		}
+		numbers[ii] = n
+	}
+	return numbers, nil
+}
+
+// buildNumericComponentsVersion allows creating a version identifier
+// based on dot separated numeric components with the number of in
+// the given [min, max] range. If the version has less than minimum
+// required components, zeroes are appended at the end. If the version
+// has more components than the maximum, an error is returned.
+func buildNumericVersion(vers string, min, max int) (string, error) {
+	numbers, err := parseNumericVersion(vers)
+	if err != nil {
+		return "", err
+	}
+	for len(numbers) < min {
+		numbers = append(numbers, 0)
+	}
+	if len(numbers) > max {
+		return "", fmt.Errorf("version %q has %d components but the maximum is %d", vers, len(numbers), max)
+	}
+	parts := make([]string, len(numbers))
+	for ii, n := range numbers {
+		parts[ii] = strconv.Itoa(n)
+	}
+	return strings.Join(parts, "."), nil
+}
+
 // Declare conformity to command interface
 var _ command = (*packager)(nil)
 
 type packager struct {
-	name, srcDir, dir, exe, icon string
-	os, appID                    string
-	install, release             bool
+	name, srcDir, dir, exe, icon       string
+	os, appID, appVersion, buildNumber string
+	install, release                   bool
+}
+
+func (p *packager) getAppVersion() string {
+	if p.appVersion == "" {
+		return defaultAppVersion
+	}
+	return p.appVersion
 }
 
 func (p *packager) packageLinux() error {
@@ -141,7 +192,29 @@ func (p *packager) packageDarwin() error {
 	contentsDir := ensureSubDir(appDir, "Contents")
 	info := filepath.Join(contentsDir, "Info.plist")
 	infoFile, _ := os.Create(info)
-	_, err := io.WriteString(infoFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+	// CFBundleShortVersionString must have 3 components
+	// This the user-visible version number
+	bundleVersionShort, err := buildNumericVersion(p.getAppVersion(), 3, 3)
+	if err != nil {
+		return err
+	}
+	// CFBundleVersion can't be empty nor zero. Some developers
+	// like to use it as a build number, while others prefer to
+	// set it to the same value as CFBundleShortVersionString.
+	// However, in constrast to CFBundleShortVersionString this
+	// is allowed to have 1, 2 or 3 components. If no build
+	// number is provided, we set it to the same value as
+	// CFBundleShortVersionString
+	var bundleVersion string
+	if p.buildNumber == "" {
+		bundleVersion = bundleVersionShort
+	} else {
+		bundleVersion, err = buildNumericVersion(p.buildNumber, 1, 3)
+		if err != nil {
+			return err
+		}
+	}
+	_, err = io.WriteString(infoFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
 		"<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"+
 		"<plist version=\"1.0\">\n"+
 		"<dict>\n"+
@@ -153,8 +226,10 @@ func (p *packager) packageDarwin() error {
 		"<string>"+p.appID+"</string>\n"+
 		"<key>CFBundleIconFile</key>\n"+
 		"<string>icon.icns</string>\n"+
+		"<key>CFBundleVersion</key>\n"+
+		"<string>"+bundleVersion+"</string>\n"+
 		"<key>CFBundleShortVersionString</key>\n"+
-		"<string>1.0</string>\n"+
+		"<string>"+bundleVersionShort+"</string>\n"+
 		"<key>NSHighResolutionCapable</key>\n"+
 		"<true/>\n"+
 		"<key>CFBundleInfoDictionaryVersion</key>\n"+
@@ -234,9 +309,27 @@ func (p *packager) packageWindows() error {
 	if _, err := os.Stat(manifest); os.IsNotExist(err) {
 		manifestGenerated = true
 		manifestFile, _ := os.Create(manifest)
-		_, err := io.WriteString(manifestFile, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"+
+		// Windows assembly versions have 4 numeric components. We
+		// Use the first 3 from the appVersion, then we append
+		// the buildNumber. This means that the build number can't
+		// have more than 1 component.
+		majorMinorPatch, err := buildNumericVersion(p.getAppVersion(), 3, 3)
+		if err != nil {
+			return err
+		}
+		var assemblyVersion string
+		if p.buildNumber == "" {
+			assemblyVersion = majorMinorPatch + ".0"
+		} else {
+			buildNumber, err := buildNumericVersion(p.buildNumber, 1, 1)
+			if err != nil {
+				return err
+			}
+			assemblyVersion = majorMinorPatch + "." + buildNumber
+		}
+		_, err = io.WriteString(manifestFile, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"+
 			"<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\" xmlns:asmv3=\"urn:schemas-microsoft-com:asm.v3\">\n"+
-			"<assemblyIdentity version=\"1.0.0.0\" processorArchitecture=\"*\" name=\""+p.name+"\" type=\"win32\"/>\n"+
+			"<assemblyIdentity version=\""+assemblyVersion+"\" processorArchitecture=\"*\" name=\""+p.name+"\" type=\"win32\"/>\n"+
 			"</assembly>")
 		if err != nil {
 			return errors.Wrap(err, "Failed to write manifest string")
@@ -304,6 +397,8 @@ func (p *packager) addFlags() {
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
 	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	flag.StringVar(&p.appVersion, "appVersion", "", "App version string. Must be a string of up to 3 numeric components separated by dots.")
+	flag.StringVar(&p.buildNumber, "buildNumber", "", "Optional build number")
 	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
 }
 
