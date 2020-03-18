@@ -189,9 +189,7 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 
 	d.dismiss = &widget.Button{Text: dismiss,
-		OnTapped: func() {
-			d.response <- false
-		},
+		OnTapped: d.Hide,
 	}
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
@@ -208,14 +206,10 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 	d.callback = callback
 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
-		OnTapped: func() {
-			d.response <- false
-		},
+		OnTapped: d.Hide,
 	}
 	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
-		OnTapped: func() {
-			d.response <- true
-		},
+		OnTapped: d.Hide,
 	}
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
