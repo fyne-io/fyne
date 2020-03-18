@@ -5,15 +5,15 @@ type Cursor string
 
 const (
 	// DefaultCursor is the default cursor typically an arrow
-	DefaultCursor Cursor = "Arrow"
+	DefaultCursor Cursor = "DefaultCursor"
 	// TextCursor is the cursor often used to indicate text selection
-	TextCursor Cursor = "Text"
+	TextCursor Cursor = "TextCursor"
 	// CrosshairCursor is the cursor often used to indicate bitmaps
-	CrosshairCursor Cursor = "Crosshair"
+	CrosshairCursor Cursor = "CrosshairCursor"
 	// PointerCursor is the cursor often used to indicate a link
-	PointerCursor Cursor = "Pointer"
+	PointerCursor Cursor = "PointerCursor"
 	// HResizeCursor is the cursor often used for horizontal resize
-	HResizeCursor Cursor = "HResize"
+	HResizeCursor Cursor = "HResizeCursor"
 	// VResizeCursor is the cursor often used for vertical resize
-	VResizeCursor Cursor = "VResize"
+	VResizeCursor Cursor = "VResizeCursor"
 )
