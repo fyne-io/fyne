@@ -30,7 +30,7 @@ func NewConfirm(title, message string, callback func(bool), parent fyne.Window) 
 	}
 	confirm := &widget.Button{Text: "Yes", Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
 		OnTapped: func() {
-			d.hideWithResp(true)
+			d.hideWithResponse(true)
 		},
 	}
 	d.setButtons(newButtonList(d.dismiss, confirm))

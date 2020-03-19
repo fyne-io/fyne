@@ -165,7 +165,7 @@ func (d *dialog) Show() {
 }
 
 func (d *dialog) Hide() {
-	d.hideWithResp(false)
+	d.hideWithResponse(false)
 }
 
 // SetDismissText allows custom text to be set in the confirmation button
@@ -174,7 +174,7 @@ func (d *dialog) SetDismissText(label string) {
 	widget.Refresh(d.win)
 }
 
-func (d *dialog) hideWithResp(resp bool) {
+func (d *dialog) hideWithResponse(resp bool) {
 	if d.response == nil {
 		// Already hidden
 		return
