@@ -3,7 +3,6 @@ package dialog // import "fyne.io/fyne/dialog"
 
 import (
 	"image/color"
-	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -28,48 +27,16 @@ type Dialog interface {
 var _ Dialog = (*dialog)(nil)
 
 type dialog struct {
-	callback func(bool)
-	title    string
-	icon     fyne.Resource
+	callback     func(bool)
+	sendResponse bool
+	title        string
+	icon         fyne.Resource
 
 	win            *widget.PopUp
 	bg             *canvas.Rectangle
 	content, label fyne.CanvasObject
 	dismiss        *widget.Button
-
-	response  chan bool
-	mu        sync.Mutex
-	responded bool
-	parent    fyne.Window
-}
-
-func (d *dialog) setupWait() {
-	d.mu.Lock()
-	if d.response != nil {
-		// Already shown
-		d.mu.Unlock()
-		return
-	}
-	d.response = make(chan bool)
-	d.mu.Unlock()
-	go d.wait()
-}
-
-func (d *dialog) wait() {
-	select {
-	case response := <-d.response:
-		d.mu.Lock()
-		defer d.mu.Unlock()
-		d.responded = true
-		d.win.Hide()
-		close(d.response)
-		d.response = nil
-
-		if d.callback != nil {
-			d.callback(response)
-		}
-	}
-
+	parent         fyne.Window
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
@@ -160,7 +127,7 @@ func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 }
 
 func (d *dialog) Show() {
-	d.setupWait()
+	d.sendResponse = true
 	d.win.Show()
 }
 
@@ -175,11 +142,11 @@ func (d *dialog) SetDismissText(label string) {
 }
 
 func (d *dialog) hideWithResponse(resp bool) {
-	if d.response == nil {
-		// Already hidden
-		return
+	d.win.Hide()
+	if d.sendResponse && d.callback != nil {
+		d.callback(resp)
 	}
-	d.response <- resp
+	d.sendResponse = false
 }
 
 // ShowCustom shows a dialog over the specified application using custom
