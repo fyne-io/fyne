@@ -1,4 +1,4 @@
-package fyne
+package desktop
 
 // Cursor represents a standard fyne cursor
 type Cursor string
@@ -12,8 +12,13 @@ const (
 	CrosshairCursor Cursor = "CrosshairCursor"
 	// PointerCursor is the cursor often used to indicate a link
 	PointerCursor Cursor = "PointerCursor"
-	// HResizeCursor is the cursor often used for horizontal resize
+	// HResizeCursor is the cursor often used to indicate horizontal resize
 	HResizeCursor Cursor = "HResizeCursor"
-	// VResizeCursor is the cursor often used for vertical resize
+	// VResizeCursor is the cursor often used to indicate vertical resize
 	VResizeCursor Cursor = "VResizeCursor"
 )
+
+// Cursorable describes any CanvasObject that needs a cursor change
+type Cursorable interface {
+	Cursor() Cursor
+}

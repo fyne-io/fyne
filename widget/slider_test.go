@@ -9,13 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSlider_Cursor(t *testing.T) {
-	slider := NewSlider(0, 1)
-	slider.SetCursor(fyne.PointerCursor)
-
-	assert.Equal(t, fyne.PointerCursor, slider.Cursor())
-}
-
 func TestSlider_HorizontalLayout(t *testing.T) {
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))

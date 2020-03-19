@@ -119,16 +119,6 @@ func (c *Check) SetChecked(checked bool) {
 	c.Refresh()
 }
 
-// Cursor returns the cursor type of this widget
-func (c *Check) Cursor() fyne.Cursor {
-	return c.BaseWidget.cursor
-}
-
-// SetCursor sets the cursor type of this widget when it is hovered
-func (c *Check) SetCursor(cursor fyne.Cursor) {
-	c.BaseWidget.cursor = cursor
-}
-
 // Hide this widget, if it was previously visible
 func (c *Check) Hide() {
 	if c.Focused() {

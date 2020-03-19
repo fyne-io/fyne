@@ -26,13 +26,6 @@ func TestRadio_MinSize(t *testing.T) {
 	assert.Greater(t, min2.Height, min.Height)
 }
 
-func TestRadio_Cursor(t *testing.T) {
-	radio := NewRadio([]string{"Hi"}, nil)
-	radio.SetCursor(fyne.PointerCursor)
-
-	assert.Equal(t, fyne.PointerCursor, radio.Cursor())
-}
-
 func TestRadio_BackgroundStyle(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
 	bg := test.WidgetRenderer(radio).BackgroundColor()

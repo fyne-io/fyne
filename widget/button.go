@@ -170,16 +170,6 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 }
 
-// Cursor returns the cursor type of this widget
-func (b *Button) Cursor() fyne.Cursor {
-	return b.BaseWidget.cursor
-}
-
-// SetCursor sets the cursor type of this widget when it is hovered
-func (b *Button) SetCursor(cursor fyne.Cursor) {
-	b.BaseWidget.cursor = cursor
-}
-
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true

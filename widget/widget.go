@@ -12,7 +12,6 @@ type BaseWidget struct {
 	size     fyne.Size
 	position fyne.Position
 	Hidden   bool
-	cursor	 fyne.Cursor
 
 	impl fyne.Widget
 }

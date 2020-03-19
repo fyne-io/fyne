@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -28,10 +29,7 @@ func TestHyperlink_Cursor(t *testing.T) {
 	hyperlink := NewHyperlink("Test", u)
 
 	assert.Nil(t, err)
-	assert.Equal(t, fyne.PointerCursor, hyperlink.Cursor())
-
-	hyperlink.SetCursor(fyne.DefaultCursor)
-	assert.Equal(t, fyne.DefaultCursor, hyperlink.Cursor())
+	assert.Equal(t, desktop.PointerCursor, hyperlink.Cursor())
 }
 
 func TestHyperlink_Alignment(t *testing.T) {

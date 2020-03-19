@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
@@ -36,16 +37,8 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 }
 
 // Cursor returns the cursor type of this widget
-func (hl *Hyperlink) Cursor() fyne.Cursor {
-	if hl.BaseWidget.cursor == "" {
-		return fyne.PointerCursor
-	}
-	return hl.BaseWidget.cursor
-}
-
-// SetCursor sets the cursor type of this widget when it is hovered
-func (hl *Hyperlink) SetCursor(cursor fyne.Cursor) {
-	hl.BaseWidget.cursor = cursor
+func (hl *Hyperlink) Cursor() desktop.Cursor {
+	return desktop.PointerCursor
 }
 
 // SetText sets the text of the hyperlink

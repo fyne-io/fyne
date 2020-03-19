@@ -28,9 +28,19 @@ const (
 )
 
 var (
-	initOnce     = &sync.Once{}
-	defaultTitle = "Fyne Application"
+	defaultCursor, textCursor, pointerCursor, crosshairCursor, hResizeCursor, vResizeCursor *glfw.Cursor
+	initOnce                                                                                = &sync.Once{}
+	defaultTitle                                                                            = "Fyne Application"
 )
+
+func initCursors() {
+	defaultCursor = glfw.CreateStandardCursor(glfw.ArrowCursor)
+	textCursor = glfw.CreateStandardCursor(glfw.IBeamCursor)
+	pointerCursor = glfw.CreateStandardCursor(glfw.HandCursor)
+	crosshairCursor = glfw.CreateStandardCursor(glfw.CrosshairCursor)
+	hResizeCursor = glfw.CreateStandardCursor(glfw.HResizeCursor)
+	vResizeCursor = glfw.CreateStandardCursor(glfw.VResizeCursor)
+}
 
 // Declare conformity to Window interface
 var _ fyne.Window = (*window)(nil)
@@ -494,31 +504,24 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), roots...)
 }
 
-var cursorMap = map[fyne.Cursor]glfw.StandardCursor{
-	fyne.DefaultCursor:   glfw.ArrowCursor,
-	fyne.TextCursor:      glfw.IBeamCursor,
-	fyne.CrosshairCursor: glfw.CrosshairCursor,
-	fyne.PointerCursor:   glfw.HandCursor,
-	fyne.HResizeCursor:   glfw.HResizeCursor,
-	fyne.VResizeCursor:   glfw.VResizeCursor,
-}
-
-func cursorToName(cursor fyne.Cursor) *glfw.Cursor {
-	cur, ok := cursorMap[cursor]
-	if !ok {
-		return glfw.CreateStandardCursor(glfw.ArrowCursor)
-	}
-	return glfw.CreateStandardCursor(cur)
-}
-
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
-	cursor := cursorToName(fyne.DefaultCursor)
+	cursor := defaultCursor
 	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
-		if cursorable, ok := object.(fyne.Cursorable); ok {
+		if cursorable, ok := object.(desktop.Cursorable); ok {
 			fyneCursor := cursorable.Cursor()
-			cursor = cursorToName(fyneCursor)
+			if fyneCursor == desktop.TextCursor {
+				cursor = textCursor
+			} else if fyneCursor == desktop.PointerCursor {
+				cursor = pointerCursor
+			} else if fyneCursor == desktop.CrosshairCursor {
+				cursor = crosshairCursor
+			} else if fyneCursor == desktop.HResizeCursor {
+				cursor = hResizeCursor
+			} else if fyneCursor == desktop.VResizeCursor {
+				cursor = vResizeCursor
+			}
 		}
 
 		_, hover := object.(desktop.Hoverable)

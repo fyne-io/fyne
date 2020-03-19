@@ -4,6 +4,7 @@ package glfw
 
 import (
 	"image/color"
+	"net/url"
 	"os"
 	"runtime"
 	"testing"
@@ -59,26 +60,32 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
-func cursorForObject(obj fyne.CanvasObject) fyne.Cursor {
-	cursor := fyne.DefaultCursor
-	if cursorable, ok := obj.(fyne.Cursorable); ok {
-		cursor = cursorable.Cursor()
+func cursorForObject(obj fyne.CanvasObject) *glfw.Cursor {
+	cursor := defaultCursor
+	if cursorable, ok := obj.(desktop.Cursorable); ok {
+		fyneCursor := cursorable.Cursor()
+		if fyneCursor == desktop.TextCursor {
+			return textCursor
+		} else if fyneCursor == desktop.PointerCursor {
+			return pointerCursor
+		} else if fyneCursor == desktop.CrosshairCursor {
+			return crosshairCursor
+		} else if fyneCursor == desktop.HResizeCursor {
+			return hResizeCursor
+		} else if fyneCursor == desktop.VResizeCursor {
+			return vResizeCursor
+		}
 	}
 	return cursor
 }
 
 func TestWindow_Cursor(t *testing.T) {
 	d.CreateWindow("Test")
+	u, _ := url.Parse("https://testing.fyne")
 
-	assert.Equal(t, fyne.DefaultCursor, cursorForObject(widget.NewLabel("")))
-
-	entry := widget.NewEntry()
-	assert.Equal(t, fyne.TextCursor, cursorForObject(entry))
-	entry.Disable()
-	assert.Equal(t, fyne.TextCursor, cursorForObject(entry))
-
-	selectEntry := widget.NewSelectEntry([]string{"A", "B", "C"})
-	assert.Equal(t, fyne.TextCursor, cursorForObject(selectEntry))
+	assert.Same(t, textCursor, cursorForObject(widget.NewEntry()))
+	assert.Same(t, pointerCursor, cursorForObject(widget.NewHyperlink("Testing", u)))
+	assert.Same(t, defaultCursor, cursorForObject(widget.NewButton("Test", nil)))
 }
 
 func TestWindow_HandleHoverable(t *testing.T) {

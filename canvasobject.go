@@ -79,9 +79,3 @@ type Focusable interface {
 type Shortcutable interface {
 	TypedShortcut(Shortcut)
 }
-
-// Cursorable describes any CanvasObject that needs a cursor change
-type Cursorable interface {
-	Cursor() Cursor
-	SetCursor(Cursor)
-}
