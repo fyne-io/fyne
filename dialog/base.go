@@ -209,7 +209,9 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 		OnTapped: d.Hide,
 	}
 	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
-		OnTapped: d.Hide,
+		OnTapped: func() {
+			d.hideWithResponse(true)
+		},
 	}
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
