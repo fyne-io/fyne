@@ -129,7 +129,7 @@ func (w *window) CenterOnScreen() {
 // centerOnScreen handles the logic for centering a window
 func (w *window) centerOnScreen() {
 	runOnMain(func() {
-		viewWidth, viewHeight := w.viewport.GetSize()
+		viewWidth, viewHeight := w.screenSize(w.canvas.size)
 
 		// get window dimensions in pixels
 		monitor := w.getMonitorForWindow()
