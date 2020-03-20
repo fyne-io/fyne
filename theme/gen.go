@@ -156,6 +156,16 @@ func main() {
 	bundleIcon("media-skip-next", f)
 	bundleIcon("media-skip-previous", f)
 
+	bundleIcon("text-align-leading", f)
+	bundleIcon("text-align-center", f)
+	bundleIcon("text-align-trailing", f)
+	bundleIcon("text-align-justify", f)
+
+	bundleIcon("text-wrap-off", f)
+	bundleIcon("text-truncate", f)
+	bundleIcon("text-wrap-break", f)
+	bundleIcon("text-wrap-word", f)
+
 	bundleIcon("view-fullscreen", f)
 	bundleIcon("view-refresh", f)
 	bundleIcon("view-zoom-fit", f)

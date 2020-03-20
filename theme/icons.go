@@ -96,6 +96,8 @@ var (
 	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                  *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
 	file, folder, folderNew, folderOpen, help, home, settings                   *ThemedResource
+	textAlignLeading, textAlignCenter, textAlignTrailing, textAlignJustify      *ThemedResource
+	textWrapOff, textTruncate, textWrapBreak, textWrapWord                      *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
 	visibility, visibilityOff, volumeDown, volumeMute, volumeUp                 *ThemedResource
 )
@@ -160,6 +162,16 @@ func init() {
 	help = NewThemedResource(helpIconRes, nil)
 	home = NewThemedResource(homeIconRes, nil)
 	settings = NewThemedResource(settingsIconRes, nil)
+
+	textAlignLeading = NewThemedResource(textalignleadingIconRes, nil)
+	textAlignCenter = NewThemedResource(textaligncenterIconRes, nil)
+	textAlignTrailing = NewThemedResource(textaligntrailingIconRes, nil)
+	textAlignJustify = NewThemedResource(textalignjustifyIconRes, nil)
+
+	textWrapOff = NewThemedResource(textwrapoffIconRes, nil)
+	textTruncate = NewThemedResource(texttruncateIconRes, nil)
+	textWrapBreak = NewThemedResource(textwrapbreakIconRes, nil)
+	textWrapWord = NewThemedResource(textwrapwordIconRes, nil)
 
 	viewFullScreen = NewThemedResource(viewfullscreenIconRes, nil)
 	viewRefresh = NewThemedResource(viewrefreshIconRes, nil)
@@ -438,6 +450,46 @@ func MenuDropDownIcon() fyne.Resource {
 // MenuDropUpIcon returns a resource containing the standard menu drop up icon for the current theme
 func MenuDropUpIcon() fyne.Resource {
 	return arrowDropUp
+}
+
+// TextAlignLeadingIcon returns a resource containing the standard text leading alignment icon for the current theme
+func TextAlignLeadingIcon() fyne.Resource {
+	return textAlignLeading
+}
+
+// TextAlignCenterIcon returns a resource containing the standard text center alignment icon for the current theme
+func TextAlignCenterIcon() fyne.Resource {
+	return textAlignCenter
+}
+
+// TextAlignTrailingIcon returns a resource containing the standard text trailing alignment icon for the current theme
+func TextAlignTrailingIcon() fyne.Resource {
+	return textAlignTrailing
+}
+
+// TextAlignJustifyIcon returns a resource containing the standard text justify alignment icon for the current theme
+func TextAlignJustifyIcon() fyne.Resource {
+	return textAlignJustify
+}
+
+// TextWrapOffIcon returns a resource containing the standard text wrap off icon for the current theme
+func TextWrapOffIcon() fyne.Resource {
+	return textWrapOff
+}
+
+// TextTruncateIcon returns a resource containing the standard text truncate icon for the current theme
+func TextTruncateIcon() fyne.Resource {
+	return textTruncate
+}
+
+// TextWrapBreakIcon returns a resource containing the standard text wrap break icon for the current theme
+func TextWrapBreakIcon() fyne.Resource {
+	return textWrapBreak
+}
+
+// TextWrapWordIcon returns a resource containing the standard text wrap word icon for the current theme
+func TextWrapWordIcon() fyne.Resource {
+	return textWrapWord
 }
 
 // ViewFullScreenIcon returns a resource containing the standard fullscreen icon for the current theme

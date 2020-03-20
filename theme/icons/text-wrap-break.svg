@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <path d="M4 5L16 5L16 7L4 7z"/>
+    <path d="M4 17L12 17L12 19L4 19z"/>
+    <path d="M4 13L16 13L15 14L16 15L4 15z"/>
+    <path d="M17 13L21 13L21 15L17 15L16 14z"/>
+    <path d="M19 16L17 18L19 20z"/>
+    <path d="M4 9L8 9L8 11L4 11z"/>
+    <line x1="16" y1="0" x2="16" y2="24" stroke="grey" stroke-dasharray="3 1" />
+</svg>
