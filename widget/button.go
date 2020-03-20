@@ -11,12 +11,11 @@ import (
 )
 
 type buttonRenderer struct {
+	*baseRenderer
+
 	icon   *canvas.Image
 	label  *canvas.Text
-	shadow *shadow
-
-	objects []fyne.CanvasObject
-	button  *Button
+	button *Button
 }
 
 func (b *buttonRenderer) padding() fyne.Size {
@@ -47,13 +46,7 @@ func (b *buttonRenderer) MinSize() fyne.Size {
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
-	if b.shadow != nil {
-		if b.button.HideShadow {
-			b.shadow.Hide()
-		} else {
-			b.shadow.Resize(size)
-		}
-	}
+	b.layoutShadow(size, fyne.NewPos(0, 0))
 	if b.button.Text != "" {
 		padding := b.padding()
 		innerSize := size.Subtract(padding)
@@ -125,16 +118,8 @@ func (b *buttonRenderer) Refresh() {
 		b.icon.Hide()
 	}
 
-	if b.shadow != nil {
-		b.shadow.depth = theme.Padding() / 2
-	}
-
 	b.Layout(b.button.Size())
 	canvas.Refresh(b.button.super())
-}
-
-func (b *buttonRenderer) Objects() []fyne.CanvasObject {
-	return b.objects
 }
 
 func (b *buttonRenderer) Destroy() {
@@ -206,16 +191,15 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{
 		text,
 	}
-	var shadow *shadow
-	if !b.HideShadow {
-		shadow = newShadow(shadowAround, theme.Padding()/2)
-		objects = append(objects, shadow)
+	shadowLevel := 1
+	if b.HideShadow {
+		shadowLevel = 0
 	}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{icon, text, shadow, objects, b}
+	return &buttonRenderer{newBaseRenderer(objects, shadowLevel), icon, text, b}
 }
 
 // SetText allows the button label to be changed
