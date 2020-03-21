@@ -10,9 +10,7 @@ func createTextDialog(title, message string, icon fyne.Resource, parent fyne.Win
 	d := newDialog(title, message, icon, nil, parent)
 
 	d.dismiss = &widget.Button{Text: "OK",
-		OnTapped: func() {
-			d.response <- false
-		},
+		OnTapped: d.Hide,
 	}
 	d.setButtons(newButtonList(d.dismiss))
 
