@@ -39,6 +39,32 @@ func TestSizeUnion(t *testing.T) {
 	assert.Equal(t, size3.Height, maxH)
 }
 
+func TestSizeMax(t *testing.T) {
+	size1 := NewSize(10, 100)
+	size2 := NewSize(100, 10)
+
+	size3 := size1.Max(size2)
+
+	maxW := Max(size1.Width, size2.Width)
+	maxH := Max(size1.Height, size2.Height)
+
+	assert.Equal(t, size3.Width, maxW)
+	assert.Equal(t, size3.Height, maxH)
+}
+
+func TestSizeMin(t *testing.T) {
+	size1 := NewSize(10, 100)
+	size2 := NewSize(100, 10)
+
+	size3 := size1.Min(size2)
+
+	minW := Min(size1.Width, size2.Width)
+	minH := Min(size1.Height, size2.Height)
+
+	assert.Equal(t, size3.Width, minW)
+	assert.Equal(t, size3.Height, minH)
+}
+
 func TestPosition_Add(t *testing.T) {
 	pos1 := NewPos(10, 10)
 	pos2 := NewPos(25, 25)
