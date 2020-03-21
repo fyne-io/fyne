@@ -207,7 +207,7 @@ func TestModalPopUp_Resize(t *testing.T) {
 	win := test.NewWindow(NewLabel("OK"))
 	win.Resize(fyne.NewSize(80, 80))
 	pop := NewModalPopUp(label, win.Canvas())
-	defer test.Canvas().Overlays().Remove(pop)
+	defer win.Canvas().Overlays().Remove(pop)
 
 	assert.Less(t, pop.Content.Size().Width, 70)
 	assert.Less(t, pop.Content.Size().Height, 50)
@@ -224,7 +224,7 @@ func TestModalPopUp_Resize_Constrained(t *testing.T) {
 	win := test.NewWindow(NewLabel("OK"))
 	win.Resize(fyne.NewSize(80, 80))
 	pop := NewModalPopUp(label, win.Canvas())
-	defer test.Canvas().Overlays().Remove(pop)
+	defer win.Canvas().Overlays().Remove(pop)
 
 	pop.Resize(fyne.NewSize(90, 100))
 	assert.Equal(t, 80, pop.Content.Size().Width)
@@ -238,7 +238,7 @@ func TestModalPopUp_Resize_ConstrainedMin(t *testing.T) {
 	win := test.NewWindow(NewLabel("OK"))
 	win.Resize(fyne.NewSize(80, 80))
 	pop := NewModalPopUp(label, win.Canvas())
-	defer test.Canvas().Overlays().Remove(pop)
+	defer win.Canvas().Overlays().Remove(pop)
 
 	win.Resize(fyne.NewSize(30, 20))
 	assert.Greater(t, pop.Content.Size().Width, 30)
