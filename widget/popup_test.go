@@ -118,7 +118,7 @@ func TestPopUp_Resize(t *testing.T) {
 	assert.Equal(t, size.Height-theme.Padding()*2, innerSize.Height)
 
 	popSize := pop.Size()
-	assert.Equal(t, 80, popSize.Width) // these are 50 as the popUp must fill our overlay
+	assert.Equal(t, 80, popSize.Width) // these are 80 as the popUp must fill our overlay
 	assert.Equal(t, 80, popSize.Height)
 }
 
@@ -200,4 +200,49 @@ func TestModalPopUp_TappedSecondary(t *testing.T) {
 	assert.True(t, pop.Visible())
 	assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
 	assert.Equal(t, pop, test.Canvas().Overlays().List()[0])
+}
+
+func TestModalPopUp_Resize(t *testing.T) {
+	label := NewLabel("Hi")
+	win := test.NewWindow(NewLabel("OK"))
+	win.Resize(fyne.NewSize(80, 80))
+	pop := NewModalPopUp(label, win.Canvas())
+	defer test.Canvas().Overlays().Remove(pop)
+
+	assert.Less(t, pop.Content.Size().Width, 70)
+	assert.Less(t, pop.Content.Size().Height, 50)
+
+	pop.Resize(fyne.NewSize(70, 50))
+	assert.Equal(t, 70-theme.Padding()*2, pop.Content.Size().Width)
+	assert.Equal(t, 50-theme.Padding()*2, pop.Content.Size().Height)
+	assert.Equal(t, 80, pop.Size().Width) // these are 80 as the popUp must fill our overlay
+	assert.Equal(t, 80, pop.Size().Height)
+}
+
+func TestModalPopUp_Resize_Constrained(t *testing.T) {
+	label := NewLabel("Hi")
+	win := test.NewWindow(NewLabel("OK"))
+	win.Resize(fyne.NewSize(80, 80))
+	pop := NewModalPopUp(label, win.Canvas())
+	defer test.Canvas().Overlays().Remove(pop)
+
+	pop.Resize(fyne.NewSize(90, 100))
+	assert.Equal(t, 80, pop.Content.Size().Width)
+	assert.Equal(t, 80, pop.Content.Size().Height)
+	assert.Equal(t, 80, pop.Size().Width)
+	assert.Equal(t, 80, pop.Size().Height)
+}
+
+func TestModalPopUp_Resize_ConstrainedMin(t *testing.T) {
+	label := NewLabel("Hi")
+	win := test.NewWindow(NewLabel("OK"))
+	win.Resize(fyne.NewSize(80, 80))
+	pop := NewModalPopUp(label, win.Canvas())
+	defer test.Canvas().Overlays().Remove(pop)
+
+	win.Resize(fyne.NewSize(30, 20))
+	assert.Greater(t, pop.Content.Size().Width, 30)
+	assert.Greater(t, pop.Content.Size().Height, 20)
+	assert.Greater(t, pop.Size().Width, 30)
+	assert.Greater(t, pop.Size().Height, 20)
 }
