@@ -26,7 +26,7 @@ func mkdir(dir string) error {
 	if buildN {
 		return nil
 	}
-	return os.MkdirAll(dir, 0755)
+	return os.MkdirAll(dir, 0750)
 }
 
 func removeAll(path string) error {
