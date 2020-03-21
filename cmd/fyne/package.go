@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"strings"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/jackmordaunt/icns"
@@ -34,7 +35,10 @@ func exists(path string) bool {
 func ensureSubDir(parent, name string) string {
 	path := filepath.Join(parent, name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, os.ModePerm)
+		err := os.Mkdir(path, os.ModePerm)
+		if err != nil {
+			fyne.LogError("Failed to create dirrectory", err)
+		}
 	}
 	return path
 }
@@ -95,24 +99,36 @@ func (p *packager) packageLinux() error {
 	appsDir := ensureSubDir(shareDir, "applications")
 	desktop := filepath.Join(appsDir, p.name+".desktop")
 	deskFile, _ := os.Create(desktop)
-	io.WriteString(deskFile, "[Desktop Entry]\n"+
+	_, err := io.WriteString(deskFile, "[Desktop Entry]\n"+
 		"Type=Application\n"+
 		"Name="+p.name+"\n"+
 		"Exec="+filepath.Base(p.exe)+"\n"+
 		"Icon="+p.name+"\n")
+	if err != nil {
+		return errors.Wrap(err, "Failed to write desktop entry string")
+	}
 
 	binDir := ensureSubDir(prefixDir, "bin")
 	binName := filepath.Join(binDir, filepath.Base(p.exe))
-	copyExeFile(p.exe, binName)
+	err = copyExeFile(p.exe, binName)
+	if err != nil {
+		return errors.Wrap(err, "Failed to copy exe file")
+	}
 
 	iconThemeDir := ensureSubDir(ensureSubDir(shareDir, "icons"), "hicolor")
 	iconDir := ensureSubDir(ensureSubDir(iconThemeDir, "512x512"), "apps")
 	iconPath := filepath.Join(iconDir, p.name+filepath.Ext(p.icon))
-	copyFile(p.icon, iconPath)
+	err = copyFile(p.icon, iconPath)
+	if err != nil {
+		return errors.Wrap(err, "Failed to copy icon")
+	}
 
 	if !p.install {
 		tarCmd := exec.Command("tar", "zcf", p.name+".tar.gz", "usr")
-		tarCmd.Run()
+		err := tarCmd.Run()
+		if err != nil {
+			return errors.Wrap(err, "Failed to create archive with tar")
+		}
 	}
 
 	return nil
@@ -125,7 +141,7 @@ func (p *packager) packageDarwin() error {
 	contentsDir := ensureSubDir(appDir, "Contents")
 	info := filepath.Join(contentsDir, "Info.plist")
 	infoFile, _ := os.Create(info)
-	io.WriteString(infoFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+	_, err := io.WriteString(infoFile, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
 		"<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"+
 		"<plist version=\"1.0\">\n"+
 		"<dict>\n"+
@@ -147,10 +163,16 @@ func (p *packager) packageDarwin() error {
 		"<string>APPL</string>\n"+
 		"</dict>\n"+
 		"</plist>\n")
+	if err != nil {
+		return errors.Wrap(err, "Failed to write infoFile string")
+	}
 
 	macOSDir := ensureSubDir(contentsDir, "MacOS")
 	binName := filepath.Join(macOSDir, exeName)
-	copyExeFile(p.exe, binName)
+	err = copyExeFile(p.exe, binName)
+	if err != nil {
+		return errors.Wrap(err, "Failed to copy exe file")
+	}
 
 	resDir := ensureSubDir(contentsDir, "Resources")
 	icnsPath := filepath.Join(resDir, "icon.icns")
@@ -195,8 +217,17 @@ func (p *packager) packageWindows() error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to open image file")
 	}
-	ico.Encode(file, srcImg)
-	file.Close()
+
+	err = ico.Encode(file, srcImg)
+	if err != nil {
+		return errors.Wrap(err, "Failed to encode icon")
+	}
+
+	err = file.Close()
+	if err != nil {
+		// Might not be necessary to return here (looks at reviewer)...
+		return errors.Wrap(err, "Failed to close image file")
+	}
 
 	// write manifest
 	manifest := p.exe + ".manifest"
@@ -204,10 +235,13 @@ func (p *packager) packageWindows() error {
 	if _, err := os.Stat(manifest); os.IsNotExist(err) {
 		manifestGenerated = true
 		manifestFile, _ := os.Create(manifest)
-		io.WriteString(manifestFile, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"+
+		_, err := io.WriteString(manifestFile, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"+
 			"<assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\" xmlns:asmv3=\"urn:schemas-microsoft-com:asm.v3\">\n"+
 			"<assemblyIdentity version=\"1.0.0.0\" processorArchitecture=\"*\" name=\""+p.name+"\" type=\"win32\"/>\n"+
 			"</assembly>")
+		if err != nil {
+			return errors.Wrap(err, "Failed to write manifest string")
+		}
 	}
 
 	// launch rsrc to generate the object file
@@ -220,11 +254,19 @@ func (p *packager) packageWindows() error {
 
 	vi.Build()
 	vi.Walk()
-	vi.WriteSyso(outPath, runtime.GOARCH)
+	err = vi.WriteSyso(outPath, runtime.GOARCH)
+	if err != nil {
+		return errors.Wrap(err, "Failed to write .syso file")
+	}
 
-	os.Remove(icoPath)
-	if manifestGenerated {
-		os.Remove(manifest)
+	err = os.Remove(icoPath)
+	if err != nil {
+		return errors.Wrap(err, "Failed to remove icon")
+	} else if manifestGenerated {
+		err := os.Remove(manifest)
+		if err != nil {
+			return errors.Wrap(err, "Failed to remove manifest")
+		}
 	}
 
 	err = p.buildPackage()
@@ -233,7 +275,10 @@ func (p *packager) packageWindows() error {
 	}
 
 	if p.install {
-		runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
+		err := runAsAdminWindows("copy", "\"\""+p.exe+"\"\"", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
+		if err != nil {
+			return errors.Wrap(err, "Failed to run as administrator")
+		}
 	}
 	return nil
 }

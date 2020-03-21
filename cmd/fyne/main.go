@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"fyne.io/fyne"
 )
 
 var commands []idCommandPair
@@ -100,7 +102,12 @@ func main() {
 		provider.addFlags()
 
 		// then parse the remaining args
-		flag.CommandLine.Parse(args[1:])
+		err := flag.CommandLine.Parse(args[1:])
+		if err != nil {
+			fyne.LogError("Failed to parse flags", err)
+			return
+		}
+
 		provider.run(flag.Args())
 	}
 }

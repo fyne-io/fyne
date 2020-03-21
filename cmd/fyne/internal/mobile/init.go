@@ -40,7 +40,10 @@ func removeAll(path string) error {
 	// os.RemoveAll behaves differently in windows.
 	// http://golang.org/issues/9606
 	if goos == "windows" {
-		resetReadOnlyFlagAll(path)
+		err := resetReadOnlyFlagAll(path)
+		if err != nil {
+			return err
+		}
 	}
 
 	return os.RemoveAll(path)
@@ -62,7 +65,10 @@ func resetReadOnlyFlagAll(path string) error {
 
 	names, _ := fd.Readdirnames(-1)
 	for _, name := range names {
-		resetReadOnlyFlagAll(path + string(filepath.Separator) + name)
+		err := resetReadOnlyFlagAll(path + string(filepath.Separator) + name)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

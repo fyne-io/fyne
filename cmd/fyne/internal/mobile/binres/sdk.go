@@ -39,7 +39,10 @@ func apiResources() ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			rc.Close()
+			err = rc.Close()
+			if err != nil {
+				return nil, err
+			}
 			break
 		}
 	}
