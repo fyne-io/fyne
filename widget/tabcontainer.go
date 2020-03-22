@@ -269,10 +269,12 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 		t.line.Move(fyne.NewPos(0, buttonHeight))
 		t.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
 
-		child := t.container.Items[t.container.current].Content
-		barHeight := buttonHeight + theme.Padding()
-		child.Move(fyne.NewPos(0, barHeight))
-		child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
+		if t.container.current < len(t.container.Items) {
+			child := t.container.Items[t.container.current].Content
+			barHeight := buttonHeight + theme.Padding()
+			child.Move(fyne.NewPos(0, barHeight))
+			child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
+		}
 	case TabLocationLeading:
 		buttonWidth := t.tabBar.MinSize().Width
 		t.tabBar.Move(fyne.NewPos(0, 0))
@@ -280,10 +282,12 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 		t.line.Move(fyne.NewPos(buttonWidth, 0))
 		t.line.Resize(fyne.NewSize(theme.Padding(), size.Height))
 
-		child := t.container.Items[t.container.current].Content
-		barWidth := buttonWidth + theme.Padding()
-		child.Move(fyne.NewPos(barWidth, 0))
-		child.Resize(fyne.NewSize(size.Width-barWidth, size.Height))
+		if t.container.current < len(t.container.Items) {
+			child := t.container.Items[t.container.current].Content
+			barWidth := buttonWidth + theme.Padding()
+			child.Move(fyne.NewPos(barWidth, 0))
+			child.Resize(fyne.NewSize(size.Width-barWidth, size.Height))
+		}
 	case TabLocationBottom:
 		buttonHeight := t.tabBar.MinSize().Height
 		t.tabBar.Move(fyne.NewPos(0, size.Height-buttonHeight))
@@ -292,9 +296,11 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 		t.line.Move(fyne.NewPos(0, size.Height-barHeight))
 		t.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
 
-		child := t.container.Items[t.container.current].Content
-		child.Move(fyne.NewPos(0, 0))
-		child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
+		if t.container.current < len(t.container.Items) {
+			child := t.container.Items[t.container.current].Content
+			child.Move(fyne.NewPos(0, 0))
+			child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
+		}
 	case TabLocationTrailing:
 		buttonWidth := t.tabBar.MinSize().Width
 		t.tabBar.Move(fyne.NewPos(size.Width-buttonWidth, 0))
@@ -303,9 +309,11 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 		t.line.Move(fyne.NewPos(size.Width-barWidth, 0))
 		t.line.Resize(fyne.NewSize(theme.Padding(), size.Height))
 
-		child := t.container.Items[t.container.current].Content
-		child.Move(fyne.NewPos(0, 0))
-		child.Resize(fyne.NewSize(size.Width-barWidth, size.Height))
+		if t.container.current < len(t.container.Items) {
+			child := t.container.Items[t.container.current].Content
+			child.Move(fyne.NewPos(0, 0))
+			child.Resize(fyne.NewSize(size.Width-barWidth, size.Height))
+		}
 	}
 }
 
