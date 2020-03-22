@@ -209,8 +209,8 @@ func TestModalPopUp_Resize(t *testing.T) {
 	pop := NewModalPopUp(label, win.Canvas())
 	defer win.Canvas().Overlays().Remove(pop)
 
-	assert.Less(t, pop.Content.Size().Width, 70)
-	assert.Less(t, pop.Content.Size().Height, 50)
+	assert.Less(t, pop.Content.Size().Width, 70-theme.Padding()*2)
+	assert.Less(t, pop.Content.Size().Height, 50-theme.Padding()*2)
 
 	pop.Resize(fyne.NewSize(70, 50))
 	assert.Equal(t, 70-theme.Padding()*2, pop.Content.Size().Width)
