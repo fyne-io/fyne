@@ -55,7 +55,7 @@ func (t *menuItemWidget) Tapped(*fyne.PointEvent) {
 }
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
-	return &hoverLabelRenderer{t.Label.CreateRenderer().(*textRenderer), t}
+	return &menuItemWidgetRenderer{t.Label.CreateRenderer().(*textRenderer), t}
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -82,12 +82,12 @@ func newMenuItemWidget(label string) *menuItemWidget {
 	return ret
 }
 
-type hoverLabelRenderer struct {
+type menuItemWidgetRenderer struct {
 	*textRenderer
 	label *menuItemWidget
 }
 
-func (h *hoverLabelRenderer) BackgroundColor() color.Color {
+func (h *menuItemWidgetRenderer) BackgroundColor() color.Color {
 	if h.label.hovered {
 		return theme.HoverColor()
 	}
