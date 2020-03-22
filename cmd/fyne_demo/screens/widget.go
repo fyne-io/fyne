@@ -47,6 +47,7 @@ func makeTextTab() fyne.Widget {
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
+	entryLoremIpsumScroller := widget.NewScrollContainer(entryLoremIpsum)
 
 	radioAlign := widget.NewRadio([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
 		var align fyne.TextAlign
@@ -94,6 +95,7 @@ func makeTextTab() fyne.Widget {
 		entryDisabled.Refresh()
 		entryMultiLine.Refresh()
 		entryLoremIpsum.Refresh()
+		entryLoremIpsumScroller.Refresh()
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 	radioWrap.OnChanged("Text Wrapping Word")
@@ -109,7 +111,7 @@ func makeTextTab() fyne.Widget {
 		entry,
 		entryDisabled,
 		entryMultiLine,
-		entryLoremIpsum,
+		entryLoremIpsumScroller,
 	)
 }
 
