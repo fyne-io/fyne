@@ -43,6 +43,33 @@ func TestScrollContainer_MinSize(t *testing.T) {
 	assert.Equal(t, 0, scroll.Offset.Y)
 }
 
+func TestScrollContainer_Direction(t *testing.T) {
+	t.Run("Both", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewScrollContainer(rect)
+		size := scroll.MinSize()
+		assert.Equal(t, 32, size.Height)
+		assert.Equal(t, 32, size.Width)
+	})
+	t.Run("HorizontalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewHorizontalScrollContainer(rect)
+		size := scroll.MinSize()
+		assert.Equal(t, 100, size.Height)
+		assert.Equal(t, 32, size.Width)
+	})
+	t.Run("VerticalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewVerticalScrollContainer(rect)
+		size := scroll.MinSize()
+		assert.Equal(t, 32, size.Height)
+		assert.Equal(t, 100, size.Width)
+	})
+}
+
 func TestScrollContainer_Refresh(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))

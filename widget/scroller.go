@@ -9,6 +9,14 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+type scrollDirection int
+
+const (
+	scrollBoth = iota
+	scrollHorizontalOnly
+	scrollVerticalOnly
+)
+
 type scrollBarOrientation int
 
 // We default to vertical as 0 due to that being the original orientation offered
@@ -244,20 +252,21 @@ func (r *scrollContainerRenderer) Destroy() {
 }
 
 func (r *scrollContainerRenderer) Layout(size fyne.Size) {
-	// The scroll bar needs to be resized and moved on the far right
-	r.horizArea.Resize(fyne.NewSize(size.Width, r.horizArea.MinSize().Height))
-	r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
+	if r.scroll.Direction != scrollHorizontalOnly {
+		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
+		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
+		r.topShadow.Resize(fyne.NewSize(size.Width, 0))
+		r.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
+		r.bottomShadow.Move(fyne.NewPos(0, r.scroll.size.Height))
+	}
 
-	r.horizArea.Move(fyne.NewPos(0, r.scroll.Size().Height-r.horizArea.Size().Height))
-	r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
-
-	r.leftShadow.Resize(fyne.NewSize(0, size.Height))
-	r.rightShadow.Resize(fyne.NewSize(0, size.Height))
-	r.topShadow.Resize(fyne.NewSize(size.Width, 0))
-	r.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
-
-	r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
-	r.bottomShadow.Move(fyne.NewPos(0, r.scroll.size.Height))
+	if r.scroll.Direction != scrollVerticalOnly {
+		r.horizArea.Resize(fyne.NewSize(size.Width, r.horizArea.MinSize().Height))
+		r.horizArea.Move(fyne.NewPos(0, r.scroll.Size().Height-r.horizArea.Size().Height))
+		r.leftShadow.Resize(fyne.NewSize(0, size.Height))
+		r.rightShadow.Resize(fyne.NewSize(0, size.Height))
+		r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
+	}
 
 	c := r.scroll.Content
 	c.Resize(c.MinSize().Union(size))
@@ -266,7 +275,14 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (r *scrollContainerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize)
+	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize)
+	switch r.scroll.Direction {
+	case scrollHorizontalOnly:
+		min.Height = fyne.Max(min.Height, r.scroll.Content.MinSize().Height)
+	case scrollVerticalOnly:
+		min.Width = fyne.Max(min.Width, r.scroll.Content.MinSize().Width)
+	}
+	return min
 }
 
 func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
@@ -274,10 +290,14 @@ func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
-	r.leftShadow.depth = theme.Padding() * 2
-	r.rightShadow.depth = theme.Padding() * 2
-	r.topShadow.depth = theme.Padding() * 2
-	r.bottomShadow.depth = theme.Padding() * 2
+	if r.scroll.Direction != scrollHorizontalOnly {
+		r.topShadow.depth = theme.Padding() * 2
+		r.bottomShadow.depth = theme.Padding() * 2
+	}
+	if r.scroll.Direction != scrollVerticalOnly {
+		r.leftShadow.depth = theme.Padding() * 2
+		r.rightShadow.depth = theme.Padding() * 2
+	}
 
 	r.Layout(r.scroll.Size())
 }
@@ -307,22 +327,28 @@ func (r *scrollContainerRenderer) handleShadowVisibility(offset int, contentSize
 }
 
 func (r *scrollContainerRenderer) updatePosition() {
-	scrollWidth := r.scroll.Size().Width
-	contentWidth := r.scroll.Content.Size().Width
-	scrollHeight := r.scroll.Size().Height
-	contentHeight := r.scroll.Content.Size().Height
-	r.handleAreaVisibility(contentWidth, scrollWidth, r.horizArea)
-	r.handleAreaVisibility(contentHeight, scrollHeight, r.vertArea)
+	scrollSize := r.scroll.Size()
+	contentSize := r.scroll.Content.Size()
 
 	r.scroll.Content.Move(fyne.NewPos(-r.scroll.Offset.X, -r.scroll.Offset.Y))
-	r.handleShadowVisibility(r.scroll.Offset.X, contentWidth, scrollWidth, r.leftShadow, r.rightShadow)
-	r.handleShadowVisibility(r.scroll.Offset.Y, contentHeight, scrollHeight, r.topShadow, r.bottomShadow)
 
-	Renderer(r.vertArea).Layout(r.scroll.size)
-	Renderer(r.horizArea).Layout(r.scroll.size)
+	if r.scroll.Direction != scrollHorizontalOnly {
+		r.handleAreaVisibility(contentSize.Height, scrollSize.Height, r.vertArea)
+		r.handleShadowVisibility(r.scroll.Offset.Y, contentSize.Height, scrollSize.Height, r.topShadow, r.bottomShadow)
+		Renderer(r.vertArea).Layout(r.scroll.size)
+	}
+	if r.scroll.Direction != scrollVerticalOnly {
+		r.handleAreaVisibility(contentSize.Width, scrollSize.Width, r.horizArea)
+		r.handleShadowVisibility(r.scroll.Offset.X, contentSize.Width, scrollSize.Width, r.leftShadow, r.rightShadow)
+		Renderer(r.horizArea).Layout(r.scroll.size)
+	}
 
-	canvas.Refresh(r.vertArea)  // this is required to force the canvas to update, we have no "Redraw()"
-	canvas.Refresh(r.horizArea) // this is required like above but if we are horizontal
+	if r.scroll.Direction != scrollHorizontalOnly {
+		canvas.Refresh(r.vertArea) // this is required to force the canvas to update, we have no "Redraw()"
+	}
+	if r.scroll.Direction != scrollVerticalOnly {
+		canvas.Refresh(r.horizArea) // this is required like above but if we are horizontal
+	}
 }
 
 // ScrollContainer defines a container that is smaller than the Content.
@@ -330,7 +356,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 type ScrollContainer struct {
 	BaseWidget
 	minSize fyne.Size
-
+	Direction scrollDirection
 	Content fyne.CanvasObject
 	Offset  fyne.Position
 }
@@ -338,22 +364,23 @@ type ScrollContainer struct {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	hbar := newScrollBarArea(s, scrollBarOrientationHorizontal)
-	vbar := newScrollBarArea(s, scrollBarOrientationVertical)
-	leftShadow := newShadow(shadowRight, theme.Padding()*2)
-	rightShadow := newShadow(shadowLeft, theme.Padding()*2)
-	topShadow := newShadow(shadowBottom, theme.Padding()*2)
-	bottomShadow := newShadow(shadowTop, theme.Padding()*2)
-	return &scrollContainerRenderer{
-		objects:      []fyne.CanvasObject{s.Content, hbar, vbar, topShadow, bottomShadow, leftShadow, rightShadow},
-		scroll:       s,
-		horizArea:    hbar,
-		vertArea:     vbar,
-		leftShadow:   leftShadow,
-		rightShadow:  rightShadow,
-		topShadow:    topShadow,
-		bottomShadow: bottomShadow,
+	scr := &scrollContainerRenderer{
+		objects: []fyne.CanvasObject{s.Content},
+		scroll:  s,
 	}
+	if s.Direction != scrollHorizontalOnly {
+		scr.vertArea = newScrollBarArea(s, scrollBarOrientationVertical)
+		scr.topShadow = newShadow(shadowBottom, theme.Padding()*2)
+		scr.bottomShadow = newShadow(shadowTop, theme.Padding()*2)
+		scr.objects = append(scr.objects, scr.vertArea, scr.topShadow, scr.bottomShadow)
+	}
+	if s.Direction != scrollVerticalOnly {
+		scr.horizArea = newScrollBarArea(s, scrollBarOrientationHorizontal)
+		scr.leftShadow = newShadow(shadowRight, theme.Padding()*2)
+		scr.rightShadow = newShadow(shadowLeft, theme.Padding()*2)
+		scr.objects = append(scr.objects, scr.horizArea, scr.leftShadow, scr.rightShadow)
+	}
+	return scr
 }
 
 // DragEnd will stop scrolling on mobile has stopped
@@ -442,9 +469,28 @@ func computeOffset(start, delta, outerWidth, innerWidth int) int {
 }
 
 // NewScrollContainer creates a scrollable parent wrapping the specified content.
-// Note that this may cause the MinSize to be smaller than that of the passed objects.
+// Note that this may cause the MinSize to be smaller than that of the passed object.
 func NewScrollContainer(content fyne.CanvasObject) *ScrollContainer {
-	s := &ScrollContainer{Content: content}
+	return newScrollContainerWithDirection(scrollBoth, content)
+}
+
+// NewHorizontalScrollContainer create a scrollable parent wrapping the specified content.
+// Note that this may cause the MinSize.Width to be smaller than that of the passed object.
+func NewHorizontalScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+	return newScrollContainerWithDirection(scrollHorizontalOnly, content)
+}
+
+// NewVerticalScrollContainer create a scrollable parent wrapping the specified content.
+// Note that this may cause the MinSize.Height to be smaller than that of the passed object.
+func NewVerticalScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+	return newScrollContainerWithDirection(scrollVerticalOnly, content)
+}
+
+func newScrollContainerWithDirection(direction scrollDirection, content fyne.CanvasObject) *ScrollContainer {
+	s := &ScrollContainer{
+		Direction: direction,
+		Content:   content,
+	}
 	s.ExtendBaseWidget(s)
 	return s
 }
