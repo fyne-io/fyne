@@ -268,59 +268,60 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 		tabLocation = TabLocationBottom
 	}
 
+	tabBarMinSize := t.tabBar.MinSize()
+	var tabBarPos fyne.Position
+	var tabBarSize fyne.Size
+	var linePos fyne.Position
+	var lineSize fyne.Size
+	var childPos fyne.Position
+	var childSize fyne.Size
 	switch tabLocation {
 	case TabLocationTop:
-		buttonHeight := t.tabBar.MinSize().Height
-		t.tabBar.Move(fyne.NewPos(0, 0))
-		t.tabBar.Resize(fyne.NewSize(size.Width, buttonHeight))
-		t.line.Move(fyne.NewPos(0, buttonHeight))
-		t.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
-
-		if t.container.current < len(t.container.Items) {
-			child := t.container.Items[t.container.current].Content
-			barHeight := buttonHeight + theme.Padding()
-			child.Move(fyne.NewPos(0, barHeight))
-			child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
-		}
-	case TabLocationLeading:
-		buttonWidth := t.tabBar.MinSize().Width
-		t.tabBar.Move(fyne.NewPos(0, 0))
-		t.tabBar.Resize(fyne.NewSize(buttonWidth, size.Height))
-		t.line.Move(fyne.NewPos(buttonWidth, 0))
-		t.line.Resize(fyne.NewSize(theme.Padding(), size.Height))
-
-		if t.container.current < len(t.container.Items) {
-			child := t.container.Items[t.container.current].Content
-			barWidth := buttonWidth + theme.Padding()
-			child.Move(fyne.NewPos(barWidth, 0))
-			child.Resize(fyne.NewSize(size.Width-barWidth, size.Height))
-		}
-	case TabLocationBottom:
-		buttonHeight := t.tabBar.MinSize().Height
-		t.tabBar.Move(fyne.NewPos(0, size.Height-buttonHeight))
-		t.tabBar.Resize(fyne.NewSize(size.Width, buttonHeight))
+		buttonHeight := tabBarMinSize.Height
+		tabBarPos = fyne.NewPos(0, 0)
+		tabBarSize = fyne.NewSize(size.Width, buttonHeight)
+		linePos = fyne.NewPos(0, buttonHeight)
+		lineSize = fyne.NewSize(size.Width, theme.Padding())
 		barHeight := buttonHeight + theme.Padding()
-		t.line.Move(fyne.NewPos(0, size.Height-barHeight))
-		t.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
-
-		if t.container.current < len(t.container.Items) {
-			child := t.container.Items[t.container.current].Content
-			child.Move(fyne.NewPos(0, 0))
-			child.Resize(fyne.NewSize(size.Width, size.Height-barHeight))
-		}
-	case TabLocationTrailing:
-		buttonWidth := t.tabBar.MinSize().Width
-		t.tabBar.Move(fyne.NewPos(size.Width-buttonWidth, 0))
-		t.tabBar.Resize(fyne.NewSize(buttonWidth, size.Height))
+		childPos = fyne.NewPos(0, barHeight)
+		childSize = fyne.NewSize(size.Width, size.Height-barHeight)
+	case TabLocationLeading:
+		buttonWidth := tabBarMinSize.Width
+		tabBarPos = fyne.NewPos(0, 0)
+		tabBarSize = fyne.NewSize(buttonWidth, size.Height)
+		linePos = fyne.NewPos(buttonWidth, 0)
+		lineSize = fyne.NewSize(theme.Padding(), size.Height)
 		barWidth := buttonWidth + theme.Padding()
-		t.line.Move(fyne.NewPos(size.Width-barWidth, 0))
-		t.line.Resize(fyne.NewSize(theme.Padding(), size.Height))
+		childPos = fyne.NewPos(barWidth, 0)
+		childSize = fyne.NewSize(size.Width-barWidth, size.Height)
+	case TabLocationBottom:
+		buttonHeight := tabBarMinSize.Height
+		tabBarPos = fyne.NewPos(0, size.Height-buttonHeight)
+		tabBarSize = fyne.NewSize(size.Width, buttonHeight)
+		barHeight := buttonHeight + theme.Padding()
+		linePos = fyne.NewPos(0, size.Height-barHeight)
+		lineSize = fyne.NewSize(size.Width, theme.Padding())
+		childPos = fyne.NewPos(0, 0)
+		childSize = fyne.NewSize(size.Width, size.Height-barHeight)
+	case TabLocationTrailing:
+		buttonWidth := tabBarMinSize.Width
+		tabBarPos = fyne.NewPos(size.Width-buttonWidth, 0)
+		tabBarSize = fyne.NewSize(buttonWidth, size.Height)
+		barWidth := buttonWidth + theme.Padding()
+		linePos = fyne.NewPos(size.Width-barWidth, 0)
+		lineSize = fyne.NewSize(theme.Padding(), size.Height)
+		childPos = fyne.NewPos(0, 0)
+		childSize = fyne.NewSize(size.Width-barWidth, size.Height)
+	}
 
-		if t.container.current < len(t.container.Items) {
-			child := t.container.Items[t.container.current].Content
-			child.Move(fyne.NewPos(0, 0))
-			child.Resize(fyne.NewSize(size.Width-barWidth, size.Height))
-		}
+	t.tabBar.Move(tabBarPos)
+	t.tabBar.Resize(tabBarSize)
+	t.line.Move(linePos)
+	t.line.Resize(lineSize)
+	if t.container.current < len(t.container.Items) {
+		child := t.container.Items[t.container.current].Content
+		child.Move(childPos)
+		child.Resize(childSize)
 	}
 }
 
