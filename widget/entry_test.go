@@ -46,6 +46,12 @@ func TestEntry_Cursor(t *testing.T) {
 	assert.Equal(t, desktop.TextCursor, entry.Cursor())
 }
 
+func TestEntry_passwordRevealerCursor(t *testing.T) {
+	entry := NewEntry()
+	pr := newPasswordRevealer(entry)
+	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
+}
+
 func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
 	entry.MinSize()

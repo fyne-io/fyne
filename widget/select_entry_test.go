@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -74,6 +75,11 @@ func TestSelectEntry_MinSize(t *testing.T) {
 			assert.Equal(t, tt.want, e.MinSize())
 		})
 	}
+}
+
+func TestSelectEntry_DropDownButtonCursor(t *testing.T) {
+	b := newCursorableButton("Test button", nil)
+	assert.Equal(t, desktop.DefaultCursor, b.Cursor())
 }
 
 func TestSelectEntry_DropDown(t *testing.T) {

@@ -1200,6 +1200,10 @@ func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
 	fyne.CurrentApp().Driver().CanvasForObject(pr).Focus(pr.entry)
 }
 
+func (pr *passwordRevealer) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
+}
+
 func newPasswordRevealer(e *Entry) *passwordRevealer {
 	pr := &passwordRevealer{
 		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
