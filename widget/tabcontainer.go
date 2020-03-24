@@ -70,6 +70,9 @@ func (t *TabContainer) SelectTab(item *TabItem) {
 
 // CurrentTab returns the currently selected TabItem.
 func (t *TabContainer) CurrentTab() *TabItem {
+	if t.current < 0 || t.current >= len(t.Items) {
+		return nil
+	}
 	return t.Items[t.current]
 }
 
@@ -214,7 +217,11 @@ func (t *TabContainer) mismatchedContent() bool {
 
 // NewTabContainer creates a new tab bar widget that allows the user to choose between different visible containers
 func NewTabContainer(items ...*TabItem) *TabContainer {
-	tabs := &TabContainer{BaseWidget: BaseWidget{}, Items: items}
+	tabs := &TabContainer{BaseWidget: BaseWidget{}, Items: items, current: -1}
+	if len(items) > 0 {
+		// Current is first tab item
+		tabs.current = 0
+	}
 	tabs.ExtendBaseWidget(tabs)
 
 	if tabs.mismatchedContent() {
