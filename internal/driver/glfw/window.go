@@ -504,6 +504,21 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), roots...)
 }
 
+func cursorToName(cursor desktop.Cursor) *glfw.Cursor {
+	var cursorMap = map[desktop.Cursor]*glfw.Cursor{
+		desktop.TextCursor:      textCursor,
+		desktop.CrosshairCursor: crosshairCursor,
+		desktop.PointerCursor:   pointerCursor,
+		desktop.HResizeCursor:   hResizeCursor,
+		desktop.VResizeCursor:   vResizeCursor,
+	}
+	ret, ok := cursorMap[cursor]
+	if !ok {
+		return defaultCursor
+	}
+	return ret
+}
+
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
@@ -511,17 +526,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			fyneCursor := cursorable.Cursor()
-			if fyneCursor == desktop.TextCursor {
-				cursor = textCursor
-			} else if fyneCursor == desktop.PointerCursor {
-				cursor = pointerCursor
-			} else if fyneCursor == desktop.CrosshairCursor {
-				cursor = crosshairCursor
-			} else if fyneCursor == desktop.HResizeCursor {
-				cursor = hResizeCursor
-			} else if fyneCursor == desktop.VResizeCursor {
-				cursor = vResizeCursor
-			}
+			cursor = cursorToName(fyneCursor)
 		}
 
 		_, hover := object.(desktop.Hoverable)
