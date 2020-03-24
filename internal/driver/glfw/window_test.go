@@ -60,32 +60,23 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.True(t, w.centered)
 }
 
-func cursorForObject(obj fyne.CanvasObject) *glfw.Cursor {
-	cursor := defaultCursor
-	if cursorable, ok := obj.(desktop.Cursorable); ok {
-		fyneCursor := cursorable.Cursor()
-		if fyneCursor == desktop.TextCursor {
-			return textCursor
-		} else if fyneCursor == desktop.PointerCursor {
-			return pointerCursor
-		} else if fyneCursor == desktop.CrosshairCursor {
-			return crosshairCursor
-		} else if fyneCursor == desktop.HResizeCursor {
-			return hResizeCursor
-		} else if fyneCursor == desktop.VResizeCursor {
-			return vResizeCursor
-		}
-	}
-	return cursor
-}
-
 func TestWindow_Cursor(t *testing.T) {
-	d.CreateWindow("Test")
+	w := d.CreateWindow("Test").(*window)
+	e := widget.NewEntry()
 	u, _ := url.Parse("https://testing.fyne")
+	h := widget.NewHyperlink("Testing", u)
+	b := widget.NewButton("Test", nil)
 
-	assert.Same(t, textCursor, cursorForObject(widget.NewEntry()))
-	assert.Same(t, pointerCursor, cursorForObject(widget.NewHyperlink("Testing", u)))
-	assert.Same(t, defaultCursor, cursorForObject(widget.NewButton("Test", nil)))
+	w.SetContent(widget.NewVBox(e, h, b))
+
+	w.mouseMoved(w.viewport, 10, float64(e.Position().Y+10))
+	assert.Same(t, textCursor, w.cursor)
+
+	w.mouseMoved(w.viewport, 10, float64(h.Position().Y+10))
+	assert.Same(t, pointerCursor, w.cursor)
+
+	w.mouseMoved(w.viewport, 10, float64(b.Position().Y+10))
+	assert.Same(t, defaultCursor, w.cursor)
 }
 
 func TestWindow_HandleHoverable(t *testing.T) {
