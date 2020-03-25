@@ -132,7 +132,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 		return NoTexture
 	}
 
-	return p.imgToTexture(tex, img.TextureFilter)
+	return p.imgToTexture(tex, img.ScalingFilter)
 }
 
 func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {

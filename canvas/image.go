@@ -51,7 +51,7 @@ type Image struct {
 	Translucency float64   // Set a translucency value > 0.0 to fade the image
 	FillMode     ImageFill // Specify how the image should scale to fill or fit
 
-	TextureFilter TextureFilter
+	ScalingFilter TextureFilter // set how the image is scaled
 }
 
 // Alpha is a convenience function that returns the alpha value for an image

@@ -27,7 +27,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
-	switch img.TextureFilter {
+	switch img.ScalingFilter {
 	case canvas.LinearFilter:
 		draw.ApproxBiLinear.Scale(base, outBounds, img.Image, img.Image.Bounds(), draw.Over, nil)
 	case canvas.NearestFilter:
