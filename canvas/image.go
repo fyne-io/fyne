@@ -24,6 +24,16 @@ const (
 	ImageFillOriginal
 )
 
+// TextureFilter defines the different scaling filters used to scaling images
+type TextureFilter int32
+
+const (
+	// LinearFilter will scale the image using ApproxBiLinear filter (or GL equivalent)
+	LinearFilter TextureFilter = 0
+	// NearestFilter will scale the image using NearestNeighbor filter (or GL equivalent)
+	NearestFilter TextureFilter = 1
+)
+
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Image)(nil)
 
@@ -40,6 +50,8 @@ type Image struct {
 
 	Translucency float64   // Set a translucency value > 0.0 to fade the image
 	FillMode     ImageFill // Specify how the image should scale to fill or fit
+
+	TextureFilter TextureFilter
 }
 
 // Alpha is a convenience function that returns the alpha value for an image

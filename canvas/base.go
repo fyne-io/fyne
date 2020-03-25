@@ -5,21 +5,12 @@ import (
 	"fyne.io/fyne"
 )
 
-type TextureFilter int32
-
-const (
-	FILTER_LINEAR  TextureFilter = 0
-	FILTER_NEAREST TextureFilter = 1
-)
-
 type baseObject struct {
 	size     fyne.Size     // The current size of the Rectangle
 	position fyne.Position // The current position of the Rectangle
 	Hidden   bool          // Is this object currently hidden
 
 	min fyne.Size // The minimum size this object can be
-
-	TextureFilter TextureFilter
 }
 
 // CurrentSize returns the current size of this rectangle object
