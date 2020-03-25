@@ -3,14 +3,13 @@ package canvas // import "fyne.io/fyne/canvas"
 
 import (
 	"fyne.io/fyne"
-	"golang.org/x/mobile/gl"
 )
 
 type TextureFilter int32
 
 const (
-	FILTER_LINEAR  TextureFilter = gl.LINEAR
-	FILTER_NEAREST TextureFilter = gl.NEAREST
+	FILTER_LINEAR  TextureFilter = 0
+	FILTER_NEAREST TextureFilter = 1
 )
 
 type baseObject struct {
@@ -20,7 +19,7 @@ type baseObject struct {
 
 	min fyne.Size // The minimum size this object can be
 
-	textureFilter TextureFilter
+	TextureFilter TextureFilter
 }
 
 // CurrentSize returns the current size of this rectangle object
@@ -50,14 +49,6 @@ func (r *baseObject) MinSize() fyne.Size {
 	}
 
 	return r.min
-}
-
-func (r *baseObject) GetTextureFilter() TextureFilter {
-	return r.textureFilter
-}
-
-func (r *baseObject) SetTextureFilter(filter TextureFilter) {
-	r.textureFilter = filter
 }
 
 // SetMinSize specifies the smallest size this object should be

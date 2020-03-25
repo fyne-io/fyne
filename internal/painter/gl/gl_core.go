@@ -27,6 +27,8 @@ type Texture uint32
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(0)
 
+var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
+
 func newTexture(textureFilter canvas.TextureFilter) Texture {
 	var texture uint32
 
@@ -37,8 +39,8 @@ func newTexture(textureFilter canvas.TextureFilter) Texture {
 	gl.GenTextures(1, &texture)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, int32(textureFilter)) //gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, int32(textureFilter))
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, textureFilterToGL[textureFilter])
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
