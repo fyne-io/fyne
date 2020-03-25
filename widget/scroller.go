@@ -15,6 +15,7 @@ type scrollBarOrientation int
 const (
 	scrollBarOrientationVertical   scrollBarOrientation = 0
 	scrollBarOrientationHorizontal scrollBarOrientation = 1
+	scrollContainerMinSize                              = 32 // TODO consider the smallest useful scroll view?
 )
 
 type scrollBarRenderer struct {
@@ -265,7 +266,7 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 }
 
 func (r *scrollContainerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(32, 32) // TODO consider the smallest useful scroll view?
+	return fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize)
 }
 
 func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
@@ -328,6 +329,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 // The Offset is used to determine the position of the child widgets within the container.
 type ScrollContainer struct {
 	BaseWidget
+	minSize fyne.Size
 
 	Content fyne.CanvasObject
 	Offset  fyne.Position
@@ -371,8 +373,18 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 
 // MinSize returns the smallest size this widget can shrink to
 func (s *ScrollContainer) MinSize() fyne.Size {
+	if s.minSize != (fyne.Size{}) {
+		return s.minSize
+	}
 	s.ExtendBaseWidget(s)
 	return s.BaseWidget.MinSize()
+}
+
+// SetMinSize specifies a minimum size for this scroll container.
+// If the specified size is larger than the content size then scrolling will not be enabled
+// This can be helpful to set scrolling in only 1 direction.
+func (s *ScrollContainer) SetMinSize(size fyne.Size) {
+	s.minSize = size
 }
 
 // Refresh causes this widget to be redrawn in it's current state
