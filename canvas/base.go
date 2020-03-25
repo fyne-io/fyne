@@ -1,7 +1,17 @@
 // Package canvas contains all of the primitive CanvasObjects that make up a Fyne GUI
 package canvas // import "fyne.io/fyne/canvas"
 
-import "fyne.io/fyne"
+import (
+	"fyne.io/fyne"
+	"golang.org/x/mobile/gl"
+)
+
+type TextureFilter int32
+
+const (
+	FILTER_LINEAR  TextureFilter = gl.LINEAR
+	FILTER_NEAREST TextureFilter = gl.NEAREST
+)
 
 type baseObject struct {
 	size     fyne.Size     // The current size of the Rectangle
@@ -9,6 +19,8 @@ type baseObject struct {
 	Hidden   bool          // Is this object currently hidden
 
 	min fyne.Size // The minimum size this object can be
+
+	textureFilter TextureFilter
 }
 
 // CurrentSize returns the current size of this rectangle object
@@ -38,6 +50,14 @@ func (r *baseObject) MinSize() fyne.Size {
 	}
 
 	return r.min
+}
+
+func (r *baseObject) GetTextureFilter() TextureFilter {
+	return r.textureFilter
+}
+
+func (r *baseObject) SetTextureFilter(filter TextureFilter) {
+	r.textureFilter = filter
 }
 
 // SetMinSize specifies the smallest size this object should be

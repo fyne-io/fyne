@@ -11,6 +11,7 @@ import (
 	"github.com/go-gl/gl/v3.2-core/gl"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 )
 
@@ -26,24 +27,28 @@ type Texture uint32
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(0)
 
-func newTexture() Texture {
+func newTexture(textureFilter canvas.TextureFilter) Texture {
 	var texture uint32
+
+	if textureFilter == 0 {
+		textureFilter = gl.LINEAR
+	}
 
 	gl.GenTextures(1, &texture)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, int32(textureFilter)) //gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, int32(textureFilter))
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
 	return Texture(texture)
 }
 
-func (p *glPainter) imgToTexture(img image.Image) Texture {
+func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.TextureFilter) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
-		texture := newTexture()
+		texture := newTexture(textureFilter)
 		r, g, b, a := i.RGBA()
 		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
 		data := []uint8{r8, g8, b8, a8}
@@ -55,14 +60,14 @@ func (p *glPainter) imgToTexture(img image.Image) Texture {
 			return 0
 		}
 
-		texture := newTexture()
+		texture := newTexture(textureFilter)
 		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(i.Rect.Size().X), int32(i.Rect.Size().Y),
 			0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(i.Pix))
 		return texture
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
 		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
-		return p.imgToTexture(rgba)
+		return p.imgToTexture(rgba, textureFilter)
 	}
 }
 

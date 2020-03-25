@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"github.com/srwiley/rasterx"
@@ -53,7 +54,7 @@ func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	rasterx.AddCircle(float64(width/2), float64(height/2), float64(p.textureScaleInt(radius)), dasher)
 	dasher.Draw()
 
-	return p.imgToTexture(raw)
+	return p.imgToTexture(raw, gl.LINEAR)
 }
 
 func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
@@ -77,7 +78,7 @@ func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	dasher.Stop(true)
 	dasher.Draw()
 
-	return p.imgToTexture(raw)
+	return p.imgToTexture(raw, gl.LINEAR)
 }
 
 func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
@@ -93,7 +94,7 @@ func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
 		}
 	}
 
-	return p.imgToTexture(image.NewUniform(col))
+	return p.imgToTexture(image.NewUniform(col), gl.LINEAR)
 }
 
 func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
@@ -117,7 +118,7 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
 
-	return p.imgToTexture(img)
+	return p.imgToTexture(img, text.GetTextureFilter())
 }
 
 func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
@@ -131,7 +132,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 		return NoTexture
 	}
 
-	return p.imgToTexture(tex)
+	return p.imgToTexture(tex, img.GetTextureFilter())
 }
 
 func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
@@ -140,7 +141,7 @@ func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScaleInt(rast.Size().Width)
 	height := p.textureScaleInt(rast.Size().Height)
 
-	return p.imgToTexture(rast.Generator(width, height))
+	return p.imgToTexture(rast.Generator(width, height), rast.GetTextureFilter())
 }
 
 func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
@@ -149,7 +150,7 @@ func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScaleInt(gradient.Size().Width)
 	height := p.textureScaleInt(gradient.Size().Height)
 
-	return p.imgToTexture(gradient.Generate(width, height))
+	return p.imgToTexture(gradient.Generate(width, height), gradient.GetTextureFilter())
 }
 
 func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
@@ -158,5 +159,5 @@ func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScaleInt(gradient.Size().Width)
 	height := p.textureScaleInt(gradient.Size().Height)
 
-	return p.imgToTexture(gradient.Generate(width, height))
+	return p.imgToTexture(gradient.Generate(width, height), gradient.GetTextureFilter())
 }
