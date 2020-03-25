@@ -65,11 +65,6 @@ func (w *BaseWidget) MinSize() fyne.Size {
 	return r.MinSize()
 }
 
-// CreateRenderer of BaseWidget does nothing, it must be overridden
-func (w *BaseWidget) CreateRenderer() fyne.WidgetRenderer {
-	return nil
-}
-
 // Visible returns whether or not this widget should be visible.
 // Note that this may not mean it is currently visible if a parent has been hidden.
 func (w *BaseWidget) Visible() bool {
@@ -120,7 +115,9 @@ func (w *BaseWidget) refresh(wid fyne.Widget) {
 // If extended then this is the extending widget, otherwise it is self.
 func (w *BaseWidget) super() fyne.Widget {
 	if w.impl == nil {
-		return w
+		var x interface{}
+		x = w
+		return x.(fyne.Widget)
 	}
 
 	return w.impl
