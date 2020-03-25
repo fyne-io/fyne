@@ -186,8 +186,8 @@ type modalPopUpRenderer struct {
 
 func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	requestedSize := r.popUp.innerSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-	size := r.popUp.MinSize().Max(requestedSize)
-	size = size.Min(canvasSize)
+	size := r.popUp.Content.MinSize().Max(requestedSize)
+	size = size.Min(canvasSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 	pos := fyne.NewPos((canvasSize.Width-size.Width)/2, (canvasSize.Height-size.Height)/2)
 	r.popUp.Content.Move(pos)
 	r.popUp.Content.Resize(size)

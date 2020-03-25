@@ -227,22 +227,8 @@ func TestModalPopUp_Resize_Constrained(t *testing.T) {
 	defer win.Canvas().Overlays().Remove(pop)
 
 	pop.Resize(fyne.NewSize(90, 100))
-	assert.Equal(t, 80, pop.Content.Size().Width)
-	assert.Equal(t, 80, pop.Content.Size().Height)
+	assert.Equal(t, 80-theme.Padding()*2, pop.Content.Size().Width)
+	assert.Equal(t, 80-theme.Padding()*2, pop.Content.Size().Height)
 	assert.Equal(t, 80, pop.Size().Width)
 	assert.Equal(t, 80, pop.Size().Height)
-}
-
-func TestModalPopUp_Resize_ConstrainedMin(t *testing.T) {
-	label := NewLabel("Hi")
-	win := test.NewWindow(NewLabel("OK"))
-	win.Resize(fyne.NewSize(80, 80))
-	pop := NewModalPopUp(label, win.Canvas())
-	defer win.Canvas().Overlays().Remove(pop)
-
-	win.Resize(fyne.NewSize(30, 20))
-	assert.Greater(t, pop.Content.Size().Width, 30)
-	assert.Greater(t, pop.Content.Size().Height, 20)
-	assert.Greater(t, pop.Size().Width, 30)
-	assert.Greater(t, pop.Size().Height, 20)
 }
