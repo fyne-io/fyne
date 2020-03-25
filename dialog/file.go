@@ -104,8 +104,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	)
 	fileScroll := widget.NewScrollContainer(f.files)
 	verticalExtra := int(float64(fileIconSize) * 0.25)
-	fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*4+theme.Padding()*3,
-		(fileIconSize+fileTextSize)*2+theme.Padding()*4+verticalExtra))
+	fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
+		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
 
 	f.breadcrumb = widget.NewHBox()
 	scrollBread := widget.NewScrollContainer(f.breadcrumb)
@@ -231,7 +231,12 @@ func showFileDialog(save bool, callback func(string), parent fyne.Window) {
 	}
 	d.setDirectory(dir)
 
+	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
+		(fileIconSize+fileTextSize)+theme.Padding()*4))
+
 	d.win = widget.NewModalPopUp(ui, parent.Canvas())
+	d.win.Resize(size)
+
 	d.win.Show()
 }
 
