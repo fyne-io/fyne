@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
-	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
 	"github.com/srwiley/rasterx"
@@ -54,7 +53,7 @@ func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	rasterx.AddCircle(float64(width/2), float64(height/2), float64(p.textureScaleInt(radius)), dasher)
 	dasher.Draw()
 
-	return p.imgToTexture(raw, gl.LINEAR)
+	return p.imgToTexture(raw, canvas.LinearFilter)
 }
 
 func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
@@ -78,7 +77,7 @@ func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	dasher.Stop(true)
 	dasher.Draw()
 
-	return p.imgToTexture(raw, gl.LINEAR)
+	return p.imgToTexture(raw, canvas.LinearFilter)
 }
 
 func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
@@ -94,7 +93,7 @@ func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
 		}
 	}
 
-	return p.imgToTexture(image.NewUniform(col), gl.LINEAR)
+	return p.imgToTexture(image.NewUniform(col), canvas.LinearFilter)
 }
 
 func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {

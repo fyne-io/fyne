@@ -32,10 +32,6 @@ var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 func newTexture(textureFilter canvas.TextureFilter) Texture {
 	var texture uint32
 
-	if textureFilter == 0 {
-		textureFilter = gl.LINEAR
-	}
-
 	gl.GenTextures(1, &texture)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
