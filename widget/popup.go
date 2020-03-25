@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
 
@@ -88,8 +87,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 	if p.modal {
 		bg := canvas.NewRectangle(theme.BackgroundColor())
-		return &modalPopUpRenderer{center: layout.NewCenterLayout(), popUp: p, bg: bg,
-			objects: []fyne.CanvasObject{bg, p.Content}}
+		return &modalPopUpRenderer{popUp: p, bg: bg, objects: []fyne.CanvasObject{bg, p.Content}}
 	}
 
 	shadow := newShadow(shadowAround, theme.Padding()*2)
@@ -181,17 +179,21 @@ func (r *popUpRenderer) Destroy() {
 }
 
 type modalPopUpRenderer struct {
-	center  fyne.Layout
 	popUp   *PopUp
 	bg      *canvas.Rectangle
 	objects []fyne.CanvasObject
 }
 
-func (r *modalPopUpRenderer) Layout(size fyne.Size) {
-	r.center.Layout(r.objects, size)
+func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
+	requestedSize := r.popUp.innerSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	size := r.popUp.Content.MinSize().Max(requestedSize)
+	size = size.Min(canvasSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	pos := fyne.NewPos((canvasSize.Width-size.Width)/2, (canvasSize.Height-size.Height)/2)
+	r.popUp.Content.Move(pos)
+	r.popUp.Content.Resize(size)
 
-	r.bg.Move(r.popUp.Content.Position().Subtract(fyne.NewPos(theme.Padding(), theme.Padding())))
-	r.bg.Resize(r.MinSize())
+	r.bg.Move(pos.Subtract(fyne.NewPos(theme.Padding(), theme.Padding())))
+	r.bg.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 }
 
 func (r *modalPopUpRenderer) MinSize() fyne.Size {
