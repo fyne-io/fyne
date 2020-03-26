@@ -225,7 +225,6 @@ func (p *packager) packageWindows() error {
 
 	err = file.Close()
 	if err != nil {
-		// Might not be necessary to return here (looks at reviewer)...
 		return errors.Wrap(err, "Failed to close image file")
 	}
 
