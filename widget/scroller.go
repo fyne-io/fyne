@@ -12,12 +12,10 @@ import (
 // ScrollDirection represents the directions in which a ScrollContainer can scroll its child content.
 type ScrollDirection int
 
+// Constants for valid values of ScrollDirection.
 const (
-	// ScrollBoth allows the ScrollContainer to scroll its child in both horizontal and vertical directions.
 	ScrollBoth ScrollDirection = iota
-	// ScrollHorizontalOnly allows the ScrollContainer to only scroll its child in the horizontal direction.
 	ScrollHorizontalOnly
-	// ScrollVerticalOnly allows the ScrollContainer to only scroll its child in the vertical direction.
 	ScrollVerticalOnly
 )
 
