@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"strings"
+	"unicode"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -90,7 +91,7 @@ func (t *textProvider) updateRowBounds() {
 	textSize := theme.TextSize()
 	maxWidth := t.Size().Width
 
-	t.rowBounds = fyne.LineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
+	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	})
 }
@@ -331,4 +332,84 @@ func (r *textRenderer) BackgroundColor() color.Color {
 }
 
 func (r *textRenderer) Destroy() {
+}
+
+// splitLines accepts a slice of runes and returns a slice containing the
+// start and end indicies of each line delimited by the newline character.
+func splitLines(text []rune) [][2]int {
+	var low, high int
+	var lines [][2]int
+	length := len(text)
+	for i := 0; i < length; i++ {
+		if text[i] == '\n' {
+			high = i
+			lines = append(lines, [2]int{low, high})
+			low = i + 1
+		}
+	}
+	return append(lines, [2]int{low, length})
+}
+
+// lineBounds accepts a slice of runes, a wrapping mode, a maximum line width and a function to measure line width.
+// lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
+func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
+	lines := splitLines(text)
+	if maxWidth == 0 || wrap == fyne.TextWrapOff {
+		return lines
+	}
+	var bounds [][2]int
+	for _, l := range lines {
+		low := l[0]
+		high := l[1]
+		if low == high {
+			bounds = append(bounds, l)
+			continue
+		}
+		switch wrap {
+		case fyne.TextTruncate:
+			for {
+				if measurer(text[low:high]) <= maxWidth {
+					bounds = append(bounds, [2]int{low, high})
+					break
+				} else {
+					high--
+				}
+			}
+		case fyne.TextWrapBreak:
+			for low < high {
+				if measurer(text[low:high]) <= maxWidth {
+					bounds = append(bounds, [2]int{low, high})
+					low = high
+					high = l[1]
+				} else {
+					high--
+				}
+			}
+		case fyne.TextWrapWord:
+			for low < high {
+				sub := text[low:high]
+				if measurer(sub) <= maxWidth {
+					bounds = append(bounds, [2]int{low, high})
+					low = high
+					high = l[1]
+					if low < high && unicode.IsSpace(text[low]) {
+						low++
+					}
+				} else {
+					last := len(sub) - 1
+					for ; last >= 0; last-- {
+						if unicode.IsSpace(sub[last]) {
+							break
+						}
+					}
+					if last < 0 {
+						high--
+					} else {
+						high = low + last
+					}
+				}
+			}
+		}
+	}
+	return bounds
 }
