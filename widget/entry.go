@@ -200,6 +200,8 @@ func (e *entryRenderer) Refresh() {
 		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
+	e.entry.text.updateRowBounds()
+	e.entry.placeholder.updateRowBounds()
 	e.entry.text.Refresh()
 	e.entry.placeholder.Refresh()
 	if e.entry.ActionItem != nil {
