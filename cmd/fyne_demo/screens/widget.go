@@ -49,6 +49,16 @@ func makeTextTab() fyne.Widget {
 	entryLoremIpsum.SetText(loremIpsum)
 	entryLoremIpsumScroller := widget.NewScrollContainer(entryLoremIpsum)
 
+	label.Alignment = fyne.TextAlignLeading
+	hyperlink.Alignment = fyne.TextAlignLeading
+
+	label.Wrapping = fyne.TextWrapWord
+	hyperlink.Wrapping = fyne.TextWrapWord
+	entry.Wrapping = fyne.TextWrapWord
+	entryDisabled.Wrapping = fyne.TextWrapWord
+	entryMultiLine.Wrapping = fyne.TextWrapWord
+	entryLoremIpsum.Wrapping = fyne.TextWrapWord
+
 	radioAlign := widget.NewRadio([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
 		var align fyne.TextAlign
 		switch s {
@@ -67,7 +77,6 @@ func makeTextTab() fyne.Widget {
 		hyperlink.Refresh()
 	})
 	radioAlign.SetSelected("Text Alignment Leading")
-	radioAlign.OnChanged("Text Alignment Leading")
 
 	radioWrap := widget.NewRadio([]string{"Text Wrapping Off", "Text Wrapping Truncate", "Text Wrapping Break", "Text Wrapping Word"}, func(s string) {
 		var wrap fyne.TextWrap
@@ -98,7 +107,6 @@ func makeTextTab() fyne.Widget {
 		entryLoremIpsumScroller.Refresh()
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
-	radioWrap.OnChanged("Text Wrapping Word")
 
 	return widget.NewVBox(
 		widget.NewHBox(
