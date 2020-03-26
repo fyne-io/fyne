@@ -1,3 +1,5 @@
+// +build !windows !ci
+
 package gl
 
 import (

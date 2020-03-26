@@ -22,6 +22,14 @@ func TestTabContainer_Empty(t *testing.T) {
 	assert.Equal(t, 0, min.Width)
 }
 
+func TestTabContainer_Resize_Empty(t *testing.T) {
+	tabs := NewTabContainer()
+	tabs.Resize(fyne.NewSize(10, 10))
+	size := tabs.Size()
+	assert.Equal(t, 10, size.Height)
+	assert.Equal(t, 10, size.Width)
+}
+
 func TestTabContainer_CurrentTabIndex(t *testing.T) {
 	tabs := NewTabContainer(&TabItem{Text: "Test", Content: NewLabel("Test")})
 

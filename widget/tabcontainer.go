@@ -318,7 +318,7 @@ func (t *tabContainerRenderer) Layout(size fyne.Size) {
 	t.tabBar.Resize(tabBarSize)
 	t.line.Move(linePos)
 	t.line.Resize(lineSize)
-	if t.container.current < len(t.container.Items) {
+	if t.container.current >= 0 && t.container.current < len(t.container.Items) {
 		child := t.container.Items[t.container.current].Content
 		child.Move(childPos)
 		child.Resize(childSize)
