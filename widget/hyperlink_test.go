@@ -24,8 +24,7 @@ func TestHyperlink_MinSize(t *testing.T) {
 }
 
 func TestHyperlink_Alignment(t *testing.T) {
-	hyperlink := NewHyperlink("Test", nil)
-	hyperlink.Alignment = fyne.TextAlignTrailing
+	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink)[0].Alignment)
 }
 
@@ -33,7 +32,7 @@ func TestHyperlink_SetText(t *testing.T) {
 	u, err := url.Parse("https://fyne.io/")
 	assert.Nil(t, err)
 
-	hyperlink := NewHyperlink("Test", u)
+	hyperlink := &Hyperlink{Text: "Test", URL: u}
 	Refresh(hyperlink)
 	hyperlink.SetText("New")
 

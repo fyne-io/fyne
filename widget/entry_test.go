@@ -179,7 +179,7 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Newline(t *testing.T) {
-	entry := NewMultiLineEntry()
+	entry := &Entry{MultiLine: true}
 	entry.SetText("Hi")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
