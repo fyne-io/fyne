@@ -57,36 +57,6 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 	assert.Equal(t, singleMin.Height, multiMin.Height)
 }
 
-func TestMultiLineEntry_Scroller_MinSize(t *testing.T) {
-	text := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	size := textMinSize(text, theme.TextSize(), fyne.TextStyle{})
-
-	multi := NewMultiLineEntry()
-	multi.SetText(text)
-	multiMin := multi.MinSize()
-	assert.Equal(t, size.Width+2*theme.Padding()+theme.ScrollBarSize(), multiMin.Width)
-	assert.Equal(t, size.Height*multiLineRows+2*theme.Padding(), multiMin.Height)
-
-	t.Run("Both", func(t *testing.T) {
-		scroller := NewScrollContainer(multi)
-		scrollerMin := scroller.MinSize()
-		assert.Equal(t, 32, scrollerMin.Height)
-		assert.Equal(t, 32, scrollerMin.Width)
-	})
-	t.Run("HorizontalOnly", func(t *testing.T) {
-		scroller := NewHorizontalScrollContainer(multi)
-		scrollerMin := scroller.MinSize()
-		assert.Equal(t, size.Height*multiLineRows+2*theme.Padding(), scrollerMin.Height)
-		assert.Equal(t, 32, scrollerMin.Width)
-	})
-	t.Run("VerticalOnly", func(t *testing.T) {
-		scroller := NewVerticalScrollContainer(multi)
-		scrollerMin := scroller.MinSize()
-		assert.Equal(t, 32, scrollerMin.Height) // TODO FIXME Should equal size.Height*multiLineRows+2*theme.Padding()
-		assert.Equal(t, size.Width+2*theme.Padding()+theme.ScrollBarSize(), scrollerMin.Width)
-	})
-}
-
 func TestEntry_SetPlaceHolder(t *testing.T) {
 	entry := NewEntry()
 
