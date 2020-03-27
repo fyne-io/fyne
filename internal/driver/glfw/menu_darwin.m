@@ -21,19 +21,19 @@ NSMenu* nativeMainMenu() {
     return [app mainMenu];
 }
 
-NSMenu* menu;
-
-void createDarwinMenu(const char* label) {
-    menu = [[NSMenu alloc] initWithTitle:[NSString stringWithUTF8String:label]];
-
-    // the menu is released at the end of the completeDarwinMenu() function
+const void* createDarwinMenu(const char* label) {
+    return (void*)[[NSMenu alloc] initWithTitle:[NSString stringWithUTF8String:label]];
 }
 
-void addDarwinMenuItem(const char* label, int id) {
-    FyneMenuItem* tapper = [[FyneMenuItem alloc] init]; // we cannot release this or the menu does not function...
-
-    NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:label]
-        action:@selector(tapped:) keyEquivalent:@""];
+void insertDarwinMenuItem(const void* m, const char* label, int id) {
+    NSMenu* menu = (NSMenu*)m;
+    // NSMenuItem's target is a weak reference, therefore we must not release it.
+    // TODO: Keep a reference in Go and release it when the menu of a window changes or the window is released.
+    FyneMenuItem* tapper = [[FyneMenuItem alloc] init];
+    NSMenuItem* item = [[NSMenuItem alloc]
+        initWithTitle:[NSString stringWithUTF8String:label]
+        action:@selector(tapped:)
+        keyEquivalent:@""];
     [item setTarget:tapper];
     [item setTag:id];
 
@@ -41,9 +41,9 @@ void addDarwinMenuItem(const char* label, int id) {
     [item release];
 }
 
-void completeDarwinMenu() {
+void completeDarwinMenu(const void* m) {
+    NSMenu* menu = (NSMenu*)m;
     NSMenu* main = nativeMainMenu();
-
     NSMenuItem* top = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
     [main addItem:top];
     [main setSubmenu:menu forItem:top];
