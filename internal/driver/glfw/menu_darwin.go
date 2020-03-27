@@ -33,22 +33,22 @@ func hasNativeMenu() bool {
 	return true
 }
 
-func setupNativeMenu(main *fyne.MainMenu) {
+func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	nextItemID := 0
 	for i := len(main.Items) - 1; i >= 0; i-- {
 		menu := main.Items[i]
 		if !menu.AfterNativeMenus {
-			nextItemID = addNativeMenu(menu, nextItemID, true)
+			nextItemID = addNativeMenu(w, menu, nextItemID, true)
 		}
 	}
 	for _, menu := range main.Items {
 		if menu.AfterNativeMenus {
-			nextItemID = addNativeMenu(menu, nextItemID, false)
+			nextItemID = addNativeMenu(w, menu, nextItemID, false)
 		}
 	}
 }
 
-func addNativeMenu(menu *fyne.Menu, nextItemID int, prepend bool) int {
+func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
 	createMenu := false
 	for _, item := range menu.Items {
 		if !item.PlaceInNativeMenu {
@@ -82,7 +82,7 @@ func addNativeMenu(menu *fyne.Menu, nextItemID int, prepend bool) int {
 				C.bool(item.Separate),
 			)
 		}
-		callbacks = append(callbacks, item.Action)
+		callbacks = append(callbacks, func() { w.queueEvent(item.Action) })
 		nextItemID++
 	}
 
