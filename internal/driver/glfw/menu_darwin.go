@@ -13,8 +13,9 @@ import (
 #cgo LDFLAGS: -framework Foundation -framework AppKit
 
 // Using void* as type for pointers is a workaround. See https://github.com/golang/go/issues/12065.
+const void* darwinAppMenu();
 const void* createDarwinMenu(const char* label);
-void insertDarwinMenuItem(const void* menu, const char* label, int id);
+void insertDarwinMenuItem(const void* menu, const char* label, int id, int index);
 void completeDarwinMenu(void* menu);
 */
 import "C"
@@ -38,19 +39,41 @@ func setupNativeMenu(main *fyne.MainMenu) {
 }
 
 func addNativeMenu(menu *fyne.Menu, nextItemID int) int {
+	createMenu := false
+	for _, item := range menu.Items {
+		if !item.PlaceInNativeMenu {
+			createMenu = true
+			break
+		}
+	}
+
 	var nsMenu unsafe.Pointer
-	nsMenu = C.createDarwinMenu(C.CString(menu.Label))
+	if createMenu {
+		nsMenu = C.createDarwinMenu(C.CString(menu.Label))
+	}
 
 	for _, item := range menu.Items {
-		C.insertDarwinMenuItem(
-			nsMenu,
-			C.CString(item.Label),
-			C.int(nextItemID),
-		)
+		if item.PlaceInNativeMenu {
+			C.insertDarwinMenuItem(
+				C.darwinAppMenu(),
+				C.CString(item.Label),
+				C.int(nextItemID),
+				C.int(1),
+			)
+		} else {
+			C.insertDarwinMenuItem(
+				nsMenu,
+				C.CString(item.Label),
+				C.int(nextItemID),
+				C.int(-1),
+			)
+		}
 		callbacks = append(callbacks, item.Action)
 		nextItemID++
 	}
 
-	C.completeDarwinMenu(nsMenu)
+	if nsMenu != nil {
+		C.completeDarwinMenu(nsMenu)
+	}
 	return nextItemID
 }

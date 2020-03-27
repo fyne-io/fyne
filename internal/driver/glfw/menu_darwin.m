@@ -21,11 +21,15 @@ NSMenu* nativeMainMenu() {
     return [app mainMenu];
 }
 
+const void* darwinAppMenu() {
+    return [[nativeMainMenu() itemAtIndex:0] submenu];
+}
+
 const void* createDarwinMenu(const char* label) {
     return (void*)[[NSMenu alloc] initWithTitle:[NSString stringWithUTF8String:label]];
 }
 
-void insertDarwinMenuItem(const void* m, const char* label, int id) {
+void insertDarwinMenuItem(const void* m, const char* label, int id, int index) {
     NSMenu* menu = (NSMenu*)m;
     // NSMenuItem's target is a weak reference, therefore we must not release it.
     // TODO: Keep a reference in Go and release it when the menu of a window changes or the window is released.
@@ -37,7 +41,11 @@ void insertDarwinMenuItem(const void* m, const char* label, int id) {
     [item setTarget:tapper];
     [item setTag:id];
 
-    [menu addItem:item];
+    if (index > -1) {
+        [menu insertItem:item atIndex:index];
+    } else {
+        [menu addItem:item];
+    }
     [item release];
 }
 

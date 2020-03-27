@@ -63,14 +63,22 @@ func main() {
 	a.SetIcon(theme.FyneLogo())
 
 	w := a.NewWindow("Fyne Demo")
-	w.SetMainMenu(fyne.NewMainMenu(fyne.NewMenu("File",
-		fyne.NewMenuItem("New", func() { fmt.Println("Menu New") }),
+	settingsItem := fyne.NewMenuItem("Settings", func() { fmt.Println("Menu Settings") })
+	settingsItem.PlaceInNativeMenu = true
+	newItem := fyne.NewMenuItem("New", func() { fmt.Println("Menu New") })
+
+	cutItem := fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") })
+	copyItem := fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") })
+	pasteItem := fyne.NewMenuItem("Paste", func() { fmt.Println("Menu Paste") })
+	mainMenu := fyne.NewMainMenu(
 		// a quit item will be appended to our first menu
-	), fyne.NewMenu("Edit",
-		fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") }),
-		fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") }),
-		fyne.NewMenuItem("Paste", func() { fmt.Println("Menu Paste") }),
-	)))
+		fyne.NewMenu("File",
+			settingsItem,
+			newItem,
+		),
+		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem),
+	)
+	w.SetMainMenu(mainMenu)
 	w.SetMaster()
 
 	tabs := widget.NewTabContainer(
