@@ -17,7 +17,7 @@ import (
 // Using void* as type for pointers is a workaround. See https://github.com/golang/go/issues/12065.
 const void* darwinAppMenu();
 const void* createDarwinMenu(const char* label);
-void insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool separate);
+void insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, int id, int index, bool separate);
 void completeDarwinMenu(void* menu);
 */
 import "C"
@@ -59,6 +59,7 @@ func addNativeMenu(menu *fyne.Menu, nextItemID int) int {
 			C.insertDarwinMenuItem(
 				C.darwinAppMenu(),
 				C.CString(item.Label),
+				C.CString(item.KeyEquivalent),
 				C.int(nextItemID),
 				C.int(1),
 				C.bool(item.Separate),
@@ -67,6 +68,7 @@ func addNativeMenu(menu *fyne.Menu, nextItemID int) int {
 			C.insertDarwinMenuItem(
 				nsMenu,
 				C.CString(item.Label),
+				C.CString(item.KeyEquivalent),
 				C.int(nextItemID),
 				C.int(-1),
 				C.bool(item.Separate),
