@@ -16,6 +16,7 @@ func NewMenu(label string, items ...*MenuItem) *Menu {
 type MenuItem struct {
 	Label             string
 	PlaceInNativeMenu bool
+	Separate          bool
 	Action            func()
 }
 

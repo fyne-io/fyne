@@ -12,10 +12,12 @@ import (
 #cgo CFLAGS: -x objective-c
 #cgo LDFLAGS: -framework Foundation -framework AppKit
 
+#include <AppKit/AppKit.h>
+
 // Using void* as type for pointers is a workaround. See https://github.com/golang/go/issues/12065.
 const void* darwinAppMenu();
 const void* createDarwinMenu(const char* label);
-void insertDarwinMenuItem(const void* menu, const char* label, int id, int index);
+void insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool separate);
 void completeDarwinMenu(void* menu);
 */
 import "C"
@@ -59,6 +61,7 @@ func addNativeMenu(menu *fyne.Menu, nextItemID int) int {
 				C.CString(item.Label),
 				C.int(nextItemID),
 				C.int(1),
+				C.bool(item.Separate),
 			)
 		} else {
 			C.insertDarwinMenuItem(
@@ -66,6 +69,7 @@ func addNativeMenu(menu *fyne.Menu, nextItemID int) int {
 				C.CString(item.Label),
 				C.int(nextItemID),
 				C.int(-1),
+				C.bool(item.Separate),
 			)
 		}
 		callbacks = append(callbacks, item.Action)

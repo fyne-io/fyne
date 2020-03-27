@@ -63,20 +63,21 @@ func main() {
 	a.SetIcon(theme.FyneLogo())
 
 	w := a.NewWindow("Fyne Demo")
+	newItem := fyne.NewMenuItem("New", func() { fmt.Println("Menu New") })
+	newItem.Separate = true
 	settingsItem := fyne.NewMenuItem("Settings", func() { fmt.Println("Menu Settings") })
 	settingsItem.PlaceInNativeMenu = true
-	newItem := fyne.NewMenuItem("New", func() { fmt.Println("Menu New") })
+	settingsItem.Separate = true
 
 	cutItem := fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") })
 	copyItem := fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") })
 	pasteItem := fyne.NewMenuItem("Paste", func() { fmt.Println("Menu Paste") })
+	findItem := fyne.NewMenuItem("Find", func() { fmt.Println("Menu Find") })
+	findItem.Separate = true
 	mainMenu := fyne.NewMainMenu(
 		// a quit item will be appended to our first menu
-		fyne.NewMenu("File",
-			settingsItem,
-			newItem,
-		),
-		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem),
+		fyne.NewMenu("File", newItem, settingsItem),
+		fyne.NewMenu("Edit", cutItem, copyItem, pasteItem, findItem),
 	)
 	w.SetMainMenu(mainMenu)
 	w.SetMaster()

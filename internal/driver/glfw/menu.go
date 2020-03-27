@@ -31,10 +31,11 @@ func newMenuBarAction(menu *fyne.Menu, c fyne.Canvas) widget.ToolbarItem {
 
 func newMenuBarActionWithQuit(menu *fyne.Menu, c fyne.Canvas) widget.ToolbarItem {
 	if menu.Items[len(menu.Items)-1].Label != "Quit" { // make sure the first menu always has a quit option
-		// TODO append a separator as well
-		menu.Items = append(menu.Items, fyne.NewMenuItem("Quit", func() {
+		quitItem := fyne.NewMenuItem("Quit", func() {
 			fyne.CurrentApp().Quit()
-		}))
+		})
+		quitItem.Separate = true
+		menu.Items = append(menu.Items, quitItem)
 	}
 	return &menuBarAction{menu.Label, menu, c}
 }
