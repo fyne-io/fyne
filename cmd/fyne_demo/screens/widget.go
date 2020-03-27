@@ -118,12 +118,10 @@ func makeScrollTab() fyne.CanvasObject {
 
 	horiz := widget.NewHorizontalScrollContainer(list)
 	vert := widget.NewVerticalScrollContainer(list2)
-	vert.SetMinSize(fyne.NewSize(32, 128))
 
-	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), widget.NewVBox(
-		horiz,
-		vert,
-	), makeScrollBothTab())
+	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
+		fyne.NewContainerWithLayout(layout.NewBorderLayout(horiz, nil, nil, nil), horiz, vert),
+		makeScrollBothTab())
 }
 
 func makeScrollBothTab() fyne.CanvasObject {
