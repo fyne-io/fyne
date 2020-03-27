@@ -5,7 +5,6 @@ package app
 import (
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"fyne.io/fyne"
 	"github.com/fsnotify/fsnotify"
@@ -42,11 +41,8 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 	go func() {
 		for event := range watcher.Events {
 			if event.Op&fsnotify.Remove != 0 { // if it was deleted then watch again
-				err := watcher.Remove(path)
-				if err != nil && runtime.GOOS == "darwin" { // fsnotify returns false positives on Windows and mac (possibly BSD too), see https://github.com/fsnotify/fsnotify/issues/268
-					fyne.LogError("Failed to stop watching settings file", err)
-					return
-				}
+				watcher.Remove(path) // fsnotify returns false positives, see https://github.com/fsnotify/fsnotify/issues/268
+
 				watchFileAddTarget(watcher, path)
 			} else {
 				callback()
