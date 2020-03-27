@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"log"
 	"math"
 	"strings"
 	"sync"
@@ -997,11 +996,11 @@ func (e *Entry) textAlign() fyne.TextAlign {
 // textWrap tells the rendering textProvider our wrapping
 func (e *Entry) textWrap() fyne.TextWrap {
 	if e.Wrapping == fyne.TextTruncate {
-		log.Println("Entry does not allow Truncation - how can the user edit text they can't see?")
+		fyne.LogError("Entry does not allow Truncation", nil)
 		e.Wrapping = fyne.TextWrapOff
 	}
 	if !e.MultiLine && e.Wrapping != fyne.TextWrapOff {
-		log.Println("Entry cannot wrap single line")
+		fyne.LogError("Entry cannot wrap single line", nil)
 		e.Wrapping = fyne.TextWrapOff
 	}
 	return e.Wrapping
