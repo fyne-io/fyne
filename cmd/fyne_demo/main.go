@@ -49,9 +49,11 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 				widget.NewButton("Dark", func() {
 					a.Settings().SetTheme(theme.DarkTheme())
+					a.Preferences().SetString("Theme", "Dark")
 				}),
 				widget.NewButton("Light", func() {
 					a.Settings().SetTheme(theme.LightTheme())
+					a.Preferences().SetString("Theme", "Light")
 				}),
 			),
 		),
@@ -82,6 +84,13 @@ func main() {
 	tabs.SetTabLocation(widget.TabLocationLeading)
 	tabs.SelectTabIndex(a.Preferences().Int(preferenceCurrentTab))
 	w.SetContent(tabs)
+
+	switch a.Preferences().StringWithFallback("Theme", "Dark") {
+	case "Dark":
+		a.Settings().SetTheme(theme.DarkTheme())
+	case "Light":
+		a.Settings().SetTheme(theme.LightTheme())
+	}
 
 	w.ShowAndRun()
 	a.Preferences().SetInt(preferenceCurrentTab, tabs.CurrentTabIndex())
