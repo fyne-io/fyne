@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/widget"
 	"golang.org/x/mobile/app"
@@ -41,10 +42,10 @@ func init() {
 }
 
 func (d *mobileDriver) CreateWindow(title string) fyne.Window {
-	canvas := NewCanvas().(*mobileCanvas) // silence lint
-	ret := &window{title: title, canvas: canvas, isChild: len(d.windows) > 0}
-	canvas.painter = pgl.NewPainter(canvas, ret)
-
+	c := NewCanvas().(*mobileCanvas) // silence lint
+	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
+	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
+	c.painter = pgl.NewPainter(c, ret)
 	d.windows = append(d.windows, ret)
 	return ret
 }
