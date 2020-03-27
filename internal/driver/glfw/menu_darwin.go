@@ -18,7 +18,7 @@ import (
 const void* darwinAppMenu();
 const void* createDarwinMenu(const char* label);
 void insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, int id, int index, bool separate);
-void completeDarwinMenu(void* menu);
+void completeDarwinMenu(void* menu, bool prepend);
 */
 import "C"
 
@@ -35,12 +35,20 @@ func hasNativeMenu() bool {
 
 func setupNativeMenu(main *fyne.MainMenu) {
 	nextItemID := 0
+	for i := len(main.Items) - 1; i >= 0; i-- {
+		menu := main.Items[i]
+		if !menu.AfterNativeMenus {
+			nextItemID = addNativeMenu(menu, nextItemID, true)
+		}
+	}
 	for _, menu := range main.Items {
-		nextItemID = addNativeMenu(menu, nextItemID)
+		if menu.AfterNativeMenus {
+			nextItemID = addNativeMenu(menu, nextItemID, false)
+		}
 	}
 }
 
-func addNativeMenu(menu *fyne.Menu, nextItemID int) int {
+func addNativeMenu(menu *fyne.Menu, nextItemID int, prepend bool) int {
 	createMenu := false
 	for _, item := range menu.Items {
 		if !item.PlaceInNativeMenu {
@@ -79,7 +87,7 @@ func addNativeMenu(menu *fyne.Menu, nextItemID int) int {
 	}
 
 	if nsMenu != nil {
-		C.completeDarwinMenu(nsMenu)
+		C.completeDarwinMenu(nsMenu, C.bool(prepend))
 	}
 	return nextItemID
 }

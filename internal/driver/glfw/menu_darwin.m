@@ -59,11 +59,15 @@ void insertDarwinMenuItem(const void* m, const char* label, const char* keyEquiv
     [item release];
 }
 
-void completeDarwinMenu(const void* m) {
+void completeDarwinMenu(const void* m, bool prepend) {
     NSMenu* menu = (NSMenu*)m;
     NSMenu* main = nativeMainMenu();
     NSMenuItem* top = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
-    [main addItem:top];
+    if (prepend) {
+        [main insertItem:top atIndex:1];
+    } else {
+        [main addItem:top];
+    }
     [main setSubmenu:menu forItem:top];
     [menu release]; // release the menu created in createDarwinMenu() function
     menu = Nil;
