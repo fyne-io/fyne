@@ -2,6 +2,7 @@ package screens
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"fyne.io/fyne"
@@ -134,6 +135,33 @@ func makeScrollBothTab() fyne.CanvasObject {
 	return scroll
 }
 
+func makeTreeTab() fyne.CanvasObject {
+	tree := widget.NewTree()
+	tree.GetBranchIcon = func(path []string, open bool) fyne.Resource {
+		if open {
+			return theme.FolderOpenIcon()
+		}
+		return theme.FolderIcon()
+	}
+	tree.GetLeafIcon = func(path []string) fyne.Resource {
+		return theme.FileIcon()
+	}
+	tree.OnLeafSelected = func(path []string) {
+		log.Println("TreeLeafSelected:", path)
+	}
+	tree.Add("A", "B", "C", "abc")
+	tree.Add("A", "D", "E", "F", "adef")
+	tree.Add("A", "D", "E", "G", "adeg")
+	tree.Add("A", "H", "I", "ahi")
+	tree.Add("A", "J", "K", "ajk")
+	tree.Add("A", "L", "M", "N", "almn")
+	tree.Add("A", "O", "ao")
+	tree.Add("A", "P", "Q", "R", "apqr")
+	tree.Add("A", "S", "T", "U", "astu")
+	tree.Add("A", "V", "W", "X", "Y", "Z", "avwxyz")
+	return widget.NewVerticalScrollContainer(tree)
+}
+
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -152,6 +180,7 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Progress", makeProgressTab()),
 			widget.NewTabItem("Form", makeFormTab()),
 			widget.NewTabItem("Scroll", makeScrollTab()),
+			widget.NewTabItem("Tree", makeTreeTab()),
 		),
 	)
 }
