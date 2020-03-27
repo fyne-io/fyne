@@ -24,8 +24,8 @@ import "C"
 
 var callbacks []func()
 
-//export menu_callback
-func menu_callback(id int) {
+//export menuCallback
+func menuCallback(id int) {
 	callbacks[id]()
 }
 

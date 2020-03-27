@@ -3,7 +3,7 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
-extern void menu_callback(int);
+extern void menuCallback(int);
 
 @interface FyneMenuItem : NSObject {
 
@@ -12,7 +12,7 @@ extern void menu_callback(int);
 
 @implementation FyneMenuItem
 - (void) tapped:(id) sender {
-    menu_callback([sender tag]);
+    menuCallback([sender tag]);
 }
 @end
 
