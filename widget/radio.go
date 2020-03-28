@@ -164,11 +164,11 @@ func (r *radioRenderer) Destroy() {
 // Changing the selection (only one can be selected) will trigger the changed func.
 type Radio struct {
 	DisableableWidget
-	Options  []string
-	Selected string
-
-	OnChanged  func(string) `json:"-"`
 	Horizontal bool
+	Mandatory  bool
+	OnChanged  func(string) `json:"-"`
+	Options    []string
+	Selected   string
 
 	hoveredItemIndex int
 	hovered          bool
@@ -238,6 +238,9 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	clicked := r.Options[index]
 
 	if r.Selected == clicked {
+		if r.Mandatory {
+			return
+		}
 		r.Selected = ""
 	} else {
 		r.Selected = clicked
@@ -276,8 +279,19 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	return &radioRenderer{items, objects, r}
 }
 
+// SetMandatory sets if the radio must have a selection.
+func (r *Radio) SetMandatory(m bool) {
+	r.Mandatory = m
+	if r.Selected == "" && len(r.Options) > 0 {
+		r.Selected = r.Options[0]
+	}
+}
+
 // SetSelected sets the radio option, it can be used to set a default option.
 func (r *Radio) SetSelected(option string) {
+	if option == "" && r.Mandatory && len(r.Options) > 0 {
+		option = r.Options[0]
+	}
 	if r.Selected == option {
 		return
 	}
