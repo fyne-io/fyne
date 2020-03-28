@@ -17,7 +17,7 @@ import (
 // Using void* as type for pointers is a workaround. See https://github.com/golang/go/issues/12065.
 const void* darwinAppMenu();
 const void* createDarwinMenu(const char* label);
-void insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, int id, int index, bool separate);
+void insertDarwinMenuItem(const void* menu, const char* label, const char* keyEquivalent, int id, int index, bool isSeparator);
 void completeDarwinMenu(void* menu, bool prepend);
 */
 import "C"
@@ -62,6 +62,7 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 		nsMenu = C.createDarwinMenu(C.CString(menu.Label))
 	}
 
+	appMenuIndex := 1
 	for _, item := range menu.Items {
 		if item.PlaceInNativeMenu {
 			C.insertDarwinMenuItem(
@@ -69,9 +70,10 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 				C.CString(item.Label),
 				C.CString(item.KeyEquivalent),
 				C.int(nextItemID),
-				C.int(1),
-				C.bool(item.Separate),
+				C.int(appMenuIndex),
+				C.bool(item.IsSeparator),
 			)
+			appMenuIndex++
 		} else {
 			C.insertDarwinMenuItem(
 				nsMenu,
@@ -79,7 +81,7 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 				C.CString(item.KeyEquivalent),
 				C.int(nextItemID),
 				C.int(-1),
-				C.bool(item.Separate),
+				C.bool(item.IsSeparator),
 			)
 		}
 		callbacks = append(callbacks, func() { w.queueEvent(item.Action) })

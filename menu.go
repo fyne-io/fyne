@@ -15,16 +15,21 @@ func NewMenu(label string, items ...*MenuItem) *Menu {
 
 // MenuItem is a single item within any menu, it contains a display Label and Action function that is called when tapped.
 type MenuItem struct {
+	IsSeparator       bool
 	Label             string
 	KeyEquivalent     string
 	PlaceInNativeMenu bool
-	Separate          bool
 	Action            func()
 }
 
 // NewMenuItem creates a new menu item from the passed label and action parameters.
 func NewMenuItem(label string, action func()) *MenuItem {
 	return &MenuItem{Label: label, Action: action}
+}
+
+// NewMenuItemSeparator creates a menu item that is to be used as a separator.
+func NewMenuItemSeparator() *MenuItem {
+	return &MenuItem{IsSeparator: true, Action: func() {}}
 }
 
 // MainMenu defines the data required to show a menu bar (desktop) or other appropriate top level menu.

@@ -34,8 +34,7 @@ func newMenuBarActionWithQuit(menu *fyne.Menu, c fyne.Canvas) widget.ToolbarItem
 		quitItem := fyne.NewMenuItem("Quit", func() {
 			fyne.CurrentApp().Quit()
 		})
-		quitItem.Separate = true
-		menu.Items = append(menu.Items, quitItem)
+		menu.Items = append(menu.Items, fyne.NewMenuItemSeparator(), quitItem)
 	}
 	return &menuBarAction{menu.Label, menu, c}
 }
