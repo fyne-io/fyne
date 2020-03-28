@@ -1,0 +1,14 @@
+# IDE Settings
+.vscode/
+
+# Folders
+vendor/
+
+# Files
+cmd/goversioninfo/goversioninfo
+*.exe
+*.syso
+
+# OS Files
+.DS_Store
+thumbs.db

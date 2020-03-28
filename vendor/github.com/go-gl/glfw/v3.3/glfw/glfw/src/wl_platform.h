@@ -249,6 +249,7 @@ typedef struct _GLFWlibraryWayland
     struct wl_cursor_theme*     cursorTheme;
     struct wl_cursor_theme*     cursorThemeHiDPI;
     struct wl_surface*          cursorSurface;
+    const char*                 cursorPreviousName;
     int                         cursorTimerfd;
     uint32_t                    serial;
 

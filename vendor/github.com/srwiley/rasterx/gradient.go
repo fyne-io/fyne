@@ -30,13 +30,13 @@ type (
 	SpreadMethod byte
 	// GradientUnits is the type for gradient units
 	GradientUnits byte
-	// GradStop is a struct representing a stop in the SVG 2.0 gradient specification
+	// GradStop represents a stop in the SVG 2.0 gradient specification
 	GradStop struct {
 		StopColor color.Color
 		Offset    float64
 		Opacity   float64
 	}
-	// Gradient is a struct hold a description of an SVG 2.0 gradient
+	// Gradient holds a description of an SVG 2.0 gradient
 	Gradient struct {
 		Points   [5]float64
 		Stops    []GradStop
@@ -163,7 +163,7 @@ func (g *Gradient) GetColorFunction(opacity float64) interface{} {
 func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix Matrix2D) interface{} {
 	switch len(g.Stops) {
 	case 0:
-		return ApplyOpacity(color.RGBA{255, 0, 255, 255}, opacity) // default error color for gradient w/o stops.
+		return ApplyOpacity(color.RGBA{0, 0, 0, 255}, opacity) // default error color for gradient w/o stops.
 	case 1:
 		return ApplyOpacity(g.Stops[0].StopColor, opacity) // Illegal, I think, should really should not happen.
 	}
@@ -287,13 +287,17 @@ func (g *Gradient) GetColorFunctionUS(opacity float64, objMatrix Matrix2D) inter
 			return g.tColor((dx*dfx+dy*dfy)/d, opacity)
 		})
 	}
+
 	p1x, p1y = g.Matrix.Transform(p1x, p1y)
 	p2x, p2y = g.Matrix.Transform(p2x, p2y)
 	p1x, p1y = objMatrix.Transform(p1x, p1y)
 	p2x, p2y = objMatrix.Transform(p2x, p2y)
 	dx := p2x - p1x
 	dy := p2y - p1y
-	d := (dx*dx + dy*dy) // self inner prod
+	d := (dx*dx + dy*dy)
+	// if d == 0.0 {
+	// 	fmt.Println("zero delta")
+	// }
 	return ColorFunc(func(xi, yi int) color.Color {
 		x := float64(xi) + 0.5
 		y := float64(yi) + 0.5
