@@ -47,7 +47,7 @@ func makeTextTab() fyne.Widget {
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
-	entryLoremIpsumScroller := widget.NewScrollContainer(entryLoremIpsum)
+	entryLoremIpsumScroller := widget.NewVerticalScrollContainer(entryLoremIpsum)
 
 	label.Alignment = fyne.TextAlignLeading
 	hyperlink.Alignment = fyne.TextAlignLeading
