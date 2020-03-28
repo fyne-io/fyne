@@ -43,7 +43,10 @@ func signPKCS7(rand io.Reader, priv *rsa.PrivateKey, msg []byte) ([]byte, error)
 	}
 
 	h := sha1.New()
-	h.Write(msg)
+	_, err = h.Write(msg)
+	if err != nil {
+		return nil, err
+	}
 	hashed := h.Sum(nil)
 
 	signed, err := rsa.SignPKCS1v15(rand, priv, crypto.SHA1, hashed)

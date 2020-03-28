@@ -174,7 +174,11 @@ type ElementEnd struct {
 
 // UnmarshalBinary creates the element end from binary data
 func (el *ElementEnd) UnmarshalBinary(bin []byte) error {
-	(&el.NodeHeader).UnmarshalBinary(bin)
+	err := (&el.NodeHeader).UnmarshalBinary(bin)
+	if err != nil {
+		return err
+	}
+
 	buf := bin[el.headerByteSize:]
 	el.NS = PoolRef(btou32(buf))
 	el.Name = PoolRef(btou32(buf[4:]))

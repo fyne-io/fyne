@@ -41,7 +41,8 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 	go func() {
 		for event := range watcher.Events {
 			if event.Op&fsnotify.Remove != 0 { // if it was deleted then watch again
-				watcher.Remove(path)
+				watcher.Remove(path) // fsnotify returns false positives, see https://github.com/fsnotify/fsnotify/issues/268
+
 				watchFileAddTarget(watcher, path)
 			} else {
 				callback()
@@ -67,5 +68,9 @@ func (s *settings) stopWatching() {
 		return
 	}
 
-	s.watcher.(*fsnotify.Watcher).Close()
+	err := s.watcher.(*fsnotify.Watcher).Close()
+	if err != nil {
+		fyne.LogError("Failed to close watcher", err)
+		return
+	}
 }

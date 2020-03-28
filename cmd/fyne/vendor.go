@@ -101,7 +101,7 @@ func recursiveCopy(src, target string) error {
 
 func ensureDir(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err2 := os.Mkdir(dir, 0755)
+		err2 := os.Mkdir(dir, 0750)
 		if err2 != nil {
 			return err2
 		}

@@ -72,7 +72,10 @@ func (p *preferences) loadFromFile(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.MkdirAll(filepath.Dir(path), 0700)
+			err := os.MkdirAll(filepath.Dir(path), 0700)
+			if err != nil {
+				return err
+			}
 			return nil
 		}
 		return err
@@ -88,7 +91,10 @@ func newPreferences() *preferences {
 	p.InMemoryPreferences = internal.NewInMemoryPreferences()
 
 	p.OnChange = func() {
-		p.save()
+		err := p.save()
+		if err != nil {
+			fyne.LogError("Failed on saving preferences", err)
+		}
 	}
 	return p
 }

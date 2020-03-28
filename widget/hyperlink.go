@@ -84,7 +84,10 @@ func (hl *Hyperlink) object() fyne.Widget {
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 	if hl.URL != nil {
-		fyne.CurrentApp().OpenURL(hl.URL)
+		err := fyne.CurrentApp().OpenURL(hl.URL)
+		if err != nil {
+			fyne.LogError("Failed to open url", err)
+		}
 	}
 }
 

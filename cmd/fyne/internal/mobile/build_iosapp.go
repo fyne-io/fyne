@@ -56,7 +56,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string, appName 
 			printcmd("echo \"%s\" > %s", file.contents, file.name)
 		}
 		if !buildN {
-			if err := ioutil.WriteFile(file.name, file.contents, 0644); err != nil {
+			if err := ioutil.WriteFile(file.name, file.contents, 0600); err != nil {
 				return nil, err
 			}
 		}

@@ -274,7 +274,11 @@ type Map struct {
 
 // UnmarshalBinary creates the map from binary data
 func (m *Map) UnmarshalBinary(bin []byte) error {
-	(&m.chunkHeader).UnmarshalBinary(bin)
+	err := (&m.chunkHeader).UnmarshalBinary(bin)
+	if err != nil {
+		return err
+	}
+
 	buf := bin[m.headerByteSize:m.byteSize]
 	m.rs = make([]TableRef, len(buf)/4)
 	for i := range m.rs {
