@@ -35,7 +35,7 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 	dir := filepath.Dir(pkg.GoFiles[0])
 
 	manifestPath := filepath.Join(dir, "AndroidManifest.xml")
-	manifestData, err := ioutil.ReadFile(manifestPath)
+	manifestData, err := ioutil.ReadFile(filepath.Clean(manifestPath))
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
@@ -274,7 +274,7 @@ func apkwWriteFile(dst, src string, apkw *Writer) error {
 		return err
 	}
 	if !buildN {
-		f, err := os.Open(src)
+		f, err := os.Open(filepath.Clean(src))
 		if err != nil {
 			return err
 		}
