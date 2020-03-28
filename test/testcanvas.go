@@ -108,6 +108,10 @@ func (c *testCanvas) Resize(size fyne.Size) {
 		return
 	}
 
+	for _, overlay := range c.overlays.List() {
+		overlay.Resize(size)
+	}
+
 	if c.padded {
 		theme := fyne.CurrentApp().Settings().Theme()
 		c.content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))

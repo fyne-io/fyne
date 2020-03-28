@@ -3,6 +3,7 @@ package screens
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"fyne.io/fyne"
@@ -58,6 +59,24 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			}()
 
 			prog.Show()
+		}),
+		widget.NewButton("File Open", func() {
+			dialog.ShowFileOpen(func(path string) {
+				if path == "" {
+					log.Println("Cancelled")
+				} else {
+					log.Println("Open file", path)
+				}
+			}, win)
+		}),
+		widget.NewButton("File Save", func() {
+			dialog.ShowFileSave(func(path string) {
+				if path == "" {
+					log.Println("Cancelled")
+				} else {
+					log.Println("Save to file", path)
+				}
+			}, win)
 		}),
 		widget.NewButton("Custom", func() {
 			entry := widget.NewEntry()

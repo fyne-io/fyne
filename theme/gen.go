@@ -132,6 +132,7 @@ func main() {
 	bundleIcon("arrow-drop-down", f)
 	bundleIcon("arrow-drop-up", f)
 
+	bundleIcon("file", f)
 	bundleIcon("folder", f)
 	bundleIcon("folder-new", f)
 	bundleIcon("folder-open", f)

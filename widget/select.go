@@ -230,5 +230,7 @@ func (s *Select) updateSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	return &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	s.ExtendBaseWidget(s)
+	return s
 }

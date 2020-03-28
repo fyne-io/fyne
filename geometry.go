@@ -19,11 +19,25 @@ func (s1 Size) Subtract(s2 Size) Size {
 }
 
 // Union returns a new Size that is the maximum of the current Size and s2.
+// Deprecated: use Max() instead
 func (s1 Size) Union(s2 Size) Size {
+	return s1.Max(s2)
+}
+
+// Max returns a new Size that is the maximum of the current Size and s2.
+func (s1 Size) Max(s2 Size) Size {
 	maxW := Max(s1.Width, s2.Width)
 	maxH := Max(s1.Height, s2.Height)
 
 	return NewSize(maxW, maxH)
+}
+
+// Min returns a new Size that is the minimum of the current Size and s2.
+func (s1 Size) Min(s2 Size) Size {
+	minW := Min(s1.Width, s2.Width)
+	minH := Min(s1.Height, s2.Height)
+
+	return NewSize(minW, minH)
 }
 
 // NewSize returns a newly allocated Size of the specified dimensions.

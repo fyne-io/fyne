@@ -235,6 +235,10 @@ func driverShowVirtualKeyboard() {
 func driverHideVirtualKeyboard() {
 }
 
+// driverShowFileOpenPicker does nothing on desktop
+func driverShowFileOpenPicker(func(string)) {
+}
+
 // convRune marks the Carbon/Cocoa private-range unicode rune representing
 // a non-unicode key event to -1, used for Rune in the key package.
 //

@@ -1,6 +1,7 @@
 package glfw
 
 import (
+	"fmt"
 	"runtime"
 	"sync"
 	"time"
@@ -60,7 +61,7 @@ func (d *gLDriver) initGLFW() {
 func (d *gLDriver) tryPollEvents() {
 	defer func() {
 		if r := recover(); r != nil {
-			fyne.LogError("GLFW poll event error (details above)", nil)
+			fyne.LogError(fmt.Sprint("GLFW poll event error: ", r), nil)
 		}
 	}()
 
