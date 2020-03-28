@@ -36,7 +36,7 @@ func makeButtonTab() fyne.Widget {
 	)
 }
 
-func makeTextTab() fyne.Widget {
+func makeTextTab() fyne.CanvasObject {
 	label := widget.NewLabel("Label")
 
 	link, err := url.Parse("https://fyne.io/")
@@ -115,7 +115,7 @@ func makeTextTab() fyne.Widget {
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 
-	return widget.NewVBox(
+	fixed := widget.NewVBox(
 		widget.NewHBox(
 			radioAlign,
 			layout.NewSpacer(),
@@ -126,8 +126,9 @@ func makeTextTab() fyne.Widget {
 		entry,
 		entryDisabled,
 		entryMultiLine,
-		entryLoremIpsumScroller,
 	)
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(fixed, nil, nil, nil),
+		fixed, entryLoremIpsumScroller)
 }
 
 func makeInputTab() fyne.Widget {
