@@ -15,19 +15,24 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 	options := NewVBox()
 	for _, option := range menu.Items {
 		opt := option // capture value
-		options.Append(newTappableLabel(opt.Label))
+		if opt.IsSeparator {
+			options.Append(newSeparator())
+		} else {
+			options.Append(newTappableLabel(opt.Label))
+		}
 	}
 	pop := NewPopUpAtPosition(options, c, pos)
 	focused := c.Focused()
 	for i, o := range options.Children {
-		label := o.(*menuItemWidget)
-		item := menu.Items[i]
-		label.OnTapped = func() {
-			if c.Focused() == nil {
-				c.Focus(focused)
+		if label, ok := o.(*menuItemWidget); ok {
+			item := menu.Items[i]
+			label.OnTapped = func() {
+				if c.Focused() == nil {
+					c.Focus(focused)
+				}
+				pop.Hide()
+				item.Action()
 			}
-			pop.Hide()
-			item.Action()
 		}
 	}
 	return pop
@@ -88,4 +93,8 @@ func (h *hoverLabelRenderer) BackgroundColor() color.Color {
 	}
 
 	return theme.BackgroundColor()
+}
+
+func newSeparator() fyne.CanvasObject {
+	return canvas.NewLine(theme.DisabledTextColor())
 }
