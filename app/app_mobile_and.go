@@ -1,6 +1,6 @@
 // +build !ci
 
-// +build android mobile
+// +build android
 
 package app
 

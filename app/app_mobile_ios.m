@@ -1,4 +1,5 @@
-// +build darwin
+// +build !ci
+
 // +build ios
 
 #import <UIKit/UIKit.h>
