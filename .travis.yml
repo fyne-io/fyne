@@ -66,18 +66,21 @@ matrix:
     - go: 1.12.x
       os: linux
       env: GO111MODULE=on GOFLAGS=
-    - go: 1.12.x
-      os: osx
-      env: GO111MODULE=off GOFLAGS=
-    - go: 1.12.x
-      os: windows
-      env: GO111MODULE=off GOFLAGS=
     - go: 1.13.x
       os: linux
       env: GO111MODULE=off GOFLAGS=
     - go: 1.13.x
       os: osx
-      env: GO111MODULE=on GOFLAGS=-mod=vendor
+      env: GO111MODULE=off GOFLAGS=
     - go: 1.13.x
+      os: windows
+      env: GO111MODULE=off GOFLAGS=
+    - go: 1.14.x
+      os: linux
+      env: GO111MODULE=on GOFLAGS=
+    - go: 1.14.x
+      os: osx
+      env: GO111MODULE=on GOFLAGS=-mod=vendor
+    - go: 1.14.x
       os: windows
       env: GO111MODULE=off GOFLAGS=
