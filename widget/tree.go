@@ -31,7 +31,7 @@ func (t *Tree) Add(path ...string) {
 	if t.root == nil {
 		t.root = newBranch(t, nil, "")
 	}
-	t.root.add(path)
+	t.root.add(path...)
 	t.root.setOpen(true)
 }
 
@@ -266,7 +266,7 @@ func (b *branch) walk(depth int, onBranch func(int, *branch), onLeaf func(int, *
 	}
 }
 
-func (b *branch) add(path []string) {
+func (b *branch) add(path ...string) {
 	if len(path) == 0 {
 		return
 	}
@@ -279,7 +279,7 @@ func (b *branch) add(path []string) {
 			b.branchNames = append(b.branchNames, p)
 			sort.Strings(b.branchNames)
 		}
-		c.add(path[1:])
+		c.add(path[1:]...)
 	} else {
 		_, ok := b.leaves[p]
 		if !ok {
@@ -288,11 +288,11 @@ func (b *branch) add(path []string) {
 			sort.Strings(b.leafNames)
 		}
 	}
+	b.update()
 }
 
-func (b *branch) setOpen(open bool) {
-	b.open = open
-	if open {
+func (b *branch) update() {
+	if b.open {
 		for _, c := range b.branches {
 			c.Show()
 		}
@@ -307,6 +307,11 @@ func (b *branch) setOpen(open bool) {
 			c.Hide()
 		}
 	}
+}
+
+func (b *branch) setOpen(open bool) {
+	b.open = open
+	b.update()
 	b.tree.Refresh()
 }
 
