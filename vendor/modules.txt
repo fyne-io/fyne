@@ -21,6 +21,7 @@ github.com/fyne-io/mobile/geom
 github.com/fyne-io/mobile/gl
 github.com/fyne-io/mobile/internal/mobileinit
 # github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
+github.com/go-gl/gl/v2.1/gl
 github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.2-core/gl
 # github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
@@ -31,6 +32,12 @@ github.com/godbus/dbus/v5
 github.com/goki/freetype
 github.com/goki/freetype/raster
 github.com/goki/freetype/truetype
+# github.com/gopherjs/gopherjs v0.0.0-20191106031601-ce3c9ade29de
+github.com/gopherjs/gopherjs/js
+# github.com/goxjs/gl v0.0.0-00010101000000-000000000000 => github.com/bluebugs/gl v0.0.0-20200213000148-b72f4b5be1d9
+github.com/goxjs/gl
+# github.com/goxjs/glfw v0.0.0-00010101000000-000000000000 => github.com/bluebugs/glfw v0.0.0-20200217202728-7a2dbf31f657
+github.com/goxjs/glfw
 # github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 github.com/jackmordaunt/icns
 # github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
@@ -110,3 +117,5 @@ golang.org/x/xerrors
 golang.org/x/xerrors/internal
 # gopkg.in/yaml.v2 v2.2.8
 gopkg.in/yaml.v2
+# honnef.co/go/js/dom v0.0.0-20190526011328-ebc4cf92d81f
+honnef.co/go/js/dom
