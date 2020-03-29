@@ -134,6 +134,17 @@ func makeScrollBothTab() fyne.CanvasObject {
 	return scroll
 }
 
+func makeSplitTab() fyne.CanvasObject {
+	left := widget.NewMultiLineEntry()
+	//left.Wrapping = fyne.TextWrapWord
+	left.SetText("Long text is looooooooooooooong")
+	right := widget.NewVerticalSplitContainer(
+		widget.NewLabel("Label"),
+		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
+	)
+	return widget.NewHorizontalSplitContainer(widget.NewVerticalScrollContainer(left), right)
+}
+
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -152,6 +163,7 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Progress", makeProgressTab()),
 			widget.NewTabItem("Form", makeFormTab()),
 			widget.NewTabItem("Scroll", makeScrollTab()),
+			widget.NewTabItem("Split", makeSplitTab()),
 		),
 	)
 }
