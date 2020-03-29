@@ -121,6 +121,7 @@ func (r *treeRenderer) Destroy() {
 
 type treeNode interface {
 	fyne.Widget
+	getTree() *Tree
 	getParent() *branch
 	getPath() []string
 	getText() string
@@ -172,6 +173,7 @@ func (r *treeNodeRenderer) Refresh() {
 	r.createCanvasObjects()
 	r.Layout(r.node.Size())
 	canvas.Refresh(r.node)
+	r.node.getTree().Refresh()
 }
 
 func (r *treeNodeRenderer) createCanvasObjects() {
@@ -223,6 +225,10 @@ type branch struct {
 	leaves      map[string]*leaf
 	open        bool
 	hovered     bool
+}
+
+func (b *branch) getTree() *Tree {
+	return b.tree
 }
 
 func (b *branch) getParent() *branch {
@@ -312,7 +318,7 @@ func (b *branch) update() {
 func (b *branch) setOpen(open bool) {
 	b.open = open
 	b.update()
-	b.tree.Refresh()
+	b.Refresh()
 }
 
 func (b *branch) Hide() {
@@ -347,12 +353,12 @@ func (b *branch) Tapped(event *fyne.PointEvent) {
 
 func (b *branch) MouseIn(event *desktop.MouseEvent) {
 	b.hovered = true
-	b.tree.Refresh()
+	b.Refresh()
 }
 
 func (b *branch) MouseOut() {
 	b.hovered = false
-	b.tree.Refresh()
+	b.Refresh()
 }
 
 func (b *branch) MouseMoved(event *desktop.MouseEvent) {
@@ -384,6 +390,10 @@ type leaf struct {
 	parent  *branch
 	text    string
 	hovered bool
+}
+
+func (l *leaf) getTree() *Tree {
+	return l.tree
 }
 
 func (l *leaf) getParent() *branch {
@@ -426,12 +436,12 @@ func (l *leaf) Tapped(event *fyne.PointEvent) {
 
 func (l *leaf) MouseIn(event *desktop.MouseEvent) {
 	l.hovered = true
-	l.tree.Refresh()
+	l.Refresh()
 }
 
 func (l *leaf) MouseOut() {
 	l.hovered = false
-	l.tree.Refresh()
+	l.Refresh()
 }
 
 func (l *leaf) MouseMoved(event *desktop.MouseEvent) {
