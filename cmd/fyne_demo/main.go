@@ -68,7 +68,6 @@ func main() {
 	settingsSeparator := fyne.NewMenuItemSeparator()
 	settingsSeparator.PlaceInNativeMenu = true
 	settingsItem := fyne.NewMenuItem("Settings", func() { fmt.Println("Menu Settings") })
-	settingsItem.KeyEquivalent = ","
 	settingsItem.PlaceInNativeMenu = true
 
 	cutItem := fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") })

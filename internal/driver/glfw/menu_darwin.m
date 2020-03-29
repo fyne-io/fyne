@@ -29,7 +29,7 @@ const void* createDarwinMenu(const char* label) {
     return (void*)[[NSMenu alloc] initWithTitle:[NSString stringWithUTF8String:label]];
 }
 
-void insertDarwinMenuItem(const void* m, const char* label, const char* keyEquivalent, int id, int index, bool isSeparator) {
+void insertDarwinMenuItem(const void* m, const char* label, int id, int index, bool isSeparator) {
     NSMenu* menu = (NSMenu*)m;
     NSMenuItem* item;
 
@@ -42,7 +42,7 @@ void insertDarwinMenuItem(const void* m, const char* label, const char* keyEquiv
         item = [[NSMenuItem alloc]
             initWithTitle:[NSString stringWithUTF8String:label]
             action:@selector(tapped:)
-            keyEquivalent:[NSString stringWithUTF8String:keyEquivalent]];
+            keyEquivalent:@""];
         [item setTarget:tapper];
         [item setTag:id];
     }
