@@ -85,7 +85,7 @@ func setCurrentContext(vm *C.JavaVM, ctx C.jobject) {
 
 //export callMain
 func callMain(mainPC uintptr) {
-	for _, name := range []string{"TMPDIR", "PATH", "LD_LIBRARY_PATH"} {
+	for _, name := range []string{"FILESDIR", "TMPDIR", "PATH", "LD_LIBRARY_PATH"} {
 		n := C.CString(name)
 		os.Setenv(name, C.GoString(C.getenv(n)))
 		C.free(unsafe.Pointer(n))
