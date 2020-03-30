@@ -12,7 +12,7 @@ import (
 
 func TestSplitContainer(t *testing.T) {
 	size := fyne.NewSize(100, 100)
-	split := (100 - dividerThickness) / 2
+	split := (100 - getDividerThickness()) / 2
 
 	objA := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
@@ -46,19 +46,19 @@ func TestSplitContainer_MinSize(t *testing.T) {
 	textB := canvas.NewText("TEXTB", color.RGBA{0, 0xff, 0, 0})
 	t.Run("Horizontal", func(t *testing.T) {
 		min := NewHorizontalSplitContainer(textA, textB).MinSize()
-		assert.Equal(t, textA.MinSize().Width+textB.MinSize().Width+dividerThickness, min.Width)
-		assert.Equal(t, fyne.Max(textA.MinSize().Height, fyne.Max(textB.MinSize().Height, dividerLength)), min.Height)
+		assert.Equal(t, textA.MinSize().Width+textB.MinSize().Width+getDividerThickness(), min.Width)
+		assert.Equal(t, fyne.Max(textA.MinSize().Height, fyne.Max(textB.MinSize().Height, getDividerLength())), min.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		min := NewVerticalSplitContainer(textA, textB).MinSize()
-		assert.Equal(t, fyne.Max(textA.MinSize().Width, fyne.Max(textB.MinSize().Width, dividerLength)), min.Width)
-		assert.Equal(t, textA.MinSize().Height+textB.MinSize().Height+dividerThickness, min.Height)
+		assert.Equal(t, fyne.Max(textA.MinSize().Width, fyne.Max(textB.MinSize().Width, getDividerLength())), min.Width)
+		assert.Equal(t, textA.MinSize().Height+textB.MinSize().Height+getDividerThickness(), min.Height)
 	})
 }
 
 func TestSplitContainer_updateOffset(t *testing.T) {
 	size := fyne.NewSize(100, 100)
-	split := (100 - dividerThickness) / 2
+	split := (100 - getDividerThickness()) / 2
 
 	objA := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
@@ -210,13 +210,13 @@ func TestSplitContainer_divider_MinSize(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
 		divider := newDivider(&SplitContainer{Horizontal: true})
 		min := divider.MinSize()
-		assert.Equal(t, dividerThickness, min.Width)
-		assert.Equal(t, dividerLength, min.Height)
+		assert.Equal(t, getDividerThickness(), min.Width)
+		assert.Equal(t, getDividerLength(), min.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		divider := newDivider(&SplitContainer{Horizontal: false})
 		min := divider.MinSize()
-		assert.Equal(t, dividerLength, min.Width)
-		assert.Equal(t, dividerThickness, min.Height)
+		assert.Equal(t, getDividerLength(), min.Width)
+		assert.Equal(t, getDividerThickness(), min.Height)
 	})
 }

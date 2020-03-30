@@ -9,12 +9,21 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-var (
-	dividerThickness = theme.Padding() * 2
-	dividerLength    = theme.Padding() * 6
-	handleThickness  = theme.Padding() / 2
-	handleLength     = theme.Padding() * 4
-)
+func getDividerThickness() int {
+	return theme.Padding() * 2
+}
+
+func getDividerLength() int {
+	return theme.Padding() * 6
+}
+
+func getHandleThickness() int {
+	return theme.Padding() / 2
+}
+
+func getHandleLength() int {
+	return theme.Padding() * 4
+}
 
 // Declare conformity with interfaces
 var _ fyne.CanvasObject = (*divider)(nil)
@@ -80,15 +89,15 @@ type dividerRenderer struct {
 func (r *dividerRenderer) Layout(size fyne.Size) {
 	var x, y, w, h int
 	if r.divider.split.Horizontal {
-		x = (dividerThickness - handleThickness) / 2
-		y = (size.Height - handleLength) / 2
-		w = handleThickness
-		h = handleLength
+		x = (getDividerThickness() - getHandleThickness()) / 2
+		y = (size.Height - getHandleLength()) / 2
+		w = getHandleThickness()
+		h = getHandleLength()
 	} else {
-		x = (size.Width - handleLength) / 2
-		y = (dividerThickness - handleThickness) / 2
-		w = handleLength
-		h = handleThickness
+		x = (size.Width - getHandleLength()) / 2
+		y = (getDividerThickness() - getHandleThickness()) / 2
+		w = getHandleLength()
+		h = getHandleThickness()
 	}
 	r.rectangle.Move(fyne.NewPos(x, y))
 	r.rectangle.Resize(fyne.NewSize(w, h))
@@ -96,9 +105,9 @@ func (r *dividerRenderer) Layout(size fyne.Size) {
 
 func (r *dividerRenderer) MinSize() fyne.Size {
 	if r.divider.split.Horizontal {
-		return fyne.NewSize(dividerThickness, dividerLength)
+		return fyne.NewSize(getDividerThickness(), getDividerLength())
 	}
-	return fyne.NewSize(dividerLength, dividerThickness)
+	return fyne.NewSize(getDividerLength(), getDividerThickness())
 }
 
 func (r *dividerRenderer) Refresh() {
@@ -130,13 +139,13 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	var dividerSize, childASize, childBSize fyne.Size
 	if r.split.Horizontal {
 		x := 0
-		half := (size.Width - dividerThickness) / 2
+		half := (size.Width - getDividerThickness()) / 2
 		childAPos.X = x
 		childASize.Width = half + r.split.offset
 		childASize.Height = size.Height
 		x += childASize.Width
 		dividerPos.X = x
-		dividerSize.Width = dividerThickness
+		dividerSize.Width = getDividerThickness()
 		dividerSize.Height = size.Height
 		x += dividerSize.Width
 		childBPos.X = x
@@ -144,14 +153,14 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 		childBSize.Height = size.Height
 	} else {
 		y := 0
-		half := (size.Height - dividerThickness) / 2
+		half := (size.Height - getDividerThickness()) / 2
 		childAPos.Y = y
 		childASize.Width = size.Width
 		childASize.Height = half + r.split.offset
 		y += childASize.Height
 		dividerPos.Y = y
 		dividerSize.Width = size.Width
-		dividerSize.Height = dividerThickness
+		dividerSize.Height = getDividerThickness()
 		y += dividerSize.Height
 		childBPos.Y = y
 		childBSize.Width = size.Width
@@ -224,11 +233,11 @@ func (s *SplitContainer) updateOffset(offset int) {
 	var positiveLimit int
 	var negativeLimit int
 	if s.Horizontal {
-		half := (s.size.Width - dividerThickness) / 2
+		half := (s.size.Width - getDividerThickness()) / 2
 		positiveLimit = half - s.ChildB.MinSize().Width
 		negativeLimit = s.ChildA.MinSize().Width - half
 	} else {
-		half := (s.size.Height - dividerThickness) / 2
+		half := (s.size.Height - getDividerThickness()) / 2
 		positiveLimit = half - s.ChildB.MinSize().Height
 		negativeLimit = s.ChildA.MinSize().Height - half
 	}
