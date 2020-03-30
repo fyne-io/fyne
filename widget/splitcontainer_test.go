@@ -185,7 +185,7 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 
 func TestSplitContainer_divider_hover(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
-		divider := newDivider(&SplitContainer{horizontal: true})
+		divider := newDivider(&SplitContainer{Horizontal: true})
 		assert.False(t, divider.hovered)
 
 		divider.MouseIn(&desktop.MouseEvent{})
@@ -195,7 +195,7 @@ func TestSplitContainer_divider_hover(t *testing.T) {
 		assert.False(t, divider.hovered)
 	})
 	t.Run("Vertical", func(t *testing.T) {
-		divider := newDivider(&SplitContainer{horizontal: false})
+		divider := newDivider(&SplitContainer{Horizontal: false})
 		assert.False(t, divider.hovered)
 
 		divider.MouseIn(&desktop.MouseEvent{})
@@ -208,13 +208,13 @@ func TestSplitContainer_divider_hover(t *testing.T) {
 
 func TestSplitContainer_divider_MinSize(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
-		divider := newDivider(&SplitContainer{horizontal: true})
+		divider := newDivider(&SplitContainer{Horizontal: true})
 		min := divider.MinSize()
 		assert.Equal(t, dividerThickness, min.Width)
 		assert.Equal(t, dividerLength, min.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
-		divider := newDivider(&SplitContainer{horizontal: false})
+		divider := newDivider(&SplitContainer{Horizontal: false})
 		min := divider.MinSize()
 		assert.Equal(t, dividerLength, min.Width)
 		assert.Equal(t, dividerThickness, min.Height)

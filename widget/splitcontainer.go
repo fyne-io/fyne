@@ -32,7 +32,7 @@ func (d *divider) DragEnd() {
 
 func (d *divider) Dragged(event *fyne.DragEvent) {
 	offset := d.split.offset
-	if d.split.horizontal {
+	if d.split.Horizontal {
 		offset += event.DraggedX
 	} else {
 		offset += event.DraggedY
@@ -79,7 +79,7 @@ type dividerRenderer struct {
 
 func (r *dividerRenderer) Layout(size fyne.Size) {
 	var x, y, w, h int
-	if r.divider.split.horizontal {
+	if r.divider.split.Horizontal {
 		x = (dividerThickness - handleThickness) / 2
 		y = (size.Height - handleLength) / 2
 		w = handleThickness
@@ -95,7 +95,7 @@ func (r *dividerRenderer) Layout(size fyne.Size) {
 }
 
 func (r *dividerRenderer) MinSize() fyne.Size {
-	if r.divider.split.horizontal {
+	if r.divider.split.Horizontal {
 		return fyne.NewSize(dividerThickness, dividerLength)
 	}
 	return fyne.NewSize(dividerLength, dividerThickness)
@@ -128,7 +128,7 @@ type splitContainerRenderer struct {
 func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	var dividerPos, childAPos, childBPos fyne.Position
 	var dividerSize, childASize, childBSize fyne.Size
-	if r.split.horizontal {
+	if r.split.Horizontal {
 		x := 0
 		half := (size.Width - dividerThickness) / 2
 		childAPos.X = x
@@ -159,20 +159,20 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	}
 	r.divider.Move(dividerPos)
 	r.divider.Resize(dividerSize)
-	r.split.childA.Move(childAPos)
-	r.split.childA.Resize(childASize)
-	r.split.childB.Move(childBPos)
-	r.split.childB.Resize(childBSize)
+	r.split.ChildA.Move(childAPos)
+	r.split.ChildA.Resize(childASize)
+	r.split.ChildB.Move(childBPos)
+	r.split.ChildB.Resize(childBSize)
 	canvas.Refresh(r.divider)
-	canvas.Refresh(r.split.childA)
-	canvas.Refresh(r.split.childB)
+	canvas.Refresh(r.split.ChildA)
+	canvas.Refresh(r.split.ChildB)
 }
 
 func (r *splitContainerRenderer) MinSize() fyne.Size {
 	s := fyne.NewSize(0, 0)
 	for _, o := range r.objects {
 		min := o.MinSize()
-		if r.split.horizontal {
+		if r.split.Horizontal {
 			s.Width += min.Width
 			s.Height = fyne.Max(s.Height, min.Height)
 		} else {
@@ -204,8 +204,8 @@ var _ fyne.CanvasObject = (*SplitContainer)(nil)
 // SplitContainer defines a container whose size is split between two children.
 type SplitContainer struct {
 	BaseWidget
-	horizontal     bool
-	childA, childB fyne.CanvasObject
+	Horizontal     bool
+	ChildA, ChildB fyne.CanvasObject
 	offset         int // Adjusts how the size is split between the children, positive favours the first while negative favours the second.
 }
 
@@ -216,21 +216,21 @@ func (s *SplitContainer) CreateRenderer() fyne.WidgetRenderer {
 	return &splitContainerRenderer{
 		split:   s,
 		divider: d,
-		objects: []fyne.CanvasObject{s.childA, d, s.childB},
+		objects: []fyne.CanvasObject{s.ChildA, d, s.ChildB},
 	}
 }
 
 func (s *SplitContainer) updateOffset(offset int) {
 	var positiveLimit int
 	var negativeLimit int
-	if s.horizontal {
+	if s.Horizontal {
 		half := (s.size.Width - dividerThickness) / 2
-		positiveLimit = half - s.childB.MinSize().Width
-		negativeLimit = s.childA.MinSize().Width - half
+		positiveLimit = half - s.ChildB.MinSize().Width
+		negativeLimit = s.ChildA.MinSize().Width - half
 	} else {
 		half := (s.size.Height - dividerThickness) / 2
-		positiveLimit = half - s.childB.MinSize().Height
-		negativeLimit = s.childA.MinSize().Height - half
+		positiveLimit = half - s.ChildB.MinSize().Height
+		negativeLimit = s.ChildA.MinSize().Height - half
 	}
 	if offset < negativeLimit {
 		offset = negativeLimit
@@ -254,9 +254,9 @@ func NewVerticalSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
 
 func newSplitContainer(horizontal bool, a, b fyne.CanvasObject) *SplitContainer {
 	s := &SplitContainer{
-		horizontal: horizontal,
-		childA:     a,
-		childB:     b,
+		Horizontal: horizontal,
+		ChildA:     a,
+		ChildB:     b,
 	}
 	s.ExtendBaseWidget(s)
 	return s
