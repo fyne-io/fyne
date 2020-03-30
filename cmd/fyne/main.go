@@ -56,6 +56,7 @@ func loadCommands() {
 	commands = []idCommandPair{
 		{"bundle", &bundler{}},
 		{"get", &getter{}},
+		{"env", &env{}},
 		{"package", &packager{}},
 		{"install", &installer{}},
 		{"vendor", &vendor{}},
