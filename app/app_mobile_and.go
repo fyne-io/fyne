@@ -5,9 +5,9 @@
 package app
 
 import (
+	"log"
 	"net/url"
 	"os"
-	"path/filepath"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -25,8 +25,11 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 }
 
 func rootConfigDir() string {
-	homeDir := "/data" //, _ := os.UserHomeDir()
+	filesDir := os.Getenv("FILESDIR")
+	if filesDir == "" {
+		log.Println("FILESDIR env was not set by android native code")
+		return "/data/data" // probably won't work, but we can't make a better guess
+	}
 
-	desktopConfig := filepath.Join(homeDir, "data")
-	return filepath.Join(desktopConfig, "fyne")
+	return filesDir
 }

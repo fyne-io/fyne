@@ -32,11 +32,6 @@ func (p *preferences) uniqueID() string {
 	return p.appID
 }
 
-// storagePath returns the location of the settings storage
-func (p *preferences) storagePath() string {
-	return filepath.Join(rootConfigDir(), p.uniqueID(), "preferences.json")
-}
-
 func (p *preferences) save() error {
 	return p.saveToFile(p.storagePath())
 }
