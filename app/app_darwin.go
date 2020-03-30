@@ -14,6 +14,9 @@ import (
 )
 
 func defaultTheme() fyne.Theme {
+	if fyne.CurrentDevice().IsMobile() { // this is called in mobile simulate mode
+		return theme.LightTheme()
+	}
 	// TODO read the macOS setting in Mojave onwards
 	return theme.DarkTheme()
 }
