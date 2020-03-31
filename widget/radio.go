@@ -165,7 +165,7 @@ func (r *radioRenderer) Destroy() {
 type Radio struct {
 	DisableableWidget
 	Horizontal bool
-	Mandatory  bool
+	Required   bool
 	OnChanged  func(string) `json:"-"`
 	Options    []string
 	Selected   string
@@ -238,7 +238,7 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	clicked := r.Options[index]
 
 	if r.Selected == clicked {
-		if r.Mandatory {
+		if r.Required {
 			return
 		}
 		r.Selected = ""
