@@ -235,7 +235,7 @@ func makeScrollBothTab() fyne.CanvasObject {
 
 func makeSplitTab() fyne.CanvasObject {
 	left := widget.NewMultiLineEntry()
-	//left.Wrapping = fyne.TextWrapWord
+	left.Wrapping = fyne.TextWrapWord
 	left.SetText("Long text is looooooooooooooong")
 	right := widget.NewVerticalSplitContainer(
 		widget.NewLabel("Label"),
