@@ -3,9 +3,11 @@ package widget
 import (
 	"image/color"
 	"strings"
+	"unicode"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -16,6 +18,7 @@ const (
 // textPresenter provides the widget specific information to a generic text provider
 type textPresenter interface {
 	textAlign() fyne.TextAlign
+	textWrap() fyne.TextWrap
 	textStyle() fyne.TextStyle
 	textColor() color.Color
 
@@ -64,28 +67,33 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// updateRowBounds updates the row bounds used to render properly the text widget.
-// updateRowBounds should be invoked every time t.buffer changes.
-func (t *textProvider) updateRowBounds() {
-	var lowBound, highBound int
-	t.rowBounds = [][2]int{}
-
-	if len(t.buffer) == 0 {
-		t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+func (t *textProvider) Resize(size fyne.Size) {
+	if t.size == size {
 		return
 	}
-
-	for i, r := range t.buffer {
-		highBound = i
-		if r != '\n' {
-			continue
-		}
-		t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
-		lowBound = i + 1
+	t.size = size
+	t.updateRowBounds()
+	if t.presenter != nil {
+		t.refreshTextRenderer()
+		cache.Renderer(t).Layout(size)
 	}
-	//first or last line, increase the highBound index to include the last char
-	highBound++
-	t.rowBounds = append(t.rowBounds, [2]int{lowBound, highBound})
+}
+
+// updateRowBounds updates the row bounds used to render properly the text widget.
+// updateRowBounds should be invoked every time t.buffer or viewport changes.
+func (t *textProvider) updateRowBounds() {
+	if t.presenter == nil {
+		t.rowBounds = [][2]int{}
+		return // not yet shown
+	}
+	textWrap := t.presenter.textWrap()
+	textStyle := t.presenter.textStyle()
+	textSize := theme.TextSize()
+	maxWidth := t.Size().Width
+
+	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
+		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	})
 }
 
 // refreshTextRenderer refresh the textRenderer canvas objects
@@ -171,6 +179,15 @@ func (t *textProvider) row(row int) []rune {
 	return t.buffer[from:to]
 }
 
+// RowBoundary returns the boundary of the row specified.
+// The row parameter should be between 0 and t.Rows()-1.
+func (t *textProvider) rowBoundary(row int) [2]int {
+	if row < 0 || row >= t.rows() {
+		return [2]int{0, 0}
+	}
+	return t.rowBounds[row]
+}
+
 // RowLength returns the number of visible characters in the row specified.
 // The row parameter should be between 0 and t.Rows()-1.
 func (t *textProvider) rowLength(row int) int {
@@ -183,11 +200,11 @@ func (t *textProvider) charMinSize() fyne.Size {
 	if t.presenter.concealed() {
 		defaultChar = passwordChar
 	}
-	return textMinSize(defaultChar, theme.TextSize(), t.presenter.textStyle())
+	return fyne.MeasureText(defaultChar, theme.TextSize(), t.presenter.textStyle())
 }
 
 // lineSizeToColumn returns the rendered size for the line specified by row up to the col position
-func (t *textProvider) lineSizeToColumn(col, row int) (size fyne.Size) {
+func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 	line := t.row(row)
 	if line == nil {
 		return fyne.NewSize(0, 0)
@@ -219,15 +236,20 @@ type textRenderer struct {
 // MinSize calculates the minimum size of a label.
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
+	wrap := r.provider.presenter.textWrap()
+	charMinSize := r.provider.charMinSize()
 	height := 0
 	width := 0
-	for i := 0; i < fyne.Min(len(r.texts), r.provider.rows()); i++ {
+	i := 0
+	for ; i < fyne.Min(len(r.texts), r.provider.rows()); i++ {
 		min := r.texts[i].MinSize()
 		if r.texts[i].Text == "" {
-			min = r.provider.charMinSize()
+			min = charMinSize
+		}
+		if wrap == fyne.TextWrapOff {
+			width = fyne.Max(width, min.Width)
 		}
 		height += min.Height
-		width = fyne.Max(width, min.Width)
 	}
 
 	return fyne.NewSize(width, height).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
@@ -312,9 +334,82 @@ func (r *textRenderer) BackgroundColor() color.Color {
 func (r *textRenderer) Destroy() {
 }
 
-func textMinSize(text string, size int, style fyne.TextStyle) fyne.Size {
-	t := canvas.NewText(text, color.Black)
-	t.TextSize = size
-	t.TextStyle = style
-	return t.MinSize()
+// splitLines accepts a slice of runes and returns a slice containing the
+// start and end indicies of each line delimited by the newline character.
+func splitLines(text []rune) [][2]int {
+	var low, high int
+	var lines [][2]int
+	length := len(text)
+	for i := 0; i < length; i++ {
+		if text[i] == '\n' {
+			high = i
+			lines = append(lines, [2]int{low, high})
+			low = i + 1
+		}
+	}
+	return append(lines, [2]int{low, length})
+}
+
+// lineBounds accepts a slice of runes, a wrapping mode, a maximum line width and a function to measure line width.
+// lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
+func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
+	lines := splitLines(text)
+	if maxWidth == 0 || wrap == fyne.TextWrapOff {
+		return lines
+	}
+	var bounds [][2]int
+	for _, l := range lines {
+		low := l[0]
+		high := l[1]
+		if low == high {
+			bounds = append(bounds, l)
+			continue
+		}
+		switch wrap {
+		case fyne.TextTruncate:
+			for {
+				if measurer(text[low:high]) <= maxWidth {
+					bounds = append(bounds, [2]int{low, high})
+					break
+				} else {
+					high--
+				}
+			}
+		case fyne.TextWrapBreak:
+			for low < high {
+				if measurer(text[low:high]) <= maxWidth {
+					bounds = append(bounds, [2]int{low, high})
+					low = high
+					high = l[1]
+				} else {
+					high--
+				}
+			}
+		case fyne.TextWrapWord:
+			for low < high {
+				sub := text[low:high]
+				if measurer(sub) <= maxWidth {
+					bounds = append(bounds, [2]int{low, high})
+					low = high
+					high = l[1]
+					if low < high && unicode.IsSpace(text[low]) {
+						low++
+					}
+				} else {
+					last := len(sub) - 1
+					for ; last >= 0; last-- {
+						if unicode.IsSpace(sub[last]) {
+							break
+						}
+					}
+					if last < 0 {
+						high--
+					} else {
+						high = low + last
+					}
+				}
+			}
+		}
+	}
+	return bounds
 }

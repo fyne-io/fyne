@@ -23,7 +23,7 @@ type progressRenderer struct {
 // MinSize calculates the minimum size of a progress bar.
 // This is simply the "100%" label size plus padding.
 func (p *progressRenderer) MinSize() fyne.Size {
-	text := textMinSize("100%", p.label.TextSize, p.label.TextStyle)
+	text := fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
 
 	return fyne.NewSize(text.Width+theme.Padding()*4, text.Height+theme.Padding()*2)
 }

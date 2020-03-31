@@ -43,7 +43,6 @@ func TestEntry_MinSize(t *testing.T) {
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
-	entry.MinSize()
 	singleMin := entry.MinSize()
 
 	multi := NewMultiLineEntry()
@@ -559,7 +558,7 @@ func TestEntry_DragSelect(t *testing.T) {
 }
 
 func getClickPosition(e *Entry, str string, row int) *fyne.PointEvent {
-	x := textMinSize(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
+	x := fyne.MeasureText(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
 
 	rowHeight := e.textProvider().charMinSize().Height
 	y := theme.Padding() + row*rowHeight + rowHeight/2
@@ -637,7 +636,7 @@ func TestEntry_DoubleTapped(t *testing.T) {
 	// select the whitespace after 'quick'
 	ev = getClickPosition(entry, "The quick", 0)
 	// add half a ' ' character
-	ev.Position.X += textMinSize(" ", theme.TextSize(), entry.textStyle()).Width / 2
+	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), entry.textStyle()).Width / 2
 	entry.Tapped(ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, " ", entry.SelectedText())
@@ -992,13 +991,6 @@ var typeKeys = func(e *Entry, keys ...fyne.KeyName) {
 			e.KeyUp(&fyne.KeyEvent{Name: key})
 		}
 	}
-}
-
-func TestEntry_SweetSweetCoverage(t *testing.T) {
-	e := NewEntry()
-	row, col := e.rowColFromTextPos(1)
-	assert.Equal(t, 0, row)
-	assert.Equal(t, 0, col)
 }
 
 func TestEntry_SelectedText(t *testing.T) {
@@ -1497,4 +1489,57 @@ func TestEntry_PasteUnicode(t *testing.T) {
 
 	assert.Equal(t, 2, e.CursorRow)
 	assert.Equal(t, 1, e.CursorColumn)
+}
+
+func TestEntry_TextWrap(t *testing.T) {
+	t.Run("SingleLine", func(t *testing.T) {
+		t.Run("WrapOff", func(t *testing.T) {
+			// Allowed
+			e := NewEntry()
+			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
+		})
+		t.Run("Truncate", func(t *testing.T) {
+			// Disallowed - fallback to TextWrapOff
+			e := NewEntry()
+			e.Wrapping = fyne.TextTruncate
+			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
+		})
+		t.Run("WrapBreak", func(t *testing.T) {
+			// Disallowed - fallback to TextWrapOff
+			e := NewEntry()
+			e.Wrapping = fyne.TextWrapBreak
+			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
+		})
+		t.Run("WrapWord", func(t *testing.T) {
+			// Disallowed - fallback to TextWrapOff
+			e := NewEntry()
+			e.Wrapping = fyne.TextWrapWord
+			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
+		})
+	})
+	t.Run("MultiLine", func(t *testing.T) {
+		t.Run("WrapOff", func(t *testing.T) {
+			// Allowed
+			e := NewMultiLineEntry()
+			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
+		})
+		t.Run("Truncate", func(t *testing.T) {
+			// Disallowed - fallback to TextWrapOff
+			e := NewMultiLineEntry()
+			e.Wrapping = fyne.TextTruncate
+			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
+		})
+		t.Run("WrapBreak", func(t *testing.T) {
+			// Allowed
+			e := NewMultiLineEntry()
+			e.Wrapping = fyne.TextWrapBreak
+			assert.Equal(t, fyne.TextWrapBreak, e.textWrap())
+		})
+		t.Run("WrapWord", func(t *testing.T) {
+			// Allowed
+			e := NewMultiLineEntry()
+			e.Wrapping = fyne.TextWrapWord
+			assert.Equal(t, fyne.TextWrapWord, e.textWrap())
+		})
+	})
 }

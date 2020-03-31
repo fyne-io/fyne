@@ -479,13 +479,13 @@ func (c *glCanvas) setupThemeListener() {
 	}()
 }
 
-func (c *glCanvas) buildMenuBar(m *fyne.MainMenu) {
+func (c *glCanvas) buildMenuBar(w *window, m *fyne.MainMenu) {
 	c.setMenuBar(nil)
 	if m == nil {
 		return
 	}
 	if hasNativeMenu() {
-		setupNativeMenu(m)
+		setupNativeMenu(w, m)
 	} else {
 		c.setMenuBar(buildMenuBar(m, c))
 	}
