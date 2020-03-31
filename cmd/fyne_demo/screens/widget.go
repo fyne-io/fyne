@@ -54,7 +54,7 @@ func makeTextTab() fyne.CanvasObject {
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
-	entryLoremIpsumScroller := widget.NewVerticalScrollContainer(entryLoremIpsum)
+	entryLoremIpsumScroller := widget.NewVScrollContainer(entryLoremIpsum)
 
 	label.Alignment = fyne.TextAlignLeading
 	hyperlink.Alignment = fyne.TextAlignLeading
@@ -215,8 +215,8 @@ func makeScrollTab() fyne.CanvasObject {
 		}))
 	}
 
-	horiz := widget.NewHorizontalScrollContainer(list)
-	vert := widget.NewVerticalScrollContainer(list2)
+	horiz := widget.NewHScrollContainer(list)
+	vert := widget.NewVScrollContainer(list2)
 
 	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
 		fyne.NewContainerWithLayout(layout.NewBorderLayout(horiz, nil, nil, nil), horiz, vert),

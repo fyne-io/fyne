@@ -472,15 +472,15 @@ func NewScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollBoth, content)
 }
 
-// NewHorizontalScrollContainer create a scrollable parent wrapping the specified content.
+// NewHScrollContainer create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Width to be smaller than that of the passed object.
-func NewHorizontalScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+func NewHScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollHorizontalOnly, content)
 }
 
-// NewVerticalScrollContainer create a scrollable parent wrapping the specified content.
+// NewVScrollContainer create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Height to be smaller than that of the passed object.
-func NewVerticalScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+func NewVScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollVerticalOnly, content)
 }
 
