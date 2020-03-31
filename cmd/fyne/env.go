@@ -40,6 +40,7 @@ func (v *env) main() {
 		&fyneReport{GoMod: &report.GoMod{WorkDir: workDir, Module: fyneModule}},
 		&report.GoVersion{},
 		&report.OS{},
+		&report.GoEnv{},
 	}
 
 	err = goinfo.Write(os.Stdout, reporters, &format.Text{})
