@@ -43,7 +43,7 @@ func (v *version) run(args []string) {
 func (v *version) get() (string, error) {
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
-		return "", fmt.Errorf("could not retrieve version information")
+		return "", fmt.Errorf("Could not retrieve version information. Please ensure module support is activated and build again")
 	}
 	return info.Main.Version, nil
 }
