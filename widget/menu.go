@@ -96,5 +96,7 @@ func (h *menuItemWidgetRenderer) BackgroundColor() color.Color {
 }
 
 func newSeparator() fyne.CanvasObject {
-	return canvas.NewLine(theme.DisabledTextColor())
+	s := canvas.NewRectangle(theme.DisabledTextColor())
+	s.SetMinSize(fyne.NewSize(1, 2))
+	return s
 }
