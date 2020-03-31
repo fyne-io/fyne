@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	aMin = textMinSize("a", theme.TextSize(), fyne.TextStyle{})
-	bMin = textMinSize("b", theme.TextSize(), fyne.TextStyle{})
-	cMin = textMinSize("c", theme.TextSize(), fyne.TextStyle{})
-	dMin = textMinSize("d", theme.TextSize(), fyne.TextStyle{})
+	aMin = fyne.MeasureText("a", theme.TextSize(), fyne.TextStyle{})
+	bMin = fyne.MeasureText("b", theme.TextSize(), fyne.TextStyle{})
+	cMin = fyne.MeasureText("c", theme.TextSize(), fyne.TextStyle{})
+	dMin = fyne.MeasureText("d", theme.TextSize(), fyne.TextStyle{})
 )
 
 func getBranch(t *testing.T, root *branch, path ...string) (branch *branch) {
