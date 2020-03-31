@@ -111,6 +111,7 @@ func (r *dividerRenderer) MinSize() fyne.Size {
 }
 
 func (r *dividerRenderer) Refresh() {
+	r.rectangle.FillColor = theme.IconColor()
 	r.Layout(r.divider.Size())
 }
 
