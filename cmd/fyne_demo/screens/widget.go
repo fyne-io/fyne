@@ -237,11 +237,11 @@ func makeSplitTab() fyne.CanvasObject {
 	left := widget.NewMultiLineEntry()
 	left.Wrapping = fyne.TextWrapWord
 	left.SetText("Long text is looooooooooooooong")
-	right := widget.NewVerticalSplitContainer(
+	right := widget.NewVSplitContainer(
 		widget.NewLabel("Label"),
 		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
 	)
-	return widget.NewHorizontalSplitContainer(widget.NewVerticalScrollContainer(left), right)
+	return widget.NewHSplitContainer(widget.NewVerticalScrollContainer(left), right)
 }
 
 // WidgetScreen shows a panel containing widget demos

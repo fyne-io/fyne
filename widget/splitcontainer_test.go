@@ -18,7 +18,7 @@ func TestSplitContainer(t *testing.T) {
 	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 
 	t.Run("Horizontal", func(t *testing.T) {
-		NewHorizontalSplitContainer(objA, objB).Resize(size)
+		NewHSplitContainer(objA, objB).Resize(size)
 
 		sizeA := objA.Size()
 		sizeB := objB.Size()
@@ -29,7 +29,7 @@ func TestSplitContainer(t *testing.T) {
 		assert.Equal(t, 100, sizeB.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
-		NewVerticalSplitContainer(objA, objB).Resize(size)
+		NewVSplitContainer(objA, objB).Resize(size)
 
 		sizeA := objA.Size()
 		sizeB := objB.Size()
@@ -45,12 +45,12 @@ func TestSplitContainer_MinSize(t *testing.T) {
 	textA := canvas.NewText("TEXTA", color.RGBA{0, 0xff, 0, 0})
 	textB := canvas.NewText("TEXTB", color.RGBA{0, 0xff, 0, 0})
 	t.Run("Horizontal", func(t *testing.T) {
-		min := NewHorizontalSplitContainer(textA, textB).MinSize()
+		min := NewHSplitContainer(textA, textB).MinSize()
 		assert.Equal(t, textA.MinSize().Width+textB.MinSize().Width+dividerThickness(), min.Width)
 		assert.Equal(t, fyne.Max(textA.MinSize().Height, fyne.Max(textB.MinSize().Height, dividerLength())), min.Height)
 	})
 	t.Run("Vertical", func(t *testing.T) {
-		min := NewVerticalSplitContainer(textA, textB).MinSize()
+		min := NewVSplitContainer(textA, textB).MinSize()
 		assert.Equal(t, fyne.Max(textA.MinSize().Width, fyne.Max(textB.MinSize().Width, dividerLength())), min.Width)
 		assert.Equal(t, textA.MinSize().Height+textB.MinSize().Height+dividerThickness(), min.Height)
 	})
@@ -64,7 +64,7 @@ func TestSplitContainer_updateOffset(t *testing.T) {
 	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 
 	t.Run("Horizontal", func(t *testing.T) {
-		sc := NewHorizontalSplitContainer(objA, objB)
+		sc := NewHSplitContainer(objA, objB)
 		sc.Resize(size)
 		t.Run("Positive", func(t *testing.T) {
 			sc.updateOffset(8)
@@ -86,7 +86,7 @@ func TestSplitContainer_updateOffset(t *testing.T) {
 		})
 	})
 	t.Run("Vertical", func(t *testing.T) {
-		sc := NewVerticalSplitContainer(objA, objB)
+		sc := NewVSplitContainer(objA, objB)
 		sc.Resize(size)
 		t.Run("Positive", func(t *testing.T) {
 			sc.updateOffset(8)
@@ -116,7 +116,7 @@ func TestSplitContainer_updateOffset_limits(t *testing.T) {
 	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 	objB.SetMinSize(size)
 	t.Run("Horizontal", func(t *testing.T) {
-		sc := NewHorizontalSplitContainer(objA, objB)
+		sc := NewHSplitContainer(objA, objB)
 		min := sc.MinSize()
 		sc.Resize(fyne.NewSize(min.Width+6, min.Height))
 		t.Run("Positive", func(t *testing.T) {
@@ -129,7 +129,7 @@ func TestSplitContainer_updateOffset_limits(t *testing.T) {
 		})
 	})
 	t.Run("Vertical", func(t *testing.T) {
-		sc := NewVerticalSplitContainer(objA, objB)
+		sc := NewVSplitContainer(objA, objB)
 		min := sc.MinSize()
 		sc.Resize(fyne.NewSize(min.Width, min.Height+6))
 		t.Run("Positive", func(t *testing.T) {
@@ -150,7 +150,7 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
 	objB.SetMinSize(size)
 	t.Run("Horizontal", func(t *testing.T) {
-		split := NewHorizontalSplitContainer(objA, objB)
+		split := NewHSplitContainer(objA, objB)
 		split.Resize(fyne.NewSize(100, 100))
 		divider := newDivider(split)
 		assert.Equal(t, 0, split.offset)
@@ -166,7 +166,7 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 		assert.Equal(t, 10, split.offset)
 	})
 	t.Run("Vertical", func(t *testing.T) {
-		split := NewVerticalSplitContainer(objA, objB)
+		split := NewVSplitContainer(objA, objB)
 		split.Resize(fyne.NewSize(100, 100))
 		divider := newDivider(split)
 		assert.Equal(t, 0, split.offset)

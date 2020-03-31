@@ -253,13 +253,13 @@ func (s *SplitContainer) updateOffset(offset int) {
 	s.Refresh()
 }
 
-// NewHorizontalSplitContainer create a splitable parent wrapping the specified children.
-func NewHorizontalSplitContainer(left, right fyne.CanvasObject) *SplitContainer {
+// NewHSplitContainer create a splitable parent wrapping the specified children.
+func NewHSplitContainer(left, right fyne.CanvasObject) *SplitContainer {
 	return newSplitContainer(true, left, right)
 }
 
-// NewVerticalSplitContainer create a splitable parent wrapping the specified children.
-func NewVerticalSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
+// NewVSplitContainer create a splitable parent wrapping the specified children.
+func NewVSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
 	return newSplitContainer(false, top, bottom)
 }
 
