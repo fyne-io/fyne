@@ -17,12 +17,17 @@ func textRenderTexts(p fyne.Widget) []*canvas.Text {
 type testTextParent struct {
 	obj   fyne.Widget
 	fg    color.Color
-	style fyne.TextStyle
 	align fyne.TextAlign
+	wrap  fyne.TextWrap
+	style fyne.TextStyle
 }
 
 func (t *testTextParent) textAlign() fyne.TextAlign {
 	return t.align
+}
+
+func (t *testTextParent) textWrap() fyne.TextWrap {
+	return t.wrap
 }
 
 func (t *testTextParent) textStyle() fyne.TextStyle {
@@ -84,6 +89,9 @@ func TestText_Rows(t *testing.T) {
 
 	text.SetText("test\ntest\ntest")
 	assert.Equal(t, text.rows(), 3)
+
+	text.SetText("test\ntest\ntest\n")
+	assert.Equal(t, text.rows(), 4)
 
 	text.SetText("\n")
 	assert.Equal(t, text.rows(), 2)
@@ -262,4 +270,383 @@ func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	fullSize := provider.lineSizeToColumn(4, 0)
 	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
 	assert.Greater(t, fullSize.Width, provider.lineSizeToColumn(2, 0).Width)
+}
+
+func TestText_splitLines(t *testing.T) {
+	tests := []struct {
+		name string
+		text string
+		want [][2]int
+	}{
+		{
+			name: "Empty",
+			text: "",
+			want: [][2]int{
+				{0, 0},
+			},
+		},
+		{
+			name: "Single",
+			text: "foo",
+			want: [][2]int{
+				{0, 3},
+			},
+		},
+		{
+			name: "Multiple",
+			text: "foo\nbar",
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+			},
+		},
+		{
+			name: "Muliple_Trailing",
+			text: "foo\nbar\n",
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+				{8, 8},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, splitLines([]rune(tt.text)))
+		})
+	}
+}
+
+func TestText_lineBounds(t *testing.T) {
+	mockMeasurer := func(text []rune) int {
+		return len(text)
+	}
+	tests := []struct {
+		name string
+		text string
+		wrap fyne.TextWrap
+		want [][2]int
+	}{
+		{
+			name: "Empty_WrapOff",
+			text: "",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 0},
+			},
+		},
+		{
+			name: "Empty_Truncate",
+			text: "",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 0},
+			},
+		},
+		{
+			name: "Empty_WrapBreak",
+			text: "",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 0},
+			},
+		},
+		{
+			name: "Empty_WrapWord",
+			text: "",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 0},
+			},
+		},
+		{
+			name: "Single_Short_WrapOff",
+			text: "foobar",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 6},
+			},
+		},
+		{
+			name: "Single_Short_Truncate",
+			text: "foobar",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 6},
+			},
+		},
+		{
+			name: "Single_Short_WrapBreak",
+			text: "foobar",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 6},
+			},
+		},
+		{
+			name: "Single_Short_WrapWord",
+			text: "foobar",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 6},
+			},
+		},
+		{
+			name: "Single_Long_WrapOff",
+			text: "foobar foobar",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 13},
+			},
+		},
+		{
+			name: "Single_Long_Truncate",
+			text: "foobar foobar",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 10},
+			},
+		},
+		{
+			name: "Single_Long_WrapBreak",
+			text: "foobar foobar",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 10},
+				{10, 13},
+			},
+		},
+		{
+			name: "Single_Long_WrapWord",
+			text: "foobar foobar",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 6},
+				{7, 13},
+			},
+		},
+		{
+			name: "Multiple_Short_WrapOff",
+			text: "foo\nbar",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+			},
+		},
+		{
+			name: "Multiple_Short_Truncate",
+			text: "foo\nbar",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+			},
+		},
+		{
+			name: "Multiple_Short_WrapBreak",
+			text: "foo\nbar",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+			},
+		},
+		{
+			name: "Multiple_Short_WrapWord",
+			text: "foo\nbar",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+			},
+		},
+		{
+			name: "Multiple_Long_WrapOff",
+			text: "foobar\nfoobar foobar foobar\nfoobar foobar",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 6},
+				{7, 27},
+				{28, 41},
+			},
+		},
+		{
+			name: "Multiple_Long_Truncate",
+			text: "foobar\nfoobar foobar foobar\nfoobar foobar",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 6},
+				{7, 17},
+				{28, 38},
+			},
+		},
+		{
+			name: "Multiple_Long_WrapBreak",
+			text: "foobar\nfoobar foobar foobar\nfoobar foobar",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 6},
+				{7, 17},
+				{17, 27},
+				{28, 38},
+				{38, 41},
+			},
+		},
+		{
+			name: "Multiple_Long_WrapWord",
+			text: "foobar\nfoobar foobar foobar\nfoobar foobar",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 6},
+				{7, 13},
+				{14, 20},
+				{21, 27},
+				{28, 34},
+				{35, 41},
+			},
+		},
+		{
+			name: "Multiple_Contiguous_Long_WrapOff",
+			text: "foobar\nfoobarfoobarfoobar\nfoobarfoobar\n",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 6},
+				{7, 25},
+				{26, 38},
+				{39, 39},
+			},
+		},
+		{
+			name: "Multiple_Contiguous_Long_Truncate",
+			text: "foobar\nfoobarfoobarfoobar\nfoobarfoobar\n",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 6},
+				{7, 17},
+				{26, 36},
+				{39, 39},
+			},
+		},
+		{
+			name: "Multiple_Contiguous_Long_WrapBreak",
+			text: "foobar\nfoobarfoobarfoobar\nfoobarfoobar\n",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 6},
+				{7, 17},
+				{17, 25},
+				{26, 36},
+				{36, 38},
+				{39, 39},
+			},
+		},
+		{
+			name: "Multiple_Contiguous_Long_WrapWord",
+			text: "foobar\nfoobarfoobarfoobar\nfoobarfoobar\n",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 6},
+				{7, 17},
+				{17, 25},
+				{26, 36},
+				{36, 38},
+				{39, 39},
+			},
+		},
+		{
+			name: "Multiple_Trailing_Short_WrapOff",
+			text: "foo\nbar\n",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+				{8, 8},
+			},
+		},
+		{
+			name: "Multiple_Trailing_Short_Truncate",
+			text: "foo\nbar\n",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+				{8, 8},
+			},
+		},
+		{
+			name: "Multiple_Trailing_Short_WrapBreak",
+			text: "foo\nbar\n",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+				{8, 8},
+			},
+		},
+		{
+			name: "Multiple_Trailing_Short_WrapWord",
+			text: "foo\nbar\n",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 3},
+				{4, 7},
+				{8, 8},
+			},
+		},
+		{
+			name: "Multiple_Trailing_Long_WrapOff",
+			text: "foobar\nfoobar foobar foobar\nfoobar foobar\n",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 6},
+				{7, 27},
+				{28, 41},
+				{42, 42},
+			},
+		},
+		{
+			name: "Multiple_Trailing_Long_Truncate",
+			text: "foobar\nfoobar foobar foobar\nfoobar foobar\n",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 6},
+				{7, 17},
+				{28, 38},
+				{42, 42},
+			},
+		},
+		{
+			name: "Multiple_Trailing_Long_WrapBreak",
+			text: "foobar\nfoobar foobar foobar\nfoobar foobar\n",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 6},
+				{7, 17},
+				{17, 27},
+				{28, 38},
+				{38, 41},
+				{42, 42},
+			},
+		},
+		{
+			name: "Multiple_Trailing_Long_WrapWord",
+			text: "foobar\nfoobar foobar foobar\nfoobar foobar\n",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 6},
+				{7, 13},
+				{14, 20},
+				{21, 27},
+				{28, 34},
+				{35, 41},
+				{42, 42},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, lineBounds([]rune(tt.text), tt.wrap, 10, mockMeasurer))
+		})
+	}
 }
