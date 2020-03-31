@@ -82,7 +82,8 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 				C.bool(item.IsSeparator),
 			)
 		}
-		callbacks = append(callbacks, func() { w.queueEvent(item.Action) })
+		action := item.Action // catch
+		callbacks = append(callbacks, func() { w.queueEvent(action) })
 		nextItemID++
 	}
 
