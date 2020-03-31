@@ -3,9 +3,8 @@ package fyne
 // Menu stores the information required for a standard menu.
 // A menu can pop down from a MainMenu or could be a pop out menu.
 type Menu struct {
-	Label            string
-	Items            []*MenuItem
-	AfterNativeMenus bool
+	Label string
+	Items []*MenuItem
 }
 
 // NewMenu creates a new menu given the specified label (to show in a MainMenu) and list of items to display.
@@ -15,10 +14,9 @@ func NewMenu(label string, items ...*MenuItem) *Menu {
 
 // MenuItem is a single item within any menu, it contains a display Label and Action function that is called when tapped.
 type MenuItem struct {
-	IsSeparator       bool
-	Label             string
-	PlaceInNativeMenu bool
-	Action            func()
+	IsSeparator bool
+	Label       string
+	Action      func()
 }
 
 // NewMenuItem creates a new menu item from the passed label and action parameters.

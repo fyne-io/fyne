@@ -35,23 +35,24 @@ func hasNativeMenu() bool {
 
 func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	nextItemID := 0
+	var helpMenu *fyne.Menu
 	for i := len(main.Items) - 1; i >= 0; i-- {
 		menu := main.Items[i]
-		if !menu.AfterNativeMenus {
-			nextItemID = addNativeMenu(w, menu, nextItemID, true)
+		if menu.Label == "Help" {
+			helpMenu = menu
+			continue
 		}
+		nextItemID = addNativeMenu(w, menu, nextItemID, true)
 	}
-	for _, menu := range main.Items {
-		if menu.AfterNativeMenus {
-			nextItemID = addNativeMenu(w, menu, nextItemID, false)
-		}
+	if helpMenu != nil {
+		addNativeMenu(w, helpMenu, nextItemID, false)
 	}
 }
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
 	createMenu := false
 	for _, item := range menu.Items {
-		if !item.PlaceInNativeMenu {
+		if item.Label != "Settings" {
 			createMenu = true
 			break
 		}
@@ -62,17 +63,22 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 		nsMenu = C.createDarwinMenu(C.CString(menu.Label))
 	}
 
-	appMenuIndex := 1
 	for _, item := range menu.Items {
-		if item.PlaceInNativeMenu {
+		if item.Label == "Settings" {
+			C.insertDarwinMenuItem(
+				C.darwinAppMenu(),
+				C.CString(""),
+				C.int(nextItemID),
+				C.int(1),
+				C.bool(true),
+			)
 			C.insertDarwinMenuItem(
 				C.darwinAppMenu(),
 				C.CString(item.Label),
 				C.int(nextItemID),
-				C.int(appMenuIndex),
-				C.bool(item.IsSeparator),
+				C.int(2),
+				C.bool(false),
 			)
-			appMenuIndex++
 		} else {
 			C.insertDarwinMenuItem(
 				nsMenu,
@@ -82,9 +88,11 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 				C.bool(item.IsSeparator),
 			)
 		}
-		action := item.Action // catch
-		callbacks = append(callbacks, func() { w.queueEvent(action) })
-		nextItemID++
+		if !item.IsSeparator {
+			action := item.Action // catch
+			callbacks = append(callbacks, func() { w.queueEvent(action) })
+			nextItemID++
+		}
 	}
 
 	if nsMenu != nil {
