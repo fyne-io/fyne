@@ -279,19 +279,8 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	return &radioRenderer{items, objects, r}
 }
 
-// SetMandatory sets if the radio must have a selection.
-func (r *Radio) SetMandatory(m bool) {
-	r.Mandatory = m
-	if r.Selected == "" && len(r.Options) > 0 {
-		r.Selected = r.Options[0]
-	}
-}
-
 // SetSelected sets the radio option, it can be used to set a default option.
 func (r *Radio) SetSelected(option string) {
-	if option == "" && r.Mandatory && len(r.Options) > 0 {
-		option = r.Options[0]
-	}
 	if r.Selected == option {
 		return
 	}

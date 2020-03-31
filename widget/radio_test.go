@@ -346,35 +346,29 @@ func TestRadio_FocusIndicator_Centered_Vertically(t *testing.T) {
 
 func TestRadio_Mandatory(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "There"}, func(string) {})
-	radio.SetMandatory(true)
-
+	radio.Mandatory = true
 	assert.True(t, radio.Mandatory)
-	assert.Equal(t, "Hi", radio.Selected, "mandatory radios select the first option if none is selected")
+	assert.Equal(t, "", radio.Selected, "the developer should select the default value if “none” is not wanted")
 
 	radio = NewRadio([]string{"Hi", "There"}, func(string) {})
 	radio.SetSelected("There")
-	radio.SetMandatory(true)
-
+	radio.Mandatory = true
 	assert.True(t, radio.Mandatory)
 	assert.Equal(t, "There", radio.Selected, "radio becoming mandatory does not affect a valid selection")
 
 	radio.SetSelected("")
 	assert.True(t, radio.Mandatory)
-	assert.Equal(t, "Hi", radio.Selected, "unsetting selection of mandatory radio selects the first option")
+	assert.Equal(t, "", radio.Selected, "the developer should select the default value if “none” is not wanted")
 
 	radio = NewRadio([]string{"Hi", "There"}, func(string) {})
-	radio.SetMandatory(true)
+	radio.Mandatory = true
 	radio.Resize(radio.MinSize())
-
+	radio.SetSelected("Hi")
 	require.Equal(t, "Hi", radio.Selected)
 	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 	assert.Equal(t, "Hi", radio.Selected, "tapping selected option of mandatory radio does nothing")
 	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.Size().Height-theme.Padding())})
 	assert.Equal(t, "There", radio.Selected)
-
-	radio = NewRadio([]string{}, func(string) {})
-	radio.SetMandatory(true)
-	require.Equal(t, "", radio.Selected, "setting radio without options to mandatory does does not fail")
 }
 
 func TestRadioRenderer_ApplyTheme(t *testing.T) {
