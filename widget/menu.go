@@ -18,7 +18,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 		if opt.IsSeparator {
 			options.Append(newSeparator())
 		} else {
-			options.Append(newTappableLabel(opt.Label))
+			options.Append(newMenuItemWidget(opt.Label))
 		}
 	}
 	pop := NewPopUpAtPosition(options, c, pos)
@@ -76,7 +76,7 @@ func (t *menuItemWidget) MouseOut() {
 func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 }
 
-func newTappableLabel(label string) *menuItemWidget {
+func newMenuItemWidget(label string) *menuItemWidget {
 	ret := &menuItemWidget{Label: NewLabel(label)}
 	ret.ExtendBaseWidget(ret)
 	return ret
