@@ -30,7 +30,7 @@ type infProgressRenderer struct {
 // MinSize calculates the minimum size of a progress bar.
 func (p *infProgressRenderer) MinSize() fyne.Size {
 	// this is to create the same size infinite progress bar as regular progress bar
-	text := textMinSize("100%", theme.TextSize(), fyne.TextStyle{})
+	text := fyne.MeasureText("100%", theme.TextSize(), fyne.TextStyle{})
 
 	return fyne.NewSize(text.Width+theme.Padding()*4, text.Height+theme.Padding()*2)
 }

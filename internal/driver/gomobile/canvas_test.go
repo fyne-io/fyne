@@ -165,6 +165,12 @@ func TestCanvas_Tappable(t *testing.T) {
 	assert.True(t, content.cancel)
 }
 
+func TestCanvas_IsEntry(t *testing.T) {
+	assert.True(t, isEntry(widget.NewEntry()))
+	assert.True(t, isEntry(widget.NewSelectEntry([]string{"1", "2"})))
+	assert.False(t, isEntry(widget.NewCheck("check item", func(bool) {})))
+}
+
 type touchableLabel struct {
 	*widget.Label
 	down, up, cancel bool

@@ -229,7 +229,7 @@ func (w *window) MainMenu() *fyne.MainMenu {
 
 func (w *window) SetMainMenu(menu *fyne.MainMenu) {
 	w.mainmenu = menu
-	w.canvas.buildMenuBar(menu)
+	w.canvas.buildMenuBar(w, menu)
 }
 
 func (w *window) fitContent() {

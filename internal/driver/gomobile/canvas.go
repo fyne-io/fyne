@@ -120,7 +120,7 @@ func (c *mobileCanvas) Focus(obj fyne.Focusable) {
 	if obj != nil {
 		obj.FocusGained()
 
-		if _, ok := obj.(*widget.Entry); ok {
+		if isEntry(obj) {
 			showVirtualKeyboard()
 		}
 	}
@@ -373,6 +373,14 @@ func (c *mobileCanvas) setupThemeListener() {
 			}
 		}
 	}()
+}
+
+func isEntry(obj fyne.Focusable) bool {
+	if _, ok := obj.(*widget.Entry); ok {
+		return true
+	}
+	_, ok := obj.(*widget.SelectEntry)
+	return ok
 }
 
 // NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.

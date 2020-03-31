@@ -3,7 +3,7 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
-extern void menu_callback(int);
+extern void menuCallback(int);
 
 @interface FyneMenuItem : NSObject {
 
@@ -12,7 +12,7 @@ extern void menu_callback(int);
 
 @implementation FyneMenuItem
 - (void) tapped:(id) sender {
-    menu_callback([sender tag]);
+    menuCallback([sender tag]);
 }
 @end
 
@@ -21,31 +21,49 @@ NSMenu* nativeMainMenu() {
     return [app mainMenu];
 }
 
-NSMenu* menu;
-
-void createDarwinMenu(const char* label) {
-    menu = [[NSMenu alloc] initWithTitle:[NSString stringWithUTF8String:label]];
-
-    // the menu is released at the end of the completeDarwinMenu() function
+const void* darwinAppMenu() {
+    return [[nativeMainMenu() itemAtIndex:0] submenu];
 }
 
-void addDarwinMenuItem(const char* label, int id) {
-    FyneMenuItem* tapper = [[FyneMenuItem alloc] init]; // we cannot release this or the menu does not function...
+const void* createDarwinMenu(const char* label) {
+    return (void*)[[NSMenu alloc] initWithTitle:[NSString stringWithUTF8String:label]];
+}
 
-    NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:label]
-        action:@selector(tapped:) keyEquivalent:@""];
-    [item setTarget:tapper];
-    [item setTag:id];
+void insertDarwinMenuItem(const void* m, const char* label, int id, int index, bool isSeparator) {
+    NSMenu* menu = (NSMenu*)m;
+    NSMenuItem* item;
 
-    [menu addItem:item];
+    if (isSeparator) {
+        item = [NSMenuItem separatorItem];
+    } else {
+        // NSMenuItem's target is a weak reference, therefore we must not release it.
+        // TODO: Keep a reference in Go and release it when the menu of a window changes or the window is released.
+        FyneMenuItem* tapper = [[FyneMenuItem alloc] init];
+        item = [[NSMenuItem alloc]
+            initWithTitle:[NSString stringWithUTF8String:label]
+            action:@selector(tapped:)
+            keyEquivalent:@""];
+        [item setTarget:tapper];
+        [item setTag:id];
+    }
+
+    if (index > -1) {
+        [menu insertItem:item atIndex:index];
+    } else {
+        [menu addItem:item];
+    }
     [item release];
 }
 
-void completeDarwinMenu() {
+void completeDarwinMenu(const void* m, bool prepend) {
+    NSMenu* menu = (NSMenu*)m;
     NSMenu* main = nativeMainMenu();
-
     NSMenuItem* top = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
-    [main addItem:top];
+    if (prepend) {
+        [main insertItem:top atIndex:1];
+    } else {
+        [main addItem:top];
+    }
     [main setSubmenu:menu forItem:top];
     [menu release]; // release the menu created in createDarwinMenu() function
     menu = Nil;
