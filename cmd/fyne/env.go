@@ -76,5 +76,12 @@ func (r *fyneReport) Info() (goinfo.Info, error) {
 	}
 	// remove info for the report
 	delete(info, "module")
+
+	versionCmd := &version{}
+	cliVersion, err := versionCmd.get()
+	if err != nil {
+		cliVersion = err.Error()
+	}
+	info["cli_version"] = cliVersion
 	return info, nil
 }
