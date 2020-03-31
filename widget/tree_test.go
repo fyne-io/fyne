@@ -85,19 +85,19 @@ func TestTree_Resize(t *testing.T) {
 	assert.Equal(t, theme.Padding(), b.Position().X)
 	assert.Equal(t, 0, b.Position().Y)
 	assert.Equal(t, s-theme.Padding()*3, b.Size().Width)
-	assert.Equal(t, bMin.Height, b.Size().Height)
+	assert.Equal(t, bMin.Height+theme.Padding()*2, b.Size().Height)
 
 	// Leaf position relative to parent branch
 	assert.Equal(t, theme.Padding(), c.Position().X)
-	assert.Equal(t, bMin.Height, c.Position().Y)
+	assert.Equal(t, bMin.Height+theme.Padding()*2, c.Position().Y)
 	assert.Equal(t, s-theme.Padding()*4, c.Size().Width)
-	assert.Equal(t, cMin.Height, c.Size().Height)
+	assert.Equal(t, cMin.Height+theme.Padding()*2, c.Size().Height)
 
 	// Leaves second
 	assert.Equal(t, theme.Padding(), a.Position().X)
-	assert.Equal(t, bMin.Height+cMin.Height, a.Position().Y)
+	assert.Equal(t, bMin.Height+cMin.Height+theme.Padding()*4, a.Position().Y)
 	assert.Equal(t, s-theme.Padding()*3, a.Size().Width)
-	assert.Equal(t, aMin.Height, a.Size().Height)
+	assert.Equal(t, aMin.Height+theme.Padding()*2, a.Size().Height)
 }
 
 func TestTree_MinSize(t *testing.T) {
@@ -111,16 +111,16 @@ func TestTree_MinSize(t *testing.T) {
 		tree := NewTree()
 		tree.Add("a", "b")
 		min := tree.MinSize()
-		assert.Equal(t, aMin.Width+theme.Padding()*3, min.Width)
-		assert.Equal(t, aMin.Height+theme.Padding()*2, min.Height)
+		assert.Equal(t, aMin.Width+theme.Padding()*5, min.Width)
+		assert.Equal(t, aMin.Height+theme.Padding()*4, min.Height)
 	})
 	t.Run("Multiple", func(t *testing.T) {
 		tree := NewTree()
 		tree.Add("a", "b")
 		tree.Add("c", "d")
 		min := tree.MinSize()
-		assert.Equal(t, fyne.Max(aMin.Width, cMin.Width)+theme.Padding()*3, min.Width)
-		assert.Equal(t, aMin.Height+cMin.Height+theme.Padding()*2, min.Height)
+		assert.Equal(t, fyne.Max(aMin.Width, cMin.Width)+theme.Padding()*5, min.Width)
+		assert.Equal(t, aMin.Height+cMin.Height+theme.Padding()*6, min.Height)
 	})
 	t.Run("Open", func(t *testing.T) {
 		tree := NewTree()
@@ -136,8 +136,8 @@ func TestTree_MinSize(t *testing.T) {
 			fyne.Max(cMin.Width, dMin.Width+theme.Padding()),
 		)
 		expectedHeight := aMin.Height + bMin.Height + cMin.Height + dMin.Height
-		assert.Equal(t, expectedWidth+theme.Padding()*3, min.Width)
-		assert.Equal(t, expectedHeight+theme.Padding()*2, min.Height)
+		assert.Equal(t, expectedWidth+theme.Padding()*5, min.Width)
+		assert.Equal(t, expectedHeight+theme.Padding()*10, min.Height)
 	})
 }
 
@@ -154,8 +154,8 @@ func TestTree_MinSize_Icon(t *testing.T) {
 		tree.UseArrowIcons()
 		tree.Add("a", "b")
 		min := tree.MinSize()
-		assert.Equal(t, theme.IconInlineSize()+aMin.Width+theme.Padding()*3, min.Width)
-		assert.Equal(t, fyne.Max(theme.IconInlineSize(), aMin.Height)+theme.Padding()*2, min.Height)
+		assert.Equal(t, theme.IconInlineSize()+aMin.Width+theme.Padding()*6, min.Width)
+		assert.Equal(t, fyne.Max(theme.IconInlineSize(), aMin.Height)+theme.Padding()*4, min.Height)
 	})
 	t.Run("Multiple", func(t *testing.T) {
 		tree := NewTree()
@@ -163,8 +163,8 @@ func TestTree_MinSize_Icon(t *testing.T) {
 		tree.Add("a", "b")
 		tree.Add("c", "d")
 		min := tree.MinSize()
-		assert.Equal(t, theme.IconInlineSize()+fyne.Max(aMin.Width, cMin.Width)+theme.Padding()*3, min.Width)
-		assert.Equal(t, fyne.Max(theme.IconInlineSize(), aMin.Height+cMin.Height)+theme.Padding()*2, min.Height)
+		assert.Equal(t, theme.IconInlineSize()+fyne.Max(aMin.Width, cMin.Width)+theme.Padding()*6, min.Width)
+		assert.Equal(t, fyne.Max(theme.IconInlineSize(), aMin.Height+cMin.Height)+theme.Padding()*6, min.Height)
 	})
 	t.Run("Open", func(t *testing.T) {
 		tree := NewTree()
@@ -184,8 +184,8 @@ func TestTree_MinSize_Icon(t *testing.T) {
 			fyne.Max(theme.IconInlineSize(), bMin.Height) +
 			fyne.Max(theme.IconInlineSize(), cMin.Height) +
 			fyne.Max(theme.IconInlineSize(), dMin.Height)
-		assert.Equal(t, expectedWidth+theme.Padding()*3, min.Width)
-		assert.Equal(t, expectedHeight+theme.Padding()*2, min.Height)
+		assert.Equal(t, expectedWidth+theme.Padding()*6, min.Width)
+		assert.Equal(t, expectedHeight+theme.Padding()*10, min.Height)
 	})
 }
 
@@ -239,8 +239,8 @@ func TestTreeRenderer_Layout(t *testing.T) {
 
 		assert.Equal(t, theme.Padding(), a.Position().X)
 		assert.Equal(t, 0, a.Position().Y)
-		assert.Equal(t, aMin.Width, a.Size().Width)
-		assert.Equal(t, aMin.Height, a.Size().Height)
+		assert.Equal(t, aMin.Width+theme.Padding()*2, a.Size().Width)
+		assert.Equal(t, aMin.Height+theme.Padding()*2, a.Size().Height)
 	})
 	t.Run("Multiple", func(t *testing.T) {
 		tree := NewTree()
@@ -253,13 +253,13 @@ func TestTreeRenderer_Layout(t *testing.T) {
 
 		assert.Equal(t, theme.Padding(), a.Position().X)
 		assert.Equal(t, 0, a.Position().Y)
-		assert.Equal(t, fyne.Max(aMin.Width, bMin.Width), a.Size().Width)
-		assert.Equal(t, aMin.Height, a.Size().Height)
+		assert.Equal(t, fyne.Max(aMin.Width, bMin.Width)+theme.Padding()*2, a.Size().Width)
+		assert.Equal(t, aMin.Height+theme.Padding()*2, a.Size().Height)
 
 		assert.Equal(t, theme.Padding(), b.Position().X)
 		assert.Equal(t, a.Size().Height, b.Position().Y)
-		assert.Equal(t, fyne.Max(aMin.Width, bMin.Width), b.Size().Width)
-		assert.Equal(t, bMin.Height, b.Size().Height)
+		assert.Equal(t, fyne.Max(aMin.Width, bMin.Width)+theme.Padding()*2, b.Size().Width)
+		assert.Equal(t, bMin.Height+theme.Padding()*2, b.Size().Height)
 	})
 	t.Run("Open", func(t *testing.T) {
 		tree := NewTree()
@@ -277,20 +277,20 @@ func TestTreeRenderer_Layout(t *testing.T) {
 		// Branches first
 		assert.Equal(t, theme.Padding(), b.Position().X)
 		assert.Equal(t, 0, b.Position().Y)
-		assert.Equal(t, width, b.Size().Width)
-		assert.Equal(t, bMin.Height, b.Size().Height)
+		assert.Equal(t, width+theme.Padding()*2, b.Size().Width)
+		assert.Equal(t, bMin.Height+theme.Padding()*2, b.Size().Height)
 
 		// Leaf position relative to parent branch
 		assert.Equal(t, theme.Padding(), c.Position().X)
 		assert.Equal(t, b.Size().Height, c.Position().Y)
-		assert.Equal(t, width-theme.Padding(), c.Size().Width)
-		assert.Equal(t, cMin.Height, c.Size().Height)
+		assert.Equal(t, width+theme.Padding(), c.Size().Width)
+		assert.Equal(t, cMin.Height+theme.Padding()*2, c.Size().Height)
 
 		// Leaves second
 		assert.Equal(t, theme.Padding(), a.Position().X)
 		assert.Equal(t, b.Position().Y+b.Size().Height+c.Size().Height, a.Position().Y)
-		assert.Equal(t, width, a.Size().Width)
-		assert.Equal(t, aMin.Height, a.Size().Height)
+		assert.Equal(t, width+theme.Padding()*2, a.Size().Width)
+		assert.Equal(t, aMin.Height+theme.Padding()*2, a.Size().Height)
 	})
 }
 
@@ -307,8 +307,8 @@ func TestTreeRenderer_MinSize(t *testing.T) {
 		tree.Add("a")
 		render := test.WidgetRenderer(tree).(*treeRenderer)
 		min := render.MinSize()
-		assert.Equal(t, aMin.Width+theme.Padding()*3, min.Width)
-		assert.Equal(t, aMin.Height+theme.Padding()*2, min.Height)
+		assert.Equal(t, aMin.Width+theme.Padding()*5, min.Width)
+		assert.Equal(t, aMin.Height+theme.Padding()*4, min.Height)
 	})
 	t.Run("Multiple", func(t *testing.T) {
 		tree := NewTree()
@@ -316,8 +316,8 @@ func TestTreeRenderer_MinSize(t *testing.T) {
 		tree.Add("b", "c")
 		render := test.WidgetRenderer(tree).(*treeRenderer)
 		min := render.MinSize()
-		assert.Equal(t, fyne.Max(aMin.Width, bMin.Width)+theme.Padding()*3, min.Width)
-		assert.Equal(t, aMin.Height+bMin.Height+theme.Padding()*2, min.Height)
+		assert.Equal(t, fyne.Max(aMin.Width, bMin.Width)+theme.Padding()*5, min.Width)
+		assert.Equal(t, aMin.Height+bMin.Height+theme.Padding()*6, min.Height)
 	})
 	t.Run("Open", func(t *testing.T) {
 		tree := NewTree()
@@ -326,11 +326,11 @@ func TestTreeRenderer_MinSize(t *testing.T) {
 		tapBranch(t, tree, "b")
 		render := test.WidgetRenderer(tree).(*treeRenderer)
 		min := render.MinSize()
-		width := aMin.Width + theme.Padding()
-		width = fyne.Max(width, bMin.Width+theme.Padding())
-		width = fyne.Max(width, cMin.Width+theme.Padding()*2)
+		width := aMin.Width + theme.Padding()*2
+		width = fyne.Max(width, bMin.Width+theme.Padding()*3)
+		width = fyne.Max(width, cMin.Width+theme.Padding()*4)
 		assert.Equal(t, width+theme.Padding()*2, min.Width)
-		assert.Equal(t, aMin.Height+bMin.Height+cMin.Height+theme.Padding()*2, min.Height)
+		assert.Equal(t, aMin.Height+bMin.Height+cMin.Height+theme.Padding()*8, min.Height)
 	})
 }
 
@@ -513,10 +513,10 @@ func TestTreeNodeRenderer_Layout(t *testing.T) {
 	ar.Layout(fyne.NewSize(s, s))
 	br.Layout(fyne.NewSize(s, s))
 	assert.Nil(t, ar.image)
-	assert.Equal(t, s, ar.text.Size().Width)
+	assert.Equal(t, s-theme.Padding()*2, ar.text.Size().Width)
 	assert.Equal(t, aMin.Height, ar.text.Size().Height)
 	assert.Nil(t, br.image)
-	assert.Equal(t, s, br.text.Size().Width)
+	assert.Equal(t, s-theme.Padding()*2, br.text.Size().Width)
 	assert.Equal(t, bMin.Height, br.text.Size().Height)
 }
 
@@ -535,11 +535,11 @@ func TestTreeNodeRenderer_Layout_Icon(t *testing.T) {
 	br.Layout(fyne.NewSize(s, s))
 	assert.Equal(t, theme.IconInlineSize(), ar.image.Size().Width)
 	assert.Equal(t, theme.IconInlineSize(), ar.image.Size().Height)
-	assert.Equal(t, s-theme.IconInlineSize(), ar.text.Size().Width)
+	assert.Equal(t, s-theme.IconInlineSize()-theme.Padding()*3, ar.text.Size().Width)
 	assert.Equal(t, aMin.Height, ar.text.Size().Height)
 	assert.Equal(t, theme.IconInlineSize(), br.image.Size().Width)
 	assert.Equal(t, theme.IconInlineSize(), br.image.Size().Height)
-	assert.Equal(t, s-theme.IconInlineSize(), br.text.Size().Width)
+	assert.Equal(t, s-theme.IconInlineSize()-theme.Padding()*3, br.text.Size().Width)
 	assert.Equal(t, bMin.Height, br.text.Size().Height)
 }
 
@@ -552,10 +552,10 @@ func TestTreeNodeRenderer_MinSize(t *testing.T) {
 	br := test.WidgetRenderer(b).(*treeNodeRenderer)
 	ar.createCanvasObjects()
 	br.createCanvasObjects()
-	assert.Equal(t, aMin.Width, ar.MinSize().Width)
-	assert.Equal(t, aMin.Height, ar.MinSize().Height)
-	assert.Equal(t, bMin.Width, br.MinSize().Width)
-	assert.Equal(t, bMin.Height, br.MinSize().Height)
+	assert.Equal(t, aMin.Width+theme.Padding()*2, ar.MinSize().Width)
+	assert.Equal(t, aMin.Height+theme.Padding()*2, ar.MinSize().Height)
+	assert.Equal(t, bMin.Width+theme.Padding()*2, br.MinSize().Width)
+	assert.Equal(t, bMin.Height+theme.Padding()*2, br.MinSize().Height)
 }
 
 func TestTreeNodeRenderer_MinSize_Icon(t *testing.T) {
@@ -568,10 +568,10 @@ func TestTreeNodeRenderer_MinSize_Icon(t *testing.T) {
 	br := test.WidgetRenderer(b).(*treeNodeRenderer)
 	ar.createCanvasObjects()
 	br.createCanvasObjects()
-	assert.Equal(t, aMin.Width+theme.IconInlineSize(), ar.MinSize().Width)
-	assert.Equal(t, fyne.Max(aMin.Height, theme.IconInlineSize()), ar.MinSize().Height)
-	assert.Equal(t, bMin.Width+theme.IconInlineSize(), br.MinSize().Width)
-	assert.Equal(t, fyne.Max(bMin.Height, theme.IconInlineSize()), br.MinSize().Height)
+	assert.Equal(t, aMin.Width+theme.IconInlineSize()+theme.Padding()*3, ar.MinSize().Width)
+	assert.Equal(t, fyne.Max(aMin.Height, theme.IconInlineSize())+theme.Padding()*2, ar.MinSize().Height)
+	assert.Equal(t, bMin.Width+theme.IconInlineSize()+theme.Padding()*3, br.MinSize().Width)
+	assert.Equal(t, fyne.Max(bMin.Height, theme.IconInlineSize())+theme.Padding()*2, br.MinSize().Height)
 }
 
 func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {

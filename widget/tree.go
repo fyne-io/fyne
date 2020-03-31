@@ -168,16 +168,19 @@ func (r *treeNodeRenderer) Layout(size fyne.Size) {
 	if r.text.Text == "" {
 		return
 	}
+	x := theme.Padding()
+	y := theme.Padding()
 	width := 0
 	height := 0
 	if r.image != nil {
 		width += theme.IconInlineSize()
 		height += theme.IconInlineSize()
-		r.image.Move(fyne.NewPos(0, 0))
+		r.image.Move(fyne.NewPos(x, y))
 		r.image.Resize(fyne.NewSize(width, height))
+		x += width + theme.Padding()
 	}
-	r.text.Move(fyne.NewPos(width, 0))
-	r.text.Resize(fyne.NewSize(size.Width-width, r.text.MinSize().Height))
+	r.text.Move(fyne.NewPos(x, y))
+	r.text.Resize(fyne.NewSize(size.Width-x-theme.Padding(), r.text.MinSize().Height))
 }
 
 func (r *treeNodeRenderer) MinSize() fyne.Size {
@@ -185,7 +188,7 @@ func (r *treeNodeRenderer) MinSize() fyne.Size {
 	height := 0
 	if r.text.Text != "" {
 		if r.image != nil {
-			width += theme.IconInlineSize()
+			width += theme.IconInlineSize() + theme.Padding()
 			height += theme.IconInlineSize()
 		}
 		s := r.text.MinSize()
@@ -193,6 +196,8 @@ func (r *treeNodeRenderer) MinSize() fyne.Size {
 		if s.Height > height {
 			height = s.Height
 		}
+		width += theme.Padding() * 2
+		height += theme.Padding() * 2
 	}
 	return fyne.NewSize(width, height)
 }
