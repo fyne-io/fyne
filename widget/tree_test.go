@@ -17,16 +17,6 @@ var (
 	bMin = textMinSize("b", theme.TextSize(), fyne.TextStyle{})
 	cMin = textMinSize("c", theme.TextSize(), fyne.TextStyle{})
 	dMin = textMinSize("d", theme.TextSize(), fyne.TextStyle{})
-
-	getBranchIcon = func(path []string, open bool) fyne.Resource {
-		if open {
-			return theme.FolderOpenIcon()
-		}
-		return theme.FolderIcon()
-	}
-	getLeafIcon = func(path []string) fyne.Resource {
-		return theme.FileIcon()
-	}
 )
 
 func getBranch(t *testing.T, root *branch, path ...string) (branch *branch) {
@@ -154,16 +144,14 @@ func TestTree_MinSize(t *testing.T) {
 func TestTree_MinSize_Icon(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		tree := NewTree()
-		tree.GetBranchIcon = getBranchIcon
-		tree.GetLeafIcon = getLeafIcon
+		tree.UseArrowIcons()
 		min := tree.MinSize()
 		assert.Equal(t, theme.Padding()*2, min.Width)
 		assert.Equal(t, theme.Padding()*2, min.Height)
 	})
 	t.Run("Single", func(t *testing.T) {
 		tree := NewTree()
-		tree.GetBranchIcon = getBranchIcon
-		tree.GetLeafIcon = getLeafIcon
+		tree.UseArrowIcons()
 		tree.Add("a", "b")
 		min := tree.MinSize()
 		assert.Equal(t, theme.IconInlineSize()+aMin.Width+theme.Padding()*3, min.Width)
@@ -171,8 +159,7 @@ func TestTree_MinSize_Icon(t *testing.T) {
 	})
 	t.Run("Multiple", func(t *testing.T) {
 		tree := NewTree()
-		tree.GetBranchIcon = getBranchIcon
-		tree.GetLeafIcon = getLeafIcon
+		tree.UseArrowIcons()
 		tree.Add("a", "b")
 		tree.Add("c", "d")
 		min := tree.MinSize()
@@ -181,8 +168,7 @@ func TestTree_MinSize_Icon(t *testing.T) {
 	})
 	t.Run("Open", func(t *testing.T) {
 		tree := NewTree()
-		tree.GetBranchIcon = getBranchIcon
-		tree.GetLeafIcon = getLeafIcon
+		tree.UseArrowIcons()
 		tree.Add("a", "b")
 		tree.Add("c", "d")
 
@@ -537,8 +523,7 @@ func TestTreeNodeRenderer_Layout(t *testing.T) {
 func TestTreeNodeRenderer_Layout_Icon(t *testing.T) {
 	tree := NewTree()
 	tree.Add("a", "b")
-	tree.GetBranchIcon = getBranchIcon
-	tree.GetLeafIcon = getLeafIcon
+	tree.UseArrowIcons()
 	a := getBranch(t, tree.root, "a")
 	b := getLeaf(t, tree.root, "a", "b")
 	ar := test.WidgetRenderer(a).(*treeNodeRenderer)
@@ -576,8 +561,7 @@ func TestTreeNodeRenderer_MinSize(t *testing.T) {
 func TestTreeNodeRenderer_MinSize_Icon(t *testing.T) {
 	tree := NewTree()
 	tree.Add("a", "b")
-	tree.GetBranchIcon = getBranchIcon
-	tree.GetLeafIcon = getLeafIcon
+	tree.UseArrowIcons()
 	a := getBranch(t, tree.root, "a")
 	b := getLeaf(t, tree.root, "a", "b")
 	ar := test.WidgetRenderer(a).(*treeNodeRenderer)
@@ -593,7 +577,7 @@ func TestTreeNodeRenderer_MinSize_Icon(t *testing.T) {
 func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	tree := NewTree()
 	tree.Add("a")
-	tree.GetLeafIcon = getLeafIcon
+	tree.UseArrowIcons()
 	a := getLeaf(t, tree.root, "a")
 	ar := test.WidgetRenderer(a).(*treeNodeRenderer)
 	ar.createCanvasObjects()
@@ -603,7 +587,7 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 	tree := NewTree()
 	tree.Add("a")
-	tree.GetLeafIcon = getLeafIcon
+	tree.UseArrowIcons()
 	a := getLeaf(t, tree.root, "a")
 	a.MouseIn(&desktop.MouseEvent{})
 	ar := test.WidgetRenderer(a).(*treeNodeRenderer)

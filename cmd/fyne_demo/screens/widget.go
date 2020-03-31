@@ -136,30 +136,36 @@ func makeScrollBothTab() fyne.CanvasObject {
 }
 
 func makeTreeTab() fyne.CanvasObject {
-	tree := widget.NewTree()
-	tree.GetBranchIcon = func(path []string, open bool) fyne.Resource {
-		if open {
-			return theme.FolderOpenIcon()
-		}
-		return theme.FolderIcon()
-	}
-	tree.GetLeafIcon = func(path []string) fyne.Resource {
-		return theme.FileIcon()
-	}
-	tree.OnLeafSelected = func(path []string) {
+	left := widget.NewTree()
+	left.UseFileSystemIcons()
+	left.OnLeafSelected = func(path []string) {
 		log.Println("TreeLeafSelected:", path)
 	}
-	tree.Add("A", "B", "C", "abc")
-	tree.Add("A", "D", "E", "F", "adef")
-	tree.Add("A", "D", "E", "G", "adeg")
-	tree.Add("A", "H", "I", "ahi")
-	tree.Add("A", "J", "K", "ajk")
-	tree.Add("A", "L", "M", "N", "almn")
-	tree.Add("A", "O", "ao")
-	tree.Add("A", "P", "Q", "R", "apqr")
-	tree.Add("A", "S", "T", "U", "astu")
-	tree.Add("A", "V", "W", "X", "Y", "Z", "avwxyz")
-	return widget.NewVerticalScrollContainer(tree)
+	left.Add("A", "B", "C", "abc")
+	left.Add("A", "D", "E", "F", "adef")
+	left.Add("A", "D", "E", "G", "adeg")
+	left.Add("A", "H", "I", "ahi")
+	left.Add("A", "J", "K", "ajk")
+	left.Add("A", "L", "M", "N", "almn")
+	left.Add("A", "O", "ao")
+	left.Add("A", "P", "Q", "R", "apqr")
+	left.Add("A", "S", "T", "U", "astu")
+	left.Add("A", "V", "W", "X", "Y", "Z", "avwxyz")
+
+	right := widget.NewTree()
+	right.UseArrowIcons()
+	right.OnLeafSelected = func(path []string) {
+		log.Println("TreeLeafSelected:", path)
+	}
+	right.Add("1", "2", "3", "1bc")
+	right.Add("1", "4", "5", "6", "1456")
+	right.Add("1", "4", "5", "7", "1457")
+	right.Add("1", "8", "9", "189")
+	right.Add("1", "10", "11", "11011")
+	return widget.NewHBox(
+		widget.NewVerticalScrollContainer(left),
+		widget.NewVerticalScrollContainer(right),
+	)
 }
 
 // WidgetScreen shows a panel containing widget demos

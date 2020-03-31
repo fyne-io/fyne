@@ -42,6 +42,34 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+// UseArrowIcons configures the tree to display a right arrow for closed branches,
+// a down arrow for open branches, and a circle for leaves.
+func (t *Tree) UseArrowIcons() {
+	t.GetBranchIcon = func(path []string, open bool) fyne.Resource {
+		if open {
+			return theme.MoveDownIcon()
+		}
+		return theme.NavigateNextIcon()
+	}
+	t.GetLeafIcon = func(path []string) fyne.Resource {
+		return theme.RadioButtonCheckedIcon()
+	}
+}
+
+// UseFileSystemIcons configures the tree to display a folder for closed branches,
+// an open folder for open branches, and a file for leaves.
+func (t *Tree) UseFileSystemIcons() {
+	t.GetBranchIcon = func(path []string, open bool) fyne.Resource {
+		if open {
+			return theme.FolderOpenIcon()
+		}
+		return theme.FolderIcon()
+	}
+	t.GetLeafIcon = func(path []string) fyne.Resource {
+		return theme.FileIcon()
+	}
+}
+
 // NewTree creates a new empty tree.
 func NewTree() *Tree {
 	t := &Tree{}
