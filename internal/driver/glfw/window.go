@@ -885,23 +885,23 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		ctrlMod = desktop.SuperModifier
 	}
 	if keyDesktopModifier == ctrlMod {
-		switch keyName {
-		case fyne.KeyV:
+		switch glfw.GetKeyName(key, 0) {
+		case "v":
 			// detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
 				Clipboard: w.Clipboard(),
 			}
-		case fyne.KeyC:
+		case "c":
 			// detect copy shortcut
 			shortcut = &fyne.ShortcutCopy{
 				Clipboard: w.Clipboard(),
 			}
-		case fyne.KeyX:
+		case "x":
 			// detect cut shortcut
 			shortcut = &fyne.ShortcutCut{
 				Clipboard: w.Clipboard(),
 			}
-		case fyne.KeyA:
+		case "a":
 			// detect selectAll shortcut
 			shortcut = &fyne.ShortcutSelectAll{}
 		}
