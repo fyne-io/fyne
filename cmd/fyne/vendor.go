@@ -117,9 +117,17 @@ func (v *vendor) main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Reset vendor content using 'go mod vendor'")
-	cmd := exec.Command("go", "mod", "vendor", "-v")
+	fmt.Println("Add missing and remove unused modules using 'go mod tidy'")
+	cmd := exec.Command("go", "mod", "tidy", "-v")
 	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Reset vendor content using 'go mod vendor'")
+	cmd = exec.Command("go", "mod", "vendor", "-v")
+	err = cmd.Run()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
