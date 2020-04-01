@@ -11,16 +11,16 @@ bool getPreferenceBool(const char* key, bool fallback) {
     if (obj == nil) {
         return fallback;
     } else {
-        return [[NSUserDefaults standardUserDefaults] boolForKey:nskey] != FALSE;
+        return [[NSUserDefaults standardUserDefaults] boolForKey:nskey] == YES;
     }
 }
 
 void setPreferenceBool(const char* key, bool value) {
     NSString *nskey = [NSString stringWithUTF8String:key];
     if (value == false) {
-        [[NSUserDefaults standardUserDefaults] setBool:FALSE forKey:nskey];
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:nskey];
     } else {
-        [[NSUserDefaults standardUserDefaults] setBool:TRUE forKey:nskey];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:nskey];
     }
 }
 
