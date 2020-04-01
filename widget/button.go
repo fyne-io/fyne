@@ -99,7 +99,7 @@ func (b *buttonRenderer) Refresh() {
 	if b.button.Icon != nil && b.button.Visible() {
 		if b.icon == nil {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
-			b.objects = append(b.objects, b.icon)
+			b.SetObjects(append(b.Objects(), b.icon))
 		} else {
 			if b.button.Disabled() {
 				// if the icon has changed, create a new disabled version

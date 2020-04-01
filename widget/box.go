@@ -56,7 +56,7 @@ func (b *Box) CreateRenderer() fyne.WidgetRenderer {
 		lay = layout.NewVBoxLayout()
 	}
 
-	return &boxRenderer{objects: b.Children, layout: lay, box: b}
+	return &boxRenderer{baseRenderer: baseRenderer{b.Children}, layout: lay, box: b}
 }
 
 func (b *Box) setBackgroundColor(bg color.Color) {
@@ -74,18 +74,17 @@ func NewVBox(children ...fyne.CanvasObject) *Box {
 }
 
 type boxRenderer struct {
+	baseRenderer
 	layout fyne.Layout
-
-	objects []fyne.CanvasObject
-	box     *Box
+	box    *Box
 }
 
 func (b *boxRenderer) MinSize() fyne.Size {
-	return b.layout.MinSize(b.objects)
+	return b.layout.MinSize(b.Objects())
 }
 
 func (b *boxRenderer) Layout(size fyne.Size) {
-	b.layout.Layout(b.objects, size)
+	b.layout.Layout(b.Objects(), size)
 }
 
 func (b *boxRenderer) BackgroundColor() color.Color {
@@ -96,19 +95,12 @@ func (b *boxRenderer) BackgroundColor() color.Color {
 	return b.box.background
 }
 
-func (b *boxRenderer) Objects() []fyne.CanvasObject {
-	return b.objects
-}
-
 func (b *boxRenderer) Refresh() {
-	b.objects = b.box.Children
-	for _, child := range b.objects {
+	b.SetObjects(b.box.Children)
+	for _, child := range b.Objects() {
 		child.Refresh()
 	}
 	b.Layout(b.box.Size())
 
 	canvas.Refresh(b.box)
-}
-
-func (b *boxRenderer) Destroy() {
 }

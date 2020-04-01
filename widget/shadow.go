@@ -39,10 +39,10 @@ func (s *shadow) CreateRenderer() fyne.WidgetRenderer {
 }
 
 type shadowRenderer struct {
+	baseRenderer
 	b, l, r, t     *canvas.LinearGradient
 	bl, br, tl, tr *canvas.RadialGradient
 	minSize        fyne.Size
-	objects        []fyne.CanvasObject
 	s              *shadow
 }
 
@@ -50,16 +50,16 @@ func (r *shadowRenderer) createShadows() {
 	switch r.s.typ {
 	case shadowLeft:
 		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
-		r.objects = []fyne.CanvasObject{r.l}
+		r.SetObjects([]fyne.CanvasObject{r.l})
 	case shadowRight:
 		r.r = canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
-		r.objects = []fyne.CanvasObject{r.r}
+		r.SetObjects([]fyne.CanvasObject{r.r})
 	case shadowBottom:
 		r.b = canvas.NewVerticalGradient(theme.ShadowColor(), color.Transparent)
-		r.objects = []fyne.CanvasObject{r.b}
+		r.SetObjects([]fyne.CanvasObject{r.b})
 	case shadowTop:
 		r.t = canvas.NewVerticalGradient(color.Transparent, theme.ShadowColor())
-		r.objects = []fyne.CanvasObject{r.t}
+		r.SetObjects([]fyne.CanvasObject{r.t})
 	case shadowAround:
 		r.tl = canvas.NewRadialGradient(theme.ShadowColor(), color.Transparent)
 		r.tl.CenterOffsetX = 0.5
@@ -77,7 +77,7 @@ func (r *shadowRenderer) createShadows() {
 		r.bl.CenterOffsetX = 0.5
 		r.bl.CenterOffsetY = -0.5
 		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
-		r.objects = []fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l}
+		r.SetObjects([]fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l})
 	}
 }
 
@@ -124,9 +124,6 @@ func (r *shadowRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-func (r *shadowRenderer) Destroy() {
-}
-
 func (r *shadowRenderer) Layout(size fyne.Size) {
 	if r.tl != nil {
 		r.tl.Resize(fyne.NewSize(r.s.depth, r.s.depth))
@@ -164,10 +161,6 @@ func (r *shadowRenderer) Layout(size fyne.Size) {
 
 func (r *shadowRenderer) MinSize() fyne.Size {
 	return r.minSize
-}
-
-func (r *shadowRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
 }
 
 func (r *shadowRenderer) Refresh() {
