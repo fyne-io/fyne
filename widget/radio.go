@@ -164,11 +164,11 @@ func (r *radioRenderer) Destroy() {
 // Changing the selection (only one can be selected) will trigger the changed func.
 type Radio struct {
 	DisableableWidget
-	Options  []string
-	Selected string
-
-	OnChanged  func(string) `json:"-"`
 	Horizontal bool
+	Required   bool
+	OnChanged  func(string) `json:"-"`
+	Options    []string
+	Selected   string
 
 	hoveredItemIndex int
 	hovered          bool
@@ -238,6 +238,9 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	clicked := r.Options[index]
 
 	if r.Selected == clicked {
+		if r.Required {
+			return
+		}
 		r.Selected = ""
 	} else {
 		r.Selected = clicked
