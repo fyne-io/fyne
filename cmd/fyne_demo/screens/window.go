@@ -3,10 +3,12 @@ package screens
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
@@ -15,6 +17,56 @@ import (
 
 func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
+}
+
+func fileOpened(f fyne.File) {
+	if f == nil {
+		log.Println("Cancelled")
+		return
+	}
+
+	if f.URI()[len(f.URI())-4:] == ".png" {
+		showImage(f)
+	}
+}
+
+func fileSaved(f fyne.File) {
+	if f == nil {
+		log.Println("Cancelled")
+		return
+	}
+
+	log.Println("Save to...", f.URI())
+}
+
+func loadImage(f fyne.File) *canvas.Image {
+	in, err := f.Open()
+	if err != nil {
+		fyne.LogError("Could not open image stream", err)
+		return nil
+	}
+
+	data, err := ioutil.ReadAll(in)
+	if err != nil {
+		fyne.LogError("Failed to load image data", err)
+		return nil
+	}
+	res := fyne.NewStaticResource(f.Name(), data)
+
+	return canvas.NewImageFromResource(res)
+}
+
+func showImage(f fyne.File) {
+	img := loadImage(f)
+	if img == nil {
+		return
+	}
+	img.FillMode = canvas.ImageFillOriginal
+
+	w := fyne.CurrentApp().NewWindow(f.Name())
+	w.SetContent(widget.NewScrollContainer(img))
+	w.Resize(fyne.NewSize(320, 240))
+	w.Show()
 }
 
 // DialogScreen loads a panel that lists the dialog windows that can be tested.
@@ -61,22 +113,10 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			prog.Show()
 		}),
 		widget.NewButton("File Open", func() {
-			dialog.ShowFileOpen(func(path string) {
-				if path == "" {
-					log.Println("Cancelled")
-				} else {
-					log.Println("Open file", path)
-				}
-			}, win)
+			dialog.ShowFileOpen(fileOpened, win)
 		}),
 		widget.NewButton("File Save", func() {
-			dialog.ShowFileSave(func(path string) {
-				if path == "" {
-					log.Println("Cancelled")
-				} else {
-					log.Println("Save to file", path)
-				}
-			}, win)
+			dialog.ShowFileSave(fileSaved, win)
 		}),
 		widget.NewButton("Custom", func() {
 			entry := widget.NewEntry()

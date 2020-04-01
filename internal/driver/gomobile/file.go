@@ -1,13 +1,61 @@
 package gomobile
 
-import "fyne.io/fyne"
+import (
+	"io"
+	"net/url"
+	"path/filepath"
+	"strings"
+
+	"fyne.io/fyne"
+)
+
+type file struct {
+	uri string
+}
+
+func (f file) Open() (io.ReadCloser, error) {
+	return nativeFileOpen(f.uri)
+}
+
+func (f file) Save() (io.WriteCloser, error) {
+	return nativeFileSave(f.uri)
+}
+
+func (f *file) ReadOnly() bool {
+	if len(f.uri) < 8 || f.uri[:7] != "file://" {
+		return true
+	}
+
+	return false
+}
+
+func (f file) Name() string {
+	u, err := url.Parse(f.uri)
+	if err != nil {
+		return "unknown"
+	}
+
+	return filepath.Base(u.Path)
+}
+
+func (f file) URI() string {
+	return f.uri
+}
+
+func (d *mobileDriver) FileFromURI(uriOrPath string) fyne.File {
+	if strings.Index(uriOrPath, "://") == -1 {
+		return &file{uri: "file://" + uriOrPath}
+	}
+
+	return &file{uri: uriOrPath}
+}
 
 type hasPicker interface {
-	ShowFileOpenPicker(callback func(string))
+	ShowFileOpenPicker(callback func(fyne.File))
 }
 
 // ShowFileOpenPicker loads the native file open dialog and returns the chosen file path via the callback func.
-func ShowFileOpenPicker(callback func(string)) {
+func ShowFileOpenPicker(callback func(fyne.File)) {
 	if a, ok := fyne.CurrentApp().Driver().(*mobileDriver).app.(hasPicker); ok {
 		a.ShowFileOpenPicker(callback)
 	}

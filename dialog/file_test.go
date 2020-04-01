@@ -13,9 +13,9 @@ import (
 )
 
 func TestShowFileOpen(t *testing.T) {
-	chosen := ""
+	var chosen fyne.File
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileOpen(func(file string) {
+	ShowFileOpen(func(file fyne.File) {
 		chosen = file
 	}, win)
 
@@ -58,13 +58,13 @@ func TestShowFileOpen(t *testing.T) {
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
-	assert.Equal(t, target.path, chosen)
+	assert.Equal(t, "file://"+target.path, chosen.URI())
 }
 
 func TestShowFileSave(t *testing.T) {
-	chosen := ""
+	var chosen fyne.File
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileSave(func(file string) {
+	ShowFileSave(func(file fyne.File) {
 		chosen = file
 	}, win)
 
@@ -115,5 +115,6 @@ func TestShowFileSave(t *testing.T) {
 	test.Type(nameEntry, "v2_")
 	test.Tap(save)
 	assert.Nil(t, win.Canvas().Overlays().Top())
-	assert.Equal(t, filepath.Join(filepath.Dir(target.path), "v2_"+filepath.Base(target.path)), chosen)
+	expectedPath := filepath.Join(filepath.Dir(target.path), "v2_"+filepath.Base(target.path))
+	assert.Equal(t, "file://"+expectedPath, chosen.URI())
 }

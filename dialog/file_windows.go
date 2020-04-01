@@ -74,6 +74,6 @@ func isHidden(file, dir string) bool {
 	return attr&syscall.FILE_ATTRIBUTE_HIDDEN != 0
 }
 
-func fileOSOverride(bool, func(string), fyne.Window) bool {
+func fileOSOverride(bool, func(fyne.File), fyne.Window) bool {
 	return false
 }
