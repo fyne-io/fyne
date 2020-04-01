@@ -80,9 +80,6 @@ func (s *selectRenderer) Refresh() {
 	canvas.Refresh(s.combo.super())
 }
 
-func (s *selectRenderer) Destroy() {
-}
-
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
 	BaseWidget

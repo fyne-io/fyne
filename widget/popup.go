@@ -168,9 +168,6 @@ func (r *popUpRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-func (r *popUpRenderer) Destroy() {
-}
-
 type modalPopUpRenderer struct {
 	popUp   *PopUp
 	bg      *canvas.Rectangle

@@ -122,9 +122,6 @@ func (b *buttonRenderer) Refresh() {
 	canvas.Refresh(b.button.super())
 }
 
-func (b *buttonRenderer) Destroy() {
-}
-
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	DisableableWidget
