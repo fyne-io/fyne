@@ -9,7 +9,9 @@ import (
 )
 
 // GoEnv collects the info about the Go environment using the go env tool
-type GoEnv struct{}
+type GoEnv struct {
+	Filter []string // Filter defines a subset of vars to returns. Leave empty to return all.
+}
 
 // Summary return the summary
 func (i *GoEnv) Summary() string {
@@ -29,5 +31,17 @@ func (i *GoEnv) Info() (goinfo.Info, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not decode the go env json info: %w", err)
 	}
-	return info, nil
+
+	if len(i.Filter) == 0 {
+		return info, nil
+	}
+
+	filteredInfo := goinfo.Info{}
+	for _, key := range i.Filter {
+		if v, ok := info[key]; ok {
+			filteredInfo[key] = v
+		}
+	}
+
+	return filteredInfo, nil
 }
