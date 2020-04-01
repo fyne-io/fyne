@@ -1,26 +1,23 @@
 // +build darwin
 // +build ios
 
+#import <stdbool.h>
 #import <Foundation/Foundation.h>
 
-int getPreferenceBool(const char* key, int fallback) {
+bool getPreferenceBool(const char* key, bool fallback) {
     NSString *nskey = [NSString stringWithUTF8String:key];
     id obj = [[NSUserDefaults standardUserDefaults] objectForKey:nskey];
 
     if (obj == nil) {
         return fallback;
     } else {
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:nskey]) {
-            return 1;
-        } else {
-            return 0;
-        }
+        return [[NSUserDefaults standardUserDefaults] boolForKey:nskey] != FALSE;
     }
 }
 
-void setPreferenceBool(const char* key, int value) {
+void setPreferenceBool(const char* key, bool value) {
     NSString *nskey = [NSString stringWithUTF8String:key];
-    if (value == 0) {
+    if (value == false) {
         [[NSUserDefaults standardUserDefaults] setBool:FALSE forKey:nskey];
     } else {
         [[NSUserDefaults standardUserDefaults] setBool:TRUE forKey:nskey];

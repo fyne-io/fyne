@@ -9,11 +9,12 @@ import (
 )
 
 /*
+#import <stdbool.h>
 #import <stdlib.h>
 #import <Foundation/Foundation.h>
 
-int getPreferenceBool(const char* key, int fallback);
-void setPreferenceBool(const char* key, int value);
+bool getPreferenceBool(const char* key, bool fallback);
+void setPreferenceBool(const char* key, bool value);
 float getPreferenceFloat(const char* key, float fallback);
 void setPreferenceFloat(const char* key, float value);
 int getPreferenceInt(const char* key, int fallback);
@@ -35,25 +36,16 @@ func (p *iOSPreferences) Bool(key string) bool {
 
 func (p *iOSPreferences) BoolWithFallback(key string, fallback bool) bool {
 	cKey := C.CString(key)
-	cBool := 0
-	if fallback {
-		cBool = 1
-	}
-	ret := C.getPreferenceBool(cKey, C.int(cBool))
+	defer C.free(unsafe.Pointer(cKey))
 
-	C.free(unsafe.Pointer(cKey))
-	return int(ret) != 0
+	return bool(C.getPreferenceBool(cKey, C.bool(fallback)))
 }
 
 func (p *iOSPreferences) SetBool(key string, value bool) {
 	cKey := C.CString(key)
-	cBool := 0
-	if value {
-		cBool = 1
-	}
-	C.setPreferenceBool(cKey, C.int(cBool))
+	defer C.free(unsafe.Pointer(cKey))
 
-	C.free(unsafe.Pointer(cKey))
+	C.setPreferenceBool(cKey, C.bool(value))
 }
 
 func (p *iOSPreferences) Float(key string) float64 {
@@ -62,17 +54,16 @@ func (p *iOSPreferences) Float(key string) float64 {
 
 func (p *iOSPreferences) FloatWithFallback(key string, fallback float64) float64 {
 	cKey := C.CString(key)
-	ret := C.getPreferenceFloat(cKey, C.float(fallback))
+	defer C.free(unsafe.Pointer(cKey))
 
-	C.free(unsafe.Pointer(cKey))
-	return float64(ret)
+	return float64(C.getPreferenceFloat(cKey, C.float(fallback)))
 }
 
 func (p *iOSPreferences) SetFloat(key string, value float64) {
 	cKey := C.CString(key)
-	C.setPreferenceFloat(cKey, C.float(value))
+	defer C.free(unsafe.Pointer(cKey))
 
-	C.free(unsafe.Pointer(cKey))
+	C.setPreferenceFloat(cKey, C.float(value))
 }
 
 func (p *iOSPreferences) Int(key string) int {
@@ -81,17 +72,16 @@ func (p *iOSPreferences) Int(key string) int {
 
 func (p *iOSPreferences) IntWithFallback(key string, fallback int) int {
 	cKey := C.CString(key)
-	ret := C.getPreferenceInt(cKey, C.int(fallback))
+	defer C.free(unsafe.Pointer(cKey))
 
-	C.free(unsafe.Pointer(cKey))
-	return int(ret)
+	return int(C.getPreferenceInt(cKey, C.int(fallback)))
 }
 
 func (p *iOSPreferences) SetInt(key string, value int) {
 	cKey := C.CString(key)
-	C.setPreferenceInt(cKey, C.int(value))
+	defer C.free(unsafe.Pointer(cKey))
 
-	C.free(unsafe.Pointer(cKey))
+	C.setPreferenceInt(cKey, C.int(value))
 }
 
 func (p *iOSPreferences) String(key string) string {
@@ -100,21 +90,20 @@ func (p *iOSPreferences) String(key string) string {
 
 func (p *iOSPreferences) StringWithFallback(key, fallback string) string {
 	cKey := C.CString(key)
+	defer C.free(unsafe.Pointer(cKey))
 	cFallback := C.CString(fallback)
-	cRet := C.getPreferenceString(cKey, cFallback)
+	defer C.free(unsafe.Pointer(cFallback))
 
-	C.free(unsafe.Pointer(cKey))
-	C.free(unsafe.Pointer(cFallback))
-	return C.GoString(cRet)
+	return C.GoString(C.getPreferenceString(cKey, cFallback))
 }
 
 func (p *iOSPreferences) SetString(key string, value string) {
 	cKey := C.CString(key)
+	defer C.free(unsafe.Pointer(cKey))
 	cValue := C.CString(value)
-	C.setPreferenceString(cKey, cValue)
+	defer C.free(unsafe.Pointer(cValue))
 
-	C.free(unsafe.Pointer(cKey))
-	C.free(unsafe.Pointer(cValue))
+	C.setPreferenceString(cKey, cValue)
 }
 
 func newPreferences() *iOSPreferences {
