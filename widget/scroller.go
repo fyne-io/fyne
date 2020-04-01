@@ -258,15 +258,6 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
-	if r.scroll.Direction != ScrollHorizontalOnly {
-		r.topShadow.depth = theme.Padding() * 2
-		r.bottomShadow.depth = theme.Padding() * 2
-	}
-	if r.scroll.Direction != ScrollVerticalOnly {
-		r.leftShadow.depth = theme.Padding() * 2
-		r.rightShadow.depth = theme.Padding() * 2
-	}
-
 	r.Layout(r.scroll.Size())
 }
 
@@ -338,14 +329,14 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	}
 	if s.Direction != ScrollHorizontalOnly {
 		scr.vertArea = newScrollBarArea(s, scrollBarOrientationVertical)
-		scr.topShadow = newShadow(shadowBottom, theme.Padding()*2)
-		scr.bottomShadow = newShadow(shadowTop, theme.Padding()*2)
+		scr.topShadow = newShadow(shadowBottom, 4)
+		scr.bottomShadow = newShadow(shadowTop, 4)
 		scr.SetObjects(append(scr.Objects(), scr.vertArea, scr.topShadow, scr.bottomShadow))
 	}
 	if s.Direction != ScrollVerticalOnly {
 		scr.horizArea = newScrollBarArea(s, scrollBarOrientationHorizontal)
-		scr.leftShadow = newShadow(shadowRight, theme.Padding()*2)
-		scr.rightShadow = newShadow(shadowLeft, theme.Padding()*2)
+		scr.leftShadow = newShadow(shadowRight, 4)
+		scr.rightShadow = newShadow(shadowLeft, 4)
 		scr.SetObjects(append(scr.Objects(), scr.horizArea, scr.leftShadow, scr.rightShadow))
 	}
 	return scr

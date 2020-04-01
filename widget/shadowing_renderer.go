@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/theme"
 )
 
 // When using the shadowingRenderer the embedding renderer should call
@@ -15,7 +14,7 @@ type shadowingRenderer struct {
 func newShadowingRenderer(objects []fyne.CanvasObject, level int) *shadowingRenderer {
 	var shadow fyne.CanvasObject
 	if level > 0 {
-		shadow = newShadow(shadowAround, level*theme.Padding()/2)
+		shadow = newShadow(shadowAround, level)
 		objects = append(objects, shadow)
 	}
 	return &shadowingRenderer{baseRenderer{objects}, shadow}

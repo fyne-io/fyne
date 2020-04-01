@@ -18,8 +18,8 @@ const (
 	shadowTop
 )
 
-func newShadow(typ shadowType, depth int) *shadow {
-	s := &shadow{typ: typ, depth: depth}
+func newShadow(typ shadowType, level int) *shadow {
+	s := &shadow{typ: typ, level: level}
 	s.ExtendBaseWidget(s)
 	return s
 }
@@ -29,7 +29,7 @@ var _ fyne.Widget = (*shadow)(nil)
 type shadow struct {
 	BaseWidget
 	typ   shadowType
-	depth int
+	level int
 }
 
 func (s *shadow) CreateRenderer() fyne.WidgetRenderer {
@@ -125,37 +125,38 @@ func (r *shadowRenderer) BackgroundColor() color.Color {
 }
 
 func (r *shadowRenderer) Layout(size fyne.Size) {
+	depth := r.s.level * 2
 	if r.tl != nil {
-		r.tl.Resize(fyne.NewSize(r.s.depth, r.s.depth))
-		r.tl.Move(fyne.NewPos(-r.s.depth, -r.s.depth))
+		r.tl.Resize(fyne.NewSize(depth, depth))
+		r.tl.Move(fyne.NewPos(-depth, -depth))
 	}
 	if r.t != nil {
-		r.t.Resize(fyne.NewSize(size.Width, r.s.depth))
-		r.t.Move(fyne.NewPos(0, -r.s.depth))
+		r.t.Resize(fyne.NewSize(size.Width, depth))
+		r.t.Move(fyne.NewPos(0, -depth))
 	}
 	if r.tr != nil {
-		r.tr.Resize(fyne.NewSize(r.s.depth, r.s.depth))
-		r.tr.Move(fyne.NewPos(size.Width, -r.s.depth))
+		r.tr.Resize(fyne.NewSize(depth, depth))
+		r.tr.Move(fyne.NewPos(size.Width, -depth))
 	}
 	if r.r != nil {
-		r.r.Resize(fyne.NewSize(r.s.depth, size.Height))
+		r.r.Resize(fyne.NewSize(depth, size.Height))
 		r.r.Move(fyne.NewPos(size.Width, 0))
 	}
 	if r.br != nil {
-		r.br.Resize(fyne.NewSize(r.s.depth, r.s.depth))
+		r.br.Resize(fyne.NewSize(depth, depth))
 		r.br.Move(fyne.NewPos(size.Width, size.Height))
 	}
 	if r.b != nil {
-		r.b.Resize(fyne.NewSize(size.Width, r.s.depth))
+		r.b.Resize(fyne.NewSize(size.Width, depth))
 		r.b.Move(fyne.NewPos(0, size.Height))
 	}
 	if r.bl != nil {
-		r.bl.Resize(fyne.NewSize(r.s.depth, r.s.depth))
-		r.bl.Move(fyne.NewPos(-r.s.depth, size.Height))
+		r.bl.Resize(fyne.NewSize(depth, depth))
+		r.bl.Move(fyne.NewPos(-depth, size.Height))
 	}
 	if r.l != nil {
-		r.l.Resize(fyne.NewSize(r.s.depth, size.Height))
-		r.l.Move(fyne.NewPos(-r.s.depth, 0))
+		r.l.Resize(fyne.NewSize(depth, size.Height))
+		r.l.Move(fyne.NewPos(-depth, 0))
 	}
 }
 
@@ -165,4 +166,5 @@ func (r *shadowRenderer) MinSize() fyne.Size {
 
 func (r *shadowRenderer) Refresh() {
 	r.refreshShadows()
+	r.Layout(r.s.Size())
 }
