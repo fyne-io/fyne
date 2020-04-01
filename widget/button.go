@@ -11,7 +11,7 @@ import (
 )
 
 type buttonRenderer struct {
-	*baseRenderer
+	*shadowingRenderer
 
 	icon   *canvas.Image
 	label  *canvas.Text
@@ -199,7 +199,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{newBaseRenderer(objects, shadowLevel), icon, text, b}
+	return &buttonRenderer{newShadowingRenderer(objects, shadowLevel), icon, text, b}
 }
 
 // SetText allows the button label to be changed
