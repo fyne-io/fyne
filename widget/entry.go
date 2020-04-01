@@ -1011,6 +1011,11 @@ func (e *Entry) textStyle() fyne.TextStyle {
 	return fyne.TextStyle{}
 }
 
+// textSize tells the rendering textProvider our size
+func (e *Entry) textSize() int {
+	return theme.TextSize()
+}
+
 // textColor tells the rendering textProvider our color
 func (e *Entry) textColor() color.Color {
 	if e.Disabled() {
@@ -1046,6 +1051,11 @@ func (p *placeholderPresenter) textWrap() fyne.TextWrap {
 // textStyle tells the rendering textProvider our style
 func (p *placeholderPresenter) textStyle() fyne.TextStyle {
 	return fyne.TextStyle{}
+}
+
+// textSize tells the rendering textProvider our size
+func (p *placeholderPresenter) textSize() int {
+	return theme.TextSize()
 }
 
 // textColor tells the rendering textProvider our color

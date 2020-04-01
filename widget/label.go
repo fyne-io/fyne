@@ -13,7 +13,9 @@ type Label struct {
 	Text      string
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
-	TextStyle fyne.TextStyle // The style of the label text
+	TextStyle fyne.TextStyle // The style of the Text
+	TextSize  int            // The font size of the Text
+	Color     color.Color    // The font color of the Text
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -62,8 +64,19 @@ func (l *Label) textStyle() fyne.TextStyle {
 	return l.TextStyle
 }
 
+// textSize tells the rendering textProvider out size
+func (l *Label) textSize() int {
+	if l.TextSize != 0 {
+		return l.TextSize
+	}
+	return theme.TextSize()
+}
+
 // textColor tells the rendering textProvider our color
 func (l *Label) textColor() color.Color {
+	if l.Color != nil {
+		return l.Color
+	}
 	return theme.TextColor()
 }
 

@@ -20,6 +20,7 @@ type testTextParent struct {
 	align fyne.TextAlign
 	wrap  fyne.TextWrap
 	style fyne.TextStyle
+	size  int
 }
 
 func (t *testTextParent) textAlign() fyne.TextAlign {
@@ -32,6 +33,10 @@ func (t *testTextParent) textWrap() fyne.TextWrap {
 
 func (t *testTextParent) textStyle() fyne.TextStyle {
 	return t.style
+}
+
+func (t *testTextParent) textSize() int {
+	return t.size
 }
 
 func (t *testTextParent) textColor() color.Color {

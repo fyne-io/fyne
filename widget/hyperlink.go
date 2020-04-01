@@ -16,7 +16,9 @@ type Hyperlink struct {
 	URL       *url.URL
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
-	TextStyle fyne.TextStyle // The style of the hyperlink text
+	TextStyle fyne.TextStyle // The style of the Text
+	TextSize  int            // The font size of the Text
+	Color     color.Color    // The font color of the Text
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -72,8 +74,19 @@ func (hl *Hyperlink) textStyle() fyne.TextStyle {
 	return hl.TextStyle
 }
 
+// textSize tells the rendering textProvider out size
+func (hl *Hyperlink) textSize() int {
+	if hl.TextSize != 0 {
+		return hl.TextSize
+	}
+	return theme.TextSize()
+}
+
 // textColor tells the rendering textProvider our color
 func (hl *Hyperlink) textColor() color.Color {
+	if hl.Color != nil {
+		return hl.Color
+	}
 	return theme.HyperlinkColor()
 }
 

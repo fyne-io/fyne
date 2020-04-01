@@ -20,6 +20,7 @@ type textPresenter interface {
 	textAlign() fyne.TextAlign
 	textWrap() fyne.TextWrap
 	textStyle() fyne.TextStyle
+	textSize() int
 	textColor() color.Color
 
 	concealed() bool
@@ -88,7 +89,7 @@ func (t *textProvider) updateRowBounds() {
 	}
 	textWrap := t.presenter.textWrap()
 	textStyle := t.presenter.textStyle()
-	textSize := theme.TextSize()
+	textSize := t.presenter.textSize()
 	maxWidth := t.Size().Width
 
 	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
@@ -200,7 +201,7 @@ func (t *textProvider) charMinSize() fyne.Size {
 	if t.presenter.concealed() {
 		defaultChar = passwordChar
 	}
-	return fyne.MeasureText(defaultChar, theme.TextSize(), t.presenter.textStyle())
+	return fyne.MeasureText(defaultChar, t.presenter.textSize(), t.presenter.textStyle())
 }
 
 // lineSizeToColumn returns the rendered size for the line specified by row up to the col position
@@ -219,9 +220,7 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 		measureText = strings.Repeat(passwordChar, col)
 	}
 
-	label := canvas.NewText(measureText, theme.TextColor())
-	label.TextStyle = t.presenter.textStyle()
-	return label.MinSize()
+	return fyne.MeasureText(measureText, t.presenter.textSize(), t.presenter.textStyle())
 }
 
 // Renderer
@@ -273,13 +272,17 @@ func (r *textRenderer) Objects() []fyne.CanvasObject {
 
 // applyTheme updates the label to match the current theme.
 func (r *textRenderer) applyTheme() {
-	c := theme.TextColor()
-	if r.provider.presenter.textColor() != nil {
-		c = r.provider.presenter.textColor()
+	c := r.provider.presenter.textColor()
+	if c == nil {
+		c = theme.TextColor()
+	}
+	s := r.provider.presenter.textSize()
+	if s == 0 {
+		s = theme.TextSize()
 	}
 	for _, text := range r.texts {
 		text.Color = c
-		text.TextSize = theme.TextSize()
+		text.TextSize = s
 	}
 }
 
@@ -298,7 +301,7 @@ func (r *textRenderer) Refresh() {
 		add := false
 		if index >= len(r.texts) {
 			add = true
-			textCanvas = canvas.NewText(line, theme.TextColor())
+			textCanvas = &canvas.Text{Text: line}
 		} else {
 			textCanvas = r.texts[index]
 			textCanvas.Text = line
@@ -306,6 +309,8 @@ func (r *textRenderer) Refresh() {
 
 		textCanvas.Alignment = r.provider.presenter.textAlign()
 		textCanvas.TextStyle = r.provider.presenter.textStyle()
+		textCanvas.TextSize = r.provider.presenter.textSize()
+		textCanvas.Color = r.provider.presenter.textColor()
 		textCanvas.Hidden = r.provider.Hidden
 
 		if add {
