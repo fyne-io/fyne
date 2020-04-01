@@ -22,10 +22,9 @@ func Test_RootConfigDir(t *testing.T) {
 func Test_StoragePath(t *testing.T) {
 	oldEnv := os.Getenv("FILESPATH")
 	os.Setenv("FILESPATH", "/tmp")
+	defer os.Setenv("FILESPATH", oldEnv)
 
 	p := &preferences{}
 	expected := "/tmp/storage/preferences.json"
 	assert.Equal(t, expected, p.storagePath())
-
-	os.Setenv("FILESPATH", oldEnv)
 }
