@@ -38,6 +38,9 @@ func makeButtonTab() fyne.Widget {
 
 func makeTextTab() fyne.CanvasObject {
 	label := widget.NewLabel("Label")
+	labelSmallPrimary := widget.NewLabel("Small Label")
+	labelSmallPrimary.TextSize = theme.TextSize() * 3 / 4
+	labelSmallPrimary.Color = theme.PrimaryColor()
 
 	link, err := url.Parse("https://fyne.io/")
 	if err != nil {
@@ -57,9 +60,11 @@ func makeTextTab() fyne.CanvasObject {
 	entryLoremIpsumScroller := widget.NewVerticalScrollContainer(entryLoremIpsum)
 
 	label.Alignment = fyne.TextAlignLeading
+	labelSmallPrimary.Alignment = fyne.TextAlignLeading
 	hyperlink.Alignment = fyne.TextAlignLeading
 
 	label.Wrapping = fyne.TextWrapWord
+	labelSmallPrimary.Wrapping = fyne.TextWrapWord
 	hyperlink.Wrapping = fyne.TextWrapWord
 	entry.Wrapping = fyne.TextWrapWord
 	entryDisabled.Wrapping = fyne.TextWrapWord
@@ -78,9 +83,11 @@ func makeTextTab() fyne.CanvasObject {
 		}
 
 		label.Alignment = align
+		labelSmallPrimary.Alignment = align
 		hyperlink.Alignment = align
 
 		label.Refresh()
+		labelSmallPrimary.Refresh()
 		hyperlink.Refresh()
 	})
 	radioAlign.SetSelected("Text Alignment Leading")
@@ -99,6 +106,7 @@ func makeTextTab() fyne.CanvasObject {
 		}
 
 		label.Wrapping = wrap
+		labelSmallPrimary.Wrapping = wrap
 		hyperlink.Wrapping = wrap
 		entry.Wrapping = wrap
 		entryDisabled.Wrapping = wrap
@@ -106,6 +114,7 @@ func makeTextTab() fyne.CanvasObject {
 		entryLoremIpsum.Wrapping = wrap
 
 		label.Refresh()
+		labelSmallPrimary.Refresh()
 		hyperlink.Refresh()
 		entry.Refresh()
 		entryDisabled.Refresh()
@@ -122,6 +131,7 @@ func makeTextTab() fyne.CanvasObject {
 			radioWrap,
 		),
 		label,
+		labelSmallPrimary,
 		hyperlink,
 		entry,
 		entryDisabled,
