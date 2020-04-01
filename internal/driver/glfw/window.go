@@ -830,24 +830,18 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyMenu:         desktop.KeyMenu,
 }
 
-func keyToName(code glfw.Key) fyne.KeyName {
-	ret, ok := keyCodeMap[code]
-	if !ok {
-		return ""
-	}
-
-	return ret
-}
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	keyName := keyToName(key)
-	if keyName == "" {
+	keyCode, found := keyCodeMap[key]
+	if !found {
 		return
 	}
-	keyEvent := &fyne.KeyEvent{Name: keyName}
+	keyName := glfw.GetKeyName(key, scancode)
+
+	keyEvent := &fyne.KeyEvent{Name: keyCode}
 	keyDesktopModifier := desktopModifier(mods)
 
-	if keyName == fyne.KeyTab {
+	if keyCode == fyne.KeyTab {
 		if keyDesktopModifier == 0 {
 			if action != glfw.Release {
 				w.canvas.focusMgr.FocusNext(w.canvas.focused)
@@ -885,7 +879,7 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 		ctrlMod = desktop.SuperModifier
 	}
 	if keyDesktopModifier == ctrlMod {
-		switch glfw.GetKeyName(key, 0) {
+		switch keyName {
 		case "v":
 			// detect paste shortcut
 			shortcut = &fyne.ShortcutPaste{
@@ -908,7 +902,7 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	}
 	if shortcut == nil && keyDesktopModifier != 0 && keyDesktopModifier != desktop.ShiftModifier {
 		shortcut = &desktop.CustomShortcut{
-			KeyName:  keyName,
+			KeyName:  keyCode,
 			Modifier: keyDesktopModifier,
 		}
 	}
