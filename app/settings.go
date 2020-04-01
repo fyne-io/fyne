@@ -85,7 +85,7 @@ func (s *settings) load() {
 }
 
 func (s *settings) loadFromFile(path string) error {
-	file, err := os.Open(filepath.Clean(path))
+	file, err := os.Open(path) // #nosec
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil

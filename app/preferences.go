@@ -50,7 +50,7 @@ func (p *preferences) saveToFile(path string) error {
 		if !os.IsExist(err) {
 			return err
 		}
-		file, err = os.Open(filepath.Clean(path))
+		file, err = os.Open(path) // #nosec
 		if err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func (p *preferences) load() {
 }
 
 func (p *preferences) loadFromFile(path string) error {
-	file, err := os.Open(filepath.Clean(path))
+	file, err := os.Open(path) // #nosec
 	if err != nil {
 		if os.IsNotExist(err) {
 			err := os.MkdirAll(filepath.Dir(path), 0700)
