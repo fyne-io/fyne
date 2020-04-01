@@ -1,6 +1,6 @@
 // +build !ci
 
-// +build !mobile,!android,!ios
+// +build !android,!ios
 
 package app
 
