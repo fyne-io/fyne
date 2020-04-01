@@ -9,7 +9,7 @@ import (
 // layoutShadow(contentSize, contentPos) to lay out the shadow.
 type shadowingRenderer struct {
 	baseRenderer
-	sh fyne.CanvasObject
+	shadow fyne.CanvasObject
 }
 
 func newShadowingRenderer(objects []fyne.CanvasObject, level int) *shadowingRenderer {
@@ -22,9 +22,9 @@ func newShadowingRenderer(objects []fyne.CanvasObject, level int) *shadowingRend
 }
 
 func (r *shadowingRenderer) layoutShadow(size fyne.Size, pos fyne.Position) {
-	if r.sh == nil {
+	if r.shadow == nil {
 		return
 	}
-	r.sh.Resize(size)
-	r.sh.Move(pos)
+	r.shadow.Resize(size)
+	r.shadow.Move(pos)
 }
