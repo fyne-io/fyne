@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"net/url"
 	"testing"
 
@@ -26,6 +27,21 @@ func TestHyperlink_MinSize(t *testing.T) {
 func TestHyperlink_Alignment(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test", Alignment: fyne.TextAlignTrailing}
 	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink)[0].Alignment)
+}
+
+func TestHyperlink_Color(t *testing.T) {
+	red := color.RGBA{0xff, 0, 0, 0xff}
+	hyperlink := &Hyperlink{Text: "Test", Color: red}
+	hyperlink.Refresh()
+
+	assert.Equal(t, red, textRenderTexts(hyperlink)[0].Color)
+}
+
+func TestHyperlink_TextSize(t *testing.T) {
+	hyperlink := &Hyperlink{Text: "Test", TextSize: 100}
+	hyperlink.Refresh()
+
+	assert.Equal(t, 100, textRenderTexts(hyperlink)[0].TextSize)
 }
 
 func TestHyperlink_SetText(t *testing.T) {

@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
@@ -65,6 +66,21 @@ func TestLabel_Alignment_Later(t *testing.T) {
 	label.Alignment = fyne.TextAlignTrailing
 	label.Refresh()
 	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(label)[0].Alignment)
+}
+
+func TestLabel_Color(t *testing.T) {
+	red := color.RGBA{0xff, 0, 0, 0xff}
+	label := &Label{Text: "Test", Color: red}
+	label.Refresh()
+
+	assert.Equal(t, red, textRenderTexts(label)[0].Color)
+}
+
+func TestLabel_TextSize(t *testing.T) {
+	label := &Label{Text: "Test", TextSize: 100}
+	label.Refresh()
+
+	assert.Equal(t, 100, textRenderTexts(label)[0].TextSize)
 }
 
 func TestText_MinSize_MultiLine(t *testing.T) {
