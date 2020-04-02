@@ -119,6 +119,13 @@ func (c *Check) SetChecked(checked bool) {
 	c.Refresh()
 }
 
+// SetText allows the check label to be changed
+func (c *Check) SetText(text string) {
+	c.Text = text
+
+	c.Refresh()
+}
+
 // Hide this widget, if it was previously visible
 func (c *Check) Hide() {
 	if c.focused {

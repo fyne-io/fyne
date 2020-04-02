@@ -55,7 +55,6 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ratio := s.getRatio(&(e.PointEvent))
 
 	s.updateValue(ratio)
-	Refresh(s)
 
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
@@ -103,13 +102,17 @@ func (s *Slider) updateValue(ratio float64) {
 	i := -(math.Log10(s.Step))
 	p := math.Pow(10, i)
 
-	if v >= s.Max {
-		s.Value = s.Max
-	} else if v <= s.Min {
-		s.Value = s.Min
-	} else {
-		s.Value = float64(int(v*p)) / p
+	s.SetValue(float64(int(v*p)) / p)
+}
+
+func (s *Slider) SetValue(value float64) {
+	if value >= s.Max {
+		value = s.Max
+	} else if value <= s.Min {
+		value = s.Min
 	}
+	s.Value = value
+	s.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below

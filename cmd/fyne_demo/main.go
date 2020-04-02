@@ -85,6 +85,7 @@ func main() {
 	tabs := widget.NewTabContainer(
 		widget.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
 		widget.NewTabItemWithIcon("Widgets", theme.ContentCopyIcon(), screens.WidgetScreen()),
+		widget.NewTabItemWithIcon("Bindings", theme.MailAttachmentIcon(), screens.BindingsScreen()),
 		widget.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
 		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)),
 		widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
