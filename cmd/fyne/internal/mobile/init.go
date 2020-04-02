@@ -55,9 +55,9 @@ func resetReadOnlyFlagAll(path string) error {
 		return err
 	}
 	if !fi.IsDir() {
-		return os.Chmod(path, 0666)
+		return os.Chmod(path, 0600)
 	}
-	fd, err := os.Open(path)
+	fd, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return err
 	}
