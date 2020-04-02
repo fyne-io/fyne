@@ -20,6 +20,6 @@ func (d *device) HasKeyboard() bool {
 	return false
 }
 
-func (d *device) SystemScale() float32 {
+func (d *device) SystemScale(fyne.Window) float32 {
 	return 1
 }
