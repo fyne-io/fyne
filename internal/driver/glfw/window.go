@@ -353,6 +353,9 @@ func (w *window) Show() {
 		w.visible = true
 		w.viewport.SetTitle(w.title)
 		w.viewport.Show()
+
+		// save coordinates
+		w.xpos, w.ypos = w.viewport.GetPos()
 	})
 
 	if w.fullScreen { // this does not work if called before viewport.Show()...
@@ -452,7 +455,11 @@ func (w *window) destroy(d *gLDriver) {
 	}
 }
 
-func (w *window) moved(viewport *glfw.Window, x, y int) {
+func (w *window) moved(_ *glfw.Window, x, y int) {
+	if w.fullScreen { // don't save the move to top left when changint to fullscreen
+		return
+	}
+
 	// save coordinates
 	w.xpos, w.ypos = x, y
 
