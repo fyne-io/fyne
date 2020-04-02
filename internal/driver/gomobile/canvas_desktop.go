@@ -2,6 +2,8 @@
 
 package gomobile
 
-func (*device) SystemScale() float32 {
+import "fyne.io/fyne"
+
+func (*device) SystemScale(_ fyne.Window) float32 {
 	return 2
 }

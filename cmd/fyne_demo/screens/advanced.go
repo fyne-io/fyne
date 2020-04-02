@@ -2,6 +2,7 @@ package screens
 
 import (
 	"fmt"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
@@ -17,6 +18,14 @@ func prependTo(g *widget.Group, s string) {
 	g.Prepend(widget.NewLabel(s))
 }
 
+func setScaleText(obj *widget.Label, win fyne.Window) {
+	for obj.Visible() {
+		obj.SetText(scaleString(win.Canvas()))
+
+		time.Sleep(time.Second)
+	}
+}
+
 // AdvancedScreen loads a panel that shows details and settings that are a bit
 // more detailed than normally needed.
 func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
@@ -26,7 +35,7 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 		&widget.FormItem{Text: "Scale", Widget: scale},
 	))
 
-	scale.SetText(scaleString(win.Canvas()))
+	go setScaleText(scale, win)
 
 	label := widget.NewLabel("Just type...")
 	generic := widget.NewGroupWithScroller("Generic")

@@ -24,9 +24,13 @@ func (*glDevice) HasKeyboard() bool {
 	return true // TODO actually check - we could be in tablet mode
 }
 
-func (*glDevice) SystemScale() float32 {
-	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-		return 1.0
+func (*glDevice) SystemScale(w fyne.Window) float32 {
+	if runtime.GOOS == "darwin" {
+		return 1.0 // macOS scaling is done at the texture level
+	}
+	if runtime.GOOS == "windows" {
+		xScale, _ := w.(*window).viewport.GetContentScale()
+		return xScale
 	}
 
 	return fyne.SettingsScaleAuto
