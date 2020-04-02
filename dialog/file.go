@@ -22,6 +22,7 @@ type fileDialog struct {
 	open       *widget.Button
 	breadcrumb *widget.Box
 	files      *fyne.Container
+	fileScroll *widget.ScrollContainer
 	parent     fyne.Window
 
 	win      *widget.PopUp
@@ -102,15 +103,15 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	f.files = fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(fileIconCellWidth,
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
-	fileScroll := widget.NewScrollContainer(f.files)
+	f.fileScroll = widget.NewScrollContainer(f.files)
 	verticalExtra := int(float64(fileIconSize) * 0.25)
-	fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
+	f.fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
 
 	f.breadcrumb = widget.NewHBox()
 	scrollBread := widget.NewScrollContainer(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
-		scrollBread, fileScroll)
+		scrollBread, f.fileScroll)
 	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	favourites := widget.NewGroup("Favourites", f.loadFavourites()...)
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favourites, nil),
@@ -164,6 +165,8 @@ func (f *fileDialog) refreshDir(dir string) {
 
 	f.files.Objects = icons
 	f.files.Refresh()
+	f.fileScroll.Offset = fyne.NewPos(0, 0)
+	f.fileScroll.Refresh()
 }
 
 func (f *fileDialog) setDirectory(dir string) {
