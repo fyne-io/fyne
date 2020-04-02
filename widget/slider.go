@@ -41,6 +41,7 @@ func NewSlider(min, max float64) *Slider {
 		Step:        1,
 		Orientation: Horizontal,
 	}
+	slider.ExtendBaseWidget(slider)
 	return slider
 }
 
