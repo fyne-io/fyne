@@ -264,6 +264,8 @@ var (
 	windowRedrawDone   = make(chan struct{})
 	windowConfigChange = make(chan windowConfig)
 	activityDestroyed  = make(chan struct{})
+
+	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight int
 )
 
 func init() {
@@ -324,6 +326,11 @@ func filePickerReturned(str *C.char) {
 	fileCallback = nil
 }
 
+//export insetsChanged
+func insetsChanged(top, bottom, left, right int) {
+	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
+}
+
 func driverShowFileOpenPicker(callback func(string)) {
 	fileCallback = callback
 
@@ -374,12 +381,16 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
 			theApp.eventsIn <- size.Event{
-				WidthPx:     widthPx,
-				HeightPx:    heightPx,
-				WidthPt:     geom.Pt(float32(widthPx) / pixelsPerPt),
-				HeightPt:    geom.Pt(float32(heightPx) / pixelsPerPt),
-				PixelsPerPt: pixelsPerPt,
-				Orientation: screenOrientation(widthPx, heightPx), // we are guessing orientation here as it was not always working
+				WidthPx:       widthPx,
+				HeightPx:      heightPx,
+				WidthPt:       geom.Pt(float32(widthPx) / pixelsPerPt),
+				HeightPt:      geom.Pt(float32(heightPx) / pixelsPerPt),
+				InsetTopPx:    screenInsetTop,
+				InsetBottomPx: screenInsetBottom,
+				InsetLeftPx:   screenInsetLeft,
+				InsetRightPx:  screenInsetRight,
+				PixelsPerPt:   pixelsPerPt,
+				Orientation:   screenOrientation(widthPx, heightPx), // we are guessing orientation here as it was not always working
 			}
 			theApp.eventsIn <- paint.Event{External: true}
 		case <-windowDestroyed:
