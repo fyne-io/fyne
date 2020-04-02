@@ -61,7 +61,11 @@ func (p *InMemoryPreferences) BoolWithFallback(key string, fallback bool) bool {
 		return fallback
 	}
 
-	return value.(bool)
+	val, ok := value.(bool)
+	if !ok {
+		return false
+	}
+	return val
 }
 
 // SetBool saves a boolean value for the given key
@@ -81,7 +85,11 @@ func (p *InMemoryPreferences) FloatWithFallback(key string, fallback float64) fl
 		return fallback
 	}
 
-	return value.(float64)
+	val, ok := value.(float64)
+	if !ok {
+		return 0.0
+	}
+	return val
 }
 
 // SetFloat saves a float64 value for the given key
@@ -105,7 +113,11 @@ func (p *InMemoryPreferences) IntWithFallback(key string, fallback int) int {
 	if intVal, ok := value.(int); ok {
 		return intVal
 	}
-	return int(value.(float64))
+	val, ok := value.(float64)
+	if !ok {
+		return 0
+	}
+	return int(val)
 }
 
 // SetInt saves an integer value for the given key
