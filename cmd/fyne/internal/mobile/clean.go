@@ -20,7 +20,7 @@ Clean removes object files and cached NDK files downloaded by gomobile init
 }
 
 func runClean(cmd *command) (err error) {
-	gopaths := filepath.SplitList(goEnv("GOPATH"))
+	gopaths := filepath.SplitList(goEnv())
 	if len(gopaths) == 0 {
 		return fmt.Errorf("GOPATH is not set")
 	}

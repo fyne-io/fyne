@@ -73,11 +73,11 @@ func resetReadOnlyFlagAll(path string) error {
 	return nil
 }
 
-func goEnv(name string) string {
-	if val := os.Getenv(name); val != "" {
+func goEnv() string {
+	if val := os.Getenv("GOPATH"); val != "" {
 		return val
 	}
-	val, err := exec.Command("go", "env", name).Output()
+	val, err := exec.Command("go", "env", "GOPATH").Output()
 	if err != nil {
 		panic(err) // the Go tool was tested to work earlier
 	}
