@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"image/color"
 	"math"
 
 	"fyne.io/fyne"
@@ -42,7 +41,7 @@ func NewSlider(min, max float64) *Slider {
 		Step:        1,
 		Orientation: Horizontal,
 	}
-	Renderer(slider).Layout(slider.MinSize())
+	slider.ExtendBaseWidget(slider)
 	return slider
 }
 
@@ -55,7 +54,7 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ratio := s.getRatio(&(e.PointEvent))
 
 	s.updateValue(ratio)
-	Refresh(s)
+	s.Refresh()
 
 	if s.OnChanged != nil {
 		s.OnChanged(s.Value)
@@ -129,7 +128,7 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 
 	objects := []fyne.CanvasObject{track, active, thumb}
 
-	return &sliderRenderer{track, active, thumb, objects, s}
+	return &sliderRenderer{baseRenderer{objects}, track, active, thumb, s}
 }
 
 const (
@@ -138,12 +137,11 @@ const (
 )
 
 type sliderRenderer struct {
+	baseRenderer
 	track  *canvas.Rectangle
 	active *canvas.Rectangle
 	thumb  *canvas.Circle
-
-	objects []fyne.CanvasObject
-	slider  *Slider
+	slider *Slider
 }
 
 // Refresh updates the widget state for drawing.
@@ -209,17 +207,6 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 	}
 
 	return fyne.Size{Width: 0, Height: 0}
-}
-
-func (s *sliderRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (s *sliderRenderer) Destroy() {
-}
-
-func (s *sliderRenderer) Objects() []fyne.CanvasObject {
-	return s.objects
 }
 
 func (s *sliderRenderer) getOffset() int {

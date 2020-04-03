@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"image/color"
 	"math"
 
 	"fyne.io/fyne"
@@ -20,10 +19,9 @@ type radioRenderItem struct {
 }
 
 type radioRenderer struct {
+	baseRenderer
 	items []*radioRenderItem
-
-	objects []fyne.CanvasObject
-	radio   *Radio
+	radio *Radio
 }
 
 func removeDuplicates(options []string) []string {
@@ -100,10 +98,6 @@ func (r *radioRenderer) applyTheme() {
 	}
 }
 
-func (r *radioRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
 func (r *radioRenderer) Refresh() {
 	r.applyTheme()
 	r.radio.removeDuplicateOptions()
@@ -118,14 +112,14 @@ func (r *radioRenderer) Refresh() {
 
 			focusIndicator := canvas.NewCircle(theme.BackgroundColor())
 
-			r.objects = append(r.objects, focusIndicator, icon, text)
+			r.setObjects(append(r.Objects(), focusIndicator, icon, text))
 			r.items = append(r.items, &radioRenderItem{icon, text, focusIndicator})
 		}
 		r.Layout(r.radio.Size())
 	} else if len(r.items) > len(r.radio.Options) {
 		total := len(r.radio.Options)
 		r.items = r.items[:total]
-		r.objects = r.objects[:total*2]
+		r.setObjects(r.Objects()[:total*2])
 	}
 
 	for i, item := range r.items {
@@ -151,13 +145,6 @@ func (r *radioRenderer) Refresh() {
 	}
 
 	canvas.Refresh(r.radio.super())
-}
-
-func (r *radioRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
-}
-
-func (r *radioRenderer) Destroy() {
 }
 
 // Radio widget has a list of text labels and radio check icons next to each.
@@ -276,7 +263,7 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 		items = append(items, &radioRenderItem{icon, text, focusIndicator})
 	}
 
-	return &radioRenderer{items, objects, r}
+	return &radioRenderer{baseRenderer{objects}, items, r}
 }
 
 // SetSelected sets the radio option, it can be used to set a default option.

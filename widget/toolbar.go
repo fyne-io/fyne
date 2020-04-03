@@ -121,40 +121,32 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 }
 
 type toolbarRenderer struct {
-	layout fyne.Layout
-
-	objects []fyne.CanvasObject
+	baseRenderer
+	layout  fyne.Layout
 	toolbar *Toolbar
 }
 
 func (r *toolbarRenderer) MinSize() fyne.Size {
-	return r.layout.MinSize(r.objects)
+	return r.layout.MinSize(r.Objects())
 }
 
 func (r *toolbarRenderer) Layout(size fyne.Size) {
-	r.layout.Layout(r.objects, size)
+	r.layout.Layout(r.Objects(), size)
 }
 
 func (r *toolbarRenderer) BackgroundColor() color.Color {
 	return theme.ButtonColor()
 }
 
-func (r *toolbarRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
-}
-
 func (r *toolbarRenderer) Refresh() {
-	r.objects = r.toolbar.objs
+	r.setObjects(r.toolbar.objs)
 
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {
-			rect := r.objects[i].(*canvas.Rectangle)
+			rect := r.Objects()[i].(*canvas.Rectangle)
 			rect.FillColor = theme.TextColor()
 		}
 	}
 
 	canvas.Refresh(r.toolbar)
-}
-
-func (r *toolbarRenderer) Destroy() {
 }

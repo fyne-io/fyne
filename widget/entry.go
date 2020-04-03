@@ -1149,6 +1149,7 @@ func NewPasswordEntry() *Entry {
 }
 
 type passwordRevealerRenderer struct {
+	baseRenderer
 	entry *Entry
 	icon  *canvas.Image
 }
@@ -1160,10 +1161,6 @@ func (prr *passwordRevealerRenderer) MinSize() fyne.Size {
 func (prr *passwordRevealerRenderer) Layout(size fyne.Size) {
 	prr.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	prr.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
-}
-
-func (prr *passwordRevealerRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (prr *passwordRevealerRenderer) Refresh() {
@@ -1178,13 +1175,6 @@ func (prr *passwordRevealerRenderer) Refresh() {
 	canvas.Refresh(prr.icon)
 }
 
-func (prr *passwordRevealerRenderer) Destroy() {
-}
-
-func (prr *passwordRevealerRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{prr.icon}
-}
-
 type passwordRevealer struct {
 	BaseWidget
 
@@ -1193,7 +1183,11 @@ type passwordRevealer struct {
 }
 
 func (pr *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
-	return &passwordRevealerRenderer{icon: pr.icon, entry: pr.entry}
+	return &passwordRevealerRenderer{
+		baseRenderer: baseRenderer{[]fyne.CanvasObject{pr.icon}},
+		icon:         pr.icon,
+		entry:        pr.entry,
+	}
 }
 
 func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
