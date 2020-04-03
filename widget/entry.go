@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -1150,7 +1151,7 @@ func NewPasswordEntry() *Entry {
 }
 
 type passwordRevealerRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	entry *Entry
 	icon  *canvas.Image
 }
@@ -1185,7 +1186,7 @@ type passwordRevealer struct {
 
 func (pr *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 	return &passwordRevealerRenderer{
-		baseRenderer: baseRenderer{[]fyne.CanvasObject{pr.icon}},
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{pr.icon}),
 		icon:         pr.icon,
 		entry:        pr.entry,
 	}

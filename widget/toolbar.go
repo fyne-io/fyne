@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -121,7 +122,7 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 }
 
 type toolbarRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	layout  fyne.Layout
 	toolbar *Toolbar
 }
@@ -139,7 +140,7 @@ func (r *toolbarRenderer) BackgroundColor() color.Color {
 }
 
 func (r *toolbarRenderer) Refresh() {
-	r.setObjects(r.toolbar.objs)
+	r.SetObjects(r.toolbar.objs)
 
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {

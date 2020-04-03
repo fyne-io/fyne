@@ -248,8 +248,8 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 	label := NewLabel("Test\nLine2")
 	render := test.WidgetRenderer(label).(*textRenderer)
 
-	text1 := render.objects[0].(*canvas.Text)
-	text2 := render.objects[0].(*canvas.Text)
+	text1 := render.Objects()[0].(*canvas.Text)
+	text2 := render.Objects()[0].(*canvas.Text)
 	customTextSize1 := text1.TextSize
 	customTextSize2 := text2.TextSize
 	withTestTheme(func() {
