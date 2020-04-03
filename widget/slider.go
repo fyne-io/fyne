@@ -77,20 +77,20 @@ func (s *Slider) getRatio(e *fyne.PointEvent) float64 {
 
 	switch s.Orientation {
 	case Vertical:
-		if y > s.size.Height-pad {
+		if y > s.Size().Height-pad {
 			return 0.0
 		} else if y < pad {
 			return 1.0
 		} else {
-			return 1 - float64(y-pad)/float64(s.size.Height-pad*2)
+			return 1 - float64(y-pad)/float64(s.Size().Height-pad*2)
 		}
 	case Horizontal:
-		if x > s.size.Width-pad {
+		if x > s.Size().Width-pad {
 			return 1.0
 		} else if x < pad {
 			return 0.0
 		} else {
-			return float64(x-pad) / float64(s.size.Width-pad*2)
+			return float64(x-pad) / float64(s.Size().Width-pad*2)
 		}
 	}
 	return 0.0

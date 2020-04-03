@@ -122,7 +122,7 @@ func TestRadio_SelectedNone(t *testing.T) {
 	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, -2)})
 	assert.Equal(t, "", selected)
 
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, radio.size.Height-2)})
+	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, radio.Size().Height-2)})
 	assert.Equal(t, "", selected)
 }
 

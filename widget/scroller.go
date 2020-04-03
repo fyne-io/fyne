@@ -236,7 +236,7 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
 		r.topShadow.Resize(fyne.NewSize(size.Width, 0))
 		r.bottomShadow.Resize(fyne.NewSize(size.Width, 0))
-		r.bottomShadow.Move(fyne.NewPos(0, r.scroll.size.Height))
+		r.bottomShadow.Move(fyne.NewPos(0, r.scroll.Size().Height))
 	}
 
 	if r.scroll.Direction != ScrollVerticalOnly {
@@ -244,7 +244,7 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 		r.horizArea.Move(fyne.NewPos(0, r.scroll.Size().Height-r.horizArea.Size().Height))
 		r.leftShadow.Resize(fyne.NewSize(0, size.Height))
 		r.rightShadow.Resize(fyne.NewSize(0, size.Height))
-		r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
+		r.rightShadow.Move(fyne.NewPos(r.scroll.Size().Width, 0))
 	}
 
 	c := r.scroll.Content
@@ -294,12 +294,12 @@ func (r *scrollContainerRenderer) updatePosition() {
 	if r.scroll.Direction != ScrollHorizontalOnly {
 		r.handleAreaVisibility(contentSize.Height, scrollSize.Height, r.vertArea)
 		r.handleShadowVisibility(r.scroll.Offset.Y, contentSize.Height, scrollSize.Height, r.topShadow, r.bottomShadow)
-		Renderer(r.vertArea).Layout(r.scroll.size)
+		Renderer(r.vertArea).Layout(r.scroll.Size())
 	}
 	if r.scroll.Direction != ScrollVerticalOnly {
 		r.handleAreaVisibility(contentSize.Width, scrollSize.Width, r.horizArea)
 		r.handleShadowVisibility(r.scroll.Offset.X, contentSize.Width, scrollSize.Width, r.leftShadow, r.rightShadow)
-		Renderer(r.horizArea).Layout(r.scroll.size)
+		Renderer(r.horizArea).Layout(r.scroll.Size())
 	}
 
 	if r.scroll.Direction != ScrollHorizontalOnly {
@@ -388,10 +388,11 @@ func (s *ScrollContainer) refreshWithoutOffsetUpdate() {
 
 // Resize sets a new size for the scroll container.
 func (s *ScrollContainer) Resize(size fyne.Size) {
-	if size != s.size {
-		s.size = size
-		s.Refresh()
+	if s.Size() == size {
+		return
 	}
+	s.BaseWidget.Resize(size)
+	s.Refresh()
 }
 
 // Scrolled is called when an input device triggers a scroll event

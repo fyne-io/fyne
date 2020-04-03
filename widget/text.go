@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -68,15 +67,12 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (t *textProvider) Resize(size fyne.Size) {
-	if t.size == size {
+	if t.Size() == size {
 		return
 	}
-	t.size = size
+	t.BaseWidget.Resize(size)
 	t.updateRowBounds()
-	if t.presenter != nil {
-		t.refreshTextRenderer()
-		cache.Renderer(t).Layout(size)
-	}
+	t.refreshTextRenderer()
 }
 
 // updateRowBounds updates the row bounds used to render properly the text widget.

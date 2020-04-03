@@ -77,8 +77,9 @@ type ProgressBar struct {
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
+	p.ExtendBaseWidget(p)
 	p.Value = v
-	p.refresh(p)
+	p.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below

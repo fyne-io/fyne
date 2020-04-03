@@ -232,14 +232,15 @@ var _ desktop.Keyable = (*Entry)(nil)
 type Entry struct {
 	DisableableWidget
 	sync.RWMutex
-	shortcut    fyne.ShortcutHandler
-	Text        string
-	PlaceHolder string
-	OnChanged   func(string) `json:"-"`
-	Password    bool
-	ReadOnly    bool // Deprecated: Use Disable() instead
-	MultiLine   bool
-	Wrapping    fyne.TextWrap
+	shortcut            fyne.ShortcutHandler
+	shortcutsRegistered bool
+	Text                string
+	PlaceHolder         string
+	OnChanged           func(string) `json:"-"`
+	Password            bool
+	ReadOnly            bool // Deprecated: Use Disable() instead
+	MultiLine           bool
+	Wrapping            fyne.TextWrap
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -1098,7 +1099,10 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
 
-func (e *Entry) registerShortcut() {
+func (e *Entry) registerShortcuts() {
+	if e.shortcutsRegistered {
+		return
+	}
 	e.shortcut.AddShortcut(&fyne.ShortcutCut{}, func(se fyne.Shortcut) {
 		cut := se.(*fyne.ShortcutCut)
 		e.cutToClipboard(cut.Clipboard)
@@ -1114,16 +1118,13 @@ func (e *Entry) registerShortcut() {
 	e.shortcut.AddShortcut(&fyne.ShortcutSelectAll{}, func(se fyne.Shortcut) {
 		e.selectAll()
 	})
+	e.shortcutsRegistered = true
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
-	if e.BaseWidget.impl != nil {
-		return
-	}
-
-	e.BaseWidget.impl = wid
-	e.registerShortcut()
+	e.BaseWidget.ExtendBaseWidget(wid)
+	e.registerShortcuts()
 }
 
 // NewEntry creates a new single line entry widget.
