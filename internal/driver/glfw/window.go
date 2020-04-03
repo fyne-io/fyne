@@ -325,7 +325,7 @@ func calculateScale(user, system, detected float32) float32 {
 	return system * user
 }
 func (w *window) calculatedScale() float32 {
-	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(w), w.detectScale())
+	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScaleForWindow(w), w.detectScale())
 	val = float32(math.Round(float64(val*10.0))) / 10.0
 
 	return val
