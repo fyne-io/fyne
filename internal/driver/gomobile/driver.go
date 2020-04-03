@@ -337,6 +337,7 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeLeftSquareBracket:  fyne.KeyLeftBracket,
 	key.CodeBackslash:          fyne.KeyBackslash,
 	key.CodeRightSquareBracket: fyne.KeyRightBracket,
+	key.CodeGraveAccent:        fyne.KeyBackTick,
 }
 
 func keyToName(code key.Code) fyne.KeyName {
