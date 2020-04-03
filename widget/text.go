@@ -282,7 +282,7 @@ func (r *textRenderer) Refresh() {
 
 		if add {
 			r.texts = append(r.texts, textCanvas)
-			r.SetObjects(append(r.Objects(), textCanvas))
+			r.setObjects(append(r.Objects(), textCanvas))
 		}
 	}
 

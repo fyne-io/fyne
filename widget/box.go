@@ -96,7 +96,7 @@ func (b *boxRenderer) BackgroundColor() color.Color {
 }
 
 func (b *boxRenderer) Refresh() {
-	b.SetObjects(b.box.Children)
+	b.setObjects(b.box.Children)
 	for _, child := range b.Objects() {
 		child.Refresh()
 	}

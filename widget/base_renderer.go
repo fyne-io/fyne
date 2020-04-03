@@ -22,6 +22,6 @@ func (r *baseRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-func (r *baseRenderer) SetObjects(objects []fyne.CanvasObject) {
+func (r *baseRenderer) setObjects(objects []fyne.CanvasObject) {
 	r.objects = objects
 }

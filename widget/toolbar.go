@@ -139,7 +139,7 @@ func (r *toolbarRenderer) BackgroundColor() color.Color {
 }
 
 func (r *toolbarRenderer) Refresh() {
-	r.SetObjects(r.toolbar.objs)
+	r.setObjects(r.toolbar.objs)
 
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {

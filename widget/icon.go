@@ -31,13 +31,13 @@ func (i *iconRenderer) BackgroundColor() color.Color {
 }
 
 func (i *iconRenderer) Refresh() {
-	i.SetObjects(nil)
+	i.setObjects(nil)
 
 	if i.image.Resource != nil {
 		raster := canvas.NewImageFromResource(i.image.Resource)
 		raster.FillMode = canvas.ImageFillContain
 
-		i.SetObjects([]fyne.CanvasObject{raster})
+		i.setObjects([]fyne.CanvasObject{raster})
 	}
 	i.Layout(i.image.Size())
 

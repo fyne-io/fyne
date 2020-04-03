@@ -112,14 +112,14 @@ func (r *radioRenderer) Refresh() {
 
 			focusIndicator := canvas.NewCircle(theme.BackgroundColor())
 
-			r.SetObjects(append(r.Objects(), focusIndicator, icon, text))
+			r.setObjects(append(r.Objects(), focusIndicator, icon, text))
 			r.items = append(r.items, &radioRenderItem{icon, text, focusIndicator})
 		}
 		r.Layout(r.radio.Size())
 	} else if len(r.items) > len(r.radio.Options) {
 		total := len(r.radio.Options)
 		r.items = r.items[:total]
-		r.SetObjects(r.Objects()[:total*2])
+		r.setObjects(r.Objects()[:total*2])
 	}
 
 	for i, item := range r.items {

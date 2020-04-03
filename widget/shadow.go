@@ -62,16 +62,16 @@ func (r *shadowRenderer) createShadows() {
 	switch r.s.typ {
 	case shadowLeft:
 		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
-		r.SetObjects([]fyne.CanvasObject{r.l})
+		r.setObjects([]fyne.CanvasObject{r.l})
 	case shadowRight:
 		r.r = canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
-		r.SetObjects([]fyne.CanvasObject{r.r})
+		r.setObjects([]fyne.CanvasObject{r.r})
 	case shadowBottom:
 		r.b = canvas.NewVerticalGradient(theme.ShadowColor(), color.Transparent)
-		r.SetObjects([]fyne.CanvasObject{r.b})
+		r.setObjects([]fyne.CanvasObject{r.b})
 	case shadowTop:
 		r.t = canvas.NewVerticalGradient(color.Transparent, theme.ShadowColor())
-		r.SetObjects([]fyne.CanvasObject{r.t})
+		r.setObjects([]fyne.CanvasObject{r.t})
 	case shadowAround:
 		r.tl = canvas.NewRadialGradient(theme.ShadowColor(), color.Transparent)
 		r.tl.CenterOffsetX = 0.5
@@ -89,7 +89,7 @@ func (r *shadowRenderer) createShadows() {
 		r.bl.CenterOffsetX = 0.5
 		r.bl.CenterOffsetY = -0.5
 		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
-		r.SetObjects([]fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l})
+		r.setObjects([]fyne.CanvasObject{r.tl, r.t, r.tr, r.r, r.br, r.b, r.bl, r.l})
 	}
 }
 
