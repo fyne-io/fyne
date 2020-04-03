@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -92,7 +93,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 	objects := []fyne.CanvasObject{bg, p.Content}
-	return &popUpRenderer{shadowingRenderer: newShadowingRenderer(objects, popUpLevel), popUp: p, bg: bg}
+	return &popUpRenderer{shadowingRenderer: newShadowingRenderer(objects, widget.PopUpLevel), popUp: p, bg: bg}
 }
 
 // NewPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.

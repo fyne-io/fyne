@@ -5,75 +5,79 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
-// elevationLevel is the level of elevation of the shadow casting object.
-type elevationLevel int
+// ElevationLevel is the level of elevation of the shadow casting object.
+type ElevationLevel int
 
-// elevationLevel constants inspired by:
+// ElevationLevel constants inspired by:
 // https://storage.googleapis.com/spec-host/mio-staging%2Fmio-design%2F1584058305895%2Fassets%2F0B6xUSjjSulxceF9udnA4Sk5tdU0%2Fbaselineelevation-chart.png
 const (
-	baseLevel             elevationLevel = 0
-	buttonLevel           elevationLevel = 2
-	popUpLevel            elevationLevel = 8
-	submergedContentLevel elevationLevel = 8
+	BaseLevel             ElevationLevel = 0
+	ButtonLevel           ElevationLevel = 2
+	PopUpLevel            ElevationLevel = 8
+	SubmergedContentLevel ElevationLevel = 8
 )
 
-type shadowType int
+// ShadowType specifies the type of the shadow.
+type ShadowType int
 
+// ShadowType constants
 const (
-	shadowAround shadowType = iota
-	shadowLeft
-	shadowRight
-	shadowBottom
-	shadowTop
+	ShadowAround ShadowType = iota
+	ShadowLeft
+	ShadowRight
+	ShadowBottom
+	ShadowTop
 )
 
-func newShadow(typ shadowType, level elevationLevel) *shadow {
-	s := &shadow{typ: typ, level: level}
+// NewShadow create a new Shadow.
+func NewShadow(typ ShadowType, level ElevationLevel) *Shadow {
+	s := &Shadow{typ: typ, level: level}
 	s.ExtendBaseWidget(s)
 	return s
 }
 
-var _ fyne.Widget = (*shadow)(nil)
+var _ fyne.Widget = (*Shadow)(nil)
 
-type shadow struct {
+// Shadow is a widget that renders a shadow.
+type Shadow struct {
 	BaseWidget
-	typ   shadowType
-	level elevationLevel
+	typ   ShadowType
+	level ElevationLevel
 }
 
-func (s *shadow) CreateRenderer() fyne.WidgetRenderer {
+// CreateRenderer satisfies the fyne.Widget interface.
+func (s *Shadow) CreateRenderer() fyne.WidgetRenderer {
 	r := &shadowRenderer{s: s}
 	r.createShadows()
 	return r
 }
 
 type shadowRenderer struct {
-	widget.BaseRenderer
+	BaseRenderer
 	b, l, r, t     *canvas.LinearGradient
 	bl, br, tl, tr *canvas.RadialGradient
 	minSize        fyne.Size
-	s              *shadow
+	s              *Shadow
 }
 
 func (r *shadowRenderer) createShadows() {
 	switch r.s.typ {
-	case shadowLeft:
+	case ShadowLeft:
 		r.l = canvas.NewHorizontalGradient(color.Transparent, theme.ShadowColor())
 		r.SetObjects([]fyne.CanvasObject{r.l})
-	case shadowRight:
+	case ShadowRight:
 		r.r = canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
 		r.SetObjects([]fyne.CanvasObject{r.r})
-	case shadowBottom:
+	case ShadowBottom:
 		r.b = canvas.NewVerticalGradient(theme.ShadowColor(), color.Transparent)
 		r.SetObjects([]fyne.CanvasObject{r.b})
-	case shadowTop:
+	case ShadowTop:
 		r.t = canvas.NewVerticalGradient(color.Transparent, theme.ShadowColor())
 		r.SetObjects([]fyne.CanvasObject{r.t})
-	case shadowAround:
+	case ShadowAround:
 		r.tl = canvas.NewRadialGradient(theme.ShadowColor(), color.Transparent)
 		r.tl.CenterOffsetX = 0.5
 		r.tl.CenterOffsetY = 0.5

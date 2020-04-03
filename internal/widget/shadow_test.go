@@ -11,11 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var shadowLevel = elevationLevel(5)
+var shadowLevel = ElevationLevel(5)
 var shadowWidth = int(shadowLevel)
 
 func TestShadow_TopShadow(t *testing.T) {
-	s := newShadow(shadowTop, shadowLevel)
+	s := NewShadow(ShadowTop, shadowLevel)
 	r := test.WidgetRenderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
@@ -28,7 +28,7 @@ func TestShadow_TopShadow(t *testing.T) {
 }
 
 func TestShadow_BottomShadow(t *testing.T) {
-	s := newShadow(shadowBottom, shadowLevel)
+	s := NewShadow(ShadowBottom, shadowLevel)
 	r := test.WidgetRenderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
@@ -41,7 +41,7 @@ func TestShadow_BottomShadow(t *testing.T) {
 }
 
 func TestShadow_AroundShadow(t *testing.T) {
-	s := newShadow(shadowAround, shadowLevel)
+	s := NewShadow(ShadowAround, shadowLevel)
 	r := test.WidgetRenderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
@@ -106,7 +106,7 @@ func TestShadow_AroundShadow(t *testing.T) {
 
 func TestShadow_ApplyTheme(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-	s := newShadow(shadowAround, shadowLevel)
+	s := NewShadow(ShadowAround, shadowLevel)
 	r := test.WidgetRenderer(s).(*shadowRenderer)
 	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
 
@@ -116,15 +116,15 @@ func TestShadow_ApplyTheme(t *testing.T) {
 }
 
 func TestShadow_BackgroundColor(t *testing.T) {
-	assert.Equal(t, color.Transparent, test.WidgetRenderer(newShadow(shadowAround, 1)).BackgroundColor())
+	assert.Equal(t, color.Transparent, test.WidgetRenderer(NewShadow(ShadowAround, 1)).BackgroundColor())
 }
 
 func TestShadow_MinSize(t *testing.T) {
-	assert.Equal(t, fyne.NewSize(0, 0), newShadow(shadowAround, 1).MinSize())
+	assert.Equal(t, fyne.NewSize(0, 0), NewShadow(ShadowAround, 1).MinSize())
 }
 
 func TestShadow_Theme(t *testing.T) {
-	shadow := newShadow(shadowAround, 1)
+	shadow := NewShadow(ShadowAround, 1)
 	light := theme.LightTheme()
 	fyne.CurrentApp().Settings().SetTheme(light)
 	shadow.Refresh()

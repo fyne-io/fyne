@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -187,7 +188,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	text.Alignment = fyne.TextAlignLeading
 
 	objects := []fyne.CanvasObject{text, icon}
-	return &selectRenderer{newShadowingRenderer(objects, buttonLevel), icon, text, s}
+	return &selectRenderer{newShadowingRenderer(objects, widget.ButtonLevel), icon, text, s}
 }
 
 // ClearSelected clears the current option of the select widget.  After
