@@ -25,7 +25,7 @@ type Text struct {
 // MinSize returns the minimum size of this text object based on its font size and content.
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
-	return fyne.CurrentApp().Driver().RenderedTextSize(t.Text, t.TextSize, t.TextStyle)
+	return fyne.MeasureText(t.Text, t.TextSize, t.TextStyle)
 }
 
 // Refresh causes this object to be redrawn in it's current state

@@ -22,10 +22,10 @@ type selectRenderer struct {
 // MinSize calculates the minimum size of a select button.
 // This is based on the selected text, the drop icon and a standard amount of padding added.
 func (s *selectRenderer) MinSize() fyne.Size {
-	min := textMinSize(s.combo.PlaceHolder, s.label.TextSize, s.label.TextStyle)
+	min := fyne.MeasureText(s.combo.PlaceHolder, s.label.TextSize, s.label.TextStyle)
 
 	for _, option := range s.combo.Options {
-		optionMin := textMinSize(option, s.label.TextSize, s.label.TextStyle)
+		optionMin := fyne.MeasureText(option, s.label.TextSize, s.label.TextStyle)
 		min = min.Union(optionMin)
 	}
 

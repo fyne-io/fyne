@@ -12,6 +12,7 @@ require (
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
+	github.com/lucor/goinfo v0.0.0-20200401173949-526b5363a13a
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pkg/errors v0.9.1
@@ -29,4 +30,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
-replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20200313204317-b97e3cad9468
+replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20200402134245-f45c22546beb

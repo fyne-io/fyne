@@ -23,6 +23,8 @@ type mobileCanvas struct {
 	scale            float32
 	size             fyne.Size
 
+	insetTop, insetBottom, insetLeft, insetRight int
+
 	focused fyne.Focusable
 	touched map[int]mobile.Touchable
 	padded  bool
@@ -74,9 +76,16 @@ func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 	}
 }
 
+func (c *mobileCanvas) edgePadding() (topLeft, bottomRight fyne.Size) {
+	scale := fyne.CurrentDevice().SystemScale()
+
+	return fyne.NewSize(int(float32(c.insetLeft)/scale), int(float32(c.insetTop)/scale)),
+		fyne.NewSize(int(float32(c.insetRight)/scale), int(float32(c.insetBottom)/scale))
+}
+
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	offset := fyne.NewPos(0, 0)
-	devicePadTopLeft, devicePadBottomRight := devicePadding()
+	devicePadTopLeft, devicePadBottomRight := c.edgePadding()
 
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height

@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 
 public class GoNativeActivity extends NativeActivity {
@@ -18,6 +20,7 @@ public class GoNativeActivity extends NativeActivity {
 	private static int FILE_OPEN_CODE = 1;
 
     private native void filePickerReturned(String str);
+    private native void insetsChanged(int top, int bottom, int left, int right);
 
 	public GoNativeActivity() {
 		super();
@@ -27,6 +30,25 @@ public class GoNativeActivity extends NativeActivity {
 	String getTmpdir() {
 		return getCacheDir().getAbsolutePath();
 	}
+
+	void updateLayout() {
+	    try {
+            WindowInsets insets = getWindow().getDecorView().getRootWindowInsets();
+            if (insets == null) {
+                return;
+            }
+
+            insetsChanged(insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetBottom(),
+                insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetRight());
+        } catch (java.lang.NoSuchMethodError e) {
+    	    Rect insets = new Rect();
+            getWindow().getDecorView().getWindowVisibleDisplayFrame(insets);
+
+            View view = findViewById(android.R.id.content).getRootView();
+            insetsChanged(insets.top, view.getHeight() - insets.height() - insets.top,
+                insets.left, view.getWidth() - insets.width() - insets.left);
+        }
+    }
 
     static void showKeyboard() {
         goNativeActivity.doShowKeyboard();
@@ -69,7 +91,7 @@ public class GoNativeActivity extends NativeActivity {
 		} catch (KeyCharacterMap.UnavailableException e) {
 			return -1;
 		} catch (Exception e) {
-			Log.e("Go", "exception reading KeyCharacterMap", e);
+			Log.e("GoLog", "exception reading KeyCharacterMap", e);
 			return -1;
 		}
 	}
@@ -87,13 +109,13 @@ public class GoNativeActivity extends NativeActivity {
 			ActivityInfo ai = getPackageManager().getActivityInfo(
 					getIntent().getComponent(), PackageManager.GET_META_DATA);
 			if (ai.metaData == null) {
-				Log.e("Go", "loadLibrary: no manifest metadata found");
+				Log.e("GoLog", "loadLibrary: no manifest metadata found");
 				return;
 			}
 			String libName = ai.metaData.getString("android.app.lib_name");
 			System.loadLibrary(libName);
 		} catch (Exception e) {
-			Log.e("Go", "loadLibrary failed", e);
+			Log.e("GoLog", "loadLibrary failed", e);
 		}
 	}
 
@@ -101,6 +123,14 @@ public class GoNativeActivity extends NativeActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		load();
 		super.onCreate(savedInstanceState);
+
+		View view = findViewById(android.R.id.content).getRootView();
+		view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+			public void onLayoutChange (View v, int left, int top, int right, int bottom,
+			                            int oldLeft, int oldTop, int oldRight, int oldBottom) {
+				GoNativeActivity.this.updateLayout();
+			}
+		});
 	}
 
 	@Override

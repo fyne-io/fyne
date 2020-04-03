@@ -68,9 +68,5 @@ func (s *settings) stopWatching() {
 		return
 	}
 
-	err := s.watcher.(*fsnotify.Watcher).Close()
-	if err != nil {
-		fyne.LogError("Failed to close watcher", err)
-		return
-	}
+	s.watcher.(*fsnotify.Watcher).Close() // fsnotify returns false positives, see https://github.com/fsnotify/fsnotify/issues/268
 }
