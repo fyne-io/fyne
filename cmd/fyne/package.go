@@ -89,7 +89,7 @@ var _ command = (*packager)(nil)
 type packager struct {
 	name, srcDir, dir, exe, icon string
 	os, appID                    string
-	install, release, debug      bool
+	install, release	     bool
 }
 
 func (p *packager) packageLinux() error {
@@ -312,7 +312,7 @@ func (p *packager) packageWasm() error {
 		"\t\t<meta charset=\"utf-8\">\n" +
 		"\t\t<link rel=\"icon\" type=\"image/png\" href=\"icon.png\">\n" +
 		"\t\t<script src=\"wasm_exec.js\"></script>\n")
-	if p.debug {
+	if !p.release {
 		io.WriteString(indexFile, "\t\t<script src=\"webgl-debug.js\"></script>\n")
 	}
 	io.WriteString(indexFile, "\t\t<script>\n" +
@@ -382,7 +382,6 @@ func (p *packager) addFlags() {
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
 	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
 	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
-	flag.BoolVar(&p.debug, "debug", false, "Define if a debugging package should be generated")
 }
 
 func (*packager) printHelp(indent string) {

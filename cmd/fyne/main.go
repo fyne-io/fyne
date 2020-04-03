@@ -61,6 +61,7 @@ func loadCommands() {
 		{"install", &installer{}},
 		{"vendor", &vendor{}},
 		{"version", &version{}},
+		{"serve", &server{}},
 	}
 }
 
