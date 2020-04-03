@@ -30,4 +30,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
-replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20200402134245-f45c22546beb
+replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20200403124556-ac83d645d551
