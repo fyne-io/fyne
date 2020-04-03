@@ -7,11 +7,12 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
-var shadowLevel = 3
-var shadowWidth = shadowLevel * 2
+var shadowLevel = elevationLevel(5)
+var shadowWidth = int(shadowLevel)
 
 func TestShadow_TopShadow(t *testing.T) {
 	s := newShadow(shadowTop, shadowLevel)
@@ -115,15 +116,15 @@ func TestShadow_ApplyTheme(t *testing.T) {
 }
 
 func TestShadow_BackgroundColor(t *testing.T) {
-	assert.Equal(t, color.Transparent, test.WidgetRenderer(newShadow(shadowAround, theme.Padding())).BackgroundColor())
+	assert.Equal(t, color.Transparent, test.WidgetRenderer(newShadow(shadowAround, 1)).BackgroundColor())
 }
 
 func TestShadow_MinSize(t *testing.T) {
-	assert.Equal(t, fyne.NewSize(0, 0), newShadow(shadowAround, theme.Padding()).MinSize())
+	assert.Equal(t, fyne.NewSize(0, 0), newShadow(shadowAround, 1).MinSize())
 }
 
 func TestShadow_Theme(t *testing.T) {
-	shadow := newShadow(shadowAround, theme.Padding())
+	shadow := newShadow(shadowAround, 1)
 	light := theme.LightTheme()
 	fyne.CurrentApp().Settings().SetTheme(light)
 	shadow.Refresh()

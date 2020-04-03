@@ -187,7 +187,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	text.Alignment = fyne.TextAlignLeading
 
 	objects := []fyne.CanvasObject{text, icon}
-	return &selectRenderer{newShadowingRenderer(objects, 1), icon, text, s}
+	return &selectRenderer{newShadowingRenderer(objects, buttonLevel), icon, text, s}
 }
 
 // ClearSelected clears the current option of the select widget.  After

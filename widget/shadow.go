@@ -8,6 +8,18 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// elevationLevel is the level of elevation of the shadow casting object.
+type elevationLevel int
+
+// elevationLevel constants inspired by:
+// https://storage.googleapis.com/spec-host/mio-staging%2Fmio-design%2F1584058305895%2Fassets%2F0B6xUSjjSulxceF9udnA4Sk5tdU0%2Fbaselineelevation-chart.png
+const (
+	baseLevel             elevationLevel = 0
+	buttonLevel           elevationLevel = 2
+	popUpLevel            elevationLevel = 8
+	submergedContentLevel elevationLevel = 8
+)
+
 type shadowType int
 
 const (
@@ -18,7 +30,7 @@ const (
 	shadowTop
 )
 
-func newShadow(typ shadowType, level int) *shadow {
+func newShadow(typ shadowType, level elevationLevel) *shadow {
 	s := &shadow{typ: typ, level: level}
 	s.ExtendBaseWidget(s)
 	return s
@@ -29,7 +41,7 @@ var _ fyne.Widget = (*shadow)(nil)
 type shadow struct {
 	BaseWidget
 	typ   shadowType
-	level int
+	level elevationLevel
 }
 
 func (s *shadow) CreateRenderer() fyne.WidgetRenderer {
@@ -125,7 +137,7 @@ func (r *shadowRenderer) BackgroundColor() color.Color {
 }
 
 func (r *shadowRenderer) Layout(size fyne.Size) {
-	depth := r.s.level * 2
+	depth := int(r.s.level)
 	if r.tl != nil {
 		r.tl.Resize(fyne.NewSize(depth, depth))
 		r.tl.Move(fyne.NewPos(-depth, -depth))

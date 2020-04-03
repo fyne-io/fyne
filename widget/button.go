@@ -188,9 +188,9 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{
 		text,
 	}
-	shadowLevel := 1
+	shadowLevel := baseLevel
 	if b.HideShadow {
-		shadowLevel = 0
+		shadowLevel = buttonLevel
 	}
 	if icon != nil {
 		objects = append(objects, icon)
