@@ -1,21 +1,21 @@
 package desktop
 
 // Cursor represents a standard fyne cursor
-type Cursor string
+type Cursor int
 
 const (
 	// DefaultCursor is the default cursor typically an arrow
-	DefaultCursor Cursor = "DefaultCursor"
+	DefaultCursor Cursor = iota
 	// TextCursor is the cursor often used to indicate text selection
-	TextCursor Cursor = "TextCursor"
+	TextCursor
 	// CrosshairCursor is the cursor often used to indicate bitmaps
-	CrosshairCursor Cursor = "CrosshairCursor"
+	CrosshairCursor
 	// PointerCursor is the cursor often used to indicate a link
-	PointerCursor Cursor = "PointerCursor"
+	PointerCursor
 	// HResizeCursor is the cursor often used to indicate horizontal resize
-	HResizeCursor Cursor = "HResizeCursor"
+	HResizeCursor
 	// VResizeCursor is the cursor often used to indicate vertical resize
-	VResizeCursor Cursor = "VResizeCursor"
+	VResizeCursor
 )
 
 // Cursorable describes any CanvasObject that needs a cursor change
