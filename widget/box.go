@@ -21,7 +21,9 @@ type Box struct {
 
 // Refresh updates this box to match the current theme
 func (b *Box) Refresh() {
-	b.background = theme.BackgroundColor()
+	if b.background != nil {
+		b.background = theme.BackgroundColor()
+	}
 
 	b.BaseWidget.Refresh()
 }
