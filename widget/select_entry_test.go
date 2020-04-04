@@ -1,13 +1,13 @@
-package widget
+package widget_test
 
 import (
 	"testing"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,7 +19,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 	largeOptions := []string{"Large Option A", "Larger Option B", "Very Large Option C"}
 	largeOptionsMinWidth := optionsMinSize(largeOptions).Width
 
-	minTextHeight := NewLabel("W").MinSize().Height
+	minTextHeight := widget.NewLabel("W").MinSize().Height
 
 	tests := map[string]struct {
 		placeholder string
@@ -40,12 +40,12 @@ func TestSelectEntry_MinSize(t *testing.T) {
 		},
 		"value": {
 			value: "foo",
-			want:  NewLabel("foo").MinSize().Add(fyne.NewSize(4*theme.Padding(), 2*theme.Padding())),
+			want:  widget.NewLabel("foo").MinSize().Add(fyne.NewSize(4*theme.Padding(), 2*theme.Padding())),
 		},
 		"large value + small options": {
 			value:   "large",
 			options: smallOptions,
-			want:    NewLabel("large").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
+			want:    widget.NewLabel("large").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
 		},
 		"small value + large options": {
 			value:   "small",
@@ -54,12 +54,12 @@ func TestSelectEntry_MinSize(t *testing.T) {
 		},
 		"placeholder": {
 			placeholder: "example",
-			want:        NewLabel("example").MinSize().Add(fyne.NewSize(4*theme.Padding(), 2*theme.Padding())),
+			want:        widget.NewLabel("example").MinSize().Add(fyne.NewSize(4*theme.Padding(), 2*theme.Padding())),
 		},
 		"large placeholder + small options": {
 			placeholder: "large",
 			options:     smallOptions,
-			want:        NewLabel("large").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
+			want:        widget.NewLabel("large").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
 		},
 		"small placeholder + large options": {
 			placeholder: "small",
@@ -69,7 +69,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			e := NewSelectEntry(tt.options)
+			e := widget.NewSelectEntry(tt.options)
 			e.PlaceHolder = tt.placeholder
 			e.Text = tt.value
 			assert.Equal(t, tt.want, e.MinSize())
@@ -77,14 +77,9 @@ func TestSelectEntry_MinSize(t *testing.T) {
 	}
 }
 
-func TestSelectEntry_DropDownButtonCursor(t *testing.T) {
-	b := newCursorableButton("Test button", nil)
-	assert.Equal(t, desktop.DefaultCursor, b.Cursor())
-}
-
 func TestSelectEntry_DropDown(t *testing.T) {
 	options := []string{"A", "B", "C"}
-	e := NewSelectEntry(options)
+	e := widget.NewSelectEntry(options)
 	w := test.NewWindow(e)
 	defer w.Close()
 	c := w.Canvas()
@@ -93,7 +88,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	var dropDownSwitch fyne.Tappable
 	for _, o := range test.LaidOutObjects(c.Content()) {
-		if b, ok := o.(*cursorableButton); ok {
+		if b, ok := o.(*widget.Button); ok {
 			dropDownSwitch = b
 			break
 		}
@@ -102,9 +97,9 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	test.Tap(dropDownSwitch)
 	require.NotNil(t, c.Overlays().Top(), "drop down didn't open")
-	require.IsType(t, &PopUp{}, c.Overlays().Top(), "drop down is not a *PopUp")
+	require.IsType(t, &widget.PopUp{}, c.Overlays().Top(), "drop down is not a *widget.PopUp")
 
-	popUp := c.Overlays().Top().(*PopUp)
+	popUp := c.Overlays().Top().(*widget.PopUp)
 	entryMinWidth := dropDownIconWidth() + emptyTextWidth() + 4*theme.Padding()
 	assert.Equal(t, optionsMinSize(options).Union(fyne.NewSize(entryMinWidth-2*theme.Padding(), 0)).Add(fyne.NewSize(0, 2*theme.Padding())), popUp.Content.Size())
 	assert.Equal(t, options, popUpOptions(popUp), "drop down menu texts don't match SelectEntry options")
@@ -114,7 +109,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 	assert.Equal(t, "B", e.Text)
 
 	test.Tap(dropDownSwitch)
-	popUp = c.Overlays().Top().(*PopUp)
+	popUp = c.Overlays().Top().(*widget.PopUp)
 	tapPopUpItem(popUp, 2)
 	assert.Nil(t, c.Overlays().Top())
 	assert.Equal(t, "C", e.Text)
@@ -126,13 +121,13 @@ func dropDownIconWidth() int {
 }
 
 func emptyTextWidth() int {
-	return NewLabel("M").MinSize().Width
+	return widget.NewLabel("M").MinSize().Width
 }
 
 func optionsMinSize(options []string) fyne.Size {
-	var labels []*Label
+	var labels []*widget.Label
 	for _, option := range options {
-		labels = append(labels, NewLabel(option))
+		labels = append(labels, widget.NewLabel(option))
 	}
 	minWidth := 0
 	minHeight := 0
@@ -145,7 +140,7 @@ func optionsMinSize(options []string) fyne.Size {
 	return fyne.NewSize(minWidth, minHeight)
 }
 
-func popUpOptions(popUp *PopUp) []string {
+func popUpOptions(popUp *widget.PopUp) []string {
 	var texts []string
 	for _, o := range test.LaidOutObjects(popUp.Content) {
 		if t, ok := o.(*canvas.Text); ok {
@@ -155,7 +150,7 @@ func popUpOptions(popUp *PopUp) []string {
 	return texts
 }
 
-func tapPopUpItem(p *PopUp, i int) {
+func tapPopUpItem(p *widget.PopUp, i int) {
 	var items []fyne.Tappable
 	for _, o := range test.LaidOutObjects(p.Content) {
 		if t, ok := o.(fyne.Tappable); ok {

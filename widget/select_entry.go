@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
@@ -46,7 +45,7 @@ func (e *SelectEntry) SetOptions(options []string) {
 		items = append(items, fyne.NewMenuItem(option, func() { e.SetText(option) }))
 	}
 	e.dropDown = fyne.NewMenu("", items...)
-	dropDownButton := newCursorableButton("", func() {
+	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
 		entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
@@ -57,20 +56,4 @@ func (e *SelectEntry) SetOptions(options []string) {
 	})
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())
 	e.ActionItem = dropDownButton
-}
-
-type cursorableButton struct {
-	Button
-}
-
-func newCursorableButton(label string, tapped func()) *cursorableButton {
-	button := &cursorableButton{}
-	button.ExtendBaseWidget(button)
-	button.Text = label
-	button.OnTapped = tapped
-	return button
-}
-
-func (c *cursorableButton) Cursor() desktop.Cursor {
-	return desktop.DefaultCursor
 }
