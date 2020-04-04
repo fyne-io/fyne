@@ -55,7 +55,7 @@ type TabContainer struct {
 func (t *TabContainer) Show() {
 	t.BaseWidget.Show()
 	t.SelectTabIndex(t.current)
-	t.refresh(t)
+	t.Refresh()
 }
 
 // SelectTab sets the specified TabItem to be selected and its content visible.
@@ -94,7 +94,7 @@ func (t *TabContainer) SelectTabIndex(index int) {
 
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	r.Layout(t.size)
-	t.refresh(t)
+	t.Refresh()
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
