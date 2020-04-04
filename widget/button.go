@@ -225,6 +225,11 @@ func (b *Button) SetText(text string) {
 	b.Refresh()
 }
 
+// Cursor returns the cursor type of this widget
+func (b *Button) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
+}
+
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
 	b.Icon = icon
