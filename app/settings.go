@@ -26,8 +26,9 @@ func (sc *SettingsSchema) StoragePath() string {
 var _ fyne.Settings = (*settings)(nil)
 
 type settings struct {
-	themeLock sync.RWMutex
-	theme     fyne.Theme
+	themeLock      sync.RWMutex
+	theme          fyne.Theme
+	themeSpecified bool
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
@@ -43,6 +44,11 @@ func (s *settings) Theme() fyne.Theme {
 }
 
 func (s *settings) SetTheme(theme fyne.Theme) {
+	s.themeSpecified = true
+	s.applyTheme(theme)
+}
+
+func (s *settings) applyTheme(theme fyne.Theme) {
 	s.themeLock.Lock()
 	defer s.themeLock.Unlock()
 	s.theme = theme
@@ -103,17 +109,21 @@ func (s *settings) fileChanged() {
 }
 
 func (s *settings) setupTheme() {
+	if s.themeSpecified {
+		return
+	}
 	name := s.schema.ThemeName
 	if env := os.Getenv("FYNE_THEME"); env != "" {
+		s.themeSpecified = true
 		name = env
 	}
 
 	if name == "light" {
-		s.SetTheme(theme.LightTheme())
+		s.applyTheme(theme.LightTheme())
 	} else if name == "dark" {
-		s.SetTheme(theme.DarkTheme())
+		s.applyTheme(theme.DarkTheme())
 	} else {
-		s.SetTheme(defaultTheme())
+		s.applyTheme(defaultTheme())
 	}
 }
 
