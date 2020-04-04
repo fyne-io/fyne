@@ -4,6 +4,7 @@ package glfw
 
 import (
 	"image/color"
+	"net/url"
 	"os"
 	"runtime"
 	"testing"
@@ -57,6 +58,28 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	assert.Equal(t, 0, w.viewport.GetAttrib(glfw.Decorated))
 	assert.False(t, w.Padded())
 	assert.True(t, w.centered)
+}
+
+func TestWindow_Cursor(t *testing.T) {
+	w := d.CreateWindow("Test").(*window)
+	e := widget.NewEntry()
+	u, _ := url.Parse("https://testing.fyne")
+	h := widget.NewHyperlink("Testing", u)
+	b := widget.NewButton("Test", nil)
+
+	w.SetContent(widget.NewVBox(e, h, b))
+
+	w.mouseMoved(w.viewport, 10, float64(e.Position().Y+10))
+	textCursor := cursorMap[desktop.TextCursor]
+	assert.Same(t, textCursor, w.cursor)
+
+	w.mouseMoved(w.viewport, 10, float64(h.Position().Y+10))
+	pointerCursor := cursorMap[desktop.PointerCursor]
+	assert.Same(t, pointerCursor, w.cursor)
+
+	w.mouseMoved(w.viewport, 10, float64(b.Position().Y+10))
+	defaultCursor := cursorMap[desktop.DefaultCursor]
+	assert.Same(t, defaultCursor, w.cursor)
 }
 
 func TestWindow_HandleHoverable(t *testing.T) {

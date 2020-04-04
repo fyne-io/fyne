@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,14 @@ func TestHyperlink_MinSize(t *testing.T) {
 
 	hyperlink.SetText("Longer")
 	assert.True(t, hyperlink.MinSize().Width > min.Width)
+}
+
+func TestHyperlink_Cursor(t *testing.T) {
+	u, err := url.Parse("https://fyne.io/")
+	hyperlink := NewHyperlink("Test", u)
+
+	assert.Nil(t, err)
+	assert.Equal(t, desktop.PointerCursor, hyperlink.Cursor())
 }
 
 func TestHyperlink_Alignment(t *testing.T) {

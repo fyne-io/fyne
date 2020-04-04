@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -40,6 +41,11 @@ func TestButton_MinSize_Icon(t *testing.T) {
 
 	assert.True(t, min2.Width > min1.Width)
 	assert.Equal(t, min2.Height, min1.Height)
+}
+
+func TestButton_Cursor(t *testing.T) {
+	button := NewButton("Test", nil)
+	assert.Equal(t, desktop.DefaultCursor, button.Cursor())
 }
 
 func TestButton_Style(t *testing.T) {

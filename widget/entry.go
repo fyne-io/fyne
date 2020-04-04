@@ -556,6 +556,11 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 }
 
+// Cursor returns the cursor type of this widget
+func (e *Entry) Cursor() desktop.Cursor {
+	return desktop.TextCursor
+}
+
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
 // update the existing selection (if shift is held), or start a selection dragging operation.
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
@@ -1196,6 +1201,10 @@ func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
 	pr.entry.Unlock()
 	pr.Refresh()
 	fyne.CurrentApp().Driver().CanvasForObject(pr).Focus(pr.entry)
+}
+
+func (pr *passwordRevealer) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
 }
 
 func newPasswordRevealer(e *Entry) *passwordRevealer {

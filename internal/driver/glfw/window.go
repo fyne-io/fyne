@@ -18,7 +18,6 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
-	"fyne.io/fyne/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -29,15 +28,20 @@ const (
 )
 
 var (
-	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
-	initOnce                                    = &sync.Once{}
-	defaultTitle                                = "Fyne Application"
+	cursorMap    map[desktop.Cursor]*glfw.Cursor
+	initOnce     = &sync.Once{}
+	defaultTitle = "Fyne Application"
 )
 
 func initCursors() {
-	defaultCursor = glfw.CreateStandardCursor(glfw.ArrowCursor)
-	entryCursor = glfw.CreateStandardCursor(glfw.IBeamCursor)
-	hyperlinkCursor = glfw.CreateStandardCursor(glfw.HandCursor)
+	cursorMap = map[desktop.Cursor]*glfw.Cursor{
+		desktop.DefaultCursor:   glfw.CreateStandardCursor(glfw.ArrowCursor),
+		desktop.TextCursor:      glfw.CreateStandardCursor(glfw.IBeamCursor),
+		desktop.CrosshairCursor: glfw.CreateStandardCursor(glfw.CrosshairCursor),
+		desktop.PointerCursor:   glfw.CreateStandardCursor(glfw.HandCursor),
+		desktop.HResizeCursor:   glfw.CreateStandardCursor(glfw.HResizeCursor),
+		desktop.VResizeCursor:   glfw.CreateStandardCursor(glfw.VResizeCursor),
+	}
 }
 
 // Declare conformity to Window interface
@@ -45,6 +49,7 @@ var _ fyne.Window = (*window)(nil)
 
 type window struct {
 	viewport *glfw.Window
+	cursor   *glfw.Cursor
 	painted  int // part of the macOS GL fix, updated GLFW should fix this
 	canvas   *glCanvas
 	title    string
@@ -509,23 +514,29 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), roots...)
 }
 
+func fyneToNativeCursor(cursor desktop.Cursor) *glfw.Cursor {
+	ret, ok := cursorMap[cursor]
+	if !ok {
+		return cursorMap[desktop.DefaultCursor]
+	}
+	return ret
+}
+
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
-	cursor := defaultCursor
+	cursor := cursorMap[desktop.DefaultCursor]
 	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
-		if wid, ok := object.(*widget.Entry); ok {
-			if !wid.Disabled() {
-				cursor = entryCursor
-			}
-		} else if _, ok := object.(*widget.Hyperlink); ok {
-			cursor = hyperlinkCursor
+		if cursorable, ok := object.(desktop.Cursorable); ok {
+			fyneCursor := cursorable.Cursor()
+			cursor = fyneToNativeCursor(fyneCursor)
 		}
 
 		_, hover := object.(desktop.Hoverable)
 		return hover
 	})
 
+	w.cursor = cursor
 	viewport.SetCursor(cursor)
 	if obj != nil && !w.objIsDragged(obj) {
 		ev := new(desktop.MouseEvent)
