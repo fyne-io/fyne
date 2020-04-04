@@ -56,3 +56,26 @@ func TestOverrideTheme(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestOverrideTheme_IgnoresSettingsChange(t *testing.T) {
+	// check that a file-load does not overwrite our value
+	set := &settings{}
+	err := os.Setenv("FYNE_THEME", "light")
+	if err != nil {
+		t.Error(err)
+	}
+	set.setupTheme()
+	assert.Equal(t, theme.LightTheme(), set.Theme())
+	err = os.Setenv("FYNE_THEME", "")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = set.loadFromFile(filepath.Join("testdata", "dark-theme.json"))
+	if err != nil {
+		t.Error(err)
+	}
+
+	set.setupTheme()
+	assert.Equal(t, theme.LightTheme(), set.Theme())
+}
