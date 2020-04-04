@@ -330,7 +330,7 @@ func calculateScale(user, system, detected float32) float32 {
 	return system * user
 }
 func (w *window) calculatedScale() float32 {
-	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(), w.detectScale())
+	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScaleForWindow(w), w.detectScale())
 	val = float32(math.Round(float64(val*10.0))) / 10.0
 
 	return val
@@ -474,7 +474,6 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 
 	w.canvas.detectedScale = w.detectScale()
 	go w.canvas.SetScale(fyne.SettingsScaleAuto) // scale is ignored
-	w.rescaleOnMain()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {

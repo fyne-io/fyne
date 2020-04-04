@@ -2,7 +2,9 @@
 
 package gomobile
 
-func (*device) SystemScale() float32 {
+import "fyne.io/fyne"
+
+func (*device) SystemScaleForWindow(_ fyne.Window) float32 {
 	if currentDPI >= 450 {
 		return 3
 	} else if currentDPI >= 340 {
