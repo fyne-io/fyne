@@ -65,6 +65,10 @@ func (c *mobileCanvas) edgePadding() (topLeft, bottomRight fyne.Size) {
 }
 
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
+	if c.content == nil { // window may not be configured yet
+		return
+	}
+
 	offset := fyne.NewPos(0, 0)
 	devicePadTopLeft, devicePadBottomRight := c.edgePadding()
 
