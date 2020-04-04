@@ -28,18 +28,20 @@ const (
 )
 
 var (
-	defaultCursor, textCursor, pointerCursor, crosshairCursor, hResizeCursor, vResizeCursor *glfw.Cursor
-	initOnce                                                                                = &sync.Once{}
-	defaultTitle                                                                            = "Fyne Application"
+	cursorMap    map[desktop.Cursor]*glfw.Cursor
+	initOnce     = &sync.Once{}
+	defaultTitle = "Fyne Application"
 )
 
 func initCursors() {
-	defaultCursor = glfw.CreateStandardCursor(glfw.ArrowCursor)
-	textCursor = glfw.CreateStandardCursor(glfw.IBeamCursor)
-	pointerCursor = glfw.CreateStandardCursor(glfw.HandCursor)
-	crosshairCursor = glfw.CreateStandardCursor(glfw.CrosshairCursor)
-	hResizeCursor = glfw.CreateStandardCursor(glfw.HResizeCursor)
-	vResizeCursor = glfw.CreateStandardCursor(glfw.VResizeCursor)
+	cursorMap = map[desktop.Cursor]*glfw.Cursor{
+		desktop.DefaultCursor:   glfw.CreateStandardCursor(glfw.ArrowCursor),
+		desktop.TextCursor:      glfw.CreateStandardCursor(glfw.IBeamCursor),
+		desktop.CrosshairCursor: glfw.CreateStandardCursor(glfw.CrosshairCursor),
+		desktop.PointerCursor:   glfw.CreateStandardCursor(glfw.HandCursor),
+		desktop.HResizeCursor:   glfw.CreateStandardCursor(glfw.HResizeCursor),
+		desktop.VResizeCursor:   glfw.CreateStandardCursor(glfw.VResizeCursor),
+	}
 }
 
 // Declare conformity to Window interface
@@ -505,17 +507,10 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), roots...)
 }
 
-func cursorToName(cursor desktop.Cursor) *glfw.Cursor {
-	var cursorMap = map[desktop.Cursor]*glfw.Cursor{
-		desktop.TextCursor:      textCursor,
-		desktop.CrosshairCursor: crosshairCursor,
-		desktop.PointerCursor:   pointerCursor,
-		desktop.HResizeCursor:   hResizeCursor,
-		desktop.VResizeCursor:   vResizeCursor,
-	}
+func fyneToNativeCursor(cursor desktop.Cursor) *glfw.Cursor {
 	ret, ok := cursorMap[cursor]
 	if !ok {
-		return defaultCursor
+		return cursorMap[desktop.DefaultCursor]
 	}
 	return ret
 }
@@ -523,11 +518,11 @@ func cursorToName(cursor desktop.Cursor) *glfw.Cursor {
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
-	cursor := defaultCursor
+	cursor := cursorMap[desktop.DefaultCursor]
 	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			fyneCursor := cursorable.Cursor()
-			cursor = cursorToName(fyneCursor)
+			cursor = fyneToNativeCursor(fyneCursor)
 		}
 
 		_, hover := object.(desktop.Hoverable)
