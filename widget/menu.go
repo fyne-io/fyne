@@ -13,25 +13,22 @@ import (
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
 func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *PopUp {
 	options := NewVBox()
-	for _, option := range menu.Items {
-		opt := option // capture value
-		if opt.IsSeparator {
+	for _, item := range menu.Items {
+		if item.IsSeparator {
 			options.Append(newSeparator())
 		} else {
-			options.Append(newMenuItemWidget(opt.Label))
+			options.Append(newMenuItemWidget(item.Label, item.Action))
 		}
 	}
 	pop := NewPopUpAtPosition(options, c, pos)
 	focused := c.Focused()
-	for i, o := range options.Children {
-		if label, ok := o.(*menuItemWidget); ok {
-			item := menu.Items[i]
-			label.OnTapped = func() {
+	for _, o := range options.Children {
+		if item, ok := o.(*menuItemWidget); ok {
+			item.DismissAction = func() {
 				if c.Focused() == nil {
 					c.Focus(focused)
 				}
 				pop.Hide()
-				item.Action()
 			}
 		}
 	}
@@ -44,14 +41,30 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 	return NewPopUpMenuAtPosition(menu, c, fyne.NewPos(0, 0))
 }
 
+func newMenuItemWidget(label string, action func()) *menuItemWidget {
+	ret := &menuItemWidget{Label: NewLabel(label), Action: action}
+	ret.ExtendBaseWidget(ret)
+	return ret
+}
+
+func newSeparator() fyne.CanvasObject {
+	s := canvas.NewRectangle(theme.DisabledTextColor())
+	s.SetMinSize(fyne.NewSize(1, 2))
+	return s
+}
+
 type menuItemWidget struct {
 	*Label
-	OnTapped func()
-	hovered  bool
+	Action        func()
+	DismissAction func()
+	hovered       bool
 }
 
 func (t *menuItemWidget) Tapped(*fyne.PointEvent) {
-	t.OnTapped()
+	t.Action()
+	if t.DismissAction != nil {
+		t.DismissAction()
+	}
 }
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
@@ -76,12 +89,6 @@ func (t *menuItemWidget) MouseOut() {
 func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 }
 
-func newMenuItemWidget(label string) *menuItemWidget {
-	ret := &menuItemWidget{Label: NewLabel(label)}
-	ret.ExtendBaseWidget(ret)
-	return ret
-}
-
 type menuItemWidgetRenderer struct {
 	*textRenderer
 	label *menuItemWidget
@@ -93,10 +100,4 @@ func (h *menuItemWidgetRenderer) BackgroundColor() color.Color {
 	}
 
 	return theme.BackgroundColor()
-}
-
-func newSeparator() fyne.CanvasObject {
-	s := canvas.NewRectangle(theme.DisabledTextColor())
-	s.SetMinSize(fyne.NewSize(1, 2))
-	return s
 }
