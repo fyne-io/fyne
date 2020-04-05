@@ -50,6 +50,66 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	assert.Equal(t, theme.Padding(), aSize.Width)
 }
 
+func TestSlider_BindMin(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	slider := NewSlider(0, 100)
+	data := &binding.Float64Binding{}
+	slider.BindMin(data)
+	data.AddListener(func(float64) {
+		done <- true
+	})
+	data.Set(75.0)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, 75.0, slider.Min)
+}
+
+func TestSlider_BindMax(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	slider := NewSlider(0, 100)
+	data := &binding.Float64Binding{}
+	slider.BindMax(data)
+	data.AddListener(func(float64) {
+		done <- true
+	})
+	data.Set(75.0)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, 75.0, slider.Max)
+}
+
+func TestSlider_BindStep(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	slider := NewSlider(0, 100)
+	data := &binding.Float64Binding{}
+	slider.BindStep(data)
+	data.AddListener(func(float64) {
+		done <- true
+	})
+	data.Set(75.0)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, 75.0, slider.Step)
+}
+
 func TestSlider_BindValue(t *testing.T) {
 	a := test.NewApp()
 	defer a.Quit()

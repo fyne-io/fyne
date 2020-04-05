@@ -425,6 +425,34 @@ func TestRadio_BindSelected_Tap(t *testing.T) {
 	assert.Equal(t, "a", data.Get())
 }
 
+func TestRadio_BindOptions(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	radio := NewRadio([]string{"a"}, nil)
+
+	data := &binding.SliceBinding{}
+	radio.BindOptions(data)
+	data.AddListener(func() {
+		done <- true
+	})
+	data.Append(
+		binding.NewStringBinding("a"),
+		binding.NewStringBinding("b"),
+		binding.NewStringBinding("c"),
+	)
+
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+
+	assert.Equal(t, 3, len(radio.Options))
+	assert.Equal(t, []string{"a", "b", "c"}, radio.Options)
+}
+
 func TestRadioRenderer_ApplyTheme(t *testing.T) {
 	radio := NewRadio([]string{"Test"}, func(string) {})
 	render := test.WidgetRenderer(radio).(*radioRenderer)

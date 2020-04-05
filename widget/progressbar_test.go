@@ -21,6 +21,46 @@ func TestProgressBar_SetValue(t *testing.T) {
 	assert.Equal(t, .5, bar.Value)
 }
 
+func TestProgressBar_BindMin(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	progressBar := NewProgressBar()
+	data := &binding.Float64Binding{}
+	progressBar.BindMin(data)
+	data.AddListener(func(float64) {
+		done <- true
+	})
+	data.Set(0.75)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, 0.75, progressBar.Min)
+}
+
+func TestProgressBar_BindMax(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	progressBar := NewProgressBar()
+	data := &binding.Float64Binding{}
+	progressBar.BindMax(data)
+	data.AddListener(func(float64) {
+		done <- true
+	})
+	data.Set(0.75)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, 0.75, progressBar.Max)
+}
+
 func TestProgressBar_BindValue(t *testing.T) {
 	a := test.NewApp()
 	defer a.Quit()

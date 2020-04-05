@@ -259,6 +259,34 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 	assert.Equal(t, "b", selected)
 }
 
+func TestSelect_BindOptions(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	combo := NewSelect([]string{"a"}, nil)
+
+	data := &binding.SliceBinding{}
+	combo.BindOptions(data)
+	data.AddListener(func() {
+		done <- true
+	})
+	data.Append(
+		binding.NewStringBinding("a"),
+		binding.NewStringBinding("b"),
+		binding.NewStringBinding("c"),
+	)
+
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+
+	assert.Equal(t, 3, len(combo.Options))
+	assert.Equal(t, []string{"a", "b", "c"}, combo.Options)
+}
+
 func TestSelectRenderer_ApplyTheme(t *testing.T) {
 	sel := &Select{}
 	render := test.WidgetRenderer(sel).(*selectRenderer)
