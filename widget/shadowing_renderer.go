@@ -15,9 +15,10 @@ func newShadowingRenderer(objects []fyne.CanvasObject, level elevationLevel) *sh
 	var shadow fyne.CanvasObject
 	if level > 0 {
 		shadow = newShadow(shadowAround, level)
-		objects = append(objects, shadow)
 	}
-	return &shadowingRenderer{baseRenderer{objects}, shadow}
+	r := &shadowingRenderer{shadow: shadow}
+	r.setObjects(objects)
+	return r
 }
 
 func (r *shadowingRenderer) layoutShadow(size fyne.Size, pos fyne.Position) {
