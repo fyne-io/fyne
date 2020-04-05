@@ -229,3 +229,12 @@ void HideKeyboard(JNIEnv* env) {
 void Java_org_golang_app_GoNativeActivity_insetsChanged(JNIEnv *env, jclass clazz, int top, int bottom, int left, int right) {
     insetsChanged(top, bottom, left, right);
 }
+
+void Java_org_golang_app_GoNativeActivity_keyboardTyped(JNIEnv *env, jclass clazz, jstring str) {
+    const char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
+	keyboardTyped((char*)cstr);
+}
+
+void Java_org_golang_app_GoNativeActivity_keyboardDelete(JNIEnv *env, jclass clazz) {
+    keyboardDelete();
+}

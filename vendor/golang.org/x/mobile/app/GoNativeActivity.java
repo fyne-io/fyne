@@ -7,16 +7,27 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
 
     private native void insetsChanged(int top, int bottom, int left, int right);
+    private native void keyboardTyped(String str);
+    private native void keyboardDelete();
+
+	private EditText mTextEdit;
+	private String oldState = "";
 
 	public GoNativeActivity() {
 		super();
@@ -51,9 +62,19 @@ public class GoNativeActivity extends NativeActivity {
     }
 
     void doShowKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        View view = findViewById(android.R.id.content).getRootView();
-        imm.showSoftInput(view, 0);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                oldState = "";
+                mTextEdit.setText("");
+                mTextEdit.setVisibility(View.VISIBLE);
+                mTextEdit.bringToFront();
+                mTextEdit.requestFocus();
+
+                InputMethodManager m = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                m.showSoftInput(mTextEdit, 0);
+            }
+        });
     }
 
     static void hideKeyboard() {
@@ -64,6 +85,13 @@ public class GoNativeActivity extends NativeActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         View view = findViewById(android.R.id.content).getRootView();
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mTextEdit.setVisibility(View.GONE);
+            }
+        });
     }
 
 	static int getRune(int deviceId, int keyCode, int metaState) {
@@ -108,6 +136,7 @@ public class GoNativeActivity extends NativeActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		load();
 		super.onCreate(savedInstanceState);
+		setupEntry();
 
 		View view = findViewById(android.R.id.content).getRootView();
 		view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -116,5 +145,43 @@ public class GoNativeActivity extends NativeActivity {
 				GoNativeActivity.this.updateLayout();
 			}
 		});
+    }
+
+    private void setupEntry() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mTextEdit = new EditText(goNativeActivity);
+                mTextEdit.setVisibility(View.GONE);
+                mTextEdit.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
+                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD); // this is required to force samsung keyboards to not suggest
+
+                FrameLayout.LayoutParams mEditTextLayoutParams = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+                mTextEdit.setLayoutParams(mEditTextLayoutParams);
+                addContentView(mTextEdit, mEditTextLayoutParams);
+
+                mTextEdit.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (s.length() > oldState.length()) {
+                            keyboardTyped(s.subSequence(oldState.length(), s.length()).toString());
+                        } else if (s.length() < oldState.length()) {
+                            // backspace key seems to be sent even for soft content
+                        }
+
+                        oldState = s.toString();
+                    }
+
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                    }
+                });
+            }
+        });
 	}
 }
