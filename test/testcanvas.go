@@ -174,7 +174,7 @@ func (c *testCanvas) Capture() image.Image {
 // LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
 func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 	if o != nil {
-		objects = layoutAndCollect(objects, o, o.MinSize().Union(o.Size()))
+		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
 	}
 	return objects
 }
@@ -183,6 +183,7 @@ func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyn
 	objects = append(objects, o)
 	if w, ok := o.(fyne.Widget); ok {
 		r := w.CreateRenderer()
+		r.Refresh()
 		r.Layout(size)
 		for _, child := range r.Objects() {
 			objects = layoutAndCollect(objects, child, child.Size())

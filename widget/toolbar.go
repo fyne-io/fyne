@@ -84,8 +84,11 @@ func (t *Toolbar) prepend(item ToolbarItem) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	for _, item := range t.Items {
-		t.append(item)
+	if len(t.objs) != len(t.Items) {
+		t.objs = []fyne.CanvasObject{}
+		for _, item := range t.Items {
+			t.append(item)
+		}
 	}
 
 	return &toolbarRenderer{toolbar: t, layout: layout.NewHBoxLayout()}
