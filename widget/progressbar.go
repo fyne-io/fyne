@@ -96,7 +96,7 @@ func (p *ProgressBar) SetMin(m float64) {
 	p.Refresh()
 }
 
-// SetMax changes the current value of this progress bar.
+// SetMax changes the current maximum of this progress bar.
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetMax(m float64) {
 	if p.Max == m {
