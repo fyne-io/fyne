@@ -3,6 +3,14 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 1.2.4 - Ongoing
+
+### Fixed
+
+ * Mobile builds now support go modules
+ * Building for mobile would try to run desktop build first
+
+
 ## 1.2.3 - 2 March 2020
 
 ### Added
