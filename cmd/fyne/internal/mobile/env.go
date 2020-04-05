@@ -281,18 +281,18 @@ func getenv(env []string, key string) string {
 func archNDK() string {
 	if runtime.GOOS == "windows" && runtime.GOARCH == "386" {
 		return "windows"
-	} else {
-		var arch string
-		switch runtime.GOARCH {
-		case "386":
-			arch = "x86"
-		case "amd64":
-			arch = "x86_64"
-		default:
-			panic("unsupported GOARCH: " + runtime.GOARCH)
-		}
-		return runtime.GOOS + "-" + arch
 	}
+
+	var arch string
+	switch runtime.GOARCH {
+	case "386":
+		arch = "x86"
+	case "amd64":
+		arch = "x86_64"
+	default:
+		panic("unsupported GOARCH: " + runtime.GOARCH)
+	}
+	return runtime.GOOS + "-" + arch
 }
 
 type ndkToolchain struct {
