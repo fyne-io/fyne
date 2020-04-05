@@ -44,6 +44,11 @@ type Event struct {
 
 	// Orientation is the orientation of the device screen.
 	Orientation Orientation
+
+	// InsetTopPx, InsetBottomPx, InsetLeftPx and InsetRightPx define the size of any border area in pixels.
+	// These values define how far in from the screen edge any controls should be drawn.
+	// The inset can be caused by status bars, button overlays or devices cutouts.
+	InsetTopPx, InsetBottomPx, InsetLeftPx, InsetRightPx int
 }
 
 // Size returns the window's size in pixels, at the time this size event was

@@ -23,6 +23,7 @@ void makeCurrentContext(GLintptr ctx);
 void swapBuffers(GLintptr ctx);
 uint64_t threadID();
 
+UIEdgeInsets getDevicePadding();
 void showKeyboard();
 void hideKeyboard();
 */
@@ -125,13 +126,19 @@ func updateConfig(width, height, orientation int32) {
 	}
 	widthPx := screenScale * int(width)
 	heightPx := screenScale * int(height)
+	insets := C.getDevicePadding()
+
 	theApp.eventsIn <- size.Event{
-		WidthPx:     widthPx,
-		HeightPx:    heightPx,
-		WidthPt:     geom.Pt(float32(widthPx) / pixelsPerPt),
-		HeightPt:    geom.Pt(float32(heightPx) / pixelsPerPt),
-		PixelsPerPt: pixelsPerPt,
-		Orientation: o,
+		WidthPx:       widthPx,
+		HeightPx:      heightPx,
+		WidthPt:       geom.Pt(float32(widthPx) / pixelsPerPt),
+		HeightPt:      geom.Pt(float32(heightPx) / pixelsPerPt),
+		InsetTopPx:    int(float32(insets.top) * float32(screenScale)),
+		InsetBottomPx: int(float32(insets.bottom) * float32(screenScale)),
+		InsetLeftPx:   int(float32(insets.left) * float32(screenScale)),
+		InsetRightPx:  int(float32(insets.right) * float32(screenScale)),
+		PixelsPerPt:   pixelsPerPt,
+		Orientation:   o,
 	}
 	theApp.eventsIn <- paint.Event{External: true}
 }

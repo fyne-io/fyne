@@ -40,6 +40,11 @@ struct utsname sysInfo;
 	self.controller = [[GoAppAppController alloc] initWithNibName:nil bundle:nil];
 	self.window.rootViewController = self.controller;
 	[self.window makeKeyAndVisible];
+
+    // update insets once key window is set
+	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	updateConfig((int)size.width, (int)size.height, orientation);
+
 	return YES;
 }
 
@@ -201,6 +206,16 @@ uint64_t threadID() {
 		abort();
 	}
 	return id;
+}
+
+UIEdgeInsets getDevicePadding() {
+    if (@available(iOS 11.0, *)) {
+        UIWindow *window = UIApplication.sharedApplication.keyWindow;
+
+        return window.safeAreaInsets;
+    }
+
+    return UIEdgeInsetsZero;
 }
 
 void showKeyboard() {

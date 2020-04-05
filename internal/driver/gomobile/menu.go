@@ -51,7 +51,7 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
 	c.menu = fyne.NewContainer(panel, shadow)
 
-	devicePadTopLeft, devicePadBottomRight := devicePadding()
+	devicePadTopLeft, devicePadBottomRight := c.edgePadding()
 	padY := devicePadTopLeft.Height + devicePadBottomRight.Height
 	panel.Move(fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height))
 	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), c.size.Height-padY))

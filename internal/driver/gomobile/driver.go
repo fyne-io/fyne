@@ -129,7 +129,13 @@ func (d *mobileDriver) Run() {
 				currentSize = e
 				currentOrientation = e.Orientation
 				currentDPI = e.PixelsPerPt * 72
+
+				canvas.insetTop = e.InsetTopPx
+				canvas.insetBottom = e.InsetBottomPx
+				canvas.insetLeft = e.InsetLeftPx
+				canvas.insetRight = e.InsetRightPx
 				canvas.SetScale(0) // value is ignored
+
 				// make sure that we paint on the next frame
 				canvas.Content().Refresh()
 			case paint.Event:

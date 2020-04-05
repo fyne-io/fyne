@@ -225,3 +225,7 @@ void HideKeyboard(JNIEnv* env) {
 		hide_keyboard_method
 	);
 }
+
+void Java_org_golang_app_GoNativeActivity_insetsChanged(JNIEnv *env, jclass clazz, int top, int bottom, int left, int right) {
+    insetsChanged(top, bottom, left, right);
+}
