@@ -29,7 +29,6 @@ const (
 
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
-	initOnce                                    = &sync.Once{}
 	defaultTitle                                = "Fyne Application"
 )
 
@@ -1065,7 +1064,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		title = defaultTitle
 	}
 	runOnMain(func() {
-		initOnce.Do(d.initGLFW)
+		d.initGLFW()
 
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, 0)
