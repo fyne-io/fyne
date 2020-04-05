@@ -19,10 +19,6 @@ package binding
 import (
 {{ range . }}	"{{ . }}"
 {{ end }})
-
-func typeError(e string, a interface{}) {
-	fyne.LogError(fmt.Sprintf("Incorrect type: expected '%s', got '%v'", e, a), nil)
-}
 `
 
 const bindingTemplate = `
@@ -42,18 +38,13 @@ func (b *{{ .Name }}Binding) Get() {{ .Type }} {
 func (b *{{ .Name }}Binding) Set(value {{ .Type }}) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *{{ .Name }}Binding) AddListener(listener func({{ .Type }})) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.({{ .Type }})
-		if ok {
-			listener(v)
-		} else {
-			typeError("{{ .Type }}", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 `
@@ -80,7 +71,6 @@ func main() {
 
 	ht := template.Must(template.New("header").Parse(headerTemplate))
 	writeFile(f, ht, []string{
-		"fmt",
 		"fyne.io/fyne",
 		"net/url",
 	})

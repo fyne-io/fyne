@@ -8,59 +8,77 @@ type Binding interface {
 type itemBinding struct {
 	Binding
 	sync.RWMutex
-	listeners []func(interface{})
+	listeners []func()
 }
 
-func (b *itemBinding) addListener(listener func(interface{})) {
+func (b *itemBinding) addListener(listener func()) {
 	b.Lock()
 	defer b.Unlock()
 	b.listeners = append(b.listeners, listener)
 }
 
-func (b *itemBinding) notify(value interface{}) {
+func (b *itemBinding) notify() {
 	b.RLock()
 	defer b.RUnlock()
 	for _, l := range b.listeners {
-		go l(value)
+		go l()
 	}
 }
 
-type sliceBinding struct {
-	Binding
-	sync.RWMutex
-	listeners []func(int, Binding)
+type SliceBinding struct {
+	itemBinding
+	values []Binding
 }
 
-func (b *sliceBinding) addListener(listener func(int, Binding)) {
-	b.Lock()
-	defer b.Unlock()
-	b.listeners = append(b.listeners, listener)
+func (b *SliceBinding) Length() int {
+	return len(b.values)
 }
 
-func (b *sliceBinding) notify(index int, value Binding) {
-	b.RLock()
-	defer b.RUnlock()
-	for _, l := range b.listeners {
-		go l(index, value)
+func (b *SliceBinding) Get(index int) Binding {
+	return b.values[index]
+}
+
+func (b *SliceBinding) Append(data ...Binding) {
+	b.values = append(b.values, data...)
+	b.notify()
+}
+
+func (b *SliceBinding) Set(index int, data Binding) {
+	old := b.values[index]
+	if old == data {
+		return
 	}
+	b.values[index] = data
+	b.notify()
 }
 
-type mapBinding struct {
-	Binding
-	sync.RWMutex
-	listeners []func(string, Binding)
+func (b *SliceBinding) AddListener(listener func()) {
+	b.addListener(listener)
 }
 
-func (b *mapBinding) addListener(listener func(string, Binding)) {
-	b.Lock()
-	defer b.Unlock()
-	b.listeners = append(b.listeners, listener)
+type MapBinding struct {
+	itemBinding
+	values map[string]Binding
 }
 
-func (b *mapBinding) notify(key string, value Binding) {
-	b.RLock()
-	defer b.RUnlock()
-	for _, l := range b.listeners {
-		go l(key, value)
+func (b *MapBinding) Length() int {
+	return len(b.values)
+}
+
+func (b *MapBinding) Get(key string) (Binding, bool) {
+	v, ok := b.values[key]
+	return v, ok
+}
+
+func (b *MapBinding) Set(key string, data Binding) {
+	old, ok := b.values[key]
+	if ok && old == data {
+		return
 	}
+	b.values[key] = data
+	b.notify()
+}
+
+func (b *MapBinding) AddListener(listener func()) {
+	b.addListener(listener)
 }

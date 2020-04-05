@@ -4,14 +4,9 @@
 package binding
 
 import (
-	"fmt"
 	"fyne.io/fyne"
 	"net/url"
 )
-
-func typeError(e string, a interface{}) {
-	fyne.LogError(fmt.Sprintf("Incorrect type: expected '%s', got '%v'", e, a), nil)
-}
 
 type BoolBinding struct {
 	itemBinding
@@ -29,18 +24,13 @@ func (b *BoolBinding) Get() bool {
 func (b *BoolBinding) Set(value bool) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *BoolBinding) AddListener(listener func(bool)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(bool)
-		if ok {
-			listener(v)
-		} else {
-			typeError("bool", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -60,18 +50,13 @@ func (b *ByteBinding) Get() byte {
 func (b *ByteBinding) Set(value byte) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *ByteBinding) AddListener(listener func(byte)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(byte)
-		if ok {
-			listener(v)
-		} else {
-			typeError("byte", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -91,18 +76,13 @@ func (b *Float64Binding) Get() float64 {
 func (b *Float64Binding) Set(value float64) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *Float64Binding) AddListener(listener func(float64)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(float64)
-		if ok {
-			listener(v)
-		} else {
-			typeError("float64", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -122,18 +102,13 @@ func (b *IntBinding) Get() int {
 func (b *IntBinding) Set(value int) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *IntBinding) AddListener(listener func(int)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(int)
-		if ok {
-			listener(v)
-		} else {
-			typeError("int", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -153,18 +128,13 @@ func (b *Int64Binding) Get() int64 {
 func (b *Int64Binding) Set(value int64) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *Int64Binding) AddListener(listener func(int64)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(int64)
-		if ok {
-			listener(v)
-		} else {
-			typeError("int64", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -184,18 +154,13 @@ func (b *UintBinding) Get() uint {
 func (b *UintBinding) Set(value uint) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *UintBinding) AddListener(listener func(uint)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(uint)
-		if ok {
-			listener(v)
-		} else {
-			typeError("uint", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -215,18 +180,13 @@ func (b *Uint64Binding) Get() uint64 {
 func (b *Uint64Binding) Set(value uint64) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *Uint64Binding) AddListener(listener func(uint64)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(uint64)
-		if ok {
-			listener(v)
-		} else {
-			typeError("uint64", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -246,18 +206,13 @@ func (b *ResourceBinding) Get() fyne.Resource {
 func (b *ResourceBinding) Set(value fyne.Resource) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *ResourceBinding) AddListener(listener func(fyne.Resource)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(fyne.Resource)
-		if ok {
-			listener(v)
-		} else {
-			typeError("fyne.Resource", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -277,18 +232,13 @@ func (b *RuneBinding) Get() rune {
 func (b *RuneBinding) Set(value rune) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *RuneBinding) AddListener(listener func(rune)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(rune)
-		if ok {
-			listener(v)
-		} else {
-			typeError("rune", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -308,18 +258,13 @@ func (b *StringBinding) Get() string {
 func (b *StringBinding) Set(value string) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *StringBinding) AddListener(listener func(string)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(string)
-		if ok {
-			listener(v)
-		} else {
-			typeError("string", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
 
@@ -339,17 +284,12 @@ func (b *URLBinding) Get() *url.URL {
 func (b *URLBinding) Set(value *url.URL) {
 	if b.value != value {
 		b.value = value
-		b.notify(value)
+		b.notify()
 	}
 }
 
 func (b *URLBinding) AddListener(listener func(*url.URL)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(*url.URL)
-		if ok {
-			listener(v)
-		} else {
-			typeError("*url.URL", value)
-		}
+	b.addListener(func() {
+		listener(b.value)
 	})
 }
