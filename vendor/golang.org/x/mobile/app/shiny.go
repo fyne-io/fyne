@@ -21,3 +21,7 @@ func driverShowVirtualKeyboard() {
 // driverHideVirtualKeyboard does nothing on desktop
 func driverHideVirtualKeyboard() {
 }
+
+// driverShowFileOpenPicker does nothing on desktop
+func driverShowFileOpenPicker(func(string)) {
+}

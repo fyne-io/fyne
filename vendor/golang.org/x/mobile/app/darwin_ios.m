@@ -63,6 +63,22 @@ struct utsname sysInfo;
 - (void)applicationWillTerminate:(UIApplication *)application {
 	lifecycleDead();
 }
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray <NSURL *>*)urls {
+    for (id url in urls) {
+        if (![url isFileURL]) {
+            continue;
+        }
+
+        NSString *path = [url path];
+        filePickerReturned([path UTF8String]);
+    }
+}
+
+- (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
+    filePickerReturned("");
+}
+
 @end
 
 @interface GoAppAppController ()
@@ -233,5 +249,18 @@ void hideKeyboard() {
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [view resignFirstResponder];
+    });
+}
+
+void showFileOpenPicker() {
+    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
+
+    UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
+        initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
+    documentPicker.delegate = appDelegate;
+    documentPicker.modalPresentationStyle = UIModalPresentationPopover;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
     });
 }

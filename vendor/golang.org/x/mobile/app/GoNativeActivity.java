@@ -3,9 +3,11 @@ package org.golang.app;
 import android.app.Activity;
 import android.app.NativeActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -21,7 +23,9 @@ import android.widget.FrameLayout;
 
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
+	private static int FILE_OPEN_CODE = 1;
 
+    private native void filePickerReturned(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
     private native void keyboardTyped(String str);
     private native void keyboardDelete();
@@ -92,6 +96,17 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setVisibility(View.GONE);
             }
         });
+    }
+
+    static void showFileOpen() {
+        goNativeActivity.doShowFileOpen();
+    }
+
+    void doShowFileOpen() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
 	static int getRune(int deviceId, int keyCode, int metaState) {
@@ -184,4 +199,21 @@ public class GoNativeActivity extends NativeActivity {
             }
         });
 	}
+
+	@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // unhandled request
+        if (requestCode != FILE_OPEN_CODE) {
+            return;
+        }
+
+        // dialog was cancelled
+        if (resultCode != Activity.RESULT_OK) {
+            filePickerReturned("");
+            return;
+        }
+
+        Uri uri = data.getData();
+        filePickerReturned(uri.getPath());
+    }
 }

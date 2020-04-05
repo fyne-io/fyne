@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +21,7 @@ func newExtendedProgressBar() *extendedProgressBar {
 func TestProgressBarRenderer_Extended_Layout(t *testing.T) {
 	bar := newExtendedProgressBar()
 	bar.Resize(fyne.NewSize(100, 100))
-	r := test.WidgetRenderer(bar).(*progressRenderer)
+	r := Renderer(bar).(*progressRenderer)
 
 	assert.Equal(t, 0.0, bar.Value)
 	assert.Equal(t, 0, r.bar.Size().Width)

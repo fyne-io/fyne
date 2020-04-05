@@ -54,6 +54,7 @@ type App interface {
 
 	ShowVirtualKeyboard()
 	HideVirtualKeyboard()
+	ShowFileOpenPicker(func(string))
 }
 
 // PublishResult is the result of an App.Publish call.
@@ -140,6 +141,9 @@ func (a *app) HideVirtualKeyboard() {
 	driverHideVirtualKeyboard()
 }
 
+func (a *app) ShowFileOpenPicker(callback func(string)) {
+	driverShowFileOpenPicker(callback)
+}
 
 type stopPumping struct{}
 

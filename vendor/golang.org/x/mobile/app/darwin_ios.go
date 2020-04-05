@@ -26,6 +26,8 @@ uint64_t threadID();
 UIEdgeInsets getDevicePadding();
 void showKeyboard();
 void hideKeyboard();
+
+void showFileOpenPicker();
 */
 import "C"
 import (
@@ -263,4 +265,22 @@ func driverShowVirtualKeyboard() {
 // driverHideVirtualKeyboard requests the driver to hide any visible virtual keyboard
 func driverHideVirtualKeyboard() {
 	C.hideKeyboard()
+}
+
+var fileCallback func(string)
+
+//export filePickerReturned
+func filePickerReturned(str *C.char) {
+	if fileCallback == nil {
+		return
+	}
+
+	fileCallback(C.GoString(str))
+	fileCallback = nil
+}
+
+func driverShowFileOpenPicker(callback func(string)) {
+	fileCallback = callback
+
+	C.showFileOpenPicker()
 }

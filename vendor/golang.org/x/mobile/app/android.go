@@ -42,8 +42,11 @@ char* createEGLSurface(ANativeWindow* window);
 char* destroyEGLSurface();
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
-void ShowKeyboard(JNIEnv* env);
-void HideKeyboard(JNIEnv* env);
+void showKeyboard(JNIEnv* env);
+void hideKeyboard(JNIEnv* env);
+void showFileOpen(JNIEnv* env);
+
+void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
 import "C"
 import (
@@ -294,7 +297,7 @@ func driverShowVirtualKeyboard() {
 
 func showSoftInput(vm, jniEnv, ctx uintptr) error {
 	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-	C.ShowKeyboard(env)
+	C.showKeyboard(env)
 	return nil
 }
 
@@ -307,7 +310,38 @@ func driverHideVirtualKeyboard() {
 
 func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-	C.HideKeyboard(env)
+	C.hideKeyboard(env)
+	return nil
+}
+
+var fileCallback func(string)
+
+//export filePickerReturned
+func filePickerReturned(str *C.char) {
+	if fileCallback == nil {
+		return
+	}
+
+	fileCallback(C.GoString(str))
+	fileCallback = nil
+}
+
+//export insetsChanged
+func insetsChanged(top, bottom, left, right int) {
+	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
+}
+
+func driverShowFileOpenPicker(callback func(string)) {
+	fileCallback = callback
+
+	if err := mobileinit.RunOnJVM(showFileOpenPicker); err != nil {
+		log.Fatalf("app: %v", err)
+	}
+}
+
+func showFileOpenPicker(vm, jniEnv, ctx uintptr) error {
+	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+	C.showFileOpen(env)
 	return nil
 }
 
@@ -387,11 +421,6 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 		}
 	}
 }
-
-//export insetsChanged
-func insetsChanged(top, bottom, left, right int) {
- 	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
- }
 
 func runInputQueue(vm, jniEnv, ctx uintptr) error {
 	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
