@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
@@ -151,6 +152,8 @@ type Button struct {
 	OnTapped   func() `json:"-"`
 	hovered    bool
 	HideShadow bool
+
+	tapBinding *binding.BoolBinding
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -165,8 +168,13 @@ const (
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
-	if b.OnTapped != nil && !b.Disabled() {
-		b.OnTapped()
+	if !b.Disabled() {
+		if b.tapBinding != nil {
+			b.tapBinding.Set(true)
+		}
+		if b.OnTapped != nil {
+			b.OnTapped()
+		}
 	}
 }
 
@@ -220,28 +228,43 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 
 // SetText allows the button label to be changed
 func (b *Button) SetText(text string) {
-	b.Text = text
-
-	b.Refresh()
+	if b.Text != text {
+		b.Text = text
+		b.Refresh()
+	}
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
 func (b *Button) SetIcon(icon fyne.Resource) {
-	b.Icon = icon
+	if b.Icon != icon {
+		b.Icon = icon
 
-	if icon != nil {
-		b.disabledIcon = theme.NewDisabledResource(icon)
-	} else {
-		b.disabledIcon = nil
+		if icon != nil {
+			b.disabledIcon = theme.NewDisabledResource(icon)
+		} else {
+			b.disabledIcon = nil
+		}
+
+		b.Refresh()
 	}
+}
 
-	b.Refresh()
+func (b *Button) BindTapped(data *binding.BoolBinding) {
+	b.tapBinding = data
+}
+
+func (b *Button) BindText(data *binding.StringBinding) {
+	data.AddListener(b.SetText)
+}
+
+func (b *Button) BindIcon(data *binding.ResourceBinding) {
+	data.AddListener(b.SetIcon)
 }
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
 	button := &Button{DisableableWidget{}, label, DefaultButton, nil, nil,
-		tapped, false, false}
+		tapped, false, false, nil}
 
 	button.ExtendBaseWidget(button)
 	return button
@@ -250,7 +273,7 @@ func NewButton(label string, tapped func()) *Button {
 // NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
 	button := &Button{DisableableWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
-		tapped, false, false}
+		tapped, false, false, nil}
 
 	button.ExtendBaseWidget(button)
 	return button

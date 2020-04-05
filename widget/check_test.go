@@ -3,7 +3,9 @@ package widget
 import (
 	"fmt"
 	"testing"
+	"time"
 
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -215,6 +217,75 @@ func TestCheck_Disabled(t *testing.T) {
 	assert.True(t, check.Disabled())
 	check.Enable()
 	assert.False(t, check.Disabled())
+}
+
+func TestCheck_BindChecked_Set(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	selected := false
+	check := NewCheck("check", func(c bool) {
+		selected = c
+		done <- true
+	})
+	data := &binding.BoolBinding{}
+	check.BindChecked(data)
+
+	// Set by binding
+	data.Set(true)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Minute):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, true, selected)
+}
+
+func TestCheck_BindChecked_Tap(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	check := NewCheck("check", nil)
+
+	data := &binding.BoolBinding{}
+	check.BindChecked(data)
+	selected := false
+	data.AddListener(func(c bool) {
+		selected = c
+		done <- true
+	})
+
+	// Set by check
+	test.Tap(check)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, true, selected)
+	assert.Equal(t, true, data.Get())
+}
+
+func TestCheck_BindText(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	check := NewCheck("check", nil)
+	data := &binding.StringBinding{}
+	check.BindText(data)
+	data.AddListener(func(string) {
+		done <- true
+	})
+	data.Set("foobar")
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "foobar", check.Text)
 }
 
 func TestCheckRenderer_ApplyTheme(t *testing.T) {

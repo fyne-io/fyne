@@ -2,8 +2,10 @@ package widget
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -46,4 +48,24 @@ func TestSlider_VerticalLayout(t *testing.T) {
 
 	assert.Greater(t, wSize.Height, aSize.Height)
 	assert.Equal(t, theme.Padding(), aSize.Width)
+}
+
+func TestSlider_BindValue(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	slider := NewSlider(0, 100)
+	data := &binding.Float64Binding{}
+	slider.BindValue(data)
+	data.AddListener(func(float64) {
+		done <- true
+	})
+	data.Set(75.0)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, 75.0, slider.Value)
 }

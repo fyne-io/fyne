@@ -15,17 +15,10 @@ import (
 // BindingsScreen loads a data bindings example panel for the demo app
 func BindingsScreen() fyne.CanvasObject {
 	// TODO entry
-	// TODO form
-	// TODO group
-	// TODO list
-	// TODO menu
-	// TODO popup
+	// TODO list - []binding
 	// TODO scroller
-	// TODO splitter
-	// TODO tabber
-	// TODO table
-	// TODO toolbar
-	// TODO tree
+	// TODO table - [][]binding
+	// TODO tree - map[string][]string
 
 	// Button <-> ProgressBar <-> Button
 	goLeftButton := &widget.Button{}
@@ -37,34 +30,34 @@ func BindingsScreen() fyne.CanvasObject {
 	goString := &binding.StringBinding{}
 	goResource := &binding.ResourceBinding{}
 
-	binding.BindButtonTapped(goLeftButton, goBool)
-	binding.BindButtonTapped(goRightButton, goBool)
-	binding.BindButtonText(goLeftButton, goString)
-	binding.BindButtonText(goRightButton, goString)
-	binding.BindButtonIcon(goLeftButton, goResource)
-	binding.BindButtonIcon(goRightButton, goResource)
-	binding.BindProgressBarValue(goProgressBar, goFloat64)
+	goLeftButton.BindTapped(goBool)
+	goRightButton.BindTapped(goBool)
+	goLeftButton.BindText(goString)
+	goRightButton.BindText(goString)
+	goLeftButton.BindIcon(goResource)
+	goRightButton.BindIcon(goResource)
+	goProgressBar.BindValue(goFloat64)
 
-	goBool.AddBoolListener(func(b bool) {
+	goBool.AddListener(func(b bool) {
 		if b {
 			// Start goroutine to update progress bar
 			go func() {
 				for num := 0.0; num < 1.0; num += 0.01 {
 					time.Sleep(100 * time.Millisecond)
-					goFloat64.SetFloat64(num)
+					goFloat64.Set(num)
 				}
-				goFloat64.SetFloat64(1.0)
-				goBool.SetBool(false)
+				goFloat64.Set(1.0)
+				goBool.Set(false)
 			}()
-			goString.SetString("")
-			goResource.SetResource(theme.InfoIcon())
+			goString.Set("")
+			goResource.Set(theme.InfoIcon())
 		} else {
-			goString.SetString("Go")
-			goResource.SetResource(theme.MediaPlayIcon())
+			goString.Set("Go")
+			goResource.Set(theme.MediaPlayIcon())
 		}
 	})
 
-	goBool.SetBool(true)
+	goBool.Set(true)
 
 	// Check <-> Label <-> Check
 	// FIXME checkRenderer.Layout can be called before checkRenderer.Refresh
@@ -77,22 +70,22 @@ func BindingsScreen() fyne.CanvasObject {
 	onOffString := &binding.StringBinding{}
 	onOffResource := &binding.ResourceBinding{}
 
-	binding.BindCheckChanged(onOffLeftCheck, onOffBool)
-	binding.BindCheckChanged(onOffRightCheck, onOffBool)
-	binding.BindCheckText(onOffLeftCheck, onOffString)
-	binding.BindCheckText(onOffRightCheck, onOffString)
-	binding.BindLabelText(onOffLabel, onOffString)
+	onOffLeftCheck.BindChecked(onOffBool)
+	onOffRightCheck.BindChecked(onOffBool)
+	onOffLeftCheck.BindText(onOffString)
+	onOffRightCheck.BindText(onOffString)
+	onOffLabel.BindText(onOffString)
 
-	onOffBool.AddBoolListener(func(b bool) {
+	onOffBool.AddListener(func(b bool) {
 		if b {
-			onOffString.SetString("On")
-			onOffResource.SetResource(theme.CheckButtonCheckedIcon())
+			onOffString.Set("On")
+			onOffResource.Set(theme.CheckButtonCheckedIcon())
 		} else {
-			onOffString.SetString("Off")
-			onOffResource.SetResource(theme.CheckButtonIcon())
+			onOffString.Set("Off")
+			onOffResource.Set(theme.CheckButtonIcon())
 		}
 	})
-	onOffBool.SetBool(true)
+	onOffBool.Set(true)
 
 	// Radio <-> Icon <-> Radio
 	// FIXME radioRenderer.Layout can be called before radioRenderer.Refresh
@@ -111,23 +104,23 @@ func BindingsScreen() fyne.CanvasObject {
 	clipboardString := &binding.StringBinding{}
 	clipboardResource := &binding.ResourceBinding{}
 
-	binding.BindRadioChanged(clipboardLeftRadio, clipboardString)
-	binding.BindRadioChanged(clipboardRightRadio, clipboardString)
-	binding.BindIconResource(clipboardIcon, clipboardResource)
+	clipboardLeftRadio.BindSelected(clipboardString)
+	clipboardRightRadio.BindSelected(clipboardString)
+	clipboardIcon.BindResource(clipboardResource)
 
-	clipboardString.AddStringListener(func(s string) {
+	clipboardString.AddListener(func(s string) {
 		switch s {
 		case "Cut":
-			clipboardResource.SetResource(theme.ContentCutIcon())
+			clipboardResource.Set(theme.ContentCutIcon())
 		case "Copy":
-			clipboardResource.SetResource(theme.ContentCopyIcon())
+			clipboardResource.Set(theme.ContentCopyIcon())
 		case "Paste":
-			clipboardResource.SetResource(theme.ContentPasteIcon())
+			clipboardResource.Set(theme.ContentPasteIcon())
 		default:
-			clipboardResource.SetResource(theme.QuestionIcon())
+			clipboardResource.Set(theme.QuestionIcon())
 		}
 	})
-	clipboardString.SetString(options[0])
+	clipboardString.Set(options[0])
 
 	// Select <-> Hyperlink <-> Select
 	urls := []string{
@@ -141,19 +134,19 @@ func BindingsScreen() fyne.CanvasObject {
 	urlString := &binding.StringBinding{}
 	urlURL := &binding.URLBinding{}
 
-	binding.BindSelectChanged(urlLeftSelect, urlString)
-	binding.BindSelectChanged(urlRightSelect, urlString)
-	binding.BindHyperlinkText(urlHyperlink, urlString)
-	binding.BindHyperlinkURL(urlHyperlink, urlURL)
+	urlLeftSelect.BindSelected(urlString)
+	urlRightSelect.BindSelected(urlString)
+	urlHyperlink.BindText(urlString)
+	urlHyperlink.BindURL(urlURL)
 
-	urlString.AddStringListener(func(s string) {
+	urlString.AddListener(func(s string) {
 		u, err := url.Parse(s)
 		if err != nil {
 			fyne.LogError("Failed to parse URL: "+s, err)
 		}
-		urlURL.SetURL(u)
+		urlURL.Set(u)
 	})
-	urlString.SetString(urls[0])
+	urlString.Set(urls[0])
 
 	// Slider <-> Label <-> Slider
 	slideLeftSlider := &widget.Slider{Max: 1, Step: 0.01}
@@ -163,14 +156,14 @@ func BindingsScreen() fyne.CanvasObject {
 	slideFloat64 := &binding.Float64Binding{}
 	slideString := &binding.StringBinding{}
 
-	binding.BindSliderChanged(slideLeftSlider, slideFloat64)
-	binding.BindSliderChanged(slideRightSlider, slideFloat64)
-	binding.BindLabelText(slideLabel, slideString)
+	slideLeftSlider.BindValue(slideFloat64)
+	slideRightSlider.BindValue(slideFloat64)
+	slideLabel.BindText(slideString)
 
-	slideFloat64.AddFloat64Listener(func(f float64) {
-		slideString.SetString(fmt.Sprintf("%f", f))
+	slideFloat64.AddListener(func(f float64) {
+		slideString.Set(fmt.Sprintf("%f", f))
 	})
-	slideFloat64.SetFloat64(0.25)
+	slideFloat64.Set(0.25)
 
 	return fyne.NewContainerWithLayout(layout.NewGridLayout(3),
 		widget.NewLabel("Left Input"), widget.NewLabel("Output"), widget.NewLabel("Right Input"),

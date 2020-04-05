@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 )
@@ -86,7 +87,12 @@ type ProgressBar struct {
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
+	if p.Value == v {
+		return
+	}
+
 	p.Value = v
+
 	p.refresh(p)
 }
 
@@ -108,6 +114,17 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	label.Alignment = fyne.TextAlignCenter
 	return &progressRenderer{[]fyne.CanvasObject{bar, label}, bar, label, p}
 }
+
+func (p *ProgressBar) BindValue(data *binding.Float64Binding) {
+	data.AddListener(p.SetValue)
+}
+
+/* TODO
+func (p *ProgressBar) BindMax(data *binding.Float64Binding) {
+}
+func (p *ProgressBar) BindMin(data *binding.Float64Binding) {
+}
+*/
 
 // NewProgressBar creates a new progress bar widget.
 // The default Min is 0 and Max is 1, Values set should be between those numbers.

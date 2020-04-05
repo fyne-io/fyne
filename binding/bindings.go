@@ -9,650 +9,347 @@ import (
 	"net/url"
 )
 
+func typeError(e string, a interface{}) {
+	fyne.LogError(fmt.Sprintf("Incorrect type: expected '%s', got '%v'", e, a), nil)
+}
+
 type BoolBinding struct {
-	BaseBinding
-	Value bool
+	itemBinding
+	value bool
 }
 
-func (b *BoolBinding) GetBool() bool {
-	return b.Value
+func NewBoolBinding(value bool) *BoolBinding {
+	return &BoolBinding{value: value}
 }
 
-func (b *BoolBinding) Set(value interface{}) {
-	v, ok := value.(bool)
-	if ok {
-		b.SetBool(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'bool', got '%v'", value), nil)
-	}
+func (b *BoolBinding) Get() bool {
+	return b.value
 }
 
-func (b *BoolBinding) SetBool(value bool) {
-	if b.Value != value {
-		b.Value = value
+func (b *BoolBinding) Set(value bool) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *BoolBinding) AddBoolListener(listener func(bool)) {
+func (b *BoolBinding) AddListener(listener func(bool)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(bool)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'bool', got '%v'", value), nil)
+			typeError("bool", value)
 		}
 	})
 }
 
 type ByteBinding struct {
-	BaseBinding
-	Value byte
+	itemBinding
+	value byte
 }
 
-func (b *ByteBinding) GetByte() byte {
-	return b.Value
+func NewByteBinding(value byte) *ByteBinding {
+	return &ByteBinding{value: value}
 }
 
-func (b *ByteBinding) Set(value interface{}) {
-	v, ok := value.(byte)
-	if ok {
-		b.SetByte(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'byte', got '%v'", value), nil)
-	}
+func (b *ByteBinding) Get() byte {
+	return b.value
 }
 
-func (b *ByteBinding) SetByte(value byte) {
-	if b.Value != value {
-		b.Value = value
+func (b *ByteBinding) Set(value byte) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *ByteBinding) AddByteListener(listener func(byte)) {
+func (b *ByteBinding) AddListener(listener func(byte)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(byte)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'byte', got '%v'", value), nil)
-		}
-	})
-}
-
-type Float32Binding struct {
-	BaseBinding
-	Value float32
-}
-
-func (b *Float32Binding) GetFloat32() float32 {
-	return b.Value
-}
-
-func (b *Float32Binding) Set(value interface{}) {
-	v, ok := value.(float32)
-	if ok {
-		b.SetFloat32(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'float32', got '%v'", value), nil)
-	}
-}
-
-func (b *Float32Binding) SetFloat32(value float32) {
-	if b.Value != value {
-		b.Value = value
-		b.notify(value)
-	}
-}
-
-func (b *Float32Binding) AddFloat32Listener(listener func(float32)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(float32)
-		if ok {
-			listener(v)
-		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'float32', got '%v'", value), nil)
+			typeError("byte", value)
 		}
 	})
 }
 
 type Float64Binding struct {
-	BaseBinding
-	Value float64
+	itemBinding
+	value float64
 }
 
-func (b *Float64Binding) GetFloat64() float64 {
-	return b.Value
+func NewFloat64Binding(value float64) *Float64Binding {
+	return &Float64Binding{value: value}
 }
 
-func (b *Float64Binding) Set(value interface{}) {
-	v, ok := value.(float64)
-	if ok {
-		b.SetFloat64(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'float64', got '%v'", value), nil)
-	}
+func (b *Float64Binding) Get() float64 {
+	return b.value
 }
 
-func (b *Float64Binding) SetFloat64(value float64) {
-	if b.Value != value {
-		b.Value = value
+func (b *Float64Binding) Set(value float64) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *Float64Binding) AddFloat64Listener(listener func(float64)) {
+func (b *Float64Binding) AddListener(listener func(float64)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(float64)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'float64', got '%v'", value), nil)
+			typeError("float64", value)
 		}
 	})
 }
 
 type IntBinding struct {
-	BaseBinding
-	Value int
+	itemBinding
+	value int
 }
 
-func (b *IntBinding) GetInt() int {
-	return b.Value
+func NewIntBinding(value int) *IntBinding {
+	return &IntBinding{value: value}
 }
 
-func (b *IntBinding) Set(value interface{}) {
-	v, ok := value.(int)
-	if ok {
-		b.SetInt(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int', got '%v'", value), nil)
-	}
+func (b *IntBinding) Get() int {
+	return b.value
 }
 
-func (b *IntBinding) SetInt(value int) {
-	if b.Value != value {
-		b.Value = value
+func (b *IntBinding) Set(value int) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *IntBinding) AddIntListener(listener func(int)) {
+func (b *IntBinding) AddListener(listener func(int)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(int)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int', got '%v'", value), nil)
-		}
-	})
-}
-
-type Int8Binding struct {
-	BaseBinding
-	Value int8
-}
-
-func (b *Int8Binding) GetInt8() int8 {
-	return b.Value
-}
-
-func (b *Int8Binding) Set(value interface{}) {
-	v, ok := value.(int8)
-	if ok {
-		b.SetInt8(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int8', got '%v'", value), nil)
-	}
-}
-
-func (b *Int8Binding) SetInt8(value int8) {
-	if b.Value != value {
-		b.Value = value
-		b.notify(value)
-	}
-}
-
-func (b *Int8Binding) AddInt8Listener(listener func(int8)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(int8)
-		if ok {
-			listener(v)
-		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int8', got '%v'", value), nil)
-		}
-	})
-}
-
-type Int16Binding struct {
-	BaseBinding
-	Value int16
-}
-
-func (b *Int16Binding) GetInt16() int16 {
-	return b.Value
-}
-
-func (b *Int16Binding) Set(value interface{}) {
-	v, ok := value.(int16)
-	if ok {
-		b.SetInt16(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int16', got '%v'", value), nil)
-	}
-}
-
-func (b *Int16Binding) SetInt16(value int16) {
-	if b.Value != value {
-		b.Value = value
-		b.notify(value)
-	}
-}
-
-func (b *Int16Binding) AddInt16Listener(listener func(int16)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(int16)
-		if ok {
-			listener(v)
-		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int16', got '%v'", value), nil)
-		}
-	})
-}
-
-type Int32Binding struct {
-	BaseBinding
-	Value int32
-}
-
-func (b *Int32Binding) GetInt32() int32 {
-	return b.Value
-}
-
-func (b *Int32Binding) Set(value interface{}) {
-	v, ok := value.(int32)
-	if ok {
-		b.SetInt32(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int32', got '%v'", value), nil)
-	}
-}
-
-func (b *Int32Binding) SetInt32(value int32) {
-	if b.Value != value {
-		b.Value = value
-		b.notify(value)
-	}
-}
-
-func (b *Int32Binding) AddInt32Listener(listener func(int32)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(int32)
-		if ok {
-			listener(v)
-		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int32', got '%v'", value), nil)
+			typeError("int", value)
 		}
 	})
 }
 
 type Int64Binding struct {
-	BaseBinding
-	Value int64
+	itemBinding
+	value int64
 }
 
-func (b *Int64Binding) GetInt64() int64 {
-	return b.Value
+func NewInt64Binding(value int64) *Int64Binding {
+	return &Int64Binding{value: value}
 }
 
-func (b *Int64Binding) Set(value interface{}) {
-	v, ok := value.(int64)
-	if ok {
-		b.SetInt64(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int64', got '%v'", value), nil)
-	}
+func (b *Int64Binding) Get() int64 {
+	return b.value
 }
 
-func (b *Int64Binding) SetInt64(value int64) {
-	if b.Value != value {
-		b.Value = value
+func (b *Int64Binding) Set(value int64) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *Int64Binding) AddInt64Listener(listener func(int64)) {
+func (b *Int64Binding) AddListener(listener func(int64)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(int64)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'int64', got '%v'", value), nil)
+			typeError("int64", value)
 		}
 	})
 }
 
 type UintBinding struct {
-	BaseBinding
-	Value uint
+	itemBinding
+	value uint
 }
 
-func (b *UintBinding) GetUint() uint {
-	return b.Value
+func NewUintBinding(value uint) *UintBinding {
+	return &UintBinding{value: value}
 }
 
-func (b *UintBinding) Set(value interface{}) {
-	v, ok := value.(uint)
-	if ok {
-		b.SetUint(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint', got '%v'", value), nil)
-	}
+func (b *UintBinding) Get() uint {
+	return b.value
 }
 
-func (b *UintBinding) SetUint(value uint) {
-	if b.Value != value {
-		b.Value = value
+func (b *UintBinding) Set(value uint) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *UintBinding) AddUintListener(listener func(uint)) {
+func (b *UintBinding) AddListener(listener func(uint)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(uint)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint', got '%v'", value), nil)
-		}
-	})
-}
-
-type Uint8Binding struct {
-	BaseBinding
-	Value uint8
-}
-
-func (b *Uint8Binding) GetUint8() uint8 {
-	return b.Value
-}
-
-func (b *Uint8Binding) Set(value interface{}) {
-	v, ok := value.(uint8)
-	if ok {
-		b.SetUint8(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint8', got '%v'", value), nil)
-	}
-}
-
-func (b *Uint8Binding) SetUint8(value uint8) {
-	if b.Value != value {
-		b.Value = value
-		b.notify(value)
-	}
-}
-
-func (b *Uint8Binding) AddUint8Listener(listener func(uint8)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(uint8)
-		if ok {
-			listener(v)
-		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint8', got '%v'", value), nil)
-		}
-	})
-}
-
-type Uint16Binding struct {
-	BaseBinding
-	Value uint16
-}
-
-func (b *Uint16Binding) GetUint16() uint16 {
-	return b.Value
-}
-
-func (b *Uint16Binding) Set(value interface{}) {
-	v, ok := value.(uint16)
-	if ok {
-		b.SetUint16(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint16', got '%v'", value), nil)
-	}
-}
-
-func (b *Uint16Binding) SetUint16(value uint16) {
-	if b.Value != value {
-		b.Value = value
-		b.notify(value)
-	}
-}
-
-func (b *Uint16Binding) AddUint16Listener(listener func(uint16)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(uint16)
-		if ok {
-			listener(v)
-		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint16', got '%v'", value), nil)
-		}
-	})
-}
-
-type Uint32Binding struct {
-	BaseBinding
-	Value uint32
-}
-
-func (b *Uint32Binding) GetUint32() uint32 {
-	return b.Value
-}
-
-func (b *Uint32Binding) Set(value interface{}) {
-	v, ok := value.(uint32)
-	if ok {
-		b.SetUint32(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint32', got '%v'", value), nil)
-	}
-}
-
-func (b *Uint32Binding) SetUint32(value uint32) {
-	if b.Value != value {
-		b.Value = value
-		b.notify(value)
-	}
-}
-
-func (b *Uint32Binding) AddUint32Listener(listener func(uint32)) {
-	b.addListener(func(value interface{}) {
-		v, ok := value.(uint32)
-		if ok {
-			listener(v)
-		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint32', got '%v'", value), nil)
+			typeError("uint", value)
 		}
 	})
 }
 
 type Uint64Binding struct {
-	BaseBinding
-	Value uint64
+	itemBinding
+	value uint64
 }
 
-func (b *Uint64Binding) GetUint64() uint64 {
-	return b.Value
+func NewUint64Binding(value uint64) *Uint64Binding {
+	return &Uint64Binding{value: value}
 }
 
-func (b *Uint64Binding) Set(value interface{}) {
-	v, ok := value.(uint64)
-	if ok {
-		b.SetUint64(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint64', got '%v'", value), nil)
-	}
+func (b *Uint64Binding) Get() uint64 {
+	return b.value
 }
 
-func (b *Uint64Binding) SetUint64(value uint64) {
-	if b.Value != value {
-		b.Value = value
+func (b *Uint64Binding) Set(value uint64) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *Uint64Binding) AddUint64Listener(listener func(uint64)) {
+func (b *Uint64Binding) AddListener(listener func(uint64)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(uint64)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'uint64', got '%v'", value), nil)
+			typeError("uint64", value)
 		}
 	})
 }
 
 type ResourceBinding struct {
-	BaseBinding
-	Value fyne.Resource
+	itemBinding
+	value fyne.Resource
 }
 
-func (b *ResourceBinding) GetResource() fyne.Resource {
-	return b.Value
+func NewResourceBinding(value fyne.Resource) *ResourceBinding {
+	return &ResourceBinding{value: value}
 }
 
-func (b *ResourceBinding) Set(value interface{}) {
-	v, ok := value.(fyne.Resource)
-	if ok {
-		b.SetResource(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'fyne.Resource', got '%v'", value), nil)
-	}
+func (b *ResourceBinding) Get() fyne.Resource {
+	return b.value
 }
 
-func (b *ResourceBinding) SetResource(value fyne.Resource) {
-	if b.Value != value {
-		b.Value = value
+func (b *ResourceBinding) Set(value fyne.Resource) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *ResourceBinding) AddResourceListener(listener func(fyne.Resource)) {
+func (b *ResourceBinding) AddListener(listener func(fyne.Resource)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(fyne.Resource)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'fyne.Resource', got '%v'", value), nil)
+			typeError("fyne.Resource", value)
 		}
 	})
 }
 
 type RuneBinding struct {
-	BaseBinding
-	Value rune
+	itemBinding
+	value rune
 }
 
-func (b *RuneBinding) GetRune() rune {
-	return b.Value
+func NewRuneBinding(value rune) *RuneBinding {
+	return &RuneBinding{value: value}
 }
 
-func (b *RuneBinding) Set(value interface{}) {
-	v, ok := value.(rune)
-	if ok {
-		b.SetRune(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'rune', got '%v'", value), nil)
-	}
+func (b *RuneBinding) Get() rune {
+	return b.value
 }
 
-func (b *RuneBinding) SetRune(value rune) {
-	if b.Value != value {
-		b.Value = value
+func (b *RuneBinding) Set(value rune) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *RuneBinding) AddRuneListener(listener func(rune)) {
+func (b *RuneBinding) AddListener(listener func(rune)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(rune)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'rune', got '%v'", value), nil)
+			typeError("rune", value)
 		}
 	})
 }
 
 type StringBinding struct {
-	BaseBinding
-	Value string
+	itemBinding
+	value string
 }
 
-func (b *StringBinding) GetString() string {
-	return b.Value
+func NewStringBinding(value string) *StringBinding {
+	return &StringBinding{value: value}
 }
 
-func (b *StringBinding) Set(value interface{}) {
-	v, ok := value.(string)
-	if ok {
-		b.SetString(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected 'string', got '%v'", value), nil)
-	}
+func (b *StringBinding) Get() string {
+	return b.value
 }
 
-func (b *StringBinding) SetString(value string) {
-	if b.Value != value {
-		b.Value = value
+func (b *StringBinding) Set(value string) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *StringBinding) AddStringListener(listener func(string)) {
+func (b *StringBinding) AddListener(listener func(string)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(string)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected 'string', got '%v'", value), nil)
+			typeError("string", value)
 		}
 	})
 }
 
 type URLBinding struct {
-	BaseBinding
-	Value *url.URL
+	itemBinding
+	value *url.URL
 }
 
-func (b *URLBinding) GetURL() *url.URL {
-	return b.Value
+func NewURLBinding(value *url.URL) *URLBinding {
+	return &URLBinding{value: value}
 }
 
-func (b *URLBinding) Set(value interface{}) {
-	v, ok := value.(*url.URL)
-	if ok {
-		b.SetURL(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected '*url.URL', got '%v'", value), nil)
-	}
+func (b *URLBinding) Get() *url.URL {
+	return b.value
 }
 
-func (b *URLBinding) SetURL(value *url.URL) {
-	if b.Value != value {
-		b.Value = value
+func (b *URLBinding) Set(value *url.URL) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *URLBinding) AddURLListener(listener func(*url.URL)) {
+func (b *URLBinding) AddListener(listener func(*url.URL)) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.(*url.URL)
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected '*url.URL', got '%v'", value), nil)
+			typeError("*url.URL", value)
 		}
 	})
 }

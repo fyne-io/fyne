@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
@@ -102,6 +103,8 @@ type Check struct {
 
 	focused bool
 	hovered bool
+
+	changeBinding *binding.BoolBinding
 }
 
 // SetChecked sets the the checked state and refreshes widget
@@ -112,6 +115,10 @@ func (c *Check) SetChecked(checked bool) {
 
 	c.Checked = checked
 
+	if c.changeBinding != nil {
+		c.changeBinding.Set(c.Checked)
+	}
+
 	if c.OnChanged != nil {
 		c.OnChanged(c.Checked)
 	}
@@ -121,9 +128,10 @@ func (c *Check) SetChecked(checked bool) {
 
 // SetText allows the check label to be changed
 func (c *Check) SetText(text string) {
-	c.Text = text
-
-	c.Refresh()
+	if c.Text != text {
+		c.Text = text
+		c.Refresh()
+	}
 }
 
 // Hide this widget, if it was previously visible
@@ -183,6 +191,15 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	return &checkRenderer{icon, text, focusIndicator, []fyne.CanvasObject{focusIndicator, icon, text}, c}
 }
 
+func (c *Check) BindChecked(data *binding.BoolBinding) {
+	c.changeBinding = data
+	data.AddListener(c.SetChecked)
+}
+
+func (c *Check) BindText(data *binding.StringBinding) {
+	data.AddListener(c.SetText)
+}
+
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
 	c := &Check{
@@ -192,6 +209,7 @@ func NewCheck(label string, changed func(bool)) *Check {
 		changed,
 		false,
 		false,
+		nil,
 	}
 
 	c.ExtendBaseWidget(c)

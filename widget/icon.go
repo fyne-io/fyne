@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 )
@@ -61,8 +62,10 @@ type Icon struct {
 
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
-	i.Resource = res
-	i.Refresh()
+	if i.Resource != res {
+		i.Resource = res
+		i.Refresh()
+	}
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -79,6 +82,10 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	render.objects = []fyne.CanvasObject{}
 
 	return render
+}
+
+func (i *Icon) BindResource(data *binding.ResourceBinding) {
+	data.AddListener(i.SetResource)
 }
 
 // NewIcon returns a new icon widget that displays a themed icon resource

@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
@@ -99,6 +100,8 @@ type Select struct {
 
 	hovered bool
 	popUp   *PopUp
+
+	changeBinding *binding.StringBinding
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -211,6 +214,9 @@ func (s *Select) ClearSelected() {
 
 // SetSelected sets the current option of the select widget
 func (s *Select) SetSelected(text string) {
+	if s.Selected == text {
+		return
+	}
 	for _, option := range s.Options {
 		if text == option {
 			s.updateSelected(text)
@@ -221,6 +227,10 @@ func (s *Select) SetSelected(text string) {
 func (s *Select) updateSelected(text string) {
 	s.Selected = text
 
+	if s.changeBinding != nil {
+		s.changeBinding.Set(s.Selected)
+	}
+
 	if s.OnChanged != nil {
 		s.OnChanged(s.Selected)
 	}
@@ -228,9 +238,19 @@ func (s *Select) updateSelected(text string) {
 	s.Refresh()
 }
 
+func (s *Select) BindSelected(data *binding.StringBinding) {
+	s.changeBinding = data
+	data.AddListener(s.SetSelected)
+}
+
+/* TODO
+func (s *Select) BindOptions(data *binding.SliceBinding) {
+}
+*/
+
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil, nil}
 	s.ExtendBaseWidget(s)
 	return s
 }

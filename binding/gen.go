@@ -19,61 +19,52 @@ package binding
 import (
 {{ range . }}	"{{ . }}"
 {{ end }})
+
+func typeError(e string, a interface{}) {
+	fyne.LogError(fmt.Sprintf("Incorrect type: expected '%s', got '%v'", e, a), nil)
+}
 `
-const unitBindingTemplate = `
+
+const bindingTemplate = `
 type {{ .Name }}Binding struct {
-	BaseBinding
-	Value {{ .Type }}
+	itemBinding
+	value {{ .Type }}
 }
 
-func (b *{{ .Name }}Binding) Get{{ .Name }}() {{ .Type }} {
-	return b.Value
+func New{{ .Name }}Binding(value {{ .Type }}) *{{ .Name }}Binding {
+	return &{{ .Name }}Binding{value: value}
 }
 
-func (b *{{ .Name }}Binding) Set(value interface{}) {
-	v, ok := value.({{ .Type }})
-	if ok {
-		b.Set{{ .Name }}(v)
-	} else {
-		fyne.LogError(fmt.Sprintf("Incorrect type: expected '{{ .Type }}', got '%v'", value), nil)
-	}
+func (b *{{ .Name }}Binding) Get() {{ .Type }} {
+	return b.value
 }
 
-func (b *{{ .Name }}Binding) Set{{ .Name }}(value {{ .Type }}) {
-	if b.Value != value {
-		b.Value = value
+func (b *{{ .Name }}Binding) Set(value {{ .Type }}) {
+	if b.value != value {
+		b.value = value
 		b.notify(value)
 	}
 }
 
-func (b *{{ .Name }}Binding) Add{{ .Name }}Listener(listener func({{ .Type }})) {
+func (b *{{ .Name }}Binding) AddListener(listener func({{ .Type }})) {
 	b.addListener(func(value interface{}) {
 		v, ok := value.({{ .Type }})
 		if ok {
 			listener(v)
 		} else {
-			fyne.LogError(fmt.Sprintf("Incorrect type: expected '{{ .Type }}', got '%v'", value), nil)
+			typeError("{{ .Type }}", value)
 		}
 	})
 }
 `
 
-func writeHeader(f *os.File, t *template.Template, imports []string) {
-	if err := t.Execute(f, imports); err != nil {
-		fyne.LogError("Unable to write file "+f.Name(), err)
-	}
+type BindingTemplate struct {
+	Name, Type string
 }
 
-func writeUnitBinding(f *os.File, t *template.Template, name, typ string) {
-	data := struct {
-		Name, Type string
-	}{
-		Name: name,
-		Type: typ,
-	}
-	if err := t.Execute(f, data); err != nil {
+func writeFile(f *os.File, t *template.Template, d interface{}) {
+	if err := t.Execute(f, d); err != nil {
 		fyne.LogError("Unable to write file "+f.Name(), err)
-		return
 	}
 }
 
@@ -88,39 +79,36 @@ func main() {
 	}
 
 	ht := template.Must(template.New("header").Parse(headerTemplate))
-	writeHeader(f, ht, []string{
+	writeFile(f, ht, []string{
 		"fmt",
 		"fyne.io/fyne",
 		"net/url",
 	})
 
-	ubt := template.Must(template.New("binding").Parse(unitBindingTemplate))
+	t := template.Must(template.New("binding").Parse(bindingTemplate))
 
-	writeUnitBinding(f, ubt, "Bool", "bool")
-	writeUnitBinding(f, ubt, "Byte", "byte")
-
-	writeUnitBinding(f, ubt, "Float32", "float32")
-	writeUnitBinding(f, ubt, "Float64", "float64")
-
-	writeUnitBinding(f, ubt, "Int", "int")
-	writeUnitBinding(f, ubt, "Int8", "int8")
-	writeUnitBinding(f, ubt, "Int16", "int16")
-	writeUnitBinding(f, ubt, "Int32", "int32")
-	writeUnitBinding(f, ubt, "Int64", "int64")
-
-	writeUnitBinding(f, ubt, "Uint", "uint")
-	writeUnitBinding(f, ubt, "Uint8", "uint8")
-	writeUnitBinding(f, ubt, "Uint16", "uint16")
-	writeUnitBinding(f, ubt, "Uint32", "uint32")
-	writeUnitBinding(f, ubt, "Uint64", "uint64")
-
-	writeUnitBinding(f, ubt, "Resource", "fyne.Resource")
-
-	writeUnitBinding(f, ubt, "Rune", "rune")
-
-	writeUnitBinding(f, ubt, "String", "string")
-
-	writeUnitBinding(f, ubt, "URL", "*url.URL")
+	for _, b := range []*BindingTemplate{
+		&BindingTemplate{Name: "Bool", Type: "bool"},
+		&BindingTemplate{Name: "Byte", Type: "byte"},
+		//		&BindingTemplate{Name:"Float32",Type:"float32"},
+		&BindingTemplate{Name: "Float64", Type: "float64"},
+		&BindingTemplate{Name: "Int", Type: "int"},
+		//		&BindingTemplate{Name:"Int8",Type:"int8"},
+		//		&BindingTemplate{Name:"Int16",Type:"int16"},
+		//		&BindingTemplate{Name:"Int32",Type:"int32"},
+		&BindingTemplate{Name: "Int64", Type: "int64"},
+		&BindingTemplate{Name: "Uint", Type: "uint"},
+		//		&BindingTemplate{Name:"Uint8",Type:"uint8"},
+		//		&BindingTemplate{Name:"Uint16",Type:"uint16"},
+		//		&BindingTemplate{Name:"Uint32",Type:"uint32"},
+		&BindingTemplate{Name: "Uint64", Type: "uint64"},
+		&BindingTemplate{Name: "Resource", Type: "fyne.Resource"},
+		&BindingTemplate{Name: "Rune", Type: "rune"},
+		&BindingTemplate{Name: "String", Type: "string"},
+		&BindingTemplate{Name: "URL", Type: "*url.URL"},
+	} {
+		writeFile(f, t, b)
+	}
 
 	f.Close()
 }

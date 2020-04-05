@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/theme"
 )
 
@@ -43,8 +44,10 @@ func (l *Label) Refresh() {
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
-	l.Text = text
-	l.textProvider.SetText(text) // calls refresh
+	if l.Text != text {
+		l.Text = text
+		l.textProvider.SetText(text) // calls refresh
+	}
 }
 
 // textAlign tells the rendering textProvider our alignment
@@ -90,4 +93,8 @@ func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 func (l *Label) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
 	return l.BaseWidget.MinSize()
+}
+
+func (l *Label) BindText(data *binding.StringBinding) {
+	data.AddListener(l.SetText)
 }

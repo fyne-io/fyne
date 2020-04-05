@@ -2,10 +2,11 @@ package widget
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/test"
-	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -105,4 +106,24 @@ func TestLabel_ApplyTheme(t *testing.T) {
 	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
 	text.Show()
 	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+}
+
+func TestLabel_BindText(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	label := NewLabel("label")
+	data := &binding.StringBinding{}
+	label.BindText(data)
+	data.AddListener(func(string) {
+		done <- true
+	})
+	data.Set("foobar")
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "foobar", label.Text)
 }

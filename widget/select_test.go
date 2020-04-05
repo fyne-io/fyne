@@ -2,8 +2,10 @@ package widget
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -180,20 +182,6 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	assert.Less(t, cont.Position().X, comboPos.X, "window too small so we render to the left")
 }
 
-func TestSelectRenderer_ApplyTheme(t *testing.T) {
-	sel := &Select{}
-	render := test.WidgetRenderer(sel).(*selectRenderer)
-
-	textSize := render.label.TextSize
-	customTextSize := textSize
-	withTestTheme(func() {
-		render.Refresh()
-		customTextSize = render.label.TextSize
-	})
-
-	assert.NotEqual(t, textSize, customTextSize)
-}
-
 func TestSelect_Move(t *testing.T) {
 	// fresh app for this test
 	app := test.NewApp()
@@ -214,4 +202,73 @@ func TestSelect_Move(t *testing.T) {
 
 	combo.Move(fyne.NewPos(20, 20))
 	assert.Equal(t, fyne.NewPos(20, 49), combo.popUp.innerPos)
+}
+
+func TestSelect_BindSelected_Set(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	selected := ""
+	combo := NewSelect([]string{"a", "b", "c"}, func(value string) {
+		selected = value
+	})
+	data := &binding.StringBinding{}
+	combo.BindSelected(data)
+	data.AddListener(func(string) {
+		done <- true
+	})
+	data.Set("b")
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "b", selected)
+}
+
+func TestSelect_BindSelected_Tap(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	combo := NewSelect([]string{"a", "b", "c"}, nil)
+
+	data := &binding.StringBinding{}
+	combo.BindSelected(data)
+	selected := ""
+	data.AddListener(func(s string) {
+		selected = s
+		done <- true
+	})
+
+	test.Tap(combo)
+
+	// Get Popup
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
+	assert.Equal(t, 1, len(canvas.Overlays().List()))
+	popup := canvas.Overlays().Top().(*PopUp)
+	box := popup.Content.(*Box)
+	test.Tap(box.Children[1].(fyne.Tappable))
+
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "b", selected)
+}
+
+func TestSelectRenderer_ApplyTheme(t *testing.T) {
+	sel := &Select{}
+	render := test.WidgetRenderer(sel).(*selectRenderer)
+
+	textSize := render.label.TextSize
+	customTextSize := textSize
+	withTestTheme(func() {
+		render.Refresh()
+		customTextSize = render.label.TextSize
+	})
+
+	assert.NotEqual(t, textSize, customTextSize)
 }

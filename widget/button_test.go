@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -127,6 +128,68 @@ func TestButton_Tapped(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for button tap")
 		}
 	}()
+}
+
+func TestButton_BindTapped(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	button := NewButton("button", nil)
+	data := &binding.BoolBinding{}
+	button.BindTapped(data)
+	tapped := false
+	data.AddListener(func(b bool) {
+		tapped = b
+		done <- true
+	})
+	test.Tap(button)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.True(t, tapped)
+}
+
+func TestButton_BindText(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	button := NewButton("button", nil)
+	data := &binding.StringBinding{}
+	button.BindText(data)
+	data.AddListener(func(string) {
+		done <- true
+	})
+	data.Set("foobar")
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "foobar", button.Text)
+}
+
+func TestButton_BindIcon(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	button := NewButtonWithIcon("button", theme.WarningIcon(), nil)
+	data := &binding.ResourceBinding{}
+	button.BindIcon(data)
+	data.AddListener(func(fyne.Resource) {
+		done <- true
+	})
+	data.Set(theme.InfoIcon())
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, theme.InfoIcon(), button.Icon)
 }
 
 func TestButtonRenderer_Layout(t *testing.T) {

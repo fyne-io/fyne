@@ -3,9 +3,11 @@ package widget
 import (
 	"net/url"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
-	_ "fyne.io/fyne/test"
+	"fyne.io/fyne/binding"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,4 +55,50 @@ func TestHyperlink_SetUrl(t *testing.T) {
 	assert.Nil(t, err)
 	hyperlink.SetURL(sURL)
 	assert.Equal(t, sURL, hyperlink.URL)
+}
+
+func TestHyperlink_BindText(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	u, err := url.Parse("https://fyne.io")
+	assert.Nil(t, err)
+	hyperlink := NewHyperlink("hyperlink", u)
+	data := &binding.StringBinding{}
+	hyperlink.BindText(data)
+	data.AddListener(func(string) {
+		done <- true
+	})
+	data.Set("foobar")
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "foobar", hyperlink.Text)
+}
+
+func TestHyperlink_BindURL(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	u, err := url.Parse("https://fyne.io")
+	assert.Nil(t, err)
+	hyperlink := NewHyperlink("hyperlink", u)
+	data := &binding.URLBinding{}
+	hyperlink.BindURL(data)
+	u, err = url.Parse("https://github.com/fyne-io/fyne")
+	assert.Nil(t, err)
+	data.AddListener(func(*url.URL) {
+		done <- true
+	})
+	data.Set(u)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, u, hyperlink.URL)
 }

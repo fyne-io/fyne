@@ -2,8 +2,10 @@ package widget
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,6 +19,26 @@ func TestProgressBar_SetValue(t *testing.T) {
 
 	bar.SetValue(.5)
 	assert.Equal(t, .5, bar.Value)
+}
+
+func TestProgressBar_BindValue(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	progressBar := NewProgressBar()
+	data := &binding.Float64Binding{}
+	progressBar.BindValue(data)
+	data.AddListener(func(float64) {
+		done <- true
+	})
+	data.Set(0.75)
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, 0.75, progressBar.Value)
 }
 
 func TestProgressRenderer_Layout(t *testing.T) {

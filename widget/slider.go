@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 )
@@ -31,6 +32,8 @@ type Slider struct {
 
 	Orientation Orientation
 	OnChanged   func(float64)
+
+	changeBinding *binding.Float64Binding
 }
 
 // NewSlider returns a basic slider.
@@ -55,10 +58,6 @@ func (s *Slider) Dragged(e *fyne.DragEvent) {
 	ratio := s.getRatio(&(e.PointEvent))
 
 	s.updateValue(ratio)
-
-	if s.OnChanged != nil {
-		s.OnChanged(s.Value)
-	}
 }
 
 func (s *Slider) buttonDiameter() int {
@@ -106,12 +105,24 @@ func (s *Slider) updateValue(ratio float64) {
 }
 
 func (s *Slider) SetValue(value float64) {
+	if s.Value == value {
+		return
+	}
 	if value >= s.Max {
 		value = s.Max
 	} else if value <= s.Min {
 		value = s.Min
 	}
 	s.Value = value
+
+	if s.changeBinding != nil {
+		s.changeBinding.Set(s.Value)
+	}
+
+	if s.OnChanged != nil {
+		s.OnChanged(s.Value)
+	}
+
 	s.Refresh()
 }
 
@@ -134,6 +145,20 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 
 	return &sliderRenderer{track, active, thumb, objects, s}
 }
+
+func (s *Slider) BindValue(data *binding.Float64Binding) {
+	s.changeBinding = data
+	data.AddListener(s.SetValue)
+}
+
+/* TODO
+func (s *Slider) BindMax(data *binding.Float64Binding) {
+}
+func (s *Slider) BindMin(data *binding.Float64Binding) {
+}
+func (s *Slider) BindStep(data *binding.Float64Binding) {
+}
+*/
 
 const (
 	standardScale = 4

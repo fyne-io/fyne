@@ -2,7 +2,10 @@ package widget
 
 import (
 	"testing"
+	"time"
 
+	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -35,6 +38,26 @@ func TestIcon_MinSize(t *testing.T) {
 
 	assert.Equal(t, theme.IconInlineSize(), min.Width)
 	assert.Equal(t, theme.IconInlineSize(), min.Height)
+}
+
+func TestIcon_BindResource(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	icon := NewIcon(theme.WarningIcon())
+	data := &binding.ResourceBinding{}
+	icon.BindResource(data)
+	data.AddListener(func(fyne.Resource) {
+		done <- true
+	})
+	data.Set(theme.InfoIcon())
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, theme.InfoIcon(), icon.Resource)
 }
 
 func TestIconRenderer_ApplyTheme(t *testing.T) {

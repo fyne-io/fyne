@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
@@ -172,6 +173,8 @@ type Radio struct {
 
 	hoveredItemIndex int
 	hovered          bool
+
+	changeBinding *binding.StringBinding
 }
 
 // indexByPosition returns the item index for a specified position or noRadioItemIndex if any
@@ -231,25 +234,18 @@ func (r *Radio) Tapped(event *fyne.PointEvent) {
 	}
 
 	index := r.indexByPosition(event.Position)
-
 	if index < 0 || index >= len(r.Options) { // in the padding
 		return
 	}
 	clicked := r.Options[index]
 
 	if r.Selected == clicked {
-		if r.Required {
-			return
+		if !r.Required {
+			r.SetSelected("")
 		}
-		r.Selected = ""
 	} else {
-		r.Selected = clicked
+		r.SetSelected(clicked)
 	}
-
-	if r.OnChanged != nil {
-		r.OnChanged(r.Selected)
-	}
-	r.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -287,6 +283,14 @@ func (r *Radio) SetSelected(option string) {
 
 	r.Selected = option
 
+	if r.changeBinding != nil {
+		r.changeBinding.Set(r.Selected)
+	}
+
+	if r.OnChanged != nil {
+		r.OnChanged(r.Selected)
+	}
+
 	r.Refresh()
 }
 
@@ -313,6 +317,16 @@ func (r *Radio) itemWidth() int {
 func (r *Radio) removeDuplicateOptions() {
 	r.Options = removeDuplicates(r.Options)
 }
+
+func (r *Radio) BindSelected(data *binding.StringBinding) {
+	r.changeBinding = data
+	data.AddListener(r.SetSelected)
+}
+
+/* TODO
+func (r *Radio) BindOptions(data *binding.SliceBinding) {
+}
+*/
 
 // NewRadio creates a new radio widget with the set options and change handler
 func NewRadio(options []string, changed func(string)) *Radio {

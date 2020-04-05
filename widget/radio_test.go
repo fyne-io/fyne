@@ -3,8 +3,10 @@ package widget
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	_ "fyne.io/fyne/test"
@@ -369,6 +371,58 @@ func TestRadio_Required(t *testing.T) {
 	assert.Equal(t, "Hi", radio.Selected, "tapping selected option of required radio does nothing")
 	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.Size().Height-theme.Padding())})
 	assert.Equal(t, "There", radio.Selected)
+}
+
+func TestRadio_BindSelected_Set(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	selected := ""
+	radio := NewRadio([]string{"a", "b", "c"}, func(value string) {
+		selected = value
+	})
+
+	data := &binding.StringBinding{}
+	radio.BindSelected(data)
+	data.AddListener(func(string) {
+		done <- true
+	})
+
+	data.Set("b")
+
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Minute):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "b", selected)
+}
+
+func TestRadio_BindSelected_Tap(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	radio := NewRadio([]string{"a", "b", "c"}, nil)
+
+	data := &binding.StringBinding{}
+	radio.BindSelected(data)
+	selected := ""
+	data.AddListener(func(value string) {
+		selected = value
+		done <- true
+	})
+
+	test.Tap(radio)
+
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "a", selected)
+	assert.Equal(t, "a", data.Get())
 }
 
 func TestRadioRenderer_ApplyTheme(t *testing.T) {

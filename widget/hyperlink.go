@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/theme"
 )
 
@@ -38,13 +39,17 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
-	hl.Text = text
-	hl.textProvider.SetText(text) // calls refresh
+	if hl.Text != text {
+		hl.Text = text
+		hl.textProvider.SetText(text) // calls refresh
+	}
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
 func (hl *Hyperlink) SetURL(url *url.URL) {
-	hl.URL = url
+	if hl.URL != url {
+		hl.URL = url
+	}
 }
 
 // SetURLFromString sets the URL of the hyperlink, taking in a string type
@@ -108,4 +113,12 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 func (hl *Hyperlink) MinSize() fyne.Size {
 	hl.ExtendBaseWidget(hl)
 	return hl.BaseWidget.MinSize()
+}
+
+func (hl *Hyperlink) BindText(data *binding.StringBinding) {
+	data.AddListener(hl.SetText)
+}
+
+func (hl *Hyperlink) BindURL(data *binding.URLBinding) {
+	data.AddListener(hl.SetURL)
 }
