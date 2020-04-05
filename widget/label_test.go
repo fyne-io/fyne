@@ -94,7 +94,7 @@ func TestText_MinSizeAdjustsWithContent(t *testing.T) {
 
 	text.SetText("Line 1\nLine 2\n")
 	assert.Equal(t, initialMin, text.MinSize())
-	assert.Equal(t, initialMin, text.textProvider.MinSize())
+	assert.Equal(t, initialMin, text.provider.MinSize())
 }
 
 func TestLabel_ApplyTheme(t *testing.T) {
@@ -105,4 +105,20 @@ func TestLabel_ApplyTheme(t *testing.T) {
 	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
 	text.Show()
 	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+}
+
+func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
+	text := NewLabel("Hello")
+	text.Resize(text.MinSize())
+	assert.NotEqual(t, fyne.NewSize(0, 0), text.Size())
+	assert.Equal(t, text.Size(), text.MinSize())
+	size := text.Size()
+
+	r := text.CreateRenderer()
+	assert.Equal(t, size, text.Size())
+	assert.Equal(t, size, text.MinSize())
+	assert.Equal(t, size, r.MinSize())
+	r.Layout(size)
+	assert.Equal(t, size, text.Size())
+	assert.Equal(t, size, text.MinSize())
 }

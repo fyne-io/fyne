@@ -265,7 +265,7 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	label := NewLabel("Test")
 	label.CreateRenderer() // TODO make this a simple refresh call once it's in
-	provider := label.textProvider
+	provider := label.provider
 
 	fullSize := provider.lineSizeToColumn(4, 0)
 	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))

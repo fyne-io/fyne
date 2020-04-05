@@ -9,6 +9,7 @@ import (
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHyperlink_MinSize(t *testing.T) {
@@ -62,4 +63,22 @@ func TestHyperlink_SetUrl(t *testing.T) {
 	assert.Nil(t, err)
 	hyperlink.SetURL(sURL)
 	assert.Equal(t, sURL, hyperlink.URL)
+}
+
+func TestHyperlink_CreateRendererDoesNotAffectSize(t *testing.T) {
+	url, err := url.Parse("https://github.com/fyne-io/fyne")
+	require.NoError(t, err)
+	link := NewHyperlink("Test", url)
+	link.Resize(link.MinSize())
+	assert.NotEqual(t, fyne.NewSize(0, 0), link.Size())
+	assert.Equal(t, link.Size(), link.MinSize())
+	size := link.Size()
+
+	r := link.CreateRenderer()
+	assert.Equal(t, size, link.Size())
+	assert.Equal(t, size, link.MinSize())
+	assert.Equal(t, size, r.MinSize())
+	r.Layout(size)
+	assert.Equal(t, size, link.Size())
+	assert.Equal(t, size, link.MinSize())
 }
