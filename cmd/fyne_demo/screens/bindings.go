@@ -92,22 +92,26 @@ func BindingsScreen() fyne.CanvasObject {
 	//  meaning radio is not initially rendered selected
 	// FIXME iconRenderer.Layout can be called before iconRenderer.Refresh
 	//  meaning icon is not initially rendered
-	options := []string{
-		"Cut",
-		"Copy",
-		"Paste",
-	}
-	clipboardLeftRadio := &widget.Radio{Options: options}
-	clipboardRightRadio := &widget.Radio{Options: options}
+
+	clipboardLeftRadio := &widget.Radio{}
+	clipboardRightRadio := &widget.Radio{}
 	clipboardIcon := &widget.Icon{}
 
+	clipboardOptions := &binding.SliceBinding{}
 	clipboardString := &binding.StringBinding{}
 	clipboardResource := &binding.ResourceBinding{}
 
+	clipboardLeftRadio.BindOptions(clipboardOptions)
+	clipboardRightRadio.BindOptions(clipboardOptions)
 	clipboardLeftRadio.BindSelected(clipboardString)
 	clipboardRightRadio.BindSelected(clipboardString)
 	clipboardIcon.BindResource(clipboardResource)
 
+	clipboardOptions.Append(
+		binding.NewStringBinding("Cut"),
+		binding.NewStringBinding("Copy"),
+		binding.NewStringBinding("Paste"),
+	)
 	clipboardString.AddListener(func(s string) {
 		switch s {
 		case "Cut":
@@ -120,25 +124,28 @@ func BindingsScreen() fyne.CanvasObject {
 			clipboardResource.Set(theme.QuestionIcon())
 		}
 	})
-	clipboardString.Set(options[0])
+	clipboardString.Set("")
 
 	// Select <-> Hyperlink <-> Select
-	urls := []string{
-		"https://fyne.io",
-		"https://github.com/fyne-io",
-	}
-	urlLeftSelect := &widget.Select{Options: urls}
-	urlRightSelect := &widget.Select{Options: urls}
+	urlLeftSelect := &widget.Select{}
+	urlRightSelect := &widget.Select{}
 	urlHyperlink := &widget.Hyperlink{}
 
+	urlOptions := &binding.SliceBinding{}
 	urlString := &binding.StringBinding{}
 	urlURL := &binding.URLBinding{}
 
+	urlLeftSelect.BindOptions(urlOptions)
+	urlRightSelect.BindOptions(urlOptions)
 	urlLeftSelect.BindSelected(urlString)
 	urlRightSelect.BindSelected(urlString)
 	urlHyperlink.BindText(urlString)
 	urlHyperlink.BindURL(urlURL)
 
+	urlOptions.Append(
+		binding.NewStringBinding("https://fyne.io"),
+		binding.NewStringBinding("https://github.com/fyne-io"),
+	)
 	urlString.AddListener(func(s string) {
 		u, err := url.Parse(s)
 		if err != nil {
@@ -146,7 +153,7 @@ func BindingsScreen() fyne.CanvasObject {
 		}
 		urlURL.Set(u)
 	})
-	urlString.Set(urls[0])
+	urlString.Set("")
 
 	// Slider <-> Label <-> Slider
 	slideLeftSlider := &widget.Slider{Max: 1, Step: 0.01}

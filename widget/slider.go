@@ -126,6 +126,36 @@ func (s *Slider) SetValue(value float64) {
 	s.Refresh()
 }
 
+func (s *Slider) SetMin(min float64) {
+	if s.Min == min {
+		return
+	}
+
+	s.Min = min
+
+	s.Refresh()
+}
+
+func (s *Slider) SetMax(max float64) {
+	if s.Max == max {
+		return
+	}
+
+	s.Max = max
+
+	s.Refresh()
+}
+
+func (s *Slider) SetStep(step float64) {
+	if s.Step == step {
+		return
+	}
+
+	s.Step = step
+
+	s.Refresh()
+}
+
 // MinSize returns the size that this widget should not shrink below
 func (s *Slider) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
@@ -151,14 +181,17 @@ func (s *Slider) BindValue(data *binding.Float64Binding) {
 	data.AddListener(s.SetValue)
 }
 
-/* TODO
-func (s *Slider) BindMax(data *binding.Float64Binding) {
-}
 func (s *Slider) BindMin(data *binding.Float64Binding) {
+	data.AddListener(s.SetMin)
 }
+
+func (s *Slider) BindMax(data *binding.Float64Binding) {
+	data.AddListener(s.SetMax)
+}
+
 func (s *Slider) BindStep(data *binding.Float64Binding) {
+	data.AddListener(s.SetStep)
 }
-*/
 
 const (
 	standardScale = 4

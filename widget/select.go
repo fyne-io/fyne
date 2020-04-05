@@ -243,10 +243,22 @@ func (s *Select) BindSelected(data *binding.StringBinding) {
 	data.AddListener(s.SetSelected)
 }
 
-/* TODO
 func (s *Select) BindOptions(data *binding.SliceBinding) {
+	data.AddListener(func() {
+		l := data.Length()
+		var options []string
+		for i := 0; i < l; i++ {
+			b, ok := data.Get(i).(*binding.StringBinding)
+			if ok {
+				// TODO Should individual elements in a slice binding be bound to, how will they get unbound?
+				//  b.AddListener(func() { })
+				options = append(options, b.Get())
+			}
+		}
+		s.Options = options
+		s.Refresh()
+	})
 }
-*/
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {

@@ -323,10 +323,22 @@ func (r *Radio) BindSelected(data *binding.StringBinding) {
 	data.AddListener(r.SetSelected)
 }
 
-/* TODO
 func (r *Radio) BindOptions(data *binding.SliceBinding) {
+	data.AddListener(func() {
+		l := data.Length()
+		var options []string
+		for i := 0; i < l; i++ {
+			b, ok := data.Get(i).(*binding.StringBinding)
+			if ok {
+				// TODO Should individual elements in a slice binding be bound to, how will they get unbound?
+				//  b.AddListener(func() { })
+				options = append(options, b.Get())
+			}
+		}
+		r.Options = options
+		r.Refresh()
+	})
 }
-*/
 
 // NewRadio creates a new radio widget with the set options and change handler
 func NewRadio(options []string, changed func(string)) *Radio {

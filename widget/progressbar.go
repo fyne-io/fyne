@@ -84,6 +84,30 @@ type ProgressBar struct {
 	Min, Max, Value float64
 }
 
+// SetMin changes the current minimum of this progress bar.
+// The widget will be refreshed to indicate the change.
+func (p *ProgressBar) SetMin(m float64) {
+	if p.Min == m {
+		return
+	}
+
+	p.Min = m
+
+	p.Refresh()
+}
+
+// SetMax changes the current value of this progress bar.
+// The widget will be refreshed to indicate the change.
+func (p *ProgressBar) SetMax(m float64) {
+	if p.Max == m {
+		return
+	}
+
+	p.Max = m
+
+	p.Refresh()
+}
+
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
@@ -93,7 +117,7 @@ func (p *ProgressBar) SetValue(v float64) {
 
 	p.Value = v
 
-	p.refresh(p)
+	p.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -115,16 +139,17 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	return &progressRenderer{[]fyne.CanvasObject{bar, label}, bar, label, p}
 }
 
+func (p *ProgressBar) BindMin(data *binding.Float64Binding) {
+	data.AddListener(p.SetMin)
+}
+
+func (p *ProgressBar) BindMax(data *binding.Float64Binding) {
+	data.AddListener(p.SetMax)
+}
+
 func (p *ProgressBar) BindValue(data *binding.Float64Binding) {
 	data.AddListener(p.SetValue)
 }
-
-/* TODO
-func (p *ProgressBar) BindMax(data *binding.Float64Binding) {
-}
-func (p *ProgressBar) BindMin(data *binding.Float64Binding) {
-}
-*/
 
 // NewProgressBar creates a new progress bar widget.
 // The default Min is 0 and Max is 1, Values set should be between those numbers.
