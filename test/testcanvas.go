@@ -183,7 +183,6 @@ func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyn
 	objects = append(objects, o)
 	if w, ok := o.(fyne.Widget); ok {
 		r := w.CreateRenderer()
-		r.Refresh()
 		r.Layout(size)
 		for _, child := range r.Objects() {
 			objects = layoutAndCollect(objects, child, child.Size())
