@@ -32,6 +32,7 @@ func init() {
 // TestMain makes sure that our driver is running on the main thread.
 // This must be done for some of our tests to function correctly.
 func TestMain(m *testing.M) {
+	d.(*gLDriver).initGLFW()
 	go func() {
 		os.Exit(m.Run())
 	}()
