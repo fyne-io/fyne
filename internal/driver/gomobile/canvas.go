@@ -57,7 +57,10 @@ func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 
 func (c *mobileCanvas) edgePadding() (topLeft, bottomRight fyne.Size) {
 	scale := fyne.CurrentDevice().SystemScale()
-	dev := fyne.CurrentDevice().(*device)
+	dev, ok := fyne.CurrentDevice().(*device)
+	if !ok {
+		return fyne.NewSize(0, 0), fyne.NewSize(0, 0) // running in test mode
+	}
 
 	return fyne.NewSize(int(float32(dev.insetLeft)/scale), int(float32(dev.insetTop)/scale)),
 		fyne.NewSize(int(float32(dev.insetRight)/scale), int(float32(dev.insetBottom)/scale))
