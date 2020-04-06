@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewPopUp(t *testing.T) {
@@ -18,6 +19,80 @@ func TestNewPopUp(t *testing.T) {
 	assert.True(t, pop.Visible())
 	assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
 	assert.Equal(t, pop, test.Canvas().Overlays().List()[0])
+}
+
+func TestShowPopUp(t *testing.T) {
+	require.Nil(t, test.Canvas().Overlays().Top())
+
+	label := NewLabel("Hi")
+	ShowPopUp(label, test.Canvas())
+	pop := test.Canvas().Overlays().Top()
+	if assert.NotNil(t, pop) {
+		defer test.Canvas().Overlays().Remove(pop)
+
+		assert.True(t, pop.Visible())
+		assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+	}
+}
+
+func TestShowPopUpAtPosition(t *testing.T) {
+	c := test.NewCanvas()
+	c.Resize(fyne.NewSize(100, 100))
+	pos := fyne.NewPos(6, 9)
+	label := NewLabel("Hi")
+	ShowPopUpAtPosition(label, c, pos)
+	pop := c.Overlays().Top()
+	if assert.NotNil(t, pop) {
+		assert.True(t, pop.Visible())
+		assert.Equal(t, 1, len(c.Overlays().List()))
+		assert.Equal(t, pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())), pop.(*PopUp).Content.Position())
+	}
+}
+
+func TestShowModalPopUp(t *testing.T) {
+	require.Nil(t, test.Canvas().Overlays().Top())
+
+	label := NewLabel("Hi")
+	ShowModalPopUp(label, test.Canvas())
+	pop := test.Canvas().Overlays().Top()
+	if assert.NotNil(t, pop) {
+		defer test.Canvas().Overlays().Remove(pop)
+
+		assert.True(t, pop.Visible())
+		assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+	}
+}
+
+func TestPopUp_Show(t *testing.T) {
+	c := test.NewCanvas()
+	cSize := fyne.NewSize(100, 100)
+	c.Resize(cSize)
+	label := NewLabel("Hi")
+	pop := newPopUp(label, c)
+	require.Nil(t, c.Overlays().Top())
+
+	pop.Show()
+	assert.Equal(t, pop, c.Overlays().Top())
+	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Equal(t, cSize, pop.Size())
+	assert.Equal(t, label.MinSize(), pop.Content.Size())
+}
+
+func TestPopUp_ShowAtPosition(t *testing.T) {
+	c := test.NewCanvas()
+	cSize := fyne.NewSize(100, 100)
+	c.Resize(cSize)
+	label := NewLabel("Hi")
+	pop := newPopUp(label, c)
+	pos := fyne.NewPos(6, 9)
+	require.Nil(t, c.Overlays().Top())
+
+	pop.ShowAtPosition(pos)
+	assert.Equal(t, pop, c.Overlays().Top())
+	assert.Equal(t, 1, len(c.Overlays().List()))
+	assert.Equal(t, cSize, pop.Size())
+	assert.Equal(t, label.MinSize(), pop.Content.Size())
+	assert.Equal(t, pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())), pop.Content.Position())
 }
 
 func TestPopUp_Hide(t *testing.T) {

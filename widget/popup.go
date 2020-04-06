@@ -53,13 +53,22 @@ func (p *PopUp) Resize(size fyne.Size) {
 	p.Refresh()
 }
 
-// Show this widget, if it was previously hidden
+// Show this pop-up as overlay if not already shown.
 func (p *PopUp) Show() {
 	if !p.overlayShown {
+		if (p.Size() == fyne.Size{}) {
+			p.Resize(p.MinSize())
+		}
 		p.Canvas.Overlays().Add(p)
 		p.overlayShown = true
 	}
 	p.BaseWidget.Show()
+}
+
+// ShowAtPosition shows this pop-up at the given position.
+func (p *PopUp) ShowAtPosition(pos fyne.Position) {
+	p.Move(pos)
+	p.Show()
 }
 
 // Tapped is called when the user taps the popUp background - if not modal then dismiss this widget
@@ -97,29 +106,56 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 
 // NewPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
 // It will then display the popup on the passed canvas.
+// Deprecated: Use ShowPopUpAtPosition() instead.
 func NewPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) *PopUp {
+	p := newPopUp(content, canvas)
+	p.ShowAtPosition(pos)
+	return p
+}
+
+// ShowPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
+// It will then display the popup on the passed canvas.
+func ShowPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) {
+	newPopUp(content, canvas).ShowAtPosition(pos)
+}
+
+func newPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 	ret := &PopUp{Content: content, Canvas: canvas, modal: false}
 	ret.ExtendBaseWidget(ret)
-	ret.Move(pos)
-
-	ret.Resize(ret.MinSize())
-	ret.Show()
 	return ret
 }
 
 // NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
+// Deprecated: This will no longer show the pop-up in 2.0. Use ShowPopUp() instead.
 func NewPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 	return NewPopUpAtPosition(content, canvas, fyne.NewPos(0, 0))
 }
 
+// ShowPopUp creates a new popUp for the specified content and displays it on the passed canvas.
+func ShowPopUp(content fyne.CanvasObject, canvas fyne.Canvas) {
+	newPopUp(content, canvas).Show()
+}
+
+func newModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
+	p := &PopUp{Content: content, Canvas: canvas, modal: true}
+	p.ExtendBaseWidget(p)
+	return p
+}
+
 // NewModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
+// Deprecated: This will no longer show the pop-up in 2.0. Use ShowModalPopUp instead.
 func NewModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
-	ret := &PopUp{Content: content, Canvas: canvas, modal: true}
-	ret.ExtendBaseWidget(ret)
-	ret.Resize(ret.MinSize())
-	ret.Show()
-	return ret
+	p := newModalPopUp(content, canvas)
+	p.Show()
+	return p
+}
+
+// ShowModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
+// A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
+func ShowModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) {
+	p := newModalPopUp(content, canvas)
+	p.Show()
 }
 
 type popUpRenderer struct {
