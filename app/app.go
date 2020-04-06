@@ -99,7 +99,7 @@ func NewAppWithDriver(d fyne.Driver, id string) fyne.App {
 	newApp := &fyneApp{uniqueID: id, driver: d,
 		prefs: prefs, exec: exec.Command}
 	fyne.SetCurrentApp(newApp)
-	newApp.settings = loadSettings();
+	newApp.settings = loadSettings()
 
 	listener := make(chan fyne.Settings)
 	newApp.Settings().AddChangeListener(listener)
