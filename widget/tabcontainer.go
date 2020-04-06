@@ -134,7 +134,11 @@ func (t *TabContainer) MinSize() fyne.Size {
 func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container {
 	var lay fyne.Layout
 	if fyne.CurrentDevice().IsMobile() {
-		lay = layout.NewGridLayout(len(buttons))
+		cells := len(buttons)
+		if cells == 0 {
+			cells = 1
+		}
+		lay = layout.NewGridLayout(cells)
 	} else if t.tabLocation == TabLocationLeading || t.tabLocation == TabLocationTrailing {
 		lay = layout.NewVBoxLayout()
 	} else {
