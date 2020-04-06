@@ -9,7 +9,7 @@ import (
 )
 
 // Declare conformity to command interface
-var _ command = (*env)(nil)
+var _ command = (*version)(nil)
 
 type version struct {
 }
