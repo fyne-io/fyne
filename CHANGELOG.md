@@ -18,7 +18,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
- * Mobile builds now support go modules
+ * Mobile builds now support go modules (#660)
  * Building for mobile would try to run desktop build first
  * Mobile apps now draw the full safe area on a screen (#799)
  * Preferences were not stored on mobile apps (#779)
