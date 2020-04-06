@@ -9,6 +9,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 
  * Added Direction field to ScrollContainer and NewHScrollContainer, NewVScrollContainer constructors (#763)
  * Added Scroller.SetMinSize() to enable better defaults for scrolled content
+ * Added "fyne vendor" subcommand to help packaging fyne dependencies in projects
+ * Added "fyne version" subcommand to help with bug reporting (#656)
 
 ### Changed
 
