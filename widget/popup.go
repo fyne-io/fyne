@@ -14,8 +14,9 @@ import (
 type PopUp struct {
 	BaseWidget
 
-	Content fyne.CanvasObject
-	Canvas  fyne.Canvas
+	Content        fyne.CanvasObject
+	Canvas         fyne.Canvas
+	WithoutPadding bool
 
 	innerPos     fyne.Position
 	innerSize    fyne.Size
@@ -165,7 +166,10 @@ type popUpRenderer struct {
 }
 
 func (r *popUpRenderer) Layout(_ fyne.Size) {
-	contentSize := r.popUp.innerSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	contentSize := r.popUp.innerSize
+	if !r.popUp.WithoutPadding {
+		contentSize = contentSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	}
 	r.popUp.Content.Resize(contentSize)
 
 	innerPos := r.popUp.innerPos
@@ -181,7 +185,10 @@ func (r *popUpRenderer) Layout(_ fyne.Size) {
 			innerPos.Y = 0 // TODO here we may need a scroller as it's longer than our canvas
 		}
 	}
-	contentPos := innerPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
+	contentPos := innerPos
+	if !r.popUp.WithoutPadding {
+		contentPos = contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
+	}
 	r.popUp.Content.Move(contentPos)
 
 	r.bg.Resize(r.popUp.innerSize)
