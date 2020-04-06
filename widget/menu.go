@@ -99,5 +99,5 @@ func (h *menuItemWidgetRenderer) BackgroundColor() color.Color {
 		return theme.HoverColor()
 	}
 
-	return theme.BackgroundColor()
+	return color.Transparent
 }
