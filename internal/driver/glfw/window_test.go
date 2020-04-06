@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -34,6 +35,11 @@ func init() {
 func TestMain(m *testing.M) {
 	d.(*gLDriver).initGLFW()
 	go func() {
+		// Wait for GL loop to be running.
+		// If we try to create windows before the loop is running, this will fail with an exception.
+		for !running() {
+			time.Sleep(10 * time.Millisecond)
+		}
 		os.Exit(m.Run())
 	}()
 	d.Run()

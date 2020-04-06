@@ -67,42 +67,27 @@ func NewToolbarSeparator() ToolbarItem {
 // Toolbar widget creates a horizontal list of tool buttons
 type Toolbar struct {
 	BaseWidget
-
 	Items []ToolbarItem
-
-	objs []fyne.CanvasObject
-}
-
-func (t *Toolbar) append(item ToolbarItem) {
-	t.objs = append(t.objs, item.ToolbarObject())
-}
-
-func (t *Toolbar) prepend(item ToolbarItem) {
-	t.objs = append([]fyne.CanvasObject{item.ToolbarObject()}, t.objs...)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	for _, item := range t.Items {
-		t.append(item)
-	}
-
-	return &toolbarRenderer{toolbar: t, layout: layout.NewHBoxLayout()}
+	r := &toolbarRenderer{toolbar: t, layout: layout.NewHBoxLayout()}
+	r.resetObjects()
+	return r
 }
 
 // Append a new ToolbarItem to the end of this Toolbar
 func (t *Toolbar) Append(item ToolbarItem) {
 	t.Items = append(t.Items, item)
-
-	t.append(item)
+	t.Refresh()
 }
 
 // Prepend a new ToolbarItem to the start of this Toolbar
 func (t *Toolbar) Prepend(item ToolbarItem) {
 	t.Items = append([]ToolbarItem{item}, t.Items...)
-
-	t.prepend(item)
+	t.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -123,6 +108,7 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 type toolbarRenderer struct {
 	baseRenderer
 	layout  fyne.Layout
+	objs    []fyne.CanvasObject
 	toolbar *Toolbar
 }
 
@@ -139,8 +125,7 @@ func (r *toolbarRenderer) BackgroundColor() color.Color {
 }
 
 func (r *toolbarRenderer) Refresh() {
-	r.setObjects(r.toolbar.objs)
-
+	r.resetObjects()
 	for i, item := range r.toolbar.Items {
 		if _, ok := item.(*ToolbarSeparator); ok {
 			rect := r.Objects()[i].(*canvas.Rectangle)
@@ -149,4 +134,14 @@ func (r *toolbarRenderer) Refresh() {
 	}
 
 	canvas.Refresh(r.toolbar)
+}
+
+func (r *toolbarRenderer) resetObjects() {
+	if len(r.objs) != len(r.toolbar.Items) {
+		r.objs = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
+		for _, item := range r.toolbar.Items {
+			r.objs = append(r.objs, item.ToolbarObject())
+		}
+	}
+	r.setObjects(r.objs)
 }
