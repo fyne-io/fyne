@@ -31,7 +31,7 @@ type mobileDriver struct {
 	glctx gl.Context
 
 	windows []fyne.Window
-	device  fyne.Device
+	device  *device
 }
 
 // Declare conformity with Driver
@@ -130,10 +130,11 @@ func (d *mobileDriver) Run() {
 				currentOrientation = e.Orientation
 				currentDPI = e.PixelsPerPt * 72
 
-				canvas.insetTop = e.InsetTopPx
-				canvas.insetBottom = e.InsetBottomPx
-				canvas.insetLeft = e.InsetLeftPx
-				canvas.insetRight = e.InsetRightPx
+				dev := d.device
+				dev.insetTop = e.InsetTopPx
+				dev.insetBottom = e.InsetBottomPx
+				dev.insetLeft = e.InsetLeftPx
+				dev.insetRight = e.InsetRightPx
 				canvas.SetScale(0) // value is ignored
 
 				// make sure that we paint on the next frame

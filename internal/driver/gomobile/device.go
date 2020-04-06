@@ -7,6 +7,7 @@ import (
 )
 
 type device struct {
+	insetTop, insetBottom, insetLeft, insetRight int
 }
 
 var (
