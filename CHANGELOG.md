@@ -5,6 +5,11 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ## 1.2.4 - Ongoing
 
+### Added
+
+ * Added Direction field to ScrollContainer and NewHScrollContainer, NewVScrollContainer constructors (#763)
+ * Added Scroller.SetMinSize() to enable better defaults for scrolled content
+
 ### Changed
 
  * Report keys based on name not key code - fixes issue with shortcuts with AZERTY (#790)
