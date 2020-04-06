@@ -12,17 +12,10 @@ import (
 // NewPopUpMenuAtPosition creates a PopUp widget populated with menu items from the passed menu structure.
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
 func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *PopUp {
-	options := NewVBox()
-	for _, item := range menu.Items {
-		if item.IsSeparator {
-			options.Append(newSeparator())
-		} else {
-			options.Append(newMenuItemWidget(item.Label, item.Action))
-		}
-	}
-	pop := NewPopUpAtPosition(options, c, pos)
+	m := newMenuWidget(menu)
+	pop := newPopUp(m, c)
 	focused := c.Focused()
-	for _, o := range options.Children {
+	for _, o := range m.Children {
 		if item, ok := o.(*menuItemWidget); ok {
 			item.DismissAction = func() {
 				if c.Focused() == nil {
@@ -32,6 +25,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 			}
 		}
 	}
+	pop.ShowAtPosition(pos)
 	return pop
 }
 
@@ -51,6 +45,18 @@ func newSeparator() fyne.CanvasObject {
 	s := canvas.NewRectangle(theme.DisabledTextColor())
 	s.SetMinSize(fyne.NewSize(1, 2))
 	return s
+}
+
+func newMenuWidget(menu *fyne.Menu) *Box {
+	m := NewVBox()
+	for _, item := range menu.Items {
+		if item.IsSeparator {
+			m.Append(newSeparator())
+		} else {
+			m.Append(newMenuItemWidget(item.Label, item.Action))
+		}
+	}
+	return m
 }
 
 type menuItemWidget struct {
