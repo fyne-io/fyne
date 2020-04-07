@@ -3,6 +3,7 @@ package screens
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"time"
 
 	"fyne.io/fyne"
@@ -14,9 +15,8 @@ import (
 
 // BindingsScreen loads a data bindings example panel for the demo app
 func BindingsScreen() fyne.CanvasObject {
-	// TODO entry
+	// TODO entry - stringBinding
 	// TODO list - []binding
-	// TODO scroller
 	// TODO table - [][]binding
 	// TODO tree - map[string][]string
 
@@ -86,6 +86,20 @@ func BindingsScreen() fyne.CanvasObject {
 		}
 	})
 	onOffBool.Set(true)
+
+	// Entry <-> Label <-> Entry
+	countLeftEntry := widget.NewEntry()
+	countRightEntry := widget.NewEntry()
+	countLabel := widget.NewLabel("0")
+
+	countString := binding.NewStringBinding("")
+
+	countLeftEntry.BindText(countString)
+	countRightEntry.BindText(countString)
+
+	countString.AddListener(func(s string) {
+		countLabel.SetText(strconv.Itoa(len(s)))
+	})
 
 	// Radio <-> Icon <-> Radio
 	// FIXME radioRenderer.Layout can be called before radioRenderer.Refresh
@@ -176,6 +190,7 @@ func BindingsScreen() fyne.CanvasObject {
 		widget.NewLabel("Left Input"), widget.NewLabel("Output"), widget.NewLabel("Right Input"),
 		goLeftButton, goProgressBar, goRightButton,
 		onOffLeftCheck, onOffLabel, onOffRightCheck,
+		countLeftEntry, countLabel, countRightEntry,
 		clipboardLeftRadio, clipboardIcon, clipboardRightRadio,
 		urlLeftSelect, urlHyperlink, urlRightSelect,
 		slideLeftSlider, slideLabel, slideRightSlider,
