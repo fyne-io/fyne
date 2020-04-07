@@ -37,11 +37,11 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/mobile/event/lifecycle"
-	"golang.org/x/mobile/event/paint"
-	"golang.org/x/mobile/event/size"
-	"golang.org/x/mobile/event/touch"
-	"golang.org/x/mobile/geom"
+	"github.com/fyne-io/mobile/event/lifecycle"
+	"github.com/fyne-io/mobile/event/paint"
+	"github.com/fyne-io/mobile/event/size"
+	"github.com/fyne-io/mobile/event/touch"
+	"github.com/fyne-io/mobile/geom"
 )
 
 var initThreadID uint64

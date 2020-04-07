@@ -42,7 +42,7 @@ error messages. For example,
 The gldebug tracing has very high overhead, so make sure to remove
 the build tag before deploying any binaries.
 */
-package gl // import "golang.org/x/mobile/gl"
+package gl // import "github.com/fyne-io/mobile/gl"
 
 /*
 Implementation details.

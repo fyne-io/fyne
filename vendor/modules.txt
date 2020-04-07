@@ -8,6 +8,18 @@ github.com/akavel/rsrc/ico
 github.com/davecgh/go-spew/spew
 # github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
+# github.com/fyne-io/mobile v0.0.0-20200407132905-419960b68ef6
+github.com/fyne-io/mobile/app
+github.com/fyne-io/mobile/app/internal/callfn
+github.com/fyne-io/mobile/event/key
+github.com/fyne-io/mobile/event/lifecycle
+github.com/fyne-io/mobile/event/paint
+github.com/fyne-io/mobile/event/size
+github.com/fyne-io/mobile/event/touch
+github.com/fyne-io/mobile/exp/f32
+github.com/fyne-io/mobile/geom
+github.com/fyne-io/mobile/gl
+github.com/fyne-io/mobile/internal/mobileinit
 # github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.2-core/gl
@@ -39,19 +51,7 @@ golang.org/x/image/font
 golang.org/x/image/math/fixed
 golang.org/x/image/colornames
 golang.org/x/image/vector
-# golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 => github.com/fyne-io/mobile v0.0.0-20200403124556-ac83d645d551
-golang.org/x/mobile/app
-golang.org/x/mobile/event/key
-golang.org/x/mobile/event/lifecycle
-golang.org/x/mobile/event/paint
-golang.org/x/mobile/event/size
-golang.org/x/mobile/event/touch
-golang.org/x/mobile/gl
-golang.org/x/mobile/exp/f32
-golang.org/x/mobile/app/internal/callfn
-golang.org/x/mobile/geom
-golang.org/x/mobile/internal/mobileinit
-# golang.org/x/mod v0.1.1-0.20191105210325-c90efee705ee
+# golang.org/x/mod v0.1.1-0.20191209134235-331c550502dd
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/internal/lazyregexp
@@ -78,8 +78,8 @@ golang.org/x/text/language
 golang.org/x/text/internal/utf8internal
 golang.org/x/text/runes
 golang.org/x/text/internal/tag
-# golang.org/x/tools v0.0.0-20190808195139-e713427fea3f
 golang.org/x/tools/go/packages
+# golang.org/x/tools v0.0.0-20200117012304-6edc0a871e69
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/internal/gopathwalk

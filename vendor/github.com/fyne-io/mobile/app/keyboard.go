@@ -1,7 +1,7 @@
 package app
 
 import "C"
-import "golang.org/x/mobile/event/key"
+import "github.com/fyne-io/mobile/event/key"
 
 //export keyboardTyped
 func keyboardTyped(str *C.char) {

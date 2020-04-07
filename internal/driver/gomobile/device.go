@@ -1,7 +1,7 @@
 package gomobile
 
 import (
-	"golang.org/x/mobile/event/size"
+	"github.com/fyne-io/mobile/event/size"
 
 	"fyne.io/fyne"
 )
