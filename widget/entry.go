@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
@@ -263,6 +264,8 @@ type Entry struct {
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
 	ActionItem fyne.CanvasObject
+
+	textBinding *binding.StringBinding
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -333,8 +336,13 @@ func (e *Entry) updateText(text string) {
 	e.Lock()
 	e.Text = text
 	e.Unlock()
-	if changed && e.OnChanged != nil {
-		e.OnChanged(text)
+	if changed {
+		if e.textBinding != nil {
+			e.textBinding.Set(text)
+		}
+		if e.OnChanged != nil {
+			e.OnChanged(text)
+		}
 	}
 
 	e.Refresh()
@@ -1124,6 +1132,11 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 
 	e.BaseWidget.impl = wid
 	e.registerShortcut()
+}
+
+func (e *Entry) BindText(data *binding.StringBinding) {
+	e.textBinding = data
+	data.AddListener(e.SetText)
 }
 
 // NewEntry creates a new single line entry widget.
