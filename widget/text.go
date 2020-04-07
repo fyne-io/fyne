@@ -89,7 +89,7 @@ func (t *textProvider) updateRowBounds() {
 	textWrap := t.presenter.textWrap()
 	textStyle := t.presenter.textStyle()
 	textSize := theme.TextSize()
-	maxWidth := t.Size().Width
+	maxWidth := t.Size().Width - 2*theme.Padding()
 
 	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
@@ -344,8 +344,31 @@ func splitLines(text []rune) [][2]int {
 // lineBounds accepts a slice of runes, a wrapping mode, a maximum line width and a function to measure line width.
 // lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
 func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
+
+	checkForwardSpace := func(low int, high int, maxHigh int) int {
+		if (low >= high) || (high >= maxHigh) {
+			return high
+		}
+		delta := maxHigh - high
+		for measurer(text[low:high+delta]) > maxWidth {
+			oldValue := delta
+			delta /= 2
+			if oldValue == delta {
+				break
+			}
+		}
+		high += delta
+		if (low < high) && measurer(text[low:high]) < maxWidth {
+			for measurer(text[low:high]) < maxWidth {
+				high++
+			}
+			high--
+		}
+		return high
+	}
+
 	lines := splitLines(text)
-	if maxWidth == 0 || wrap == fyne.TextWrapOff {
+	if maxWidth <= 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
 	var bounds [][2]int
@@ -358,28 +381,35 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 		}
 		switch wrap {
 		case fyne.TextTruncate:
-			for {
-				if measurer(text[low:high]) <= maxWidth {
-					bounds = append(bounds, [2]int{low, high})
-					break
-				} else {
-					high--
-				}
+			symbWidth := measurer(text[low:high]) / (high - low)
+			if maxWidth/symbWidth < (high - low) {
+				high = checkForwardSpace(low, low+maxWidth/symbWidth, high)
 			}
+			for measurer(text[low:high]) > maxWidth {
+				high--
+			}
+			bounds = append(bounds, [2]int{low, high})
 		case fyne.TextWrapBreak:
 			for low < high {
-				if measurer(text[low:high]) <= maxWidth {
+				curWidth := measurer(text[low:high])
+				symbWidth := curWidth / (high - low)
+				if curWidth <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
 					low = high
 					high = l[1]
 				} else {
-					high--
+					high = checkForwardSpace(low, low+maxWidth/symbWidth, high)
+					for measurer(text[low:high]) > maxWidth {
+						high--
+					}
 				}
 			}
 		case fyne.TextWrapWord:
 			for low < high {
 				sub := text[low:high]
-				if measurer(sub) <= maxWidth {
+				curWidth := measurer(sub)
+				symbWidth := curWidth / len(sub)
+				if curWidth <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
 					low = high
 					high = l[1]
@@ -387,17 +417,25 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 						low++
 					}
 				} else {
-					last := len(sub) - 1
-					for ; last >= 0; last-- {
-						if unicode.IsSpace(sub[last]) {
-							break
+					last := maxWidth / symbWidth
+					if last > len(sub)-1 {
+						last = len(sub) - 1
+					}
+
+					findSpaceIndex := func(last int) int {
+						curIndex := last
+						for ; curIndex >= 0; curIndex-- {
+							if unicode.IsSpace(sub[curIndex]) {
+								break
+							}
 						}
+						if curIndex < 0 {
+							return last
+						}
+						return curIndex
 					}
-					if last < 0 {
-						high--
-					} else {
-						high = low + last
-					}
+
+					high = low + findSpaceIndex(checkForwardSpace(low, low+last, low+len(sub)-1)-low)
 				}
 			}
 		}
