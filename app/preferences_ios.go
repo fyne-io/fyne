@@ -3,6 +3,7 @@
 package app
 
 import (
+	"errors"
 	"unsafe"
 
 	"fyne.io/fyne"
@@ -104,6 +105,11 @@ func (p *iOSPreferences) SetString(key string, value string) {
 	defer C.free(unsafe.Pointer(cValue))
 
 	C.setPreferenceString(cKey, cValue)
+}
+
+// TODO: Implement the support for RemoveValue on iOS to make it work across all platforms.
+func (p *iOSPreferences) RemoveValue(key string) {
+	fyne.LogError("Calling RemoveValue() on iOS", errors.New("It is currently not supported to use RemoveValue on iOS"))
 }
 
 func newPreferences() *iOSPreferences {
