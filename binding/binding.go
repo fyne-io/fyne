@@ -3,6 +3,7 @@ package binding
 import "sync"
 
 type Binding interface {
+	addListener(func())
 }
 
 type itemBinding struct {
