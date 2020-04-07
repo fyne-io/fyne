@@ -2,8 +2,10 @@ package widget
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
@@ -1542,4 +1544,24 @@ func TestEntry_TextWrap(t *testing.T) {
 			assert.Equal(t, fyne.TextWrapWord, e.textWrap())
 		})
 	})
+}
+
+func TestEntry_BindText(t *testing.T) {
+	a := test.NewApp()
+	defer a.Quit()
+	done := make(chan bool)
+	entry := NewEntry()
+	data := &binding.StringBinding{}
+	entry.BindText(data)
+	data.AddListener(func(string) {
+		done <- true
+	})
+	data.Set("foobar")
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+	assert.Equal(t, "foobar", entry.Text)
 }
