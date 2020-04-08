@@ -3,6 +3,7 @@ package fyne
 import (
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"path/filepath"
 )
 
@@ -59,7 +60,12 @@ func LoadResourceFromPath(path string) (Resource, error) {
 
 // LoadResourceFromURLString creates a new StaticResource in memory using the body of the specified URL.
 func LoadResourceFromURLString(urlStr string) (Resource, error) {
-	res, err := http.Get(urlStr)
+	u, err := url.ParseRequestURI(urlStr)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := http.Get(u.String())
 	if err != nil {
 		return nil, err
 	}
