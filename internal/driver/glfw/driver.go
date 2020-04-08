@@ -3,6 +3,7 @@
 package glfw
 
 import (
+	"runtime"
 	"sync"
 
 	"fyne.io/fyne"
@@ -58,6 +59,10 @@ func (d *gLDriver) Quit() {
 }
 
 func (d *gLDriver) Run() {
+	count := runtime.Callers(4, make([]uintptr, 1))
+	if count == 0 {
+		panic("Run() must be called from main goroutine")
+	}
 	d.runGL()
 }
 

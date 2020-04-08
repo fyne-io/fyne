@@ -389,6 +389,11 @@ func (w *window) Close() {
 }
 
 func (w *window) ShowAndRun() {
+	count := runtime.Callers(4, make([]uintptr, 1))
+	if count == 0 {
+		panic("ShowAndRun() must be called from main goroutine")
+	}
+
 	w.Show()
 	fyne.CurrentApp().Driver().Run()
 }
