@@ -165,7 +165,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 	return pkg, nil
 }
 
-var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _(?:.*/vendor/)?(github.com/fyne-io.*/[^.]*)`)
+var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(github.com/fyne-io.*/[^.]*)`)
 
 func extractPkgs(nm string, path string) (map[string]bool, error) {
 	if buildN {
