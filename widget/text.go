@@ -348,6 +348,7 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 	if maxWidth == 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
+	maxWidth -= 2 * theme.Padding()
 	var bounds [][2]int
 	for _, l := range lines {
 		low := l[0]
@@ -361,7 +362,6 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 			for {
 				curWidth := measurer(text[low:high])
 				symbWidth := (curWidth / len(text[low:high]))
-				curWidth += symbWidth
 				if maxWidth/symbWidth < len(text[low:high]) {
 					high = low + (maxWidth / symbWidth)
 				}
@@ -376,7 +376,6 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 			for low < high {
 				curWidth := measurer(text[low:high])
 				symbWidth := (curWidth / len(text[low:high]))
-				curWidth += symbWidth
 				if curWidth <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
 					low = high
@@ -394,7 +393,6 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 				sub := text[low:high]
 				curWidth := measurer(sub)
 				symbWidth := (curWidth / len(sub))
-				curWidth += symbWidth
 				if curWidth <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
 					low = high
