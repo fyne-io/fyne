@@ -89,7 +89,7 @@ func (t *textProvider) updateRowBounds() {
 	textWrap := t.presenter.textWrap()
 	textStyle := t.presenter.textStyle()
 	textSize := theme.TextSize()
-	maxWidth := t.Size().Width
+	maxWidth := t.Size().Width - 2*theme.Padding()
 
 	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
@@ -345,10 +345,9 @@ func splitLines(text []rune) [][2]int {
 // lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
 func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
 	lines := splitLines(text)
-	if maxWidth == 0 || wrap == fyne.TextWrapOff {
+	if maxWidth <= 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
-	maxWidth -= 2 * theme.Padding()
 	var bounds [][2]int
 	for _, l := range lines {
 		low := l[0]
@@ -361,9 +360,11 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 		case fyne.TextTruncate:
 			for {
 				curWidth := measurer(text[low:high])
-				symbWidth := (curWidth / len(text[low:high]))
-				if maxWidth/symbWidth < len(text[low:high]) {
-					high = low + (maxWidth / symbWidth)
+				textLength := high - low
+				symbWidth := curWidth / textLength
+				if maxWidth/symbWidth < textLength {
+					high = low + maxWidth/symbWidth
+					curWidth = measurer(text[low:high])
 				}
 				if curWidth <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
@@ -375,13 +376,13 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 		case fyne.TextWrapBreak:
 			for low < high {
 				curWidth := measurer(text[low:high])
-				symbWidth := (curWidth / len(text[low:high]))
+				symbWidth := curWidth / (high - low)
 				if curWidth <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
 					low = high
 					high = l[1]
 				} else {
-					if (high - low) <= (maxWidth / symbWidth) {
+					if (high - low) <= maxWidth/symbWidth {
 						high--
 					} else {
 						high = low + maxWidth/symbWidth
@@ -392,7 +393,7 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 			for low < high {
 				sub := text[low:high]
 				curWidth := measurer(sub)
-				symbWidth := (curWidth / len(sub))
+				symbWidth := curWidth / len(sub)
 				if curWidth <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
 					low = high
