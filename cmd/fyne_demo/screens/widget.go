@@ -31,7 +31,7 @@ func makeButtonTab() fyne.Widget {
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
-		widget.NewButtonWithIcon("Button (test & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
+		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
 		disabled,
 	)
 }
