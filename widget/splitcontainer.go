@@ -9,8 +9,12 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+func halfDividerThickness() int {
+	return theme.Padding()
+}
+
 func dividerThickness() int {
-	return theme.Padding() * 2
+	return halfDividerThickness() * 2
 }
 
 func dividerLength() int {
@@ -40,13 +44,13 @@ func (d *divider) DragEnd() {
 }
 
 func (d *divider) Dragged(event *fyne.DragEvent) {
-	offset := d.split.offset
+	ratio := d.split.ratio
 	if d.split.Horizontal {
-		offset += event.DraggedX
+		ratio += float64(event.DraggedX) / float64(d.split.Size().Width)
 	} else {
-		offset += event.DraggedY
+		ratio += float64(event.DraggedY) / float64(d.split.Size().Height)
 	}
-	d.split.updateOffset(offset)
+	d.split.SetRatio(ratio)
 }
 
 func (d *divider) MouseIn(event *desktop.MouseEvent) {
@@ -138,11 +142,11 @@ type splitContainerRenderer struct {
 func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	var dividerPos, leadingPos, trailingPos fyne.Position
 	var dividerSize, leadingSize, trailingSize fyne.Size
+	half := float64(halfDividerThickness())
 	if r.split.Horizontal {
 		x := 0
-		half := (size.Width - dividerThickness()) / 2
 		leadingPos.X = x
-		leadingSize.Width = half + r.split.offset
+		leadingSize.Width = int(r.split.ratio*float64(size.Width) - half)
 		leadingSize.Height = size.Height
 		x += leadingSize.Width
 		dividerPos.X = x
@@ -150,14 +154,13 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 		dividerSize.Height = size.Height
 		x += dividerSize.Width
 		trailingPos.X = x
-		trailingSize.Width = half - r.split.offset
+		trailingSize.Width = int((1.0-r.split.ratio)*float64(size.Width) - half)
 		trailingSize.Height = size.Height
 	} else {
 		y := 0
-		half := (size.Height - dividerThickness()) / 2
 		leadingPos.Y = y
 		leadingSize.Width = size.Width
-		leadingSize.Height = half + r.split.offset
+		leadingSize.Height = int(r.split.ratio*float64(size.Height) - half)
 		y += leadingSize.Height
 		dividerPos.Y = y
 		dividerSize.Width = size.Width
@@ -165,7 +168,7 @@ func (r *splitContainerRenderer) Layout(size fyne.Size) {
 		y += dividerSize.Height
 		trailingPos.Y = y
 		trailingSize.Width = size.Width
-		trailingSize.Height = half - r.split.offset
+		trailingSize.Height = int((1.0-r.split.ratio)*float64(size.Height) - half)
 	}
 	r.divider.Move(dividerPos)
 	r.divider.Resize(dividerSize)
@@ -217,7 +220,7 @@ type SplitContainer struct {
 	Horizontal bool
 	Leading    fyne.CanvasObject
 	Trailing   fyne.CanvasObject
-	offset     int // Adjusts how the size is split between the children, positive favours leading while negative favours trailing.
+	ratio      float64
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -231,25 +234,36 @@ func (s *SplitContainer) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-func (s *SplitContainer) updateOffset(offset int) {
-	var positiveLimit int
-	var negativeLimit int
+// SetRatio sets the dividing ratio (0.0 to 1.0) of the SplitContainer.
+// SetRatio ensures neither child is smaller than their min size.
+// SetRatio must be called after Resize to ensure size is set.
+// 0.0 - Leading is min size, Trailing uses all remaining space.
+// 0.5 - Leading & Trailing equally share the available space.
+// 1.0 - Trailing is min size, Leading uses all remaining space.
+func (s *SplitContainer) SetRatio(ratio float64) {
+	var max float64
+	var min float64
+	half := float64(halfDividerThickness())
 	if s.Horizontal {
-		half := (s.size.Width - dividerThickness()) / 2
-		positiveLimit = half - s.Trailing.MinSize().Width
-		negativeLimit = s.Leading.MinSize().Width - half
+		sw := float64(s.size.Width)
+		lw := float64(s.Leading.MinSize().Width)
+		tw := float64(s.Trailing.MinSize().Width)
+		max = 1.0 - ((tw + half) / sw)
+		min = (lw + half) / sw
 	} else {
-		half := (s.size.Height - dividerThickness()) / 2
-		positiveLimit = half - s.Trailing.MinSize().Height
-		negativeLimit = s.Leading.MinSize().Height - half
+		sh := float64(s.size.Height)
+		lh := float64(s.Leading.MinSize().Height)
+		th := float64(s.Trailing.MinSize().Height)
+		max = 1.0 - ((th + half) / sh)
+		min = (lh + half) / sh
 	}
-	if offset < negativeLimit {
-		offset = negativeLimit
+	if ratio < min {
+		ratio = min
 	}
-	if offset > positiveLimit {
-		offset = positiveLimit
+	if ratio > max {
+		ratio = max
 	}
-	s.offset = offset
+	s.ratio = ratio
 	s.Refresh()
 }
 
@@ -268,6 +282,7 @@ func newSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *Sp
 		Horizontal: horizontal,
 		Leading:    leading,
 		Trailing:   trailing,
+		ratio:      0.5, // Sensible default, can be overriden with SetRatio
 	}
 	s.ExtendBaseWidget(s)
 	return s
