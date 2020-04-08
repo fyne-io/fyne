@@ -9,128 +9,81 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func halfDividerThickness() int {
-	return theme.Padding()
-}
+// Declare conformity with CanvasObject interface
+var _ fyne.CanvasObject = (*SplitContainer)(nil)
 
-func dividerThickness() int {
-	return halfDividerThickness() * 2
-}
-
-func dividerLength() int {
-	return theme.Padding() * 6
-}
-
-func handleThickness() int {
-	return theme.Padding() / 2
-}
-
-func handleLength() int {
-	return theme.Padding() * 4
-}
-
-// Declare conformity with interfaces
-var _ fyne.CanvasObject = (*divider)(nil)
-var _ fyne.Draggable = (*divider)(nil)
-var _ desktop.Hoverable = (*divider)(nil)
-
-type divider struct {
+// SplitContainer defines a container whose size is split between two children.
+type SplitContainer struct {
 	BaseWidget
-	split   *SplitContainer
-	hovered bool
+	Horizontal bool
+	Leading    fyne.CanvasObject
+	Trailing   fyne.CanvasObject
+	ratio      float64
 }
 
-func (d *divider) DragEnd() {
+// NewHSplitContainer create a splitable parent wrapping the specified children.
+func NewHSplitContainer(left, right fyne.CanvasObject) *SplitContainer {
+	return newSplitContainer(true, left, right)
 }
 
-func (d *divider) Dragged(event *fyne.DragEvent) {
-	ratio := d.split.ratio
-	if d.split.Horizontal {
-		ratio += float64(event.DraggedX) / float64(d.split.Size().Width)
-	} else {
-		ratio += float64(event.DraggedY) / float64(d.split.Size().Height)
+// NewVSplitContainer create a splitable parent wrapping the specified children.
+func NewVSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
+	return newSplitContainer(false, top, bottom)
+}
+
+func newSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *SplitContainer {
+	s := &SplitContainer{
+		Horizontal: horizontal,
+		Leading:    leading,
+		Trailing:   trailing,
+		ratio:      0.5, // Sensible default, can be overriden with SetRatio
 	}
-	d.split.SetRatio(ratio)
+	s.ExtendBaseWidget(s)
+	return s
 }
 
-func (d *divider) MouseIn(event *desktop.MouseEvent) {
-	d.hovered = true
-	d.split.Refresh()
+// SetRatio sets the dividing ratio (0.0 to 1.0) of the SplitContainer.
+// SetRatio ensures neither child is smaller than their min size.
+// SetRatio must be called after Resize to ensure size is set.
+// 0.0 - Leading is min size, Trailing uses all remaining space.
+// 0.5 - Leading & Trailing equally share the available space.
+// 1.0 - Trailing is min size, Leading uses all remaining space.
+func (s *SplitContainer) SetRatio(ratio float64) {
+	var max float64
+	var min float64
+	half := float64(halfDividerThickness())
+	if s.Horizontal {
+		sw := float64(s.size.Width)
+		lw := float64(s.Leading.MinSize().Width)
+		tw := float64(s.Trailing.MinSize().Width)
+		max = 1.0 - ((tw + half) / sw)
+		min = (lw + half) / sw
+	} else {
+		sh := float64(s.size.Height)
+		lh := float64(s.Leading.MinSize().Height)
+		th := float64(s.Trailing.MinSize().Height)
+		max = 1.0 - ((th + half) / sh)
+		min = (lh + half) / sh
+	}
+	if ratio < min {
+		ratio = min
+	}
+	if ratio > max {
+		ratio = max
+	}
+	s.ratio = ratio
+	s.Refresh()
 }
-
-func (d *divider) MouseOut() {
-	d.hovered = false
-	d.split.Refresh()
-}
-
-func (d *divider) MouseMoved(event *desktop.MouseEvent) {}
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (d *divider) CreateRenderer() fyne.WidgetRenderer {
-	d.ExtendBaseWidget(d)
-	r := canvas.NewRectangle(theme.IconColor())
-	return &dividerRenderer{
-		divider:   d,
-		rectangle: r,
-		objects:   []fyne.CanvasObject{r},
+func (s *SplitContainer) CreateRenderer() fyne.WidgetRenderer {
+	s.ExtendBaseWidget(s)
+	d := newDivider(s)
+	return &splitContainerRenderer{
+		split:   s,
+		divider: d,
+		objects: []fyne.CanvasObject{s.Leading, d, s.Trailing},
 	}
-}
-
-func newDivider(split *SplitContainer) *divider {
-	d := &divider{
-		split: split,
-	}
-	d.ExtendBaseWidget(d)
-	return d
-}
-
-type dividerRenderer struct {
-	divider   *divider
-	rectangle *canvas.Rectangle
-	objects   []fyne.CanvasObject
-}
-
-func (r *dividerRenderer) Layout(size fyne.Size) {
-	var x, y, w, h int
-	if r.divider.split.Horizontal {
-		x = (dividerThickness() - handleThickness()) / 2
-		y = (size.Height - handleLength()) / 2
-		w = handleThickness()
-		h = handleLength()
-	} else {
-		x = (size.Width - handleLength()) / 2
-		y = (dividerThickness() - handleThickness()) / 2
-		w = handleLength()
-		h = handleThickness()
-	}
-	r.rectangle.Move(fyne.NewPos(x, y))
-	r.rectangle.Resize(fyne.NewSize(w, h))
-}
-
-func (r *dividerRenderer) MinSize() fyne.Size {
-	if r.divider.split.Horizontal {
-		return fyne.NewSize(dividerThickness(), dividerLength())
-	}
-	return fyne.NewSize(dividerLength(), dividerThickness())
-}
-
-func (r *dividerRenderer) Refresh() {
-	r.rectangle.FillColor = theme.IconColor()
-	r.Layout(r.divider.Size())
-}
-
-func (r *dividerRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
-}
-
-func (r *dividerRenderer) BackgroundColor() color.Color {
-	if r.divider.hovered {
-		return theme.HoverColor()
-	}
-	return theme.ButtonColor()
-}
-
-func (r *dividerRenderer) Destroy() {
 }
 
 type splitContainerRenderer struct {
@@ -211,79 +164,126 @@ func (r *splitContainerRenderer) BackgroundColor() color.Color {
 func (r *splitContainerRenderer) Destroy() {
 }
 
-// Declare conformity with CanvasObject interface
-var _ fyne.CanvasObject = (*SplitContainer)(nil)
+// Declare conformity with interfaces
+var _ fyne.CanvasObject = (*divider)(nil)
+var _ fyne.Draggable = (*divider)(nil)
+var _ desktop.Hoverable = (*divider)(nil)
 
-// SplitContainer defines a container whose size is split between two children.
-type SplitContainer struct {
+type divider struct {
 	BaseWidget
-	Horizontal bool
-	Leading    fyne.CanvasObject
-	Trailing   fyne.CanvasObject
-	ratio      float64
+	split   *SplitContainer
+	hovered bool
 }
+
+func newDivider(split *SplitContainer) *divider {
+	d := &divider{
+		split: split,
+	}
+	d.ExtendBaseWidget(d)
+	return d
+}
+
+func (d *divider) DragEnd() {
+}
+
+func (d *divider) Dragged(event *fyne.DragEvent) {
+	ratio := d.split.ratio
+	if d.split.Horizontal {
+		ratio += float64(event.DraggedX) / float64(d.split.Size().Width)
+	} else {
+		ratio += float64(event.DraggedY) / float64(d.split.Size().Height)
+	}
+	d.split.SetRatio(ratio)
+}
+
+func (d *divider) MouseIn(event *desktop.MouseEvent) {
+	d.hovered = true
+	d.split.Refresh()
+}
+
+func (d *divider) MouseOut() {
+	d.hovered = false
+	d.split.Refresh()
+}
+
+func (d *divider) MouseMoved(event *desktop.MouseEvent) {}
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (s *SplitContainer) CreateRenderer() fyne.WidgetRenderer {
-	s.ExtendBaseWidget(s)
-	d := newDivider(s)
-	return &splitContainerRenderer{
-		split:   s,
-		divider: d,
-		objects: []fyne.CanvasObject{s.Leading, d, s.Trailing},
+func (d *divider) CreateRenderer() fyne.WidgetRenderer {
+	d.ExtendBaseWidget(d)
+	r := canvas.NewRectangle(theme.IconColor())
+	return &dividerRenderer{
+		divider:   d,
+		rectangle: r,
+		objects:   []fyne.CanvasObject{r},
 	}
 }
 
-// SetRatio sets the dividing ratio (0.0 to 1.0) of the SplitContainer.
-// SetRatio ensures neither child is smaller than their min size.
-// SetRatio must be called after Resize to ensure size is set.
-// 0.0 - Leading is min size, Trailing uses all remaining space.
-// 0.5 - Leading & Trailing equally share the available space.
-// 1.0 - Trailing is min size, Leading uses all remaining space.
-func (s *SplitContainer) SetRatio(ratio float64) {
-	var max float64
-	var min float64
-	half := float64(halfDividerThickness())
-	if s.Horizontal {
-		sw := float64(s.size.Width)
-		lw := float64(s.Leading.MinSize().Width)
-		tw := float64(s.Trailing.MinSize().Width)
-		max = 1.0 - ((tw + half) / sw)
-		min = (lw + half) / sw
+type dividerRenderer struct {
+	divider   *divider
+	rectangle *canvas.Rectangle
+	objects   []fyne.CanvasObject
+}
+
+func (r *dividerRenderer) Layout(size fyne.Size) {
+	var x, y, w, h int
+	if r.divider.split.Horizontal {
+		x = (dividerThickness() - handleThickness()) / 2
+		y = (size.Height - handleLength()) / 2
+		w = handleThickness()
+		h = handleLength()
 	} else {
-		sh := float64(s.size.Height)
-		lh := float64(s.Leading.MinSize().Height)
-		th := float64(s.Trailing.MinSize().Height)
-		max = 1.0 - ((th + half) / sh)
-		min = (lh + half) / sh
+		x = (size.Width - handleLength()) / 2
+		y = (dividerThickness() - handleThickness()) / 2
+		w = handleLength()
+		h = handleThickness()
 	}
-	if ratio < min {
-		ratio = min
-	}
-	if ratio > max {
-		ratio = max
-	}
-	s.ratio = ratio
-	s.Refresh()
+	r.rectangle.Move(fyne.NewPos(x, y))
+	r.rectangle.Resize(fyne.NewSize(w, h))
 }
 
-// NewHSplitContainer create a splitable parent wrapping the specified children.
-func NewHSplitContainer(left, right fyne.CanvasObject) *SplitContainer {
-	return newSplitContainer(true, left, right)
-}
-
-// NewVSplitContainer create a splitable parent wrapping the specified children.
-func NewVSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
-	return newSplitContainer(false, top, bottom)
-}
-
-func newSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *SplitContainer {
-	s := &SplitContainer{
-		Horizontal: horizontal,
-		Leading:    leading,
-		Trailing:   trailing,
-		ratio:      0.5, // Sensible default, can be overriden with SetRatio
+func (r *dividerRenderer) MinSize() fyne.Size {
+	if r.divider.split.Horizontal {
+		return fyne.NewSize(dividerThickness(), dividerLength())
 	}
-	s.ExtendBaseWidget(s)
-	return s
+	return fyne.NewSize(dividerLength(), dividerThickness())
+}
+
+func (r *dividerRenderer) Refresh() {
+	r.rectangle.FillColor = theme.IconColor()
+	r.Layout(r.divider.Size())
+}
+
+func (r *dividerRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *dividerRenderer) BackgroundColor() color.Color {
+	if r.divider.hovered {
+		return theme.HoverColor()
+	}
+	return theme.ButtonColor()
+}
+
+func (r *dividerRenderer) Destroy() {
+}
+
+func halfDividerThickness() int {
+	return theme.Padding()
+}
+
+func dividerThickness() int {
+	return halfDividerThickness() * 2
+}
+
+func dividerLength() int {
+	return theme.Padding() * 6
+}
+
+func handleThickness() int {
+	return theme.Padding() / 2
+}
+
+func handleLength() int {
+	return theme.Padding() * 4
 }
