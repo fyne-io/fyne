@@ -31,7 +31,7 @@ func makeButtonTab() fyne.Widget {
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
-		widget.NewButtonWithIcon("Button (test & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
+		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
 		disabled,
 	)
 }
@@ -61,8 +61,6 @@ func makeTextTab() fyne.CanvasObject {
 
 	label.Wrapping = fyne.TextWrapWord
 	hyperlink.Wrapping = fyne.TextWrapWord
-	entry.Wrapping = fyne.TextWrapWord
-	entryDisabled.Wrapping = fyne.TextWrapWord
 	entryMultiLine.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
@@ -100,15 +98,13 @@ func makeTextTab() fyne.CanvasObject {
 
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
-		entry.Wrapping = wrap
-		entryDisabled.Wrapping = wrap
-		entryMultiLine.Wrapping = wrap
-		entryLoremIpsum.Wrapping = wrap
+		if wrap != fyne.TextTruncate {
+			entryMultiLine.Wrapping = wrap
+			entryLoremIpsum.Wrapping = wrap
+		}
 
 		label.Refresh()
 		hyperlink.Refresh()
-		entry.Refresh()
-		entryDisabled.Refresh()
 		entryMultiLine.Refresh()
 		entryLoremIpsum.Refresh()
 		entryLoremIpsumScroller.Refresh()
