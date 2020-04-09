@@ -71,7 +71,7 @@ func (f *Form) MinSize() fyne.Size {
 	return f.BaseWidget.MinSize()
 }
 
-// Refresh updates the widget state when requestedgit d.
+// Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
 	f.BaseWidget.Refresh()
 	canvas.Refresh(f) // refresh ourselves for BG color - the above updates the content
