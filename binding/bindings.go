@@ -9,7 +9,7 @@ import (
 )
 
 type BoolBinding struct {
-	itemBinding
+	ItemBinding
 	value bool
 }
 
@@ -34,34 +34,8 @@ func (b *BoolBinding) AddListener(listener func(bool)) {
 	})
 }
 
-type ByteBinding struct {
-	itemBinding
-	value byte
-}
-
-func NewByteBinding(value byte) *ByteBinding {
-	return &ByteBinding{value: value}
-}
-
-func (b *ByteBinding) Get() byte {
-	return b.value
-}
-
-func (b *ByteBinding) Set(value byte) {
-	if b.value != value {
-		b.value = value
-		b.notify()
-	}
-}
-
-func (b *ByteBinding) AddListener(listener func(byte)) {
-	b.addListener(func() {
-		listener(b.value)
-	})
-}
-
 type Float64Binding struct {
-	itemBinding
+	ItemBinding
 	value float64
 }
 
@@ -87,7 +61,7 @@ func (b *Float64Binding) AddListener(listener func(float64)) {
 }
 
 type IntBinding struct {
-	itemBinding
+	ItemBinding
 	value int
 }
 
@@ -113,7 +87,7 @@ func (b *IntBinding) AddListener(listener func(int)) {
 }
 
 type Int64Binding struct {
-	itemBinding
+	ItemBinding
 	value int64
 }
 
@@ -138,60 +112,8 @@ func (b *Int64Binding) AddListener(listener func(int64)) {
 	})
 }
 
-type UintBinding struct {
-	itemBinding
-	value uint
-}
-
-func NewUintBinding(value uint) *UintBinding {
-	return &UintBinding{value: value}
-}
-
-func (b *UintBinding) Get() uint {
-	return b.value
-}
-
-func (b *UintBinding) Set(value uint) {
-	if b.value != value {
-		b.value = value
-		b.notify()
-	}
-}
-
-func (b *UintBinding) AddListener(listener func(uint)) {
-	b.addListener(func() {
-		listener(b.value)
-	})
-}
-
-type Uint64Binding struct {
-	itemBinding
-	value uint64
-}
-
-func NewUint64Binding(value uint64) *Uint64Binding {
-	return &Uint64Binding{value: value}
-}
-
-func (b *Uint64Binding) Get() uint64 {
-	return b.value
-}
-
-func (b *Uint64Binding) Set(value uint64) {
-	if b.value != value {
-		b.value = value
-		b.notify()
-	}
-}
-
-func (b *Uint64Binding) AddListener(listener func(uint64)) {
-	b.addListener(func() {
-		listener(b.value)
-	})
-}
-
 type ResourceBinding struct {
-	itemBinding
+	ItemBinding
 	value fyne.Resource
 }
 
@@ -217,7 +139,7 @@ func (b *ResourceBinding) AddListener(listener func(fyne.Resource)) {
 }
 
 type RuneBinding struct {
-	itemBinding
+	ItemBinding
 	value rune
 }
 
@@ -243,7 +165,7 @@ func (b *RuneBinding) AddListener(listener func(rune)) {
 }
 
 type StringBinding struct {
-	itemBinding
+	ItemBinding
 	value string
 }
 
@@ -269,7 +191,7 @@ func (b *StringBinding) AddListener(listener func(string)) {
 }
 
 type URLBinding struct {
-	itemBinding
+	ItemBinding
 	value *url.URL
 }
 

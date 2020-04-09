@@ -23,7 +23,7 @@ import (
 
 const bindingTemplate = `
 type {{ .Name }}Binding struct {
-	itemBinding
+	ItemBinding
 	value {{ .Type }}
 }
 
@@ -79,19 +79,19 @@ func main() {
 
 	for _, b := range []*BindingTemplate{
 		&BindingTemplate{Name: "Bool", Type: "bool"},
-		&BindingTemplate{Name: "Byte", Type: "byte"},
-		//		&BindingTemplate{Name:"Float32",Type:"float32"},
+		//&BindingTemplate{Name: "Byte", Type: "byte"},
+		//&BindingTemplate{Name:"Float32",Type:"float32"},
 		&BindingTemplate{Name: "Float64", Type: "float64"},
 		&BindingTemplate{Name: "Int", Type: "int"},
-		//		&BindingTemplate{Name:"Int8",Type:"int8"},
-		//		&BindingTemplate{Name:"Int16",Type:"int16"},
-		//		&BindingTemplate{Name:"Int32",Type:"int32"},
+		//&BindingTemplate{Name:"Int8",Type:"int8"},
+		//&BindingTemplate{Name:"Int16",Type:"int16"},
+		//&BindingTemplate{Name:"Int32",Type:"int32"},
 		&BindingTemplate{Name: "Int64", Type: "int64"},
-		&BindingTemplate{Name: "Uint", Type: "uint"},
-		//		&BindingTemplate{Name:"Uint8",Type:"uint8"},
-		//		&BindingTemplate{Name:"Uint16",Type:"uint16"},
-		//		&BindingTemplate{Name:"Uint32",Type:"uint32"},
-		&BindingTemplate{Name: "Uint64", Type: "uint64"},
+		//&BindingTemplate{Name: "Uint", Type: "uint"},
+		//&BindingTemplate{Name:"Uint8",Type:"uint8"},
+		//&BindingTemplate{Name:"Uint16",Type:"uint16"},
+		//&BindingTemplate{Name:"Uint32",Type:"uint32"},
+		//&BindingTemplate{Name: "Uint64", Type: "uint64"},
 		&BindingTemplate{Name: "Resource", Type: "fyne.Resource"},
 		&BindingTemplate{Name: "Rune", Type: "rune"},
 		&BindingTemplate{Name: "String", Type: "string"},

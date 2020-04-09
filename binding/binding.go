@@ -2,23 +2,25 @@ package binding
 
 import "sync"
 
+// Binding is the base interface of the Data Binding API.
 type Binding interface {
 	addListener(func())
 }
 
-type itemBinding struct {
+// ItemBinding implements a data binding for a single item.
+type ItemBinding struct {
 	Binding
 	sync.RWMutex
 	listeners []func()
 }
 
-func (b *itemBinding) addListener(listener func()) {
+func (b *ItemBinding) addListener(listener func()) {
 	b.Lock()
 	defer b.Unlock()
 	b.listeners = append(b.listeners, listener)
 }
 
-func (b *itemBinding) notify() {
+func (b *ItemBinding) notify() {
 	b.RLock()
 	defer b.RUnlock()
 	for _, l := range b.listeners {
@@ -27,7 +29,7 @@ func (b *itemBinding) notify() {
 }
 
 type SliceBinding struct {
-	itemBinding
+	ItemBinding
 	values []Binding
 }
 
@@ -58,7 +60,7 @@ func (b *SliceBinding) AddListener(listener func()) {
 }
 
 type MapBinding struct {
-	itemBinding
+	ItemBinding
 	values map[string]Binding
 }
 
