@@ -15,7 +15,6 @@ import (
 
 // BindingsScreen loads a data bindings example panel for the demo app
 func BindingsScreen() fyne.CanvasObject {
-	// TODO entry - stringBinding
 	// TODO list - []binding
 	// TODO table - [][]binding
 	// TODO tree - map[string][]string
@@ -60,8 +59,6 @@ func BindingsScreen() fyne.CanvasObject {
 	goBool.Set(true)
 
 	// Check <-> Label <-> Check
-	// FIXME checkRenderer.Layout can be called before checkRenderer.Refresh
-	//  meaning check box is not initially rendered checked
 	onOffLeftCheck := &widget.Check{}
 	onOffRightCheck := &widget.Check{}
 	onOffLabel := &widget.Label{}
@@ -102,11 +99,6 @@ func BindingsScreen() fyne.CanvasObject {
 	})
 
 	// Radio <-> Icon <-> Radio
-	// FIXME radioRenderer.Layout can be called before radioRenderer.Refresh
-	//  meaning radio is not initially rendered selected
-	// FIXME iconRenderer.Layout can be called before iconRenderer.Refresh
-	//  meaning icon is not initially rendered
-
 	clipboardLeftRadio := &widget.Radio{}
 	clipboardRightRadio := &widget.Radio{}
 	clipboardIcon := &widget.Icon{}
