@@ -243,7 +243,7 @@ func (s *Select) BindSelected(data *binding.StringBinding) {
 	data.AddListener(s.SetSelected)
 }
 
-func (s *Select) BindOptions(data *binding.SliceBinding) {
+func (s *Select) BindOptions(data *binding.ListBinding) {
 	data.AddListener(func() {
 		l := data.Length()
 		var options []string

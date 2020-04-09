@@ -111,7 +111,7 @@ func BindingsScreen() fyne.CanvasObject {
 	clipboardRightRadio := &widget.Radio{}
 	clipboardIcon := &widget.Icon{}
 
-	clipboardOptions := &binding.SliceBinding{}
+	clipboardOptions := &binding.ListBinding{}
 	clipboardString := &binding.StringBinding{}
 	clipboardResource := &binding.ResourceBinding{}
 
@@ -145,7 +145,7 @@ func BindingsScreen() fyne.CanvasObject {
 	urlRightSelect := &widget.Select{}
 	urlHyperlink := &widget.Hyperlink{}
 
-	urlOptions := &binding.SliceBinding{}
+	urlOptions := &binding.ListBinding{}
 	urlString := &binding.StringBinding{}
 	urlURL := &binding.URLBinding{}
 

@@ -431,7 +431,7 @@ func TestRadio_BindOptions(t *testing.T) {
 	done := make(chan bool)
 	radio := NewRadio([]string{"a"}, nil)
 
-	data := &binding.SliceBinding{}
+	data := &binding.ListBinding{}
 	radio.BindOptions(data)
 	data.AddListener(func() {
 		done <- true

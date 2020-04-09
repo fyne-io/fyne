@@ -28,25 +28,26 @@ func (b *ItemBinding) notify() {
 	}
 }
 
-type SliceBinding struct {
+// ListBinding implements a data binding for a list of bindings.
+type ListBinding struct {
 	ItemBinding
 	values []Binding
 }
 
-func (b *SliceBinding) Length() int {
+func (b *ListBinding) Length() int {
 	return len(b.values)
 }
 
-func (b *SliceBinding) Get(index int) Binding {
+func (b *ListBinding) Get(index int) Binding {
 	return b.values[index]
 }
 
-func (b *SliceBinding) Append(data ...Binding) {
+func (b *ListBinding) Append(data ...Binding) {
 	b.values = append(b.values, data...)
 	b.notify()
 }
 
-func (b *SliceBinding) Set(index int, data Binding) {
+func (b *ListBinding) Set(index int, data Binding) {
 	old := b.values[index]
 	if old == data {
 		return
@@ -55,7 +56,7 @@ func (b *SliceBinding) Set(index int, data Binding) {
 	b.notify()
 }
 
-func (b *SliceBinding) AddListener(listener func()) {
+func (b *ListBinding) AddListener(listener func()) {
 	b.addListener(listener)
 }
 

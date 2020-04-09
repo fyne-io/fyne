@@ -323,7 +323,7 @@ func (r *Radio) BindSelected(data *binding.StringBinding) {
 	data.AddListener(r.SetSelected)
 }
 
-func (r *Radio) BindOptions(data *binding.SliceBinding) {
+func (r *Radio) BindOptions(data *binding.ListBinding) {
 	data.AddListener(func() {
 		l := data.Length()
 		var options []string

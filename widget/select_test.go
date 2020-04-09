@@ -265,7 +265,7 @@ func TestSelect_BindOptions(t *testing.T) {
 	done := make(chan bool)
 	combo := NewSelect([]string{"a"}, nil)
 
-	data := &binding.SliceBinding{}
+	data := &binding.ListBinding{}
 	combo.BindOptions(data)
 	data.AddListener(func() {
 		done <- true
