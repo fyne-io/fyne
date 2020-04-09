@@ -22,19 +22,23 @@ import (
 `
 
 const bindingTemplate = `
+// {{ .Name }}Binding implements a data binding for a {{ .Type }}.
 type {{ .Name }}Binding struct {
 	ItemBinding
 	value {{ .Type }}
 }
 
+// New{{ .Name }}Binding creates a new binding with the given value.
 func New{{ .Name }}Binding(value {{ .Type }}) *{{ .Name }}Binding {
 	return &{{ .Name }}Binding{value: value}
 }
 
+// Get returns the bound value.
 func (b *{{ .Name }}Binding) Get() {{ .Type }} {
 	return b.value
 }
 
+// Set updates the bound value.
 func (b *{{ .Name }}Binding) Set(value {{ .Type }}) {
 	if b.value != value {
 		b.value = value
@@ -42,6 +46,7 @@ func (b *{{ .Name }}Binding) Set(value {{ .Type }}) {
 	}
 }
 
+// AddListener adds the given listener to the binding.
 func (b *{{ .Name }}Binding) AddListener(listener func({{ .Type }})) {
 	b.addListener(func() {
 		listener(b.value)
