@@ -10,15 +10,15 @@ github.com/davecgh/go-spew/spew
 github.com/fsnotify/fsnotify
 # github.com/fyne-io/mobile v0.0.0-20200408112643-2d6e8ba97390
 github.com/fyne-io/mobile/app
-github.com/fyne-io/mobile/app/internal/callfn
 github.com/fyne-io/mobile/event/key
 github.com/fyne-io/mobile/event/lifecycle
 github.com/fyne-io/mobile/event/paint
 github.com/fyne-io/mobile/event/size
 github.com/fyne-io/mobile/event/touch
-github.com/fyne-io/mobile/exp/f32
-github.com/fyne-io/mobile/geom
 github.com/fyne-io/mobile/gl
+github.com/fyne-io/mobile/exp/f32
+github.com/fyne-io/mobile/app/internal/callfn
+github.com/fyne-io/mobile/geom
 github.com/fyne-io/mobile/internal/mobileinit
 # github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 github.com/go-gl/gl/v3.1/gles2
@@ -78,11 +78,12 @@ golang.org/x/text/language
 golang.org/x/text/internal/utf8internal
 golang.org/x/text/runes
 golang.org/x/text/internal/tag
-golang.org/x/tools/go/packages
 # golang.org/x/tools v0.0.0-20200117012304-6edc0a871e69
+golang.org/x/tools/go/packages
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/internal/gopathwalk
+golang.org/x/tools/internal/packagesinternal
 golang.org/x/tools/internal/semver
 golang.org/x/tools/go/internal/gcimporter
 golang.org/x/tools/internal/fastwalk
