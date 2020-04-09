@@ -421,17 +421,21 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 					if last > len(sub)-1 {
 						last = len(sub) - 1
 					}
-					last = checkForwardSpace(low, low+last, low+len(sub)-1) - low
-					for ; last >= 0; last-- {
-						if unicode.IsSpace(sub[last]) {
-							break
+
+					findSpaceIndex := func(last int) int {
+						curIndex := last
+						for ; curIndex >= 0; curIndex-- {
+							if unicode.IsSpace(sub[curIndex]) {
+								break
+							}
 						}
+						if curIndex < 0 {
+							return last
+						}
+						return curIndex
 					}
-					if last < 0 {
-						high--
-					} else {
-						high = low + last
-					}
+
+					high = low + findSpaceIndex(checkForwardSpace(low, low+last, low+len(sub)-1)-low)
 				}
 			}
 		}
