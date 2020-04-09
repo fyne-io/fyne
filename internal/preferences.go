@@ -33,6 +33,13 @@ func (p *InMemoryPreferences) get(key string) (interface{}, bool) {
 	return v, err
 }
 
+func (p *InMemoryPreferences) remove(key string) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	delete(p.values, key)
+}
+
 // Values provides access to the underlying value map - for internal use only...
 func (p *InMemoryPreferences) Values() map[string]interface{} {
 	p.lock.RLock()
@@ -143,6 +150,11 @@ func (p *InMemoryPreferences) StringWithFallback(key, fallback string) string {
 // SetString saves a string value for the given key
 func (p *InMemoryPreferences) SetString(key string, value string) {
 	p.set(key, value)
+}
+
+// RemoveValue deletes a value on the given key
+func (p *InMemoryPreferences) RemoveValue(key string) {
+	p.remove(key)
 }
 
 // NewInMemoryPreferences creates a new preferences implementation stored in memory

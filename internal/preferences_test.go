@@ -129,3 +129,22 @@ func TestInMemoryPreferences_OnChange(t *testing.T) {
 
 	assert.True(t, called)
 }
+
+func TestRemoveValue(t *testing.T) {
+	p := NewInMemoryPreferences()
+
+	p.SetBool("dummy", true)
+	p.SetFloat("pi", 3.14)
+	p.SetInt("number", 2)
+	p.SetString("month", "January")
+
+	p.RemoveValue("dummy")
+	p.RemoveValue("pi")
+	p.RemoveValue("number")
+	p.RemoveValue("month")
+
+	assert.Equal(t, false, p.Bool("dummy"))
+	assert.Equal(t, float64(0), p.Float("pi"))
+	assert.Equal(t, 0, p.Int("number"))
+	assert.Equal(t, "", p.String("month"))
+}
