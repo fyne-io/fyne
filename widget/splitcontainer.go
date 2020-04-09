@@ -167,6 +167,7 @@ func (r *splitContainerRenderer) Destroy() {
 // Declare conformity with interfaces
 var _ fyne.CanvasObject = (*divider)(nil)
 var _ fyne.Draggable = (*divider)(nil)
+var _ desktop.Cursorable = (*divider)(nil)
 var _ desktop.Hoverable = (*divider)(nil)
 
 type divider struct {
@@ -181,6 +182,13 @@ func newDivider(split *SplitContainer) *divider {
 	}
 	d.ExtendBaseWidget(d)
 	return d
+}
+
+func (d *divider) Cursor() desktop.Cursor {
+	if d.split.Horizontal {
+		return desktop.HResizeCursor
+	}
+	return desktop.VResizeCursor
 }
 
 func (d *divider) DragEnd() {

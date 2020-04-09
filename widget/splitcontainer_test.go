@@ -141,6 +141,17 @@ func TestSplitContainer_SetRatio_limits(t *testing.T) {
 	})
 }
 
+func TestSplitContainer_divider_cursor(t *testing.T) {
+	t.Run("Horizontal", func(t *testing.T) {
+		divider := newDivider(&SplitContainer{Horizontal: true})
+		assert.Equal(t, desktop.HResizeCursor, divider.Cursor())
+	})
+	t.Run("Vertical", func(t *testing.T) {
+		divider := newDivider(&SplitContainer{Horizontal: false})
+		assert.Equal(t, desktop.VResizeCursor, divider.Cursor())
+	})
+}
+
 func TestSplitContainer_divider_drag(t *testing.T) {
 	size := fyne.NewSize(10, 10)
 	objA := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
