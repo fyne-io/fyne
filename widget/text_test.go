@@ -650,3 +650,59 @@ func TestText_lineBounds(t *testing.T) {
 		})
 	}
 }
+
+func TestText_lineBounds_variable_char_width(t *testing.T) {
+	tests := []struct {
+		name string
+		text string
+		wrap fyne.TextWrap
+		want [][2]int
+	}{
+		{
+			name: "IM_WrapOff",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 20},
+			},
+		},
+		{
+			name: "IM_Truncate",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 12},
+			},
+		},
+		{
+			name: "IM_WrapBreak",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 12},
+				{12, 16},
+				{16, 20},
+			},
+		},
+		{
+			name: "IM_WrapWord",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 12},
+				{12, 16},
+				{16, 20},
+			},
+		},
+	}
+	textSize := 10
+	textStyle := fyne.TextStyle{}
+	measurer := func(text []rune) int {
+		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, lineBounds([]rune(tt.text), tt.wrap, 50, measurer))
+		})
+	}
+}
