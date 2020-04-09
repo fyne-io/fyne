@@ -238,12 +238,17 @@ func (s *Select) updateSelected(text string) {
 	s.Refresh()
 }
 
-func (s *Select) BindSelected(data *binding.StringBinding) {
+// BindSelected binds the Select's Selected Option to the given data binding.
+// Returns the Select for chaining.
+func (s *Select) BindSelected(data *binding.StringBinding) *Select {
 	s.changeBinding = data
 	data.AddListener(s.SetSelected)
+	return s
 }
 
-func (s *Select) BindOptions(data *binding.ListBinding) {
+// BindOptions binds the Select's Options to the given data binding.
+// Returns the Select for chaining.
+func (s *Select) BindOptions(data *binding.ListBinding) *Select {
 	data.AddListener(func() {
 		l := data.Length()
 		var options []string
@@ -258,6 +263,7 @@ func (s *Select) BindOptions(data *binding.ListBinding) {
 		s.Options = options
 		s.Refresh()
 	})
+	return s
 }
 
 // NewSelect creates a new select widget with the set list of options and changes handler

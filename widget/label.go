@@ -95,6 +95,9 @@ func (l *Label) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-func (l *Label) BindText(data *binding.StringBinding) {
+// BindText binds the Label's Text to the given data binding.
+// Returns the Label for chaining.
+func (l *Label) BindText(data *binding.StringBinding) *Label {
 	data.AddListener(l.SetText)
+	return l
 }

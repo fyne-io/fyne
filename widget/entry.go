@@ -1134,9 +1134,12 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 	e.registerShortcut()
 }
 
-func (e *Entry) BindText(data *binding.StringBinding) {
+// BindText binds the Entry's Text to the given data binding.
+// Returns the Entry for chaining.
+func (e *Entry) BindText(data *binding.StringBinding) *Entry {
 	e.textBinding = data
 	data.AddListener(e.SetText)
+	return e
 }
 
 // NewEntry creates a new single line entry widget.

@@ -191,13 +191,19 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	return &checkRenderer{icon, text, focusIndicator, []fyne.CanvasObject{focusIndicator, icon, text}, c}
 }
 
-func (c *Check) BindChecked(data *binding.BoolBinding) {
+// BindChecked binds the Check's OnChanged to the given data binding.
+// Returns the Check for chaining.
+func (c *Check) BindChecked(data *binding.BoolBinding) *Check {
 	c.changeBinding = data
 	data.AddListener(c.SetChecked)
+	return c
 }
 
-func (c *Check) BindText(data *binding.StringBinding) {
+// BindText binds the Check's Text to the given data binding.
+// Returns the Check for chaining.
+func (c *Check) BindText(data *binding.StringBinding) *Check {
 	data.AddListener(c.SetText)
+	return c
 }
 
 // NewCheck creates a new check widget with the set label and change handler

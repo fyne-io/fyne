@@ -115,10 +115,16 @@ func (hl *Hyperlink) MinSize() fyne.Size {
 	return hl.BaseWidget.MinSize()
 }
 
-func (hl *Hyperlink) BindText(data *binding.StringBinding) {
+// BindText binds the Hyperlink's Text to the given data binding.
+// Returns the Hyperlink for chaining.
+func (hl *Hyperlink) BindText(data *binding.StringBinding) *Hyperlink {
 	data.AddListener(hl.SetText)
+	return hl
 }
 
-func (hl *Hyperlink) BindURL(data *binding.URLBinding) {
+// BindURL binds the Hyperlink's URL to the given data binding.
+// Returns the Hyperlink for chaining.
+func (hl *Hyperlink) BindURL(data *binding.URLBinding) *Hyperlink {
 	data.AddListener(hl.SetURL)
+	return hl
 }

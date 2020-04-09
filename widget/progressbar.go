@@ -139,16 +139,25 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	return &progressRenderer{[]fyne.CanvasObject{bar, label}, bar, label, p}
 }
 
-func (p *ProgressBar) BindMin(data *binding.Float64Binding) {
+// BindMin binds the ProgressBar's Minimum to the given data binding.
+// Returns the ProgressBar for chaining.
+func (p *ProgressBar) BindMin(data *binding.Float64Binding) *ProgressBar {
 	data.AddListener(p.SetMin)
+	return p
 }
 
-func (p *ProgressBar) BindMax(data *binding.Float64Binding) {
+// BindMax binds the ProgressBar's Maximum to the given data binding.
+// Returns the ProgressBar for chaining.
+func (p *ProgressBar) BindMax(data *binding.Float64Binding) *ProgressBar {
 	data.AddListener(p.SetMax)
+	return p
 }
 
-func (p *ProgressBar) BindValue(data *binding.Float64Binding) {
+// BindValue binds the ProgressBar's Value to the given data binding.
+// Returns the ProgressBar for chaining.
+func (p *ProgressBar) BindValue(data *binding.Float64Binding) *ProgressBar {
 	data.AddListener(p.SetValue)
+	return p
 }
 
 // NewProgressBar creates a new progress bar widget.

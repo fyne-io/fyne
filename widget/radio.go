@@ -318,12 +318,17 @@ func (r *Radio) removeDuplicateOptions() {
 	r.Options = removeDuplicates(r.Options)
 }
 
-func (r *Radio) BindSelected(data *binding.StringBinding) {
+// BindSelected binds the Radio's Selected Option to the given data binding.
+// Returns the Radio for chaining.
+func (r *Radio) BindSelected(data *binding.StringBinding) *Radio {
 	r.changeBinding = data
 	data.AddListener(r.SetSelected)
+	return r
 }
 
-func (r *Radio) BindOptions(data *binding.ListBinding) {
+// BindOptions binds the Radio's Options to the given data binding.
+// Returns the Radio for chaining.
+func (r *Radio) BindOptions(data *binding.ListBinding) *Radio {
 	data.AddListener(func() {
 		l := data.Length()
 		var options []string
@@ -338,6 +343,7 @@ func (r *Radio) BindOptions(data *binding.ListBinding) {
 		r.Options = options
 		r.Refresh()
 	})
+	return r
 }
 
 // NewRadio creates a new radio widget with the set options and change handler

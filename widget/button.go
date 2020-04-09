@@ -249,16 +249,25 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 	}
 }
 
-func (b *Button) BindTapped(data *binding.BoolBinding) {
+// BindTapped binds the Button's OnTap to the given data binding.
+// Returns the Button for chaining.
+func (b *Button) BindTapped(data *binding.BoolBinding) *Button {
 	b.tapBinding = data
+	return b
 }
 
-func (b *Button) BindText(data *binding.StringBinding) {
+// BindText binds the Button's Text to the given data binding.
+// Returns the Button for chaining.
+func (b *Button) BindText(data *binding.StringBinding) *Button {
 	data.AddListener(b.SetText)
+	return b
 }
 
-func (b *Button) BindIcon(data *binding.ResourceBinding) {
+// BindIcon binds the Button's Icon to the given data binding.
+// Returns the Button for chaining.
+func (b *Button) BindIcon(data *binding.ResourceBinding) *Button {
 	data.AddListener(b.SetIcon)
+	return b
 }
 
 // NewButton creates a new button widget with the set label and tap handler

@@ -104,6 +104,7 @@ func (s *Slider) updateValue(ratio float64) {
 	s.SetValue(float64(int(v*p)) / p)
 }
 
+// SetValue sets the Slider's Value to the given value.
 func (s *Slider) SetValue(value float64) {
 	if s.Value == value {
 		return
@@ -126,6 +127,7 @@ func (s *Slider) SetValue(value float64) {
 	s.Refresh()
 }
 
+// SetMin sets the Slider's Minimum to the given min.
 func (s *Slider) SetMin(min float64) {
 	if s.Min == min {
 		return
@@ -136,6 +138,7 @@ func (s *Slider) SetMin(min float64) {
 	s.Refresh()
 }
 
+// SetMax sets the Slider's Maximum to the given max.
 func (s *Slider) SetMax(max float64) {
 	if s.Max == max {
 		return
@@ -146,6 +149,7 @@ func (s *Slider) SetMax(max float64) {
 	s.Refresh()
 }
 
+// SetStep sets the Slider's Step to the given step.
 func (s *Slider) SetStep(step float64) {
 	if s.Step == step {
 		return
@@ -176,21 +180,33 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	return &sliderRenderer{track, active, thumb, objects, s}
 }
 
-func (s *Slider) BindValue(data *binding.Float64Binding) {
+// BindValue binds the Slider's Value to the given data binding.
+// Returns the Slider for chaining.
+func (s *Slider) BindValue(data *binding.Float64Binding) *Slider {
 	s.changeBinding = data
 	data.AddListener(s.SetValue)
+	return s
 }
 
-func (s *Slider) BindMin(data *binding.Float64Binding) {
+// BindMin binds the Slider's Minimum to the given data binding.
+// Returns the Slider for chaining.
+func (s *Slider) BindMin(data *binding.Float64Binding) *Slider {
 	data.AddListener(s.SetMin)
+	return s
 }
 
-func (s *Slider) BindMax(data *binding.Float64Binding) {
+// BindMax binds the Slider's Maximum to the given data binding.
+// Returns the Slider for chaining.
+func (s *Slider) BindMax(data *binding.Float64Binding) *Slider {
 	data.AddListener(s.SetMax)
+	return s
 }
 
-func (s *Slider) BindStep(data *binding.Float64Binding) {
+// BindStep binds the Slider's Step to the given data binding.
+// Returns the Slider for chaining.
+func (s *Slider) BindStep(data *binding.Float64Binding) *Slider {
 	data.AddListener(s.SetStep)
+	return s
 }
 
 const (
