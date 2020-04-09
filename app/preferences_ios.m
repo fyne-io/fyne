@@ -72,3 +72,8 @@ void setPreferenceString(const char* key, const char* value) {
     NSString *nsval = [NSString stringWithUTF8String:value];
     [[NSUserDefaults standardUserDefaults] setObject:nsval forKey:nskey];
 }
+
+void removePreferenceValue(const char* key) {
+    NSString *nskey = [NSString stringWithUTF8String:key];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:nskey];
+}
