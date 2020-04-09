@@ -65,7 +65,7 @@ func TestSplitContainer_SetRatio(t *testing.T) {
 		sc := NewHSplitContainer(objA, objB)
 		sc.Resize(size)
 		t.Run("Leading", func(t *testing.T) {
-			sc.SetRatio(0.75)
+			sc.SetOffset(0.75)
 			sizeA := objA.Size()
 			sizeB := objB.Size()
 			assert.Equal(t, 75-halfDividerThickness(), sizeA.Width)
@@ -74,7 +74,7 @@ func TestSplitContainer_SetRatio(t *testing.T) {
 			assert.Equal(t, 100, sizeB.Height)
 		})
 		t.Run("Trailing", func(t *testing.T) {
-			sc.SetRatio(0.25)
+			sc.SetOffset(0.25)
 			sizeA := objA.Size()
 			sizeB := objB.Size()
 			assert.Equal(t, 25-halfDividerThickness(), sizeA.Width)
@@ -87,7 +87,7 @@ func TestSplitContainer_SetRatio(t *testing.T) {
 		sc := NewVSplitContainer(objA, objB)
 		sc.Resize(size)
 		t.Run("Leading", func(t *testing.T) {
-			sc.SetRatio(0.75)
+			sc.SetOffset(0.75)
 			sizeA := objA.Size()
 			sizeB := objB.Size()
 			assert.Equal(t, 100, sizeA.Width)
@@ -96,7 +96,7 @@ func TestSplitContainer_SetRatio(t *testing.T) {
 			assert.Equal(t, 25-halfDividerThickness(), sizeB.Height)
 		})
 		t.Run("Trailing", func(t *testing.T) {
-			sc.SetRatio(0.25)
+			sc.SetOffset(0.25)
 			sizeA := objA.Size()
 			sizeB := objB.Size()
 			assert.Equal(t, 100, sizeA.Width)
@@ -115,28 +115,48 @@ func TestSplitContainer_SetRatio_limits(t *testing.T) {
 	objB.SetMinSize(size)
 	t.Run("Horizontal", func(t *testing.T) {
 		sc := NewHSplitContainer(objA, objB)
-		min := sc.MinSize()
-		sc.Resize(fyne.NewSize(min.Width*2, min.Height))
 		t.Run("Leading", func(t *testing.T) {
-			sc.SetRatio(1.0)
-			assert.Equal(t, 0.75, sc.ratio)
+			sc.SetOffset(1.0)
+			sc.Resize(fyne.NewSize(200, 50))
+			sizeA := objA.Size()
+			sizeB := objB.Size()
+			assert.Equal(t, 150-dividerThickness(), sizeA.Width)
+			assert.Equal(t, 50, sizeA.Height)
+			assert.Equal(t, 50, sizeB.Width)
+			assert.Equal(t, 50, sizeB.Height)
 		})
 		t.Run("Trailing", func(t *testing.T) {
-			sc.SetRatio(0.0)
-			assert.Equal(t, 0.25, sc.ratio)
+			sc.SetOffset(0.0)
+			sc.Resize(fyne.NewSize(200, 50))
+			sizeA := objA.Size()
+			sizeB := objB.Size()
+			assert.Equal(t, 50, sizeA.Width)
+			assert.Equal(t, 50, sizeA.Height)
+			assert.Equal(t, 150-dividerThickness(), sizeB.Width)
+			assert.Equal(t, 50, sizeB.Height)
 		})
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		sc := NewVSplitContainer(objA, objB)
-		min := sc.MinSize()
-		sc.Resize(fyne.NewSize(min.Width, min.Height*2))
 		t.Run("Leading", func(t *testing.T) {
-			sc.SetRatio(1.0)
-			assert.Equal(t, 0.75, sc.ratio)
+			sc.SetOffset(1.0)
+			sc.Resize(fyne.NewSize(50, 200))
+			sizeA := objA.Size()
+			sizeB := objB.Size()
+			assert.Equal(t, 50, sizeA.Width)
+			assert.Equal(t, 150-dividerThickness(), sizeA.Height)
+			assert.Equal(t, 50, sizeB.Width)
+			assert.Equal(t, 50, sizeB.Height)
 		})
 		t.Run("Trailing", func(t *testing.T) {
-			sc.SetRatio(0.0)
-			assert.Equal(t, 0.25, sc.ratio)
+			sc.SetOffset(0.0)
+			sc.Resize(fyne.NewSize(50, 200))
+			sizeA := objA.Size()
+			sizeB := objB.Size()
+			assert.Equal(t, 50, sizeA.Width)
+			assert.Equal(t, 50, sizeA.Height)
+			assert.Equal(t, 50, sizeB.Width)
+			assert.Equal(t, 150-dividerThickness(), sizeB.Height)
 		})
 	})
 }
@@ -162,33 +182,33 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 		split := NewHSplitContainer(objA, objB)
 		split.Resize(fyne.NewSize(100, 100))
 		divider := newDivider(split)
-		assert.Equal(t, 0.5, split.ratio)
+		assert.Equal(t, 0.5, split.Offset)
 
 		divider.Dragged(&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(20, 9)},
 			DraggedX:   10,
 			DraggedY:   -1,
 		})
-		assert.Equal(t, 0.6, split.ratio)
+		assert.Equal(t, 0.6, split.Offset)
 
 		divider.DragEnd()
-		assert.Equal(t, 0.6, split.ratio)
+		assert.Equal(t, 0.6, split.Offset)
 	})
 	t.Run("Vertical", func(t *testing.T) {
 		split := NewVSplitContainer(objA, objB)
 		split.Resize(fyne.NewSize(100, 100))
 		divider := newDivider(split)
-		assert.Equal(t, 0.5, split.ratio)
+		assert.Equal(t, 0.5, split.Offset)
 
 		divider.Dragged(&fyne.DragEvent{
 			PointEvent: fyne.PointEvent{Position: fyne.NewPos(9, 20)},
 			DraggedX:   -1,
 			DraggedY:   10,
 		})
-		assert.Equal(t, 0.6, split.ratio)
+		assert.Equal(t, 0.6, split.Offset)
 
 		divider.DragEnd()
-		assert.Equal(t, 0.6, split.ratio)
+		assert.Equal(t, 0.6, split.Offset)
 	})
 }
 
