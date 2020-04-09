@@ -23,7 +23,7 @@ static jmethodID find_method(JNIEnv *env, jclass clazz, const char *name, const 
 }
 
 jobject getClipboard(uintptr_t jni_env, uintptr_t ctx) {
-	JNIEnv* env = (JNIEnv*)jni_env;
+	JNIEnv *env = (JNIEnv*)jni_env;
 	jclass ctxClass = (*env)->GetObjectClass(env, ctx);
 	jmethodID getSystemService = find_method(env, ctxClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
 
@@ -32,7 +32,7 @@ jobject getClipboard(uintptr_t jni_env, uintptr_t ctx) {
 }
 
 char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx) {
-	JNIEnv* env = (JNIEnv*)jni_env;
+	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject mgr = getClipboard(jni_env, ctx);
 
 	jclass mgrClass = (*env)->GetObjectClass(env, mgr);
@@ -47,14 +47,14 @@ char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx) {
 	jmethodID toString = (*env)->GetMethodID(env, clzCharSequence, "toString", "()Ljava/lang/String;");
 	jobject s = (*env)->CallObjectMethod(env, content, toString);
 
-	const char* chars = (*env)->GetStringUTFChars(env, s, NULL);
+	const char *chars = (*env)->GetStringUTFChars(env, s, NULL);
 	const char *copy = strdup(chars);
 	(*env)->ReleaseStringUTFChars(env, s, chars);
 	return copy;
 }
 
 void setClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *content) {
-	JNIEnv* env = (JNIEnv*)jni_env;
+	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject mgr = getClipboard(jni_env, ctx);
 
 	jclass mgrClass = (*env)->GetObjectClass(env, mgr);
