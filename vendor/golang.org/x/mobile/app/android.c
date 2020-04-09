@@ -12,8 +12,8 @@
 #include <string.h>
 #include "_cgo_export.h"
 
-#define LOG_INFO(...) __android_log_print(ANDROID_LOG_INFO, "Go", __VA_ARGS__)
-#define LOG_FATAL(...) __android_log_print(ANDROID_LOG_FATAL, "Go", __VA_ARGS__)
+#define LOG_INFO(...) __android_log_print(ANDROID_LOG_INFO, "GoLog", __VA_ARGS__)
+#define LOG_FATAL(...) __android_log_print(ANDROID_LOG_FATAL, "GoLog", __VA_ARGS__)
 
 static jclass current_class;
 
@@ -84,6 +84,11 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "()V");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
+
+		// Set FILESDIR
+		if (setenv("FILESDIR", activity->internalDataPath, 1) != 0) {
+			LOG_INFO("setenv(\"FILESDIR\", \"%s\", 1) failed: %d", activity->internalDataPath, errno);
+		}
 
 		// Set TMPDIR.
 		jmethodID gettmpdir = find_method(env, current_class, "getTmpdir", "()Ljava/lang/String;");
@@ -232,6 +237,19 @@ void showFileOpen(JNIEnv* env) {
 }
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str) {
-    char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
-	filePickerReturned(cstr);
+    const char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
+	filePickerReturned((char*)cstr);
+}
+
+void Java_org_golang_app_GoNativeActivity_insetsChanged(JNIEnv *env, jclass clazz, int top, int bottom, int left, int right) {
+    insetsChanged(top, bottom, left, right);
+}
+
+void Java_org_golang_app_GoNativeActivity_keyboardTyped(JNIEnv *env, jclass clazz, jstring str) {
+    const char* cstr = (*env)->GetStringUTFChars(env, str, JNI_FALSE);
+	keyboardTyped((char*)cstr);
+}
+
+void Java_org_golang_app_GoNativeActivity_keyboardDelete(JNIEnv *env, jclass clazz) {
+    keyboardDelete();
 }

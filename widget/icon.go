@@ -9,8 +9,7 @@ import (
 )
 
 type iconRenderer struct {
-	objects []fyne.CanvasObject
-
+	baseRenderer
 	image *Icon
 }
 
@@ -20,15 +19,11 @@ func (i *iconRenderer) MinSize() fyne.Size {
 }
 
 func (i *iconRenderer) Layout(size fyne.Size) {
-	if len(i.objects) == 0 {
+	if len(i.Objects()) == 0 {
 		return
 	}
 
-	i.objects[0].Resize(size)
-}
-
-func (i *iconRenderer) Objects() []fyne.CanvasObject {
-	return i.objects
+	i.Objects()[0].Resize(size)
 }
 
 func (i *iconRenderer) BackgroundColor() color.Color {
@@ -36,20 +31,17 @@ func (i *iconRenderer) BackgroundColor() color.Color {
 }
 
 func (i *iconRenderer) Refresh() {
-	i.objects = nil
+	i.setObjects(nil)
 
 	if i.image.Resource != nil {
 		raster := canvas.NewImageFromResource(i.image.Resource)
 		raster.FillMode = canvas.ImageFillContain
 
-		i.objects = append(i.objects, raster)
+		i.setObjects([]fyne.CanvasObject{raster})
 	}
 	i.Layout(i.image.Size())
 
 	canvas.Refresh(i.image.super())
-}
-
-func (i *iconRenderer) Destroy() {
 }
 
 // Icon widget is a basic image component that load's its resource to match the theme.
@@ -74,11 +66,7 @@ func (i *Icon) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	i.ExtendBaseWidget(i)
-	render := &iconRenderer{image: i}
-
-	render.objects = []fyne.CanvasObject{}
-
-	return render
+	return &iconRenderer{image: i}
 }
 
 // NewIcon returns a new icon widget that displays a themed icon resource

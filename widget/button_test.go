@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,6 +41,11 @@ func TestButton_MinSize_Icon(t *testing.T) {
 
 	assert.True(t, min2.Width > min1.Width)
 	assert.Equal(t, min2.Height, min1.Height)
+}
+
+func TestButton_Cursor(t *testing.T) {
+	button := NewButton("Test", nil)
+	assert.Equal(t, desktop.DefaultCursor, button.Cursor())
 }
 
 func TestButton_Style(t *testing.T) {
@@ -218,6 +225,31 @@ func TestButton_Disabled(t *testing.T) {
 	assert.True(t, button.Disabled())
 	button.Enable()
 	assert.False(t, button.Disabled())
+}
+
+func TestButton_Shadow(t *testing.T) {
+	{
+		button := NewButton("Test", func() {})
+		shadowFound := false
+		for _, o := range test.LaidOutObjects(button) {
+			if s, ok := o.(*shadow); ok {
+				shadowFound = true
+				assert.Equal(t, elevationLevel(2), s.level)
+			}
+		}
+		if !shadowFound {
+			assert.Fail(t, "button should cast a shadow")
+		}
+	}
+	{
+		button := NewButton("Test", func() {})
+		button.HideShadow = true
+		for _, o := range test.LaidOutObjects(button) {
+			if _, ok := o.(*shadow); ok {
+				assert.Fail(t, "button with HideShadow == true should not create a shadow")
+			}
+		}
+	}
 }
 
 func TestButtonRenderer_ApplyTheme(t *testing.T) {

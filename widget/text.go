@@ -226,10 +226,8 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 
 // Renderer
 type textRenderer struct {
-	objects []fyne.CanvasObject
-
-	texts []*canvas.Text
-
+	baseRenderer
+	texts    []*canvas.Text
 	provider *textProvider
 }
 
@@ -265,10 +263,6 @@ func (r *textRenderer) Layout(size fyne.Size) {
 		text.Move(fyne.NewPos(theme.Padding(), yPos))
 		yPos += lineHeight
 	}
-}
-
-func (r *textRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
 }
 
 // applyTheme updates the label to match the current theme.
@@ -310,7 +304,7 @@ func (r *textRenderer) Refresh() {
 
 		if add {
 			r.texts = append(r.texts, textCanvas)
-			r.objects = append(r.objects, textCanvas)
+			r.setObjects(append(r.Objects(), textCanvas))
 		}
 	}
 
@@ -329,9 +323,6 @@ func (r *textRenderer) Refresh() {
 
 func (r *textRenderer) BackgroundColor() color.Color {
 	return color.Transparent
-}
-
-func (r *textRenderer) Destroy() {
 }
 
 // splitLines accepts a slice of runes and returns a slice containing the

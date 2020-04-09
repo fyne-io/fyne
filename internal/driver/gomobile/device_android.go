@@ -4,11 +4,7 @@ package gomobile
 
 import "fyne.io/fyne"
 
-func devicePadding() (topLeft, bottomRight fyne.Size) {
-	return fyne.NewSize(0, 48), fyne.NewSize(0, 0)
-}
-
-func (*device) SystemScale() float32 {
+func (*device) SystemScaleForWindow(_ fyne.Window) float32 {
 	if currentDPI >= 600 {
 		return 4
 	} else if currentDPI >= 405 {

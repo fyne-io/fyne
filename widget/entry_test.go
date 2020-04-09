@@ -41,6 +41,17 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
+func TestEntry_Cursor(t *testing.T) {
+	entry := NewEntry()
+	assert.Equal(t, desktop.TextCursor, entry.Cursor())
+}
+
+func TestEntry_passwordRevealerCursor(t *testing.T) {
+	entry := NewEntry()
+	pr := newPasswordRevealer(entry)
+	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
+}
+
 func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
 	singleMin := entry.MinSize()

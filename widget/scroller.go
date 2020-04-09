@@ -29,16 +29,13 @@ const (
 )
 
 type scrollBarRenderer struct {
+	baseRenderer
 	scrollBar *scrollBar
-
-	minSize fyne.Size
+	minSize   fyne.Size
 }
 
 func (r *scrollBarRenderer) BackgroundColor() color.Color {
 	return theme.ScrollBarColor()
-}
-
-func (r *scrollBarRenderer) Destroy() {
 }
 
 func (r *scrollBarRenderer) Layout(size fyne.Size) {
@@ -46,10 +43,6 @@ func (r *scrollBarRenderer) Layout(size fyne.Size) {
 
 func (r *scrollBarRenderer) MinSize() fyne.Size {
 	return r.minSize
-}
-
-func (r *scrollBarRenderer) Objects() []fyne.CanvasObject {
-	return nil
 }
 
 func (r *scrollBarRenderer) Refresh() {
@@ -113,17 +106,13 @@ func newScrollBar(area *scrollBarArea) *scrollBar {
 }
 
 type scrollBarAreaRenderer struct {
+	baseRenderer
 	area *scrollBarArea
 	bar  *scrollBar
-
-	objects []fyne.CanvasObject
 }
 
 func (r *scrollBarAreaRenderer) BackgroundColor() color.Color {
 	return color.Transparent
-}
-
-func (r *scrollBarAreaRenderer) Destroy() {
 }
 
 func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
@@ -150,10 +139,6 @@ func (r *scrollBarAreaRenderer) MinSize() fyne.Size {
 	default:
 		return fyne.NewSize(min, theme.ScrollBarSize())
 	}
-}
-
-func (r *scrollBarAreaRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
 }
 
 func (r *scrollBarAreaRenderer) Refresh() {
@@ -192,7 +177,7 @@ type scrollBarArea struct {
 
 func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	bar := newScrollBar(a)
-	return &scrollBarAreaRenderer{area: a, bar: bar, objects: []fyne.CanvasObject{bar}}
+	return &scrollBarAreaRenderer{baseRenderer: baseRenderer{[]fyne.CanvasObject{bar}}, area: a, bar: bar}
 }
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
@@ -237,20 +222,12 @@ func newScrollBarArea(scroll *ScrollContainer, orientation scrollBarOrientation)
 }
 
 type scrollContainerRenderer struct {
+	baseRenderer
 	scroll                  *ScrollContainer
 	vertArea                *scrollBarArea
 	horizArea               *scrollBarArea
 	leftShadow, rightShadow *shadow
 	topShadow, bottomShadow *shadow
-
-	objects []fyne.CanvasObject
-}
-
-func (r *scrollContainerRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (r *scrollContainerRenderer) Destroy() {
 }
 
 func (r *scrollContainerRenderer) Layout(size fyne.Size) {
@@ -280,20 +257,7 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 	return r.scroll.MinSize()
 }
 
-func (r *scrollContainerRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
-}
-
 func (r *scrollContainerRenderer) Refresh() {
-	if r.scroll.Direction != ScrollHorizontalOnly {
-		r.topShadow.depth = theme.Padding() * 2
-		r.bottomShadow.depth = theme.Padding() * 2
-	}
-	if r.scroll.Direction != ScrollVerticalOnly {
-		r.leftShadow.depth = theme.Padding() * 2
-		r.rightShadow.depth = theme.Padding() * 2
-	}
-
 	r.Layout(r.scroll.Size())
 }
 
@@ -360,20 +324,20 @@ type ScrollContainer struct {
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	scr := &scrollContainerRenderer{
-		objects: []fyne.CanvasObject{s.Content},
-		scroll:  s,
+		baseRenderer: baseRenderer{[]fyne.CanvasObject{s.Content}},
+		scroll:       s,
 	}
 	if s.Direction != ScrollHorizontalOnly {
 		scr.vertArea = newScrollBarArea(s, scrollBarOrientationVertical)
-		scr.topShadow = newShadow(shadowBottom, theme.Padding()*2)
-		scr.bottomShadow = newShadow(shadowTop, theme.Padding()*2)
-		scr.objects = append(scr.objects, scr.vertArea, scr.topShadow, scr.bottomShadow)
+		scr.topShadow = newShadow(shadowBottom, submergedContentLevel)
+		scr.bottomShadow = newShadow(shadowTop, submergedContentLevel)
+		scr.setObjects(append(scr.Objects(), scr.vertArea, scr.topShadow, scr.bottomShadow))
 	}
 	if s.Direction != ScrollVerticalOnly {
 		scr.horizArea = newScrollBarArea(s, scrollBarOrientationHorizontal)
-		scr.leftShadow = newShadow(shadowRight, theme.Padding()*2)
-		scr.rightShadow = newShadow(shadowLeft, theme.Padding()*2)
-		scr.objects = append(scr.objects, scr.horizArea, scr.leftShadow, scr.rightShadow)
+		scr.leftShadow = newShadow(shadowRight, submergedContentLevel)
+		scr.rightShadow = newShadow(shadowLeft, submergedContentLevel)
+		scr.setObjects(append(scr.Objects(), scr.horizArea, scr.leftShadow, scr.rightShadow))
 	}
 	return scr
 }
@@ -472,15 +436,15 @@ func NewScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollBoth, content)
 }
 
-// NewHorizontalScrollContainer create a scrollable parent wrapping the specified content.
+// NewHScrollContainer create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Width to be smaller than that of the passed object.
-func NewHorizontalScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+func NewHScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollHorizontalOnly, content)
 }
 
-// NewVerticalScrollContainer create a scrollable parent wrapping the specified content.
+// NewVScrollContainer create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Height to be smaller than that of the passed object.
-func NewVerticalScrollContainer(content fyne.CanvasObject) *ScrollContainer {
+func NewVScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollVerticalOnly, content)
 }
 

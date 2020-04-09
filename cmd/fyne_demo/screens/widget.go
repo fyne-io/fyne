@@ -31,7 +31,7 @@ func makeButtonTab() fyne.Widget {
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
-		widget.NewButtonWithIcon("Button (test & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
+		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
 		disabled,
 	)
 }
@@ -54,15 +54,13 @@ func makeTextTab() fyne.CanvasObject {
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
-	entryLoremIpsumScroller := widget.NewVerticalScrollContainer(entryLoremIpsum)
+	entryLoremIpsumScroller := widget.NewVScrollContainer(entryLoremIpsum)
 
 	label.Alignment = fyne.TextAlignLeading
 	hyperlink.Alignment = fyne.TextAlignLeading
 
 	label.Wrapping = fyne.TextWrapWord
 	hyperlink.Wrapping = fyne.TextWrapWord
-	entry.Wrapping = fyne.TextWrapWord
-	entryDisabled.Wrapping = fyne.TextWrapWord
 	entryMultiLine.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
@@ -100,15 +98,13 @@ func makeTextTab() fyne.CanvasObject {
 
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
-		entry.Wrapping = wrap
-		entryDisabled.Wrapping = wrap
-		entryMultiLine.Wrapping = wrap
-		entryLoremIpsum.Wrapping = wrap
+		if wrap != fyne.TextTruncate {
+			entryMultiLine.Wrapping = wrap
+			entryLoremIpsum.Wrapping = wrap
+		}
 
 		label.Refresh()
 		hyperlink.Refresh()
-		entry.Refresh()
-		entryDisabled.Refresh()
 		entryMultiLine.Refresh()
 		entryLoremIpsum.Refresh()
 		entryLoremIpsumScroller.Refresh()
@@ -215,8 +211,8 @@ func makeScrollTab() fyne.CanvasObject {
 		}))
 	}
 
-	horiz := widget.NewHorizontalScrollContainer(list)
-	vert := widget.NewVerticalScrollContainer(list2)
+	horiz := widget.NewHScrollContainer(list)
+	vert := widget.NewVScrollContainer(list2)
 
 	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
 		fyne.NewContainerWithLayout(layout.NewBorderLayout(horiz, nil, nil, nil), horiz, vert),
@@ -241,7 +237,7 @@ func makeSplitTab() fyne.CanvasObject {
 		widget.NewLabel("Label"),
 		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
 	)
-	return widget.NewHSplitContainer(widget.NewVerticalScrollContainer(left), right)
+	return widget.NewHSplitContainer(widget.NewVScrollContainer(left), right)
 }
 
 // WidgetScreen shows a panel containing widget demos

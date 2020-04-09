@@ -18,7 +18,6 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
-	"fyne.io/fyne/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -29,15 +28,19 @@ const (
 )
 
 var (
-	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
-	initOnce                                    = &sync.Once{}
-	defaultTitle                                = "Fyne Application"
+	cursorMap    map[desktop.Cursor]*glfw.Cursor
+	defaultTitle = "Fyne Application"
 )
 
 func initCursors() {
-	defaultCursor = glfw.CreateStandardCursor(glfw.ArrowCursor)
-	entryCursor = glfw.CreateStandardCursor(glfw.IBeamCursor)
-	hyperlinkCursor = glfw.CreateStandardCursor(glfw.HandCursor)
+	cursorMap = map[desktop.Cursor]*glfw.Cursor{
+		desktop.DefaultCursor:   glfw.CreateStandardCursor(glfw.ArrowCursor),
+		desktop.TextCursor:      glfw.CreateStandardCursor(glfw.IBeamCursor),
+		desktop.CrosshairCursor: glfw.CreateStandardCursor(glfw.CrosshairCursor),
+		desktop.PointerCursor:   glfw.CreateStandardCursor(glfw.HandCursor),
+		desktop.HResizeCursor:   glfw.CreateStandardCursor(glfw.HResizeCursor),
+		desktop.VResizeCursor:   glfw.CreateStandardCursor(glfw.VResizeCursor),
+	}
 }
 
 // Declare conformity to Window interface
@@ -45,6 +48,7 @@ var _ fyne.Window = (*window)(nil)
 
 type window struct {
 	viewport *glfw.Window
+	cursor   *glfw.Cursor
 	painted  int // part of the macOS GL fix, updated GLFW should fix this
 	canvas   *glCanvas
 	title    string
@@ -325,7 +329,7 @@ func calculateScale(user, system, detected float32) float32 {
 	return system * user
 }
 func (w *window) calculatedScale() float32 {
-	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScale(), w.detectScale())
+	val := calculateScale(w.userScale(), fyne.CurrentDevice().SystemScaleForWindow(w), w.detectScale())
 	val = float32(math.Round(float64(val*10.0))) / 10.0
 
 	return val
@@ -353,6 +357,9 @@ func (w *window) Show() {
 		w.visible = true
 		w.viewport.SetTitle(w.title)
 		w.viewport.Show()
+
+		// save coordinates
+		w.xpos, w.ypos = w.viewport.GetPos()
 	})
 
 	if w.fullScreen { // this does not work if called before viewport.Show()...
@@ -452,7 +459,11 @@ func (w *window) destroy(d *gLDriver) {
 	}
 }
 
-func (w *window) moved(viewport *glfw.Window, x, y int) {
+func (w *window) moved(_ *glfw.Window, x, y int) {
+	if w.fullScreen { // don't save the move to top left when changint to fullscreen
+		return
+	}
+
 	// save coordinates
 	w.xpos, w.ypos = x, y
 
@@ -462,7 +473,6 @@ func (w *window) moved(viewport *glfw.Window, x, y int) {
 
 	w.canvas.detectedScale = w.detectScale()
 	go w.canvas.SetScale(fyne.SettingsScaleAuto) // scale is ignored
-	w.rescaleOnMain()
 }
 
 func (w *window) resized(viewport *glfw.Window, width, height int) {
@@ -502,23 +512,29 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), roots...)
 }
 
+func fyneToNativeCursor(cursor desktop.Cursor) *glfw.Cursor {
+	ret, ok := cursorMap[cursor]
+	if !ok {
+		return cursorMap[desktop.DefaultCursor]
+	}
+	return ret
+}
+
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
-	cursor := defaultCursor
+	cursor := cursorMap[desktop.DefaultCursor]
 	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
-		if wid, ok := object.(*widget.Entry); ok {
-			if !wid.Disabled() {
-				cursor = entryCursor
-			}
-		} else if _, ok := object.(*widget.Hyperlink); ok {
-			cursor = hyperlinkCursor
+		if cursorable, ok := object.(desktop.Cursorable); ok {
+			fyneCursor := cursorable.Cursor()
+			cursor = fyneToNativeCursor(fyneCursor)
 		}
 
 		_, hover := object.(desktop.Hoverable)
 		return hover
 	})
 
+	w.cursor = cursor
 	viewport.SetCursor(cursor)
 	if obj != nil && !w.objIsDragged(obj) {
 		ev := new(desktop.MouseEvent)
@@ -759,6 +775,10 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyHome:      fyne.KeyHome,
 	glfw.KeyEnd:       fyne.KeyEnd,
 
+	glfw.KeySpace:   fyne.KeySpace,
+	glfw.KeyKPEnter: fyne.KeyEnter,
+
+	// functions
 	glfw.KeyF1:  fyne.KeyF1,
 	glfw.KeyF2:  fyne.KeyF2,
 	glfw.KeyF3:  fyne.KeyF3,
@@ -772,59 +792,17 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyF11: fyne.KeyF11,
 	glfw.KeyF12: fyne.KeyF12,
 
-	glfw.KeyKPEnter: fyne.KeyEnter,
-
-	// printable
-	glfw.KeySpace:      fyne.KeySpace,
-	glfw.KeyApostrophe: fyne.KeyApostrophe,
-	glfw.KeyComma:      fyne.KeyComma,
-	glfw.KeyMinus:      fyne.KeyMinus,
-	glfw.KeyPeriod:     fyne.KeyPeriod,
-	glfw.KeySlash:      fyne.KeySlash,
-
-	glfw.Key0:         fyne.Key0,
-	glfw.Key1:         fyne.Key1,
-	glfw.Key2:         fyne.Key2,
-	glfw.Key3:         fyne.Key3,
-	glfw.Key4:         fyne.Key4,
-	glfw.Key5:         fyne.Key5,
-	glfw.Key6:         fyne.Key6,
-	glfw.Key7:         fyne.Key7,
-	glfw.Key8:         fyne.Key8,
-	glfw.Key9:         fyne.Key9,
-	glfw.KeySemicolon: fyne.KeySemicolon,
-	glfw.KeyEqual:     fyne.KeyEqual,
-
-	glfw.KeyA: fyne.KeyA,
-	glfw.KeyB: fyne.KeyB,
-	glfw.KeyC: fyne.KeyC,
-	glfw.KeyD: fyne.KeyD,
-	glfw.KeyE: fyne.KeyE,
-	glfw.KeyF: fyne.KeyF,
-	glfw.KeyG: fyne.KeyG,
-	glfw.KeyH: fyne.KeyH,
-	glfw.KeyI: fyne.KeyI,
-	glfw.KeyJ: fyne.KeyJ,
-	glfw.KeyK: fyne.KeyK,
-	glfw.KeyL: fyne.KeyL,
-	glfw.KeyM: fyne.KeyM,
-	glfw.KeyN: fyne.KeyN,
-	glfw.KeyO: fyne.KeyO,
-	glfw.KeyP: fyne.KeyP,
-	glfw.KeyQ: fyne.KeyQ,
-	glfw.KeyR: fyne.KeyR,
-	glfw.KeyS: fyne.KeyS,
-	glfw.KeyT: fyne.KeyT,
-	glfw.KeyU: fyne.KeyU,
-	glfw.KeyV: fyne.KeyV,
-	glfw.KeyW: fyne.KeyW,
-	glfw.KeyX: fyne.KeyX,
-	glfw.KeyY: fyne.KeyY,
-	glfw.KeyZ: fyne.KeyZ,
-
-	glfw.KeyLeftBracket:  fyne.KeyLeftBracket,
-	glfw.KeyBackslash:    fyne.KeyBackslash,
-	glfw.KeyRightBracket: fyne.KeyRightBracket,
+	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
+	glfw.Key0: fyne.Key0,
+	glfw.Key1: fyne.Key1,
+	glfw.Key2: fyne.Key2,
+	glfw.Key3: fyne.Key3,
+	glfw.Key4: fyne.Key4,
+	glfw.Key5: fyne.Key5,
+	glfw.Key6: fyne.Key6,
+	glfw.Key7: fyne.Key7,
+	glfw.Key8: fyne.Key8,
+	glfw.Key9: fyne.Key9,
 
 	// desktop
 	glfw.KeyLeftShift:    desktop.KeyShiftLeft,
@@ -838,8 +816,57 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyMenu:         desktop.KeyMenu,
 }
 
-func keyToName(code glfw.Key) fyne.KeyName {
+var keyNameMap = map[string]fyne.KeyName{
+	"'": fyne.KeyApostrophe,
+	",": fyne.KeyComma,
+	"-": fyne.KeyMinus,
+	".": fyne.KeyPeriod,
+	"/": fyne.KeySlash,
+	"`": fyne.KeyBackTick,
+
+	";": fyne.KeySemicolon,
+	"=": fyne.KeyEqual,
+
+	"a": fyne.KeyA,
+	"b": fyne.KeyB,
+	"c": fyne.KeyC,
+	"d": fyne.KeyD,
+	"e": fyne.KeyE,
+	"f": fyne.KeyF,
+	"g": fyne.KeyG,
+	"h": fyne.KeyH,
+	"i": fyne.KeyI,
+	"j": fyne.KeyJ,
+	"k": fyne.KeyK,
+	"l": fyne.KeyL,
+	"m": fyne.KeyM,
+	"n": fyne.KeyN,
+	"o": fyne.KeyO,
+	"p": fyne.KeyP,
+	"q": fyne.KeyQ,
+	"r": fyne.KeyR,
+	"s": fyne.KeyS,
+	"t": fyne.KeyT,
+	"u": fyne.KeyU,
+	"v": fyne.KeyV,
+	"w": fyne.KeyW,
+	"x": fyne.KeyX,
+	"y": fyne.KeyY,
+	"z": fyne.KeyZ,
+
+	"[":  fyne.KeyLeftBracket,
+	"\\": fyne.KeyBackslash,
+	"]":  fyne.KeyRightBracket,
+}
+
+func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	ret, ok := keyCodeMap[code]
+	if ok {
+		return ret
+	}
+
+	keyName := glfw.GetKeyName(code, scancode)
+	ret, ok = keyNameMap[keyName]
 	if !ok {
 		return ""
 	}
@@ -848,7 +875,7 @@ func keyToName(code glfw.Key) fyne.KeyName {
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	keyName := keyToName(key)
+	keyName := keyToName(key, scancode)
 	if keyName == "" {
 		return
 	}
@@ -1068,7 +1095,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 		title = defaultTitle
 	}
 	runOnMain(func() {
-		initOnce.Do(d.initGLFW)
+		d.initGLFW()
 
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, 0)
