@@ -345,24 +345,23 @@ func splitLines(text []rune) [][2]int {
 // lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
 func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
 
-	checkForwardSpace := func(low int, high int, maxHigh int) int {
-		if (low >= high) || (high >= maxHigh) {
-			return high
+	binarySearch := func(low int, maxHigh int) int {
+		if low >= maxHigh {
+			return low
 		}
-		delta := maxHigh - high
-		for measurer(text[low:high+delta]) > maxWidth {
-			oldValue := delta
+		if measurer(text[low:maxHigh]) <= maxWidth {
+			return maxHigh
+		}
+		high := low
+		delta := maxHigh - low
+		for delta > 0 {
 			delta /= 2
-			if oldValue == delta {
-				break
+			if measurer(text[low:high+delta]) < maxWidth {
+				high += delta
 			}
 		}
-		high += delta
-		if (low < high) && measurer(text[low:high]) < maxWidth {
-			for measurer(text[low:high]) < maxWidth {
-				high++
-			}
-			high--
+		for (high < maxHigh) && measurer(text[low:high+1]) <= maxWidth {
+			high++
 		}
 		return high
 	}
@@ -381,35 +380,22 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 		}
 		switch wrap {
 		case fyne.TextTruncate:
-			symbWidth := measurer(text[low:high]) / (high - low)
-			if maxWidth/symbWidth < (high - low) {
-				high = checkForwardSpace(low, low+maxWidth/symbWidth, high)
-			}
-			for measurer(text[low:high]) > maxWidth {
-				high--
-			}
+			high = binarySearch(low, high)
 			bounds = append(bounds, [2]int{low, high})
 		case fyne.TextWrapBreak:
 			for low < high {
-				curWidth := measurer(text[low:high])
-				symbWidth := curWidth / (high - low)
-				if curWidth <= maxWidth {
+				if measurer(text[low:high]) <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
 					low = high
 					high = l[1]
 				} else {
-					high = checkForwardSpace(low, low+maxWidth/symbWidth, high)
-					for measurer(text[low:high]) > maxWidth {
-						high--
-					}
+					high = binarySearch(low, high)
 				}
 			}
 		case fyne.TextWrapWord:
 			for low < high {
 				sub := text[low:high]
-				curWidth := measurer(sub)
-				symbWidth := curWidth / len(sub)
-				if curWidth <= maxWidth {
+				if measurer(sub) <= maxWidth {
 					bounds = append(bounds, [2]int{low, high})
 					low = high
 					high = l[1]
@@ -417,11 +403,7 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 						low++
 					}
 				} else {
-					last := maxWidth / symbWidth
-					if last > len(sub)-1 {
-						last = len(sub) - 1
-					}
-
+					last := len(sub) - 1
 					findSpaceIndex := func(last int) int {
 						curIndex := last
 						for ; curIndex >= 0; curIndex-- {
@@ -434,8 +416,7 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 						}
 						return curIndex
 					}
-
-					high = low + findSpaceIndex(checkForwardSpace(low, low+last, low+len(sub)-1)-low)
+					high = low + findSpaceIndex(binarySearch(low, low+last)-low)
 				}
 			}
 		}
