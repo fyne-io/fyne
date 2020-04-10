@@ -33,7 +33,7 @@ func NewVSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
 
 func newSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *SplitContainer {
 	s := &SplitContainer{
-		Offset:     0.5, // Sensible default, can be overriden with SetRatio
+		Offset:     0.5, // Sensible default, can be overriden with SetOffset
 		Horizontal: horizontal,
 		Leading:    leading,
 		Trailing:   trailing,
