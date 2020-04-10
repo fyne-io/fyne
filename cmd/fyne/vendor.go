@@ -126,7 +126,7 @@ func (v *vendor) main() {
 	}
 
 	fmt.Printf("Parsing %s to detect dependency module path for GLFW\n", goModVendorFile)
-	f, err := os.Open(filepath.Join(wd, goModVendorFile))
+	f, err := os.Open(filepath.Join(wd, goModVendorFile)) // #nosec
 	if err != nil {
 		fmt.Printf("Cannot open %s: %v\n", goModVendorFile, err)
 		os.Exit(1)

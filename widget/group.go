@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
@@ -43,9 +41,13 @@ func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	label := NewLabel(g.Text)
 	labelBg := canvas.NewRectangle(theme.BackgroundColor())
 	line := canvas.NewRectangle(theme.ButtonColor())
-	objects := []fyne.CanvasObject{line, labelBg, label, g.content}
-	return &groupRenderer{label: label, line: line, labelBg: labelBg,
-		objects: objects, group: g}
+	return &groupRenderer{
+		baseRenderer: baseRenderer{[]fyne.CanvasObject{line, labelBg, label, g.content}},
+		label:        label,
+		line:         line,
+		labelBg:      labelBg,
+		group:        g,
+	}
 }
 
 // NewGroup creates a new grouped list widget with a title and the specified list of child objects.
@@ -68,11 +70,10 @@ func NewGroupWithScroller(title string, children ...fyne.CanvasObject) *Group {
 }
 
 type groupRenderer struct {
+	baseRenderer
 	label         *Label
 	line, labelBg *canvas.Rectangle
-
-	objects []fyne.CanvasObject
-	group   *Group
+	group         *Group
 }
 
 func (g *groupRenderer) MinSize() fyne.Size {
@@ -99,14 +100,6 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 	g.group.content.Resize(fyne.NewSize(size.Width, size.Height-labelHeight-theme.Padding()))
 }
 
-func (g *groupRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (g *groupRenderer) Objects() []fyne.CanvasObject {
-	return g.objects
-}
-
 func (g *groupRenderer) Refresh() {
 	g.line.FillColor = theme.ButtonColor()
 	g.labelBg.FillColor = theme.BackgroundColor()
@@ -116,7 +109,4 @@ func (g *groupRenderer) Refresh() {
 
 	g.line.Refresh()
 	g.labelBg.Refresh()
-}
-
-func (g *groupRenderer) Destroy() {
 }

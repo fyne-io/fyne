@@ -161,4 +161,6 @@ const (
 	KeySemicolon KeyName = ";"
 	// KeyEqual is the key "="
 	KeyEqual KeyName = "="
+	// KeyBackTick is the key "`" on a US keyboard
+	KeyBackTick KeyName = "`"
 )

@@ -123,7 +123,13 @@ func (d *mobileDriver) Run() {
 				currentSize = e
 				currentOrientation = e.Orientation
 				currentDPI = e.PixelsPerPt * 72
+
+				canvas.insetTop = e.InsetTopPx
+				canvas.insetBottom = e.InsetBottomPx
+				canvas.insetLeft = e.InsetLeftPx
+				canvas.insetRight = e.InsetRightPx
 				canvas.SetScale(0) // value is ignored
+
 				// make sure that we paint on the next frame
 				canvas.Content().Refresh()
 			case paint.Event:
@@ -325,6 +331,7 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeLeftSquareBracket:  fyne.KeyLeftBracket,
 	key.CodeBackslash:          fyne.KeyBackslash,
 	key.CodeRightSquareBracket: fyne.KeyRightBracket,
+	key.CodeGraveAccent:        fyne.KeyBackTick,
 }
 
 func keyToName(code key.Code) fyne.KeyName {

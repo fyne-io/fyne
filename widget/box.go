@@ -21,23 +21,25 @@ type Box struct {
 
 // Refresh updates this box to match the current theme
 func (b *Box) Refresh() {
-	b.background = theme.BackgroundColor()
+	if b.background != nil {
+		b.background = theme.BackgroundColor()
+	}
 
-	b.BaseWidget.refresh(b)
+	b.BaseWidget.Refresh()
 }
 
 // Prepend inserts a new CanvasObject at the top/left of the box
 func (b *Box) Prepend(object fyne.CanvasObject) {
 	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
 
-	b.refresh(b)
+	b.Refresh()
 }
 
 // Append adds a new CanvasObject to the end/right of the box
 func (b *Box) Append(object fyne.CanvasObject) {
 	b.Children = append(b.Children, object)
 
-	b.refresh(b)
+	b.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -56,7 +58,7 @@ func (b *Box) CreateRenderer() fyne.WidgetRenderer {
 		lay = layout.NewVBoxLayout()
 	}
 
-	return &boxRenderer{objects: b.Children, layout: lay, box: b}
+	return &boxRenderer{baseRenderer: baseRenderer{b.Children}, layout: lay, box: b}
 }
 
 func (b *Box) setBackgroundColor(bg color.Color) {
@@ -74,18 +76,17 @@ func NewVBox(children ...fyne.CanvasObject) *Box {
 }
 
 type boxRenderer struct {
+	baseRenderer
 	layout fyne.Layout
-
-	objects []fyne.CanvasObject
-	box     *Box
+	box    *Box
 }
 
 func (b *boxRenderer) MinSize() fyne.Size {
-	return b.layout.MinSize(b.objects)
+	return b.layout.MinSize(b.Objects())
 }
 
 func (b *boxRenderer) Layout(size fyne.Size) {
-	b.layout.Layout(b.objects, size)
+	b.layout.Layout(b.Objects(), size)
 }
 
 func (b *boxRenderer) BackgroundColor() color.Color {
@@ -96,19 +97,12 @@ func (b *boxRenderer) BackgroundColor() color.Color {
 	return b.box.background
 }
 
-func (b *boxRenderer) Objects() []fyne.CanvasObject {
-	return b.objects
-}
-
 func (b *boxRenderer) Refresh() {
-	b.objects = b.box.Children
-	for _, child := range b.objects {
+	b.setObjects(b.box.Children)
+	for _, child := range b.Objects() {
 		child.Refresh()
 	}
 	b.Layout(b.box.Size())
 
 	canvas.Refresh(b.box)
-}
-
-func (b *boxRenderer) Destroy() {
 }

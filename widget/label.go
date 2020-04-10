@@ -10,11 +10,13 @@ import (
 
 // Label widget is a label component with appropriate padding and layout.
 type Label struct {
-	textProvider
+	BaseWidget
 	Text      string
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the label text
+
+	provider textProvider
 
 	textBinding *binding.StringBinding
 	textNotify  *binding.NotifyFunction
@@ -38,8 +40,8 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 
 // Refresh checks if the text content should be updated then refreshes the graphical context
 func (l *Label) Refresh() {
-	if l.Text != string(l.buffer) {
-		l.textProvider.SetText(l.Text)
+	if l.Text != string(l.provider.buffer) {
+		l.provider.SetText(l.Text)
 	}
 
 	l.BaseWidget.Refresh()
@@ -47,10 +49,11 @@ func (l *Label) Refresh() {
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
-	if l.Text != text {
-		l.Text = text
-		l.textProvider.SetText(text) // calls refresh
+	if l.Text == text {
+		return
 	}
+	l.Text = text
+	l.provider.SetText(text) // calls refresh
 }
 
 // textAlign tells the rendering textProvider our alignment
@@ -86,10 +89,9 @@ func (l *Label) object() fyne.Widget {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
-	hidden := l.Hidden
-	l.textProvider = newTextProvider(l.Text, l)
-	l.textProvider.Hidden = hidden
-	return l.textProvider.CreateRenderer()
+	l.provider = newTextProvider(l.Text, l)
+	l.provider.Hidden = l.Hidden
+	return l.provider.CreateRenderer()
 }
 
 // MinSize returns the size that this widget should not shrink below

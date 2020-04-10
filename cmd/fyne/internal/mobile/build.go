@@ -25,24 +25,24 @@ var tmpdir string
 var cmdBuild = &command{
 	run:   runBuild,
 	Name:  "build",
-	Usage: "[-target android|ios] [-o output] [-bundleid bundleID] [build flags] [package]",
+	Usage: "[-os android|ios] [-o output] [-bundleid bundleID] [build flags] [package]",
 	Short: "compile android APK and iOS app",
 	Long: `
 Build compiles and encodes the app named by the import path.
 
 The named package must define a main function.
 
-The -target Flag takes a target system name, either android (the
+The -os Flag takes a target system name, either android (the
 default) or ios.
 
-For -target android, if an AndroidManifest.xml is defined in the
+For -os=android, if an AndroidManifest.xml is defined in the
 package directory, it is added to the APK output. Otherwise, a default
 manifest is generated. By default, this builds a fat APK for all supported
 instruction sets (arm, 386, amd64, arm64). A subset of instruction sets can
 be selected by specifying target type with the architecture name. E.g.
--target=android/arm,android/386.
+-os=android/arm,android/386.
 
-For -target ios, gomobile must be run on an OS X machine with Xcode
+For -os ios, gomobile must be run on an OS X machine with Xcode
 installed.
 
 If the package directory contains an assets subdirectory, its contents
@@ -54,7 +54,7 @@ The default version is 7.0.
 Flag -androidapi sets the Android API version to compile against.
 The default and minimum is 15.
 
-The -bundleid Flag is required for -target ios and sets the bundle ID to use
+The -bundleid Flag is required for -os=ios and sets the bundle ID to use
 with the app.
 
 The -o Flag specifies the output file name. If not specified, the
@@ -89,7 +89,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 
 	targetOS, targetArchs, err := parseBuildTarget(buildTarget)
 	if err != nil {
-		return nil, fmt.Errorf(`invalid -target=%q: %v`, buildTarget, err)
+		return nil, fmt.Errorf(`invalid -os=%q: %v`, buildTarget, err)
 	}
 
 	var buildPath string
@@ -138,7 +138,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 		}
 	case "darwin":
 		if !xcodeAvailable() {
-			return nil, fmt.Errorf("-target=ios requires XCode")
+			return nil, fmt.Errorf("-os=ios requires XCode")
 		}
 		if buildRelease {
 			targetArchs = []string{"arm", "arm64"}
@@ -247,7 +247,7 @@ var (
 	buildGcflags    string      // -gcflags
 	buildLdflags    string      // -ldflags
 	buildRelease    bool        // -release
-	buildTarget     string      // -target
+	buildTarget     string      // -os
 	buildTrimpath   bool        // -trimpath
 	buildWork       bool        // -work
 	buildBundleID   string      // -bundleid
@@ -273,7 +273,7 @@ func addBuildFlags(cmd *command) {
 	cmd.Flag.StringVar(&buildO, "o", "", "")
 	cmd.Flag.StringVar(&buildGcflags, "gcflags", "", "")
 	cmd.Flag.StringVar(&buildLdflags, "ldflags", "", "")
-	cmd.Flag.StringVar(&buildTarget, "target", "android", "")
+	cmd.Flag.StringVar(&buildTarget, "os", "android", "")
 	cmd.Flag.StringVar(&buildBundleID, "bundleid", "", "")
 	cmd.Flag.StringVar(&buildIOSVersion, "iosversion", "7.0", "")
 	cmd.Flag.IntVar(&buildAndroidAPI, "androidapi", minAndroidAPI, "")

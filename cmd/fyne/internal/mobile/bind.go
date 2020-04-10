@@ -25,7 +25,7 @@ func copyFile(dst, src string) error {
 		if buildN {
 			return nil
 		}
-		f, err := os.Open(src)
+		f, err := os.Open(filepath.Clean(src))
 		if err != nil {
 			return err
 		}
