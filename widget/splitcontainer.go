@@ -47,10 +47,11 @@ func newSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *Sp
 // 0.5 - Leading & Trailing equally share the available space.
 // 1.0 - Trailing is min size, Leading uses all remaining space.
 func (s *SplitContainer) SetOffset(offset float64) {
-	if s.Offset != offset {
-		s.Offset = offset
-		s.Refresh()
+	if s.Offset == offset {
+		return
 	}
+	s.Offset = offset
+	s.Refresh()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
