@@ -59,10 +59,10 @@ func (p *preferences) saveToFile(path string) error {
 }
 
 func (p *preferences) load() {
-	err := p.loadFromFile(p.storagePath())
+	/*err := p.loadFromFile(p.storagePath())
 	if err != nil {
 		fyne.LogError("Preferences load error:", err)
-	}
+	}*/
 }
 
 func (p *preferences) loadFromFile(path string) error {

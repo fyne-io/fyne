@@ -1,4 +1,4 @@
-// +build !ci
+// +build !ci !js !wasm !web
 
 // +build !ios
 

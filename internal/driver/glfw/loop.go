@@ -1,17 +1,14 @@
 package glfw
 
 import (
-	"fmt"
 	"runtime"
-	"sync"
 	"time"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 type funcData struct {
@@ -65,19 +62,6 @@ func runOnDraw(w *window, f func()) {
 	<-done
 }
 
-func (d *gLDriver) initGLFW() {
-	initOnce.Do(func() {
-		err := glfw.Init()
-		if err != nil {
-			fyne.LogError("failed to initialise GLFW", err)
-			return
-		}
-
-		initCursors()
-		d.startDrawThread()
-	})
-}
-
 func (d *gLDriver) runGL() {
 	eventTick := time.NewTicker(time.Second / 10)
 	runMutex.Lock()
@@ -90,7 +74,7 @@ func (d *gLDriver) runGL() {
 		select {
 		case <-d.done:
 			eventTick.Stop()
-			glfw.Terminate()
+			d.Terminate()
 			return
 		case f := <-funcQueue:
 			f.f()
@@ -173,16 +157,6 @@ func (d *gLDriver) startDrawThread() {
 			}
 		}
 	}()
-}
-
-func (d *gLDriver) tryPollEvents() {
-	defer func() {
-		if r := recover(); r != nil {
-			fyne.LogError(fmt.Sprint("GLFW poll event error: ", r), nil)
-		}
-	}()
-
-	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
 }
 
 func freeDirtyTextures(canvas *glCanvas) {

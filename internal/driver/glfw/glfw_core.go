@@ -1,4 +1,5 @@
-// +build !gles,!arm,!arm64
+// +build !gles !arm !arm64
+// +build !js,!wasm,!web
 
 package glfw
 

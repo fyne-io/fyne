@@ -14,8 +14,8 @@ require (
 	github.com/godbus/dbus/v5 v5.0.3
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/gopherjs/gopherjs v0.0.0-20191106031601-ce3c9ade29de // indirect
-	github.com/goxjs/gl v0.0.0-00010101000000-000000000000 // indirect
-	github.com/goxjs/glfw v0.0.0-00010101000000-000000000000 // indirect
+	github.com/goxjs/gl v0.0.0-00010101000000-000000000000
+	github.com/goxjs/glfw v0.0.0-00010101000000-000000000000
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 	github.com/lucor/goinfo v0.0.0-20200401173949-526b5363a13a

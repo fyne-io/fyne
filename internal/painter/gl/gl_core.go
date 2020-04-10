@@ -1,4 +1,5 @@
 // +build !gles,!arm,!arm64,!android,!ios,!mobile
+// +build !js,!wasm,!web
 
 package gl
 

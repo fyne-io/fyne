@@ -1,4 +1,4 @@
-// +build !android,!ios,!mobile,!nacl
+// +build !android,!ios,!mobile,!nacl,!js,!wasm,!web
 
 package app
 

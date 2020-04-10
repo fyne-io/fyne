@@ -1,26 +1,24 @@
-// +build !windows,!android,!ios,!wasm,!js
+// +build wasm js
 
 package dialog
 
+
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+        "fyne.io/fyne"
 )
 
 func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
-	return []fyne.CanvasObject{widget.NewButton("Computer", func() {
-		f.setDirectory("/")
-	})}
+        return nil
 }
 
 func isHidden(file, _ string) bool {
-	return len(file) == 0 || file[0] == '.'
+        return false
 }
 
 func fileOpenOSOverride(func(fyne.FileReadCloser, error), fyne.Window) bool {
-	return false
+        return true
 }
 
 func fileSaveOSOverride(func(fyne.FileWriteCloser, error), fyne.Window) bool {
-	return false
+        return true
 }

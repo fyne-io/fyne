@@ -1,7 +1,7 @@
 // +build !ci
 
 // +build linux openbsd freebsd netbsd
-// +build !android
+// +build !android,!js,!wasm,!web
 
 package app
 

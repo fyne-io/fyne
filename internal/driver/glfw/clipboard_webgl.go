@@ -1,11 +1,10 @@
-// +build !js,!wasm,!web
+// +build js wasm web
 
 package glfw
 
 import (
 	"fyne.io/fyne"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/goxjs/glfw"
 )
 
 // Declare conformity with Clipboard interface
@@ -20,7 +19,7 @@ type clipboard struct {
 func (c *clipboard) Content() string {
 	content := ""
 	runOnMain(func() {
-		content = glfw.GetClipboardString()
+		content, _ = c.window.GetClipboardString()
 	})
 	return content
 }
@@ -28,12 +27,6 @@ func (c *clipboard) Content() string {
 // SetContent sets the clipboard content
 func (c *clipboard) SetContent(content string) {
 	runOnMain(func() {
-		defer func() {
-			if r := recover(); r != nil {
-				fyne.LogError("GLFW clipboard error (details above)", nil)
-			}
-		}()
-
-		glfw.SetClipboardString(content)
+		c.window.SetClipboardString(content)
 	})
 }

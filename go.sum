@@ -162,6 +162,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
+github.com/fyne-io/mobile v0.0.0-20200403124556-ac83d645d551 h1:dn0sIP619Xg4hiGDTt0UL0nwCvh28EQEPFcy7xPewjA=
+github.com/fyne-io/mobile v0.0.0-20200403124556-ac83d645d551/go.mod h1:HhyeqDET1gM7/EpVmvg/NWEaljaiP7HvoEldAUaoxOw=
 github.com/fyne-io/mobile v0.0.2-0.20200511203347-825e44fe5a95 h1:aj+YsmpJ5UY2YkUezODaM3XE0jS7TDBcWomFwpQCB1I=
 github.com/fyne-io/mobile v0.0.2-0.20200511203347-825e44fe5a95/go.mod h1:/kOrWrZB6sasLbEy2JIvr4arEzQTXBTZGb3Y96yWbHY=
 github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7 h1:SCYMcCJ89LjRGwEa0tRluNRiMjZHalQZrVrvTbPh+qw=
