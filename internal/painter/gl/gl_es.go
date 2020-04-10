@@ -28,12 +28,6 @@ type Buffer uint32
 // Program represents a compiled GL program
 type Program uint32
 
-// Texture represents an uploaded GL texture
-type Texture uint32
-
-// NoTexture is the zero value for a Texture
-var NoTexture = Texture(0)
-
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
 func newTexture(textureFilter canvas.ImageScale) Texture {
@@ -56,6 +50,19 @@ func newTexture(textureFilter canvas.ImageScale) Texture {
 	logError()
 
 	return Texture(texture)
+}
+
+func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) (Texture, error) {
+	texture, ok := cache.GetTexture(object)
+
+	if !ok {
+		texture = cache.TextureType(creator(object))
+		cache.SetTexture(object, texture, p.canvas)
+	}
+	if texture == cache.NoTexture {
+		return NoTexture, fmt.Errorf("No texture available.")
+	}
+	return Texture(texture), nil
 }
 
 func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {

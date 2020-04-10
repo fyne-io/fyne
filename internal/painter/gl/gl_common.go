@@ -15,6 +15,12 @@ import (
 	"fyne.io/fyne/v2/internal/painter"
 )
 
+// Texture represents an uploaded GL texture
+type Texture cache.TextureType
+
+// NoTexture is the zero value for a Texture
+var NoTexture = Texture(cache.NoTexture)
+
 func logGLError(err uint32) {
 	if err == 0 {
 		return
@@ -25,16 +31,6 @@ func logGLError(err uint32) {
 	if ok {
 		log.Printf("  At: %s:%d", file, line)
 	}
-}
-
-func (p *glPainter) getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) Texture {
-	texture, ok := cache.GetTexture(object)
-
-	if !ok {
-		texture = cache.TextureType(creator(object))
-		cache.SetTexture(object, texture, p.canvas)
-	}
-	return Texture(texture)
 }
 
 func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
