@@ -17,7 +17,7 @@ const headerTemplate = `// auto-generated
 package binding
 
 import (
-{{ range . }}	"{{ . }}"
+{{ range . }}{{ if ne . "" }}	"{{ . }}"{{ end }}
 {{ end }})
 `
 
@@ -77,8 +77,9 @@ func main() {
 
 	ht := template.Must(template.New("header").Parse(headerTemplate))
 	writeFile(f, ht, []string{
-		"fyne.io/fyne",
 		"net/url",
+		"",
+		"fyne.io/fyne",
 	})
 
 	t := template.Must(template.New("binding").Parse(bindingTemplate))

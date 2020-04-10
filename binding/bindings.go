@@ -4,8 +4,9 @@
 package binding
 
 import (
-	"fyne.io/fyne"
 	"net/url"
+
+	"fyne.io/fyne"
 )
 
 // BoolBinding implements a data binding for a bool.
