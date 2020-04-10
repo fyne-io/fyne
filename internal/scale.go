@@ -9,6 +9,8 @@ import (
 // ScaleInt converts a fyne coordinate in the given canvas to a screen coordinate
 func ScaleInt(c fyne.Canvas, v int) int {
 	switch c.Scale() {
+	case 0.0:
+		panic("Incorrect scale most likely not set.")
 	case 1.0:
 		return v
 	default:
@@ -24,6 +26,8 @@ func ScaleSize(c fyne.Canvas, s fyne.Size) fyne.PixelSize {
 // UnscaleInt converts a screen coordinate for a given canvas to a fyne coordinate
 func UnscaleInt(c fyne.Canvas, v int) int {
 	switch c.Scale() {
+	case 0.0:
+		panic("Incorrect scale most likely not set.")
 	case 1.0:
 		return v
 	default:
