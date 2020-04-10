@@ -153,7 +153,11 @@ type Button struct {
 	hovered    bool
 	HideShadow bool
 
-	tapBinding *binding.BoolBinding
+	tapBinding  *binding.BoolBinding
+	textBinding *binding.StringBinding
+	iconBinding *binding.ResourceBinding
+	textNotify  *binding.NotifyFunction
+	iconNotify  *binding.NotifyFunction
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -256,24 +260,55 @@ func (b *Button) BindTapped(data *binding.BoolBinding) *Button {
 	return b
 }
 
+// UnbindTapped unbinds the Button's OnTap from the data binding (if any).
+// Returns the Button for chaining.
+func (b *Button) UnbindTapped() *Button {
+	b.tapBinding = nil
+	return b
+}
+
 // BindText binds the Button's Text to the given data binding.
 // Returns the Button for chaining.
 func (b *Button) BindText(data *binding.StringBinding) *Button {
-	data.AddListener(b.SetText)
+	b.textBinding = data
+	b.textNotify = data.AddStringListener(b.SetText)
+	return b
+}
+
+// UnbindText unbinds the Button's Text from the data binding (if any).
+// Returns the Button for chaining.
+func (b *Button) UnbindText() *Button {
+	b.textBinding.DeleteListener(b.textNotify)
+	b.textNotify = nil
 	return b
 }
 
 // BindIcon binds the Button's Icon to the given data binding.
 // Returns the Button for chaining.
 func (b *Button) BindIcon(data *binding.ResourceBinding) *Button {
-	data.AddListener(b.SetIcon)
+	b.iconBinding = data
+	b.iconNotify = data.AddResourceListener(b.SetIcon)
+	return b
+}
+
+// UnbindIcon unbinds the Button's Icon from the data binding (if any).
+// Returns the Button for chaining.
+func (b *Button) UnbindIcon() *Button {
+	b.iconBinding.DeleteListener(b.iconNotify)
+	b.iconNotify = nil
 	return b
 }
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
-	button := &Button{DisableableWidget{}, label, DefaultButton, nil, nil,
-		tapped, false, false, nil}
+	button := &Button{
+		DisableableWidget: DisableableWidget{},
+		Text:              label,
+		Style:             DefaultButton,
+		OnTapped:          tapped,
+		hovered:           false,
+		HideShadow:        false,
+	}
 
 	button.ExtendBaseWidget(button)
 	return button
@@ -281,8 +316,16 @@ func NewButton(label string, tapped func()) *Button {
 
 // NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
-	button := &Button{DisableableWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
-		tapped, false, false, nil}
+	button := &Button{
+		DisableableWidget: DisableableWidget{},
+		Text:              label,
+		Style:             DefaultButton,
+		Icon:              icon,
+		disabledIcon:      theme.NewDisabledResource(icon),
+		OnTapped:          tapped,
+		hovered:           false,
+		HideShadow:        false,
+	}
 
 	button.ExtendBaseWidget(button)
 	return button

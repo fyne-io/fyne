@@ -174,7 +174,10 @@ type Radio struct {
 	hoveredItemIndex int
 	hovered          bool
 
-	changeBinding *binding.StringBinding
+	selectedBinding *binding.StringBinding
+	optionBinding   *binding.ListBinding
+	selectedNotify  *binding.NotifyFunction
+	optionNotify    *binding.NotifyFunction
 }
 
 // indexByPosition returns the item index for a specified position or noRadioItemIndex if any
@@ -283,8 +286,8 @@ func (r *Radio) SetSelected(option string) {
 
 	r.Selected = option
 
-	if r.changeBinding != nil {
-		r.changeBinding.Set(r.Selected)
+	if r.selectedBinding != nil {
+		r.selectedBinding.Set(r.Selected)
 	}
 
 	if r.OnChanged != nil {
@@ -321,21 +324,31 @@ func (r *Radio) removeDuplicateOptions() {
 // BindSelected binds the Radio's Selected Option to the given data binding.
 // Returns the Radio for chaining.
 func (r *Radio) BindSelected(data *binding.StringBinding) *Radio {
-	r.changeBinding = data
-	data.AddListener(r.SetSelected)
+	r.selectedBinding = data
+	r.selectedNotify = data.AddStringListener(r.SetSelected)
+	return r
+}
+
+// UnbindSelected unbinds the Radio's Selected from the data binding (if any).
+// Returns the Radio for chaining.
+func (r *Radio) UnbindSelected() *Radio {
+	r.selectedBinding.DeleteListener(r.selectedNotify)
+	r.selectedBinding = nil
+	r.selectedNotify = nil
 	return r
 }
 
 // BindOptions binds the Radio's Options to the given data binding.
 // Returns the Radio for chaining.
 func (r *Radio) BindOptions(data *binding.ListBinding) *Radio {
-	data.AddListener(func() {
+	r.optionBinding = data
+	r.optionNotify = data.AddListenerFunction(func(binding.Binding) {
 		l := data.Length()
 		var options []string
 		for i := 0; i < l; i++ {
 			b, ok := data.Get(i).(*binding.StringBinding)
 			if ok {
-				// TODO Should individual elements in a slice binding be bound to, how will they get unbound?
+				// TODO Should individual elements in a slice binding be bound to?
 				//  b.AddListener(func() { })
 				options = append(options, b.Get())
 			}
@@ -343,6 +356,15 @@ func (r *Radio) BindOptions(data *binding.ListBinding) *Radio {
 		r.Options = options
 		r.Refresh()
 	})
+	return r
+}
+
+// UnbindOptions unbinds the Radio's Options from the data binding (if any).
+// Returns the Radio for chaining.
+func (r *Radio) UnbindOptions() *Radio {
+	r.optionBinding.DeleteListener(r.optionNotify)
+	r.optionBinding = nil
+	r.optionNotify = nil
 	return r
 }
 

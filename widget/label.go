@@ -15,6 +15,9 @@ type Label struct {
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the label text
+
+	textBinding *binding.StringBinding
+	textNotify  *binding.NotifyFunction
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -98,6 +101,16 @@ func (l *Label) MinSize() fyne.Size {
 // BindText binds the Label's Text to the given data binding.
 // Returns the Label for chaining.
 func (l *Label) BindText(data *binding.StringBinding) *Label {
-	data.AddListener(l.SetText)
+	l.textBinding = data
+	l.textNotify = data.AddStringListener(l.SetText)
+	return l
+}
+
+// UnbindText unbinds the Label's Text from the data binding (if any).
+// Returns the Label for chaining.
+func (l *Label) UnbindText() *Label {
+	l.textBinding.DeleteListener(l.textNotify)
+	l.textBinding = nil
+	l.textNotify = nil
 	return l
 }

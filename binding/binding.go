@@ -4,27 +4,52 @@ import "sync"
 
 // Binding is the base interface of the Data Binding API.
 type Binding interface {
-	addListener(func())
+	AddListener(Notifiable)
+	DeleteListener(Notifiable)
 }
 
 // ItemBinding implements a data binding for a single item.
 type ItemBinding struct {
 	Binding
 	sync.RWMutex
-	listeners []func()
+	listeners []Notifiable // TODO maybe a map[Notifiable]bool would be quicker, especially for DeleteListener?
 }
 
-func (b *ItemBinding) addListener(listener func()) {
+// AddListenerFunction adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *ItemBinding) AddListenerFunction(listener func(Binding)) *NotifyFunction {
+	n := &NotifyFunction{
+		F: listener,
+	}
+	b.AddListener(n)
+	return n
+}
+
+// AddListener adds the given listener to the binding.
+func (b *ItemBinding) AddListener(listener Notifiable) {
 	b.Lock()
 	defer b.Unlock()
 	b.listeners = append(b.listeners, listener)
+}
+
+// DeleteListener removes the given listener from the binding.
+func (b *ItemBinding) DeleteListener(listener Notifiable) {
+	b.Lock()
+	defer b.Unlock()
+	var listeners []Notifiable
+	for _, l := range b.listeners {
+		if l != listener {
+			listeners = append(listeners, l)
+		}
+	}
+	b.listeners = listeners
 }
 
 func (b *ItemBinding) notify() {
 	b.RLock()
 	defer b.RUnlock()
 	for _, l := range b.listeners {
-		go l()
+		go l.Notify(b)
 	}
 }
 
@@ -60,11 +85,6 @@ func (b *ListBinding) Set(index int, data Binding) {
 	b.notify()
 }
 
-// AddListener adds the given listener to the binding.
-func (b *ListBinding) AddListener(listener func()) {
-	b.addListener(listener)
-}
-
 // MapBinding implements a data binding for a map string to binding.
 type MapBinding struct {
 	ItemBinding
@@ -90,9 +110,4 @@ func (b *MapBinding) Set(key string, data Binding) {
 	}
 	b.values[key] = data
 	b.notify()
-}
-
-// AddListener adds the given listener to the binding.
-func (b *MapBinding) AddListener(listener func()) {
-	b.addListener(listener)
 }

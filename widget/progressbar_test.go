@@ -28,7 +28,7 @@ func TestProgressBar_BindMin(t *testing.T) {
 	progressBar := NewProgressBar()
 	data := &binding.Float64Binding{}
 	progressBar.BindMin(data)
-	data.AddListener(func(float64) {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Set(0.75)
@@ -48,7 +48,7 @@ func TestProgressBar_BindMax(t *testing.T) {
 	progressBar := NewProgressBar()
 	data := &binding.Float64Binding{}
 	progressBar.BindMax(data)
-	data.AddListener(func(float64) {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Set(0.75)
@@ -68,7 +68,7 @@ func TestProgressBar_BindValue(t *testing.T) {
 	progressBar := NewProgressBar()
 	data := &binding.Float64Binding{}
 	progressBar.BindValue(data)
-	data.AddListener(func(float64) {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Set(0.75)

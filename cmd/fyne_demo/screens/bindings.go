@@ -37,7 +37,7 @@ func BindingsScreen() fyne.CanvasObject {
 	goRightButton.BindIcon(goResource)
 	goProgressBar.BindValue(goFloat64)
 
-	goBool.AddListener(func(b bool) {
+	goBool.AddBoolListener(func(b bool) {
 		if b {
 			// Start goroutine to update progress bar
 			go func() {
@@ -73,7 +73,7 @@ func BindingsScreen() fyne.CanvasObject {
 	onOffRightCheck.BindText(onOffString)
 	onOffLabel.BindText(onOffString)
 
-	onOffBool.AddListener(func(b bool) {
+	onOffBool.AddBoolListener(func(b bool) {
 		if b {
 			onOffString.Set("On")
 			onOffResource.Set(theme.CheckButtonCheckedIcon())
@@ -94,7 +94,7 @@ func BindingsScreen() fyne.CanvasObject {
 	countLeftEntry.BindText(countString)
 	countRightEntry.BindText(countString)
 
-	countString.AddListener(func(s string) {
+	countString.AddStringListener(func(s string) {
 		countLabel.SetText(strconv.Itoa(len(s)))
 	})
 
@@ -118,7 +118,7 @@ func BindingsScreen() fyne.CanvasObject {
 		binding.NewStringBinding("Copy"),
 		binding.NewStringBinding("Paste"),
 	)
-	clipboardString.AddListener(func(s string) {
+	clipboardString.AddStringListener(func(s string) {
 		switch s {
 		case "Cut":
 			clipboardResource.Set(theme.ContentCutIcon())
@@ -152,7 +152,7 @@ func BindingsScreen() fyne.CanvasObject {
 		binding.NewStringBinding("https://fyne.io"),
 		binding.NewStringBinding("https://github.com/fyne-io"),
 	)
-	urlString.AddListener(func(s string) {
+	urlString.AddStringListener(func(s string) {
 		u, err := url.Parse(s)
 		if err != nil {
 			fyne.LogError("Failed to parse URL: "+s, err)
@@ -173,7 +173,7 @@ func BindingsScreen() fyne.CanvasObject {
 	slideRightSlider.BindValue(slideFloat64)
 	slideLabel.BindText(slideString)
 
-	slideFloat64.AddListener(func(f float64) {
+	slideFloat64.AddFloat64Listener(func(f float64) {
 		slideString.Set(fmt.Sprintf("%f", f))
 	})
 	slideFloat64.Set(0.25)

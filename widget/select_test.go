@@ -214,7 +214,7 @@ func TestSelect_BindSelected_Set(t *testing.T) {
 	})
 	data := &binding.StringBinding{}
 	combo.BindSelected(data)
-	data.AddListener(func(string) {
+	data.AddStringListener(func(string) {
 		done <- true
 	})
 	data.Set("b")
@@ -236,7 +236,7 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 	data := &binding.StringBinding{}
 	combo.BindSelected(data)
 	selected := ""
-	data.AddListener(func(s string) {
+	data.AddStringListener(func(s string) {
 		selected = s
 		done <- true
 	})
@@ -267,7 +267,7 @@ func TestSelect_BindOptions(t *testing.T) {
 
 	data := &binding.ListBinding{}
 	combo.BindOptions(data)
-	data.AddListener(func() {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Append(

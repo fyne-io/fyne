@@ -251,7 +251,7 @@ func TestCheck_BindChecked_Tap(t *testing.T) {
 	data := &binding.BoolBinding{}
 	check.BindChecked(data)
 	selected := false
-	data.AddListener(func(c bool) {
+	data.AddBoolListener(func(c bool) {
 		selected = c
 		done <- true
 	})
@@ -275,7 +275,7 @@ func TestCheck_BindText(t *testing.T) {
 	check := NewCheck("check", nil)
 	data := &binding.StringBinding{}
 	check.BindText(data)
-	data.AddListener(func(string) {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Set("foobar")

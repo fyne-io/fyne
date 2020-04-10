@@ -138,7 +138,7 @@ func TestButton_BindTapped(t *testing.T) {
 	data := &binding.BoolBinding{}
 	button.BindTapped(data)
 	tapped := false
-	data.AddListener(func(b bool) {
+	data.AddBoolListener(func(b bool) {
 		tapped = b
 		done <- true
 	})
@@ -159,7 +159,7 @@ func TestButton_BindText(t *testing.T) {
 	button := NewButton("button", nil)
 	data := &binding.StringBinding{}
 	button.BindText(data)
-	data.AddListener(func(string) {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Set("foobar")
@@ -179,7 +179,7 @@ func TestButton_BindIcon(t *testing.T) {
 	button := NewButtonWithIcon("button", theme.WarningIcon(), nil)
 	data := &binding.ResourceBinding{}
 	button.BindIcon(data)
-	data.AddListener(func(fyne.Resource) {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Set(theme.InfoIcon())

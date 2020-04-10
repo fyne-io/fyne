@@ -82,6 +82,9 @@ type ProgressBar struct {
 	BaseWidget
 
 	Min, Max, Value float64
+
+	maxBinding, minBinding, valueBinding *binding.Float64Binding
+	maxNotify, minNotify, valueNotify    *binding.NotifyFunction
 }
 
 // SetMin changes the current minimum of this progress bar.
@@ -139,24 +142,54 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	return &progressRenderer{[]fyne.CanvasObject{bar, label}, bar, label, p}
 }
 
-// BindMin binds the ProgressBar's Minimum to the given data binding.
+// BindMin binds the ProgressBar's Min to the given data binding.
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) BindMin(data *binding.Float64Binding) *ProgressBar {
-	data.AddListener(p.SetMin)
+	p.minBinding = data
+	p.minNotify = data.AddFloat64Listener(p.SetMin)
 	return p
 }
 
-// BindMax binds the ProgressBar's Maximum to the given data binding.
+// UnbindMin unbinds the ProgressBar's Min from the data binding (if any).
+// Returns the ProgressBar for chaining.
+func (p *ProgressBar) UnbindMin() *ProgressBar {
+	p.minBinding.DeleteListener(p.minNotify)
+	p.minBinding = nil
+	p.minNotify = nil
+	return p
+}
+
+// BindMax binds the ProgressBar's Max to the given data binding.
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) BindMax(data *binding.Float64Binding) *ProgressBar {
-	data.AddListener(p.SetMax)
+	p.maxBinding = data
+	p.maxNotify = data.AddFloat64Listener(p.SetMax)
+	return p
+}
+
+// UnbindMax unbinds the ProgressBar's Max from the data binding (if any).
+// Returns the ProgressBar for chaining.
+func (p *ProgressBar) UnbindMax() *ProgressBar {
+	p.maxBinding.DeleteListener(p.maxNotify)
+	p.maxBinding = nil
+	p.maxNotify = nil
 	return p
 }
 
 // BindValue binds the ProgressBar's Value to the given data binding.
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) BindValue(data *binding.Float64Binding) *ProgressBar {
-	data.AddListener(p.SetValue)
+	p.valueBinding = data
+	p.valueNotify = data.AddFloat64Listener(p.SetValue)
+	return p
+}
+
+// UnbindValue unbinds the ProgressBar's Value from the data binding (if any).
+// Returns the ProgressBar for chaining.
+func (p *ProgressBar) UnbindValue() *ProgressBar {
+	p.valueBinding.DeleteListener(p.valueNotify)
+	p.valueBinding = nil
+	p.valueNotify = nil
 	return p
 }
 

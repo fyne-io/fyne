@@ -266,6 +266,7 @@ type Entry struct {
 	ActionItem fyne.CanvasObject
 
 	textBinding *binding.StringBinding
+	textNotify  *binding.NotifyFunction
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -1138,7 +1139,16 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 // Returns the Entry for chaining.
 func (e *Entry) BindText(data *binding.StringBinding) *Entry {
 	e.textBinding = data
-	data.AddListener(e.SetText)
+	e.textNotify = data.AddStringListener(e.SetText)
+	return e
+}
+
+// UnbindText unbinds the Entry's Text from the data binding (if any).
+// Returns the Entry for chaining.
+func (e *Entry) UnbindText() *Entry {
+	e.textBinding.DeleteListener(e.textNotify)
+	e.textBinding = nil
+	e.textNotify = nil
 	return e
 }
 

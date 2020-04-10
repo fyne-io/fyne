@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"fyne.io/fyne"
 	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
@@ -47,7 +46,7 @@ func TestIcon_BindResource(t *testing.T) {
 	icon := NewIcon(theme.WarningIcon())
 	data := &binding.ResourceBinding{}
 	icon.BindResource(data)
-	data.AddListener(func(fyne.Resource) {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Set(theme.InfoIcon())

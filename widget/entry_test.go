@@ -1553,7 +1553,7 @@ func TestEntry_BindText(t *testing.T) {
 	entry := NewEntry()
 	data := &binding.StringBinding{}
 	entry.BindText(data)
-	data.AddListener(func(string) {
+	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Set("foobar")

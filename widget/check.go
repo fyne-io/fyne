@@ -105,6 +105,9 @@ type Check struct {
 	hovered bool
 
 	changeBinding *binding.BoolBinding
+	textBinding   *binding.StringBinding
+	checkNotify   *binding.NotifyFunction
+	textNotify    *binding.NotifyFunction
 }
 
 // SetChecked sets the the checked state and refreshes widget
@@ -195,27 +198,44 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 // Returns the Check for chaining.
 func (c *Check) BindChecked(data *binding.BoolBinding) *Check {
 	c.changeBinding = data
-	data.AddListener(c.SetChecked)
+	c.checkNotify = data.AddBoolListener(c.SetChecked)
+	return c
+}
+
+// UnbindChecked unbinds the Check's OnChanged from the data binding (if any).
+// Returns the Check for chaining.
+func (c *Check) UnbindChecked() *Check {
+	c.changeBinding.DeleteListener(c.checkNotify)
+	c.changeBinding = nil
+	c.checkNotify = nil
 	return c
 }
 
 // BindText binds the Check's Text to the given data binding.
 // Returns the Check for chaining.
 func (c *Check) BindText(data *binding.StringBinding) *Check {
-	data.AddListener(c.SetText)
+	c.textBinding = data
+	c.textNotify = data.AddStringListener(c.SetText)
+	return c
+}
+
+// UnbindText unbinds the Check's Text from the data binding (if any).
+// Returns the Check for chaining.
+func (c *Check) UnbindText() *Check {
+	c.textBinding.DeleteListener(c.textNotify)
+	c.textNotify = nil
 	return c
 }
 
 // NewCheck creates a new check widget with the set label and change handler
 func NewCheck(label string, changed func(bool)) *Check {
 	c := &Check{
-		DisableableWidget{},
-		label,
-		false,
-		changed,
-		false,
-		false,
-		nil,
+		DisableableWidget: DisableableWidget{},
+		Text:              label,
+		Checked:           false,
+		OnChanged:         changed,
+		focused:           false,
+		hovered:           false,
 	}
 
 	c.ExtendBaseWidget(c)

@@ -46,9 +46,10 @@ func (b *{{ .Name }}Binding) Set(value {{ .Type }}) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *{{ .Name }}Binding) AddListener(listener func({{ .Type }})) {
-	b.addListener(func() {
+// Add{{ .Name }}Listener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *{{ .Name }}Binding) Add{{ .Name }}Listener(listener func({{ .Type }})) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }

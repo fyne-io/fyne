@@ -32,9 +32,10 @@ func (b *BoolBinding) Set(value bool) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *BoolBinding) AddListener(listener func(bool)) {
-	b.addListener(func() {
+// AddBoolListener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *BoolBinding) AddBoolListener(listener func(bool)) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
@@ -63,9 +64,10 @@ func (b *Float64Binding) Set(value float64) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *Float64Binding) AddListener(listener func(float64)) {
-	b.addListener(func() {
+// AddFloat64Listener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *Float64Binding) AddFloat64Listener(listener func(float64)) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
@@ -94,9 +96,10 @@ func (b *IntBinding) Set(value int) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *IntBinding) AddListener(listener func(int)) {
-	b.addListener(func() {
+// AddIntListener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *IntBinding) AddIntListener(listener func(int)) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
@@ -125,9 +128,10 @@ func (b *Int64Binding) Set(value int64) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *Int64Binding) AddListener(listener func(int64)) {
-	b.addListener(func() {
+// AddInt64Listener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *Int64Binding) AddInt64Listener(listener func(int64)) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
@@ -156,9 +160,10 @@ func (b *ResourceBinding) Set(value fyne.Resource) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *ResourceBinding) AddListener(listener func(fyne.Resource)) {
-	b.addListener(func() {
+// AddResourceListener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *ResourceBinding) AddResourceListener(listener func(fyne.Resource)) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
@@ -187,9 +192,10 @@ func (b *RuneBinding) Set(value rune) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *RuneBinding) AddListener(listener func(rune)) {
-	b.addListener(func() {
+// AddRuneListener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *RuneBinding) AddRuneListener(listener func(rune)) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
@@ -218,9 +224,10 @@ func (b *StringBinding) Set(value string) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *StringBinding) AddListener(listener func(string)) {
-	b.addListener(func() {
+// AddStringListener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *StringBinding) AddStringListener(listener func(string)) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
@@ -249,9 +256,10 @@ func (b *URLBinding) Set(value *url.URL) {
 	}
 }
 
-// AddListener adds the given listener to the binding.
-func (b *URLBinding) AddListener(listener func(*url.URL)) {
-	b.addListener(func() {
+// AddURLListener adds the given function as a listener to the binding.
+// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
+func (b *URLBinding) AddURLListener(listener func(*url.URL)) *NotifyFunction {
+	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
