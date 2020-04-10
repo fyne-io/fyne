@@ -20,22 +20,14 @@ func BindingsScreen() fyne.CanvasObject {
 	// TODO tree - map[string][]string
 
 	// Button <-> ProgressBar <-> Button
-	goLeftButton := &widget.Button{}
-	goRightButton := &widget.Button{}
-	goProgressBar := &widget.ProgressBar{Max: 1}
-
 	goBool := &binding.BoolBinding{}
 	goFloat64 := &binding.Float64Binding{}
 	goString := &binding.StringBinding{}
 	goResource := &binding.ResourceBinding{}
 
-	goLeftButton.BindTapped(goBool)
-	goRightButton.BindTapped(goBool)
-	goLeftButton.BindText(goString)
-	goRightButton.BindText(goString)
-	goLeftButton.BindIcon(goResource)
-	goRightButton.BindIcon(goResource)
-	goProgressBar.BindValue(goFloat64)
+	goLeftButton := (&widget.Button{}).BindTapped(goBool).BindText(goString).BindIcon(goResource)
+	goRightButton := (&widget.Button{}).BindTapped(goBool).BindText(goString).BindIcon(goResource)
+	goProgressBar := (&widget.ProgressBar{Max: 1}).BindValue(goFloat64)
 
 	goBool.AddBoolListener(func(b bool) {
 		if b {
@@ -59,19 +51,13 @@ func BindingsScreen() fyne.CanvasObject {
 	goBool.Set(true)
 
 	// Check <-> Label <-> Check
-	onOffLeftCheck := &widget.Check{}
-	onOffRightCheck := &widget.Check{}
-	onOffLabel := &widget.Label{}
-
 	onOffBool := &binding.BoolBinding{}
 	onOffString := &binding.StringBinding{}
 	onOffResource := &binding.ResourceBinding{}
 
-	onOffLeftCheck.BindChecked(onOffBool)
-	onOffRightCheck.BindChecked(onOffBool)
-	onOffLeftCheck.BindText(onOffString)
-	onOffRightCheck.BindText(onOffString)
-	onOffLabel.BindText(onOffString)
+	onOffLeftCheck := (&widget.Check{}).BindChecked(onOffBool).BindText(onOffString)
+	onOffRightCheck := (&widget.Check{}).BindChecked(onOffBool).BindText(onOffString)
+	onOffLabel := (&widget.Label{}).BindText(onOffString)
 
 	onOffBool.AddBoolListener(func(b bool) {
 		if b {
@@ -85,33 +71,24 @@ func BindingsScreen() fyne.CanvasObject {
 	onOffBool.Set(true)
 
 	// Entry <-> Label <-> Entry
-	countLeftEntry := widget.NewEntry()
-	countRightEntry := widget.NewEntry()
-	countLabel := widget.NewLabel("0")
-
 	countString := binding.NewStringBinding("")
 
-	countLeftEntry.BindText(countString)
-	countRightEntry.BindText(countString)
+	countLeftEntry := widget.NewEntry().BindText(countString)
+	countRightEntry := widget.NewEntry().BindText(countString)
+	countLabel := widget.NewLabel("0")
 
 	countString.AddStringListener(func(s string) {
 		countLabel.SetText(strconv.Itoa(len(s)))
 	})
 
 	// Radio <-> Icon <-> Radio
-	clipboardLeftRadio := &widget.Radio{}
-	clipboardRightRadio := &widget.Radio{}
-	clipboardIcon := &widget.Icon{}
-
 	clipboardOptions := &binding.ListBinding{}
 	clipboardString := &binding.StringBinding{}
 	clipboardResource := &binding.ResourceBinding{}
 
-	clipboardLeftRadio.BindOptions(clipboardOptions)
-	clipboardRightRadio.BindOptions(clipboardOptions)
-	clipboardLeftRadio.BindSelected(clipboardString)
-	clipboardRightRadio.BindSelected(clipboardString)
-	clipboardIcon.BindResource(clipboardResource)
+	clipboardLeftRadio := (&widget.Radio{}).BindOptions(clipboardOptions).BindSelected(clipboardString)
+	clipboardRightRadio := (&widget.Radio{}).BindOptions(clipboardOptions).BindSelected(clipboardString)
+	clipboardIcon := (&widget.Icon{}).BindResource(clipboardResource)
 
 	clipboardOptions.Append(
 		binding.NewStringBinding("Cut"),
@@ -133,20 +110,13 @@ func BindingsScreen() fyne.CanvasObject {
 	clipboardString.Set("")
 
 	// Select <-> Hyperlink <-> Select
-	urlLeftSelect := &widget.Select{}
-	urlRightSelect := &widget.Select{}
-	urlHyperlink := &widget.Hyperlink{}
-
 	urlOptions := &binding.ListBinding{}
 	urlString := &binding.StringBinding{}
 	urlURL := &binding.URLBinding{}
 
-	urlLeftSelect.BindOptions(urlOptions)
-	urlRightSelect.BindOptions(urlOptions)
-	urlLeftSelect.BindSelected(urlString)
-	urlRightSelect.BindSelected(urlString)
-	urlHyperlink.BindText(urlString)
-	urlHyperlink.BindURL(urlURL)
+	urlLeftSelect := (&widget.Select{}).BindOptions(urlOptions).BindSelected(urlString)
+	urlRightSelect := (&widget.Select{}).BindOptions(urlOptions).BindSelected(urlString)
+	urlHyperlink := (&widget.Hyperlink{}).BindText(urlString).BindURL(urlURL)
 
 	urlOptions.Append(
 		binding.NewStringBinding("https://fyne.io"),
@@ -162,16 +132,12 @@ func BindingsScreen() fyne.CanvasObject {
 	urlString.Set("")
 
 	// Slider <-> Label <-> Slider
-	slideLeftSlider := &widget.Slider{Max: 1, Step: 0.01}
-	slideRightSlider := &widget.Slider{Max: 1, Step: 0.01}
-	slideLabel := &widget.Label{}
-
 	slideFloat64 := &binding.Float64Binding{}
 	slideString := &binding.StringBinding{}
 
-	slideLeftSlider.BindValue(slideFloat64)
-	slideRightSlider.BindValue(slideFloat64)
-	slideLabel.BindText(slideString)
+	slideLeftSlider := (&widget.Slider{Max: 1, Step: 0.01}).BindValue(slideFloat64)
+	slideRightSlider := (&widget.Slider{Max: 1, Step: 0.01}).BindValue(slideFloat64)
+	slideLabel := (&widget.Label{}).BindText(slideString)
 
 	slideFloat64.AddFloat64Listener(func(f float64) {
 		slideString.Set(fmt.Sprintf("%f", f))
