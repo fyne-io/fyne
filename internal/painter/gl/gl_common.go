@@ -19,16 +19,6 @@ var textures = make(map[fyne.CanvasObject]Texture, 1024)
 
 const vectorPad = 10
 
-func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) Texture {
-	texture, ok := textures[object]
-
-	if !ok {
-		texture = creator(object)
-		textures[object] = texture
-	}
-	return texture
-}
-
 func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	circle := obj.(*canvas.Circle)
 	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2

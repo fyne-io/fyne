@@ -58,8 +58,8 @@ func (p *glPainter) rectCoords(size fyne.Size, pos fyne.Position, frame fyne.Siz
 func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture,
 	pos fyne.Position, size, frame fyne.Size, fill canvas.ImageFill, alpha, aspect float32, pad int) {
 
-	texture := getTexture(o, creator)
-	if texture == NoTexture {
+	texture, err := getTexture(o, creator)
+	if err != nil {
 		return
 	}
 
