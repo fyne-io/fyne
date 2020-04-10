@@ -208,6 +208,7 @@ func (c *Check) BindText(data *binding.StringBinding) *Check {
 // Returns the Check for chaining.
 func (c *Check) UnbindText() *Check {
 	c.textBinding.DeleteListener(c.textNotify)
+	c.textBinding = nil
 	c.textNotify = nil
 	return c
 }
