@@ -229,6 +229,15 @@ func makeScrollBothTab() fyne.CanvasObject {
 	return scroll
 }
 
+func makeAccordionTab() fyne.CanvasObject {
+	ac := widget.NewAccordionContainer()
+	ac.Append("A", widget.NewLabel("One"))
+	ac.Append("B", widget.NewLabel("Two"))
+	ac.Append("C", widget.NewLabel("Three"))
+	ac.CloseAll()
+	return ac
+}
+
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -248,6 +257,7 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Progress", makeProgressTab()),
 			widget.NewTabItem("Form", makeFormTab()),
 			widget.NewTabItem("Scroll", makeScrollTab()),
+			widget.NewTabItem("Accordion", makeAccordionTab()),
 		),
 	)
 }
