@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.NativeActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ClipboardManager;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
@@ -160,6 +161,9 @@ public class GoNativeActivity extends NativeActivity {
 				GoNativeActivity.this.updateLayout();
 			}
 		});
+
+        // without this the JNI clipboard code does not work on older devices (SDK 16)
+		getSystemService(CLIPBOARD_SERVICE);
     }
 
     private void setupEntry() {
