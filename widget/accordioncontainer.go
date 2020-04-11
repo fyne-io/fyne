@@ -37,16 +37,16 @@ func (a *AccordionContainer) MinSize() fyne.Size {
 func (a *AccordionContainer) Append(header string, detail fyne.CanvasObject) {
 	item := &accordionItem{
 		BaseWidget: BaseWidget{},
-		Container:  a,
-		Detail:     detail,
+		container:  a,
+		detail:     detail,
 		open:       true,
 	}
-	item.Header = &accordionItemHeader{
+	item.header = &accordionItemHeader{
 		BaseWidget: BaseWidget{},
-		Item:       item,
-		Text:       header,
+		item:       item,
+		text:       header,
 	}
-	item.Header.ExtendBaseWidget(item.Header)
+	item.header.ExtendBaseWidget(item.header)
 	item.ExtendBaseWidget(item)
 
 	r := cache.Renderer(a).(*accordionContainerRenderer)
@@ -68,14 +68,14 @@ func (a *AccordionContainer) Open(index int) {
 	if index < 0 || index >= len(a.Items) {
 		return
 	}
-	a.Items[index].SetOpen(true)
+	a.Items[index].setOpen(true)
 	a.Refresh()
 }
 
 // OpenAll expands all items.
 func (a *AccordionContainer) OpenAll() {
 	for _, i := range a.Items {
-		i.SetOpen(true)
+		i.setOpen(true)
 	}
 	a.Refresh()
 }
@@ -85,14 +85,14 @@ func (a *AccordionContainer) Close(index int) {
 	if index < 0 || index >= len(a.Items) {
 		return
 	}
-	a.Items[index].SetOpen(false)
+	a.Items[index].setOpen(false)
 	a.Refresh()
 }
 
 // CloseAll collapses all items.
 func (a *AccordionContainer) CloseAll() {
 	for _, i := range a.Items {
-		i.SetOpen(false)
+		i.setOpen(false)
 	}
 	a.Refresh()
 }
@@ -163,20 +163,20 @@ var _ fyne.Widget = (*accordionItem)(nil)
 
 type accordionItem struct {
 	BaseWidget
-	Container *AccordionContainer
-	Header    *accordionItemHeader
-	Detail    fyne.CanvasObject
+	container *AccordionContainer
+	header    *accordionItemHeader
+	detail    fyne.CanvasObject
 	open      bool
 }
 
-func (i *accordionItem) SetOpen(open bool) {
+func (i *accordionItem) setOpen(open bool) {
 	if i.open == open {
 		return
 	}
 	if i.open = open; i.open {
-		i.Detail.Show()
+		i.detail.Show()
 	} else {
-		i.Detail.Hide()
+		i.detail.Hide()
 	}
 }
 
@@ -185,8 +185,8 @@ func (i *accordionItem) CreateRenderer() fyne.WidgetRenderer {
 	return &accordionItemRenderer{
 		item: i,
 		objects: []fyne.CanvasObject{
-			i.Header,
-			i.Detail,
+			i.header,
+			i.detail,
 		},
 	}
 }
@@ -197,11 +197,11 @@ type accordionItemRenderer struct {
 }
 
 func (r *accordionItemRenderer) MinSize() fyne.Size {
-	min := r.item.Header.MinSize()
+	min := r.item.header.MinSize()
 	width := min.Width
 	height := min.Height
 	if r.item.open {
-		min := r.item.Detail.MinSize()
+		min := r.item.detail.MinSize()
 		width = fyne.Max(width, min.Width)
 		height += min.Height
 	}
@@ -209,12 +209,12 @@ func (r *accordionItemRenderer) MinSize() fyne.Size {
 }
 
 func (r *accordionItemRenderer) Layout(size fyne.Size) {
-	height := r.item.Header.MinSize().Height
-	r.item.Header.Move(fyne.NewPos(0, 0))
-	r.item.Header.Resize(fyne.NewSize(size.Width, height))
+	height := r.item.header.MinSize().Height
+	r.item.header.Move(fyne.NewPos(0, 0))
+	r.item.header.Resize(fyne.NewSize(size.Width, height))
 	if r.item.open {
-		r.item.Detail.Move(fyne.NewPos(0, height))
-		r.item.Detail.Resize(fyne.NewSize(size.Width, r.item.Detail.MinSize().Height))
+		r.item.detail.Move(fyne.NewPos(0, height))
+		r.item.detail.Resize(fyne.NewSize(size.Width, r.item.detail.MinSize().Height))
 	}
 }
 
@@ -227,8 +227,8 @@ func (r *accordionItemRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *accordionItemRenderer) Refresh() {
-	r.item.Header.Refresh()
-	r.item.Detail.Refresh()
+	r.item.header.Refresh()
+	r.item.detail.Refresh()
 	canvas.Refresh(r.item)
 }
 
@@ -241,27 +241,27 @@ var _ desktop.Hoverable = (*accordionItemHeader)(nil)
 
 type accordionItemHeader struct {
 	BaseWidget
-	Item    *accordionItem
-	Text    string
+	item    *accordionItem
+	text    string
 	hovered bool
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (h *accordionItemHeader) Tapped(*fyne.PointEvent) {
-	h.Item.SetOpen(!h.Item.open)
-	h.Item.Container.Refresh()
+	h.item.setOpen(!h.item.open)
+	h.item.container.Refresh()
 }
 
 // MouseIn is called when a desktop pointer enters the widget
 func (h *accordionItemHeader) MouseIn(*desktop.MouseEvent) {
 	h.hovered = true
-	h.Item.Container.Refresh()
+	h.item.container.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (h *accordionItemHeader) MouseOut() {
 	h.hovered = false
-	h.Item.Container.Refresh()
+	h.item.container.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -320,12 +320,12 @@ func (r *accordionItemHeaderRenderer) Refresh() {
 }
 
 func (r *accordionItemHeaderRenderer) updateCanvasObjects() {
-	if r.header.Item.open {
+	if r.header.item.open {
 		r.image = r.images[0]
 	} else {
 		r.image = r.images[1]
 	}
-	r.text.Text = r.header.Text
+	r.text.Text = r.header.text
 	r.text.Color = theme.TextColor()
 	r.text.TextSize = theme.TextSize()
 	r.text.TextStyle = fyne.TextStyle{}
