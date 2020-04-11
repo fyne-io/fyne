@@ -20,11 +20,11 @@ type AccordionContainer struct {
 
 // NewAccordionContainer creates a new accordion widget.
 func NewAccordionContainer() *AccordionContainer {
-	accordion := &AccordionContainer{
+	a := &AccordionContainer{
 		BaseWidget: BaseWidget{},
 	}
-	accordion.ExtendBaseWidget(accordion)
-	return accordion
+	a.ExtendBaseWidget(a)
+	return a
 }
 
 // MinSize returns the size that this widget should not shrink below.

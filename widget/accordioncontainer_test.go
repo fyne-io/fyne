@@ -27,6 +27,19 @@ func addItem(t *testing.T, ac *AccordionContainer, header, detail string) {
 	ac.Append(header, &canvas.Text{Text: detail, TextSize: theme.TextSize()})
 }
 
+func TestAccordionContainer(t *testing.T) {
+	t.Run("Initializer", func(t *testing.T) {
+		ac := &AccordionContainer{}
+		addItem(t, ac, "foo", "foobar")
+		assert.Equal(t, 1, len(ac.Items))
+	})
+	t.Run("Constructor", func(t *testing.T) {
+		ac := NewAccordionContainer()
+		addItem(t, ac, "foo", "foobar")
+		assert.Equal(t, 1, len(ac.Items))
+	})
+}
+
 func TestAccordionContainer_Empty(t *testing.T) {
 	ac := NewAccordionContainer()
 	assert.Equal(t, 0, len(ac.Items))

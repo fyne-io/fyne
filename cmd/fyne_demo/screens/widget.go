@@ -230,7 +230,7 @@ func makeScrollBothTab() fyne.CanvasObject {
 }
 
 func makeAccordionTab() fyne.CanvasObject {
-	ac := widget.NewAccordionContainer()
+	ac := &widget.AccordionContainer{}
 	ac.Append("A", widget.NewLabel("One"))
 	ac.Append("B", widget.NewLabel("Two"))
 	ac.Append("C", widget.NewLabel("Three"))
