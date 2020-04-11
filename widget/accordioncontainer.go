@@ -173,8 +173,7 @@ func (i *accordionItem) SetOpen(open bool) {
 	if i.open == open {
 		return
 	}
-	i.open = open
-	if open {
+	if i.open = open; i.open {
 		i.Detail.Show()
 	} else {
 		i.Detail.Hide()
@@ -229,6 +228,7 @@ func (r *accordionItemRenderer) Objects() []fyne.CanvasObject {
 
 func (r *accordionItemRenderer) Refresh() {
 	r.item.Header.Refresh()
+	r.item.Detail.Refresh()
 	canvas.Refresh(r.item)
 }
 
@@ -276,8 +276,9 @@ func (h *accordionItemHeader) CreateRenderer() fyne.WidgetRenderer {
 			canvas.NewImageFromResource(theme.ContentRemoveIcon()),
 			canvas.NewImageFromResource(theme.ContentAddIcon()),
 		},
+		text: &canvas.Text{},
 	}
-	r.createCanvasObjects()
+	r.updateCanvasObjects()
 	return r
 }
 
@@ -314,18 +315,15 @@ func (r *accordionItemHeaderRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *accordionItemHeaderRenderer) Refresh() {
-	r.createCanvasObjects()
+	r.updateCanvasObjects()
 	canvas.Refresh(r.header)
 }
 
-func (r *accordionItemHeaderRenderer) createCanvasObjects() {
+func (r *accordionItemHeaderRenderer) updateCanvasObjects() {
 	if r.header.Item.open {
 		r.image = r.images[0]
 	} else {
 		r.image = r.images[1]
-	}
-	if r.text == nil {
-		r.text = &canvas.Text{}
 	}
 	r.text.Text = r.header.Text
 	r.text.Color = theme.TextColor()

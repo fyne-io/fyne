@@ -48,6 +48,7 @@ func TestAccordionContainer_Open(t *testing.T) {
 	addItem(t, ac, "foo", "foobar")
 	ac.Open(0)
 	assert.True(t, ac.Items[0].open)
+	assert.True(t, ac.Items[0].Detail.Visible())
 }
 
 func TestAccordionContainer_OpenAll(t *testing.T) {
@@ -59,6 +60,9 @@ func TestAccordionContainer_OpenAll(t *testing.T) {
 	assert.True(t, ac.Items[0].open)
 	assert.True(t, ac.Items[1].open)
 	assert.True(t, ac.Items[2].open)
+	assert.True(t, ac.Items[0].Detail.Visible())
+	assert.True(t, ac.Items[1].Detail.Visible())
+	assert.True(t, ac.Items[2].Detail.Visible())
 }
 
 func TestAccordionContainer_Close(t *testing.T) {
@@ -66,6 +70,7 @@ func TestAccordionContainer_Close(t *testing.T) {
 	addItem(t, ac, "foo", "foobar")
 	ac.Close(0)
 	assert.False(t, ac.Items[0].open)
+	assert.False(t, ac.Items[0].Detail.Visible())
 }
 
 func TestAccordionContainer_CloseAll(t *testing.T) {
@@ -77,6 +82,9 @@ func TestAccordionContainer_CloseAll(t *testing.T) {
 	assert.False(t, ac.Items[0].open)
 	assert.False(t, ac.Items[1].open)
 	assert.False(t, ac.Items[2].open)
+	assert.False(t, ac.Items[0].Detail.Visible())
+	assert.False(t, ac.Items[1].Detail.Visible())
+	assert.False(t, ac.Items[2].Detail.Visible())
 }
 
 func TestAccordionContainerRenderer_Layout(t *testing.T) {
@@ -199,7 +207,6 @@ func Test_accordionItemHeaderRenderer_BackgroundColor(t *testing.T) {
 	addItem(t, ac, "foo", "foobar")
 	acih := ac.Items[0].Header
 	acihr := test.WidgetRenderer(acih).(*accordionItemHeaderRenderer)
-	acihr.createCanvasObjects()
 	assert.Equal(t, theme.BackgroundColor(), acihr.BackgroundColor())
 }
 
@@ -208,7 +215,6 @@ func Test_accordionItemHeaderRenderer_BackgroundColor_Hovered(t *testing.T) {
 	addItem(t, ac, "foo", "foobar")
 	acih := ac.Items[0].Header
 	acihr := test.WidgetRenderer(acih).(*accordionItemHeaderRenderer)
-	acihr.createCanvasObjects()
 	acih.MouseIn(&desktop.MouseEvent{})
 	assert.Equal(t, theme.HoverColor(), acihr.BackgroundColor())
 	acih.MouseOut()
