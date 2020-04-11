@@ -3,6 +3,8 @@
 package glfw
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
 	"fyne.io/fyne"
@@ -51,6 +53,9 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 	repaintWindow(w.(*window))
 	// accessing the menu bar's actual CanvasObjects isn't straight forward
+	// 0 is the first menu
+	// 1 is the second menu
+	fmt.Println(reflect.TypeOf(cache.Renderer(mbar).Objects()[0]), reflect.TypeOf(cache.Renderer(mbar).Objects()[1]))
 	m2 := cache.Renderer(mbar).Objects()[1]
 
 	tests := map[string]struct {

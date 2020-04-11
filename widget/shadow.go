@@ -18,6 +18,7 @@ const (
 	buttonLevel           elevationLevel = 2
 	popUpLevel            elevationLevel = 8
 	submergedContentLevel elevationLevel = 8
+	menuLevel             elevationLevel = 4
 )
 
 type shadowType int

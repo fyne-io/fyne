@@ -64,7 +64,18 @@ func main() {
 
 	w := a.NewWindow("Fyne Demo")
 
-	newItem := fyne.NewMenuItem("New", func() { fmt.Println("Menu New") })
+	// newItem := fyne.NewMenuItem("New", func() { fmt.Println("Menu New") })
+	newItem := fyne.NewMenuItem("New", nil)
+	otherItem := fyne.NewMenuItem("Other", nil)
+	otherItem.ChildMenu = fyne.NewMenu("",
+		fyne.NewMenuItem("Project", func() { fmt.Println("Menu New->Other->Project") }),
+		fyne.NewMenuItem("Mail", func() { fmt.Println("Menu New->Other->Mail") }),
+	)
+	newItem.ChildMenu = fyne.NewMenu("",
+		fyne.NewMenuItem("File", func() { fmt.Println("Menu New->File") }),
+		fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") }),
+		otherItem,
+	)
 	settingsItem := fyne.NewMenuItem("Settings", func() { fmt.Println("Menu Settings") })
 
 	cutItem := fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") })

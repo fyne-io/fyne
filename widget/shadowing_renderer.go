@@ -28,3 +28,10 @@ func (r *shadowingRenderer) layoutShadow(size fyne.Size, pos fyne.Position) {
 	r.shadow.Resize(size)
 	r.shadow.Move(pos)
 }
+
+func (r *shadowingRenderer) setObjects(objects []fyne.CanvasObject) {
+	if r.shadow != nil {
+		objects = append([]fyne.CanvasObject{r.shadow}, objects...)
+	}
+	r.baseRenderer.setObjects(objects)
+}

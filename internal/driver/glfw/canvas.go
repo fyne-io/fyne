@@ -23,7 +23,7 @@ type glCanvas struct {
 	sync.RWMutex
 
 	content  fyne.CanvasObject
-	menu     *widget.Toolbar
+	menu     fyne.CanvasObject
 	overlays *overlayStack
 	padded   bool
 	size     fyne.Size
@@ -491,14 +491,14 @@ func (c *glCanvas) buildMenuBar(w *window, m *fyne.MainMenu) {
 	}
 }
 
-func (c *glCanvas) setMenuBar(b *widget.Toolbar) {
+func (c *glCanvas) setMenuBar(b fyne.CanvasObject) {
 	c.Lock()
 	c.menu = b
 	c.menuTree = &renderCacheTree{root: &renderCacheNode{obj: c.menu}}
 	c.Unlock()
 }
 
-func (c *glCanvas) menuBar() *widget.Toolbar {
+func (c *glCanvas) menuBar() fyne.CanvasObject {
 	c.RLock()
 	defer c.RUnlock()
 	return c.menu
