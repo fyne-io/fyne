@@ -234,6 +234,7 @@ func makeAccordionTab() fyne.CanvasObject {
 	ac.Append("A", widget.NewLabel("One"))
 	ac.Append("B", widget.NewLabel("Two"))
 	ac.Append("C", widget.NewLabel("Three"))
+	ac.Append("D", &widget.Entry{Text: "Four"})
 	ac.CloseAll()
 	return ac
 }
