@@ -31,18 +31,18 @@ func TestAccordionContainer(t *testing.T) {
 	t.Run("Initializer", func(t *testing.T) {
 		ac := &AccordionContainer{}
 		addItem(t, ac, "foo", "foobar")
-		assert.Equal(t, 1, len(ac.Items))
+		assert.Equal(t, 1, len(ac.items))
 	})
 	t.Run("Constructor", func(t *testing.T) {
 		ac := NewAccordionContainer()
 		addItem(t, ac, "foo", "foobar")
-		assert.Equal(t, 1, len(ac.Items))
+		assert.Equal(t, 1, len(ac.items))
 	})
 }
 
 func TestAccordionContainer_Empty(t *testing.T) {
 	ac := NewAccordionContainer()
-	assert.Equal(t, 0, len(ac.Items))
+	assert.Equal(t, 0, len(ac.items))
 	min := ac.MinSize()
 	assert.Equal(t, 0, min.Height)
 	assert.Equal(t, 0, min.Width)
@@ -60,8 +60,8 @@ func TestAccordionContainer_Open(t *testing.T) {
 	ac := NewAccordionContainer()
 	addItem(t, ac, "foo", "foobar")
 	ac.Open(0)
-	assert.True(t, ac.Items[0].open)
-	assert.True(t, ac.Items[0].detail.Visible())
+	assert.True(t, ac.items[0].open)
+	assert.True(t, ac.items[0].detail.Visible())
 }
 
 func TestAccordionContainer_OpenAll(t *testing.T) {
@@ -70,20 +70,20 @@ func TestAccordionContainer_OpenAll(t *testing.T) {
 	addItem(t, ac, "foo2", "foobar2")
 	addItem(t, ac, "foo3", "foobar3")
 	ac.OpenAll()
-	assert.True(t, ac.Items[0].open)
-	assert.True(t, ac.Items[1].open)
-	assert.True(t, ac.Items[2].open)
-	assert.True(t, ac.Items[0].detail.Visible())
-	assert.True(t, ac.Items[1].detail.Visible())
-	assert.True(t, ac.Items[2].detail.Visible())
+	assert.True(t, ac.items[0].open)
+	assert.True(t, ac.items[1].open)
+	assert.True(t, ac.items[2].open)
+	assert.True(t, ac.items[0].detail.Visible())
+	assert.True(t, ac.items[1].detail.Visible())
+	assert.True(t, ac.items[2].detail.Visible())
 }
 
 func TestAccordionContainer_Close(t *testing.T) {
 	ac := NewAccordionContainer()
 	addItem(t, ac, "foo", "foobar")
 	ac.Close(0)
-	assert.False(t, ac.Items[0].open)
-	assert.False(t, ac.Items[0].detail.Visible())
+	assert.False(t, ac.items[0].open)
+	assert.False(t, ac.items[0].detail.Visible())
 }
 
 func TestAccordionContainer_CloseAll(t *testing.T) {
@@ -92,12 +92,12 @@ func TestAccordionContainer_CloseAll(t *testing.T) {
 	addItem(t, ac, "foo2", "foobar2")
 	addItem(t, ac, "foo3", "foobar3")
 	ac.CloseAll()
-	assert.False(t, ac.Items[0].open)
-	assert.False(t, ac.Items[1].open)
-	assert.False(t, ac.Items[2].open)
-	assert.False(t, ac.Items[0].detail.Visible())
-	assert.False(t, ac.Items[1].detail.Visible())
-	assert.False(t, ac.Items[2].detail.Visible())
+	assert.False(t, ac.items[0].open)
+	assert.False(t, ac.items[1].open)
+	assert.False(t, ac.items[2].open)
+	assert.False(t, ac.items[0].detail.Visible())
+	assert.False(t, ac.items[1].detail.Visible())
+	assert.False(t, ac.items[2].detail.Visible())
 }
 
 func TestAccordionContainerRenderer_Layout(t *testing.T) {
@@ -110,24 +110,24 @@ func TestAccordionContainerRenderer_Layout(t *testing.T) {
 
 	checkSizeAndPosition := func(t *testing.T, min fyne.Size) {
 		t.Helper()
-		item0Pos := ac.Items[0].Position()
-		item1Pos := ac.Items[1].Position()
-		item2Pos := ac.Items[2].Position()
-		item0Size := ac.Items[0].Size()
-		item1Size := ac.Items[1].Size()
-		item2Size := ac.Items[2].Size()
+		item0Pos := ac.items[0].Position()
+		item1Pos := ac.items[1].Position()
+		item2Pos := ac.items[2].Position()
+		item0Size := ac.items[0].Size()
+		item1Size := ac.items[1].Size()
+		item2Size := ac.items[2].Size()
 		assert.Equal(t, theme.Padding(), item0Pos.X)
 		assert.Equal(t, theme.Padding(), item0Pos.Y)
 		assert.Equal(t, min.Width-theme.Padding()*2, item0Size.Width)
-		assert.Equal(t, ac.Items[0].MinSize().Height, item0Size.Height)
+		assert.Equal(t, ac.items[0].MinSize().Height, item0Size.Height)
 		assert.Equal(t, theme.Padding(), item1Pos.X)
-		assert.Equal(t, theme.Padding()+ac.Items[0].MinSize().Height, item1Pos.Y)
+		assert.Equal(t, theme.Padding()+ac.items[0].MinSize().Height, item1Pos.Y)
 		assert.Equal(t, min.Width-theme.Padding()*2, item1Size.Width)
-		assert.Equal(t, ac.Items[1].MinSize().Height, item1Size.Height)
+		assert.Equal(t, ac.items[1].MinSize().Height, item1Size.Height)
 		assert.Equal(t, theme.Padding(), item2Pos.X)
-		assert.Equal(t, theme.Padding()+ac.Items[0].MinSize().Height+ac.Items[1].MinSize().Height, item2Pos.Y)
+		assert.Equal(t, theme.Padding()+ac.items[0].MinSize().Height+ac.items[1].MinSize().Height, item2Pos.Y)
 		assert.Equal(t, min.Width-theme.Padding()*2, item2Size.Width)
-		assert.Equal(t, ac.Items[2].MinSize().Height, item2Size.Height)
+		assert.Equal(t, ac.items[2].MinSize().Height, item2Size.Height)
 	}
 
 	t.Run("AllClosed", func(t *testing.T) {
@@ -218,7 +218,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 func Test_accordionItemHeaderRenderer_BackgroundColor(t *testing.T) {
 	ac := NewAccordionContainer()
 	addItem(t, ac, "foo", "foobar")
-	acih := ac.Items[0].header
+	acih := ac.items[0].header
 	acihr := test.WidgetRenderer(acih).(*accordionItemHeaderRenderer)
 	assert.Equal(t, theme.BackgroundColor(), acihr.BackgroundColor())
 }
@@ -226,7 +226,7 @@ func Test_accordionItemHeaderRenderer_BackgroundColor(t *testing.T) {
 func Test_accordionItemHeaderRenderer_BackgroundColor_Hovered(t *testing.T) {
 	ac := NewAccordionContainer()
 	addItem(t, ac, "foo", "foobar")
-	acih := ac.Items[0].header
+	acih := ac.items[0].header
 	acihr := test.WidgetRenderer(acih).(*accordionItemHeaderRenderer)
 	acih.MouseIn(&desktop.MouseEvent{})
 	assert.Equal(t, theme.HoverColor(), acihr.BackgroundColor())

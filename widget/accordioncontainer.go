@@ -15,7 +15,7 @@ import (
 type AccordionContainer struct {
 	BaseWidget
 
-	Items []*accordionItem
+	items []*accordionItem
 }
 
 // NewAccordionContainer creates a new accordion widget.
@@ -50,7 +50,7 @@ func (a *AccordionContainer) Append(header string, detail fyne.CanvasObject) {
 	item.ExtendBaseWidget(item)
 
 	r := cache.Renderer(a).(*accordionContainerRenderer)
-	a.Items = append(a.Items, item)
+	a.items = append(a.items, item)
 	r.objects = append(r.objects, item)
 	a.Refresh()
 }
@@ -58,23 +58,23 @@ func (a *AccordionContainer) Append(header string, detail fyne.CanvasObject) {
 // Remove deletes the item at the given index from this AccordionContainer.
 func (a *AccordionContainer) Remove(index int) {
 	r := cache.Renderer(a).(*accordionContainerRenderer)
-	a.Items = append(a.Items[:index], a.Items[index+1:]...)
+	a.items = append(a.items[:index], a.items[index+1:]...)
 	r.objects = append(r.objects[:index], r.objects[index+1:]...)
 	a.Refresh()
 }
 
 // Open expands the item at the given index.
 func (a *AccordionContainer) Open(index int) {
-	if index < 0 || index >= len(a.Items) {
+	if index < 0 || index >= len(a.items) {
 		return
 	}
-	a.Items[index].setOpen(true)
+	a.items[index].setOpen(true)
 	a.Refresh()
 }
 
 // OpenAll expands all items.
 func (a *AccordionContainer) OpenAll() {
-	for _, i := range a.Items {
+	for _, i := range a.items {
 		i.setOpen(true)
 	}
 	a.Refresh()
@@ -82,16 +82,16 @@ func (a *AccordionContainer) OpenAll() {
 
 // Close collapses the item at the given index.
 func (a *AccordionContainer) Close(index int) {
-	if index < 0 || index >= len(a.Items) {
+	if index < 0 || index >= len(a.items) {
 		return
 	}
-	a.Items[index].setOpen(false)
+	a.items[index].setOpen(false)
 	a.Refresh()
 }
 
 // CloseAll collapses all items.
 func (a *AccordionContainer) CloseAll() {
-	for _, i := range a.Items {
+	for _, i := range a.items {
 		i.setOpen(false)
 	}
 	a.Refresh()
@@ -100,7 +100,7 @@ func (a *AccordionContainer) CloseAll() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (a *AccordionContainer) CreateRenderer() fyne.WidgetRenderer {
 	var os []fyne.CanvasObject
-	for _, i := range a.Items {
+	for _, i := range a.items {
 		os = append(os, i)
 	}
 	return &accordionContainerRenderer{
@@ -117,12 +117,12 @@ type accordionContainerRenderer struct {
 func (r *accordionContainerRenderer) MinSize() fyne.Size {
 	width := 0
 	height := 0
-	for _, i := range r.container.Items {
+	for _, i := range r.container.items {
 		min := i.MinSize()
 		width = fyne.Max(width, min.Width)
 		height += min.Height
 	}
-	if len(r.container.Items) > 0 {
+	if len(r.container.items) > 0 {
 		width += theme.Padding() * 2
 		height += theme.Padding() * 2
 	}
@@ -133,7 +133,7 @@ func (r *accordionContainerRenderer) Layout(size fyne.Size) {
 	x := theme.Padding()
 	y := theme.Padding()
 	w := size.Width - theme.Padding()*2
-	for _, i := range r.container.Items {
+	for _, i := range r.container.items {
 		h := i.MinSize().Height
 		i.Move(fyne.NewPos(x, y))
 		i.Resize(fyne.NewSize(w, h))
@@ -150,7 +150,7 @@ func (r *accordionContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *accordionContainerRenderer) Refresh() {
-	for _, i := range r.container.Items {
+	for _, i := range r.container.items {
 		i.Refresh()
 	}
 	canvas.Refresh(r.container)
