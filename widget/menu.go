@@ -21,7 +21,8 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 			options.Append(newMenuItemWidget(opt.Label))
 		}
 	}
-	pop := NewPopUpAtPosition(options, c, pos)
+	pop := newPopUp(options, c)
+	pop.NotPadded = true
 	focused := c.Focused()
 	for i, o := range options.Children {
 		if label, ok := o.(*menuItemWidget); ok {
@@ -35,6 +36,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 			}
 		}
 	}
+	pop.ShowAtPosition(pos)
 	return pop
 }
 
@@ -45,7 +47,8 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 }
 
 type menuItemWidget struct {
-	*Label
+	BaseWidget
+	Label    string
 	OnTapped func()
 	hovered  bool
 }
@@ -55,21 +58,20 @@ func (t *menuItemWidget) Tapped(*fyne.PointEvent) {
 }
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
-	return &menuItemWidgetRenderer{t.Label.CreateRenderer().(*textRenderer), t}
+	text := canvas.NewText(t.Label, theme.TextColor())
+	return &menuItemWidgetRenderer{baseRenderer{[]fyne.CanvasObject{text}}, text, t}
 }
 
 // MouseIn is called when a desktop pointer enters the widget
 func (t *menuItemWidget) MouseIn(*desktop.MouseEvent) {
 	t.hovered = true
-
-	canvas.Refresh(t)
+	t.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (t *menuItemWidget) MouseOut() {
 	t.hovered = false
-
-	canvas.Refresh(t)
+	t.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -77,22 +79,46 @@ func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 }
 
 func newMenuItemWidget(label string) *menuItemWidget {
-	ret := &menuItemWidget{Label: NewLabel(label)}
+	ret := &menuItemWidget{Label: label}
 	ret.ExtendBaseWidget(ret)
 	return ret
 }
 
 type menuItemWidgetRenderer struct {
-	*textRenderer
-	label *menuItemWidget
+	baseRenderer
+	text *canvas.Text
+	w    *menuItemWidget
 }
 
-func (h *menuItemWidgetRenderer) BackgroundColor() color.Color {
-	if h.label.hovered {
+func (r *menuItemWidgetRenderer) Layout(size fyne.Size) {
+	padding := r.padding()
+	r.text.Resize(r.text.MinSize())
+	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
+}
+
+func (r *menuItemWidgetRenderer) MinSize() fyne.Size {
+	return r.text.MinSize().Add(r.padding())
+}
+
+func (r *menuItemWidgetRenderer) Refresh() {
+	if r.text.TextSize != theme.TextSize() {
+		defer r.Layout(r.w.Size())
+	}
+	r.text.TextSize = theme.TextSize()
+	r.text.Color = theme.TextColor()
+	canvas.Refresh(r.text)
+}
+
+func (r *menuItemWidgetRenderer) BackgroundColor() color.Color {
+	if r.w.hovered {
 		return theme.HoverColor()
 	}
 
 	return color.Transparent
+}
+
+func (r *menuItemWidgetRenderer) padding() fyne.Size {
+	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 }
 
 func newSeparator() fyne.CanvasObject {
