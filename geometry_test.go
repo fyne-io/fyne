@@ -1,6 +1,7 @@
 package fyne
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -74,4 +75,26 @@ func TestPosition_Subtract(t *testing.T) {
 
 	assert.Equal(t, 15, pos3.X)
 	assert.Equal(t, 15, pos3.Y)
+}
+
+func BenchmarkSize_isEmpty_Comparison(b *testing.B) {
+	size := NewSize(0, 0)
+	result := 0
+	for i := 0; i < b.N; i++ {
+		if (size == Size{}) {
+			result++
+		}
+	}
+	fmt.Sprintf("result: %d\n", result)
+}
+
+func BenchmarkSize_isEmpty_Function(b *testing.B) {
+	size := NewSize(0, 0)
+	result := 0
+	for i := 0; i < b.N; i++ {
+		if size.Empty() {
+			result++
+		}
+	}
+	fmt.Sprintf("result: %d\n", result)
 }

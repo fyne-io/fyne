@@ -40,6 +40,11 @@ func (s1 Size) Min(s2 Size) Size {
 	return NewSize(minW, minH)
 }
 
+// Empty returns true if the size has a width and height of 0.
+func (s *Size) Empty() bool {
+	return s.Width == 0 && s.Height == 0
+}
+
 // NewSize returns a newly allocated Size of the specified dimensions.
 func NewSize(w int, h int) Size {
 	return Size{w, h}
