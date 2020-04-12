@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -151,8 +150,8 @@ func TestSelect_Tapped(t *testing.T) {
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 
 	cont := over.(*PopUp).Content
-	assert.Equal(t, cont.Position().X, pos.X+theme.Padding())
-	assert.True(t, cont.Position().Y > pos.Y)
+	assert.Equal(t, cont.Position().X, pos.X)
+	assert.Equal(t, cont.Position().Y, pos.Y)
 
 	items := cont.(*Box).Children
 	assert.Equal(t, 2, len(items))

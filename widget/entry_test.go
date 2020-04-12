@@ -448,8 +448,8 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 
 	cont := over.(*PopUp).Content
-	assert.Equal(t, pos.X+theme.Padding()+tapPos.X, cont.Position().X)
-	assert.Equal(t, pos.Y+theme.Padding()+tapPos.Y, cont.Position().Y)
+	assert.Equal(t, pos.X+tapPos.X, cont.Position().X)
+	assert.Equal(t, pos.Y+tapPos.Y, cont.Position().Y)
 
 	items := cont.(*Box).Children
 	assert.Equal(t, 4, len(items)) // Cut, Copy, Paste, Select All
