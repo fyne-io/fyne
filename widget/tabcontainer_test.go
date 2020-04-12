@@ -55,14 +55,14 @@ func TestTabContainer_SelectTab(t *testing.T) {
 	assert.Equal(t, tab1, tabs.CurrentTab())
 
 	var selectedTab *TabItem
-	tabs.OnTabSelected = func(tab *TabItem) {
+	tabs.OnChanged = func(tab *TabItem) {
 		selectedTab = tab
 	}
 	tabs.SelectTab(tab2)
 	assert.Equal(t, tab2, tabs.CurrentTab())
 	assert.Equal(t, tab2, selectedTab)
 
-	tabs.OnTabSelected = func(tab *TabItem) {
+	tabs.OnChanged = func(tab *TabItem) {
 		assert.Fail(t, "unexpected tab selection")
 	}
 	tabs.SelectTab(NewTabItem("Test3", NewLabel("Test3")))
@@ -77,7 +77,7 @@ func TestTabContainer_SelectTabIndex(t *testing.T) {
 	assert.Equal(t, 0, tabs.CurrentTabIndex())
 
 	var selectedTab *TabItem
-	tabs.OnTabSelected = func(tab *TabItem) {
+	tabs.OnChanged = func(tab *TabItem) {
 		selectedTab = tab
 	}
 	tabs.SelectTabIndex(1)
