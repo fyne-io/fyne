@@ -229,6 +229,17 @@ func makeScrollBothTab() fyne.CanvasObject {
 	return scroll
 }
 
+func makeSplitTab() fyne.CanvasObject {
+	left := widget.NewMultiLineEntry()
+	left.Wrapping = fyne.TextWrapWord
+	left.SetText("Long text is looooooooooooooong")
+	right := widget.NewVSplitContainer(
+		widget.NewLabel("Label"),
+		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
+	)
+	return widget.NewHSplitContainer(widget.NewVScrollContainer(left), right)
+}
+
 func makeAccordionTab() fyne.CanvasObject {
 	link, err := url.Parse("https://fyne.io/")
 	if err != nil {
@@ -265,6 +276,7 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Progress", makeProgressTab()),
 			widget.NewTabItem("Form", makeFormTab()),
 			widget.NewTabItem("Scroll", makeScrollTab()),
+			widget.NewTabItem("Split", makeSplitTab()),
 			widget.NewTabItem("Accordion", makeAccordionTab()),
 		),
 	)
