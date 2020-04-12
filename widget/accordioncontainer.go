@@ -49,7 +49,7 @@ func (a *AccordionContainer) Remove(item *AccordionItem) {
 	}
 }
 
-// Remove deletes the item at the given index from this AccordionContainer.
+// RemoveIndex deletes the item at the given index from this AccordionContainer.
 func (a *AccordionContainer) RemoveIndex(index int) {
 	a.Items = append(a.Items[:index], a.Items[index+1:]...)
 	a.Refresh()
@@ -220,12 +220,14 @@ func (r *accordionContainerRenderer) updateObjects() {
 func (r *accordionContainerRenderer) Destroy() {
 }
 
+// AccordionItem represents a single item in an AccordionContainer.
 type AccordionItem struct {
 	Title  string
 	Detail fyne.CanvasObject
 	Open   bool
 }
 
+// NewAccordionItem creates a new item for an Accordion.
 func NewAccordionItem(title string, detail fyne.CanvasObject) *AccordionItem {
 	return &AccordionItem{
 		Title:  title,
