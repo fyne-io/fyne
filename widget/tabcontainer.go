@@ -97,8 +97,8 @@ func (t *TabContainer) SelectTabIndex(index int) {
 	r.Layout(t.size)
 	t.Refresh()
 
-	if callback := t.OnChanged; callback != nil {
-		callback(t.Items[t.current])
+	if t.OnChanged != nil {
+		t.OnChanged(t.Items[t.current])
 	}
 }
 
