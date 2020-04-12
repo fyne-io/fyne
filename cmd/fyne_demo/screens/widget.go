@@ -230,12 +230,19 @@ func makeScrollBothTab() fyne.CanvasObject {
 }
 
 func makeAccordionTab() fyne.CanvasObject {
-	ac := &widget.AccordionContainer{}
-	ac.Append("A", widget.NewLabel("One"))
-	ac.Append("B", widget.NewLabel("Two"))
-	ac.Append("C", widget.NewLabel("Three"))
-	ac.Append("D", &widget.Entry{Text: "Four"})
-	ac.CloseAll()
+	link, err := url.Parse("https://fyne.io/")
+	if err != nil {
+		fyne.LogError("Could not parse URL", err)
+	}
+	ac := widget.NewAccordionContainer(
+		widget.NewAccordionItem("A", widget.NewHyperlink("One", link)),
+		widget.NewAccordionItem("B", widget.NewLabel("Two")),
+		&widget.AccordionItem{
+			Title:  "C",
+			Detail: widget.NewLabel("Three"),
+		},
+	)
+	ac.Append(widget.NewAccordionItem("D", &widget.Entry{Text: "Four"}))
 	return ac
 }
 
