@@ -300,18 +300,31 @@ func TestModalPopUp_TappedSecondary(t *testing.T) {
 func TestModalPopUp_Resize(t *testing.T) {
 	label := NewLabel("Hi")
 	win := test.NewWindow(NewLabel("OK"))
+	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
-	pop := NewModalPopUp(label, win.Canvas())
-	defer win.Canvas().Overlays().Remove(pop)
+	size := fyne.NewSize(50, 40)
 
-	assert.Less(t, pop.Content.Size().Width, 70-theme.Padding()*2)
-	assert.Less(t, pop.Content.Size().Height, 50-theme.Padding()*2)
+	for name, tt := range map[string]struct {
+		pad             bool
+		wantContentSize fyne.Size
+	}{
+		"with padding":    {true, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))},
+		"without padding": {false, size},
+	} {
+		t.Run(name, func(t *testing.T) {
+			pop := newModalPopUp(label, win.Canvas())
+			pop.WithoutPadding = !tt.pad
+			pop.Show()
+			defer test.Canvas().Overlays().Remove(pop)
 
-	pop.Resize(fyne.NewSize(70, 50))
-	assert.Equal(t, 70-theme.Padding()*2, pop.Content.Size().Width)
-	assert.Equal(t, 50-theme.Padding()*2, pop.Content.Size().Height)
-	assert.Equal(t, 80, pop.Size().Width) // these are 80 as the popUp must fill our overlay
-	assert.Equal(t, 80, pop.Size().Height)
+			pop.Resize(size)
+			assert.Equal(t, tt.wantContentSize, pop.Content.Size())
+
+			popSize := pop.Size()
+			assert.Equal(t, 80, popSize.Width) // these are 80 as the popUp must fill our overlay
+			assert.Equal(t, 80, popSize.Height)
+		})
+	}
 }
 
 func TestModalPopUp_Resize_Constrained(t *testing.T) {
