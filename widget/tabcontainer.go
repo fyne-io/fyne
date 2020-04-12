@@ -46,9 +46,10 @@ const (
 type TabContainer struct {
 	BaseWidget
 
-	Items       []*TabItem
-	current     int
-	tabLocation TabLocation
+	Items         []*TabItem
+	OnTabSelected func(tab *TabItem)
+	current       int
+	tabLocation   TabLocation
 }
 
 // Show this widget, if it was previously hidden
@@ -80,6 +81,8 @@ func (t *TabContainer) CurrentTab() *TabItem {
 func (t *TabContainer) SelectTabIndex(index int) {
 	if index < 0 || index >= len(t.Items) {
 		return
+	} else if t.current == index {
+		return
 	}
 
 	t.current = index
@@ -95,6 +98,11 @@ func (t *TabContainer) SelectTabIndex(index int) {
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	r.Layout(t.size)
 	t.Refresh()
+
+	callback := t.OnTabSelected
+	if callback != nil {
+		callback(t.Items[t.current])
+	}
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
