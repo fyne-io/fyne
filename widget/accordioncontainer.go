@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
@@ -119,6 +117,7 @@ func (a *AccordionContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 type accordionContainerRenderer struct {
+	baseRenderer
 	container *AccordionContainer
 	headers   []*Button
 }
@@ -166,20 +165,6 @@ func (r *accordionContainerRenderer) Layout(size fyne.Size) {
 	}
 }
 
-func (r *accordionContainerRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (r *accordionContainerRenderer) Objects() (objects []fyne.CanvasObject) {
-	for _, h := range r.headers {
-		objects = append(objects, h)
-	}
-	for _, i := range r.container.Items {
-		objects = append(objects, i.Detail)
-	}
-	return
-}
-
 func (r *accordionContainerRenderer) Refresh() {
 	r.updateObjects()
 	r.Layout(r.container.Size())
@@ -200,6 +185,7 @@ func (r *accordionContainerRenderer) updateObjects() {
 			r.headers = append(r.headers, h)
 		}
 		h.Hidden = false
+		h.HideShadow = true
 		h.Text = ai.Title
 		h.OnTapped = r.container.toggleForIndex(i)
 		if ai.Open {
@@ -215,9 +201,15 @@ func (r *accordionContainerRenderer) updateObjects() {
 	for ; i < hs; i++ {
 		r.headers[i].Hide()
 	}
-}
-
-func (r *accordionContainerRenderer) Destroy() {
+	// Set objects
+	var objects []fyne.CanvasObject
+	for _, h := range r.headers {
+		objects = append(objects, h)
+	}
+	for _, i := range r.container.Items {
+		objects = append(objects, i.Detail)
+	}
+	r.setObjects(objects)
 }
 
 // AccordionItem represents a single item in an AccordionContainer.
