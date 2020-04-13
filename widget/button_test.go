@@ -142,7 +142,7 @@ func TestButton_BindTapped(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	button := NewButton("button", nil)
-	data := &binding.BoolBinding{}
+	data := &binding.Bool{}
 	button.BindTapped(data)
 	tapped := false
 	data.AddBoolListener(func(b bool) {
@@ -164,7 +164,7 @@ func TestButton_BindText(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	button := NewButton("button", nil)
-	data := &binding.StringBinding{}
+	data := &binding.String{}
 	button.BindText(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
@@ -184,7 +184,7 @@ func TestButton_BindIcon(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	button := NewButtonWithIcon("button", theme.WarningIcon(), nil)
-	data := &binding.ResourceBinding{}
+	data := &binding.Resource{}
 	button.BindIcon(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true

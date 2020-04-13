@@ -75,7 +75,7 @@ func TestHyperlink_BindText(t *testing.T) {
 	u, err := url.Parse("https://fyne.io")
 	assert.Nil(t, err)
 	hyperlink := NewHyperlink("hyperlink", u)
-	data := &binding.StringBinding{}
+	data := &binding.String{}
 	hyperlink.BindText(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
@@ -97,7 +97,7 @@ func TestHyperlink_BindURL(t *testing.T) {
 	u, err := url.Parse("https://fyne.io")
 	assert.Nil(t, err)
 	hyperlink := NewHyperlink("hyperlink", u)
-	data := &binding.URLBinding{}
+	data := &binding.URL{}
 	hyperlink.BindURL(data)
 	u, err = url.Parse("https://github.com/fyne-io/fyne")
 	assert.Nil(t, err)

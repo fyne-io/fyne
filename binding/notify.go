@@ -1,6 +1,6 @@
 package binding
 
-// Notifiable represents and object that can be notified.
+// Notifiable represents an object that can be notified.
 type Notifiable interface {
 	Notify(Binding)
 }

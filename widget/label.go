@@ -18,8 +18,8 @@ type Label struct {
 
 	provider textProvider
 
-	textBinding *binding.StringBinding
-	textNotify  *binding.NotifyFunction
+	textBind   *binding.String
+	textNotify *binding.NotifyFunction
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -102,8 +102,8 @@ func (l *Label) MinSize() fyne.Size {
 
 // BindText binds the Label's Text to the given data binding.
 // Returns the Label for chaining.
-func (l *Label) BindText(data *binding.StringBinding) *Label {
-	l.textBinding = data
+func (l *Label) BindText(data *binding.String) *Label {
+	l.textBind = data
 	l.textNotify = data.AddStringListener(l.SetText)
 	return l
 }
@@ -111,8 +111,8 @@ func (l *Label) BindText(data *binding.StringBinding) *Label {
 // UnbindText unbinds the Label's Text from the data binding (if any).
 // Returns the Label for chaining.
 func (l *Label) UnbindText() *Label {
-	l.textBinding.DeleteListener(l.textNotify)
-	l.textBinding = nil
+	l.textBind.DeleteListener(l.textNotify)
+	l.textBind = nil
 	l.textNotify = nil
 	return l
 }

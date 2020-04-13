@@ -22,10 +22,10 @@ type Hyperlink struct {
 
 	provider textProvider
 
-	textBinding *binding.StringBinding
-	urlBinding  *binding.URLBinding
-	textNotify  *binding.NotifyFunction
-	urlNotify   *binding.NotifyFunction
+	textBind   *binding.String
+	urlBind    *binding.URL
+	textNotify *binding.NotifyFunction
+	urlNotify  *binding.NotifyFunction
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -131,8 +131,8 @@ func (hl *Hyperlink) MinSize() fyne.Size {
 
 // BindText binds the Hyperlink's Text to the given data binding.
 // Returns the Hyperlink for chaining.
-func (hl *Hyperlink) BindText(data *binding.StringBinding) *Hyperlink {
-	hl.textBinding = data
+func (hl *Hyperlink) BindText(data *binding.String) *Hyperlink {
+	hl.textBind = data
 	hl.textNotify = data.AddStringListener(hl.SetText)
 	return hl
 }
@@ -140,16 +140,16 @@ func (hl *Hyperlink) BindText(data *binding.StringBinding) *Hyperlink {
 // UnbindText unbinds the Hyperlink's Text from the data binding (if any).
 // Returns the Hyperlink for chaining.
 func (hl *Hyperlink) UnbindText() *Hyperlink {
-	hl.textBinding.DeleteListener(hl.textNotify)
-	hl.textBinding = nil
+	hl.textBind.DeleteListener(hl.textNotify)
+	hl.textBind = nil
 	hl.textNotify = nil
 	return hl
 }
 
 // BindURL binds the Hyperlink's URL to the given data binding.
 // Returns the Hyperlink for chaining.
-func (hl *Hyperlink) BindURL(data *binding.URLBinding) *Hyperlink {
-	hl.urlBinding = data
+func (hl *Hyperlink) BindURL(data *binding.URL) *Hyperlink {
+	hl.urlBind = data
 	hl.urlNotify = data.AddURLListener(hl.SetURL)
 	return hl
 }
@@ -157,8 +157,8 @@ func (hl *Hyperlink) BindURL(data *binding.URLBinding) *Hyperlink {
 // UnbindURL unbinds the Hyperlink's URL from the data binding (if any).
 // Returns the Hyperlink for chaining.
 func (hl *Hyperlink) UnbindURL() *Hyperlink {
-	hl.urlBinding.DeleteListener(hl.urlNotify)
-	hl.urlBinding = nil
+	hl.urlBind.DeleteListener(hl.urlNotify)
+	hl.urlBind = nil
 	hl.urlNotify = nil
 	return hl
 }

@@ -32,8 +32,8 @@ type Slider struct {
 	Orientation Orientation
 	OnChanged   func(float64)
 
-	maxBinding, minBinding, stepBinding, valueBinding *binding.Float64Binding
-	maxNotify, minNotify, stepNotify, valueNotify     *binding.NotifyFunction
+	maxBind, minBind, stepBind, valueBind         *binding.Float64
+	maxNotify, minNotify, stepNotify, valueNotify *binding.NotifyFunction
 }
 
 // NewSlider returns a basic slider.
@@ -116,8 +116,8 @@ func (s *Slider) SetValue(value float64) {
 	}
 	s.Value = value
 
-	if s.valueBinding != nil {
-		s.valueBinding.Set(s.Value)
+	if s.valueBind != nil {
+		s.valueBind.Set(s.Value)
 	}
 
 	if s.OnChanged != nil {
@@ -182,8 +182,8 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 
 // BindMin binds the Slider's Min to the given data binding.
 // Returns the Slider for chaining.
-func (s *Slider) BindMin(data *binding.Float64Binding) *Slider {
-	s.minBinding = data
+func (s *Slider) BindMin(data *binding.Float64) *Slider {
+	s.minBind = data
 	s.minNotify = data.AddFloat64Listener(s.SetMin)
 	return s
 }
@@ -191,16 +191,16 @@ func (s *Slider) BindMin(data *binding.Float64Binding) *Slider {
 // UnbindMin unbinds the Slider's Min from the data binding (if any).
 // Returns the Slider for chaining.
 func (s *Slider) UnbindMin() *Slider {
-	s.minBinding.DeleteListener(s.minNotify)
-	s.minBinding = nil
+	s.minBind.DeleteListener(s.minNotify)
+	s.minBind = nil
 	s.minNotify = nil
 	return s
 }
 
 // BindMax binds the Slider's Max to the given data binding.
 // Returns the Slider for chaining.
-func (s *Slider) BindMax(data *binding.Float64Binding) *Slider {
-	s.maxBinding = data
+func (s *Slider) BindMax(data *binding.Float64) *Slider {
+	s.maxBind = data
 	s.maxNotify = data.AddFloat64Listener(s.SetMax)
 	return s
 }
@@ -208,16 +208,16 @@ func (s *Slider) BindMax(data *binding.Float64Binding) *Slider {
 // UnbindMax unbinds the Slider's Max from the data binding (if any).
 // Returns the Slider for chaining.
 func (s *Slider) UnbindMax() *Slider {
-	s.maxBinding.DeleteListener(s.maxNotify)
-	s.maxBinding = nil
+	s.maxBind.DeleteListener(s.maxNotify)
+	s.maxBind = nil
 	s.maxNotify = nil
 	return s
 }
 
 // BindStep binds the Slider's Step to the given data binding.
 // Returns the Slider for chaining.
-func (s *Slider) BindStep(data *binding.Float64Binding) *Slider {
-	s.stepBinding = data
+func (s *Slider) BindStep(data *binding.Float64) *Slider {
+	s.stepBind = data
 	s.stepNotify = data.AddFloat64Listener(s.SetStep)
 	return s
 }
@@ -225,16 +225,16 @@ func (s *Slider) BindStep(data *binding.Float64Binding) *Slider {
 // UnbindStep unbinds the Slider's Step from the data binding (if any).
 // Returns the Slider for chaining.
 func (s *Slider) UnbindStep() *Slider {
-	s.stepBinding.DeleteListener(s.stepNotify)
-	s.stepBinding = nil
+	s.stepBind.DeleteListener(s.stepNotify)
+	s.stepBind = nil
 	s.stepNotify = nil
 	return s
 }
 
 // BindValue binds the Slider's Value to the given data binding.
 // Returns the Slider for chaining.
-func (s *Slider) BindValue(data *binding.Float64Binding) *Slider {
-	s.valueBinding = data
+func (s *Slider) BindValue(data *binding.Float64) *Slider {
+	s.valueBind = data
 	s.valueNotify = data.AddFloat64Listener(s.SetValue)
 	return s
 }
@@ -242,8 +242,8 @@ func (s *Slider) BindValue(data *binding.Float64Binding) *Slider {
 // UnbindValue unbinds the Slider's Value from the data binding (if any).
 // Returns the Slider for chaining.
 func (s *Slider) UnbindValue() *Slider {
-	s.valueBinding.DeleteListener(s.valueNotify)
-	s.valueBinding = nil
+	s.valueBind.DeleteListener(s.valueNotify)
+	s.valueBind = nil
 	s.valueNotify = nil
 	return s
 }

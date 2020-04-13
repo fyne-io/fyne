@@ -89,10 +89,10 @@ type Check struct {
 	focused bool
 	hovered bool
 
-	changeBinding *binding.BoolBinding
-	textBinding   *binding.StringBinding
-	checkNotify   *binding.NotifyFunction
-	textNotify    *binding.NotifyFunction
+	changeBind  *binding.Bool
+	textBind    *binding.String
+	checkNotify *binding.NotifyFunction
+	textNotify  *binding.NotifyFunction
 }
 
 // SetChecked sets the the checked state and refreshes widget
@@ -103,8 +103,8 @@ func (c *Check) SetChecked(checked bool) {
 
 	c.Checked = checked
 
-	if c.changeBinding != nil {
-		c.changeBinding.Set(c.Checked)
+	if c.changeBind != nil {
+		c.changeBind.Set(c.Checked)
 	}
 
 	if c.OnChanged != nil {
@@ -181,8 +181,8 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 
 // BindChecked binds the Check's OnChanged to the given data binding.
 // Returns the Check for chaining.
-func (c *Check) BindChecked(data *binding.BoolBinding) *Check {
-	c.changeBinding = data
+func (c *Check) BindChecked(data *binding.Bool) *Check {
+	c.changeBind = data
 	c.checkNotify = data.AddBoolListener(c.SetChecked)
 	return c
 }
@@ -190,16 +190,16 @@ func (c *Check) BindChecked(data *binding.BoolBinding) *Check {
 // UnbindChecked unbinds the Check's OnChanged from the data binding (if any).
 // Returns the Check for chaining.
 func (c *Check) UnbindChecked() *Check {
-	c.changeBinding.DeleteListener(c.checkNotify)
-	c.changeBinding = nil
+	c.changeBind.DeleteListener(c.checkNotify)
+	c.changeBind = nil
 	c.checkNotify = nil
 	return c
 }
 
 // BindText binds the Check's Text to the given data binding.
 // Returns the Check for chaining.
-func (c *Check) BindText(data *binding.StringBinding) *Check {
-	c.textBinding = data
+func (c *Check) BindText(data *binding.String) *Check {
+	c.textBind = data
 	c.textNotify = data.AddStringListener(c.SetText)
 	return c
 }
@@ -207,8 +207,8 @@ func (c *Check) BindText(data *binding.StringBinding) *Check {
 // UnbindText unbinds the Check's Text from the data binding (if any).
 // Returns the Check for chaining.
 func (c *Check) UnbindText() *Check {
-	c.textBinding.DeleteListener(c.textNotify)
-	c.textBinding = nil
+	c.textBind.DeleteListener(c.textNotify)
+	c.textBind = nil
 	c.textNotify = nil
 	return c
 }

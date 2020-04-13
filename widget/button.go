@@ -135,11 +135,11 @@ type Button struct {
 	hovered    bool
 	HideShadow bool
 
-	tapBinding  *binding.BoolBinding
-	textBinding *binding.StringBinding
-	iconBinding *binding.ResourceBinding
-	textNotify  *binding.NotifyFunction
-	iconNotify  *binding.NotifyFunction
+	tapBind    *binding.Bool
+	textBind   *binding.String
+	iconBind   *binding.Resource
+	textNotify *binding.NotifyFunction
+	iconNotify *binding.NotifyFunction
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -155,8 +155,8 @@ const (
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
 	if !b.Disabled() {
-		if b.tapBinding != nil {
-			b.tapBinding.Set(true)
+		if b.tapBind != nil {
+			b.tapBind.Set(true)
 		}
 		if b.OnTapped != nil {
 			b.OnTapped()
@@ -241,22 +241,22 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 
 // BindTapped binds the Button's OnTap to the given data binding.
 // Returns the Button for chaining.
-func (b *Button) BindTapped(data *binding.BoolBinding) *Button {
-	b.tapBinding = data
+func (b *Button) BindTapped(data *binding.Bool) *Button {
+	b.tapBind = data
 	return b
 }
 
 // UnbindTapped unbinds the Button's OnTap from the data binding (if any).
 // Returns the Button for chaining.
 func (b *Button) UnbindTapped() *Button {
-	b.tapBinding = nil
+	b.tapBind = nil
 	return b
 }
 
 // BindText binds the Button's Text to the given data binding.
 // Returns the Button for chaining.
-func (b *Button) BindText(data *binding.StringBinding) *Button {
-	b.textBinding = data
+func (b *Button) BindText(data *binding.String) *Button {
+	b.textBind = data
 	b.textNotify = data.AddStringListener(b.SetText)
 	return b
 }
@@ -264,16 +264,16 @@ func (b *Button) BindText(data *binding.StringBinding) *Button {
 // UnbindText unbinds the Button's Text from the data binding (if any).
 // Returns the Button for chaining.
 func (b *Button) UnbindText() *Button {
-	b.textBinding.DeleteListener(b.textNotify)
-	b.textBinding = nil
+	b.textBind.DeleteListener(b.textNotify)
+	b.textBind = nil
 	b.textNotify = nil
 	return b
 }
 
 // BindIcon binds the Button's Icon to the given data binding.
 // Returns the Button for chaining.
-func (b *Button) BindIcon(data *binding.ResourceBinding) *Button {
-	b.iconBinding = data
+func (b *Button) BindIcon(data *binding.Resource) *Button {
+	b.iconBind = data
 	b.iconNotify = data.AddResourceListener(b.SetIcon)
 	return b
 }
@@ -281,8 +281,8 @@ func (b *Button) BindIcon(data *binding.ResourceBinding) *Button {
 // UnbindIcon unbinds the Button's Icon from the data binding (if any).
 // Returns the Button for chaining.
 func (b *Button) UnbindIcon() *Button {
-	b.iconBinding.DeleteListener(b.iconNotify)
-	b.iconBinding = nil
+	b.iconBind.DeleteListener(b.iconNotify)
+	b.iconBind = nil
 	b.iconNotify = nil
 	return b
 }

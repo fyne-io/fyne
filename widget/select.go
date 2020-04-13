@@ -93,10 +93,10 @@ type Select struct {
 	hovered bool
 	popUp   *PopUp
 
-	selectedBinding *binding.StringBinding
-	optionBinding   *binding.ListBinding
-	selectedNotify  *binding.NotifyFunction
-	optionNotify    *binding.NotifyFunction
+	selectedBind   *binding.String
+	optionBind     *binding.List
+	selectedNotify *binding.NotifyFunction
+	optionNotify   *binding.NotifyFunction
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -218,8 +218,8 @@ func (s *Select) SetSelected(text string) {
 func (s *Select) updateSelected(text string) {
 	s.Selected = text
 
-	if s.selectedBinding != nil {
-		s.selectedBinding.Set(s.Selected)
+	if s.selectedBind != nil {
+		s.selectedBind.Set(s.Selected)
 	}
 
 	if s.OnChanged != nil {
@@ -231,8 +231,8 @@ func (s *Select) updateSelected(text string) {
 
 // BindSelected binds the Select's Selected Option to the given data binding.
 // Returns the Select for chaining.
-func (s *Select) BindSelected(data *binding.StringBinding) *Select {
-	s.selectedBinding = data
+func (s *Select) BindSelected(data *binding.String) *Select {
+	s.selectedBind = data
 	s.selectedNotify = data.AddStringListener(s.SetSelected)
 	return s
 }
@@ -240,21 +240,21 @@ func (s *Select) BindSelected(data *binding.StringBinding) *Select {
 // UnbindSelected unbinds the Select's Selected from the data binding (if any).
 // Returns the Select for chaining.
 func (s *Select) UnbindSelected() *Select {
-	s.selectedBinding.DeleteListener(s.selectedNotify)
-	s.selectedBinding = nil
+	s.selectedBind.DeleteListener(s.selectedNotify)
+	s.selectedBind = nil
 	s.selectedNotify = nil
 	return s
 }
 
 // BindOptions binds the Select's Options to the given data binding.
 // Returns the Select for chaining.
-func (s *Select) BindOptions(data *binding.ListBinding) *Select {
-	s.optionBinding = data
+func (s *Select) BindOptions(data *binding.List) *Select {
+	s.optionBind = data
 	s.optionNotify = data.AddListenerFunction(func(binding.Binding) {
 		l := data.Length()
 		var options []string
 		for i := 0; i < l; i++ {
-			b, ok := data.Get(i).(*binding.StringBinding)
+			b, ok := data.Get(i).(*binding.String)
 			if ok {
 				// TODO Should individual elements in a slice binding be bound to?
 				//  b.AddListener(func() { })
@@ -270,8 +270,8 @@ func (s *Select) BindOptions(data *binding.ListBinding) *Select {
 // UnbindOptions unbinds the Select's Options from the data binding (if any).
 // Returns the Select for chaining.
 func (s *Select) UnbindOptions() *Select {
-	s.optionBinding.DeleteListener(s.optionNotify)
-	s.optionBinding = nil
+	s.optionBind.DeleteListener(s.optionNotify)
+	s.optionBind = nil
 	s.optionNotify = nil
 	return s
 }

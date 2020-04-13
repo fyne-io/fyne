@@ -382,7 +382,7 @@ func TestRadio_BindSelected_Set(t *testing.T) {
 		selected = value
 	})
 
-	data := &binding.StringBinding{}
+	data := &binding.String{}
 	radio.BindSelected(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
@@ -405,7 +405,7 @@ func TestRadio_BindSelected_Tap(t *testing.T) {
 	done := make(chan bool)
 	radio := NewRadio([]string{"a", "b", "c"}, nil)
 
-	data := &binding.StringBinding{}
+	data := &binding.String{}
 	radio.BindSelected(data)
 	selected := ""
 	data.AddStringListener(func(value string) {
@@ -431,15 +431,15 @@ func TestRadio_BindOptions(t *testing.T) {
 	done := make(chan bool)
 	radio := NewRadio([]string{"a"}, nil)
 
-	data := &binding.ListBinding{}
+	data := &binding.List{}
 	radio.BindOptions(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 	data.Append(
-		binding.NewStringBinding("a"),
-		binding.NewStringBinding("b"),
-		binding.NewStringBinding("c"),
+		binding.NewString("a"),
+		binding.NewString("b"),
+		binding.NewString("c"),
 	)
 
 	select {

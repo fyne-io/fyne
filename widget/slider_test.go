@@ -55,7 +55,7 @@ func TestSlider_BindMin(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
-	data := &binding.Float64Binding{}
+	data := &binding.Float64{}
 	slider.BindMin(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
@@ -75,7 +75,7 @@ func TestSlider_BindMax(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
-	data := &binding.Float64Binding{}
+	data := &binding.Float64{}
 	slider.BindMax(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
@@ -95,7 +95,7 @@ func TestSlider_BindStep(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
-	data := &binding.Float64Binding{}
+	data := &binding.Float64{}
 	slider.BindStep(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
@@ -115,7 +115,7 @@ func TestSlider_BindValue(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
-	data := &binding.Float64Binding{}
+	data := &binding.Float64{}
 	slider.BindValue(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true

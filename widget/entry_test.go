@@ -1562,7 +1562,7 @@ func TestEntry_BindText(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	entry := NewEntry()
-	data := &binding.StringBinding{}
+	data := &binding.String{}
 	entry.BindText(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true

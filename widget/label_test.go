@@ -114,7 +114,7 @@ func TestLabel_BindText(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	label := NewLabel("label")
-	data := &binding.StringBinding{}
+	data := &binding.String{}
 	label.BindText(data)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true

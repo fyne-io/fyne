@@ -74,8 +74,8 @@ type ProgressBar struct {
 
 	Min, Max, Value float64
 
-	maxBinding, minBinding, valueBinding *binding.Float64Binding
-	maxNotify, minNotify, valueNotify    *binding.NotifyFunction
+	maxBind, minBind, valueBind       *binding.Float64
+	maxNotify, minNotify, valueNotify *binding.NotifyFunction
 }
 
 // SetMin changes the current minimum of this progress bar.
@@ -135,8 +135,8 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 
 // BindMin binds the ProgressBar's Min to the given data binding.
 // Returns the ProgressBar for chaining.
-func (p *ProgressBar) BindMin(data *binding.Float64Binding) *ProgressBar {
-	p.minBinding = data
+func (p *ProgressBar) BindMin(data *binding.Float64) *ProgressBar {
+	p.minBind = data
 	p.minNotify = data.AddFloat64Listener(p.SetMin)
 	return p
 }
@@ -144,16 +144,16 @@ func (p *ProgressBar) BindMin(data *binding.Float64Binding) *ProgressBar {
 // UnbindMin unbinds the ProgressBar's Min from the data binding (if any).
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) UnbindMin() *ProgressBar {
-	p.minBinding.DeleteListener(p.minNotify)
-	p.minBinding = nil
+	p.minBind.DeleteListener(p.minNotify)
+	p.minBind = nil
 	p.minNotify = nil
 	return p
 }
 
 // BindMax binds the ProgressBar's Max to the given data binding.
 // Returns the ProgressBar for chaining.
-func (p *ProgressBar) BindMax(data *binding.Float64Binding) *ProgressBar {
-	p.maxBinding = data
+func (p *ProgressBar) BindMax(data *binding.Float64) *ProgressBar {
+	p.maxBind = data
 	p.maxNotify = data.AddFloat64Listener(p.SetMax)
 	return p
 }
@@ -161,16 +161,16 @@ func (p *ProgressBar) BindMax(data *binding.Float64Binding) *ProgressBar {
 // UnbindMax unbinds the ProgressBar's Max from the data binding (if any).
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) UnbindMax() *ProgressBar {
-	p.maxBinding.DeleteListener(p.maxNotify)
-	p.maxBinding = nil
+	p.maxBind.DeleteListener(p.maxNotify)
+	p.maxBind = nil
 	p.maxNotify = nil
 	return p
 }
 
 // BindValue binds the ProgressBar's Value to the given data binding.
 // Returns the ProgressBar for chaining.
-func (p *ProgressBar) BindValue(data *binding.Float64Binding) *ProgressBar {
-	p.valueBinding = data
+func (p *ProgressBar) BindValue(data *binding.Float64) *ProgressBar {
+	p.valueBind = data
 	p.valueNotify = data.AddFloat64Listener(p.SetValue)
 	return p
 }
@@ -178,8 +178,8 @@ func (p *ProgressBar) BindValue(data *binding.Float64Binding) *ProgressBar {
 // UnbindValue unbinds the ProgressBar's Value from the data binding (if any).
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) UnbindValue() *ProgressBar {
-	p.valueBinding.DeleteListener(p.valueNotify)
-	p.valueBinding = nil
+	p.valueBind.DeleteListener(p.valueNotify)
+	p.valueBind = nil
 	p.valueNotify = nil
 	return p
 }

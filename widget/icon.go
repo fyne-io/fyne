@@ -51,8 +51,8 @@ type Icon struct {
 
 	Resource fyne.Resource // The resource for this icon
 
-	resourceBinding *binding.ResourceBinding
-	resourceNotify  *binding.NotifyFunction
+	resourceBind   *binding.Resource
+	resourceNotify *binding.NotifyFunction
 }
 
 // SetResource updates the resource rendered in this icon widget
@@ -77,8 +77,8 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 
 // BindResource binds the Icon's Resource to the given data binding.
 // Returns the Icon for chaining.
-func (i *Icon) BindResource(data *binding.ResourceBinding) *Icon {
-	i.resourceBinding = data
+func (i *Icon) BindResource(data *binding.Resource) *Icon {
+	i.resourceBind = data
 	i.resourceNotify = data.AddResourceListener(i.SetResource)
 	return i
 }
@@ -86,8 +86,8 @@ func (i *Icon) BindResource(data *binding.ResourceBinding) *Icon {
 // UnbindResource unbinds the Icon's Resource from the data binding (if any).
 // Returns the Icon for chaining.
 func (i *Icon) UnbindResource() *Icon {
-	i.resourceBinding.DeleteListener(i.resourceNotify)
-	i.resourceBinding = nil
+	i.resourceBind.DeleteListener(i.resourceNotify)
+	i.resourceBind = nil
 	i.resourceNotify = nil
 	return i
 }
