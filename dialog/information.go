@@ -32,8 +32,8 @@ func NewInformation(title, message string, parent fyne.Window) Dialog {
 }
 
 // NewInformationWithCallback creates a dialog over the specified window for user information.
-// The title is used for the dialog window and message is the content.
-// After creation you should call Show().
+// The title is used for the dialog window and message is the content. The callback
+// is executed when the user closes the dialog. After creation you should call Show().
 func NewInformationWithCallback(title, message string, callback func(), parent fyne.Window) Dialog {
 	return createTextDialogWithCallback(title, message, theme.InfoIcon(), callback, parent)
 }
@@ -46,6 +46,7 @@ func ShowInformation(title, message string, parent fyne.Window) {
 
 // ShowInformationWithCallback shows a dialog over the specified window for user
 // information. The title is used for the dialog window and message is the content.
+// The callback is executed when the user closes the dialog.
 func ShowInformationWithCallback(title, message string, callback func(), parent fyne.Window) {
 	NewInformationWithCallback(title, message, callback, parent).Show()
 }
@@ -57,7 +58,8 @@ func ShowError(err error, parent fyne.Window) {
 }
 
 // ShowErrorWithCallback shows a dialog over the specified window for an application
-// error. The title and message are extracted from the provided error.
+// error. The title and message are extracted from the provided error. The callback
+// is executed when the user closes the dialog.
 func ShowErrorWithCallback(err error, callback func(), parent fyne.Window) {
 	createTextDialogWithCallback("Error", err.Error(), theme.WarningIcon(), callback, parent).Show()
 }
