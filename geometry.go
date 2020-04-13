@@ -19,8 +19,8 @@ type Position struct {
 
 // Add returns a new Position that is the result of offsetting the current
 // position by p2 X and Y.
-func (p1 Position) Add(p2 Position) Position {
-	return Position{p1.X + p2.X, p1.Y + p2.Y}
+func (p Position) Add(p2 Position) Position {
+	return Position{p.X + p2.X, p.Y + p2.Y}
 }
 
 // IsZero returns whether the Size has zero width and zero height.
@@ -30,8 +30,8 @@ func (p Position) IsZero() bool {
 
 // Subtract returns a new Position that is the result of offsetting the current
 // position by p2 -X and -Y.
-func (p1 Position) Subtract(p2 Position) Position {
-	return Position{p1.X - p2.X, p1.Y - p2.Y}
+func (p Position) Subtract(p2 Position) Position {
+	return Position{p.X - p2.X, p.Y - p2.Y}
 }
 
 // Size describes something with width and height.
