@@ -21,6 +21,7 @@ type Dialog interface {
 	Show()
 	Hide()
 	SetDismissText(label string)
+	SetOnClosed(closed func())
 }
 
 // Declare conformity to Dialog interface
@@ -37,6 +38,14 @@ type dialog struct {
 	content, label fyne.CanvasObject
 	dismiss        *widget.Button
 	parent         fyne.Window
+}
+
+// SetOnClosed allows to set a callback function that is called when
+// the dialog is closed
+func (d *dialog) SetOnClosed(closed func()) {
+	d.callback = func(dummy bool) {
+		closed()
+	}
 }
 
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
