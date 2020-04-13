@@ -12,7 +12,7 @@ import (
 )
 
 type buttonRenderer struct {
-	*shadowingRenderer
+	*widget.ShadowingRenderer
 
 	icon   *canvas.Image
 	label  *canvas.Text
@@ -47,7 +47,7 @@ func (b *buttonRenderer) MinSize() fyne.Size {
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
-	b.layoutShadow(size, fyne.NewPos(0, 0))
+	b.LayoutShadow(size, fyne.NewPos(0, 0))
 	if b.button.Text != "" {
 		padding := b.padding()
 		innerSize := size.Subtract(padding)
@@ -197,7 +197,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{newShadowingRenderer(objects, shadowLevel), icon, text, b}
+	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b}
 }
 
 // SetText allows the button label to be changed

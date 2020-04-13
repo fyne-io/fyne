@@ -99,10 +99,16 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 	objects := []fyne.CanvasObject{bg, p.Content}
 	if p.modal {
-		return &modalPopUpRenderer{widget.NewBaseRenderer(objects), popUpBaseRenderer{popUp: p, bg: bg}}
+		return &modalPopUpRenderer{
+			widget.NewBaseRenderer(objects),
+			popUpBaseRenderer{popUp: p, bg: bg},
+		}
 	}
 
-	return &popUpRenderer{newShadowingRenderer(objects, widget.PopUpLevel), popUpBaseRenderer{popUp: p, bg: bg}}
+	return &popUpRenderer{
+		widget.NewShadowingRenderer(objects, widget.PopUpLevel),
+		popUpBaseRenderer{popUp: p, bg: bg},
+	}
 }
 
 // NewPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
@@ -179,7 +185,7 @@ func (r *popUpBaseRenderer) offset() fyne.Position {
 }
 
 type popUpRenderer struct {
-	*shadowingRenderer
+	*widget.ShadowingRenderer
 	popUpBaseRenderer
 }
 
@@ -211,7 +217,7 @@ func (r *popUpRenderer) Layout(_ fyne.Size) {
 
 	r.bg.Resize(r.popUp.innerSize)
 	r.bg.Move(innerPos)
-	r.layoutShadow(r.popUp.innerSize, innerPos)
+	r.LayoutShadow(r.popUp.innerSize, innerPos)
 }
 
 func (r *popUpRenderer) MinSize() fyne.Size {

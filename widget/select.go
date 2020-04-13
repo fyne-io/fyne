@@ -13,7 +13,7 @@ import (
 const defaultPlaceHolder string = "(Select one)"
 
 type selectRenderer struct {
-	*shadowingRenderer
+	*widget.ShadowingRenderer
 
 	icon  *Icon
 	label *canvas.Text
@@ -36,7 +36,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
-	s.layoutShadow(size, fyne.NewPos(0, 0))
+	s.LayoutShadow(size, fyne.NewPos(0, 0))
 	inner := size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 
 	offset := fyne.NewSize(theme.IconInlineSize(), 0)
@@ -188,7 +188,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	text.Alignment = fyne.TextAlignLeading
 
 	objects := []fyne.CanvasObject{text, icon}
-	return &selectRenderer{newShadowingRenderer(objects, widget.ButtonLevel), icon, text, s}
+	return &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, text, s}
 }
 
 // ClearSelected clears the current option of the select widget.  After
