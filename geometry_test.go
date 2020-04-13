@@ -26,7 +26,7 @@ func TestPosition_Subtract(t *testing.T) {
 	assert.Equal(t, 15, pos3.Y)
 }
 
-func TestSizeAdd(t *testing.T) {
+func TestSize_Add(t *testing.T) {
 	size1 := NewSize(10, 10)
 	size2 := NewSize(25, 25)
 
@@ -36,7 +36,7 @@ func TestSizeAdd(t *testing.T) {
 	assert.Equal(t, 35, size3.Height)
 }
 
-func TestSizeMax(t *testing.T) {
+func TestSize_Max(t *testing.T) {
 	size1 := NewSize(10, 100)
 	size2 := NewSize(100, 10)
 
@@ -46,7 +46,7 @@ func TestSizeMax(t *testing.T) {
 	assert.Equal(t, 100, size3.Height)
 }
 
-func TestSizeMin(t *testing.T) {
+func TestSize_Min(t *testing.T) {
 	size1 := NewSize(10, 100)
 	size2 := NewSize(100, 10)
 
@@ -56,7 +56,7 @@ func TestSizeMin(t *testing.T) {
 	assert.Equal(t, 10, size3.Height)
 }
 
-func TestSizeSubtract(t *testing.T) {
+func TestSize_Subtract(t *testing.T) {
 	size1 := NewSize(25, 25)
 	size2 := NewSize(10, 10)
 
@@ -66,7 +66,7 @@ func TestSizeSubtract(t *testing.T) {
 	assert.Equal(t, 15, size3.Height)
 }
 
-func TestSizeUnion(t *testing.T) {
+func TestSize_Union(t *testing.T) {
 	size1 := NewSize(10, 100)
 	size2 := NewSize(100, 10)
 
