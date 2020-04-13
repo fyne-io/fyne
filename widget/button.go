@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -188,9 +189,9 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{
 		text,
 	}
-	shadowLevel := buttonLevel
+	shadowLevel := widget.ButtonLevel
 	if b.HideShadow {
-		shadowLevel = baseLevel
+		shadowLevel = widget.BaseLevel
 	}
 	if icon != nil {
 		objects = append(objects, icon)

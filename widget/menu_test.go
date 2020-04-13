@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -41,7 +42,7 @@ func TestPopUpMenu_Size(t *testing.T) {
 	assert.Equal(t, expectedSize, pop.Content.Size())
 
 	for _, o := range test.LaidOutObjects(pop) {
-		if s, ok := o.(*shadow); ok {
+		if s, ok := o.(*widget.Shadow); ok {
 			assert.Equal(t, expectedSize, s.Size(), "infer pop-up’s inner size from shadow’s size")
 		}
 	}

@@ -102,7 +102,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 		return &modalPopUpRenderer{widget.NewBaseRenderer(objects), popUpBaseRenderer{popUp: p, bg: bg}}
 	}
 
-	return &popUpRenderer{newShadowingRenderer(objects, popUpLevel), popUpBaseRenderer{popUp: p, bg: bg}}
+	return &popUpRenderer{newShadowingRenderer(objects, widget.PopUpLevel), popUpBaseRenderer{popUp: p, bg: bg}}
 }
 
 // NewPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.

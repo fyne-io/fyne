@@ -12,10 +12,10 @@ type shadowingRenderer struct {
 	shadow fyne.CanvasObject
 }
 
-func newShadowingRenderer(objects []fyne.CanvasObject, level elevationLevel) *shadowingRenderer {
+func newShadowingRenderer(objects []fyne.CanvasObject, level widget.ElevationLevel) *shadowingRenderer {
 	var s fyne.CanvasObject
 	if level > 0 {
-		s = newShadow(shadowAround, level)
+		s = widget.NewShadow(widget.ShadowAround, level)
 	}
 	r := &shadowingRenderer{shadow: s}
 	r.SetObjects(objects)
