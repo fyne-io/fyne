@@ -19,7 +19,7 @@ const (
 
 var _ fyne.Draggable = (*Slider)(nil)
 
-// Slider if a widget that can slide between two fixed values.
+// Slider is a widget that can slide between two fixed values.
 type Slider struct {
 	BaseWidget
 
