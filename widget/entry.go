@@ -1151,7 +1151,9 @@ func (e *Entry) BindText(data *binding.String) *Entry {
 // UnbindText unbinds the Entry's Text from the data binding (if any).
 // Returns the Entry for chaining.
 func (e *Entry) UnbindText() *Entry {
-	e.textBind.DeleteListener(e.textNotify)
+	if e.textBind != nil {
+		e.textBind.DeleteListener(e.textNotify)
+	}
 	e.textBind = nil
 	e.textNotify = nil
 	return e

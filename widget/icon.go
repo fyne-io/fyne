@@ -86,7 +86,9 @@ func (i *Icon) BindResource(data *binding.Resource) *Icon {
 // UnbindResource unbinds the Icon's Resource from the data binding (if any).
 // Returns the Icon for chaining.
 func (i *Icon) UnbindResource() *Icon {
-	i.resourceBind.DeleteListener(i.resourceNotify)
+	if i.resourceBind != nil {
+		i.resourceBind.DeleteListener(i.resourceNotify)
+	}
 	i.resourceBind = nil
 	i.resourceNotify = nil
 	return i

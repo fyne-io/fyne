@@ -319,7 +319,9 @@ func (r *Radio) BindSelected(data *binding.String) *Radio {
 // UnbindSelected unbinds the Radio's Selected from the data binding (if any).
 // Returns the Radio for chaining.
 func (r *Radio) UnbindSelected() *Radio {
-	r.selectedBind.DeleteListener(r.selectedNotify)
+	if r.selectedBind != nil {
+		r.selectedBind.DeleteListener(r.selectedNotify)
+	}
 	r.selectedBind = nil
 	r.selectedNotify = nil
 	return r
@@ -349,7 +351,9 @@ func (r *Radio) BindOptions(data *binding.List) *Radio {
 // UnbindOptions unbinds the Radio's Options from the data binding (if any).
 // Returns the Radio for chaining.
 func (r *Radio) UnbindOptions() *Radio {
-	r.optionBind.DeleteListener(r.optionNotify)
+	if r.optionBind != nil {
+		r.optionBind.DeleteListener(r.optionNotify)
+	}
 	r.optionBind = nil
 	r.optionNotify = nil
 	return r

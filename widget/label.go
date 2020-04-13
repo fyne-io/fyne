@@ -111,7 +111,9 @@ func (l *Label) BindText(data *binding.String) *Label {
 // UnbindText unbinds the Label's Text from the data binding (if any).
 // Returns the Label for chaining.
 func (l *Label) UnbindText() *Label {
-	l.textBind.DeleteListener(l.textNotify)
+	if l.textBind != nil {
+		l.textBind.DeleteListener(l.textNotify)
+	}
 	l.textBind = nil
 	l.textNotify = nil
 	return l

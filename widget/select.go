@@ -240,7 +240,9 @@ func (s *Select) BindSelected(data *binding.String) *Select {
 // UnbindSelected unbinds the Select's Selected from the data binding (if any).
 // Returns the Select for chaining.
 func (s *Select) UnbindSelected() *Select {
-	s.selectedBind.DeleteListener(s.selectedNotify)
+	if s.selectedBind != nil {
+		s.selectedBind.DeleteListener(s.selectedNotify)
+	}
 	s.selectedBind = nil
 	s.selectedNotify = nil
 	return s
@@ -270,7 +272,9 @@ func (s *Select) BindOptions(data *binding.List) *Select {
 // UnbindOptions unbinds the Select's Options from the data binding (if any).
 // Returns the Select for chaining.
 func (s *Select) UnbindOptions() *Select {
-	s.optionBind.DeleteListener(s.optionNotify)
+	if s.optionBind != nil {
+		s.optionBind.DeleteListener(s.optionNotify)
+	}
 	s.optionBind = nil
 	s.optionNotify = nil
 	return s

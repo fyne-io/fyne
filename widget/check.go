@@ -190,7 +190,9 @@ func (c *Check) BindChecked(data *binding.Bool) *Check {
 // UnbindChecked unbinds the Check's OnChanged from the data binding (if any).
 // Returns the Check for chaining.
 func (c *Check) UnbindChecked() *Check {
-	c.changeBind.DeleteListener(c.checkNotify)
+	if c.changeBind != nil {
+		c.changeBind.DeleteListener(c.checkNotify)
+	}
 	c.changeBind = nil
 	c.checkNotify = nil
 	return c
@@ -207,7 +209,9 @@ func (c *Check) BindText(data *binding.String) *Check {
 // UnbindText unbinds the Check's Text from the data binding (if any).
 // Returns the Check for chaining.
 func (c *Check) UnbindText() *Check {
-	c.textBind.DeleteListener(c.textNotify)
+	if c.textBind != nil {
+		c.textBind.DeleteListener(c.textNotify)
+	}
 	c.textBind = nil
 	c.textNotify = nil
 	return c

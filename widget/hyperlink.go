@@ -140,7 +140,9 @@ func (hl *Hyperlink) BindText(data *binding.String) *Hyperlink {
 // UnbindText unbinds the Hyperlink's Text from the data binding (if any).
 // Returns the Hyperlink for chaining.
 func (hl *Hyperlink) UnbindText() *Hyperlink {
-	hl.textBind.DeleteListener(hl.textNotify)
+	if hl.textBind != nil {
+		hl.textBind.DeleteListener(hl.textNotify)
+	}
 	hl.textBind = nil
 	hl.textNotify = nil
 	return hl
@@ -157,7 +159,9 @@ func (hl *Hyperlink) BindURL(data *binding.URL) *Hyperlink {
 // UnbindURL unbinds the Hyperlink's URL from the data binding (if any).
 // Returns the Hyperlink for chaining.
 func (hl *Hyperlink) UnbindURL() *Hyperlink {
-	hl.urlBind.DeleteListener(hl.urlNotify)
+	if hl.urlBind != nil {
+		hl.urlBind.DeleteListener(hl.urlNotify)
+	}
 	hl.urlBind = nil
 	hl.urlNotify = nil
 	return hl

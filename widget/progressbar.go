@@ -144,7 +144,9 @@ func (p *ProgressBar) BindMin(data *binding.Float64) *ProgressBar {
 // UnbindMin unbinds the ProgressBar's Min from the data binding (if any).
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) UnbindMin() *ProgressBar {
-	p.minBind.DeleteListener(p.minNotify)
+	if p.minBind != nil {
+		p.minBind.DeleteListener(p.minNotify)
+	}
 	p.minBind = nil
 	p.minNotify = nil
 	return p
@@ -161,7 +163,9 @@ func (p *ProgressBar) BindMax(data *binding.Float64) *ProgressBar {
 // UnbindMax unbinds the ProgressBar's Max from the data binding (if any).
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) UnbindMax() *ProgressBar {
-	p.maxBind.DeleteListener(p.maxNotify)
+	if p.maxBind != nil {
+		p.maxBind.DeleteListener(p.maxNotify)
+	}
 	p.maxBind = nil
 	p.maxNotify = nil
 	return p
@@ -178,7 +182,9 @@ func (p *ProgressBar) BindValue(data *binding.Float64) *ProgressBar {
 // UnbindValue unbinds the ProgressBar's Value from the data binding (if any).
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) UnbindValue() *ProgressBar {
-	p.valueBind.DeleteListener(p.valueNotify)
+	if p.valueBind != nil {
+		p.valueBind.DeleteListener(p.valueNotify)
+	}
 	p.valueBind = nil
 	p.valueNotify = nil
 	return p

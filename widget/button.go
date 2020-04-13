@@ -264,7 +264,9 @@ func (b *Button) BindText(data *binding.String) *Button {
 // UnbindText unbinds the Button's Text from the data binding (if any).
 // Returns the Button for chaining.
 func (b *Button) UnbindText() *Button {
-	b.textBind.DeleteListener(b.textNotify)
+	if b.textBind != nil {
+		b.textBind.DeleteListener(b.textNotify)
+	}
 	b.textBind = nil
 	b.textNotify = nil
 	return b
@@ -281,7 +283,9 @@ func (b *Button) BindIcon(data *binding.Resource) *Button {
 // UnbindIcon unbinds the Button's Icon from the data binding (if any).
 // Returns the Button for chaining.
 func (b *Button) UnbindIcon() *Button {
-	b.iconBind.DeleteListener(b.iconNotify)
+	if b.iconBind != nil {
+		b.iconBind.DeleteListener(b.iconNotify)
+	}
 	b.iconBind = nil
 	b.iconNotify = nil
 	return b
