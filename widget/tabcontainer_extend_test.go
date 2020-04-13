@@ -1,0 +1,56 @@
+package widget
+
+import (
+	"testing"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+type extendedTabContainer struct {
+	TabContainer
+}
+
+func newExtendedTabContainer(items ...*TabItem) *extendedTabContainer {
+	ret := &extendedTabContainer{}
+	ret.ExtendBaseWidget(ret)
+
+	ret.Items = items
+	return ret
+}
+
+func TestTabContainer_Extended_Tapped(t *testing.T) {
+	tabs := newExtendedTabContainer(
+		NewTabItem("Test1", NewLabel("Test1")),
+		NewTabItem("Test2", NewLabel("Test2")),
+	)
+	r := Renderer(tabs).(*tabContainerRenderer)
+
+	tab1 := r.tabBar.Objects[0].(*tabButton)
+	tab2 := r.tabBar.Objects[1].(*tabButton)
+	require.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
+
+	tab2.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 1, tabs.CurrentTabIndex())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab2).BackgroundColor())
+	assert.False(t, tabs.Items[0].Content.Visible())
+	assert.True(t, tabs.Items[1].Content.Visible())
+
+	tab2.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 1, tabs.CurrentTabIndex())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab2).BackgroundColor())
+	assert.False(t, tabs.Items[0].Content.Visible())
+	assert.True(t, tabs.Items[1].Content.Visible())
+
+	tab1.Tapped(&fyne.PointEvent{})
+	assert.Equal(t, 0, tabs.CurrentTabIndex())
+	require.Equal(t, theme.PrimaryColor(), Renderer(tab1).BackgroundColor())
+	require.Equal(t, theme.BackgroundColor(), Renderer(tab2).BackgroundColor())
+	assert.True(t, tabs.Items[0].Content.Visible())
+	assert.False(t, tabs.Items[1].Content.Visible())
+}

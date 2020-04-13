@@ -16,7 +16,7 @@ gobuild_args: "-v -tags ci"
 install: true
 
 before_script:
-  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/ | grep -v /cmd/fyne/internal/mobile)
+  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
   - GO111MODULE=off go get golang.org/x/tools/cmd/goimports
   - GO111MODULE=off go get github.com/fzipp/gocyclo
   - GO111MODULE=off go get golang.org/x/lint/golint
@@ -34,7 +34,7 @@ script:
   - test -z "$(goimports -e -d $GO_FILES | tee /dev/stderr)"
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
-  - golint -set_exit_status $(go list -tags ci ./... | grep -v /cmd/fyne/internal/mobile)
+  - golint -set_exit_status $(go list -tags ci ./...)
   - gocyclo -over 50 $GO_FILES
   - |
     set -e

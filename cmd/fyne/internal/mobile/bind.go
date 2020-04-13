@@ -10,9 +10,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
-// ctx, pkg, tmpdir in build.go
+// pkg, tmpdir in build.go
 
 func copyFile(dst, src string) error {
 	if buildX {
@@ -60,4 +63,18 @@ func writeFile(filename string, generate func(io.Writer) error) error {
 	}()
 
 	return generate(f)
+}
+
+func packagesConfig(targetOS string) *packages.Config {
+	config := &packages.Config{}
+	// Add CGO_ENABLED=1 explicitly since Cgo is disabled when GOOS is different from host OS.
+	config.Env = append(os.Environ(), "GOARCH=arm", "GOOS="+targetOS, "CGO_ENABLED=1")
+	tags := buildTags
+	if targetOS == "darwin" {
+		tags = append(tags, "ios")
+	}
+	if len(tags) > 0 {
+		config.BuildFlags = []string{"-tags=" + strings.Join(tags, ",")}
+	}
+	return config
 }

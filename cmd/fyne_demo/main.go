@@ -17,20 +17,32 @@ import (
 
 const preferenceCurrentTab = "currentTab"
 
-func welcomeScreen(a fyne.App) fyne.CanvasObject {
-	logo := canvas.NewImageFromResource(data.FyneScene)
-	logo.SetMinSize(fyne.NewSize(228, 167))
-
-	link, err := url.Parse("https://fyne.io/")
+func parseURL(urlStr string) *url.URL {
+	link, err := url.Parse(urlStr)
 	if err != nil {
 		fyne.LogError("Could not parse URL", err)
 	}
+
+	return link
+}
+
+func welcomeScreen(a fyne.App) fyne.CanvasObject {
+	logo := canvas.NewImageFromResource(data.FyneScene)
+	logo.SetMinSize(fyne.NewSize(228, 167))
 
 	return widget.NewVBox(
 		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		layout.NewSpacer(),
 		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
-		widget.NewHyperlinkWithStyle("fyne.io", link, fyne.TextAlignCenter, fyne.TextStyle{}),
+
+		widget.NewHBox(layout.NewSpacer(),
+			widget.NewHyperlink("fyne.io", parseURL("https://fyne.io/")),
+			widget.NewLabel("-"),
+			widget.NewHyperlink("documentation", parseURL("https://fyne.io/develop/")),
+			widget.NewLabel("-"),
+			widget.NewHyperlink("sponsor", parseURL("https://github.com/sponsors/fyne-io")),
+			layout.NewSpacer(),
+		),
 		layout.NewSpacer(),
 
 		widget.NewGroup("Theme",

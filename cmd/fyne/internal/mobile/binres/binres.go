@@ -61,8 +61,10 @@ func errWrongType(have ResType, want ...ResType) error {
 	return fmt.Errorf("wrong resource type %s, want one of %v", have, want)
 }
 
+//ResType is the type of a resource
 type ResType uint16
 
+// IsSupported returns if a type is supported
 func (t ResType) IsSupported() bool {
 	return t != ResNull
 }
@@ -147,6 +149,7 @@ func (hdr chunkHeader) MarshalBinary() ([]byte, error) {
 	return bin, nil
 }
 
+// XML represents an XML text file in memory
 type XML struct {
 	chunkHeader
 
@@ -314,224 +317,9 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 	for _, ltkn := range q {
 		tkn, line := ltkn.Token, ltkn.line
 
-		switch tkn := tkn.(type) {
-		case xml.StartElement:
-			el := &Element{
-				NodeHeader: NodeHeader{
-					LineNumber: uint32(line),
-					Comment:    0xFFFFFFFF,
-				},
-				NS:   NoEntry,
-				Name: pool.ref(tkn.Name.Local),
-			}
-			if len(bx.stack) == 0 {
-				bx.Children = append(bx.Children, el)
-			} else {
-				n := len(bx.stack)
-				var p *Element
-				p, bx.stack = bx.stack[n-1], bx.stack[:n-1]
-				p.Children = append(p.Children, el)
-				bx.stack = append(bx.stack, p)
-			}
-			bx.stack = append(bx.stack, el)
-
-			for _, attr := range tkn.Attr {
-				if (attr.Name.Space == "xmlns" && attr.Name.Local == "tools") || attr.Name.Space == toolsSchema {
-					continue // TODO can tbl be queried for schemas to determine validity instead?
-				}
-
-				if attr.Name.Space == "xmlns" && attr.Name.Local == "android" {
-					if bx.Namespace != nil {
-						return nil, fmt.Errorf("multiple declarations of xmlns:android encountered")
-					}
-					bx.Namespace = &Namespace{
-						NodeHeader: NodeHeader{
-							LineNumber: uint32(line),
-							Comment:    NoEntry,
-						},
-						prefix: 0,
-						uri:    0,
-					}
-					continue
-				}
-
-				nattr := &Attribute{
-					NS:       pool.ref(attr.Name.Space),
-					Name:     pool.ref(attr.Name.Local),
-					RawValue: NoEntry,
-				}
-				el.attrs = append(el.attrs, nattr)
-
-				if attr.Name.Space == "" {
-					nattr.NS = NoEntry
-					// TODO it's unclear how to query these
-					switch attr.Name.Local {
-					case "platformBuildVersionCode":
-						nattr.TypedValue.Type = DataIntDec
-						i, err := strconv.Atoi(attr.Value)
-						if err != nil {
-							return nil, err
-						}
-						nattr.TypedValue.Value = uint32(i)
-					default: // "package", "platformBuildVersionName", and any invalid
-						nattr.RawValue = pool.ref(attr.Value)
-						nattr.TypedValue.Type = DataString
-					}
-				} else {
-					// get type spec and value data type
-					ref, err := tbl.RefByName("attr/" + attr.Name.Local)
-					if err != nil {
-						return nil, err
-					}
-					nt, err := ref.Resolve(tbl)
-					if err != nil {
-						return nil, err
-					}
-					if len(nt.values) == 0 {
-						panic("encountered empty values slice")
-					}
-
-					if len(nt.values) == 1 {
-						val := nt.values[0]
-						if val.data.Type != DataIntDec {
-							panic("TODO only know how to handle DataIntDec type here")
-						}
-
-						t := DataType(val.data.Value)
-						switch t {
-						case DataString, DataAttribute, DataType(0x3e):
-							// TODO identify 0x3e, in bootstrap.xml this is the native lib name
-							nattr.RawValue = pool.ref(attr.Value)
-							nattr.TypedValue.Type = DataString
-							nattr.TypedValue.Value = uint32(nattr.RawValue)
-						case DataIntBool, DataType(0x08):
-							nattr.TypedValue.Type = DataIntBool
-							switch attr.Value {
-							case "true":
-								nattr.TypedValue.Value = 0xFFFFFFFF
-							case "false":
-								nattr.TypedValue.Value = 0
-							default:
-								return nil, fmt.Errorf("invalid bool value %q", attr.Value)
-							}
-						case DataIntDec, DataFloat, DataFraction:
-							// TODO DataFraction needs it's own case statement. minSdkVersion identifies as DataFraction
-							// but has accepted input in the past such as android:minSdkVersion="L"
-							// Other use-cases for DataFraction are currently unknown as applicable to manifest generation
-							// but this provides minimum support for writing out minSdkVersion="15" correctly.
-							nattr.TypedValue.Type = DataIntDec
-							i, err := strconv.Atoi(attr.Value)
-							if err != nil {
-								return nil, err
-							}
-							nattr.TypedValue.Value = uint32(i)
-						case DataReference:
-							nattr.TypedValue.Type = DataReference
-							dref, err := tbl.RefByName(attr.Value)
-							if err != nil {
-								if strings.HasPrefix(attr.Value, "@mipmap") {
-									// firstDrawableId is a TableRef matching first entry of mipmap spec initialized by NewMipmapTable.
-									// 7f is default package, 02 is mipmap spec, 0000 is first entry; e.g. R.drawable.icon
-									// TODO resource table should generate ids as required.
-									const firstDrawableId = 0x7f020000
-									nattr.TypedValue.Value = firstDrawableId
-									continue
-								}
-								return nil, err
-							}
-							nattr.TypedValue.Value = uint32(dref)
-						default:
-							return nil, fmt.Errorf("unhandled data type %0#2x: %s", uint8(t), t)
-						}
-					} else {
-						// 0x01000000 is an unknown ref that doesn't point to anything, typically
-						// located at the start of entry value lists, peek at last value to determine type.
-						t := nt.values[len(nt.values)-1].data.Type
-						switch t {
-						case DataIntDec:
-							for _, val := range nt.values {
-								if val.name == 0x01000000 {
-									continue
-								}
-								nr, err := val.name.Resolve(tbl)
-								if err != nil {
-									return nil, err
-								}
-								if attr.Value == nr.key.Resolve(tbl.pkgs[0].keyPool) { // TODO hard-coded pkg ref
-									nattr.TypedValue = *val.data
-									break
-								}
-							}
-						case DataIntHex:
-							nattr.TypedValue.Type = t
-							for _, x := range strings.Split(attr.Value, "|") {
-								for _, val := range nt.values {
-									if val.name == 0x01000000 {
-										continue
-									}
-									nr, err := val.name.Resolve(tbl)
-									if err != nil {
-										return nil, err
-									}
-									if x == nr.key.Resolve(tbl.pkgs[0].keyPool) { // TODO hard-coded pkg ref
-										nattr.TypedValue.Value |= val.data.Value
-										break
-									}
-								}
-							}
-						default:
-							return nil, fmt.Errorf("unhandled data type for configuration %0#2x: %s", uint8(t), t)
-						}
-					}
-				}
-			}
-		case xml.CharData:
-			if s := poolTrim(string(tkn)); s != "" {
-				cdt := &CharData{
-					NodeHeader: NodeHeader{
-						LineNumber: uint32(line),
-						Comment:    NoEntry,
-					},
-					RawData: pool.ref(s),
-				}
-				el := bx.stack[len(bx.stack)-1]
-				if el.head == nil {
-					el.head = cdt
-				} else if el.tail == nil {
-					el.tail = cdt
-				} else {
-					return nil, fmt.Errorf("element head and tail already contain chardata")
-				}
-			}
-		case xml.EndElement:
-			if tkn.Name.Local == "manifest" {
-				bx.Namespace.end = &Namespace{
-					NodeHeader: NodeHeader{
-						LineNumber: uint32(line),
-						Comment:    NoEntry,
-					},
-					prefix: 0,
-					uri:    0,
-				}
-			}
-			n := len(bx.stack)
-			var el *Element
-			el, bx.stack = bx.stack[n-1], bx.stack[:n-1]
-			if el.end != nil {
-				return nil, fmt.Errorf("element end already exists")
-			}
-			el.end = &ElementEnd{
-				NodeHeader: NodeHeader{
-					LineNumber: uint32(line),
-					Comment:    NoEntry,
-				},
-				NS:   el.NS,
-				Name: el.Name,
-			}
-		case xml.Comment, xml.ProcInst:
-			// discard
-		default:
-			panic(fmt.Errorf("unhandled token type: %T %+v", tkn, tkn))
+		i, err := handleTokens(tkn, line, pool, bx, tbl)
+		if err != nil {
+			return i, err
 		}
 	}
 
@@ -679,6 +467,237 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 	return bx, nil
 }
 
+func handleTokens(tkn xml.Token, line int, pool *Pool, bx *XML, tbl *Table) (*XML, error) {
+	switch tkn := tkn.(type) {
+	case xml.StartElement:
+		el := &Element{
+			NodeHeader: NodeHeader{
+				LineNumber: uint32(line),
+				Comment:    0xFFFFFFFF,
+			},
+			NS:   NoEntry,
+			Name: pool.ref(tkn.Name.Local),
+		}
+		if len(bx.stack) == 0 {
+			bx.Children = append(bx.Children, el)
+		} else {
+			n := len(bx.stack)
+			var p *Element
+			p, bx.stack = bx.stack[n-1], bx.stack[:n-1]
+			p.Children = append(p.Children, el)
+			bx.stack = append(bx.stack, p)
+		}
+		bx.stack = append(bx.stack, el)
+
+		i, err := addAttributes(tkn, bx, line, pool, el, tbl)
+		if err != nil {
+			return i, err
+		}
+	case xml.CharData:
+		if s := poolTrim(string(tkn)); s != "" {
+			cdt := &CharData{
+				NodeHeader: NodeHeader{
+					LineNumber: uint32(line),
+					Comment:    NoEntry,
+				},
+				RawData: pool.ref(s),
+			}
+			el := bx.stack[len(bx.stack)-1]
+			if el.head == nil {
+				el.head = cdt
+			} else if el.tail == nil {
+				el.tail = cdt
+			} else {
+				return nil, fmt.Errorf("element head and tail already contain chardata")
+			}
+		}
+	case xml.EndElement:
+		if tkn.Name.Local == "manifest" {
+			bx.Namespace.end = &Namespace{
+				NodeHeader: NodeHeader{
+					LineNumber: uint32(line),
+					Comment:    NoEntry,
+				},
+				prefix: 0,
+				uri:    0,
+			}
+		}
+		n := len(bx.stack)
+		var el *Element
+		el, bx.stack = bx.stack[n-1], bx.stack[:n-1]
+		if el.end != nil {
+			return nil, fmt.Errorf("element end already exists")
+		}
+		el.end = &ElementEnd{
+			NodeHeader: NodeHeader{
+				LineNumber: uint32(line),
+				Comment:    NoEntry,
+			},
+			NS:   el.NS,
+			Name: el.Name,
+		}
+	case xml.Comment, xml.ProcInst:
+		// discard
+	default:
+		panic(fmt.Errorf("unhandled token type: %T %+v", tkn, tkn))
+	}
+	return nil, nil
+}
+
+func addAttributes(tkn xml.StartElement, bx *XML, line int, pool *Pool, el *Element, tbl *Table) (*XML, error) {
+	for _, attr := range tkn.Attr {
+		if (attr.Name.Space == "xmlns" && attr.Name.Local == "tools") || attr.Name.Space == toolsSchema {
+			continue // TODO can tbl be queried for schemas to determine validity instead?
+		}
+
+		if attr.Name.Space == "xmlns" && attr.Name.Local == "android" {
+			if bx.Namespace != nil {
+				return nil, fmt.Errorf("multiple declarations of xmlns:android encountered")
+			}
+			bx.Namespace = &Namespace{
+				NodeHeader: NodeHeader{
+					LineNumber: uint32(line),
+					Comment:    NoEntry,
+				},
+				prefix: 0,
+				uri:    0,
+			}
+			continue
+		}
+
+		nattr := &Attribute{
+			NS:       pool.ref(attr.Name.Space),
+			Name:     pool.ref(attr.Name.Local),
+			RawValue: NoEntry,
+		}
+		el.attrs = append(el.attrs, nattr)
+
+		if attr.Name.Space == "" {
+			nattr.NS = NoEntry
+			// TODO it's unclear how to query these
+			switch attr.Name.Local {
+			case "platformBuildVersionCode":
+				nattr.TypedValue.Type = DataIntDec
+				i, err := strconv.Atoi(attr.Value)
+				if err != nil {
+					return nil, err
+				}
+				nattr.TypedValue.Value = uint32(i)
+			default: // "package", "platformBuildVersionName", and any invalid
+				nattr.RawValue = pool.ref(attr.Value)
+				nattr.TypedValue.Type = DataString
+			}
+		} else {
+			// get type spec and value data type
+			ref, err := tbl.RefByName("attr/" + attr.Name.Local)
+			if err != nil {
+				return nil, err
+			}
+			nt, err := ref.Resolve(tbl)
+			if err != nil {
+				return nil, err
+			}
+			if len(nt.values) == 0 {
+				panic("encountered empty values slice")
+			}
+
+			if len(nt.values) == 1 {
+				val := nt.values[0]
+				if val.data.Type != DataIntDec {
+					panic("TODO only know how to handle DataIntDec type here")
+				}
+
+				t := DataType(val.data.Value)
+				switch t {
+				case DataString, DataAttribute, DataType(0x3e):
+					// TODO identify 0x3e, in bootstrap.xml this is the native lib name
+					nattr.RawValue = pool.ref(attr.Value)
+					nattr.TypedValue.Type = DataString
+					nattr.TypedValue.Value = uint32(nattr.RawValue)
+				case DataIntBool, DataType(0x08):
+					nattr.TypedValue.Type = DataIntBool
+					switch attr.Value {
+					case "true":
+						nattr.TypedValue.Value = 0xFFFFFFFF
+					case "false":
+						nattr.TypedValue.Value = 0
+					default:
+						return nil, fmt.Errorf("invalid bool value %q", attr.Value)
+					}
+				case DataIntDec, DataFloat, DataFraction:
+					// TODO DataFraction needs it's own case statement. minSdkVersion identifies as DataFraction
+					// but has accepted input in the past such as android:minSdkVersion="L"
+					// Other use-cases for DataFraction are currently unknown as applicable to manifest generation
+					// but this provides minimum support for writing out minSdkVersion="15" correctly.
+					nattr.TypedValue.Type = DataIntDec
+					i, err := strconv.Atoi(attr.Value)
+					if err != nil {
+						return nil, err
+					}
+					nattr.TypedValue.Value = uint32(i)
+				case DataReference:
+					nattr.TypedValue.Type = DataReference
+					dref, err := tbl.RefByName(attr.Value)
+					if err != nil {
+						if strings.HasPrefix(attr.Value, "@mipmap") {
+							// firstDrawableId is a TableRef matching first entry of mipmap spec initialized by NewMipmapTable.
+							// 7f is default package, 02 is mipmap spec, 0000 is first entry; e.g. R.drawable.icon
+							// TODO resource table should generate ids as required.
+							const firstDrawableID = 0x7f020000
+							nattr.TypedValue.Value = firstDrawableID
+							continue
+						}
+						return nil, err
+					}
+					nattr.TypedValue.Value = uint32(dref)
+				default:
+					return nil, fmt.Errorf("unhandled data type %0#2x: %s", uint8(t), t)
+				}
+			} else {
+				// 0x01000000 is an unknown ref that doesn't point to anything, typically
+				// located at the start of entry value lists, peek at last value to determine type.
+				t := nt.values[len(nt.values)-1].data.Type
+				switch t {
+				case DataIntDec:
+					for _, val := range nt.values {
+						if val.name == 0x01000000 {
+							continue
+						}
+						nr, err := val.name.Resolve(tbl)
+						if err != nil {
+							return nil, err
+						}
+						if attr.Value == nr.key.Resolve(tbl.pkgs[0].keyPool) { // TODO hard-coded pkg ref
+							nattr.TypedValue = *val.data
+							break
+						}
+					}
+				case DataIntHex:
+					nattr.TypedValue.Type = t
+					for _, x := range strings.Split(attr.Value, "|") {
+						for _, val := range nt.values {
+							if val.name == 0x01000000 {
+								continue
+							}
+							nr, err := val.name.Resolve(tbl)
+							if err != nil {
+								return nil, err
+							}
+							if x == nr.key.Resolve(tbl.pkgs[0].keyPool) { // TODO hard-coded pkg ref
+								nattr.TypedValue.Value |= val.data.Value
+								break
+							}
+						}
+					}
+				default:
+					return nil, fmt.Errorf("unhandled data type for configuration %0#2x: %s", uint8(t), t)
+				}
+			}
+		}
+	}
+	return nil, nil
+}
+
 // UnmarshalBinary decodes all resource chunks in buf returning any error encountered.
 func (bx *XML) UnmarshalBinary(buf []byte) error {
 	if err := (&bx.chunkHeader).UnmarshalBinary(buf); err != nil {
@@ -773,6 +792,7 @@ func (bx *XML) kind(t ResType) (unmarshaler, error) {
 	}
 }
 
+// MarshalBinary formats the XML in memory to it's text appearance
 func (bx *XML) MarshalBinary() ([]byte, error) {
 	bx.typ = ResXML
 	bx.headerByteSize = 8

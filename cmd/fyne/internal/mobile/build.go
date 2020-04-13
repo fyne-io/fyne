@@ -16,10 +16,10 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
-var ctx = build.Default
-var pkg *build.Package // TODO(crawshaw): remove global pkg variable
 var tmpdir string
 
 var cmdBuild = &command{
@@ -72,9 +72,16 @@ const (
 )
 
 func runBuild(cmd *command) (err error) {
+	_, err = runBuildImpl(cmd)
+	return
+}
+
+// runBuildImpl builds a package for mobiles based on the given commands.
+// runBuildImpl returns a built package information and an error if exists.
+func runBuildImpl(cmd *command) (*packages.Package, error) {
 	cleanup, err := buildEnvInit()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer cleanup()
 
@@ -82,38 +89,36 @@ func runBuild(cmd *command) (err error) {
 
 	targetOS, targetArchs, err := parseBuildTarget(buildTarget)
 	if err != nil {
-		return fmt.Errorf(`invalid -target=%q: %v`, buildTarget, err)
+		return nil, fmt.Errorf(`invalid -target=%q: %v`, buildTarget, err)
 	}
 
-	oldCtx := ctx
-	defer func() {
-		ctx = oldCtx
-	}()
-	ctx.GOARCH = targetArchs[0]
-	ctx.GOOS = targetOS
-
-	if ctx.GOOS == "darwin" {
-		ctx.BuildTags = append(ctx.BuildTags, "ios")
-	}
-
+	var buildPath string
 	switch len(args) {
 	case 0:
-		pkg, err = ctx.ImportDir(cwd, build.ImportComment)
+		buildPath = "."
 	case 1:
-		pkg, err = ctx.Import(args[0], cwd, build.ImportComment)
+		buildPath = args[0]
 	default:
 		cmd.usage()
 		os.Exit(1)
 	}
+	pkgs, err := packages.Load(packagesConfig(targetOS), buildPath)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	// len(pkgs) can be more than 1 e.g., when the specified path includes `...`.
+	if len(pkgs) != 1 {
+		cmd.usage()
+		os.Exit(1)
 	}
 
+	pkg := pkgs[0]
+
 	if pkg.Name != "main" && buildO != "" {
-		return fmt.Errorf("cannot set -o when building non-main package")
+		return nil, fmt.Errorf("cannot set -o when building non-main package")
 	}
 	if buildBundleID == "" {
-		return fmt.Errorf("value for -appID is required for a mobile package")
+		return nil, fmt.Errorf("value for -appID is required for a mobile package")
 	}
 
 	var nmpkgs map[string]bool
@@ -121,48 +126,50 @@ func runBuild(cmd *command) (err error) {
 	case "android":
 		if pkg.Name != "main" {
 			for _, arch := range targetArchs {
-				env := androidEnv[arch]
-				if err := goBuild(pkg.ImportPath, env); err != nil {
-					return err
+				if err := goBuild(pkg.PkgPath, androidEnv[arch]); err != nil {
+					return nil, err
 				}
 			}
-			return nil
+			return pkg, nil
 		}
 		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	case "darwin":
 		if !xcodeAvailable() {
-			return fmt.Errorf("-target=ios requires XCode")
+			return nil, fmt.Errorf("-target=ios requires XCode")
 		}
+		if buildRelease {
+			targetArchs = []string{"arm", "arm64"}
+		}
+
 		if pkg.Name != "main" {
 			for _, arch := range targetArchs {
-				env := darwinEnv[arch]
-				if err := goBuild(pkg.ImportPath, env); err != nil {
-					return err
+				if err := goBuild(pkg.PkgPath, darwinEnv[arch]); err != nil {
+					return nil, err
 				}
 			}
-			return nil
+			return pkg, nil
 		}
 		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	if !nmpkgs["golang.org/x/mobile/app"] {
-		return fmt.Errorf(`%s does not import "golang.org/x/mobile/app"`, pkg.ImportPath)
+	if !nmpkgs["github.com/fyne-io/mobile/app"] {
+		return nil, fmt.Errorf(`%s does not import "github.com/fyne-io/mobile/app"`, pkg.PkgPath)
 	}
 
-	return nil
+	return pkg, nil
 }
 
-var nmRE = regexp.MustCompile(`[0-9a-f]{8} t (?:.*/vendor/)?(golang.org/x.*/[^.]*)`)
+var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(github.com/fyne-io.*/[^.]*)`)
 
 func extractPkgs(nm string, path string) (map[string]bool, error) {
 	if buildN {
-		return map[string]bool{"golang.org/x/mobile/app": true}, nil
+		return map[string]bool{"github.com/fyne-io/mobile/app": true}, nil
 	}
 	r, w := io.Pipe()
 	cmd := exec.Command(nm, path)
@@ -195,11 +202,11 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 func importsApp(pkg *build.Package) error {
 	// Building a program, make sure it is appropriate for mobile.
 	for _, path := range pkg.Imports {
-		if path == "golang.org/x/mobile/app" {
+		if path == "github.com/fyne-io/mobile/app" {
 			return nil
 		}
 	}
-	return fmt.Errorf(`%s does not import "golang.org/x/mobile/app"`, pkg.ImportPath)
+	return fmt.Errorf(`%s does not import "github.com/fyne-io/mobile/app"`, pkg.ImportPath)
 }
 
 var xout io.Writer = os.Stderr
@@ -226,23 +233,25 @@ func printcmd(format string, args ...interface{}) {
 
 // "Build flags", used by multiple commands.
 var (
-	buildA          bool   // -a
-	buildI          bool   // -i
-	buildN          bool   // -n
-	buildV          bool   // -v
-	buildX          bool   // -x
-	buildO          string // -o
-	buildGcflags    string // -gcflags
-	buildLdflags    string // -ldflags
-	buildRelease    bool   // -release
-	buildTarget     string // -target
-	buildTrimpath   bool   // -trimpath
-	buildWork       bool   // -work
-	buildBundleID   string // -bundleid
-	buildIOSVersion string // -iosversion
-	buildAndroidAPI int    // -androidapi
+	buildA          bool        // -a
+	buildI          bool        // -i
+	buildN          bool        // -n
+	buildV          bool        // -v
+	buildX          bool        // -x
+	buildO          string      // -o
+	buildGcflags    string      // -gcflags
+	buildLdflags    string      // -ldflags
+	buildRelease    bool        // -release
+	buildTarget     string      // -target
+	buildTrimpath   bool        // -trimpath
+	buildWork       bool        // -work
+	buildBundleID   string      // -bundleid
+	buildIOSVersion string      // -iosversion
+	buildAndroidAPI int         // -androidapi
+	buildTags       stringsFlag // -tags
 )
 
+// RunNewBuild executes a new mobile build for the specified configuration
 func RunNewBuild(target, appID, icon, name string, release bool) error {
 	buildTarget = target
 	buildBundleID = appID
@@ -267,7 +276,7 @@ func addBuildFlags(cmd *command) {
 	cmd.Flag.BoolVar(&buildA, "a", false, "")
 	cmd.Flag.BoolVar(&buildI, "i", false, "")
 	cmd.Flag.BoolVar(&buildTrimpath, "trimpath", false, "")
-	cmd.Flag.Var((*stringsFlag)(&ctx.BuildTags), "tags", "")
+	cmd.Flag.Var(&buildTags, "tags", "")
 }
 
 func addBuildFlagsNVXWork(cmd *command) {
@@ -293,17 +302,26 @@ func goBuild(src string, env []string, args ...string) error {
 	return goCmd("build", []string{src}, env, args...)
 }
 
-func goInstall(srcs []string, env []string, args ...string) error {
-	return goCmd("install", srcs, env, args...)
+func goBuildAt(at string, src string, env []string, args ...string) error {
+	return goCmdAt(at, "build", []string{src}, env, args...)
 }
 
 func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
-	cmd := exec.Command(
-		goBin(),
-		subcmd,
-	)
-	if len(ctx.BuildTags) > 0 {
-		cmd.Args = append(cmd.Args, "-tags", strings.Join(ctx.BuildTags, " "))
+	return goCmdAt("", subcmd, srcs, env, args...)
+}
+
+func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...string) error {
+	cmd := exec.Command("go", subcmd)
+	tags := buildTags
+	targetOS, _, err := parseBuildTarget(buildTarget)
+	if err != nil {
+		return err
+	}
+	if targetOS == "darwin" {
+		tags = append(tags, "ios")
+	}
+	if len(tags) > 0 {
+		cmd.Args = append(cmd.Args, "-tags", strings.Join(tags, " "))
 	}
 	if buildV {
 		cmd.Args = append(cmd.Args, "-v")
@@ -329,8 +347,7 @@ func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
 	cmd.Args = append(cmd.Args, args...)
 	cmd.Args = append(cmd.Args, srcs...)
 	cmd.Env = append([]string{}, env...)
-	// gomobile does not support modules yet.
-	cmd.Env = append(cmd.Env, "GO111MODULE=off")
+	cmd.Dir = at
 	return runCmd(cmd)
 }
 

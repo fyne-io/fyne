@@ -14,6 +14,7 @@ import (
 	"unicode/utf16"
 )
 
+// NoEntry marks a key with no value in the table
 const NoEntry = 0xFFFFFFFF
 
 // TableRef uniquely identifies entries within a resource table.
@@ -170,6 +171,7 @@ func (tbl *Table) RefByName(name string) (TableRef, error) {
 	return 0, fmt.Errorf("failed to find table ref by %q", name)
 }
 
+// UnmarshalBinary creates the table from binary data
 func (tbl *Table) UnmarshalBinary(bin []byte) error {
 	if err := (&tbl.chunkHeader).UnmarshalBinary(bin); err != nil {
 		return err
@@ -200,6 +202,7 @@ func (tbl *Table) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given table
 func (tbl *Table) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 12)
 	putu16(bin, uint16(ResTable))
@@ -248,6 +251,7 @@ type Package struct {
 	specs []*TypeSpec
 }
 
+// UnmarshalBinary creates a pakage from binary data
 func (pkg *Package) UnmarshalBinary(bin []byte) error {
 	if err := (&pkg.chunkHeader).UnmarshalBinary(bin); err != nil {
 		return err
@@ -322,6 +326,7 @@ func (pkg *Package) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given package
 func (pkg *Package) MarshalBinary() ([]byte, error) {
 	// Package header size is determined by C++ struct ResTable_package
 	// see frameworks/base/include/ResourceTypes.h
@@ -392,6 +397,7 @@ type TypeSpec struct {
 	types   []*Type
 }
 
+// UnmarshalBinary creates the type spec from binary data
 func (spec *TypeSpec) UnmarshalBinary(bin []byte) error {
 	if err := (&spec.chunkHeader).UnmarshalBinary(bin); err != nil {
 		return err
@@ -412,6 +418,7 @@ func (spec *TypeSpec) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given type spec
 func (spec *TypeSpec) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 16+len(spec.entries)*4)
 	putu16(bin, uint16(ResTableTypeSpec))
@@ -491,6 +498,7 @@ type Type struct {
 	entries []*Entry
 }
 
+// UnmarshalBinary creates the type from binary data
 func (typ *Type) UnmarshalBinary(bin []byte) error {
 	if err := (&typ.chunkHeader).UnmarshalBinary(bin); err != nil {
 		return err
@@ -558,6 +566,7 @@ func (typ *Type) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given type
 func (typ *Type) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 56+len(typ.entries)*4)
 	putu16(bin, uint16(ResTableType))
@@ -626,6 +635,7 @@ type Entry struct {
 	values []*Value
 }
 
+// UnmarshalBinary creates an entry from binary data
 func (nt *Entry) UnmarshalBinary(bin []byte) error {
 	nt.size = btou16(bin)
 	nt.flags = btou16(bin[2:])
@@ -654,6 +664,7 @@ func (nt *Entry) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given entry
 func (nt *Entry) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 8)
 	sz := nt.size
@@ -686,17 +697,20 @@ func (nt *Entry) MarshalBinary() ([]byte, error) {
 	return bin, nil
 }
 
+// Value is resource value associated with a key
 type Value struct {
 	name TableRef
 	data *Data
 }
 
+// UnmarshalBinary creates the pool from binary data
 func (val *Value) UnmarshalBinary(bin []byte) error {
 	val.name = TableRef(btou32(bin))
 	val.data = &Data{}
 	return val.data.UnmarshalBinary(bin[4:])
 }
 
+// MarshalBinary outputs the binary format from a given value
 func (val *Value) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 12)
 	putu32(bin, uint32(val.name))
@@ -708,6 +722,7 @@ func (val *Value) MarshalBinary() ([]byte, error) {
 	return bin, nil
 }
 
+// DataType marks the type of a data item in a value
 type DataType uint8
 
 // explicitly defined for clarity and resolvability with apt source
@@ -729,6 +744,7 @@ const (
 	DataIntColorRGB4     DataType = 0x1f // raw integer value of the form #rgb
 )
 
+// Data is the raw data stored in a value
 type Data struct {
 	ByteSize uint16
 	Res0     uint8 // always 0, useful for debugging bad read offsets
@@ -736,6 +752,7 @@ type Data struct {
 	Value    uint32
 }
 
+// UnmarshalBinary creates the data item from binary data
 func (d *Data) UnmarshalBinary(bin []byte) error {
 	d.ByteSize = btou16(bin)
 	d.Res0 = uint8(bin[2])
@@ -744,6 +761,7 @@ func (d *Data) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given data item
 func (d *Data) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 8)
 	putu16(bin, 8)
