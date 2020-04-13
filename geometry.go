@@ -1,43 +1,8 @@
 package fyne
 
-// Size describes something with width and height.
-type Size struct {
-	Width  int // The number of units along the X axis.
-	Height int // The number of units along the Y axis.
-}
-
-// Add returns a new Size that is the result of increasing the current size by
-// s2 Width and Height.
-func (s1 Size) Add(s2 Size) Size {
-	return Size{s1.Width + s2.Width, s1.Height + s2.Height}
-}
-
-// Subtract returns a new Size that is the result of decreasing the current size
-// by s2 Width and Height.
-func (s1 Size) Subtract(s2 Size) Size {
-	return Size{s1.Width - s2.Width, s1.Height - s2.Height}
-}
-
-// Union returns a new Size that is the maximum of the current Size and s2.
-// Deprecated: use Max() instead
-func (s1 Size) Union(s2 Size) Size {
-	return s1.Max(s2)
-}
-
-// Max returns a new Size that is the maximum of the current Size and s2.
-func (s1 Size) Max(s2 Size) Size {
-	maxW := Max(s1.Width, s2.Width)
-	maxH := Max(s1.Height, s2.Height)
-
-	return NewSize(maxW, maxH)
-}
-
-// Min returns a new Size that is the minimum of the current Size and s2.
-func (s1 Size) Min(s2 Size) Size {
-	minW := Min(s1.Width, s2.Width)
-	minH := Min(s1.Height, s2.Height)
-
-	return NewSize(minW, minH)
+// NewPos returns a newly allocated Position representing the specified coordinates.
+func NewPos(x int, y int) Position {
+	return Position{x, y}
 }
 
 // NewSize returns a newly allocated Size of the specified dimensions.
@@ -64,7 +29,42 @@ func (p1 Position) Subtract(p2 Position) Position {
 	return Position{p1.X - p2.X, p1.Y - p2.Y}
 }
 
-// NewPos returns a newly allocated Position representing the specified coordinates.
-func NewPos(x int, y int) Position {
-	return Position{x, y}
+// Size describes something with width and height.
+type Size struct {
+	Width  int // The number of units along the X axis.
+	Height int // The number of units along the Y axis.
+}
+
+// Add returns a new Size that is the result of increasing the current size by
+// s2 Width and Height.
+func (s1 Size) Add(s2 Size) Size {
+	return Size{s1.Width + s2.Width, s1.Height + s2.Height}
+}
+
+// Max returns a new Size that is the maximum of the current Size and s2.
+func (s1 Size) Max(s2 Size) Size {
+	maxW := Max(s1.Width, s2.Width)
+	maxH := Max(s1.Height, s2.Height)
+
+	return NewSize(maxW, maxH)
+}
+
+// Min returns a new Size that is the minimum of the current Size and s2.
+func (s1 Size) Min(s2 Size) Size {
+	minW := Min(s1.Width, s2.Width)
+	minH := Min(s1.Height, s2.Height)
+
+	return NewSize(minW, minH)
+}
+
+// Subtract returns a new Size that is the result of decreasing the current size
+// by s2 Width and Height.
+func (s1 Size) Subtract(s2 Size) Size {
+	return Size{s1.Width - s2.Width, s1.Height - s2.Height}
+}
+
+// Union returns a new Size that is the maximum of the current Size and s2.
+// Deprecated: use Max() instead
+func (s1 Size) Union(s2 Size) Size {
+	return s1.Max(s2)
 }
