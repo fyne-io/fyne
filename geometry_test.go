@@ -36,6 +36,23 @@ func TestSize_Add(t *testing.T) {
 	assert.Equal(t, 35, size3.Height)
 }
 
+func TestSize_IsZero(t *testing.T) {
+	for name, tt := range map[string]struct {
+		s    Size
+		want bool
+	}{
+		"zero value":    {Size{}, true},
+		"0x0":           {NewSize(0, 0), true},
+		"zero width":    {NewSize(0, 42), false},
+		"zero height":   {NewSize(17, 0), false},
+		"non-zero area": {NewSize(6, 9), false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tt.want, tt.s.IsZero())
+		})
+	}
+}
+
 func TestSize_Max(t *testing.T) {
 	size1 := NewSize(10, 100)
 	size2 := NewSize(100, 10)

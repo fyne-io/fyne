@@ -41,6 +41,11 @@ func (s1 Size) Add(s2 Size) Size {
 	return Size{s1.Width + s2.Width, s1.Height + s2.Height}
 }
 
+// IsZero returns whether the Size has zero width and zero height.
+func (s Size) IsZero() bool {
+	return s.Width == 0 && s.Height == 0
+}
+
 // Max returns a new Size that is the maximum of the current Size and s2.
 func (s1 Size) Max(s2 Size) Size {
 	maxW := Max(s1.Width, s2.Width)
