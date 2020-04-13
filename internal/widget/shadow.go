@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -42,11 +41,9 @@ var _ fyne.Widget = (*Shadow)(nil)
 
 // Shadow is a widget that renders a shadow.
 type Shadow struct {
-	hidden bool
-	level  ElevationLevel
-	pos    fyne.Position
-	size   fyne.Size
-	typ    ShadowType
+	base
+	level ElevationLevel
+	typ   ShadowType
 }
 
 // CreateRenderer satisfies the fyne.Widget interface.
@@ -58,72 +55,27 @@ func (s *Shadow) CreateRenderer() fyne.WidgetRenderer {
 
 // Hide satisfies the fyne.Widget interface.
 func (s *Shadow) Hide() {
-	if s.hidden {
-		return
-	}
-
-	s.hidden = true
-	canvas.Refresh(s)
+	s.hide(s)
 }
 
 // MinSize satisfies the fyne.Widget interface.
 func (s *Shadow) MinSize() fyne.Size {
-	return fyne.NewSize(0, 0)
-}
-
-// Move satisfies the fyne.Widget interface.
-func (s *Shadow) Move(pos fyne.Position) {
-	s.pos = pos
-}
-
-// Position satisfies the fyne.Widget interface.
-func (s *Shadow) Position() fyne.Position {
-	return s.pos
+	return s.minSize(s)
 }
 
 // Refresh satisfies the fyne.Widget interface.
 func (s *Shadow) Refresh() {
-	r := cache.Renderer(s)
-	if r == nil {
-		return
-	}
-
-	r.Refresh()
+	s.refresh(s)
 }
 
 // Resize satisfies the fyne.Widget interface.
 func (s *Shadow) Resize(size fyne.Size) {
-	if s.size == size {
-		return
-	}
-
-	s.size = size
-	r := cache.Renderer(s)
-	if r == nil {
-		return
-	}
-
-	r.Layout(size)
+	s.resize(size, s)
 }
 
 // Show satisfies the fyne.Widget interface.
 func (s *Shadow) Show() {
-	if !s.hidden {
-		return
-	}
-
-	s.hidden = false
-	s.Refresh()
-}
-
-// Size satisfies the fyne.Widget interface.
-func (s *Shadow) Size() fyne.Size {
-	return s.size
-}
-
-// Visible satisfies the fyne.Widget interface.
-func (s *Shadow) Visible() bool {
-	return !s.hidden
+	s.show(s)
 }
 
 type shadowRenderer struct {
