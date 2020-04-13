@@ -56,7 +56,7 @@ func (p *PopUp) Resize(size fyne.Size) {
 // Show this pop-up as overlay if not already shown.
 func (p *PopUp) Show() {
 	if !p.overlayShown {
-		if (p.Size() == fyne.Size{}) {
+		if p.Size().IsZero() {
 			p.Resize(p.MinSize())
 		}
 		p.Canvas.Overlays().Add(p)
