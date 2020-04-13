@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -60,7 +61,7 @@ func (t *menuItemWidget) Tapped(*fyne.PointEvent) {
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(t.Item.Label, theme.TextColor())
-	return &menuItemWidgetRenderer{baseRenderer{[]fyne.CanvasObject{text}}, text, t}
+	return &menuItemWidgetRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{text}), text, t}
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -86,7 +87,7 @@ func newMenuItemWidget(item *fyne.MenuItem) *menuItemWidget {
 }
 
 type menuItemWidgetRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	text *canvas.Text
 	w    *menuItemWidget
 }

@@ -29,7 +29,7 @@ func TestShadowingRenderer_Objects(t *testing.T) {
 			assert.Equal(t, append(tt.wantPrependedObjects, objects...), r.Objects())
 
 			otherObjects := []fyne.CanvasObject{NewLabel("X"), NewLabel("Y")}
-			r.setObjects(otherObjects)
+			r.SetObjects(otherObjects)
 			assert.Equal(t, append(tt.wantPrependedObjects, otherObjects...), r.Objects())
 		})
 	}

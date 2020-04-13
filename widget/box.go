@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -58,7 +59,7 @@ func (b *Box) CreateRenderer() fyne.WidgetRenderer {
 		lay = layout.NewVBoxLayout()
 	}
 
-	return &boxRenderer{baseRenderer: baseRenderer{b.Children}, layout: lay, box: b}
+	return &boxRenderer{BaseRenderer: widget.NewBaseRenderer(b.Children), layout: lay, box: b}
 }
 
 func (b *Box) setBackgroundColor(bg color.Color) {
@@ -76,7 +77,7 @@ func NewVBox(children ...fyne.CanvasObject) *Box {
 }
 
 type boxRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	layout fyne.Layout
 	box    *Box
 }
@@ -98,7 +99,7 @@ func (b *boxRenderer) BackgroundColor() color.Color {
 }
 
 func (b *boxRenderer) Refresh() {
-	b.setObjects(b.box.Children)
+	b.SetObjects(b.box.Children)
 	for _, child := range b.Objects() {
 		child.Refresh()
 	}

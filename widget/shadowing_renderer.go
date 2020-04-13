@@ -2,12 +2,13 @@ package widget
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/widget"
 )
 
 // When using the shadowingRenderer the embedding renderer should call
 // layoutShadow(contentSize, contentPos) to lay out the shadow.
 type shadowingRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	shadow fyne.CanvasObject
 }
 
@@ -17,7 +18,7 @@ func newShadowingRenderer(objects []fyne.CanvasObject, level elevationLevel) *sh
 		s = newShadow(shadowAround, level)
 	}
 	r := &shadowingRenderer{shadow: s}
-	r.setObjects(objects)
+	r.SetObjects(objects)
 	return r
 }
 
@@ -29,9 +30,10 @@ func (r *shadowingRenderer) layoutShadow(size fyne.Size, pos fyne.Position) {
 	r.shadow.Move(pos)
 }
 
-func (r *shadowingRenderer) setObjects(objects []fyne.CanvasObject) {
+// SetObjects updates the objects of the renderer.
+func (r *shadowingRenderer) SetObjects(objects []fyne.CanvasObject) {
 	if r.shadow != nil {
 		objects = append([]fyne.CanvasObject{r.shadow}, objects...)
 	}
-	r.baseRenderer.setObjects(objects)
+	r.BaseRenderer.SetObjects(objects)
 }

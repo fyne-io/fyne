@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -98,7 +99,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	bg := canvas.NewRectangle(theme.BackgroundColor())
 	objects := []fyne.CanvasObject{bg, p.Content}
 	if p.modal {
-		return &modalPopUpRenderer{baseRenderer{objects}, popUpBaseRenderer{popUp: p, bg: bg}}
+		return &modalPopUpRenderer{widget.NewBaseRenderer(objects), popUpBaseRenderer{popUp: p, bg: bg}}
 	}
 
 	return &popUpRenderer{newShadowingRenderer(objects, popUpLevel), popUpBaseRenderer{popUp: p, bg: bg}}
@@ -229,7 +230,7 @@ func (r *popUpRenderer) BackgroundColor() color.Color {
 }
 
 type modalPopUpRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	popUpBaseRenderer
 }
 

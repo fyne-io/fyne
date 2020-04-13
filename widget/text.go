@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -226,7 +227,7 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 
 // Renderer
 type textRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	texts    []*canvas.Text
 	provider *textProvider
 }
@@ -304,7 +305,7 @@ func (r *textRenderer) Refresh() {
 
 		if add {
 			r.texts = append(r.texts, textCanvas)
-			r.setObjects(append(r.Objects(), textCanvas))
+			r.SetObjects(append(r.Objects(), textCanvas))
 		}
 	}
 
