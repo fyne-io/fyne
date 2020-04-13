@@ -37,8 +37,8 @@ type Size struct {
 
 // Add returns a new Size that is the result of increasing the current size by
 // s2 Width and Height.
-func (s1 Size) Add(s2 Size) Size {
-	return Size{s1.Width + s2.Width, s1.Height + s2.Height}
+func (s Size) Add(s2 Size) Size {
+	return Size{s.Width + s2.Width, s.Height + s2.Height}
 }
 
 // IsZero returns whether the Size has zero width and zero height.
@@ -47,29 +47,29 @@ func (s Size) IsZero() bool {
 }
 
 // Max returns a new Size that is the maximum of the current Size and s2.
-func (s1 Size) Max(s2 Size) Size {
-	maxW := Max(s1.Width, s2.Width)
-	maxH := Max(s1.Height, s2.Height)
+func (s Size) Max(s2 Size) Size {
+	maxW := Max(s.Width, s2.Width)
+	maxH := Max(s.Height, s2.Height)
 
 	return NewSize(maxW, maxH)
 }
 
 // Min returns a new Size that is the minimum of the current Size and s2.
-func (s1 Size) Min(s2 Size) Size {
-	minW := Min(s1.Width, s2.Width)
-	minH := Min(s1.Height, s2.Height)
+func (s Size) Min(s2 Size) Size {
+	minW := Min(s.Width, s2.Width)
+	minH := Min(s.Height, s2.Height)
 
 	return NewSize(minW, minH)
 }
 
 // Subtract returns a new Size that is the result of decreasing the current size
 // by s2 Width and Height.
-func (s1 Size) Subtract(s2 Size) Size {
-	return Size{s1.Width - s2.Width, s1.Height - s2.Height}
+func (s Size) Subtract(s2 Size) Size {
+	return Size{s.Width - s2.Width, s.Height - s2.Height}
 }
 
 // Union returns a new Size that is the maximum of the current Size and s2.
 // Deprecated: use Max() instead
-func (s1 Size) Union(s2 Size) Size {
-	return s1.Max(s2)
+func (s Size) Union(s2 Size) Size {
+	return s.Max(s2)
 }
