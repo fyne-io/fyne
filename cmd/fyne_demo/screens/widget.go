@@ -2,6 +2,7 @@ package screens
 
 import (
 	"fmt"
+	"image/color"
 	"net/url"
 	"time"
 
@@ -29,10 +30,19 @@ func makeButtonTab() fyne.Widget {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
 
+	grid := widget.NewTextGridFromString("TextGrid\n  Content")
+	grid.SetStyleRange(0, 0, 0, 3,
+		&widget.CustomTextGridStyle{FGColor: color.RGBA{R: 0, G: 0, B: 128, A: 255}})
+	grid.SetStyleRange(0, 4, 0, 7,
+		&widget.CustomTextGridStyle{BGColor: &color.RGBA{R: 128, G: 0, B: 0, A: 255}})
+	grid.LineNumbers = true
+	grid.Whitespace = true
+
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
 		disabled,
+		grid,
 	)
 }
 
