@@ -17,7 +17,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 		if item.IsSeparator {
 			options.Append(newSeparator())
 		} else {
-			options.Append(newMenuItemWidget(item.Label, item.Action))
+			options.Append(newMenuItemWidget(item))
 		}
 	}
 	pop := newPopUp(options, c)
@@ -45,21 +45,21 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 
 type menuItemWidget struct {
 	BaseWidget
-	Action        func()
 	DismissAction func()
-	Label         string
-	hovered       bool
+	Item          *fyne.MenuItem
+
+	hovered bool
 }
 
 func (t *menuItemWidget) Tapped(*fyne.PointEvent) {
-	t.Action()
+	t.Item.Action()
 	if t.DismissAction != nil {
 		t.DismissAction()
 	}
 }
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
-	text := canvas.NewText(t.Label, theme.TextColor())
+	text := canvas.NewText(t.Item.Label, theme.TextColor())
 	return &menuItemWidgetRenderer{baseRenderer{[]fyne.CanvasObject{text}}, text, t}
 }
 
@@ -79,8 +79,8 @@ func (t *menuItemWidget) MouseOut() {
 func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 }
 
-func newMenuItemWidget(label string, action func()) *menuItemWidget {
-	ret := &menuItemWidget{Label: label, Action: action}
+func newMenuItemWidget(item *fyne.MenuItem) *menuItemWidget {
+	ret := &menuItemWidget{Item: item}
 	ret.ExtendBaseWidget(ret)
 	return ret
 }
