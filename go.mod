@@ -7,6 +7,7 @@ require (
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/fyne-io/mobile v0.0.1
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
@@ -20,7 +21,6 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
-	golang.org/x/mobile v0.0.0-20200222142934-3c8601c510d0
 	golang.org/x/mod v0.2.0
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
 	golang.org/x/sys v0.0.0-20200327173247-9dae0f8f5775 // indirect
@@ -29,5 +29,3 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
-
-replace golang.org/x/mobile => github.com/fyne-io/mobile v0.0.0-20200403124556-ac83d645d551

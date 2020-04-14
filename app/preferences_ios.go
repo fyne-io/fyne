@@ -21,6 +21,7 @@ int getPreferenceInt(const char* key, int fallback);
 void setPreferenceInt(const char* key, int value);
 const char* getPreferenceString(const char* key, const char* fallback);
 void setPreferenceString(const char* key, const char* value);
+void removePreferenceValue(const char* key);
 */
 import "C"
 
@@ -104,6 +105,13 @@ func (p *iOSPreferences) SetString(key string, value string) {
 	defer C.free(unsafe.Pointer(cValue))
 
 	C.setPreferenceString(cKey, cValue)
+}
+
+func (p *iOSPreferences) RemoveValue(key string) {
+	cKey := C.CString(key)
+	defer C.free(unsafe.Pointer(cKey))
+
+	C.removePreferenceValue(cKey)
 }
 
 func newPreferences() *iOSPreferences {

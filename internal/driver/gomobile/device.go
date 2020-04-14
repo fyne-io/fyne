@@ -1,12 +1,13 @@
 package gomobile
 
 import (
-	"golang.org/x/mobile/event/size"
+	"github.com/fyne-io/mobile/event/size"
 
 	"fyne.io/fyne"
 )
 
 type device struct {
+	insetTop, insetBottom, insetLeft, insetRight int
 }
 
 var (

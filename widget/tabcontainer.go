@@ -47,6 +47,7 @@ type TabContainer struct {
 	BaseWidget
 
 	Items       []*TabItem
+	OnChanged   func(tab *TabItem)
 	current     int
 	tabLocation TabLocation
 }
@@ -78,7 +79,7 @@ func (t *TabContainer) CurrentTab() *TabItem {
 
 // SelectTabIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *TabContainer) SelectTabIndex(index int) {
-	if index < 0 || index >= len(t.Items) {
+	if index < 0 || index >= len(t.Items) || t.current == index {
 		return
 	}
 
@@ -95,6 +96,10 @@ func (t *TabContainer) SelectTabIndex(index int) {
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	r.Layout(t.size)
 	t.Refresh()
+
+	if t.OnChanged != nil {
+		t.OnChanged(t.Items[t.current])
+	}
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
