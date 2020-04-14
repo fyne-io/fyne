@@ -1,20 +1,15 @@
 package fyne
 
-// NewPos returns a newly allocated Position representing the specified coordinates.
-func NewPos(x int, y int) Position {
-	return Position{x, y}
-}
-
-// NewSize returns a newly allocated Size of the specified dimensions.
-func NewSize(w int, h int) Size {
-	return Size{w, h}
-}
-
 // Position describes a generic X, Y coordinate relative to a parent Canvas
 // or CanvasObject.
 type Position struct {
 	X int // The position from the parent's left edge
 	Y int // The position from the parent's top edge
+}
+
+// NewPos returns a newly allocated Position representing the specified coordinates.
+func NewPos(x int, y int) Position {
+	return Position{x, y}
 }
 
 // Add returns a new Position that is the result of offsetting the current
@@ -38,6 +33,11 @@ func (p Position) Subtract(p2 Position) Position {
 type Size struct {
 	Width  int // The number of units along the X axis.
 	Height int // The number of units along the Y axis.
+}
+
+// NewSize returns a newly allocated Size of the specified dimensions.
+func NewSize(w int, h int) Size {
+	return Size{w, h}
 }
 
 // Add returns a new Size that is the result of increasing the current size by
