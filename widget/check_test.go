@@ -268,9 +268,9 @@ func TestCheck_BindText(t *testing.T) {
 	done := make(chan bool)
 	check := NewCheck("check", nil)
 	data := binding.NewString("foo")
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	check.BindText(data)
 	timeout(t, done)
 	assert.Equal(t, "foo", check.Text)

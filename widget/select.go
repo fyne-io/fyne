@@ -254,7 +254,7 @@ func (s *Select) UnbindSelected() *Select {
 func (s *Select) BindOptions(data binding.List) *Select {
 	s.UnbindOptions()
 	s.optionBind = data
-	s.optionNotify = data.AddListenerFunction(func(binding.Binding) {
+	s.optionNotify = binding.NewNotifyFunction(func(binding.Binding) {
 		l := data.Length()
 		var options []string
 		for i := 0; i < l; i++ {
@@ -268,6 +268,7 @@ func (s *Select) BindOptions(data binding.List) *Select {
 		s.Options = options
 		s.Refresh()
 	})
+	data.AddListener(s.optionNotify)
 	return s
 }
 

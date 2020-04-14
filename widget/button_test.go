@@ -143,9 +143,9 @@ func TestButton_BindText(t *testing.T) {
 	done := make(chan bool)
 	button := NewButton("button", nil)
 	data := binding.NewString("foo")
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	button.BindText(data)
 	timeout(t, done)
 	assert.Equal(t, "foo", button.Text)
@@ -161,9 +161,9 @@ func TestButton_BindIcon(t *testing.T) {
 	done := make(chan bool)
 	button := NewButtonWithIcon("button", theme.WarningIcon(), nil)
 	data := binding.NewResource(theme.QuestionIcon())
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	button.BindIcon(data)
 	timeout(t, done)
 	assert.Equal(t, theme.QuestionIcon(), button.Icon)

@@ -333,7 +333,7 @@ func (r *Radio) UnbindSelected() *Radio {
 func (r *Radio) BindOptions(data binding.List) *Radio {
 	r.UnbindOptions()
 	r.optionBind = data
-	r.optionNotify = data.AddListenerFunction(func(binding.Binding) {
+	r.optionNotify = binding.NewNotifyFunction(func(binding.Binding) {
 		l := data.Length()
 		var options []string
 		for i := 0; i < l; i++ {
@@ -347,6 +347,7 @@ func (r *Radio) BindOptions(data binding.List) *Radio {
 		r.Options = options
 		r.Refresh()
 	})
+	data.AddListener(r.optionNotify)
 	return r
 }
 

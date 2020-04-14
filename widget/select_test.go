@@ -260,9 +260,9 @@ func TestSelect_BindOptions(t *testing.T) {
 		binding.NewString("b"),
 		binding.NewString("c"),
 	)
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	combo.BindOptions(data)
 	timeout(t, done)
 	assert.Equal(t, 3, len(combo.Options))

@@ -10,6 +10,13 @@ type NotifyFunction struct {
 	F func(Binding)
 }
 
+// NewNotifyFunction creates a new NotifyFunction which wraps the given function and can be used to listen to a binding.
+func NewNotifyFunction(function func(Binding)) *NotifyFunction {
+	return &NotifyFunction{
+		F: function,
+	}
+}
+
 // Notify is called when the given binding has changed.
 func (n *NotifyFunction) Notify(data Binding) {
 	if n.F == nil {

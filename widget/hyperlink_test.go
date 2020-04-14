@@ -75,9 +75,9 @@ func TestHyperlink_BindText(t *testing.T) {
 	assert.Nil(t, err)
 	hyperlink := NewHyperlink("hyperlink", u)
 	data := binding.NewString("foo")
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	hyperlink.BindText(data)
 	timeout(t, done)
 	assert.Equal(t, "foo", hyperlink.Text)
@@ -94,9 +94,9 @@ func TestHyperlink_BindURL(t *testing.T) {
 	assert.Nil(t, err)
 	hyperlink := NewHyperlink("hyperlink", nil)
 	data := binding.NewURL(u1)
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	hyperlink.BindURL(data)
 	timeout(t, done)
 	assert.Equal(t, u1, hyperlink.URL)

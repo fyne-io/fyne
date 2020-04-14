@@ -44,9 +44,11 @@ func (b *baseBool) Set(value bool) {
 // AddBoolListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *baseBool) AddBoolListener(listener func(bool)) *NotifyFunction {
-	return b.AddListenerFunction(func(Binding) {
+	n := NewNotifyFunction(func(Binding) {
 		listener(b.value)
 	})
+	b.AddListener(n)
+	return n
 }
 
 // Float64 defines a data binding for a float64.
@@ -84,9 +86,11 @@ func (b *baseFloat64) Set(value float64) {
 // AddFloat64Listener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *baseFloat64) AddFloat64Listener(listener func(float64)) *NotifyFunction {
-	return b.AddListenerFunction(func(Binding) {
+	n := NewNotifyFunction(func(Binding) {
 		listener(b.value)
 	})
+	b.AddListener(n)
+	return n
 }
 
 // Int defines a data binding for a int.
@@ -124,9 +128,11 @@ func (b *baseInt) Set(value int) {
 // AddIntListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *baseInt) AddIntListener(listener func(int)) *NotifyFunction {
-	return b.AddListenerFunction(func(Binding) {
+	n := NewNotifyFunction(func(Binding) {
 		listener(b.value)
 	})
+	b.AddListener(n)
+	return n
 }
 
 // Int64 defines a data binding for a int64.
@@ -164,9 +170,11 @@ func (b *baseInt64) Set(value int64) {
 // AddInt64Listener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *baseInt64) AddInt64Listener(listener func(int64)) *NotifyFunction {
-	return b.AddListenerFunction(func(Binding) {
+	n := NewNotifyFunction(func(Binding) {
 		listener(b.value)
 	})
+	b.AddListener(n)
+	return n
 }
 
 // Resource defines a data binding for a fyne.Resource.
@@ -204,9 +212,11 @@ func (b *baseResource) Set(value fyne.Resource) {
 // AddResourceListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *baseResource) AddResourceListener(listener func(fyne.Resource)) *NotifyFunction {
-	return b.AddListenerFunction(func(Binding) {
+	n := NewNotifyFunction(func(Binding) {
 		listener(b.value)
 	})
+	b.AddListener(n)
+	return n
 }
 
 // Rune defines a data binding for a rune.
@@ -244,9 +254,11 @@ func (b *baseRune) Set(value rune) {
 // AddRuneListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *baseRune) AddRuneListener(listener func(rune)) *NotifyFunction {
-	return b.AddListenerFunction(func(Binding) {
+	n := NewNotifyFunction(func(Binding) {
 		listener(b.value)
 	})
+	b.AddListener(n)
+	return n
 }
 
 // String defines a data binding for a string.
@@ -284,9 +296,11 @@ func (b *baseString) Set(value string) {
 // AddStringListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *baseString) AddStringListener(listener func(string)) *NotifyFunction {
-	return b.AddListenerFunction(func(Binding) {
+	n := NewNotifyFunction(func(Binding) {
 		listener(b.value)
 	})
+	b.AddListener(n)
+	return n
 }
 
 // URL defines a data binding for a *url.URL.
@@ -324,7 +338,9 @@ func (b *baseURL) Set(value *url.URL) {
 // AddURLListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *baseURL) AddURLListener(listener func(*url.URL)) *NotifyFunction {
-	return b.AddListenerFunction(func(Binding) {
+	n := NewNotifyFunction(func(Binding) {
 		listener(b.value)
 	})
+	b.AddListener(n)
+	return n
 }

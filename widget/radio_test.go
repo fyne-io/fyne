@@ -390,9 +390,9 @@ func TestRadio_BindSelected_Set(t *testing.T) {
 	timeout(t, done)
 	assert.Equal(t, "c", radio.Selected)
 
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 
 	data.Set("b")
 
@@ -436,9 +436,9 @@ func TestRadio_BindOptions(t *testing.T) {
 		binding.NewString("b"),
 		binding.NewString("c"),
 	)
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	radio.BindOptions(data)
 	timeout(t, done)
 	assert.Equal(t, 3, len(radio.Options))

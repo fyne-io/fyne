@@ -114,9 +114,9 @@ func TestLabel_BindText(t *testing.T) {
 	done := make(chan bool)
 	label := NewLabel("label")
 	data := binding.NewString("foo")
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	label.BindText(data)
 	timeout(t, done)
 	assert.Equal(t, "foo", label.Text)

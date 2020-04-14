@@ -44,9 +44,9 @@ func TestIcon_BindResource(t *testing.T) {
 	done := make(chan bool)
 	icon := NewIcon(theme.WarningIcon())
 	data := binding.NewResource(theme.QuestionIcon())
-	data.AddListenerFunction(func(binding.Binding) {
+	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	})
+	}))
 	icon.BindResource(data)
 	timeout(t, done)
 	assert.Equal(t, theme.QuestionIcon(), icon.Resource)

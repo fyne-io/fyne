@@ -6,9 +6,6 @@ import "sync"
 type Binding interface {
 	// AddListener adds the given listener to the binding.
 	AddListener(Notifiable)
-	// AddListenerFunction adds the given function as a listener to the binding.
-	// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-	AddListenerFunction(listener func(Binding)) *NotifyFunction
 	// DeleteListener removes the given listener from the binding.
 	DeleteListener(Notifiable)
 }
@@ -36,16 +33,6 @@ type base struct {
 	Binding
 	sync.RWMutex
 	listeners []Notifiable // TODO maybe a map[Notifiable]bool would be quicker, especially for DeleteListener?
-}
-
-// AddListenerFunction adds the given function as a listener to the binding.
-// The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *base) AddListenerFunction(listener func(Binding)) *NotifyFunction {
-	n := &NotifyFunction{
-		F: listener,
-	}
-	b.AddListener(n)
-	return n
 }
 
 // AddListener adds the given listener to the binding.
