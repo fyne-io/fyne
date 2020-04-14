@@ -18,7 +18,7 @@ func (p Position) Add(p2 Position) Position {
 	return Position{p.X + p2.X, p.Y + p2.Y}
 }
 
-// IsZero returns whether the Size has zero width and zero height.
+// IsZero returns whether the Position is at the zero-point.
 func (p Position) IsZero() bool {
 	return p.X == 0 && p.Y == 0
 }
