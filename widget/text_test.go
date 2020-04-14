@@ -706,3 +706,106 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 		})
 	}
 }
+
+func TestText_binarySearch(t *testing.T) {
+	tests := []struct {
+		name string
+		text string
+		want int
+	}{
+		{
+			name: "IM_Test",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			want: 12,
+		},
+		{
+			name: "Single_Line",
+			text: "foobar foobar",
+			want: 9,
+		},
+		{
+			name: "WH_Test",
+			text: "wwwww hhhhhh",
+			want: 6,
+		},
+		{
+			name: "DS_Test",
+			text: "dddddd sssssss",
+			want: 8,
+		},
+		{
+			name: "DI_Test",
+			text: "dididi dididd",
+			want: 10,
+		},
+		{
+			name: "XW_Test",
+			text: "xwxwxwxw xwxw",
+			want: 7,
+		},
+		{
+			name: "W_Test",
+			text: "WWWWW",
+			want: 4,
+		},
+		{
+			name: "Empty",
+			text: "",
+			want: 0,
+		},
+	}
+	textSize := 10
+	textStyle := fyne.TextStyle{}
+	measurer := func(text []rune) int {
+		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	}
+
+	for _, tt := range tests {
+		binarySearch := newBinarySearch(measurer, []rune(tt.text), 50)
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, binarySearch(0, len(tt.text)))
+		})
+	}
+
+}
+
+func TestText_findSpaceIndex(t *testing.T) {
+	tests := []struct {
+		name string
+		text string
+		last int
+		want int
+	}{
+		{
+			name: "case_1",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			last: 18,
+			want: 18,
+		},
+		{
+			name: "case_2",
+			text: "foobar foobar",
+			last: 12,
+			want: 6,
+		},
+		{
+			name: "case_3",
+			text: "ww wwww www",
+			last: 9,
+			want: 7,
+		},
+		{
+			name: "case_4",
+			text: "ww wwww www wwwww",
+			last: 5,
+			want: 2,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, findSpaceIndex([]rune(tt.text), tt.last))
+		})
+	}
+
+}
