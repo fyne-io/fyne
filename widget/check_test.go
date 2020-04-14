@@ -230,12 +230,12 @@ func TestCheck_BindChecked_Set(t *testing.T) {
 	check.Checked = true
 	data := binding.NewBool(false)
 	check.BindChecked(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, false, check.Checked)
 
 	// Set by binding
 	data.Set(true)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, true, selected)
 }
 
@@ -252,12 +252,12 @@ func TestCheck_BindChecked_Tap(t *testing.T) {
 		done <- true
 	})
 	check.BindChecked(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, false, check.Checked)
 
 	// Set by check
 	test.Tap(check)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, true, selected)
 	assert.Equal(t, true, data.Get())
 }
@@ -272,11 +272,11 @@ func TestCheck_BindText(t *testing.T) {
 		done <- true
 	}))
 	check.BindText(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foo", check.Text)
 
 	data.Set("foobar")
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foobar", check.Text)
 }
 

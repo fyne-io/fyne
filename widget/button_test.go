@@ -147,11 +147,11 @@ func TestButton_BindText(t *testing.T) {
 		done <- true
 	}))
 	button.BindText(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foo", button.Text)
 
 	data.Set("foobar")
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foobar", button.Text)
 }
 
@@ -165,11 +165,11 @@ func TestButton_BindIcon(t *testing.T) {
 		done <- true
 	}))
 	button.BindIcon(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, theme.QuestionIcon(), button.Icon)
 
 	data.Set(theme.InfoIcon())
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, theme.InfoIcon(), button.Icon)
 }
 

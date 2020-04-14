@@ -217,7 +217,7 @@ func TestSelect_BindSelected_Set(t *testing.T) {
 		done <- true
 	})
 	data.Set("b")
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "b", selected)
 }
 
@@ -244,7 +244,7 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 	box := popup.Content.(*Box)
 	test.Tap(box.Children[1].(fyne.Tappable))
 
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "b", selected)
 }
 
@@ -264,12 +264,12 @@ func TestSelect_BindOptions(t *testing.T) {
 		done <- true
 	}))
 	combo.BindOptions(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 3, len(combo.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, combo.Options)
 
 	data.Add(binding.NewString("d"))
-	timeout(t, done)
+	timedWait(t, done)
 
 	assert.Equal(t, 4, len(combo.Options))
 	assert.Equal(t, []string{"a", "b", "c", "d"}, combo.Options)

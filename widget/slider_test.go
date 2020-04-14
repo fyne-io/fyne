@@ -59,10 +59,10 @@ func TestSlider_BindMin(t *testing.T) {
 		done <- true
 	}))
 	slider.BindMin(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 1.0, slider.Min)
 	data.Set(75.0)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 75.0, slider.Min)
 }
 
@@ -76,10 +76,10 @@ func TestSlider_BindMax(t *testing.T) {
 		done <- true
 	}))
 	slider.BindMax(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 1.0, slider.Max)
 	data.Set(75.0)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 75.0, slider.Max)
 }
 
@@ -93,10 +93,10 @@ func TestSlider_BindStep(t *testing.T) {
 		done <- true
 	}))
 	slider.BindStep(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 1.0, slider.Step)
 	data.Set(75.0)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 75.0, slider.Step)
 }
 
@@ -110,9 +110,9 @@ func TestSlider_BindValue(t *testing.T) {
 		done <- true
 	}))
 	slider.BindValue(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 1.0, slider.Value)
 	data.Set(75.0)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 75.0, slider.Value)
 }

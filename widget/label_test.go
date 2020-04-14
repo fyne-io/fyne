@@ -118,10 +118,10 @@ func TestLabel_BindText(t *testing.T) {
 		done <- true
 	}))
 	label.BindText(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foo", label.Text)
 	data.Set("foobar")
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foobar", label.Text)
 }
 

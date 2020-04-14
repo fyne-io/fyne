@@ -79,10 +79,10 @@ func TestHyperlink_BindText(t *testing.T) {
 		done <- true
 	}))
 	hyperlink.BindText(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foo", hyperlink.Text)
 	data.Set("foobar")
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foobar", hyperlink.Text)
 }
 
@@ -98,13 +98,13 @@ func TestHyperlink_BindURL(t *testing.T) {
 		done <- true
 	}))
 	hyperlink.BindURL(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, u1, hyperlink.URL)
 
 	u2, err := url.Parse("https://github.com/fyne-io/fyne")
 	assert.Nil(t, err)
 	data.Set(u2)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, u2, hyperlink.URL)
 }
 

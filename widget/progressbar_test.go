@@ -30,10 +30,10 @@ func TestProgressBar_BindMin(t *testing.T) {
 		done <- true
 	}))
 	progressBar.BindMin(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 0.5, progressBar.Min)
 	data.Set(0.75)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 0.75, progressBar.Min)
 }
 
@@ -47,10 +47,10 @@ func TestProgressBar_BindMax(t *testing.T) {
 		done <- true
 	}))
 	progressBar.BindMax(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 0.5, progressBar.Max)
 	data.Set(0.75)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 0.75, progressBar.Max)
 }
 
@@ -64,10 +64,10 @@ func TestProgressBar_BindValue(t *testing.T) {
 		done <- true
 	}))
 	progressBar.BindValue(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 0.5, progressBar.Value)
 	data.Set(0.75)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, 0.75, progressBar.Value)
 }
 

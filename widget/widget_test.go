@@ -176,7 +176,7 @@ func withTestTheme(f func()) {
 	settings.SetTheme(current)
 }
 
-func timeout(t *testing.T, done chan bool) {
+func timedWait(t *testing.T, done chan bool) {
 	t.Helper()
 	select {
 	case <-done:

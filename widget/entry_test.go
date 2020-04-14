@@ -1566,9 +1566,9 @@ func TestEntry_BindText(t *testing.T) {
 		done <- true
 	}))
 	entry.BindText(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foo", entry.Text)
 	data.Set("foobar")
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, "foobar", entry.Text)
 }

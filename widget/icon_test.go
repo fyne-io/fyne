@@ -48,10 +48,10 @@ func TestIcon_BindResource(t *testing.T) {
 		done <- true
 	}))
 	icon.BindResource(data)
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, theme.QuestionIcon(), icon.Resource)
 	data.Set(theme.InfoIcon())
-	timeout(t, done)
+	timedWait(t, done)
 	assert.Equal(t, theme.InfoIcon(), icon.Resource)
 }
 
