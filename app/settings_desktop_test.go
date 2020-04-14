@@ -19,7 +19,7 @@ func TestDefaultTheme(t *testing.T) {
 }
 
 func TestEnsureDir(t *testing.T) {
-	tmpDir := filepath.Join(rootConfigDir(), "fynetest")
+	tmpDir := testPath("fynetest")
 
 	ensureDirExists(tmpDir)
 	if st, err := os.Stat(tmpDir); err != nil || !st.IsDir() {
@@ -44,7 +44,7 @@ func TestWatchSettings(t *testing.T) {
 }
 
 func TestWatchFile(t *testing.T) {
-	path := filepath.Join(rootConfigDir(), "fyne-temp-watch.txt")
+	path := testPath("fyne-temp-watch.txt")
 	os.Create(path)
 	defer os.Remove(path)
 
@@ -64,7 +64,7 @@ func TestWatchFile(t *testing.T) {
 }
 
 func TestFileWatcher_FileDeleted(t *testing.T) {
-	path := filepath.Join(rootConfigDir(), "fyne-temp-watch.txt")
+	path := testPath("fyne-temp-watch.txt")
 	os.Create(path)
 	defer os.Remove(path)
 
@@ -86,4 +86,9 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 	case <-time.After(100 * time.Millisecond):
 		t.Error("File watcher callback was not called")
 	}
+}
+
+func testPath(child string) string {
+	// TMPDIR would be more normal but fsnotify cannot watch that on macOS...
+	return filepath.Join("testdata", child)
 }
