@@ -3,7 +3,6 @@ package widget
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"fyne.io/fyne/binding"
 	"fyne.io/fyne/driver/desktop"
@@ -228,17 +227,15 @@ func TestCheck_BindChecked_Set(t *testing.T) {
 		selected = c
 		done <- true
 	})
-	data := &binding.Bool{}
+	check.Checked = true
+	data := binding.NewBool(false)
 	check.BindChecked(data)
+	timeout(t, done)
+	assert.Equal(t, false, check.Checked)
 
 	// Set by binding
 	data.Set(true)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Minute):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, true, selected)
 }
 
@@ -248,22 +245,19 @@ func TestCheck_BindChecked_Tap(t *testing.T) {
 	done := make(chan bool)
 	check := NewCheck("check", nil)
 
-	data := &binding.Bool{}
-	check.BindChecked(data)
+	data := binding.NewBool(false)
 	selected := false
 	data.AddBoolListener(func(c bool) {
 		selected = c
 		done <- true
 	})
+	check.BindChecked(data)
+	timeout(t, done)
+	assert.Equal(t, false, check.Checked)
 
 	// Set by check
 	test.Tap(check)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, true, selected)
 	assert.Equal(t, true, data.Get())
 }
@@ -273,18 +267,16 @@ func TestCheck_BindText(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	check := NewCheck("check", nil)
-	data := &binding.String{}
-	check.BindText(data)
+	data := binding.NewString("foo")
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	check.BindText(data)
+	timeout(t, done)
+	assert.Equal(t, "foo", check.Text)
+
 	data.Set("foobar")
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, "foobar", check.Text)
 }
 

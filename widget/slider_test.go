@@ -2,7 +2,6 @@ package widget
 
 import (
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/binding"
@@ -55,18 +54,15 @@ func TestSlider_BindMin(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
-	data := &binding.Float64{}
-	slider.BindMin(data)
+	data := binding.NewFloat64(1.0)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	slider.BindMin(data)
+	timeout(t, done)
+	assert.Equal(t, 1.0, slider.Min)
 	data.Set(75.0)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, 75.0, slider.Min)
 }
 
@@ -75,18 +71,15 @@ func TestSlider_BindMax(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
-	data := &binding.Float64{}
-	slider.BindMax(data)
+	data := binding.NewFloat64(1.0)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	slider.BindMax(data)
+	timeout(t, done)
+	assert.Equal(t, 1.0, slider.Max)
 	data.Set(75.0)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, 75.0, slider.Max)
 }
 
@@ -95,18 +88,15 @@ func TestSlider_BindStep(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
-	data := &binding.Float64{}
-	slider.BindStep(data)
+	data := binding.NewFloat64(1.0)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	slider.BindStep(data)
+	timeout(t, done)
+	assert.Equal(t, 1.0, slider.Step)
 	data.Set(75.0)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, 75.0, slider.Step)
 }
 
@@ -115,17 +105,14 @@ func TestSlider_BindValue(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
-	data := &binding.Float64{}
-	slider.BindValue(data)
+	data := binding.NewFloat64(1.0)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	slider.BindValue(data)
+	timeout(t, done)
+	assert.Equal(t, 1.0, slider.Value)
 	data.Set(75.0)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, 75.0, slider.Value)
 }

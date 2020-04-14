@@ -89,10 +89,10 @@ type Check struct {
 	focused bool
 	hovered bool
 
-	changeBind  *binding.Bool
-	textBind    *binding.String
-	checkNotify *binding.NotifyFunction
-	textNotify  *binding.NotifyFunction
+	changeBind  binding.Bool
+	textBind    binding.String
+	checkNotify binding.Notifiable
+	textNotify  binding.Notifiable
 }
 
 // SetChecked sets the the checked state and refreshes widget
@@ -181,7 +181,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 
 // BindChecked binds the Check's OnChanged to the given data binding.
 // Returns the Check for chaining.
-func (c *Check) BindChecked(data *binding.Bool) *Check {
+func (c *Check) BindChecked(data binding.Bool) *Check {
 	c.changeBind = data
 	c.checkNotify = data.AddBoolListener(c.SetChecked)
 	return c
@@ -200,7 +200,7 @@ func (c *Check) UnbindChecked() *Check {
 
 // BindText binds the Check's Text to the given data binding.
 // Returns the Check for chaining.
-func (c *Check) BindText(data *binding.String) *Check {
+func (c *Check) BindText(data binding.String) *Check {
 	c.textBind = data
 	c.textNotify = data.AddStringListener(c.SetText)
 	return c

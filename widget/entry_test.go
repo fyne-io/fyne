@@ -2,7 +2,6 @@ package widget
 
 import (
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/binding"
@@ -1562,17 +1561,14 @@ func TestEntry_BindText(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	entry := NewEntry()
-	data := &binding.String{}
-	entry.BindText(data)
+	data := binding.NewString("foo")
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	entry.BindText(data)
+	timeout(t, done)
+	assert.Equal(t, "foo", entry.Text)
 	data.Set("foobar")
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, "foobar", entry.Text)
 }

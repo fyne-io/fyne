@@ -3,13 +3,11 @@ package widget
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/binding"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
-	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -382,20 +380,23 @@ func TestRadio_BindSelected_Set(t *testing.T) {
 		selected = value
 	})
 
-	data := &binding.String{}
+	data := binding.NewString("c")
+	data.AddStringListener(func(value string) {
+		selected = value
+		done <- true
+	})
+
 	radio.BindSelected(data)
+	timeout(t, done)
+	assert.Equal(t, "c", radio.Selected)
+
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
 
 	data.Set("b")
 
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Minute):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, "b", selected)
 }
 
@@ -405,22 +406,20 @@ func TestRadio_BindSelected_Tap(t *testing.T) {
 	done := make(chan bool)
 	radio := NewRadio([]string{"a", "b", "c"}, nil)
 
-	data := &binding.String{}
-	radio.BindSelected(data)
+	data := binding.NewString("c")
 	selected := ""
 	data.AddStringListener(func(value string) {
 		selected = value
 		done <- true
 	})
 
+	radio.BindSelected(data)
+	timeout(t, done)
+	assert.Equal(t, "c", radio.Selected)
+
 	test.Tap(radio)
 
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, "a", selected)
 	assert.Equal(t, "a", data.Get())
 }
@@ -431,26 +430,24 @@ func TestRadio_BindOptions(t *testing.T) {
 	done := make(chan bool)
 	radio := NewRadio([]string{"a"}, nil)
 
-	data := &binding.List{}
-	radio.BindOptions(data)
-	data.AddListenerFunction(func(binding.Binding) {
-		done <- true
-	})
-	data.Append(
+	data := &binding.BaseList{}
+	data.Add(
 		binding.NewString("a"),
 		binding.NewString("b"),
 		binding.NewString("c"),
 	)
-
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
-
+	data.AddListenerFunction(func(binding.Binding) {
+		done <- true
+	})
+	radio.BindOptions(data)
+	timeout(t, done)
 	assert.Equal(t, 3, len(radio.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, radio.Options)
+
+	data.Add(binding.NewString("d"))
+	timeout(t, done)
+	assert.Equal(t, 4, len(radio.Options))
+	assert.Equal(t, []string{"a", "b", "c", "d"}, radio.Options)
 }
 
 func TestRadioRenderer_ApplyTheme(t *testing.T) {

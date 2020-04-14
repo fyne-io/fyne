@@ -265,8 +265,8 @@ type Entry struct {
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
 	ActionItem fyne.CanvasObject
 
-	textBind   *binding.String
-	textNotify *binding.NotifyFunction
+	textBind   binding.String
+	textNotify binding.Notifiable
 }
 
 // SetText manually sets the text of the Entry to the given text value.
@@ -1142,7 +1142,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 
 // BindText binds the Entry's Text to the given data binding.
 // Returns the Entry for chaining.
-func (e *Entry) BindText(data *binding.String) *Entry {
+func (e *Entry) BindText(data binding.String) *Entry {
 	e.textBind = data
 	e.textNotify = data.AddStringListener(e.SetText)
 	return e

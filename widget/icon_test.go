@@ -2,7 +2,6 @@ package widget
 
 import (
 	"testing"
-	"time"
 
 	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
@@ -44,18 +43,15 @@ func TestIcon_BindResource(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	icon := NewIcon(theme.WarningIcon())
-	data := &binding.Resource{}
-	icon.BindResource(data)
+	data := binding.NewResource(theme.QuestionIcon())
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	icon.BindResource(data)
+	timeout(t, done)
+	assert.Equal(t, theme.QuestionIcon(), icon.Resource)
 	data.Set(theme.InfoIcon())
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, theme.InfoIcon(), icon.Resource)
 }
 

@@ -93,10 +93,10 @@ type Select struct {
 	hovered bool
 	popUp   *PopUp
 
-	selectedBind   *binding.String
-	optionBind     *binding.List
-	selectedNotify *binding.NotifyFunction
-	optionNotify   *binding.NotifyFunction
+	selectedBind   binding.String
+	optionBind     binding.List
+	selectedNotify binding.Notifiable
+	optionNotify   binding.Notifiable
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -231,7 +231,7 @@ func (s *Select) updateSelected(text string) {
 
 // BindSelected binds the Select's Selected Option to the given data binding.
 // Returns the Select for chaining.
-func (s *Select) BindSelected(data *binding.String) *Select {
+func (s *Select) BindSelected(data binding.String) *Select {
 	s.selectedBind = data
 	s.selectedNotify = data.AddStringListener(s.SetSelected)
 	return s
@@ -250,13 +250,13 @@ func (s *Select) UnbindSelected() *Select {
 
 // BindOptions binds the Select's Options to the given data binding.
 // Returns the Select for chaining.
-func (s *Select) BindOptions(data *binding.List) *Select {
+func (s *Select) BindOptions(data binding.List) *Select {
 	s.optionBind = data
 	s.optionNotify = data.AddListenerFunction(func(binding.Binding) {
 		l := data.Length()
 		var options []string
 		for i := 0; i < l; i++ {
-			b, ok := data.Get(i).(*binding.String)
+			b, ok := data.Get(i).(binding.String)
 			if ok {
 				// TODO Should individual elements in a slice binding be bound to?
 				//  b.AddListener(func() { })

@@ -175,3 +175,13 @@ func withTestTheme(f func()) {
 	f()
 	settings.SetTheme(current)
 }
+
+func timeout(t *testing.T, done chan bool) {
+	t.Helper()
+	select {
+	case <-done:
+		time.Sleep(time.Millisecond)
+	case <-time.After(time.Second):
+		assert.Fail(t, "Timeout")
+	}
+}

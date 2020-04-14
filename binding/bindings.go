@@ -9,24 +9,32 @@ import (
 	"fyne.io/fyne"
 )
 
-// Bool implements a data binding for a bool.
-type Bool struct {
-	Base
+// Bool defines a data binding for a bool.
+type Bool interface {
+	Binding
+	Get() bool
+	Set(bool)
+	AddBoolListener(func(bool)) *NotifyFunction
+}
+
+// baseBool implements a data binding for a bool.
+type baseBool struct {
+	base
 	value bool
 }
 
 // NewBool creates a new binding with the given value.
-func NewBool(value bool) *Bool {
-	return &Bool{value: value}
+func NewBool(value bool) Bool {
+	return &baseBool{value: value}
 }
 
 // Get returns the bound value.
-func (b *Bool) Get() bool {
+func (b *baseBool) Get() bool {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *Bool) Set(value bool) {
+func (b *baseBool) Set(value bool) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -35,30 +43,38 @@ func (b *Bool) Set(value bool) {
 
 // AddBoolListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *Bool) AddBoolListener(listener func(bool)) *NotifyFunction {
+func (b *baseBool) AddBoolListener(listener func(bool)) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
 
-// Float64 implements a data binding for a float64.
-type Float64 struct {
-	Base
+// Float64 defines a data binding for a float64.
+type Float64 interface {
+	Binding
+	Get() float64
+	Set(float64)
+	AddFloat64Listener(func(float64)) *NotifyFunction
+}
+
+// baseFloat64 implements a data binding for a float64.
+type baseFloat64 struct {
+	base
 	value float64
 }
 
 // NewFloat64 creates a new binding with the given value.
-func NewFloat64(value float64) *Float64 {
-	return &Float64{value: value}
+func NewFloat64(value float64) Float64 {
+	return &baseFloat64{value: value}
 }
 
 // Get returns the bound value.
-func (b *Float64) Get() float64 {
+func (b *baseFloat64) Get() float64 {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *Float64) Set(value float64) {
+func (b *baseFloat64) Set(value float64) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -67,30 +83,38 @@ func (b *Float64) Set(value float64) {
 
 // AddFloat64Listener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *Float64) AddFloat64Listener(listener func(float64)) *NotifyFunction {
+func (b *baseFloat64) AddFloat64Listener(listener func(float64)) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
 
-// Int implements a data binding for a int.
-type Int struct {
-	Base
+// Int defines a data binding for a int.
+type Int interface {
+	Binding
+	Get() int
+	Set(int)
+	AddIntListener(func(int)) *NotifyFunction
+}
+
+// baseInt implements a data binding for a int.
+type baseInt struct {
+	base
 	value int
 }
 
 // NewInt creates a new binding with the given value.
-func NewInt(value int) *Int {
-	return &Int{value: value}
+func NewInt(value int) Int {
+	return &baseInt{value: value}
 }
 
 // Get returns the bound value.
-func (b *Int) Get() int {
+func (b *baseInt) Get() int {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *Int) Set(value int) {
+func (b *baseInt) Set(value int) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -99,30 +123,38 @@ func (b *Int) Set(value int) {
 
 // AddIntListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *Int) AddIntListener(listener func(int)) *NotifyFunction {
+func (b *baseInt) AddIntListener(listener func(int)) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
 
-// Int64 implements a data binding for a int64.
-type Int64 struct {
-	Base
+// Int64 defines a data binding for a int64.
+type Int64 interface {
+	Binding
+	Get() int64
+	Set(int64)
+	AddInt64Listener(func(int64)) *NotifyFunction
+}
+
+// baseInt64 implements a data binding for a int64.
+type baseInt64 struct {
+	base
 	value int64
 }
 
 // NewInt64 creates a new binding with the given value.
-func NewInt64(value int64) *Int64 {
-	return &Int64{value: value}
+func NewInt64(value int64) Int64 {
+	return &baseInt64{value: value}
 }
 
 // Get returns the bound value.
-func (b *Int64) Get() int64 {
+func (b *baseInt64) Get() int64 {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *Int64) Set(value int64) {
+func (b *baseInt64) Set(value int64) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -131,30 +163,38 @@ func (b *Int64) Set(value int64) {
 
 // AddInt64Listener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *Int64) AddInt64Listener(listener func(int64)) *NotifyFunction {
+func (b *baseInt64) AddInt64Listener(listener func(int64)) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
 
-// Resource implements a data binding for a fyne.Resource.
-type Resource struct {
-	Base
+// Resource defines a data binding for a fyne.Resource.
+type Resource interface {
+	Binding
+	Get() fyne.Resource
+	Set(fyne.Resource)
+	AddResourceListener(func(fyne.Resource)) *NotifyFunction
+}
+
+// baseResource implements a data binding for a fyne.Resource.
+type baseResource struct {
+	base
 	value fyne.Resource
 }
 
 // NewResource creates a new binding with the given value.
-func NewResource(value fyne.Resource) *Resource {
-	return &Resource{value: value}
+func NewResource(value fyne.Resource) Resource {
+	return &baseResource{value: value}
 }
 
 // Get returns the bound value.
-func (b *Resource) Get() fyne.Resource {
+func (b *baseResource) Get() fyne.Resource {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *Resource) Set(value fyne.Resource) {
+func (b *baseResource) Set(value fyne.Resource) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -163,30 +203,38 @@ func (b *Resource) Set(value fyne.Resource) {
 
 // AddResourceListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *Resource) AddResourceListener(listener func(fyne.Resource)) *NotifyFunction {
+func (b *baseResource) AddResourceListener(listener func(fyne.Resource)) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
 
-// Rune implements a data binding for a rune.
-type Rune struct {
-	Base
+// Rune defines a data binding for a rune.
+type Rune interface {
+	Binding
+	Get() rune
+	Set(rune)
+	AddRuneListener(func(rune)) *NotifyFunction
+}
+
+// baseRune implements a data binding for a rune.
+type baseRune struct {
+	base
 	value rune
 }
 
 // NewRune creates a new binding with the given value.
-func NewRune(value rune) *Rune {
-	return &Rune{value: value}
+func NewRune(value rune) Rune {
+	return &baseRune{value: value}
 }
 
 // Get returns the bound value.
-func (b *Rune) Get() rune {
+func (b *baseRune) Get() rune {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *Rune) Set(value rune) {
+func (b *baseRune) Set(value rune) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -195,30 +243,38 @@ func (b *Rune) Set(value rune) {
 
 // AddRuneListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *Rune) AddRuneListener(listener func(rune)) *NotifyFunction {
+func (b *baseRune) AddRuneListener(listener func(rune)) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
 
-// String implements a data binding for a string.
-type String struct {
-	Base
+// String defines a data binding for a string.
+type String interface {
+	Binding
+	Get() string
+	Set(string)
+	AddStringListener(func(string)) *NotifyFunction
+}
+
+// baseString implements a data binding for a string.
+type baseString struct {
+	base
 	value string
 }
 
 // NewString creates a new binding with the given value.
-func NewString(value string) *String {
-	return &String{value: value}
+func NewString(value string) String {
+	return &baseString{value: value}
 }
 
 // Get returns the bound value.
-func (b *String) Get() string {
+func (b *baseString) Get() string {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *String) Set(value string) {
+func (b *baseString) Set(value string) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -227,30 +283,38 @@ func (b *String) Set(value string) {
 
 // AddStringListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *String) AddStringListener(listener func(string)) *NotifyFunction {
+func (b *baseString) AddStringListener(listener func(string)) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})
 }
 
-// URL implements a data binding for a *url.URL.
-type URL struct {
-	Base
+// URL defines a data binding for a *url.URL.
+type URL interface {
+	Binding
+	Get() *url.URL
+	Set(*url.URL)
+	AddURLListener(func(*url.URL)) *NotifyFunction
+}
+
+// baseURL implements a data binding for a *url.URL.
+type baseURL struct {
+	base
 	value *url.URL
 }
 
 // NewURL creates a new binding with the given value.
-func NewURL(value *url.URL) *URL {
-	return &URL{value: value}
+func NewURL(value *url.URL) URL {
+	return &baseURL{value: value}
 }
 
 // Get returns the bound value.
-func (b *URL) Get() *url.URL {
+func (b *baseURL) Get() *url.URL {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *URL) Set(value *url.URL) {
+func (b *baseURL) Set(value *url.URL) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -259,7 +323,7 @@ func (b *URL) Set(value *url.URL) {
 
 // AddURLListener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *URL) AddURLListener(listener func(*url.URL)) *NotifyFunction {
+func (b *baseURL) AddURLListener(listener func(*url.URL)) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})

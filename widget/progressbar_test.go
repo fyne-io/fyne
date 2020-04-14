@@ -2,7 +2,6 @@ package widget
 
 import (
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/binding"
@@ -26,18 +25,15 @@ func TestProgressBar_BindMin(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	progressBar := NewProgressBar()
-	data := &binding.Float64{}
-	progressBar.BindMin(data)
+	data := binding.NewFloat64(0.5)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	progressBar.BindMin(data)
+	timeout(t, done)
+	assert.Equal(t, 0.5, progressBar.Min)
 	data.Set(0.75)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, 0.75, progressBar.Min)
 }
 
@@ -46,18 +42,15 @@ func TestProgressBar_BindMax(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	progressBar := NewProgressBar()
-	data := &binding.Float64{}
-	progressBar.BindMax(data)
+	data := binding.NewFloat64(0.5)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	progressBar.BindMax(data)
+	timeout(t, done)
+	assert.Equal(t, 0.5, progressBar.Max)
 	data.Set(0.75)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, 0.75, progressBar.Max)
 }
 
@@ -66,18 +59,15 @@ func TestProgressBar_BindValue(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	progressBar := NewProgressBar()
-	data := &binding.Float64{}
-	progressBar.BindValue(data)
+	data := binding.NewFloat64(0.5)
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	progressBar.BindValue(data)
+	timeout(t, done)
+	assert.Equal(t, 0.5, progressBar.Value)
 	data.Set(0.75)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, 0.75, progressBar.Value)
 }
 

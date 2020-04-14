@@ -22,24 +22,32 @@ import (
 `
 
 const bindingTemplate = `
-// {{ .Name }} implements a data binding for a {{ .Type }}.
-type {{ .Name }} struct {
-	Base
+// {{ .Name }} defines a data binding for a {{ .Type }}.
+type {{ .Name }} interface {
+	Binding
+	Get() {{ .Type }}
+	Set({{ .Type }})
+	Add{{ .Name }}Listener(func({{ .Type }})) *NotifyFunction
+}
+
+// base{{ .Name }} implements a data binding for a {{ .Type }}.
+type base{{ .Name }} struct {
+	base
 	value {{ .Type }}
 }
 
 // New{{ .Name }} creates a new binding with the given value.
-func New{{ .Name }}(value {{ .Type }}) *{{ .Name }} {
-	return &{{ .Name }}{value: value}
+func New{{ .Name }}(value {{ .Type }}) {{ .Name }} {
+	return &base{{ .Name }}{value: value}
 }
 
 // Get returns the bound value.
-func (b *{{ .Name }}) Get() {{ .Type }} {
+func (b *base{{ .Name }}) Get() {{ .Type }} {
 	return b.value
 }
 
 // Set updates the bound value.
-func (b *{{ .Name }}) Set(value {{ .Type }}) {
+func (b *base{{ .Name }}) Set(value {{ .Type }}) {
 	if b.value != value {
 		b.value = value
 		b.notify()
@@ -48,7 +56,7 @@ func (b *{{ .Name }}) Set(value {{ .Type }}) {
 
 // Add{{ .Name }}Listener adds the given function as a listener to the binding.
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
-func (b *{{ .Name }}) Add{{ .Name }}Listener(listener func({{ .Type }})) *NotifyFunction {
+func (b *base{{ .Name }}) Add{{ .Name }}Listener(listener func({{ .Type }})) *NotifyFunction {
 	return b.AddListenerFunction(func(Binding) {
 		listener(b.value)
 	})

@@ -74,8 +74,8 @@ type ProgressBar struct {
 
 	Min, Max, Value float64
 
-	maxBind, minBind, valueBind       *binding.Float64
-	maxNotify, minNotify, valueNotify *binding.NotifyFunction
+	maxBind, minBind, valueBind       binding.Float64
+	maxNotify, minNotify, valueNotify binding.Notifiable
 }
 
 // SetMin changes the current minimum of this progress bar.
@@ -135,7 +135,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 
 // BindMin binds the ProgressBar's Min to the given data binding.
 // Returns the ProgressBar for chaining.
-func (p *ProgressBar) BindMin(data *binding.Float64) *ProgressBar {
+func (p *ProgressBar) BindMin(data binding.Float64) *ProgressBar {
 	p.minBind = data
 	p.minNotify = data.AddFloat64Listener(p.SetMin)
 	return p
@@ -154,7 +154,7 @@ func (p *ProgressBar) UnbindMin() *ProgressBar {
 
 // BindMax binds the ProgressBar's Max to the given data binding.
 // Returns the ProgressBar for chaining.
-func (p *ProgressBar) BindMax(data *binding.Float64) *ProgressBar {
+func (p *ProgressBar) BindMax(data binding.Float64) *ProgressBar {
 	p.maxBind = data
 	p.maxNotify = data.AddFloat64Listener(p.SetMax)
 	return p
@@ -173,7 +173,7 @@ func (p *ProgressBar) UnbindMax() *ProgressBar {
 
 // BindValue binds the ProgressBar's Value to the given data binding.
 // Returns the ProgressBar for chaining.
-func (p *ProgressBar) BindValue(data *binding.Float64) *ProgressBar {
+func (p *ProgressBar) BindValue(data binding.Float64) *ProgressBar {
 	p.valueBind = data
 	p.valueNotify = data.AddFloat64Listener(p.SetValue)
 	return p

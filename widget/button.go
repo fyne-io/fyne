@@ -135,11 +135,10 @@ type Button struct {
 	hovered    bool
 	HideShadow bool
 
-	tapBind    *binding.Bool
-	textBind   *binding.String
-	iconBind   *binding.Resource
-	textNotify *binding.NotifyFunction
-	iconNotify *binding.NotifyFunction
+	textBind   binding.String
+	iconBind   binding.Resource
+	textNotify binding.Notifiable
+	iconNotify binding.Notifiable
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -154,13 +153,8 @@ const (
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
-	if !b.Disabled() {
-		if b.tapBind != nil {
-			b.tapBind.Set(true)
-		}
-		if b.OnTapped != nil {
-			b.OnTapped()
-		}
+	if b.OnTapped != nil && !b.Disabled() {
+		b.OnTapped()
 	}
 }
 
@@ -239,23 +233,9 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 	}
 }
 
-// BindTapped binds the Button's OnTap to the given data binding.
-// Returns the Button for chaining.
-func (b *Button) BindTapped(data *binding.Bool) *Button {
-	b.tapBind = data
-	return b
-}
-
-// UnbindTapped unbinds the Button's OnTap from the data binding (if any).
-// Returns the Button for chaining.
-func (b *Button) UnbindTapped() *Button {
-	b.tapBind = nil
-	return b
-}
-
 // BindText binds the Button's Text to the given data binding.
 // Returns the Button for chaining.
-func (b *Button) BindText(data *binding.String) *Button {
+func (b *Button) BindText(data binding.String) *Button {
 	b.textBind = data
 	b.textNotify = data.AddStringListener(b.SetText)
 	return b
@@ -274,7 +254,7 @@ func (b *Button) UnbindText() *Button {
 
 // BindIcon binds the Button's Icon to the given data binding.
 // Returns the Button for chaining.
-func (b *Button) BindIcon(data *binding.Resource) *Button {
+func (b *Button) BindIcon(data binding.Resource) *Button {
 	b.iconBind = data
 	b.iconNotify = data.AddResourceListener(b.SetIcon)
 	return b

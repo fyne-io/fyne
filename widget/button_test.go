@@ -137,45 +137,21 @@ func TestButton_Tapped(t *testing.T) {
 	}()
 }
 
-func TestButton_BindTapped(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
-	done := make(chan bool)
-	button := NewButton("button", nil)
-	data := &binding.Bool{}
-	button.BindTapped(data)
-	tapped := false
-	data.AddBoolListener(func(b bool) {
-		tapped = b
-		done <- true
-	})
-	test.Tap(button)
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
-	assert.True(t, tapped)
-}
-
 func TestButton_BindText(t *testing.T) {
 	a := test.NewApp()
 	defer a.Quit()
 	done := make(chan bool)
 	button := NewButton("button", nil)
-	data := &binding.String{}
-	button.BindText(data)
+	data := binding.NewString("foo")
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	button.BindText(data)
+	timeout(t, done)
+	assert.Equal(t, "foo", button.Text)
+
 	data.Set("foobar")
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, "foobar", button.Text)
 }
 
@@ -184,18 +160,16 @@ func TestButton_BindIcon(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	button := NewButtonWithIcon("button", theme.WarningIcon(), nil)
-	data := &binding.Resource{}
-	button.BindIcon(data)
+	data := binding.NewResource(theme.QuestionIcon())
 	data.AddListenerFunction(func(binding.Binding) {
 		done <- true
 	})
+	button.BindIcon(data)
+	timeout(t, done)
+	assert.Equal(t, theme.QuestionIcon(), button.Icon)
+
 	data.Set(theme.InfoIcon())
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, theme.InfoIcon(), button.Icon)
 }
 

@@ -161,10 +161,10 @@ type Radio struct {
 	hoveredItemIndex int
 	hovered          bool
 
-	selectedBind   *binding.String
-	optionBind     *binding.List
-	selectedNotify *binding.NotifyFunction
-	optionNotify   *binding.NotifyFunction
+	selectedBind   binding.String
+	optionBind     binding.List
+	selectedNotify binding.Notifiable
+	optionNotify   binding.Notifiable
 }
 
 // indexByPosition returns the item index for a specified position or noRadioItemIndex if any
@@ -310,7 +310,7 @@ func (r *Radio) removeDuplicateOptions() {
 
 // BindSelected binds the Radio's Selected Option to the given data binding.
 // Returns the Radio for chaining.
-func (r *Radio) BindSelected(data *binding.String) *Radio {
+func (r *Radio) BindSelected(data binding.String) *Radio {
 	r.selectedBind = data
 	r.selectedNotify = data.AddStringListener(r.SetSelected)
 	return r
@@ -329,13 +329,13 @@ func (r *Radio) UnbindSelected() *Radio {
 
 // BindOptions binds the Radio's Options to the given data binding.
 // Returns the Radio for chaining.
-func (r *Radio) BindOptions(data *binding.List) *Radio {
+func (r *Radio) BindOptions(data binding.List) *Radio {
 	r.optionBind = data
 	r.optionNotify = data.AddListenerFunction(func(binding.Binding) {
 		l := data.Length()
 		var options []string
 		for i := 0; i < l; i++ {
-			b, ok := data.Get(i).(*binding.String)
+			b, ok := data.Get(i).(binding.String)
 			if ok {
 				// TODO Should individual elements in a slice binding be bound to?
 				//  b.AddListener(func() { })

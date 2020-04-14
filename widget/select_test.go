@@ -2,7 +2,6 @@ package widget
 
 import (
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/binding"
@@ -212,18 +211,13 @@ func TestSelect_BindSelected_Set(t *testing.T) {
 	combo := NewSelect([]string{"a", "b", "c"}, func(value string) {
 		selected = value
 	})
-	data := &binding.String{}
+	data := binding.NewString("")
 	combo.BindSelected(data)
 	data.AddStringListener(func(string) {
 		done <- true
 	})
 	data.Set("b")
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, "b", selected)
 }
 
@@ -233,7 +227,7 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 	done := make(chan bool)
 	combo := NewSelect([]string{"a", "b", "c"}, nil)
 
-	data := &binding.String{}
+	data := binding.NewString("")
 	combo.BindSelected(data)
 	selected := ""
 	data.AddStringListener(func(s string) {
@@ -250,12 +244,7 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 	box := popup.Content.(*Box)
 	test.Tap(box.Children[1].(fyne.Tappable))
 
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
+	timeout(t, done)
 	assert.Equal(t, "b", selected)
 }
 
@@ -265,26 +254,25 @@ func TestSelect_BindOptions(t *testing.T) {
 	done := make(chan bool)
 	combo := NewSelect([]string{"a"}, nil)
 
-	data := &binding.List{}
-	combo.BindOptions(data)
-	data.AddListenerFunction(func(binding.Binding) {
-		done <- true
-	})
-	data.Append(
+	data := &binding.BaseList{}
+	data.Add(
 		binding.NewString("a"),
 		binding.NewString("b"),
 		binding.NewString("c"),
 	)
-
-	select {
-	case <-done:
-		time.Sleep(time.Millisecond) // Powernap in case our listener runs first
-	case <-time.After(time.Second):
-		assert.Fail(t, "Timeout")
-	}
-
+	data.AddListenerFunction(func(binding.Binding) {
+		done <- true
+	})
+	combo.BindOptions(data)
+	timeout(t, done)
 	assert.Equal(t, 3, len(combo.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, combo.Options)
+
+	data.Add(binding.NewString("d"))
+	timeout(t, done)
+
+	assert.Equal(t, 4, len(combo.Options))
+	assert.Equal(t, []string{"a", "b", "c", "d"}, combo.Options)
 }
 
 func TestSelectRenderer_ApplyTheme(t *testing.T) {
