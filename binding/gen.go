@@ -32,7 +32,7 @@ type {{ .Name }} interface {
 
 // base{{ .Name }} implements a data binding for a {{ .Type }}.
 type base{{ .Name }} struct {
-	base
+	Base
 	value {{ .Type }}
 }
 

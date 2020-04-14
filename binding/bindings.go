@@ -19,7 +19,7 @@ type Bool interface {
 
 // baseBool implements a data binding for a bool.
 type baseBool struct {
-	base
+	Base
 	value bool
 }
 
@@ -61,7 +61,7 @@ type Float64 interface {
 
 // baseFloat64 implements a data binding for a float64.
 type baseFloat64 struct {
-	base
+	Base
 	value float64
 }
 
@@ -103,7 +103,7 @@ type Int interface {
 
 // baseInt implements a data binding for a int.
 type baseInt struct {
-	base
+	Base
 	value int
 }
 
@@ -145,7 +145,7 @@ type Int64 interface {
 
 // baseInt64 implements a data binding for a int64.
 type baseInt64 struct {
-	base
+	Base
 	value int64
 }
 
@@ -187,7 +187,7 @@ type Resource interface {
 
 // baseResource implements a data binding for a fyne.Resource.
 type baseResource struct {
-	base
+	Base
 	value fyne.Resource
 }
 
@@ -229,7 +229,7 @@ type Rune interface {
 
 // baseRune implements a data binding for a rune.
 type baseRune struct {
-	base
+	Base
 	value rune
 }
 
@@ -271,7 +271,7 @@ type String interface {
 
 // baseString implements a data binding for a string.
 type baseString struct {
-	base
+	Base
 	value string
 }
 
@@ -313,7 +313,7 @@ type URL interface {
 
 // baseURL implements a data binding for a *url.URL.
 type baseURL struct {
-	base
+	Base
 	value *url.URL
 }
 

@@ -28,15 +28,15 @@ type Map interface {
 	Get(string) (Binding, bool)
 }
 
-// base implements a data binding with listeners.
-type base struct {
+// Base is the base implementation of a data binding and handles adding, deleting, and notifying listeners.
+type Base struct {
 	Binding
 	sync.RWMutex
 	listeners []Notifiable // TODO maybe a map[Notifiable]bool would be quicker, especially for DeleteListener?
 }
 
 // AddListener adds the given listener to the binding.
-func (b *base) AddListener(listener Notifiable) {
+func (b *Base) AddListener(listener Notifiable) {
 	b.Lock()
 	defer b.Unlock()
 	b.listeners = append(b.listeners, listener)
@@ -45,7 +45,7 @@ func (b *base) AddListener(listener Notifiable) {
 }
 
 // DeleteListener removes the given listener from the binding.
-func (b *base) DeleteListener(listener Notifiable) {
+func (b *Base) DeleteListener(listener Notifiable) {
 	b.Lock()
 	defer b.Unlock()
 	var listeners []Notifiable
@@ -57,7 +57,7 @@ func (b *base) DeleteListener(listener Notifiable) {
 	b.listeners = listeners
 }
 
-func (b *base) notify() {
+func (b *Base) notify() {
 	b.RLock()
 	defer b.RUnlock()
 	for _, l := range b.listeners {
@@ -67,7 +67,7 @@ func (b *base) notify() {
 
 // BaseList implements a data binding for a slice of bindings.
 type BaseList struct {
-	base
+	Base
 	values []Binding
 }
 
@@ -104,7 +104,7 @@ func (b *BaseList) Set(index int, data Binding) {
 
 // BaseMap implements a data binding for a map string to binding.
 type BaseMap struct {
-	base
+	Base
 	values map[string]Binding
 }
 
