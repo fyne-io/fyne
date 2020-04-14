@@ -64,8 +64,8 @@ type TextGrid struct {
 	BaseWidget
 	Content [][]TextGridCell
 
-	LineNumbers bool
-	Whitespace  bool
+	ShowLineNumbers bool
+	ShowWhitespace  bool
 }
 
 // MinSize returns the smallest size this widget can shrink to
@@ -84,35 +84,34 @@ func (t *TextGrid) Resize(size fyne.Size) {
 // New lines and columns will be added as required. Lines are separated by '\n'.
 // The grid will use default text style and any previous content and style will be removed.
 func (t *TextGrid) SetText(text string) {
-	rows := strings.Split(text, "\n")
-	var buffer [][]TextGridCell
-	for _, runes := range rows {
+	var rows [][]TextGridCell
+	for _, line := range strings.Split(text, "\n") {
 		var row []TextGridCell
-		for _, r := range runes {
+		for _, r := range line {
 			row = append(row, TextGridCell{Rune: r})
 		}
-		buffer = append(buffer, row)
+		rows = append(rows, row)
 	}
 
-	t.Content = buffer
+	t.Content = rows
 	t.Refresh()
 }
 
 // Text returns the contents of the buffer as a single string (with no style information).
 // It reconstructs the lines by joining with a `\n` character.
 func (t *TextGrid) Text() string {
-	ret := ""
+	var runes []rune
 	for i, row := range t.Content {
 		for _, r := range row {
-			ret += string(r.Rune)
+			runes = append(runes, r.Rune)
 		}
 
 		if i < len(t.Content)-1 {
-			ret += "\n"
+			runes = append(runes, '\n')
 		}
 	}
 
-	return ret
+	return string(runes)
 }
 
 // Row returns the content of a specified row as a slice of TextGridCells.
@@ -185,7 +184,7 @@ func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style T
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer
 func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	render := &textGridRender{text: t}
+	render := &textGridRenderer{text: t}
 
 	cell := canvas.NewText("M", color.White)
 	cell.TextStyle.Monospace = true
@@ -208,7 +207,7 @@ func NewTextGridFromString(content string) *TextGrid {
 	return grid
 }
 
-type textGridRender struct {
+type textGridRenderer struct {
 	text *TextGrid
 
 	cols, rows int
@@ -217,7 +216,7 @@ type textGridRender struct {
 	objects  []fyne.CanvasObject
 }
 
-func (t *textGridRender) appendTextCell(str rune) {
+func (t *textGridRenderer) appendTextCell(str rune) {
 	text := canvas.NewText(string(str), theme.TextColor())
 	text.TextStyle.Monospace = true
 
@@ -225,7 +224,7 @@ func (t *textGridRender) appendTextCell(str rune) {
 	t.objects = append(t.objects, bg, text)
 }
 
-func (t *textGridRender) setCellRune(str rune, pos int, style TextGridStyle) {
+func (t *textGridRenderer) setCellRune(str rune, pos int, style TextGridStyle) {
 	rect := t.objects[pos*2].(*canvas.Rectangle)
 	text := t.objects[pos*2+1].(*canvas.Text)
 	if str == 0 {
@@ -247,7 +246,7 @@ func (t *textGridRender) setCellRune(str rune, pos int, style TextGridStyle) {
 	rect.FillColor = bg
 }
 
-func (t *textGridRender) ensureGrid() {
+func (t *textGridRenderer) ensureGrid() {
 	cellCount := t.cols * t.rows
 	if len(t.objects) == cellCount*2 {
 		return
@@ -257,16 +256,13 @@ func (t *textGridRender) ensureGrid() {
 	}
 }
 
-func (t *textGridRender) refreshGrid() {
+func (t *textGridRenderer) refreshGrid() {
 	line := 1
 	x := 0
 
 	for rowIndex, row := range t.text.Content {
-		if rowIndex >= t.rows { // would be an overflow - bad
-			break
-		}
 		i := 0
-		if t.text.LineNumbers {
+		if t.text.ShowLineNumbers {
 			lineStr := []rune(fmt.Sprintf("%d", line))
 			for c := 0; c < len(lineStr); c++ {
 				t.setCellRune(lineStr[c], x, TextGridStyleWhitespace) // line numbers
@@ -286,7 +282,7 @@ func (t *textGridRender) refreshGrid() {
 			if i >= t.cols { // would be an overflow - bad
 				continue
 			}
-			if t.text.Whitespace && r.Rune == ' ' {
+			if t.text.ShowWhitespace && r.Rune == ' ' {
 				if r.Style != nil && r.Style.BackgroundColor() != nil {
 					whitespaceBG := &CustomTextGridStyle{FGColor: TextGridStyleWhitespace.TextColor(),
 						BGColor: r.Style.BackgroundColor()}
@@ -300,7 +296,7 @@ func (t *textGridRender) refreshGrid() {
 			i++
 			x++
 		}
-		if t.text.Whitespace && i < t.cols && rowIndex < len(t.text.Content)-1 {
+		if t.text.ShowWhitespace && i < t.cols && rowIndex < len(t.text.Content)-1 {
 			t.setCellRune(textAreaNewLineSymbol, x, TextGridStyleWhitespace) // newline
 			i++
 			x++
@@ -313,16 +309,16 @@ func (t *textGridRender) refreshGrid() {
 		line++
 	}
 	for ; x < len(t.objects)/2; x++ {
-		t.setCellRune(' ', x, TextGridStyleDefault) // blank lines?
+		t.setCellRune(' ', x, TextGridStyleDefault) // trailing cells and blank lines
 	}
 	canvas.Refresh(t.text)
 }
 
-func (t *textGridRender) lineCountWidth() int {
+func (t *textGridRenderer) lineCountWidth() int {
 	return len(fmt.Sprintf("%d", t.rows+1))
 }
 
-func (t *textGridRender) updateGridSize(size fyne.Size) {
+func (t *textGridRenderer) updateGridSize(size fyne.Size) {
 	bufRows := len(t.text.Content)
 	bufCols := 0
 	for _, row := range t.text.Content {
@@ -331,10 +327,10 @@ func (t *textGridRender) updateGridSize(size fyne.Size) {
 	sizeCols := int(math.Floor(float64(size.Width) / float64(t.cellSize.Width)))
 	sizeRows := int(math.Floor(float64(size.Height) / float64(t.cellSize.Height)))
 
-	if t.text.Whitespace {
+	if t.text.ShowWhitespace {
 		bufCols++
 	}
-	if t.text.LineNumbers {
+	if t.text.ShowLineNumbers {
 		bufCols += t.lineCountWidth()
 	}
 
@@ -342,7 +338,7 @@ func (t *textGridRender) updateGridSize(size fyne.Size) {
 	t.rows = int(math.Max(float64(sizeRows), float64(bufRows)))
 }
 
-func (t *textGridRender) Layout(size fyne.Size) {
+func (t *textGridRenderer) Layout(size fyne.Size) {
 	t.updateGridSize(size)
 	t.ensureGrid()
 
@@ -363,25 +359,25 @@ func (t *textGridRender) Layout(size fyne.Size) {
 	}
 }
 
-func (t *textGridRender) MinSize() fyne.Size {
+func (t *textGridRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(t.cellSize.Width*t.cols, t.cellSize.Height*t.rows)
 }
 
-func (t *textGridRender) Refresh() {
+func (t *textGridRenderer) Refresh() {
 	t.ensureGrid()
 	t.refreshGrid()
 }
 
-func (t *textGridRender) ApplyTheme() {
+func (t *textGridRenderer) ApplyTheme() {
 }
 
-func (t *textGridRender) BackgroundColor() color.Color {
+func (t *textGridRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-func (t *textGridRender) Objects() []fyne.CanvasObject {
+func (t *textGridRenderer) Objects() []fyne.CanvasObject {
 	return t.objects
 }
 
-func (t *textGridRender) Destroy() {
+func (t *textGridRenderer) Destroy() {
 }

@@ -60,7 +60,7 @@ func TestTextGrid_SetStyleRange(t *testing.T) {
 func TestTextGrid_CreateRendererRows(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(56, 22))
-	rend := test.WidgetRenderer(grid).(*textGridRender)
+	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 	rend.Refresh()
 
 	assert.Equal(t, 8, len(rend.objects))
@@ -69,7 +69,7 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 func TestTextGridRender_Size(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(32, 42)) // causes refresh
-	rend := test.WidgetRenderer(grid).(*textGridRender)
+	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 
 	assert.Equal(t, 2, rend.cols)
 	assert.Equal(t, 2, rend.rows)
@@ -77,9 +77,9 @@ func TestTextGridRender_Size(t *testing.T) {
 
 func TestTextGridRender_Whitespace(t *testing.T) {
 	grid := NewTextGridFromString("A b\nc")
-	grid.Whitespace = true
+	grid.ShowWhitespace = true
 	grid.Resize(fyne.NewSize(56, 42)) // causes refresh
-	rend := test.WidgetRenderer(grid).(*textGridRender)
+	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 
 	assert.Equal(t, 4, rend.cols)
 	assert.Equal(t, 2, rend.rows)
@@ -92,9 +92,9 @@ func TestTextGridRender_Whitespace(t *testing.T) {
 func TestTextGridRender_TextColor(t *testing.T) {
 	grid := NewTextGridFromString("Ab ")
 	grid.Content[0][1].Style = &CustomTextGridStyle{FGColor: color.Black}
-	grid.Whitespace = true
+	grid.ShowWhitespace = true
 	grid.Resize(fyne.NewSize(56, 22)) // causes refresh
-	rend := test.WidgetRenderer(grid).(*textGridRender)
+	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 
 	assert.Equal(t, 4, rend.cols)
 	assert.Equal(t, 1, rend.rows)

@@ -35,8 +35,8 @@ func makeButtonTab() fyne.Widget {
 		&widget.CustomTextGridStyle{FGColor: color.RGBA{R: 0, G: 0, B: 128, A: 255}})
 	grid.SetStyleRange(0, 4, 0, 7,
 		&widget.CustomTextGridStyle{BGColor: &color.RGBA{R: 128, G: 0, B: 0, A: 255}})
-	grid.LineNumbers = true
-	grid.Whitespace = true
+	grid.ShowLineNumbers = true
+	grid.ShowWhitespace = true
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
