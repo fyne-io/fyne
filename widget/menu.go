@@ -18,7 +18,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 		if opt.IsSeparator {
 			options.Append(newSeparator())
 		} else {
-			options.Append(newTappableLabel(opt.Label))
+			options.Append(newMenuItemWidget(opt.Label))
 		}
 	}
 	pop := NewPopUpAtPosition(options, c, pos)
@@ -55,7 +55,7 @@ func (t *menuItemWidget) Tapped(*fyne.PointEvent) {
 }
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
-	return &hoverLabelRenderer{t.Label.CreateRenderer().(*textRenderer), t}
+	return &menuItemWidgetRenderer{t.Label.CreateRenderer().(*textRenderer), t}
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -76,25 +76,27 @@ func (t *menuItemWidget) MouseOut() {
 func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 }
 
-func newTappableLabel(label string) *menuItemWidget {
+func newMenuItemWidget(label string) *menuItemWidget {
 	ret := &menuItemWidget{Label: NewLabel(label)}
 	ret.ExtendBaseWidget(ret)
 	return ret
 }
 
-type hoverLabelRenderer struct {
+type menuItemWidgetRenderer struct {
 	*textRenderer
 	label *menuItemWidget
 }
 
-func (h *hoverLabelRenderer) BackgroundColor() color.Color {
+func (h *menuItemWidgetRenderer) BackgroundColor() color.Color {
 	if h.label.hovered {
 		return theme.HoverColor()
 	}
 
-	return theme.BackgroundColor()
+	return color.Transparent
 }
 
 func newSeparator() fyne.CanvasObject {
-	return canvas.NewLine(theme.DisabledTextColor())
+	s := canvas.NewRectangle(theme.DisabledTextColor())
+	s.SetMinSize(fyne.NewSize(1, 2))
+	return s
 }
