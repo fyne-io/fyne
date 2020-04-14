@@ -103,6 +103,7 @@ func (l *Label) MinSize() fyne.Size {
 // BindText binds the Label's Text to the given data binding.
 // Returns the Label for chaining.
 func (l *Label) BindText(data binding.String) *Label {
+	l.UnbindText()
 	l.textBind = data
 	l.textNotify = data.AddStringListener(l.SetText)
 	return l

@@ -232,6 +232,7 @@ func (s *Select) updateSelected(text string) {
 // BindSelected binds the Select's Selected Option to the given data binding.
 // Returns the Select for chaining.
 func (s *Select) BindSelected(data binding.String) *Select {
+	s.UnbindSelected()
 	s.selectedBind = data
 	s.selectedNotify = data.AddStringListener(s.SetSelected)
 	return s
@@ -251,6 +252,7 @@ func (s *Select) UnbindSelected() *Select {
 // BindOptions binds the Select's Options to the given data binding.
 // Returns the Select for chaining.
 func (s *Select) BindOptions(data binding.List) *Select {
+	s.UnbindOptions()
 	s.optionBind = data
 	s.optionNotify = data.AddListenerFunction(func(binding.Binding) {
 		l := data.Length()

@@ -236,6 +236,7 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 // BindText binds the Button's Text to the given data binding.
 // Returns the Button for chaining.
 func (b *Button) BindText(data binding.String) *Button {
+	b.UnbindText()
 	b.textBind = data
 	b.textNotify = data.AddStringListener(b.SetText)
 	return b
@@ -255,6 +256,7 @@ func (b *Button) UnbindText() *Button {
 // BindIcon binds the Button's Icon to the given data binding.
 // Returns the Button for chaining.
 func (b *Button) BindIcon(data binding.Resource) *Button {
+	b.UnbindIcon()
 	b.iconBind = data
 	b.iconNotify = data.AddResourceListener(b.SetIcon)
 	return b

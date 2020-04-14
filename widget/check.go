@@ -182,6 +182,7 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 // BindChecked binds the Check's OnChanged to the given data binding.
 // Returns the Check for chaining.
 func (c *Check) BindChecked(data binding.Bool) *Check {
+	c.UnbindChecked()
 	c.changeBind = data
 	c.checkNotify = data.AddBoolListener(c.SetChecked)
 	return c
@@ -201,6 +202,7 @@ func (c *Check) UnbindChecked() *Check {
 // BindText binds the Check's Text to the given data binding.
 // Returns the Check for chaining.
 func (c *Check) BindText(data binding.String) *Check {
+	c.UnbindText()
 	c.textBind = data
 	c.textNotify = data.AddStringListener(c.SetText)
 	return c

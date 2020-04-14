@@ -78,6 +78,7 @@ func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 // BindResource binds the Icon's Resource to the given data binding.
 // Returns the Icon for chaining.
 func (i *Icon) BindResource(data binding.Resource) *Icon {
+	i.UnbindResource()
 	i.resourceBind = data
 	i.resourceNotify = data.AddResourceListener(i.SetResource)
 	return i

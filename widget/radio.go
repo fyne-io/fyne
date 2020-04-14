@@ -311,6 +311,7 @@ func (r *Radio) removeDuplicateOptions() {
 // BindSelected binds the Radio's Selected Option to the given data binding.
 // Returns the Radio for chaining.
 func (r *Radio) BindSelected(data binding.String) *Radio {
+	r.UnbindSelected()
 	r.selectedBind = data
 	r.selectedNotify = data.AddStringListener(r.SetSelected)
 	return r
@@ -330,6 +331,7 @@ func (r *Radio) UnbindSelected() *Radio {
 // BindOptions binds the Radio's Options to the given data binding.
 // Returns the Radio for chaining.
 func (r *Radio) BindOptions(data binding.List) *Radio {
+	r.UnbindOptions()
 	r.optionBind = data
 	r.optionNotify = data.AddListenerFunction(func(binding.Binding) {
 		l := data.Length()

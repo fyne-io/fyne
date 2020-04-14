@@ -136,6 +136,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 // BindMin binds the ProgressBar's Min to the given data binding.
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) BindMin(data binding.Float64) *ProgressBar {
+	p.UnbindMin()
 	p.minBind = data
 	p.minNotify = data.AddFloat64Listener(p.SetMin)
 	return p
@@ -155,6 +156,7 @@ func (p *ProgressBar) UnbindMin() *ProgressBar {
 // BindMax binds the ProgressBar's Max to the given data binding.
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) BindMax(data binding.Float64) *ProgressBar {
+	p.UnbindMax()
 	p.maxBind = data
 	p.maxNotify = data.AddFloat64Listener(p.SetMax)
 	return p
@@ -174,6 +176,7 @@ func (p *ProgressBar) UnbindMax() *ProgressBar {
 // BindValue binds the ProgressBar's Value to the given data binding.
 // Returns the ProgressBar for chaining.
 func (p *ProgressBar) BindValue(data binding.Float64) *ProgressBar {
+	p.UnbindValue()
 	p.valueBind = data
 	p.valueNotify = data.AddFloat64Listener(p.SetValue)
 	return p

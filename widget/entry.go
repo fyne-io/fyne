@@ -1143,6 +1143,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 // BindText binds the Entry's Text to the given data binding.
 // Returns the Entry for chaining.
 func (e *Entry) BindText(data binding.String) *Entry {
+	e.UnbindText()
 	e.textBind = data
 	e.textNotify = data.AddStringListener(e.SetText)
 	return e
