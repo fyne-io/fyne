@@ -388,7 +388,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 	provider := e.textProvider()
 	for i := 0; i < provider.rows(); i++ {
 		b := provider.rowBoundary(i)
-		if b[0] < pos {
+		if b[0] <= pos {
 			if b[1] < pos {
 				row++
 			}
