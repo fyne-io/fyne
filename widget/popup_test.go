@@ -135,7 +135,7 @@ func TestPopUp_Move(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			pop := newPopUp(label, win.Canvas())
-			pop.WithoutPadding = !tt.pad
+			pop.NotPadded = !tt.pad
 			defer test.Canvas().Overlays().Remove(pop)
 
 			pop.Move(pos)
@@ -203,7 +203,7 @@ func TestPopUp_Resize(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			pop := newPopUp(label, win.Canvas())
-			pop.WithoutPadding = !tt.pad
+			pop.NotPadded = !tt.pad
 			pop.Show()
 			defer test.Canvas().Overlays().Remove(pop)
 
@@ -313,7 +313,7 @@ func TestModalPopUp_Resize(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			pop := newModalPopUp(label, win.Canvas())
-			pop.WithoutPadding = !tt.pad
+			pop.NotPadded = !tt.pad
 			pop.Show()
 			defer test.Canvas().Overlays().Remove(pop)
 

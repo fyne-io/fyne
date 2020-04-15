@@ -14,9 +14,9 @@ import (
 type PopUp struct {
 	BaseWidget
 
-	Content        fyne.CanvasObject
-	Canvas         fyne.Canvas
-	WithoutPadding bool
+	Content   fyne.CanvasObject
+	Canvas    fyne.Canvas
+	NotPadded bool
 
 	innerPos     fyne.Position
 	innerSize    fyne.Size
@@ -164,14 +164,14 @@ type popUpBaseRenderer struct {
 }
 
 func (r *popUpBaseRenderer) padding() fyne.Size {
-	if r.popUp.WithoutPadding {
+	if r.popUp.NotPadded {
 		return fyne.NewSize(0, 0)
 	}
 	return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 }
 
 func (r *popUpBaseRenderer) offset() fyne.Position {
-	if r.popUp.WithoutPadding {
+	if r.popUp.NotPadded {
 		return fyne.NewPos(0, 0)
 	}
 	return fyne.NewPos(theme.Padding(), theme.Padding())
@@ -184,7 +184,7 @@ type popUpRenderer struct {
 
 func (r *popUpRenderer) Layout(_ fyne.Size) {
 	contentSize := r.popUp.innerSize
-	if !r.popUp.WithoutPadding {
+	if !r.popUp.NotPadded {
 		contentSize = contentSize.Subtract(r.padding())
 	}
 	r.popUp.Content.Resize(contentSize)
@@ -203,7 +203,7 @@ func (r *popUpRenderer) Layout(_ fyne.Size) {
 		}
 	}
 	contentPos := innerPos
-	if !r.popUp.WithoutPadding {
+	if !r.popUp.NotPadded {
 		contentPos = contentPos.Add(r.offset())
 	}
 	r.popUp.Content.Move(contentPos)
