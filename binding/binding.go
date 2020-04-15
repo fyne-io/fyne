@@ -38,7 +38,7 @@ type Map interface {
 type Base struct {
 	Binding
 	sync.RWMutex
-	listeners []Notifiable // TODO maybe a map[Notifiable]bool would be quicker, especially for DeleteListener?
+	listeners []Notifiable
 }
 
 // AddListener adds the given listener to the binding.
