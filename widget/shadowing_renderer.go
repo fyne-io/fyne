@@ -12,12 +12,13 @@ type shadowingRenderer struct {
 }
 
 func newShadowingRenderer(objects []fyne.CanvasObject, level elevationLevel) *shadowingRenderer {
-	var shadow fyne.CanvasObject
+	var s fyne.CanvasObject
 	if level > 0 {
-		shadow = newShadow(shadowAround, level)
-		objects = append(objects, shadow)
+		s = newShadow(shadowAround, level)
 	}
-	return &shadowingRenderer{baseRenderer{objects}, shadow}
+	r := &shadowingRenderer{shadow: s}
+	r.setObjects(objects)
+	return r
 }
 
 func (r *shadowingRenderer) layoutShadow(size fyne.Size, pos fyne.Position) {
@@ -26,4 +27,11 @@ func (r *shadowingRenderer) layoutShadow(size fyne.Size, pos fyne.Position) {
 	}
 	r.shadow.Resize(size)
 	r.shadow.Move(pos)
+}
+
+func (r *shadowingRenderer) setObjects(objects []fyne.CanvasObject) {
+	if r.shadow != nil {
+		objects = append([]fyne.CanvasObject{r.shadow}, objects...)
+	}
+	r.baseRenderer.setObjects(objects)
 }
