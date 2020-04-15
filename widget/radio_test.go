@@ -381,23 +381,18 @@ func TestRadio_BindSelected_Set(t *testing.T) {
 	})
 
 	data := binding.NewString("c")
+	radio.BindSelected(data)
 	data.AddStringListener(func(value string) {
 		selected = value
 		done <- true
 	})
-
-	radio.BindSelected(data)
 	timedWait(t, done)
 	assert.Equal(t, "c", radio.Selected)
 
-	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
-		done <- true
-	}))
-
-	data.Set("b")
+	data.Set("a")
 
 	timedWait(t, done)
-	assert.Equal(t, "b", selected)
+	assert.Equal(t, "a", selected)
 }
 
 func TestRadio_BindSelected_Tap(t *testing.T) {
@@ -407,13 +402,12 @@ func TestRadio_BindSelected_Tap(t *testing.T) {
 	radio := NewRadio([]string{"a", "b", "c"}, nil)
 
 	data := binding.NewString("c")
+	radio.BindSelected(data)
 	selected := ""
 	data.AddStringListener(func(value string) {
 		selected = value
 		done <- true
 	})
-
-	radio.BindSelected(data)
 	timedWait(t, done)
 	assert.Equal(t, "c", radio.Selected)
 
@@ -436,10 +430,10 @@ func TestRadio_BindOptions(t *testing.T) {
 		binding.NewString("b"),
 		binding.NewString("c"),
 	)
+	radio.BindOptions(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
-	radio.BindOptions(data)
 	timedWait(t, done)
 	assert.Equal(t, 3, len(radio.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, radio.Options)

@@ -50,7 +50,7 @@ func (b *base{{ .Name }}) Get() {{ .Type }} {
 func (b *base{{ .Name }}) Set(value {{ .Type }}) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 

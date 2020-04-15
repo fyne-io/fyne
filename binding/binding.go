@@ -1,6 +1,10 @@
 package binding
 
-import "sync"
+import (
+	"sync"
+
+	"fyne.io/fyne"
+)
 
 // Binding is the base interface of the Data Binding API.
 type Binding interface {
@@ -39,6 +43,12 @@ type Base struct {
 func (b *Base) AddListener(listener Notifiable) {
 	b.Lock()
 	defer b.Unlock()
+	for _, l := range b.listeners {
+		if l == listener {
+			fyne.LogError("Listener already added to this Binding", nil)
+			return
+		}
+	}
 	b.listeners = append(b.listeners, listener)
 	// Call the listener with the current state
 	go listener.Notify(b)
@@ -57,11 +67,25 @@ func (b *Base) DeleteListener(listener Notifiable) {
 	b.listeners = listeners
 }
 
-func (b *Base) notify() {
+// Update should be called whenever the data changed.
+// This will enqueue the binding for the Updater.
+func (b *Base) Update() {
+	if updaterQueue == nil {
+		panic("binding.Start() not called")
+	}
+	select {
+	case updaterQueue <- b.notifyListeners:
+	default:
+		fyne.LogError("UpdateQueue full", nil)
+	}
+}
+
+// notifyListeners should only be called by Updater
+func (b *Base) notifyListeners() {
 	b.RLock()
 	defer b.RUnlock()
 	for _, l := range b.listeners {
-		go l.Notify(b)
+		l.Notify(b)
 	}
 }
 
@@ -89,7 +113,7 @@ func (b *BaseList) Get(index int) Binding {
 // Add appends the given binding(s) to the slice.
 func (b *BaseList) Add(data ...Binding) {
 	b.values = append(b.values, data...)
-	b.notify()
+	b.Update()
 }
 
 // Set puts the given binding into the slice at the given index.
@@ -99,7 +123,7 @@ func (b *BaseList) Set(index int, data Binding) {
 		return
 	}
 	b.values[index] = data
-	b.notify()
+	b.Update()
 }
 
 // BaseMap implements a data binding for a map string to binding.
@@ -131,5 +155,27 @@ func (b *BaseMap) Set(key string, data Binding) {
 		return
 	}
 	b.values[key] = data
-	b.notify()
+	b.Update()
+}
+
+var updaterQueue chan func()
+
+// Start initializes the binding queue and starts the updater.
+// Start should be called once when an app is created.
+func Start() {
+	updaterQueue = make(chan func(), 1024)
+	go func() {
+		for fn := range updaterQueue {
+			fn()
+		}
+	}()
+}
+
+// Stop closes the binding queue causing the updater to quit.
+// Stop should be called once when an app is quitting.
+func Stop() {
+	if updaterQueue != nil {
+		close(updaterQueue)
+		updaterQueue = nil
+	}
 }

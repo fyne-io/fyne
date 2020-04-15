@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/theme"
 )
@@ -43,7 +44,7 @@ func (a *testApp) Run() {
 }
 
 func (a *testApp) Quit() {
-	// no-op
+	binding.Stop()
 }
 
 func (a *testApp) UniqueID() string {
@@ -107,6 +108,7 @@ func NewApp() fyne.App {
 		}
 	}()
 
+	binding.Start()
 	return test
 }
 

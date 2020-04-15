@@ -211,11 +211,13 @@ func TestSelect_BindSelected_Set(t *testing.T) {
 	combo := NewSelect([]string{"a", "b", "c"}, func(value string) {
 		selected = value
 	})
-	data := binding.NewString("")
+	data := binding.NewString("c")
 	combo.BindSelected(data)
 	data.AddStringListener(func(string) {
 		done <- true
 	})
+	timedWait(t, done)
+	assert.Equal(t, "c", selected)
 	data.Set("b")
 	timedWait(t, done)
 	assert.Equal(t, "b", selected)
@@ -227,13 +229,15 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 	done := make(chan bool)
 	combo := NewSelect([]string{"a", "b", "c"}, nil)
 
-	data := binding.NewString("")
+	data := binding.NewString("c")
 	combo.BindSelected(data)
 	selected := ""
 	data.AddStringListener(func(s string) {
 		selected = s
 		done <- true
 	})
+	timedWait(t, done)
+	assert.Equal(t, "c", selected)
 
 	test.Tap(combo)
 
@@ -260,10 +264,10 @@ func TestSelect_BindOptions(t *testing.T) {
 		binding.NewString("b"),
 		binding.NewString("c"),
 	)
+	combo.BindOptions(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
-	combo.BindOptions(data)
 	timedWait(t, done)
 	assert.Equal(t, 3, len(combo.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, combo.Options)

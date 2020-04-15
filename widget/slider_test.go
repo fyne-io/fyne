@@ -55,10 +55,10 @@ func TestSlider_BindMin(t *testing.T) {
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
 	data := binding.NewFloat64(1.0)
+	slider.BindMin(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
-	slider.BindMin(data)
 	timedWait(t, done)
 	assert.Equal(t, 1.0, slider.Min)
 	data.Set(75.0)
@@ -72,10 +72,10 @@ func TestSlider_BindMax(t *testing.T) {
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
 	data := binding.NewFloat64(1.0)
+	slider.BindMax(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
-	slider.BindMax(data)
 	timedWait(t, done)
 	assert.Equal(t, 1.0, slider.Max)
 	data.Set(75.0)
@@ -89,10 +89,10 @@ func TestSlider_BindStep(t *testing.T) {
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
 	data := binding.NewFloat64(1.0)
+	slider.BindStep(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
-	slider.BindStep(data)
 	timedWait(t, done)
 	assert.Equal(t, 1.0, slider.Step)
 	data.Set(75.0)
@@ -106,10 +106,10 @@ func TestSlider_BindValue(t *testing.T) {
 	done := make(chan bool)
 	slider := NewSlider(0, 100)
 	data := binding.NewFloat64(1.0)
+	slider.BindValue(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
-	slider.BindValue(data)
 	timedWait(t, done)
 	assert.Equal(t, 1.0, slider.Value)
 	data.Set(75.0)

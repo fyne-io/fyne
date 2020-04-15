@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/internal"
 	helper "fyne.io/fyne/internal/app"
 )
@@ -58,6 +59,8 @@ func (app *fyneApp) Run() {
 }
 
 func (app *fyneApp) Quit() {
+	binding.Stop()
+
 	for _, window := range app.driver.AllWindows() {
 		window.Close()
 	}
@@ -113,5 +116,6 @@ func NewAppWithDriver(d fyne.Driver, id string) fyne.App {
 		newApp.settings.watchSettings()
 	}
 
+	binding.Start()
 	return newApp
 }

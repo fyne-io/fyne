@@ -37,7 +37,7 @@ func (b *baseBool) Get() bool {
 func (b *baseBool) Set(value bool) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 
@@ -79,7 +79,7 @@ func (b *baseFloat64) Get() float64 {
 func (b *baseFloat64) Set(value float64) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 
@@ -121,7 +121,7 @@ func (b *baseInt) Get() int {
 func (b *baseInt) Set(value int) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 
@@ -163,7 +163,7 @@ func (b *baseInt64) Get() int64 {
 func (b *baseInt64) Set(value int64) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 
@@ -205,7 +205,7 @@ func (b *baseResource) Get() fyne.Resource {
 func (b *baseResource) Set(value fyne.Resource) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 
@@ -247,7 +247,7 @@ func (b *baseRune) Get() rune {
 func (b *baseRune) Set(value rune) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 
@@ -289,7 +289,7 @@ func (b *baseString) Get() string {
 func (b *baseString) Set(value string) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 
@@ -331,7 +331,7 @@ func (b *baseURL) Get() *url.URL {
 func (b *baseURL) Set(value *url.URL) {
 	if b.value != value {
 		b.value = value
-		b.notify()
+		b.Update()
 	}
 }
 
