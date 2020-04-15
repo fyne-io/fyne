@@ -15,9 +15,10 @@ import (
 
 // BindingsScreen loads a data bindings example panel for the demo app
 func BindingsScreen() fyne.CanvasObject {
+	// TODO form - map[string]binding
 	// TODO list - []binding
 	// TODO table - [][]binding
-	// TODO tree - map[string][]string
+	// TODO tree - []binding
 
 	// Button <-> ProgressBar <-> Button
 	var goProgress float64
