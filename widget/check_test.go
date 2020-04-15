@@ -221,17 +221,24 @@ func TestCheck_Disabled(t *testing.T) {
 func TestCheck_BindChecked_Set(t *testing.T) {
 	a := test.NewApp()
 	defer a.Quit()
+	checked := true
+
 	done := make(chan bool)
 	selected := false
 	check := NewCheck("check", func(c bool) {
 		selected = c
 		done <- true
 	})
-	check.Checked = true
-	data := binding.NewBool(false)
+	data := binding.NewBool(&checked)
 	check.BindChecked(data)
 	timedWait(t, done)
-	assert.Equal(t, false, check.Checked)
+	assert.Equal(t, true, check.Checked)
+
+	// Set directly
+	checked = false
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, false, selected)
 
 	// Set by binding
 	data.Set(true)
@@ -242,10 +249,12 @@ func TestCheck_BindChecked_Set(t *testing.T) {
 func TestCheck_BindChecked_Tap(t *testing.T) {
 	a := test.NewApp()
 	defer a.Quit()
+	checked := true
+
 	done := make(chan bool)
 	check := NewCheck("check", nil)
 
-	data := binding.NewBool(false)
+	data := binding.NewBool(&checked)
 	check.BindChecked(data)
 	selected := false
 	data.AddBoolListener(func(c bool) {
@@ -253,7 +262,13 @@ func TestCheck_BindChecked_Tap(t *testing.T) {
 		done <- true
 	})
 	timedWait(t, done)
-	assert.Equal(t, false, check.Checked)
+	assert.Equal(t, true, check.Checked)
+
+	// Set directly
+	checked = false
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, false, selected)
 
 	// Set by check
 	test.Tap(check)
@@ -267,7 +282,9 @@ func TestCheck_BindText(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	check := NewCheck("check", nil)
-	data := binding.NewString("foo")
+
+	text := "foo"
+	data := binding.NewString(&text)
 	check.BindText(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
@@ -275,6 +292,13 @@ func TestCheck_BindText(t *testing.T) {
 	timedWait(t, done)
 	assert.Equal(t, "foo", check.Text)
 
+	// Set directly
+	text = "bar"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, "bar", check.Text)
+
+	// Set by binding
 	data.Set("foobar")
 	timedWait(t, done)
 	assert.Equal(t, "foobar", check.Text)

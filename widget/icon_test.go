@@ -43,13 +43,23 @@ func TestIcon_BindResource(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	icon := NewIcon(theme.WarningIcon())
-	data := binding.NewResource(theme.QuestionIcon())
+
+	resource := theme.QuestionIcon()
+	data := binding.NewResource(&resource)
 	icon.BindResource(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
 	timedWait(t, done)
 	assert.Equal(t, theme.QuestionIcon(), icon.Resource)
+
+	// Set directly
+	resource = theme.SearchIcon()
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, theme.SearchIcon(), icon.Resource)
+
+	// Set by binding
 	data.Set(theme.InfoIcon())
 	timedWait(t, done)
 	assert.Equal(t, theme.InfoIcon(), icon.Resource)

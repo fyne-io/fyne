@@ -21,7 +21,7 @@ import (
 {{ end }})
 `
 
-const bindingTemplate = `
+const elementBindingTemplate = `
 // {{ .Name }} defines a data binding for a {{ .Type }}.
 type {{ .Name }} interface {
 	Binding
@@ -33,23 +33,23 @@ type {{ .Name }} interface {
 // base{{ .Name }} implements a data binding for a {{ .Type }}.
 type base{{ .Name }} struct {
 	Base
-	value {{ .Type }}
+	value *{{ .Type }}
 }
 
 // New{{ .Name }} creates a new binding with the given value.
-func New{{ .Name }}(value {{ .Type }}) {{ .Name }} {
+func New{{ .Name }}(value *{{ .Type }}) {{ .Name }} {
 	return &base{{ .Name }}{value: value}
 }
 
 // Get returns the bound value.
 func (b *base{{ .Name }}) Get() {{ .Type }} {
-	return b.value
+	return *b.value
 }
 
 // Set updates the bound value.
 func (b *base{{ .Name }}) Set(value {{ .Type }}) {
-	if b.value != value {
-		b.value = value
+	if *b.value != value {
+		*b.value = value
 		b.Update()
 	}
 }
@@ -58,10 +58,22 @@ func (b *base{{ .Name }}) Set(value {{ .Type }}) {
 // The function is wrapped in the returned NotifyFunction which can be passed to DeleteListener.
 func (b *base{{ .Name }}) Add{{ .Name }}Listener(listener func({{ .Type }})) *NotifyFunction {
 	n := NewNotifyFunction(func(Binding) {
-		listener(b.value)
+		listener(*b.value)
 	})
 	b.AddListener(n)
 	return n
+}
+`
+
+const listBindingTemplate = `
+// New{{ .Name }}List creates a new list binding with the given values.
+func New{{ .Name }}List(values ...{{ .Type }}) *BaseList {
+	list := &BaseList{}
+	for _, v := range values {
+		w := v
+		list.Add(New{{ .Name }}(&w))
+	}
+	return list
 }
 `
 
@@ -92,7 +104,8 @@ func main() {
 		"fyne.io/fyne",
 	})
 
-	t := template.Must(template.New("binding").Parse(bindingTemplate))
+	et := template.Must(template.New("element").Parse(elementBindingTemplate))
+	lt := template.Must(template.New("list").Parse(listBindingTemplate))
 
 	for _, b := range []*BindingTemplate{
 		&BindingTemplate{Name: "Bool", Type: "bool"},
@@ -114,7 +127,8 @@ func main() {
 		&BindingTemplate{Name: "String", Type: "string"},
 		&BindingTemplate{Name: "URL", Type: "*url.URL"},
 	} {
-		writeFile(f, t, b)
+		writeFile(f, et, b)
+		writeFile(f, lt, b)
 	}
 
 	f.Close()

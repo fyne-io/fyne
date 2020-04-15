@@ -380,7 +380,8 @@ func TestRadio_BindSelected_Set(t *testing.T) {
 		selected = value
 	})
 
-	data := binding.NewString("c")
+	value := "c"
+	data := binding.NewString(&value)
 	radio.BindSelected(data)
 	data.AddStringListener(func(value string) {
 		selected = value
@@ -389,8 +390,14 @@ func TestRadio_BindSelected_Set(t *testing.T) {
 	timedWait(t, done)
 	assert.Equal(t, "c", radio.Selected)
 
-	data.Set("a")
+	// Set directly
+	value = "b"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, "b", radio.Selected)
 
+	// Set by binding
+	data.Set("a")
 	timedWait(t, done)
 	assert.Equal(t, "a", selected)
 }
@@ -401,7 +408,8 @@ func TestRadio_BindSelected_Tap(t *testing.T) {
 	done := make(chan bool)
 	radio := NewRadio([]string{"a", "b", "c"}, nil)
 
-	data := binding.NewString("c")
+	value := "c"
+	data := binding.NewString(&value)
 	radio.BindSelected(data)
 	selected := ""
 	data.AddStringListener(func(value string) {
@@ -411,8 +419,14 @@ func TestRadio_BindSelected_Tap(t *testing.T) {
 	timedWait(t, done)
 	assert.Equal(t, "c", radio.Selected)
 
-	test.Tap(radio)
+	// Set directly
+	value = "b"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, "b", radio.Selected)
 
+	// Set by tap
+	test.Tap(radio)
 	timedWait(t, done)
 	assert.Equal(t, "a", selected)
 	assert.Equal(t, "a", data.Get())
@@ -424,12 +438,7 @@ func TestRadio_BindOptions(t *testing.T) {
 	done := make(chan bool)
 	radio := NewRadio([]string{"a"}, nil)
 
-	data := &binding.BaseList{}
-	data.Add(
-		binding.NewString("a"),
-		binding.NewString("b"),
-		binding.NewString("c"),
-	)
+	data := binding.NewStringList("a", "b", "c")
 	radio.BindOptions(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
@@ -438,7 +447,8 @@ func TestRadio_BindOptions(t *testing.T) {
 	assert.Equal(t, 3, len(radio.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, radio.Options)
 
-	data.Add(binding.NewString("d"))
+	d := "d"
+	data.Add(binding.NewString(&d))
 	timedWait(t, done)
 	assert.Equal(t, 4, len(radio.Options))
 	assert.Equal(t, []string{"a", "b", "c", "d"}, radio.Options)

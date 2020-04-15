@@ -1561,13 +1561,22 @@ func TestEntry_BindText(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	entry := NewEntry()
-	data := binding.NewString("foo")
+	text := "foo"
+	data := binding.NewString(&text)
 	entry.BindText(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
 	timedWait(t, done)
 	assert.Equal(t, "foo", entry.Text)
+
+	// Set directly
+	text = "bar"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, "bar", entry.Text)
+
+	// Set by binding
 	data.Set("foobar")
 	timedWait(t, done)
 	assert.Equal(t, "foobar", entry.Text)

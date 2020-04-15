@@ -142,7 +142,8 @@ func TestButton_BindText(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	button := NewButton("button", nil)
-	data := binding.NewString("foo")
+	text := "foo"
+	data := binding.NewString(&text)
 	button.BindText(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
@@ -150,6 +151,13 @@ func TestButton_BindText(t *testing.T) {
 	timedWait(t, done)
 	assert.Equal(t, "foo", button.Text)
 
+	// Set directly
+	text = "bar"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, "bar", button.Text)
+
+	// Set by binding
 	data.Set("foobar")
 	timedWait(t, done)
 	assert.Equal(t, "foobar", button.Text)
@@ -160,7 +168,8 @@ func TestButton_BindIcon(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	button := NewButtonWithIcon("button", theme.WarningIcon(), nil)
-	data := binding.NewResource(theme.QuestionIcon())
+	resource := theme.QuestionIcon()
+	data := binding.NewResource(&resource)
 	button.BindIcon(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
@@ -168,6 +177,13 @@ func TestButton_BindIcon(t *testing.T) {
 	timedWait(t, done)
 	assert.Equal(t, theme.QuestionIcon(), button.Icon)
 
+	// Set directly
+	resource = theme.SearchIcon()
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, theme.SearchIcon(), button.Icon)
+
+	// Set by binding
 	data.Set(theme.InfoIcon())
 	timedWait(t, done)
 	assert.Equal(t, theme.InfoIcon(), button.Icon)

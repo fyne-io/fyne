@@ -74,13 +74,23 @@ func TestHyperlink_BindText(t *testing.T) {
 	u, err := url.Parse("https://fyne.io")
 	assert.Nil(t, err)
 	hyperlink := NewHyperlink("hyperlink", u)
-	data := binding.NewString("foo")
+
+	text := "foo"
+	data := binding.NewString(&text)
 	hyperlink.BindText(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
 	timedWait(t, done)
 	assert.Equal(t, "foo", hyperlink.Text)
+
+	// Set directly
+	text = "bar"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, "bar", hyperlink.Text)
+
+	// Set by binding
 	data.Set("foobar")
 	timedWait(t, done)
 	assert.Equal(t, "foobar", hyperlink.Text)
@@ -93,7 +103,9 @@ func TestHyperlink_BindURL(t *testing.T) {
 	u1, err := url.Parse("https://fyne.io")
 	assert.Nil(t, err)
 	hyperlink := NewHyperlink("hyperlink", nil)
-	data := binding.NewURL(u1)
+
+	u := u1
+	data := binding.NewURL(&u)
 	hyperlink.BindURL(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
@@ -101,11 +113,20 @@ func TestHyperlink_BindURL(t *testing.T) {
 	timedWait(t, done)
 	assert.Equal(t, u1, hyperlink.URL)
 
-	u2, err := url.Parse("https://github.com/fyne-io/fyne")
+	// Set directly
+	u2, err := url.Parse("https://fyne.io/develop")
 	assert.Nil(t, err)
-	data.Set(u2)
+	u = u2
+	data.Update()
 	timedWait(t, done)
 	assert.Equal(t, u2, hyperlink.URL)
+
+	// Set by binding
+	u3, err := url.Parse("https://github.com/fyne-io/fyne")
+	assert.Nil(t, err)
+	data.Set(u3)
+	timedWait(t, done)
+	assert.Equal(t, u3, hyperlink.URL)
 }
 
 func TestHyperlink_CreateRendererDoesNotAffectSize(t *testing.T) {

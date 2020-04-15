@@ -20,9 +20,12 @@ func BindingsScreen() fyne.CanvasObject {
 	// TODO tree - map[string][]string
 
 	// Button <-> ProgressBar <-> Button
-	goFloat64 := binding.NewFloat64(0.0)
-	goString := binding.NewString("")
-	goResource := binding.NewResource(nil)
+	var goProgress float64
+	var goText string
+	var goRes fyne.Resource
+	goFloat64 := binding.NewFloat64(&goProgress)
+	goString := binding.NewString(&goText)
+	goResource := binding.NewResource(&goRes)
 
 	reset := func() {
 		goString.Set("Go")
@@ -49,9 +52,12 @@ func BindingsScreen() fyne.CanvasObject {
 	reset()
 
 	// Check <-> Label <-> Check
-	onOffBool := binding.NewBool(false)
-	onOffString := binding.NewString("")
-	onOffResource := binding.NewResource(nil)
+	var onOffChecked bool
+	var onOffText string
+	var onOffRes fyne.Resource
+	onOffBool := binding.NewBool(&onOffChecked)
+	onOffString := binding.NewString(&onOffText)
+	onOffResource := binding.NewResource(&onOffRes)
 
 	onOffLeftCheck := (&widget.Check{}).BindChecked(onOffBool).BindText(onOffString)
 	onOffRightCheck := (&widget.Check{}).BindChecked(onOffBool).BindText(onOffString)
@@ -69,7 +75,8 @@ func BindingsScreen() fyne.CanvasObject {
 	onOffBool.Set(true)
 
 	// Entry <-> Label <-> Entry
-	countString := binding.NewString("")
+	var countText string
+	countString := binding.NewString(&countText)
 
 	countLeftEntry := widget.NewEntry().BindText(countString)
 	countRightEntry := widget.NewEntry().BindText(countString)
@@ -80,13 +87,12 @@ func BindingsScreen() fyne.CanvasObject {
 	})
 
 	// Radio <-> Icon <-> Radio
-	clipboardOptions := binding.NewList(
-		binding.NewString("Cut"),
-		binding.NewString("Copy"),
-		binding.NewString("Paste"),
-	)
-	clipboardString := binding.NewString("")
-	clipboardResource := binding.NewResource(nil)
+	clipboardSlice := []string{"Cut", "Copy", "Paste"}
+	var clipboardText string
+	var clipboardRes fyne.Resource
+	clipboardOptions := binding.NewStringList(clipboardSlice...)
+	clipboardString := binding.NewString(&clipboardText)
+	clipboardResource := binding.NewResource(&clipboardRes)
 
 	clipboardLeftRadio := (&widget.Radio{}).BindOptions(clipboardOptions).BindSelected(clipboardString)
 	clipboardRightRadio := (&widget.Radio{}).BindOptions(clipboardOptions).BindSelected(clipboardString)
@@ -106,12 +112,12 @@ func BindingsScreen() fyne.CanvasObject {
 	})
 
 	// Select <-> Hyperlink <-> Select
-	urlOptions := binding.NewList(
-		binding.NewString("https://fyne.io"),
-		binding.NewString("https://github.com/fyne-io"),
-	)
-	urlString := binding.NewString("")
-	urlURL := binding.NewURL(nil)
+	urlSlice := []string{"https://fyne.io", "https://github.com/fyne-io"}
+	var urlText string
+	var urlU *url.URL
+	urlOptions := binding.NewStringList(urlSlice...)
+	urlString := binding.NewString(&urlText)
+	urlURL := binding.NewURL(&urlU)
 
 	urlLeftSelect := (&widget.Select{}).BindOptions(urlOptions).BindSelected(urlString)
 	urlRightSelect := (&widget.Select{}).BindOptions(urlOptions).BindSelected(urlString)
@@ -127,8 +133,10 @@ func BindingsScreen() fyne.CanvasObject {
 	})
 
 	// Slider <-> Label <-> Slider
-	slideFloat64 := binding.NewFloat64(0.0)
-	slideString := binding.NewString("")
+	slideValue := 0.0
+	var slideText string
+	slideFloat64 := binding.NewFloat64(&slideValue)
+	slideString := binding.NewString(&slideText)
 
 	slideLeftSlider := (&widget.Slider{Max: 1, Step: 0.01}).BindValue(slideFloat64)
 	slideRightSlider := (&widget.Slider{Max: 1, Step: 0.01}).BindValue(slideFloat64)

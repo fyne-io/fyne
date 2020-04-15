@@ -211,13 +211,22 @@ func TestSelect_BindSelected_Set(t *testing.T) {
 	combo := NewSelect([]string{"a", "b", "c"}, func(value string) {
 		selected = value
 	})
-	data := binding.NewString("c")
+	value := "c"
+	data := binding.NewString(&value)
 	combo.BindSelected(data)
 	data.AddStringListener(func(string) {
 		done <- true
 	})
 	timedWait(t, done)
 	assert.Equal(t, "c", selected)
+
+	// Set directly
+	value = "a"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, "a", selected)
+
+	// Set by binding
 	data.Set("b")
 	timedWait(t, done)
 	assert.Equal(t, "b", selected)
@@ -229,7 +238,8 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 	done := make(chan bool)
 	combo := NewSelect([]string{"a", "b", "c"}, nil)
 
-	data := binding.NewString("c")
+	value := "c"
+	data := binding.NewString(&value)
 	combo.BindSelected(data)
 	selected := ""
 	data.AddStringListener(func(s string) {
@@ -239,6 +249,13 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 	timedWait(t, done)
 	assert.Equal(t, "c", selected)
 
+	// Set directly
+	value = "a"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, "a", selected)
+
+	// Set by tap
 	test.Tap(combo)
 
 	// Get Popup
@@ -258,12 +275,7 @@ func TestSelect_BindOptions(t *testing.T) {
 	done := make(chan bool)
 	combo := NewSelect([]string{"a"}, nil)
 
-	data := &binding.BaseList{}
-	data.Add(
-		binding.NewString("a"),
-		binding.NewString("b"),
-		binding.NewString("c"),
-	)
+	data := binding.NewStringList("a", "b", "c")
 	combo.BindOptions(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
@@ -272,7 +284,8 @@ func TestSelect_BindOptions(t *testing.T) {
 	assert.Equal(t, 3, len(combo.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, combo.Options)
 
-	data.Add(binding.NewString("d"))
+	d := "d"
+	data.Add(binding.NewString(&d))
 	timedWait(t, done)
 
 	assert.Equal(t, 4, len(combo.Options))

@@ -25,13 +25,22 @@ func TestProgressBar_BindMin(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	progressBar := NewProgressBar()
-	data := binding.NewFloat64(0.5)
+	min := 0.5
+	data := binding.NewFloat64(&min)
 	progressBar.BindMin(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
 	timedWait(t, done)
 	assert.Equal(t, 0.5, progressBar.Min)
+
+	// Set directly
+	min = 0.25
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, 0.25, progressBar.Min)
+
+	// Set by binding
 	data.Set(0.75)
 	timedWait(t, done)
 	assert.Equal(t, 0.75, progressBar.Min)
@@ -42,13 +51,22 @@ func TestProgressBar_BindMax(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	progressBar := NewProgressBar()
-	data := binding.NewFloat64(0.5)
+	max := 0.5
+	data := binding.NewFloat64(&max)
 	progressBar.BindMax(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
 	timedWait(t, done)
 	assert.Equal(t, 0.5, progressBar.Max)
+
+	// Set directly
+	max = 0.25
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, 0.25, progressBar.Max)
+
+	// Set by binding
 	data.Set(0.75)
 	timedWait(t, done)
 	assert.Equal(t, 0.75, progressBar.Max)
@@ -59,13 +77,22 @@ func TestProgressBar_BindValue(t *testing.T) {
 	defer a.Quit()
 	done := make(chan bool)
 	progressBar := NewProgressBar()
-	data := binding.NewFloat64(0.5)
+	value := 0.5
+	data := binding.NewFloat64(&value)
 	progressBar.BindValue(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
 	}))
 	timedWait(t, done)
 	assert.Equal(t, 0.5, progressBar.Value)
+
+	// Set directly
+	value = 0.25
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, 0.25, progressBar.Value)
+
+	// Set by binding
 	data.Set(0.75)
 	timedWait(t, done)
 	assert.Equal(t, 0.75, progressBar.Value)

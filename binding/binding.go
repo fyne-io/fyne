@@ -12,6 +12,8 @@ type Binding interface {
 	AddListener(Notifiable)
 	// DeleteListener removes the given listener from the binding.
 	DeleteListener(Notifiable)
+	// Update tells the binding that the data changed.
+	Update()
 }
 
 // List defines a data binding wrapping a list of bindings.
