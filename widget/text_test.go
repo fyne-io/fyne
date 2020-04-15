@@ -708,61 +708,53 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 }
 
 func TestText_binarySearch(t *testing.T) {
-	tests := []struct {
-		name string
-		text string
-		want int
-	}{
-		{
-			name: "IM_Test",
-			text: "iiiiiiiiiimmmmmmmmmm",
-			want: 12,
-		},
-		{
-			name: "Single_Line",
-			text: "foobar foobar",
-			want: 9,
-		},
-		{
-			name: "WH_Test",
-			text: "wwwww hhhhhh",
-			want: 6,
-		},
-		{
-			name: "DS_Test",
-			text: "dddddd sssssss",
-			want: 8,
-		},
-		{
-			name: "DI_Test",
-			text: "dididi dididd",
-			want: 10,
-		},
-		{
-			name: "XW_Test",
-			text: "xwxwxwxw xwxw",
-			want: 7,
-		},
-		{
-			name: "W_Test",
-			text: "WWWWW",
-			want: 4,
-		},
-		{
-			name: "Empty",
-			text: "",
-			want: 0,
-		},
-	}
 	textSize := 10
 	textStyle := fyne.TextStyle{}
 	measurer := func(text []rune) int {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
 	}
-
-	for _, tt := range tests {
-		binarySearch := newBinarySearch(measurer, []rune(tt.text), 50)
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range map[string]struct {
+		text string
+		want int
+	}{
+		"IM": {
+			text: "iiiiiiiiiimmmmmmmmmm",
+			want: 12,
+		},
+		"Single_Line": {
+			text: "foobar foobar",
+			want: 9,
+		},
+		"WH": {
+			text: "wwwww hhhhhh",
+			want: 6,
+		},
+		"DS": {
+			text: "dddddd sssssss",
+			want: 8,
+		},
+		"DI": {
+			text: "dididi dididd",
+			want: 10,
+		},
+		"XW": {
+			text: "xwxwxwxw xwxw",
+			want: 7,
+		},
+		"W": {
+			text: "WWWWW",
+			want: 4,
+		},
+		"Empty": {
+			text: "",
+			want: 0,
+		},
+	} {
+		maxWidth := 50
+		binarySearch := newBinarySearch(func(low int, high int) bool {
+			return measurer([]rune(tt.text[low:high])) <= maxWidth
+		})
+		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, tt.want, binarySearch(0, len(tt.text)))
 		})
 	}
@@ -770,42 +762,29 @@ func TestText_binarySearch(t *testing.T) {
 }
 
 func TestText_findSpaceIndex(t *testing.T) {
-	tests := []struct {
-		name string
+	for name, tt := range map[string]struct {
 		text string
-		last int
 		want int
 	}{
-		{
-			name: "case_1",
+		"no_space_fallback": {
 			text: "iiiiiiiiiimmmmmmmmmm",
-			last: 18,
-			want: 18,
+			want: 19,
 		},
-		{
-			name: "case_2",
+		"single_space": {
 			text: "foobar foobar",
-			last: 12,
 			want: 6,
 		},
-		{
-			name: "case_3",
+		"double_space": {
 			text: "ww wwww www",
-			last: 9,
 			want: 7,
 		},
-		{
-			name: "case_4",
+		"many_spaces": {
 			text: "ww wwww www wwwww",
-			last: 5,
-			want: 2,
+			want: 11,
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, findSpaceIndex([]rune(tt.text), tt.last))
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tt.want, findSpaceIndex([]rune(tt.text), len(tt.text)-1))
 		})
 	}
-
 }
