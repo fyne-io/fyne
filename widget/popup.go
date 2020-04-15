@@ -19,6 +19,7 @@ type PopUp struct {
 	Canvas    fyne.Canvas
 	NotPadded bool
 
+	hideShadow   bool
 	innerPos     fyne.Position
 	innerSize    fyne.Size
 	modal        bool
@@ -105,8 +106,13 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 		}
 	}
 
+	shadowLevel := widget.PopUpLevel
+	if p.hideShadow {
+		shadowLevel = widget.BaseLevel
+	}
+
 	return &popUpRenderer{
-		widget.NewShadowingRenderer(objects, widget.PopUpLevel),
+		widget.NewShadowingRenderer(objects, shadowLevel),
 		popUpBaseRenderer{popUp: p, bg: bg},
 	}
 }

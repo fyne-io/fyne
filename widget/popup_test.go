@@ -4,6 +4,9 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -271,6 +274,56 @@ func TestPopUp_Stacked(t *testing.T) {
 	assert.False(t, pop1.Visible())
 	assert.Nil(t, test.Canvas().Overlays().Top())
 	assert.Empty(t, test.Canvas().Overlays().List())
+}
+
+func TestPopUp_Layout(t *testing.T) {
+	win := test.NewWindow(NewLabel("OK"))
+	defer win.Close()
+	win.Resize(fyne.NewSize(80, 80))
+	pos := fyne.NewPos(6, 9)
+	size := fyne.NewSize(50, 40)
+
+	for name, tt := range map[string]struct {
+		pad        bool
+		castShadow bool
+	}{
+		"with padding with shadow":       {true, true},
+		"without padding with shadow":    {false, true},
+		"with padding without shadow":    {true, false},
+		"without padding without shadow": {false, false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			content := NewLabel("Hi")
+			pop := newPopUp(content, win.Canvas())
+			pop.NotPadded = !tt.pad
+			pop.hideShadow = !tt.castShadow
+			pop.ShowAtPosition(pos)
+			defer test.Canvas().Overlays().Remove(pop)
+
+			pop.Resize(size)
+			r := cache.Renderer(pop)
+			expectedObjectCount := 2
+			if tt.castShadow {
+				expectedObjectCount++
+			}
+			require.GreaterOrEqual(t, len(r.Objects()), expectedObjectCount)
+
+			bgIdx := 0
+			if tt.castShadow {
+				if s, ok := r.Objects()[0].(*widget.Shadow); assert.True(t, ok, "first rendered object is a shadow") {
+					assert.Equal(t, size, s.Size())
+					assert.Equal(t, pos, s.Position())
+				}
+				bgIdx = 1
+			}
+			if bg, ok := r.Objects()[bgIdx].(*canvas.Rectangle); assert.True(t, ok, "a background rectangle is rendered before the content") {
+				assert.Equal(t, size, bg.Size())
+				assert.Equal(t, pos, bg.Position())
+				assert.Equal(t, theme.BackgroundColor(), bg.FillColor)
+			}
+			assert.Equal(t, r.Objects()[bgIdx+1], content)
+		})
+	}
 }
 
 func TestModalPopUp_Tapped(t *testing.T) {
