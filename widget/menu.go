@@ -13,28 +13,27 @@ import (
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
 func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *PopUp {
 	options := NewVBox()
-	for _, option := range menu.Items {
-		opt := option // capture value
-		if opt.IsSeparator {
+	for _, item := range menu.Items {
+		if item.IsSeparator {
 			options.Append(newSeparator())
 		} else {
-			options.Append(newMenuItemWidget(opt.Label))
+			options.Append(newMenuItemWidget(item))
 		}
 	}
-	pop := NewPopUpAtPosition(options, c, pos)
+	pop := newPopUp(options, c)
+	pop.NotPadded = true
 	focused := c.Focused()
-	for i, o := range options.Children {
-		if label, ok := o.(*menuItemWidget); ok {
-			item := menu.Items[i]
-			label.OnTapped = func() {
+	for _, o := range options.Children {
+		if item, ok := o.(*menuItemWidget); ok {
+			item.DismissAction = func() {
 				if c.Focused() == nil {
 					c.Focus(focused)
 				}
 				pop.Hide()
-				item.Action()
 			}
 		}
 	}
+	pop.ShowAtPosition(pos)
 	return pop
 }
 
@@ -45,54 +44,82 @@ func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 }
 
 type menuItemWidget struct {
-	*Label
-	OnTapped func()
-	hovered  bool
+	BaseWidget
+	DismissAction func()
+	Item          *fyne.MenuItem
+
+	hovered bool
 }
 
 func (t *menuItemWidget) Tapped(*fyne.PointEvent) {
-	t.OnTapped()
+	t.Item.Action()
+	if t.DismissAction != nil {
+		t.DismissAction()
+	}
 }
 
 func (t *menuItemWidget) CreateRenderer() fyne.WidgetRenderer {
-	return &menuItemWidgetRenderer{t.Label.CreateRenderer().(*textRenderer), t}
+	text := canvas.NewText(t.Item.Label, theme.TextColor())
+	return &menuItemWidgetRenderer{baseRenderer{[]fyne.CanvasObject{text}}, text, t}
 }
 
 // MouseIn is called when a desktop pointer enters the widget
 func (t *menuItemWidget) MouseIn(*desktop.MouseEvent) {
 	t.hovered = true
-
-	canvas.Refresh(t)
+	t.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (t *menuItemWidget) MouseOut() {
 	t.hovered = false
-
-	canvas.Refresh(t)
+	t.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
 func (t *menuItemWidget) MouseMoved(*desktop.MouseEvent) {
 }
 
-func newMenuItemWidget(label string) *menuItemWidget {
-	ret := &menuItemWidget{Label: NewLabel(label)}
+func newMenuItemWidget(item *fyne.MenuItem) *menuItemWidget {
+	ret := &menuItemWidget{Item: item}
 	ret.ExtendBaseWidget(ret)
 	return ret
 }
 
 type menuItemWidgetRenderer struct {
-	*textRenderer
-	label *menuItemWidget
+	baseRenderer
+	text *canvas.Text
+	w    *menuItemWidget
 }
 
-func (h *menuItemWidgetRenderer) BackgroundColor() color.Color {
-	if h.label.hovered {
+func (r *menuItemWidgetRenderer) Layout(size fyne.Size) {
+	padding := r.padding()
+	r.text.Resize(r.text.MinSize())
+	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
+}
+
+func (r *menuItemWidgetRenderer) MinSize() fyne.Size {
+	return r.text.MinSize().Add(r.padding())
+}
+
+func (r *menuItemWidgetRenderer) Refresh() {
+	if r.text.TextSize != theme.TextSize() {
+		defer r.Layout(r.w.Size())
+	}
+	r.text.TextSize = theme.TextSize()
+	r.text.Color = theme.TextColor()
+	canvas.Refresh(r.text)
+}
+
+func (r *menuItemWidgetRenderer) BackgroundColor() color.Color {
+	if r.w.hovered {
 		return theme.HoverColor()
 	}
 
 	return color.Transparent
+}
+
+func (r *menuItemWidgetRenderer) padding() fyne.Size {
+	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 }
 
 func newSeparator() fyne.CanvasObject {
