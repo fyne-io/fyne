@@ -264,13 +264,14 @@ func (t *textGridRenderer) refreshGrid() {
 		i := 0
 		if t.text.ShowLineNumbers {
 			lineStr := []rune(fmt.Sprintf("%d", line))
+			pad := t.lineCountWidth() - len(lineStr)
+			for ; i < pad; i++ {
+				t.setCellRune(' ', x, TextGridStyleWhitespace) // padding space
+				x++
+			}
 			for c := 0; c < len(lineStr); c++ {
 				t.setCellRune(lineStr[c], x, TextGridStyleWhitespace) // line numbers
 				i++
-				x++
-			}
-			for ; i < t.lineCountWidth(); i++ {
-				t.setCellRune(' ', x, TextGridStyleWhitespace) // padding space
 				x++
 			}
 

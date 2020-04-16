@@ -14,10 +14,30 @@ import (
 
 func TestNewTextGrid(t *testing.T) {
 	grid := NewTextGridFromString("A")
-	Renderer(grid).Refresh()
+	test.WidgetRenderer(grid).Refresh()
 
 	assert.Equal(t, 1, len(grid.Content))
 	assert.Equal(t, 1, len(grid.Content[0]))
+}
+
+func TestTextGrid_LineNumbers(t *testing.T) {
+	grid := NewTextGridFromString("1\n2\n3\n4\n5\n6\n7\n8\n9\n10")
+	grid.ShowLineNumbers = true
+
+	grid.Resize(fyne.NewSize(100, 250))
+	r := test.WidgetRenderer(grid).(*textGridRenderer)
+
+	assert.Equal(t, ' ', rendererCellRune(r, 0, 0))
+	assert.Equal(t, '1', rendererCellRune(r, 0, 1))
+	assert.Equal(t, '|', rendererCellRune(r, 0, 2))
+	assert.Equal(t, '1', rendererCellRune(r, 0, 3))
+	assert.Equal(t, '2', rendererCellRune(r, 1, 3))
+
+	assert.Equal(t, '1', rendererCellRune(r, 9, 0))
+	assert.Equal(t, '0', rendererCellRune(r, 9, 1))
+	assert.Equal(t, '|', rendererCellRune(r, 9, 2))
+	assert.Equal(t, '1', rendererCellRune(r, 9, 3))
+	assert.Equal(t, '0', rendererCellRune(r, 9, 4))
 }
 
 func TestTextGrid_SetText(t *testing.T) {
@@ -101,4 +121,14 @@ func TestTextGridRender_TextColor(t *testing.T) {
 	assert.Equal(t, theme.TextColor(), rend.objects[1].(*canvas.Text).Color)
 	assert.Equal(t, color.Black, rend.objects[3].(*canvas.Text).Color)
 	assert.Equal(t, TextGridStyleWhitespace.TextColor(), rend.objects[5].(*canvas.Text).Color)
+}
+
+func rendererCell(r *textGridRenderer, row, col int) (*canvas.Rectangle, *canvas.Text) {
+	i := (row*r.cols + col) * 2
+	return r.objects[i].(*canvas.Rectangle), r.objects[i+1].(*canvas.Text)
+}
+
+func rendererCellRune(r *textGridRenderer, row, col int) rune {
+	_, text := rendererCell(r, row, col)
+	return []rune(text.Text)[0]
 }
