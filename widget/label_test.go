@@ -10,6 +10,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestLabel_Hide(t *testing.T) {
+	label := NewLabel("Test")
+	label.Hide()
+	label.Refresh()
+
+	assert.True(t, label.Hidden)
+	assert.False(t, label.provider.Hidden) // we don't propagate hide
+
+	label.Show()
+	assert.False(t, label.Hidden)
+	assert.False(t, label.provider.Hidden)
+}
+
 func TestLabel_MinSize(t *testing.T) {
 	label := NewLabel("Test")
 	min := label.MinSize()
@@ -18,6 +31,19 @@ func TestLabel_MinSize(t *testing.T) {
 
 	label.SetText("Longer")
 	assert.True(t, label.MinSize().Width > min.Width)
+}
+
+func TestLabel_Resize(t *testing.T) {
+	label := NewLabel("Test")
+	size := fyne.NewSize(100, 20)
+	label.Resize(size)
+
+	assert.Equal(t, size, label.Size())
+	assert.Equal(t, size, label.provider.Size())
+
+	label.SetText("Longer")
+	assert.Equal(t, size, label.Size())
+	assert.Equal(t, size, label.provider.Size())
 }
 
 func TestLabel_Text(t *testing.T) {
