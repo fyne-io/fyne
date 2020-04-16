@@ -341,8 +341,8 @@ func splitLines(text []rune) [][2]int {
 	return append(lines, [2]int{low, length})
 }
 
-// binarySearch accepts a function that checks if the text width less the maximum width and the start and end rune index 
-// binarySearch returns the index of rune located as close to the maximum line width as possible 
+// binarySearch accepts a function that checks if the text width less the maximum width and the start and end rune index
+// binarySearch returns the index of rune located as close to the maximum line width as possible
 func binarySearch(lessMaxWidth func(int, int) bool, low int, maxHigh int) int {
 	if low >= maxHigh {
 		return low
