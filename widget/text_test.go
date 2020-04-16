@@ -708,6 +708,7 @@ func TestText_lineBounds_variable_char_width(t *testing.T) {
 }
 
 func TestText_binarySearch(t *testing.T) {
+	maxWidth := 50
 	textSize := 10
 	textStyle := fyne.TextStyle{}
 	measurer := func(text []rune) int {
@@ -750,15 +751,13 @@ func TestText_binarySearch(t *testing.T) {
 			want: 0,
 		},
 	} {
-		maxWidth := 50
-		binarySearch := newBinarySearch(func(low int, high int) bool {
+		checker := func(low int, high int) bool {
 			return measurer([]rune(tt.text[low:high])) <= maxWidth
-		})
+		}
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tt.want, binarySearch(0, len(tt.text)))
+			assert.Equal(t, tt.want, binarySearch(checker, 0, len(tt.text)))
 		})
 	}
-
 }
 
 func TestText_findSpaceIndex(t *testing.T) {

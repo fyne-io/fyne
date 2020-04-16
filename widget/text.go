@@ -341,33 +341,30 @@ func splitLines(text []rune) [][2]int {
 	return append(lines, [2]int{low, length})
 }
 
-// newBinarySearch accepts a function that checks if the text width between the start and end index less the maximum width
-// newBinarySearch returns a function that accepts the start and end rune index and returns the index of rune
-// located as close to the maximum line width as possible
-func newBinarySearch(lessMaxWidth func(int, int) bool) func(low int, maxHigh int) int {
-	return func(low int, maxHigh int) int {
-		if low >= maxHigh {
-			return low
-		}
-		if lessMaxWidth(low, maxHigh) {
-			return maxHigh
-		}
-		high := low
-		delta := maxHigh - low
-		for delta > 0 {
-			delta /= 2
-			if lessMaxWidth(low, high+delta) {
-				high += delta
-			}
-		}
-		for (high < maxHigh) && lessMaxWidth(low, high+1) {
-			high++
-		}
-		return high
+// binarySearch accepts a function that checks if the text width less the maximum width and the start and end rune index 
+// binarySearch returns the index of rune located as close to the maximum line width as possible 
+func binarySearch(lessMaxWidth func(int, int) bool, low int, maxHigh int) int {
+	if low >= maxHigh {
+		return low
 	}
+	if lessMaxWidth(low, maxHigh) {
+		return maxHigh
+	}
+	high := low
+	delta := maxHigh - low
+	for delta > 0 {
+		delta /= 2
+		if lessMaxWidth(low, high+delta) {
+			high += delta
+		}
+	}
+	for (high < maxHigh) && lessMaxWidth(low, high+1) {
+		high++
+	}
+	return high
 }
 
-// findSpaceIndex accepts a slice of runes and the last rune index
+// findSpaceIndex accepts a slice of runes and a fallback index
 // findSpaceIndex returns the index of the last space in the text, or fallback if there are no spaces
 func findSpaceIndex(text []rune, fallback int) int {
 	curIndex := fallback
@@ -386,14 +383,15 @@ func findSpaceIndex(text []rune, fallback int) int {
 // lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
 func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
 
-	binarySearch := newBinarySearch(func(low int, high int) bool {
-		return measurer(text[low:high]) <= maxWidth
-	})
-
 	lines := splitLines(text)
 	if maxWidth <= 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
+
+	checker := func(low int, high int) bool {
+		return measurer(text[low:high]) <= maxWidth
+	}
+
 	var bounds [][2]int
 	for _, l := range lines {
 		low := l[0]
@@ -404,7 +402,7 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 		}
 		switch wrap {
 		case fyne.TextTruncate:
-			high = binarySearch(low, high)
+			high = binarySearch(checker, low, high)
 			bounds = append(bounds, [2]int{low, high})
 		case fyne.TextWrapBreak:
 			for low < high {
@@ -413,7 +411,7 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 					low = high
 					high = l[1]
 				} else {
-					high = binarySearch(low, high)
+					high = binarySearch(checker, low, high)
 				}
 			}
 		case fyne.TextWrapWord:
@@ -428,7 +426,7 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 					}
 				} else {
 					last := low + len(sub) - 1
-					high = low + findSpaceIndex(sub, binarySearch(low, last)-low)
+					high = low + findSpaceIndex(sub, binarySearch(checker, low, last)-low)
 				}
 			}
 		}
