@@ -93,10 +93,11 @@ type Select struct {
 	hovered bool
 	popUp   *PopUp
 
-	selectedBind   binding.String
-	optionBind     binding.List
-	selectedNotify binding.Notifiable
-	optionNotify   binding.Notifiable
+	selectedBind    binding.String
+	selectedNotify  binding.Notifiable
+	optionBind      binding.List
+	optionNotify    binding.Notifiable
+	optionNotifiers map[binding.String]binding.Notifiable
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -255,14 +256,31 @@ func (s *Select) BindOptions(data binding.List) *Select {
 	s.UnbindOptions()
 	s.optionBind = data
 	s.optionNotify = binding.NewNotifyFunction(func(binding.Binding) {
-		l := data.Length()
 		var options []string
-		for i := 0; i < l; i++ {
+		for i := 0; i < data.Length(); i++ {
 			b, ok := data.Get(i).(binding.String)
 			if ok {
-				// TODO Should individual elements in a slice binding be bound to?
-				//  b.AddListener(func() { })
 				options = append(options, b.Get())
+				if s.optionNotifiers == nil {
+					s.optionNotifiers = make(map[binding.String]binding.Notifiable)
+				}
+				n, ok := s.optionNotifiers[b]
+				if !ok {
+					index := i
+					n = binding.NewNotifyFunction(func(binding.Binding) {
+						if index >= len(s.Options) {
+							return
+						}
+						value := b.Get()
+						if s.Options[index] == value {
+							return
+						}
+						s.Options[index] = value
+						s.Refresh()
+					})
+					s.optionNotifiers[b] = n
+					b.AddListener(n)
+				}
 			}
 		}
 		s.Options = options
@@ -278,8 +296,14 @@ func (s *Select) UnbindOptions() *Select {
 	if s.optionBind != nil {
 		s.optionBind.DeleteListener(s.optionNotify)
 	}
+	if s.optionNotifiers != nil {
+		for b, n := range s.optionNotifiers {
+			b.DeleteListener(n)
+		}
+	}
 	s.optionBind = nil
 	s.optionNotify = nil
+	s.optionNotifiers = nil
 	return s
 }
 

@@ -372,8 +372,8 @@ func TestRadio_Required(t *testing.T) {
 }
 
 func TestRadio_BindSelected_Set(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
+	app := test.NewApp()
+	defer app.Quit()
 	done := make(chan bool)
 	selected := ""
 	radio := NewRadio([]string{"a", "b", "c"}, func(value string) {
@@ -381,7 +381,7 @@ func TestRadio_BindSelected_Set(t *testing.T) {
 	})
 
 	value := "c"
-	data := binding.NewString(&value)
+	data := binding.NewStringRef(&value)
 	radio.BindSelected(data)
 	data.AddStringListener(func(value string) {
 		selected = value
@@ -403,13 +403,13 @@ func TestRadio_BindSelected_Set(t *testing.T) {
 }
 
 func TestRadio_BindSelected_Tap(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
+	app := test.NewApp()
+	defer app.Quit()
 	done := make(chan bool)
 	radio := NewRadio([]string{"a", "b", "c"}, nil)
 
 	value := "c"
-	data := binding.NewString(&value)
+	data := binding.NewStringRef(&value)
 	radio.BindSelected(data)
 	selected := ""
 	data.AddStringListener(func(value string) {
@@ -433,25 +433,59 @@ func TestRadio_BindSelected_Tap(t *testing.T) {
 }
 
 func TestRadio_BindOptions(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
+	app := test.NewApp()
+	defer app.Quit()
 	done := make(chan bool)
 	radio := NewRadio([]string{"a"}, nil)
 
-	data := binding.NewStringList("a", "b", "c")
+	a := "a"
+	b := "b"
+	c := "c"
+	options := []*string{&a, &b, &c}
+	data := binding.NewStringListRefs(&options)
 	radio.BindOptions(data)
-	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
+	n := binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	}))
+	})
+	data.AddListener(n)
 	timedWait(t, done)
 	assert.Equal(t, 3, len(radio.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, radio.Options)
 
+	// Set directly
+	b = "2"
+	data.Update()
+	timedWait(t, done)
+	assert.Equal(t, 3, len(radio.Options))
+	assert.Equal(t, []string{"a", "2", "c"}, radio.Options)
+
+	// Append directly
 	d := "d"
-	data.Add(binding.NewString(&d))
+	options = append(options, &d)
+	data.Update()
 	timedWait(t, done)
 	assert.Equal(t, 4, len(radio.Options))
-	assert.Equal(t, []string{"a", "b", "c", "d"}, radio.Options)
+	assert.Equal(t, []string{"a", "2", "c", "d"}, radio.Options)
+
+	// Append through binding
+	s, ok := data.Get(0).(binding.String)
+	assert.True(t, ok)
+	s.Set("1")
+	s.AddListener(n)
+	timedWait(t, done)
+	assert.Equal(t, 4, len(radio.Options))
+	assert.Equal(t, []string{"1", "2", "c", "d"}, radio.Options)
+
+	// Set through binding
+	e := "e"
+	data.AddRef(&e)
+	timedWait(t, done)
+	assert.Equal(t, 5, len(radio.Options))
+	assert.Equal(t, []string{"1", "2", "c", "d", "e"}, radio.Options)
+	data.AddString("f")
+	timedWait(t, done)
+	assert.Equal(t, 6, len(radio.Options))
+	assert.Equal(t, []string{"1", "2", "c", "d", "e", "f"}, radio.Options)
 }
 
 func TestRadioRenderer_ApplyTheme(t *testing.T) {

@@ -76,7 +76,7 @@ func TestHyperlink_BindText(t *testing.T) {
 	hyperlink := NewHyperlink("hyperlink", u)
 
 	text := "foo"
-	data := binding.NewString(&text)
+	data := binding.NewStringRef(&text)
 	hyperlink.BindText(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
@@ -105,7 +105,7 @@ func TestHyperlink_BindURL(t *testing.T) {
 	hyperlink := NewHyperlink("hyperlink", nil)
 
 	u := u1
-	data := binding.NewURL(&u)
+	data := binding.NewURLRef(&u)
 	hyperlink.BindURL(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true

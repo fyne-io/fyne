@@ -229,7 +229,7 @@ func TestCheck_BindChecked_Set(t *testing.T) {
 		selected = c
 		done <- true
 	})
-	data := binding.NewBool(&checked)
+	data := binding.NewBoolRef(&checked)
 	check.BindChecked(data)
 	timedWait(t, done)
 	assert.Equal(t, true, check.Checked)
@@ -254,7 +254,7 @@ func TestCheck_BindChecked_Tap(t *testing.T) {
 	done := make(chan bool)
 	check := NewCheck("check", nil)
 
-	data := binding.NewBool(&checked)
+	data := binding.NewBoolRef(&checked)
 	check.BindChecked(data)
 	selected := false
 	data.AddBoolListener(func(c bool) {
@@ -284,7 +284,7 @@ func TestCheck_BindText(t *testing.T) {
 	check := NewCheck("check", nil)
 
 	text := "foo"
-	data := binding.NewString(&text)
+	data := binding.NewStringRef(&text)
 	check.BindText(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true

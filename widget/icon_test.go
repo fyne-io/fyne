@@ -45,7 +45,7 @@ func TestIcon_BindResource(t *testing.T) {
 	icon := NewIcon(theme.WarningIcon())
 
 	resource := theme.QuestionIcon()
-	data := binding.NewResource(&resource)
+	data := binding.NewResourceRef(&resource)
 	icon.BindResource(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true

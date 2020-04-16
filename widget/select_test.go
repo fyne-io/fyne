@@ -204,15 +204,15 @@ func TestSelect_Move(t *testing.T) {
 }
 
 func TestSelect_BindSelected_Set(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
+	app := test.NewApp()
+	defer app.Quit()
 	done := make(chan bool)
 	selected := ""
 	combo := NewSelect([]string{"a", "b", "c"}, func(value string) {
 		selected = value
 	})
 	value := "c"
-	data := binding.NewString(&value)
+	data := binding.NewStringRef(&value)
 	combo.BindSelected(data)
 	data.AddStringListener(func(string) {
 		done <- true
@@ -233,13 +233,13 @@ func TestSelect_BindSelected_Set(t *testing.T) {
 }
 
 func TestSelect_BindSelected_Tap(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
+	app := test.NewApp()
+	defer app.Quit()
 	done := make(chan bool)
 	combo := NewSelect([]string{"a", "b", "c"}, nil)
 
 	value := "c"
-	data := binding.NewString(&value)
+	data := binding.NewStringRef(&value)
 	combo.BindSelected(data)
 	selected := ""
 	data.AddStringListener(func(s string) {
@@ -270,26 +270,59 @@ func TestSelect_BindSelected_Tap(t *testing.T) {
 }
 
 func TestSelect_BindOptions(t *testing.T) {
-	a := test.NewApp()
-	defer a.Quit()
+	app := test.NewApp()
+	defer app.Quit()
 	done := make(chan bool)
 	combo := NewSelect([]string{"a"}, nil)
 
-	data := binding.NewStringList("a", "b", "c")
+	a := "a"
+	b := "b"
+	c := "c"
+	options := []*string{&a, &b, &c}
+	data := binding.NewStringListRefs(&options)
 	combo.BindOptions(data)
-	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
+	n := binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
-	}))
+	})
+	data.AddListener(n)
 	timedWait(t, done)
 	assert.Equal(t, 3, len(combo.Options))
 	assert.Equal(t, []string{"a", "b", "c"}, combo.Options)
 
-	d := "d"
-	data.Add(binding.NewString(&d))
+	// Set directly
+	b = "2"
+	data.Update()
 	timedWait(t, done)
+	assert.Equal(t, 3, len(combo.Options))
+	assert.Equal(t, []string{"a", "2", "c"}, combo.Options)
 
+	// Append directly
+	d := "d"
+	options = append(options, &d)
+	data.Update()
+	timedWait(t, done)
 	assert.Equal(t, 4, len(combo.Options))
-	assert.Equal(t, []string{"a", "b", "c", "d"}, combo.Options)
+	assert.Equal(t, []string{"a", "2", "c", "d"}, combo.Options)
+
+	// Append through binding
+	s, ok := data.Get(0).(binding.String)
+	assert.True(t, ok)
+	s.AddListener(n)
+	s.Set("1")
+	timedWait(t, done)
+	assert.Equal(t, 4, len(combo.Options))
+	assert.Equal(t, []string{"1", "2", "c", "d"}, combo.Options)
+
+	// Set through binding
+	e := "e"
+	data.AddRef(&e)
+	timedWait(t, done)
+	assert.Equal(t, 5, len(combo.Options))
+	assert.Equal(t, []string{"1", "2", "c", "d", "e"}, combo.Options)
+	data.AddString("f")
+	timedWait(t, done)
+	assert.Equal(t, 6, len(combo.Options))
+	assert.Equal(t, []string{"1", "2", "c", "d", "e", "f"}, combo.Options)
 }
 
 func TestSelectRenderer_ApplyTheme(t *testing.T) {

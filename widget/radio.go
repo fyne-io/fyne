@@ -161,10 +161,11 @@ type Radio struct {
 	hoveredItemIndex int
 	hovered          bool
 
-	selectedBind   binding.String
-	optionBind     binding.List
-	selectedNotify binding.Notifiable
-	optionNotify   binding.Notifiable
+	selectedBind    binding.String
+	selectedNotify  binding.Notifiable
+	optionBind      binding.List
+	optionNotify    binding.Notifiable
+	optionNotifiers map[binding.String]binding.Notifiable
 }
 
 // indexByPosition returns the item index for a specified position or noRadioItemIndex if any
@@ -334,14 +335,31 @@ func (r *Radio) BindOptions(data binding.List) *Radio {
 	r.UnbindOptions()
 	r.optionBind = data
 	r.optionNotify = binding.NewNotifyFunction(func(binding.Binding) {
-		l := data.Length()
 		var options []string
-		for i := 0; i < l; i++ {
+		for i := 0; i < data.Length(); i++ {
 			b, ok := data.Get(i).(binding.String)
 			if ok {
-				// TODO Should individual elements in a slice binding be bound to?
-				//  b.AddListener(func() { })
 				options = append(options, b.Get())
+				if r.optionNotifiers == nil {
+					r.optionNotifiers = make(map[binding.String]binding.Notifiable)
+				}
+				n, ok := r.optionNotifiers[b]
+				if !ok {
+					index := i
+					n = binding.NewNotifyFunction(func(binding.Binding) {
+						if index >= len(r.Options) {
+							return
+						}
+						value := b.Get()
+						if r.Options[index] == value {
+							return
+						}
+						r.Options[index] = value
+						r.Refresh()
+					})
+					r.optionNotifiers[b] = n
+					b.AddListener(n)
+				}
 			}
 		}
 		r.Options = options
@@ -357,8 +375,14 @@ func (r *Radio) UnbindOptions() *Radio {
 	if r.optionBind != nil {
 		r.optionBind.DeleteListener(r.optionNotify)
 	}
+	if r.optionNotifiers != nil {
+		for b, n := range r.optionNotifiers {
+			b.DeleteListener(n)
+		}
+	}
 	r.optionBind = nil
 	r.optionNotify = nil
+	r.optionNotifiers = nil
 	return r
 }
 

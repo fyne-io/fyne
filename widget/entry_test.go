@@ -1562,7 +1562,7 @@ func TestEntry_BindText(t *testing.T) {
 	done := make(chan bool)
 	entry := NewEntry()
 	text := "foo"
-	data := binding.NewString(&text)
+	data := binding.NewStringRef(&text)
 	entry.BindText(data)
 	data.AddListener(binding.NewNotifyFunction(func(binding.Binding) {
 		done <- true
