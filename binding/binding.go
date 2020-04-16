@@ -165,6 +165,9 @@ var updaterQueue chan func()
 // Start initializes the binding queue and starts the updater.
 // Start should be called once when an app is created.
 func Start() {
+	if updaterQueue != nil {
+		Stop()
+	}
 	updaterQueue = make(chan func(), 1024)
 	go func() {
 		for fn := range updaterQueue {
@@ -176,8 +179,9 @@ func Start() {
 // Stop closes the binding queue causing the updater to quit.
 // Stop should be called once when an app is quitting.
 func Stop() {
-	if updaterQueue != nil {
-		close(updaterQueue)
-		updaterQueue = nil
+	if updaterQueue == nil {
+		return
 	}
+	close(updaterQueue)
+	updaterQueue = nil
 }
