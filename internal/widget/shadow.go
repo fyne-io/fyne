@@ -27,6 +27,7 @@ const (
 	ButtonLevel           ElevationLevel = 2
 	PopUpLevel            ElevationLevel = 8
 	SubmergedContentLevel ElevationLevel = 8
+	MenuLevel             ElevationLevel = 4
 )
 
 // ShadowType specifies the type of the shadow.

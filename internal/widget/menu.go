@@ -34,7 +34,7 @@ func NewMenu(menu *fyne.Menu) *Menu {
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	cont := fyne.NewContainerWithLayout(layout.NewVBoxLayout(), m.Items...)
 	return &menuRenderer{
-		NewBaseRenderer([]fyne.CanvasObject{cont}),
+		NewShadowingRenderer([]fyne.CanvasObject{cont}, MenuLevel),
 		cont,
 		m,
 	}
@@ -72,13 +72,14 @@ func (m *Menu) dismiss() {
 }
 
 type menuRenderer struct {
-	BaseRenderer
+	*ShadowingRenderer
 	cont *fyne.Container
 	m    *Menu
 }
 
 // Layout satisfies the fyne.WidgetRenderer interface.
 func (r *menuRenderer) Layout(size fyne.Size) {
+	r.LayoutShadow(size, fyne.NewPos(0, 0))
 	padding := r.padding()
 	r.cont.Resize(size.Subtract(padding))
 	r.cont.Move(fyne.NewPos(padding.Width/2, padding.Height/2))

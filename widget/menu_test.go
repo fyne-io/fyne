@@ -20,6 +20,7 @@ func TestNewPopUpMenu(t *testing.T) {
 	pop := NewPopUpMenu(menu, c)
 	assert.Equal(t, 1, len(c.Overlays().List()))
 	assert.Equal(t, pop, c.Overlays().List()[0])
+	assert.True(t, pop.hideShadow, "menu renders shadow by itself")
 
 	pop.Hide()
 	assert.Equal(t, 0, len(c.Overlays().List()))

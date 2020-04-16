@@ -71,10 +71,15 @@ func TestMenu_Layout(t *testing.T) {
 	itemSize := canvas.NewText("B (long)", color.Black).MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 	size := fyne.NewSize(itemSize.Width, 2*itemSize.Height+2+4*theme.Padding()) // 2 for the separator; padding between items (2) & at start/end of menu (2)
 	objects := test.LaidOutObjects(m)
-	require.GreaterOrEqual(t, len(objects), 1)
+	require.GreaterOrEqual(t, len(objects), 2)
 
 	assert.Equal(t, objects[0], m)
 	assert.Equal(t, size, m.MinSize())
+
+	if s, ok := objects[1].(*widget.Shadow); assert.True(t, ok, "expect shadow") {
+		assert.Equal(t, size, s.Size())
+		assert.Equal(t, fyne.NewPos(0, 0), s.Position())
+	}
 
 	containerFound := false
 	for _, object := range objects {

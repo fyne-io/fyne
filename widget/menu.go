@@ -11,6 +11,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 	m := widget.NewMenu(menu)
 	pop := newPopUp(m, c)
 	pop.NotPadded = true
+	pop.hideShadow = true
 	focused := c.Focused()
 	m.DismissAction = func() {
 		if c.Focused() == nil {
