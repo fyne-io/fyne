@@ -34,7 +34,7 @@ func TestPopUpMenu_Size(t *testing.T) {
 		fyne.NewMenuItem("A", func() {}),
 	)
 	menuItemSize := canvas.NewText("A", color.Black).MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-	expectedSize := menuItemSize.Add(fyne.NewSize(0, menuItemSize.Height)).Add(fyne.NewSize(0, theme.Padding()))
+	expectedSize := menuItemSize.Add(fyne.NewSize(0, menuItemSize.Height)).Add(fyne.NewSize(0, theme.Padding()*3))
 	c := win.Canvas()
 
 	pop := NewPopUpMenu(menu, c)

@@ -101,16 +101,16 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	popUp := c.Overlays().Top().(*widget.PopUp)
 	entryMinWidth := dropDownIconWidth() + emptyTextWidth() + 4*theme.Padding()
-	assert.Equal(t, optionsMinSize(options).Max(fyne.NewSize(entryMinWidth, 0)).Add(fyne.NewSize(0, 2*theme.Padding())), popUp.Content.Size())
+	assert.Equal(t, optionsMinSize(options).Max(fyne.NewSize(entryMinWidth, 0)), popUp.Content.Size())
 	assert.Equal(t, options, popUpOptions(popUp), "drop down menu texts don't match SelectEntry options")
 
-	tapPopUpItem(popUp, 1)
+	tapPopUpItem(t, popUp, 1)
 	assert.Nil(t, c.Overlays().Top())
 	assert.Equal(t, "B", e.Text)
 
 	test.Tap(dropDownSwitch)
 	popUp = c.Overlays().Top().(*widget.PopUp)
-	tapPopUpItem(popUp, 2)
+	tapPopUpItem(t, popUp, 2)
 	assert.Nil(t, c.Overlays().Top())
 	assert.Equal(t, "C", e.Text)
 }
@@ -137,6 +137,8 @@ func optionsMinSize(options []string) fyne.Size {
 		}
 		minHeight += label.MinSize().Height
 	}
+	// padding before, after and between all options
+	minHeight += (len(labels) + 1) * theme.Padding()
 	return fyne.NewSize(minWidth, minHeight)
 }
 
@@ -150,12 +152,13 @@ func popUpOptions(popUp *widget.PopUp) []string {
 	return texts
 }
 
-func tapPopUpItem(p *widget.PopUp, i int) {
+func tapPopUpItem(t *testing.T, p *widget.PopUp, i int) {
 	var items []fyne.Tappable
 	for _, o := range test.LaidOutObjects(p.Content) {
 		if t, ok := o.(fyne.Tappable); ok {
 			items = append(items, t)
 		}
 	}
+	require.Greater(t, len(items), i, "not enough tappables found (%d out of at least %d)", len(items), i+1)
 	test.Tap(items[i])
 }

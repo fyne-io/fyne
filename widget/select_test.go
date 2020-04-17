@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 
 	"github.com/stretchr/testify/assert"
@@ -153,7 +154,7 @@ func TestSelect_Tapped(t *testing.T) {
 	assert.Equal(t, cont.Position().X, pos.X)
 	assert.Equal(t, cont.Position().Y, pos.Y)
 
-	items := cont.(*Box).Children
+	items := cont.(*widget.Menu).Items
 	assert.Equal(t, 2, len(items))
 }
 

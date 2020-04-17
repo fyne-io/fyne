@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -472,7 +473,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	assert.Equal(t, pos.X+tapPos.X, cont.Position().X)
 	assert.Equal(t, pos.Y+tapPos.Y, cont.Position().Y)
 
-	items := cont.(*Box).Children
+	items := cont.(*widget.Menu).Items
 	assert.Equal(t, 4, len(items)) // Cut, Copy, Paste, Select All
 	test.Tap(entry.popUp)
 
@@ -483,7 +484,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	over = canvas.Overlays().Top()
 
 	cont = over.(*PopUp).Content
-	items = cont.(*Box).Children
+	items = cont.(*widget.Menu).Items
 	assert.Equal(t, 2, len(items)) // Copy, Select All
 	firstDisabled := items[0]
 	test.Tap(entry.popUp)
@@ -499,7 +500,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	assert.NotNil(t, over)
 
 	cont = over.(*PopUp).Content
-	items = cont.(*Box).Children
+	items = cont.(*widget.Menu).Items
 	assert.Equal(t, 2, len(items)) // Paste, Select All
 	assert.NotEqual(t, firstDisabled, items[0])
 }
