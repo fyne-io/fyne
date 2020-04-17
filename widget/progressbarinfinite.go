@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -19,7 +20,7 @@ const (
 )
 
 type infProgressRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	bar      *canvas.Rectangle
 	ticker   *time.Ticker
 	running  atomic.Value
@@ -173,7 +174,7 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	render := &infProgressRenderer{
-		baseRenderer: baseRenderer{[]fyne.CanvasObject{bar}},
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bar}),
 		bar:          bar,
 		progress:     p,
 	}

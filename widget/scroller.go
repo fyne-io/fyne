@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -29,7 +30,7 @@ const (
 )
 
 type scrollBarRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	scrollBar *scrollBar
 	minSize   fyne.Size
 }
@@ -106,7 +107,7 @@ func newScrollBar(area *scrollBarArea) *scrollBar {
 }
 
 type scrollBarAreaRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	area *scrollBarArea
 	bar  *scrollBar
 }
@@ -177,7 +178,7 @@ type scrollBarArea struct {
 
 func (a *scrollBarArea) CreateRenderer() fyne.WidgetRenderer {
 	bar := newScrollBar(a)
-	return &scrollBarAreaRenderer{baseRenderer: baseRenderer{[]fyne.CanvasObject{bar}}, area: a, bar: bar}
+	return &scrollBarAreaRenderer{BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bar}), area: a, bar: bar}
 }
 
 func (a *scrollBarArea) MouseIn(*desktop.MouseEvent) {
@@ -222,12 +223,12 @@ func newScrollBarArea(scroll *ScrollContainer, orientation scrollBarOrientation)
 }
 
 type scrollContainerRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	scroll                  *ScrollContainer
 	vertArea                *scrollBarArea
 	horizArea               *scrollBarArea
-	leftShadow, rightShadow *shadow
-	topShadow, bottomShadow *shadow
+	leftShadow, rightShadow *widget.Shadow
+	topShadow, bottomShadow *widget.Shadow
 }
 
 func (r *scrollContainerRenderer) Layout(size fyne.Size) {
@@ -324,20 +325,20 @@ type ScrollContainer struct {
 func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	scr := &scrollContainerRenderer{
-		baseRenderer: baseRenderer{[]fyne.CanvasObject{s.Content}},
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{s.Content}),
 		scroll:       s,
 	}
 	if s.Direction != ScrollHorizontalOnly {
 		scr.vertArea = newScrollBarArea(s, scrollBarOrientationVertical)
-		scr.topShadow = newShadow(shadowBottom, submergedContentLevel)
-		scr.bottomShadow = newShadow(shadowTop, submergedContentLevel)
-		scr.setObjects(append(scr.Objects(), scr.vertArea, scr.topShadow, scr.bottomShadow))
+		scr.topShadow = widget.NewShadow(widget.ShadowBottom, widget.SubmergedContentLevel)
+		scr.bottomShadow = widget.NewShadow(widget.ShadowTop, widget.SubmergedContentLevel)
+		scr.SetObjects(append(scr.Objects(), scr.vertArea, scr.topShadow, scr.bottomShadow))
 	}
 	if s.Direction != ScrollVerticalOnly {
 		scr.horizArea = newScrollBarArea(s, scrollBarOrientationHorizontal)
-		scr.leftShadow = newShadow(shadowRight, submergedContentLevel)
-		scr.rightShadow = newShadow(shadowLeft, submergedContentLevel)
-		scr.setObjects(append(scr.Objects(), scr.horizArea, scr.leftShadow, scr.rightShadow))
+		scr.leftShadow = widget.NewShadow(widget.ShadowRight, widget.SubmergedContentLevel)
+		scr.rightShadow = widget.NewShadow(widget.ShadowLeft, widget.SubmergedContentLevel)
+		scr.SetObjects(append(scr.Objects(), scr.horizArea, scr.leftShadow, scr.rightShadow))
 	}
 	return scr
 }

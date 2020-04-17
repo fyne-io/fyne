@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -42,7 +43,7 @@ func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	labelBg := canvas.NewRectangle(theme.BackgroundColor())
 	line := canvas.NewRectangle(theme.ButtonColor())
 	return &groupRenderer{
-		baseRenderer: baseRenderer{[]fyne.CanvasObject{line, labelBg, label, g.content}},
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{line, labelBg, label, g.content}),
 		label:        label,
 		line:         line,
 		labelBg:      labelBg,
@@ -70,7 +71,7 @@ func NewGroupWithScroller(title string, children ...fyne.CanvasObject) *Group {
 }
 
 type groupRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	label         *Label
 	line, labelBg *canvas.Rectangle
 	group         *Group

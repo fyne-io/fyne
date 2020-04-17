@@ -7,11 +7,12 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 type buttonRenderer struct {
-	*shadowingRenderer
+	*widget.ShadowingRenderer
 
 	icon   *canvas.Image
 	label  *canvas.Text
@@ -46,7 +47,7 @@ func (b *buttonRenderer) MinSize() fyne.Size {
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
-	b.layoutShadow(size, fyne.NewPos(0, 0))
+	b.LayoutShadow(size, fyne.NewPos(0, 0))
 	if b.button.Text != "" {
 		padding := b.padding()
 		innerSize := size.Subtract(padding)
@@ -99,7 +100,7 @@ func (b *buttonRenderer) Refresh() {
 	if b.button.Icon != nil && b.button.Visible() {
 		if b.icon == nil {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
-			b.setObjects(append(b.Objects(), b.icon))
+			b.SetObjects(append(b.Objects(), b.icon))
 		} else {
 			if b.button.Disabled() {
 				// if the icon has changed, create a new disabled version
@@ -188,15 +189,15 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{
 		text,
 	}
-	shadowLevel := buttonLevel
+	shadowLevel := widget.ButtonLevel
 	if b.HideShadow {
-		shadowLevel = baseLevel
+		shadowLevel = widget.BaseLevel
 	}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{newShadowingRenderer(objects, shadowLevel), icon, text, b}
+	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b}
 }
 
 // SetText allows the button label to be changed

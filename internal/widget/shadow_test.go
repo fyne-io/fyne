@@ -11,37 +11,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var shadowLevel = elevationLevel(5)
+var shadowLevel = ElevationLevel(5)
 var shadowWidth = int(shadowLevel)
 
-func TestShadow_TopShadow(t *testing.T) {
-	s := newShadow(shadowTop, shadowLevel)
+func TestShadow_ApplyTheme(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	s := NewShadow(ShadowAround, shadowLevel)
 	r := test.WidgetRenderer(s).(*shadowRenderer)
-	r.Layout(fyne.NewSize(100, 100))
-
-	assert.Equal(t, []fyne.CanvasObject{r.t}, r.Objects())
-	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.t.Size())
-	assert.Equal(t, fyne.NewPos(0, -shadowWidth), r.t.Position())
-	assert.Equal(t, 0.0, r.t.Angle)
-	assert.Equal(t, color.Transparent, r.t.StartColor)
-	assert.Equal(t, theme.ShadowColor(), r.t.EndColor)
-}
-
-func TestShadow_BottomShadow(t *testing.T) {
-	s := newShadow(shadowBottom, shadowLevel)
-	r := test.WidgetRenderer(s).(*shadowRenderer)
-	r.Layout(fyne.NewSize(100, 100))
-
-	assert.Equal(t, []fyne.CanvasObject{r.b}, r.Objects())
-	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.b.Size())
-	assert.Equal(t, fyne.NewPos(0, 100), r.b.Position())
-	assert.Equal(t, 0.0, r.b.Angle)
 	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
-	assert.Equal(t, color.Transparent, r.b.EndColor)
+
+	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	r.Refresh()
+	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
 }
 
 func TestShadow_AroundShadow(t *testing.T) {
-	s := newShadow(shadowAround, shadowLevel)
+	s := NewShadow(ShadowAround, shadowLevel)
 	r := test.WidgetRenderer(s).(*shadowRenderer)
 	r.Layout(fyne.NewSize(100, 100))
 
@@ -104,27 +89,29 @@ func TestShadow_AroundShadow(t *testing.T) {
 	assert.Equal(t, theme.ShadowColor(), r.l.EndColor)
 }
 
-func TestShadow_ApplyTheme(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-	s := newShadow(shadowAround, shadowLevel)
-	r := test.WidgetRenderer(s).(*shadowRenderer)
-	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
-
-	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
-	r.Refresh()
-	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
+func TestShadow_BackgroundColor(t *testing.T) {
+	assert.Equal(t, color.Transparent, test.WidgetRenderer(NewShadow(ShadowAround, 1)).BackgroundColor())
 }
 
-func TestShadow_BackgroundColor(t *testing.T) {
-	assert.Equal(t, color.Transparent, test.WidgetRenderer(newShadow(shadowAround, 1)).BackgroundColor())
+func TestShadow_BottomShadow(t *testing.T) {
+	s := NewShadow(ShadowBottom, shadowLevel)
+	r := test.WidgetRenderer(s).(*shadowRenderer)
+	r.Layout(fyne.NewSize(100, 100))
+
+	assert.Equal(t, []fyne.CanvasObject{r.b}, r.Objects())
+	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.b.Size())
+	assert.Equal(t, fyne.NewPos(0, 100), r.b.Position())
+	assert.Equal(t, 0.0, r.b.Angle)
+	assert.Equal(t, theme.ShadowColor(), r.b.StartColor)
+	assert.Equal(t, color.Transparent, r.b.EndColor)
 }
 
 func TestShadow_MinSize(t *testing.T) {
-	assert.Equal(t, fyne.NewSize(0, 0), newShadow(shadowAround, 1).MinSize())
+	assert.Equal(t, fyne.NewSize(0, 0), NewShadow(ShadowAround, 1).MinSize())
 }
 
 func TestShadow_Theme(t *testing.T) {
-	shadow := newShadow(shadowAround, 1)
+	shadow := NewShadow(ShadowAround, 1)
 	light := theme.LightTheme()
 	fyne.CurrentApp().Settings().SetTheme(light)
 	shadow.Refresh()
@@ -138,4 +125,17 @@ func TestShadow_Theme(t *testing.T) {
 	assert.Equal(t, dark.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).r.StartColor)
 	assert.Equal(t, dark.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).r.StartColor)
 	assert.Equal(t, dark.ShadowColor(), test.WidgetRenderer(shadow).(*shadowRenderer).tr.StartColor)
+}
+
+func TestShadow_TopShadow(t *testing.T) {
+	s := NewShadow(ShadowTop, shadowLevel)
+	r := test.WidgetRenderer(s).(*shadowRenderer)
+	r.Layout(fyne.NewSize(100, 100))
+
+	assert.Equal(t, []fyne.CanvasObject{r.t}, r.Objects())
+	assert.Equal(t, fyne.NewSize(100, shadowWidth), r.t.Size())
+	assert.Equal(t, fyne.NewPos(0, -shadowWidth), r.t.Position())
+	assert.Equal(t, 0.0, r.t.Angle)
+	assert.Equal(t, color.Transparent, r.t.StartColor)
+	assert.Equal(t, theme.ShadowColor(), r.t.EndColor)
 }

@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -106,7 +107,7 @@ func NewToolbar(items ...ToolbarItem) *Toolbar {
 }
 
 type toolbarRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	layout  fyne.Layout
 	objs    []fyne.CanvasObject
 	toolbar *Toolbar
@@ -143,5 +144,5 @@ func (r *toolbarRenderer) resetObjects() {
 			r.objs = append(r.objs, item.ToolbarObject())
 		}
 	}
-	r.setObjects(r.objs)
+	r.SetObjects(r.objs)
 }
