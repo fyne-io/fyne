@@ -342,8 +342,10 @@ func (t *tabContainerRenderer) Refresh() {
 	t.line.Refresh()
 
 	for i, child := range t.container.Items {
-		old := t.objects[i]
+		tab := t.tabBar.Objects[i].(*tabButton)
+		tab.setText(child.Text)
 
+		old := t.objects[i]
 		if old == child.Content {
 			continue
 		}
@@ -396,6 +398,15 @@ type tabButton struct {
 func (b *tabButton) MinSize() fyne.Size {
 	b.ExtendBaseWidget(b)
 	return b.BaseWidget.MinSize()
+}
+
+func (b *tabButton) setText(text string) {
+	if text == b.Text {
+		return
+	}
+
+	b.Text = text
+	b.Refresh()
 }
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
@@ -527,6 +538,7 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabButtonRenderer) Refresh() {
+	r.label.Text = r.button.Text
 	r.label.Color = theme.TextColor()
 	r.label.TextSize = theme.TextSize()
 
