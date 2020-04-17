@@ -4,10 +4,10 @@ package gomobile
 
 import "io"
 
-func nativeFileOpen(uri string) (io.ReadCloser, error) {
+func nativeFileOpen(f *file) (io.ReadCloser, error) {
 	panic("Please implement me")
 }
 
-func nativeFileSave(uri string) (io.WriteCloser, error) {
+func nativeFileSave(f *file) (io.WriteCloser, error) {
 	panic("Please implement me")
 }

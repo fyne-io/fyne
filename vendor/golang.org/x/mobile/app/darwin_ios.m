@@ -60,18 +60,22 @@ struct utsname sysInfo;
 }
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray <NSURL *>*)urls {
-    for (id url in urls) {
-        if (![url isFileURL]) {
-            continue;
-        }
-
-        NSString *path = [url path];
-        filePickerReturned([path UTF8String]);
+    if ([urls count] == 0) {
+        return;
     }
+
+    NSURL* url = urls[0];
+    NSURL* toClose = NULL;
+    BOOL secured = [url startAccessingSecurityScopedResource];
+    if (secured) {
+        toClose = url;
+    }
+
+    filePickerReturned((char*)[[url description] UTF8String], toClose);
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-    filePickerReturned("");
+    filePickerReturned("", NULL);
 }
 
 @end
@@ -248,4 +252,13 @@ void showFileOpenPicker() {
     dispatch_async(dispatch_get_main_queue(), ^{
         [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
     });
+}
+
+void closeFileResource(void* urlPtr) {
+    if (urlPtr == NULL) {
+        return;
+    }
+
+    NSURL* url = (NSURL*) urlPtr;
+    [url stopAccessingSecurityScopedResource];
 }

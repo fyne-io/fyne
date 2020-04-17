@@ -25,8 +25,11 @@ func fileOpened(f fyne.File) {
 		return
 	}
 
-	if f.URI()[len(f.URI())-4:] == ".png" {
+	ext := f.URI()[len(f.URI())-4:]
+	if ext == ".png" {
 		showImage(f)
+	} else if ext == ".txt" {
+		showText(f)
 	}
 }
 
@@ -65,6 +68,30 @@ func showImage(f fyne.File) {
 
 	w := fyne.CurrentApp().NewWindow(f.Name())
 	w.SetContent(widget.NewScrollContainer(img))
+	w.Resize(fyne.NewSize(320, 240))
+	w.Show()
+}
+
+func loadText(f fyne.File) string {
+	in, err := f.Open()
+	if err != nil {
+		fyne.LogError("Failed to load text data", err)
+		return ""
+	}
+	data, err := ioutil.ReadAll(in)
+	in.Close()
+	if data == nil {
+		return ""
+	}
+
+	return string(data)
+}
+
+func showText(f fyne.File) {
+	text := widget.NewLabel(loadText(f))
+
+	w := fyne.CurrentApp().NewWindow(f.Name())
+	w.SetContent(widget.NewScrollContainer(text))
 	w.Resize(fyne.NewSize(320, 240))
 	w.Show()
 }
@@ -112,7 +139,7 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 
 			prog.Show()
 		}),
-		widget.NewButton("File Open", func() {
+		widget.NewButton("File Open (try txt or png)", func() {
 			dialog.ShowFileOpen(fileOpened, win)
 		}),
 		widget.NewButton("File Save", func() {
