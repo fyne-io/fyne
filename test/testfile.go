@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 )
 
 type file struct {
+	*os.File
 	path string
 }
 
@@ -32,10 +34,23 @@ func (f *file) URI() string {
 	return "file://" + f.path
 }
 
-func (d *testDriver) FileFromURI(uri string) fyne.File {
+func openFile(uri string, create bool) (*file, error) {
 	if len(uri) < 8 || uri[:7] != "file://" {
-		return nil
+		return nil, fmt.Errorf("unsupported URL protocol")
 	}
 
-	return &file{path: uri[7:]}
+	path := uri[7:]
+	f, err := os.Open(path)
+	if err != nil && create {
+		f, err = os.Create(path)
+	}
+	return &file{File: f, path: path}, err
+}
+
+func (d *testDriver) FileReaderForURI(uri string) (fyne.FileReader, error) {
+	return openFile(uri, false)
+}
+
+func (d *testDriver) FileWriterForURI(uri string) (fyne.FileWriter, error) {
+	return openFile(uri, true)
 }

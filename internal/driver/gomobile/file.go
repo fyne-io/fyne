@@ -2,7 +2,6 @@ package gomobile
 
 import (
 	"io"
-	"log"
 	"net/url"
 	"path/filepath"
 	"strings"
@@ -10,29 +9,63 @@ import (
 	"fyne.io/fyne"
 )
 
-type file struct {
-	uri string
+type fileOpen struct {
+	io.ReadCloser
+	uri  string
 	done func()
 }
 
-func (f *file) Open() (io.ReadCloser, error) {
-	return nativeFileOpen(f)
+//func (f *fileOpen) Save() (io.WriteCloser, error) {
+//	return nativeFileSave(f)
+//}
+
+func (f *fileOpen) Name() string {
+	return nameFromURI(f.uri)
 }
 
-func (f *file) Save() (io.WriteCloser, error) {
-	return nativeFileSave(f)
+func (f *fileOpen) URI() string {
+	return f.uri
 }
 
-func (f *file) ReadOnly() bool {
-	if len(f.uri) < 8 || f.uri[:7] != "file://" {
-		return true
+func (d *mobileDriver) FileReaderForURI(uriOrPath string) (fyne.FileReader, error) {
+	uri := uriOrPath
+	if strings.Index(uriOrPath, "://") == -1 {
+		uri = "file://" + uriOrPath
 	}
 
-	return false
+	file := &fileOpen{uri: uri}
+	read, err := nativeFileOpen(file)
+	file.ReadCloser = read
+	return file, err
 }
 
-func (f *file) Name() string {
-	u, err := url.Parse(f.uri)
+type fileSave struct {
+	io.WriteCloser
+	uri string
+}
+
+func (f *fileSave) Name() string {
+	return nameFromURI(f.uri)
+}
+
+func (f *fileSave) URI() string {
+	return f.uri
+}
+
+func (d *mobileDriver) FileWriterForURI(uriOrPath string) (fyne.FileWriter, error) {
+	uri := uriOrPath
+	if strings.Index(uriOrPath, "://") == -1 {
+		uri = "file://" + uriOrPath
+	}
+
+	file := &fileSave{uri: uri}
+	write, err := nativeFileSave(file)
+	file.WriteCloser = write
+	return file, err
+}
+
+func nameFromURI(uri string) string {
+	u, err := url.Parse(uri)
 	if err != nil {
 		return "unknown"
 	}
@@ -40,32 +73,18 @@ func (f *file) Name() string {
 	return filepath.Base(u.Path)
 }
 
-func (f *file) URI() string {
-	return f.uri
-}
-
-func (d *mobileDriver) FileFromURI(uriOrPath string) fyne.File {
-	if strings.Index(uriOrPath, "://") == -1 {
-		return &file{uri: "file://" + uriOrPath}
-	}
-
-	return &file{uri: uriOrPath}
-}
-
 type hasPicker interface {
 	ShowFileOpenPicker(callback func(string, func()))
 }
 
 // ShowFileOpenPicker loads the native file open dialog and returns the chosen file path via the callback func.
-func ShowFileOpenPicker(callback func(fyne.File)) {
+func ShowFileOpenPicker(callback func(fyne.FileReader, error)) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, closer func()) {
-			log.Print("FILE uri", uri)
-			f := drv.FileFromURI(uri)
-			f.(*file).done = closer
-			log.Println("FILE=", f)
-			callback(f)
+			f, err := drv.FileReaderForURI(uri)
+			f.(*fileOpen).done = closer
+			callback(f, err)
 		})
 	}
 }

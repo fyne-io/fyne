@@ -15,15 +15,16 @@ func isHidden(file, _ string) bool {
 	return false
 }
 
-func fileOSOverride(save bool, callback func(fyne.File), parent fyne.Window) bool {
-	if save {
-		ShowInformation("File Save", "File save not available on mobile", parent)
+func fileOpenOSOverride(callback func(fyne.FileReader, error), _ fyne.Window) bool {
+	gomobile.ShowFileOpenPicker(callback)
+	return true
+}
 
-		if callback != nil {
-			callback(nil)
-		}
-	} else {
-		gomobile.ShowFileOpenPicker(callback)
+func fileSaveOSOverride(callback func(fyne.FileWriter, error), parent fyne.Window) bool {
+	ShowInformation("File Save", "File save not available on mobile", parent)
+
+	if callback != nil {
+		callback(nil, nil)
 	}
 
 	return true

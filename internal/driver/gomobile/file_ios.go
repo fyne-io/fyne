@@ -45,7 +45,7 @@ func (s *secureReadCloser) Read(p []byte) (int, error) {
 		err = io.EOF
 	}
 
-	newOffset := s.offset+count
+	newOffset := s.offset + count
 
 	o := 0
 	for i := s.offset; i < newOffset; i++ {
@@ -64,7 +64,7 @@ func (s *secureReadCloser) Close() error {
 	return nil
 }
 
-func nativeFileOpen(f *file) (io.ReadCloser, error) {
+func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	cStr := C.CString(f.uri)
 	defer C.free(unsafe.Pointer(cStr))
 
@@ -74,6 +74,6 @@ func nativeFileOpen(f *file) (io.ReadCloser, error) {
 	return fileStruct, nil
 }
 
-func nativeFileSave(f *file) (io.WriteCloser, error) {
+func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
 	panic("Please implement me")
 }

@@ -2,6 +2,7 @@ package dialog
 
 import (
 	"log"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -13,10 +14,12 @@ import (
 )
 
 func TestShowFileOpen(t *testing.T) {
-	var chosen fyne.File
+	var chosen fyne.FileReader
+	var openErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileOpen(func(file fyne.File) {
+	ShowFileOpen(func(file fyne.FileReader, err error) {
 		chosen = file
+		openErr = err
 	}, win)
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
@@ -58,14 +61,20 @@ func TestShowFileOpen(t *testing.T) {
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
+	assert.Nil(t, openErr)
 	assert.Equal(t, "file://"+target.path, chosen.URI())
+
+	err := chosen.Close()
+	assert.Nil(t, err)
 }
 
 func TestShowFileSave(t *testing.T) {
-	var chosen fyne.File
+	var chosen fyne.FileWriter
+	var saveErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileSave(func(file fyne.File) {
+	ShowFileSave(func(file fyne.FileWriter, err error) {
 		chosen = file
+		saveErr = err
 	}, win)
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
@@ -115,6 +124,12 @@ func TestShowFileSave(t *testing.T) {
 	test.Type(nameEntry, "v2_")
 	test.Tap(save)
 	assert.Nil(t, win.Canvas().Overlays().Top())
+	assert.Nil(t, saveErr)
 	expectedPath := filepath.Join(filepath.Dir(target.path), "v2_"+filepath.Base(target.path))
 	assert.Equal(t, "file://"+expectedPath, chosen.URI())
+
+	err := chosen.Close()
+	assert.Nil(t, err)
+	err = os.Remove(expectedPath)
+	assert.Nil(t, err)
 }

@@ -12,9 +12,13 @@ type Driver interface {
 	// font size and style.
 	RenderedTextSize(string, int, TextStyle) Size
 
-	// FileFromURI loads a file descriptor for the given resource indicator.
+	// FileReaderForURI opens a file reader for the given resource indicator.
 	// This may refer to a filesystem (typical on desktop) or data from another application.
-	FileFromURI(string) File
+	FileReaderForURI(string) (FileReader, error)
+
+	// FileWriterForURI opens a file writer for the given resource indicator.
+	// This should refer to a filesystem resource as external data will not be writable.
+	FileWriterForURI(string) (FileWriter, error)
 
 	// Get the canvas that is associated with a given CanvasObject.
 	CanvasForObject(CanvasObject) Canvas

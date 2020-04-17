@@ -2,7 +2,6 @@ package glfw
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
@@ -10,19 +9,12 @@ import (
 )
 
 type file struct {
+	*os.File
 	path string
 }
 
-func (f *file) Open() (io.ReadCloser, error) {
-	return os.Open(f.path)
-}
-
-func (f *file) Save() (io.WriteCloser, error) {
-	return os.Open(f.path)
-}
-
-func (f *file) ReadOnly() bool {
-	return false // TODO can we actually check the read/write status?
+func (d *gLDriver) FileReaderForURI(uri string) (fyne.FileReader, error) {
+	return openFile(uri, false)
 }
 
 func (f *file) Name() string {
@@ -33,15 +25,33 @@ func (f *file) URI() string {
 	return "file://" + f.path
 }
 
-func fileWithPath(path string) fyne.File {
-	return &file{path: path}
+type fileWriter struct {
+	*os.File
+	path string
 }
 
-func (d *gLDriver) FileFromURI(uri string) fyne.File {
+func (d *gLDriver) FileWriterForURI(uri string) (fyne.FileWriter, error) {
+	return openFile(uri, true)
+}
+
+func (f *fileWriter) Name() string {
+	return filepath.Base(f.path)
+}
+
+func (f *fileWriter) URI() string {
+	return "file://" + f.path
+}
+
+func openFile(uri string, create bool) (*file, error) {
 	if len(uri) < 8 || uri[:7] != "file://" {
-		fyne.LogError(fmt.Sprintf("Invalid URI for file: %s", uri), nil)
-		return nil
+		return nil, fmt.Errorf("invalid URI for file: %s", uri)
 	}
 
-	return fileWithPath(uri[7:])
+	path := uri[7:]
+	f, err := os.Open(path)
+	if err != nil && create {
+		f, err = os.Create(path)
+	}
+
+	return &file{File: f, path: path}, err
 }

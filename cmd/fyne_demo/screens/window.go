@@ -19,7 +19,7 @@ func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
 }
 
-func fileOpened(f fyne.File) {
+func fileOpened(f fyne.FileReader) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
@@ -31,9 +31,13 @@ func fileOpened(f fyne.File) {
 	} else if ext == ".txt" {
 		showText(f)
 	}
+	err := f.Close()
+	if err != nil {
+		fyne.LogError("Failed to close stream", err)
+	}
 }
 
-func fileSaved(f fyne.File) {
+func fileSaved(f fyne.FileWriter) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
@@ -42,14 +46,8 @@ func fileSaved(f fyne.File) {
 	log.Println("Save to...", f.URI())
 }
 
-func loadImage(f fyne.File) *canvas.Image {
-	in, err := f.Open()
-	if err != nil {
-		fyne.LogError("Could not open image stream", err)
-		return nil
-	}
-
-	data, err := ioutil.ReadAll(in)
+func loadImage(f fyne.FileReader) *canvas.Image {
+	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		fyne.LogError("Failed to load image data", err)
 		return nil
@@ -59,7 +57,7 @@ func loadImage(f fyne.File) *canvas.Image {
 	return canvas.NewImageFromResource(res)
 }
 
-func showImage(f fyne.File) {
+func showImage(f fyne.FileReader) {
 	img := loadImage(f)
 	if img == nil {
 		return
@@ -72,14 +70,12 @@ func showImage(f fyne.File) {
 	w.Show()
 }
 
-func loadText(f fyne.File) string {
-	in, err := f.Open()
+func loadText(f fyne.FileReader) string {
+	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		fyne.LogError("Failed to load text data", err)
 		return ""
 	}
-	data, err := ioutil.ReadAll(in)
-	in.Close()
 	if data == nil {
 		return ""
 	}
@@ -87,8 +83,9 @@ func loadText(f fyne.File) string {
 	return string(data)
 }
 
-func showText(f fyne.File) {
+func showText(f fyne.FileReader) {
 	text := widget.NewLabel(loadText(f))
+	text.Wrapping = fyne.TextWrapWord
 
 	w := fyne.CurrentApp().NewWindow(f.Name())
 	w.SetContent(widget.NewScrollContainer(text))
@@ -140,10 +137,24 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			prog.Show()
 		}),
 		widget.NewButton("File Open (try txt or png)", func() {
-			dialog.ShowFileOpen(fileOpened, win)
+			dialog.ShowFileOpen(func(reader fyne.FileReader, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+
+				fileOpened(reader)
+			}, win)
 		}),
 		widget.NewButton("File Save", func() {
-			dialog.ShowFileSave(fileSaved, win)
+			dialog.ShowFileSave(func(writer fyne.FileWriter, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+
+				fileSaved(writer)
+			}, win)
 		}),
 		widget.NewButton("Custom", func() {
 			entry := widget.NewEntry()
