@@ -13,7 +13,6 @@ import (
 
 // General mobile build environment. Initialized by envInit.
 var (
-	cwd          string
 	gomobilepath string // $GOPATH/pkg/gomobile
 
 	androidEnv map[string][]string // android arch -> []string
@@ -24,6 +23,8 @@ var (
 	darwinArmNM  string
 
 	allArchs = []string{"arm", "arm64", "386", "amd64"}
+
+	bitcodeEnabled bool
 )
 
 func buildEnvInit() (cleanup func(), err error) {
@@ -74,10 +75,18 @@ func buildEnvInit() (cleanup func(), err error) {
 }
 
 func envInit() (err error) {
-	// TODO(crawshaw): cwd only used by ctx.Import, which can take "."
-	cwd, err = os.Getwd()
+	// Check the current Go version by go-list.
+	// An arbitrary standard package ('runtime' here) is given to go-list.
+	// This is because go-list tries to analyze the module at the current directory if no packages are given,
+	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
+	cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
+	cmd.Stderr = os.Stderr
+	out, err := cmd.Output()
 	if err != nil {
 		return err
+	}
+	if len(strings.TrimSpace(string(out))) > 0 {
+		bitcodeEnabled = true
 	}
 
 	// Setup the cross-compiler environments.
@@ -100,7 +109,7 @@ func envInit() (err error) {
 				for _, tool := range tools {
 					_, err = os.Stat(tool)
 					if err != nil {
-						return fmt.Errorf("No compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it.", arch, tool)
+						return fmt.Errorf("No compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it", arch, tool)
 					}
 				}
 			}
@@ -142,6 +151,10 @@ func envInit() (err error) {
 		}
 		if err != nil {
 			return err
+		}
+
+		if bitcodeEnabled {
+			cflags += " -fembed-bitcode"
 		}
 		env = append(env,
 			"GOOS=darwin",
@@ -268,18 +281,18 @@ func getenv(env []string, key string) string {
 func archNDK() string {
 	if runtime.GOOS == "windows" && runtime.GOARCH == "386" {
 		return "windows"
-	} else {
-		var arch string
-		switch runtime.GOARCH {
-		case "386":
-			arch = "x86"
-		case "amd64":
-			arch = "x86_64"
-		default:
-			panic("unsupported GOARCH: " + runtime.GOARCH)
-		}
-		return runtime.GOOS + "-" + arch
 	}
+
+	var arch string
+	switch runtime.GOARCH {
+	case "386":
+		arch = "x86"
+	case "amd64":
+		arch = "x86_64"
+	default:
+		panic("unsupported GOARCH: " + runtime.GOARCH)
+	}
+	return runtime.GOOS + "-" + arch
 }
 
 type ndkToolchain struct {

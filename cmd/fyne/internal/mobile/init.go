@@ -71,7 +71,7 @@ func goEnv(name string) string {
 	if val := os.Getenv(name); val != "" {
 		return val
 	}
-	val, err := exec.Command(goBin(), "env", name).Output()
+	val, err := exec.Command("go", "env", name).Output()
 	if err != nil {
 		panic(err) // the Go tool was tested to work earlier
 	}
@@ -88,12 +88,7 @@ func runCmd(cmd *exec.Cmd) error {
 		if env != "" {
 			env += " "
 		}
-		args := make([]string, len(cmd.Args))
-		copy(args, cmd.Args)
-		if args[0] == goBin() {
-			args[0] = "go"
-		}
-		printcmd("%s%s%s", dir, env, strings.Join(args, " "))
+		printcmd("%s%s%s", dir, env, strings.Join(cmd.Args, " "))
 	}
 
 	buf := new(bytes.Buffer)

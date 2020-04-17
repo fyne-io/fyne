@@ -23,7 +23,7 @@ Steps to reproduce the behaviour:
 
 
 ### Example code:
-<!-- If applicable, add a short code snippet to help exaplain and simplify reproduction of the problem. -->
+<!-- If applicable, add a short code snippet to help explain and simplify reproduction of the problem. -->
 <!-- Please write the code inside a code block with go syntax, like this:
 ```go
 Write your code here.

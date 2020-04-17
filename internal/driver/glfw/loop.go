@@ -21,6 +21,7 @@ type funcData struct {
 var funcQueue = make(chan funcData)
 var runFlag = false
 var runMutex = &sync.Mutex{}
+var initOnce = &sync.Once{}
 
 // Arrange that main.main runs on main thread.
 func init() {
@@ -48,13 +49,15 @@ func runOnMain(f func()) {
 }
 
 func (d *gLDriver) initGLFW() {
-	err := glfw.Init()
-	if err != nil {
-		fyne.LogError("failed to initialise GLFW", err)
-		return
-	}
+	initOnce.Do(func() {
+		err := glfw.Init()
+		if err != nil {
+			fyne.LogError("failed to initialise GLFW", err)
+			return
+		}
 
-	initCursors()
+		initCursors()
+	})
 }
 
 func (d *gLDriver) runGL() {

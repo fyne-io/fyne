@@ -7,16 +7,21 @@ import (
 	"os"
 )
 
-var commands map[string]command
+var commands []idCommandPair
 var provider command
+
+type idCommandPair struct {
+	id       string
+	provider command
+}
 
 func printUsage() {
 	fmt.Println("Usage: fyne [command] [parameters], where command is one of:")
 	fmt.Print("  ")
 
 	i := 0
-	for id := range commands {
-		fmt.Print(id)
+	for _, c := range commands {
+		fmt.Print(c.id)
 
 		if i < len(commands)-1 {
 			fmt.Print(", ")
@@ -30,10 +35,10 @@ func printUsage() {
 	if provider != nil {
 		provider.printHelp(" ")
 	} else {
-		for id, provider := range commands {
-			fmt.Printf("  %s\n", id)
-			provider.printHelp("   ")
-			fmt.Printf("    For more information run \"fyne help %s\"\n", id)
+		for _, c := range commands {
+			fmt.Printf("  %s\n", c.id)
+			c.provider.printHelp("   ")
+			fmt.Printf("    For more information run \"fyne help %s\"\n", c.id)
 			fmt.Println("")
 		}
 	}
@@ -46,12 +51,23 @@ func help() {
 }
 
 func loadCommands() {
-	commands = make(map[string]command)
+	commands = []idCommandPair{
+		{"bundle", &bundler{}},
+		{"get", &getter{}},
+		{"package", &packager{}},
+		{"install", &installer{}},
+		{"vendor", &vendor{}},
+		{"version", &version{}},
+	}
+}
 
-	commands["bundle"] = &bundler{}
-	commands["get"] = &getter{}
-	commands["package"] = &packager{}
-	commands["install"] = &installer{}
+func getCommand(id string) command {
+	for _, c := range commands {
+		if c.id == id {
+			return c.provider
+		}
+	}
+	return nil
 }
 
 func main() {
@@ -70,12 +86,13 @@ func main() {
 
 	if command == "help" {
 		if len(args) >= 2 {
-			provider = commands[args[1]]
-			provider.addFlags()
+			if provider = getCommand(args[1]); provider != nil {
+				provider.addFlags()
+			}
 		}
 		help()
 	} else {
-		provider = commands[command]
+		provider = getCommand(command)
 		if provider == nil {
 			fmt.Fprintln(os.Stderr, "Unsupported command", command)
 			return

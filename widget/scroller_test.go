@@ -26,6 +26,109 @@ func TestNewScrollContainer(t *testing.T) {
 	assert.Equal(t, fyne.NewPos(100-theme.ScrollBarSmallSize()*2, 0), barArea.Position())
 }
 
+func TestScrollContainer_MinSize(t *testing.T) {
+	rect := canvas.NewRectangle(color.Black)
+	rect.SetMinSize(fyne.NewSize(500, 50))
+	scroll := NewScrollContainer(rect)
+	assert.Equal(t, fyne.NewSize(32, 32), scroll.MinSize())
+
+	scrollMin := fyne.NewSize(100, 100)
+	scroll.SetMinSize(scrollMin)
+	Renderer(scroll).Layout(scroll.minSize)
+
+	assert.Equal(t, scrollMin, scroll.MinSize())
+	assert.Equal(t, fyne.NewSize(500, 100), rect.Size())
+	assert.Equal(t, 0, scroll.Offset.X)
+	assert.Equal(t, 0, scroll.Offset.Y)
+}
+
+func TestScrollContainer_MinSize_Direction(t *testing.T) {
+	t.Run("Both", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewScrollContainer(rect)
+		size := scroll.MinSize()
+		assert.Equal(t, 32, size.Height)
+		assert.Equal(t, 32, size.Width)
+	})
+	t.Run("HorizontalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewHScrollContainer(rect)
+		size := scroll.MinSize()
+		assert.Equal(t, 100, size.Height)
+		assert.Equal(t, 32, size.Width)
+	})
+	t.Run("VerticalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewVScrollContainer(rect)
+		size := scroll.MinSize()
+		assert.Equal(t, 32, size.Height)
+		assert.Equal(t, 100, size.Width)
+	})
+}
+
+func TestScrollContainer_SetMinSize_Direction(t *testing.T) {
+	t.Run("Both", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewScrollContainer(rect)
+		scroll.SetMinSize(fyne.NewSize(50, 50))
+		size := scroll.MinSize()
+		assert.Equal(t, 50, size.Height)
+		assert.Equal(t, 50, size.Width)
+	})
+	t.Run("HorizontalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewHScrollContainer(rect)
+		scroll.SetMinSize(fyne.NewSize(50, 50))
+		size := scroll.MinSize()
+		assert.Equal(t, 100, size.Height)
+		assert.Equal(t, 50, size.Width)
+	})
+	t.Run("VerticalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewVScrollContainer(rect)
+		scroll.SetMinSize(fyne.NewSize(50, 50))
+		size := scroll.MinSize()
+		assert.Equal(t, 50, size.Height)
+		assert.Equal(t, 100, size.Width)
+	})
+}
+
+func TestScrollContainer_Resize_Direction(t *testing.T) {
+	t.Run("Both", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewScrollContainer(rect)
+		scroll.Resize(scroll.MinSize())
+		size := scroll.Size()
+		assert.Equal(t, 32, size.Height)
+		assert.Equal(t, 32, size.Width)
+	})
+	t.Run("HorizontalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewHScrollContainer(rect)
+		scroll.Resize(scroll.MinSize())
+		size := scroll.Size()
+		assert.Equal(t, 100, size.Height)
+		assert.Equal(t, 32, size.Width)
+	})
+	t.Run("VerticalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewVScrollContainer(rect)
+		scroll.Resize(scroll.MinSize())
+		size := scroll.Size()
+		assert.Equal(t, 32, size.Height)
+		assert.Equal(t, 100, size.Width)
+	})
+}
+
 func TestScrollContainer_Refresh(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
@@ -353,6 +456,102 @@ func TestScrollContainerRenderer_LimitBarSize(t *testing.T) {
 
 	assert.Equal(t, 120, areaHoriz.bar.Size().Width)
 	assert.Equal(t, 120, areaVert.bar.Size().Height)
+}
+
+func TestScrollContainerRenderer_Direction(t *testing.T) {
+	t.Run("Both", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewScrollContainer(rect)
+		r := Renderer(scroll).(*scrollContainerRenderer)
+		assert.NotNil(t, r.vertArea)
+		assert.NotNil(t, r.topShadow)
+		assert.NotNil(t, r.bottomShadow)
+		assert.NotNil(t, r.horizArea)
+		assert.NotNil(t, r.leftShadow)
+		assert.NotNil(t, r.rightShadow)
+	})
+	t.Run("HorizontalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewHScrollContainer(rect)
+		r := Renderer(scroll).(*scrollContainerRenderer)
+		assert.Nil(t, r.vertArea)
+		assert.Nil(t, r.topShadow)
+		assert.Nil(t, r.bottomShadow)
+		assert.NotNil(t, r.horizArea)
+		assert.NotNil(t, r.leftShadow)
+		assert.NotNil(t, r.rightShadow)
+	})
+	t.Run("VerticalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewVScrollContainer(rect)
+		r := Renderer(scroll).(*scrollContainerRenderer)
+		assert.NotNil(t, r.vertArea)
+		assert.NotNil(t, r.topShadow)
+		assert.NotNil(t, r.bottomShadow)
+		assert.Nil(t, r.horizArea)
+		assert.Nil(t, r.leftShadow)
+		assert.Nil(t, r.rightShadow)
+	})
+}
+
+func TestScrollContainerRenderer_MinSize_Direction(t *testing.T) {
+	t.Run("Both", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewScrollContainer(rect)
+		size := Renderer(scroll).MinSize()
+		assert.Equal(t, 32, size.Height)
+		assert.Equal(t, 32, size.Width)
+	})
+	t.Run("HorizontalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewHScrollContainer(rect)
+		size := Renderer(scroll).MinSize()
+		assert.Equal(t, 100, size.Height)
+		assert.Equal(t, 32, size.Width)
+	})
+	t.Run("VerticalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewVScrollContainer(rect)
+		size := Renderer(scroll).MinSize()
+		assert.Equal(t, 32, size.Height)
+		assert.Equal(t, 100, size.Width)
+	})
+}
+
+func TestScrollContainerRenderer_SetMinSize_Direction(t *testing.T) {
+	t.Run("Both", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewScrollContainer(rect)
+		scroll.SetMinSize(fyne.NewSize(50, 50))
+		size := Renderer(scroll).MinSize()
+		assert.Equal(t, 50, size.Height)
+		assert.Equal(t, 50, size.Width)
+	})
+	t.Run("HorizontalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewHScrollContainer(rect)
+		scroll.SetMinSize(fyne.NewSize(50, 50))
+		size := Renderer(scroll).MinSize()
+		assert.Equal(t, 100, size.Height)
+		assert.Equal(t, 50, size.Width)
+	})
+	t.Run("VerticalOnly", func(t *testing.T) {
+		rect := canvas.NewRectangle(color.Black)
+		rect.SetMinSize(fyne.NewSize(100, 100))
+		scroll := NewVScrollContainer(rect)
+		scroll.SetMinSize(fyne.NewSize(50, 50))
+		size := Renderer(scroll).MinSize()
+		assert.Equal(t, 50, size.Height)
+		assert.Equal(t, 100, size.Width)
+	})
 }
 
 func TestScrollBar_Dragged_ClickedInside(t *testing.T) {

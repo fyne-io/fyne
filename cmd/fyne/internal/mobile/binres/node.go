@@ -12,6 +12,7 @@ type NodeHeader struct {
 	Comment    PoolRef // optional xml comment associated with element, MaxUint32 if none
 }
 
+// UnmarshalBinary creates a node header from binary data
 func (hdr *NodeHeader) UnmarshalBinary(bin []byte) error {
 	if err := (&hdr.chunkHeader).UnmarshalBinary(bin); err != nil {
 		return err
@@ -21,6 +22,7 @@ func (hdr *NodeHeader) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given header
 func (hdr *NodeHeader) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 16)
 	b, err := hdr.chunkHeader.MarshalBinary()
@@ -33,6 +35,7 @@ func (hdr *NodeHeader) MarshalBinary() ([]byte, error) {
 	return bin, nil
 }
 
+// Namespace represents an XML namespace
 type Namespace struct {
 	NodeHeader
 	prefix PoolRef
@@ -41,6 +44,7 @@ type Namespace struct {
 	end *Namespace // TODO don't let this type be recursive
 }
 
+// UnmarshalBinary creates a namespace from binary data
 func (ns *Namespace) UnmarshalBinary(bin []byte) error {
 	if err := (&ns.NodeHeader).UnmarshalBinary(bin); err != nil {
 		return err
@@ -51,6 +55,7 @@ func (ns *Namespace) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given namespace
 func (ns *Namespace) MarshalBinary() ([]byte, error) {
 	if ns.end == nil {
 		ns.typ = ResXMLEndNamespace
@@ -71,6 +76,7 @@ func (ns *Namespace) MarshalBinary() ([]byte, error) {
 	return bin, nil
 }
 
+// Element represents an XML element
 type Element struct {
 	NodeHeader
 	NS             PoolRef
@@ -78,7 +84,7 @@ type Element struct {
 	AttributeStart uint16  // byte offset where attrs start
 	AttributeSize  uint16  // byte size of attrs
 	AttributeCount uint16  // length of attrs
-	IdIndex        uint16  // Index (1-based) of the "id" attribute. 0 if none.
+	IDIndex        uint16  // Index (1-based) of the "id" attribute. 0 if none.
 	ClassIndex     uint16  // Index (1-based) of the "class" attribute. 0 if none.
 	StyleIndex     uint16  // Index (1-based) of the "style" attribute. 0 if none.
 
@@ -89,6 +95,7 @@ type Element struct {
 	head, tail *CharData
 }
 
+// UnmarshalBinary creates an element from binary data
 func (el *Element) UnmarshalBinary(buf []byte) error {
 	if err := (&el.NodeHeader).UnmarshalBinary(buf); err != nil {
 		return err
@@ -100,7 +107,7 @@ func (el *Element) UnmarshalBinary(buf []byte) error {
 	el.AttributeStart = btou16(buf[8:])
 	el.AttributeSize = btou16(buf[10:])
 	el.AttributeCount = btou16(buf[12:])
-	el.IdIndex = btou16(buf[14:])
+	el.IDIndex = btou16(buf[14:])
 	el.ClassIndex = btou16(buf[16:])
 	el.StyleIndex = btou16(buf[18:])
 
@@ -118,13 +125,14 @@ func (el *Element) UnmarshalBinary(buf []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given element
 func (el *Element) MarshalBinary() ([]byte, error) {
 	el.typ = ResXMLStartElement
 	el.headerByteSize = 16
 	el.AttributeSize = 20
 	el.AttributeStart = 20
 	el.AttributeCount = uint16(len(el.attrs))
-	el.IdIndex = 0
+	el.IDIndex = 0
 	el.ClassIndex = 0
 	el.StyleIndex = 0
 	el.byteSize = uint32(el.headerByteSize) + uint32(el.AttributeStart) + uint32(len(el.attrs)*int(el.AttributeSize))
@@ -140,7 +148,7 @@ func (el *Element) MarshalBinary() ([]byte, error) {
 	putu16(bin[24:], el.AttributeStart)
 	putu16(bin[26:], el.AttributeSize)
 	putu16(bin[28:], el.AttributeCount)
-	putu16(bin[30:], el.IdIndex)
+	putu16(bin[30:], el.IDIndex)
 	putu16(bin[32:], el.ClassIndex)
 	putu16(bin[34:], el.StyleIndex)
 
@@ -164,6 +172,7 @@ type ElementEnd struct {
 	Name PoolRef // name of node if binElement, raw chardata if binCharData
 }
 
+// UnmarshalBinary creates the element end from binary data
 func (el *ElementEnd) UnmarshalBinary(bin []byte) error {
 	(&el.NodeHeader).UnmarshalBinary(bin)
 	buf := bin[el.headerByteSize:]
@@ -172,6 +181,7 @@ func (el *ElementEnd) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given element end
 func (el *ElementEnd) MarshalBinary() ([]byte, error) {
 	el.typ = ResXMLEndElement
 	el.headerByteSize = 16
@@ -188,6 +198,7 @@ func (el *ElementEnd) MarshalBinary() ([]byte, error) {
 	return bin, nil
 }
 
+// Attribute represents an XML attribute
 type Attribute struct {
 	NS         PoolRef
 	Name       PoolRef
@@ -195,6 +206,7 @@ type Attribute struct {
 	TypedValue Data    // Processesd typed value of this attribute.
 }
 
+// UnmarshalBinary creates the attribute end from binary data
 func (attr *Attribute) UnmarshalBinary(bin []byte) error {
 	attr.NS = PoolRef(btou32(bin))
 	attr.Name = PoolRef(btou32(bin[4:]))
@@ -202,6 +214,7 @@ func (attr *Attribute) UnmarshalBinary(bin []byte) error {
 	return (&attr.TypedValue).UnmarshalBinary(bin[12:])
 }
 
+// MarshalBinary outputs the binary format from a given attribute
 func (attr *Attribute) MarshalBinary() ([]byte, error) {
 	bin := make([]byte, 20)
 	putu32(bin, uint32(attr.NS))
@@ -222,6 +235,7 @@ type CharData struct {
 	TypedData Data    // typed value of character data
 }
 
+// UnmarshalBinary creates the character data from binary data
 func (cdt *CharData) UnmarshalBinary(bin []byte) error {
 	if err := (&cdt.NodeHeader).UnmarshalBinary(bin); err != nil {
 		return err
@@ -231,6 +245,7 @@ func (cdt *CharData) UnmarshalBinary(bin []byte) error {
 	return (&cdt.TypedData).UnmarshalBinary(buf[4:])
 }
 
+// MarshalBinary outputs the binary format from given character data
 func (cdt *CharData) MarshalBinary() ([]byte, error) {
 	cdt.typ = ResXMLCharData
 	cdt.headerByteSize = 16

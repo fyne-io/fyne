@@ -1,3 +1,5 @@
+// +build !ios
+
 package app
 
 import (
@@ -28,11 +30,6 @@ func (p *preferences) uniqueID() string {
 	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
 	p.appID = fmt.Sprintf("missing-id-%d", time.Now().Unix()) // This is a fake unique - it just has to not be reused...
 	return p.appID
-}
-
-// storagePath returns the location of the settings storage
-func (p *preferences) storagePath() string {
-	return filepath.Join(rootConfigDir(), p.uniqueID(), "preferences.json")
 }
 
 func (p *preferences) save() error {

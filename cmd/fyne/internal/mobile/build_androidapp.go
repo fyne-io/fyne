@@ -12,7 +12,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"go/build"
 	"io"
 	"io/ioutil"
 	"log"
@@ -21,15 +20,21 @@ import (
 	"strings"
 
 	"fyne.io/fyne/cmd/fyne/internal/mobile/binres"
+	"golang.org/x/tools/go/packages"
 )
 
-func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, iconPath, appName string) (map[string]bool, error) {
+func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string, iconPath, appName string) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err
 	}
 	libName := androidPkgName(appName)
-	manifestPath := filepath.Join(pkg.Dir, "AndroidManifest.xml")
+
+	// TODO(hajimehoshi): This works only with Go tools that assume all source files are in one directory.
+	// Fix this to work with other Go tools.
+	dir := filepath.Dir(pkg.GoFiles[0])
+
+	manifestPath := filepath.Join(dir, "AndroidManifest.xml")
 	manifestData, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -62,7 +67,6 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 	nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
 
 	for _, arch := range androidArchs {
-		env := androidEnv[arch]
 		toolchain := ndk.Toolchain(arch)
 		libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
 		libAbsPath := filepath.Join(tmpdir, libPath)
@@ -70,8 +74,8 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 			return nil, err
 		}
 		err = goBuild(
-			pkg.ImportPath,
-			env,
+			pkg.PkgPath,
+			androidEnv[arch],
 			"-buildmode=c-shared",
 			"-o", libAbsPath,
 		)
@@ -118,34 +122,8 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 	if !buildN {
 		apkw = NewWriter(out, privKey)
 	}
-	apkwCreate := func(name string) (io.Writer, error) {
-		if buildV {
-			fmt.Fprintf(os.Stderr, "apk: %s\n", name)
-		}
-		if buildN {
-			return ioutil.Discard, nil
-		}
-		return apkw.Create(name)
-	}
-	apkwWriteFile := func(dst, src string) error {
-		w, err := apkwCreate(dst)
-		if err != nil {
-			return err
-		}
-		if !buildN {
-			f, err := os.Open(src)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			if _, err := io.Copy(w, f); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
 
-	w, err := apkwCreate("classes.dex")
+	w, err := apkwCreate("classes.dex", apkw)
 	if err != nil {
 		return nil, err
 	}
@@ -158,20 +136,20 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 	}
 
 	for _, libFile := range libFiles {
-		if err := apkwWriteFile(libFile, filepath.Join(tmpdir, libFile)); err != nil {
+		if err := apkwWriteFile(libFile, filepath.Join(tmpdir, libFile), apkw); err != nil {
 			return nil, err
 		}
 	}
 
 	for _, arch := range androidArchs {
 		toolchain := ndk.Toolchain(arch)
-		if nmpkgs[arch]["golang.org/x/mobile/exp/audio/al"] {
+		if nmpkgs[arch]["github.com/fyne-io/mobile/exp/audio/al"] {
 			dst := "lib/" + toolchain.abi + "/libopenal.so"
 			src := filepath.Join(gomobilepath, dst)
 			if _, err := os.Stat(src); err != nil {
-				return nil, errors.New("the Android requires the golang.org/x/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal Flag pointing to an OpenAL source directory.")
+				return nil, errors.New("the Android requires the github.com/fyne-io/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal Flag pointing to an OpenAL source directory")
 			}
-			if err := apkwWriteFile(dst, src); err != nil {
+			if err := apkwWriteFile(dst, src, apkw); err != nil {
 				return nil, err
 			}
 		}
@@ -182,7 +160,7 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 		iconPath string
 	}
 	arsc.iconPath = iconPath
-	assetsDir := filepath.Join(pkg.Dir, "assets")
+	assetsDir := filepath.Join(dir, "assets")
 	assetsDirExists := true
 	fi, err := os.Stat(assetsDir)
 	if err != nil {
@@ -221,7 +199,7 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 			}
 
 			name := "assets/" + path[len(assetsDir)+1:]
-			return apkwWriteFile(name, path)
+			return apkwWriteFile(name, path, apkw)
 		})
 		if err != nil {
 			return nil, fmt.Errorf("asset %v", err)
@@ -240,10 +218,10 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 			return nil, err
 		}
 		tbl, name := binres.NewMipmapTable(pkgname)
-		if err := apkwWriteFile(name, arsc.iconPath); err != nil {
+		if err := apkwWriteFile(name, arsc.iconPath, apkw); err != nil {
 			return nil, err
 		}
-		w, err := apkwCreate("resources.arsc")
+		w, err := apkwCreate("resources.arsc", apkw)
 		if err != nil {
 			return nil, err
 		}
@@ -256,7 +234,7 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 		}
 	}
 
-	w, err = apkwCreate("AndroidManifest.xml")
+	w, err = apkwCreate("AndroidManifest.xml", apkw)
 	if err != nil {
 		return nil, err
 	}
@@ -278,6 +256,34 @@ func goAndroidBuild(pkg *build.Package, bundleID string, androidArchs []string, 
 
 	// TODO: return nmpkgs
 	return nmpkgs[androidArchs[0]], nil
+}
+
+func apkwCreate(name string, apkw *Writer) (io.Writer, error) {
+	if buildV {
+		fmt.Fprintf(os.Stderr, "apk: %s\n", name)
+	}
+	if buildN {
+		return ioutil.Discard, nil
+	}
+	return apkw.Create(name)
+}
+
+func apkwWriteFile(dst, src string, apkw *Writer) error {
+	w, err := apkwCreate(dst, apkw)
+	if err != nil {
+		return err
+	}
+	if !buildN {
+		f, err := os.Open(src)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		if _, err := io.Copy(w, f); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // androidPkgName sanitizes the go package name to be acceptable as a android
