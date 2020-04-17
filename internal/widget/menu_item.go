@@ -9,6 +9,17 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+var _ fyne.Widget = (*MenuItem)(nil)
+
+// MenuItem is a widget for displaying a fyne.MenuItem.
+type MenuItem struct {
+	base
+	DismissAction func()
+	Item          *fyne.MenuItem
+
+	hovered bool
+}
+
 // NewMenuItem creates a new MenuItem.
 func NewMenuItem(item *fyne.MenuItem) *MenuItem {
 	return &MenuItem{Item: item}
@@ -19,17 +30,6 @@ func NewMenuItemSeparator() fyne.CanvasObject {
 	s := canvas.NewRectangle(theme.DisabledTextColor())
 	s.SetMinSize(fyne.NewSize(1, 2))
 	return s
-}
-
-var _ fyne.Widget = (*MenuItem)(nil)
-
-// MenuItem is a widget for displaying a fyne.MenuItem.
-type MenuItem struct {
-	base
-	DismissAction func()
-	Item          *fyne.MenuItem
-
-	hovered bool
 }
 
 // CreateRenderer satisfies the fyne.Widget interface.

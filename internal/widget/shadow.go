@@ -8,6 +8,15 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+var _ fyne.Widget = (*Shadow)(nil)
+
+// Shadow is a widget that renders a shadow.
+type Shadow struct {
+	base
+	level ElevationLevel
+	typ   ShadowType
+}
+
 // ElevationLevel is the level of elevation of the shadow casting object.
 type ElevationLevel int
 
@@ -35,15 +44,6 @@ const (
 // NewShadow create a new Shadow.
 func NewShadow(typ ShadowType, level ElevationLevel) *Shadow {
 	return &Shadow{typ: typ, level: level}
-}
-
-var _ fyne.Widget = (*Shadow)(nil)
-
-// Shadow is a widget that renders a shadow.
-type Shadow struct {
-	base
-	level ElevationLevel
-	typ   ShadowType
 }
 
 // CreateRenderer satisfies the fyne.Widget interface.

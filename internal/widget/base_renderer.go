@@ -7,15 +7,15 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// NewBaseRenderer creates a new BaseRenderer.
-func NewBaseRenderer(objects []fyne.CanvasObject) BaseRenderer {
-	return BaseRenderer{objects}
-}
-
 // BaseRenderer is a renderer base providing the most common implementations of a part of the
 // widget.Renderer interface.
 type BaseRenderer struct {
 	objects []fyne.CanvasObject
+}
+
+// NewBaseRenderer creates a new BaseRenderer.
+func NewBaseRenderer(objects []fyne.CanvasObject) BaseRenderer {
+	return BaseRenderer{objects}
 }
 
 // BackgroundColor satisfies the fyne.WidgetRenderer interface.
