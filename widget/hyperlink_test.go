@@ -39,6 +39,28 @@ func TestHyperlink_Alignment(t *testing.T) {
 	assert.Equal(t, fyne.TextAlignTrailing, textRenderTexts(hyperlink)[0].Alignment)
 }
 
+func TestHyperlink_Hide(t *testing.T) {
+	hyperlink := &Hyperlink{Text: "Test"}
+	hyperlink.Hide()
+	hyperlink.Refresh()
+
+	assert.True(t, hyperlink.Hidden)
+	assert.False(t, hyperlink.provider.Hidden) // we don't propagate hide
+
+	hyperlink.Show()
+	assert.False(t, hyperlink.Hidden)
+	assert.False(t, hyperlink.provider.Hidden)
+}
+
+func TestHyperlink_Resize(t *testing.T) {
+	hyperlink := &Hyperlink{Text: "Test"}
+	size := fyne.NewSize(100, 20)
+	hyperlink.Resize(size)
+
+	assert.Equal(t, size, hyperlink.Size())
+	assert.Equal(t, size, hyperlink.provider.Size())
+}
+
 func TestHyperlink_SetText(t *testing.T) {
 	u, err := url.Parse("https://fyne.io/")
 	assert.Nil(t, err)

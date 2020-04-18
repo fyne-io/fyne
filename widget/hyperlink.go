@@ -43,6 +43,13 @@ func (hl *Hyperlink) Cursor() desktop.Cursor {
 	return desktop.PointerCursor
 }
 
+// Resize sets a new size for the hyperlink.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (hl *Hyperlink) Resize(size fyne.Size) {
+	hl.BaseWidget.Resize(size)
+	hl.provider.Resize(size)
+}
+
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
 	hl.Text = text
