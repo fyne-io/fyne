@@ -17,90 +17,29 @@ type testWindow struct {
 	menu      *fyne.MainMenu
 }
 
-func (w *testWindow) Title() string {
-	return w.title
+// NewWindow creates and registers a new window for test purposes
+func NewWindow(content fyne.CanvasObject) fyne.Window {
+	window := fyne.CurrentApp().NewWindow("")
+	window.SetContent(content)
+	return window
 }
 
-func (w *testWindow) SetTitle(title string) {
-	w.title = title
+// Canvas satisfies the fyne.Window interface.
+func (w *testWindow) Canvas() fyne.Canvas {
+	return w.canvas
 }
 
-func (w *testWindow) FullScreen() bool {
-	return w.fullScreen
-}
-
-func (w *testWindow) SetFullScreen(fullScreen bool) {
-	w.fullScreen = fullScreen
-}
-
+// CenterOnScreen satisfies the fyne.Window interface.
 func (w *testWindow) CenterOnScreen() {
 	// no-op
 }
 
-func (w *testWindow) Resize(size fyne.Size) {
-	w.canvas.Resize(size)
-}
-
-func (w *testWindow) RequestFocus() {
-	for _, win := range w.driver.AllWindows() {
-		win.(*testWindow).focused = false
-	}
-
-	w.focused = true
-}
-
-func (w *testWindow) FixedSize() bool {
-	return w.fixedSize
-}
-
-func (w *testWindow) SetFixedSize(fixed bool) {
-	w.fixedSize = fixed
-}
-
-func (w *testWindow) Padded() bool {
-	return w.canvas.Padded()
-}
-
-func (w *testWindow) SetPadded(padded bool) {
-	w.canvas.SetPadded(padded)
-}
-
-func (w *testWindow) Icon() fyne.Resource {
-	return fyne.CurrentApp().Icon()
-}
-
-func (w *testWindow) SetIcon(icon fyne.Resource) {
-	// no-op
-}
-
-func (w *testWindow) SetMaster() {
-	// no-op
-}
-
-func (w *testWindow) MainMenu() *fyne.MainMenu {
-	return w.menu
-}
-
-func (w *testWindow) SetMainMenu(menu *fyne.MainMenu) {
-	w.menu = menu
-}
-
-func (w *testWindow) SetOnClosed(closed func()) {
-	w.onClosed = closed
-}
-
-func (w *testWindow) Show() {
-	w.RequestFocus()
-}
-
+// Clipboard satisfies the fyne.Window interface.
 func (w *testWindow) Clipboard() fyne.Clipboard {
 	return w.clipboard
 }
 
-func (w *testWindow) Hide() {
-	w.focused = false
-}
-
+// Close satisfies the fyne.Window interface.
 func (w *testWindow) Close() {
 	if w.onClosed != nil {
 		w.onClosed()
@@ -109,25 +48,111 @@ func (w *testWindow) Close() {
 	w.driver.removeWindow(w)
 }
 
-func (w *testWindow) ShowAndRun() {
-	w.Show()
-}
-
+// Content satisfies the fyne.Window interface.
 func (w *testWindow) Content() fyne.CanvasObject {
 	return w.Canvas().Content()
 }
 
+// FixedSize satisfies the fyne.Window interface.
+func (w *testWindow) FixedSize() bool {
+	return w.fixedSize
+}
+
+// FullScreen satisfies the fyne.Window interface.
+func (w *testWindow) FullScreen() bool {
+	return w.fullScreen
+}
+
+// Hide satisfies the fyne.Window interface.
+func (w *testWindow) Hide() {
+	w.focused = false
+}
+
+// Icon satisfies the fyne.Window interface.
+func (w *testWindow) Icon() fyne.Resource {
+	return fyne.CurrentApp().Icon()
+}
+
+// MainMenu satisfies the fyne.Window interface.
+func (w *testWindow) MainMenu() *fyne.MainMenu {
+	return w.menu
+}
+
+// Padded satisfies the fyne.Window interface.
+func (w *testWindow) Padded() bool {
+	return w.canvas.Padded()
+}
+
+// RequestFocus satisfies the fyne.Window interface.
+func (w *testWindow) RequestFocus() {
+	for _, win := range w.driver.AllWindows() {
+		win.(*testWindow).focused = false
+	}
+
+	w.focused = true
+}
+
+// Resize satisfies the fyne.Window interface.
+func (w *testWindow) Resize(size fyne.Size) {
+	w.canvas.Resize(size)
+}
+
+// SetContent satisfies the fyne.Window interface.
 func (w *testWindow) SetContent(obj fyne.CanvasObject) {
 	w.Canvas().SetContent(obj)
 }
 
-func (w *testWindow) Canvas() fyne.Canvas {
-	return w.canvas
+// SetFixedSize satisfies the fyne.Window interface.
+func (w *testWindow) SetFixedSize(fixed bool) {
+	w.fixedSize = fixed
 }
 
-// NewWindow creates and registers a new window for test purposes
-func NewWindow(content fyne.CanvasObject) fyne.Window {
-	window := fyne.CurrentApp().NewWindow("")
-	window.SetContent(content)
-	return window
+// SetIcon satisfies the fyne.Window interface.
+func (w *testWindow) SetIcon(icon fyne.Resource) {
+	// no-op
+}
+
+// SetFullScreen satisfies the fyne.Window interface.
+func (w *testWindow) SetFullScreen(fullScreen bool) {
+	w.fullScreen = fullScreen
+}
+
+// SetMainMenu satisfies the fyne.Window interface.
+func (w *testWindow) SetMainMenu(menu *fyne.MainMenu) {
+	w.menu = menu
+}
+
+// SetMaster satisfies the fyne.Window interface.
+func (w *testWindow) SetMaster() {
+	// no-op
+}
+
+// SetOnClosed satisfies the fyne.Window interface.
+func (w *testWindow) SetOnClosed(closed func()) {
+	w.onClosed = closed
+}
+
+// SetPadded satisfies the fyne.Window interface.
+func (w *testWindow) SetPadded(padded bool) {
+	w.canvas.SetPadded(padded)
+}
+
+// SetTitle satisfies the fyne.Window interface.
+func (w *testWindow) SetTitle(title string) {
+	w.title = title
+}
+
+// Show satisfies the fyne.Window interface.
+func (w *testWindow) Show() {
+	w.RequestFocus()
+}
+
+// ShowAndRun satisfies the fyne.Window interface.
+func (w *testWindow) ShowAndRun() {
+	w.Show()
+}
+
+// Title satisfies the fyne.Window interface.
+func (w *testWindow) Title() string {
+	return w.title
 }
