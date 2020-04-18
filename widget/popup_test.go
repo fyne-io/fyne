@@ -315,6 +315,9 @@ func TestPopUp_Layout(t *testing.T) {
 					assert.Equal(t, pos, s.Position())
 				}
 				bgIdx = 1
+			} else {
+				_, ok := r.Objects()[0].(*widget.Shadow)
+				assert.False(t, ok, "first rendered object is NOT a shadow")
 			}
 			if bg, ok := r.Objects()[bgIdx].(*canvas.Rectangle); assert.True(t, ok, "a background rectangle is rendered before the content") {
 				assert.Equal(t, size, bg.Size())
