@@ -17,6 +17,19 @@ import (
 	"golang.org/x/image/font"
 )
 
+type gradient interface {
+	Generate(int, int) image.Image
+	Size() fyne.Size
+}
+
+func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, frame fyne.Size, base *image.RGBA) {
+	bounds := g.Size()
+	width := internal.ScaleInt(c, bounds.Width)
+	height := internal.ScaleInt(c, bounds.Height)
+	tex := g.Generate(width, height)
+	drawTex(c, pos, width, height, base, tex)
+}
+
 func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.Size, base *image.RGBA) {
 	bounds := img.Size()
 	width := internal.ScaleInt(c, bounds.Width)
@@ -29,6 +42,10 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
 	} // TODO support contain
 
+	drawTex(c, pos, width, height, base, tex)
+}
+
+func drawTex(c fyne.Canvas, pos fyne.Position, width int, height int, base *image.RGBA, tex image.Image) {
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	draw.Draw(base, outBounds, tex, image.ZP, draw.Over)
