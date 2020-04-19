@@ -44,10 +44,7 @@ type dialog struct {
 // the dialog is closed
 func (d *dialog) SetOnClosed(closed func()) {
 	// if there is already a callback set, remember it and call both
-	var originalCallback func(_ bool)
-	if d.callback != nil {
-		originalCallback = d.callback
-	}
+	originalCallback := d.callback
 
 	d.callback = func(response bool) {
 		closed()
