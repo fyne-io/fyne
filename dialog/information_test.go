@@ -51,7 +51,7 @@ func TestDialog_ErrorCallback(t *testing.T) {
 	func() {
 		select {
 		case <-tapped:
-		case <-time.After(100 * time.Second):
+		case <-time.After(100 * time.Millisecond):
 			assert.Fail(t, "Timed out waiting for button tap")
 		}
 	}()
