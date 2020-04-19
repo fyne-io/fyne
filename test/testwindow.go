@@ -24,6 +24,14 @@ func NewWindow(content fyne.CanvasObject) fyne.Window {
 	return window
 }
 
+// NewWindowWithPainter creates and registers a new window for test purposes
+func NewWindowWithPainter(content fyne.CanvasObject, painter SoftwarePainter) fyne.Window {
+	window := fyne.CurrentApp().NewWindow("")
+	window.Canvas().(*testCanvas).painter = painter
+	window.SetContent(content)
+	return window
+}
+
 // Canvas satisfies the fyne.Window interface.
 func (w *testWindow) Canvas() fyne.Canvas {
 	return w.canvas
