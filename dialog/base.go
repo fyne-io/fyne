@@ -28,11 +28,10 @@ type Dialog interface {
 var _ Dialog = (*dialog)(nil)
 
 type dialog struct {
-	callback         func(bool)
-	originalCallback func(bool) // used by SetOnClosed() if there is already a callback set
-	sendResponse     bool
-	title            string
-	icon             fyne.Resource
+	callback     func(bool)
+	sendResponse bool
+	title        string
+	icon         fyne.Resource
 
 	win            *widget.PopUp
 	bg             *canvas.Rectangle
@@ -45,14 +44,15 @@ type dialog struct {
 // the dialog is closed
 func (d *dialog) SetOnClosed(closed func()) {
 	// if there is already a callback set, remember it and call both
+	var originalCallback func(_ bool)
 	if d.callback != nil {
-		d.originalCallback = d.callback
+		originalCallback = d.callback
 	}
 
 	d.callback = func(response bool) {
 		closed()
-		if d.originalCallback != nil {
-			d.originalCallback(response)
+		if originalCallback != nil {
+			originalCallback(response)
 		}
 	}
 }
