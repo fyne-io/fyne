@@ -25,7 +25,7 @@ type (
 		placeX, placeY         float64
 		curX, curY             float64
 		cntlPtX, cntlPtY       float64
-		pathStartX, pathStartY fixed.Int26_6
+		pathStartX, pathStartY float64
 		points                 []float64
 		lastKey                uint8
 		ErrorMode              ErrorMode
@@ -177,6 +177,8 @@ func (c *PathCursor) addSeg(segString string) error {
 		}
 		if c.inPath {
 			c.Path.Stop(true)
+			c.placeX = c.pathStartX
+			c.placeY = c.pathStartY
 			c.inPath = false
 		}
 	case 'm':
@@ -186,9 +188,9 @@ func (c *PathCursor) addSeg(segString string) error {
 		if !c.hasSetsOrMore(2, rel) {
 			return errParamMismatch
 		}
-		c.pathStartX, c.pathStartY = fixed.Int26_6((c.points[0]+c.curX)*64), fixed.Int26_6((c.points[1]+c.curY)*64)
+		c.pathStartX, c.pathStartY = c.points[0], c.points[1]
 		c.inPath = true
-		c.Path.Start(fixed.Point26_6{X: c.pathStartX, Y: c.pathStartY})
+		c.Path.Start(fixed.Point26_6{X: fixed.Int26_6((c.pathStartX + c.curX) * 64), Y: fixed.Int26_6((c.pathStartY + c.curY) * 64)})
 		for i := 2; i < l-1; i += 2 {
 			c.Path.Line(fixed.Point26_6{
 				X: fixed.Int26_6((c.points[i] + c.curX) * 64),

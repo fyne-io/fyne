@@ -10,8 +10,10 @@ import (
 )
 
 const (
+	// SortedFlag is 1 if the pool is sorted
 	SortedFlag uint32 = 1 << 0
-	UTF8Flag          = 1 << 8
+	// UTF8Flag is 1 if the pool uses utf8 strings
+	UTF8Flag = 1 << 8
 )
 
 // PoolRef is the i'th string in a pool.
@@ -75,9 +77,13 @@ func (pl *Pool) RefByName(s string) (PoolRef, error) {
 	return 0, fmt.Errorf("PoolRef by name %q does not exist", s)
 }
 
+// IsSorted returns true if the sorted flag is set
 func (pl *Pool) IsSorted() bool { return pl.flags&SortedFlag == SortedFlag }
-func (pl *Pool) IsUTF8() bool   { return pl.flags&UTF8Flag == UTF8Flag }
 
+// IsUTF8 returns true if the UTF8Flag is set
+func (pl *Pool) IsUTF8() bool { return pl.flags&UTF8Flag == UTF8Flag }
+
+// UnmarshalBinary creates the pool from binary data
 func (pl *Pool) UnmarshalBinary(bin []byte) error {
 	if err := (&pl.chunkHeader).UnmarshalBinary(bin); err != nil {
 		return err
@@ -162,6 +168,7 @@ func (pl *Pool) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given pool
 func (pl *Pool) MarshalBinary() ([]byte, error) {
 	if pl.IsUTF8() {
 		return nil, fmt.Errorf("encode utf8 not supported")
@@ -238,12 +245,14 @@ func (pl *Pool) MarshalBinary() ([]byte, error) {
 	return bin, nil
 }
 
+// Span marks a span of characters
 type Span struct {
 	name PoolRef
 
 	firstChar, lastChar uint32
 }
 
+// UnmarshalBinary creates the span from binary data
 func (spn *Span) UnmarshalBinary(bin []byte) error {
 	const end = 0xFFFFFFFF
 	spn.name = PoolRef(btou32(bin))
@@ -263,6 +272,7 @@ type Map struct {
 	rs []TableRef
 }
 
+// UnmarshalBinary creates the map from binary data
 func (m *Map) UnmarshalBinary(bin []byte) error {
 	(&m.chunkHeader).UnmarshalBinary(bin)
 	buf := bin[m.headerByteSize:m.byteSize]
@@ -273,6 +283,7 @@ func (m *Map) UnmarshalBinary(bin []byte) error {
 	return nil
 }
 
+// MarshalBinary outputs the binary format from a given map
 func (m *Map) MarshalBinary() ([]byte, error) {
 	m.typ = ResXMLResourceMap
 	m.headerByteSize = 8

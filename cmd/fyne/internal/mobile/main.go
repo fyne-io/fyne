@@ -10,17 +10,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
-	"runtime"
 )
 
 var (
 	gomobileName = "gomobile"
 )
-
-func goBin() string {
-	return filepath.Join(runtime.GOROOT(), "bin", "go")
-}
 
 const documentationHeader = `// Copyright 2015 The Go Authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style

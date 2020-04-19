@@ -55,9 +55,24 @@ func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 	}
 }
 
+func (c *mobileCanvas) edgePadding() (topLeft, bottomRight fyne.Size) {
+	scale := fyne.CurrentDevice().SystemScale()
+	dev, ok := fyne.CurrentDevice().(*device)
+	if !ok {
+		return fyne.NewSize(0, 0), fyne.NewSize(0, 0) // running in test mode
+	}
+
+	return fyne.NewSize(int(float32(dev.insetLeft)/scale), int(float32(dev.insetTop)/scale)),
+		fyne.NewSize(int(float32(dev.insetRight)/scale), int(float32(dev.insetBottom)/scale))
+}
+
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
+	if c.content == nil { // window may not be configured yet
+		return
+	}
+
 	offset := fyne.NewPos(0, 0)
-	devicePadTopLeft, devicePadBottomRight := devicePadding()
+	devicePadTopLeft, devicePadBottomRight := c.edgePadding()
 
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height

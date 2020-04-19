@@ -29,7 +29,6 @@ const (
 
 var (
 	defaultCursor, entryCursor, hyperlinkCursor *glfw.Cursor
-	initOnce                                    = &sync.Once{}
 	defaultTitle                                = "Fyne Application"
 )
 
@@ -84,6 +83,10 @@ func (w *window) Title() string {
 
 func (w *window) SetTitle(title string) {
 	w.title = title
+	if !w.visible {
+		return
+	}
+
 	runOnMain(func() {
 		w.viewport.SetTitle(title)
 	})
@@ -124,7 +127,7 @@ func (w *window) CenterOnScreen() {
 // centerOnScreen handles the logic for centering a window
 func (w *window) centerOnScreen() {
 	runOnMain(func() {
-		viewWidth, viewHeight := w.viewport.GetSize()
+		viewWidth, viewHeight := w.screenSize(w.canvas.size)
 
 		// get window dimensions in pixels
 		monitor := w.getMonitorForWindow()
@@ -350,7 +353,11 @@ func (w *window) Show() {
 
 	runOnMain(func() {
 		w.visible = true
+		w.viewport.SetTitle(w.title)
 		w.viewport.Show()
+
+		// save coordinates
+		w.xpos, w.ypos = w.viewport.GetPos()
 	})
 
 	if w.fullScreen { // this does not work if called before viewport.Show()...
@@ -450,7 +457,11 @@ func (w *window) destroy(d *gLDriver) {
 	}
 }
 
-func (w *window) moved(viewport *glfw.Window, x, y int) {
+func (w *window) moved(_ *glfw.Window, x, y int) {
+	if w.fullScreen { // don't save the move to top left when changint to fullscreen
+		return
+	}
+
 	// save coordinates
 	w.xpos, w.ypos = x, y
 
@@ -751,6 +762,10 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyHome:      fyne.KeyHome,
 	glfw.KeyEnd:       fyne.KeyEnd,
 
+	glfw.KeySpace:   fyne.KeySpace,
+	glfw.KeyKPEnter: fyne.KeyEnter,
+
+	// functions
 	glfw.KeyF1:  fyne.KeyF1,
 	glfw.KeyF2:  fyne.KeyF2,
 	glfw.KeyF3:  fyne.KeyF3,
@@ -764,59 +779,17 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyF11: fyne.KeyF11,
 	glfw.KeyF12: fyne.KeyF12,
 
-	glfw.KeyKPEnter: fyne.KeyEnter,
-
-	// printable
-	glfw.KeySpace:      fyne.KeySpace,
-	glfw.KeyApostrophe: fyne.KeyApostrophe,
-	glfw.KeyComma:      fyne.KeyComma,
-	glfw.KeyMinus:      fyne.KeyMinus,
-	glfw.KeyPeriod:     fyne.KeyPeriod,
-	glfw.KeySlash:      fyne.KeySlash,
-
-	glfw.Key0:         fyne.Key0,
-	glfw.Key1:         fyne.Key1,
-	glfw.Key2:         fyne.Key2,
-	glfw.Key3:         fyne.Key3,
-	glfw.Key4:         fyne.Key4,
-	glfw.Key5:         fyne.Key5,
-	glfw.Key6:         fyne.Key6,
-	glfw.Key7:         fyne.Key7,
-	glfw.Key8:         fyne.Key8,
-	glfw.Key9:         fyne.Key9,
-	glfw.KeySemicolon: fyne.KeySemicolon,
-	glfw.KeyEqual:     fyne.KeyEqual,
-
-	glfw.KeyA: fyne.KeyA,
-	glfw.KeyB: fyne.KeyB,
-	glfw.KeyC: fyne.KeyC,
-	glfw.KeyD: fyne.KeyD,
-	glfw.KeyE: fyne.KeyE,
-	glfw.KeyF: fyne.KeyF,
-	glfw.KeyG: fyne.KeyG,
-	glfw.KeyH: fyne.KeyH,
-	glfw.KeyI: fyne.KeyI,
-	glfw.KeyJ: fyne.KeyJ,
-	glfw.KeyK: fyne.KeyK,
-	glfw.KeyL: fyne.KeyL,
-	glfw.KeyM: fyne.KeyM,
-	glfw.KeyN: fyne.KeyN,
-	glfw.KeyO: fyne.KeyO,
-	glfw.KeyP: fyne.KeyP,
-	glfw.KeyQ: fyne.KeyQ,
-	glfw.KeyR: fyne.KeyR,
-	glfw.KeyS: fyne.KeyS,
-	glfw.KeyT: fyne.KeyT,
-	glfw.KeyU: fyne.KeyU,
-	glfw.KeyV: fyne.KeyV,
-	glfw.KeyW: fyne.KeyW,
-	glfw.KeyX: fyne.KeyX,
-	glfw.KeyY: fyne.KeyY,
-	glfw.KeyZ: fyne.KeyZ,
-
-	glfw.KeyLeftBracket:  fyne.KeyLeftBracket,
-	glfw.KeyBackslash:    fyne.KeyBackslash,
-	glfw.KeyRightBracket: fyne.KeyRightBracket,
+	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
+	glfw.Key0: fyne.Key0,
+	glfw.Key1: fyne.Key1,
+	glfw.Key2: fyne.Key2,
+	glfw.Key3: fyne.Key3,
+	glfw.Key4: fyne.Key4,
+	glfw.Key5: fyne.Key5,
+	glfw.Key6: fyne.Key6,
+	glfw.Key7: fyne.Key7,
+	glfw.Key8: fyne.Key8,
+	glfw.Key9: fyne.Key9,
 
 	// desktop
 	glfw.KeyLeftShift:    desktop.KeyShiftLeft,
@@ -830,8 +803,57 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyMenu:         desktop.KeyMenu,
 }
 
-func keyToName(code glfw.Key) fyne.KeyName {
+var keyNameMap = map[string]fyne.KeyName{
+	"'": fyne.KeyApostrophe,
+	",": fyne.KeyComma,
+	"-": fyne.KeyMinus,
+	".": fyne.KeyPeriod,
+	"/": fyne.KeySlash,
+	"`": fyne.KeyBackTick,
+
+	";": fyne.KeySemicolon,
+	"=": fyne.KeyEqual,
+
+	"a": fyne.KeyA,
+	"b": fyne.KeyB,
+	"c": fyne.KeyC,
+	"d": fyne.KeyD,
+	"e": fyne.KeyE,
+	"f": fyne.KeyF,
+	"g": fyne.KeyG,
+	"h": fyne.KeyH,
+	"i": fyne.KeyI,
+	"j": fyne.KeyJ,
+	"k": fyne.KeyK,
+	"l": fyne.KeyL,
+	"m": fyne.KeyM,
+	"n": fyne.KeyN,
+	"o": fyne.KeyO,
+	"p": fyne.KeyP,
+	"q": fyne.KeyQ,
+	"r": fyne.KeyR,
+	"s": fyne.KeyS,
+	"t": fyne.KeyT,
+	"u": fyne.KeyU,
+	"v": fyne.KeyV,
+	"w": fyne.KeyW,
+	"x": fyne.KeyX,
+	"y": fyne.KeyY,
+	"z": fyne.KeyZ,
+
+	"[":  fyne.KeyLeftBracket,
+	"\\": fyne.KeyBackslash,
+	"]":  fyne.KeyRightBracket,
+}
+
+func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	ret, ok := keyCodeMap[code]
+	if ok {
+		return ret
+	}
+
+	keyName := glfw.GetKeyName(code, scancode)
+	ret, ok = keyNameMap[keyName]
 	if !ok {
 		return ""
 	}
@@ -840,7 +862,7 @@ func keyToName(code glfw.Key) fyne.KeyName {
 }
 
 func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	keyName := keyToName(key)
+	keyName := keyToName(key, scancode)
 	if keyName == "" {
 		return
 	}
@@ -1042,7 +1064,7 @@ func (d *gLDriver) CreateWindow(title string) fyne.Window {
 		title = defaultTitle
 	}
 	runOnMain(func() {
-		initOnce.Do(d.initGLFW)
+		d.initGLFW()
 
 		// make the window hidden, we will set it up and then show it later
 		glfw.WindowHint(glfw.Visible, 0)

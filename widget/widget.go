@@ -106,11 +106,7 @@ func (w *BaseWidget) Refresh() {
 		return
 	}
 
-	w.refresh(w.impl)
-}
-
-func (w *BaseWidget) refresh(wid fyne.Widget) {
-	render := cache.Renderer(wid)
+	render := cache.Renderer(w.impl)
 	render.Refresh()
 }
 
