@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
@@ -130,6 +131,10 @@ func TestMenu_ItemTapped(t *testing.T) {
 }
 
 func TestMenu_Layout(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.DarkTheme())
+
 	item1 := fyne.NewMenuItem("A", nil)
 	item2 := fyne.NewMenuItem("B (long)", nil)
 	sep := fyne.NewMenuItemSeparator()
@@ -142,9 +147,11 @@ func TestMenu_Layout(t *testing.T) {
 	subItem3.ChildMenu = fyne.NewMenu("", subsubItem1, subsubItem2)
 	item3.ChildMenu = fyne.NewMenu("", subItem1, subItem2, subItem3)
 	m := widget.NewMenu(fyne.NewMenu("", item1, sep, item2, item3))
-	w := test.NewWindow(m)
+	w := test.NewWindowWithPainter(m, software.NewPainter())
+	defer w.Close()
 	w.Resize(fyne.NewSize(1000, 1000))
 	m.Resize(m.MinSize())
+	c := w.Canvas()
 
 	subItem := m.Items[3].(*widget.MenuItem)
 	subItem.MouseIn(nil)
@@ -157,6 +164,8 @@ func TestMenu_Layout(t *testing.T) {
 	cons := selectContainers(objects)
 	shadows := selectShadows(objects)
 	submenuIcons := selectImages(objects)
+
+	test.AssertImageMatches(t, "menu_layout.png", c.Capture())
 
 	if assert.Len(t, cons, 3, "one container for each menu") &&
 		assert.Len(t, shadows, 3, "one container for each menu") &&
@@ -173,9 +182,10 @@ func TestMenu_Layout(t *testing.T) {
 		assertMenu(t, cons[2], shadows[2], nil, []*fyne.MenuItem{subsubItem1, subsubItem2}, "subsubitem A (long)", false, -1)
 	}
 
-	// move menu to the far right -> no place left for the submenu
+	// move menu to the far right -> no space left for the submenu
 	m.Move(fyne.NewPos(1000-menuWidth-10, 0))
 	test.LaidOutObjects(m)
+	test.AssertImageMatches(t, "menu_layout_no_space_on_right.png", c.Capture())
 	assert.Equal(t, fyne.NewPos(-submenuWidth, 0), subItem.Child.Position(), "submenu is placed to the left if insufficient space to the right")
 
 	// window space too small to place submenu to the left or to the right
@@ -183,6 +193,7 @@ func TestMenu_Layout(t *testing.T) {
 	m.Resize(m.MinSize())
 	m.Move(fyne.NewPos(0, 0))
 	test.LaidOutObjects(m)
+	test.AssertImageMatches(t, "menu_layout_no_space_on_both_sides.png", c.Capture())
 	assert.Equal(t, fyne.NewPos(menuWidth/2, 0), subItem.Child.Position(), "submenu is placed as far right as possible if space is too tight to both sides")
 
 	// window too short to place submenu
@@ -192,6 +203,8 @@ func TestMenu_Layout(t *testing.T) {
 	absSubItemPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(subItem)
 	test.LaidOutObjects(m)
 	assert.Equal(t, fyne.NewPos(menuWidth, winHeight-(absSubItemPos.Y+subItem.Child.Size().Height)), subItem.Child.Position(), "submenu is placed as far right as possible if space is too tight to both sides")
+
+	test.AssertImageMatches(t, "menu_layout_window_too_short.png", c.Capture())
 }
 
 func assertMenu(t *testing.T, c *fyne.Container, shadow *widget.Shadow, icon *canvas.Image, items []*fyne.MenuItem, longestLabel string, longestIsSub bool, subitem int) (subPos fyne.Position) {
