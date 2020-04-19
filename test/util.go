@@ -39,12 +39,6 @@ func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
 	obj.TappedSecondary(ev)
 }
 
-func typeChars(chars []rune, keyDown func(rune)) {
-	for _, char := range chars {
-		keyDown(char)
-	}
-}
-
 // Type performs a series of key events to simulate typing of a value into the specified object.
 // The focusable object will be focused before typing begins.
 // The chars parameter will be input one rune at a time to the focused object.
@@ -64,4 +58,10 @@ func TypeOnCanvas(c fyne.Canvas, chars string) {
 // This can be used for verifying correctness of rendered components for a widget in unit tests.
 func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
 	return cache.Renderer(wid)
+}
+
+func typeChars(chars []rune, keyDown func(rune)) {
+	for _, char := range chars {
+		keyDown(char)
+	}
 }
