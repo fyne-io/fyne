@@ -51,7 +51,8 @@ func (e *SelectEntry) SetOptions(options []string) {
 		entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
 		popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height))
 
-		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, popUpPos)
+		e.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+		e.popUp.ShowAtPosition(popUpPos)
 		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())

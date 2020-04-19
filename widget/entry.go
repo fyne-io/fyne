@@ -548,13 +548,16 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		return // no popup options for a disabled concealed field
 	}
 
+	var menu *fyne.Menu
 	if e.Disabled() {
-		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", copyItem, selectAllItem), c, popUpPos)
+		menu = fyne.NewMenu("", copyItem, selectAllItem)
 	} else if e.concealed() {
-		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", pasteItem, selectAllItem), c, popUpPos)
+		menu = fyne.NewMenu("", pasteItem, selectAllItem)
 	} else {
-		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c, popUpPos)
+		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
 	}
+	e.popUp = newPopUpMenu(menu, c)
+	e.popUp.ShowAtPosition(popUpPos)
 }
 
 // Cursor returns the cursor type of this widget

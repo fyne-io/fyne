@@ -142,7 +142,8 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		items = append(items, item)
 	}
 
-	s.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, s.popUpPos())
+	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp.ShowAtPosition(s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
 }
 
