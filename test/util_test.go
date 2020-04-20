@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"image/draw"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/goki/freetype"
@@ -39,7 +38,7 @@ func TestAssertImageEqualsMaster(t *testing.T) {
 	tt := &testing.T{}
 	assert.False(t, test.AssertImageEqualsMaster(tt, "non_existing_master.png", img), "non existing master is not equal a given image")
 	assert.True(t, tt.Failed(), "test failed")
-	assert.Equal(t, img, readImage(t, "failed/non_existing_master.png"), "image was written to disk")
+	assert.Equal(t, img, readImage(t, "testdata/failed/non_existing_master.png"), "image was written to disk")
 
 	tt = &testing.T{}
 	assert.True(t, test.AssertImageEqualsMaster(tt, "master.png", img), "existing master is equal a given image")
@@ -48,11 +47,15 @@ func TestAssertImageEqualsMaster(t *testing.T) {
 	tt = &testing.T{}
 	assert.False(t, test.AssertImageEqualsMaster(tt, "diffing_master.png", img), "existing master is not equal a given image")
 	assert.True(t, tt.Failed(), "test did not fail")
-	assert.Equal(t, img, readImage(t, "failed/diffing_master.png"), "image was written to disk")
+	assert.Equal(t, img, readImage(t, "testdata/failed/diffing_master.png"), "image was written to disk")
+
+	if !t.Failed() {
+		os.RemoveAll("testdata/failed")
+	}
 }
 
-func readImage(t *testing.T, name string) image.Image {
-	file, err := os.Open(filepath.Join("testdata", name))
+func readImage(t *testing.T, path string) image.Image {
+	file, err := os.Open(path)
 	require.NoError(t, err)
 	defer file.Close()
 	raw, _, err := image.Decode(file)
