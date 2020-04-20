@@ -10,9 +10,7 @@ package gomobile
 #import <stdbool.h>
 
 void* iosParseUrl(const char* url);
-bool iosOpenSecureURL(void* url);
 const void* iosReadFromURL(void* url, int* len);
-void iosCloseSecureURL(void* url);
 */
 import "C"
 import (
@@ -28,7 +26,7 @@ type secureReadCloser struct {
 	offset int
 }
 
-// Declare conformity to File interface
+// Declare conformity to ReadCloser interface
 var _ io.ReadCloser = (*secureReadCloser)(nil)
 
 func (s *secureReadCloser) Read(p []byte) (int, error) {
