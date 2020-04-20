@@ -42,6 +42,10 @@ func (*softwarePainter) Paint(c fyne.Canvas) image.Image {
 	}
 
 	driver.WalkVisibleObjectTree(c.Content(), paint, nil)
+	for _, o := range c.Overlays().List() {
+		driver.WalkVisibleObjectTree(o, paint, nil)
+	}
+
 	return base
 }
 
