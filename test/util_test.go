@@ -17,7 +17,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func TestAssertImageEqualsMaster(t *testing.T) {
+func TestAssertImageMatches(t *testing.T) {
 	bounds := image.Rect(0, 0, 100, 50)
 	img := image.NewRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(color.White), image.ZP, draw.Src)
@@ -36,16 +36,16 @@ func TestAssertImageEqualsMaster(t *testing.T) {
 	draw.Draw(img, bounds, txtImg, image.ZP, draw.Over)
 
 	tt := &testing.T{}
-	assert.False(t, test.AssertImageEqualsMaster(tt, "non_existing_master.png", img), "non existing master is not equal a given image")
+	assert.False(t, test.AssertImageMatches(tt, "non_existing_master.png", img), "non existing master is not equal a given image")
 	assert.True(t, tt.Failed(), "test failed")
 	assert.Equal(t, img, readImage(t, "testdata/failed/non_existing_master.png"), "image was written to disk")
 
 	tt = &testing.T{}
-	assert.True(t, test.AssertImageEqualsMaster(tt, "master.png", img), "existing master is equal a given image")
+	assert.True(t, test.AssertImageMatches(tt, "master.png", img), "existing master is equal a given image")
 	assert.False(t, tt.Failed(), "test did not fail")
 
 	tt = &testing.T{}
-	assert.False(t, test.AssertImageEqualsMaster(tt, "diffing_master.png", img), "existing master is not equal a given image")
+	assert.False(t, test.AssertImageMatches(tt, "diffing_master.png", img), "existing master is not equal a given image")
 	assert.True(t, tt.Failed(), "test did not fail")
 	assert.Equal(t, img, readImage(t, "testdata/failed/diffing_master.png"), "image was written to disk")
 

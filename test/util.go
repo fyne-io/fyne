@@ -15,12 +15,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// AssertImageEqualsMaster asserts that the master image loaded from `masterFilename` and the image `img` are equal.
-// The `masterFilename` is relative to the `testdata` directory which is relative to the test.
-// The test `t` fails if the loaded master image does not equal the given image.
+// AssertImageMatches asserts that the given image is the same as the one stored in the master file.
+// The master filename is relative to the `testdata` directory which is relative to the test.
+// The test `t` fails if the given image is not equal to the loaded master image.
 // In this case the given image is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
 // This path is also reported, thus the file can be used as new master.
-func AssertImageEqualsMaster(t *testing.T, masterFilename string, img image.Image) bool {
+func AssertImageMatches(t *testing.T, masterFilename string, img image.Image) bool {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 	masterPath := filepath.Join(wd, "testdata", masterFilename)
