@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -50,29 +51,31 @@ func (a *testApp) UniqueID() string {
 	return "testApp" // TODO should this be randomised?
 }
 
-func (a *testApp) applyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
+func (a *testApp) applyThemeTo(content fyne.CanvasObject) {
 	if content == nil {
 		return
 	}
 	content.Refresh()
 
-	if wid, ok := content.(fyne.Widget); ok {
-		for _, o := range wid.CreateRenderer().Objects() {
-			a.applyThemeTo(o, canv)
+	switch x := content.(type) {
+	case fyne.Widget:
+		for _, o := range cache.Renderer(x).Objects() {
+			a.applyThemeTo(o)
 		}
-	}
-	if c, ok := content.(*fyne.Container); ok {
-		for _, o := range c.Objects {
-			a.applyThemeTo(o, canv)
+	case *fyne.Container:
+		for _, o := range x.Objects {
+			a.applyThemeTo(o)
 		}
 	}
 }
 
 func (a *testApp) applyTheme() {
 	for _, window := range a.driver.AllWindows() {
-		content := window.Content()
-
-		a.applyThemeTo(content, window.Canvas())
+		c := window.Canvas()
+		a.applyThemeTo(c.Content())
+		for _, o := range c.Overlays().List() {
+			a.applyThemeTo(o)
+		}
 	}
 }
 
