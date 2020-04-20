@@ -467,3 +467,20 @@ func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
 
 	assert.NotEqual(t, textSize, customTextSize)
 }
+
+func Test_tabButtonRenderer_SetText(t *testing.T) {
+	item := &TabItem{Text: "Test", Content: NewLabel("Content")}
+	tabs := NewTabContainer(item)
+	tabRenderer := test.WidgetRenderer(tabs).(*tabContainerRenderer)
+	tabButton := tabRenderer.tabBar.Objects[0].(*tabButton)
+	renderer := test.WidgetRenderer(tabButton).(*tabButtonRenderer)
+
+	assert.Equal(t, "Test", renderer.label.Text)
+
+	tabButton.setText("Temp")
+	assert.Equal(t, "Temp", renderer.label.Text)
+
+	item.Text = "Replace"
+	tabs.Refresh()
+	assert.Equal(t, "Replace", renderer.label.Text)
+}
