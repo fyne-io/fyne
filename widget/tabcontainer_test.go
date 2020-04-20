@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -455,9 +456,9 @@ func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
 func Test_tabButtonRenderer_SetText(t *testing.T) {
 	item := &TabItem{Text: "Test", Content: NewLabel("Content")}
 	tabs := NewTabContainer(item)
-	tabRenderer := test.WidgetRenderer(tabs).(*tabContainerRenderer)
+	tabRenderer := cache.Renderer(tabs).(*tabContainerRenderer)
 	tabButton := tabRenderer.tabBar.Objects[0].(*tabButton)
-	renderer := test.WidgetRenderer(tabButton).(*tabButtonRenderer)
+	renderer := cache.Renderer(tabButton).(*tabButtonRenderer)
 
 	assert.Equal(t, "Test", renderer.label.Text)
 
