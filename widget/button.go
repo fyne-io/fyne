@@ -7,16 +7,16 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 type buttonRenderer struct {
+	*widget.ShadowingRenderer
+
 	icon   *canvas.Image
 	label  *canvas.Text
-	shadow *shadow
-
-	objects []fyne.CanvasObject
-	button  *Button
+	button *Button
 }
 
 func (b *buttonRenderer) padding() fyne.Size {
@@ -47,13 +47,7 @@ func (b *buttonRenderer) MinSize() fyne.Size {
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
-	if b.shadow != nil {
-		if b.button.HideShadow {
-			b.shadow.Hide()
-		} else {
-			b.shadow.Resize(size)
-		}
-	}
+	b.LayoutShadow(size, fyne.NewPos(0, 0))
 	if b.button.Text != "" {
 		padding := b.padding()
 		innerSize := size.Subtract(padding)
@@ -106,7 +100,7 @@ func (b *buttonRenderer) Refresh() {
 	if b.button.Icon != nil && b.button.Visible() {
 		if b.icon == nil {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
-			b.objects = append(b.objects, b.icon)
+			b.SetObjects(append(b.Objects(), b.icon))
 		} else {
 			if b.button.Disabled() {
 				// if the icon has changed, create a new disabled version
@@ -125,19 +119,8 @@ func (b *buttonRenderer) Refresh() {
 		b.icon.Hide()
 	}
 
-	if b.shadow != nil {
-		b.shadow.depth = theme.Padding() / 2
-	}
-
 	b.Layout(b.button.Size())
 	canvas.Refresh(b.button.super())
-}
-
-func (b *buttonRenderer) Objects() []fyne.CanvasObject {
-	return b.objects
-}
-
-func (b *buttonRenderer) Destroy() {
 }
 
 // Button widget has a text label and triggers an event func when clicked
@@ -206,16 +189,15 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{
 		text,
 	}
-	var shadow *shadow
-	if !b.HideShadow {
-		shadow = newShadow(shadowAround, theme.Padding()/2)
-		objects = append(objects, shadow)
+	shadowLevel := widget.ButtonLevel
+	if b.HideShadow {
+		shadowLevel = widget.BaseLevel
 	}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{icon, text, shadow, objects, b}
+	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b}
 }
 
 // SetText allows the button label to be changed
@@ -223,6 +205,11 @@ func (b *Button) SetText(text string) {
 	b.Text = text
 
 	b.Refresh()
+}
+
+// Cursor returns the cursor type of this widget
+func (b *Button) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon

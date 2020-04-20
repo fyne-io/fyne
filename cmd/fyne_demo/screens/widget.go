@@ -31,7 +31,7 @@ func makeButtonTab() fyne.Widget {
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
-		widget.NewButtonWithIcon("Button (test & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
+		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
 		disabled,
 	)
 }
@@ -61,8 +61,6 @@ func makeTextTab() fyne.CanvasObject {
 
 	label.Wrapping = fyne.TextWrapWord
 	hyperlink.Wrapping = fyne.TextWrapWord
-	entry.Wrapping = fyne.TextWrapWord
-	entryDisabled.Wrapping = fyne.TextWrapWord
 	entryMultiLine.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
@@ -100,15 +98,13 @@ func makeTextTab() fyne.CanvasObject {
 
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
-		entry.Wrapping = wrap
-		entryDisabled.Wrapping = wrap
-		entryMultiLine.Wrapping = wrap
-		entryLoremIpsum.Wrapping = wrap
+		if wrap != fyne.TextTruncate {
+			entryMultiLine.Wrapping = wrap
+			entryLoremIpsum.Wrapping = wrap
+		}
 
 		label.Refresh()
 		hyperlink.Refresh()
-		entry.Refresh()
-		entryDisabled.Refresh()
 		entryMultiLine.Refresh()
 		entryLoremIpsum.Refresh()
 		entryLoremIpsumScroller.Refresh()
@@ -233,6 +229,17 @@ func makeScrollBothTab() fyne.CanvasObject {
 	return scroll
 }
 
+func makeSplitTab() fyne.CanvasObject {
+	left := widget.NewMultiLineEntry()
+	left.Wrapping = fyne.TextWrapWord
+	left.SetText("Long text is looooooooooooooong")
+	right := widget.NewVSplitContainer(
+		widget.NewLabel("Label"),
+		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
+	)
+	return widget.NewHSplitContainer(widget.NewVScrollContainer(left), right)
+}
+
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -252,6 +259,7 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Progress", makeProgressTab()),
 			widget.NewTabItem("Form", makeFormTab()),
 			widget.NewTabItem("Scroll", makeScrollTab()),
+			widget.NewTabItem("Split", makeSplitTab()),
 		),
 	)
 }

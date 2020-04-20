@@ -5,18 +5,20 @@ import (
 	"net/url"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
 // Hyperlink widget is a text component with appropriate padding and layout.
 // When clicked, the default web browser should open with a URL
 type Hyperlink struct {
-	textProvider
+	BaseWidget
 	Text      string
 	URL       *url.URL
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
+	provider  textProvider
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -36,10 +38,22 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 	return hl
 }
 
+// Cursor returns the cursor type of this widget
+func (hl *Hyperlink) Cursor() desktop.Cursor {
+	return desktop.PointerCursor
+}
+
+// Resize sets a new size for the hyperlink.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (hl *Hyperlink) Resize(size fyne.Size) {
+	hl.BaseWidget.Resize(size)
+	hl.provider.Resize(size)
+}
+
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
 	hl.Text = text
-	hl.textProvider.SetText(text) // calls refresh
+	hl.provider.SetText(text) // calls refresh
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
@@ -99,9 +113,9 @@ func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
-	hl.textProvider = newTextProvider(hl.Text, hl)
 	hl.ExtendBaseWidget(hl)
-	return hl.textProvider.CreateRenderer()
+	hl.provider = newTextProvider(hl.Text, hl)
+	return hl.provider.CreateRenderer()
 }
 
 // MinSize returns the smallest size this widget can shrink to

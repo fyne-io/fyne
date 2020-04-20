@@ -1,12 +1,13 @@
 package gomobile
 
 import (
-	"golang.org/x/mobile/event/size"
+	"github.com/fyne-io/mobile/event/size"
 
 	"fyne.io/fyne"
 )
 
 type device struct {
+	insetTop, insetBottom, insetLeft, insetRight int
 }
 
 var (
@@ -32,6 +33,10 @@ func (*device) IsMobile() bool {
 
 func (*device) HasKeyboard() bool {
 	return false
+}
+
+func (d *device) SystemScale() float32 {
+	return d.SystemScaleForWindow(nil)
 }
 
 func (*device) ShowVirtualKeyboard() {

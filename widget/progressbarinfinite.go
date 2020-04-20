@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -19,11 +20,10 @@ const (
 )
 
 type infProgressRenderer struct {
-	objects []fyne.CanvasObject
-	bar     *canvas.Rectangle
-	ticker  *time.Ticker
-	running atomic.Value
-
+	widget.BaseRenderer
+	bar      *canvas.Rectangle
+	ticker   *time.Ticker
+	running  atomic.Value
 	progress *ProgressBarInfinite
 }
 
@@ -90,10 +90,6 @@ func (p *infProgressRenderer) Refresh() {
 
 	p.updateBar()
 	canvas.Refresh(p.progress)
-}
-
-func (p *infProgressRenderer) Objects() []fyne.CanvasObject {
-	return p.objects
 }
 
 // Start the infinite progress bar background thread to update it continuously
@@ -178,9 +174,9 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	render := &infProgressRenderer{
-		objects:  []fyne.CanvasObject{bar},
-		bar:      bar,
-		progress: p,
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bar}),
+		bar:          bar,
+		progress:     p,
 	}
 	render.running.Store(false)
 	render.start()

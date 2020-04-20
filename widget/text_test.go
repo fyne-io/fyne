@@ -248,8 +248,8 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 	label := NewLabel("Test\nLine2")
 	render := test.WidgetRenderer(label).(*textRenderer)
 
-	text1 := render.objects[0].(*canvas.Text)
-	text2 := render.objects[0].(*canvas.Text)
+	text1 := render.Objects()[0].(*canvas.Text)
+	text2 := render.Objects()[0].(*canvas.Text)
 	customTextSize1 := text1.TextSize
 	customTextSize2 := text2.TextSize
 	withTestTheme(func() {
@@ -265,7 +265,7 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 func TestTextProvider_LineSizeToColumn(t *testing.T) {
 	label := NewLabel("Test")
 	label.CreateRenderer() // TODO make this a simple refresh call once it's in
-	provider := label.textProvider
+	provider := label.provider
 
 	fullSize := provider.lineSizeToColumn(4, 0)
 	assert.Equal(t, fullSize, provider.lineSizeToColumn(10, 0))
@@ -647,6 +647,143 @@ func TestText_lineBounds(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.want, lineBounds([]rune(tt.text), tt.wrap, 10, mockMeasurer))
+		})
+	}
+}
+
+func TestText_lineBounds_variable_char_width(t *testing.T) {
+	tests := []struct {
+		name string
+		text string
+		wrap fyne.TextWrap
+		want [][2]int
+	}{
+		{
+			name: "IM_WrapOff",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			wrap: fyne.TextWrapOff,
+			want: [][2]int{
+				{0, 20},
+			},
+		},
+		{
+			name: "IM_Truncate",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			wrap: fyne.TextTruncate,
+			want: [][2]int{
+				{0, 12},
+			},
+		},
+		{
+			name: "IM_WrapBreak",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			wrap: fyne.TextWrapBreak,
+			want: [][2]int{
+				{0, 12},
+				{12, 16},
+				{16, 20},
+			},
+		},
+		{
+			name: "IM_WrapWord",
+			text: "iiiiiiiiiimmmmmmmmmm",
+			wrap: fyne.TextWrapWord,
+			want: [][2]int{
+				{0, 12},
+				{12, 16},
+				{16, 20},
+			},
+		},
+	}
+	textSize := 10
+	textStyle := fyne.TextStyle{}
+	measurer := func(text []rune) int {
+		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, lineBounds([]rune(tt.text), tt.wrap, 50, measurer))
+		})
+	}
+}
+
+func TestText_binarySearch(t *testing.T) {
+	maxWidth := 50
+	textSize := 10
+	textStyle := fyne.TextStyle{}
+	measurer := func(text []rune) int {
+		return fyne.MeasureText(string(text), textSize, textStyle).Width
+	}
+	for name, tt := range map[string]struct {
+		text string
+		want int
+	}{
+		"IM": {
+			text: "iiiiiiiiiimmmmmmmmmm",
+			want: 12,
+		},
+		"Single_Line": {
+			text: "foobar foobar",
+			want: 9,
+		},
+		"WH": {
+			text: "wwwww hhhhhh",
+			want: 6,
+		},
+		"DS": {
+			text: "dddddd sssssss",
+			want: 8,
+		},
+		"DI": {
+			text: "dididi dididd",
+			want: 10,
+		},
+		"XW": {
+			text: "xwxwxwxw xwxw",
+			want: 7,
+		},
+		"W": {
+			text: "WWWWW",
+			want: 4,
+		},
+		"Empty": {
+			text: "",
+			want: 0,
+		},
+	} {
+		checker := func(low int, high int) bool {
+			return measurer([]rune(tt.text[low:high])) <= maxWidth
+		}
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tt.want, binarySearch(checker, 0, len(tt.text)))
+		})
+	}
+}
+
+func TestText_findSpaceIndex(t *testing.T) {
+	for name, tt := range map[string]struct {
+		text string
+		want int
+	}{
+		"no_space_fallback": {
+			text: "iiiiiiiiiimmmmmmmmmm",
+			want: 19,
+		},
+		"single_space": {
+			text: "foobar foobar",
+			want: 6,
+		},
+		"double_space": {
+			text: "ww wwww www",
+			want: 7,
+		},
+		"many_spaces": {
+			text: "ww wwww www wwwww",
+			want: 11,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tt.want, findSpaceIndex([]rune(tt.text), len(tt.text)-1))
 		})
 	}
 }
