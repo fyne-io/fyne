@@ -13,7 +13,6 @@ import (
 	"fyne.io/fyne/internal/painter"
 	pgl "fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 
 	"github.com/fyne-io/mobile/app"
 	"github.com/fyne-io/mobile/event/key"
@@ -193,8 +192,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, sz size.Event) {
 	window.Resize(newSize)
 
 	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		// TODO should this be somehow not scroll container specific?
-		if _, ok := obj.(*widget.ScrollContainer); ok {
+		if _, ok := obj.(fyne.Scrollable); ok {
 			canvas.painter.StartClipping(
 				fyne.NewPos(pos.X, canvas.Size().Height-pos.Y-obj.Size().Height),
 				obj.Size(),
@@ -204,7 +202,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, sz size.Event) {
 		return false
 	}
 	afterPaint := func(obj, _ fyne.CanvasObject) {
-		if _, ok := obj.(*widget.ScrollContainer); ok {
+		if _, ok := obj.(fyne.Scrollable); ok {
 			canvas.painter.StopClipping()
 		}
 	}

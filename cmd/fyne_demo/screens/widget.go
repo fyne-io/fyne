@@ -3,9 +3,11 @@ package screens
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -240,6 +242,166 @@ func makeSplitTab() fyne.CanvasObject {
 	return widget.NewHSplitContainer(widget.NewVScrollContainer(left), right)
 }
 
+func makeListTab() fyne.CanvasObject {
+	// Create Data Bindings
+	buttonItems := binding.NewIntList()
+	hyperlinkItems := binding.NewStringList("https://fyne.io")
+	labelItems := binding.NewStringList()
+	stringItems := binding.NewStringList("A", "B")
+
+	// Add lots of buttons
+	go func() {
+		for i := 0; i < 1000000; i++ {
+			buttonItems.AddInt(i)
+		}
+	}()
+	// Add one hyperlink later
+	go func() {
+		for _, s := range []string{
+			"https://fyne.io/blog",
+			"https://fyne.io/contribute",
+			"https://fyne.io/develop",
+			"https://fyne.io/events",
+			"https://fyne.io/fynedesk",
+			"https://fyne.io/support",
+			"https://apps.fyne.io",
+			"https://tour.fyne.io",
+			"https://github.com/fyne-io",
+			"https://gophers.slack.com/app_redirect?channel=fyne",
+			"https://twitter.com/fyne_io",
+		} {
+			time.Sleep(10 * time.Second)
+			hyperlinkItems.AddString(s)
+		}
+	}()
+	// Add lots of text
+	go func() {
+		for i := 0; i < len(loremIpsum); i++ {
+			labelItems.AddString(strconv.Itoa(i) + ": " + loremIpsum[:i+1])
+		}
+	}()
+	// Add some strings later
+	go func() {
+		for _, s := range []string{
+			"C", "D", "E",
+			"F", "G", "H",
+			"I", "J", "K",
+			"L", "M", "N",
+			"O", "P", "Q",
+			"R", "S", "T",
+			"U", "V", "W",
+			"X", "Y", "Z"} {
+			time.Sleep(time.Second)
+			stringItems.AddString(s)
+		}
+	}()
+
+	cellSize := binding.NewSize(fyne.NewSize(30, 30))
+	padding := binding.NewInt(theme.Padding() * 4)
+	var buttonCells int
+	buttonList := &widget.List{
+		Items:    buttonItems,
+		CellSize: cellSize,
+		Padding:  padding,
+		OnCreateCell: func() fyne.CanvasObject {
+			buttonCells++
+			fmt.Printf("Created Button Cell: %d\n", buttonCells)
+			return &widget.Button{}
+		},
+		OnBindCell: func(c fyne.CanvasObject, b binding.Binding) {
+			w, ok := c.(*widget.Button)
+			if ok {
+				i, ok := b.(binding.Int)
+				if ok {
+					w.Text = fmt.Sprintf("Item: %d", i.Get())
+				}
+				w.OnTapped = func() {
+					fmt.Printf("Tapped: %d\n", i.Get())
+				}
+				// TODO w.hovered = false
+				w.HideShadow = true
+				w.Show()
+			}
+		},
+		OnSelected: func(i int, b binding.Binding) {
+			fmt.Printf("Selected: %d %v\n", i, b)
+		},
+	}
+
+	var hyperlinkCells int
+	hyperlinkList := &widget.List{
+		Horizontal: binding.NewBool(true),
+		Items:      hyperlinkItems,
+		OnCreateCell: func() fyne.CanvasObject {
+			hyperlinkCells++
+			fmt.Printf("Created Hyperlink Cell: %d\n", hyperlinkCells)
+			return &widget.Hyperlink{}
+		},
+		OnBindCell: func(c fyne.CanvasObject, b binding.Binding) {
+			hl, ok := c.(*widget.Hyperlink)
+			if ok {
+				s, ok := b.(binding.String)
+				if ok {
+					text := s.Get()
+					hl.Text = text
+					u, err := url.Parse(text)
+					if err != nil {
+						fyne.LogError(fmt.Sprintf("Could not parse URL: %s", s), err)
+					} else {
+						hl.URL = u
+					}
+				}
+				// hl.Color = theme.TextHyperlinkColor.Get()
+				// hl.TextSize = theme.TextSize.Get()
+				hl.Show()
+			}
+		},
+		OnSelected: func(i int, b binding.Binding) {
+			fmt.Printf("selected: %d %v\n", i, b)
+		},
+	}
+
+	var labelCells int
+	labelList := &widget.List{
+		Items: labelItems,
+		OnCreateCell: func() fyne.CanvasObject {
+			labelCells++
+			fmt.Printf("Created Label Cell: %d\n", labelCells)
+			return &widget.Label{
+				Wrapping: fyne.TextWrapBreak,
+			}
+		},
+		OnBindCell: func(object fyne.CanvasObject, data binding.Binding) {
+			t, ok := object.(*widget.Label)
+			if ok {
+				s, ok := data.(binding.String)
+				if ok {
+					t.Text = s.Get()
+				}
+				t.Show()
+			}
+		},
+		OnSelected: func(i int, b binding.Binding) {
+			fmt.Printf("selected: %d %v\n", i, b)
+		},
+	}
+
+	stringList := &widget.List{
+		Horizontal: binding.NewBool(true),
+		Items:      stringItems,
+		CellSize:   binding.NewSize(fyne.NewSize(50, 50)),
+		OnSelected: func(i int, b binding.Binding) {
+			fmt.Printf("selected: %d %v\n", i, b)
+		},
+	}
+	return widget.NewTabContainer(
+		widget.NewTabItem("Vertical, Fixed Cell Size, Button List", buttonList),
+		widget.NewTabItem("Vertical, Label List", labelList),
+		widget.NewTabItem("Horizontal, Fixed Cell Size, String List", stringList),
+		widget.NewTabItem("Horizontal, Hyperlink List", hyperlinkList),
+	)
+}
+
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -260,6 +422,7 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Form", makeFormTab()),
 			widget.NewTabItem("Scroll", makeScrollTab()),
 			widget.NewTabItem("Split", makeSplitTab()),
+			widget.NewTabItem("List", makeListTab()),
 		),
 	)
 }
