@@ -113,11 +113,15 @@ func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
 }
 
 // WithTestTheme runs a function with the testTheme temporarily set.
-func WithTestTheme(f func()) {
+func WithTestTheme(t *testing.T, f func()) {
 	settings := fyne.CurrentApp().Settings()
 	current := settings.Theme()
 	settings.SetTheme(&testTheme{})
-	defer settings.SetTheme(current)
+	WaitForThemeToBeApplied(t)
+	defer func() {
+		settings.SetTheme(current)
+		WaitForThemeToBeApplied(t)
+	}()
 	f()
 }
 

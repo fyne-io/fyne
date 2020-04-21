@@ -58,7 +58,3 @@ func TestApplyThemeCalledChild(t *testing.T) {
 
 	window.Close()
 }
-
-func withTestTheme(f func()) {
-	test.WithTestTheme(f)
-}
