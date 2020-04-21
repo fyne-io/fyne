@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -452,56 +453,42 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 }
 
 func TestEntry_TappedSecondary(t *testing.T) {
-	// fresh app for this test
-	test.NewApp()
-	// don't let our app hang around for too long
+	app := test.NewApp()
 	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
 
 	entry := NewEntry()
-	canvas := fyne.CurrentApp().Driver().CanvasForObject(entry)
-	canvas.(test.WindowlessCanvas).Resize(fyne.NewSize(100, 150))
+	w := test.NewWindowWithPainter(entry, software.NewPainter())
+	defer w.Close()
+	w.Resize(fyne.NewSize(150, 200))
+	c := w.Canvas()
 
-	tapPos := fyne.NewPos(1, 1)
+	entry.Resize(entry.MinSize())
+	entry.Move(fyne.NewPos(10, 10))
+	test.AssertImageMatches(t, "entry_tapped_secondary_initial.png", c.Capture())
+
+	tapPos := fyne.NewPos(20, 10)
 	test.TapSecondaryAt(entry, tapPos)
-
-	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	over := canvas.Overlays().Top()
-	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
-
-	cont := over.(*PopUp).Content
-	assert.Equal(t, pos.X+tapPos.X, cont.Position().X)
-	assert.Equal(t, pos.Y+tapPos.Y, cont.Position().Y)
-
-	items := cont.(*Box).Children
-	assert.Equal(t, 4, len(items)) // Cut, Copy, Paste, Select All
-	test.Tap(entry.popUp)
+	test.AssertImageMatches(t, "entry_tapped_secondary_full_menu.png", c.Capture())
+	assert.Equal(t, 1, len(c.Overlays().List()))
+	c.Overlays().Remove(c.Overlays().Top())
 
 	entry.Disable()
-
 	test.TapSecondaryAt(entry, tapPos)
-	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	over = canvas.Overlays().Top()
-
-	cont = over.(*PopUp).Content
-	items = cont.(*Box).Children
-	assert.Equal(t, 2, len(items)) // Copy, Select All
-	firstDisabled := items[0]
-	test.Tap(entry.popUp)
+	test.AssertImageMatches(t, "entry_tapped_secondary_read_menu.png", c.Capture())
+	assert.Equal(t, 1, len(c.Overlays().List()))
+	c.Overlays().Remove(c.Overlays().Top())
 
 	entry.Password = true
+	entry.Refresh()
 	test.TapSecondaryAt(entry, tapPos)
-	assert.Nil(t, canvas.Overlays().Top()) // No popup for disabled password
+	test.AssertImageMatches(t, "entry_tapped_secondary_no_password_menu.png", c.Capture())
+	assert.Nil(t, c.Overlays().Top(), "No popup for disabled password")
 
 	entry.Enable()
 	test.TapSecondaryAt(entry, tapPos)
-	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	over = canvas.Overlays().Top()
-	assert.NotNil(t, over)
-
-	cont = over.(*PopUp).Content
-	items = cont.(*Box).Children
-	assert.Equal(t, 2, len(items)) // Paste, Select All
-	assert.NotEqual(t, firstDisabled, items[0])
+	test.AssertImageMatches(t, "entry_tapped_secondary_password_menu.png", c.Capture())
+	assert.Equal(t, 1, len(c.Overlays().List()))
 }
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
