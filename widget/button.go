@@ -148,19 +148,28 @@ const (
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
-	if b.OnTapped != nil && !b.Disabled() {
+	if b.Disabled() {
+		return
+	}
+	if b.OnTapped != nil {
 		b.OnTapped()
 	}
 }
 
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
+	if b.Disabled() {
+		return
+	}
 	b.hovered = true
 	b.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (b *Button) MouseOut() {
+	if b.Disabled() {
+		return
+	}
 	b.hovered = false
 	b.Refresh()
 }
