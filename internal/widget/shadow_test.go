@@ -29,12 +29,10 @@ func TestShadow_ApplyTheme(t *testing.T) {
 	s.Move(fyne.NewPos(10, 10))
 	test.AssertImageMatches(t, "shadow_theme_dark.png", w.Canvas().Capture())
 
-	app.Settings().SetTheme(theme.LightTheme())
-	test.WaitForThemeToBeApplied(t)
+	test.ApplyTheme(t, theme.LightTheme())
 	test.AssertImageMatches(t, "shadow_theme_light.png", w.Canvas().Capture())
 
-	app.Settings().SetTheme(theme.DarkTheme())
-	test.WaitForThemeToBeApplied(t)
+	test.ApplyTheme(t, theme.DarkTheme())
 	test.AssertImageMatches(t, "shadow_theme_dark.png", w.Canvas().Capture())
 }
 

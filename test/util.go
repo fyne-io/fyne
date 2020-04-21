@@ -97,10 +97,11 @@ func TypeOnCanvas(c fyne.Canvas, chars string) {
 	typeChars([]rune(chars), c.OnTypedRune())
 }
 
-// WaitForThemeToBeApplied waits for the current theme to be applied to the current app.
-func WaitForThemeToBeApplied(t *testing.T) {
+// ApplyTheme sets the given theme and waits for it to be applied to the current app.
+func ApplyTheme(t *testing.T, theme fyne.Theme) {
 	require.IsType(t, &testApp{}, fyne.CurrentApp())
 	a := fyne.CurrentApp().(*testApp)
+	a.Settings().SetTheme(theme)
 	for a.appliedTheme != a.Settings().Theme() {
 		time.Sleep(1 * time.Millisecond)
 	}
@@ -116,12 +117,8 @@ func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
 func WithTestTheme(t *testing.T, f func()) {
 	settings := fyne.CurrentApp().Settings()
 	current := settings.Theme()
-	settings.SetTheme(&testTheme{})
-	WaitForThemeToBeApplied(t)
-	defer func() {
-		settings.SetTheme(current)
-		WaitForThemeToBeApplied(t)
-	}()
+	ApplyTheme(t, &testTheme{})
+	defer ApplyTheme(t, current)
 	f()
 }
 
