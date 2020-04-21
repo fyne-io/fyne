@@ -189,6 +189,7 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
+// Enable this widget, updating any style or features appropriately.
 func (l *List) Enable() {
 	if l.Disabled == nil {
 		l.Disabled = binding.NewBool(false)
@@ -197,6 +198,7 @@ func (l *List) Enable() {
 	}
 }
 
+// Disable this widget so that it cannot be interacted with, updating any style appropriately.
 func (l *List) Disable() {
 	if l.Disabled == nil {
 		l.Disabled = binding.NewBool(true)
@@ -205,19 +207,21 @@ func (l *List) Disable() {
 	}
 }
 
-func (l *List) IsDisabled() (disabled bool) {
-	if l.Disabled != nil {
-		disabled = l.Disabled.Get()
-	}
-	return
-}
-
+// Hide this widget so it is no lonver visible
 func (l *List) Hide() {
 	if l.Hidden == nil {
 		l.Hidden = binding.NewBool(true)
 	} else {
 		l.Hidden.Set(true)
 	}
+}
+
+// IsDisabled returns true if this widget is currently disabled or false if it can currently be interacted with.
+func (l *List) IsDisabled() (disabled bool) {
+	if l.Disabled != nil {
+		disabled = l.Disabled.Get()
+	}
+	return
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -262,6 +266,7 @@ func (l *List) MouseMoved(event *desktop.MouseEvent) {
 	// TODO
 }
 
+// Move the widget to a new position, relative to its parent.
 func (l *List) Move(pos fyne.Position) {
 	log.Println("List.Move:", pos)
 	if l.Pos == nil {
@@ -271,6 +276,7 @@ func (l *List) Move(pos fyne.Position) {
 	}
 }
 
+// Position gets the current position of this widget, relative to its parent.
 func (l *List) Position() (pos fyne.Position) {
 	if l.Pos != nil {
 		pos = l.Pos.Get()
@@ -279,11 +285,13 @@ func (l *List) Position() (pos fyne.Position) {
 	return
 }
 
+// Refresh causes this widget to be redrawn in it's current state
 func (l *List) Refresh() {
 	log.Println("List.Refresh")
 	// no-op
 }
 
+// Resize sets a new size for a widget.
 func (l *List) Resize(size fyne.Size) {
 	log.Println("List.Resize:", size)
 	if l.Siz == nil {
@@ -357,6 +365,7 @@ func (l *List) Scrolled(event *fyne.ScrollEvent) {
 	l.offsetScroll.Set(offsetScroll)
 }
 
+// Show this widget so it becomes visible
 func (l *List) Show() {
 	if l.Hidden == nil {
 		l.Hidden = binding.NewBool(false)
@@ -365,6 +374,7 @@ func (l *List) Show() {
 	}
 }
 
+// Size gets the current size of this widget.
 func (l *List) Size() (size fyne.Size) {
 	if l.Siz != nil {
 		size = l.Siz.Get()
@@ -385,6 +395,7 @@ func (l *List) Tapped(event *fyne.PointEvent) {
 	}
 }
 
+// Visible returns whether or not this widget should be visible.
 func (l *List) Visible() (visible bool) {
 	if l.Hidden != nil {
 		visible = !l.Hidden.Get()
