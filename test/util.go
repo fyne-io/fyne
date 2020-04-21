@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/cache"
@@ -96,10 +97,29 @@ func TypeOnCanvas(c fyne.Canvas, chars string) {
 	typeChars([]rune(chars), c.OnTypedRune())
 }
 
+// ApplyTheme sets the given theme and waits for it to be applied to the current app.
+func ApplyTheme(t *testing.T, theme fyne.Theme) {
+	require.IsType(t, &testApp{}, fyne.CurrentApp())
+	a := fyne.CurrentApp().(*testApp)
+	a.Settings().SetTheme(theme)
+	for a.appliedTheme != a.Settings().Theme() {
+		time.Sleep(1 * time.Millisecond)
+	}
+}
+
 // WidgetRenderer allows test scripts to gain access to the current renderer for a widget.
 // This can be used for verifying correctness of rendered components for a widget in unit tests.
 func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
 	return cache.Renderer(wid)
+}
+
+// WithTestTheme runs a function with the testTheme temporarily set.
+func WithTestTheme(t *testing.T, f func()) {
+	settings := fyne.CurrentApp().Settings()
+	current := settings.Theme()
+	ApplyTheme(t, &testTheme{})
+	defer ApplyTheme(t, current)
+	f()
 }
 
 func typeChars(chars []rune, keyDown func(rune)) {

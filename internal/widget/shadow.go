@@ -137,6 +137,7 @@ func (r *shadowRenderer) MinSize() fyne.Size {
 func (r *shadowRenderer) Refresh() {
 	r.refreshShadows()
 	r.Layout(r.s.Size())
+	canvas.Refresh(r.s)
 }
 
 func (r *shadowRenderer) createShadows() {
