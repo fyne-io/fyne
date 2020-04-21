@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -60,7 +59,7 @@ func (a *testApp) applyThemeTo(content fyne.CanvasObject) {
 
 	switch x := content.(type) {
 	case fyne.Widget:
-		for _, o := range cache.Renderer(x).Objects() {
+		for _, o := range WidgetRenderer(x).Objects() {
 			a.applyThemeTo(o)
 		}
 	case *fyne.Container:
