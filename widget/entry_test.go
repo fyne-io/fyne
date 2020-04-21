@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
@@ -38,7 +39,7 @@ func TestEntry_MinSize(t *testing.T) {
 	assert.True(t, min.Height > theme.Padding()*2)
 
 	min = entry.MinSize()
-	entry.ActionItem = newPasswordRevealer(entry)
+	entry.ActionItem = canvas.NewCircle(color.Black)
 	assert.Equal(t, min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0)), entry.MinSize())
 }
 
@@ -48,8 +49,7 @@ func TestEntry_Cursor(t *testing.T) {
 }
 
 func TestEntry_passwordRevealerCursor(t *testing.T) {
-	entry := NewEntry()
-	pr := newPasswordRevealer(entry)
+	pr := NewPasswordEntry().ActionItem.(desktop.Cursorable)
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
 }
 
@@ -479,19 +479,22 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 func TestEntry_HidePopUpOnEntry(t *testing.T) {
 	entry := NewEntry()
 	tapPos := fyne.NewPos(1, 1)
+	c := fyne.CurrentApp().Driver().CanvasForObject(entry)
+
+	assert.Nil(t, c.Overlays().Top())
 
 	test.TapSecondaryAt(entry, tapPos)
-	test.Type(entry, "KJGFD")
+	assert.NotNil(t, c.Overlays().Top())
 
-	assert.NotNil(t, entry.popUp)
+	test.Type(entry, "KJGFD")
+	assert.Nil(t, c.Overlays().Top())
 	assert.Equal(t, "KJGFD", entry.Text)
-	assert.Equal(t, true, entry.popUp.Hidden)
 }
 
 func TestEntry_MouseDownOnSelect(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("Ahnj\nBuki\n")
-	entry.selectAll()
+	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
@@ -515,9 +518,9 @@ func TestEntry_DragSelect(t *testing.T) {
 	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
 
 	// get position after the letter 'e' on the second row
-	ev1 := getClickPosition(entry, "ove", 1)
+	ev1 := getClickPosition("ove", 1)
 	// get position after the letter 'z' on the second row
-	ev2 := getClickPosition(entry, "over the laz", 1)
+	ev2 := getClickPosition("over the laz", 1)
 	// add a couple of pixels, this is currently a workaround for weird mouse to column logic on text with kerning
 	ev2.Position.X += 2
 
@@ -534,10 +537,10 @@ func TestEntry_DragSelect(t *testing.T) {
 	assert.Equal(t, "r the laz", entry.SelectedText())
 }
 
-func getClickPosition(e *Entry, str string, row int) *fyne.PointEvent {
-	x := fyne.MeasureText(str, theme.TextSize(), e.textStyle()).Width + theme.Padding()
+func getClickPosition(str string, row int) *fyne.PointEvent {
+	x := fyne.MeasureText(str, theme.TextSize(), fyne.TextStyle{}).Width + theme.Padding()
 
-	rowHeight := e.textProvider().charMinSize().Height
+	rowHeight := fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{}).Height
 	y := theme.Padding() + row*rowHeight + rowHeight/2
 
 	pos := fyne.NewPos(x, y)
@@ -549,21 +552,21 @@ func TestEntry_DoubleTapped(t *testing.T) {
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
 
 	// select the word 'quick'
-	ev := getClickPosition(entry, "The qui", 0)
+	ev := getClickPosition("The qui", 0)
 	entry.Tapped(ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, "quick", entry.SelectedText())
 
 	// select the whitespace after 'quick'
-	ev = getClickPosition(entry, "The quick", 0)
+	ev = getClickPosition("The quick", 0)
 	// add half a ' ' character
-	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), entry.textStyle()).Width / 2
+	ev.Position.X += fyne.MeasureText(" ", theme.TextSize(), fyne.TextStyle{}).Width / 2
 	entry.Tapped(ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, " ", entry.SelectedText())
 
 	// select all whitespace after 'jumped'
-	ev = getClickPosition(entry, "jumped  ", 1)
+	ev = getClickPosition("jumped  ", 1)
 	entry.Tapped(ev)
 	entry.DoubleTapped(ev)
 	assert.Equal(t, "    ", entry.SelectedText())
@@ -572,9 +575,10 @@ func TestEntry_DoubleTapped(t *testing.T) {
 func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("A\nB\n")
+	c := fyne.CurrentApp().Driver().CanvasForObject(entry)
 
 	test.Tap(entry)
-	assert.True(t, entry.focused)
+	assert.Equal(t, c.Focused(), entry)
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
@@ -1308,7 +1312,6 @@ func TestEntry_EmptySelection(t *testing.T) {
 	// check that the selection has been removed
 	typeKeys(entry, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftUp)
 	assert.Equal(t, "", entry.SelectedText())
-	assert.Equal(t, false, entry.selecting)
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
