@@ -127,16 +127,12 @@ c`)
 
 func TestTextGridRender_TextColor(t *testing.T) {
 	grid := NewTextGridFromString("Ab ")
-	grid.Content[0][1].Style = &CustomTextGridStyle{FGColor: color.Black}
+	customStyle := &CustomTextGridStyle{FGColor: color.Black}
+	grid.Content[0][1].Style = customStyle
 	grid.ShowWhitespace = true
 	grid.Resize(fyne.NewSize(56, 22)) // causes refresh
-	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 
-	assert.Equal(t, 4, rend.cols)
-	assert.Equal(t, 1, rend.rows)
-	assert.Equal(t, theme.TextColor(), rend.objects[1].(*canvas.Text).Color)
-	assert.Equal(t, color.Black, rend.objects[3].(*canvas.Text).Color)
-	assert.Equal(t, TextGridStyleWhitespace.TextColor(), rend.objects[5].(*canvas.Text).Color)
+	assertGridStyle(t, grid, " 12", map[string]TextGridStyle{"1": customStyle, "2": TextGridStyleWhitespace})
 }
 
 func assertGridContent(t *testing.T, g *TextGrid, expected string) {
@@ -146,7 +142,39 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 	for y, line := range lines {
 		x := 0 // rune count - using index below would be offset into string bytes
 		for _, r := range line {
-			assert.Equal(t, r, rendererCellRune(renderer, y, x))
+			_, fg := rendererCell(renderer, y, x)
+			assert.Equal(t, r, []rune(fg.Text)[0])
+			x++
+		}
+	}
+}
+
+func assertGridStyle(t *testing.T, g *TextGrid, expected string, expectedStyles map[string]TextGridStyle) {
+	lines := strings.Split(expected, "\n")
+	renderer := test.WidgetRenderer(g).(*textGridRenderer)
+
+	for y, line := range lines {
+		x := 0 // rune count - using index below would be offset into string bytes
+		for _, r := range line {
+			expected := expectedStyles[string(r)]
+			bg, fg := rendererCell(renderer, y, x)
+
+			if r == ' ' {
+				assert.Equal(t, theme.TextColor(), fg.Color)
+				assert.Equal(t, color.Transparent, bg.FillColor)
+			} else {
+				if expected.TextColor() == nil {
+					assert.Equal(t, theme.TextColor(), fg.Color)
+				} else {
+					assert.Equal(t, expected.TextColor(), fg.Color)
+				}
+
+				if expected.BackgroundColor() == nil {
+					assert.Equal(t, color.Transparent, bg.FillColor)
+				} else {
+					assert.Equal(t, expected.BackgroundColor(), bg.FillColor)
+				}
+			}
 			x++
 		}
 	}
@@ -155,9 +183,4 @@ func assertGridContent(t *testing.T, g *TextGrid, expected string) {
 func rendererCell(r *textGridRenderer, row, col int) (*canvas.Rectangle, *canvas.Text) {
 	i := (row*r.cols + col) * 2
 	return r.objects[i].(*canvas.Rectangle), r.objects[i+1].(*canvas.Text)
-}
-
-func rendererCellRune(r *textGridRenderer, row, col int) rune {
-	_, text := rendererCell(r, row, col)
-	return []rune(text.Text)[0]
 }
