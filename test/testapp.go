@@ -17,9 +17,10 @@ func init() {
 }
 
 type testApp struct {
-	driver   *testDriver
-	settings fyne.Settings
-	prefs    fyne.Preferences
+	appliedTheme fyne.Theme
+	driver       *testDriver
+	settings     fyne.Settings
+	prefs        fyne.Preferences
 }
 
 func (a *testApp) Icon() fyne.Resource {
@@ -107,6 +108,7 @@ func NewApp() fyne.App {
 		for {
 			_ = <-listener
 			test.applyTheme()
+			test.appliedTheme = test.Settings().Theme()
 		}
 	}()
 

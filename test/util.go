@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/cache"
@@ -94,6 +95,15 @@ func Type(obj fyne.Focusable, chars string) {
 // rather than a focusable widget.
 func TypeOnCanvas(c fyne.Canvas, chars string) {
 	typeChars([]rune(chars), c.OnTypedRune())
+}
+
+// WaitForThemeToBeApplied waits for the current theme to be applied to the current app.
+func WaitForThemeToBeApplied(t *testing.T) {
+	require.IsType(t, &testApp{}, fyne.CurrentApp())
+	a := fyne.CurrentApp().(*testApp)
+	for a.appliedTheme != a.Settings().Theme() {
+		time.Sleep(1 * time.Millisecond)
+	}
 }
 
 // WidgetRenderer allows test scripts to gain access to the current renderer for a widget.
