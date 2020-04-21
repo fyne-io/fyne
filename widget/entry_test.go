@@ -69,22 +69,28 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 }
 
 func TestEntry_SetPlaceHolder(t *testing.T) {
-	entry := NewEntry()
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
 
+	entry := NewEntry()
+	w := test.NewWindowWithPainter(entry, software.NewPainter())
+	defer w.Close()
+	w.Resize(fyne.NewSize(150, 200))
+	c := w.Canvas()
+
+	entry.Resize(entry.MinSize())
+	entry.Move(fyne.NewPos(10, 10))
 	assert.Equal(t, 0, len(entry.Text))
-	assert.Equal(t, 0, entry.textProvider().len())
+	test.AssertImageMatches(t, "entry_set_placeholder_initial.png", c.Capture())
 
 	entry.SetPlaceHolder("Test")
 	assert.Equal(t, 0, len(entry.Text))
-	assert.Equal(t, 0, entry.textProvider().len())
-	assert.Equal(t, 4, entry.placeholderProvider().len())
-	assert.True(t, entry.placeholderProvider().Visible())
+	test.AssertImageMatches(t, "entry_set_placeholder_set.png", c.Capture())
 
 	entry.SetText("Hi")
 	assert.Equal(t, 2, len(entry.Text))
-	assert.False(t, entry.placeholderProvider().Visible())
-
-	assert.Equal(t, 2, entry.textProvider().len())
+	test.AssertImageMatches(t, "entry_set_placeholder_replaced.png", c.Capture())
 }
 
 func TestEntry_SetTextEmptyString(t *testing.T) {
