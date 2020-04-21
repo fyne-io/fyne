@@ -102,6 +102,15 @@ func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
 	return cache.Renderer(wid)
 }
 
+// WithTestTheme runs a function with the testTheme temporarily set.
+func WithTestTheme(f func()) {
+	settings := fyne.CurrentApp().Settings()
+	current := settings.Theme()
+	settings.SetTheme(&testTheme{})
+	defer settings.SetTheme(current)
+	f()
+}
+
 func typeChars(chars []rune, keyDown func(rune)) {
 	for _, char := range chars {
 		keyDown(char)

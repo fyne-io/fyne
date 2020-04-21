@@ -250,16 +250,18 @@ func TestTextRenderer_ApplyTheme(t *testing.T) {
 
 	text1 := render.Objects()[0].(*canvas.Text)
 	text2 := render.Objects()[0].(*canvas.Text)
-	customTextSize1 := text1.TextSize
-	customTextSize2 := text2.TextSize
+	textSize1 := text1.TextSize
+	textSize2 := text2.TextSize
+	customTextSize1 := textSize1
+	customTextSize2 := textSize2
 	withTestTheme(func() {
 		render.applyTheme()
 		customTextSize1 = text1.TextSize
 		customTextSize2 = text2.TextSize
 	})
 
-	assert.Equal(t, testTextSize, customTextSize1)
-	assert.Equal(t, testTextSize, customTextSize2)
+	assert.NotEqual(t, textSize1, customTextSize1)
+	assert.NotEqual(t, textSize2, customTextSize2)
 }
 
 func TestTextProvider_LineSizeToColumn(t *testing.T) {
