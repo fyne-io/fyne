@@ -387,56 +387,42 @@ func TestEntryFocus(t *testing.T) {
 }
 
 func TestEntry_Tapped(t *testing.T) {
-	entry := NewEntry()
+	entry, window := setupImageTest(false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
 	entry.SetText("MMM")
+	test.AssertImageMatches(t, "entry_tapped_initial.png", c.Capture())
 
 	test.Tap(entry)
-	assert.True(t, entry.focused)
+	test.AssertImageMatches(t, "entry_tapped_focused.png", c.Capture())
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(int(float32(testCharSize)*1.5), testCharSize/2) // tap in the middle of the 2nd "M"
 	ev := &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
-
+	test.AssertImageMatches(t, "entry_tapped_tapped_2nd_m.png", c.Capture())
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 1, entry.CursorColumn)
 
 	pos = fyne.NewPos(int(float32(testCharSize)*2.5), testCharSize/2) // tap in the middle of the 3rd "M"
 	ev = &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
-
+	test.AssertImageMatches(t, "entry_tapped_tapped_3nd_m.png", c.Capture())
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 2, entry.CursorColumn)
-}
 
-func TestEntry_Tapped_AfterCol(t *testing.T) {
-	entry := NewEntry()
-	entry.SetText("M")
-
-	test.Tap(entry)
-	assert.True(t, entry.focused)
-
-	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(testCharSize*2, testCharSize/2) // tap after text
-	ev := &fyne.PointEvent{Position: pos}
+	pos = fyne.NewPos(testCharSize*4, testCharSize/2) // tap after text
+	ev = &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
-
+	test.AssertImageMatches(t, "entry_tapped_tapped_after_last_col.png", c.Capture())
 	assert.Equal(t, 0, entry.CursorRow)
-	assert.Equal(t, 1, entry.CursorColumn)
-}
+	assert.Equal(t, 3, entry.CursorColumn)
 
-func TestEntry_Tapped_AfterRow(t *testing.T) {
-	entry := NewEntry()
-	entry.SetText("M\nM\n")
-
-	test.Tap(entry)
-	assert.True(t, entry.focused)
-
-	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev := &fyne.PointEvent{Position: pos}
+	pos = fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
+	ev = &fyne.PointEvent{Position: pos}
 	entry.Tapped(ev)
-
+	test.AssertImageMatches(t, "entry_tapped_tapped_after_last_row.png", c.Capture())
 	assert.Equal(t, 2, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
 }
