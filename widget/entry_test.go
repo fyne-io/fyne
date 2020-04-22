@@ -1172,44 +1172,66 @@ func TestEntry_SelectAll(t *testing.T) {
 	assert.Equal(t, 9, e.CursorColumn)
 }
 
-func TestEntry_SelectSnapping(t *testing.T) {
+func TestEntry_SelectSnapRight(t *testing.T) {
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
-	e := setup()
-	typeKeys(e, keyShiftLeftUp)
 	assert.Equal(t, 1, e.CursorRow)
 	assert.Equal(t, 5, e.CursorColumn)
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
 
-	typeKeys(e, fyne.KeyRight)
+	typeKeys(e, keyShiftLeftUp, fyne.KeyRight)
 	assert.Equal(t, 1, e.CursorRow)
 	assert.Equal(t, 5, e.CursorColumn)
-	a, b := e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
+	test.AssertImageMatches(t, "entry_selection_snap_right.png", c.Capture())
+}
 
-	e = setup()
+func TestEntry_SelectSnapLeft(t *testing.T) {
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
+
 	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft)
 	assert.Equal(t, 1, e.CursorRow)
 	assert.Equal(t, 2, e.CursorColumn)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
+	test.AssertImageMatches(t, "entry_selection_snap_left.png", c.Capture())
+}
 
-	// up and down snap to start/end respectively, but they also move
-	e = setup()
+func TestEntry_SelectSnapDown(t *testing.T) {
+	// down snaps to end, but it also moves
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
+
 	typeKeys(e, keyShiftLeftUp, fyne.KeyDown)
 	assert.Equal(t, 2, e.CursorRow)
 	assert.Equal(t, 5, e.CursorColumn)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
+	test.AssertImageMatches(t, "entry_selection_snap_down.png", c.Capture())
+}
 
-	e = setup()
+func TestEntry_SelectSnapUp(t *testing.T) {
+	// up snaps to start, but it also moves
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.Equal(t, 1, e.CursorRow)
+	assert.Equal(t, 5, e.CursorColumn)
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
+
 	typeKeys(e, keyShiftLeftUp, fyne.KeyUp)
 	assert.Equal(t, 0, e.CursorRow)
 	assert.Equal(t, 5, e.CursorColumn)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
+	test.AssertImageMatches(t, "entry_selection_snap_up.png", c.Capture())
 }
 
 func TestEntry_SelectDelete(t *testing.T) {
