@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/driver"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -70,8 +71,21 @@ func TapAt(obj TappableCanvasObject, pos fyne.Position) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
 	absPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(obj)
 	ev := &fyne.PointEvent{AbsolutePosition: absPos.Add(pos), Position: pos}
-	handleFocusOnTap(c, obj)
-	obj.Tapped(ev)
+	tap(c, obj, ev)
+}
+
+// TapCanvas taps at an absolute position on the canvas.
+// It fails the test if there is no fyne.Tappable reachable at the position.
+func TapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position) {
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		}
+		return false
+	}
+	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	require.NotNil(t, o, "no tappable found at %#v", pos)
+	tap(c, o.(TappableCanvasObject), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
@@ -126,6 +140,11 @@ func WithTestTheme(t *testing.T, f func()) {
 	ApplyTheme(t, &testTheme{})
 	defer ApplyTheme(t, current)
 	f()
+}
+
+func tap(c fyne.Canvas, obj TappableCanvasObject, ev *fyne.PointEvent) {
+	handleFocusOnTap(c, obj)
+	obj.Tapped(ev)
 }
 
 func handleFocusOnTap(c fyne.Canvas, obj fyne.CanvasObject) {

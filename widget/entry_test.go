@@ -475,14 +475,21 @@ func TestEntry_TappedSecondary(t *testing.T) {
 }
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
-	entry := NewEntry()
-	tapPos := fyne.NewPos(1, 1)
-	test.TapSecondaryAt(entry, tapPos)
+	entry, window := setupImageTest(false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
-	assert.NotNil(t, entry.popUp)
+	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
+	test.AssertImageMatches(t, "entry_focus_with_popup_initial.png", c.Capture())
 
-	test.Tap(entry.popUp)
-	assert.True(t, entry.focused)
+	test.TapCanvas(t, c, fyne.NewPos(20, 20))
+	test.AssertImageMatches(t, "entry_focus_with_popup_entry_selected.png", c.Capture())
+
+	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
+	test.AssertImageMatches(t, "entry_focus_with_popup_initial.png", c.Capture())
+
+	test.TapCanvas(t, c, fyne.NewPos(5, 5))
+	test.AssertImageMatches(t, "entry_focus_with_popup_dismissed.png", c.Capture())
 }
 
 func TestEntry_HidePopUpOnEntry(t *testing.T) {
