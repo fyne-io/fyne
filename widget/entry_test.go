@@ -193,10 +193,14 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Newline(t *testing.T) {
-	entry := &Entry{MultiLine: true}
+	entry, window := setupImageTest(true)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
 	entry.SetText("Hi")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
+	test.AssertImageMatches(t, "entry_on_key_down_newline_initial.png", c.Capture())
 
 	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.TypedKey(right)
@@ -211,9 +215,8 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 
 	test.Type(entry, "o")
-	assert.Equal(t, "H\noi", entry.textProvider().String())
-	assert.Equal(t, "H", entryRenderTexts(entry)[0].Text)
-	assert.Equal(t, "oi", entryRenderTexts(entry)[1].Text)
+	assert.Equal(t, "H\noi", entry.Text)
+	test.AssertImageMatches(t, "entry_on_key_down_newline_typed.png", c.Capture())
 }
 
 func TestEntry_OnKeyDown_Backspace(t *testing.T) {
