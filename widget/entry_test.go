@@ -802,11 +802,15 @@ func TestPasswordEntry_NewlineIgnored(t *testing.T) {
 }
 
 func TestPasswordEntry_Obfuscation(t *testing.T) {
-	entry := NewPasswordEntry()
+	entry, window := setupPasswordImageTest()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	test.AssertImageMatches(t, "password_entry_obfuscation_initial.png", c.Capture())
 
 	test.Type(entry, "Hié™שרה")
 	assert.Equal(t, "Hié™שרה", entry.Text)
-	assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
+	test.AssertImageMatches(t, "password_entry_obfuscation_typed.png", c.Capture())
 }
 
 func TestEntry_OnCut(t *testing.T) {
@@ -1566,6 +1570,20 @@ func setupImageTest(multiLine bool) (*Entry, fyne.Window) {
 	} else {
 		entry.Resize(entry.MinSize().Max(fyne.NewSize(100, 0)))
 	}
+	entry.Move(fyne.NewPos(10, 10))
+
+	return entry, w
+}
+
+func setupPasswordImageTest() (*Entry, fyne.Window) {
+	app := test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	entry := NewPasswordEntry()
+	w := test.NewWindowWithPainter(entry, software.NewPainter())
+	w.Resize(fyne.NewSize(150, 100))
+
+	entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
 	entry.Move(fyne.NewPos(10, 10))
 
 	return entry, w
