@@ -959,11 +959,16 @@ func TestEntry_PasteOverSelection(t *testing.T) {
 }
 
 func TestPasswordEntry_Placeholder(t *testing.T) {
-	entry := NewPasswordEntry()
-	entry.SetPlaceHolder("Password")
+	entry, window := setupPasswordImageTest()
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
-	assert.Equal(t, "Password", entryRenderPlaceholderTexts(entry)[0].Text)
-	assert.False(t, entry.placeholderProvider().presenter.concealed())
+	entry.SetPlaceHolder("Password")
+	test.AssertImageMatches(t, "password_entry_placeholder_initial.png", c.Capture())
+
+	test.Type(entry, "Hié™שרה")
+	assert.Equal(t, "Hié™שרה", entry.Text)
+	test.AssertImageMatches(t, "password_entry_placeholder_typed.png", c.Capture())
 }
 
 func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
