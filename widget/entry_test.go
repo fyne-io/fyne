@@ -1047,6 +1047,21 @@ func TestEntry_SelectedText(t *testing.T) {
 // T e s t i n g
 // T e[s t i]n g
 // T e s t i n g
+func setupSelection() (*widget.Entry, fyne.Window) {
+	e, window := setupImageTest(true)
+	e.SetText("Testing\nTesting\nTesting")
+	e.CursorRow = 1
+	e.CursorColumn = 2
+	c := window.Canvas()
+	c.Focus(e)
+	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+	return e, window
+}
+
+// Selects "sti" on line 2 of a new multiline
+// T e s t i n g
+// T e[s t i]n g
+// T e s t i n g
 var setup = func() *Entry {
 	e := NewMultiLineEntry()
 	e.SetText("Testing\nTesting\nTesting")
@@ -1070,17 +1085,17 @@ var setupReverse = func() *Entry {
 }
 
 func TestEntry_SelectionHides(t *testing.T) {
-	e := setup()
-	selection := test.WidgetRenderer(e).(*entryRenderer).selection[0]
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
-	e.FocusGained()
-	assert.True(t, selection.Visible())
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
 
-	e.FocusLost()
-	assert.False(t, selection.Visible())
+	c.Unfocus()
+	test.AssertImageMatches(t, "entry_selection_focus_lost.png", c.Capture())
 
-	e.FocusGained()
-	assert.True(t, selection.Visible())
+	c.Focus(e)
+	test.AssertImageMatches(t, "entry_selection_focus_gained.png", c.Capture())
 }
 
 func TestEntry_SelectHomeEnd(t *testing.T) {
