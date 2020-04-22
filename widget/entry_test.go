@@ -1047,14 +1047,20 @@ func TestEntry_SelectedText(t *testing.T) {
 // T e s t i n g
 // T e[s t i]n g
 // T e s t i n g
-func setupSelection() (*widget.Entry, fyne.Window) {
+func setupSelection(reverse bool) (*widget.Entry, fyne.Window) {
 	e, window := setupImageTest(true)
 	e.SetText("Testing\nTesting\nTesting")
-	e.CursorRow = 1
-	e.CursorColumn = 2
 	c := window.Canvas()
 	c.Focus(e)
-	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+	if reverse {
+		e.CursorRow = 1
+		e.CursorColumn = 5
+		typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft)
+	} else {
+		e.CursorRow = 1
+		e.CursorColumn = 2
+		typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
+	}
 	return e, window
 }
 
@@ -1071,21 +1077,8 @@ var setup = func() *Entry {
 	return e
 }
 
-// Selects "sti" on line 2 of a new multiline (but in reverse)
-// T e s t i n g
-// T e]s t i[n g
-// T e s t i n g
-var setupReverse = func() *Entry {
-	e := NewMultiLineEntry()
-	e.SetText("Testing\nTesting\nTesting")
-	e.CursorRow = 1
-	e.CursorColumn = 5
-	typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft, fyne.KeyLeft)
-	return e
-}
-
 func TestEntry_SelectionHides(t *testing.T) {
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1099,7 +1092,7 @@ func TestEntry_SelectionHides(t *testing.T) {
 }
 
 func TestEntry_SelectHomeEnd(t *testing.T) {
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1115,7 +1108,7 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 }
 
 func TestEntry_SelectHomeWithoutShift(t *testing.T) {
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1127,7 +1120,7 @@ func TestEntry_SelectHomeWithoutShift(t *testing.T) {
 }
 
 func TestEntry_SelectEndWithoutShift(t *testing.T) {
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1139,7 +1132,7 @@ func TestEntry_SelectEndWithoutShift(t *testing.T) {
 }
 
 func TestEntry_MultilineSelect(t *testing.T) {
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1173,7 +1166,7 @@ func TestEntry_SelectAll(t *testing.T) {
 }
 
 func TestEntry_SelectSnapRight(t *testing.T) {
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1188,7 +1181,7 @@ func TestEntry_SelectSnapRight(t *testing.T) {
 }
 
 func TestEntry_SelectSnapLeft(t *testing.T) {
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1204,7 +1197,7 @@ func TestEntry_SelectSnapLeft(t *testing.T) {
 
 func TestEntry_SelectSnapDown(t *testing.T) {
 	// down snaps to end, but it also moves
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1220,7 +1213,7 @@ func TestEntry_SelectSnapDown(t *testing.T) {
 
 func TestEntry_SelectSnapUp(t *testing.T) {
 	// up snaps to start, but it also moves
-	e, window := setupSelection()
+	e, window := setupSelection(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1234,110 +1227,167 @@ func TestEntry_SelectSnapUp(t *testing.T) {
 	test.AssertImageMatches(t, "entry_selection_snap_up.png", c.Capture())
 }
 
-func TestEntry_SelectDelete(t *testing.T) {
+func TestEntry_Select(t *testing.T) {
+	for name, tt := range map[string]struct {
+		keys          []fyne.KeyName
+		text          string
+		setupReverse  bool
+		wantImage     string
+		wantSelection string
+		wantText      string
+	}{
+		"delete single-line": {
+			keys:      []fyne.KeyName{fyne.KeyDelete},
+			wantText:  "Testing\nTeng\nTesting",
+			wantImage: "entry_selection_delete_single_line.png",
+		},
+		"delete multi-line": {
+			keys:      []fyne.KeyName{fyne.KeyDown, fyne.KeyDelete},
+			wantText:  "Testing\nTeng",
+			wantImage: "entry_selection_delete_multi_line.png",
+		},
+		"delete reverse multi-line": {
+			keys:         []fyne.KeyName{fyne.KeyDown, fyne.KeyDelete},
+			setupReverse: true,
+			wantText:     "Testing\nTestisting",
+			wantImage:    "entry_selection_delete_reverse_multi_line.png",
+		},
+		"delete select down with Shift still hold": {
+			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyDown},
+			wantText:      "Testing\nTeng\nTesting",
+			wantSelection: "ng\nTe",
+			wantImage:     "entry_selection_delete_and_add_down.png",
+		},
+		"delete reverse select down with Shift still hold": {
+			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyDown},
+			setupReverse:  true,
+			wantText:      "Testing\nTeng\nTesting",
+			wantSelection: "ng\nTe",
+			wantImage:     "entry_selection_delete_and_add_down.png",
+		},
+		"delete select up with Shift still hold": {
+			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyUp},
+			wantText:      "Testing\nTeng\nTesting",
+			wantSelection: "sting\nTe",
+			wantImage:     "entry_selection_delete_and_add_up.png",
+		},
+		"delete reverse select up with Shift still hold": {
+			keys:          []fyne.KeyName{fyne.KeyDelete, fyne.KeyUp},
+			setupReverse:  true,
+			wantText:      "Testing\nTeng\nTesting",
+			wantSelection: "sting\nTe",
+			wantImage:     "entry_selection_delete_and_add_up.png",
+		},
+		// The backspace delete behaviour is the same as via delete.
+		"backspace single-line": {
+			keys:      []fyne.KeyName{fyne.KeyBackspace},
+			wantText:  "Testing\nTeng\nTesting",
+			wantImage: "entry_selection_delete_single_line.png",
+		},
+		"backspace multi-line": {
+			keys:      []fyne.KeyName{fyne.KeyDown, fyne.KeyBackspace},
+			wantText:  "Testing\nTeng",
+			wantImage: "entry_selection_delete_multi_line.png",
+		},
+		"backspace reverse multi-line": {
+			keys:         []fyne.KeyName{fyne.KeyDown, fyne.KeyBackspace},
+			setupReverse: true,
+			wantText:     "Testing\nTestisting",
+			wantImage:    "entry_selection_delete_reverse_multi_line.png",
+		},
+		"backspace select down with Shift still hold": {
+			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyDown},
+			wantText:      "Testing\nTeng\nTesting",
+			wantSelection: "ng\nTe",
+			wantImage:     "entry_selection_delete_and_add_down.png",
+		},
+		"backspace reverse select down with Shift still hold": {
+			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyDown},
+			setupReverse:  true,
+			wantText:      "Testing\nTeng\nTesting",
+			wantSelection: "ng\nTe",
+			wantImage:     "entry_selection_delete_and_add_down.png",
+		},
+		"backspace select up with Shift still hold": {
+			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyUp},
+			wantText:      "Testing\nTeng\nTesting",
+			wantSelection: "sting\nTe",
+			wantImage:     "entry_selection_delete_and_add_up.png",
+		},
+		"backspace reverse select up with Shift still hold": {
+			keys:          []fyne.KeyName{fyne.KeyBackspace, fyne.KeyUp},
+			setupReverse:  true,
+			wantText:      "Testing\nTeng\nTesting",
+			wantSelection: "sting\nTe",
+			wantImage:     "entry_selection_delete_and_add_up.png",
+		},
+		// Erase the selection and add a newline at selection start
+		"enter": {
+			keys:      []fyne.KeyName{fyne.KeyEnter},
+			wantText:  "Testing\nTe\nng\nTesting",
+			wantImage: "entry_selection_enter.png",
+		},
+		"enter reverse": {
+			keys:         []fyne.KeyName{fyne.KeyEnter},
+			setupReverse: true,
+			wantText:     "Testing\nTe\nng\nTesting",
+			wantImage:    "entry_selection_enter.png",
+		},
+		"replace": {
+			text:      "hello",
+			wantText:  "Testing\nTehellong\nTesting",
+			wantImage: "entry_selection_replace.png",
+		},
+		"replace reverse": {
+			text:         "hello",
+			setupReverse: true,
+			wantText:     "Testing\nTehellong\nTesting",
+			wantImage:    "entry_selection_replace.png",
+		},
+		"deselect and delete": {
+			keys:      []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, fyne.KeyDelete},
+			wantText:  "Testing\nTeting\nTesting",
+			wantImage: "entry_selection_deselect_delete.png",
+		},
+		"deselect and delete holding shift": {
+			keys:      []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyDelete},
+			wantText:  "Testing\nTeting\nTesting",
+			wantImage: "entry_selection_deselect_delete.png",
+		},
+		// ensure that backspace doesn't leave a selection start at the old cursor position
+		"deselect and backspace holding shift": {
+			keys:      []fyne.KeyName{keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyBackspace},
+			wantText:  "Testing\nTsting\nTesting",
+			wantImage: "entry_selection_deselect_backspace.png",
+		},
+		// clear selection, select a character and while holding shift issue two backspaces
+		"deselect, select and double backspace": {
+			keys:      []fyne.KeyName{keyShiftLeftUp, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyBackspace, fyne.KeyBackspace},
+			wantText:  "Testing\nTeing\nTesting",
+			wantImage: "entry_selection_deselect_select_backspace.png",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			entry, window := setupSelection(tt.setupReverse)
+			defer teardownImageTest(window)
+			c := window.Canvas()
 
-	e := setup()
-	typeKeys(e, fyne.KeyDelete)
-	// "Testing\nTeng\nTesting"
-	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
-	assert.Equal(t, 20, len(e.Text))
-	a, b := e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
+			if tt.setupReverse {
+				test.AssertImageMatches(t, "entry_selection_reverse_initial.png", c.Capture())
+			} else {
+				test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
+			}
 
-	e = setup()
-	typeKeys(e, fyne.KeyDown, fyne.KeyDelete)
-	assert.Equal(t, "Testing\nTeng", e.Text)
-	assert.Equal(t, 12, len(e.Text))
-
-	e = setupReverse()
-	typeKeys(e, fyne.KeyDown, fyne.KeyDelete)
-	assert.Equal(t, "Testing\nTestisting", e.Text)
-	assert.Equal(t, 18, len(e.Text))
-
-	{
-		// After pressing delete we should be able to press down to get a new selection
-		// as we're still holding delete
-		e = setup()
-		typeKeys(e, fyne.KeyDelete, fyne.KeyDown)
-		// T e s t i n g
-		// T e[n g
-		// T e]s t i n g
-		a, b = e.selection()
-		assert.Equal(t, 10, a)
-		assert.Equal(t, 15, b)
-
-		e = setupReverse()
-		typeKeys(e, fyne.KeyDelete, fyne.KeyDown)
-		a, b = e.selection()
-		assert.Equal(t, 10, a)
-		assert.Equal(t, 15, b)
+			if tt.text != "" {
+				test.Type(entry, tt.text)
+			} else {
+				typeKeys(entry, tt.keys...)
+			}
+			assert.Equal(t, tt.wantText, entry.Text)
+			assert.Equal(t, tt.wantSelection, entry.SelectedText())
+			test.AssertImageMatches(t, tt.wantImage, c.Capture())
+		})
 	}
-
-	{
-		// Pressing up after delete should
-		//  a) delete the selection
-		//  b) move the selection start point
-		e = setup()
-		typeKeys(e, fyne.KeyDelete, fyne.KeyUp)
-		// T e[s t i n g
-		// T e]n g
-		// T e s t i n g
-		a, b = e.selection()
-		assert.Equal(t, 2, a)
-		assert.Equal(t, 10, b)
-
-		e = setupReverse()
-		typeKeys(e, fyne.KeyDelete, fyne.KeyUp)
-		a, b = e.selection()
-		assert.Equal(t, 2, a)
-		assert.Equal(t, 10, b)
-	}
-}
-
-func TestEntry_SelectBackspace(t *testing.T) {
-
-	// AFAIK the backspace on selection behaviour should be identical to delete
-	e := setup()
-	typeKeys(e, fyne.KeyBackspace)
-	// "Testing\nTeng\nTesting"
-	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
-	assert.Equal(t, 20, len(e.Text))
-	a, b := e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
-}
-
-func TestEntry_SelectEnter(t *testing.T) {
-
-	// Erase the selection and add a newline at selection start
-	e := setup()
-	typeKeys(e, fyne.KeyEnter)
-	// "Testing\nTeng\nTesting"
-	assert.Equal(t, "Testing\nTe\nng\nTesting", e.Text)
-	assert.Equal(t, 21, len(e.Text))
-	a, b := e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
-
-	e = setupReverse()
-	typeKeys(e, fyne.KeyEnter)
-	// "Testing\nTeng\nTesting"
-	assert.Equal(t, "Testing\nTe\nng\nTesting", e.Text)
-	assert.Equal(t, 21, len(e.Text))
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
-}
-
-func TestEntry_SelectReplace(t *testing.T) {
-	e := setup()
-	test.Type(e, "hello")
-	assert.Equal(t, "Testing\nTehellong\nTesting", e.Text)
-
-	e = setupReverse()
-	test.Type(e, "hello")
-	assert.Equal(t, "Testing\nTehellong\nTesting", e.Text)
 }
 
 func TestEntry_EraseSelection(t *testing.T) {
@@ -1371,40 +1421,6 @@ func TestEntry_EmptySelection(t *testing.T) {
 	assert.Equal(t, "", entry.SelectedText())
 	assert.Equal(t, false, entry.selecting)
 	assert.Equal(t, 1, entry.CursorColumn)
-}
-
-func TestEntry_EraseEmptySelection(t *testing.T) {
-	e := setup()
-	// clear empty selection
-	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, fyne.KeyDelete)
-	assert.Equal(t, "Testing\nTeting\nTesting", e.Text)
-	a, b := e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
-
-	e = setup()
-	// clear empty selection while shift is held
-	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyDelete)
-	assert.Equal(t, "Testing\nTeting\nTesting", e.Text)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
-
-	// ensure that backspace doesn't leave a selection start at the old cursor position
-	e = setup()
-	typeKeys(e, keyShiftLeftUp, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyBackspace)
-	assert.Equal(t, "Testing\nTsting\nTesting", e.Text)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
-
-	// clear selection, select a character and while holding shift issue two backspaces
-	e = setup()
-	typeKeys(e, keyShiftLeftUp, fyne.KeyRight, fyne.KeyLeft, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyBackspace, fyne.KeyBackspace)
-	assert.Equal(t, "Testing\nTeing\nTesting", e.Text)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
 }
 
 func TestPasswordEntry_Reveal(t *testing.T) {
