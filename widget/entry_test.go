@@ -166,15 +166,17 @@ func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
 }
 
 func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
-	entry := NewEntry()
-	entry.SetReadOnly(true)
+	entry, window := setupImageTest()
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
+	entry.SetReadOnly(true)
 	entry.FocusGained()
-	assert.False(t, entry.focused)
+	test.AssertImageMatches(t, "entry_set_readonly_on_focus_readonly.png", c.Capture())
 
 	entry.SetReadOnly(false)
 	entry.FocusGained()
-	assert.True(t, entry.focused)
+	test.AssertImageMatches(t, "entry_set_readonly_on_focus_writable.png", c.Capture())
 }
 
 func TestEntry_OnKeyDown_Insert(t *testing.T) {
