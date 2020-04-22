@@ -1099,36 +1099,43 @@ func TestEntry_SelectionHides(t *testing.T) {
 }
 
 func TestEntry_SelectHomeEnd(t *testing.T) {
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
+
 	// T e[s t i] n g -> end -> // T e[s t i n g]
-	e := setup()
 	typeKeys(e, fyne.KeyEnd)
-	a, b := e.selection()
-	assert.Equal(t, 10, a)
-	assert.Equal(t, 15, b)
+	test.AssertImageMatches(t, "entry_selection_add_to_end.png", c.Capture())
 
 	// T e s[t i n g] -> home -> ]T e[s t i n g
 	typeKeys(e, fyne.KeyHome)
-	a, b = e.selection()
-	assert.Equal(t, 8, a)
-	assert.Equal(t, 10, b)
+	test.AssertImageMatches(t, "entry_selection_add_to_home.png", c.Capture())
+}
+
+func TestEntry_SelectHomeWithoutShift(t *testing.T) {
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
 
 	// home after releasing shift
-	e = setup()
 	typeKeys(e, keyShiftLeftUp, fyne.KeyHome)
-	assert.Equal(t, 1, e.CursorRow)
-	assert.Equal(t, 0, e.CursorColumn)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
+	test.AssertImageMatches(t, "entry_selection_home.png", c.Capture())
+}
+
+func TestEntry_SelectEndWithoutShift(t *testing.T) {
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
 
 	// end after releasing shift
-	e = setup()
 	typeKeys(e, keyShiftLeftUp, fyne.KeyEnd)
-	assert.Equal(t, 1, e.CursorRow)
-	assert.Equal(t, 7, e.CursorColumn)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
+	test.AssertImageMatches(t, "entry_selection_end.png", c.Capture())
 }
 
 func TestEntry_MultilineSelect(t *testing.T) {
