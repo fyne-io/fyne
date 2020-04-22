@@ -1012,50 +1012,35 @@ var typeKeys = func(e *Entry, keys ...fyne.KeyName) {
 }
 
 func TestEntry_SelectedText(t *testing.T) {
-	r := NewEntry()
-	r.SetText("Testing")
-	typeKeys(r, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight)
-	a, b := r.selection()
-	assert.Equal(t, 3, a)
-	assert.Equal(t, 5, b)
-	assert.Equal(t, "ti", r.SelectedText())
+	e, window := setupImageTest(false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
-	e := NewEntry()
+	c.Focus(e)
 	e.SetText("Testing")
+	test.AssertImageMatches(t, "entry_select_initial.png", c.Capture())
 
 	// move right, press & hold shift and move right
 	typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight)
-	a, b = e.selection()
-	assert.Equal(t, 1, a)
-	assert.Equal(t, 3, b)
 	assert.Equal(t, "es", e.SelectedText())
+	test.AssertImageMatches(t, "entry_select_selected.png", c.Capture())
 
 	// release shift
 	typeKeys(e, keyShiftLeftUp)
-	a, b = e.selection()
-	assert.Equal(t, 1, a)
-	assert.Equal(t, 3, b)
-
 	// press shift and move
 	typeKeys(e, keyShiftLeftDown, fyne.KeyRight)
-	a, b = e.selection()
-	assert.Equal(t, 1, a)
-	assert.Equal(t, 4, b)
+	assert.Equal(t, "est", e.SelectedText())
+	test.AssertImageMatches(t, "entry_select_add_selection.png", c.Capture())
 
 	// release shift and move right
 	typeKeys(e, keyShiftLeftUp, fyne.KeyRight)
-	a, b = e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
 	assert.Equal(t, "", e.SelectedText())
+	test.AssertImageMatches(t, "entry_select_move_wo_shift.png", c.Capture())
 
 	// press shift and move left
-	e.CursorColumn = 4 // we should be here already thanks to snapping
 	typeKeys(e, keyShiftLeftDown, fyne.KeyLeft, fyne.KeyLeft)
-	a, b = e.selection()
-	assert.Equal(t, 2, a)
-	assert.Equal(t, 4, b)
 	assert.Equal(t, "st", e.SelectedText())
+	test.AssertImageMatches(t, "entry_select_select_left.png", c.Capture())
 }
 
 // Selects "sti" on line 2 of a new multiline
