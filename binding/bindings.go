@@ -20,6 +20,7 @@ type Bool interface {
 	Set(bool)
 	SetRef(*bool)
 	Listen() <-chan bool
+	OnUpdate(func(bool))
 }
 
 // baseBool implements a data binding for a bool.
@@ -85,6 +86,16 @@ func (b *baseBool) Listen() <-chan bool {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseBool) OnUpdate(function func(bool)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -255,6 +266,16 @@ func (b *baseBoolList) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseBoolList) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *baseBoolList) Update() {
 	b.Lock()
@@ -277,6 +298,7 @@ type Float64 interface {
 	Set(float64)
 	SetRef(*float64)
 	Listen() <-chan float64
+	OnUpdate(func(float64))
 }
 
 // baseFloat64 implements a data binding for a float64.
@@ -342,6 +364,16 @@ func (b *baseFloat64) Listen() <-chan float64 {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseFloat64) OnUpdate(function func(float64)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -512,6 +544,16 @@ func (b *baseFloat64List) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseFloat64List) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *baseFloat64List) Update() {
 	b.Lock()
@@ -534,6 +576,7 @@ type Int interface {
 	Set(int)
 	SetRef(*int)
 	Listen() <-chan int
+	OnUpdate(func(int))
 }
 
 // baseInt implements a data binding for a int.
@@ -599,6 +642,16 @@ func (b *baseInt) Listen() <-chan int {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseInt) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -769,6 +822,16 @@ func (b *baseIntList) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseIntList) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *baseIntList) Update() {
 	b.Lock()
@@ -791,6 +854,7 @@ type Int64 interface {
 	Set(int64)
 	SetRef(*int64)
 	Listen() <-chan int64
+	OnUpdate(func(int64))
 }
 
 // baseInt64 implements a data binding for a int64.
@@ -856,6 +920,16 @@ func (b *baseInt64) Listen() <-chan int64 {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseInt64) OnUpdate(function func(int64)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -1026,6 +1100,16 @@ func (b *baseInt64List) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseInt64List) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *baseInt64List) Update() {
 	b.Lock()
@@ -1048,6 +1132,7 @@ type Position interface {
 	Set(fyne.Position)
 	SetRef(*fyne.Position)
 	Listen() <-chan fyne.Position
+	OnUpdate(func(fyne.Position))
 }
 
 // basePosition implements a data binding for a fyne.Position.
@@ -1113,6 +1198,16 @@ func (b *basePosition) Listen() <-chan fyne.Position {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *basePosition) OnUpdate(function func(fyne.Position)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -1283,6 +1378,16 @@ func (b *basePositionList) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *basePositionList) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *basePositionList) Update() {
 	b.Lock()
@@ -1305,6 +1410,7 @@ type Resource interface {
 	Set(fyne.Resource)
 	SetRef(*fyne.Resource)
 	Listen() <-chan fyne.Resource
+	OnUpdate(func(fyne.Resource))
 }
 
 // baseResource implements a data binding for a fyne.Resource.
@@ -1370,6 +1476,16 @@ func (b *baseResource) Listen() <-chan fyne.Resource {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseResource) OnUpdate(function func(fyne.Resource)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -1540,6 +1656,16 @@ func (b *baseResourceList) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseResourceList) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *baseResourceList) Update() {
 	b.Lock()
@@ -1562,6 +1688,7 @@ type Rune interface {
 	Set(rune)
 	SetRef(*rune)
 	Listen() <-chan rune
+	OnUpdate(func(rune))
 }
 
 // baseRune implements a data binding for a rune.
@@ -1627,6 +1754,16 @@ func (b *baseRune) Listen() <-chan rune {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseRune) OnUpdate(function func(rune)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -1797,6 +1934,16 @@ func (b *baseRuneList) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseRuneList) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *baseRuneList) Update() {
 	b.Lock()
@@ -1819,6 +1966,7 @@ type Size interface {
 	Set(fyne.Size)
 	SetRef(*fyne.Size)
 	Listen() <-chan fyne.Size
+	OnUpdate(func(fyne.Size))
 }
 
 // baseSize implements a data binding for a fyne.Size.
@@ -1884,6 +2032,16 @@ func (b *baseSize) Listen() <-chan fyne.Size {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseSize) OnUpdate(function func(fyne.Size)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -2054,6 +2212,16 @@ func (b *baseSizeList) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseSizeList) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *baseSizeList) Update() {
 	b.Lock()
@@ -2076,6 +2244,7 @@ type String interface {
 	Set(string)
 	SetRef(*string)
 	Listen() <-chan string
+	OnUpdate(func(string))
 }
 
 // baseString implements a data binding for a string.
@@ -2141,6 +2310,16 @@ func (b *baseString) Listen() <-chan string {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseString) OnUpdate(function func(string)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -2311,6 +2490,16 @@ func (b *baseStringList) Listen() <-chan int {
 	return c
 }
 
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseStringList) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
+}
+
 // Update notifies all listeners after a change.
 func (b *baseStringList) Update() {
 	b.Lock()
@@ -2333,6 +2522,7 @@ type URL interface {
 	Set(*url.URL)
 	SetRef(**url.URL)
 	Listen() <-chan *url.URL
+	OnUpdate(func(*url.URL))
 }
 
 // baseURL implements a data binding for a *url.URL.
@@ -2398,6 +2588,16 @@ func (b *baseURL) Listen() <-chan *url.URL {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *baseURL) OnUpdate(function func(*url.URL)) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -2566,6 +2766,16 @@ func (b *baseURLList) Listen() <-chan int {
 		b.traces = append(b.traces, trace)
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the list length updates.
+func (b *baseURLList) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.

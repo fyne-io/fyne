@@ -30,6 +30,7 @@ type {{ .Name }} interface {
 	Set({{ .Type }})
 	SetRef(*{{ .Type }})
 	Listen() <-chan {{ .Type }}
+	OnUpdate(func({{ .Type }}))
 }
 
 // base{{ .Name }} implements a data binding for a {{ .Type }}.
@@ -95,6 +96,16 @@ func (b *base{{ .Name }}) Listen() <-chan {{ .Type }} {
 		b.traces = append(b.traces, fmt.Sprintf("%s#%d", file, line))
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the binding updates.
+func (b *base{{ .Name }}) OnUpdate(function func({{ .Type }})) {
+	go func() {
+		channel := b.Listen()
+		for data := range channel {
+			function(data)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.
@@ -265,6 +276,16 @@ func (b *base{{ .Name }}List) Listen() <-chan int {
 		b.traces = append(b.traces, trace)
 	}
 	return c
+}
+
+// OnUpdate calls the given function whenever the list length updates.
+func (b *base{{ .Name }}List) OnUpdate(function func(int)) {
+	go func() {
+		channel := b.Listen()
+		for length := range channel {
+			function(length)
+		}
+	}()
 }
 
 // Update notifies all listeners after a change.

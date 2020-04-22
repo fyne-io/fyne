@@ -6,24 +6,27 @@ type Binding interface {
 	Update()
 }
 
+// Collection is a binding holding a collection of multiple bindings.
+type Collection interface {
+	Binding
+	// Length returns the length of the collection.
+	Length() int
+	// Listen returns a channel through which collection updates will be published.
+	Listen() <-chan int
+	// OnUpdate calls the given function whenever the collection updates.
+	OnUpdate(func(int))
+}
+
 // List defines a data binding wrapping a list of bindings.
 type List interface {
-	Binding
-	// Length returns the length of the list.
-	Length() int
+	Collection
 	// Get returns the binding at the given index.
 	Get(int) Binding
-	// Listen returns a channel through which list length updates will be published.
-	Listen() <-chan int
 }
 
 // Map defines a data binding wrapping a list of bindings.
 type Map interface {
-	Binding
-	// Length returns the length of the map.
-	Length() int
+	Collection
 	// Get returns the binding for the given key.
 	Get(string) (Binding, bool)
-	// Listen returns a channel through which map length updates will be published.
-	Listen() <-chan int
 }
