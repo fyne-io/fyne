@@ -427,22 +427,6 @@ func TestEntry_Tapped(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorColumn)
 }
 
-func TestEntry_PasteFromClipboard(t *testing.T) {
-	entry := NewEntry()
-
-	w := test.NewApp().NewWindow("")
-	w.SetContent(entry)
-
-	testContent := "test"
-
-	clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
-	clipboard.SetContent(testContent)
-
-	entry.pasteFromClipboard(clipboard)
-
-	assert.Equal(t, entry.Text, testContent)
-}
-
 func TestEntry_TappedSecondary(t *testing.T) {
 	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
@@ -526,22 +510,6 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 	assert.Equal(t, entry.SelectedText(), "")
 }
 
-func TestEntry_MouseClickAndDragAfterRow(t *testing.T) {
-	entry := NewEntry()
-	entry.SetText("A\nB\n")
-
-	testCharSize := theme.TextSize()
-	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
-	ev := &fyne.PointEvent{Position: pos}
-
-	me := &desktop.MouseEvent{PointEvent: *ev, Button: desktop.LeftMouseButton}
-	entry.MouseDown(me)
-	de := &fyne.DragEvent{PointEvent: *ev, DraggedX: 1, DraggedY: 0}
-	entry.Dragged(de)
-	entry.MouseUp(me)
-	assert.False(t, entry.selecting)
-}
-
 func TestEntry_DragSelect(t *testing.T) {
 	entry := NewEntry()
 	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
@@ -574,62 +542,6 @@ func getClickPosition(e *Entry, str string, row int) *fyne.PointEvent {
 
 	pos := fyne.NewPos(x, y)
 	return &fyne.PointEvent{Position: pos}
-}
-
-func TestEntry_ExpandSelectionForDoubleTap(t *testing.T) {
-	str := []rune(" fish 日本語日  \t  test 本日本 moose  \t")
-
-	// select invalid (before start)
-	start, end := getTextWhitespaceRegion(str, -1)
-	assert.Equal(t, -1, start)
-	assert.Equal(t, -1, end)
-
-	// select whitespace at the end of text
-	start, end = getTextWhitespaceRegion(str, len(str))
-	assert.Equal(t, 29, start)
-	assert.Equal(t, 32, end)
-	start, end = getTextWhitespaceRegion(str, len(str)+100)
-	assert.Equal(t, 29, start)
-	assert.Equal(t, 32, end)
-
-	// select the whitespace
-	start, end = getTextWhitespaceRegion(str, 0)
-	assert.Equal(t, 0, start)
-	assert.Equal(t, 1, end)
-
-	// select "fish"
-	start, end = getTextWhitespaceRegion(str, 1)
-	assert.Equal(t, 1, start)
-	assert.Equal(t, 5, end)
-	start, end = getTextWhitespaceRegion(str, 4)
-	assert.Equal(t, 1, start)
-	assert.Equal(t, 5, end)
-
-	// select "日本語日"
-	start, end = getTextWhitespaceRegion(str, 6)
-	assert.Equal(t, 6, start)
-	assert.Equal(t, 10, end)
-	start, end = getTextWhitespaceRegion(str, 9)
-	assert.Equal(t, 6, start)
-	assert.Equal(t, 10, end)
-
-	// select "  \t  "
-	start, end = getTextWhitespaceRegion(str, 10)
-	assert.Equal(t, 10, start)
-	assert.Equal(t, 15, end)
-
-	// select "  \t"
-	start, end = getTextWhitespaceRegion(str, 30)
-	assert.Equal(t, 29, start)
-	assert.Equal(t, len(str), end)
-}
-
-func TestEntry_ExpandSelectionWithWordSeparators(t *testing.T) {
-	// select "is_a"
-	str := []rune("This-is_a-test")
-	start, end := getTextWhitespaceRegion(str, 6)
-	assert.Equal(t, 5, start)
-	assert.Equal(t, 9, end)
 }
 
 func TestEntry_DoubleTapped(t *testing.T) {
@@ -1064,19 +976,6 @@ func setupSelection(reverse bool) (*widget.Entry, fyne.Window) {
 	return e, window
 }
 
-// Selects "sti" on line 2 of a new multiline
-// T e s t i n g
-// T e[s t i]n g
-// T e s t i n g
-var setup = func() *Entry {
-	e := NewMultiLineEntry()
-	e.SetText("Testing\nTesting\nTesting")
-	e.CursorRow = 1
-	e.CursorColumn = 2
-	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
-	return e
-}
-
 func TestEntry_SelectionHides(t *testing.T) {
 	e, window := setupSelection(false)
 	defer teardownImageTest(window)
@@ -1388,16 +1287,6 @@ func TestEntry_Select(t *testing.T) {
 			test.AssertImageMatches(t, tt.wantImage, c.Capture())
 		})
 	}
-}
-
-func TestEntry_EraseSelection(t *testing.T) {
-	e := setup()
-	e.eraseSelection()
-	e.updateText(e.textProvider().String())
-	assert.Equal(t, "Testing\nTeng\nTesting", e.Text)
-	a, b := e.selection()
-	assert.Equal(t, -1, a)
-	assert.Equal(t, -1, b)
 }
 
 func TestEntry_EmptySelection(t *testing.T) {
