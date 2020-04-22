@@ -1139,30 +1139,21 @@ func TestEntry_SelectEndWithoutShift(t *testing.T) {
 }
 
 func TestEntry_MultilineSelect(t *testing.T) {
-	e := setup()
+	e, window := setupSelection()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	test.AssertImageMatches(t, "entry_selection_initial.png", c.Capture())
 
 	// Extend the selection down one row
-	assert.Equal(t, 1, e.CursorRow)
 	typeKeys(e, fyne.KeyDown)
-	assert.Equal(t, 2, e.CursorRow)
-	assert.Equal(t, 5, e.CursorColumn)
-	a, b := e.selection()
-	assert.Equal(t, 10, a)
-	assert.Equal(t, 21, b)
+	test.AssertImageMatches(t, "entry_selection_add_one_row_down.png", c.Capture())
 
 	typeKeys(e, fyne.KeyUp)
-	assert.Equal(t, 1, e.CursorRow)
-	assert.Equal(t, 5, e.CursorColumn)
-	a, b = e.selection()
-	assert.Equal(t, 10, a)
-	assert.Equal(t, 13, b)
+	test.AssertImageMatches(t, "entry_selection_remove_one_row_up.png", c.Capture())
 
 	typeKeys(e, fyne.KeyUp)
-	assert.Equal(t, 0, e.CursorRow)
-	assert.Equal(t, 5, e.CursorColumn)
-	a, b = e.selection()
-	assert.Equal(t, 5, a)
-	assert.Equal(t, 10, b)
+	test.AssertImageMatches(t, "entry_selection_remove_add_one_row_up.png", c.Capture())
 }
 
 func TestEntry_SelectAll(t *testing.T) {
