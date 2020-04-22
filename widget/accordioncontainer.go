@@ -190,10 +190,10 @@ func (r *accordionContainerRenderer) updateObjects() {
 		h.Text = ai.Title
 		h.OnTapped = r.container.toggleForIndex(i)
 		if ai.Open {
-			h.Icon = theme.MoveUpIcon()
+			h.Icon = theme.MoveDownIcon()
 			ai.Detail.Show()
 		} else {
-			h.Icon = theme.MoveDownIcon()
+			h.Icon = theme.NavigateNextIcon()
 			ai.Detail.Hide()
 		}
 		h.Refresh()
