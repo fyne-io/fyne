@@ -16,6 +16,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// SecondaryTappableCanvasObject is an interface used by the secondary tap helper methods.
+type SecondaryTappableCanvasObject interface {
+	fyne.CanvasObject
+	fyne.SecondaryTappable
+}
+
+// TappableCanvasObject is an interface used by the tap helper methods.
+type TappableCanvasObject interface {
+	fyne.CanvasObject
+	fyne.Tappable
+}
+
 // AssertImageMatches asserts that the given image is the same as the one stored in the master file.
 // The master filename is relative to the `testdata` directory which is relative to the test.
 // The test `t` fails if the given image is not equal to the loaded master image.
@@ -49,36 +61,30 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image) bo
 }
 
 // Tap simulates a left mouse click on the specified object.
-func Tap(obj fyne.Tappable) {
+func Tap(obj TappableCanvasObject) {
 	TapAt(obj, fyne.NewPos(1, 1))
 }
 
 // TapAt simulates a left mouse click on the passed object at a specified place within it.
-func TapAt(obj fyne.Tappable, pos fyne.Position) {
-	if focus, ok := obj.(fyne.Focusable); ok {
-		if focus != Canvas().Focused() {
-			Canvas().Focus(focus)
-		}
-	}
-
-	ev := &fyne.PointEvent{Position: pos}
+func TapAt(obj TappableCanvasObject, pos fyne.Position) {
+	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
+	absPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(obj)
+	ev := &fyne.PointEvent{AbsolutePosition: absPos.Add(pos), Position: pos}
+	handleFocusOnTap(c, obj)
 	obj.Tapped(ev)
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
-func TapSecondary(obj fyne.SecondaryTappable) {
+func TapSecondary(obj SecondaryTappableCanvasObject) {
 	TapSecondaryAt(obj, fyne.NewPos(1, 1))
 }
 
 // TapSecondaryAt simulates a right mouse click on the passed object at a specified place within it.
-func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
-	if focus, ok := obj.(fyne.Focusable); ok {
-		if focus != Canvas().Focused() {
-			Canvas().Focus(focus)
-		}
-	}
-
-	ev := &fyne.PointEvent{Position: pos}
+func TapSecondaryAt(obj SecondaryTappableCanvasObject, pos fyne.Position) {
+	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
+	handleFocusOnTap(c, obj)
+	absPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(obj)
+	ev := &fyne.PointEvent{AbsolutePosition: absPos.Add(pos), Position: pos}
 	obj.TappedSecondary(ev)
 }
 
@@ -120,6 +126,21 @@ func WithTestTheme(t *testing.T, f func()) {
 	ApplyTheme(t, &testTheme{})
 	defer ApplyTheme(t, current)
 	f()
+}
+
+func handleFocusOnTap(c fyne.Canvas, obj fyne.CanvasObject) {
+	unfocus := true
+	if focus, ok := obj.(fyne.Focusable); ok {
+		if dis, ok := obj.(fyne.Disableable); !ok || !dis.Disabled() {
+			unfocus = false
+			if focus != c.Focused() {
+				c.Focus(focus)
+			}
+		}
+	}
+	if unfocus {
+		c.Unfocus()
+	}
 }
 
 func typeChars(chars []rune, keyDown func(rune)) {
