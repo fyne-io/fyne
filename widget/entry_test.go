@@ -133,13 +133,15 @@ func TestEntry_SetText_Overflow(t *testing.T) {
 }
 
 func TestEntry_SetText_Manual(t *testing.T) {
-	entry := NewEntry()
-	provider := entry.textProvider()
-	assert.Equal(t, "", string(provider.buffer))
+	entry, window := setupImageTest()
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	test.AssertImageMatches(t, "entry_set_text_initial.png", c.Capture())
 
 	entry.Text = "Test"
 	entry.Refresh()
-	assert.Equal(t, "Test", string(provider.buffer))
+	test.AssertImageMatches(t, "entry_set_text_changed.png", c.Capture())
 }
 
 func TestEntry_OnKeyDown(t *testing.T) {
