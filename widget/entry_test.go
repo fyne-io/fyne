@@ -370,20 +370,20 @@ func TestEntryNotify(t *testing.T) {
 }
 
 func TestEntryFocus(t *testing.T) {
-	entry := NewEntry()
+	entry, window := setupImageTest(false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	test.AssertImageMatches(t, "entry_focus_initial.png", c.Capture())
 
 	entry.FocusGained()
-	assert.True(t, entry.focused)
+	test.AssertImageMatches(t, "entry_focus_focus_gained.png", c.Capture())
 
 	entry.FocusLost()
-	assert.False(t, entry.focused)
-}
-
-func TestEntryWindowFocus(t *testing.T) {
-	entry := NewEntry()
+	test.AssertImageMatches(t, "entry_focus_focus_lost.png", c.Capture())
 
 	test.Canvas().Focus(entry)
-	assert.True(t, entry.focused)
+	test.AssertImageMatches(t, "entry_focus_focus_gained.png", c.Capture())
 }
 
 func TestEntry_Tapped(t *testing.T) {
