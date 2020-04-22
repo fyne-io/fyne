@@ -1157,13 +1157,17 @@ func TestEntry_MultilineSelect(t *testing.T) {
 }
 
 func TestEntry_SelectAll(t *testing.T) {
-	e := NewMultiLineEntry()
-	e.SetText("First Row\nSecond Row\nThird Row")
-	e.selectAll()
-	a, b := e.selection()
+	e, window := setupImageTest(true)
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
-	assert.Equal(t, 0, a)
-	assert.Equal(t, 30, b)
+	c.Focus(e)
+	e.SetText("First Row\nSecond Row\nThird Row")
+	test.AssertImageMatches(t, "entry_select_all_initial.png", c.Capture())
+
+	shortcut := &fyne.ShortcutSelectAll{}
+	e.TypedShortcut(shortcut)
+	test.AssertImageMatches(t, "entry_select_all_selected.png", c.Capture())
 	assert.Equal(t, 2, e.CursorRow)
 	assert.Equal(t, 9, e.CursorColumn)
 }
