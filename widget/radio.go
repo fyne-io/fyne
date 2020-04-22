@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -19,7 +20,7 @@ type radioRenderItem struct {
 }
 
 type radioRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	items []*radioRenderItem
 	radio *Radio
 }
@@ -112,14 +113,14 @@ func (r *radioRenderer) Refresh() {
 
 			focusIndicator := canvas.NewCircle(theme.BackgroundColor())
 
-			r.setObjects(append(r.Objects(), focusIndicator, icon, text))
+			r.SetObjects(append(r.Objects(), focusIndicator, icon, text))
 			r.items = append(r.items, &radioRenderItem{icon, text, focusIndicator})
 		}
 		r.Layout(r.radio.Size())
 	} else if len(r.items) > len(r.radio.Options) {
 		total := len(r.radio.Options)
 		r.items = r.items[:total]
-		r.setObjects(r.Objects()[:total*2])
+		r.SetObjects(r.Objects()[:total*2])
 	}
 
 	for i, item := range r.items {
@@ -263,7 +264,7 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 		items = append(items, &radioRenderItem{icon, text, focusIndicator})
 	}
 
-	return &radioRenderer{baseRenderer{objects}, items, r}
+	return &radioRenderer{widget.NewBaseRenderer(objects), items, r}
 }
 
 // SetSelected sets the radio option, it can be used to set a default option.

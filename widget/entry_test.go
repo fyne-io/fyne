@@ -258,6 +258,27 @@ func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
 	assert.Equal(t, "Hi", entry.Text)
 }
 
+func TestEntry_OnKeyDown_BackspaceBeyondTextAndNewLine(t *testing.T) {
+	entry := NewMultiLineEntry()
+	entry.SetText("H\ni")
+
+	down := &fyne.KeyEvent{Name: fyne.KeyDown}
+	entry.TypedKey(down)
+	right := &fyne.KeyEvent{Name: fyne.KeyRight}
+	entry.TypedKey(right)
+
+	key := &fyne.KeyEvent{Name: fyne.KeyBackspace}
+	entry.TypedKey(key)
+
+	assert.Equal(t, 1, entry.CursorRow)
+	assert.Equal(t, 0, entry.CursorColumn)
+	entry.TypedKey(key)
+
+	assert.Equal(t, 0, entry.CursorRow)
+	assert.Equal(t, 1, entry.CursorColumn)
+	assert.Equal(t, "H", entry.Text)
+}
+
 func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
 	entry := NewEntry()
 
@@ -448,8 +469,8 @@ func TestEntry_TappedSecondary(t *testing.T) {
 	pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(over)
 
 	cont := over.(*PopUp).Content
-	assert.Equal(t, pos.X+theme.Padding()+tapPos.X, cont.Position().X)
-	assert.Equal(t, pos.Y+theme.Padding()+tapPos.Y, cont.Position().Y)
+	assert.Equal(t, pos.X+tapPos.X, cont.Position().X)
+	assert.Equal(t, pos.Y+tapPos.Y, cont.Position().Y)
 
 	items := cont.(*Box).Children
 	assert.Equal(t, 4, len(items)) // Cut, Copy, Paste, Select All

@@ -6,13 +6,14 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 const defaultText = "%d%%"
 
 type progressRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	bar      *canvas.Rectangle
 	label    *canvas.Text
 	progress *ProgressBar
@@ -97,7 +98,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	label := canvas.NewText("0%", theme.TextColor())
 	label.Alignment = fyne.TextAlignCenter
-	return &progressRenderer{baseRenderer{[]fyne.CanvasObject{bar, label}}, bar, label, p}
+	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{bar, label}), bar, label, p}
 }
 
 // NewProgressBar creates a new progress bar widget.

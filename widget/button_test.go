@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -232,9 +233,8 @@ func TestButton_Shadow(t *testing.T) {
 		button := NewButton("Test", func() {})
 		shadowFound := false
 		for _, o := range test.LaidOutObjects(button) {
-			if s, ok := o.(*shadow); ok {
+			if _, ok := o.(*widget.Shadow); ok {
 				shadowFound = true
-				assert.Equal(t, elevationLevel(2), s.level)
 			}
 		}
 		if !shadowFound {
@@ -245,7 +245,7 @@ func TestButton_Shadow(t *testing.T) {
 		button := NewButton("Test", func() {})
 		button.HideShadow = true
 		for _, o := range test.LaidOutObjects(button) {
-			if _, ok := o.(*shadow); ok {
+			if _, ok := o.(*widget.Shadow); ok {
 				assert.Fail(t, "button with HideShadow == true should not create a shadow")
 			}
 		}
@@ -258,7 +258,7 @@ func TestButtonRenderer_ApplyTheme(t *testing.T) {
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
-	withTestTheme(func() {
+	test.WithTestTheme(t, func() {
 		render.applyTheme()
 		customTextSize = render.label.TextSize
 	})

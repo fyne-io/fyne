@@ -3,12 +3,17 @@
 package glfw
 
 import (
+	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
 )
+
+const mainGoroutineID = 1
 
 var canvasMutex sync.RWMutex
 var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
@@ -58,7 +63,20 @@ func (d *gLDriver) Quit() {
 }
 
 func (d *gLDriver) Run() {
+	if goroutineID() != mainGoroutineID {
+		panic("Run() or ShowAndRun() must be called from main goroutine")
+	}
 	d.runGL()
+}
+
+func goroutineID() int {
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)]
+	// string format expects "goroutine X [running..."
+	id := strings.Split(strings.TrimSpace(string(b)), " ")[1]
+
+	num, _ := strconv.Atoi(id)
+	return num
 }
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.

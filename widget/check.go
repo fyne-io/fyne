@@ -4,11 +4,12 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 type checkRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	icon           *canvas.Image
 	label          *canvas.Text
 	focusIndicator *canvas.Circle
@@ -158,7 +159,13 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
-	return &checkRenderer{baseRenderer{[]fyne.CanvasObject{focusIndicator, icon, text}}, icon, text, focusIndicator, c}
+	return &checkRenderer{
+		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, text}),
+		icon,
+		text,
+		focusIndicator,
+		c,
+	}
 }
 
 // NewCheck creates a new check widget with the set label and change handler

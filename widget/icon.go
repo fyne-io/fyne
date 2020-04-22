@@ -5,11 +5,12 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 type iconRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	image *Icon
 }
 
@@ -31,13 +32,13 @@ func (i *iconRenderer) BackgroundColor() color.Color {
 }
 
 func (i *iconRenderer) Refresh() {
-	i.setObjects(nil)
+	i.SetObjects(nil)
 
 	if i.image.Resource != nil {
 		raster := canvas.NewImageFromResource(i.image.Resource)
 		raster.FillMode = canvas.ImageFillContain
 
-		i.setObjects([]fyne.CanvasObject{raster})
+		i.SetObjects([]fyne.CanvasObject{raster})
 	}
 	i.Layout(i.image.Size())
 

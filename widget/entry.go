@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -388,7 +389,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 	provider := e.textProvider()
 	for i := 0; i < provider.rows(); i++ {
 		b := provider.rowBoundary(i)
-		if b[0] < pos {
+		if b[0] <= pos {
 			if b[1] < pos {
 				row++
 			}
@@ -1154,7 +1155,7 @@ func NewPasswordEntry() *Entry {
 }
 
 type passwordRevealerRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	entry *Entry
 	icon  *canvas.Image
 }
@@ -1189,7 +1190,7 @@ type passwordRevealer struct {
 
 func (pr *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 	return &passwordRevealerRenderer{
-		baseRenderer: baseRenderer{[]fyne.CanvasObject{pr.icon}},
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{pr.icon}),
 		icon:         pr.icon,
 		entry:        pr.entry,
 	}

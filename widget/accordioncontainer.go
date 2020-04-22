@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -117,7 +118,7 @@ func (a *AccordionContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 type accordionContainerRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	container *AccordionContainer
 	headers   []*Button
 }
@@ -209,7 +210,7 @@ func (r *accordionContainerRenderer) updateObjects() {
 	for _, i := range r.container.Items {
 		objects = append(objects, i.Detail)
 	}
-	r.setObjects(objects)
+	r.SetObjects(objects)
 }
 
 // AccordionItem represents a single item in an AccordionContainer.

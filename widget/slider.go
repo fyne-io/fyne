@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -19,7 +20,7 @@ const (
 
 var _ fyne.Draggable = (*Slider)(nil)
 
-// Slider if a widget that can slide between two fixed values.
+// Slider is a widget that can slide between two fixed values.
 type Slider struct {
 	BaseWidget
 
@@ -128,7 +129,7 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 
 	objects := []fyne.CanvasObject{track, active, thumb}
 
-	return &sliderRenderer{baseRenderer{objects}, track, active, thumb, s}
+	return &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
 }
 
 const (
@@ -137,7 +138,7 @@ const (
 )
 
 type sliderRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	track  *canvas.Rectangle
 	active *canvas.Rectangle
 	thumb  *canvas.Circle

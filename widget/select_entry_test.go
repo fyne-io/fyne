@@ -101,7 +101,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	popUp := c.Overlays().Top().(*widget.PopUp)
 	entryMinWidth := dropDownIconWidth() + emptyTextWidth() + 4*theme.Padding()
-	assert.Equal(t, optionsMinSize(options).Union(fyne.NewSize(entryMinWidth-2*theme.Padding(), 0)).Add(fyne.NewSize(0, 2*theme.Padding())), popUp.Content.Size())
+	assert.Equal(t, optionsMinSize(options).Max(fyne.NewSize(entryMinWidth, 0)).Add(fyne.NewSize(0, 2*theme.Padding())), popUp.Content.Size())
 	assert.Equal(t, options, popUpOptions(popUp), "drop down menu texts don't match SelectEntry options")
 
 	tapPopUpItem(popUp, 1)

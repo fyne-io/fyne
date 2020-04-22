@@ -3,6 +3,7 @@
 package glfw
 
 import (
+	"sync"
 	"testing"
 
 	"fyne.io/fyne"
@@ -97,4 +98,35 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 			assert.Equal(t, tt.want, d.AbsolutePositionForObject(tt.object))
 		})
 	}
+}
+
+var mainRoutineID int
+
+func init() {
+	mainRoutineID = goroutineID()
+}
+
+func TestGoroutineID(t *testing.T) {
+	assert.Equal(t, 1, mainRoutineID)
+
+	var childID1, childID2 int
+	testID1 := goroutineID()
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		childID1 = goroutineID()
+		wg.Done()
+	}()
+	go func() {
+		childID2 = goroutineID()
+		wg.Done()
+	}()
+	wg.Wait()
+	testID2 := goroutineID()
+
+	assert.Equal(t, testID1, testID2)
+	assert.Greater(t, childID1, 0)
+	assert.NotEqual(t, testID1, childID1)
+	assert.Greater(t, childID2, 0)
+	assert.NotEqual(t, childID1, childID2)
 }

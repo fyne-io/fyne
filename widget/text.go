@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -89,7 +90,7 @@ func (t *textProvider) updateRowBounds() {
 	textWrap := t.presenter.textWrap()
 	textStyle := t.presenter.textStyle()
 	textSize := theme.TextSize()
-	maxWidth := t.Size().Width
+	maxWidth := t.Size().Width - 2*theme.Padding()
 
 	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
@@ -226,7 +227,7 @@ func (t *textProvider) lineSizeToColumn(col, row int) fyne.Size {
 
 // Renderer
 type textRenderer struct {
-	baseRenderer
+	widget.BaseRenderer
 	texts    []*canvas.Text
 	provider *textProvider
 }
@@ -300,11 +301,10 @@ func (r *textRenderer) Refresh() {
 
 		textCanvas.Alignment = r.provider.presenter.textAlign()
 		textCanvas.TextStyle = r.provider.presenter.textStyle()
-		textCanvas.Hidden = r.provider.Hidden
 
 		if add {
 			r.texts = append(r.texts, textCanvas)
-			r.setObjects(append(r.Objects(), textCanvas))
+			r.SetObjects(append(r.Objects(), textCanvas))
 		}
 	}
 
@@ -341,13 +341,57 @@ func splitLines(text []rune) [][2]int {
 	return append(lines, [2]int{low, length})
 }
 
+// binarySearch accepts a function that checks if the text width less the maximum width and the start and end rune index
+// binarySearch returns the index of rune located as close to the maximum line width as possible
+func binarySearch(lessMaxWidth func(int, int) bool, low int, maxHigh int) int {
+	if low >= maxHigh {
+		return low
+	}
+	if lessMaxWidth(low, maxHigh) {
+		return maxHigh
+	}
+	high := low
+	delta := maxHigh - low
+	for delta > 0 {
+		delta /= 2
+		if lessMaxWidth(low, high+delta) {
+			high += delta
+		}
+	}
+	for (high < maxHigh) && lessMaxWidth(low, high+1) {
+		high++
+	}
+	return high
+}
+
+// findSpaceIndex accepts a slice of runes and a fallback index
+// findSpaceIndex returns the index of the last space in the text, or fallback if there are no spaces
+func findSpaceIndex(text []rune, fallback int) int {
+	curIndex := fallback
+	for ; curIndex >= 0; curIndex-- {
+		if unicode.IsSpace(text[curIndex]) {
+			break
+		}
+	}
+	if curIndex < 0 {
+		return fallback
+	}
+	return curIndex
+}
+
 // lineBounds accepts a slice of runes, a wrapping mode, a maximum line width and a function to measure line width.
 // lineBounds returns a slice containing the start and end indicies of each line with the given wrapping applied.
 func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]rune) int) [][2]int {
+
 	lines := splitLines(text)
-	if maxWidth == 0 || wrap == fyne.TextWrapOff {
+	if maxWidth <= 0 || wrap == fyne.TextWrapOff {
 		return lines
 	}
+
+	checker := func(low int, high int) bool {
+		return measurer(text[low:high]) <= maxWidth
+	}
+
 	var bounds [][2]int
 	for _, l := range lines {
 		low := l[0]
@@ -358,14 +402,8 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 		}
 		switch wrap {
 		case fyne.TextTruncate:
-			for {
-				if measurer(text[low:high]) <= maxWidth {
-					bounds = append(bounds, [2]int{low, high})
-					break
-				} else {
-					high--
-				}
-			}
+			high = binarySearch(checker, low, high)
+			bounds = append(bounds, [2]int{low, high})
 		case fyne.TextWrapBreak:
 			for low < high {
 				if measurer(text[low:high]) <= maxWidth {
@@ -373,7 +411,7 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 					low = high
 					high = l[1]
 				} else {
-					high--
+					high = binarySearch(checker, low, high)
 				}
 			}
 		case fyne.TextWrapWord:
@@ -387,17 +425,8 @@ func lineBounds(text []rune, wrap fyne.TextWrap, maxWidth int, measurer func([]r
 						low++
 					}
 				} else {
-					last := len(sub) - 1
-					for ; last >= 0; last-- {
-						if unicode.IsSpace(sub[last]) {
-							break
-						}
-					}
-					if last < 0 {
-						high--
-					} else {
-						high = low + last
-					}
+					last := low + len(sub) - 1
+					high = low + findSpaceIndex(sub, binarySearch(checker, low, last)-low)
 				}
 			}
 		}
