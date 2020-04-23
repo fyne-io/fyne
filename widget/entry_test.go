@@ -1504,55 +1504,65 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 func TestEntry_PageUpDown(t *testing.T) {
 	t.Run("single line", func(*testing.T) {
-		e := NewEntry()
+		e, window := setupImageTest(false)
+		defer teardownImageTest(window)
+		c := window.Canvas()
+
+		c.Focus(e)
 		e.SetText("Testing")
+		test.AssertImageMatches(t, "entry_select_initial.png", c.Capture())
+
 		// move right, press & hold shift and pagedown
 		typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyPageDown)
-		a, b := e.selection()
-		assert.Equal(t, 1, a)
-		assert.Equal(t, 7, b)
 		assert.Equal(t, "esting", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
+		test.AssertImageMatches(t, "entry_select_single_line_shift_pagedown.png", c.Capture())
+
 		// while shift is held press pageup
 		typeKeys(e, fyne.KeyPageUp)
-		a, b = e.selection()
-		assert.Equal(t, 0, a)
-		assert.Equal(t, 1, b)
 		assert.Equal(t, "T", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 0, e.CursorColumn)
+		test.AssertImageMatches(t, "entry_select_single_line_shift_pageup.png", c.Capture())
+
 		// release shift and press pagedown
 		typeKeys(e, keyShiftLeftUp, fyne.KeyPageDown)
 		assert.Equal(t, "", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
+		test.AssertImageMatches(t, "entry_select_single_line_pagedown.png", c.Capture())
 	})
 
 	t.Run("page down single line", func(*testing.T) {
-		e := NewMultiLineEntry()
+		e, window := setupImageTest(true)
+		defer teardownImageTest(window)
+		c := window.Canvas()
+
+		c.Focus(e)
 		e.SetText("Testing\nTesting\nTesting")
+		test.AssertImageMatches(t, "entry_select_multi_line_initial.png", c.Capture())
+
 		// move right, press & hold shift and pagedown
 		typeKeys(e, fyne.KeyRight, keyShiftLeftDown, fyne.KeyPageDown)
-		a, b := e.selection()
-		assert.Equal(t, 1, a)
-		assert.Equal(t, 23, b)
 		assert.Equal(t, "esting\nTesting\nTesting", e.SelectedText())
 		assert.Equal(t, 2, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
+		test.AssertImageMatches(t, "entry_select_multi_line_shift_pagedown.png", c.Capture())
+
 		// while shift is held press pageup
 		typeKeys(e, fyne.KeyPageUp)
-		a, b = e.selection()
-		assert.Equal(t, 0, a)
-		assert.Equal(t, 1, b)
 		assert.Equal(t, "T", e.SelectedText())
 		assert.Equal(t, 0, e.CursorRow)
 		assert.Equal(t, 0, e.CursorColumn)
+		test.AssertImageMatches(t, "entry_select_multi_line_shift_pageup.png", c.Capture())
+
 		// release shift and press pagedown
 		typeKeys(e, keyShiftLeftUp, fyne.KeyPageDown)
 		assert.Equal(t, "", e.SelectedText())
 		assert.Equal(t, 2, e.CursorRow)
 		assert.Equal(t, 7, e.CursorColumn)
+		test.AssertImageMatches(t, "entry_select_multi_line_pagedown.png", c.Capture())
 	})
 }
 
