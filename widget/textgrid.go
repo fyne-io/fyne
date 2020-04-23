@@ -203,10 +203,7 @@ func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style T
 func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	render := &textGridRenderer{text: t}
-
-	cell := canvas.NewText("M", color.White)
-	cell.TextStyle.Monospace = true
-	render.cellSize = cell.MinSize()
+	render.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
 	return render
 }
