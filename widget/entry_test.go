@@ -1584,56 +1584,65 @@ func TestEntry_PasteUnicode(t *testing.T) {
 }
 
 func TestEntry_TextWrap(t *testing.T) {
-	t.Run("SingleLine", func(t *testing.T) {
-		t.Run("WrapOff", func(t *testing.T) {
-			// Allowed
-			e := NewEntry()
-			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
+	for name, tt := range map[string]struct {
+		multiLine bool
+		wantImage string
+		wrap      fyne.TextWrap
+	}{
+		"single line WrapOff": {
+			wantImage: "entry_wrap_single_line_off.png",
+		},
+		// Disallowed - fallback to TextWrapOff
+		"single line Truncate": {
+			wrap:      fyne.TextTruncate,
+			wantImage: "entry_wrap_single_line_off.png",
+		},
+		// Disallowed - fallback to TextWrapOff
+		"single line WrapBreak": {
+			wrap:      fyne.TextWrapBreak,
+			wantImage: "entry_wrap_single_line_off.png",
+		},
+		// Disallowed - fallback to TextWrapOff
+		"single line WrapWord": {
+			wrap:      fyne.TextWrapWord,
+			wantImage: "entry_wrap_single_line_off.png",
+		},
+		"multi line WrapOff": {
+			multiLine: true,
+			wantImage: "entry_wrap_multi_line_off.png",
+		},
+		// Disallowed - fallback to TextWrapOff
+		"multi line Truncate": {
+			multiLine: true,
+			wrap:      fyne.TextTruncate,
+			wantImage: "entry_wrap_multi_line_off.png",
+		},
+		"multi line WrapBreak": {
+			multiLine: true,
+			wrap:      fyne.TextWrapBreak,
+			wantImage: "entry_wrap_multi_line_wrap_break.png",
+		},
+		"multi line WrapWord": {
+			multiLine: true,
+			wrap:      fyne.TextWrapWord,
+			wantImage: "entry_wrap_multi_line_wrap_word.png",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			e, window := setupImageTest(tt.multiLine)
+			defer teardownImageTest(window)
+			c := window.Canvas()
+
+			c.Focus(e)
+			e.Wrapping = tt.wrap
+			if tt.multiLine {
+				e.SetText("A long text on short words w/o NLs or LFs.")
+			} else {
+				e.SetText("Testing Wrapping")
+			}
+			test.AssertImageMatches(t, tt.wantImage, c.Capture())
 		})
-		t.Run("Truncate", func(t *testing.T) {
-			// Disallowed - fallback to TextWrapOff
-			e := NewEntry()
-			e.Wrapping = fyne.TextTruncate
-			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
-		})
-		t.Run("WrapBreak", func(t *testing.T) {
-			// Disallowed - fallback to TextWrapOff
-			e := NewEntry()
-			e.Wrapping = fyne.TextWrapBreak
-			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
-		})
-		t.Run("WrapWord", func(t *testing.T) {
-			// Disallowed - fallback to TextWrapOff
-			e := NewEntry()
-			e.Wrapping = fyne.TextWrapWord
-			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
-		})
-	})
-	t.Run("MultiLine", func(t *testing.T) {
-		t.Run("WrapOff", func(t *testing.T) {
-			// Allowed
-			e := NewMultiLineEntry()
-			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
-		})
-		t.Run("Truncate", func(t *testing.T) {
-			// Disallowed - fallback to TextWrapOff
-			e := NewMultiLineEntry()
-			e.Wrapping = fyne.TextTruncate
-			assert.Equal(t, fyne.TextWrapOff, e.textWrap())
-		})
-		t.Run("WrapBreak", func(t *testing.T) {
-			// Allowed
-			e := NewMultiLineEntry()
-			e.Wrapping = fyne.TextWrapBreak
-			assert.Equal(t, fyne.TextWrapBreak, e.textWrap())
-		})
-		t.Run("WrapWord", func(t *testing.T) {
-			// Allowed
-			e := NewMultiLineEntry()
-			e.Wrapping = fyne.TextWrapWord
-			assert.Equal(t, fyne.TextWrapWord, e.textWrap())
-		})
-	})
+	}
 }
 
 func setupImageTest(multiLine bool) (*Entry, fyne.Window) {
