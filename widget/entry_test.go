@@ -1424,57 +1424,81 @@ func TestEntry_EmptySelection(t *testing.T) {
 }
 
 func TestPasswordEntry_Reveal(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := NewPasswordEntry()
-		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.ActionItem.(*passwordRevealer)
+		window := test.NewWindowWithPainter(entry, software.NewPainter())
+		defer window.Close()
+		window.Resize(fyne.NewSize(150, 100))
+		entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
+		entry.Move(fyne.NewPos(10, 10))
+		c := window.Canvas()
+
+		test.AssertImageMatches(t, "password_entry_initial.png", c.Capture())
+		c.Focus(entry)
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
-		assert.Equal(t, theme.VisibilityOffIcon(), actionIcon.icon.Resource)
+		test.AssertImageMatches(t, "password_entry_concealed.png", c.Capture())
 
 		// update the Password field
 		entry.Password = false
-		Refresh(entry)
-
+		entry.Refresh()
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
-		assert.True(t, entry.focused)
-		assert.Equal(t, theme.VisibilityIcon(), actionIcon.icon.Resource)
+		test.AssertImageMatches(t, "password_entry_revealed.png", c.Capture())
+		assert.Equal(t, entry, c.Focused())
+
+		// update the Password field
+		entry.Password = true
+		entry.Refresh()
+		assert.Equal(t, "Hié™שרה", entry.Text)
+		test.AssertImageMatches(t, "password_entry_concealed.png", c.Capture())
+		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
-		test.Tap(actionIcon)
-
+		tapPos := fyne.NewPos(140-theme.Padding()*2-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
+		test.TapCanvas(t, c, tapPos)
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
-		assert.True(t, entry.focused)
-		assert.Equal(t, theme.VisibilityOffIcon(), actionIcon.icon.Resource)
+		test.AssertImageMatches(t, "password_entry_revealed.png", c.Capture())
+		assert.Equal(t, entry, c.Focused())
+
+		// tap on action icon
+		test.TapCanvas(t, c, tapPos)
+		assert.Equal(t, "Hié™שרה", entry.Text)
+		test.AssertImageMatches(t, "password_entry_concealed.png", c.Capture())
+		assert.Equal(t, entry, c.Focused())
 	})
 
 	// This test cover backward compatibility use case when on an Entry widget
 	// the Password field is set to true.
-	// In this case the action item should not be displayed
+	// In this case the action item will be set when the renderer is created.
 	t.Run("Entry with Password field", func(t *testing.T) {
-		entry := NewEntry()
+		entry := &Entry{}
 		entry.Password = true
 		entry.Refresh()
+		window := test.NewWindowWithPainter(entry, software.NewPainter())
+		defer window.Close()
+		window.Resize(fyne.NewSize(150, 100))
+		entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
+		entry.Move(fyne.NewPos(10, 10))
+		c := window.Canvas()
 
-		// action icon is not displayed
-		actionIcon := test.WidgetRenderer(entry).(*entryRenderer).entry.ActionItem
-		assert.NotNil(t, actionIcon)
+		test.AssertImageMatches(t, "password_entry_initial.png", c.Capture())
+		c.Focus(entry)
 
 		test.Type(entry, "Hié™שרה")
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		assert.Equal(t, "•••••••", entryRenderTexts(entry)[0].Text)
+		test.AssertImageMatches(t, "password_entry_concealed.png", c.Capture())
 
 		// update the Password field
 		entry.Password = false
-		Refresh(entry)
-
+		entry.Refresh()
 		assert.Equal(t, "Hié™שרה", entry.Text)
-		assert.Equal(t, "Hié™שרה", entryRenderTexts(entry)[0].Text)
-		assert.True(t, entry.focused)
-		assert.NotNil(t, actionIcon)
+		test.AssertImageMatches(t, "password_entry_revealed.png", c.Capture())
+		assert.Equal(t, entry, c.Focused())
 	})
 }
 
