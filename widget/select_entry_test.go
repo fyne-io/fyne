@@ -86,7 +86,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	assert.Nil(t, c.Overlays().Top())
 
-	var dropDownSwitch test.TappableCanvasObject
+	var dropDownSwitch *widget.Button
 	for _, o := range test.LaidOutObjects(c.Content()) {
 		if b, ok := o.(*widget.Button); ok {
 			dropDownSwitch = b
@@ -151,9 +151,9 @@ func popUpOptions(popUp *widget.PopUp) []string {
 }
 
 func tapPopUpItem(p *widget.PopUp, i int) {
-	var items []test.TappableCanvasObject
+	var items []fyne.Tappable
 	for _, o := range test.LaidOutObjects(p.Content) {
-		if t, ok := o.(test.TappableCanvasObject); ok {
+		if t, ok := o.(fyne.Tappable); ok {
 			items = append(items, t)
 		}
 	}

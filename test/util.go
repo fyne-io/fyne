@@ -17,18 +17,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// SecondaryTappableCanvasObject is an interface used by the secondary tap helper methods.
-type SecondaryTappableCanvasObject interface {
-	fyne.CanvasObject
-	fyne.SecondaryTappable
-}
-
-// TappableCanvasObject is an interface used by the tap helper methods.
-type TappableCanvasObject interface {
-	fyne.CanvasObject
-	fyne.Tappable
-}
-
 // AssertImageMatches asserts that the given image is the same as the one stored in the master file.
 // The master filename is relative to the `testdata` directory which is relative to the test.
 // The test `t` fails if the given image is not equal to the loaded master image.
@@ -62,15 +50,13 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image) bo
 }
 
 // Tap simulates a left mouse click on the specified object.
-func Tap(obj TappableCanvasObject) {
+func Tap(obj fyne.Tappable) {
 	TapAt(obj, fyne.NewPos(1, 1))
 }
 
 // TapAt simulates a left mouse click on the passed object at a specified place within it.
-func TapAt(obj TappableCanvasObject, pos fyne.Position) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
-	absPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(obj)
-	ev := &fyne.PointEvent{AbsolutePosition: absPos.Add(pos), Position: pos}
+func TapAt(obj fyne.Tappable, pos fyne.Position) {
+	ev, c := prepareTap(obj, pos)
 	tap(c, obj, ev)
 }
 
@@ -85,20 +71,18 @@ func TapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position) {
 	}
 	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	require.NotNil(t, o, "no tappable found at %#v", pos)
-	tap(c, o.(TappableCanvasObject), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
+	tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
-func TapSecondary(obj SecondaryTappableCanvasObject) {
+func TapSecondary(obj fyne.SecondaryTappable) {
 	TapSecondaryAt(obj, fyne.NewPos(1, 1))
 }
 
 // TapSecondaryAt simulates a right mouse click on the passed object at a specified place within it.
-func TapSecondaryAt(obj SecondaryTappableCanvasObject, pos fyne.Position) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(obj)
+func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
+	ev, c := prepareTap(obj, pos)
 	handleFocusOnTap(c, obj)
-	absPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(obj)
-	ev := &fyne.PointEvent{AbsolutePosition: absPos.Add(pos), Position: pos}
 	obj.TappedSecondary(ev)
 }
 
@@ -142,12 +126,26 @@ func WithTestTheme(t *testing.T, f func()) {
 	f()
 }
 
-func tap(c fyne.Canvas, obj TappableCanvasObject, ev *fyne.PointEvent) {
+func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
+	d := fyne.CurrentApp().Driver()
+	ev := &fyne.PointEvent{Position: pos}
+	var c fyne.Canvas
+	if co, ok := obj.(fyne.CanvasObject); ok {
+		c = d.CanvasForObject(co)
+		ev.AbsolutePosition = d.AbsolutePositionForObject(co).Add(pos)
+	}
+	return ev, c
+}
+
+func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	handleFocusOnTap(c, obj)
 	obj.Tapped(ev)
 }
 
-func handleFocusOnTap(c fyne.Canvas, obj fyne.CanvasObject) {
+func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
+	if c == nil {
+		return
+	}
 	unfocus := true
 	if focus, ok := obj.(fyne.Focusable); ok {
 		if dis, ok := obj.(fyne.Disableable); !ok || !dis.Disabled() {
