@@ -14,16 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func entryRenderTexts(e *Entry) []*canvas.Text {
-	textWid := e.text
-	return test.WidgetRenderer(textWid).(*textRenderer).texts
-}
-
-func entryRenderPlaceholderTexts(e *Entry) []*canvas.Text {
-	textWid := e.placeholder
-	return test.WidgetRenderer(textWid).(*textRenderer).texts
-}
-
 func TestEntry_MinSize(t *testing.T) {
 	entry := NewEntry()
 	min := entry.MinSize()
