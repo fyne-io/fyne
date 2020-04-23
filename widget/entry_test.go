@@ -69,18 +69,10 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 }
 
 func TestEntry_SetPlaceHolder(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	entry, window := setupImageTest()
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
-	entry := NewEntry()
-	w := test.NewWindowWithPainter(entry, software.NewPainter())
-	defer w.Close()
-	w.Resize(fyne.NewSize(150, 200))
-	c := w.Canvas()
-
-	entry.Resize(entry.MinSize())
-	entry.Move(fyne.NewPos(10, 10))
 	assert.Equal(t, 0, len(entry.Text))
 	test.AssertImageMatches(t, "entry_set_placeholder_initial.png", c.Capture())
 
@@ -459,18 +451,10 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 }
 
 func TestEntry_TappedSecondary(t *testing.T) {
-	app := test.NewApp()
-	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	entry, window := setupImageTest()
+	defer teardownImageTest(window)
+	c := window.Canvas()
 
-	entry := NewEntry()
-	w := test.NewWindowWithPainter(entry, software.NewPainter())
-	defer w.Close()
-	w.Resize(fyne.NewSize(150, 200))
-	c := w.Canvas()
-
-	entry.Resize(entry.MinSize())
-	entry.Move(fyne.NewPos(10, 10))
 	test.AssertImageMatches(t, "entry_tapped_secondary_initial.png", c.Capture())
 
 	tapPos := fyne.NewPos(20, 10)
@@ -1567,4 +1551,23 @@ func TestEntry_TextWrap(t *testing.T) {
 			assert.Equal(t, fyne.TextWrapWord, e.textWrap())
 		})
 	})
+}
+
+func setupImageTest() (*Entry, fyne.Window) {
+	app := test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	entry := NewEntry()
+	w := test.NewWindowWithPainter(entry, software.NewPainter())
+	w.Resize(fyne.NewSize(150, 200))
+
+	entry.Resize(entry.MinSize().Max(fyne.NewSize(100, 0)))
+	entry.Move(fyne.NewPos(10, 10))
+
+	return entry, w
+}
+
+func teardownImageTest(w fyne.Window) {
+	w.Close()
+	test.NewApp()
 }
