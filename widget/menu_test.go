@@ -20,7 +20,6 @@ func TestNewPopUpMenu(t *testing.T) {
 	pop := NewPopUpMenu(menu, c)
 	assert.Equal(t, 1, len(c.Overlays().List()))
 	assert.Equal(t, pop, c.Overlays().List()[0])
-	assert.True(t, pop.hideShadow, "menu renders shadow by itself")
 
 	pop.Hide()
 	assert.Equal(t, 0, len(c.Overlays().List()))
@@ -34,8 +33,8 @@ func TestPopUpMenu_Size(t *testing.T) {
 		fyne.NewMenuItem("A", func() {}),
 		fyne.NewMenuItem("A", func() {}),
 	)
-	menuItemSize := canvas.NewText("A", color.Black).MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-	expectedSize := menuItemSize.Add(fyne.NewSize(0, menuItemSize.Height)).Add(fyne.NewSize(0, theme.Padding()*3))
+	menuItemSize := canvas.NewText("A", color.Black).MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	expectedSize := menuItemSize.Add(fyne.NewSize(0, menuItemSize.Height)).Add(fyne.NewSize(0, theme.Padding()))
 	c := win.Canvas()
 
 	pop := NewPopUpMenu(menu, c)
@@ -44,7 +43,7 @@ func TestPopUpMenu_Size(t *testing.T) {
 
 	for _, o := range test.LaidOutObjects(pop) {
 		if s, ok := o.(*widget.Shadow); ok {
-			assert.Equal(t, expectedSize, s.Size(), "infer pop-up’s inner size from shadow’s size")
+			assert.Equal(t, expectedSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), s.Size())
 		}
 	}
 }
