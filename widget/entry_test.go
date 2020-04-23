@@ -1,4 +1,4 @@
-package widget
+package widget_test
 
 import (
 	"image/color"
@@ -10,12 +10,13 @@ import (
 	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestEntry_MinSize(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	min := entry.MinSize()
 	entry.SetPlaceHolder("")
 	assert.Equal(t, min, entry.MinSize())
@@ -34,20 +35,20 @@ func TestEntry_MinSize(t *testing.T) {
 }
 
 func TestEntry_Cursor(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	assert.Equal(t, desktop.TextCursor, entry.Cursor())
 }
 
 func TestEntry_passwordRevealerCursor(t *testing.T) {
-	pr := NewPasswordEntry().ActionItem.(desktop.Cursorable)
+	pr := widget.NewPasswordEntry().ActionItem.(desktop.Cursorable)
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	singleMin := entry.MinSize()
 
-	multi := NewMultiLineEntry()
+	multi := widget.NewMultiLineEntry()
 	multiMin := multi.MinSize()
 
 	assert.Equal(t, singleMin.Width, multiMin.Width)
@@ -76,7 +77,7 @@ func TestEntry_SetPlaceHolder(t *testing.T) {
 }
 
 func TestEntry_SetTextEmptyString(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 
 	assert.Equal(t, 0, entry.CursorColumn)
 
@@ -85,7 +86,7 @@ func TestEntry_SetTextEmptyString(t *testing.T) {
 	entry.SetText("")
 	assert.Equal(t, 0, entry.CursorColumn)
 
-	entry = NewMultiLineEntry()
+	entry = widget.NewMultiLineEntry()
 	test.Type(entry, "test\ntest")
 
 	down := &fyne.KeyEvent{Name: fyne.KeyDown}
@@ -99,7 +100,7 @@ func TestEntry_SetTextEmptyString(t *testing.T) {
 }
 
 func TestEntry_SetText_Overflow(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 
 	assert.Equal(t, 0, entry.CursorColumn)
 
@@ -135,7 +136,7 @@ func TestEntry_SetText_Manual(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 
 	test.Type(entry, "Hi")
 
@@ -143,7 +144,7 @@ func TestEntry_OnKeyDown(t *testing.T) {
 }
 
 func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 
 	test.Type(entry, "H")
 	entry.SetReadOnly(true)
@@ -170,7 +171,7 @@ func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Insert(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 
 	test.Type(entry, "Hi")
 	assert.Equal(t, "Hi", entry.Text)
@@ -210,7 +211,7 @@ func TestEntry_OnKeyDown_Newline(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Backspace(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("Hi")
 	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.TypedKey(right)
@@ -227,7 +228,7 @@ func TestEntry_OnKeyDown_Backspace(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("Hi")
 	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.TypedKey(right)
@@ -242,7 +243,7 @@ func TestEntry_OnKeyDown_BackspaceBeyondText(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
-	entry := NewMultiLineEntry()
+	entry := widget.NewMultiLineEntry()
 	entry.SetText("H\ni")
 
 	down := &fyne.KeyEvent{Name: fyne.KeyDown}
@@ -255,7 +256,7 @@ func TestEntry_OnKeyDown_BackspaceNewline(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_BackspaceBeyondTextAndNewLine(t *testing.T) {
-	entry := NewMultiLineEntry()
+	entry := widget.NewMultiLineEntry()
 	entry.SetText("H\ni")
 
 	down := &fyne.KeyEvent{Name: fyne.KeyDown}
@@ -276,7 +277,7 @@ func TestEntry_OnKeyDown_BackspaceBeyondTextAndNewLine(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 
 	test.Type(entry, "è")
 	assert.Equal(t, 0, entry.CursorRow)
@@ -290,7 +291,7 @@ func TestEntry_OnKeyDown_Backspace_Unicode(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Delete(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("Hi")
 	right := &fyne.KeyEvent{Name: fyne.KeyRight}
 	entry.TypedKey(right)
@@ -306,7 +307,7 @@ func TestEntry_OnKeyDown_Delete(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_DeleteBeyondText(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("Hi")
 
 	key := &fyne.KeyEvent{Name: fyne.KeyDelete}
@@ -318,7 +319,7 @@ func TestEntry_OnKeyDown_DeleteBeyondText(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_DeleteNewline(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("H\ni")
 
 	right := &fyne.KeyEvent{Name: fyne.KeyRight}
@@ -331,7 +332,7 @@ func TestEntry_OnKeyDown_DeleteNewline(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Home_End(t *testing.T) {
-	entry := &Entry{}
+	entry := &widget.Entry{}
 	entry.SetText("Hi")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
@@ -348,7 +349,7 @@ func TestEntry_OnKeyDown_Home_End(t *testing.T) {
 }
 
 func TestEntryNotify(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	changed := false
 
 	entry.OnChanged = func(string) {
@@ -377,11 +378,11 @@ func TestEntryFocus(t *testing.T) {
 }
 
 func TestEntry_Tapped(t *testing.T) {
-	entry, window := setupImageTest(false)
+	entry, window := setupImageTest(true)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
-	entry.SetText("MMM")
+	entry.SetText("MMM\nWWW\n")
 	test.AssertImageMatches(t, "entry_tapped_initial.png", c.Capture())
 
 	test.Tap(entry)
@@ -467,7 +468,7 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 }
 
 func TestEntry_HidePopUpOnEntry(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	tapPos := fyne.NewPos(1, 1)
 	c := fyne.CurrentApp().Driver().CanvasForObject(entry)
 
@@ -482,7 +483,7 @@ func TestEntry_HidePopUpOnEntry(t *testing.T) {
 }
 
 func TestEntry_MouseDownOnSelect(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("Ahnj\nBuki\n")
 	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
 
@@ -504,7 +505,7 @@ func TestEntry_MouseDownOnSelect(t *testing.T) {
 }
 
 func TestEntry_DragSelect(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("The quick brown fox jumped\nover the lazy dog\nThe quick\nbrown fox\njumped over the lazy dog\n")
 
 	// get position after the letter 'e' on the second row
@@ -538,7 +539,7 @@ func getClickPosition(str string, row int) *fyne.PointEvent {
 }
 
 func TestEntry_DoubleTapped(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
 
 	// select the word 'quick'
@@ -563,7 +564,7 @@ func TestEntry_DoubleTapped(t *testing.T) {
 }
 
 func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("A\nB\n")
 	c := fyne.CurrentApp().Driver().CanvasForObject(entry)
 
@@ -580,7 +581,7 @@ func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 }
 
 func TestEntry_CursorRow(t *testing.T) {
-	entry := NewMultiLineEntry()
+	entry := widget.NewMultiLineEntry()
 	entry.SetText("test")
 	assert.Equal(t, 0, entry.CursorRow)
 
@@ -604,7 +605,7 @@ func TestEntry_CursorRow(t *testing.T) {
 }
 
 func TestEntry_CursorColumn(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("")
 	assert.Equal(t, 0, entry.CursorColumn)
 
@@ -628,7 +629,7 @@ func TestEntry_CursorColumn(t *testing.T) {
 }
 
 func TestEntry_CursorColumn_Wrap(t *testing.T) {
-	entry := NewMultiLineEntry()
+	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nb")
 	assert.Equal(t, 0, entry.CursorRow)
 	assert.Equal(t, 0, entry.CursorColumn)
@@ -652,7 +653,7 @@ func TestEntry_CursorColumn_Wrap(t *testing.T) {
 }
 
 func TestEntry_CursorColumn_Jump(t *testing.T) {
-	entry := NewMultiLineEntry()
+	entry := widget.NewMultiLineEntry()
 	entry.SetText("a\nbc")
 
 	// go to end of text
@@ -671,7 +672,7 @@ func TestEntry_CursorColumn_Jump(t *testing.T) {
 	assert.Equal(t, 1, entry.CursorColumn)
 }
 
-func checkNewlineIgnored(t *testing.T, entry *Entry) {
+func checkNewlineIgnored(t *testing.T, entry *widget.Entry) {
 	assert.Equal(t, 0, entry.CursorRow)
 
 	// only 1 line, do nothing
@@ -694,14 +695,14 @@ func checkNewlineIgnored(t *testing.T, entry *Entry) {
 }
 
 func TestSingleLineEntry_NewlineIgnored(t *testing.T) {
-	entry := &Entry{MultiLine: false}
+	entry := &widget.Entry{MultiLine: false}
 	entry.SetText("test")
 
 	checkNewlineIgnored(t, entry)
 }
 
 func TestPasswordEntry_NewlineIgnored(t *testing.T) {
-	entry := NewPasswordEntry()
+	entry := widget.NewPasswordEntry()
 	entry.SetText("test")
 
 	checkNewlineIgnored(t, entry)
@@ -720,7 +721,7 @@ func TestPasswordEntry_Obfuscation(t *testing.T) {
 }
 
 func TestEntry_OnCut(t *testing.T) {
-	e := NewEntry()
+	e := widget.NewEntry()
 	e.SetText("Testing")
 	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
@@ -733,7 +734,7 @@ func TestEntry_OnCut(t *testing.T) {
 }
 
 func TestEntry_OnCut_Password(t *testing.T) {
-	e := NewPasswordEntry()
+	e := widget.NewPasswordEntry()
 	e.SetText("Testing")
 	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
@@ -746,7 +747,7 @@ func TestEntry_OnCut_Password(t *testing.T) {
 }
 
 func TestEntry_OnCopy(t *testing.T) {
-	e := NewEntry()
+	e := widget.NewEntry()
 	e.SetText("Testing")
 	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
@@ -759,7 +760,7 @@ func TestEntry_OnCopy(t *testing.T) {
 }
 
 func TestEntry_OnCopy_Password(t *testing.T) {
-	e := NewPasswordEntry()
+	e := widget.NewPasswordEntry()
 	e.SetText("Testing")
 	typeKeys(e, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
@@ -776,14 +777,14 @@ func TestEntry_OnPaste(t *testing.T) {
 	shortcut := &fyne.ShortcutPaste{Clipboard: clipboard}
 	tests := []struct {
 		name             string
-		entry            *Entry
+		entry            *widget.Entry
 		clipboardContent string
 		wantText         string
 		wantRow, wantCol int
 	}{
 		{
 			name:             "singleline: empty content",
-			entry:            NewEntry(),
+			entry:            widget.NewEntry(),
 			clipboardContent: "",
 			wantText:         "",
 			wantRow:          0,
@@ -791,7 +792,7 @@ func TestEntry_OnPaste(t *testing.T) {
 		},
 		{
 			name:             "singleline: simple text",
-			entry:            NewEntry(),
+			entry:            widget.NewEntry(),
 			clipboardContent: "clipboard content",
 			wantText:         "clipboard content",
 			wantRow:          0,
@@ -799,7 +800,7 @@ func TestEntry_OnPaste(t *testing.T) {
 		},
 		{
 			name:             "singleline: UTF8 text",
-			entry:            NewEntry(),
+			entry:            widget.NewEntry(),
 			clipboardContent: "Hié™שרה",
 			wantText:         "Hié™שרה",
 			wantRow:          0,
@@ -807,7 +808,7 @@ func TestEntry_OnPaste(t *testing.T) {
 		},
 		{
 			name:             "singleline: with new line",
-			entry:            NewEntry(),
+			entry:            widget.NewEntry(),
 			clipboardContent: "clipboard\ncontent",
 			wantText:         "clipboard content",
 			wantRow:          0,
@@ -815,7 +816,7 @@ func TestEntry_OnPaste(t *testing.T) {
 		},
 		{
 			name:             "singleline: with tab",
-			entry:            NewEntry(),
+			entry:            widget.NewEntry(),
 			clipboardContent: "clipboard\tcontent",
 			wantText:         "clipboard\tcontent",
 			wantRow:          0,
@@ -823,7 +824,7 @@ func TestEntry_OnPaste(t *testing.T) {
 		},
 		{
 			name:             "password: with new line",
-			entry:            NewPasswordEntry(),
+			entry:            widget.NewPasswordEntry(),
 			clipboardContent: "3SB=y+)z\nkHGK(hx6 -e_\"1TZu q^bF3^$u H[:e\"1O.",
 			wantText:         `3SB=y+)z kHGK(hx6 -e_"1TZu q^bF3^$u H[:e"1O.`,
 			wantRow:          0,
@@ -831,7 +832,7 @@ func TestEntry_OnPaste(t *testing.T) {
 		},
 		{
 			name:             "multiline: with new line",
-			entry:            NewMultiLineEntry(),
+			entry:            widget.NewMultiLineEntry(),
 			clipboardContent: "clipboard\ncontent",
 			wantText:         "clipboard\ncontent",
 			wantRow:          1,
@@ -851,7 +852,7 @@ func TestEntry_OnPaste(t *testing.T) {
 }
 
 func TestEntry_PasteOverSelection(t *testing.T) {
-	e := NewEntry()
+	e := widget.NewEntry()
 	e.SetText("Testing")
 	typeKeys(e, fyne.KeyRight, fyne.KeyRight, keyShiftLeftDown, fyne.KeyRight, fyne.KeyRight, fyne.KeyRight)
 
@@ -878,8 +879,8 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 }
 
 func TestPasswordEntry_ActionItemSizeAndPlacement(t *testing.T) {
-	e := NewEntry()
-	b := NewButton("", func() {})
+	e := widget.NewEntry()
+	b := widget.NewButton("", func() {})
 	b.Icon = theme.CancelIcon()
 	e.ActionItem = b
 	test.WidgetRenderer(e).Layout(e.MinSize())
@@ -894,7 +895,7 @@ const (
 	keyShiftRightUp   fyne.KeyName = "RightShiftUp"
 )
 
-var typeKeys = func(e *Entry, keys ...fyne.KeyName) {
+var typeKeys = func(e *widget.Entry, keys ...fyne.KeyName) {
 	var keyDown = func(key *fyne.KeyEvent) {
 		e.KeyDown(key)
 		e.TypedKey(key)
@@ -1284,7 +1285,7 @@ func TestEntry_Select(t *testing.T) {
 }
 
 func TestEntry_EmptySelection(t *testing.T) {
-	entry := NewEntry()
+	entry := widget.NewEntry()
 	entry.SetText("text")
 
 	// trying to select at the edge
@@ -1311,7 +1312,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
-		entry := NewPasswordEntry()
+		entry := widget.NewPasswordEntry()
 		window := test.NewWindowWithPainter(entry, software.NewPainter())
 		defer window.Close()
 		window.Resize(fyne.NewSize(150, 100))
@@ -1358,7 +1359,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 	// the Password field is set to true.
 	// In this case the action item will be set when the renderer is created.
 	t.Run("Entry with Password field", func(t *testing.T) {
-		entry := &Entry{}
+		entry := &widget.Entry{}
 		entry.Password = true
 		entry.Refresh()
 		window := test.NewWindowWithPainter(entry, software.NewPainter())
@@ -1449,7 +1450,7 @@ func TestEntry_PageUpDown(t *testing.T) {
 }
 
 func TestEntry_PasteUnicode(t *testing.T) {
-	e := NewMultiLineEntry()
+	e := widget.NewMultiLineEntry()
 	e.SetText("line")
 	e.CursorColumn = 4
 
@@ -1527,11 +1528,11 @@ func TestEntry_TextWrap(t *testing.T) {
 	}
 }
 
-func setupImageTest(multiLine bool) (*Entry, fyne.Window) {
+func setupImageTest(multiLine bool) (*widget.Entry, fyne.Window) {
 	app := test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
 
-	entry := &Entry{MultiLine: multiLine}
+	entry := &widget.Entry{MultiLine: multiLine}
 	w := test.NewWindowWithPainter(entry, software.NewPainter())
 	w.Resize(fyne.NewSize(150, 200))
 
@@ -1545,11 +1546,11 @@ func setupImageTest(multiLine bool) (*Entry, fyne.Window) {
 	return entry, w
 }
 
-func setupPasswordImageTest() (*Entry, fyne.Window) {
+func setupPasswordImageTest() (*widget.Entry, fyne.Window) {
 	app := test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
 
-	entry := NewPasswordEntry()
+	entry := widget.NewPasswordEntry()
 	w := test.NewWindowWithPainter(entry, software.NewPainter())
 	w.Resize(fyne.NewSize(150, 100))
 
