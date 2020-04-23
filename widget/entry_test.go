@@ -69,7 +69,7 @@ func TestMultiLineEntry_MinSize(t *testing.T) {
 }
 
 func TestEntry_SetPlaceHolder(t *testing.T) {
-	entry, window := setupImageTest()
+	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -133,7 +133,7 @@ func TestEntry_SetText_Overflow(t *testing.T) {
 }
 
 func TestEntry_SetText_Manual(t *testing.T) {
-	entry, window := setupImageTest()
+	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -166,7 +166,7 @@ func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
 }
 
 func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
-	entry, window := setupImageTest()
+	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -458,7 +458,7 @@ func TestEntry_PasteFromClipboard(t *testing.T) {
 }
 
 func TestEntry_TappedSecondary(t *testing.T) {
-	entry, window := setupImageTest()
+	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1560,15 +1560,19 @@ func TestEntry_TextWrap(t *testing.T) {
 	})
 }
 
-func setupImageTest() (*Entry, fyne.Window) {
+func setupImageTest(multiLine bool) (*Entry, fyne.Window) {
 	app := test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
 
-	entry := NewEntry()
+	entry := &Entry{MultiLine: multiLine}
 	w := test.NewWindowWithPainter(entry, software.NewPainter())
 	w.Resize(fyne.NewSize(150, 200))
 
-	entry.Resize(entry.MinSize().Max(fyne.NewSize(100, 0)))
+	if multiLine {
+		entry.Resize(fyne.NewSize(100, 100))
+	} else {
+		entry.Resize(entry.MinSize().Max(fyne.NewSize(100, 0)))
+	}
 	entry.Move(fyne.NewPos(10, 10))
 
 	return entry, w
