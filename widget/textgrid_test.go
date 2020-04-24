@@ -68,13 +68,18 @@ func TestTextGrid_SetStyleRange(t *testing.T) {
 func TestTextGrid_SetStyleRange_Overflow(t *testing.T) {
 	grid := NewTextGridFromString("Ab\ncd")
 
+	grid.SetStyleRange(-2, 0, -1, 2, &CustomTextGridStyle{FGColor: color.White, BGColor: color.Black})
 	grid.SetStyleRange(2, 2, 4, 2, &CustomTextGridStyle{FGColor: color.White, BGColor: color.Black})
 	assert.Nil(t, grid.Content[0][0].Style)
 	assert.Nil(t, grid.Content[0][1].Style)
 	assert.Nil(t, grid.Content[1][0].Style)
 	assert.Nil(t, grid.Content[1][1].Style)
 
+	grid.SetStyleRange(-2, 0,  0, 0, &CustomTextGridStyle{FGColor: color.Black, BGColor: color.White})
 	grid.SetStyleRange(1, 1, 4, 0, &CustomTextGridStyle{FGColor: color.White, BGColor: color.Black})
+	assert.Equal(t, color.Black, grid.Content[0][0].Style.TextColor())
+	assert.Equal(t, color.White, grid.Content[0][0].Style.BackgroundColor())
+	assert.Nil(t, grid.Content[0][1].Style)
 	assert.Nil(t, grid.Content[1][0].Style)
 	assert.Equal(t, color.White, grid.Content[1][1].Style.TextColor())
 	assert.Equal(t, color.Black, grid.Content[1][1].Style.BackgroundColor())

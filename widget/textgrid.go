@@ -166,8 +166,12 @@ func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
 
 // SetStyleRange sets a grid style to all the cells between the start row and column through to the end row and column.
 func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style TextGridStyle) {
-	if startRow >= len(t.Content) {
+	if startRow >= len(t.Content) || endRow < 0 {
 		return
+	}
+	if startRow < 0 {
+		startRow = 0
+		startCol = 0
 	}
 	if endRow >= len(t.Content) {
 		endRow = len(t.Content) - 1
