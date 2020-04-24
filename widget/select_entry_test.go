@@ -86,7 +86,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	assert.Nil(t, c.Overlays().Top())
 
-	var dropDownSwitch fyne.Tappable
+	var dropDownSwitch *widget.Button
 	for _, o := range test.LaidOutObjects(c.Content()) {
 		if b, ok := o.(*widget.Button); ok {
 			dropDownSwitch = b
