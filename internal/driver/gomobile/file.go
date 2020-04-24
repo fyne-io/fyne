@@ -1,6 +1,7 @@
 package gomobile
 
 import (
+	"errors"
 	"io"
 	"net/url"
 	"path/filepath"
@@ -15,10 +16,6 @@ type fileOpen struct {
 	done func()
 }
 
-//func (f *fileOpen) Save() (io.WriteCloser, error) {
-//	return nativeFileSave(f)
-//}
-
 func (f *fileOpen) Name() string {
 	return nameFromURI(f.uri)
 }
@@ -27,7 +24,7 @@ func (f *fileOpen) URI() string {
 	return f.uri
 }
 
-func (d *mobileDriver) FileReaderForURI(uriOrPath string) (fyne.FileReader, error) {
+func (d *mobileDriver) FileReaderForURI(uriOrPath string) (fyne.FileReadCloser, error) {
 	uri := uriOrPath
 	if strings.Index(uriOrPath, "://") == -1 {
 		uri = "file://" + uriOrPath
@@ -39,29 +36,8 @@ func (d *mobileDriver) FileReaderForURI(uriOrPath string) (fyne.FileReader, erro
 	return file, err
 }
 
-type fileSave struct {
-	io.WriteCloser
-	uri string
-}
-
-func (f *fileSave) Name() string {
-	return nameFromURI(f.uri)
-}
-
-func (f *fileSave) URI() string {
-	return f.uri
-}
-
-func (d *mobileDriver) FileWriterForURI(uriOrPath string) (fyne.FileWriter, error) {
-	uri := uriOrPath
-	if strings.Index(uriOrPath, "://") == -1 {
-		uri = "file://" + uriOrPath
-	}
-
-	file := &fileSave{uri: uri}
-	write, err := nativeFileSave(file)
-	file.WriteCloser = write
-	return file, err
+func (d *mobileDriver) FileWriterForURI(uriOrPath string) (fyne.FileWriteCloser, error) {
+	return nil, errors.New("file writing is not supported on mobile")
 }
 
 func nameFromURI(uri string) string {
@@ -78,7 +54,7 @@ type hasPicker interface {
 }
 
 // ShowFileOpenPicker loads the native file open dialog and returns the chosen file path via the callback func.
-func ShowFileOpenPicker(callback func(fyne.FileReader, error)) {
+func ShowFileOpenPicker(callback func(fyne.FileReadCloser, error)) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, closer func()) {

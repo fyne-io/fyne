@@ -81,7 +81,3 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	stream.stream = ret
 	return stream, nil
 }
-
-func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
-	panic("Please implement me")
-}

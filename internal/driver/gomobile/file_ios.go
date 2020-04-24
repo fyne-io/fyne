@@ -71,7 +71,3 @@ func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
 	fileStruct := &secureReadCloser{url: url, closer: f.done}
 	return fileStruct, nil
 }
-
-func nativeFileSave(f *fileSave) (io.WriteCloser, error) {
-	panic("Please implement me")
-}

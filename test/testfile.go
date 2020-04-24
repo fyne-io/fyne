@@ -47,10 +47,10 @@ func openFile(uri string, create bool) (*file, error) {
 	return &file{File: f, path: path}, err
 }
 
-func (d *testDriver) FileReaderForURI(uri string) (fyne.FileReader, error) {
+func (d *testDriver) FileReaderForURI(uri string) (fyne.FileReadCloser, error) {
 	return openFile(uri, false)
 }
 
-func (d *testDriver) FileWriterForURI(uri string) (fyne.FileWriter, error) {
+func (d *testDriver) FileWriterForURI(uri string) (fyne.FileWriteCloser, error) {
 	return openFile(uri, true)
 }

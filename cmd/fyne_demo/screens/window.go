@@ -19,7 +19,7 @@ func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
 }
 
-func fileOpened(f fyne.FileReader) {
+func fileOpened(f fyne.FileReadCloser) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
@@ -37,7 +37,7 @@ func fileOpened(f fyne.FileReader) {
 	}
 }
 
-func fileSaved(f fyne.FileWriter) {
+func fileSaved(f fyne.FileWriteCloser) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
@@ -46,7 +46,7 @@ func fileSaved(f fyne.FileWriter) {
 	log.Println("Save to...", f.URI())
 }
 
-func loadImage(f fyne.FileReader) *canvas.Image {
+func loadImage(f fyne.FileReadCloser) *canvas.Image {
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		fyne.LogError("Failed to load image data", err)
@@ -57,7 +57,7 @@ func loadImage(f fyne.FileReader) *canvas.Image {
 	return canvas.NewImageFromResource(res)
 }
 
-func showImage(f fyne.FileReader) {
+func showImage(f fyne.FileReadCloser) {
 	img := loadImage(f)
 	if img == nil {
 		return
@@ -70,7 +70,7 @@ func showImage(f fyne.FileReader) {
 	w.Show()
 }
 
-func loadText(f fyne.FileReader) string {
+func loadText(f fyne.FileReadCloser) string {
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		fyne.LogError("Failed to load text data", err)
@@ -83,7 +83,7 @@ func loadText(f fyne.FileReader) string {
 	return string(data)
 }
 
-func showText(f fyne.FileReader) {
+func showText(f fyne.FileReadCloser) {
 	text := widget.NewLabel(loadText(f))
 	text.Wrapping = fyne.TextWrapWord
 
@@ -137,7 +137,7 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			prog.Show()
 		}),
 		widget.NewButton("File Open (try txt or png)", func() {
-			dialog.ShowFileOpen(func(reader fyne.FileReader, err error) {
+			dialog.ShowFileOpen(func(reader fyne.FileReadCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -147,7 +147,7 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			}, win)
 		}),
 		widget.NewButton("File Save", func() {
-			dialog.ShowFileSave(func(writer fyne.FileWriter, err error) {
+			dialog.ShowFileSave(func(writer fyne.FileWriteCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return

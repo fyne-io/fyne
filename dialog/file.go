@@ -58,7 +58,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 
 		if f.save {
-			callback := f.callback.(func(fyne.FileWriter, error))
+			callback := f.callback.(func(fyne.FileWriteCloser, error))
 			name := f.fileName.(*widget.Entry).Text
 			path := filepath.Join(f.dir, name)
 
@@ -84,7 +84,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 					f.win.Hide()
 				}, f.parent)
 		} else if f.selected != nil {
-			callback := f.callback.(func(fyne.FileReader, error))
+			callback := f.callback.(func(fyne.FileReadCloser, error))
 			f.win.Hide()
 			callback(fyne.OpenFileFromURI("file://" + f.selected.path))
 		}
@@ -96,9 +96,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			f.win.Hide()
 			if f.callback != nil {
 				if f.save {
-					f.callback.(func(fyne.FileWriter, error))(nil, nil)
+					f.callback.(func(fyne.FileWriteCloser, error))(nil, nil)
 				} else {
-					f.callback.(func(fyne.FileReader, error))(nil, nil)
+					f.callback.(func(fyne.FileReadCloser, error))(nil, nil)
 				}
 			}
 		}),
@@ -248,7 +248,7 @@ func showFileDialog(save bool, callback interface{}, parent fyne.Window) {
 
 // ShowFileOpen shows a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified.
-func ShowFileOpen(callback func(fyne.FileReader, error), parent fyne.Window) {
+func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) {
 	if fileOpenOSOverride(callback, parent) {
 		return
 	}
@@ -258,7 +258,7 @@ func ShowFileOpen(callback func(fyne.FileReader, error), parent fyne.Window) {
 // ShowFileSave shows a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified.
-func ShowFileSave(callback func(fyne.FileWriter, error), parent fyne.Window) {
+func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) {
 	if fileSaveOSOverride(callback, parent) {
 		return
 	}
