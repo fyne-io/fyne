@@ -8,6 +8,7 @@ import (
 )
 
 var _ fyne.Widget = (*Menu)(nil)
+var _ fyne.Tappable = (*Menu)(nil)
 
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {
@@ -63,6 +64,11 @@ func (m *Menu) Resize(size fyne.Size) {
 // Show satisfies the fyne.Widget interface.
 func (m *Menu) Show() {
 	m.show(m)
+}
+
+// Tapped satisfies the fyne.Tappable interface.
+func (m *Menu) Tapped(*fyne.PointEvent) {
+	// Hit a separator or padding -> do nothing.
 }
 
 func (m *Menu) dismiss() {

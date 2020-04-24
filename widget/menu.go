@@ -13,23 +13,20 @@ import (
 // ShowPopUpMenuAtPosition creates a PopUp menu populated with items from the passed menu structure.
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
 func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) {
-	pop := newPopUpMenu(menu, c)
-	pop.ShowAtPosition(pos)
+	m := newPopUpMenu(menu, c)
+	m.ShowAtPosition(pos)
 }
 
-func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
-	m := widget.NewMenu(menu)
-	pop := newPopUp(m, c)
-	pop.NotPadded = true
-	pop.hideShadow = true
+func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *widget.PopUpMenu {
+	m := widget.NewPopUpMenu(menu, c)
 	focused := c.Focused()
 	m.DismissAction = func() {
 		if c.Focused() == nil {
 			c.Focus(focused)
 		}
-		pop.Hide()
+		m.Hide()
 	}
-	return pop
+	return m
 }
 
 // NewPopUpMenuAtPosition creates a PopUp widget populated with menu items from the passed menu structure.

@@ -91,7 +91,7 @@ type Select struct {
 	OnChanged   func(string) `json:"-"`
 
 	hovered bool
-	popUp   *PopUp
+	popUp   *widget.PopUpMenu
 }
 
 var _ fyne.Widget = (*Select)(nil)
