@@ -15,11 +15,9 @@ import (
 type PopUp struct {
 	BaseWidget
 
-	Content   fyne.CanvasObject
-	Canvas    fyne.Canvas
-	NotPadded bool
+	Content fyne.CanvasObject
+	Canvas  fyne.Canvas
 
-	hideShadow   bool
 	innerPos     fyne.Position
 	innerSize    fyne.Size
 	modal        bool
@@ -106,13 +104,8 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 		}
 	}
 
-	shadowLevel := widget.PopUpLevel
-	if p.hideShadow {
-		shadowLevel = widget.BaseLevel
-	}
-
 	return &popUpRenderer{
-		widget.NewShadowingRenderer(objects, shadowLevel),
+		widget.NewShadowingRenderer(objects, widget.PopUpLevel),
 		popUpBaseRenderer{popUp: p, bg: bg},
 	}
 }
@@ -177,16 +170,10 @@ type popUpBaseRenderer struct {
 }
 
 func (r *popUpBaseRenderer) padding() fyne.Size {
-	if r.popUp.NotPadded {
-		return fyne.NewSize(0, 0)
-	}
 	return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 }
 
 func (r *popUpBaseRenderer) offset() fyne.Position {
-	if r.popUp.NotPadded {
-		return fyne.NewPos(0, 0)
-	}
 	return fyne.NewPos(theme.Padding(), theme.Padding())
 }
 
@@ -196,11 +183,7 @@ type popUpRenderer struct {
 }
 
 func (r *popUpRenderer) Layout(_ fyne.Size) {
-	contentSize := r.popUp.innerSize
-	if !r.popUp.NotPadded {
-		contentSize = contentSize.Subtract(r.padding())
-	}
-	r.popUp.Content.Resize(contentSize)
+	r.popUp.Content.Resize(r.popUp.innerSize.Subtract(r.padding()))
 
 	innerPos := r.popUp.innerPos
 	if innerPos.X+r.popUp.innerSize.Width > r.popUp.Canvas.Size().Width {
@@ -215,11 +198,7 @@ func (r *popUpRenderer) Layout(_ fyne.Size) {
 			innerPos.Y = 0 // TODO here we may need a scroller as it's longer than our canvas
 		}
 	}
-	contentPos := innerPos
-	if !r.popUp.NotPadded {
-		contentPos = contentPos.Add(r.offset())
-	}
-	r.popUp.Content.Move(contentPos)
+	r.popUp.Content.Move(innerPos.Add(r.offset()))
 
 	r.bg.Resize(r.popUp.innerSize)
 	r.bg.Move(innerPos)

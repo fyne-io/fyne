@@ -127,29 +127,17 @@ func TestPopUp_Move(t *testing.T) {
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
 	win.Resize(fyne.NewSize(50, 50))
+	pop := newPopUp(label, win.Canvas())
+	defer test.Canvas().Overlays().Remove(pop)
+
 	pos := fyne.NewPos(10, 10)
+	pop.Move(pos)
 
-	for name, tt := range map[string]struct {
-		pad            bool
-		wantContentPos fyne.Position
-	}{
-		"with padding":    {true, pos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))},
-		"without padding": {false, pos},
-	} {
-		t.Run(name, func(t *testing.T) {
-			pop := newPopUp(label, win.Canvas())
-			pop.NotPadded = !tt.pad
-			defer test.Canvas().Overlays().Remove(pop)
+	assert.Equal(t, pos.Add(fyne.NewPos(theme.Padding(), theme.Padding())), pop.Content.Position())
 
-			pop.Move(pos)
-
-			assert.Equal(t, tt.wantContentPos, pop.Content.Position())
-
-			popPos := pop.Position()
-			assert.Equal(t, 0, popPos.X) // these are 0 as the popUp must fill our overlay
-			assert.Equal(t, 0, popPos.Y)
-		})
-	}
+	popPos := pop.Position()
+	assert.Equal(t, 0, popPos.X) // these are 0 as the popUp must fill our overlay
+	assert.Equal(t, 0, popPos.Y)
 }
 
 func TestPopUp_Move_Constrained(t *testing.T) {
@@ -195,29 +183,18 @@ func TestPopUp_Resize(t *testing.T) {
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
+
+	pop := newPopUp(label, win.Canvas())
+	pop.Show()
+	defer test.Canvas().Overlays().Remove(pop)
+
 	size := fyne.NewSize(50, 40)
+	pop.Resize(size)
+	assert.Equal(t, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), pop.Content.Size())
 
-	for name, tt := range map[string]struct {
-		pad             bool
-		wantContentSize fyne.Size
-	}{
-		"with padding":    {true, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))},
-		"without padding": {false, size},
-	} {
-		t.Run(name, func(t *testing.T) {
-			pop := newPopUp(label, win.Canvas())
-			pop.NotPadded = !tt.pad
-			pop.Show()
-			defer test.Canvas().Overlays().Remove(pop)
-
-			pop.Resize(size)
-			assert.Equal(t, tt.wantContentSize, pop.Content.Size())
-
-			popSize := pop.Size()
-			assert.Equal(t, 80, popSize.Width) // these are 80 as the popUp must fill our overlay
-			assert.Equal(t, 80, popSize.Height)
-		})
-	}
+	popSize := pop.Size()
+	assert.Equal(t, 80, popSize.Width) // these are 80 as the popUp must fill our overlay
+	assert.Equal(t, 80, popSize.Height)
 }
 
 func TestPopUp_Tapped(t *testing.T) {
@@ -280,53 +257,28 @@ func TestPopUp_Layout(t *testing.T) {
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
+
+	content := NewLabel("Hi")
+	pop := newPopUp(content, win.Canvas())
 	pos := fyne.NewPos(6, 9)
+	pop.ShowAtPosition(pos)
+	defer test.Canvas().Overlays().Remove(pop)
+
 	size := fyne.NewSize(50, 40)
+	pop.Resize(size)
+	r := cache.Renderer(pop)
+	require.GreaterOrEqual(t, len(r.Objects()), 3)
 
-	for name, tt := range map[string]struct {
-		pad        bool
-		castShadow bool
-	}{
-		"with padding with shadow":       {true, true},
-		"without padding with shadow":    {false, true},
-		"with padding without shadow":    {true, false},
-		"without padding without shadow": {false, false},
-	} {
-		t.Run(name, func(t *testing.T) {
-			content := NewLabel("Hi")
-			pop := newPopUp(content, win.Canvas())
-			pop.NotPadded = !tt.pad
-			pop.hideShadow = !tt.castShadow
-			pop.ShowAtPosition(pos)
-			defer test.Canvas().Overlays().Remove(pop)
-
-			pop.Resize(size)
-			r := cache.Renderer(pop)
-			expectedObjectCount := 2
-			if tt.castShadow {
-				expectedObjectCount++
-			}
-			require.GreaterOrEqual(t, len(r.Objects()), expectedObjectCount)
-
-			bgIdx := 0
-			if tt.castShadow {
-				if s, ok := r.Objects()[0].(*widget.Shadow); assert.True(t, ok, "first rendered object is a shadow") {
-					assert.Equal(t, size, s.Size())
-					assert.Equal(t, pos, s.Position())
-				}
-				bgIdx = 1
-			} else {
-				_, ok := r.Objects()[0].(*widget.Shadow)
-				assert.False(t, ok, "first rendered object is NOT a shadow")
-			}
-			if bg, ok := r.Objects()[bgIdx].(*canvas.Rectangle); assert.True(t, ok, "a background rectangle is rendered before the content") {
-				assert.Equal(t, size, bg.Size())
-				assert.Equal(t, pos, bg.Position())
-				assert.Equal(t, theme.BackgroundColor(), bg.FillColor)
-			}
-			assert.Equal(t, r.Objects()[bgIdx+1], content)
-		})
+	if s, ok := r.Objects()[0].(*widget.Shadow); assert.True(t, ok, "first rendered object is a shadow") {
+		assert.Equal(t, size, s.Size())
+		assert.Equal(t, pos, s.Position())
 	}
+	if bg, ok := r.Objects()[1].(*canvas.Rectangle); assert.True(t, ok, "a background rectangle is rendered before the content") {
+		assert.Equal(t, size, bg.Size())
+		assert.Equal(t, pos, bg.Position())
+		assert.Equal(t, theme.BackgroundColor(), bg.FillColor)
+	}
+	assert.Equal(t, r.Objects()[2], content)
 }
 
 func TestModalPopUp_Tapped(t *testing.T) {
@@ -358,29 +310,18 @@ func TestModalPopUp_Resize(t *testing.T) {
 	win := test.NewWindow(NewLabel("OK"))
 	defer win.Close()
 	win.Resize(fyne.NewSize(80, 80))
+
+	pop := newModalPopUp(label, win.Canvas())
+	pop.Show()
+	defer test.Canvas().Overlays().Remove(pop)
+
 	size := fyne.NewSize(50, 40)
+	pop.Resize(size)
+	assert.Equal(t, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), pop.Content.Size())
 
-	for name, tt := range map[string]struct {
-		pad             bool
-		wantContentSize fyne.Size
-	}{
-		"with padding":    {true, size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))},
-		"without padding": {false, size},
-	} {
-		t.Run(name, func(t *testing.T) {
-			pop := newModalPopUp(label, win.Canvas())
-			pop.NotPadded = !tt.pad
-			pop.Show()
-			defer test.Canvas().Overlays().Remove(pop)
-
-			pop.Resize(size)
-			assert.Equal(t, tt.wantContentSize, pop.Content.Size())
-
-			popSize := pop.Size()
-			assert.Equal(t, 80, popSize.Width) // these are 80 as the popUp must fill our overlay
-			assert.Equal(t, 80, popSize.Height)
-		})
-	}
+	popSize := pop.Size()
+	assert.Equal(t, 80, popSize.Width) // these are 80 as the popUp must fill our overlay
+	assert.Equal(t, 80, popSize.Height)
 }
 
 func TestModalPopUp_Resize_Constrained(t *testing.T) {
