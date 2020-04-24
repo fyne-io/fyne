@@ -51,7 +51,7 @@ func TestProgressRenderer_ApplyTheme(t *testing.T) {
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
-	withTestTheme(func() {
+	test.WithTestTheme(t, func() {
 		render.applyTheme()
 		customTextSize = render.label.TextSize
 	})

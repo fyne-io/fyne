@@ -42,6 +42,13 @@ func (l *Label) Refresh() {
 	l.BaseWidget.Refresh()
 }
 
+// Resize sets a new size for the label.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (l *Label) Resize(size fyne.Size) {
+	l.BaseWidget.Resize(size)
+	l.provider.Resize(size)
+}
+
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
@@ -82,7 +89,6 @@ func (l *Label) object() fyne.Widget {
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.provider = newTextProvider(l.Text, l)
-	l.provider.Hidden = l.Hidden
 	return l.provider.CreateRenderer()
 }
 
