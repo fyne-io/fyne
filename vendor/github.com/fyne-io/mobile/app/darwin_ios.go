@@ -28,6 +28,7 @@ void showKeyboard();
 void hideKeyboard();
 
 void showFileOpenPicker();
+void closeFileResource(void* urlPtr);
 */
 import "C"
 import (
@@ -36,6 +37,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/fyne-io/mobile/event/lifecycle"
 	"github.com/fyne-io/mobile/event/paint"
@@ -267,19 +269,21 @@ func driverHideVirtualKeyboard() {
 	C.hideKeyboard()
 }
 
-var fileCallback func(string)
+var fileCallback func(string, func())
 
 //export filePickerReturned
-func filePickerReturned(str *C.char) {
+func filePickerReturned(str *C.char, urlPtr unsafe.Pointer) {
 	if fileCallback == nil {
 		return
 	}
 
-	fileCallback(C.GoString(str))
+	fileCallback(C.GoString(str), func() {
+		C.closeFileResource(urlPtr)
+	})
 	fileCallback = nil
 }
 
-func driverShowFileOpenPicker(callback func(string)) {
+func driverShowFileOpenPicker(callback func(string, func())) {
 	fileCallback = callback
 
 	C.showFileOpenPicker()

@@ -314,7 +314,7 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 	return nil
 }
 
-var fileCallback func(string)
+var fileCallback func(string, func())
 
 //export filePickerReturned
 func filePickerReturned(str *C.char) {
@@ -322,7 +322,7 @@ func filePickerReturned(str *C.char) {
 		return
 	}
 
-	fileCallback(C.GoString(str))
+	fileCallback(C.GoString(str), nil)
 	fileCallback = nil
 }
 
@@ -331,7 +331,7 @@ func insetsChanged(top, bottom, left, right int) {
 	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
 }
 
-func driverShowFileOpenPicker(callback func(string)) {
+func driverShowFileOpenPicker(callback func(string, func())) {
 	fileCallback = callback
 
 	if err := mobileinit.RunOnJVM(showFileOpenPicker); err != nil {

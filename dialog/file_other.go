@@ -17,6 +17,10 @@ func isHidden(file, _ string) bool {
 	return len(file) == 0 || file[0] == '.'
 }
 
-func fileOSOverride(bool, func(string), fyne.Window) bool {
+func fileOpenOSOverride(func(fyne.FileReadCloser, error), fyne.Window) bool {
+	return false
+}
+
+func fileSaveOSOverride(func(fyne.FileWriteCloser, error), fyne.Window) bool {
 	return false
 }
