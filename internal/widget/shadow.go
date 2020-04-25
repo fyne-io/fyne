@@ -25,9 +25,9 @@ type ElevationLevel int
 const (
 	BaseLevel             ElevationLevel = 0
 	ButtonLevel           ElevationLevel = 2
+	MenuLevel             ElevationLevel = 4
 	PopUpLevel            ElevationLevel = 8
 	SubmergedContentLevel ElevationLevel = 8
-	MenuLevel             ElevationLevel = 4
 )
 
 // ShadowType specifies the type of the shadow.
