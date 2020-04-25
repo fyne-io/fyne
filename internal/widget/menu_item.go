@@ -45,7 +45,12 @@ func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 		i.initChildWidget()
 		objects = append(objects, i.Child)
 	}
-	return &menuItemRenderer{NewBaseRenderer(objects), i, icon, text}
+	return &menuItemRenderer{
+		NewBaseRenderer(objects),
+		i,
+		icon,
+		text,
+	}
 }
 
 // Hide satisfies the fyne.Widget interface.
@@ -115,8 +120,34 @@ func (i *MenuItem) activateChild() {
 	}
 	i.Parent.activeChild = i.Child
 	if i.Child != nil {
+		if i.Child.Size().IsZero() {
+			i.Child.Resize(i.Child.MinSize())
+			i.updateChildPosition()
+		}
 		i.Child.Show()
 	}
+}
+
+func (i *MenuItem) updateChildPosition() {
+	itemSize := i.Size()
+	cp := fyne.NewPos(itemSize.Width, -theme.Padding())
+	d := fyne.CurrentApp().Driver()
+	c := d.CanvasForObject(i)
+	if c != nil {
+		absPos := d.AbsolutePositionForObject(i)
+		childSize := i.Child.Size()
+		if absPos.X+itemSize.Width+childSize.Width > c.Size().Width {
+			if absPos.X-childSize.Width >= 0 {
+				cp.X = -childSize.Width
+			} else {
+				cp.X = c.Size().Width - absPos.X - childSize.Width
+			}
+		}
+		if absPos.Y+childSize.Height-theme.Padding() > c.Size().Height {
+			cp.Y = c.Size().Height - absPos.Y - childSize.Height
+		}
+	}
+	i.Child.Move(cp)
 }
 
 func (i *MenuItem) initChildWidget() {
@@ -137,7 +168,7 @@ type menuItemRenderer struct {
 
 // BackgroundColor satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) BackgroundColor() color.Color {
-	if r.i.hovered {
+	if r.i.hovered || (r.i.Child != nil && r.i.Child.Visible()) {
 		return theme.HoverColor()
 	}
 
@@ -153,31 +184,6 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	if r.icon != nil {
 		r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 		r.icon.Move(fyne.NewPos(size.Width-theme.IconInlineSize(), (size.Height-theme.IconInlineSize())/2))
-	}
-
-	if r.i.Child != nil {
-		r.i.Child.Resize(r.i.Child.MinSize())
-		var cp fyne.Position
-		itemSize := r.i.Size()
-		cp.X = itemSize.Width
-
-		d := fyne.CurrentApp().Driver()
-		c := d.CanvasForObject(r.i)
-		if c != nil {
-			absPos := d.AbsolutePositionForObject(r.i)
-			childSize := r.i.Child.Size()
-			if absPos.X+itemSize.Width+childSize.Width > c.Size().Width {
-				if absPos.X-childSize.Width >= 0 {
-					cp.X = -childSize.Width
-				} else {
-					cp.X = c.Size().Width - absPos.X - childSize.Width
-				}
-			}
-			if absPos.Y+childSize.Height > c.Size().Height {
-				cp.Y = c.Size().Height - absPos.Y - childSize.Height
-			}
-		}
-		r.i.Child.Move(cp)
 	}
 }
 
