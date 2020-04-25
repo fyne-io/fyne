@@ -3,17 +3,16 @@ package widget_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var shadowLevel = widget.ElevationLevel(5)
-var shadowWidth = int(shadowLevel)
 
 func TestShadow_ApplyTheme(t *testing.T) {
 	app := test.NewApp()
