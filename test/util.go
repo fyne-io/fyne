@@ -102,15 +102,7 @@ func TapAt(obj fyne.Tappable, pos fyne.Position) {
 // TapCanvas taps at an absolute position on the canvas.
 // It fails the test if there is no fyne.Tappable reachable at the position.
 func TapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position) {
-	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		}
-		return false
-	}
-	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
-	require.NotNil(t, o, "no tappable found at %#v", pos)
-	tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
+	tapCanvas(t, c, pos, true)
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
@@ -123,6 +115,12 @@ func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
 	ev, c := prepareTap(obj, pos)
 	handleFocusOnTap(c, obj)
 	obj.TappedSecondary(ev)
+}
+
+// TryToTapCanvas tries to tap at an absolute position on the canvas.
+// Contrary to TapCanvas it does not fail if there is no fyne.Tappable reachable at the position.
+func TryToTapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position) {
+	tapCanvas(t, c, pos, false)
 }
 
 // Type performs a series of key events to simulate typing of a value into the specified object.
@@ -179,6 +177,22 @@ func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canv
 func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	handleFocusOnTap(c, obj)
 	obj.Tapped(ev)
+}
+
+func tapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position, failIfNotTappable bool) {
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		}
+		return false
+	}
+	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	if o == nil && !failIfNotTappable {
+		return
+	}
+
+	require.NotNil(t, o, "no tappable found at %#v", pos)
+	tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
 }
 
 func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
