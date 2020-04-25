@@ -7,11 +7,11 @@ import (
 	"fyne.io/fyne/driver/desktop"
 )
 
-var _ fyne.Widget = (*Overlay)(nil)
-var _ fyne.Tappable = (*Overlay)(nil)
+var _ fyne.Widget = (*OverlayContainer)(nil)
+var _ fyne.Tappable = (*OverlayContainer)(nil)
 
-// Overlay is a transparent widget containing one fyne.CanvasObject and meant to be used as overlay.
-type Overlay struct {
+// OverlayContainer is a transparent widget containing one fyne.CanvasObject and meant to be used as overlay.
+type OverlayContainer struct {
 	base
 	Content fyne.CanvasObject
 
@@ -20,18 +20,18 @@ type Overlay struct {
 	shown         bool
 }
 
-// NewOverlay creates an Overlay.
-func NewOverlay(c fyne.CanvasObject, canvas fyne.Canvas, dismissAction func()) *Overlay {
-	return &Overlay{canvas: canvas, Content: c, dismissAction: dismissAction}
+// NewOverlayContainer creates an OverlayContainer.
+func NewOverlayContainer(c fyne.CanvasObject, canvas fyne.Canvas, dismissAction func()) *OverlayContainer {
+	return &OverlayContainer{canvas: canvas, Content: c, dismissAction: dismissAction}
 }
 
 // CreateRenderer satisfies the fyne.Widget interface.
-func (o *Overlay) CreateRenderer() fyne.WidgetRenderer {
+func (o *OverlayContainer) CreateRenderer() fyne.WidgetRenderer {
 	return &overlayRenderer{BaseRenderer{[]fyne.CanvasObject{o.Content}}, o}
 }
 
 // Hide satisfies the fyne.Widget interface.
-func (o *Overlay) Hide() {
+func (o *OverlayContainer) Hide() {
 	if o.shown {
 		o.canvas.Overlays().Remove(o)
 		o.shown = false
@@ -40,34 +40,34 @@ func (o *Overlay) Hide() {
 }
 
 // MinSize satisfies the fyne.Widget interface.
-func (o *Overlay) MinSize() fyne.Size {
+func (o *OverlayContainer) MinSize() fyne.Size {
 	return o.minSize(o)
 }
 
 // MouseIn satisfies the desktop.Hoverable interface.
-func (o *Overlay) MouseIn(*desktop.MouseEvent) {
+func (o *OverlayContainer) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseOut satisfies the desktop.Hoverable interface.
-func (o *Overlay) MouseOut() {
+func (o *OverlayContainer) MouseOut() {
 }
 
 // MouseMoved satisfies the desktop.Hoverable interface.
-func (o *Overlay) MouseMoved(*desktop.MouseEvent) {
+func (o *OverlayContainer) MouseMoved(*desktop.MouseEvent) {
 }
 
 // Refresh satisfies the fyne.Widget interface.
-func (o *Overlay) Refresh() {
+func (o *OverlayContainer) Refresh() {
 	o.refresh(o)
 }
 
 // Resize satisfies the fyne.Widget interface.
-func (o *Overlay) Resize(size fyne.Size) {
+func (o *OverlayContainer) Resize(size fyne.Size) {
 	o.resize(size, o)
 }
 
 // Show satisfies the fyne.Widget interface.
-func (o *Overlay) Show() {
+func (o *OverlayContainer) Show() {
 	if !o.shown {
 		o.canvas.Overlays().Add(o)
 		o.shown = true
@@ -76,7 +76,7 @@ func (o *Overlay) Show() {
 }
 
 // Tapped satisfies the fyne.Tappable interface.
-func (o *Overlay) Tapped(*fyne.PointEvent) {
+func (o *OverlayContainer) Tapped(*fyne.PointEvent) {
 	if o.dismissAction != nil {
 		o.dismissAction()
 	}
@@ -84,7 +84,7 @@ func (o *Overlay) Tapped(*fyne.PointEvent) {
 
 type overlayRenderer struct {
 	BaseRenderer
-	o *Overlay
+	o *OverlayContainer
 }
 
 var _ fyne.WidgetRenderer = (*overlayRenderer)(nil)

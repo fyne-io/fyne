@@ -4,18 +4,18 @@ import (
 	"fyne.io/fyne"
 )
 
-// PopUpMenu is a Menu which displays itself in an Overlay.
+// PopUpMenu is a Menu which displays itself in an OverlayContainer.
 type PopUpMenu struct {
 	*Menu
 	canvas  fyne.Canvas
-	overlay *Overlay
+	overlay *OverlayContainer
 }
 
 // NewPopUpMenu creates a new PopUpMenu.
 func NewPopUpMenu(m *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	p := &PopUpMenu{Menu: NewMenu(m), canvas: c}
 	p.Menu.Resize(p.Menu.MinSize())
-	o := NewOverlay(p.Menu, c, p.dismiss)
+	o := NewOverlayContainer(p.Menu, c, p.dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o
 	return p
