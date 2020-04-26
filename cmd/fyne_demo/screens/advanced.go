@@ -56,19 +56,6 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 		})
 	}
 
-	shareItem := fyne.NewMenuItem("Share via", nil)
-	shareItem.ChildMenu = fyne.NewMenu("",
-		fyne.NewMenuItem("Twitter", func() { fmt.Println("context menu Share->Twitter") }),
-		fyne.NewMenuItem("Reddit", func() { fmt.Println("context menu Share->Reddit") }),
-	)
-	menuLabel := &contextMenuLabel{
-		widget.Label{Text: "secondary-tap me for context menu"},
-		fyne.NewMenu("",
-			fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
-			shareItem,
-		),
-	}
-
 	return widget.NewHBox(
 		widget.NewVBox(screen,
 			widget.NewButton("Custom Theme", func() {
@@ -84,18 +71,5 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 				generic, desk,
 			),
 		),
-		menuLabel,
 	)
-}
-
-var _ fyne.SecondaryTappable = (*contextMenuLabel)(nil)
-
-type contextMenuLabel struct {
-	widget.Label
-	menu *fyne.Menu
-}
-
-// TappedSecondary satisfies the fyne.SecondaryTappable interface.
-func (l *contextMenuLabel) TappedSecondary(e *fyne.PointEvent) {
-	widget.ShowPopUpMenuAtPosition(l.menu, fyne.CurrentApp().Driver().CanvasForObject(l), e.AbsolutePosition)
 }
