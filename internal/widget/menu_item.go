@@ -16,13 +16,14 @@ type MenuItem struct {
 	base
 	DismissAction func()
 	Item          *fyne.MenuItem
+	Parent        *Menu
 
 	hovered bool
 }
 
 // NewMenuItem creates a new MenuItem.
-func NewMenuItem(item *fyne.MenuItem) *MenuItem {
-	return &MenuItem{Item: item}
+func NewMenuItem(item *fyne.MenuItem, parent *Menu) *MenuItem {
+	return &MenuItem{Item: item, Parent: parent}
 }
 
 // NewMenuItemSeparator creates a separator meant to separate MenuItems.
@@ -81,10 +82,12 @@ func (i *MenuItem) Show() {
 
 // Tapped satisfies the fyne.Tappable interface.
 func (i *MenuItem) Tapped(*fyne.PointEvent) {
-	i.Item.Action()
-	if i.DismissAction != nil {
-		i.DismissAction()
+	if i.Item.Action == nil {
+		return
 	}
+
+	i.Item.Action()
+	i.Parent.dismiss()
 }
 
 type menuItemRenderer struct {

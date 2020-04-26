@@ -4,13 +4,12 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSelectEntry_MinSize(t *testing.T) {
@@ -78,40 +77,35 @@ func TestSelectEntry_MinSize(t *testing.T) {
 }
 
 func TestSelectEntry_DropDown(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
 	options := []string{"A", "B", "C"}
 	e := widget.NewSelectEntry(options)
-	w := test.NewWindow(e)
+	w := test.NewWindowWithPainter(e, software.NewPainter())
 	defer w.Close()
+	w.Resize(fyne.NewSize(150, 200))
+	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
+	e.Move(fyne.NewPos(10, 10))
 	c := w.Canvas()
 
+	test.AssertImageMatches(t, "select_entry_dropdown_initial.png", c.Capture())
 	assert.Nil(t, c.Overlays().Top())
 
-	var dropDownSwitch *widget.Button
-	for _, o := range test.LaidOutObjects(c.Content()) {
-		if b, ok := o.(*widget.Button); ok {
-			dropDownSwitch = b
-			break
-		}
-	}
-	require.NotNil(t, dropDownSwitch, "drop down switch not found")
+	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
+	test.TapCanvas(t, c, switchPos)
+	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened.png", c.Capture())
 
-	test.Tap(dropDownSwitch)
-	require.NotNil(t, c.Overlays().Top(), "drop down didn't open")
-	require.IsType(t, &widget.PopUp{}, c.Overlays().Top(), "drop down is not a *widget.PopUp")
-
-	popUp := c.Overlays().Top().(*widget.PopUp)
-	entryMinWidth := dropDownIconWidth() + emptyTextWidth() + 4*theme.Padding()
-	assert.Equal(t, optionsMinSize(options).Max(fyne.NewSize(entryMinWidth, 0)).Add(fyne.NewSize(0, 2*theme.Padding())), popUp.Content.Size())
-	assert.Equal(t, options, popUpOptions(popUp), "drop down menu texts don't match SelectEntry options")
-
-	tapPopUpItem(popUp, 1)
-	assert.Nil(t, c.Overlays().Top())
+	test.TapCanvas(t, c, fyne.NewPos(50, 15+2*(theme.Padding()+e.Size().Height)))
+	test.AssertImageMatches(t, "select_entry_dropdown_tapped_B.png", c.Capture())
 	assert.Equal(t, "B", e.Text)
 
-	test.Tap(dropDownSwitch)
-	popUp = c.Overlays().Top().(*widget.PopUp)
-	tapPopUpItem(popUp, 2)
-	assert.Nil(t, c.Overlays().Top())
+	test.TapCanvas(t, c, switchPos)
+	test.AssertImageMatches(t, "select_entry_dropdown_B_opened.png", c.Capture())
+
+	test.TapCanvas(t, c, fyne.NewPos(50, 15+3*(theme.Padding()+e.Size().Height)))
+	test.AssertImageMatches(t, "select_entry_dropdown_tapped_C.png", c.Capture())
 	assert.Equal(t, "C", e.Text)
 }
 
@@ -137,25 +131,7 @@ func optionsMinSize(options []string) fyne.Size {
 		}
 		minHeight += label.MinSize().Height
 	}
+	// padding between all options
+	minHeight += (len(labels) - 1) * theme.Padding()
 	return fyne.NewSize(minWidth, minHeight)
-}
-
-func popUpOptions(popUp *widget.PopUp) []string {
-	var texts []string
-	for _, o := range test.LaidOutObjects(popUp.Content) {
-		if t, ok := o.(*canvas.Text); ok {
-			texts = append(texts, t.Text)
-		}
-	}
-	return texts
-}
-
-func tapPopUpItem(p *widget.PopUp, i int) {
-	var items []fyne.Tappable
-	for _, o := range test.LaidOutObjects(p.Content) {
-		if t, ok := o.(fyne.Tappable); ok {
-			items = append(items, t)
-		}
-	}
-	test.Tap(items[i])
 }
