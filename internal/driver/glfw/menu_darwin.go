@@ -15,10 +15,11 @@ import (
 #include <AppKit/AppKit.h>
 
 // Using void* as type for pointers is a workaround. See https://github.com/golang/go/issues/12065.
+void assignDarwinSubmenu(const void*, const void*);
 void completeDarwinMenu(void* menu, bool prepend);
 const void* createDarwinMenu(const char* label);
 const void* darwinAppMenu();
-void insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool isSeparator);
+const void* insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool isSeparator);
 */
 import "C"
 
@@ -80,23 +81,51 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 				C.bool(false),
 			)
 		} else {
-			C.insertDarwinMenuItem(
+			nsMenuItem := C.insertDarwinMenuItem(
 				nsMenu,
 				C.CString(item.Label),
 				C.int(nextItemID),
 				C.int(-1),
 				C.bool(item.IsSeparator),
 			)
+			if item.ChildMenu != nil {
+				nextItemID = addNativeSubMenu(w, nsMenuItem, item.ChildMenu, nextItemID)
+			}
 		}
 		if !item.IsSeparator {
-			action := item.Action // catch
-			callbacks = append(callbacks, func() { w.queueEvent(action) })
-			nextItemID++
+			if action := item.Action; action != nil { // catch action value
+				callbacks = append(callbacks, func() { w.queueEvent(action) })
+				nextItemID++
+			}
 		}
 	}
 
 	if nsMenu != nil {
 		C.completeDarwinMenu(nsMenu, C.bool(prepend))
 	}
+	return nextItemID
+}
+
+func addNativeSubMenu(w *window, nsParentMenuItem unsafe.Pointer, menu *fyne.Menu, nextItemID int) int {
+	nsMenu := C.createDarwinMenu(C.CString(menu.Label))
+	for _, item := range menu.Items {
+		nsMenuItem := C.insertDarwinMenuItem(
+			nsMenu,
+			C.CString(item.Label),
+			C.int(nextItemID),
+			C.int(-1),
+			C.bool(item.IsSeparator),
+		)
+		if item.ChildMenu != nil {
+			nextItemID = addNativeSubMenu(w, nsMenuItem, item.ChildMenu, nextItemID)
+		}
+		if !item.IsSeparator {
+			if action := item.Action; action != nil { // catch action value
+				callbacks = append(callbacks, func() { w.queueEvent(action) })
+				nextItemID++
+			}
+		}
+	}
+	C.assignDarwinSubmenu(nsParentMenuItem, nsMenu)
 	return nextItemID
 }

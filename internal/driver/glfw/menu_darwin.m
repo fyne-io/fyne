@@ -6,7 +6,6 @@
 extern void menuCallback(int);
 
 @interface FyneMenuItem : NSObject {
-
 }
 @end
 
@@ -16,8 +15,17 @@ extern void menuCallback(int);
 }
 @end
 
+// forward declaration … we want methods to be ordered alphabetically
+NSMenu* nativeMainMenu();
+
+void assignDarwinSubmenu(const void* i, const void* m) {
+    NSMenu* menu = (NSMenu*)m; // this menu is created in the createDarwinMenu() function
+    NSMenuItem *item = (NSMenuItem*)i;
+    [item setSubmenu:menu]; // this retains the menu
+    [menu release]; // release the menu
+}
+
 void completeDarwinMenu(const void* m, bool prepend) {
-    NSMenu* menu = (NSMenu*)m;
     NSMenu* main = nativeMainMenu();
     NSMenuItem* top = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
     if (prepend) {
@@ -25,9 +33,7 @@ void completeDarwinMenu(const void* m, bool prepend) {
     } else {
         [main addItem:top];
     }
-    [main setSubmenu:menu forItem:top];
-    [menu release]; // release the menu created in createDarwinMenu() function
-    menu = Nil;
+    assignDarwinSubmenu(top, m);
 }
 
 const void* createDarwinMenu(const char* label) {
@@ -38,7 +44,7 @@ const void* darwinAppMenu() {
     return [[nativeMainMenu() itemAtIndex:0] submenu];
 }
 
-void insertDarwinMenuItem(const void* m, const char* label, int id, int index, bool isSeparator) {
+const void* insertDarwinMenuItem(const void* m, const char* label, int id, int index, bool isSeparator) {
     NSMenu* menu = (NSMenu*)m;
     NSMenuItem* item;
 
@@ -61,7 +67,8 @@ void insertDarwinMenuItem(const void* m, const char* label, int id, int index, b
     } else {
         [menu addItem:item];
     }
-    [item release];
+    [item release]; // retained by the menu
+    return item;
 }
 
 NSMenu* nativeMainMenu() {
