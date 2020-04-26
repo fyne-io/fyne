@@ -19,6 +19,7 @@ func ContainerScreen() fyne.CanvasObject {
 		// layouts
 		widget.NewTabItem("Border", makeBorderLayout()),
 		widget.NewTabItem("Box", makeBoxLayout()),
+		widget.NewTabItem("Center", makeCenterLayout()),
 		widget.NewTabItem("Grid", makeGridLayout()),
 	)
 }
@@ -49,10 +50,29 @@ func makeBoxLayout() *fyne.Container {
 		col, center, right)
 }
 
+func makeButtonList(count int) []fyne.CanvasObject {
+	var items []fyne.CanvasObject
+	for i := 1; i <= count; i++ {
+		index := i // capture
+		items = append(items, widget.NewButton(fmt.Sprintf("Button %d", index), func() {
+			fmt.Println("Tapped", index)
+		}))
+	}
+
+	return items
+}
+
 func makeCell() fyne.CanvasObject {
 	rect := canvas.NewRectangle(&color.RGBA{128, 128, 128, 255})
 	rect.SetMinSize(fyne.NewSize(30, 30))
 	return rect
+}
+
+func makeCenterLayout() *fyne.Container {
+	middle := widget.NewButton("CenterLayout", func() {})
+
+	return fyne.NewContainerWithLayout(layout.NewCenterLayout(),
+		middle)
 }
 
 func makeGridLayout() *fyne.Container {
@@ -66,21 +86,11 @@ func makeGridLayout() *fyne.Container {
 }
 
 func makeScrollTab() fyne.CanvasObject {
-	list := widget.NewHBox()
-	list2 := widget.NewVBox()
+	hlist := makeButtonList(20)
+	vlist := makeButtonList(50)
 
-	for i := 1; i <= 20; i++ {
-		index := i // capture
-		list.Append(widget.NewButton(fmt.Sprintf("Button %d", index), func() {
-			fmt.Println("Tapped", index)
-		}))
-		list2.Append(widget.NewButton(fmt.Sprintf("Button %d", index), func() {
-			fmt.Println("Tapped", index)
-		}))
-	}
-
-	horiz := widget.NewHScrollContainer(list)
-	vert := widget.NewVScrollContainer(list2)
+	horiz := widget.NewHScrollContainer(widget.NewHBox(hlist...))
+	vert := widget.NewVScrollContainer(widget.NewVBox(vlist...))
 
 	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
 		fyne.NewContainerWithLayout(layout.NewBorderLayout(horiz, nil, nil, nil), horiz, vert),
