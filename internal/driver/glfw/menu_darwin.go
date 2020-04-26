@@ -86,10 +86,13 @@ func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointe
 
 func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 	if !item.IsSeparator {
-		if action := item.Action; action != nil { // catch action value
-			callbacks = append(callbacks, func() { w.queueEvent(action) })
-			nextItemID++
-		}
+		action := item.Action // catch action value
+		callbacks = append(callbacks, func() {
+			if action != nil {
+				w.queueEvent(action)
+			}
+		})
+		nextItemID++
 	}
 	return nextItemID
 }
