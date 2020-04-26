@@ -26,20 +26,7 @@ import "C"
 var callbacks []func()
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
-	createMenu := false
-	for _, item := range menu.Items {
-		if item.Label != "Settings" {
-			createMenu = true
-			break
-		}
-	}
-
-	var nsMenu unsafe.Pointer
-	if createMenu {
-		nsMenu = C.createDarwinMenu(C.CString(menu.Label))
-	}
-
-	for _, item := range menu.Items {
+	for i, item := range menu.Items {
 		if item.Label == "Settings" {
 			C.insertDarwinMenuItem(
 				C.darwinAppMenu(),
@@ -55,33 +42,31 @@ func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int
 				C.int(2),
 				C.bool(false),
 			)
-		} else {
-			nsMenuItem := C.insertDarwinMenuItem(
-				nsMenu,
-				C.CString(item.Label),
-				C.int(nextItemID),
-				C.int(-1),
-				C.bool(item.IsSeparator),
-			)
-			if item.ChildMenu != nil {
-				nextItemID = addNativeSubMenu(w, nsMenuItem, item.ChildMenu, nextItemID)
+			nextItemID = registerCallback(w, item, nextItemID)
+			if len(menu.Items) == 1 {
+				return nextItemID
 			}
-		}
-		if !item.IsSeparator {
-			if action := item.Action; action != nil { // catch action value
-				callbacks = append(callbacks, func() { w.queueEvent(action) })
-				nextItemID++
-			}
+
+			items := make([]*fyne.MenuItem, 0, len(menu.Items)-1)
+			items = append(items, menu.Items[:i]...)
+			items = append(items, menu.Items[i+1:]...)
+			menu = fyne.NewMenu(menu.Label, items...)
+			break
 		}
 	}
 
-	if nsMenu != nil {
-		C.completeDarwinMenu(nsMenu, C.bool(prepend))
-	}
+	nsMenu, nextItemID := createNativeMenu(w, menu, nextItemID)
+	C.completeDarwinMenu(nsMenu, C.bool(prepend))
 	return nextItemID
 }
 
 func addNativeSubMenu(w *window, nsParentMenuItem unsafe.Pointer, menu *fyne.Menu, nextItemID int) int {
+	nsMenu, nextItemID := createNativeMenu(w, menu, nextItemID)
+	C.assignDarwinSubmenu(nsParentMenuItem, nsMenu)
+	return nextItemID
+}
+
+func createNativeMenu(w *window, menu *fyne.Menu, nextItemID int) (unsafe.Pointer, int) {
 	nsMenu := C.createDarwinMenu(C.CString(menu.Label))
 	for _, item := range menu.Items {
 		nsMenuItem := C.insertDarwinMenuItem(
@@ -91,17 +76,21 @@ func addNativeSubMenu(w *window, nsParentMenuItem unsafe.Pointer, menu *fyne.Men
 			C.int(-1),
 			C.bool(item.IsSeparator),
 		)
+		nextItemID = registerCallback(w, item, nextItemID)
 		if item.ChildMenu != nil {
 			nextItemID = addNativeSubMenu(w, nsMenuItem, item.ChildMenu, nextItemID)
 		}
-		if !item.IsSeparator {
-			if action := item.Action; action != nil { // catch action value
-				callbacks = append(callbacks, func() { w.queueEvent(action) })
-				nextItemID++
-			}
+	}
+	return nsMenu, nextItemID
+}
+
+func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
+	if !item.IsSeparator {
+		if action := item.Action; action != nil { // catch action value
+			callbacks = append(callbacks, func() { w.queueEvent(action) })
+			nextItemID++
 		}
 	}
-	C.assignDarwinSubmenu(nsParentMenuItem, nsMenu)
 	return nextItemID
 }
 
