@@ -39,7 +39,7 @@ func bundleFont(font, name string, f *os.File) {
 	_, dirname, _, _ := runtime.Caller(0)
 	path := path.Join(path.Dir(dirname), "font", fmt.Sprintf("%s-%s.ttf", font, name))
 
-	if name == "Regular" && font != fontFace {
+	if name == "Powerline" && font != fontFace {
 		name = "Monospace"
 	}
 
@@ -85,7 +85,7 @@ func main() {
 	bundleFont(fontFace, "Bold", f)
 	bundleFont(fontFace, "Italic", f)
 	bundleFont(fontFace, "BoldItalic", f)
-	bundleFont("NotoMono", "Regular", f)
+	bundleFont("DejaVuSansMono", "Powerline", f)
 	f.Close()
 
 	f = openFile("bundled-icons.go")

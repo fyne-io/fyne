@@ -27,7 +27,7 @@ type fileDialog struct {
 
 	win      *widget.PopUp
 	selected *fileDialogItem
-	callback func(string)
+	callback interface{}
 	dir      string
 	save     bool
 }
@@ -58,13 +58,14 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 
 		if f.save {
+			callback := f.callback.(func(fyne.FileWriteCloser, error))
 			name := f.fileName.(*widget.Entry).Text
 			path := filepath.Join(f.dir, name)
 
 			info, err := os.Stat(path)
 			if os.IsNotExist(err) {
 				f.win.Hide()
-				f.callback(path)
+				callback(fyne.SaveFileToURI("file://" + path))
 				return
 			} else if info.IsDir() {
 				ShowInformation("Cannot overwrite",
@@ -75,16 +76,17 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			ShowConfirm("Overwrite?", "Are you sure you want to overwrite the file\n"+name+"?",
 				func(ok bool) {
 					if !ok {
-						f.callback("")
+						callback(nil, nil)
 						return
 					}
 
-					f.callback(path)
+					callback(fyne.SaveFileToURI("file://" + path))
 					f.win.Hide()
 				}, f.parent)
 		} else if f.selected != nil {
+			callback := f.callback.(func(fyne.FileReadCloser, error))
 			f.win.Hide()
-			f.callback(f.selected.path)
+			callback(fyne.OpenFileFromURI("file://" + f.selected.path))
 		}
 	})
 	f.open.Style = widget.PrimaryButton
@@ -93,7 +95,11 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		widget.NewButton("Cancel", func() {
 			f.win.Hide()
 			if f.callback != nil {
-				f.callback("")
+				if f.save {
+					f.callback.(func(fyne.FileWriteCloser, error))(nil, nil)
+				} else {
+					f.callback.(func(fyne.FileReadCloser, error))(nil, nil)
+				}
 			}
 		}),
 		f.open)
@@ -221,10 +227,7 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 	}
 }
 
-func showFileDialog(save bool, callback func(string), parent fyne.Window) {
-	if fileOSOverride(save, callback, parent) {
-		return
-	}
+func showFileDialog(save bool, callback interface{}, parent fyne.Window) {
 	d := &fileDialog{callback: callback, save: save, parent: parent}
 	ui := d.makeUI()
 	dir, err := os.UserHomeDir()
@@ -245,13 +248,19 @@ func showFileDialog(save bool, callback func(string), parent fyne.Window) {
 
 // ShowFileOpen shows a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified.
-func ShowFileOpen(callback func(string), parent fyne.Window) {
+func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) {
+	if fileOpenOSOverride(callback, parent) {
+		return
+	}
 	showFileDialog(false, callback, parent)
 }
 
 // ShowFileSave shows a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified.
-func ShowFileSave(callback func(string), parent fyne.Window) {
+func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) {
+	if fileSaveOSOverride(callback, parent) {
+		return
+	}
 	showFileDialog(true, callback, parent)
 }
