@@ -15,10 +15,10 @@ import (
 #include <AppKit/AppKit.h>
 
 // Using void* as type for pointers is a workaround. See https://github.com/golang/go/issues/12065.
-const void* darwinAppMenu();
-const void* createDarwinMenu(const char* label);
-void insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool isSeparator);
 void completeDarwinMenu(void* menu, bool prepend);
+const void* createDarwinMenu(const char* label);
+const void* darwinAppMenu();
+void insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool isSeparator);
 */
 import "C"
 

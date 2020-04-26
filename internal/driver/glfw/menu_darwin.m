@@ -16,17 +16,26 @@ extern void menuCallback(int);
 }
 @end
 
-NSMenu* nativeMainMenu() {
-    NSApplication* app = [NSApplication sharedApplication];
-    return [app mainMenu];
-}
-
-const void* darwinAppMenu() {
-    return [[nativeMainMenu() itemAtIndex:0] submenu];
+void completeDarwinMenu(const void* m, bool prepend) {
+    NSMenu* menu = (NSMenu*)m;
+    NSMenu* main = nativeMainMenu();
+    NSMenuItem* top = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+    if (prepend) {
+        [main insertItem:top atIndex:1];
+    } else {
+        [main addItem:top];
+    }
+    [main setSubmenu:menu forItem:top];
+    [menu release]; // release the menu created in createDarwinMenu() function
+    menu = Nil;
 }
 
 const void* createDarwinMenu(const char* label) {
     return (void*)[[NSMenu alloc] initWithTitle:[NSString stringWithUTF8String:label]];
+}
+
+const void* darwinAppMenu() {
+    return [[nativeMainMenu() itemAtIndex:0] submenu];
 }
 
 void insertDarwinMenuItem(const void* m, const char* label, int id, int index, bool isSeparator) {
@@ -55,16 +64,7 @@ void insertDarwinMenuItem(const void* m, const char* label, int id, int index, b
     [item release];
 }
 
-void completeDarwinMenu(const void* m, bool prepend) {
-    NSMenu* menu = (NSMenu*)m;
-    NSMenu* main = nativeMainMenu();
-    NSMenuItem* top = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
-    if (prepend) {
-        [main insertItem:top atIndex:1];
-    } else {
-        [main addItem:top];
-    }
-    [main setSubmenu:menu forItem:top];
-    [menu release]; // release the menu created in createDarwinMenu() function
-    menu = Nil;
+NSMenu* nativeMainMenu() {
+    NSApplication* app = [NSApplication sharedApplication];
+    return [app mainMenu];
 }
