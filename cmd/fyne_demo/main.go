@@ -64,7 +64,6 @@ func main() {
 
 	w := a.NewWindow("Fyne Demo")
 
-	// newItem := fyne.NewMenuItem("New", func() { fmt.Println("Menu New") })
 	newItem := fyne.NewMenuItem("New", nil)
 	otherItem := fyne.NewMenuItem("Other", nil)
 	otherItem.ChildMenu = fyne.NewMenu("",
