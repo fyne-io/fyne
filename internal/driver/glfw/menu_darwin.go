@@ -25,31 +25,6 @@ import "C"
 
 var callbacks []func()
 
-//export menuCallback
-func menuCallback(id int) {
-	callbacks[id]()
-}
-
-func hasNativeMenu() bool {
-	return true
-}
-
-func setupNativeMenu(w *window, main *fyne.MainMenu) {
-	nextItemID := 0
-	var helpMenu *fyne.Menu
-	for i := len(main.Items) - 1; i >= 0; i-- {
-		menu := main.Items[i]
-		if menu.Label == "Help" {
-			helpMenu = menu
-			continue
-		}
-		nextItemID = addNativeMenu(w, menu, nextItemID, true)
-	}
-	if helpMenu != nil {
-		addNativeMenu(w, helpMenu, nextItemID, false)
-	}
-}
-
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
 	createMenu := false
 	for _, item := range menu.Items {
@@ -128,4 +103,29 @@ func addNativeSubMenu(w *window, nsParentMenuItem unsafe.Pointer, menu *fyne.Men
 	}
 	C.assignDarwinSubmenu(nsParentMenuItem, nsMenu)
 	return nextItemID
+}
+
+func hasNativeMenu() bool {
+	return true
+}
+
+//export menuCallback
+func menuCallback(id int) {
+	callbacks[id]()
+}
+
+func setupNativeMenu(w *window, main *fyne.MainMenu) {
+	nextItemID := 0
+	var helpMenu *fyne.Menu
+	for i := len(main.Items) - 1; i >= 0; i-- {
+		menu := main.Items[i]
+		if menu.Label == "Help" {
+			helpMenu = menu
+			continue
+		}
+		nextItemID = addNativeMenu(w, menu, nextItemID, true)
+	}
+	if helpMenu != nil {
+		addNativeMenu(w, helpMenu, nextItemID, false)
+	}
 }
