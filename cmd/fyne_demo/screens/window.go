@@ -93,9 +93,8 @@ func showText(f fyne.FileReadCloser) {
 	w.Show()
 }
 
-// DialogScreen loads a panel that lists the dialog windows that can be tested.
-func DialogScreen(win fyne.Window) fyne.CanvasObject {
-	dialogs := widget.NewGroup("Dialogs",
+func loadDialogGroup(win fyne.Window) *widget.Group {
+	return widget.NewGroup("Dialogs",
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
 		}),
@@ -169,7 +168,9 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 			dialog.ShowCustom("Custom dialog", "Done", content, win)
 		}),
 	)
+}
 
+func loadWindowGroup() *widget.Group {
 	windowGroup := widget.NewGroup("Windows",
 		widget.NewButton("New window", func() {
 			w := fyne.CurrentApp().NewWindow("Hello")
@@ -207,7 +208,10 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 				}()
 			}))
 	}
-	windows := widget.NewVBox(dialogs, windowGroup)
+	return windowGroup
+}
 
-	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), windows, LayoutPanel())
+// DialogScreen loads a panel that lists the dialog windows that can be tested.
+func DialogScreen(win fyne.Window) fyne.CanvasObject {
+	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), loadDialogGroup(win), loadWindowGroup())
 }

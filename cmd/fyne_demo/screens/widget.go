@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -197,49 +196,6 @@ func makeFormTab() fyne.Widget {
 	return form
 }
 
-func makeScrollTab() fyne.CanvasObject {
-	list := widget.NewHBox()
-	list2 := widget.NewVBox()
-
-	for i := 1; i <= 20; i++ {
-		index := i // capture
-		list.Append(widget.NewButton(fmt.Sprintf("Button %d", index), func() {
-			fmt.Println("Tapped", index)
-		}))
-		list2.Append(widget.NewButton(fmt.Sprintf("Button %d", index), func() {
-			fmt.Println("Tapped", index)
-		}))
-	}
-
-	horiz := widget.NewHScrollContainer(list)
-	vert := widget.NewVScrollContainer(list2)
-
-	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
-		fyne.NewContainerWithLayout(layout.NewBorderLayout(horiz, nil, nil, nil), horiz, vert),
-		makeScrollBothTab())
-}
-
-func makeScrollBothTab() fyne.CanvasObject {
-	logo := canvas.NewImageFromResource(theme.FyneLogo())
-	logo.SetMinSize(fyne.NewSize(800, 800))
-
-	scroll := widget.NewScrollContainer(logo)
-	scroll.Resize(fyne.NewSize(400, 400))
-
-	return scroll
-}
-
-func makeSplitTab() fyne.CanvasObject {
-	left := widget.NewMultiLineEntry()
-	left.Wrapping = fyne.TextWrapWord
-	left.SetText("Long text is looooooooooooooong")
-	right := widget.NewVSplitContainer(
-		widget.NewLabel("Label"),
-		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
-	)
-	return widget.NewHSplitContainer(widget.NewVScrollContainer(left), right)
-}
-
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -258,8 +214,6 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Input", makeInputTab()),
 			widget.NewTabItem("Progress", makeProgressTab()),
 			widget.NewTabItem("Form", makeFormTab()),
-			widget.NewTabItem("Scroll", makeScrollTab()),
-			widget.NewTabItem("Split", makeSplitTab()),
 		),
 	)
 }
