@@ -41,6 +41,9 @@ func (t *themedApp) UniqueID() string {
 	return ""
 }
 
+func (t *themedApp) SendNotification(notification *fyne.Notification) {
+}
+
 func (t *themedApp) Settings() fyne.Settings {
 	return t
 }
