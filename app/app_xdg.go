@@ -6,6 +6,7 @@
 package app
 
 import (
+	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -22,6 +23,10 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	cmd := app.exec("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return cmd.Run()
+}
+
+func (app *fyneApp) SendNotification(notify *fyne.Notification) {
+	log.Println("NOT YET IMPLEMENTED") // TODO
 }
 
 func rootConfigDir() string {

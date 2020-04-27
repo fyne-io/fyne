@@ -24,6 +24,10 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	return cmd.Run()
 }
 
+func (app *fyneApp) SendNotification(notify *fyne.Notification) {
+	log.Println("NOT YET IMPLEMENTED") // TODO
+}
+
 func rootConfigDir() string {
 	filesDir := os.Getenv("FILESDIR")
 	if filesDir == "" {

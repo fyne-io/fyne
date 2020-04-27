@@ -14,6 +14,7 @@ void openURL(char *urlStr);
 */
 import "C"
 import (
+	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -41,4 +42,8 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	C.free(unsafe.Pointer(urlStr))
 
 	return nil
+}
+
+func (app *fyneApp) SendNotification(notify *fyne.Notification) {
+	log.Println("NOT YET IMPLEMENTED") // TODO
 }
