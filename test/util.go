@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 
@@ -47,6 +48,44 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image) bo
 		return false
 	}
 	return true
+}
+
+// MoveMouse simulates a mouse movement to the given position.
+func MoveMouse(c fyne.Canvas, pos fyne.Position) {
+	tc, _ := c.(*testCanvas)
+	var oldHovered, hovered desktop.Hoverable
+	if tc != nil {
+		oldHovered = tc.hovered
+	}
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(desktop.Hoverable); ok {
+			return true
+		}
+		return false
+	}
+	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	if o != nil {
+		hovered = o.(desktop.Hoverable)
+		me := &desktop.MouseEvent{
+			PointEvent: fyne.PointEvent{
+				AbsolutePosition: pos,
+				Position:         pos.Subtract(absPos),
+			},
+		}
+		if hovered == oldHovered {
+			hovered.MouseMoved(me)
+		} else {
+			if oldHovered != nil {
+				oldHovered.MouseOut()
+			}
+			hovered.MouseIn(me)
+		}
+	} else if oldHovered != nil {
+		oldHovered.MouseOut()
+	}
+	if tc != nil {
+		tc.hovered = hovered
+	}
 }
 
 // Tap simulates a left mouse click on the specified object.
