@@ -25,6 +25,8 @@ github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.2-core/gl
 # github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
 github.com/go-gl/glfw/v3.3/glfw
+# github.com/godbus/dbus/v5 v5.0.3
+github.com/godbus/dbus/v5
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 github.com/goki/freetype
 github.com/goki/freetype/raster
