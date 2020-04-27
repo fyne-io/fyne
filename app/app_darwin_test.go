@@ -1,3 +1,7 @@
+// +build !ci
+
+// +build !ios
+
 package app
 
 import (
