@@ -97,9 +97,8 @@ func NewApp() fyne.App {
 	settings := &testSettings{}
 	settings.listenerMutex = &sync.Mutex{}
 	prefs := internal.NewInMemoryPreferences()
-	test := &testApp{settings: settings, prefs: prefs}
+	test := &testApp{settings: settings, prefs: prefs, driver: NewDriver().(*testDriver)}
 	fyne.SetCurrentApp(test)
-	test.driver = NewDriver().(*testDriver)
 
 	listener := make(chan fyne.Settings)
 	test.Settings().AddChangeListener(listener)
