@@ -98,4 +98,9 @@ func TestDarwinMenu(t *testing.T) {
 	assert.Equal(t, 2, testNSMenuNumberOfItems(m))
 	assertNSMenuItem("Help", "Help!!!", m, 0)
 	assertNSMenuItem("Help Me", "Help me!!!", m, 1)
+
+	// change action works
+	itemOpen.Action = func() { lastAction = "new open" }
+	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
+	assertNSMenuItem("Open", "new open", m, 1)
 }

@@ -121,10 +121,9 @@ func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator
 
 func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
 	if !item.IsSeparator {
-		action := item.Action // catch action value
 		callbacks = append(callbacks, func() {
-			if action != nil {
-				w.queueEvent(action)
+			if item.Action != nil {
+				w.queueEvent(item.Action)
 			}
 		})
 		nextItemID++
