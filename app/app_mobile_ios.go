@@ -6,15 +6,15 @@ package app
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -framework Foundation -framework UIKit
+#cgo LDFLAGS: -framework Foundation -framework UIKit -framework UserNotifications
 
 #include <stdlib.h>
 
 void openURL(char *urlStr);
+void sendNotification(char *title, char *content);
 */
 import "C"
 import (
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -45,5 +45,10 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 }
 
 func (app *fyneApp) SendNotification(notify *fyne.Notification) {
-	log.Println("NOT YET IMPLEMENTED") // TODO
+	titleStr := C.CString(notify.Title)
+	defer C.free(unsafe.Pointer(titleStr))
+	contentStr := C.CString(notify.Content)
+	defer C.free(unsafe.Pointer(contentStr))
+
+	C.sendNotification(titleStr, contentStr)
 }

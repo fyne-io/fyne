@@ -9,7 +9,7 @@ package app
 
 /*
 #cgo CFLAGS: -x objective-c -DGL_SILENCE_DEPRECATION
-#cgo LDFLAGS: -framework Foundation -framework UIKit -framework GLKit -framework OpenGLES -framework QuartzCore
+#cgo LDFLAGS: -framework Foundation -framework UIKit -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications
 #include <sys/utsname.h>
 #include <stdint.h>
 #include <pthread.h>
