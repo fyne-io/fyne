@@ -44,11 +44,14 @@ func TestDarwinMenu(t *testing.T) {
 	menuHelp := fyne.NewMenu("Help", itemHelp, itemHelpMe)
 
 	itemHelloWorld := fyne.NewMenuItem("Hello World", func() { lastAction = "Hello World!" })
+	itemPrefs := fyne.NewMenuItem("Preferences", func() { lastAction = "prefs" })
 	itemMore := fyne.NewMenuItem("More", func() { lastAction = "more" })
-	menuMore := fyne.NewMenu("More Stuff", itemHelloWorld, itemMore)
+	itemMorePrefs := fyne.NewMenuItem("Preferences…", func() { lastAction = "more prefs" })
+	menuMore := fyne.NewMenu("More Stuff", itemHelloWorld, itemPrefs, itemMore, itemMorePrefs)
 
 	itemSettings := fyne.NewMenuItem("Settings", func() { lastAction = "settings" })
-	menuSettings := fyne.NewMenu("Settings", itemSettings)
+	itemMoreSetings := fyne.NewMenuItem("Settings…", func() { lastAction = "more settings" })
+	menuSettings := fyne.NewMenu("Settings", itemSettings, fyne.NewMenuItemSeparator(), itemMoreSetings)
 
 	mainMenu := fyne.NewMainMenu(menuEdit, menuHelp, menuMore, menuSettings)
 	setupNativeMenu(w, mainMenu)
@@ -62,7 +65,11 @@ func TestDarwinMenu(t *testing.T) {
 	m := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 0))
 	assert.Equal(t, "", testNSMenuTitle(m), "app menu doesn’t have a title")
 	assertNSMenuItemSeparator(m, 1)
-	assertNSMenuItem("Settings", "settings", m, 2)
+	assertNSMenuItem("Preferences", "prefs", m, 2)
+	assertNSMenuItem("Preferences…", "more prefs", m, 3)
+	assertNSMenuItemSeparator(m, 4)
+	assertNSMenuItem("Settings", "settings", m, 5)
+	assertNSMenuItem("Settings…", "more settings", m, 6)
 
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
 	assert.Equal(t, "File", testNSMenuTitle(m))

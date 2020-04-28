@@ -37,33 +37,17 @@ var callbacks []func()
 var ecb func(string)
 
 func addNativeMenu(w *window, menu *fyne.Menu, nextItemID int, prepend bool) int {
-	for i, item := range menu.Items {
-		if item.Label == "Settings" {
-			C.insertDarwinMenuItem(
-				C.darwinAppMenu(),
-				C.CString(""),
-				C.int(nextItemID),
-				C.int(1),
-				C.bool(true),
-			)
-			C.insertDarwinMenuItem(
-				C.darwinAppMenu(),
-				C.CString(item.Label),
-				C.int(nextItemID),
-				C.int(2),
-				C.bool(false),
-			)
-			nextItemID = registerCallback(w, item, nextItemID)
-			if len(menu.Items) == 1 {
-				return nextItemID
-			}
+	menu, nextItemID = handleSpecialItems(w, menu, nextItemID, true)
 
-			items := make([]*fyne.MenuItem, 0, len(menu.Items)-1)
-			items = append(items, menu.Items[:i]...)
-			items = append(items, menu.Items[i+1:]...)
-			menu = fyne.NewMenu(menu.Label, items...)
+	containsItems := false
+	for _, item := range menu.Items {
+		if !item.IsSeparator {
+			containsItems = true
 			break
 		}
+	}
+	if !containsItems {
+		return nextItemID
 	}
 
 	nsMenu, nextItemID := createNativeMenu(w, menu, nextItemID)
@@ -102,6 +86,37 @@ func exceptionCallback(e *C.char) {
 		panic("unhandled Obj-C exception: " + msg)
 	}
 	ecb(msg)
+}
+
+func handleSpecialItems(w *window, menu *fyne.Menu, nextItemID int, addSeparator bool) (*fyne.Menu, int) {
+	for i, item := range menu.Items {
+		if item.Label == "Settings" || item.Label == "Settings…" || item.Label == "Preferences" || item.Label == "Preferences…" {
+			items := make([]*fyne.MenuItem, 0, len(menu.Items)-1)
+			items = append(items, menu.Items[:i]...)
+			items = append(items, menu.Items[i+1:]...)
+			menu, nextItemID = handleSpecialItems(w, fyne.NewMenu(menu.Label, items...), nextItemID, false)
+
+			C.insertDarwinMenuItem(
+				C.darwinAppMenu(),
+				C.CString(item.Label),
+				C.int(nextItemID),
+				C.int(1),
+				C.bool(false),
+			)
+			if addSeparator {
+				C.insertDarwinMenuItem(
+					C.darwinAppMenu(),
+					C.CString(""),
+					C.int(nextItemID),
+					C.int(1),
+					C.bool(true),
+				)
+			}
+			nextItemID = registerCallback(w, item, nextItemID)
+			break
+		}
+	}
+	return menu, nextItemID
 }
 
 func registerCallback(w *window, item *fyne.MenuItem, nextItemID int) int {
