@@ -5,13 +5,13 @@
 
 extern void menuCallback(int);
 
-@interface FyneMenuItem : NSObject {
+@interface FyneMenuHandler : NSObject {
 }
 @end
 
-@implementation FyneMenuItem
-- (void) tapped:(id) sender {
-    menuCallback([sender tag]);
+@implementation FyneMenuHandler
++ (void) tapped:(NSMenuItem*) item {
+    menuCallback([item tag]);
 }
 @end
 
@@ -51,14 +51,11 @@ const void* insertDarwinMenuItem(const void* m, const char* label, int id, int i
     if (isSeparator) {
         item = [NSMenuItem separatorItem];
     } else {
-        // NSMenuItem's target is a weak reference, therefore we must not release it.
-        // TODO: Keep a reference in Go and release it when the menu of a window changes or the window is released.
-        FyneMenuItem* tapper = [[FyneMenuItem alloc] init];
         item = [[NSMenuItem alloc]
             initWithTitle:[NSString stringWithUTF8String:label]
             action:@selector(tapped:)
             keyEquivalent:@""];
-        [item setTarget:tapper];
+        [item setTarget:[FyneMenuHandler class]];
         [item setTag:id];
     }
 
