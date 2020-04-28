@@ -29,6 +29,14 @@ func makeButtonTab() fyne.Widget {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
 
+	return widget.NewVBox(
+		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
+		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
+		disabled,
+	)
+}
+
+func makeTextGrid() *widget.TextGrid {
 	grid := widget.NewTextGridFromString("TextGrid\n  Content")
 	grid.SetStyleRange(0, 0, 0, 3,
 		&widget.CustomTextGridStyle{FGColor: color.RGBA{R: 0, G: 0, B: 128, A: 255}})
@@ -37,12 +45,7 @@ func makeButtonTab() fyne.Widget {
 	grid.ShowLineNumbers = true
 	grid.ShowWhitespace = true
 
-	return widget.NewVBox(
-		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
-		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
-		disabled,
-		grid,
-	)
+	return grid
 }
 
 func makeTextTab() fyne.CanvasObject {
@@ -54,13 +57,6 @@ func makeTextTab() fyne.CanvasObject {
 	}
 	hyperlink := widget.NewHyperlink("Hyperlink", link)
 
-	entry := widget.NewEntry()
-	entry.SetPlaceHolder("Entry")
-	entryDisabled := widget.NewEntry()
-	entryDisabled.SetText("Entry (disabled)")
-	entryDisabled.Disable()
-	entryMultiLine := widget.NewMultiLineEntry()
-	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
 	entryLoremIpsumScroller := widget.NewVScrollContainer(entryLoremIpsum)
@@ -70,7 +66,6 @@ func makeTextTab() fyne.CanvasObject {
 
 	label.Wrapping = fyne.TextWrapWord
 	hyperlink.Wrapping = fyne.TextWrapWord
-	entryMultiLine.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
 	radioAlign := widget.NewRadio([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
@@ -108,13 +103,11 @@ func makeTextTab() fyne.CanvasObject {
 		label.Wrapping = wrap
 		hyperlink.Wrapping = wrap
 		if wrap != fyne.TextTruncate {
-			entryMultiLine.Wrapping = wrap
 			entryLoremIpsum.Wrapping = wrap
 		}
 
 		label.Refresh()
 		hyperlink.Refresh()
-		entryMultiLine.Refresh()
 		entryLoremIpsum.Refresh()
 		entryLoremIpsumScroller.Refresh()
 	})
@@ -128,15 +121,21 @@ func makeTextTab() fyne.CanvasObject {
 		),
 		label,
 		hyperlink,
-		entry,
-		entryDisabled,
-		entryMultiLine,
 	)
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(fixed, nil, nil, nil),
-		fixed, entryLoremIpsumScroller)
+
+	grid := makeTextGrid()
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(fixed, grid, nil, nil),
+		fixed, entryLoremIpsumScroller, grid)
 }
 
 func makeInputTab() fyne.Widget {
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder("Entry")
+	entryDisabled := widget.NewEntry()
+	entryDisabled.SetText("Entry (disabled)")
+	entryDisabled.Disable()
+	entryMultiLine := widget.NewMultiLineEntry()
+	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
 	selectEntry.PlaceHolder = "Type or select"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
@@ -147,6 +146,9 @@ func makeInputTab() fyne.Widget {
 	disabledRadio.Disable()
 
 	return widget.NewVBox(
+		entry,
+		entryDisabled,
+		entryMultiLine,
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
