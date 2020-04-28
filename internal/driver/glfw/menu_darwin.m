@@ -4,6 +4,7 @@
 #import <AppKit/AppKit.h>
 
 extern void menuCallback(int);
+extern void exceptionCallback(const char*);
 
 @interface FyneMenuHandler : NSObject {
 }
@@ -44,6 +45,10 @@ const void* darwinAppMenu() {
     return [[nativeMainMenu() itemAtIndex:0] submenu];
 }
 
+void handleException(const char* m, id e) {
+    exceptionCallback([[NSString stringWithFormat:@"%s failed: %@", m, e] UTF8String]);
+}
+
 const void* insertDarwinMenuItem(const void* m, const char* label, int id, int index, bool isSeparator) {
     NSMenu* menu = (NSMenu*)m;
     NSMenuItem* item;
@@ -71,4 +76,56 @@ const void* insertDarwinMenuItem(const void* m, const char* label, int id, int i
 NSMenu* nativeMainMenu() {
     NSApplication* app = [NSApplication sharedApplication];
     return [app mainMenu];
+}
+
+const void* test_darwinMainMenu() {
+    return nativeMainMenu();
+}
+
+const void* test_NSMenu_itemAtIndex(const void* m, NSInteger i) {
+    NSMenu* menu = (NSMenu*)m;
+    @try {
+        return [menu itemAtIndex: i];
+    } @catch(NSException* e) {
+        handleException("test_NSMenu_itemAtIndex", e);
+        return NULL;
+    }
+}
+
+NSInteger test_NSMenu_numberOfItems(const void* m) {
+    NSMenu* menu = (NSMenu*)m;
+    return [menu numberOfItems];
+}
+
+void test_NSMenu_performActionForItemAtIndex(const void* m, NSInteger i) {
+    NSMenu* menu = (NSMenu*)m;
+    @try {
+        // Using performActionForItemAtIndex: would be better but sadly it crashes.
+        // We simulate the relevant effect for now.
+        // [menu performActionForItemAtIndex:i];
+        NSMenuItem* item = [menu itemAtIndex:i];
+        [[item target] performSelector:[item action] withObject:item];
+    } @catch(NSException* e) {
+        handleException("test_NSMenu_performActionForItemAtIndex", e);
+    }
+}
+
+const char* test_NSMenu_title(const void* m) {
+    NSMenu* menu = (NSMenu*)m;
+    return [[menu title] UTF8String];
+}
+
+bool test_NSMenu_isSeparatorItem(const void* i) {
+    NSMenuItem* item = (NSMenuItem*)i;
+    return [item isSeparatorItem];
+}
+
+const void* test_NSMenuItem_submenu(const void* i) {
+    NSMenuItem* item = (NSMenuItem*)i;
+    return [item submenu];
+}
+
+const char* test_NSMenuItem_title(const void* i) {
+    NSMenuItem* item = (NSMenuItem*)i;
+    return [[item title] UTF8String];
 }
