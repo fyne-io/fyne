@@ -34,8 +34,8 @@ func (p *PopUpMenu) Hide() {
 
 // Move satisfies the fyne.Widget interface.
 func (p *PopUpMenu) Move(pos fyne.Position) {
-	p.adjustPosition()
 	p.Menu.Move(pos)
+	p.adjustPosition()
 }
 
 // Resize satisfies the fyne.Widget interface.

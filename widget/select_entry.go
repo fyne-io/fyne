@@ -33,6 +33,15 @@ func (e *SelectEntry) MinSize() fyne.Size {
 	return min
 }
 
+// Resize satisfies the fyne.CanvasObject interface.
+func (e *SelectEntry) Resize(size fyne.Size) {
+	e.Entry.Resize(size)
+	if e.popUp != nil {
+		e.popUp.Resize(fyne.NewSize(size.Width, e.popUp.Size().Height))
+	}
+
+}
+
 // SetOptions sets the options the user might select from.
 func (e *SelectEntry) SetOptions(options []string) {
 	if len(options) == 0 {
