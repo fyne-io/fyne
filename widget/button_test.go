@@ -126,111 +126,111 @@ func TestButton_Layout(t *testing.T) {
 		text      string
 		icon      fyne.Resource
 		alignment widget.ButtonAlign
-		ordering  widget.ButtonOrder
+		placement widget.ButtonIconPlacement
 	}{
 		"text_only_center_leading": {
 			text:      "Test",
 			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"text_only_center_trailing": {
 			text:      "Test",
 			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 		"text_only_leading_leading": {
 			text:      "Test",
 			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"text_only_leading_trailing": {
 			text:      "Test",
 			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 		"text_only_trailing_leading": {
 			text:      "Test",
 			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"text_only_trailing_trailing": {
 			text:      "Test",
 			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 		"icon_only_center_leading": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"icon_only_center_trailing": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 		"icon_only_leading_leading": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"icon_only_leading_trailing": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 		"icon_only_trailing_leading": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"icon_only_trailing_trailing": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 		"text_icon_center_leading": {
 			text:      "Test",
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"text_icon_center_trailing": {
 			text:      "Test",
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 		"text_icon_leading_leading": {
 			text:      "Test",
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"text_icon_leading_trailing": {
 			text:      "Test",
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 		"text_icon_trailing_leading": {
 			text:      "Test",
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconLeadingText,
+			placement: widget.ButtonIconLeadingText,
 		},
 		"text_icon_trailing_trailing": {
 			text:      "Test",
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconTrailingText,
+			placement: widget.ButtonIconTrailingText,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			button := &widget.Button{
-				Text:      tt.text,
-				Icon:      tt.icon,
-				Alignment: tt.alignment,
-				Ordering:  tt.ordering,
+				Text:          tt.text,
+				Icon:          tt.icon,
+				Alignment:     tt.alignment,
+				IconPlacement: tt.placement,
 			}
 
 			window := test.NewWindowWithPainter(button, software.NewPainter())

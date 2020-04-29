@@ -69,8 +69,8 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 			// Both
 			switch b.button.Alignment {
 			case ButtonAlignCenter:
-				switch b.button.Ordering {
-				case ButtonOrderIconLeadingText:
+				switch b.button.IconPlacement {
+				case ButtonIconLeadingText:
 					// +------------------------+
 					// |       Icon Text        |
 					// +------------------------+
@@ -79,7 +79,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
 					labelPos.X = iconPos.X + iconSize.Width + theme.Padding()
 					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-				case ButtonOrderIconTrailingText:
+				case ButtonIconTrailingText:
 					// +------------------------+
 					// |       Text Icon        |
 					// +------------------------+
@@ -90,8 +90,8 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
 				}
 			case ButtonAlignLeading:
-				switch b.button.Ordering {
-				case ButtonOrderIconLeadingText:
+				switch b.button.IconPlacement {
+				case ButtonIconLeadingText:
 					// +------------------------+
 					// | Icon Text              |
 					// +------------------------+
@@ -99,7 +99,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
 					labelPos.X = iconPos.X + iconSize.Width + theme.Padding()
 					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-				case ButtonOrderIconTrailingText:
+				case ButtonIconTrailingText:
 					// +------------------------+
 					// | Text Icon              |
 					// +------------------------+
@@ -109,8 +109,8 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
 				}
 			case ButtonAlignTrailing:
-				switch b.button.Ordering {
-				case ButtonOrderIconLeadingText:
+				switch b.button.IconPlacement {
+				case ButtonIconLeadingText:
 					// +------------------------+
 					// |              Icon Text |
 					// +------------------------+
@@ -118,7 +118,7 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
 					iconPos.X = labelPos.X - theme.Padding() - iconSize.Width
 					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-				case ButtonOrderIconTrailingText:
+				case ButtonIconTrailingText:
 					// +------------------------+
 					// |              Text Icon |
 					// +------------------------+
@@ -234,12 +234,12 @@ func (b *buttonRenderer) Refresh() {
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	DisableableWidget
-	Text         string
-	Style        ButtonStyle
-	Icon         fyne.Resource
-	disabledIcon fyne.Resource
-	Alignment    ButtonAlign
-	Ordering     ButtonOrder
+	Text          string
+	Style         ButtonStyle
+	Icon          fyne.Resource
+	disabledIcon  fyne.Resource
+	Alignment     ButtonAlign
+	IconPlacement ButtonIconPlacement
 
 	OnTapped   func() `json:"-"`
 	hovered    bool
@@ -268,14 +268,14 @@ const (
 	ButtonAlignTrailing
 )
 
-// ButtonOrder represents the ordering of icon & text within a button.
-type ButtonOrder int
+// ButtonIconPlacement represents the ordering of icon & text within a button.
+type ButtonIconPlacement int
 
 const (
-	// ButtonOrderIconLeadingText aligns the icon on the leading edge of the text.
-	ButtonOrderIconLeadingText ButtonOrder = iota
-	// ButtonOrderIconTrailingText aligns the icon on the trailing edge of the text.
-	ButtonOrderIconTrailingText
+	// ButtonIconLeadingText aligns the icon on the leading edge of the text.
+	ButtonIconLeadingText ButtonIconPlacement = iota
+	// ButtonIconTrailingText aligns the icon on the trailing edge of the text.
+	ButtonIconTrailingText
 )
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
