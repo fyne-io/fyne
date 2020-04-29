@@ -138,16 +138,6 @@ func TestButton_Layout(t *testing.T) {
 			alignment: widget.ButtonAlignCenter,
 			ordering:  widget.ButtonOrderIconTrailingText,
 		},
-		"text_only_center_above": {
-			text:      "Test",
-			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"text_only_center_below": {
-			text:      "Test",
-			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconBelowText,
-		},
 		"text_only_leading_leading": {
 			text:      "Test",
 			alignment: widget.ButtonAlignLeading,
@@ -157,16 +147,6 @@ func TestButton_Layout(t *testing.T) {
 			text:      "Test",
 			alignment: widget.ButtonAlignLeading,
 			ordering:  widget.ButtonOrderIconTrailingText,
-		},
-		"text_only_leading_above": {
-			text:      "Test",
-			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"text_only_leading_below": {
-			text:      "Test",
-			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconBelowText,
 		},
 		"text_only_trailing_leading": {
 			text:      "Test",
@@ -178,16 +158,6 @@ func TestButton_Layout(t *testing.T) {
 			alignment: widget.ButtonAlignTrailing,
 			ordering:  widget.ButtonOrderIconTrailingText,
 		},
-		"text_only_trailing_above": {
-			text:      "Test",
-			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"text_only_trailing_below": {
-			text:      "Test",
-			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconBelowText,
-		},
 		"icon_only_center_leading": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignCenter,
@@ -197,16 +167,6 @@ func TestButton_Layout(t *testing.T) {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignCenter,
 			ordering:  widget.ButtonOrderIconTrailingText,
-		},
-		"icon_only_center_above": {
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"icon_only_center_below": {
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconBelowText,
 		},
 		"icon_only_leading_leading": {
 			icon:      theme.CancelIcon(),
@@ -218,16 +178,6 @@ func TestButton_Layout(t *testing.T) {
 			alignment: widget.ButtonAlignLeading,
 			ordering:  widget.ButtonOrderIconTrailingText,
 		},
-		"icon_only_leading_above": {
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"icon_only_leading_below": {
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconBelowText,
-		},
 		"icon_only_trailing_leading": {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignTrailing,
@@ -237,16 +187,6 @@ func TestButton_Layout(t *testing.T) {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignTrailing,
 			ordering:  widget.ButtonOrderIconTrailingText,
-		},
-		"icon_only_trailing_above": {
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"icon_only_trailing_below": {
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconBelowText,
 		},
 		"text_icon_center_leading": {
 			text:      "Test",
@@ -260,18 +200,6 @@ func TestButton_Layout(t *testing.T) {
 			alignment: widget.ButtonAlignCenter,
 			ordering:  widget.ButtonOrderIconTrailingText,
 		},
-		"text_icon_center_above": {
-			text:      "Test",
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"text_icon_center_below": {
-			text:      "Test",
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignCenter,
-			ordering:  widget.ButtonOrderIconBelowText,
-		},
 		"text_icon_leading_leading": {
 			text:      "Test",
 			icon:      theme.CancelIcon(),
@@ -284,18 +212,6 @@ func TestButton_Layout(t *testing.T) {
 			alignment: widget.ButtonAlignLeading,
 			ordering:  widget.ButtonOrderIconTrailingText,
 		},
-		"text_icon_leading_above": {
-			text:      "Test",
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"text_icon_leading_below": {
-			text:      "Test",
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignLeading,
-			ordering:  widget.ButtonOrderIconBelowText,
-		},
 		"text_icon_trailing_leading": {
 			text:      "Test",
 			icon:      theme.CancelIcon(),
@@ -307,18 +223,6 @@ func TestButton_Layout(t *testing.T) {
 			icon:      theme.CancelIcon(),
 			alignment: widget.ButtonAlignTrailing,
 			ordering:  widget.ButtonOrderIconTrailingText,
-		},
-		"text_icon_trailing_above": {
-			text:      "Test",
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconAboveText,
-		},
-		"text_icon_trailing_below": {
-			text:      "Test",
-			icon:      theme.CancelIcon(),
-			alignment: widget.ButtonAlignTrailing,
-			ordering:  widget.ButtonOrderIconBelowText,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

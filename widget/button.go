@@ -34,39 +34,16 @@ func (b *buttonRenderer) MinSize() (size fyne.Size) {
 	hasLabel := b.label.Text != ""
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 	labelSize := b.label.MinSize()
-	switch b.button.Ordering {
-	// Vertical Layout
-	case ButtonOrderIconAboveText:
-		fallthrough
-	case ButtonOrderIconBelowText:
-		size.Width = fyne.Max(labelSize.Width, iconSize.Width)
-		if hasLabel {
-			size.Height = labelSize.Height
-		}
-		if hasIcon {
-			if hasLabel {
-				size.Height += theme.Padding()
-			}
-			size.Height += iconSize.Height
-		}
-
-	// Horizontal Layout
-	case ButtonOrderIconLeadingText:
-		fallthrough
-	case ButtonOrderIconTrailingText:
-		fallthrough
-	default:
-		if hasLabel {
-			size.Width = labelSize.Width
-		}
-		if hasIcon {
-			if hasLabel {
-				size.Width += theme.Padding()
-			}
-			size.Width += iconSize.Width
-		}
-		size.Height = fyne.Max(labelSize.Height, iconSize.Height)
+	if hasLabel {
+		size.Width = labelSize.Width
 	}
+	if hasIcon {
+		if hasLabel {
+			size.Width += theme.Padding()
+		}
+		size.Width += iconSize.Width
+	}
+	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
 	size = size.Add(b.padding())
 	return
 }
@@ -111,26 +88,6 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
 					iconPos.X = labelPos.X + labelSize.Width + theme.Padding()
 					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-				case ButtonOrderIconAboveText:
-					// +------------------------+
-					// |          Icon          |
-					// |          Text          |
-					// +------------------------+
-					contentHeight := iconSize.Height + theme.Padding() + labelSize.Height
-					iconPos.X = innerOffset.X + (innerSize.Width-iconSize.Width)/2
-					iconPos.Y = innerOffset.Y + (innerSize.Height-contentHeight)/2
-					labelPos.X = innerOffset.X + (innerSize.Width-labelSize.Width)/2
-					labelPos.Y = iconPos.Y + iconSize.Height + theme.Padding()
-				case ButtonOrderIconBelowText:
-					// +------------------------+
-					// |          Text          |
-					// |          Icon          |
-					// +------------------------+
-					contentHeight := labelSize.Height + theme.Padding() + iconSize.Height
-					labelPos.X = innerOffset.X + (innerSize.Width-labelSize.Width)/2
-					labelPos.Y = innerOffset.Y + (innerSize.Height-contentHeight)/2
-					iconPos.X = innerOffset.X + (innerSize.Width-iconSize.Width)/2
-					iconPos.Y = labelPos.Y + labelSize.Height + theme.Padding()
 				}
 			case ButtonAlignLeading:
 				switch b.button.Ordering {
@@ -150,26 +107,6 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
 					iconPos.X = labelPos.X + labelSize.Width + theme.Padding()
 					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-				case ButtonOrderIconAboveText:
-					// +------------------------+
-					// | Icon                   |
-					// | Text                   |
-					// +------------------------+
-					contentHeight := iconSize.Height + theme.Padding() + labelSize.Height
-					iconPos.X = innerOffset.X
-					iconPos.Y = innerOffset.Y + (innerSize.Height-contentHeight)/2
-					labelPos.X = innerOffset.X
-					labelPos.Y = iconPos.Y + iconSize.Height + theme.Padding()
-				case ButtonOrderIconBelowText:
-					// +------------------------+
-					// | Text                   |
-					// | Icon                   |
-					// +------------------------+
-					contentHeight := labelSize.Height + theme.Padding() + iconSize.Height
-					labelPos.X = innerOffset.X
-					labelPos.Y = innerOffset.Y + (innerSize.Height-contentHeight)/2
-					iconPos.X = innerOffset.X
-					iconPos.Y = labelPos.Y + labelSize.Height + theme.Padding()
 				}
 			case ButtonAlignTrailing:
 				switch b.button.Ordering {
@@ -189,26 +126,6 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
 					labelPos.X = iconPos.X - theme.Padding() - labelSize.Width
 					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-				case ButtonOrderIconAboveText:
-					// +------------------------+
-					// |                   Icon |
-					// |                   Text |
-					// +------------------------+
-					contentHeight := iconSize.Height + theme.Padding() + labelSize.Height
-					iconPos.X = innerOffset.X + innerSize.Width - iconSize.Width
-					iconPos.Y = innerOffset.Y + (innerSize.Height-contentHeight)/2
-					labelPos.X = innerOffset.X + innerSize.Width - labelSize.Width
-					labelPos.Y = iconPos.Y + iconSize.Height + theme.Padding()
-				case ButtonOrderIconBelowText:
-					// +------------------------+
-					// |                   Text |
-					// |                   Icon |
-					// +------------------------+
-					contentHeight := labelSize.Height + theme.Padding() + iconSize.Height
-					labelPos.X = innerOffset.X + innerSize.Width - labelSize.Width
-					labelPos.Y = innerOffset.Y + (innerSize.Height-contentHeight)/2
-					iconPos.X = innerOffset.X + innerSize.Width - iconSize.Width
-					iconPos.Y = labelPos.Y + labelSize.Height + theme.Padding()
 				}
 			}
 			b.label.Move(labelPos)
@@ -359,10 +276,6 @@ const (
 	ButtonOrderIconLeadingText ButtonOrder = iota
 	// ButtonOrderIconTrailingText aligns the icon on the trailing edge of the text.
 	ButtonOrderIconTrailingText
-	// ButtonOrderIconAboveText aligns the icon above the text.
-	ButtonOrderIconAboveText
-	// ButtonOrderIconBelowText aligns the icon below the text.
-	ButtonOrderIconBelowText
 )
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
