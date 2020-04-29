@@ -38,11 +38,28 @@ func makeButtonTab() fyne.Widget {
 	grid.ShowLineNumbers = true
 	grid.ShowWhitespace = true
 
+	shareItem := fyne.NewMenuItem("Share via", nil)
+	shareItem.ChildMenu = fyne.NewMenu("",
+		fyne.NewMenuItem("Twitter", func() { fmt.Println("context menu Share->Twitter") }),
+		fyne.NewMenuItem("Reddit", func() { fmt.Println("context menu Share->Reddit") }),
+	)
+	menuLabel := &contextMenuButton{
+		widget.NewButton("tap me for pop-up menu with submenus", nil),
+		fyne.NewMenu("",
+			fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
+			shareItem,
+		),
+	}
+
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
 		disabled,
 		grid,
+		layout.NewSpacer(),
+		layout.NewSpacer(),
+		menuLabel,
+		layout.NewSpacer(),
 	)
 }
 
@@ -272,4 +289,14 @@ func WidgetScreen() fyne.CanvasObject {
 			widget.NewTabItem("Split", makeSplitTab()),
 		),
 	)
+}
+
+type contextMenuButton struct {
+	*widget.Button
+	menu *fyne.Menu
+}
+
+// Tapped satisfies the fyne.Tappable interface.
+func (b *contextMenuButton) Tapped(e *fyne.PointEvent) {
+	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
 }
