@@ -1,15 +1,17 @@
-package canvas
+package canvas_test
 
 import (
 	"fmt"
 	"image/color"
 	"testing"
 
+	"fyne.io/fyne/canvas"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewHorizontalGradient(t *testing.T) {
-	horizontal := NewHorizontalGradient(color.Black, color.Transparent)
+	horizontal := canvas.NewHorizontalGradient(color.Black, color.Transparent)
 
 	smallImg := horizontal.Generate(5, 5)
 	expectedAlphaValues := [][]uint8{
@@ -34,7 +36,7 @@ func TestNewHorizontalGradient(t *testing.T) {
 }
 
 func TestNewHorizontalGradient_Flipped(t *testing.T) {
-	horizontal := NewHorizontalGradient(color.Black, color.Transparent)
+	horizontal := canvas.NewHorizontalGradient(color.Black, color.Transparent)
 	horizontal.Angle -= 180
 
 	smallImg := horizontal.Generate(5, 5)
@@ -60,7 +62,7 @@ func TestNewHorizontalGradient_Flipped(t *testing.T) {
 }
 
 func TestNewVerticalGradient(t *testing.T) {
-	vertical := NewVerticalGradient(color.Black, color.Transparent)
+	vertical := canvas.NewVerticalGradient(color.Black, color.Transparent)
 
 	smallImg := vertical.Generate(5, 5)
 	expectedAlphaValues := [][]uint8{
@@ -85,7 +87,7 @@ func TestNewVerticalGradient(t *testing.T) {
 }
 
 func TestNewVerticalGradient_Flipped(t *testing.T) {
-	vertical := NewVerticalGradient(color.Black, color.Transparent)
+	vertical := canvas.NewVerticalGradient(color.Black, color.Transparent)
 	vertical.Angle += 180
 
 	smallImg := vertical.Generate(5, 5)
@@ -111,7 +113,7 @@ func TestNewVerticalGradient_Flipped(t *testing.T) {
 }
 
 func TestNewLinearGradient_45(t *testing.T) {
-	negative := NewLinearGradient(color.Black, color.Transparent, 45.0)
+	negative := canvas.NewLinearGradient(color.Black, color.Transparent, 45.0)
 
 	smallImg := negative.Generate(5, 5)
 	expectedAlphaValues := [][]uint8{
@@ -138,7 +140,7 @@ func TestNewLinearGradient_45(t *testing.T) {
 }
 
 func TestNewLinearGradient_225(t *testing.T) {
-	negative := NewLinearGradient(color.Black, color.Transparent, 225.0)
+	negative := canvas.NewLinearGradient(color.Black, color.Transparent, 225.0)
 
 	smallImg := negative.Generate(5, 5)
 	expectedAlphaValues := [][]uint8{
@@ -165,7 +167,7 @@ func TestNewLinearGradient_225(t *testing.T) {
 }
 
 func TestNewLinearGradient_135(t *testing.T) {
-	positive := NewLinearGradient(color.Black, color.Transparent, 135.0)
+	positive := canvas.NewLinearGradient(color.Black, color.Transparent, 135.0)
 
 	smallImg := positive.Generate(5, 5)
 	expectedAlphaValues := [][]uint8{
@@ -192,7 +194,7 @@ func TestNewLinearGradient_135(t *testing.T) {
 }
 
 func TestNewLinearGradient_315(t *testing.T) {
-	positive := NewLinearGradient(color.Black, color.Transparent, 315.0)
+	positive := canvas.NewLinearGradient(color.Black, color.Transparent, 315.0)
 
 	smallImg := positive.Generate(5, 5)
 	expectedAlphaValues := [][]uint8{
@@ -219,7 +221,7 @@ func TestNewLinearGradient_315(t *testing.T) {
 }
 
 func TestNewRadialGradient(t *testing.T) {
-	circle := NewRadialGradient(color.Black, color.Transparent)
+	circle := canvas.NewRadialGradient(color.Black, color.Transparent)
 
 	{
 		imgOddDiameter := circle.Generate(5, 5)

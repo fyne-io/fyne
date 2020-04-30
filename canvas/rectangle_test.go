@@ -1,15 +1,16 @@
-package canvas
+package canvas_test
 
 import (
 	"image/color"
 	"testing"
 
-	_ "fyne.io/fyne/test"
+	"fyne.io/fyne/canvas"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRectangle_MinSize(t *testing.T) {
-	rect := NewRectangle(color.Black)
+	rect := canvas.NewRectangle(color.Black)
 	min := rect.MinSize()
 
 	assert.True(t, min.Width > 0)
@@ -18,7 +19,7 @@ func TestRectangle_MinSize(t *testing.T) {
 
 func TestRectangle_FillColor(t *testing.T) {
 	c := color.White
-	rect := NewRectangle(c)
+	rect := canvas.NewRectangle(c)
 
 	assert.Equal(t, c, rect.FillColor)
 }
