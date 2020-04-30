@@ -27,7 +27,7 @@ const void* test_NSMenu_itemAtIndex(const void*, NSInteger);
 NSInteger   test_NSMenu_numberOfItems(const void*);
 void        test_NSMenu_performActionForItemAtIndex(const void*, NSInteger);
 const char* test_NSMenu_title(const void*);
-bool        test_NSMenu_isSeparatorItem(const void*);
+bool        test_NSMenuItem_isSeparatorItem(const void*);
 const void* test_NSMenuItem_submenu(const void*);
 const char* test_NSMenuItem_title(const void*);
 */
@@ -185,8 +185,8 @@ func testNSMenuTitle(m unsafe.Pointer) string {
 	return C.GoString(C.test_NSMenu_title(m))
 }
 
-func testNSMenuIsSeparatorItem(i unsafe.Pointer) bool {
-	return bool(C.test_NSMenu_isSeparatorItem(i))
+func testNSMenuItemIsSeparatorItem(i unsafe.Pointer) bool {
+	return bool(C.test_NSMenuItem_isSeparatorItem(i))
 }
 
 func testNSMenuItemSubmenu(i unsafe.Pointer) unsafe.Pointer {

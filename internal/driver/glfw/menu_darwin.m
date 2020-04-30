@@ -115,7 +115,7 @@ const char* test_NSMenu_title(const void* m) {
     return [[menu title] UTF8String];
 }
 
-bool test_NSMenu_isSeparatorItem(const void* i) {
+bool test_NSMenuItem_isSeparatorItem(const void* i) {
     NSMenuItem* item = (NSMenuItem*)i;
     return [item isSeparatorItem];
 }

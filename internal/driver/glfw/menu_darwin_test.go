@@ -29,7 +29,7 @@ func TestDarwinMenu(t *testing.T) {
 
 	assertNSMenuItemSeparator := func(m unsafe.Pointer, i int) {
 		item := testNSMenuItemAtIndex(m, i)
-		assert.True(t, testNSMenuIsSeparatorItem(item), "item is expected to be a separator")
+		assert.True(t, testNSMenuItemIsSeparatorItem(item), "item is expected to be a separator")
 	}
 
 	itemNew := fyne.NewMenuItem("New", func() { lastAction = "new" })
