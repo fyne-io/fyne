@@ -167,6 +167,7 @@ func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
 
 	for len(data.Cells) <= col {
 		data.Cells = append(data.Cells, TextGridCell{})
+		t.Rows[row] = data
 	}
 	data.Cells[col].Style = style
 }
@@ -396,8 +397,8 @@ func (t *textGridRenderer) MinSize() fyne.Size {
 	for _, row := range t.text.Rows {
 		longestRow = int(math.Max(float64(longestRow), float64(len(row.Cells))))
 	}
-	return fyne.NewSize(t.cellSize.Width*len(t.text.Rows),
-		t.cellSize.Height*longestRow)
+	return fyne.NewSize(t.cellSize.Width*longestRow,
+		t.cellSize.Height*len(t.text.Rows))
 }
 
 func (t *textGridRenderer) Refresh() {
