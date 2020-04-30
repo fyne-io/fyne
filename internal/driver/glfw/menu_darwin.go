@@ -15,8 +15,8 @@ import (
 #include <AppKit/AppKit.h>
 
 // Using void* as type for pointers is a workaround. See https://github.com/golang/go/issues/12065.
-void assignDarwinSubmenu(const void*, const void*);
-void completeDarwinMenu(void* menu, bool prepend);
+void        assignDarwinSubmenu(const void*, const void*);
+void        completeDarwinMenu(void* menu, bool prepend);
 const void* createDarwinMenu(const char* label);
 const void* darwinAppMenu();
 const void* insertDarwinMenuItem(const void* menu, const char* label, int id, int index, bool isSeparator);
@@ -24,10 +24,10 @@ const void* insertDarwinMenuItem(const void* menu, const char* label, int id, in
 // Used for tests.
 const void* test_darwinMainMenu();
 const void* test_NSMenu_itemAtIndex(const void*, NSInteger);
-NSInteger test_NSMenu_numberOfItems(const void*);
-void test_NSMenu_performActionForItemAtIndex(const void*, NSInteger);
+NSInteger   test_NSMenu_numberOfItems(const void*);
+void        test_NSMenu_performActionForItemAtIndex(const void*, NSInteger);
 const char* test_NSMenu_title(const void*);
-bool test_NSMenu_isSeparatorItem(const void*);
+bool        test_NSMenu_isSeparatorItem(const void*);
 const void* test_NSMenuItem_submenu(const void*);
 const char* test_NSMenuItem_title(const void*);
 */
