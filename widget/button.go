@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
 
@@ -17,6 +18,7 @@ type buttonRenderer struct {
 	icon   *canvas.Image
 	label  *canvas.Text
 	button *Button
+	layout fyne.Layout
 }
 
 func (b *buttonRenderer) padding() fyne.Size {
@@ -60,78 +62,21 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 	labelSize := b.label.MinSize()
 	padding := b.padding()
-	innerSize := size.Subtract(padding)
-	innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
-	var iconPos fyne.Position
-	var labelPos fyne.Position
 	if hasLabel {
 		if hasIcon {
 			// Both
-			switch b.button.Alignment {
-			case ButtonAlignCenter:
-				switch b.button.IconPlacement {
-				case ButtonIconLeadingText:
-					// +------------------------+
-					// |       Icon Text        |
-					// +------------------------+
-					contentWidth := iconSize.Width + theme.Padding() + labelSize.Width
-					iconPos.X = innerOffset.X + (innerSize.Width-contentWidth)/2
-					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-					labelPos.X = iconPos.X + iconSize.Width + theme.Padding()
-					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-				case ButtonIconTrailingText:
-					// +------------------------+
-					// |       Text Icon        |
-					// +------------------------+
-					contentWidth := labelSize.Width + theme.Padding() + iconSize.Width
-					labelPos.X = innerOffset.X + (innerSize.Width-contentWidth)/2
-					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-					iconPos.X = labelPos.X + labelSize.Width + theme.Padding()
-					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-				}
-			case ButtonAlignLeading:
-				switch b.button.IconPlacement {
-				case ButtonIconLeadingText:
-					// +------------------------+
-					// | Icon Text              |
-					// +------------------------+
-					iconPos.X = innerOffset.X
-					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-					labelPos.X = iconPos.X + iconSize.Width + theme.Padding()
-					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-				case ButtonIconTrailingText:
-					// +------------------------+
-					// | Text Icon              |
-					// +------------------------+
-					labelPos.X = innerOffset.X
-					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-					iconPos.X = labelPos.X + labelSize.Width + theme.Padding()
-					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-				}
-			case ButtonAlignTrailing:
-				switch b.button.IconPlacement {
-				case ButtonIconLeadingText:
-					// +------------------------+
-					// |              Icon Text |
-					// +------------------------+
-					labelPos.X = innerOffset.X + innerSize.Width - labelSize.Width
-					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-					iconPos.X = labelPos.X - theme.Padding() - iconSize.Width
-					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-				case ButtonIconTrailingText:
-					// +------------------------+
-					// |              Text Icon |
-					// +------------------------+
-					iconPos.X = innerOffset.X + innerSize.Width - iconSize.Width
-					iconPos.Y = innerOffset.Y + (innerSize.Height-iconSize.Height)/2
-					labelPos.X = iconPos.X - theme.Padding() - labelSize.Width
-					labelPos.Y = innerOffset.Y + (innerSize.Height-labelSize.Height)/2
-				}
+			var objects []fyne.CanvasObject
+			if b.button.IconPlacement == ButtonIconLeadingText {
+				objects = append(objects, b.icon, b.label)
+			} else {
+				objects = append(objects, b.label, b.icon)
 			}
-			b.label.Move(labelPos)
-			b.label.Resize(labelSize)
-			b.icon.Move(iconPos)
-			b.icon.Resize(iconSize)
+			b.icon.SetMinSize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+			min := b.layout.MinSize(objects)
+			b.layout.Layout(objects, min)
+			pos := alignedPosition(b.button.Alignment, padding, min, size)
+			b.label.Move(b.label.Position().Add(pos))
+			b.icon.Move(b.icon.Position().Add(pos))
 		} else {
 			// Label Only
 			b.label.Move(alignedPosition(b.button.Alignment, padding, labelSize, size))
@@ -148,34 +93,13 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 	pos.Y = (layoutSize.Height - objectSize.Height) / 2
 	switch align {
 	case ButtonAlignCenter:
-		// +------------------------+
-		// |         Object         |
-		// +------------------------+
 		pos.X = (layoutSize.Width - objectSize.Width) / 2
 	case ButtonAlignLeading:
-		// +------------------------+
-		// | Object                 |
-		// +------------------------+
 		pos.X = padding.Width / 2
 	case ButtonAlignTrailing:
-		// +------------------------+
-		// |                 Object |
-		// +------------------------+
 		pos.X = layoutSize.Width - objectSize.Width - padding.Width/2
 	}
 	return
-}
-
-// applyAlignment updates the button label alignment
-func (b *buttonRenderer) applyAlignment() {
-	switch b.button.Alignment {
-	case ButtonAlignLeading:
-		b.label.Alignment = fyne.TextAlignLeading
-	case ButtonAlignTrailing:
-		b.label.Alignment = fyne.TextAlignTrailing
-	default:
-		b.label.Alignment = fyne.TextAlignCenter
-	}
 }
 
 // applyTheme updates this button to match the current theme
@@ -202,7 +126,6 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 
 func (b *buttonRenderer) Refresh() {
 	b.applyTheme()
-	b.applyAlignment()
 	b.label.Text = b.button.Text
 
 	if b.button.Icon != nil && b.button.Visible() {
@@ -328,9 +251,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, icon)
 	}
 
-	r := &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b}
-	r.applyAlignment()
-	return r
+	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
 }
 
 // SetText allows the button label to be changed

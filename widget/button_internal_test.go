@@ -106,9 +106,13 @@ func TestButtonRenderer_Layout_Stretch(t *testing.T) {
 	} else {
 		iconYOffset = (textHeight - theme.IconInlineSize()) / 2
 	}
-	assert.Equal(t, fyne.NewPos(50+theme.Padding()*2, 50+theme.Padding()+iconYOffset), render.icon.Position(), "icon position")
-	assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), render.icon.Size(), "icon size")
-	assert.Equal(t, fyne.NewPos(50+theme.Padding()*3+theme.IconInlineSize(), 50+theme.Padding()+labelYOffset), render.label.Position(), "label position")
+	minIconHeight := fyne.Max(theme.IconInlineSize(), textHeight)
+	assert.Equal(t, 50+theme.Padding()*2, render.icon.Position().X, "icon x")
+	assert.Equal(t, 50+theme.Padding()+iconYOffset, render.icon.Position().Y, "icon y")
+	assert.Equal(t, theme.IconInlineSize(), render.icon.Size().Width, "icon width")
+	assert.Equal(t, minIconHeight, render.icon.Size().Height, "icon height")
+	assert.Equal(t, 50+theme.Padding()*3+theme.IconInlineSize(), render.label.Position().X, "label x")
+	assert.Equal(t, 50+theme.Padding()+labelYOffset, render.label.Position().Y, "label y")
 	assert.Equal(t, render.label.MinSize(), render.label.Size(), "label size")
 }
 
