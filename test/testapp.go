@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
 )
 
@@ -99,6 +100,7 @@ func NewApp() fyne.App {
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, driver: NewDriver().(*testDriver)}
 	fyne.SetCurrentApp(test)
+	painter.SvgCacheMonitorTheme()
 
 	listener := make(chan fyne.Settings)
 	test.Settings().AddChangeListener(listener)
