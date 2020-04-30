@@ -26,6 +26,7 @@ const void* test_darwinMainMenu();
 const void* test_NSMenu_itemAtIndex(const void*, NSInteger);
 NSInteger   test_NSMenu_numberOfItems(const void*);
 void        test_NSMenu_performActionForItemAtIndex(const void*, NSInteger);
+void        test_NSMenu_removeItemAtIndex(const void* m, NSInteger i);
 const char* test_NSMenu_title(const void*);
 bool        test_NSMenuItem_isSeparatorItem(const void*);
 const void* test_NSMenuItem_submenu(const void*);
@@ -146,6 +147,7 @@ func menuCallback(id int) {
 
 func setupNativeMenu(w *window, main *fyne.MainMenu) {
 	nextItemID := 0
+	callbacks = []func(){}
 	var helpMenu *fyne.Menu
 	for i := len(main.Items) - 1; i >= 0; i-- {
 		menu := main.Items[i]
@@ -179,6 +181,10 @@ func testNSMenuNumberOfItems(m unsafe.Pointer) int {
 
 func testNSMenuPerformActionForItemAtIndex(m unsafe.Pointer, i int) {
 	C.test_NSMenu_performActionForItemAtIndex(m, C.long(i))
+}
+
+func testNSMenuRemoveItemAtIndex(m unsafe.Pointer, i int) {
+	C.test_NSMenu_removeItemAtIndex(m, C.long(i))
 }
 
 func testNSMenuTitle(m unsafe.Pointer) string {
