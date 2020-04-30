@@ -131,6 +131,7 @@ func (b *buttonRenderer) Refresh() {
 	if b.button.Icon != nil && b.button.Visible() {
 		if b.icon == nil {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
+			b.icon.FillMode = canvas.ImageFillContain
 			b.SetObjects(append(b.Objects(), b.icon))
 		} else {
 			if b.button.Disabled() {
@@ -236,6 +237,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
+		icon.FillMode = canvas.ImageFillContain
 	}
 
 	text := canvas.NewText(b.Text, theme.TextColor())
