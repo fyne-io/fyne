@@ -63,7 +63,19 @@ func makeButtonTab() fyne.Widget {
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
-		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
+		widget.NewButtonWithIcon("Button (text & leading icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & leading icon button") }),
+		&widget.Button{
+			Alignment: widget.ButtonAlignLeading,
+			Text:      "Button (leading-aligned, text only)",
+			OnTapped:  func() { fmt.Println("tapped leading-aligned, text only button") },
+		},
+		&widget.Button{
+			Alignment:     widget.ButtonAlignTrailing,
+			IconPlacement: widget.ButtonIconTrailingText,
+			Text:          "Button (trailing-aligned, text & trailing icon)",
+			Icon:          theme.ConfirmIcon(),
+			OnTapped:      func() { fmt.Println("tapped trailing-aligned, text & trailing icon button") },
+		},
 		disabled,
 		grid,
 		layout.NewSpacer(),
