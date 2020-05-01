@@ -3,7 +3,6 @@ package software
 import (
 	"image"
 	"image/draw"
-	"log"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -54,7 +53,6 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 			pos.Y += (height - newHeight) / 2
 			height = internal.ScaleInt(c, newHeight)
 		}
-		log.Println("ICON?", width, height)
 		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
 	}
 
