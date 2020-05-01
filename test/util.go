@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	"image/png"
@@ -23,7 +24,7 @@ import (
 // The test `t` fails if the given image is not equal to the loaded master image.
 // In this case the given image is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
 // This path is also reported, thus the file can be used as new master.
-func AssertImageMatches(t *testing.T, masterFilename string, img image.Image) bool {
+func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, msgAndArgs ...interface{}) bool {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 	masterPath := filepath.Join(wd, "testdata", masterFilename)
@@ -43,7 +44,11 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image) bo
 	expected := image.NewRGBA(raw.Bounds())
 	draw.Draw(expected, expected.Bounds(), raw, image.Pt(0, 0), draw.Src)
 
-	if !assert.Equal(t, expected, img, "Image did not match master. Actual image written to %s.", failedPath) {
+	var msg string
+	if len(msgAndArgs) > 0 {
+		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
+	}
+	if !assert.Equal(t, expected, img, "%sImage did not match master. Actual image written to file://%s.", msg, failedPath) {
 		require.NoError(t, writeImage(failedPath, img))
 		return false
 	}
