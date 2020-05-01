@@ -185,6 +185,8 @@ func (r *accordionContainerRenderer) updateObjects() {
 			h = &Button{}
 			r.headers = append(r.headers, h)
 		}
+		h.Alignment = ButtonAlignLeading
+		h.IconPlacement = ButtonIconLeadingText
 		h.Hidden = false
 		h.HideShadow = true
 		h.Text = ai.Title
