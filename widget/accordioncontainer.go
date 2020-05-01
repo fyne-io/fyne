@@ -192,10 +192,10 @@ func (r *accordionContainerRenderer) updateObjects() {
 		h.Text = ai.Title
 		h.OnTapped = r.container.toggleForIndex(i)
 		if ai.Open {
-			h.Icon = theme.MoveDownIcon()
+			h.Icon = theme.MenuDropUpIcon()
 			ai.Detail.Show()
 		} else {
-			h.Icon = theme.NavigateNextIcon()
+			h.Icon = theme.MenuDropDownIcon()
 			ai.Detail.Hide()
 		}
 		h.Refresh()
