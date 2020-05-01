@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/app"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
 )
@@ -52,34 +53,6 @@ func (a *testApp) UniqueID() string {
 	return "testApp" // TODO should this be randomised?
 }
 
-func (a *testApp) applyThemeTo(content fyne.CanvasObject) {
-	if content == nil {
-		return
-	}
-	content.Refresh()
-
-	switch x := content.(type) {
-	case fyne.Widget:
-		for _, o := range WidgetRenderer(x).Objects() {
-			a.applyThemeTo(o)
-		}
-	case *fyne.Container:
-		for _, o := range x.Objects {
-			a.applyThemeTo(o)
-		}
-	}
-}
-
-func (a *testApp) applyTheme() {
-	for _, window := range a.driver.AllWindows() {
-		c := window.Canvas()
-		a.applyThemeTo(c.Content())
-		for _, o := range c.Overlays().List() {
-			a.applyThemeTo(o)
-		}
-	}
-}
-
 func (a *testApp) Driver() fyne.Driver {
 	return a.driver
 }
@@ -95,7 +68,7 @@ func (a *testApp) Preferences() fyne.Preferences {
 // NewApp returns a new dummy app used for testing.
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
-	settings := &testSettings{}
+	settings := &testSettings{scale: 1.0}
 	settings.listenerMutex = &sync.Mutex{}
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, driver: NewDriver().(*testDriver)}
@@ -107,7 +80,7 @@ func NewApp() fyne.App {
 	go func() {
 		for {
 			_ = <-listener
-			test.applyTheme()
+			app.ApplySettings(test.Settings(), test)
 			test.appliedTheme = test.Settings().Theme()
 		}
 	}()
