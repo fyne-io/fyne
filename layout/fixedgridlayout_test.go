@@ -1,4 +1,4 @@
-package layout
+package layout_test
 
 import (
 	"image/color"
@@ -6,7 +6,9 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +25,7 @@ func TestFixedGridLayout_Layout(t *testing.T) {
 	}
 	container.Resize(gridSize)
 
-	NewFixedGridLayout(cellSize).Layout(container.Objects, gridSize)
+	layout.NewFixedGridLayout(cellSize).Layout(container.Objects, gridSize)
 
 	assert.Equal(t, obj1.Size(), cellSize)
 	cell2Pos := fyne.NewPos(50+theme.Padding(), 0)
@@ -43,7 +45,7 @@ func TestFixedGridLayout_Layout_Min(t *testing.T) {
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
 	}
 
-	NewFixedGridLayout(cellSize).Layout(container.Objects, container.MinSize())
+	layout.NewFixedGridLayout(cellSize).Layout(container.Objects, container.MinSize())
 
 	assert.Equal(t, obj1.Size(), cellSize)
 	cell2Pos := fyne.NewPos(0, 50+theme.Padding())
@@ -66,7 +68,7 @@ func TestFixedGridLayout_Layout_HiddenItem(t *testing.T) {
 	}
 	container.Resize(gridSize)
 
-	NewFixedGridLayout(cellSize).Layout(container.Objects, gridSize)
+	layout.NewFixedGridLayout(cellSize).Layout(container.Objects, gridSize)
 
 	assert.Equal(t, obj1.Size(), cellSize)
 	cell3Pos := fyne.NewPos(50+theme.Padding(), 0)
@@ -78,7 +80,7 @@ func TestFixedGridLayout_MinSize(t *testing.T) {
 	minSize := cellSize
 
 	container := fyne.NewContainer(canvas.NewRectangle(color.RGBA{0, 0, 0, 0}))
-	layout := NewFixedGridLayout(cellSize)
+	layout := layout.NewFixedGridLayout(cellSize)
 
 	layoutMin := layout.MinSize(container.Objects)
 	assert.Equal(t, minSize, layoutMin)
@@ -94,9 +96,9 @@ func TestFixedGridLayout_Resize_LessThanMinSize(t *testing.T) {
 	minSize := cellSize
 
 	container := fyne.NewContainer(canvas.NewRectangle(color.RGBA{0, 0, 0, 0}))
-	layout := NewFixedGridLayout(cellSize)
+	l := layout.NewFixedGridLayout(cellSize)
 	container.Resize(fyne.NewSize(25, 25))
 
-	layoutMin := layout.MinSize(container.Objects)
+	layoutMin := l.MinSize(container.Objects)
 	assert.Equal(t, minSize, layoutMin)
 }
