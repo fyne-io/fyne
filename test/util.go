@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/internal/driver"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -55,14 +56,22 @@ func Tap(obj fyne.Tappable) {
 
 // TapAt simulates a left mouse click on the passed object at a specified place within it.
 func TapAt(obj fyne.Tappable, pos fyne.Position) {
-	if focus, ok := obj.(fyne.Focusable); ok {
-		if focus != Canvas().Focused() {
-			Canvas().Focus(focus)
-		}
-	}
+	ev, c := prepareTap(obj, pos)
+	tap(c, obj, ev)
+}
 
-	ev := &fyne.PointEvent{Position: pos}
-	obj.Tapped(ev)
+// TapCanvas taps at an absolute position on the canvas.
+// It fails the test if there is no fyne.Tappable reachable at the position.
+func TapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position) {
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		}
+		return false
+	}
+	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	require.NotNil(t, o, "no tappable found at %#v", pos)
+	tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
@@ -72,13 +81,8 @@ func TapSecondary(obj fyne.SecondaryTappable) {
 
 // TapSecondaryAt simulates a right mouse click on the passed object at a specified place within it.
 func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
-	if focus, ok := obj.(fyne.Focusable); ok {
-		if focus != Canvas().Focused() {
-			Canvas().Focus(focus)
-		}
-	}
-
-	ev := &fyne.PointEvent{Position: pos}
+	ev, c := prepareTap(obj, pos)
+	handleFocusOnTap(c, obj)
 	obj.TappedSecondary(ev)
 }
 
@@ -120,6 +124,40 @@ func WithTestTheme(t *testing.T, f func()) {
 	ApplyTheme(t, &testTheme{})
 	defer ApplyTheme(t, current)
 	f()
+}
+
+func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
+	d := fyne.CurrentApp().Driver()
+	ev := &fyne.PointEvent{Position: pos}
+	var c fyne.Canvas
+	if co, ok := obj.(fyne.CanvasObject); ok {
+		c = d.CanvasForObject(co)
+		ev.AbsolutePosition = d.AbsolutePositionForObject(co).Add(pos)
+	}
+	return ev, c
+}
+
+func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
+	handleFocusOnTap(c, obj)
+	obj.Tapped(ev)
+}
+
+func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
+	if c == nil {
+		return
+	}
+	unfocus := true
+	if focus, ok := obj.(fyne.Focusable); ok {
+		if dis, ok := obj.(fyne.Disableable); !ok || !dis.Disabled() {
+			unfocus = false
+			if focus != c.Focused() {
+				c.Focus(focus)
+			}
+		}
+	}
+	if unfocus {
+		c.Unfocus()
+	}
 }
 
 func typeChars(chars []rune, keyDown func(rune)) {

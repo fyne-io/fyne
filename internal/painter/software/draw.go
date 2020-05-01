@@ -40,7 +40,21 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 		width = internal.ScaleInt(c, img.Size().Width)
 		height = internal.ScaleInt(c, img.Size().Height)
 		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
-	} // TODO support contain
+	} else if img.FillMode == canvas.ImageFillContain {
+		imgAspect := painter.GetAspect(img)
+		objAspect := float32(width) / float32(height)
+
+		if objAspect > imgAspect {
+			newWidth := int(float32(height) * imgAspect)
+			pos.X += (width - newWidth) / 2
+			width = internal.ScaleInt(c, newWidth)
+		} else if objAspect < imgAspect {
+			newHeight := int(float32(width) / imgAspect)
+			pos.Y += (height - newHeight) / 2
+			height = internal.ScaleInt(c, newHeight)
+		}
+		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
+	}
 
 	drawTex(c, pos, width, height, base, tex)
 }

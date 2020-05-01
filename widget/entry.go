@@ -259,7 +259,7 @@ type Entry struct {
 
 	// selecting indicates whether the cursor has moved since it was at the selection start location
 	selecting bool
-	popUp     *PopUp
+	popUp     *widget.PopUpMenu
 	// TODO: Add OnSelectChanged
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
@@ -548,13 +548,16 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 		return // no popup options for a disabled concealed field
 	}
 
+	var menu *fyne.Menu
 	if e.Disabled() {
-		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", copyItem, selectAllItem), c, popUpPos)
+		menu = fyne.NewMenu("", copyItem, selectAllItem)
 	} else if e.concealed() {
-		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", pasteItem, selectAllItem), c, popUpPos)
+		menu = fyne.NewMenu("", pasteItem, selectAllItem)
 	} else {
-		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem), c, popUpPos)
+		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
 	}
+	e.popUp = newPopUpMenu(menu, c)
+	e.popUp.ShowAtPosition(popUpPos)
 }
 
 // Cursor returns the cursor type of this widget
@@ -626,7 +629,7 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 }
 
 // getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
-// and expanding to the start and end of the whitespace or text underneat the specified position.
+// and expanding to the start and end of the whitespace or text underneath the specified position.
 func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 
 	if len(row) == 0 || col < 0 {

@@ -181,10 +181,18 @@ func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 
 func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyne.Size) []fyne.CanvasObject {
 	objects = append(objects, o)
-	if w, ok := o.(fyne.Widget); ok {
-		r := w.CreateRenderer()
+	switch c := o.(type) {
+	case fyne.Widget:
+		r := c.CreateRenderer()
 		r.Layout(size)
 		for _, child := range r.Objects() {
+			objects = layoutAndCollect(objects, child, child.Size())
+		}
+	case *fyne.Container:
+		if c.Layout != nil {
+			c.Layout.Layout(c.Objects, size)
+		}
+		for _, child := range c.Objects {
 			objects = layoutAndCollect(objects, child, child.Size())
 		}
 	}

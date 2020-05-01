@@ -214,6 +214,6 @@ public class GoNativeActivity extends NativeActivity {
         }
 
         Uri uri = data.getData();
-        filePickerReturned(uri.getPath());
+        filePickerReturned(uri.toString());
     }
 }
