@@ -305,6 +305,12 @@ func (e *Entry) SetReadOnly(ro bool) {
 	}
 }
 
+// IsReadOnly is for internal use, only.
+// Deprecated: Use Disabled() instead.
+func (e *Entry) IsReadOnly() bool {
+	return e.ReadOnly
+}
+
 // Enable this widget, updating any style or features appropriately.
 func (e *Entry) Enable() { // TODO remove this override after ReadOnly is removed
 	e.ReadOnly = false

@@ -3,12 +3,15 @@ package app
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/widget"
 )
 
 // FocusManager represents a standard manager of input focus for a canvas
 type FocusManager struct {
 	canvas fyne.Canvas
+}
+
+type deprecatedReadonly interface {
+	IsReadOnly() bool
 }
 
 func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
@@ -19,7 +22,7 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 			// disabled widget cannot receive focus
 			return false
 		}
-		if e, ok := obj.(*widget.Entry); ok && e.ReadOnly { // TODO remove once ReadOnly is gone
+		if e, ok := obj.(deprecatedReadonly); ok && e.IsReadOnly() { // TODO: remove once widget/Entry.ReadOnly is gone
 			return false
 		}
 
