@@ -28,7 +28,7 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindowWithPainter(combo, software.NewPainter())
 	defer w.Close()
-	w.Resize(fyne.NewSize(200, 150))
+	w.Resize(fyne.NewSize(200, 200))
 	combo.Resize(combo.MinSize())
 	combo.Move(fyne.NewPos(10, 10))
 	test.Tap(combo)

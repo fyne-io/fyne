@@ -14,7 +14,8 @@ var _ fyne.Tappable = (*Menu)(nil)
 type Menu struct {
 	base
 	menuBase
-	Items []fyne.CanvasObject
+	Items       []fyne.CanvasObject
+	CustomSized bool
 }
 
 // NewMenu creates a new Menu.
@@ -33,7 +34,10 @@ func NewMenu(menu *fyne.Menu) *Menu {
 
 // CreateRenderer satisfies the fyne.Widget interface.
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
-	cont := fyne.NewContainerWithLayout(layout.NewVBoxLayout(), m.Items...)
+	cont := &fyne.Container{
+		Layout:  layout.NewVBoxLayout(),
+		Objects: m.Items,
+	}
 	return &menuRenderer{
 		NewShadowingRenderer([]fyne.CanvasObject{cont}, MenuLevel),
 		cont,
@@ -78,7 +82,19 @@ type menuRenderer struct {
 }
 
 // Layout satisfies the fyne.WidgetRenderer interface.
-func (r *menuRenderer) Layout(size fyne.Size) {
+func (r *menuRenderer) Layout(s fyne.Size) {
+	minSize := r.MinSize()
+	var size fyne.Size
+	if r.m.CustomSized {
+		size = minSize.Max(s)
+	} else {
+		size = minSize
+	}
+	if size != r.m.Size() {
+		r.m.Resize(size)
+		return
+	}
+
 	r.LayoutShadow(size, fyne.NewPos(0, 0))
 	padding := r.padding()
 	r.cont.Resize(size.Subtract(padding))

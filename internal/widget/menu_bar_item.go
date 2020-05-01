@@ -76,6 +76,7 @@ func (i *MenuBarItem) Refresh() {
 // Resize satisfies the fyne.Widget interface.
 func (i *MenuBarItem) Resize(size fyne.Size) {
 	i.resize(size, i)
+	i.updateChildPosition()
 }
 
 // Show satisfies the fyne.Widget interface.
@@ -116,6 +117,9 @@ func (r *menuBarItemRenderer) BackgroundColor() color.Color {
 // Layout satisfies the fyne.WidgetRenderer interface.
 func (r *menuBarItemRenderer) Layout(_ fyne.Size) {
 	padding := r.padding()
+
+	r.text.TextSize = theme.TextSize()
+	r.text.Color = theme.TextColor()
 	r.text.Resize(r.text.MinSize())
 	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
 }
@@ -127,12 +131,7 @@ func (r *menuBarItemRenderer) MinSize() fyne.Size {
 
 // Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *menuBarItemRenderer) Refresh() {
-	if r.text.TextSize != theme.TextSize() {
-		defer r.Layout(r.i.Size())
-	}
-	r.text.TextSize = theme.TextSize()
-	r.text.Color = theme.TextColor()
-	canvas.Refresh(r.text)
+	canvas.Refresh(r.i)
 }
 
 func (r *menuBarItemRenderer) padding() fyne.Size {

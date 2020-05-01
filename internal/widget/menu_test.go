@@ -212,6 +212,7 @@ func TestMenu_Layout(t *testing.T) {
 		windowSize     fyne.Size
 		menuPos        fyne.Position
 		mousePositions []fyne.Position
+		useTestTheme   bool
 		wantImage      string
 	}{
 		"normal": {
@@ -266,6 +267,12 @@ func TestMenu_Layout(t *testing.T) {
 			},
 			wantImage: "menu_layout_window_too_short.png",
 		},
+		"theme change": {
+			windowSize:   fyne.NewSize(500, 300),
+			menuPos:      fyne.NewPos(10, 10),
+			useTestTheme: true,
+			wantImage:    "menu_layout_theme_changed.png",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			w.Resize(tt.windowSize)
@@ -277,7 +284,13 @@ func TestMenu_Layout(t *testing.T) {
 			for _, pos := range tt.mousePositions {
 				test.MoveMouse(c, pos)
 			}
-			test.AssertImageMatches(t, tt.wantImage, c.Capture())
+			if tt.useTestTheme {
+				test.WithTestTheme(t, func() {
+					test.AssertImageMatches(t, tt.wantImage, c.Capture())
+				})
+			} else {
+				test.AssertImageMatches(t, tt.wantImage, c.Capture())
+			}
 		})
 	}
 }

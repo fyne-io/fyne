@@ -21,6 +21,11 @@ var _ fyne.Theme = testTheme{}
 type testTheme struct {
 }
 
+// NewTheme returns a new testTheme.
+func NewTheme() fyne.Theme {
+	return &testTheme{}
+}
+
 // BackgroundColor satisfies the fyne.Theme interface.
 func (testTheme) BackgroundColor() color.Color {
 	return red

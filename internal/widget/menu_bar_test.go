@@ -18,7 +18,6 @@ func TestMenuBar(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
-	isLightTheme := true
 
 	w := test.NewWindowWithPainter(nil, software.NewPainter())
 	defer w.Close()
@@ -52,14 +51,17 @@ func TestMenuBar(t *testing.T) {
 	menu := fyne.NewMainMenu(m1, m2, m3)
 	menuBar := widget.NewMenuBar(menu, c)
 
+	themeCounter := 0
 	button := publicWidgets.NewButton("Button", func() {
-		if isLightTheme {
+		switch themeCounter % 3 {
+		case 0:
 			test.ApplyTheme(t, theme.DarkTheme())
-			isLightTheme = false
-		} else {
+		case 1:
+			test.ApplyTheme(t, test.NewTheme())
+		default:
 			test.ApplyTheme(t, theme.LightTheme())
-			isLightTheme = true
 		}
+		themeCounter++
 	})
 
 	container := fyne.NewContainer(button, menuBar)
@@ -101,6 +103,10 @@ func TestMenuBar(t *testing.T) {
 				{
 					actions:   []action{{"tap", buttonPos}},
 					wantImage: "menu_bar_hovered_content_dark.png",
+				},
+				{
+					actions:   []action{{"tap", buttonPos}},
+					wantImage: "menu_bar_hovered_content_test_theme.png",
 				},
 				{
 					actions:   []action{{"tap", buttonPos}},

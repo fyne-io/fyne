@@ -103,13 +103,18 @@ func (r *menuBarRenderer) BackgroundColor() color.Color {
 // Layout satisfies the fyne.WidgetRenderer interface.
 func (r *menuBarRenderer) Layout(size fyne.Size) {
 	r.LayoutShadow(size, fyne.NewPos(0, 0))
+	minSize := r.MinSize()
+	if size.Height != minSize.Height || size.Width < minSize.Width {
+		r.b.Resize(fyne.NewSize(fyne.Max(size.Width, minSize.Width), minSize.Height))
+		return
+	}
+
 	padding := r.padding()
 	if r.b.active {
 		r.bg.Resize(r.b.canvas.Size())
 	} else {
 		r.bg.Resize(fyne.NewSize(0, 0))
 	}
-	r.b.Resize(r.b.MinSize().Max(fyne.NewSize(size.Width, 0)))
 	r.cont.Resize(size.Subtract(padding))
 	r.cont.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
 }

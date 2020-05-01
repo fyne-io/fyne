@@ -45,10 +45,10 @@ func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, i.Child)
 	}
 	return &menuItemRenderer{
-		NewBaseRenderer(objects),
-		i,
-		icon,
-		text,
+		BaseRenderer: NewBaseRenderer(objects),
+		i:            i,
+		icon:         icon,
+		text:         text,
 	}
 }
 
@@ -87,6 +87,9 @@ func (i *MenuItem) Refresh() {
 // Resize satisfies the fyne.Widget interface.
 func (i *MenuItem) Resize(size fyne.Size) {
 	i.resize(size, i)
+	if i.Child != nil {
+		i.updateChildPosition()
+	}
 }
 
 // Show satisfies the fyne.Widget interface.
@@ -128,9 +131,13 @@ func (i *MenuItem) updateChildPosition() {
 
 type menuItemRenderer struct {
 	BaseRenderer
-	i    *MenuItem
-	icon *canvas.Image
-	text *canvas.Text
+	i       *MenuItem
+	icon    *canvas.Image
+	minSize fyne.Size
+	pad     fyne.Size
+	msPad   fyne.Size
+	tPad    int
+	text    *canvas.Text
 }
 
 // BackgroundColor satisfies the fyne.WidgetRenderer interface.
@@ -145,6 +152,9 @@ func (r *menuItemRenderer) BackgroundColor() color.Color {
 // Layout satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) Layout(size fyne.Size) {
 	padding := r.padding()
+
+	r.text.TextSize = theme.TextSize()
+	r.text.Color = theme.TextColor()
 	r.text.Resize(r.text.MinSize())
 	r.text.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
 
@@ -156,23 +166,34 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 
 // MinSize satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) MinSize() fyne.Size {
-	minSize := r.text.MinSize().Add(r.padding())
-	if r.icon == nil {
-		return minSize
+	if r.minSizeUnchanged() {
+		return r.minSize
 	}
-	return minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
+
+	minSize := r.text.MinSize().Add(r.padding())
+	r.msPad = r.padding()
+	if r.icon != nil {
+		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
+	}
+	r.minSize = minSize
+	return r.minSize
 }
 
 // Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) Refresh() {
-	if r.text.TextSize != theme.TextSize() {
-		defer r.Layout(r.i.Size())
-	}
-	r.text.TextSize = theme.TextSize()
-	r.text.Color = theme.TextColor()
-	canvas.Refresh(r.text)
+	canvas.Refresh(r.i)
+}
+
+func (r *menuItemRenderer) minSizeUnchanged() bool {
+	return !r.minSize.IsZero() &&
+		r.text.TextSize == theme.TextSize() &&
+		(r.icon == nil || r.icon.Size().Width == theme.IconInlineSize()) &&
+		r.msPad == r.padding()
 }
 
 func (r *menuItemRenderer) padding() fyne.Size {
-	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+	if r.tPad != theme.Padding() {
+		r.pad = fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+	}
+	return r.pad
 }

@@ -163,7 +163,7 @@ func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
 func WithTestTheme(t *testing.T, f func()) {
 	settings := fyne.CurrentApp().Settings()
 	current := settings.Theme()
-	ApplyTheme(t, &testTheme{})
+	ApplyTheme(t, NewTheme())
 	defer ApplyTheme(t, current)
 	f()
 }
