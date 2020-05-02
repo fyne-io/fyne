@@ -26,6 +26,12 @@ func parseURL(urlStr string) *url.URL {
 	return link
 }
 
+func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
+	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
+		focused.TypedShortcut(s)
+	}
+}
+
 func welcomeScreen(a fyne.App) fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(data.FyneScene)
 	logo.SetMinSize(fyne.NewSize(228, 167))
@@ -77,9 +83,21 @@ func main() {
 	)
 	settingsItem := fyne.NewMenuItem("Settings", func() { fmt.Println("Menu Settings") })
 
-	cutItem := fyne.NewMenuItem("Cut", func() { fmt.Println("Menu Cut") })
-	copyItem := fyne.NewMenuItem("Copy", func() { fmt.Println("Menu Copy") })
-	pasteItem := fyne.NewMenuItem("Paste", func() { fmt.Println("Menu Paste") })
+	cutItem := fyne.NewMenuItem("Cut", func() {
+		shortcutFocused(&fyne.ShortcutCut{
+			Clipboard: w.Clipboard(),
+		}, w)
+	})
+	copyItem := fyne.NewMenuItem("Copy", func() {
+		shortcutFocused(&fyne.ShortcutCopy{
+			Clipboard: w.Clipboard(),
+		}, w)
+	})
+	pasteItem := fyne.NewMenuItem("Paste", func() {
+		shortcutFocused(&fyne.ShortcutPaste{
+			Clipboard: w.Clipboard(),
+		}, w)
+	})
 	findItem := fyne.NewMenuItem("Find", func() { fmt.Println("Menu Find") })
 
 	helpMenu := fyne.NewMenu("Help", fyne.NewMenuItem("Help", func() { fmt.Println("Help Menu") }))

@@ -44,7 +44,19 @@ func makeButtonTab() fyne.Widget {
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
-		widget.NewButtonWithIcon("Button (text & icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & icon button") }),
+		widget.NewButtonWithIcon("Button (text & leading icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & leading icon button") }),
+		&widget.Button{
+			Alignment: widget.ButtonAlignLeading,
+			Text:      "Button (leading-aligned, text only)",
+			OnTapped:  func() { fmt.Println("tapped leading-aligned, text only button") },
+		},
+		&widget.Button{
+			Alignment:     widget.ButtonAlignTrailing,
+			IconPlacement: widget.ButtonIconTrailingText,
+			Text:          "Button (trailing-aligned, text & trailing icon)",
+			Icon:          theme.ConfirmIcon(),
+			OnTapped:      func() { fmt.Println("tapped trailing-aligned, text & trailing icon button") },
+		},
 		disabled,
 		layout.NewSpacer(),
 		layout.NewSpacer(),
@@ -54,11 +66,21 @@ func makeButtonTab() fyne.Widget {
 }
 
 func makeTextGrid() *widget.TextGrid {
-	grid := widget.NewTextGridFromString("TextGrid\n  Content")
+	grid := widget.NewTextGridFromString("TextGrid\n  Content\nZebra")
 	grid.SetStyleRange(0, 0, 0, 3,
 		&widget.CustomTextGridStyle{FGColor: color.RGBA{R: 0, G: 0, B: 128, A: 255}})
 	grid.SetStyleRange(0, 4, 0, 7,
 		&widget.CustomTextGridStyle{BGColor: &color.RGBA{R: 128, G: 0, B: 0, A: 255}})
+	grid.Rows[1].Style = &widget.CustomTextGridStyle{BGColor: &color.RGBA{R: 64, G: 64, B: 64, A: 128}}
+
+	white := &widget.CustomTextGridStyle{FGColor: &color.RGBA{R: 255, G: 255, B: 255, A: 255}}
+	black := &widget.CustomTextGridStyle{FGColor: &color.RGBA{R: 0, G: 0, B: 0, A: 255}}
+	grid.Rows[2].Cells[0].Style = white
+	grid.Rows[2].Cells[1].Style = black
+	grid.Rows[2].Cells[2].Style = white
+	grid.Rows[2].Cells[3].Style = black
+	grid.Rows[2].Cells[4].Style = white
+
 	grid.ShowLineNumbers = true
 	grid.ShowWhitespace = true
 
