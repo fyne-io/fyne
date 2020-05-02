@@ -983,23 +983,37 @@ func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 
 // textProvider returns the text handler for this entry
 func (e *Entry) textProvider() *textProvider {
-	if e.text == nil {
-		text := newTextProvider(e.Text, e)
-		text.ExtendBaseWidget(&text)
-		e.text = &text
+	if e.text != nil {
+		return e.text
 	}
 
+	e.Lock()
+	defer e.Unlock()
+	if e.text != nil {
+		return e.text
+	}
+
+	text := newTextProvider(e.Text, e)
+	text.ExtendBaseWidget(&text)
+	e.text = &text
 	return e.text
 }
 
 // placeholderProvider returns the placeholder text handler for this entry
 func (e *Entry) placeholderProvider() *textProvider {
-	if e.placeholder == nil {
-		text := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
-		text.ExtendBaseWidget(&text)
-		e.placeholder = &text
+	if e.placeholder != nil {
+		return e.placeholder
 	}
 
+	e.Lock()
+	defer e.Unlock()
+	if e.placeholder != nil {
+		return e.placeholder
+	}
+
+	text := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
+	text.ExtendBaseWidget(&text)
+	e.placeholder = &text
 	return e.placeholder
 }
 
