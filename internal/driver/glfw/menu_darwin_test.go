@@ -1,4 +1,5 @@
 // +build !ci
+// +build !no_native_menus
 
 package glfw
 
@@ -16,6 +17,8 @@ func TestDarwinMenu(t *testing.T) {
 	setExceptionCallback(func(msg string) { t.Error("Obj-C exception:", msg) })
 	defer setExceptionCallback(nil)
 
+	resetMainMenu()
+
 	w := d.CreateWindow("Test").(*window)
 
 	var lastAction string
@@ -29,7 +32,7 @@ func TestDarwinMenu(t *testing.T) {
 
 	assertNSMenuItemSeparator := func(m unsafe.Pointer, i int) {
 		item := testNSMenuItemAtIndex(m, i)
-		assert.True(t, testNSMenuIsSeparatorItem(item), "item is expected to be a separator")
+		assert.True(t, testNSMenuItemIsSeparatorItem(item), "item is expected to be a separator")
 	}
 
 	itemNew := fyne.NewMenuItem("New", func() { lastAction = "new" })
@@ -103,4 +106,46 @@ func TestDarwinMenu(t *testing.T) {
 	itemOpen.Action = func() { lastAction = "new open" }
 	m = testNSMenuItemSubmenu(testNSMenuItemAtIndex(mm, 1))
 	assertNSMenuItem("Open", "new open", m, 1)
+}
+
+var initialAppMenuItems []string
+var initialMenus []string
+
+func initMainMenu() {
+	d.CreateWindow("Test").Close() // ensure GLFW has performed [NSApp run]
+	mainMenu := testDarwinMainMenu()
+	for i := 0; i < testNSMenuNumberOfItems(mainMenu); i++ {
+		menu := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mainMenu, i))
+		initialMenus = append(initialMenus, testNSMenuTitle(menu))
+	}
+	appMenu := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mainMenu, 0))
+	for i := 0; i < testNSMenuNumberOfItems(appMenu); i++ {
+		item := testNSMenuItemAtIndex(appMenu, i)
+		initialAppMenuItems = append(initialAppMenuItems, testNSMenuItemTitle(item))
+	}
+}
+
+func resetMainMenu() {
+	mainMenu := testDarwinMainMenu()
+	j := 0
+	for i := 0; i < testNSMenuNumberOfItems(mainMenu); i++ {
+		menu := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mainMenu, i))
+		if testNSMenuTitle(menu) == initialMenus[j] {
+			j++
+			continue
+		}
+		testNSMenuRemoveItemAtIndex(mainMenu, i)
+		i--
+	}
+	j = 0
+	appMenu := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mainMenu, 0))
+	for i := 0; i < testNSMenuNumberOfItems(appMenu); i++ {
+		item := testNSMenuItemAtIndex(appMenu, i)
+		if testNSMenuItemTitle(item) == initialAppMenuItems[j] {
+			j++
+			continue
+		}
+		testNSMenuRemoveItemAtIndex(appMenu, i)
+		i--
+	}
 }

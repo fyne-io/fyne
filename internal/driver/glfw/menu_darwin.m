@@ -110,12 +110,21 @@ void test_NSMenu_performActionForItemAtIndex(const void* m, NSInteger i) {
     }
 }
 
+void test_NSMenu_removeItemAtIndex(const void* m, NSInteger i) {
+    NSMenu* menu = (NSMenu*)m;
+    @try {
+        [menu removeItemAtIndex: i];
+    } @catch(NSException* e) {
+        handleException("test_NSMenu_removeItemAtIndex", e);
+    }
+}
+
 const char* test_NSMenu_title(const void* m) {
     NSMenu* menu = (NSMenu*)m;
     return [[menu title] UTF8String];
 }
 
-bool test_NSMenu_isSeparatorItem(const void* i) {
+bool test_NSMenuItem_isSeparatorItem(const void* i) {
     NSMenuItem* item = (NSMenuItem*)i;
     return [item isSeparatorItem];
 }

@@ -107,35 +107,32 @@ func (g *boxLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // For a BoxLayout this is the width of the widest item and the height is
 // the sum of of all children combined with padding between each.
 func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	spacerCount := 0
 	minSize := fyne.NewSize(0, 0)
-	added := false
+	addPadding := false
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
 		}
 
 		if g.isSpacer(child) {
-			spacerCount++
 			continue
 		}
 
 		if g.horizontal {
-			minSize = minSize.Add(fyne.NewSize(child.MinSize().Width, 0))
 			minSize.Height = fyne.Max(child.MinSize().Height, minSize.Height)
-			if added {
+			minSize.Width += child.MinSize().Width
+			if addPadding {
 				minSize.Width += theme.Padding()
 			}
 		} else {
-			minSize = minSize.Add(fyne.NewSize(0, child.MinSize().Height))
 			minSize.Width = fyne.Max(child.MinSize().Width, minSize.Width)
-			if added {
+			minSize.Height += child.MinSize().Height
+			if addPadding {
 				minSize.Height += theme.Padding()
 			}
 		}
-		added = true
+		addPadding = true
 	}
-
 	return minSize
 }
 
