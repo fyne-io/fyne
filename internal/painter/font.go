@@ -121,7 +121,7 @@ func newFontWithFallback(chosen, fallback font.Face, chosenFont, fallbackFont *t
 
 type fontCacheItem struct {
 	font, fallback *truetype.Font
-	faces          map[float64]font.Face
+	faces          map[truetype.Options]font.Face
 }
 
 var fontCache = make(map[fyne.TextStyle]*fontCacheItem)
@@ -155,17 +155,17 @@ func CachedFontFace(style fyne.TextStyle, opts *truetype.Options) font.Face {
 			f2 = loadFont(theme.DefaultTextFont())
 		}
 
-		comp = &fontCacheItem{font: f1, fallback: f2, faces: make(map[float64]font.Face)}
+		comp = &fontCacheItem{font: f1, fallback: f2, faces: make(map[truetype.Options]font.Face)}
 		fontCache[style] = comp
 	}
 
-	face := comp.faces[opts.Size]
+	face := comp.faces[*opts]
 	if face == nil {
 		f1 := truetype.NewFace(comp.font, opts)
 		f2 := truetype.NewFace(comp.fallback, opts)
 		face = newFontWithFallback(f1, f2, comp.font, comp.fallback)
 
-		comp.faces[opts.Size] = face
+		comp.faces[*opts] = face
 	}
 
 	return face
