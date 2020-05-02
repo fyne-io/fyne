@@ -40,6 +40,7 @@ func TestMain(m *testing.M) {
 		for !running() {
 			time.Sleep(10 * time.Millisecond)
 		}
+		initMainMenu()
 		os.Exit(m.Run())
 	}()
 	d.Run()
