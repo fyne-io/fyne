@@ -20,65 +20,17 @@ type Settings struct {
 	preview *canvas.Image
 }
 
-func (s *Settings) save() error {
-	return s.saveToFile(s.fyneSettings.StoragePath())
+// NewSettings returns a new settings instance with the current configuration loaded
+func NewSettings() *Settings {
+	s := &Settings{}
+	s.load()
+
+	return s
 }
 
-func (s *Settings) saveToFile(path string) error {
-	err := os.MkdirAll(filepath.Dir(path), 0700)
-	if err != nil { // this is not an exists error according to docs
-		return err
-	}
-
-	file, err := os.Create(path)
-	if err != nil {
-		if !os.IsExist(err) {
-			return err
-		}
-		file, err = os.Open(path) // #nosec
-		if err != nil {
-			return err
-		}
-	}
-	encode := json.NewEncoder(file)
-
-	return encode.Encode(&s.fyneSettings)
-}
-
-func (s *Settings) load() {
-	err := s.loadFromFile(s.fyneSettings.StoragePath())
-	if err != nil {
-		fyne.LogError("Settings load error:", err)
-	}
-}
-
-func (s *Settings) loadFromFile(path string) error {
-	file, err := os.Open(path) // #nosec
-	if err != nil {
-		if os.IsNotExist(err) {
-			err := os.MkdirAll(filepath.Dir(path), 0700)
-			if err != nil {
-				return err
-			}
-			return nil
-		}
-		return err
-	}
-	decode := json.NewDecoder(file)
-
-	return decode.Decode(&s.fyneSettings)
-}
-
-func (s *Settings) chooseTheme(name string) {
-	s.fyneSettings.ThemeName = name
-
-	switch name {
-	case "light":
-		s.preview.Resource = themeLightPreview
-	default:
-		s.preview.Resource = themeDarkPreview
-	}
-	canvas.Refresh(s.preview)
+// AppearanceIcon returns the icon for appearance settings
+func (s *Settings) AppearanceIcon() fyne.Resource {
+	return theme.NewThemedResource(appearanceIcon, nil)
 }
 
 // LoadAppearanceScreen creates a new settings screen to handle appearance configuration
@@ -107,15 +59,63 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 		scale, bottom, s.preview)
 }
 
-// AppearanceIcon returns the icon for appearance settings
-func (s *Settings) AppearanceIcon() fyne.Resource {
-	return theme.NewThemedResource(appearanceIcon, nil)
+func (s *Settings) chooseTheme(name string) {
+	s.fyneSettings.ThemeName = name
+
+	switch name {
+	case "light":
+		s.preview.Resource = themeLightPreview
+	default:
+		s.preview.Resource = themeDarkPreview
+	}
+	canvas.Refresh(s.preview)
 }
 
-// NewSettings returns a new settings instance with the current configuration loaded
-func NewSettings() *Settings {
-	s := &Settings{}
-	s.load()
+func (s *Settings) load() {
+	err := s.loadFromFile(s.fyneSettings.StoragePath())
+	if err != nil {
+		fyne.LogError("Settings load error:", err)
+	}
+}
 
-	return s
+func (s *Settings) loadFromFile(path string) error {
+	file, err := os.Open(path) // #nosec
+	if err != nil {
+		if os.IsNotExist(err) {
+			err := os.MkdirAll(filepath.Dir(path), 0700)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+		return err
+	}
+	decode := json.NewDecoder(file)
+
+	return decode.Decode(&s.fyneSettings)
+}
+
+func (s *Settings) save() error {
+	return s.saveToFile(s.fyneSettings.StoragePath())
+}
+
+func (s *Settings) saveToFile(path string) error {
+	err := os.MkdirAll(filepath.Dir(path), 0700)
+	if err != nil { // this is not an exists error according to docs
+		return err
+	}
+
+	file, err := os.Create(path)
+	if err != nil {
+		if !os.IsExist(err) {
+			return err
+		}
+		file, err = os.Open(path) // #nosec
+		if err != nil {
+			return err
+		}
+	}
+	encode := json.NewEncoder(file)
+
+	return encode.Encode(&s.fyneSettings)
 }
