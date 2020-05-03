@@ -2,12 +2,8 @@ package settings
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -85,47 +81,30 @@ func (s *Settings) chooseTheme(name string) {
 	canvas.Refresh(s.preview)
 }
 
-func (s *Settings) chooseScale(value string) {
-	if value == "" || strings.EqualFold(value, "auto") {
-		s.fyneSettings.Scale = fyne.SettingsScaleAuto
-		return
-	}
-
-	scale, err := strconv.ParseFloat(value, 32)
-	if err != nil {
-		log.Println("Cannot set scale to:", value)
-	}
-	s.fyneSettings.Scale = float32(scale)
-}
-
 // LoadAppearanceScreen creates a new settings screen to handle appearance configuration
-func (s *Settings) LoadAppearanceScreen() fyne.CanvasObject {
+func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	s.preview = canvas.NewImageFromResource(themeDarkPreview)
 	s.preview.FillMode = canvas.ImageFillContain
 
 	def := s.fyneSettings.ThemeName
 	themes := widget.NewSelect([]string{"dark", "light"}, s.chooseTheme)
 	themes.SetSelected(def)
-	scale := widget.NewEntry()
-	scale.SetText("Auto")
-	if s.fyneSettings.Scale != fyne.SettingsScaleAuto {
-		scale.SetText(fmt.Sprintf("%.2f", s.fyneSettings.Scale))
-	}
-	scale.OnChanged = s.chooseScale
 
-	top := widget.NewForm(
-		&widget.FormItem{Text: "Scale", Widget: scale},
-		&widget.FormItem{Text: "Theme", Widget: themes})
+	scale := s.makeScaleGroup(w.Canvas().Scale())
+	scale.Append(widget.NewGroup("Theme", themes))
+
 	bottom := widget.NewHBox(layout.NewSpacer(),
 		&widget.Button{Text: "Apply", Style: widget.PrimaryButton, OnTapped: func() {
 			err := s.save()
 			if err != nil {
 				fyne.LogError("Failed on saving", err)
 			}
+
+			s.setSelectedScale(s.fyneSettings.Scale)
 		}})
 
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(top, bottom, nil, nil),
-		top, bottom, s.preview)
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(scale, bottom, nil, nil),
+		scale, bottom, s.preview)
 }
 
 // AppearanceIcon returns the icon for appearance settings
