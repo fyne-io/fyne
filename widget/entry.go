@@ -20,6 +20,7 @@ const (
 )
 
 // Declare conformity with interfaces
+var _ fyne.Disableable = (*Entry)(nil)
 var _ fyne.Draggable = (*Entry)(nil)
 var _ fyne.Focusable = (*Entry)(nil)
 var _ fyne.Tappable = (*Entry)(nil)
@@ -120,8 +121,13 @@ func (e *Entry) Disable() { // TODO remove this override after ReadOnly is remov
 	e.DisableableWidget.Disable()
 }
 
+// Disabled satisfies the fyne.Disableable interface.
+func (e *Entry) Disabled() bool {
+	return e.DisableableWidget.disabled || e.ReadOnly
+}
+
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
-func (e *Entry) DoubleTapped(ev *fyne.PointEvent) {
+func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 	row := e.textProvider().row(e.CursorRow)
 
 	start, end := getTextWhitespaceRegion(row, e.CursorColumn)
@@ -204,12 +210,6 @@ func (e *Entry) Hide() {
 	e.DisableableWidget.Hide()
 }
 
-// IsReadOnly is for internal use, only.
-// Deprecated: Use Disabled() instead.
-func (e *Entry) IsReadOnly() bool {
-	return e.ReadOnly
-}
-
 // KeyDown handler for keypress events - used to store shift modifier state for text selection
 func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 	// For keyboard cursor controlled selection we now need to store shift key state and selection "start"
@@ -260,7 +260,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 // MouseUp called on mouse release
 // If a mouse drag event has completed then check to see if it has resulted in an empty selection,
 // if so, and if a text select key isn't held, then disable selecting
-func (e *Entry) MouseUp(m *desktop.MouseEvent) {
+func (e *Entry) MouseUp(_ *desktop.MouseEvent) {
 	start, _ := e.selection()
 	if start == -1 && e.selecting && e.selectKeyDown == false {
 		e.selecting = false

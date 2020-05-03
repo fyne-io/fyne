@@ -10,19 +10,12 @@ type FocusManager struct {
 	canvas fyne.Canvas
 }
 
-type deprecatedReadonly interface {
-	IsReadOnly() bool
-}
-
 func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 	var first, next fyne.Focusable
 	found := current == nil // if we have no starting point then pretend we matched already
 	driver.WalkVisibleObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 			// disabled widget cannot receive focus
-			return false
-		}
-		if e, ok := obj.(deprecatedReadonly); ok && e.IsReadOnly() { // TODO: remove once widget/Entry.ReadOnly is gone
 			return false
 		}
 
