@@ -73,13 +73,13 @@ func NewApp() fyne.App {
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, driver: NewDriver().(*testDriver)}
 	fyne.SetCurrentApp(test)
-	painter.SvgCacheMonitorTheme()
 
 	listener := make(chan fyne.Settings)
 	test.Settings().AddChangeListener(listener)
 	go func() {
 		for {
 			_ = <-listener
+			painter.SvgCacheReset()
 			app.ApplySettings(test.Settings(), test)
 			test.appliedTheme = test.Settings().Theme()
 		}

@@ -186,9 +186,9 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 }
 
 func TestMenu_Layout(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.DarkTheme())
+	test.ApplyTheme(t, theme.DarkTheme())
 
 	w := test.NewWindowWithPainter(nil, software.NewPainter())
 	defer w.Close()
