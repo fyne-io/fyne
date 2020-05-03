@@ -22,6 +22,12 @@ var scales = []*scaleItems{
 	{scale: 1.3, name: "Large"},
 	{scale: 1.8, name: "Huge"}}
 
+func (s *Settings) appliedScale(value float32) {
+	for _, scale := range scales {
+		scale.preview.TextSize = int(float32(theme.TextSize()) * scale.scale / value)
+	}
+}
+
 func (s *Settings) chooseScale(value float32) {
 	s.fyneSettings.Scale = value
 
@@ -89,11 +95,5 @@ func (s *Settings) monitorTheme() {
 func (s *Settings) refreshScalePreviews() {
 	for _, scale := range scales {
 		scale.preview.Color = theme.TextColor()
-	}
-}
-
-func (s *Settings) setSelectedScale(value float32) {
-	for _, scale := range scales {
-		scale.preview.TextSize = int(float32(theme.TextSize()) * scale.scale / value)
 	}
 }

@@ -52,7 +52,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 				fyne.LogError("Failed on saving", err)
 			}
 
-			s.setSelectedScale(s.fyneSettings.Scale)
+			s.appliedScale(s.fyneSettings.Scale)
 		}})
 
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(scale, bottom, nil, nil),
