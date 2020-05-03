@@ -131,13 +131,11 @@ func (i *MenuItem) updateChildPosition() {
 
 type menuItemRenderer struct {
 	BaseRenderer
-	i       *MenuItem
-	icon    *canvas.Image
-	minSize fyne.Size
-	pad     fyne.Size
-	msPad   fyne.Size
-	tPad    int
-	text    *canvas.Text
+	i                *MenuItem
+	icon             *canvas.Image
+	lastThemePadding int
+	minSize          fyne.Size
+	text             *canvas.Text
 }
 
 // BackgroundColor satisfies the fyne.WidgetRenderer interface.
@@ -151,7 +149,7 @@ func (r *menuItemRenderer) BackgroundColor() color.Color {
 
 // Layout satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) Layout(size fyne.Size) {
-	padding := r.padding()
+	padding := r.itemPadding()
 
 	r.text.TextSize = theme.TextSize()
 	r.text.Color = theme.TextColor()
@@ -170,8 +168,7 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 		return r.minSize
 	}
 
-	minSize := r.text.MinSize().Add(r.padding())
-	r.msPad = r.padding()
+	minSize := r.text.MinSize().Add(r.itemPadding())
 	if r.icon != nil {
 		minSize = minSize.Add(fyne.NewSize(theme.IconInlineSize(), 0))
 	}
@@ -188,12 +185,9 @@ func (r *menuItemRenderer) minSizeUnchanged() bool {
 	return !r.minSize.IsZero() &&
 		r.text.TextSize == theme.TextSize() &&
 		(r.icon == nil || r.icon.Size().Width == theme.IconInlineSize()) &&
-		r.msPad == r.padding()
+		r.lastThemePadding == theme.Padding()
 }
 
-func (r *menuItemRenderer) padding() fyne.Size {
-	if r.tPad != theme.Padding() {
-		r.pad = fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
-	}
-	return r.pad
+func (r *menuItemRenderer) itemPadding() fyne.Size {
+	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
 }
