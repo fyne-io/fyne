@@ -15,7 +15,7 @@ type Menu struct {
 	base
 	menuBase
 	Items       []fyne.CanvasObject
-	CustomSized bool
+	customSized bool
 }
 
 // NewMenu creates a new Menu.
@@ -85,7 +85,7 @@ type menuRenderer struct {
 func (r *menuRenderer) Layout(s fyne.Size) {
 	minSize := r.MinSize()
 	var size fyne.Size
-	if r.m.CustomSized {
+	if r.m.customSized {
 		size = minSize.Max(s)
 	} else {
 		size = minSize
