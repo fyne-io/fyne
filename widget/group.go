@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// Group widget is list of widgets that contains a visual border around the list and a group title at the top.
+// Group widget contains a list of widgets that are grouped under a dividing line and title at the top.
 type Group struct {
 	BaseWidget
 
