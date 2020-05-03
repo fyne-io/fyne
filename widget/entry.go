@@ -1177,58 +1177,15 @@ func NewPasswordEntry() *Entry {
 	return e
 }
 
-type passwordRevealerRenderer struct {
-	widget.BaseRenderer
-	entry *Entry
-	icon  *canvas.Image
-}
-
-func (prr *passwordRevealerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-}
-
-func (prr *passwordRevealerRenderer) Layout(size fyne.Size) {
-	prr.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	prr.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
-}
-
-func (prr *passwordRevealerRenderer) Refresh() {
-	prr.entry.Lock()
-	revealPassword := !prr.entry.Password
-	prr.entry.Unlock()
-	if revealPassword {
-		prr.icon.Resource = theme.VisibilityIcon()
-	} else {
-		prr.icon.Resource = theme.VisibilityOffIcon()
-	}
-	canvas.Refresh(prr.icon)
-}
+var _ desktop.Cursorable = (*passwordRevealer)(nil)
+var _ fyne.Tappable = (*passwordRevealer)(nil)
+var _ fyne.Widget = (*passwordRevealer)(nil)
 
 type passwordRevealer struct {
 	BaseWidget
 
 	icon  *canvas.Image
 	entry *Entry
-}
-
-func (pr *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
-	return &passwordRevealerRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{pr.icon}),
-		icon:         pr.icon,
-		entry:        pr.entry,
-	}
-}
-
-func (pr *passwordRevealer) Tapped(*fyne.PointEvent) {
-	pr.entry.Lock()
-	pr.entry.Password = !pr.entry.Password
-	pr.entry.Unlock()
-	pr.Refresh()
-	fyne.CurrentApp().Driver().CanvasForObject(pr).Focus(pr.entry)
-}
-
-func (pr *passwordRevealer) Cursor() desktop.Cursor {
-	return desktop.DefaultCursor
 }
 
 func newPasswordRevealer(e *Entry) *passwordRevealer {
@@ -1238,4 +1195,59 @@ func newPasswordRevealer(e *Entry) *passwordRevealer {
 	}
 	pr.ExtendBaseWidget(pr)
 	return pr
+}
+
+// CreateRenderer satisfies the fyne.Widget interface.
+func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
+	return &passwordRevealerRenderer{
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
+		icon:         r.icon,
+		entry:        r.entry,
+	}
+}
+
+// Cursor satisfies the desktop.Cursorable interface.
+func (r *passwordRevealer) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
+}
+
+// Tapped satisfies the fyne.Tappable interface.
+func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
+	r.entry.Lock()
+	r.entry.Password = !r.entry.Password
+	r.entry.Unlock()
+	r.Refresh()
+	fyne.CurrentApp().Driver().CanvasForObject(r).Focus(r.entry)
+}
+
+var _ fyne.WidgetRenderer = (*passwordRevealerRenderer)(nil)
+
+type passwordRevealerRenderer struct {
+	widget.BaseRenderer
+	entry *Entry
+	icon  *canvas.Image
+}
+
+// Layout satisfies the fyne.WidgetRenderer interface.
+func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
+	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
+}
+
+// MinSize satisfies the fyne.WidgetRenderer interface.
+func (r *passwordRevealerRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+}
+
+// Refresh satisfies the fyne.WidgetRenderer interface.
+func (r *passwordRevealerRenderer) Refresh() {
+	r.entry.Lock()
+	revealPassword := !r.entry.Password
+	r.entry.Unlock()
+	if revealPassword {
+		r.icon.Resource = theme.VisibilityIcon()
+	} else {
+		r.icon.Resource = theme.VisibilityOffIcon()
+	}
+	canvas.Refresh(r.icon)
 }
