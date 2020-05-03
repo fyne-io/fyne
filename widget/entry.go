@@ -19,208 +19,6 @@ const (
 	doubleClickWordSeperator = "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 )
 
-type entryRenderer struct {
-	line, cursor *canvas.Rectangle
-	selection    []fyne.CanvasObject
-
-	objects []fyne.CanvasObject
-	entry   *Entry
-}
-
-// MinSize calculates the minimum size of an entry widget.
-// This is based on the contained text with a standard amount of padding added.
-// If MultiLine is true then we will reserve space for at leasts 3 lines
-func (e *entryRenderer) MinSize() fyne.Size {
-	minSize := e.entry.placeholderProvider().MinSize()
-
-	if e.entry.textProvider().len() > 0 {
-		minSize = e.entry.text.MinSize()
-	}
-
-	if e.entry.MultiLine == true {
-		// ensure multiline height is at least charMinSize * multilineRows
-		minSize.Height = fyne.Max(minSize.Height, e.entry.text.charMinSize().Height*multiLineRows)
-	}
-
-	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-}
-
-// This process builds a slice of rectangles:
-// - one entry per row of text
-// - ordered by row order as they occur in multiline text
-// This process could be optimized in the scenario where the user is selecting upwards:
-// If the upwards case instead produces an order-reversed slice then only the newest rectangle would
-// require movement and resizing. The existing solution creates a new rectangle and then moves/resizes
-// all rectangles to comply with the occurrence order as stated above.
-func (e *entryRenderer) buildSelection() {
-	e.entry.RLock()
-	cursorRow, cursorCol := e.entry.CursorRow, e.entry.CursorColumn
-	selectRow, selectCol := -1, -1
-	if e.entry.selecting {
-		selectRow = e.entry.selectRow
-		selectCol = e.entry.selectColumn
-	}
-	e.entry.RUnlock()
-
-	if selectRow == -1 {
-		e.selection = e.selection[:0]
-
-		return
-	}
-
-	provider := e.entry.textProvider()
-	// Convert column, row into x,y
-	getCoordinates := func(column int, row int) (int, int) {
-		sz := provider.lineSizeToColumn(column, row)
-		return sz.Width + theme.Padding()*2, sz.Height*row + theme.Padding()*2
-	}
-
-	lineHeight := e.entry.text.charMinSize().Height
-
-	minmax := func(a, b int) (int, int) {
-		if a < b {
-			return a, b
-		}
-		return b, a
-	}
-
-	// The remainder of the function calculates the set of boxes and add them to e.selection
-
-	selectStartRow, selectEndRow := minmax(selectRow, cursorRow)
-	selectStartCol, selectEndCol := minmax(selectCol, cursorCol)
-	if selectRow < cursorRow {
-		selectStartCol, selectEndCol = selectCol, cursorCol
-	}
-	if selectRow > cursorRow {
-		selectStartCol, selectEndCol = cursorCol, selectCol
-	}
-	rowCount := selectEndRow - selectStartRow + 1
-
-	// trim e.selection to remove unwanted old rectangles
-	if len(e.selection) > rowCount {
-		e.selection = e.selection[:rowCount]
-	}
-
-	// build a rectangle for each row and add it to e.selection
-	for i := 0; i < rowCount; i++ {
-		if len(e.selection) <= i {
-			box := canvas.NewRectangle(theme.FocusColor())
-			e.selection = append(e.selection, box)
-		}
-
-		// determine starting/ending columns for this rectangle
-		row := selectStartRow + i
-		startCol, endCol := selectStartCol, selectEndCol
-		if selectStartRow < row {
-			startCol = 0
-		}
-		if selectEndRow > row {
-			endCol = provider.rowLength(row)
-		}
-
-		// translate columns and row into draw coordinates
-		x1, y1 := getCoordinates(startCol, row)
-		x2, _ := getCoordinates(endCol, row)
-
-		// resize and reposition each rectangle
-		e.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
-		e.selection[i].Move(fyne.NewPos(x1-1, y1))
-	}
-}
-
-func (e *entryRenderer) moveCursor() {
-	e.entry.RLock()
-	size := e.entry.textProvider().lineSizeToColumn(e.entry.CursorColumn, e.entry.CursorRow)
-	xPos := size.Width
-	yPos := size.Height * e.entry.CursorRow
-	e.entry.RUnlock()
-
-	// build e.selection[] if the user has made a selection
-	e.buildSelection()
-
-	lineHeight := e.entry.text.charMinSize().Height
-	e.cursor.Resize(fyne.NewSize(2, lineHeight))
-	e.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))
-
-	if e.entry.OnCursorChanged != nil {
-		e.entry.OnCursorChanged()
-	}
-}
-
-// Layout the components of the entry widget.
-func (e *entryRenderer) Layout(size fyne.Size) {
-	e.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
-	e.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
-
-	actionIconSize := fyne.NewSize(0, 0)
-	if e.entry.ActionItem != nil {
-		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-		e.entry.ActionItem.Resize(actionIconSize)
-		e.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
-	}
-
-	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
-	entryPos := fyne.NewPos(theme.Padding(), theme.Padding())
-	e.entry.text.Resize(entrySize)
-	e.entry.text.Move(entryPos)
-	e.entry.placeholder.Resize(entrySize)
-	e.entry.placeholder.Move(entryPos)
-}
-
-func (e *entryRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (e *entryRenderer) Refresh() {
-	if e.entry.Text != string(e.entry.textProvider().buffer) {
-		e.entry.textProvider().SetText(e.entry.Text)
-	}
-	if e.entry.textProvider().len() == 0 && e.entry.Visible() {
-		e.entry.placeholderProvider().Show()
-	} else if e.entry.placeholderProvider().Visible() {
-		e.entry.placeholderProvider().Hide()
-	}
-
-	e.cursor.FillColor = theme.FocusColor()
-	if e.entry.focused {
-		e.cursor.Show()
-		e.line.FillColor = theme.FocusColor()
-	} else {
-		e.cursor.Hide()
-		if e.entry.Disabled() {
-			e.line.FillColor = theme.DisabledButtonColor()
-		} else {
-			e.line.FillColor = theme.ButtonColor()
-		}
-	}
-	e.moveCursor()
-
-	for _, selection := range e.selection {
-		selection.(*canvas.Rectangle).Hidden = !e.entry.focused && !e.entry.disabled
-		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
-	}
-
-	e.entry.text.updateRowBounds()
-	e.entry.placeholder.updateRowBounds()
-	e.entry.text.Refresh()
-	e.entry.placeholder.Refresh()
-	if e.entry.ActionItem != nil {
-		e.entry.ActionItem.Refresh()
-	}
-	canvas.Refresh(e.entry.super())
-}
-
-func (e *entryRenderer) Objects() []fyne.CanvasObject {
-	// Objects are generated dynamically force selection rectangles to appear underneath the text
-	if e.entry.selecting {
-		return append(e.selection, e.objects...)
-	}
-	return e.objects
-}
-
-func (e *entryRenderer) Destroy() {
-}
-
 // Declare conformity with interfaces
 var _ fyne.Draggable = (*Entry)(nil)
 var _ fyne.Focusable = (*Entry)(nil)
@@ -1058,41 +856,6 @@ func (e *Entry) object() fyne.Widget {
 	return nil
 }
 
-type placeholderPresenter struct {
-	e *Entry
-}
-
-// textAlign tells the rendering textProvider our alignment
-func (p *placeholderPresenter) textAlign() fyne.TextAlign {
-	return fyne.TextAlignLeading
-}
-
-// textWrap tells the rendering textProvider our wrapping
-func (p *placeholderPresenter) textWrap() fyne.TextWrap {
-	return p.e.Wrapping
-}
-
-// textStyle tells the rendering textProvider our style
-func (p *placeholderPresenter) textStyle() fyne.TextStyle {
-	return fyne.TextStyle{}
-}
-
-// textColor tells the rendering textProvider our color
-func (p *placeholderPresenter) textColor() color.Color {
-	return theme.PlaceHolderColor()
-}
-
-// concealed tells the rendering textProvider if we are a concealed field
-// placeholder text is not obfuscated, returning false
-func (p *placeholderPresenter) concealed() bool {
-	return false
-}
-
-// object returns the root object of the widget so it can be referenced
-func (p *placeholderPresenter) object() fyne.Widget {
-	return nil
-}
-
 // MinSize returns the size that this widget should not shrink below
 func (e *Entry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
@@ -1177,6 +940,214 @@ func NewPasswordEntry() *Entry {
 	return e
 }
 
+var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
+
+type entryRenderer struct {
+	line, cursor *canvas.Rectangle
+	selection    []fyne.CanvasObject
+
+	objects []fyne.CanvasObject
+	entry   *Entry
+}
+
+// BackgroundColor satisfies the fyne.WidgetRenderer interface.
+func (r *entryRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+// Destroy satisfies the fyne.WidgetRenderer interface.
+func (r *entryRenderer) Destroy() {
+}
+
+// Layout the components of the entry widget.
+func (r *entryRenderer) Layout(size fyne.Size) {
+	r.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
+	r.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
+
+	actionIconSize := fyne.NewSize(0, 0)
+	if r.entry.ActionItem != nil {
+		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		r.entry.ActionItem.Resize(actionIconSize)
+		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+	}
+
+	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
+	entryPos := fyne.NewPos(theme.Padding(), theme.Padding())
+	r.entry.text.Resize(entrySize)
+	r.entry.text.Move(entryPos)
+	r.entry.placeholder.Resize(entrySize)
+	r.entry.placeholder.Move(entryPos)
+}
+
+// MinSize calculates the minimum size of an entry widget.
+// This is based on the contained text with a standard amount of padding added.
+// If MultiLine is true then we will reserve space for at leasts 3 lines
+func (r *entryRenderer) MinSize() fyne.Size {
+	minSize := r.entry.placeholderProvider().MinSize()
+
+	if r.entry.textProvider().len() > 0 {
+		minSize = r.entry.text.MinSize()
+	}
+
+	if r.entry.MultiLine == true {
+		// ensure multiline height is at least charMinSize * multilineRows
+		minSize.Height = fyne.Max(minSize.Height, r.entry.text.charMinSize().Height*multiLineRows)
+	}
+
+	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
+}
+
+// Objects satisfies the fyne.WidgetRenderer interface.
+func (r *entryRenderer) Objects() []fyne.CanvasObject {
+	// Objects are generated dynamically force selection rectangles to appear underneath the text
+	if r.entry.selecting {
+		return append(r.selection, r.objects...)
+	}
+	return r.objects
+}
+
+// Refresh satisfies the fyne.WidgetRenderer interface.
+func (r *entryRenderer) Refresh() {
+	if r.entry.Text != string(r.entry.textProvider().buffer) {
+		r.entry.textProvider().SetText(r.entry.Text)
+	}
+	if r.entry.textProvider().len() == 0 && r.entry.Visible() {
+		r.entry.placeholderProvider().Show()
+	} else if r.entry.placeholderProvider().Visible() {
+		r.entry.placeholderProvider().Hide()
+	}
+
+	r.cursor.FillColor = theme.FocusColor()
+	if r.entry.focused {
+		r.cursor.Show()
+		r.line.FillColor = theme.FocusColor()
+	} else {
+		r.cursor.Hide()
+		if r.entry.Disabled() {
+			r.line.FillColor = theme.DisabledButtonColor()
+		} else {
+			r.line.FillColor = theme.ButtonColor()
+		}
+	}
+	r.moveCursor()
+
+	for _, selection := range r.selection {
+		selection.(*canvas.Rectangle).Hidden = !r.entry.focused && !r.entry.disabled
+		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
+	}
+
+	r.entry.text.updateRowBounds()
+	r.entry.placeholder.updateRowBounds()
+	r.entry.text.Refresh()
+	r.entry.placeholder.Refresh()
+	if r.entry.ActionItem != nil {
+		r.entry.ActionItem.Refresh()
+	}
+	canvas.Refresh(r.entry.super())
+}
+
+// This process builds a slice of rectangles:
+// - one entry per row of text
+// - ordered by row order as they occur in multiline text
+// This process could be optimized in the scenario where the user is selecting upwards:
+// If the upwards case instead produces an order-reversed slice then only the newest rectangle would
+// require movement and resizing. The existing solution creates a new rectangle and then moves/resizes
+// all rectangles to comply with the occurrence order as stated above.
+func (r *entryRenderer) buildSelection() {
+	r.entry.RLock()
+	cursorRow, cursorCol := r.entry.CursorRow, r.entry.CursorColumn
+	selectRow, selectCol := -1, -1
+	if r.entry.selecting {
+		selectRow = r.entry.selectRow
+		selectCol = r.entry.selectColumn
+	}
+	r.entry.RUnlock()
+
+	if selectRow == -1 {
+		r.selection = r.selection[:0]
+
+		return
+	}
+
+	provider := r.entry.textProvider()
+	// Convert column, row into x,y
+	getCoordinates := func(column int, row int) (int, int) {
+		sz := provider.lineSizeToColumn(column, row)
+		return sz.Width + theme.Padding()*2, sz.Height*row + theme.Padding()*2
+	}
+
+	lineHeight := r.entry.text.charMinSize().Height
+
+	minmax := func(a, b int) (int, int) {
+		if a < b {
+			return a, b
+		}
+		return b, a
+	}
+
+	// The remainder of the function calculates the set of boxes and add them to r.selection
+
+	selectStartRow, selectEndRow := minmax(selectRow, cursorRow)
+	selectStartCol, selectEndCol := minmax(selectCol, cursorCol)
+	if selectRow < cursorRow {
+		selectStartCol, selectEndCol = selectCol, cursorCol
+	}
+	if selectRow > cursorRow {
+		selectStartCol, selectEndCol = cursorCol, selectCol
+	}
+	rowCount := selectEndRow - selectStartRow + 1
+
+	// trim r.selection to remove unwanted old rectangles
+	if len(r.selection) > rowCount {
+		r.selection = r.selection[:rowCount]
+	}
+
+	// build a rectangle for each row and add it to r.selection
+	for i := 0; i < rowCount; i++ {
+		if len(r.selection) <= i {
+			box := canvas.NewRectangle(theme.FocusColor())
+			r.selection = append(r.selection, box)
+		}
+
+		// determine starting/ending columns for this rectangle
+		row := selectStartRow + i
+		startCol, endCol := selectStartCol, selectEndCol
+		if selectStartRow < row {
+			startCol = 0
+		}
+		if selectEndRow > row {
+			endCol = provider.rowLength(row)
+		}
+
+		// translate columns and row into draw coordinates
+		x1, y1 := getCoordinates(startCol, row)
+		x2, _ := getCoordinates(endCol, row)
+
+		// resize and reposition each rectangle
+		r.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
+		r.selection[i].Move(fyne.NewPos(x1-1, y1))
+	}
+}
+
+func (r *entryRenderer) moveCursor() {
+	r.entry.RLock()
+	size := r.entry.textProvider().lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
+	xPos := size.Width
+	yPos := size.Height * r.entry.CursorRow
+	r.entry.RUnlock()
+
+	// build r.selection[] if the user has made a selection
+	r.buildSelection()
+
+	lineHeight := r.entry.text.charMinSize().Height
+	r.cursor.Resize(fyne.NewSize(2, lineHeight))
+	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))
+
+	if r.entry.OnCursorChanged != nil {
+		r.entry.OnCursorChanged()
+	}
+}
+
 var _ desktop.Cursorable = (*passwordRevealer)(nil)
 var _ fyne.Tappable = (*passwordRevealer)(nil)
 var _ fyne.Widget = (*passwordRevealer)(nil)
@@ -1250,4 +1221,39 @@ func (r *passwordRevealerRenderer) Refresh() {
 		r.icon.Resource = theme.VisibilityOffIcon()
 	}
 	canvas.Refresh(r.icon)
+}
+
+type placeholderPresenter struct {
+	e *Entry
+}
+
+// concealed tells the rendering textProvider if we are a concealed field
+// placeholder text is not obfuscated, returning false
+func (p *placeholderPresenter) concealed() bool {
+	return false
+}
+
+// object returns the root object of the widget so it can be referenced
+func (p *placeholderPresenter) object() fyne.Widget {
+	return nil
+}
+
+// textAlign tells the rendering textProvider our alignment
+func (p *placeholderPresenter) textAlign() fyne.TextAlign {
+	return fyne.TextAlignLeading
+}
+
+// textColor tells the rendering textProvider our color
+func (p *placeholderPresenter) textColor() color.Color {
+	return theme.PlaceHolderColor()
+}
+
+// textStyle tells the rendering textProvider our style
+func (p *placeholderPresenter) textStyle() fyne.TextStyle {
+	return fyne.TextStyle{}
+}
+
+// textWrap tells the rendering textProvider our wrapping
+func (p *placeholderPresenter) textWrap() fyne.TextWrap {
+	return p.e.Wrapping
 }
