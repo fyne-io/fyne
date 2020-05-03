@@ -28,47 +28,83 @@ func TestAccordionContainer_Empty(t *testing.T) {
 	ac := widget.NewAccordionContainer()
 	assert.Equal(t, 0, len(ac.Items))
 }
+
 func TestAccordionContainer_Append(t *testing.T) {
 	ac := widget.NewAccordionContainer()
 	ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 	assert.Equal(t, 1, len(ac.Items))
 }
+
 func TestAccordionContainer_Remove(t *testing.T) {
 	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
 	ac := widget.NewAccordionContainer(ai)
 	ac.Remove(ai)
 	assert.Equal(t, 0, len(ac.Items))
 }
+
 func TestAccordionContainer_RemoveIndex(t *testing.T) {
-	ac := widget.NewAccordionContainer()
-	ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-	ac.RemoveIndex(0)
-	assert.Equal(t, 0, len(ac.Items))
+	t.Run("Exists", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+		ac.RemoveIndex(0)
+		assert.Equal(t, 0, len(ac.Items))
+	})
+	t.Run("BelowBounds", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+		ac.RemoveIndex(-1)
+		assert.Equal(t, 1, len(ac.Items))
+	})
+	t.Run("AboveBounds", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+		ac.RemoveIndex(1)
+		assert.Equal(t, 1, len(ac.Items))
+	})
 }
 
 func TestAccordionContainer_Open(t *testing.T) {
-	ac := widget.NewAccordionContainer()
-	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
-	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
-	ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
+	t.Run("Exists", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
+		ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
+		ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
+		assert.False(t, ac.Items[0].Open)
+		assert.False(t, ac.Items[1].Open)
+		assert.False(t, ac.Items[2].Open)
 
-	ac.Open(0)
-	assert.True(t, ac.Items[0].Open)
-	assert.False(t, ac.Items[1].Open)
-	assert.False(t, ac.Items[2].Open)
+		ac.Open(0)
+		assert.True(t, ac.Items[0].Open)
+		assert.False(t, ac.Items[1].Open)
+		assert.False(t, ac.Items[2].Open)
 
-	// Opening index 1 should close index 0
-	ac.Open(1)
-	assert.False(t, ac.Items[0].Open)
-	assert.True(t, ac.Items[1].Open)
-	assert.False(t, ac.Items[2].Open)
+		// Opening index 1 should close index 0
+		ac.Open(1)
+		assert.False(t, ac.Items[0].Open)
+		assert.True(t, ac.Items[1].Open)
+		assert.False(t, ac.Items[2].Open)
 
-	ac.MultiOpen = true
-	ac.Open(2)
-	// Opening index 2 should not close index 1
-	assert.False(t, ac.Items[0].Open)
-	assert.True(t, ac.Items[1].Open)
-	assert.True(t, ac.Items[2].Open)
+		ac.MultiOpen = true
+		ac.Open(2)
+		// Opening index 2 should not close index 1
+		assert.False(t, ac.Items[0].Open)
+		assert.True(t, ac.Items[1].Open)
+		assert.True(t, ac.Items[2].Open)
+	})
+	t.Run("BelowBounds", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+		assert.False(t, ac.Items[0].Open)
+		ac.Open(-1)
+		assert.False(t, ac.Items[0].Open)
+	})
+	t.Run("AboveBounds", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+		assert.False(t, ac.Items[0].Open)
+		ac.Open(1)
+		assert.False(t, ac.Items[0].Open)
+	})
 }
 
 func TestAccordionContainer_OpenAll(t *testing.T) {
@@ -92,11 +128,37 @@ func TestAccordionContainer_OpenAll(t *testing.T) {
 }
 
 func TestAccordionContainer_Close(t *testing.T) {
-	ac := widget.NewAccordionContainer()
-	ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-	ac.Close(0)
-	assert.False(t, ac.Items[0].Open)
-	assert.False(t, ac.Items[0].Detail.Visible())
+	t.Run("Exists", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(&widget.AccordionItem{
+			Title:  "foo",
+			Detail: widget.NewLabel("foobar"),
+			Open:   true,
+		})
+		ac.Close(0)
+		assert.False(t, ac.Items[0].Open)
+		assert.False(t, ac.Items[0].Detail.Visible())
+	})
+	t.Run("BelowBounds", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(&widget.AccordionItem{
+			Title:  "foo",
+			Detail: widget.NewLabel("foobar"),
+			Open:   true,
+		})
+		ac.Close(-1)
+		assert.True(t, ac.Items[0].Open)
+	})
+	t.Run("AboveBounds", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(&widget.AccordionItem{
+			Title:  "foo",
+			Detail: widget.NewLabel("foobar"),
+			Open:   true,
+		})
+		ac.Close(1)
+		assert.True(t, ac.Items[0].Open)
+	})
 }
 
 func TestAccordionContainer_CloseAll(t *testing.T) {
@@ -112,8 +174,8 @@ func TestAccordionContainer_CloseAll(t *testing.T) {
 }
 
 func TestAccordionContainer_Layout(t *testing.T) {
-	app := test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		multiOpen bool

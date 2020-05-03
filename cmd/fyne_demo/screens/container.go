@@ -3,6 +3,7 @@ package screens
 import (
 	"fmt"
 	"image/color"
+	"net/url"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"

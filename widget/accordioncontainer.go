@@ -26,32 +26,43 @@ func NewAccordionContainer(items ...*AccordionItem) *AccordionContainer {
 	return a
 }
 
-// MinSize returns the size that this widget should not shrink below.
-func (a *AccordionContainer) MinSize() fyne.Size {
-	a.ExtendBaseWidget(a)
-	return a.BaseWidget.MinSize()
-}
-
 // Append adds the given item to this AccordionContainer.
 func (a *AccordionContainer) Append(item *AccordionItem) {
 	a.Items = append(a.Items, item)
 	a.Refresh()
 }
 
-// Remove deletes the given item from this AccordionContainer.
-func (a *AccordionContainer) Remove(item *AccordionItem) {
-	for i, ai := range a.Items {
-		if ai == item {
-			a.RemoveIndex(i)
-			break
-		}
+// Close collapses the item at the given index.
+func (a *AccordionContainer) Close(index int) {
+	if index < 0 || index >= len(a.Items) {
+		return
 	}
+	a.Items[index].Open = false
+	a.Refresh()
 }
 
-// RemoveIndex deletes the item at the given index from this AccordionContainer.
-func (a *AccordionContainer) RemoveIndex(index int) {
-	a.Items = append(a.Items[:index], a.Items[index+1:]...)
+// CloseAll collapses all items.
+func (a *AccordionContainer) CloseAll() {
+	for _, i := range a.Items {
+		i.Open = false
+	}
 	a.Refresh()
+}
+
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (a *AccordionContainer) CreateRenderer() fyne.WidgetRenderer {
+	a.ExtendBaseWidget(a)
+	r := &accordionContainerRenderer{
+		container: a,
+	}
+	r.updateObjects()
+	return r
+}
+
+// MinSize returns the size that this widget should not shrink below.
+func (a *AccordionContainer) MinSize() fyne.Size {
+	a.ExtendBaseWidget(a)
+	return a.BaseWidget.MinSize()
 }
 
 // Open expands the item at the given index.
@@ -80,67 +91,29 @@ func (a *AccordionContainer) OpenAll() {
 	a.Refresh()
 }
 
-// Close collapses the item at the given index.
-func (a *AccordionContainer) Close(index int) {
-	if index < 0 || index >= len(a.Items) {
-		return
-	}
-	a.Items[index].Open = false
-	a.Refresh()
-}
-
-// CloseAll collapses all items.
-func (a *AccordionContainer) CloseAll() {
-	for _, i := range a.Items {
-		i.Open = false
-	}
-	a.Refresh()
-}
-
-func (a *AccordionContainer) toggleForIndex(index int) func() {
-	return func() {
-		if a.Items[index].Open {
-			a.Close(index)
-		} else {
-			a.Open(index)
+// Remove deletes the given item from this AccordionContainer.
+func (a *AccordionContainer) Remove(item *AccordionItem) {
+	for i, ai := range a.Items {
+		if ai == item {
+			a.RemoveIndex(i)
+			break
 		}
 	}
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (a *AccordionContainer) CreateRenderer() fyne.WidgetRenderer {
-	a.ExtendBaseWidget(a)
-	r := &accordionContainerRenderer{
-		container: a,
+// RemoveIndex deletes the item at the given index from this AccordionContainer.
+func (a *AccordionContainer) RemoveIndex(index int) {
+	if index < 0 || index >= len(a.Items) {
+		return
 	}
-	r.updateObjects()
-	return r
+	a.Items = append(a.Items[:index], a.Items[index+1:]...)
+	a.Refresh()
 }
 
 type accordionContainerRenderer struct {
 	widget.BaseRenderer
 	container *AccordionContainer
 	headers   []*Button
-}
-
-func (r *accordionContainerRenderer) MinSize() fyne.Size {
-	width := 0
-	height := 0
-	for i, ai := range r.container.Items {
-		if i != 0 {
-			height += theme.Padding()
-		}
-		min := r.headers[i].MinSize()
-		width = fyne.Max(width, min.Width)
-		height += min.Height
-		if ai.Open {
-			height += theme.Padding()
-			min := ai.Detail.MinSize()
-			width = fyne.Max(width, min.Width)
-			height += min.Height
-		}
-	}
-	return fyne.NewSize(width, height)
 }
 
 func (r *accordionContainerRenderer) Layout(size fyne.Size) {
@@ -164,6 +137,26 @@ func (r *accordionContainerRenderer) Layout(size fyne.Size) {
 			y += min
 		}
 	}
+}
+
+func (r *accordionContainerRenderer) MinSize() fyne.Size {
+	width := 0
+	height := 0
+	for i, ai := range r.container.Items {
+		if i != 0 {
+			height += theme.Padding()
+		}
+		min := r.headers[i].MinSize()
+		width = fyne.Max(width, min.Width)
+		height += min.Height
+		if ai.Open {
+			height += theme.Padding()
+			min := ai.Detail.MinSize()
+			width = fyne.Max(width, min.Width)
+			height += min.Height
+		}
+	}
+	return fyne.NewSize(width, height)
 }
 
 func (r *accordionContainerRenderer) Refresh() {
@@ -190,7 +183,14 @@ func (r *accordionContainerRenderer) updateObjects() {
 		h.Hidden = false
 		h.HideShadow = true
 		h.Text = ai.Title
-		h.OnTapped = r.container.toggleForIndex(i)
+		index := i // capture
+		h.OnTapped = func() {
+			if ai.Open {
+				r.container.Close(index)
+			} else {
+				r.container.Open(index)
+			}
+		}
 		if ai.Open {
 			h.Icon = theme.MenuDropUpIcon()
 			ai.Detail.Show()
