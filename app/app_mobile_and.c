@@ -63,19 +63,19 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 	(*env)->CallObjectMethod(env, builder, setContentTitle, titleStr);
 
 	jmethodID setContentText = find_method(env, cls, "setContentText", "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;");
-    (*env)->CallObjectMethod(env, builder, setContentText, bodyStr);
+	(*env)->CallObjectMethod(env, builder, setContentText, bodyStr);
 
-    int iconID = 17629184; // constant of "unknown app icon"
+	int iconID = 17629184; // constant of "unknown app icon"
 	jmethodID setSmallIcon = find_method(env, cls, "setSmallIcon", "(I)Landroid/app/Notification$Builder;");
-    (*env)->CallObjectMethod(env, builder, setSmallIcon, iconID);
+	(*env)->CallObjectMethod(env, builder, setSmallIcon, iconID);
 
 	jmethodID build = find_method(env, cls, "build", "()Landroid/app/Notification;");
-    jobject notif = (*env)->CallObjectMethod(env, builder, build);
+	jobject notif = (*env)->CallObjectMethod(env, builder, build);
 
 	jclass mgrCls = find_class(env, "android/app/NotificationManager");
-    jobject mgr = getSystemService(env, ctx, "notification");
+	jobject mgr = getSystemService(env, ctx, "notification");
 
 	jmethodID notify = find_method(env, mgrCls, "notify", "(ILandroid/app/Notification;)V");
-    (*env)->CallVoidMethod(env, mgr, notify, nextId, notif);
-    nextId++;
+	(*env)->CallVoidMethod(env, mgr, notify, nextId, notif);
+	nextId++;
 }
