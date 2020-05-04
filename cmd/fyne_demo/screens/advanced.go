@@ -56,19 +56,20 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 		})
 	}
 
-	return widget.NewHBox(widget.NewVBox(screen,
-		widget.NewButton("Custom Theme", func() {
-			fyne.CurrentApp().Settings().SetTheme(newCustomTheme())
-		}),
-		widget.NewButton("Fullscreen", func() {
-			win.SetFullScreen(!win.FullScreen())
-		}),
-	),
-
+	return widget.NewHBox(
+		widget.NewVBox(screen,
+			widget.NewButton("Custom Theme", func() {
+				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())
+			}),
+			widget.NewButton("Fullscreen", func() {
+				win.SetFullScreen(!win.FullScreen())
+			}),
+		),
 		fyne.NewContainerWithLayout(layout.NewBorderLayout(label, nil, nil, nil),
 			label,
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 				generic, desk,
 			),
-		))
+		),
+	)
 }

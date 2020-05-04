@@ -37,6 +37,7 @@ func (i *fileDialogItem) TappedSecondary(_ *fyne.PointEvent) {
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	img := canvas.NewImageFromResource(i.icon)
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
+	text.Wrapping = fyne.TextTruncate
 	extText := canvas.NewText(i.ext, theme.BackgroundColor())
 	extText.Alignment = fyne.TextAlignCenter
 	extText.TextSize = theme.TextSize()

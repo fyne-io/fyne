@@ -152,8 +152,16 @@ func detectTeamID() (string, error) {
 	)
 	pemString, err := cmd.Output()
 	if err != nil {
-		err = fmt.Errorf("failed to pull the signing certificate to determine your team ID: %v", err)
-		return "", err
+		// If no "iPhone Developer" cert is found then try the new "Apple Development".
+		cmd := exec.Command(
+			"security", "find-certificate",
+			"-c", "Apple Development", "-p",
+		)
+		pemString, err = cmd.Output()
+		if err != nil {
+			err = fmt.Errorf("failed to pull the signing certificate to determine your team ID: %v", err)
+			return "", err
+		}
 	}
 
 	block, _ := pem.Decode(pemString)

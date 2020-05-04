@@ -15,6 +15,8 @@ type Menu struct {
 	base
 	DismissAction func()
 	Items         []fyne.CanvasObject
+
+	activeChild *Menu
 }
 
 // NewMenu creates a new Menu.
@@ -72,6 +74,11 @@ func (m *Menu) Tapped(*fyne.PointEvent) {
 }
 
 func (m *Menu) dismiss() {
+	if m.activeChild != nil {
+		defer m.activeChild.dismiss()
+		m.activeChild.Hide()
+		m.activeChild = nil
+	}
 	if m.DismissAction != nil {
 		m.DismissAction()
 	}
