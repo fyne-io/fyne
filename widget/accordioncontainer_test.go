@@ -43,24 +43,21 @@ func TestAccordionContainer_Remove(t *testing.T) {
 }
 
 func TestAccordionContainer_RemoveIndex(t *testing.T) {
-	t.Run("Exists", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
-		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-		ac.RemoveIndex(0)
-		assert.Equal(t, 0, len(ac.Items))
-	})
-	t.Run("BelowBounds", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
-		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-		ac.RemoveIndex(-1)
-		assert.Equal(t, 1, len(ac.Items))
-	})
-	t.Run("AboveBounds", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
-		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-		ac.RemoveIndex(1)
-		assert.Equal(t, 1, len(ac.Items))
-	})
+	for name, tt := range map[string]struct {
+		index  int
+		length int
+	}{
+		"Exists":      {index: 0, length: 0},
+		"BelowBounds": {index: -1, length: 1},
+		"AboveBounds": {index: 1, length: 1},
+	} {
+		t.Run(name, func(t *testing.T) {
+			ac := widget.NewAccordionContainer()
+			ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+			ac.RemoveIndex(tt.index)
+			assert.Equal(t, tt.length, len(ac.Items))
+		})
+	}
 }
 
 func TestAccordionContainer_Open(t *testing.T) {
@@ -288,6 +285,139 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			test.AssertImageMatches(t, "accordion_layout_"+name+".png", window.Canvas().Capture())
 
 			window.Close()
+		})
+	}
+}
+
+func TestAccordionContainer_MinSize(t *testing.T) {
+	minSizeA := fyne.MeasureText("A", theme.TextSize(), fyne.TextStyle{})
+	minSizeA.Width += theme.IconInlineSize() + theme.Padding()*5
+	minSizeA.Height = fyne.Max(minSizeA.Height, theme.IconInlineSize()) + theme.Padding()*2
+	minSizeB := fyne.MeasureText("B", theme.TextSize(), fyne.TextStyle{})
+	minSizeB.Width += theme.IconInlineSize() + theme.Padding()*5
+	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.Padding()*2
+	minSize1 := fyne.MeasureText("1", theme.TextSize(), fyne.TextStyle{})
+	minSize1.Width += theme.Padding() * 2
+	minSize1.Height += theme.Padding() * 2
+	minSize2 := fyne.MeasureText("2", theme.TextSize(), fyne.TextStyle{})
+	minSize2.Width += theme.Padding() * 2
+	minSize2.Height += theme.Padding() * 2
+
+	for name, tt := range map[string]struct {
+		multiOpen bool
+		items     []*widget.AccordionItem
+		opened    []int
+		want      fyne.Size
+	}{
+		"single_open_one_item": {
+			items: []*widget.AccordionItem{
+				&widget.AccordionItem{
+					Title:  "A",
+					Detail: widget.NewLabel("1"),
+				},
+			},
+			want: minSizeA,
+		},
+		"single_open_one_item_opened": {
+			items: []*widget.AccordionItem{
+				&widget.AccordionItem{
+					Title:  "A",
+					Detail: widget.NewLabel("1"),
+				},
+			},
+			opened: []int{0},
+			want:   fyne.NewSize(minSizeA.Width, minSizeA.Height+minSize1.Height+theme.Padding()),
+		},
+		"single_open_multiple_items": {
+			items: []*widget.AccordionItem{
+				&widget.AccordionItem{
+					Title:  "A",
+					Detail: widget.NewLabel("1"),
+				},
+				&widget.AccordionItem{
+					Title:  "B",
+					Detail: widget.NewLabel("2"),
+				},
+			},
+			want: fyne.NewSize(fyne.Max(minSizeA.Width, minSizeB.Width), minSizeA.Height+minSizeB.Height+theme.Padding()),
+		},
+		"single_open_multiple_items_opened": {
+			items: []*widget.AccordionItem{
+				&widget.AccordionItem{
+					Title:  "A",
+					Detail: widget.NewLabel("1"),
+				},
+				&widget.AccordionItem{
+					Title:  "B",
+					Detail: widget.NewLabel("2"),
+				},
+			},
+			opened: []int{0, 1},
+			want:   fyne.NewSize(fyne.Max(fyne.Max(minSizeA.Width, minSizeB.Width), minSize2.Width), minSizeA.Height+minSizeB.Height+minSize2.Height+theme.Padding()*2),
+		},
+		"multiple_open_one_item": {
+			multiOpen: true,
+			items: []*widget.AccordionItem{
+				&widget.AccordionItem{
+					Title:  "A",
+					Detail: widget.NewLabel("1"),
+				},
+			},
+			want: minSizeA,
+		},
+		"multiple_open_one_item_opened": {
+			multiOpen: true,
+			items: []*widget.AccordionItem{
+				&widget.AccordionItem{
+					Title:  "A",
+					Detail: widget.NewLabel("1"),
+				},
+			},
+			opened: []int{0},
+			want:   fyne.NewSize(minSizeA.Width, minSizeA.Height+minSize1.Height+theme.Padding()),
+		},
+		"multiple_open_multiple_items": {
+			multiOpen: true,
+			items: []*widget.AccordionItem{
+				&widget.AccordionItem{
+					Title:  "A",
+					Detail: widget.NewLabel("1"),
+				},
+				&widget.AccordionItem{
+					Title:  "B",
+					Detail: widget.NewLabel("2"),
+				},
+			},
+			want: fyne.NewSize(fyne.Max(minSizeA.Width, minSizeB.Width), minSizeA.Height+minSizeB.Height+theme.Padding()),
+		},
+		"multiple_open_multiple_items_opened": {
+			multiOpen: true,
+			items: []*widget.AccordionItem{
+				&widget.AccordionItem{
+					Title:  "A",
+					Detail: widget.NewLabel("1"),
+				},
+				&widget.AccordionItem{
+					Title:  "B",
+					Detail: widget.NewLabel("2"),
+				},
+			},
+			opened: []int{0, 1},
+			want:   fyne.NewSize(fyne.Max(fyne.Max(fyne.Max(minSizeA.Width, minSizeB.Width), minSize1.Width), minSize2.Width), minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.Padding()*3),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			accordion := &widget.AccordionContainer{
+				MultiOpen: tt.multiOpen,
+			}
+			for _, ai := range tt.items {
+				accordion.Append(ai)
+			}
+			for _, o := range tt.opened {
+				accordion.Open(o)
+			}
+
+			assert.Equal(t, tt.want, accordion.MinSize())
 		})
 	}
 }

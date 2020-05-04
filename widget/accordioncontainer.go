@@ -139,24 +139,22 @@ func (r *accordionContainerRenderer) Layout(size fyne.Size) {
 	}
 }
 
-func (r *accordionContainerRenderer) MinSize() fyne.Size {
-	width := 0
-	height := 0
+func (r *accordionContainerRenderer) MinSize() (size fyne.Size) {
 	for i, ai := range r.container.Items {
 		if i != 0 {
-			height += theme.Padding()
+			size.Height += theme.Padding()
 		}
 		min := r.headers[i].MinSize()
-		width = fyne.Max(width, min.Width)
-		height += min.Height
+		size.Width = fyne.Max(size.Width, min.Width)
+		size.Height += min.Height
 		if ai.Open {
-			height += theme.Padding()
+			size.Height += theme.Padding()
 			min := ai.Detail.MinSize()
-			width = fyne.Max(width, min.Width)
-			height += min.Height
+			size.Width = fyne.Max(size.Width, min.Width)
+			size.Height += min.Height
 		}
 	}
-	return fyne.NewSize(width, height)
+	return
 }
 
 func (r *accordionContainerRenderer) Refresh() {
