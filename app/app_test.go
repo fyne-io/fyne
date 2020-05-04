@@ -56,7 +56,7 @@ func TestFyneApp_OpenURL(t *testing.T) {
 func TestFyneApp_SendNotification(t *testing.T) {
 	n := fyne.NewNotification("Test Title", "Some content")
 
-	test.ExpectNotification(t, n, func(a fyne.App) {
+	test.AssertNotificationSent(t, n, func(a fyne.App) {
 		a.SendNotification(n)
 	})
 }

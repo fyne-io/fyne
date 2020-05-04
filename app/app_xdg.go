@@ -33,7 +33,7 @@ func (app *fyneApp) SendNotification(n *fyne.Notification) {
 		return
 	}
 
-	appName := ""       // considered fyne.CurrentApp().UniqueID() but really would need a prettier name
+	appName := fyne.CurrentApp().UniqueID()
 	appIcon := ""       // TODO in the future extract icon from app to cache and pass path
 	timeout := int32(0) // we don't support this yet
 

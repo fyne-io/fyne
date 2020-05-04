@@ -43,7 +43,7 @@ type App interface {
 	// This must be set for use of the Preferences() functions... see NewWithId(string)
 	UniqueID() string
 
-	// SendNotification sends a system notification that will be displayed in to the operating system notifications area.
+	// SendNotification sends a system notification that will be displayed in the operating system's notification area.
 	SendNotification(*Notification)
 
 	// Settings return the globally set settings, determining theme and so on.

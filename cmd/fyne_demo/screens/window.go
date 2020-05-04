@@ -208,10 +208,21 @@ func loadWindowGroup() *widget.Group {
 				}()
 			}))
 	}
+
+	windowGroup.Append(widget.NewGroup("Other",
+		widget.NewButton("Notification", func() {
+			fyne.CurrentApp().SendNotification(&fyne.Notification{
+				Title:   "Fyne Demo",
+				Content: "Testing notifications...",
+			})
+		})))
+
 	return windowGroup
 }
 
 // DialogScreen loads a panel that lists the dialog windows that can be tested.
 func DialogScreen(win fyne.Window) fyne.CanvasObject {
-	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), loadDialogGroup(win), loadWindowGroup())
+	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
+		widget.NewScrollContainer(loadDialogGroup(win)),
+		widget.NewScrollContainer(loadWindowGroup()))
 }

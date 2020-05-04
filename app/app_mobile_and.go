@@ -35,10 +35,10 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	return cmd.Run()
 }
 
-func (app *fyneApp) SendNotification(notify *fyne.Notification) {
-	titleStr := C.CString(notify.Title)
+func (app *fyneApp) SendNotification(n *fyne.Notification) {
+	titleStr := C.CString(n.Title)
 	defer C.free(unsafe.Pointer(titleStr))
-	contentStr := C.CString(notify.Content)
+	contentStr := C.CString(n.Content)
 	defer C.free(unsafe.Pointer(contentStr))
 
 	mobileApp.RunOnJVM(func(vm, env, ctx uintptr) error {

@@ -52,15 +52,15 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 
 var scriptNum = 0
 
-func (app *fyneApp) SendNotification(notify *fyne.Notification) {
-	title := escapeNotifyString(notify.Title)
-	content := escapeNotifyString(notify.Content)
+func (app *fyneApp) SendNotification(n *fyne.Notification) {
+	title := escapeNotificationString(n.Title)
+	content := escapeNotificationString(n.Content)
 
 	script := fmt.Sprintf(notificationTemplate, title, content)
 	go runScript("notify", script)
 }
 
-func escapeNotifyString(in string) string {
+func escapeNotificationString(in string) string {
 	noSlash := strings.ReplaceAll(in, "`", "``")
 	return strings.ReplaceAll(noSlash, "\"", "`\"")
 }
@@ -83,4 +83,7 @@ func runScript(name, script string) {
 	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", "-File", tmpFilePath)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	err = cmd.Run()
+	if err != nil {
+		fyne.LogError("Failed to launch windows notify script", err)
+	}
 }

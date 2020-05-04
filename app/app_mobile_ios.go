@@ -44,10 +44,10 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	return nil
 }
 
-func (app *fyneApp) SendNotification(notify *fyne.Notification) {
-	titleStr := C.CString(notify.Title)
+func (app *fyneApp) SendNotification(n *fyne.Notification) {
+	titleStr := C.CString(n.Title)
 	defer C.free(unsafe.Pointer(titleStr))
-	contentStr := C.CString(notify.Content)
+	contentStr := C.CString(n.Content)
 	defer C.free(unsafe.Pointer(contentStr))
 
 	C.sendNotification(titleStr, contentStr)

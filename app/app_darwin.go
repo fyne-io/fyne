@@ -37,9 +37,9 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	return cmd.Run()
 }
 
-func (app *fyneApp) SendNotification(notify *fyne.Notification) {
-	title := escapeNotifyString(notify.Title)
-	content := escapeNotifyString(notify.Content)
+func (app *fyneApp) SendNotification(n *fyne.Notification) {
+	title := escapeNotificationString(n.Title)
+	content := escapeNotificationString(n.Content)
 	template := `display notification "%s" with title "%s"`
 	script := fmt.Sprintf(template, content, title)
 
@@ -49,7 +49,7 @@ func (app *fyneApp) SendNotification(notify *fyne.Notification) {
 	}
 }
 
-func escapeNotifyString(in string) string {
+func escapeNotificationString(in string) string {
 	noSlash := strings.ReplaceAll(in, "\\", "\\\\")
 	return strings.ReplaceAll(noSlash, "\"", "\\\"")
 }

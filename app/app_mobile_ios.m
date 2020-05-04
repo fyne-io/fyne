@@ -15,6 +15,7 @@ static int notifyNum = 0;
 
 void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSString *body) {
     UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+    [content autorelease];
     content.title = title;
     content.body = body;
 
@@ -30,10 +31,10 @@ void doSendNotification(UNUserNotificationCenter *center, NSString *title, NSStr
     }];
 }
 
-void sendNotification(char *title, char *body) {
+void sendNotification(char *cTitle, char *cBody) {
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    NSString *titleStr = [NSString stringWithUTF8String:title];
-    NSString *bodyStr = [NSString stringWithUTF8String:body];
+    NSString *title = [NSString stringWithUTF8String:cTitle];
+    NSString *body = [NSString stringWithUTF8String:cBody];
 
     UNAuthorizationOptions options = UNAuthorizationOptionAlert;
     [center requestAuthorizationWithOptions:options
@@ -41,7 +42,7 @@ void sendNotification(char *title, char *body) {
             if (!granted) {
                 NSLog(@"Unable to get permission to send notifications");
             } else {
-                doSendNotification(center, titleStr, bodyStr);
+                doSendNotification(center, title, body);
             }
         }];
 }

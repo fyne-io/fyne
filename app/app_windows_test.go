@@ -11,10 +11,10 @@ import (
 )
 
 func TestEscapeNotifyString(t *testing.T) {
-	assert.Equal(t, "normal", escapeNotifyString("normal"))
-	assert.Equal(t, "isn't", escapeNotifyString("isn't"))
-	assert.Equal(t, "`\"mine`\"", escapeNotifyString(`"mine"`))
-	assert.Equal(t, "sla\\sh", escapeNotifyString(`sla\sh`))
-	assert.Equal(t, "qu``ote", escapeNotifyString("qu`ote"))
-	assert.Equal(t, "escaped ```\" string", escapeNotifyString("escaped `\" string"))
+	assert.Equal(t, "normal", escapeNotificationString("normal"))
+	assert.Equal(t, "isn't", escapeNotificationString("isn't"))
+	assert.Equal(t, "`\"mine`\"", escapeNotificationString(`"mine"`))
+	assert.Equal(t, "sla\\sh", escapeNotificationString(`sla\sh`))
+	assert.Equal(t, "qu``ote", escapeNotificationString("qu`ote"))
+	assert.Equal(t, "escaped ```\" string", escapeNotificationString("escaped `\" string"))
 }
