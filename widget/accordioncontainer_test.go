@@ -24,104 +24,10 @@ func TestAccordionContainer(t *testing.T) {
 	})
 }
 
-func TestAccordionContainer_Empty(t *testing.T) {
-	ac := widget.NewAccordionContainer()
-	assert.Equal(t, 0, len(ac.Items))
-}
-
 func TestAccordionContainer_Append(t *testing.T) {
 	ac := widget.NewAccordionContainer()
 	ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 	assert.Equal(t, 1, len(ac.Items))
-}
-
-func TestAccordionContainer_Remove(t *testing.T) {
-	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
-	ac := widget.NewAccordionContainer(ai)
-	ac.Remove(ai)
-	assert.Equal(t, 0, len(ac.Items))
-}
-
-func TestAccordionContainer_RemoveIndex(t *testing.T) {
-	for name, tt := range map[string]struct {
-		index  int
-		length int
-	}{
-		"Exists":      {index: 0, length: 0},
-		"BelowBounds": {index: -1, length: 1},
-		"AboveBounds": {index: 1, length: 1},
-	} {
-		t.Run(name, func(t *testing.T) {
-			ac := widget.NewAccordionContainer()
-			ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-			ac.RemoveIndex(tt.index)
-			assert.Equal(t, tt.length, len(ac.Items))
-		})
-	}
-}
-
-func TestAccordionContainer_Open(t *testing.T) {
-	t.Run("Exists", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
-		ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
-		ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
-		ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
-		assert.False(t, ac.Items[0].Open)
-		assert.False(t, ac.Items[1].Open)
-		assert.False(t, ac.Items[2].Open)
-
-		ac.Open(0)
-		assert.True(t, ac.Items[0].Open)
-		assert.False(t, ac.Items[1].Open)
-		assert.False(t, ac.Items[2].Open)
-
-		// Opening index 1 should close index 0
-		ac.Open(1)
-		assert.False(t, ac.Items[0].Open)
-		assert.True(t, ac.Items[1].Open)
-		assert.False(t, ac.Items[2].Open)
-
-		ac.MultiOpen = true
-		ac.Open(2)
-		// Opening index 2 should not close index 1
-		assert.False(t, ac.Items[0].Open)
-		assert.True(t, ac.Items[1].Open)
-		assert.True(t, ac.Items[2].Open)
-	})
-	t.Run("BelowBounds", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
-		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-		assert.False(t, ac.Items[0].Open)
-		ac.Open(-1)
-		assert.False(t, ac.Items[0].Open)
-	})
-	t.Run("AboveBounds", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
-		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
-		assert.False(t, ac.Items[0].Open)
-		ac.Open(1)
-		assert.False(t, ac.Items[0].Open)
-	})
-}
-
-func TestAccordionContainer_OpenAll(t *testing.T) {
-	ac := widget.NewAccordionContainer()
-	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
-	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
-	ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
-
-	ac.OpenAll()
-	// Cannot open all items if !accordion.MultiOpen
-	assert.False(t, ac.Items[0].Open)
-	assert.False(t, ac.Items[1].Open)
-	assert.False(t, ac.Items[2].Open)
-
-	ac.MultiOpen = true
-	ac.OpenAll()
-	// All items should be open
-	assert.True(t, ac.Items[0].Open)
-	assert.True(t, ac.Items[1].Open)
-	assert.True(t, ac.Items[2].Open)
 }
 
 func TestAccordionContainer_Close(t *testing.T) {
@@ -418,6 +324,95 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.want, accordion.MinSize())
+		})
+	}
+}
+
+func TestAccordionContainer_Open(t *testing.T) {
+	t.Run("Exists", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
+		ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
+		ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
+		assert.False(t, ac.Items[0].Open)
+		assert.False(t, ac.Items[1].Open)
+		assert.False(t, ac.Items[2].Open)
+
+		ac.Open(0)
+		assert.True(t, ac.Items[0].Open)
+		assert.False(t, ac.Items[1].Open)
+		assert.False(t, ac.Items[2].Open)
+
+		// Opening index 1 should close index 0
+		ac.Open(1)
+		assert.False(t, ac.Items[0].Open)
+		assert.True(t, ac.Items[1].Open)
+		assert.False(t, ac.Items[2].Open)
+
+		ac.MultiOpen = true
+		ac.Open(2)
+		// Opening index 2 should not close index 1
+		assert.False(t, ac.Items[0].Open)
+		assert.True(t, ac.Items[1].Open)
+		assert.True(t, ac.Items[2].Open)
+	})
+	t.Run("BelowBounds", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+		assert.False(t, ac.Items[0].Open)
+		ac.Open(-1)
+		assert.False(t, ac.Items[0].Open)
+	})
+	t.Run("AboveBounds", func(t *testing.T) {
+		ac := widget.NewAccordionContainer()
+		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+		assert.False(t, ac.Items[0].Open)
+		ac.Open(1)
+		assert.False(t, ac.Items[0].Open)
+	})
+}
+
+func TestAccordionContainer_OpenAll(t *testing.T) {
+	ac := widget.NewAccordionContainer()
+	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
+	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
+	ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
+
+	ac.OpenAll()
+	// Cannot open all items if !accordion.MultiOpen
+	assert.False(t, ac.Items[0].Open)
+	assert.False(t, ac.Items[1].Open)
+	assert.False(t, ac.Items[2].Open)
+
+	ac.MultiOpen = true
+	ac.OpenAll()
+	// All items should be open
+	assert.True(t, ac.Items[0].Open)
+	assert.True(t, ac.Items[1].Open)
+	assert.True(t, ac.Items[2].Open)
+}
+
+func TestAccordionContainer_Remove(t *testing.T) {
+	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
+	ac := widget.NewAccordionContainer(ai)
+	ac.Remove(ai)
+	assert.Equal(t, 0, len(ac.Items))
+}
+
+func TestAccordionContainer_RemoveIndex(t *testing.T) {
+	for name, tt := range map[string]struct {
+		index  int
+		length int
+	}{
+		"Exists":      {index: 0, length: 0},
+		"BelowBounds": {index: -1, length: 1},
+		"AboveBounds": {index: 1, length: 1},
+	} {
+		t.Run(name, func(t *testing.T) {
+			ac := widget.NewAccordionContainer()
+			ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
+			ac.RemoveIndex(tt.index)
+			assert.Equal(t, tt.length, len(ac.Items))
 		})
 	}
 }
