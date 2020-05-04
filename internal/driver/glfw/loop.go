@@ -100,12 +100,14 @@ func (d *gLDriver) runGL() {
 			reassign := false
 			for _, win := range d.windows {
 				w := win.(*window)
-				viewport := w.viewport
+				if w.viewport == nil {
+					continue
+				}
 
-				if viewport.ShouldClose() {
+				if w.viewport.ShouldClose() {
 					reassign = true
 					// remove window from window list
-					viewport.Destroy()
+					w.viewport.Destroy()
 
 					go w.destroy(d)
 					continue

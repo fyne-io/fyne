@@ -19,7 +19,7 @@ func TestDarwinMenu(t *testing.T) {
 
 	resetMainMenu()
 
-	w := d.CreateWindow("Test").(*window)
+	w := createWindow("Test").(*window)
 
 	var lastAction string
 	assertNSMenuItem := func(wantTitle, wantAction string, m unsafe.Pointer, i int) {
@@ -112,7 +112,7 @@ var initialAppMenuItems []string
 var initialMenus []string
 
 func initMainMenu() {
-	d.CreateWindow("Test").Close() // ensure GLFW has performed [NSApp run]
+	createWindow("Test").Close() // ensure GLFW has performed [NSApp run]
 	mainMenu := testDarwinMainMenu()
 	for i := 0; i < testNSMenuNumberOfItems(mainMenu); i++ {
 		menu := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mainMenu, i))

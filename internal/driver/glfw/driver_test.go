@@ -14,7 +14,7 @@ import (
 )
 
 func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
-	w := d.CreateWindow("Test")
+	w := createWindow("Test")
 
 	cr1c1 := widget.NewLabel("row 1 col 1")
 	cr1c2 := widget.NewLabel("row 1 col 2")
