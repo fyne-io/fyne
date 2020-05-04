@@ -13,7 +13,7 @@ func main() {
 	a := app.New()
 	w := a.NewWindow("Fyne Desktop Settings")
 
-	appearance := s.LoadAppearanceScreen()
+	appearance := s.LoadAppearanceScreen(w)
 	tabs := widget.NewTabContainer(
 		&widget.TabItem{Text: "Appearance", Icon: s.AppearanceIcon(), Content: appearance})
 	tabs.SetTabLocation(widget.TabLocationLeading)
