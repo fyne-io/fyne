@@ -64,8 +64,7 @@ func (s *Settings) makeScaleGroup(scale float32) *widget.Group {
 	scalePreviewBox := fyne.NewContainerWithLayout(layout.NewGridLayout(5), s.makeScalePreviews(scale)...)
 	scaleBox := fyne.NewContainerWithLayout(layout.NewGridLayout(5), s.makeScaleButtons()...)
 
-	s.monitorTheme()
-	return widget.NewGroup("Scale", scalePreviewBox, scaleBox)
+	return widget.NewGroup("Scale", scalePreviewBox, scaleBox, newRefreshMonitor(s))
 }
 
 func (s *Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
@@ -82,18 +81,26 @@ func (s *Settings) makeScalePreviews(value float32) []fyne.CanvasObject {
 	return previews
 }
 
-func (s *Settings) monitorTheme() {
-	watch := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(watch)
-	go func() {
-		for range watch {
-			s.refreshScalePreviews()
-		}
-	}()
-}
-
 func (s *Settings) refreshScalePreviews() {
 	for _, scale := range scales {
 		scale.preview.Color = theme.TextColor()
 	}
+}
+
+// refreshMonitor is a simple widget that updates canvas components when the UI is asked to refresh.
+// Captures theme and scale changes without the settings monitoring code.
+type refreshMonitor struct {
+	widget.Label
+	settings *Settings
+}
+
+func (r *refreshMonitor) Refresh() {
+	r.settings.refreshScalePreviews()
+	r.Label.Refresh()
+}
+
+func newRefreshMonitor(s *Settings) *refreshMonitor {
+	r := &refreshMonitor{settings: s}
+	r.Hide()
+	return r
 }
