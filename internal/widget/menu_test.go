@@ -156,32 +156,41 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	w.Resize(size.Add(fyne.NewSize(10, 10)))
 
 	// tap on top padding
-	test.TapCanvas(t, c, fyne.NewPos(5, 1))
-	assert.False(t, item1Hit, "item 1 should not be hit")
-	assert.False(t, item2Hit, "item 2 should not be hit")
-	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	p := fyne.NewPos(5, 1)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	}
 
 	// tap on separator
-	test.TapCanvas(t, c, fyne.NewPos(5, size.Height/2))
-	assert.False(t, item1Hit, "item 1 should not be hit")
-	assert.False(t, item2Hit, "item 2 should not be hit")
-	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	fyne.NewPos(5, size.Height/2)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	}
 
 	// tap bottom padding
-	test.TapCanvas(t, c, fyne.NewPos(5, size.Height-1))
-	assert.False(t, item1Hit, "item 1 should not be hit")
-	assert.False(t, item2Hit, "item 2 should not be hit")
-	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	p = fyne.NewPos(5, size.Height-1)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	}
 
 	// verify test setup: we can hit the items and the container
-	test.TapCanvas(t, c, fyne.NewPos(5, size.Height/4))
+	test.TapCanvas(c, fyne.NewPos(5, size.Height/4))
 	assert.True(t, item1Hit, "hit item 1")
 	assert.False(t, item2Hit, "item 2 should not be hit")
 	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
-	test.TapCanvas(t, c, fyne.NewPos(5, 3*size.Height/4))
+	test.TapCanvas(c, fyne.NewPos(5, 3*size.Height/4))
 	assert.True(t, item2Hit, "hit item 2")
 	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
-	test.TapCanvas(t, c, fyne.NewPos(size.Width+1, size.Height+1))
+	test.TapCanvas(c, fyne.NewPos(size.Width+1, size.Height+1))
 	assert.True(t, overlayContainerHit, "hit the overlay container")
 }
 

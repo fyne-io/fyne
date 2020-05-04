@@ -302,7 +302,7 @@ func TestMenuBar(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			test.MoveMouse(c, fyne.NewPos(0, 0))
-			test.TryToTapCanvas(t, c, fyne.NewPos(0, 0))
+			test.TapCanvas(c, fyne.NewPos(0, 0))
 			test.AssertImageMatches(t, "menu_bar_initial.png", c.Capture())
 			for i, s := range tt.steps {
 				t.Run("step "+strconv.Itoa(i+1), func(t *testing.T) {
@@ -313,7 +313,7 @@ func TestMenuBar(t *testing.T) {
 							test.MoveMouse(c, a.pos)
 						case "tap":
 							test.MoveMouse(c, a.pos)
-							test.TapCanvas(t, c, a.pos)
+							test.TapCanvas(c, a.pos)
 						}
 					}
 					test.AssertImageMatches(t, s.wantImage, c.Capture())

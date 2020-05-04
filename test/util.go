@@ -19,6 +19,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// AssertCanvasTappableAt asserts that the canvas is tappable at the given position.
+func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool {
+	if o, _ := findTappable(c, pos); o == nil {
+		return false
+	}
+	return true
+}
+
 // AssertImageMatches asserts that the given image is the same as the one stored in the master file.
 // The master filename is relative to the `testdata` directory which is relative to the test.
 // The test `t` fails if the given image is not equal to the loaded master image.
@@ -105,9 +113,10 @@ func TapAt(obj fyne.Tappable, pos fyne.Position) {
 }
 
 // TapCanvas taps at an absolute position on the canvas.
-// It fails the test if there is no fyne.Tappable reachable at the position.
-func TapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position) {
-	tapCanvas(t, c, pos, true)
+func TapCanvas(c fyne.Canvas, pos fyne.Position) {
+	if o, absPos := findTappable(c, pos); o != nil {
+		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
+	}
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
@@ -120,12 +129,6 @@ func TapSecondaryAt(obj fyne.SecondaryTappable, pos fyne.Position) {
 	ev, c := prepareTap(obj, pos)
 	handleFocusOnTap(c, obj)
 	obj.TappedSecondary(ev)
-}
-
-// TryToTapCanvas tries to tap at an absolute position on the canvas.
-// Contrary to TapCanvas it does not fail if there is no fyne.Tappable reachable at the position.
-func TryToTapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position) {
-	tapCanvas(t, c, pos, false)
 }
 
 // Type performs a series of key events to simulate typing of a value into the specified object.
@@ -168,6 +171,16 @@ func WithTestTheme(t *testing.T, f func()) {
 	f()
 }
 
+func findTappable(c fyne.Canvas, pos fyne.Position) (fyne.CanvasObject, fyne.Position) {
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		}
+		return false
+	}
+	return driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+}
+
 func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
 	d := fyne.CurrentApp().Driver()
 	ev := &fyne.PointEvent{Position: pos}
@@ -182,22 +195,6 @@ func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canv
 func tap(c fyne.Canvas, obj fyne.Tappable, ev *fyne.PointEvent) {
 	handleFocusOnTap(c, obj)
 	obj.Tapped(ev)
-}
-
-func tapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position, failIfNotTappable bool) {
-	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		}
-		return false
-	}
-	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
-	if o == nil && !failIfNotTappable {
-		return
-	}
-
-	require.NotNil(t, o, "no tappable found at %#v", pos)
-	tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
 }
 
 func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
