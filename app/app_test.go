@@ -58,9 +58,9 @@ func TestFyneApp_SendNotification(t *testing.T) {
 	testApp := test.NewApp()
 	oldApp := fyne.CurrentApp() // we are testing the app package so don't use the test app
 	fyne.SetCurrentApp(testApp)
+	defer fyne.SetCurrentApp(oldApp)
 
 	test.AssertNotificationSent(t, n, func() {
 		fyne.CurrentApp().SendNotification(n)
 	})
-	fyne.SetCurrentApp(oldApp)
 }
