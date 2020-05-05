@@ -6,11 +6,12 @@ package app
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -framework Foundation -framework UIKit
+#cgo LDFLAGS: -framework Foundation -framework UIKit -framework UserNotifications
 
 #include <stdlib.h>
 
 void openURL(char *urlStr);
+void sendNotification(char *title, char *content);
 */
 import "C"
 import (
@@ -41,4 +42,13 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	C.free(unsafe.Pointer(urlStr))
 
 	return nil
+}
+
+func (app *fyneApp) SendNotification(n *fyne.Notification) {
+	titleStr := C.CString(n.Title)
+	defer C.free(unsafe.Pointer(titleStr))
+	contentStr := C.CString(n.Content)
+	defer C.free(unsafe.Pointer(contentStr))
+
+	C.sendNotification(titleStr, contentStr)
 }

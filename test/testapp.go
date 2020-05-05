@@ -18,10 +18,13 @@ func init() {
 }
 
 type testApp struct {
-	appliedTheme fyne.Theme
-	driver       *testDriver
-	settings     fyne.Settings
-	prefs        fyne.Preferences
+	driver   *testDriver
+	settings fyne.Settings
+	prefs    fyne.Preferences
+
+	// user action variables
+	appliedTheme     fyne.Theme
+	lastNotification *fyne.Notification
 }
 
 func (a *testApp) Icon() fyne.Resource {
@@ -55,6 +58,10 @@ func (a *testApp) UniqueID() string {
 
 func (a *testApp) Driver() fyne.Driver {
 	return a.driver
+}
+
+func (a *testApp) SendNotification(notify *fyne.Notification) {
+	a.lastNotification = notify
 }
 
 func (a *testApp) Settings() fyne.Settings {

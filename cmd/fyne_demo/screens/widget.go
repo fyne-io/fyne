@@ -233,10 +233,10 @@ func makeFormTab() fyne.Widget {
 		},
 		OnSubmit: func() {
 			fmt.Println("Form submitted")
-			fmt.Println("Name:", name.Text)
-			fmt.Println("Email:", email.Text)
-			fmt.Println("Password:", password.Text)
-			fmt.Println("Message:", largeText.Text)
+			fyne.CurrentApp().SendNotification(&fyne.Notification{
+				Title:   "Form for: " + name.Text,
+				Content: largeText.Text,
+			})
 		},
 	}
 	form.Append("Name", name)

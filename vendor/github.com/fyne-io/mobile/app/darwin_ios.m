@@ -12,6 +12,7 @@
 
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
+#import <UserNotifications/UserNotifications.h>
 
 struct utsname sysInfo;
 
@@ -44,6 +45,9 @@ struct utsname sysInfo;
     // update insets once key window is set
 	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
 	updateConfig((int)size.width, (int)size.height, orientation);
+
+	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+	center.delegate = self;
 
 	return YES;
 }
@@ -83,6 +87,11 @@ struct utsname sysInfo;
     filePickerReturned("", NULL);
 }
 
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler {
+	completionHandler(UNNotificationPresentationOptionAlert);
+}
 @end
 
 @interface GoAppAppController ()
