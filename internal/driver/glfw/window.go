@@ -1085,8 +1085,6 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 
 		ret.canvas = newCanvas()
 		ret.canvas.context = ret
-		ret.canvas.detectedScale = ret.detectScale()
-		ret.canvas.scale = ret.calculatedScale()
 		ret.SetIcon(ret.icon)
 		d.windows = append(d.windows, ret)
 	})
@@ -1141,6 +1139,8 @@ func (w *window) create() {
 		glfw.DetachCurrentContext()
 
 		w.viewport = win
+		w.canvas.detectedScale = w.detectScale()
+		w.canvas.scale = w.calculatedScale()
 		for _, fn := range w.pending {
 			fn()
 		}
