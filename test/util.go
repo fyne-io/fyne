@@ -22,6 +22,7 @@ import (
 // AssertCanvasTappableAt asserts that the canvas is tappable at the given position.
 func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool {
 	if o, _ := findTappable(c, pos); o == nil {
+		t.Errorf("No tappable found at %#v", pos)
 		return false
 	}
 	return true
