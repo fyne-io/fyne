@@ -31,7 +31,7 @@ func GraphicsScreen() fyne.CanvasObject {
 			canvas.Refresh(gradient)
 		}
 	}()
-	content := fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(90, 90)),
+	content := fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(90, 90)),
 		&canvas.Rectangle{FillColor: color.RGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.RGBA{0xff, 0xff, 0xff, 0xff},
 			StrokeWidth: 1},
