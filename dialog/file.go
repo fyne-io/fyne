@@ -165,7 +165,7 @@ func (f *fileDialog) refreshDir(dir string) {
 		if file.IsDir() {
 			icons = append(icons, f.newFileItem(theme.FolderIcon(), itemPath))
 		} else {
-			icons = append(icons, f.newFileItem(theme.FileIcon(), itemPath))
+			icons = append(icons, f.newFileItem(nil, itemPath))
 		}
 	}
 

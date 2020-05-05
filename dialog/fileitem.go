@@ -1,8 +1,13 @@
 package dialog
 
 import (
+	"bufio"
 	"image/color"
+	"mime"
+	"os"
 	"path/filepath"
+	"strings"
+	"unicode/utf8"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -21,9 +26,10 @@ type fileDialogItem struct {
 	picker    *fileDialog
 	isCurrent bool
 
-	path      string
-	icon      fyne.Resource
-	name, ext string
+	path                  string
+	icon                  fyne.Resource
+	name, ext             string
+	mimeType, mimeSubType string
 }
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
@@ -35,24 +41,44 @@ func (i *fileDialogItem) TappedSecondary(_ *fyne.PointEvent) {
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
-	img := canvas.NewImageFromResource(i.icon)
+	var img fyne.CanvasObject
+	if i.icon == nil {
+		img = NewFileIcon(i.mimeType, i.mimeSubType)
+	} else {
+		img = canvas.NewImageFromResource(i.icon)
+	}
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
 	text.Wrapping = fyne.TextTruncate
-	extText := canvas.NewText(i.ext, theme.BackgroundColor())
-	extText.Alignment = fyne.TextAlignCenter
-	extText.TextSize = theme.TextSize()
+
 	return &fileItemRenderer{item: i,
-		img: img, text: text, ext: extText, objects: []fyne.CanvasObject{img, text, extText}}
+		img: img, text: text, objects: []fyne.CanvasObject{img, text}}
 }
 
 func (i *fileDialogItem) isDirectory() bool {
 	return i.icon == theme.FolderIcon() || i.icon == theme.FolderOpenIcon()
 }
 
-func fileParts(path string) (name, ext string) {
+func fileParts(path string) (name, ext, mimeType, mimeSubType string) {
 	name = filepath.Base(path)
 	ext = filepath.Ext(name[1:])
 	name = name[:len(name)-len(ext)]
+
+	mimeTypeFull := mime.TypeByExtension(ext)
+	if mimeTypeFull == "" {
+		mimeTypeFull = "text/plain"
+		file, err := os.Open(path)
+		if err == nil {
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			if scanner.Scan() && !utf8.Valid(scanner.Bytes()) {
+				mimeTypeFull = "application/octet-stream"
+			}
+		}
+	}
+
+	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
+	mimeType = mimeTypeSplit[0]
+	mimeSubType = mimeTypeSplit[1]
 
 	if len(ext) > 1 {
 		ext = ext[1:]
@@ -61,18 +87,20 @@ func fileParts(path string) (name, ext string) {
 }
 
 func (f *fileDialog) newFileItem(icon fyne.Resource, path string) *fileDialogItem {
-	name, ext := fileParts(path)
+	name, ext, mimeType, mimeSubType := fileParts(path)
 	if icon == theme.FolderOpenIcon() {
 		name = "(Parent)"
 		ext = ""
 	}
 
 	ret := &fileDialogItem{
-		picker: f,
-		icon:   icon,
-		name:   name,
-		ext:    ext,
-		path:   path,
+		picker:      f,
+		icon:        icon,
+		name:        name,
+		ext:         ext,
+		path:        path,
+		mimeType:    mimeType,
+		mimeSubType: mimeSubType,
 	}
 	ret.ExtendBaseWidget(ret)
 	return ret
@@ -81,8 +109,7 @@ func (f *fileDialog) newFileItem(icon fyne.Resource, path string) *fileDialogIte
 type fileItemRenderer struct {
 	item *fileDialogItem
 
-	ext     *canvas.Text
-	img     *canvas.Image
+	img     fyne.CanvasObject
 	text    *widget.Label
 	objects []fyne.CanvasObject
 }
@@ -91,9 +118,6 @@ func (s fileItemRenderer) Layout(size fyne.Size) {
 	iconAlign := (size.Width - fileIconSize) / 2
 	s.img.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 	s.img.Move(fyne.NewPos(iconAlign, 0))
-	s.ext.Resize(fyne.NewSize(fileIconSize, fileTextSize))
-	ratioDown := 0.45
-	s.ext.Move(fyne.NewPos(iconAlign, int(float64(fileIconSize)*ratioDown)))
 
 	s.text.Resize(fyne.NewSize(size.Width, fileTextSize))
 	s.text.Move(fyne.NewPos(0, fileIconSize+theme.Padding()))
