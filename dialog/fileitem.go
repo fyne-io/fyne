@@ -57,8 +57,8 @@ func fileParts(path string) (name, ext string) {
 	if len(ext) > 1 {
 		ext = ext[1:]
 	}
-	if len(ext) > 10 {
-		ext = ext[:10]
+	if len(ext) > 5 {
+		ext = ext[:5]
 	}
 	return
 }

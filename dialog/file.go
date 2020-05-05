@@ -42,12 +42,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				f.open.Enable()
 			}
 		}
-		saveName.Wrapping = fyne.TextTruncate
 		f.fileName = saveName
 	} else {
-		openName := widget.NewLabel("")
-		openName.Wrapping = fyne.TextTruncate
-		f.fileName = openName
+		f.fileName = widget.NewLabel("")
 	}
 
 	label := "Open"
@@ -107,7 +104,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}),
 		f.open)
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
-		buttons, f.fileName)
+		buttons, widget.NewHScrollContainer(f.fileName))
 
 	f.files = fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(fileIconCellWidth,
 		fileIconSize+theme.Padding()+fileTextSize)),
