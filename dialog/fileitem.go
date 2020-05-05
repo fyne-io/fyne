@@ -43,7 +43,11 @@ func (i *fileDialogItem) TappedSecondary(_ *fyne.PointEvent) {
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	var img fyne.CanvasObject
 	if i.icon == nil {
-		img = NewFileIcon(i.mimeType, i.mimeSubType)
+		mimeSub := i.mimeSubType
+		if len(mimeSub) > 5 {
+			mimeSub = mimeSub[:5]
+		}
+		img = NewFileIcon(i.mimeType, mimeSub)
 	} else {
 		img = canvas.NewImageFromResource(i.icon)
 	}
@@ -80,9 +84,6 @@ func fileParts(path string) (name, ext, mimeType, mimeSubType string) {
 	mimeType = mimeTypeSplit[0]
 	mimeSubType = mimeTypeSplit[1]
 
-	if len(ext) > 1 {
-		ext = ext[1:]
-	}
 	return
 }
 
