@@ -11,18 +11,21 @@ func ApplyThemeTo(content fyne.CanvasObject, canv fyne.Canvas) {
 	if content == nil {
 		return
 	}
-	if wid, ok := content.(fyne.Widget); ok {
-		for _, o := range cache.Renderer(wid).Objects() {
-			ApplyThemeTo(o, canv)
-		}
-		cache.Renderer(wid).Layout(wid.Size()) // theme can cause sizing changes
-	}
-	if c, ok := content.(*fyne.Container); ok {
-		for _, o := range c.Objects {
-			ApplyThemeTo(o, canv)
-		}
-	}
 
+	switch o := content.(type) {
+	case fyne.Widget:
+		for _, co := range cache.Renderer(o).Objects() {
+			ApplyThemeTo(co, canv)
+		}
+		cache.Renderer(o).Layout(content.Size()) // theme can cause sizing changes
+	case *fyne.Container:
+		for _, co := range o.Objects {
+			ApplyThemeTo(co, canv)
+		}
+		if l := o.Layout; l != nil {
+			l.Layout(o.Objects, o.Size()) // theme can cause sizing changes
+		}
+	}
 	content.Refresh()
 }
 

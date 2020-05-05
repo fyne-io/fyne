@@ -41,8 +41,8 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	// We want to test the handling of the canvas' Fyne menu here.
 	// We work around w.SetMainMenu because on MacOS the main menu is a native menu.
 	c := w.Canvas().(*glCanvas)
-	mbar := buildMenuBar(mm, c)
-	c.setMenuBar(mbar)
+	movl := buildMenuOverlay(mm, c)
+	c.setMenuOverlay(movl)
 
 	ovli1 := widget.NewLabel("Overlay Item 1")
 	ovli2 := widget.NewLabel("Overlay Item 2")
@@ -52,7 +52,11 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 	repaintWindow(w.(*window))
 	// accessing the menu bar's actual CanvasObjects isn't straight forward
-	m2 := cache.Renderer(mbar).Objects()[1]
+	// 0 is the shadow
+	// 1 is the menu bar’s background
+	// 2 is the container holding the items
+	mbarCont := cache.Renderer(movl.(fyne.Widget)).Objects()[2].(*fyne.Container)
+	m2 := mbarCont.Objects[1]
 
 	tests := map[string]struct {
 		object fyne.CanvasObject
@@ -77,7 +81,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 
 		"a menu": {
 			object: m2,
-			want:   fyne.NewPos(74, 0),
+			want:   fyne.NewPos(78, 0),
 		},
 
 		"an overlay item": {

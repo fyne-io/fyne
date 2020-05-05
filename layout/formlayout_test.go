@@ -1,13 +1,14 @@
-package layout
+package layout_test
 
 import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne/theme"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +30,7 @@ func TestFormLayout(t *testing.T) {
 	}
 	container.Resize(gridSize)
 
-	NewFormLayout().Layout(container.Objects, gridSize)
+	layout.NewFormLayout().Layout(container.Objects, gridSize)
 
 	assert.Equal(t, fyne.NewSize(70, 100), label1.Size())
 	assert.Equal(t, fyne.NewSize(120, 100), content1.Size())
@@ -57,7 +58,7 @@ func TestFormLayout_Hidden(t *testing.T) {
 	}
 	container.Resize(gridSize)
 
-	NewFormLayout().Layout(container.Objects, gridSize)
+	layout.NewFormLayout().Layout(container.Objects, gridSize)
 
 	assert.Equal(t, fyne.NewSize(50, 80), label2.Size())
 	assert.Equal(t, fyne.NewSize(140, 80), content2.Size())
@@ -78,7 +79,7 @@ func TestFormLayout_StretchX(t *testing.T) {
 	}
 	container.Resize(wideSize)
 
-	NewFormLayout().Layout(container.Objects, wideSize)
+	layout.NewFormLayout().Layout(container.Objects, wideSize)
 
 	assert.Equal(t, fyne.NewSize(50, 50), label1.Size())
 	assert.Equal(t, fyne.NewSize(wideSize.Width-50-theme.Padding(), 50), content1.Size())
@@ -100,8 +101,8 @@ func TestFormLayout_MinSize(t *testing.T) {
 		Objects: []fyne.CanvasObject{label1, content1, label2, content2},
 	}
 
-	layout := NewFormLayout()
-	layoutMin := layout.MinSize(container.Objects)
+	l := layout.NewFormLayout()
+	layoutMin := l.MinSize(container.Objects)
 	expectedRowWidth := 70 + 120 + theme.Padding()
 	expectedRowHeight := 100 + 80 + theme.Padding()
 	assert.Equal(t, fyne.NewSize(expectedRowWidth, expectedRowHeight), layoutMin)
@@ -125,8 +126,8 @@ func TestFormLayout_MinSize_Hidden(t *testing.T) {
 		Objects: []fyne.CanvasObject{label1, content1, label2, content2},
 	}
 
-	layout := NewFormLayout()
-	layoutMin := layout.MinSize(container.Objects)
+	l := layout.NewFormLayout()
+	layoutMin := l.MinSize(container.Objects)
 	expectedRowWidth := 50 + 100 + theme.Padding()
 	expectedRowHeight := 100
 	assert.Equal(t, fyne.NewSize(expectedRowWidth, expectedRowHeight), layoutMin)

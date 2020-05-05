@@ -119,8 +119,9 @@ func TestButton_Disabled(t *testing.T) {
 }
 
 func TestButton_Layout(t *testing.T) {
-	app := test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		text      string

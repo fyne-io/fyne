@@ -5,6 +5,7 @@ import (
 	"image/draw"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
 )
 
@@ -29,6 +30,7 @@ type testCanvas struct {
 	content  fyne.CanvasObject
 	overlays *internal.OverlayStack
 	focused  fyne.Focusable
+	hovered  desktop.Hoverable
 	padded   bool
 
 	onTypedRune func(rune)

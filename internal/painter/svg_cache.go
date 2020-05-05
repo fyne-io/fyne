@@ -87,11 +87,10 @@ func svgCachePut(res fyne.Resource, pix *image.RGBA, w int, h int) {
 	}
 }
 
-func svgCacheReset() {
+// SvgCacheReset clears the SVG cache.
+func SvgCacheReset() {
 	rasterMutex.Lock()
-	for k := range rasters {
-		delete(rasters, k)
-	}
+	rasters = make(map[fyne.Resource]*rasterInfo)
 	rasterMutex.Unlock()
 }
 
@@ -102,7 +101,7 @@ func SvgCacheMonitorTheme() {
 	go func() {
 		for {
 			<-listener
-			svgCacheReset()
+			SvgCacheReset()
 		}
 	}()
 
