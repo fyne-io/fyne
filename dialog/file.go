@@ -42,9 +42,12 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				f.open.Enable()
 			}
 		}
+		saveName.Wrapping = fyne.TextTruncate
 		f.fileName = saveName
 	} else {
-		f.fileName = widget.NewLabel("")
+		openName := widget.NewLabel("")
+		openName.Wrapping = fyne.TextTruncate
+		f.fileName = openName
 	}
 
 	label := "Open"
