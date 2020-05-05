@@ -55,8 +55,12 @@ func TestFyneApp_OpenURL(t *testing.T) {
 
 func TestFyneApp_SendNotification(t *testing.T) {
 	n := fyne.NewNotification("Test Title", "Some content")
+	testApp := test.NewApp()
+	oldApp := fyne.CurrentApp() // we are testing the app package so don't use the test app
+	fyne.SetCurrentApp(testApp)
 
-	test.AssertNotificationSent(t, n, func(a fyne.App) {
-		a.SendNotification(n)
+	test.AssertNotificationSent(t, n, func() {
+		fyne.CurrentApp().SendNotification(n)
 	})
+	fyne.SetCurrentApp(oldApp)
 }
