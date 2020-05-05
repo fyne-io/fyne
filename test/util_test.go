@@ -13,9 +13,28 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/image/font"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
+
+func TestAssertCanvasTappableAt(t *testing.T) {
+	c := test.NewCanvas()
+	b := widget.NewButton("foo", nil)
+	c.SetContent(b)
+	c.Resize(fyne.NewSize(300, 300))
+	b.Resize(fyne.NewSize(100, 100))
+	b.Move(fyne.NewPos(100, 100))
+
+	tt := &testing.T{}
+	assert.True(t, test.AssertCanvasTappableAt(tt, c, fyne.NewPos(101, 101)), "tappable found")
+	assert.False(t, tt.Failed(), "test did not fail")
+
+	tt = &testing.T{}
+	assert.False(t, test.AssertCanvasTappableAt(tt, c, fyne.NewPos(99, 99)), "tappable not found")
+	assert.True(t, tt.Failed(), "test failed")
+}
 
 func TestAssertImageMatches(t *testing.T) {
 	bounds := image.Rect(0, 0, 100, 50)
