@@ -77,7 +77,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		}
 		return false
 	}
-	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, absPos, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
 		hovered = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
@@ -172,14 +172,15 @@ func WithTestTheme(t *testing.T, f func()) {
 	f()
 }
 
-func findTappable(c fyne.Canvas, pos fyne.Position) (fyne.CanvasObject, fyne.Position) {
+func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne.Position) {
 	matches := func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		}
 		return false
 	}
-	return driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	return
 }
 
 func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {

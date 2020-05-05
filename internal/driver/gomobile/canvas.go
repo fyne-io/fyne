@@ -225,9 +225,9 @@ func (c *mobileCanvas) walkTree(
 	}
 }
 
-func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
-	if c.menu != nil && c.overlays.Top() == nil {
-		return driver.FindObjectAtPositionMatching(pos, test, c.menu)
+func (c *mobileCanvas) findObjectAtPositionMatching(pos fyne.Position, test func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
+	if c.menu != nil {
+		return driver.FindObjectAtPositionMatching(pos, test, c.overlays.Top(), c.menu)
 	}
 
 	return driver.FindObjectAtPositionMatching(pos, test, c.overlays.Top(), c.windowHead, c.content)
@@ -238,7 +238,7 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 	c.lastTapDownPos[tapID] = pos
 	c.dragging = nil
 
-	co, objPos := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		} else if _, ok := object.(mobile.Touchable); ok {
@@ -258,13 +258,15 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 		c.touched[tapID] = wid
 	}
 
-	needsFocus := true
-	wid := c.Focused()
-	if wid != nil {
-		if wid.(fyne.CanvasObject) != co {
-			c.Unfocus()
-		} else {
-			needsFocus = false
+	needsFocus := false
+	if layer != 1 { // 0 - overlay, 1 - window head / menu, 2 - content
+		needsFocus = true
+		if wid := c.Focused(); wid != nil {
+			if wid.(fyne.CanvasObject) != co {
+				c.Unfocus()
+			} else {
+				needsFocus = false
+			}
 		}
 	}
 	if wid, ok := co.(fyne.Focusable); ok && needsFocus {
@@ -284,7 +286,7 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 	}
 	c.lastTapDownPos[tapID] = pos
 
-	co, objPos := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Draggable); ok {
 			return true
 		} else if _, ok := object.(mobile.Touchable); ok {
@@ -339,7 +341,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 		return
 	}
 
-	co, objPos := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
+	co, objPos, _ := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		} else if _, ok := object.(fyne.SecondaryTappable); ok {

@@ -142,7 +142,7 @@ type menuBarBackground struct {
 }
 
 var _ fyne.Widget = (*menuBarBackground)(nil)
-var _ fyne.Tappable = (*menuBarBackground)(nil)     // unfocus menu on click outside
+var _ fyne.Tappable = (*menuBarBackground)(nil)     // deactivate menu on click outside
 var _ desktop.Hoverable = (*menuBarBackground)(nil) // block hover events on main content
 
 // CreateRenderer satisfies the fyne.Widget interface.
