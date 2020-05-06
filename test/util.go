@@ -9,13 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
