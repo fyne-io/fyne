@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"image"
 	"image/draw"
 	"image/png"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 
@@ -17,12 +19,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// AssertCanvasTappableAt asserts that the canvas is tappable at the given position.
+func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool {
+	if o, _ := findTappable(c, pos); o == nil {
+		t.Errorf("No tappable found at %#v", pos)
+		return false
+	}
+	return true
+}
+
 // AssertImageMatches asserts that the given image is the same as the one stored in the master file.
 // The master filename is relative to the `testdata` directory which is relative to the test.
 // The test `t` fails if the given image is not equal to the loaded master image.
 // In this case the given image is written into a file in `testdata/failed/<masterFilename>` (relative to the test).
 // This path is also reported, thus the file can be used as new master.
-func AssertImageMatches(t *testing.T, masterFilename string, img image.Image) bool {
+func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, msgAndArgs ...interface{}) bool {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 	masterPath := filepath.Join(wd, "testdata", masterFilename)
@@ -42,11 +53,53 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image) bo
 	expected := image.NewRGBA(raw.Bounds())
 	draw.Draw(expected, expected.Bounds(), raw, image.Pt(0, 0), draw.Src)
 
-	if !assert.Equal(t, expected, img, "Image did not match master. Actual image written to %s.", failedPath) {
+	var msg string
+	if len(msgAndArgs) > 0 {
+		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
+	}
+	if !assert.Equal(t, expected, img, "%sImage did not match master. Actual image written to file://%s.", msg, failedPath) {
 		require.NoError(t, writeImage(failedPath, img))
 		return false
 	}
 	return true
+}
+
+// MoveMouse simulates a mouse movement to the given position.
+func MoveMouse(c fyne.Canvas, pos fyne.Position) {
+	tc, _ := c.(*testCanvas)
+	var oldHovered, hovered desktop.Hoverable
+	if tc != nil {
+		oldHovered = tc.hovered
+	}
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(desktop.Hoverable); ok {
+			return true
+		}
+		return false
+	}
+	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	if o != nil {
+		hovered = o.(desktop.Hoverable)
+		me := &desktop.MouseEvent{
+			PointEvent: fyne.PointEvent{
+				AbsolutePosition: pos,
+				Position:         pos.Subtract(absPos),
+			},
+		}
+		if hovered == oldHovered {
+			hovered.MouseMoved(me)
+		} else {
+			if oldHovered != nil {
+				oldHovered.MouseOut()
+			}
+			hovered.MouseIn(me)
+		}
+	} else if oldHovered != nil {
+		oldHovered.MouseOut()
+	}
+	if tc != nil {
+		tc.hovered = hovered
+	}
 }
 
 // Tap simulates a left mouse click on the specified object.
@@ -61,17 +114,10 @@ func TapAt(obj fyne.Tappable, pos fyne.Position) {
 }
 
 // TapCanvas taps at an absolute position on the canvas.
-// It fails the test if there is no fyne.Tappable reachable at the position.
-func TapCanvas(t *testing.T, c fyne.Canvas, pos fyne.Position) {
-	matches := func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		}
-		return false
+func TapCanvas(c fyne.Canvas, pos fyne.Position) {
+	if o, absPos := findTappable(c, pos); o != nil {
+		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
 	}
-	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
-	require.NotNil(t, o, "no tappable found at %#v", pos)
-	tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
 }
 
 // TapSecondary simulates a right mouse click on the specified object.
@@ -121,9 +167,19 @@ func WidgetRenderer(wid fyne.Widget) fyne.WidgetRenderer {
 func WithTestTheme(t *testing.T, f func()) {
 	settings := fyne.CurrentApp().Settings()
 	current := settings.Theme()
-	ApplyTheme(t, &testTheme{})
+	ApplyTheme(t, NewTheme())
 	defer ApplyTheme(t, current)
 	f()
+}
+
+func findTappable(c fyne.Canvas, pos fyne.Position) (fyne.CanvasObject, fyne.Position) {
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Tappable); ok {
+			return true
+		}
+		return false
+	}
+	return driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 }
 
 func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {

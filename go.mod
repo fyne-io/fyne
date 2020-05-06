@@ -7,9 +7,10 @@ require (
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/fyne-io/mobile v0.0.2-0.20200421111809-d9d371319719
+	github.com/fyne-io/mobile v0.0.2-0.20200428171212-b58c43ed67eb
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
+	github.com/godbus/dbus/v5 v5.0.3
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca

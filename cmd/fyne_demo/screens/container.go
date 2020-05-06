@@ -3,6 +3,7 @@ package screens
 import (
 	"fmt"
 	"image/color"
+	"net/url"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -14,6 +15,7 @@ import (
 // ContainerScreen loads a tab panel for containers and layouts
 func ContainerScreen() fyne.CanvasObject {
 	return widget.NewTabContainer(
+		widget.NewTabItem("Accordion", makeAccordionTab()),
 		widget.NewTabItem("Split", makeSplitTab()),
 		widget.NewTabItem("Scroll", makeScrollTab()),
 		// layouts
@@ -22,6 +24,23 @@ func ContainerScreen() fyne.CanvasObject {
 		widget.NewTabItem("Center", makeCenterLayout()),
 		widget.NewTabItem("Grid", makeGridLayout()),
 	)
+}
+
+func makeAccordionTab() fyne.CanvasObject {
+	link, err := url.Parse("https://fyne.io/")
+	if err != nil {
+		fyne.LogError("Could not parse URL", err)
+	}
+	ac := widget.NewAccordionContainer(
+		widget.NewAccordionItem("A", widget.NewHyperlink("One", link)),
+		widget.NewAccordionItem("B", widget.NewLabel("Two")),
+		&widget.AccordionItem{
+			Title:  "C",
+			Detail: widget.NewLabel("Three"),
+		},
+	)
+	ac.Append(widget.NewAccordionItem("D", &widget.Entry{Text: "Four"}))
+	return ac
 }
 
 func makeBorderLayout() *fyne.Container {

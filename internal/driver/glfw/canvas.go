@@ -23,7 +23,7 @@ type glCanvas struct {
 	sync.RWMutex
 
 	content  fyne.CanvasObject
-	menu     *widget.Toolbar
+	menu     fyne.CanvasObject
 	overlays *overlayStack
 	padded   bool
 	size     fyne.Size
@@ -479,38 +479,38 @@ func (c *glCanvas) setupThemeListener() {
 	}()
 }
 
-func (c *glCanvas) buildMenuBar(w *window, m *fyne.MainMenu) {
-	c.setMenuBar(nil)
+func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
+	c.setMenuOverlay(nil)
 	if m == nil {
 		return
 	}
 	if hasNativeMenu() {
 		setupNativeMenu(w, m)
 	} else {
-		c.setMenuBar(buildMenuBar(m, c))
+		c.setMenuOverlay(buildMenuOverlay(m, c))
 	}
 }
 
-func (c *glCanvas) setMenuBar(b *widget.Toolbar) {
+func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
 	c.Lock()
 	c.menu = b
 	c.menuTree = &renderCacheTree{root: &renderCacheNode{obj: c.menu}}
 	c.Unlock()
 }
 
-func (c *glCanvas) menuBar() *widget.Toolbar {
+func (c *glCanvas) menuOverlay() fyne.CanvasObject {
 	c.RLock()
 	defer c.RUnlock()
 	return c.menu
 }
 
 func (c *glCanvas) menuHeight() int {
-	switch c.menuBar() {
+	switch c.menuOverlay() {
 	case nil:
 		// no menu or native menu -> does not consume space on the canvas
 		return 0
 	default:
-		return c.menuBar().MinSize().Height
+		return c.menuOverlay().MinSize().Height
 	}
 }
 

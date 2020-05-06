@@ -1,4 +1,4 @@
-package layout
+package layout_test
 
 import (
 	"image/color"
@@ -6,8 +6,9 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	_ "fyne.io/fyne/test"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +25,7 @@ func TestGridLayout(t *testing.T) {
 	}
 	container.Resize(gridSize)
 
-	NewGridLayout(2).Layout(container.Objects, gridSize)
+	layout.NewGridLayout(2).Layout(container.Objects, gridSize)
 
 	assert.Equal(t, obj1.Size(), cellSize)
 	cell2Pos := fyne.NewPos(50+theme.Padding(), 0)
@@ -45,7 +46,7 @@ func TestGridLayoutRounding(t *testing.T) {
 	}
 	container.Resize(gridSize)
 
-	NewGridLayout(3).Layout(container.Objects, gridSize)
+	layout.NewGridLayout(3).Layout(container.Objects, gridSize)
 
 	assert.Equal(t, fyne.NewPos(0, 0), obj1.Position())
 	assert.Equal(t, fyne.NewSize(33, 50), obj1.Size())
@@ -68,7 +69,7 @@ func TestGridLayout_Vertical(t *testing.T) {
 	}
 	container.Resize(gridSize)
 
-	NewGridLayoutWithRows(2).Layout(container.Objects, gridSize)
+	layout.NewGridLayoutWithRows(2).Layout(container.Objects, gridSize)
 
 	assert.Equal(t, obj1.Size(), cellSize)
 	cell2Pos := fyne.NewPos(0, 50+theme.Padding())
@@ -83,7 +84,7 @@ func TestGridLayout_MinSize(t *testing.T) {
 	minSize := text1.MinSize().Add(fyne.NewSize(0, text2.MinSize().Height+theme.Padding()))
 
 	container := fyne.NewContainer(text1, text2)
-	layoutMin := NewGridLayout(1).MinSize(container.Objects)
+	layoutMin := layout.NewGridLayout(1).MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
 }
@@ -94,7 +95,7 @@ func TestGridLayout_MinSize_Vertical(t *testing.T) {
 	minSize := text1.MinSize().Add(fyne.NewSize(text2.MinSize().Width+theme.Padding(), 0))
 
 	container := fyne.NewContainer(text1, text2)
-	layoutMin := NewGridLayoutWithRows(1).MinSize(container.Objects)
+	layoutMin := layout.NewGridLayoutWithRows(1).MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
 }
@@ -107,7 +108,7 @@ func TestGridLayout_MinSize_HiddenItem(t *testing.T) {
 	minSize := text1.MinSize().Add(fyne.NewSize(0, text3.MinSize().Height+theme.Padding()))
 
 	container := fyne.NewContainer(text1, text2, text3)
-	layoutMin := NewGridLayout(1).MinSize(container.Objects)
+	layoutMin := layout.NewGridLayout(1).MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
 }

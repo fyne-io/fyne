@@ -8,7 +8,7 @@ github.com/akavel/rsrc/ico
 github.com/davecgh/go-spew/spew
 # github.com/fsnotify/fsnotify v1.4.9
 github.com/fsnotify/fsnotify
-# github.com/fyne-io/mobile v0.0.2-0.20200421111809-d9d371319719
+# github.com/fyne-io/mobile v0.0.2-0.20200428171212-b58c43ed67eb
 github.com/fyne-io/mobile/app
 github.com/fyne-io/mobile/app/internal/callfn
 github.com/fyne-io/mobile/event/key
@@ -25,6 +25,8 @@ github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.2-core/gl
 # github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
 github.com/go-gl/glfw/v3.3/glfw
+# github.com/godbus/dbus/v5 v5.0.3
+github.com/godbus/dbus/v5
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 github.com/goki/freetype
 github.com/goki/freetype/raster

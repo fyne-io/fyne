@@ -15,6 +15,7 @@ type PopUpMenu struct {
 func NewPopUpMenu(m *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	p := &PopUpMenu{Menu: NewMenu(m), canvas: c}
 	p.Menu.Resize(p.Menu.MinSize())
+	p.Menu.customSized = true
 	o := NewOverlayContainer(p.Menu, c, p.dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o

@@ -7,11 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 )
@@ -135,10 +133,76 @@ func TestMenu_ItemTapped(t *testing.T) {
 	assert.True(t, newActionTapped, "tap on item performs its current action")
 }
 
-func TestMenu_Layout(t *testing.T) {
+func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.DarkTheme())
+
+	w := app.NewWindow("")
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	var item1Hit, item2Hit, overlayContainerHit bool
+	m := widget.NewMenu(fyne.NewMenu("",
+		fyne.NewMenuItem("Foo", func() { item1Hit = true }),
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Bar", func() { item2Hit = true }),
+	))
+	size := m.MinSize()
+	m.Resize(size)
+	o := widget.NewOverlayContainer(m, c, func() { overlayContainerHit = true })
+	w.SetContent(o)
+	w.Resize(size.Add(fyne.NewSize(10, 10)))
+
+	// tap on top padding
+	p := fyne.NewPos(5, 1)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	}
+
+	// tap on separator
+	fyne.NewPos(5, size.Height/2)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	}
+
+	// tap bottom padding
+	p = fyne.NewPos(5, size.Height-1)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	}
+
+	// verify test setup: we can hit the items and the container
+	test.TapCanvas(c, fyne.NewPos(5, size.Height/4))
+	assert.True(t, item1Hit, "hit item 1")
+	assert.False(t, item2Hit, "item 2 should not be hit")
+	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	test.TapCanvas(c, fyne.NewPos(5, 3*size.Height/4))
+	assert.True(t, item2Hit, "hit item 2")
+	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	test.TapCanvas(c, fyne.NewPos(size.Width+1, size.Height+1))
+	assert.True(t, overlayContainerHit, "hit the overlay container")
+}
+
+func TestMenu_Layout(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.DarkTheme())
+
+	w := test.NewWindowWithPainter(nil, software.NewPainter())
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
 
 	item1 := fyne.NewMenuItem("A", nil)
 	item2 := fyne.NewMenuItem("B (long)", nil)
@@ -151,135 +215,91 @@ func TestMenu_Layout(t *testing.T) {
 	subsubItem2 := fyne.NewMenuItem("subsubitem B", nil)
 	subItem3.ChildMenu = fyne.NewMenu("", subsubItem1, subsubItem2)
 	item3.ChildMenu = fyne.NewMenu("", subItem1, subItem2, subItem3)
-	m := widget.NewMenu(fyne.NewMenu("", item1, sep, item2, item3))
-	w := test.NewWindowWithPainter(m, software.NewPainter())
-	defer w.Close()
-	w.Resize(fyne.NewSize(1000, 1000))
-	m.Resize(m.MinSize())
-	c := w.Canvas()
+	menu := fyne.NewMenu("", item1, sep, item2, item3)
 
-	subItem := m.Items[3].(*widget.MenuItem)
-	subItem.MouseIn(nil)
-	subsubItem := subItem.Child.Items[2].(*widget.MenuItem)
-	subsubItem.MouseIn(nil)
-
-	menuWidth := 0
-	submenuWidth := 0
-	objects := test.LaidOutObjects(m)
-	cons := selectContainers(objects)
-	shadows := selectShadows(objects)
-	submenuIcons := selectImages(objects)
-
-	test.AssertImageMatches(t, "menu_layout.png", c.Capture())
-
-	if assert.Len(t, cons, 3, "one container for each menu") &&
-		assert.Len(t, shadows, 3, "one container for each menu") &&
-		assert.Len(t, submenuIcons, 2, "one icon for each menu item with submenu") {
-		// root menu
-		submenuPos := assertMenu(t, cons[0], shadows[0], submenuIcons[0], []*fyne.MenuItem{item1, nil, item2, item3}, "B (long)", false, 3)
-		menuWidth = submenuPos.X
-		assert.Equal(t, submenuPos, subItem.Child.Position(), "correct submenu position")
-		// sub menu
-		subsubmenuPos := assertMenu(t, cons[1], shadows[1], submenuIcons[1], []*fyne.MenuItem{subItem1, subItem2, subItem3}, "subitem C (long)", true, 2)
-		submenuWidth = subsubmenuPos.X
-		assert.Equal(t, subsubmenuPos, subsubItem.Child.Position(), "correct subsubmenu position")
-		// sub sub menu
-		assertMenu(t, cons[2], shadows[2], nil, []*fyne.MenuItem{subsubItem1, subsubItem2}, "subsubitem A (long)", false, -1)
-	}
-
-	// move menu to the far right -> no space left for the submenu
-	m.Move(fyne.NewPos(1000-menuWidth-10, 0))
-	test.LaidOutObjects(m)
-	test.AssertImageMatches(t, "menu_layout_no_space_on_right.png", c.Capture())
-	assert.Equal(t, fyne.NewPos(-submenuWidth, 0), subItem.Child.Position(), "submenu is placed to the left if insufficient space to the right")
-
-	// window space too small to place submenu to the left or to the right
-	w.Resize(fyne.NewSize(menuWidth/2+submenuWidth, 1000))
-	m.Resize(m.MinSize())
-	m.Move(fyne.NewPos(0, 0))
-	test.LaidOutObjects(m)
-	test.AssertImageMatches(t, "menu_layout_no_space_on_both_sides.png", c.Capture())
-	assert.Equal(t, fyne.NewPos(menuWidth/2, 0), subItem.Child.Position(), "submenu is placed as far right as possible if space is too tight to both sides")
-
-	// window too short to place submenu
-	winHeight := m.Size().Height + subItem.Child.Size().Height/2
-	w.Resize(fyne.NewSize(1000, winHeight))
-	m.Resize(m.MinSize())
-	absSubItemPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(subItem)
-	test.LaidOutObjects(m)
-	assert.Equal(t, fyne.NewPos(menuWidth, winHeight-(absSubItemPos.Y+subItem.Child.Size().Height)), subItem.Child.Position(), "submenu is placed as far right as possible if space is too tight to both sides")
-
-	test.AssertImageMatches(t, "menu_layout_window_too_short.png", c.Capture())
-}
-
-func assertMenu(t *testing.T, c *fyne.Container, shadow *widget.Shadow, icon *canvas.Image, items []*fyne.MenuItem, longestLabel string, longestIsSub bool, subitem int) (subPos fyne.Position) {
-	itemSize := canvas.NewText(longestLabel, color.Black).MinSize().Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
-	if longestIsSub {
-		itemSize.Width += theme.IconInlineSize()
-	}
-	yOff := 0
-	itemCount := 0
-	sepCount := 0
-	for i, item := range items {
-		o := c.Objects[i]
-		assert.Equal(t, fyne.NewPos(0, yOff), o.Position())
-		if item != nil {
-			assert.Equal(t, item, o.(*widget.MenuItem).Item)
-			assert.Equal(t, itemSize, o.Size())
-			if i == subitem {
-				assert.Equal(t, fyne.NewPos(itemSize.Width-theme.IconInlineSize(), (itemSize.Height-theme.IconInlineSize())/2), icon.Position())
-				assert.Equal(t, fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()), icon.Size())
-				subPos = fyne.NewPos(itemSize.Width, 0)
+	for name, tt := range map[string]struct {
+		windowSize     fyne.Size
+		menuPos        fyne.Position
+		mousePositions []fyne.Position
+		useTestTheme   bool
+		wantImage      string
+	}{
+		"normal": {
+			windowSize: fyne.NewSize(500, 300),
+			menuPos:    fyne.NewPos(10, 10),
+			wantImage:  "menu_layout_normal.png",
+		},
+		"normal with submenus": {
+			windowSize: fyne.NewSize(500, 300),
+			menuPos:    fyne.NewPos(10, 10),
+			mousePositions: []fyne.Position{
+				fyne.NewPos(30, 100),
+				fyne.NewPos(100, 170),
+			},
+			wantImage: "menu_layout_normal_with_submenus.png",
+		},
+		"background of active submenu parents resets if sibling is hovered": {
+			windowSize: fyne.NewSize(500, 300),
+			menuPos:    fyne.NewPos(10, 10),
+			mousePositions: []fyne.Position{
+				fyne.NewPos(30, 100),  // open submenu
+				fyne.NewPos(100, 170), // open subsubmenu
+				fyne.NewPos(300, 170), // hover subsubmenu item
+				fyne.NewPos(30, 60),   // hover sibling of submenu parent
+			},
+			wantImage: "menu_layout_background_reset.png",
+		},
+		"no space on right side for submenu": {
+			windowSize: fyne.NewSize(500, 300),
+			menuPos:    fyne.NewPos(410, 10),
+			mousePositions: []fyne.Position{
+				fyne.NewPos(430, 100), // open submenu
+				fyne.NewPos(300, 170), // open subsubmenu
+			},
+			wantImage: "menu_layout_no_space_on_right.png",
+		},
+		"no space on left & right side for submenu": {
+			windowSize: fyne.NewSize(200, 300),
+			menuPos:    fyne.NewPos(10, 10),
+			mousePositions: []fyne.Position{
+				fyne.NewPos(30, 100),  // open submenu
+				fyne.NewPos(100, 170), // open subsubmenu
+			},
+			wantImage: "menu_layout_no_space_on_both_sides.png",
+		},
+		"window too short for submenu": {
+			windowSize: fyne.NewSize(500, 150),
+			menuPos:    fyne.NewPos(10, 10),
+			mousePositions: []fyne.Position{
+				fyne.NewPos(30, 100),  // open submenu
+				fyne.NewPos(100, 130), // open subsubmenu
+			},
+			wantImage: "menu_layout_window_too_short.png",
+		},
+		"theme change": {
+			windowSize:   fyne.NewSize(500, 300),
+			menuPos:      fyne.NewPos(10, 10),
+			useTestTheme: true,
+			wantImage:    "menu_layout_theme_changed.png",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			w.Resize(tt.windowSize)
+			m := widget.NewMenu(menu)
+			w.SetContent(m)
+			w.Resize(tt.windowSize) // SetContent changes window’s size
+			m.Resize(m.MinSize())
+			m.Move(tt.menuPos)
+			for _, pos := range tt.mousePositions {
+				test.MoveMouse(c, pos)
 			}
-			yOff += itemSize.Height + theme.Padding()
-			itemCount++
-		} else { // separator
-			assert.IsType(t, (*canvas.Rectangle)(nil), o)
-			assert.Equal(t, fyne.NewSize(itemSize.Width, 2), o.Size())
-			yOff += 2 + theme.Padding()
-			sepCount++
-		}
+			if tt.useTestTheme {
+				test.WithTestTheme(t, func() {
+					test.AssertImageMatches(t, tt.wantImage, c.Capture())
+				})
+			} else {
+				test.AssertImageMatches(t, tt.wantImage, c.Capture())
+			}
+		})
 	}
-
-	// height = item heights + sep heights + padding between items/seps & at start/end of menu
-	size := fyne.NewSize(itemSize.Width, itemCount*itemSize.Height+sepCount*2+(2+itemCount+sepCount-1)*theme.Padding())
-	menu := c.Objects[0].(*widget.MenuItem).Parent
-	assert.Equal(t, size, menu.MinSize())
-
-	assert.Equal(t, fyne.NewPos(0, 0), shadow.Position())
-	assert.Equal(t, size, shadow.Size())
-
-	assert.Equal(t, layout.NewVBoxLayout(), c.Layout)
-	assert.Len(t, c.Objects, itemCount+sepCount, "container children size is equal to item + sep count")
-	assert.Equal(t, fyne.NewPos(0, theme.Padding()), c.Position())
-	assert.Equal(t, size.Subtract(fyne.NewSize(0, theme.Padding()*2)), c.Size(), "container size does not include leading & trailing padding")
-
-	return
-}
-
-func selectContainers(objects []fyne.CanvasObject) (containers []*fyne.Container) {
-	for _, object := range objects {
-		if c, ok := object.(*fyne.Container); ok {
-			containers = append(containers, c)
-		}
-	}
-	return
-}
-
-func selectShadows(objects []fyne.CanvasObject) (shadows []*widget.Shadow) {
-	for _, object := range objects {
-		if c, ok := object.(*widget.Shadow); ok {
-			shadows = append(shadows, c)
-		}
-	}
-	return
-}
-
-func selectImages(objects []fyne.CanvasObject) (images []*canvas.Image) {
-	for _, object := range objects {
-		if c, ok := object.(*canvas.Image); ok {
-			images = append(images, c)
-		}
-	}
-	return
 }

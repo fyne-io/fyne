@@ -457,13 +457,13 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
 	test.AssertImageMatches(t, "entry_focus_with_popup_initial.png", c.Capture())
 
-	test.TapCanvas(t, c, fyne.NewPos(20, 20))
+	test.TapCanvas(c, fyne.NewPos(20, 20))
 	test.AssertImageMatches(t, "entry_focus_with_popup_entry_selected.png", c.Capture())
 
 	test.TapSecondaryAt(entry, fyne.NewPos(1, 1))
 	test.AssertImageMatches(t, "entry_focus_with_popup_initial.png", c.Capture())
 
-	test.TapCanvas(t, c, fyne.NewPos(5, 5))
+	test.TapCanvas(c, fyne.NewPos(5, 5))
 	test.AssertImageMatches(t, "entry_focus_with_popup_dismissed.png", c.Capture())
 }
 
@@ -1343,13 +1343,13 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 		// tap on action icon
 		tapPos := fyne.NewPos(140-theme.Padding()*2-theme.IconInlineSize()/2, 10+entry.Size().Height/2)
-		test.TapCanvas(t, c, tapPos)
+		test.TapCanvas(c, tapPos)
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		test.AssertImageMatches(t, "password_entry_revealed.png", c.Capture())
 		assert.Equal(t, entry, c.Focused())
 
 		// tap on action icon
-		test.TapCanvas(t, c, tapPos)
+		test.TapCanvas(c, tapPos)
 		assert.Equal(t, "Hié™שרה", entry.Text)
 		test.AssertImageMatches(t, "password_entry_concealed.png", c.Capture())
 		assert.Equal(t, entry, c.Focused())

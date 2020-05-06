@@ -3,7 +3,6 @@ package app
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
-	"fyne.io/fyne/widget"
 )
 
 // FocusManager represents a standard manager of input focus for a canvas
@@ -17,9 +16,6 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 	driver.WalkVisibleObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 			// disabled widget cannot receive focus
-			return false
-		}
-		if e, ok := obj.(*widget.Entry); ok && e.ReadOnly { // TODO remove once ReadOnly is gone
 			return false
 		}
 

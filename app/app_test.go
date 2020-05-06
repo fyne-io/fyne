@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/test"
 	_ "fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -50,4 +51,12 @@ func TestFyneApp_OpenURL(t *testing.T) {
 	for opened == "" {
 	}
 	assert.Equal(t, urlStr, opened)
+}
+
+func TestFyneApp_SendNotification(t *testing.T) {
+	n := fyne.NewNotification("Test Title", "Some content")
+
+	test.AssertNotificationSent(t, n, func(a fyne.App) {
+		a.SendNotification(n)
+	})
 }
