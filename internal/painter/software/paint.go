@@ -21,7 +21,7 @@ func (*softwarePainter) Paint(c fyne.Canvas) image.Image {
 
 	size := c.Size().Union(c.Content().MinSize())
 	bounds := image.Rect(0, 0, int(float32(size.Width)*c.Scale()), int(float32(size.Height)*c.Scale()))
-	base := image.NewRGBA(bounds)
+	base := image.NewNRGBA(bounds)
 	draw.Draw(base, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
 	paint := func(obj fyne.CanvasObject, pos, _ fyne.Position, _ fyne.Size) bool {

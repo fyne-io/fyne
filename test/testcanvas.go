@@ -167,7 +167,7 @@ func (c *testCanvas) Capture() image.Image {
 	theme := fyne.CurrentApp().Settings().Theme()
 
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
-	img := image.NewRGBA(bounds)
+	img := image.NewNRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
 	return img

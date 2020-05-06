@@ -15,7 +15,7 @@ func TestSVG_ReplaceFillColor(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	red := color.RGBA{0xff, 0x00, 0x00, 0xff}
+	red := color.NRGBA{0xff, 0x00, 0x00, 0xff}
 	rdr := bytes.NewReader(src)
 	s, err := svgFromXML(rdr)
 	if err != nil {

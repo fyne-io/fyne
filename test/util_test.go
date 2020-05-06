@@ -38,10 +38,10 @@ func TestAssertCanvasTappableAt(t *testing.T) {
 
 func TestAssertImageMatches(t *testing.T) {
 	bounds := image.Rect(0, 0, 100, 50)
-	img := image.NewRGBA(bounds)
+	img := image.NewNRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(color.White), image.ZP, draw.Src)
 
-	txtImg := image.NewRGBA(bounds)
+	txtImg := image.NewNRGBA(bounds)
 	opts := truetype.Options{Size: 20, DPI: 96}
 	f, _ := truetype.Parse(theme.TextFont().Content())
 	face := truetype.NewFace(f, &opts)
@@ -79,7 +79,7 @@ func readImage(t *testing.T, path string) image.Image {
 	defer file.Close()
 	raw, _, err := image.Decode(file)
 	require.NoError(t, err)
-	img := image.NewRGBA(raw.Bounds())
+	img := image.NewNRGBA(raw.Bounds())
 	draw.Draw(img, img.Bounds(), raw, image.Pt(0, 0), draw.Src)
 	return img
 }
