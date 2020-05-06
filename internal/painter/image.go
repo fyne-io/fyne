@@ -59,7 +59,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 					checkImageMinSize(img, c, w, h)
 				}
 
-				tex = image.NewRGBA(image.Rect(0, 0, width, height))
+				tex = image.NewNRGBA(image.Rect(0, 0, width, height))
 				scanner := rasterx.NewScannerGV(w, h, tex, tex.Bounds())
 				raster := rasterx.NewDasher(width, height, scanner)
 
@@ -89,7 +89,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 			checkImageMinSize(img, c, origSize.X, origSize.Y)
 		}
 
-		tex := image.NewRGBA(image.Rect(0, 0, pixels.Bounds().Dx(), pixels.Bounds().Dy()))
+		tex := image.NewNRGBA(image.Rect(0, 0, pixels.Bounds().Dx(), pixels.Bounds().Dy()))
 		draw.Draw(tex, tex.Bounds(), pixels, pixels.Bounds().Min, draw.Src)
 
 		return tex
@@ -102,12 +102,12 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 			checkImageMinSize(img, c, origSize.X, origSize.Y)
 		}
 
-		tex := image.NewRGBA(image.Rect(0, 0, origSize.X, origSize.Y))
+		tex := image.NewNRGBA(image.Rect(0, 0, origSize.X, origSize.Y))
 		draw.Draw(tex, tex.Bounds(), img.Image, img.Image.Bounds().Min, draw.Src)
 
 		return tex
 	default:
-		return image.NewRGBA(image.Rect(0, 0, 1, 1))
+		return image.NewNRGBA(image.Rect(0, 0, 1, 1))
 	}
 }
 

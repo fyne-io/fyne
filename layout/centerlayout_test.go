@@ -15,7 +15,7 @@ func TestCenterLayout(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 	min := fyne.NewSize(10, 10)
 
-	obj := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	obj.SetMinSize(min)
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj},
@@ -29,7 +29,7 @@ func TestCenterLayout(t *testing.T) {
 }
 
 func TestCenterLayout_MinSize(t *testing.T) {
-	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
 	container := fyne.NewContainer(text)
@@ -39,9 +39,9 @@ func TestCenterLayout_MinSize(t *testing.T) {
 }
 
 func TestCenterLayout_MinSize_Hidden(t *testing.T) {
-	text1 := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text1 := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	text1.Hide()
-	text2 := canvas.NewText("1\n2", color.RGBA{0, 0xff, 0, 0})
+	text2 := canvas.NewText("1\n2", color.NRGBA{0, 0xff, 0, 0})
 
 	container := fyne.NewContainer(text1, text2)
 	layoutMin := layout.NewCenterLayout().MinSize(container.Objects)
@@ -50,7 +50,7 @@ func TestCenterLayout_MinSize_Hidden(t *testing.T) {
 }
 
 func TestContainerCenterLayoutMinSize(t *testing.T) {
-	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
 	container := fyne.NewContainer(text)

@@ -82,7 +82,7 @@ func makeButtonList(count int) []fyne.CanvasObject {
 }
 
 func makeCell() fyne.CanvasObject {
-	rect := canvas.NewRectangle(&color.RGBA{128, 128, 128, 255})
+	rect := canvas.NewRectangle(&color.NRGBA{128, 128, 128, 255})
 	rect.SetMinSize(fyne.NewSize(30, 30))
 	return rect
 }

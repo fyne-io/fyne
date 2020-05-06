@@ -14,7 +14,7 @@ import (
 func TestMaxLayout(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 
-	obj := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj},
 	}
@@ -26,7 +26,7 @@ func TestMaxLayout(t *testing.T) {
 }
 
 func TestMaxLayoutMinSize(t *testing.T) {
-	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
 	container := fyne.NewContainer(text)
@@ -36,7 +36,7 @@ func TestMaxLayoutMinSize(t *testing.T) {
 }
 
 func TestContainerMaxLayoutMinSize(t *testing.T) {
-	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
 	container := fyne.NewContainer(text)

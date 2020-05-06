@@ -3,19 +3,19 @@ package test
 import (
 	"fmt"
 	"image"
-	"image/draw"
 	"image/png"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,14 +50,15 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 	defer file.Close()
 	raw, _, err := image.Decode(file)
 	require.NoError(t, err)
-	expected := image.NewRGBA(raw.Bounds())
-	draw.Draw(expected, expected.Bounds(), raw, image.Pt(0, 0), draw.Src)
+
+	masterPix := pixelsForImage(t, raw) // let's just compare the pixels directly
+	capturePix := pixelsForImage(t, img)
 
 	var msg string
 	if len(msgAndArgs) > 0 {
 		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
 	}
-	if !assert.Equal(t, expected, img, "%sImage did not match master. Actual image written to file://%s.", msg, failedPath) {
+	if !assert.Equal(t, masterPix, capturePix, "%sImage did not match master. Actual image written to file://%s.", msg, failedPath) {
 		require.NoError(t, writeImage(failedPath, img))
 		return false
 	}
@@ -214,6 +215,20 @@ func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
 	if unfocus {
 		c.Unfocus()
 	}
+}
+
+func pixelsForImage(t *testing.T, img image.Image) []uint8 {
+	var pix []uint8
+	if data, ok := img.(*image.RGBA); ok {
+		pix = data.Pix
+	} else if data, ok := img.(*image.NRGBA); ok {
+		pix = data.Pix
+	}
+	if pix == nil {
+		t.Error("Master image is unsupported type")
+	}
+
+	return pix
 }
 
 func typeChars(chars []rune, keyDown func(rune)) {

@@ -11,7 +11,7 @@ import (
 )
 
 func makeTestImage() image.Image {
-	src := image.NewRGBA(image.Rect(0, 0, 3, 3))
+	src := image.NewNRGBA(image.Rect(0, 0, 3, 3))
 
 	for y := 0; y < 3; y++ {
 		for x := 0; x < 3; x++ {
@@ -27,7 +27,7 @@ func makeTestImage() image.Image {
 }
 
 func TestDrawImage(t *testing.T) {
-	target := image.NewRGBA(image.Rect(0, 0, 50, 50))
+	target := image.NewNRGBA(image.Rect(0, 0, 50, 50))
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.Resize(fyne.NewSize(50, 50))
 
@@ -36,7 +36,7 @@ func TestDrawImage(t *testing.T) {
 }
 
 func TestDrawImage_StretchX(t *testing.T) {
-	target := image.NewRGBA(image.Rect(0, 0, 100, 50))
+	target := image.NewNRGBA(image.Rect(0, 0, 100, 50))
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.Resize(fyne.NewSize(100, 50))
 
@@ -45,7 +45,7 @@ func TestDrawImage_StretchX(t *testing.T) {
 }
 
 func TestDrawImage_StretchY(t *testing.T) {
-	target := image.NewRGBA(image.Rect(0, 0, 50, 100))
+	target := image.NewNRGBA(image.Rect(0, 0, 50, 100))
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.Resize(fyne.NewSize(50, 100))
 
@@ -54,7 +54,7 @@ func TestDrawImage_StretchY(t *testing.T) {
 }
 
 func TestDrawImage_Contain(t *testing.T) {
-	target := image.NewRGBA(image.Rect(0, 0, 50, 50))
+	target := image.NewNRGBA(image.Rect(0, 0, 50, 50))
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.FillMode = canvas.ImageFillContain
 	img.Resize(fyne.NewSize(50, 50))
@@ -64,7 +64,7 @@ func TestDrawImage_Contain(t *testing.T) {
 }
 
 func TestDrawImage_ContainX(t *testing.T) {
-	target := image.NewRGBA(image.Rect(0, 0, 100, 50))
+	target := image.NewNRGBA(image.Rect(0, 0, 100, 50))
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.FillMode = canvas.ImageFillContain
 	img.Resize(fyne.NewSize(100, 50))
@@ -74,7 +74,7 @@ func TestDrawImage_ContainX(t *testing.T) {
 }
 
 func TestDrawImage_ContainY(t *testing.T) {
-	target := image.NewRGBA(image.Rect(0, 0, 50, 100))
+	target := image.NewNRGBA(image.Rect(0, 0, 50, 100))
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.FillMode = canvas.ImageFillContain
 	img.Resize(fyne.NewSize(50, 100))

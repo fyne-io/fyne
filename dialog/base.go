@@ -115,7 +115,7 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 
 func (d *dialog) applyTheme() {
 	r, g, b, _ := theme.BackgroundColor().RGBA()
-	bg := &color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
+	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
 	d.bg.FillColor = bg
 }
 
