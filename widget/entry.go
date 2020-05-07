@@ -648,8 +648,8 @@ func (e *Entry) placeholderProvider() *textProvider {
 	}
 
 	text := newTextProvider(e.PlaceHolder, &placeholderPresenter{e})
-	text.ExtendBaseWidget(&text)
-	e.placeholder = &text
+	text.ExtendBaseWidget(text)
+	e.placeholder = text
 	return e.placeholder
 }
 
@@ -825,8 +825,8 @@ func (e *Entry) textProvider() *textProvider {
 	}
 
 	text := newTextProvider(e.Text, e)
-	text.ExtendBaseWidget(&text)
-	e.text = &text
+	text.ExtendBaseWidget(text)
+	e.text = text
 	return e.text
 }
 

@@ -38,11 +38,11 @@ type textProvider struct {
 }
 
 // newTextProvider returns a new textProvider with the given text and settings from the passed textPresenter.
-func newTextProvider(text string, pres textPresenter) textProvider {
+func newTextProvider(text string, pres textPresenter) *textProvider {
 	if pres == nil {
 		panic("textProvider requires a presenter")
 	}
-	t := textProvider{
+	t := &textProvider{
 		buffer:    []rune(text),
 		presenter: pres,
 	}

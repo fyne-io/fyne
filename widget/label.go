@@ -14,7 +14,7 @@ type Label struct {
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the label text
-	provider  textProvider
+	provider  *textProvider
 }
 
 // NewLabel creates a new label widget with the set text content
@@ -35,6 +35,10 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 
 // Refresh checks if the text content should be updated then refreshes the graphical context
 func (l *Label) Refresh() {
+	if l.provider == nil { // not created until visible
+		return
+	}
+
 	if l.Text != string(l.provider.buffer) {
 		l.provider.SetText(l.Text)
 	}
@@ -46,12 +50,18 @@ func (l *Label) Refresh() {
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (l *Label) Resize(size fyne.Size) {
 	l.BaseWidget.Resize(size)
+	if l.provider == nil { // not created until visible
+		return
+	}
 	l.provider.Resize(size)
 }
 
 // SetText sets the text of the label
 func (l *Label) SetText(text string) {
 	l.Text = text
+	if l.provider == nil { // not created until visible
+		return
+	}
 	l.provider.SetText(text) // calls refresh
 }
 
