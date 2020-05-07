@@ -79,6 +79,7 @@ type window struct {
 	width, height int
 	ignoreResize  bool
 
+	eventLock  sync.RWMutex
 	eventQueue chan func()
 	eventWait  sync.WaitGroup
 	pending    []func()
@@ -418,6 +419,9 @@ func (w *window) closed(viewport *glfw.Window) {
 
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
+	w.eventLock.Lock()
+	defer w.eventLock.Unlock()
+
 	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
 	if w.eventQueue != nil {
 		w.waitForEvents()
@@ -425,7 +429,7 @@ func (w *window) destroy(d *gLDriver) {
 		w.eventQueue = nil
 	}
 
-	if w.master || len(d.windows) == 0 {
+	if w.master || len(d.windowList()) == 0 {
 		d.Quit()
 	}
 }
@@ -1045,6 +1049,9 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 }
 
 func (w *window) runEventQueue() {
+	w.eventLock.Lock()
+	defer w.eventLock.Unlock()
+
 	for fn := range w.eventQueue {
 		fn()
 		w.eventWait.Done()
@@ -1075,7 +1082,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 		ret.canvas = newCanvas()
 		ret.canvas.context = ret
 		ret.SetIcon(ret.icon)
-		d.windows = append(d.windows, ret)
+		d.addWindow(ret)
 	})
 	return ret
 }

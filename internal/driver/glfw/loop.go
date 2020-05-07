@@ -98,7 +98,7 @@ func (d *gLDriver) runGL() {
 			d.tryPollEvents()
 			newWindows := []fyne.Window{}
 			reassign := false
-			for _, win := range d.windows {
+			for _, win := range d.windowList() {
 				w := win.(*window)
 				if w.viewport == nil {
 					continue
@@ -123,7 +123,9 @@ func (d *gLDriver) runGL() {
 				d.repaintWindow(w)
 			}
 			if reassign {
+				d.windowLock.Lock()
 				d.windows = newWindows
+				d.windowLock.Unlock()
 			}
 		}
 	}

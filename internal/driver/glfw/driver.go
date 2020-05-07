@@ -22,9 +22,10 @@ var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
 var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
-	windows []fyne.Window
-	device  *glDevice
-	done    chan interface{}
+	windowLock sync.RWMutex
+	windows    []fyne.Window
+	device     *glDevice
+	done       chan interface{}
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
@@ -67,6 +68,18 @@ func (d *gLDriver) Run() {
 		panic("Run() or ShowAndRun() must be called from main goroutine")
 	}
 	d.runGL()
+}
+
+func (d *gLDriver) addWindow(w *window) {
+	d.windowLock.Lock()
+	defer d.windowLock.Unlock()
+	d.windows = append(d.windows, w)
+}
+
+func (d *gLDriver) windowList() []fyne.Window {
+	d.windowLock.RLock()
+	defer d.windowLock.RUnlock()
+	return d.windows
 }
 
 func goroutineID() int {
