@@ -131,9 +131,8 @@ func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
 
 func (s *testSettings) SetTheme(theme fyne.Theme) {
 	s.propertyLock.Lock()
-	defer s.propertyLock.Unlock()
-
 	s.theme = theme
+	s.propertyLock.Unlock()
 
 	s.apply()
 }
@@ -156,7 +155,11 @@ func (s *testSettings) Scale() float32 {
 }
 
 func (s *testSettings) apply() {
-	for _, listener := range s.changeListeners {
+	s.propertyLock.RLock()
+	listeners := s.changeListeners
+	s.propertyLock.RUnlock()
+
+	for _, listener := range listeners {
 		listener <- s
 	}
 }
