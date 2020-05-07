@@ -152,7 +152,7 @@ func ApplyTheme(t *testing.T, theme fyne.Theme) {
 	require.IsType(t, &testApp{}, fyne.CurrentApp())
 	a := fyne.CurrentApp().(*testApp)
 	a.Settings().SetTheme(theme)
-	for a.appliedTheme != a.Settings().Theme() {
+	for a.lastAppliedTheme() != theme {
 		time.Sleep(1 * time.Millisecond)
 	}
 }

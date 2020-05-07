@@ -3,6 +3,7 @@ package test
 import (
 	"image"
 	"image/draw"
+	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
@@ -37,15 +38,21 @@ type testCanvas struct {
 	onTypedKey  func(*fyne.KeyEvent)
 
 	fyne.ShortcutHandler
-	painter SoftwarePainter
+	painter      SoftwarePainter
+	propertyLock sync.RWMutex
 }
 
 func (c *testCanvas) Content() fyne.CanvasObject {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
 	return c.content
 }
 
 func (c *testCanvas) SetContent(content fyne.CanvasObject) {
+	c.propertyLock.Lock()
 	c.content = content
+	c.propertyLock.Unlock()
 
 	if content == nil {
 		return
@@ -62,6 +69,9 @@ func (c *testCanvas) Overlay() fyne.CanvasObject {
 }
 
 func (c *testCanvas) Overlays() fyne.OverlayStack {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
 	return c.overlays
 }
 
@@ -74,6 +84,9 @@ func (c *testCanvas) Refresh(fyne.CanvasObject) {
 }
 
 func (c *testCanvas) Focus(obj fyne.Focusable) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
 	if obj == c.focused {
 		return
 	}
@@ -90,6 +103,9 @@ func (c *testCanvas) Focus(obj fyne.Focusable) {
 }
 
 func (c *testCanvas) Unfocus() {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
 	if c.focused != nil {
 		c.focused.FocusLost()
 	}
@@ -97,37 +113,55 @@ func (c *testCanvas) Unfocus() {
 }
 
 func (c *testCanvas) Focused() fyne.Focusable {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
 	return c.focused
 }
 
 func (c *testCanvas) Size() fyne.Size {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
 	return c.size
 }
 
 func (c *testCanvas) Resize(size fyne.Size) {
+	c.propertyLock.Lock()
+	content := c.content
+	overlays := c.overlays
+	padded := c.padded
 	c.size = size
-	if c.content == nil {
+	c.propertyLock.Unlock()
+
+	if content == nil {
 		return
 	}
 
-	for _, overlay := range c.overlays.List() {
+	for _, overlay := range overlays.List() {
 		overlay.Resize(size)
 	}
 
-	if c.padded {
+	if padded {
 		theme := fyne.CurrentApp().Settings().Theme()
-		c.content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-		c.content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+		content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	} else {
-		c.content.Resize(size)
+		content.Resize(size)
 	}
 }
 
 func (c *testCanvas) Scale() float32 {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
 	return c.scale
 }
 
 func (c *testCanvas) SetScale(scale float32) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
 	c.scale = scale
 }
 
@@ -136,27 +170,45 @@ func (c *testCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 }
 
 func (c *testCanvas) OnTypedRune() func(rune) {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
 	return c.onTypedRune
 }
 
 func (c *testCanvas) SetOnTypedRune(handler func(rune)) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
 	c.onTypedRune = handler
 }
 
 func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
 	return c.onTypedKey
 }
 
 func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
 	c.onTypedKey = handler
 }
 
 func (c *testCanvas) Padded() bool {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
 	return c.padded
 }
 
 func (c *testCanvas) SetPadded(padded bool) {
+	c.propertyLock.Lock()
 	c.padded = padded
+	c.propertyLock.Unlock()
+
 	c.Resize(c.Size())
 }
 
