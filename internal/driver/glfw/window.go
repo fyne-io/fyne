@@ -419,14 +419,18 @@ func (w *window) closed(viewport *glfw.Window) {
 
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
-	w.eventLock.Lock()
-	defer w.eventLock.Unlock()
+	w.eventLock.RLock()
+	queue := w.eventQueue
+	w.eventLock.RUnlock()
 
 	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
-	if w.eventQueue != nil {
+	if queue != nil {
 		w.waitForEvents()
+
+		w.eventLock.Lock()
 		close(w.eventQueue)
 		w.eventQueue = nil
+		w.eventLock.Unlock()
 	}
 
 	if w.master || len(d.windowList()) == 0 {
@@ -1050,9 +1054,10 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 
 func (w *window) runEventQueue() {
 	w.eventLock.Lock()
-	defer w.eventLock.Unlock()
+	queue := w.eventQueue
+	w.eventLock.Unlock()
 
-	for fn := range w.eventQueue {
+	for fn := range queue {
 		fn()
 		w.eventWait.Done()
 	}
