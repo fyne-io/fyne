@@ -26,7 +26,6 @@ func AssertNotificationSent(t *testing.T, n *fyne.Notification, f func()) {
 		return
 	}
 
-	assert.NotNil(t, a.lastNotification)
 	assert.Equal(t, n.Title, a.lastNotification.Title)
 	assert.Equal(t, n.Content, a.lastNotification.Content)
 }

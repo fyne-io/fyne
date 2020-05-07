@@ -31,5 +31,5 @@ func TestAssertNotificationSent_NotSent(t *testing.T) {
 	test.AssertNotificationSent(tt, &fyne.Notification{}, func() {
 		// don't send anything
 	})
-	assert.True(t, tt.Failed(), "A notification was sent incorrectly")
+	assert.True(t, tt.Failed(), "notification assert should fail if no notification was sent")
 }
