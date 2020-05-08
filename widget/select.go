@@ -23,6 +23,9 @@ type selectRenderer struct {
 // MinSize calculates the minimum size of a select button.
 // This is based on the selected text, the drop icon and a standard amount of padding added.
 func (s *selectRenderer) MinSize() fyne.Size {
+	s.combo.propertyLock.RLock()
+	defer s.combo.propertyLock.RUnlock()
+
 	min := fyne.MeasureText(s.combo.PlaceHolder, s.label.TextSize, s.label.TextStyle)
 
 	for _, option := range s.combo.Options {
@@ -41,6 +44,10 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 
 	offset := fyne.NewSize(theme.IconInlineSize(), 0)
 	labelSize := inner.Subtract(offset)
+
+	s.combo.propertyLock.RLock()
+	defer s.combo.propertyLock.RUnlock()
+
 	s.label.Resize(labelSize)
 	s.label.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()))
 
@@ -58,6 +65,7 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 }
 
 func (s *selectRenderer) Refresh() {
+	s.combo.propertyLock.Lock()
 	s.label.Color = theme.TextColor()
 	s.label.TextSize = theme.TextSize()
 
@@ -76,6 +84,7 @@ func (s *selectRenderer) Refresh() {
 	} else {
 		s.icon.Resource = theme.MenuDropDownIcon()
 	}
+	s.combo.propertyLock.Unlock()
 
 	s.Layout(s.combo.Size())
 	canvas.Refresh(s.combo.super())
