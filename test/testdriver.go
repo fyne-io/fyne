@@ -26,6 +26,7 @@ type testDriver struct {
 // Declare conformity with Driver
 var _ fyne.Driver = (*testDriver)(nil)
 
+// CanvasForObject satisfies the fyne.Driver interface.
 func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	d.windowsMutex.RLock()
 	defer d.windowsMutex.RUnlock()
@@ -33,6 +34,7 @@ func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	return d.windows[len(d.windows)-1].Canvas()
 }
 
+// AbsolutePositionForObject satisfies the fyne.Driver interface.
 func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	c := d.CanvasForObject(co)
 	if c == nil {
@@ -43,6 +45,7 @@ func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Positi
 	return driver.AbsolutePositionForObject(co, tc.objectTrees())
 }
 
+// CreateWindow satisfies the fyne.Driver interface.
 func (d *testDriver) CreateWindow(string) fyne.Window {
 	canvas := NewCanvas().(*testCanvas)
 	canvas.painter = d.painter
@@ -56,6 +59,7 @@ func (d *testDriver) CreateWindow(string) fyne.Window {
 	return window
 }
 
+// AllWindows satisfies the fyne.Driver interface.
 func (d *testDriver) AllWindows() []fyne.Window {
 	d.windowsMutex.RLock()
 	defer d.windowsMutex.RUnlock()
@@ -80,6 +84,7 @@ func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyl
 	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
 }
 
+// Device satisfies the fyne.Driver interface.
 func (d *testDriver) Device() fyne.Device {
 	if d.device == nil {
 		d.device = &device{}
@@ -87,10 +92,12 @@ func (d *testDriver) Device() fyne.Device {
 	return d.device
 }
 
+// Run satisfies the fyne.Driver interface.
 func (d *testDriver) Run() {
 	// no-op
 }
 
+// Quit satisfies the fyne.Driver interface.
 func (d *testDriver) Quit() {
 	// no-op
 }
