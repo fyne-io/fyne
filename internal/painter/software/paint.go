@@ -24,7 +24,7 @@ func NewPainter() test.SoftwarePainter {
 func (*painter) Paint(c fyne.Canvas) image.Image {
 	theme := fyne.CurrentApp().Settings().Theme()
 
-	size := c.Size().Union(c.Content().MinSize())
+	size := c.Size().Max(c.Content().MinSize())
 	bounds := image.Rect(0, 0, int(float32(size.Width)*c.Scale()), int(float32(size.Height)*c.Scale()))
 	base := image.NewNRGBA(bounds)
 	draw.Draw(base, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)

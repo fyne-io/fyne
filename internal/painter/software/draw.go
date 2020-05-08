@@ -7,9 +7,9 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/cache"
 	pnt "fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
@@ -103,5 +103,5 @@ func drawWidget(c fyne.Canvas, wid fyne.Widget, pos fyne.Position, frame fyne.Si
 	scaledHeight := internal.ScaleInt(c, wid.Size().Height)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 	bounds := image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight)
-	draw.Draw(base, bounds, image.NewUniform(widget.Renderer(wid).BackgroundColor()), image.ZP, draw.Over)
+	draw.Draw(base, bounds, image.NewUniform(cache.Renderer(wid).BackgroundColor()), image.ZP, draw.Over)
 }
