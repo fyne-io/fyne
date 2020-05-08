@@ -10,13 +10,18 @@ import (
 	"fyne.io/fyne/test"
 )
 
-type softwarePainter struct {
+type painter struct {
+}
+
+// NewPainter creates a new software painter that can paint a canvas in memory
+func NewPainter() test.SoftwarePainter {
+	return &painter{}
 }
 
 // Paint is the main entry point for a simple software painter.
 // The canvas to be drawn is passed in as a parameter and the return is an
 // image containing the result of rendering.
-func (*softwarePainter) Paint(c fyne.Canvas) image.Image {
+func (*painter) Paint(c fyne.Canvas) image.Image {
 	theme := fyne.CurrentApp().Settings().Theme()
 
 	size := c.Size().Union(c.Content().MinSize())
@@ -47,9 +52,4 @@ func (*softwarePainter) Paint(c fyne.Canvas) image.Image {
 	}
 
 	return base
-}
-
-// NewPainter creates a new software painter that can paint a canvas in memory
-func NewPainter() test.SoftwarePainter {
-	return &softwarePainter{}
 }
