@@ -70,7 +70,7 @@ func (s *Shadow) MinSize() fyne.Size {
 // Refresh triggers a redraw of the shadow.
 // Implements: fyne.Widget
 func (s *Shadow) Refresh() {
-	s.refresh(s)
+	RefreshWidget(s)
 }
 
 // Resize changes the size of the shadow.

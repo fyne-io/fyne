@@ -61,7 +61,7 @@ func (m *Menu) MinSize() fyne.Size {
 // Refresh triggers a redraw of the menu.
 // Implements: fyne.Widget
 func (m *Menu) Refresh() {
-	m.refresh(m)
+	RefreshWidget(m)
 }
 
 // Resize has no effect because menus are always displayed with their minimal size.

@@ -66,7 +66,7 @@ func (o *OverlayContainer) MouseOut() {
 // Refresh triggers a redraw of the overlay container.
 // Implements: fyne.Widget
 func (o *OverlayContainer) Refresh() {
-	o.refresh(o)
+	RefreshWidget(o)
 }
 
 // Resize changes the size of the overlay container.

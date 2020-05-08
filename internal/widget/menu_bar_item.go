@@ -78,7 +78,7 @@ func (i *MenuBarItem) MouseOut() {
 // Refresh triggers a redraw of the menu bar item.
 // Implements: fyne.Widget
 func (i *MenuBarItem) Refresh() {
-	i.refresh(i)
+	RefreshWidget(i)
 }
 
 // Resize changes the size of the menu bar item.

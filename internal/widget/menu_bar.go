@@ -60,7 +60,7 @@ func (b *MenuBar) MinSize() fyne.Size {
 // Refresh triggers a redraw of the menu bar.
 // Implements: fyne.Widget
 func (b *MenuBar) Refresh() {
-	b.refresh(b)
+	RefreshWidget(b)
 }
 
 // Resize resizes the menu bar.
@@ -170,7 +170,7 @@ func (bg *menuBarBackground) MouseMoved(*desktop.MouseEvent) {
 }
 
 func (bg *menuBarBackground) Refresh() {
-	bg.refresh(bg)
+	RefreshWidget(bg)
 }
 
 func (bg *menuBarBackground) Resize(size fyne.Size) {

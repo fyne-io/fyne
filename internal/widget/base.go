@@ -74,7 +74,8 @@ func MinSizeOf(w fyne.Widget) fyne.Size {
 	return r.MinSize()
 }
 
-func (b *Base) refresh(w fyne.Widget) {
+// RefreshWidget is a helper method to refresh a widget.
+func RefreshWidget(w fyne.Widget) {
 	r := cache.Renderer(w)
 	if r == nil {
 		return
