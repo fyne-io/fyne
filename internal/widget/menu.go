@@ -55,7 +55,7 @@ func (m *Menu) Hide() {
 // MinSize returns the minimal size of the menu.
 // Implements: fyne.Widget
 func (m *Menu) MinSize() fyne.Size {
-	return m.minSize(m)
+	return MinSizeOf(m)
 }
 
 // Refresh triggers a redraw of the menu.

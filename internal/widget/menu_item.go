@@ -62,7 +62,7 @@ func (i *MenuItem) Hide() {
 // MinSize returns the minimal size of the menu item.
 // Implements: fyne.Widget
 func (i *MenuItem) MinSize() fyne.Size {
-	return i.minSize(i)
+	return MinSizeOf(i)
 }
 
 // MouseIn changes the item to be hovered and shows the submenu if the item has one.

@@ -54,7 +54,7 @@ func (b *MenuBar) Hide() {
 // MinSize returns the minimal size of the menu bar.
 // Implements: fyne.Widget
 func (b *MenuBar) MinSize() fyne.Size {
-	return b.minSize(b)
+	return MinSizeOf(b)
 }
 
 // Refresh triggers a redraw of the menu bar.
@@ -157,7 +157,7 @@ func (bg *menuBarBackground) Hide() {
 }
 
 func (bg *menuBarBackground) MinSize() fyne.Size {
-	return bg.minSize(bg)
+	return MinSizeOf(bg)
 }
 
 func (bg *menuBarBackground) MouseIn(*desktop.MouseEvent) {

@@ -64,7 +64,7 @@ func (s *Shadow) Hide() {
 // MinSize returns the minimal size of the shadow.
 // Implements: fyne.Widget
 func (s *Shadow) MinSize() fyne.Size {
-	return s.minSize(s)
+	return MinSizeOf(s)
 }
 
 // Refresh triggers a redraw of the shadow.

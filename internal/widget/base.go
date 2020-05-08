@@ -64,7 +64,8 @@ func HideWidget(b *Base, w fyne.Widget) {
 	canvas.Refresh(w)
 }
 
-func (b *Base) minSize(w fyne.Widget) fyne.Size {
+// MinSizeOf is a helper method to get the minSize of a widget.
+func MinSizeOf(w fyne.Widget) fyne.Size {
 	r := cache.Renderer(w)
 	if r == nil {
 		return fyne.NewSize(0, 0)

@@ -45,7 +45,7 @@ func (o *OverlayContainer) Hide() {
 // This is the same as the size of the canvas.
 // Implements: fyne.Widget
 func (o *OverlayContainer) MinSize() fyne.Size {
-	return o.minSize(o)
+	return MinSizeOf(o)
 }
 
 // MouseIn catches mouse-in events not handled by the container’s content. It does nothing.
