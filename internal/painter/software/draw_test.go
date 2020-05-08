@@ -31,7 +31,7 @@ func TestDrawImage(t *testing.T) {
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.Resize(fyne.NewSize(50, 50))
 
-	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 50), target)
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), target)
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
@@ -40,7 +40,7 @@ func TestDrawImage_StretchX(t *testing.T) {
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.Resize(fyne.NewSize(100, 50))
 
-	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(100, 50), target)
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), target)
 	test.AssertImageMatches(t, "draw_image_stretchx.png", target)
 }
 
@@ -49,7 +49,7 @@ func TestDrawImage_StretchY(t *testing.T) {
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.Resize(fyne.NewSize(50, 100))
 
-	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 100), target)
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), target)
 	test.AssertImageMatches(t, "draw_image_stretchy.png", target)
 }
 
@@ -59,7 +59,7 @@ func TestDrawImage_Contain(t *testing.T) {
 	img.FillMode = canvas.ImageFillContain
 	img.Resize(fyne.NewSize(50, 50))
 
-	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 50), target)
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), target)
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
@@ -69,7 +69,7 @@ func TestDrawImage_ContainX(t *testing.T) {
 	img.FillMode = canvas.ImageFillContain
 	img.Resize(fyne.NewSize(100, 50))
 
-	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(100, 50), target)
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), target)
 	test.AssertImageMatches(t, "draw_image_containx.png", target)
 }
 
@@ -79,6 +79,6 @@ func TestDrawImage_ContainY(t *testing.T) {
 	img.FillMode = canvas.ImageFillContain
 	img.Resize(fyne.NewSize(50, 100))
 
-	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 100), target)
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), target)
 	test.AssertImageMatches(t, "draw_image_containy.png", target)
 }

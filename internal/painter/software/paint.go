@@ -32,15 +32,15 @@ func (*painter) Paint(c fyne.Canvas) image.Image {
 	paint := func(obj fyne.CanvasObject, pos, _ fyne.Position, _ fyne.Size) bool {
 		switch o := obj.(type) {
 		case *canvas.Image:
-			drawImage(c, o, pos, size, base)
+			drawImage(c, o, pos, base)
 		case *canvas.Text:
-			drawText(c, o, pos, size, base)
+			drawText(c, o, pos, base)
 		case gradient:
-			drawGradient(c, o, pos, size, base)
+			drawGradient(c, o, pos, base)
 		case *canvas.Rectangle:
-			drawRectangle(c, o, pos, size, base)
+			drawRectangle(c, o, pos, base)
 		case fyne.Widget:
-			drawWidget(c, o, pos, size, base)
+			drawWidget(c, o, pos, base)
 		}
 
 		return false

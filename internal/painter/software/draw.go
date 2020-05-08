@@ -22,7 +22,7 @@ type gradient interface {
 	Size() fyne.Size
 }
 
-func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
+func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGBA) {
 	bounds := g.Size()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
@@ -30,7 +30,7 @@ func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, frame fyne.Size,
 	drawTex(c, pos, width, height, base, tex)
 }
 
-func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
+func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.NRGBA) {
 	bounds := img.Size()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
@@ -65,7 +65,7 @@ func drawTex(c fyne.Canvas, pos fyne.Position, width int, height int, base *imag
 	draw.Draw(base, outBounds, tex, image.ZP, draw.Over)
 }
 
-func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
+func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA) {
 	bounds := text.MinSize()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
@@ -90,7 +90,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, frame fyne.Si
 	draw.Draw(base, imgBounds, txtImg, image.ZP, draw.Over)
 }
 
-func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
+func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA) {
 	scaledWidth := internal.ScaleInt(c, rect.Size().Width)
 	scaledHeight := internal.ScaleInt(c, rect.Size().Height)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
@@ -98,7 +98,7 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, fra
 	draw.Draw(base, bounds, image.NewUniform(rect.FillColor), image.ZP, draw.Over)
 }
 
-func drawWidget(c fyne.Canvas, wid fyne.Widget, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
+func drawWidget(c fyne.Canvas, wid fyne.Widget, pos fyne.Position, base *image.NRGBA) {
 	scaledWidth := internal.ScaleInt(c, wid.Size().Width)
 	scaledHeight := internal.ScaleInt(c, wid.Size().Height)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
