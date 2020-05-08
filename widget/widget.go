@@ -19,6 +19,18 @@ type BaseWidget struct {
 	propertyLock sync.RWMutex
 }
 
+// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
+func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
+	w.propertyLock.Lock()
+	defer w.propertyLock.Unlock()
+
+	if w.impl != nil {
+		return
+	}
+
+	w.impl = wid
+}
+
 // ReadFields provides a guaranteed thread safe way to access widget fields.
 func (w *BaseWidget) ReadFields(f func()) {
 	w.propertyLock.RLock()
@@ -37,18 +49,6 @@ func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
 	w.Refresh()
 }
 
-// ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
-func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
-	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
-
-	if w.impl != nil {
-		return
-	}
-
-	w.impl = wid
-}
-
 // Size gets the current size of this widget.
 func (w *BaseWidget) Size() fyne.Size {
 	w.propertyLock.RLock()
@@ -60,11 +60,16 @@ func (w *BaseWidget) Size() fyne.Size {
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Resize(size fyne.Size) {
+	var baseSize fyne.Size
+	w.ReadFields(func() {
+		baseSize = w.size
+	})
+	if baseSize == size {
+		return
+	}
+
 	var impl fyne.Widget
 	w.ReadFields(func() {
-		if w.size == size {
-			return
-		}
 		w.size = size
 
 		impl = w.impl
@@ -117,23 +122,23 @@ func (w *BaseWidget) Visible() bool {
 
 // Show this widget so it becomes visible
 func (w *BaseWidget) Show() {
-	w.SetFieldsAndRefresh(func() {
-		if !w.Hidden {
-			return
-		}
+	if w.Visible() {
+		return
+	}
 
+	w.SetFieldsAndRefresh(func() {
 		w.Hidden = false
 	})
 }
 
 // Hide this widget so it is no longer visible
 func (w *BaseWidget) Hide() {
+	if !w.Visible() {
+		return
+	}
+
 	var impl fyne.Widget
 	w.ReadFields(func() {
-		if w.Hidden {
-			return
-		}
-
 		w.Hidden = true
 		impl = w.impl
 	})
