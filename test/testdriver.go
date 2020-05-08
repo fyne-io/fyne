@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter/software"
 
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
@@ -76,7 +77,11 @@ func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 // CreateWindow satisfies the fyne.Driver interface.
 func (d *testDriver) CreateWindow(string) fyne.Window {
 	canvas := NewCanvas().(*testCanvas)
-	canvas.painter = d.painter
+	if d.painter != nil {
+		canvas.painter = d.painter
+	} else {
+		canvas.painter = software.NewPainter()
+	}
 
 	window := &testWindow{canvas: canvas, driver: d}
 	window.clipboard = &testClipboard{}

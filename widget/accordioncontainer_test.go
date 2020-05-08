@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -185,7 +184,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 				accordion.Open(o)
 			}
 
-			window := test.NewWindowWithPainter(accordion, software.NewPainter())
+			window := test.NewWindow(accordion)
 			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertImageMatches(t, "accordion_layout_"+name+".png", window.Canvas().Capture())
