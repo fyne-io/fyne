@@ -116,7 +116,7 @@ func (w *testWindow) SetFixedSize(fixed bool) {
 }
 
 // SetIcon satisfies the fyne.Window interface.
-func (w *testWindow) SetIcon(icon fyne.Resource) {
+func (w *testWindow) SetIcon(_ fyne.Resource) {
 	// no-op
 }
 
