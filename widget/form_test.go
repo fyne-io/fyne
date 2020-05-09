@@ -72,7 +72,8 @@ func TestForm_AddRemoveButton(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for submit button tap")
 		}
 	}()
-	assert.Equal(t, 1, scount)
+	assert.Equal(t, 1, scount) // because we tapped submit
+
 	go test.Tap(form.cancelButton)
 	func() {
 		select {
@@ -81,7 +82,7 @@ func TestForm_AddRemoveButton(t *testing.T) {
 			assert.Fail(t, "Timed out waiting for cancel button tap")
 		}
 	}()
-	assert.Equal(t, 1, ccount)
+	assert.Equal(t, 1, ccount) // because we tapped cancel
 
 	form.OnSubmit(func() {
 		sscount++
@@ -92,8 +93,22 @@ func TestForm_AddRemoveButton(t *testing.T) {
 		select {
 		case <-tapped:
 		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Timed out waiting for cancel button tap")
+			assert.Fail(t, "Timed out waiting for updated submit button tap")
 		}
 	}()
-	assert.Equal(t, 11, sscount)
+	assert.Equal(t, 11, sscount) // because the new func adds 1 to 10 to get 11
+
+	form.OnCancel(func() {
+		sscount = sscount - 6
+		tapped <- true
+	})
+	go test.Tap(form.cancelButton)
+	func() {
+		select {
+		case <-tapped:
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Timed out waiting for updated cancel button tap")
+		}
+	}()
+	assert.Equal(t, 5, sscount) // because the new cancel subtracts 6 from 11 to get 5
 }
