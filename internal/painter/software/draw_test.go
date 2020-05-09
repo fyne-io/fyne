@@ -35,6 +35,26 @@ func TestDrawImage(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
+func TestDrawImageNearestFilter(t *testing.T) {
+	target := image.NewNRGBA(image.Rect(0, 0, 50, 50))
+	img := canvas.NewImageFromImage(makeTestImage())
+	img.ScalingFilter = canvas.NearestFilter
+	img.Resize(fyne.NewSize(50, 50))
+
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 50), target)
+	test.AssertImageMatches(t, "draw_image_nearest_default.png", target)
+}
+
+func TestDrawImageLinearFilter(t *testing.T) {
+	target := image.NewNRGBA(image.Rect(0, 0, 50, 50))
+	img := canvas.NewImageFromImage(makeTestImage())
+	img.ScalingFilter = canvas.LinearFilter // default value
+	img.Resize(fyne.NewSize(50, 50))
+
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 50), target)
+	test.AssertImageMatches(t, "draw_image_linear_default.png", target)
+}
+
 func TestDrawImage_StretchX(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 100, 50))
 	img := canvas.NewImageFromImage(makeTestImage())
