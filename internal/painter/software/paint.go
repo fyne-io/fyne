@@ -21,24 +21,31 @@ func (*softwarePainter) Paint(c fyne.Canvas) image.Image {
 
 	size := c.Size().Union(c.Content().MinSize())
 	bounds := image.Rect(0, 0, int(float32(size.Width)*c.Scale()), int(float32(size.Height)*c.Scale()))
-	base := image.NewRGBA(bounds)
+	base := image.NewNRGBA(bounds)
 	draw.Draw(base, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
 	paint := func(obj fyne.CanvasObject, pos, _ fyne.Position, _ fyne.Size) bool {
-		if img, ok := obj.(*canvas.Image); ok {
-			drawImage(c, img, pos, size, base)
-		} else if text, ok := obj.(*canvas.Text); ok {
-			drawText(c, text, pos, size, base)
-		} else if rect, ok := obj.(*canvas.Rectangle); ok {
-			drawRectangle(c, rect, pos, size, base)
-		} else if wid, ok := obj.(fyne.Widget); ok {
-			drawWidget(c, wid, pos, size, base)
+		switch o := obj.(type) {
+		case *canvas.Image:
+			drawImage(c, o, pos, size, base)
+		case *canvas.Text:
+			drawText(c, o, pos, size, base)
+		case gradient:
+			drawGradient(c, o, pos, size, base)
+		case *canvas.Rectangle:
+			drawRectangle(c, o, pos, size, base)
+		case fyne.Widget:
+			drawWidget(c, o, pos, size, base)
 		}
 
 		return false
 	}
 
 	driver.WalkVisibleObjectTree(c.Content(), paint, nil)
+	for _, o := range c.Overlays().List() {
+		driver.WalkVisibleObjectTree(o, paint, nil)
+	}
+
 	return base
 }
 

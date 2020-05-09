@@ -1,15 +1,17 @@
-package canvas
+package canvas_test
 
 import (
 	"image"
 	"testing"
+
+	"fyne.io/fyne/canvas"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRasterFromImage(t *testing.T) {
 	source := image.Rect(2, 2, 4, 4)
-	dest := NewRasterFromImage(source)
+	dest := canvas.NewRasterFromImage(source)
 	img := dest.Generator(6, 6)
 
 	// image.Rect is a 16 bit colour model

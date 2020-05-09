@@ -30,7 +30,7 @@ import (
 	"path/filepath"
 )
 
-var outfile = flag.String("o", "", "result will be written file")
+var outfile = flag.String("o", "dex.go", "result will be written file")
 
 var tmpdir string
 
@@ -58,7 +58,7 @@ func gendex() error {
 	if err := os.MkdirAll(tmpdir+"/work/org/golang/app", 0775); err != nil {
 		return err
 	}
-	javaFiles, err := filepath.Glob("../../../../vendor/golang.org/x/mobile/app/*.java")
+	javaFiles, err := filepath.Glob("../../../../vendor/github.com/fyne-io/mobile/app/*.java")
 	if err != nil {
 		return err
 	}

@@ -66,7 +66,8 @@ func Containsf(t TestingT, s interface{}, contains interface{}, msg string, args
 	t.FailNow()
 }
 
-// DirExists checks whether a directory exists in the given path. It also fails if the path is a file rather a directory or there is an error checking whether it exists.
+// DirExists checks whether a directory exists in the given path. It also fails
+// if the path is a file rather a directory or there is an error checking whether it exists.
 func DirExists(t TestingT, path string, msgAndArgs ...interface{}) {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
@@ -77,7 +78,8 @@ func DirExists(t TestingT, path string, msgAndArgs ...interface{}) {
 	t.FailNow()
 }
 
-// DirExistsf checks whether a directory exists in the given path. It also fails if the path is a file rather a directory or there is an error checking whether it exists.
+// DirExistsf checks whether a directory exists in the given path. It also fails
+// if the path is a file rather a directory or there is an error checking whether it exists.
 func DirExistsf(t TestingT, path string, msg string, args ...interface{}) {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
@@ -270,6 +272,34 @@ func Errorf(t TestingT, err error, msg string, args ...interface{}) {
 	t.FailNow()
 }
 
+// Eventually asserts that given condition will be met in waitFor time,
+// periodically checking target function each tick.
+//
+//    assert.Eventually(t, func() bool { return true; }, time.Second, 10*time.Millisecond)
+func Eventually(t TestingT, condition func() bool, waitFor time.Duration, tick time.Duration, msgAndArgs ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.Eventually(t, condition, waitFor, tick, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// Eventuallyf asserts that given condition will be met in waitFor time,
+// periodically checking target function each tick.
+//
+//    assert.Eventuallyf(t, func() bool { return true; }, time.Second, 10*time.Millisecond, "error message %s", "formatted")
+func Eventuallyf(t TestingT, condition func() bool, waitFor time.Duration, tick time.Duration, msg string, args ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.Eventuallyf(t, condition, waitFor, tick, msg, args...) {
+		return
+	}
+	t.FailNow()
+}
+
 // Exactly asserts that two objects are equal in value and type.
 //
 //    assert.Exactly(t, int32(123), int64(123))
@@ -366,7 +396,8 @@ func Falsef(t TestingT, value bool, msg string, args ...interface{}) {
 	t.FailNow()
 }
 
-// FileExists checks whether a file exists in the given path. It also fails if the path points to a directory or there is an error when trying to check the file.
+// FileExists checks whether a file exists in the given path. It also fails if
+// the path points to a directory or there is an error when trying to check the file.
 func FileExists(t TestingT, path string, msgAndArgs ...interface{}) {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
@@ -377,7 +408,8 @@ func FileExists(t TestingT, path string, msgAndArgs ...interface{}) {
 	t.FailNow()
 }
 
-// FileExistsf checks whether a file exists in the given path. It also fails if the path points to a directory or there is an error when trying to check the file.
+// FileExistsf checks whether a file exists in the given path. It also fails if
+// the path points to a directory or there is an error when trying to check the file.
 func FileExistsf(t TestingT, path string, msg string, args ...interface{}) {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
@@ -403,7 +435,7 @@ func Greater(t TestingT, e1 interface{}, e2 interface{}, msgAndArgs ...interface
 	t.FailNow()
 }
 
-// GreaterOrEqual asserts that the first element in greater or equal than the second
+// GreaterOrEqual asserts that the first element is greater than or equal to the second
 //
 //    assert.GreaterOrEqual(t, 2, 1)
 //    assert.GreaterOrEqual(t, 2, 2)
@@ -419,7 +451,7 @@ func GreaterOrEqual(t TestingT, e1 interface{}, e2 interface{}, msgAndArgs ...in
 	t.FailNow()
 }
 
-// GreaterOrEqualf asserts that the first element in greater or equal than the second
+// GreaterOrEqualf asserts that the first element is greater than or equal to the second
 //
 //    assert.GreaterOrEqualf(t, 2, 1, "error message %s", "formatted")
 //    assert.GreaterOrEqualf(t, 2, 2, "error message %s", "formatted")
@@ -632,7 +664,7 @@ func Implementsf(t TestingT, interfaceObject interface{}, object interface{}, ms
 
 // InDelta asserts that the two numerals are within delta of each other.
 //
-// 	 assert.InDelta(t, math.Pi, (22 / 7.0), 0.01)
+// 	 assert.InDelta(t, math.Pi, 22/7.0, 0.01)
 func InDelta(t TestingT, expected interface{}, actual interface{}, delta float64, msgAndArgs ...interface{}) {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
@@ -689,7 +721,7 @@ func InDeltaSlicef(t TestingT, expected interface{}, actual interface{}, delta f
 
 // InDeltaf asserts that the two numerals are within delta of each other.
 //
-// 	 assert.InDeltaf(t, math.Pi, (22 / 7.0, "error message %s", "formatted"), 0.01)
+// 	 assert.InDeltaf(t, math.Pi, 22/7.0, 0.01, "error message %s", "formatted")
 func InDeltaf(t TestingT, expected interface{}, actual interface{}, delta float64, msg string, args ...interface{}) {
 	if h, ok := t.(tHelper); ok {
 		h.Helper()
@@ -820,7 +852,7 @@ func Lenf(t TestingT, object interface{}, length int, msg string, args ...interf
 	t.FailNow()
 }
 
-// Less asserts that the first element in less than the second
+// Less asserts that the first element is less than the second
 //
 //    assert.Less(t, 1, 2)
 //    assert.Less(t, float64(1), float64(2))
@@ -835,7 +867,7 @@ func Less(t TestingT, e1 interface{}, e2 interface{}, msgAndArgs ...interface{})
 	t.FailNow()
 }
 
-// LessOrEqual asserts that the first element in greater or equal than the second
+// LessOrEqual asserts that the first element is less than or equal to the second
 //
 //    assert.LessOrEqual(t, 1, 2)
 //    assert.LessOrEqual(t, 2, 2)
@@ -851,7 +883,7 @@ func LessOrEqual(t TestingT, e1 interface{}, e2 interface{}, msgAndArgs ...inter
 	t.FailNow()
 }
 
-// LessOrEqualf asserts that the first element in greater or equal than the second
+// LessOrEqualf asserts that the first element is less than or equal to the second
 //
 //    assert.LessOrEqualf(t, 1, 2, "error message %s", "formatted")
 //    assert.LessOrEqualf(t, 2, 2, "error message %s", "formatted")
@@ -867,7 +899,7 @@ func LessOrEqualf(t TestingT, e1 interface{}, e2 interface{}, msg string, args .
 	t.FailNow()
 }
 
-// Lessf asserts that the first element in less than the second
+// Lessf asserts that the first element is less than the second
 //
 //    assert.Lessf(t, 1, 2, "error message %s", "formatted")
 //    assert.Lessf(t, float64(1, "error message %s", "formatted"), float64(2))
@@ -877,6 +909,34 @@ func Lessf(t TestingT, e1 interface{}, e2 interface{}, msg string, args ...inter
 		h.Helper()
 	}
 	if assert.Lessf(t, e1, e2, msg, args...) {
+		return
+	}
+	t.FailNow()
+}
+
+// Never asserts that the given condition doesn't satisfy in waitFor time,
+// periodically checking the target function each tick.
+//
+//    assert.Never(t, func() bool { return false; }, time.Second, 10*time.Millisecond)
+func Never(t TestingT, condition func() bool, waitFor time.Duration, tick time.Duration, msgAndArgs ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.Never(t, condition, waitFor, tick, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// Neverf asserts that the given condition doesn't satisfy in waitFor time,
+// periodically checking the target function each tick.
+//
+//    assert.Neverf(t, func() bool { return false; }, time.Second, 10*time.Millisecond, "error message %s", "formatted")
+func Neverf(t TestingT, condition func() bool, waitFor time.Duration, tick time.Duration, msg string, args ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.Neverf(t, condition, waitFor, tick, msg, args...) {
 		return
 	}
 	t.FailNow()
@@ -903,6 +963,30 @@ func Nilf(t TestingT, object interface{}, msg string, args ...interface{}) {
 		h.Helper()
 	}
 	if assert.Nilf(t, object, msg, args...) {
+		return
+	}
+	t.FailNow()
+}
+
+// NoDirExists checks whether a directory does not exist in the given path.
+// It fails if the path points to an existing _directory_ only.
+func NoDirExists(t TestingT, path string, msgAndArgs ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.NoDirExists(t, path, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// NoDirExistsf checks whether a directory does not exist in the given path.
+// It fails if the path points to an existing _directory_ only.
+func NoDirExistsf(t TestingT, path string, msg string, args ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.NoDirExistsf(t, path, msg, args...) {
 		return
 	}
 	t.FailNow()
@@ -935,6 +1019,30 @@ func NoErrorf(t TestingT, err error, msg string, args ...interface{}) {
 		h.Helper()
 	}
 	if assert.NoErrorf(t, err, msg, args...) {
+		return
+	}
+	t.FailNow()
+}
+
+// NoFileExists checks whether a file does not exist in a given path. It fails
+// if the path points to an existing _file_ only.
+func NoFileExists(t TestingT, path string, msgAndArgs ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.NoFileExists(t, path, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// NoFileExistsf checks whether a file does not exist in a given path. It fails
+// if the path points to an existing _file_ only.
+func NoFileExistsf(t TestingT, path string, msg string, args ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.NoFileExistsf(t, path, msg, args...) {
 		return
 	}
 	t.FailNow()
@@ -1116,6 +1224,38 @@ func NotRegexpf(t TestingT, rx interface{}, str interface{}, msg string, args ..
 	t.FailNow()
 }
 
+// NotSame asserts that two pointers do not reference the same object.
+//
+//    assert.NotSame(t, ptr1, ptr2)
+//
+// Both arguments must be pointer variables. Pointer variable sameness is
+// determined based on the equality of both type and value.
+func NotSame(t TestingT, expected interface{}, actual interface{}, msgAndArgs ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.NotSame(t, expected, actual, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// NotSamef asserts that two pointers do not reference the same object.
+//
+//    assert.NotSamef(t, ptr1, ptr2, "error message %s", "formatted")
+//
+// Both arguments must be pointer variables. Pointer variable sameness is
+// determined based on the equality of both type and value.
+func NotSamef(t TestingT, expected interface{}, actual interface{}, msg string, args ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.NotSamef(t, expected, actual, msg, args...) {
+		return
+	}
+	t.FailNow()
+}
+
 // NotSubset asserts that the specified list(array, slice...) contains not all
 // elements given in the specified subset(array, slice...).
 //
@@ -1174,6 +1314,36 @@ func Panics(t TestingT, f assert.PanicTestFunc, msgAndArgs ...interface{}) {
 		h.Helper()
 	}
 	if assert.Panics(t, f, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// PanicsWithError asserts that the code inside the specified PanicTestFunc
+// panics, and that the recovered panic value is an error that satisfies the
+// EqualError comparison.
+//
+//   assert.PanicsWithError(t, "crazy error", func(){ GoCrazy() })
+func PanicsWithError(t TestingT, errString string, f assert.PanicTestFunc, msgAndArgs ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.PanicsWithError(t, errString, f, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// PanicsWithErrorf asserts that the code inside the specified PanicTestFunc
+// panics, and that the recovered panic value is an error that satisfies the
+// EqualError comparison.
+//
+//   assert.PanicsWithErrorf(t, "crazy error", func(){ GoCrazy() }, "error message %s", "formatted")
+func PanicsWithErrorf(t TestingT, errString string, f assert.PanicTestFunc, msg string, args ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.PanicsWithErrorf(t, errString, f, msg, args...) {
 		return
 	}
 	t.FailNow()
@@ -1355,6 +1525,28 @@ func WithinDurationf(t TestingT, expected time.Time, actual time.Time, delta tim
 		h.Helper()
 	}
 	if assert.WithinDurationf(t, expected, actual, delta, msg, args...) {
+		return
+	}
+	t.FailNow()
+}
+
+// YAMLEq asserts that two YAML strings are equivalent.
+func YAMLEq(t TestingT, expected string, actual string, msgAndArgs ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.YAMLEq(t, expected, actual, msgAndArgs...) {
+		return
+	}
+	t.FailNow()
+}
+
+// YAMLEqf asserts that two YAML strings are equivalent.
+func YAMLEqf(t TestingT, expected string, actual string, msg string, args ...interface{}) {
+	if h, ok := t.(tHelper); ok {
+		h.Helper()
+	}
+	if assert.YAMLEqf(t, expected, actual, msg, args...) {
 		return
 	}
 	t.FailNow()

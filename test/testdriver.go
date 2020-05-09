@@ -112,6 +112,8 @@ func (d *testDriver) removeWindow(w *testWindow) {
 // NewDriver sets up and registers a new dummy driver for test purpose
 func NewDriver() fyne.Driver {
 	driver := new(testDriver)
+	driver.windowsMutex = sync.RWMutex{}
+
 	// make a single dummy window for rendering tests
 	driver.CreateWindow("")
 
@@ -123,8 +125,6 @@ func NewDriver() fyne.Driver {
 func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
 	driver := new(testDriver)
 	driver.painter = painter
-
-	driver.windows = make([]fyne.Window, 0)
 	driver.windowsMutex = sync.RWMutex{}
 
 	return driver

@@ -93,8 +93,7 @@ func walkObjectTree(
 // FindObjectAtPositionMatching is used to find an object in a canvas at the specified position.
 // The matches function determines of the type of object that is found at this position is of a suitable type.
 // The various canvas roots and overlays that can be searched are also passed in.
-func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.CanvasObject) bool,
-	overlay fyne.CanvasObject, roots ...fyne.CanvasObject) (fyne.CanvasObject, fyne.Position) {
+func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.CanvasObject) bool, overlay fyne.CanvasObject, roots ...fyne.CanvasObject) (fyne.CanvasObject, fyne.Position, int) {
 	var found fyne.CanvasObject
 	var foundPos fyne.Position
 
@@ -126,10 +125,12 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 		return false
 	}
 
+	layer := 0
 	if overlay != nil {
 		WalkVisibleObjectTree(overlay, findFunc, nil)
 	} else {
 		for _, root := range roots {
+			layer++
 			if root == nil {
 				continue
 			}
@@ -140,7 +141,7 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 		}
 	}
 
-	return found, foundPos
+	return found, foundPos, layer
 }
 
 // AbsolutePositionForObject returns the absolute position of an object in a set of object trees.

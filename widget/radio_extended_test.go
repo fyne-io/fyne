@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/test"
 	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -185,7 +186,7 @@ func TestRadioRenderer_Extended_ApplyTheme(t *testing.T) {
 	item := render.items[0]
 	textSize := item.label.TextSize
 	customTextSize := textSize
-	withTestTheme(func() {
+	test.WithTestTheme(t, func() {
 		render.applyTheme()
 		customTextSize = item.label.TextSize
 	})

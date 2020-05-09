@@ -95,7 +95,7 @@ var (
 	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                    *ThemedResource
 	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                  *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
-	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
+	file, folder, folderNew, folderOpen, help, home, settings                   *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
 	visibility, visibilityOff, volumeDown, volumeMute, volumeUp                 *ThemedResource
 )
@@ -153,6 +153,7 @@ func init() {
 	arrowDropDown = NewThemedResource(arrowdropdownIconRes, nil)
 	arrowDropUp = NewThemedResource(arrowdropupIconRes, nil)
 
+	file = NewThemedResource(fileIconRes, nil)
 	folder = NewThemedResource(folderIconRes, nil)
 	folderNew = NewThemedResource(foldernewIconRes, nil)
 	folderOpen = NewThemedResource(folderopenIconRes, nil)
@@ -302,6 +303,11 @@ func QuestionIcon() fyne.Resource {
 // WarningIcon returns a resource containing the standard dialog warning icon for the current theme
 func WarningIcon() fyne.Resource {
 	return warning
+}
+
+// FileIcon returns a resource containing the standard file icon for the current theme
+func FileIcon() fyne.Resource {
+	return file
 }
 
 // FolderIcon returns a resource containing the standard folder icon for the current theme

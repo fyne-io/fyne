@@ -93,7 +93,7 @@ func addIcon(coff *coff.Coff, fname string, newID <-chan uint16) error {
 	return nil
 }
 
-func bufferIcon(f *os.File, offset int64, size int) (coff.Sizer, error) {
+func bufferIcon(f *os.File, offset int64, size int) (*bytes.Reader, error) {
 	data := make([]byte, size)
 	_, err := f.ReadAt(data, offset)
 	if err != nil {

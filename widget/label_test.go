@@ -5,10 +5,23 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
-	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
+
+func TestLabel_Hide(t *testing.T) {
+	label := NewLabel("Test")
+	label.Hide()
+	label.Refresh()
+
+	assert.True(t, label.Hidden)
+	assert.False(t, label.provider.Hidden) // we don't propagate hide
+
+	label.Show()
+	assert.False(t, label.Hidden)
+	assert.False(t, label.provider.Hidden)
+}
 
 func TestLabel_MinSize(t *testing.T) {
 	label := NewLabel("Test")
@@ -18,6 +31,19 @@ func TestLabel_MinSize(t *testing.T) {
 
 	label.SetText("Longer")
 	assert.True(t, label.MinSize().Width > min.Width)
+}
+
+func TestLabel_Resize(t *testing.T) {
+	label := NewLabel("Test")
+	size := fyne.NewSize(100, 20)
+	label.Resize(size)
+
+	assert.Equal(t, size, label.Size())
+	assert.Equal(t, size, label.provider.Size())
+
+	label.SetText("Longer")
+	assert.Equal(t, size, label.Size())
+	assert.Equal(t, size, label.provider.Size())
 }
 
 func TestLabel_Text(t *testing.T) {
@@ -68,16 +94,16 @@ func TestLabel_Alignment_Later(t *testing.T) {
 }
 
 func TestText_MinSize_MultiLine(t *testing.T) {
-	text := NewLabel("Break")
-	min := text.MinSize()
-	text = NewLabel("Bre\nak")
-	min2 := text.MinSize()
+	textOneLine := NewLabel("Break")
+	min := textOneLine.MinSize()
+	textMultiLine := NewLabel("Bre\nak")
+	min2 := textMultiLine.MinSize()
 
 	assert.True(t, min2.Width < min.Width)
 	assert.True(t, min2.Height > min.Height)
 
 	yPos := -1
-	for _, text := range test.WidgetRenderer(text).(*textRenderer).texts {
+	for _, text := range test.WidgetRenderer(textMultiLine).(*textRenderer).texts {
 		assert.True(t, text.Size().Height < min2.Height)
 		assert.True(t, text.Position().Y > yPos)
 		yPos = text.Position().Y
@@ -94,7 +120,7 @@ func TestText_MinSizeAdjustsWithContent(t *testing.T) {
 
 	text.SetText("Line 1\nLine 2\n")
 	assert.Equal(t, initialMin, text.MinSize())
-	assert.Equal(t, initialMin, text.textProvider.MinSize())
+	assert.Equal(t, initialMin, text.provider.MinSize())
 }
 
 func TestLabel_ApplyTheme(t *testing.T) {
@@ -105,4 +131,20 @@ func TestLabel_ApplyTheme(t *testing.T) {
 	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
 	text.Show()
 	assert.Equal(t, theme.TextColor(), render.texts[0].Color)
+}
+
+func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
+	text := NewLabel("Hello")
+	text.Resize(text.MinSize())
+	size := text.Size()
+	assert.NotEqual(t, fyne.NewSize(0, 0), size)
+	assert.Equal(t, size, text.MinSize())
+
+	r := text.CreateRenderer()
+	assert.Equal(t, size, text.Size())
+	assert.Equal(t, size, text.MinSize())
+	assert.Equal(t, size, r.MinSize())
+	r.Layout(size)
+	assert.Equal(t, size, text.Size())
+	assert.Equal(t, size, text.MinSize())
 }

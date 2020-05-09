@@ -101,7 +101,7 @@ func recursiveCopy(src, target string) error {
 
 func ensureDir(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err2 := os.Mkdir(dir, 0755)
+		err2 := os.Mkdir(dir, 0750)
 		if err2 != nil {
 			return err2
 		}
@@ -126,7 +126,7 @@ func (v *vendor) main() {
 	}
 
 	fmt.Printf("Parsing %s to detect dependency module path for GLFW\n", goModVendorFile)
-	f, err := os.Open(filepath.Join(wd, goModVendorFile))
+	f, err := os.Open(filepath.Join(wd, goModVendorFile)) // #nosec
 	if err != nil {
 		fmt.Printf("Cannot open %s: %v\n", goModVendorFile, err)
 		os.Exit(1)

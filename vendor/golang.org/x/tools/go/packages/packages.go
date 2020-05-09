@@ -35,6 +35,9 @@ import (
 // Load may return more information than requested.
 type LoadMode int
 
+// TODO(matloob): When a V2 of go/packages is released, rename NeedExportsFile to
+// NeedExportFile to make it consistent with the Package field it's adding.
+
 const (
 	// NeedName adds Name and PkgPath.
 	NeedName LoadMode = 1 << iota
@@ -52,7 +55,7 @@ const (
 	// NeedDeps adds the fields requested by the LoadMode in the packages in Imports.
 	NeedDeps
 
-	// NeedExportsFile adds ExportsFile.
+	// NeedExportsFile adds ExportFile.
 	NeedExportsFile
 
 	// NeedTypes adds Types, Fset, and IllTyped.
@@ -296,11 +299,17 @@ type Package struct {
 
 	// forTest is the package under test, if any.
 	forTest string
+
+	// module is the module information for the package if it exists.
+	module *packagesinternal.Module
 }
 
 func init() {
 	packagesinternal.GetForTest = func(p interface{}) string {
 		return p.(*Package).forTest
+	}
+	packagesinternal.GetModule = func(p interface{}) *packagesinternal.Module {
+		return p.(*Package).module
 	}
 }
 

@@ -1,13 +1,24 @@
 // +build !ci
 
-// +build android mobile
+// +build android
 
 package app
 
+/*
+#cgo LDFLAGS: -landroid -llog
+
+#include <stdlib.h>
+
+void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *content);
+*/
+import "C"
 import (
+	"log"
 	"net/url"
 	"os"
-	"path/filepath"
+	"unsafe"
+
+	mobileApp "github.com/fyne-io/mobile/app"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -24,9 +35,24 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 	return cmd.Run()
 }
 
-func rootConfigDir() string {
-	homeDir := "/data" //, _ := os.UserHomeDir()
+func (app *fyneApp) SendNotification(n *fyne.Notification) {
+	titleStr := C.CString(n.Title)
+	defer C.free(unsafe.Pointer(titleStr))
+	contentStr := C.CString(n.Content)
+	defer C.free(unsafe.Pointer(contentStr))
 
-	desktopConfig := filepath.Join(homeDir, "data")
-	return filepath.Join(desktopConfig, "fyne")
+	mobileApp.RunOnJVM(func(vm, env, ctx uintptr) error {
+		C.sendNotification(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx), titleStr, contentStr)
+		return nil
+	})
+}
+
+func rootConfigDir() string {
+	filesDir := os.Getenv("FILESDIR")
+	if filesDir == "" {
+		log.Println("FILESDIR env was not set by android native code")
+		return "/data/data" // probably won't work, but we can't make a better guess
+	}
+
+	return filesDir
 }

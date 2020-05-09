@@ -6,21 +6,22 @@ import (
 	"strconv"
 	"time"
 
-	"fyne.io/fyne/internal"
-	"fyne.io/fyne/widget"
-	"golang.org/x/mobile/app"
-	"golang.org/x/mobile/event/key"
-	"golang.org/x/mobile/event/lifecycle"
-	"golang.org/x/mobile/event/paint"
-	"golang.org/x/mobile/event/size"
-	"golang.org/x/mobile/event/touch"
-	"golang.org/x/mobile/gl"
-
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
 	pgl "fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
+
+	"github.com/fyne-io/mobile/app"
+	"github.com/fyne-io/mobile/event/key"
+	"github.com/fyne-io/mobile/event/lifecycle"
+	"github.com/fyne-io/mobile/event/paint"
+	"github.com/fyne-io/mobile/event/size"
+	"github.com/fyne-io/mobile/event/touch"
+	"github.com/fyne-io/mobile/gl"
 )
 
 const tapSecondaryDelay = 300 * time.Millisecond
@@ -30,7 +31,7 @@ type mobileDriver struct {
 	glctx gl.Context
 
 	windows []fyne.Window
-	device  fyne.Device
+	device  *device
 }
 
 // Declare conformity with Driver
@@ -41,10 +42,10 @@ func init() {
 }
 
 func (d *mobileDriver) CreateWindow(title string) fyne.Window {
-	canvas := NewCanvas().(*mobileCanvas) // silence lint
-	ret := &window{title: title, canvas: canvas, isChild: len(d.windows) > 0}
-	canvas.painter = pgl.NewPainter(canvas, ret)
-
+	c := NewCanvas().(*mobileCanvas) // silence lint
+	ret := &window{title: title, canvas: c, isChild: len(d.windows) > 0}
+	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
+	c.painter = pgl.NewPainter(c, ret)
 	d.windows = append(d.windows, ret)
 	return ret
 }
@@ -123,7 +124,14 @@ func (d *mobileDriver) Run() {
 				currentSize = e
 				currentOrientation = e.Orientation
 				currentDPI = e.PixelsPerPt * 72
+
+				dev := d.device
+				dev.insetTop = e.InsetTopPx
+				dev.insetBottom = e.InsetBottomPx
+				dev.insetLeft = e.InsetLeftPx
+				dev.insetRight = e.InsetRightPx
 				canvas.SetScale(0) // value is ignored
+
 				// make sure that we paint on the next frame
 				canvas.Content().Refresh()
 			case paint.Event:
@@ -325,6 +333,7 @@ var keyCodeMap = map[key.Code]fyne.KeyName{
 	key.CodeLeftSquareBracket:  fyne.KeyLeftBracket,
 	key.CodeBackslash:          fyne.KeyBackslash,
 	key.CodeRightSquareBracket: fyne.KeyRightBracket,
+	key.CodeGraveAccent:        fyne.KeyBackTick,
 }
 
 func keyToName(code key.Code) fyne.KeyName {

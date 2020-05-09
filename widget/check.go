@@ -1,22 +1,19 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 type checkRenderer struct {
-	icon  *canvas.Image
-	label *canvas.Text
-
+	widget.BaseRenderer
+	icon           *canvas.Image
+	label          *canvas.Text
 	focusIndicator *canvas.Circle
-
-	objects []fyne.CanvasObject
-	check   *Check
+	check          *Check
 }
 
 // MinSize calculates the minimum size of a check.
@@ -54,10 +51,6 @@ func (c *checkRenderer) applyTheme() {
 	}
 }
 
-func (c *checkRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
 func (c *checkRenderer) Refresh() {
 	c.applyTheme()
 	c.label.Text = c.check.Text
@@ -83,13 +76,6 @@ func (c *checkRenderer) Refresh() {
 	}
 
 	canvas.Refresh(c.check.super())
-}
-
-func (c *checkRenderer) Objects() []fyne.CanvasObject {
-	return c.objects
-}
-
-func (c *checkRenderer) Destroy() {
 }
 
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
@@ -173,7 +159,13 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
-	return &checkRenderer{icon, text, focusIndicator, []fyne.CanvasObject{focusIndicator, icon, text}, c}
+	return &checkRenderer{
+		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, text}),
+		icon,
+		text,
+		focusIndicator,
+		c,
+	}
 }
 
 // NewCheck creates a new check widget with the set label and change handler

@@ -15,7 +15,20 @@ import (
 	"golang.org/x/image/font"
 )
 
-func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.Size, base *image.RGBA) {
+type gradient interface {
+	Generate(int, int) image.Image
+	Size() fyne.Size
+}
+
+func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
+	bounds := g.Size()
+	width := internal.ScaleInt(c, bounds.Width)
+	height := internal.ScaleInt(c, bounds.Height)
+	tex := g.Generate(width, height)
+	drawTex(c, pos, width, height, base, tex)
+}
+
+func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
 	bounds := img.Size()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
@@ -23,8 +36,27 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 	if img.FillMode == canvas.ImageFillStretch {
 		width = internal.ScaleInt(c, img.Size().Width)
 		height = internal.ScaleInt(c, img.Size().Height)
-	} // TODO support contain
+		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
+	} else if img.FillMode == canvas.ImageFillContain {
+		imgAspect := painter.GetAspect(img)
+		objAspect := float32(width) / float32(height)
 
+		if objAspect > imgAspect {
+			newWidth := int(float32(height) * imgAspect)
+			pos.X += (width - newWidth) / 2
+			width = internal.ScaleInt(c, newWidth)
+		} else if objAspect < imgAspect {
+			newHeight := int(float32(width) / imgAspect)
+			pos.Y += (height - newHeight) / 2
+			height = internal.ScaleInt(c, newHeight)
+		}
+		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
+	}
+
+	drawTex(c, pos, width, height, base, tex)
+}
+
+func drawTex(c fyne.Canvas, pos fyne.Position, width int, height int, base *image.NRGBA, tex image.Image) {
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	switch img.ScalingFilter {
@@ -35,7 +67,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 	}
 }
 
-func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, frame fyne.Size, base *image.RGBA) {
+func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
 	bounds := text.MinSize()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
@@ -60,7 +92,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, frame fyne.Si
 	draw.Draw(base, imgBounds, txtImg, image.ZP, draw.Over)
 }
 
-func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size, base *image.RGBA) {
+func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
 	scaledWidth := internal.ScaleInt(c, rect.Size().Width)
 	scaledHeight := internal.ScaleInt(c, rect.Size().Height)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
@@ -68,7 +100,7 @@ func drawRectangle(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, fra
 	draw.Draw(base, bounds, image.NewUniform(rect.FillColor), image.ZP, draw.Over)
 }
 
-func drawWidget(c fyne.Canvas, wid fyne.Widget, pos fyne.Position, frame fyne.Size, base *image.RGBA) {
+func drawWidget(c fyne.Canvas, wid fyne.Widget, pos fyne.Position, frame fyne.Size, base *image.NRGBA) {
 	scaledWidth := internal.ScaleInt(c, wid.Size().Width)
 	scaledHeight := internal.ScaleInt(c, wid.Size().Height)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)

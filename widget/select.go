@@ -6,27 +6,27 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 const defaultPlaceHolder string = "(Select one)"
 
 type selectRenderer struct {
-	icon   *Icon
-	label  *canvas.Text
-	shadow fyne.CanvasObject
+	*widget.ShadowingRenderer
 
-	objects []fyne.CanvasObject
-	combo   *Select
+	icon  *Icon
+	label *canvas.Text
+	combo *Select
 }
 
 // MinSize calculates the minimum size of a select button.
 // This is based on the selected text, the drop icon and a standard amount of padding added.
 func (s *selectRenderer) MinSize() fyne.Size {
-	min := textMinSize(s.combo.PlaceHolder, s.label.TextSize, s.label.TextStyle)
+	min := fyne.MeasureText(s.combo.PlaceHolder, s.label.TextSize, s.label.TextStyle)
 
 	for _, option := range s.combo.Options {
-		optionMin := textMinSize(option, s.label.TextSize, s.label.TextStyle)
+		optionMin := fyne.MeasureText(option, s.label.TextSize, s.label.TextStyle)
 		min = min.Union(optionMin)
 	}
 
@@ -36,7 +36,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
-	s.shadow.Resize(size)
+	s.LayoutShadow(size, fyne.NewPos(0, 0))
 	inner := size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 
 	offset := fyne.NewSize(theme.IconInlineSize(), 0)
@@ -81,13 +81,6 @@ func (s *selectRenderer) Refresh() {
 	canvas.Refresh(s.combo.super())
 }
 
-func (s *selectRenderer) Objects() []fyne.CanvasObject {
-	return s.objects
-}
-
-func (s *selectRenderer) Destroy() {
-}
-
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
 	BaseWidget
@@ -98,7 +91,7 @@ type Select struct {
 	OnChanged   func(string) `json:"-"`
 
 	hovered bool
-	popUp   *PopUp
+	popUp   *widget.PopUpMenu
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -149,7 +142,8 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		items = append(items, item)
 	}
 
-	s.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, s.popUpPos())
+	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp.ShowAtPosition(s.popUpPos())
 	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
 }
 
@@ -194,12 +188,8 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	}
 	text.Alignment = fyne.TextAlignLeading
 
-	shadow := newShadow(shadowAround, theme.Padding()/2)
-	objects := []fyne.CanvasObject{
-		text, icon, shadow,
-	}
-
-	return &selectRenderer{icon, text, shadow, objects, s}
+	objects := []fyne.CanvasObject{text, icon}
+	return &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, text, s}
 }
 
 // ClearSelected clears the current option of the select widget.  After
@@ -230,5 +220,7 @@ func (s *Select) updateSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	return &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	s.ExtendBaseWidget(s)
+	return s
 }

@@ -11,8 +11,8 @@ import (
 type LinearGradient struct {
 	baseObject
 
-	StartColor color.Color // The beginning RGBA color of the gradient
-	EndColor   color.Color // The end RGBA color of the gradient
+	StartColor color.Color // The beginning color of the gradient
+	EndColor   color.Color // The end color of the gradient
 	Angle      float64     // The angle of the gradient (0/180 for vertical; 90/270 for horizontal)
 }
 
@@ -66,8 +66,8 @@ func (g *LinearGradient) Refresh() {
 type RadialGradient struct {
 	baseObject
 
-	StartColor color.Color // The beginning RGBA color of the gradient
-	EndColor   color.Color // The end RGBA color of the gradient
+	StartColor color.Color // The beginning color of the gradient
+	EndColor   color.Color // The end color of the gradient
 	// The offset of the center for generation of the gradient.
 	// This is not a DP measure but relates to the width/height.
 	// A value of 0.5 would move the center by the half width/height.
@@ -111,7 +111,7 @@ func (g *RadialGradient) Refresh() {
 	Refresh(g)
 }
 
-func calculatePixel(d float64, startColor, endColor color.Color) *color.RGBA64 {
+func calculatePixel(d float64, startColor, endColor color.Color) *color.NRGBA64 {
 	// fetch RGBA values
 	aR, aG, aB, aA := startColor.RGBA()
 	bR, bG, bB, bA := endColor.RGBA()
@@ -123,7 +123,7 @@ func calculatePixel(d float64, startColor, endColor color.Color) *color.RGBA64 {
 	dA := float64(bA) - float64(aA)
 
 	// Apply gradations
-	pixel := &color.RGBA64{
+	pixel := &color.NRGBA64{
 		R: uint16(float64(aR) + d*dR),
 		B: uint16(float64(aB) + d*dB),
 		G: uint16(float64(aG) + d*dG),
@@ -134,7 +134,7 @@ func calculatePixel(d float64, startColor, endColor color.Color) *color.RGBA64 {
 }
 
 func computeGradient(generator func(x, y float64) float64, w, h int, startColor, endColor color.Color) image.Image {
-	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	img := image.NewNRGBA(image.Rect(0, 0, w, h))
 
 	if startColor == nil && endColor == nil {
 		return img

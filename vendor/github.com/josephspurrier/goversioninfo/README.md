@@ -17,11 +17,11 @@ To install, run the following command:
 go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
 ~~~
 
-Copy versioninfo.json into your working directory and then modify the file with your own settings.
+Copy testdata/resource/versioninfo.json into your working directory and then modify the file with your own settings.
 
 Add a similar text to the top of your Go source code (-icon and -manifest are optional, but can also be specified in the versioninfo.json file):
 ~~~ go
-//go:generate goversioninfo -icon=icon.ico -manifest=goversioninfo.exe.manifest
+//go:generate goversioninfo -icon=testdata/resource/icon.ico -manifest=testdata/resource/goversioninfo.exe.manifest
 ~~~
 
 Run the Go commands in this order so goversioninfo will create a file called resource.syso in the same directory as the Go source code.
@@ -94,7 +94,7 @@ If you find any other differences, let me know.
 
 You can also use [windres](https://sourceware.org/binutils/docs/binutils/windres.html) to create the syso file. The windres executable is available in either [MinGW](http://www.mingw.org/) or [tdm-gcc](http://tdm-gcc.tdragon.net/).
 
-Below is a sample batch file you can use to create a .syso file from a .rc file. There are sample .rc files in the rc folder.
+Below is a sample batch file you can use to create a .syso file from a .rc file. There are sample .rc files in the testdata/rc folder.
 
 ~~~
 @ECHO OFF
@@ -102,12 +102,12 @@ Below is a sample batch file you can use to create a .syso file from a .rc file.
 SET PATH=C:\TDM-GCC-64\bin;%PATH%
 REM SET PATH=C:\mingw64\bin;%PATH%
 
-windres -i versioninfo.rc -O coff -o versioninfo.syso
+windres -i testdata/rc/versioninfo.rc -O coff -o versioninfo.syso
 
 PAUSE
 ~~~
 
-The information on how to create a .rc file is available [here](https://msdn.microsoft.com/en-us/library/windows/desktop/aa381043(v=vs.85).aspx). You can use the versioninfo.rc file to create a .syso file that contains version info, icon, and manifest.
+The information on how to create a .rc file is available [here](https://msdn.microsoft.com/en-us/library/windows/desktop/aa381043(v=vs.85).aspx). You can use the testdata/rc/versioninfo.rc file to create a .syso file that contains version info, icon, and manifest.
 
 ## Issues
 

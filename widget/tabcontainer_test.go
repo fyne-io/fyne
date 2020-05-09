@@ -12,6 +12,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestTabContainer_Empty(t *testing.T) {
+	tabs := NewTabContainer()
+	assert.Equal(t, 0, len(tabs.Items))
+	assert.Equal(t, -1, tabs.CurrentTabIndex())
+	assert.Nil(t, tabs.CurrentTab())
+	min := tabs.MinSize()
+	assert.Equal(t, 4, min.Height)
+	assert.Equal(t, 0, min.Width)
+}
+
+func TestTabContainer_Resize_Empty(t *testing.T) {
+	tabs := NewTabContainer()
+	tabs.Resize(fyne.NewSize(10, 10))
+	size := tabs.Size()
+	assert.Equal(t, 10, size.Height)
+	assert.Equal(t, 10, size.Width)
+}
+
 func TestTabContainer_CurrentTabIndex(t *testing.T) {
 	tabs := NewTabContainer(&TabItem{Text: "Test", Content: NewLabel("Test")})
 
@@ -36,7 +54,18 @@ func TestTabContainer_SelectTab(t *testing.T) {
 	assert.Equal(t, 2, len(tabs.Items))
 	assert.Equal(t, tab1, tabs.CurrentTab())
 
+	var selectedTab *TabItem
+	tabs.OnChanged = func(tab *TabItem) {
+		selectedTab = tab
+	}
 	tabs.SelectTab(tab2)
+	assert.Equal(t, tab2, tabs.CurrentTab())
+	assert.Equal(t, tab2, selectedTab)
+
+	tabs.OnChanged = func(tab *TabItem) {
+		assert.Fail(t, "unexpected tab selection")
+	}
+	tabs.SelectTab(NewTabItem("Test3", NewLabel("Test3")))
 	assert.Equal(t, tab2, tabs.CurrentTab())
 }
 
@@ -47,8 +76,13 @@ func TestTabContainer_SelectTabIndex(t *testing.T) {
 	assert.Equal(t, 2, len(tabs.Items))
 	assert.Equal(t, 0, tabs.CurrentTabIndex())
 
+	var selectedTab *TabItem
+	tabs.OnChanged = func(tab *TabItem) {
+		selectedTab = tab
+	}
 	tabs.SelectTabIndex(1)
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
+	assert.Equal(t, tabs.Items[1], selectedTab)
 }
 
 func TestTabItem_Content(t *testing.T) {
@@ -426,10 +460,27 @@ func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
-	withTestTheme(func() {
+	test.WithTestTheme(t, func() {
 		render.Refresh()
 		customTextSize = render.label.TextSize
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)
+}
+
+func Test_tabButtonRenderer_SetText(t *testing.T) {
+	item := &TabItem{Text: "Test", Content: NewLabel("Content")}
+	tabs := NewTabContainer(item)
+	tabRenderer := test.WidgetRenderer(tabs).(*tabContainerRenderer)
+	tabButton := tabRenderer.tabBar.Objects[0].(*tabButton)
+	renderer := test.WidgetRenderer(tabButton).(*tabButtonRenderer)
+
+	assert.Equal(t, "Test", renderer.label.Text)
+
+	tabButton.setText("Temp")
+	assert.Equal(t, "Temp", renderer.label.Text)
+
+	item.Text = "Replace"
+	tabs.Refresh()
+	assert.Equal(t, "Replace", renderer.label.Text)
 }

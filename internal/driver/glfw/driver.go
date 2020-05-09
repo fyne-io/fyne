@@ -3,12 +3,17 @@
 package glfw
 
 import (
+	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
 )
+
+const mainGoroutineID = 1
 
 var canvasMutex sync.RWMutex
 var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
@@ -17,9 +22,10 @@ var canvases = make(map[fyne.CanvasObject]fyne.Canvas)
 var _ fyne.Driver = (*gLDriver)(nil)
 
 type gLDriver struct {
-	windows []fyne.Window
-	device  *glDevice
-	done    chan interface{}
+	windowLock sync.RWMutex
+	windows    []fyne.Window
+	device     *glDevice
+	done       chan interface{}
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
@@ -58,7 +64,32 @@ func (d *gLDriver) Quit() {
 }
 
 func (d *gLDriver) Run() {
+	if goroutineID() != mainGoroutineID {
+		panic("Run() or ShowAndRun() must be called from main goroutine")
+	}
 	d.runGL()
+}
+
+func (d *gLDriver) addWindow(w *window) {
+	d.windowLock.Lock()
+	defer d.windowLock.Unlock()
+	d.windows = append(d.windows, w)
+}
+
+func (d *gLDriver) windowList() []fyne.Window {
+	d.windowLock.RLock()
+	defer d.windowLock.RUnlock()
+	return d.windows
+}
+
+func goroutineID() int {
+	b := make([]byte, 64)
+	b = b[:runtime.Stack(b, false)]
+	// string format expects "goroutine X [running..."
+	id := strings.Split(strings.TrimSpace(string(b)), " ")[1]
+
+	num, _ := strconv.Atoi(id)
+	return num
 }
 
 // NewGLDriver sets up a new Driver instance implemented using the GLFW Go library and OpenGL bindings.

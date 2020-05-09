@@ -1,15 +1,22 @@
+os: windows
+sudo: false
 language: go
-
 go:
-  #- 1.0
-  #- 1.1
-  #- 1.2
-  #- 1.3
-  - 1.4
-  - 1.5
-  - 1.6
-  - tip
-
+  # - '1.0'
+  # - '1.1'
+  # - '1.2'
+  # - '1.3'
+  # - '1.4'
+  - '1.5'
+  - '1.6'
+  - '1.7'
+  - '1.8'
+  - '1.9'
+  - '1.10'
+  - '1.11'
+  - '1.12'
+  - '1.13'
+  - '1.14'
 before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
@@ -17,6 +24,11 @@ before_install:
   - go get github.com/akavel/rsrc/binutil
   - go get github.com/akavel/rsrc/coff
   - go get github.com/akavel/rsrc/ico
-
 script:
-    - $HOME/gopath/bin/goveralls -repotoken lNZXr7UDQai10RBP6KAOqA6fRcs5NlKEe
+  # Install binary.
+  - go install github.com/$TRAVIS_REPO_SLUG/cmd/goversioninfo
+  # Test building 32 and 64 on Windows.
+  - bash $TRAVIS_BUILD_DIR/testdata/bash/build.sh
+  # Run tests and send coverage info.
+  - cd $TRAVIS_BUILD_DIR
+  - $GOPATH/bin/goveralls -service=travis-ci
