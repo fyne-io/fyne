@@ -125,7 +125,9 @@ func (f *Form) setButtons() {
 	}
 
 	// remove the buttonBox from the forms vbox
-	f.vbox.Children = f.vbox.Children[:1]
+	if len(f.vbox.Children) > 1 {
+		f.vbox.Children = f.vbox.Children[:1]
+	}
 
 	// create the buttons
 	if f.onCancel != nil {
