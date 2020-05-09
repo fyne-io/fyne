@@ -3,6 +3,7 @@ package canvas // import "fyne.io/fyne/canvas"
 
 import (
 	"sync"
+
 	"fyne.io/fyne"
 )
 
