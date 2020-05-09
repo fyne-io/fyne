@@ -1,7 +1,6 @@
 package software
 
 import (
-	"fmt"
 	"image"
 
 	"fyne.io/fyne"
@@ -42,8 +41,6 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 		imgAspect := painter.GetAspect(img)
 		objAspect := float32(width) / float32(height)
 
-		fmt.Printf("imgAspect:%f - objAspect:%f\n", imgAspect, objAspect)
-
 		if objAspect < 1 {
 			newHeight := int(float32(width) / imgAspect)
 			scaledY += (height - newHeight) / 2
@@ -58,9 +55,9 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	switch img.ScalingFilter {
 	case canvas.LinearFilter:
-		draw.CatmullRom.Scale(base, outBounds, tmpImg, img.Image.Bounds(), draw.Over, nil)
+		draw.CatmullRom.Scale(base, outBounds, tmpImg, tmpImg.Bounds(), draw.Over, nil)
 	case canvas.NearestFilter:
-		draw.NearestNeighbor.Scale(base, outBounds, tmpImg, img.Image.Bounds(), draw.Over, nil)
+		draw.NearestNeighbor.Scale(base, outBounds, tmpImg, tmpImg.Bounds(), draw.Over, nil)
 	}
 }
 
