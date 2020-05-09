@@ -2,6 +2,7 @@ package widget
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
@@ -46,9 +47,53 @@ func TestForm_CustomButtonsText(t *testing.T) {
 	assert.Equal(t, "Submit", form.SubmitText)
 	assert.Equal(t, "Cancel", form.CancelText)
 
-	form := NewForm().
+	form = NewForm().
 		OnSubmitWithLabel("Apply", func() {}).
 		OnCancelWithLabel("Close", func() {})
 	assert.Equal(t, "Apply", form.SubmitText)
 	assert.Equal(t, "Close", form.CancelText)
+}
+
+func TestForm_AddRemoveButton(t *testing.T) {
+	scount := 0
+	ccount := 0
+	sscount := 10
+	tapped := make(chan bool)
+	form := NewForm().
+		Append("test", NewEntry()).
+		OnSubmit(func() { scount++; tapped <- true }).
+		OnCancel(func() { ccount++; tapped <- true })
+
+	go test.Tap(form.submitButton)
+	func() {
+		select {
+		case <-tapped:
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Timed out waiting for submit button tap")
+		}
+	}()
+	assert.Equal(t, 1, scount)
+	go test.Tap(form.cancelButton)
+	func() {
+		select {
+		case <-tapped:
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Timed out waiting for cancel button tap")
+		}
+	}()
+	assert.Equal(t, 1, ccount)
+
+	form.OnSubmit(func() {
+		sscount++
+		tapped <- true
+	})
+	go test.Tap(form.submitButton)
+	func() {
+		select {
+		case <-tapped:
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Timed out waiting for cancel button tap")
+		}
+	}()
+	assert.Equal(t, 11, sscount)
 }
