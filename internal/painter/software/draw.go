@@ -6,13 +6,11 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
-	"github.com/nfnt/resize"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 )
@@ -34,35 +32,32 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 	bounds := img.Size()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
-	tex := painter.PaintImage(img, c, width, height)
 
 	if img.FillMode == canvas.ImageFillStretch {
 		width = internal.ScaleInt(c, img.Size().Width)
 		height = internal.ScaleInt(c, img.Size().Height)
-		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
 	} else if img.FillMode == canvas.ImageFillContain {
-		imgAspect := painter.GetAspect(img)
+		imgAspect := float32(img.Size().Width) / float32(img.Size().Height)
 		objAspect := float32(width) / float32(height)
 
 		if objAspect > imgAspect {
 			newWidth := int(float32(height) * imgAspect)
 			pos.X += (width - newWidth) / 2
-			width = internal.ScaleInt(c, newWidth)
+			width = newWidth //internal.ScaleInt(c, newWidth)
 		} else if objAspect < imgAspect {
 			newHeight := int(float32(width) / imgAspect)
 			pos.Y += (height - newHeight) / 2
-			height = internal.ScaleInt(c, newHeight)
+			height = newHeight //internal.ScaleInt(c, newHeight)
 		}
-		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
 	}
 
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
-	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
+	outBounds := image.Rect(pos.X, pos.X, pos.X+scaledX+width, pos.Y+scaledY+height)
 	switch img.ScalingFilter {
 	case canvas.LinearFilter:
-		draw.ApproxBiLinear.Scale(base, outBounds, tex, tex.Bounds(), draw.Over, nil)
+		draw.CatmullRom.Scale(base, outBounds, img.Image, img.Image.Bounds(), draw.Over, nil)
 	case canvas.NearestFilter:
-		draw.NearestNeighbor.Scale(base, outBounds, tex, tex.Bounds(), draw.Over, nil)
+		draw.NearestNeighbor.Scale(base, outBounds, img.Image, img.Image.Bounds(), draw.Over, nil)
 	}
 }
 
