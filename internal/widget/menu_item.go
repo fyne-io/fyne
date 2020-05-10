@@ -14,7 +14,7 @@ var _ fyne.Widget = (*MenuItem)(nil)
 // MenuItem is a widget for displaying a fyne.MenuItem.
 type MenuItem struct {
 	Base
-	menuItemBase
+	Child  *Menu
 	Item   *fyne.MenuItem
 	Parent *Menu
 
@@ -42,7 +42,12 @@ func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 	if i.Item.ChildMenu != nil {
 		icon = canvas.NewImageFromResource(theme.MenuExpandIcon())
 		objects = append(objects, icon)
-		i.initChildWidget(i.Item.ChildMenu, i.Parent.dismiss)
+		if i.Child == nil {
+			child := NewMenu(i.Item.ChildMenu)
+			child.Hide()
+			child.DismissAction = i.Parent.dismiss
+			i.Child = child
+		}
 		objects = append(objects, i.Child)
 	}
 	return &menuItemRenderer{
@@ -70,7 +75,7 @@ func (i *MenuItem) MinSize() fyne.Size {
 // Implements: desktop.Hoverable
 func (i *MenuItem) MouseIn(*desktop.MouseEvent) {
 	i.hovered = true
-	i.activateChild(&i.Parent.menuBase, i.updateChildPosition)
+	i.activateChild()
 	i.Refresh()
 }
 
@@ -113,7 +118,7 @@ func (i *MenuItem) Show() {
 func (i *MenuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
-			i.activateChild(&i.Parent.menuBase, i.updateChildPosition)
+			i.activateChild()
 			i.Refresh()
 		}
 		return
@@ -121,6 +126,25 @@ func (i *MenuItem) Tapped(*fyne.PointEvent) {
 
 	i.Item.Action()
 	i.Parent.dismiss()
+}
+
+func (i *MenuItem) activateChild() {
+	if i.Child != nil {
+		i.Child.deactivateChild()
+	}
+	if i.Parent.activeChild == i.Child {
+		return
+	}
+
+	i.Parent.deactivateChild()
+	if i.Child != nil {
+		if i.Child.Size().IsZero() {
+			i.Child.Resize(i.Child.MinSize())
+			i.updateChildPosition()
+		}
+		i.Parent.activeChild = i.Child
+		i.Child.Show()
+	}
 }
 
 func (i *MenuItem) updateChildPosition() {

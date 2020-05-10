@@ -15,11 +15,11 @@ var _ fyne.Widget = (*MenuBar)(nil)
 // MenuBar is a widget for displaying a fyne.MainMenu in a bar.
 type MenuBar struct {
 	Base
-	menuBase
 	Items []fyne.CanvasObject
 
-	active bool
-	canvas fyne.Canvas
+	active      bool
+	activeChild *Menu
+	canvas      fyne.Canvas
 }
 
 // NewMenuBar creates a menu bar populated with items from the passed main menu structure.
@@ -91,7 +91,11 @@ func (b *MenuBar) deactivate() {
 	}
 
 	b.active = false
-	b.dismiss()
+	if b.activeChild != nil {
+		defer b.activeChild.dismiss()
+		b.activeChild.Hide()
+		b.activeChild = nil
+	}
 	b.Refresh()
 }
 

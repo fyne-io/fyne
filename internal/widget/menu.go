@@ -13,9 +13,10 @@ var _ fyne.Tappable = (*Menu)(nil)
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {
 	Base
-	menuBase
-	Items       []fyne.CanvasObject
-	customSized bool
+	DismissAction func()
+	Items         []fyne.CanvasObject
+	activeChild   *Menu
+	customSized   bool
 }
 
 // NewMenu creates a new Menu.
@@ -80,6 +81,24 @@ func (m *Menu) Show() {
 // Implements: fyne.Tappable
 func (m *Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
+}
+
+func (m *Menu) deactivateChild() {
+	if m.activeChild != nil {
+		m.activeChild.Hide()
+		m.activeChild = nil
+	}
+}
+
+func (m *Menu) dismiss() {
+	if m.activeChild != nil {
+		defer m.activeChild.dismiss()
+		m.activeChild.Hide()
+		m.activeChild = nil
+	}
+	if m.DismissAction != nil {
+		m.DismissAction()
+	}
 }
 
 type menuRenderer struct {
