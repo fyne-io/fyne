@@ -21,26 +21,29 @@ type Box struct {
 }
 
 // Refresh updates this box to match the current theme
-func (b *Box) Refresh() {
+func (b *Box) Refresh() *Box {
 	if b.background != nil {
 		b.background = theme.BackgroundColor()
 	}
 
 	b.BaseWidget.Refresh()
+	return b
 }
 
 // Prepend inserts a new CanvasObject at the top/left of the box
-func (b *Box) Prepend(object fyne.CanvasObject) {
+func (b *Box) Prepend(object fyne.CanvasObject) *Box {
 	b.Children = append([]fyne.CanvasObject{object}, b.Children...)
 
 	b.Refresh()
+	return b
 }
 
 // Append adds a new CanvasObject to the end/right of the box
-func (b *Box) Append(object fyne.CanvasObject) {
+func (b *Box) Append(object fyne.CanvasObject) *Box {
 	b.Children = append(b.Children, object)
 
 	b.Refresh()
+	return b
 }
 
 // MinSize returns the size that this widget should not shrink below

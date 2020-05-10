@@ -203,26 +203,30 @@ const (
 )
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
-func (b *Button) Tapped(*fyne.PointEvent) {
+func (b *Button) Tapped(*fyne.PointEvent) *Button {
 	if b.OnTapped != nil && !b.Disabled() {
 		b.OnTapped()
 	}
+	return b
 }
 
 // MouseIn is called when a desktop pointer enters the widget
-func (b *Button) MouseIn(*desktop.MouseEvent) {
+func (b *Button) MouseIn(*desktop.MouseEvent) *Button {
 	b.hovered = true
 	b.Refresh()
+	return b
 }
 
 // MouseOut is called when a desktop pointer exits the widget
-func (b *Button) MouseOut() {
+func (b *Button) MouseOut() *Button {
 	b.hovered = false
 	b.Refresh()
+	return b
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
-func (b *Button) MouseMoved(*desktop.MouseEvent) {
+func (b *Button) MouseMoved(*desktop.MouseEvent) *Button {
+	return b
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -257,10 +261,11 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // SetText allows the button label to be changed
-func (b *Button) SetText(text string) {
+func (b *Button) SetText(text string) *Button {
 	b.Text = text
 
 	b.Refresh()
+	return b
 }
 
 // Cursor returns the cursor type of this widget
@@ -269,7 +274,7 @@ func (b *Button) Cursor() desktop.Cursor {
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
-func (b *Button) SetIcon(icon fyne.Resource) {
+func (b *Button) SetIcon(icon fyne.Resource) *Button {
 	b.Icon = icon
 
 	if icon != nil {
@@ -279,6 +284,7 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 	}
 
 	b.Refresh()
+	return b
 }
 
 // NewButton creates a new button widget with the set label and tap handler
