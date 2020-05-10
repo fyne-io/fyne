@@ -72,6 +72,7 @@ func (d *gLDriver) tryPollEvents() {
 }
 
 func (d *gLDriver) runGL() {
+	// TUNING TODO - allow the ticker rate to be tunable ?
 	fps := time.NewTicker(time.Second / 60)
 	runMutex.Lock()
 	runFlag = true
