@@ -23,6 +23,9 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 // The last row of the grid will contain the appropriate form control buttons if any should be shown.
 // Calling OnSubmit will set the submit button to be visible and call back the function when tapped.
 // Calling OnCancel will do the same for a cancel button.
+// If you change OnSubmit/OnCancel after the form is created and rendered, you need to call
+// Refresh() to update the form with the correct buttons.
+// Setting OnSubmit/OnCancel to nil will remove the buttons.
 type Form struct {
 	BaseWidget
 
@@ -33,7 +36,6 @@ type Form struct {
 	CancelText string
 
 	itemGrid     *fyne.Container
-	vbox         *Box
 	buttonBox    *Box
 	cancelButton *Button
 	submitButton *Button
@@ -132,8 +134,8 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 	f.buttonBox.Hide()
 
-	f.vbox = NewVBox(f.itemGrid, f.buttonBox)
-	renderer := cache.Renderer(f.vbox)
+	vbox := NewVBox(f.itemGrid, f.buttonBox)
+	renderer := cache.Renderer(vbox)
 	f.setButtons()
 	return renderer
 }
