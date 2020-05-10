@@ -12,9 +12,10 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar, shadow color.Color
-	regular, bold, italic, bolditalic, monospace                                  fyne.Resource
-	disabledButton, disabledIcon, disabledText                                    color.Color
+	button, text, icon, hyperlink, placeholder, hover, scrollBar, shadow color.Color
+	primary, primaryText, primaryIcon, primaryHover                      color.Color
+	regular, bold, italic, bolditalic, monospace                         fyne.Resource
+	disabledButton, disabledIcon, disabledText                           color.Color
 }
 
 // LightTheme defines the built in light theme colours and sizes
@@ -24,12 +25,15 @@ func LightTheme() fyne.Theme {
 		button:         color.NRGBA{0xd9, 0xd9, 0xd9, 0xff},
 		disabledButton: color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
 		text:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		primaryText:    color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		disabledText:   color.NRGBA{0x80, 0x80, 0x80, 0xff},
 		icon:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		primaryIcon:    color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		disabledIcon:   color.NRGBA{0x80, 0x80, 0x80, 0xff},
 		hyperlink:      color.NRGBA{0x0, 0x0, 0xd9, 0xff},
 		placeholder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		primary:        color.NRGBA{0x9f, 0xa8, 0xda, 0xff},
+		primary:        color.NRGBA{0x9f, 0xa8, 0xda, 0x80},
+		primaryHover:   color.NRGBA{0x9f, 0xa8, 0xda, 0xa0}, // same as light mode
 		hover:          color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
@@ -40,21 +44,29 @@ func LightTheme() fyne.Theme {
 }
 
 // DarkTheme defines the built in dark theme colours and sizes
+// See https://www.material.io/design/color/dark-theme.html
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:     color.NRGBA{0x42, 0x42, 0x42, 0xff},
-		button:         color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		disabledButton: color.NRGBA{0x31, 0x31, 0x31, 0xff},
-		text:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		disabledText:   color.NRGBA{0x60, 0x60, 0x60, 0xff},
-		icon:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		disabledIcon:   color.NRGBA{0x60, 0x60, 0x60, 0xff},
+		// background: color.NRGBA{0x12, 0x12, 0x12, 0xff}, // recommended background - very dark
+		// background:     color.NRGBA{0x1F, 0x1B, 0x24, 0xff}, // branding suggestion from the article above - very purple
+		background:     color.NRGBA{0x24, 0x24, 0x24, 0xff},
+		button:         color.NRGBA{0xff, 0xff, 0xff, 0x30},
+		hover:          color.NRGBA{0xff, 0xff, 0xff, 0x40},
+		disabledButton: color.NRGBA{0xff, 0xff, 0xff, 0x10},
+		text:           color.NRGBA{0xff, 0xff, 0xff, 0xd0},
+		primaryText:    color.NRGBA{0x12, 0x12, 0x12, 0xff},
+		disabledText:   color.NRGBA{0xff, 0xff, 0xff, 0x40},
+		icon:           color.NRGBA{0xff, 0xff, 0xff, 0xe0},
+		primaryIcon:    color.NRGBA{0x12, 0x12, 0x12, 0xff},
+		disabledIcon:   color.NRGBA{0xff, 0xff, 0xff, 0x60},
 		hyperlink:      color.NRGBA{0x99, 0x99, 0xff, 0xff},
 		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		primary:        color.NRGBA{0x1a, 0x23, 0x7e, 0xff},
-		hover:          color.NRGBA{0x31, 0x31, 0x31, 0xff},
+		primary:        color.NRGBA{0x9f, 0xa8, 0xda, 0x90}, // same as light mode
+		primaryHover:   color.NRGBA{0x9f, 0xa8, 0xda, 0xb0}, // same as light mode
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
+		//primary:        color.NRGBA{0x33, 0x29, 0x40, 0xff},
+		//primary:   color.NRGBA{0xb0, 0xbe, 0xc5, 0xff},
 	}
 
 	theme.initFonts()
@@ -90,9 +102,19 @@ func (t *builtinTheme) DisabledTextColor() color.Color {
 	return t.disabledText
 }
 
+// PrimaryTextColor returns the theme's standard text colour on primary background
+func (t *builtinTheme) PrimaryTextColor() color.Color {
+	return t.primaryText
+}
+
 // IconColor returns the theme's standard text colour
 func (t *builtinTheme) IconColor() color.Color {
 	return t.icon
+}
+
+// PrimaryIconColor returns the theme's standard icon color on a primary background
+func (t *builtinTheme) PrimaryIconColor() color.Color {
+	return t.primaryIcon
 }
 
 // DisabledIconColor returns the color for a disabledIcon UI element
@@ -108,6 +130,11 @@ func (t *builtinTheme) PlaceHolderColor() color.Color {
 // PrimaryColor returns the colour used to highlight primary features
 func (t *builtinTheme) PrimaryColor() color.Color {
 	return t.primary
+}
+
+// PrimaryHoverColor returns the colour used to highlight primary features on hover
+func (t *builtinTheme) PrimaryHoverColor() color.Color {
+	return t.primaryHover
 }
 
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor
@@ -251,7 +278,12 @@ func DisabledTextColor() color.Color {
 	return current().DisabledTextColor()
 }
 
-// IconColor returns the theme's standard text colour
+// PrimaryTextColor returns the color for text on a primary background
+func PrimaryTextColor() color.Color {
+	return current().PrimaryTextColor()
+}
+
+// IconColor returns the theme's standard icon colour
 func IconColor() color.Color {
 	return current().IconColor()
 }
@@ -259,6 +291,11 @@ func IconColor() color.Color {
 // DisabledIconColor returns the color for a disabledIcon UI element
 func DisabledIconColor() color.Color {
 	return current().DisabledIconColor()
+}
+
+// PrimaryIconColor returns the theme's icon color on a primary background
+func PrimaryIconColor() color.Color {
+	return current().PrimaryIconColor()
 }
 
 // PlaceHolderColor returns the theme's standard text colour
@@ -269,6 +306,11 @@ func PlaceHolderColor() color.Color {
 // PrimaryColor returns the colour used to highlight primary features
 func PrimaryColor() color.Color {
 	return current().PrimaryColor()
+}
+
+// PrimaryHoverColor returns the colour used to highlight primary features on hover
+func PrimaryHoverColor() color.Color {
+	return current().PrimaryHoverColor()
 }
 
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor

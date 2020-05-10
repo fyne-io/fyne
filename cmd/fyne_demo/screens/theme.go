@@ -37,12 +37,20 @@ func (customTheme) TextColor() color.Color {
 	return color.White
 }
 
+func (customTheme) PrimaryTextColor() color.Color {
+	return orange
+}
+
 func (customTheme) DisabledTextColor() color.Color {
 	return color.Black
 }
 
 func (customTheme) IconColor() color.Color {
 	return color.White
+}
+
+func (customTheme) PrimaryIconColor() color.Color {
+	return color.Black
 }
 
 func (customTheme) DisabledIconColor() color.Color {
@@ -55,6 +63,10 @@ func (customTheme) PlaceHolderColor() color.Color {
 
 func (customTheme) PrimaryColor() color.Color {
 	return orange
+}
+
+func (customTheme) PrimaryHoverColor() color.Color {
+	return color.Transparent
 }
 
 func (customTheme) HoverColor() color.Color {

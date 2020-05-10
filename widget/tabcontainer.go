@@ -365,10 +365,11 @@ func (t *tabContainerRenderer) Refresh() {
 	}
 
 	for i, button := range t.tabBar.Objects {
+		b := button.(*tabButton)
 		if i == t.container.current {
-			button.(*tabButton).Style = PrimaryButton
+			b.Style = PrimaryButton
 		} else {
-			button.(*tabButton).Style = DefaultButton
+			b.Style = DefaultButton
 		}
 
 		button.Refresh()
@@ -464,6 +465,9 @@ type tabButtonRenderer struct {
 func (r *tabButtonRenderer) BackgroundColor() color.Color {
 	switch {
 	case r.button.Style == PrimaryButton:
+		if r.button.hovered {
+			return theme.PrimaryHoverColor()
+		}
 		return theme.PrimaryColor()
 	case r.button.hovered:
 		return theme.HoverColor()
@@ -541,7 +545,11 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabButtonRenderer) Refresh() {
 	r.label.Text = r.button.Text
-	r.label.Color = theme.TextColor()
+	if r.button.Style == PrimaryButton {
+		r.label.Color = theme.PrimaryTextColor()
+	} else {
+		r.label.Color = theme.TextColor()
+	}
 	r.label.TextSize = theme.TextSize()
 
 	canvas.Refresh(r.button)

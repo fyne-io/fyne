@@ -10,10 +10,13 @@ type Theme interface {
 	HyperlinkColor() color.Color
 	TextColor() color.Color
 	DisabledTextColor() color.Color
+	PrimaryTextColor() color.Color
 	IconColor() color.Color
 	DisabledIconColor() color.Color
+	PrimaryIconColor() color.Color
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color
+	PrimaryHoverColor() color.Color
 	HoverColor() color.Color
 	FocusColor() color.Color
 	ScrollBarColor() color.Color
