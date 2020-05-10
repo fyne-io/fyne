@@ -227,41 +227,47 @@ func makeFormTab() fyne.Widget {
 	password.SetPlaceHolder("Password")
 	largeText := widget.NewMultiLineEntry()
 
-	form := widget.NewForm()
-
-	setSubmit := widget.NewButton("Set Submit", func() {
-		form.OnSubmitWithLabel("New Submit", func() {
-			fmt.Println("New Submit Button added")
-		})
-	})
-	clearSubmit := widget.NewButton("Remove Submit", func() {
-		form.OnSubmit(nil)
-	})
-	setCancel := widget.NewButton("Set Cancel", func() {
-		form.OnCancelWithLabel("New Cancel", func() {
-			fmt.Println("New Cancel Button added")
-		})
-	})
-	clearCancel := widget.NewButton("Remove Cancel", func() {
-		form.OnCancel(nil)
-	})
-
-	return form.
-		Append("Name", name).
-		Append("Email", email).
-		Append("Password", password).
-		Append("Message", largeText).
-		Append("", widget.NewHBox(setSubmit, clearSubmit, setCancel, clearCancel)).
-		OnCancel(func() {
+	form := &widget.Form{
+		OnCancel: func() {
 			fmt.Println("Cancelled")
-		}).
-		OnSubmit(func() {
+		},
+		OnSubmit: func() {
 			fmt.Println("Form submitted")
 			fyne.CurrentApp().SendNotification(&fyne.Notification{
 				Title:   "Form for: " + name.Text,
 				Content: largeText.Text,
 			})
-		})
+		},
+	}
+
+	form.Append("Name", name)
+	form.Append("Email", email)
+	form.Append("Password", password)
+	form.Append("Message", largeText)
+
+	// Added to demonstrate that buttons can be reset after the form is alive
+	setSubmit := widget.NewButton("Set Submit", func() {
+		form.OnSubmit = func() { println("New Submit Button") }
+		form.SubmitText = "New Submit"
+		form.Refresh()
+	})
+	clearSubmit := widget.NewButton("Remove Submit", func() {
+		form.OnSubmit = nil
+		form.Refresh()
+	})
+
+	setCancel := widget.NewButton("Set Cancel", func() {
+		form.OnCancel = func() { println("New Cancel Button") }
+		form.CancelText = "New Cancel"
+		form.Refresh()
+	})
+	clearCancel := widget.NewButton("Remove Cancel", func() {
+		form.OnCancel = nil
+		form.Refresh()
+	})
+	form.Append("", widget.NewHBox(setSubmit, clearSubmit, setCancel, clearCancel))
+
+	return form
 }
 
 // WidgetScreen shows a panel containing widget demos

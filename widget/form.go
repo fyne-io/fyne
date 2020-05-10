@@ -27,15 +27,14 @@ type Form struct {
 	BaseWidget
 
 	Items      []*FormItem
-	onSubmit   func()
-	onCancel   func()
+	OnSubmit   func()
+	OnCancel   func()
 	SubmitText string
 	CancelText string
 
 	itemGrid     *fyne.Container
-	rendered     bool
-	buttonsBox   *Box
 	vbox         *Box
+	buttonBox    *Box
 	cancelButton *Button
 	submitButton *Button
 }
@@ -82,33 +81,8 @@ func (f *Form) MinSize() fyne.Size {
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
 	f.BaseWidget.Refresh()
+	f.setButtons()
 	canvas.Refresh(f) // refresh ourselves for BG color - the above updates the content
-}
-
-// OnSubmit sets the onSubmit func ptr
-func (f *Form) OnSubmit(fn func()) *Form {
-	f.onSubmit = fn
-	f.setButtons()
-	return f
-}
-
-// OnSubmitWithLabel sets the onSubmit func ptr and sets the name of the button
-func (f *Form) OnSubmitWithLabel(lbl string, fn func()) *Form {
-	f.SubmitText = lbl
-	return f.OnSubmit(fn)
-}
-
-// OnCancel sets the onSubmit func ptr
-func (f *Form) OnCancel(fn func()) *Form {
-	f.onCancel = fn
-	f.setButtons()
-	return f
-}
-
-// OnCancelWithLabel sets the onCancel func ptr and sets the name of the button
-func (f *Form) OnCancelWithLabel(lbl string, fn func()) *Form {
-	f.CancelText = lbl
-	return f.OnCancel(fn)
 }
 
 func (f *Form) setButtons() {
@@ -119,41 +93,26 @@ func (f *Form) setButtons() {
 		f.SubmitText = "Submit"
 	}
 
-	// if there is no renderer yet, exit
-	if !f.rendered {
-		return
+	// set visibility on the buttons
+	if f.OnCancel == nil {
+		f.cancelButton.Hide()
+	} else {
+		f.cancelButton.SetText(f.CancelText)
+		f.cancelButton.OnTapped = f.OnCancel
+		f.cancelButton.Show()
 	}
-
-	// remove the buttonBox from the forms vbox
-	if len(f.vbox.Children) > 1 {
-		f.vbox.Children = f.vbox.Children[:1]
+	if f.OnSubmit == nil {
+		f.submitButton.Hide()
+	} else {
+		f.submitButton.SetText(f.SubmitText)
+		f.submitButton.OnTapped = f.OnSubmit
+		f.submitButton.Show()
 	}
-
-	// create the buttons
-	if f.onCancel != nil {
-		f.cancelButton = NewButtonWithIcon(f.CancelText, theme.CancelIcon(), f.onCancel)
+	if f.OnCancel == nil && f.OnSubmit == nil {
+		f.buttonBox.Hide()
+	} else {
+		f.buttonBox.Show()
 	}
-	if f.onSubmit != nil {
-		f.submitButton = NewButtonWithIcon(f.SubmitText, theme.ConfirmIcon(), f.onSubmit)
-	}
-
-	// fill in the button box if needed
-	switch {
-	case f.onCancel != nil && f.onSubmit != nil:
-		f.buttonsBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
-	case f.onCancel != nil && f.onSubmit == nil:
-		f.buttonsBox = NewHBox(layout.NewSpacer(), f.cancelButton)
-	case f.onCancel == nil && f.onSubmit != nil:
-		f.buttonsBox = NewHBox(layout.NewSpacer(), f.submitButton)
-	case f.onCancel == nil && f.onSubmit == nil:
-		// we are done here
-		f.buttonsBox = nil
-		f.vbox.Refresh()
-		return
-	}
-
-	// add the button box to the itemsGrid and we are done
-	f.vbox.Append(f.buttonsBox)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -164,10 +123,18 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 		f.itemGrid.AddObject(f.createLabel(item.Text))
 		f.itemGrid.AddObject(item.Widget)
 	}
-	f.rendered = true
-	f.vbox = NewVBox(f.itemGrid)
-	f.setButtons()
+
+	// Create the buttons and hide the box till they are needed
+	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
+	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
+	f.submitButton.Hide()
+	f.cancelButton.Hide()
+	f.buttonBox = NewHBox(f.cancelButton, f.submitButton)
+	f.buttonBox.Hide()
+
+	f.vbox = NewVBox(f.itemGrid, f.buttonBox)
 	renderer := cache.Renderer(f.vbox)
+	f.setButtons()
 	return renderer
 }
 

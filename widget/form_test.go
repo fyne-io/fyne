@@ -2,7 +2,6 @@ package widget
 
 import (
 	"testing"
-	"time"
 
 	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
@@ -40,16 +39,13 @@ func TestForm_Append(t *testing.T) {
 }
 
 func TestForm_CustomButtonsText(t *testing.T) {
-	form := NewForm().
-		OnSubmit(func() {}).
-		OnCancel(func() {})
+	form := &Form{OnSubmit: func() {}, OnCancel: func() {}}
 	form.Append("test", NewEntry())
 	assert.Equal(t, "Submit", form.SubmitText)
 	assert.Equal(t, "Cancel", form.CancelText)
 
-	form = NewForm().
-		OnSubmitWithLabel("Apply", func() {}).
-		OnCancelWithLabel("Close", func() {})
+	form = &Form{OnSubmit: func() {}, SubmitText: "Apply",
+		OnCancel: func() {}, CancelText: "Close"}
 	assert.Equal(t, "Apply", form.SubmitText)
 	assert.Equal(t, "Close", form.CancelText)
 }
@@ -58,57 +54,25 @@ func TestForm_AddRemoveButton(t *testing.T) {
 	scount := 0
 	ccount := 0
 	sscount := 10
-	tapped := make(chan bool)
-	form := NewForm().
-		Append("test", NewEntry()).
-		OnSubmit(func() { scount++; tapped <- true }).
-		OnCancel(func() { ccount++; tapped <- true })
+	form := &Form{OnSubmit: func() {}, OnCancel: func() {}}
+	form.Append("test", NewEntry())
+	form.OnSubmit = func() { scount++ }
+	form.OnCancel = func() { ccount++ }
+	form.Refresh()
 
-	go test.Tap(form.submitButton)
-	func() {
-		select {
-		case <-tapped:
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Timed out waiting for submit button tap")
-		}
-	}()
-	assert.Equal(t, 1, scount) // because we tapped submit
+	test.Tap(form.submitButton)
+	assert.Equal(t, 1, scount, "tapping submit should incr scount")
 
-	go test.Tap(form.cancelButton)
-	func() {
-		select {
-		case <-tapped:
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Timed out waiting for cancel button tap")
-		}
-	}()
-	assert.Equal(t, 1, ccount) // because we tapped cancel
+	test.Tap(form.cancelButton)
+	assert.Equal(t, 1, ccount, "tapping cancel should incr ccount")
 
-	form.OnSubmit(func() {
-		sscount++
-		tapped <- true
-	})
-	go test.Tap(form.submitButton)
-	func() {
-		select {
-		case <-tapped:
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Timed out waiting for updated submit button tap")
-		}
-	}()
-	assert.Equal(t, 11, sscount) // because the new func adds 1 to 10 to get 11
+	form.OnSubmit = func() { sscount++ }
+	form.Refresh()
+	test.Tap(form.submitButton)
+	assert.Equal(t, 11, sscount, "tapping new submit should incr sscount from 10 to 11")
 
-	form.OnCancel(func() {
-		sscount = sscount - 6
-		tapped <- true
-	})
-	go test.Tap(form.cancelButton)
-	func() {
-		select {
-		case <-tapped:
-		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Timed out waiting for updated cancel button tap")
-		}
-	}()
-	assert.Equal(t, 5, sscount) // because the new cancel subtracts 6 from 11 to get 5
+	form.OnCancel = func() { sscount = sscount - 6 }
+	form.Refresh()
+	test.Tap(form.cancelButton)
+	assert.Equal(t, 5, sscount, "tapping new cancel should decr ssount from 11 down to 5")
 }
