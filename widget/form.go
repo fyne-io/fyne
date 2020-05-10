@@ -129,7 +129,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
 	f.submitButton.Hide()
 	f.cancelButton.Hide()
-	f.buttonBox = NewHBox(f.cancelButton, f.submitButton)
+	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 	f.buttonBox.Hide()
 
 	f.vbox = NewVBox(f.itemGrid, f.buttonBox)
