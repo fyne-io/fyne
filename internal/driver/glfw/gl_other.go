@@ -14,6 +14,3 @@ func updateGLContext(w *window) {
 
 	w.canvas.painter.SetOutputSize(winWidth, winHeight)
 }
-
-func forceWindowRefresh(_ *window) {
-}
