@@ -312,10 +312,6 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) Show() {
-	go w.doShow()
-}
-
-func (w *window) doShow() {
 	w.createLock.Do(w.create)
 
 	runOnMain(func() {

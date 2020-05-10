@@ -73,6 +73,7 @@ func (d *gLDriver) initGLFW() {
 		}
 
 		initCursors()
+		d.startDrawThread()
 	})
 }
 
@@ -83,7 +84,6 @@ func (d *gLDriver) runGL() {
 	runMutex.Unlock()
 
 	d.initGLFW()
-	d.startDrawThread()
 	d.startRedrawTimer()
 
 	for {
