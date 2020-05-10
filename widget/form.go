@@ -21,8 +21,8 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 
 // Form widget is two column grid where each row has a label and a widget (usually an input).
 // The last row of the grid will contain the appropriate form control buttons if any should be shown.
-// Calling OnSubmit will set the submit button to be visible and call back the function when tapped.
-// Calling OnCancel will do the same for a cancel button.
+// Setting OnSubmit will set the submit button to be visible and call back the function when tapped.
+// Setting OnCancel will do the same for a cancel button.
 // If you change OnSubmit/OnCancel after the form is created and rendered, you need to call
 // Refresh() to update the form with the correct buttons.
 // Setting OnSubmit/OnCancel to nil will remove the buttons.
