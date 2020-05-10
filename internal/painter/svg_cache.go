@@ -16,6 +16,8 @@ type rasterInfo struct {
 	expires time.Time
 }
 
+// TODO TUNING - making big assumptions in here about what "is best" for a desktop app
+// provide hooks to let the user tune these params
 var cacheDuration = time.Minute * 5
 var rasters = make(map[fyne.Resource]*rasterInfo)
 var aspects = make(map[interface{}]float32, 16)

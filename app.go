@@ -54,6 +54,10 @@ type App interface {
 
 	// Preferences returns the application preferences, used for storing configuration and state
 	Preferences() Preferences
+
+	// TODO TUNING - add app level parameters to tune various things
+	// OR - have a global fyne.Tuning object that gets init'd on boot and do everything through there
+	// but then we only have 1 app per executable, right ?
 }
 
 var app App

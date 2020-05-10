@@ -6,6 +6,8 @@ import (
 	"fyne.io/fyne"
 )
 
+// TODO TUNING - expire saved widgets out of the map ?
+
 var renderers sync.Map
 
 type isBaseWidget interface {

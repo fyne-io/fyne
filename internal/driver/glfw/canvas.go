@@ -155,6 +155,7 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 		// all good
 	default:
 		// queue is full, ignore
+		// TODO TUNING - define behavior on queue full - discard latest / discard oldest
 	}
 	c.setDirty(true)
 }
@@ -550,6 +551,7 @@ func newCanvas() *glCanvas {
 	c.overlays = &overlayStack{onChange: func() { c.setDirty(true) }}
 
 	c.focusMgr = app.NewFocusManager(c)
+	// TODO TUNING - set the size of this queue
 	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
 	c.dirtyMutex = &sync.Mutex{}
 
