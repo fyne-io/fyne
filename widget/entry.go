@@ -169,13 +169,14 @@ func (e *Entry) Enable() { // TODO remove this override after ReadOnly is remove
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
-func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
+func (e *Entry) ExtendBaseWidget(wid fyne.Widget) *Entry {
 	if e.BaseWidget.impl != nil {
-		return
+		return e
 	}
 
 	e.BaseWidget.impl = wid
 	e.registerShortcut()
+	return e
 }
 
 // Focused returns whether or not this Entry has focus.
@@ -279,19 +280,21 @@ func (e *Entry) SelectedText() string {
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
-func (e *Entry) SetPlaceHolder(text string) {
+func (e *Entry) SetPlaceHolder(text string) *Entry {
 	e.PlaceHolder = text
 	e.placeholderProvider().SetText(text) // refreshes
+	return e
 }
 
 // SetReadOnly sets whether or not the Entry should not be editable
 // Deprecated: Use Disable() instead.
-func (e *Entry) SetReadOnly(ro bool) {
+func (e *Entry) SetReadOnly(ro bool) *Entry {
 	if ro {
 		e.Disable()
 	} else {
 		e.Enable()
 	}
+	return e
 }
 
 // SetText manually sets the text of the Entry to the given text value.

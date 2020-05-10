@@ -91,9 +91,9 @@ type Check struct {
 }
 
 // SetChecked sets the the checked state and refreshes widget
-func (c *Check) SetChecked(checked bool) {
+func (c *Check) SetChecked(checked bool) *Check {
 	if checked == c.Checked {
-		return
+		return c
 	}
 
 	c.Checked = checked
@@ -103,6 +103,7 @@ func (c *Check) SetChecked(checked bool) {
 	}
 
 	c.Refresh()
+	return c
 }
 
 // Hide this widget, if it was previously visible

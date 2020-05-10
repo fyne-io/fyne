@@ -86,9 +86,10 @@ func (c *Container) Hide() {
 }
 
 // AddObject adds another CanvasObject to the set this Container holds.
-func (c *Container) AddObject(o CanvasObject) {
+func (c *Container) AddObject(o CanvasObject) *Container {
 	c.Objects = append(c.Objects, o)
 	c.layout()
+	return c
 }
 
 // Refresh causes this object to be redrawn in it's current state

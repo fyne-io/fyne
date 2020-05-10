@@ -206,10 +206,11 @@ func (r *Radio) MouseMoved(event *desktop.MouseEvent) {
 }
 
 // Append adds a new option to the end of a Radio widget.
-func (r *Radio) Append(option string) {
+func (r *Radio) Append(option string) *Radio {
 	r.Options = append(r.Options, option)
 
 	r.Refresh()
+	return r
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
@@ -268,14 +269,15 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // SetSelected sets the radio option, it can be used to set a default option.
-func (r *Radio) SetSelected(option string) {
+func (r *Radio) SetSelected(option string) *Radio {
 	if r.Selected == option {
-		return
+		return r
 	}
 
 	r.Selected = option
 
 	r.Refresh()
+	return r
 }
 
 func (r *Radio) itemHeight() int {

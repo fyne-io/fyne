@@ -17,17 +17,19 @@ type Group struct {
 }
 
 // Prepend inserts a new CanvasObject at the top of the group
-func (g *Group) Prepend(object fyne.CanvasObject) {
+func (g *Group) Prepend(object fyne.CanvasObject) *Group {
 	g.box.Prepend(object)
 
 	Refresh(g)
+	return g
 }
 
 // Append adds a new CanvasObject to the end of the group
-func (g *Group) Append(object fyne.CanvasObject) {
+func (g *Group) Append(object fyne.CanvasObject) *Group {
 	g.box.Append(object)
 
 	Refresh(g)
+	return g
 }
 
 // MinSize returns the size that this widget should not shrink below

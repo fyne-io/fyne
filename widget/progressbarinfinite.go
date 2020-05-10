@@ -145,13 +145,15 @@ func (p *ProgressBarInfinite) Hide() {
 }
 
 // Start the infinite progress bar background thread to update it continuously
-func (p *ProgressBarInfinite) Start() {
+func (p *ProgressBarInfinite) Start() *ProgressBarInfinite {
 	cache.Renderer(p).(*infProgressRenderer).start()
+	return p
 }
 
 // Stop the infinite progress goroutine and sets value to the Max
-func (p *ProgressBarInfinite) Stop() {
+func (p *ProgressBarInfinite) Stop() *ProgressBarInfinite {
 	cache.Renderer(p).(*infProgressRenderer).stop()
+	return p
 }
 
 // Running returns the current state of the infinite progress animation

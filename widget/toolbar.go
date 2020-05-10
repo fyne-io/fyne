@@ -80,15 +80,17 @@ func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // Append a new ToolbarItem to the end of this Toolbar
-func (t *Toolbar) Append(item ToolbarItem) {
+func (t *Toolbar) Append(item ToolbarItem) *Toolbar {
 	t.Items = append(t.Items, item)
 	t.Refresh()
+	return t
 }
 
 // Prepend a new ToolbarItem to the start of this Toolbar
-func (t *Toolbar) Prepend(item ToolbarItem) {
+func (t *Toolbar) Prepend(item ToolbarItem) *Toolbar {
 	t.Items = append([]ToolbarItem{item}, t.Items...)
 	t.Refresh()
+	return t
 }
 
 // MinSize returns the size that this widget should not shrink below

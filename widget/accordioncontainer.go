@@ -69,7 +69,7 @@ func (a *AccordionContainer) MinSize() fyne.Size {
 }
 
 // Open expands the item at the given index.
-func (a *AccordionContainer) Open(index int) *AccordianContainer {
+func (a *AccordionContainer) Open(index int) *AccordionContainer {
 	if index < 0 || index >= len(a.Items) {
 		return a
 	}
@@ -85,7 +85,7 @@ func (a *AccordionContainer) Open(index int) *AccordianContainer {
 }
 
 // OpenAll expands all items.
-func (a *AccordionContainer) OpenAll() *AccordianContainer {
+func (a *AccordionContainer) OpenAll() *AccordionContainer {
 	if !a.MultiOpen {
 		return a
 	}
@@ -97,7 +97,7 @@ func (a *AccordionContainer) OpenAll() *AccordianContainer {
 }
 
 // Remove deletes the given item from this AccordionContainer.
-func (a *AccordionContainer) Remove(item *AccordionItem) *AccordianContainer {
+func (a *AccordionContainer) Remove(item *AccordionItem) *AccordionContainer {
 	for i, ai := range a.Items {
 		if ai == item {
 			a.RemoveIndex(i)
@@ -108,7 +108,7 @@ func (a *AccordionContainer) Remove(item *AccordionItem) *AccordianContainer {
 }
 
 // RemoveIndex deletes the item at the given index from this AccordionContainer.
-func (a *AccordionContainer) RemoveIndex(index int) *AccordianContainer {
+func (a *AccordionContainer) RemoveIndex(index int) *AccordionContainer {
 	if index < 0 || index >= len(a.Items) {
 		return a
 	}

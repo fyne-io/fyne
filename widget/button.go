@@ -203,30 +203,26 @@ const (
 )
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
-func (b *Button) Tapped(*fyne.PointEvent) *Button {
+func (b *Button) Tapped(*fyne.PointEvent) {
 	if b.OnTapped != nil && !b.Disabled() {
 		b.OnTapped()
 	}
-	return b
 }
 
 // MouseIn is called when a desktop pointer enters the widget
-func (b *Button) MouseIn(*desktop.MouseEvent) *Button {
+func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
 	b.Refresh()
-	return b
 }
 
 // MouseOut is called when a desktop pointer exits the widget
-func (b *Button) MouseOut() *Button {
+func (b *Button) MouseOut() {
 	b.hovered = false
 	b.Refresh()
-	return b
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
-func (b *Button) MouseMoved(*desktop.MouseEvent) *Button {
-	return b
+func (b *Button) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MinSize returns the size that this widget should not shrink below

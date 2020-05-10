@@ -39,14 +39,13 @@ func (e *SelectEntry) Resize(size fyne.Size) {
 	if e.popUp != nil {
 		e.popUp.Resize(fyne.NewSize(size.Width, e.popUp.Size().Height))
 	}
-
 }
 
 // SetOptions sets the options the user might select from.
-func (e *SelectEntry) SetOptions(options []string) {
+func (e *SelectEntry) SetOptions(options []string) *SelectEntry {
 	if len(options) == 0 {
 		e.ActionItem = nil
-		return
+		return e
 	}
 
 	var items []*fyne.MenuItem
@@ -67,4 +66,5 @@ func (e *SelectEntry) SetOptions(options []string) {
 	})
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())
 	e.ActionItem = dropDownButton
+	return e
 }

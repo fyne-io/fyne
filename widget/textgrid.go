@@ -90,7 +90,7 @@ func (t *TextGrid) Resize(size fyne.Size) {
 // SetText updates the buffer of this textgrid to contain the specified text.
 // New lines and columns will be added as required. Lines are separated by '\n'.
 // The grid will use default text style and any previous content and style will be removed.
-func (t *TextGrid) SetText(text string) {
+func (t *TextGrid) SetText(text string) *TextGrid {
 	lines := strings.Split(text, "\n")
 	rows := make([]TextGridRow, len(lines))
 	for i, line := range lines {
@@ -104,6 +104,7 @@ func (t *TextGrid) SetText(text string) {
 
 	t.Rows = rows
 	t.Refresh()
+	return t
 }
 
 // Text returns the contents of the buffer as a single string (with no style information).
@@ -143,9 +144,9 @@ func (t *TextGrid) Row(row int) TextGridRow {
 
 // SetRow updates the specified row of the grid's contents using the specified content and style and then refreshes.
 // If the row is beyond the end of the current buffer it will be expanded.
-func (t *TextGrid) SetRow(row int, content TextGridRow) {
+func (t *TextGrid) SetRow(row int, content TextGridRow) *TextGrid {
 	if row < 0 {
-		return
+		return t
 	}
 	for len(t.Rows) <= row {
 		t.Rows = append(t.Rows, TextGridRow{})
@@ -153,12 +154,13 @@ func (t *TextGrid) SetRow(row int, content TextGridRow) {
 
 	t.Rows[row] = content
 	t.Refresh()
+	return t
 }
 
 // SetStyle sets a grid style to the cell at named row and column
-func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
+func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) *TextGrid {
 	if row < 0 || col < 0 {
-		return
+		return t
 	}
 	for len(t.Rows) <= row {
 		t.Rows = append(t.Rows, TextGridRow{})
@@ -170,12 +172,13 @@ func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
 		t.Rows[row] = data
 	}
 	data.Cells[col].Style = style
+	return t
 }
 
 // SetStyleRange sets a grid style to all the cells between the start row and column through to the end row and column.
-func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style TextGridStyle) {
+func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style TextGridStyle) *TextGrid {
 	if startRow >= len(t.Rows) || endRow < 0 {
-		return
+		return t
 	}
 	if startRow < 0 {
 		startRow = 0
@@ -190,7 +193,7 @@ func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style T
 		for col := startCol; col <= endCol; col++ {
 			t.SetStyle(startRow, col, style)
 		}
-		return
+		return t
 	}
 
 	// first row
@@ -209,6 +212,7 @@ func (t *TextGrid) SetStyleRange(startRow, startCol, endRow, endCol int, style T
 	for col := 0; col <= endCol; col++ {
 		t.SetStyle(endRow, col, style)
 	}
+	return t
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to it's renderer

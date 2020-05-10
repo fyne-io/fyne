@@ -128,23 +128,25 @@ type DisableableWidget struct {
 }
 
 // Enable this widget, updating any style or features appropriately.
-func (w *DisableableWidget) Enable() {
+func (w *DisableableWidget) Enable() *DisableableWidget {
 	if !w.disabled {
-		return
+		return w
 	}
 
 	w.disabled = false
 	w.Refresh()
+	return w
 }
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
-func (w *DisableableWidget) Disable() {
+func (w *DisableableWidget) Disable() *DisableableWidget {
 	if w.disabled {
-		return
+		return w
 	}
 
 	w.disabled = true
 	w.Refresh()
+	return w
 }
 
 // Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.

@@ -51,14 +51,16 @@ func (hl *Hyperlink) Resize(size fyne.Size) {
 }
 
 // SetText sets the text of the hyperlink
-func (hl *Hyperlink) SetText(text string) {
+func (hl *Hyperlink) SetText(text string) *Hyperlink {
 	hl.Text = text
 	hl.provider.SetText(text) // calls refresh
+	return hl
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
-func (hl *Hyperlink) SetURL(url *url.URL) {
+func (hl *Hyperlink) SetURL(url *url.URL) *Hyperlink {
 	hl.URL = url
+	return hl
 }
 
 // SetURLFromString sets the URL of the hyperlink, taking in a string type

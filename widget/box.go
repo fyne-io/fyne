@@ -21,13 +21,12 @@ type Box struct {
 }
 
 // Refresh updates this box to match the current theme
-func (b *Box) Refresh() *Box {
+func (b *Box) Refresh() {
 	if b.background != nil {
 		b.background = theme.BackgroundColor()
 	}
 
 	b.BaseWidget.Refresh()
-	return b
 }
 
 // Prepend inserts a new CanvasObject at the top/left of the box

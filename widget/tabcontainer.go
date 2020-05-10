@@ -60,13 +60,14 @@ func (t *TabContainer) Show() {
 }
 
 // SelectTab sets the specified TabItem to be selected and its content visible.
-func (t *TabContainer) SelectTab(item *TabItem) {
+func (t *TabContainer) SelectTab(item *TabItem) *TabContainer {
 	for i, child := range t.Items {
 		if child == item {
 			t.SelectTabIndex(i)
-			return
+			return t
 		}
 	}
+	return t
 }
 
 // CurrentTab returns the currently selected TabItem.
@@ -78,9 +79,9 @@ func (t *TabContainer) CurrentTab() *TabItem {
 }
 
 // SelectTabIndex sets the TabItem at the specific index to be selected and its content visible.
-func (t *TabContainer) SelectTabIndex(index int) {
+func (t *TabContainer) SelectTabIndex(index int) *TabContainer {
 	if index < 0 || index >= len(t.Items) || t.current == index {
-		return
+		return t
 	}
 
 	t.current = index
@@ -100,6 +101,7 @@ func (t *TabContainer) SelectTabIndex(index int) {
 	if t.OnChanged != nil {
 		t.OnChanged(t.Items[t.current])
 	}
+	return t
 }
 
 // CurrentTabIndex returns the index of the currently selected TabItem.
@@ -158,37 +160,40 @@ func (t *TabContainer) buildTabBar(buttons []fyne.CanvasObject) *fyne.Container 
 }
 
 // Append adds a new TabItem to the rightmost side of the tab panel
-func (t *TabContainer) Append(item *TabItem) {
+func (t *TabContainer) Append(item *TabItem) *TabContainer {
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	t.Items = append(t.Items, item)
 	r.objects = append(r.objects, item.Content)
 	r.tabBar.Objects = append(r.tabBar.Objects, t.makeButton(item))
 
 	t.Refresh()
+	return t
 }
 
 // Remove tab by value
-func (t *TabContainer) Remove(item *TabItem) {
+func (t *TabContainer) Remove(item *TabItem) *TabContainer {
 	for index, existingItem := range t.Items {
 		if existingItem == item {
 			t.RemoveIndex(index)
 			break
 		}
 	}
+	return t
 }
 
 // RemoveIndex removes tab by index
-func (t *TabContainer) RemoveIndex(index int) {
+func (t *TabContainer) RemoveIndex(index int) *TabContainer {
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	t.Items = append(t.Items[:index], t.Items[index+1:]...)
 	r.objects = append(r.objects[:index], r.objects[index+1:]...)
 	r.tabBar.Objects = append(r.tabBar.Objects[:index], r.tabBar.Objects[index+1:]...)
 
 	t.Refresh()
+	return t
 }
 
 // SetTabLocation sets the location of the tab bar
-func (t *TabContainer) SetTabLocation(l TabLocation) {
+func (t *TabContainer) SetTabLocation(l TabLocation) *TabContainer {
 	t.tabLocation = l
 	r := cache.Renderer(t).(*tabContainerRenderer)
 	buttons := r.tabBar.Objects
@@ -204,6 +209,7 @@ func (t *TabContainer) SetTabLocation(l TabLocation) {
 	r.tabBar = t.buildTabBar(buttons)
 
 	r.Layout(t.size)
+	return t
 }
 
 func (t *TabContainer) mismatchedContent() bool {

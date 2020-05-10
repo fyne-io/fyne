@@ -67,9 +67,10 @@ func (p *PopUp) Show() {
 }
 
 // ShowAtPosition shows this pop-up at the given position.
-func (p *PopUp) ShowAtPosition(pos fyne.Position) {
+func (p *PopUp) ShowAtPosition(pos fyne.Position) *PopUp {
 	p.Move(pos)
 	p.Show()
+	return p
 }
 
 // Tapped is called when the user taps the popUp background - if not modal then dismiss this widget
@@ -121,8 +122,8 @@ func NewPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.
 
 // ShowPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
 // It will then display the popup on the passed canvas.
-func ShowPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) {
-	newPopUp(content, canvas).ShowAtPosition(pos)
+func ShowPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) *PopUp {
+	return newPopUp(content, canvas).ShowAtPosition(pos)
 }
 
 func newPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
@@ -159,9 +160,10 @@ func NewModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 
 // ShowModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
-func ShowModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) {
+func ShowModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 	p := newModalPopUp(content, canvas)
 	p.Show()
+	return p
 }
 
 type popUpBaseRenderer struct {
