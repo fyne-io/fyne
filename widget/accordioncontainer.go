@@ -27,26 +27,29 @@ func NewAccordionContainer(items ...*AccordionItem) *AccordionContainer {
 }
 
 // Append adds the given item to this AccordionContainer.
-func (a *AccordionContainer) Append(item *AccordionItem) {
+func (a *AccordionContainer) Append(item *AccordionItem) *AccordionContainer {
 	a.Items = append(a.Items, item)
 	a.Refresh()
+	return a
 }
 
 // Close collapses the item at the given index.
-func (a *AccordionContainer) Close(index int) {
+func (a *AccordionContainer) Close(index int) *AccordionContainer {
 	if index < 0 || index >= len(a.Items) {
-		return
+		return a
 	}
 	a.Items[index].Open = false
 	a.Refresh()
+	return a
 }
 
 // CloseAll collapses all items.
-func (a *AccordionContainer) CloseAll() {
+func (a *AccordionContainer) CloseAll() *AccordionContainer {
 	for _, i := range a.Items {
 		i.Open = false
 	}
 	a.Refresh()
+	return a
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -66,9 +69,9 @@ func (a *AccordionContainer) MinSize() fyne.Size {
 }
 
 // Open expands the item at the given index.
-func (a *AccordionContainer) Open(index int) {
+func (a *AccordionContainer) Open(index int) *AccordianContainer {
 	if index < 0 || index >= len(a.Items) {
-		return
+		return a
 	}
 	for i, ai := range a.Items {
 		if i == index {
@@ -78,36 +81,40 @@ func (a *AccordionContainer) Open(index int) {
 		}
 	}
 	a.Refresh()
+	return a
 }
 
 // OpenAll expands all items.
-func (a *AccordionContainer) OpenAll() {
+func (a *AccordionContainer) OpenAll() *AccordianContainer {
 	if !a.MultiOpen {
-		return
+		return a
 	}
 	for _, i := range a.Items {
 		i.Open = true
 	}
 	a.Refresh()
+	return a
 }
 
 // Remove deletes the given item from this AccordionContainer.
-func (a *AccordionContainer) Remove(item *AccordionItem) {
+func (a *AccordionContainer) Remove(item *AccordionItem) *AccordianContainer {
 	for i, ai := range a.Items {
 		if ai == item {
 			a.RemoveIndex(i)
 			break
 		}
 	}
+	return a
 }
 
 // RemoveIndex deletes the item at the given index from this AccordionContainer.
-func (a *AccordionContainer) RemoveIndex(index int) {
+func (a *AccordionContainer) RemoveIndex(index int) *AccordianContainer {
 	if index < 0 || index >= len(a.Items) {
-		return
+		return a
 	}
 	a.Items = append(a.Items[:index], a.Items[index+1:]...)
 	a.Refresh()
+	return a
 }
 
 type accordionContainerRenderer struct {
