@@ -2,23 +2,38 @@ package widget
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/widget"
 )
 
 // PopUpMenu is a Menu which displays itself in an OverlayContainer.
 type PopUpMenu struct {
-	*Menu
+	*widget.Menu
 	canvas  fyne.Canvas
-	overlay *OverlayContainer
+	overlay *widget.OverlayContainer
 }
 
-// NewPopUpMenu creates a new PopUpMenu.
-func NewPopUpMenu(m *fyne.Menu, c fyne.Canvas) *PopUpMenu {
-	p := &PopUpMenu{Menu: NewMenu(m), canvas: c}
+// ShowPopUpMenuAtPosition creates a PopUp menu populated with items from the passed menu structure.
+// It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
+func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) {
+	m := NewPopUpMenu2(menu, c)
+	m.ShowAtPosition(pos)
+}
+
+func NewPopUpMenu2(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
+	p := &PopUpMenu{Menu: widget.NewMenu(menu), canvas: c}
 	p.Menu.Resize(p.Menu.MinSize())
 	p.Menu.customSized = true
-	o := NewOverlayContainer(p.Menu, c, p.Dismiss)
+	o := widget.NewOverlayContainer(p.Menu, c, p.Dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o
+
+	focused := c.Focused()
+	p.DismissAction = func() {
+		if c.Focused() == nil {
+			c.Focus(focused)
+		}
+		p.Hide()
+	}
 	return p
 }
 
@@ -64,16 +79,21 @@ func (p *PopUpMenu) ShowAtPosition(pos fyne.Position) {
 }
 
 func (p *PopUpMenu) adjustPosition() {
-	if p.pos.X+p.size.Width > p.canvas.Size().Width {
-		p.pos.X = p.canvas.Size().Width - p.size.Width
-		if p.pos.X < 0 {
-			p.pos.X = 0 // TODO here we may need a scroller as it's wider than our canvas
+	newX := p.Position().X
+	newY := p.Position().Y
+	if p.Position().X+p.Size().Width > p.canvas.Size().Width {
+		newX = p.canvas.Size().Width - p.Size().Width
+		if newX < 0 {
+			newX = 0 // TODO here we may need a scroller as it's wider than our canvas
 		}
 	}
-	if p.pos.Y+p.size.Height > p.canvas.Size().Height {
-		p.pos.Y = p.canvas.Size().Height - p.size.Height
-		if p.pos.Y < 0 {
-			p.pos.Y = 0 // TODO here we may need a scroller as it's longer than our canvas
+	if p.Position().Y+p.Size().Height > p.canvas.Size().Height {
+		newY = p.canvas.Size().Height - p.Size().Height
+		if newY < 0 {
+			newY = 0 // TODO here we may need a scroller as it's longer than our canvas
 		}
+	}
+	if newX != p.Position().X || newY != p.Position().Y {
+		p.Base.Move(fyne.NewPos(newX, newY))
 	}
 }

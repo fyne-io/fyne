@@ -1,16 +1,15 @@
-package widget_test
+package widget
 
 import (
 	"image/color"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPopUpMenu_Move(t *testing.T) {
@@ -91,13 +90,13 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 	assert.Equal(t, menuSize, m.Size())
 }
 
-func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
+func setupPopUpMenuTest() (*PopUpMenu, fyne.Window) {
 	app := test.NewApp()
 	app.Settings().SetTheme(theme.DarkTheme())
 
 	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
 	w.Resize(fyne.NewSize(200, 200))
-	m := widget.NewPopUpMenu(fyne.NewMenu(
+	m := NewPopUpMenu2(fyne.NewMenu(
 		"",
 		fyne.NewMenuItem("Option A", nil),
 		fyne.NewMenuItem("Option B", nil),
