@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/cache"
-	pnt "fyne.io/fyne/internal/painter"
+	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
 
 	"github.com/goki/freetype"
@@ -34,14 +34,14 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	bounds := img.Size()
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
-	tex := pnt.PaintImage(img, c, width, height)
+	tex := painter.PaintImage(img, c, width, height)
 
 	if img.FillMode == canvas.ImageFillStretch {
 		width = internal.ScaleInt(c, img.Size().Width)
 		height = internal.ScaleInt(c, img.Size().Height)
 		tex = resize.Resize(uint(width), uint(height), tex, resize.Lanczos3)
 	} else if img.FillMode == canvas.ImageFillContain {
-		imgAspect := pnt.GetAspect(img)
+		imgAspect := painter.GetAspect(img)
 		objAspect := float32(width) / float32(height)
 
 		if objAspect > imgAspect {
