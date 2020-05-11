@@ -116,8 +116,8 @@ func limit(i int) uint8 {
 	return uint8(i)
 }
 
-func brighten(c color.NRGBA, amount int) color.Color {
-	factor := 1.0 + (float64(amount) / 10.0)
+func brighten(c color.NRGBA, amount float64) color.Color {
+	factor := 1.0 + (amount / 10.0)
 	r := limit(int(float64(c.R) * factor))
 	g := limit(int(float64(c.G) * factor))
 	b := limit(int(float64(c.B) * factor))
