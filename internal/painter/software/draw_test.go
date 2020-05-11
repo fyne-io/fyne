@@ -84,7 +84,7 @@ func TestDrawImage_Contain(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
-func TestDrawImage_ContainX(t *testing.T) {
+func TestDrawImage_ContainHV(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 100, 50))
 	img := canvas.NewImageFromImage(makeTestImage(3, 5))
 	img.FillMode = canvas.ImageFillContain
@@ -92,10 +92,20 @@ func TestDrawImage_ContainX(t *testing.T) {
 	img.Resize(fyne.NewSize(100, 50))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(100, 50), target)
-	test.AssertImageMatches(t, "draw_image_containx.png", target)
+	test.AssertImageMatches(t, "draw_image_contain_HV.png", target)
+}
+func TestDrawImage_ContainHH(t *testing.T) {
+	target := image.NewNRGBA(image.Rect(0, 0, 100, 50))
+	img := canvas.NewImageFromImage(makeTestImage(9, 3))
+	img.FillMode = canvas.ImageFillContain
+	img.ScalingFilter = canvas.NearestFilter
+	img.Resize(fyne.NewSize(100, 50))
+
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(100, 50), target)
+	test.AssertImageMatches(t, "draw_image_contain_HH.png", target)
 }
 
-func TestDrawImage_ContainY(t *testing.T) {
+func TestDrawImage_ContainVH(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 50, 100))
 	img := canvas.NewImageFromImage(makeTestImage(5, 3))
 	img.FillMode = canvas.ImageFillContain
@@ -103,5 +113,16 @@ func TestDrawImage_ContainY(t *testing.T) {
 	img.Resize(fyne.NewSize(50, 100))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 100), target)
-	test.AssertImageMatches(t, "draw_image_containy.png", target)
+	test.AssertImageMatches(t, "draw_image_contain_VH.png", target)
+}
+
+func TestDrawImage_ContainVV(t *testing.T) {
+	target := image.NewNRGBA(image.Rect(0, 0, 50, 100))
+	img := canvas.NewImageFromImage(makeTestImage(3, 9))
+	img.FillMode = canvas.ImageFillContain
+	img.ScalingFilter = canvas.NearestFilter
+	img.Resize(fyne.NewSize(50, 100))
+
+	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 100), target)
+	test.AssertImageMatches(t, "draw_image_contain_VV.png", target)
 }
