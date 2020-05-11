@@ -13,11 +13,12 @@ import (
 type builtinTheme struct {
 	palette                                      *palette
 	regular, bold, italic, bolditalic, monospace fyne.Resource
+	direction int
 }
 
 // LightTheme defines the built in light theme colours and sizes
 func LightTheme() fyne.Theme {
-	theme := &builtinTheme{}
+	theme := &builtinTheme{direction: 1}
 	theme.palette = defaultPalette()
 	theme.initFonts()
 	return theme
@@ -26,7 +27,7 @@ func LightTheme() fyne.Theme {
 // DarkTheme defines the built in dark theme colours and sizes
 // See https://www.material.io/design/color/dark-theme.html
 func DarkTheme() fyne.Theme {
-	theme := &builtinTheme{}
+	theme := &builtinTheme{direction: -1}
 	var err error
 	theme.palette, err = newPalette(defaultPalette(), `
 {
@@ -51,12 +52,12 @@ func (t *builtinTheme) BackgroundColor() color.Color {
 
 // ButtonColor returns the theme's standard button colour
 func (t *builtinTheme) ButtonColor() color.Color {
-	return brighten(t.palette.canvasColor, 1)
+	return brighten(t.palette.canvasColor, 1 * t.direction)
 }
 
 // DisabledButtonColor returns the theme's disabled button colour
 func (t *builtinTheme) DisabledButtonColor() color.Color {
-	return brighten(t.palette.canvasColor, -1)
+	return brighten(t.palette.canvasColor, -1 * t.direction)
 }
 
 // HyperlinkColor returns the theme's standard hyperlink colour
@@ -82,12 +83,12 @@ func (t *builtinTheme) PrimaryTextColor() color.Color {
 
 // IconColor returns the theme's standard text colour
 func (t *builtinTheme) IconColor() color.Color {
-	return brighten(t.palette.textColor, 1)
+	return brighten(t.palette.textColor, 1 * t.direction)
 }
 
 // DisabledIconColor returns the color for a disabledIcon UI element
 func (t *builtinTheme) DisabledIconColor() color.Color {
-	return brighten(t.palette.disabledColor, 1)
+	return brighten(t.palette.disabledColor, 1 * t.direction)
 }
 
 // PlaceHolderColor returns the theme's placeholder text colour
@@ -102,12 +103,12 @@ func (t *builtinTheme) PrimaryColor() color.Color {
 
 // PrimaryHoverColor returns the colour used to highlight primary features on hover
 func (t *builtinTheme) PrimaryHoverColor() color.Color {
-	return brighten(t.palette.primary1Color, -1)
+	return brighten(t.palette.primary1Color, 1 * t.direction)
 }
 
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor
 func (t *builtinTheme) HoverColor() color.Color {
-	return brighten(t.palette.canvasColor, -1)
+	return brighten(t.palette.canvasColor, 1 * t.direction)
 }
 
 // FocusColor returns the colour used to highlight a focused widget
@@ -221,7 +222,9 @@ func Extend(str string) error {
 	c := current()
 	t,ok := c.(*builtinTheme)
 	if !ok {
-		return fmt.Errorf("Unknown type %T for current theme", c)
+		fmt.Printf("Unknown type %T for current theme", c)
+		fyne.CurrentApp().Settings().SetTheme(DarkTheme())
+		t = current().(*builtinTheme)
 	}
 	newPalette,err := newPalette(t.palette, str)
 	if err != nil {
