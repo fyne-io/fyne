@@ -8,9 +8,13 @@ import (
 )
 
 var (
-	red   = &color.RGBA{R: 255, G: 0, B: 0, A: 255}
-	green = &color.RGBA{R: 0, G: 255, B: 0, A: 255}
-	blue  = &color.RGBA{R: 0, G: 0, B: 255, A: 255}
+	red    = &color.RGBA{R: 255, G: 0, B: 0, A: 255}
+	green  = &color.RGBA{R: 0, G: 255, B: 0, A: 255}
+	green2 = &color.RGBA{R: 10, G: 255, B: 0, A: 255}
+	green3 = &color.RGBA{R: 20, G: 255, B: 0, A: 255}
+	green4 = &color.RGBA{R: 30, G: 255, B: 0, A: 255}
+	blue   = &color.RGBA{R: 0, G: 0, B: 255, A: 255}
+	blue2  = &color.RGBA{R: 10, G: 0, B: 255, A: 255}
 )
 
 const testTextSize = 18
@@ -86,9 +90,30 @@ func (testTheme) PlaceHolderColor() color.Color {
 	return blue
 }
 
+// PrimaryTextColor satisfies the fyne.Theme interface.
+func (testTheme) PrimaryTextColor() color.Color {
+	return blue2
+}
+
 // PrimaryColor satisfies the fyne.Theme interface.
 func (testTheme) PrimaryColor() color.Color {
 	return green
+}
+
+// PrimaryHoverColor satisfies the fyne.Theme interface.
+func (testTheme) PrimaryHoverColor() color.Color {
+	return green2
+
+}
+
+// SecondaryColor satisfies the fyne.Theme interface.
+func (testTheme) SecondaryColor() color.Color {
+	return green3
+}
+
+// SecondaryHoverColor satisfies the fyne.Theme interface.
+func (testTheme) SecondaryHoverColor() color.Color {
+	return green4
 }
 
 // ScrollBarColor satisfies the fyne.Theme interface.

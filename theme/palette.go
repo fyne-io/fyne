@@ -16,7 +16,6 @@ func defaultPalette() *palette {
 		"canvasColor": "#ffffff",
 		"primary1Color": "#9fa8da",
 		"primary2Color": "#b39ddb",
-		"primary2Color": "#757575",
 		"accent1Color": "#00bfa5",
 		"accent2Color": "#b9f6ca",
 		"accent3Color": "#ccff90"

@@ -15,6 +15,8 @@ type Theme interface {
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color
 	PrimaryHoverColor() color.Color
+	SecondaryColor() color.Color
+	SecondaryHoverColor() color.Color
 	PrimaryTextColor() color.Color
 	HoverColor() color.Color
 	FocusColor() color.Color

@@ -105,7 +105,7 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 // applyTheme updates this button to match the current theme
 func (b *buttonRenderer) applyTheme() {
 	b.label.TextSize = theme.TextSize()
-	if b.button.Style == PrimaryButton {
+	if b.button.Style == PrimaryButton || b.button.Style == SecondaryButton {
 		b.label.Color = theme.PrimaryTextColor()
 	} else {
 		b.label.Color = theme.TextColor()
@@ -125,6 +125,11 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 			return theme.PrimaryHoverColor()
 		}
 		return theme.PrimaryColor()
+	case b.button.Style == SecondaryButton:
+		if b.button.hovered {
+			return theme.SecondaryHoverColor()
+		}
+		return theme.SecondaryColor()
 	case b.button.hovered:
 		return theme.HoverColor()
 	default:
@@ -186,6 +191,7 @@ const (
 	DefaultButton ButtonStyle = iota
 	// PrimaryButton that should be more prominent to the user
 	PrimaryButton
+	SecondaryButton
 )
 
 // ButtonAlign represents the horizontal alignment of a button.
@@ -237,6 +243,12 @@ func (b *Button) MouseMoved(*desktop.MouseEvent) {
 func (b *Button) MinSize() fyne.Size {
 	b.ExtendBaseWidget(b)
 	return b.BaseWidget.MinSize()
+}
+
+// SetStyle sets the style on the button
+func (b *Button) SetStyle(s ButtonStyle) *Button {
+	b.Style = s
+	return b
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer

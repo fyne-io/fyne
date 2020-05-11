@@ -2,7 +2,6 @@
 package theme // import "fyne.io/fyne/theme"
 
 import (
-	"fmt"
 	"image/color"
 	"os"
 	"strings"
@@ -107,13 +106,26 @@ func (t *builtinTheme) PrimaryColor() color.Color {
 }
 
 // PrimaryHoverColor returns the colour used to highlight primary features on hover
+// always brighten
 func (t *builtinTheme) PrimaryHoverColor() color.Color {
-	return brighten(t.palette.primary1Color, t.direction)
+	return brighten(t.palette.primary1Color, 1.0)
+}
+
+// Primary2Color returns the colour used to highlight primary features
+func (t *builtinTheme) SecondaryColor() color.Color {
+	return t.palette.accent1Color
+}
+
+// Primary2HoverColor returns the colour used to highlight primary features on hover
+// always brighten
+func (t *builtinTheme) SecondaryHoverColor() color.Color {
+	return brighten(t.palette.accent1Color, 1.0)
 }
 
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor
+// always brighten
 func (t *builtinTheme) HoverColor() color.Color {
-	return brighten(t.ButtonColor().(color.NRGBA), t.direction)
+	return brighten(t.ButtonColor().(color.NRGBA), 0.8)
 }
 
 // FocusColor returns the colour used to highlight a focused widget
@@ -227,7 +239,6 @@ func Extend(str string) error {
 	c := current()
 	t, ok := c.(*builtinTheme)
 	if !ok {
-		fmt.Printf("Unknown type %T for current theme", c)
 		fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 		t = current().(*builtinTheme)
 	}
@@ -236,6 +247,7 @@ func Extend(str string) error {
 		return err
 	}
 	theme := &builtinTheme{}
+	*theme = *t
 	theme.palette = newPalette
 	theme.initFonts()
 	fyne.CurrentApp().Settings().SetTheme(theme)
@@ -301,6 +313,16 @@ func PrimaryColor() color.Color {
 // PrimaryHoverColor returns the colour used to highlight primary features on hover
 func PrimaryHoverColor() color.Color {
 	return current().PrimaryHoverColor()
+}
+
+// Primary2Color returns the colour used to highlight primary features
+func SecondaryColor() color.Color {
+	return current().SecondaryColor()
+}
+
+// Primary2HoverColor returns the colour used to highlight primary features on hover
+func SecondaryHoverColor() color.Color {
+	return current().SecondaryHoverColor()
 }
 
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor

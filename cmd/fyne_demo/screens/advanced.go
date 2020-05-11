@@ -58,6 +58,7 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 		})
 	}
 
+	// if we had chaining here, wouldnt need to create all this guff outside of the HBox
 	themeUpdateEntry := widget.NewMultiLineEntry()
 	link, _ := url.Parse("https://cimdalli.github.io/mui-theme-generator/")
 	notifyError := func(err error) {
@@ -74,18 +75,18 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 					if err := theme.Extend(win.Clipboard().Content()); err != nil {
 						notifyError(err)
 					}
-				}),
+				}).SetStyle(widget.SecondaryButton),
 			),
 			themeUpdateEntry,
-			widget.NewButton("Extend Current Theme", func() {
+			widget.NewButton("Extend Theme", func() {
 				if err := theme.Extend(themeUpdateEntry.Text); err != nil {
 					notifyError(err)
 				}
 				themeUpdateEntry.SetText("")
-			}),
+			}).SetStyle(widget.PrimaryButton),
 			widget.NewButton("Custom Theme", func() {
 				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())
-			}),
+			}).SetStyle(widget.SecondaryButton),
 			widget.NewButton("Fullscreen", func() {
 				win.SetFullScreen(!win.FullScreen())
 			}),

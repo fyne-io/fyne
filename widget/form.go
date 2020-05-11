@@ -98,7 +98,9 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 			f.CancelText = "Cancel"
 		}
 
-		buttons.Append(NewButtonWithIcon(f.CancelText, theme.CancelIcon(), f.OnCancel))
+		cancelButton := NewButtonWithIcon(f.CancelText, theme.CancelIcon(), f.OnCancel)
+		cancelButton.Style = SecondaryButton
+		buttons.Append(cancelButton)
 	}
 	if f.OnSubmit != nil {
 		if f.SubmitText == "" {
