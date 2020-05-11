@@ -61,13 +61,15 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 	return widget.NewHBox(
 		widget.NewVBox(screen,
 			themeUpdateEntry,
-			widget.NewButton("Apply Custom Theme", func() {
+			widget.NewButton("Extend Current Theme", func() {
 				if err := theme.Extend(themeUpdateEntry.Text); err != nil {
 					println("Error:", err.Error())
 				}
 				themeUpdateEntry.SetText("")
-
 			}),
+			widget.NewButton("Custom Theme", func() {
+				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())	
+			})
 			widget.NewButton("Fullscreen", func() {
 				win.SetFullScreen(!win.FullScreen())
 			}),
