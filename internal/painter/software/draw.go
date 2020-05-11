@@ -49,7 +49,7 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 			newHeight := int(float32(width) / imgAspect)
 			scaledY += (height - newHeight) / 2
 			height = internal.ScaleInt(c, newHeight)
-		} 
+		}
 	}
 
 	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
