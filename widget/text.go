@@ -69,12 +69,22 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (t *textProvider) Resize(size fyne.Size) {
-	if t.size == size {
+	var baseSize fyne.Size
+	t.ReadFields(func() {
+		baseSize = t.size
+	})
+	if baseSize == size {
 		return
 	}
-	t.size = size
+
+	var presenter textPresenter
+	t.SetFields(func() {
+		t.size = size
+		presenter = t.presenter
+	})
+
 	t.updateRowBounds()
-	if t.presenter != nil {
+	if presenter != nil {
 		t.refreshTextRenderer()
 		cache.Renderer(t).Layout(size)
 	}
@@ -235,14 +245,23 @@ type textRenderer struct {
 // MinSize calculates the minimum size of a label.
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
-	wrap := r.provider.presenter.textWrap()
+	var presenter textPresenter
+	r.provider.ReadFields(func() {
+		presenter = r.provider.presenter
+	})
+
+	wrap := presenter.textWrap()
 	charMinSize := r.provider.charMinSize()
 	height := 0
 	width := 0
 	i := 0
-	for ; i < fyne.Min(len(r.texts), r.provider.rows()); i++ {
-		min := r.texts[i].MinSize()
-		if r.texts[i].Text == "" {
+	texts := r.provider.GetField(func() interface{} {
+		return r.texts
+	}).([]*canvas.Text)
+
+	for ; i < fyne.Min(len(texts), r.provider.rows()); i++ {
+		min := texts[i].MinSize()
+		if texts[i].Text == "" {
 			min = charMinSize
 		}
 		if wrap == fyne.TextWrapOff {
