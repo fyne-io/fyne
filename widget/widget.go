@@ -39,22 +39,34 @@ func (w *BaseWidget) ReadFields(f func()) {
 	f()
 }
 
+// GetField provides a guaranteed thread safe way to access fields and return a value.
+func (w *BaseWidget) GetField(f func() interface{}) interface{} {
+	w.propertyLock.RLock()
+	defer w.propertyLock.RUnlock()
+
+	return f()
+}
+
+// SetFields provides a guaranteed thread safe way to directly manipulate widget fields.
+func (w *BaseWidget) SetFields(f func()) {
+	w.propertyLock.Lock()
+	defer w.propertyLock.Unlock()
+
+	f()
+}
+
 // SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
 // This method is a guaranteed thread-safe way of directly manipulating widget fields.
 func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
-	w.propertyLock.Lock()
-	f()
-	w.propertyLock.Unlock()
-
+	w.SetFields(f)
 	w.Refresh()
 }
 
 // Size gets the current size of this widget.
 func (w *BaseWidget) Size() fyne.Size {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.size
+	return w.GetField(func() interface{} {
+		return w.size
+	}).(fyne.Size)
 }
 
 // Resize sets a new size for a widget.
@@ -69,11 +81,11 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 	}
 
 	var impl fyne.Widget
-	w.ReadFields(func() {
+	w.SetFields(func() {
 		w.size = size
-
 		impl = w.impl
 	})
+
 	if impl == nil {
 		return
 	}
@@ -82,26 +94,22 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 
 // Position gets the current position of this widget, relative to its parent.
 func (w *BaseWidget) Position() fyne.Position {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return w.position
+	return w.GetField(func() interface{} {
+		return w.position
+	}).(fyne.Position)
 }
 
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Move(pos fyne.Position) {
-	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
-
-	w.position = pos
+	w.SetFields(func() {
+		w.position = pos
+	})
 }
 
 // MinSize for the widget - it should never be resized below this value.
 func (w *BaseWidget) MinSize() fyne.Size {
-	w.propertyLock.RLock()
-	impl := w.impl
-	w.propertyLock.RUnlock()
+	impl := w.getImpl()
 
 	r := cache.Renderer(impl)
 	if r == nil {
@@ -114,10 +122,9 @@ func (w *BaseWidget) MinSize() fyne.Size {
 // Visible returns whether or not this widget should be visible.
 // Note that this may not mean it is currently visible if a parent has been hidden.
 func (w *BaseWidget) Visible() bool {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return !w.Hidden
+	return w.GetField(func() interface{} {
+		return !w.Hidden
+	}).(bool)
 }
 
 // Show this widget so it becomes visible
@@ -137,11 +144,11 @@ func (w *BaseWidget) Hide() {
 		return
 	}
 
-	var impl fyne.Widget
-	w.ReadFields(func() {
+	w.SetFields(func() {
 		w.Hidden = true
-		impl = w.impl
 	})
+
+	impl := w.getImpl()
 	if impl == nil {
 		return
 	}
@@ -150,10 +157,7 @@ func (w *BaseWidget) Hide() {
 
 // Refresh causes this widget to be redrawn in it's current state
 func (w *BaseWidget) Refresh() {
-	w.propertyLock.RLock()
-	impl := w.impl
-	w.propertyLock.RUnlock()
-
+	impl := w.getImpl()
 	if impl == nil {
 		return
 	}
@@ -162,16 +166,30 @@ func (w *BaseWidget) Refresh() {
 	render.Refresh()
 }
 
+func (w *BaseWidget) getImpl() fyne.Widget {
+	impl := w.GetField(func() interface{} {
+		return w.impl
+	})
+
+	if impl == nil {
+		return nil
+	}
+
+	return impl.(fyne.Widget)
+}
+
 // super will return the actual object that this represents.
 // If extended then this is the extending widget, otherwise it is self.
 func (w *BaseWidget) super() fyne.Widget {
-	if w.impl == nil {
+	impl := w.getImpl()
+
+	if impl == nil {
 		var x interface{}
 		x = w
 		return x.(fyne.Widget)
 	}
 
-	return w.impl
+	return impl
 }
 
 // DisableableWidget describes an extension to BaseWidget which can be disabled.
@@ -206,10 +224,9 @@ func (w *DisableableWidget) Disable() {
 
 // Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
 func (w *DisableableWidget) Disabled() bool {
-	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
-
-	return w.disabled
+	return w.GetField(func() interface{} {
+		return w.disabled
+	}).(bool)
 }
 
 // Renderer looks up the render implementation for a widget

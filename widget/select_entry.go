@@ -23,11 +23,18 @@ func NewSelectEntry(options []string) *SelectEntry {
 
 // MinSize satisfies the fyne.CanvasObject interface.
 func (e *SelectEntry) MinSize() fyne.Size {
-	min := e.Entry.MinSize()
-	if e.dropDown != nil {
-		for _, item := range e.dropDown.Items {
+	var entry Entry
+	var drop *fyne.Menu
+	e.ReadFields(func() {
+		entry = e.Entry
+		drop = e.dropDown
+	})
+	min := entry.MinSize()
+
+	if drop != nil {
+		for _, item := range drop.Items {
 			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(fyne.NewSize(4*theme.Padding(), 0))
-			min = min.Union(itemMin)
+			min = min.Max(itemMin)
 		}
 	}
 	return min

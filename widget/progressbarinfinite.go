@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"sync/atomic"
 	"time"
 
 	"fyne.io/fyne"
@@ -23,7 +22,7 @@ type infProgressRenderer struct {
 	widget.BaseRenderer
 	bar      *canvas.Rectangle
 	ticker   *time.Ticker
-	running  atomic.Value
+	running  bool
 	progress *ProgressBarInfinite
 }
 
@@ -92,11 +91,19 @@ func (p *infProgressRenderer) Refresh() {
 	canvas.Refresh(p.progress)
 }
 
+func (p *infProgressRenderer) isRunning() bool {
+	return p.progress.GetField(func() interface{} {
+		return p.running
+	}).(bool)
+}
+
 // Start the infinite progress bar background thread to update it continuously
 func (p *infProgressRenderer) start() {
-	if !p.running.Load().(bool) {
-		p.ticker = time.NewTicker(infiniteRefreshRate)
-		p.running.Store(true)
+	if !p.isRunning() {
+		p.progress.SetFields(func() {
+			p.ticker = time.NewTicker(infiniteRefreshRate)
+			p.running = true
+		})
 
 		go p.infiniteProgressLoop()
 	}
@@ -104,22 +111,31 @@ func (p *infProgressRenderer) start() {
 
 // Stop the infinite progress goroutine and sets value to the Max
 func (p *infProgressRenderer) stop() {
-	p.running.Store(false)
+	p.progress.SetFields(func() {
+		p.running = false
+	})
 }
 
 // infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar
 // the function can be exited by calling Stop()
 func (p *infProgressRenderer) infiniteProgressLoop() {
-	for p.running.Load().(bool) {
+	for p.isRunning() {
+		ticker := p.progress.GetField(func() interface{} {
+			return p.ticker.C
+		}).(<-chan time.Time)
+
 		select {
-		case <-p.ticker.C:
+		case <-ticker:
 			p.Refresh()
 			break
 		}
 	}
-	if p.ticker != nil {
-		p.ticker.Stop()
-	}
+
+	p.progress.ReadFields(func() {
+		if p.ticker != nil {
+			p.ticker.Stop()
+		}
+	})
 }
 
 func (p *infProgressRenderer) Destroy() {
@@ -160,7 +176,7 @@ func (p *ProgressBarInfinite) Running() bool {
 		return false
 	}
 
-	return cache.Renderer(p).(*infProgressRenderer).running.Load().(bool)
+	return cache.Renderer(p).(*infProgressRenderer).isRunning()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -178,7 +194,6 @@ func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 		bar:          bar,
 		progress:     p,
 	}
-	render.running.Store(false)
 	render.start()
 	return render
 }
