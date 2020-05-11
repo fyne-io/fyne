@@ -69,7 +69,7 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 			}),
 			widget.NewButton("Custom Theme", func() {
 				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())	
-			})
+			}),
 			widget.NewButton("Fullscreen", func() {
 				win.SetFullScreen(!win.FullScreen())
 			}),
