@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func DefaultPalette() *Palette {
-	p, _ := NewPalette(nil, `
+func defaultPalette() *palette {
+	p, _ := newPalette(nil, `
 {
 	"palette": {
 		"textColor": "#000000",
@@ -25,7 +25,7 @@ func DefaultPalette() *Palette {
 	return p
 }
 
-type Palette struct {
+type palette struct {
 	primary1Color      color.NRGBA
 	primary2Color      color.NRGBA
 	primary3Color      color.NRGBA
@@ -43,7 +43,7 @@ type Palette struct {
 	shadowColor        color.NRGBA
 }
 
-type PaletteDescription struct {
+type paletteDescription struct {
 	Primary1Color      string
 	Primary2Color      string
 	Primary3Color      string
@@ -61,13 +61,12 @@ type PaletteDescription struct {
 	ShadowColor        string
 }
 
-// NewPalette
-func NewPalette(base *Palette, str string) (*Palette, error) {
+func newPalette(base *palette, str string) (*palette, error) {
 	type exportedPalette struct {
-		Palette PaletteDescription
+		Palette paletteDescription
 	}
 	ep := &exportedPalette{}
-	np := &Palette{}
+	np := &palette{}
 	if base != nil {
 		*np = *base
 	}

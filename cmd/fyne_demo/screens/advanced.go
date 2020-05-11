@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
+	"fyne.io/fyne/theme"
 )
 
 func scaleString(c fyne.Canvas) string {
@@ -56,10 +57,16 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 		})
 	}
 
+	themeUpdateEntry := widget.NewMultiLineEntry()
 	return widget.NewHBox(
 		widget.NewVBox(screen,
-			widget.NewButton("Custom Theme", func() {
-				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())
+			themeUpdateEntry,
+			widget.NewButton("Apply Custom Theme", func() {
+				if err := theme.Extend(themeUpdateEntry.Text); err != nil {
+					println("Error:", err.Error())
+				}
+				themeUpdateEntry.SetText("")
+
 			}),
 			widget.NewButton("Fullscreen", func() {
 				win.SetFullScreen(!win.FullScreen())

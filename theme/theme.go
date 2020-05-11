@@ -3,6 +3,7 @@ package theme // import "fyne.io/fyne/theme"
 
 import (
 	"image/color"
+	"fmt"
 	"os"
 	"strings"
 
@@ -10,14 +11,14 @@ import (
 )
 
 type builtinTheme struct {
-	palette                                      *Palette
+	palette                                      *palette
 	regular, bold, italic, bolditalic, monospace fyne.Resource
 }
 
 // LightTheme defines the built in light theme colours and sizes
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{}
-	theme.palette = DefaultPalette()
+	theme.palette = defaultPalette()
 	theme.initFonts()
 	return theme
 }
@@ -27,7 +28,7 @@ func LightTheme() fyne.Theme {
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{}
 	var err error
-	theme.palette, err = NewPalette(DefaultPalette(), `
+	theme.palette, err = newPalette(defaultPalette(), `
 {
 	"palette": {
 		"canvasColor": "#242424",
@@ -215,7 +216,26 @@ func current() fyne.Theme {
 	return fyne.CurrentApp().Settings().Theme()
 }
 
+// Extend will apply the new palette from the input JSON, or return error
+func Extend(str string) error { 
+	c := current()
+	t,ok := c.(*builtinTheme)
+	if !ok {
+		return fmt.Errorf("Unknown type %T for current theme", c)
+	}
+	newPalette,err := newPalette(t.palette, str)
+	if err != nil {
+		return err
+	}
+	theme := &builtinTheme{}
+	theme.palette = newPalette
+	theme.initFonts()
+	fyne.CurrentApp().Settings().SetTheme(theme)
+	return nil
+}
+
 // BackgroundColor returns the theme's background colour
+
 func BackgroundColor() color.Color {
 	return current().BackgroundColor()
 }
