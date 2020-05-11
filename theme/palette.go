@@ -12,6 +12,7 @@ func defaultPalette() *palette {
 {
 	"palette": {
 		"textColor": "#000000",
+		"secondaryTextColor": "#121212",
 		"canvasColor": "#ffffff",
 		"primary1Color": "#9fa8da",
 		"primary2Color": "#b39ddb",

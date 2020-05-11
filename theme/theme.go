@@ -2,8 +2,8 @@
 package theme // import "fyne.io/fyne/theme"
 
 import (
-	"image/color"
 	"fmt"
+	"image/color"
 	"os"
 	"strings"
 
@@ -13,7 +13,8 @@ import (
 type builtinTheme struct {
 	palette                                      *palette
 	regular, bold, italic, bolditalic, monospace fyne.Resource
-	direction float64
+	direction                                    float64
+	isDark                                       bool
 }
 
 // LightTheme defines the built in light theme colours and sizes
@@ -27,14 +28,15 @@ func LightTheme() fyne.Theme {
 // DarkTheme defines the built in dark theme colours and sizes
 // See https://www.material.io/design/color/dark-theme.html
 func DarkTheme() fyne.Theme {
-	theme := &builtinTheme{direction: -1.0}
+	theme := &builtinTheme{direction: -1.0, isDark: true}
 	var err error
 	theme.palette, err = newPalette(defaultPalette(), `
 {
 	"palette": {
-		"canvasColor": "#242424",
-		"textColor": "#aaaaaa",
-		"secondaryTextColor": "rgba(255, 255, 255, 0.7)",
+		"canvasColor": "#303030",
+		"textColor": "rgba(255, 255, 255, 0.7)",
+		"secondaryTextColor": "rgba(255, 255, 255, 1.0)",
+		"alternateTextColor": "#303030",
 		"textColor": "rgba(255, 255, 255, 0.9)"
 	}
 }
@@ -52,12 +54,12 @@ func (t *builtinTheme) BackgroundColor() color.Color {
 
 // ButtonColor returns the theme's standard button colour
 func (t *builtinTheme) ButtonColor() color.Color {
-	return brighten(t.palette.canvasColor, -2.4 * t.direction)
+	return brighten(t.palette.canvasColor, -3.4*t.direction)
 }
 
 // DisabledButtonColor returns the theme's disabled button colour
 func (t *builtinTheme) DisabledButtonColor() color.Color {
-	return brighten(t.palette.canvasColor, -1.2 * t.direction)
+	return brighten(t.palette.canvasColor, -1.2*t.direction)
 }
 
 // HyperlinkColor returns the theme's standard hyperlink colour
@@ -71,24 +73,27 @@ func (t *builtinTheme) TextColor() color.Color {
 	return t.palette.textColor
 }
 
-// DisabledIconColor returns the color for a disabledIcon UI element
+// DisabledTextColor returns the color for a disabledIcon UI element
 func (t *builtinTheme) DisabledTextColor() color.Color {
 	return t.palette.disabledColor
 }
 
 // PrimaryTextColor returns the theme's standard text colour on primary background
 func (t *builtinTheme) PrimaryTextColor() color.Color {
-	return t.palette.canvasColor
+	if t.isDark {
+		return t.palette.canvasColor
+	}
+	return t.palette.textColor
 }
 
 // IconColor returns the theme's standard text colour
 func (t *builtinTheme) IconColor() color.Color {
-	return brighten(t.palette.textColor, 0.8 * t.direction)
+	return t.palette.secondaryTextColor
 }
 
 // DisabledIconColor returns the color for a disabledIcon UI element
 func (t *builtinTheme) DisabledIconColor() color.Color {
-	return brighten(t.palette.disabledColor, 0.8 * t.direction)
+	return brighten(t.palette.disabledColor, 0.8*t.direction)
 }
 
 // PlaceHolderColor returns the theme's placeholder text colour
@@ -103,12 +108,12 @@ func (t *builtinTheme) PrimaryColor() color.Color {
 
 // PrimaryHoverColor returns the colour used to highlight primary features on hover
 func (t *builtinTheme) PrimaryHoverColor() color.Color {
-	return brighten(t.palette.primary1Color, 0.8 * t.direction)
+	return brighten(t.palette.primary1Color, t.direction)
 }
 
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor
 func (t *builtinTheme) HoverColor() color.Color {
-	return brighten(t.palette.canvasColor, -1.0 * t.direction)
+	return brighten(t.ButtonColor().(color.NRGBA), t.direction)
 }
 
 // FocusColor returns the colour used to highlight a focused widget
@@ -218,15 +223,15 @@ func current() fyne.Theme {
 }
 
 // Extend will apply the new palette from the input JSON, or return error
-func Extend(str string) error { 
+func Extend(str string) error {
 	c := current()
-	t,ok := c.(*builtinTheme)
+	t, ok := c.(*builtinTheme)
 	if !ok {
 		fmt.Printf("Unknown type %T for current theme", c)
 		fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 		t = current().(*builtinTheme)
 	}
-	newPalette,err := newPalette(t.palette, str)
+	newPalette, err := newPalette(t.palette, str)
 	if err != nil {
 		return err
 	}

@@ -2,13 +2,14 @@ package screens
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
-	"fyne.io/fyne/widget"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 func scaleString(c fyne.Canvas) string {
@@ -58,17 +59,32 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 	}
 
 	themeUpdateEntry := widget.NewMultiLineEntry()
+	link, _ := url.Parse("https://cimdalli.github.io/mui-theme-generator/")
+	notifyError := func(err error) {
+		fyne.CurrentApp().SendNotification(&fyne.Notification{
+			Title:   "Error",
+			Content: err.Error(),
+		})
+	}
 	return widget.NewHBox(
 		widget.NewVBox(screen,
+			widget.NewHBox(
+				widget.NewHyperlink("MaterialUI Themes", link),
+				widget.NewButton("Paste", func() {
+					if err := theme.Extend(win.Clipboard().Content()); err != nil {
+						notifyError(err)
+					}
+				}),
+			),
 			themeUpdateEntry,
 			widget.NewButton("Extend Current Theme", func() {
 				if err := theme.Extend(themeUpdateEntry.Text); err != nil {
-					println("Error:", err.Error())
+					notifyError(err)
 				}
 				themeUpdateEntry.SetText("")
 			}),
 			widget.NewButton("Custom Theme", func() {
-				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())	
+				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())
 			}),
 			widget.NewButton("Fullscreen", func() {
 				win.SetFullScreen(!win.FullScreen())

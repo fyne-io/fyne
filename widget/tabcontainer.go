@@ -79,7 +79,7 @@ func (t *TabContainer) CurrentTab() *TabItem {
 
 // SelectTabIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *TabContainer) SelectTabIndex(index int) {
-	if index < 0 || index >= len(t.Items) || t.current == index {
+	if index < 0 || index >= len(t.Items) {
 		return
 	}
 
@@ -236,6 +236,7 @@ func NewTabContainer(items ...*TabItem) *TabContainer {
 	if tabs.mismatchedContent() {
 		internal.LogHint("TabContainer items should all have the same type of content (text, icons or both)")
 	}
+	tabs.SelectTabIndex(0)
 
 	return tabs
 }
