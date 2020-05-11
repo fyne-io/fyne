@@ -19,6 +19,7 @@ cmd/hello/hello
 
 ### JetBrains
 .idea
+.vscode
 
 ### Vim
 # Swap
