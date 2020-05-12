@@ -40,7 +40,7 @@ func (l *Label) Refresh() {
 	}
 
 	if l.Text != string(l.provider.buffer) {
-		l.provider.SetText(l.Text)
+		l.provider.setText(l.Text)
 	}
 
 	l.BaseWidget.Refresh()
@@ -62,7 +62,7 @@ func (l *Label) SetText(text string) {
 	if l.provider == nil { // not created until visible
 		return
 	}
-	l.provider.SetText(text) // calls refresh
+	l.provider.setText(text) // calls refresh
 }
 
 // textAlign tells the rendering textProvider our alignment

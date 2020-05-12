@@ -286,8 +286,10 @@ func (e *Entry) SelectedText() string {
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
 func (e *Entry) SetPlaceHolder(text string) {
-	e.PlaceHolder = text
-	e.placeholderProvider().SetText(text) // refreshes
+	e.SetFields(func() {
+		e.PlaceHolder = text
+		e.placeholderProvider().setText(text) // refreshes
+	})
 }
 
 // SetReadOnly sets whether or not the Entry should not be editable
@@ -302,7 +304,9 @@ func (e *Entry) SetReadOnly(ro bool) {
 
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
-	e.textProvider().SetText(text)
+	e.SetFields(func() {
+		e.textProvider().setText(text)
+	})
 	e.updateText(text)
 
 	if text == "" {
@@ -963,7 +967,7 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 // Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *entryRenderer) Refresh() {
 	if r.entry.Text != string(r.entry.textProvider().buffer) {
-		r.entry.textProvider().SetText(r.entry.Text)
+		r.entry.textProvider().setText(r.entry.Text)
 	}
 	if r.entry.textProvider().len() == 0 && r.entry.Visible() {
 		r.entry.placeholderProvider().Show()

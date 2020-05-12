@@ -59,7 +59,7 @@ func (hl *Hyperlink) SetText(text string) {
 	if hl.provider == nil { // not created until visible
 		return
 	}
-	hl.provider.SetText(text) // calls refresh
+	hl.provider.setText(text) // calls refresh
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
