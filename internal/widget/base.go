@@ -18,9 +18,9 @@ type base struct {
 
 // Move satisfies the fyne.Widget interface.
 func (b *base) Move(pos fyne.Position) {
-	b.setFieldsAndRefresh(nil, func() {
+	b.setFieldsAndRefresh(func() {
 		b.pos = pos
-	})
+	}, nil)
 }
 
 // Position satisfies the fyne.Widget interface.
@@ -42,7 +42,7 @@ func (b *base) readFields(f func()) {
 
 // SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
 // This method is a guaranteed thread-safe way of directly manipulating widget fields.
-func (b *base) setFieldsAndRefresh(w fyne.Widget, f func()) {
+func (b *base) setFieldsAndRefresh(f func(), w fyne.Widget) {
 	b.propertyLock.Lock()
 	f()
 	b.propertyLock.Unlock()
@@ -124,7 +124,7 @@ func (b *base) show(w fyne.Widget) {
 		return
 	}
 
-	b.setFieldsAndRefresh(w, func() {
+	b.setFieldsAndRefresh(func() {
 		b.hidden = false
-	})
+	}, w)
 }

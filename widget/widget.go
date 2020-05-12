@@ -58,7 +58,13 @@ func (w *BaseWidget) SetFields(f func()) {
 // This method is a guaranteed thread-safe way of directly manipulating widget fields.
 func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
 	w.SetFields(f)
-	w.Refresh()
+
+	impl := w.getImpl()
+	if impl == nil {
+		w.Refresh()
+	} else {
+		impl.Refresh()
+	}
 }
 
 // Size gets the current size of this widget.
