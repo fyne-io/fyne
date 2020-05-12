@@ -888,14 +888,19 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 
 // updateText updates the internal text to the given value
 func (e *Entry) updateText(text string) {
+	var callback func(string)
 	e.SetFieldsAndRefresh(func() {
 		changed := e.Text != text
 		e.Text = text
 
 		if changed && e.OnChanged != nil {
-			e.OnChanged(text)
+			callback = e.OnChanged
 		}
 	})
+
+	if callback != nil {
+		callback(text)
+	}
 }
 
 var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
@@ -1105,15 +1110,18 @@ func (r *entryRenderer) moveCursor() {
 		yPos = size.Height * r.entry.CursorRow
 	})
 
+	var callback func()
 	r.entry.SetFields(func() {
 		lineHeight := r.entry.text.charMinSize().Height
 		r.cursor.Resize(fyne.NewSize(2, lineHeight))
 		r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))
 
-		if r.entry.OnCursorChanged != nil {
-			r.entry.OnCursorChanged()
-		}
+		callback = r.entry.OnCursorChanged
 	})
+
+	if callback != nil {
+		callback()
+	}
 }
 
 var _ desktop.Cursorable = (*passwordRevealer)(nil)
