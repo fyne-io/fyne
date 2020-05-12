@@ -254,12 +254,14 @@ func (e *Entry) MinSize() fyne.Size {
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
 // update the existing selection (if shift is held), or start a selection dragging operation.
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
-	if e.selectKeyDown {
-		e.selecting = true
-	}
-	if e.selecting && e.selectKeyDown == false && m.Button == desktop.LeftMouseButton {
-		e.selecting = false
-	}
+	e.SetFields(func() {
+		if e.selectKeyDown {
+			e.selecting = true
+		}
+		if e.selecting && e.selectKeyDown == false && m.Button == desktop.LeftMouseButton {
+			e.selecting = false
+		}
+	})
 	e.updateMousePointer(&m.PointEvent, m.Button == desktop.RightMouseButton)
 }
 
@@ -268,20 +270,26 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 // if so, and if a text select key isn't held, then disable selecting
 func (e *Entry) MouseUp(_ *desktop.MouseEvent) {
 	start, _ := e.selection()
-	if start == -1 && e.selecting && e.selectKeyDown == false {
-		e.selecting = false
-	}
+	e.SetFields(func() {
+		if start == -1 && e.selecting && e.selectKeyDown == false {
+			e.selecting = false
+		}
+	})
 }
 
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
 func (e *Entry) SelectedText() string {
-	if e.selecting == false {
+	if e.GetField(func() interface{} {
+		return e.selecting
+	}).(bool) == false {
 		return ""
 	}
 
 	start, stop := e.selection()
-	return string(e.textProvider().buffer[start:stop])
+	return e.GetField(func() interface{} {
+		return string(e.textProvider().buffer[start:stop])
+	}).(string)
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
