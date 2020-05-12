@@ -37,7 +37,7 @@ func TestDrawImage(t *testing.T) {
 func TestDrawImageNearestFilter(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 50, 50))
 	img := canvas.NewImageFromImage(makeTestImage(3, 3))
-	img.ScalingFilter = canvas.NearestFilter
+	img.ScaleMode = canvas.ImageScalePixels
 	img.Resize(fyne.NewSize(50, 50))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 50), target)
@@ -47,7 +47,7 @@ func TestDrawImageNearestFilter(t *testing.T) {
 func TestDrawImageLinearFilter(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 50, 50))
 	img := canvas.NewImageFromImage(makeTestImage(3, 3))
-	img.ScalingFilter = canvas.LinearFilter // default value
+	img.ScaleMode = canvas.ImageScaleSmooth // default value
 	img.Resize(fyne.NewSize(50, 50))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 50), target)
@@ -57,7 +57,7 @@ func TestDrawImageLinearFilter(t *testing.T) {
 func TestDrawImage_StretchX(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 100, 50))
 	img := canvas.NewImageFromImage(makeTestImage(3, 3))
-	img.ScalingFilter = canvas.NearestFilter
+	img.ScaleMode = canvas.ImageScalePixels
 	img.Resize(fyne.NewSize(100, 50))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(100, 50), target)
@@ -67,7 +67,7 @@ func TestDrawImage_StretchX(t *testing.T) {
 func TestDrawImage_StretchY(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 50, 100))
 	img := canvas.NewImageFromImage(makeTestImage(3, 3))
-	img.ScalingFilter = canvas.NearestFilter
+	img.ScaleMode = canvas.ImageScalePixels
 	img.Resize(fyne.NewSize(50, 100))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 100), target)
@@ -88,7 +88,7 @@ func TestDrawImage_ContainHV(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 100, 50))
 	img := canvas.NewImageFromImage(makeTestImage(3, 5))
 	img.FillMode = canvas.ImageFillContain
-	img.ScalingFilter = canvas.NearestFilter
+	img.ScaleMode = canvas.ImageScalePixels
 	img.Resize(fyne.NewSize(100, 50))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(100, 50), target)
@@ -98,7 +98,7 @@ func TestDrawImage_ContainHH(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 100, 50))
 	img := canvas.NewImageFromImage(makeTestImage(9, 3))
 	img.FillMode = canvas.ImageFillContain
-	img.ScalingFilter = canvas.NearestFilter
+	img.ScaleMode = canvas.ImageScalePixels
 	img.Resize(fyne.NewSize(100, 50))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(100, 50), target)
@@ -109,7 +109,7 @@ func TestDrawImage_ContainVH(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 50, 100))
 	img := canvas.NewImageFromImage(makeTestImage(5, 3))
 	img.FillMode = canvas.ImageFillContain
-	img.ScalingFilter = canvas.NearestFilter
+	img.ScaleMode = canvas.ImageScalePixels
 	img.Resize(fyne.NewSize(50, 100))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 100), target)
@@ -120,7 +120,7 @@ func TestDrawImage_ContainVV(t *testing.T) {
 	target := image.NewNRGBA(image.Rect(0, 0, 50, 100))
 	img := canvas.NewImageFromImage(makeTestImage(3, 9))
 	img.FillMode = canvas.ImageFillContain
-	img.ScalingFilter = canvas.NearestFilter
+	img.ScaleMode = canvas.ImageScalePixels
 	img.Resize(fyne.NewSize(50, 100))
 
 	drawImage(test.Canvas(), img, fyne.NewPos(0, 0), fyne.NewSize(50, 100), target)

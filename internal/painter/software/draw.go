@@ -53,10 +53,10 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, frame fyne.S
 	}
 
 	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
-	switch img.ScalingFilter {
-	case canvas.LinearFilter:
+	switch img.ScaleMode {
+	case canvas.ImageScaleSmooth:
 		draw.CatmullRom.Scale(base, outBounds, tmpImg, tmpImg.Bounds(), draw.Over, nil)
-	case canvas.NearestFilter:
+	case canvas.ImageScalePixels:
 		draw.NearestNeighbor.Scale(base, outBounds, tmpImg, tmpImg.Bounds(), draw.Over, nil)
 	}
 }

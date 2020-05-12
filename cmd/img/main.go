@@ -20,7 +20,7 @@ func main() {
 	})
 
 	logo.FillMode = canvas.ImageFillContain
-	logo.ScalingFilter = canvas.LinearFilter
+	logo.ScaleMode = canvas.ImageScaleSmooth
 	logo.SetMinSize(fyne.NewSize(100, 100))
 
 	w := a.NewWindow("Hello")

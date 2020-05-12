@@ -29,7 +29,7 @@ var NoTexture = Texture(0)
 
 var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 
-func newTexture(textureFilter canvas.TextureFilter) Texture {
+func newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture uint32
 
 	gl.GenTextures(1, &texture)
@@ -43,7 +43,7 @@ func newTexture(textureFilter canvas.TextureFilter) Texture {
 	return Texture(texture)
 }
 
-func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.TextureFilter) Texture {
+func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
 		texture := newTexture(textureFilter)
