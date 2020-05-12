@@ -116,7 +116,6 @@ func (r *radioRenderer) Refresh() {
 			r.SetObjects(append(r.Objects(), focusIndicator, icon, text))
 			r.items = append(r.items, &radioRenderItem{icon, text, focusIndicator})
 		}
-		r.Layout(r.radio.Size())
 	} else if len(r.items) > len(r.radio.Options) {
 		total := len(r.radio.Options)
 		r.items = r.items[:total]

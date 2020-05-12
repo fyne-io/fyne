@@ -17,6 +17,7 @@ type BaseWidget struct {
 
 	impl         fyne.Widget
 	propertyLock sync.RWMutex
+	renderLock   sync.Mutex
 }
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
@@ -115,6 +116,8 @@ func (w *BaseWidget) MinSize() fyne.Size {
 		return fyne.NewSize(0, 0)
 	}
 
+	w.renderLock.Lock()
+	defer w.renderLock.Unlock()
 	return r.MinSize()
 }
 
@@ -162,6 +165,8 @@ func (w *BaseWidget) Refresh() {
 	}
 
 	render := cache.Renderer(impl)
+	w.renderLock.Lock()
+	defer w.renderLock.Unlock()
 	render.Refresh()
 }
 
