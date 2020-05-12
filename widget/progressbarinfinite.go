@@ -75,16 +75,20 @@ func (p *infProgressRenderer) Layout(size fyne.Size) {
 	p.updateBar()
 }
 
-// applyTheme updates the infinite progress bar to match the current theme
-func (p *infProgressRenderer) applyTheme() {
-}
-
 func (p *infProgressRenderer) BackgroundColor() color.Color {
 	return theme.ButtonColor()
 }
 
 // Refresh updates the size and position of the horizontal scrolling infinite progress bar
 func (p *infProgressRenderer) Refresh() {
+	if p.isRunning() {
+		return // we refresh from the goroutine
+	}
+
+	p.doRefresh()
+}
+
+func (p *infProgressRenderer) doRefresh() {
 	p.bar.FillColor = theme.PrimaryColor()
 
 	p.updateBar()
@@ -126,7 +130,7 @@ func (p *infProgressRenderer) infiniteProgressLoop() {
 
 		select {
 		case <-ticker:
-			p.Refresh()
+			p.doRefresh()
 			break
 		}
 	}
