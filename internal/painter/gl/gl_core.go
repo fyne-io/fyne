@@ -32,6 +32,10 @@ var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
 func newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture uint32
 
+	if int(textureFilter) >= len(textureFilterToGL) {
+		panic(fmt.Sprintf("Invalid canvas.ImageScale value (%d)", textureFilter))
+	}
+
 	gl.GenTextures(1, &texture)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture)
