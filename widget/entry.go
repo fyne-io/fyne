@@ -93,17 +93,20 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	cursor := canvas.NewRectangle(theme.FocusColor())
 	cursor.Hide()
 
-	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
+	var objects []fyne.CanvasObject
+	e.SetFields(func() {
+		objects = []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
 
-	if e.Password && e.ActionItem == nil {
-		// An entry widget has been created via struct setting manually
-		// the Password field to true. Going to enable the password revealer.
-		e.ActionItem = newPasswordRevealer(e)
-	}
+		if e.Password && e.ActionItem == nil {
+			// An entry widget has been created via struct setting manually
+			// the Password field to true. Going to enable the password revealer.
+			e.ActionItem = newPasswordRevealer(e)
+		}
 
-	if e.ActionItem != nil {
-		objects = append(objects, e.ActionItem)
-	}
+		if e.ActionItem != nil {
+			objects = append(objects, e.ActionItem)
+		}
+	})
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
 
@@ -167,11 +170,14 @@ func (e *Entry) Enable() { // TODO remove this override after ReadOnly is remove
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
-	if e.BaseWidget.impl != nil {
-		return
-	}
+	e.SetFields(func() {
+		if e.BaseWidget.impl != nil {
+			return
+		}
 
-	e.BaseWidget.impl = wid
+		e.BaseWidget.impl = wid
+	})
+
 	e.registerShortcut()
 }
 
@@ -984,8 +990,12 @@ func (r *entryRenderer) Refresh() {
 		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
-	r.entry.text.updateRowBounds()
-	r.entry.placeholder.updateRowBounds()
+	r.entry.text.SetFields(func() {
+		r.entry.text.updateRowBounds()
+	})
+	r.entry.placeholder.SetFields(func() {
+		r.entry.placeholder.updateRowBounds()
+	})
 	r.entry.text.Refresh()
 	r.entry.placeholder.Refresh()
 	if r.entry.ActionItem != nil {
@@ -1080,12 +1090,18 @@ func (r *entryRenderer) buildSelection() {
 func (r *entryRenderer) moveCursor() {
 	// build r.selection[] if the user has made a selection
 	r.buildSelection()
+	provider := r.entry.GetField(func() interface{} {
+		return r.entry.textProvider()
+	}).(*textProvider)
+
+	var xPos, yPos int
+	provider.ReadFields(func() {
+		size := provider.lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
+		xPos = size.Width
+		yPos = size.Height * r.entry.CursorRow
+	})
 
 	r.entry.SetFields(func() {
-		size := r.entry.textProvider().lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
-		xPos := size.Width
-		yPos := size.Height * r.entry.CursorRow
-
 		lineHeight := r.entry.text.charMinSize().Height
 		r.cursor.Resize(fyne.NewSize(2, lineHeight))
 		r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))

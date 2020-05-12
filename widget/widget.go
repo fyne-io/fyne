@@ -21,14 +21,13 @@ type BaseWidget struct {
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
-	w.propertyLock.Lock()
-	defer w.propertyLock.Unlock()
+	w.SetFields(func() {
+		if w.impl != nil {
+			return
+		}
 
-	if w.impl != nil {
-		return
-	}
-
-	w.impl = wid
+		w.impl = wid
+	})
 }
 
 // ReadFields provides a guaranteed thread safe way to access widget fields.

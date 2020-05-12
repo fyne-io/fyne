@@ -63,7 +63,9 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 	}
 	r := &textRenderer{provider: t}
 
-	t.updateRowBounds() // set up the initial text layout etc
+	t.SetFields(func() {
+		t.updateRowBounds() // set up the initial text layout etc
+	})
 	r.Refresh()
 	return r
 }
@@ -81,9 +83,10 @@ func (t *textProvider) Resize(size fyne.Size) {
 	t.SetFields(func() {
 		t.size = size
 		presenter = t.presenter
+
+		t.updateRowBounds()
 	})
 
-	t.updateRowBounds()
 	if presenter != nil {
 		t.refreshTextRenderer()
 		cache.Renderer(t).Layout(size)
@@ -100,7 +103,7 @@ func (t *textProvider) updateRowBounds() {
 	textWrap := t.presenter.textWrap()
 	textStyle := t.presenter.textStyle()
 	textSize := theme.TextSize()
-	maxWidth := t.Size().Width - 2*theme.Padding()
+	maxWidth := t.size.Width - 2*theme.Padding()
 
 	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
@@ -275,14 +278,16 @@ func (r *textRenderer) MinSize() fyne.Size {
 
 func (r *textRenderer) Layout(size fyne.Size) {
 	yPos := theme.Padding()
-	lineHeight := r.provider.charMinSize().Height
-	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
-	for i := 0; i < len(r.texts); i++ {
-		text := r.texts[i]
-		text.Resize(lineSize)
-		text.Move(fyne.NewPos(theme.Padding(), yPos))
-		yPos += lineHeight
-	}
+	r.provider.ReadFields(func() {
+		lineHeight := r.provider.charMinSize().Height
+		lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
+		for i := 0; i < len(r.texts); i++ {
+			text := r.texts[i]
+			text.Resize(lineSize)
+			text.Move(fyne.NewPos(theme.Padding(), yPos))
+			yPos += lineHeight
+		}
+	})
 }
 
 // applyTheme updates the label to match the current theme.
@@ -298,40 +303,53 @@ func (r *textRenderer) applyTheme() {
 }
 
 func (r *textRenderer) Refresh() {
-	index := 0
-	for ; index < r.provider.rows(); index++ {
-		var line string
-		row := r.provider.row(index)
-		if r.provider.presenter.concealed() {
-			line = strings.Repeat(passwordChar, len(row))
-		} else {
-			line = string(row)
+	var concealed bool
+	var align fyne.TextAlign
+	var style fyne.TextStyle
+
+	r.provider.ReadFields(func() {
+		concealed = r.provider.presenter.concealed()
+		align = r.provider.presenter.textAlign()
+		style = r.provider.presenter.textStyle()
+	})
+
+	r.provider.SetFields(func() {
+		index := 0
+		for ; index < r.provider.rows(); index++ {
+			var line string
+			row := r.provider.row(index)
+			if concealed {
+				line = strings.Repeat(passwordChar, len(row))
+			} else {
+				line = string(row)
+			}
+
+			var textCanvas *canvas.Text
+			add := false
+			if index >= len(r.texts) {
+				add = true
+				textCanvas = canvas.NewText(line, theme.TextColor())
+			} else {
+				textCanvas = r.texts[index]
+				textCanvas.Text = line
+			}
+
+			textCanvas.Alignment = align
+			textCanvas.TextStyle = style
+
+			if add {
+				r.texts = append(r.texts, textCanvas)
+				r.SetObjects(append(r.Objects(), textCanvas))
+			}
 		}
 
-		var textCanvas *canvas.Text
-		add := false
-		if index >= len(r.texts) {
-			add = true
-			textCanvas = canvas.NewText(line, theme.TextColor())
-		} else {
-			textCanvas = r.texts[index]
-			textCanvas.Text = line
+		for ; index < len(r.texts); index++ {
+			r.texts[index].Text = ""
 		}
 
-		textCanvas.Alignment = r.provider.presenter.textAlign()
-		textCanvas.TextStyle = r.provider.presenter.textStyle()
+		r.applyTheme()
+	})
 
-		if add {
-			r.texts = append(r.texts, textCanvas)
-			r.SetObjects(append(r.Objects(), textCanvas))
-		}
-	}
-
-	for ; index < len(r.texts); index++ {
-		r.texts[index].Text = ""
-	}
-
-	r.applyTheme()
 	r.Layout(r.provider.Size())
 	if r.provider.presenter.object() == nil {
 		canvas.Refresh(r.provider)
