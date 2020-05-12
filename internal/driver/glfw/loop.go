@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
-
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -18,8 +17,16 @@ type funcData struct {
 	done chan bool
 }
 
+type drawData struct {
+	f    func()
+	win  *window
+	done chan bool
+}
+
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
+var drawFuncQueue = make(chan drawData)
+var windowQueue = make(chan *window, 16)
 var runFlag = false
 var runMutex = &sync.Mutex{}
 var initOnce = &sync.Once{}
@@ -49,6 +56,14 @@ func runOnMain(f func()) {
 	}
 }
 
+// force a function f to run on the draw thread
+func runOnDraw(w *window, f func()) {
+	done := make(chan bool)
+
+	drawFuncQueue <- drawData{f: f, win: w, done: done}
+	<-done
+}
+
 func (d *gLDriver) initGLFW() {
 	initOnce.Do(func() {
 		err := glfw.Init()
@@ -61,30 +76,20 @@ func (d *gLDriver) initGLFW() {
 	})
 }
 
-func (d *gLDriver) tryPollEvents() {
-	defer func() {
-		if r := recover(); r != nil {
-			fyne.LogError(fmt.Sprint("GLFW poll event error: ", r), nil)
-		}
-	}()
-
-	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
-}
-
 func (d *gLDriver) runGL() {
-	fps := time.NewTicker(time.Second / 60)
+	eventTick := time.NewTicker(time.Second / 10)
 	runMutex.Lock()
 	runFlag = true
 	runMutex.Unlock()
 
-	settingsChange := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
 	d.initGLFW()
+	d.startDrawThread()
+	d.startRedrawTimer()
 
 	for {
 		select {
 		case <-d.done:
-			fps.Stop()
+			eventTick.Stop()
 			glfw.Terminate()
 			return
 		case f := <-funcQueue:
@@ -92,9 +97,7 @@ func (d *gLDriver) runGL() {
 			if f.done != nil {
 				f.done <- true
 			}
-		case <-settingsChange:
-			painter.ClearFontCache()
-		case <-fps.C:
+		case <-eventTick.C:
 			d.tryPollEvents()
 			newWindows := []fyne.Window{}
 			reassign := false
@@ -111,16 +114,8 @@ func (d *gLDriver) runGL() {
 
 					go w.destroy(d)
 					continue
-				} else {
-					newWindows = append(newWindows, win)
 				}
-
-				canvas := w.canvas
-				if !canvas.isDirty() || !w.visible {
-					continue
-				}
-
-				d.repaintWindow(w)
+				newWindows = append(newWindows, win)
 			}
 			if reassign {
 				d.windowLock.Lock()
@@ -138,12 +133,69 @@ func (d *gLDriver) repaintWindow(w *window) {
 
 		updateGLContext(w)
 		if canvas.ensureMinSize() {
-			w.fitContent()
+			// TODO we can no longer run fitContent on this thread as it can impact viewport so must be on main
+			// TODO but if we run it on main from here we will block the redraw queue on resize ... so need another signal :(
+			//runOnMain(func() {
+			//	w.fitContent()
+			//})
 		}
 		canvas.paint(canvas.Size())
 
 		w.viewport.SwapBuffers()
 	})
+}
+
+func (d *gLDriver) startDrawThread() {
+	settingsChange := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+
+	go func() {
+		runtime.LockOSThread()
+
+		for {
+			select {
+			case f := <-drawFuncQueue:
+				f.win.RunWithContext(f.f)
+				if f.done != nil {
+					f.done <- true
+				}
+			case <-settingsChange:
+				painter.ClearFontCache()
+			case w := <-windowQueue:
+				d.repaintWindow(w)
+			}
+		}
+	}()
+}
+
+func (d *gLDriver) startRedrawTimer() {
+	draw := time.NewTicker(time.Second / 60)
+	go func() {
+		for {
+			select {
+			case <-draw.C:
+				for _, win := range d.windowList() {
+					w := win.(*window)
+					canvas := w.canvas
+					if w.viewport == nil || !canvas.isDirty() || !w.visible {
+						continue
+					}
+
+					windowQueue <- w
+				}
+			}
+		}
+	}()
+}
+
+func (d *gLDriver) tryPollEvents() {
+	defer func() {
+		if r := recover(); r != nil {
+			fyne.LogError(fmt.Sprint("GLFW poll event error: ", r), nil)
+		}
+	}()
+
+	glfw.PollEvents() // This call blocks while window is being resized, which prevents freeDirtyTextures from being called
 }
 
 func freeDirtyTextures(canvas *glCanvas) {
@@ -159,4 +211,9 @@ func freeDirtyTextures(canvas *glCanvas) {
 			return
 		}
 	}
+}
+
+// refreshWindow requests that the specified window be redrawn
+func refreshWindow(w *window) {
+	windowQueue <- w
 }
