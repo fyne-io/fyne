@@ -21,6 +21,9 @@ cmd/hello/hello
 .idea
 .vscode
 
+### VSCode
+.vscode
+
 ### Vim
 # Swap
 [._]*.s[a-v][a-z]
