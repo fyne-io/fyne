@@ -130,8 +130,10 @@ func (t *textProvider) refreshTextRenderer() {
 
 // SetText sets the text of the widget
 func (t *textProvider) setText(text string) {
-	t.buffer = []rune(text)
-	t.updateRowBounds()
+	t.SetFields(func() {
+		t.buffer = []rune(text)
+		t.updateRowBounds()
+	})
 
 	t.refreshTextRenderer()
 }

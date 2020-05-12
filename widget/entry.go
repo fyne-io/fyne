@@ -296,8 +296,8 @@ func (e *Entry) SelectedText() string {
 func (e *Entry) SetPlaceHolder(text string) {
 	e.SetFields(func() {
 		e.PlaceHolder = text
-		e.placeholderProvider().setText(text) // refreshes
 	})
+	e.placeholderProvider().setText(text) // refreshes
 }
 
 // SetReadOnly sets whether or not the Entry should not be editable
@@ -312,9 +312,7 @@ func (e *Entry) SetReadOnly(ro bool) {
 
 // SetText manually sets the text of the Entry to the given text value.
 func (e *Entry) SetText(text string) {
-	e.SetFields(func() {
-		e.textProvider().setText(text)
-	})
+	e.textProvider().setText(text)
 	e.updateText(text)
 
 	if text == "" {
@@ -979,13 +977,22 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 
 // Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *entryRenderer) Refresh() {
-	if r.entry.Text != string(r.entry.textProvider().buffer) {
-		r.entry.textProvider().setText(r.entry.Text)
+	var provider, placeholder *textProvider
+	content := r.entry.GetField(func() interface{} {
+		provider = r.entry.textProvider()
+		placeholder = r.entry.placeholderProvider()
+		return r.entry.Text
+	}).(string)
+
+	if content != string(provider.buffer) {
+		provider.setText(content)
+		return
 	}
-	if r.entry.textProvider().len() == 0 && r.entry.Visible() {
-		r.entry.placeholderProvider().Show()
-	} else if r.entry.placeholderProvider().Visible() {
-		r.entry.placeholderProvider().Hide()
+
+	if provider.len() == 0 && r.entry.Visible() {
+		placeholder.Show()
+	} else if placeholder.Visible() {
+		placeholder.Hide()
 	}
 
 	r.cursor.FillColor = theme.FocusColor()
