@@ -312,6 +312,10 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) Show() {
+	go w.doShow()
+}
+
+func (w *window) doShow() {
 	w.createLock.Do(w.create)
 
 	runOnMain(func() {
@@ -473,11 +477,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-	w.RunWithContext(func() {
-		freeDirtyTextures(w.canvas)
-	})
-	forceWindowRefresh(w)
-	w.canvas.setDirty(true)
+	refreshWindow(w)
 }
 
 func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
@@ -1121,11 +1121,17 @@ func (w *window) create() {
 			fyne.LogError("window creation error", err)
 			return
 		}
-		win.MakeContextCurrent()
+		w.viewport = win
+	})
 
+	// run the GL init on the draw thread
+	runOnDraw(w, func() {
 		w.canvas.painter = gl.NewPainter(w.canvas, w)
 		w.canvas.painter.Init()
+	})
 
+	runOnMain(func() {
+		win := w.viewport
 		win.SetCloseCallback(w.closed)
 		win.SetPosCallback(w.moved)
 		win.SetSizeCallback(w.resized)
@@ -1137,11 +1143,13 @@ func (w *window) create() {
 		win.SetKeyCallback(w.keyPressed)
 		win.SetCharCallback(w.charInput)
 		win.SetFocusCallback(w.focused)
-		glfw.DetachCurrentContext()
 
-		w.viewport = win
 		w.canvas.detectedScale = w.detectScale()
 		w.canvas.scale = w.calculatedScale()
+		winWidth, _ := win.GetSize()
+		texWidth, _ := win.GetFramebufferSize()
+		w.canvas.setTextureScale(float32(texWidth) / float32(winWidth))
+
 		for _, fn := range w.pending {
 			fn()
 		}
