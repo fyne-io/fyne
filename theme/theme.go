@@ -12,10 +12,9 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, icon, hyperlink, placeholder, hover, scrollBar, shadow color.Color
-	primary, primaryText, primaryIcon, primaryHover                      color.Color
-	regular, bold, italic, bolditalic, monospace                         fyne.Resource
-	disabledButton, disabledIcon, disabledText                           color.Color
+	button, primary, text, icon, hyperlink, placeholder, hover, scrollBar, shadow color.Color
+	regular, bold, italic, bolditalic, monospace                                  fyne.Resource
+	disabledButton, disabledIcon, disabledText                                    color.Color
 }
 
 // LightTheme defines the built in light theme colours and sizes
@@ -25,15 +24,12 @@ func LightTheme() fyne.Theme {
 		button:         color.NRGBA{0xd9, 0xd9, 0xd9, 0xff},
 		disabledButton: color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
 		text:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		primaryText:    color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		disabledText:   color.NRGBA{0x80, 0x80, 0x80, 0xff},
 		icon:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		primaryIcon:    color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		disabledIcon:   color.NRGBA{0x80, 0x80, 0x80, 0xff},
 		hyperlink:      color.NRGBA{0x0, 0x0, 0xd9, 0xff},
 		placeholder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
 		primary:        color.NRGBA{0x9f, 0xa8, 0xda, 0x80},
-		primaryHover:   color.NRGBA{0x9f, 0xa8, 0xda, 0xa0}, // same as light mode
 		hover:          color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
@@ -54,15 +50,12 @@ func DarkTheme() fyne.Theme {
 		hover:          color.NRGBA{0xff, 0xff, 0xff, 0x40},
 		disabledButton: color.NRGBA{0xff, 0xff, 0xff, 0x10},
 		text:           color.NRGBA{0xff, 0xff, 0xff, 0xd0},
-		primaryText:    color.NRGBA{0x12, 0x12, 0x12, 0xff},
 		disabledText:   color.NRGBA{0xff, 0xff, 0xff, 0x40},
 		icon:           color.NRGBA{0xff, 0xff, 0xff, 0xe0},
-		primaryIcon:    color.NRGBA{0x12, 0x12, 0x12, 0xff},
 		disabledIcon:   color.NRGBA{0xff, 0xff, 0xff, 0x60},
 		hyperlink:      color.NRGBA{0x99, 0x99, 0xff, 0xff},
 		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
 		primary:        color.NRGBA{0x9f, 0xa8, 0xda, 0xd0}, // same as light mode
-		primaryHover:   color.NRGBA{0x9f, 0xa8, 0xda, 0xff}, // same as light mode
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
 		//primary:        color.NRGBA{0x33, 0x29, 0x40, 0xff},
@@ -102,19 +95,9 @@ func (t *builtinTheme) DisabledTextColor() color.Color {
 	return t.disabledText
 }
 
-// PrimaryTextColor returns the theme's standard text colour on primary background
-func (t *builtinTheme) PrimaryTextColor() color.Color {
-	return t.primaryText
-}
-
 // IconColor returns the theme's standard text colour
 func (t *builtinTheme) IconColor() color.Color {
 	return t.icon
-}
-
-// PrimaryIconColor returns the theme's standard icon color on a primary background
-func (t *builtinTheme) PrimaryIconColor() color.Color {
-	return t.primaryIcon
 }
 
 // DisabledIconColor returns the color for a disabledIcon UI element
@@ -130,11 +113,6 @@ func (t *builtinTheme) PlaceHolderColor() color.Color {
 // PrimaryColor returns the colour used to highlight primary features
 func (t *builtinTheme) PrimaryColor() color.Color {
 	return t.primary
-}
-
-// PrimaryHoverColor returns the colour used to highlight primary features on hover
-func (t *builtinTheme) PrimaryHoverColor() color.Color {
-	return t.primaryHover
 }
 
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor
@@ -278,11 +256,6 @@ func DisabledTextColor() color.Color {
 	return current().DisabledTextColor()
 }
 
-// PrimaryTextColor returns the color for text on a primary background
-func PrimaryTextColor() color.Color {
-	return current().PrimaryTextColor()
-}
-
 // IconColor returns the theme's standard icon colour
 func IconColor() color.Color {
 	return current().IconColor()
@@ -293,11 +266,6 @@ func DisabledIconColor() color.Color {
 	return current().DisabledIconColor()
 }
 
-// PrimaryIconColor returns the theme's icon color on a primary background
-func PrimaryIconColor() color.Color {
-	return current().PrimaryIconColor()
-}
-
 // PlaceHolderColor returns the theme's standard text colour
 func PlaceHolderColor() color.Color {
 	return current().PlaceHolderColor()
@@ -306,11 +274,6 @@ func PlaceHolderColor() color.Color {
 // PrimaryColor returns the colour used to highlight primary features
 func PrimaryColor() color.Color {
 	return current().PrimaryColor()
-}
-
-// PrimaryHoverColor returns the colour used to highlight primary features on hover
-func PrimaryHoverColor() color.Color {
-	return current().PrimaryHoverColor()
 }
 
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor
