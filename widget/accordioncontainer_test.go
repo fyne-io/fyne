@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -88,7 +89,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 			},
 		},
@@ -96,7 +97,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 			},
 			opened: []int{0},
@@ -105,11 +106,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
-					Detail: widget.NewLabel("2"),
+					Detail: widget.NewLabel("2222222222"),
 				},
 			},
 		},
@@ -117,11 +118,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
-					Detail: widget.NewLabel("2"),
+					Detail: widget.NewLabel("2222222222"),
 				},
 			},
 			opened: []int{0, 1},
@@ -131,7 +132,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 			},
 		},
@@ -140,7 +141,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 			},
 			opened: []int{0},
@@ -150,11 +151,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
-					Detail: widget.NewLabel("2"),
+					Detail: widget.NewLabel("2222222222"),
 				},
 			},
 		},
@@ -163,11 +164,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
-					Detail: widget.NewLabel("2"),
+					Detail: widget.NewLabel("2222222222"),
 				},
 			},
 			opened: []int{0, 1},
@@ -184,7 +185,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 				accordion.Open(o)
 			}
 
-			window := test.NewWindow(accordion)
+			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), accordion))
 			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertImageMatches(t, "accordion_layout_"+name+".png", window.Canvas().Capture())
@@ -201,12 +202,18 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 	minSizeB := fyne.MeasureText("B", theme.TextSize(), fyne.TextStyle{})
 	minSizeB.Width += theme.IconInlineSize() + theme.Padding()*5
 	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.Padding()*2
-	minSize1 := fyne.MeasureText("1", theme.TextSize(), fyne.TextStyle{})
+	minSize1 := fyne.MeasureText("11111", theme.TextSize(), fyne.TextStyle{})
 	minSize1.Width += theme.Padding() * 2
 	minSize1.Height += theme.Padding() * 2
-	minSize2 := fyne.MeasureText("2", theme.TextSize(), fyne.TextStyle{})
+	minSize2 := fyne.MeasureText("2222222222", theme.TextSize(), fyne.TextStyle{})
 	minSize2.Width += theme.Padding() * 2
 	minSize2.Height += theme.Padding() * 2
+
+	minWidthA1 := fyne.Max(minSizeA.Width, minSize1.Width)
+	minWidthB2 := fyne.Max(minSizeB.Width, minSize2.Width)
+	minWidthA1B2 := fyne.Max(minWidthA1, minWidthB2)
+
+	minHeightA1 := minSizeA.Height + minSize1.Height + theme.Padding()
 
 	for name, tt := range map[string]struct {
 		multiOpen bool
@@ -218,97 +225,97 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 			},
-			want: minSizeA,
+			want: fyne.NewSize(minWidthA1, minSizeA.Height),
 		},
 		"single_open_one_item_opened": {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 			},
 			opened: []int{0},
-			want:   fyne.NewSize(minSizeA.Width, minSizeA.Height+minSize1.Height+theme.Padding()),
+			want:   fyne.NewSize(minWidthA1, minHeightA1),
 		},
 		"single_open_multiple_items": {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
-					Detail: widget.NewLabel("2"),
+					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: fyne.NewSize(fyne.Max(minSizeA.Width, minSizeB.Width), minSizeA.Height+minSizeB.Height+theme.Padding()),
+			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.Padding()),
 		},
 		"single_open_multiple_items_opened": {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
-					Detail: widget.NewLabel("2"),
+					Detail: widget.NewLabel("2222222222"),
 				},
 			},
 			opened: []int{0, 1},
-			want:   fyne.NewSize(fyne.Max(fyne.Max(minSizeA.Width, minSizeB.Width), minSize2.Width), minSizeA.Height+minSizeB.Height+minSize2.Height+theme.Padding()*2),
+			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize2.Height+theme.Padding()*2),
 		},
 		"multiple_open_one_item": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 			},
-			want: minSizeA,
+			want: fyne.NewSize(minWidthA1, minSizeA.Height),
 		},
 		"multiple_open_one_item_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 			},
 			opened: []int{0},
-			want:   fyne.NewSize(minSizeA.Width, minSizeA.Height+minSize1.Height+theme.Padding()),
+			want:   fyne.NewSize(minWidthA1, minHeightA1),
 		},
 		"multiple_open_multiple_items": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
-					Detail: widget.NewLabel("2"),
+					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: fyne.NewSize(fyne.Max(minSizeA.Width, minSizeB.Width), minSizeA.Height+minSizeB.Height+theme.Padding()),
+			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.Padding()),
 		},
 		"multiple_open_multiple_items_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("1"),
+					Detail: widget.NewLabel("11111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
-					Detail: widget.NewLabel("2"),
+					Detail: widget.NewLabel("2222222222"),
 				},
 			},
 			opened: []int{0, 1},
-			want:   fyne.NewSize(fyne.Max(fyne.Max(fyne.Max(minSizeA.Width, minSizeB.Width), minSize1.Width), minSize2.Width), minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.Padding()*3),
+			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.Padding()*3),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

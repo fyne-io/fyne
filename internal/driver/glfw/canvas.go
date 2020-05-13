@@ -550,7 +550,7 @@ func newCanvas() *glCanvas {
 	c.overlays = &overlayStack{onChange: func() { c.setDirty(true) }}
 
 	c.focusMgr = app.NewFocusManager(c)
-	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
+	c.refreshQueue = make(chan fyne.CanvasObject, 4096)
 	c.dirtyMutex = &sync.Mutex{}
 
 	c.setupThemeListener()
