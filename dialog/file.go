@@ -66,7 +66,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			info, err := os.Stat(path)
 			if os.IsNotExist(err) {
 				f.win.Hide()
-				callback(storage.SaveFileToURI("file://" + path))
+				callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
 				return
 			} else if info.IsDir() {
 				ShowInformation("Cannot overwrite",
@@ -81,13 +81,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 						return
 					}
 
-					callback(storage.SaveFileToURI("file://" + path))
+					callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
 					f.win.Hide()
 				}, f.parent)
 		} else if f.selected != nil {
 			callback := f.callback.(func(fyne.FileReadCloser, error))
 			f.win.Hide()
-			callback(storage.OpenFileFromURI("file://" + f.selected.path))
+			callback(storage.OpenFileFromURI(storage.NewURI("file://" + f.selected.path)))
 		}
 	})
 	f.open.Style = widget.PrimaryButton
