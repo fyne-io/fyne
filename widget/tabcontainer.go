@@ -79,7 +79,7 @@ func (t *TabContainer) CurrentTab() *TabItem {
 
 // SelectTabIndex sets the TabItem at the specific index to be selected and its content visible.
 func (t *TabContainer) SelectTabIndex(index int) {
-	if index < 0 || index >= len(t.Items) || t.current == index {
+	if index < 0 || index >= len(t.Items) {
 		return
 	}
 
@@ -546,6 +546,9 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 func (r *tabButtonRenderer) Refresh() {
 	r.label.Text = r.button.Text
 	r.label.Color = theme.TextColor()
+	if r.button.Style == PrimaryButton {
+		r.label.Color = color.Black
+	}
 	r.label.TextSize = theme.TextSize()
 
 	canvas.Refresh(r.button)
