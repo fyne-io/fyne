@@ -464,7 +464,11 @@ type tabButtonRenderer struct {
 func (r *tabButtonRenderer) BackgroundColor() color.Color {
 	switch {
 	case r.button.Style == PrimaryButton:
-		return theme.PrimaryColor()
+		c := theme.PrimaryColor()
+		if r.button.hovered {
+			c = theme.Brighten(c, 1)
+		}
+		return c
 	case r.button.hovered:
 		return theme.HoverColor()
 	default:
