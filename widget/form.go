@@ -54,13 +54,13 @@ func (f *Form) ensureGrid() {
 }
 
 // Append adds a new row to the form, using the text as a label next to the specified Widget
-func (f *Form) Append(text string, widget fyne.CanvasObject) *Form {
+func (f *Form) Append(text string, widget fyne.CanvasObject) {
 	item := &FormItem{Text: text, Widget: widget}
-	return f.AppendItem(item)
+	f.AppendItem(item)
 }
 
 // AppendItem adds the specified row to the end of the Form
-func (f *Form) AppendItem(item *FormItem) *Form {
+func (f *Form) AppendItem(item *FormItem) {
 	f.ExtendBaseWidget(f) // could be called before render
 
 	// ensure we have a renderer set up (that creates itemGrid)...
@@ -71,7 +71,6 @@ func (f *Form) AppendItem(item *FormItem) *Form {
 	f.itemGrid.AddObject(item.Widget)
 
 	f.Refresh()
-	return f
 }
 
 // MinSize returns the size that this widget should not shrink below
