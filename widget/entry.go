@@ -170,14 +170,16 @@ func (e *Entry) Enable() { // TODO remove this override after ReadOnly is remove
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
-	e.SetFields(func() {
-		if e.BaseWidget.impl != nil {
-			return
-		}
+	impl := e.GetField(func() interface{} {
+		return e.BaseWidget.impl
+	})
+	if impl != nil {
+		return
+	}
 
+	e.SetFields(func() {
 		e.BaseWidget.impl = wid
 	})
-
 	e.registerShortcut()
 }
 
@@ -322,12 +324,11 @@ func (e *Entry) SetText(text string) {
 		})
 		return
 	}
-	provider := e.textProvider()
 	e.SetFields(func() {
-		if e.CursorRow >= provider.rows() {
-			e.CursorRow = provider.rows() - 1
+		if e.CursorRow >= e.textProvider().rows() {
+			e.CursorRow = e.textProvider().rows() - 1
 		}
-		rowLength := provider.rowLength(e.CursorRow)
+		rowLength := e.textProvider().rowLength(e.CursorRow)
 		if e.CursorColumn >= rowLength {
 			e.CursorColumn = rowLength
 		}
@@ -384,7 +385,12 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		return
 	}
 
-	provider := e.textProvider()
+	var multiLine bool
+	var provider *textProvider
+	e.ReadFields(func() {
+		provider = e.textProvider()
+		multiLine = e.MultiLine
+	})
 
 	if e.selectKeyDown || e.selecting {
 		if e.selectingKeyHandler(key) {
@@ -415,9 +421,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			provider.deleteFromTo(pos, pos+1)
 		})
 	case fyne.KeyReturn, fyne.KeyEnter:
-		if e.GetField(func() interface{} {
-			return !e.MultiLine
-		}).(bool) {
+		if !multiLine {
 			return
 		}
 		e.SetFields(func() {
@@ -426,9 +430,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			e.CursorRow++
 		})
 	case fyne.KeyUp:
-		if e.GetField(func() interface{} {
-			return !e.MultiLine
-		}).(bool) {
+		if !multiLine {
 			return
 		}
 
@@ -443,9 +445,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 			}
 		})
 	case fyne.KeyDown:
-		if e.GetField(func() interface{} {
-			return !e.MultiLine
-		}).(bool) {
+		if !multiLine {
 			return
 		}
 
@@ -899,7 +899,7 @@ func (e *Entry) updateText(text string) {
 		changed := e.Text != text
 		e.Text = text
 
-		if changed && e.OnChanged != nil {
+		if changed {
 			callback = e.OnChanged
 		}
 	})

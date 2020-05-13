@@ -21,11 +21,14 @@ type BaseWidget struct {
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
-	w.SetFields(func() {
-		if w.impl != nil {
-			return
-		}
+	impl := w.GetField(func() interface{} {
+		return w.impl
+	})
+	if impl != nil {
+		return
+	}
 
+	w.SetFields(func() {
 		w.impl = wid
 	})
 }
