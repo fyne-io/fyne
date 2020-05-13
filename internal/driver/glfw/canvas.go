@@ -201,7 +201,22 @@ func (c *glCanvas) Resize(size fyne.Size) {
 		c.menu.Refresh()
 		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
 	}
-	c.Refresh(c.content)
+
+	// make sure that primitives that are size specific are repainted
+	c.refreshRasters()
+}
+
+func (c *glCanvas) refreshRasters() {
+	refreshRaster := func(node *renderCacheNode) {
+		if !node.obj.Visible() {
+			return
+		}
+
+		if rast, ok := node.obj.(*canvas.Raster); ok {
+			canvas.Refresh(rast)
+		}
+	}
+	c.walkTrees(nil, refreshRaster)
 }
 
 func (c *glCanvas) Size() fyne.Size {
