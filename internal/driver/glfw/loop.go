@@ -112,9 +112,11 @@ func (d *gLDriver) runGL() {
 
 				if w.viewport.ShouldClose() {
 					reassign = true
-					// remove window from window list
-					w.viewport.Destroy()
+					v := w.viewport
+					w.viewport = nil
 
+					// remove window from window list
+					v.Destroy()
 					go w.destroy(d)
 					continue
 				}
