@@ -15,9 +15,13 @@ var (
 
 // customTheme is a simple demonstration of a bespoke theme loaded by a Fyne app.
 type customTheme struct {
+	DarkMode bool
 }
 
-func (customTheme) BackgroundColor() color.Color {
+func (c *customTheme) BackgroundColor() color.Color {
+	if c.DarkMode {
+		return theme.Brighten(purple, -2)
+	}
 	return purple
 }
 
@@ -53,11 +57,17 @@ func (customTheme) PlaceHolderColor() color.Color {
 	return grey
 }
 
-func (customTheme) PrimaryColor() color.Color {
+func (c *customTheme) PrimaryColor() color.Color {
+	if c.DarkMode {
+		return theme.Brighten(orange, -3)
+	}
 	return orange
 }
 
-func (customTheme) HoverColor() color.Color {
+func (c *customTheme) HoverColor() color.Color {
+	if c.DarkMode {
+		return theme.Brighten(orange, -2)
+	}
 	return orange
 }
 
@@ -115,4 +125,8 @@ func (customTheme) ScrollBarSmallSize() int {
 
 func newCustomTheme() fyne.Theme {
 	return &customTheme{}
+}
+
+func newCustomThemeDark() fyne.Theme {
+	return &customTheme{DarkMode: true}
 }

@@ -61,6 +61,9 @@ func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 			widget.NewButton("Custom Theme", func() {
 				fyne.CurrentApp().Settings().SetTheme(newCustomTheme())
 			}),
+			widget.NewButton("Custom Theme - DarkMode", func() {
+				fyne.CurrentApp().Settings().SetTheme(newCustomThemeDark())
+			}),
 			widget.NewButton("Fullscreen", func() {
 				win.SetFullScreen(!win.FullScreen())
 			}),

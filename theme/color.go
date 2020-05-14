@@ -1,9 +1,7 @@
 package theme
 
 import (
-	"fmt"
 	"image/color"
-	"strings"
 )
 
 // Brighten takes a color and brightens / dims it by the given
@@ -11,33 +9,27 @@ import (
 // in the intensity of the color.  Negative values allow for
 // dimming the color. This is used to compute a color such as
 // a hightlight on hover based on a base color.
-func Brighten(clr color.Color, amount float64) color.Color {
+func Brighten(c color.Color, amount float64) color.Color {
+	r,g,b,a := c.RGBA()
 	factor := 1.0 + (amount / 10.0)
-	c, ok := clr.(color.NRGBA)
-	if !ok {
-		return clr
+	fn := func(i uint32, f float64) uint8 {
+		return uint8(float64(i)*f/255)
 	}
-	r := limit(int(float64(c.R) * factor))
-	g := limit(int(float64(c.G) * factor))
-	b := limit(int(float64(c.B) * factor))
-	return color.NRGBA{r, g, b, c.A}
+	return color.RGBA{fn(r,factor),fn(g,factor),fn(b,factor), uint8(a)}
 }
 
-func rgb(c color.NRGBA, s string) color.NRGBA {
-	if strings.HasPrefix(s, "#") && len(s) == 7 {
-		fmt.Sscanf(s, "#%02x%02x%02x", &c.R, &c.G, &c.B)
-		c.A = 255
+// PrimaryTextColor returns either {black, white} depending on
+// the brightness of the primary color
+func PrimaryTextColor() color.Color {
+	r, g, b, _ := PrimaryColor().RGBA()
+	if (r+g+b)/3 < 24000 {  
+		// is a dark primary
+		return color.White
 	}
-	if strings.HasPrefix(s, "rgba(") {
-		s = strings.Replace(s, " ", "", -1)
-		alpha := 1.0
-		fmt.Sscanf(s, "rgba(%d,%d,%d,%f)", &c.R, &c.G, &c.B, &alpha)
-		c.A = uint8(255.0 * alpha)
-	}
-	return c
+	return color.Black
 }
 
-func limit(i int) uint8 {
+func limit(i uint8) uint8 {
 	if i < 0 {
 		return 0
 	}

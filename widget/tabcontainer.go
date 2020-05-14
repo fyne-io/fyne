@@ -424,7 +424,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 
 	c := theme.TextColor()
 	if b.Style == PrimaryButton {
-		c = color.Black
+		c = theme.PrimaryTextColor()
 	}
 	label := canvas.NewText(b.Text, c)
 	label.Alignment = fyne.TextAlignCenter
@@ -467,6 +467,11 @@ type tabButtonRenderer struct {
 }
 
 func (r *tabButtonRenderer) BackgroundColor() color.Color {
+	if r.button.Style == PrimaryButton {
+		r.label.Color = theme.PrimaryTextColor()
+	} else {
+		r.label.Color = theme.TextColor()
+	}
 	switch {
 	case r.button.Style == PrimaryButton:
 		c := theme.PrimaryColor()

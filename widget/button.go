@@ -107,7 +107,7 @@ func (b *buttonRenderer) applyTheme() {
 	b.label.TextSize = theme.TextSize()
 	c := theme.TextColor()
 	if b.button.Style == PrimaryButton {
-		c = color.Black
+		c = theme.PrimaryTextColor()
 	}
 
 	if b.button.Disabled() {
