@@ -472,10 +472,12 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 		w.canvas.setTextureScale(texScale)
 		w.canvas.painter.SetOutputSize(width, height)
 	})
+
+	refreshWindow(w)
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-	refreshWindow(w)
+	//	refreshWindow(w) // this seems to cause flashes of partial drawn canvas but I have no idea why... do we need it?
 }
 
 func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
