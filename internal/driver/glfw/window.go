@@ -316,6 +316,9 @@ func (w *window) Show() {
 }
 
 func (w *window) doShow() {
+	for !running() {
+		time.Sleep(time.Millisecond*10)
+	}
 	w.createLock.Do(w.create)
 
 	runOnMain(func() {
