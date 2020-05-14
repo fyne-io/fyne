@@ -13,4 +13,6 @@ func repaintWindow(w *window) {
 	runOnDraw(w, func() {
 		d.(*gLDriver).repaintWindow(w)
 	})
+
+	time.Sleep(time.Millisecond * 150) // wait for the frames to be rendered... o
 }
