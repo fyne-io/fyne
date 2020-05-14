@@ -23,6 +23,16 @@ func TestNewTextGrid(t *testing.T) {
 
 func TestTextGrid_SetText(t *testing.T) {
 	grid := NewTextGrid()
+	grid.Resize(fyne.NewSize(20, 20))
+	text := "\n\n\n\n\n\n\n\n\n\n\n\n"
+	grid.SetText(text) // goes beyond the current view size - don't crash
+
+	assert.Equal(t, 13, len(grid.Rows))
+	assert.Equal(t, 0, len(grid.Rows[1].Cells))
+}
+
+func TestTextGrid_SetText_Overflow(t *testing.T) {
+	grid := NewTextGrid()
 	grid.SetText("Hello\nthere")
 
 	assert.Equal(t, 2, len(grid.Rows))
