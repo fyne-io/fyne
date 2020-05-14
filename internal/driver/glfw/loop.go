@@ -28,7 +28,6 @@ type drawData struct {
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
-var windowQueue = make(chan *window, 16)
 var runFlag = false
 var runMutex = &sync.Mutex{}
 var initOnce = &sync.Once{}
@@ -86,7 +85,6 @@ func (d *gLDriver) runGL() {
 	runMutex.Unlock()
 
 	d.initGLFW()
-	d.startRedrawTimer()
 
 	for {
 		select {
@@ -146,6 +144,7 @@ func (d *gLDriver) repaintWindow(w *window) {
 func (d *gLDriver) startDrawThread() {
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+	draw := time.NewTicker(time.Second / 60)
 
 	go func() {
 		runtime.LockOSThread()
@@ -159,18 +158,6 @@ func (d *gLDriver) startDrawThread() {
 				}
 			case <-settingsChange:
 				painter.ClearFontCache()
-			case w := <-windowQueue:
-				d.repaintWindow(w)
-			}
-		}
-	}()
-}
-
-func (d *gLDriver) startRedrawTimer() {
-	draw := time.NewTicker(time.Second / 60)
-	go func() {
-		for {
-			select {
 			case <-draw.C:
 				for _, win := range d.windowList() {
 					w := win.(*window)
@@ -179,7 +166,7 @@ func (d *gLDriver) startRedrawTimer() {
 						continue
 					}
 
-					windowQueue <- w
+					d.repaintWindow(w)
 				}
 			}
 		}
@@ -213,7 +200,7 @@ func freeDirtyTextures(canvas *glCanvas) {
 
 // refreshWindow requests that the specified window be redrawn
 func refreshWindow(w *window) {
-	windowQueue <- w
+	w.canvas.setDirty(true)
 }
 
 func updateGLContext(w *window) {
