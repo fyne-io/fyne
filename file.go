@@ -1,6 +1,9 @@
 package fyne
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 // FileReadCloser represents a cross platform data stream from a file or provider of data.
 // It may refer to an item on a filesystem or data in another application that we have access to.
@@ -21,8 +24,8 @@ type FileWriteCloser interface {
 // URI represents the identifier of a resource on a target system.
 // This resource may be a file or another data source such as an app or file sharing system.
 type URI interface {
+	fmt.Stringer
 	Extension() string
 	MimeType() string
 	Scheme() string
-	String() string
 }
