@@ -8,7 +8,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -199,7 +198,7 @@ func TestMenu_Layout(t *testing.T) {
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.DarkTheme())
 
-	w := test.NewWindowWithPainter(nil, software.NewPainter())
+	w := test.NewWindow(nil)
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()

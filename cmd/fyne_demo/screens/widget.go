@@ -274,7 +274,6 @@ type contextMenuButton struct {
 	menu *fyne.Menu
 }
 
-// Tapped satisfies the fyne.Tappable interface.
 func (b *contextMenuButton) Tapped(e *fyne.PointEvent) {
 	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
 }
