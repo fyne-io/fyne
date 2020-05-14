@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
+
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -106,6 +108,9 @@ func (d *gLDriver) runGL() {
 				if w.viewport == nil {
 					continue
 				}
+				if w.canvas.ensureMinSize() {
+					w.fitContent()
+				}
 
 				if w.viewport.ShouldClose() {
 					reassign = true
@@ -132,13 +137,6 @@ func (d *gLDriver) repaintWindow(w *window) {
 		freeDirtyTextures(canvas)
 
 		updateGLContext(w)
-		if canvas.ensureMinSize() {
-			// TODO we can no longer run fitContent on this thread as it can impact viewport so must be on main
-			// TODO but if we run it on main from here we will block the redraw queue on resize ... so need another signal :(
-			//runOnMain(func() {
-			//	w.fitContent()
-			//})
-		}
 		canvas.paint(canvas.Size())
 
 		w.viewport.SwapBuffers()
@@ -216,4 +214,14 @@ func freeDirtyTextures(canvas *glCanvas) {
 // refreshWindow requests that the specified window be redrawn
 func refreshWindow(w *window) {
 	windowQueue <- w
+}
+
+func updateGLContext(w *window) {
+	canvas := w.Canvas()
+	size := canvas.Size()
+
+	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.(*glCanvas).texScale
+	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.(*glCanvas).texScale
+
+	w.canvas.painter.SetOutputSize(int(winWidth), int(winHeight))
 }
