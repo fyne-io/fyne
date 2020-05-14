@@ -421,11 +421,7 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 		icon = canvas.NewImageFromResource(b.Icon)
 	}
 
-	c := theme.TextColor()
-	if b.Style == PrimaryButton {
-		c = color.Black
-	}
-	label := canvas.NewText(b.Text, c)
+	label := canvas.NewText(b.Text, theme.TextColor())
 	label.Alignment = fyne.TextAlignCenter
 
 	objects := []fyne.CanvasObject{label}
