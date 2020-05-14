@@ -239,7 +239,6 @@ func makeFormTab() fyne.Widget {
 			})
 		},
 	}
-
 	form.Append("Name", name)
 	form.Append("Email", email)
 	form.Append("Password", password)
