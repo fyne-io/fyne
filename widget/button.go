@@ -105,14 +105,10 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 // applyTheme updates this button to match the current theme
 func (b *buttonRenderer) applyTheme() {
 	b.label.TextSize = theme.TextSize()
-	c := theme.TextColor()
-	if b.button.Style == PrimaryButton {
-		c = color.Black
-	}
+	b.label.Color = theme.TextColor()
 	if b.button.Disabled() {
-		c = theme.DisabledTextColor()
+		b.label.Color = theme.DisabledTextColor()
 	}
-	b.label.Color = c
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
@@ -120,11 +116,7 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 	case b.button.Disabled():
 		return theme.DisabledButtonColor()
 	case b.button.Style == PrimaryButton:
-		c := theme.PrimaryColor()
-		if b.button.hovered {
-			c = theme.Brighten(c, 1)
-		}
-		return c
+		return theme.PrimaryColor()
 	case b.button.hovered:
 		return theme.HoverColor()
 	default:
