@@ -7,7 +7,7 @@ import "time"
 func repaintWindow(w *window) {
 	for !running() {
 		// Wait for GLFW loop to be running.
-		// If we try to create windows before the context is created, this will fail with an exception.
+		// If we try to paint windows before the context is created, we will end up on the wrong thread.
 		time.Sleep(time.Millisecond * 10)
 	}
 	runOnDraw(w, func() {

@@ -207,7 +207,7 @@ func (c *glCanvas) Resize(size fyne.Size) {
 }
 
 func (c *glCanvas) refreshRasters() {
-	refreshRaster := func(node *renderCacheNode) {
+	c.walkTrees(nil, func(node *renderCacheNode) {
 		if !node.obj.Visible() {
 			return
 		}
@@ -215,8 +215,7 @@ func (c *glCanvas) refreshRasters() {
 		if rast, ok := node.obj.(*canvas.Raster); ok {
 			canvas.Refresh(rast)
 		}
-	}
-	c.walkTrees(nil, refreshRaster)
+	})
 }
 
 func (c *glCanvas) Size() fyne.Size {
