@@ -48,7 +48,6 @@ func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
 	return drv
 }
 
-// AbsolutePositionForObject satisfies the fyne.Driver interface.
 func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
 	c := d.CanvasForObject(co)
 	if c == nil {
@@ -59,14 +58,12 @@ func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Positi
 	return driver.AbsolutePositionForObject(co, tc.objectTrees())
 }
 
-// AllWindows satisfies the fyne.Driver interface.
 func (d *testDriver) AllWindows() []fyne.Window {
 	d.windowsMutex.RLock()
 	defer d.windowsMutex.RUnlock()
 	return d.windows
 }
 
-// CanvasForObject satisfies the fyne.Driver interface.
 func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	d.windowsMutex.RLock()
 	defer d.windowsMutex.RUnlock()
@@ -74,7 +71,6 @@ func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 	return d.windows[len(d.windows)-1].Canvas()
 }
 
-// CreateWindow satisfies the fyne.Driver interface.
 func (d *testDriver) CreateWindow(string) fyne.Window {
 	canvas := NewCanvas().(*testCanvas)
 	if d.painter != nil {
@@ -92,7 +88,6 @@ func (d *testDriver) CreateWindow(string) fyne.Window {
 	return window
 }
 
-// Device satisfies the fyne.Driver interface.
 func (d *testDriver) Device() fyne.Device {
 	if d.device == nil {
 		d.device = &device{}
@@ -118,12 +113,10 @@ func (d *testDriver) RenderedTextSize(text string, size int, _ fyne.TextStyle) f
 	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
 }
 
-// Run satisfies the fyne.Driver interface.
 func (d *testDriver) Run() {
 	// no-op
 }
 
-// Quit satisfies the fyne.Driver interface.
 func (d *testDriver) Quit() {
 	// no-op
 }
