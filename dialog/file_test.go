@@ -30,7 +30,7 @@ func TestShowFileOpen(t *testing.T) {
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
 
-	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.Label)
+	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
 
@@ -85,7 +85,7 @@ func TestShowFileSave(t *testing.T) {
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Save File", title.Text)
 
-	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.Entry)
+	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Entry)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	save := buttons.Children[1].(*widget.Button)
 

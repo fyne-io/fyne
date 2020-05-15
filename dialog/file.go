@@ -105,7 +105,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}),
 		f.open)
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
-		buttons, f.fileName)
+		buttons, widget.NewHScrollContainer(f.fileName))
 
 	f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(fileIconCellWidth,
 		fileIconSize+theme.Padding()+fileTextSize)),
