@@ -25,7 +25,7 @@ func fileOpened(f fyne.FileReadCloser) {
 		return
 	}
 
-	ext := f.URI()[len(f.URI())-4:]
+	ext := f.URI().Extension()
 	if ext == ".png" {
 		showImage(f)
 	} else if ext == ".txt" {

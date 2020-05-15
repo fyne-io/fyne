@@ -14,11 +14,11 @@ type Driver interface {
 
 	// FileReaderForURI opens a file reader for the given resource indicator.
 	// This may refer to a filesystem (typical on desktop) or data from another application.
-	FileReaderForURI(string) (FileReadCloser, error)
+	FileReaderForURI(URI) (FileReadCloser, error)
 
 	// FileWriterForURI opens a file writer for the given resource indicator.
 	// This should refer to a filesystem resource as external data will not be writable.
-	FileWriterForURI(string) (FileWriteCloser, error)
+	FileWriterForURI(URI) (FileWriteCloser, error)
 
 	// CanvasForObject returns the canvas that is associated with a given CanvasObject.
 	CanvasForObject(CanvasObject) Canvas
