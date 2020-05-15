@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -234,7 +233,7 @@ func TestButton_Layout(t *testing.T) {
 				IconPlacement: tt.placement,
 			}
 
-			window := test.NewWindowWithPainter(button, software.NewPainter())
+			window := test.NewWindow(button)
 			window.Resize(button.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertImageMatches(t, "button_layout_"+name+".png", window.Canvas().Capture())

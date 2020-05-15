@@ -33,7 +33,8 @@ func NewMenuItemSeparator() fyne.CanvasObject {
 	return s
 }
 
-// CreateRenderer satisfies the fyne.Widget interface.
+// CreateRenderer returns a new renderer for the menu item.
+// Implements: fyne.Widget
 func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(i.Item.Label, theme.TextColor())
 	objects := []fyne.CanvasObject{text}
@@ -52,39 +53,47 @@ func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-// Hide satisfies the fyne.Widget interface.
+// Hide hides the menu item.
+// Implements: fyne.Widget
 func (i *MenuItem) Hide() {
 	i.hide(i)
 }
 
-// MinSize satisfies the fyne.Widget interface.
+// MinSize returns the minimal size of the menu item.
+// Implements: fyne.Widget
 func (i *MenuItem) MinSize() fyne.Size {
 	return i.minSize(i)
 }
 
-// MouseIn satisfies the desktop.Hoverable interface.
+// MouseIn changes the item to be hovered and shows the submenu if the item has one.
+// The submenu of any sibling of the item will be hidden.
+// Implements: desktop.Hoverable
 func (i *MenuItem) MouseIn(*desktop.MouseEvent) {
 	i.hovered = true
 	i.activateChild(&i.Parent.menuBase, i.updateChildPosition)
 	i.Refresh()
 }
 
-// MouseMoved satisfies the desktop.Hoverable interface.
+// MouseMoved does nothing.
+// Implements: desktop.Hoverable
 func (i *MenuItem) MouseMoved(*desktop.MouseEvent) {
 }
 
-// MouseOut satisfies the desktop.Hoverable interface.
+// MouseOut changes the item to not be hovered but has no effect on the visibility of the item's submenu.
+// Implements: desktop.Hoverable
 func (i *MenuItem) MouseOut() {
 	i.hovered = false
 	i.Refresh()
 }
 
-// Refresh satisfies the fyne.Widget interface.
+// Refresh triggers a redraw of the menu item.
+// Implements: fyne.Widget
 func (i *MenuItem) Refresh() {
 	i.refresh(i)
 }
 
-// Resize satisfies the fyne.Widget interface.
+// Resize changes the size of the menu item.
+// Implements: fyne.Widget
 func (i *MenuItem) Resize(size fyne.Size) {
 	i.resize(size, i)
 	if i.Child != nil {
@@ -92,12 +101,15 @@ func (i *MenuItem) Resize(size fyne.Size) {
 	}
 }
 
-// Show satisfies the fyne.Widget interface.
+// Show makes the menu item visible.
+// Implements: fyne.Widget
 func (i *MenuItem) Show() {
 	i.show(i)
 }
 
-// Tapped satisfies the fyne.Tappable interface.
+// Tapped performs the action of the item and dismisses the menu.
+// It does nothing if the item doesn’t have an action.
+// Implements: fyne.Tappable
 func (i *MenuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		return
@@ -138,7 +150,6 @@ type menuItemRenderer struct {
 	text             *canvas.Text
 }
 
-// BackgroundColor satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) BackgroundColor() color.Color {
 	if r.i.hovered || (r.i.Child != nil && r.i.Child.Visible()) {
 		return theme.HoverColor()
@@ -147,7 +158,6 @@ func (r *menuItemRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-// Layout satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) Layout(size fyne.Size) {
 	padding := r.itemPadding()
 
@@ -162,7 +172,6 @@ func (r *menuItemRenderer) Layout(size fyne.Size) {
 	}
 }
 
-// MinSize satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) MinSize() fyne.Size {
 	if r.minSizeUnchanged() {
 		return r.minSize
@@ -176,7 +185,6 @@ func (r *menuItemRenderer) MinSize() fyne.Size {
 	return r.minSize
 }
 
-// Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *menuItemRenderer) Refresh() {
 	canvas.Refresh(r.i)
 }
