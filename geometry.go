@@ -40,6 +40,17 @@ func NewSize(w int, h int) Size {
 	return Size{w, h}
 }
 
+// PixelSize describe an object width and height in Pixels
+type PixelSize struct {
+	Width  int // The number of pixels along the X axis.
+	Height int // The number of pixels along the Y axis.
+}
+
+// NewPixelSize return a newly allocated PixelSize of the specified dimensions.
+func NewPixelSize(w int, h int) PixelSize {
+	return PixelSize{w, h}
+}
+
 // Add returns a new Size that is the result of increasing the current size by
 // s2 Width and Height.
 func (s Size) Add(s2 Size) Size {
