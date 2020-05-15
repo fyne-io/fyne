@@ -312,6 +312,13 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) Show() {
+	go w.doShow()
+}
+
+func (w *window) doShow() {
+	for !running() {
+		time.Sleep(time.Millisecond * 10)
+	}
 	w.createLock.Do(w.create)
 
 	runOnMain(func() {

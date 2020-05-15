@@ -244,6 +244,28 @@ func makeFormTab() fyne.Widget {
 	form.Append("Password", password)
 	form.Append("Message", largeText)
 
+	// Added to demonstrate that buttons can be reset after the form is alive
+	setSubmit := widget.NewButton("Set Submit", func() {
+		form.OnSubmit = func() { println("New Submit Button") }
+		form.SubmitText = "New Submit"
+		form.Refresh()
+	})
+	clearSubmit := widget.NewButton("Remove Submit", func() {
+		form.OnSubmit = nil
+		form.Refresh()
+	})
+
+	setCancel := widget.NewButton("Set Cancel", func() {
+		form.OnCancel = func() { println("New Cancel Button") }
+		form.CancelText = "New Cancel"
+		form.Refresh()
+	})
+	clearCancel := widget.NewButton("Remove Cancel", func() {
+		form.OnCancel = nil
+		form.Refresh()
+	})
+	form.Append("", widget.NewHBox(setSubmit, clearSubmit, setCancel, clearCancel))
+
 	return form
 }
 
@@ -274,7 +296,6 @@ type contextMenuButton struct {
 	menu *fyne.Menu
 }
 
-// Tapped satisfies the fyne.Tappable interface.
 func (b *contextMenuButton) Tapped(e *fyne.PointEvent) {
 	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
 }
