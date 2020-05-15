@@ -201,7 +201,21 @@ func (c *glCanvas) Resize(size fyne.Size) {
 		c.menu.Refresh()
 		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
 	}
-	c.Refresh(c.content)
+
+	// make sure that primitives that are size specific are repainted
+	c.refreshRasters()
+}
+
+func (c *glCanvas) refreshRasters() {
+	c.walkTrees(nil, func(node *renderCacheNode) {
+		if !node.obj.Visible() {
+			return
+		}
+
+		if rast, ok := node.obj.(*canvas.Raster); ok {
+			canvas.Refresh(rast)
+		}
+	})
 }
 
 func (c *glCanvas) Size() fyne.Size {
@@ -228,11 +242,6 @@ func (c *glCanvas) SetScale(_ float32) {
 	c.setDirty(true)
 
 	c.context.RescaleContext()
-}
-
-func (c *glCanvas) setTextureScale(scale float32) {
-	c.texScale = scale
-	c.painter.SetFrameBufferScale(scale)
 }
 
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
