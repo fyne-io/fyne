@@ -23,6 +23,9 @@ func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 // The last row of the grid will contain the appropriate form control buttons if any should be shown.
 // Setting OnSubmit will set the submit button to be visible and call back the function when tapped.
 // Setting OnCancel will do the same for a cancel button.
+// If you change OnSubmit/OnCancel after the form is created and rendered, you need to call
+// Refresh() to update the form with the correct buttons.
+// Setting OnSubmit/OnCancel to nil will remove the buttons.
 type Form struct {
 	BaseWidget
 
@@ -32,7 +35,10 @@ type Form struct {
 	SubmitText string
 	CancelText string
 
-	itemGrid *fyne.Container
+	itemGrid     *fyne.Container
+	buttonBox    *Box
+	cancelButton *Button
+	submitButton *Button
 }
 
 func (f *Form) createLabel(text string) *Label {
@@ -76,7 +82,38 @@ func (f *Form) MinSize() fyne.Size {
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
 	f.BaseWidget.Refresh()
+	f.setButtons()
 	canvas.Refresh(f) // refresh ourselves for BG color - the above updates the content
+}
+
+func (f *Form) setButtons() {
+	if f.CancelText == "" {
+		f.CancelText = "Cancel"
+	}
+	if f.SubmitText == "" {
+		f.SubmitText = "Submit"
+	}
+
+	// set visibility on the buttons
+	if f.OnCancel == nil {
+		f.cancelButton.Hide()
+	} else {
+		f.cancelButton.SetText(f.CancelText)
+		f.cancelButton.OnTapped = f.OnCancel
+		f.cancelButton.Show()
+	}
+	if f.OnSubmit == nil {
+		f.submitButton.Hide()
+	} else {
+		f.submitButton.SetText(f.SubmitText)
+		f.submitButton.OnTapped = f.OnSubmit
+		f.submitButton.Show()
+	}
+	if f.OnCancel == nil && f.OnSubmit == nil {
+		f.buttonBox.Hide()
+	} else {
+		f.buttonBox.Show()
+	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -88,28 +125,13 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 		f.itemGrid.AddObject(item.Widget)
 	}
 
-	if f.OnCancel == nil && f.OnSubmit == nil {
-		return cache.Renderer(NewVBox(f.itemGrid))
-	}
+	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
+	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
+	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 
-	buttons := NewHBox(layout.NewSpacer())
-	if f.OnCancel != nil {
-		if f.CancelText == "" {
-			f.CancelText = "Cancel"
-		}
-
-		buttons.Append(NewButtonWithIcon(f.CancelText, theme.CancelIcon(), f.OnCancel))
-	}
-	if f.OnSubmit != nil {
-		if f.SubmitText == "" {
-			f.SubmitText = "Submit"
-		}
-
-		submitButton := NewButtonWithIcon(f.SubmitText, theme.ConfirmIcon(), f.OnSubmit)
-		submitButton.Style = PrimaryButton
-		buttons.Append(submitButton)
-	}
-	return cache.Renderer(NewVBox(f.itemGrid, buttons))
+	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))
+	f.setButtons() // will set correct visibility on the submit/cancel btns
+	return renderer
 }
 
 // NewForm creates a new form widget with the specified rows of form items

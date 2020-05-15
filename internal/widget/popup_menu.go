@@ -22,36 +22,42 @@ func NewPopUpMenu(m *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	return p
 }
 
-// CreateRenderer satisfies the fyne.Widget interface.
+// CreateRenderer returns a new renderer for the pop-up menu.
+// Implements: fyne.Widget
 func (p *PopUpMenu) CreateRenderer() fyne.WidgetRenderer {
 	return p.overlay.CreateRenderer()
 }
 
-// Hide satisfies the fyne.Widget interface.
+// Hide hides the pop-up menu.
+// Implements: fyne.Widget
 func (p *PopUpMenu) Hide() {
 	p.overlay.Hide()
 	p.Menu.Hide()
 }
 
-// Move satisfies the fyne.Widget interface.
+// Move moves the pop-up menu.
+// The position is absolute because pop-up menus are shown in an overlay which covers the whole canvas.
+// Implements: fyne.Widget
 func (p *PopUpMenu) Move(pos fyne.Position) {
 	p.Menu.Move(pos)
 	p.adjustPosition()
 }
 
-// Resize satisfies the fyne.Widget interface.
+// Resize changes the size of the pop-up menu.
+// Implements: fyne.Widget
 func (p *PopUpMenu) Resize(size fyne.Size) {
 	p.Menu.Resize(size)
 	p.adjustPosition()
 }
 
-// Show satisfies the fyne.Widget interface.
+// Show makes the pop-up menu visible.
+// Implements: fyne.Widget
 func (p *PopUpMenu) Show() {
 	p.overlay.Show()
 	p.Menu.Show()
 }
 
-// ShowAtPosition shows the menu at the specified position.
+// ShowAtPosition shows the pop-up menu at the specified position.
 func (p *PopUpMenu) ShowAtPosition(pos fyne.Position) {
 	p.Move(pos)
 	p.Show()

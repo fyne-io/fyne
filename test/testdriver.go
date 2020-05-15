@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter/software"
 
 	"github.com/goki/freetype/truetype"
 	"golang.org/x/image/font"
@@ -26,11 +27,25 @@ type testDriver struct {
 // Declare conformity with Driver
 var _ fyne.Driver = (*testDriver)(nil)
 
-func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
-	d.windowsMutex.RLock()
-	defer d.windowsMutex.RUnlock()
-	// cheating: probably the last created window is meant
-	return d.windows[len(d.windows)-1].Canvas()
+// NewDriver sets up and registers a new dummy driver for test purpose
+func NewDriver() fyne.Driver {
+	drv := new(testDriver)
+	drv.windowsMutex = sync.RWMutex{}
+
+	// make a single dummy window for rendering tests
+	drv.CreateWindow("")
+
+	return drv
+}
+
+// NewDriverWithPainter creates a new dummy driver that will pass the given
+// painter to all canvases created
+func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
+	drv := new(testDriver)
+	drv.painter = painter
+	drv.windowsMutex = sync.RWMutex{}
+
+	return drv
 }
 
 func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
@@ -43,9 +58,26 @@ func (d *testDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Positi
 	return driver.AbsolutePositionForObject(co, tc.objectTrees())
 }
 
+func (d *testDriver) AllWindows() []fyne.Window {
+	d.windowsMutex.RLock()
+	defer d.windowsMutex.RUnlock()
+	return d.windows
+}
+
+func (d *testDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
+	d.windowsMutex.RLock()
+	defer d.windowsMutex.RUnlock()
+	// cheating: probably the last created window is meant
+	return d.windows[len(d.windows)-1].Canvas()
+}
+
 func (d *testDriver) CreateWindow(string) fyne.Window {
 	canvas := NewCanvas().(*testCanvas)
-	canvas.painter = d.painter
+	if d.painter != nil {
+		canvas.painter = d.painter
+	} else {
+		canvas.painter = software.NewPainter()
+	}
 
 	window := &testWindow{canvas: canvas, driver: d}
 	window.clipboard = &testClipboard{}
@@ -56,14 +88,15 @@ func (d *testDriver) CreateWindow(string) fyne.Window {
 	return window
 }
 
-func (d *testDriver) AllWindows() []fyne.Window {
-	d.windowsMutex.RLock()
-	defer d.windowsMutex.RUnlock()
-	return d.windows
+func (d *testDriver) Device() fyne.Device {
+	if d.device == nil {
+		d.device = &device{}
+	}
+	return d.device
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
+func (d *testDriver) RenderedTextSize(text string, size int, _ fyne.TextStyle) fyne.Size {
 	var opts truetype.Options
 	opts.Size = float64(size)
 	opts.DPI = 78 // TODO move this?
@@ -78,13 +111,6 @@ func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyl
 	advance := font.MeasureString(face, text)
 
 	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
-}
-
-func (d *testDriver) Device() fyne.Device {
-	if d.device == nil {
-		d.device = &device{}
-	}
-	return d.device
 }
 
 func (d *testDriver) Run() {
@@ -107,25 +133,4 @@ func (d *testDriver) removeWindow(w *testWindow) {
 
 	d.windows = append(d.windows[:i], d.windows[i+1:]...)
 	d.windowsMutex.Unlock()
-}
-
-// NewDriver sets up and registers a new dummy driver for test purpose
-func NewDriver() fyne.Driver {
-	driver := new(testDriver)
-	driver.windowsMutex = sync.RWMutex{}
-
-	// make a single dummy window for rendering tests
-	driver.CreateWindow("")
-
-	return driver
-}
-
-// NewDriverWithPainter creates a new dummy driver that will pass the given
-// painter to all canvases created
-func NewDriverWithPainter(painter SoftwarePainter) fyne.Driver {
-	driver := new(testDriver)
-	driver.painter = painter
-	driver.windowsMutex = sync.RWMutex{}
-
-	return driver
 }
