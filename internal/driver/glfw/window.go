@@ -468,10 +468,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 
 	winWidth, _ := viewport.GetSize()
 	texScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	runOnDraw(w, func() {
-		w.canvas.setTextureScale(texScale)
-		w.canvas.painter.SetOutputSize(width, height)
-	})
+	w.canvas.texScale = texScale
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
@@ -1146,7 +1143,7 @@ func (w *window) create() {
 		w.canvas.scale = w.calculatedScale()
 		winWidth, _ := win.GetSize()
 		texWidth, _ := win.GetFramebufferSize()
-		w.canvas.setTextureScale(float32(texWidth) / float32(winWidth))
+		w.canvas.texScale = float32(texWidth) / float32(winWidth)
 
 		for _, fn := range w.pending {
 			fn()

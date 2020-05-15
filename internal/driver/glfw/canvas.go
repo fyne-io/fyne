@@ -244,11 +244,6 @@ func (c *glCanvas) SetScale(_ float32) {
 	c.context.RescaleContext()
 }
 
-func (c *glCanvas) setTextureScale(scale float32) {
-	c.texScale = scale
-	c.painter.SetFrameBufferScale(scale)
-}
-
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
 	texScale := c.texScale
 	multiple := float64(c.Scale() * texScale)

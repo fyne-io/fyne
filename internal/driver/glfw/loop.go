@@ -206,11 +206,12 @@ func refreshWindow(w *window) {
 }
 
 func updateGLContext(w *window) {
-	canvas := w.Canvas()
+	canvas := w.Canvas().(*glCanvas)
 	size := canvas.Size()
 
-	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.(*glCanvas).texScale
-	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.(*glCanvas).texScale
+	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.texScale
+	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.texScale
 
+	canvas.painter.SetFrameBufferScale(canvas.texScale)
 	w.canvas.painter.SetOutputSize(int(winWidth), int(winHeight))
 }
