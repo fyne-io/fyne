@@ -19,7 +19,7 @@ func TestPaintImage_SVG(t *testing.T) {
 	test.AssertImageMatches(t, "svg-stroke-default.png", c.Capture())
 }
 
-func TestPaintImage_SVG_Stretch(t *testing.T) {
+func TestPaintImage_SVG_StretchX(t *testing.T) {
 	img := canvas.NewImageFromFile("testdata/stroke.svg")
 	img.FillMode = canvas.ImageFillStretch
 	c := test.NewCanvasWithPainter(software.NewPainter())
@@ -27,10 +27,21 @@ func TestPaintImage_SVG_Stretch(t *testing.T) {
 	c.Resize(fyne.NewSize(640, 240))
 	img.Refresh()
 
-	test.AssertImageMatches(t, "svg-stroke-stretch.png", c.Capture())
+	test.AssertImageMatches(t, "svg-stroke-stretchx.png", c.Capture())
 }
 
-func TestPaintImage_SVG_Contain(t *testing.T) {
+func TestPaintImage_SVG_StretchY(t *testing.T) {
+	img := canvas.NewImageFromFile("testdata/stroke.svg")
+	img.FillMode = canvas.ImageFillStretch
+	c := test.NewCanvasWithPainter(software.NewPainter())
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(480, 480))
+	img.Refresh()
+
+	test.AssertImageMatches(t, "svg-stroke-stretchy.png", c.Capture())
+}
+
+func TestPaintImage_SVG_ContainX(t *testing.T) {
 	img := canvas.NewImageFromFile("testdata/stroke.svg")
 	img.FillMode = canvas.ImageFillContain
 	c := test.NewCanvasWithPainter(software.NewPainter())
@@ -38,5 +49,16 @@ func TestPaintImage_SVG_Contain(t *testing.T) {
 	c.Resize(fyne.NewSize(640, 240))
 	img.Refresh()
 
-	test.AssertImageMatches(t, "svg-stroke-contain.png", c.Capture())
+	test.AssertImageMatches(t, "svg-stroke-containx.png", c.Capture())
+}
+
+func TestPaintImage_SVG_ContainY(t *testing.T) {
+	img := canvas.NewImageFromFile("testdata/stroke.svg")
+	img.FillMode = canvas.ImageFillContain
+	c := test.NewCanvasWithPainter(software.NewPainter())
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(480, 480))
+	img.Refresh()
+
+	test.AssertImageMatches(t, "svg-stroke-containy.png", c.Capture())
 }
