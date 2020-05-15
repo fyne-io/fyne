@@ -49,18 +49,28 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 					fyne.LogError("SVG Load error:", err)
 					return nil
 				}
-				icon.SetTarget(0, 0, float64(width), float64(height))
 
-				w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
-				// this is used by our render code, so let's set it to the file aspect
-				aspects[img.Resource] = float32(w) / float32(h)
-				// if the image specifies it should be original size we need at least that many pixels on screen
-				if img.FillMode == canvas.ImageFillOriginal {
-					checkImageMinSize(img, c, w, h)
+				origW, origH := int(icon.ViewBox.W), int(icon.ViewBox.H)
+				aspect := float32(origW) / float32(origH)
+				viewAspect := float32(width) / float32(height)
+
+				texW, texH := width, height
+				if viewAspect > aspects[img.Resource] {
+					texW = int(float32(height) * aspect)
+				} else if viewAspect < aspects[img.Resource] {
+					texH = int(float32(width) / aspect)
 				}
 
-				tex = image.NewNRGBA(image.Rect(0, 0, width, height))
-				scanner := rasterx.NewScannerGV(w, h, tex, tex.Bounds())
+				icon.SetTarget(0, 0, float64(texW), float64(texH))
+				// this is used by our render code, so let's set it to the file aspect
+				aspects[img.Resource] = aspect
+				// if the image specifies it should be original size we need at least that many pixels on screen
+				if img.FillMode == canvas.ImageFillOriginal {
+					checkImageMinSize(img, c, origW, origH)
+				}
+
+				tex = image.NewNRGBA(image.Rect(0, 0, texW, texH))
+				scanner := rasterx.NewScannerGV(origW, origH, tex, tex.Bounds())
 				raster := rasterx.NewDasher(width, height, scanner)
 
 				err = drawSVGSafely(icon, raster)
