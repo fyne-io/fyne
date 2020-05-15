@@ -155,17 +155,19 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				fileSaved(writer)
 			}, win)
 		}),
-		widget.NewButton("Custom", func() {
-			entry := widget.NewEntry()
-			entry.SetPlaceHolder("Type something here")
-			entry.OnChanged = func(text string) {
-				fmt.Println("Entered", text)
-			}
-			sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, func(o string) {
-				fmt.Println("Selected", o)
-			})
-			content := widget.NewVBox(entry, sel)
-			dialog.ShowCustom("Custom dialog", "Done", content, win)
+		widget.NewButton("Custom Dialog (Login Form)", func() {
+			username := widget.NewEntry()
+			password := widget.NewPasswordEntry()
+			content := widget.NewForm(widget.NewFormItem("Username", username),
+				widget.NewFormItem("Password", password))
+
+			dialog.ShowCustomConfirm("Login...", "Log In", "Cancel", content, func(b bool) {
+				if !b {
+					return
+				}
+
+				log.Println("Please Authenticate", username.Text, password.Text)
+			}, win)
 		}),
 	)
 }
