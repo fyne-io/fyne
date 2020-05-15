@@ -245,21 +245,24 @@ func (w *window) fitContent() {
 	}
 
 	minWidth, minHeight := w.minSizeOnScreen()
-	if w.size.Width < minWidth || w.size.Height < minHeight {
-		targetWidth, targetHeight := w.size.Width, w.size.Height
-		if targetWidth < minWidth {
-			targetWidth = minWidth
-		}
-		if targetHeight < minHeight {
-			targetHeight = minHeight
-		}
-		w.viewport.SetSize(targetWidth, targetHeight)
-	}
 	if w.fixedSize {
 		limitSize := internal.ScaleSize(w.canvas, w.Canvas().Size())
 
 		w.viewport.SetSizeLimits(limitSize.Width, limitSize.Height, limitSize.Width, limitSize.Height)
+		w.viewport.SetSize(limitSize.Width, limitSize.Height)
 	} else {
+		// Adjust size to be at least minSize
+		if w.size.Width < minWidth || w.size.Height < minHeight {
+			targetWidth, targetHeight := w.size.Width, w.size.Height
+			if targetWidth < minWidth {
+				targetWidth = minWidth
+			}
+			if targetHeight < minHeight {
+				targetHeight = minHeight
+			}
+			w.viewport.SetSize(targetWidth, targetHeight)
+		}
+
 		w.viewport.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
 	}
 }
