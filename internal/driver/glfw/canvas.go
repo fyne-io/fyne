@@ -109,6 +109,8 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
 	c.Unlock()
 
+	c.content.Resize(c.content.MinSize()) // give it the space it wants then calculate the real min
+	// the pass above makes some layouts wide enough to wrap, so we ask again what the true min is.
 	newSize := c.size.Union(c.canvasSize(c.content.MinSize()))
 	c.Resize(newSize)
 
