@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -147,4 +148,19 @@ func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
 	r.Layout(size)
 	assert.Equal(t, size, text.Size())
 	assert.Equal(t, size, text.MinSize())
+}
+
+func TestLabel_ChangeTruncate(t *testing.T) {
+	c := test.NewCanvasWithPainter(software.NewPainter())
+	c.SetPadded(false)
+	text := NewLabel("Hello")
+	c.SetContent(text)
+	c.Resize(text.MinSize())
+	test.AssertImageMatches(t, "label-default.png", c.Capture())
+
+	truncSize := text.MinSize().Subtract(fyne.NewSize(10, 0))
+	text.Resize(truncSize)
+	text.Wrapping = fyne.TextTruncate
+	text.Refresh()
+	test.AssertImageMatches(t, "label-truncate.png", c.Capture())
 }

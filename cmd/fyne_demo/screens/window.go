@@ -25,7 +25,7 @@ func fileOpened(f fyne.FileReadCloser) {
 		return
 	}
 
-	ext := f.URI()[len(f.URI())-4:]
+	ext := f.URI().Extension()
 	if ext == ".png" {
 		showImage(f)
 	} else if ext == ".txt" {
@@ -172,7 +172,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 	)
 }
 
-func loadWindowGroup() *widget.Group {
+func loadWindowGroup() fyne.Widget {
 	windowGroup := widget.NewGroup("Windows",
 		widget.NewButton("New window", func() {
 			w := fyne.CurrentApp().NewWindow("Hello")
@@ -211,15 +211,15 @@ func loadWindowGroup() *widget.Group {
 			}))
 	}
 
-	windowGroup.Append(widget.NewGroup("Other",
+	otherGroup := widget.NewGroup("Other",
 		widget.NewButton("Notification", func() {
 			fyne.CurrentApp().SendNotification(&fyne.Notification{
 				Title:   "Fyne Demo",
 				Content: "Testing notifications...",
 			})
-		})))
+		}))
 
-	return windowGroup
+	return widget.NewVBox(windowGroup, otherGroup)
 }
 
 // DialogScreen loads a panel that lists the dialog windows that can be tested.
