@@ -72,7 +72,7 @@ func openStream(uri string) unsafe.Pointer {
 }
 
 func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
-	ret := openStream(f.uri)
+	ret := openStream(f.uri.String())
 	if ret == nil {
 		return nil, errors.New("resource not found at URI")
 	}
