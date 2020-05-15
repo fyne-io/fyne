@@ -18,9 +18,10 @@ func init() {
 }
 
 type testApp struct {
-	driver   *testDriver
-	settings fyne.Settings
-	prefs    fyne.Preferences
+	driver       *testDriver
+	settings     fyne.Settings
+	prefs        fyne.Preferences
+	propertyLock sync.RWMutex
 
 	// user action variables
 	appliedTheme     fyne.Theme
@@ -61,6 +62,9 @@ func (a *testApp) Driver() fyne.Driver {
 }
 
 func (a *testApp) SendNotification(notify *fyne.Notification) {
+	a.propertyLock.Lock()
+	defer a.propertyLock.Unlock()
+
 	a.lastNotification = notify
 }
 
@@ -72,11 +76,24 @@ func (a *testApp) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
+func (a *testApp) lastAppliedTheme() fyne.Theme {
+	a.propertyLock.Lock()
+	defer a.propertyLock.Unlock()
+
+	return a.appliedTheme
+}
+
+func (a *testApp) lastNotificationSent() *fyne.Notification {
+	a.propertyLock.Lock()
+	defer a.propertyLock.Unlock()
+
+	return a.lastNotification
+}
+
 // NewApp returns a new dummy app used for testing.
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0}
-	settings.listenerMutex = &sync.Mutex{}
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, driver: NewDriver().(*testDriver)}
 	fyne.SetCurrentApp(test)
@@ -88,7 +105,10 @@ func NewApp() fyne.App {
 			_ = <-listener
 			painter.SvgCacheReset()
 			app.ApplySettings(test.Settings(), test)
+
+			test.propertyLock.Lock()
 			test.appliedTheme = test.Settings().Theme()
+			test.propertyLock.Unlock()
 		}
 	}()
 
@@ -100,22 +120,27 @@ type testSettings struct {
 	scale float32
 
 	changeListeners []chan fyne.Settings
-	listenerMutex   *sync.Mutex
+	propertyLock    sync.RWMutex
 }
 
 func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
-	s.listenerMutex.Lock()
-	defer s.listenerMutex.Unlock()
+	s.propertyLock.Lock()
+	defer s.propertyLock.Unlock()
 	s.changeListeners = append(s.changeListeners, listener)
 }
 
 func (s *testSettings) SetTheme(theme fyne.Theme) {
+	s.propertyLock.Lock()
 	s.theme = theme
+	s.propertyLock.Unlock()
 
 	s.apply()
 }
 
 func (s *testSettings) Theme() fyne.Theme {
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
+
 	if s.theme == nil {
 		return theme.DarkTheme()
 	}
@@ -124,13 +149,17 @@ func (s *testSettings) Theme() fyne.Theme {
 }
 
 func (s *testSettings) Scale() float32 {
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
 	return s.scale
 }
 
 func (s *testSettings) apply() {
-	s.listenerMutex.Lock()
-	defer s.listenerMutex.Unlock()
-	for _, listener := range s.changeListeners {
+	s.propertyLock.RLock()
+	listeners := s.changeListeners
+	s.propertyLock.RUnlock()
+
+	for _, listener := range listeners {
 		listener <- s
 	}
 }

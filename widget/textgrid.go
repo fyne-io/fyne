@@ -402,6 +402,7 @@ func (t *textGridRenderer) MinSize() fyne.Size {
 }
 
 func (t *textGridRenderer) Refresh() {
+	t.updateGridSize(t.text.size)
 	t.refreshGrid()
 }
 

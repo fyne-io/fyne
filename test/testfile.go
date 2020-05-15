@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/storage"
 )
 
 type file struct {
@@ -30,16 +31,16 @@ func (f *file) Name() string {
 	return filepath.Base(f.path)
 }
 
-func (f *file) URI() string {
-	return "file://" + f.path
+func (f *file) URI() fyne.URI {
+	return storage.NewURI("file://" + f.path)
 }
 
-func openFile(uri string, create bool) (*file, error) {
-	if len(uri) < 8 || uri[:7] != "file://" {
+func openFile(uri fyne.URI, create bool) (*file, error) {
+	if uri.Scheme() != "file" {
 		return nil, fmt.Errorf("unsupported URL protocol")
 	}
 
-	path := uri[7:]
+	path := uri.String()[7:]
 	f, err := os.Open(path)
 	if err != nil && create {
 		f, err = os.Create(path)
@@ -47,10 +48,10 @@ func openFile(uri string, create bool) (*file, error) {
 	return &file{File: f, path: path}, err
 }
 
-func (d *testDriver) FileReaderForURI(uri string) (fyne.FileReadCloser, error) {
+func (d *testDriver) FileReaderForURI(uri fyne.URI) (fyne.FileReadCloser, error) {
 	return openFile(uri, false)
 }
 
-func (d *testDriver) FileWriterForURI(uri string) (fyne.FileWriteCloser, error) {
+func (d *testDriver) FileWriterForURI(uri fyne.URI) (fyne.FileWriteCloser, error) {
 	return openFile(uri, true)
 }

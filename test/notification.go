@@ -4,25 +4,28 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // AssertNotificationSent allows an app developer to assert that a notification was sent.
 // After the content of f has executed this utility will check that the specified notification was sent.
-func AssertNotificationSent(t *testing.T, n *fyne.Notification, f func(a fyne.App)) {
-	if f == nil {
-		return
-	}
+func AssertNotificationSent(t *testing.T, n *fyne.Notification, f func()) {
+	require.NotNil(t, f, "function has to be specified")
+	require.IsType(t, &testApp{}, fyne.CurrentApp())
+	a := fyne.CurrentApp().(*testApp)
+	a.lastNotification = nil
 
-	a := NewApp().(*testApp)
-	fyne.SetCurrentApp(a)
-
-	f(a)
+	f()
 	if n == nil {
+		assert.Nil(t, a.lastNotification)
+		return
+	} else if a.lastNotification == nil {
+		t.Error("No notification sent")
 		return
 	}
 
-	assert.NotNil(t, a.lastNotification)
 	assert.Equal(t, n.Title, a.lastNotification.Title)
 	assert.Equal(t, n.Content, a.lastNotification.Content)
 }

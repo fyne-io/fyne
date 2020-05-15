@@ -16,9 +16,9 @@ func TestGridLWrapLayout_Layout(t *testing.T) {
 	gridSize := fyne.NewSize(125, 125)
 	cellSize := fyne.NewSize(50, 50)
 
-	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
@@ -37,9 +37,9 @@ func TestGridLWrapLayout_Layout(t *testing.T) {
 func TestGridLWrapLayout_Layout_Min(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 
-	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
@@ -58,10 +58,10 @@ func TestGridLWrapLayout_Layout_HiddenItem(t *testing.T) {
 	gridSize := fyne.NewSize(125, 125)
 	cellSize := fyne.NewSize(50, 50)
 
-	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	obj2.Hide()
-	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
@@ -79,7 +79,7 @@ func TestGridLWrapLayout_MinSize(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 	minSize := cellSize
 
-	container := fyne.NewContainer(canvas.NewRectangle(color.RGBA{0, 0, 0, 0}))
+	container := fyne.NewContainer(canvas.NewRectangle(color.NRGBA{0, 0, 0, 0}))
 	layout := layout.NewGridWrapLayout(cellSize)
 
 	layoutMin := layout.MinSize(container.Objects)
@@ -95,7 +95,7 @@ func TestGridLWrapLayout_Resize_LessThanMinSize(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 	minSize := cellSize
 
-	container := fyne.NewContainer(canvas.NewRectangle(color.RGBA{0, 0, 0, 0}))
+	container := fyne.NewContainer(canvas.NewRectangle(color.NRGBA{0, 0, 0, 0}))
 	l := layout.NewGridWrapLayout(cellSize)
 	container.Resize(fyne.NewSize(25, 25))
 

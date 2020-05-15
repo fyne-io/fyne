@@ -62,7 +62,7 @@ func TestShowFileOpen(t *testing.T) {
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, openErr)
-	assert.Equal(t, "file://"+target.path, chosen.URI())
+	assert.Equal(t, "file://"+target.path, chosen.URI().String())
 
 	err := chosen.Close()
 	assert.Nil(t, err)
@@ -126,7 +126,7 @@ func TestShowFileSave(t *testing.T) {
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, saveErr)
 	expectedPath := filepath.Join(filepath.Dir(target.path), "v2_"+filepath.Base(target.path))
-	assert.Equal(t, "file://"+expectedPath, chosen.URI())
+	assert.Equal(t, "file://"+expectedPath, chosen.URI().String())
 
 	err := chosen.Close()
 	assert.Nil(t, err)

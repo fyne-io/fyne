@@ -79,6 +79,7 @@ type window struct {
 	width, height int
 	ignoreResize  bool
 
+	eventLock  sync.RWMutex
 	eventQueue chan func()
 	eventWait  sync.WaitGroup
 	pending    []func()
@@ -311,6 +312,13 @@ func (w *window) detectScale() float32 {
 }
 
 func (w *window) Show() {
+	go w.doShow()
+}
+
+func (w *window) doShow() {
+	for !running() {
+		time.Sleep(time.Millisecond * 10)
+	}
 	w.createLock.Do(w.create)
 
 	runOnMain(func() {
@@ -418,14 +426,21 @@ func (w *window) closed(viewport *glfw.Window) {
 
 // destroy this window and, if it's the last window quit the app
 func (w *window) destroy(d *gLDriver) {
+	w.eventLock.RLock()
+	queue := w.eventQueue
+	w.eventLock.RUnlock()
+
 	// finish serial event queue and nil it so we don't panic if window.closed() is called twice.
-	if w.eventQueue != nil {
+	if queue != nil {
 		w.waitForEvents()
+
+		w.eventLock.Lock()
 		close(w.eventQueue)
 		w.eventQueue = nil
+		w.eventLock.Unlock()
 	}
 
-	if w.master || len(d.windows) == 0 {
+	if w.master || len(d.windowList()) == 0 {
 		d.Quit()
 	}
 }
@@ -458,29 +473,17 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 		return
 	}
 
-	winWidth, _ := w.viewport.GetSize()
+	winWidth, _ := viewport.GetSize()
 	texScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	w.canvas.setTextureScale(texScale)
-	w.canvas.painter.SetOutputSize(width, height)
+	w.canvas.texScale = texScale
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-	w.RunWithContext(func() {
-		freeDirtyTextures(w.canvas)
-	})
-	forceWindowRefresh(w)
-	w.canvas.setDirty(true)
+	refreshWindow(w)
 }
 
-func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position,
-	matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position) {
-	roots := []fyne.CanvasObject{canvas.content}
-
-	if canvas.menu != nil {
-		roots = []fyne.CanvasObject{canvas.menu, canvas.content}
-	}
-
-	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), roots...)
+func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
+	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.content)
 }
 
 func fyneToNativeCursor(cursor desktop.Cursor) *glfw.Cursor {
@@ -495,7 +498,7 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
 	cursor := cursorMap[desktop.DefaultCursor]
-	obj, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
 			fyneCursor := cursorable.Cursor()
 			cursor = fyneToNativeCursor(fyneCursor)
@@ -567,18 +570,9 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-	co, pos := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		} else if _, ok := object.(fyne.SecondaryTappable); ok {
-			return true
-		} else if _, ok := object.(fyne.Focusable); ok {
-			return true
-		} else if _, ok := object.(fyne.Draggable); ok {
-			return true
-		} else if _, ok := object.(desktop.Mouseable); ok {
-			return true
-		} else if _, ok := object.(desktop.Hoverable); ok {
+	co, pos, layer := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+		switch object.(type) {
+		case fyne.Tappable, fyne.SecondaryTappable, fyne.Focusable, fyne.Draggable, desktop.Mouseable, desktop.Hoverable:
 			return true
 		}
 
@@ -609,13 +603,16 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		}
 	}
 
-	needsfocus := true
-	wid := w.canvas.Focused()
-	if wid != nil {
-		if wid.(fyne.CanvasObject) != co {
-			w.canvas.Unfocus()
-		} else {
-			needsfocus = false
+	needsfocus := false
+	if layer != 1 { // 0 - overlay, 1 - menu, 2 - content
+		needsfocus = true
+
+		if wid := w.canvas.Focused(); wid != nil {
+			if wid.(fyne.CanvasObject) != co {
+				w.canvas.Unfocus()
+			} else {
+				needsfocus = false
+			}
 		}
 	}
 
@@ -684,7 +681,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
-	co, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	co, _, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		_, ok := object.(fyne.Scrollable)
 		return ok
 	})
@@ -1058,7 +1055,11 @@ func (w *window) runOnMainWhenCreated(fn func()) {
 }
 
 func (w *window) runEventQueue() {
-	for fn := range w.eventQueue {
+	w.eventLock.Lock()
+	queue := w.eventQueue
+	w.eventLock.Unlock()
+
+	for fn := range queue {
 		fn()
 		w.eventWait.Done()
 	}
@@ -1088,7 +1089,7 @@ func (d *gLDriver) createWindow(title string, decorate bool) fyne.Window {
 		ret.canvas = newCanvas()
 		ret.canvas.context = ret
 		ret.SetIcon(ret.icon)
-		d.windows = append(d.windows, ret)
+		d.addWindow(ret)
 	})
 	return ret
 }
@@ -1122,11 +1123,17 @@ func (w *window) create() {
 			fyne.LogError("window creation error", err)
 			return
 		}
-		win.MakeContextCurrent()
+		w.viewport = win
+	})
 
+	// run the GL init on the draw thread
+	runOnDraw(w, func() {
 		w.canvas.painter = gl.NewPainter(w.canvas, w)
 		w.canvas.painter.Init()
+	})
 
+	runOnMain(func() {
+		win := w.viewport
 		win.SetCloseCallback(w.closed)
 		win.SetPosCallback(w.moved)
 		win.SetSizeCallback(w.resized)
@@ -1138,11 +1145,13 @@ func (w *window) create() {
 		win.SetKeyCallback(w.keyPressed)
 		win.SetCharCallback(w.charInput)
 		win.SetFocusCallback(w.focused)
-		glfw.DetachCurrentContext()
 
-		w.viewport = win
 		w.canvas.detectedScale = w.detectScale()
 		w.canvas.scale = w.calculatedScale()
+		winWidth, _ := win.GetSize()
+		texWidth, _ := win.GetFramebufferSize()
+		w.canvas.texScale = float32(texWidth) / float32(winWidth)
+
 		for _, fn := range w.pending {
 			fn()
 		}

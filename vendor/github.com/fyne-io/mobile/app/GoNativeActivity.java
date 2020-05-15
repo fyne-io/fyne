@@ -17,6 +17,7 @@ import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -170,6 +171,7 @@ public class GoNativeActivity extends NativeActivity {
                 mTextEdit.setVisibility(View.GONE);
                 mTextEdit.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
                     InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD); // this is required to force samsung keyboards to not suggest
+                mTextEdit.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
 
                 FrameLayout.LayoutParams mEditTextLayoutParams = new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);

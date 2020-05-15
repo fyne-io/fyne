@@ -23,16 +23,16 @@ func TestNewHorizontalGradient(t *testing.T) {
 	}
 	for y, xv := range expectedAlphaValues {
 		for x, v := range xv {
-			assert.Equal(t, color.RGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 		}
 	}
 
 	img := horizontal.Generate(51, 5)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xfd}, img.At(0, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(0, 0))
 	for i := 0; i < 5; i++ {
-		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(25, i))
+		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(25, i))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x02}, img.At(50, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(50, 0))
 }
 
 func TestNewHorizontalGradient_Flipped(t *testing.T) {
@@ -49,16 +49,16 @@ func TestNewHorizontalGradient_Flipped(t *testing.T) {
 	}
 	for y, xv := range expectedAlphaValues {
 		for x, v := range xv {
-			assert.Equal(t, color.RGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 		}
 	}
 
 	img := horizontal.Generate(51, 5)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x02}, img.At(0, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(0, 0))
 	for i := 0; i < 5; i++ {
-		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(25, i))
+		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(25, i))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xfd}, img.At(50, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(50, 0))
 }
 
 func TestNewVerticalGradient(t *testing.T) {
@@ -74,16 +74,16 @@ func TestNewVerticalGradient(t *testing.T) {
 	}
 	for y, xv := range expectedAlphaValues {
 		for x, v := range xv {
-			assert.Equal(t, color.RGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 		}
 	}
 
 	imgVert := vertical.Generate(5, 51)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xfd}, imgVert.At(0, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, imgVert.At(0, 0))
 	for i := 0; i < 5; i++ {
-		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
+		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x02}, imgVert.At(0, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, imgVert.At(0, 50))
 }
 
 func TestNewVerticalGradient_Flipped(t *testing.T) {
@@ -100,16 +100,16 @@ func TestNewVerticalGradient_Flipped(t *testing.T) {
 	}
 	for y, xv := range expectedAlphaValues {
 		for x, v := range xv {
-			assert.Equal(t, color.RGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 		}
 	}
 
 	imgVert := vertical.Generate(5, 51)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x02}, imgVert.At(0, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, imgVert.At(0, 0))
 	for i := 0; i < 5; i++ {
-		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
+		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, imgVert.At(i, 25))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xfd}, imgVert.At(0, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, imgVert.At(0, 50))
 }
 
 func TestNewLinearGradient_45(t *testing.T) {
@@ -125,18 +125,18 @@ func TestNewLinearGradient_45(t *testing.T) {
 	}
 	for y, xv := range expectedAlphaValues {
 		for x, v := range xv {
-			assert.Equal(t, color.RGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 		}
 	}
 
 	img := negative.Generate(51, 51)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xfd}, img.At(50, 0))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x02}, img.At(0, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(50, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(0, 50))
 	for i := 0; i < 5; i++ {
-		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(i, i))
+		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(i, i))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(0, 0))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(0, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50, 50))
 }
 
 func TestNewLinearGradient_225(t *testing.T) {
@@ -152,18 +152,18 @@ func TestNewLinearGradient_225(t *testing.T) {
 	}
 	for y, xv := range expectedAlphaValues {
 		for x, v := range xv {
-			assert.Equal(t, color.RGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 		}
 	}
 
 	img := negative.Generate(51, 51)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x02}, img.At(50, 0))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xfd}, img.At(0, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(50, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(0, 50))
 	for i := 0; i < 5; i++ {
-		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(i, i))
+		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(i, i))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(0, 0))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(0, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50, 50))
 }
 
 func TestNewLinearGradient_135(t *testing.T) {
@@ -179,18 +179,18 @@ func TestNewLinearGradient_135(t *testing.T) {
 	}
 	for y, xv := range expectedAlphaValues {
 		for x, v := range xv {
-			assert.Equal(t, color.RGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 		}
 	}
 
 	img := positive.Generate(51, 51)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x02}, img.At(0, 0))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xfd}, img.At(50, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(0, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(50, 50))
 	for i := 0; i < 5; i++ {
-		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50-i, i))
+		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50-i, i))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50, 0))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(0, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(0, 50))
 }
 
 func TestNewLinearGradient_315(t *testing.T) {
@@ -206,18 +206,18 @@ func TestNewLinearGradient_315(t *testing.T) {
 	}
 	for y, xv := range expectedAlphaValues {
 		for x, v := range xv {
-			assert.Equal(t, color.RGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+			assert.Equal(t, color.NRGBA{0, 0, 0, v}, smallImg.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 		}
 	}
 
 	img := positive.Generate(51, 51)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xfd}, img.At(0, 0))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x02}, img.At(50, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xfd}, img.At(0, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x02}, img.At(50, 50))
 	for i := 0; i < 5; i++ {
-		assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50-i, i))
+		assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50-i, i))
 	}
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(50, 0))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7f}, img.At(0, 50))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(50, 0))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7f}, img.At(0, 50))
 }
 
 func TestNewRadialGradient(t *testing.T) {
@@ -234,7 +234,7 @@ func TestNewRadialGradient(t *testing.T) {
 		}
 		for y, xv := range expectedAlphaValues {
 			for x, v := range xv {
-				assert.Equal(t, color.RGBA{0, 0, 0, v}, imgOddDiameter.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+				assert.Equal(t, color.NRGBA{0, 0, 0, v}, imgOddDiameter.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 			}
 		}
 	}
@@ -251,38 +251,38 @@ func TestNewRadialGradient(t *testing.T) {
 		}
 		for y, xv := range expectedAlphaValues {
 			for x, v := range xv {
-				assert.Equal(t, color.RGBA{0, 0, 0, v}, imgEvenDiameter.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
+				assert.Equal(t, color.NRGBA{0, 0, 0, v}, imgEvenDiameter.At(x, y), fmt.Sprintf("alpha value at %d,%d", x, y))
 			}
 		}
 	}
 
 	imgCircle := circle.Generate(10, 10)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x18}, imgCircle.At(9, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x4a}, imgCircle.At(8, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7d}, imgCircle.At(7, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xaf}, imgCircle.At(6, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xdb}, imgCircle.At(5, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xdb}, imgCircle.At(4, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xaf}, imgCircle.At(3, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x7d}, imgCircle.At(2, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x4a}, imgCircle.At(1, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x18}, imgCircle.At(0, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x18}, imgCircle.At(9, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x4a}, imgCircle.At(8, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7d}, imgCircle.At(7, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xaf}, imgCircle.At(6, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xdb}, imgCircle.At(5, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xdb}, imgCircle.At(4, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xaf}, imgCircle.At(3, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x7d}, imgCircle.At(2, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x4a}, imgCircle.At(1, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x18}, imgCircle.At(0, 5))
 
 	circle.CenterOffsetX = 0.1
 	circle.CenterOffsetY = 0.1
 	imgCircleOffset := circle.Generate(10, 10)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xe1}, imgCircleOffset.At(5, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xbc}, imgCircleOffset.At(4, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x93}, imgCircleOffset.At(3, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x69}, imgCircleOffset.At(2, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x3e}, imgCircleOffset.At(1, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xe1}, imgCircleOffset.At(5, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xbc}, imgCircleOffset.At(4, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x93}, imgCircleOffset.At(3, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x69}, imgCircleOffset.At(2, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x3e}, imgCircleOffset.At(1, 5))
 
 	circle.CenterOffsetX = -0.1
 	circle.CenterOffsetY = -0.1
 	imgCircleOffset = circle.Generate(10, 10)
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xa5}, imgCircleOffset.At(5, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xbc}, imgCircleOffset.At(4, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xbc}, imgCircleOffset.At(3, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0xa5}, imgCircleOffset.At(2, 5))
-	assert.Equal(t, color.RGBA{0, 0, 0, 0x83}, imgCircleOffset.At(1, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xa5}, imgCircleOffset.At(5, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xbc}, imgCircleOffset.At(4, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xbc}, imgCircleOffset.At(3, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0xa5}, imgCircleOffset.At(2, 5))
+	assert.Equal(t, color.NRGBA{0, 0, 0, 0x83}, imgCircleOffset.At(1, 5))
 }
