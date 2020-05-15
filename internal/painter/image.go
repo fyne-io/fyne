@@ -50,27 +50,27 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 					return nil
 				}
 
-				w, h := int(icon.ViewBox.W), int(icon.ViewBox.H)
-				aspect := float32(w) / float32(h)
+				origW, origH := int(icon.ViewBox.W), int(icon.ViewBox.H)
+				aspect := float32(origW) / float32(origH)
 				viewAspect := float32(width) / float32(height)
 
-				ww, hh := width, height
+				texW, texH := width, height
 				if viewAspect > aspects[img.Resource] {
-					ww = int(float32(height) * aspect)
+					texW = int(float32(height) * aspect)
 				} else if viewAspect < aspects[img.Resource] {
-					hh = int(float32(width) / aspect)
+					texH = int(float32(width) / aspect)
 				}
 
-				icon.SetTarget(0, 0, float64(ww), float64(hh))
+				icon.SetTarget(0, 0, float64(texW), float64(texH))
 				// this is used by our render code, so let's set it to the file aspect
 				aspects[img.Resource] = aspect
 				// if the image specifies it should be original size we need at least that many pixels on screen
 				if img.FillMode == canvas.ImageFillOriginal {
-					checkImageMinSize(img, c, w, h)
+					checkImageMinSize(img, c, origW, origH)
 				}
 
-				tex = image.NewNRGBA(image.Rect(0, 0, ww, hh))
-				scanner := rasterx.NewScannerGV(w, h, tex, tex.Bounds())
+				tex = image.NewNRGBA(image.Rect(0, 0, texW, texH))
+				scanner := rasterx.NewScannerGV(origW, origH, tex, tex.Bounds())
 				raster := rasterx.NewDasher(width, height, scanner)
 
 				err = drawSVGSafely(icon, raster)
