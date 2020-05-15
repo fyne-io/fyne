@@ -55,9 +55,9 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 				viewAspect := float32(width) / float32(height)
 
 				texW, texH := width, height
-				if viewAspect > aspects[img.Resource] {
+				if viewAspect > aspect {
 					texW = int(float32(height) * aspect)
-				} else if viewAspect < aspects[img.Resource] {
+				} else if viewAspect < aspect {
 					texH = int(float32(width) / aspect)
 				}
 
