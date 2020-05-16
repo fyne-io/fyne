@@ -139,7 +139,9 @@ func (d *gLDriver) repaintWindow(w *window) {
 		updateGLContext(w)
 		canvas.paint(canvas.Size())
 
-		w.viewport.SwapBuffers()
+		if w.viewport != nil {
+			w.viewport.SwapBuffers()
+		}
 	})
 }
 
