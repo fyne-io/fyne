@@ -14,16 +14,6 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func TestTabContainer_Empty(t *testing.T) {
-	tabs := NewTabContainer()
-	assert.Equal(t, 0, len(tabs.Items))
-	assert.Equal(t, -1, tabs.CurrentTabIndex())
-	assert.Nil(t, tabs.CurrentTab())
-	min := tabs.MinSize()
-	assert.Equal(t, 4, min.Height)
-	assert.Equal(t, 0, min.Width)
-}
-
 func TestTabContainer_SetTabLocation(t *testing.T) {
 	tab1 := NewTabItem("Test1", NewLabel("Test1"))
 	tab2 := NewTabItem("Test2", NewLabel("Test2"))

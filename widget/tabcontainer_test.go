@@ -12,6 +12,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestTabContainer_Empty(t *testing.T) {
+	tabs := NewTabContainer()
+	assert.Equal(t, 0, len(tabs.Items))
+	assert.Equal(t, -1, tabs.CurrentTabIndex())
+	assert.Nil(t, tabs.CurrentTab())
+	min := tabs.MinSize()
+	assert.Equal(t, 0, min.Width)
+	assert.Equal(t, theme.Padding(), min.Height)
+}
+
 func TestTabContainer_Resize_Empty(t *testing.T) {
 	tabs := NewTabContainer()
 	tabs.Resize(fyne.NewSize(10, 10))
