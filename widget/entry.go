@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -27,6 +28,7 @@ var _ fyne.Tappable = (*Entry)(nil)
 var _ fyne.Widget = (*Entry)(nil)
 var _ desktop.Mouseable = (*Entry)(nil)
 var _ desktop.Keyable = (*Entry)(nil)
+var _ mobile.Keyboardable = (*Entry)(nil)
 
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
@@ -552,6 +554,16 @@ func (e *Entry) TypedRune(r rune) {
 // Implements: fyne.Shortcutable
 func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 	e.shortcut.TypedShortcut(shortcut)
+}
+
+// Keyboard implements the Keyboardable interface
+// Implements: mobile.Keyboardable
+func (e *Entry) Keyboard() mobile.Keyboard {
+	if e.MultiLine {
+		return mobile.MultiLineKeyboard
+	}
+
+	return mobile.DefaultKeyboard
 }
 
 // concealed tells the rendering textProvider if we are a concealed field

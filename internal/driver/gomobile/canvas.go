@@ -130,17 +130,26 @@ func (c *mobileCanvas) resize(size fyne.Size) {
 }
 
 func (c *mobileCanvas) Focus(obj fyne.Focusable) {
+	if c.focused == obj || obj == nil {
+		return
+	}
+
+	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
+		c.Unfocus()
+		return
+	}
+
 	if c.focused != nil {
 		c.focused.FocusLost()
 	}
 
 	c.focused = obj
-	if obj != nil {
-		obj.FocusGained()
+	obj.FocusGained()
 
-		if isEntry(obj) {
-			showVirtualKeyboard()
-		}
+	if keyb, ok := obj.(mobile.Keyboardable); ok {
+		showVirtualKeyboard(keyb.Keyboard())
+	} else {
+		hideVirtualKeyboard()
 	}
 }
 
@@ -239,11 +248,8 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 	c.dragging = nil
 
 	co, objPos, layer := c.findObjectAtPositionMatching(pos, func(object fyne.CanvasObject) bool {
-		if _, ok := object.(fyne.Tappable); ok {
-			return true
-		} else if _, ok := object.(mobile.Touchable); ok {
-			return true
-		} else if _, ok := object.(fyne.Focusable); ok {
+		switch object.(type) {
+		case fyne.Tappable, mobile.Touchable, fyne.Focusable:
 			return true
 		}
 
@@ -258,20 +264,11 @@ func (c *mobileCanvas) tapDown(pos fyne.Position, tapID int) {
 		c.touched[tapID] = wid
 	}
 
-	needsFocus := false
 	if layer != 1 { // 0 - overlay, 1 - window head / menu, 2 - content
-		needsFocus = true
-		if wid := c.Focused(); wid != nil {
-			if wid.(fyne.CanvasObject) != co {
-				c.Unfocus()
-			} else {
-				needsFocus = false
-			}
-		}
-	}
-	if wid, ok := co.(fyne.Focusable); ok && needsFocus {
-		if dis, ok := wid.(fyne.Disableable); !ok || !dis.Disabled() {
+		if wid, ok := co.(fyne.Focusable); ok {
 			c.Focus(wid)
+		} else {
+			c.Unfocus()
 		}
 	}
 }
@@ -393,14 +390,6 @@ func (c *mobileCanvas) setupThemeListener() {
 			}
 		}
 	}()
-}
-
-func isEntry(obj fyne.Focusable) bool {
-	if _, ok := obj.(*widget.Entry); ok {
-		return true
-	}
-	_, ok := obj.(*widget.SelectEntry)
-	return ok
 }
 
 // NewCanvas creates a new gomobile mobileCanvas. This is a mobileCanvas that will render on a mobile device using OpenGL.
