@@ -1,5 +1,6 @@
 // +build !ci
 // +build !no_native_menus
+// +build !mobile
 
 package glfw
 
