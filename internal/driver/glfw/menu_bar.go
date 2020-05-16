@@ -6,8 +6,8 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/layout"
 	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	publicWidget "fyne.io/fyne/widget"
 )
@@ -37,7 +37,10 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 // CreateRenderer returns a new renderer for the menu bar.
 // Implements: fyne.Widget
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
-	cont := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), b.Items...)
+	cont := &fyne.Container{
+		Layout:  &layout.Box{Horizontal: true, PadBeforeAndAfter: true},
+		Objects: b.Items,
+	}
 	bg := &menuBarBackground{action: b.deactivate}
 	return &menuBarRenderer{
 		widget.NewShadowingRenderer([]fyne.CanvasObject{bg, cont}, widget.MenuLevel),
@@ -120,27 +123,21 @@ func (r *menuBarRenderer) Layout(size fyne.Size) {
 		return
 	}
 
-	padding := r.padding()
 	if r.b.active {
 		r.bg.Resize(r.b.canvas.Size())
 	} else {
 		r.bg.Resize(fyne.NewSize(0, 0))
 	}
-	r.cont.Resize(size.Subtract(padding))
-	r.cont.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
+	r.cont.Resize(size)
 }
 
 func (r *menuBarRenderer) MinSize() fyne.Size {
-	return r.cont.MinSize().Add(r.padding())
+	return r.cont.MinSize()
 }
 
 func (r *menuBarRenderer) Refresh() {
 	r.Layout(r.b.Size())
 	canvas.Refresh(r.b)
-}
-
-func (r *menuBarRenderer) padding() fyne.Size {
-	return fyne.NewSize(theme.Padding()*2, 0)
 }
 
 // Transparent overlay shown as soon as menu is active.

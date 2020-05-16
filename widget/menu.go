@@ -3,9 +3,8 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/layout"
 	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
 )
 
 var _ fyne.Widget = (*Menu)(nil)
@@ -38,7 +37,7 @@ func NewMenu(menu *fyne.Menu) *Menu {
 // Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	cont := &fyne.Container{
-		Layout:  layout.NewVBoxLayout(),
+		Layout:  &layout.Box{Horizontal: false, PadBeforeAndAfter: true},
 		Objects: m.Items,
 	}
 	return &menuRenderer{
@@ -124,19 +123,13 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	}
 
 	r.LayoutShadow(size, fyne.NewPos(0, 0))
-	padding := r.padding()
-	r.cont.Resize(size.Subtract(padding))
-	r.cont.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
+	r.cont.Resize(size)
 }
 
 func (r *menuRenderer) MinSize() fyne.Size {
-	return r.cont.MinSize().Add(r.padding())
+	return r.cont.MinSize()
 }
 
 func (r *menuRenderer) Refresh() {
 	canvas.Refresh(r.m)
-}
-
-func (r *menuRenderer) padding() fyne.Size {
-	return fyne.NewSize(0, theme.Padding()*2)
 }
