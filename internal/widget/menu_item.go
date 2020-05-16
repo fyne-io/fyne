@@ -112,6 +112,10 @@ func (i *MenuItem) Show() {
 // Implements: fyne.Tappable
 func (i *MenuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
+		if fyne.CurrentDevice().IsMobile() {
+			i.activateChild(&i.Parent.menuBase, i.updateChildPosition)
+			i.Refresh()
+		}
 		return
 	}
 
@@ -151,7 +155,7 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) BackgroundColor() color.Color {
-	if r.i.hovered || (r.i.Child != nil && r.i.Child.Visible()) {
+	if !fyne.CurrentDevice().IsMobile() && (r.i.hovered || (r.i.Child != nil && r.i.Child.Visible())) {
 		return theme.HoverColor()
 	}
 
