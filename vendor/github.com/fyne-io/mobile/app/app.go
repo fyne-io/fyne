@@ -52,7 +52,7 @@ type App interface {
 	// is to trigger a side effect rather than modify the event.
 	RegisterFilter(f func(interface{}) interface{})
 
-	ShowVirtualKeyboard()
+	ShowVirtualKeyboard(Keyboard)
 	HideVirtualKeyboard()
 	ShowFileOpenPicker(func(string, func()))
 }
@@ -133,8 +133,8 @@ func (a *app) RegisterFilter(f func(interface{}) interface{}) {
 	a.filters = append(a.filters, f)
 }
 
-func (a *app) ShowVirtualKeyboard() {
-	driverShowVirtualKeyboard()
+func (a *app) ShowVirtualKeyboard(keyboard Keyboard) {
+	driverShowVirtualKeyboard(keyboard)
 }
 
 func (a *app) HideVirtualKeyboard() {

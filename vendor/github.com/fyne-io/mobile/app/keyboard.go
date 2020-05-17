@@ -3,6 +3,19 @@ package app
 import "C"
 import "github.com/fyne-io/mobile/event/key"
 
+type Keyboard int32
+
+const (
+	// DefaultKeyboard is the keyboard with default input style and "Done" return key
+	DefaultKeyboard Keyboard = iota
+	// MultiLineKeyboard is the keyboard with default input style and "return" return key
+	MultiLineKeyboard
+	// NumberKeyboard is the keyboard with number input style and "Done" return key
+	NumberKeyboard
+	// WebKeyboard is the keyboard with web input style and "Done" return key
+	WebKeyboard
+)
+
 //export keyboardTyped
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {

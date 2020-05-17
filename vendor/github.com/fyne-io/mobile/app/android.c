@@ -79,7 +79,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		current_class = (*env)->GetObjectClass(env, activity->clazz);
 		current_class = (*env)->NewGlobalRef(env, current_class);
 		key_rune_method = find_static_method(env, current_class, "getRune", "(III)I");
-		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "()V");
+		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "(I)V");
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "()V");
 
@@ -212,11 +212,12 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e) {
 	);
 }
 
-void showKeyboard(JNIEnv* env) {
+void showKeyboard(JNIEnv* env, int keyboardType) {
 	(*env)->CallStaticVoidMethod(
 		env,
 		current_class,
-		show_keyboard_method
+		show_keyboard_method,
+		keyboardType
 	);
 }
 

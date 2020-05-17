@@ -247,11 +247,38 @@ UIEdgeInsets getDevicePadding() {
     return UIEdgeInsetsZero;
 }
 
-void showKeyboard() {
+void showKeyboard(int keyboardType) {
     GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
     GoInputView *view = appDelegate.controller.inputView;
 
     dispatch_async(dispatch_get_main_queue(), ^{
+        switch (keyboardType)
+        {
+            case 0:
+                [view setKeyboardType:UIKeyboardTypeDefault];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+            case 1:
+                [view setKeyboardType:UIKeyboardTypeDefault];
+                [view setReturnKeyType:UIReturnKeyDefault];
+                break;
+            case 2:
+                [view setKeyboardType:UIKeyboardTypeNumberPad];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+            case 3:
+                [view setKeyboardType:UIKeyboardTypeURL];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+            default:
+                NSLog(@"unknown keyboard type, use default");
+                [view setKeyboardType:UIKeyboardTypeDefault];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+        }
+        // refresh settings if keyboard is already open
+        [view reloadInputViews];
+
         BOOL ret = [view becomeFirstResponder];
     });
 }
