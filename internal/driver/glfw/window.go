@@ -311,6 +311,12 @@ func (w *window) detectScale() float32 {
 	return calculateDetectedScale(widthMm, widthPx)
 }
 
+func (w *window) detectTextureScale() float32 {
+	winWidth, _ := w.viewport.GetSize()
+	texWidth, _ := w.viewport.GetFramebufferSize()
+	return float32(texWidth) / float32(winWidth)
+}
+
 func (w *window) Show() {
 	go w.doShow()
 }
@@ -476,6 +482,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 	winWidth, _ := viewport.GetSize()
 	texScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
 	w.canvas.texScale = texScale
+	w.canvas.Refresh(w.canvas.content) // apply texture scale
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
@@ -1148,9 +1155,9 @@ func (w *window) create() {
 
 		w.canvas.detectedScale = w.detectScale()
 		w.canvas.scale = w.calculatedScale()
-		winWidth, _ := win.GetSize()
-		texWidth, _ := win.GetFramebufferSize()
-		w.canvas.texScale = float32(texWidth) / float32(winWidth)
+		w.canvas.texScale = w.detectTextureScale()
+		// update window size now we have scaled detected
+		w.viewport.SetSize(w.screenSize(w.canvas.size))
 
 		for _, fn := range w.pending {
 			fn()
