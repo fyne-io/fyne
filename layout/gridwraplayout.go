@@ -27,8 +27,8 @@ func (g *gridWrapLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		g.colCount = int(math.Floor(float64(size.Width+theme.Padding()) / float64(g.CellSize.Width+theme.Padding())))
 	}
 
-	x, y := 0, 0
-	for i, child := range objects {
+	i, x, y := 0, 0, 0
+	for _, child := range objects {
 		if !child.Visible() {
 			continue
 		}
@@ -45,6 +45,7 @@ func (g *gridWrapLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		} else {
 			x += g.CellSize.Width + theme.Padding()
 		}
+		i++
 	}
 }
 
