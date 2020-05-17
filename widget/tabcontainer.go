@@ -70,7 +70,6 @@ func NewTabItemWithIcon(text string, icon fyne.Resource, content fyne.CanvasObje
 // Append adds a new TabItem to the rightmost side of the tab panel
 func (c *TabContainer) Append(item *TabItem) {
 	c.SetItems(append(c.Items, item))
-	c.Refresh()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
