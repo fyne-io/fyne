@@ -85,7 +85,7 @@ func TestTabContainer_SelectTabIndex(t *testing.T) {
 	assert.Equal(t, tabs.Items[1], selectedTab)
 }
 
-func TestTabItem_Content(t *testing.T) {
+func TestTabContainer_ChangeItemContent(t *testing.T) {
 	item1 := &TabItem{Text: "Test1", Content: NewLabel("Test1")}
 	item2 := &TabItem{Text: "Test2", Content: NewLabel("Test2")}
 	tabs := NewTabContainer(item1, item2)
@@ -173,7 +173,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	}
 }
 
-func Test_tabContainer_Tapped(t *testing.T) {
+func TestTabContainer_Tapped(t *testing.T) {
 	tabs := NewTabContainer(
 		NewTabItem("Test1", NewLabel("Test1")),
 		NewTabItem("Test2", NewLabel("Test2")),
@@ -231,18 +231,31 @@ func TestTabContainer_Hidden_AsChild(t *testing.T) {
 	assert.True(t, c2.Visible())
 }
 
-func TestTabContainerRenderer_ApplyTheme(t *testing.T) {
+func TestTabContainer_ApplyTheme(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
-	tabs := NewTabContainer(&TabItem{Text: "Test1", Content: NewLabel("Test1")})
+	item := &TabItem{Text: "Test1", Content: NewLabel("Test1")}
+	tabs := NewTabContainer(item)
 	underline := test.WidgetRenderer(tabs).(*tabContainerRenderer).line
 	barColor := underline.FillColor
 
 	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 	tabs.Refresh()
 	assert.NotEqual(t, barColor, underline.FillColor)
+
+	tabButton := tabs.makeButton(item)
+	render := test.WidgetRenderer(tabButton).(*tabButtonRenderer)
+
+	textSize := render.label.TextSize
+	customTextSize := textSize
+	test.WithTestTheme(t, func() {
+		render.Refresh()
+		customTextSize = render.label.TextSize
+	})
+
+	assert.NotEqual(t, textSize, customTextSize)
 }
 
-func TestTabContainerRenderer_Layout(t *testing.T) {
+func TestTabContainer_Layout(t *testing.T) {
 	textSize := canvas.NewText("Text0", theme.TextColor()).MinSize()
 	textWidth := textSize.Width
 	textHeight := textSize.Height
@@ -436,7 +449,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 	assert.Equal(t, "Text5", tabs.Items[3].Text)
 }
 
-func Test_tabButton_Hovered(t *testing.T) {
+func TestTabContainer_HoveredButton(t *testing.T) {
 	b := &tabButton{}
 	r := test.WidgetRenderer(b)
 	require.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
@@ -447,28 +460,12 @@ func Test_tabButton_Hovered(t *testing.T) {
 	assert.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
 }
 
-func Test_tabButtonRenderer_BackgroundColor(t *testing.T) {
+func TestTabContainer_ButtonBackgroundColor(t *testing.T) {
 	r := test.WidgetRenderer(&tabButton{})
 	assert.Equal(t, theme.BackgroundColor(), r.BackgroundColor())
 }
 
-func TestTabButtonRenderer_ApplyTheme(t *testing.T) {
-	item := &TabItem{Text: "Test", Content: NewLabel("Content")}
-	tabs := NewTabContainer(item)
-	tabButton := tabs.makeButton(item)
-	render := test.WidgetRenderer(tabButton).(*tabButtonRenderer)
-
-	textSize := render.label.TextSize
-	customTextSize := textSize
-	test.WithTestTheme(t, func() {
-		render.Refresh()
-		customTextSize = render.label.TextSize
-	})
-
-	assert.NotEqual(t, textSize, customTextSize)
-}
-
-func Test_tabButtonRenderer_SetText(t *testing.T) {
+func TestTabContainer_SetButtonText(t *testing.T) {
 	item := &TabItem{Text: "Test", Content: NewLabel("Content")}
 	tabs := NewTabContainer(item)
 	tabRenderer := test.WidgetRenderer(tabs).(*tabContainerRenderer)
