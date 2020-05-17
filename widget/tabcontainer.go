@@ -351,8 +351,18 @@ func (r *tabContainerRenderer) tabsInSync() bool {
 	if len(r.objects) != len(r.container.Items) {
 		return false
 	}
+	if len(r.tabBar.Objects) != len(r.container.Items) {
+		return false
+	}
 	for i, item := range r.container.Items {
 		if item.Content != r.objects[i] {
+			return false
+		}
+		button := r.tabBar.Objects[i].(*tabButton)
+		if item.Text != button.Text {
+			return false
+		}
+		if item.Icon != button.Icon {
 			return false
 		}
 	}

@@ -61,6 +61,56 @@ func TestTabContainer_ChangeItemContent(t *testing.T) {
 	test.AssertImageMatches(t, "tabcontainer/two_change_unselected.png", c.Capture())
 }
 
+func TestTabContainer_ChangeItemIcon(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	item1 := &widget.TabItem{Icon: theme.CancelIcon(), Content: widget.NewLabel("Text1")}
+	item2 := &widget.TabItem{Icon: theme.ConfirmIcon(), Content: widget.NewLabel("Text2")}
+	tabs := widget.NewTabContainer(item1, item2)
+	w := test.NewWindow(tabs)
+	defer w.Close()
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(150, 150))
+	c := w.Canvas()
+
+	test.AssertImageMatches(t, "tabcontainer/two_icons_initial.png", c.Capture())
+
+	item1.Icon = theme.InfoIcon()
+	tabs.Refresh()
+	test.AssertImageMatches(t, "tabcontainer/two_icons_change_icon_selected.png", c.Capture())
+
+	item2.Icon = theme.ContentAddIcon()
+	tabs.Refresh()
+	test.AssertImageMatches(t, "tabcontainer/two_icons_change_icon_unselected.png", c.Capture())
+}
+
+func TestTabContainer_ChangeItemText(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	item1 := &widget.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
+	item2 := &widget.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
+	tabs := widget.NewTabContainer(item1, item2)
+	w := test.NewWindow(tabs)
+	defer w.Close()
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(150, 150))
+	c := w.Canvas()
+
+	test.AssertImageMatches(t, "tabcontainer/two_initial.png", c.Capture())
+
+	item1.Text = "New 1"
+	tabs.Refresh()
+	test.AssertImageMatches(t, "tabcontainer/two_change_tab_text_selected.png", c.Capture())
+
+	item2.Text = "New 2"
+	tabs.Refresh()
+	test.AssertImageMatches(t, "tabcontainer/two_change_tab_text_unselected.png", c.Capture())
+}
+
 func TestTabContainer_CurrentTab(t *testing.T) {
 	tab1 := &widget.TabItem{Text: "Test1", Content: widget.NewLabel("Test1")}
 	tab2 := &widget.TabItem{Text: "Test2", Content: widget.NewLabel("Test2")}
