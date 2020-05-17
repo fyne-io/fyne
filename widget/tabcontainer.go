@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
-	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -139,17 +138,6 @@ func (c *TabContainer) SelectTabIndex(index int) {
 	}
 
 	c.current = index
-
-	for i, child := range c.Items {
-		if i == c.current {
-			child.Content.Show()
-		} else {
-			child.Content.Hide()
-		}
-	}
-
-	r := cache.Renderer(c).(*tabContainerRenderer)
-	r.Layout(c.size)
 	c.Refresh()
 
 	if c.OnChanged != nil {
@@ -299,8 +287,19 @@ func (r *tabContainerRenderer) Refresh() {
 	if r.updateTabs() {
 		r.Layout(r.container.Size())
 	} else {
+		current := r.container.current
+		if current >= 0 && current < len(r.objects) && !r.objects[current].Visible() {
+			for i, o := range r.objects {
+				if i == current {
+					o.Show()
+				} else {
+					o.Hide()
+				}
+			}
+			r.Layout(r.container.Size())
+		}
 		for i, button := range r.tabBar.Objects {
-			if i == r.container.current {
+			if i == current {
 				button.(*tabButton).Style = PrimaryButton
 			} else {
 				button.(*tabButton).Style = DefaultButton
