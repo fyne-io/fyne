@@ -1056,6 +1056,7 @@ func (w *window) queueEvent(fn func()) {
 func (w *window) runOnMainWhenCreated(fn func()) {
 	if w.viewport != nil {
 		runOnMain(fn)
+		return
 	}
 
 	w.pending = append(w.pending, fn)
