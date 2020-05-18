@@ -38,7 +38,8 @@ func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture = p.glctx().CreateTexture()
 
 	if int(textureFilter) >= len(textureFilterToGL) {
-		panic(fmt.Sprintf("Invalid canvas.ImageScale value (%d)", textureFilter))
+		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as defualt value", textureFilter), nil)
+		textureFilter = canvas.ImageScaleSmooth
 	}
 
 	p.glctx().ActiveTexture(gl.TEXTURE0)
