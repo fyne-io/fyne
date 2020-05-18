@@ -63,7 +63,7 @@ func (s *secureReadCloser) Close() error {
 }
 
 func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
-	cStr := C.CString(f.uri)
+	cStr := C.CString(f.uri.String())
 	defer C.free(unsafe.Pointer(cStr))
 
 	url := C.iosParseUrl(cStr)

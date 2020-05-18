@@ -12,22 +12,18 @@ type base struct {
 	size   fyne.Size
 }
 
-// Move satisfies the fyne.Widget interface.
 func (b *base) Move(pos fyne.Position) {
 	b.pos = pos
 }
 
-// Position satisfies the fyne.Widget interface.
 func (b *base) Position() fyne.Position {
 	return b.pos
 }
 
-// Size satisfies the fyne.Widget interface.
 func (b *base) Size() fyne.Size {
 	return b.size
 }
 
-// Visible satisfies the fyne.Widget interface.
 func (b *base) Visible() bool {
 	return !b.hidden
 }

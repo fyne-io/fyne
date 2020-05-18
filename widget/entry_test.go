@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -1313,7 +1312,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := widget.NewPasswordEntry()
-		window := test.NewWindowWithPainter(entry, software.NewPainter())
+		window := test.NewWindow(entry)
 		defer window.Close()
 		window.Resize(fyne.NewSize(150, 100))
 		entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
@@ -1362,7 +1361,7 @@ func TestPasswordEntry_Reveal(t *testing.T) {
 		entry := &widget.Entry{}
 		entry.Password = true
 		entry.Refresh()
-		window := test.NewWindowWithPainter(entry, software.NewPainter())
+		window := test.NewWindow(entry)
 		defer window.Close()
 		window.Resize(fyne.NewSize(150, 100))
 		entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))
@@ -1533,7 +1532,7 @@ func setupImageTest(multiLine bool) (*widget.Entry, fyne.Window) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	entry := &widget.Entry{MultiLine: multiLine}
-	w := test.NewWindowWithPainter(entry, software.NewPainter())
+	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(150, 200))
 
 	if multiLine {
@@ -1551,7 +1550,7 @@ func setupPasswordImageTest() (*widget.Entry, fyne.Window) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	entry := widget.NewPasswordEntry()
-	w := test.NewWindowWithPainter(entry, software.NewPainter())
+	w := test.NewWindow(entry)
 	w.Resize(fyne.NewSize(150, 100))
 
 	entry.Resize(entry.MinSize().Max(fyne.NewSize(130, 0)))

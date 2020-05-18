@@ -80,7 +80,7 @@ func (p *glPainter) textureScaleInt(v int) int {
 	return int(math.Round(float64(v) * float64(p.canvas.Scale()*p.texScale)))
 }
 
-var start = &sync.Once{}
+var startCacheMonitor = &sync.Once{}
 
 // NewPainter creates a new GL based renderer for the provided canvas.
 // If it is a master painter it will also initialise OpenGL
@@ -89,7 +89,7 @@ func NewPainter(c fyne.Canvas, ctx driver.WithContext) Painter {
 	p.texScale = 1.0
 
 	glInit()
-	start.Do(func() {
+	startCacheMonitor.Do(func() {
 		go painter.SvgCacheMonitorTheme()
 	})
 

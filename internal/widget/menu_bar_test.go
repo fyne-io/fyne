@@ -1,3 +1,5 @@
+// +build !mobile
+
 package widget_test
 
 import (
@@ -7,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -19,7 +20,7 @@ func TestMenuBar(t *testing.T) {
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
 
-	w := test.NewWindowWithPainter(nil, software.NewPainter())
+	w := test.NewWindow(nil)
 	defer w.Close()
 	w.SetPadded(false)
 	w.Resize(fyne.NewSize(300, 300))

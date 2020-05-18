@@ -66,6 +66,10 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 
 // MoveMouse simulates a mouse movement to the given position.
 func MoveMouse(c fyne.Canvas, pos fyne.Position) {
+	if fyne.CurrentDevice().IsMobile() {
+		return
+	}
+
 	tc, _ := c.(*testCanvas)
 	var oldHovered, hovered desktop.Hoverable
 	if tc != nil {

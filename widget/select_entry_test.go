@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -83,7 +82,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 
 	options := []string{"A", "B", "C"}
 	e := widget.NewSelectEntry(options)
-	w := test.NewWindowWithPainter(e, software.NewPainter())
+	w := test.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
 	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
@@ -116,7 +115,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 
 	options := []string{"A", "B", "C"}
 	e := widget.NewSelectEntry(options)
-	w := test.NewWindowWithPainter(e, software.NewPainter())
+	w := test.NewWindow(e)
 	defer w.Close()
 	w.Resize(fyne.NewSize(150, 200))
 	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))

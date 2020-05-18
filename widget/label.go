@@ -37,6 +37,8 @@ func NewLabelWithStyle(text string, alignment fyne.TextAlign, style fyne.TextSty
 func (l *Label) Refresh() {
 	if l.Text != string(l.provider.buffer) {
 		l.provider.SetText(l.Text)
+	} else {
+		l.provider.updateRowBounds() // if truncate/wrap has changed
 	}
 
 	l.BaseWidget.Refresh()

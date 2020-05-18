@@ -25,12 +25,14 @@ func NewOverlayContainer(c fyne.CanvasObject, canvas fyne.Canvas, dismissAction 
 	return &OverlayContainer{canvas: canvas, Content: c, dismissAction: dismissAction}
 }
 
-// CreateRenderer satisfies the fyne.Widget interface.
+// CreateRenderer returns a new renderer for the overlay container.
+// Implements: fyne.Widget
 func (o *OverlayContainer) CreateRenderer() fyne.WidgetRenderer {
 	return &overlayRenderer{BaseRenderer{[]fyne.CanvasObject{o.Content}}, o}
 }
 
-// Hide satisfies the fyne.Widget interface.
+// Hide hides the overlay container.
+// Implements: fyne.Widget
 func (o *OverlayContainer) Hide() {
 	if o.shown {
 		o.canvas.Overlays().Remove(o)
@@ -39,34 +41,43 @@ func (o *OverlayContainer) Hide() {
 	o.hide(o)
 }
 
-// MinSize satisfies the fyne.Widget interface.
+// MinSize returns the minimal size of the overlay container.
+// This is the same as the size of the canvas.
+// Implements: fyne.Widget
 func (o *OverlayContainer) MinSize() fyne.Size {
 	return o.minSize(o)
 }
 
-// MouseIn satisfies the desktop.Hoverable interface.
+// MouseIn catches mouse-in events not handled by the container’s content. It does nothing.
+// Implements: desktop.Hoverable
 func (o *OverlayContainer) MouseIn(*desktop.MouseEvent) {
 }
 
-// MouseOut satisfies the desktop.Hoverable interface.
-func (o *OverlayContainer) MouseOut() {
-}
-
-// MouseMoved satisfies the desktop.Hoverable interface.
+// MouseMoved catches mouse-moved events not handled by the container’s content. It does nothing.
+// Implements: desktop.Hoverable
 func (o *OverlayContainer) MouseMoved(*desktop.MouseEvent) {
 }
 
-// Refresh satisfies the fyne.Widget interface.
+// MouseOut catches mouse-out events not handled by the container’s content. It does nothing.
+// Implements: desktop.Hoverable
+func (o *OverlayContainer) MouseOut() {
+}
+
+// Refresh triggers a redraw of the overlay container.
+// Implements: fyne.Widget
 func (o *OverlayContainer) Refresh() {
 	o.refresh(o)
 }
 
-// Resize satisfies the fyne.Widget interface.
+// Resize changes the size of the overlay container.
+// This is normally called by the canvas overlay management.
+// Implements: fyne.Widget
 func (o *OverlayContainer) Resize(size fyne.Size) {
 	o.resize(size, o)
 }
 
-// Show satisfies the fyne.Widget interface.
+// Show makes the overlay container visible.
+// Implements: fyne.Widget
 func (o *OverlayContainer) Show() {
 	if !o.shown {
 		o.canvas.Overlays().Add(o)
@@ -75,7 +86,9 @@ func (o *OverlayContainer) Show() {
 	o.show(o)
 }
 
-// Tapped satisfies the fyne.Tappable interface.
+// Tapped catches tap events not handled by the container’s content.
+// It performs the overlay container’s dismiss action.
+// Implements: fyne.Tappable
 func (o *OverlayContainer) Tapped(*fyne.PointEvent) {
 	if o.dismissAction != nil {
 		o.dismissAction()
@@ -89,20 +102,16 @@ type overlayRenderer struct {
 
 var _ fyne.WidgetRenderer = (*overlayRenderer)(nil)
 
-// BackgroundColor satisfies the fyne.WidgetRenderer interface.
 func (r *overlayRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-// Layout satisfies the fyne.WidgetRenderer interface.
 func (r *overlayRenderer) Layout(fyne.Size) {
 }
 
-// MinSize satisfies the fyne.WidgetRenderer interface.
 func (r *overlayRenderer) MinSize() fyne.Size {
 	return r.o.canvas.Size()
 }
 
-// Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *overlayRenderer) Refresh() {
 }
