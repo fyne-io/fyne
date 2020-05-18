@@ -32,17 +32,20 @@ func (i *iconRenderer) BackgroundColor() color.Color {
 }
 
 func (i *iconRenderer) Refresh() {
-	i.SetObjects(nil)
+	i.updateObjects()
+	i.Layout(i.image.Size())
+	canvas.Refresh(i.image.super())
+}
 
+func (i *iconRenderer) updateObjects() {
+	var objects []fyne.CanvasObject
 	if i.image.Resource != nil {
+		// TODO this is recreated every time - perhaps cache as long as i.image.Resource doesn't change
 		raster := canvas.NewImageFromResource(i.image.Resource)
 		raster.FillMode = canvas.ImageFillContain
-
-		i.SetObjects([]fyne.CanvasObject{raster})
+		objects = append(objects, raster)
 	}
-	i.Layout(i.image.Size())
-
-	canvas.Refresh(i.image.super())
+	i.SetObjects(objects)
 }
 
 // Icon widget is a basic image component that load's its resource to match the theme.
@@ -67,7 +70,9 @@ func (i *Icon) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	i.ExtendBaseWidget(i)
-	return &iconRenderer{image: i}
+	r := &iconRenderer{image: i}
+	r.updateObjects()
+	return r
 }
 
 // NewIcon returns a new icon widget that displays a themed icon resource

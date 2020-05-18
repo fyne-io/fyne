@@ -102,7 +102,11 @@ func (r *radioRenderer) applyTheme() {
 func (r *radioRenderer) Refresh() {
 	r.applyTheme()
 	r.radio.removeDuplicateOptions()
+	r.updateItems()
+	canvas.Refresh(r.radio.super())
+}
 
+func (r *radioRenderer) updateItems() {
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
 			option := r.radio.Options[i]
@@ -144,8 +148,6 @@ func (r *radioRenderer) Refresh() {
 			item.focusIndicator.FillColor = theme.BackgroundColor()
 		}
 	}
-
-	canvas.Refresh(r.radio.super())
 }
 
 // Radio widget has a list of text labels and radio check icons next to each.
@@ -264,7 +266,11 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 		items = append(items, &radioRenderItem{icon, text, focusIndicator})
 	}
 
-	return &radioRenderer{widget.NewBaseRenderer(objects), items, r}
+	rr := &radioRenderer{widget.NewBaseRenderer(objects), items, r}
+	rr.applyTheme()
+	r.removeDuplicateOptions()
+	rr.updateItems()
+	return rr
 }
 
 // SetSelected sets the radio option, it can be used to set a default option.

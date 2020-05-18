@@ -53,8 +53,17 @@ func (c *checkRenderer) applyTheme() {
 
 func (c *checkRenderer) Refresh() {
 	c.applyTheme()
-	c.label.Text = c.check.Text
+	c.updateLabel()
+	c.updateResource()
+	c.updateFocusIndicator()
+	canvas.Refresh(c.check.super())
+}
 
+func (c *checkRenderer) updateLabel() {
+	c.label.Text = c.check.Text
+}
+
+func (c *checkRenderer) updateResource() {
 	res := theme.CheckButtonIcon()
 	if c.check.Checked {
 		res = theme.CheckButtonCheckedIcon()
@@ -62,9 +71,10 @@ func (c *checkRenderer) Refresh() {
 	if c.check.Disabled() {
 		res = theme.NewDisabledResource(res)
 	}
-
 	c.icon.Resource = res
+}
 
+func (c *checkRenderer) updateFocusIndicator() {
 	if c.check.Disabled() {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
 	} else if c.check.focused {
@@ -74,8 +84,6 @@ func (c *checkRenderer) Refresh() {
 	} else {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
 	}
-
-	canvas.Refresh(c.check.super())
 }
 
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
@@ -159,13 +167,18 @@ func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
-	return &checkRenderer{
+	r := &checkRenderer{
 		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, text}),
 		icon,
 		text,
 		focusIndicator,
 		c,
 	}
+	r.applyTheme()
+	r.updateLabel()
+	r.updateResource()
+	r.updateFocusIndicator()
+	return r
 }
 
 // NewCheck creates a new check widget with the set label and change handler
