@@ -1,3 +1,5 @@
+// +build !mobile
+
 package widget_test
 
 import (
