@@ -71,10 +71,9 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (t *textProvider) Resize(size fyne.Size) {
-	var baseSize fyne.Size
-	t.ReadFields(func() {
-		baseSize = t.size
-	})
+	t.propertyLock.RLock()
+	baseSize := t.size
+	t.propertyLock.RUnlock()
 	if baseSize == size {
 		return
 	}
@@ -250,19 +249,18 @@ type textRenderer struct {
 // MinSize calculates the minimum size of a label.
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
-	var presenter textPresenter
-	r.provider.ReadFields(func() {
-		presenter = r.provider.presenter
-	})
+	r.provider.propertyLock.RLock()
+	wrap := r.provider.presenter.textWrap()
+	r.provider.propertyLock.RUnlock()
 
-	wrap := presenter.textWrap()
 	charMinSize := r.provider.charMinSize()
 	height := 0
 	width := 0
 	i := 0
-	texts := r.provider.GetField(func() interface{} {
-		return r.texts
-	}).([]*canvas.Text)
+
+	r.provider.propertyLock.RLock()
+	texts := r.texts
+	r.provider.propertyLock.RUnlock()
 
 	for ; i < fyne.Min(len(texts), r.provider.rows()); i++ {
 		min := texts[i].MinSize()
@@ -279,17 +277,18 @@ func (r *textRenderer) MinSize() fyne.Size {
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
+	r.provider.propertyLock.RLock()
+	defer r.provider.propertyLock.RUnlock()
+
 	yPos := theme.Padding()
-	r.provider.ReadFields(func() {
-		lineHeight := r.provider.charMinSize().Height
-		lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
-		for i := 0; i < len(r.texts); i++ {
-			text := r.texts[i]
-			text.Resize(lineSize)
-			text.Move(fyne.NewPos(theme.Padding(), yPos))
-			yPos += lineHeight
-		}
-	})
+	lineHeight := r.provider.charMinSize().Height
+	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
+	for i := 0; i < len(r.texts); i++ {
+		text := r.texts[i]
+		text.Resize(lineSize)
+		text.Move(fyne.NewPos(theme.Padding(), yPos))
+		yPos += lineHeight
+	}
 }
 
 // applyTheme updates the label to match the current theme.
@@ -309,11 +308,11 @@ func (r *textRenderer) Refresh() {
 	var align fyne.TextAlign
 	var style fyne.TextStyle
 
-	r.provider.ReadFields(func() {
-		concealed = r.provider.presenter.concealed()
-		align = r.provider.presenter.textAlign()
-		style = r.provider.presenter.textStyle()
-	})
+	r.provider.propertyLock.RLock()
+	concealed = r.provider.presenter.concealed()
+	align = r.provider.presenter.textAlign()
+	style = r.provider.presenter.textStyle()
+	r.provider.propertyLock.RUnlock()
 
 	r.provider.SetFields(func() {
 		index := 0

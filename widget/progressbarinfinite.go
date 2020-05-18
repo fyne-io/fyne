@@ -96,9 +96,10 @@ func (p *infProgressRenderer) doRefresh() {
 }
 
 func (p *infProgressRenderer) isRunning() bool {
-	return p.progress.GetField(func() interface{} {
-		return p.running
-	}).(bool)
+	p.progress.propertyLock.RLock()
+	defer p.progress.propertyLock.RUnlock()
+
+	return p.running
 }
 
 // Start the infinite progress bar background thread to update it continuously
@@ -124,9 +125,9 @@ func (p *infProgressRenderer) stop() {
 // the function can be exited by calling Stop()
 func (p *infProgressRenderer) infiniteProgressLoop() {
 	for p.isRunning() {
-		ticker := p.progress.GetField(func() interface{} {
-			return p.ticker.C
-		}).(<-chan time.Time)
+		p.progress.propertyLock.RLock()
+		ticker := p.ticker.C
+		p.progress.propertyLock.RUnlock()
 
 		select {
 		case <-ticker:
@@ -135,11 +136,11 @@ func (p *infProgressRenderer) infiniteProgressLoop() {
 		}
 	}
 
-	p.progress.ReadFields(func() {
-		if p.ticker != nil {
-			p.ticker.Stop()
-		}
-	})
+	p.progress.propertyLock.RLock()
+	defer p.progress.propertyLock.RUnlock()
+	if p.ticker != nil {
+		p.ticker.Stop()
+	}
 }
 
 func (p *infProgressRenderer) Destroy() {

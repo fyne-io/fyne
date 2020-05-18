@@ -21,9 +21,7 @@ type BaseWidget struct {
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
-	impl := w.GetField(func() interface{} {
-		return w.impl
-	})
+	impl := w.getImpl()
 	if impl != nil {
 		return
 	}
@@ -31,22 +29,6 @@ func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
 	w.SetFields(func() {
 		w.impl = wid
 	})
-}
-
-// ReadFields provides a guaranteed thread safe way to access widget fields.
-func (w *BaseWidget) ReadFields(f func()) {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	f()
-}
-
-// GetField provides a guaranteed thread safe way to access fields and return a value.
-func (w *BaseWidget) GetField(f func() interface{}) interface{} {
-	w.propertyLock.RLock()
-	defer w.propertyLock.RUnlock()
-
-	return f()
 }
 
 // SetFields provides a guaranteed thread safe way to directly manipulate widget fields.
@@ -72,18 +54,18 @@ func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
 
 // Size gets the current size of this widget.
 func (w *BaseWidget) Size() fyne.Size {
-	return w.GetField(func() interface{} {
-		return w.size
-	}).(fyne.Size)
+	w.propertyLock.RLock()
+	defer w.propertyLock.RUnlock()
+
+	return w.size
 }
 
 // Resize sets a new size for a widget.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Resize(size fyne.Size) {
-	var baseSize fyne.Size
-	w.ReadFields(func() {
-		baseSize = w.size
-	})
+	w.propertyLock.RLock()
+	baseSize := w.size
+	w.propertyLock.RUnlock()
 	if baseSize == size {
 		return
 	}
@@ -102,9 +84,10 @@ func (w *BaseWidget) Resize(size fyne.Size) {
 
 // Position gets the current position of this widget, relative to its parent.
 func (w *BaseWidget) Position() fyne.Position {
-	return w.GetField(func() interface{} {
-		return w.position
-	}).(fyne.Position)
+	w.propertyLock.RLock()
+	defer w.propertyLock.RUnlock()
+
+	return w.position
 }
 
 // Move the widget to a new position, relative to its parent.
@@ -130,9 +113,10 @@ func (w *BaseWidget) MinSize() fyne.Size {
 // Visible returns whether or not this widget should be visible.
 // Note that this may not mean it is currently visible if a parent has been hidden.
 func (w *BaseWidget) Visible() bool {
-	return w.GetField(func() interface{} {
-		return !w.Hidden
-	}).(bool)
+	w.propertyLock.RLock()
+	defer w.propertyLock.RUnlock()
+
+	return !w.Hidden
 }
 
 // Show this widget so it becomes visible
@@ -175,15 +159,15 @@ func (w *BaseWidget) Refresh() {
 }
 
 func (w *BaseWidget) getImpl() fyne.Widget {
-	impl := w.GetField(func() interface{} {
-		return w.impl
-	})
+	w.propertyLock.RLock()
+	impl := w.impl
+	w.propertyLock.RUnlock()
 
 	if impl == nil {
 		return nil
 	}
 
-	return impl.(fyne.Widget)
+	return impl
 }
 
 // super will return the actual object that this represents.
@@ -232,9 +216,10 @@ func (w *DisableableWidget) Disable() {
 
 // Disabled returns true if this widget is currently disabled or false if it can currently be interacted with.
 func (w *DisableableWidget) Disabled() bool {
-	return w.GetField(func() interface{} {
-		return w.disabled
-	}).(bool)
+	w.propertyLock.RLock()
+	defer w.propertyLock.RUnlock()
+
+	return w.disabled
 }
 
 // Renderer looks up the render implementation for a widget

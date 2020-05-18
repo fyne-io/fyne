@@ -25,19 +25,10 @@ func (b *base) Move(pos fyne.Position) {
 
 // Position satisfies the fyne.Widget interface.
 func (b *base) Position() fyne.Position {
-	var pos fyne.Position
-	b.readFields(func() {
-		pos = b.pos
-	})
-	return pos
-}
-
-// readFields provides a guaranteed thread safe way to access widget fields.
-func (b *base) readFields(f func()) {
 	b.propertyLock.RLock()
 	defer b.propertyLock.RUnlock()
 
-	f()
+	return b.pos
 }
 
 // SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
@@ -54,20 +45,18 @@ func (b *base) setFieldsAndRefresh(f func(), w fyne.Widget) {
 
 // Size satisfies the fyne.Widget interface.
 func (b *base) Size() fyne.Size {
-	var size fyne.Size
-	b.readFields(func() {
-		size = b.size
-	})
-	return size
+	b.propertyLock.RLock()
+	defer b.propertyLock.RUnlock()
+
+	return b.size
 }
 
 // Visible satisfies the fyne.Widget interface.
 func (b *base) Visible() bool {
-	var hidden bool
-	b.readFields(func() {
-		hidden = b.hidden
-	})
-	return !hidden
+	b.propertyLock.RLock()
+	defer b.propertyLock.RUnlock()
+
+	return !b.hidden
 }
 
 func (b *base) hide(w fyne.Widget) {
@@ -100,10 +89,9 @@ func (b *base) refresh(w fyne.Widget) {
 }
 
 func (b *base) resize(size fyne.Size, w fyne.Widget) {
-	var baseSize fyne.Size
-	b.readFields(func() {
-		baseSize = b.size
-	})
+	b.propertyLock.RLock()
+	baseSize := b.size
+	b.propertyLock.RUnlock()
 	if baseSize == size {
 		return
 	}

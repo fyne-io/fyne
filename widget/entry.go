@@ -170,9 +170,7 @@ func (e *Entry) Enable() { // TODO remove this override after ReadOnly is remove
 
 // ExtendBaseWidget is used by an extending widget to make use of BaseWidget functionality.
 func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
-	impl := e.GetField(func() interface{} {
-		return e.BaseWidget.impl
-	})
+	impl := e.getImpl()
 	if impl != nil {
 		return
 	}
@@ -186,9 +184,10 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 // Focused returns whether or not this Entry has focus.
 // Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
 func (e *Entry) Focused() bool {
-	return e.GetField(func() interface{} {
-		return e.focused
-	}).(bool)
+	e.propertyLock.RLock()
+	defer e.propertyLock.RUnlock()
+
+	return e.focused
 }
 
 // FocusGained is called when the Entry has been given focus.
@@ -282,16 +281,17 @@ func (e *Entry) MouseUp(_ *desktop.MouseEvent) {
 // SelectedText returns the text currently selected in this Entry.
 // If there is no selection it will return the empty string.
 func (e *Entry) SelectedText() string {
-	if e.GetField(func() interface{} {
-		return e.selecting
-	}).(bool) == false {
+	e.propertyLock.RLock()
+	selecting := e.selecting
+	e.propertyLock.RUnlock()
+	if !selecting {
 		return ""
 	}
 
 	start, stop := e.selection()
-	return e.GetField(func() interface{} {
-		return string(e.textProvider().buffer[start:stop])
-	}).(string)
+	e.propertyLock.RLock()
+	defer e.propertyLock.RUnlock()
+	return string(e.textProvider().buffer[start:stop])
 }
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
@@ -385,12 +385,10 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		return
 	}
 
-	var multiLine bool
-	var provider *textProvider
-	e.ReadFields(func() {
-		provider = e.textProvider()
-		multiLine = e.MultiLine
-	})
+	e.propertyLock.RLock()
+	provider := e.textProvider()
+	multiLine := e.MultiLine
+	e.propertyLock.RUnlock()
 
 	if e.selectKeyDown || e.selecting {
 		if e.selectingKeyHandler(key) {
@@ -401,9 +399,9 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 
 	switch key.Name {
 	case fyne.KeyBackspace:
-		isEmpty := e.GetField(func() interface{} {
-			return provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
-		}).(bool)
+		e.propertyLock.RLock()
+		isEmpty := provider.len() == 0 || (e.CursorColumn == 0 && e.CursorRow == 0)
+		e.propertyLock.RUnlock()
 		if isEmpty {
 			return
 		}
@@ -788,9 +786,9 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 //   "T  e  s_[t  i] n  g" == 3, 5
 //   "T  e_[s  t  i] n  g" == 2, 5
 func (e *Entry) selection() (start, end int) {
-	noSelection := e.GetField(func() interface{} {
-		return !e.selecting || (e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn)
-	}).(bool)
+	e.propertyLock.RLock()
+	noSelection := !e.selecting || (e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn)
+	e.propertyLock.RUnlock()
 
 	if noSelection {
 		return -1, -1
@@ -977,12 +975,11 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 
 // Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *entryRenderer) Refresh() {
-	var provider, placeholder *textProvider
-	content := r.entry.GetField(func() interface{} {
-		provider = r.entry.textProvider()
-		placeholder = r.entry.placeholderProvider()
-		return r.entry.Text
-	}).(string)
+	r.entry.propertyLock.RLock()
+	provider := r.entry.textProvider()
+	placeholder := r.entry.placeholderProvider()
+	content := r.entry.Text
+	r.entry.propertyLock.RUnlock()
 
 	if content != string(provider.buffer) {
 		provider.setText(content)
@@ -1114,16 +1111,15 @@ func (r *entryRenderer) buildSelection() {
 func (r *entryRenderer) moveCursor() {
 	// build r.selection[] if the user has made a selection
 	r.buildSelection()
-	provider := r.entry.GetField(func() interface{} {
-		return r.entry.textProvider()
-	}).(*textProvider)
+	r.entry.propertyLock.RLock()
+	provider := r.entry.textProvider()
+	r.entry.propertyLock.RUnlock()
 
-	var xPos, yPos int
-	provider.ReadFields(func() {
-		size := provider.lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
-		xPos = size.Width
-		yPos = size.Height * r.entry.CursorRow
-	})
+	r.entry.propertyLock.RLock()
+	size := provider.lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
+	xPos := size.Width
+	yPos := size.Height * r.entry.CursorRow
+	r.entry.propertyLock.RUnlock()
 
 	var callback func()
 	r.entry.SetFields(func() {
@@ -1202,9 +1198,9 @@ func (r *passwordRevealerRenderer) MinSize() fyne.Size {
 
 // Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *passwordRevealerRenderer) Refresh() {
-	if r.entry.GetField(func() interface{} {
-		return !r.entry.Password
-	}).(bool) {
+	r.entry.propertyLock.RLock()
+	defer r.entry.propertyLock.RUnlock()
+	if !r.entry.Password {
 		r.icon.Resource = theme.VisibilityIcon()
 	} else {
 		r.icon.Resource = theme.VisibilityOffIcon()
