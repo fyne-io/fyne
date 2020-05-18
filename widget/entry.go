@@ -93,20 +93,19 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	cursor := canvas.NewRectangle(theme.FocusColor())
 	cursor.Hide()
 
-	var objects []fyne.CanvasObject
-	e.SetFields(func() {
-		objects = []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
 
-		if e.Password && e.ActionItem == nil {
-			// An entry widget has been created via struct setting manually
-			// the Password field to true. Going to enable the password revealer.
-			e.ActionItem = newPasswordRevealer(e)
-		}
+	if e.Password && e.ActionItem == nil {
+		// An entry widget has been created via struct setting manually
+		// the Password field to true. Going to enable the password revealer.
+		e.ActionItem = newPasswordRevealer(e)
+	}
 
-		if e.ActionItem != nil {
-			objects = append(objects, e.ActionItem)
-		}
-	})
+	if e.ActionItem != nil {
+		objects = append(objects, e.ActionItem)
+	}
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
 
@@ -136,7 +135,7 @@ func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 		return
 	}
 
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		if e.selectKeyDown == false {
 			e.selectRow = e.CursorRow
 			e.selectColumn = start
@@ -175,9 +174,9 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 		return
 	}
 
-	e.SetFields(func() {
-		e.BaseWidget.impl = wid
-	})
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+	e.BaseWidget.impl = wid
 	e.registerShortcut()
 }
 
@@ -195,17 +194,16 @@ func (e *Entry) FocusGained() {
 	if e.Disabled() {
 		return
 	}
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		e.focused = true
 	})
 }
 
 // FocusLost is called when the Entry has had focus removed.
 func (e *Entry) FocusLost() {
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		e.focused = false
 	})
-
 }
 
 // Hide satisfies the fyne.CanvasObject interface.
@@ -255,14 +253,15 @@ func (e *Entry) MinSize() fyne.Size {
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
 // update the existing selection (if shift is held), or start a selection dragging operation.
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
-	e.SetFields(func() {
-		if e.selectKeyDown {
-			e.selecting = true
-		}
-		if e.selecting && e.selectKeyDown == false && m.Button == desktop.LeftMouseButton {
-			e.selecting = false
-		}
-	})
+	e.propertyLock.Lock()
+	if e.selectKeyDown {
+		e.selecting = true
+	}
+	if e.selecting && e.selectKeyDown == false && m.Button == desktop.LeftMouseButton {
+		e.selecting = false
+	}
+	e.propertyLock.Unlock()
+
 	e.updateMousePointer(&m.PointEvent, m.Button == desktop.RightMouseButton)
 }
 
@@ -271,11 +270,12 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 // if so, and if a text select key isn't held, then disable selecting
 func (e *Entry) MouseUp(_ *desktop.MouseEvent) {
 	start, _ := e.selection()
-	e.SetFields(func() {
-		if start == -1 && e.selecting && e.selectKeyDown == false {
-			e.selecting = false
-		}
-	})
+
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+	if start == -1 && e.selecting && e.selectKeyDown == false {
+		e.selecting = false
+	}
 }
 
 // SelectedText returns the text currently selected in this Entry.
@@ -296,9 +296,10 @@ func (e *Entry) SelectedText() string {
 
 // SetPlaceHolder sets the text that will be displayed if the entry is otherwise empty
 func (e *Entry) SetPlaceHolder(text string) {
-	e.SetFields(func() {
-		e.PlaceHolder = text
-	})
+	e.propertyLock.Lock()
+	e.PlaceHolder = text
+	e.propertyLock.Unlock()
+
 	e.placeholderProvider().setText(text) // refreshes
 }
 
@@ -318,21 +319,21 @@ func (e *Entry) SetText(text string) {
 	e.updateText(text)
 
 	if text == "" {
-		e.SetFieldsAndRefresh(func() {
+		e.setFieldsAndRefresh(func() {
 			e.CursorColumn = 0
 			e.CursorRow = 0
 		})
 		return
 	}
-	e.SetFields(func() {
-		if e.CursorRow >= e.textProvider().rows() {
-			e.CursorRow = e.textProvider().rows() - 1
-		}
-		rowLength := e.textProvider().rowLength(e.CursorRow)
-		if e.CursorColumn >= rowLength {
-			e.CursorColumn = rowLength
-		}
-	})
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+	if e.CursorRow >= e.textProvider().rows() {
+		e.CursorRow = e.textProvider().rows() - 1
+	}
+	rowLength := e.textProvider().rowLength(e.CursorRow)
+	if e.CursorColumn >= rowLength {
+		e.CursorColumn = rowLength
+	}
 }
 
 // Tapped is called when this entry has been tapped so we should update the cursor position.
@@ -405,118 +406,120 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 		if isEmpty {
 			return
 		}
-		e.SetFields(func() {
-			pos := e.cursorTextPos()
-			provider.deleteFromTo(pos-1, pos)
-			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
-		})
+
+		e.propertyLock.Lock()
+		pos := e.cursorTextPos()
+		provider.deleteFromTo(pos-1, pos)
+		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos - 1)
+		e.propertyLock.Unlock()
 	case fyne.KeyDelete:
 		pos := e.cursorTextPos()
 		if provider.len() == 0 || pos == provider.len() {
 			return
 		}
-		e.SetFields(func() {
-			provider.deleteFromTo(pos, pos+1)
-		})
+
+		e.propertyLock.Lock()
+		provider.deleteFromTo(pos, pos+1)
+		e.propertyLock.Unlock()
 	case fyne.KeyReturn, fyne.KeyEnter:
 		if !multiLine {
 			return
 		}
-		e.SetFields(func() {
-			provider.insertAt(e.cursorTextPos(), []rune("\n"))
-			e.CursorColumn = 0
-			e.CursorRow++
-		})
+		e.propertyLock.Lock()
+		provider.insertAt(e.cursorTextPos(), []rune("\n"))
+		e.CursorColumn = 0
+		e.CursorRow++
+		e.propertyLock.Unlock()
 	case fyne.KeyUp:
 		if !multiLine {
 			return
 		}
 
-		e.SetFields(func() {
-			if e.CursorRow > 0 {
-				e.CursorRow--
-			}
+		e.propertyLock.Lock()
+		if e.CursorRow > 0 {
+			e.CursorRow--
+		}
 
-			rowLength := provider.rowLength(e.CursorRow)
-			if e.CursorColumn > rowLength {
-				e.CursorColumn = rowLength
-			}
-		})
+		rowLength := provider.rowLength(e.CursorRow)
+		if e.CursorColumn > rowLength {
+			e.CursorColumn = rowLength
+		}
+		e.propertyLock.Unlock()
 	case fyne.KeyDown:
 		if !multiLine {
 			return
 		}
 
-		e.SetFields(func() {
-			if e.CursorRow < provider.rows()-1 {
-				e.CursorRow++
-			}
+		e.propertyLock.Lock()
+		if e.CursorRow < provider.rows()-1 {
+			e.CursorRow++
+		}
 
-			rowLength := provider.rowLength(e.CursorRow)
-			if e.CursorColumn > rowLength {
-				e.CursorColumn = rowLength
-			}
-		})
+		rowLength := provider.rowLength(e.CursorRow)
+		if e.CursorColumn > rowLength {
+			e.CursorColumn = rowLength
+		}
+		e.propertyLock.Unlock()
 	case fyne.KeyLeft:
-		e.SetFields(func() {
-			if e.CursorColumn > 0 {
-				e.CursorColumn--
-			} else if e.MultiLine && e.CursorRow > 0 {
-				e.CursorRow--
-				e.CursorColumn = provider.rowLength(e.CursorRow)
-			}
-		})
+		e.propertyLock.Lock()
+		if e.CursorColumn > 0 {
+			e.CursorColumn--
+		} else if e.MultiLine && e.CursorRow > 0 {
+			e.CursorRow--
+			e.CursorColumn = provider.rowLength(e.CursorRow)
+		}
+		e.propertyLock.Unlock()
 	case fyne.KeyRight:
-		e.SetFields(func() {
-			if e.MultiLine {
-				rowLength := provider.rowLength(e.CursorRow)
-				if e.CursorColumn < rowLength {
-					e.CursorColumn++
-				} else if e.CursorRow < provider.rows()-1 {
-					e.CursorRow++
-					e.CursorColumn = 0
-				}
-			} else if e.CursorColumn < provider.len() {
+		e.propertyLock.Lock()
+		if e.MultiLine {
+			rowLength := provider.rowLength(e.CursorRow)
+			if e.CursorColumn < rowLength {
 				e.CursorColumn++
+			} else if e.CursorRow < provider.rows()-1 {
+				e.CursorRow++
+				e.CursorColumn = 0
 			}
-		})
+		} else if e.CursorColumn < provider.len() {
+			e.CursorColumn++
+		}
+		e.propertyLock.Unlock()
 	case fyne.KeyEnd:
-		e.SetFields(func() {
-			if e.MultiLine {
-				e.CursorColumn = provider.rowLength(e.CursorRow)
-			} else {
-				e.CursorColumn = provider.len()
-			}
-		})
+		e.propertyLock.Lock()
+		if e.MultiLine {
+			e.CursorColumn = provider.rowLength(e.CursorRow)
+		} else {
+			e.CursorColumn = provider.len()
+		}
+		e.propertyLock.Unlock()
 	case fyne.KeyHome:
-		e.SetFields(func() {
-			e.CursorColumn = 0
-		})
+		e.propertyLock.Lock()
+		e.CursorColumn = 0
+		e.propertyLock.Unlock()
 	case fyne.KeyPageUp:
-		e.SetFields(func() {
-			if e.MultiLine {
-				e.CursorRow = 0
-			}
-			e.CursorColumn = 0
-		})
+		e.propertyLock.Lock()
+		if e.MultiLine {
+			e.CursorRow = 0
+		}
+		e.CursorColumn = 0
+		e.propertyLock.Unlock()
 	case fyne.KeyPageDown:
-		e.SetFields(func() {
-			if e.MultiLine {
-				e.CursorRow = provider.rows() - 1
-				e.CursorColumn = provider.rowLength(e.CursorRow)
-			} else {
-				e.CursorColumn = provider.len()
-			}
-		})
+		e.propertyLock.Lock()
+		if e.MultiLine {
+			e.CursorRow = provider.rows() - 1
+			e.CursorColumn = provider.rowLength(e.CursorRow)
+		} else {
+			e.CursorColumn = provider.len()
+		}
+		e.propertyLock.Unlock()
 	default:
 		return
 	}
 
-	e.SetFields(func() {
-		if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
-			e.selecting = false
-		}
-	})
+	e.propertyLock.Lock()
+	if e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn {
+		e.selecting = false
+	}
+	e.propertyLock.Unlock()
 	e.updateText(provider.String())
 }
 
@@ -526,31 +529,30 @@ func (e *Entry) TypedRune(r rune) {
 		return
 	}
 
-	var selecting bool
-	e.SetFields(func() {
-		if e.popUp != nil {
-			e.popUp.Hide()
-		}
+	e.propertyLock.Lock()
+	if e.popUp != nil {
+		e.popUp.Hide()
+	}
 
-		selecting = e.selecting
-	})
+	selecting := e.selecting
+	e.propertyLock.Unlock()
+
 	// if we've typed a character and we're selecting then replace the selection with the character
 	if selecting {
 		e.eraseSelection()
 	}
 
-	var content string
-	e.SetFields(func() {
-		provider := e.textProvider()
-		e.selecting = false
+	e.propertyLock.Lock()
+	provider := e.textProvider()
+	e.selecting = false
 
-		runes := []rune{r}
-		pos := e.cursorTextPos()
-		provider.insertAt(pos, runes)
-		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
+	runes := []rune{r}
+	pos := e.cursorTextPos()
+	provider.insertAt(pos, runes)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(pos + len(runes))
 
-		content = provider.String()
-	})
+	content := provider.String()
+	e.propertyLock.Unlock()
 	e.updateText(content)
 }
 
@@ -613,12 +615,12 @@ func (e *Entry) eraseSelection() {
 		return
 	}
 
-	e.SetFields(func() {
-		provider.deleteFromTo(posA, posB)
-		e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
-		e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
-		e.selecting = false
-	})
+	e.propertyLock.Lock()
+	provider.deleteFromTo(posA, posB)
+	e.CursorRow, e.CursorColumn = e.rowColFromTextPos(posA)
+	e.selectRow, e.selectColumn = e.CursorRow, e.CursorColumn
+	e.selecting = false
+	e.propertyLock.Unlock()
 	e.updateText(provider.String())
 }
 
@@ -709,7 +711,7 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 
 // selectAll selects all text in entry
 func (e *Entry) selectAll() {
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		e.selectRow = 0
 		e.selectColumn = 0
 
@@ -755,18 +757,18 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		case fyne.KeyLeft:
 			// seek to the start of the selection -- return handled
 			selectStart, _ := e.selection()
-			e.SetFields(func() {
-				e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
-				e.selecting = false
-			})
+			e.propertyLock.Lock()
+			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectStart)
+			e.selecting = false
+			e.propertyLock.Unlock()
 			return true
 		case fyne.KeyRight:
 			// seek to the end of the selection -- return handled
 			_, selectEnd := e.selection()
-			e.SetFields(func() {
-				e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
-				e.selecting = false
-			})
+			e.propertyLock.Lock()
+			e.CursorRow, e.CursorColumn = e.rowColFromTextPos(selectEnd)
+			e.selecting = false
+			e.propertyLock.Unlock()
 			return true
 		case fyne.KeyUp, fyne.KeyDown, fyne.KeyEnd, fyne.KeyHome, fyne.KeyPageUp, fyne.KeyPageDown:
 			// cursor movement without left or right shift -- clear selection and return unhandled
@@ -785,7 +787,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 //   "T  e  s [t  i]_n  g" == 3, 5
 //   "T  e  s_[t  i] n  g" == 3, 5
 //   "T  e_[s  t  i] n  g" == 2, 5
-func (e *Entry) selection() (start, end int) {
+func (e *Entry) selection() (int, int) {
 	e.propertyLock.RLock()
 	noSelection := !e.selecting || (e.CursorRow == e.selectRow && e.CursorColumn == e.selectColumn)
 	e.propertyLock.RUnlock()
@@ -794,20 +796,19 @@ func (e *Entry) selection() (start, end int) {
 		return -1, -1
 	}
 
-	e.SetFields(func() {
-		// Find the selection start
-		rowA, colA := e.CursorRow, e.CursorColumn
-		rowB, colB := e.selectRow, e.selectColumn
-		// Reposition if the cursors row is more than select start row, or if the row is the same and
-		// the cursors col is more that the select start column
-		if rowA > e.selectRow || (rowA == e.selectRow && colA > e.selectColumn) {
-			rowA, colA = e.selectRow, e.selectColumn
-			rowB, colB = e.CursorRow, e.CursorColumn
-		}
+	e.propertyLock.Lock()
+	defer e.propertyLock.Unlock()
+	// Find the selection start
+	rowA, colA := e.CursorRow, e.CursorColumn
+	rowB, colB := e.selectRow, e.selectColumn
+	// Reposition if the cursors row is more than select start row, or if the row is the same and
+	// the cursors col is more that the select start column
+	if rowA > e.selectRow || (rowA == e.selectRow && colA > e.selectColumn) {
+		rowA, colA = e.selectRow, e.selectColumn
+		rowB, colB = e.CursorRow, e.CursorColumn
+	}
 
-		start, end = e.textPosFromRowCol(rowA, colA), e.textPosFromRowCol(rowB, colB)
-	})
-	return
+	return e.textPosFromRowCol(rowA, colA), e.textPosFromRowCol(rowB, colB)
 }
 
 // textAlign tells the rendering textProvider our alignment
@@ -864,8 +865,7 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 		e.FocusGained()
 	}
 
-	e.SetFieldsAndRefresh(func() {
-
+	e.setFieldsAndRefresh(func() {
 		rowHeight := e.textProvider().charMinSize().Height
 		row := int(math.Floor(float64(ev.Position.Y-theme.Padding()) / float64(rowHeight)))
 		col := 0
@@ -893,7 +893,7 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 // updateText updates the internal text to the given value
 func (e *Entry) updateText(text string) {
 	var callback func(string)
-	e.SetFieldsAndRefresh(func() {
+	e.setFieldsAndRefresh(func() {
 		changed := e.Text != text
 		e.Text = text
 
@@ -1011,12 +1011,13 @@ func (r *entryRenderer) Refresh() {
 		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
-	r.entry.text.SetFields(func() {
-		r.entry.text.updateRowBounds()
-	})
-	r.entry.placeholder.SetFields(func() {
-		r.entry.placeholder.updateRowBounds()
-	})
+	r.entry.propertyLock.Lock()
+	r.entry.text.updateRowBounds()
+	r.entry.propertyLock.Unlock()
+	r.entry.placeholder.propertyLock.Lock()
+	r.entry.placeholder.updateRowBounds()
+	r.entry.placeholder.propertyLock.Unlock()
+
 	r.entry.text.Refresh()
 	r.entry.placeholder.Refresh()
 	if r.entry.ActionItem != nil {
@@ -1121,14 +1122,13 @@ func (r *entryRenderer) moveCursor() {
 	yPos := size.Height * r.entry.CursorRow
 	r.entry.propertyLock.RUnlock()
 
-	var callback func()
-	r.entry.SetFields(func() {
-		lineHeight := r.entry.text.charMinSize().Height
-		r.cursor.Resize(fyne.NewSize(2, lineHeight))
-		r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))
+	r.entry.propertyLock.Lock()
+	lineHeight := r.entry.text.charMinSize().Height
+	r.cursor.Resize(fyne.NewSize(2, lineHeight))
+	r.cursor.Move(fyne.NewPos(xPos-1+theme.Padding()*2, yPos+theme.Padding()*2))
 
-		callback = r.entry.OnCursorChanged
-	})
+	callback := r.entry.OnCursorChanged
+	r.entry.propertyLock.Unlock()
 
 	if callback != nil {
 		callback()
@@ -1171,7 +1171,7 @@ func (r *passwordRevealer) Cursor() desktop.Cursor {
 
 // Tapped satisfies the fyne.Tappable interface.
 func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
-	r.entry.SetFieldsAndRefresh(func() {
+	r.entry.setFieldsAndRefresh(func() {
 		r.entry.Password = !r.entry.Password
 	})
 	fyne.CurrentApp().Driver().CanvasForObject(r).Focus(r.entry)

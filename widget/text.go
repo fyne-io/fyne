@@ -63,9 +63,9 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 	}
 	r := &textRenderer{provider: t}
 
-	t.SetFields(func() {
-		t.updateRowBounds() // set up the initial text layout etc
-	})
+	t.propertyLock.Lock()
+	t.updateRowBounds() // set up the initial text layout etc
+	t.propertyLock.Unlock()
 	r.Refresh()
 	return r
 }
@@ -73,18 +73,17 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 func (t *textProvider) Resize(size fyne.Size) {
 	t.propertyLock.RLock()
 	baseSize := t.size
+	presenter := t.presenter
 	t.propertyLock.RUnlock()
 	if baseSize == size {
 		return
 	}
 
-	var presenter textPresenter
-	t.SetFields(func() {
-		t.size = size
-		presenter = t.presenter
+	t.propertyLock.Lock()
+	t.size = size
 
-		t.updateRowBounds()
-	})
+	t.updateRowBounds()
+	t.propertyLock.Unlock()
 
 	if presenter != nil {
 		t.refreshTextRenderer()
@@ -129,10 +128,10 @@ func (t *textProvider) refreshTextRenderer() {
 
 // SetText sets the text of the widget
 func (t *textProvider) setText(text string) {
-	t.SetFields(func() {
-		t.buffer = []rune(text)
-		t.updateRowBounds()
-	})
+	t.propertyLock.Lock()
+	t.buffer = []rune(text)
+	t.updateRowBounds()
+	t.propertyLock.Unlock()
 
 	t.refreshTextRenderer()
 }
@@ -314,42 +313,42 @@ func (r *textRenderer) Refresh() {
 	style = r.provider.presenter.textStyle()
 	r.provider.propertyLock.RUnlock()
 
-	r.provider.SetFields(func() {
-		index := 0
-		for ; index < r.provider.rows(); index++ {
-			var line string
-			row := r.provider.row(index)
-			if concealed {
-				line = strings.Repeat(passwordChar, len(row))
-			} else {
-				line = string(row)
-			}
-
-			var textCanvas *canvas.Text
-			add := false
-			if index >= len(r.texts) {
-				add = true
-				textCanvas = canvas.NewText(line, theme.TextColor())
-			} else {
-				textCanvas = r.texts[index]
-				textCanvas.Text = line
-			}
-
-			textCanvas.Alignment = align
-			textCanvas.TextStyle = style
-
-			if add {
-				r.texts = append(r.texts, textCanvas)
-				r.SetObjects(append(r.Objects(), textCanvas))
-			}
+	r.provider.propertyLock.Lock()
+	index := 0
+	for ; index < r.provider.rows(); index++ {
+		var line string
+		row := r.provider.row(index)
+		if concealed {
+			line = strings.Repeat(passwordChar, len(row))
+		} else {
+			line = string(row)
 		}
 
-		for ; index < len(r.texts); index++ {
-			r.texts[index].Text = ""
+		var textCanvas *canvas.Text
+		add := false
+		if index >= len(r.texts) {
+			add = true
+			textCanvas = canvas.NewText(line, theme.TextColor())
+		} else {
+			textCanvas = r.texts[index]
+			textCanvas.Text = line
 		}
 
-		r.applyTheme()
-	})
+		textCanvas.Alignment = align
+		textCanvas.TextStyle = style
+
+		if add {
+			r.texts = append(r.texts, textCanvas)
+			r.SetObjects(append(r.Objects(), textCanvas))
+		}
+	}
+
+	for ; index < len(r.texts); index++ {
+		r.texts[index].Text = ""
+	}
+
+	r.applyTheme()
+	r.provider.propertyLock.Unlock()
 
 	r.Layout(r.provider.Size())
 	if r.provider.presenter.object() == nil {

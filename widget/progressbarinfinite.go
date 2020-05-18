@@ -105,10 +105,10 @@ func (p *infProgressRenderer) isRunning() bool {
 // Start the infinite progress bar background thread to update it continuously
 func (p *infProgressRenderer) start() {
 	if !p.isRunning() {
-		p.progress.SetFields(func() {
-			p.ticker = time.NewTicker(infiniteRefreshRate)
-			p.running = true
-		})
+		p.progress.propertyLock.Lock()
+		defer p.progress.propertyLock.Unlock()
+		p.ticker = time.NewTicker(infiniteRefreshRate)
+		p.running = true
 
 		go p.infiniteProgressLoop()
 	}
@@ -116,9 +116,10 @@ func (p *infProgressRenderer) start() {
 
 // Stop the infinite progress goroutine and sets value to the Max
 func (p *infProgressRenderer) stop() {
-	p.progress.SetFields(func() {
-		p.running = false
-	})
+	p.progress.propertyLock.Lock()
+	defer p.progress.propertyLock.Unlock()
+
+	p.running = false
 }
 
 // infiniteProgressLoop should be called as a goroutine to update the inner infinite progress bar

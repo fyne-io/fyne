@@ -26,30 +26,9 @@ func (w *BaseWidget) ExtendBaseWidget(wid fyne.Widget) {
 		return
 	}
 
-	w.SetFields(func() {
-		w.impl = wid
-	})
-}
-
-// SetFields provides a guaranteed thread safe way to directly manipulate widget fields.
-func (w *BaseWidget) SetFields(f func()) {
 	w.propertyLock.Lock()
 	defer w.propertyLock.Unlock()
-
-	f()
-}
-
-// SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
-// This method is a guaranteed thread-safe way of directly manipulating widget fields.
-func (w *BaseWidget) SetFieldsAndRefresh(f func()) {
-	w.SetFields(f)
-
-	impl := w.getImpl()
-	if impl == nil {
-		w.Refresh()
-	} else {
-		impl.Refresh()
-	}
+	w.impl = wid
 }
 
 // Size gets the current size of this widget.
@@ -65,16 +44,15 @@ func (w *BaseWidget) Size() fyne.Size {
 func (w *BaseWidget) Resize(size fyne.Size) {
 	w.propertyLock.RLock()
 	baseSize := w.size
+	impl := w.impl
 	w.propertyLock.RUnlock()
 	if baseSize == size {
 		return
 	}
 
-	var impl fyne.Widget
-	w.SetFields(func() {
-		w.size = size
-		impl = w.impl
-	})
+	w.propertyLock.Lock()
+	w.size = size
+	w.propertyLock.Unlock()
 
 	if impl == nil {
 		return
@@ -93,9 +71,10 @@ func (w *BaseWidget) Position() fyne.Position {
 // Move the widget to a new position, relative to its parent.
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (w *BaseWidget) Move(pos fyne.Position) {
-	w.SetFields(func() {
-		w.position = pos
-	})
+	w.propertyLock.Lock()
+	defer w.propertyLock.Unlock()
+
+	w.position = pos
 }
 
 // MinSize for the widget - it should never be resized below this value.
@@ -125,7 +104,7 @@ func (w *BaseWidget) Show() {
 		return
 	}
 
-	w.SetFieldsAndRefresh(func() {
+	w.setFieldsAndRefresh(func() {
 		w.Hidden = false
 	})
 }
@@ -136,9 +115,9 @@ func (w *BaseWidget) Hide() {
 		return
 	}
 
-	w.SetFields(func() {
-		w.Hidden = true
-	})
+	w.propertyLock.Lock()
+	w.Hidden = true
+	w.propertyLock.Unlock()
 
 	impl := w.getImpl()
 	if impl == nil {
@@ -170,6 +149,21 @@ func (w *BaseWidget) getImpl() fyne.Widget {
 	return impl
 }
 
+// setFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
+// This method is a guaranteed thread-safe way of directly manipulating widget fields.
+func (w *BaseWidget) setFieldsAndRefresh(f func()) {
+	w.propertyLock.Lock()
+	f()
+	w.propertyLock.Unlock()
+
+	impl := w.getImpl()
+	if impl == nil {
+		w.Refresh()
+	} else {
+		impl.Refresh()
+	}
+}
+
 // super will return the actual object that this represents.
 // If extended then this is the extending widget, otherwise it is self.
 func (w *BaseWidget) super() fyne.Widget {
@@ -194,7 +188,7 @@ type DisableableWidget struct {
 
 // Enable this widget, updating any style or features appropriately.
 func (w *DisableableWidget) Enable() {
-	w.SetFieldsAndRefresh(func() {
+	w.setFieldsAndRefresh(func() {
 		if !w.disabled {
 			return
 		}
@@ -205,7 +199,7 @@ func (w *DisableableWidget) Enable() {
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
 func (w *DisableableWidget) Disable() {
-	w.SetFieldsAndRefresh(func() {
+	w.setFieldsAndRefresh(func() {
 		if w.disabled {
 			return
 		}

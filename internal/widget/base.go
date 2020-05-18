@@ -31,18 +31,6 @@ func (b *base) Position() fyne.Position {
 	return b.pos
 }
 
-// SetFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
-// This method is a guaranteed thread-safe way of directly manipulating widget fields.
-func (b *base) setFieldsAndRefresh(f func(), w fyne.Widget) {
-	b.propertyLock.Lock()
-	f()
-	b.propertyLock.Unlock()
-
-	if w != nil { // the wrapping function didn't tell us what to refresh
-		b.refresh(w)
-	}
-}
-
 // Size satisfies the fyne.Widget interface.
 func (b *base) Size() fyne.Size {
 	b.propertyLock.RLock()
@@ -105,6 +93,18 @@ func (b *base) resize(size fyne.Size, w fyne.Widget) {
 	}
 
 	r.Layout(size)
+}
+
+// setFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
+// This method is a guaranteed thread-safe way of directly manipulating widget fields.
+func (b *base) setFieldsAndRefresh(f func(), w fyne.Widget) {
+	b.propertyLock.Lock()
+	f()
+	b.propertyLock.Unlock()
+
+	if w != nil { // the wrapping function didn't tell us what to refresh
+		b.refresh(w)
+	}
 }
 
 func (b *base) show(w fyne.Widget) {
