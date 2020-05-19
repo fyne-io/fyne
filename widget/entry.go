@@ -1086,6 +1086,8 @@ func (r *entryRenderer) buildSelection() {
 		r.selection = r.selection[:rowCount]
 	}
 
+	r.entry.Lock()
+	defer r.entry.Unlock()
 	// build a rectangle for each row and add it to r.selection
 	for i := 0; i < rowCount; i++ {
 		if len(r.selection) <= i {
