@@ -106,9 +106,6 @@ func (d *gLDriver) runGL() {
 				if w.viewport == nil {
 					continue
 				}
-				if w.canvas.ensureMinSize() {
-					w.fitContent()
-				}
 
 				if w.viewport.ShouldClose() {
 					reassign = true
@@ -120,6 +117,11 @@ func (d *gLDriver) runGL() {
 					go w.destroy(d)
 					continue
 				}
+
+				if w.canvas.ensureMinSize() {
+					w.fitContent()
+				}
+
 				newWindows = append(newWindows, win)
 			}
 			if reassign {
