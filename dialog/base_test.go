@@ -10,36 +10,47 @@ import (
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
-func TestConfirmDialog_Layout(t *testing.T) {
+func TestCustomDialog_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
-		title, message string
+		title   string
+		dismiss string
+		content fyne.CanvasObject
 	}{
 		"label": {
 			title:   "Title",
-			message: "FooBar",
+			dismiss: "Dismiss",
+			content: widget.NewLabel("FooBar"),
 		},
 		"label_long_title": {
 			title:   strings.Repeat("Title", 100),
-			message: "FooBar",
+			dismiss: "Dismiss",
+			content: widget.NewLabel("FooBar"),
 		},
-		"label_long_message": {
+		"label_long_dismiss": {
 			title:   "Title",
-			message: strings.Repeat("FooBar", 100),
+			dismiss: strings.Repeat("Dismiss", 100),
+			content: widget.NewLabel("FooBar"),
+		},
+		"label_long_content": {
+			title:   "Title",
+			dismiss: "Dismiss",
+			content: widget.NewLabel(strings.Repeat("FooBar", 100)),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			window := fyne.CurrentApp().NewWindow(name)
 			window.SetContent(canvas.NewRectangle(color.Black))
-			dialog.ShowConfirm(tt.title, tt.message, func(bool) {}, window)
+			dialog.ShowCustom(tt.title, tt.dismiss, tt.content, window)
 			window.Resize(fyne.NewSize(400, 300))
 
-			test.AssertImageMatches(t, "confirm/layout_"+name+".png", window.Canvas().Capture())
+			test.AssertImageMatches(t, "custom/layout_"+name+".png", window.Canvas().Capture())
 
 			window.Close()
 		})

@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func TestConfirmDialog_Layout(t *testing.T) {
+func TestProgressDialog_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -22,24 +22,25 @@ func TestConfirmDialog_Layout(t *testing.T) {
 	}{
 		"label": {
 			title:   "Title",
-			message: "FooBar",
+			message: "Working",
 		},
 		"label_long_title": {
 			title:   strings.Repeat("Title", 100),
-			message: "FooBar",
+			message: "Working",
 		},
-		"label_long_message": {
+		"label_long_dismiss": {
 			title:   "Title",
-			message: strings.Repeat("FooBar", 100),
+			message: strings.Repeat("Working", 100),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			window := fyne.CurrentApp().NewWindow(name)
 			window.SetContent(canvas.NewRectangle(color.Black))
-			dialog.ShowConfirm(tt.title, tt.message, func(bool) {}, window)
+			progress := dialog.NewProgress(tt.title, tt.message, window)
+			progress.Show()
 			window.Resize(fyne.NewSize(400, 300))
 
-			test.AssertImageMatches(t, "confirm/layout_"+name+".png", window.Canvas().Capture())
+			test.AssertImageMatches(t, "progress/layout_"+name+".png", window.Canvas().Capture())
 
 			window.Close()
 		})

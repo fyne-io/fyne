@@ -1,48 +1,77 @@
-package dialog
+package dialog_test
 
 import (
 	"errors"
+	"image/color"
+	"strings"
 	"testing"
 
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/test"
-	"github.com/stretchr/testify/assert"
+	"fyne.io/fyne/theme"
 )
 
-func TestDialog_MinSize(t *testing.T) {
-	window := test.NewWindow(nil)
-	defer window.Close()
-	d := NewInformation("Looooooooooooooong title", "message...", window)
-	information := d.(*dialog)
+func TestErrorDialog_Layout(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
 
-	dialogContent := information.win.Content.MinSize()
-	label := information.label.MinSize()
+	for name, tt := range map[string]struct {
+		err error
+	}{
+		"error": {
+			err: errors.New("TestError"),
+		},
+		"error_long": {
+			err: errors.New(strings.Repeat("TestError", 100)),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			window := fyne.CurrentApp().NewWindow(name)
+			window.SetContent(canvas.NewRectangle(color.Black))
+			dialog.ShowError(tt.err, window)
+			window.Resize(fyne.NewSize(400, 300))
 
-	assert.Less(t, label.Width, dialogContent.Width)
+			test.AssertImageMatches(t, "error/layout_"+name+".png", window.Canvas().Capture())
+
+			window.Close()
+		})
+	}
 }
 
-func TestDialog_InformationCallback(t *testing.T) {
-	d := NewInformation("Information", "Hello World", test.NewWindow(nil))
-	tapped := false
-	d.SetOnClosed(func() { tapped = true })
-	d.Show()
+func TestInformationDialog_Layout(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
 
-	information := d.(*dialog)
-	assert.False(t, information.win.Hidden)
-	test.Tap(information.dismiss)
-	assert.True(t, tapped)
-	assert.True(t, information.win.Hidden)
-}
+	for name, tt := range map[string]struct {
+		title   string
+		message string
+	}{
+		"label": {
+			title:   "Title",
+			message: "Information",
+		},
+		"label_long_title": {
+			title:   strings.Repeat("Title", 100),
+			message: "Information",
+		},
+		"label_long_message": {
+			title:   "Title",
+			message: strings.Repeat("Information", 100),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			window := fyne.CurrentApp().NewWindow(name)
+			window.SetContent(canvas.NewRectangle(color.Black))
+			dialog.ShowInformation(tt.title, tt.message, window)
+			window.Resize(fyne.NewSize(400, 300))
 
-func TestDialog_ErrorCallback(t *testing.T) {
-	err := errors.New("Error message")
-	d := NewError(err, test.NewWindow(nil))
-	tapped := false
-	d.SetOnClosed(func() { tapped = true })
-	d.Show()
+			test.AssertImageMatches(t, "information/layout_"+name+".png", window.Canvas().Capture())
 
-	information := d.(*dialog)
-	assert.False(t, information.win.Hidden)
-	test.Tap(information.dismiss)
-	assert.True(t, tapped)
-	assert.True(t, information.win.Hidden)
+			window.Close()
+		})
+	}
 }
