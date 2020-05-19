@@ -7,13 +7,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   sodipodi:docname="file-video.svg"
-   id="svg96"
-   viewBox="0 0 24 24"
-   height="24"
+   version="1.1"
    width="24"
-   version="1.1">
+   height="24"
+   viewBox="0 0 24 24"
+   id="svg96"
+   sodipodi:docname="file-video.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)">
   <metadata
      id="metadata102">
     <rdf:RDF>
@@ -28,28 +28,28 @@
   <defs
      id="defs100" />
   <sodipodi:namedview
-     inkscape:current-layer="svg96"
-     inkscape:window-maximized="0"
-     inkscape:window-y="579"
-     inkscape:window-x="841"
-     inkscape:cy="12"
-     inkscape:cx="8.9166667"
-     inkscape:zoom="42"
-     showgrid="false"
-     id="namedview98"
-     inkscape:window-height="1039"
-     inkscape:window-width="1910"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0"
-     guidetolerance="10"
-     gridtolerance="10"
-     objecttolerance="10"
-     borderopacity="1"
-     bordercolor="#666666"
+     inkscape:document-rotation="0"
      pagecolor="#ffffff"
-     inkscape:document-rotation="0" />
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1910"
+     inkscape:window-height="1039"
+     id="namedview98"
+     showgrid="false"
+     inkscape:zoom="42"
+     inkscape:cx="5.5357143"
+     inkscape:cy="12"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg96" />
   <path
-     d="m 13,9 h 5.5 L 13,3.5 V 9 M 11.687225,7.9236581 V 4.8665423 L 9.8366701,5.9874848 V 4.8665423 H 5.5187087 V 7.9236581 H 9.8366701 V 6.8027157 Z M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2"
-     style="fill:#000000"
+     d="m 13,9 h 5.5 L 13,3.5 V 9 M 11.8,7.7785579 V 4.7214421 L 9.85,5.8423846 V 4.7214421 H 5.3 V 7.7785579 H 9.85 V 6.6576155 Z M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2"
+     style="display:inline;fill:#000000"
      id="path94" />
 </svg>

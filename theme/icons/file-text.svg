@@ -7,13 +7,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   sodipodi:docname="file-text.svg"
-   id="svg116"
-   viewBox="0 0 24 24"
-   height="24"
+   version="1.1"
    width="24"
-   version="1.1">
+   height="24"
+   viewBox="0 0 24 24"
+   id="svg116"
+   sodipodi:docname="file-text.svg"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)">
   <metadata
      id="metadata122">
     <rdf:RDF>
@@ -28,28 +28,28 @@
   <defs
      id="defs120" />
   <sodipodi:namedview
-     inkscape:current-layer="svg116"
-     inkscape:window-maximized="0"
-     inkscape:window-y="250"
-     inkscape:window-x="1738"
-     inkscape:cy="11.047619"
-     inkscape:cx="8.9166667"
-     inkscape:zoom="42"
-     showgrid="false"
-     id="namedview118"
-     inkscape:window-height="1205"
-     inkscape:window-width="1517"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0"
-     guidetolerance="10"
-     gridtolerance="10"
-     objecttolerance="10"
-     borderopacity="1"
-     bordercolor="#666666"
+     inkscape:document-rotation="0"
      pagecolor="#ffffff"
-     inkscape:document-rotation="0" />
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1517"
+     inkscape:window-height="1045"
+     id="namedview118"
+     showgrid="false"
+     inkscape:zoom="42"
+     inkscape:cx="10.659624"
+     inkscape:cy="12"
+     inkscape:window-x="145"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg116" />
   <path
-     d="m 13,9 h 5.5 L 13,3.5 V 9 M 9.7,8.7 v -2 h -5 v 2 h 5 M 11.7,6 V 4 h -7 V 6 Z M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2"
+     d="m 13,9 h 5.5 L 13,3.5 V 9 M 9.964966,8 V 6.5 H 5.3221088 V 8 H 9.964966 M 11.8,6 V 4.5 H 5.3 V 6 Z M 6,2 h 8 l 6,6 v 12 a 2,2 0 0 1 -2,2 H 6 C 4.89,22 4,21.1 4,20 V 4 C 4,2.89 4.89,2 6,2"
      style="fill:#000000"
      id="path114" />
 </svg>
