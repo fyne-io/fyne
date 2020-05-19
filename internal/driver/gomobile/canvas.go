@@ -330,6 +330,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 		c.dragging.DragEnd()
 
 		c.dragging = nil
+		return
 	}
 
 	duration := time.Since(c.lastTapDown[tapID])
