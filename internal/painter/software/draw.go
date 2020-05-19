@@ -1,6 +1,7 @@
 package software
 
 import (
+	"fmt"
 	"image"
 
 	"fyne.io/fyne"
@@ -54,10 +55,13 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 
 	outBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	switch img.ScaleMode {
-	case canvas.ImageScaleSmooth:
-		draw.CatmullRom.Scale(base, outBounds, tmpImg, tmpImg.Bounds(), draw.Over, nil)
 	case canvas.ImageScalePixels:
 		draw.NearestNeighbor.Scale(base, outBounds, tmpImg, tmpImg.Bounds(), draw.Over, nil)
+	default:
+		if img.ScaleMode != canvas.ImageScaleSmooth {
+			fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", img.ScaleMode), nil)
+		}
+		draw.CatmullRom.Scale(base, outBounds, tmpImg, tmpImg.Bounds(), draw.Over, nil)
 	}
 }
 
