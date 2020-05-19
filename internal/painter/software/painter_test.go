@@ -70,7 +70,7 @@ func TestPainter_PaintImageScaleSmooth(t *testing.T) {
 func TestPainter_PaintImage_StretchX(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
-	c.SetContent(canvas.NewImageFromImage(makeTestImage(4, 3)))
+	c.SetContent(canvas.NewImageFromImage(makeTestImage(3, 3)))
 	c.Resize(fyne.NewSize(100, 50))
 	p := software.NewPainter()
 
@@ -81,7 +81,7 @@ func TestPainter_PaintImage_StretchX(t *testing.T) {
 func TestPainter_PaintImage_StretchY(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
-	c.SetContent(canvas.NewImageFromImage(makeTestImage(3, 4)))
+	c.SetContent(canvas.NewImageFromImage(makeTestImage(3, 3)))
 	c.Resize(fyne.NewSize(50, 100))
 	p := software.NewPainter()
 
