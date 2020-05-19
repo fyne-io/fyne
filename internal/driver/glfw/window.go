@@ -102,10 +102,12 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	if full {
-		w.fullScreen = true
+	w.fullScreen = full
+	if !w.visible {
+		return
 	}
-	w.runOnMainWhenCreated(func() {
+
+	runOnMain(func() {
 		monitor := w.getMonitorForWindow()
 		mode := monitor.GetVideoMode()
 
@@ -113,7 +115,6 @@ func (w *window) SetFullScreen(full bool) {
 			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 		} else {
 			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
-			w.fullScreen = false
 		}
 	})
 }
@@ -334,11 +335,14 @@ func (w *window) doShow() {
 
 		// save coordinates
 		w.xpos, w.ypos = w.viewport.GetPos()
-	})
 
-	if w.fullScreen { // this does not work if called before viewport.Show()...
-		w.SetFullScreen(true)
-	}
+		if w.fullScreen { // this does not work if called before viewport.Show()
+			go func() {
+				time.Sleep(time.Millisecond * 100)
+				w.SetFullScreen(true)
+			}()
+		}
+	})
 
 	// show top canvas element
 	if w.canvas.content != nil {
@@ -452,12 +456,10 @@ func (w *window) destroy(d *gLDriver) {
 }
 
 func (w *window) moved(_ *glfw.Window, x, y int) {
-	if w.fullScreen { // don't save the move to top left when changint to fullscreen
-		return
+	if !w.fullScreen { // don't save the move to top left when changing to fullscreen
+		// save coordinates
+		w.xpos, w.ypos = x, y
 	}
-
-	// save coordinates
-	w.xpos, w.ypos = x, y
 
 	if w.canvas.detectedScale == w.detectScale() {
 		return
@@ -1056,6 +1058,7 @@ func (w *window) queueEvent(fn func()) {
 func (w *window) runOnMainWhenCreated(fn func()) {
 	if w.viewport != nil {
 		runOnMain(fn)
+		return
 	}
 
 	w.pending = append(w.pending, fn)
@@ -1157,12 +1160,11 @@ func (w *window) create() {
 		w.canvas.scale = w.calculatedScale()
 		w.canvas.texScale = w.detectTextureScale()
 		// update window size now we have scaled detected
-		w.viewport.SetSize(w.screenSize(w.canvas.size))
+		w.fitContent()
 
 		for _, fn := range w.pending {
 			fn()
 		}
-		w.fitContent()
 	})
 }
 
