@@ -313,7 +313,6 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 			return
 		}
 	}
-	objPos = pos.Subtract(c.dragging.(fyne.CanvasObject).Position())
 
 	ev := new(fyne.DragEvent)
 	ev.Position = objPos
