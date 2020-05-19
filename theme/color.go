@@ -20,7 +20,6 @@ func Brighten(c color.Color, amount float64) color.Color {
 
 // PrimaryTextColor returns either {black, white} depending on
 // the brightness of the primary color
-// add some code here
 func PrimaryTextColor() color.Color {
 	r, g, b, _ := PrimaryColor().RGBA()
 	if (r+g+b)/3 < 24000 {
