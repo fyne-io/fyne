@@ -100,9 +100,11 @@ func (r *radioRenderer) applyTheme() {
 }
 
 func (r *radioRenderer) Refresh() {
+	r.radio.propertyLock.RLock()
 	r.applyTheme()
 	r.radio.removeDuplicateOptions()
 	r.updateItems()
+	r.radio.propertyLock.RUnlock()
 	canvas.Refresh(r.radio.super())
 }
 
@@ -251,6 +253,8 @@ func (r *Radio) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	r.ExtendBaseWidget(r)
+	r.propertyLock.RLock()
+	defer r.propertyLock.RUnlock()
 	var items []*radioRenderItem
 	var objects []fyne.CanvasObject
 

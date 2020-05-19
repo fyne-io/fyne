@@ -65,10 +65,10 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 }
 
 func (s *selectRenderer) Refresh() {
-	s.combo.propertyLock.Lock()
+	s.combo.propertyLock.RLock()
 	s.updateLabel()
 	s.updateIcon()
-	s.combo.propertyLock.Unlock()
+	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())
 	canvas.Refresh(s.combo.super())
@@ -195,6 +195,8 @@ func (s *Select) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
 	icon := NewIcon(theme.MenuDropDownIcon())
 	text := canvas.NewText(s.Selected, theme.TextColor())
 

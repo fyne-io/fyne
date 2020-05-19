@@ -32,7 +32,9 @@ func (i *iconRenderer) BackgroundColor() color.Color {
 }
 
 func (i *iconRenderer) Refresh() {
+	i.image.propertyLock.RLock()
 	i.updateObjects()
+	i.image.propertyLock.RUnlock()
 	i.Layout(i.image.Size())
 	canvas.Refresh(i.image.super())
 }
@@ -70,6 +72,8 @@ func (i *Icon) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (i *Icon) CreateRenderer() fyne.WidgetRenderer {
 	i.ExtendBaseWidget(i)
+	i.propertyLock.RLock()
+	defer i.propertyLock.RUnlock()
 	r := &iconRenderer{image: i}
 	r.updateObjects()
 	return r

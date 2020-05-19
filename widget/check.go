@@ -52,10 +52,12 @@ func (c *checkRenderer) applyTheme() {
 }
 
 func (c *checkRenderer) Refresh() {
+	c.check.propertyLock.RLock()
 	c.applyTheme()
 	c.updateLabel()
 	c.updateResource()
 	c.updateFocusIndicator()
+	c.check.propertyLock.RUnlock()
 	canvas.Refresh(c.check.super())
 }
 
@@ -161,6 +163,8 @@ func (c *Check) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
 	text := canvas.NewText(c.Text, theme.TextColor())
