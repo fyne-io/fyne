@@ -41,6 +41,7 @@ func TestHyperlink_Alignment(t *testing.T) {
 
 func TestHyperlink_Hide(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test"}
+	hyperlink.CreateRenderer()
 	hyperlink.Hide()
 	hyperlink.Refresh()
 
@@ -54,6 +55,7 @@ func TestHyperlink_Hide(t *testing.T) {
 
 func TestHyperlink_Resize(t *testing.T) {
 	hyperlink := &Hyperlink{Text: "Test"}
+	hyperlink.CreateRenderer()
 	size := fyne.NewSize(100, 20)
 	hyperlink.Resize(size)
 
