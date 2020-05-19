@@ -3,7 +3,6 @@ package test
 import (
 	"fmt"
 	"image"
-	"image/draw"
 	"image/png"
 	"os"
 	"path/filepath"
@@ -50,14 +49,15 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 	defer file.Close()
 	raw, _, err := image.Decode(file)
 	require.NoError(t, err)
-	expected := image.NewRGBA(raw.Bounds())
-	draw.Draw(expected, expected.Bounds(), raw, image.Pt(0, 0), draw.Src)
+
+	masterPix := pixelsForImage(t, raw) // let's just compare the pixels directly
+	capturePix := pixelsForImage(t, img)
 
 	var msg string
 	if len(msgAndArgs) > 0 {
 		msg = fmt.Sprintf(msgAndArgs[0].(string)+"\n", msgAndArgs[1:]...)
 	}
-	if !assert.Equal(t, expected, img, "%sImage did not match master. Actual image written to file://%s.", msg, failedPath) {
+	if !assert.Equal(t, masterPix, capturePix, "%sImage did not match master. Actual image written to file://%s.", msg, failedPath) {
 		require.NoError(t, writeImage(failedPath, img))
 		return false
 	}
@@ -66,6 +66,10 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 
 // MoveMouse simulates a mouse movement to the given position.
 func MoveMouse(c fyne.Canvas, pos fyne.Position) {
+	if fyne.CurrentDevice().IsMobile() {
+		return
+	}
+
 	tc, _ := c.(*testCanvas)
 	var oldHovered, hovered desktop.Hoverable
 	if tc != nil {
@@ -77,7 +81,7 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		}
 		return false
 	}
-	o, absPos := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, absPos, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
 		hovered = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
@@ -152,7 +156,7 @@ func ApplyTheme(t *testing.T, theme fyne.Theme) {
 	require.IsType(t, &testApp{}, fyne.CurrentApp())
 	a := fyne.CurrentApp().(*testApp)
 	a.Settings().SetTheme(theme)
-	for a.appliedTheme != a.Settings().Theme() {
+	for a.lastAppliedTheme() != theme {
 		time.Sleep(1 * time.Millisecond)
 	}
 }
@@ -172,14 +176,15 @@ func WithTestTheme(t *testing.T, f func()) {
 	f()
 }
 
-func findTappable(c fyne.Canvas, pos fyne.Position) (fyne.CanvasObject, fyne.Position) {
+func findTappable(c fyne.Canvas, pos fyne.Position) (o fyne.CanvasObject, p fyne.Position) {
 	matches := func(object fyne.CanvasObject) bool {
 		if _, ok := object.(fyne.Tappable); ok {
 			return true
 		}
 		return false
 	}
-	return driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ = driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	return
 }
 
 func prepareTap(obj interface{}, pos fyne.Position) (*fyne.PointEvent, fyne.Canvas) {
@@ -214,6 +219,20 @@ func handleFocusOnTap(c fyne.Canvas, obj interface{}) {
 	if unfocus {
 		c.Unfocus()
 	}
+}
+
+func pixelsForImage(t *testing.T, img image.Image) []uint8 {
+	var pix []uint8
+	if data, ok := img.(*image.RGBA); ok {
+		pix = data.Pix
+	} else if data, ok := img.(*image.NRGBA); ok {
+		pix = data.Pix
+	}
+	if pix == nil {
+		t.Error("Master image is unsupported type")
+	}
+
+	return pix
 }
 
 func typeChars(chars []rune, keyDown func(rune)) {

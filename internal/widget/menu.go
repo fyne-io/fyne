@@ -32,7 +32,8 @@ func NewMenu(menu *fyne.Menu) *Menu {
 	return m
 }
 
-// CreateRenderer satisfies the fyne.Widget interface.
+// CreateRenderer returns a new renderer for the menu.
+// Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	cont := &fyne.Container{
 		Layout:  layout.NewVBoxLayout(),
@@ -45,32 +46,38 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-// Hide satisfies the fyne.Widget interface.
+// Hide hides the menu.
+// Implements: fyne.Widget
 func (m *Menu) Hide() {
 	m.hide(m)
 }
 
-// MinSize satisfies the fyne.Widget interface.
+// MinSize returns the minimal size of the menu.
+// Implements: fyne.Widget
 func (m *Menu) MinSize() fyne.Size {
 	return m.minSize(m)
 }
 
-// Refresh satisfies the fyne.Widget interface.
+// Refresh triggers a redraw of the menu.
+// Implements: fyne.Widget
 func (m *Menu) Refresh() {
 	m.refresh(m)
 }
 
-// Resize satisfies the fyne.Widget interface.
+// Resize has no effect because menus are always displayed with their minimal size.
+// Implements: fyne.Widget
 func (m *Menu) Resize(size fyne.Size) {
 	m.resize(size, m)
 }
 
-// Show satisfies the fyne.Widget interface.
+// Show makes the menu visible.
+// Implements: fyne.Widget
 func (m *Menu) Show() {
 	m.show(m)
 }
 
-// Tapped satisfies the fyne.Tappable interface.
+// Tapped catches taps on separators and the menu background. It doesn’t perform any action.
+// Implements: fyne.Tappable
 func (m *Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
 }
@@ -81,7 +88,6 @@ type menuRenderer struct {
 	m    *Menu
 }
 
-// Layout satisfies the fyne.WidgetRenderer interface.
 func (r *menuRenderer) Layout(s fyne.Size) {
 	minSize := r.MinSize()
 	var size fyne.Size
@@ -101,12 +107,10 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	r.cont.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
 }
 
-// MinSize satisfies the fyne.WidgetRenderer interface.
 func (r *menuRenderer) MinSize() fyne.Size {
 	return r.cont.MinSize().Add(r.padding())
 }
 
-// Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *menuRenderer) Refresh() {
 	canvas.Refresh(r.m)
 }

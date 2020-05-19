@@ -68,13 +68,13 @@ func makeButtonTab() fyne.Widget {
 func makeTextGrid() *widget.TextGrid {
 	grid := widget.NewTextGridFromString("TextGrid\n  Content\nZebra")
 	grid.SetStyleRange(0, 0, 0, 3,
-		&widget.CustomTextGridStyle{FGColor: color.RGBA{R: 0, G: 0, B: 128, A: 255}})
+		&widget.CustomTextGridStyle{FGColor: color.NRGBA{R: 0, G: 0, B: 128, A: 255}})
 	grid.SetStyleRange(0, 4, 0, 7,
-		&widget.CustomTextGridStyle{BGColor: &color.RGBA{R: 128, G: 0, B: 0, A: 255}})
-	grid.Rows[1].Style = &widget.CustomTextGridStyle{BGColor: &color.RGBA{R: 64, G: 64, B: 64, A: 128}}
+		&widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 128, G: 0, B: 0, A: 255}})
+	grid.Rows[1].Style = &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 64, B: 64, A: 128}}
 
-	white := &widget.CustomTextGridStyle{FGColor: &color.RGBA{R: 255, G: 255, B: 255, A: 255}}
-	black := &widget.CustomTextGridStyle{FGColor: &color.RGBA{R: 0, G: 0, B: 0, A: 255}}
+	white := &widget.CustomTextGridStyle{FGColor: &color.NRGBA{R: 255, G: 255, B: 255, A: 255}}
+	black := &widget.CustomTextGridStyle{FGColor: &color.NRGBA{R: 0, G: 0, B: 0, A: 255}}
 	grid.Rows[2].Cells[0].Style = white
 	grid.Rows[2].Cells[1].Style = black
 	grid.Rows[2].Cells[2].Style = white
@@ -244,6 +244,28 @@ func makeFormTab() fyne.Widget {
 	form.Append("Password", password)
 	form.Append("Message", largeText)
 
+	// Added to demonstrate that buttons can be reset after the form is alive
+	setSubmit := widget.NewButton("Set Submit", func() {
+		form.OnSubmit = func() { println("New Submit Button") }
+		form.SubmitText = "New Submit"
+		form.Refresh()
+	})
+	clearSubmit := widget.NewButton("Remove Submit", func() {
+		form.OnSubmit = nil
+		form.Refresh()
+	})
+
+	setCancel := widget.NewButton("Set Cancel", func() {
+		form.OnCancel = func() { println("New Cancel Button") }
+		form.CancelText = "New Cancel"
+		form.Refresh()
+	})
+	clearCancel := widget.NewButton("Remove Cancel", func() {
+		form.OnCancel = nil
+		form.Refresh()
+	})
+	form.Append("", widget.NewHBox(setSubmit, clearSubmit, setCancel, clearCancel))
+
 	return form
 }
 
@@ -274,7 +296,6 @@ type contextMenuButton struct {
 	menu *fyne.Menu
 }
 
-// Tapped satisfies the fyne.Tappable interface.
 func (b *contextMenuButton) Tapped(e *fyne.PointEvent) {
 	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
 }

@@ -13,8 +13,8 @@ import (
 func TestSplitContainer(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 
-	objA := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	t.Run("Horizontal", func(t *testing.T) {
 		NewHSplitContainer(objA, objB).Resize(size)
@@ -41,8 +41,8 @@ func TestSplitContainer(t *testing.T) {
 }
 
 func TestSplitContainer_MinSize(t *testing.T) {
-	textA := canvas.NewText("TEXTA", color.RGBA{0, 0xff, 0, 0})
-	textB := canvas.NewText("TEXTB", color.RGBA{0, 0xff, 0, 0})
+	textA := canvas.NewText("TEXTA", color.NRGBA{0, 0xff, 0, 0})
+	textB := canvas.NewText("TEXTB", color.NRGBA{0, 0xff, 0, 0})
 	t.Run("Horizontal", func(t *testing.T) {
 		min := NewHSplitContainer(textA, textB).MinSize()
 		assert.Equal(t, textA.MinSize().Width+textB.MinSize().Width+dividerThickness(), min.Width)
@@ -58,8 +58,8 @@ func TestSplitContainer_MinSize(t *testing.T) {
 func TestSplitContainer_SetRatio(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 
-	objA := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	t.Run("Horizontal", func(t *testing.T) {
 		sc := NewHSplitContainer(objA, objB)
@@ -109,9 +109,9 @@ func TestSplitContainer_SetRatio(t *testing.T) {
 
 func TestSplitContainer_SetRatio_limits(t *testing.T) {
 	size := fyne.NewSize(50, 50)
-	objA := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	objA.SetMinSize(size)
-	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	objB.SetMinSize(size)
 	t.Run("Horizontal", func(t *testing.T) {
 		sc := NewHSplitContainer(objA, objB)
@@ -174,9 +174,9 @@ func TestSplitContainer_divider_cursor(t *testing.T) {
 
 func TestSplitContainer_divider_drag(t *testing.T) {
 	size := fyne.NewSize(10, 10)
-	objA := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	objA.SetMinSize(size)
-	objB := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	objB.SetMinSize(size)
 	t.Run("Horizontal", func(t *testing.T) {
 		split := NewHSplitContainer(objA, objB)

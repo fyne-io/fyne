@@ -42,3 +42,15 @@ func TestGroup_Text(t *testing.T) {
 
 	assert.Equal(t, "World", test.WidgetRenderer(group).(*groupRenderer).label.Text)
 }
+
+func TestGroup_Scroll(t *testing.T) {
+	group := NewGroupWithScroller("Test",
+		NewLabel("A label"), NewLabel("Another item"))
+	group.Resize(group.MinSize())
+
+	scroll := group.content.(*ScrollContainer)
+	assert.Equal(t, scroll.Direction, ScrollVerticalOnly)
+	assert.Equal(t, group.MinSize().Width, scroll.Content.Size().Width)
+	totalHeight := test.WidgetRenderer(group).(*groupRenderer).label.MinSize().Height + scroll.Content.Size().Height
+	assert.Less(t, group.MinSize().Height, totalHeight)
+}

@@ -12,10 +12,6 @@ func (d *device) Orientation() fyne.DeviceOrientation {
 	return fyne.OrientationVertical
 }
 
-func (d *device) IsMobile() bool {
-	return false
-}
-
 func (d *device) HasKeyboard() bool {
 	return false
 }

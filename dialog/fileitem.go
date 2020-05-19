@@ -84,6 +84,9 @@ func fileParts(path string) (name, ext, mimeType, mimeSubType string) {
 	mimeType = mimeTypeSplit[0]
 	mimeSubType = mimeTypeSplit[1]
 
+	if len(ext) > 5 {
+		ext = ext[:5]
+	}
 	return
 }
 

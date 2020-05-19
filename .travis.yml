@@ -84,3 +84,6 @@ matrix:
     - go: 1.14.x
       os: windows
       env: GO111MODULE=off GOFLAGS=
+    - go: 1.14.x
+      os: linux
+      env: GO111MODULE=on GOFLAGS=-tags=mobile

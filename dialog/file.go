@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -65,7 +66,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			info, err := os.Stat(path)
 			if os.IsNotExist(err) {
 				f.win.Hide()
-				callback(fyne.SaveFileToURI("file://" + path))
+				callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
 				return
 			} else if info.IsDir() {
 				ShowInformation("Cannot overwrite",
@@ -80,13 +81,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 						return
 					}
 
-					callback(fyne.SaveFileToURI("file://" + path))
+					callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
 					f.win.Hide()
 				}, f.parent)
 		} else if f.selected != nil {
 			callback := f.callback.(func(fyne.FileReadCloser, error))
 			f.win.Hide()
-			callback(fyne.OpenFileFromURI("file://" + f.selected.path))
+			callback(storage.OpenFileFromURI(storage.NewURI("file://" + f.selected.path)))
 		}
 	})
 	f.open.Style = widget.PrimaryButton
@@ -104,9 +105,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}),
 		f.open)
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
-		buttons, f.fileName)
+		buttons, widget.NewHScrollContainer(f.fileName))
 
-	f.files = fyne.NewContainerWithLayout(layout.NewFixedGridLayout(fyne.NewSize(fileIconCellWidth,
+	f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(fileIconCellWidth,
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
 	f.fileScroll = widget.NewScrollContainer(f.files)

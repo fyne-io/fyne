@@ -16,9 +16,9 @@ func TestGridLayout(t *testing.T) {
 	gridSize := fyne.NewSize(100+theme.Padding(), 100+theme.Padding())
 	cellSize := fyne.NewSize(50, 50)
 
-	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
@@ -37,9 +37,9 @@ func TestGridLayout(t *testing.T) {
 func TestGridLayoutRounding(t *testing.T) {
 	gridSize := fyne.NewSize(100+theme.Padding()*2, 50)
 
-	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
@@ -60,9 +60,9 @@ func TestGridLayout_Vertical(t *testing.T) {
 	gridSize := fyne.NewSize(100+theme.Padding(), 100+theme.Padding())
 	cellSize := fyne.NewSize(50, 50)
 
-	obj1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
-	obj3 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj3 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj1, obj2, obj3},
@@ -79,8 +79,8 @@ func TestGridLayout_Vertical(t *testing.T) {
 }
 
 func TestGridLayout_MinSize(t *testing.T) {
-	text1 := canvas.NewText("Large Text", color.RGBA{0xff, 0, 0, 0})
-	text2 := canvas.NewText("small", color.RGBA{0xff, 0, 0, 0})
+	text1 := canvas.NewText("Large Text", color.NRGBA{0xff, 0, 0, 0})
+	text2 := canvas.NewText("small", color.NRGBA{0xff, 0, 0, 0})
 	minSize := text1.MinSize().Add(fyne.NewSize(0, text2.MinSize().Height+theme.Padding()))
 
 	container := fyne.NewContainer(text1, text2)
@@ -90,8 +90,8 @@ func TestGridLayout_MinSize(t *testing.T) {
 }
 
 func TestGridLayout_MinSize_Vertical(t *testing.T) {
-	text1 := canvas.NewText("Text", color.RGBA{0xff, 0, 0, 0})
-	text2 := canvas.NewText("Text", color.RGBA{0xff, 0, 0, 0})
+	text1 := canvas.NewText("Text", color.NRGBA{0xff, 0, 0, 0})
+	text2 := canvas.NewText("Text", color.NRGBA{0xff, 0, 0, 0})
 	minSize := text1.MinSize().Add(fyne.NewSize(text2.MinSize().Width+theme.Padding(), 0))
 
 	container := fyne.NewContainer(text1, text2)
@@ -101,10 +101,10 @@ func TestGridLayout_MinSize_Vertical(t *testing.T) {
 }
 
 func TestGridLayout_MinSize_HiddenItem(t *testing.T) {
-	text1 := canvas.NewText("Large Text", color.RGBA{0xff, 0, 0, 0})
-	text2 := canvas.NewText("hidden", color.RGBA{0xff, 0, 0, 0})
+	text1 := canvas.NewText("Large Text", color.NRGBA{0xff, 0, 0, 0})
+	text2 := canvas.NewText("hidden", color.NRGBA{0xff, 0, 0, 0})
 	text2.Hide()
-	text3 := canvas.NewText("small", color.RGBA{0xff, 0, 0, 0})
+	text3 := canvas.NewText("small", color.NRGBA{0xff, 0, 0, 0})
 	minSize := text1.MinSize().Add(fyne.NewSize(0, text3.MinSize().Height+theme.Padding()))
 
 	container := fyne.NewContainer(text1, text2, text3)

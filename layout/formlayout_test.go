@@ -15,14 +15,14 @@ import (
 func TestFormLayout(t *testing.T) {
 	gridSize := fyne.NewSize(125, 125)
 
-	label1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label1.SetMinSize(fyne.NewSize(50, 50))
-	content1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content1.SetMinSize(fyne.NewSize(100, 100))
 
-	label2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label2.SetMinSize(fyne.NewSize(70, 30))
-	content2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content2.SetMinSize(fyne.NewSize(120, 80))
 
 	container := &fyne.Container{
@@ -41,16 +41,16 @@ func TestFormLayout(t *testing.T) {
 func TestFormLayout_Hidden(t *testing.T) {
 	gridSize := fyne.NewSize(190+theme.Padding(), 125)
 
-	label1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label1.SetMinSize(fyne.NewSize(70, 50))
 	label1.Hide()
-	content1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content1.SetMinSize(fyne.NewSize(120, 100))
 	content1.Hide()
 
-	label2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label2.SetMinSize(fyne.NewSize(50, 30))
-	content2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content2.SetMinSize(fyne.NewSize(100, 80))
 
 	container := &fyne.Container{
@@ -69,9 +69,9 @@ func TestFormLayout_Hidden(t *testing.T) {
 func TestFormLayout_StretchX(t *testing.T) {
 	wideSize := fyne.NewSize(150, 50)
 
-	label1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label1.SetMinSize(fyne.NewSize(50, 50))
-	content1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content1.SetMinSize(fyne.NewSize(50, 50))
 
 	container := &fyne.Container{
@@ -87,14 +87,14 @@ func TestFormLayout_StretchX(t *testing.T) {
 
 func TestFormLayout_MinSize(t *testing.T) {
 
-	label1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label1.SetMinSize(fyne.NewSize(50, 50))
-	content1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content1.SetMinSize(fyne.NewSize(100, 100))
 
-	label2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label2.SetMinSize(fyne.NewSize(70, 30))
-	content2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content2.SetMinSize(fyne.NewSize(120, 80))
 
 	container := &fyne.Container{
@@ -110,15 +110,15 @@ func TestFormLayout_MinSize(t *testing.T) {
 
 func TestFormLayout_MinSize_Hidden(t *testing.T) {
 
-	label1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label1.SetMinSize(fyne.NewSize(50, 50))
-	content1 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content1 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content1.SetMinSize(fyne.NewSize(100, 100))
 
-	label2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	label2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	label2.SetMinSize(fyne.NewSize(70, 30))
 	label2.Hide()
-	content2 := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	content2 := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	content2.SetMinSize(fyne.NewSize(120, 80))
 	content2.Hide()
 
