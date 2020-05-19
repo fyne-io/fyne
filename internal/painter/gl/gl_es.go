@@ -32,7 +32,7 @@ func newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture uint32
 
 	if int(textureFilter) >= len(textureFilterToGL) {
-		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as defualt value", textureFilter), nil)
+		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", textureFilter), nil)
 		textureFilter = canvas.ImageScaleSmooth
 	}
 
