@@ -284,7 +284,7 @@ func (r *Radio) itemHeight() int {
 	}
 
 	count := 1
-	if r.Options != nil {
+	if r.Options != nil && len(r.Options) > 0 {
 		count = len(r.Options)
 	}
 	return r.MinSize().Height / count
@@ -295,7 +295,11 @@ func (r *Radio) itemWidth() int {
 		return r.MinSize().Width
 	}
 
-	return r.MinSize().Width / len(r.Options)
+	count := 1
+	if r.Options != nil && len(r.Options) > 0 {
+		count = len(r.Options)
+	}
+	return r.MinSize().Width / count
 }
 
 func (r *Radio) removeDuplicateOptions() {
