@@ -431,7 +431,6 @@ func (w *window) closed(viewport *glfw.Window) {
 	if w.onClosed != nil {
 		w.queueEvent(w.onClosed)
 	}
-
 }
 
 // destroy this window and, if it's the last window quit the app
@@ -452,6 +451,8 @@ func (w *window) destroy(d *gLDriver) {
 
 	if w.master || len(d.windowList()) == 0 {
 		d.Quit()
+	} else if runtime.GOOS == "darwin" {
+		d.focusPreviousWindow()
 	}
 }
 

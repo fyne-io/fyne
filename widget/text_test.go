@@ -65,13 +65,13 @@ func newTrailingBoldWhiteTextPresenter() textPresenter {
 
 func TestText_Alignment(t *testing.T) {
 	text := &textProvider{presenter: newTrailingBoldWhiteTextPresenter()}
-	text.SetText("Test")
+	text.setText("Test")
 	assert.Equal(t, fyne.TextAlignTrailing, test.WidgetRenderer(text).(*textRenderer).texts[0].Alignment)
 }
 
 func TestText_Row(t *testing.T) {
 	text := &textProvider{presenter: newTestTextPresenter()}
-	text.SetText("test")
+	text.setText("test")
 
 	assert.Nil(t, text.row(-1))
 	assert.Nil(t, text.row(1))
@@ -81,41 +81,41 @@ func TestText_Row(t *testing.T) {
 
 func TestText_Rows(t *testing.T) {
 	text := &textProvider{presenter: newTestTextPresenter()}
-	text.SetText("test")
+	text.setText("test")
 	assert.Equal(t, 1, text.rows())
 
-	text.SetText("test\ntest")
+	text.setText("test\ntest")
 	assert.Equal(t, text.rows(), 2)
 
-	text.SetText("test\ntest\ntest")
+	text.setText("test\ntest\ntest")
 	assert.Equal(t, text.rows(), 3)
 
-	text.SetText("test\ntest\ntest\n")
+	text.setText("test\ntest\ntest\n")
 	assert.Equal(t, text.rows(), 4)
 
-	text.SetText("\n")
+	text.setText("\n")
 	assert.Equal(t, text.rows(), 2)
 }
 
 func TestText_RowLength(t *testing.T) {
 	text := &textProvider{presenter: newTestTextPresenter()}
-	text.SetText("test")
+	text.setText("test")
 
 	rl := text.rowLength(0)
 	assert.Equal(t, 4, rl)
 
-	text.SetText("test\ntèsts")
+	text.setText("test\ntèsts")
 	rl = text.rowLength(0)
 	assert.Equal(t, 4, rl)
 
 	rl = text.rowLength(1)
 	assert.Equal(t, 5, rl)
 
-	text.SetText("")
+	text.setText("")
 	rl = text.rowLength(0)
 	assert.Equal(t, 0, rl)
 
-	text.SetText("\nhello")
+	text.setText("\nhello")
 	rl = text.rowLength(0)
 	assert.Equal(t, 0, rl)
 
