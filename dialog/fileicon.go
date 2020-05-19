@@ -19,25 +19,11 @@ type fileIcon struct {
 	widget.BaseWidget
 
 	extension, mimeType, mimeSubType string
+	resource fyne.Resource
 }
 
 func (i *fileIcon) CreateRenderer() fyne.WidgetRenderer {
-	var res fyne.Resource
-	switch i.mimeType {
-	case "application":
-		res = theme.FileApplicationIcon()
-	case "audio":
-		res = theme.FileAudioIcon()
-	case "image":
-		res = theme.FileImageIcon()
-	case "text":
-		res = theme.FileTextIcon()
-	case "video":
-		res = theme.FileVideoIcon()
-	default:
-		res = theme.FileIcon()
-	}
-	img := canvas.NewImageFromResource(res)
+	img := canvas.NewImageFromResource(i.resource)
 	extText := canvas.NewText(i.extension, theme.BackgroundColor())
 	extText.Alignment = fyne.TextAlignCenter
 	extText.TextSize = theme.TextSize()
@@ -75,10 +61,27 @@ func mimeTypeGet(path string) (ext, mimeType, mimeSubType string) {
 func NewFileIcon(path string) fyne.CanvasObject {
 	ext, mimeType, mimeSubType := mimeTypeGet(path)
 
+	var res fyne.Resource
+	switch mimeType {
+	case "application":
+		res = theme.FileApplicationIcon()
+	case "audio":
+		res = theme.FileAudioIcon()
+	case "image":
+		res = theme.FileImageIcon()
+	case "text":
+		res = theme.FileTextIcon()
+	case "video":
+		res = theme.FileVideoIcon()
+	default:
+		res = theme.FileIcon()
+	}
+
 	ret := &fileIcon{
 		mimeType:    mimeType,
 		mimeSubType: mimeSubType,
 		extension:   ext,
+		resource:    res,
 	}
 
 	ret.ExtendBaseWidget(ret)

@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestShowFileOpen(t *testing.T) {
@@ -43,7 +43,7 @@ func TestShowFileOpen(t *testing.T) {
 
 	var target *fileDialogItem
 	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).icon == theme.FileIcon() {
+		if icon.(*fileDialogItem).dir == false {
 			target = icon.(*fileDialogItem)
 		}
 	}
@@ -98,7 +98,7 @@ func TestShowFileSave(t *testing.T) {
 
 	var target *fileDialogItem
 	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).icon == theme.FileIcon() {
+		if icon.(*fileDialogItem).dir == false {
 			target = icon.(*fileDialogItem)
 		}
 	}
