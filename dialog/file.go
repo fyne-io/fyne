@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -143,6 +144,14 @@ func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
 	return places
 }
 
+func fileName(path string) (name string) {
+	name = filepath.Base(path)
+	ext := filepath.Ext(path[1:])
+	name = name[:len(name)-len(ext)]
+
+	return
+}
+
 func (f *fileDialog) refreshDir(dir string) {
 	f.files.Objects = nil
 
@@ -155,7 +164,8 @@ func (f *fileDialog) refreshDir(dir string) {
 	var icons []fyne.CanvasObject
 	parent := filepath.Dir(dir)
 	if parent != dir {
-		icons = append(icons, f.newFileItem(theme.FolderOpenIcon(), filepath.Dir(dir)))
+		icons = append(icons, f.newFileItem(canvas.NewImageFromResource(theme.FolderOpenIcon()),
+			filepath.Dir(dir), "(Parent)", true))
 	}
 	for _, file := range files {
 		if isHidden(file.Name(), dir) {
@@ -164,9 +174,11 @@ func (f *fileDialog) refreshDir(dir string) {
 
 		itemPath := filepath.Join(dir, file.Name())
 		if file.IsDir() {
-			icons = append(icons, f.newFileItem(theme.FolderIcon(), itemPath))
+			icons = append(icons, f.newFileItem(canvas.NewImageFromResource(theme.FolderIcon()),
+				itemPath, file.Name(), true))
 		} else {
-			icons = append(icons, f.newFileItem(nil, itemPath))
+			icons = append(icons, f.newFileItem(NewFileIcon(itemPath), itemPath,
+				fileName(itemPath), false))
 		}
 	}
 

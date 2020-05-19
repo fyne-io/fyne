@@ -1,13 +1,7 @@
 package dialog
 
 import (
-	"bufio"
 	"image/color"
-	"mime"
-	"os"
-	"path/filepath"
-	"strings"
-	"unicode/utf8"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -26,10 +20,10 @@ type fileDialogItem struct {
 	picker    *fileDialog
 	isCurrent bool
 
-	path                  string
-	icon                  fyne.Resource
-	name, ext             string
-	mimeType, mimeSubType string
+	icon fyne.CanvasObject
+	name string
+	path string
+	dir  bool
 }
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
@@ -41,70 +35,25 @@ func (i *fileDialogItem) TappedSecondary(_ *fyne.PointEvent) {
 }
 
 func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
-	var img fyne.CanvasObject
-	if i.icon == nil {
-		mimeSub := i.mimeSubType
-		if len(mimeSub) > 5 {
-			mimeSub = mimeSub[:5]
-		}
-		img = NewFileIcon(i.mimeType, mimeSub)
-	} else {
-		img = canvas.NewImageFromResource(i.icon)
-	}
 	text := widget.NewLabelWithStyle(i.name, fyne.TextAlignCenter, fyne.TextStyle{})
 	text.Wrapping = fyne.TextTruncate
 
 	return &fileItemRenderer{item: i,
-		img: img, text: text, objects: []fyne.CanvasObject{img, text}}
+		img: i.icon, text: text, objects: []fyne.CanvasObject{i.icon, text}}
 }
 
 func (i *fileDialogItem) isDirectory() bool {
-	return i.icon == theme.FolderIcon() || i.icon == theme.FolderOpenIcon()
+	return i.dir
 }
 
-func fileParts(path string) (name, ext, mimeType, mimeSubType string) {
-	name = filepath.Base(path)
-	ext = filepath.Ext(name[1:])
-	name = name[:len(name)-len(ext)]
-
-	mimeTypeFull := mime.TypeByExtension(ext)
-	if mimeTypeFull == "" {
-		mimeTypeFull = "text/plain"
-		file, err := os.Open(path)
-		if err == nil {
-			defer file.Close()
-			scanner := bufio.NewScanner(file)
-			if scanner.Scan() && !utf8.Valid(scanner.Bytes()) {
-				mimeTypeFull = "application/octet-stream"
-			}
-		}
-	}
-
-	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
-	mimeType = mimeTypeSplit[0]
-	mimeSubType = mimeTypeSplit[1]
-
-	if len(ext) > 5 {
-		ext = ext[:5]
-	}
-	return
-}
-
-func (f *fileDialog) newFileItem(icon fyne.Resource, path string) *fileDialogItem {
-	name, ext, mimeType, mimeSubType := fileParts(path)
-	if icon == theme.FolderOpenIcon() {
-		name = "(Parent)"
-		ext = ""
-	}
+func (f *fileDialog) newFileItem(icon fyne.CanvasObject, path string, name string, dir bool) *fileDialogItem {
 
 	ret := &fileDialogItem{
-		picker:      f,
-		icon:        icon,
-		name:        name,
-		ext:         ext,
-		path:        path,
-		mimeType:    mimeType,
-		mimeSubType: mimeSubType,
+		picker: f,
+		icon:   icon,
+		name:   name,
+		path:   path,
+		dir:    dir,
 	}
 	ret.ExtendBaseWidget(ret)
 	return ret

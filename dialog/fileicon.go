@@ -1,7 +1,13 @@
 package dialog
 
 import (
+	"bufio"
 	"image/color"
+	"mime"
+	"os"
+	"path/filepath"
+	"strings"
+	"unicode/utf8"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -12,7 +18,7 @@ import (
 type fileIcon struct {
 	widget.BaseWidget
 
-	mimeType, mimeSubType string
+	extension, mimeType, mimeSubType string
 }
 
 func (i *fileIcon) CreateRenderer() fyne.WidgetRenderer {
@@ -32,19 +38,47 @@ func (i *fileIcon) CreateRenderer() fyne.WidgetRenderer {
 		res = theme.FileIcon()
 	}
 	img := canvas.NewImageFromResource(res)
-	extText := canvas.NewText(i.mimeSubType, theme.BackgroundColor())
+	extText := canvas.NewText(i.extension, theme.BackgroundColor())
 	extText.Alignment = fyne.TextAlignCenter
 	extText.TextSize = theme.TextSize()
 	return &fileIconRenderer{item: i,
 		img: img, ext: extText, objects: []fyne.CanvasObject{img, extText}}
 }
 
-// NewFileIcon takes mimetype information and creates an icon that can be used to represent files
-func NewFileIcon(mimeType string, mimeSubType string) fyne.CanvasObject {
+func mimeTypeGet(path string) (ext, mimeType, mimeSubType string) {
+	ext = filepath.Ext(path[1:])
+	mimeTypeFull := mime.TypeByExtension(ext)
+	if mimeTypeFull == "" {
+		mimeTypeFull = "text/plain"
+		file, err := os.Open(path)
+		if err == nil {
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			if scanner.Scan() && !utf8.Valid(scanner.Bytes()) {
+				mimeTypeFull = "application/octet-stream"
+			}
+		}
+	}
+
+	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
+	mimeType = mimeTypeSplit[0]
+	mimeSubTypeSplit := strings.Split(mimeTypeSplit[1], ";")
+	mimeSubType = mimeSubTypeSplit[0]
+
+	if len(ext) > 5 {
+		ext = ext[:5]
+	}
+	return
+}
+
+// NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
+func NewFileIcon(path string) fyne.CanvasObject {
+	ext, mimeType, mimeSubType := mimeTypeGet(path)
 
 	ret := &fileIcon{
 		mimeType:    mimeType,
 		mimeSubType: mimeSubType,
+		extension:   ext,
 	}
 
 	ret.ExtendBaseWidget(ret)
