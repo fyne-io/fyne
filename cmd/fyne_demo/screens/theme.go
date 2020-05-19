@@ -72,6 +72,7 @@ func (c *customTheme) HoverColor() color.Color {
 }
 
 func (customTheme) FocusColor() color.Color {
+	theme.Brighten(orange, .8)
 	return orange
 }
 
