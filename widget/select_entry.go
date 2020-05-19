@@ -21,25 +21,27 @@ func NewSelectEntry(options []string) *SelectEntry {
 	return e
 }
 
-// MinSize satisfies the fyne.CanvasObject interface.
+// MinSize returns the minimal size of the select entry.
+// Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
 	min := e.Entry.MinSize()
+
 	if e.dropDown != nil {
 		for _, item := range e.dropDown.Items {
 			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(fyne.NewSize(4*theme.Padding(), 0))
-			min = min.Union(itemMin)
+			min = min.Max(itemMin)
 		}
 	}
 	return min
 }
 
-// Resize satisfies the fyne.CanvasObject interface.
+// Resize changes the size of the select entry.
+// Implements: fyne.Widget
 func (e *SelectEntry) Resize(size fyne.Size) {
 	e.Entry.Resize(size)
 	if e.popUp != nil {
 		e.popUp.Resize(fyne.NewSize(size.Width, e.popUp.Size().Height))
 	}
-
 }
 
 // SetOptions sets the options the user might select from.

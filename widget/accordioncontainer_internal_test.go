@@ -17,9 +17,9 @@ func TestAccordionContainer_Toggle(t *testing.T) {
 	aih := acr.headers[0]
 	assert.False(t, ai.Open)
 
-	aih.OnTapped()
+	test.Tap(aih)
 	assert.True(t, ai.Open)
-	aih.OnTapped()
+	test.Tap(aih)
 	assert.False(t, ai.Open)
 }
 

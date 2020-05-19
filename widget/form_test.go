@@ -49,3 +49,30 @@ func TestForm_CustomButtonsText(t *testing.T) {
 	assert.Equal(t, "Apply", form.SubmitText)
 	assert.Equal(t, "Close", form.CancelText)
 }
+
+func TestForm_AddRemoveButton(t *testing.T) {
+	scount := 0
+	ccount := 0
+	sscount := 10
+	form := &Form{OnSubmit: func() {}, OnCancel: func() {}}
+	form.Append("test", NewEntry())
+	form.OnSubmit = func() { scount++ }
+	form.OnCancel = func() { ccount++ }
+	form.Refresh()
+
+	test.Tap(form.submitButton)
+	assert.Equal(t, 1, scount, "tapping submit should incr scount")
+
+	test.Tap(form.cancelButton)
+	assert.Equal(t, 1, ccount, "tapping cancel should incr ccount")
+
+	form.OnSubmit = func() { sscount++ }
+	form.Refresh()
+	test.Tap(form.submitButton)
+	assert.Equal(t, 11, sscount, "tapping new submit should incr sscount from 10 to 11")
+
+	form.OnCancel = func() { sscount = sscount - 6 }
+	form.Refresh()
+	test.Tap(form.cancelButton)
+	assert.Equal(t, 5, sscount, "tapping new cancel should decr ssount from 11 down to 5")
+}

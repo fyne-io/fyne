@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
+
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -26,7 +28,6 @@ type drawData struct {
 // channel for queuing functions on the main thread
 var funcQueue = make(chan funcData)
 var drawFuncQueue = make(chan drawData)
-var windowQueue = make(chan *window, 16)
 var runFlag = false
 var runMutex = &sync.Mutex{}
 var initOnce = &sync.Once{}
@@ -73,6 +74,7 @@ func (d *gLDriver) initGLFW() {
 		}
 
 		initCursors()
+		d.startDrawThread()
 	})
 }
 
@@ -83,8 +85,6 @@ func (d *gLDriver) runGL() {
 	runMutex.Unlock()
 
 	d.initGLFW()
-	d.startDrawThread()
-	d.startRedrawTimer()
 
 	for {
 		select {
@@ -109,12 +109,19 @@ func (d *gLDriver) runGL() {
 
 				if w.viewport.ShouldClose() {
 					reassign = true
-					// remove window from window list
-					w.viewport.Destroy()
+					v := w.viewport
+					w.viewport = nil
 
+					// remove window from window list
+					v.Destroy()
 					go w.destroy(d)
 					continue
 				}
+
+				if w.canvas.ensureMinSize() {
+					w.fitContent()
+				}
+
 				newWindows = append(newWindows, win)
 			}
 			if reassign {
@@ -132,22 +139,18 @@ func (d *gLDriver) repaintWindow(w *window) {
 		freeDirtyTextures(canvas)
 
 		updateGLContext(w)
-		if canvas.ensureMinSize() {
-			// TODO we can no longer run fitContent on this thread as it can impact viewport so must be on main
-			// TODO but if we run it on main from here we will block the redraw queue on resize ... so need another signal :(
-			//runOnMain(func() {
-			//	w.fitContent()
-			//})
-		}
 		canvas.paint(canvas.Size())
 
-		w.viewport.SwapBuffers()
+		if w.viewport != nil {
+			w.viewport.SwapBuffers()
+		}
 	})
 }
 
 func (d *gLDriver) startDrawThread() {
 	settingsChange := make(chan fyne.Settings)
 	fyne.CurrentApp().Settings().AddChangeListener(settingsChange)
+	draw := time.NewTicker(time.Second / 60)
 
 	go func() {
 		runtime.LockOSThread()
@@ -161,18 +164,6 @@ func (d *gLDriver) startDrawThread() {
 				}
 			case <-settingsChange:
 				painter.ClearFontCache()
-			case w := <-windowQueue:
-				d.repaintWindow(w)
-			}
-		}
-	}()
-}
-
-func (d *gLDriver) startRedrawTimer() {
-	draw := time.NewTicker(time.Second / 60)
-	go func() {
-		for {
-			select {
 			case <-draw.C:
 				for _, win := range d.windowList() {
 					w := win.(*window)
@@ -181,7 +172,7 @@ func (d *gLDriver) startRedrawTimer() {
 						continue
 					}
 
-					windowQueue <- w
+					d.repaintWindow(w)
 				}
 			}
 		}
@@ -215,5 +206,16 @@ func freeDirtyTextures(canvas *glCanvas) {
 
 // refreshWindow requests that the specified window be redrawn
 func refreshWindow(w *window) {
-	windowQueue <- w
+	w.canvas.setDirty(true)
+}
+
+func updateGLContext(w *window) {
+	canvas := w.Canvas().(*glCanvas)
+	size := canvas.Size()
+
+	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.texScale
+	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.texScale
+
+	canvas.painter.SetFrameBufferScale(canvas.texScale)
+	w.canvas.painter.SetOutputSize(int(winWidth), int(winHeight))
 }
