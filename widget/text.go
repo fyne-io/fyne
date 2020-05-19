@@ -38,11 +38,11 @@ type textProvider struct {
 }
 
 // newTextProvider returns a new textProvider with the given text and settings from the passed textPresenter.
-func newTextProvider(text string, pres textPresenter) textProvider {
+func newTextProvider(text string, pres textPresenter) *textProvider {
 	if pres == nil {
 		panic("textProvider requires a presenter")
 	}
-	t := textProvider{
+	t := &textProvider{
 		buffer:    []rune(text),
 		presenter: pres,
 	}
@@ -63,18 +63,29 @@ func (t *textProvider) CreateRenderer() fyne.WidgetRenderer {
 	}
 	r := &textRenderer{provider: t}
 
+	t.propertyLock.Lock()
 	t.updateRowBounds() // set up the initial text layout etc
+	t.propertyLock.Unlock()
 	r.Refresh()
 	return r
 }
 
 func (t *textProvider) Resize(size fyne.Size) {
-	if t.size == size {
+	t.propertyLock.RLock()
+	baseSize := t.size
+	presenter := t.presenter
+	t.propertyLock.RUnlock()
+	if baseSize == size {
 		return
 	}
+
+	t.propertyLock.Lock()
 	t.size = size
+
 	t.updateRowBounds()
-	if t.presenter != nil {
+	t.propertyLock.Unlock()
+
+	if presenter != nil {
 		t.refreshTextRenderer()
 		cache.Renderer(t).Layout(size)
 	}
@@ -90,7 +101,7 @@ func (t *textProvider) updateRowBounds() {
 	textWrap := t.presenter.textWrap()
 	textStyle := t.presenter.textStyle()
 	textSize := theme.TextSize()
-	maxWidth := t.Size().Width - 2*theme.Padding()
+	maxWidth := t.size.Width - 2*theme.Padding()
 
 	t.rowBounds = lineBounds(t.buffer, textWrap, maxWidth, func(text []rune) int {
 		return fyne.MeasureText(string(text), textSize, textStyle).Width
@@ -116,9 +127,11 @@ func (t *textProvider) refreshTextRenderer() {
 }
 
 // SetText sets the text of the widget
-func (t *textProvider) SetText(text string) {
+func (t *textProvider) setText(text string) {
+	t.propertyLock.Lock()
 	t.buffer = []rune(text)
 	t.updateRowBounds()
+	t.propertyLock.Unlock()
 
 	t.refreshTextRenderer()
 }
@@ -235,14 +248,22 @@ type textRenderer struct {
 // MinSize calculates the minimum size of a label.
 // This is based on the contained text with a standard amount of padding added.
 func (r *textRenderer) MinSize() fyne.Size {
+	r.provider.propertyLock.RLock()
 	wrap := r.provider.presenter.textWrap()
+	r.provider.propertyLock.RUnlock()
+
 	charMinSize := r.provider.charMinSize()
 	height := 0
 	width := 0
 	i := 0
-	for ; i < fyne.Min(len(r.texts), r.provider.rows()); i++ {
-		min := r.texts[i].MinSize()
-		if r.texts[i].Text == "" {
+
+	r.provider.propertyLock.RLock()
+	texts := r.texts
+	r.provider.propertyLock.RUnlock()
+
+	for ; i < fyne.Min(len(texts), r.provider.rows()); i++ {
+		min := texts[i].MinSize()
+		if texts[i].Text == "" {
 			min = charMinSize
 		}
 		if wrap == fyne.TextWrapOff {
@@ -255,6 +276,9 @@ func (r *textRenderer) MinSize() fyne.Size {
 }
 
 func (r *textRenderer) Layout(size fyne.Size) {
+	r.provider.propertyLock.RLock()
+	defer r.provider.propertyLock.RUnlock()
+
 	yPos := theme.Padding()
 	lineHeight := r.provider.charMinSize().Height
 	lineSize := fyne.NewSize(size.Width-theme.Padding()*2, lineHeight)
@@ -279,11 +303,22 @@ func (r *textRenderer) applyTheme() {
 }
 
 func (r *textRenderer) Refresh() {
+	var concealed bool
+	var align fyne.TextAlign
+	var style fyne.TextStyle
+
+	r.provider.propertyLock.RLock()
+	concealed = r.provider.presenter.concealed()
+	align = r.provider.presenter.textAlign()
+	style = r.provider.presenter.textStyle()
+	r.provider.propertyLock.RUnlock()
+
+	r.provider.propertyLock.Lock()
 	index := 0
 	for ; index < r.provider.rows(); index++ {
 		var line string
 		row := r.provider.row(index)
-		if r.provider.presenter.concealed() {
+		if concealed {
 			line = strings.Repeat(passwordChar, len(row))
 		} else {
 			line = string(row)
@@ -299,8 +334,8 @@ func (r *textRenderer) Refresh() {
 			textCanvas.Text = line
 		}
 
-		textCanvas.Alignment = r.provider.presenter.textAlign()
-		textCanvas.TextStyle = r.provider.presenter.textStyle()
+		textCanvas.Alignment = align
+		textCanvas.TextStyle = style
 
 		if add {
 			r.texts = append(r.texts, textCanvas)
@@ -313,6 +348,8 @@ func (r *textRenderer) Refresh() {
 	}
 
 	r.applyTheme()
+	r.provider.propertyLock.Unlock()
+
 	r.Layout(r.provider.Size())
 	if r.provider.presenter.object() == nil {
 		canvas.Refresh(r.provider)

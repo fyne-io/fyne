@@ -13,6 +13,7 @@ import (
 
 func TestLabel_Hide(t *testing.T) {
 	label := NewLabel("Test")
+	label.CreateRenderer()
 	label.Hide()
 	label.Refresh()
 
@@ -36,6 +37,7 @@ func TestLabel_MinSize(t *testing.T) {
 
 func TestLabel_Resize(t *testing.T) {
 	label := NewLabel("Test")
+	label.CreateRenderer()
 	size := fyne.NewSize(100, 20)
 	label.Resize(size)
 
