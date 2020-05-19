@@ -289,12 +289,11 @@ func TestSelect_Layout(t *testing.T) {
 				Options:     tt.options,
 				Selected:    tt.selected,
 			}
-			combo.CreateRenderer()
+
+			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), combo))
 			if tt.expanded {
 				test.Tap(combo)
 			}
-
-			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), combo))
 			window.Resize(combo.MinSize().Max(fyne.NewSize(150, 200)))
 
 			test.AssertImageMatches(t, "select/layout_"+name+".png", window.Canvas().Capture())
