@@ -85,7 +85,15 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
 
-	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
+	offset := 0
+	switch text.Alignment {
+	case fyne.TextAlignTrailing:
+		offset = text.Size().Width - bounds.Width
+	case fyne.TextAlignCenter:
+		offset = (text.Size().Width - bounds.Width) / 2
+	}
+	scaledX := internal.ScaleInt(c, pos.X+offset)
+	scaledY := internal.ScaleInt(c, pos.Y)
 	imgBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	draw.Draw(base, imgBounds, txtImg, image.ZP, draw.Over)
 }
