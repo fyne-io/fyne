@@ -165,7 +165,11 @@ func (e *Entry) DragEnd() {
 // It updates the selection accordingly.
 // Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
-	e.selecting = true
+	if !e.selecting {
+		e.selectRow, e.selectColumn = e.getRowCol(&d.PointEvent)
+
+		e.selecting = true
+	}
 	e.updateMousePointer(&d.PointEvent, false)
 }
 
@@ -338,6 +342,9 @@ func (e *Entry) SetText(text string) {
 // Tapped is called when this entry has been tapped so we should update the cursor position.
 // Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
+	if fyne.CurrentDevice().IsMobile() && e.selecting {
+		e.selecting = false
+	}
 	e.updateMousePointer(ev, false)
 }
 
@@ -871,11 +878,7 @@ func (e *Entry) textWrap() fyne.TextWrap {
 	return e.Wrapping
 }
 
-func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
-	if !e.focused && !e.Disabled() {
-		e.FocusGained()
-	}
-
+func (e *Entry) getRowCol(ev *fyne.PointEvent) (int, int) {
 	rowHeight := e.textProvider().charMinSize().Height
 	row := int(math.Floor(float64(ev.Position.Y-theme.Padding()) / float64(rowHeight)))
 	col := 0
@@ -887,6 +890,16 @@ func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
 	} else {
 		col = e.cursorColAt(e.textProvider().row(row), ev.Position)
 	}
+
+	return row, col
+}
+
+func (e *Entry) updateMousePointer(ev *fyne.PointEvent, rightClick bool) {
+	if !e.focused && !e.Disabled() {
+		e.FocusGained()
+	}
+
+	row, col := e.getRowCol(ev)
 
 	e.Lock()
 	if !rightClick || rightClick && !e.selecting {
@@ -1072,6 +1085,8 @@ func (r *entryRenderer) buildSelection() {
 		r.selection = r.selection[:rowCount]
 	}
 
+	r.entry.Lock()
+	defer r.entry.Unlock()
 	// build a rectangle for each row and add it to r.selection
 	for i := 0; i < rowCount; i++ {
 		if len(r.selection) <= i {
