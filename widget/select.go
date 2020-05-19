@@ -105,7 +105,8 @@ type Select struct {
 
 var _ fyne.Widget = (*Select)(nil)
 
-// Hide satisfies the fyne.CanvasObject interface.
+// Hide hides the select.
+// Implements: fyne.Widget
 func (s *Select) Hide() {
 	if s.popUp != nil {
 		s.popUp.Hide()
@@ -114,7 +115,8 @@ func (s *Select) Hide() {
 	s.BaseWidget.Hide()
 }
 
-// Move satisfies the fyne.CanvasObject interface.
+// Move changes the relative position of the select.
+// Implements: fyne.Widget
 func (s *Select) Move(pos fyne.Position) {
 	s.BaseWidget.Move(pos)
 

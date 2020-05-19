@@ -31,7 +31,7 @@ func TestEnsureDir(t *testing.T) {
 
 func TestWatchSettings(t *testing.T) {
 	settings := &settings{}
-	listener := make(chan fyne.Settings)
+	listener := make(chan fyne.Settings, 1)
 	settings.AddChangeListener(listener)
 
 	settings.fileChanged() // simulate the settings file changing
@@ -48,7 +48,7 @@ func TestWatchFile(t *testing.T) {
 	os.Create(path)
 	defer os.Remove(path)
 
-	called := make(chan interface{})
+	called := make(chan interface{}, 1)
 	watchFile(path, func() {
 		called <- true
 	})
@@ -68,7 +68,7 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 	os.Create(path)
 	defer os.Remove(path)
 
-	called := make(chan interface{})
+	called := make(chan interface{}, 1)
 	watcher := watchFile(path, func() {
 		called <- true
 	})

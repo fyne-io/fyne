@@ -20,6 +20,9 @@ cmd/hello/hello
 ### JetBrains
 .idea
 
+### VSCode
+.vscode
+
 ### Vim
 # Swap
 [._]*.s[a-v][a-z]

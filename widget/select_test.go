@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -26,7 +25,7 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
-	w := test.NewWindowWithPainter(combo, software.NewPainter())
+	w := test.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 200))
 	combo.Resize(combo.MinSize())
@@ -73,7 +72,7 @@ func TestSelect_Move(t *testing.T) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, nil)
-	w := test.NewWindowWithPainter(combo, software.NewPainter())
+	w := test.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 
@@ -159,7 +158,7 @@ func TestSelect_Tapped(t *testing.T) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
-	w := test.NewWindowWithPainter(combo, software.NewPainter())
+	w := test.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 	combo.Resize(combo.MinSize())
@@ -176,7 +175,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
-	w := test.NewWindowWithPainter(combo, software.NewPainter())
+	w := test.NewWindow(combo)
 	defer w.Close()
 	w.Resize(fyne.NewSize(200, 150))
 	combo.Resize(combo.MinSize())

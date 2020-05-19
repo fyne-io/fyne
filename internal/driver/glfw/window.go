@@ -102,10 +102,12 @@ func (w *window) FullScreen() bool {
 }
 
 func (w *window) SetFullScreen(full bool) {
-	if full {
-		w.fullScreen = true
+	w.fullScreen = full
+	if !w.visible {
+		return
 	}
-	w.runOnMainWhenCreated(func() {
+
+	runOnMain(func() {
 		monitor := w.getMonitorForWindow()
 		mode := monitor.GetVideoMode()
 
@@ -113,7 +115,6 @@ func (w *window) SetFullScreen(full bool) {
 			w.viewport.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
 		} else {
 			w.viewport.SetMonitor(nil, w.xpos, w.ypos, w.width, w.height, 0)
-			w.fullScreen = false
 		}
 	})
 }
@@ -311,7 +312,20 @@ func (w *window) detectScale() float32 {
 	return calculateDetectedScale(widthMm, widthPx)
 }
 
+func (w *window) detectTextureScale() float32 {
+	winWidth, _ := w.viewport.GetSize()
+	texWidth, _ := w.viewport.GetFramebufferSize()
+	return float32(texWidth) / float32(winWidth)
+}
+
 func (w *window) Show() {
+	go w.doShow()
+}
+
+func (w *window) doShow() {
+	for !running() {
+		time.Sleep(time.Millisecond * 10)
+	}
 	w.createLock.Do(w.create)
 
 	runOnMain(func() {
@@ -321,11 +335,14 @@ func (w *window) Show() {
 
 		// save coordinates
 		w.xpos, w.ypos = w.viewport.GetPos()
-	})
 
-	if w.fullScreen { // this does not work if called before viewport.Show()...
-		w.SetFullScreen(true)
-	}
+		if w.fullScreen { // this does not work if called before viewport.Show()
+			go func() {
+				time.Sleep(time.Millisecond * 100)
+				w.SetFullScreen(true)
+			}()
+		}
+	})
 
 	// show top canvas element
 	if w.canvas.content != nil {
@@ -439,12 +456,10 @@ func (w *window) destroy(d *gLDriver) {
 }
 
 func (w *window) moved(_ *glfw.Window, x, y int) {
-	if w.fullScreen { // don't save the move to top left when changint to fullscreen
-		return
+	if !w.fullScreen { // don't save the move to top left when changing to fullscreen
+		// save coordinates
+		w.xpos, w.ypos = x, y
 	}
-
-	// save coordinates
-	w.xpos, w.ypos = x, y
 
 	if w.canvas.detectedScale == w.detectScale() {
 		return
@@ -466,18 +481,14 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 		return
 	}
 
-	winWidth, _ := w.viewport.GetSize()
+	winWidth, _ := viewport.GetSize()
 	texScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	w.canvas.setTextureScale(texScale)
-	w.canvas.painter.SetOutputSize(width, height)
+	w.canvas.texScale = texScale
+	w.canvas.Refresh(w.canvas.content) // apply texture scale
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
-	w.RunWithContext(func() {
-		freeDirtyTextures(w.canvas)
-	})
-	forceWindowRefresh(w)
-	w.canvas.setDirty(true)
+	refreshWindow(w)
 }
 
 func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
@@ -1047,6 +1058,7 @@ func (w *window) queueEvent(fn func()) {
 func (w *window) runOnMainWhenCreated(fn func()) {
 	if w.viewport != nil {
 		runOnMain(fn)
+		return
 	}
 
 	w.pending = append(w.pending, fn)
@@ -1121,11 +1133,17 @@ func (w *window) create() {
 			fyne.LogError("window creation error", err)
 			return
 		}
-		win.MakeContextCurrent()
+		w.viewport = win
+	})
 
+	// run the GL init on the draw thread
+	runOnDraw(w, func() {
 		w.canvas.painter = gl.NewPainter(w.canvas, w)
 		w.canvas.painter.Init()
+	})
 
+	runOnMain(func() {
+		win := w.viewport
 		win.SetCloseCallback(w.closed)
 		win.SetPosCallback(w.moved)
 		win.SetSizeCallback(w.resized)
@@ -1137,15 +1155,16 @@ func (w *window) create() {
 		win.SetKeyCallback(w.keyPressed)
 		win.SetCharCallback(w.charInput)
 		win.SetFocusCallback(w.focused)
-		glfw.DetachCurrentContext()
 
-		w.viewport = win
 		w.canvas.detectedScale = w.detectScale()
 		w.canvas.scale = w.calculatedScale()
+		w.canvas.texScale = w.detectTextureScale()
+		// update window size now we have scaled detected
+		w.fitContent()
+
 		for _, fn := range w.pending {
 			fn()
 		}
-		w.fitContent()
 	})
 }
 

@@ -109,6 +109,8 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
 	c.Unlock()
 
+	c.content.Resize(c.content.MinSize()) // give it the space it wants then calculate the real min
+	// the pass above makes some layouts wide enough to wrap, so we ask again what the true min is.
 	newSize := c.size.Union(c.canvasSize(c.content.MinSize()))
 	c.Resize(newSize)
 
@@ -201,7 +203,21 @@ func (c *glCanvas) Resize(size fyne.Size) {
 		c.menu.Refresh()
 		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
 	}
-	c.Refresh(c.content)
+
+	// make sure that primitives that are size specific are repainted
+	c.refreshRasters()
+}
+
+func (c *glCanvas) refreshRasters() {
+	c.walkTrees(nil, func(node *renderCacheNode) {
+		if !node.obj.Visible() {
+			return
+		}
+
+		if rast, ok := node.obj.(*canvas.Raster); ok {
+			canvas.Refresh(rast)
+		}
+	})
 }
 
 func (c *glCanvas) Size() fyne.Size {
@@ -228,11 +244,6 @@ func (c *glCanvas) SetScale(_ float32) {
 	c.setDirty(true)
 
 	c.context.RescaleContext()
-}
-
-func (c *glCanvas) setTextureScale(scale float32) {
-	c.texScale = scale
-	c.painter.SetFrameBufferScale(scale)
 }
 
 func (c *glCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
@@ -550,7 +561,7 @@ func newCanvas() *glCanvas {
 	c.overlays = &overlayStack{onChange: func() { c.setDirty(true) }}
 
 	c.focusMgr = app.NewFocusManager(c)
-	c.refreshQueue = make(chan fyne.CanvasObject, 1024)
+	c.refreshQueue = make(chan fyne.CanvasObject, 4096)
 	c.dirtyMutex = &sync.Mutex{}
 
 	c.setupThemeListener()

@@ -8,7 +8,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -96,7 +95,7 @@ func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
 	app := test.NewApp()
 	app.Settings().SetTheme(theme.DarkTheme())
 
-	w := test.NewWindowWithPainter(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}), software.NewPainter())
+	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
 	w.Resize(fyne.NewSize(200, 200))
 	m := widget.NewPopUpMenu(fyne.NewMenu(
 		"",

@@ -16,14 +16,12 @@ type base struct {
 	propertyLock sync.RWMutex
 }
 
-// Move satisfies the fyne.Widget interface.
 func (b *base) Move(pos fyne.Position) {
 	b.setFieldsAndRefresh(func() {
 		b.pos = pos
 	}, nil)
 }
 
-// Position satisfies the fyne.Widget interface.
 func (b *base) Position() fyne.Position {
 	b.propertyLock.RLock()
 	defer b.propertyLock.RUnlock()
@@ -31,7 +29,6 @@ func (b *base) Position() fyne.Position {
 	return b.pos
 }
 
-// Size satisfies the fyne.Widget interface.
 func (b *base) Size() fyne.Size {
 	b.propertyLock.RLock()
 	defer b.propertyLock.RUnlock()
@@ -39,7 +36,6 @@ func (b *base) Size() fyne.Size {
 	return b.size
 }
 
-// Visible satisfies the fyne.Widget interface.
 func (b *base) Visible() bool {
 	b.propertyLock.RLock()
 	defer b.propertyLock.RUnlock()

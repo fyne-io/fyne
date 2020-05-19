@@ -86,6 +86,7 @@ func NewPasswordEntry() *Entry {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
+// Implements: fyne.Widget
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
@@ -110,23 +111,27 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // Cursor returns the cursor type of this widget
+// Implements: desktop.Cursorable
 func (e *Entry) Cursor() desktop.Cursor {
 	return desktop.TextCursor
 }
 
 // Disable this widget so that it cannot be interacted with, updating any style appropriately.
+// Implements: fyne.Disableable
 func (e *Entry) Disable() { // TODO remove this override after ReadOnly is removed
 	e.ReadOnly = true
 
 	e.DisableableWidget.Disable()
 }
 
-// Disabled satisfies the fyne.Disableable interface.
+// Disabled returns whether the entry is disabled or read-only.
+// Implements: fyne.Disableable
 func (e *Entry) Disabled() bool {
 	return e.DisableableWidget.disabled || e.ReadOnly
 }
 
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
+// Implements: fyne.DoubleTappable
 func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 	row := e.textProvider().row(e.CursorRow)
 
@@ -150,17 +155,21 @@ func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 	})
 }
 
-// DragEnd is called at end of a drag event - currently ignored
+// DragEnd is called at end of a drag event. It does nothing.
+// Implements: fyne.Draggable
 func (e *Entry) DragEnd() {
 }
 
-// Dragged is called when the pointer moves while a button is held down
+// Dragged is called when the pointer moves while a button is held down.
+// It updates the selection accordingly.
+// Implements: fyne.Draggable
 func (e *Entry) Dragged(d *fyne.DragEvent) {
 	e.selecting = true
 	e.updateMousePointer(&d.PointEvent, false)
 }
 
 // Enable this widget, updating any style or features appropriately.
+// Implements: fyne.Disableable
 func (e *Entry) Enable() { // TODO remove this override after ReadOnly is removed
 	e.ReadOnly = false
 
@@ -181,6 +190,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 }
 
 // Focused returns whether or not this Entry has focus.
+// Implements: fyne.Focusable
 // Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
 func (e *Entry) Focused() bool {
 	e.propertyLock.RLock()
@@ -190,6 +200,7 @@ func (e *Entry) Focused() bool {
 }
 
 // FocusGained is called when the Entry has been given focus.
+// Implements: fyne.Focusable
 func (e *Entry) FocusGained() {
 	if e.Disabled() {
 		return
@@ -200,13 +211,15 @@ func (e *Entry) FocusGained() {
 }
 
 // FocusLost is called when the Entry has had focus removed.
+// Implements: fyne.Focusable
 func (e *Entry) FocusLost() {
 	e.setFieldsAndRefresh(func() {
 		e.focused = false
 	})
 }
 
-// Hide satisfies the fyne.CanvasObject interface.
+// Hide hides the entry.
+// Implements: fyne.Widget
 func (e *Entry) Hide() {
 	if e.popUp != nil {
 		e.popUp.Hide()
@@ -216,6 +229,7 @@ func (e *Entry) Hide() {
 }
 
 // KeyDown handler for keypress events - used to store shift modifier state for text selection
+// Implements: desktop.Keyable
 func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 	// For keyboard cursor controlled selection we now need to store shift key state and selection "start"
 	// Note: selection start is where the highlight started (if the user moves the selection up or left then
@@ -230,6 +244,7 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 }
 
 // KeyUp handler for key release events - used to reset shift modifier state for text selection
+// Implements: desktop.Keyable
 func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	// Handle shift release for keyboard selection
 	// Note: if shift is released then the user may repress it without moving to adjust their old selection
@@ -238,7 +253,8 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	}
 }
 
-// MinSize returns the size that this widget should not shrink below
+// MinSize returns the size that this widget should not shrink below.
+// Implements: fyne.Widget
 func (e *Entry) MinSize() fyne.Size {
 	e.ExtendBaseWidget(e)
 
@@ -252,6 +268,7 @@ func (e *Entry) MinSize() fyne.Size {
 
 // MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
 // update the existing selection (if shift is held), or start a selection dragging operation.
+// Implements: desktop.Mouseable
 func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	e.propertyLock.Lock()
 	if e.selectKeyDown {
@@ -268,6 +285,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 // MouseUp called on mouse release
 // If a mouse drag event has completed then check to see if it has resulted in an empty selection,
 // if so, and if a text select key isn't held, then disable selecting
+// Implements: desktop.Mouseable
 func (e *Entry) MouseUp(_ *desktop.MouseEvent) {
 	start, _ := e.selection()
 
@@ -337,6 +355,7 @@ func (e *Entry) SetText(text string) {
 }
 
 // Tapped is called when this entry has been tapped so we should update the cursor position.
+// Implements: fyne.Tappable
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	e.updateMousePointer(ev, false)
 }
@@ -344,6 +363,7 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 // TappedSecondary is called when right or alternative tap is invoked.
 //
 // Opens the PopUpMenu with `Paste` item to paste text from the clipboard.
+// Implements: fyne.SecondaryTappable
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
@@ -381,6 +401,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 }
 
 // TypedKey receives key input events when the Entry widget is focused.
+// Implements: fyne.Focusable
 func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 	if e.Disabled() {
 		return
@@ -524,6 +545,7 @@ func (e *Entry) TypedKey(key *fyne.KeyEvent) {
 }
 
 // TypedRune receives text input events when the Entry widget is focused.
+// Implements: fyne.Focusable
 func (e *Entry) TypedRune(r rune) {
 	if e.Disabled() {
 		return
@@ -557,6 +579,7 @@ func (e *Entry) TypedRune(r rune) {
 }
 
 // TypedShortcut implements the Shortcutable interface
+// Implements: fyne.Shortcutable
 func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 	e.shortcut.TypedShortcut(shortcut)
 }
@@ -917,16 +940,13 @@ type entryRenderer struct {
 	entry   *Entry
 }
 
-// BackgroundColor satisfies the fyne.WidgetRenderer interface.
 func (r *entryRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
 
-// Destroy satisfies the fyne.WidgetRenderer interface.
 func (r *entryRenderer) Destroy() {
 }
 
-// Layout the components of the entry widget.
 func (r *entryRenderer) Layout(size fyne.Size) {
 	r.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
 	r.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
@@ -964,7 +984,6 @@ func (r *entryRenderer) MinSize() fyne.Size {
 	return minSize.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
 }
 
-// Objects satisfies the fyne.WidgetRenderer interface.
 func (r *entryRenderer) Objects() []fyne.CanvasObject {
 	// Objects are generated dynamically force selection rectangles to appear underneath the text
 	if r.entry.selecting {
@@ -973,7 +992,6 @@ func (r *entryRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-// Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	provider := r.entry.textProvider()
@@ -1155,7 +1173,6 @@ func newPasswordRevealer(e *Entry) *passwordRevealer {
 	return pr
 }
 
-// CreateRenderer satisfies the fyne.Widget interface.
 func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 	return &passwordRevealerRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
@@ -1164,12 +1181,10 @@ func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-// Cursor satisfies the desktop.Cursorable interface.
 func (r *passwordRevealer) Cursor() desktop.Cursor {
 	return desktop.DefaultCursor
 }
 
-// Tapped satisfies the fyne.Tappable interface.
 func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
 	r.entry.setFieldsAndRefresh(func() {
 		r.entry.Password = !r.entry.Password
@@ -1185,18 +1200,15 @@ type passwordRevealerRenderer struct {
 	icon  *canvas.Image
 }
 
-// Layout satisfies the fyne.WidgetRenderer interface.
 func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
 	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
 }
 
-// MinSize satisfies the fyne.WidgetRenderer interface.
 func (r *passwordRevealerRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 }
 
-// Refresh satisfies the fyne.WidgetRenderer interface.
 func (r *passwordRevealerRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()

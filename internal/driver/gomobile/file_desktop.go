@@ -9,9 +9,9 @@ import (
 )
 
 func nativeFileOpen(f *fileOpen) (io.ReadCloser, error) {
-	if len(f.uri) < 8 || f.uri[:7] != "file://" {
+	if f.uri.Scheme() != "file" {
 		return nil, errors.New("Mobile simulator mode only supports file:// URIs")
 	}
 
-	return os.Open(f.uri[7:])
+	return os.Open(f.uri.String()[7:])
 }

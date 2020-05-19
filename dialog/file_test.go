@@ -30,7 +30,7 @@ func TestShowFileOpen(t *testing.T) {
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Open File", title.Text)
 
-	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.Label)
+	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
 
@@ -62,7 +62,7 @@ func TestShowFileOpen(t *testing.T) {
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, openErr)
-	assert.Equal(t, "file://"+target.path, chosen.URI())
+	assert.Equal(t, "file://"+target.path, chosen.URI().String())
 
 	err := chosen.Close()
 	assert.Nil(t, err)
@@ -85,7 +85,7 @@ func TestShowFileSave(t *testing.T) {
 	title := ui.Objects[1].(*widget.Label)
 	assert.Equal(t, "Save File", title.Text)
 
-	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.Entry)
+	nameEntry := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Entry)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	save := buttons.Children[1].(*widget.Button)
 
@@ -126,7 +126,7 @@ func TestShowFileSave(t *testing.T) {
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, saveErr)
 	expectedPath := filepath.Join(filepath.Dir(target.path), "v2_"+filepath.Base(target.path))
-	assert.Equal(t, "file://"+expectedPath, chosen.URI())
+	assert.Equal(t, "file://"+expectedPath, chosen.URI().String())
 
 	err := chosen.Close()
 	assert.Nil(t, err)
