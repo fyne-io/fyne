@@ -22,6 +22,8 @@ type fileIcon struct {
 	resource fyne.Resource
 }
 
+const ratioDown = 0.45
+
 func (i *fileIcon) CreateRenderer() fyne.WidgetRenderer {
 	img := canvas.NewImageFromResource(i.resource)
 	extText := canvas.NewText(i.extension, theme.BackgroundColor())
@@ -101,7 +103,6 @@ func (s fileIconRenderer) Layout(size fyne.Size) {
 	s.img.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 	s.img.Move(fyne.NewPos(iconAlign, 0))
 	s.ext.Resize(fyne.NewSize(fileIconSize, fileTextSize))
-	ratioDown := 0.45
 	s.ext.Move(fyne.NewPos(iconAlign, int(float64(fileIconSize)*ratioDown)))
 }
 
