@@ -344,7 +344,6 @@ func (e *Entry) SetText(text string) {
 func (e *Entry) Tapped(ev *fyne.PointEvent) {
 	if fyne.CurrentDevice().IsMobile() && e.selecting {
 		e.selecting = false
-		return
 	}
 	e.updateMousePointer(ev, false)
 }
