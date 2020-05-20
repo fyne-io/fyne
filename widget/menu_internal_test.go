@@ -42,7 +42,7 @@ func TestMenu_ItemTapped(t *testing.T) {
 
 	dismissed = false // reset
 	mi3.MouseIn(nil)
-	sm := mi3.Child
+	sm := mi3.child
 	smi := sm.Items[0].(*menuItem)
 	assert.Equal(t, subItem, smi.Item)
 	assert.True(t, sm.Visible(), "sub menu is visible")
