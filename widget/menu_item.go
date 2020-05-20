@@ -18,13 +18,14 @@ type menuItem struct {
 	Item   *fyne.MenuItem
 	Parent *Menu
 
-	child   *Menu
-	hovered bool
+	child           *Menu
+	hovered         bool
+	onActivateChild func(*menuItem)
 }
 
 // newMenuItem creates a new menuItem.
-func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
-	return &menuItem{Item: item, Parent: parent}
+func newMenuItem(item *fyne.MenuItem, parent *Menu, onActivateChild func(*menuItem)) *menuItem {
+	return &menuItem{Item: item, Parent: parent, onActivateChild: onActivateChild}
 }
 
 // newMenuItemSeparator creates a separator meant to separate MenuItems.
@@ -32,6 +33,16 @@ func newMenuItemSeparator() fyne.CanvasObject {
 	s := canvas.NewRectangle(theme.DisabledTextColor())
 	s.SetMinSize(fyne.NewSize(1, 2))
 	return s
+}
+
+func (i *menuItem) Child() *Menu {
+	if i.Item.ChildMenu != nil && i.child == nil {
+		child := NewMenu(i.Item.ChildMenu)
+		child.Hide()
+		child.DismissAction = i.Parent.Dismiss
+		i.child = child
+	}
+	return i.child
 }
 
 // CreateRenderer returns a new renderer for the menu item.
@@ -43,13 +54,6 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	if i.Item.ChildMenu != nil {
 		icon = canvas.NewImageFromResource(theme.MenuExpandIcon())
 		objects = append(objects, icon)
-		if i.child == nil {
-			child := NewMenu(i.Item.ChildMenu)
-			child.Hide()
-			child.DismissAction = i.Parent.Dismiss
-			i.child = child
-		}
-		objects = append(objects, i.child)
 	}
 	return &menuItemRenderer{
 		BaseRenderer: widget.NewBaseRenderer(objects),
@@ -76,7 +80,7 @@ func (i *menuItem) MinSize() fyne.Size {
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 	i.hovered = true
-	i.activateChild()
+	i.onActivateChild(i)
 	i.Refresh()
 }
 
@@ -102,9 +106,6 @@ func (i *menuItem) Refresh() {
 // Implements: fyne.Widget
 func (i *menuItem) Resize(size fyne.Size) {
 	widget.ResizeWidget(&i.Base, i, size)
-	if i.child != nil {
-		i.updateChildPosition()
-	}
 }
 
 // Show makes the menu item visible.
@@ -119,7 +120,7 @@ func (i *menuItem) Show() {
 func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
-			i.activateChild()
+			i.onActivateChild(i)
 			i.Refresh()
 		}
 		return
@@ -127,47 +128,6 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 
 	i.Item.Action()
 	i.Parent.Dismiss()
-}
-
-func (i *menuItem) activateChild() {
-	if i.child != nil {
-		i.child.DeactivateChild()
-	}
-	if i.Parent.activeChild == i.child {
-		return
-	}
-
-	i.Parent.DeactivateChild()
-	if i.child != nil {
-		if i.child.Size().IsZero() {
-			i.child.Resize(i.child.MinSize())
-			i.updateChildPosition()
-		}
-		i.Parent.activeChild = i.child
-		i.child.Show()
-	}
-}
-
-func (i *menuItem) updateChildPosition() {
-	itemSize := i.Size()
-	cp := fyne.NewPos(itemSize.Width, -theme.Padding())
-	d := fyne.CurrentApp().Driver()
-	c := d.CanvasForObject(i)
-	if c != nil {
-		absPos := d.AbsolutePositionForObject(i)
-		childSize := i.child.Size()
-		if absPos.X+itemSize.Width+childSize.Width > c.Size().Width {
-			if absPos.X-childSize.Width >= 0 {
-				cp.X = -childSize.Width
-			} else {
-				cp.X = c.Size().Width - absPos.X - childSize.Width
-			}
-		}
-		if absPos.Y+childSize.Height-theme.Padding() > c.Size().Height {
-			cp.Y = c.Size().Height - absPos.Y - childSize.Height
-		}
-	}
-	i.child.Move(cp)
 }
 
 type menuItemRenderer struct {
