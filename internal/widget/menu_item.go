@@ -13,7 +13,7 @@ var _ fyne.Widget = (*MenuItem)(nil)
 
 // MenuItem is a widget for displaying a fyne.MenuItem.
 type MenuItem struct {
-	base
+	Base
 	menuItemBase
 	Item   *fyne.MenuItem
 	Parent *Menu

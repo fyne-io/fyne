@@ -14,7 +14,7 @@ var _ desktop.Hoverable = (*MenuBarItem)(nil)
 
 // MenuBarItem is a widget for displaying an item for a fyne.Menu in a MenuBar.
 type MenuBarItem struct {
-	base
+	Base
 	menuItemBase
 	Menu   *fyne.Menu
 	Parent *MenuBar

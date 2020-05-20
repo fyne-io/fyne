@@ -14,7 +14,7 @@ var _ fyne.Widget = (*MenuBar)(nil)
 
 // MenuBar is a widget for displaying a fyne.MainMenu in a bar.
 type MenuBar struct {
-	base
+	Base
 	menuBase
 	Items []fyne.CanvasObject
 
@@ -140,7 +140,7 @@ func (r *menuBarRenderer) padding() fyne.Size {
 // Transparent overlay shown as soon as menu is active.
 // It catches mouse events outside the menu's objects.
 type menuBarBackground struct {
-	base
+	Base
 	action func()
 }
 

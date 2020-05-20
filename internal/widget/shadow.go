@@ -12,7 +12,7 @@ var _ fyne.Widget = (*Shadow)(nil)
 
 // Shadow is a widget that renders a shadow.
 type Shadow struct {
-	base
+	Base
 	level ElevationLevel
 	typ   ShadowType
 }

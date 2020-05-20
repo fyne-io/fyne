@@ -12,7 +12,7 @@ var _ fyne.Tappable = (*Menu)(nil)
 
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {
-	base
+	Base
 	menuBase
 	Items       []fyne.CanvasObject
 	customSized bool
