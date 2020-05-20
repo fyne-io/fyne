@@ -67,7 +67,7 @@ func (m *Menu) Refresh() {
 // Resize has no effect because menus are always displayed with their minimal size.
 // Implements: fyne.Widget
 func (m *Menu) Resize(size fyne.Size) {
-	m.resize(size, m)
+	ResizeWidget(&m.Base, m, size)
 }
 
 // Show makes the menu visible.

@@ -84,7 +84,8 @@ func RefreshWidget(w fyne.Widget) {
 	r.Refresh()
 }
 
-func (b *Base) resize(size fyne.Size, w fyne.Widget) {
+// ResizeWidget is a helper method to resize a widget.
+func ResizeWidget(b *Base, w fyne.Widget, size fyne.Size) {
 	b.propertyLock.RLock()
 	baseSize := b.size
 	b.propertyLock.RUnlock()
@@ -111,7 +112,7 @@ func (b *Base) setFieldsAndRefresh(f func(), w fyne.Widget) {
 	b.propertyLock.Unlock()
 
 	if w != nil { // the wrapping function didn't tell us what to refresh
-		b.refresh(w)
+		RefreshWidget(w)
 	}
 }
 

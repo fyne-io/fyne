@@ -84,7 +84,7 @@ func (i *MenuBarItem) Refresh() {
 // Resize changes the size of the menu bar item.
 // Implements: fyne.Widget
 func (i *MenuBarItem) Resize(size fyne.Size) {
-	i.resize(size, i)
+	ResizeWidget(&i.Base, i, size)
 	i.updateChildPosition()
 }
 

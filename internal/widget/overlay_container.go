@@ -73,7 +73,7 @@ func (o *OverlayContainer) Refresh() {
 // This is normally called by the canvas overlay management.
 // Implements: fyne.Widget
 func (o *OverlayContainer) Resize(size fyne.Size) {
-	o.resize(size, o)
+	ResizeWidget(&o.Base, o, size)
 }
 
 // Show makes the overlay container visible.

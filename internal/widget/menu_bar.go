@@ -67,7 +67,7 @@ func (b *MenuBar) Refresh() {
 // It only affects the width because menu bars are always displayed with their minimal height.
 // Implements: fyne.Widget
 func (b *MenuBar) Resize(size fyne.Size) {
-	b.resize(size, b)
+	ResizeWidget(&b.Base, b, size)
 }
 
 // Show makes the menu bar visible.
@@ -174,7 +174,7 @@ func (bg *menuBarBackground) Refresh() {
 }
 
 func (bg *menuBarBackground) Resize(size fyne.Size) {
-	bg.resize(size, bg)
+	ResizeWidget(&bg.Base, bg, size)
 }
 
 func (bg *menuBarBackground) Show() {

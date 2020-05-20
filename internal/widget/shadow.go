@@ -76,7 +76,7 @@ func (s *Shadow) Refresh() {
 // Resize changes the size of the shadow.
 // Implements: fyne.Widget
 func (s *Shadow) Resize(size fyne.Size) {
-	s.resize(size, s)
+	ResizeWidget(&s.Base, s, size)
 }
 
 // Show makes the shadow visible.
