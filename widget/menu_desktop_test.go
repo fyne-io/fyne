@@ -44,7 +44,7 @@ func TestMenu_Layout(t *testing.T) {
 		"normal": {
 			windowSize: fyne.NewSize(500, 300),
 			menuPos:    fyne.NewPos(10, 10),
-			wantImage:  "menu_layout_normal.png",
+			wantImage:  "menu/layout_normal.png",
 		},
 		"normal with submenus": {
 			windowSize: fyne.NewSize(500, 300),
@@ -53,7 +53,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),
 				fyne.NewPos(100, 170),
 			},
-			wantImage: "menu_layout_normal_with_submenus.png",
+			wantImage: "menu/desktop/layout_normal_with_submenus.png",
 		},
 		"background of active submenu parents resets if sibling is hovered": {
 			windowSize: fyne.NewSize(500, 300),
@@ -64,7 +64,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(300, 170), // hover subsubmenu item
 				fyne.NewPos(30, 60),   // hover sibling of submenu parent
 			},
-			wantImage: "menu_layout_background_reset.png",
+			wantImage: "menu/desktop/layout_background_reset.png",
 		},
 		"no space on right side for submenu": {
 			windowSize: fyne.NewSize(500, 300),
@@ -73,7 +73,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(430, 100), // open submenu
 				fyne.NewPos(300, 170), // open subsubmenu
 			},
-			wantImage: "menu_layout_no_space_on_right.png",
+			wantImage: "menu/desktop/layout_no_space_on_right.png",
 		},
 		"no space on left & right side for submenu": {
 			windowSize: fyne.NewSize(200, 300),
@@ -82,7 +82,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 170), // open subsubmenu
 			},
-			wantImage: "menu_layout_no_space_on_both_sides.png",
+			wantImage: "menu/desktop/layout_no_space_on_both_sides.png",
 		},
 		"window too short for submenu": {
 			windowSize: fyne.NewSize(500, 150),
@@ -91,13 +91,13 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 130), // open subsubmenu
 			},
-			wantImage: "menu_layout_window_too_short.png",
+			wantImage: "menu/desktop/layout_window_too_short.png",
 		},
 		"theme change": {
 			windowSize:   fyne.NewSize(500, 300),
 			menuPos:      fyne.NewPos(10, 10),
 			useTestTheme: true,
-			wantImage:    "menu_layout_theme_changed.png",
+			wantImage:    "menu/layout_theme_changed.png",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
