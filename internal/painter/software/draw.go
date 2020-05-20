@@ -32,6 +32,9 @@ func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGB
 
 func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.NRGBA) {
 	bounds := img.Size()
+	if bounds.IsZero() {
+		return
+	}
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
