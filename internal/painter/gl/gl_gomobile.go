@@ -27,8 +27,6 @@ type Texture gl.Texture
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(gl.Texture{0})
 
-var sharedBuffer gl.Buffer
-
 func (p *glPainter) glctx() gl.Context {
 	return p.context.Context().(gl.Context)
 }
@@ -127,7 +125,6 @@ const (
 func (p *glPainter) Init() {
 	p.glctx().Disable(gl.DEPTH_TEST)
 	p.glctx().Enable(gl.BLEND)
-	sharedBuffer = p.glctx().CreateBuffer()
 
 	vertexShader, err := p.compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
@@ -166,7 +163,8 @@ func (p *glPainter) glScissorClose() {
 func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	ctx := p.glctx()
 
-	ctx.BindBuffer(gl.ARRAY_BUFFER, sharedBuffer)
+	buf := ctx.CreateBuffer()
+	ctx.BindBuffer(gl.ARRAY_BUFFER, buf)
 	ctx.BufferData(gl.ARRAY_BUFFER, f32.Bytes(binary.LittleEndian, points...), gl.DYNAMIC_DRAW)
 
 	vertAttrib := ctx.GetAttribLocation(gl.Program(p.program), "vert")
@@ -177,11 +175,14 @@ func (p *glPainter) glCreateBuffer(points []float32) Buffer {
 	ctx.EnableVertexAttribArray(texCoordAttrib)
 	ctx.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
 
-	return Buffer(sharedBuffer)
+	return Buffer(buf)
 }
 
-func (p *glPainter) glFreeBuffer(_ Buffer) {
-	// we don't free a shared buffer!
+func (p *glPainter) glFreeBuffer(b Buffer) {
+	ctx := p.glctx()
+
+	ctx.BindBuffer(gl.ARRAY_BUFFER, gl.Buffer(b))
+	ctx.DeleteBuffer(gl.Buffer(b))
 }
 
 func (p *glPainter) glDrawTexture(texture Texture, alpha float32) {
