@@ -259,9 +259,10 @@ func (r *textRenderer) MinSize() fyne.Size {
 
 	r.provider.propertyLock.RLock()
 	texts := r.texts
+	count := fyne.Min(len(texts), r.provider.rows())
 	r.provider.propertyLock.RUnlock()
 
-	for ; i < fyne.Min(len(texts), r.provider.rows()); i++ {
+	for ; i < count; i++ {
 		min := texts[i].MinSize()
 		if texts[i].Text == "" {
 			min = charMinSize

@@ -45,6 +45,7 @@ var _ fyne.Window = (*window)(nil)
 
 type window struct {
 	viewport   *glfw.Window
+	viewLock   sync.RWMutex
 	createLock sync.Once
 	decorate   bool
 	fixedSize  bool
@@ -158,7 +159,9 @@ func (w *window) RequestFocus() {
 
 func (w *window) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
+	w.viewLock.Lock()
 	w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
+	w.viewLock.Unlock()
 
 	w.runOnMainWhenCreated(func() {
 		w.ignoreResize = true
@@ -250,6 +253,8 @@ func (w *window) fitContent() {
 
 	w.ignoreResize = true
 	minWidth, minHeight := w.minSizeOnScreen()
+	w.viewLock.Lock()
+	defer w.viewLock.Unlock()
 	if w.width < minWidth || w.height < minHeight {
 		if w.width < minWidth {
 			w.width = minWidth
@@ -1134,8 +1139,14 @@ func (w *window) create() {
 			fyne.LogError("window creation error", err)
 			return
 		}
+
+		w.viewLock.Lock()
 		w.viewport = win
+		w.viewLock.Unlock()
 	})
+	if w.view() == nil { // something went wrong above, it will have been logged
+		return
+	}
 
 	// run the GL init on the draw thread
 	runOnDraw(w, func() {
@@ -1144,7 +1155,7 @@ func (w *window) create() {
 	})
 
 	runOnMain(func() {
-		win := w.viewport
+		win := w.view()
 		win.SetCloseCallback(w.closed)
 		win.SetPosCallback(w.moved)
 		win.SetSizeCallback(w.resized)
@@ -1167,6 +1178,13 @@ func (w *window) create() {
 			fn()
 		}
 	})
+}
+
+func (w *window) view() *glfw.Window {
+	w.viewLock.RLock()
+	defer w.viewLock.RUnlock()
+
+	return w.viewport
 }
 
 func (d *gLDriver) CreateSplashWindow() fyne.Window {

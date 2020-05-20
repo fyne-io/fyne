@@ -1000,6 +1000,8 @@ func (r *entryRenderer) MinSize() fyne.Size {
 }
 
 func (r *entryRenderer) Objects() []fyne.CanvasObject {
+	r.entry.propertyLock.RLock()
+	defer r.entry.propertyLock.RUnlock()
 	// Objects are generated dynamically force selection rectangles to appear underneath the text
 	if r.entry.selecting {
 		return append(r.selection, r.objects...)
@@ -1012,6 +1014,8 @@ func (r *entryRenderer) Refresh() {
 	provider := r.entry.textProvider()
 	placeholder := r.entry.placeholderProvider()
 	content := r.entry.Text
+	focused := r.entry.focused
+	selections := r.selection
 	r.entry.propertyLock.RUnlock()
 
 	if content != string(provider.buffer) {
@@ -1026,7 +1030,7 @@ func (r *entryRenderer) Refresh() {
 	}
 
 	r.cursor.FillColor = theme.FocusColor()
-	if r.entry.focused {
+	if focused {
 		r.cursor.Show()
 		r.line.FillColor = theme.FocusColor()
 	} else {
@@ -1039,14 +1043,14 @@ func (r *entryRenderer) Refresh() {
 	}
 	r.moveCursor()
 
-	for _, selection := range r.selection {
+	for _, selection := range selections {
 		selection.(*canvas.Rectangle).Hidden = !r.entry.focused && !r.entry.disabled
 		selection.(*canvas.Rectangle).FillColor = theme.FocusColor()
 	}
 
-	r.entry.propertyLock.Lock()
+	r.entry.text.propertyLock.Lock()
 	r.entry.text.updateRowBounds()
-	r.entry.propertyLock.Unlock()
+	r.entry.text.propertyLock.Unlock()
 	r.entry.placeholder.propertyLock.Lock()
 	r.entry.placeholder.updateRowBounds()
 	r.entry.placeholder.propertyLock.Unlock()
@@ -1149,10 +1153,9 @@ func (r *entryRenderer) moveCursor() {
 	r.buildSelection()
 	r.entry.propertyLock.RLock()
 	provider := r.entry.textProvider()
-	r.entry.propertyLock.RUnlock()
-
-	r.entry.propertyLock.RLock()
+	provider.propertyLock.RLock()
 	size := provider.lineSizeToColumn(r.entry.CursorColumn, r.entry.CursorRow)
+	provider.propertyLock.RUnlock()
 	xPos := size.Width
 	yPos := size.Height * r.entry.CursorRow
 	r.entry.propertyLock.RUnlock()

@@ -168,7 +168,7 @@ func (d *gLDriver) startDrawThread() {
 				for _, win := range d.windowList() {
 					w := win.(*window)
 					canvas := w.canvas
-					if w.viewport == nil || !canvas.isDirty() || !w.visible {
+					if w.view() == nil || !canvas.isDirty() || !w.visible {
 						continue
 					}
 
