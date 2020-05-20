@@ -14,7 +14,7 @@ import (
 func TestNewFileItem(t *testing.T) {
 	f := &fileDialog{}
 	_ = f.makeUI()
-	item := f.newFileItem(canvas.NewImageFromResource(theme.FileIcon()), "/path/to/filename.txt", "filename", false)
+	item := f.newFileItem("/path/to/filename.txt", false)
 
 	assert.Equal(t, item.name, "filename")
 
@@ -29,7 +29,7 @@ func TestNewFileItem_Folder(t *testing.T) {
 	currentDir, _ := filepath.Abs(".")
 	parentDir := filepath.Dir(currentDir)
 	f.setDirectory(parentDir)
-	item := f.newFileItem(canvas.NewImageFromResource(theme.FolderIcon()), currentDir, filepath.Base(currentDir), true)
+	item := f.newFileItem(currentDir, true)
 
 	assert.Equal(t, item.name, filepath.Base(currentDir))
 
@@ -45,7 +45,10 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 	currentDir, _ := filepath.Abs(".")
 	parentDir := filepath.Dir(currentDir)
 	f.setDirectory(currentDir)
-	item := f.newFileItem(canvas.NewImageFromResource(theme.FolderOpenIcon()), parentDir, "(Parent)", true)
+
+	item := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
+		name: "(Parent)", path: parentDir, dir: true}
+	item.ExtendBaseWidget(item)
 
 	assert.Equal(t, item.name, "(Parent)")
 

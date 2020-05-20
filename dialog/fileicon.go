@@ -1,16 +1,12 @@
 package dialog
 
 import (
-	"bufio"
 	"image/color"
-	"mime"
-	"os"
-	"path/filepath"
 	"strings"
-	"unicode/utf8"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -34,24 +30,13 @@ func (i *fileIcon) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func mimeTypeGet(path string) (ext, mimeType, mimeSubType string) {
-	ext = filepath.Ext(path[1:])
-	mimeTypeFull := mime.TypeByExtension(ext)
-	if mimeTypeFull == "" {
-		mimeTypeFull = "text/plain"
-		file, err := os.Open(path)
-		if err == nil {
-			defer file.Close()
-			scanner := bufio.NewScanner(file)
-			if scanner.Scan() && !utf8.Valid(scanner.Bytes()) {
-				mimeTypeFull = "application/octet-stream"
-			}
-		}
-	}
+	uri := storage.NewURI(path)
+	ext = uri.Extension()
+	mimeTypeFull := uri.MimeType()
 
 	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
 	mimeType = mimeTypeSplit[0]
-	mimeSubTypeSplit := strings.Split(mimeTypeSplit[1], ";")
-	mimeSubType = mimeSubTypeSplit[0]
+	mimeSubType = mimeTypeSplit[1]
 
 	if len(ext) > 5 {
 		ext = ext[:5]
@@ -61,6 +46,7 @@ func mimeTypeGet(path string) (ext, mimeType, mimeSubType string) {
 
 // NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
 func NewFileIcon(path string) fyne.CanvasObject {
+
 	ext, mimeType, mimeSubType := mimeTypeGet(path)
 
 	var res fyne.Resource

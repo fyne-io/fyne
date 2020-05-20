@@ -144,14 +144,6 @@ func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
 	return places
 }
 
-func fileName(path string) (name string) {
-	name = filepath.Base(path)
-	ext := filepath.Ext(path[1:])
-	name = name[:len(name)-len(ext)]
-
-	return
-}
-
 func (f *fileDialog) refreshDir(dir string) {
 	f.files.Objects = nil
 
@@ -164,8 +156,10 @@ func (f *fileDialog) refreshDir(dir string) {
 	var icons []fyne.CanvasObject
 	parent := filepath.Dir(dir)
 	if parent != dir {
-		icons = append(icons, f.newFileItem(canvas.NewImageFromResource(theme.FolderOpenIcon()),
-			filepath.Dir(dir), "(Parent)", true))
+		fi := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
+			name: "(Parent)", path: filepath.Dir(dir), dir: true}
+		fi.ExtendBaseWidget(fi)
+		icons = append(icons, fi)
 	}
 	for _, file := range files {
 		if isHidden(file.Name(), dir) {
@@ -174,11 +168,9 @@ func (f *fileDialog) refreshDir(dir string) {
 
 		itemPath := filepath.Join(dir, file.Name())
 		if file.IsDir() {
-			icons = append(icons, f.newFileItem(canvas.NewImageFromResource(theme.FolderIcon()),
-				itemPath, file.Name(), true))
+			icons = append(icons, f.newFileItem(itemPath, true))
 		} else {
-			icons = append(icons, f.newFileItem(NewFileIcon(itemPath), itemPath,
-				fileName(itemPath), false))
+			icons = append(icons, f.newFileItem(itemPath, false))
 		}
 	}
 

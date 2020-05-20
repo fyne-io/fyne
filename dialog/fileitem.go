@@ -2,6 +2,7 @@ package dialog
 
 import (
 	"image/color"
+	"path/filepath"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -42,11 +43,26 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 		img: i.icon, text: text, objects: []fyne.CanvasObject{i.icon, text}}
 }
 
+func fileName(path string) (name string) {
+	name = filepath.Base(path)
+	ext := filepath.Ext(path[1:])
+	name = name[:len(name)-len(ext)]
+
+	return
+}
+
 func (i *fileDialogItem) isDirectory() bool {
 	return i.dir
 }
 
-func (f *fileDialog) newFileItem(icon fyne.CanvasObject, path string, name string, dir bool) *fileDialogItem {
+func (f *fileDialog) newFileItem(path string, dir bool) *fileDialogItem {
+	var icon fyne.CanvasObject
+	if dir {
+		icon = canvas.NewImageFromResource(theme.FolderIcon())
+	} else {
+		icon = NewFileIcon(path)
+	}
+	name := fileName(path)
 
 	ret := &fileDialogItem{
 		picker: f,
