@@ -12,7 +12,7 @@ func NewMenu(label string, items ...*MenuItem) *Menu {
 	return &Menu{label, items}
 }
 
-// MenuItem is a sligne item within any menu, it contains a dispay Label and Action function that is called when tapped.
+// MenuItem is a single item within any menu, it contains a dispay Label and Action function that is called when tapped.
 type MenuItem struct {
 	Label  string
 	Action func()
