@@ -39,7 +39,7 @@ func TestMenuBar(t *testing.T) {
 	m1i3 := fyne.NewMenuItem("Recent", nil)
 	m1i3.ChildMenu = fyne.NewMenu("", m1i3i1, m1i3i2, m1i3i3)
 	// TODO: remove useless separators: trailing, leading & double
-	// m1 := fyne.NewMenu("File", m1i1, m1i2, fyne.NewMenuItemSeparator(), m1i3)
+	// m1 := fyne.NewMenu("File", m1i1, m1i2, fyne.newMenuItemSeparator(), m1i3)
 	m1 := fyne.NewMenu("File", m1i1, m1i2, m1i3)
 
 	m2i1 := fyne.NewMenuItem("Copy", func() { lastAction = "copy" })

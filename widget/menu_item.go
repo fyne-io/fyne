@@ -10,10 +10,10 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-var _ fyne.Widget = (*MenuItem)(nil)
+var _ fyne.Widget = (*menuItem)(nil)
 
-// MenuItem is a widget for displaying a fyne.MenuItem.
-type MenuItem struct {
+// menuItem is a widget for displaying a fyne.menuItem.
+type menuItem struct {
 	widget.Base
 	Child  *Menu
 	Item   *fyne.MenuItem
@@ -22,13 +22,13 @@ type MenuItem struct {
 	hovered bool
 }
 
-// NewMenuItem creates a new MenuItem.
-func NewMenuItem(item *fyne.MenuItem, parent *Menu) *MenuItem {
-	return &MenuItem{Item: item, Parent: parent}
+// newMenuItem creates a new menuItem.
+func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
+	return &menuItem{Item: item, Parent: parent}
 }
 
-// NewMenuItemSeparator creates a separator meant to separate MenuItems.
-func NewMenuItemSeparator() fyne.CanvasObject {
+// newMenuItemSeparator creates a separator meant to separate MenuItems.
+func newMenuItemSeparator() fyne.CanvasObject {
 	s := canvas.NewRectangle(theme.DisabledTextColor())
 	s.SetMinSize(fyne.NewSize(1, 2))
 	return s
@@ -36,7 +36,7 @@ func NewMenuItemSeparator() fyne.CanvasObject {
 
 // CreateRenderer returns a new renderer for the menu item.
 // Implements: fyne.Widget
-func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
+func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(i.Item.Label, theme.TextColor())
 	objects := []fyne.CanvasObject{text}
 	var icon *canvas.Image
@@ -61,20 +61,20 @@ func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 
 // Hide hides the menu item.
 // Implements: fyne.Widget
-func (i *MenuItem) Hide() {
+func (i *menuItem) Hide() {
 	widget.HideWidget(&i.Base, i)
 }
 
 // MinSize returns the minimal size of the menu item.
 // Implements: fyne.Widget
-func (i *MenuItem) MinSize() fyne.Size {
+func (i *menuItem) MinSize() fyne.Size {
 	return widget.MinSizeOf(i)
 }
 
 // MouseIn changes the item to be hovered and shows the submenu if the item has one.
 // The submenu of any sibling of the item will be hidden.
 // Implements: desktop.Hoverable
-func (i *MenuItem) MouseIn(*desktop.MouseEvent) {
+func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 	i.hovered = true
 	i.activateChild()
 	i.Refresh()
@@ -82,25 +82,25 @@ func (i *MenuItem) MouseIn(*desktop.MouseEvent) {
 
 // MouseMoved does nothing.
 // Implements: desktop.Hoverable
-func (i *MenuItem) MouseMoved(*desktop.MouseEvent) {
+func (i *menuItem) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut changes the item to not be hovered but has no effect on the visibility of the item's submenu.
 // Implements: desktop.Hoverable
-func (i *MenuItem) MouseOut() {
+func (i *menuItem) MouseOut() {
 	i.hovered = false
 	i.Refresh()
 }
 
 // Refresh triggers a redraw of the menu item.
 // Implements: fyne.Widget
-func (i *MenuItem) Refresh() {
+func (i *menuItem) Refresh() {
 	widget.RefreshWidget(i)
 }
 
 // Resize changes the size of the menu item.
 // Implements: fyne.Widget
-func (i *MenuItem) Resize(size fyne.Size) {
+func (i *menuItem) Resize(size fyne.Size) {
 	widget.ResizeWidget(&i.Base, i, size)
 	if i.Child != nil {
 		i.updateChildPosition()
@@ -109,14 +109,14 @@ func (i *MenuItem) Resize(size fyne.Size) {
 
 // Show makes the menu item visible.
 // Implements: fyne.Widget
-func (i *MenuItem) Show() {
+func (i *menuItem) Show() {
 	widget.ShowWidget(&i.Base, i)
 }
 
 // Tapped performs the action of the item and dismisses the menu.
 // It does nothing if the item doesn’t have an action.
 // Implements: fyne.Tappable
-func (i *MenuItem) Tapped(*fyne.PointEvent) {
+func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
 			i.activateChild()
@@ -129,7 +129,7 @@ func (i *MenuItem) Tapped(*fyne.PointEvent) {
 	i.Parent.Dismiss()
 }
 
-func (i *MenuItem) activateChild() {
+func (i *menuItem) activateChild() {
 	if i.Child != nil {
 		i.Child.DeactivateChild()
 	}
@@ -148,7 +148,7 @@ func (i *MenuItem) activateChild() {
 	}
 }
 
-func (i *MenuItem) updateChildPosition() {
+func (i *menuItem) updateChildPosition() {
 	itemSize := i.Size()
 	cp := fyne.NewPos(itemSize.Width, -theme.Padding())
 	d := fyne.CurrentApp().Driver()
@@ -172,7 +172,7 @@ func (i *MenuItem) updateChildPosition() {
 
 type menuItemRenderer struct {
 	widget.BaseRenderer
-	i                *MenuItem
+	i                *menuItem
 	icon             *canvas.Image
 	lastThemePadding int
 	minSize          fyne.Size

@@ -25,9 +25,9 @@ func NewMenu(menu *fyne.Menu) *Menu {
 	m := &Menu{Items: items}
 	for i, item := range menu.Items {
 		if item.IsSeparator {
-			items[i] = NewMenuItemSeparator()
+			items[i] = newMenuItemSeparator()
 		} else {
-			items[i] = NewMenuItem(item, m)
+			items[i] = newMenuItem(item, m)
 		}
 	}
 	return m
