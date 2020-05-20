@@ -58,7 +58,7 @@ func (s *Shadow) CreateRenderer() fyne.WidgetRenderer {
 // Hide hides the shadow.
 // Implements: fyne.Widget
 func (s *Shadow) Hide() {
-	s.hide(s)
+	HideWidget(&s.Base, s)
 }
 
 // MinSize returns the minimal size of the shadow.

@@ -38,7 +38,7 @@ func (o *OverlayContainer) Hide() {
 		o.canvas.Overlays().Remove(o)
 		o.shown = false
 	}
-	o.hide(o)
+	HideWidget(&o.Base, o)
 }
 
 // MinSize returns the minimal size of the overlay container.

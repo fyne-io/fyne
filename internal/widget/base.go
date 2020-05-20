@@ -52,7 +52,8 @@ func (b *Base) Visible() bool {
 	return !b.hidden
 }
 
-func (b *Base) hide(w fyne.Widget) {
+// HideWidget is a helper method to hide and refresh a widget.
+func HideWidget(b *Base, w fyne.Widget) {
 	if !b.Visible() {
 		return
 	}

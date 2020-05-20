@@ -49,7 +49,7 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 // Hide hides the menu.
 // Implements: fyne.Widget
 func (m *Menu) Hide() {
-	m.hide(m)
+	HideWidget(&m.Base, m)
 }
 
 // MinSize returns the minimal size of the menu.
