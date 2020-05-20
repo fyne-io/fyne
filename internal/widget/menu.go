@@ -47,6 +47,14 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
+// DeactivateChild deactivates the active child menu.
+func (m *Menu) DeactivateChild() {
+	if m.activeChild != nil {
+		m.activeChild.Hide()
+		m.activeChild = nil
+	}
+}
+
 // Hide hides the menu.
 // Implements: fyne.Widget
 func (m *Menu) Hide() {
@@ -83,16 +91,10 @@ func (m *Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
 }
 
-func (m *Menu) deactivateChild() {
+// Dismiss dismisses the menu by dismissing and hiding the active child and performing the DismissAction.
+func (m *Menu) Dismiss() {
 	if m.activeChild != nil {
-		m.activeChild.Hide()
-		m.activeChild = nil
-	}
-}
-
-func (m *Menu) dismiss() {
-	if m.activeChild != nil {
-		defer m.activeChild.dismiss()
+		defer m.activeChild.Dismiss()
 		m.activeChild.Hide()
 		m.activeChild = nil
 	}

@@ -45,7 +45,7 @@ func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 		if i.Child == nil {
 			child := NewMenu(i.Item.ChildMenu)
 			child.Hide()
-			child.DismissAction = i.Parent.dismiss
+			child.DismissAction = i.Parent.Dismiss
 			i.Child = child
 		}
 		objects = append(objects, i.Child)
@@ -125,18 +125,18 @@ func (i *MenuItem) Tapped(*fyne.PointEvent) {
 	}
 
 	i.Item.Action()
-	i.Parent.dismiss()
+	i.Parent.Dismiss()
 }
 
 func (i *MenuItem) activateChild() {
 	if i.Child != nil {
-		i.Child.deactivateChild()
+		i.Child.DeactivateChild()
 	}
 	if i.Parent.activeChild == i.Child {
 		return
 	}
 
-	i.Parent.deactivateChild()
+	i.Parent.DeactivateChild()
 	if i.Child != nil {
 		if i.Child.Size().IsZero() {
 			i.Child.Resize(i.Child.MinSize())

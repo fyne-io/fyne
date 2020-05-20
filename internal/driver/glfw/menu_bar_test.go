@@ -1,18 +1,18 @@
 // +build !mobile
 
-package widget_test
+package glfw_test
 
 import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/internal/driver/glfw"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	publicWidgets "fyne.io/fyne/widget"
+	"fyne.io/fyne/widget"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMenuBar(t *testing.T) {
@@ -50,10 +50,10 @@ func TestMenuBar(t *testing.T) {
 	m3 := fyne.NewMenu("Help", m3i1)
 
 	menu := fyne.NewMainMenu(m1, m2, m3)
-	menuBar := widget.NewMenuBar(menu, c)
+	menuBar := glfw.NewMenuBar(menu, c)
 
 	themeCounter := 0
-	button := publicWidgets.NewButton("Button", func() {
+	button := widget.NewButton("Button", func() {
 		switch themeCounter % 3 {
 		case 0:
 			test.ApplyTheme(t, theme.DarkTheme())

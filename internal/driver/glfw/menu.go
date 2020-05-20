@@ -2,7 +2,6 @@ package glfw
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
 )
 
 func buildMenuOverlay(menus *fyne.MainMenu, c fyne.Canvas) fyne.CanvasObject {
@@ -13,5 +12,5 @@ func buildMenuOverlay(menus *fyne.MainMenu, c fyne.Canvas) fyne.CanvasObject {
 		menus.Items[0].Items = append(menus.Items[0].Items, fyne.NewMenuItemSeparator(), quitItem)
 	}
 
-	return widget.NewMenuBar(menus, c)
+	return NewMenuBar(menus, c)
 }
