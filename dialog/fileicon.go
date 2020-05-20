@@ -18,31 +18,15 @@ type fileIcon struct {
 	resource fyne.Resource
 }
 
+type fileIconRenderer struct {
+	item *fileIcon
+
+	ext     *canvas.Text
+	img     *canvas.Image
+	objects []fyne.CanvasObject
+}
+
 const ratioDown float64 = 0.45
-
-func (i *fileIcon) CreateRenderer() fyne.WidgetRenderer {
-	img := canvas.NewImageFromResource(i.resource)
-	extText := canvas.NewText(i.extension, theme.BackgroundColor())
-	extText.Alignment = fyne.TextAlignCenter
-	extText.TextSize = theme.TextSize()
-	return &fileIconRenderer{item: i,
-		img: img, ext: extText, objects: []fyne.CanvasObject{img, extText}}
-}
-
-func mimeTypeGet(path string) (ext, mimeType, mimeSubType string) {
-	uri := storage.NewURI(path)
-	ext = uri.Extension()
-	mimeTypeFull := uri.MimeType()
-
-	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
-	mimeType = mimeTypeSplit[0]
-	mimeSubType = mimeTypeSplit[1]
-
-	if len(ext) > 5 {
-		ext = ext[:5]
-	}
-	return
-}
 
 // NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
 func NewFileIcon(path string) fyne.CanvasObject {
@@ -76,12 +60,20 @@ func NewFileIcon(path string) fyne.CanvasObject {
 	return ret
 }
 
-type fileIconRenderer struct {
-	item *fileIcon
+func (i *fileIcon) CreateRenderer() fyne.WidgetRenderer {
+	img := canvas.NewImageFromResource(i.resource)
+	extText := canvas.NewText(i.extension, theme.BackgroundColor())
+	extText.Alignment = fyne.TextAlignCenter
+	extText.TextSize = theme.TextSize()
+	return &fileIconRenderer{item: i,
+		img: img, ext: extText, objects: []fyne.CanvasObject{img, extText}}
+}
 
-	ext     *canvas.Text
-	img     *canvas.Image
-	objects []fyne.CanvasObject
+func (s fileIconRenderer) BackgroundColor() color.Color {
+	return color.Transparent
+}
+
+func (s fileIconRenderer) Destroy() {
 }
 
 func (s fileIconRenderer) Layout(size fyne.Size) {
@@ -97,17 +89,25 @@ func (s fileIconRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(fileIconSize, fileIconSize+fileTextSize+theme.Padding())
 }
 
-func (s fileIconRenderer) Refresh() {
-	canvas.Refresh(s.item)
-}
-
-func (s fileIconRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
 func (s fileIconRenderer) Objects() []fyne.CanvasObject {
 	return s.objects
 }
 
-func (s fileIconRenderer) Destroy() {
+func (s fileIconRenderer) Refresh() {
+	canvas.Refresh(s.item)
+}
+
+func mimeTypeGet(path string) (ext, mimeType, mimeSubType string) {
+	uri := storage.NewURI(path)
+	ext = uri.Extension()
+	mimeTypeFull := uri.MimeType()
+
+	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
+	mimeType = mimeTypeSplit[0]
+	mimeSubType = mimeTypeSplit[1]
+
+	if len(ext) > 5 {
+		ext = ext[:5]
+	}
+	return
 }
