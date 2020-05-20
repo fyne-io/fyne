@@ -3,12 +3,13 @@ package widget_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
+	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMenu_ItemTapped(t *testing.T) {
@@ -78,7 +79,7 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	))
 	size := m.MinSize()
 	m.Resize(size)
-	o := widget.NewOverlayContainer(m, c, func() { overlayContainerHit = true })
+	o := internalWidget.NewOverlayContainer(m, c, func() { overlayContainerHit = true })
 	w.SetContent(o)
 	w.Resize(size.Add(fyne.NewSize(10, 10)))
 

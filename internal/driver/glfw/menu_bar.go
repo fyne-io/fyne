@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
+	publicWidget "fyne.io/fyne/widget"
 )
 
 var _ fyne.Widget = (*MenuBar)(nil)
@@ -19,7 +20,7 @@ type MenuBar struct {
 	Items []fyne.CanvasObject
 
 	active      bool
-	activeChild *widget.Menu
+	activeChild *publicWidget.Menu
 	canvas      fyne.Canvas
 }
 

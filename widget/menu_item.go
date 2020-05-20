@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -13,7 +14,7 @@ var _ fyne.Widget = (*MenuItem)(nil)
 
 // MenuItem is a widget for displaying a fyne.MenuItem.
 type MenuItem struct {
-	Base
+	widget.Base
 	Child  *Menu
 	Item   *fyne.MenuItem
 	Parent *Menu
@@ -51,7 +52,7 @@ func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, i.Child)
 	}
 	return &menuItemRenderer{
-		BaseRenderer: NewBaseRenderer(objects),
+		BaseRenderer: widget.NewBaseRenderer(objects),
 		i:            i,
 		icon:         icon,
 		text:         text,
@@ -61,13 +62,13 @@ func (i *MenuItem) CreateRenderer() fyne.WidgetRenderer {
 // Hide hides the menu item.
 // Implements: fyne.Widget
 func (i *MenuItem) Hide() {
-	HideWidget(&i.Base, i)
+	widget.HideWidget(&i.Base, i)
 }
 
 // MinSize returns the minimal size of the menu item.
 // Implements: fyne.Widget
 func (i *MenuItem) MinSize() fyne.Size {
-	return MinSizeOf(i)
+	return widget.MinSizeOf(i)
 }
 
 // MouseIn changes the item to be hovered and shows the submenu if the item has one.
@@ -94,13 +95,13 @@ func (i *MenuItem) MouseOut() {
 // Refresh triggers a redraw of the menu item.
 // Implements: fyne.Widget
 func (i *MenuItem) Refresh() {
-	RefreshWidget(i)
+	widget.RefreshWidget(i)
 }
 
 // Resize changes the size of the menu item.
 // Implements: fyne.Widget
 func (i *MenuItem) Resize(size fyne.Size) {
-	ResizeWidget(&i.Base, i, size)
+	widget.ResizeWidget(&i.Base, i, size)
 	if i.Child != nil {
 		i.updateChildPosition()
 	}
@@ -109,7 +110,7 @@ func (i *MenuItem) Resize(size fyne.Size) {
 // Show makes the menu item visible.
 // Implements: fyne.Widget
 func (i *MenuItem) Show() {
-	ShowWidget(&i.Base, i)
+	widget.ShowWidget(&i.Base, i)
 }
 
 // Tapped performs the action of the item and dismisses the menu.
@@ -170,7 +171,7 @@ func (i *MenuItem) updateChildPosition() {
 }
 
 type menuItemRenderer struct {
-	BaseRenderer
+	widget.BaseRenderer
 	i                *MenuItem
 	icon             *canvas.Image
 	lastThemePadding int

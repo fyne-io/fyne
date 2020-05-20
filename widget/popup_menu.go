@@ -12,7 +12,7 @@ import (
 
 // PopUpMenu is a Menu which displays itself in an OverlayContainer.
 type PopUpMenu struct {
-	*widget.Menu
+	*Menu
 	canvas  fyne.Canvas
 	overlay *widget.OverlayContainer
 }
@@ -25,7 +25,7 @@ func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) 
 }
 
 func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
-	p := &PopUpMenu{Menu: widget.NewMenu(menu), canvas: c}
+	p := &PopUpMenu{Menu: NewMenu(menu), canvas: c}
 	p.Menu.Resize(p.Menu.MinSize())
 	p.Menu.customSized = true
 	o := widget.NewOverlayContainer(p.Menu, c, p.Dismiss)

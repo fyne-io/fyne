@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
@@ -12,7 +13,7 @@ var _ fyne.Tappable = (*Menu)(nil)
 
 // Menu is a widget for displaying a fyne.Menu.
 type Menu struct {
-	Base
+	widget.Base
 	DismissAction func()
 	Items         []fyne.CanvasObject
 	activeChild   *Menu
@@ -41,7 +42,7 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 		Objects: m.Items,
 	}
 	return &menuRenderer{
-		NewShadowingRenderer([]fyne.CanvasObject{cont}, MenuLevel),
+		widget.NewShadowingRenderer([]fyne.CanvasObject{cont}, widget.MenuLevel),
 		cont,
 		m,
 	}
@@ -58,31 +59,31 @@ func (m *Menu) DeactivateChild() {
 // Hide hides the menu.
 // Implements: fyne.Widget
 func (m *Menu) Hide() {
-	HideWidget(&m.Base, m)
+	widget.HideWidget(&m.Base, m)
 }
 
 // MinSize returns the minimal size of the menu.
 // Implements: fyne.Widget
 func (m *Menu) MinSize() fyne.Size {
-	return MinSizeOf(m)
+	return widget.MinSizeOf(m)
 }
 
 // Refresh triggers a redraw of the menu.
 // Implements: fyne.Widget
 func (m *Menu) Refresh() {
-	RefreshWidget(m)
+	widget.RefreshWidget(m)
 }
 
 // Resize has no effect because menus are always displayed with their minimal size.
 // Implements: fyne.Widget
 func (m *Menu) Resize(size fyne.Size) {
-	ResizeWidget(&m.Base, m, size)
+	widget.ResizeWidget(&m.Base, m, size)
 }
 
 // Show makes the menu visible.
 // Implements: fyne.Widget
 func (m *Menu) Show() {
-	ShowWidget(&m.Base, m)
+	widget.ShowWidget(&m.Base, m)
 }
 
 // Tapped catches taps on separators and the menu background. It doesn’t perform any action.
@@ -104,7 +105,7 @@ func (m *Menu) Dismiss() {
 }
 
 type menuRenderer struct {
-	*ShadowingRenderer
+	*widget.ShadowingRenderer
 	cont *fyne.Container
 	m    *Menu
 }

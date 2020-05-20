@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
+	publicWidget "fyne.io/fyne/widget"
 )
 
 var _ fyne.Widget = (*MenuBarItem)(nil)
@@ -16,7 +17,7 @@ var _ desktop.Hoverable = (*MenuBarItem)(nil)
 // MenuBarItem is a widget for displaying an item for a fyne.Menu in a MenuBar.
 type MenuBarItem struct {
 	widget.Base
-	Child  *widget.Menu
+	Child  *publicWidget.Menu
 	Menu   *fyne.Menu
 	Parent *MenuBar
 
@@ -29,7 +30,7 @@ func (i *MenuBarItem) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(i.Menu.Label, theme.TextColor())
 	objects := []fyne.CanvasObject{text}
 	if i.Child == nil {
-		child := widget.NewMenu(i.Menu)
+		child := publicWidget.NewMenu(i.Menu)
 		child.Hide()
 		child.DismissAction = i.Parent.deactivate
 		i.Child = child
