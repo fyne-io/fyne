@@ -73,7 +73,7 @@ func (m *Menu) Resize(size fyne.Size) {
 // Show makes the menu visible.
 // Implements: fyne.Widget
 func (m *Menu) Show() {
-	m.show(m)
+	ShowWidget(&m.Base, m)
 }
 
 // Tapped catches taps on separators and the menu background. It doesn’t perform any action.

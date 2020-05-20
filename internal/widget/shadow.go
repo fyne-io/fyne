@@ -82,7 +82,7 @@ func (s *Shadow) Resize(size fyne.Size) {
 // Show makes the shadow visible.
 // Implements: fyne.Widget
 func (s *Shadow) Show() {
-	s.show(s)
+	ShowWidget(&s.Base, s)
 }
 
 type shadowRenderer struct {

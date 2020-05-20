@@ -73,7 +73,7 @@ func (b *MenuBar) Resize(size fyne.Size) {
 // Show makes the menu bar visible.
 // Implements: fyne.Widget
 func (b *MenuBar) Show() {
-	b.show(b)
+	ShowWidget(&b.Base, b)
 }
 
 func (b *MenuBar) activate() {
@@ -178,7 +178,7 @@ func (bg *menuBarBackground) Resize(size fyne.Size) {
 }
 
 func (bg *menuBarBackground) Show() {
-	bg.show(bg)
+	ShowWidget(&bg.Base, bg)
 }
 
 func (bg *menuBarBackground) Tapped(*fyne.PointEvent) {

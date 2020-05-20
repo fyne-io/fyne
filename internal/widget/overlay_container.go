@@ -83,7 +83,7 @@ func (o *OverlayContainer) Show() {
 		o.canvas.Overlays().Add(o)
 		o.shown = true
 	}
-	o.show(o)
+	ShowWidget(&o.Base, o)
 }
 
 // Tapped catches tap events not handled by the container’s content.

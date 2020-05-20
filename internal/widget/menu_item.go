@@ -104,7 +104,7 @@ func (i *MenuItem) Resize(size fyne.Size) {
 // Show makes the menu item visible.
 // Implements: fyne.Widget
 func (i *MenuItem) Show() {
-	i.show(i)
+	ShowWidget(&i.Base, i)
 }
 
 // Tapped performs the action of the item and dismisses the menu.

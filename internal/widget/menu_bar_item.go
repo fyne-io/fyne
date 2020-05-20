@@ -91,7 +91,7 @@ func (i *MenuBarItem) Resize(size fyne.Size) {
 // Show makes the menu bar item visible.
 // Implements: fyne.Widget
 func (i *MenuBarItem) Show() {
-	i.show(i)
+	ShowWidget(&i.Base, i)
 }
 
 // Tapped toggles the activation state of the menu bar.

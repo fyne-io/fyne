@@ -116,7 +116,8 @@ func (b *Base) setFieldsAndRefresh(f func(), w fyne.Widget) {
 	}
 }
 
-func (b *Base) show(w fyne.Widget) {
+// ShowWidget is a helper method to show and refresh a widget.
+func ShowWidget(b *Base, w fyne.Widget) {
 	if b.Visible() {
 		return
 	}
