@@ -107,13 +107,13 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.Lock()
 	c.content = content
 	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
-	c.Unlock()
 
 	c.content.Resize(c.content.MinSize()) // give it the space it wants then calculate the real min
 	// the pass above makes some layouts wide enough to wrap, so we ask again what the true min is.
 	newSize := c.size.Union(c.canvasSize(c.content.MinSize()))
-	c.Resize(newSize)
+	c.Unlock()
 
+	c.Resize(newSize)
 	c.setDirty(true)
 }
 
@@ -146,6 +146,8 @@ func (c *glCanvas) Padded() bool {
 }
 
 func (c *glCanvas) SetPadded(padded bool) {
+	c.Lock()
+	defer c.Unlock()
 	c.padded = padded
 
 	c.content.Move(c.contentPos())
@@ -162,29 +164,45 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 }
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
-	if c.focused != nil {
-		c.focused.FocusLost()
+	c.RLock()
+	focused := c.focused
+	c.RUnlock()
+	if focused != nil {
+		focused.FocusLost()
 	}
 
+	c.Lock()
 	c.focused = obj
+	c.Unlock()
 	if obj != nil {
 		obj.FocusGained()
 	}
 }
 
 func (c *glCanvas) Unfocus() {
-	if c.focused != nil {
-		c.focused.FocusLost()
+	c.RLock()
+	focused := c.focused
+	c.RUnlock()
+
+	if focused != nil {
+		focused.FocusLost()
 	}
+
+	c.Lock()
 	c.focused = nil
+	c.Unlock()
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {
+	c.RLock()
+	defer c.RUnlock()
 	return c.focused
 }
 
 func (c *glCanvas) Resize(size fyne.Size) {
+	c.Lock()
 	c.size = size
+	c.Unlock()
 
 	for _, overlay := range c.overlays.List() {
 		if p, ok := overlay.(*widget.PopUp); ok {
@@ -196,6 +214,7 @@ func (c *glCanvas) Resize(size fyne.Size) {
 		}
 	}
 
+	c.RLock()
 	c.content.Resize(c.contentSize(size))
 	c.content.Move(c.contentPos())
 
@@ -203,6 +222,7 @@ func (c *glCanvas) Resize(size fyne.Size) {
 		c.menu.Refresh()
 		c.menu.Resize(fyne.NewSize(size.Width, c.menu.MinSize().Height))
 	}
+	c.RUnlock()
 
 	// make sure that primitives that are size specific are repainted
 	c.refreshRasters()
@@ -221,14 +241,20 @@ func (c *glCanvas) refreshRasters() {
 }
 
 func (c *glCanvas) Size() fyne.Size {
+	c.RLock()
+	defer c.RUnlock()
 	return c.size
 }
 
 func (c *glCanvas) MinSize() fyne.Size {
+	c.RLock()
+	defer c.RUnlock()
 	return c.canvasSize(c.content.MinSize())
 }
 
 func (c *glCanvas) Scale() float32 {
+	c.RLock()
+	defer c.RUnlock()
 	return c.scale
 }
 
@@ -240,7 +266,9 @@ func (c *glCanvas) SetScale(_ float32) {
 		return
 	}
 
+	c.Lock()
 	c.scale = c.context.(*window).calculatedScale()
+	c.Unlock()
 	c.setDirty(true)
 
 	c.context.RescaleContext()
@@ -342,12 +370,18 @@ func (c *glCanvas) ensureMinSize() bool {
 		}
 	}
 	c.walkTrees(nil, ensureMinSize)
-	if windowNeedsMinSizeUpdate && (c.size.Width < c.MinSize().Width || c.size.Height < c.MinSize().Height) {
+
+	c.RLock()
+	shouldResize := windowNeedsMinSizeUpdate && (c.size.Width < c.MinSize().Width || c.size.Height < c.MinSize().Height)
+	c.RUnlock()
+	if shouldResize {
 		c.Resize(c.Size().Union(c.MinSize()))
 	}
 
 	if lastParent != nil {
+		c.RLock()
 		updateLayout(lastParent)
+		c.RUnlock()
 	}
 	return windowNeedsMinSizeUpdate
 }
@@ -510,8 +544,6 @@ func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
 }
 
 func (c *glCanvas) menuOverlay() fyne.CanvasObject {
-	c.RLock()
-	defer c.RUnlock()
 	return c.menu
 }
 
