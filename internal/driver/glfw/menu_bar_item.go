@@ -20,9 +20,8 @@ type menuBarItem struct {
 	Menu   *fyne.Menu
 	Parent *MenuBar
 
-	child           *publicWidget.Menu
-	hovered         bool
-	onActivateChild func(item *menuBarItem)
+	child   *publicWidget.Menu
+	hovered bool
 }
 
 func (i *menuBarItem) Child() *publicWidget.Menu {
@@ -66,7 +65,7 @@ func (i *menuBarItem) MinSize() fyne.Size {
 func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
 	if i.Parent.active {
 		i.hovered = true
-		i.onActivateChild(i)
+		i.Parent.activateChild(i)
 		i.Refresh()
 	} else {
 		i.hovered = true
@@ -117,8 +116,7 @@ func (i *menuBarItem) Tapped(*fyne.PointEvent) {
 	if i.Parent.active {
 		i.Parent.deactivate()
 	} else {
-		i.Parent.activate()
-		i.onActivateChild(i)
+		i.Parent.activateChild(i)
 	}
 }
 

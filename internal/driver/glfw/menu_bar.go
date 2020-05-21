@@ -28,7 +28,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 	items := make([]fyne.CanvasObject, len(mainMenu.Items))
 	b := &MenuBar{Items: items, canvas: canvas}
 	for i, menu := range mainMenu.Items {
-		items[i] = &menuBarItem{Menu: menu, Parent: b, onActivateChild: b.activateChild}
+		items[i] = &menuBarItem{Menu: menu, Parent: b}
 	}
 	return b
 }
@@ -90,16 +90,10 @@ func (b *MenuBar) Show() {
 	widget.ShowWidget(&b.Base, b)
 }
 
-func (b *MenuBar) activate() {
-	if b.active {
-		return
-	}
-
-	b.active = true
-	b.Refresh()
-}
-
 func (b *MenuBar) activateChild(item *menuBarItem) {
+	if !b.active {
+		b.active = true
+	}
 	if item.Child() != nil {
 		item.Child().DeactivateChild()
 	}
