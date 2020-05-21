@@ -91,15 +91,15 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
 
+	size := text.Size()
 	offsetX := 0
 	offsetY := 0
 	switch text.Alignment {
 	case fyne.TextAlignTrailing:
-		offsetX = text.Size().Width - bounds.Width
+		offsetX = size.Width - bounds.Width
 	case fyne.TextAlignCenter:
-		offsetX = (text.Size().Width - bounds.Width) / 2
+		offsetX = (size.Width - bounds.Width) / 2
 	}
-	size := text.Size()
 	if size.Height > bounds.Height {
 		offsetY = (size.Height - bounds.Height) / 2
 	}
