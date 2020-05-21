@@ -428,8 +428,6 @@ func (c *glCanvas) walkTrees(
 	beforeChildren func(*renderCacheNode, fyne.Position),
 	afterChildren func(*renderCacheNode),
 ) {
-	c.RLock()
-	defer c.RUnlock()
 	c.walkTree(c.contentTree, beforeChildren, afterChildren)
 	if c.menu != nil {
 		c.walkTree(c.menuTree, beforeChildren, afterChildren)
