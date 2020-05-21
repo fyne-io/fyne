@@ -101,7 +101,7 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 	rend.Refresh()
 
-	assert.Equal(t, 8, len(rend.objects))
+	assert.Equal(t, 10, len(rend.objects))
 }
 
 func TestTextGridRenderer_Resize(t *testing.T) {
@@ -138,7 +138,7 @@ func TestTextGridRender_Size(t *testing.T) {
 	grid.Resize(fyne.NewSize(32, 42)) // causes refresh
 	rend := test.WidgetRenderer(grid).(*textGridRenderer)
 
-	assert.Equal(t, 2, rend.cols)
+	assert.Equal(t, 3, rend.cols)
 	assert.Equal(t, 2, rend.rows)
 }
 

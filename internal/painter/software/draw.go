@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
-	"fyne.io/fyne/theme"
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
@@ -80,9 +79,8 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	var opts truetype.Options
 	fontSize := float64(text.TextSize) * float64(c.Scale())
 	opts.Size = fontSize
-	opts.DPI = 78.0
-	f, _ := truetype.Parse(theme.TextFont().Content())
-	face := truetype.NewFace(f, &opts)
+	opts.DPI = painter.TextDPI
+	face := painter.CachedFontFace(text.TextStyle, &opts)
 
 	d := font.Drawer{}
 	d.Dst = txtImg
@@ -91,15 +89,20 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
 
-	offset := 0
+	size := text.Size()
+	offsetX := 0
+	offsetY := 0
 	switch text.Alignment {
 	case fyne.TextAlignTrailing:
-		offset = text.Size().Width - bounds.Width
+		offsetX = size.Width - bounds.Width
 	case fyne.TextAlignCenter:
-		offset = (text.Size().Width - bounds.Width) / 2
+		offsetX = (size.Width - bounds.Width) / 2
 	}
-	scaledX := internal.ScaleInt(c, pos.X+offset)
-	scaledY := internal.ScaleInt(c, pos.Y)
+	if size.Height > bounds.Height {
+		offsetY = (size.Height - bounds.Height) / 2
+	}
+	scaledX := internal.ScaleInt(c, pos.X+offsetX)
+	scaledY := internal.ScaleInt(c, pos.Y+offsetY)
 	imgBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	draw.Draw(base, imgBounds, txtImg, image.ZP, draw.Over)
 }
