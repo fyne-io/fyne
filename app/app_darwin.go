@@ -4,6 +4,16 @@
 
 package app
 
+/*
+#cgo CFLAGS: -x objective-c
+#cgo LDFLAGS: -framework Foundation
+
+#include <AppKit/AppKit.h>
+
+bool isBundled();
+void sendNotification(const char *title, const char *content);
+*/
+import "C"
 import (
 	"fmt"
 	"net/url"
@@ -11,6 +21,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"unsafe"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -38,6 +49,16 @@ func (app *fyneApp) OpenURL(url *url.URL) error {
 }
 
 func (app *fyneApp) SendNotification(n *fyne.Notification) {
+	if C.isBundled() {
+		title := C.CString(n.Title)
+		defer C.free(unsafe.Pointer(title))
+		content := C.CString(n.Content)
+		defer C.free(unsafe.Pointer(content))
+
+		C.sendNotification(title, content)
+		return
+	}
+
 	title := escapeNotificationString(n.Title)
 	content := escapeNotificationString(n.Content)
 	template := `display notification "%s" with title "%s"`
