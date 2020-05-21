@@ -2,10 +2,12 @@ package test
 
 import (
 	"image"
+	"log"
 	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
+	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/internal/painter/software"
 
 	"github.com/goki/freetype/truetype"
@@ -96,21 +98,21 @@ func (d *testDriver) Device() fyne.Device {
 }
 
 // RenderedTextSize looks up how bit a string would be if drawn on screen
-func (d *testDriver) RenderedTextSize(text string, size int, _ fyne.TextStyle) fyne.Size {
+func (d *testDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
 	var opts truetype.Options
 	opts.Size = float64(size)
-	opts.DPI = 78 // TODO move this?
+	opts.DPI = painter.TextDPI
 
-	theme := fyne.CurrentApp().Settings().Theme()
-	// TODO check style
-	f, err := truetype.Parse(theme.TextFont().Content())
-	if err != nil {
-		fyne.LogError("Unable to load theme font", err)
-	}
-	face := truetype.NewFace(f, &opts)
+	face := painter.CachedFontFace(style, &opts)
 	advance := font.MeasureString(face, text)
 
-	return fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
+	sws := fyne.NewSize(advance.Ceil(), face.Metrics().Height.Ceil())
+	gls := painter.RenderedTextSize(text, size, style)
+	if sws != gls {
+		log.Println("SoftwareTextSize:", sws)
+		log.Println("GLTextSize:", gls)
+	}
+	return sws
 }
 
 func (d *testDriver) Run() {
