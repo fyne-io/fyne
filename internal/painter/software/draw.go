@@ -72,7 +72,11 @@ func drawTex(c fyne.Canvas, pos fyne.Position, width int, height int, base *imag
 }
 
 func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA) {
+	size := text.Size()
 	bounds := text.MinSize()
+	if size.Height > bounds.Height {
+		pos = fyne.NewPos(pos.X, pos.Y+(size.Height-bounds.Height)/2)
+	}
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
