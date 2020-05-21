@@ -21,17 +21,6 @@ func TestRadio_Layout(t *testing.T) {
 		options    []string
 		selected   string
 	}{
-		"empty": {},
-		"empty_disabled": {
-			disabled: true,
-		},
-		"empty_horizontal": {
-			horizontal: true,
-		},
-		"empty_horizontal_disabled": {
-			disabled:   true,
-			horizontal: true,
-		},
 		"single": {
 			options: []string{"Test"},
 		},
