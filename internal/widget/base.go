@@ -17,14 +17,6 @@ type Base struct {
 	propertyLock sync.RWMutex
 }
 
-// Move sets the position of the widget relative to its parent.
-// Implements: fyne.Widget
-func (b *Base) Move(pos fyne.Position) {
-	b.setFieldsAndRefresh(func() {
-		b.pos = pos
-	}, nil)
-}
-
 // Position returns the position of the widget relative to its parent.
 // Implements: fyne.Widget
 func (b *Base) Position() fyne.Position {
@@ -74,6 +66,15 @@ func MinSizeOf(w fyne.Widget) fyne.Size {
 	return r.MinSize()
 }
 
+// MoveWidget is a helper method to set the position of a widget relative to its parent.
+func MoveWidget(b *Base, w fyne.Widget, pos fyne.Position) {
+	b.propertyLock.Lock()
+	b.pos = pos
+	b.propertyLock.Unlock()
+
+	RefreshWidget(w)
+}
+
 // RefreshWidget is a helper method to refresh a widget.
 func RefreshWidget(w fyne.Widget) {
 	r := cache.Renderer(w)
@@ -104,25 +105,15 @@ func ResizeWidget(b *Base, w fyne.Widget, size fyne.Size) {
 	r.Layout(size)
 }
 
-// setFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
-// This method is a guaranteed thread-safe way of directly manipulating widget fields.
-func (b *Base) setFieldsAndRefresh(f func(), w fyne.Widget) {
-	b.propertyLock.Lock()
-	f()
-	b.propertyLock.Unlock()
-
-	if w != nil { // the wrapping function didn't tell us what to refresh
-		RefreshWidget(w)
-	}
-}
-
 // ShowWidget is a helper method to show and refresh a widget.
 func ShowWidget(b *Base, w fyne.Widget) {
 	if b.Visible() {
 		return
 	}
 
-	b.setFieldsAndRefresh(func() {
-		b.hidden = false
-	}, w)
+	b.propertyLock.Lock()
+	b.hidden = false
+	b.propertyLock.Unlock()
+
+	RefreshWidget(w)
 }

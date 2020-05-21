@@ -63,6 +63,12 @@ func (o *OverlayContainer) MouseMoved(*desktop.MouseEvent) {
 func (o *OverlayContainer) MouseOut() {
 }
 
+// Move sets the position of the widget relative to its parent.
+// Implements: fyne.Widget
+func (o *OverlayContainer) Move(pos fyne.Position) {
+	MoveWidget(&o.Base, o, pos)
+}
+
 // Refresh triggers a redraw of the overlay container.
 // Implements: fyne.Widget
 func (o *OverlayContainer) Refresh() {

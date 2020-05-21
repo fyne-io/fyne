@@ -99,7 +99,7 @@ func (p *PopUpMenu) adjustPosition() {
 		}
 	}
 	if newX != p.Position().X || newY != p.Position().Y {
-		p.Base.Move(fyne.NewPos(newX, newY))
+		widget.MoveWidget(&p.Base, p, fyne.NewPos(newX, newY))
 	}
 }
 

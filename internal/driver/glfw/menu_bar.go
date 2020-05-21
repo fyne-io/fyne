@@ -65,6 +65,12 @@ func (b *MenuBar) MinSize() fyne.Size {
 	return widget.MinSizeOf(b)
 }
 
+// Move sets the position of the widget relative to its parent.
+// Implements: fyne.Widget
+func (b *MenuBar) Move(pos fyne.Position) {
+	widget.MoveWidget(&b.Base, b, pos)
+}
+
 // Refresh triggers a redraw of the menu bar.
 // Implements: fyne.Widget
 func (b *MenuBar) Refresh() {
@@ -199,6 +205,10 @@ func (bg *menuBarBackground) MouseOut() {
 }
 
 func (bg *menuBarBackground) MouseMoved(*desktop.MouseEvent) {
+}
+
+func (bg *menuBarBackground) Move(pos fyne.Position) {
+	widget.MoveWidget(&bg.Base, bg, pos)
 }
 
 func (bg *menuBarBackground) Refresh() {

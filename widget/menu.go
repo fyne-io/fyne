@@ -75,6 +75,12 @@ func (m *Menu) MinSize() fyne.Size {
 	return widget.MinSizeOf(m)
 }
 
+// Move sets the position of the widget relative to its parent.
+// Implements: fyne.Widget
+func (m *Menu) Move(pos fyne.Position) {
+	widget.MoveWidget(&m.Base, m, pos)
+}
+
 // Refresh triggers a redraw of the menu.
 // Implements: fyne.Widget
 func (m *Menu) Refresh() {

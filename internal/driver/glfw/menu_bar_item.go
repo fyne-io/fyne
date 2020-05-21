@@ -86,6 +86,12 @@ func (i *menuBarItem) MouseOut() {
 	i.Refresh()
 }
 
+// Move sets the position of the widget relative to its parent.
+// Implements: fyne.Widget
+func (i *menuBarItem) Move(pos fyne.Position) {
+	widget.MoveWidget(&i.Base, i, pos)
+}
+
 // Refresh triggers a redraw of the menu bar item.
 // Implements: fyne.Widget
 func (i *menuBarItem) Refresh() {
