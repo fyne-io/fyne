@@ -109,8 +109,10 @@ func (d *gLDriver) runGL() {
 
 				if w.viewport.ShouldClose() {
 					reassign = true
+					w.viewLock.Lock()
 					v := w.viewport
 					w.viewport = nil
+					w.viewLock.Unlock()
 
 					// remove window from window list
 					v.Destroy()
@@ -171,8 +173,12 @@ func (d *gLDriver) startDrawThread() {
 			case <-draw.C:
 				for _, win := range d.windowList() {
 					w := win.(*window)
+					w.viewLock.RLock()
 					canvas := w.canvas
-					if w.view() == nil || !canvas.isDirty() || !w.visible {
+					view := w.viewport
+					visible := w.visible
+					w.viewLock.RUnlock()
+					if view == nil || !canvas.isDirty() || !visible {
 						continue
 					}
 
