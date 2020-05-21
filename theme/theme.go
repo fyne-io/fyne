@@ -43,8 +43,6 @@ func LightTheme() fyne.Theme {
 // See https://www.material.io/design/color/dark-theme.html
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{
-		// background: color.NRGBA{0x12, 0x12, 0x12, 0xff}, // recommended background - very dark
-		// background:     color.NRGBA{0x1F, 0x1B, 0x24, 0xff}, // branding suggestion from the article above - very purple
 		background:     color.NRGBA{0x24, 0x24, 0x24, 0xff},
 		button:         color.NRGBA{0xff, 0xff, 0xff, 0x30},
 		hover:          color.NRGBA{0xff, 0xff, 0xff, 0x40},
@@ -58,8 +56,30 @@ func DarkTheme() fyne.Theme {
 		primary:        color.NRGBA{0x9f, 0xa8, 0xda, 0xff}, // same as light mode
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
-		//primary:        color.NRGBA{0x33, 0x29, 0x40, 0xff},
-		//primary:   color.NRGBA{0xb0, 0xbe, 0xc5, 0xff},
+	}
+
+	theme.initFonts()
+	return theme
+}
+
+// MonoTheme is a monochrome theme
+// This should be used for running test cases so that any future changes
+// to the colored themes do not require regenerating all the test images
+func MonoTheme() fyne.Theme {
+	theme := &builtinTheme{
+		background:     color.NRGBA{0x44, 0x44, 0x44, 0xff},
+		button:         color.NRGBA{0x33, 0x33, 0x33, 0xff},
+		hover:          color.NRGBA{0x55, 0x55, 0x55, 0xff},
+		disabledButton: color.NRGBA{0x22, 0x22, 0x22, 0xff},
+		text:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		disabledText:   color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		icon:           color.NRGBA{0xee, 0xee, 0xee, 0xff},
+		disabledIcon:   color.NRGBA{0xaa, 0xaa, 0xaa, 0xff},
+		hyperlink:      color.NRGBA{0x99, 0x99, 0x99, 0xff},
+		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		primary:        color.NRGBA{0x66, 0x66, 0x66, 0xff},
+		scrollBar:      color.NRGBA{0x11, 0x11, 0x11, 0xff},
+		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x60},
 	}
 
 	theme.initFonts()

@@ -7,9 +7,11 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/painter/software"
 	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 )
 
 func TestPaintImage_SVG(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	img := canvas.NewImageFromFile("testdata/stroke.svg")
 	c := test.NewCanvasWithPainter(software.NewPainter())
 	c.SetContent(img)
@@ -20,6 +22,7 @@ func TestPaintImage_SVG(t *testing.T) {
 }
 
 func TestPaintImage_SVG_StretchX(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	img := canvas.NewImageFromFile("testdata/stroke.svg")
 	img.FillMode = canvas.ImageFillStretch
 	c := test.NewCanvasWithPainter(software.NewPainter())
@@ -31,6 +34,7 @@ func TestPaintImage_SVG_StretchX(t *testing.T) {
 }
 
 func TestPaintImage_SVG_StretchY(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	img := canvas.NewImageFromFile("testdata/stroke.svg")
 	img.FillMode = canvas.ImageFillStretch
 	c := test.NewCanvasWithPainter(software.NewPainter())
@@ -42,6 +46,7 @@ func TestPaintImage_SVG_StretchY(t *testing.T) {
 }
 
 func TestPaintImage_SVG_ContainX(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	img := canvas.NewImageFromFile("testdata/stroke.svg")
 	img.FillMode = canvas.ImageFillContain
 	c := test.NewCanvasWithPainter(software.NewPainter())
@@ -53,6 +58,7 @@ func TestPaintImage_SVG_ContainX(t *testing.T) {
 }
 
 func TestPaintImage_SVG_ContainY(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	img := canvas.NewImageFromFile("testdata/stroke.svg")
 	img.FillMode = canvas.ImageFillContain
 	c := test.NewCanvasWithPainter(software.NewPainter())
