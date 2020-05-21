@@ -15,7 +15,7 @@ type fileIcon struct {
 	widget.BaseWidget
 
 	extension, mimeType, mimeSubType string
-	resource fyne.Resource
+	resource                         fyne.Resource
 }
 
 type fileIconRenderer struct {
@@ -81,7 +81,7 @@ func (s fileIconRenderer) Layout(size fyne.Size) {
 	s.img.Resize(fyne.NewSize(fileIconSize, fileIconSize))
 	s.img.Move(fyne.NewPos(iconAlign, 0))
 	s.ext.Resize(fyne.NewSize(fileIconSize, fileTextSize))
-	alignHeight := float64(fileIconSize)*ratioDown
+	alignHeight := float64(fileIconSize) * ratioDown
 	s.ext.Move(fyne.NewPos(iconAlign, int(alignHeight)))
 }
 
@@ -100,14 +100,18 @@ func (s fileIconRenderer) Refresh() {
 func mimeTypeGet(path string) (ext, mimeType, mimeSubType string) {
 	uri := storage.NewURI(path)
 	ext = uri.Extension()
-	mimeTypeFull := uri.MimeType()
-
-	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
-	mimeType = mimeTypeSplit[0]
-	mimeSubType = mimeTypeSplit[1]
-
 	if len(ext) > 5 {
 		ext = ext[:5]
 	}
+
+	mimeTypeFull := uri.MimeType()
+	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
+	if len(mimeTypeSplit) <= 1 {
+		mimeType, mimeSubType = "", ""
+		return
+	}
+	mimeType = mimeTypeSplit[0]
+	mimeSubType = mimeTypeSplit[1]
+
 	return
 }

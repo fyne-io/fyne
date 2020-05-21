@@ -26,8 +26,7 @@ func (u *uri) Extension() string {
 }
 
 func (u *uri) MimeType() string {
-	ext := filepath.Ext(u.raw[1:])
-	mimeTypeFull := mime.TypeByExtension(ext)
+	mimeTypeFull := mime.TypeByExtension(u.Extension())
 	if mimeTypeFull == "" {
 		mimeTypeFull = "text/plain"
 		file, err := os.Open(u.raw)
@@ -39,10 +38,8 @@ func (u *uri) MimeType() string {
 			}
 		}
 	}
-	mimeSubTypeSplit := strings.Split(mimeTypeFull, ";")
-	mimeTypeFull = mimeSubTypeSplit[0]
 
-	return mimeTypeFull
+	return strings.Split(mimeTypeFull, ";")[0]
 }
 
 func (u *uri) Scheme() string {
