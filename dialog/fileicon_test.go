@@ -1,3 +1,4 @@
+// +build !ci
 package dialog
 
 import (
