@@ -110,7 +110,8 @@ func TestText_Layout(t *testing.T) {
 			text.Alignment = tt.align
 
 			window := test.NewWindow(text)
-			window.Resize(text.MinSize().Max(tt.size).Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding())))
+			window.SetPadded(false)
+			window.Resize(text.MinSize().Max(tt.size))
 
 			test.AssertImageMatches(t, "text/layout_"+name+".png", window.Canvas().Capture())
 
