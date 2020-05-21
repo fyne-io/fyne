@@ -79,7 +79,7 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	var opts truetype.Options
 	fontSize := float64(text.TextSize) * float64(c.Scale())
 	opts.Size = fontSize
-	opts.DPI = float64(painter.TextDPI)
+	opts.DPI = painter.TextDPI
 	face := painter.CachedFontFace(text.TextStyle, &opts)
 
 	d := font.Drawer{}
