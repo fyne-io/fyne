@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -13,10 +14,9 @@ import (
 func TestNewFileItem(t *testing.T) {
 	f := &fileDialog{}
 	_ = f.makeUI()
-	item := f.newFileItem(theme.FileIcon(), "/path/to/filename.txt")
+	item := f.newFileItem("/path/to/filename.txt", false)
 
 	assert.Equal(t, item.name, "filename")
-	assert.Equal(t, item.ext, "txt")
 
 	test.Tap(item)
 	assert.True(t, item.isCurrent)
@@ -29,10 +29,9 @@ func TestNewFileItem_Folder(t *testing.T) {
 	currentDir, _ := filepath.Abs(".")
 	parentDir := filepath.Dir(currentDir)
 	f.setDirectory(parentDir)
-	item := f.newFileItem(theme.FolderIcon(), currentDir)
+	item := f.newFileItem(currentDir, true)
 
 	assert.Equal(t, item.name, filepath.Base(currentDir))
-	assert.Equal(t, item.ext, "")
 
 	test.Tap(item)
 	assert.False(t, item.isCurrent)
@@ -46,10 +45,12 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 	currentDir, _ := filepath.Abs(".")
 	parentDir := filepath.Dir(currentDir)
 	f.setDirectory(currentDir)
-	item := f.newFileItem(theme.FolderOpenIcon(), parentDir)
+
+	item := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
+		name: "(Parent)", path: parentDir, dir: true}
+	item.ExtendBaseWidget(item)
 
 	assert.Equal(t, item.name, "(Parent)")
-	assert.Equal(t, item.ext, "")
 
 	test.Tap(item)
 	assert.False(t, item.isCurrent)
