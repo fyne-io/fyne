@@ -11,21 +11,21 @@ import (
 	publicWidget "fyne.io/fyne/widget"
 )
 
-var _ fyne.Widget = (*MenuBarItem)(nil)
-var _ desktop.Hoverable = (*MenuBarItem)(nil)
+var _ fyne.Widget = (*menuBarItem)(nil)
+var _ desktop.Hoverable = (*menuBarItem)(nil)
 
-// MenuBarItem is a widget for displaying an item for a fyne.Menu in a MenuBar.
-type MenuBarItem struct {
+// menuBarItem is a widget for displaying an item for a fyne.Menu in a MenuBar.
+type menuBarItem struct {
 	widget.Base
 	Menu   *fyne.Menu
 	Parent *MenuBar
 
 	child           *publicWidget.Menu
 	hovered         bool
-	onActivateChild func(item *MenuBarItem)
+	onActivateChild func(item *menuBarItem)
 }
 
-func (i *MenuBarItem) Child() *publicWidget.Menu {
+func (i *menuBarItem) Child() *publicWidget.Menu {
 	if i.child == nil {
 		child := publicWidget.NewMenu(i.Menu)
 		child.Hide()
@@ -37,7 +37,7 @@ func (i *MenuBarItem) Child() *publicWidget.Menu {
 
 // CreateRenderer returns a new renderer for the menu bar item.
 // Implements: fyne.Widget
-func (i *MenuBarItem) CreateRenderer() fyne.WidgetRenderer {
+func (i *menuBarItem) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(i.Menu.Label, theme.TextColor())
 	objects := []fyne.CanvasObject{text}
 
@@ -50,20 +50,20 @@ func (i *MenuBarItem) CreateRenderer() fyne.WidgetRenderer {
 
 // Hide hides the menu bar item.
 // Implements: fyne.Widget
-func (i *MenuBarItem) Hide() {
+func (i *menuBarItem) Hide() {
 	widget.HideWidget(&i.Base, i)
 }
 
 // MinSize returns the minimal size of the menu bar item.
 // Implements: fyne.Widget
-func (i *MenuBarItem) MinSize() fyne.Size {
+func (i *menuBarItem) MinSize() fyne.Size {
 	return widget.MinSizeOf(i)
 }
 
 // MouseIn changes the item to be hovered and shows the menu if the bar is active.
 // The menu that was displayed before will be hidden.
 // Implements: desktop.Hoverable
-func (i *MenuBarItem) MouseIn(_ *desktop.MouseEvent) {
+func (i *menuBarItem) MouseIn(_ *desktop.MouseEvent) {
 	if i.Parent.active {
 		i.hovered = true
 		i.onActivateChild(i)
@@ -76,38 +76,38 @@ func (i *MenuBarItem) MouseIn(_ *desktop.MouseEvent) {
 
 // MouseMoved does nothing.
 // Implements: desktop.Hoverable
-func (i *MenuBarItem) MouseMoved(_ *desktop.MouseEvent) {
+func (i *menuBarItem) MouseMoved(_ *desktop.MouseEvent) {
 }
 
 // MouseOut changes the item to not be hovered but has no effect on the visibility of the menu.
 // Implements: desktop.Hoverable
-func (i *MenuBarItem) MouseOut() {
+func (i *menuBarItem) MouseOut() {
 	i.hovered = false
 	i.Refresh()
 }
 
 // Refresh triggers a redraw of the menu bar item.
 // Implements: fyne.Widget
-func (i *MenuBarItem) Refresh() {
+func (i *menuBarItem) Refresh() {
 	widget.RefreshWidget(i)
 }
 
 // Resize changes the size of the menu bar item.
 // Implements: fyne.Widget
-func (i *MenuBarItem) Resize(size fyne.Size) {
+func (i *menuBarItem) Resize(size fyne.Size) {
 	widget.ResizeWidget(&i.Base, i, size)
 }
 
 // Show makes the menu bar item visible.
 // Implements: fyne.Widget
-func (i *MenuBarItem) Show() {
+func (i *menuBarItem) Show() {
 	widget.ShowWidget(&i.Base, i)
 }
 
 // Tapped toggles the activation state of the menu bar.
 // It shows the item’s menu if the bar is activated and hides it if the bar is deactivated.
 // Implements: fyne.Tappable
-func (i *MenuBarItem) Tapped(*fyne.PointEvent) {
+func (i *menuBarItem) Tapped(*fyne.PointEvent) {
 	if i.Parent.active {
 		i.Parent.deactivate()
 	} else {
@@ -118,7 +118,7 @@ func (i *MenuBarItem) Tapped(*fyne.PointEvent) {
 
 type menuBarItemRenderer struct {
 	widget.BaseRenderer
-	i    *MenuBarItem
+	i    *menuBarItem
 	text *canvas.Text
 }
 

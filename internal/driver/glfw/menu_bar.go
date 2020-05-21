@@ -19,7 +19,7 @@ type MenuBar struct {
 	Items []fyne.CanvasObject
 
 	active     bool
-	activeItem *MenuBarItem
+	activeItem *menuBarItem
 	canvas     fyne.Canvas
 }
 
@@ -28,7 +28,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 	items := make([]fyne.CanvasObject, len(mainMenu.Items))
 	b := &MenuBar{Items: items, canvas: canvas}
 	for i, menu := range mainMenu.Items {
-		items[i] = &MenuBarItem{Menu: menu, Parent: b, onActivateChild: b.activateChild}
+		items[i] = &menuBarItem{Menu: menu, Parent: b, onActivateChild: b.activateChild}
 	}
 	return b
 }
@@ -43,7 +43,7 @@ func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 	bg := &menuBarBackground{action: b.deactivate}
 	objects := []fyne.CanvasObject{bg, cont}
 	for _, item := range b.Items {
-		objects = append(objects, item.(*MenuBarItem).Child())
+		objects = append(objects, item.(*menuBarItem).Child())
 	}
 	return &menuBarRenderer{
 		widget.NewShadowingRenderer(objects, widget.MenuLevel),
@@ -93,7 +93,7 @@ func (b *MenuBar) activate() {
 	b.Refresh()
 }
 
-func (b *MenuBar) activateChild(item *MenuBarItem) {
+func (b *MenuBar) activateChild(item *menuBarItem) {
 	if item.Child() != nil {
 		item.Child().DeactivateChild()
 	}
