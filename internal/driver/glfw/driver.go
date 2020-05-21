@@ -80,8 +80,12 @@ func (d *gLDriver) addWindow(w *window) {
 // This may not do the right thing if your app has 3 or more windows open, but it was agreed this was not much
 // of an issue, and the added complexity to track focus was not needed at this time.
 func (d *gLDriver) focusPreviousWindow() {
+	d.windowLock.RLock()
+	wins := d.windows
+	d.windowLock.RUnlock()
+
 	var chosen fyne.Window
-	for _, w := range d.windows {
+	for _, w := range wins {
 		chosen = w
 		if w.(*window).master {
 			break

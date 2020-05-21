@@ -45,6 +45,7 @@ var _ fyne.Window = (*window)(nil)
 
 type window struct {
 	viewport   *glfw.Window
+	viewLock   sync.RWMutex
 	createLock sync.Once
 	decorate   bool
 	fixedSize  bool
@@ -77,7 +78,7 @@ type window struct {
 
 	xpos, ypos    int
 	width, height int
-	ignoreResize  bool
+	shouldExpand  bool
 
 	eventLock  sync.RWMutex
 	eventQueue chan func()
@@ -158,12 +159,14 @@ func (w *window) RequestFocus() {
 
 func (w *window) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
-	w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
+	w.viewLock.Lock()
+	if w.fixedSize {
+		w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
+	}
+	w.viewLock.Unlock()
 
 	w.runOnMainWhenCreated(func() {
-		w.ignoreResize = true
 		w.viewport.SetSize(w.width, w.height)
-		w.ignoreResize = false
 		w.fitContent()
 	})
 }
@@ -248,8 +251,9 @@ func (w *window) fitContent() {
 		return
 	}
 
-	w.ignoreResize = true
 	minWidth, minHeight := w.minSizeOnScreen()
+	w.viewLock.Lock()
+	defer w.viewLock.Unlock()
 	if w.width < minWidth || w.height < minHeight {
 		if w.width < minWidth {
 			w.width = minWidth
@@ -267,7 +271,6 @@ func (w *window) fitContent() {
 	} else {
 		w.viewport.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
 	}
-	w.ignoreResize = false
 }
 
 func (w *window) SetOnClosed(closed func()) {
@@ -394,15 +397,6 @@ func (w *window) Content() fyne.CanvasObject {
 	return w.canvas.content
 }
 
-func (w *window) resize(canvasSize fyne.Size) {
-	if !w.fullScreen && !w.fixedSize {
-		w.width = internal.ScaleInt(w.canvas, canvasSize.Width)
-		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
-	}
-
-	w.canvas.Resize(canvasSize)
-}
-
 func (w *window) SetContent(content fyne.CanvasObject) {
 	// hide old canvas element
 	if w.visible && w.canvas.Content() != nil {
@@ -470,11 +464,17 @@ func (w *window) moved(_ *glfw.Window, x, y int) {
 	go w.canvas.SetScale(fyne.SettingsScaleAuto) // scale is ignored
 }
 
-func (w *window) resized(viewport *glfw.Window, width, height int) {
-	if w.ignoreResize {
+func (w *window) resized(_ *glfw.Window, width, height int) {
+	if w.fixedSize {
 		return
 	}
-	w.resize(fyne.NewSize(internal.UnscaleInt(w.canvas, width), internal.UnscaleInt(w.canvas, height)))
+
+	canvasSize := fyne.NewSize(internal.UnscaleInt(w.canvas, width), internal.UnscaleInt(w.canvas, height))
+	if !w.fullScreen {
+		w.width = internal.ScaleInt(w.canvas, canvasSize.Width)
+		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
+	}
+	w.canvas.Resize(canvasSize)
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
@@ -483,9 +483,8 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 	}
 
 	winWidth, _ := viewport.GetSize()
-	texScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	w.canvas.texScale = texScale
-	w.canvas.Refresh(w.canvas.content) // apply texture scale
+	w.canvas.texScale = float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
+	w.canvas.Refresh(w.canvas.content)                     // apply texture scale
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
@@ -1134,8 +1133,14 @@ func (w *window) create() {
 			fyne.LogError("window creation error", err)
 			return
 		}
+
+		w.viewLock.Lock()
 		w.viewport = win
+		w.viewLock.Unlock()
 	})
+	if w.view() == nil { // something went wrong above, it will have been logged
+		return
+	}
 
 	// run the GL init on the draw thread
 	runOnDraw(w, func() {
@@ -1144,7 +1149,7 @@ func (w *window) create() {
 	})
 
 	runOnMain(func() {
-		win := w.viewport
+		win := w.view()
 		win.SetCloseCallback(w.closed)
 		win.SetPosCallback(w.moved)
 		win.SetSizeCallback(w.resized)
@@ -1167,6 +1172,13 @@ func (w *window) create() {
 			fn()
 		}
 	})
+}
+
+func (w *window) view() *glfw.Window {
+	w.viewLock.RLock()
+	defer w.viewLock.RUnlock()
+
+	return w.viewport
 }
 
 func (d *gLDriver) CreateSplashWindow() fyne.Window {
