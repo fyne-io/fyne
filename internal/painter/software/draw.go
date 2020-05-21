@@ -72,11 +72,7 @@ func drawTex(c fyne.Canvas, pos fyne.Position, width int, height int, base *imag
 }
 
 func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.NRGBA) {
-	size := text.Size()
 	bounds := text.MinSize()
-	if size.Height > bounds.Height {
-		pos = fyne.NewPos(pos.X, pos.Y+(size.Height-bounds.Height)/2)
-	}
 	width := internal.ScaleInt(c, bounds.Width)
 	height := internal.ScaleInt(c, bounds.Height)
 	txtImg := image.NewRGBA(image.Rect(0, 0, width, height))
@@ -95,15 +91,20 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
 
-	offset := 0
+	offsetX := 0
+	offsetY := 0
 	switch text.Alignment {
 	case fyne.TextAlignTrailing:
-		offset = text.Size().Width - bounds.Width
+		offsetX = text.Size().Width - bounds.Width
 	case fyne.TextAlignCenter:
-		offset = (text.Size().Width - bounds.Width) / 2
+		offsetX = (text.Size().Width - bounds.Width) / 2
 	}
-	scaledX := internal.ScaleInt(c, pos.X+offset)
-	scaledY := internal.ScaleInt(c, pos.Y)
+	size := text.Size()
+	if size.Height > bounds.Height {
+		offsetY = (size.Height - bounds.Height) / 2
+	}
+	scaledX := internal.ScaleInt(c, pos.X+offsetX)
+	scaledY := internal.ScaleInt(c, pos.Y+offsetY)
 	imgBounds := image.Rect(scaledX, scaledY, scaledX+width, scaledY+height)
 	draw.Draw(base, imgBounds, txtImg, image.ZP, draw.Over)
 }

@@ -40,28 +40,74 @@ func TestText_Layout(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
-		text string
-		size fyne.Size
+		text  string
+		align fyne.TextAlign
+		size  fyne.Size
 	}{
-		"short_small": {
-			text: "abc",
-			size: fyne.NewSize(1, 1),
+		"short_leading_small": {
+			text:  "abc",
+			align: fyne.TextAlignLeading,
+			size:  fyne.NewSize(1, 1),
 		},
-		"short_large": {
-			text: "abc",
-			size: fyne.NewSize(100, 100),
+		"short_leading_large": {
+			text:  "abc",
+			align: fyne.TextAlignLeading,
+			size:  fyne.NewSize(500, 100),
 		},
-		"long_small": {
-			text: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-			size: fyne.NewSize(1, 1),
+		"long_leading_small": {
+			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			align: fyne.TextAlignLeading,
+			size:  fyne.NewSize(1, 1),
 		},
-		"long_large": {
-			text: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-			size: fyne.NewSize(100, 100),
+		"long_leading_large": {
+			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			align: fyne.TextAlignLeading,
+			size:  fyne.NewSize(500, 100),
+		},
+		"short_center_small": {
+			text:  "abc",
+			align: fyne.TextAlignCenter,
+			size:  fyne.NewSize(1, 1),
+		},
+		"short_center_large": {
+			text:  "abc",
+			align: fyne.TextAlignCenter,
+			size:  fyne.NewSize(500, 100),
+		},
+		"long_center_small": {
+			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			align: fyne.TextAlignCenter,
+			size:  fyne.NewSize(1, 1),
+		},
+		"long_center_large": {
+			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			align: fyne.TextAlignCenter,
+			size:  fyne.NewSize(500, 100),
+		},
+		"short_trailing_small": {
+			text:  "abc",
+			align: fyne.TextAlignTrailing,
+			size:  fyne.NewSize(1, 1),
+		},
+		"short_trailing_large": {
+			text:  "abc",
+			align: fyne.TextAlignTrailing,
+			size:  fyne.NewSize(500, 100),
+		},
+		"long_trailing_small": {
+			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			align: fyne.TextAlignTrailing,
+			size:  fyne.NewSize(1, 1),
+		},
+		"long_trailing_large": {
+			text:  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+			align: fyne.TextAlignTrailing,
+			size:  fyne.NewSize(500, 100),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			text := canvas.NewText(tt.text, theme.TextColor())
+			text.Alignment = tt.align
 
 			window := test.NewWindow(text)
 			window.Resize(text.MinSize().Max(tt.size))
