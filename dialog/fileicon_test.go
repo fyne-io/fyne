@@ -1,4 +1,4 @@
-// +build !ci
+// +build !ci,!windows
 
 package dialog
 
