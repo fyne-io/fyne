@@ -15,11 +15,11 @@ func TestNewFileIcon(t *testing.T) {
 	f := &fileDialog{}
 	_ = f.makeUI()
 
-	item := NewFileIcon("/path/to/filename.bin")
+	item := NewFileIcon("/path/to/filename.zip")
 
-	assert.Equal(t, item.(*fileIcon).extension, ".bin")
+	assert.Equal(t, item.(*fileIcon).extension, ".zip")
 	assert.Equal(t, item.(*fileIcon).mimeType, "application")
-	assert.Equal(t, item.(*fileIcon).mimeSubType, "octet-stream")
+	assert.Equal(t, item.(*fileIcon).mimeSubType, "zip")
 	assert.Equal(t, item.(*fileIcon).resource, theme.FileApplicationIcon())
 
 	item = NewFileIcon("/path/to/filename.mp3")
