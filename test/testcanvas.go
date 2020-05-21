@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/theme"
 )
 
 var (
@@ -58,8 +59,10 @@ func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 		return
 	}
 
-	theme := fyne.CurrentApp().Settings().Theme()
-	padding := fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	padding := fyne.NewSize(0, 0)
+	if c.padded {
+		padding = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	}
 	c.Resize(content.MinSize().Add(padding))
 }
 
@@ -148,6 +151,7 @@ func (c *testCanvas) Resize(size fyne.Size) {
 		content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	} else {
 		content.Resize(size)
+		content.Move(fyne.NewPos(0, 0))
 	}
 }
 
