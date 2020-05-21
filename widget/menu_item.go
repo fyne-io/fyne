@@ -121,7 +121,6 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
 			i.onActivateChild(i)
-			i.Refresh()
 		}
 		return
 	}
