@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/internal/layout"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
-	publicWidget "fyne.io/fyne/widget"
 )
 
 var _ fyne.Widget = (*MenuBar)(nil)
@@ -19,9 +18,9 @@ type MenuBar struct {
 	widget.Base
 	Items []fyne.CanvasObject
 
-	active      bool
-	activeChild *publicWidget.Menu
-	canvas      fyne.Canvas
+	active     bool
+	activeItem *MenuBarItem
+	canvas     fyne.Canvas
 }
 
 // NewMenuBar creates a menu bar populated with items from the passed main menu structure.
@@ -29,7 +28,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 	items := make([]fyne.CanvasObject, len(mainMenu.Items))
 	b := &MenuBar{Items: items, canvas: canvas}
 	for i, menu := range mainMenu.Items {
-		items[i] = &MenuBarItem{Menu: menu, Parent: b}
+		items[i] = &MenuBarItem{Menu: menu, Parent: b, onActivateChild: b.activateChild}
 	}
 	return b
 }
@@ -42,8 +41,12 @@ func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
 		Objects: b.Items,
 	}
 	bg := &menuBarBackground{action: b.deactivate}
+	objects := []fyne.CanvasObject{bg, cont}
+	for _, item := range b.Items {
+		objects = append(objects, item.(*MenuBarItem).Child())
+	}
 	return &menuBarRenderer{
-		widget.NewShadowingRenderer([]fyne.CanvasObject{bg, cont}, widget.MenuLevel),
+		widget.NewShadowingRenderer(objects, widget.MenuLevel),
 		b,
 		bg,
 		cont,
@@ -90,16 +93,36 @@ func (b *MenuBar) activate() {
 	b.Refresh()
 }
 
+func (b *MenuBar) activateChild(item *MenuBarItem) {
+	if item.Child() != nil {
+		item.Child().DeactivateChild()
+	}
+	if b.activeItem == item {
+		return
+	}
+
+	if b.activeItem != nil {
+		b.activeItem.Child().Hide()
+	}
+	b.activeItem = item
+	if item == nil {
+		return
+	}
+
+	item.Child().Show()
+	b.Refresh()
+}
+
 func (b *MenuBar) deactivate() {
 	if !b.active {
 		return
 	}
 
 	b.active = false
-	if b.activeChild != nil {
-		defer b.activeChild.Dismiss()
-		b.activeChild.Hide()
-		b.activeChild = nil
+	if b.activeItem != nil {
+		defer b.activeItem.Child().Dismiss()
+		b.activeItem.Child().Hide()
+		b.activeItem = nil
 	}
 	b.Refresh()
 }
@@ -129,6 +152,12 @@ func (r *menuBarRenderer) Layout(size fyne.Size) {
 		r.bg.Resize(fyne.NewSize(0, 0))
 	}
 	r.cont.Resize(size)
+	if item := r.b.activeItem; item != nil {
+		if item.Child().Size().IsZero() {
+			item.Child().Resize(item.Child().MinSize())
+		}
+		item.Child().Move(fyne.NewPos(item.Position().X, item.Size().Height))
+	}
 }
 
 func (r *menuBarRenderer) MinSize() fyne.Size {

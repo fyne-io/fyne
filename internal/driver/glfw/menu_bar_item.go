@@ -20,8 +20,19 @@ type MenuBarItem struct {
 	Menu   *fyne.Menu
 	Parent *MenuBar
 
-	child   *publicWidget.Menu
-	hovered bool
+	child           *publicWidget.Menu
+	hovered         bool
+	onActivateChild func(item *MenuBarItem)
+}
+
+func (i *MenuBarItem) Child() *publicWidget.Menu {
+	if i.child == nil {
+		child := publicWidget.NewMenu(i.Menu)
+		child.Hide()
+		child.DismissAction = i.Parent.deactivate
+		i.child = child
+	}
+	return i.child
 }
 
 // CreateRenderer returns a new renderer for the menu bar item.
@@ -29,13 +40,6 @@ type MenuBarItem struct {
 func (i *MenuBarItem) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(i.Menu.Label, theme.TextColor())
 	objects := []fyne.CanvasObject{text}
-	if i.child == nil {
-		child := publicWidget.NewMenu(i.Menu)
-		child.Hide()
-		child.DismissAction = i.Parent.deactivate
-		i.child = child
-	}
-	objects = append(objects, i.child)
 
 	return &menuBarItemRenderer{
 		widget.NewBaseRenderer(objects),
@@ -62,7 +66,7 @@ func (i *MenuBarItem) MinSize() fyne.Size {
 func (i *MenuBarItem) MouseIn(_ *desktop.MouseEvent) {
 	if i.Parent.active {
 		i.hovered = true
-		i.activateChild()
+		i.onActivateChild(i)
 		i.Refresh()
 	} else {
 		i.hovered = true
@@ -92,7 +96,6 @@ func (i *MenuBarItem) Refresh() {
 // Implements: fyne.Widget
 func (i *MenuBarItem) Resize(size fyne.Size) {
 	widget.ResizeWidget(&i.Base, i, size)
-	i.updateChildPosition()
 }
 
 // Show makes the menu bar item visible.
@@ -109,34 +112,8 @@ func (i *MenuBarItem) Tapped(*fyne.PointEvent) {
 		i.Parent.deactivate()
 	} else {
 		i.Parent.activate()
-		i.activateChild()
+		i.onActivateChild(i)
 	}
-	i.Refresh()
-}
-
-func (i *MenuBarItem) activateChild() {
-	if i.child != nil {
-		i.child.DeactivateChild()
-	}
-	if i.Parent.activeChild == i.child {
-		return
-	}
-
-	if i.Parent.activeChild != nil {
-		i.Parent.activeChild.Hide()
-	}
-	i.Parent.activeChild = i.child
-	if i.child != nil {
-		if i.child.Size().IsZero() {
-			i.child.Resize(i.child.MinSize())
-			i.updateChildPosition()
-		}
-		i.child.Show()
-	}
-}
-
-func (i *MenuBarItem) updateChildPosition() {
-	i.child.Move(fyne.NewPos(0, i.Size().Height))
 }
 
 type menuBarItemRenderer struct {
