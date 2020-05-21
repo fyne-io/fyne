@@ -118,7 +118,8 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
-				if w.canvas.ensureMinSize() {
+				if w.shouldExpand {
+					w.shouldExpand = false
 					w.fitContent()
 				}
 
@@ -136,6 +137,9 @@ func (d *gLDriver) runGL() {
 func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
+		if w.canvas.ensureMinSize() {
+			w.shouldExpand = true
+		}
 		freeDirtyTextures(canvas)
 
 		updateGLContext(w)
@@ -213,6 +217,7 @@ func updateGLContext(w *window) {
 	canvas := w.Canvas().(*glCanvas)
 	size := canvas.Size()
 
+	// w.width and w.height are not correct if we are maximised, so figure from canvas
 	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.texScale
 	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.texScale
 
