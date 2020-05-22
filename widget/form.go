@@ -63,12 +63,11 @@ func (f *Form) Append(text string, widget fyne.CanvasObject) {
 func (f *Form) AppendItem(item *FormItem) {
 	f.ExtendBaseWidget(f) // could be called before render
 
-	// ensure we have a renderer set up (that creates itemGrid)...
-	cache.Renderer(f.super())
-
 	f.Items = append(f.Items, item)
-	f.itemGrid.AddObject(f.createLabel(item.Text))
-	f.itemGrid.AddObject(item.Widget)
+	if f.itemGrid != nil {
+		f.itemGrid.AddObject(f.createLabel(item.Text))
+		f.itemGrid.AddObject(item.Widget)
+	}
 
 	f.Refresh()
 }
@@ -81,9 +80,10 @@ func (f *Form) MinSize() fyne.Size {
 
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
-	f.BaseWidget.Refresh()
+	cache.Renderer(f.super()) // we are about to make changes to renderer created content... not great!
 	f.setButtons()
-	canvas.Refresh(f) // refresh ourselves for BG color - the above updates the content
+	f.BaseWidget.Refresh()
+	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
 }
 
 func (f *Form) setButtons() {
@@ -127,6 +127,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 
 	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
 	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
+	f.submitButton.Style = PrimaryButton
 	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 
 	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))
