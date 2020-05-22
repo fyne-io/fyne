@@ -28,6 +28,8 @@ type Texture gl.Texture
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(gl.Texture{0})
 
+var textureFilterToGL = []int{gl.LINEAR, gl.NEAREST}
+
 var sharedBuffer gl.Buffer
 
 func (p *glPainter) glctx() gl.Context {
@@ -74,7 +76,7 @@ func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScal
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
 		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
-		return p.imgToTexture(rgba, img.ScaleMode)
+		return p.imgToTexture(rgba, textureFilter)
 	}
 }
 

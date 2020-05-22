@@ -28,6 +28,8 @@ type Texture uint32
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(0)
 
+var textureFilterToGL = []int32{gl.LINEAR, gl.NEAREST}
+
 func newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture uint32
 
