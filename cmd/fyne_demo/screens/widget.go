@@ -228,6 +228,10 @@ func makeFormTab() fyne.Widget {
 	largeText := widget.NewMultiLineEntry()
 
 	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "Name", Widget: name},
+			{Text: "Email", Widget: email},
+		},
 		OnCancel: func() {
 			fmt.Println("Cancelled")
 		},
@@ -239,8 +243,6 @@ func makeFormTab() fyne.Widget {
 			})
 		},
 	}
-	form.Append("Name", name)
-	form.Append("Email", email)
 	form.Append("Password", password)
 	form.Append("Message", largeText)
 	return form

@@ -62,9 +62,7 @@ func (f *Form) Append(text string, widget fyne.CanvasObject) {
 // AppendItem adds the specified row to the end of the Form
 func (f *Form) AppendItem(item *FormItem) {
 	f.ExtendBaseWidget(f) // could be called before render
-
-	// ensure we have a renderer set up (that creates itemGrid)...
-	cache.Renderer(f.super())
+	f.ensureGrid()
 
 	f.Items = append(f.Items, item)
 	f.itemGrid.AddObject(f.createLabel(item.Text))
@@ -81,9 +79,10 @@ func (f *Form) MinSize() fyne.Size {
 
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
-	f.BaseWidget.Refresh()
+	cache.Renderer(f.super()) // we are about to make changes to renderer created content... not great!
 	f.setButtons()
-	canvas.Refresh(f) // refresh ourselves for BG color - the above updates the content
+	f.BaseWidget.Refresh()
+	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
 }
 
 func (f *Form) setButtons() {

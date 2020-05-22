@@ -3,7 +3,10 @@ package widget
 import (
 	"testing"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -75,4 +78,22 @@ func TestForm_AddRemoveButton(t *testing.T) {
 	form.Refresh()
 	test.Tap(form.cancelButton)
 	assert.Equal(t, 5, sscount, "tapping new cancel should decr ssount from 11 down to 5")
+}
+
+func TestSelect_Theme(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	form := &Form{
+		Items: []*FormItem{
+			{Text: "test1", Widget: NewEntry()},
+			{Text: "test2", Widget: NewEntry()},
+		},
+		OnSubmit: func() {}, OnCancel: func() {}}
+	w := test.NewWindow(form)
+	w.Resize(fyne.NewSize(300, 200))
+	defer w.Close()
+
+	test.AssertImageMatches(t, "form_theme_initial.png", w.Canvas().Capture())
 }
