@@ -1,4 +1,5 @@
 // +build !mobile
+// +build !ci !windows
 
 package glfw_test
 
