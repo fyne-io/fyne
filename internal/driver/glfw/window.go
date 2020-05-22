@@ -240,10 +240,7 @@ func (w *window) SetMainMenu(menu *fyne.MainMenu) {
 }
 
 func (w *window) fitContent() {
-	w.canvas.RLock()
-	content := w.canvas.content
-	w.canvas.RUnlock()
-	if content == nil {
+	if w.canvas.Content() == nil {
 		return
 	}
 
@@ -350,8 +347,8 @@ func (w *window) doShow() {
 	})
 
 	// show top canvas element
-	if w.canvas.content != nil {
-		w.canvas.content.Show()
+	if w.canvas.Content() != nil {
+		w.canvas.Content().Show()
 	}
 }
 
@@ -398,7 +395,7 @@ func (w *window) Clipboard() fyne.Clipboard {
 }
 
 func (w *window) Content() fyne.CanvasObject {
-	return w.canvas.content
+	return w.canvas.Content()
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
@@ -491,7 +488,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 
 	winWidth, _ := viewport.GetSize()
 	w.canvas.texScale = float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	w.canvas.Refresh(w.canvas.content)                     // apply texture scale
+	w.canvas.Refresh(w.canvas.Content())                   // apply texture scale
 }
 
 func (w *window) refresh(viewport *glfw.Window) {
@@ -499,7 +496,7 @@ func (w *window) refresh(viewport *glfw.Window) {
 }
 
 func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Position, matches func(object fyne.CanvasObject) bool) (fyne.CanvasObject, fyne.Position, int) {
-	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.content)
+	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.Content())
 }
 
 func fyneToNativeCursor(cursor desktop.Cursor) *glfw.Cursor {
