@@ -79,7 +79,7 @@ func (d *gLDriver) initGLFW() {
 }
 
 func (d *gLDriver) runGL() {
-	eventTick := time.NewTicker(time.Second / 10)
+	eventTick := time.NewTicker(time.Second / 60)
 	runMutex.Lock()
 	runFlag = true
 	runMutex.Unlock()
