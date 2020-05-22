@@ -120,8 +120,14 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
-				if w.shouldExpand {
+				w.viewLock.RLock()
+				expand := w.shouldExpand
+				w.viewLock.RUnlock()
+
+				if expand {
+					w.viewLock.Lock()
 					w.shouldExpand = false
+					w.viewLock.Unlock()
 					w.fitContent()
 				}
 
@@ -140,7 +146,9 @@ func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
 		if w.canvas.ensureMinSize() {
+			w.viewLock.Lock()
 			w.shouldExpand = true
+			w.viewLock.Unlock()
 		}
 		freeDirtyTextures(canvas)
 
