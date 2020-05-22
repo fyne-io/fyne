@@ -45,14 +45,6 @@ func (f *Form) createLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }
 
-func (f *Form) ensureGrid() {
-	if f.itemGrid != nil {
-		return
-	}
-
-	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
-}
-
 // Append adds a new row to the form, using the text as a label next to the specified Widget
 func (f *Form) Append(text string, widget fyne.CanvasObject) {
 	item := &FormItem{Text: text, Widget: widget}
@@ -119,11 +111,12 @@ func (f *Form) setButtons() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
-	f.ensureGrid()
+	itemGrid := fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
 	for _, item := range f.Items {
-		f.itemGrid.AddObject(f.createLabel(item.Text))
-		f.itemGrid.AddObject(item.Widget)
+		itemGrid.AddObject(f.createLabel(item.Text))
+		itemGrid.AddObject(item.Widget)
 	}
+	f.itemGrid = itemGrid
 
 	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
 	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
