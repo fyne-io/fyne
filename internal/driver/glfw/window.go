@@ -332,7 +332,9 @@ func (w *window) doShow() {
 	w.createLock.Do(w.create)
 
 	runOnMain(func() {
+		w.viewLock.Lock()
 		w.visible = true
+		w.viewLock.Unlock()
 		w.viewport.SetTitle(w.title)
 		w.viewport.Show()
 
@@ -360,7 +362,9 @@ func (w *window) Hide() {
 
 	runOnMain(func() {
 		w.viewport.Hide()
+		w.viewLock.Lock()
 		w.visible = false
+		w.viewLock.Unlock()
 
 		// hide top canvas element
 		if w.canvas.Content() != nil {
@@ -398,8 +402,11 @@ func (w *window) Content() fyne.CanvasObject {
 }
 
 func (w *window) SetContent(content fyne.CanvasObject) {
+	w.viewLock.RLock()
+	visible := w.visible
+	w.viewLock.RUnlock()
 	// hide old canvas element
-	if w.visible && w.canvas.Content() != nil {
+	if visible && w.canvas.Content() != nil {
 		w.canvas.Content().Hide()
 	}
 
