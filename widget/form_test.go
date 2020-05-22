@@ -80,7 +80,7 @@ func TestForm_AddRemoveButton(t *testing.T) {
 	assert.Equal(t, 5, sscount, "tapping new cancel should decr ssount from 11 down to 5")
 }
 
-func TestSelect_Theme(t *testing.T) {
+func TestForm_ChangeTheme(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
@@ -96,4 +96,9 @@ func TestSelect_Theme(t *testing.T) {
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form_theme_initial.png", w.Canvas().Capture())
+
+	test.WithTestTheme(t, func() {
+		form.Refresh()
+		test.AssertImageMatches(t, "form_theme_changed.png", w.Canvas().Capture())
+	})
 }
