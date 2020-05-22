@@ -62,11 +62,12 @@ func (f *Form) Append(text string, widget fyne.CanvasObject) {
 // AppendItem adds the specified row to the end of the Form
 func (f *Form) AppendItem(item *FormItem) {
 	f.ExtendBaseWidget(f) // could be called before render
-	f.ensureGrid()
 
 	f.Items = append(f.Items, item)
-	f.itemGrid.AddObject(f.createLabel(item.Text))
-	f.itemGrid.AddObject(item.Widget)
+	if f.itemGrid != nil {
+		f.itemGrid.AddObject(f.createLabel(item.Text))
+		f.itemGrid.AddObject(item.Widget)
+	}
 
 	f.Refresh()
 }
