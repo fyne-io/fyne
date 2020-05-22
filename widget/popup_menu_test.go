@@ -19,16 +19,16 @@ func TestPopUpMenu_Move(t *testing.T) {
 	c := w.Canvas()
 
 	m.Show()
-	test.AssertImageMatches(t, "popup_menu_shown.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/shown.png", c.Capture())
 
 	m.Move(fyne.NewPos(20, 20))
-	test.AssertImageMatches(t, "popup_menu_moved.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/moved.png", c.Capture())
 
 	m.Move(fyne.NewPos(190, 10))
-	test.AssertImageMatches(t, "popup_menu_no_space_right.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/no_space_right.png", c.Capture())
 
 	m.Move(fyne.NewPos(10, 190))
-	test.AssertImageMatches(t, "popup_menu_no_space_down.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/no_space_down.png", c.Capture())
 }
 
 func TestPopUpMenu_Resize(t *testing.T) {
@@ -37,14 +37,14 @@ func TestPopUpMenu_Resize(t *testing.T) {
 	c := w.Canvas()
 
 	m.ShowAtPosition(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "popup_menu_shown_at_pos.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/shown_at_pos.png", c.Capture())
 
 	m.Resize(m.Size().Add(fyne.NewSize(10, 10)))
-	test.AssertImageMatches(t, "popup_menu_grown.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/grown.png", c.Capture())
 
 	largeSize := c.Size().Add(fyne.NewSize(10, 10))
 	m.Resize(largeSize)
-	test.AssertImageMatches(t, "popup_menu_canvas_too_small.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/canvas_too_small.png", c.Capture())
 	assert.Equal(t, largeSize, m.Size())
 }
 
@@ -53,10 +53,10 @@ func TestPopUpMenu_Show(t *testing.T) {
 	defer tearDownPopUpMenuTest(w)
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "popup_menu_hidden.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/hidden.png", c.Capture())
 
 	m.Show()
-	test.AssertImageMatches(t, "popup_menu_shown.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/shown.png", c.Capture())
 }
 
 func TestPopUpMenu_ShowAtPosition(t *testing.T) {
@@ -64,30 +64,30 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 	defer tearDownPopUpMenuTest(w)
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "popup_menu_hidden.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/hidden.png", c.Capture())
 
 	m.ShowAtPosition(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "popup_menu_shown_at_pos.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/shown_at_pos.png", c.Capture())
 
 	m.Hide()
-	test.AssertImageMatches(t, "popup_menu_hidden.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/hidden.png", c.Capture())
 
 	m.ShowAtPosition(fyne.NewPos(190, 10))
-	test.AssertImageMatches(t, "popup_menu_no_space_right.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/no_space_right.png", c.Capture())
 
 	m.Hide()
-	test.AssertImageMatches(t, "popup_menu_hidden.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/hidden.png", c.Capture())
 
 	m.ShowAtPosition(fyne.NewPos(10, 190))
-	test.AssertImageMatches(t, "popup_menu_no_space_down.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/no_space_down.png", c.Capture())
 
 	m.Hide()
-	test.AssertImageMatches(t, "popup_menu_hidden.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/hidden.png", c.Capture())
 	menuSize := c.Size().Add(fyne.NewSize(10, 10))
 	m.Resize(menuSize)
 
 	m.ShowAtPosition(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "popup_menu_canvas_too_small.png", c.Capture())
+	test.AssertImageMatches(t, "popup_menu/canvas_too_small.png", c.Capture())
 	assert.Equal(t, menuSize, m.Size())
 }
 
