@@ -208,6 +208,11 @@ func (w *window) SetIcon(icon fyne.Resource) {
 		return
 	}
 
+	if string(icon.Content()[:4]) == "<svg" {
+		fyne.LogError("Window icon does not support vector images", nil)
+		return
+	}
+
 	w.runOnMainWhenCreated(func() {
 		if w.icon == nil {
 			w.viewport.SetIcon(nil)
