@@ -81,13 +81,13 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		}
 		return false
 	}
-	o, absPos, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
 		hovered = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
 			PointEvent: fyne.PointEvent{
 				AbsolutePosition: pos,
-				Position:         pos.Subtract(absPos),
+				Position:         p,
 			},
 		}
 		if hovered == oldHovered {
@@ -119,8 +119,8 @@ func TapAt(obj fyne.Tappable, pos fyne.Position) {
 
 // TapCanvas taps at an absolute position on the canvas.
 func TapCanvas(c fyne.Canvas, pos fyne.Position) {
-	if o, absPos := findTappable(c, pos); o != nil {
-		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
+	if o, p := findTappable(c, pos); o != nil {
+		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
 	}
 }
 
