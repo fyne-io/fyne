@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,11 +25,8 @@ func TestShadow_ApplyTheme(t *testing.T) {
 	s.Move(fyne.NewPos(10, 10))
 	test.AssertImageMatches(t, "shadow_theme_mono.png", w.Canvas().Capture())
 
-	test.ApplyTheme(t, theme.LightTheme())
-	test.AssertImageMatches(t, "shadow_theme_light.png", w.Canvas().Capture())
-
-	test.ApplyTheme(t, theme.DarkTheme())
-	test.AssertImageMatches(t, "shadow_theme_dark.png", w.Canvas().Capture())
+	test.ApplyTheme(t, test.NewTheme())
+	test.AssertImageMatches(t, "shadow_theme_ugly.png", w.Canvas().Capture())
 }
 
 func TestShadow_AroundShadow(t *testing.T) {
