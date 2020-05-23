@@ -78,7 +78,7 @@ func TestAccordionContainer_CloseAll(t *testing.T) {
 
 func TestAccordionContainer_Layout(t *testing.T) {
 	test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.MonoTheme())
 
 	for name, tt := range map[string]struct {
 		multiOpen bool
@@ -87,7 +87,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 	}{
 		"single_open_one_item": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -95,7 +95,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		},
 		"single_open_one_item_opened": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -104,11 +104,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		},
 		"single_open_multiple_items": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -116,11 +116,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		},
 		"single_open_multiple_items_opened": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -130,7 +130,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		"multiple_open_one_item": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -139,7 +139,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		"multiple_open_one_item_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -149,11 +149,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		"multiple_open_multiple_items": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -162,11 +162,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		"multiple_open_multiple_items_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -223,7 +223,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 	}{
 		"single_open_one_item": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -232,7 +232,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 		},
 		"single_open_one_item_opened": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -242,11 +242,11 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 		},
 		"single_open_multiple_items": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -255,11 +255,11 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 		},
 		"single_open_multiple_items_opened": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -270,7 +270,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 		"multiple_open_one_item": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -280,7 +280,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 		"multiple_open_one_item_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -291,11 +291,11 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 		"multiple_open_multiple_items": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -305,11 +305,11 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 		"multiple_open_multiple_items_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},

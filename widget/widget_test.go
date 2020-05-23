@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +28,7 @@ func TestApplyThemeCalled(t *testing.T) {
 	widget := &myWidget{refreshed: make(chan bool)}
 
 	window := test.NewWindow(widget)
-	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 
 	func() {
 		select {
@@ -47,7 +46,7 @@ func TestApplyThemeCalledChild(t *testing.T) {
 	parent := NewVBox(child)
 
 	window := test.NewWindow(parent)
-	fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	func() {
 		select {
 		case <-child.refreshed:

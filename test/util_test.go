@@ -37,6 +37,7 @@ func TestAssertCanvasTappableAt(t *testing.T) {
 }
 
 func TestAssertImageMatches(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	bounds := image.Rect(0, 0, 100, 50)
 	img := image.NewNRGBA(bounds)
 	draw.Draw(img, bounds, image.NewUniform(color.White), image.ZP, draw.Src)

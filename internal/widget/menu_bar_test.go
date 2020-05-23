@@ -11,15 +11,13 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	publicWidgets "fyne.io/fyne/widget"
 )
 
 func TestMenuBar(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(test.MonoTheme())
 
 	w := test.NewWindow(nil)
 	defer w.Close()
@@ -54,14 +52,15 @@ func TestMenuBar(t *testing.T) {
 	menuBar := widget.NewMenuBar(menu, c)
 
 	themeCounter := 0
+	prefix := "mono-"
 	button := publicWidgets.NewButton("Button", func() {
 		switch themeCounter % 3 {
 		case 0:
-			test.ApplyTheme(t, theme.DarkTheme())
-		case 1:
+			test.ApplyTheme(t, test.MonoTheme())
+			prefix = "mono-"
+		case 1, 2:
 			test.ApplyTheme(t, test.NewTheme())
-		default:
-			test.ApplyTheme(t, theme.LightTheme())
+			prefix = "ugly-"
 		}
 		themeCounter++
 	})
@@ -318,7 +317,7 @@ func TestMenuBar(t *testing.T) {
 							test.TapCanvas(c, a.pos)
 						}
 					}
-					test.AssertImageMatches(t, s.wantImage, c.Capture())
+					test.AssertImageMatches(t, prefix+s.wantImage, c.Capture())
 					assert.Equal(t, s.wantAction, lastAction, "last action should match expected")
 				})
 			}

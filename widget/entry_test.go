@@ -123,6 +123,7 @@ func TestEntry_SetText_Overflow(t *testing.T) {
 }
 
 func TestEntry_SetText_Manual(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -156,6 +157,7 @@ func TestEntry_SetReadOnly_KeyDown(t *testing.T) {
 }
 
 func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -183,6 +185,7 @@ func TestEntry_OnKeyDown_Insert(t *testing.T) {
 }
 
 func TestEntry_OnKeyDown_Newline(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupImageTest(true)
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -360,6 +363,7 @@ func TestEntryNotify(t *testing.T) {
 }
 
 func TestEntryFocus(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -377,6 +381,7 @@ func TestEntryFocus(t *testing.T) {
 }
 
 func TestEntry_Tapped(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupImageTest(true)
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -418,6 +423,7 @@ func TestEntry_Tapped(t *testing.T) {
 }
 
 func TestEntry_TappedSecondary(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -449,6 +455,7 @@ func TestEntry_TappedSecondary(t *testing.T) {
 }
 
 func TestEntry_FocusWithPopUp(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -708,6 +715,7 @@ func TestPasswordEntry_NewlineIgnored(t *testing.T) {
 }
 
 func TestPasswordEntry_Obfuscation(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupPasswordImageTest()
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -865,6 +873,7 @@ func TestEntry_PasteOverSelection(t *testing.T) {
 }
 
 func TestPasswordEntry_Placeholder(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	entry, window := setupPasswordImageTest()
 	defer teardownImageTest(window)
 	c := window.Canvas()
@@ -921,6 +930,7 @@ func TestEntry_SelectedText(t *testing.T) {
 	e, window := setupImageTest(false)
 	defer teardownImageTest(window)
 	c := window.Canvas()
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 
 	c.Focus(e)
 	e.SetText("Testing")
@@ -972,6 +982,7 @@ func setupSelection(reverse bool) (*widget.Entry, fyne.Window) {
 
 func TestEntry_SelectionHides(t *testing.T) {
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -986,6 +997,7 @@ func TestEntry_SelectionHides(t *testing.T) {
 
 func TestEntry_SelectHomeEnd(t *testing.T) {
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1002,6 +1014,7 @@ func TestEntry_SelectHomeEnd(t *testing.T) {
 
 func TestEntry_SelectHomeWithoutShift(t *testing.T) {
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1014,6 +1027,7 @@ func TestEntry_SelectHomeWithoutShift(t *testing.T) {
 
 func TestEntry_SelectEndWithoutShift(t *testing.T) {
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1026,6 +1040,7 @@ func TestEntry_SelectEndWithoutShift(t *testing.T) {
 
 func TestEntry_MultilineSelect(t *testing.T) {
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1044,6 +1059,7 @@ func TestEntry_MultilineSelect(t *testing.T) {
 
 func TestEntry_SelectAll(t *testing.T) {
 	e, window := setupImageTest(true)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1060,6 +1076,7 @@ func TestEntry_SelectAll(t *testing.T) {
 
 func TestEntry_SelectSnapRight(t *testing.T) {
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1075,6 +1092,7 @@ func TestEntry_SelectSnapRight(t *testing.T) {
 
 func TestEntry_SelectSnapLeft(t *testing.T) {
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1091,6 +1109,7 @@ func TestEntry_SelectSnapLeft(t *testing.T) {
 func TestEntry_SelectSnapDown(t *testing.T) {
 	// down snaps to end, but it also moves
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1107,6 +1126,7 @@ func TestEntry_SelectSnapDown(t *testing.T) {
 func TestEntry_SelectSnapUp(t *testing.T) {
 	// up snaps to start, but it also moves
 	e, window := setupSelection(false)
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	defer teardownImageTest(window)
 	c := window.Canvas()
 
@@ -1308,7 +1328,7 @@ func TestEntry_EmptySelection(t *testing.T) {
 func TestPasswordEntry_Reveal(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(test.MonoTheme())
 
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := widget.NewPasswordEntry()
@@ -1529,7 +1549,7 @@ func TestEntry_TextWrap(t *testing.T) {
 
 func setupImageTest(multiLine bool) (*widget.Entry, fyne.Window) {
 	app := test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(test.MonoTheme())
 
 	entry := &widget.Entry{MultiLine: multiLine}
 	w := test.NewWindow(entry)
@@ -1547,7 +1567,7 @@ func setupImageTest(multiLine bool) (*widget.Entry, fyne.Window) {
 
 func setupPasswordImageTest() (*widget.Entry, fyne.Window) {
 	app := test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(test.MonoTheme())
 
 	entry := widget.NewPasswordEntry()
 	w := test.NewWindow(entry)

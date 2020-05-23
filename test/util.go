@@ -37,6 +37,7 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 	require.NoError(t, err)
 	masterPath := filepath.Join(wd, "testdata", masterFilename)
 	failedPath := filepath.Join(wd, "testdata/failed", masterFilename)
+	os.Remove(failedPath)
 	_, err = os.Stat(masterPath)
 	if os.IsNotExist(err) {
 		require.NoError(t, writeImage(failedPath, img))

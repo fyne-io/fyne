@@ -93,7 +93,7 @@ func (a *testApp) lastNotificationSent() *fyne.Notification {
 // NewApp returns a new dummy app used for testing.
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
-	settings := &testSettings{scale: 1.0}
+	settings := &testSettings{scale: 1.0: theme: MonoTheme()}
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, driver: NewDriver().(*testDriver)}
 	fyne.SetCurrentApp(test)

@@ -153,6 +153,7 @@ func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
 }
 
 func TestLabel_ChangeTruncate(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	c := test.NewCanvasWithPainter(software.NewPainter())
 	c.SetPadded(false)
 	text := NewLabel("Hello")

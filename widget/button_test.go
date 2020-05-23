@@ -118,9 +118,10 @@ func TestButton_Disabled(t *testing.T) {
 }
 
 func TestButton_Layout(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.MonoTheme())
 
 	for name, tt := range map[string]struct {
 		text      string

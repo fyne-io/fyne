@@ -78,7 +78,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 func TestSelectEntry_DropDown(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(test.MonoTheme())
 
 	options := []string{"A", "B", "C"}
 	e := widget.NewSelectEntry(options)
@@ -111,7 +111,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 func TestSelectEntry_DropDownResize(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	app.Settings().SetTheme(test.MonoTheme())
 
 	options := []string{"A", "B", "C"}
 	e := widget.NewSelectEntry(options)
