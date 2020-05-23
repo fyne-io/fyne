@@ -100,7 +100,6 @@ func TestMenu_ItemWithChildTapped(t *testing.T) {
 }
 
 func TestMenu_Layout(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	test.NewApp()
 	defer test.NewApp()
 
