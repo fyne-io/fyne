@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 )
 
 func TestMenu_ItemTapped(t *testing.T) {
@@ -63,7 +62,6 @@ func TestMenu_ItemTapped(t *testing.T) {
 func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.DarkTheme())
 
 	w := app.NewWindow("")
 	defer w.Close()

@@ -18,7 +18,6 @@ import (
 func TestTabContainer_ApplyTheme(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	w := test.NewWindow(
 		widget.NewTabContainer(&widget.TabItem{Text: "Test", Content: widget.NewLabel("Text")}),
@@ -30,9 +29,6 @@ func TestTabContainer_ApplyTheme(t *testing.T) {
 
 	test.AssertImageMatches(t, "tabcontainer/desktop/single_initial.png", c.Capture())
 
-	test.ApplyTheme(t, theme.DarkTheme())
-	test.AssertImageMatches(t, "tabcontainer/desktop/single_dark.png", c.Capture())
-
 	test.ApplyTheme(t, test.NewTheme())
 	test.AssertImageMatches(t, "tabcontainer/desktop/single_custom_theme.png", c.Capture())
 }
@@ -40,7 +36,6 @@ func TestTabContainer_ApplyTheme(t *testing.T) {
 func TestTabContainer_ChangeItemContent(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	item1 := &widget.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &widget.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -65,7 +60,6 @@ func TestTabContainer_ChangeItemContent(t *testing.T) {
 func TestTabContainer_ChangeItemIcon(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	item1 := &widget.TabItem{Icon: theme.CancelIcon(), Content: widget.NewLabel("Text1")}
 	item2 := &widget.TabItem{Icon: theme.ConfirmIcon(), Content: widget.NewLabel("Text2")}
@@ -90,7 +84,6 @@ func TestTabContainer_ChangeItemIcon(t *testing.T) {
 func TestTabContainer_ChangeItemText(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	item1 := &widget.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &widget.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -115,7 +108,6 @@ func TestTabContainer_ChangeItemText(t *testing.T) {
 func TestTabContainer_DynamicTabs(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	item1 := &widget.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	tabs := widget.NewTabContainer(item1)
@@ -168,7 +160,6 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 func TestTabContainer_HoverButtons(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	item1 := &widget.TabItem{Text: "Test1", Content: widget.NewLabel("Text1")}
 	item2 := &widget.TabItem{Text: "Test2", Content: widget.NewLabel("Text2")}
@@ -194,7 +185,6 @@ func TestTabContainer_HoverButtons(t *testing.T) {
 func TestTabContainer_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	w := test.NewWindow(nil)
 	defer w.Close()
@@ -295,7 +285,6 @@ func TestTabContainer_Layout(t *testing.T) {
 func TestTabContainer_SetTabLocation(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	item1 := &widget.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	item2 := &widget.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}
@@ -329,7 +318,6 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 func TestTabContainer_Tapped(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	item1 := &widget.TabItem{Text: "Test1", Content: widget.NewLabel("Text 1")}
 	item2 := &widget.TabItem{Text: "Test2", Content: widget.NewLabel("Text 2")}

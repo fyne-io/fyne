@@ -15,9 +15,8 @@ import (
 )
 
 func TestMenuBar(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
 
 	w := test.NewWindow(nil)
 	defer w.Close()

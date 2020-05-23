@@ -1326,9 +1326,8 @@ func TestEntry_EmptySelection(t *testing.T) {
 }
 
 func TestPasswordEntry_Reveal(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
 
 	t.Run("NewPasswordEntry constructor", func(t *testing.T) {
 		entry := widget.NewPasswordEntry()
@@ -1548,8 +1547,7 @@ func TestEntry_TextWrap(t *testing.T) {
 }
 
 func setupImageTest(multiLine bool) (*widget.Entry, fyne.Window) {
-	app := test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
+	test.NewApp()
 
 	entry := &widget.Entry{MultiLine: multiLine}
 	w := test.NewWindow(entry)
@@ -1566,8 +1564,7 @@ func setupImageTest(multiLine bool) (*widget.Entry, fyne.Window) {
 }
 
 func setupPasswordImageTest() (*widget.Entry, fyne.Window) {
-	app := test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
+	test.NewApp()
 
 	entry := widget.NewPasswordEntry()
 	w := test.NewWindow(entry)

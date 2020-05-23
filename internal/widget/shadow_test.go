@@ -14,9 +14,8 @@ import (
 var shadowLevel = widget.ElevationLevel(5)
 
 func TestShadow_ApplyTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
 	w := test.NewWindow(s)
@@ -35,9 +34,8 @@ func TestShadow_ApplyTheme(t *testing.T) {
 }
 
 func TestShadow_AroundShadow(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
 	w := test.NewWindow(s)
@@ -50,9 +48,8 @@ func TestShadow_AroundShadow(t *testing.T) {
 }
 
 func TestShadow_Transparency(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
 	w := test.NewWindow(s)
@@ -69,9 +66,8 @@ func TestShadow_Transparency(t *testing.T) {
 }
 
 func TestShadow_BottomShadow(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
 
 	s := widget.NewShadow(widget.ShadowBottom, shadowLevel)
 	w := test.NewWindow(s)
@@ -88,9 +84,8 @@ func TestShadow_MinSize(t *testing.T) {
 }
 
 func TestShadow_TopShadow(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(test.MonoTheme())
 
 	s := widget.NewShadow(widget.ShadowTop, shadowLevel)
 	w := test.NewWindow(s)

@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 )
 
 func TestMenu_ItemWithChildTapped(t *testing.T) {
@@ -71,7 +70,6 @@ func TestMenu_ItemWithChildTapped(t *testing.T) {
 func TestMenu_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.MonoTheme())
 
 	w := test.NewWindow(nil)
 	defer w.Close()
