@@ -16,6 +16,7 @@ import (
 )
 
 func TestMenuBar(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	app := test.NewApp()
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())

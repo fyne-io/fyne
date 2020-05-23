@@ -1,8 +1,9 @@
 package test
 
 import (
-	"fyne.io/fyne/theme"
 	"image/color"
+
+	"fyne.io/fyne/theme"
 
 	"fyne.io/fyne"
 )
@@ -24,7 +25,7 @@ func MonoTheme() fyne.Theme {
 		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
 		primary:        color.NRGBA{0x66, 0x66, 0x66, 0xff},
 		scrollBar:      color.NRGBA{0x11, 0x11, 0x11, 0xff},
-		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x60},
+		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0xff},
 	}
 	return theme
 }

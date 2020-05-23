@@ -71,7 +71,7 @@ func TestMenu_ItemWithChildTapped(t *testing.T) {
 func TestMenu_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.DarkTheme())
+	test.ApplyTheme(t, theme.MonoTheme())
 
 	w := test.NewWindow(nil)
 	defer w.Close()

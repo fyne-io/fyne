@@ -16,7 +16,7 @@ var shadowLevel = widget.ElevationLevel(5)
 func TestShadow_ApplyTheme(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.DarkTheme())
+	app.Settings().SetTheme(theme.MonoTheme())
 
 	s := widget.NewShadow(widget.ShadowAround, shadowLevel)
 	w := test.NewWindow(s)
