@@ -102,7 +102,7 @@ func NewApp() fyne.App {
 	test.Settings().AddChangeListener(listener)
 	go func() {
 		for {
-			_ = <-listener
+			<-listener
 			painter.SvgCacheReset()
 			app.ApplySettings(test.Settings(), test)
 

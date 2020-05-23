@@ -62,30 +62,6 @@ func DarkTheme() fyne.Theme {
 	return theme
 }
 
-// MonoTheme is a monochrome theme
-// This should be used for running test cases so that any future changes
-// to the colored themes do not require regenerating all the test images
-func MonoTheme() fyne.Theme {
-	theme := &builtinTheme{
-		background:     color.NRGBA{0x44, 0x44, 0x44, 0xff},
-		button:         color.NRGBA{0x33, 0x33, 0x33, 0xff},
-		hover:          color.NRGBA{0x55, 0x55, 0x55, 0xff},
-		disabledButton: color.NRGBA{0x22, 0x22, 0x22, 0xff},
-		text:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		disabledText:   color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		icon:           color.NRGBA{0xee, 0xee, 0xee, 0xff},
-		disabledIcon:   color.NRGBA{0xaa, 0xaa, 0xaa, 0xff},
-		hyperlink:      color.NRGBA{0x99, 0x99, 0x99, 0xff},
-		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		primary:        color.NRGBA{0x66, 0x66, 0x66, 0xff},
-		scrollBar:      color.NRGBA{0x11, 0x11, 0x11, 0xff},
-		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x60},
-	}
-
-	theme.initFonts()
-	return theme
-}
-
 func (t *builtinTheme) BackgroundColor() color.Color {
 	return t.background
 }
@@ -161,7 +137,7 @@ func (t *builtinTheme) TextSize() int {
 }
 
 func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
-	variantPath := strings.Replace(env, "Regular", variant, 0)
+	variantPath := strings.Replace(env, "Regular", variant, 1)
 
 	res, err := fyne.LoadResourceFromPath(variantPath)
 	if err != nil {

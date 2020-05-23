@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/cmd/fyne_demo/data"
 	"fyne.io/fyne/cmd/fyne_demo/screens"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -60,7 +61,7 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 					a.Settings().SetTheme(theme.LightTheme())
 				}),
 				widget.NewButton("Mono", func() {
-					a.Settings().SetTheme(theme.MonoTheme())
+					a.Settings().SetTheme(test.MonoTheme())
 				}),
 			),
 		),

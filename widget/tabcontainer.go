@@ -493,7 +493,7 @@ func (r *tabButtonRenderer) BackgroundColor() color.Color {
 	case r.button.Style == PrimaryButton:
 		c := theme.PrimaryColor()
 		if r.button.hovered {
-			c = theme.Brighten(c, 1)
+			c = theme.Brighten(c, 1.16)
 		}
 		return c
 	case r.button.hovered:

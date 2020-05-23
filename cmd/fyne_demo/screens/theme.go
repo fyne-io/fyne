@@ -20,7 +20,7 @@ type customTheme struct {
 
 func (c *customTheme) BackgroundColor() color.Color {
 	if c.DarkMode {
-		return theme.Brighten(purple, -2)
+		return theme.Brighten(purple, 0.8)
 	}
 	return purple
 }
@@ -59,20 +59,20 @@ func (customTheme) PlaceHolderColor() color.Color {
 
 func (c *customTheme) PrimaryColor() color.Color {
 	if c.DarkMode {
-		return theme.Brighten(orange, -3)
+		return theme.Brighten(orange, 0.7)
 	}
 	return orange
 }
 
 func (c *customTheme) HoverColor() color.Color {
 	if c.DarkMode {
-		return theme.Brighten(orange, -2)
+		return theme.Brighten(orange, 0.8)
 	}
 	return orange
 }
 
 func (customTheme) FocusColor() color.Color {
-	theme.Brighten(orange, .8)
+	theme.Brighten(orange, 0.8)
 	return orange
 }
 

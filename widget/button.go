@@ -123,7 +123,7 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 	case b.button.Style == PrimaryButton:
 		c := theme.PrimaryColor()
 		if b.button.hovered {
-			c = theme.Brighten(c, 1)
+			c = theme.Brighten(c, 1.16)
 		}
 		return c
 	case b.button.hovered:
