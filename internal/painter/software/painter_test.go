@@ -29,6 +29,7 @@ func makeTestImage() image.Image {
 }
 
 func TestPainter_PaintImage(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(canvas.NewImageFromImage(makeTestImage()))
@@ -40,6 +41,7 @@ func TestPainter_PaintImage(t *testing.T) {
 }
 
 func TestPainter_PaintImage_StretchX(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(canvas.NewImageFromImage(makeTestImage()))
@@ -51,6 +53,7 @@ func TestPainter_PaintImage_StretchX(t *testing.T) {
 }
 
 func TestPainter_PaintImage_StretchY(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(canvas.NewImageFromImage(makeTestImage()))
@@ -62,6 +65,7 @@ func TestPainter_PaintImage_StretchY(t *testing.T) {
 }
 
 func TestPainter_PaintImage_Contain(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.FillMode = canvas.ImageFillContain
 	c := test.NewCanvas()
@@ -75,6 +79,7 @@ func TestPainter_PaintImage_Contain(t *testing.T) {
 }
 
 func TestPainter_PaintImage_ContainX(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	test.ApplyTheme(t, theme.LightTheme())
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.FillMode = canvas.ImageFillContain
@@ -89,6 +94,7 @@ func TestPainter_PaintImage_ContainX(t *testing.T) {
 }
 
 func TestPainter_PaintImage_ContainY(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	test.ApplyTheme(t, theme.LightTheme())
 	img := canvas.NewImageFromImage(makeTestImage())
 	img.FillMode = canvas.ImageFillContain

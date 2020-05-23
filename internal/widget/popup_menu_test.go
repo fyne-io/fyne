@@ -10,11 +10,9 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 )
 
 func TestPopUpMenu_Move(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	m, w := setupPopUpMenuTest()
 	defer tearDownPopUpMenuTest(w)
 	c := w.Canvas()
@@ -33,7 +31,6 @@ func TestPopUpMenu_Move(t *testing.T) {
 }
 
 func TestPopUpMenu_Resize(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	m, w := setupPopUpMenuTest()
 	defer tearDownPopUpMenuTest(w)
 	c := w.Canvas()
@@ -51,7 +48,6 @@ func TestPopUpMenu_Resize(t *testing.T) {
 }
 
 func TestPopUpMenu_Show(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	m, w := setupPopUpMenuTest()
 	defer tearDownPopUpMenuTest(w)
 	c := w.Canvas()
@@ -63,7 +59,6 @@ func TestPopUpMenu_Show(t *testing.T) {
 }
 
 func TestPopUpMenu_ShowAtPosition(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	m, w := setupPopUpMenuTest()
 	defer tearDownPopUpMenuTest(w)
 	c := w.Canvas()
@@ -96,9 +91,8 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 }
 
 func setupPopUpMenuTest() (*widget.PopUpMenu, fyne.Window) {
-	fyne.CurrentApp().Settings().SetTheme(test.MonoTheme())
 	app := test.NewApp()
-	app.Settings().SetTheme(theme.DarkTheme())
+	app.Settings().SetTheme(test.MonoTheme())
 
 	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
 	w.Resize(fyne.NewSize(200, 200))
