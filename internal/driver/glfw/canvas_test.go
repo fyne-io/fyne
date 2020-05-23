@@ -16,6 +16,7 @@ import (
 )
 
 func TestGlCanvas_Content(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	content := &canvas.Circle{}
 	w := createWindow("Test")
 	w.SetContent(content)
@@ -24,12 +25,14 @@ func TestGlCanvas_Content(t *testing.T) {
 }
 
 func TestGlCanvas_NilContent(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test")
 
 	assert.NotNil(t, w.Content()) // never a nil canvas so we have a sensible fallback
 }
 
 func TestGlCanvas_Resize(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test")
 	w.SetPadded(false)
 
@@ -45,6 +48,7 @@ func TestGlCanvas_Resize(t *testing.T) {
 
 // TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test")
 	w.SetPadded(false)
 
@@ -67,6 +71,7 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 
 // TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test")
 	w.SetPadded(false)
 
@@ -87,6 +92,7 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 }
 
 func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test")
 	w.SetPadded(false)
 
@@ -119,6 +125,7 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 }
 
 func TestGlCanvas_Scale(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
 
@@ -127,6 +134,7 @@ func TestGlCanvas_Scale(t *testing.T) {
 }
 
 func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
 
@@ -143,7 +151,7 @@ func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
 }
 
 func Test_glCanvas_SetContent(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	var menuHeight int
 	if hasNativeMenu() {
 		menuHeight = 0
@@ -185,6 +193,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 }
 
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
@@ -215,6 +224,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
 }
 
 func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
@@ -252,6 +262,7 @@ func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
 }
 
 func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
 	leftObj1 := canvas.NewRectangle(color.Black)
@@ -298,6 +309,7 @@ func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll
 }
 
 func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test").(*window)
 	w.ignoreResize = true // for some reason the test is causing a WM resize event
 	c := w.Canvas().(*glCanvas)
@@ -338,6 +350,7 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 }
 
 func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test").(*window)
 	w.ignoreResize = true // for some reason the test is causing a WM resize event
 	c := w.Canvas().(*glCanvas)
@@ -374,6 +387,7 @@ func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) 
 }
 
 func Test_glCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	w := createWindow("Test").(*window)
 	w.ignoreResize = true
 	c := w.Canvas().(*glCanvas)
@@ -397,6 +411,7 @@ func Test_glCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t 
 }
 
 func Test_glCanvas_walkTree(t *testing.T) {
+	fyne.CurrentApp().Settings().SetTheme(theme.MonoTheme())
 	leftObj1 := canvas.NewRectangle(color.Gray16{Y: 1})
 	leftObj2 := canvas.NewRectangle(color.Gray16{Y: 2})
 	leftCol := &modifiableBox{Box: widget.NewVBox(leftObj1, leftObj2)}
