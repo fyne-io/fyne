@@ -143,7 +143,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				}
 
 				fileOpened(reader)
-			}, win)
+			}, win, nil)
 		}),
 		widget.NewButton("File Save", func() {
 			dialog.ShowFileSave(func(writer fyne.FileWriteCloser, err error) {
@@ -153,7 +153,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				}
 
 				fileSaved(writer)
-			}, win)
+			}, win, nil)
 		}),
 		widget.NewButton("Custom Dialog (Login Form)", func() {
 			username := widget.NewEntry()
