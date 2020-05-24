@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -155,7 +156,10 @@ func (f *fileDialog) refreshDir(dir string) {
 	var icons []fyne.CanvasObject
 	parent := filepath.Dir(dir)
 	if parent != dir {
-		icons = append(icons, f.newFileItem(theme.FolderOpenIcon(), filepath.Dir(dir)))
+		fi := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
+			name: "(Parent)", path: filepath.Dir(dir), dir: true}
+		fi.ExtendBaseWidget(fi)
+		icons = append(icons, fi)
 	}
 	for _, file := range files {
 		if isHidden(file.Name(), dir) {
@@ -164,9 +168,9 @@ func (f *fileDialog) refreshDir(dir string) {
 
 		itemPath := filepath.Join(dir, file.Name())
 		if file.IsDir() {
-			icons = append(icons, f.newFileItem(theme.FolderIcon(), itemPath))
+			icons = append(icons, f.newFileItem(itemPath, true))
 		} else {
-			icons = append(icons, f.newFileItem(theme.FileIcon(), itemPath))
+			icons = append(icons, f.newFileItem(itemPath, false))
 		}
 	}
 

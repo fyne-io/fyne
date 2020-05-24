@@ -11,27 +11,27 @@ import (
 	"fyne.io/fyne/test"
 )
 
-func makeTestImage() image.Image {
-	src := image.NewNRGBA(image.Rect(0, 0, 3, 3))
-
-	for y := 0; y < 3; y++ {
-		for x := 0; x < 3; x++ {
-			if x == y {
-				src.Set(x, y, color.Black)
-			} else {
-				src.Set(x, y, color.White)
-			}
+func makeTestImage(w, h int) image.Image {
+	src := image.NewNRGBA(image.Rect(0, 0, w, h))
+	colors := []color.Color{color.White, color.Black}
+	c := 0
+	for y := 0; y < h; y++ {
+		c = y % 2
+		for x := 0; x < w; x++ {
+			src.Set(x, y, colors[c])
+			c = 1 - c
 		}
 	}
-
 	return src
 }
 
 func TestPainter_PaintImage(t *testing.T) {
 	test.ApplyTheme(t, test.MonoTheme())
+	img := canvas.NewImageFromImage(makeTestImage(3, 3))
+
 	c := test.NewCanvas()
 	c.SetPadded(false)
-	c.SetContent(canvas.NewImageFromImage(makeTestImage()))
+	c.SetContent(img)
 	c.Resize(fyne.NewSize(50, 50))
 	p := software.NewPainter()
 
@@ -39,11 +39,39 @@ func TestPainter_PaintImage(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_default.png", target)
 }
 
+func TestPainter_PaintImageScalePixels(t *testing.T) {
+	img := canvas.NewImageFromImage(makeTestImage(3, 3))
+	img.ScaleMode = canvas.ImageScalePixels
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(50, 50))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_ImageScalePixels.png", target)
+}
+
+func TestPainter_PaintImageScaleSmooth(t *testing.T) {
+	img := canvas.NewImageFromImage(makeTestImage(3, 3))
+	img.ScaleMode = canvas.ImageScaleSmooth
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(50, 50))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_image_ImageScaleSmooth.png", target)
+}
+
 func TestPainter_PaintImage_StretchX(t *testing.T) {
 	test.ApplyTheme(t, test.MonoTheme())
 	c := test.NewCanvas()
 	c.SetPadded(false)
-	c.SetContent(canvas.NewImageFromImage(makeTestImage()))
+	c.SetContent(canvas.NewImageFromImage(makeTestImage(3, 3)))
 	c.Resize(fyne.NewSize(100, 50))
 	p := software.NewPainter()
 
@@ -55,7 +83,7 @@ func TestPainter_PaintImage_StretchY(t *testing.T) {
 	test.ApplyTheme(t, test.MonoTheme())
 	c := test.NewCanvas()
 	c.SetPadded(false)
-	c.SetContent(canvas.NewImageFromImage(makeTestImage()))
+	c.SetContent(canvas.NewImageFromImage(makeTestImage(3, 3)))
 	c.Resize(fyne.NewSize(50, 100))
 	p := software.NewPainter()
 
@@ -65,8 +93,10 @@ func TestPainter_PaintImage_StretchY(t *testing.T) {
 
 func TestPainter_PaintImage_Contain(t *testing.T) {
 	test.ApplyTheme(t, test.MonoTheme())
-	img := canvas.NewImageFromImage(makeTestImage())
+	img := canvas.NewImageFromImage(makeTestImage(3, 3))
 	img.FillMode = canvas.ImageFillContain
+	img.ScaleMode = canvas.ImageScalePixels
+
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
@@ -74,13 +104,15 @@ func TestPainter_PaintImage_Contain(t *testing.T) {
 	p := software.NewPainter()
 
 	target := p.Paint(c)
-	test.AssertImageMatches(t, "draw_image_default.png", target)
+	test.AssertImageMatches(t, "draw_image_contain.png", target)
 }
 
 func TestPainter_PaintImage_ContainX(t *testing.T) {
 	test.ApplyTheme(t, test.MonoTheme())
-	img := canvas.NewImageFromImage(makeTestImage())
+	img := canvas.NewImageFromImage(makeTestImage(3, 4))
 	img.FillMode = canvas.ImageFillContain
+	img.ScaleMode = canvas.ImageScalePixels
+
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)
@@ -93,8 +125,10 @@ func TestPainter_PaintImage_ContainX(t *testing.T) {
 
 func TestPainter_PaintImage_ContainY(t *testing.T) {
 	test.ApplyTheme(t, test.MonoTheme())
-	img := canvas.NewImageFromImage(makeTestImage())
+	img := canvas.NewImageFromImage(makeTestImage(4, 3))
 	img.FillMode = canvas.ImageFillContain
+	img.ScaleMode = canvas.ImageScalePixels
+
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	c.SetContent(img)

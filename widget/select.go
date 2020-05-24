@@ -65,7 +65,16 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 }
 
 func (s *selectRenderer) Refresh() {
-	s.combo.propertyLock.Lock()
+	s.combo.propertyLock.RLock()
+	s.updateLabel()
+	s.updateIcon()
+	s.combo.propertyLock.RUnlock()
+
+	s.Layout(s.combo.Size())
+	canvas.Refresh(s.combo.super())
+}
+
+func (s *selectRenderer) updateLabel() {
 	s.label.Color = theme.TextColor()
 	s.label.TextSize = theme.TextSize()
 
@@ -78,16 +87,14 @@ func (s *selectRenderer) Refresh() {
 	} else {
 		s.label.Text = s.combo.Selected
 	}
+}
 
+func (s *selectRenderer) updateIcon() {
 	if false { // s.combo.down {
 		s.icon.Resource = theme.MenuDropUpIcon()
 	} else {
 		s.icon.Resource = theme.MenuDropDownIcon()
 	}
-	s.combo.propertyLock.Unlock()
-
-	s.Layout(s.combo.Size())
-	canvas.Refresh(s.combo.super())
 }
 
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
@@ -188,6 +195,8 @@ func (s *Select) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
 	icon := NewIcon(theme.MenuDropDownIcon())
 	text := canvas.NewText(s.Selected, theme.TextColor())
 
@@ -200,7 +209,10 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	text.Alignment = fyne.TextAlignLeading
 
 	objects := []fyne.CanvasObject{text, icon}
-	return &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, text, s}
+	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, text, s}
+	r.updateLabel()
+	r.updateIcon()
+	return r
 }
 
 // ClearSelected clears the current option of the select widget.  After

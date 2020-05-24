@@ -14,6 +14,7 @@ func TestNewURI(t *testing.T) {
 	assert.Equal(t, uriStr, u.String())
 	assert.Equal(t, "file", u.Scheme())
 	assert.Equal(t, ".txt", u.Extension())
+	assert.Equal(t, "text/plain", u.MimeType())
 }
 
 func TestNewURI_Content(t *testing.T) {
@@ -24,4 +25,5 @@ func TestNewURI_Content(t *testing.T) {
 	assert.Equal(t, uriStr, u.String())
 	assert.Equal(t, "content", u.Scheme())
 	assert.Equal(t, ".png", u.Extension())
+	assert.Equal(t, "image/png", u.MimeType())
 }
