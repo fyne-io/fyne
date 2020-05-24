@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -29,9 +28,9 @@ type fileIconRenderer struct {
 const ratioDown float64 = 0.45
 
 // NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
-func NewFileIcon(path string) fyne.CanvasObject {
+func NewFileIcon(uri fyne.URI) fyne.CanvasObject {
 
-	ext, mimeType, mimeSubType := mimeTypeGet(storage.NewURI(path))
+	ext, mimeType, mimeSubType := mimeTypeGet(uri)
 
 	var res fyne.Resource
 	switch mimeType {
