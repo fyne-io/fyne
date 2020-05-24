@@ -279,7 +279,7 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 }
 
 func showFileDialog(save bool, callback interface{}, parent fyne.Window, filter FileFilter) {
-	d := &fileDialog{callback: callback, save: save, parent: parent}
+	d := &fileDialog{callback: callback, save: save, parent: parent, filter: filter}
 	ui := d.makeUI()
 	dir, err := os.UserHomeDir()
 	if err != nil {
@@ -311,7 +311,16 @@ func NewMimeTypeFileFilter(mimeTypes []string) FileFilter {
 
 // ShowFileOpen shows a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified.
-func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window, filter FileFilter) {
+func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) {
+	if fileOpenOSOverride(callback, parent) {
+		return
+	}
+	showFileDialog(false, callback, parent, nil)
+}
+
+// ShowFileOpenWithFilter shows a file dialog with a filter limiting displayed files to choose a file to open.
+// The dialog will appear over the window specified.
+func ShowFileOpenWithFilter(callback func(fyne.FileReadCloser, error), parent fyne.Window, filter FileFilter) {
 	if fileOpenOSOverride(callback, parent) {
 		return
 	}
@@ -321,7 +330,17 @@ func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window,
 // ShowFileSave shows a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified.
-func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window, filter FileFilter) {
+func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) {
+	if fileSaveOSOverride(callback, parent) {
+		return
+	}
+	showFileDialog(true, callback, parent, nil)
+}
+
+// ShowFileSaveWithFilter shows a file dialog with a filter limiting displayed files to choose a file to save to (new or overwrite).
+// If the user chooses an existing file they will be asked if they are sure.
+// The dialog will appear over the window specified.
+func ShowFileSaveWithFilter(callback func(fyne.FileWriteCloser, error), parent fyne.Window, filter FileFilter) {
 	if fileSaveOSOverride(callback, parent) {
 		return
 	}

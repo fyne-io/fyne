@@ -143,7 +143,17 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				}
 
 				fileOpened(reader)
-			}, win, nil)
+			}, win)
+		}),
+		widget.NewButton("File Open With Filter (only show txt or png)", func() {
+			dialog.ShowFileOpenWithFilter(func(reader fyne.FileReadCloser, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+
+				fileOpened(reader)
+			}, win, dialog.NewExtensionFileFilter([]string{".png", ".txt"}))
 		}),
 		widget.NewButton("File Save", func() {
 			dialog.ShowFileSave(func(writer fyne.FileWriteCloser, err error) {
@@ -153,7 +163,17 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				}
 
 				fileSaved(writer)
-			}, win, nil)
+			}, win)
+		}),
+		widget.NewButton("File Save With Filter (only show images)", func() {
+			dialog.ShowFileSaveWithFilter(func(writer fyne.FileWriteCloser, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+
+				fileSaved(writer)
+			}, win, dialog.NewMimeTypeFileFilter([]string{"image/*"}))
 		}),
 		widget.NewButton("Custom Dialog (Login Form)", func() {
 			username := widget.NewEntry()
