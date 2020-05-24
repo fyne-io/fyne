@@ -81,15 +81,54 @@ func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 }
 
 func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
+	if rect, ok := rect.(*canvas.Rectangle); ok {
+		width := p.textureScaleInt(rect.Size().Width + vectorPad*2)
+		height := p.textureScaleInt(rect.Size().Height + vectorPad*2)
+		stroke := rect.StrokeWidth * p.canvas.Scale() * p.texScale
+
+		raw := image.NewRGBA(image.Rect(0, 0, width, height))
+		scanner := rasterx.NewScannerGV(rect.Size().Width, rect.Size().Height, raw, raw.Bounds())
+
+		if rect.FillColor != nil {
+			filler := rasterx.NewFiller(width, height, scanner)
+			filler.SetColor(rect.FillColor)
+			rasterx.AddRect(0, 0, float64(width), float64(height), 0, filler)
+			filler.Draw()
+		}
+
+		if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
+			buf := float64(stroke / 2)
+			p1x, p1y := float64(0), float64(0)
+			p2x, p2y := float64(width), float64(0)
+			p3x, p3y := float64(width), float64(height)
+			p4x, p4y := float64(0), float64(height)
+
+			dasher := rasterx.NewDasher(width, height, scanner)
+			dasher.SetColor(rect.StrokeColor)
+			dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+			dasher.Start(rasterx.ToFixedP(p1x, p1y+buf))
+			dasher.Line(rasterx.ToFixedP(p2x, p2y+buf))
+			dasher.Stop(false)
+			dasher.Start(rasterx.ToFixedP(p2x-buf, p2y))
+			dasher.Line(rasterx.ToFixedP(p3x-buf, p3y))
+			dasher.Stop(false)
+			dasher.Start(rasterx.ToFixedP(p3x, p3y-buf))
+			dasher.Line(rasterx.ToFixedP(p4x, p4y-buf))
+			dasher.Stop(false)
+			dasher.Start(rasterx.ToFixedP(p4x+buf, p4y))
+			dasher.Line(rasterx.ToFixedP(p1x+buf, p1y))
+			dasher.Stop(false)
+			dasher.Draw()
+		}
+
+		return p.imgToTexture(raw, canvas.ImageScaleSmooth)
+	}
+
 	col := theme.BackgroundColor()
 	if wid, ok := rect.(fyne.Widget); ok {
 		widCol := cache.Renderer(wid).BackgroundColor()
 		if widCol != nil {
 			col = widCol
-		}
-	} else if rect, ok := rect.(*canvas.Rectangle); ok {
-		if rect.FillColor != nil {
-			col = rect.FillColor
 		}
 	}
 
