@@ -28,7 +28,7 @@ func (i *menuBarItem) Child() *publicWidget.Menu {
 	if i.child == nil {
 		child := publicWidget.NewMenu(i.Menu)
 		child.Hide()
-		child.DismissAction = i.Parent.deactivate
+		child.OnDismiss = i.Parent.deactivate
 		i.child = child
 	}
 	return i.child

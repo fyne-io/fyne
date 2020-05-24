@@ -33,7 +33,7 @@ func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	p.overlay = o
 
 	focused := c.Focused()
-	p.DismissAction = func() {
+	p.OnDismiss = func() {
 		if c.Focused() == nil {
 			c.Focus(focused)
 		}

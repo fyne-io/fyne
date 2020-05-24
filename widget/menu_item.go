@@ -39,7 +39,7 @@ func (i *menuItem) Child() *Menu {
 	if i.Item.ChildMenu != nil && i.child == nil {
 		child := NewMenu(i.Item.ChildMenu)
 		child.Hide()
-		child.DismissAction = i.Parent.Dismiss
+		child.OnDismiss = i.Parent.Dismiss
 		i.child = child
 	}
 	return i.child

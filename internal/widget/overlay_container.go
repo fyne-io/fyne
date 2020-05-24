@@ -15,14 +15,14 @@ type OverlayContainer struct {
 	Base
 	Content fyne.CanvasObject
 
-	canvas        fyne.Canvas
-	dismissAction func()
-	shown         bool
+	canvas    fyne.Canvas
+	onDismiss func()
+	shown     bool
 }
 
 // NewOverlayContainer creates an OverlayContainer.
-func NewOverlayContainer(c fyne.CanvasObject, canvas fyne.Canvas, dismissAction func()) *OverlayContainer {
-	return &OverlayContainer{canvas: canvas, Content: c, dismissAction: dismissAction}
+func NewOverlayContainer(c fyne.CanvasObject, canvas fyne.Canvas, onDismiss func()) *OverlayContainer {
+	return &OverlayContainer{canvas: canvas, Content: c, onDismiss: onDismiss}
 }
 
 // CreateRenderer returns a new renderer for the overlay container.
@@ -96,8 +96,8 @@ func (o *OverlayContainer) Show() {
 // It performs the overlay container’s dismiss action.
 // Implements: fyne.Tappable
 func (o *OverlayContainer) Tapped(*fyne.PointEvent) {
-	if o.dismissAction != nil {
-		o.dismissAction()
+	if o.onDismiss != nil {
+		o.onDismiss()
 	}
 }
 
