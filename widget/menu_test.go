@@ -29,10 +29,10 @@ func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
 		fyne.NewMenuItem("Bar", func() { item2Hit = true }),
 	))
 	size := m.MinSize()
+	w.Resize(size.Add(fyne.NewSize(10, 10)))
 	m.Resize(size)
 	o := internalWidget.NewOverlayContainer(m, c, func() { overlayContainerHit = true })
 	w.SetContent(o)
-	w.Resize(size.Add(fyne.NewSize(10, 10)))
 
 	// tap on top padding
 	p := fyne.NewPos(5, 1)

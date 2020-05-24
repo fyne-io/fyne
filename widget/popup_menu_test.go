@@ -45,7 +45,7 @@ func TestPopUpMenu_Resize(t *testing.T) {
 	largeSize := c.Size().Add(fyne.NewSize(10, 10))
 	m.Resize(largeSize)
 	test.AssertImageMatches(t, "popup_menu/canvas_too_small.png", c.Capture())
-	assert.Equal(t, largeSize, m.Size())
+	assert.Equal(t, fyne.NewSize(largeSize.Width, c.Size().Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
 }
 
 func TestPopUpMenu_Show(t *testing.T) {
@@ -88,7 +88,7 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 
 	m.ShowAtPosition(fyne.NewPos(10, 10))
 	test.AssertImageMatches(t, "popup_menu/canvas_too_small.png", c.Capture())
-	assert.Equal(t, menuSize, m.Size())
+	assert.Equal(t, fyne.NewSize(menuSize.Width, c.Size().Height), m.Size(), "width is larger than canvas; height is limited by canvas (menu scrolls)")
 }
 
 func setupPopUpMenuTest() (*PopUpMenu, fyne.Window) {

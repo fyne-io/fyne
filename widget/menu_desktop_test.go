@@ -3,9 +3,12 @@
 package widget_test
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -16,7 +19,7 @@ func TestMenu_Layout(t *testing.T) {
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.DarkTheme())
 
-	w := test.NewWindow(nil)
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()
@@ -91,7 +94,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 130), // open subsubmenu
 			},
-			wantImage: "menu/desktop/layout_window_too_short.png",
+			wantImage: "menu/desktop/layout_window_too_short_for_submenu.png",
 		},
 		"theme change": {
 			windowSize:   fyne.NewSize(500, 300),
@@ -99,14 +102,20 @@ func TestMenu_Layout(t *testing.T) {
 			useTestTheme: true,
 			wantImage:    "menu/layout_theme_changed.png",
 		},
+		"window too short for menu": {
+			windowSize: fyne.NewSize(100, 50),
+			menuPos:    fyne.NewPos(10, 10),
+			wantImage:  "menu/layout_window_too_short.png",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			w.Resize(tt.windowSize)
 			m := widget.NewMenu(menu)
-			w.SetContent(m)
-			w.Resize(tt.windowSize) // SetContent changes window’s size
-			m.Resize(m.MinSize())
+			o := internalWidget.NewOverlayContainer(m, c, nil)
+			c.Overlays().Add(o)
+			defer c.Overlays().Remove(o)
 			m.Move(tt.menuPos)
+			m.Resize(m.MinSize())
 			for _, pos := range tt.mousePositions {
 				test.MoveMouse(c, pos)
 			}
@@ -119,4 +128,46 @@ func TestMenu_Layout(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMenu_Scrolling(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.DarkTheme())
+
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	menu := fyne.NewMenu("",
+		fyne.NewMenuItem("A", nil),
+		fyne.NewMenuItem("B", nil),
+		fyne.NewMenuItem("C", nil),
+		fyne.NewMenuItem("D", nil),
+		fyne.NewMenuItem("E", nil),
+		fyne.NewMenuItem("F", nil),
+	)
+
+	w.Resize(fyne.NewSize(100, 100))
+	m := widget.NewMenu(menu)
+	o := internalWidget.NewOverlayContainer(m, c, nil)
+	c.Overlays().Add(o)
+	defer c.Overlays().Remove(o)
+	m.Move(fyne.NewPos(10, 10))
+	m.Resize(m.MinSize())
+	maxScrollDistance := m.MinSize().Height - 90
+	test.AssertImageMatches(t, "menu/desktop/scroll_top.png", c.Capture())
+
+	test.Scroll(c, fyne.NewPos(20, 20), 0, -50)
+	test.AssertImageMatches(t, "menu/desktop/scroll_middle.png", c.Capture())
+
+	test.Scroll(c, fyne.NewPos(20, 20), 0, -maxScrollDistance)
+	test.AssertImageMatches(t, "menu/desktop/scroll_bottom.png", c.Capture())
+
+	test.Scroll(c, fyne.NewPos(20, 20), 0, maxScrollDistance-50)
+	test.AssertImageMatches(t, "menu/desktop/scroll_middle.png", c.Capture())
+
+	test.Scroll(c, fyne.NewPos(20, 20), 0, 50)
+	test.AssertImageMatches(t, "menu/desktop/scroll_top.png", c.Capture())
 }

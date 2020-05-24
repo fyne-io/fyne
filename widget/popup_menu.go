@@ -59,15 +59,14 @@ func (p *PopUpMenu) Hide() {
 // The position is absolute because pop-up menus are shown in an overlay which covers the whole canvas.
 // Implements: fyne.Widget
 func (p *PopUpMenu) Move(pos fyne.Position) {
-	p.Menu.Move(pos)
-	p.adjustPosition()
+	widget.MoveWidget(&p.Base, p, p.adjustedPosition(pos, p.Size()))
 }
 
 // Resize changes the size of the pop-up menu.
 // Implements: fyne.Widget
 func (p *PopUpMenu) Resize(size fyne.Size) {
+	widget.MoveWidget(&p.Base, p, p.adjustedPosition(p.Position(), size))
 	p.Menu.Resize(size)
-	p.adjustPosition()
 }
 
 // Show makes the pop-up menu visible.
@@ -83,24 +82,22 @@ func (p *PopUpMenu) ShowAtPosition(pos fyne.Position) {
 	p.Show()
 }
 
-func (p *PopUpMenu) adjustPosition() {
-	newX := p.Position().X
-	newY := p.Position().Y
-	if p.Position().X+p.Size().Width > p.canvas.Size().Width {
-		newX = p.canvas.Size().Width - p.Size().Width
-		if newX < 0 {
-			newX = 0 // TODO here we may need a scroller as it's wider than our canvas
+func (p *PopUpMenu) adjustedPosition(pos fyne.Position, size fyne.Size) fyne.Position {
+	x := pos.X
+	y := pos.Y
+	if x+size.Width > p.canvas.Size().Width {
+		x = p.canvas.Size().Width - size.Width
+		if x < 0 {
+			x = 0 // TODO here we may need a scroller as it's wider than our canvas
 		}
 	}
-	if p.Position().Y+p.Size().Height > p.canvas.Size().Height {
-		newY = p.canvas.Size().Height - p.Size().Height
-		if newY < 0 {
-			newY = 0 // TODO here we may need a scroller as it's longer than our canvas
+	if y+size.Height > p.canvas.Size().Height {
+		y = p.canvas.Size().Height - size.Height
+		if y < 0 {
+			y = 0 // TODO here we may need a scroller as it's longer than our canvas
 		}
 	}
-	if newX != p.Position().X || newY != p.Position().Y {
-		widget.MoveWidget(&p.Base, p, fyne.NewPos(newX, newY))
-	}
+	return fyne.NewPos(x, y)
 }
 
 //
