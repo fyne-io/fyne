@@ -10,7 +10,6 @@ var _ fyne.Layout = (*Box)(nil)
 // Box is a box layout for stacking a number of child canvas objects horizontally or vertically.
 type Box struct {
 	Horizontal        bool
-	PadBeforeAndAfter bool
 }
 
 // Layout is called to pack all child objects into a specified size.
@@ -36,28 +35,18 @@ func (b *Box) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		}
 	}
 
+	x, y := 0, 0
 	var extra int
 	if b.Horizontal {
 		extra = size.Width - total - (theme.Padding() * (len(objects) - len(spacers) - 1))
 	} else {
 		extra = size.Height - total - (theme.Padding() * (len(objects) - len(spacers) - 1))
 	}
-	if b.PadBeforeAndAfter {
-		extra -= theme.Padding() * 2
-	}
 	extraCell := 0
 	if len(spacers) > 0 {
 		extraCell = int(float64(extra) / float64(len(spacers)))
 	}
 
-	x, y := 0, 0
-	if b.PadBeforeAndAfter {
-		if b.Horizontal {
-			x = theme.Padding()
-		} else {
-			y = theme.Padding()
-		}
-	}
 	for _, child := range objects {
 		if !child.Visible() {
 			continue
@@ -91,13 +80,6 @@ func (b *Box) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // the sum of of all children combined with padding between each.
 func (b *Box) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	minSize := fyne.NewSize(0, 0)
-	if b.PadBeforeAndAfter {
-		if b.Horizontal {
-			minSize.Width = 2 * theme.Padding()
-		} else {
-			minSize.Height = 2 * theme.Padding()
-		}
-	}
 	addPadding := false
 	for _, child := range objects {
 		if !child.Visible() {

@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // NewRectangle returns a new Rectangle instance
@@ -129,22 +128,6 @@ func TestBox_HorizontalMiddleSpacer(t *testing.T) {
 	assert.Equal(t, cell3Pos, obj3.Position())
 }
 
-func TestBox_HorizontalPadBeforeAndAfter(t *testing.T) {
-	require.Greater(t, theme.Padding(), 0)
-	cellSize := fyne.NewSize(50, 50)
-
-	obj1 := NewMinSizeRect(cellSize)
-	obj2 := NewMinSizeRect(cellSize)
-
-	container := fyne.NewContainerWithLayout(&layout.Box{Horizontal: true, PadBeforeAndAfter: true}, obj1, obj2)
-	assert.Equal(t, container.MinSize(), fyne.NewSize(100+theme.Padding()+theme.Padding()*2, 50))
-
-	assert.Equal(t, fyne.NewPos(theme.Padding(), 0), obj1.Position())
-	assert.Equal(t, cellSize, obj1.Size())
-	assert.Equal(t, fyne.NewPos(cellSize.Width+theme.Padding()*2, 0), obj2.Position())
-	assert.Equal(t, cellSize, obj2.Size())
-}
-
 func TestBox_VerticalSimple(t *testing.T) {
 	cellSize := fyne.NewSize(50, 50)
 
@@ -251,20 +234,4 @@ func TestBox_VerticalMiddleSpacer(t *testing.T) {
 	assert.Equal(t, cell2Pos, obj2.Position())
 	cell3Pos := fyne.NewPos(0, 250)
 	assert.Equal(t, cell3Pos, obj3.Position())
-}
-
-func TestBox_VerticalPadBeforeAndAfter(t *testing.T) {
-	require.Greater(t, theme.Padding(), 0)
-	cellSize := fyne.NewSize(50, 50)
-
-	obj1 := NewMinSizeRect(cellSize)
-	obj2 := NewMinSizeRect(cellSize)
-
-	container := fyne.NewContainerWithLayout(&layout.Box{PadBeforeAndAfter: true}, obj1, obj2)
-	assert.Equal(t, container.MinSize(), fyne.NewSize(50, 100+theme.Padding()+theme.Padding()*2))
-
-	assert.Equal(t, fyne.NewPos(0, theme.Padding()), obj1.Position())
-	assert.Equal(t, cellSize, obj1.Size())
-	assert.Equal(t, fyne.NewPos(0, cellSize.Width+theme.Padding()*2), obj2.Position())
-	assert.Equal(t, cellSize, obj2.Size())
 }
