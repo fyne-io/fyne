@@ -103,7 +103,6 @@ func (b *boxRenderer) Refresh() {
 	for _, child := range b.Objects() {
 		child.Refresh()
 	}
-	b.Layout(b.box.Size())
 
 	canvas.Refresh(b.box)
 }

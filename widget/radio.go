@@ -100,9 +100,15 @@ func (r *radioRenderer) applyTheme() {
 }
 
 func (r *radioRenderer) Refresh() {
+	r.radio.propertyLock.RLock()
 	r.applyTheme()
 	r.radio.removeDuplicateOptions()
+	r.updateItems()
+	r.radio.propertyLock.RUnlock()
+	canvas.Refresh(r.radio.super())
+}
 
+func (r *radioRenderer) updateItems() {
 	if len(r.items) < len(r.radio.Options) {
 		for i := len(r.items); i < len(r.radio.Options); i++ {
 			option := r.radio.Options[i]
@@ -144,8 +150,6 @@ func (r *radioRenderer) Refresh() {
 			item.focusIndicator.FillColor = theme.BackgroundColor()
 		}
 	}
-
-	canvas.Refresh(r.radio.super())
 }
 
 // Radio widget has a list of text labels and radio check icons next to each.
@@ -249,6 +253,8 @@ func (r *Radio) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	r.ExtendBaseWidget(r)
+	r.propertyLock.RLock()
+	defer r.propertyLock.RUnlock()
 	var items []*radioRenderItem
 	var objects []fyne.CanvasObject
 
@@ -264,7 +270,11 @@ func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 		items = append(items, &radioRenderItem{icon, text, focusIndicator})
 	}
 
-	return &radioRenderer{widget.NewBaseRenderer(objects), items, r}
+	rr := &radioRenderer{widget.NewBaseRenderer(objects), items, r}
+	rr.applyTheme()
+	r.removeDuplicateOptions()
+	rr.updateItems()
+	return rr
 }
 
 // SetSelected sets the radio option, it can be used to set a default option.
@@ -284,7 +294,7 @@ func (r *Radio) itemHeight() int {
 	}
 
 	count := 1
-	if r.Options != nil {
+	if r.Options != nil && len(r.Options) > 0 {
 		count = len(r.Options)
 	}
 	return r.MinSize().Height / count
@@ -295,7 +305,11 @@ func (r *Radio) itemWidth() int {
 		return r.MinSize().Width
 	}
 
-	return r.MinSize().Width / len(r.Options)
+	count := 1
+	if r.Options != nil && len(r.Options) > 0 {
+		count = len(r.Options)
+	}
+	return r.MinSize().Width / count
 }
 
 func (r *Radio) removeDuplicateOptions() {
