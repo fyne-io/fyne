@@ -6,8 +6,8 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/layout"
 	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
 
@@ -36,10 +36,7 @@ func NewMenuBar(mainMenu *fyne.MainMenu, canvas fyne.Canvas) *MenuBar {
 // CreateRenderer returns a new renderer for the menu bar.
 // Implements: fyne.Widget
 func (b *MenuBar) CreateRenderer() fyne.WidgetRenderer {
-	cont := &fyne.Container{
-		Layout:  &layout.Box{Horizontal: true, PadBeforeAndAfter: true},
-		Objects: b.Items,
-	}
+	cont := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), b.Items...)
 	bg := &menuBarBackground{action: b.deactivate}
 	objects := []fyne.CanvasObject{bg, cont}
 	for _, item := range b.Items {
@@ -151,17 +148,18 @@ func (r *menuBarRenderer) Layout(size fyne.Size) {
 	} else {
 		r.bg.Resize(fyne.NewSize(0, 0))
 	}
-	r.cont.Resize(size)
+	r.cont.Resize(fyne.NewSize(size.Width-2*theme.Padding(), size.Height))
+	r.cont.Move(fyne.NewPos(theme.Padding(), 0))
 	if item := r.b.activeItem; item != nil {
 		if item.Child().Size().IsZero() {
 			item.Child().Resize(item.Child().MinSize())
 		}
-		item.Child().Move(fyne.NewPos(item.Position().X, item.Size().Height))
+		item.Child().Move(fyne.NewPos(item.Position().X+theme.Padding(), item.Size().Height))
 	}
 }
 
 func (r *menuBarRenderer) MinSize() fyne.Size {
-	return r.cont.MinSize()
+	return r.cont.MinSize().Add(fyne.NewSize(theme.Padding()*2, 0))
 }
 
 func (r *menuBarRenderer) Refresh() {

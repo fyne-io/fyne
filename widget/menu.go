@@ -3,8 +3,8 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/layout"
 	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
 
@@ -38,7 +38,7 @@ func NewMenu(menu *fyne.Menu) *Menu {
 // Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	cont := &fyne.Container{
-		Layout:  &layout.Box{Horizontal: false, PadBeforeAndAfter: true},
+		Layout:  layout.NewVBoxLayout(),
 		Objects: m.Items,
 	}
 	objects := []fyne.CanvasObject{cont}
@@ -154,12 +154,14 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	}
 
 	r.LayoutShadow(size, fyne.NewPos(0, 0))
-	r.cont.Resize(size)
+	padding := r.padding()
+	r.cont.Resize(size.Subtract(padding))
+	r.cont.Move(fyne.NewPos(padding.Width/2, padding.Height/2))
 	r.layoutActiveChild()
 }
 
 func (r *menuRenderer) MinSize() fyne.Size {
-	return r.cont.MinSize()
+	return r.cont.MinSize().Add(r.padding())
 }
 
 func (r *menuRenderer) Refresh() {
@@ -178,7 +180,7 @@ func (r *menuRenderer) layoutActiveChild() {
 	}
 
 	itemSize := item.Size()
-	cp := fyne.NewPos(itemSize.Width, item.Position().Y-theme.Padding())
+	cp := fyne.NewPos(itemSize.Width, item.Position().Y)
 	d := fyne.CurrentApp().Driver()
 	c := d.CanvasForObject(item)
 	if c != nil {
@@ -191,9 +193,16 @@ func (r *menuRenderer) layoutActiveChild() {
 				cp.X = c.Size().Width - absPos.X - childSize.Width
 			}
 		}
-		if absPos.Y+childSize.Height-theme.Padding() > c.Size().Height {
-			cp.Y = c.Size().Height - absPos.Y - childSize.Height + item.Position().Y
+		requiredHeight := childSize.Height - theme.Padding()
+		availableHeight := c.Size().Height - absPos.Y
+		missingHeight := requiredHeight - availableHeight
+		if missingHeight > 0 {
+			cp.Y -= missingHeight
 		}
 	}
 	item.Child().Move(cp)
+}
+
+func (r *menuRenderer) padding() fyne.Size {
+	return fyne.NewSize(0, theme.Padding()*2)
 }
