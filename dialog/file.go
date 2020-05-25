@@ -77,7 +77,7 @@ func (mt *mimeTypeFileFilter) Matches(uri fyne.URI) bool {
 			continue
 		}
 		mType := mimeTypeSplit[0]
-		mSubType := mimeTypeSplit[1]
+		mSubType := strings.Split(mimeTypeSplit[1], ";")[0]
 		if mType == mimeType {
 			if mSubType == mimeSubType || mSubType == "*" {
 				return true
@@ -221,10 +221,7 @@ func (f *fileDialog) refreshDir(dir string) {
 		itemPath := filepath.Join(dir, file.Name())
 		if file.IsDir() {
 			icons = append(icons, f.newFileItem(itemPath, true))
-		} else {
-			if f.filter != nil && !f.filter.Matches(storage.NewURI(itemPath)) {
-				continue
-			}
+		} else if f.filter == nil || f.filter.Matches(storage.NewURI(itemPath)) {
 			icons = append(icons, f.newFileItem(itemPath, false))
 		}
 	}
