@@ -95,7 +95,8 @@ var (
 	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                    *ThemedResource
 	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                  *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
-	file, folder, folderNew, folderOpen, help, home, settings                   *ThemedResource
+	file, fileApplication, fileAudio, fileImage, fileText, fileVideo            *ThemedResource
+	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
 	visibility, visibilityOff, volumeDown, volumeMute, volumeUp                 *ThemedResource
 )
@@ -154,6 +155,11 @@ func init() {
 	arrowDropUp = NewThemedResource(arrowdropupIconRes, nil)
 
 	file = NewThemedResource(fileIconRes, nil)
+	fileApplication = NewThemedResource(fileapplicationIconRes, nil)
+	fileAudio = NewThemedResource(fileaudioIconRes, nil)
+	fileImage = NewThemedResource(fileimageIconRes, nil)
+	fileText = NewThemedResource(filetextIconRes, nil)
+	fileVideo = NewThemedResource(filevideoIconRes, nil)
 	folder = NewThemedResource(folderIconRes, nil)
 	folderNew = NewThemedResource(foldernewIconRes, nil)
 	folderOpen = NewThemedResource(folderopenIconRes, nil)
@@ -305,9 +311,34 @@ func WarningIcon() fyne.Resource {
 	return warning
 }
 
-// FileIcon returns a resource containing the standard file icon for the current theme
+// FileIcon returns a resource containing the appropriate file icon for the current theme
 func FileIcon() fyne.Resource {
 	return file
+}
+
+// FileApplicationIcon returns a resource containing the file icon representing application files for the current theme
+func FileApplicationIcon() fyne.Resource {
+	return fileApplication
+}
+
+// FileAudioIcon returns a resource containing the file icon representing audio files for the current theme
+func FileAudioIcon() fyne.Resource {
+	return fileAudio
+}
+
+// FileImageIcon returns a resource containing the file icon representing image files for the current theme
+func FileImageIcon() fyne.Resource {
+	return fileImage
+}
+
+// FileTextIcon returns a resource containing the file icon representing text files for the current theme
+func FileTextIcon() fyne.Resource {
+	return fileText
+}
+
+// FileVideoIcon returns a resource containing the file icon representing video files for the current theme
+func FileVideoIcon() fyne.Resource {
+	return fileVideo
 }
 
 // FolderIcon returns a resource containing the standard folder icon for the current theme

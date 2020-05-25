@@ -12,6 +12,7 @@ import (
 	"github.com/fyne-io/mobile/gl"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 )
 
@@ -27,6 +28,8 @@ type Texture gl.Texture
 // NoTexture is the zero value for a Texture
 var NoTexture = Texture(gl.Texture{0})
 
+var textureFilterToGL = []int{gl.LINEAR, gl.NEAREST}
+
 func (p *glPainter) logError() {
 	err := p.glctx().GetError()
 	logGLError(uint32(err))
@@ -36,15 +39,20 @@ func (p *glPainter) glctx() gl.Context {
 	return p.context.Context().(gl.Context)
 }
 
-func (p *glPainter) newTexture() Texture {
+func (p *glPainter) newTexture(textureFilter canvas.ImageScale) Texture {
 	var texture = p.glctx().CreateTexture()
 	p.logError()
+
+	if int(textureFilter) >= len(textureFilterToGL) {
+		fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", textureFilter), nil)
+		textureFilter = canvas.ImageScaleSmooth
+	}
 
 	p.glctx().ActiveTexture(gl.TEXTURE0)
 	p.glctx().BindTexture(gl.TEXTURE_2D, texture)
 	p.logError()
-	p.glctx().TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	p.glctx().TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	p.glctx().TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, textureFilterToGL[textureFilter])
+	p.glctx().TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, textureFilterToGL[textureFilter])
 	p.glctx().TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	p.glctx().TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	p.logError()
@@ -52,10 +60,10 @@ func (p *glPainter) newTexture() Texture {
 	return Texture(texture)
 }
 
-func (p *glPainter) imgToTexture(img image.Image) Texture {
+func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScale) Texture {
 	switch i := img.(type) {
 	case *image.Uniform:
-		texture := p.newTexture()
+		texture := p.newTexture(textureFilter)
 		r, g, b, a := i.RGBA()
 		r8, g8, b8, a8 := uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8)
 		data := []uint8{r8, g8, b8, a8}
@@ -68,7 +76,7 @@ func (p *glPainter) imgToTexture(img image.Image) Texture {
 			return NoTexture
 		}
 
-		texture := p.newTexture()
+		texture := p.newTexture(textureFilter)
 		p.glctx().TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, i.Rect.Size().X, i.Rect.Size().Y,
 			gl.RGBA, gl.UNSIGNED_BYTE, i.Pix)
 		p.logError()
@@ -76,7 +84,7 @@ func (p *glPainter) imgToTexture(img image.Image) Texture {
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
 		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
-		return p.imgToTexture(rgba)
+		return p.imgToTexture(rgba, textureFilter)
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -185,4 +186,119 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	test.Tap(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
 	test.AssertImageMatches(t, "select_tapped_constrained.png", w.Canvas().Capture())
+}
+
+func TestSelect_Layout(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	for name, tt := range map[string]struct {
+		placeholder string
+		options     []string
+		selected    string
+		expanded    bool
+	}{
+		"empty": {},
+		"empty_placeholder": {
+			placeholder: "(Pick 1)",
+		},
+		"empty_expanded": {
+			expanded: true,
+		},
+		"empty_expanded_placeholder": {
+			placeholder: "(Pick 1)",
+			expanded:    true,
+		},
+		"single": {
+			options: []string{"Test"},
+		},
+		"single_placeholder": {
+			placeholder: "(Pick 1)",
+			options:     []string{"Test"},
+		},
+		"single_selected": {
+			options:  []string{"Test"},
+			selected: "Test",
+		},
+		"single_selected_placeholder": {
+			placeholder: "(Pick 1)",
+			options:     []string{"Test"},
+			selected:    "Test",
+		},
+		"single_expanded": {
+			options:  []string{"Test"},
+			expanded: true,
+		},
+		"single_expanded_placeholder": {
+			placeholder: "(Pick 1)",
+			options:     []string{"Test"},
+			expanded:    true,
+		},
+		"single_expanded_selected": {
+			options:  []string{"Test"},
+			selected: "Test",
+			expanded: true,
+		},
+		"single_expanded_selected_placeholder": {
+			placeholder: "(Pick 1)",
+			options:     []string{"Test"},
+			selected:    "Test",
+			expanded:    true,
+		},
+		"multiple": {
+			options: []string{"Foo", "Bar"},
+		},
+		"multiple_placeholder": {
+			placeholder: "(Pick 1)",
+			options:     []string{"Foo", "Bar"},
+		},
+		"multiple_selected": {
+			options:  []string{"Foo", "Bar"},
+			selected: "Foo",
+		},
+		"multiple_selected_placeholder": {
+			placeholder: "(Pick 1)",
+			options:     []string{"Foo", "Bar"},
+			selected:    "Foo",
+		},
+		"multiple_expanded": {
+			options:  []string{"Foo", "Bar"},
+			expanded: true,
+		},
+		"multiple_expanded_placeholder": {
+			placeholder: "(Pick 1)",
+			options:     []string{"Foo", "Bar"},
+			expanded:    true,
+		},
+		"multiple_expanded_selected": {
+			options:  []string{"Foo", "Bar"},
+			selected: "Foo",
+			expanded: true,
+		},
+		"multiple_expanded_selected_placeholder": {
+			placeholder: "(Pick 1)",
+			options:     []string{"Foo", "Bar"},
+			selected:    "Foo",
+			expanded:    true,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			combo := &widget.Select{
+				PlaceHolder: tt.placeholder,
+				Options:     tt.options,
+				Selected:    tt.selected,
+			}
+
+			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), combo))
+			if tt.expanded {
+				test.Tap(combo)
+			}
+			window.Resize(combo.MinSize().Max(fyne.NewSize(150, 200)))
+
+			test.AssertImageMatches(t, "select/layout_"+name+".png", window.Canvas().Capture())
+
+			window.Close()
+		})
+	}
 }

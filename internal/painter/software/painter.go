@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/driver"
 )
 
@@ -25,22 +26,28 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 	theme := fyne.CurrentApp().Settings().Theme()
 
 	size := c.Size().Max(c.Content().MinSize())
-	bounds := image.Rect(0, 0, int(float32(size.Width)*c.Scale()), int(float32(size.Height)*c.Scale()))
+	bounds := image.Rect(0, 0, internal.ScaleInt(c, size.Width), internal.ScaleInt(c, size.Height))
 	base := image.NewNRGBA(bounds)
 	draw.Draw(base, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
 
-	paint := func(obj fyne.CanvasObject, pos, _ fyne.Position, _ fyne.Size) bool {
+	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
+		clip := image.Rect(
+			internal.ScaleInt(c, clipPos.X),
+			internal.ScaleInt(c, clipPos.Y),
+			internal.ScaleInt(c, clipPos.X+clipSize.Width),
+			internal.ScaleInt(c, clipPos.Y+clipSize.Height),
+		)
 		switch o := obj.(type) {
 		case *canvas.Image:
-			drawImage(c, o, pos, base)
+			drawImage(c, o, pos, base, clip)
 		case *canvas.Text:
-			drawText(c, o, pos, base)
+			drawText(c, o, pos, base, clip)
 		case gradient:
-			drawGradient(c, o, pos, base)
+			drawGradient(c, o, pos, base, clip)
 		case *canvas.Rectangle:
-			drawRectangle(c, o, pos, base)
+			drawRectangle(c, o, pos, base, clip)
 		case fyne.Widget:
-			drawWidget(c, o, pos, base)
+			drawWidget(c, o, pos, base, clip)
 		}
 
 		return false

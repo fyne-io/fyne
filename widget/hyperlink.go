@@ -18,7 +18,7 @@ type Hyperlink struct {
 	Alignment fyne.TextAlign // The alignment of the Text
 	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
-	provider  textProvider
+	provider  *textProvider
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -47,13 +47,19 @@ func (hl *Hyperlink) Cursor() desktop.Cursor {
 // Note this should not be used if the widget is being managed by a Layout within a Container.
 func (hl *Hyperlink) Resize(size fyne.Size) {
 	hl.BaseWidget.Resize(size)
+	if hl.provider == nil { // not created until visible
+		return
+	}
 	hl.provider.Resize(size)
 }
 
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
 	hl.Text = text
-	hl.provider.SetText(text) // calls refresh
+	if hl.provider == nil { // not created until visible
+		return
+	}
+	hl.provider.setText(text) // calls refresh
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
