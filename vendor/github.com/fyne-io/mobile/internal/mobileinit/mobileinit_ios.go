@@ -33,6 +33,5 @@ func (aslWriter) Write(p []byte) (n int, err error) {
 }
 
 func init() {
-	w := aslWriter{}
 	log.SetOutput(aslWriter{})
 }
