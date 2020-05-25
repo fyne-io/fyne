@@ -8,9 +8,7 @@
 package mobileinit
 
 import (
-	"io"
 	"log"
-	"os"
 	"unsafe"
 )
 
@@ -35,5 +33,6 @@ func (aslWriter) Write(p []byte) (n int, err error) {
 }
 
 func init() {
-	log.SetOutput(io.MultiWriter(os.Stderr, aslWriter{}))
+	w := aslWriter{}
+	log.SetOutput(aslWriter{})
 }
