@@ -32,8 +32,8 @@ func TestTabContainer_Empty(t *testing.T) {
 	assert.Equal(t, -1, tabs.CurrentTabIndex())
 	assert.Nil(t, tabs.CurrentTab())
 	min := tabs.MinSize()
-	assert.Equal(t, 0, min.Width)
-	assert.Equal(t, theme.Padding(), min.Height)
+	assert.Equal(t, 2*theme.Padding(), min.Width)
+	assert.Equal(t, 3*theme.Padding(), min.Height)
 }
 
 func TestTabContainer_Hidden_AsChild(t *testing.T) {

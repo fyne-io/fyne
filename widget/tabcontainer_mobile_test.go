@@ -3,6 +3,7 @@
 package widget_test
 
 import (
+	"fmt"
 	"testing"
 
 	"fyne.io/fyne"
@@ -164,6 +165,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 	test.AssertImageMatches(t, "tabcontainer/mobile/dynamic_replaced_completely.png", c.Capture())
 }
 
+// FIXME should mobile have hover tests?
 func TestTabContainer_HoverButtons(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
@@ -284,11 +286,145 @@ func TestTabContainer_Layout(t *testing.T) {
 			tabs := widget.NewTabContainer(tt.item)
 			tabs.SetTabLocation(tt.location)
 			w.SetContent(tabs)
-			w.Resize(fyne.NewSize(150, 150))
+			w.Resize(fyne.NewSize(300, 300).Max(tabs.MinSize()))
 
 			test.AssertImageMatches(t, tt.wantImage, c.Capture())
 		})
 	}
+}
+
+func TestTabContainer_Overflow(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	w := test.NewWindow(nil)
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	tests := []struct {
+		name      string
+		expanded  bool
+		location  widget.TabLocation
+		wantImage string
+	}{
+		{
+			name:      "top: tab with overflow collapsed",
+			location:  widget.TabLocationTop,
+			wantImage: "tabcontainer/mobile/overflow_top_collapsed.png",
+		},
+		{
+			name:      "top: tabs with overflow expanded",
+			expanded:  true,
+			location:  widget.TabLocationTop,
+			wantImage: "tabcontainer/mobile/overflow_top_expanded.png",
+		},
+		{
+			name:      "bottom: tab with overflow collapsed",
+			location:  widget.TabLocationBottom,
+			wantImage: "tabcontainer/mobile/overflow_bottom_collapsed.png",
+		},
+		{
+			name:      "bottom: tab with overflow expanded",
+			expanded:  true,
+			location:  widget.TabLocationBottom,
+			wantImage: "tabcontainer/mobile/overflow_bottom_expanded.png",
+		},
+		{
+			name:      "leading: tab with overflow collapsed",
+			location:  widget.TabLocationLeading,
+			wantImage: "tabcontainer/mobile/overflow_bottom_collapsed.png",
+		},
+		{
+			name:      "leading: tab with overflow expanded",
+			expanded:  true,
+			location:  widget.TabLocationLeading,
+			wantImage: "tabcontainer/mobile/overflow_bottom_expanded.png",
+		},
+		{
+			name:      "trailing: tab with overflow collapsed",
+			location:  widget.TabLocationTrailing,
+			wantImage: "tabcontainer/mobile/overflow_bottom_collapsed.png",
+		},
+		{
+			name:      "trailing: tab with overflow expanded",
+			expanded:  true,
+			location:  widget.TabLocationTrailing,
+			wantImage: "tabcontainer/mobile/overflow_bottom_expanded.png",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tabs := widget.NewTabContainer()
+			for i := 0; i < 10; i++ {
+				tabs.Append(widget.NewTabItemWithIcon(fmt.Sprintf("Text %d", i+1), theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())))
+			}
+			tabs.SetTabLocation(tt.location)
+			w.SetContent(tabs)
+			w.Resize(fyne.NewSize(300, 300).Max(tabs.MinSize()))
+
+			if tt.expanded {
+				tabs.ToggleOverflow()
+			}
+
+			test.AssertImageMatches(t, tt.wantImage, c.Capture())
+
+			if tt.expanded {
+				tabs.ToggleOverflow()
+			}
+		})
+	}
+}
+
+func TestTabContainer_Overflow_IconOnly(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	w := test.NewWindow(nil)
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	tabs := widget.NewTabContainer()
+	for i := 0; i < 10; i++ {
+		tabs.Append(widget.NewTabItemWithIcon("", theme.CancelIcon(), canvas.NewCircle(theme.BackgroundColor())))
+	}
+	w.SetContent(tabs)
+	w.Resize(fyne.NewSize(300, 300).Max(tabs.MinSize()))
+
+	test.AssertImageMatches(t, "tabcontainer/mobile/overflow_icon_only_collapsed.png", c.Capture())
+
+	tabs.ToggleOverflow()
+
+	test.AssertImageMatches(t, "tabcontainer/mobile/overflow_icon_only_expanded.png", c.Capture())
+
+	tabs.ToggleOverflow()
+}
+
+func TestTabContainer_Resize_Overflow(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	tabs := widget.NewTabContainer()
+	for i := 0; i < 10; i++ {
+		tabs.Append(widget.NewTabItem("Test", canvas.NewCircle(theme.BackgroundColor())))
+	}
+
+	w := test.NewWindow(tabs)
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	w.Resize(tabs.MinSize())
+
+	tabs.ToggleOverflow()
+
+	w.Resize(fyne.NewSize(300, 300).Max(tabs.MinSize()))
+
+	test.AssertImageMatches(t, "tabcontainer/mobile/resize_overflow.png", c.Capture())
 }
 
 func TestTabContainer_SetTabLocation(t *testing.T) {
@@ -305,23 +441,23 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 	w.SetPadded(false)
 	c := w.Canvas()
 
-	w.Resize(tabs.MinSize())
+	w.Resize(fyne.NewSize(300, 150).Max(tabs.MinSize()))
 	test.AssertImageMatches(t, "tabcontainer/mobile/tab_location_top.png", c.Capture())
 
 	tabs.SetTabLocation(widget.TabLocationLeading)
-	w.Resize(tabs.MinSize())
+	w.Resize(fyne.NewSize(300, 150).Max(tabs.MinSize()))
 	test.AssertImageMatches(t, "tabcontainer/mobile/tab_location_bottom.png", c.Capture(), "leading is the same as bottom on mobile")
 
 	tabs.SetTabLocation(widget.TabLocationBottom)
-	w.Resize(tabs.MinSize())
+	w.Resize(fyne.NewSize(300, 150).Max(tabs.MinSize()))
 	test.AssertImageMatches(t, "tabcontainer/mobile/tab_location_bottom.png", c.Capture())
 
 	tabs.SetTabLocation(widget.TabLocationTrailing)
-	w.Resize(tabs.MinSize())
+	w.Resize(fyne.NewSize(300, 150).Max(tabs.MinSize()))
 	test.AssertImageMatches(t, "tabcontainer/mobile/tab_location_bottom.png", c.Capture(), "trailing is the same as bottom on mobile")
 
 	tabs.SetTabLocation(widget.TabLocationTop)
-	w.Resize(tabs.MinSize())
+	w.Resize(fyne.NewSize(300, 150).Max(tabs.MinSize()))
 	test.AssertImageMatches(t, "tabcontainer/mobile/tab_location_top.png", c.Capture())
 }
 
@@ -347,7 +483,7 @@ func TestTabContainer_Tapped(t *testing.T) {
 	assert.Equal(t, 1, tabs.CurrentTabIndex())
 	test.AssertImageMatches(t, "tabcontainer/mobile/three_tapped_second.png", c.Capture())
 
-	test.TapCanvas(c, fyne.NewPos(150, 10))
+	test.TapCanvas(c, fyne.NewPos(125, 10))
 	assert.Equal(t, 2, tabs.CurrentTabIndex())
 	test.AssertImageMatches(t, "tabcontainer/mobile/three_tapped_third.png", c.Capture())
 

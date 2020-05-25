@@ -341,6 +341,16 @@ func Test_MoveUpIcon_FileSource(t *testing.T) {
 	assert.Equal(t, "arrow-up.svg", result)
 }
 
+func Test_MoreHorizontalIcon_FileSource(t *testing.T) {
+	result := MoreHorizontalIcon().Name()
+	assert.Equal(t, "more-horizontal.svg", result)
+}
+
+func Test_MoreVerticalIcon_FileSource(t *testing.T) {
+	result := MoreVerticalIcon().Name()
+	assert.Equal(t, "more-vertical.svg", result)
+}
+
 func Test_NavigateBackIcon_FileSource(t *testing.T) {
 	result := NavigateBackIcon().Name()
 	assert.Equal(t, "arrow-back.svg", result)

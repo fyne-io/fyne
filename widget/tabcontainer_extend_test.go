@@ -29,8 +29,8 @@ func TestTabContainer_Extended_Tapped(t *testing.T) {
 	)
 	r := test.WidgetRenderer(tabs).(*tabContainerRenderer)
 
-	tab1 := r.tabBar.Objects[0].(*tabButton)
-	tab2 := r.tabBar.Objects[1].(*tabButton)
+	tab1 := r.tabButtons[0].(*tabButton)
+	tab2 := r.tabButtons[1].(*tabButton)
 	require.Equal(t, 0, tabs.CurrentTabIndex())
 	require.Equal(t, theme.PrimaryColor(), test.WidgetRenderer(tab1).BackgroundColor())
 

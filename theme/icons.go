@@ -94,6 +94,7 @@ var (
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
 	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                    *ThemedResource
 	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                  *ThemedResource
+	moreHorizontal, moreVertical                                                *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
 	file, fileApplication, fileAudio, fileImage, fileText, fileVideo            *ThemedResource
 	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
@@ -146,6 +147,9 @@ func init() {
 	mediaReplay = NewThemedResource(mediareplayIconRes, nil)
 	mediaSkipNext = NewThemedResource(mediaskipnextIconRes, nil)
 	mediaSkipPrevious = NewThemedResource(mediaskippreviousIconRes, nil)
+
+	moreHorizontal = NewThemedResource(morehorizontalIconRes, nil)
+	moreVertical = NewThemedResource(moreverticalIconRes, nil)
 
 	arrowBack = NewThemedResource(arrowbackIconRes, nil)
 	arrowDown = NewThemedResource(arrowdownIconRes, nil)
@@ -449,6 +453,16 @@ func MoveDownIcon() fyne.Resource {
 // MoveUpIcon returns a resource containing the standard up arrow icon for the current theme
 func MoveUpIcon() fyne.Resource {
 	return arrowUp
+}
+
+// MoreHorizontalIcon returns a resource containing the standard horizontal more icon for the current theme
+func MoreHorizontalIcon() fyne.Resource {
+	return moreHorizontal
+}
+
+// MoreVerticalIcon returns a resource containing the standard vertical more icon for the current theme
+func MoreVerticalIcon() fyne.Resource {
+	return moreVertical
 }
 
 // NavigateBackIcon returns a resource containing the standard backward navigation icon for the current theme

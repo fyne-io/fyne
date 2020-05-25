@@ -14,11 +14,20 @@ import (
 )
 
 func TestButton_MinSize(t *testing.T) {
-	button := widget.NewButton("Hi", nil)
-	min := button.MinSize()
+	t.Run("Text", func(t *testing.T) {
+		button := widget.NewButton("Hi", nil)
+		min := button.MinSize()
 
-	assert.True(t, min.Width > theme.Padding()*2)
-	assert.True(t, min.Height > theme.Padding()*2)
+		assert.True(t, min.Width > theme.Padding()*2)
+		assert.True(t, min.Height > theme.Padding()*2)
+	})
+	t.Run("Icon", func(t *testing.T) {
+		button := widget.NewButtonWithIcon("", theme.CancelIcon(), nil)
+		min := button.MinSize()
+
+		assert.Equal(t, theme.IconInlineSize()+2*theme.Padding(), min.Width)
+		assert.Equal(t, theme.IconInlineSize()+2*theme.Padding(), min.Height)
+	})
 }
 
 func TestButton_SetText(t *testing.T) {

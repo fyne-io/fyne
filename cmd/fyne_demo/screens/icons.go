@@ -157,6 +157,9 @@ var icons = []struct {
 	{"MediaSkipNext", theme.MediaSkipNextIcon()},
 	{"MediaSkipPrevious", theme.MediaSkipPreviousIcon()},
 
+	{"MoreHorizontal", theme.MoreHorizontalIcon()},
+	{"MoreVertical", theme.MoreVerticalIcon()},
+
 	{"VolumeDown", theme.VolumeDownIcon()},
 	{"VolumeMute", theme.VolumeMuteIcon()},
 	{"VolumeUp", theme.VolumeUpIcon()},

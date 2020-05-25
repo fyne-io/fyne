@@ -38,14 +38,15 @@ func (b *buttonRenderer) MinSize() (size fyne.Size) {
 	labelSize := b.label.MinSize()
 	if hasLabel {
 		size.Width = labelSize.Width
+		size.Height = labelSize.Height
 	}
 	if hasIcon {
 		if hasLabel {
 			size.Width += theme.Padding()
 		}
 		size.Width += iconSize.Width
+		size.Height = fyne.Max(size.Height, iconSize.Height)
 	}
-	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
 	size = size.Add(b.padding())
 	return
 }

@@ -161,6 +161,9 @@ func main() {
 	bundleIcon("media-skip-next", f)
 	bundleIcon("media-skip-previous", f)
 
+	bundleIcon("more-horizontal", f)
+	bundleIcon("more-vertical", f)
+
 	bundleIcon("view-fullscreen", f)
 	bundleIcon("view-refresh", f)
 	bundleIcon("view-zoom-fit", f)
