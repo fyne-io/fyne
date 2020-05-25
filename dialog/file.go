@@ -35,6 +35,15 @@ type fileDialog struct {
 	save     bool
 }
 
+// FileDialog is a dialog containing a file picker for use in opening or saving files
+type FileDialog struct {
+	save     bool
+	callback interface{}
+	filter   FileFilter
+	parent   fyne.Window
+	dialog   *fileDialog
+}
+
 // FileFilter is an interface that can be implemented to provide a filter to a file dialog
 type FileFilter interface {
 	Matches(fyne.URI) bool
@@ -278,7 +287,7 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 	}
 }
 
-func showFileDialog(save bool, callback interface{}, parent fyne.Window, filter FileFilter) {
+func showFileDialog(save bool, callback interface{}, parent fyne.Window, filter FileFilter) *fileDialog {
 	d := &fileDialog{callback: callback, save: save, parent: parent, filter: filter}
 	ui := d.makeUI()
 	dir, err := os.UserHomeDir()
@@ -295,6 +304,30 @@ func showFileDialog(save bool, callback interface{}, parent fyne.Window, filter 
 	d.win.Resize(size)
 
 	d.win.Show()
+	return d
+}
+
+// SetFilter sets a filter for limiting files that can be chosen in the file dialog
+func (fd *FileDialog) SetFilter(filter FileFilter) {
+	fd.filter = filter
+	if fd.dialog != nil {
+		fd.dialog.refreshDir(fd.dialog.dir)
+	}
+}
+
+// Show shows the file dialog
+func (fd *FileDialog) Show() {
+	if !fd.save {
+		if fileOpenOSOverride(fd.callback.(func(fyne.FileReadCloser, error)), fd.parent) {
+			return
+		}
+		fd.dialog = showFileDialog(false, fd.callback, fd.parent, fd.filter)
+		return
+	}
+	if fileSaveOSOverride(fd.callback.(func(fyne.FileWriteCloser, error)), fd.parent) {
+		return
+	}
+	fd.dialog = showFileDialog(true, fd.callback, fd.parent, fd.filter)
 }
 
 // NewExtensionFileFilter takes a string slice of extensions with a leading . and creates a filter for the file dialog.
@@ -309,40 +342,17 @@ func NewMimeTypeFileFilter(mimeTypes []string) FileFilter {
 	return &mimeTypeFileFilter{mimeTypes: mimeTypes}
 }
 
-// ShowFileOpen shows a file dialog allowing the user to choose a file to open.
+// NewFileOpenDialog creates a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified.
-func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) {
-	if fileOpenOSOverride(callback, parent) {
-		return
-	}
-	showFileDialog(false, callback, parent, nil)
+func NewFileOpenDialog(callback func(fyne.FileReadCloser, error), parent fyne.Window) *FileDialog {
+	dialog := &FileDialog{callback: callback, parent: parent}
+	return dialog
 }
 
-// ShowFileOpenWithFilter shows a file dialog with a filter limiting displayed files to choose a file to open.
-// The dialog will appear over the window specified.
-func ShowFileOpenWithFilter(callback func(fyne.FileReadCloser, error), parent fyne.Window, filter FileFilter) {
-	if fileOpenOSOverride(callback, parent) {
-		return
-	}
-	showFileDialog(false, callback, parent, filter)
-}
-
-// ShowFileSave shows a file dialog allowing the user to choose a file to save to (new or overwrite).
+// NewFileSaveDialog creates a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified.
-func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) {
-	if fileSaveOSOverride(callback, parent) {
-		return
-	}
-	showFileDialog(true, callback, parent, nil)
-}
-
-// ShowFileSaveWithFilter shows a file dialog with a filter limiting displayed files to choose a file to save to (new or overwrite).
-// If the user chooses an existing file they will be asked if they are sure.
-// The dialog will appear over the window specified.
-func ShowFileSaveWithFilter(callback func(fyne.FileWriteCloser, error), parent fyne.Window, filter FileFilter) {
-	if fileSaveOSOverride(callback, parent) {
-		return
-	}
-	showFileDialog(true, callback, parent, filter)
+func NewFileSaveDialog(callback func(fyne.FileWriteCloser, error), parent fyne.Window) *FileDialog {
+	dialog := &FileDialog{callback: callback, parent: parent, save: true}
+	return dialog
 }

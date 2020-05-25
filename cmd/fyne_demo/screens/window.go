@@ -136,27 +136,39 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 			prog.Show()
 		}),
 		widget.NewButton("File Open (try txt or png)", func() {
-			dialog.ShowFileOpen(func(reader fyne.FileReadCloser, err error) {
+			dialog.NewFileOpenDialog(func(reader fyne.FileReadCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
 				}
 
 				fileOpened(reader)
-			}, win)
+			}, win).Show()
 		}),
 		widget.NewButton("File Open With Filter (only show txt or png)", func() {
-			dialog.ShowFileOpenWithFilter(func(reader fyne.FileReadCloser, err error) {
+			fd := dialog.NewFileOpenDialog(func(reader fyne.FileReadCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
 				}
 
 				fileOpened(reader)
-			}, win, dialog.NewExtensionFileFilter([]string{".png", ".txt"}))
+			}, win)
+			fd.SetFilter(dialog.NewExtensionFileFilter([]string{".png", ".txt"}))
+			fd.Show()
 		}),
 		widget.NewButton("File Save", func() {
-			dialog.ShowFileSave(func(writer fyne.FileWriteCloser, err error) {
+			dialog.NewFileSaveDialog(func(writer fyne.FileWriteCloser, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+
+				fileSaved(writer)
+			}, win).Show()
+		}),
+		widget.NewButton("File Save With Filter (only show images)", func() {
+			fd := dialog.NewFileSaveDialog(func(writer fyne.FileWriteCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -164,16 +176,8 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 
 				fileSaved(writer)
 			}, win)
-		}),
-		widget.NewButton("File Save With Filter (only show images)", func() {
-			dialog.ShowFileSaveWithFilter(func(writer fyne.FileWriteCloser, err error) {
-				if err != nil {
-					dialog.ShowError(err, win)
-					return
-				}
-
-				fileSaved(writer)
-			}, win, dialog.NewMimeTypeFileFilter([]string{"image/*"}))
+			fd.SetFilter(dialog.NewMimeTypeFileFilter([]string{"image/*"}))
+			fd.Show()
 		}),
 		widget.NewButton("Custom Dialog (Login Form)", func() {
 			username := widget.NewEntry()

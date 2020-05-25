@@ -17,10 +17,10 @@ func TestShowFileOpen(t *testing.T) {
 	var chosen fyne.FileReadCloser
 	var openErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileOpen(func(file fyne.FileReadCloser, err error) {
+	NewFileOpenDialog(func(file fyne.FileReadCloser, err error) {
 		chosen = file
 		openErr = err
-	}, win)
+	}, win).Show()
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
 	defer win.Canvas().Overlays().Remove(popup)
@@ -72,10 +72,10 @@ func TestShowFileSave(t *testing.T) {
 	var chosen fyne.FileWriteCloser
 	var saveErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileSave(func(file fyne.FileWriteCloser, err error) {
+	NewFileSaveDialog(func(file fyne.FileWriteCloser, err error) {
 		chosen = file
 		saveErr = err
-	}, win)
+	}, win).Show()
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
 	defer win.Canvas().Overlays().Remove(popup)
