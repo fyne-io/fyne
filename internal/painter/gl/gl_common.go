@@ -2,22 +2,37 @@ package gl
 
 import (
 	"image"
+	"log"
+	"runtime"
+
+	"github.com/goki/freetype"
+	"github.com/goki/freetype/truetype"
+	"github.com/srwiley/rasterx"
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
-	"github.com/goki/freetype"
-	"github.com/goki/freetype/truetype"
-	"github.com/srwiley/rasterx"
-	"golang.org/x/image/font"
-	"golang.org/x/image/math/fixed"
 )
 
 var textures = make(map[fyne.CanvasObject]Texture, 1024)
 
 const vectorPad = 10
+
+func logGLError(err uint32) {
+	if err == 0 {
+		return
+	}
+
+	log.Printf("Error %x in GL Renderer", err)
+	_, file, line, ok := runtime.Caller(2)
+	if ok {
+		log.Printf("  At: %s:%d", file, line)
+	}
+}
 
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) Texture {
 	texture, ok := textures[object]
