@@ -156,7 +156,7 @@ func TestFileFilters(t *testing.T) {
 	count := 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := storage.NewURI(icon.(*fileDialogItem).path)
+			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
 			assert.Equal(t, uri.Extension(), ".png")
 			count++
 		}
@@ -168,7 +168,7 @@ func TestFileFilters(t *testing.T) {
 	count = 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := storage.NewURI(icon.(*fileDialogItem).path)
+			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
 			assert.Equal(t, uri.MimeType(), "image/jpeg")
 			count++
 		}
@@ -180,7 +180,7 @@ func TestFileFilters(t *testing.T) {
 	count = 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := storage.NewURI(icon.(*fileDialogItem).path)
+			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
 			mimeType := strings.Split(uri.MimeType(), "/")[0]
 			assert.Equal(t, mimeType, "image")
 			count++

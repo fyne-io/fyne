@@ -218,7 +218,7 @@ func (f *fileDialog) refreshDir(dir string) {
 		itemPath := filepath.Join(dir, file.Name())
 		if file.IsDir() {
 			icons = append(icons, f.newFileItem(itemPath, true))
-		} else if f.file.filter == nil || f.file.filter.Matches(storage.NewURI(itemPath)) {
+		} else if f.file.filter == nil || f.file.filter.Matches(storage.NewURI("file://"+itemPath)) {
 			icons = append(icons, f.newFileItem(itemPath, false))
 		}
 	}
