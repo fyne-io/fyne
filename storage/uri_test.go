@@ -3,6 +3,8 @@ package storage
 import (
 	"testing"
 
+	_ "fyne.io/fyne/test"
+
 	"github.com/stretchr/testify/assert"
 )
 
