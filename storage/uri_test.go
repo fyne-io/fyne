@@ -1,7 +1,9 @@
-package storage
+package storage_test
 
 import (
 	"testing"
+
+	"fyne.io/fyne/storage"
 
 	_ "fyne.io/fyne/test"
 
@@ -10,7 +12,7 @@ import (
 
 func TestNewURI(t *testing.T) {
 	uriStr := "file:///nothere.txt"
-	u := NewURI(uriStr)
+	u := storage.NewURI(uriStr)
 
 	assert.NotNil(t, u)
 	assert.Equal(t, uriStr, u.String())
@@ -21,7 +23,7 @@ func TestNewURI(t *testing.T) {
 
 func TestNewURI_Content(t *testing.T) {
 	uriStr := "content:///otherapp/something/pic.png"
-	u := NewURI(uriStr)
+	u := storage.NewURI(uriStr)
 
 	assert.NotNil(t, u)
 	assert.Equal(t, uriStr, u.String())
