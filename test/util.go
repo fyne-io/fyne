@@ -64,6 +64,28 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 	return true
 }
 
+// Drag drags at an absolute position on the canvas.
+// deltaX/Y is the dragging distance: <0 for dragging up/left, >0 for dragging down/right.
+func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Draggable); ok {
+			return true
+		}
+		return false
+	}
+	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	if o == nil {
+		return
+	}
+	e := &fyne.DragEvent{
+		PointEvent: fyne.PointEvent{Position: p},
+		DraggedX:   deltaX,
+		DraggedY:   deltaY,
+	}
+	o.(fyne.Draggable).Dragged(e)
+	o.(fyne.Draggable).DragEnd()
+}
+
 // MoveMouse simulates a mouse movement to the given position.
 func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 	if fyne.CurrentDevice().IsMobile() {
@@ -81,13 +103,13 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 		}
 		return false
 	}
-	o, absPos, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	o, p, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
 	if o != nil {
 		hovered = o.(desktop.Hoverable)
 		me := &desktop.MouseEvent{
 			PointEvent: fyne.PointEvent{
 				AbsolutePosition: pos,
-				Position:         pos.Subtract(absPos),
+				Position:         p,
 			},
 		}
 		if hovered == oldHovered {
@@ -106,6 +128,24 @@ func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 	}
 }
 
+// Scroll scrolls at an absolute position on the canvas.
+// deltaX/Y is the scrolling distance: <0 for scrolling up/left, >0 for scrolling down/right.
+func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
+	matches := func(object fyne.CanvasObject) bool {
+		if _, ok := object.(fyne.Scrollable); ok {
+			return true
+		}
+		return false
+	}
+	o, _, _ := driver.FindObjectAtPositionMatching(pos, matches, c.Overlays().Top(), c.Content())
+	if o == nil {
+		return
+	}
+
+	e := &fyne.ScrollEvent{DeltaX: deltaX, DeltaY: deltaY}
+	o.(fyne.Scrollable).Scrolled(e)
+}
+
 // Tap simulates a left mouse click on the specified object.
 func Tap(obj fyne.Tappable) {
 	TapAt(obj, fyne.NewPos(1, 1))
@@ -119,8 +159,8 @@ func TapAt(obj fyne.Tappable, pos fyne.Position) {
 
 // TapCanvas taps at an absolute position on the canvas.
 func TapCanvas(c fyne.Canvas, pos fyne.Position) {
-	if o, absPos := findTappable(c, pos); o != nil {
-		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: pos.Subtract(absPos)})
+	if o, p := findTappable(c, pos); o != nil {
+		tap(c, o.(fyne.Tappable), &fyne.PointEvent{AbsolutePosition: pos, Position: p})
 	}
 }
 

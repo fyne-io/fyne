@@ -635,7 +635,7 @@ func TestWindow_SetIcon(t *testing.T) {
 	w := createWindow("Test")
 	assert.Equal(t, fyne.CurrentApp().Icon(), w.Icon())
 
-	newIcon := theme.CancelIcon()
+	newIcon := theme.FyneLogo()
 	w.SetIcon(newIcon)
 	assert.Equal(t, newIcon, w.Icon())
 }

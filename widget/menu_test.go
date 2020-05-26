@@ -1,49 +1,74 @@
-package widget
+package widget_test
 
 import (
-	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
+	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewPopUpMenu(t *testing.T) {
-	c := test.Canvas()
-	menu := fyne.NewMenu("Foo", fyne.NewMenuItem("Bar", func() {}))
+func TestMenu_TappedPaddingOrSeparator(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.DarkTheme())
 
-	pop := NewPopUpMenu(menu, c)
-	assert.Equal(t, 1, len(c.Overlays().List()))
-	assert.Equal(t, pop, c.Overlays().List()[0])
+	w := app.NewWindow("")
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
 
-	pop.Hide()
-	assert.Equal(t, 0, len(c.Overlays().List()))
-}
+	var item1Hit, item2Hit, overlayContainerHit bool
+	m := widget.NewMenu(fyne.NewMenu("",
+		fyne.NewMenuItem("Foo", func() { item1Hit = true }),
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Bar", func() { item2Hit = true }),
+	))
+	size := m.MinSize()
+	w.Resize(size.Add(fyne.NewSize(10, 10)))
+	m.Resize(size)
+	o := internalWidget.NewOverlayContainer(m, c, func() { overlayContainerHit = true })
+	w.SetContent(o)
 
-func TestPopUpMenu_Size(t *testing.T) {
-	win := test.NewWindow(NewLabel("OK"))
-	defer win.Close()
-	win.Resize(fyne.NewSize(100, 100))
-	menu := fyne.NewMenu("Foo",
-		fyne.NewMenuItem("A", func() {}),
-		fyne.NewMenuItem("A", func() {}),
-	)
-	menuItemSize := canvas.NewText("A", color.Black).MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-	expectedSize := menuItemSize.Add(fyne.NewSize(0, menuItemSize.Height)).Add(fyne.NewSize(0, theme.Padding()))
-	c := win.Canvas()
-
-	pop := NewPopUpMenu(menu, c)
-	defer pop.Hide()
-	assert.Equal(t, expectedSize, pop.Content.Size())
-
-	for _, o := range test.LaidOutObjects(pop) {
-		if s, ok := o.(*widget.Shadow); ok {
-			assert.Equal(t, expectedSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), s.Size())
-		}
+	// tap on top padding
+	p := fyne.NewPos(5, 1)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
 	}
+
+	// tap on separator
+	fyne.NewPos(5, size.Height/2)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	}
+
+	// tap bottom padding
+	p = fyne.NewPos(5, size.Height-1)
+	if test.AssertCanvasTappableAt(t, c, p) {
+		test.TapCanvas(c, p)
+		assert.False(t, item1Hit, "item 1 should not be hit")
+		assert.False(t, item2Hit, "item 2 should not be hit")
+		assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	}
+
+	// verify test setup: we can hit the items and the container
+	test.TapCanvas(c, fyne.NewPos(5, size.Height/4))
+	assert.True(t, item1Hit, "hit item 1")
+	assert.False(t, item2Hit, "item 2 should not be hit")
+	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	test.TapCanvas(c, fyne.NewPos(5, 3*size.Height/4))
+	assert.True(t, item2Hit, "hit item 2")
+	assert.False(t, overlayContainerHit, "the overlay container should not be hit")
+	test.TapCanvas(c, fyne.NewPos(size.Width+1, size.Height+1))
+	assert.True(t, overlayContainerHit, "hit the overlay container")
 }

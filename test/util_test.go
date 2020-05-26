@@ -73,6 +73,44 @@ func TestAssertImageMatches(t *testing.T) {
 	}
 }
 
+func TestDrag(t *testing.T) {
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	d := &draggable{}
+	c.SetContent(fyne.NewContainer(d))
+	c.Resize(fyne.NewSize(30, 30))
+	d.Resize(fyne.NewSize(20, 20))
+	d.Move(fyne.NewPos(10, 10))
+
+	test.Drag(c, fyne.NewPos(5, 5), 10, 10)
+	assert.Nil(t, d.event, "nothing happens if no draggable was found at position")
+	assert.False(t, d.wasDragged)
+
+	test.Drag(c, fyne.NewPos(15, 15), 17, 42)
+	assert.Equal(t, &fyne.DragEvent{
+		PointEvent: fyne.PointEvent{Position: fyne.Position{X: 5, Y: 5}},
+		DraggedX:   17,
+		DraggedY:   42,
+	}, d.event)
+	assert.True(t, d.wasDragged)
+}
+
+func TestScroll(t *testing.T) {
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	s := &scrollable{}
+	c.SetContent(fyne.NewContainer(s))
+	c.Resize(fyne.NewSize(30, 30))
+	s.Resize(fyne.NewSize(20, 20))
+	s.Move(fyne.NewPos(10, 10))
+
+	test.Scroll(c, fyne.NewPos(5, 5), 10, 10)
+	assert.Nil(t, s.event, "nothing happens if no scrollable was found at position")
+
+	test.Scroll(c, fyne.NewPos(15, 15), 17, 42)
+	assert.Equal(t, &fyne.ScrollEvent{DeltaX: 17, DeltaY: 42}, s.event)
+}
+
 func readImage(t *testing.T, path string) image.Image {
 	file, err := os.Open(path)
 	require.NoError(t, err)
@@ -82,4 +120,31 @@ func readImage(t *testing.T, path string) image.Image {
 	img := image.NewNRGBA(raw.Bounds())
 	draw.Draw(img, img.Bounds(), raw, image.Pt(0, 0), draw.Src)
 	return img
+}
+
+type draggable struct {
+	widget.BaseWidget
+	event      *fyne.DragEvent
+	wasDragged bool
+}
+
+var _ fyne.Draggable = (*draggable)(nil)
+
+func (d *draggable) Dragged(event *fyne.DragEvent) {
+	d.event = event
+}
+
+func (d *draggable) DragEnd() {
+	d.wasDragged = true
+}
+
+type scrollable struct {
+	widget.BaseWidget
+	event *fyne.ScrollEvent
+}
+
+var _ fyne.Scrollable = (*scrollable)(nil)
+
+func (s *scrollable) Scrolled(event *fyne.ScrollEvent) {
+	s.event = event
 }

@@ -160,7 +160,7 @@ func (w *window) RequestFocus() {
 func (w *window) Resize(size fyne.Size) {
 	w.canvas.Resize(size)
 	w.viewLock.Lock()
-	if w.fixedSize {
+	if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
 		w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
 	}
 	w.viewLock.Unlock()
@@ -205,6 +205,11 @@ func (w *window) SetIcon(icon fyne.Resource) {
 		if appIcon != nil {
 			w.SetIcon(appIcon)
 		}
+		return
+	}
+
+	if string(icon.Content()[:4]) == "<svg" {
+		fyne.LogError("Window icon does not support vector images", nil)
 		return
 	}
 
@@ -1125,9 +1130,11 @@ func (w *window) create() {
 		initWindowHints()
 
 		pixWidth, pixHeight := w.screenSize(w.canvas.size)
+		pixWidth = fyne.Max(pixWidth, w.width)
 		if pixWidth == 0 {
 			pixWidth = 10
 		}
+		pixHeight = fyne.Max(pixHeight, w.height)
 		if pixHeight == 0 {
 			pixHeight = 10
 		}
