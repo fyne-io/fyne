@@ -136,17 +136,17 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 			prog.Show()
 		}),
 		widget.NewButton("File Open (try txt or png)", func() {
-			dialog.NewFileOpenDialog(func(reader fyne.FileReadCloser, err error) {
+			dialog.ShowFileOpen(func(reader fyne.FileReadCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
 				}
 
 				fileOpened(reader)
-			}, win).Show()
+			}, win)
 		}),
 		widget.NewButton("File Open With Filter (only show txt or png)", func() {
-			fd := dialog.NewFileOpenDialog(func(reader fyne.FileReadCloser, err error) {
+			fd := dialog.NewFileOpen(func(reader fyne.FileReadCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -158,17 +158,17 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 			fd.Show()
 		}),
 		widget.NewButton("File Save", func() {
-			dialog.NewFileSaveDialog(func(writer fyne.FileWriteCloser, err error) {
+			dialog.ShowFileSave(func(writer fyne.FileWriteCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
 				}
 
 				fileSaved(writer)
-			}, win).Show()
+			}, win)
 		}),
 		widget.NewButton("File Save With Filter (only show images)", func() {
-			fd := dialog.NewFileSaveDialog(func(writer fyne.FileWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(writer fyne.FileWriteCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return

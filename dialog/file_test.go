@@ -19,10 +19,10 @@ func TestShowFileOpen(t *testing.T) {
 	var chosen fyne.FileReadCloser
 	var openErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	NewFileOpenDialog(func(file fyne.FileReadCloser, err error) {
+	ShowFileOpen(func(file fyne.FileReadCloser, err error) {
 		chosen = file
 		openErr = err
-	}, win).Show()
+	}, win)
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
 	defer win.Canvas().Overlays().Remove(popup)
@@ -74,10 +74,10 @@ func TestShowFileSave(t *testing.T) {
 	var chosen fyne.FileWriteCloser
 	var saveErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	NewFileSaveDialog(func(file fyne.FileWriteCloser, err error) {
+	ShowFileSave(func(file fyne.FileWriteCloser, err error) {
 		chosen = file
 		saveErr = err
-	}, win).Show()
+	}, win)
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
 	defer win.Canvas().Overlays().Remove(popup)
@@ -138,7 +138,7 @@ func TestShowFileSave(t *testing.T) {
 
 func TestFileFilters(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
-	f := NewFileOpenDialog(func(file fyne.FileReadCloser, err error) {
+	f := NewFileOpen(func(file fyne.FileReadCloser, err error) {
 	}, win)
 
 	f.SetFilter(NewExtensionFileFilter([]string{".png"}))

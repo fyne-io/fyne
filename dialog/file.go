@@ -336,17 +336,40 @@ func NewMimeTypeFileFilter(mimeTypes []string) FileFilter {
 	return &mimeTypeFileFilter{mimeTypes: mimeTypes}
 }
 
-// NewFileOpenDialog creates a file dialog allowing the user to choose a file to open.
-// The dialog will appear over the window specified.
-func NewFileOpenDialog(callback func(fyne.FileReadCloser, error), parent fyne.Window) *File {
+// NewFileOpen creates a file dialog allowing the user to choose a file to open.
+// The dialog will appear over the window specified when Show() is called.
+func NewFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) *File {
 	dialog := &File{callback: callback, parent: parent}
 	return dialog
 }
 
-// NewFileSaveDialog creates a file dialog allowing the user to choose a file to save to (new or overwrite).
+// NewFileSave creates a file dialog allowing the user to choose a file to save to (new or overwrite).
+// If the user chooses an existing file they will be asked if they are sure.
+// The dialog will appear over the window specified when Show() is called.
+func NewFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) *File {
+	dialog := &File{callback: callback, parent: parent, save: true}
+	return dialog
+}
+
+// ShowFileOpen creates and shows a file dialog allowing the user to choose a file to open.
+// The dialog will appear over the window specified.
+func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) *File {
+	dialog := NewFileOpen(callback, parent)
+	if fileOpenOSOverride(callback, parent) {
+		return nil
+	}
+	dialog.Show()
+	return dialog
+}
+
+// ShowFileSave creates and shows a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified.
-func NewFileSaveDialog(callback func(fyne.FileWriteCloser, error), parent fyne.Window) *File {
-	dialog := &File{callback: callback, parent: parent, save: true}
+func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) *File {
+	dialog := NewFileSave(callback, parent)
+	if fileSaveOSOverride(callback, parent) {
+		return nil
+	}
+	dialog.Show()
 	return dialog
 }
