@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewFileItem(t *testing.T) {
-	f := &fileDialog{}
+	f := &fileDialog{file: &File{}}
 	_ = f.makeUI()
 	item := f.newFileItem("/path/to/filename.txt", false)
 
@@ -24,7 +24,7 @@ func TestNewFileItem(t *testing.T) {
 }
 
 func TestNewFileItem_Folder(t *testing.T) {
-	f := &fileDialog{}
+	f := &fileDialog{file: &File{}}
 	_ = f.makeUI()
 	currentDir, _ := filepath.Abs(".")
 	parentDir := filepath.Dir(currentDir)
@@ -40,7 +40,7 @@ func TestNewFileItem_Folder(t *testing.T) {
 }
 
 func TestNewFileItem_ParentFolder(t *testing.T) {
-	f := &fileDialog{}
+	f := &fileDialog{file: &File{}}
 	_ = f.makeUI()
 	currentDir, _ := filepath.Abs(".")
 	parentDir := filepath.Dir(currentDir)

@@ -15,9 +15,6 @@ import (
 )
 
 func TestNewFileIcon(t *testing.T) {
-	f := &fileDialog{}
-	_ = f.makeUI()
-
 	item := NewFileIcon(storage.NewURI("/path/to/filename.zip"))
 
 	assert.Equal(t, item.(*fileIcon).extension, ".zip")

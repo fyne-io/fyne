@@ -138,11 +138,11 @@ func TestShowFileSave(t *testing.T) {
 
 func TestFileFilters(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
-	fd := NewFileOpenDialog(func(file fyne.FileReadCloser, err error) {
+	f := NewFileOpenDialog(func(file fyne.FileReadCloser, err error) {
 	}, win)
 
-	fd.SetFilter(NewExtensionFileFilter([]string{".png"}))
-	fd.Show()
+	f.SetFilter(NewExtensionFileFilter([]string{".png"}))
+	f.Show()
 
 	workingDir, err := os.Getwd()
 	if err != nil {
@@ -151,10 +151,10 @@ func TestFileFilters(t *testing.T) {
 	}
 	testDataDir := filepath.Join(workingDir, "testdata")
 
-	fd.dialog.setDirectory(testDataDir)
+	f.dialog.setDirectory(testDataDir)
 
 	count := 0
-	for _, icon := range fd.dialog.files.Objects {
+	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
 			uri := storage.NewURI(icon.(*fileDialogItem).path)
 			assert.Equal(t, uri.Extension(), ".png")
@@ -163,10 +163,10 @@ func TestFileFilters(t *testing.T) {
 	}
 	assert.Equal(t, count, 1)
 
-	fd.SetFilter(NewMimeTypeFileFilter([]string{"image/jpeg"}))
+	f.SetFilter(NewMimeTypeFileFilter([]string{"image/jpeg"}))
 
 	count = 0
-	for _, icon := range fd.dialog.files.Objects {
+	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
 			uri := storage.NewURI(icon.(*fileDialogItem).path)
 			assert.Equal(t, uri.MimeType(), "image/jpeg")
@@ -175,10 +175,10 @@ func TestFileFilters(t *testing.T) {
 	}
 	assert.Equal(t, count, 1)
 
-	fd.SetFilter(NewMimeTypeFileFilter([]string{"image/*"}))
+	f.SetFilter(NewMimeTypeFileFilter([]string{"image/*"}))
 
 	count = 0
-	for _, icon := range fd.dialog.files.Objects {
+	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
 			uri := storage.NewURI(icon.(*fileDialogItem).path)
 			mimeType := strings.Split(uri.MimeType(), "/")[0]
