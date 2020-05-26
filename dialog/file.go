@@ -308,6 +308,7 @@ func showFileDialog(save bool, callback interface{}, parent fyne.Window, filter 
 func (fd *FileDialog) SetFilter(filter FileFilter) {
 	fd.filter = filter
 	if fd.dialog != nil {
+		fd.dialog.filter = filter
 		fd.dialog.refreshDir(fd.dialog.dir)
 	}
 }
