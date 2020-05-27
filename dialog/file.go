@@ -162,11 +162,11 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	})
 	f.open.Style = widget.PrimaryButton
 	f.open.Disable()
-	label = "Cancel"
+	dismissLabel := "Cancel"
 	if f.file.dismissText != "" {
-		label = f.file.dismissText
+		dismissLabel = f.file.dismissText
 	}
-	f.dismiss = widget.NewButton(label, func() {
+	f.dismiss = widget.NewButton(dismissLabel, func() {
 		f.win.Hide()
 		if f.file.onClosedCallback != nil {
 			f.file.onClosedCallback(false)
