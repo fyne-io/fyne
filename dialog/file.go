@@ -22,6 +22,7 @@ type textWidget interface {
 type fileDialog struct {
 	file       *FileDialog
 	fileName   textWidget
+	dismiss    *widget.Button
 	open       *widget.Button
 	breadcrumb *widget.Box
 	files      *fyne.Container
@@ -34,12 +35,18 @@ type fileDialog struct {
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
 type FileDialog struct {
-	save     bool
-	callback interface{}
-	filter   FileFilter
-	parent   fyne.Window
-	dialog   *fileDialog
+	save             bool
+	nativePicker     bool
+	callback         interface{}
+	onClosedCallback func(bool)
+	filter           FileFilter
+	parent           fyne.Window
+	dialog           *fileDialog
+	dismissText      string
 }
+
+// Declare conformity to Dialog interface
+var _ Dialog = (*FileDialog)(nil)
 
 // FileFilter is an interface that can be implemented to provide a filter to a file dialog.
 type FileFilter interface {
@@ -67,7 +74,7 @@ func (e *extensionFileFilter) Matches(uri fyne.URI) bool {
 
 // Matches returns true if a file URI has one of the filtered mimetypes.
 func (mt *mimeTypeFileFilter) Matches(uri fyne.URI) bool {
-	mimeType, mimeSubType := mimeTypeGet(uri)
+	mimeType, mimeSubType := mimeTypeSplit(uri)
 	for _, mimeTypeFull := range mt.mimeTypes {
 		mimeTypeSplit := strings.Split(mimeTypeFull, "/")
 		if len(mimeTypeSplit) <= 1 {
@@ -106,6 +113,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	f.open = widget.NewButton(label, func() {
 		if f.file.callback == nil {
 			f.win.Hide()
+			if f.file.onClosedCallback != nil {
+				f.file.onClosedCallback(false)
+			}
 			return
 		}
 
@@ -117,6 +127,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			info, err := os.Stat(path)
 			if os.IsNotExist(err) {
 				f.win.Hide()
+				if f.file.onClosedCallback != nil {
+					f.file.onClosedCallback(true)
+				}
 				callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
 				return
 			} else if info.IsDir() {
@@ -134,27 +147,39 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 					callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
 					f.win.Hide()
+					if f.file.onClosedCallback != nil {
+						f.file.onClosedCallback(true)
+					}
 				}, f.file.parent)
 		} else if f.selected != nil {
 			callback := f.file.callback.(func(fyne.FileReadCloser, error))
 			f.win.Hide()
+			if f.file.onClosedCallback != nil {
+				f.file.onClosedCallback(true)
+			}
 			callback(storage.OpenFileFromURI(storage.NewURI("file://" + f.selected.path)))
 		}
 	})
 	f.open.Style = widget.PrimaryButton
 	f.open.Disable()
-	buttons := widget.NewHBox(
-		widget.NewButton("Cancel", func() {
-			f.win.Hide()
-			if f.file.callback != nil {
-				if f.file.save {
-					f.file.callback.(func(fyne.FileWriteCloser, error))(nil, nil)
-				} else {
-					f.file.callback.(func(fyne.FileReadCloser, error))(nil, nil)
-				}
+	label = "Cancel"
+	if f.file.dismissText != "" {
+		label = f.file.dismissText
+	}
+	f.dismiss = widget.NewButton(label, func() {
+		f.win.Hide()
+		if f.file.onClosedCallback != nil {
+			f.file.onClosedCallback(false)
+		}
+		if f.file.callback != nil {
+			if f.file.save {
+				f.file.callback.(func(fyne.FileWriteCloser, error))(nil, nil)
+			} else {
+				f.file.callback.(func(fyne.FileReadCloser, error))(nil, nil)
 			}
-		}),
-		f.open)
+		}
+	})
+	buttons := widget.NewHBox(f.dismiss, f.open)
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
 		buttons, widget.NewHScrollContainer(f.fileName))
 
@@ -301,27 +326,69 @@ func showFile(file *FileDialog) *fileDialog {
 	return d
 }
 
+// Show shows the file dialog.
+func (f *FileDialog) Show() {
+	if f.save {
+		if fileSaveOSOverride(f.callback.(func(fyne.FileWriteCloser, error)), f.parent) {
+			f.nativePicker = true
+			return
+		}
+	} else {
+		if fileOpenOSOverride(f.callback.(func(fyne.FileReadCloser, error)), f.parent) {
+			f.nativePicker = true
+			return
+		}
+	}
+	if f.dialog != nil {
+		f.dialog.win.Show()
+		return
+	}
+	f.dialog = showFile(f)
+}
+
+// Hide hides the file dialog.
+func (f *FileDialog) Hide() {
+	if f.nativePicker {
+		return
+	}
+	f.dialog.win.Hide()
+	if f.onClosedCallback != nil {
+		f.onClosedCallback(false)
+	}
+}
+
+// SetDismissText allows custom text to be set in the confirmation button
+func (f *FileDialog) SetDismissText(label string) {
+	if f.nativePicker {
+		return
+	}
+	f.dialog.dismiss.SetText(label)
+	widget.Refresh(f.dialog.win)
+}
+
+// SetOnClosed sets a callback function that is called when
+// the dialog is closed.
+func (f *FileDialog) SetOnClosed(closed func()) {
+	// If there is already a callback set, remember it and call both.
+	if f.nativePicker {
+		return
+	}
+	originalCallback := f.onClosedCallback
+
+	f.onClosedCallback = func(response bool) {
+		closed()
+		if originalCallback != nil {
+			originalCallback(response)
+		}
+	}
+}
+
 // SetFilter sets a filter for limiting files that can be chosen in the file dialog.
 func (f *FileDialog) SetFilter(filter FileFilter) {
 	f.filter = filter
 	if f.dialog != nil {
 		f.dialog.refreshDir(f.dialog.dir)
 	}
-}
-
-// Show shows the file dialog
-func (f *FileDialog) Show() {
-	if !f.save {
-		if fileOpenOSOverride(f.callback.(func(fyne.FileReadCloser, error)), f.parent) {
-			return
-		} 
-	else {
-		if fileSaveOSOverride(f.callback.(func(fyne.FileWriteCloser, error)), f.parent) {
-			return
-		}
-	}
-	
-	f.dialog = showFile(f)
 }
 
 // NewExtensionFileFilter takes a string slice of extensions with a leading . and creates a filter for the file dialog.
@@ -356,7 +423,7 @@ func NewFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window)
 func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) {
 	dialog := NewFileOpen(callback, parent)
 	if fileOpenOSOverride(callback, parent) {
-		return nil
+		return
 	}
 	dialog.Show()
 }
@@ -367,7 +434,7 @@ func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window)
 func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) {
 	dialog := NewFileSave(callback, parent)
 	if fileSaveOSOverride(callback, parent) {
-		return nil
+		return
 	}
 	dialog.Show()
 }
