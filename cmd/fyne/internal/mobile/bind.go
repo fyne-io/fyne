@@ -69,6 +69,11 @@ func packagesConfig(targetOS string) *packages.Config {
 	config := &packages.Config{}
 	// Add CGO_ENABLED=1 explicitly since Cgo is disabled when GOOS is different from host OS.
 	config.Env = append(os.Environ(), "GOARCH=arm", "GOOS="+targetOS, "CGO_ENABLED=1")
+	if targetOS == "android" {
+		// with Cgo enabled we need to ensure the C compiler is set via CC to
+		// avoid the error: "gcc: error: unrecognized command line option '-marm'"
+		config.Env = append(os.Environ(), androidEnv["arm"]...)
+	}
 	tags := buildTags
 	if targetOS == "darwin" {
 		tags = append(tags, "ios")

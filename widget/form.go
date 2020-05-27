@@ -45,14 +45,6 @@ func (f *Form) createLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 }
 
-func (f *Form) ensureGrid() {
-	if f.itemGrid != nil {
-		return
-	}
-
-	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
-}
-
 // Append adds a new row to the form, using the text as a label next to the specified Widget
 func (f *Form) Append(text string, widget fyne.CanvasObject) {
 	item := &FormItem{Text: text, Widget: widget}
@@ -63,12 +55,11 @@ func (f *Form) Append(text string, widget fyne.CanvasObject) {
 func (f *Form) AppendItem(item *FormItem) {
 	f.ExtendBaseWidget(f) // could be called before render
 
-	// ensure we have a renderer set up (that creates itemGrid)...
-	cache.Renderer(f.super())
-
 	f.Items = append(f.Items, item)
-	f.itemGrid.AddObject(f.createLabel(item.Text))
-	f.itemGrid.AddObject(item.Widget)
+	if f.itemGrid != nil {
+		f.itemGrid.AddObject(f.createLabel(item.Text))
+		f.itemGrid.AddObject(item.Widget)
+	}
 
 	f.Refresh()
 }
@@ -81,9 +72,10 @@ func (f *Form) MinSize() fyne.Size {
 
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
-	f.BaseWidget.Refresh()
+	cache.Renderer(f.super()) // we are about to make changes to renderer created content... not great!
 	f.setButtons()
-	canvas.Refresh(f) // refresh ourselves for BG color - the above updates the content
+	f.BaseWidget.Refresh()
+	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
 }
 
 func (f *Form) setButtons() {
@@ -119,14 +111,16 @@ func (f *Form) setButtons() {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
-	f.ensureGrid()
+	itemGrid := fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
 	for _, item := range f.Items {
-		f.itemGrid.AddObject(f.createLabel(item.Text))
-		f.itemGrid.AddObject(item.Widget)
+		itemGrid.AddObject(f.createLabel(item.Text))
+		itemGrid.AddObject(item.Widget)
 	}
+	f.itemGrid = itemGrid
 
 	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
 	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
+	f.submitButton.Style = PrimaryButton
 	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 
 	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))

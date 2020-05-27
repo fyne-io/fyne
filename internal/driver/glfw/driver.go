@@ -76,6 +76,28 @@ func (d *gLDriver) addWindow(w *window) {
 	d.windows = append(d.windows, w)
 }
 
+// a trivial implementation of "focus previous" - return to the most recently opened, or master if set.
+// This may not do the right thing if your app has 3 or more windows open, but it was agreed this was not much
+// of an issue, and the added complexity to track focus was not needed at this time.
+func (d *gLDriver) focusPreviousWindow() {
+	d.windowLock.RLock()
+	wins := d.windows
+	d.windowLock.RUnlock()
+
+	var chosen fyne.Window
+	for _, w := range wins {
+		chosen = w
+		if w.(*window).master {
+			break
+		}
+	}
+
+	if chosen == nil {
+		return
+	}
+	chosen.RequestFocus()
+}
+
 func (d *gLDriver) windowList() []fyne.Window {
 	d.windowLock.RLock()
 	defer d.windowLock.RUnlock()

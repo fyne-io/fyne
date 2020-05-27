@@ -40,13 +40,10 @@ func makeButtonTab() fyne.Widget {
 		fyne.NewMenuItem("Twitter", func() { fmt.Println("context menu Share->Twitter") }),
 		fyne.NewMenuItem("Reddit", func() { fmt.Println("context menu Share->Reddit") }),
 	)
-	menuLabel := &contextMenuButton{
-		widget.NewButton("tap me for pop-up menu with submenus", nil),
-		fyne.NewMenu("",
-			fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
-			shareItem,
-		),
-	}
+	menuLabel := newContextMenuButton("tap me for pop-up menu with submenus", fyne.NewMenu("",
+		fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
+		shareItem,
+	))
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
@@ -224,6 +221,10 @@ func makeFormTab() fyne.Widget {
 	largeText := widget.NewMultiLineEntry()
 
 	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "Name", Widget: name},
+			{Text: "Email", Widget: email},
+		},
 		OnCancel: func() {
 			fmt.Println("Cancelled")
 		},
@@ -235,33 +236,8 @@ func makeFormTab() fyne.Widget {
 			})
 		},
 	}
-	form.Append("Name", name)
-	form.Append("Email", email)
 	form.Append("Password", password)
 	form.Append("Message", largeText)
-
-	// Added to demonstrate that buttons can be reset after the form is alive
-	setSubmit := widget.NewButton("Set Submit", func() {
-		form.OnSubmit = func() { println("New Submit Button") }
-		form.SubmitText = "New Submit"
-		form.Refresh()
-	})
-	clearSubmit := widget.NewButton("Remove Submit", func() {
-		form.OnSubmit = nil
-		form.Refresh()
-	})
-
-	setCancel := widget.NewButton("Set Cancel", func() {
-		form.OnCancel = func() { println("New Cancel Button") }
-		form.CancelText = "New Cancel"
-		form.Refresh()
-	})
-	clearCancel := widget.NewButton("Remove Cancel", func() {
-		form.OnCancel = nil
-		form.Refresh()
-	})
-	form.Append("", widget.NewHBox(setSubmit, clearSubmit, setCancel, clearCancel))
-
 	return form
 }
 
@@ -332,10 +308,18 @@ func WidgetScreen() fyne.CanvasObject {
 }
 
 type contextMenuButton struct {
-	*widget.Button
+	widget.Button
 	menu *fyne.Menu
 }
 
 func (b *contextMenuButton) Tapped(e *fyne.PointEvent) {
 	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
+}
+
+func newContextMenuButton(label string, menu *fyne.Menu) *contextMenuButton {
+	b := &contextMenuButton{menu: menu}
+	b.Text = label
+
+	b.ExtendBaseWidget(b)
+	return b
 }

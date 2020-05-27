@@ -32,10 +32,10 @@ func GraphicsScreen() fyne.CanvasObject {
 		}
 	}()
 	content := fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(90, 90)),
+		canvas.NewImageFromResource(theme.FyneLogo()),
 		&canvas.Rectangle{FillColor: color.NRGBA{0x80, 0, 0, 0xff},
 			StrokeColor: color.NRGBA{0xff, 0xff, 0xff, 0xff},
 			StrokeWidth: 1},
-		canvas.NewImageFromResource(theme.FyneLogo()),
 		&canvas.Line{StrokeColor: color.NRGBA{0, 0, 0x80, 0xff}, StrokeWidth: 5},
 		&canvas.Circle{StrokeColor: color.NRGBA{0, 0, 0x80, 0xff},
 			FillColor:   color.NRGBA{0x30, 0x30, 0x30, 0x60},
