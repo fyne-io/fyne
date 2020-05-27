@@ -30,7 +30,8 @@ const ratioDown float64 = 0.45
 // NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
 func NewFileIcon(uri fyne.URI) fyne.CanvasObject {
 
-	ext, mimeType, mimeSubType := mimeTypeGet(uri)
+	mimeType, mimeSubType := mimeTypeGet(uri)
+	ext := uri.Extension()
 
 	var res fyne.Resource
 	switch mimeType {
@@ -96,8 +97,8 @@ func (s fileIconRenderer) Refresh() {
 	canvas.Refresh(s.item)
 }
 
-func mimeTypeGet(uri fyne.URI) (ext, mimeType, mimeSubType string) {
-	ext = uri.Extension()
+func mimeTypeGet(uri fyne.URI) (mimeType, mimeSubType string) {
+	ext := uri.Extension()
 	if len(ext) > 5 {
 		ext = ext[:5]
 	}

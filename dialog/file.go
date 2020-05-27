@@ -20,7 +20,7 @@ type textWidget interface {
 }
 
 type fileDialog struct {
-	file       *File
+	file       *FileDialog
 	fileName   textWidget
 	open       *widget.Button
 	breadcrumb *widget.Box
@@ -32,8 +32,8 @@ type fileDialog struct {
 	dir      string
 }
 
-// File is a dialog containing a file picker for use in opening or saving files
-type File struct {
+// FileDialog is a dialog containing a file picker for use in opening or saving files.
+type FileDialog struct {
 	save     bool
 	callback interface{}
 	filter   FileFilter
@@ -41,7 +41,7 @@ type File struct {
 	dialog   *fileDialog
 }
 
-// FileFilter is an interface that can be implemented to provide a filter to a file dialog
+// FileFilter is an interface that can be implemented to provide a filter to a file dialog.
 type FileFilter interface {
 	Matches(fyne.URI) bool
 }
@@ -54,7 +54,7 @@ type mimeTypeFileFilter struct {
 	mimeTypes []string
 }
 
-// Matches returns true if a file URI has one of the filtered extensions
+// Matches returns true if a file URI has one of the filtered extensions.
 func (e *extensionFileFilter) Matches(uri fyne.URI) bool {
 	extension := uri.Extension()
 	for _, ext := range e.extensions {
@@ -65,9 +65,9 @@ func (e *extensionFileFilter) Matches(uri fyne.URI) bool {
 	return false
 }
 
-// Matches returns true if a file URI has one of the filtered mimetypes
+// Matches returns true if a file URI has one of the filtered mimetypes.
 func (mt *mimeTypeFileFilter) Matches(uri fyne.URI) bool {
-	_, mimeType, mimeSubType := mimeTypeGet(uri)
+	mimeType, mimeSubType := mimeTypeGet(uri)
 	for _, mimeTypeFull := range mt.mimeTypes {
 		mimeTypeSplit := strings.Split(mimeTypeFull, "/")
 		if len(mimeTypeSplit) <= 1 {
@@ -281,7 +281,7 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 	}
 }
 
-func showFile(file *File) *fileDialog {
+func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file}
 	ui := d.makeUI()
 	dir, err := os.UserHomeDir()
@@ -301,8 +301,8 @@ func showFile(file *File) *fileDialog {
 	return d
 }
 
-// SetFilter sets a filter for limiting files that can be chosen in the file dialog
-func (f *File) SetFilter(filter FileFilter) {
+// SetFilter sets a filter for limiting files that can be chosen in the file dialog.
+func (f *FileDialog) SetFilter(filter FileFilter) {
 	f.filter = filter
 	if f.dialog != nil {
 		f.dialog.refreshDir(f.dialog.dir)
@@ -310,17 +310,17 @@ func (f *File) SetFilter(filter FileFilter) {
 }
 
 // Show shows the file dialog
-func (f *File) Show() {
+func (f *FileDialog) Show() {
 	if !f.save {
 		if fileOpenOSOverride(f.callback.(func(fyne.FileReadCloser, error)), f.parent) {
 			return
+		} 
+	else {
+		if fileSaveOSOverride(f.callback.(func(fyne.FileWriteCloser, error)), f.parent) {
+			return
 		}
-		f.dialog = showFile(f)
-		return
 	}
-	if fileSaveOSOverride(f.callback.(func(fyne.FileWriteCloser, error)), f.parent) {
-		return
-	}
+	
 	f.dialog = showFile(f)
 }
 
@@ -338,38 +338,36 @@ func NewMimeTypeFileFilter(mimeTypes []string) FileFilter {
 
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified when Show() is called.
-func NewFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) *File {
-	dialog := &File{callback: callback, parent: parent}
+func NewFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) *FileDialog {
+	dialog := &FileDialog{callback: callback, parent: parent}
 	return dialog
 }
 
 // NewFileSave creates a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified when Show() is called.
-func NewFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) *File {
-	dialog := &File{callback: callback, parent: parent, save: true}
+func NewFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) *FileDialog {
+	dialog := &FileDialog{callback: callback, parent: parent, save: true}
 	return dialog
 }
 
 // ShowFileOpen creates and shows a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified.
-func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) *File {
+func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) {
 	dialog := NewFileOpen(callback, parent)
 	if fileOpenOSOverride(callback, parent) {
 		return nil
 	}
 	dialog.Show()
-	return dialog
 }
 
 // ShowFileSave creates and shows a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified.
-func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) *File {
+func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) {
 	dialog := NewFileSave(callback, parent)
 	if fileSaveOSOverride(callback, parent) {
 		return nil
 	}
 	dialog.Show()
-	return dialog
 }
