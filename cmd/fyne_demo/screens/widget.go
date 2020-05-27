@@ -26,7 +26,7 @@ Suspendisse id maximus felis. Sed mauris odio, mattis eget mi eu, consequat temp
 )
 
 var (
-	progress *widget.ProgressBar
+	progress    *widget.ProgressBar
 	infProgress *widget.ProgressBarInfinite
 	endProgress chan interface{}
 )
