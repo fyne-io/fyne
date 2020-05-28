@@ -366,10 +366,10 @@ func (f *FileDialog) SetDismissText(label string) {
 // SetOnClosed sets a callback function that is called when
 // the dialog is closed.
 func (f *FileDialog) SetOnClosed(closed func()) {
-	// If there is already a callback set, remember it and call both.
 	if f.dialog == nil {
 		return
 	}
+	// If there is already a callback set, remember it and call both.
 	originalCallback := f.onClosedCallback
 
 	f.onClosedCallback = func(response bool) {
