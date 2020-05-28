@@ -36,7 +36,6 @@ type fileDialog struct {
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
 type FileDialog struct {
 	save             bool
-	nativePicker     bool
 	callback         interface{}
 	onClosedCallback func(bool)
 	filter           FileFilter
@@ -74,7 +73,7 @@ func (e *extensionFileFilter) Matches(uri fyne.URI) bool {
 
 // Matches returns true if a file URI has one of the filtered mimetypes.
 func (mt *mimeTypeFileFilter) Matches(uri fyne.URI) bool {
-	mimeType, mimeSubType := mimeTypeSplit(uri)
+	mimeType, mimeSubType := splitMimeType(uri)
 	for _, mimeTypeFull := range mt.mimeTypes {
 		mimeTypeSplit := strings.Split(mimeTypeFull, "/")
 		if len(mimeTypeSplit) <= 1 {
@@ -330,12 +329,10 @@ func showFile(file *FileDialog) *fileDialog {
 func (f *FileDialog) Show() {
 	if f.save {
 		if fileSaveOSOverride(f.callback.(func(fyne.FileWriteCloser, error)), f.parent) {
-			f.nativePicker = true
 			return
 		}
 	} else {
 		if fileOpenOSOverride(f.callback.(func(fyne.FileReadCloser, error)), f.parent) {
-			f.nativePicker = true
 			return
 		}
 	}
@@ -348,7 +345,7 @@ func (f *FileDialog) Show() {
 
 // Hide hides the file dialog.
 func (f *FileDialog) Hide() {
-	if f.nativePicker {
+	if f.dialog == nil {
 		return
 	}
 	f.dialog.win.Hide()
@@ -359,7 +356,7 @@ func (f *FileDialog) Hide() {
 
 // SetDismissText allows custom text to be set in the confirmation button
 func (f *FileDialog) SetDismissText(label string) {
-	if f.nativePicker {
+	if f.dialog == nil {
 		return
 	}
 	f.dialog.dismiss.SetText(label)
@@ -370,7 +367,7 @@ func (f *FileDialog) SetDismissText(label string) {
 // the dialog is closed.
 func (f *FileDialog) SetOnClosed(closed func()) {
 	// If there is already a callback set, remember it and call both.
-	if f.nativePicker {
+	if f.dialog == nil {
 		return
 	}
 	originalCallback := f.onClosedCallback
