@@ -3,77 +3,23 @@
 package widget_test
 
 import (
+	"image/color"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/canvas"
+	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
-
-func TestMenu_ItemWithChildTapped(t *testing.T) {
-	sub1 := fyne.NewMenuItem("sub1", nil)
-	sub1.ChildMenu = fyne.NewMenu("",
-		fyne.NewMenuItem("sub1 A", nil),
-		fyne.NewMenuItem("sub1 B", nil),
-	)
-	sub2sub := fyne.NewMenuItem("sub2sub", nil)
-	sub2sub.ChildMenu = fyne.NewMenu("",
-		fyne.NewMenuItem("sub2sub A", nil),
-		fyne.NewMenuItem("sub2sub B", nil),
-	)
-	sub2 := fyne.NewMenuItem("sub2", nil)
-	sub2.ChildMenu = fyne.NewMenu("",
-		fyne.NewMenuItem("sub2 A", nil),
-		fyne.NewMenuItem("sub2 B", nil),
-		sub2sub,
-	)
-	m := widget.NewMenu(
-		fyne.NewMenu("",
-			fyne.NewMenuItem("Foo", nil),
-			fyne.NewMenuItemSeparator(),
-			fyne.NewMenuItem("Bar", nil),
-			sub1,
-			sub2,
-		),
-	)
-	size := m.MinSize()
-	m.Resize(size)
-
-	sub1Widget := m.Items[3].(*widget.MenuItem)
-	assert.Equal(t, sub1, sub1Widget.Item)
-	sub2Widget := m.Items[4].(*widget.MenuItem)
-	assert.Equal(t, sub2, sub2Widget.Item)
-	assert.False(t, sub1Widget.Child.Visible(), "submenu is invisible initially")
-	assert.False(t, sub2Widget.Child.Visible(), "submenu is invisible initially")
-	test.Tap(sub1Widget)
-	assert.True(t, sub1Widget.Child.Visible(), "tapping item shows submenu")
-	assert.False(t, sub2Widget.Child.Visible(), "other Child menu stays hidden")
-	test.Tap(sub2Widget)
-	assert.False(t, sub1Widget.Child.Visible(), "tapping other item hides current submenu")
-	assert.True(t, sub2Widget.Child.Visible(), "other Child menu shows up")
-
-	sub2subWidget := sub2Widget.Child.Items[2].(*widget.MenuItem)
-	assert.Equal(t, sub2sub, sub2subWidget.Item)
-	assert.False(t, sub2subWidget.Child.Visible(), "2nd level submenu is invisible initially")
-	test.Tap(sub2subWidget)
-	assert.True(t, sub2Widget.Child.Visible(), "1st level submenu stays visible")
-	assert.True(t, sub2subWidget.Child.Visible(), "2nd level submenu shows up")
-
-	test.Tap(sub1Widget)
-	assert.False(t, sub2Widget.Child.Visible(), "1st level submenu is hidden by other submenu")
-	test.Tap(sub2Widget)
-	assert.False(t, sub2subWidget.Child.Visible(), "2nd level submenu is hidden when re-entering its parent")
-}
 
 func TestMenu_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.DarkTheme())
 
-	w := test.NewWindow(nil)
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
 	w.SetPadded(false)
 	c := w.Canvas()
@@ -101,7 +47,7 @@ func TestMenu_Layout(t *testing.T) {
 		"normal": {
 			windowSize: fyne.NewSize(500, 300),
 			menuPos:    fyne.NewPos(10, 10),
-			wantImage:  "menu_layout_normal.png",
+			wantImage:  "menu/layout_normal.png",
 		},
 		"normal with submenus": {
 			windowSize: fyne.NewSize(500, 300),
@@ -110,7 +56,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),
 				fyne.NewPos(100, 170),
 			},
-			wantImage: "menu_layout_mobile_normal_with_submenus.png",
+			wantImage: "menu/mobile/layout_normal_with_submenus.png",
 		},
 		"background of active submenu parents resets if sibling is hovered": {
 			windowSize: fyne.NewSize(500, 300),
@@ -121,7 +67,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(300, 170), // hover subsubmenu item
 				fyne.NewPos(30, 60),   // hover sibling of submenu parent
 			},
-			wantImage: "menu_layout_mobile_background_reset.png",
+			wantImage: "menu/mobile/layout_background_reset.png",
 		},
 		"no space on right side for submenu": {
 			windowSize: fyne.NewSize(500, 300),
@@ -130,7 +76,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(430, 100), // open submenu
 				fyne.NewPos(300, 170), // open subsubmenu
 			},
-			wantImage: "menu_layout_mobile_no_space_on_right.png",
+			wantImage: "menu/mobile/layout_no_space_on_right.png",
 		},
 		"no space on left & right side for submenu": {
 			windowSize: fyne.NewSize(200, 300),
@@ -139,7 +85,7 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 170), // open subsubmenu
 			},
-			wantImage: "menu_layout_mobile_no_space_on_both_sides.png",
+			wantImage: "menu/mobile/layout_no_space_on_both_sides.png",
 		},
 		"window too short for submenu": {
 			windowSize: fyne.NewSize(500, 150),
@@ -148,22 +94,28 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 130), // open subsubmenu
 			},
-			wantImage: "menu_layout_mobile_window_too_short.png",
+			wantImage: "menu/mobile/layout_window_too_short_for_submenu.png",
 		},
 		"theme change": {
 			windowSize:   fyne.NewSize(500, 300),
 			menuPos:      fyne.NewPos(10, 10),
 			useTestTheme: true,
-			wantImage:    "menu_layout_theme_changed.png",
+			wantImage:    "menu/layout_theme_changed.png",
+		},
+		"window too short for menu": {
+			windowSize: fyne.NewSize(100, 50),
+			menuPos:    fyne.NewPos(10, 10),
+			wantImage:  "menu/layout_window_too_short.png",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			w.Resize(tt.windowSize)
 			m := widget.NewMenu(menu)
-			w.SetContent(m)
-			w.Resize(tt.windowSize) // SetContent changes window’s size
-			m.Resize(m.MinSize())
+			o := internalWidget.NewOverlayContainer(m, c, nil)
+			c.Overlays().Add(o)
+			defer c.Overlays().Remove(o)
 			m.Move(tt.menuPos)
+			m.Resize(m.MinSize())
 			for _, pos := range tt.tapPositions {
 				test.TapCanvas(c, pos)
 			}
@@ -176,4 +128,46 @@ func TestMenu_Layout(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMenu_Dragging(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.DarkTheme())
+
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	menu := fyne.NewMenu("",
+		fyne.NewMenuItem("A", nil),
+		fyne.NewMenuItem("B", nil),
+		fyne.NewMenuItem("C", nil),
+		fyne.NewMenuItem("D", nil),
+		fyne.NewMenuItem("E", nil),
+		fyne.NewMenuItem("F", nil),
+	)
+
+	w.Resize(fyne.NewSize(100, 100))
+	m := widget.NewMenu(menu)
+	o := internalWidget.NewOverlayContainer(m, c, nil)
+	c.Overlays().Add(o)
+	defer c.Overlays().Remove(o)
+	m.Move(fyne.NewPos(10, 10))
+	m.Resize(m.MinSize())
+	maxDragDistance := m.MinSize().Height - 90
+	test.AssertImageMatches(t, "menu/mobile/drag_top.png", c.Capture())
+
+	test.Drag(c, fyne.NewPos(20, 20), 0, -50)
+	test.AssertImageMatches(t, "menu/mobile/drag_middle.png", c.Capture())
+
+	test.Drag(c, fyne.NewPos(20, 20), 0, -maxDragDistance)
+	test.AssertImageMatches(t, "menu/mobile/drag_bottom.png", c.Capture())
+
+	test.Drag(c, fyne.NewPos(20, 20), 0, maxDragDistance-50)
+	test.AssertImageMatches(t, "menu/mobile/drag_middle.png", c.Capture())
+
+	test.Drag(c, fyne.NewPos(20, 20), 0, 50)
+	test.AssertImageMatches(t, "menu/mobile/drag_top.png", c.Capture())
 }

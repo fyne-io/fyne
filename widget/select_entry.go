@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -10,7 +9,7 @@ import (
 type SelectEntry struct {
 	Entry
 	dropDown *fyne.Menu
-	popUp    *widget.PopUpMenu
+	popUp    *PopUpMenu
 }
 
 // NewSelectEntry creates a SelectEntry.

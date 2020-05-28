@@ -8,7 +8,8 @@ import (
 	"fyne.io/fyne/internal/cache"
 )
 
-type base struct {
+// Base is a simple base widget for internal use.
+type Base struct {
 	hidden bool
 	pos    fyne.Position
 	size   fyne.Size
@@ -16,34 +17,35 @@ type base struct {
 	propertyLock sync.RWMutex
 }
 
-func (b *base) Move(pos fyne.Position) {
-	b.setFieldsAndRefresh(func() {
-		b.pos = pos
-	}, nil)
-}
-
-func (b *base) Position() fyne.Position {
+// Position returns the position of the widget relative to its parent.
+// Implements: fyne.Widget
+func (b *Base) Position() fyne.Position {
 	b.propertyLock.RLock()
 	defer b.propertyLock.RUnlock()
 
 	return b.pos
 }
 
-func (b *base) Size() fyne.Size {
+// Size returns the current size of the widget.
+// Implements: fyne.Widget
+func (b *Base) Size() fyne.Size {
 	b.propertyLock.RLock()
 	defer b.propertyLock.RUnlock()
 
 	return b.size
 }
 
-func (b *base) Visible() bool {
+// Visible returns whether the widget is visible or not.
+// Implements: fyne.Widget
+func (b *Base) Visible() bool {
 	b.propertyLock.RLock()
 	defer b.propertyLock.RUnlock()
 
 	return !b.hidden
 }
 
-func (b *base) hide(w fyne.Widget) {
+// HideWidget is a helper method to hide and refresh a widget.
+func HideWidget(b *Base, w fyne.Widget) {
 	if !b.Visible() {
 		return
 	}
@@ -54,7 +56,8 @@ func (b *base) hide(w fyne.Widget) {
 	canvas.Refresh(w)
 }
 
-func (b *base) minSize(w fyne.Widget) fyne.Size {
+// MinSizeOf is a helper method to get the minSize of a widget.
+func MinSizeOf(w fyne.Widget) fyne.Size {
 	r := cache.Renderer(w)
 	if r == nil {
 		return fyne.NewSize(0, 0)
@@ -63,7 +66,17 @@ func (b *base) minSize(w fyne.Widget) fyne.Size {
 	return r.MinSize()
 }
 
-func (b *base) refresh(w fyne.Widget) {
+// MoveWidget is a helper method to set the position of a widget relative to its parent.
+func MoveWidget(b *Base, w fyne.Widget, pos fyne.Position) {
+	b.propertyLock.Lock()
+	b.pos = pos
+	b.propertyLock.Unlock()
+
+	RefreshWidget(w)
+}
+
+// RefreshWidget is a helper method to refresh a widget.
+func RefreshWidget(w fyne.Widget) {
 	r := cache.Renderer(w)
 	if r == nil {
 		return
@@ -72,7 +85,8 @@ func (b *base) refresh(w fyne.Widget) {
 	r.Refresh()
 }
 
-func (b *base) resize(size fyne.Size, w fyne.Widget) {
+// ResizeWidget is a helper method to resize a widget.
+func ResizeWidget(b *Base, w fyne.Widget, size fyne.Size) {
 	b.propertyLock.RLock()
 	baseSize := b.size
 	b.propertyLock.RUnlock()
@@ -91,24 +105,15 @@ func (b *base) resize(size fyne.Size, w fyne.Widget) {
 	r.Layout(size)
 }
 
-// setFieldsAndRefresh helps to make changes to a widget that should be followed by a refresh.
-// This method is a guaranteed thread-safe way of directly manipulating widget fields.
-func (b *base) setFieldsAndRefresh(f func(), w fyne.Widget) {
-	b.propertyLock.Lock()
-	f()
-	b.propertyLock.Unlock()
-
-	if w != nil { // the wrapping function didn't tell us what to refresh
-		b.refresh(w)
-	}
-}
-
-func (b *base) show(w fyne.Widget) {
+// ShowWidget is a helper method to show and refresh a widget.
+func ShowWidget(b *Base, w fyne.Widget) {
 	if b.Visible() {
 		return
 	}
 
-	b.setFieldsAndRefresh(func() {
-		b.hidden = false
-	}, w)
+	b.propertyLock.Lock()
+	b.hidden = false
+	b.propertyLock.Unlock()
+
+	RefreshWidget(w)
 }

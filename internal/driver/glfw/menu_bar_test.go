@@ -1,18 +1,19 @@
 // +build !mobile
+// +build !ci !windows
 
-package widget_test
+package glfw_test
 
 import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/internal/driver/glfw"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	publicWidgets "fyne.io/fyne/widget"
+	"fyne.io/fyne/widget"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMenuBar(t *testing.T) {
@@ -39,7 +40,7 @@ func TestMenuBar(t *testing.T) {
 	m1i3 := fyne.NewMenuItem("Recent", nil)
 	m1i3.ChildMenu = fyne.NewMenu("", m1i3i1, m1i3i2, m1i3i3)
 	// TODO: remove useless separators: trailing, leading & double
-	// m1 := fyne.NewMenu("File", m1i1, m1i2, fyne.NewMenuItemSeparator(), m1i3)
+	// m1 := fyne.NewMenu("File", m1i1, m1i2, fyne.newMenuItemSeparator(), m1i3)
 	m1 := fyne.NewMenu("File", m1i1, m1i2, m1i3)
 
 	m2i1 := fyne.NewMenuItem("Copy", func() { lastAction = "copy" })
@@ -50,10 +51,10 @@ func TestMenuBar(t *testing.T) {
 	m3 := fyne.NewMenu("Help", m3i1)
 
 	menu := fyne.NewMainMenu(m1, m2, m3)
-	menuBar := widget.NewMenuBar(menu, c)
+	menuBar := glfw.NewMenuBar(menu, c)
 
 	themeCounter := 0
-	button := publicWidgets.NewButton("Button", func() {
+	button := widget.NewButton("Button", func() {
 		switch themeCounter % 3 {
 		case 0:
 			test.ApplyTheme(t, theme.DarkTheme())
