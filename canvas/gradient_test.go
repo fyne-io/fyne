@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/canvas"
+	internalTest "fyne.io/fyne/internal/test"
 	"fyne.io/fyne/test"
 
 	"github.com/stretchr/testify/assert"
@@ -291,7 +292,7 @@ func TestNewRadialGradient(t *testing.T) {
 }
 
 func TestGradient_colorComputation(t *testing.T) {
-	bg := test.NewCheckedImage(50, 50, 1, 2)
+	bg := internalTest.NewCheckedImage(50, 50, 1, 2)
 	bounds := image.Rect(0, 0, 49, 49)
 	dst := image.NewNRGBA(bounds)
 	draw.Draw(dst, bounds, bg, image.Pt(0, 0), draw.Src)
