@@ -15,17 +15,7 @@ import (
 )
 
 func makeTestImage(w, h int) image.Image {
-	src := image.NewNRGBA(image.Rect(0, 0, w, h))
-	colors := []color.Color{color.White, color.Black}
-	c := 0
-	for y := 0; y < h; y++ {
-		c = y % 2
-		for x := 0; x < w; x++ {
-			src.Set(x, y, colors[c])
-			c = 1 - c
-		}
-	}
-	return src
+	return test.NewCheckedImage(w, h, w, h)
 }
 
 func TestPainter_paintGradient_clipped(t *testing.T) {
