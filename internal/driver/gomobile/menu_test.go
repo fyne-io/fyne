@@ -5,13 +5,13 @@ package gomobile
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMobileCanvas_DismissBar(t *testing.T) {
