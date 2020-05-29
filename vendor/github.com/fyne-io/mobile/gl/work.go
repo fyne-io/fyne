@@ -87,7 +87,7 @@ type context3 struct {
 func NewContext() (Context, Worker) {
 	glctx := &context{
 		workAvailable: make(chan struct{}, 1),
-		work:          make(chan call, workbufLen),
+		work:          make(chan call, workbufLen*4),
 		retvalue:      make(chan C.uintptr_t),
 	}
 	if C.GLES_VERSION == "GL_ES_2_0" {
