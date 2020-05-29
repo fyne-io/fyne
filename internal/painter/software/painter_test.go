@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/painter/software"
+	internalTest "fyne.io/fyne/internal/test"
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -15,7 +16,7 @@ import (
 )
 
 func makeTestImage(w, h int) image.Image {
-	return test.NewCheckedImage(w, h, w, h)
+	return internalTest.NewCheckedImage(w, h, w, h)
 }
 
 func TestPainter_paintGradient_clipped(t *testing.T) {

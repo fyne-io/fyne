@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"testing"
 
-	"fyne.io/fyne/test"
+	"fyne.io/fyne/internal/test"
 
 	"github.com/stretchr/testify/assert"
 )
