@@ -111,7 +111,7 @@ func (g *RadialGradient) Refresh() {
 	Refresh(g)
 }
 
-func calculatePixel(d float64, startColor, endColor color.Color) *color.NRGBA64 {
+func calculatePixel(d float64, startColor, endColor color.Color) color.Color {
 	// fetch RGBA values
 	aR, aG, aB, aA := startColor.RGBA()
 	bR, bG, bB, bA := endColor.RGBA()
@@ -123,7 +123,7 @@ func calculatePixel(d float64, startColor, endColor color.Color) *color.NRGBA64 
 	dA := float64(bA) - float64(aA)
 
 	// Apply gradations
-	pixel := &color.NRGBA64{
+	pixel := &color.RGBA64{
 		R: uint16(float64(aR) + d*dR),
 		B: uint16(float64(aB) + d*dB),
 		G: uint16(float64(aG) + d*dG),

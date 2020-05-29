@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/app"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
 	"fyne.io/fyne/theme"
@@ -195,6 +196,53 @@ func (c *mobileCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut
 
 func (c *mobileCanvas) Capture() image.Image {
 	return c.painter.Capture(c)
+}
+
+func (c *mobileCanvas) ensureMinSize() {
+	if c.Content() == nil {
+		return
+	}
+	var lastParent fyne.CanvasObject
+
+	ensureMinSize := func(obj, parent fyne.CanvasObject) {
+		if !obj.Visible() {
+			return
+		}
+		minSize := obj.MinSize()
+
+		objToLayout := obj
+		if parent != nil {
+			objToLayout = parent
+		} else {
+			size := obj.Size()
+			expectedSize := minSize.Union(size)
+			if expectedSize != size && size != c.size {
+				objToLayout = nil
+				obj.Resize(expectedSize)
+			}
+		}
+
+		if objToLayout != lastParent {
+			updateLayout(lastParent)
+			lastParent = objToLayout
+		}
+	}
+	c.walkTree(nil, ensureMinSize)
+
+	if lastParent != nil {
+		updateLayout(lastParent)
+	}
+}
+
+func updateLayout(objToLayout fyne.CanvasObject) {
+	switch cont := objToLayout.(type) {
+	case *fyne.Container:
+		if cont.Layout != nil {
+			cont.Layout.Layout(cont.Objects, cont.Size())
+		}
+	case fyne.Widget:
+		cache.Renderer(cont).Layout(cont.Size())
+	}
 }
 
 func (c *mobileCanvas) objectTrees() []fyne.CanvasObject {
