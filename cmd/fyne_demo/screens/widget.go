@@ -25,6 +25,12 @@ Mauris erat urna, fermentum et quam rhoncus, fringilla consequat ante. Vivamus c
 Suspendisse id maximus felis. Sed mauris odio, mattis eget mi eu, consequat tempus purus.`
 )
 
+var (
+	progress    *widget.ProgressBar
+	infProgress *widget.ProgressBarInfinite
+	endProgress chan interface{}
+)
+
 func makeButtonTab() fyne.Widget {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
@@ -34,13 +40,10 @@ func makeButtonTab() fyne.Widget {
 		fyne.NewMenuItem("Twitter", func() { fmt.Println("context menu Share->Twitter") }),
 		fyne.NewMenuItem("Reddit", func() { fmt.Println("context menu Share->Reddit") }),
 	)
-	menuLabel := &contextMenuButton{
-		widget.NewButton("tap me for pop-up menu with submenus", nil),
-		fyne.NewMenu("",
-			fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
-			shareItem,
-		),
-	}
+	menuLabel := newContextMenuButton("tap me for pop-up menu with submenus", fyne.NewMenu("",
+		fyne.NewMenuItem("Copy", func() { fmt.Println("context menu copy") }),
+		shareItem,
+	))
 
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
@@ -199,19 +202,9 @@ func makeInputTab() fyne.Widget {
 }
 
 func makeProgressTab() fyne.Widget {
-	progress := widget.NewProgressBar()
-	infProgress := widget.NewProgressBarInfinite()
-
-	go func() {
-		num := 0.0
-		for num < 1.0 {
-			time.Sleep(100 * time.Millisecond)
-			progress.SetValue(num)
-			num += 0.01
-		}
-
-		progress.SetValue(1)
-	}()
+	progress = widget.NewProgressBar()
+	infProgress = widget.NewProgressBarInfinite()
+	endProgress = make(chan interface{}, 1)
 
 	return widget.NewVBox(
 		widget.NewLabel("Percent"), progress,
@@ -248,6 +241,41 @@ func makeFormTab() fyne.Widget {
 	return form
 }
 
+func startProgress() {
+	progress.SetValue(0)
+	select { // ignore stale end message
+	case <-endProgress:
+	default:
+	}
+
+	go func() {
+		num := 0.0
+		for num < 1.0 {
+			time.Sleep(100 * time.Millisecond)
+			select {
+			case <-endProgress:
+				return
+			default:
+			}
+
+			progress.SetValue(num)
+			num += 0.01
+		}
+
+		progress.SetValue(1)
+	}()
+	infProgress.Start()
+}
+
+func stopProgress() {
+	if !infProgress.Running() {
+		return
+	}
+
+	infProgress.Stop()
+	endProgress <- struct{}{}
+}
+
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -258,23 +286,40 @@ func WidgetScreen() fyne.CanvasObject {
 		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
 	)
 
+	progress := makeProgressTab()
+	tabs := widget.NewTabContainer(
+		widget.NewTabItem("Buttons", makeButtonTab()),
+		widget.NewTabItem("Text", makeTextTab()),
+		widget.NewTabItem("Input", makeInputTab()),
+		widget.NewTabItem("Progress", progress),
+		widget.NewTabItem("Form", makeFormTab()),
+	)
+	tabs.OnChanged = func(t *widget.TabItem) {
+		if t.Content == progress {
+			startProgress()
+		} else {
+			stopProgress()
+		}
+	}
+
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(toolbar, nil, nil, nil),
-		toolbar,
-		widget.NewTabContainer(
-			widget.NewTabItem("Buttons", makeButtonTab()),
-			widget.NewTabItem("Text", makeTextTab()),
-			widget.NewTabItem("Input", makeInputTab()),
-			widget.NewTabItem("Progress", makeProgressTab()),
-			widget.NewTabItem("Form", makeFormTab()),
-		),
+		toolbar, tabs,
 	)
 }
 
 type contextMenuButton struct {
-	*widget.Button
+	widget.Button
 	menu *fyne.Menu
 }
 
 func (b *contextMenuButton) Tapped(e *fyne.PointEvent) {
 	widget.ShowPopUpMenuAtPosition(b.menu, fyne.CurrentApp().Driver().CanvasForObject(b), e.AbsolutePosition)
+}
+
+func newContextMenuButton(label string, menu *fyne.Menu) *contextMenuButton {
+	b := &contextMenuButton{menu: menu}
+	b.Text = label
+
+	b.ExtendBaseWidget(b)
+	return b
 }
