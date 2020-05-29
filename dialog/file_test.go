@@ -141,7 +141,7 @@ func TestFileFilters(t *testing.T) {
 	f := NewFileOpen(func(file fyne.FileReadCloser, err error) {
 	}, win)
 
-	f.SetFilter(NewExtensionFileFilter([]string{".png"}))
+	f.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
 	f.Show()
 
 	workingDir, err := os.Getwd()
@@ -163,7 +163,7 @@ func TestFileFilters(t *testing.T) {
 	}
 	assert.Equal(t, count, 1)
 
-	f.SetFilter(NewMimeTypeFileFilter([]string{"image/jpeg"}))
+	f.SetFilter(storage.NewMimeTypeFileFilter([]string{"image/jpeg"}))
 
 	count = 0
 	for _, icon := range f.dialog.files.Objects {
@@ -175,7 +175,7 @@ func TestFileFilters(t *testing.T) {
 	}
 	assert.Equal(t, count, 1)
 
-	f.SetFilter(NewMimeTypeFileFilter([]string{"image/*"}))
+	f.SetFilter(storage.NewMimeTypeFileFilter([]string{"image/*"}))
 
 	count = 0
 	for _, icon := range f.dialog.files.Objects {

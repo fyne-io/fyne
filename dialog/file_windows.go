@@ -74,10 +74,10 @@ func isHidden(file, dir string) bool {
 	return attr&syscall.FILE_ATTRIBUTE_HIDDEN != 0
 }
 
-func fileOpenOSOverride(_ func(fyne.FileReadCloser, error), _ fyne.Window) bool {
+func fileOpenOSOverride(*FileDialog) bool {
 	return false
 }
 
-func fileSaveOSOverride(_ func(fyne.FileWriteCloser, error), _ fyne.Window) bool {
+func fileSaveOSOverride(*FileDialog) bool {
 	return false
 }
