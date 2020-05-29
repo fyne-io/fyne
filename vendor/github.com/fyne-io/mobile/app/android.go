@@ -44,7 +44,7 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
 void showKeyboard(JNIEnv* env);
 void hideKeyboard(JNIEnv* env);
-void showFileOpen(JNIEnv* env);
+void showFileOpen(JNIEnv* env, char* mimes);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -52,7 +52,9 @@ import "C"
 import (
 	"fmt"
 	"log"
+	"mime"
 	"os"
+	"strings"
 	"time"
 	"unsafe"
 
@@ -331,18 +333,37 @@ func insetsChanged(top, bottom, left, right int) {
 	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
 }
 
-func driverShowFileOpenPicker(callback func(string, func())) {
+func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	fileCallback = callback
 
-	if err := mobileinit.RunOnJVM(showFileOpenPicker); err != nil {
+	mimes := "*/*"
+	if filter.MimeTypes != nil {
+		mimes = strings.Join(filter.MimeTypes, ",")
+	} else if filter.Extensions != nil {
+		var mimeTypes []string
+		for _, ext := range filter.Extensions {
+			mimeType := mime.TypeByExtension(ext)
+			if mimeType == "" {
+				continue
+			}
+
+			mimeTypes = append(mimeTypes, mimeType)
+		}
+		mimes = strings.Join(mimeTypes, ",")
+	}
+	mimeStr := C.CString(mimes)
+	defer C.free(unsafe.Pointer(mimeStr))
+
+	open := func(vm, jniEnv, ctx uintptr) error {
+		// TODO pass in filter...
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+		C.showFileOpen(env, mimeStr)
+		return nil
+	}
+
+	if err := mobileinit.RunOnJVM(open); err != nil {
 		log.Fatalf("app: %v", err)
 	}
-}
-
-func showFileOpenPicker(vm, jniEnv, ctx uintptr) error {
-	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-	C.showFileOpen(env)
-	return nil
 }
 
 var mainUserFn func(App)
