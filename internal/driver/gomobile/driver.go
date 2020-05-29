@@ -143,6 +143,7 @@ func (d *mobileDriver) Run() {
 					canvas.painter.Init() // we cannot init until the context is set above
 				}
 
+				canvas.ensureMinSize()
 				if d.freeDirtyTextures(canvas) {
 					d.paintWindow(current, currentSize)
 					a.Publish()
