@@ -84,6 +84,6 @@ type Window interface {
 	// This can be useful to set a key handler for the window, for example.
 	Canvas() Canvas
 
-	//Clipboard returns the system clipboard
+	// Clipboard returns the system clipboard
 	Clipboard() Clipboard
 }
