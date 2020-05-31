@@ -44,7 +44,7 @@ func (*device) ShowVirtualKeyboard() {
 	showVirtualKeyboard(mobile.DefaultKeyboard)
 }
 
-func (*device) ShowVirtualKeyboardType(keyboard mobile.Keyboard) {
+func (*device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
 	showVirtualKeyboard(keyboard)
 }
 

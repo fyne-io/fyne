@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -30,9 +31,8 @@ public class GoNativeActivity extends NativeActivity {
              InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD; // this is required to force samsung keyboards to not suggest
 
 	private static final int DEFAULT_KEYBOARD_CODE = 0;
-	private static final int MULTILINE_KEYBOARD_CODE = 1;
+	private static final int SINGLELINE_KEYBOARD_CODE = 1;
 	private static final int NUMBER_KEYBOARD_CODE = 2;
-	private static final int WEB_KEYBOARD_CODE = 3;
 
     private native void filePickerReturned(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
@@ -78,24 +78,20 @@ public class GoNativeActivity extends NativeActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                int imeOptions = EditorInfo.IME_ACTION_DONE;
+                int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                 int inputType = DEFAULT_INPUT_TYPE;
                 switch (keyboardType) {
                     case DEFAULT_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_ACTION_DONE;
+                        imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
                         inputType = DEFAULT_INPUT_TYPE;
                         break;
-                    case MULTILINE_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+                    case SINGLELINE_KEYBOARD_CODE:
+                        imeOptions = EditorInfo.IME_ACTION_DONE;
                         inputType = DEFAULT_INPUT_TYPE;
                         break;
                     case NUMBER_KEYBOARD_CODE:
                         imeOptions = EditorInfo.IME_ACTION_DONE;
                         inputType = DEFAULT_INPUT_TYPE | InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
-                        break;
-                    case WEB_KEYBOARD_CODE:
-                        imeOptions = EditorInfo.IME_ACTION_DONE;
-                        inputType = DEFAULT_INPUT_TYPE | InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI;
                         break;
                     default:
                         Log.e("GoLog", "unknown keyboard type, use default");
@@ -138,7 +134,12 @@ public class GoNativeActivity extends NativeActivity {
 
     void doShowFileOpen(String mimes) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType(mimes);
+        if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.setType("*/*");
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
+        } else {
+            intent.setType(mimes);
+        }
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }

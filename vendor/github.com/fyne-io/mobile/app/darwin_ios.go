@@ -260,7 +260,7 @@ func (a *app) loop(ctx C.GLintptr) {
 }
 
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func driverShowVirtualKeyboard(keyboard Keyboard) {
+func driverShowVirtualKeyboard(keyboard KeyboardType) {
 	C.showKeyboard(C.int(int32(keyboard)))
 }
 

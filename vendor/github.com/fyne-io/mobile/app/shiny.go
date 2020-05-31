@@ -15,7 +15,7 @@ func main(f func(a App)) {
 }
 
 // driverShowVirtualKeyboard does nothing on desktop
-func driverShowVirtualKeyboard(Keyboard) {
+func driverShowVirtualKeyboard(KeyboardType) {
 }
 
 // driverHideVirtualKeyboard does nothing on desktop

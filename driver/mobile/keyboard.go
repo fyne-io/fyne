@@ -4,23 +4,21 @@ import (
 	"fyne.io/fyne"
 )
 
-// Keyboard represents a standard fyne keyboard
-type Keyboard int32
+// KeyboardType represents a type of virtual keyboard
+type KeyboardType int32
 
 const (
-	// DefaultKeyboard is the keyboard with default input style and "Done" return key
-	DefaultKeyboard Keyboard = iota
-	// MultiLineKeyboard is the keyboard with default input style and "return" return key
-	MultiLineKeyboard
+	// DefaultKeyboard is the keyboard with default input style and "return" return key
+	DefaultKeyboard KeyboardType = iota
+	// SingleLineKeyboard is the keyboard with default input style and "Done" return key
+	SingleLineKeyboard
 	// NumberKeyboard is the keyboard with number input style and "Done" return key
 	NumberKeyboard
-	// WebKeyboard is the keyboard with web input style and "Done" return key
-	WebKeyboard
 )
 
 // Keyboardable describes any CanvasObject that needs a keyboard
 type Keyboardable interface {
 	fyne.Focusable
 
-	Keyboard() Keyboard
+	Keyboard() KeyboardType
 }

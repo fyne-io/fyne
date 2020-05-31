@@ -595,12 +595,15 @@ func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 
 // Keyboard implements the Keyboardable interface
 // Implements: mobile.Keyboardable
-func (e *Entry) Keyboard() mobile.Keyboard {
+func (e *Entry) Keyboard() mobile.KeyboardType {
+	e.propertyLock.RLock()
+	defer e.propertyLock.RUnlock()
+
 	if e.MultiLine {
-		return mobile.MultiLineKeyboard
+		return mobile.DefaultKeyboard
 	}
 
-	return mobile.DefaultKeyboard
+	return mobile.SingleLineKeyboard
 }
 
 // concealed tells the rendering textProvider if we are a concealed field

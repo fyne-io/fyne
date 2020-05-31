@@ -6,8 +6,8 @@ import (
 	"github.com/fyne-io/mobile/app"
 )
 
-func showVirtualKeyboard(keyboard mobile.Keyboard) {
-	fyne.CurrentApp().Driver().(*mobileDriver).app.ShowVirtualKeyboard(app.Keyboard(keyboard))
+func showVirtualKeyboard(keyboard mobile.KeyboardType) {
+	fyne.CurrentApp().Driver().(*mobileDriver).app.ShowVirtualKeyboard(app.KeyboardType(keyboard))
 }
 
 func hideVirtualKeyboard() {
