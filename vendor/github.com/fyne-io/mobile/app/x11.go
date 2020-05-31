@@ -133,5 +133,5 @@ func driverHideVirtualKeyboard() {
 }
 
 // driverShowFileOpenPicker does nothing on desktop
-func driverShowFileOpenPicker(func(string, func())) {
+func driverShowFileOpenPicker(func(string, func()), *FileFilter) {
 }

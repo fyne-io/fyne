@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"path/filepath"
 
+	"github.com/fyne-io/mobile/app"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
 )
@@ -27,12 +29,29 @@ func (f *fileOpen) URI() fyne.URI {
 func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.FileReadCloser, error) {
 	file := &fileOpen{uri: u}
 	read, err := nativeFileOpen(file)
+	if read == nil {
+		return nil, err
+	}
 	file.ReadCloser = read
 	return file, err
 }
 
 func (d *mobileDriver) FileWriterForURI(u fyne.URI) (fyne.FileWriteCloser, error) {
 	return nil, errors.New("file writing is not supported on mobile")
+}
+
+func mobileFilter(filter storage.FileFilter) *app.FileFilter {
+	mobile := &app.FileFilter{}
+
+	if f, ok := filter.(*storage.MimeTypeFileFilter); ok {
+		mobile.MimeTypes = f.MimeTypes
+	} else if f, ok := filter.(*storage.ExtensionFileFilter); ok {
+		mobile.Extensions = f.Extensions
+	} else {
+		fyne.LogError("Custom filter types not supported on mobile", nil)
+	}
+
+	return mobile
 }
 
 func nameFromURI(uri fyne.URI) string {
@@ -45,17 +64,19 @@ func nameFromURI(uri fyne.URI) string {
 }
 
 type hasPicker interface {
-	ShowFileOpenPicker(callback func(string, func()))
+	ShowFileOpenPicker(func(string, func()), *app.FileFilter)
 }
 
 // ShowFileOpenPicker loads the native file open dialog and returns the chosen file path via the callback func.
-func ShowFileOpenPicker(callback func(fyne.FileReadCloser, error)) {
+func ShowFileOpenPicker(callback func(fyne.FileReadCloser, error), filter storage.FileFilter) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, closer func()) {
 			f, err := drv.FileReaderForURI(storage.NewURI(uri))
-			f.(*fileOpen).done = closer
+			if f != nil {
+				f.(*fileOpen).done = closer
+			}
 			callback(f, err)
-		})
+		}, mobileFilter(filter))
 	}
 }

@@ -132,13 +132,13 @@ public class GoNativeActivity extends NativeActivity {
         });
     }
 
-    static void showFileOpen() {
-        goNativeActivity.doShowFileOpen();
+    static void showFileOpen(String mimes) {
+        goNativeActivity.doShowFileOpen(mimes);
     }
 
-    void doShowFileOpen() {
+    void doShowFileOpen(String mimes) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("*/*");
+        intent.setType(mimes);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }

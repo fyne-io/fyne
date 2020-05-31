@@ -1,4 +1,5 @@
 // +build !ci
+// +build !mobile
 
 package glfw
 
@@ -29,10 +30,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	cr2 := widget.NewHBox(cr2c1, cr2c2, cr2c3)
 	cr3 := widget.NewHBox(cr3c1, cr3c2, cr3c3)
 	content := widget.NewVBox(cr1, cr2, cr3)
-
 	cr2c2.Hide()
-	w.SetContent(content)
-	w.Resize(fyne.NewSize(200, 200))
 
 	mm := fyne.NewMainMenu(
 		fyne.NewMenu("Menu 1", fyne.NewMenuItem("Menu 1 Item", nil)),
@@ -43,12 +41,15 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	c := w.Canvas().(*glCanvas)
 	movl := buildMenuOverlay(mm, c)
 	c.setMenuOverlay(movl)
+	w.SetContent(content)
+	w.Resize(fyne.NewSize(200, 200))
 
 	ovli1 := widget.NewLabel("Overlay Item 1")
 	ovli2 := widget.NewLabel("Overlay Item 2")
 	ovli3 := widget.NewLabel("Overlay Item 3")
 	ovlContent := widget.NewVBox(ovli1, ovli2, ovli3)
 	ovl := widget.NewModalPopUp(ovlContent, c)
+	ovl.Show()
 
 	repaintWindow(w.(*window))
 	// accessing the menu bar's actual CanvasObjects isn't straight forward

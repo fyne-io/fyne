@@ -81,7 +81,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		key_rune_method = find_static_method(env, current_class, "getRune", "(III)I");
 		show_keyboard_method = find_static_method(env, current_class, "showKeyboard", "(I)V");
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
-		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "()V");
+		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -229,11 +229,13 @@ void hideKeyboard(JNIEnv* env) {
 	);
 }
 
-void showFileOpen(JNIEnv* env) {
+void showFileOpen(JNIEnv* env, char* mimes) {
+    jstring mimesJString = (*env)->NewStringUTF(env, mimes);
     (*env)->CallStaticVoidMethod(
 		env,
 		current_class,
-		show_file_open_method
+		show_file_open_method,
+		mimesJString
 	);
 }
 

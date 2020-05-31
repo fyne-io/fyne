@@ -8,7 +8,7 @@ github.com/akavel/rsrc/ico
 github.com/davecgh/go-spew/spew
 # github.com/fsnotify/fsnotify v1.4.9
 github.com/fsnotify/fsnotify
-# github.com/fyne-io/mobile v0.0.2-0.20200511203347-825e44fe5a95
+# github.com/fyne-io/mobile v0.0.2-0.20200528163636-261ce6a40089
 github.com/fyne-io/mobile/app
 github.com/fyne-io/mobile/app/internal/callfn
 github.com/fyne-io/mobile/event/key
@@ -52,9 +52,11 @@ github.com/srwiley/rasterx
 # github.com/stretchr/testify v1.5.1
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# golang.org/x/image v0.0.0-20200119044424-58c23975cae1
+# golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 golang.org/x/image/colornames
+golang.org/x/image/draw
 golang.org/x/image/font
+golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
 golang.org/x/image/vector
 # golang.org/x/mod v0.2.0

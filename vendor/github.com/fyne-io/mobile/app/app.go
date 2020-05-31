@@ -54,7 +54,12 @@ type App interface {
 
 	ShowVirtualKeyboard(Keyboard)
 	HideVirtualKeyboard()
-	ShowFileOpenPicker(func(string, func()))
+	ShowFileOpenPicker(func(string, func()), *FileFilter)
+}
+
+type FileFilter struct {
+	Extensions []string
+	MimeTypes []string
 }
 
 // PublishResult is the result of an App.Publish call.
@@ -141,8 +146,8 @@ func (a *app) HideVirtualKeyboard() {
 	driverHideVirtualKeyboard()
 }
 
-func (a *app) ShowFileOpenPicker(callback func(string, func())) {
-	driverShowFileOpenPicker(callback)
+func (a *app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
+	driverShowFileOpenPicker(callback, filter)
 }
 
 type stopPumping struct{}

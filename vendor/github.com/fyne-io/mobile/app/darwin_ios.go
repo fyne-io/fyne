@@ -9,7 +9,7 @@ package app
 
 /*
 #cgo CFLAGS: -x objective-c -DGL_SILENCE_DEPRECATION
-#cgo LDFLAGS: -framework Foundation -framework UIKit -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications
+#cgo LDFLAGS: -framework Foundation -framework UIKit -framework MobileCoreServices -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications
 #include <sys/utsname.h>
 #include <stdint.h>
 #include <pthread.h>
@@ -27,7 +27,7 @@ UIEdgeInsets getDevicePadding();
 void showKeyboard();
 void hideKeyboard();
 
-void showFileOpenPicker();
+void showFileOpenPicker(char* mimes, char *exts);
 void closeFileResource(void* urlPtr);
 */
 import "C"
@@ -283,8 +283,22 @@ func filePickerReturned(str *C.char, urlPtr unsafe.Pointer) {
 	fileCallback = nil
 }
 
-func driverShowFileOpenPicker(callback func(string, func())) {
+func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	fileCallback = callback
 
-	C.showFileOpenPicker()
+	mimes := strings.Join(filter.MimeTypes, "|")
+
+	// extensions must have the '.' removed for UTI lookups on iOS
+	extList := []string{}
+	for _, ext := range filter.Extensions {
+		extList = append(extList, ext[1:])
+	}
+	exts := strings.Join(extList, "|")
+
+	mimeStr := C.CString(mimes)
+	defer C.free(unsafe.Pointer(mimeStr))
+	extStr := C.CString(exts)
+	defer C.free(unsafe.Pointer(extStr))
+
+	C.showFileOpenPicker(mimeStr, extStr)
 }

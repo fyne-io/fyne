@@ -1,8 +1,11 @@
 package storage
 
 import (
+	"bufio"
+	"mime"
 	"path/filepath"
 	"strings"
+	"unicode/utf8"
 
 	"fyne.io/fyne"
 )
@@ -22,7 +25,20 @@ func (u *uri) Extension() string {
 }
 
 func (u *uri) MimeType() string {
-	return "x/unknown" // TODO - added in #405
+	mimeTypeFull := mime.TypeByExtension(u.Extension())
+	if mimeTypeFull == "" {
+		mimeTypeFull = "text/plain"
+		readCloser, err := fyne.CurrentApp().Driver().FileReaderForURI(u)
+		if err == nil {
+			defer readCloser.Close()
+			scanner := bufio.NewScanner(readCloser)
+			if scanner.Scan() && !utf8.Valid(scanner.Bytes()) {
+				mimeTypeFull = "application/octet-stream"
+			}
+		}
+	}
+
+	return strings.Split(mimeTypeFull, ";")[0]
 }
 
 func (u *uri) Scheme() string {

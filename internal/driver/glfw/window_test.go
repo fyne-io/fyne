@@ -1,4 +1,5 @@
 // +build !ci
+// +build !mobile
 
 package glfw
 
@@ -333,8 +334,9 @@ func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 func TestWindow_HoverableOnDragging(t *testing.T) {
 	w := createWindow("Test").(*window)
 	dh := &draggableHoverableObject{Rectangle: canvas.NewRectangle(color.White)}
-	dh.SetMinSize(fyne.NewSize(10, 10))
-	w.SetContent(dh)
+	c := fyne.NewContainer(dh) // allow manual positioning
+	dh.Resize(fyne.NewSize(10, 10))
+	w.SetContent(c)
 
 	repaintWindow(w)
 	w.mouseMoved(w.viewport, 8, 8)
@@ -391,9 +393,9 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	assert.Nil(t, dh.popMouseOutEvent())
 
 	// mouseOut on mouse release after dragging out of area
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 8, 8)
-	w.mouseMoved(w.viewport, 16, 8)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseMoved(w.viewport, 16, 8) // outside the 10x10 object
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.waitForEvents()
 	assert.NotNil(t, dh.popMouseOutEvent())
@@ -634,7 +636,7 @@ func TestWindow_SetIcon(t *testing.T) {
 	w := createWindow("Test")
 	assert.Equal(t, fyne.CurrentApp().Icon(), w.Icon())
 
-	newIcon := theme.CancelIcon()
+	newIcon := theme.FyneLogo()
 	w.SetIcon(newIcon)
 	assert.Equal(t, newIcon, w.Icon())
 }

@@ -11,6 +11,7 @@
 #include <sys/utsname.h>
 
 #import <UIKit/UIKit.h>
+#import <MobileCoreServices/MobileCoreServices.h>
 #import <GLKit/GLKit.h>
 #import <UserNotifications/UserNotifications.h>
 
@@ -292,11 +293,34 @@ void hideKeyboard() {
     });
 }
 
-void showFileOpenPicker() {
+void showFileOpenPicker(char* mimes, char *exts) {
     GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
 
+    NSMutableArray *docTypes = [NSMutableArray array];
+    if (mimes != NULL && strlen(mimes) > 0) {
+        NSString *mimeList = [NSString stringWithUTF8String:mimes];
+        NSArray *mimeItems = [mimeList componentsSeparatedByString:@"|"];
+
+        for (NSString *mime in mimeItems)  {
+            CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
+
+            [docTypes addObject:UTI];
+        }
+    } else if (exts != NULL && strlen(exts) > 0) {
+        NSString *extList = [NSString stringWithUTF8String:exts];
+        NSArray *extItems = [extList componentsSeparatedByString:@"|"];
+
+        for (NSString *ext in extItems)  {
+            CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext, NULL);
+
+            [docTypes addObject:UTI];
+        }
+    } else {
+        [docTypes addObject:@"public.data"];
+    }
+
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
-        initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
+        initWithDocumentTypes:docTypes inMode:UIDocumentPickerModeOpen];
     documentPicker.delegate = appDelegate;
     documentPicker.modalPresentationStyle = UIModalPresentationPopover;
 

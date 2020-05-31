@@ -103,7 +103,11 @@ func (p *glPainter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.Canva
 }
 
 func (p *glPainter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, 0)
+	pad := 0
+	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
+		pad = vectorPad
+	}
+	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, pad)
 }
 
 func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {

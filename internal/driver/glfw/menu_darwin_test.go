@@ -1,5 +1,6 @@
 // +build !ci
 // +build !no_native_menus
+// +build !mobile
 
 package glfw
 
@@ -130,7 +131,7 @@ func resetMainMenu() {
 	j := 0
 	for i := 0; i < testNSMenuNumberOfItems(mainMenu); i++ {
 		menu := testNSMenuItemSubmenu(testNSMenuItemAtIndex(mainMenu, i))
-		if testNSMenuTitle(menu) == initialMenus[j] {
+		if j < len(initialMenus) && testNSMenuTitle(menu) == initialMenus[j] {
 			j++
 			continue
 		}
