@@ -38,7 +38,7 @@ type FileDialog struct {
 	save             bool
 	callback         interface{}
 	onClosedCallback func(bool)
-	filter           FileFilter
+	filter           storage.FileFilter
 	parent           fyne.Window
 	dialog           *fileDialog
 	dismissText      string
@@ -46,49 +46,6 @@ type FileDialog struct {
 
 // Declare conformity to Dialog interface
 var _ Dialog = (*FileDialog)(nil)
-
-// FileFilter is an interface that can be implemented to provide a filter to a file dialog.
-type FileFilter interface {
-	Matches(fyne.URI) bool
-}
-
-type extensionFileFilter struct {
-	extensions []string
-}
-
-type mimeTypeFileFilter struct {
-	mimeTypes []string
-}
-
-// Matches returns true if a file URI has one of the filtered extensions.
-func (e *extensionFileFilter) Matches(uri fyne.URI) bool {
-	extension := uri.Extension()
-	for _, ext := range e.extensions {
-		if extension == ext {
-			return true
-		}
-	}
-	return false
-}
-
-// Matches returns true if a file URI has one of the filtered mimetypes.
-func (mt *mimeTypeFileFilter) Matches(uri fyne.URI) bool {
-	mimeType, mimeSubType := splitMimeType(uri)
-	for _, mimeTypeFull := range mt.mimeTypes {
-		mimeTypeSplit := strings.Split(mimeTypeFull, "/")
-		if len(mimeTypeSplit) <= 1 {
-			continue
-		}
-		mType := mimeTypeSplit[0]
-		mSubType := strings.Split(mimeTypeSplit[1], ";")[0]
-		if mType == mimeType {
-			if mSubType == mimeSubType || mSubType == "*" {
-				return true
-			}
-		}
-	}
-	return false
-}
 
 func (f *fileDialog) makeUI() fyne.CanvasObject {
 	if f.file.save {
@@ -328,11 +285,11 @@ func showFile(file *FileDialog) *fileDialog {
 // Show shows the file dialog.
 func (f *FileDialog) Show() {
 	if f.save {
-		if fileSaveOSOverride(f.callback.(func(fyne.FileWriteCloser, error)), f.parent) {
+		if fileSaveOSOverride(f) {
 			return
 		}
 	} else {
-		if fileOpenOSOverride(f.callback.(func(fyne.FileReadCloser, error)), f.parent) {
+		if fileOpenOSOverride(f) {
 			return
 		}
 	}
@@ -381,23 +338,11 @@ func (f *FileDialog) SetOnClosed(closed func()) {
 }
 
 // SetFilter sets a filter for limiting files that can be chosen in the file dialog.
-func (f *FileDialog) SetFilter(filter FileFilter) {
+func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 	f.filter = filter
 	if f.dialog != nil {
 		f.dialog.refreshDir(f.dialog.dir)
 	}
-}
-
-// NewExtensionFileFilter takes a string slice of extensions with a leading . and creates a filter for the file dialog.
-// Example: .jpg, .mp3, .txt, .sh
-func NewExtensionFileFilter(extensions []string) FileFilter {
-	return &extensionFileFilter{extensions: extensions}
-}
-
-// NewMimeTypeFileFilter takes a string slice of mimetypes, including globs, and creates a filter for the file dialog.
-// Example: image/*, audio/mp3, text/plain, application/*
-func NewMimeTypeFileFilter(mimeTypes []string) FileFilter {
-	return &mimeTypeFileFilter{mimeTypes: mimeTypes}
 }
 
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
@@ -419,7 +364,7 @@ func NewFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window)
 // The dialog will appear over the window specified.
 func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) {
 	dialog := NewFileOpen(callback, parent)
-	if fileOpenOSOverride(callback, parent) {
+	if fileOpenOSOverride(dialog) {
 		return
 	}
 	dialog.Show()
@@ -430,7 +375,7 @@ func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window)
 // The dialog will appear over the window specified.
 func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) {
 	dialog := NewFileSave(callback, parent)
-	if fileSaveOSOverride(callback, parent) {
+	if fileSaveOSOverride(dialog) {
 		return
 	}
 	dialog.Show()
