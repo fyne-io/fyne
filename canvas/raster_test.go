@@ -14,7 +14,7 @@ func TestRasterFromImage(t *testing.T) {
 	dest := canvas.NewRasterFromImage(source)
 	img := dest.Generator(6, 6)
 
-	// image.Rect is a 16 bit colour model
+	// image.Rect is a 16 bit color model
 	_, _, _, a := img.At(0, 0).RGBA()
 	assert.Equal(t, uint32(0x0000), a)
 	_, _, _, a = img.At(2, 2).RGBA()
