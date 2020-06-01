@@ -281,7 +281,7 @@ func UnmarshalXML(r io.Reader, withIcon bool) (*XML, error) {
 									Space: androidSchema,
 									Local: "targetSdkVersion",
 								},
-								Value: "25",
+								Value: "28",
 							},
 						},
 					}
