@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate go run gendex.go -o dex.go
+//go:generate go run gendex/gendex.go -o dex.go
 
 package mobile
 

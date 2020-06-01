@@ -24,7 +24,7 @@ void swapBuffers(GLintptr ctx);
 uint64_t threadID();
 
 UIEdgeInsets getDevicePadding();
-void showKeyboard();
+void showKeyboard(int keyboardType);
 void hideKeyboard();
 
 void showFileOpenPicker(char* mimes, char *exts);
@@ -260,8 +260,8 @@ func (a *app) loop(ctx C.GLintptr) {
 }
 
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func driverShowVirtualKeyboard() {
-	C.showKeyboard()
+func driverShowVirtualKeyboard(keyboard KeyboardType) {
+	C.showKeyboard(C.int(int32(keyboard)))
 }
 
 // driverHideVirtualKeyboard requests the driver to hide any visible virtual keyboard

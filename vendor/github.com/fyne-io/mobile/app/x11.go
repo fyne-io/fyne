@@ -125,7 +125,7 @@ func onStop() {
 }
 
 // driverShowVirtualKeyboard does nothing on desktop
-func driverShowVirtualKeyboard() {
+func driverShowVirtualKeyboard(KeyboardType) {
 }
 
 // driverHideVirtualKeyboard does nothing on desktop
