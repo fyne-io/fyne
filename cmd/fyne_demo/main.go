@@ -125,9 +125,6 @@ func main() {
 		tabs.Append(widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
 	}
 	tabs.SetTabLocation(widget.TabLocationLeading)
-	tabs.OnChanged = func(tab *widget.TabItem) {
-		fmt.Printf("%s tab selected\n", tab.Text)
-	}
 	tabs.SelectTabIndex(a.Preferences().Int(preferenceCurrentTab))
 	w.SetContent(tabs)
 

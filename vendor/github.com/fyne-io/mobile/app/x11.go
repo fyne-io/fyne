@@ -125,7 +125,7 @@ func onStop() {
 }
 
 // driverShowVirtualKeyboard does nothing on desktop
-func driverShowVirtualKeyboard() {
+func driverShowVirtualKeyboard(KeyboardType) {
 }
 
 // driverHideVirtualKeyboard does nothing on desktop
@@ -133,5 +133,5 @@ func driverHideVirtualKeyboard() {
 }
 
 // driverShowFileOpenPicker does nothing on desktop
-func driverShowFileOpenPicker(func(string, func())) {
+func driverShowFileOpenPicker(func(string, func()), *FileFilter) {
 }

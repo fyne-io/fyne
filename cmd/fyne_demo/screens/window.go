@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/widget"
 )
 
@@ -135,8 +136,11 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 
 			prog.Show()
 		}),
-		widget.NewButton("File Open (try txt or png)", func() {
-			dialog.ShowFileOpen(func(reader fyne.FileReadCloser, err error) {
+		widget.NewButton("File Open With Filter (.txt or .png)", func() {
+			fd := dialog.NewFileOpen(func(reader fyne.FileReadCloser, err error) {
+				if err == nil && reader == nil {
+					return
+				}
 				if err != nil {
 					dialog.ShowError(err, win)
 					return
@@ -144,6 +148,8 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 
 				fileOpened(reader)
 			}, win)
+			fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".txt"}))
+			fd.Show()
 		}),
 		widget.NewButton("File Save", func() {
 			dialog.ShowFileSave(func(writer fyne.FileWriteCloser, err error) {

@@ -45,7 +45,8 @@ func TestWatchSettings(t *testing.T) {
 
 func TestWatchFile(t *testing.T) {
 	path := testPath("fyne-temp-watch.txt")
-	os.Create(path)
+	f, _ := os.Create(path)
+	f.Close()
 	defer os.Remove(path)
 
 	called := make(chan interface{}, 1)
@@ -65,7 +66,8 @@ func TestWatchFile(t *testing.T) {
 
 func TestFileWatcher_FileDeleted(t *testing.T) {
 	path := testPath("fyne-temp-watch.txt")
-	os.Create(path)
+	f, _ := os.Create(path)
+	f.Close()
 	defer os.Remove(path)
 
 	called := make(chan interface{}, 1)
@@ -79,13 +81,14 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 
 	defer watcher.Close()
 	os.Remove(path)
-	os.Create(path)
+	f, _ = os.Create(path)
 
 	select {
 	case _ = <-called:
 	case <-time.After(100 * time.Millisecond):
 		t.Error("File watcher callback was not called")
 	}
+	f.Close()
 }
 
 func testPath(child string) string {

@@ -52,9 +52,14 @@ type App interface {
 	// is to trigger a side effect rather than modify the event.
 	RegisterFilter(f func(interface{}) interface{})
 
-	ShowVirtualKeyboard()
+	ShowVirtualKeyboard(KeyboardType)
 	HideVirtualKeyboard()
-	ShowFileOpenPicker(func(string, func()))
+	ShowFileOpenPicker(func(string, func()), *FileFilter)
+}
+
+type FileFilter struct {
+	Extensions []string
+	MimeTypes []string
 }
 
 // PublishResult is the result of an App.Publish call.
@@ -133,16 +138,16 @@ func (a *app) RegisterFilter(f func(interface{}) interface{}) {
 	a.filters = append(a.filters, f)
 }
 
-func (a *app) ShowVirtualKeyboard() {
-	driverShowVirtualKeyboard()
+func (a *app) ShowVirtualKeyboard(keyboard KeyboardType) {
+	driverShowVirtualKeyboard(keyboard)
 }
 
 func (a *app) HideVirtualKeyboard() {
 	driverHideVirtualKeyboard()
 }
 
-func (a *app) ShowFileOpenPicker(callback func(string, func())) {
-	driverShowFileOpenPicker(callback)
+func (a *app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
+	driverShowFileOpenPicker(callback, filter)
 }
 
 type stopPumping struct{}

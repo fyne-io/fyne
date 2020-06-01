@@ -79,7 +79,7 @@ func (d *gLDriver) initGLFW() {
 }
 
 func (d *gLDriver) runGL() {
-	eventTick := time.NewTicker(time.Second / 10)
+	eventTick := time.NewTicker(time.Second / 60)
 	runMutex.Lock()
 	runFlag = true
 	runMutex.Unlock()
@@ -109,8 +109,10 @@ func (d *gLDriver) runGL() {
 
 				if w.viewport.ShouldClose() {
 					reassign = true
+					w.viewLock.Lock()
 					v := w.viewport
 					w.viewport = nil
+					w.viewLock.Unlock()
 
 					// remove window from window list
 					v.Destroy()
@@ -118,7 +120,14 @@ func (d *gLDriver) runGL() {
 					continue
 				}
 
-				if w.canvas.ensureMinSize() {
+				w.viewLock.RLock()
+				expand := w.shouldExpand
+				w.viewLock.RUnlock()
+
+				if expand {
+					w.viewLock.Lock()
+					w.shouldExpand = false
+					w.viewLock.Unlock()
 					w.fitContent()
 				}
 
@@ -136,6 +145,11 @@ func (d *gLDriver) runGL() {
 func (d *gLDriver) repaintWindow(w *window) {
 	canvas := w.canvas
 	w.RunWithContext(func() {
+		if w.canvas.ensureMinSize() {
+			w.viewLock.Lock()
+			w.shouldExpand = true
+			w.viewLock.Unlock()
+		}
 		freeDirtyTextures(canvas)
 
 		updateGLContext(w)
@@ -167,8 +181,12 @@ func (d *gLDriver) startDrawThread() {
 			case <-draw.C:
 				for _, win := range d.windowList() {
 					w := win.(*window)
+					w.viewLock.RLock()
 					canvas := w.canvas
-					if w.viewport == nil || !canvas.isDirty() || !w.visible {
+					view := w.viewport
+					visible := w.visible
+					w.viewLock.RUnlock()
+					if view == nil || !canvas.isDirty() || !visible {
 						continue
 					}
 
@@ -213,6 +231,7 @@ func updateGLContext(w *window) {
 	canvas := w.Canvas().(*glCanvas)
 	size := canvas.Size()
 
+	// w.width and w.height are not correct if we are maximised, so figure from canvas
 	winWidth := float32(internal.ScaleInt(canvas, size.Width)) * canvas.texScale
 	winHeight := float32(internal.ScaleInt(canvas, size.Height)) * canvas.texScale
 

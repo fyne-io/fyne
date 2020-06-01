@@ -12,7 +12,7 @@ var _ fyne.Widget = (*Shadow)(nil)
 
 // Shadow is a widget that renders a shadow.
 type Shadow struct {
-	base
+	Base
 	level ElevationLevel
 	typ   ShadowType
 }
@@ -58,31 +58,37 @@ func (s *Shadow) CreateRenderer() fyne.WidgetRenderer {
 // Hide hides the shadow.
 // Implements: fyne.Widget
 func (s *Shadow) Hide() {
-	s.hide(s)
+	HideWidget(&s.Base, s)
 }
 
 // MinSize returns the minimal size of the shadow.
 // Implements: fyne.Widget
 func (s *Shadow) MinSize() fyne.Size {
-	return s.minSize(s)
+	return MinSizeOf(s)
+}
+
+// Move sets the position of the widget relative to its parent.
+// Implements: fyne.Widget
+func (s *Shadow) Move(pos fyne.Position) {
+	MoveWidget(&s.Base, s, pos)
 }
 
 // Refresh triggers a redraw of the shadow.
 // Implements: fyne.Widget
 func (s *Shadow) Refresh() {
-	s.refresh(s)
+	RefreshWidget(s)
 }
 
 // Resize changes the size of the shadow.
 // Implements: fyne.Widget
 func (s *Shadow) Resize(size fyne.Size) {
-	s.resize(size, s)
+	ResizeWidget(&s.Base, s, size)
 }
 
 // Show makes the shadow visible.
 // Implements: fyne.Widget
 func (s *Shadow) Show() {
-	s.show(s)
+	ShowWidget(&s.Base, s)
 }
 
 type shadowRenderer struct {

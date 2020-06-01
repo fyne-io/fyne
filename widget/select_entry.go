@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -10,7 +9,7 @@ import (
 type SelectEntry struct {
 	Entry
 	dropDown *fyne.Menu
-	popUp    *widget.PopUpMenu
+	popUp    *PopUpMenu
 }
 
 // NewSelectEntry creates a SelectEntry.
@@ -25,10 +24,11 @@ func NewSelectEntry(options []string) *SelectEntry {
 // Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
 	min := e.Entry.MinSize()
+
 	if e.dropDown != nil {
 		for _, item := range e.dropDown.Items {
 			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(fyne.NewSize(4*theme.Padding(), 0))
-			min = min.Union(itemMin)
+			min = min.Max(itemMin)
 		}
 	}
 	return min

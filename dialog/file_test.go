@@ -4,13 +4,15 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 	"github.com/stretchr/testify/assert"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/storage"
+	"fyne.io/fyne/test"
+	"fyne.io/fyne/widget"
 )
 
 func TestShowFileOpen(t *testing.T) {
@@ -43,7 +45,7 @@ func TestShowFileOpen(t *testing.T) {
 
 	var target *fileDialogItem
 	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).icon == theme.FileIcon() {
+		if icon.(*fileDialogItem).dir == false {
 			target = icon.(*fileDialogItem)
 		}
 	}
@@ -98,7 +100,7 @@ func TestShowFileSave(t *testing.T) {
 
 	var target *fileDialogItem
 	for _, icon := range files.Objects {
-		if icon.(*fileDialogItem).icon == theme.FileIcon() {
+		if icon.(*fileDialogItem).dir == false {
 			target = icon.(*fileDialogItem)
 		}
 	}
@@ -132,4 +134,57 @@ func TestShowFileSave(t *testing.T) {
 	assert.Nil(t, err)
 	err = os.Remove(expectedPath)
 	assert.Nil(t, err)
+}
+
+func TestFileFilters(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+	f := NewFileOpen(func(file fyne.FileReadCloser, err error) {
+	}, win)
+
+	f.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
+	f.Show()
+
+	workingDir, err := os.Getwd()
+	if err != nil {
+		fyne.LogError("Could not get current working directory", err)
+		t.FailNow()
+	}
+	testDataDir := filepath.Join(workingDir, "testdata")
+
+	f.dialog.setDirectory(testDataDir)
+
+	count := 0
+	for _, icon := range f.dialog.files.Objects {
+		if icon.(*fileDialogItem).dir == false {
+			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
+			assert.Equal(t, uri.Extension(), ".png")
+			count++
+		}
+	}
+	assert.Equal(t, count, 1)
+
+	f.SetFilter(storage.NewMimeTypeFileFilter([]string{"image/jpeg"}))
+
+	count = 0
+	for _, icon := range f.dialog.files.Objects {
+		if icon.(*fileDialogItem).dir == false {
+			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
+			assert.Equal(t, uri.MimeType(), "image/jpeg")
+			count++
+		}
+	}
+	assert.Equal(t, count, 1)
+
+	f.SetFilter(storage.NewMimeTypeFileFilter([]string{"image/*"}))
+
+	count = 0
+	for _, icon := range f.dialog.files.Objects {
+		if icon.(*fileDialogItem).dir == false {
+			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
+			mimeType := strings.Split(uri.MimeType(), "/")[0]
+			assert.Equal(t, mimeType, "image")
+			count++
+		}
+	}
+	assert.Equal(t, count, 2)
 }
