@@ -788,6 +788,7 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyLeftSuper:    desktop.KeySuperLeft,
 	glfw.KeyRightSuper:   desktop.KeySuperRight,
 	glfw.KeyMenu:         desktop.KeyMenu,
+	glfw.KeyCapsLock:     desktop.KeyCapsLock,
 }
 
 var keyNameMap = map[string]fyne.KeyName{

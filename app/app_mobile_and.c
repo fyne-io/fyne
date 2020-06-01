@@ -4,6 +4,7 @@
 
 #include <android/log.h>
 #include <jni.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #define LOG_FATAL(...) __android_log_print(ANDROID_LOG_FATAL, "GoLog", __VA_ARGS__)
@@ -50,6 +51,14 @@ jobject getSystemService(uintptr_t jni_env, uintptr_t ctx, char *service) {
 
 int nextId = 1;
 
+bool isOreoOrLater(JNIEnv *env) {
+    jclass versionClass = find_class(env, "android/os/Build$VERSION" );
+    jfieldID sdkIntFieldID = (*env)->GetStaticFieldID(env, versionClass, "SDK_INT", "I" );
+    int sdkVersion = (*env)->GetStaticIntField(env, versionClass, sdkIntFieldID );
+
+    return sdkVersion >= 26; // O = Oreo, will not be defined for older builds
+}
+
 void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *title, char *body) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jstring titleStr = (*env)->NewStringUTF(env, title);
@@ -58,6 +67,25 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 	jclass cls = find_class(env, "android/app/Notification$Builder");
 	jmethodID constructor = find_method(env, cls, "<init>", "(Landroid/content/Context;)V");
 	jobject builder = (*env)->NewObject(env, cls, constructor, ctx);
+
+	jclass mgrCls = find_class(env, "android/app/NotificationManager");
+	jobject mgr = getSystemService(env, ctx, "notification");
+
+	if (isOreoOrLater(env)) {
+		jstring channelId = (*env)->NewStringUTF(env, "fyne-notif");
+		jstring name = (*env)->NewStringUTF(env, "Fyne Notification");
+        int importance = 4; // IMPORTANCE_HIGH
+
+		jclass chanCls = find_class(env, "android/app/NotificationChannel");
+		jmethodID constructor = find_method(env, chanCls, "<init>", "(Ljava/lang/String;Ljava/lang/CharSequence;I)V");
+		jobject channel = (*env)->NewObject(env, chanCls, constructor, channelId, name, importance);
+
+		jmethodID createChannel = find_method(env, mgrCls, "createNotificationChannel", "(Landroid/app/NotificationChannel;)V");
+		(*env)->CallVoidMethod(env, mgr, createChannel, channel);
+
+		jmethodID setChannelId = find_method(env, cls, "setChannelId", "(Ljava/lang/String;)Landroid/app/Notification$Builder;");
+		(*env)->CallObjectMethod(env, builder, setChannelId, channelId);
+	}
 
 	jmethodID setContentTitle = find_method(env, cls, "setContentTitle", "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;");
 	(*env)->CallObjectMethod(env, builder, setContentTitle, titleStr);
@@ -71,9 +99,6 @@ void sendNotification(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char 
 
 	jmethodID build = find_method(env, cls, "build", "()Landroid/app/Notification;");
 	jobject notif = (*env)->CallObjectMethod(env, builder, build);
-
-	jclass mgrCls = find_class(env, "android/app/NotificationManager");
-	jobject mgr = getSystemService(env, ctx, "notification");
 
 	jmethodID notify = find_method(env, mgrCls, "notify", "(ILandroid/app/Notification;)V");
 	(*env)->CallVoidMethod(env, mgr, notify, nextId, notif);
