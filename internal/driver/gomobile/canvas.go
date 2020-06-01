@@ -406,6 +406,7 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 	if c.menu != nil && c.overlays.Top() == nil && pos.X > c.menu.Size().Width {
 		c.menu.Hide()
+		c.menu.Refresh()
 		c.menu = nil
 		return
 	}
