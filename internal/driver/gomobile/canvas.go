@@ -39,6 +39,7 @@ type mobileCanvas struct {
 	lastTapDownPos map[int]fyne.Position
 	dragging       fyne.Draggable
 	refreshQueue   chan fyne.CanvasObject
+	minSizeCache   map[fyne.CanvasObject]fyne.Size
 }
 
 func (c *mobileCanvas) Content() fyne.CanvasObject {
@@ -205,6 +206,29 @@ func (c *mobileCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut
 
 func (c *mobileCanvas) Capture() image.Image {
 	return c.painter.Capture(c)
+}
+
+func (c *mobileCanvas) minSizeChanged() bool {
+	if c.Content() == nil {
+		return false
+	}
+	minSizeChange := false
+
+	ensureMinSize := func(obj, parent fyne.CanvasObject) {
+		if !obj.Visible() {
+			return
+		}
+		minSize := obj.MinSize()
+
+		if minSize != c.minSizeCache[obj] {
+			minSizeChange = true
+
+			c.minSizeCache[obj] = minSize
+		}
+	}
+	c.walkTree(nil, ensureMinSize)
+
+	return minSizeChange
 }
 
 func (c *mobileCanvas) ensureMinSize() {
@@ -448,6 +472,7 @@ func NewCanvas() fyne.Canvas {
 	ret.touched = make(map[int]mobile.Touchable)
 	ret.lastTapDownPos = make(map[int]fyne.Position)
 	ret.lastTapDown = make(map[int]time.Time)
+	ret.minSizeCache = make(map[fyne.CanvasObject]fyne.Size)
 	ret.overlays = &internal.OverlayStack{}
 
 	ret.setupThemeListener()
