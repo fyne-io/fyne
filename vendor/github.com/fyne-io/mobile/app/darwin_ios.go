@@ -24,7 +24,7 @@ void swapBuffers(GLintptr ctx);
 uint64_t threadID();
 
 UIEdgeInsets getDevicePadding();
-void showKeyboard();
+void showKeyboard(int keyboardType);
 void hideKeyboard();
 
 void showFileOpenPicker(char* mimes, char *exts);
