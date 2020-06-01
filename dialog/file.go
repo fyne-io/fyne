@@ -152,12 +152,12 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, f.fileScroll)
 	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	favourites := widget.NewGroup("Favourites", f.loadFavourites()...)
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favourites, nil),
-		favourites, header, footer, body)
+	favorites := widget.NewGroup("Favorites", f.loadFavorites()...)
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favorites, nil),
+		favorites, header, footer, body)
 }
 
-func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
+func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
 	home, _ := os.UserHomeDir()
 	places := []fyne.CanvasObject{
 		widget.NewButton("Home", func() {

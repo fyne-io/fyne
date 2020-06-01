@@ -156,7 +156,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
-* Correct the colour of Entry widget cursor if theme changes
+* Correct the color of Entry widget cursor if theme changes
 * Error where widgets created before main() function could crash (#490)
 * App.Run panics if called without a window (#527)
 * Support context menu for disabled entry widgets (#488)

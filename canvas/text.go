@@ -16,7 +16,7 @@ type Text struct {
 	baseObject
 	Alignment fyne.TextAlign // The alignment of the text content
 
-	Color     color.Color    // The main text draw colour
+	Color     color.Color    // The main text draw color
 	Text      string         // The string content of this Text
 	TextSize  int            // Size of the text - if the Canvas scale is 1.0 this will be equivalent to point size
 	TextStyle fyne.TextStyle // The style of the text content
