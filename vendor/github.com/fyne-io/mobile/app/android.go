@@ -42,7 +42,7 @@ char* createEGLSurface(ANativeWindow* window);
 char* destroyEGLSurface();
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
-void showKeyboard(JNIEnv* env);
+void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
 
@@ -67,6 +67,11 @@ import (
 	"github.com/fyne-io/mobile/geom"
 	"github.com/fyne-io/mobile/internal/mobileinit"
 )
+
+// mimeMap contains standard mime entries that are missing on Android
+var mimeMap = map[string]string{
+	".txt": "text/plain",
+}
 
 // RunOnJVM runs fn on a new goroutine locked to an OS thread with a JNIEnv.
 //
@@ -291,16 +296,15 @@ func main(f func(App)) {
 }
 
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func driverShowVirtualKeyboard() {
-	if err := mobileinit.RunOnJVM(showSoftInput); err != nil {
+func driverShowVirtualKeyboard(keyboard KeyboardType) {
+	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
+		C.showKeyboard(env, C.int(int32(keyboard)))
+		return nil
+	})
+	if err != nil {
 		log.Fatalf("app: %v", err)
 	}
-}
-
-func showSoftInput(vm, jniEnv, ctx uintptr) error {
-	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-	C.showKeyboard(env)
-	return nil
 }
 
 // driverHideVirtualKeyboard requests the driver to hide any visible virtual keyboard
@@ -338,10 +342,16 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 
 	mimes := "*/*"
 	if filter.MimeTypes != nil {
-		mimes = strings.Join(filter.MimeTypes, ",")
+		mimes = strings.Join(filter.MimeTypes, "|")
 	} else if filter.Extensions != nil {
 		var mimeTypes []string
 		for _, ext := range filter.Extensions {
+			if mimeEntry, ok := mimeMap[ext]; ok {
+				mimeTypes = append(mimeTypes, mimeEntry)
+
+				continue
+			}
+
 			mimeType := mime.TypeByExtension(ext)
 			if mimeType == "" {
 				continue
@@ -349,7 +359,7 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 
 			mimeTypes = append(mimeTypes, mimeType)
 		}
-		mimes = strings.Join(mimeTypes, ",")
+		mimes = strings.Join(mimeTypes, "|")
 	}
 	mimeStr := C.CString(mimes)
 	defer C.free(unsafe.Pointer(mimeStr))
@@ -368,8 +378,8 @@ func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter)
 
 var mainUserFn func(App)
 
-var DisplayMetrics struct{
-	WidthPx int
+var DisplayMetrics struct {
+	WidthPx  int
 	HeightPx int
 }
 

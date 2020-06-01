@@ -228,7 +228,7 @@ func lifecycleVisible() {
 func lifecycleFocused() { theApp.sendLifecycle(lifecycle.StageFocused) }
 
 // driverShowVirtualKeyboard does nothing on desktop
-func driverShowVirtualKeyboard() {
+func driverShowVirtualKeyboard(KeyboardType) {
 }
 
 // driverHideVirtualKeyboard does nothing on desktop
