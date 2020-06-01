@@ -19,7 +19,7 @@ func TestDefaultTheme(t *testing.T) {
 }
 
 func TestEnsureDir(t *testing.T) {
-	tmpDir := filepath.Join(rootConfigDir(), "fynetest")
+	tmpDir := testPath("fynetest")
 
 	ensureDirExists(tmpDir)
 	if st, err := os.Stat(tmpDir); err != nil || !st.IsDir() {
@@ -31,7 +31,7 @@ func TestEnsureDir(t *testing.T) {
 
 func TestWatchSettings(t *testing.T) {
 	settings := &settings{}
-	listener := make(chan fyne.Settings)
+	listener := make(chan fyne.Settings, 1)
 	settings.AddChangeListener(listener)
 
 	settings.fileChanged() // simulate the settings file changing
@@ -44,11 +44,12 @@ func TestWatchSettings(t *testing.T) {
 }
 
 func TestWatchFile(t *testing.T) {
-	path := filepath.Join(rootConfigDir(), "fyne-temp-watch.txt")
-	os.Create(path)
+	path := testPath("fyne-temp-watch.txt")
+	f, _ := os.Create(path)
+	f.Close()
 	defer os.Remove(path)
 
-	called := make(chan interface{})
+	called := make(chan interface{}, 1)
 	watchFile(path, func() {
 		called <- true
 	})
@@ -64,11 +65,12 @@ func TestWatchFile(t *testing.T) {
 }
 
 func TestFileWatcher_FileDeleted(t *testing.T) {
-	path := filepath.Join(rootConfigDir(), "fyne-temp-watch.txt")
-	os.Create(path)
+	path := testPath("fyne-temp-watch.txt")
+	f, _ := os.Create(path)
+	f.Close()
 	defer os.Remove(path)
 
-	called := make(chan interface{})
+	called := make(chan interface{}, 1)
 	watcher := watchFile(path, func() {
 		called <- true
 	})
@@ -79,11 +81,17 @@ func TestFileWatcher_FileDeleted(t *testing.T) {
 
 	defer watcher.Close()
 	os.Remove(path)
-	os.Create(path)
+	f, _ = os.Create(path)
 
 	select {
 	case _ = <-called:
 	case <-time.After(100 * time.Millisecond):
 		t.Error("File watcher callback was not called")
 	}
+	f.Close()
+}
+
+func testPath(child string) string {
+	// TMPDIR would be more normal but fsnotify cannot watch that on macOS...
+	return filepath.Join("testdata", child)
 }

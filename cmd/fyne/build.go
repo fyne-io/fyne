@@ -25,6 +25,8 @@ func (b *builder) build() error {
 	}
 	cmd.Dir = b.srcdir
 	env := os.Environ()
+	env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+
 	if goos != "ios" && goos != "android" {
 		env = append(env, "GOOS="+goos)
 	}

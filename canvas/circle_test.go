@@ -1,17 +1,17 @@
-package canvas
+package canvas_test
 
 import (
 	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 
-	_ "fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCircle_MinSize(t *testing.T) {
-	circle := NewCircle(color.Black)
+	circle := canvas.NewCircle(color.Black)
 	min := circle.MinSize()
 
 	assert.True(t, min.Width > 0)
@@ -20,7 +20,7 @@ func TestCircle_MinSize(t *testing.T) {
 
 func TestCircle_FillColor(t *testing.T) {
 	c := color.White
-	circle := NewCircle(c)
+	circle := canvas.NewCircle(c)
 
 	assert.Equal(t, c, circle.FillColor)
 }
@@ -28,7 +28,7 @@ func TestCircle_FillColor(t *testing.T) {
 func TestCircle_Resize(t *testing.T) {
 	targetWidth := 50
 	targetHeight := 50
-	circle := NewCircle(color.White)
+	circle := canvas.NewCircle(color.White)
 	start := circle.Size()
 	assert.True(t, start.Height == 0)
 	assert.True(t, start.Width == 0)
@@ -40,7 +40,7 @@ func TestCircle_Resize(t *testing.T) {
 }
 
 func TestCircle_Move(t *testing.T) {
-	circle := NewCircle(color.White)
+	circle := canvas.NewCircle(color.White)
 	circle.Resize(fyne.NewSize(50, 50))
 
 	start := fyne.Position{X: 0, Y: 0}

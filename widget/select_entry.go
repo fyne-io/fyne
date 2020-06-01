@@ -9,7 +9,7 @@ import (
 type SelectEntry struct {
 	Entry
 	dropDown *fyne.Menu
-	popUp    *PopUp
+	popUp    *PopUpMenu
 }
 
 // NewSelectEntry creates a SelectEntry.
@@ -20,16 +20,27 @@ func NewSelectEntry(options []string) *SelectEntry {
 	return e
 }
 
-// MinSize satisfies the fyne.CanvasObject interface.
+// MinSize returns the minimal size of the select entry.
+// Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
 	min := e.Entry.MinSize()
+
 	if e.dropDown != nil {
 		for _, item := range e.dropDown.Items {
 			itemMin := fyne.MeasureText(item.Label, theme.TextSize(), fyne.TextStyle{}).Add(fyne.NewSize(4*theme.Padding(), 0))
-			min = min.Union(itemMin)
+			min = min.Max(itemMin)
 		}
 	}
 	return min
+}
+
+// Resize changes the size of the select entry.
+// Implements: fyne.Widget
+func (e *SelectEntry) Resize(size fyne.Size) {
+	e.Entry.Resize(size)
+	if e.popUp != nil {
+		e.popUp.Resize(fyne.NewSize(size.Width, e.popUp.Size().Height))
+	}
 }
 
 // SetOptions sets the options the user might select from.
@@ -51,7 +62,8 @@ func (e *SelectEntry) SetOptions(options []string) {
 		entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
 		popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height))
 
-		e.popUp = NewPopUpMenuAtPosition(fyne.NewMenu("", items...), c, popUpPos)
+		e.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+		e.popUp.ShowAtPosition(popUpPos)
 		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
 	})
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())

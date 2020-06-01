@@ -3,13 +3,16 @@ package screens
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/widget"
 )
 
@@ -17,9 +20,82 @@ func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
 }
 
-// DialogScreen loads a panel that lists the dialog windows that can be tested.
-func DialogScreen(win fyne.Window) fyne.CanvasObject {
-	dialogs := widget.NewGroup("Dialogs",
+func fileOpened(f fyne.FileReadCloser) {
+	if f == nil {
+		log.Println("Cancelled")
+		return
+	}
+
+	ext := f.URI().Extension()
+	if ext == ".png" {
+		showImage(f)
+	} else if ext == ".txt" {
+		showText(f)
+	}
+	err := f.Close()
+	if err != nil {
+		fyne.LogError("Failed to close stream", err)
+	}
+}
+
+func fileSaved(f fyne.FileWriteCloser) {
+	if f == nil {
+		log.Println("Cancelled")
+		return
+	}
+
+	log.Println("Save to...", f.URI())
+}
+
+func loadImage(f fyne.FileReadCloser) *canvas.Image {
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		fyne.LogError("Failed to load image data", err)
+		return nil
+	}
+	res := fyne.NewStaticResource(f.Name(), data)
+
+	return canvas.NewImageFromResource(res)
+}
+
+func showImage(f fyne.FileReadCloser) {
+	img := loadImage(f)
+	if img == nil {
+		return
+	}
+	img.FillMode = canvas.ImageFillOriginal
+
+	w := fyne.CurrentApp().NewWindow(f.Name())
+	w.SetContent(widget.NewScrollContainer(img))
+	w.Resize(fyne.NewSize(320, 240))
+	w.Show()
+}
+
+func loadText(f fyne.FileReadCloser) string {
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		fyne.LogError("Failed to load text data", err)
+		return ""
+	}
+	if data == nil {
+		return ""
+	}
+
+	return string(data)
+}
+
+func showText(f fyne.FileReadCloser) {
+	text := widget.NewLabel(loadText(f))
+	text.Wrapping = fyne.TextWrapWord
+
+	w := fyne.CurrentApp().NewWindow(f.Name())
+	w.SetContent(widget.NewScrollContainer(text))
+	w.Resize(fyne.NewSize(320, 240))
+	w.Show()
+}
+
+func loadDialogGroup(win fyne.Window) *widget.Group {
+	return widget.NewGroup("Dialogs",
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
 		}),
@@ -60,38 +136,49 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 
 			prog.Show()
 		}),
-		widget.NewButton("File Open", func() {
-			dialog.ShowFileOpen(func(path string) {
-				if path == "" {
-					log.Println("Cancelled")
-				} else {
-					log.Println("Open file", path)
+		widget.NewButton("File Open With Filter (.txt or .png)", func() {
+			fd := dialog.NewFileOpen(func(reader fyne.FileReadCloser, err error) {
+				if err == nil && reader == nil {
+					return
 				}
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+
+				fileOpened(reader)
 			}, win)
+			fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".txt"}))
+			fd.Show()
 		}),
 		widget.NewButton("File Save", func() {
-			dialog.ShowFileSave(func(path string) {
-				if path == "" {
-					log.Println("Cancelled")
-				} else {
-					log.Println("Save to file", path)
+			dialog.ShowFileSave(func(writer fyne.FileWriteCloser, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
 				}
+
+				fileSaved(writer)
 			}, win)
 		}),
-		widget.NewButton("Custom", func() {
-			entry := widget.NewEntry()
-			entry.SetPlaceHolder("Type something here")
-			entry.OnChanged = func(text string) {
-				fmt.Println("Entered", text)
-			}
-			sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, func(o string) {
-				fmt.Println("Selected", o)
-			})
-			content := widget.NewVBox(entry, sel)
-			dialog.ShowCustom("Custom dialog", "Done", content, win)
+		widget.NewButton("Custom Dialog (Login Form)", func() {
+			username := widget.NewEntry()
+			password := widget.NewPasswordEntry()
+			content := widget.NewForm(widget.NewFormItem("Username", username),
+				widget.NewFormItem("Password", password))
+
+			dialog.ShowCustomConfirm("Login...", "Log In", "Cancel", content, func(b bool) {
+				if !b {
+					return
+				}
+
+				log.Println("Please Authenticate", username.Text, password.Text)
+			}, win)
 		}),
 	)
+}
 
+func loadWindowGroup() fyne.Widget {
 	windowGroup := widget.NewGroup("Windows",
 		widget.NewButton("New window", func() {
 			w := fyne.CurrentApp().NewWindow("Hello")
@@ -129,7 +216,21 @@ func DialogScreen(win fyne.Window) fyne.CanvasObject {
 				}()
 			}))
 	}
-	windows := widget.NewVBox(dialogs, windowGroup)
 
-	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2), windows, LayoutPanel())
+	otherGroup := widget.NewGroup("Other",
+		widget.NewButton("Notification", func() {
+			fyne.CurrentApp().SendNotification(&fyne.Notification{
+				Title:   "Fyne Demo",
+				Content: "Testing notifications...",
+			})
+		}))
+
+	return widget.NewVBox(windowGroup, otherGroup)
+}
+
+// DialogScreen loads a panel that lists the dialog windows that can be tested.
+func DialogScreen(win fyne.Window) fyne.CanvasObject {
+	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
+		widget.NewScrollContainer(loadDialogGroup(win)),
+		widget.NewScrollContainer(loadWindowGroup()))
 }

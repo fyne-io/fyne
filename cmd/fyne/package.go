@@ -57,7 +57,7 @@ func copyFileMode(src, tgt string, perm os.FileMode) error {
 		return err
 	}
 
-	source, err := os.Open(src)
+	source, err := os.Open(filepath.Clean(src))
 	if err != nil {
 		return err
 	}
@@ -386,6 +386,7 @@ func (p *packager) validate() error {
 
 func calculateExeName(sourceDir, os string) string {
 	exeName := filepath.Base(sourceDir)
+	/* #nosec */
 	if data, err := ioutil.ReadFile(filepath.Join(sourceDir, "go.mod")); err == nil {
 		modulePath := modfile.ModulePath(data)
 		moduleName, _, ok := module.SplitPathVersion(modulePath)

@@ -3,16 +3,46 @@
 package gomobile
 
 import (
+	"image/color"
 	"testing"
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/mobile"
+	"fyne.io/fyne/layout"
 	_ "fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(100, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(100, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(100, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(100, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	content := widget.NewHBox(leftCol, rightCol)
+	c.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), content))
+	c.resize(fyne.NewSize(300, 300))
+
+	oldContentSize := fyne.NewSize(200+theme.Padding(), 100+theme.Padding())
+	assert.Equal(t, oldContentSize, content.Size())
+
+	leftObj1.SetMinSize(fyne.NewSize(110, 60))
+	c.ensureMinSize()
+
+	expectedContentSize := oldContentSize.Add(fyne.NewSize(10, 10))
+	assert.Equal(t, expectedContentSize, content.Size())
+}
 
 func TestCanvas_PixelCoordinateAtPosition(t *testing.T) {
 	c := NewCanvas().(*mobileCanvas)
@@ -163,12 +193,6 @@ func TestCanvas_Tappable(t *testing.T) {
 		wid.Dragged(ev)
 	})
 	assert.True(t, content.cancel)
-}
-
-func TestCanvas_IsEntry(t *testing.T) {
-	assert.True(t, isEntry(widget.NewEntry()))
-	assert.True(t, isEntry(widget.NewSelectEntry([]string{"1", "2"})))
-	assert.False(t, isEntry(widget.NewCheck("check item", func(bool) {})))
 }
 
 type touchableLabel struct {

@@ -6,17 +6,16 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 const defaultText = "%d%%"
 
 type progressRenderer struct {
-	objects []fyne.CanvasObject
-
-	bar   *canvas.Rectangle
-	label *canvas.Text
-
+	widget.BaseRenderer
+	bar      *canvas.Rectangle
+	label    *canvas.Text
 	progress *ProgressBar
 }
 
@@ -37,7 +36,7 @@ func (p *progressRenderer) updateBar() {
 	}
 
 	delta := float32(p.progress.Max - p.progress.Min)
-	ratio := float32(p.progress.Value-p.progress.Min) / float32(delta)
+	ratio := float32(p.progress.Value-p.progress.Min) / delta
 
 	p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
 
@@ -69,13 +68,6 @@ func (p *progressRenderer) Refresh() {
 	canvas.Refresh(p.progress)
 }
 
-func (p *progressRenderer) Objects() []fyne.CanvasObject {
-	return p.objects
-}
-
-func (p *progressRenderer) Destroy() {
-}
-
 // ProgressBar widget creates a horizontal panel that indicates progress
 type ProgressBar struct {
 	BaseWidget
@@ -87,7 +79,7 @@ type ProgressBar struct {
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
 	p.Value = v
-	p.refresh(p)
+	p.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -106,7 +98,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	label := canvas.NewText("0%", theme.TextColor())
 	label.Alignment = fyne.TextAlignCenter
-	return &progressRenderer{[]fyne.CanvasObject{bar, label}, bar, label, p}
+	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{bar, label}), bar, label, p}
 }
 
 // NewProgressBar creates a new progress bar widget.

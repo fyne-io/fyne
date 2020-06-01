@@ -2,22 +2,37 @@ package gl
 
 import (
 	"image"
+	"log"
+	"runtime"
+
+	"github.com/goki/freetype"
+	"github.com/goki/freetype/truetype"
+	"github.com/srwiley/rasterx"
+	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
-	"github.com/goki/freetype"
-	"github.com/goki/freetype/truetype"
-	"github.com/srwiley/rasterx"
-	"golang.org/x/image/font"
-	"golang.org/x/image/math/fixed"
 )
 
 var textures = make(map[fyne.CanvasObject]Texture, 1024)
 
 const vectorPad = 10
+
+func logGLError(err uint32) {
+	if err == 0 {
+		return
+	}
+
+	log.Printf("Error %x in GL Renderer", err)
+	_, file, line, ok := runtime.Caller(2)
+	if ok {
+		log.Printf("  At: %s:%d", file, line)
+	}
+}
 
 func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasObject) Texture) Texture {
 	texture, ok := textures[object]
@@ -53,7 +68,7 @@ func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	rasterx.AddCircle(float64(width/2), float64(height/2), float64(p.textureScaleInt(radius)), dasher)
 	dasher.Draw()
 
-	return p.imgToTexture(raw)
+	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
@@ -77,7 +92,7 @@ func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	dasher.Stop(true)
 	dasher.Draw()
 
-	return p.imgToTexture(raw)
+	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
@@ -88,12 +103,53 @@ func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
 			col = widCol
 		}
 	} else if rect, ok := rect.(*canvas.Rectangle); ok {
+		if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
+			return p.newGlStrokedRectTexture(rect)
+		}
 		if rect.FillColor != nil {
 			col = rect.FillColor
 		}
 	}
 
-	return p.imgToTexture(image.NewUniform(col))
+	return p.imgToTexture(image.NewUniform(col), canvas.ImageScaleSmooth)
+}
+
+func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
+	rect := obj.(*canvas.Rectangle)
+
+	width := p.textureScaleInt(rect.Size().Width + vectorPad*2)
+	height := p.textureScaleInt(rect.Size().Height + vectorPad*2)
+	stroke := rect.StrokeWidth * p.canvas.Scale() * p.texScale
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(rect.Size().Width, rect.Size().Height, raw, raw.Bounds())
+
+	scaledPad := p.textureScaleInt(vectorPad)
+	p1x, p1y := scaledPad, scaledPad
+	p2x, p2y := p.textureScaleInt(rect.Size().Width)+scaledPad, scaledPad
+	p3x, p3y := p.textureScaleInt(rect.Size().Width)+scaledPad, p.textureScaleInt(rect.Size().Height)+scaledPad
+	p4x, p4y := scaledPad, p.textureScaleInt(rect.Size().Height)+scaledPad
+
+	if rect.FillColor != nil {
+		filler := rasterx.NewFiller(width, height, scanner)
+		filler.SetColor(rect.FillColor)
+		rasterx.AddRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), 0, filler)
+		filler.Draw()
+	}
+
+	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
+		dasher := rasterx.NewDasher(width, height, scanner)
+		dasher.SetColor(rect.StrokeColor)
+		dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+		dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
+		dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))
+		dasher.Line(rasterx.ToFixedP(float64(p3x), float64(p3y)))
+		dasher.Line(rasterx.ToFixedP(float64(p4x), float64(p4y)))
+		dasher.Stop(true)
+		dasher.Draw()
+	}
+
+	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
@@ -117,7 +173,7 @@ func (p *glPainter) newGlTextTexture(obj fyne.CanvasObject) Texture {
 	d.Dot = freetype.Pt(0, height-face.Metrics().Descent.Ceil())
 	d.DrawString(text.Text)
 
-	return p.imgToTexture(img)
+	return p.imgToTexture(img, canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
@@ -131,7 +187,7 @@ func (p *glPainter) newGlImageTexture(obj fyne.CanvasObject) Texture {
 		return NoTexture
 	}
 
-	return p.imgToTexture(tex)
+	return p.imgToTexture(tex, img.ScaleMode)
 }
 
 func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
@@ -140,7 +196,7 @@ func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScaleInt(rast.Size().Width)
 	height := p.textureScaleInt(rast.Size().Height)
 
-	return p.imgToTexture(rast.Generator(width, height))
+	return p.imgToTexture(rast.Generator(width, height), canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
@@ -149,7 +205,7 @@ func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScaleInt(gradient.Size().Width)
 	height := p.textureScaleInt(gradient.Size().Height)
 
-	return p.imgToTexture(gradient.Generate(width, height))
+	return p.imgToTexture(gradient.Generate(width, height), canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
@@ -158,5 +214,5 @@ func (p *glPainter) newGlRadialGradientTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScaleInt(gradient.Size().Width)
 	height := p.textureScaleInt(gradient.Size().Height)
 
-	return p.imgToTexture(gradient.Generate(width, height))
+	return p.imgToTexture(gradient.Generate(width, height), canvas.ImageScaleSmooth)
 }
