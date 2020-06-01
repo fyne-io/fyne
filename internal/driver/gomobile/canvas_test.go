@@ -195,6 +195,37 @@ func TestCanvas_Tappable(t *testing.T) {
 	assert.True(t, content.cancel)
 }
 
+func TestCanvas_Focusable(t *testing.T) {
+	content := newFocusableEntry()
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(content)
+
+	c.tapDown(fyne.NewPos(10, 10), 0)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	c.tapDown(fyne.NewPos(10, 10), 1)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	c.Focus(content)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	c.Unfocus()
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+
+	content.Disable()
+	c.Focus(content)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+
+	c.tapDown(fyne.NewPos(10, 10), 2)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+}
+
 type touchableLabel struct {
 	*widget.Label
 	down, up, cancel bool
@@ -223,4 +254,26 @@ func (t *tappableLabel) Tapped(_ *fyne.PointEvent) {
 
 func (t *tappableLabel) TappedSecondary(_ *fyne.PointEvent) {
 	t.altTap = true
+}
+
+type focusableEntry struct {
+	widget.Entry
+	focusedTimes   int
+	unfocusedTimes int
+}
+
+func newFocusableEntry() *focusableEntry {
+	entry := &focusableEntry{}
+	entry.ExtendBaseWidget(entry)
+	return entry
+}
+
+func (f *focusableEntry) FocusGained() {
+	f.focusedTimes++
+	f.Entry.FocusGained()
+}
+
+func (f *focusableEntry) FocusLost() {
+	f.unfocusedTimes++
+	f.Entry.FocusLost()
 }

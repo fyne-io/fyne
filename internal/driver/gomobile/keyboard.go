@@ -7,9 +7,13 @@ import (
 )
 
 func showVirtualKeyboard(keyboard mobile.KeyboardType) {
-	fyne.CurrentApp().Driver().(*mobileDriver).app.ShowVirtualKeyboard(app.KeyboardType(keyboard))
+	if driver, ok := fyne.CurrentApp().Driver().(*mobileDriver); ok {
+		driver.app.ShowVirtualKeyboard(app.KeyboardType(keyboard))
+	}
 }
 
 func hideVirtualKeyboard() {
-	fyne.CurrentApp().Driver().(*mobileDriver).app.HideVirtualKeyboard()
+	if driver, ok := fyne.CurrentApp().Driver().(*mobileDriver); ok {
+		driver.app.HideVirtualKeyboard()
+	}
 }
