@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -58,7 +59,7 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 }
 
 func (s *selectRenderer) BackgroundColor() color.Color {
-	if s.combo.hovered {
+	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	}
 	return theme.ButtonColor()
@@ -106,8 +107,8 @@ type Select struct {
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 
-	hovered bool
-	popUp   *PopUpMenu
+	hovered, tapped bool
+	popUp           *PopUpMenu
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -150,6 +151,13 @@ func (s *Select) optionTapped(text string) {
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (s *Select) Tapped(*fyne.PointEvent) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
+	s.tapped = true
+	defer func() { // TODO move to a real animation
+		time.Sleep(time.Millisecond * buttonTapDuration)
+		s.tapped = false
+		s.Refresh()
+	}()
+	s.Refresh()
 
 	var items []*fyne.MenuItem
 	for _, option := range s.Options {
@@ -243,7 +251,7 @@ func (s *Select) updateSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, false, nil}
 	s.ExtendBaseWidget(s)
 	return s
 }
