@@ -31,7 +31,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Windows redraw and animations continue on window resize and move
 * New...PopUp() methods are being replaced by Show...Popup() or New...Popup().Show()
 * Apps started on a goroutine will now panic as this is not supported
-* On Linux apps now simulate 120DPI instead of 06DPI
+* On Linux apps now simulate 120DPI instead of 96DPI
 * Improved fyne_settings scale picking user interface
 * Reorganised fyne_demo to accomodate growing collection of widgets and containers
 * Rendering now happens on a different thread to events for more consistent drawing
@@ -50,6 +50,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Preserve aspect ratio in SVG stroke drawing (#976)
 * Fixed many race conditions in widget data handling
 * Various crashes and render glitches in extended widgets
+* Fix security issues reported by gosec (#742)
 
 
 ## 1.2.4 - 13 April 2020
