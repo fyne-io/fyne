@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"strings"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -11,6 +12,8 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
+
+const buttonTapDuration = 250
 
 type buttonRenderer struct {
 	*widget.ShadowingRenderer
@@ -117,7 +120,7 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 		return theme.DisabledButtonColor()
 	case b.button.Style == PrimaryButton:
 		return theme.PrimaryColor()
-	case b.button.hovered:
+	case b.button.hovered, b.button.tapped: // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	default:
 		return theme.ButtonColor()
@@ -166,8 +169,9 @@ type Button struct {
 	IconPlacement ButtonIconPlacement
 
 	OnTapped   func() `json:"-"`
-	hovered    bool
 	HideShadow bool
+
+	hovered, tapped bool
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -204,6 +208,14 @@ const (
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
+	b.tapped = true
+	defer func() { // TODO move to a real animation
+		time.Sleep(time.Millisecond * buttonTapDuration)
+		b.tapped = false
+		b.Refresh()
+	}()
+	b.Refresh()
+
 	if b.OnTapped != nil && !b.Disabled() {
 		b.OnTapped()
 	}
