@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin linux openbsd
+// +build darwin linux openbsd freebsd
 
 package gl
 
@@ -13,6 +13,7 @@ package gl
 #cgo darwin,arm64       LDFLAGS: -framework OpenGLES
 #cgo linux              LDFLAGS: -lGLESv2
 #cgo openbsd            LDFLAGS: -L/usr/X11R6/lib/ -lGLESv2
+#cgo freebsd            LDFLAGS: -L/usr/local/X11R6/lib/ -lGLESv2
 
 #cgo android            CFLAGS: -Dos_android
 #cgo ios                CFLAGS: -Dos_ios
@@ -22,8 +23,10 @@ package gl
 #cgo darwin             CFLAGS: -DGL_SILENCE_DEPRECATION
 #cgo linux              CFLAGS: -Dos_linux
 #cgo openbsd            CFLAGS: -Dos_openbsd
+#cgo freebsd            CFLAGS: -Dos_freebsd
 
 #cgo openbsd            CFLAGS: -I/usr/X11R6/include/
+#cgo freebsd            CFLAGS: -I/usr/local/X11R6/include/
 
 #include <stdint.h>
 #include "work.h"
@@ -84,7 +87,7 @@ type context3 struct {
 func NewContext() (Context, Worker) {
 	glctx := &context{
 		workAvailable: make(chan struct{}, 1),
-		work:          make(chan call, workbufLen),
+		work:          make(chan call, workbufLen*4),
 		retvalue:      make(chan C.uintptr_t),
 	}
 	if C.GLES_VERSION == "GL_ES_2_0" {

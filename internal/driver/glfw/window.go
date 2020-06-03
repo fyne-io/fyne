@@ -644,7 +644,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseButton = 0
 	}
 
-	// we cannot switch here as objects may respond to multiple cases
+git	// we cannot switch here as objects may respond to multiple cases
 	if wid, ok := co.(fyne.Focusable); ok && needsfocus {
 		if dis, ok := wid.(fyne.Disableable); !ok || !dis.Disabled() {
 			w.canvas.Focus(wid)
@@ -804,6 +804,7 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyLeftSuper:    desktop.KeySuperLeft,
 	glfw.KeyRightSuper:   desktop.KeySuperRight,
 	glfw.KeyMenu:         desktop.KeyMenu,
+	glfw.KeyCapsLock:     desktop.KeyCapsLock,
 }
 
 var keyNameMap = map[string]fyne.KeyName{

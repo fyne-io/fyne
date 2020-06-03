@@ -14,7 +14,7 @@
 //
 // Requires ANDROID_HOME be set to the path of the Android SDK, and
 // javac must be on the PATH.
-package mobile
+package main
 
 import (
 	"bytes"

@@ -761,6 +761,43 @@ func TestWindow_Focus(t *testing.T) {
 	assert.Equal(t, "ef", e2.Text)
 }
 
+func TestWindow_ManualFocus(t *testing.T) {
+	w := createWindow("Test").(*window)
+	content := &focusable{Rectangle: canvas.NewRectangle(color.Black)}
+	content.SetMinSize(fyne.NewSize(10, 10))
+	w.SetContent(content)
+	repaintWindow(w)
+
+	w.mouseMoved(w.viewport, 9, 9)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.waitForEvents()
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.waitForEvents()
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	w.canvas.Focus(content)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 0, content.unfocusedTimes)
+
+	w.canvas.Unfocus()
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+
+	content.Disable()
+	w.canvas.Focus(content)
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.waitForEvents()
+	assert.Equal(t, 1, content.focusedTimes)
+	assert.Equal(t, 1, content.unfocusedTimes)
+}
+
 func TestWindow_Clipboard(t *testing.T) {
 	w := createWindow("Test")
 
@@ -945,6 +982,46 @@ func (t *tappable) popTapEvent() (e interface{}) {
 func (t *tappable) popSecondaryTapEvent() (e interface{}) {
 	e, t.secondaryTapEvents = pop(t.secondaryTapEvents)
 	return
+}
+
+var _ fyne.Focusable = (*focusable)(nil)
+var _ fyne.Disableable = (*focusable)(nil)
+
+type focusable struct {
+	*canvas.Rectangle
+	focusedTimes   int
+	unfocusedTimes int
+	disabled       bool
+}
+
+func (f *focusable) Focused() bool {
+	panic("deprecated")
+}
+
+func (f *focusable) TypedRune(rune) {
+}
+
+func (f *focusable) TypedKey(*fyne.KeyEvent) {
+}
+
+func (f *focusable) FocusGained() {
+	f.focusedTimes++
+}
+
+func (f *focusable) FocusLost() {
+	f.unfocusedTimes++
+}
+
+func (f *focusable) Enable() {
+	f.disabled = false
+}
+
+func (f *focusable) Disable() {
+	f.disabled = true
+}
+
+func (f *focusable) Disabled() bool {
+	return f.disabled
 }
 
 //

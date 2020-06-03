@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -29,9 +28,8 @@ type fileIconRenderer struct {
 const ratioDown float64 = 0.45
 
 // NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
-func NewFileIcon(path string) fyne.CanvasObject {
-
-	ext, mimeType, mimeSubType := mimeTypeGet(path)
+func NewFileIcon(uri fyne.URI) fyne.CanvasObject {
+	mimeType, mimeSubType := splitMimeType(uri)
 
 	var res fyne.Resource
 	switch mimeType {
@@ -52,7 +50,7 @@ func NewFileIcon(path string) fyne.CanvasObject {
 	ret := &fileIcon{
 		mimeType:    mimeType,
 		mimeSubType: mimeSubType,
-		extension:   ext,
+		extension:   trimmedExtension(uri),
 		resource:    res,
 	}
 
@@ -97,21 +95,19 @@ func (s fileIconRenderer) Refresh() {
 	canvas.Refresh(s.item)
 }
 
-func mimeTypeGet(path string) (ext, mimeType, mimeSubType string) {
-	uri := storage.NewURI(path)
-	ext = uri.Extension()
+func trimmedExtension(uri fyne.URI) string {
+	ext := uri.Extension()
 	if len(ext) > 5 {
 		ext = ext[:5]
 	}
+	return ext
+}
 
+func splitMimeType(uri fyne.URI) (string, string) {
 	mimeTypeFull := uri.MimeType()
 	mimeTypeSplit := strings.Split(mimeTypeFull, "/")
 	if len(mimeTypeSplit) <= 1 {
-		mimeType, mimeSubType = "", ""
-		return
+		return "", ""
 	}
-	mimeType = mimeTypeSplit[0]
-	mimeSubType = mimeTypeSplit[1]
-
-	return
+	return mimeTypeSplit[0], mimeTypeSplit[1]
 }

@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -24,7 +25,14 @@ import android.widget.FrameLayout;
 
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
-	private static int FILE_OPEN_CODE = 1;
+	private static final int FILE_OPEN_CODE = 1;
+
+	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
+             InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD; // this is required to force samsung keyboards to not suggest
+
+	private static final int DEFAULT_KEYBOARD_CODE = 0;
+	private static final int SINGLELINE_KEYBOARD_CODE = 1;
+	private static final int NUMBER_KEYBOARD_CODE = 2;
 
     private native void filePickerReturned(String str);
     private native void insetsChanged(int top, int bottom, int left, int right);
@@ -62,14 +70,35 @@ public class GoNativeActivity extends NativeActivity {
         }
     }
 
-    static void showKeyboard() {
-        goNativeActivity.doShowKeyboard();
+    static void showKeyboard(int keyboardType) {
+        goNativeActivity.doShowKeyboard(keyboardType);
     }
 
-    void doShowKeyboard() {
+    void doShowKeyboard(final int keyboardType) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                int imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+                int inputType = DEFAULT_INPUT_TYPE;
+                switch (keyboardType) {
+                    case DEFAULT_KEYBOARD_CODE:
+                        imeOptions = EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+                        inputType = DEFAULT_INPUT_TYPE;
+                        break;
+                    case SINGLELINE_KEYBOARD_CODE:
+                        imeOptions = EditorInfo.IME_ACTION_DONE;
+                        inputType = DEFAULT_INPUT_TYPE;
+                        break;
+                    case NUMBER_KEYBOARD_CODE:
+                        imeOptions = EditorInfo.IME_ACTION_DONE;
+                        inputType = DEFAULT_INPUT_TYPE | InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
+                        break;
+                    default:
+                        Log.e("GoLog", "unknown keyboard type, use default");
+                }
+                mTextEdit.setImeOptions(imeOptions);
+                mTextEdit.setInputType(inputType);
+
                 oldState = "";
                 mTextEdit.setText("");
                 mTextEdit.setVisibility(View.VISIBLE);
@@ -99,13 +128,18 @@ public class GoNativeActivity extends NativeActivity {
         });
     }
 
-    static void showFileOpen() {
-        goNativeActivity.doShowFileOpen();
+    static void showFileOpen(String mimes) {
+        goNativeActivity.doShowFileOpen(mimes);
     }
 
-    void doShowFileOpen() {
+    void doShowFileOpen(String mimes) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("*/*");
+        if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.setType("*/*");
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
+        } else {
+            intent.setType(mimes);
+        }
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
@@ -169,9 +203,7 @@ public class GoNativeActivity extends NativeActivity {
             public void run() {
                 mTextEdit = new EditText(goNativeActivity);
                 mTextEdit.setVisibility(View.GONE);
-                mTextEdit.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS |
-                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD); // this is required to force samsung keyboards to not suggest
-                mTextEdit.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
+                mTextEdit.setInputType(DEFAULT_INPUT_TYPE);
 
                 FrameLayout.LayoutParams mEditTextLayoutParams = new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);

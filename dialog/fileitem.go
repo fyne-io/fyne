@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -60,7 +61,7 @@ func (f *fileDialog) newFileItem(path string, dir bool) *fileDialogItem {
 	if dir {
 		icon = canvas.NewImageFromResource(theme.FolderIcon())
 	} else {
-		icon = NewFileIcon(path)
+		icon = NewFileIcon(storage.NewURI("file://" + path))
 	}
 	name := fileName(path)
 
