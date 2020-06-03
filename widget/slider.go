@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"math"
 
 	"fyne.io/fyne"
@@ -28,6 +29,7 @@ type Slider struct {
 	Min   float64
 	Max   float64
 	Step  float64
+	focused bool
 
 	Orientation Orientation
 	OnChanged   func(float64)
@@ -44,6 +46,51 @@ func NewSlider(min, max float64) *Slider {
 	}
 	slider.ExtendBaseWidget(slider)
 	return slider
+}
+
+
+// FocusGained is called when the Entry has been given focus.
+func (s *Slider) FocusGained() {
+	s.focused = true
+	s.Refresh()
+}
+
+// FocusLost is called when the Entry has had focus removed.
+func (s *Slider) FocusLost() {
+	s.focused = false
+	s.Refresh()
+}
+
+// Focused returns whether or not this Entry has focus.
+func (s *Slider) Focused() bool {
+	return s.focused
+}
+
+func (s *Slider) TypedRune(r rune) {
+
+}
+
+func (s *Slider) TypedKey(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyLeft || key.Name == fyne.KeyDown {
+		if s.Value>s.Min + s.Step {
+			s.Value -= s.Step
+		} else {
+			s.Value = s.Min
+		}
+	} else if key.Name == fyne.KeyRight || key.Name == fyne.KeyUp {
+		if s.Value<s.Max-s.Step {
+			s.Value += s.Step
+		} else {
+			s.Value = s.Max
+		}
+	}
+	s.Refresh()
+}
+
+func (s *Slider) KeyUp(key *fyne.KeyEvent) {
+}
+
+func (s *Slider) KeyDown(key *fyne.KeyEvent) {
 }
 
 // DragEnd function.
@@ -208,6 +255,16 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 	}
 
 	return fyne.Size{Width: 0, Height: 0}
+}
+
+func (s *sliderRenderer) BackgroundColor() color.Color {
+	if s.slider.focused {
+		return theme.FocusColor()
+	}
+	return theme.BackgroundColor()
+}
+
+func (s *sliderRenderer) Destroy() {
 }
 
 func (s *sliderRenderer) getOffset() int {

@@ -119,6 +119,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.itemGrid = itemGrid
 
 	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
+	f.cancelButton.Style = CancelButton
 	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
 	f.submitButton.Style = PrimaryButton
 	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)

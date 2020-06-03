@@ -181,7 +181,12 @@ func loadWindowGroup() fyne.Widget {
 		}),
 		widget.NewButton("Fixed size window", func() {
 			w := fyne.CurrentApp().NewWindow("Fixed")
-			w.SetContent(fyne.NewContainerWithLayout(layout.NewCenterLayout(), widget.NewLabel("Hello World!")))
+			w.SetContent(fyne.NewContainerWithLayout(
+				layout.NewGridLayoutWithRows(3),
+				widget.NewLabel("Hello World!"),
+				widget.NewButton("Cancel", func() {w.Close()}),
+				widget.NewButton("OK", func() {w.Close()})),
+			)
 
 			w.Resize(fyne.NewSize(240, 180))
 			w.SetFixedSize(true)

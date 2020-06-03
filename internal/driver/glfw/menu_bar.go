@@ -16,11 +16,41 @@ var _ fyne.Widget = (*MenuBar)(nil)
 // MenuBar is a widget for displaying a fyne.MainMenu in a bar.
 type MenuBar struct {
 	widget.Base
-	Items []fyne.CanvasObject
-
+	Items      []fyne.CanvasObject
+	index      int
 	active     bool
-	activeItem *menuBarItem
 	canvas     fyne.Canvas
+	activeItem *menuBarItem
+}
+
+// HandleKey will process keys pressed when menu is open
+func (b *MenuBar) HandleKey(key fyne.KeyName) {
+	if key == fyne.KeyEscape {
+		b.deactivate()
+	} else if key == fyne.KeyEnter || key == fyne.KeyReturn || key == fyne.KeySpace {
+		// Simulate tapping on  menu entry
+		b.Items[b.index].(*menuBarItem).Child().Do()
+	} else if key == fyne.KeyRight {
+		// Move to the menu item at right
+		if b.index < len(b.Items)-1 {
+			b.Items[b.index].(*menuBarItem).Tapped(nil)
+			b.index++
+			b.Items[b.index].(*menuBarItem).Tapped(nil)
+		}
+	} else if key == fyne.KeyLeft {
+		// Move to the menu item at left
+		if b.index > 0 {
+			b.Items[b.index].(*menuBarItem).Tapped(nil)
+			b.index--
+			b.Items[b.index].(*menuBarItem).Tapped(nil)
+		}
+	} else if key == fyne.KeyUp {
+		// Move focus to menu item above
+		b.Items[b.index].(*menuBarItem).Child().Up()
+	} else if key == fyne.KeyDown {
+		// Move focus to menu item below
+		b.Items[b.index].(*menuBarItem).Child().Down()
+	}
 }
 
 // NewMenuBar creates a menu bar populated with items from the passed main menu structure.
@@ -106,6 +136,7 @@ func (b *MenuBar) activateChild(item *menuBarItem) {
 		return
 	}
 
+
 	item.Child().Show()
 	b.Refresh()
 }
@@ -114,7 +145,7 @@ func (b *MenuBar) deactivate() {
 	if !b.active {
 		return
 	}
-
+	b.active = false
 	b.active = false
 	if b.activeItem != nil {
 		defer b.activeItem.Child().Dismiss()

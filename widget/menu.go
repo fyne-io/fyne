@@ -18,6 +18,66 @@ type Menu struct {
 	OnDismiss   func()
 	activeItem  *menuItem
 	customSized bool
+	index       int
+}
+
+func (m *Menu) Defocus() {
+	for _,o := range m.Items {
+		if mi, ok := o.(*menuItem); ok {
+			mi.FocusLost()
+		}
+	}
+}
+
+func (m *Menu) Do() {
+	if m.activeItem!=nil {
+		m.activeItem.child.Do()
+		return
+	}
+	if o, ok := m.Items[m.index].(*menuItem); ok {
+		o.MouseIn(nil)
+		o.Tapped(nil)
+	}
+}
+
+func (m *Menu) Up() {
+	if m.activeItem!=nil {
+		m.activeItem.child.Up()
+		return
+	}
+	index := m.index
+	for true {
+		index--
+		if index < 0 {
+			index=0
+		}
+		if o, ok := m.Items[index].(*menuItem); ok {
+			m.Items[m.index].(*menuItem).FocusLost()
+			m.index = index
+			o.FocusGained()
+			break
+		}
+	}
+}
+
+func (m *Menu) Down() {
+	if m.activeItem!=nil {
+		m.activeItem.child.Down()
+		return
+	}
+	index := m.index
+	for true {
+		index++
+		if index >=len(m.Items) {
+			break
+		}
+		if o, ok := m.Items[index].(*menuItem); ok {
+			m.Items[m.index].(*menuItem).FocusLost()
+			m.index = index
+			o.FocusGained()
+			break
+		}
+	}
 }
 
 // NewMenu creates a new Menu.
@@ -252,3 +312,4 @@ func (r *menuBoxRenderer) MinSize() fyne.Size {
 func (r *menuBoxRenderer) Refresh() {
 	canvas.Refresh(r.b)
 }
+

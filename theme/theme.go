@@ -61,6 +61,39 @@ func DarkTheme() fyne.Theme {
 	return theme
 }
 
+// shade will darken a light color and lighten a light color by the given % value
+// should use 4,8, 12 or 14 percent darken/lighten to implement google material design rules
+func Shade(c color.Color, pct uint32) color.Color {
+	r, g, b, a := c.RGBA()
+	if pct == 0 {
+		return color.NRGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+	}
+	if pct > 50 {
+		pct = 50
+	}
+	if r+g+b < 3*0x8080 {
+		// Lighten
+		return color.NRGBA{
+			R: uint8((r + (0x10000-r)*pct/50) >> 8),
+			G: uint8((g + (0x10000-g)*pct/50) >> 8),
+			B: uint8((b + (0x10000-b)*pct/50) >> 8),
+			A: uint8(a >> 8),
+		}
+	} else {
+		// Darken
+		return color.NRGBA{
+			R: uint8((r * (100 - pct) / 100) >> 8),
+			G: uint8((g * (100 - pct) / 100) >> 8),
+			B: uint8((b * (100 - pct) / 100) >> 8),
+			A: uint8(a >> 8),
+		}
+	}
+}
+
+const PressedShade = 14
+	const HoveredShade = 4
+const FocusedShade = 8
+
 func (t *builtinTheme) BackgroundColor() color.Color {
 	return t.background
 }
@@ -117,7 +150,7 @@ func (t *builtinTheme) HoverColor() color.Color {
 
 // FocusColor returns the colour used to highlight a focused widget
 func (t *builtinTheme) FocusColor() color.Color {
-	return t.primary
+	return Shade(t.primary, FocusedShade)
 }
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar
@@ -274,6 +307,16 @@ func PrimaryColor() color.Color {
 // HoverColor returns the colour used to highlight interactive elements currently under a cursor
 func HoverColor() color.Color {
 	return current().HoverColor()
+}
+
+// PressedColor returns the colour used for a pressed button
+func PressedColor() color.Color {
+	return Shade(FocusColor(), PressedShade)
+}
+
+// HoverFocused returns the colour used for a focused/primary hovered button
+func HoverFocusedColor() color.Color {
+	return Shade(FocusColor(), HoveredShade)
 }
 
 // FocusColor returns the colour used to highlight a focussed widget

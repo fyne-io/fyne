@@ -15,12 +15,31 @@ var _ fyne.Widget = (*menuItem)(nil)
 // menuItem is a widget for displaying a fyne.menuItem.
 type menuItem struct {
 	widget.Base
-	Item   *fyne.MenuItem
-	Parent *Menu
-
+	Item            *fyne.MenuItem
+	Parent          *Menu
 	child           *Menu
 	hovered         bool
+	focused         bool
 	onActivateChild func(*menuItem)
+}
+
+// FocusGained is called when the Entry has been given focus.
+func (i *menuItem) FocusGained() {
+	i.focused = true
+	i.hovered = true
+	i.Refresh()
+}
+
+// FocusLost is called when the Entry has had focus removed.
+func (i *menuItem) FocusLost() {
+	i.focused = false
+	i.hovered = false
+	i.Refresh()
+}
+
+// Focused returns whether or not this Entry has focus.
+func (i *menuItem) Focused() bool {
+	return i.focused
 }
 
 // newMenuItem creates a new menuItem.
@@ -78,8 +97,20 @@ func (i *menuItem) MinSize() fyne.Size {
 // MouseIn changes the item to be hovered and shows the submenu if the item has one.
 // The submenu of any sibling of the item will be hidden.
 // Implements: desktop.Hoverable
-func (i *menuItem) MouseIn(*desktop.MouseEvent) {
+func (i *menuItem) MouseIn(e *desktop.MouseEvent) {
 	i.hovered = true
+	if i.Child() != nil {
+		i.Child().Defocus()
+		if e == nil && i.Child().Items[0] != nil {
+			// A nil event means this is actualy a keyboard event activating the menu
+			// So focus the first menu item
+			i.Parent.index = 0
+			for j, o := range i.Child().Items {
+				o.(*menuItem).focused = (j == 0)
+				o.(*menuItem).hovered = false
+			}
+		}
+	}
 	i.onActivateChild(i)
 	i.Refresh()
 }
@@ -145,10 +176,12 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) BackgroundColor() color.Color {
+	if r.i.focused {
+		return theme.FocusColor()
+	}
 	if !fyne.CurrentDevice().IsMobile() && (r.i.hovered || (r.i.child != nil && r.i.child.Visible())) {
 		return theme.HoverColor()
 	}
-
 	return color.Transparent
 }
 

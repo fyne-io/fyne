@@ -23,9 +23,9 @@ type ToolbarAction struct {
 
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
-	button := NewButtonWithIcon("", t.Icon, t.OnActivated)
-	button.HideShadow = true
-
+	//button := NewButtonWithIcon("", t.Icon, t.OnActivated)
+	//button.HideShadow = true
+	button := newToolbarButton(t.Icon, t.OnActivated)
 	return button
 }
 
@@ -68,7 +68,94 @@ func NewToolbarSeparator() ToolbarItem {
 // Toolbar widget creates a horizontal list of tool buttons
 type Toolbar struct {
 	BaseWidget
-	Items []ToolbarItem
+	Items    []ToolbarItem
+	focused  bool
+	current  int
+	renderer *toolbarRenderer
+}
+
+// FocusGained is called when the Entry has been given focus.
+func (b *Toolbar) FocusGained() {
+	b.focused = true
+	if b.current < len(b.Items) {
+		if o, ok := b.renderer.objs[b.current].(*ToolbarButton); ok {
+			o.focused = true
+			o.Refresh()
+		}
+	}
+	b.Refresh()
+}
+
+// FocusLost is called when the Entry has had focus removed.
+func (b *Toolbar) FocusLost() {
+	b.focused = false
+	if b.current < len(b.renderer.objs) {
+		bt := b.renderer.objs[b.current]
+		if o, ok := bt.(*ToolbarButton); ok {
+			o.focused = false
+			o.Refresh()
+		}
+	}
+	b.Refresh()
+}
+
+// Focused returns whether or not this Entry has focus.
+func (b *Toolbar) Focused() bool {
+	return b.focused
+}
+
+func (b *Toolbar) TypedRune(r rune) {
+}
+
+func (t *Toolbar) changeFocusedButton(delta int) {
+	i := t.current
+	ok := false
+	for i+delta >= 0 && i+delta < len(t.renderer.objs) && !ok {
+		i = i + delta
+		_, ok = t.renderer.objs[i].(*ToolbarButton)
+	}
+	if ok {
+		t.current = i
+	}
+}
+
+func (b *Toolbar) TypedKey(key *fyne.KeyEvent) {
+	if bt, ok := b.renderer.objs[b.current].(*ToolbarButton); ok {
+		bt.focused = false
+		bt.Refresh()
+		if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+			bt.OnTap()
+		}
+	}
+	if key.Name == fyne.KeyLeft || key.Name == fyne.KeyUp {
+		b.changeFocusedButton(-1)
+	} else if key.Name == fyne.KeyRight || key.Name == fyne.KeyDown {
+		b.changeFocusedButton(+1)
+	}
+
+	if bt, ok := b.renderer.objs[b.current].(*ToolbarButton); ok {
+		bt.focused = true
+		bt.Refresh()
+	}
+	b.Refresh()
+}
+
+func (b *Toolbar) KeyUp(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+		if btn, ok := b.renderer.objs[b.current].(*ToolbarButton); ok {
+			btn.pressed = false
+			btn.Refresh()
+		}
+	}
+}
+
+func (b *Toolbar) KeyDown(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+		if btn, ok := b.renderer.objs[b.current].(*ToolbarButton); ok {
+			btn.pressed = true
+			btn.Refresh()
+		}
+	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -76,6 +163,7 @@ func (t *Toolbar) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	r := &toolbarRenderer{toolbar: t, layout: layout.NewHBoxLayout()}
 	r.resetObjects()
+	t.renderer = r
 	return r
 }
 
@@ -101,7 +189,6 @@ func (t *Toolbar) MinSize() fyne.Size {
 func NewToolbar(items ...ToolbarItem) *Toolbar {
 	t := &Toolbar{Items: items}
 	t.ExtendBaseWidget(t)
-
 	t.Refresh()
 	return t
 }
@@ -141,7 +228,11 @@ func (r *toolbarRenderer) resetObjects() {
 	if len(r.objs) != len(r.toolbar.Items) {
 		r.objs = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
 		for _, item := range r.toolbar.Items {
-			r.objs = append(r.objs, item.ToolbarObject())
+			o := item.ToolbarObject()
+			if b,ok := o.(*ToolbarButton); ok {
+				b.toolbar = r.toolbar
+			}
+			r.objs = append(r.objs, o)
 		}
 	}
 	r.SetObjects(r.objs)

@@ -112,11 +112,22 @@ func (i *menuBarItem) Show() {
 // Tapped toggles the activation state of the menu bar.
 // It shows the item’s menu if the bar is activated and hides it if the bar is deactivated.
 // Implements: fyne.Tappable
-func (i *menuBarItem) Tapped(*fyne.PointEvent) {
+func (i *menuBarItem) Tapped(pos *fyne.PointEvent) {
 	if i.Parent.active {
 		i.Parent.deactivate()
 	} else {
+		// Set then menu bar's index to the tapped items index and update focus
 		i.Parent.activateChild(i)
+		for j := 0; j < len(i.Parent.Items); j++ {
+			if i.Parent.Items[j] == i {
+				i.Parent.index = j
+				if pos==nil {
+					i.Parent.Items[i.Parent.index].(*menuBarItem).Child().Up()
+				} else {
+					i.Parent.Items[i.Parent.index].(*menuBarItem).Child().Defocus()
+				}
+			}
+		}
 	}
 }
 
@@ -130,7 +141,6 @@ func (r *menuBarItemRenderer) BackgroundColor() color.Color {
 	if r.i.hovered || (r.i.child != nil && r.i.child.Visible()) {
 		return theme.HoverColor()
 	}
-
 	return color.Transparent
 }
 

@@ -46,7 +46,7 @@ func TestToolbar_ItemPositioning(t *testing.T) {
 	toolbar.Refresh()
 	var items []fyne.CanvasObject
 	for _, o := range test.LaidOutObjects(toolbar) {
-		if b, ok := o.(*Button); ok {
+		if b, ok := o.(*ToolbarButton); ok {
 			items = append(items, b)
 		}
 	}

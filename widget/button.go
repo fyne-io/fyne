@@ -115,10 +115,16 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 	switch {
 	case b.button.Disabled():
 		return theme.DisabledButtonColor()
-	case b.button.Style == PrimaryButton:
-		return theme.PrimaryColor()
+	case b.button.pressed:
+		return theme.PressedColor()
+	case b.button.hovered && b.button.focused:
+		return theme.HoverFocusedColor()
 	case b.button.hovered:
 		return theme.HoverColor()
+	case b.button.focused:
+		return theme.FocusColor()
+	case b.button.Style == PrimaryButton:
+		return theme.PrimaryColor()
 	default:
 		return theme.ButtonColor()
 	}
@@ -168,6 +174,9 @@ type Button struct {
 	OnTapped   func() `json:"-"`
 	hovered    bool
 	HideShadow bool
+
+	focused  bool
+	pressed  bool
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -178,6 +187,7 @@ const (
 	DefaultButton ButtonStyle = iota
 	// PrimaryButton that should be more prominent to the user
 	PrimaryButton
+	CancelButton
 )
 
 // ButtonAlign represents the horizontal alignment of a button.
@@ -209,6 +219,57 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 }
 
+// TappedSecondary is called when a secondary pointer tapped event is captured
+func (b *Button) TappedSecondary(*fyne.PointEvent) {
+}
+
+// FocusGained is called when the Entry has been given focus.
+func (b *Button) FocusGained() {
+	if b.Disabled() {
+		return
+	}
+	b.focused = true
+	b.Refresh()
+}
+
+// FocusLost is called when the Entry has had focus removed.
+func (b *Button) FocusLost() {
+	b.focused = false
+	b.Refresh()
+}
+
+// Focused returns whether or not this Entry has focus.
+func (b *Button) Focused() bool {
+	return b.focused
+}
+
+// TypedRune receives text input events when the Check is focused.
+func (b *Button) TypedRune(r rune) {
+}
+
+func (b *Button) TypedKey(key *fyne.KeyEvent) {
+	if b.Disabled() {
+		return
+	}
+	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+		b.Tapped(nil)
+	}
+}
+
+func (b *Button) KeyUp(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+		b.pressed = false
+		b.Refresh()
+	}
+}
+
+func (b *Button) KeyDown(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+		b.pressed = true
+		b.Refresh()
+	}
+}
+
 // MouseIn is called when a desktop pointer enters the widget
 func (b *Button) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
@@ -217,12 +278,28 @@ func (b *Button) MouseIn(*desktop.MouseEvent) {
 
 // MouseOut is called when a desktop pointer exits the widget
 func (b *Button) MouseOut() {
+	b.pressed = false
 	b.hovered = false
 	b.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
 func (b *Button) MouseMoved(*desktop.MouseEvent) {
+}
+
+// MouseDown called on mouse click, this triggers a mouse click which can move the cursor,
+// update the existing selection (if shift is held), or start a selection dragging operation.
+func (b *Button) MouseDown(m *desktop.MouseEvent) {
+	b.pressed = true
+	b.Refresh()
+}
+
+// MouseUp called on mouse release
+// If a mouse drag event has completed then check to see if it has resulted in an empty selection,
+// if so, and if a text select key isn't held, then disable selecting
+func (b *Button) MouseUp(m *desktop.MouseEvent) {
+	b.pressed = false
+	b.Refresh()
 }
 
 // MinSize returns the size that this widget should not shrink below

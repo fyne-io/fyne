@@ -20,6 +20,8 @@ type TabContainer struct {
 	OnChanged   func(tab *TabItem)
 	current     int
 	tabLocation TabLocation
+	focused     bool
+	renderer    tabContainerRenderer
 }
 
 // TabItem represents a single view in a TabContainer.
@@ -49,7 +51,6 @@ func NewTabContainer(items ...*TabItem) *TabContainer {
 		tabs.current = 0
 	}
 	tabs.ExtendBaseWidget(tabs)
-
 	if tabs.mismatchedContent() {
 		internal.LogHint("TabContainer items should all have the same type of content (text, icons or both)")
 	}
@@ -299,8 +300,10 @@ func (r *tabContainerRenderer) Refresh() {
 		}
 		for i, button := range r.tabBar.Objects {
 			if i == current {
+				button.(*tabButton).focused = r.container.focused
 				button.(*tabButton).Style = PrimaryButton
 			} else {
+				button.(*tabButton).focused = false
 				button.(*tabButton).Style = DefaultButton
 			}
 
@@ -411,11 +414,76 @@ var _ desktop.Hoverable = (*tabButton)(nil)
 type tabButton struct {
 	BaseWidget
 	hovered      bool
+	focused      bool
+	pressed      bool
 	Icon         fyne.Resource
 	IconPosition buttonIconPosition
 	OnTap        func()
 	Style        ButtonStyle
 	Text         string
+}
+
+// FocusGained is called when the Entry has been given focus.
+func (b *TabContainer) FocusGained() {
+	b.focused = true
+	b.Refresh()
+}
+
+// FocusLost is called when the Entry has had focus removed.
+func (b *TabContainer) FocusLost() {
+	b.focused = false
+	b.Refresh()
+}
+
+// Focused returns whether or not this Entry has focus.
+func (b *TabContainer) Focused() bool {
+	return b.focused
+}
+
+func (b *TabContainer) TypedRune(r rune) {
+
+}
+
+func (b *TabContainer) TypedKey(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyLeft || key.Name == fyne.KeyUp {
+		if b.current > 0 {
+			b.SelectTabIndex(b.current-1)
+		}
+	} else if key.Name == fyne.KeyRight || key.Name == fyne.KeyDown {
+		if b.current < len(b.Items)-1 {
+			b.SelectTabIndex(b.current+1)
+		}
+	}
+	b.Refresh()
+}
+
+func (b *TabContainer) KeyUp(key *fyne.KeyEvent) {
+	if b.renderer.tabBar==nil {
+		return
+	}
+	o := b.renderer.tabBar.Objects
+	if len(o)>b.current {
+		o[b.current].(*tabButton).pressed = false
+	}
+}
+
+func (b *TabContainer) KeyDown(key *fyne.KeyEvent) {
+	if b.renderer.tabBar==nil {
+		return
+	}
+		o := b.renderer.tabBar.Objects
+	if len(o)>b.current {
+		o[b.current].(*tabButton).pressed = true
+	}
+}
+
+func (b *tabButton) setText(text string) {
+	if text == b.Text {
+		return
+	}
+
+	b.Text = text
+	b.Refresh()
 }
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
@@ -463,15 +531,6 @@ func (b *tabButton) Tapped(e *fyne.PointEvent) {
 	b.OnTap()
 }
 
-func (b *tabButton) setText(text string) {
-	if text == b.Text {
-		return
-	}
-
-	b.Text = text
-	b.Refresh()
-}
-
 type tabButtonRenderer struct {
 	button  *tabButton
 	icon    *canvas.Image
@@ -481,10 +540,14 @@ type tabButtonRenderer struct {
 
 func (r *tabButtonRenderer) BackgroundColor() color.Color {
 	switch {
-	case r.button.Style == PrimaryButton:
-		return theme.PrimaryColor()
+	case r.button.pressed:
+		return theme.Shade(theme.FocusColor(), theme.PressedShade)
 	case r.button.hovered:
 		return theme.HoverColor()
+	case r.button.focused:
+		return theme.FocusColor()
+	case r.button.Style == PrimaryButton:
+		return theme.PrimaryColor()
 	default:
 		return theme.BackgroundColor()
 	}

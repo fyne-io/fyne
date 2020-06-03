@@ -58,6 +58,9 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 }
 
 func (s *selectRenderer) BackgroundColor() color.Color {
+	if s.combo.focused {
+		return theme.FocusColor	()
+	}
 	if s.combo.hovered {
 		return theme.HoverColor()
 	}
@@ -107,10 +110,57 @@ type Select struct {
 	OnChanged   func(string) `json:"-"`
 
 	hovered bool
+	focused bool
 	popUp   *PopUpMenu
+	Parent  fyne.CanvasObject
 }
 
 var _ fyne.Widget = (*Select)(nil)
+
+// FocusGained is called when the Entry has been given focus.
+func (s *Select) FocusGained() {
+	s.focused = true
+	s.Refresh()
+}
+
+// FocusLost is called when the Entry has had focus removed.
+func (s *Select) FocusLost() {
+	s.focused = false
+	s.Refresh()
+}
+
+// Focused returns whether or not this Entry has focus.
+func (s *Select) Focused() bool {
+	return s.focused
+}
+
+func (s *Select) TypedRune(r rune) {
+}
+
+func (s *Select) TypedKey(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyEnter || key.Name == fyne.KeyReturn || key.Name == fyne.KeySpace {
+		if s.popUp==nil || !s.popUp.Visible() {
+			s.Tapped(nil)
+		} else {
+			s.popUp.Menu.Do()
+		}
+	}
+	if s.popUp!=nil {
+		if key.Name == fyne.KeyUp {
+			s.popUp.Menu.Up()
+		} else if key.Name == fyne.KeyDown {
+			s.popUp.Menu.Down()
+		} else if key.Name == fyne.KeyEscape {
+			s.popUp.Dismiss()
+		}
+	}
+}
+
+func (s *Select) KeyUp(key *fyne.KeyEvent) {
+}
+
+func (s *Select) KeyDown(key *fyne.KeyEvent) {
+}
 
 // Hide hides the select.
 // Implements: fyne.Widget
@@ -119,7 +169,6 @@ func (s *Select) Hide() {
 		s.popUp.Hide()
 		s.popUp = nil
 	}
-	s.BaseWidget.Hide()
 }
 
 // Move changes the relative position of the select.
@@ -144,7 +193,7 @@ func (s *Select) Resize(size fyne.Size) {
 
 func (s *Select) optionTapped(text string) {
 	s.SetSelected(text)
-	s.popUp = nil
+	s.popUp.Dismiss()
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
@@ -160,9 +209,12 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		items = append(items, item)
 	}
 
-	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
-	s.popUp.ShowAtPosition(s.popUpPos())
-	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
+	s.popUp = ShowPopUpMenuAtPosition(fyne.NewMenu("", items...), c, s.popUpPos())
+	if s.popUp != nil {
+		c.Focus(s.popUp)
+		s.popUp.Parent = s
+		s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
+	}
 }
 
 func (s *Select) popUpPos() fyne.Position {
@@ -233,17 +285,15 @@ func (s *Select) SetSelected(text string) {
 
 func (s *Select) updateSelected(text string) {
 	s.Selected = text
-
 	if s.OnChanged != nil {
 		s.OnChanged(s.Selected)
 	}
-
 	s.Refresh()
 }
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, nil}
+	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, false, nil, nil}
 	s.ExtendBaseWidget(s)
 	return s
 }

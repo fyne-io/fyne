@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter/gl"
+	"fyne.io/fyne/widget"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -627,7 +628,10 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 
 		if wid := w.canvas.Focused(); wid != nil {
 			if wid.(fyne.CanvasObject) != co {
-				w.canvas.Unfocus()
+				// Avoid changing focus when a toolbar button is pressed.
+				if _, isToolbarButton := co.(*widget.ToolbarButton); !isToolbarButton {
+					w.canvas.Unfocus()
+				}
 			} else {
 				needsfocus = false
 			}
@@ -868,7 +872,26 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	keyEvent := &fyne.KeyEvent{Name: keyName}
 	keyDesktopModifier := desktopModifier(mods)
 
-	if keyName == fyne.KeyTab {
+	// Activate the menu when the Alt key is pressed
+	focused := w.canvas.Focused()
+	isMenu := false
+	menu, ok := w.canvas.menu.(*MenuBar)
+	if ok {
+		isMenu = menu.active
+		if !isMenu && action == glfw.Press && (key == glfw.KeyLeftAlt || key == glfw.KeyRightAlt) &&
+			keyDesktopModifier == desktop.AltModifier {
+			mbi := menu.Items[0].(*menuBarItem)
+			mbi.Tapped(nil)
+		}
+	}
+	if isMenu {
+		if action == glfw.Release {
+			menu.HandleKey(keyName)
+		}
+		return
+	}
+
+	if keyName == fyne.KeyTab && action != glfw.Release && !isMenu {
 		if keyDesktopModifier == 0 {
 			if action != glfw.Release {
 				w.canvas.focusMgr.FocusNext(w.canvas.focused)
@@ -961,7 +984,6 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 	}
 
 	// No shortcut detected, pass down to TypedKey
-	focused := w.canvas.Focused()
 	if focused != nil {
 		w.queueEvent(func() { focused.TypedKey(keyEvent) })
 	} else if w.canvas.onTypedKey != nil {

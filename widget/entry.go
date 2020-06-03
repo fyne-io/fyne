@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -245,6 +246,16 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 		}
 		e.selectKeyDown = true
 	}
+	if key.Name == fyne.KeyEscape {
+		if cancelBtn := e.findButton(CancelButton); cancelBtn != nil {
+			cancelBtn.KeyDown(&fyne.KeyEvent{Name: fyne.KeyEnter})
+		}
+	}
+	if !e.MultiLine && (key.Name == fyne.KeyEnter || key.Name == fyne.KeyReturn) {
+		if okBtn := e.findButton(PrimaryButton); okBtn != nil {
+			okBtn.KeyDown(&fyne.KeyEvent{Name: fyne.KeyEnter})
+		}
+	}
 }
 
 // KeyUp handler for key release events - used to reset shift modifier state for text selection
@@ -254,6 +265,18 @@ func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	// Note: if shift is released then the user may repress it without moving to adjust their old selection
 	if key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight {
 		e.selectKeyDown = false
+	}
+	if key.Name == fyne.KeyEscape {
+		if cancelBtn := e.findButton(CancelButton); cancelBtn != nil {
+			cancelBtn.KeyUp(&fyne.KeyEvent{Name: fyne.KeyEnter})
+			cancelBtn.Tapped(nil)
+		}
+	}
+	if !e.MultiLine && (key.Name == fyne.KeyEnter || key.Name == fyne.KeyReturn) {
+		if okBtn := e.findButton(PrimaryButton); okBtn != nil {
+			okBtn.KeyUp(&fyne.KeyEvent{Name: fyne.KeyEnter})
+			okBtn.Tapped(nil)
+		}
 	}
 }
 
@@ -405,6 +428,36 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 	e.popUp = newPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
+}
+
+// findButton returns the button from a form with required style.
+// Used to find the OK or Cancel buttons on a form.
+func (e *Entry) findButton(requiredStyle ButtonStyle) *Button {
+	var btn *Button
+	driver.WalkVisibleObjectTree(
+		fyne.CurrentApp().Driver().CanvasForObject(e).Content(),
+		func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+			if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
+				// disabled widget cannot receive focus
+				return false
+			}
+			if b, ok := obj.(*Button); ok && b.Style == requiredStyle {
+				btn = b
+				return true
+			}
+			return false
+		}, nil)
+
+	return btn
+}
+
+func (e *Entry) HandleOkCancel() {
+	if okBtn := e.findButton(PrimaryButton); okBtn != nil {
+		okBtn.Tapped(nil)
+	}
+	if cancelBtn := e.findButton(PrimaryButton); cancelBtn != nil {
+		cancelBtn.Tapped(nil)
+	}
 }
 
 // TypedKey receives key input events when the Entry widget is focused.

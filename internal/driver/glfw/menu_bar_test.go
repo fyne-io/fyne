@@ -112,7 +112,7 @@ func TestMenuBar(t *testing.T) {
 				},
 				{
 					actions:   []action{{"tap", buttonPos}},
-					wantImage: "menu_bar_hovered_content.png",
+					wantImage: "menu_bar_hovered_focused_content.png",
 				},
 			},
 		},
@@ -182,7 +182,7 @@ func TestMenuBar(t *testing.T) {
 				{
 					actions:    []action{{"tap", fileNewPos}},
 					wantAction: "new",
-					wantImage:  "menu_bar_initial.png",
+					wantImage:  "menu_bar_initial1.png",
 				},
 			},
 		},
@@ -198,7 +198,7 @@ func TestMenuBar(t *testing.T) {
 				{
 					actions:    []action{{"tap", fileOpenPos}},
 					wantAction: "open",
-					wantImage:  "menu_bar_initial.png",
+					wantImage:  "menu_bar_initial2.png",
 				},
 			},
 		},
@@ -222,7 +222,7 @@ func TestMenuBar(t *testing.T) {
 				{
 					actions:    []action{{"tap", fileRecentOlderOld1Pos}},
 					wantAction: "old 1",
-					wantImage:  "menu_bar_initial.png",
+					wantImage:  "menu_bar_initial3.png",
 				},
 			},
 		},
@@ -305,7 +305,7 @@ func TestMenuBar(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			test.MoveMouse(c, fyne.NewPos(0, 0))
 			test.TapCanvas(c, fyne.NewPos(0, 0))
-			test.AssertImageMatches(t, "menu_bar_initial.png", c.Capture())
+			test.AssertImageMatches(t, "menu_bar_initial4.png", c.Capture())
 			for i, s := range tt.steps {
 				t.Run("step "+strconv.Itoa(i+1), func(t *testing.T) {
 					lastAction = ""

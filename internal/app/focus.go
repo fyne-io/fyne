@@ -13,7 +13,12 @@ type FocusManager struct {
 func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 	var first, next fyne.Focusable
 	found := current == nil // if we have no starting point then pretend we matched already
-	driver.WalkVisibleObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	//OBS driver.WalkVisibleObjectTree(f.cavas.Content(), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	content := f.canvas.Overlays().Top()
+	if content==nil {
+		content = f.canvas.Content()
+	}
+	driver.WalkVisibleObjectTree(content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 			// disabled widget cannot receive focus
 			return false
@@ -48,7 +53,13 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
 	var last, previous fyne.Focusable
 	found := false
-	driver.WalkVisibleObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+
+	content := f.canvas.Overlays().Top()
+	if content==nil {
+		content = f.canvas.Content()
+	}
+	driver.WalkVisibleObjectTree(content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	//OBS driver.WalkVisibleObjectTree(f.canvas.Content(), func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 			// disabled widget cannot receive focus
 			return false
