@@ -1,3 +1,6 @@
+// +build !ci
+// +build !mobile
+
 package glfw
 
 import (
