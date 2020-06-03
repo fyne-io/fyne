@@ -425,7 +425,7 @@ func (p *packager) doPackage() error {
 	case "windows":
 		return p.packageWindows()
 	case "android/arm":
-		fallthrough
+		return p.packageAndroid(p.os)
 	case "android/386":
 		return p.packageAndroid(p.os)
 	case "android":
