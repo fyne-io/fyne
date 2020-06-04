@@ -190,8 +190,8 @@ func loadWindowGroup() fyne.Widget {
 			w.SetContent(fyne.NewContainerWithLayout(
 				layout.NewGridLayoutWithRows(3),
 				widget.NewLabel("Hello World!"),
-				widget.NewButton("Cancel", func() {w.Close()}),
-				widget.NewButton("OK", func() {w.Close()})),
+				widget.NewButton("Cancel", func() { w.Close() }),
+				widget.NewButton("OK", func() { w.Close() })),
 			)
 
 			w.Resize(fyne.NewSize(240, 180))

@@ -38,7 +38,7 @@ type dialog struct {
 	content, label fyne.CanvasObject
 	dismiss        *widget.Button
 	parent         fyne.Window
-	oldFocus	   fyne.Focusable
+	oldFocus       fyne.Focusable
 }
 
 // SetOnClosed allows to set a callback function that is called when
@@ -146,7 +146,7 @@ func (d *dialog) Show() {
 	d.sendResponse = true
 	d.win.Show()
 	d.oldFocus = d.win.Canvas.Focused()
-	if d.dismiss!=nil {
+	if d.dismiss != nil {
 		d.win.Canvas.Focus(d.dismiss)
 	} else {
 		d.win.Canvas.Focus(nil)

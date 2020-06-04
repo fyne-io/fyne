@@ -23,7 +23,7 @@ type Menu struct {
 
 // Defocus is used to defocus all menu items when a menuBarItem is tapped
 func (m *Menu) Defocus() {
-	for _,o := range m.Items {
+	for _, o := range m.Items {
 		if mi, ok := o.(*menuItem); ok {
 			mi.FocusLost()
 		}
@@ -32,7 +32,7 @@ func (m *Menu) Defocus() {
 
 // HandleEnterKey is called when the Enter key is pressed, and will simulate tapping
 func (m *Menu) HandleEnterKey() {
-	if m.activeItem!=nil {
+	if m.activeItem != nil {
 		m.activeItem.child.HandleEnterKey()
 		return
 	}
@@ -44,8 +44,8 @@ func (m *Menu) HandleEnterKey() {
 
 func (m *Menu) selectCurrent(option string) {
 	m.currentItem = 0
-	for i:=0; i<len(m.Items); i++ {
- 		if o, ok := m.Items[i].(*menuItem); ok {
+	for i := 0; i < len(m.Items); i++ {
+		if o, ok := m.Items[i].(*menuItem); ok {
 			if o.Item.Label == option {
 				m.currentItem = i
 				break
@@ -62,7 +62,7 @@ func (m *Menu) moveSelection(delta int) {
 	i := m.currentItem
 	for true {
 		i += delta
-		if i < 0 || i >=len(m.Items) {
+		if i < 0 || i >= len(m.Items) {
 			break
 		}
 		if o, ok := m.Items[i].(*menuItem); ok {
@@ -77,7 +77,7 @@ func (m *Menu) moveSelection(delta int) {
 
 // HandleUpKey is called when the keyboard up arrow is pressed and will select previous menu item
 func (m *Menu) HandleUpKey() {
-	if m.activeItem!=nil {
+	if m.activeItem != nil {
 		m.activeItem.child.HandleUpKey()
 		return
 	}
@@ -86,7 +86,7 @@ func (m *Menu) HandleUpKey() {
 
 // HandleDownKey is called when the keyboard down arrow is pressed and will select next menu item
 func (m *Menu) HandleDownKey() {
-	if m.activeItem!=nil {
+	if m.activeItem != nil {
 		m.activeItem.child.HandleDownKey()
 		return
 	}
@@ -325,4 +325,3 @@ func (r *menuBoxRenderer) MinSize() fyne.Size {
 func (r *menuBoxRenderer) Refresh() {
 	canvas.Refresh(r.b)
 }
-

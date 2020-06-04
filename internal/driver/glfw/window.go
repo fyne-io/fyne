@@ -623,7 +623,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	if layer != 1 { // 0 - overlay, 1 - menu, 2 - content
-		if wid, ok := co.(fyne.Focusable); ok  {
+		if wid, ok := co.(fyne.Focusable); ok {
 			// Avoid changing focus when a toolbar button is pressed.
 			if _, isToolbarButton := co.(*widget.ToolbarButton); !isToolbarButton {
 				w.canvas.Focus(wid)
