@@ -438,5 +438,5 @@ func (p *packager) doPackage() error {
 }
 
 func (p *packager) isMobile() bool {
-	return p.os == "ios" || (len(p.os) >= 7 && p.os[0:7] == "android")
+	return p.os == "ios" || strings.HasPrefix(p.os, "android")
 }
