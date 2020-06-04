@@ -14,7 +14,7 @@ type file struct {
 	path string
 }
 
-func (d *gLDriver) FileReaderForURI(uri fyne.URI) (fyne.FileReadCloser, error) {
+func (d *gLDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(uri, false)
 }
 
@@ -31,7 +31,7 @@ type fileWriter struct {
 	path string
 }
 
-func (d *gLDriver) FileWriterForURI(uri fyne.URI) (fyne.FileWriteCloser, error) {
+func (d *gLDriver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(uri, true)
 }
 
