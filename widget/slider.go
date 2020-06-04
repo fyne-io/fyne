@@ -25,10 +25,10 @@ var _ fyne.Draggable = (*Slider)(nil)
 type Slider struct {
 	BaseWidget
 
-	Value float64
-	Min   float64
-	Max   float64
-	Step  float64
+	Value   float64
+	Min     float64
+	Max     float64
+	Step    float64
 	focused bool
 
 	Orientation Orientation
@@ -48,7 +48,6 @@ func NewSlider(min, max float64) *Slider {
 	return slider
 }
 
-
 // FocusGained is called when the Entry has been given focus.
 func (s *Slider) FocusGained() {
 	s.focused = true
@@ -66,19 +65,20 @@ func (s *Slider) Focused() bool {
 	return s.focused
 }
 
-func (s *Slider) TypedRune(r rune) {
-
+// TypedRune is not used here
+func (s *Slider) TypedRune(rune) {
 }
 
+// TypedKey recieves keyboard events when slider is focused
 func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyLeft || key.Name == fyne.KeyDown {
-		if s.Value>s.Min + s.Step {
+		if s.Value > s.Min+s.Step {
 			s.Value -= s.Step
 		} else {
 			s.Value = s.Min
 		}
 	} else if key.Name == fyne.KeyRight || key.Name == fyne.KeyUp {
-		if s.Value<s.Max-s.Step {
+		if s.Value < s.Max-s.Step {
 			s.Value += s.Step
 		} else {
 			s.Value = s.Max
@@ -87,10 +87,12 @@ func (s *Slider) TypedKey(key *fyne.KeyEvent) {
 	s.Refresh()
 }
 
-func (s *Slider) KeyUp(key *fyne.KeyEvent) {
+// KeyUp is not used here
+func (s *Slider) KeyUp(*fyne.KeyEvent) {
 }
 
-func (s *Slider) KeyDown(key *fyne.KeyEvent) {
+// KeyDown is not used here
+func (s *Slider) KeyDown(*fyne.KeyEvent) {
 }
 
 // DragEnd function.

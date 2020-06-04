@@ -60,7 +60,7 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 
 func (s *selectRenderer) BackgroundColor() color.Color {
 	if s.combo.focused {
-		return theme.FocusColor	()
+		return theme.FocusColor()
 	}
 	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
@@ -135,12 +135,14 @@ func (s *Select) Focused() bool {
 	return s.focused
 }
 
-func (s *Select) TypedRune(r rune) {
+// TypedRune is not used here
+func (s *Select) TypedRune(rune) {
 }
 
+// TypedKey receives text input when the widget is focused
 func (s *Select) TypedKey(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyEnter || key.Name == fyne.KeyReturn || key.Name == fyne.KeySpace {
-		if s.popUp==nil || !s.popUp.Visible() {
+		if s.popUp == nil || !s.popUp.Visible() {
 			s.Tapped(nil)
 		} else {
 			s.popUp.Menu.HandleEnterKey()

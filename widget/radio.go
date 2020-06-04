@@ -166,58 +166,62 @@ type Radio struct {
 
 	hoveredItemIndex int
 	hovered          bool
-	focused bool
+	focused          bool
 }
 
 // FocusGained is called when the Entry has been given focus.
-func (s *Radio) FocusGained() {
-	s.focused = true
-	s.Refresh()
+func (r *Radio) FocusGained() {
+	r.focused = true
+	r.Refresh()
 }
 
 // FocusLost is called when the Entry has had focus removed.
-func (s *Radio) FocusLost() {
-	s.focused = false
-	s.Refresh()
+func (r *Radio) FocusLost() {
+	r.focused = false
+	r.Refresh()
 }
 
 // Focused returns whether or not this Entry has focus.
-func (s *Radio) Focused() bool {
-	return s.focused
-}
-func (s *Radio) TypedRune(r rune) {
-
+func (r *Radio) Focused() bool {
+	return r.focused
 }
 
-func (s *Radio) TypedKey(key *fyne.KeyEvent) {
+//TypedRune is not used here
+func (r *Radio) TypedRune(rune) {
+}
+
+// TypedKey is called when a key is pressed
+func (r *Radio) TypedKey(key *fyne.KeyEvent) {
 	index := -1
-	for i:=0; i<len(s.Options); i++ {
-		if s.Selected == s.Options[i] {
-			index = i;
+	for i := 0; i < len(r.Options); i++ {
+		if r.Selected == r.Options[i] {
+			index = i
 			break
 		}
 	}
 	if key.Name == fyne.KeyLeft || key.Name == fyne.KeyUp {
 		index--
-		if index >= 0	{
-			s.Selected = s.Options[index]
+		if index >= 0 {
+			r.Selected = r.Options[index]
 		} else {
-			s.Selected = ""
+			r.Selected = ""
 		}
 	} else if key.Name == fyne.KeyRight || key.Name == fyne.KeyDown {
 		index++
-		if index>=len(s.Options)  {
-			index=len(s.Options)-1
+		if index >= len(r.Options) {
+			index = len(r.Options) - 1
 		}
-		s.Selected = s.Options[index]
+		r.Selected = r.Options[index]
 	}
-	s.Refresh()
+	r.Refresh()
 }
 
-func (s *Radio) KeyUp(key *fyne.KeyEvent) {
+// KeyUp is not used here
+func (r *Radio) KeyUp(*fyne.KeyEvent) {
 }
 
-func (s *Radio) KeyDown(key *fyne.KeyEvent) {
+// KeyDown is not used here
+func (r *Radio) KeyDown(*fyne.KeyEvent) {
 }
 
 // indexByPosition returns the item index for a specified position or noRadioItemIndex if any

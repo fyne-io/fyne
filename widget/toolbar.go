@@ -66,48 +66,50 @@ func NewToolbarSeparator() ToolbarItem {
 // Toolbar widget creates a horizontal list of tool buttons
 type Toolbar struct {
 	BaseWidget
-	Items    []ToolbarItem
-	focused  bool
-	current  int
-	buttons  []*ToolbarButton
+	Items   []ToolbarItem
+	focused bool
+	current int
+	buttons []*ToolbarButton
 }
 
 // FocusGained is called when the Entry has been given focus.
-func (b *Toolbar) FocusGained() {
-	b.focused = true
-	if b.current < len(b.Items) {
-		b.buttons[b.current].focused = true
+func (t *Toolbar) FocusGained() {
+	t.focused = true
+	if t.current < len(t.Items) {
+		t.buttons[t.current].focused = true
 	}
-	b.Refresh()
+	t.Refresh()
 }
 
 // FocusLost is called when the Entry has had focus removed.
-func (b *Toolbar) FocusLost() {
-	b.focused = false
-	if b.current < len(b.buttons) {
-		b.buttons[b.current].focused = false
+func (t *Toolbar) FocusLost() {
+	t.focused = false
+	if t.current < len(t.buttons) {
+		t.buttons[t.current].focused = false
 	}
-	b.Refresh()
+	t.Refresh()
 }
 
 // Focused returns whether or not this Entry has focus.
-func (b *Toolbar) Focused() bool {
-	return b.focused
+func (t *Toolbar) Focused() bool {
+	return t.focused
 }
 
-func (b *Toolbar) TypedRune(r rune) {
+// TypedRune is not usedd
+func (t *Toolbar) TypedRune(rune) {
 }
 
 func (t *Toolbar) changeFocusedButton(delta int) {
 	t.current = t.current + delta
 	if t.current < 0 {
-		t. current = 0
+		t.current = 0
 	}
 	if t.current >= len(t.buttons) {
-		t.current = len(t.buttons)-1
+		t.current = len(t.buttons) - 1
 	}
 }
 
+// TypedKey receives keyboard events when the toolbar is focused
 func (t *Toolbar) TypedKey(key *fyne.KeyEvent) {
 	t.buttons[t.current].focused = false
 	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
@@ -123,17 +125,19 @@ func (t *Toolbar) TypedKey(key *fyne.KeyEvent) {
 	t.Refresh()
 }
 
-func (b *Toolbar) KeyUp(key *fyne.KeyEvent) {
+// KeyUp is called when a key is released
+func (t *Toolbar) KeyUp(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
-		b.buttons[b.current].pressed = false
-		b.buttons[b.current].Refresh()
+		t.buttons[t.current].pressed = false
+		t.buttons[t.current].Refresh()
 	}
 }
 
-func (b *Toolbar) KeyDown(key *fyne.KeyEvent) {
+// KeyDown is called when a key is pressed
+func (t *Toolbar) KeyDown(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
-		b.buttons[b.current].pressed = false
-		b.buttons[b.current].Refresh()
+		t.buttons[t.current].pressed = false
+		t.buttons[t.current].Refresh()
 	}
 }
 
@@ -207,7 +211,7 @@ func (r *toolbarRenderer) resetObjects() {
 		r.objs = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
 		for _, item := range r.toolbar.Items {
 			o := item.ToolbarObject()
-			if b,ok := o.(*ToolbarButton); ok {
+			if b, ok := o.(*ToolbarButton); ok {
 				b.toolbar = r.toolbar
 				r.toolbar.buttons = append(r.toolbar.buttons, b)
 			}

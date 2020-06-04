@@ -1,9 +1,10 @@
 package widget
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
-	"image/color"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -52,9 +53,9 @@ func (b *ToolbarButton) CreateRenderer() fyne.WidgetRenderer {
 	}
 	return &ToolbarButtonRenderer{
 		BaseRenderer: widget.NewBaseRenderer(objects),
-		button:  b,
-		icon:    icon,
-		label:   label,
+		button:       b,
+		icon:         icon,
+		label:        label,
 	}
 }
 
@@ -83,8 +84,8 @@ func (b *ToolbarButton) MouseMoved(e *desktop.MouseEvent) {
 func (b *ToolbarButton) MouseDown(m *desktop.MouseEvent) {
 	b.pressed = true
 	b.focused = true
-	for j,o:=range b.toolbar.buttons {
-		if o==b {
+	for j, o := range b.toolbar.buttons {
+		if o == b {
 			o.focused = true
 			b.toolbar.current = j
 		} else {
@@ -103,11 +104,12 @@ func (b *ToolbarButton) MouseUp(m *desktop.MouseEvent) {
 	b.Refresh()
 }
 
+// ToolbarButtonRenderer is the renderer for toolbar buttons
 type ToolbarButtonRenderer struct {
 	widget.BaseRenderer
-	button  *ToolbarButton
-	icon    *canvas.Image
-	label   *canvas.Text
+	button *ToolbarButton
+	icon   *canvas.Image
+	label  *canvas.Text
 }
 
 // Refresh updates the widget state when requested.

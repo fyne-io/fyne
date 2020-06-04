@@ -9,8 +9,8 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/driver/mobile"
+	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )

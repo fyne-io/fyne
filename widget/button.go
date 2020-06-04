@@ -177,10 +177,10 @@ type Button struct {
 	OnTapped   func() `json:"-"`
 	HideShadow bool
 
-	focused  bool
-	pressed  bool
-	hovered  bool
-	tapped   bool
+	focused bool
+	pressed bool
+	hovered bool
+	tapped  bool
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -191,6 +191,7 @@ const (
 	DefaultButton ButtonStyle = iota
 	// PrimaryButton that should be more prominent to the user
 	PrimaryButton
+	// CancelButton is a style used for buttons activated by the escape key
 	CancelButton
 )
 
@@ -252,9 +253,10 @@ func (b *Button) Focused() bool {
 }
 
 // TypedRune receives text input events when the Check is focused.
-func (b *Button) TypedRune(r rune) {
+func (b *Button) TypedRune(rune) {
 }
 
+// TypedKey is called when a key is pressed
 func (b *Button) TypedKey(key *fyne.KeyEvent) {
 	if b.Disabled() {
 		return
@@ -264,6 +266,7 @@ func (b *Button) TypedKey(key *fyne.KeyEvent) {
 	}
 }
 
+// KeyUp is called when a button is released
 func (b *Button) KeyUp(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
 		b.pressed = false
@@ -271,6 +274,7 @@ func (b *Button) KeyUp(key *fyne.KeyEvent) {
 	}
 }
 
+// KeyDown is called when a button is pressed
 func (b *Button) KeyDown(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
 		b.pressed = true

@@ -61,7 +61,7 @@ func DarkTheme() fyne.Theme {
 	return theme
 }
 
-// shade will darken a light color and lighten a light color by the given % value
+// Shade will darken a light color and lighten a light color by the given % value
 // should use 4,8, 12 or 14 percent darken/lighten to implement google material design rules
 // Note that the percent lightening is twice the percent given. See material.io/design/interaction/states.
 func Shade(c color.Color, pct uint32) color.Color {
@@ -80,18 +80,23 @@ func Shade(c color.Color, pct uint32) color.Color {
 			B: uint8((b + (0x10000-b)*pct/50) >> 8),
 			A: uint8(a >> 8),
 		}
-	} else { // Darken by given percent
-		return color.NRGBA{
-			R: uint8((r * (100 - pct) / 100) >> 8),
-			G: uint8((g * (100 - pct) / 100) >> 8),
-			B: uint8((b * (100 - pct) / 100) >> 8),
-			A: uint8(a >> 8),
-		}
+	}
+	// Darken by given percent
+	return color.NRGBA{
+		R: uint8((r * (100 - pct) / 100) >> 8),
+		G: uint8((g * (100 - pct) / 100) >> 8),
+		B: uint8((b * (100 - pct) / 100) >> 8),
+		A: uint8(a >> 8),
 	}
 }
 
+// PressedShade is the shade used for pressed buttons, in %
 const PressedShade = 14
+
+// HoveredShade is the shade used for hovered buttons, in %
 const HoveredShade = 4
+
+// FocusedShade is the shade used for focused buttons, in %
 const FocusedShade = 8
 
 func (t *builtinTheme) BackgroundColor() color.Color {
@@ -314,7 +319,7 @@ func PressedColor() color.Color {
 	return Shade(FocusColor(), PressedShade)
 }
 
-// HoverFocused returns the colour used for a focused/primary hovered button
+// HoverFocusedColor returns the colour used for a focused/primary hovered button
 func HoverFocusedColor() color.Color {
 	return Shade(FocusColor(), HoveredShade)
 }

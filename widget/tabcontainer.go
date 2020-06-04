@@ -423,34 +423,35 @@ type tabButton struct {
 }
 
 // FocusGained is called when the Entry has been given focus.
-func (b *TabContainer) FocusGained() {
-	b.focused = true
-	b.Refresh()
+func (c *TabContainer) FocusGained() {
+	c.focused = true
+	c.Refresh()
 }
 
 // FocusLost is called when the Entry has had focus removed.
-func (b *TabContainer) FocusLost() {
-	b.focused = false
-	b.Refresh()
+func (c *TabContainer) FocusLost() {
+	c.focused = false
+	c.Refresh()
 }
 
 // Focused returns whether or not this Entry has focus.
-func (b *TabContainer) Focused() bool {
-	return b.focused
+func (c *TabContainer) Focused() bool {
+	return c.focused
 }
 
-func (b *TabContainer) TypedRune(r rune) {
-
+// TypedRune is not used
+func (c *TabContainer) TypedRune(rune) {
 }
 
-func (b *TabContainer) TypedKey(key *fyne.KeyEvent) {
+// TypedKey receive keyboard events when the TabContainer is focused
+func (c *TabContainer) TypedKey(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyLeft || key.Name == fyne.KeyUp {
-		if b.current > 0 {
-			b.SelectTabIndex(b.current-1)
+		if c.current > 0 {
+			c.SelectTabIndex(c.current - 1)
 		}
 	} else if key.Name == fyne.KeyRight || key.Name == fyne.KeyDown {
-		if b.current < len(b.Items)-1 {
-			b.SelectTabIndex(b.current+1)
+		if c.current < len(c.Items)-1 {
+			c.SelectTabIndex(c.current + 1)
 		}
 	}
 }
