@@ -622,18 +622,13 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		}
 	}
 
-	needsfocus := false
 	if layer != 1 { // 0 - overlay, 1 - menu, 2 - content
-		needsfocus = true
-
-		if wid := w.canvas.Focused(); wid != nil {
-			if wid.(fyne.CanvasObject) != co {
-				// Avoid changing focus when a toolbar button is pressed.
-				if _, isToolbarButton := co.(*widget.ToolbarButton); !isToolbarButton {
-					w.canvas.Unfocus()
-				}
+		if wid, ok := co.(fyne.Focusable); ok  {
+			// Avoid changing focus when a toolbar button is pressed.
+			if _, isToolbarButton := co.(*widget.ToolbarButton); !isToolbarButton {
+				w.canvas.Focus(wid)
 			} else {
-				needsfocus = false
+				w.canvas.Unfocus()
 			}
 		}
 	}
@@ -642,13 +637,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseButton = button
 	} else if action == glfw.Release {
 		w.mouseButton = 0
-	}
-
-git	// we cannot switch here as objects may respond to multiple cases
-	if wid, ok := co.(fyne.Focusable); ok && needsfocus {
-		if dis, ok := wid.(fyne.Disableable); !ok || !dis.Disabled() {
-			w.canvas.Focus(wid)
-		}
 	}
 
 	// Check for double click/tap
@@ -875,33 +863,27 @@ func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, a
 
 	// Activate the menu when the Alt key is pressed
 	focused := w.canvas.Focused()
-	isMenu := false
-	menu, ok := w.canvas.menu.(*MenuBar)
-	if ok {
-		isMenu = menu.active
-		if !isMenu && action == glfw.Press && (key == glfw.KeyLeftAlt || key == glfw.KeyRightAlt) &&
-			keyDesktopModifier == desktop.AltModifier {
-			mbi := menu.Items[0].(*menuBarItem)
-			mbi.Tapped(nil)
-		}
-	}
-	if isMenu {
-		if action == glfw.Release {
-			menu.HandleKey(keyName)
-		}
-		return
-	}
-
-	if keyName == fyne.KeyTab && action != glfw.Release && !isMenu {
-		if keyDesktopModifier == 0 {
-			if action != glfw.Release {
-				w.canvas.focusMgr.FocusNext(w.canvas.focused)
+	if menu, ok := w.canvas.menu.(*MenuBar); ok {
+		if !menu.active {
+			if action == glfw.Press && (key == glfw.KeyLeftAlt || key == glfw.KeyRightAlt) &&
+				keyDesktopModifier == desktop.AltModifier {
+				mbi := menu.Items[0].(*menuBarItem)
+				mbi.Tapped(nil)
+			}
+		} else {
+			if action == glfw.Release {
+				menu.handleKey(keyName)
 			}
 			return
+		}
+	}
+
+	if keyName == fyne.KeyTab && action != glfw.Release {
+		if keyDesktopModifier == 0 {
+			w.canvas.focusMgr.FocusNext(w.canvas.focused)
+			return
 		} else if keyDesktopModifier == desktop.ShiftModifier {
-			if action != glfw.Release {
-				w.canvas.focusMgr.FocusPrevious(w.canvas.focused)
-			}
+			w.canvas.focusMgr.FocusPrevious(w.canvas.focused)
 			return
 		}
 	}

@@ -231,10 +231,6 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 }
 
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (b *Button) TappedSecondary(*fyne.PointEvent) {
-}
-
 // FocusGained is called when the Entry has been given focus.
 func (b *Button) FocusGained() {
 	if b.Disabled() {

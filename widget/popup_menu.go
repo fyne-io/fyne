@@ -15,7 +15,7 @@ type PopUpMenu struct {
 	*Menu
 	canvas  fyne.Canvas
 	overlay *widget.OverlayContainer
-	Parent  fyne.CanvasObject
+	parent  fyne.CanvasObject
 }
 
 // TypedRune receives text input events when the Check is focused.
@@ -25,15 +25,15 @@ func (p *PopUpMenu) TypedRune(r rune) {
 // TypedKey receives text input events when the menu item is focused.
 func (p *PopUpMenu) TypedKey(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyDown {
-		p.Menu.Down()
+		p.Menu.HandleDownKey()
 	} else if key.Name == fyne.KeyUp {
-		p.Menu.Up()
+		p.Menu.HandleUpKey()
 	} else if key.Name == fyne.KeyEscape {
 		p.Menu.Dismiss()
-		p.canvas.Focus(p.Parent.(fyne.Focusable))
+		p.canvas.Focus(p.parent.(fyne.Focusable))
 	} else if key.Name == fyne.KeyEnter || key.Name == fyne.KeyReturn || key.Name == fyne.KeyTab {
-		p.Menu.Do()
-		p.canvas.Focus(p.Parent.(fyne.Focusable))
+		p.Menu.HandleEnterKey()
+		p.canvas.Focus(p.parent.(fyne.Focusable))
 	}
 }
 
@@ -52,10 +52,9 @@ func (p *PopUpMenu) FocusLost() {
 
 // ShowPopUpMenuAtPosition creates a PopUp menu populated with items from the passed menu structure.
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
-func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position)  *PopUpMenu {
+func ShowPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) {
 	m := newPopUpMenu(menu, c)
 	m.ShowAtPosition(pos)
-	return m
 }
 
 func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {

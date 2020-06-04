@@ -83,14 +83,12 @@ func (b *ToolbarButton) MouseMoved(e *desktop.MouseEvent) {
 func (b *ToolbarButton) MouseDown(m *desktop.MouseEvent) {
 	b.pressed = true
 	b.focused = true
-	for j,o:=range b.toolbar.renderer.objs {
-		if tb,ok:=o.(*ToolbarButton); ok {
-			if tb==b {
-				tb.focused = true
-				b.toolbar.current = j
-			} else {
-				tb.focused = false
-			}
+	for j,o:=range b.toolbar.buttons {
+		if o==b {
+			o.focused = true
+			b.toolbar.current = j
+		} else {
+			o.focused = false
 		}
 	}
 	b.Refresh()

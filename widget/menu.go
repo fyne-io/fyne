@@ -18,9 +18,10 @@ type Menu struct {
 	OnDismiss   func()
 	activeItem  *menuItem
 	customSized bool
-	index       int
+	currentItem int
 }
 
+// Defocus is used to defocus all menu items when a menuBarItem is tapped
 func (m *Menu) Defocus() {
 	for _,o := range m.Items {
 		if mi, ok := o.(*menuItem); ok {
@@ -29,55 +30,67 @@ func (m *Menu) Defocus() {
 	}
 }
 
-func (m *Menu) Do() {
+// HandleEnterKey is called when the Enter key is pressed, and will simulate tapping
+func (m *Menu) HandleEnterKey() {
 	if m.activeItem!=nil {
-		m.activeItem.child.Do()
+		m.activeItem.child.HandleEnterKey()
 		return
 	}
-	if o, ok := m.Items[m.index].(*menuItem); ok {
+	if o, ok := m.Items[m.currentItem].(*menuItem); ok {
 		o.MouseIn(nil)
 		o.Tapped(nil)
 	}
 }
 
-func (m *Menu) Up() {
-	if m.activeItem!=nil {
-		m.activeItem.child.Up()
-		return
-	}
-	index := m.index
-	for true {
-		index--
-		if index < 0 {
-			index=0
+func (m *Menu) selectCurrent(option string) {
+	m.currentItem = 0
+	for i:=0; i<len(m.Items); i++ {
+ 		if o, ok := m.Items[i].(*menuItem); ok {
+			if o.Item.Label == option {
+				m.currentItem = i
+				break
+			}
 		}
-		if o, ok := m.Items[index].(*menuItem); ok {
-			m.Items[m.index].(*menuItem).FocusLost()
-			m.index = index
+	}
+	if o, ok := m.Items[m.currentItem].(*menuItem); ok {
+		o.FocusGained()
+	}
+	m.Refresh()
+}
+
+func (m *Menu) moveSelection(delta int) {
+	i := m.currentItem
+	for true {
+		i += delta
+		if i < 0 || i >=len(m.Items) {
+			break
+		}
+		if o, ok := m.Items[i].(*menuItem); ok {
+			m.Items[m.currentItem].(*menuItem).FocusLost()
+			m.currentItem = i
 			o.FocusGained()
+			m.Refresh()
 			break
 		}
 	}
 }
 
-func (m *Menu) Down() {
+// HandleUpKey is called when the keyboard up arrow is pressed and will select previous menu item
+func (m *Menu) HandleUpKey() {
 	if m.activeItem!=nil {
-		m.activeItem.child.Down()
+		m.activeItem.child.HandleUpKey()
 		return
 	}
-	index := m.index
-	for true {
-		index++
-		if index >=len(m.Items) {
-			break
-		}
-		if o, ok := m.Items[index].(*menuItem); ok {
-			m.Items[m.index].(*menuItem).FocusLost()
-			m.index = index
-			o.FocusGained()
-			break
-		}
+	m.moveSelection(-1)
+}
+
+// HandleDownKey is called when the keyboard down arrow is pressed and will select next menu item
+func (m *Menu) HandleDownKey() {
+	if m.activeItem!=nil {
+		m.activeItem.child.HandleDownKey()
+		return
 	}
+	m.moveSelection(1)
 }
 
 // NewMenu creates a new Menu.

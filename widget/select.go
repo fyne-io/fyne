@@ -114,7 +114,6 @@ type Select struct {
 	focused bool
 	tapped  bool
 	popUp   *PopUpMenu
-	Parent  fyne.CanvasObject
 }
 
 var _ fyne.Widget = (*Select)(nil)
@@ -144,24 +143,9 @@ func (s *Select) TypedKey(key *fyne.KeyEvent) {
 		if s.popUp==nil || !s.popUp.Visible() {
 			s.Tapped(nil)
 		} else {
-			s.popUp.Menu.Do()
+			s.popUp.Menu.HandleEnterKey()
 		}
 	}
-	if s.popUp!=nil {
-		if key.Name == fyne.KeyUp {
-			s.popUp.Menu.Up()
-		} else if key.Name == fyne.KeyDown {
-			s.popUp.Menu.Down()
-		} else if key.Name == fyne.KeyEscape {
-			s.popUp.Dismiss()
-		}
-	}
-}
-
-func (s *Select) KeyUp(key *fyne.KeyEvent) {
-}
-
-func (s *Select) KeyDown(key *fyne.KeyEvent) {
 }
 
 // Hide hides the select.
@@ -171,6 +155,7 @@ func (s *Select) Hide() {
 		s.popUp.Hide()
 		s.popUp = nil
 	}
+	s.BaseWidget.Hide()
 }
 
 // Move changes the relative position of the select.
@@ -195,11 +180,11 @@ func (s *Select) Resize(size fyne.Size) {
 
 func (s *Select) optionTapped(text string) {
 	s.SetSelected(text)
-	s.popUp.Dismiss()
+	s.popUp = nil
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
-func (s *Select) Tapped(*fyne.PointEvent) {
+func (s *Select) Tapped(pos *fyne.PointEvent) {
 	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
 	s.tapped = true
 	defer func() { // TODO move to a real animation
@@ -217,12 +202,13 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 		})
 		items = append(items, item)
 	}
-
-	s.popUp = ShowPopUpMenuAtPosition(fyne.NewMenu("", items...), c, s.popUpPos())
-	if s.popUp != nil {
-		c.Focus(s.popUp)
-		s.popUp.Parent = s
-		s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
+	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp.ShowAtPosition(s.popUpPos())
+	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
+	c.Focus(s.popUp)
+	s.popUp.parent = s
+	if pos == nil {
+		s.popUp.Menu.selectCurrent(s.Selected)
 	}
 }
 
@@ -302,7 +288,7 @@ func (s *Select) updateSelected(text string) {
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, false, false, nil, nil}
+	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, false, false, nil}
 	s.ExtendBaseWidget(s)
 	return s
 }

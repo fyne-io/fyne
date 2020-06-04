@@ -63,24 +63,24 @@ func DarkTheme() fyne.Theme {
 
 // shade will darken a light color and lighten a light color by the given % value
 // should use 4,8, 12 or 14 percent darken/lighten to implement google material design rules
+// Note that the percent lightening is twice the percent given. See material.io/design/interaction/states.
 func Shade(c color.Color, pct uint32) color.Color {
-	r, g, b, a := c.RGBA()
 	if pct == 0 {
-		return color.NRGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
+		return c
 	}
+	r, g, b, a := c.RGBA()
 	if pct > 50 {
 		pct = 50
 	}
 	if r+g+b < 3*0x8080 {
-		// Lighten
+		// Lighten by twice the percent given.
 		return color.NRGBA{
 			R: uint8((r + (0x10000-r)*pct/50) >> 8),
 			G: uint8((g + (0x10000-g)*pct/50) >> 8),
 			B: uint8((b + (0x10000-b)*pct/50) >> 8),
 			A: uint8(a >> 8),
 		}
-	} else {
-		// Darken
+	} else { // Darken by given percent
 		return color.NRGBA{
 			R: uint8((r * (100 - pct) / 100) >> 8),
 			G: uint8((g * (100 - pct) / 100) >> 8),
@@ -91,7 +91,7 @@ func Shade(c color.Color, pct uint32) color.Color {
 }
 
 const PressedShade = 14
-	const HoveredShade = 4
+const HoveredShade = 4
 const FocusedShade = 8
 
 func (t *builtinTheme) BackgroundColor() color.Color {

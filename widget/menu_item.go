@@ -26,14 +26,12 @@ type menuItem struct {
 // FocusGained is called when the Entry has been given focus.
 func (i *menuItem) FocusGained() {
 	i.focused = true
-	i.hovered = true
 	i.Refresh()
 }
 
 // FocusLost is called when the Entry has had focus removed.
 func (i *menuItem) FocusLost() {
 	i.focused = false
-	i.hovered = false
 	i.Refresh()
 }
 
@@ -104,7 +102,7 @@ func (i *menuItem) MouseIn(e *desktop.MouseEvent) {
 		if e == nil && i.Child().Items[0] != nil {
 			// A nil event means this is actualy a keyboard event activating the menu
 			// So focus the first menu item
-			i.Parent.index = 0
+			i.Parent.currentItem = 0
 			for j, o := range i.Child().Items {
 				o.(*menuItem).focused = (j == 0)
 				o.(*menuItem).hovered = false

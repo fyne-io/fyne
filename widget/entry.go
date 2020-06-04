@@ -260,7 +260,7 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 	}
 }
 
-// KeyUp handler for key release events - used to reset shift modifier state for text selection
+// KeyUp handler for key release events - used to reset shift modifier state for text selection.
 // Implements: desktop.Keyable
 func (e *Entry) KeyUp(key *fyne.KeyEvent) {
 	// Handle shift release for keyboard selection
@@ -436,8 +436,13 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 // Used to find the OK or Cancel buttons on a form.
 func (e *Entry) findButton(requiredStyle ButtonStyle) *Button {
 	var btn *Button
+	d := fyne.CurrentApp().Driver()
+	c := d.CanvasForObject(e)
+	if c == nil {
+		return nil
+	}
 	driver.WalkVisibleObjectTree(
-		fyne.CurrentApp().Driver().CanvasForObject(e).Content(),
+		c.Content(),
 		func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 			if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 				// disabled widget cannot receive focus
@@ -451,15 +456,6 @@ func (e *Entry) findButton(requiredStyle ButtonStyle) *Button {
 		}, nil)
 
 	return btn
-}
-
-func (e *Entry) HandleOkCancel() {
-	if okBtn := e.findButton(PrimaryButton); okBtn != nil {
-		okBtn.Tapped(nil)
-	}
-	if cancelBtn := e.findButton(PrimaryButton); cancelBtn != nil {
-		cancelBtn.Tapped(nil)
-	}
 }
 
 // TypedKey receives key input events when the Entry widget is focused.

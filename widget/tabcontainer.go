@@ -21,7 +21,6 @@ type TabContainer struct {
 	current     int
 	tabLocation TabLocation
 	focused     bool
-	renderer    tabContainerRenderer
 }
 
 // TabItem represents a single view in a TabContainer.
@@ -454,36 +453,6 @@ func (b *TabContainer) TypedKey(key *fyne.KeyEvent) {
 			b.SelectTabIndex(b.current+1)
 		}
 	}
-	b.Refresh()
-}
-
-func (b *TabContainer) KeyUp(key *fyne.KeyEvent) {
-	if b.renderer.tabBar==nil {
-		return
-	}
-	o := b.renderer.tabBar.Objects
-	if len(o)>b.current {
-		o[b.current].(*tabButton).pressed = false
-	}
-}
-
-func (b *TabContainer) KeyDown(key *fyne.KeyEvent) {
-	if b.renderer.tabBar==nil {
-		return
-	}
-		o := b.renderer.tabBar.Objects
-	if len(o)>b.current {
-		o[b.current].(*tabButton).pressed = true
-	}
-}
-
-func (b *tabButton) setText(text string) {
-	if text == b.Text {
-		return
-	}
-
-	b.Text = text
-	b.Refresh()
 }
 
 func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
@@ -529,6 +498,15 @@ func (b *tabButton) MouseOut() {
 
 func (b *tabButton) Tapped(e *fyne.PointEvent) {
 	b.OnTap()
+}
+
+func (b *tabButton) setText(text string) {
+	if text == b.Text {
+		return
+	}
+
+	b.Text = text
+	b.Refresh()
 }
 
 type tabButtonRenderer struct {

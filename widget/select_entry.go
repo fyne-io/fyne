@@ -56,8 +56,8 @@ func (e *SelectEntry) SetOptions(options []string) {
 		items = append(items, fyne.NewMenuItem(option, func() { e.SetText(option) }))
 	}
 	e.dropDown = fyne.NewMenu("", items...)
-	dropDownButton := NewButton("", func() {})
-	dropDownButton.OnTapped = func() {
+	var dropDownButton *Button
+	dropDownButton = NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 		if e.popUp != nil {
 			e.popUp.Hide()
@@ -68,9 +68,10 @@ func (e *SelectEntry) SetOptions(options []string) {
 		e.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
 		e.popUp.ShowAtPosition(popUpPos)
 		c.Focus(e.popUp)
-		e.popUp.Parent = dropDownButton
+		e.popUp.parent = dropDownButton
 		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
-	}
+		e.popUp.Menu.selectCurrent(e.Text	)
+	})
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())
 	e.ActionItem = dropDownButton
 }

@@ -120,11 +120,11 @@ func (i *menuBarItem) Tapped(pos *fyne.PointEvent) {
 		i.Parent.activateChild(i)
 		for j := 0; j < len(i.Parent.Items); j++ {
 			if i.Parent.Items[j] == i {
-				i.Parent.index = j
+				i.Parent.currentItem = j
 				if pos==nil {
-					i.Parent.Items[i.Parent.index].(*menuBarItem).Child().Up()
+					i.Parent.Items[i.Parent.currentItem].(*menuBarItem).Child().HandleUpKey()
 				} else {
-					i.Parent.Items[i.Parent.index].(*menuBarItem).Child().Defocus()
+					i.Parent.Items[i.Parent.currentItem].(*menuBarItem).Child().Defocus()
 				}
 			}
 		}

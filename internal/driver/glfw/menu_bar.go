@@ -16,40 +16,40 @@ var _ fyne.Widget = (*MenuBar)(nil)
 // MenuBar is a widget for displaying a fyne.MainMenu in a bar.
 type MenuBar struct {
 	widget.Base
-	Items      []fyne.CanvasObject
-	index      int
-	active     bool
-	canvas     fyne.Canvas
-	activeItem *menuBarItem
+	Items       []fyne.CanvasObject
+	currentItem int
+	active      bool
+	canvas      fyne.Canvas
+	activeItem  *menuBarItem
 }
 
-// HandleKey will process keys pressed when menu is open
-func (b *MenuBar) HandleKey(key fyne.KeyName) {
+// handleKey will process keys pressed when menu is open
+func (b *MenuBar) handleKey(key fyne.KeyName) {
 	if key == fyne.KeyEscape {
 		b.deactivate()
 	} else if key == fyne.KeyEnter || key == fyne.KeyReturn || key == fyne.KeySpace {
 		// Simulate tapping on  menu entry
-		b.Items[b.index].(*menuBarItem).Child().Do()
+		b.Items[b.currentItem].(*menuBarItem).Child().HandleEnterKey()
 	} else if key == fyne.KeyRight {
 		// Move to the menu item at right
-		if b.index < len(b.Items)-1 {
-			b.Items[b.index].(*menuBarItem).Tapped(nil)
-			b.index++
-			b.Items[b.index].(*menuBarItem).Tapped(nil)
+		if b.currentItem < len(b.Items)-1 {
+			b.Items[b.currentItem].(*menuBarItem).Tapped(nil)
+			b.currentItem++
+			b.Items[b.currentItem].(*menuBarItem).Tapped(nil)
 		}
 	} else if key == fyne.KeyLeft {
 		// Move to the menu item at left
-		if b.index > 0 {
-			b.Items[b.index].(*menuBarItem).Tapped(nil)
-			b.index--
-			b.Items[b.index].(*menuBarItem).Tapped(nil)
+		if b.currentItem > 0 {
+			b.Items[b.currentItem].(*menuBarItem).Tapped(nil)
+			b.currentItem--
+			b.Items[b.currentItem].(*menuBarItem).Tapped(nil)
 		}
 	} else if key == fyne.KeyUp {
 		// Move focus to menu item above
-		b.Items[b.index].(*menuBarItem).Child().Up()
+		b.Items[b.currentItem].(*menuBarItem).Child().HandleUpKey()
 	} else if key == fyne.KeyDown {
 		// Move focus to menu item below
-		b.Items[b.index].(*menuBarItem).Child().Down()
+		b.Items[b.currentItem].(*menuBarItem).Child().HandleDownKey()
 	}
 }
 
@@ -145,7 +145,6 @@ func (b *MenuBar) deactivate() {
 	if !b.active {
 		return
 	}
-	b.active = false
 	b.active = false
 	if b.activeItem != nil {
 		defer b.activeItem.Child().Dismiss()
