@@ -76,7 +76,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 
 		if f.file.save {
-			callback := f.file.callback.(func(fyne.FileWriteCloser, error))
+			callback := f.file.callback.(func(fyne.URIWriteCloser, error))
 			name := f.fileName.(*widget.Entry).Text
 			path := filepath.Join(f.dir, name)
 
@@ -108,7 +108,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 					}
 				}, f.file.parent)
 		} else if f.selected != nil {
-			callback := f.file.callback.(func(fyne.FileReadCloser, error))
+			callback := f.file.callback.(func(fyne.URIReadCloser, error))
 			f.win.Hide()
 			if f.file.onClosedCallback != nil {
 				f.file.onClosedCallback(true)
@@ -129,9 +129,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 		if f.file.callback != nil {
 			if f.file.save {
-				f.file.callback.(func(fyne.FileWriteCloser, error))(nil, nil)
+				f.file.callback.(func(fyne.URIWriteCloser, error))(nil, nil)
 			} else {
-				f.file.callback.(func(fyne.FileReadCloser, error))(nil, nil)
+				f.file.callback.(func(fyne.URIReadCloser, error))(nil, nil)
 			}
 		}
 	})
@@ -152,12 +152,12 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, f.fileScroll)
 	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	favourites := widget.NewGroup("Favourites", f.loadFavourites()...)
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favourites, nil),
-		favourites, header, footer, body)
+	favorites := widget.NewGroup("Favorites", f.loadFavorites()...)
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favorites, nil),
+		favorites, header, footer, body)
 }
 
-func (f *fileDialog) loadFavourites() []fyne.CanvasObject {
+func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
 	home, _ := os.UserHomeDir()
 	places := []fyne.CanvasObject{
 		widget.NewButton("Home", func() {
@@ -347,7 +347,7 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified when Show() is called.
-func NewFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) *FileDialog {
+func NewFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) *FileDialog {
 	dialog := &FileDialog{callback: callback, parent: parent}
 	return dialog
 }
@@ -355,14 +355,14 @@ func NewFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) 
 // NewFileSave creates a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified when Show() is called.
-func NewFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) *FileDialog {
+func NewFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window) *FileDialog {
 	dialog := &FileDialog{callback: callback, parent: parent, save: true}
 	return dialog
 }
 
 // ShowFileOpen creates and shows a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified.
-func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window) {
+func ShowFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) {
 	dialog := NewFileOpen(callback, parent)
 	if fileOpenOSOverride(dialog) {
 		return
@@ -373,7 +373,7 @@ func ShowFileOpen(callback func(fyne.FileReadCloser, error), parent fyne.Window)
 // ShowFileSave creates and shows a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified.
-func ShowFileSave(callback func(fyne.FileWriteCloser, error), parent fyne.Window) {
+func ShowFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window) {
 	dialog := NewFileSave(callback, parent)
 	if fileSaveOSOverride(dialog) {
 		return

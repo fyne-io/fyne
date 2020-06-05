@@ -167,6 +167,16 @@ func (c *glCanvas) Focus(obj fyne.Focusable) {
 	c.RLock()
 	focused := c.focused
 	c.RUnlock()
+
+	if focused == obj || obj == nil {
+		return
+	}
+
+	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
+		c.Unfocus()
+		return
+	}
+
 	if focused != nil {
 		focused.FocusLost()
 	}
@@ -174,23 +184,18 @@ func (c *glCanvas) Focus(obj fyne.Focusable) {
 	c.Lock()
 	c.focused = obj
 	c.Unlock()
-	if obj != nil {
-		obj.FocusGained()
-	}
+	obj.FocusGained()
 }
 
 func (c *glCanvas) Unfocus() {
-	c.RLock()
+	c.Lock()
 	focused := c.focused
-	c.RUnlock()
+	c.focused = nil
+	c.Unlock()
 
 	if focused != nil {
 		focused.FocusLost()
 	}
-
-	c.Lock()
-	c.focused = nil
-	c.Unlock()
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {

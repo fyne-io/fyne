@@ -34,11 +34,15 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 
 func welcomeScreen(a fyne.App) fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(data.FyneScene)
-	logo.SetMinSize(fyne.NewSize(228, 167))
+	if fyne.CurrentDevice().IsMobile() {
+		logo.SetMinSize(fyne.NewSize(171, 125))
+	} else {
+		logo.SetMinSize(fyne.NewSize(228, 167))
+	}
 
 	return widget.NewVBox(
-		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		layout.NewSpacer(),
+		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
 
 		widget.NewHBox(layout.NewSpacer(),
@@ -115,8 +119,11 @@ func main() {
 		widget.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
 		widget.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),
 		widget.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), screens.ContainerScreen()),
-		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)),
-		widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
+		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)))
+
+	if !fyne.CurrentDevice().IsMobile() {
+		tabs.Append(widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
+	}
 	tabs.SetTabLocation(widget.TabLocationLeading)
 	tabs.SelectTabIndex(a.Preferences().Int(preferenceCurrentTab))
 	w.SetContent(tabs)

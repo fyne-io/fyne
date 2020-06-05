@@ -3,20 +3,55 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 1.3 - In Progress
+## 1.3 - 5 June 2020
 
 ### Added
- 
+
+* File open and save dialogs (#225)
+* Add notifications support (#398)
+* Add text wrap support (#332)
+* Add Accordion widget (#206)
+* Add TextGrid widget (#115)
+* Add SplitContainer widget (#205)
+* Add new URI type and handlers for cross-platform data access
 * Desktop apps can now create splash windows
+* Add ScaleMode to images, new ImageScalePixels feature for retro graphics
+* Allow widgets to influence mouse cursor style (#726)
 * Support changing the text on form submit/cancel buttons
+* Support reporting CapsLock key events (#552)
+* Add OnClosed callback for Dialog
+* Add new image test helpers for validating render output
+* Support showing different types of soft keyboard on mobile devices (#971, #975)
 
 ### Changed
 
 * Upgraded underlying GLFW library to fix various issues (#183, #61)
+* Add submenu support and hover effects (#395)
+* Default to non-premultiplied alpha (NRGBA) across toolkit
+* Rename FixedGridLayout to GridWrapLayout (deprecate old API) (#836)
+* Windows redraw and animations continue on window resize and move
+* New...PopUp() methods are being replaced by Show...Popup() or New...Popup().Show()
+* Apps started on a goroutine will now panic as this is not supported
+* On Linux apps now simulate 120DPI instead of 96DPI
+* Improved fyne_settings scale picking user interface
+* Reorganised fyne_demo to accomodate growing collection of widgets and containers
+* Rendering now happens on a different thread to events for more consistent drawing
+* Improved text selection on mobile devices
 
-### Fixed
+### Fixed (highlights)
 
-*
+* Panic when trying to paste empty clipboard into entry (#743)
+* Scale does not match user configuration in Windows 10 (#635)
+* Copy/Paste not working on Entry Field in Windows OS (#981)
+* Select widgets with many options overflow UI without scrolling (#675)
+* android: typing in entry expands only after full refresh (#972)
+* iOS app stops re-drawing mid frame after a while (#950)
+* Too many successive GUI updates do not properly update the view (904)
+* iOS apps would not build using Apple's new certificates
+* Preserve aspect ratio in SVG stroke drawing (#976)
+* Fixed many race conditions in widget data handling
+* Various crashes and render glitches in extended widgets
+* Fix security issues reported by gosec (#742)
 
 
 ## 1.2.4 - 13 April 2020
@@ -156,7 +191,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ### Fixed
 
-* Correct the colour of Entry widget cursor if theme changes
+* Correct the color of Entry widget cursor if theme changes
 * Error where widgets created before main() function could crash (#490)
 * App.Run panics if called without a window (#527)
 * Support context menu for disabled entry widgets (#488)
