@@ -18,8 +18,8 @@ func Test_calculateExeName(t *testing.T) {
 }
 
 func Test_isMobile(t *testing.T) {
-	osList := []string{"darwin", "linux", "windows", "android/arm", "android/386", "android", "ios"}
-	osIsMobile := []bool{false, false, false, true, true, true, true}
+	osList := []string{"darwin", "linux", "windows", "android/arm", "android/arm64", "android/amd64", "android/386", "android", "ios"}
+	osIsMobile := []bool{false, false, false, true, true, true, true, true, true}
 	p := &packager{os: "", install: false, srcDir: ""}
 
 	assert.Equal(t, p.isMobile(), false)
