@@ -17,44 +17,44 @@ type builtinTheme struct {
 	disabledButton, disabledIcon, disabledText                                    color.Color
 }
 
-// LightTheme defines the built in light theme colours and sizes
+// LightTheme defines the built in light theme colors and sizes
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:     color.RGBA{0xf5, 0xf5, 0xf5, 0xff},
-		button:         color.RGBA{0xd9, 0xd9, 0xd9, 0xff},
-		disabledButton: color.RGBA{0xe7, 0xe7, 0xe7, 0xff},
-		text:           color.RGBA{0x21, 0x21, 0x21, 0xff},
-		disabledText:   color.RGBA{0x80, 0x80, 0x80, 0xff},
-		icon:           color.RGBA{0x21, 0x21, 0x21, 0xff},
-		disabledIcon:   color.RGBA{0x80, 0x80, 0x80, 0xff},
-		hyperlink:      color.RGBA{0x0, 0x0, 0xd9, 0xff},
-		placeholder:    color.RGBA{0x88, 0x88, 0x88, 0xff},
-		primary:        color.RGBA{0x9f, 0xa8, 0xda, 0xff},
-		hover:          color.RGBA{0xe7, 0xe7, 0xe7, 0xff},
-		scrollBar:      color.RGBA{0x0, 0x0, 0x0, 0x99},
-		shadow:         color.RGBA{0x0, 0x0, 0x0, 0x33},
+		background:     color.NRGBA{0xf5, 0xf5, 0xf5, 0xff},
+		button:         color.NRGBA{0xd9, 0xd9, 0xd9, 0xff},
+		disabledButton: color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
+		text:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		disabledText:   color.NRGBA{0x80, 0x80, 0x80, 0xff},
+		icon:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		disabledIcon:   color.NRGBA{0x80, 0x80, 0x80, 0xff},
+		hyperlink:      color.NRGBA{0x0, 0x0, 0xd9, 0xff},
+		placeholder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		primary:        color.NRGBA{0x9f, 0xa8, 0xda, 0xff},
+		hover:          color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
+		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
 	}
 
 	theme.initFonts()
 	return theme
 }
 
-// DarkTheme defines the built in dark theme colours and sizes
+// DarkTheme defines the built in dark theme colors and sizes
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:     color.RGBA{0x42, 0x42, 0x42, 0xff},
-		button:         color.RGBA{0x21, 0x21, 0x21, 0xff},
-		disabledButton: color.RGBA{0x31, 0x31, 0x31, 0xff},
-		text:           color.RGBA{0xff, 0xff, 0xff, 0xff},
-		disabledText:   color.RGBA{0x60, 0x60, 0x60, 0xff},
-		icon:           color.RGBA{0xff, 0xff, 0xff, 0xff},
-		disabledIcon:   color.RGBA{0x60, 0x60, 0x60, 0xff},
-		hyperlink:      color.RGBA{0x99, 0x99, 0xff, 0xff},
-		placeholder:    color.RGBA{0xb2, 0xb2, 0xb2, 0xff},
-		primary:        color.RGBA{0x1a, 0x23, 0x7e, 0xff},
-		hover:          color.RGBA{0x31, 0x31, 0x31, 0xff},
-		scrollBar:      color.RGBA{0x0, 0x0, 0x0, 0x99},
-		shadow:         color.RGBA{0x0, 0x0, 0x0, 0x66},
+		background:     color.NRGBA{0x42, 0x42, 0x42, 0xff},
+		button:         color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		disabledButton: color.NRGBA{0x31, 0x31, 0x31, 0xff},
+		text:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		disabledText:   color.NRGBA{0x60, 0x60, 0x60, 0xff},
+		icon:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		disabledIcon:   color.NRGBA{0x60, 0x60, 0x60, 0xff},
+		hyperlink:      color.NRGBA{0x99, 0x99, 0xff, 0xff},
+		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		primary:        color.NRGBA{0x1a, 0x23, 0x7e, 0xff},
+		hover:          color.NRGBA{0x31, 0x31, 0x31, 0xff},
+		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
 	}
 
 	theme.initFonts()
@@ -65,22 +65,22 @@ func (t *builtinTheme) BackgroundColor() color.Color {
 	return t.background
 }
 
-// ButtonColor returns the theme's standard button colour
+// ButtonColor returns the theme's standard button color
 func (t *builtinTheme) ButtonColor() color.Color {
 	return t.button
 }
 
-// DisabledButtonColor returns the theme's disabled button colour
+// DisabledButtonColor returns the theme's disabled button color
 func (t *builtinTheme) DisabledButtonColor() color.Color {
 	return t.disabledButton
 }
 
-// HyperlinkColor returns the theme's standard hyperlink colour
+// HyperlinkColor returns the theme's standard hyperlink color
 func (t *builtinTheme) HyperlinkColor() color.Color {
 	return t.hyperlink
 }
 
-// TextColor returns the theme's standard text colour
+// TextColor returns the theme's standard text color
 func (t *builtinTheme) TextColor() color.Color {
 	return t.text
 }
@@ -90,7 +90,7 @@ func (t *builtinTheme) DisabledTextColor() color.Color {
 	return t.disabledText
 }
 
-// IconColor returns the theme's standard text colour
+// IconColor returns the theme's standard text color
 func (t *builtinTheme) IconColor() color.Color {
 	return t.icon
 }
@@ -100,22 +100,22 @@ func (t *builtinTheme) DisabledIconColor() color.Color {
 	return t.disabledIcon
 }
 
-// PlaceHolderColor returns the theme's placeholder text colour
+// PlaceHolderColor returns the theme's placeholder text color
 func (t *builtinTheme) PlaceHolderColor() color.Color {
 	return t.placeholder
 }
 
-// PrimaryColor returns the colour used to highlight primary features
+// PrimaryColor returns the color used to highlight primary features
 func (t *builtinTheme) PrimaryColor() color.Color {
 	return t.primary
 }
 
-// HoverColor returns the colour used to highlight interactive elements currently under a cursor
+// HoverColor returns the color used to highlight interactive elements currently under a cursor
 func (t *builtinTheme) HoverColor() color.Color {
 	return t.hover
 }
 
-// FocusColor returns the colour used to highlight a focused widget
+// FocusColor returns the color used to highlight a focused widget
 func (t *builtinTheme) FocusColor() color.Color {
 	return t.primary
 }
@@ -221,27 +221,27 @@ func current() fyne.Theme {
 	return fyne.CurrentApp().Settings().Theme()
 }
 
-// BackgroundColor returns the theme's background colour
+// BackgroundColor returns the theme's background color
 func BackgroundColor() color.Color {
 	return current().BackgroundColor()
 }
 
-// ButtonColor returns the theme's standard button colour
+// ButtonColor returns the theme's standard button color
 func ButtonColor() color.Color {
 	return current().ButtonColor()
 }
 
-// DisabledButtonColor returns the theme's disabled button colour
+// DisabledButtonColor returns the theme's disabled button color
 func DisabledButtonColor() color.Color {
 	return current().DisabledButtonColor()
 }
 
-// HyperlinkColor returns the theme's standard hyperlink colour
+// HyperlinkColor returns the theme's standard hyperlink color
 func HyperlinkColor() color.Color {
 	return current().HyperlinkColor()
 }
 
-// TextColor returns the theme's standard text colour
+// TextColor returns the theme's standard text color
 func TextColor() color.Color {
 	return current().TextColor()
 }
@@ -251,7 +251,7 @@ func DisabledTextColor() color.Color {
 	return current().DisabledTextColor()
 }
 
-// IconColor returns the theme's standard text colour
+// IconColor returns the theme's standard text color
 func IconColor() color.Color {
 	return current().IconColor()
 }
@@ -261,22 +261,22 @@ func DisabledIconColor() color.Color {
 	return current().DisabledIconColor()
 }
 
-// PlaceHolderColor returns the theme's standard text colour
+// PlaceHolderColor returns the theme's standard text color
 func PlaceHolderColor() color.Color {
 	return current().PlaceHolderColor()
 }
 
-// PrimaryColor returns the colour used to highlight primary features
+// PrimaryColor returns the color used to highlight primary features
 func PrimaryColor() color.Color {
 	return current().PrimaryColor()
 }
 
-// HoverColor returns the colour used to highlight interactive elements currently under a cursor
+// HoverColor returns the color used to highlight interactive elements currently under a cursor
 func HoverColor() color.Color {
 	return current().HoverColor()
 }
 
-// FocusColor returns the colour used to highlight a focussed widget
+// FocusColor returns the color used to highlight a focussed widget
 func FocusColor() color.Color {
 	return current().FocusColor()
 }

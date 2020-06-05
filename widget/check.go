@@ -1,22 +1,19 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 type checkRenderer struct {
-	icon  *canvas.Image
-	label *canvas.Text
-
+	widget.BaseRenderer
+	icon           *canvas.Image
+	label          *canvas.Text
 	focusIndicator *canvas.Circle
-
-	objects []fyne.CanvasObject
-	check   *Check
+	check          *Check
 }
 
 // MinSize calculates the minimum size of a check.
@@ -54,14 +51,21 @@ func (c *checkRenderer) applyTheme() {
 	}
 }
 
-func (c *checkRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
+func (c *checkRenderer) Refresh() {
+	c.check.propertyLock.RLock()
+	c.applyTheme()
+	c.updateLabel()
+	c.updateResource()
+	c.updateFocusIndicator()
+	c.check.propertyLock.RUnlock()
+	canvas.Refresh(c.check.super())
 }
 
-func (c *checkRenderer) Refresh() {
-	c.applyTheme()
+func (c *checkRenderer) updateLabel() {
 	c.label.Text = c.check.Text
+}
 
+func (c *checkRenderer) updateResource() {
 	res := theme.CheckButtonIcon()
 	if c.check.Checked {
 		res = theme.CheckButtonCheckedIcon()
@@ -69,27 +73,19 @@ func (c *checkRenderer) Refresh() {
 	if c.check.Disabled() {
 		res = theme.NewDisabledResource(res)
 	}
-
 	c.icon.Resource = res
+}
 
+func (c *checkRenderer) updateFocusIndicator() {
 	if c.check.Disabled() {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
-	} else if c.check.Focused() {
+	} else if c.check.focused {
 		c.focusIndicator.FillColor = theme.FocusColor()
 	} else if c.check.hovered {
 		c.focusIndicator.FillColor = theme.HoverColor()
 	} else {
 		c.focusIndicator.FillColor = theme.BackgroundColor()
 	}
-
-	canvas.Refresh(c.check.super())
-}
-
-func (c *checkRenderer) Objects() []fyne.CanvasObject {
-	return c.objects
-}
-
-func (c *checkRenderer) Destroy() {
 }
 
 // Check widget has a text label and a checked (or unchecked) icon and triggers an event func when toggled
@@ -121,7 +117,7 @@ func (c *Check) SetChecked(checked bool) {
 
 // Hide this widget, if it was previously visible
 func (c *Check) Hide() {
-	if c.Focused() {
+	if c.focused {
 		c.FocusLost()
 		fyne.CurrentApp().Driver().CanvasForObject(c).Focus(nil)
 	}
@@ -150,16 +146,12 @@ func (c *Check) MouseMoved(*desktop.MouseEvent) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (c *Check) Tapped(*fyne.PointEvent) {
-	if !c.Focused() {
+	if !c.focused {
 		c.FocusGained()
 	}
 	if !c.Disabled() {
 		c.SetChecked(!c.Checked)
 	}
-}
-
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (c *Check) TappedSecondary(*fyne.PointEvent) {
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -171,13 +163,26 @@ func (c *Check) MinSize() fyne.Size {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *Check) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
 	icon := canvas.NewImageFromResource(theme.CheckButtonIcon())
 
 	text := canvas.NewText(c.Text, theme.TextColor())
 	text.Alignment = fyne.TextAlignLeading
 
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
-	return &checkRenderer{icon, text, focusIndicator, []fyne.CanvasObject{focusIndicator, icon, text}, c}
+	r := &checkRenderer{
+		widget.NewBaseRenderer([]fyne.CanvasObject{focusIndicator, icon, text}),
+		icon,
+		text,
+		focusIndicator,
+		c,
+	}
+	r.applyTheme()
+	r.updateLabel()
+	r.updateResource()
+	r.updateFocusIndicator()
+	return r
 }
 
 // NewCheck creates a new check widget with the set label and change handler
@@ -213,6 +218,7 @@ func (c *Check) FocusLost() {
 }
 
 // Focused returns whether or not this Check has focus.
+// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
 func (c *Check) Focused() bool {
 	if c.Disabled() {
 		return false

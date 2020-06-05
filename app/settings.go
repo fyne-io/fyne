@@ -26,7 +26,7 @@ func (sc *SettingsSchema) StoragePath() string {
 var _ fyne.Settings = (*settings)(nil)
 
 type settings struct {
-	themeLock      sync.RWMutex
+	propertyLock   sync.RWMutex
 	theme          fyne.Theme
 	themeSpecified bool
 
@@ -38,8 +38,8 @@ type settings struct {
 }
 
 func (s *settings) Theme() fyne.Theme {
-	s.themeLock.RLock()
-	defer s.themeLock.RUnlock()
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
 	return s.theme
 }
 
@@ -49,15 +49,15 @@ func (s *settings) SetTheme(theme fyne.Theme) {
 }
 
 func (s *settings) applyTheme(theme fyne.Theme) {
-	s.themeLock.Lock()
-	defer s.themeLock.Unlock()
+	s.propertyLock.Lock()
+	defer s.propertyLock.Unlock()
 	s.theme = theme
 	s.apply()
 }
 
 func (s *settings) Scale() float32 {
-	s.themeLock.RLock()
-	defer s.themeLock.RUnlock()
+	s.propertyLock.RLock()
+	defer s.propertyLock.RUnlock()
 	return s.schema.Scale
 }
 
@@ -91,7 +91,7 @@ func (s *settings) load() {
 }
 
 func (s *settings) loadFromFile(path string) error {
-	file, err := os.Open(path)
+	file, err := os.Open(path) // #nosec
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil

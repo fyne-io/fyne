@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -49,7 +50,7 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 	width := 100.0
 	bar.Resize(fyne.NewSize(int(width), 10))
 
-	render := Renderer(bar).(*infProgressRenderer)
+	render := test.WidgetRenderer(bar).(*infProgressRenderer)
 
 	// width of bar is one step size because updateBar() will have run once
 	assert.Equal(t, int(width*progressBarInfiniteStepSizeRatio), render.bar.Size().Width)

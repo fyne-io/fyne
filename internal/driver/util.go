@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/cache"
-	"fyne.io/fyne/widget"
 )
 
 // WalkVisibleObjectTree will walk an object tree for all visible objects executing the passed functions following
@@ -65,9 +64,9 @@ func walkObjectTree(
 	case fyne.Widget:
 		children = cache.Renderer(co).Objects()
 
-		if scroll, ok := obj.(*widget.ScrollContainer); ok {
+		if _, ok := obj.(fyne.Scrollable); ok {
 			clipPos = pos
-			clipSize = scroll.Size()
+			clipSize = obj.Size()
 		}
 	}
 
@@ -94,8 +93,7 @@ func walkObjectTree(
 // FindObjectAtPositionMatching is used to find an object in a canvas at the specified position.
 // The matches function determines of the type of object that is found at this position is of a suitable type.
 // The various canvas roots and overlays that can be searched are also passed in.
-func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.CanvasObject) bool,
-	overlay fyne.CanvasObject, roots ...fyne.CanvasObject) (fyne.CanvasObject, fyne.Position) {
+func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.CanvasObject) bool, overlay fyne.CanvasObject, roots ...fyne.CanvasObject) (fyne.CanvasObject, fyne.Position, int) {
 	var found fyne.CanvasObject
 	var foundPos fyne.Position
 
@@ -127,10 +125,12 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 		return false
 	}
 
+	layer := 0
 	if overlay != nil {
 		WalkVisibleObjectTree(overlay, findFunc, nil)
 	} else {
 		for _, root := range roots {
+			layer++
 			if root == nil {
 				continue
 			}
@@ -141,5 +141,24 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 		}
 	}
 
-	return found, foundPos
+	return found, foundPos, layer
+}
+
+// AbsolutePositionForObject returns the absolute position of an object in a set of object trees.
+// If the object is not part of any of the trees, the position (0,0) is returned.
+func AbsolutePositionForObject(object fyne.CanvasObject, trees []fyne.CanvasObject) fyne.Position {
+	var pos fyne.Position
+	findPos := func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+		if o == object {
+			pos = p
+			return true
+		}
+		return false
+	}
+	for _, tree := range trees {
+		if WalkVisibleObjectTree(tree, findPos, nil) {
+			break
+		}
+	}
+	return pos
 }

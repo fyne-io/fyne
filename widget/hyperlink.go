@@ -5,17 +5,20 @@ import (
 	"net/url"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/theme"
 )
 
 // Hyperlink widget is a text component with appropriate padding and layout.
 // When clicked, the default web browser should open with a URL
 type Hyperlink struct {
-	textProvider
+	BaseWidget
 	Text      string
 	URL       *url.URL
 	Alignment fyne.TextAlign // The alignment of the Text
+	Wrapping  fyne.TextWrap  // The wrapping of the Text
 	TextStyle fyne.TextStyle // The style of the hyperlink text
+	provider  *textProvider
 }
 
 // NewHyperlink creates a new hyperlink widget with the set text content
@@ -35,10 +38,28 @@ func NewHyperlinkWithStyle(text string, url *url.URL, alignment fyne.TextAlign, 
 	return hl
 }
 
+// Cursor returns the cursor type of this widget
+func (hl *Hyperlink) Cursor() desktop.Cursor {
+	return desktop.PointerCursor
+}
+
+// Resize sets a new size for the hyperlink.
+// Note this should not be used if the widget is being managed by a Layout within a Container.
+func (hl *Hyperlink) Resize(size fyne.Size) {
+	hl.BaseWidget.Resize(size)
+	if hl.provider == nil { // not created until visible
+		return
+	}
+	hl.provider.Resize(size)
+}
+
 // SetText sets the text of the hyperlink
 func (hl *Hyperlink) SetText(text string) {
 	hl.Text = text
-	hl.textProvider.SetText(text) // calls refresh
+	if hl.provider == nil { // not created until visible
+		return
+	}
+	hl.provider.setText(text) // calls refresh
 }
 
 // SetURL sets the URL of the hyperlink, taking in a URL type
@@ -61,6 +82,11 @@ func (hl *Hyperlink) textAlign() fyne.TextAlign {
 	return hl.Alignment
 }
 
+// textWrap tells the rendering textProvider our wrapping
+func (hl *Hyperlink) textWrap() fyne.TextWrap {
+	return hl.Wrapping
+}
+
 // textStyle tells the rendering textProvider our style
 func (hl *Hyperlink) textStyle() fyne.TextStyle {
 	return hl.TextStyle
@@ -71,8 +97,8 @@ func (hl *Hyperlink) textColor() color.Color {
 	return theme.HyperlinkColor()
 }
 
-// password tells the rendering textProvider if we are a password field
-func (hl *Hyperlink) password() bool {
+// concealed tells the rendering textProvider if we are a concealed field
+func (hl *Hyperlink) concealed() bool {
 	return false
 }
 
@@ -84,19 +110,18 @@ func (hl *Hyperlink) object() fyne.Widget {
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 func (hl *Hyperlink) Tapped(*fyne.PointEvent) {
 	if hl.URL != nil {
-		fyne.CurrentApp().OpenURL(hl.URL)
+		err := fyne.CurrentApp().OpenURL(hl.URL)
+		if err != nil {
+			fyne.LogError("Failed to open url", err)
+		}
 	}
-}
-
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (hl *Hyperlink) TappedSecondary(*fyne.PointEvent) {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
-	hl.textProvider = newTextProvider(hl.Text, hl)
 	hl.ExtendBaseWidget(hl)
-	return hl.textProvider.CreateRenderer()
+	hl.provider = newTextProvider(hl.Text, hl)
+	return hl.provider.CreateRenderer()
 }
 
 // MinSize returns the smallest size this widget can shrink to

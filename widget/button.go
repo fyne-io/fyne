@@ -3,20 +3,25 @@ package widget
 import (
 	"image/color"
 	"strings"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
 
+const buttonTapDuration = 250
+
 type buttonRenderer struct {
+	*widget.ShadowingRenderer
+
 	icon   *canvas.Image
 	label  *canvas.Text
-	shadow *shadow
-
-	objects []fyne.CanvasObject
-	button  *Button
+	button *Button
+	layout fyne.Layout
 }
 
 func (b *buttonRenderer) padding() fyne.Size {
@@ -29,52 +34,75 @@ func (b *buttonRenderer) padding() fyne.Size {
 // MinSize calculates the minimum size of a button.
 // This is based on the contained text, any icon that is set and a standard
 // amount of padding added.
-func (b *buttonRenderer) MinSize() fyne.Size {
+func (b *buttonRenderer) MinSize() (size fyne.Size) {
+	hasIcon := b.icon != nil
+	hasLabel := b.label.Text != ""
+	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 	labelSize := b.label.MinSize()
-	contentHeight := fyne.Max(labelSize.Height, theme.IconInlineSize())
-	contentWidth := 0
-	if b.icon != nil {
-		contentWidth += theme.IconInlineSize()
+	if hasLabel {
+		size.Width = labelSize.Width
 	}
-	if b.button.Text != "" {
-		if b.icon != nil {
-			contentWidth += theme.Padding()
+	if hasIcon {
+		if hasLabel {
+			size.Width += theme.Padding()
 		}
-		contentWidth += labelSize.Width
+		size.Width += iconSize.Width
 	}
-	return fyne.NewSize(contentWidth, contentHeight).Add(b.padding())
+	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
+	size = size.Add(b.padding())
+	return
 }
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
-	if b.shadow != nil {
-		if b.button.HideShadow {
-			b.shadow.Hide()
+	b.LayoutShadow(size, fyne.NewPos(0, 0))
+	hasIcon := b.icon != nil
+	hasLabel := b.label.Text != ""
+	if !hasIcon && !hasLabel {
+		// Nothing to layout
+		return
+	}
+	iconSize := fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+	labelSize := b.label.MinSize()
+	padding := b.padding()
+	if hasLabel {
+		if hasIcon {
+			// Both
+			var objects []fyne.CanvasObject
+			if b.button.IconPlacement == ButtonIconLeadingText {
+				objects = append(objects, b.icon, b.label)
+			} else {
+				objects = append(objects, b.label, b.icon)
+			}
+			b.icon.SetMinSize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+			min := b.layout.MinSize(objects)
+			b.layout.Layout(objects, min)
+			pos := alignedPosition(b.button.Alignment, padding, min, size)
+			b.label.Move(b.label.Position().Add(pos))
+			b.icon.Move(b.icon.Position().Add(pos))
 		} else {
-			b.shadow.Resize(size)
+			// Label Only
+			b.label.Move(alignedPosition(b.button.Alignment, padding, labelSize, size))
+			b.label.Resize(labelSize)
 		}
+	} else {
+		// Icon Only
+		b.icon.Move(alignedPosition(b.button.Alignment, padding, iconSize, size))
+		b.icon.Resize(iconSize)
 	}
-	if b.button.Text != "" {
-		padding := b.padding()
-		innerSize := size.Subtract(padding)
-		innerOffset := fyne.NewPos(padding.Width/2, padding.Height/2)
+}
 
-		labelSize := b.label.MinSize()
-		contentWidth := labelSize.Width
-
-		if b.icon != nil {
-			contentWidth += theme.Padding() + theme.IconInlineSize()
-			iconOffset := fyne.NewPos((innerSize.Width-contentWidth)/2, (innerSize.Height-theme.IconInlineSize())/2)
-			b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-			b.icon.Move(innerOffset.Add(iconOffset))
-		}
-		labelOffset := fyne.NewPos((innerSize.Width+contentWidth)/2-labelSize.Width, (innerSize.Height-labelSize.Height)/2)
-		b.label.Resize(labelSize)
-		b.label.Move(innerOffset.Add(labelOffset))
-	} else if b.icon != nil {
-		b.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-		b.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
+func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Size) (pos fyne.Position) {
+	pos.Y = (layoutSize.Height - objectSize.Height) / 2
+	switch align {
+	case ButtonAlignCenter:
+		pos.X = (layoutSize.Width - objectSize.Width) / 2
+	case ButtonAlignLeading:
+		pos.X = padding.Width / 2
+	case ButtonAlignTrailing:
+		pos.X = layoutSize.Width - objectSize.Width - padding.Width/2
 	}
+	return
 }
 
 // applyTheme updates this button to match the current theme
@@ -92,7 +120,7 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 		return theme.DisabledButtonColor()
 	case b.button.Style == PrimaryButton:
 		return theme.PrimaryColor()
-	case b.button.hovered:
+	case b.button.hovered, b.button.tapped: // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	default:
 		return theme.ButtonColor()
@@ -106,7 +134,8 @@ func (b *buttonRenderer) Refresh() {
 	if b.button.Icon != nil && b.button.Visible() {
 		if b.icon == nil {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
-			b.objects = append(b.objects, b.icon)
+			b.icon.FillMode = canvas.ImageFillContain
+			b.SetObjects(append(b.Objects(), b.icon))
 		} else {
 			if b.button.Disabled() {
 				// if the icon has changed, create a new disabled version
@@ -125,32 +154,24 @@ func (b *buttonRenderer) Refresh() {
 		b.icon.Hide()
 	}
 
-	if b.shadow != nil {
-		b.shadow.depth = theme.Padding() / 2
-	}
-
 	b.Layout(b.button.Size())
 	canvas.Refresh(b.button.super())
-}
-
-func (b *buttonRenderer) Objects() []fyne.CanvasObject {
-	return b.objects
-}
-
-func (b *buttonRenderer) Destroy() {
 }
 
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	DisableableWidget
-	Text         string
-	Style        ButtonStyle
-	Icon         fyne.Resource
-	disabledIcon fyne.Resource
+	Text          string
+	Style         ButtonStyle
+	Icon          fyne.Resource
+	disabledIcon  fyne.Resource
+	Alignment     ButtonAlign
+	IconPlacement ButtonIconPlacement
 
 	OnTapped   func() `json:"-"`
-	hovered    bool
 	HideShadow bool
+
+	hovered, tapped bool
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -163,15 +184,41 @@ const (
 	PrimaryButton
 )
 
+// ButtonAlign represents the horizontal alignment of a button.
+type ButtonAlign int
+
+const (
+	// ButtonAlignCenter aligns the icon and the text centrally.
+	ButtonAlignCenter ButtonAlign = iota
+	// ButtonAlignLeading aligns the icon and the text with the leading edge.
+	ButtonAlignLeading
+	// ButtonAlignTrailing aligns the icon and the text with the trailing edge.
+	ButtonAlignTrailing
+)
+
+// ButtonIconPlacement represents the ordering of icon & text within a button.
+type ButtonIconPlacement int
+
+const (
+	// ButtonIconLeadingText aligns the icon on the leading edge of the text.
+	ButtonIconLeadingText ButtonIconPlacement = iota
+	// ButtonIconTrailingText aligns the icon on the trailing edge of the text.
+	ButtonIconTrailingText
+)
+
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
+	b.tapped = true
+	defer func() { // TODO move to a real animation
+		time.Sleep(time.Millisecond * buttonTapDuration)
+		b.tapped = false
+		b.Refresh()
+	}()
+	b.Refresh()
+
 	if b.OnTapped != nil && !b.Disabled() {
 		b.OnTapped()
 	}
-}
-
-// TappedSecondary is called when a secondary pointer tapped event is captured
-func (b *Button) TappedSecondary(*fyne.PointEvent) {
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -202,24 +249,23 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
+		icon.FillMode = canvas.ImageFillContain
 	}
 
 	text := canvas.NewText(b.Text, theme.TextColor())
-	text.Alignment = fyne.TextAlignCenter
 
 	objects := []fyne.CanvasObject{
 		text,
 	}
-	var shadow *shadow
-	if !b.HideShadow {
-		shadow = newShadow(shadowAround, theme.Padding()/2)
-		objects = append(objects, shadow)
+	shadowLevel := widget.ButtonLevel
+	if b.HideShadow {
+		shadowLevel = widget.BaseLevel
 	}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{icon, text, shadow, objects, b}
+	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
 }
 
 // SetText allows the button label to be changed
@@ -227,6 +273,11 @@ func (b *Button) SetText(text string) {
 	b.Text = text
 
 	b.Refresh()
+}
+
+// Cursor returns the cursor type of this widget
+func (b *Button) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
 }
 
 // SetIcon updates the icon on a label - pass nil to hide an icon
@@ -244,8 +295,10 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 
 // NewButton creates a new button widget with the set label and tap handler
 func NewButton(label string, tapped func()) *Button {
-	button := &Button{DisableableWidget{}, label, DefaultButton, nil, nil,
-		tapped, false, false}
+	button := &Button{
+		Text:     label,
+		OnTapped: tapped,
+	}
 
 	button.ExtendBaseWidget(button)
 	return button
@@ -253,8 +306,12 @@ func NewButton(label string, tapped func()) *Button {
 
 // NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
-	button := &Button{DisableableWidget{}, label, DefaultButton, icon, theme.NewDisabledResource(icon),
-		tapped, false, false}
+	button := &Button{
+		Text:         label,
+		Icon:         icon,
+		disabledIcon: theme.NewDisabledResource(icon),
+		OnTapped:     tapped,
+	}
 
 	button.ExtendBaseWidget(button)
 	return button

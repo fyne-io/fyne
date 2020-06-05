@@ -25,7 +25,12 @@ func bundleFile(name string, filepath string, f *os.File) {
 }
 
 func openFile(filename string) *os.File {
-	os.Remove(filename)
+	err := os.Remove(filename)
+	if err != nil {
+		fyne.LogError("Unable to remove file "+filename, err)
+		return nil
+	}
+
 	_, dirname, _, _ := runtime.Caller(0)
 	f, err := os.Create(path.Join(path.Dir(dirname), filename))
 	if err != nil {

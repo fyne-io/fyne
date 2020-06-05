@@ -47,7 +47,11 @@ func (i *installer) install() error {
 			i.installDir = "/" // the tarball contains the structure starting at usr/local
 		case "windows":
 			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), p.name)
-			runAsAdminWindows("mkdir", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
+			err := runAsAdminWindows("mkdir", "\"\""+filepath.Join(os.Getenv("ProgramFiles"), p.name)+"\"\"")
+			if err != nil {
+				fyne.LogError("Failed to run as windows administrator", err)
+				return err
+			}
 		default:
 			return errors.New("Unsupported target operating system \"" + p.os + "\"")
 		}

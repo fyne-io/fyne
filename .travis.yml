@@ -31,14 +31,27 @@ script:
       # check that go mod tidy does not change go.mod/go.sum
       go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
     fi
-  - test -z "$(goimports -e -d $GO_FILES | tee /dev/stderr)"
+  - |
+    if [ "$TRAVIS_OS_NAME" != "windows" ]
+    then
+      test -z $(goimports -e -d $GO_FILES | tee /dev/stderr)
+    fi
+# goimports reports a lot of pseudo-diffs on Windows
+#      echo > goimports.out
+#      tail -f goimports.out &
+#      test -z "$(goimports -e -d $GO_FILES | tee goimports.out)"
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
-  - golint -set_exit_status $(go list -tags ci ./...)
+# Windows golint alarm probably related to https://github.com/golang/lint/issues/157
+  - |
+    if [ "$TRAVIS_OS_NAME" != "windows" ]
+    then
+      golint -set_exit_status $(go list -tags ci ./...)
+    fi
   - gocyclo -over 50 $GO_FILES
   - |
     set -e
-    if [[ "$TRAVIS_PULL_REQUEST" == "false" && -n "$COVERALLS_TOKEN" ]]
+    if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PULL_REQUEST" == "false" && -n "$COVERALLS_TOKEN" ]]
     then
       go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
       $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
@@ -53,12 +66,24 @@ matrix:
     - go: 1.12.x
       os: linux
       env: GO111MODULE=on GOFLAGS=
-    - go: 1.12.x
-      os: osx
-      env: GO111MODULE=off GOFLAGS=
     - go: 1.13.x
       os: linux
       env: GO111MODULE=off GOFLAGS=
     - go: 1.13.x
       os: osx
+      env: GO111MODULE=off GOFLAGS=
+    - go: 1.13.x
+      os: windows
+      env: GO111MODULE=off GOFLAGS=
+    - go: 1.14.x
+      os: linux
+      env: GO111MODULE=on GOFLAGS=
+    - go: 1.14.x
+      os: osx
       env: GO111MODULE=on GOFLAGS=-mod=vendor
+    - go: 1.14.x
+      os: windows
+      env: GO111MODULE=off GOFLAGS=
+    - go: 1.14.x
+      os: linux
+      env: GO111MODULE=on GOFLAGS=-tags=mobile

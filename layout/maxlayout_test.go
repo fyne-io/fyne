@@ -1,4 +1,4 @@
-package layout
+package layout_test
 
 import (
 	"image/color"
@@ -6,39 +6,41 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMaxLayout(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 
-	obj := canvas.NewRectangle(color.RGBA{0, 0, 0, 0})
+	obj := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj},
 	}
 	container.Resize(size)
 
-	NewMaxLayout().Layout(container.Objects, size)
+	layout.NewMaxLayout().Layout(container.Objects, size)
 
 	assert.Equal(t, obj.Size(), size)
 }
 
 func TestMaxLayoutMinSize(t *testing.T) {
-	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
 	container := fyne.NewContainer(text)
-	layoutMin := NewMaxLayout().MinSize(container.Objects)
+	layoutMin := layout.NewMaxLayout().MinSize(container.Objects)
 
 	assert.Equal(t, minSize, layoutMin)
 }
 
 func TestContainerMaxLayoutMinSize(t *testing.T) {
-	text := canvas.NewText("Padding", color.RGBA{0, 0xff, 0, 0})
+	text := canvas.NewText("Padding", color.NRGBA{0, 0xff, 0, 0})
 	minSize := text.MinSize()
 
 	container := fyne.NewContainer(text)
-	container.Layout = NewMaxLayout()
+	container.Layout = layout.NewMaxLayout()
 	layoutMin := container.MinSize()
 
 	assert.Equal(t, minSize, layoutMin)

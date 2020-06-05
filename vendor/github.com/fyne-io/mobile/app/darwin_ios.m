@@ -11,7 +11,9 @@
 #include <sys/utsname.h>
 
 #import <UIKit/UIKit.h>
+#import <MobileCoreServices/MobileCoreServices.h>
 #import <GLKit/GLKit.h>
+#import <UserNotifications/UserNotifications.h>
 
 struct utsname sysInfo;
 
@@ -45,6 +47,9 @@ struct utsname sysInfo;
 	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
 	updateConfig((int)size.width, (int)size.height, orientation);
 
+	UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+	center.delegate = self;
+
 	return YES;
 }
 
@@ -65,20 +70,29 @@ struct utsname sysInfo;
 }
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray <NSURL *>*)urls {
-    for (id url in urls) {
-        if (![url isFileURL]) {
-            continue;
-        }
-
-        NSString *path = [url path];
-        filePickerReturned([path UTF8String]);
+    if ([urls count] == 0) {
+        return;
     }
+
+    NSURL* url = urls[0];
+    NSURL* toClose = NULL;
+    BOOL secured = [url startAccessingSecurityScopedResource];
+    if (secured) {
+        toClose = url;
+    }
+
+    filePickerReturned((char*)[[url description] UTF8String], toClose);
 }
 
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-    filePickerReturned("");
+    filePickerReturned("", NULL);
 }
 
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler {
+	completionHandler(UNNotificationPresentationOptionAlert);
+}
 @end
 
 @interface GoAppAppController ()
@@ -234,11 +248,38 @@ UIEdgeInsets getDevicePadding() {
     return UIEdgeInsetsZero;
 }
 
-void showKeyboard() {
+#define DEFAULT_KEYBOARD_CODE 0
+#define SINGLELINE_KEYBOARD_CODE 1
+#define NUMBER_KEYBOARD_CODE 2
+
+void showKeyboard(int keyboardType) {
     GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
     GoInputView *view = appDelegate.controller.inputView;
 
     dispatch_async(dispatch_get_main_queue(), ^{
+        switch (keyboardType)
+        {
+            case DEFAULT_KEYBOARD_CODE:
+                [view setKeyboardType:UIKeyboardTypeDefault];
+                [view setReturnKeyType:UIReturnKeyDefault];
+                break;
+            case SINGLELINE_KEYBOARD_CODE:
+                [view setKeyboardType:UIKeyboardTypeDefault];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+            case NUMBER_KEYBOARD_CODE:
+                [view setKeyboardType:UIKeyboardTypeNumberPad];
+                [view setReturnKeyType:UIReturnKeyDone];
+                break;
+            default:
+                NSLog(@"unknown keyboard type, use default");
+                [view setKeyboardType:UIKeyboardTypeDefault];
+                [view setReturnKeyType:UIReturnKeyDefault];
+                break;
+        }
+        // refresh settings if keyboard is already open
+        [view reloadInputViews];
+
         BOOL ret = [view becomeFirstResponder];
     });
 }
@@ -252,15 +293,47 @@ void hideKeyboard() {
     });
 }
 
-void showFileOpenPicker() {
+void showFileOpenPicker(char* mimes, char *exts) {
     GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
 
+    NSMutableArray *docTypes = [NSMutableArray array];
+    if (mimes != NULL && strlen(mimes) > 0) {
+        NSString *mimeList = [NSString stringWithUTF8String:mimes];
+        NSArray *mimeItems = [mimeList componentsSeparatedByString:@"|"];
+
+        for (NSString *mime in mimeItems)  {
+            CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
+
+            [docTypes addObject:UTI];
+        }
+    } else if (exts != NULL && strlen(exts) > 0) {
+        NSString *extList = [NSString stringWithUTF8String:exts];
+        NSArray *extItems = [extList componentsSeparatedByString:@"|"];
+
+        for (NSString *ext in extItems)  {
+            CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext, NULL);
+
+            [docTypes addObject:UTI];
+        }
+    } else {
+        [docTypes addObject:@"public.data"];
+    }
+
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
-        initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
+        initWithDocumentTypes:docTypes inMode:UIDocumentPickerModeOpen];
     documentPicker.delegate = appDelegate;
     documentPicker.modalPresentationStyle = UIModalPresentationPopover;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
     });
+}
+
+void closeFileResource(void* urlPtr) {
+    if (urlPtr == NULL) {
+        return;
+    }
+
+    NSURL* url = (NSURL*) urlPtr;
+    [url stopAccessingSecurityScopedResource];
 }

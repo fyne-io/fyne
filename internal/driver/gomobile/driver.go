@@ -1,7 +1,6 @@
 package gomobile
 
 import (
-	"fmt"
 	"runtime"
 	"strconv"
 	"time"
@@ -77,18 +76,13 @@ func (d *mobileDriver) CanvasForObject(fyne.CanvasObject) fyne.Canvas {
 }
 
 func (d *mobileDriver) AbsolutePositionForObject(co fyne.CanvasObject) fyne.Position {
-	var pos fyne.Position
-	c := fyne.CurrentApp().Driver().CanvasForObject(co).(*mobileCanvas)
+	c := d.CanvasForObject(co)
+	if c == nil {
+		return fyne.NewPos(0, 0)
+	}
 
-	c.walkTree(func(o fyne.CanvasObject, p fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		if o == co {
-			pos = p
-			return true
-		}
-		return false
-	}, nil)
-
-	return pos
+	mc := c.(*mobileCanvas)
+	return driver.AbsolutePositionForObject(co, mc.objectTrees())
 }
 
 func (d *mobileDriver) Quit() {
@@ -149,13 +143,18 @@ func (d *mobileDriver) Run() {
 				}
 
 				if d.freeDirtyTextures(canvas) {
-					d.paintWindow(current, currentSize)
-					a.Publish()
+					newSize := fyne.NewSize(int(float32(currentSize.WidthPx)/canvas.scale), int(float32(currentSize.HeightPx)/canvas.scale))
 
-					err := d.glctx.GetError()
-					if err != 0 {
-						fyne.LogError(fmt.Sprintf("OpenGL Error: %d", err), nil)
+					if canvas.minSizeChanged() {
+						canvas.ensureMinSize()
+
+						canvas.sizeContent(newSize) // force resize of content
+					} else { // if screen changed
+						current.Resize(newSize)
 					}
+
+					d.paintWindow(current, newSize)
+					a.Publish()
 				}
 
 				time.Sleep(time.Millisecond * 10)
@@ -186,16 +185,13 @@ func (d *mobileDriver) onStart() {
 func (d *mobileDriver) onStop() {
 }
 
-func (d *mobileDriver) paintWindow(window fyne.Window, sz size.Event) {
+func (d *mobileDriver) paintWindow(window fyne.Window, size fyne.Size) {
 	canvas := window.Canvas().(*mobileCanvas)
 
 	r, g, b, a := theme.BackgroundColor().RGBA()
 	max16bit := float32(255 * 255)
 	d.glctx.ClearColor(float32(r)/max16bit, float32(g)/max16bit, float32(b)/max16bit, float32(a)/max16bit)
 	d.glctx.Clear(gl.COLOR_BUFFER_BIT)
-
-	newSize := fyne.NewSize(int(float32(sz.WidthPx)/canvas.scale), int(float32(sz.HeightPx)/canvas.scale))
-	window.Resize(newSize)
 
 	paint := func(obj fyne.CanvasObject, pos fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		// TODO should this be somehow not scroll container specific?
@@ -205,7 +201,7 @@ func (d *mobileDriver) paintWindow(window fyne.Window, sz size.Event) {
 				obj.Size(),
 			)
 		}
-		canvas.painter.Paint(obj, pos, newSize)
+		canvas.painter.Paint(obj, pos, size)
 		return false
 	}
 	afterPaint := func(obj, _ fyne.CanvasObject) {
@@ -242,7 +238,7 @@ func (d *mobileDriver) tapUpCanvas(canvas *mobileCanvas, x, y float32, tapID tou
 
 	canvas.tapUp(pos, int(tapID), func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		go wid.Tapped(ev)
-	}, func(wid fyne.Tappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 		go wid.TappedSecondary(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 		go wid.DragEnd()

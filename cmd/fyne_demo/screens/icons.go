@@ -110,6 +110,12 @@ var icons = []struct {
 	{"DocumentPrintIcon", theme.DocumentPrintIcon()},
 	{"DocumentSaveIcon", theme.DocumentSaveIcon()},
 
+	{"FileIcon", theme.FileIcon()},
+	{"FileApplicationIcon", theme.FileApplicationIcon()},
+	{"FileAudioIcon", theme.FileAudioIcon()},
+	{"FileImageIcon", theme.FileImageIcon()},
+	{"FileTextIcon", theme.FileTextIcon()},
+	{"FileVideoIcon", theme.FileVideoIcon()},
 	{"FolderIcon", theme.FolderIcon()},
 	{"FolderNewIcon", theme.FolderNewIcon()},
 	{"FolderOpenIcon", theme.FolderOpenIcon()},

@@ -10,7 +10,7 @@ import (
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Line)(nil)
 
-// Line describes a coloured line primitive in a Fyne canvas.
+// Line describes a colored line primitive in a Fyne canvas.
 // Lines are special as they can have a negative width or height to indicate
 // an inverse slope (i.e. slope up vs down).
 type Line struct {
@@ -18,7 +18,7 @@ type Line struct {
 	Position2 fyne.Position // The current bottomright position of the Line
 	Hidden    bool          // Is this Line currently hidden
 
-	StrokeColor color.Color // The line stroke colour
+	StrokeColor color.Color // The line stroke color
 	StrokeWidth float32     // The stroke width of the line
 }
 

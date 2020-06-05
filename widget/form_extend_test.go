@@ -3,7 +3,7 @@ package widget
 import (
 	"testing"
 
-	"fyne.io/fyne/internal/cache"
+	"fyne.io/fyne/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,7 +16,7 @@ func TestForm_Extended_CreateRenderer(t *testing.T) {
 	form := &extendedForm{}
 	form.ExtendBaseWidget(form)
 	form.Items = []*FormItem{{Text: "test1", Widget: NewEntry()}}
-	assert.NotNil(t, cache.Renderer(form))
+	assert.NotNil(t, test.WidgetRenderer(form))
 	assert.Equal(t, 2, len(form.itemGrid.Objects))
 
 	form.Append("test2", NewEntry())

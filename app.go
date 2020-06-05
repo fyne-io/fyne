@@ -1,6 +1,9 @@
 package fyne
 
-import "net/url"
+import (
+	"net/url"
+	"sync"
+)
 
 // An App is the definition of a graphical application.
 // Apps can have multiple windows, it will exit when the first window to be
@@ -31,6 +34,8 @@ type App interface {
 
 	// Calling Quit on the application will cause the application to exit
 	// cleanly, closing all open windows.
+	// This function does no thing on a mobile device as the application lifecycle is
+	// managed by the operating system.
 	Quit()
 
 	// Driver returns the driver that is rendering this application.
@@ -41,6 +46,9 @@ type App interface {
 	// This must be set for use of the Preferences() functions... see NewWithId(string)
 	UniqueID() string
 
+	// SendNotification sends a system notification that will be displayed in the operating system's notification area.
+	SendNotification(*Notification)
+
 	// Settings return the globally set settings, determining theme and so on.
 	Settings() Settings
 
@@ -49,13 +57,20 @@ type App interface {
 }
 
 var app App
+var appLock sync.RWMutex
 
 // SetCurrentApp is an internal function to set the app instance currently running.
 func SetCurrentApp(current App) {
+	appLock.Lock()
+	defer appLock.Unlock()
+
 	app = current
 }
 
 // CurrentApp returns the current application, for which there is only 1 per process.
 func CurrentApp() App {
+	appLock.RLock()
+	defer appLock.RUnlock()
+
 	return app
 }

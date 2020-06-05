@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"fyne.io/fyne"
 )
 
 // General mobile build environment. Initialized by envInit.
@@ -52,7 +54,10 @@ func buildEnvInit() (cleanup func(), err error) {
 			fmt.Printf("WORK=%s\n", tmpdir)
 			return
 		}
-		removeAll(tmpdir)
+		err := removeAll(tmpdir)
+		if err != nil {
+			fyne.LogError("Failed to remove all in cleanup function", err)
+		}
 	}
 	if buildN {
 		tmpdir = "$WORK"

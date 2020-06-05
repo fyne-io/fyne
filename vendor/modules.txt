@@ -4,89 +4,99 @@ github.com/Kodeworks/golang-image-ico
 github.com/akavel/rsrc/binutil
 github.com/akavel/rsrc/coff
 github.com/akavel/rsrc/ico
-# github.com/davecgh/go-spew v1.1.0
+# github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/fsnotify/fsnotify v1.4.7
+# github.com/fsnotify/fsnotify v1.4.9
 github.com/fsnotify/fsnotify
-# github.com/fyne-io/mobile v0.0.0-20200408112643-2d6e8ba97390
+# github.com/fyne-io/mobile v0.0.2
 github.com/fyne-io/mobile/app
+github.com/fyne-io/mobile/app/internal/callfn
 github.com/fyne-io/mobile/event/key
 github.com/fyne-io/mobile/event/lifecycle
 github.com/fyne-io/mobile/event/paint
 github.com/fyne-io/mobile/event/size
 github.com/fyne-io/mobile/event/touch
-github.com/fyne-io/mobile/gl
 github.com/fyne-io/mobile/exp/f32
-github.com/fyne-io/mobile/app/internal/callfn
 github.com/fyne-io/mobile/geom
+github.com/fyne-io/mobile/gl
 github.com/fyne-io/mobile/internal/mobileinit
 # github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.2-core/gl
-# github.com/go-gl/glfw v0.0.0-20181213070059-819e8ce5125f
-github.com/go-gl/glfw/v3.2/glfw
+# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
+github.com/go-gl/glfw/v3.3/glfw
+# github.com/godbus/dbus/v5 v5.0.3
+github.com/godbus/dbus/v5
 # github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-github.com/goki/freetype/truetype
 github.com/goki/freetype
 github.com/goki/freetype/raster
+github.com/goki/freetype/truetype
 # github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 github.com/jackmordaunt/icns
-# github.com/josephspurrier/goversioninfo v0.0.0-20190124120936-8611f5a5ff3f
+# github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 github.com/josephspurrier/goversioninfo
+# github.com/lucor/goinfo v0.0.0-20200401173949-526b5363a13a
+github.com/lucor/goinfo
+github.com/lucor/goinfo/format
+github.com/lucor/goinfo/report
 # github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 github.com/nfnt/resize
-# github.com/pkg/errors v0.8.1
+# github.com/pkg/errors v0.9.1
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/srwiley/oksvg v0.0.0-20200311192757-870daf9aa564
 github.com/srwiley/oksvg
-# github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
+# github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 github.com/srwiley/rasterx
-# github.com/stretchr/testify v1.3.1-0.20190311161405-34c6fa2dc709
+# github.com/stretchr/testify v1.5.1
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# golang.org/x/image v0.0.0-20190802002840-cff245a6509b
-golang.org/x/image/font
-golang.org/x/image/math/fixed
+# golang.org/x/image v0.0.0-20200430140353-33d19683fad8
 golang.org/x/image/colornames
+golang.org/x/image/draw
+golang.org/x/image/font
+golang.org/x/image/math/f64
+golang.org/x/image/math/fixed
 golang.org/x/image/vector
-# golang.org/x/mod v0.1.1-0.20191209134235-331c550502dd
+# golang.org/x/mod v0.2.0
+golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
-golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/semver
-# golang.org/x/net v0.0.0-20190620200207-3b0461eec859
-golang.org/x/net/html/charset
+# golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 golang.org/x/net/html
 golang.org/x/net/html/atom
-# golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb
+golang.org/x/net/html/charset
+# golang.org/x/sys v0.0.0-20200327173247-9dae0f8f5775
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.0
+# golang.org/x/text v0.3.2
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
-golang.org/x/text/transform
-golang.org/x/text/encoding/internal/identifier
 golang.org/x/text/encoding/internal
+golang.org/x/text/encoding/internal/identifier
 golang.org/x/text/encoding/japanese
 golang.org/x/text/encoding/korean
 golang.org/x/text/encoding/simplifiedchinese
 golang.org/x/text/encoding/traditionalchinese
 golang.org/x/text/encoding/unicode
-golang.org/x/text/language
-golang.org/x/text/internal/utf8internal
-golang.org/x/text/runes
+golang.org/x/text/internal/language
+golang.org/x/text/internal/language/compact
 golang.org/x/text/internal/tag
-# golang.org/x/tools v0.0.0-20200117012304-6edc0a871e69
-golang.org/x/tools/go/packages
+golang.org/x/text/internal/utf8internal
+golang.org/x/text/language
+golang.org/x/text/runes
+golang.org/x/text/transform
+# golang.org/x/tools v0.0.0-20200328031815-3db5fc6bac03
 golang.org/x/tools/go/gcexportdata
-golang.org/x/tools/go/internal/packagesdriver
-golang.org/x/tools/internal/gopathwalk
-golang.org/x/tools/internal/packagesinternal
-golang.org/x/tools/internal/semver
 golang.org/x/tools/go/internal/gcimporter
-golang.org/x/tools/internal/fastwalk
-# golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898
+golang.org/x/tools/go/internal/packagesdriver
+golang.org/x/tools/go/packages
+golang.org/x/tools/internal/gocommand
+golang.org/x/tools/internal/packagesinternal
+# golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 golang.org/x/xerrors
 golang.org/x/xerrors/internal
+# gopkg.in/yaml.v2 v2.2.8
+gopkg.in/yaml.v2

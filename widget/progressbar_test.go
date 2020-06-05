@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +23,7 @@ func TestProgressRenderer_Layout(t *testing.T) {
 	bar := NewProgressBar()
 	bar.Resize(fyne.NewSize(100, 10))
 
-	render := Renderer(bar).(*progressRenderer)
+	render := test.WidgetRenderer(bar).(*progressRenderer)
 	assert.Equal(t, 0, render.bar.Size().Width)
 
 	bar.SetValue(.5)
@@ -36,7 +37,7 @@ func TestProgressRenderer_Layout_Overflow(t *testing.T) {
 	bar := NewProgressBar()
 	bar.Resize(fyne.NewSize(100, 10))
 
-	render := Renderer(bar).(*progressRenderer)
+	render := test.WidgetRenderer(bar).(*progressRenderer)
 	bar.SetValue(1)
 	assert.Equal(t, bar.Size().Width, render.bar.Size().Width)
 
@@ -46,11 +47,11 @@ func TestProgressRenderer_Layout_Overflow(t *testing.T) {
 
 func TestProgressRenderer_ApplyTheme(t *testing.T) {
 	bar := NewProgressBar()
-	render := Renderer(bar).(*progressRenderer)
+	render := test.WidgetRenderer(bar).(*progressRenderer)
 
 	textSize := render.label.TextSize
 	customTextSize := textSize
-	withTestTheme(func() {
+	test.WithTestTheme(t, func() {
 		render.applyTheme()
 		customTextSize = render.label.TextSize
 	})

@@ -115,7 +115,7 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 
 func (d *dialog) applyTheme() {
 	r, g, b, _ := theme.BackgroundColor().RGBA()
-	bg := &color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
+	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
 	d.bg.FillColor = bg
 }
 
@@ -164,10 +164,10 @@ func (d *dialog) hideWithResponse(resp bool) {
 	d.sendResponse = false
 }
 
-// ShowCustom shows a dialog over the specified application using custom
+// NewCustom creates and returns a dialog over the specified application using custom
 // content. The button will have the dismiss text set.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
-func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
+func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 
 	d.dismiss = &widget.Button{Text: dismiss,
@@ -175,15 +175,15 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 	}
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
-	d.Show()
+	return d
 }
 
-// ShowCustomConfirm shows a dialog over the specified application using custom
-// content. The cancel button will have the dismiss text set and the "OK" will use
-// the confirm text. The response callback is called on user action.
+// NewCustomConfirm creates and returns a dialog over the specified application using
+// custom content. The cancel button will have the dismiss text set and the "OK" will
+// use the confirm text. The response callback is called on user action.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
-func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
-	callback func(bool), parent fyne.Window) {
+func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
+	callback func(bool), parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 	d.callback = callback
 
@@ -197,5 +197,21 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 	}
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
-	d.Show()
+	return d
+}
+
+// ShowCustom shows a dialog over the specified application using custom
+// content. The button will have the dismiss text set.
+// The MinSize() of the CanvasObject passed will be used to set the size of the window.
+func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
+	NewCustom(title, dismiss, content, parent).Show()
+}
+
+// ShowCustomConfirm shows a dialog over the specified application using custom
+// content. The cancel button will have the dismiss text set and the "OK" will use
+// the confirm text. The response callback is called on user action.
+// The MinSize() of the CanvasObject passed will be used to set the size of the window.
+func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
+	callback func(bool), parent fyne.Window) {
+	NewCustomConfirm(title, confirm, dismiss, content, callback, parent).Show()
 }

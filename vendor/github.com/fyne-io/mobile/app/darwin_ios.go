@@ -9,7 +9,7 @@ package app
 
 /*
 #cgo CFLAGS: -x objective-c -DGL_SILENCE_DEPRECATION
-#cgo LDFLAGS: -framework Foundation -framework UIKit -framework GLKit -framework OpenGLES -framework QuartzCore
+#cgo LDFLAGS: -framework Foundation -framework UIKit -framework MobileCoreServices -framework GLKit -framework OpenGLES -framework QuartzCore -framework UserNotifications
 #include <sys/utsname.h>
 #include <stdint.h>
 #include <pthread.h>
@@ -24,10 +24,11 @@ void swapBuffers(GLintptr ctx);
 uint64_t threadID();
 
 UIEdgeInsets getDevicePadding();
-void showKeyboard();
+void showKeyboard(int keyboardType);
 void hideKeyboard();
 
-void showFileOpenPicker();
+void showFileOpenPicker(char* mimes, char *exts);
+void closeFileResource(void* urlPtr);
 */
 import "C"
 import (
@@ -36,6 +37,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/fyne-io/mobile/event/lifecycle"
 	"github.com/fyne-io/mobile/event/paint"
@@ -258,8 +260,8 @@ func (a *app) loop(ctx C.GLintptr) {
 }
 
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func driverShowVirtualKeyboard() {
-	C.showKeyboard()
+func driverShowVirtualKeyboard(keyboard KeyboardType) {
+	C.showKeyboard(C.int(int32(keyboard)))
 }
 
 // driverHideVirtualKeyboard requests the driver to hide any visible virtual keyboard
@@ -267,20 +269,36 @@ func driverHideVirtualKeyboard() {
 	C.hideKeyboard()
 }
 
-var fileCallback func(string)
+var fileCallback func(string, func())
 
 //export filePickerReturned
-func filePickerReturned(str *C.char) {
+func filePickerReturned(str *C.char, urlPtr unsafe.Pointer) {
 	if fileCallback == nil {
 		return
 	}
 
-	fileCallback(C.GoString(str))
+	fileCallback(C.GoString(str), func() {
+		C.closeFileResource(urlPtr)
+	})
 	fileCallback = nil
 }
 
-func driverShowFileOpenPicker(callback func(string)) {
+func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
 	fileCallback = callback
 
-	C.showFileOpenPicker()
+	mimes := strings.Join(filter.MimeTypes, "|")
+
+	// extensions must have the '.' removed for UTI lookups on iOS
+	extList := []string{}
+	for _, ext := range filter.Extensions {
+		extList = append(extList, ext[1:])
+	}
+	exts := strings.Join(extList, "|")
+
+	mimeStr := C.CString(mimes)
+	defer C.free(unsafe.Pointer(mimeStr))
+	extStr := C.CString(exts)
+	defer C.free(unsafe.Pointer(extStr))
+
+	C.showFileOpenPicker(mimeStr, extStr)
 }

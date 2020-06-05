@@ -168,7 +168,10 @@ func (w *Writer) Close() error {
 	}
 
 	mHash := sha1.New()
-	mHash.Write(manifest.Bytes())
+	_, err := mHash.Write(manifest.Bytes())
+	if err != nil {
+		return err
+	}
 	cert := new(bytes.Buffer)
 	fmt.Fprint(cert, certHeader)
 	fmt.Fprintf(cert, "SHA1-Digest-Manifest: %s\n\n", base64.StdEncoding.EncodeToString(mHash.Sum(nil)))
@@ -260,7 +263,10 @@ func (w *fileWriter) Write(p []byte) (n int, err error) {
 	if w.closed {
 		return 0, fmt.Errorf("apk: write to closed file %q", w.name)
 	}
-	w.sha1.Write(p)
+	_, err = w.sha1.Write(p)
+	if err != nil {
+		err = fmt.Errorf("apk: sha1 write %s", err)
+	}
 	n, err = w.w.Write(p)
 	if err != nil {
 		err = fmt.Errorf("apk: %v", err)

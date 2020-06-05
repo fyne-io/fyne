@@ -1,6 +1,7 @@
 package gomobile
 
 import (
+	"fyne.io/fyne/driver/mobile"
 	"github.com/fyne-io/mobile/event/size"
 
 	"fyne.io/fyne"
@@ -35,8 +36,16 @@ func (*device) HasKeyboard() bool {
 	return false
 }
 
+func (d *device) SystemScale() float32 {
+	return d.SystemScaleForWindow(nil)
+}
+
 func (*device) ShowVirtualKeyboard() {
-	showVirtualKeyboard()
+	showVirtualKeyboard(mobile.DefaultKeyboard)
+}
+
+func (*device) ShowVirtualKeyboardType(keyboard mobile.KeyboardType) {
+	showVirtualKeyboard(keyboard)
 }
 
 func (*device) HideVirtualKeyboard() {

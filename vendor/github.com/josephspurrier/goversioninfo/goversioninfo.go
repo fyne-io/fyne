@@ -87,10 +87,12 @@ type StringFileInfo struct {
 // Helpers
 // *****************************************************************************
 
+// SizedReader is a *bytes.Buffer.
 type SizedReader struct {
 	*bytes.Buffer
 }
 
+// Size returns the length of the buffer.
 func (s SizedReader) Size() int64 {
 	return int64(s.Buffer.Len())
 }

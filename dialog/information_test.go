@@ -9,7 +9,9 @@ import (
 )
 
 func TestDialog_MinSize(t *testing.T) {
-	d := NewInformation("Looooooooooooooong title", "message...", test.NewWindow(nil))
+	window := test.NewWindow(nil)
+	defer window.Close()
+	d := NewInformation("Looooooooooooooong title", "message...", window)
 	information := d.(*dialog)
 
 	dialogContent := information.win.Content.MinSize()

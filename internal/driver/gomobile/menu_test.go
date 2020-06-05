@@ -1,13 +1,51 @@
+// +build !windows !ci
+
 package gomobile
 
 import (
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMobileCanvas_DismissBar(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(canvas.NewRectangle(theme.BackgroundColor()))
+	menu := fyne.NewMainMenu(
+		fyne.NewMenu("Test"))
+	c.showMenu(menu)
+	c.resize(fyne.NewSize(100, 100))
+
+	assert.NotNil(t, c.menu)
+	// simulate tap as the test util does not know about our menu...
+	c.tapDown(fyne.NewPos(80, 20), 1)
+	c.tapUp(fyne.NewPos(80, 20), 1, nil, nil, nil)
+	assert.Nil(t, c.menu)
+}
+
+func TestMobileCanvas_DismissMenu(t *testing.T) {
+	c := NewCanvas().(*mobileCanvas)
+	c.SetContent(canvas.NewRectangle(theme.BackgroundColor()))
+	menu := fyne.NewMainMenu(
+		fyne.NewMenu("Test", fyne.NewMenuItem("TapMe", func() {})))
+	c.showMenu(menu)
+	c.resize(fyne.NewSize(100, 100))
+
+	assert.NotNil(t, c.menu)
+	menuObj := c.menu.(*fyne.Container).Objects[0].(*widget.Box).Children[1].(*menuLabel)
+	point := &fyne.PointEvent{Position: fyne.NewPos(10, 10)}
+	menuObj.Tapped(point)
+
+	tapMeItem := c.overlays.Top().(*internalWidget.OverlayContainer).Content.(*widget.Menu).Items[0].(fyne.Tappable)
+	tapMeItem.Tapped(point)
+	assert.Nil(t, c.menu)
+}
 
 func TestMobileCanvas_Menu(t *testing.T) {
 	c := &mobileCanvas{}

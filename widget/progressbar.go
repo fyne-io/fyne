@@ -6,24 +6,23 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
 const defaultText = "%d%%"
 
 type progressRenderer struct {
-	objects []fyne.CanvasObject
-
-	bar   *canvas.Rectangle
-	label *canvas.Text
-
+	widget.BaseRenderer
+	bar      *canvas.Rectangle
+	label    *canvas.Text
 	progress *ProgressBar
 }
 
 // MinSize calculates the minimum size of a progress bar.
 // This is simply the "100%" label size plus padding.
 func (p *progressRenderer) MinSize() fyne.Size {
-	text := textMinSize("100%", p.label.TextSize, p.label.TextStyle)
+	text := fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
 
 	return fyne.NewSize(text.Width+theme.Padding()*4, text.Height+theme.Padding()*2)
 }
@@ -37,7 +36,7 @@ func (p *progressRenderer) updateBar() {
 	}
 
 	delta := float32(p.progress.Max - p.progress.Min)
-	ratio := float32(p.progress.Value-p.progress.Min) / float32(delta)
+	ratio := float32(p.progress.Value-p.progress.Min) / delta
 
 	p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
 
@@ -67,13 +66,6 @@ func (p *progressRenderer) Refresh() {
 	p.updateBar()
 
 	canvas.Refresh(p.progress)
-}
-
-func (p *progressRenderer) Objects() []fyne.CanvasObject {
-	return p.objects
-}
-
-func (p *progressRenderer) Destroy() {
 }
 
 // ProgressBar widget creates a horizontal panel that indicates progress
@@ -106,7 +98,7 @@ func (p *ProgressBar) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.PrimaryColor())
 	label := canvas.NewText("0%", theme.TextColor())
 	label.Alignment = fyne.TextAlignCenter
-	return &progressRenderer{[]fyne.CanvasObject{bar, label}, bar, label, p}
+	return &progressRenderer{widget.NewBaseRenderer([]fyne.CanvasObject{bar, label}), bar, label, p}
 }
 
 // NewProgressBar creates a new progress bar widget.

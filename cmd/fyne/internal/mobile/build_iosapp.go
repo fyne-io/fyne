@@ -56,7 +56,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string, appName 
 			printcmd("echo \"%s\" > %s", file.contents, file.name)
 		}
 		if !buildN {
-			if err := ioutil.WriteFile(file.name, file.contents, 0644); err != nil {
+			if err := ioutil.WriteFile(file.name, file.contents, 0600); err != nil {
 				return nil, err
 			}
 		}
@@ -152,8 +152,16 @@ func detectTeamID() (string, error) {
 	)
 	pemString, err := cmd.Output()
 	if err != nil {
-		err = fmt.Errorf("failed to pull the signing certificate to determine your team ID: %v", err)
-		return "", err
+		// If no "iPhone Developer" cert is found then try the new "Apple Development".
+		cmd := exec.Command(
+			"security", "find-certificate",
+			"-c", "Apple Development", "-p",
+		)
+		pemString, err = cmd.Output()
+		if err != nil {
+			err = fmt.Errorf("failed to pull the signing certificate to determine your team ID: %v", err)
+			return "", err
+		}
 	}
 
 	block, _ := pem.Decode(pemString)
