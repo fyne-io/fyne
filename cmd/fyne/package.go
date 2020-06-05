@@ -298,7 +298,7 @@ func (p *packager) packageIOS() error {
 }
 
 func (p *packager) addFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/386, darwin, ios, linux, windows)")
+	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, ios, linux, windows)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
@@ -424,11 +424,7 @@ func (p *packager) doPackage() error {
 		return p.packageLinux()
 	case "windows":
 		return p.packageWindows()
-	case "android/arm":
-		return p.packageAndroid(p.os)
-	case "android/386":
-		return p.packageAndroid(p.os)
-	case "android":
+	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
 		return p.packageAndroid(p.os)
 	case "ios":
 		return p.packageIOS()
