@@ -10,8 +10,9 @@ More detailed release notes can be found on the [releases page](https://github.c
 * File open and save dialogs (#225)
 * Add notifications support (#398)
 * Add text wrap support (#332)
-* Add accordion widget (#206)
+* Add Accordion widget (#206)
 * Add TextGrid widget (#115)
+* Add SplitContainer widget (#205)
 * Add new URI type and handlers for cross-platform data access
 * Desktop apps can now create splash windows
 * Add ScaleMode to images, new ImageScalePixels feature for retro graphics
