@@ -16,10 +16,10 @@ import (
 )
 
 func TestShowFileOpen(t *testing.T) {
-	var chosen fyne.FileReadCloser
+	var chosen fyne.URIReadCloser
 	var openErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileOpen(func(file fyne.FileReadCloser, err error) {
+	ShowFileOpen(func(file fyne.URIReadCloser, err error) {
 		chosen = file
 		openErr = err
 	}, win)
@@ -71,10 +71,10 @@ func TestShowFileOpen(t *testing.T) {
 }
 
 func TestShowFileSave(t *testing.T) {
-	var chosen fyne.FileWriteCloser
+	var chosen fyne.URIWriteCloser
 	var saveErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileSave(func(file fyne.FileWriteCloser, err error) {
+	ShowFileSave(func(file fyne.URIWriteCloser, err error) {
 		chosen = file
 		saveErr = err
 	}, win)
@@ -138,7 +138,7 @@ func TestShowFileSave(t *testing.T) {
 
 func TestFileFilters(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
-	f := NewFileOpen(func(file fyne.FileReadCloser, err error) {
+	f := NewFileOpen(func(file fyne.URIReadCloser, err error) {
 	}, win)
 
 	f.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
