@@ -26,4 +26,3 @@ func Test_tabButtonRenderer_SetText(t *testing.T) {
 	renderer = cache.Renderer(button).(*tabButtonRenderer)
 	assert.Equal(t, "Replace", renderer.label.Text)
 }
-
