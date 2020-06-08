@@ -129,7 +129,9 @@ func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 
 	objects := []fyne.CanvasObject{track, active, thumb}
 
-	return &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
+	slide := &sliderRenderer{widget.NewBaseRenderer(objects), track, active, thumb, s}
+	slide.Refresh() // prepare for first draw
+	return slide
 }
 
 const (
@@ -152,7 +154,7 @@ func (s *sliderRenderer) Refresh() {
 	s.active.FillColor = theme.TextColor()
 
 	s.Layout(s.slider.Size())
-	canvas.Refresh(s.slider)
+	canvas.Refresh(s.slider.super())
 }
 
 // Layout the components of the widget.
