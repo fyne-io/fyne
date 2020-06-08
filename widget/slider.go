@@ -215,6 +215,9 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 func (s *sliderRenderer) getOffset() int {
 	w := s.slider
 	size := s.track.Size()
+	if w.Value == w.Min || w.Min == w.Max {
+		return 0
+	}
 	ratio := (w.Value - w.Min) / (w.Max - w.Min)
 	endPad := s.slider.endOffset()
 
