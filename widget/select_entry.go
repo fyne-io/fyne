@@ -70,7 +70,7 @@ func (e *SelectEntry) SetOptions(options []string) {
 		c.Focus(e.popUp)
 		e.popUp.parent = dropDownButton
 		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
-		e.popUp.Menu.selectCurrent(e.Text)
+		e.popUp.Menu.selectCurrent(e.Text   )
 	})
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())
 	e.ActionItem = dropDownButton
