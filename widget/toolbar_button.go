@@ -138,10 +138,6 @@ func (r *ToolbarButtonRenderer) BackgroundColor() color.Color {
 	}
 }
 
-// Destroy does nothing
-func (r *ToolbarButtonRenderer) Destroy() {
-}
-
 // Layout the components of the button widget
 func (r *ToolbarButtonRenderer) Layout(size fyne.Size) {
 	padding := r.padding()

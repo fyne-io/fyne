@@ -136,7 +136,7 @@ func (t *Toolbar) KeyUp(key *fyne.KeyEvent) {
 // KeyDown is called when a key is pressed
 func (t *Toolbar) KeyDown(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
-		t.buttons[t.current].pressed = false
+		t.buttons[t.current].pressed = true
 		t.buttons[t.current].Refresh()
 	}
 }
@@ -209,11 +209,16 @@ func (r *toolbarRenderer) Refresh() {
 func (r *toolbarRenderer) resetObjects() {
 	if len(r.objs) != len(r.toolbar.Items) {
 		r.objs = make([]fyne.CanvasObject, 0, len(r.toolbar.Items))
-		for _, item := range r.toolbar.Items {
+		// Remove old buttons and recreate when renderer is recreated
+		r.toolbar.buttons = nil
+		for i, item := range r.toolbar.Items {
 			o := item.ToolbarObject()
 			if b, ok := o.(*ToolbarButton); ok {
 				b.toolbar = r.toolbar
 				r.toolbar.buttons = append(r.toolbar.buttons, b)
+				if r.toolbar.current == i {
+					b.focused = r.toolbar.focused
+				}
 			}
 			r.objs = append(r.objs, o)
 		}
