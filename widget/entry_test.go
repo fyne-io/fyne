@@ -1264,7 +1264,6 @@ func TestEntry_Select(t *testing.T) {
 			entry, window := setupSelection(tt.setupReverse)
 			defer teardownImageTest(window)
 			c := window.Canvas()
-
 			if tt.setupReverse {
 				test.AssertImageMatches(t, "entry/selection_reverse_initial.png", c.Capture())
 			} else {

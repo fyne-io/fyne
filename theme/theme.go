@@ -96,7 +96,7 @@ const PressedShade = 14
 // HoveredShade is the shade used for hovered buttons, in %
 const HoveredShade = 4
 
-// FocusedShade is the shade used for focused buttons, in %
+// FocusedShade is the shade used for focused buttons, in %.
 const FocusedShade = 8
 
 func (t *builtinTheme) BackgroundColor() color.Color {
