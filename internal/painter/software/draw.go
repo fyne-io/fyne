@@ -47,11 +47,11 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		if objAspect > imgAspect {
 			newWidth := int(float32(height) * imgAspect)
 			scaledX += (width - newWidth) / 2
-			width = internal.ScaleInt(c, newWidth)
+			width = newWidth
 		} else if objAspect < imgAspect {
 			newHeight := int(float32(width) / imgAspect)
 			scaledY += (height - newHeight) / 2
-			height = internal.ScaleInt(c, newHeight)
+			height = newHeight
 		}
 	}
 

@@ -20,7 +20,7 @@ func confirmCallback(response bool) {
 	fmt.Println("Responded with", response)
 }
 
-func fileOpened(f fyne.FileReadCloser) {
+func fileOpened(f fyne.URIReadCloser) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
@@ -38,7 +38,7 @@ func fileOpened(f fyne.FileReadCloser) {
 	}
 }
 
-func fileSaved(f fyne.FileWriteCloser) {
+func fileSaved(f fyne.URIWriteCloser) {
 	if f == nil {
 		log.Println("Cancelled")
 		return
@@ -47,7 +47,7 @@ func fileSaved(f fyne.FileWriteCloser) {
 	log.Println("Save to...", f.URI())
 }
 
-func loadImage(f fyne.FileReadCloser) *canvas.Image {
+func loadImage(f fyne.URIReadCloser) *canvas.Image {
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		fyne.LogError("Failed to load image data", err)
@@ -58,7 +58,7 @@ func loadImage(f fyne.FileReadCloser) *canvas.Image {
 	return canvas.NewImageFromResource(res)
 }
 
-func showImage(f fyne.FileReadCloser) {
+func showImage(f fyne.URIReadCloser) {
 	img := loadImage(f)
 	if img == nil {
 		return
@@ -71,7 +71,7 @@ func showImage(f fyne.FileReadCloser) {
 	w.Show()
 }
 
-func loadText(f fyne.FileReadCloser) string {
+func loadText(f fyne.URIReadCloser) string {
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		fyne.LogError("Failed to load text data", err)
@@ -84,7 +84,7 @@ func loadText(f fyne.FileReadCloser) string {
 	return string(data)
 }
 
-func showText(f fyne.FileReadCloser) {
+func showText(f fyne.URIReadCloser) {
 	text := widget.NewLabel(loadText(f))
 	text.Wrapping = fyne.TextWrapWord
 
@@ -137,7 +137,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 			prog.Show()
 		}),
 		widget.NewButton("File Open With Filter (.txt or .png)", func() {
-			fd := dialog.NewFileOpen(func(reader fyne.FileReadCloser, err error) {
+			fd := dialog.NewFileOpen(func(reader fyne.URIReadCloser, err error) {
 				if err == nil && reader == nil {
 					return
 				}
@@ -152,7 +152,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 			fd.Show()
 		}),
 		widget.NewButton("File Save", func() {
-			dialog.ShowFileSave(func(writer fyne.FileWriteCloser, err error) {
+			dialog.ShowFileSave(func(writer fyne.URIWriteCloser, err error) {
 				if err != nil {
 					dialog.ShowError(err, win)
 					return

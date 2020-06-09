@@ -282,8 +282,8 @@ func (p *packager) packageWindows() error {
 	return nil
 }
 
-func (p *packager) packageAndroid() error {
-	return mobile.RunNewBuild("android", p.appID, p.icon, p.name, p.release)
+func (p *packager) packageAndroid(arch string) error {
+	return mobile.RunNewBuild(arch, p.appID, p.icon, p.name, p.release)
 }
 
 func (p *packager) packageIOS() error {
@@ -298,7 +298,7 @@ func (p *packager) packageIOS() error {
 }
 
 func (p *packager) addFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, darwin, ios, linux, windows)")
+	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, ios, linux, windows)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
@@ -424,8 +424,8 @@ func (p *packager) doPackage() error {
 		return p.packageLinux()
 	case "windows":
 		return p.packageWindows()
-	case "android":
-		return p.packageAndroid()
+	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
+		return p.packageAndroid(p.os)
 	case "ios":
 		return p.packageIOS()
 	default:
@@ -434,5 +434,5 @@ func (p *packager) doPackage() error {
 }
 
 func (p *packager) isMobile() bool {
-	return p.os == "ios" || p.os == "android"
+	return p.os == "ios" || strings.HasPrefix(p.os, "android")
 }

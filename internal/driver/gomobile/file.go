@@ -26,7 +26,7 @@ func (f *fileOpen) URI() fyne.URI {
 	return f.uri
 }
 
-func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.FileReadCloser, error) {
+func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.URIReadCloser, error) {
 	file := &fileOpen{uri: u}
 	read, err := nativeFileOpen(file)
 	if read == nil {
@@ -36,7 +36,7 @@ func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.FileReadCloser, error)
 	return file, err
 }
 
-func (d *mobileDriver) FileWriterForURI(u fyne.URI) (fyne.FileWriteCloser, error) {
+func (d *mobileDriver) FileWriterForURI(u fyne.URI) (fyne.URIWriteCloser, error) {
 	return nil, errors.New("file writing is not supported on mobile")
 }
 
@@ -68,7 +68,7 @@ type hasPicker interface {
 }
 
 // ShowFileOpenPicker loads the native file open dialog and returns the chosen file path via the callback func.
-func ShowFileOpenPicker(callback func(fyne.FileReadCloser, error), filter storage.FileFilter) {
+func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage.FileFilter) {
 	drv := fyne.CurrentApp().Driver().(*mobileDriver)
 	if a, ok := drv.app.(hasPicker); ok {
 		a.ShowFileOpenPicker(func(uri string, closer func()) {
