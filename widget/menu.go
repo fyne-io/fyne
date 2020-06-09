@@ -62,8 +62,11 @@ func (m *Menu) moveSelection(delta int) {
 	i := m.currentItem
 	for true {
 		i += delta
-		if i < 0 || i >= len(m.Items) {
-			break
+		if i < 0 {
+			i = 0
+		}
+		if i >= len(m.Items) {
+			i = len(m.Items) - 1
 		}
 		if o, ok := m.Items[i].(*menuItem); ok {
 			m.Items[m.currentItem].(*menuItem).FocusLost()
