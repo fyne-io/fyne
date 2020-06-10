@@ -213,13 +213,13 @@ func (s *sliderRenderer) MinSize() fyne.Size {
 }
 
 func (s *sliderRenderer) getOffset() int {
+	endPad := s.slider.endOffset()
 	w := s.slider
 	size := s.track.Size()
 	if w.Value == w.Min || w.Min == w.Max {
-		return 0
+		return endPad
 	}
 	ratio := (w.Value - w.Min) / (w.Max - w.Min)
-	endPad := s.slider.endOffset()
 
 	switch w.Orientation {
 	case Vertical:

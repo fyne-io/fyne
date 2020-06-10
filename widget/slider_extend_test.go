@@ -23,6 +23,7 @@ func newExtendedSlider() *extendedSlider {
 
 func TestSlider_Extended_Value(t *testing.T) {
 	slider := newExtendedSlider()
+	slider.Resize(slider.MinSize().Add(fyne.NewSize(20, 0)))
 	objs := cache.Renderer(slider).Objects()
 	assert.Equal(t, 3, len(objs))
 	thumb := objs[2]
