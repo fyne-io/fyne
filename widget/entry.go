@@ -1034,7 +1034,7 @@ func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RUnlock()
 
 	if content != string(provider.buffer) {
-		provider.setText(content)
+		r.entry.SetText(content)
 		return
 	}
 
