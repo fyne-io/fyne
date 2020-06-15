@@ -265,10 +265,20 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file}
 	ui := d.makeUI()
-	dir, err := os.UserHomeDir()
+
+	// by default, use ./ as the starting directory
+	dir, err := os.Getwd()
 	if err != nil {
-		fyne.LogError("Could not load user home dir", err)
-		dir, _ = os.Getwd() //fallback
+
+		// if that doesn't work, fail-over to ~/
+		fyne.LogError("Could not load CWD", err)
+		dir, err = os.Getwd()
+		if err != nil {
+
+			// if that dosen't work, fail over to /
+			fyne.LogError("Could not load user home dir", err)
+			dir = "/"
+		}
 	}
 	d.setDirectory(dir)
 
