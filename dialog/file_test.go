@@ -15,6 +15,93 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+// comparePaths compares if two file paths point to the same thing, and calls
+// t.Fatalf() if there is an error in performing the comparison.
+//
+// Returns true of both paths point to the same thing.
+//
+// You should use this if you need to compare file paths, since it explicitly
+// normalizes the paths to a stable canonical form. It also nicely
+// abstracts out the requisite error handling.
+//
+// You should only call this function on paths that you expect to be valid.
+func comparePaths(t *testing.T, p1, p2 string) bool {
+	a1, err := filepath.Abs(p1)
+	if err != nil {
+		t.Fatalf("Failed to normalize path '%s'", p1)
+	}
+
+	a2, err := filepath.Abs(p2)
+	if err != nil {
+		t.Fatalf("Failed to normalize path '%s'", p2)
+	}
+
+	return a1 == a2
+}
+
+func TestEffectiveStartingDir(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Skipf("os.Getwd() failed, cannot run this test on this system (error getting ./), error was '%s'", err)
+	}
+
+	parent := filepath.Dir(wd)
+	_, err = os.Stat(parent)
+	if err != nil {
+		t.Skipf("os.Getwd() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
+	}
+
+	dialog := &FileDialog{}
+
+	// test that we get ./ when running with the default struct values
+	res := dialog.effectiveStartingDir()
+	expect := wd
+	if err != nil {
+		t.Skipf("os.Getwd() failed, cannot run this test on this system, error was '%s'", err)
+	}
+	if !comparePaths(t, res, expect) {
+		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
+			expect, res)
+	}
+
+	// this should always be equivalent to the preceding test
+	dialog.StartingDirectory = ""
+	res = dialog.effectiveStartingDir()
+	expect = wd
+	if err != nil {
+		t.Skipf("os.Getwd() failed, cannot run this test on this system, error was '%s'", err)
+	}
+	if !comparePaths(t, res, expect) {
+		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
+			expect, res)
+	}
+
+	// check using StartingDirectory with some other directory
+	dialog.StartingDirectory = parent
+	res = dialog.effectiveStartingDir()
+	expect = parent
+	if err != nil {
+		t.Skipf("os.Getwd() failed, cannot run this test on this system, error was '%s'", err)
+	}
+	if res != expect {
+		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
+			expect, res)
+	}
+
+	// make sure we fail over if the specified directory does not exist
+	dialog.StartingDirectory = "/some/file/that/does/not/exist"
+	res = dialog.effectiveStartingDir()
+	expect = wd
+	if err != nil {
+		t.Skipf("os.Getwd() failed, cannot run this test on this system, error was '%s'", err)
+	}
+	if res != expect {
+		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
+			expect, res)
+	}
+
+}
+
 func TestShowFileOpen(t *testing.T) {
 	var chosen fyne.URIReadCloser
 	var openErr error
