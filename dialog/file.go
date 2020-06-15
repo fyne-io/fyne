@@ -375,8 +375,8 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 	}
 }
 
-// Configure the directory that the file dialog should show by default. If set
-// to the empty string ./ (CWD) is assumed.
+// SetStartingDirectory configures the directory that the file dialog should
+// show by default. If set to the empty string ./ (CWD) is assumed.
 func (f *FileDialog) SetStartingDirectory(path string) {
 	f.startingDirectory = path
 }
@@ -420,7 +420,7 @@ func ShowFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window)
 	ShowFileSaveAt(callback, parent, "")
 }
 
-// ShoeFileSaveAt works simialrly to ShowFileSave(), but with a custom starting
+// ShowFileSaveAt works simialrly to ShowFileSave(), but with a custom starting
 // directory.
 func ShowFileSaveAt(callback func(fyne.URIWriteCloser, error), parent fyne.Window, where string) {
 	dialog := NewFileSave(callback, parent)
