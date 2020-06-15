@@ -452,7 +452,7 @@ func (w *window) destroy(d *gLDriver) {
 		w.eventLock.Unlock()
 	}
 
-	if w.master || len(d.windowList()) == 0 {
+	if w.master {
 		d.Quit()
 	} else if runtime.GOOS == "darwin" {
 		d.focusPreviousWindow()
