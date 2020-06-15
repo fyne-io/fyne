@@ -42,7 +42,7 @@ type FileDialog struct {
 	parent            fyne.Window
 	dialog            *fileDialog
 	dismissText       string
-	startingDirectory string
+	StartingDirectory string
 }
 
 // Declare conformity to Dialog interface
@@ -263,44 +263,52 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 	}
 }
 
+// effectiveStartingDir calculates the directory at which the file dialog should
+// open, based on the values of StartingDirectory, CWD, home, and any error
+// conditions which occur.
+//
+// Order of precedence is:
+//
+// * file.StartingDirectory if non-empty and os.Stat()-able
+// * os.Getwd()
+// * os.UserHomeDir()
+// * "/" (should be filesystem root on all supported platforms)
+func (file *FileDialog) effectiveStartingDir() string {
+	if file.StartingDirectory != "" {
+		// the starting directory is set explicitly
+		if _, err := os.Stat(file.StartingDirectory); err != nil {
+			fyne.LogError("Error with StartingDirectory", err)
+		} else {
+			return file.StartingDirectory
+		}
+	}
+
+	// Either no custom starting directory was set, or there
+	// was an error with it...
+	//
+	// Try to use CWD
+	var err error = nil
+	dir, err := os.Getwd()
+	if err != nil {
+		// if that doesn't work, fail-over to ~/
+		fyne.LogError("Could not load CWD", err)
+		dir, err = os.UserHomeDir()
+		if err != nil {
+
+			// if that dosen't work, fail over to /
+			fyne.LogError("Could not load user home dir", err)
+			dir = "/"
+		}
+	}
+
+	return dir
+}
+
 func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file}
 	ui := d.makeUI()
 
-	dir := ""
-
-	if file.startingDirectory != "" {
-		// the starting directory is set explicitly
-		if _, err := os.Stat(file.startingDirectory); err != nil {
-			fyne.LogError("Error with startingDirectory", err)
-		} else {
-			dir = file.startingDirectory
-		}
-	}
-
-	if dir == "" {
-		// Either no custom starting directory was set, or there
-		// was an error with it...
-		//
-		// Try to use CWD
-		var err error = nil
-		dir, err = os.Getwd()
-		if err != nil {
-
-			// if that doesn't work, fail-over to ~/
-			fyne.LogError("Could not load CWD", err)
-			dir, err = os.UserHomeDir()
-			if err != nil {
-
-				// if that dosen't work, fail over to /
-				fyne.LogError("Could not load user home dir", err)
-				dir = "/"
-			}
-		}
-
-	}
-
-	d.setDirectory(dir)
+	d.setDirectory(file.effectiveStartingDir())
 
 	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
@@ -375,12 +383,6 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 	}
 }
 
-// SetStartingDirectory configures the directory that the file dialog should
-// show by default. If set to the empty string ./ (CWD) is assumed.
-func (f *FileDialog) SetStartingDirectory(path string) {
-	f.startingDirectory = path
-}
-
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified when Show() is called.
 func NewFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) *FileDialog {
@@ -404,12 +406,12 @@ func ShowFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) 
 
 // ShowFileOpenAt works similarly to ShowFileOpen(), but with a custom starting
 // directory.
-func ShowFileOpenAt(callback func(fyne.URIReadCloser, error), parent fyne.Window, where string) {
+func ShowFileOpenAt(callback func(fyne.URIReadCloser, error), parent fyne.Window, startdir string) {
 	dialog := NewFileOpen(callback, parent)
 	if fileOpenOSOverride(dialog) {
 		return
 	}
-	dialog.SetStartingDirectory(where)
+	dialog.StartingDirectory = startdir
 	dialog.Show()
 }
 
@@ -422,11 +424,11 @@ func ShowFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window)
 
 // ShowFileSaveAt works simialrly to ShowFileSave(), but with a custom starting
 // directory.
-func ShowFileSaveAt(callback func(fyne.URIWriteCloser, error), parent fyne.Window, where string) {
+func ShowFileSaveAt(callback func(fyne.URIWriteCloser, error), parent fyne.Window, startdir string) {
 	dialog := NewFileSave(callback, parent)
 	if fileSaveOSOverride(dialog) {
 		return
 	}
-	dialog.SetStartingDirectory(where)
+	dialog.StartingDirectory = startdir
 	dialog.Show()
 }
