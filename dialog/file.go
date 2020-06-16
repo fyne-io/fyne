@@ -295,21 +295,7 @@ func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file}
 	ui := d.makeUI()
 
-	// by default, use ./ as the starting directory
-	dir, err := os.Getwd()
-	if err != nil {
-
-		// if that doesn't work, fail-over to ~/
-		fyne.LogError("Could not load CWD", err)
-		dir, err = os.UserHomeDir()
-		if err != nil {
-
-			// if that dosen't work, fail over to /
-			fyne.LogError("Could not load user home dir", err)
-			dir = "/"
-		}
-	}
-	d.setDirectory(dir)
+	d.setDirectory(file.effectiveStartingDir())
 
 	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
