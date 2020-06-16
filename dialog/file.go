@@ -273,35 +273,32 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 // * os.Getwd()
 // * os.UserHomeDir()
 // * "/" (should be filesystem root on all supported platforms)
-func (file *FileDialog) effectiveStartingDir() string {
-	if file.StartingDirectory != "" {
+func (f *FileDialog) effectiveStartingDir() string {
+	if f.StartingDirectory != "" {
 		// the starting directory is set explicitly
-		if _, err := os.Stat(file.StartingDirectory); err != nil {
+		if _, err := os.Stat(f.StartingDirectory); err != nil {
 			fyne.LogError("Error with StartingDirectory", err)
 		} else {
-			return file.StartingDirectory
+			return f.StartingDirectory
 		}
 	}
 
-	// Either no custom starting directory was set, or there
-	// was an error with it...
-	//
 	// Try to use CWD
 	var err error = nil
 	dir, err := os.Getwd()
-	if err != nil {
-		// if that doesn't work, fail-over to ~/
-		fyne.LogError("Could not load CWD", err)
-		dir, err = os.UserHomeDir()
-		if err != nil {
-
-			// if that dosen't work, fail over to /
-			fyne.LogError("Could not load user home dir", err)
-			dir = "/"
-		}
+	if err == nil {
+		return dir
 	}
+	fyne.LogError("Could not load CWD", err)
 
-	return dir
+	// fail over to home dir
+	dir, err = os.UserHomeDir()
+	if err == nil {
+		return dir
+	}
+	fyne.LogError("Could not load user home dir", err)
+
+	return "/"
 }
 
 func showFile(file *FileDialog) *fileDialog {
