@@ -134,6 +134,22 @@ func TestEntry_SetText_Manual(t *testing.T) {
 	test.AssertImageMatches(t, "entry/set_text_changed.png", c.Capture())
 }
 
+func TestEntry_SetText_Underflow(t *testing.T) {
+	entry := widget.NewEntry()
+	test.Type(entry, "test")
+	assert.Equal(t, 4, entry.CursorColumn)
+
+	entry.Text = ""
+	entry.Refresh()
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	key := &fyne.KeyEvent{Name: fyne.KeyBackspace}
+	entry.TypedKey(key)
+
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, "", entry.Text)
+}
+
 func TestEntry_OnKeyDown(t *testing.T) {
 	entry := widget.NewEntry()
 

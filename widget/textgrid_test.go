@@ -168,7 +168,14 @@ func TestTextGridRender_TextColor(t *testing.T) {
 	grid.ShowWhitespace = true
 	grid.Resize(fyne.NewSize(56, 22)) // causes refresh
 
+	currentTextColor := TextGridStyleWhitespace.TextColor()
 	assertGridStyle(t, grid, " 12", map[string]TextGridStyle{"1": customStyle, "2": TextGridStyleWhitespace})
+
+	test.WithTestTheme(t, func() {
+		grid.Refresh()
+		assert.NotEqual(t, TextGridStyleWhitespace.TextColor(), currentTextColor)
+		assertGridStyle(t, grid, " 12", map[string]TextGridStyle{"1": customStyle, "2": TextGridStyleWhitespace})
+	})
 }
 
 func assertGridContent(t *testing.T, g *TextGrid, expected string) {
