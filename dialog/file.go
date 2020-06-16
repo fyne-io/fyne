@@ -272,7 +272,7 @@ func showFile(file *FileDialog) *fileDialog {
 
 		// if that doesn't work, fail-over to ~/
 		fyne.LogError("Could not load CWD", err)
-		dir, err = os.Getwd()
+		dir, err = os.UserHomeDir()
 		if err != nil {
 
 			// if that dosen't work, fail over to /
