@@ -136,6 +136,29 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened.png", c.Capture())
 }
 
+func TestSelectEntry_SetOptions(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	e := widget.NewSelectEntry([]string{"A", "B", "C"})
+	w := test.NewWindow(e)
+	defer w.Close()
+	w.Resize(fyne.NewSize(150, 200))
+	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
+	e.Move(fyne.NewPos(10, 10))
+	c := w.Canvas()
+
+	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
+	test.TapCanvas(c, switchPos)
+	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened.png", c.Capture())
+	test.TapCanvas(c, switchPos)
+
+	e.SetOptions([]string{"1", "2", "3"})
+	test.TapCanvas(c, switchPos)
+	test.AssertImageMatches(t, "select_entry_dropdown_empty_setopts.png", c.Capture())
+}
+
 func dropDownIconWidth() int {
 	dropDownIconWidth := theme.IconInlineSize() + theme.Padding()
 	return dropDownIconWidth
