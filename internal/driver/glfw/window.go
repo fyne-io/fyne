@@ -51,7 +51,6 @@ type window struct {
 	fixedSize  bool
 
 	cursor   *glfw.Cursor
-	painted  int // part of the macOS GL fix, updated GLFW should fix this
 	canvas   *glCanvas
 	title    string
 	icon     fyne.Resource
@@ -653,7 +652,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	_, tap := co.(fyne.Tappable)
 	_, altTap := co.(fyne.SecondaryTappable)
 	// Prevent Tapped from triggering if DoubleTapped has been sent
-	if (tap || altTap) && doubleTapped == false {
+	if (tap || altTap) && !doubleTapped {
 		if action == glfw.Press {
 			w.mousePressed = co
 		} else if action == glfw.Release {

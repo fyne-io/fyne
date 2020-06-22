@@ -28,7 +28,7 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 	size := c.Size().Max(c.Content().MinSize())
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, size.Width), internal.ScaleInt(c, size.Height))
 	base := image.NewNRGBA(bounds)
-	draw.Draw(base, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
+	draw.Draw(base, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
 
 	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
 		clip := image.Rect(

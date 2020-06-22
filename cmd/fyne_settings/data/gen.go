@@ -57,5 +57,4 @@ func main() {
 	bundleFile("themeLightPreview", "widgets-light.png", f)
 
 	bundleFile("appearanceIcon", "appearance.svg", f)
-	bundleFile("languageIcon", "language.svg", f)
 }
