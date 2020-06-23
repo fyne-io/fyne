@@ -3,6 +3,7 @@ package widget
 import (
 	"image/color"
 	"math"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -32,14 +33,15 @@ var _ mobile.Keyboardable = (*Entry)(nil)
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	DisableableWidget
-	shortcut    fyne.ShortcutHandler
-	Text        string
-	PlaceHolder string
-	OnChanged   func(string) `json:"-"`
-	Password    bool
-	ReadOnly    bool // Deprecated: Use Disable() instead
-	MultiLine   bool
-	Wrapping    fyne.TextWrap
+	shortcut        fyne.ShortcutHandler
+	Text            string
+	PlaceHolder     string
+	OnChanged       func(string) `json:"-"`
+	RegexValidation *regexp.Regexp
+	Password        bool
+	ReadOnly        bool // Deprecated: Use Disable() instead
+	MultiLine       bool
+	Wrapping        fyne.TextWrap
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -964,7 +966,11 @@ func (e *Entry) updateText(text string) {
 	})
 
 	if callback != nil {
-		callback(text)
+		if e.RegexValidation == nil {
+			callback(text)
+		} else if e.RegexValidation.MatchString(text) {
+			callback(text)
+		}
 	}
 }
 

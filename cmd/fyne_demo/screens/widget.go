@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"net/url"
+	"regexp"
 	"time"
 
 	"fyne.io/fyne"
@@ -168,12 +169,20 @@ func makeTextTab() fyne.CanvasObject {
 		fixed, entryLoremIpsumScroller, grid)
 }
 
+var correctInput = regexp.MustCompile(`\d`)
+
 func makeInputTab() fyne.Widget {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Entry")
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
+	entryValidated := widget.NewEntry()
+	entryValidated.SetPlaceHolder("Validated, must be a number")
+	entryValidated.RegexValidation = correctInput
+	entryValidated.OnChanged = func(validText string) {
+		fmt.Println("Valid input:", validText)
+	}
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
@@ -188,6 +197,7 @@ func makeInputTab() fyne.Widget {
 	return widget.NewVBox(
 		entry,
 		entryDisabled,
+		entryValidated,
 		entryMultiLine,
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
