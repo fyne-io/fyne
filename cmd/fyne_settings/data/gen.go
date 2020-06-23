@@ -38,7 +38,7 @@ func openFile(filename string) *os.File {
 		return nil
 	}
 
-	_, err = f.WriteString("// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //\n\npackage main\n\nimport \"fyne.io/fyne\"\n\n")
+	_, err = f.WriteString("// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //\n\npackage settings\n\nimport \"fyne.io/fyne\"\n\n")
 	if err != nil {
 		fyne.LogError("Unable to write file "+filename, err)
 		return nil
@@ -57,4 +57,5 @@ func main() {
 	bundleFile("themeLightPreview", "widgets-light.png", f)
 
 	bundleFile("appearanceIcon", "appearance.svg", f)
+	bundleFile("languageIcon", "language.svg", f)
 }
