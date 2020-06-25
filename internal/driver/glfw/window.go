@@ -327,6 +327,11 @@ func (w *window) Show() {
 }
 
 func (w *window) doShow() {
+	if w.view() != nil {
+		w.doShowAgain()
+		return
+	}
+
 	for !running() {
 		time.Sleep(time.Millisecond * 10)
 	}
@@ -1170,6 +1175,25 @@ func (w *window) create() {
 		for _, fn := range w.pending {
 			fn()
 		}
+	})
+}
+
+func (w *window) doShowAgain() {
+	if w.viewport == nil {
+		return
+	}
+
+	runOnMain(func() {
+		// show top canvas element
+		if w.canvas.Content() != nil {
+			w.canvas.Content().Show()
+		}
+
+		w.viewport.SetPos(w.xpos, w.ypos)
+		w.viewport.Show()
+		w.viewLock.Lock()
+		w.visible = true
+		w.viewLock.Unlock()
 	})
 }
 
