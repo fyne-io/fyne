@@ -100,7 +100,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
 		}),
 		widget.NewButton("Error", func() {
-			err := errors.New("A dummy error message")
+			err := errors.New("a dummy error message")
 			dialog.ShowError(err, win)
 		}),
 		widget.NewButton("Confirm", func() {

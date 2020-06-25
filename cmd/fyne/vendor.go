@@ -65,7 +65,7 @@ func cacheModPath(r io.Reader) (string, string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return "", "", fmt.Errorf("Cannot read content: %v", err)
+		return "", "", fmt.Errorf("cannot read content: %v", err)
 	}
 	return "", "", nil
 }
@@ -73,7 +73,7 @@ func cacheModPath(r io.Reader) (string, string, error) {
 func recursiveCopy(src, target string) error {
 	files, err := ioutil.ReadDir(src)
 	if err != nil {
-		return fmt.Errorf("Cannot read dir %s: %v", src, err)
+		return fmt.Errorf("cannot read dir %s: %v", src, err)
 	}
 	err = ensureDir(target)
 	if err != nil {

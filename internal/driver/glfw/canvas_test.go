@@ -429,7 +429,6 @@ func Test_glCanvas_walkTree(t *testing.T) {
 	// test that first walk calls the hooks correctly
 	//
 	type beforeCall struct {
-		node   *renderCacheNode
 		obj    fyne.CanvasObject
 		parent fyne.CanvasObject
 		pos    fyne.Position

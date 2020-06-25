@@ -83,13 +83,6 @@ func (a *testApp) lastAppliedTheme() fyne.Theme {
 	return a.appliedTheme
 }
 
-func (a *testApp) lastNotificationSent() *fyne.Notification {
-	a.propertyLock.Lock()
-	defer a.propertyLock.Unlock()
-
-	return a.lastNotification
-}
-
 // NewApp returns a new dummy app used for testing.
 // It loads a test driver which creates a virtual window in memory for testing.
 func NewApp() fyne.App {
@@ -102,7 +95,7 @@ func NewApp() fyne.App {
 	test.Settings().AddChangeListener(listener)
 	go func() {
 		for {
-			_ = <-listener
+			<-listener
 			painter.SvgCacheReset()
 			app.ApplySettings(test.Settings(), test)
 

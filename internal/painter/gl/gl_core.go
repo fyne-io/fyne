@@ -74,7 +74,7 @@ func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScal
 		return texture
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
+		draw.Draw(rgba, rgba.Rect, img, image.Point{}, draw.Over)
 		return p.imgToTexture(rgba, textureFilter)
 	}
 }
