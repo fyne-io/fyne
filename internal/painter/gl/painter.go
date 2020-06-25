@@ -80,6 +80,13 @@ func (p *glPainter) textureScaleInt(v int) int {
 	return int(math.Round(float64(v) * float64(p.canvas.Scale()*p.texScale)))
 }
 
+func (p *glPainter) textureScale(v float32) int {
+	if p.canvas.Scale() == 1.0 && p.texScale == 1.0 {
+		return int(v)
+	}
+	return int(math.Round(float64(v) * float64(p.canvas.Scale()*p.texScale)))
+}
+
 var startCacheMonitor = &sync.Once{}
 
 // NewPainter creates a new GL based renderer for the provided canvas.

@@ -44,6 +44,8 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 			drawText(c, o, pos, base, clip)
 		case gradient:
 			drawGradient(c, o, pos, base, clip)
+		case *canvas.Circle:
+			drawCircle(c, o, pos, base, clip)
 		case *canvas.Rectangle:
 			drawRectangle(c, o, pos, base, clip)
 		case fyne.Widget:
