@@ -10,6 +10,9 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// DrawCircle rasterizes the given circle object into an image.
+// The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
+// The scale function is used to understand how many pixels are required per unit of size.
 func DrawCircle(circle *canvas.Circle, vectorPad int, scale func(float32) int) *image.RGBA {
 	radius := float32(math.Min(float64(circle.Size().Width), float64(circle.Size().Height)) / 2)
 
