@@ -23,7 +23,7 @@ github.com/fyne-io/mobile/internal/mobileinit
 # github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 github.com/go-gl/gl/v3.1/gles2
 github.com/go-gl/gl/v3.2-core/gl
-# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
+# github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3
 github.com/go-gl/glfw/v3.3/glfw
 # github.com/godbus/dbus/v5 v5.0.3
 github.com/godbus/dbus/v5
