@@ -20,8 +20,6 @@ import (
 
 var textures = make(map[fyne.CanvasObject]Texture, 1024)
 
-const vectorPad = 10
-
 func logGLError(err uint32) {
 	if err == 0 {
 		return
@@ -47,6 +45,7 @@ func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasO
 func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	circle := obj.(*canvas.Circle)
 	radius := fyne.Min(circle.Size().Width, circle.Size().Height) / 2
+	vectorPad := int(circle.StrokeWidth) + 2
 
 	width := p.textureScaleInt(circle.Size().Width + vectorPad*2)
 	height := p.textureScaleInt(circle.Size().Height + vectorPad*2)
@@ -73,6 +72,7 @@ func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 
 func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	line := obj.(*canvas.Line)
+	vectorPad := int(line.StrokeWidth) + 2
 
 	col := line.StrokeColor
 	width := p.textureScaleInt(line.Size().Width + vectorPad*2)
@@ -116,6 +116,7 @@ func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
 
 func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
+	vectorPad := int(rect.StrokeWidth) + 2
 
 	width := p.textureScaleInt(rect.Size().Width + vectorPad*2)
 	height := p.textureScaleInt(rect.Size().Height + vectorPad*2)
