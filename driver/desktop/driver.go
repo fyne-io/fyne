@@ -1,3 +1,4 @@
+// Package desktop provides desktop specific driver functionality.
 package desktop
 
 import "fyne.io/fyne"

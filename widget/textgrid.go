@@ -24,7 +24,7 @@ var (
 	TextGridStyleWhitespace TextGridStyle
 )
 
-// define the types seperately to the var definition so the custom style API is not leaked in their instances.
+// define the types separately to the var definition so the custom style API is not leaked in their instances.
 func init() {
 	TextGridStyleDefault = &CustomTextGridStyle{}
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.ButtonColor()}
