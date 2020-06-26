@@ -930,6 +930,7 @@ func (w *Window) SetClipboardString(str string) {
 func (w *Window) GetClipboardString() string {
 	cs := C.glfwGetClipboardString(w.data)
 	if cs == nil {
+		acceptError(FormatUnavailable)
 		return ""
 	}
 	return C.GoString(cs)
