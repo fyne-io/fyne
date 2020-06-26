@@ -157,15 +157,19 @@ func (w *window) RequestFocus() {
 }
 
 func (w *window) Resize(size fyne.Size) {
-	w.canvas.Resize(size)
-	w.viewLock.Lock()
-	if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
-		w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
-	}
-	w.viewLock.Unlock()
+	// we cannot perform this until window is prepared as we don't know it's scale!
 
 	w.runOnMainWhenCreated(func() {
-		w.viewport.SetSize(w.width, w.height)
+		w.canvas.Resize(size)
+		w.viewLock.Lock()
+
+		width, height := internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
+		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
+			w.width, w.height = width, height
+		}
+		w.viewLock.Unlock()
+
+		w.viewport.SetSize(width, height)
 		w.fitContent()
 	})
 }
