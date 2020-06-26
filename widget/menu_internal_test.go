@@ -38,7 +38,7 @@ func TestMenu_ItemTapped(t *testing.T) {
 	test.Tap(mi2)
 	assert.True(t, tapped)
 	assert.True(t, dismissed, "tap on item dismisses the menu")
-	assert.True(t, m.Visible(), "tap on item does not hide the menu … OnDismiss is reponsible for that")
+	assert.True(t, m.Visible(), "tap on item does not hide the menu … OnDismiss is responsible for that")
 
 	dismissed = false // reset
 	mi3.MouseIn(nil)
@@ -49,7 +49,7 @@ func TestMenu_ItemTapped(t *testing.T) {
 
 	test.Tap(smi)
 	assert.True(t, dismissed, "tap on sub item dismisses the root menu")
-	assert.True(t, m.Visible(), "tap on item does not hide the menu … OnDismiss is reponsible for that")
+	assert.True(t, m.Visible(), "tap on item does not hide the menu … OnDismiss is responsible for that")
 	assert.False(t, sm.Visible(), "tap on sub item hides the sub menu")
 
 	newActionTapped := false

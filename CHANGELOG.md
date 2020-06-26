@@ -34,7 +34,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Apps started on a goroutine will now panic as this is not supported
 * On Linux apps now simulate 120DPI instead of 96DPI
 * Improved fyne_settings scale picking user interface
-* Reorganised fyne_demo to accomodate growing collection of widgets and containers
+* Reorganised fyne_demo to accommodate growing collection of widgets and containers
 * Rendering now happens on a different thread to events for more consistent drawing
 * Improved text selection on mobile devices
 
