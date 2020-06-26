@@ -1,4 +1,4 @@
-// Package storage provides storage specific functionality.
+// Package storage provides storage access and management functionality.
 package storage
 
 import (
