@@ -186,6 +186,9 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 	callback func(bool), parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 	d.callback = callback
+	// TODO: This is required to avoid confusion.
+	// Normally this function should only provide the dialog, but currently it is also displayed, which is wrong.
+	// For this case the ShowCustomConfirm() method was built.
 	d.sendResponse = true
 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
