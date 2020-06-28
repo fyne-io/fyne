@@ -1,3 +1,4 @@
+// Package playground provides tooling for running fyne applications inside the Go playground.
 package playground
 
 import (

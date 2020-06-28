@@ -1,3 +1,4 @@
+// Package mobile provides mobile specific driver functionality.
 package mobile
 
 // Device describes functionality only available on mobile

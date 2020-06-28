@@ -268,21 +268,12 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 //
 // Order of precedence is:
 //
-// * os.Getwd()
 // * os.UserHomeDir()
 // * "/" (should be filesystem root on all supported platforms)
 func (f *FileDialog) effectiveStartingDir() string {
 
-	// Try to use CWD
-	var err error = nil
-	dir, err := os.Getwd()
-	if err == nil {
-		return dir
-	}
-	fyne.LogError("Could not load CWD", err)
-
-	// fail over to home dir
-	dir, err = os.UserHomeDir()
+	// Try home dir
+	dir, err := os.UserHomeDir()
 	if err == nil {
 		return dir
 	}
