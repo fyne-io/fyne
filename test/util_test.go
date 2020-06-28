@@ -39,7 +39,7 @@ func TestAssertCanvasTappableAt(t *testing.T) {
 func TestAssertImageMatches(t *testing.T) {
 	bounds := image.Rect(0, 0, 100, 50)
 	img := image.NewNRGBA(bounds)
-	draw.Draw(img, bounds, image.NewUniform(color.White), image.ZP, draw.Src)
+	draw.Draw(img, bounds, image.NewUniform(color.White), image.Point{}, draw.Src)
 
 	txtImg := image.NewNRGBA(bounds)
 	opts := truetype.Options{Size: 20, DPI: 96}
@@ -52,7 +52,7 @@ func TestAssertImageMatches(t *testing.T) {
 		Dot:  freetype.Pt(0, 50-face.Metrics().Descent.Ceil()),
 	}
 	d.DrawString("Hello!")
-	draw.Draw(img, bounds, txtImg, image.ZP, draw.Over)
+	draw.Draw(img, bounds, txtImg, image.Point{}, draw.Over)
 
 	tt := &testing.T{}
 	assert.False(t, test.AssertImageMatches(tt, "non_existing_master.png", img), "non existing master is not equal a given image")

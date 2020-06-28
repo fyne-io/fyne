@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne/test"
-	_ "fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 

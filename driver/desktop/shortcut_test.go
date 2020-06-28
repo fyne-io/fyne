@@ -47,8 +47,6 @@ func TestCustomShortcut_Shortcut(t *testing.T) {
 }
 
 func Test_modifierToString(t *testing.T) {
-	type args struct {
-	}
 	tests := []struct {
 		name string
 		mods Modifier

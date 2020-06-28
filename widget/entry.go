@@ -143,7 +143,7 @@ func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 	}
 
 	e.setFieldsAndRefresh(func() {
-		if e.selectKeyDown == false {
+		if !e.selectKeyDown {
 			e.selectRow = e.CursorRow
 			e.selectColumn = start
 		}
@@ -241,7 +241,7 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 	// Note: selection start is where the highlight started (if the user moves the selection up or left then
 	// the selectRow/Column will not match SelectionStart)
 	if key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight {
-		if e.selecting == false {
+		if !e.selecting {
 			e.selectRow = e.CursorRow
 			e.selectColumn = e.CursorColumn
 		}
@@ -280,7 +280,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	if e.selectKeyDown {
 		e.selecting = true
 	}
-	if e.selecting && e.selectKeyDown == false && m.Button == desktop.LeftMouseButton {
+	if e.selecting && !e.selectKeyDown && m.Button == desktop.LeftMouseButton {
 		e.selecting = false
 	}
 	e.propertyLock.Unlock()
@@ -297,7 +297,7 @@ func (e *Entry) MouseUp(_ *desktop.MouseEvent) {
 
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
-	if start == -1 && e.selecting && e.selectKeyDown == false {
+	if start == -1 && e.selecting && !e.selectKeyDown {
 		e.selecting = false
 	}
 }
@@ -791,7 +791,7 @@ func (e *Entry) selectAll() {
 // returns true if the keypress has been fully handled
 func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 
-	if e.selectKeyDown && e.selecting == false {
+	if e.selectKeyDown && !e.selecting {
 		switch key.Name {
 		case fyne.KeyUp, fyne.KeyDown,
 			fyne.KeyLeft, fyne.KeyRight,
@@ -801,7 +801,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		}
 	}
 
-	if e.selecting == false {
+	if !e.selecting {
 		return false
 	}
 
@@ -816,7 +816,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		return false
 	}
 
-	if e.selectKeyDown == false {
+	if !e.selectKeyDown {
 		switch key.Name {
 		case fyne.KeyLeft:
 			// seek to the start of the selection -- return handled
@@ -1006,7 +1006,7 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		minSize = r.entry.text.MinSize()
 	}
 
-	if r.entry.MultiLine == true {
+	if r.entry.MultiLine {
 		// ensure multiline height is at least charMinSize * multilineRows
 		minSize.Height = fyne.Max(minSize.Height, r.entry.text.charMinSize().Height*multiLineRows)
 	}
@@ -1034,7 +1034,7 @@ func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RUnlock()
 
 	if content != string(provider.buffer) {
-		provider.setText(content)
+		r.entry.SetText(content)
 		return
 	}
 

@@ -224,7 +224,7 @@ func (c *testCanvas) Capture() image.Image {
 
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	img := image.NewNRGBA(bounds)
-	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.ZP, draw.Src)
+	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
 
 	return img
 }

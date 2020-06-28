@@ -51,7 +51,6 @@ type window struct {
 	fixedSize  bool
 
 	cursor   *glfw.Cursor
-	painted  int // part of the macOS GL fix, updated GLFW should fix this
 	canvas   *glCanvas
 	title    string
 	icon     fyne.Resource
@@ -158,15 +157,19 @@ func (w *window) RequestFocus() {
 }
 
 func (w *window) Resize(size fyne.Size) {
-	w.canvas.Resize(size)
-	w.viewLock.Lock()
-	if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
-		w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
-	}
-	w.viewLock.Unlock()
+	// we cannot perform this until window is prepared as we don't know it's scale!
 
 	w.runOnMainWhenCreated(func() {
-		w.viewport.SetSize(w.width, w.height)
+		w.canvas.Resize(size)
+		w.viewLock.Lock()
+
+		width, height := internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
+		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
+			w.width, w.height = width, height
+		}
+		w.viewLock.Unlock()
+
+		w.viewport.SetSize(width, height)
 		w.fitContent()
 	})
 }
@@ -328,6 +331,11 @@ func (w *window) Show() {
 }
 
 func (w *window) doShow() {
+	if w.view() != nil {
+		w.doShowAgain()
+		return
+	}
+
 	for !running() {
 		time.Sleep(time.Millisecond * 10)
 	}
@@ -455,7 +463,7 @@ func (w *window) destroy(d *gLDriver) {
 		w.eventLock.Unlock()
 	}
 
-	if w.master || len(d.windowList()) == 0 {
+	if w.master {
 		d.Quit()
 	} else if runtime.GOOS == "darwin" {
 		d.focusPreviousWindow()
@@ -490,7 +498,7 @@ func (w *window) resized(_ *glfw.Window, width, height int) {
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
-	if width == 0 || height == 0 {
+	if width == 0 || height == 0 || runtime.GOOS != "darwin" {
 		return
 	}
 
@@ -656,7 +664,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	_, tap := co.(fyne.Tappable)
 	_, altTap := co.(fyne.SecondaryTappable)
 	// Prevent Tapped from triggering if DoubleTapped has been sent
-	if (tap || altTap) && doubleTapped == false {
+	if (tap || altTap) && !doubleTapped {
 		if action == glfw.Press {
 			w.mousePressed = co
 		} else if action == glfw.Release {
@@ -1174,6 +1182,25 @@ func (w *window) create() {
 		for _, fn := range w.pending {
 			fn()
 		}
+	})
+}
+
+func (w *window) doShowAgain() {
+	if w.viewport == nil {
+		return
+	}
+
+	runOnMain(func() {
+		// show top canvas element
+		if w.canvas.Content() != nil {
+			w.canvas.Content().Show()
+		}
+
+		w.viewport.SetPos(w.xpos, w.ypos)
+		w.viewport.Show()
+		w.viewLock.Lock()
+		w.visible = true
+		w.viewLock.Unlock()
 	})
 }
 

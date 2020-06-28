@@ -133,7 +133,6 @@ func (p *infProgressRenderer) infiniteProgressLoop() {
 		select {
 		case <-ticker:
 			p.doRefresh()
-			break
 		}
 	}
 

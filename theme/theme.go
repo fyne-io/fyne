@@ -136,7 +136,7 @@ func (t *builtinTheme) TextSize() int {
 }
 
 func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
-	variantPath := strings.Replace(env, "Regular", variant, 0)
+	variantPath := strings.Replace(env, "Regular", variant, -1)
 
 	res, err := fyne.LoadResourceFromPath(variantPath)
 	if err != nil {

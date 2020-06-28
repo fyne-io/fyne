@@ -26,21 +26,8 @@ func (f *file) URI() fyne.URI {
 	return storage.NewURI("file://" + f.path)
 }
 
-type fileWriter struct {
-	*os.File
-	path string
-}
-
 func (d *gLDriver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(uri, true)
-}
-
-func (f *fileWriter) Name() string {
-	return filepath.Base(f.path)
-}
-
-func (f *fileWriter) URI() fyne.URI {
-	return storage.NewURI("file://" + f.path)
 }
 
 func openFile(uri fyne.URI, create bool) (*file, error) {
