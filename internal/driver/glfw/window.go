@@ -340,6 +340,9 @@ func (w *window) doShow() {
 		time.Sleep(time.Millisecond * 10)
 	}
 	w.createLock.Do(w.create)
+	if w.view() == nil {
+		return
+	}
 
 	runOnMain(func() {
 		w.viewLock.Lock()
