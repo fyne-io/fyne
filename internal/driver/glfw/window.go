@@ -122,23 +122,27 @@ func (w *window) SetFullScreen(full bool) {
 func (w *window) CenterOnScreen() {
 	w.centered = true
 
-	w.runOnMainWhenCreated(func() {
-		viewWidth, viewHeight := w.screenSize(w.canvas.size)
+	if w.view() != nil {
+		w.doCenterOnScreen()
+	}
+}
 
-		// get window dimensions in pixels
-		monitor := w.getMonitorForWindow()
-		monMode := monitor.GetVideoMode()
+func (w *window) doCenterOnScreen() {
+	viewWidth, viewHeight := w.screenSize(w.canvas.size)
 
-		// these come into play when dealing with multiple monitors
-		monX, monY := monitor.GetPos()
+	// get window dimensions in pixels
+	monitor := w.getMonitorForWindow()
+	monMode := monitor.GetVideoMode()
 
-		// math them to the middle
-		newX := (monMode.Width / 2) - (viewWidth / 2) + monX
-		newY := (monMode.Height / 2) - (viewHeight / 2) + monY
+	// these come into play when dealing with multiple monitors
+	monX, monY := monitor.GetPos()
 
-		// set new window coordinates
-		w.viewport.SetPos(newX, newY)
-	}) // end of runOnMain(){}
+	// math them to the middle
+	newX := (monMode.Width / 2) - (viewWidth / 2) + monX
+	newY := (monMode.Height / 2) - (viewHeight / 2) + monY
+
+	// set new window coordinates
+	w.viewport.SetPos(newX, newY)
 }
 
 // minSizeOnScreen gets the padded minimum size of a window content in screen pixels
@@ -180,7 +184,10 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-	w.runOnMainWhenCreated(w.fitContent)
+
+	if w.view() != nil {
+		w.fitContent()
+	}
 }
 
 func (w *window) Padded() bool {
@@ -1181,6 +1188,12 @@ func (w *window) create() {
 
 		for _, fn := range w.pending {
 			fn()
+		}
+
+		// order of operation matters so we do these last items in order
+		w.viewport.SetSize(w.width, w.height) // ensure we requested latest size
+		if w.centered {
+			w.doCenterOnScreen() // lastly center if that was requested
 		}
 	})
 }
