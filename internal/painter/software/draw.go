@@ -23,16 +23,25 @@ type gradient interface {
 }
 
 func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
-	scaledWidth := internal.ScaleInt(c, circle.Size().Width)
-	scaledHeight := internal.ScaleInt(c, circle.Size().Height)
-	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
+	pad := painter.VectorPad(circle)
+	scaledWidth := internal.ScaleInt(c, circle.Size().Width + pad * 2)
+	scaledHeight := internal.ScaleInt(c, circle.Size().Height + pad * 2)
+	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
-	raw := painter.DrawCircle(circle, 0, func(in float32) int {
+	raw := painter.DrawCircle(circle, pad, func(in float32) int {
 		return int(math.Round(float64(in) * float64(c.Scale())))
 	})
 
-	draw.Draw(base, bounds, raw, image.ZP, draw.Over)
+	// the clip intersect above cannot be negative, so we may need to compensate
+	offX, offY := 0, 0
+	if scaledX < 0 {
+		offX = -scaledX
+	}
+	if scaledY < 0 {
+		offY = -scaledY
+	}
+	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
 }
 
 func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
