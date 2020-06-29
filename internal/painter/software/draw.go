@@ -24,8 +24,8 @@ type gradient interface {
 
 func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(circle)
-	scaledWidth := internal.ScaleInt(c, circle.Size().Width + pad * 2)
-	scaledHeight := internal.ScaleInt(c, circle.Size().Height + pad * 2)
+	scaledWidth := internal.ScaleInt(c, circle.Size().Width+pad*2)
+	scaledHeight := internal.ScaleInt(c, circle.Size().Height+pad*2)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
 	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
 
@@ -91,6 +91,28 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 	}
 
 	drawTex(scaledX, scaledY, width, height, base, scaledImg, clip)
+}
+
+func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	pad := painter.VectorPad(line)
+	scaledWidth := internal.ScaleInt(c, line.Size().Width+pad*2)
+	scaledHeight := internal.ScaleInt(c, line.Size().Height+pad*2)
+	scaledX, scaledY := internal.ScaleInt(c, pos.X-pad), internal.ScaleInt(c, pos.Y-pad)
+	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+
+	raw := painter.DrawLine(line, pad, func(in float32) int {
+		return int(math.Round(float64(in) * float64(c.Scale())))
+	})
+
+	// the clip intersect above cannot be negative, so we may need to compensate
+	offX, offY := 0, 0
+	if scaledX < 0 {
+		offX = -scaledX
+	}
+	if scaledY < 0 {
+		offY = -scaledY
+	}
+	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
 }
 
 func drawTex(x, y, width int, height int, base *image.NRGBA, tex image.Image, clip image.Rectangle) {

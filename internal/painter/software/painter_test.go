@@ -194,6 +194,20 @@ func TestPainter_paintImage_containY(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_containy.png", target)
 }
 
+func TestPainter_paintLine(t *testing.T) {
+	test.ApplyTheme(t, theme.LightTheme())
+	obj := canvas.NewLine(color.Black)
+	obj.StrokeWidth = 6
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_line.png", p.Paint(c))
+}
+
 func TestPainter_paintRectangle_clipped(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 	red1 := canvas.NewRectangle(color.NRGBA{R: 200, A: 255})

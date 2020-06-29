@@ -51,25 +51,7 @@ func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 
 func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	line := obj.(*canvas.Line)
-	vectorPad := painter.VectorPad(line)
-
-	col := line.StrokeColor
-	width := p.textureScaleInt(line.Size().Width + vectorPad*2)
-	height := p.textureScaleInt(line.Size().Height + vectorPad*2)
-	stroke := line.StrokeWidth * p.canvas.Scale() * p.texScale
-
-	raw := image.NewRGBA(image.Rect(0, 0, width, height))
-	scanner := rasterx.NewScannerGV(line.Size().Width, line.Size().Height, raw, raw.Bounds())
-	dasher := rasterx.NewDasher(width, height, scanner)
-	dasher.SetColor(col)
-	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
-	p1x, p1y := p.textureScaleInt(line.Position1.X-line.Position().X+vectorPad), p.textureScaleInt(line.Position1.Y-line.Position().Y+vectorPad)
-	p2x, p2y := p.textureScaleInt(line.Position2.X-line.Position().X+vectorPad), p.textureScaleInt(line.Position2.Y-line.Position().Y+vectorPad)
-
-	dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
-	dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))
-	dasher.Stop(true)
-	dasher.Draw()
+	raw := painter.DrawLine(line, painter.VectorPad(line), p.textureScale)
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }

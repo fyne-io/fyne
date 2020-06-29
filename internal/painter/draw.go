@@ -38,3 +38,28 @@ func DrawCircle(circle *canvas.Circle, vectorPad int, scale func(float32) int) *
 
 	return raw
 }
+
+// DrawLine rasterizes the given line object into an image.
+// The bounds of the output image will be increased by vectorPad to allow for stroke overflow at the edges.
+// The scale function is used to understand how many pixels are required per unit of size.
+func DrawLine(line *canvas.Line, vectorPad int, scale func(float32) int) *image.RGBA {
+	col := line.StrokeColor
+	width := scale(float32(line.Size().Width + vectorPad*2))
+	height := scale(float32(line.Size().Height + vectorPad*2))
+	stroke := scale(line.StrokeWidth)
+
+	raw := image.NewRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(line.Size().Width, line.Size().Height, raw, raw.Bounds())
+	dasher := rasterx.NewDasher(width, height, scanner)
+	dasher.SetColor(col)
+	dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
+	p1x, p1y := scale(float32(line.Position1.X-line.Position().X+vectorPad)), scale(float32(line.Position1.Y-line.Position().Y+vectorPad))
+	p2x, p2y := scale(float32(line.Position2.X-line.Position().X+vectorPad)), scale(float32(line.Position2.Y-line.Position().Y+vectorPad))
+
+	dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
+	dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))
+	dasher.Stop(true)
+	dasher.Draw()
+
+	return raw
+}
