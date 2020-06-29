@@ -19,6 +19,19 @@ func makeTestImage(w, h int) image.Image {
 	return internalTest.NewCheckedImage(w, h, w, h)
 }
 
+func TestPainter_paintCircle(t *testing.T) {
+	test.ApplyTheme(t, theme.LightTheme())
+	obj := canvas.NewCircle(color.Black)
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_circle.png", p.Paint(c))
+}
+
 func TestPainter_paintGradient_clipped(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 	g := canvas.NewRadialGradient(color.NRGBA{R: 200, A: 255}, color.NRGBA{B: 200, A: 255})

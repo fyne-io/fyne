@@ -40,19 +40,16 @@ func comparePaths(t *testing.T, p1, p2 string) bool {
 }
 
 func TestEffectiveStartingDir(t *testing.T) {
-	wd, err := os.Getwd()
+	home, err := os.UserHomeDir()
 	if err != nil {
-		t.Skipf("os.Getwd() failed, cannot run this test on this system (error getting ./), error was '%s'", err)
+		t.Skipf("os.UserHomeDir) failed, cannot run this test on this system, error was '%s'", err)
 	}
 
 	dialog := &FileDialog{}
 
-	// test that we get ./ when running with the default struct values
+	// test that we get $HOME when running with the default struct values
 	res := dialog.effectiveStartingDir()
-	expect := wd
-	if err != nil {
-		t.Skipf("os.Getwd() failed, cannot run this test on this system, error was '%s'", err)
-	}
+	expect := home
 	if !comparePaths(t, res, expect) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
