@@ -79,13 +79,13 @@ func (p *glPainter) drawWidget(wid fyne.Widget, pos fyne.Position, frame fyne.Si
 }
 
 func (p *glPainter) drawCircle(circle *canvas.Circle, pos fyne.Position, frame fyne.Size) {
-	vectorPad := int(circle.StrokeWidth) + 2
-	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, vectorPad)
+	p.drawTextureWithDetails(circle, p.newGlCircleTexture, pos, circle.Size(), frame, canvas.ImageFillStretch,
+		1.0, 0.0, painter.VectorPad(circle))
 }
 
 func (p *glPainter) drawLine(line *canvas.Line, pos fyne.Position, frame fyne.Size) {
-	vectorPad := int(line.StrokeWidth) + 2
-	p.drawTextureWithDetails(line, p.newGlLineTexture, pos, line.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, vectorPad)
+	p.drawTextureWithDetails(line, p.newGlLineTexture, pos, line.Size(), frame, canvas.ImageFillStretch,
+		1.0, 0.0, painter.VectorPad(line))
 }
 
 func (p *glPainter) drawImage(img *canvas.Image, pos fyne.Position, frame fyne.Size) {
@@ -105,8 +105,8 @@ func (p *glPainter) drawGradient(o fyne.CanvasObject, texCreator func(fyne.Canva
 }
 
 func (p *glPainter) drawRectangle(rect *canvas.Rectangle, pos fyne.Position, frame fyne.Size) {
-	vectorPad := int(rect.StrokeWidth) + 2
-	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch, 1.0, 0.0, vectorPad)
+	p.drawTextureWithDetails(rect, p.newGlRectTexture, pos, rect.Size(), frame, canvas.ImageFillStretch,
+		1.0, 0.0, painter.VectorPad(rect))
 }
 
 func (p *glPainter) drawText(text *canvas.Text, pos fyne.Position, frame fyne.Size) {

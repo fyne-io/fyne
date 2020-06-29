@@ -44,16 +44,14 @@ func getTexture(object fyne.CanvasObject, creator func(canvasObject fyne.CanvasO
 
 func (p *glPainter) newGlCircleTexture(obj fyne.CanvasObject) Texture {
 	circle := obj.(*canvas.Circle)
-	vectorPad := int(circle.StrokeWidth) + 2
-
-	raw := painter.DrawCircle(circle, vectorPad, p.textureScale)
+	raw := painter.DrawCircle(circle, painter.VectorPad(circle), p.textureScale)
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }
 
 func (p *glPainter) newGlLineTexture(obj fyne.CanvasObject) Texture {
 	line := obj.(*canvas.Line)
-	vectorPad := int(line.StrokeWidth) + 2
+	vectorPad := painter.VectorPad(line)
 
 	col := line.StrokeColor
 	width := p.textureScaleInt(line.Size().Width + vectorPad*2)
@@ -97,7 +95,7 @@ func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
 
 func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
-	vectorPad := int(rect.StrokeWidth) + 2
+	vectorPad := painter.VectorPad(rect)
 
 	width := p.textureScaleInt(rect.Size().Width + vectorPad*2)
 	height := p.textureScaleInt(rect.Size().Height + vectorPad*2)
