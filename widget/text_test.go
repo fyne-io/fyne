@@ -303,7 +303,7 @@ func TestText_splitLines(t *testing.T) {
 			},
 		},
 		{
-			name: "Muliple_Trailing",
+			name: "Multiple_Trailing",
 			text: "foo\nbar\n",
 			want: [][2]int{
 				{0, 3},

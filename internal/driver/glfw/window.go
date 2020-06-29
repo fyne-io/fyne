@@ -51,7 +51,6 @@ type window struct {
 	fixedSize  bool
 
 	cursor   *glfw.Cursor
-	painted  int // part of the macOS GL fix, updated GLFW should fix this
 	canvas   *glCanvas
 	title    string
 	icon     fyne.Resource
@@ -123,23 +122,27 @@ func (w *window) SetFullScreen(full bool) {
 func (w *window) CenterOnScreen() {
 	w.centered = true
 
-	w.runOnMainWhenCreated(func() {
-		viewWidth, viewHeight := w.screenSize(w.canvas.size)
+	if w.view() != nil {
+		w.doCenterOnScreen()
+	}
+}
 
-		// get window dimensions in pixels
-		monitor := w.getMonitorForWindow()
-		monMode := monitor.GetVideoMode()
+func (w *window) doCenterOnScreen() {
+	viewWidth, viewHeight := w.screenSize(w.canvas.size)
 
-		// these come into play when dealing with multiple monitors
-		monX, monY := monitor.GetPos()
+	// get window dimensions in pixels
+	monitor := w.getMonitorForWindow()
+	monMode := monitor.GetVideoMode()
 
-		// math them to the middle
-		newX := (monMode.Width / 2) - (viewWidth / 2) + monX
-		newY := (monMode.Height / 2) - (viewHeight / 2) + monY
+	// these come into play when dealing with multiple monitors
+	monX, monY := monitor.GetPos()
 
-		// set new window coordinates
-		w.viewport.SetPos(newX, newY)
-	}) // end of runOnMain(){}
+	// math them to the middle
+	newX := (monMode.Width / 2) - (viewWidth / 2) + monX
+	newY := (monMode.Height / 2) - (viewHeight / 2) + monY
+
+	// set new window coordinates
+	w.viewport.SetPos(newX, newY)
 }
 
 // minSizeOnScreen gets the padded minimum size of a window content in screen pixels
@@ -158,15 +161,19 @@ func (w *window) RequestFocus() {
 }
 
 func (w *window) Resize(size fyne.Size) {
-	w.canvas.Resize(size)
-	w.viewLock.Lock()
-	if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
-		w.width, w.height = internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
-	}
-	w.viewLock.Unlock()
+	// we cannot perform this until window is prepared as we don't know it's scale!
 
 	w.runOnMainWhenCreated(func() {
-		w.viewport.SetSize(w.width, w.height)
+		w.canvas.Resize(size)
+		w.viewLock.Lock()
+
+		width, height := internal.ScaleInt(w.canvas, size.Width), internal.ScaleInt(w.canvas, size.Height)
+		if w.fixedSize || !w.visible { // fixed size ignores future `resized` and if not visible we may not get the event
+			w.width, w.height = width, height
+		}
+		w.viewLock.Unlock()
+
+		w.viewport.SetSize(width, height)
 		w.fitContent()
 	})
 }
@@ -177,7 +184,10 @@ func (w *window) FixedSize() bool {
 
 func (w *window) SetFixedSize(fixed bool) {
 	w.fixedSize = fixed
-	w.runOnMainWhenCreated(w.fitContent)
+
+	if w.view() != nil {
+		w.fitContent()
+	}
 }
 
 func (w *window) Padded() bool {
@@ -337,6 +347,9 @@ func (w *window) doShow() {
 		time.Sleep(time.Millisecond * 10)
 	}
 	w.createLock.Do(w.create)
+	if w.view() == nil {
+		return
+	}
 
 	runOnMain(func() {
 		w.viewLock.Lock()
@@ -492,7 +505,7 @@ func (w *window) resized(_ *glfw.Window, width, height int) {
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
-	if width == 0 || height == 0 {
+	if width == 0 || height == 0 || runtime.GOOS != "darwin" {
 		return
 	}
 
@@ -658,7 +671,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	_, tap := co.(fyne.Tappable)
 	_, altTap := co.(fyne.SecondaryTappable)
 	// Prevent Tapped from triggering if DoubleTapped has been sent
-	if (tap || altTap) && doubleTapped == false {
+	if (tap || altTap) && !doubleTapped {
 		if action == glfw.Press {
 			w.mousePressed = co
 		} else if action == glfw.Release {
@@ -1175,6 +1188,12 @@ func (w *window) create() {
 
 		for _, fn := range w.pending {
 			fn()
+		}
+
+		// order of operation matters so we do these last items in order
+		w.viewport.SetSize(w.width, w.height) // ensure we requested latest size
+		if w.centered {
+			w.doCenterOnScreen() // lastly center if that was requested
 		}
 	})
 }

@@ -92,7 +92,7 @@ func (d *gLDriver) focusPreviousWindow() {
 		}
 	}
 
-	if chosen == nil {
+	if chosen == nil || chosen.(*window).view() == nil {
 		return
 	}
 	chosen.RequestFocus()

@@ -125,7 +125,7 @@ func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
-			err = errors.New("Crash when rendering SVG")
+			err = errors.New("crash when rendering svg")
 		}
 	}()
 	icon.Draw(raster, 1)
