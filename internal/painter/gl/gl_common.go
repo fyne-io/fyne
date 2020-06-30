@@ -7,9 +7,7 @@ import (
 
 	"github.com/goki/freetype"
 	"github.com/goki/freetype/truetype"
-	"github.com/srwiley/rasterx"
 	"golang.org/x/image/font"
-	"golang.org/x/image/math/fixed"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -77,39 +75,7 @@ func (p *glPainter) newGlRectTexture(rect fyne.CanvasObject) Texture {
 
 func (p *glPainter) newGlStrokedRectTexture(obj fyne.CanvasObject) Texture {
 	rect := obj.(*canvas.Rectangle)
-	vectorPad := painter.VectorPad(rect)
-
-	width := p.textureScaleInt(rect.Size().Width + vectorPad*2)
-	height := p.textureScaleInt(rect.Size().Height + vectorPad*2)
-	stroke := rect.StrokeWidth * p.canvas.Scale() * p.texScale
-
-	raw := image.NewRGBA(image.Rect(0, 0, width, height))
-	scanner := rasterx.NewScannerGV(rect.Size().Width, rect.Size().Height, raw, raw.Bounds())
-
-	scaledPad := p.textureScaleInt(vectorPad)
-	p1x, p1y := scaledPad, scaledPad
-	p2x, p2y := p.textureScaleInt(rect.Size().Width)+scaledPad, scaledPad
-	p3x, p3y := p.textureScaleInt(rect.Size().Width)+scaledPad, p.textureScaleInt(rect.Size().Height)+scaledPad
-	p4x, p4y := scaledPad, p.textureScaleInt(rect.Size().Height)+scaledPad
-
-	if rect.FillColor != nil {
-		filler := rasterx.NewFiller(width, height, scanner)
-		filler.SetColor(rect.FillColor)
-		rasterx.AddRect(float64(p1x), float64(p1y), float64(p3x), float64(p3y), 0, filler)
-		filler.Draw()
-	}
-
-	if rect.StrokeColor != nil && rect.StrokeWidth > 0 {
-		dasher := rasterx.NewDasher(width, height, scanner)
-		dasher.SetColor(rect.StrokeColor)
-		dasher.SetStroke(fixed.Int26_6(float64(stroke)*64), 0, nil, nil, nil, 0, nil, 0)
-		dasher.Start(rasterx.ToFixedP(float64(p1x), float64(p1y)))
-		dasher.Line(rasterx.ToFixedP(float64(p2x), float64(p2y)))
-		dasher.Line(rasterx.ToFixedP(float64(p3x), float64(p3y)))
-		dasher.Line(rasterx.ToFixedP(float64(p4x), float64(p4y)))
-		dasher.Stop(true)
-		dasher.Draw()
-	}
+	raw := painter.DrawRectangle(rect, painter.VectorPad(rect), p.textureScale)
 
 	return p.imgToTexture(raw, canvas.ImageScaleSmooth)
 }

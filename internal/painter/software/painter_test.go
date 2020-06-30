@@ -246,6 +246,21 @@ func TestPainter_paintRectangle_clipped(t *testing.T) {
 	test.AssertImageMatches(t, "draw_rect_clipped.png", p.Paint(c))
 }
 
+func TestPainter_paintRectangle_stroke(t *testing.T) {
+	test.ApplyTheme(t, theme.LightTheme())
+	obj := canvas.NewRectangle(color.Black)
+	obj.StrokeWidth = 5
+	obj.StrokeColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_rectangle_stroke.png", p.Paint(c))
+}
+
 func TestPainter_paintText_clipped(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 	scroll := widget.NewScrollContainer(widget.NewLabel("some text\nis here\nand here"))
