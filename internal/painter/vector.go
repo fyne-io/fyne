@@ -5,6 +5,9 @@ import (
 	"fyne.io/fyne/canvas"
 )
 
+// VectorPad returns the number of additional points that should be added around a texture.
+// This is to accommodate overflow caused by stroke and line endings etc.
+// THe result is in fyne.Size type coordinates and should be scaled for output.
 func VectorPad(obj fyne.CanvasObject) int {
 	switch co := obj.(type) {
 	case *canvas.Circle:
