@@ -503,7 +503,7 @@ func (w *window) resized(_ *glfw.Window, width, height int) {
 	}
 
 	d, ok := fyne.CurrentApp().Driver().(*gLDriver)
-	if !ok { // don't wait to redraw in this way if we are running on test
+	if !ok || !w.visible { // don't wait to redraw in this way if we are running on test or not yet drawn
 		w.canvas.Resize(canvasSize)
 		return
 	}
