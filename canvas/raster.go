@@ -28,6 +28,11 @@ func (r *Raster) Alpha() float64 {
 	return 1.0 - r.Translucency
 }
 
+func (r *Raster) Resize(s fyne.Size) {
+	r.baseObject.Resize(s)
+	Refresh(r)
+}
+
 // Refresh causes this object to be redrawn in it's current state
 func (r *Raster) Refresh() {
 	Refresh(r)
