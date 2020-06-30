@@ -141,9 +141,9 @@ func (p *packager) packageLinux() error {
 
 		makefile, _ := os.Create(filepath.Join(p.dir, tempDir, "Makefile"))
 		_, err := io.WriteString(makefile, `ifneq ("$(wildcard /usr/local)","")`+"\n"+
-			"DESTDIR ?= /usr/local\n"+
+			"PREFIX ?= /usr/local\n"+
 			"else\n"+
-			"DESTDIR ?= /usr\n"+
+			"PREFIX ?= /usr\n"+
 			"endif\n"+
 			"\n"+
 			"install:\n"+
