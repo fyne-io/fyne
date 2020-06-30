@@ -501,7 +501,17 @@ func (w *window) resized(_ *glfw.Window, width, height int) {
 		w.width = internal.ScaleInt(w.canvas, canvasSize.Width)
 		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
 	}
-	w.canvas.Resize(canvasSize)
+
+	d, ok := fyne.CurrentApp().Driver().(*gLDriver)
+	if !ok { // don't wait to redraw in this way if we are running on test
+		w.canvas.Resize(canvasSize)
+		return
+	}
+
+	runOnDraw(w, func() {
+		w.canvas.Resize(canvasSize)
+		d.repaintWindow(w)
+	})
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
