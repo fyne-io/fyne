@@ -90,6 +90,7 @@ func (d *gLDriver) runGL() {
 		select {
 		case <-d.done:
 			eventTick.Stop()
+			d.drawDone <- nil // wait for draw thread to stop
 			glfw.Terminate()
 			return
 		case f := <-funcQueue:
@@ -175,6 +176,8 @@ func (d *gLDriver) startDrawThread() {
 
 		for {
 			select {
+			case <-d.drawDone:
+				return
 			case f := <-drawFuncQueue:
 				f.win.RunWithContext(f.f)
 				if f.done != nil {
