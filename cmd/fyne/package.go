@@ -146,6 +146,8 @@ func (p *packager) packageLinux() error {
 			"PREFIX ?= /usr\n"+
 			"endif\n"+
 			"\n"+
+			"default:\n"+
+			`	# Run "sudo make install" to install the application.`+"\n"+
 			"install:\n"+
 			"	install -Dm00644 usr/"+local+"share/applications/"+p.name+`.desktop $(DESTDIR)$(PREFIX)/share/applications/`+p.name+".desktop\n"+
 			"	install -Dm00755 usr/"+local+"bin/"+filepath.Base(p.exe)+` $(DESTDIR)$(PREFIX)/bin/`+filepath.Base(p.exe)+"\n"+
