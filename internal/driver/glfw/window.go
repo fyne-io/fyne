@@ -381,9 +381,9 @@ func (w *window) Hide() {
 	}
 
 	runOnMain(func() {
-		w.viewport.Hide()
 		w.viewLock.Lock()
 		w.visible = false
+		w.viewport.Hide()
 		w.viewLock.Unlock()
 
 		// hide top canvas element
