@@ -3,6 +3,7 @@ package software
 import (
 	"fmt"
 	"image"
+	"math"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -19,6 +20,19 @@ import (
 type gradient interface {
 	Generate(int, int) image.Image
 	Size() fyne.Size
+}
+
+func drawCircle(c fyne.Canvas, circle *canvas.Circle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	scaledWidth := internal.ScaleInt(c, circle.Size().Width)
+	scaledHeight := internal.ScaleInt(c, circle.Size().Height)
+	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
+	bounds := clip.Intersect(image.Rect(scaledX, scaledY, scaledX+scaledWidth, scaledY+scaledHeight))
+
+	raw := painter.DrawCircle(circle, 0, func(in float32) int {
+		return int(math.Round(float64(in) * float64(c.Scale())))
+	})
+
+	draw.Draw(base, bounds, raw, image.ZP, draw.Over)
 }
 
 func drawGradient(c fyne.Canvas, g gradient, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
