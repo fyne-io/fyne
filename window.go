@@ -35,6 +35,10 @@ type Window interface {
 	// the Window object is currently positioned on.
 	CenterOnScreen()
 
+	// Move places a window to the position given on the monitor
+	// the Window object is currently positioned on.
+	Move(Position)
+
 	// Padded, normally true, states whether the window should have inner
 	// padding so that components do not touch the window edge.
 	Padded() bool

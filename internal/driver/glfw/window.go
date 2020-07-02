@@ -145,6 +145,25 @@ func (w *window) doCenterOnScreen() {
 	w.viewport.SetPos(newX, newY)
 }
 
+func (w *window) Move(pos fyne.Position) {
+	w.runOnMainWhenCreated(func() {
+		// get window dimensions in pixels
+		monitor := w.getMonitorForWindow()
+		monMode := monitor.GetVideoMode()
+
+		// these come into play when dealing with multiple monitors
+		monX, monY := monitor.GetPos()
+
+		// it is not allowed to move window out of the screen bounds
+		if monX+pos.X > monMode.Width || monY+pos.Y > monMode.Height {
+			return
+		}
+
+		// set new window coordinates
+		w.viewport.SetPos(monX+pos.X, monY+pos.Y)
+	}) // end of runOnMain(){}
+}
+
 // minSizeOnScreen gets the padded minimum size of a window content in screen pixels
 func (w *window) minSizeOnScreen() (int, int) {
 	// get minimum size of content inside the window

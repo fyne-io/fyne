@@ -32,6 +32,10 @@ func (w *testWindow) CenterOnScreen() {
 	// no-op
 }
 
+func (w *testWindow) Move(_ fyne.Position) {
+	// no-op
+}
+
 func (w *testWindow) Clipboard() fyne.Clipboard {
 	return w.clipboard
 }
