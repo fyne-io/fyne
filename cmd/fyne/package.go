@@ -93,13 +93,41 @@ type packager struct {
 }
 
 func (p *packager) packageLinux() error {
-	prefixDir := ensureSubDir(ensureSubDir(p.dir, "usr"), "local")
+	var prefixDir string
+	local := "local/"
+	tempDir := "tmp-pkg"
+
+	if p.install {
+		tempDir = ""
+	}
+
+	if _, err := os.Stat(filepath.Join("/", "usr", "local")); os.IsNotExist(err) {
+		prefixDir = ensureSubDir(ensureSubDir(p.dir, tempDir), "usr")
+		local = ""
+	} else {
+		prefixDir = ensureSubDir(ensureSubDir(ensureSubDir(p.dir, tempDir), "usr"), "local")
+	}
+
 	shareDir := ensureSubDir(prefixDir, "share")
+
+	binDir := ensureSubDir(prefixDir, "bin")
+	binName := filepath.Join(binDir, filepath.Base(p.exe))
+	err := copyExeFile(p.exe, binName)
+	if err != nil {
+		return errors.Wrap(err, "Failed to copy application binary file")
+	}
+
+	iconDir := ensureSubDir(shareDir, "pixmaps")
+	iconPath := filepath.Join(iconDir, p.name+filepath.Ext(p.icon))
+	err = copyFile(p.icon, iconPath)
+	if err != nil {
+		return errors.Wrap(err, "Failed to copy icon")
+	}
 
 	appsDir := ensureSubDir(shareDir, "applications")
 	desktop := filepath.Join(appsDir, p.name+".desktop")
 	deskFile, _ := os.Create(desktop)
-	_, err := io.WriteString(deskFile, "[Desktop Entry]\n"+
+	_, err = io.WriteString(deskFile, "[Desktop Entry]\n"+
 		"Type=Application\n"+
 		"Name="+p.name+"\n"+
 		"Exec="+filepath.Base(p.exe)+"\n"+
@@ -108,24 +136,28 @@ func (p *packager) packageLinux() error {
 		return errors.Wrap(err, "Failed to write desktop entry string")
 	}
 
-	binDir := ensureSubDir(prefixDir, "bin")
-	binName := filepath.Join(binDir, filepath.Base(p.exe))
-	err = copyExeFile(p.exe, binName)
-	if err != nil {
-		return errors.Wrap(err, "Failed to copy exe file")
-	}
-
-	iconThemeDir := ensureSubDir(ensureSubDir(shareDir, "icons"), "hicolor")
-	iconDir := ensureSubDir(ensureSubDir(iconThemeDir, "512x512"), "apps")
-	iconPath := filepath.Join(iconDir, p.name+filepath.Ext(p.icon))
-	err = copyFile(p.icon, iconPath)
-	if err != nil {
-		return errors.Wrap(err, "Failed to copy icon")
-	}
-
 	if !p.install {
-		tarCmd := exec.Command("tar", "zcf", p.name+".tar.gz", "usr")
-		err := tarCmd.Run()
+		defer os.RemoveAll(filepath.Join(p.dir, tempDir))
+
+		makefile, _ := os.Create(filepath.Join(p.dir, tempDir, "Makefile"))
+		_, err := io.WriteString(makefile, `ifneq ("$(wildcard /usr/local)","")`+"\n"+
+			"PREFIX ?= /usr/local\n"+
+			"else\n"+
+			"PREFIX ?= /usr\n"+
+			"endif\n"+
+			"\n"+
+			"default:\n"+
+			`	# Run "sudo make install" to install the application.`+"\n"+
+			"install:\n"+
+			"	install -Dm00644 usr/"+local+"share/applications/"+p.name+`.desktop $(DESTDIR)$(PREFIX)/share/applications/`+p.name+".desktop\n"+
+			"	install -Dm00755 usr/"+local+"bin/"+filepath.Base(p.exe)+` $(DESTDIR)$(PREFIX)/bin/`+filepath.Base(p.exe)+"\n"+
+			"	install -Dm00644 usr/"+local+"share/pixmaps/"+p.name+filepath.Ext(p.icon)+` $(DESTDIR)$(PREFIX)/share/pixmaps/`+p.name+filepath.Ext(p.icon)+"\n")
+		if err != nil {
+			return errors.Wrap(err, "Failed to write Makefile string")
+		}
+
+		tarCmd := exec.Command("tar", "zcf", p.name+".tar.gz", "-C", tempDir, "usr", "Makefile")
+		err = tarCmd.Run()
 		if err != nil {
 			return errors.Wrap(err, "Failed to create archive with tar")
 		}
