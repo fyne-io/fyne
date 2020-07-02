@@ -1239,7 +1239,7 @@ func (w *window) create() {
 		}
 
 		if w.move {
-			w.doMove() // lastly center if that was requested
+			w.doMove() // lastly move if that was requested
 		}
 	})
 }
