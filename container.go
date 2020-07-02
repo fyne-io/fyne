@@ -98,6 +98,13 @@ func (c *Container) Refresh() {
 	for _, child := range c.Objects {
 		child.Refresh()
 	}
+
+	// this is basically just canvas.Refresh(c) without the package loop
+	o := CurrentApp().Driver().CanvasForObject(c)
+	if o == nil {
+		return
+	}
+	o.Refresh(c)
 }
 
 // NewContainer returns a new Container instance holding the specified CanvasObjects.
