@@ -90,6 +90,7 @@ func (d *gLDriver) runGL() {
 		select {
 		case <-d.done:
 			eventTick.Stop()
+			d.drawDone <- nil // wait for draw thread to stop
 			glfw.Terminate()
 			return
 		case f := <-funcQueue:
@@ -110,6 +111,7 @@ func (d *gLDriver) runGL() {
 				if w.viewport.ShouldClose() {
 					reassign = true
 					w.viewLock.Lock()
+					w.visible = false
 					v := w.viewport
 					w.viewport = nil
 					w.viewLock.Unlock()
@@ -159,8 +161,13 @@ func (d *gLDriver) repaintWindow(w *window) {
 		updateGLContext(w)
 		canvas.paint(canvas.Size())
 
-		if w.viewport != nil {
-			w.viewport.SwapBuffers()
+		w.viewLock.RLock()
+		view := w.viewport
+		visible := w.visible
+		w.viewLock.RUnlock()
+
+		if view != nil && visible {
+			view.SwapBuffers()
 		}
 	})
 }
@@ -175,6 +182,8 @@ func (d *gLDriver) startDrawThread() {
 
 		for {
 			select {
+			case <-d.drawDone:
+				return
 			case f := <-drawFuncQueue:
 				f.win.RunWithContext(f.f)
 				if f.done != nil {
