@@ -3,7 +3,6 @@ package glfw
 import "C"
 import (
 	"bytes"
-	"fmt"
 	"image"
 	_ "image/png" // for the icon
 	"runtime"
@@ -126,7 +125,6 @@ func (w *window) CenterOnScreen() {
 	w.centered = true
 
 	if w.view() != nil {
-		fmt.Println("CENTER")
 		w.doCenterOnScreen()
 	}
 }
