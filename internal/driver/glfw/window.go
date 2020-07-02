@@ -3,6 +3,7 @@ package glfw
 import "C"
 import (
 	"bytes"
+	"fmt"
 	"image"
 	_ "image/png" // for the icon
 	"runtime"
@@ -62,7 +63,9 @@ type window struct {
 	fullScreen bool
 	centered   bool
 	visible    bool
+	move       bool
 
+	moveTo             fyne.Position
 	mousePos           fyne.Position
 	mouseDragged       fyne.Draggable
 	mouseDraggedOffset fyne.Position
@@ -123,6 +126,7 @@ func (w *window) CenterOnScreen() {
 	w.centered = true
 
 	if w.view() != nil {
+		fmt.Println("CENTER")
 		w.doCenterOnScreen()
 	}
 }
@@ -146,22 +150,33 @@ func (w *window) doCenterOnScreen() {
 }
 
 func (w *window) Move(pos fyne.Position) {
-	w.runOnMainWhenCreated(func() {
-		// get window dimensions in pixels
-		monitor := w.getMonitorForWindow()
-		monMode := monitor.GetVideoMode()
+	w.move = true
+	w.moveTo = pos
 
-		// these come into play when dealing with multiple monitors
-		monX, monY := monitor.GetPos()
+	if w.view() != nil {
+		w.doMove()
+	}
+}
 
-		// it is not allowed to move window out of the screen bounds
-		if monX+pos.X > monMode.Width || monY+pos.Y > monMode.Height {
-			return
-		}
+func (w *window) doMove() {
+	// get window dimensions in pixels
+	monitor := w.getMonitorForWindow()
+	monMode := monitor.GetVideoMode()
 
-		// set new window coordinates
-		w.viewport.SetPos(monX+pos.X, monY+pos.Y)
-	}) // end of runOnMain(){}
+	// these come into play when dealing with multiple monitors
+	monX, monY := monitor.GetPos()
+
+	// calculate new x and y positions
+	x := monX + w.moveTo.X
+	y := monY + w.moveTo.Y
+
+	// it is not allowed to move window out of the screen bounds
+	if x < 0 || y < 0 || x > monMode.Width || y > monMode.Height {
+		return
+	}
+
+	// set new window coordinates
+	w.viewport.SetPos(x, y)
 }
 
 // minSizeOnScreen gets the padded minimum size of a window content in screen pixels
@@ -1223,6 +1238,10 @@ func (w *window) create() {
 		w.viewport.SetSize(w.width, w.height) // ensure we requested latest size
 		if w.centered {
 			w.doCenterOnScreen() // lastly center if that was requested
+		}
+
+		if w.move {
+			w.doMove() // lastly center if that was requested
 		}
 	})
 }
