@@ -231,7 +231,7 @@ type scrollContainerRenderer struct {
 	topShadow, bottomShadow *widget.Shadow
 }
 
-func (r *scrollContainerRenderer) Layout(size fyne.Size) {
+func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 	if r.scroll.Direction != ScrollHorizontalOnly {
 		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
 		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
@@ -248,10 +248,14 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 		r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
 	}
 
-	c := r.scroll.Content
-	c.Resize(c.MinSize().Union(size))
-
 	r.updatePosition()
+}
+
+func (r *scrollContainerRenderer) Layout(size fyne.Size) {
+	c := r.scroll.Content
+	c.Resize(c.MinSize().Max(size))
+
+	r.layoutBars(size)
 }
 
 func (r *scrollContainerRenderer) MinSize() fyne.Size {
@@ -259,7 +263,7 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
-	r.Layout(r.scroll.Size())
+	r.layoutBars(r.scroll.Size())
 }
 
 func (r *scrollContainerRenderer) handleAreaVisibility(contentSize int, scrollSize int, area *scrollBarArea) {
@@ -390,8 +394,7 @@ func (s *ScrollContainer) refreshWithoutOffsetUpdate() {
 // Resize sets a new size for the scroll container.
 func (s *ScrollContainer) Resize(size fyne.Size) {
 	if size != s.size {
-		s.size = size
-		s.Refresh()
+		s.BaseWidget.Resize(size)
 	}
 }
 
