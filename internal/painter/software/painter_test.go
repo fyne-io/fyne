@@ -32,6 +32,21 @@ func TestPainter_paintCircle(t *testing.T) {
 	test.AssertImageMatches(t, "draw_circle.png", p.Paint(c))
 }
 
+func TestPainter_paintCircleStroke(t *testing.T) {
+	test.ApplyTheme(t, theme.LightTheme())
+	obj := canvas.NewCircle(color.White)
+	obj.StrokeColor = color.Black
+	obj.StrokeWidth = 4
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_circle_stroke.png", p.Paint(c))
+}
+
 func TestPainter_paintGradient_clipped(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 	g := canvas.NewRadialGradient(color.NRGBA{R: 200, A: 255}, color.NRGBA{B: 200, A: 255})
@@ -179,6 +194,20 @@ func TestPainter_paintImage_containY(t *testing.T) {
 	test.AssertImageMatches(t, "draw_image_containy.png", target)
 }
 
+func TestPainter_paintLine(t *testing.T) {
+	test.ApplyTheme(t, theme.LightTheme())
+	obj := canvas.NewLine(color.Black)
+	obj.StrokeWidth = 6
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_line.png", p.Paint(c))
+}
+
 func TestPainter_paintRectangle_clipped(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 	red1 := canvas.NewRectangle(color.NRGBA{R: 200, A: 255})
@@ -215,6 +244,21 @@ func TestPainter_paintRectangle_clipped(t *testing.T) {
 	p := software.NewPainter()
 
 	test.AssertImageMatches(t, "draw_rect_clipped.png", p.Paint(c))
+}
+
+func TestPainter_paintRectangle_stroke(t *testing.T) {
+	test.ApplyTheme(t, theme.LightTheme())
+	obj := canvas.NewRectangle(color.Black)
+	obj.StrokeWidth = 5
+	obj.StrokeColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
+
+	c := test.NewCanvas()
+	c.SetPadded(true)
+	c.SetContent(obj)
+	c.Resize(fyne.NewSize(70+2*theme.Padding(), 70+2*theme.Padding()))
+	p := software.NewPainter()
+
+	test.AssertImageMatches(t, "draw_rectangle_stroke.png", p.Paint(c))
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {
