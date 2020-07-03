@@ -476,6 +476,7 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 
 	base := fyne.NewContainerWithLayout(layout.NewGridLayout(1), rect, scroll)
 	w.SetContent(base)
+	refreshWindow(w) // ensure any async resize is done
 
 	w.mousePos = fyne.NewPos(10, 80)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
