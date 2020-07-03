@@ -26,8 +26,14 @@ func (l *Circle) Size() fyne.Size {
 }
 
 // Resize sets a new bottom-right position for the circle object
+// If it has a stroke width this will cause it to Refresh.
 func (l *Circle) Resize(size fyne.Size) {
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
+	if l.StrokeWidth == 0 {
+		return
+	}
+
+	Refresh(l)
 }
 
 // Position gets the current top-left position of this circle object, relative to its parent / canvas
