@@ -273,7 +273,7 @@ func (w *window) fitContent() {
 		if w.height < minHeight {
 			w.height = minHeight
 		}
-		w.viewport.SetSize(w.width, w.height)
+		w.shouldExpand = true // queue the resize to happen on main
 	}
 	if w.fixedSize {
 		w.width = internal.ScaleInt(w.canvas, w.Canvas().Size().Width)
