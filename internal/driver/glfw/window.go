@@ -381,9 +381,9 @@ func (w *window) Hide() {
 	}
 
 	runOnMain(func() {
-		w.viewport.Hide()
 		w.viewLock.Lock()
 		w.visible = false
+		w.viewport.Hide()
 		w.viewLock.Unlock()
 
 		// hide top canvas element
@@ -501,7 +501,13 @@ func (w *window) resized(_ *glfw.Window, width, height int) {
 		w.width = internal.ScaleInt(w.canvas, canvasSize.Width)
 		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
 	}
-	w.canvas.Resize(canvasSize)
+
+	if !w.visible { // don't redraw if hidden
+		w.canvas.Resize(canvasSize)
+		return
+	}
+
+	w.platformResize(canvasSize)
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
@@ -514,7 +520,7 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 	w.canvas.Refresh(w.canvas.Content())                   // apply texture scale
 }
 
-func (w *window) refresh(viewport *glfw.Window) {
+func (w *window) refresh(_ *glfw.Window) {
 	refreshWindow(w)
 }
 
@@ -867,7 +873,7 @@ func keyToName(code glfw.Key, scancode int) fyne.KeyName {
 	return ret
 }
 
-func (w *window) keyPressed(viewport *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	keyName := keyToName(key, scancode)
 	if keyName == "" {
 		return
@@ -997,7 +1003,7 @@ func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
 // Unicode character is input.
 //
 // Characters do not map 1:1 to physical keys, as a key may produce zero, one or more characters.
-func (w *window) charInput(viewport *glfw.Window, char rune) {
+func (w *window) charInput(_ *glfw.Window, char rune) {
 	if w.canvas.Focused() == nil && w.canvas.onTypedRune == nil {
 		return
 	}
@@ -1010,7 +1016,7 @@ func (w *window) charInput(viewport *glfw.Window, char rune) {
 	}
 }
 
-func (w *window) focused(viewport *glfw.Window, focused bool) {
+func (w *window) focused(_ *glfw.Window, focused bool) {
 	if w.canvas.focused == nil {
 		return
 	}
@@ -1051,7 +1057,7 @@ func (w *window) rescaleOnMain() {
 		return
 	}
 
-	size := w.canvas.size.Union(w.canvas.MinSize())
+	size := w.canvas.size.Max(w.canvas.MinSize())
 	newWidth, newHeight := w.screenSize(size)
 	w.viewport.SetSize(newWidth, newHeight)
 }
