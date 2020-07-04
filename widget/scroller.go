@@ -229,7 +229,7 @@ type scrollContainerRenderer struct {
 	horizArea               *scrollBarArea
 	leftShadow, rightShadow *widget.Shadow
 	topShadow, bottomShadow *widget.Shadow
-	minSize                 fyne.Size
+	oldMinSize              fyne.Size
 }
 
 func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
@@ -264,12 +264,12 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
-	if r.minSize == r.scroll.Content.MinSize() {
+	if r.oldMinSize == r.scroll.Content.MinSize() && r.scroll.Content.Size() == r.oldMinSize {
 		r.layoutBars(r.scroll.Size())
 		return
 	}
 
-	r.minSize = r.scroll.Content.MinSize()
+	r.oldMinSize = r.scroll.Content.MinSize()
 	r.Layout(r.scroll.Size())
 }
 

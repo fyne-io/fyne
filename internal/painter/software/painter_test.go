@@ -235,8 +235,7 @@ func TestPainter_paintText_clipped(t *testing.T) {
 
 func TestPainter_paintWidgetBackground_clipped(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
-	w := &testWidget{}
-	w.Resize(fyne.NewSize(100, 100))
+	w := &testWidget{min: fyne.NewSize(100, 100)}
 	scroll := widget.NewScrollContainer(w)
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
@@ -253,12 +252,17 @@ func TestPainter_paintWidgetBackground_clipped(t *testing.T) {
 
 type testWidget struct {
 	widget.BaseWidget
+	min fyne.Size
 }
 
 var _ fyne.Widget = (*testWidget)(nil)
 
 func (w *testWidget) CreateRenderer() fyne.WidgetRenderer {
 	return &testWidgetRenderer{}
+}
+
+func (w *testWidget) MinSize() fyne.Size {
+	return w.min
 }
 
 type testWidgetRenderer struct {
