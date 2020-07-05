@@ -1196,6 +1196,9 @@ func (w *window) create() {
 			fn()
 		}
 
+		if w.fixedSize { // as the window will not be sized later we may need to pack menus etc
+			w.canvas.Resize(w.canvas.Size())
+		}
 		// order of operation matters so we do these last items in order
 		w.viewport.SetSize(w.width, w.height) // ensure we requested latest size
 		if w.centered {
