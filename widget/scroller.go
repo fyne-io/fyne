@@ -39,7 +39,7 @@ func (r *scrollBarRenderer) BackgroundColor() color.Color {
 	return theme.ScrollBarColor()
 }
 
-func (r *scrollBarRenderer) Layout(size fyne.Size) {
+func (r *scrollBarRenderer) Layout(_ fyne.Size) {
 }
 
 func (r *scrollBarRenderer) MinSize() fyne.Size {
@@ -116,7 +116,7 @@ func (r *scrollBarAreaRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
+func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {
 	var barHeight, barWidth, barX, barY int
 	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
@@ -371,7 +371,7 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 
 // MinSize returns the smallest size this widget can shrink to
 func (s *ScrollContainer) MinSize() fyne.Size {
-	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Union(s.minSize)
+	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
 	switch s.Direction {
 	case ScrollHorizontalOnly:
 		min.Height = fyne.Max(min.Height, s.Content.MinSize().Height)
@@ -383,7 +383,7 @@ func (s *ScrollContainer) MinSize() fyne.Size {
 
 // SetMinSize specifies a minimum size for this scroll container.
 // If the specified size is larger than the content size then scrolling will not be enabled
-// This can be helpful to set scrolling in only 1 direction.
+// This can be helpful to appear larger than default if the layout is collapsing this widget.
 func (s *ScrollContainer) SetMinSize(size fyne.Size) {
 	s.minSize = size
 }
