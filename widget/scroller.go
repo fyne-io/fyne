@@ -229,9 +229,10 @@ type scrollContainerRenderer struct {
 	horizArea               *scrollBarArea
 	leftShadow, rightShadow *widget.Shadow
 	topShadow, bottomShadow *widget.Shadow
+	oldMinSize              fyne.Size
 }
 
-func (r *scrollContainerRenderer) Layout(size fyne.Size) {
+func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 	if r.scroll.Direction != ScrollHorizontalOnly {
 		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
 		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
@@ -248,10 +249,14 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 		r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
 	}
 
-	c := r.scroll.Content
-	c.Resize(c.MinSize().Union(size))
-
 	r.updatePosition()
+}
+
+func (r *scrollContainerRenderer) Layout(size fyne.Size) {
+	c := r.scroll.Content
+	c.Resize(c.MinSize().Max(size))
+
+	r.layoutBars(size)
 }
 
 func (r *scrollContainerRenderer) MinSize() fyne.Size {
@@ -259,6 +264,12 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
+	if r.oldMinSize == r.scroll.Content.MinSize() && r.scroll.Content.Size() == r.oldMinSize {
+		r.layoutBars(r.scroll.Size())
+		return
+	}
+
+	r.oldMinSize = r.scroll.Content.MinSize()
 	r.Layout(r.scroll.Size())
 }
 

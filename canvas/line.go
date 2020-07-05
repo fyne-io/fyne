@@ -28,9 +28,10 @@ func (l *Line) Size() fyne.Size {
 		int(math.Abs(float64(l.Position2.Y)-float64(l.Position1.Y))))
 }
 
-// Resize sets a new bottom-right position for the line object
+// Resize sets a new bottom-right position for the line object and it will then be refreshed.
 func (l *Line) Resize(size fyne.Size) {
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
+	Refresh(l)
 }
 
 // Position gets the current top-left position of this line object, relative to its parent / canvas

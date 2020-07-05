@@ -127,10 +127,15 @@ func (d *gLDriver) runGL() {
 				w.viewLock.RUnlock()
 
 				if expand {
+					w.fitContent()
 					w.viewLock.Lock()
 					w.shouldExpand = false
+					view := w.viewport
 					w.viewLock.Unlock()
-					w.fitContent()
+					oldWidth, oldHeight := view.GetSize()
+					if oldWidth != w.width || oldHeight != w.height {
+						view.SetSize(w.width, w.height)
+					}
 				}
 
 				newWindows = append(newWindows, win)

@@ -273,7 +273,7 @@ func (w *window) fitContent() {
 		if w.height < minHeight {
 			w.height = minHeight
 		}
-		w.viewport.SetSize(w.width, w.height)
+		w.shouldExpand = true // queue the resize to happen on main
 	}
 	if w.fixedSize {
 		w.width = internal.ScaleInt(w.canvas, w.Canvas().Size().Width)
@@ -502,16 +502,12 @@ func (w *window) resized(_ *glfw.Window, width, height int) {
 		w.height = internal.ScaleInt(w.canvas, canvasSize.Height)
 	}
 
-	d, ok := fyne.CurrentApp().Driver().(*gLDriver)
-	if !ok || !w.visible { // don't wait to redraw in this way if we are running on test or not yet drawn
+	if !w.visible { // don't redraw if hidden
 		w.canvas.Resize(canvasSize)
 		return
 	}
 
-	runOnDraw(w, func() {
-		w.canvas.Resize(canvasSize)
-		d.repaintWindow(w)
-	})
+	w.platformResize(canvasSize)
 }
 
 func (w *window) frameSized(viewport *glfw.Window, width, height int) {
