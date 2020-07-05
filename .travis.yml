@@ -49,6 +49,8 @@ script:
       golint -set_exit_status $(go list -tags ci ./...)
     fi
   - gocyclo -over 50 $GO_FILES
+
+after_success:
   - |
     set -e
     if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PULL_REQUEST" == "false" && -n "$COVERALLS_TOKEN" ]]
