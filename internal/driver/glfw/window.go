@@ -1073,7 +1073,7 @@ func (w *window) queueEvent(fn func()) {
 	select {
 	case w.eventQueue <- fn:
 	default:
-		fyne.LogError("EventQueue full", nil)
+		fyne.LogError("EventQueue full, perhaps a callback blocked the event handler", nil)
 	}
 }
 
