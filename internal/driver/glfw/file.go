@@ -36,10 +36,7 @@ func openFile(uri fyne.URI, create bool) (*file, error) {
 	}
 
 	path := uri.String()[7:]
-	f, err := os.Open(path)
-	if err != nil && create {
-		f, err = os.Create(path)
-	}
+	f, err := os.Create(path) // If it exists this will truncate which is what we wanted
 
 	return &file{File: f, path: path}, err
 }
