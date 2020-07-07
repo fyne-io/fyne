@@ -96,13 +96,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 			ShowConfirm("Overwrite?", "Are you sure you want to overwrite the file\n"+name+"?",
 				func(ok bool) {
+					f.win.Hide()
 					if !ok {
 						callback(nil, nil)
 						return
 					}
 
 					callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
-					f.win.Hide()
 					if f.file.onClosedCallback != nil {
 						f.file.onClosedCallback(true)
 					}
