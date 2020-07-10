@@ -64,6 +64,10 @@ type Window interface {
 	// SetOnClosed sets a function that runs when the window is closed.
 	SetOnClosed(func())
 
+	// SetWillClose sets a function that runs before the window is closed
+	// and can block closing
+	SetWillClose(func() bool)
+
 	// Show the window on screen.
 	Show()
 	// Hide the window from the user.

@@ -74,6 +74,8 @@ type window struct {
 	mouseLastClick     fyne.CanvasObject
 	mousePressed       fyne.CanvasObject
 	onClosed           func()
+	willClose          func() bool
+	closing            bool
 
 	xpos, ypos    int
 	width, height int
@@ -292,6 +294,10 @@ func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
+func (w *window) SetWillClose(willClose func() bool) {
+	w.willClose = willClose
+}
+
 func (w *window) getMonitorForWindow() *glfw.Monitor {
 	xOff := w.xpos + (w.width / 2)
 	yOff := w.ypos + (w.height / 2)
@@ -446,6 +452,28 @@ func (w *window) Canvas() fyne.Canvas {
 }
 
 func (w *window) closed(viewport *glfw.Window) {
+	viewport.SetShouldClose(false)
+	if w.closing {
+		return
+	}
+	w.closing = true
+
+	go func() {
+		defer func() {
+			w.closing = false
+		}()
+
+		if w.willClose != nil {
+			if !w.willClose() {
+				return
+			}
+		}
+
+		w.doClose(viewport)
+	}()
+}
+
+func (w *window) doClose(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
 	w.canvas.walkTrees(nil, func(node *renderCacheNode) {

@@ -92,6 +92,10 @@ func (w *window) SetOnClosed(callback func()) {
 	w.onClosed = callback
 }
 
+func (w *window) SetWillClose(_ func() bool) {
+	// no-op
+}
+
 func (w *window) Show() {
 	menu := fyne.CurrentApp().Driver().(*mobileDriver).findMenu(w)
 	menuButton := widget.NewButtonWithIcon("", theme.MenuIcon(), func() {

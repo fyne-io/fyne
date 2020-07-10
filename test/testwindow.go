@@ -112,6 +112,10 @@ func (w *testWindow) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
+func (w *testWindow) SetWillClose(_ func() bool) {
+	// no-op
+}
+
 func (w *testWindow) SetPadded(padded bool) {
 	w.canvas.SetPadded(padded)
 }
