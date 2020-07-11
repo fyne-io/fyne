@@ -31,9 +31,9 @@ func TestGLDriver_FileReaderForURI_Again(t *testing.T) { // a bug blanked files
 
 func TestGLDriver_FileWriterForURI(t *testing.T) {
 	uri, path := testURI("text2.txt")
+	defer os.Remove(path)
 	write, err := NewGLDriver().FileWriterForURI(uri)
 	defer write.Close()
-	defer os.Remove(path)
 
 	assert.Nil(t, err)
 	assert.Equal(t, uri, write.URI())
