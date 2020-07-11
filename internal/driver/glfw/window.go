@@ -356,6 +356,10 @@ func (w *window) doShow() {
 		w.visible = true
 		w.viewLock.Unlock()
 		w.viewport.SetTitle(w.title)
+
+		if w.centered {
+			w.doCenterOnScreen() // lastly center if that was requested
+		}
 		w.viewport.Show()
 
 		// save coordinates
@@ -1201,9 +1205,6 @@ func (w *window) create() {
 		}
 		// order of operation matters so we do these last items in order
 		w.viewport.SetSize(w.width, w.height) // ensure we requested latest size
-		if w.centered {
-			w.doCenterOnScreen() // lastly center if that was requested
-		}
 	})
 }
 
