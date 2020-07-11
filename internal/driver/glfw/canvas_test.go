@@ -365,7 +365,7 @@ func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) 
 func Test_glCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
-	c.Resize(fyne.NewSize(100, 100))
+	w.Resize(fyne.NewSize(100, 100))
 	popUpContent := canvas.NewRectangle(color.Black)
 	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
 	popUp := widget.NewPopUp(popUpContent, c)
