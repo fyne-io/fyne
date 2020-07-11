@@ -1,3 +1,5 @@
+// +build !ci !windows
+
 package glfw
 
 import (
