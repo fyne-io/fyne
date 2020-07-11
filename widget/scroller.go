@@ -354,6 +354,15 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	return scr
 }
 
+
+//ScrollToEnd will help to auto scroll container to last to show latest info which end user really cared about
+//Such as when user insert new widget into ScrollerContainer, or container contail label, and label continue add new text, 
+//Usually users would apprecaite if the content auto scroll to end to show latest new added info 
+func (s *ScrollContainer) ScrollToEnd() {
+	s.Offset.Y = s.Content.Size().Height - s.Size().Height
+}
+
+
 // DragEnd will stop scrolling on mobile has stopped
 func (s *ScrollContainer) DragEnd() {
 }
