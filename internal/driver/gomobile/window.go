@@ -12,8 +12,7 @@ type window struct {
 	title     string
 	visible   bool
 	onClosed  func()
-	willClose func() bool
-	clossing  bool
+	willClose func()
 	isChild   bool
 
 	clipboard fyne.Clipboard
@@ -94,7 +93,7 @@ func (w *window) SetOnClosed(callback func()) {
 	w.onClosed = callback
 }
 
-func (w *window) SetWillClose(callback func() bool) {
+func (w *window) SetWillClose(callback func()) {
 	w.willClose = callback
 }
 
@@ -136,21 +135,12 @@ func (w *window) Hide() {
 }
 
 func (w *window) Close() {
-	if w.clossing {
+	if w.willClose != nil {
+		w.willClose()
 		return
 	}
-	w.clossing = true
-	go func() {
-		defer func() { w.clossing = false }()
 
-		if w.willClose != nil {
-			if !w.willClose() {
-				return
-			}
-		}
-
-		w.doClose()
-	}()
+	w.doClose()
 }
 
 func (w *window) doClose() {

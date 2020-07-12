@@ -112,7 +112,7 @@ func (w *testWindow) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func (w *testWindow) SetWillClose(_ func() bool) {
+func (w *testWindow) SetWillClose(_ func()) {
 	// no-op
 }
 
