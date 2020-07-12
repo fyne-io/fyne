@@ -355,10 +355,8 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 
-//ScrollToEnd will help to auto scroll container to last to show latest info which end user really cared about
-//Such as when user insert new widget into ScrollerContainer, or container contail label, and label continue add new text, 
-//Usually users would apprecaite if the content auto scroll to end to show latest new added info 
-func (s *ScrollContainer) ScrollToEnd() {
+//ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
+func (s *ScrollContainer) ScrollToBottom() {
 	s.Offset.Y = s.Content.Size().Height - s.Size().Height
 }
 
