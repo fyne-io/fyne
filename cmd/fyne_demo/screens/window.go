@@ -178,7 +178,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 		}),
 		widget.NewButton("Text Entry Dialog (no validation)", func() {
 			dialog.ShowInput("Text Entry", "Enter some text: ",
-				func(response bool) {
+				func(response string) {
 					fmt.Printf("User entered text, response was: %v\n", response)
 				},
 				nil,
@@ -186,7 +186,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 		}),
 		widget.NewButton("Text Entry Dialog (integer validation)", func() {
 			dialog.ShowInput("Text Entry", "Enter a number: ",
-				func(response bool) {
+				func(response string) {
 					fmt.Printf("User entered text, response was: %v\n", response)
 				},
 				func(text string) (bool, string) {
@@ -200,7 +200,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 		}),
 		widget.NewButton("Text Entry Dialog (default value)", func() {
 			i := dialog.NewInput("Text Entry", "Enter the best widget toolkit: ",
-				func(response bool) {
+				func(response string) {
 					fmt.Printf("User entered text, response was: %v\n", response)
 				},
 				func(text string) (bool, string) {
