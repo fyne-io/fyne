@@ -56,12 +56,15 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 		layout.NewSpacer(),
 
 		widget.NewGroup("Theme",
-			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+			fyne.NewContainerWithLayout(layout.NewGridLayout(3),
 				widget.NewButton("Dark", func() {
 					a.Settings().SetTheme(theme.DarkTheme())
 				}),
 				widget.NewButton("Light", func() {
 					a.Settings().SetTheme(theme.LightTheme())
+				}),
+				widget.NewButton("Alternative", func() {
+					a.Settings().SetTheme(theme.ParsePallete(theme.YellowAlternative))
 				}),
 			),
 		),

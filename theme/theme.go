@@ -10,11 +10,12 @@ import (
 )
 
 type builtinTheme struct {
-	background color.Color
-
+	background                                                                    color.Color
 	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar, shadow color.Color
 	regular, bold, italic, bolditalic, monospace                                  fyne.Resource
 	disabledButton, disabledIcon, disabledText                                    color.Color
+	Primary, Secondary, Shadow, OnSurface, OnSecondary, OnPrimary, OnBackground   color.NRGBA
+	Disabled, DisabledText, Background, Surface, OnError, Hyperlink, Error        color.NRGBA
 }
 
 // LightTheme defines the built in light theme colors and sizes

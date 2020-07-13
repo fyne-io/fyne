@@ -114,6 +114,7 @@ func newAppWithDriver(d fyne.Driver, id string) fyne.App {
 			helper.ApplySettings(set, newApp)
 		}
 	}()
+	helper.ApplySettings(newApp.settings, newApp)
 	if !d.Device().IsMobile() {
 		newApp.settings.watchSettings()
 	}

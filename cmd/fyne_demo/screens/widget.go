@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"time"
 
+	"golang.org/x/image/colornames"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -45,6 +47,29 @@ func makeButtonTab() fyne.Widget {
 		shareItem,
 	))
 
+	b1 := widget.NewButton("DEFAULT", func() {})
+	b1.SetStyling(&theme.DefaultFlatButton)
+	b2 := widget.NewButton(" PRIMARY", func() {})
+	b2.SetStyling(&theme.PrimaryFlatButton)
+	b3 := widget.NewButton(" SECONDARY", func() {})
+	b3.SetStyling(&theme.SecondaryFlatButton)
+	b4 := widget.NewButton("DEFAULT", func() {})
+	b4.SetStyling(&theme.DefaultRaisedButton)
+	b5 := widget.NewButton(" PRIMARY", func() {})
+	b5.SetStyling(&theme.PrimaryRaisedButton)
+	b6 := widget.NewButton(" SECONDARY", func() {})
+	b6.SetStyling(&theme.SecondaryRaisedButton)
+	s := layout.NewSpacer()
+	b11 := widget.NewButton("CUSTOM", func() {})
+	customStyle := &theme.ButtonStyle{
+		EnabledColor: colornames.Green,
+		TextColor:    colornames.White,
+		TextSize:     20,
+		Height:       40,
+		MinWidth:     300,
+	}
+	customStyle.AddStateColors()
+	b11.SetStyling(customStyle)
 	return widget.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("Button (text & leading icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & leading icon button") }),
@@ -62,6 +87,9 @@ func makeButtonTab() fyne.Widget {
 		},
 		disabled,
 		layout.NewSpacer(),
+		widget.NewHBox(b1, s, b2, s, b3, s, b4, s, b5, s, b6),
+		layout.NewSpacer(),
+		widget.NewHBox(s, b11, s),
 		layout.NewSpacer(),
 		menuLabel,
 		layout.NewSpacer(),

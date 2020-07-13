@@ -49,6 +49,8 @@ func (b *buttonRenderer) MinSize() (size fyne.Size) {
 		size.Width += iconSize.Width
 	}
 	size.Height = fyne.Max(labelSize.Height, iconSize.Height)
+	size.Height = fyne.Max(size.Height, int(b.button.styling.Height))
+	size.Width = fyne.Max(size.Width, int(b.button.styling.MinWidth))
 	size = size.Add(b.padding())
 	return
 }
@@ -107,23 +109,35 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 
 // applyTheme updates this button to match the current theme
 func (b *buttonRenderer) applyTheme() {
-	b.label.TextSize = theme.TextSize()
-	b.label.Color = theme.TextColor()
+	if b.button.Style == PrimaryButton {
+		b.button.styling = &theme.PrimaryRaisedButton
+	} else if b.button.Style == DefaultButton {
+		b.button.styling = &theme.DefaultRaisedButton
+	}
+	b.label.TextSize = b.button.styling.TextSize
+	b.label.Color = b.button.styling.TextColor
 	if b.button.Disabled() {
-		b.label.Color = theme.DisabledTextColor()
+		b.label.Color = b.button.styling.DisabledTextColor
 	}
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
+	if b.button.Style == PrimaryButton {
+		b.button.styling = &theme.PrimaryRaisedButton
+	} else if b.button.Style == DefaultButton {
+		b.button.styling = &theme.DefaultRaisedButton
+	}
 	switch {
 	case b.button.Disabled():
-		return theme.DisabledButtonColor()
-	case b.button.Style == PrimaryButton:
-		return theme.PrimaryColor()
-	case b.button.hovered, b.button.tapped: // TODO tapped will be different to hovered when we have animation
-		return theme.HoverColor()
+		return b.button.styling.DisabledColor
+	case b.button.hovered:
+		return b.button.styling.Hovered
+	case b.button.pressed:
+		return b.button.styling.Pressed
+	case b.button.focused:
+		return b.button.styling.Focused
 	default:
-		return theme.ButtonColor()
+		return b.button.styling.EnabledColor
 	}
 }
 
@@ -163,15 +177,16 @@ type Button struct {
 	DisableableWidget
 	Text          string
 	Style         ButtonStyle
+	styling       *theme.ButtonStyle
 	Icon          fyne.Resource
 	disabledIcon  fyne.Resource
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement
-
-	OnTapped   func() `json:"-"`
-	HideShadow bool
-
-	hovered, tapped bool
+	OnTapped      func() `json:"-"`
+	HideShadow    bool
+	hovered       bool
+	pressed       bool
+	focused       bool
 }
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -208,10 +223,10 @@ const (
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
-	b.tapped = true
+	b.pressed = true
 	defer func() { // TODO move to a real animation
 		time.Sleep(time.Millisecond * buttonTapDuration)
-		b.tapped = false
+		b.pressed = false
 		b.Refresh()
 	}()
 	b.Refresh()
@@ -251,21 +266,22 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		icon = canvas.NewImageFromResource(b.Icon)
 		icon.FillMode = canvas.ImageFillContain
 	}
-
-	text := canvas.NewText(b.Text, theme.TextColor())
+	text := canvas.NewText(b.Text, nil)
 
 	objects := []fyne.CanvasObject{
 		text,
 	}
 	shadowLevel := widget.ButtonLevel
-	if b.HideShadow {
+	if b.HideShadow || b.styling != nil && b.styling.ShadowColor == nil {
 		shadowLevel = widget.BaseLevel
 	}
 	if icon != nil {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
+	r := &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
+	r.applyTheme()
+	return r
 }
 
 // SetText allows the button label to be changed
@@ -291,6 +307,12 @@ func (b *Button) SetIcon(icon fyne.Resource) {
 	}
 
 	b.Refresh()
+}
+
+// SetStyling will set local styling for a button
+func (b *Button) SetStyling(s *theme.ButtonStyle) {
+	b.Style = -1 // Set the old style number to an invalid number - use style instead
+	b.styling = s
 }
 
 // NewButton creates a new button widget with the set label and tap handler
