@@ -10,6 +10,7 @@ type testWindow struct {
 	fixedSize  bool
 	focused    bool
 	onClosed   func()
+	willClose  func()
 
 	canvas    *testCanvas
 	clipboard fyne.Clipboard
@@ -36,12 +37,20 @@ func (w *testWindow) Clipboard() fyne.Clipboard {
 	return w.clipboard
 }
 
-func (w *testWindow) Close() {
+func (w *testWindow) DoClose() {
 	if w.onClosed != nil {
 		w.onClosed()
 	}
 	w.focused = false
 	w.driver.removeWindow(w)
+}
+
+func (w *testWindow) Close() {
+	if w.willClose != nil {
+		w.willClose()
+		return
+	}
+	w.DoClose()
 }
 
 func (w *testWindow) Content() fyne.CanvasObject {
@@ -112,8 +121,8 @@ func (w *testWindow) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func (w *testWindow) SetWillClose(_ func()) {
-	// no-op
+func (w *testWindow) SetWillClose(willClose func()) {
+	w.willClose = willClose
 }
 
 func (w *testWindow) SetPadded(padded bool) {

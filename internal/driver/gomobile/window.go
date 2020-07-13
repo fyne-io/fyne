@@ -143,6 +143,10 @@ func (w *window) Close() {
 	w.doClose()
 }
 
+func (w *window) DoClose() {
+	w.doClose()
+}
+
 func (w *window) doClose() {
 	d := fyne.CurrentApp().Driver().(*mobileDriver)
 	pos := -1

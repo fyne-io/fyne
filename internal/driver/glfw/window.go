@@ -409,6 +409,13 @@ func (w *window) Close() {
 	if w.viewport == nil {
 		return
 	}
+	w.closed(w.viewport)
+}
+
+func (w *window) DoClose() {
+	if w.viewport == nil {
+		return
+	}
 	w.doClose(w.viewport)
 }
 
