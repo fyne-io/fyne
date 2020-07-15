@@ -236,26 +236,6 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}
 }
 
-// FocusGained is called when the Entry has been given focus.
-func (b *Button) FocusGained() {
-	if b.Disabled() {
-		return
-	}
-	b.focused = true
-	b.Refresh()
-}
-
-// FocusLost is called when the Entry has had focus removed.
-func (b *Button) FocusLost() {
-	b.focused = false
-	b.Refresh()
-}
-
-// Focused returns whether or not this Entry has focus.
-func (b *Button) Focused() bool {
-	return b.focused
-}
-
 // TypedRune receives text input events when the Check is focused.
 func (b *Button) TypedRune(r rune) {
 }
@@ -272,18 +252,10 @@ func (b *Button) TypedKey(key *fyne.KeyEvent) {
 
 // KeyUp handles key release events
 func (b *Button) KeyUp(key *fyne.KeyEvent) {
-	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
-		//b.pressed = false
-		//b.Refresh()
-	}
 }
 
 // KeyDown handles key press events
 func (b *Button) KeyDown(key *fyne.KeyEvent) {
-	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
-		b.pressed = true
-		b.Refresh()
-	}
 }
 
 // MouseIn is called when a desktop pointer enters the widget
