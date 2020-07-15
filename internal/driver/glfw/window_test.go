@@ -826,8 +826,11 @@ func TestWindow_WillClose(t *testing.T) {
 
 	createLocaWindow := func() fyne.Window {
 		w := createWindow("Test")
-		w.SetOnClosed(func() {
-			closed <- true
+		w.SetCloseIntercept(func() {
+			go func() {
+				closed <- true
+				w.Close()
+			}()
 		})
 		return w
 	}
@@ -842,12 +845,16 @@ func TestWindow_WillClose(t *testing.T) {
 	}
 
 	w := createLocaWindow()
-	w.SetWillClose(func() {})
+	w.SetCloseIntercept(func() {})
 	w.Close()
 	assert.False(t, checkClosed())
 
-	w.SetWillClose(func() {
-		w.DoClose()
+	w.SetCloseIntercept(func() {
+		go func() {
+			w.SetCloseIntercept(nil)
+			closed <- true
+			w.Close()
+		}()
 	})
 	w.Close()
 	assert.True(t, checkClosed())

@@ -9,11 +9,11 @@ import (
 )
 
 type window struct {
-	title     string
-	visible   bool
-	onClosed  func()
-	willClose func()
-	isChild   bool
+	title              string
+	visible            bool
+	onClosed           func()
+	onCloseIntercepted func()
+	isChild            bool
 
 	clipboard fyne.Clipboard
 	canvas    *mobileCanvas
@@ -93,8 +93,8 @@ func (w *window) SetOnClosed(callback func()) {
 	w.onClosed = callback
 }
 
-func (w *window) SetWillClose(callback func()) {
-	w.willClose = callback
+func (w *window) SetCloseIntercept(callback func()) {
+	w.onCloseIntercepted = callback
 }
 
 func (w *window) Show() {
@@ -135,19 +135,11 @@ func (w *window) Hide() {
 }
 
 func (w *window) Close() {
-	if w.willClose != nil {
-		w.willClose()
+	if w.onCloseIntercepted != nil {
+		w.onCloseIntercepted()
 		return
 	}
 
-	w.doClose()
-}
-
-func (w *window) DoClose() {
-	w.doClose()
-}
-
-func (w *window) doClose() {
 	d := fyne.CurrentApp().Driver().(*mobileDriver)
 	pos := -1
 	for i, win := range d.windows {

@@ -64,8 +64,8 @@ type Window interface {
 	// SetOnClosed sets a function that runs when the window is closed.
 	SetOnClosed(func())
 
-	// SetWillClose sets a function that runs instead of closing if defined
-	SetWillClose(func())
+	// SetCloseIntercept sets a function that runs instead of closing if defined
+	SetCloseIntercept(func())
 
 	// Show the window on screen.
 	Show()
@@ -75,10 +75,6 @@ type Window interface {
 	// Close the window.
 	// If it is the only open window, or the "master" window the app will Quit.
 	Close()
-
-	// DoClose the window without pre-checks.
-	// If it is the only open window, or the "master" window the app will Quit.
-	DoClose()
 
 	// ShowAndRun is a shortcut to show the window and then run the application.
 	// This should be called near the end of a main() function as it will block.

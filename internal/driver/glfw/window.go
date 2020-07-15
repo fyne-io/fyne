@@ -74,7 +74,7 @@ type window struct {
 	mouseLastClick     fyne.CanvasObject
 	mousePressed       fyne.CanvasObject
 	onClosed           func()
-	willClose          func()
+	onCloseIntercepted func()
 
 	xpos, ypos    int
 	width, height int
@@ -293,8 +293,8 @@ func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
-func (w *window) SetWillClose(willClose func()) {
-	w.willClose = willClose
+func (w *window) SetCloseIntercept(callback func()) {
+	w.onCloseIntercepted = callback
 }
 
 func (w *window) getMonitorForWindow() *glfw.Monitor {
@@ -412,13 +412,6 @@ func (w *window) Close() {
 	w.closed(w.viewport)
 }
 
-func (w *window) DoClose() {
-	if w.viewport == nil {
-		return
-	}
-	w.doClose(w.viewport)
-}
-
 func (w *window) ShowAndRun() {
 	w.Show()
 	fyne.CurrentApp().Driver().Run()
@@ -460,15 +453,11 @@ func (w *window) Canvas() fyne.Canvas {
 func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(false)
 
-	if w.willClose != nil {
-		w.willClose()
+	if w.onCloseIntercepted != nil {
+		w.onCloseIntercepted()
 		return
 	}
 
-	w.doClose(viewport)
-}
-
-func (w *window) doClose(viewport *glfw.Window) {
 	viewport.SetShouldClose(true)
 
 	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
