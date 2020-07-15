@@ -62,12 +62,12 @@ func Lighter(c1, c2 color.Color) bool {
 func (b *ButtonStyle) AddStateColors() {
 	if Lighter(b.EnabledColor, b.TextColor) {
 		b.Hovered = Blend(b.EnabledColor, b.TextColor, 0.08)
-		b.Pressed = Blend(b.EnabledColor, b.TextColor, 0.16)
+		b.Pressed = Blend(b.EnabledColor, b.TextColor, 0.24)
 		b.Focused = Blend(b.EnabledColor, b.TextColor, 0.16)
 	} else {
 		b.Hovered = Blend(b.EnabledColor, b.TextColor, 0.16)
-		b.Pressed = Blend(b.EnabledColor, b.TextColor, 0.32)
-		b.Focused = Blend(b.EnabledColor, b.TextColor, 0.32)
+		b.Pressed = Blend(b.EnabledColor, b.TextColor, 0.42)
+		b.Focused = Blend(b.EnabledColor, b.TextColor, 0.24)
 	}
 }
 

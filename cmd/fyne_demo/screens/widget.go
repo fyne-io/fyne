@@ -63,7 +63,8 @@ func makeButtonTab() fyne.Widget {
 	b11 := widget.NewButton("CUSTOM", func() {})
 	customStyle := &theme.ButtonStyle{
 		EnabledColor: colornames.Green,
-		TextColor:    colornames.White,
+		TextColor:    colornames.Lightgoldenrodyellow,
+		ShadowColor:  colornames.Black,
 		TextSize:     20,
 		Height:       40,
 		MinWidth:     300,

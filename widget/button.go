@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const buttonTapDuration = 250
+const buttonTapDuration = 100
 
 type buttonRenderer struct {
 	*widget.ShadowingRenderer
@@ -130,12 +130,12 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 	switch {
 	case b.button.Disabled():
 		return b.button.styling.DisabledColor
-	case b.button.hovered:
-		return b.button.styling.Hovered
 	case b.button.pressed:
 		return b.button.styling.Pressed
 	case b.button.focused:
 		return b.button.styling.Focused
+	case b.button.hovered:
+		return b.button.styling.Hovered
 	default:
 		return b.button.styling.EnabledColor
 	}
@@ -233,6 +233,56 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 
 	if b.OnTapped != nil && !b.Disabled() {
 		b.OnTapped()
+	}
+}
+
+// FocusGained is called when the Entry has been given focus.
+func (b *Button) FocusGained() {
+	if b.Disabled() {
+		return
+	}
+	b.focused = true
+	b.Refresh()
+}
+
+// FocusLost is called when the Entry has had focus removed.
+func (b *Button) FocusLost() {
+	b.focused = false
+	b.Refresh()
+}
+
+// Focused returns whether or not this Entry has focus.
+func (b *Button) Focused() bool {
+	return b.focused
+}
+
+// TypedRune receives text input events when the Check is focused.
+func (b *Button) TypedRune(r rune) {
+}
+
+//TypedKey handles key events
+func (b *Button) TypedKey(key *fyne.KeyEvent) {
+	if b.Disabled() {
+		return
+	}
+	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+		b.Tapped(nil)
+	}
+}
+
+// KeyUp handles key release events
+func (b *Button) KeyUp(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+		//b.pressed = false
+		//b.Refresh()
+	}
+}
+
+// KeyDown handles key press events
+func (b *Button) KeyDown(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter || key.Name == fyne.KeySpace {
+		b.pressed = true
+		b.Refresh()
 	}
 }
 
