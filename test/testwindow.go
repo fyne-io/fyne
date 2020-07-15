@@ -38,11 +38,6 @@ func (w *testWindow) Clipboard() fyne.Clipboard {
 }
 
 func (w *testWindow) Close() {
-	if w.onCloseIntercepted != nil {
-		w.onCloseIntercepted()
-		return
-	}
-
 	if w.onClosed != nil {
 		w.onClosed()
 	}

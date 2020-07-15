@@ -409,7 +409,20 @@ func (w *window) Close() {
 	if w.viewport == nil {
 		return
 	}
-	w.closed(w.viewport)
+
+	w.viewport.SetShouldClose(true)
+
+	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
+		switch co := node.obj.(type) {
+		case fyne.Widget:
+			cache.DestroyRenderer(co)
+		}
+	})
+
+	// trigger callbacks
+	if w.onClosed != nil {
+		w.queueEvent(w.onClosed)
+	}
 }
 
 func (w *window) ShowAndRun() {
@@ -458,19 +471,7 @@ func (w *window) closed(viewport *glfw.Window) {
 		return
 	}
 
-	viewport.SetShouldClose(true)
-
-	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
-		switch co := node.obj.(type) {
-		case fyne.Widget:
-			cache.DestroyRenderer(co)
-		}
-	})
-
-	// trigger callbacks
-	if w.onClosed != nil {
-		w.queueEvent(w.onClosed)
-	}
+	w.Close()
 }
 
 // destroy this window and, if it's the last window quit the app

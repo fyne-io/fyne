@@ -821,49 +821,6 @@ func TestWindow_Clipboard(t *testing.T) {
 	cb.SetContent(cliboardContent)
 }
 
-func TestWindow_WillClose(t *testing.T) {
-	closed := make(chan bool)
-
-	createLocaWindow := func() fyne.Window {
-		w := createWindow("Test")
-		w.SetCloseIntercept(func() {
-			go func() {
-				closed <- true
-				w.Close()
-			}()
-		})
-		return w
-	}
-
-	checkClosed := func() bool {
-		select {
-		case <-closed:
-			return true
-		case <-time.After(100 * time.Millisecond):
-			return false
-		}
-	}
-
-	w := createLocaWindow()
-	w.SetCloseIntercept(func() {})
-	w.Close()
-	assert.False(t, checkClosed())
-
-	w.SetCloseIntercept(func() {
-		go func() {
-			w.SetCloseIntercept(nil)
-			closed <- true
-			w.Close()
-		}()
-	})
-	w.Close()
-	assert.True(t, checkClosed())
-
-	w = createLocaWindow()
-	w.Close()
-	assert.True(t, checkClosed())
-}
-
 // This test makes our developer screens flash, let's not run it regularly...
 //func TestWindow_Shortcut(t *testing.T) {
 //	w := createWindow("Test")

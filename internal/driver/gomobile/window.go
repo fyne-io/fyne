@@ -108,7 +108,7 @@ func (w *window) Show() {
 
 	if w.isChild {
 		exit := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
-			w.Close()
+			w.tryClose()
 		})
 		title := widget.NewLabel(w.title)
 		title.Alignment = fyne.TextAlignCenter
@@ -134,12 +134,16 @@ func (w *window) Hide() {
 	}
 }
 
-func (w *window) Close() {
+func (w *window) tryClose() {
 	if w.onCloseIntercepted != nil {
 		w.onCloseIntercepted()
 		return
 	}
 
+	w.Close()
+}
+
+func (w *window) Close() {
 	d := fyne.CurrentApp().Driver().(*mobileDriver)
 	pos := -1
 	for i, win := range d.windows {
