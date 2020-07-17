@@ -41,7 +41,7 @@ func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	g.ExtendBaseWidget(g)
 	label := NewLabel(g.Text)
 	labelBg := canvas.NewRectangle(theme.BackgroundColor())
-	line := canvas.NewRectangle(theme.ButtonColor())
+	line := canvas.NewRectangle(theme.ShadowColor())
 	return &groupRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{line, labelBg, label, g.content}),
 		label:        label,
@@ -102,7 +102,7 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 }
 
 func (g *groupRenderer) Refresh() {
-	g.line.FillColor = theme.ButtonColor()
+	g.line.FillColor = theme.ShadowColor()
 	g.labelBg.FillColor = theme.BackgroundColor()
 
 	g.label.SetText(g.group.Text)

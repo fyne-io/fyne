@@ -5,12 +5,17 @@ import "image/color"
 // Theme defines the requirements of any Fyne theme.
 type Theme interface {
 	BackgroundColor() color.Color
+	// Deprecated: Standard buttons no longer have a color, they are drawn as outlines over background.
 	ButtonColor() color.Color
+	// Deprecated: Standard buttons no longer have a color, they are drawn as outlines over background.
 	DisabledButtonColor() color.Color
+	// Deprecated: Hyperlinks now use the primary color for consistency.
 	HyperlinkColor() color.Color
 	TextColor() color.Color
 	DisabledTextColor() color.Color
+	// Deprecated: Icons now use the text colour for consistency.
 	IconColor() color.Color
+	// Deprecated: Disabled icons match disabled text color for consistency.
 	DisabledIconColor() color.Color
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color

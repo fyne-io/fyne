@@ -92,7 +92,7 @@ func NewPasswordEntry() *Entry {
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	line := canvas.NewRectangle(theme.ButtonColor())
+	line := canvas.NewRectangle(theme.ShadowColor())
 	cursor := canvas.NewRectangle(theme.FocusColor())
 	cursor.Hide()
 
@@ -1051,9 +1051,9 @@ func (r *entryRenderer) Refresh() {
 	} else {
 		r.cursor.Hide()
 		if r.entry.Disabled() {
-			r.line.FillColor = theme.DisabledButtonColor()
+			r.line.FillColor = theme.DisabledTextColor()
 		} else {
-			r.line.FillColor = theme.ButtonColor()
+			r.line.FillColor = theme.ShadowColor()
 		}
 	}
 	r.moveCursor()

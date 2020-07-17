@@ -109,7 +109,10 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 func (b *buttonRenderer) applyTheme() {
 	b.label.TextSize = theme.TextSize()
 	b.label.Color = theme.TextColor()
-	if b.button.Disabled() {
+	switch {
+	case b.button.Style == PrimaryButton:
+		b.label.Color = theme.BackgroundColor()
+	case b.button.disabled:
 		b.label.Color = theme.DisabledTextColor()
 	}
 }
@@ -117,13 +120,13 @@ func (b *buttonRenderer) applyTheme() {
 func (b *buttonRenderer) BackgroundColor() color.Color {
 	switch {
 	case b.button.Disabled():
-		return theme.DisabledButtonColor()
+		return theme.BackgroundColor()
 	case b.button.Style == PrimaryButton:
 		return theme.PrimaryColor()
 	case b.button.hovered, b.button.tapped: // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	default:
-		return theme.ButtonColor()
+		return theme.BackgroundColor()
 	}
 }
 
@@ -253,6 +256,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	text := canvas.NewText(b.Text, theme.TextColor())
+	text.TextStyle.Bold = true
 
 	objects := []fyne.CanvasObject{
 		text,

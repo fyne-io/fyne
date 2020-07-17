@@ -273,7 +273,7 @@ func (r *dividerRenderer) BackgroundColor() color.Color {
 	if r.divider.hovered {
 		return theme.HoverColor()
 	}
-	return theme.ButtonColor()
+	return theme.BackgroundColor()
 }
 
 func (r *dividerRenderer) Destroy() {

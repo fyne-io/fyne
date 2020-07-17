@@ -12,27 +12,27 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, text, icon, hyperlink, placeholder, primary, hover, scrollBar, shadow color.Color
-	regular, bold, italic, bolditalic, monospace                                  fyne.Resource
-	disabledButton, disabledIcon, disabledText                                    color.Color
+	text, placeholder, primary, hover, shadow, disabled, scrollBar color.Color
+	regular, bold, italic, boldItalic, monospace                   fyne.Resource
 }
+
+var (
+	themePrimaryColor = color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff}
+
+//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
+)
 
 // LightTheme defines the built in light theme colors and sizes
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:     color.NRGBA{0xf5, 0xf5, 0xf5, 0xff},
-		button:         color.NRGBA{0xd9, 0xd9, 0xd9, 0xff},
-		disabledButton: color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
-		text:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		disabledText:   color.NRGBA{0x80, 0x80, 0x80, 0xff},
-		icon:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		disabledIcon:   color.NRGBA{0x80, 0x80, 0x80, 0xff},
-		hyperlink:      color.NRGBA{0x0, 0x0, 0xd9, 0xff},
-		placeholder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		primary:        color.NRGBA{0x9f, 0xa8, 0xda, 0xff},
-		hover:          color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
-		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
+		background:  color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		disabled:    color.NRGBA{0x0, 0x0, 0x0, 0x42},
+		text:        color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		placeholder: color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		primary:     themePrimaryColor,
+		hover:       color.NRGBA{0x0, 0x0, 0x0, 0x0f},
+		scrollBar:   color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		shadow:      color.NRGBA{0x0, 0x0, 0x0, 0x33},
 	}
 
 	theme.initFonts()
@@ -42,19 +42,14 @@ func LightTheme() fyne.Theme {
 // DarkTheme defines the built in dark theme colors and sizes
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{
-		background:     color.NRGBA{0x42, 0x42, 0x42, 0xff},
-		button:         color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		disabledButton: color.NRGBA{0x31, 0x31, 0x31, 0xff},
-		text:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		disabledText:   color.NRGBA{0x60, 0x60, 0x60, 0xff},
-		icon:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		disabledIcon:   color.NRGBA{0x60, 0x60, 0x60, 0xff},
-		hyperlink:      color.NRGBA{0x99, 0x99, 0xff, 0xff},
-		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		primary:        color.NRGBA{0x1a, 0x23, 0x7e, 0xff},
-		hover:          color.NRGBA{0x31, 0x31, 0x31, 0xff},
-		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
+		background:  color.NRGBA{0x30, 0x30, 0x30, 0xff},
+		disabled:    color.NRGBA{0xff, 0xff, 0xff, 0x42},
+		text:        color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		placeholder: color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		primary:     themePrimaryColor,
+		hover:       color.NRGBA{0xff, 0xff, 0xff, 0x0f},
+		scrollBar:   color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		shadow:      color.NRGBA{0x0, 0x0, 0x0, 0x66},
 	}
 
 	theme.initFonts()
@@ -65,19 +60,22 @@ func (t *builtinTheme) BackgroundColor() color.Color {
 	return t.background
 }
 
-// ButtonColor returns the theme's standard button color
+// ButtonColor returns the theme's standard button color.
+// Deprecated: Standard buttons no longer have a color, they are drawn as outlines over background.
 func (t *builtinTheme) ButtonColor() color.Color {
-	return t.button
+	return t.background
 }
 
-// DisabledButtonColor returns the theme's disabled button color
+// DisabledButtonColor returns the theme's disabled button color.
+// Deprecated: Standard buttons no longer have a color, they are drawn as outlines over background.
 func (t *builtinTheme) DisabledButtonColor() color.Color {
-	return t.disabledButton
+	return t.background
 }
 
-// HyperlinkColor returns the theme's standard hyperlink color
+// HyperlinkColor returns the theme's standard hyperlink color.
+// Deprecated: Hyperlinks now use the primary color for consistency.
 func (t *builtinTheme) HyperlinkColor() color.Color {
-	return t.hyperlink
+	return t.primary
 }
 
 // TextColor returns the theme's standard text color
@@ -87,17 +85,19 @@ func (t *builtinTheme) TextColor() color.Color {
 
 // DisabledIconColor returns the color for a disabledIcon UI element
 func (t *builtinTheme) DisabledTextColor() color.Color {
-	return t.disabledText
+	return t.disabled
 }
 
-// IconColor returns the theme's standard text color
+// IconColor returns the theme's standard text color.
+// Deprecated: Icons now use the text colour for consistency.
 func (t *builtinTheme) IconColor() color.Color {
-	return t.icon
+	return t.text
 }
 
-// DisabledIconColor returns the color for a disabledIcon UI element
+// DisabledIconColor returns the color for a disabledIcon UI element.
+// Deprecated: Disabled icons match disabled text color for consistency.
 func (t *builtinTheme) DisabledIconColor() color.Color {
-	return t.disabledIcon
+	return t.disabled
 }
 
 // PlaceHolderColor returns the theme's placeholder text color
@@ -151,7 +151,7 @@ func (t *builtinTheme) initFonts() {
 	t.regular = regular
 	t.bold = bold
 	t.italic = italic
-	t.bolditalic = bolditalic
+	t.boldItalic = bolditalic
 	t.monospace = monospace
 
 	font := os.Getenv("FYNE_FONT")
@@ -159,7 +159,7 @@ func (t *builtinTheme) initFonts() {
 		t.regular = loadCustomFont(font, "Regular", regular)
 		t.bold = loadCustomFont(font, "Bold", bold)
 		t.italic = loadCustomFont(font, "Italic", italic)
-		t.bolditalic = loadCustomFont(font, "BoldItalic", bolditalic)
+		t.boldItalic = loadCustomFont(font, "BoldItalic", bolditalic)
 	}
 	font = os.Getenv("FYNE_FONT_MONOSPACE")
 	if font != "" {
@@ -184,7 +184,7 @@ func (t *builtinTheme) TextItalicFont() fyne.Resource {
 
 // TextBoldItalicFont returns the font resource for the bold and italic font style
 func (t *builtinTheme) TextBoldItalicFont() fyne.Resource {
-	return t.bolditalic
+	return t.boldItalic
 }
 
 // TextMonospaceFont retutns the font resource for the monospace font face
@@ -226,17 +226,20 @@ func BackgroundColor() color.Color {
 	return current().BackgroundColor()
 }
 
-// ButtonColor returns the theme's standard button color
+// ButtonColor returns the theme's standard button color.
+// Deprecated: Standard buttons no longer have a color, they are drawn as outlines over background.
 func ButtonColor() color.Color {
 	return current().ButtonColor()
 }
 
-// DisabledButtonColor returns the theme's disabled button color
+// DisabledButtonColor returns the theme's disabled button color.
+// Deprecated: Standard buttons no longer have a color, they are drawn as outlines over background.
 func DisabledButtonColor() color.Color {
 	return current().DisabledButtonColor()
 }
 
-// HyperlinkColor returns the theme's standard hyperlink color
+// HyperlinkColor returns the theme's standard hyperlink color.
+// Deprecated: Hyperlinks now use the primary color for consistency.
 func HyperlinkColor() color.Color {
 	return current().HyperlinkColor()
 }
@@ -251,12 +254,14 @@ func DisabledTextColor() color.Color {
 	return current().DisabledTextColor()
 }
 
-// IconColor returns the theme's standard text color
+// IconColor returns the theme's standard text color.
+// Deprecated: Icons now use the text colour for consistency.
 func IconColor() color.Color {
 	return current().IconColor()
 }
 
-// DisabledIconColor returns the color for a disabledIcon UI element
+// DisabledIconColor returns the color for a disabledIcon UI element.
+// Deprecated: Disabled icons match disabled text color for consistency.
 func DisabledIconColor() color.Color {
 	return current().DisabledIconColor()
 }

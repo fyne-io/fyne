@@ -122,7 +122,7 @@ func (r *toolbarRenderer) Layout(size fyne.Size) {
 }
 
 func (r *toolbarRenderer) BackgroundColor() color.Color {
-	return theme.ButtonColor()
+	return theme.PrimaryColor()
 }
 
 func (r *toolbarRenderer) Refresh() {

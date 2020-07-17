@@ -75,7 +75,7 @@ func (c *TabContainer) Append(item *TabItem) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *TabContainer) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
-	r := &tabContainerRenderer{line: canvas.NewRectangle(theme.ButtonColor()), container: c}
+	r := &tabContainerRenderer{line: canvas.NewRectangle(theme.ShadowColor()), container: c}
 	r.updateTabs()
 	return r
 }
@@ -280,7 +280,7 @@ func (r *tabContainerRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tabContainerRenderer) Refresh() {
-	r.line.FillColor = theme.ButtonColor()
+	r.line.FillColor = theme.ShadowColor()
 	r.line.Refresh()
 
 	if r.updateTabs() {
@@ -426,6 +426,10 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	label := canvas.NewText(b.Text, theme.TextColor())
+	if b.Style == PrimaryButton {
+		label.Color = theme.BackgroundColor()
+	}
+	label.TextStyle.Bold = true
 	label.Alignment = fyne.TextAlignCenter
 
 	objects := []fyne.CanvasObject{label}
@@ -559,7 +563,11 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabButtonRenderer) Refresh() {
 	r.label.Text = r.button.Text
-	r.label.Color = theme.TextColor()
+	if r.button.Style == PrimaryButton {
+		r.label.Color = theme.BackgroundColor()
+	} else {
+		r.label.Color = theme.TextColor()
+	}
 	r.label.TextSize = theme.TextSize()
 
 	canvas.Refresh(r.button)
