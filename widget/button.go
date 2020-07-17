@@ -115,6 +115,14 @@ func (b *buttonRenderer) applyTheme() {
 	case b.button.disabled:
 		b.label.Color = theme.DisabledTextColor()
 	}
+	if b.icon != nil && b.icon.Resource != nil {
+		if res, ok := b.icon.Resource.(theme.ThemedResource); ok {
+			if (b.button.Style == PrimaryButton) != res.Inverted() {
+				b.icon.Resource = res.Invert()
+				b.icon.Refresh()
+			}
+		}
+	}
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
@@ -131,7 +139,6 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 }
 
 func (b *buttonRenderer) Refresh() {
-	b.applyTheme()
 	b.label.Text = b.button.Text
 
 	if b.button.Icon != nil && b.button.Visible() {
@@ -157,6 +164,7 @@ func (b *buttonRenderer) Refresh() {
 		b.icon.Hide()
 	}
 
+	b.applyTheme()
 	b.Layout(b.button.Size())
 	canvas.Refresh(b.button.super())
 }
@@ -269,7 +277,9 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
+	r := &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
+	r.applyTheme()
+	return r
 }
 
 // SetText allows the button label to be changed
