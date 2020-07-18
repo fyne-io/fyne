@@ -98,7 +98,12 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
-	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
+	provider := e.textProvider()
+	placeholder := e.placeholderProvider()
+	if provider.len() != 0 {
+		placeholder.Hide()
+	}
+	objects := []fyne.CanvasObject{line, placeholder, provider, cursor}
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -1038,7 +1043,7 @@ func (r *entryRenderer) Refresh() {
 		return
 	}
 
-	if provider.len() == 0 && r.entry.Visible() {
+	if provider.len() == 0 {
 		placeholder.Show()
 	} else if placeholder.Visible() {
 		placeholder.Hide()
