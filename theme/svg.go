@@ -42,10 +42,10 @@ type rectObj struct {
 	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
 	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
-	X               string   `xml:"x,attr"`
-	Y               string   `xml:"y,attr"`
-	Width           string   `xml:"width,attr"`
-	Height          string   `xml:"height,attr"`
+	X               string   `xml:"x,attr,omitempty"`
+	Y               string   `xml:"y,attr,omitempty"`
+	Width           string   `xml:"width,attr,omitempty"`
+	Height          string   `xml:"height,attr,omitempty"`
 }
 
 type circleObj struct {
@@ -56,9 +56,9 @@ type circleObj struct {
 	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
 	StrokeLineJoin  string   `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string   `xml:"stroke-dasharray,attr,omitempty"`
-	CX              string   `xml:"cx,attr"`
-	CY              string   `xml:"cy,attr"`
-	R               string   `xml:"r,attr"`
+	CX              string   `xml:"cx,attr,omitempty"`
+	CY              string   `xml:"cy,attr,omitempty"`
+	R               string   `xml:"r,attr,omitempty"`
 }
 
 type polygonObj struct {
