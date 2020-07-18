@@ -24,11 +24,11 @@ func TestButton_DisabledColor(t *testing.T) {
 	button := NewButton("Test", nil)
 	bg := test.WidgetRenderer(button).BackgroundColor()
 	button.Style = DefaultButton
-	assert.Equal(t, bg, theme.BackgroundColor())
+	assert.Equal(t, bg, theme.ButtonColor())
 
 	button.Disable()
 	bg = test.WidgetRenderer(button).BackgroundColor()
-	assert.Equal(t, bg, theme.BackgroundColor())
+	assert.Equal(t, bg, theme.DisabledButtonColor())
 }
 
 func TestButton_DisabledIcon(t *testing.T) {

@@ -128,13 +128,13 @@ func (b *buttonRenderer) applyTheme() {
 func (b *buttonRenderer) BackgroundColor() color.Color {
 	switch {
 	case b.button.Disabled():
-		return theme.BackgroundColor()
+		return theme.DisabledButtonColor()
 	case b.button.Style == PrimaryButton:
 		return theme.PrimaryColor()
 	case b.button.hovered, b.button.tapped: // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	default:
-		return theme.BackgroundColor()
+		return theme.ButtonColor()
 	}
 }
 

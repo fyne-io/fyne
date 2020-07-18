@@ -62,7 +62,7 @@ func (s *selectRenderer) BackgroundColor() color.Color {
 	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	}
-	return theme.BackgroundColor()
+	return theme.ButtonColor()
 }
 
 func (s *selectRenderer) Refresh() {
