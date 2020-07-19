@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
