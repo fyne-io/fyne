@@ -50,7 +50,7 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 
 	for _, drive := range listDrives() {
 		driveRoot := drive + string(os.PathSeparator) // capture loop var
-		places = append(places, widget.NewButton(drive, func() {
+		places = append(places, widget.NewButtonWithIcon(drive, theme.StorageIcon(), func() {
 			f.setDirectory(driveRoot)
 		}))
 	}

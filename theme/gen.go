@@ -177,6 +177,7 @@ func main() {
 
 	bundleIcon("download", f)
 	bundleIcon("computer", f)
+	bundleIcon("storage", f)
 
 	f.Close()
 }

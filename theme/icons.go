@@ -96,7 +96,7 @@ var (
 	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                      *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
 	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
-	folder, folderNew, folderOpen, help, home, settings                             *ThemedResource
+	folder, folderNew, folderOpen, help, home, settings, storage                    *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               *ThemedResource
 	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
 )
@@ -183,6 +183,7 @@ func init() {
 
 	download = NewThemedResource(downloadIconRes, nil)
 	computer = NewThemedResource(computerIconRes, nil)
+	storage = NewThemedResource(storageIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -543,4 +544,9 @@ func ComputerIcon() fyne.Resource {
 // DownloadIcon returns a resource containing the standard download icon for the current theme
 func DownloadIcon() fyne.Resource {
 	return download
+}
+
+// StorageIcon returns a resource containing the standard storage icon for the current theme
+func StorageIcon() fyne.Resource {
+	return storage
 }
