@@ -33,7 +33,7 @@ $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("appID").Show($toast);`
 
 func defaultTheme() fyne.Theme {
-	return theme.DarkTheme() // TODO check Windows theme
+	return theme.DarkTheme() // TODO find a way to determine if the Windows theme is more "light" or "dark"...?
 }
 
 func rootConfigDir() string {
