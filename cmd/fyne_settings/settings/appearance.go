@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -11,6 +12,10 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+)
+
+const (
+	systemThemeName = "system default"
 )
 
 // Settings gives access to user interfaces to control Fyne settings
@@ -39,7 +44,14 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	s.preview.FillMode = canvas.ImageFillContain
 
 	def := s.fyneSettings.ThemeName
-	themes := widget.NewSelect([]string{"dark", "light"}, s.chooseTheme)
+	themeNames := []string{"dark", "light"}
+	if runtime.GOOS == "darwin" {
+		themeNames = append(themeNames, systemThemeName)
+		if s.fyneSettings.ThemeName == "" {
+			def = systemThemeName
+		}
+	}
+	themes := widget.NewSelect(themeNames, s.chooseTheme)
 	themes.SetSelected(def)
 
 	scale := s.makeScaleGroup(w.Canvas().Scale())
@@ -60,6 +72,9 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 }
 
 func (s *Settings) chooseTheme(name string) {
+	if name == systemThemeName {
+		name = ""
+	}
 	s.fyneSettings.ThemeName = name
 
 	switch name {
