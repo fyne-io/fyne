@@ -33,7 +33,7 @@ $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("appID").Show($toast);`
 
 func defaultTheme() fyne.Theme {
-	return theme.DarkTheme()
+	return theme.DarkTheme() // TODO check Windows theme
 }
 
 func rootConfigDir() string {
@@ -84,4 +84,7 @@ func runScript(name, script string) {
 	if err != nil {
 		fyne.LogError("Failed to launch windows notify script", err)
 	}
+}
+func watchTheme() {
+	// TODO monitor the Windows theme
 }
