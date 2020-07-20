@@ -86,19 +86,19 @@ func colorizeResource(res fyne.Resource, clr color.Color) []byte {
 }
 
 var (
-	cancel, confirm, delete, search, searchReplace, menu, menuExpand            *ThemedResource
-	checked, unchecked, radioButton, radioButtonChecked                         *ThemedResource
-	contentAdd, contentRemove, contentCut, contentCopy, contentPaste            *ThemedResource
-	contentRedo, contentUndo, info, question, warning                           *ThemedResource
-	documentCreate, documentPrint, documentSave                                 *ThemedResource
-	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
-	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                    *ThemedResource
-	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                  *ThemedResource
-	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
-	file, fileApplication, fileAudio, fileImage, fileText, fileVideo            *ThemedResource
-	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
-	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
-	visibility, visibilityOff, volumeDown, volumeMute, volumeUp                 *ThemedResource
+	cancel, confirm, delete, search, searchReplace, menu, menuExpand                *ThemedResource
+	checked, unchecked, radioButton, radioButtonChecked                             *ThemedResource
+	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                *ThemedResource
+	contentRedo, contentUndo, info, question, warning                               *ThemedResource
+	document, documentCreate, documentPrint, documentSave                           *ThemedResource
+	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     *ThemedResource
+	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        *ThemedResource
+	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                      *ThemedResource
+	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
+	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
+	folder, folderNew, folderOpen, help, home, settings, storage                    *ThemedResource
+	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               *ThemedResource
+	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
 )
 
 func init() {
@@ -123,6 +123,7 @@ func init() {
 	contentRedo = NewThemedResource(contentredoIconRes, nil)
 	contentUndo = NewThemedResource(contentundoIconRes, nil)
 
+	document = NewThemedResource(documentIconRes, nil)
 	documentCreate = NewThemedResource(documentcreateIconRes, nil)
 	documentPrint = NewThemedResource(documentprintIconRes, nil)
 	documentSave = NewThemedResource(documentsaveIconRes, nil)
@@ -179,6 +180,10 @@ func init() {
 	volumeDown = NewThemedResource(volumedownIconRes, nil)
 	volumeMute = NewThemedResource(volumemuteIconRes, nil)
 	volumeUp = NewThemedResource(volumeupIconRes, nil)
+
+	download = NewThemedResource(downloadIconRes, nil)
+	computer = NewThemedResource(computerIconRes, nil)
+	storage = NewThemedResource(storageIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -279,6 +284,11 @@ func ContentRedoIcon() fyne.Resource {
 // ContentUndoIcon returns a resource containing the standard content undo icon for the current theme
 func ContentUndoIcon() fyne.Resource {
 	return contentUndo
+}
+
+// DocumentIcon returns a resource containing the standard document icon for the current theme
+func DocumentIcon() fyne.Resource {
+	return document
 }
 
 // DocumentCreateIcon returns a resource containing the standard document create icon for the current theme
@@ -524,4 +534,19 @@ func VolumeMuteIcon() fyne.Resource {
 // VolumeUpIcon returns a resource containing the standard volume up icon for the current theme
 func VolumeUpIcon() fyne.Resource {
 	return volumeUp
+}
+
+// ComputerIcon returns a resource containing the standard computer icon for the current theme
+func ComputerIcon() fyne.Resource {
+	return computer
+}
+
+// DownloadIcon returns a resource containing the standard download icon for the current theme
+func DownloadIcon() fyne.Resource {
+	return download
+}
+
+// StorageIcon returns a resource containing the standard storage icon for the current theme
+func StorageIcon() fyne.Resource {
+	return storage
 }
