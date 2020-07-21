@@ -7,10 +7,13 @@ type Theme interface {
 	BackgroundColor() color.Color
 	ButtonColor() color.Color
 	DisabledButtonColor() color.Color
+	// Deprecated: Hyperlinks now use the primary color for consistency.
 	HyperlinkColor() color.Color
 	TextColor() color.Color
 	DisabledTextColor() color.Color
+	// Deprecated: Icons now use the text colour for consistency.
 	IconColor() color.Color
+	// Deprecated: Disabled icons match disabled text color for consistency.
 	DisabledIconColor() color.Color
 	PlaceHolderColor() color.Color
 	PrimaryColor() color.Color

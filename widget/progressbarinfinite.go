@@ -76,7 +76,7 @@ func (p *infProgressRenderer) Layout(size fyne.Size) {
 }
 
 func (p *infProgressRenderer) BackgroundColor() color.Color {
-	return theme.ButtonColor()
+	return theme.ShadowColor()
 }
 
 // Refresh updates the size and position of the horizontal scrolling infinite progress bar
