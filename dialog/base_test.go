@@ -12,8 +12,7 @@ import (
 )
 
 func TestShowCustom_ApplyTheme(t *testing.T) {
-	a := test.NewApp()
-	a.Settings().SetTheme(theme.DarkTheme())
+	test.ApplyTheme(t, theme.DarkTheme())
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(300, 200))
 	d := NewCustom("Title", "OK", widget.NewLabel("Content"), w)
@@ -21,6 +20,6 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 	d.Show()
 	test.AssertImageMatches(t, "dialog-custom-dark.png", w.Canvas().Capture())
 
-	a.Settings().SetTheme(theme.LightTheme())
+	test.ApplyTheme(t, theme.LightTheme())
 	test.AssertImageMatches(t, "dialog-custom-light.png", w.Canvas().Capture())
 }
