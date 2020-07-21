@@ -45,7 +45,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 
 	def := s.fyneSettings.ThemeName
 	themeNames := []string{"dark", "light"}
-	if runtime.GOOS == "darwin" {
+	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
 		themeNames = append(themeNames, systemThemeName)
 		if s.fyneSettings.ThemeName == "" {
 			def = systemThemeName
