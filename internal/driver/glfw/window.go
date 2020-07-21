@@ -264,8 +264,9 @@ func (w *window) fitContent() {
 	}
 
 	minWidth, minHeight := w.minSizeOnScreen()
-	w.viewLock.Lock()
-	defer w.viewLock.Unlock()
+	w.viewLock.RLock()
+	view := w.viewport
+	w.viewLock.RUnlock()
 	if w.width < minWidth || w.height < minHeight {
 		if w.width < minWidth {
 			w.width = minWidth
@@ -273,15 +274,17 @@ func (w *window) fitContent() {
 		if w.height < minHeight {
 			w.height = minHeight
 		}
+		w.viewLock.Lock()
 		w.shouldExpand = true // queue the resize to happen on main
+		w.viewLock.Unlock()
 	}
 	if w.fixedSize {
 		w.width = internal.ScaleInt(w.canvas, w.Canvas().Size().Width)
 		w.height = internal.ScaleInt(w.canvas, w.Canvas().Size().Height)
 
-		w.viewport.SetSizeLimits(w.width, w.height, w.width, w.height)
+		view.SetSizeLimits(w.width, w.height, w.width, w.height)
 	} else {
-		w.viewport.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
+		view.SetSizeLimits(minWidth, minHeight, glfw.DontCare, glfw.DontCare)
 	}
 }
 

@@ -7,7 +7,6 @@ package app
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"os/exec"
@@ -69,7 +68,6 @@ func runScript(name, script string) {
 	scriptNum++
 	appID := fyne.CurrentApp().UniqueID()
 	fileName := fmt.Sprintf("fyne-%s-%s-%d.ps1", appID, name, scriptNum)
-	log.Println(fileName)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
 	err := ioutil.WriteFile(tmpFilePath, []byte(script), 0600)
@@ -77,10 +75,10 @@ func runScript(name, script string) {
 		fyne.LogError("Could not write script to show notification", err)
 		return
 	}
-	log.Println("PATH", tmpFilePath)
 	defer os.Remove(tmpFilePath)
 
-	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", "-File", tmpFilePath)
+	launch := "(Get-Content -Encoding UTF8 -Path " + tmpFilePath + " -Raw) | Invoke-Expression"
+	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	err = cmd.Run()
 	if err != nil {
