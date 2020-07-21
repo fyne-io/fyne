@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -83,7 +84,7 @@ func (s *settings) apply() {
 
 func (s *settings) load() {
 	err := s.loadFromFile(s.schema.StoragePath())
-	if err != nil {
+	if err != nil && err != io.EOF { // we can get an EOF in windows settings writes
 		fyne.LogError("Settings load error:", err)
 	}
 
