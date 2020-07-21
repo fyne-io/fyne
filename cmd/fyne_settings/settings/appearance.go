@@ -2,6 +2,7 @@ package settings
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -105,17 +106,10 @@ func (s *Settings) saveToFile(path string) error {
 		return err
 	}
 
-	file, err := os.Create(path)
+	data, err := json.Marshal(&s.fyneSettings)
 	if err != nil {
-		if !os.IsExist(err) {
-			return err
-		}
-		file, err = os.Open(path) // #nosec
-		if err != nil {
-			return err
-		}
+		return err
 	}
-	encode := json.NewEncoder(file)
 
-	return encode.Encode(&s.fyneSettings)
+	return ioutil.WriteFile(path, data, 0644)
 }
