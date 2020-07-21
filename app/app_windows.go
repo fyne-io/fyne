@@ -14,6 +14,8 @@ import (
 	"strings"
 	"syscall"
 
+	"golang.org/x/sys/windows/registry"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
 )
@@ -32,8 +34,26 @@ $xml.LoadXml($toastXml.OuterXml)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("appID").Show($toast);`
 
+func isDark() bool {
+	k, err := registry.OpenKey(registry.CURRENT_USER, `SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize`, registry.QUERY_VALUE)
+	if err != nil { // older version of Windows will not have this key
+		return false
+	}
+	defer k.Close()
+
+	useLight, _, err := k.GetIntegerValue("AppsUseLightTheme")
+	if err != nil { // older version of Windows will not have this value
+		return false
+	}
+
+	return useLight == 0
+}
+
 func defaultTheme() fyne.Theme {
-	return theme.DarkTheme() // TODO find a way to determine if the Windows theme is more "light" or "dark"...?
+	if isDark() {
+		return theme.DarkTheme()
+	}
+	return theme.LightTheme()
 }
 
 func rootConfigDir() string {
