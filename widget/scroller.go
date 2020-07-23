@@ -360,7 +360,7 @@ func (s *ScrollContainer) ScrollToBottom() {
 	s.Refresh()
 }
 
-//ScrollToTop will scroll content to container top - tt is easy if compare to ScrollToBottom
+//ScrollToTop will scroll content to container top
 func (s *ScrollContainer) ScrollToTop() {
 	s.Offset.Y = 0
 	s.Refresh()
