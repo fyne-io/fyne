@@ -54,7 +54,7 @@ type InvertedThemedResource struct {
 }
 
 // NewInvertedThemedResource creates a resource that adapts to the current theme for use over highlighted elements.
-func NewInvertedThemedResource(orig *ThemedResource) *InvertedThemedResource {
+func NewInvertedThemedResource(orig fyne.Resource) *InvertedThemedResource {
 	res := &InvertedThemedResource{source: orig}
 	return res
 }
