@@ -47,7 +47,7 @@ func TestScrollContainer_ScrollToTop(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(500, 50))
 	scroll := NewScrollContainer(rect)
-	scroll.ScrollToTop(true)
+	scroll.ScrollToTop()
 	Y := scroll.Offset.Y
 	assert.Equal(t, 0, Y)
 }
@@ -56,9 +56,9 @@ func TestScrollContainer_ScrollToBottom(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(500, 50))
 	scroll := NewScrollContainer(rect)
-	scroll.ScrollToBottom(true)
-	Y := 50 + scroll.MinSize().Height
-	ExpectedY := scroll.Content.Size().Height - scroll.Size().Height + scroll.MinSize().Height
+	scroll.ScrollToBottom()
+	ExpectedY := 50
+	Y := scroll.Content.Size().Height - scroll.Size().Height
 	assert.Equal(t, ExpectedY, Y)
 }
 
