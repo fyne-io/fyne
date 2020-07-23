@@ -79,9 +79,15 @@ func TestNewDisabledResource(t *testing.T) {
 	assert.Equal(t, name, fmt.Sprintf("disabled_%v", source.Name()))
 }
 
+func TestThemedResource_Invert(t *testing.T) {
+	staticResource := helperLoadRes(t, "cancel_Paths.svg")
+	inverted := NewThemedResource(staticResource, nil).Invert()
+	assert.Equal(t, "inverted-"+staticResource.Name(), inverted.Name())
+}
+
 func TestThemedResource_Name(t *testing.T) {
 	staticResource := helperLoadRes(t, "cancel_Paths.svg")
-	themedResource := &themedResource{
+	themedResource := &ThemedResource{
 		source: staticResource,
 	}
 	assert.Equal(t, staticResource.Name(), themedResource.Name())
@@ -90,7 +96,7 @@ func TestThemedResource_Name(t *testing.T) {
 func TestThemedResource_Content_NoGroupsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	staticResource := helperLoadRes(t, "cancel_Paths.svg")
-	themedResource := &themedResource{
+	themedResource := &ThemedResource{
 		source: staticResource,
 	}
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
@@ -99,7 +105,7 @@ func TestThemedResource_Content_NoGroupsFile(t *testing.T) {
 func TestThemedResource_Content_GroupPathFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	staticResource := helperLoadRes(t, "check_GroupPaths.svg")
-	themedResource := &themedResource{
+	themedResource := &ThemedResource{
 		source: staticResource,
 	}
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
@@ -108,7 +114,7 @@ func TestThemedResource_Content_GroupPathFile(t *testing.T) {
 func TestThemedResource_Content_GroupRectFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	staticResource := helperLoadRes(t, "info_GroupRects.svg")
-	themedResource := &themedResource{
+	themedResource := &ThemedResource{
 		source: staticResource,
 	}
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
@@ -117,7 +123,7 @@ func TestThemedResource_Content_GroupRectFile(t *testing.T) {
 func TestThemedResource_Content_GroupPolygonsFile(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	staticResource := helperLoadRes(t, "warning_GroupPolygons.svg")
-	themedResource := &themedResource{
+	themedResource := &ThemedResource{
 		source: staticResource,
 	}
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
@@ -127,7 +133,7 @@ func TestThemedResource_Content_GroupPolygonsFile(t *testing.T) {
 func TestThemedResource_Content_BlackFillIsUpdated(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	staticResource := helperLoadRes(t, "cancel_PathsBlackFill.svg")
-	themedResource := &themedResource{
+	themedResource := &ThemedResource{
 		source: staticResource,
 	}
 	assert.NotEqual(t, staticResource.Content(), themedResource.Content())
