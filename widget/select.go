@@ -207,6 +207,7 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	defer s.propertyLock.RUnlock()
 	icon := NewIcon(theme.MenuDropDownIcon())
 	text := canvas.NewText(s.Selected, theme.TextColor())
+	text.TextStyle.Bold = true
 
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder

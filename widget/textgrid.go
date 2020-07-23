@@ -27,7 +27,7 @@ var (
 // define the types separately to the var definition so the custom style API is not leaked in their instances.
 func init() {
 	TextGridStyleDefault = &CustomTextGridStyle{}
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.ButtonColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
 }
 
 // TextGridCell represents a single cell in a text grid.
@@ -402,7 +402,7 @@ func (t *textGridRenderer) MinSize() fyne.Size {
 }
 
 func (t *textGridRenderer) Refresh() {
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.ButtonColor()}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
 	t.updateGridSize(t.text.size)
 	t.refreshGrid()
 }

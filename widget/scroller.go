@@ -65,6 +65,10 @@ func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
 	return &scrollBarRenderer{scrollBar: b}
 }
 
+func (b *scrollBar) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
+}
+
 func (b *scrollBar) DragEnd() {
 }
 

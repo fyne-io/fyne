@@ -131,8 +131,8 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 		return
 	}
 
-	i.Item.Action()
 	i.Parent.Dismiss()
+	i.Item.Action()
 }
 
 type menuItemRenderer struct {
