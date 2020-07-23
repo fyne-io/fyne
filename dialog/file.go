@@ -160,13 +160,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
 	home, _ := os.UserHomeDir()
 	places := []fyne.CanvasObject{
-		widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
+		makeFavoriteButton("Home", theme.HomeIcon(), func() {
 			f.setDirectory(home)
 		}),
-		widget.NewButtonWithIcon("Documents", theme.DocumentIcon(), func() {
+		makeFavoriteButton("Documents", theme.DocumentIcon(), func() {
 			f.setDirectory(filepath.Join(home, "Documents"))
 		}),
-		widget.NewButtonWithIcon("Downloads", theme.DownloadIcon(), func() {
+		makeFavoriteButton("Downloads", theme.DownloadIcon(), func() {
 			f.setDirectory(filepath.Join(home, "Downloads"))
 		}),
 	}
@@ -395,4 +395,11 @@ func ShowFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window)
 		return
 	}
 	dialog.Show()
+}
+
+func makeFavoriteButton(title string, icon fyne.Resource, f func()) *widget.Button {
+	b := widget.NewButtonWithIcon(title, icon, f)
+
+	b.Alignment = widget.ButtonAlignLeading
+	return b
 }

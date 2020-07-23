@@ -5,11 +5,10 @@ package dialog
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 )
 
 func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
-	return []fyne.CanvasObject{widget.NewButtonWithIcon("Computer", theme.ComputerIcon(), func() {
+	return []fyne.CanvasObject{makeFavoriteButton("Computer", theme.ComputerIcon(), func() {
 		f.setDirectory("/")
 	})}
 }
