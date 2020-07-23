@@ -22,6 +22,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix encoding issue with Windows notifications (#1191)
 * Fix issue where content expanding on Windows could freeze (#1189)
 * Fix errors on Windows when reloading Fyne settings (#1165)
+* Dialogs not updating theme correctly (#1201)
 
 
 ## 1.3.2 - 11 July 2020
