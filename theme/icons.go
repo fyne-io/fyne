@@ -10,78 +10,72 @@ import (
 	"fyne.io/fyne"
 )
 
-// ThemedResource is a resource wrapper that will return an appropriate resource
+// ThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // for the currently selected theme.
-type ThemedResource interface {
-	fyne.Resource
-	Invert() ThemedResource
-	Inverted() bool
-}
-
-type themedResource struct {
+type ThemedResource struct {
 	source fyne.Resource
-}
-
-// Name returns the underlying resource name (used for caching)
-func (res *themedResource) Name() string {
-	return res.source.Name()
-}
-
-// Content returns the underlying content of the resource adapted to the current text color
-func (res *themedResource) Content() []byte {
-	clr := current().TextColor()
-	return colorizeResource(res.source, clr)
-}
-
-func (res *themedResource) Invert() ThemedResource {
-	return newInvertedThemedResource(res)
-}
-
-func (res *themedResource) Inverted() bool {
-	return false
-}
-
-type invertedThemedResource struct {
-	ThemedResource
-	original *themedResource
-}
-
-func (res *invertedThemedResource) Name() string {
-	return "invert-" + res.original.source.Name()
-}
-
-// Content returns the underlying content of the resource adapted to the current background color
-func (res *invertedThemedResource) Content() []byte {
-	clr := current().BackgroundColor()
-	return colorizeResource(res.original, clr)
-}
-
-func (res *invertedThemedResource) Invert() ThemedResource {
-	return res.original
-}
-
-func (res *invertedThemedResource) Inverted() bool {
-	return true
-}
-
-func newInvertedThemedResource(orig *themedResource) ThemedResource {
-	res := &invertedThemedResource{original: orig}
-	return res
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
 //
 // Deprecated: NewThemedResource() will be replaced with a single parameter version in a future release
 // usage of this method will break, but using the first parameter only will be a trivial change.
-func NewThemedResource(src, ignored fyne.Resource) ThemedResource {
+func NewThemedResource(src, ignored fyne.Resource) *ThemedResource {
 	if ignored != nil {
 		log.Println("Deprecation Warning: In version 2.0 NewThemedResource() will only accept a single StaticResource.\n" +
 			"While two resources are still supported to preserve backwards compatibility, only the first resource is rendered.\n" +
 			"The resource color is set by the theme's IconColor().")
 	}
-	return &themedResource{
+	return &ThemedResource{
 		source: src,
 	}
+}
+
+// Name returns the underlying resource name (used for caching).
+func (res *ThemedResource) Name() string {
+	return res.source.Name()
+}
+
+// Content returns the underlying content of the resource adapted to the current text color.
+func (res *ThemedResource) Content() []byte {
+	clr := current().TextColor()
+	return colorizeResource(res.source, clr)
+}
+
+// Invert returns a different resource for use over highlighted elements.
+func (res *ThemedResource) Invert() *InvertedThemedResource {
+	return NewInvertedThemedResource(res)
+}
+
+// InvertedThemedResource is a resource wrapper that will return a version of the resource with the main color changed
+// for use over highlighted elements.
+type InvertedThemedResource struct {
+	source fyne.Resource
+}
+
+// NewInvertedThemedResource creates a resource that adapts to the current theme for use over highlighted elements.
+func NewInvertedThemedResource(orig *ThemedResource) *InvertedThemedResource {
+	res := &InvertedThemedResource{source: orig}
+	return res
+}
+
+// Name returns the underlying resource name (used for caching).
+func (res *InvertedThemedResource) Name() string {
+	return "inverted-" + res.source.Name()
+}
+
+// Content returns the underlying content of the resource adapted to the current background color.
+func (res *InvertedThemedResource) Content() []byte {
+	clr := current().BackgroundColor()
+	return colorizeResource(res.source, clr)
+}
+
+// Invert returns a different resource for use over normal background colors.
+func (res *InvertedThemedResource) Invert() *ThemedResource {
+	if original, ok := res.source.(*ThemedResource); ok {
+		return original
+	}
+	return NewThemedResource(res.source, nil)
 }
 
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
@@ -128,19 +122,19 @@ func colorizeResource(res fyne.Resource, clr color.Color) []byte {
 }
 
 var (
-	cancel, confirm, delete, search, searchReplace, menu, menuExpand                ThemedResource
-	checked, unchecked, radioButton, radioButtonChecked                             ThemedResource
-	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                ThemedResource
-	contentRedo, contentUndo, info, question, warning                               ThemedResource
-	document, documentCreate, documentPrint, documentSave                           ThemedResource
-	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     ThemedResource
-	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        ThemedResource
-	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                      ThemedResource
-	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         ThemedResource
-	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                ThemedResource
-	folder, folderNew, folderOpen, help, home, settings, storage                    ThemedResource
-	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               ThemedResource
-	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer ThemedResource
+	cancel, confirm, delete, search, searchReplace, menu, menuExpand                *ThemedResource
+	checked, unchecked, radioButton, radioButtonChecked                             *ThemedResource
+	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                *ThemedResource
+	contentRedo, contentUndo, info, question, warning                               *ThemedResource
+	document, documentCreate, documentPrint, documentSave                           *ThemedResource
+	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     *ThemedResource
+	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        *ThemedResource
+	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                      *ThemedResource
+	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
+	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
+	folder, folderNew, folderOpen, help, home, settings, storage                    *ThemedResource
+	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               *ThemedResource
+	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
 )
 
 func init() {

@@ -571,8 +571,14 @@ func (r *tabButtonRenderer) Refresh() {
 	r.label.TextSize = theme.TextSize()
 
 	if r.icon != nil && r.icon.Resource != nil {
-		if res, ok := r.icon.Resource.(theme.ThemedResource); ok {
-			if (r.button.Style == PrimaryButton) != res.Inverted() {
+		switch res := r.icon.Resource.(type) {
+		case *theme.ThemedResource:
+			if r.button.Style == PrimaryButton {
+				r.icon.Resource = res.Invert()
+				r.icon.Refresh()
+			}
+		case *theme.InvertedThemedResource:
+			if r.button.Style != PrimaryButton {
 				r.icon.Resource = res.Invert()
 				r.icon.Refresh()
 			}
