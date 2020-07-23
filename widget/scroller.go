@@ -354,23 +354,17 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	return scr
 }
 
-
 //ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
-func (s *ScrollContainer) ScrollToBottom(isNeedRefresh bool) {
-	s.Offset.Y = s.Content.Size().Height - s.Size().Height + s.MinSize().Height
-	if isNeedRefresh {
-		s.Refresh()
-	}
+func (s *ScrollContainer) ScrollToBottom() {
+	s.Offset.Y = s.Content.Size().Height - s.Size().Height
+	s.Refresh()
 }
 
-//ScrollToTop will scroll content to container top. It is easy if compare to ScrollToBottom
-func (s *ScrollContainer) ScrollToTop(isNeedRefresh bool) {
+//ScrollToTop will scroll content to container top - tt is easy if compare to ScrollToBottom
+func (s *ScrollContainer) ScrollToTop() {
 	s.Offset.Y = 0
-	if isNeedRefresh {
-		s.Refresh()
-	}
+	s.Refresh()
 }
-
 
 // DragEnd will stop scrolling on mobile has stopped
 func (s *ScrollContainer) DragEnd() {
