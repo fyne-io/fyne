@@ -316,6 +316,11 @@ func (f *FileDialog) Show() {
 	f.dialog = showFile(f)
 }
 
+// Resize dialog
+func (f *FileDialog) Resize(size fyne.Size) {
+	f.dialog.win.Resize(size)
+}
+
 // Hide hides the file dialog.
 func (f *FileDialog) Hide() {
 	if f.dialog == nil {
