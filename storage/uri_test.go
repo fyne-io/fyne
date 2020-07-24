@@ -31,3 +31,17 @@ func TestNewURI_Content(t *testing.T) {
 	assert.Equal(t, ".png", u.Extension())
 	assert.Equal(t, "image/png", u.MimeType())
 }
+
+func TestURI_Scheme(t *testing.T) {
+	assert.Equal(t, "http", storage.NewURI("http://google.com").Scheme())
+	assert.Equal(t, "http", storage.NewURI("hTtP://google.com").Scheme())
+	assert.Equal(t, "file", storage.NewURI("file:///home/user/file.txt").Scheme())
+	assert.Equal(t, "file", storage.NewURI("FILE://C:/autoexec.bat").Scheme())
+}
+
+func TestURI_Extension(t *testing.T) {
+	assert.Equal(t, ".txt", storage.NewURI("file:///text.txt").Extension())
+	assert.Equal(t, ".txt", storage.NewURI("file:///text.tXt").Extension())
+	assert.Equal(t, ".a", storage.NewURI("file:///library.A").Extension())
+	assert.Equal(t, ".jpeg", storage.NewURI("file://C:/image.JPEG").Extension())
+}
