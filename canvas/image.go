@@ -2,8 +2,13 @@ package canvas
 
 import (
 	"image"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"path/filepath"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/storage"
 )
 
 // ImageFill defines the different type of ways an image can stretch to fill its space.
@@ -71,6 +76,49 @@ func (i *Image) Refresh() {
 func NewImageFromFile(file string) *Image {
 	return &Image{
 		File: file,
+	}
+}
+
+// NewImageFromURI creates a new image from named resource.
+// File URIs will read the file path and other schemes will download the data into a resource
+// Images returned from this method will scale to fit the canvas object.
+// The method for scaling can be set using the Fill field.
+func NewImageFromURI(uri fyne.URI) *Image {
+	if uri.Scheme() == "file" && len(uri.String()) > 7 {
+		return &Image{
+			File: uri.String()[7:],
+		}
+	}
+
+	var read io.ReadCloser
+
+	read, err := storage.OpenFileFromURI(uri) // attempt unknown file type
+	if err != nil {
+		if uri.Scheme() != "http" && uri.Scheme() != "https" {
+			fyne.LogError("unsupported URI scheme, "+uri.Scheme(), nil)
+			return nil
+		}
+
+		resp, err := http.Get(uri.String())
+		if err != nil {
+			fyne.LogError("Failed to read image data", err)
+			return nil
+		}
+		read = resp.Body
+	}
+
+	data, err := ioutil.ReadAll(read)
+	if err != nil {
+		fyne.LogError("Unable to read image data", err)
+		return nil
+	}
+	res := &fyne.StaticResource{
+		StaticName:    filepath.Base(uri.String()),
+		StaticContent: data,
+	}
+
+	return &Image{
+		Resource: res,
 	}
 }
 

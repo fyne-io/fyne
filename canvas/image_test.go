@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/storage"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -28,5 +29,22 @@ func TestNewImageFromFile(t *testing.T) {
 
 	img := canvas.NewImageFromFile(path)
 	assert.NotNil(t, img)
-	assert.Equal(t, img.File, path)
+	assert.Equal(t, path, img.File)
+}
+
+func TestNewImageFromURI_File(t *testing.T) {
+	pwd, _ := os.Getwd()
+	path := filepath.Join(filepath.Dir(pwd), "theme", "icons", "fyne.png")
+
+	img := canvas.NewImageFromURI(storage.NewURI("file://" + path))
+	assert.NotNil(t, img)
+	assert.Equal(t, path, img.File)
+}
+
+func TestNewImageFromURI_HTTPS(t *testing.T) {
+	url := "https://fyne.io/img/favicon.png"
+
+	img := canvas.NewImageFromURI(storage.NewURI(url))
+	assert.NotNil(t, img)
+	assert.Equal(t, "favicon.png", img.Resource.Name())
 }
