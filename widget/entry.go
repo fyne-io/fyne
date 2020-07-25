@@ -780,6 +780,9 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 
 // selectAll selects all text in entry
 func (e *Entry) selectAll() {
+	if e.textProvider().len() == 0 {
+		return
+	}
 	e.setFieldsAndRefresh(func() {
 		e.selectRow = 0
 		e.selectColumn = 0
