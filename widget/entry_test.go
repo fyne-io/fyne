@@ -1091,6 +1091,13 @@ func TestEntry_SelectAll(t *testing.T) {
 	assert.Equal(t, 9, e.CursorColumn)
 }
 
+func TestEntry_SelectAll_EmptyEntry(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
+
+	assert.Equal(t, "", entry.SelectedText())
+}
+
 func TestEntry_SelectSnapRight(t *testing.T) {
 	e, window := setupSelection(false)
 	defer teardownImageTest(window)
