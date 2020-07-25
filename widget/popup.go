@@ -100,7 +100,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{bg, p.Content}
 	if p.modal {
 		return &modalPopUpRenderer{
-			widget.NewBaseRenderer(objects),
+			widget.NewShadowingRenderer(objects, widget.DialogLevel),
 			popUpBaseRenderer{popUp: p, bg: bg},
 		}
 	}
@@ -222,7 +222,7 @@ func (r *popUpRenderer) BackgroundColor() color.Color {
 }
 
 type modalPopUpRenderer struct {
-	widget.BaseRenderer
+	*widget.ShadowingRenderer
 	popUpBaseRenderer
 }
 
@@ -235,8 +235,10 @@ func (r *modalPopUpRenderer) Layout(canvasSize fyne.Size) {
 	r.popUp.Content.Move(pos)
 	r.popUp.Content.Resize(size)
 
-	r.bg.Move(pos.Subtract(r.offset()))
+	innerPos := pos.Subtract(r.offset())
+	r.bg.Move(innerPos)
 	r.bg.Resize(size.Add(padding))
+	r.LayoutShadow(r.popUp.innerSize, innerPos)
 }
 
 func (r *modalPopUpRenderer) MinSize() fyne.Size {
