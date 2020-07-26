@@ -65,7 +65,7 @@ func (p *progressRenderer) Refresh() {
 	p.applyTheme()
 	p.updateBar()
 
-	canvas.Refresh(p.progress)
+	canvas.Refresh(p.progress.super())
 }
 
 // ProgressBar widget creates a horizontal panel that indicates progress

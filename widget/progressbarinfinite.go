@@ -92,7 +92,7 @@ func (p *infProgressRenderer) doRefresh() {
 	p.bar.FillColor = theme.PrimaryColor()
 
 	p.updateBar()
-	canvas.Refresh(p.progress)
+	canvas.Refresh(p.progress.super())
 }
 
 func (p *infProgressRenderer) isRunning() bool {
