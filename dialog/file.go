@@ -316,9 +316,23 @@ func (f *FileDialog) Show() {
 	f.dialog = showFile(f)
 }
 
-// Resize dialog
+// Resize dialog, call this function after dialog show
 func (f *FileDialog) Resize(size fyne.Size) {
-	f.dialog.win.Resize(size)
+	maxSize := f.dialog.win.Size()
+	minSize := f.dialog.win.MinSize()
+	newWidth := size.Width
+	if size.Width > maxSize.Width {
+		newWidth = maxSize.Width
+	} else if size.Width < minSize.Width {
+		newWidth = minSize.Width
+	}
+	newHeight := size.Height
+	if size.Height > maxSize.Height {
+		newHeight = maxSize.Height
+	} else if size.Height < minSize.Height {
+		newHeight = minSize.Height
+	}
+	f.dialog.win.Resize(fyne.NewSize(newWidth, newHeight))
 }
 
 // Hide hides the file dialog.
