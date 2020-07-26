@@ -116,8 +116,14 @@ func (b *buttonRenderer) applyTheme() {
 		b.label.Color = theme.DisabledTextColor()
 	}
 	if b.icon != nil && b.icon.Resource != nil {
-		if res, ok := b.icon.Resource.(theme.ThemedResource); ok {
-			if (b.button.Style == PrimaryButton) != res.Inverted() {
+		switch res := b.icon.Resource.(type) {
+		case *theme.ThemedResource:
+			if b.button.Style == PrimaryButton {
+				b.icon.Resource = res.Invert()
+				b.icon.Refresh()
+			}
+		case *theme.InvertedThemedResource:
+			if b.button.Style != PrimaryButton {
 				b.icon.Resource = res.Invert()
 				b.icon.Refresh()
 			}
