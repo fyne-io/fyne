@@ -57,6 +57,36 @@ func TestEffectiveStartingDir(t *testing.T) {
 
 }
 
+//TestFileDialogResize test new func Resize
+func TestFileDialogResize(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+	f := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	}, win)
+
+	f.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
+	f.Show()
+
+	size := fyne.NewSize(800, 600)
+	f.Resize(size)
+	maxSize := f.dialog.win.Size()
+	minSize := f.dialog.win.MinSize()
+	expectedWidth := size.Width
+	if size.Width > maxSize.Width {
+		expectedWidth = maxSize.Width
+	} else if size.Width < minSize.Width {
+		expectedWidth = minSize.Width
+	}
+	assert.Equal(t, expectedWidth, f.dialog.win.Size().Height)
+
+	expectedHeight := size.Height
+	if size.Height > maxSize.Height {
+		expectedHeight = maxSize.Height
+	} else if size.Height < minSize.Height {
+		expectedHeight = minSize.Height
+	}
+	assert.Equal(t, expectedHeight, f.dialog.win.Size().Height)
+}
+
 func TestShowFileOpen(t *testing.T) {
 	var chosen fyne.URIReadCloser
 	var openErr error
