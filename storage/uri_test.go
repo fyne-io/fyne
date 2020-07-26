@@ -41,7 +41,6 @@ func TestURI_Scheme(t *testing.T) {
 
 func TestURI_Extension(t *testing.T) {
 	assert.Equal(t, ".txt", storage.NewURI("file:///text.txt").Extension())
-	assert.Equal(t, ".txt", storage.NewURI("file:///text.tXt").Extension())
-	assert.Equal(t, ".a", storage.NewURI("file:///library.A").Extension())
-	assert.Equal(t, ".jpeg", storage.NewURI("file://C:/image.JPEG").Extension())
+	assert.Equal(t, ".a", storage.NewURI("file:///library.a").Extension())
+	assert.Equal(t, ".JPEG", storage.NewURI("file://C:/image.JPEG").Extension())
 }

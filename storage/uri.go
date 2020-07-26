@@ -21,7 +21,7 @@ func NewURI(u string) fyne.URI {
 }
 
 func (u *uri) Extension() string {
-	return strings.ToLower(filepath.Ext(u.raw))
+	return filepath.Ext(u.raw)
 }
 
 func (u *uri) MimeType() string {
