@@ -26,6 +26,7 @@ type svg struct {
 type pathObj struct {
 	XMLName         xml.Name `xml:"path"`
 	Fill            string   `xml:"fill,attr,omitempty"`
+	FillOpacity     string   `xml:"fill-opacity,attr,omitempty"`
 	Stroke          string   `xml:"stroke,attr,omitempty"`
 	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
 	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
@@ -37,6 +38,7 @@ type pathObj struct {
 type rectObj struct {
 	XMLName         xml.Name `xml:"rect"`
 	Fill            string   `xml:"fill,attr,omitempty"`
+	FillOpacity     string   `xml:"fill-opacity,attr,omitempty"`
 	Stroke          string   `xml:"stroke,attr,omitempty"`
 	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
 	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
@@ -51,6 +53,7 @@ type rectObj struct {
 type circleObj struct {
 	XMLName         xml.Name `xml:"circle"`
 	Fill            string   `xml:"fill,attr,omitempty"`
+	FillOpacity     string   `xml:"fill-opacity,attr,omitempty"`
 	Stroke          string   `xml:"stroke,attr,omitempty"`
 	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
 	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
@@ -64,6 +67,7 @@ type circleObj struct {
 type polygonObj struct {
 	XMLName         xml.Name `xml:"polygon"`
 	Fill            string   `xml:"fill,attr,omitempty"`
+	FillOpacity     string   `xml:"fill-opacity,attr,omitempty"`
 	Stroke          string   `xml:"stroke,attr,omitempty"`
 	StrokeWidth     string   `xml:"stroke-width,attr,omitempty"`
 	StrokeLineCap   string   `xml:"stroke-linecap,attr,omitempty"`
@@ -82,47 +86,53 @@ type objGroup struct {
 	StrokeLineJoin  string        `xml:"stroke-linejoin,attr,omitempty"`
 	StrokeDashArray string        `xml:"stroke-dasharray,attr,omitempty"`
 	Paths           []*pathObj    `xml:"path"`
+	Circles         []*circleObj  `xml:"circle"`
 	Rects           []*rectObj    `xml:"rect"`
 	Polygons        []*polygonObj `xml:"polygon"`
 }
 
-func replacePathsFill(paths []*pathObj, hexColor string) {
+func replacePathsFill(paths []*pathObj, hexColor string, opacity string) {
 	for _, path := range paths {
 		if path.Fill != "none" {
 			path.Fill = hexColor
+			path.FillOpacity = opacity
 		}
 	}
 }
 
-func replaceRectsFill(rects []*rectObj, hexColor string) {
+func replaceRectsFill(rects []*rectObj, hexColor string, opacity string) {
 	for _, rect := range rects {
 		if rect.Fill != "none" {
 			rect.Fill = hexColor
+			rect.FillOpacity = opacity
 		}
 	}
 }
 
-func replaceCirclesFill(circles []*circleObj, hexColor string) {
+func replaceCirclesFill(circles []*circleObj, hexColor string, opacity string) {
 	for _, circle := range circles {
 		if circle.Fill != "none" {
 			circle.Fill = hexColor
+			circle.FillOpacity = opacity
 		}
 	}
 }
 
-func replacePolygonsFill(polys []*polygonObj, hexColor string) {
+func replacePolygonsFill(polys []*polygonObj, hexColor string, opacity string) {
 	for _, poly := range polys {
 		if poly.Fill != "none" {
 			poly.Fill = hexColor
+			poly.FillOpacity = opacity
 		}
 	}
 }
 
-func replaceGroupObjectFill(groups []*objGroup, hexColor string) {
+func replaceGroupObjectFill(groups []*objGroup, hexColor string, opacity string) {
 	for _, grp := range groups {
-		replacePathsFill(grp.Paths, hexColor)
-		replaceRectsFill(grp.Rects, hexColor)
-		replacePolygonsFill(grp.Polygons, hexColor)
+		replaceCirclesFill(grp.Circles, hexColor, opacity)
+		replacePathsFill(grp.Paths, hexColor, opacity)
+		replaceRectsFill(grp.Rects, hexColor, opacity)
+		replacePolygonsFill(grp.Polygons, hexColor, opacity)
 	}
 }
 
@@ -130,11 +140,12 @@ func replaceGroupObjectFill(groups []*objGroup, hexColor string) {
 // colors is being operated upon, all fills will be converted to a single color.  Mostly used
 // to recolor Icons to match the theme's IconColor.
 func (s *svg) replaceFillColor(reader io.Reader, color color.Color) error {
-	replacePathsFill(s.Paths, colorToHexString(color))
-	replaceRectsFill(s.Rects, colorToHexString(color))
-	replaceCirclesFill(s.Circles, colorToHexString(color))
-	replacePolygonsFill(s.Polygons, colorToHexString(color))
-	replaceGroupObjectFill(s.Groups, colorToHexString(color))
+	hexColor, opacity := colorToHexAndOpacity(color)
+	replacePathsFill(s.Paths, hexColor, opacity)
+	replaceRectsFill(s.Rects, hexColor, opacity)
+	replaceCirclesFill(s.Circles, hexColor, opacity)
+	replacePolygonsFill(s.Polygons, hexColor, opacity)
+	replaceGroupObjectFill(s.Groups, hexColor, opacity)
 	return nil
 }
 
@@ -151,8 +162,8 @@ func svgFromXML(reader io.Reader) (*svg, error) {
 	return &s, nil
 }
 
-func colorToHexString(color color.Color) string {
-	r, g, b, _ := color.RGBA()
+func colorToHexAndOpacity(color color.Color) (string, string) {
+	r, g, b, a := color.RGBA()
 	cBytes := []byte{byte(r), byte(g), byte(b)}
-	return fmt.Sprintf("#%s", hex.EncodeToString(cBytes))
+	return fmt.Sprintf("#%s", hex.EncodeToString(cBytes)), fmt.Sprintf("%f", float64(a)/0xffff)
 }
