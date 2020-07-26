@@ -60,7 +60,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 //TestFileDialogResize test new func Resize
 func TestFileDialogResize(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
-
+	win.Resize(fyne.NewSize(600, 400))
 	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {
 	}, win)
 	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
@@ -68,6 +68,7 @@ func TestFileDialogResize(t *testing.T) {
 	//Mimic the fileopen dialog
 	d := &fileDialog{file: file}
 	ui := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil))
+	ui.Resize(fyne.NewSize(300, 280))
 	originalSize := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
@@ -79,7 +80,7 @@ func TestFileDialogResize(t *testing.T) {
 	size := fyne.NewSize(800, 600)
 	file.Resize(size)
 	maxSize := file.dialog.win.Content.Size()
-	minSize := file.dialog.win.Content.MinSize()
+	minSize := file.dialog.win.MinSize()
 	//Test width
 	expectedWidth := size.Width
 	if size.Width > maxSize.Width {
@@ -97,11 +98,11 @@ func TestFileDialogResize(t *testing.T) {
 	}
 	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height)
 
-	//Test again - for any worng size
-	size = fyne.NewSize(-1, -1)
+	//Test again - for extreme min size
+	size = fyne.NewSize(1, 1)
 	file.Resize(size)
 	maxSize = file.dialog.win.Content.Size()
-	minSize = file.dialog.win.Content.MinSize()
+	minSize = file.dialog.win.MinSize()
 	//Test width
 	expectedWidth = size.Width
 	if size.Width > maxSize.Width {
