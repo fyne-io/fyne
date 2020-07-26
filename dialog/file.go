@@ -318,7 +318,7 @@ func (f *FileDialog) Show() {
 
 // Resize dialog, call this function after dialog show
 func (f *FileDialog) Resize(size fyne.Size) {
-	maxSize := f.dialog.win.Content.Size()
+	maxSize := f.dialog.win.Size()
 	minSize := f.dialog.win.MinSize()
 	newWidth := size.Width
 	if size.Width > maxSize.Width {
