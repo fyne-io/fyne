@@ -60,31 +60,64 @@ func TestEffectiveStartingDir(t *testing.T) {
 //TestFileDialogResize test new func Resize
 func TestFileDialogResize(t *testing.T) {
 	win := test.NewWindow(widget.NewLabel("Content"))
-	f := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+
+	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {
 	}, win)
+	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
 
-	f.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
-	f.Show()
+	//Mimic the fileopen dialog
+	d := &fileDialog{file: file}
+	ui := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil))
+	originalSize := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
+		(fileIconSize+fileTextSize)+theme.Padding()*4))
+	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
+	d.win.Resize(originalSize)
 
+	file.dialog = d
+
+	//Test resize - bigger size
 	size := fyne.NewSize(800, 600)
-	f.Resize(size)
-	maxSize := f.dialog.win.Size()
-	minSize := f.dialog.win.MinSize()
+	file.Resize(size)
+	maxSize := file.dialog.win.Content.Size()
+	minSize := file.dialog.win.Content.MinSize()
+	//Test width
 	expectedWidth := size.Width
 	if size.Width > maxSize.Width {
 		expectedWidth = maxSize.Width
 	} else if size.Width < minSize.Width {
 		expectedWidth = minSize.Width
 	}
-	assert.Equal(t, expectedWidth, f.dialog.win.Size().Height)
-
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width)
+	//Test height
 	expectedHeight := size.Height
 	if size.Height > maxSize.Height {
 		expectedHeight = maxSize.Height
 	} else if size.Height < minSize.Height {
 		expectedHeight = minSize.Height
 	}
-	assert.Equal(t, expectedHeight, f.dialog.win.Size().Height)
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height)
+
+	//Test again - for any worng size
+	size = fyne.NewSize(-1, -1)
+	file.Resize(size)
+	maxSize = file.dialog.win.Content.Size()
+	minSize = file.dialog.win.Content.MinSize()
+	//Test width
+	expectedWidth = size.Width
+	if size.Width > maxSize.Width {
+		expectedWidth = maxSize.Width
+	} else if size.Width < minSize.Width {
+		expectedWidth = minSize.Width
+	}
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width)
+	//Test height
+	expectedHeight = size.Height
+	if size.Height > maxSize.Height {
+		expectedHeight = maxSize.Height
+	} else if size.Height < minSize.Height {
+		expectedHeight = minSize.Height
+	}
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height)
 }
 
 func TestShowFileOpen(t *testing.T) {
