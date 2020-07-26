@@ -23,6 +23,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix issue where content expanding on Windows could freeze (#1189)
 * Fix errors on Windows when reloading Fyne settings (#1165)
 * Dialogs not updating theme correctly (#1201)
+* Update the extended progressbar on refresh (#1219)
 
 
 ## 1.3.2 - 11 July 2020
