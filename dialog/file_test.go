@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
