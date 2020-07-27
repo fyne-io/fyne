@@ -57,6 +57,92 @@ func TestEffectiveStartingDir(t *testing.T) {
 
 }
 
+func TestFileDialogResize(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+	win.Resize(fyne.NewSize(600, 400))
+	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {
+	}, win)
+	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
+
+	//Mimic the fileopen dialog
+	d := &fileDialog{file: file}
+	open := widget.NewButton("open", func() {})
+	ui := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, open), open)
+	ui.Resize(fyne.NewSize(300, 280))
+	originalSize := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
+		(fileIconSize+fileTextSize)+theme.Padding()*4))
+	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
+	d.win.Resize(originalSize)
+
+	file.dialog = d
+
+	//Test resize - bigger size
+	size := fyne.NewSize(800, 600)
+	file.Resize(size)
+	maxSize := file.dialog.win.Size()
+	minSize := file.dialog.win.MinSize()
+	//Test width
+	expectedWidth := size.Width
+	if size.Width > maxSize.Width {
+		expectedWidth = maxSize.Width
+	} else if size.Width < minSize.Width {
+		expectedWidth = minSize.Width
+	}
+	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width)
+	//Test height
+	expectedHeight := size.Height
+	if size.Height > maxSize.Height {
+		expectedHeight = maxSize.Height
+	} else if size.Height < minSize.Height {
+		expectedHeight = minSize.Height
+	}
+	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height)
+
+	//Test again - for extreme min size
+	size = fyne.NewSize(1, 1)
+	file.Resize(size)
+	maxSize = file.dialog.win.Size()
+	minSize = file.dialog.win.MinSize()
+	contentMinSize := file.dialog.win.Content.MinSize()
+
+	//Test width
+	if contentMinSize.Width < minSize.Width {
+		expectedWidth = size.Width
+		if size.Width > maxSize.Width {
+			expectedWidth = maxSize.Width
+		} else if size.Width < contentMinSize.Width {
+			expectedWidth = contentMinSize.Width
+		}
+		assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width)
+	} else {
+		expectedWidth = size.Width
+		if size.Width > maxSize.Width {
+			expectedWidth = maxSize.Width
+		} else if size.Width < minSize.Width {
+			expectedWidth = minSize.Width
+		}
+		assert.Equal(t, expectedWidth, file.dialog.win.Size().Width)
+	}
+	//Test height
+	if contentMinSize.Height < minSize.Height {
+		expectedHeight = size.Height
+		if size.Height > maxSize.Height {
+			expectedHeight = maxSize.Height
+		} else if size.Height < contentMinSize.Height {
+			expectedHeight = contentMinSize.Height
+		}
+		assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height)
+	} else {
+		expectedHeight = size.Height
+		if size.Height > maxSize.Height {
+			expectedHeight = maxSize.Height
+		} else if size.Height < contentMinSize.Height {
+			expectedHeight = contentMinSize.Height
+		}
+		assert.Equal(t, expectedHeight, file.dialog.win.Size().Height)
+	}
+}
+
 func TestShowFileOpen(t *testing.T) {
 	var chosen fyne.URIReadCloser
 	var openErr error
