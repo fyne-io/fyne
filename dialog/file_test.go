@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
