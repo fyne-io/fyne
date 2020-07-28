@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"strconv"
 	"time"
 
 	"fyne.io/fyne"
@@ -176,42 +175,12 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				log.Println("Please Authenticate", username.Text, password.Text)
 			}, win)
 		}),
-		widget.NewButton("Text Entry Dialog (no validation)", func() {
+		widget.NewButton("Text Entry Dialog", func() {
 			dialog.ShowInput("Text Entry", "Enter some text: ",
 				func(response string) {
 					fmt.Printf("User entered text, response was: %v\n", response)
 				},
-				nil,
 				win)
-		}),
-		widget.NewButton("Text Entry Dialog (integer validation)", func() {
-			dialog.ShowInput("Text Entry", "Enter a number: ",
-				func(response string) {
-					fmt.Printf("User entered text, response was: %v\n", response)
-				},
-				func(text string) (bool, string) {
-					_, err := strconv.Atoi(text)
-					if err != nil {
-						return false, "please enter a valid integer"
-					}
-					return true, ""
-				},
-				win)
-		}),
-		widget.NewButton("Text Entry Dialog (default value)", func() {
-			i := dialog.NewInput("Text Entry", "Enter the best widget toolkit: ",
-				func(response string) {
-					fmt.Printf("User entered text, response was: %v\n", response)
-				},
-				func(text string) (bool, string) {
-					if text != "fyne" {
-						return false, "please enter the best widget toolkit"
-					}
-					return true, "how flattering :)"
-				},
-				win)
-			i.SetText("fyne")
-			i.Show()
 		}),
 	)
 }
