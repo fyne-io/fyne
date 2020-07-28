@@ -6,7 +6,7 @@ import (
 	"syscall"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/theme"
 )
 
 func driveMask() uint32 {
@@ -50,7 +50,7 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 
 	for _, drive := range listDrives() {
 		driveRoot := drive + string(os.PathSeparator) // capture loop var
-		places = append(places, widget.NewButton(drive, func() {
+		places = append(places, makeFavoriteButton(drive, theme.StorageIcon(), func() {
 			f.setDirectory(driveRoot)
 		}))
 	}

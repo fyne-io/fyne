@@ -92,13 +92,18 @@ func NewPasswordEntry() *Entry {
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	line := canvas.NewRectangle(theme.ButtonColor())
+	line := canvas.NewRectangle(theme.ShadowColor())
 	cursor := canvas.NewRectangle(theme.FocusColor())
 	cursor.Hide()
 
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
-	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
+	provider := e.textProvider()
+	placeholder := e.placeholderProvider()
+	if provider.len() != 0 {
+		placeholder.Hide()
+	}
+	objects := []fyne.CanvasObject{line, placeholder, provider, cursor}
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -775,6 +780,9 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 
 // selectAll selects all text in entry
 func (e *Entry) selectAll() {
+	if e.textProvider().len() == 0 {
+		return
+	}
 	e.setFieldsAndRefresh(func() {
 		e.selectRow = 0
 		e.selectColumn = 0
@@ -1038,7 +1046,7 @@ func (r *entryRenderer) Refresh() {
 		return
 	}
 
-	if provider.len() == 0 && r.entry.Visible() {
+	if provider.len() == 0 {
 		placeholder.Show()
 	} else if placeholder.Visible() {
 		placeholder.Hide()
@@ -1051,9 +1059,9 @@ func (r *entryRenderer) Refresh() {
 	} else {
 		r.cursor.Hide()
 		if r.entry.Disabled() {
-			r.line.FillColor = theme.DisabledButtonColor()
+			r.line.FillColor = theme.DisabledTextColor()
 		} else {
-			r.line.FillColor = theme.ButtonColor()
+			r.line.FillColor = theme.ShadowColor()
 		}
 	}
 	r.moveCursor()

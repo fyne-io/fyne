@@ -65,6 +65,10 @@ func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
 	return &scrollBarRenderer{scrollBar: b}
 }
 
+func (b *scrollBar) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
+}
+
 func (b *scrollBar) DragEnd() {
 }
 
@@ -352,6 +356,18 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 		scr.SetObjects(append(scr.Objects(), scr.horizArea, scr.leftShadow, scr.rightShadow))
 	}
 	return scr
+}
+
+//ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
+func (s *ScrollContainer) ScrollToBottom() {
+	s.Offset.Y = s.Content.Size().Height - s.Size().Height
+	s.Refresh()
+}
+
+//ScrollToTop will scroll content to container top
+func (s *ScrollContainer) ScrollToTop() {
+	s.Offset.Y = 0
+	s.Refresh()
 }
 
 // DragEnd will stop scrolling on mobile has stopped

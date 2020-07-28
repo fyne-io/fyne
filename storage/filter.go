@@ -27,7 +27,7 @@ type MimeTypeFileFilter struct {
 func (e *ExtensionFileFilter) Matches(uri fyne.URI) bool {
 	extension := uri.Extension()
 	for _, ext := range e.Extensions {
-		if extension == ext {
+		if strings.EqualFold(extension, ext) {
 			return true
 		}
 	}

@@ -109,8 +109,25 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 func (b *buttonRenderer) applyTheme() {
 	b.label.TextSize = theme.TextSize()
 	b.label.Color = theme.TextColor()
-	if b.button.Disabled() {
+	switch {
+	case b.button.Style == PrimaryButton:
+		b.label.Color = theme.BackgroundColor()
+	case b.button.disabled:
 		b.label.Color = theme.DisabledTextColor()
+	}
+	if b.icon != nil && b.icon.Resource != nil {
+		switch res := b.icon.Resource.(type) {
+		case *theme.ThemedResource:
+			if b.button.Style == PrimaryButton {
+				b.icon.Resource = res.Invert()
+				b.icon.Refresh()
+			}
+		case *theme.InvertedThemedResource:
+			if b.button.Style != PrimaryButton {
+				b.icon.Resource = res.Invert()
+				b.icon.Refresh()
+			}
+		}
 	}
 }
 
@@ -128,7 +145,6 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 }
 
 func (b *buttonRenderer) Refresh() {
-	b.applyTheme()
 	b.label.Text = b.button.Text
 
 	if b.button.Icon != nil && b.button.Visible() {
@@ -154,6 +170,7 @@ func (b *buttonRenderer) Refresh() {
 		b.icon.Hide()
 	}
 
+	b.applyTheme()
 	b.Layout(b.button.Size())
 	canvas.Refresh(b.button.super())
 }
@@ -253,6 +270,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	text := canvas.NewText(b.Text, theme.TextColor())
+	text.TextStyle.Bold = true
 
 	objects := []fyne.CanvasObject{
 		text,
@@ -265,7 +283,9 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
+	r := &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
+	r.applyTheme()
+	return r
 }
 
 // SetText allows the button label to be changed

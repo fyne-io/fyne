@@ -5,6 +5,7 @@ package app
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -15,7 +16,9 @@ import (
 )
 
 func TestDefaultTheme(t *testing.T) {
-	assert.Equal(t, theme.DarkTheme(), defaultTheme())
+	if runtime.GOOS != "darwin" { // system defines default for macOS
+		assert.Equal(t, theme.DarkTheme(), defaultTheme())
+	}
 }
 
 func TestEnsureDir(t *testing.T) {

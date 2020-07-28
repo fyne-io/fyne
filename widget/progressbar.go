@@ -58,14 +58,14 @@ func (p *progressRenderer) applyTheme() {
 }
 
 func (p *progressRenderer) BackgroundColor() color.Color {
-	return theme.ButtonColor()
+	return theme.ShadowColor()
 }
 
 func (p *progressRenderer) Refresh() {
 	p.applyTheme()
 	p.updateBar()
 
-	canvas.Refresh(p.progress)
+	canvas.Refresh(p.progress.super())
 }
 
 // ProgressBar widget creates a horizontal panel that indicates progress
