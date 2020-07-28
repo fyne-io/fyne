@@ -7,13 +7,15 @@ import (
 )
 
 // InputDialog is a variation of a dialog which prompts the user to enter some
-// text, with an optional validation function.
+// text.
 type InputDialog struct {
 	*dialog
 
 	onConfirm func(string)
 
 	entry *widget.Entry
+
+	confirmButton *widget.Button
 }
 
 // SetText changes the current text value of the input dialog, this can
@@ -22,10 +24,15 @@ func (i *InputDialog) SetText(s string) {
 	i.entry.SetText(s)
 }
 
+// GetText returns the current text value entered in the input dialog.
+func (i *InputDialog) GetText() string {
+	return i.entry.Text
+}
+
 // NewInput creates a dialog over the specified window for the user to enter
-// a value, possibly with validation.
+// a value.
 //
-// onConfirm is a callback that runs when the user enters a valid string of
+// onConfirm is a callback that runs when the user enters a string of
 // text and clicks the "confirm" button. May be nil.
 func NewInput(title, message string, onConfirm func(string), parent fyne.Window) *InputDialog {
 
@@ -58,12 +65,12 @@ func NewInput(title, message string, onConfirm func(string), parent fyne.Window)
 	d.setButtons(newButtonList(d.dismiss, confirm))
 
 	// and instantiate ourselves
-	i := &InputDialog{d, onConfirm, entry}
+	i := &InputDialog{d, onConfirm, entry, confirm}
 
 	// now we have everything we need for the confirmation button
 	confirm.OnTapped = func() {
 
-		// User has confirmed and entered a valid input
+		// User has confirmed and entered an input
 		if i.onConfirm != nil {
 			i.onConfirm(entry.Text)
 		}
