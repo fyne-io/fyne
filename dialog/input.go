@@ -56,9 +56,15 @@ func NewInput(title, message string, onConfirm func(string), parent fyne.Window)
 	})
 	d.dismiss.Icon = theme.CancelIcon()
 
-	// we will override the OnTapped function later once we've instanced
-	// the variables we need
+	// create confirmation button
 	confirm := widget.NewButton("Ok", func() {
+		// User has confirmed and entered an input
+		if onConfirm != nil {
+			onConfirm(entry.Text)
+		}
+
+		// Also hide the dialog, and trigger it's callback
+		d.hideWithResponse(true)
 	})
 
 	// attach response buttons to the dialog
@@ -66,18 +72,6 @@ func NewInput(title, message string, onConfirm func(string), parent fyne.Window)
 
 	// and instantiate ourselves
 	i := &InputDialog{d, onConfirm, entry, confirm}
-
-	// now we have everything we need for the confirmation button
-	confirm.OnTapped = func() {
-
-		// User has confirmed and entered an input
-		if i.onConfirm != nil {
-			i.onConfirm(entry.Text)
-		}
-
-		// Also hide the dialog, and trigger it's callback
-		d.hideWithResponse(true)
-	}
 
 	return i
 }
