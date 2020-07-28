@@ -117,6 +117,7 @@ func main() {
 	bundleIcon("content-redo", f)
 	bundleIcon("content-undo", f)
 
+	bundleIcon("document", f)
 	bundleIcon("document-create", f)
 	bundleIcon("document-print", f)
 	bundleIcon("document-save", f)
@@ -173,6 +174,10 @@ func main() {
 
 	bundleIcon("visibility", f)
 	bundleIcon("visibility-off", f)
+
+	bundleIcon("download", f)
+	bundleIcon("computer", f)
+	bundleIcon("storage", f)
 
 	f.Close()
 }

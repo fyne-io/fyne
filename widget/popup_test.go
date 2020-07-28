@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
@@ -25,17 +26,21 @@ func TestNewPopUp(t *testing.T) {
 }
 
 func TestShowPopUp(t *testing.T) {
-	require.Nil(t, test.Canvas().Overlays().Top())
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(200, 200))
+	require.Nil(t, w.Canvas().Overlays().Top())
 
 	label := NewLabel("Hi")
-	ShowPopUp(label, test.Canvas())
-	pop := test.Canvas().Overlays().Top()
+	ShowPopUp(label, w.Canvas())
+	pop := w.Canvas().Overlays().Top()
 	if assert.NotNil(t, pop) {
-		defer test.Canvas().Overlays().Remove(pop)
+		defer w.Canvas().Overlays().Remove(pop)
 
 		assert.True(t, pop.Visible())
-		assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
 	}
+
+	test.AssertImageMatches(t, "popup.png", w.Canvas().Capture())
 }
 
 func TestShowPopUpAtPosition(t *testing.T) {
@@ -53,17 +58,21 @@ func TestShowPopUpAtPosition(t *testing.T) {
 }
 
 func TestShowModalPopUp(t *testing.T) {
-	require.Nil(t, test.Canvas().Overlays().Top())
+	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	w.Resize(fyne.NewSize(200, 200))
+	require.Nil(t, w.Canvas().Overlays().Top())
 
 	label := NewLabel("Hi")
-	ShowModalPopUp(label, test.Canvas())
-	pop := test.Canvas().Overlays().Top()
+	ShowModalPopUp(label, w.Canvas())
+	pop := w.Canvas().Overlays().Top()
 	if assert.NotNil(t, pop) {
-		defer test.Canvas().Overlays().Remove(pop)
+		defer w.Canvas().Overlays().Remove(pop)
 
 		assert.True(t, pop.Visible())
-		assert.Equal(t, 1, len(test.Canvas().Overlays().List()))
+		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
 	}
+
+	test.AssertImageMatches(t, "popup-modal.png", w.Canvas().Capture())
 }
 
 func TestPopUp_Show(t *testing.T) {

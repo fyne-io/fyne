@@ -880,6 +880,23 @@ func TestEntry_PasteOverSelection(t *testing.T) {
 	assert.Equal(t, "TeInsertng", e.Text)
 }
 
+func TestEntry_Placeholder(t *testing.T) {
+	entry := &widget.Entry{}
+	entry.Text = "Text"
+	entry.PlaceHolder = "Placehold"
+
+	window := test.NewWindow(entry)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.Equal(t, "Text", entry.Text)
+	test.AssertImageMatches(t, "entry/placeholder_withtext.png", c.Capture())
+
+	entry.SetText("")
+	assert.Equal(t, "", entry.Text)
+	test.AssertImageMatches(t, "entry/placeholder_initial.png", c.Capture())
+}
+
 func TestPasswordEntry_Placeholder(t *testing.T) {
 	entry, window := setupPasswordImageTest()
 	defer teardownImageTest(window)
@@ -1072,6 +1089,13 @@ func TestEntry_SelectAll(t *testing.T) {
 	test.AssertImageMatches(t, "entry/select_all_selected.png", c.Capture())
 	assert.Equal(t, 2, e.CursorRow)
 	assert.Equal(t, 9, e.CursorColumn)
+}
+
+func TestEntry_SelectAll_EmptyEntry(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
+
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_SelectSnapRight(t *testing.T) {

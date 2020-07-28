@@ -28,6 +28,7 @@ const (
 	MenuLevel             ElevationLevel = 4
 	PopUpLevel            ElevationLevel = 8
 	SubmergedContentLevel ElevationLevel = 8
+	DialogLevel           ElevationLevel = 24
 )
 
 // ShadowType specifies the type of the shadow.

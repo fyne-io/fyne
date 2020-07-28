@@ -10,21 +10,10 @@ import (
 	"fyne.io/fyne"
 )
 
-// ThemedResource is a resource wrapper that will return an appropriate resource
+// ThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // for the currently selected theme.
 type ThemedResource struct {
 	source fyne.Resource
-}
-
-// Name returns the underlying resource name (used for caching)
-func (res *ThemedResource) Name() string {
-	return res.source.Name()
-}
-
-// Content returns the underlying content of the correct resource for the current theme
-func (res *ThemedResource) Content() []byte {
-	clr := fyne.CurrentApp().Settings().Theme().IconColor()
-	return colorizeResource(res.source, clr)
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
@@ -40,6 +29,53 @@ func NewThemedResource(src, ignored fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source: src,
 	}
+}
+
+// Name returns the underlying resource name (used for caching).
+func (res *ThemedResource) Name() string {
+	return res.source.Name()
+}
+
+// Content returns the underlying content of the resource adapted to the current text color.
+func (res *ThemedResource) Content() []byte {
+	clr := current().TextColor()
+	return colorizeResource(res.source, clr)
+}
+
+// Invert returns a different resource for use over highlighted elements.
+func (res *ThemedResource) Invert() *InvertedThemedResource {
+	return NewInvertedThemedResource(res)
+}
+
+// InvertedThemedResource is a resource wrapper that will return a version of the resource with the main color changed
+// for use over highlighted elements.
+type InvertedThemedResource struct {
+	source fyne.Resource
+}
+
+// NewInvertedThemedResource creates a resource that adapts to the current theme for use over highlighted elements.
+func NewInvertedThemedResource(orig fyne.Resource) *InvertedThemedResource {
+	res := &InvertedThemedResource{source: orig}
+	return res
+}
+
+// Name returns the underlying resource name (used for caching).
+func (res *InvertedThemedResource) Name() string {
+	return "inverted-" + res.source.Name()
+}
+
+// Content returns the underlying content of the resource adapted to the current background color.
+func (res *InvertedThemedResource) Content() []byte {
+	clr := current().BackgroundColor()
+	return colorizeResource(res.source, clr)
+}
+
+// Invert returns a different resource for use over normal background colors.
+func (res *InvertedThemedResource) Invert() *ThemedResource {
+	if original, ok := res.source.(*ThemedResource); ok {
+		return original
+	}
+	return NewThemedResource(res.source, nil)
 }
 
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
@@ -86,19 +122,19 @@ func colorizeResource(res fyne.Resource, clr color.Color) []byte {
 }
 
 var (
-	cancel, confirm, delete, search, searchReplace, menu, menuExpand            *ThemedResource
-	checked, unchecked, radioButton, radioButtonChecked                         *ThemedResource
-	contentAdd, contentRemove, contentCut, contentCopy, contentPaste            *ThemedResource
-	contentRedo, contentUndo, info, question, warning                           *ThemedResource
-	documentCreate, documentPrint, documentSave                                 *ThemedResource
-	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend *ThemedResource
-	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                    *ThemedResource
-	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                  *ThemedResource
-	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp     *ThemedResource
-	file, fileApplication, fileAudio, fileImage, fileText, fileVideo            *ThemedResource
-	folder, folderNew, folderOpen, help, home, settings                         *ThemedResource
-	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut           *ThemedResource
-	visibility, visibilityOff, volumeDown, volumeMute, volumeUp                 *ThemedResource
+	cancel, confirm, delete, search, searchReplace, menu, menuExpand                *ThemedResource
+	checked, unchecked, radioButton, radioButtonChecked                             *ThemedResource
+	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                *ThemedResource
+	contentRedo, contentUndo, info, question, warning                               *ThemedResource
+	document, documentCreate, documentPrint, documentSave                           *ThemedResource
+	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     *ThemedResource
+	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        *ThemedResource
+	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                      *ThemedResource
+	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
+	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
+	folder, folderNew, folderOpen, help, home, settings, storage                    *ThemedResource
+	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               *ThemedResource
+	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
 )
 
 func init() {
@@ -123,6 +159,7 @@ func init() {
 	contentRedo = NewThemedResource(contentredoIconRes, nil)
 	contentUndo = NewThemedResource(contentundoIconRes, nil)
 
+	document = NewThemedResource(documentIconRes, nil)
 	documentCreate = NewThemedResource(documentcreateIconRes, nil)
 	documentPrint = NewThemedResource(documentprintIconRes, nil)
 	documentSave = NewThemedResource(documentsaveIconRes, nil)
@@ -179,6 +216,10 @@ func init() {
 	volumeDown = NewThemedResource(volumedownIconRes, nil)
 	volumeMute = NewThemedResource(volumemuteIconRes, nil)
 	volumeUp = NewThemedResource(volumeupIconRes, nil)
+
+	download = NewThemedResource(downloadIconRes, nil)
+	computer = NewThemedResource(computerIconRes, nil)
+	storage = NewThemedResource(storageIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -279,6 +320,11 @@ func ContentRedoIcon() fyne.Resource {
 // ContentUndoIcon returns a resource containing the standard content undo icon for the current theme
 func ContentUndoIcon() fyne.Resource {
 	return contentUndo
+}
+
+// DocumentIcon returns a resource containing the standard document icon for the current theme
+func DocumentIcon() fyne.Resource {
+	return document
 }
 
 // DocumentCreateIcon returns a resource containing the standard document create icon for the current theme
@@ -524,4 +570,19 @@ func VolumeMuteIcon() fyne.Resource {
 // VolumeUpIcon returns a resource containing the standard volume up icon for the current theme
 func VolumeUpIcon() fyne.Resource {
 	return volumeUp
+}
+
+// ComputerIcon returns a resource containing the standard computer icon for the current theme
+func ComputerIcon() fyne.Resource {
+	return computer
+}
+
+// DownloadIcon returns a resource containing the standard download icon for the current theme
+func DownloadIcon() fyne.Resource {
+	return download
+}
+
+// StorageIcon returns a resource containing the standard storage icon for the current theme
+func StorageIcon() fyne.Resource {
+	return storage
 }

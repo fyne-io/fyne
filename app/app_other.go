@@ -25,3 +25,7 @@ func (app *fyneApp) OpenURL(_ *url.URL) error {
 func (app *fyneApp) SendNotification(_ *fyne.Notification) {
 	fyne.LogError("Refusing to show notification for unknown operating system", nil)
 }
+
+func watchTheme() {
+	// no-op
+}
