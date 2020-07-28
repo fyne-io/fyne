@@ -29,6 +29,11 @@ func (i *InputDialog) GetText() string {
 	return i.entry.Text
 }
 
+// SetPlaceholder defines the placeholder text for the entry
+func (i *InputDialog) SetPlaceHolder(s string) {
+	i.entry.SetPlaceHolder(s)
+}
+
 // NewInput creates a dialog over the specified window for the user to enter
 // a value.
 //
