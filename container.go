@@ -108,7 +108,14 @@ func (c *Container) Refresh() {
 }
 
 // NewContainer returns a new Container instance holding the specified CanvasObjects.
+// Deprecated: Use NewContainerWithoutLayout to create a container that uses manual layout.
 func NewContainer(objects ...CanvasObject) *Container {
+	return NewContainerWithoutLayout(objects...)
+}
+
+// NewContainerWithoutLayout returns a new Container instance holding the specified CanvasObjects
+// that are manually arranged.
+func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 	ret := &Container{
 		Objects: objects,
 	}
