@@ -10,7 +10,7 @@ func TestMinSize(t *testing.T) {
 	box := new(dummyObject)
 	minSize := box.MinSize()
 
-	container := NewContainer(box)
+	container := NewContainerWithoutLayout(box)
 	assert.Equal(t, minSize, container.MinSize())
 
 	container.AddObject(box)
@@ -19,7 +19,7 @@ func TestMinSize(t *testing.T) {
 
 func TestMove(t *testing.T) {
 	box := new(dummyObject)
-	container := NewContainer(box)
+	container := NewContainerWithoutLayout(box)
 
 	size := NewSize(100, 100)
 	pos := NewPos(0, 0)
@@ -38,7 +38,7 @@ func TestMove(t *testing.T) {
 func TestNilLayout(t *testing.T) {
 	box := new(dummyObject)
 	boxSize := box.size
-	container := NewContainer(box)
+	container := NewContainerWithoutLayout(box)
 
 	size := NewSize(100, 100)
 	container.Resize(size)
@@ -58,7 +58,7 @@ func (c *customLayout) Layout(objs []CanvasObject, size Size) {
 	}
 }
 
-func (c *customLayout) MinSize(objects []CanvasObject) Size {
+func (c *customLayout) MinSize(_ []CanvasObject) Size {
 	return NewSize(10, 10)
 }
 
@@ -78,7 +78,7 @@ func TestCustomLayout(t *testing.T) {
 
 func TestContainer_Hide(t *testing.T) {
 	box := new(dummyObject)
-	container := NewContainer(box)
+	container := NewContainerWithoutLayout(box)
 
 	assert.True(t, container.Visible())
 	assert.True(t, box.Visible())
@@ -89,7 +89,7 @@ func TestContainer_Hide(t *testing.T) {
 
 func TestContainer_Show(t *testing.T) {
 	box := new(dummyObject)
-	container := NewContainer(box)
+	container := NewContainerWithoutLayout(box)
 
 	container.Hide()
 	assert.True(t, box.Visible())
