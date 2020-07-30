@@ -26,6 +26,7 @@ type URIWriteCloser interface {
 type URI interface {
 	fmt.Stringer
 	Extension() string
+	Name() string
 	MimeType() string
 	Scheme() string
 }

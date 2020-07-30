@@ -24,6 +24,10 @@ func (u *uri) Extension() string {
 	return filepath.Ext(u.raw)
 }
 
+func (u *uri) Name() string {
+	return filepath.Base(u.raw)
+}
+
 func (u *uri) MimeType() string {
 	mimeTypeFull := mime.TypeByExtension(u.Extension())
 	if mimeTypeFull == "" {

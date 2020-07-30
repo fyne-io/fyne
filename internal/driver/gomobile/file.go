@@ -3,8 +3,6 @@ package gomobile
 import (
 	"errors"
 	"io"
-	"net/url"
-	"path/filepath"
 
 	"github.com/fyne-io/mobile/app"
 
@@ -19,7 +17,7 @@ type fileOpen struct {
 }
 
 func (f *fileOpen) Name() string {
-	return nameFromURI(f.uri)
+	return f.uri.Name()
 }
 
 func (f *fileOpen) URI() fyne.URI {
@@ -52,15 +50,6 @@ func mobileFilter(filter storage.FileFilter) *app.FileFilter {
 	}
 
 	return mobile
-}
-
-func nameFromURI(uri fyne.URI) string {
-	u, err := url.Parse(uri.String())
-	if err != nil {
-		return "unknown"
-	}
-
-	return filepath.Base(u.Path)
 }
 
 type hasPicker interface {
