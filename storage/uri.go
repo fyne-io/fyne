@@ -47,7 +47,7 @@ func (u *uri) Scheme() string {
 		return ""
 	}
 
-	return u.raw[:pos]
+	return strings.ToLower(u.raw[:pos])
 }
 
 func (u *uri) String() string {
