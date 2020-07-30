@@ -9,7 +9,6 @@ import (
 
 type builder struct {
 	os, srcdir string
-	release    bool
 }
 
 func (b *builder) build() error {
@@ -20,17 +19,9 @@ func (b *builder) build() error {
 
 	var cmd *exec.Cmd
 	if goos == "windows" {
-		if b.release {
-			cmd = exec.Command("go", "build", "-ldflags", "-s -w -H=windowsgui", ".")
-		} else {
-			cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", ".")
-		}
+		cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", ".")
 	} else {
-		if b.release {
-			cmd = exec.Command("go", "build", "-ldflags", "-s -w", ".")
-		} else {
-			cmd = exec.Command("go", "build", ".")
-		}
+		cmd = exec.Command("go", "build", ".")
 	}
 	cmd.Dir = b.srcdir
 	env := os.Environ()
