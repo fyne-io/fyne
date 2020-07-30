@@ -22,6 +22,7 @@ type Dialog interface {
 	Hide()
 	SetDismissText(label string)
 	SetOnClosed(closed func())
+	Resize(size fyne.Size)
 }
 
 // Declare conformity to Dialog interface
@@ -144,6 +145,25 @@ func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 func (d *dialog) Show() {
 	d.sendResponse = true
 	d.win.Show()
+}
+
+// Resize dialog, call this function after dialog show
+func (d *dialog) Resize(size fyne.Size) {
+	maxSize := d.win.Size()
+	minSize := d.win.MinSize()
+	newWidth := size.Width
+	if size.Width > maxSize.Width {
+		newWidth = maxSize.Width
+	} else if size.Width < minSize.Width {
+		newWidth = minSize.Width
+	}
+	newHeight := size.Height
+	if size.Height > maxSize.Height {
+		newHeight = maxSize.Height
+	} else if size.Height < minSize.Height {
+		newHeight = minSize.Height
+	}
+	d.win.Resize(fyne.NewSize(newWidth, newHeight))
 }
 
 func (d *dialog) Hide() {
