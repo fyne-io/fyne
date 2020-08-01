@@ -11,8 +11,6 @@ import (
 type EntryDialog struct {
 	*dialog
 
-	onConfirm func(string)
-
 	entry *widget.Entry
 
 	confirmButton *widget.Button
@@ -34,12 +32,21 @@ func (i *EntryDialog) SetPlaceHolder(s string) {
 	i.entry.SetPlaceHolder(s)
 }
 
-// NewEntryDialog creates a dialog over the specified window for the user to enter
-// a value.
+// NewEntryDialog creates a dialog over the specified window for the user to
+// enter a value.
 //
 // onConfirm is a callback that runs when the user enters a string of
 // text and clicks the "confirm" button. May be nil.
-func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) *EntryDialog {
+//
+// onClosed is called unconditionally weather the user confirms or cancels. The
+// argument will be true if the user confirmed, and false otherwise. May be
+// nil.
+//
+// Note that onClosed will be called after onConfirm, if both are non-nil. This
+// way onConfirm can potential modify state that onClosed needs to get the user
+// input when the user confirms, while also being able to handle the case where
+// the user cancelled.
+func NewEntryDialog(title, message string, onConfirm func(string), onClosed func(bool), parent fyne.Window) *EntryDialog {
 
 	// create the widgets necessary for the dialog
 	entry := widget.NewEntry()
@@ -58,6 +65,9 @@ func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.W
 	d.dismiss = widget.NewButton("Cancel", func() {
 		entry.Text = ""
 		d.Hide()
+		if onClosed != nil {
+			onClosed(false)
+		}
 	})
 	d.dismiss.Icon = theme.CancelIcon()
 
@@ -68,6 +78,10 @@ func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.W
 			onConfirm(entry.Text)
 		}
 
+		if onClosed != nil {
+			onClosed(true)
+		}
+
 		// Also hide the dialog, and trigger it's callback
 		d.hideWithResponse(true)
 	})
@@ -76,12 +90,12 @@ func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.W
 	d.setButtons(newButtonList(d.dismiss, confirm))
 
 	// and instantiate ourselves
-	i := &EntryDialog{d, onConfirm, entry, confirm}
+	i := &EntryDialog{d, entry, confirm}
 
 	return i
 }
 
 // ShowEntryDialog creates a new entry dialog and shows it immediately.
-func ShowEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) {
-	NewEntryDialog(title, message, onConfirm, parent).Show()
+func ShowEntryDialog(title, message string, onConfirm func(string), onClosed func(bool), parent fyne.Window) {
+	NewEntryDialog(title, message, onConfirm, onClosed, parent).Show()
 }

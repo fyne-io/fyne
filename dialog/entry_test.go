@@ -10,7 +10,7 @@ import (
 
 func TestEntryDialogConfirm(t *testing.T) {
 	ch := make(chan string)
-	i := NewEntryDialog("test1", "test2", func(s string) { ch <- s }, test.NewWindow(nil))
+	i := NewEntryDialog("test1", "test2", func(s string) { ch <- s }, nil, test.NewWindow(nil))
 	i.Show()
 
 	assert.False(t, i.win.Hidden)
