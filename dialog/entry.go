@@ -28,7 +28,7 @@ func (i *EntryDialog) GetText() string {
 }
 
 // SetPlaceholder defines the placeholder text for the entry
-func (i *EntryDialog) SetPlaceHolder(s string) {
+func (i *EntryDialog) SetPlaceholder(s string) {
 	i.entry.SetPlaceHolder(s)
 }
 
