@@ -176,7 +176,7 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 			}, win)
 		}),
 		widget.NewButton("Text Entry Dialog", func() {
-			dialog.ShowInput("Text Entry", "Enter some text: ",
+			dialog.ShowEntryDialog("Text Entry", "Enter some text: ",
 				func(response string) {
 					fmt.Printf("User entered text, response was: %v\n", response)
 				},

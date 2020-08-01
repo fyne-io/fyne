@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInputDialogConfirm(t *testing.T) {
+func TestEntryDialogConfirm(t *testing.T) {
 	ch := make(chan string)
-	i := NewInput("test1", "test2", func(s string) { ch <- s }, test.NewWindow(nil))
+	i := NewEntryDialog("test1", "test2", func(s string) { ch <- s }, test.NewWindow(nil))
 	i.Show()
 
 	assert.False(t, i.win.Hidden)

@@ -6,9 +6,9 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-// InputDialog is a variation of a dialog which prompts the user to enter some
+// EntryDialog is a variation of a dialog which prompts the user to enter some
 // text.
-type InputDialog struct {
+type EntryDialog struct {
 	*dialog
 
 	onConfirm func(string)
@@ -18,28 +18,28 @@ type InputDialog struct {
 	confirmButton *widget.Button
 }
 
-// SetText changes the current text value of the input dialog, this can
+// SetText changes the current text value of the entry dialog, this can
 // be useful for setting a default value.
-func (i *InputDialog) SetText(s string) {
+func (i *EntryDialog) SetText(s string) {
 	i.entry.SetText(s)
 }
 
-// GetText returns the current text value entered in the input dialog.
-func (i *InputDialog) GetText() string {
+// GetText returns the current text value entered in the entry dialog.
+func (i *EntryDialog) GetText() string {
 	return i.entry.Text
 }
 
 // SetPlaceholder defines the placeholder text for the entry
-func (i *InputDialog) SetPlaceHolder(s string) {
+func (i *EntryDialog) SetPlaceHolder(s string) {
 	i.entry.SetPlaceHolder(s)
 }
 
-// NewInput creates a dialog over the specified window for the user to enter
+// NewEntryDialog creates a dialog over the specified window for the user to enter
 // a value.
 //
 // onConfirm is a callback that runs when the user enters a string of
 // text and clicks the "confirm" button. May be nil.
-func NewInput(title, message string, onConfirm func(string), parent fyne.Window) *InputDialog {
+func NewEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) *EntryDialog {
 
 	// create the widgets necessary for the dialog
 	entry := widget.NewEntry()
@@ -76,12 +76,12 @@ func NewInput(title, message string, onConfirm func(string), parent fyne.Window)
 	d.setButtons(newButtonList(d.dismiss, confirm))
 
 	// and instantiate ourselves
-	i := &InputDialog{d, onConfirm, entry, confirm}
+	i := &EntryDialog{d, onConfirm, entry, confirm}
 
 	return i
 }
 
-// ShowInput creates a new input dialog and shows it immediately.
-func ShowInput(title, message string, onConfirm func(string), parent fyne.Window) {
-	NewInput(title, message, onConfirm, parent).Show()
+// ShowEntryDialog creates a new entry dialog and shows it immediately.
+func ShowEntryDialog(title, message string, onConfirm func(string), parent fyne.Window) {
+	NewEntryDialog(title, message, onConfirm, parent).Show()
 }
