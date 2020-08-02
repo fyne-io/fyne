@@ -32,3 +32,26 @@ type URI interface {
 	MimeType() string
 	Scheme() string
 }
+
+// ListableURI represents a URI that can have child items, most commonly a
+// directory on disk in the native filesystem.
+type ListableURI interface {
+	URI
+
+	// List returns a list of child URIs of this URI.
+	List() []URI
+
+	// Writeable returns true if it is possible to create new child URIs
+	// nested under this one.
+	Writeable() bool
+
+	// CreateChildURI creates a new non-listable child URI under this one.
+	// In local filesystem terms, this creates a file within the directory
+	// represented by this ListableURI.
+	CreateChildURI(string) error
+
+	// CreateChildListableURI creates a new listable child URI under this
+	// one.  In local filesystem terms, this creates a file within the
+	// directory represented by this ListableURI.
+	CreateChildListableURI(string) error
+}
