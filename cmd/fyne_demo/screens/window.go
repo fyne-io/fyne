@@ -180,9 +180,6 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				func(response string) {
 					fmt.Printf("User entered text, response was: %v\n", response)
 				},
-				func(result bool) {
-					fmt.Printf("Dialog result was: %v\n", result)
-				},
 				win)
 		}),
 	)
