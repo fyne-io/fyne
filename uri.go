@@ -9,6 +9,7 @@ import (
 // It may refer to an item on a filesystem or data in another application that we have access to.
 type URIReadCloser interface {
 	io.ReadCloser
+	// Deprecated, use URI().Name() instead
 	Name() string
 	URI() URI
 }
@@ -17,6 +18,7 @@ type URIReadCloser interface {
 // This will normally refer to a local file resource.
 type URIWriteCloser interface {
 	io.WriteCloser
+	// Deprecated, use URI().Name() instead
 	Name() string
 	URI() URI
 }
@@ -26,6 +28,7 @@ type URIWriteCloser interface {
 type URI interface {
 	fmt.Stringer
 	Extension() string
+	Name() string
 	MimeType() string
 	Scheme() string
 }

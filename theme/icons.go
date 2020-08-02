@@ -109,7 +109,7 @@ func colorizeResource(res fyne.Resource, clr color.Color) []byte {
 		fyne.LogError("could not load SVG, falling back to static content:", err)
 		return res.Content()
 	}
-	if err := s.replaceFillColor(rdr, clr); err != nil {
+	if err := s.replaceFillColor(clr); err != nil {
 		fyne.LogError("could not replace fill color, falling back to static content:", err)
 		return res.Content()
 	}

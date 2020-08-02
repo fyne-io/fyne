@@ -53,7 +53,7 @@ func loadImage(f fyne.URIReadCloser) *canvas.Image {
 		fyne.LogError("Failed to load image data", err)
 		return nil
 	}
-	res := fyne.NewStaticResource(f.Name(), data)
+	res := fyne.NewStaticResource(f.URI().Name(), data)
 
 	return canvas.NewImageFromResource(res)
 }
@@ -65,7 +65,7 @@ func showImage(f fyne.URIReadCloser) {
 	}
 	img.FillMode = canvas.ImageFillOriginal
 
-	w := fyne.CurrentApp().NewWindow(f.Name())
+	w := fyne.CurrentApp().NewWindow(f.URI().Name())
 	w.SetContent(widget.NewScrollContainer(img))
 	w.Resize(fyne.NewSize(320, 240))
 	w.Show()
@@ -88,7 +88,7 @@ func showText(f fyne.URIReadCloser) {
 	text := widget.NewLabel(loadText(f))
 	text.Wrapping = fyne.TextWrapWord
 
-	w := fyne.CurrentApp().NewWindow(f.Name())
+	w := fyne.CurrentApp().NewWindow(f.URI().Name())
 	w.SetContent(widget.NewScrollContainer(text))
 	w.Resize(fyne.NewSize(320, 240))
 	w.Show()
