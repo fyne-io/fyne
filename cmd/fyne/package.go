@@ -347,8 +347,9 @@ func (*packager) printHelp(indent string) {
 
 func (p *packager) buildPackage() error {
 	b := &builder{
-		os:     p.os,
-		srcdir: p.srcDir,
+		os:      p.os,
+		srcdir:  p.srcDir,
+		release: p.release,
 	}
 
 	return b.build()
