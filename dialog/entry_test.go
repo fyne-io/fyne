@@ -17,5 +17,5 @@ func TestEntryDialogConfirm(t *testing.T) {
 	test.Type(i.entry, "test3")
 	go test.Tap(i.confirmButton)
 	assert.EqualValues(t, "test3", <-ch)
-	assert.EqualValues(t, "test3", i.GetText())
+	assert.EqualValues(t, "test3", i.entry.Text)
 }

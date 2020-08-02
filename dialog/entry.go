@@ -24,25 +24,20 @@ func (i *EntryDialog) SetText(s string) {
 	i.entry.SetText(s)
 }
 
-// GetText returns the current text value entered in the entry dialog.
-func (i *EntryDialog) GetText() string {
-	return i.entry.Text
-}
-
 // SetPlaceholder defines the placeholder text for the entry
 func (i *EntryDialog) SetPlaceholder(s string) {
 	i.entry.SetPlaceHolder(s)
 }
 
-// SetOnClosed changes the onClosed callback, which is nil by default.
+// SetOnClosed changes the callback which is run when the dialog is closed,
+// which is nil by default.
 //
-// onClosed is called unconditionally weather the user confirms or cancels. The
-// May be
+// The callback is called unconditionally weather the user confirms or cancels.
 //
-// Note that onClosed will be called after onConfirm, if both are non-nil. This
-// way onConfirm can potential modify state that onClosed needs to get the user
-// input when the user confirms, while also being able to handle the case where
-// the user cancelled.
+// Note that the callback will be called after onConfirm, if both are non-nil.
+// This way onConfirm can potential modify state that this callback needs to
+// get the user input when the user confirms, while also being able to handle
+// the case where the user cancelled.
 func (i *EntryDialog) SetOnClosed(callback func()) {
 	i.onClosed = callback
 }
