@@ -139,7 +139,7 @@ func replaceGroupObjectFill(groups []*objGroup, hexColor string, opacity string)
 // replaceFillColor alters an svg objects fill color.  Note that if an svg with multiple fill
 // colors is being operated upon, all fills will be converted to a single color.  Mostly used
 // to recolor Icons to match the theme's IconColor.
-func (s *svg) replaceFillColor(reader io.Reader, color color.Color) error {
+func (s *svg) replaceFillColor(color color.Color) error {
 	hexColor, opacity := colorToHexAndOpacity(color)
 	replacePathsFill(s.Paths, hexColor, opacity)
 	replaceRectsFill(s.Rects, hexColor, opacity)
