@@ -32,7 +32,7 @@ func (i *EntryDialog) SetPlaceholder(s string) {
 // SetOnClosed changes the callback which is run when the dialog is closed,
 // which is nil by default.
 //
-// The callback is called unconditionally weather the user confirms or cancels.
+// The callback is called unconditionally whether the user confirms or cancels.
 //
 // Note that the callback will be called after onConfirm, if both are non-nil.
 // This way onConfirm can potential modify state that this callback needs to
