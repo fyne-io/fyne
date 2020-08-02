@@ -175,6 +175,13 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				log.Println("Please Authenticate", username.Text, password.Text)
 			}, win)
 		}),
+		widget.NewButton("Text Entry Dialog", func() {
+			dialog.ShowEntryDialog("Text Entry", "Enter some text: ",
+				func(response string) {
+					fmt.Printf("User entered text, response was: %v\n", response)
+				},
+				win)
+		}),
 	)
 }
 
