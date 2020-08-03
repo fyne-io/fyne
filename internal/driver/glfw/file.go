@@ -3,7 +3,6 @@ package glfw
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
@@ -19,7 +18,7 @@ func (d *gLDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 }
 
 func (f *file) Name() string {
-	return filepath.Base(f.path)
+	return f.URI().Name()
 }
 
 func (f *file) URI() fyne.URI {
