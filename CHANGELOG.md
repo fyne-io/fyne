@@ -8,6 +8,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Added
 
 * Use icons for file dialog favourites (#1186)
+* Add ScrollContainer ScrollToBottom and ScrollToTop
 
 ### Changed
 
@@ -24,6 +25,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix errors on Windows when reloading Fyne settings (#1165)
 * Dialogs not updating theme correctly (#1201)
 * Update the extended progressbar on refresh (#1219)
+* Sagfault if font fails (#1200)
 
 
 ## 1.3.2 - 11 July 2020
