@@ -285,6 +285,10 @@ func (r *Radio) SetSelected(option string) {
 
 	r.Selected = option
 
+	if r.OnChanged != nil {
+		r.OnChanged(option)
+	}
+
 	r.Refresh()
 }
 
