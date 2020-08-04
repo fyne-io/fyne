@@ -25,7 +25,8 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix errors on Windows when reloading Fyne settings (#1165)
 * Dialogs not updating theme correctly (#1201)
 * Update the extended progressbar on refresh (#1219)
-* Sagfault if font fails (#1200)
+* Segfault if font fails (#1200)
+* Slider rendering incorrectly when window maximized (#1223)
 
 
 ## 1.3.2 - 11 July 2020
