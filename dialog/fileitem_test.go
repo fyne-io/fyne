@@ -11,6 +11,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestFileItem_Name(t *testing.T) {
+	f := &fileDialog{file: &FileDialog{}}
+	_ = f.makeUI()
+
+	item := f.newFileItem("/path/to/filename.txt", false)
+	assert.Equal(t, "filename", item.name)
+
+	item = f.newFileItem("/path/to/MyFile.jpeg", false)
+	assert.Equal(t, "MyFile", item.name)
+
+	item = f.newFileItem("/path/to/.maybeHidden.txt", false)
+	assert.Equal(t, ".maybeHidden", item.name)
+}
+
+func TestFileItem_FolderName(t *testing.T) {
+	f := &fileDialog{file: &FileDialog{}}
+	_ = f.makeUI()
+
+	item := f.newFileItem("/path/to/foldername/", true)
+	assert.Equal(t, "foldername", item.name)
+
+	item = f.newFileItem("/path/to/myapp.app/", true)
+	assert.Equal(t, "myapp", item.name)
+
+	item = f.newFileItem("/path/to/.maybeHidden/", true)
+	assert.Equal(t, ".maybeHidden", item.name)
+}
+
 func TestNewFileItem(t *testing.T) {
 	f := &fileDialog{file: &FileDialog{}}
 	_ = f.makeUI()

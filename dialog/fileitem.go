@@ -46,7 +46,7 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 
 func fileName(path string) (name string) {
 	name = filepath.Base(path)
-	ext := filepath.Ext(path)
+	ext := filepath.Ext(name[1:])
 	name = name[:len(name)-len(ext)]
 
 	return
