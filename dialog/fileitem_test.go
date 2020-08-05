@@ -44,7 +44,7 @@ func TestNewFileItem(t *testing.T) {
 	_ = f.makeUI()
 	item := f.newFileItem("/path/to/filename.txt", false)
 
-	assert.Equal(t, item.name, "filename")
+	assert.Equal(t, "filename", item.name)
 
 	test.Tap(item)
 	assert.True(t, item.isCurrent)
@@ -59,7 +59,7 @@ func TestNewFileItem_Folder(t *testing.T) {
 	f.setDirectory(parentDir)
 	item := f.newFileItem(currentDir, true)
 
-	assert.Equal(t, item.name, filepath.Base(currentDir))
+	assert.Equal(t, filepath.Base(currentDir), item.name)
 
 	test.Tap(item)
 	assert.False(t, item.isCurrent)
@@ -78,7 +78,7 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 		name: "(Parent)", path: parentDir, dir: true}
 	item.ExtendBaseWidget(item)
 
-	assert.Equal(t, item.name, "(Parent)")
+	assert.Equal(t, "(Parent)", item.name)
 
 	test.Tap(item)
 	assert.False(t, item.isCurrent)
