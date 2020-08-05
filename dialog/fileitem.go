@@ -58,12 +58,14 @@ func (i *fileDialogItem) isDirectory() bool {
 
 func (f *fileDialog) newFileItem(path string, dir bool) *fileDialogItem {
 	var icon fyne.CanvasObject
+	var name string
 	if dir {
 		icon = canvas.NewImageFromResource(theme.FolderIcon())
+		name = filepath.Base(path)
 	} else {
 		icon = NewFileIcon(storage.NewURI("file://" + path))
+		name = fileName(path)
 	}
-	name := fileName(path)
 
 	ret := &fileDialogItem{
 		picker: f,
