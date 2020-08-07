@@ -33,7 +33,7 @@ func TestFileItem_FolderName(t *testing.T) {
 	assert.Equal(t, "foldername", item.name)
 
 	item = f.newFileItem("/path/to/myapp.app/", true)
-	assert.Equal(t, "myapp", item.name)
+	assert.Equal(t, "myapp.app", item.name)
 
 	item = f.newFileItem("/path/to/.maybeHidden/", true)
 	assert.Equal(t, ".maybeHidden", item.name)
