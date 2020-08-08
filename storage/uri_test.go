@@ -52,3 +52,11 @@ func TestURI_Name(t *testing.T) {
 	assert.Equal(t, "image.JPEG", storage.NewURI("file://C:/image.JPEG").Name())
 	assert.Equal(t, "directory", storage.NewURI("file://C:/directory/").Name())
 }
+
+func TestURI_Parent(t *testing.T) {
+	// note the trailing slashes are significant, as they tend to belie a
+	// directory
+	assert.Equal(t, "file:///foo/bar/", storage.NewURI("file:///foo/bar/baz").Parent().String())
+	assert.Equal(t, "file:///foo/bar/", storage.NewURI("file:///foo/bar/baz/").Parent().String())
+	assert.Equal(t, "file:///C:/foo/bar/", storage.NewURI("file:///C:/foo/bar/baz/").Parent().String())
+}

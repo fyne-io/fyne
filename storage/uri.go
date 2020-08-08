@@ -57,3 +57,16 @@ func (u *uri) Scheme() string {
 func (u *uri) String() string {
 	return u.raw
 }
+
+func (u *uri) Parent() fyne.URI {
+	s := u.raw
+
+	// trim trailing slash
+	if s[len(s)-1] == '/' {
+		s = s[0 : len(s)-2]
+	}
+
+	components := strings.Split(s, "/")
+	parent := strings.Join(components[0:len(components)-1], "/") + "/"
+	return NewURI(parent)
+}
