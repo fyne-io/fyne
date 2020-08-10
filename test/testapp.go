@@ -22,6 +22,7 @@ type testApp struct {
 	settings     fyne.Settings
 	prefs        fyne.Preferences
 	propertyLock sync.RWMutex
+	storage      fyne.Storage
 
 	// user action variables
 	appliedTheme     fyne.Theme
@@ -76,6 +77,10 @@ func (a *testApp) Preferences() fyne.Preferences {
 	return a.prefs
 }
 
+func (a *testApp) Storage() fyne.Storage {
+	return a.storage
+}
+
 func (a *testApp) lastAppliedTheme() fyne.Theme {
 	a.propertyLock.Lock()
 	defer a.propertyLock.Unlock()
@@ -88,7 +93,7 @@ func (a *testApp) lastAppliedTheme() fyne.Theme {
 func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0}
 	prefs := internal.NewInMemoryPreferences()
-	test := &testApp{settings: settings, prefs: prefs, driver: NewDriver().(*testDriver)}
+	test := &testApp{settings: settings, prefs: prefs, storage: &testStorage{}, driver: NewDriver().(*testDriver)}
 	fyne.SetCurrentApp(test)
 
 	listener := make(chan fyne.Settings)
