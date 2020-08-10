@@ -87,13 +87,13 @@ And you can run that simply as:
 
 It should look like this:
 
-<p align="center">
+<div align="center">
   <table cellpadding="0" cellspacing="0" style="margin: auto; border-collapse: collapse;"><tr><td>
     <img src="img/hello-light.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
   </td><td>
     <img src="img/hello-dark.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
   </td></tr></table>
-</p>
+</div>
 
 > Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
 > To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
