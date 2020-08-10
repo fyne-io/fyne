@@ -55,9 +55,34 @@ func (d *dialog) SetOnClosed(closed func()) {
 	}
 }
 
+// dialogTitle is really just a normal title but we use the Refresh() hook to update the background rectangle.
+type dialogTitle struct {
+	widget.Label
+
+	d *dialog
+}
+
+// Refresh applies the current theme to the whole dialog before refreshing the underlying label.
+func (t *dialogTitle) Refresh() {
+	t.d.applyTheme()
+
+	t.BaseWidget.Refresh()
+}
+
+func newDialogTitle(title string, d *dialog) *dialogTitle {
+	l := &dialogTitle{}
+	l.Text = title
+	l.Alignment = fyne.TextAlignLeading
+	l.TextStyle.Bold = true
+
+	l.d = d
+	l.ExtendBaseWidget(l)
+	return l
+}
+
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	d.bg = canvas.NewRectangle(theme.BackgroundColor())
-	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	d.label = newDialogTitle(d.title, d)
 
 	var content fyne.CanvasObject
 	if d.icon == nil {

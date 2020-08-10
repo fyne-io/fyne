@@ -73,12 +73,13 @@ func (f *Form) MinSize() fyne.Size {
 // Refresh updates the widget state when requested.
 func (f *Form) Refresh() {
 	cache.Renderer(f.super()) // we are about to make changes to renderer created content... not great!
-	f.setButtons()
+	f.updateButtons()
+	f.updateLabels()
 	f.BaseWidget.Refresh()
 	canvas.Refresh(f.super()) // refresh ourselves for BG color - the above updates the content
 }
 
-func (f *Form) setButtons() {
+func (f *Form) updateButtons() {
 	if f.CancelText == "" {
 		f.CancelText = "Cancel"
 	}
@@ -108,6 +109,17 @@ func (f *Form) setButtons() {
 	}
 }
 
+func (f *Form) updateLabels() {
+	for i, item := range f.Items {
+		l := f.itemGrid.Objects[i*2].(*Label)
+		if l.Text == item.Text {
+			continue
+		}
+
+		l.SetText(item.Text)
+	}
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
@@ -124,7 +136,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 
 	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))
-	f.setButtons() // will set correct visibility on the submit/cancel btns
+	f.updateButtons() // will set correct visibility on the submit/cancel btns
 	return renderer
 }
 
