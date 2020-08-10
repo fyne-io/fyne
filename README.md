@@ -88,11 +88,13 @@ And you can run that simply as:
 It should look like this:
 
 <div align="center">
-  <table cellpadding="0" cellspacing="0" style="margin: auto; border-collapse: collapse;"><tr><td>
-    <img src="img/hello-light.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
-  </td><td>
-    <img src="img/hello-dark.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
-  </td></tr></table>
+  <table cellpadding="0" cellspacing="0" style="margin: auto; border-collapse: collapse;">
+    <tr style="border: none;"><td style="border: none;">
+      <img src="img/hello-light.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
+    </td><td style="border: none;">
+      <img src="img/hello-dark.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
+    </td></tr>
+  </table>
 </div>
 
 > Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
