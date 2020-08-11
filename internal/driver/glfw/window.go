@@ -467,7 +467,7 @@ func (w *window) closed(viewport *glfw.Window) {
 	viewport.SetShouldClose(false)
 
 	if w.onCloseIntercepted != nil {
-		w.onCloseIntercepted()
+		w.queueEvent(w.onCloseIntercepted)
 		return
 	}
 
