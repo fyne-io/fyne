@@ -826,35 +826,31 @@ func TestWindow_CloseInterception(t *testing.T) {
 	w := d.CreateWindow("test").(*window)
 	w.create()
 
-	// Close is not calling the interceptor
-	intercepted := false
+	onIntercepted := false
+	onClosed := false
 	w.SetCloseIntercept(func() {
-		intercepted = true
+		onIntercepted = true
+	})
+	w.SetOnClosed(func() {
+		onClosed = true
 	})
 	w.Close()
 	w.waitForEvents()
-	assert.False(t, intercepted)
+	assert.False(t, onIntercepted) // The interceptor is not called by the Close.
+	assert.True(t, onClosed)
 
-	// closed is calling the interceptor
+	onIntercepted = false
+	onClosed = false
 	w.closed(w.viewport)
 	w.waitForEvents()
-	assert.True(t, intercepted)
+	assert.True(t, onIntercepted) // The interceptor is called by the closed.
+	assert.False(t, onClosed)     // If the interceptor is set Close is not called.
 
-	// the interceptor is not calling Close if set
-	intercepted = false
-	w.SetCloseIntercept(func() {})
-	w.SetOnClosed(func() {
-		intercepted = true
-	})
-	w.closed(w.viewport)
-	w.waitForEvents()
-	assert.False(t, intercepted)
-
-	// Close is called if the interceptor is not set
+	onClosed = false
 	w.SetCloseIntercept(nil)
 	w.closed(w.viewport)
 	w.waitForEvents()
-	assert.True(t, intercepted)
+	assert.True(t, onClosed) // Close is called if the interceptor is not set.
 }
 
 // This test makes our developer screens flash, let's not run it regularly...
