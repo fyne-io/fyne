@@ -82,6 +82,10 @@ func (s *selectRenderer) Refresh() {
 	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())
+	if s.combo.popUp != nil {
+		s.combo.Move(s.combo.position)
+		s.combo.Resize(s.combo.size)
+	}
 	canvas.Refresh(s.combo.super())
 }
 
@@ -149,7 +153,7 @@ func (s *Select) Resize(size fyne.Size) {
 	s.BaseWidget.Resize(size)
 
 	if s.popUp != nil {
-		s.popUp.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
+		s.popUp.Resize(fyne.NewSize(size.Width-theme.Padding()*2, s.popUp.MinSize().Height))
 	}
 }
 
@@ -185,7 +189,7 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
-	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height))
+	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height-theme.Padding()))
 }
 
 // MouseIn is called when a desktop pointer enters the widget

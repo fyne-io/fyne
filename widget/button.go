@@ -62,8 +62,8 @@ func (b *buttonRenderer) Layout(size fyne.Size) {
 	var inset fyne.Position
 	bgSize := size
 	if !b.button.HideShadow {
-		inset = fyne.NewPos(theme.Padding(), theme.Padding())
-		bgSize = size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+		inset = fyne.NewPos(theme.Padding()/2, theme.Padding()/2)
+		bgSize = size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding()))
 	}
 	b.LayoutShadow(bgSize, inset)
 
