@@ -21,6 +21,7 @@ const (
 type infProgressRenderer struct {
 	widget.BaseRenderer
 	bar      *canvas.Rectangle
+	label    *canvas.Text
 	ticker   *time.Ticker
 	running  bool
 	progress *ProgressBarInfinite
@@ -29,7 +30,12 @@ type infProgressRenderer struct {
 // MinSize calculates the minimum size of a progress bar.
 func (p *infProgressRenderer) MinSize() fyne.Size {
 	// this is to create the same size infinite progress bar as regular progress bar
-	text := fyne.MeasureText("100%", theme.TextSize(), fyne.TextStyle{})
+	var text fyne.Size
+	if p.progress.CustomText == "" {
+		text = fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
+	} else {
+		text = fyne.MeasureText(p.progress.CustomText, p.label.TextSize, p.label.TextStyle)
+	}
 
 	return fyne.NewSize(text.Width+theme.Padding()*4, text.Height+theme.Padding()*2)
 }
@@ -67,11 +73,16 @@ func (p *infProgressRenderer) updateBar() {
 		}
 	}
 
+	if p.progress.CustomText != "" {
+		p.label.Text = p.progress.CustomText
+	}
+
 	p.bar.Move(barPos)
 }
 
 // Layout the components of the infinite progress bar
 func (p *infProgressRenderer) Layout(size fyne.Size) {
+	p.label.Resize(size)
 	p.updateBar()
 }
 
@@ -88,9 +99,15 @@ func (p *infProgressRenderer) Refresh() {
 	p.doRefresh()
 }
 
-func (p *infProgressRenderer) doRefresh() {
+// applyTheme updates the progress bar to match the current theme
+func (p *infProgressRenderer) applyTheme() {
 	p.bar.FillColor = theme.PrimaryColor()
+	p.label.Color = theme.TextColor()
+	p.label.TextSize = theme.TextSize()
+}
 
+func (p *infProgressRenderer) doRefresh() {
+	p.applyTheme()
 	p.updateBar()
 	canvas.Refresh(p.progress.super())
 }
@@ -151,6 +168,13 @@ func (p *infProgressRenderer) Destroy() {
 // An infinite progress bar loops 0% -> 100% repeatedly until Stop() is called
 type ProgressBarInfinite struct {
 	BaseWidget
+	CustomText string
+}
+
+// SetCustomText sets a custom text on top of the progress animation.
+func (p *ProgressBarInfinite) SetCustomText(text string) {
+	p.CustomText = text
+	p.Refresh()
 }
 
 // Show this widget, if it was previously hidden
@@ -194,9 +218,12 @@ func (p *ProgressBarInfinite) MinSize() fyne.Size {
 func (p *ProgressBarInfinite) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 	bar := canvas.NewRectangle(theme.PrimaryColor())
+	label := canvas.NewText("", theme.TextColor())
+	label.Alignment = fyne.TextAlignCenter
 	render := &infProgressRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bar}),
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{bar, label}),
 		bar:          bar,
+		label:        label,
 		progress:     p,
 	}
 	render.start()

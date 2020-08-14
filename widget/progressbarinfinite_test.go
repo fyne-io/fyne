@@ -66,3 +66,12 @@ func TestInfiniteProgressRenderer_Layout(t *testing.T) {
 	assert.Equal(t, maxWidth, render.bar.Size().Width)
 	bar.Hide()
 }
+
+func TestProgressBarInfinite_SetCustomText(t *testing.T) {
+	bar := NewProgressBarInfinite()
+
+	assert.Equal(t, "", bar.CustomText)
+
+	bar.SetCustomText("custom")
+	assert.Equal(t, "custom", bar.CustomText)
+}
