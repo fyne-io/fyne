@@ -22,12 +22,7 @@ type progressRenderer struct {
 // MinSize calculates the minimum size of a progress bar.
 // This is simply the "100%" label size plus padding.
 func (p *progressRenderer) MinSize() fyne.Size {
-	var text fyne.Size
-	if p.progress.CustomText == "" {
-		text = fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
-	} else {
-		text = fyne.MeasureText(p.progress.CustomText, p.label.TextSize, p.label.TextStyle)
-	}
+	text := fyne.MeasureText("100%", p.label.TextSize, p.label.TextStyle)
 
 	return fyne.NewSize(text.Width+theme.Padding()*4, text.Height+theme.Padding()*2)
 }
@@ -43,11 +38,7 @@ func (p *progressRenderer) updateBar() {
 	delta := float32(p.progress.Max - p.progress.Min)
 	ratio := float32(p.progress.Value-p.progress.Min) / delta
 
-	if p.progress.CustomText == "" {
-		p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
-	} else {
-		p.label.Text = p.progress.CustomText
-	}
+	p.label.Text = fmt.Sprintf(defaultText, int(ratio*100))
 
 	size := p.progress.Size()
 	p.bar.Resize(fyne.NewSize(int(float32(size.Width)*ratio), size.Height))
@@ -67,7 +58,7 @@ func (p *progressRenderer) applyTheme() {
 }
 
 func (p *progressRenderer) BackgroundColor() color.Color {
-	return theme.ShadowColor()
+	return theme.ButtonColor()
 }
 
 func (p *progressRenderer) Refresh() {
@@ -82,20 +73,12 @@ type ProgressBar struct {
 	BaseWidget
 
 	Min, Max, Value float64
-	CustomText      string
 }
 
 // SetValue changes the current value of this progress bar (from p.Min to p.Max).
 // The widget will be refreshed to indicate the change.
 func (p *ProgressBar) SetValue(v float64) {
 	p.Value = v
-	p.Refresh()
-}
-
-// SetCustomText sets a custom text instead of the progression percentage.
-// The CustomText needs to be empty for percentages to be displayed.
-func (p *ProgressBar) SetCustomText(text string) {
-	p.CustomText = text
 	p.Refresh()
 }
 

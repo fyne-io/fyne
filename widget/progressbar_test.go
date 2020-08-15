@@ -19,15 +19,6 @@ func TestProgressBar_SetValue(t *testing.T) {
 	assert.Equal(t, .5, bar.Value)
 }
 
-func TestProgressBar_SetCustomText(t *testing.T) {
-	bar := NewProgressBar()
-
-	assert.Equal(t, "", bar.CustomText)
-
-	bar.SetCustomText("custom")
-	assert.Equal(t, "custom", bar.CustomText)
-}
-
 func TestProgressRenderer_Layout(t *testing.T) {
 	bar := NewProgressBar()
 	bar.Resize(fyne.NewSize(100, 10))
