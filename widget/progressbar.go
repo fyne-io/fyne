@@ -58,7 +58,7 @@ func (p *progressRenderer) applyTheme() {
 }
 
 func (p *progressRenderer) BackgroundColor() color.Color {
-	return theme.ButtonColor()
+	return theme.ShadowColor()
 }
 
 func (p *progressRenderer) Refresh() {
