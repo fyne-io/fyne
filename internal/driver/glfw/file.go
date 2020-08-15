@@ -2,7 +2,9 @@ package glfw
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
@@ -11,6 +13,52 @@ import (
 type file struct {
 	*os.File
 	path string
+}
+
+// directory implements ListableURI
+type directory struct {
+	fyne.URI
+}
+
+func (d *directory) List() ([]fyne.URI, error) {
+	if d.Scheme() != "file" {
+		return nil, fmt.Errorf("driver/glfw/file.go does not understand scheme '%s'", d.Scheme())
+	}
+
+	path := d.String()[len(d.Scheme())+3 : len(d.String())]
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	urilist := []fyne.URI{}
+
+	for _, f := range files {
+		uri := storage.NewURI("file://" + filepath.Join(path, f.Name()))
+		urilist = append(urilist, uri)
+	}
+
+	return urilist, nil
+}
+
+// ListableURIForURI will attempt to convert an existing URI object into a
+// listable URI
+func ListableURIForURI(uri fyne.URI) (fyne.ListableURI, error) {
+	if uri.Scheme() != "file" {
+		return nil, fmt.Errorf("driver/glfw/file.go does not understand scheme '%s'", uri.Scheme())
+	}
+
+	path := uri.String()[len(uri.Scheme())+3 : len(uri.String())]
+	s, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if !s.IsDir() {
+		return nil, fmt.Errorf("Path '%s' is not a directory, cannot convert to listable URI", path)
+	}
+
+	return &directory{URI: uri}, nil
 }
 
 func (d *gLDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {

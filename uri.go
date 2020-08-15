@@ -40,5 +40,5 @@ type ListableURI interface {
 	URI
 
 	// List returns a list of child URIs of this URI.
-	List() []URI
+	List() ([]URI, error)
 }
