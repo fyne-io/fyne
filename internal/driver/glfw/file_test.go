@@ -58,7 +58,7 @@ func Test_ListableURI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	//defer os.RemoveAll(tempdir)
+	defer os.RemoveAll(tempdir)
 
 	content := []byte("Test Content!")
 
