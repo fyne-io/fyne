@@ -32,13 +32,6 @@ func TestNewURI_Content(t *testing.T) {
 	assert.Equal(t, "image/png", u.MimeType())
 }
 
-func TestURI_Extension(t *testing.T) {
-	assert.Equal(t, ".txt", storage.NewURI("file:///text.txt").Extension())
-	assert.Equal(t, ".a", storage.NewURI("file:///library.a").Extension())
-	assert.Equal(t, ".JPEG", storage.NewURI("file://C:/image.JPEG").Extension())
-	assert.Equal(t, "", storage.NewURI("file://C:/directory/").Extension())
-}
-
 func TestURI_Scheme(t *testing.T) {
 	assert.Equal(t, "http", storage.NewURI("http://google.com").Scheme())
 	assert.Equal(t, "http", storage.NewURI("hTtP://google.com").Scheme())
@@ -59,4 +52,11 @@ func TestURI_Parent(t *testing.T) {
 	assert.Equal(t, "file:///foo/bar/", storage.NewURI("file:///foo/bar/baz").Parent().String())
 	assert.Equal(t, "file:///foo/bar/", storage.NewURI("file:///foo/bar/baz/").Parent().String())
 	assert.Equal(t, "file:///C:/foo/bar/", storage.NewURI("file:///C:/foo/bar/baz/").Parent().String())
+}
+
+func TestURI_Extension(t *testing.T) {
+	assert.Equal(t, ".txt", storage.NewURI("file:///text.txt").Extension())
+	assert.Equal(t, ".a", storage.NewURI("file:///library.a").Extension())
+	assert.Equal(t, ".JPEG", storage.NewURI("file://C:/image.JPEG").Extension())
+	assert.Equal(t, "", storage.NewURI("file://C:/directory/").Extension())
 }
