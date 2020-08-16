@@ -37,11 +37,13 @@ type Entry struct {
 	Text            string
 	PlaceHolder     string
 	OnChanged       func(string) `json:"-"`
-	RegexValidation *regexp.Regexp
 	Password        bool
 	ReadOnly        bool // Deprecated: Use Disable() instead
 	MultiLine       bool
 	Wrapping        fyne.TextWrap
+
+	RegexValidation *regexp.Regexp
+	ValidInput 		bool
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -89,6 +91,13 @@ func NewPasswordEntry() *Entry {
 	return e
 }
 
+//NewValidatedEntry creates a new validated entry widget
+func NewValidatedEntry(regex *regexp.Regexp) *Entry {
+	e := &Entry{RegexValidation: regex}
+	e.ExtendBaseWidget(e)
+	return e
+}
+
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 // Implements: fyne.Widget
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
@@ -111,8 +120,10 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		// An entry widget has been created via struct setting manually
 		// the Password field to true. Going to enable the password revealer.
 		e.ActionItem = newPasswordRevealer(e)
+	} else if e.RegexValidation != nil && e.ActionItem == nil {
+		e.ActionItem = newRegexpStatus(e)
 	}
-
+	
 	if e.ActionItem != nil {
 		objects = append(objects, e.ActionItem)
 	}
@@ -969,7 +980,12 @@ func (e *Entry) updateText(text string) {
 		if e.RegexValidation == nil {
 			callback(text)
 		} else if e.RegexValidation.MatchString(text) {
+			e.ValidInput = true
+			e.Refresh()
 			callback(text)
+		} else {
+			e.ValidInput = false
+			e.Refresh()
 		}
 	}
 }
@@ -1302,6 +1318,60 @@ func (p *placeholderPresenter) textStyle() fyne.TextStyle {
 // textWrap tells the rendering textProvider our wrapping
 func (p *placeholderPresenter) textWrap() fyne.TextWrap {
 	return p.e.Wrapping
+}
+
+var _ fyne.Widget = (*regexpStatus)(nil)
+
+type regexpStatus struct {
+	BaseWidget
+	
+	entry *Entry
+	icon  *canvas.Image
+}
+
+func newRegexpStatus(e *Entry) *regexpStatus {
+	rs := &regexpStatus{
+		icon:  canvas.NewImageFromResource(theme.CancelIcon()),
+		entry: e,
+	}
+	rs.ExtendBaseWidget(rs)
+	return rs
+}
+
+func (r *regexpStatus) CreateRenderer() fyne.WidgetRenderer {
+	return &regexpStatusRenderer{
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
+		icon:         r.icon,
+		entry:        r.entry,
+	}
+}
+
+var _ fyne.WidgetRenderer = (*regexpStatusRenderer)(nil)
+
+type regexpStatusRenderer struct {
+	widget.BaseRenderer
+	entry *Entry
+	icon  *canvas.Image
+}
+
+func (r *regexpStatusRenderer) Layout(size fyne.Size) {
+	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
+	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
+}
+
+func (r *regexpStatusRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+}
+
+func (r *regexpStatusRenderer) Refresh() {
+	r.entry.propertyLock.RLock()
+	defer r.entry.propertyLock.RUnlock()
+	if r.entry.ValidInput {
+		r.icon.Resource = theme.ConfirmIcon()
+	} else {
+		r.icon.Resource = theme.CancelIcon()
+	}
+	canvas.Refresh(r.icon)
 }
 
 // getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col

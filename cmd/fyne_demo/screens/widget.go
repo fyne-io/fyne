@@ -177,9 +177,8 @@ func makeInputTab() fyne.Widget {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
-	entryValidated := widget.NewEntry()
+	entryValidated := widget.NewValidatedEntry(correctInput)
 	entryValidated.SetPlaceHolder("Validated, must be a number")
-	entryValidated.RegexValidation = correctInput
 	entryValidated.OnChanged = func(validText string) {
 		fmt.Println("Valid input:", validText)
 	}
