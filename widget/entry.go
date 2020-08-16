@@ -33,17 +33,17 @@ var _ mobile.Keyboardable = (*Entry)(nil)
 // Entry widget allows simple text to be input when focused.
 type Entry struct {
 	DisableableWidget
-	shortcut        fyne.ShortcutHandler
-	Text            string
-	PlaceHolder     string
-	OnChanged       func(string) `json:"-"`
-	Password        bool
-	ReadOnly        bool // Deprecated: Use Disable() instead
-	MultiLine       bool
-	Wrapping        fyne.TextWrap
+	shortcut    fyne.ShortcutHandler
+	Text        string
+	PlaceHolder string
+	OnChanged   func(string) `json:"-"`
+	Password    bool
+	ReadOnly    bool // Deprecated: Use Disable() instead
+	MultiLine   bool
+	Wrapping    fyne.TextWrap
 
 	RegexValidation *regexp.Regexp
-	ValidInput 		bool
+	ValidInput      bool
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -123,7 +123,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	} else if e.RegexValidation != nil && e.ActionItem == nil {
 		e.ActionItem = newRegexpStatus(e)
 	}
-	
+
 	if e.ActionItem != nil {
 		objects = append(objects, e.ActionItem)
 	}
@@ -1324,7 +1324,7 @@ var _ fyne.Widget = (*regexpStatus)(nil)
 
 type regexpStatus struct {
 	BaseWidget
-	
+
 	entry *Entry
 	icon  *canvas.Image
 }
