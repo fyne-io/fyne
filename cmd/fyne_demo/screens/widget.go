@@ -201,11 +201,25 @@ func makeInputTab() fyne.Widget {
 
 func makeProgressTab() fyne.Widget {
 	progress = widget.NewProgressBar()
+	
+	format := widget.NewProgressBar()
+	format.TextFormatter = func() string {
+		return fmt.Sprintf("%.2f out of %.2f", format.Value, format.Max)
+	}
+	
+	go func() {
+		for format.Value < format.Max {
+			time.Sleep(time.Second)
+			format.SetValue(format.Value+0.01)
+		}	
+	}()
+	
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
 
 	return widget.NewVBox(
 		widget.NewLabel("Percent"), progress,
+		widget.NewLabel("Formatted"), format,
 		widget.NewLabel("Infinite"), infProgress)
 }
 
