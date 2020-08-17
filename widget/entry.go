@@ -43,7 +43,7 @@ type Entry struct {
 	Wrapping    fyne.TextWrap
 
 	RegexValidation *regexp.Regexp
-	regexpStatus    *regexpStatus
+	regexStatus     *regexStatus
 	ValidInput      bool
 
 	CursorRow, CursorColumn int
@@ -95,7 +95,7 @@ func NewPasswordEntry() *Entry {
 //NewValidatedEntry creates a new validated entry widget
 func NewValidatedEntry(regex *regexp.Regexp) *Entry {
 	e := &Entry{RegexValidation: regex}
-	e.regexpStatus = newRegexpStatus(e)
+	e.regexStatus = newRegexStatus(e)
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -125,8 +125,8 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	if e.RegexValidation != nil {
-		e.regexpStatus = newRegexpStatus(e)
-		objects = append(objects, e.regexpStatus)
+		e.regexStatus = newRegexStatus(e)
+		objects = append(objects, e.regexStatus)
 	}
 
 	if e.ActionItem != nil {
@@ -989,13 +989,15 @@ func (e *Entry) updateText(text string) {
 		if e.RegexValidation == nil {
 			callback(text)
 		} else if e.RegexValidation.MatchString(text) {
-			e.ValidInput = true
 			callback(text)
+			e.ValidInput = true
 		} else {
 			e.ValidInput = false
 		}
 
-		e.regexpStatus.Refresh()
+		if e.RegexValidation != nil {
+			e.regexStatus.Refresh()
+		}
 	}
 }
 
@@ -1030,12 +1032,12 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	regexIconSize := fyne.NewSize(0, 0)
 	if r.entry.RegexValidation != nil {
 		regexIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-		r.entry.regexpStatus.Resize(regexIconSize)
+		r.entry.regexStatus.Resize(regexIconSize)
 
 		if r.entry.ActionItem == nil {
-			r.entry.regexpStatus.Move(fyne.NewPos(size.Width-regexIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+			r.entry.regexStatus.Move(fyne.NewPos(size.Width-regexIconSize.Width-2*theme.Padding(), theme.Padding()*2))
 		} else {
-			r.entry.regexpStatus.Move(fyne.NewPos(size.Width-regexIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
+			r.entry.regexStatus.Move(fyne.NewPos(size.Width-regexIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
 		}
 	}
 
@@ -1127,7 +1129,7 @@ func (r *entryRenderer) Refresh() {
 		r.entry.ActionItem.Refresh()
 	}
 	if r.entry.RegexValidation != nil {
-		r.entry.regexpStatus.Refresh()
+		r.entry.regexStatus.Refresh()
 	}
 	canvas.Refresh(r.entry.super())
 }
@@ -1344,17 +1346,17 @@ func (p *placeholderPresenter) textWrap() fyne.TextWrap {
 	return p.e.Wrapping
 }
 
-var _ fyne.Widget = (*regexpStatus)(nil)
+var _ fyne.Widget = (*regexStatus)(nil)
 
-type regexpStatus struct {
+type regexStatus struct {
 	BaseWidget
 
 	entry *Entry
 	icon  *canvas.Image
 }
 
-func newRegexpStatus(e *Entry) *regexpStatus {
-	rs := &regexpStatus{
+func newRegexStatus(e *Entry) *regexStatus {
+	rs := &regexStatus{
 		icon:  canvas.NewImageFromResource(theme.WarningIcon()),
 		entry: e,
 	}
@@ -1362,32 +1364,32 @@ func newRegexpStatus(e *Entry) *regexpStatus {
 	return rs
 }
 
-func (r *regexpStatus) CreateRenderer() fyne.WidgetRenderer {
-	return &regexpStatusRenderer{
+func (r *regexStatus) CreateRenderer() fyne.WidgetRenderer {
+	return &regexStatusRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
 		icon:         r.icon,
 		entry:        r.entry,
 	}
 }
 
-var _ fyne.WidgetRenderer = (*regexpStatusRenderer)(nil)
+var _ fyne.WidgetRenderer = (*regexStatusRenderer)(nil)
 
-type regexpStatusRenderer struct {
+type regexStatusRenderer struct {
 	widget.BaseRenderer
 	entry *Entry
 	icon  *canvas.Image
 }
 
-func (r *regexpStatusRenderer) Layout(size fyne.Size) {
+func (r *regexStatusRenderer) Layout(size fyne.Size) {
 	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
 }
 
-func (r *regexpStatusRenderer) MinSize() fyne.Size {
+func (r *regexStatusRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 }
 
-func (r *regexpStatusRenderer) Refresh() {
+func (r *regexStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
 	if r.entry.ValidInput {
