@@ -1393,18 +1393,20 @@ func (r *regexStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
 	if r.entry.ValidInput {
-		r.icon.Show()
 		r.icon.Resource = theme.ConfirmIcon()
+		r.icon.Show()
 	} else {
 		r.icon.Hide()
 	}
 
-	if !r.entry.Focused() && r.entry.Text != "" && !r.entry.ValidInput {
+	if !r.entry.Focused() && r.entry.Text != "" { // Do we want to match on empty entry?
+		if !r.entry.ValidInput {
+			r.icon.Resource = theme.WarningIcon()
+		} else {
+			r.icon.Resource = theme.ConfirmIcon()
+		}
+
 		r.icon.Show()
-		r.icon.Resource = theme.WarningIcon()
-	} else if !r.entry.Focused() && r.entry.Text != "" && r.entry.ValidInput {
-		r.icon.Show()
-		r.icon.Resource = theme.ConfirmIcon()
 	}
 
 	canvas.Refresh(r.icon)
