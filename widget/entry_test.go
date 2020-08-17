@@ -2,6 +2,7 @@ package widget_test
 
 import (
 	"image/color"
+	"regexp"
 	"testing"
 
 	"fyne.io/fyne"
@@ -41,6 +42,22 @@ func TestEntry_Cursor(t *testing.T) {
 func TestEntry_passwordRevealerCursor(t *testing.T) {
 	pr := widget.NewPasswordEntry().ActionItem.(desktop.Cursorable)
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
+}
+
+func TestEntry_NewValidatedEntry(t *testing.T) {
+	called := false
+	entry := widget.NewValidatedEntry(regexp.MustCompile(`\d`))
+	entry.OnChanged = func(_ string) {
+		called = true
+	}
+
+	test.Type(entry, "invalid")
+	assert.Equal(t, false, entry.ValidInput)
+	assert.Equal(t, false, called)
+
+	test.Type(entry, "365 days")
+	assert.Equal(t, true, entry.ValidInput)
+	assert.Equal(t, true, called)
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {

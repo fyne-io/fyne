@@ -44,7 +44,7 @@ type Entry struct {
 
 	RegexValidation *regexp.Regexp
 	regexStatus     *regexStatus
-	ValidInput      bool
+	ValidInput      bool // Will be false if RegexValidation is empty
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -95,7 +95,6 @@ func NewPasswordEntry() *Entry {
 //NewValidatedEntry creates a new validated entry widget
 func NewValidatedEntry(regex *regexp.Regexp) *Entry {
 	e := &Entry{RegexValidation: regex}
-	e.regexStatus = newRegexStatus(e)
 	e.ExtendBaseWidget(e)
 	return e
 }
