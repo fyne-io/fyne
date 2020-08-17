@@ -122,7 +122,9 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		// An entry widget has been created via struct setting manually
 		// the Password field to true. Going to enable the password revealer.
 		e.ActionItem = newPasswordRevealer(e)
-	} else if e.RegexValidation != nil {
+	}
+
+	if e.RegexValidation != nil {
 		e.regexpStatus = newRegexpStatus(e)
 		objects = append(objects, e.regexpStatus)
 	}
@@ -1395,9 +1397,12 @@ func (r *regexpStatusRenderer) Refresh() {
 		r.icon.Hide()
 	}
 
-	if !r.entry.Focused() && r.entry.Text != "" {
+	if !r.entry.Focused() && r.entry.Text != "" && !r.entry.ValidInput {
 		r.icon.Show()
 		r.icon.Resource = theme.WarningIcon()
+	} else if !r.entry.Focused() && r.entry.Text != "" && r.entry.ValidInput {
+		r.icon.Show()
+		r.icon.Resource = theme.ConfirmIcon()
 	}
 
 	canvas.Refresh(r.icon)
