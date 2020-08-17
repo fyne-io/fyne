@@ -43,6 +43,7 @@ type Entry struct {
 	Wrapping    fyne.TextWrap
 
 	RegexValidation *regexp.Regexp
+	regexpStatus    *regexpStatus
 	ValidInput      bool
 
 	CursorRow, CursorColumn int
@@ -94,6 +95,7 @@ func NewPasswordEntry() *Entry {
 //NewValidatedEntry creates a new validated entry widget
 func NewValidatedEntry(regex *regexp.Regexp) *Entry {
 	e := &Entry{RegexValidation: regex}
+	e.regexpStatus = newRegexpStatus(e)
 	e.ExtendBaseWidget(e)
 	return e
 }
@@ -120,13 +122,15 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		// An entry widget has been created via struct setting manually
 		// the Password field to true. Going to enable the password revealer.
 		e.ActionItem = newPasswordRevealer(e)
-	} else if e.RegexValidation != nil && e.ActionItem == nil {
-		e.ActionItem = newRegexpStatus(e)
+	} else if e.RegexValidation != nil {
+		e.regexpStatus = newRegexpStatus(e)
+		objects = append(objects, e.regexpStatus)
 	}
 
 	if e.ActionItem != nil {
 		objects = append(objects, e.ActionItem)
 	}
+
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
 
@@ -284,6 +288,9 @@ func (e *Entry) MinSize() fyne.Size {
 
 	min := e.BaseWidget.MinSize()
 	if e.ActionItem != nil {
+		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+	}
+	if e.RegexValidation != nil {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
 
@@ -981,12 +988,12 @@ func (e *Entry) updateText(text string) {
 			callback(text)
 		} else if e.RegexValidation.MatchString(text) {
 			e.ValidInput = true
-			e.Refresh()
 			callback(text)
 		} else {
 			e.ValidInput = false
-			e.Refresh()
 		}
+
+		e.regexpStatus.Refresh()
 	}
 }
 
@@ -1016,6 +1023,18 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 		r.entry.ActionItem.Resize(actionIconSize)
 		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+	}
+
+	regexIconSize := fyne.NewSize(0, 0)
+	if r.entry.RegexValidation != nil {
+		regexIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		r.entry.regexpStatus.Resize(regexIconSize)
+
+		if r.entry.ActionItem == nil {
+			r.entry.regexpStatus.Move(fyne.NewPos(size.Width-regexIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+		} else {
+			r.entry.regexpStatus.Move(fyne.NewPos(size.Width-regexIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
+		}
 	}
 
 	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
@@ -1104,6 +1123,9 @@ func (r *entryRenderer) Refresh() {
 	r.entry.placeholder.Refresh()
 	if r.entry.ActionItem != nil {
 		r.entry.ActionItem.Refresh()
+	}
+	if r.entry.RegexValidation != nil {
+		r.entry.regexpStatus.Refresh()
 	}
 	canvas.Refresh(r.entry.super())
 }
@@ -1331,7 +1353,7 @@ type regexpStatus struct {
 
 func newRegexpStatus(e *Entry) *regexpStatus {
 	rs := &regexpStatus{
-		icon:  canvas.NewImageFromResource(theme.CancelIcon()),
+		icon:  canvas.NewImageFromResource(theme.WarningIcon()),
 		entry: e,
 	}
 	rs.ExtendBaseWidget(rs)
@@ -1367,10 +1389,17 @@ func (r *regexpStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
 	if r.entry.ValidInput {
+		r.icon.Show()
 		r.icon.Resource = theme.ConfirmIcon()
 	} else {
-		r.icon.Resource = theme.CancelIcon()
+		r.icon.Hide()
 	}
+
+	if !r.entry.Focused() && r.entry.Text != "" {
+		r.icon.Show()
+		r.icon.Resource = theme.WarningIcon()
+	}
+
 	canvas.Refresh(r.icon)
 }
 

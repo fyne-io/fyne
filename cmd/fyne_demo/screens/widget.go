@@ -169,16 +169,14 @@ func makeTextTab() fyne.CanvasObject {
 		fixed, entryLoremIpsumScroller, grid)
 }
 
-var correctInput = regexp.MustCompile(`\d`)
-
 func makeInputTab() fyne.Widget {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Entry")
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
-	entryValidated := widget.NewValidatedEntry(correctInput)
-	entryValidated.SetPlaceHolder("Validated, must be a number")
+	entryValidated := widget.NewValidatedEntry(regexp.MustCompile(`\d`))
+	entryValidated.SetPlaceHolder("Validated, must contain a number")
 	entryValidated.OnChanged = func(validText string) {
 		fmt.Println("Valid input:", validText)
 	}
