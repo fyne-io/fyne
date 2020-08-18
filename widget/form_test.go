@@ -97,6 +97,19 @@ func TestForm_Renderer(t *testing.T) {
 	test.AssertImageMatches(t, "form_initial.png", w.Canvas().Capture())
 }
 
+func TestForm_ChangeText(t *testing.T) {
+	item := &FormItem{Text: "Test", Widget: NewEntry()}
+	form := &Form{Items: []*FormItem{item}}
+
+	renderer := test.WidgetRenderer(form)
+	c := renderer.Objects()[0].(*fyne.Container)
+	assert.Equal(t, "Test", c.Objects[0].(*Label).Text)
+
+	item.Text = "Changed"
+	form.Refresh()
+	assert.Equal(t, "Changed", c.Objects[0].(*Label).Text)
+}
+
 func TestForm_ChangeTheme(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()

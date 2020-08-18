@@ -54,6 +54,9 @@ type App interface {
 
 	// Preferences returns the application preferences, used for storing configuration and state
 	Preferences() Preferences
+
+	// Storage returns a storage handler specific to this application.
+	Storage() Storage
 }
 
 var app App
