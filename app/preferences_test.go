@@ -9,6 +9,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func loadPreferences(id string) *preferences {
+	p := newPreferences(&fyneApp{})
+	p.load(id)
+
+	return p
+}
+
 func TestPreferences_Save(t *testing.T) {
 	p := loadPreferences("dummy")
 	p.Values()["keyString"] = "value"
