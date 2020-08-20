@@ -27,6 +27,7 @@ Suspendisse id maximus felis. Sed mauris odio, mattis eget mi eu, consequat temp
 
 var (
 	progress    *widget.ProgressBar
+	fprogress   *widget.ProgressBar
 	infProgress *widget.ProgressBarInfinite
 	endProgress chan interface{}
 )
@@ -202,24 +203,17 @@ func makeInputTab() fyne.Widget {
 func makeProgressTab() fyne.Widget {
 	progress = widget.NewProgressBar()
 
-	format := widget.NewProgressBar()
-	format.TextFormatter = func() string {
-		return fmt.Sprintf("%.2f out of %.2f", format.Value, format.Max)
+	fprogress = widget.NewProgressBar()
+	fprogress.TextFormatter = func() string {
+		return fmt.Sprintf("%.2f out of %.2f", fprogress.Value, fprogress.Max)
 	}
-
-	go func() {
-		for format.Value < format.Max {
-			time.Sleep(time.Second)
-			format.SetValue(format.Value + 0.01)
-		}
-	}()
 
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
 
 	return widget.NewVBox(
 		widget.NewLabel("Percent"), progress,
-		widget.NewLabel("Formatted"), format,
+		widget.NewLabel("Formatted"), fprogress,
 		widget.NewLabel("Infinite"), infProgress)
 }
 
@@ -255,6 +249,7 @@ func makeFormTab() fyne.Widget {
 
 func startProgress() {
 	progress.SetValue(0)
+	fprogress.SetValue(0)
 	select { // ignore stale end message
 	case <-endProgress:
 	default:
@@ -271,10 +266,12 @@ func startProgress() {
 			}
 
 			progress.SetValue(num)
+			fprogress.SetValue(num)
 			num += 0.01
 		}
 
 		progress.SetValue(1)
+		fprogress.SetValue(1)
 	}()
 	infProgress.Start()
 }
