@@ -44,7 +44,7 @@ type Entry struct {
 
 	RegexValidation *regexp.Regexp
 	regexStatus     *regexStatus
-	ValidInput      bool // Will be false if RegexValidation is empty
+	validInput      bool
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -989,9 +989,9 @@ func (e *Entry) updateText(text string) {
 			callback(text)
 		} else if e.RegexValidation.MatchString(text) {
 			callback(text)
-			e.ValidInput = true
+			e.validInput = true
 		} else {
-			e.ValidInput = false
+			e.validInput = false
 		}
 
 		if e.RegexValidation != nil {
@@ -1345,6 +1345,16 @@ func (p *placeholderPresenter) textWrap() fyne.TextWrap {
 	return p.e.Wrapping
 }
 
+// ValidationStatus returns a bool for if the input is valid or not.
+// Always returns true if InputValidation hasn't been set.
+func (e *Entry) ValidationStatus() bool {
+	if e.InputValidation == nil {
+		return true
+	}
+
+	return e.validInput
+}
+
 var _ fyne.Widget = (*regexStatus)(nil)
 
 type regexStatus struct {
@@ -1391,7 +1401,7 @@ func (r *regexStatusRenderer) MinSize() fyne.Size {
 func (r *regexStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
-	if r.entry.ValidInput {
+	if r.entry.validInput {
 		r.icon.Resource = theme.ConfirmIcon()
 		r.icon.Show()
 	} else {
@@ -1399,7 +1409,7 @@ func (r *regexStatusRenderer) Refresh() {
 	}
 
 	if !r.entry.Focused() && r.entry.Text != "" { // Do we want to match on empty entry?
-		if !r.entry.ValidInput {
+		if !r.entry.validInput {
 			r.icon.Resource = theme.WarningIcon()
 		} else {
 			r.icon.Resource = theme.ConfirmIcon()
