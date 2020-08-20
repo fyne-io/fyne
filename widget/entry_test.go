@@ -46,17 +46,19 @@ func TestEntry_passwordRevealerCursor(t *testing.T) {
 
 func TestEntry_NewValidatedEntry(t *testing.T) {
 	called := false
-	entry := widget.NewValidatedEntry(regexp.MustCompile(`\d`))
+	entry := &widget.Entry{RegexValidation: regexp.MustCompile(`\d`)}
+	entry.ExtendBaseWidget(entry)
+
 	entry.OnChanged = func(_ string) {
 		called = true
 	}
 
 	test.Type(entry, "invalid")
-	assert.Equal(t, false, entry.ValidInput)
+	assert.Equal(t, false, entry.ValidationStatus())
 	assert.Equal(t, false, called)
 
 	test.Type(entry, "365 days")
-	assert.Equal(t, true, entry.ValidInput)
+	assert.Equal(t, true, entry.ValidationStatus())
 	assert.Equal(t, true, called)
 }
 

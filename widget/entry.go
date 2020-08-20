@@ -92,13 +92,6 @@ func NewPasswordEntry() *Entry {
 	return e
 }
 
-//NewValidatedEntry creates a new validated entry widget
-func NewValidatedEntry(regex *regexp.Regexp) *Entry {
-	e := &Entry{RegexValidation: regex}
-	e.ExtendBaseWidget(e)
-	return e
-}
-
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 // Implements: fyne.Widget
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
