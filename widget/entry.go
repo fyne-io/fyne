@@ -1348,7 +1348,7 @@ func (p *placeholderPresenter) textWrap() fyne.TextWrap {
 // ValidationStatus returns a bool for if the input is valid or not.
 // Always returns true if InputValidation hasn't been set.
 func (e *Entry) ValidationStatus() bool {
-	if e.InputValidation == nil {
+	if e.RegexValidation == nil {
 		return true
 	}
 
