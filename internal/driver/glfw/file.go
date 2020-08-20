@@ -41,9 +41,7 @@ func (d *directory) List() ([]fyne.URI, error) {
 	return urilist, nil
 }
 
-// ListableURIForURI will attempt to convert an existing URI object into a
-// listable URI
-func ListableURIForURI(uri fyne.URI) (fyne.ListableURI, error) {
+func (d *gLDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	if uri.Scheme() != "file" {
 		return nil, fmt.Errorf("driver/glfw/file.go does not understand scheme '%s'", uri.Scheme())
 	}

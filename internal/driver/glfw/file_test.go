@@ -79,7 +79,7 @@ func Test_ListableURI(t *testing.T) {
 
 	uri := storage.NewURI("file://" + tempdir)
 
-	luri, err := ListableURIForURI(uri)
+	luri, err := NewGLDriver().ListerForURI(uri)
 	if err != nil {
 		t.Fatal(err)
 	}
