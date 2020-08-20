@@ -12,7 +12,6 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3
 	github.com/godbus/dbus/v5 v5.0.3
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/google/go-cmp v0.5.1
 	github.com/jackmordaunt/icns v0.0.0-20181231085925-4f16af745526
 	github.com/josephspurrier/goversioninfo v0.0.0-20200309025242-14b0ab84c6ca
 	github.com/lucor/goinfo v0.0.0-20200401173949-526b5363a13a
