@@ -274,6 +274,34 @@ func stopProgress() {
 	endProgress <- struct{}{}
 }
 
+func makeListTab() fyne.CanvasObject {
+	var data []string
+	for i := 0; i < 1000; i++ {
+		data = append(data, fmt.Sprintf("Test Item %d", i))
+	}
+
+	icon := widget.NewIcon(nil)
+	label := widget.NewLabel("Select An Item From The List")
+	hbox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, label)
+
+	list := widget.NewList()
+	list.Length = len(data)
+	list.OnNewItem = func() fyne.CanvasObject {
+		return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+	}
+	list.OnUpdateItem = func(index int, item fyne.CanvasObject) {
+		item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[index])
+	}
+	list.OnItemSelected = func(index int, item fyne.CanvasObject) {
+		icon.Resource = item.(*fyne.Container).Objects[0].(*widget.Icon).Resource
+		label.Text = data[index]
+		icon.Refresh()
+		label.Refresh()
+	}
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, list, nil), list,
+		fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
+}
+
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -291,6 +319,7 @@ func WidgetScreen() fyne.CanvasObject {
 		widget.NewTabItem("Input", makeInputTab()),
 		widget.NewTabItem("Progress", progress),
 		widget.NewTabItem("Form", makeFormTab()),
+		widget.NewTabItem("List", makeListTab()),
 	)
 	tabs.OnChanged = func(t *widget.TabItem) {
 		if t.Content == progress {
