@@ -207,16 +207,23 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	j := 0
 	for i := firstItemIndex; i <= lastItemIndex && j < len(l.itemCache); i++ {
 		item := l.itemCache[j].(*listItem)
-		l.list.OnUpdateItem(i, item.child)
 		index := i
+		if index != l.list.selectedIndex {
+			item.selected = false
+		} else {
+			item.selected = true
+			l.list.selectedItem = item
+		}
+		l.list.OnUpdateItem(index, item.child)
 		item.onTapped = func() {
-			if l.list.selected != nil {
-				l.list.selected.selected = false
-				l.list.selected.Refresh()
+			if l.list.selectedItem != nil && l.list.selectedIndex >= firstItemIndex && l.list.selectedIndex <= lastItemIndex {
+				l.list.selectedItem.selected = false
+				l.list.selectedItem.Refresh()
 			}
-			l.list.selected = item
-			l.list.selected.selected = true
-			l.list.selected.Refresh()
+			l.list.selectedItem = item
+			l.list.selectedIndex = index
+			l.list.selectedItem.selected = true
+			l.list.selectedItem.Refresh()
 			if l.list.OnItemSelected != nil {
 				l.list.OnItemSelected(index, item.child)
 			}
@@ -250,10 +257,11 @@ type List struct {
 	OnUpdateItem   func(index int, item fyne.CanvasObject)
 	OnItemSelected func(index int, item fyne.CanvasObject)
 
-	listLayout *fyne.Container
-	scroller   *ScrollContainer
-	selected   *listItem
-	itemMin    fyne.Size
+	listLayout    *fyne.Container
+	scroller      *ScrollContainer
+	selectedItem  *listItem
+	selectedIndex int
+	itemMin       fyne.Size
 }
 
 // Refresh updates list to match the current theme
@@ -300,5 +308,5 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 // NewList creates and returns a list widget for displaying items in
 // a vertical layout with scrolling and caching for performance
 func NewList() *List {
-	return &List{BaseWidget: BaseWidget{}}
+	return &List{BaseWidget: BaseWidget{}, selectedIndex: -1}
 }
