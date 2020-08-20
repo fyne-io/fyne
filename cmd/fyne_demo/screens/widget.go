@@ -285,7 +285,9 @@ func makeListTab() fyne.CanvasObject {
 	hbox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, label)
 
 	list := widget.NewList()
-	list.Length = len(data)
+	list.Length = func() int {
+		return len(data)
+	}
 	list.OnNewItem = func() fyne.CanvasObject {
 		return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
 	}

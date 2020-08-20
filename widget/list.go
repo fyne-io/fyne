@@ -161,48 +161,50 @@ func newListLayout(itemMin fyne.Size, itemCount int) fyne.Layout {
 type listRenderer struct {
 	widget.BaseRenderer
 	list      *List
+	scroller  *ScrollContainer
+	layout    *fyne.Container
 	itemCache []fyne.CanvasObject
 }
 
 func (l *listRenderer) MinSize() fyne.Size {
-	return l.list.scroller.MinSize()
+	return l.scroller.MinSize()
 }
 
 func (l *listRenderer) Layout(size fyne.Size) {
-	l.list.scroller.Resize(size)
-	if l.list.Length == 0 {
+	l.scroller.Resize(size)
+	if l.list.Length() == 0 {
 		return
 	}
 	firstItemIndex := 0
-	if l.list.scroller.Offset.Y > 0 {
-		firstItemIndex = int(math.Ceil(float64(l.list.scroller.Offset.Y) / float64(l.list.itemMin.Height)))
+	if l.scroller.Offset.Y > 0 {
+		firstItemIndex = int(math.Ceil(float64(l.scroller.Offset.Y) / float64(l.list.itemMin.Height)))
 	}
-	lastItemIndex := int(math.Ceil(float64(l.list.scroller.Offset.Y+size.Height) / float64(l.list.itemMin.Height)))
-	if lastItemIndex >= l.list.Length {
-		lastItemIndex = l.list.Length - 1
+	lastItemIndex := int(math.Ceil(float64(l.scroller.Offset.Y+size.Height) / float64(l.list.itemMin.Height)))
+	if lastItemIndex >= l.list.Length() {
+		lastItemIndex = l.list.Length() - 1
 	}
 	visibleItemCount := int(math.Ceil(float64(size.Height) / float64(l.list.itemMin.Height)))
 	if lastItemIndex-firstItemIndex < visibleItemCount {
 		visibleItemCount = lastItemIndex - firstItemIndex
 	}
-	if len(l.itemCache) < visibleItemCount && len(l.itemCache) < l.list.Length {
-		for i := len(l.itemCache); i < visibleItemCount && i < l.list.Length; i++ {
+	if len(l.itemCache) < visibleItemCount && len(l.itemCache) < l.list.Length() {
+		for i := len(l.itemCache); i < visibleItemCount && i < l.list.Length(); i++ {
 			item := newListItem(l.list.OnNewItem(), nil)
 			l.itemCache = append(l.itemCache, item)
 		}
-	} else if len(l.itemCache) > l.list.Length {
-		for i := l.list.Length - 1; i < len(l.itemCache); i++ {
+	} else if len(l.itemCache) > l.list.Length() {
+		for i := l.list.Length() - 1; i < len(l.itemCache); i++ {
 			l.itemCache[i].Hide()
 		}
-		l.itemCache = l.itemCache[:l.list.Length]
+		l.itemCache = l.itemCache[:l.list.Length()]
 	} else if len(l.itemCache) > visibleItemCount {
 		for i := visibleItemCount + 1; i < len(l.itemCache); i++ {
 			l.itemCache[i].Hide()
 		}
 		l.itemCache = l.itemCache[:visibleItemCount+1]
 	}
-	l.list.listLayout.Objects = l.itemCache
-	l.list.listLayout.Layout.Layout(l.list.listLayout.Objects, l.list.listLayout.Layout.MinSize(nil))
+	l.layout.Objects = l.itemCache
+	l.layout.Layout.Layout(l.layout.Objects, l.layout.Layout.MinSize(nil))
 
 	j := 0
 	for i := firstItemIndex; i <= lastItemIndex && j < len(l.itemCache); i++ {
@@ -242,7 +244,7 @@ func (l *listRenderer) BackgroundColor() color.Color {
 }
 
 func (l *listRenderer) Refresh() {
-	l.Layout(l.list.scroller.Size())
+	l.Layout(l.scroller.Size())
 	canvas.Refresh(l.list.super())
 }
 
@@ -252,13 +254,11 @@ type List struct {
 	BaseWidget
 	background color.Color
 
-	Length         int
+	Length         func() int
 	OnNewItem      func() fyne.CanvasObject
 	OnUpdateItem   func(index int, item fyne.CanvasObject)
 	OnItemSelected func(index int, item fyne.CanvasObject)
 
-	listLayout    *fyne.Container
-	scroller      *ScrollContainer
 	selectedItem  *listItem
 	selectedIndex int
 	itemMin       fyne.Size
@@ -287,22 +287,22 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	if l.itemMin.Width == 0 && l.itemMin.Height == 0 && l.OnNewItem != nil {
 		l.itemMin = newListItem(l.OnNewItem(), nil).MinSize()
 	}
-	l.listLayout = fyne.NewContainerWithLayout(newListLayout(l.itemMin, l.Length))
-	l.scroller = NewVScrollContainer(l.listLayout)
+	layout := fyne.NewContainerWithLayout(newListLayout(l.itemMin, l.Length()))
+	scroller := NewVScrollContainer(layout)
 
-	l.scroller.onOffsetChanged = func() {
-		ll := l.listLayout.Layout.(*listLayout)
-		if ll.offsetX == l.scroller.Offset.X && ll.offsetY == l.scroller.Offset.Y {
+	scroller.onOffsetChanged = func() {
+		ll := layout.Layout.(*listLayout)
+		if ll.offsetX == scroller.Offset.X && ll.offsetY == scroller.Offset.Y {
 			return
 		}
-		ll.offsetX = l.scroller.Offset.X
-		ll.offsetY = l.scroller.Offset.Y
-		l.listLayout.Layout.Layout(l.listLayout.Objects, l.listLayout.Layout.MinSize(nil))
+		ll.offsetX = scroller.Offset.X
+		ll.offsetY = scroller.Offset.Y
+		ll.Layout(layout.Objects, layout.Layout.MinSize(nil))
 		l.BaseWidget.Refresh()
 	}
 
-	objects := []fyne.CanvasObject{l.listLayout, l.scroller}
-	return &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l}
+	objects := []fyne.CanvasObject{scroller}
+	return &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l, scroller: scroller, layout: layout}
 }
 
 // NewList creates and returns a list widget for displaying items in
