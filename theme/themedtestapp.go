@@ -48,6 +48,10 @@ func (t *themedApp) Settings() fyne.Settings {
 	return t
 }
 
+func (t *themedApp) Storage() fyne.Storage {
+	return nil
+}
+
 func (t *themedApp) Preferences() fyne.Preferences {
 	return nil
 }
