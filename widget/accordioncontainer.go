@@ -179,7 +179,6 @@ func (r *accordionContainerRenderer) updateObjects() {
 		h.Alignment = ButtonAlignLeading
 		h.IconPlacement = ButtonIconLeadingText
 		h.Hidden = false
-		h.HideShadow = true
 		h.Text = ai.Title
 		index := i // capture
 		h.OnTapped = func() {

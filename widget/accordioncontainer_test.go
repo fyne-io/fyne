@@ -197,12 +197,12 @@ func TestAccordionContainer_Layout(t *testing.T) {
 
 func TestAccordionContainer_MinSize(t *testing.T) {
 	minSizeA := fyne.MeasureText("A", theme.TextSize(), fyne.TextStyle{})
-	minSizeA.Width += theme.IconInlineSize() + theme.Padding()*5
-	minSizeA.Height = fyne.Max(minSizeA.Height, theme.IconInlineSize()) + theme.Padding()*2
+	minSizeA.Width += theme.IconInlineSize() + theme.Padding()*7
+	minSizeA.Height = fyne.Max(minSizeA.Height, theme.IconInlineSize()) + theme.Padding()*4
 	minSizeB := fyne.MeasureText("B", theme.TextSize(), fyne.TextStyle{})
-	minSizeB.Width += theme.IconInlineSize() + theme.Padding()*5
-	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.Padding()*2
-	minSize1 := fyne.MeasureText("11111", theme.TextSize(), fyne.TextStyle{})
+	minSizeB.Width += theme.IconInlineSize() + theme.Padding()*7
+	minSizeB.Height = fyne.Max(minSizeB.Height, theme.IconInlineSize()) + theme.Padding()*4
+	minSize1 := fyne.MeasureText("111111", theme.TextSize(), fyne.TextStyle{})
 	minSize1.Width += theme.Padding() * 2
 	minSize1.Height += theme.Padding() * 2
 	minSize2 := fyne.MeasureText("2222222222", theme.TextSize(), fyne.TextStyle{})
@@ -225,7 +225,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("11111"),
+					Detail: widget.NewLabel("111111"),
 				},
 			},
 			want: fyne.NewSize(minWidthA1, minSizeA.Height),
@@ -234,7 +234,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("11111"),
+					Detail: widget.NewLabel("111111"),
 				},
 			},
 			opened: []int{0},
@@ -244,7 +244,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("11111"),
+					Detail: widget.NewLabel("111111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
@@ -257,7 +257,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("11111"),
+					Detail: widget.NewLabel("111111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
@@ -272,7 +272,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("11111"),
+					Detail: widget.NewLabel("111111"),
 				},
 			},
 			want: fyne.NewSize(minWidthA1, minSizeA.Height),
@@ -282,7 +282,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("11111"),
+					Detail: widget.NewLabel("111111"),
 				},
 			},
 			opened: []int{0},
@@ -293,7 +293,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("11111"),
+					Detail: widget.NewLabel("111111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
@@ -307,7 +307,7 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 			items: []*widget.AccordionItem{
 				&widget.AccordionItem{
 					Title:  "A",
-					Detail: widget.NewLabel("11111"),
+					Detail: widget.NewLabel("111111"),
 				},
 				&widget.AccordionItem{
 					Title:  "B",
