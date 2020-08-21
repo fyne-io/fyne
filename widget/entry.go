@@ -978,16 +978,15 @@ func (e *Entry) updateText(text string) {
 	})
 
 	if callback != nil {
-		if e.RegexValidation == nil {
-			callback(text)
-		} else if e.RegexValidation.MatchString(text) {
-			callback(text)
-			e.validInput = true
-		} else {
-			e.validInput = false
-		}
+		callback(text)
 
 		if e.RegexValidation != nil {
+			if e.RegexValidation.MatchString(text) {
+				e.validInput = true
+			} else {
+				e.validInput = false
+			}
+
 			e.regexStatus.Refresh()
 		}
 	}
@@ -1352,7 +1351,6 @@ var _ fyne.Widget = (*regexStatus)(nil)
 
 type regexStatus struct {
 	BaseWidget
-
 	entry *Entry
 	icon  *canvas.Image
 }
@@ -1362,6 +1360,7 @@ func newRegexStatus(e *Entry) *regexStatus {
 		icon:  canvas.NewImageFromResource(theme.WarningIcon()),
 		entry: e,
 	}
+
 	rs.ExtendBaseWidget(rs)
 	return rs
 }
