@@ -21,6 +21,7 @@ type fyneApp struct {
 	uniqueID string
 
 	settings *settings
+	storage  *store
 	prefs    fyne.Preferences
 	running  bool
 	runMutex sync.Mutex
@@ -76,6 +77,10 @@ func (app *fyneApp) Settings() fyne.Settings {
 	return app.settings
 }
 
+func (app *fyneApp) Storage() fyne.Storage {
+	return app.storage
+}
+
 func (app *fyneApp) Preferences() fyne.Preferences {
 	return app.prefs
 }
@@ -95,16 +100,15 @@ func NewAppWithDriver(d fyne.Driver, id string) fyne.App {
 }
 
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
-	var prefs fyne.Preferences
-	if id == "" {
-		prefs = newPreferences()
-	} else {
-		prefs = loadPreferences(id)
-	}
-	newApp := &fyneApp{uniqueID: id, driver: d,
-		prefs: prefs, exec: exec.Command}
+	newApp := &fyneApp{uniqueID: id, driver: d, exec: exec.Command}
 	fyne.SetCurrentApp(newApp)
+
+	newApp.prefs = newPreferences(newApp)
+	if pref, ok := newApp.prefs.(interface{ load(string) }); ok && id != "" {
+		pref.load(id)
+	}
 	newApp.settings = loadSettings()
+	newApp.storage = &store{a: newApp}
 
 	listener := make(chan fyne.Settings)
 	newApp.Settings().AddChangeListener(listener)

@@ -821,6 +821,38 @@ func TestWindow_Clipboard(t *testing.T) {
 	cb.SetContent(cliboardContent)
 }
 
+func TestWindow_CloseInterception(t *testing.T) {
+	d := NewGLDriver()
+	w := d.CreateWindow("test").(*window)
+	w.create()
+
+	onIntercepted := false
+	onClosed := false
+	w.SetCloseIntercept(func() {
+		onIntercepted = true
+	})
+	w.SetOnClosed(func() {
+		onClosed = true
+	})
+	w.Close()
+	w.waitForEvents()
+	assert.False(t, onIntercepted) // The interceptor is not called by the Close.
+	assert.True(t, onClosed)
+
+	onIntercepted = false
+	onClosed = false
+	w.closed(w.viewport)
+	w.waitForEvents()
+	assert.True(t, onIntercepted) // The interceptor is called by the closed.
+	assert.False(t, onClosed)     // If the interceptor is set Close is not called.
+
+	onClosed = false
+	w.SetCloseIntercept(nil)
+	w.closed(w.viewport)
+	w.waitForEvents()
+	assert.True(t, onClosed) // Close is called if the interceptor is not set.
+}
+
 // This test makes our developer screens flash, let's not run it regularly...
 //func TestWindow_Shortcut(t *testing.T) {
 //	w := createWindow("Test")
