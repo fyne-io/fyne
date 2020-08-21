@@ -26,9 +26,9 @@ var (
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{
 		background:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		button:         color.NRGBA{0xd9, 0xd9, 0xd9, 0xff},
+		button:         color.Transparent,
 		disabled:       color.NRGBA{0x0, 0x0, 0x0, 0x42},
-		disabledButton: color.NRGBA{0xe7, 0xe7, 0xe7, 0xff},
+		disabledButton: color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
 		text:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		placeholder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
 		primary:        themePrimaryColor,
@@ -45,9 +45,9 @@ func LightTheme() fyne.Theme {
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{
 		background:     color.NRGBA{0x30, 0x30, 0x30, 0xff},
-		button:         color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		button:         color.Transparent,
 		disabled:       color.NRGBA{0xff, 0xff, 0xff, 0x42},
-		disabledButton: color.NRGBA{0x31, 0x31, 0x31, 0xff},
+		disabledButton: color.NRGBA{0x26, 0x26, 0x26, 0xff},
 		text:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
 		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
 		primary:        themePrimaryColor,

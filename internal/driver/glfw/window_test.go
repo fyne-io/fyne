@@ -500,7 +500,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	b2 := widget.NewButton("Tap", func() { tapped = 2 })
 	w.SetContent(widget.NewVBox(b1, b2))
 
-	w.mouseMoved(w.viewport, 10, 20)
+	w.mouseMoved(w.viewport, 15, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
@@ -509,7 +509,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	tapped = 0
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseMoved(w.viewport, 10, 40)
+	w.mouseMoved(w.viewport, 15, 45)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
