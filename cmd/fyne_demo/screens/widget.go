@@ -284,16 +284,17 @@ func makeListTab() fyne.CanvasObject {
 	label := widget.NewLabel("Select An Item From The List")
 	hbox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, label)
 
-	list := widget.NewList()
-	list.Length = func() int {
-		return len(data)
-	}
-	list.OnNewItem = func() fyne.CanvasObject {
-		return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
-	}
-	list.OnUpdateItem = func(index int, item fyne.CanvasObject) {
-		item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[index])
-	}
+	list := widget.NewList(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+		},
+		func(index int, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[index])
+		},
+	)
 	list.OnItemSelected = func(index int, item fyne.CanvasObject) {
 		icon.Resource = item.(*fyne.Container).Objects[0].(*widget.Icon).Resource
 		label.Text = data[index]
