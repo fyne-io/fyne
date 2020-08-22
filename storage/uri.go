@@ -58,7 +58,7 @@ func (u *uri) String() string {
 	return u.raw
 }
 
-func (u *uri) Parent() fyne.URI {
+func (u *uri) Parent() (fyne.URI, error) {
 	s := u.raw
 
 	// trim trailing slash
@@ -66,7 +66,17 @@ func (u *uri) Parent() fyne.URI {
 		s = s[0 : len(s)-2]
 	}
 
+	// We want to specifically make sure you don't take the parent of root.
+	//
+	// Note that we compare components[0] against "" since strings.Split()
+	// will strip out the single / on root.
+	//
+	// Also note that components[0] will be something like 'file:'.
 	components := strings.Split(s, "/")
+	if (len(components) == 2 && components[1] == "") || (len(components) == 1) {
+		return nil, URIRootError
+	}
+
 	parent := strings.Join(components[0:len(components)-1], "/") + "/"
-	return NewURI(parent)
+	return NewURI(parent), nil
 }

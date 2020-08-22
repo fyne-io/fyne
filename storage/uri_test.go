@@ -49,9 +49,21 @@ func TestURI_Name(t *testing.T) {
 func TestURI_Parent(t *testing.T) {
 	// note the trailing slashes are significant, as they tend to belie a
 	// directory
-	assert.Equal(t, "file:///foo/bar/", storage.NewURI("file:///foo/bar/baz").Parent().String())
-	assert.Equal(t, "file:///foo/bar/", storage.NewURI("file:///foo/bar/baz/").Parent().String())
-	assert.Equal(t, "file:///C:/foo/bar/", storage.NewURI("file:///C:/foo/bar/baz/").Parent().String())
+
+	parent, err := storage.NewURI("file:///foo/bar/baz").Parent()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///foo/bar/", parent.String())
+
+	parent, err = storage.NewURI("file:///foo/bar/baz/").Parent()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///foo/bar/", parent.String())
+
+	parent, err = storage.NewURI("file:///C:/foo/bar/baz/").Parent()
+	assert.Nil(t, err)
+	assert.Equal(t, "file:///C:/foo/bar/", parent.String())
+
+	parent, err = storage.NewURI("file:///").Parent()
+	assert.Equal(t, storage.URIRootError, err)
 }
 
 func TestURI_Extension(t *testing.T) {
