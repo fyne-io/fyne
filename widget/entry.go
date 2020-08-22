@@ -977,18 +977,18 @@ func (e *Entry) updateText(text string) {
 		}
 	})
 
+	if e.RegexValidation != nil {
+		if e.RegexValidation.MatchString(text) {
+			e.validInput = true
+		} else {
+			e.validInput = false
+		}
+
+		e.regexStatus.Refresh()
+	}
+
 	if callback != nil {
 		callback(text)
-
-		if e.RegexValidation != nil {
-			if e.RegexValidation.MatchString(text) {
-				e.validInput = true
-			} else {
-				e.validInput = false
-			}
-
-			e.regexStatus.Refresh()
-		}
 	}
 }
 
@@ -1357,7 +1357,7 @@ type regexStatus struct {
 
 func newRegexStatus(e *Entry) *regexStatus {
 	rs := &regexStatus{
-		icon:  canvas.NewImageFromResource(theme.WarningIcon()),
+		icon:  canvas.NewImageFromResource(theme.NewErrorThemedResource(theme.ErrorIcon())),
 		entry: e,
 	}
 
@@ -1402,7 +1402,7 @@ func (r *regexStatusRenderer) Refresh() {
 
 	if !r.entry.Focused() && r.entry.Text != "" { // Do we want to match on empty entry?
 		if !r.entry.validInput {
-			r.icon.Resource = theme.WarningIcon()
+			r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
 		} else {
 			r.icon.Resource = theme.ConfirmIcon()
 		}

@@ -73,6 +73,10 @@ func (customTheme) ShadowColor() color.Color {
 	return &color.RGBA{0xcc, 0xcc, 0xcc, 0xcc}
 }
 
+func (customTheme) ErrorColor() color.Color {
+	return &color.NRGBA{0xa7, 0x0, 0x18, 0x1}
+}
+
 func (customTheme) TextSize() int {
 	return 12
 }

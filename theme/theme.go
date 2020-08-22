@@ -12,8 +12,8 @@ import (
 type builtinTheme struct {
 	background color.Color
 
-	button, disabledButton, text, placeholder, primary, hover, shadow, disabled, scrollBar color.Color
-	regular, bold, italic, boldItalic, monospace                                           fyne.Resource
+	button, disabledButton, text, placeholder, primary, hover, shadow, disabled, scrollBar, errors color.Color
+	regular, bold, italic, boldItalic, monospace                                                   fyne.Resource
 }
 
 var (
@@ -35,6 +35,7 @@ func LightTheme() fyne.Theme {
 		hover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
+		errors:         color.NRGBA{0xa7, 0x0, 0x18, 0x1},
 	}
 
 	theme.initFonts()
@@ -54,6 +55,7 @@ func DarkTheme() fyne.Theme {
 		hover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
+		errors:         color.NRGBA{0xa7, 0x0, 0x18, 0x1},
 	}
 
 	theme.initFonts()
@@ -130,6 +132,11 @@ func (t *builtinTheme) ScrollBarColor() color.Color {
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func (t *builtinTheme) ShadowColor() color.Color {
 	return t.shadow
+}
+
+// ErrorColor returns the color (and translucency) for indicating errors
+func (t *builtinTheme) ErrorColor() color.Color {
+	return t.errors
 }
 
 // TextSize returns the standard text size
@@ -294,6 +301,11 @@ func ScrollBarColor() color.Color {
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func ShadowColor() color.Color {
 	return current().ShadowColor()
+}
+
+// ErrorColor returns the color (and translucency) for indicating errors
+func ErrorColor() color.Color {
+	return current().ErrorColor()
 }
 
 // TextSize returns the standard text size
