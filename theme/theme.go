@@ -35,7 +35,7 @@ func LightTheme() fyne.Theme {
 		hover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
-		errors:         color.NRGBA{0xa7, 0x0, 0x18, 0x1},
+		errors:         color.NRGBA{0xf4, 0x43, 0x36, 0xff},
 	}
 
 	theme.initFonts()
@@ -55,7 +55,7 @@ func DarkTheme() fyne.Theme {
 		hover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
-		errors:         color.NRGBA{0xa7, 0x0, 0x18, 0x1},
+		errors:         color.NRGBA{0xf4, 0x43, 0x36, 0xff},
 	}
 
 	theme.initFonts()
@@ -305,7 +305,7 @@ func ShadowColor() color.Color {
 
 // ErrorColor returns the color (and translucency) for indicating errors
 func ErrorColor() color.Color {
-	return current().ErrorColor()
+	return &color.NRGBA{0xf4, 0x43, 0x36, 0xff}
 }
 
 // TextSize returns the standard text size
