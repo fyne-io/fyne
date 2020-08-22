@@ -20,7 +20,7 @@ type Driver interface {
 	// This should refer to a filesystem resource as external data will not be writable.
 	FileWriterForURI(URI) (URIWriteCloser, error)
 
-	// ListerForURI converts a URI to a list able URI, if it is possible to do so.
+	// ListerForURI converts a URI to a listable URI, if it is possible to do so.
 	ListerForURI(URI) (ListableURI, error)
 
 	// CanvasForObject returns the canvas that is associated with a given CanvasObject.
