@@ -64,6 +64,9 @@ type directory struct {
 	fyne.URI
 }
 
+// Declare conformity to the ListableURI interface
+var _ fyne.ListableURI = (*directory)(nil)
+
 func (d *directory) List() ([]fyne.URI, error) {
 	if d.Scheme() != "file" {
 		return nil, fmt.Errorf("driver/glfw/file.go does not understand scheme '%s'", d.Scheme())

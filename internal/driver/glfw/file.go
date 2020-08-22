@@ -15,10 +15,12 @@ type file struct {
 	path string
 }
 
-// directory implements ListableURI
 type directory struct {
 	fyne.URI
 }
+
+// Declare conformity to the ListableURI interface
+var _ fyne.ListableURI = (*directory)(nil)
 
 func (d *directory) List() ([]fyne.URI, error) {
 	if d.Scheme() != "file" {
