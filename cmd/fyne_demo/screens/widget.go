@@ -175,15 +175,8 @@ func makeInputTab() fyne.Widget {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
-	entryValidated := &widget.Entry{RegexValidation: regexp.MustCompile(`\d`)}
+	entryValidated := &widget.Entry{Validator: &fyne.Validator{Regex: regexp.MustCompile(`\d`)}}
 	entryValidated.SetPlaceHolder("Must contain a number")
-	entryValidated.OnChanged = func(text string) {
-		if entryValidated.ValidationStatus() {
-			fmt.Println("Contains a number:", text)
-		} else {
-			fmt.Println("Does not contain a number:", text)
-		}
-	}
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})

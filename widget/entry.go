@@ -3,7 +3,6 @@ package widget
 import (
 	"image/color"
 	"math"
-	"regexp"
 	"strings"
 	"unicode"
 
@@ -42,9 +41,9 @@ type Entry struct {
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
 
-	RegexValidation *regexp.Regexp
-	regexStatus     *regexStatus
-	validInput      bool
+	Validator   *fyne.Validator
+	regexStatus *regexStatus
+	validInput  bool
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -116,7 +115,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		e.ActionItem = newPasswordRevealer(e)
 	}
 
-	if e.RegexValidation != nil {
+	if e.Validator != nil {
 		e.regexStatus = newRegexStatus(e)
 		objects = append(objects, e.regexStatus)
 	}
@@ -284,7 +283,7 @@ func (e *Entry) MinSize() fyne.Size {
 	if e.ActionItem != nil {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
-	if e.RegexValidation != nil {
+	if e.Validator != nil {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
 
@@ -977,13 +976,8 @@ func (e *Entry) updateText(text string) {
 		}
 	})
 
-	if e.RegexValidation != nil {
-		if e.RegexValidation.MatchString(text) {
-			e.validInput = true
-		} else {
-			e.validInput = false
-		}
-
+	if e.Validator != nil {
+		e.validInput = e.Validator.RegexStringValidator(text)
 		e.regexStatus.Refresh()
 	}
 
@@ -1021,7 +1015,7 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	}
 
 	regexIconSize := fyne.NewSize(0, 0)
-	if r.entry.RegexValidation != nil {
+	if r.entry.Validator != nil {
 		regexIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 		r.entry.regexStatus.Resize(regexIconSize)
 
@@ -1119,7 +1113,11 @@ func (r *entryRenderer) Refresh() {
 	if r.entry.ActionItem != nil {
 		r.entry.ActionItem.Refresh()
 	}
-	if r.entry.RegexValidation != nil {
+	if r.entry.Validator != nil {
+		if !r.entry.Focused() && r.entry.Text != "" && !r.entry.validInput {
+			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff}
+		}
+
 		r.entry.regexStatus.Refresh()
 	}
 	canvas.Refresh(r.entry.super())
@@ -1337,16 +1335,6 @@ func (p *placeholderPresenter) textWrap() fyne.TextWrap {
 	return p.e.Wrapping
 }
 
-// ValidationStatus returns a bool for if the input is valid or not.
-// Always returns true if InputValidation hasn't been set.
-func (e *Entry) ValidationStatus() bool {
-	if e.RegexValidation == nil {
-		return true
-	}
-
-	return e.validInput
-}
-
 var _ fyne.Widget = (*regexStatus)(nil)
 
 type regexStatus struct {
@@ -1400,7 +1388,7 @@ func (r *regexStatusRenderer) Refresh() {
 		r.icon.Hide()
 	}
 
-	if !r.entry.Focused() && r.entry.Text != "" { // Do we want to match on empty entry?
+	if !r.entry.Focused() && r.entry.Text != "" {
 		if !r.entry.validInput {
 			r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
 		} else {
