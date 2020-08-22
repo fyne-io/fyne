@@ -28,7 +28,7 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
 	defer w.Close()
-	w.Resize(fyne.NewSize(200, 200))
+	w.Resize(fyne.NewSize(220, 220))
 	combo.Resize(combo.MinSize())
 	combo.Move(fyne.NewPos(10, 10))
 	test.Tap(combo)
@@ -36,9 +36,9 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	test.AssertImageMatches(t, "select/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
+		combo.Resize(combo.MinSize())
 		combo.Refresh()
 		time.Sleep(100 * time.Millisecond)
-		// Looks weird but the test infrastructure does not adjust min-sizes.
 		test.AssertImageMatches(t, "select/theme_changed.png", w.Canvas().Capture())
 	})
 }

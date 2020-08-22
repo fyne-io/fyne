@@ -18,6 +18,7 @@ type selectRenderer struct {
 
 	icon  *Icon
 	label *canvas.Text
+	bg    *canvas.Rectangle
 	combo *Select
 }
 
@@ -34,14 +35,18 @@ func (s *selectRenderer) MinSize() fyne.Size {
 		min = min.Union(optionMin)
 	}
 
-	min = min.Add(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
+	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
 	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 }
 
 // Layout the components of the button widget
 func (s *selectRenderer) Layout(size fyne.Size) {
-	s.LayoutShadow(size, fyne.NewPos(0, 0))
-	inner := size.Subtract(fyne.NewSize(theme.Padding()*4, theme.Padding()*2))
+	doublePad := theme.Padding() * 2
+	s.LayoutShadow(size.Subtract(fyne.NewSize(doublePad, doublePad)), fyne.NewPos(theme.Padding(), theme.Padding()))
+	inner := size.Subtract(fyne.NewSize(doublePad*2, doublePad))
+
+	s.bg.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	s.bg.Resize(size.Subtract(fyne.NewSize(doublePad, doublePad)))
 
 	offset := fyne.NewSize(theme.IconInlineSize(), 0)
 	labelSize := inner.Subtract(offset)
@@ -50,15 +55,19 @@ func (s *selectRenderer) Layout(size fyne.Size) {
 	defer s.combo.propertyLock.RUnlock()
 
 	s.label.Resize(labelSize)
-	s.label.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()))
+	s.label.Move(fyne.NewPos(doublePad, theme.Padding()))
 
 	s.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	s.icon.Move(fyne.NewPos(
-		size.Width-theme.IconInlineSize()-theme.Padding()*2,
+		size.Width-theme.IconInlineSize()-doublePad,
 		(size.Height-theme.IconInlineSize())/2))
 }
 
 func (s *selectRenderer) BackgroundColor() color.Color {
+	return color.Transparent
+}
+
+func (s *selectRenderer) buttonColor() color.Color {
 	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	}
@@ -69,9 +78,14 @@ func (s *selectRenderer) Refresh() {
 	s.combo.propertyLock.RLock()
 	s.updateLabel()
 	s.updateIcon()
+	s.bg.FillColor = s.buttonColor()
 	s.combo.propertyLock.RUnlock()
 
 	s.Layout(s.combo.Size())
+	if s.combo.popUp != nil {
+		s.combo.Move(s.combo.position)
+		s.combo.Resize(s.combo.size)
+	}
 	canvas.Refresh(s.combo.super())
 }
 
@@ -139,7 +153,7 @@ func (s *Select) Resize(size fyne.Size) {
 	s.BaseWidget.Resize(size)
 
 	if s.popUp != nil {
-		s.popUp.Resize(fyne.NewSize(size.Width, s.popUp.MinSize().Height))
+		s.popUp.Resize(fyne.NewSize(size.Width-theme.Padding()*2, s.popUp.MinSize().Height))
 	}
 }
 
@@ -170,12 +184,12 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 
 	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
 	s.popUp.ShowAtPosition(s.popUpPos())
-	s.popUp.Resize(fyne.NewSize(s.Size().Width, s.popUp.MinSize().Height))
+	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
 }
 
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
-	return buttonPos.Add(fyne.NewPos(0, s.Size().Height))
+	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height-theme.Padding()))
 }
 
 // MouseIn is called when a desktop pointer enters the widget
@@ -217,8 +231,10 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	}
 	text.Alignment = fyne.TextAlignLeading
 
-	objects := []fyne.CanvasObject{text, icon}
-	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, text, s}
+	bg := canvas.NewRectangle(color.Transparent)
+	objects := []fyne.CanvasObject{bg, text, icon}
+	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, text, bg, s}
+	bg.FillColor = r.buttonColor()
 	r.updateLabel()
 	r.updateIcon()
 	return r
