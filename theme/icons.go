@@ -106,14 +106,6 @@ func (res *ErrorThemedResource) Content() []byte {
 	return colorizeResource(res.source, clr)
 }
 
-// // Warning adapts the color of the resource to the warning color.
-// func (res *WarningThemedResource) Warning() *ThemedResource {
-// 	if original, ok := res.source.(*ThemedResource); ok {
-// 		return original
-// 	}
-// 	return NewThemedResource(res.source, nil)
-// }
-
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
 // the current theme's `DisabledIconColor` color.
 type DisabledResource struct {
