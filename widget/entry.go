@@ -41,9 +41,9 @@ type Entry struct {
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
 
-	Validator   *fyne.Validator
-	regexStatus *regexStatus
-	validInput  bool
+	Validator        *fyne.Validator
+	validationStatus *validationStatus
+	validInput       bool
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -116,8 +116,8 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	if e.Validator != nil {
-		e.regexStatus = newRegexStatus(e)
-		objects = append(objects, e.regexStatus)
+		e.validationStatus = newValidationStatus(e)
+		objects = append(objects, e.validationStatus)
 	}
 
 	if e.ActionItem != nil {
@@ -977,8 +977,8 @@ func (e *Entry) updateText(text string) {
 	})
 
 	if e.Validator != nil {
-		e.validInput = e.Validator.RegexStringValidator(text)
-		e.regexStatus.Refresh()
+		e.validInput = e.Validator.Validate(text)
+		e.validationStatus.Refresh()
 	}
 
 	if callback != nil {
@@ -1014,15 +1014,15 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
 	}
 
-	regexIconSize := fyne.NewSize(0, 0)
+	validatorIconSize := fyne.NewSize(0, 0)
 	if r.entry.Validator != nil {
-		regexIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-		r.entry.regexStatus.Resize(regexIconSize)
+		validatorIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		r.entry.validationStatus.Resize(validatorIconSize)
 
 		if r.entry.ActionItem == nil {
-			r.entry.regexStatus.Move(fyne.NewPos(size.Width-regexIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-2*theme.Padding(), theme.Padding()*2))
 		} else {
-			r.entry.regexStatus.Move(fyne.NewPos(size.Width-regexIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
 		}
 	}
 
@@ -1118,7 +1118,7 @@ func (r *entryRenderer) Refresh() {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff}
 		}
 
-		r.entry.regexStatus.Refresh()
+		r.entry.validationStatus.Refresh()
 	}
 	canvas.Refresh(r.entry.super())
 }
@@ -1335,16 +1335,16 @@ func (p *placeholderPresenter) textWrap() fyne.TextWrap {
 	return p.e.Wrapping
 }
 
-var _ fyne.Widget = (*regexStatus)(nil)
+var _ fyne.Widget = (*validationStatus)(nil)
 
-type regexStatus struct {
+type validationStatus struct {
 	BaseWidget
 	entry *Entry
 	icon  *canvas.Image
 }
 
-func newRegexStatus(e *Entry) *regexStatus {
-	rs := &regexStatus{
+func newValidationStatus(e *Entry) *validationStatus {
+	rs := &validationStatus{
 		icon:  canvas.NewImageFromResource(theme.NewErrorThemedResource(theme.ErrorIcon())),
 		entry: e,
 	}
@@ -1353,32 +1353,32 @@ func newRegexStatus(e *Entry) *regexStatus {
 	return rs
 }
 
-func (r *regexStatus) CreateRenderer() fyne.WidgetRenderer {
-	return &regexStatusRenderer{
+func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
+	return &validationStatusRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
 		icon:         r.icon,
 		entry:        r.entry,
 	}
 }
 
-var _ fyne.WidgetRenderer = (*regexStatusRenderer)(nil)
+var _ fyne.WidgetRenderer = (*validationStatusRenderer)(nil)
 
-type regexStatusRenderer struct {
+type validationStatusRenderer struct {
 	widget.BaseRenderer
 	entry *Entry
 	icon  *canvas.Image
 }
 
-func (r *regexStatusRenderer) Layout(size fyne.Size) {
+func (r *validationStatusRenderer) Layout(size fyne.Size) {
 	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
 }
 
-func (r *regexStatusRenderer) MinSize() fyne.Size {
+func (r *validationStatusRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 }
 
-func (r *regexStatusRenderer) Refresh() {
+func (r *validationStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
 	if r.entry.validInput {
