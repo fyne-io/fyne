@@ -372,6 +372,7 @@ func (l *listLayout) itemAppended(objects []fyne.CanvasObject) {
 func (l *listLayout) itemPrepended(objects []fyne.CanvasObject) {
 	objects[0].Move(fyne.NewPos(0, objects[1].Position().Y-l.list.itemMin.Height))
 	objects[0].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
+	l.layoutEndY -= l.list.itemMin.Height
 }
 
 type cachePool interface {
