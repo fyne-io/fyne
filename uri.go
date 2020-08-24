@@ -31,7 +31,6 @@ type URI interface {
 	Name() string
 	MimeType() string
 	Scheme() string
-	Parent() (URI, error)
 }
 
 // ListableURI represents a URI that can have child items, most commonly a

@@ -58,8 +58,10 @@ func (u *uri) String() string {
 	return u.raw
 }
 
-func (u *uri) Parent() (fyne.URI, error) {
-	s := u.raw
+// Parent gets the parent of a URI by splitting it along '/' separators and
+// removing the last item.
+func Parent(u fyne.URI) (fyne.URI, error) {
+	s := u.String()
 
 	// trim trailing slash
 	if s[len(s)-1] == '/' {

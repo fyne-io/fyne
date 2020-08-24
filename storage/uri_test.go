@@ -50,19 +50,19 @@ func TestURI_Parent(t *testing.T) {
 	// note the trailing slashes are significant, as they tend to belie a
 	// directory
 
-	parent, err := storage.NewURI("file:///foo/bar/baz").Parent()
+	parent, err := storage.Parent(storage.NewURI("file:///foo/bar/baz"))
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
-	parent, err = storage.NewURI("file:///foo/bar/baz/").Parent()
+	parent, err = storage.Parent(storage.NewURI("file:///foo/bar/baz/"))
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
-	parent, err = storage.NewURI("file:///C:/foo/bar/baz/").Parent()
+	parent, err = storage.Parent(storage.NewURI("file:///C:/foo/bar/baz/"))
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///C:/foo/bar/", parent.String())
 
-	parent, err = storage.NewURI("file:///").Parent()
+	parent, err = storage.Parent(storage.NewURI("file:///"))
 	assert.Equal(t, storage.URIRootError, err)
 }
 
