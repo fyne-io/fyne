@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"mime"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -65,20 +66,46 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 
 	// trim trailing slash
 	if s[len(s)-1] == '/' {
-		s = s[0 : len(s)-2]
+		s = s[0 : len(s)-1]
 	}
 
-	// We want to specifically make sure you don't take the parent of root.
-	//
-	// Note that we compare components[0] against "" since strings.Split()
-	// will strip out the single / on root.
-	//
-	// Also note that components[0] will be something like 'file:'.
-	components := strings.Split(s, "/")
-	if (len(components) == 2 && components[1] == "") || (len(components) == 1) {
+	// trim the scheme (and +1 for the :)
+	s = s[len(u.Scheme())+1 : len(s)]
+
+	// Completely empty URI with just a scheme
+	if len(s) == 0 {
 		return nil, URIRootError
 	}
 
-	parent := strings.Join(components[0:len(components)-1], "/") + "/"
+	// trim leading forward slashes
+	trimmed := 0
+	for s[0] == '/' {
+		s = s[1:len(s)]
+		trimmed++
+
+		// if all we have left is an empty string, than this URI
+		// pointed to a UNIX-style root
+		if len(s) == 0 {
+			return nil, URIRootError
+		}
+	}
+
+	// handle Windows drive letters
+	r := regexp.MustCompile("[A-Za-z][:]")
+	components := strings.Split(s, "/")
+	if len(components) == 1 && r.MatchString(components[0]) && trimmed <= 2 {
+		// trimmed <= 2 makes sure we handle UNIX-style paths on
+		// Windows correctly
+		return nil, URIRootError
+	}
+
+	parent := u.Scheme() + "://"
+	if trimmed > 2 && len(components) > 1 {
+		// Because we trimmed all the leading '/' characters, for UNIX
+		// style paths we want to insert one back in. Presumably we
+		// trimmed two instances of / for the scheme.
+		parent = parent + "/"
+	}
+	parent = parent + strings.Join(components[0:len(components)-1], "/") + "/"
 	return NewURI(parent), nil
 }
