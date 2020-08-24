@@ -27,6 +27,7 @@ Suspendisse id maximus felis. Sed mauris odio, mattis eget mi eu, consequat temp
 
 var (
 	progress    *widget.ProgressBar
+	fprogress   *widget.ProgressBar
 	infProgress *widget.ProgressBarInfinite
 	endProgress chan interface{}
 )
@@ -201,11 +202,18 @@ func makeInputTab() fyne.Widget {
 
 func makeProgressTab() fyne.Widget {
 	progress = widget.NewProgressBar()
+
+	fprogress = widget.NewProgressBar()
+	fprogress.TextFormatter = func() string {
+		return fmt.Sprintf("%.2f out of %.2f", fprogress.Value, fprogress.Max)
+	}
+
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
 
 	return widget.NewVBox(
 		widget.NewLabel("Percent"), progress,
+		widget.NewLabel("Formatted"), fprogress,
 		widget.NewLabel("Infinite"), infProgress)
 }
 
@@ -241,6 +249,7 @@ func makeFormTab() fyne.Widget {
 
 func startProgress() {
 	progress.SetValue(0)
+	fprogress.SetValue(0)
 	select { // ignore stale end message
 	case <-endProgress:
 	default:
@@ -257,10 +266,12 @@ func startProgress() {
 			}
 
 			progress.SetValue(num)
+			fprogress.SetValue(num)
 			num += 0.01
 		}
 
 		progress.SetValue(1)
+		fprogress.SetValue(1)
 	}()
 	infProgress.Start()
 }
@@ -301,8 +312,8 @@ func makeListTab() fyne.CanvasObject {
 		icon.Refresh()
 		label.Refresh()
 	}
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, list, nil), list,
-		fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
+	split := widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
+	return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil), split)
 }
 
 // WidgetScreen shows a panel containing widget demos
