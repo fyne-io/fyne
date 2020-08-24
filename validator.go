@@ -1,23 +1,27 @@
 package fyne
 
-import "regexp"
+import (
+	"errors"
+	"regexp"
+)
 
-// Validator is a handler for validating inputs in widgets
-type Validator struct {
-	Regex *regexp.Regexp
-
-	// Custom specifies a custom validator that takes any input value and returns a bool for the validation status.
-	// If defined, Custom() will be preferred over other validation methods.
-	Custom func(value interface{}) bool
+// Validator is a common interface for validating inputs
+type Validator interface {
+	Validate(string) error
 }
 
-// Validate runs validation on a given set of input using an available validator
-func (v *Validator) Validate(input interface{}) bool {
-	if v.Custom != nil {
-		return v.Custom(input)
-	} else if text, ok := input.(string); v.Regex != nil && ok {
-		return v.Regex.MatchString(text)
+// RegexValidater is a regex implementation of fyne.Validator
+type RegexValidator struct {
+	Reason string
+	Regex  *regexp.Regexp
+}
+
+// Validate will validate the provided string with a regular expression
+// Returns nil if valid, otherwise returns an error with a set reason.
+func (r RegexValidator) Validate(text string) error {
+	if r.Regex != nil && !r.Regex.MatchString(text) {
+		return errors.New(r.Reason)
 	}
 
-	return true // Nothing to validate with, the same as having no validator.
+	return nil // Nothing to validate with, same as having no validator.
 }

@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/driver/mobile"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -41,7 +40,7 @@ type Entry struct {
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
 
-	Validator        *fyne.Validator
+	Validator        fyne.Validator
 	validationStatus *validationStatus
 	validInput       bool
 
@@ -977,7 +976,12 @@ func (e *Entry) updateText(text string) {
 	})
 
 	if e.Validator != nil {
-		e.validInput = e.Validator.Validate(text)
+		if err := e.Validator.Validate(text); err == nil {
+			e.validInput = true
+		} else {
+			e.validInput = false //TODO: Show reason to user when invalid
+		}
+
 		e.validationStatus.Refresh()
 	}
 
@@ -1233,73 +1237,6 @@ func (r *entryRenderer) moveCursor() {
 	}
 }
 
-var _ desktop.Cursorable = (*passwordRevealer)(nil)
-var _ fyne.Tappable = (*passwordRevealer)(nil)
-var _ fyne.Widget = (*passwordRevealer)(nil)
-
-type passwordRevealer struct {
-	BaseWidget
-
-	icon  *canvas.Image
-	entry *Entry
-}
-
-func newPasswordRevealer(e *Entry) *passwordRevealer {
-	pr := &passwordRevealer{
-		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
-		entry: e,
-	}
-	pr.ExtendBaseWidget(pr)
-	return pr
-}
-
-func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
-	return &passwordRevealerRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
-		icon:         r.icon,
-		entry:        r.entry,
-	}
-}
-
-func (r *passwordRevealer) Cursor() desktop.Cursor {
-	return desktop.DefaultCursor
-}
-
-func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
-	r.entry.setFieldsAndRefresh(func() {
-		r.entry.Password = !r.entry.Password
-	})
-	fyne.CurrentApp().Driver().CanvasForObject(r).Focus(r.entry)
-}
-
-var _ fyne.WidgetRenderer = (*passwordRevealerRenderer)(nil)
-
-type passwordRevealerRenderer struct {
-	widget.BaseRenderer
-	entry *Entry
-	icon  *canvas.Image
-}
-
-func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
-	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
-}
-
-func (r *passwordRevealerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-}
-
-func (r *passwordRevealerRenderer) Refresh() {
-	r.entry.propertyLock.RLock()
-	defer r.entry.propertyLock.RUnlock()
-	if !r.entry.Password {
-		r.icon.Resource = theme.VisibilityIcon()
-	} else {
-		r.icon.Resource = theme.VisibilityOffIcon()
-	}
-	canvas.Refresh(r.icon)
-}
-
 type placeholderPresenter struct {
 	e *Entry
 }
@@ -1333,72 +1270,6 @@ func (p *placeholderPresenter) textStyle() fyne.TextStyle {
 // textWrap tells the rendering textProvider our wrapping
 func (p *placeholderPresenter) textWrap() fyne.TextWrap {
 	return p.e.Wrapping
-}
-
-var _ fyne.Widget = (*validationStatus)(nil)
-
-type validationStatus struct {
-	BaseWidget
-	entry *Entry
-	icon  *canvas.Image
-}
-
-func newValidationStatus(e *Entry) *validationStatus {
-	rs := &validationStatus{
-		icon:  canvas.NewImageFromResource(theme.NewErrorThemedResource(theme.ErrorIcon())),
-		entry: e,
-	}
-
-	rs.ExtendBaseWidget(rs)
-	return rs
-}
-
-func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
-	return &validationStatusRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
-		icon:         r.icon,
-		entry:        r.entry,
-	}
-}
-
-var _ fyne.WidgetRenderer = (*validationStatusRenderer)(nil)
-
-type validationStatusRenderer struct {
-	widget.BaseRenderer
-	entry *Entry
-	icon  *canvas.Image
-}
-
-func (r *validationStatusRenderer) Layout(size fyne.Size) {
-	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
-}
-
-func (r *validationStatusRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-}
-
-func (r *validationStatusRenderer) Refresh() {
-	r.entry.propertyLock.RLock()
-	defer r.entry.propertyLock.RUnlock()
-	if r.entry.validInput {
-		r.icon.Resource = theme.ConfirmIcon()
-		r.icon.Show()
-	} else {
-		r.icon.Hide()
-	}
-
-	if !r.entry.Focused() && r.entry.Text != "" {
-		if !r.entry.validInput {
-			r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
-		} else {
-			r.icon.Resource = theme.ConfirmIcon()
-		}
-
-		r.icon.Show()
-	}
-
-	canvas.Refresh(r.icon)
 }
 
 // getTextWhitespaceRegion returns the start/end markers for selection highlight on starting from col
