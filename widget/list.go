@@ -20,7 +20,6 @@ type List struct {
 	CreateItem     func() fyne.CanvasObject
 	UpdateItem     func(index int, item fyne.CanvasObject)
 	OnItemSelected func(index int, item fyne.CanvasObject)
-
 	offsetY         int
 	previousOffsetY int
 	selectedItem    *listItem
@@ -45,9 +44,7 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	}
 	layout := fyne.NewContainerWithLayout(newListLayout(l))
 	layout.Resize(layout.MinSize())
-
 	scroller := NewVScrollContainer(layout)
-
 	objects := []fyne.CanvasObject{scroller}
 	return newListRenderer(objects, l, scroller, layout)
 }
@@ -383,6 +380,7 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		y += l.list.itemMin.Height
 		child.Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
 	}
+	l.layoutEndY = y
 }
 
 func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
