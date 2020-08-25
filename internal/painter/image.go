@@ -146,10 +146,10 @@ func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
 }
 
 func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) {
-	pixSize := fyne.NewSize(internal.UnscaleInt(c, pixX), internal.UnscaleInt(c, pixY))
+	dpSize := fyne.NewSize(internal.UnscaleInt(c, pixX), internal.UnscaleInt(c, pixY))
 
-	if img.MinSize() != pixSize {
-		img.SetMinSize(pixSize)
+	if img.MinSize() != dpSize {
+		img.SetMinSize(dpSize)
 		canvas.Refresh(img) // force the initial size to be respected
 	}
 }
