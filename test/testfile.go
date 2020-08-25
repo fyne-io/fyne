@@ -69,7 +69,7 @@ var _ fyne.ListableURI = (*directory)(nil)
 
 func (d *directory) List() ([]fyne.URI, error) {
 	if d.Scheme() != "file" {
-		return nil, fmt.Errorf("driver/glfw/file.go does not understand scheme '%s'", d.Scheme())
+		return nil, fmt.Errorf("unsupported URL protocol")
 	}
 
 	path := d.String()[len(d.Scheme())+3 : len(d.String())]
@@ -90,7 +90,7 @@ func (d *directory) List() ([]fyne.URI, error) {
 
 func (d *testDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	if uri.Scheme() != "file" {
-		return nil, fmt.Errorf("driver/glfw/file.go does not understand scheme '%s'", uri.Scheme())
+		return nil, fmt.Errorf("unsupported URL protocol")
 	}
 
 	path := uri.String()[len(uri.Scheme())+3 : len(uri.String())]
