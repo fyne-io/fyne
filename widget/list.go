@@ -67,15 +67,6 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-// Refresh updates list to match the current theme
-func (l *List) Refresh() {
-	if l.background != nil {
-		l.background = theme.BackgroundColor()
-	}
-
-	l.BaseWidget.Refresh()
-}
-
 type listRenderer struct {
 	widget.BaseRenderer
 	list             *List
@@ -86,6 +77,7 @@ type listRenderer struct {
 	visibleItemCount int
 	firstItemIndex   int
 	lastItemIndex    int
+	size             fyne.Size
 }
 
 func (l *listRenderer) BackgroundColor() color.Color {
@@ -97,6 +89,15 @@ func (l *listRenderer) BackgroundColor() color.Color {
 }
 
 func (l *listRenderer) Layout(size fyne.Size) {
+	if size != l.size {
+		if size.Width != l.size.Width {
+			for _, child := range l.children {
+				child.Resize(fyne.NewSize(size.Width, l.list.itemMin.Height))
+			}
+		}
+		l.scroller.Resize(size)
+		l.size = size
+	}
 	if l.list.Length() == 0 {
 		return
 	}
@@ -135,11 +136,10 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		} else if offsetChange < l.list.itemMin.Height {
 			return
 		} else {
-			itemChange = int(math.Ceil(float64(offsetChange) / float64(l.list.itemMin.Height)))
+			itemChange = int(math.Floor(float64(offsetChange) / float64(l.list.itemMin.Height)))
 		}
 		l.list.previousOffsetY = l.list.offsetY
 		for i := 0; i < itemChange && l.firstItemIndex != 0; i++ {
-			l.children[len(l.children)-1].Hide()
 			l.itemCache.Release(l.children[len(l.children)-1])
 			l.children = l.children[:len(l.children)-1]
 			l.firstItemIndex--
@@ -148,7 +148,6 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		}
 	} else {
 		// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize
-		l.scroller.Resize(size)
 		l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
 		if len(l.children) >= l.visibleItemCount || len(l.children) >= l.list.Length() {
 			return
@@ -333,9 +332,8 @@ func (li *listItemRenderer) Refresh() {
 }
 
 type listLayout struct {
-	list       *List
-	itemCount  int
-	layoutEndY int
+	list      *List
+	itemCount int
 }
 
 var _ fyne.Layout = (*listLayout)(nil)
@@ -354,7 +352,6 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		y += l.list.itemMin.Height
 		child.Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 	}
-	l.layoutEndY = y
 }
 
 func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
@@ -364,15 +361,17 @@ func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 }
 
 func (l *listLayout) itemAppended(objects []fyne.CanvasObject) {
-	objects[len(objects)-1].Move(fyne.NewPos(0, l.layoutEndY))
+	if len(objects) > 1 {
+		objects[len(objects)-1].Move(fyne.NewPos(0, objects[len(objects)-2].Position().Y+l.list.itemMin.Height))
+	} else {
+		objects[len(objects)-1].Move(fyne.NewPos(0, 0))
+	}
 	objects[len(objects)-1].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
-	l.layoutEndY += l.list.itemMin.Height
 }
 
 func (l *listLayout) itemPrepended(objects []fyne.CanvasObject) {
 	objects[0].Move(fyne.NewPos(0, objects[1].Position().Y-l.list.itemMin.Height))
 	objects[0].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
-	l.layoutEndY -= l.list.itemMin.Height
 }
 
 type cachePool interface {
