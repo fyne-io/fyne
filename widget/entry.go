@@ -42,7 +42,7 @@ type Entry struct {
 
 	Validator        fyne.Validator
 	validationStatus *validationStatus
-	validInput       bool
+	validationError  error
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -976,12 +976,7 @@ func (e *Entry) updateText(text string) {
 	})
 
 	if e.Validator != nil {
-		if err := e.Validator.Validate(text); err == nil {
-			e.validInput = true
-		} else {
-			e.validInput = false //TODO: Show reason to user when invalid
-		}
-
+		e.validationError = e.Validator.Validate(text)
 		e.validationStatus.Refresh()
 	}
 
@@ -1118,7 +1113,7 @@ func (r *entryRenderer) Refresh() {
 		r.entry.ActionItem.Refresh()
 	}
 	if r.entry.Validator != nil {
-		if !r.entry.Focused() && r.entry.Text != "" && !r.entry.validInput {
+		if !r.entry.Focused() && r.entry.Text != "" && r.entry.validationError != nil {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff}
 		}
 

@@ -10,16 +10,16 @@ type Validator interface {
 	Validate(string) error
 }
 
-// RegexValidater is a regex implementation of fyne.Validator
-type RegexValidator struct {
+// RegexpValidator is a regexp implementation of fyne.Validator
+type RegexpValidator struct {
 	Reason string
-	Regex  *regexp.Regexp
+	Regexp *regexp.Regexp
 }
 
 // Validate will validate the provided string with a regular expression
-// Returns nil if valid, otherwise returns an error with a set reason.
-func (r RegexValidator) Validate(text string) error {
-	if r.Regex != nil && !r.Regex.MatchString(text) {
+// Returns nil if valid, otherwise returns an error with a reason text
+func (r RegexpValidator) Validate(text string) error {
+	if r.Regexp != nil && !r.Regexp.MatchString(text) {
 		return errors.New(r.Reason)
 	}
 

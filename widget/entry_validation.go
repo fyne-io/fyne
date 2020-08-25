@@ -7,6 +7,15 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// SetValidationError manually updates the validation status until the next input change
+func (e *Entry) SetValidationError(err error) {
+	e.validationError = err
+
+	if e.Validator != nil {
+		e.validationStatus.Refresh()
+	}
+}
+
 var erroricon = theme.NewErrorThemedResource(theme.ErrorIcon()) // Avoid having to parse XML on each status refresh
 
 var _ fyne.Widget = (*validationStatus)(nil)
@@ -55,7 +64,7 @@ func (r *validationStatusRenderer) MinSize() fyne.Size {
 func (r *validationStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
-	if r.entry.validInput {
+	if r.entry.validationError == nil {
 		r.icon.Resource = theme.ConfirmIcon()
 		r.icon.Show()
 	} else {
@@ -63,7 +72,7 @@ func (r *validationStatusRenderer) Refresh() {
 	}
 
 	if !r.entry.Focused() && r.entry.Text != "" {
-		if !r.entry.validInput {
+		if r.entry.validationError != nil {
 			r.icon.Resource = erroricon
 		} else {
 			r.icon.Resource = theme.ConfirmIcon()

@@ -45,15 +45,15 @@ func TestEntry_passwordRevealerCursor(t *testing.T) {
 }
 
 func TestEntry_ValidatedEntry(t *testing.T) {
-	v := &fyne.Validator{Regex: regexp.MustCompile(`^\d{4}-\d{2}-\d{2}`)}
-	entry := &widget.Entry{Validator: v}
+	r := fyne.RegexpValidator{Regexp: regexp.MustCompile(`^\d{4}-\d{2}-\d{2}`)}
+	entry := &widget.Entry{Validator: r}
 	entry.ExtendBaseWidget(entry)
 
 	test.Type(entry, "2020-02")
-	assert.Equal(t, false, v.Validate(entry.Text))
+	assert.Error(t, r.Validate(entry.Text))
 
 	test.Type(entry, "-12")
-	assert.Equal(t, true, v.Validate(entry.Text))
+	assert.Equal(t, nil, r.Validate(entry.Text))
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
