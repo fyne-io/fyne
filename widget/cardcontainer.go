@@ -75,6 +75,9 @@ func (c *cardRenderer) MinSize() fyne.Size {
 	hasContent := c.card.Content != nil
 
 	if !hasHeader && !hasSubHeader && !hasContent {
+		if c.card.Image == nil {
+			return fyne.NewSize(theme.Padding(), theme.Padding()) // empty, just space for border
+		}
 		return fyne.NewSize(c.card.Image.MinSize().Width+theme.Padding(), cardMediaHeight+theme.Padding())
 	}
 
