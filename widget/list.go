@@ -40,7 +40,7 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
-	if l.itemMin.Width == 0 && l.itemMin.Height == 0 && l.CreateItem != nil {
+	if l.itemMin.IsZero() && l.CreateItem != nil {
 		l.itemMin = newListItem(l.CreateItem(), nil).MinSize()
 	}
 	layout := fyne.NewContainerWithLayout(newListLayout(l))
@@ -72,7 +72,7 @@ type listRenderer struct {
 	list             *List
 	scroller         *ScrollContainer
 	layout           *fyne.Container
-	itemCache        *listCache
+	itemCache        *listPool
 	children         []fyne.CanvasObject
 	visibleItemCount int
 	firstItemIndex   int
@@ -102,7 +102,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		return
 	}
 	if l.itemCache == nil {
-		l.itemCache = &listCache{}
+		l.itemCache = &listPool{}
 	}
 
 	offsetChange := l.list.previousOffsetY - l.list.offsetY
@@ -159,11 +159,11 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		l.layout.Layout.Layout(l.layout.Objects, l.list.itemMin)
 		l.lastItemIndex = l.firstItemIndex + len(l.children) - 1
 
-		cachePoolCount := 5
+		poolCapacity := 5
 		if l.list.Length()-len(l.children) < 5 {
-			cachePoolCount = l.list.Length() - len(l.children)
+			poolCapacity = l.list.Length() - len(l.children)
 		}
-		for i := l.itemCache.Count(); i < cachePoolCount; i++ {
+		for i := l.itemCache.Count(); i < poolCapacity; i++ {
 			// Make sure to keep extra items in the cache
 			item := newListItem(l.list.CreateItem(), nil)
 			l.itemCache.Release(item)
@@ -181,21 +181,23 @@ func (l *listRenderer) Refresh() {
 }
 
 func (l *listRenderer) appendItem(index int) {
-	item := l.itemCache.Obtain()
-	if item == nil {
-		item = newListItem(l.list.CreateItem(), nil)
-	}
+	item := l.getItem()
 	l.children = append(l.children, item)
 	l.setupListItem(item, index)
 	l.layout.Objects = l.children
 	l.layout.Layout.(*listLayout).itemAppended(l.layout.Objects)
 }
 
-func (l *listRenderer) prependItem(index int) {
+func (l *listRenderer) getItem() fyne.CanvasObject {
 	item := l.itemCache.Obtain()
 	if item == nil {
 		item = newListItem(l.list.CreateItem(), nil)
 	}
+	return item
+}
+
+func (l *listRenderer) prependItem(index int) {
+	item := l.getItem()
 	l.children = append([]fyne.CanvasObject{item}, l.children...)
 	l.setupListItem(item, index)
 	l.layout.Objects = l.children
@@ -374,39 +376,39 @@ func (l *listLayout) itemPrepended(objects []fyne.CanvasObject) {
 	objects[0].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 }
 
-type cachePool interface {
+type pool interface {
 	Count() int
 	Obtain() fyne.CanvasObject
 	Release(fyne.CanvasObject)
 }
 
-type listCache struct {
-	availableCache []fyne.CanvasObject
+type listPool struct {
+	contents []fyne.CanvasObject
 }
 
 // Count returns the number of available items in the cache
-func (lc *listCache) Count() int {
-	return len(lc.availableCache)
+func (lc *listPool) Count() int {
+	return len(lc.contents)
 }
 
 // Obtain returns an item from the cache for use
-func (lc *listCache) Obtain() fyne.CanvasObject {
-	cacheLength := len(lc.availableCache)
+func (lc *listPool) Obtain() fyne.CanvasObject {
+	cacheLength := len(lc.contents)
 	if cacheLength == 0 {
 		return nil
 	}
-	item := lc.availableCache[0]
+	item := lc.contents[0]
 	if cacheLength > 0 {
-		lc.availableCache = lc.availableCache[1:]
+		lc.contents = lc.contents[1:]
 	} else {
-		lc.availableCache = nil
+		lc.contents = nil
 	}
 	item.Show()
 	return item
 }
 
 // Release adds an item into the cache to be used later
-func (lc *listCache) Release(item fyne.CanvasObject) {
-	lc.availableCache = append(lc.availableCache, item)
+func (lc *listPool) Release(item fyne.CanvasObject) {
+	lc.contents = append(lc.contents, item)
 	item.Hide()
 }
