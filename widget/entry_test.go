@@ -52,7 +52,7 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 	assert.Error(t, r.Validate(entry.Text))
 
 	test.Type(entry, "-12")
-	assert.Equal(t, nil, r.Validate(entry.Text))
+	assert.NoError(t, r.Validate(entry.Text))
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {

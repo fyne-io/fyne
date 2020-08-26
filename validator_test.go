@@ -1,7 +1,6 @@
 package fyne
 
 import (
-	"errors"
 	"regexp"
 	"testing"
 
@@ -15,6 +14,6 @@ func TestValidator_RegexValidator(t *testing.T) {
 
 	r.Regexp = regexp.MustCompile(`^\d{2}-\w{4}$`)
 
-	assert.Equal(t, nil, r.Validate("10-fyne"))
-	assert.Equal(t, errors.New(r.Reason), r.Validate("100-fynedesk"))
+	assert.NoError(t, r.Validate("10-fyne"))
+	assert.EqualError(t, r.Validate("100-fynedesk"), r.Reason)
 }

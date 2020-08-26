@@ -174,7 +174,7 @@ func makeInputTab() fyne.Widget {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
-	entryValidated := &widget.Entry{Validator: fyne.NewRegexpValidator(`\d`, "Does not contain a number")}
+	entryValidated := &widget.Entry{Validator: fyne.NewRegexpValidator(`\d`, "Must contain a number")}
 	entryValidated.SetPlaceHolder("Must contain a number")
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
