@@ -3,7 +3,6 @@ package test
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -57,51 +56,6 @@ func (d *testDriver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error)
 	return openFile(uri, true)
 }
 
-// lazily copied over from the glfw driver, should be good enough for testing
-// purposes
-
-type directory struct {
-	fyne.URI
-}
-
-// Declare conformity to the ListableURI interface
-var _ fyne.ListableURI = (*directory)(nil)
-
-func (d *directory) List() ([]fyne.URI, error) {
-	if d.Scheme() != "file" {
-		return nil, fmt.Errorf("unsupported URL protocol")
-	}
-
-	path := d.String()[len(d.Scheme())+3 : len(d.String())]
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		return nil, err
-	}
-
-	urilist := []fyne.URI{}
-
-	for _, f := range files {
-		uri := storage.NewURI("file://" + filepath.Join(path, f.Name()))
-		urilist = append(urilist, uri)
-	}
-
-	return urilist, nil
-}
-
 func (d *testDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
-	if uri.Scheme() != "file" {
-		return nil, fmt.Errorf("unsupported URL protocol")
-	}
-
-	path := uri.String()[len(uri.Scheme())+3 : len(uri.String())]
-	s, err := os.Stat(path)
-	if err != nil {
-		return nil, err
-	}
-
-	if !s.IsDir() {
-		return nil, fmt.Errorf("Path '%s' is not a directory, cannot convert to listable URI", path)
-	}
-
-	return &directory{URI: uri}, nil
+	return nil, fmt.Errorf("test driver does support creating listable URIs yet")
 }
