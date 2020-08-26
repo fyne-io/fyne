@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// List is a widget that caches list items for performance and
+// List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller
 // List requires that all items are the same size
 type List struct {
@@ -73,7 +73,7 @@ type listRenderer struct {
 	list             *List
 	scroller         *ScrollContainer
 	layout           *fyne.Container
-	itemCache        *listPool
+	itemPool         *listPool
 	children         []fyne.CanvasObject
 	visibleItemCount int
 	firstItemIndex   int
@@ -102,8 +102,8 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	if l.list.Length() == 0 {
 		return
 	}
-	if l.itemCache == nil {
-		l.itemCache = &listPool{}
+	if l.itemPool == nil {
+		l.itemPool = &listPool{}
 	}
 
 	offsetChange := l.list.previousOffsetY - l.list.offsetY
@@ -122,7 +122,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		}
 		l.list.previousOffsetY = l.list.offsetY
 		for i := 0; i < itemChange && l.lastItemIndex != l.list.Length()-1; i++ {
-			l.itemCache.Release(l.children[0])
+			l.itemPool.Release(l.children[0])
 			l.children = l.children[1:]
 			l.firstItemIndex++
 			l.lastItemIndex++
@@ -141,7 +141,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		}
 		l.list.previousOffsetY = l.list.offsetY
 		for i := 0; i < itemChange && l.firstItemIndex != 0; i++ {
-			l.itemCache.Release(l.children[len(l.children)-1])
+			l.itemPool.Release(l.children[len(l.children)-1])
 			l.children = l.children[:len(l.children)-1]
 			l.firstItemIndex--
 			l.lastItemIndex--
@@ -164,10 +164,10 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		if l.list.Length()-len(l.children) < 5 {
 			poolCapacity = l.list.Length() - len(l.children)
 		}
-		for i := l.itemCache.Count(); i < poolCapacity; i++ {
-			// Make sure to keep extra items in the cache
+		for i := l.itemPool.Count(); i < poolCapacity; i++ {
+			// Make sure to keep extra items in the pool
 			item := newListItem(l.list.CreateItem(), nil)
-			l.itemCache.Release(item)
+			l.itemPool.Release(item)
 		}
 	}
 }
@@ -190,7 +190,7 @@ func (l *listRenderer) appendItem(index int) {
 }
 
 func (l *listRenderer) getItem() fyne.CanvasObject {
-	item := l.itemCache.Obtain()
+	item := l.itemPool.Obtain()
 	if item == nil {
 		item = newListItem(l.list.CreateItem(), nil)
 	}
@@ -387,19 +387,19 @@ type listPool struct {
 	contents []fyne.CanvasObject
 }
 
-// Count returns the number of available items in the cache
+// Count returns the number of available items in the pool
 func (lc *listPool) Count() int {
 	return len(lc.contents)
 }
 
-// Obtain returns an item from the cache for use
+// Obtain returns an item from the pool for use
 func (lc *listPool) Obtain() fyne.CanvasObject {
-	cacheLength := len(lc.contents)
-	if cacheLength == 0 {
+	poolLength := len(lc.contents)
+	if poolLength == 0 {
 		return nil
 	}
 	item := lc.contents[0]
-	if cacheLength > 0 {
+	if poolLength > 0 {
 		lc.contents = lc.contents[1:]
 	} else {
 		lc.contents = nil
@@ -408,7 +408,7 @@ func (lc *listPool) Obtain() fyne.CanvasObject {
 	return item
 }
 
-// Release adds an item into the cache to be used later
+// Release adds an item into the pool to be used later
 func (lc *listPool) Release(item fyne.CanvasObject) {
 	lc.contents = append(lc.contents, item)
 	item.Hide()
