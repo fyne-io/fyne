@@ -17,6 +17,7 @@ type preferences struct {
 	*internal.InMemoryPreferences
 
 	appID string
+	app   *fyneApp
 }
 
 // Declare conformity with Preferences interface
@@ -58,7 +59,8 @@ func (p *preferences) saveToFile(path string) error {
 	return encode.Encode(&values)
 }
 
-func (p *preferences) load() {
+func (p *preferences) load(appID string) {
+	p.appID = appID
 	err := p.loadFromFile(p.storagePath())
 	if err != nil {
 		fyne.LogError("Preferences load error:", err)
@@ -83,8 +85,9 @@ func (p *preferences) loadFromFile(path string) error {
 	return decode.Decode(&values)
 }
 
-func newPreferences() *preferences {
+func newPreferences(app *fyneApp) *preferences {
 	p := &preferences{}
+	p.app = app
 	p.InMemoryPreferences = internal.NewInMemoryPreferences()
 
 	p.OnChange = func() {
@@ -93,13 +96,5 @@ func newPreferences() *preferences {
 			fyne.LogError("Failed on saving preferences", err)
 		}
 	}
-	return p
-}
-
-func loadPreferences(id string) *preferences {
-	p := newPreferences()
-	p.appID = id
-
-	p.load()
 	return p
 }

@@ -45,6 +45,10 @@ func (dummyApp) Settings() Settings {
 	return nil
 }
 
+func (dummyApp) Storage() Storage {
+	return nil
+}
+
 func (dummyApp) Preferences() Preferences {
 	return nil
 }
