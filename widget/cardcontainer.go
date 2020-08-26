@@ -199,7 +199,7 @@ func (c *CardContainer) SetSubTitle(text string) {
 	c.Refresh()
 }
 
-// SetText updates the main title for this card.
+// SetTitle updates the main title for this card.
 func (c *CardContainer) SetTitle(text string) {
 	c.Title = text
 
