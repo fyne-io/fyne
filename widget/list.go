@@ -14,6 +14,7 @@ import (
 
 // List is a widget that caches list items for performance and
 // lays the items out in a vertical direction inside of a scroller
+// List requires that all items are the same size
 type List struct {
 	BaseWidget
 
@@ -320,12 +321,12 @@ func (li *listItemRenderer) BackgroundColor() color.Color {
 }
 
 func (li *listItemRenderer) Refresh() {
-	if li.item.selected == true {
+	if li.item.selected {
 		li.item.statusIndicator.FillColor = theme.FocusColor()
 		canvas.Refresh(li.item.super())
 		return
 	}
-	if li.item.hovered == true {
+	if li.item.hovered {
 		li.item.statusIndicator.FillColor = theme.HoverColor()
 	} else {
 		li.item.statusIndicator.FillColor = theme.BackgroundColor()
