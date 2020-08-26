@@ -21,43 +21,8 @@ const (
 	cardMediaHeight = 128
 )
 
-// MinSize calculates the minimum size of a card.
-// This is based on the contained text, image and content.
-func (c *cardRenderer) MinSize() fyne.Size {
-	hasHeader := c.card.Title != ""
-	hasSubHeader := c.card.SubTitle != ""
-	hasImage := c.card.Image != nil
-	hasContent := c.card.Content != nil
-
-	if !hasHeader && !hasSubHeader && !hasContent {
-		return fyne.NewSize(c.card.Image.MinSize().Width+theme.Padding(), cardMediaHeight+theme.Padding())
-	}
-
-	min := fyne.NewSize(theme.Padding()*5, theme.Padding()*5) // content padding plus 1 pad border
-	if hasImage {
-		min = fyne.NewSize(min.Width, min.Height+cardMediaHeight)
-	}
-
-	if hasHeader {
-		min = fyne.NewSize(fyne.Max(min.Width, c.header.MinSize().Width+theme.Padding()*5),
-			min.Height+c.header.MinSize().Height)
-		if hasSubHeader || hasContent {
-			min.Height += theme.Padding()
-		}
-	}
-	if hasSubHeader {
-		min = fyne.NewSize(fyne.Max(min.Width, c.subHeader.MinSize().Width+theme.Padding()*5),
-			min.Height+c.subHeader.MinSize().Height)
-		if hasContent {
-			min.Height += theme.Padding()
-		}
-	}
-	if hasContent {
-		min = fyne.NewSize(fyne.Max(min.Width, c.card.Content.MinSize().Width+theme.Padding()*3),
-			min.Height+c.card.Content.MinSize().Height)
-	}
-
-	return min
+func (c *cardRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
 }
 
 // Layout the components of the card container.
@@ -101,20 +66,43 @@ func (c *cardRenderer) Layout(size fyne.Size) {
 	}
 }
 
-// applyTheme updates this button to match the current theme
-func (c *cardRenderer) applyTheme() {
-	if c.header != nil {
-		c.header.TextSize = int(float32(theme.TextSize()) * 1.7)
-		c.header.Color = theme.TextColor()
-	}
-	if c.subHeader != nil {
-		c.subHeader.TextSize = theme.TextSize()
-		c.subHeader.Color = theme.TextColor()
-	}
-}
+// MinSize calculates the minimum size of a card.
+// This is based on the contained text, image and content.
+func (c *cardRenderer) MinSize() fyne.Size {
+	hasHeader := c.card.Title != ""
+	hasSubHeader := c.card.SubTitle != ""
+	hasImage := c.card.Image != nil
+	hasContent := c.card.Content != nil
 
-func (c *cardRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
+	if !hasHeader && !hasSubHeader && !hasContent {
+		return fyne.NewSize(c.card.Image.MinSize().Width+theme.Padding(), cardMediaHeight+theme.Padding())
+	}
+
+	min := fyne.NewSize(theme.Padding()*5, theme.Padding()*5) // content padding plus 1 pad border
+	if hasImage {
+		min = fyne.NewSize(min.Width, min.Height+cardMediaHeight)
+	}
+
+	if hasHeader {
+		min = fyne.NewSize(fyne.Max(min.Width, c.header.MinSize().Width+theme.Padding()*5),
+			min.Height+c.header.MinSize().Height)
+		if hasSubHeader || hasContent {
+			min.Height += theme.Padding()
+		}
+	}
+	if hasSubHeader {
+		min = fyne.NewSize(fyne.Max(min.Width, c.subHeader.MinSize().Width+theme.Padding()*5),
+			min.Height+c.subHeader.MinSize().Height)
+		if hasContent {
+			min.Height += theme.Padding()
+		}
+	}
+	if hasContent {
+		min = fyne.NewSize(fyne.Max(min.Width, c.card.Content.MinSize().Width+theme.Padding()*3),
+			min.Height+c.card.Content.MinSize().Height)
+	}
+
+	return min
 }
 
 func (c *cardRenderer) Refresh() {
@@ -128,6 +116,18 @@ func (c *cardRenderer) Refresh() {
 	canvas.Refresh(c.card.super())
 }
 
+// applyTheme updates this button to match the current theme
+func (c *cardRenderer) applyTheme() {
+	if c.header != nil {
+		c.header.TextSize = int(float32(theme.TextSize()) * 1.7)
+		c.header.Color = theme.TextColor()
+	}
+	if c.subHeader != nil {
+		c.subHeader.TextSize = theme.TextSize()
+		c.subHeader.Color = theme.TextColor()
+	}
+}
+
 // CardContainer widget groups title, subtitle with content and a header image
 type CardContainer struct {
 	BaseWidget
@@ -136,10 +136,16 @@ type CardContainer struct {
 	Content         fyne.CanvasObject
 }
 
-// MinSize returns the size that this widget should not shrink below
-func (c *CardContainer) MinSize() fyne.Size {
-	c.ExtendBaseWidget(c)
-	return c.BaseWidget.MinSize()
+// NewCardContainer creates a new card widget with the specified title, subtitle and content (all optional).
+func NewCardContainer(title, subtitle string, content fyne.CanvasObject) *CardContainer {
+	card := &CardContainer{
+		Title:    title,
+		SubTitle: subtitle,
+		Content:  content,
+	}
+
+	card.ExtendBaseWidget(card)
+	return card
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -163,16 +169,15 @@ func (c *CardContainer) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// SetText updates the main title for this card.
-func (c *CardContainer) SetTitle(text string) {
-	c.Title = text
-
-	c.Refresh()
+// MinSize returns the size that this widget should not shrink below
+func (c *CardContainer) MinSize() fyne.Size {
+	c.ExtendBaseWidget(c)
+	return c.BaseWidget.MinSize()
 }
 
-// SetSubTitle updates the secondary title for this card.
-func (c *CardContainer) SetSubTitle(text string) {
-	c.SubTitle = text
+// SetContent changes the body of this card to have the specified content.
+func (c *CardContainer) SetContent(obj fyne.CanvasObject) {
+	c.Content = obj
 
 	c.Refresh()
 }
@@ -184,21 +189,16 @@ func (c *CardContainer) SetImage(img *canvas.Image) {
 	c.Refresh()
 }
 
-// SetContent changes the body of this card to have the specified content.
-func (c *CardContainer) SetContent(obj fyne.CanvasObject) {
-	c.Content = obj
+// SetSubTitle updates the secondary title for this card.
+func (c *CardContainer) SetSubTitle(text string) {
+	c.SubTitle = text
 
 	c.Refresh()
 }
 
-// NewCardContainer creates a new card widget with the specified title, subtitle and content (all optional).
-func NewCardContainer(title, subtitle string, content fyne.CanvasObject) *CardContainer {
-	card := &CardContainer{
-		Title:    title,
-		SubTitle: subtitle,
-		Content:  content,
-	}
+// SetText updates the main title for this card.
+func (c *CardContainer) SetTitle(text string) {
+	c.Title = text
 
-	card.ExtendBaseWidget(card)
-	return card
+	c.Refresh()
 }
