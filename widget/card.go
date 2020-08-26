@@ -104,9 +104,11 @@ func (c *cardRenderer) Layout(size fyne.Size) {
 // applyTheme updates this button to match the current theme
 func (c *cardRenderer) applyTheme() {
 	if c.header != nil {
+		c.header.TextSize = int(float32(theme.TextSize()) * 1.7)
 		c.header.Color = theme.TextColor()
 	}
 	if c.subHeader != nil {
+		c.subHeader.TextSize = theme.TextSize()
 		c.subHeader.Color = theme.TextColor()
 	}
 }
@@ -146,7 +148,6 @@ func (c *CardContainer) CreateRenderer() fyne.WidgetRenderer {
 
 	header := canvas.NewText(c.Title, theme.TextColor())
 	header.TextStyle.Bold = true
-	header.TextSize = theme.TextSize() * 2
 	subHeader := canvas.NewText(c.SubTitle, theme.TextColor())
 
 	objects := []fyne.CanvasObject{header, subHeader}
