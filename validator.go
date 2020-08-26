@@ -16,6 +16,19 @@ type RegexpValidator struct {
 	Regexp *regexp.Regexp
 }
 
+// NewRegexpValidator creates a new validator that uses regular expression parsing
+func NewRegexpValidator(regexpstr, reason string) *RegexpValidator {
+	r := &RegexpValidator{Reason: reason}
+	expression, err := regexp.Compile(regexpstr)
+	if err != nil {
+		LogError("Regexp did not compile", err)
+		return nil
+	}
+
+	r.Regexp = expression
+	return r
+}
+
 // Validate will validate the provided string with a regular expression
 // Returns nil if valid, otherwise returns an error with a reason text
 func (r RegexpValidator) Validate(text string) error {

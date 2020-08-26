@@ -2,7 +2,6 @@ package widget_test
 
 import (
 	"image/color"
-	"regexp"
 	"testing"
 
 	"fyne.io/fyne"
@@ -45,7 +44,7 @@ func TestEntry_passwordRevealerCursor(t *testing.T) {
 }
 
 func TestEntry_ValidatedEntry(t *testing.T) {
-	r := fyne.RegexpValidator{Regexp: regexp.MustCompile(`^\d{4}-\d{2}-\d{2}`)}
+	r := fyne.NewRegexpValidator(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
 	entry := &widget.Entry{Validator: r}
 	entry.ExtendBaseWidget(entry)
 

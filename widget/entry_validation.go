@@ -16,8 +16,6 @@ func (e *Entry) SetValidationError(err error) {
 	}
 }
 
-var erroricon = theme.NewErrorThemedResource(theme.ErrorIcon()) // Avoid having to parse XML on each status refresh
-
 var _ fyne.Widget = (*validationStatus)(nil)
 
 type validationStatus struct {
@@ -28,7 +26,7 @@ type validationStatus struct {
 
 func newValidationStatus(e *Entry) *validationStatus {
 	rs := &validationStatus{
-		icon:  canvas.NewImageFromResource(erroricon),
+		icon:  canvas.NewImageFromResource(theme.ConfirmIcon()),
 		entry: e,
 	}
 
@@ -73,7 +71,7 @@ func (r *validationStatusRenderer) Refresh() {
 
 	if !r.entry.Focused() && r.entry.Text != "" {
 		if r.entry.validationError != nil {
-			r.icon.Resource = erroricon
+			r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
 		} else {
 			r.icon.Resource = theme.ConfirmIcon()
 		}
