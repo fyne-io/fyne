@@ -175,6 +175,8 @@ func makeInputTab() fyne.Widget {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
+	entryValidated := &widget.Entry{Validator: fyne.NewRegexpValidator(`\d`, "Must contain a number")}
+	entryValidated.SetPlaceHolder("Must contain a number")
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
@@ -189,6 +191,7 @@ func makeInputTab() fyne.Widget {
 	return widget.NewVBox(
 		entry,
 		entryDisabled,
+		entryValidated,
 		entryMultiLine,
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
