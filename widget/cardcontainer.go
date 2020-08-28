@@ -112,8 +112,10 @@ func (c *cardRenderer) Layout(size fyne.Size) {
 		pos.Y += cardMediaHeight
 	}
 
-	size.Width -= theme.Padding() * 4
-	pos.X += theme.Padding() * 2
+	titlePad := theme.Padding() * 2
+	contentPad := theme.Padding()
+	size.Width -= titlePad * 2
+	pos.X += titlePad
 	pos.Y += theme.Padding()
 
 	if c.card.Title != "" {
@@ -130,12 +132,12 @@ func (c *cardRenderer) Layout(size fyne.Size) {
 		pos.Y += height + theme.Padding()
 	}
 
-	size.Width += theme.Padding() * 2
-	pos.X -= theme.Padding()
-	pos.Y += theme.Padding()
+	size.Width += titlePad
+	pos.X -= contentPad
+	pos.Y += contentPad
 
 	if c.card.Content != nil {
-		height := size.Height - pos.Y - theme.Padding()*3
+		height := size.Height - pos.Y - titlePad - contentPad
 		c.card.Content.Move(pos)
 		c.card.Content.Resize(fyne.NewSize(size.Width, height))
 	}
@@ -156,27 +158,29 @@ func (c *cardRenderer) MinSize() fyne.Size {
 		return fyne.NewSize(c.card.Image.MinSize().Width+theme.Padding(), cardMediaHeight+theme.Padding())
 	}
 
-	min := fyne.NewSize(theme.Padding()*5, theme.Padding()*5) // content padding plus 1 pad border
+	titlePad := theme.Padding() * 2
+	contentPad := theme.Padding()
+	min := fyne.NewSize(titlePad*2+theme.Padding(), titlePad*2+theme.Padding())
 	if hasImage {
 		min = fyne.NewSize(min.Width, min.Height+cardMediaHeight)
 	}
 
 	if hasHeader {
-		min = fyne.NewSize(fyne.Max(min.Width, c.header.MinSize().Width+theme.Padding()*5),
+		min = fyne.NewSize(fyne.Max(min.Width, c.header.MinSize().Width+titlePad*2+theme.Padding()),
 			min.Height+c.header.MinSize().Height)
 		if hasSubHeader || hasContent {
 			min.Height += theme.Padding()
 		}
 	}
 	if hasSubHeader {
-		min = fyne.NewSize(fyne.Max(min.Width, c.subHeader.MinSize().Width+theme.Padding()*5),
+		min = fyne.NewSize(fyne.Max(min.Width, c.subHeader.MinSize().Width+titlePad*2+theme.Padding()),
 			min.Height+c.subHeader.MinSize().Height)
 		if hasContent {
 			min.Height += theme.Padding()
 		}
 	}
 	if hasContent {
-		min = fyne.NewSize(fyne.Max(min.Width, c.card.Content.MinSize().Width+theme.Padding()*3),
+		min = fyne.NewSize(fyne.Max(min.Width, c.card.Content.MinSize().Width+contentPad*2+theme.Padding()),
 			min.Height+c.card.Content.MinSize().Height)
 	}
 
