@@ -30,11 +30,12 @@ func TestGlCanvas_NilContent(t *testing.T) {
 }
 
 func TestGlCanvas_Resize(t *testing.T) {
-	w := createWindow("Test")
+	w := createWindow("Test").(*window)
 	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
 	w.SetContent(content)
+	repaintWindow(w)
 
 	size := fyne.NewSize(200, 100)
 	assert.NotEqual(t, size, content.Size())
@@ -45,7 +46,7 @@ func TestGlCanvas_Resize(t *testing.T) {
 
 // TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
-	w := createWindow("Test")
+	w := createWindow("Test").(*window)
 	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
@@ -60,6 +61,7 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 	assert.NotEqual(t, size, overContentSize)
 
 	w.Resize(size)
+	repaintWindow(w)
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
 	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
@@ -67,7 +69,7 @@ func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
 
 // TODO: this can be removed when #707 is addressed
 func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
-	w := createWindow("Test")
+	w := createWindow("Test").(*window)
 	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
@@ -82,12 +84,13 @@ func TestGlCanvas_ResizeWithOtherOverlay(t *testing.T) {
 	assert.NotEqual(t, size, over.Size())
 
 	w.Resize(size)
+	repaintWindow(w)
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
 }
 
 func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
-	w := createWindow("Test")
+	w := createWindow("Test").(*window)
 	w.SetPadded(false)
 
 	content := widget.NewLabel("Content")
@@ -112,6 +115,7 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 	assert.NotEqual(t, size, o3.Size())
 
 	w.Resize(size)
+	repaintWindow(w)
 	assert.Equal(t, size, content.Size(), "canvas content is resized")
 	assert.Equal(t, size, o1.Size(), "canvas overlay 1 is resized")
 	assert.Equal(t, size, o2.Size(), "canvas overlay 2 is resized")
@@ -173,11 +177,13 @@ func Test_glCanvas_SetContent(t *testing.T) {
 			canvasSize := 200
 			w.SetContent(content)
 			w.Resize(fyne.NewSize(canvasSize, canvasSize))
+			repaintWindow(w)
 
 			newContent := canvas.NewCircle(color.White)
 			assert.Equal(t, fyne.NewPos(0, 0), newContent.Position())
 			assert.Equal(t, fyne.NewSize(0, 0), newContent.Size())
 			w.SetContent(newContent)
+
 			assert.Equal(t, fyne.NewPos(tt.expectedPad, tt.expectedPad+tt.expectedMenuHeight), newContent.Position())
 			assert.Equal(t, fyne.NewSize(canvasSize-2*tt.expectedPad, canvasSize-2*tt.expectedPad-tt.expectedMenuHeight), newContent.Size())
 		})
@@ -306,6 +312,7 @@ func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
 	rightCol := widget.NewVBox(rightObj1, rightObj2)
 	content := widget.NewHBox(leftCol, rightCol)
 	w.SetContent(content)
+	repaintWindow(w)
 
 	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
 	assert.Equal(t, oldCanvasSize, c.Size())

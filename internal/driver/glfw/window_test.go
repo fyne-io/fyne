@@ -65,6 +65,7 @@ func TestGLDriver_CreateSplashWindow(t *testing.T) {
 	d := NewGLDriver().(desktop.Driver)
 	w := d.CreateSplashWindow().(*window)
 	w.create()
+	repaintWindow(w)
 
 	assert.Equal(t, 0, w.viewport.GetAttrib(glfw.Decorated))
 	assert.False(t, w.Padded())
@@ -79,6 +80,7 @@ func TestWindow_Cursor(t *testing.T) {
 	b := widget.NewButton("Test", nil)
 
 	w.SetContent(widget.NewVBox(e, h, b))
+	repaintWindow(w)
 
 	w.mouseMoved(w.viewport, 10, float64(e.Position().Y+10))
 	textCursor := cursorMap[desktop.TextCursor]
@@ -408,6 +410,7 @@ func TestWindow_Tapped(t *testing.T) {
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
 	w.SetContent(widget.NewVBox(rect, o))
+	repaintWindow(w)
 
 	w.mousePos = fyne.NewPos(50, 160)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -426,6 +429,7 @@ func TestWindow_TappedSecondary(t *testing.T) {
 	o := &tappableObject{Rectangle: canvas.NewRectangle(color.White)}
 	o.SetMinSize(fyne.NewSize(100, 100))
 	w.SetContent(o)
+	repaintWindow(w)
 
 	w.mousePos = fyne.NewPos(50, 60)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
@@ -446,6 +450,7 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 		tapped = true
 	})
 	w.SetContent(o)
+	repaintWindow(w)
 
 	w.mousePos = fyne.NewPos(10, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
@@ -499,6 +504,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	b1 := widget.NewButton("Tap", func() { tapped = 1 })
 	b2 := widget.NewButton("Tap", func() { tapped = 2 })
 	w.SetContent(widget.NewVBox(b1, b2))
+	repaintWindow(w)
 
 	w.mouseMoved(w.viewport, 15, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
@@ -527,6 +533,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 	m := &mouseableObject{Rectangle: canvas.NewRectangle(color.White)}
 	m.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(m)
+	repaintWindow(w)
 
 	w.mouseMoved(w.viewport, 5, 5)
 	w.waitForEvents()
