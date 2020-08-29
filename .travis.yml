@@ -15,6 +15,11 @@ gobuild_args: "-v -tags ci"
 # Disable travis default install step (go get ${gobuild_args} ./...)
 install: true
 
+cache:
+    directories:
+      - $HOME/.cache/go-build        # Cache the binaries
+      - $HOME/gopath/pkg/mod         # Cache the Go modules
+
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
   - GO111MODULE=off go get golang.org/x/tools/cmd/goimports
