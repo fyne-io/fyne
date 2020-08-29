@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/validator"
 	"fyne.io/fyne/widget"
 )
 
@@ -176,7 +176,7 @@ func makeInputTab() fyne.Widget {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
-	entryValidated := &widget.Entry{Validator: validator.NewRegexp(`\d`, "Must contain a number")}
+	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
 	entryValidated.SetPlaceHolder("Must contain a number")
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")

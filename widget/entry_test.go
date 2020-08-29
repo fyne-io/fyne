@@ -6,10 +6,10 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/validator"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -45,7 +45,7 @@ func TestEntry_passwordRevealerCursor(t *testing.T) {
 }
 
 func TestEntry_ValidatedEntry(t *testing.T) {
-	r := validator.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
+	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
 	entry := &widget.Entry{Validator: r}
 	entry.ExtendBaseWidget(entry)
 
