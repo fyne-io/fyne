@@ -23,7 +23,7 @@ cache:
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
   - |
-    if ["$RUN_CODE_CHECKS" = "on" ]
+    if [ "$RUN_CODE_CHECKS" = "on" ]
     then
       GO111MODULE=off go get golang.org/x/tools/cmd/goimports
       GO111MODULE=off go get github.com/fzipp/gocyclo
@@ -42,7 +42,7 @@ script:
     fi
   - |
     # No reason to run code checks on every operating system.
-    if [["$RUN_CODE_CHECKS" = "on" && "$TRAVIS_OS_NAME" != "windows" ]] # Goimports pseaudo diffs on windows and https://github.com/golang/lint/issues/157
+    if [[ "$RUN_CODE_CHECKS" = "on" && "$TRAVIS_OS_NAME" != "windows" ]] # Goimports pseaudo diffs on windows and https://github.com/golang/lint/issues/157
     then
       test -z $(goimports -e -d $GO_FILES | tee /dev/stderr)
       golint -set_exit_status $(go list -tags ci ./...)
