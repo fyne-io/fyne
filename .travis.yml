@@ -16,9 +16,9 @@ gobuild_args: "-v -tags ci"
 install: true
 
 cache:
-    directories:
-      - $HOME/.cache/go-build        # Cache the binaries
-      - $HOME/gopath/pkg/mod         # Cache the Go modules
+  directories:
+    - $HOME/gopath/pkg/mod
+  apt: true
 
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
@@ -72,7 +72,7 @@ matrix:
   include:
     - go: 1.13.x
       os: linux
-      env: GO111MODULE=on GOFLAGS=
+      env: GO111MODULE=on GOFLAGS
     - go: 1.14.x
       os: linux
       env: GO111MODULE=off GOFLAGS=
