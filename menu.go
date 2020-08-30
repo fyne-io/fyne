@@ -14,6 +14,7 @@ func NewMenu(label string, items ...*MenuItem) *Menu {
 
 // MenuItem is a single item within any menu, it contains a display Label and Action function that is called when tapped.
 type MenuItem struct {
+	ChildMenu   *Menu
 	IsSeparator bool
 	Label       string
 	Action      func()

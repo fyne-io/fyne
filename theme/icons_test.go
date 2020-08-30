@@ -1,12 +1,20 @@
 package theme
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"image/color"
 	"path/filepath"
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/internal/test"
+
+	"github.com/srwiley/oksvg"
+	"github.com/srwiley/rasterx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -28,6 +36,20 @@ func helperLoadRes(t *testing.T, name string) fyne.Resource {
 		t.Fatal(err)
 	}
 	return res
+}
+
+func helperDrawSVG(t *testing.T, data []byte) image.Image {
+	icon, err := oksvg.ReadIconStream(bytes.NewReader(data))
+	require.NoError(t, err, "failed to read SVG data")
+
+	width := int(icon.ViewBox.W) * 2
+	height := int(icon.ViewBox.H) * 2
+	icon.SetTarget(0, 0, float64(width), float64(height))
+	img := image.NewNRGBA(image.Rect(0, 0, width, height))
+	scanner := rasterx.NewScannerGV(width, height, img, img.Bounds())
+	raster := rasterx.NewDasher(width, height, scanner)
+	icon.Draw(raster, 1)
+	return img
 }
 
 func TestIconThemeChangeDoesNotChangeName(t *testing.T) {
@@ -77,6 +99,12 @@ func TestNewDisabledResource(t *testing.T) {
 	name := custom.Name()
 
 	assert.Equal(t, name, fmt.Sprintf("disabled_%v", source.Name()))
+}
+
+func TestThemedResource_Invert(t *testing.T) {
+	staticResource := helperLoadRes(t, "cancel_Paths.svg")
+	inverted := NewThemedResource(staticResource, nil).Invert()
+	assert.Equal(t, "inverted-"+staticResource.Name(), inverted.Name())
 }
 
 func TestThemedResource_Name(t *testing.T) {
@@ -148,6 +176,62 @@ func TestDisabledResource_Content_NoGroupsFile(t *testing.T) {
 		source: staticResource,
 	}
 	assert.NotEqual(t, staticResource.Content(), disabledResource.Content())
+}
+
+func TestColorizeResource(t *testing.T) {
+	tests := map[string]struct {
+		svgFile   string
+		color     color.Color
+		wantImage string
+	}{
+		"paths": {
+			svgFile:   "cancel_Paths.svg",
+			color:     color.RGBA{R: 100, G: 100, A: 200},
+			wantImage: "colorized/paths.png",
+		},
+		"circles": {
+			svgFile:   "circles.svg",
+			color:     color.RGBA{R: 100, B: 100, A: 200},
+			wantImage: "colorized/circles.png",
+		},
+		"polygons": {
+			svgFile:   "polygons.svg",
+			color:     color.RGBA{G: 100, B: 100, A: 200},
+			wantImage: "colorized/polygons.png",
+		},
+		"rects": {
+			svgFile:   "rects.svg",
+			color:     color.RGBA{R: 100, G: 100, B: 100, A: 200},
+			wantImage: "colorized/rects.png",
+		},
+		"group of paths": {
+			svgFile:   "check_GroupPaths.svg",
+			color:     color.RGBA{R: 100, G: 100, A: 100},
+			wantImage: "colorized/group_paths.png",
+		},
+		"group of circles": {
+			svgFile:   "group_circles.svg",
+			color:     color.RGBA{R: 100, B: 100, A: 100},
+			wantImage: "colorized/group_circles.png",
+		},
+		"group of polygons": {
+			svgFile:   "warning_GroupPolygons.svg",
+			color:     color.RGBA{G: 100, B: 100, A: 100},
+			wantImage: "colorized/group_polygons.png",
+		},
+		"group of rects": {
+			svgFile:   "info_GroupRects.svg",
+			color:     color.RGBA{R: 100, G: 100, B: 100, A: 100},
+			wantImage: "colorized/group_rects.png",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			src := helperLoadRes(t, tt.svgFile)
+			got := helperDrawSVG(t, colorizeResource(src, tt.color))
+			test.AssertImageMatches(t, tt.wantImage, got)
+		})
+	}
 }
 
 // Test Asset Sources

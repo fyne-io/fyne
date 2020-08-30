@@ -16,7 +16,7 @@ type Text struct {
 	baseObject
 	Alignment fyne.TextAlign // The alignment of the text content
 
-	Color     color.Color    // The main text draw colour
+	Color     color.Color    // The main text draw color
 	Text      string         // The string content of this Text
 	TextSize  int            // Size of the text - if the Canvas scale is 1.0 this will be equivalent to point size
 	TextStyle fyne.TextStyle // The style of the text content
@@ -26,6 +26,11 @@ type Text struct {
 // This is normally determined by the render implementation.
 func (t *Text) MinSize() fyne.Size {
 	return fyne.MeasureText(t.Text, t.TextSize, t.TextStyle)
+}
+
+// SetMinSize has no effect as the smallest size this canvas object can be is based on its font size and content.
+func (t *Text) SetMinSize(size fyne.Size) {
+	// no-op
 }
 
 // Refresh causes this object to be redrawn in it's current state

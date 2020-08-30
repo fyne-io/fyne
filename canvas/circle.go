@@ -9,14 +9,14 @@ import (
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Circle)(nil)
 
-// Circle describes a coloured circle primitive in a Fyne canvas
+// Circle describes a colored circle primitive in a Fyne canvas
 type Circle struct {
 	Position1 fyne.Position // The current top-left position of the Circle
 	Position2 fyne.Position // The current bottomright position of the Circle
 	Hidden    bool          // Is this circle currently hidden
 
-	FillColor   color.Color // The circle fill colour
-	StrokeColor color.Color // The circle stroke colour
+	FillColor   color.Color // The circle fill color
+	StrokeColor color.Color // The circle stroke color
 	StrokeWidth float32     // The stroke width of the circle
 }
 
@@ -26,8 +26,14 @@ func (l *Circle) Size() fyne.Size {
 }
 
 // Resize sets a new bottom-right position for the circle object
+// If it has a stroke width this will cause it to Refresh.
 func (l *Circle) Resize(size fyne.Size) {
 	l.Position2 = fyne.NewPos(l.Position1.X+size.Width, l.Position1.Y+size.Height)
+	if l.StrokeWidth == 0 {
+		return
+	}
+
+	Refresh(l)
 }
 
 // Position gets the current top-left position of this circle object, relative to its parent / canvas

@@ -38,7 +38,14 @@ func (dummyApp) UniqueID() string {
 	return "dummy"
 }
 
+func (dummyApp) SendNotification(*Notification) {
+}
+
 func (dummyApp) Settings() Settings {
+	return nil
+}
+
+func (dummyApp) Storage() Storage {
 	return nil
 }
 

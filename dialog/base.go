@@ -1,4 +1,4 @@
-// Package dialog defines standard dialog windows for application GUIs
+// Package dialog defines standard dialog windows for application GUIs.
 package dialog // import "fyne.io/fyne/dialog"
 
 import (
@@ -21,6 +21,8 @@ type Dialog interface {
 	Show()
 	Hide()
 	SetDismissText(label string)
+	SetOnClosed(closed func())
+	Resize(size fyne.Size)
 }
 
 // Declare conformity to Dialog interface
@@ -39,9 +41,48 @@ type dialog struct {
 	parent         fyne.Window
 }
 
+// SetOnClosed allows to set a callback function that is called when
+// the dialog is closed
+func (d *dialog) SetOnClosed(closed func()) {
+	// if there is already a callback set, remember it and call both
+	originalCallback := d.callback
+
+	d.callback = func(response bool) {
+		closed()
+		if originalCallback != nil {
+			originalCallback(response)
+		}
+	}
+}
+
+// dialogTitle is really just a normal title but we use the Refresh() hook to update the background rectangle.
+type dialogTitle struct {
+	widget.Label
+
+	d *dialog
+}
+
+// Refresh applies the current theme to the whole dialog before refreshing the underlying label.
+func (t *dialogTitle) Refresh() {
+	t.d.applyTheme()
+
+	t.BaseWidget.Refresh()
+}
+
+func newDialogTitle(title string, d *dialog) *dialogTitle {
+	l := &dialogTitle{}
+	l.Text = title
+	l.Alignment = fyne.TextAlignLeading
+	l.TextStyle.Bold = true
+
+	l.d = d
+	l.ExtendBaseWidget(l)
+	return l
+}
+
 func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 	d.bg = canvas.NewRectangle(theme.BackgroundColor())
-	d.label = widget.NewLabelWithStyle(d.title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	d.label = newDialogTitle(d.title, d)
 
 	var content fyne.CanvasObject
 	if d.icon == nil {
@@ -100,7 +141,7 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 
 func (d *dialog) applyTheme() {
 	r, g, b, _ := theme.BackgroundColor().RGBA()
-	bg := &color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
+	bg := &color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 230}
 	d.bg.FillColor = bg
 }
 
@@ -131,6 +172,25 @@ func (d *dialog) Show() {
 	d.win.Show()
 }
 
+// Resize dialog, call this function after dialog show
+func (d *dialog) Resize(size fyne.Size) {
+	maxSize := d.win.Size()
+	minSize := d.win.MinSize()
+	newWidth := size.Width
+	if size.Width > maxSize.Width {
+		newWidth = maxSize.Width
+	} else if size.Width < minSize.Width {
+		newWidth = minSize.Width
+	}
+	newHeight := size.Height
+	if size.Height > maxSize.Height {
+		newHeight = maxSize.Height
+	} else if size.Height < minSize.Height {
+		newHeight = minSize.Height
+	}
+	d.win.Resize(fyne.NewSize(newWidth, newHeight))
+}
+
 func (d *dialog) Hide() {
 	d.hideWithResponse(false)
 }
@@ -149,10 +209,10 @@ func (d *dialog) hideWithResponse(resp bool) {
 	d.sendResponse = false
 }
 
-// ShowCustom shows a dialog over the specified application using custom
+// NewCustom creates and returns a dialog over the specified application using custom
 // content. The button will have the dismiss text set.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
-func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
+func NewCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 
 	d.dismiss = &widget.Button{Text: dismiss,
@@ -160,17 +220,21 @@ func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Wi
 	}
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, layout.NewSpacer()))
 
-	d.Show()
+	return d
 }
 
-// ShowCustomConfirm shows a dialog over the specified application using custom
-// content. The cancel button will have the dismiss text set and the "OK" will use
-// the confirm text. The response callback is called on user action.
+// NewCustomConfirm creates and returns a dialog over the specified application using
+// custom content. The cancel button will have the dismiss text set and the "OK" will
+// use the confirm text. The response callback is called on user action.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
-func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
-	callback func(bool), parent fyne.Window) {
+func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
+	callback func(bool), parent fyne.Window) Dialog {
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 	d.callback = callback
+	// TODO: This is required to avoid confusion.
+	// Normally this function should only provide the dialog, but currently it is also displayed, which is wrong.
+	// For this case the ShowCustomConfirm() method was built.
+	d.sendResponse = true
 
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
@@ -182,5 +246,21 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 	}
 	d.setButtons(widget.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 
-	d.Show()
+	return d
+}
+
+// ShowCustom shows a dialog over the specified application using custom
+// content. The button will have the dismiss text set.
+// The MinSize() of the CanvasObject passed will be used to set the size of the window.
+func ShowCustom(title, dismiss string, content fyne.CanvasObject, parent fyne.Window) {
+	NewCustom(title, dismiss, content, parent).Show()
+}
+
+// ShowCustomConfirm shows a dialog over the specified application using custom
+// content. The cancel button will have the dismiss text set and the "OK" will use
+// the confirm text. The response callback is called on user action.
+// The MinSize() of the CanvasObject passed will be used to set the size of the window.
+func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
+	callback func(bool), parent fyne.Window) {
+	NewCustomConfirm(title, confirm, dismiss, content, callback, parent).Show()
 }

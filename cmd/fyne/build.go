@@ -9,6 +9,7 @@ import (
 
 type builder struct {
 	os, srcdir string
+	release    bool
 }
 
 func (b *builder) build() error {
@@ -19,12 +20,22 @@ func (b *builder) build() error {
 
 	var cmd *exec.Cmd
 	if goos == "windows" {
-		cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", ".")
+		if b.release {
+			cmd = exec.Command("go", "build", "-ldflags", "-s -w -H=windowsgui", ".")
+		} else {
+			cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", ".")
+		}
 	} else {
-		cmd = exec.Command("go", "build", ".")
+		if b.release {
+			cmd = exec.Command("go", "build", "-ldflags", "-s -w", ".")
+		} else {
+			cmd = exec.Command("go", "build", ".")
+		}
 	}
 	cmd.Dir = b.srcdir
 	env := os.Environ()
+	env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
+
 	if goos != "ios" && goos != "android" {
 		env = append(env, "GOOS="+goos)
 	}

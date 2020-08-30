@@ -12,14 +12,14 @@ func (d *device) Orientation() fyne.DeviceOrientation {
 	return fyne.OrientationVertical
 }
 
-func (d *device) IsMobile() bool {
-	return false
-}
-
 func (d *device) HasKeyboard() bool {
 	return false
 }
 
 func (d *device) SystemScale() float32 {
+	return d.SystemScaleForWindow(nil)
+}
+
+func (d *device) SystemScaleForWindow(fyne.Window) float32 {
 	return 1
 }

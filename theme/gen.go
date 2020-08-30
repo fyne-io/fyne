@@ -39,7 +39,7 @@ func bundleFont(font, name string, f *os.File) {
 	_, dirname, _, _ := runtime.Caller(0)
 	path := path.Join(path.Dir(dirname), "font", fmt.Sprintf("%s-%s.ttf", font, name))
 
-	if name == "Regular" && font != fontFace {
+	if name == "Powerline" && font != fontFace {
 		name = "Monospace"
 	}
 
@@ -85,7 +85,7 @@ func main() {
 	bundleFont(fontFace, "Bold", f)
 	bundleFont(fontFace, "Italic", f)
 	bundleFont(fontFace, "BoldItalic", f)
-	bundleFont("NotoMono", "Regular", f)
+	bundleFont("DejaVuSansMono", "Powerline", f)
 	f.Close()
 
 	f = openFile("bundled-icons.go")
@@ -117,6 +117,7 @@ func main() {
 	bundleIcon("content-redo", f)
 	bundleIcon("content-undo", f)
 
+	bundleIcon("document", f)
 	bundleIcon("document-create", f)
 	bundleIcon("document-print", f)
 	bundleIcon("document-save", f)
@@ -124,6 +125,7 @@ func main() {
 	bundleIcon("info", f)
 	bundleIcon("question", f)
 	bundleIcon("warning", f)
+	bundleIcon("error", f)
 
 	bundleIcon("arrow-back", f)
 	bundleIcon("arrow-down", f)
@@ -133,6 +135,11 @@ func main() {
 	bundleIcon("arrow-drop-up", f)
 
 	bundleIcon("file", f)
+	bundleIcon("file-application", f)
+	bundleIcon("file-audio", f)
+	bundleIcon("file-image", f)
+	bundleIcon("file-text", f)
+	bundleIcon("file-video", f)
 	bundleIcon("folder", f)
 	bundleIcon("folder-new", f)
 	bundleIcon("folder-open", f)
@@ -168,6 +175,10 @@ func main() {
 
 	bundleIcon("visibility", f)
 	bundleIcon("visibility-off", f)
+
+	bundleIcon("download", f)
+	bundleIcon("computer", f)
+	bundleIcon("storage", f)
 
 	f.Close()
 }

@@ -46,8 +46,5 @@ func TestFyneApp_OpenURL(t *testing.T) {
 		return // when running in CI mode we don't actually open URLs...
 	}
 
-	// wait for the command to execute then check the URL we loaded
-	for opened == "" {
-	}
 	assert.Equal(t, urlStr, opened)
 }

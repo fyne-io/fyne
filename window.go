@@ -61,7 +61,12 @@ type Window interface {
 	// The way this is rendered will depend on the loaded driver.
 	SetMainMenu(*MainMenu)
 
+	// SetOnClosed sets a function that runs when the window is closed.
 	SetOnClosed(func())
+
+	// SetCloseIntercept sets a function that runs instead of closing if defined.
+	// Close() should be called explicitly in the interceptor to close the window.
+	SetCloseIntercept(func())
 
 	// Show the window on screen.
 	Show()
@@ -84,6 +89,6 @@ type Window interface {
 	// This can be useful to set a key handler for the window, for example.
 	Canvas() Canvas
 
-	//Clipboard returns the system clipboard
+	// Clipboard returns the system clipboard
 	Clipboard() Clipboard
 }

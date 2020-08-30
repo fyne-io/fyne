@@ -1,7 +1,11 @@
 ### Project Specific
 cmd/fyne/fyne
 cmd/fyne_demo/fyne_demo
+cmd/fyne_settings/fyne_settings
 cmd/hello/hello
+
+### Tests
+**/testdata/failed
 
 ### Go
 # Output of the coverage tool
@@ -16,6 +20,9 @@ cmd/hello/hello
 
 ### JetBrains
 .idea
+
+### VSCode
+.vscode
 
 ### Vim
 # Swap

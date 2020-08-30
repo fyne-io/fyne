@@ -65,7 +65,7 @@ func cacheModPath(r io.Reader) (string, string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return "", "", fmt.Errorf("Cannot read content: %v", err)
+		return "", "", fmt.Errorf("cannot read content: %v", err)
 	}
 	return "", "", nil
 }
@@ -73,7 +73,7 @@ func cacheModPath(r io.Reader) (string, string, error) {
 func recursiveCopy(src, target string) error {
 	files, err := ioutil.ReadDir(src)
 	if err != nil {
-		return fmt.Errorf("Cannot read dir %s: %v", src, err)
+		return fmt.Errorf("cannot read dir %s: %v", src, err)
 	}
 	err = ensureDir(target)
 	if err != nil {
@@ -117,16 +117,24 @@ func (v *vendor) main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Reset vendor content using 'go mod vendor'")
-	cmd := exec.Command("go", "mod", "vendor", "-v")
+	fmt.Println("Add missing and remove unused modules using 'go mod tidy'")
+	cmd := exec.Command("go", "mod", "tidy", "-v")
 	err := cmd.Run()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 
+	fmt.Println("Reset vendor content using 'go mod vendor'")
+	cmd = exec.Command("go", "mod", "vendor", "-v")
+	err = cmd.Run()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
 	fmt.Printf("Parsing %s to detect dependency module path for GLFW\n", goModVendorFile)
-	f, err := os.Open(filepath.Join(wd, goModVendorFile))
+	f, err := os.Open(filepath.Join(wd, goModVendorFile)) // #nosec
 	if err != nil {
 		fmt.Printf("Cannot open %s: %v\n", goModVendorFile, err)
 		os.Exit(1)

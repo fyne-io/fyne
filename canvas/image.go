@@ -24,6 +24,16 @@ const (
 	ImageFillOriginal
 )
 
+// ImageScale defines the different scaling filters used to scaling images
+type ImageScale int32
+
+const (
+	// ImageScaleSmooth will scale the image using ApproxBiLinear filter (or GL equivalent)
+	ImageScaleSmooth ImageScale = 0
+	// ImageScalePixels will scale the image using NearestNeighbor filter (or GL equivalent)
+	ImageScalePixels ImageScale = 1
+)
+
 // Declare conformity with CanvasObject interface
 var _ fyne.CanvasObject = (*Image)(nil)
 
@@ -38,8 +48,10 @@ type Image struct {
 	Resource fyne.Resource // Load the image from an in-memory resource
 	Image    image.Image   // Specify a loaded image to use in this canvas object
 
-	Translucency float64   // Set a translucency value > 0.0 to fade the image
-	FillMode     ImageFill // Specify how the image should scale to fill or fit
+	Translucency float64    // Set a translucency value > 0.0 to fade the image
+	FillMode     ImageFill  // Specify how the image should expand to fill or fit the available space
+	ScaleMode    ImageScale // Specify the type of scaling interpolation applied to the image
+
 }
 
 // Alpha is a convenience function that returns the alpha value for an image

@@ -28,6 +28,13 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 	assert.Equal(t, theme.Padding(), aSize.Height)
 }
 
+func TestSlider_OutOfRange(t *testing.T) {
+	slider := NewSlider(2, 5)
+	slider.Resize(fyne.NewSize(100, 10))
+
+	assert.Equal(t, float64(2), slider.Value)
+}
+
 func TestSlider_VerticalLayout(t *testing.T) {
 	slider := NewSlider(0, 1)
 	slider.Orientation = Vertical

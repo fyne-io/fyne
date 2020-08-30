@@ -1,4 +1,4 @@
-// Package main loads a very basic Hello World graphical application
+// Package main loads a very basic Hello World graphical application.
 package main
 
 import (
@@ -8,12 +8,13 @@ import (
 
 func main() {
 	a := app.New()
-
 	w := a.NewWindow("Hello")
+
+	hello := widget.NewLabel("Hello Fyne!")
 	w.SetContent(widget.NewVBox(
-		widget.NewLabel("Hello Fyne!"),
-		widget.NewButton("Quit", func() {
-			a.Quit()
+		hello,
+		widget.NewButton("Hi!", func() {
+			hello.SetText("Welcome :)")
 		}),
 	))
 

@@ -61,6 +61,8 @@ func watchFile(path string, callback func()) *fsnotify.Watcher {
 
 func (s *settings) watchSettings() {
 	s.watcher = watchFile(s.schema.StoragePath(), s.fileChanged)
+
+	watchTheme()
 }
 
 func (s *settings) stopWatching() {
@@ -68,9 +70,5 @@ func (s *settings) stopWatching() {
 		return
 	}
 
-	err := s.watcher.(*fsnotify.Watcher).Close()
-	if err != nil {
-		fyne.LogError("Failed to close watcher", err)
-		return
-	}
+	s.watcher.(*fsnotify.Watcher).Close() // fsnotify returns false positives, see https://github.com/fsnotify/fsnotify/issues/268
 }

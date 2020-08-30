@@ -100,6 +100,7 @@ func GetVersionString() string {
 func GetClipboardString() string {
 	cs := C.glfwGetClipboardString(nil)
 	if cs == nil {
+		acceptError(FormatUnavailable)
 		return ""
 	}
 	return C.GoString(cs)

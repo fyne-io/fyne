@@ -1,14 +1,13 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
-// Group widget is list of widgets that contains a visual border around the list and a group title at the top.
+// Group widget contains a list of widgets that are grouped under a dividing line and title at the top.
 type Group struct {
 	BaseWidget
 
@@ -42,10 +41,14 @@ func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	g.ExtendBaseWidget(g)
 	label := NewLabel(g.Text)
 	labelBg := canvas.NewRectangle(theme.BackgroundColor())
-	line := canvas.NewRectangle(theme.ButtonColor())
-	objects := []fyne.CanvasObject{line, labelBg, label, g.content}
-	return &groupRenderer{label: label, line: line, labelBg: labelBg,
-		objects: objects, group: g}
+	line := canvas.NewRectangle(theme.ShadowColor())
+	return &groupRenderer{
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{line, labelBg, label, g.content}),
+		label:        label,
+		line:         line,
+		labelBg:      labelBg,
+		group:        g,
+	}
 }
 
 // NewGroup creates a new grouped list widget with a title and the specified list of child objects.
@@ -61,18 +64,17 @@ func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 // This group will scroll when the available space is less than needed to display the items it contains.
 func NewGroupWithScroller(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
-	group := &Group{BaseWidget{}, title, box, NewScrollContainer(box)}
+	group := &Group{BaseWidget{}, title, box, NewVScrollContainer(box)}
 
 	Renderer(group).Layout(group.MinSize())
 	return group
 }
 
 type groupRenderer struct {
+	widget.BaseRenderer
 	label         *Label
 	line, labelBg *canvas.Rectangle
-
-	objects []fyne.CanvasObject
-	group   *Group
+	group         *Group
 }
 
 func (g *groupRenderer) MinSize() fyne.Size {
@@ -99,16 +101,8 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 	g.group.content.Resize(fyne.NewSize(size.Width, size.Height-labelHeight-theme.Padding()))
 }
 
-func (g *groupRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (g *groupRenderer) Objects() []fyne.CanvasObject {
-	return g.objects
-}
-
 func (g *groupRenderer) Refresh() {
-	g.line.FillColor = theme.ButtonColor()
+	g.line.FillColor = theme.ShadowColor()
 	g.labelBg.FillColor = theme.BackgroundColor()
 
 	g.label.SetText(g.group.Text)
@@ -116,7 +110,4 @@ func (g *groupRenderer) Refresh() {
 
 	g.line.Refresh()
 	g.labelBg.Refresh()
-}
-
-func (g *groupRenderer) Destroy() {
 }
