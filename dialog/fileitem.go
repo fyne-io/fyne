@@ -46,7 +46,7 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 
 func fileName(path string) (name string) {
 	name = filepath.Base(path)
-	ext := filepath.Ext(path)
+	ext := filepath.Ext(name[1:])
 	name = name[:len(name)-len(ext)]
 
 	return
@@ -58,12 +58,14 @@ func (i *fileDialogItem) isDirectory() bool {
 
 func (f *fileDialog) newFileItem(path string, dir bool) *fileDialogItem {
 	var icon fyne.CanvasObject
+	var name string
 	if dir {
 		icon = canvas.NewImageFromResource(theme.FolderIcon())
+		name = filepath.Base(path)
 	} else {
 		icon = NewFileIcon(storage.NewURI("file://" + path))
+		name = fileName(path)
 	}
-	name := fileName(path)
 
 	ret := &fileDialogItem{
 		picker: f,

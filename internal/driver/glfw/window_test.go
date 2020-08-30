@@ -500,7 +500,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	b2 := widget.NewButton("Tap", func() { tapped = 2 })
 	w.SetContent(widget.NewVBox(b1, b2))
 
-	w.mouseMoved(w.viewport, 10, 20)
+	w.mouseMoved(w.viewport, 15, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
@@ -509,7 +509,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	tapped = 0
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseMoved(w.viewport, 10, 40)
+	w.mouseMoved(w.viewport, 15, 45)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
@@ -819,6 +819,38 @@ func TestWindow_Clipboard(t *testing.T) {
 
 	// Restore clipboardContent, if any
 	cb.SetContent(cliboardContent)
+}
+
+func TestWindow_CloseInterception(t *testing.T) {
+	d := NewGLDriver()
+	w := d.CreateWindow("test").(*window)
+	w.create()
+
+	onIntercepted := false
+	onClosed := false
+	w.SetCloseIntercept(func() {
+		onIntercepted = true
+	})
+	w.SetOnClosed(func() {
+		onClosed = true
+	})
+	w.Close()
+	w.waitForEvents()
+	assert.False(t, onIntercepted) // The interceptor is not called by the Close.
+	assert.True(t, onClosed)
+
+	onIntercepted = false
+	onClosed = false
+	w.closed(w.viewport)
+	w.waitForEvents()
+	assert.True(t, onIntercepted) // The interceptor is called by the closed.
+	assert.False(t, onClosed)     // If the interceptor is set Close is not called.
+
+	onClosed = false
+	w.SetCloseIntercept(nil)
+	w.closed(w.viewport)
+	w.waitForEvents()
+	assert.True(t, onClosed) // Close is called if the interceptor is not set.
 }
 
 // This test makes our developer screens flash, let's not run it regularly...

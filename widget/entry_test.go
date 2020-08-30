@@ -43,6 +43,18 @@ func TestEntry_passwordRevealerCursor(t *testing.T) {
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
 }
 
+func TestEntry_ValidatedEntry(t *testing.T) {
+	r := fyne.NewRegexpValidator(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
+	entry := &widget.Entry{Validator: r}
+	entry.ExtendBaseWidget(entry)
+
+	test.Type(entry, "2020-02")
+	assert.Error(t, r.Validate(entry.Text))
+
+	test.Type(entry, "-12")
+	assert.NoError(t, r.Validate(entry.Text))
+}
+
 func TestMultiLineEntry_MinSize(t *testing.T) {
 	entry := widget.NewEntry()
 	singleMin := entry.MinSize()
