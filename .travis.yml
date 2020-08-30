@@ -66,7 +66,7 @@ env:
 
 matrix:
   include:
-    - go: 1.13.x
+    - go: 1.12.x
       os: linux
       env: RUN_CODE_CHECKS=on GO111MODULE=on GOFLAGS=
     - go: 1.14.x
