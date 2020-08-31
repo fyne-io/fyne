@@ -3,12 +3,13 @@ package screens
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"net/url"
+	"os"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -140,34 +141,31 @@ func makeSplitTab() fyne.CanvasObject {
 }
 
 func makeTreeTab() fyne.CanvasObject {
-	left := widget.NewTree()
-	left.UseFileSystemIcons()
-	left.OnLeafSelected = func(path []string) {
-		log.Println("TreeLeafSelected:", path)
-	}
-	left.Add("A", "B", "C", "abc")
-	left.Add("A", "D", "E", "F", "adef")
-	left.Add("A", "D", "E", "G", "adeg")
-	left.Add("A", "H", "I", "ahi")
-	left.Add("A", "J", "K", "ajk")
-	left.Add("A", "L", "M", "N", "almn")
-	left.Add("A", "O", "ao")
-	left.Add("A", "P", "Q", "R", "apqr")
-	left.Add("A", "S", "T", "U", "astu")
-	left.Add("A", "V", "W", "X", "Y", "Z", "avwxyz")
+	left := make(map[string][]string)
+	widget.AddTreePath(left, "A", "B", "C", "abc")
+	widget.AddTreePath(left, "A", "D", "E", "F", "adef")
+	widget.AddTreePath(left, "A", "D", "E", "G", "adeg")
+	widget.AddTreePath(left, "A", "H", "I", "ahi")
+	widget.AddTreePath(left, "A", "J", "K", "ajk")
+	widget.AddTreePath(left, "A", "L", "M", "N", "almn")
+	widget.AddTreePath(left, "A", "O", "ao")
+	widget.AddTreePath(left, "A", "P", "Q", "R", "apqr")
+	widget.AddTreePath(left, "A", "S", "T", "U", "astu")
+	widget.AddTreePath(left, "A", "V", "W", "X", "Y", "Z", "avwxyz")
 
-	right := widget.NewTree()
-	right.UseArrowIcons()
-	right.OnLeafSelected = func(path []string) {
-		log.Println("TreeLeafSelected:", path)
+	l := widget.NewTreeOfStrings(left)
+	l.OnNodeSelected = func(id string, node fyne.CanvasObject) {
+		fmt.Println("LeftTreeNodeSelected:", id)
 	}
-	right.Add("1", "2", "3", "1bc")
-	right.Add("1", "4", "5", "6", "1456")
-	right.Add("1", "4", "5", "7", "1457")
-	right.Add("1", "8", "9", "189")
-	right.Add("1", "10", "11", "11011")
-	return widget.NewHBox(
-		widget.NewVScrollContainer(left),
-		widget.NewVScrollContainer(right),
-	)
+	l.OpenBranch("A")
+
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		fyne.LogError("Could not get user home dir", err)
+	}
+	r := widget.NewTreeOfFiles(storage.NewURI("file://" + dir))
+	r.OnNodeSelected = func(id string, node fyne.CanvasObject) {
+		fmt.Println("RightTreeNodeSelected:", id)
+	}
+	return widget.NewHSplitContainer(l, r)
 }
