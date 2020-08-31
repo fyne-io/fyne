@@ -47,6 +47,11 @@ func (res *ThemedResource) Invert() *InvertedThemedResource {
 	return NewInvertedThemedResource(res)
 }
 
+// Error resturns a different resource for indicating an error.
+func (res *ThemedResource) Error() *ErrorThemedResource {
+	return NewErrorThemedResource(res)
+}
+
 // InvertedThemedResource is a resource wrapper that will return a version of the resource with the main color changed
 // for use over highlighted elements.
 type InvertedThemedResource struct {
@@ -76,6 +81,29 @@ func (res *InvertedThemedResource) Invert() *ThemedResource {
 		return original
 	}
 	return NewThemedResource(res.source, nil)
+}
+
+// ErrorThemedResource is a resource wrapper that will return a version of the resource with the main color changed
+// to indicate an error.
+type ErrorThemedResource struct {
+	source fyne.Resource
+}
+
+// NewErrorThemedResource creates a resource that adapts to the error color for the current theme.
+func NewErrorThemedResource(orig fyne.Resource) *ErrorThemedResource {
+	res := &ErrorThemedResource{source: orig}
+	return res
+}
+
+// Name returns the underlying resource name (used for caching).
+func (res *ErrorThemedResource) Name() string {
+	return "error-" + res.source.Name()
+}
+
+// Content returns the underlying content of the resource adapted to the current background color.
+func (res *ErrorThemedResource) Content() []byte {
+	clr := &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
+	return colorizeResource(res.source, clr)
 }
 
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
@@ -125,7 +153,7 @@ var (
 	cancel, confirm, delete, search, searchReplace, menu, menuExpand                *ThemedResource
 	checked, unchecked, radioButton, radioButtonChecked                             *ThemedResource
 	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                *ThemedResource
-	contentRedo, contentUndo, info, question, warning                               *ThemedResource
+	contentRedo, contentUndo, info, question, warning, errori                       *ThemedResource
 	document, documentCreate, documentPrint, documentSave                           *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     *ThemedResource
 	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        *ThemedResource
@@ -167,6 +195,7 @@ func init() {
 	info = NewThemedResource(infoIconRes, nil)
 	question = NewThemedResource(questionIconRes, nil)
 	warning = NewThemedResource(warningIconRes, nil)
+	errori = NewThemedResource(errorIconRes, nil)
 
 	mailAttachment = NewThemedResource(mailattachmentIconRes, nil)
 	mailCompose = NewThemedResource(mailcomposeIconRes, nil)
@@ -355,6 +384,11 @@ func QuestionIcon() fyne.Resource {
 // WarningIcon returns a resource containing the standard dialog warning icon for the current theme
 func WarningIcon() fyne.Resource {
 	return warning
+}
+
+// ErrorIcon returns a resource containing the standard dialog error icon for the current theme
+func ErrorIcon() fyne.Resource {
+	return errori
 }
 
 // FileIcon returns a resource containing the appropriate file icon for the current theme
