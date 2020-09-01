@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -41,6 +42,18 @@ func TestEntry_Cursor(t *testing.T) {
 func TestEntry_passwordRevealerCursor(t *testing.T) {
 	pr := widget.NewPasswordEntry().ActionItem.(desktop.Cursorable)
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
+}
+
+func TestEntry_ValidatedEntry(t *testing.T) {
+	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
+	entry := &widget.Entry{Validator: r}
+	entry.ExtendBaseWidget(entry)
+
+	test.Type(entry, "2020-02")
+	assert.Error(t, r.Validate(entry.Text))
+
+	test.Type(entry, "-12")
+	assert.NoError(t, r.Validate(entry.Text))
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {

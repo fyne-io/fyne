@@ -16,3 +16,9 @@ func OpenFileFromURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 func SaveFileToURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 	return fyne.CurrentApp().Driver().FileWriterForURI(uri)
 }
+
+// ListerForURI will attempt to use the application's driver to convert a
+// standard URI into a listable URI.
+func ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
+	return fyne.CurrentApp().Driver().ListerForURI(uri)
+}
