@@ -13,7 +13,7 @@ import (
 )
 
 // List is a widget that pools list items for performance and
-// lays the items out in a vertical direction inside of a scroller
+// lays the items out in a vertical direction inside of a scroller.
 // List requires that all items are the same size
 type List struct {
 	BaseWidget
@@ -23,7 +23,6 @@ type List struct {
 	UpdateItem     func(index int, item fyne.CanvasObject)
 	OnItemSelected func(index int, item fyne.CanvasObject)
 
-	background      color.Color
 	offsetY         int
 	previousOffsetY int
 	selectedItem    *listItem
@@ -82,11 +81,7 @@ type listRenderer struct {
 }
 
 func (l *listRenderer) BackgroundColor() color.Color {
-	if l.list.background == nil {
-		return theme.BackgroundColor()
-	}
-
-	return l.list.background
+	return theme.BackgroundColor()
 }
 
 func (l *listRenderer) Layout(size fyne.Size) {
@@ -110,65 +105,35 @@ func (l *listRenderer) Layout(size fyne.Size) {
 
 	if offsetChange < 0 {
 		// Scrolling Down
-		itemChange := 0
-		layoutEndY := l.children[len(l.children)-1].Position().Y + l.list.itemMin.Height
-		scrollerEndY := l.scroller.Offset.Y + l.scroller.Size().Height
-		if layoutEndY < scrollerEndY {
-			itemChange = int(math.Ceil(float64(scrollerEndY-layoutEndY) / float64(l.list.itemMin.Height)))
-		} else if offsetChange*-1 < l.list.itemMin.Height {
-			return
-		} else {
-			itemChange = int(math.Floor(float64(offsetChange*-1) / float64(l.list.itemMin.Height)))
-		}
-		l.list.previousOffsetY = l.list.offsetY
-		for i := 0; i < itemChange && l.lastItemIndex != l.list.Length()-1; i++ {
-			l.itemPool.Release(l.children[0])
-			l.children = l.children[1:]
-			l.firstItemIndex++
-			l.lastItemIndex++
-			l.appendItem(l.lastItemIndex)
-		}
+		l.scrollDown(offsetChange)
+		return
+
 	} else if offsetChange > 0 {
 		// Scrolling Up
-		itemChange := 0
-		layoutStartY := l.children[0].Position().Y
-		if layoutStartY > l.scroller.Offset.Y {
-			itemChange = int(math.Ceil(float64(layoutStartY-l.scroller.Offset.Y) / float64(l.list.itemMin.Height)))
-		} else if offsetChange < l.list.itemMin.Height {
-			return
-		} else {
-			itemChange = int(math.Floor(float64(offsetChange) / float64(l.list.itemMin.Height)))
-		}
-		l.list.previousOffsetY = l.list.offsetY
-		for i := 0; i < itemChange && l.firstItemIndex != 0; i++ {
-			l.itemPool.Release(l.children[len(l.children)-1])
-			l.children = l.children[:len(l.children)-1]
-			l.firstItemIndex--
-			l.lastItemIndex--
-			l.prependItem(l.firstItemIndex)
-		}
-	} else {
-		// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize
-		l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
-		if len(l.children) >= l.visibleItemCount || len(l.children) >= l.list.Length() {
-			return
-		}
-		for i := len(l.children) + l.firstItemIndex; len(l.children) <= l.visibleItemCount && i < l.list.Length(); i++ {
-			l.appendItem(i)
-		}
-		l.layout.Objects = l.children
-		l.layout.Layout.Layout(l.layout.Objects, l.list.itemMin)
-		l.lastItemIndex = l.firstItemIndex + len(l.children) - 1
+		l.scrollUp(offsetChange)
+		return
+	}
 
-		poolCapacity := 5
-		if l.list.Length()-len(l.children) < 5 {
-			poolCapacity = l.list.Length() - len(l.children)
-		}
-		for i := l.itemPool.Count(); i < poolCapacity; i++ {
-			// Make sure to keep extra items in the pool
-			item := newListItem(l.list.CreateItem(), nil)
-			l.itemPool.Release(item)
-		}
+	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize
+	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
+	if len(l.children) >= l.visibleItemCount || len(l.children) >= l.list.Length() {
+		return
+	}
+	for i := len(l.children) + l.firstItemIndex; len(l.children) <= l.visibleItemCount && i < l.list.Length(); i++ {
+		l.appendItem(i)
+	}
+	l.layout.Objects = l.children
+	l.layout.Layout.Layout(l.layout.Objects, l.list.itemMin)
+	l.lastItemIndex = l.firstItemIndex + len(l.children) - 1
+
+	poolCapacity := 5
+	if l.list.Length()-len(l.children) < 5 {
+		poolCapacity = l.list.Length() - len(l.children)
+	}
+	for i := l.itemPool.Count(); i < poolCapacity; i++ {
+		// Make sure to keep extra items in the pool
+		item := newListItem(l.list.CreateItem(), nil)
+		l.itemPool.Release(item)
 	}
 }
 
@@ -177,6 +142,9 @@ func (l *listRenderer) MinSize() fyne.Size {
 }
 
 func (l *listRenderer) Refresh() {
+	if l.list.CreateItem != nil {
+		l.list.itemMin = newListItem(l.list.CreateItem(), nil).MinSize()
+	}
 	l.Layout(l.list.Size())
 	canvas.Refresh(l.list.super())
 }
@@ -203,6 +171,47 @@ func (l *listRenderer) prependItem(index int) {
 	l.setupListItem(item, index)
 	l.layout.Objects = l.children
 	l.layout.Layout.(*listLayout).itemPrepended(l.layout.Objects)
+}
+
+func (l *listRenderer) scrollDown(offsetChange int) {
+	itemChange := 0
+	layoutEndY := l.children[len(l.children)-1].Position().Y + l.list.itemMin.Height
+	scrollerEndY := l.scroller.Offset.Y + l.scroller.Size().Height
+	if layoutEndY < scrollerEndY {
+		itemChange = int(math.Ceil(float64(scrollerEndY-layoutEndY) / float64(l.list.itemMin.Height)))
+	} else if offsetChange*-1 < l.list.itemMin.Height {
+		return
+	} else {
+		itemChange = int(math.Floor(float64(offsetChange*-1) / float64(l.list.itemMin.Height)))
+	}
+	l.list.previousOffsetY = l.list.offsetY
+	for i := 0; i < itemChange && l.lastItemIndex != l.list.Length()-1; i++ {
+		l.itemPool.Release(l.children[0])
+		l.children = l.children[1:]
+		l.firstItemIndex++
+		l.lastItemIndex++
+		l.appendItem(l.lastItemIndex)
+	}
+}
+
+func (l *listRenderer) scrollUp(offsetChange int) {
+	itemChange := 0
+	layoutStartY := l.children[0].Position().Y
+	if layoutStartY > l.scroller.Offset.Y {
+		itemChange = int(math.Ceil(float64(layoutStartY-l.scroller.Offset.Y) / float64(l.list.itemMin.Height)))
+	} else if offsetChange < l.list.itemMin.Height {
+		return
+	} else {
+		itemChange = int(math.Floor(float64(offsetChange) / float64(l.list.itemMin.Height)))
+	}
+	l.list.previousOffsetY = l.list.offsetY
+	for i := 0; i < itemChange && l.firstItemIndex != 0; i++ {
+		l.itemPool.Release(l.children[len(l.children)-1])
+		l.children = l.children[:len(l.children)-1]
+		l.firstItemIndex--
+		l.lastItemIndex--
+		l.prependItem(l.firstItemIndex)
+	}
 }
 
 func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
@@ -232,7 +241,6 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 type listItem struct {
 	DisableableWidget
 
-	background        color.Color
 	onTapped          func()
 	statusIndicator   *canvas.Rectangle
 	child             fyne.CanvasObject
@@ -313,11 +321,7 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 }
 
 func (li *listItemRenderer) BackgroundColor() color.Color {
-	if li.item.background == nil {
-		return theme.BackgroundColor()
-	}
-
-	return li.item.background
+	return theme.BackgroundColor()
 }
 
 func (li *listItemRenderer) Refresh() {
@@ -394,16 +398,11 @@ func (lc *listPool) Count() int {
 
 // Obtain returns an item from the pool for use
 func (lc *listPool) Obtain() fyne.CanvasObject {
-	poolLength := len(lc.contents)
-	if poolLength == 0 {
+	if len(lc.contents) == 0 {
 		return nil
 	}
 	item := lc.contents[0]
-	if poolLength > 0 {
-		lc.contents = lc.contents[1:]
-	} else {
-		lc.contents = nil
-	}
+	lc.contents = lc.contents[1:]
 	item.Show()
 	return item
 }
