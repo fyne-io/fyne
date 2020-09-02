@@ -15,7 +15,6 @@ import (
 
 func TestNewList(t *testing.T) {
 	list := createList()
-	test.WidgetRenderer(list).(*listRenderer).Layout(fyne.NewSize(200, 1000))
 
 	template := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
@@ -32,7 +31,6 @@ func TestNewList(t *testing.T) {
 func TestListResize(t *testing.T) {
 	list := createList()
 	template := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
-	test.WidgetRenderer(list).(*listRenderer).Layout(fyne.NewSize(200, 1000))
 
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
@@ -67,11 +65,11 @@ func TestListOffsetChange(t *testing.T) {
 
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
+	visibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
 	poolCount := test.WidgetRenderer(list).(*listRenderer).itemPool.Count()
 
 	assert.Equal(t, 0, firstItemIndex)
-	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
+	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex)
 	assert.Equal(t, poolCount, 5)
 
 	scroll := test.WidgetRenderer(list).(*listRenderer).scroller
@@ -81,21 +79,20 @@ func TestListOffsetChange(t *testing.T) {
 
 	newFirstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	newLastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	newVisibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
+	newVisibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
 	poolCount = test.WidgetRenderer(list).(*listRenderer).itemPool.Count()
 
 	assert.NotEqual(t, firstItemIndex, newFirstItemIndex)
-	assert.Equal(t, newFirstItemIndex, firstItemIndex+indexChange)
+	assert.Equal(t, newFirstItemIndex, firstItemIndex+indexChange-1)
 	assert.NotEqual(t, lastItemIndex, newLastItemIndex)
-	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange)
+	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange-1)
 	assert.Equal(t, visibleCount, newVisibleCount)
-	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex+1)
+	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex)
 	assert.Equal(t, poolCount, 5)
 }
 
 func TestListHover(t *testing.T) {
 	list := createList()
-	test.WidgetRenderer(list).(*listRenderer).Layout(fyne.NewSize(100, 1000))
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	for i := 0; i < 2; i++ {
@@ -109,7 +106,6 @@ func TestListHover(t *testing.T) {
 
 func TestListSelection(t *testing.T) {
 	list := createList()
-	list.Resize(fyne.NewSize(100, 1000))
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
@@ -124,7 +120,6 @@ func TestListSelection(t *testing.T) {
 
 func TestListDataChange(t *testing.T) {
 	list := createList()
-	list.Resize(fyne.NewSize(100, 1000))
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "Test Item 0")
@@ -151,6 +146,7 @@ func createList() *List {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
 		},
 	)
+	list.Resize(fyne.NewSize(200, 1000))
 	return list
 }
 
