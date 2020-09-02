@@ -66,7 +66,7 @@ func (e *SelectEntry) SetOptions(options []string) {
 		e.popUp.ShowAtPosition(popUpPos)
 		e.popUp.Resize(fyne.NewSize(e.Size().Width-theme.Padding()*2, e.popUp.MinSize().Height))
 	})
-	dropDownButton.HideShadow = true
+	dropDownButton.Style = LowEmphasisButton
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())
 	e.ActionItem = dropDownButton
 }

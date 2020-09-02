@@ -26,7 +26,7 @@ type buttonRenderer struct {
 }
 
 func (b *buttonRenderer) padding() fyne.Size {
-	if b.button.HideShadow {
+	if b.button.HideShadow || b.button.Style == FlatButton {
 		return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 	}
 	if b.button.Text == "" {
@@ -61,7 +61,7 @@ func (b *buttonRenderer) MinSize() (size fyne.Size) {
 func (b *buttonRenderer) Layout(size fyne.Size) {
 	var inset fyne.Position
 	bgSize := size
-	if !b.button.HideShadow {
+	if !b.button.HideShadow || b.button.Style != FlatButton {
 		inset = fyne.NewPos(theme.Padding()/2, theme.Padding()/2)
 		bgSize = size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding()))
 	}
@@ -205,7 +205,8 @@ type Button struct {
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement
 
-	OnTapped   func() `json:"-"`
+	OnTapped func() `json:"-"`
+	// Deprecated: use Style = widget.LowEmphasisButton instead
 	HideShadow bool
 
 	hovered, tapped bool
@@ -219,6 +220,18 @@ const (
 	DefaultButton ButtonStyle = iota
 	// PrimaryButton that should be more prominent to the user
 	PrimaryButton
+	// FlatButton is less prominent than default button
+	FlatButton
+
+	// LowEmphasisButton is used to indicate a button that is less important than default.
+	// Identical to FlatButton.
+	LowEmphasisButton = FlatButton
+	// MediumEmphasisButton is used to indicate a button that neither low or high emphasis - this is default.
+	// Identical to DefaultButton.
+	MediumEmphasisButton = DefaultButton
+	// HighEmphasisButton is used to indicate a button that is more important than default.
+	// Identical to PrimaryButton.
+	HighEmphasisButton = PrimaryButton
 )
 
 // ButtonAlign represents the horizontal alignment of a button.
@@ -298,7 +311,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		text,
 	}
 	shadowLevel := widget.ButtonLevel
-	if b.HideShadow {
+	if b.HideShadow || b.Style == FlatButton {
 		shadowLevel = widget.BaseLevel
 	}
 	if icon != nil {
