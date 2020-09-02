@@ -118,7 +118,7 @@ func (d *gLDriver) runGL() {
 
 					// remove window from window list
 					v.Destroy()
-					go w.destroy(d)
+					w.destroy(d)
 					continue
 				}
 

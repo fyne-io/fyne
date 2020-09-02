@@ -480,7 +480,7 @@ func (w *window) destroy(d *gLDriver) {
 	if w.master {
 		d.Quit()
 	} else if runtime.GOOS == "darwin" {
-		d.focusPreviousWindow()
+		go d.focusPreviousWindow()
 	}
 }
 
