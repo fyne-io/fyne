@@ -33,7 +33,9 @@ type List struct {
 // NewList creates and returns a list widget for displaying items in
 // a vertical layout with scrolling and caching for performance
 func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem func(index int, item fyne.CanvasObject)) *List {
-	return &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem, selectedIndex: -1}
+	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem, selectedIndex: -1}
+	list.ExtendBaseWidget(list)
+	return list
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -100,7 +102,6 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	if l.itemPool == nil {
 		l.itemPool = &listPool{}
 	}
-
 	offsetChange := l.list.previousOffsetY - l.list.offsetY
 
 	if offsetChange < 0 {
@@ -115,6 +116,10 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	}
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize
+	for _, child := range l.children {
+		l.itemPool.Release(child)
+	}
+	l.children = nil
 	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
 	if len(l.children) >= l.visibleItemCount || len(l.children) >= l.list.Length() {
 		return
@@ -403,12 +408,10 @@ func (lc *listPool) Obtain() fyne.CanvasObject {
 	}
 	item := lc.contents[0]
 	lc.contents = lc.contents[1:]
-	item.Show()
 	return item
 }
 
 // Release adds an item into the pool to be used later
 func (lc *listPool) Release(item fyne.CanvasObject) {
 	lc.contents = append(lc.contents, item)
-	item.Hide()
 }
