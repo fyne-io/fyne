@@ -307,13 +307,11 @@ func makeListTab() fyne.CanvasObject {
 		},
 	)
 	list.OnItemSelected = func(index int, item fyne.CanvasObject) {
-		icon.Resource = item.(*fyne.Container).Objects[0].(*widget.Icon).Resource
-		label.Text = data[index]
-		icon.Refresh()
-		label.Refresh()
+		icon.SetResource(item.(*fyne.Container).Objects[0].(*widget.Icon).Resource)
+		label.SetText(data[index])
 	}
 	split := widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil), split)
+	return fyne.NewContainerWithLayout(layout.NewMaxLayout(), split)
 }
 
 // WidgetScreen shows a panel containing widget demos

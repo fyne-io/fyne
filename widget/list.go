@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"image/color"
 	"math"
 
 	"fyne.io/fyne"
@@ -80,10 +79,6 @@ type listRenderer struct {
 	firstItemIndex   int
 	lastItemIndex    int
 	size             fyne.Size
-}
-
-func (l *listRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (l *listRenderer) Layout(size fyne.Size) {
@@ -323,10 +318,6 @@ func (li *listItemRenderer) MinSize() (size fyne.Size) {
 func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.LayoutShadow(size, fyne.NewPos(0, 0))
 	li.layout.Layout([]fyne.CanvasObject{li.item.statusIndicator, li.item.child}, size)
-}
-
-func (li *listItemRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
 }
 
 func (li *listItemRenderer) Refresh() {

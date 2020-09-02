@@ -28,7 +28,7 @@ func TestNewList(t *testing.T) {
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
 }
 
-func TestListResize(t *testing.T) {
+func TestList_Resize(t *testing.T) {
 	list := createList()
 	template := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 
@@ -58,7 +58,7 @@ func TestListResize(t *testing.T) {
 	assert.Equal(t, poolCount, 5)
 }
 
-func TestListOffsetChange(t *testing.T) {
+func TestList_OffsetChange(t *testing.T) {
 	list := createList()
 	template := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 	test.WidgetRenderer(list).(*listRenderer).Layout(fyne.NewSize(100, 1000))
@@ -91,7 +91,7 @@ func TestListOffsetChange(t *testing.T) {
 	assert.Equal(t, poolCount, 5)
 }
 
-func TestListHover(t *testing.T) {
+func TestList_Hover(t *testing.T) {
 	list := createList()
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
@@ -104,7 +104,7 @@ func TestListHover(t *testing.T) {
 	}
 }
 
-func TestListSelection(t *testing.T) {
+func TestList_Selection(t *testing.T) {
 	list := createList()
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
@@ -118,7 +118,7 @@ func TestListSelection(t *testing.T) {
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
 }
 
-func TestListDataChange(t *testing.T) {
+func TestList_DataChange(t *testing.T) {
 	list := createList()
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
