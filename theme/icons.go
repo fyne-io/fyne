@@ -42,11 +42,6 @@ func (res *ThemedResource) Content() []byte {
 	return colorizeResource(res.source, clr)
 }
 
-// Invert returns a different resource for use over highlighted elements.
-func (res *ThemedResource) Invert() *InvertedThemedResource {
-	return NewInvertedThemedResource(res)
-}
-
 // Error resturns a different resource for indicating an error.
 func (res *ThemedResource) Error() *ErrorThemedResource {
 	return NewErrorThemedResource(res)
@@ -75,12 +70,9 @@ func (res *InvertedThemedResource) Content() []byte {
 	return colorizeResource(res.source, clr)
 }
 
-// Invert returns a different resource for use over normal background colors.
-func (res *InvertedThemedResource) Invert() *ThemedResource {
-	if original, ok := res.source.(*ThemedResource); ok {
-		return original
-	}
-	return NewThemedResource(res.source, nil)
+// Original returns the underlying resource that this inverted themed resource was adapted from
+func (res *InvertedThemedResource) Original() fyne.Resource {
+	return res.source
 }
 
 // ErrorThemedResource is a resource wrapper that will return a version of the resource with the main color changed
@@ -104,6 +96,11 @@ func (res *ErrorThemedResource) Name() string {
 func (res *ErrorThemedResource) Content() []byte {
 	clr := &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
 	return colorizeResource(res.source, clr)
+}
+
+// Original returns the underlying resource that this error themed resource was adapted from
+func (res *ErrorThemedResource) Original() fyne.Resource {
+	return res.source
 }
 
 // PrimaryThemedResource is a resource wrapper that will return a version of the resource with the main color changed
