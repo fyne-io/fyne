@@ -106,6 +106,33 @@ func (res *ErrorThemedResource) Content() []byte {
 	return colorizeResource(res.source, clr)
 }
 
+// PrimaryThemedResource is a resource wrapper that will return a version of the resource with the main color changed
+// to the theme primary color.
+type PrimaryThemedResource struct {
+	source fyne.Resource
+}
+
+// NewPrimaryThemedResource creates a resource that adapts to the primary color for the current theme.
+func NewPrimaryThemedResource(orig fyne.Resource) *PrimaryThemedResource {
+	res := &PrimaryThemedResource{source: orig}
+	return res
+}
+
+// Name returns the underlying resource name (used for caching).
+func (res *PrimaryThemedResource) Name() string {
+	return "primary-" + res.source.Name()
+}
+
+// Content returns the underlying content of the resource adapted to the current background color.
+func (res *PrimaryThemedResource) Content() []byte {
+	return colorizeResource(res.source, PrimaryColor())
+}
+
+// Original returns the underlying resource that this primary themed resource was adapted from
+func (res *PrimaryThemedResource) Original() fyne.Resource {
+	return res.source
+}
+
 // DisabledResource is a resource wrapper that will return an appropriate resource colorized by
 // the current theme's `DisabledIconColor` color.
 type DisabledResource struct {
