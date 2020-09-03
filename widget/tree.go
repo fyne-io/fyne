@@ -643,8 +643,8 @@ func (r *treeNodeRenderer) Layout(size fyne.Size) {
 	}
 	x += theme.IconInlineSize()
 	if i := r.indicator; i != nil {
-		i.Move(fyne.NewPos(x, y))
-		s := fyne.NewSize(theme.Padding(), height)
+		i.Move(fyne.NewPos(x, 0))
+		s := fyne.NewSize(theme.Padding(), size.Height-1)
 		i.SetMinSize(s)
 		i.Resize(s)
 	}

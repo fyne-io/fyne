@@ -158,6 +158,10 @@ func makeTreeTab() fyne.CanvasObject {
 		fmt.Println("LeftTreeNodeSelected:", id)
 	}
 	l.OpenBranch("A")
+	l.OpenBranch("D")
+	l.OpenBranch("E")
+	l.OpenBranch("L")
+	l.OpenBranch("M")
 
 	dir, err := os.UserHomeDir()
 	if err != nil {
