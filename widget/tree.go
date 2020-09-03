@@ -608,9 +608,11 @@ type treeNodeRenderer struct {
 }
 
 func (r *treeNodeRenderer) BackgroundColor() color.Color {
+	/* TODO FIXME removed until transparent BG becomes the default
 	if r.treeNode.hovered {
 		return theme.HoverColor()
 	}
+	*/
 	return theme.BackgroundColor()
 }
 
