@@ -628,6 +628,12 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
 	//log.Println("treeNodeRenderer.Layout:", size)
+	if d := r.divider; d != nil {
+		d.Move(fyne.NewPos(0, size.Height-1))
+		s := fyne.NewSize(size.Width, 1)
+		d.SetMinSize(s)
+		d.Resize(s)
+	}
 	x := theme.Padding() + r.treeNode.Indent()
 	y := theme.Padding()
 	height := size.Height - 2*theme.Padding()
@@ -646,12 +652,6 @@ func (r *treeNodeRenderer) Layout(size fyne.Size) {
 	if c := r.treeNode.content; c != nil {
 		c.Move(fyne.NewPos(x, y))
 		c.Resize(fyne.NewSize(size.Width-x-theme.Padding(), height))
-	}
-	if d := r.divider; d != nil {
-		d.Move(fyne.NewPos(x+theme.Padding(), size.Height-1))
-		s := fyne.NewSize(size.Width-x-2*theme.Padding(), 1)
-		d.SetMinSize(s)
-		d.Resize(s)
 	}
 }
 
