@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -20,13 +21,14 @@ type textWidget interface {
 }
 
 type fileDialog struct {
-	file       *FileDialog
-	fileName   textWidget
-	dismiss    *widget.Button
-	open       *widget.Button
-	breadcrumb *widget.Box
-	files      *fyne.Container
-	fileScroll *widget.ScrollContainer
+	file            *FileDialog
+	fileName        textWidget
+	dismiss         *widget.Button
+	open            *widget.Button
+	breadcrumb      *widget.Box
+	files           *fyne.Container
+	fileScroll      *widget.ScrollContainer
+	showHiddenCheck *widget.Check
 
 	win      *widget.PopUp
 	selected *fileDialogItem
@@ -143,6 +145,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
 	f.fileScroll = widget.NewScrollContainer(f.files)
+	f.showHiddenCheck = widget.NewCheck("Show Hidden Files", func(_ bool) {
+		f.refreshDir(f.dir)
+	})
 	verticalExtra := int(float64(fileIconSize) * 0.25)
 	f.fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
@@ -151,7 +156,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	scrollBread := widget.NewHScrollContainer(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, f.fileScroll)
-	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	headerLabel := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	header := widget.NewHBox(headerLabel, f.showHiddenCheck)
 	favorites := widget.NewGroup("Favorites", f.loadFavorites()...)
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favorites, nil),
 		favorites, header, footer, body)
@@ -193,7 +199,7 @@ func (f *fileDialog) refreshDir(dir string) {
 		icons = append(icons, fi)
 	}
 	for _, file := range files {
-		if isHidden(file.Name(), dir) {
+		if !f.showHiddenCheck.Checked && isHidden(file.Name(), dir) {
 			continue
 		}
 		itemPath := filepath.Join(dir, file.Name())
@@ -292,6 +298,12 @@ func showFile(file *FileDialog) *fileDialog {
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
 
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
+	showHiddenShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: desktop.ControlModifier}
+	d.win.Canvas.AddShortcut(showHiddenShortcut, func(shortcut fyne.Shortcut) {
+		d.showHiddenCheck.Checked = !d.showHiddenCheck.Checked
+		d.showHiddenCheck.OnChanged(true)
+		d.showHiddenCheck.Refresh()
+	})
 	d.win.Resize(size)
 
 	d.win.Show()
