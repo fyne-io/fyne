@@ -19,6 +19,18 @@ func TestCard_Layout(t *testing.T) {
 		icon            *canvas.Image
 		content         fyne.CanvasObject
 	}{
+		"title": {
+			title:    "Title",
+			subtitle: "",
+			icon:     nil,
+			content:  nil,
+		},
+		"subtitle": {
+			title:    "",
+			subtitle: "Subtitle",
+			icon:     nil,
+			content:  nil,
+		},
 		"titles": {
 			title:    "Title",
 			subtitle: "Subtitle",
@@ -30,6 +42,12 @@ func TestCard_Layout(t *testing.T) {
 			subtitle: "",
 			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
 			content:  nil,
+		},
+		"just_content": {
+			title:    "",
+			subtitle: "",
+			icon:     nil,
+			content:  widget.NewHyperlink("link", nil),
 		},
 		"title_content": {
 			title:    "Hello",
@@ -53,7 +71,7 @@ func TestCard_Layout(t *testing.T) {
 			}
 
 			window := test.NewWindow(card)
-			size := card.MinSize().Max(fyne.NewSize(120, 80))
+			size := card.MinSize().Max(fyne.NewSize(80, 0)) // give a little width for image only tests
 			window.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 
 			test.AssertImageMatches(t, "card/layout_"+name+".png", window.Canvas().Capture())
