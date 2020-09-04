@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -61,7 +62,7 @@ func TestTreeContainer_Indentation(t *testing.T) {
 	assert.Equal(t, s, tree.Size().Width)
 	assert.Equal(t, s, tree.Size().Height)
 
-	AddTreePath(data, "A", "B", "C")
+	widget.AddTreePath(data, "A", "B", "C")
 
 	tree.OpenAllBranches()
 
@@ -82,8 +83,8 @@ func TestTreeContainer_Resize(t *testing.T) {
 	assert.Equal(t, s, tree.Size().Width)
 	assert.Equal(t, s, tree.Size().Height)
 
-	AddTreePath(data, "A")
-	AddTreePath(data, "B", "C")
+	widget.AddTreePath(data, "A")
+	widget.AddTreePath(data, "B", "C")
 
 	tree.OpenBranch("B")
 
@@ -206,7 +207,7 @@ func TestTreeContainer_MinSize(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			data := make(map[string][]string)
 			for _, d := range tt.items {
-				AddTreePath(data, d...)
+				widget.AddTreePath(data, d...)
 			}
 			tree := NewTreeWithStrings(data)
 			for _, o := range tt.opened {
@@ -222,7 +223,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 	/* TODO needs "fyne.io/fyne/test".DoubleTap(obj fyne.DoubleTappable)
 	t.Run("Branch", func(t *testing.T) {
 		data := make(map[string][]string)
-		AddTreePath(data, "A", "B")
+		widget.AddTreePath(data, "A", "B")
 		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
@@ -242,7 +243,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 	*/
 	t.Run("BranchIcon", func(t *testing.T) {
 		data := make(map[string][]string)
-		AddTreePath(data, "A", "B")
+		widget.AddTreePath(data, "A", "B")
 		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
@@ -261,7 +262,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 	})
 	t.Run("Leaf", func(t *testing.T) {
 		data := make(map[string][]string)
-		AddTreePath(data, "A")
+		widget.AddTreePath(data, "A")
 		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
@@ -282,8 +283,8 @@ func TestTreeContainer_Tap(t *testing.T) {
 func TestTreeContainer_Walk(t *testing.T) {
 	t.Run("Open", func(t *testing.T) {
 		data := make(map[string][]string)
-		AddTreePath(data, "A", "B", "C")
-		AddTreePath(data, "D", "E", "F")
+		widget.AddTreePath(data, "A", "B", "C")
+		widget.AddTreePath(data, "D", "E", "F")
 		tree := NewTreeWithStrings(data)
 		tree.OpenBranch("A")
 		tree.OpenBranch("B")
@@ -313,8 +314,8 @@ func TestTreeContainer_Walk(t *testing.T) {
 	})
 	t.Run("Closed", func(t *testing.T) {
 		data := make(map[string][]string)
-		AddTreePath(data, "A", "B", "C")
-		AddTreePath(data, "D", "E", "F")
+		widget.AddTreePath(data, "A", "B", "C")
+		widget.AddTreePath(data, "D", "E", "F")
 		tree := NewTreeWithStrings(data)
 		var branches []string
 		var leaves []string
@@ -337,7 +338,7 @@ func TestTreeContainer_Walk(t *testing.T) {
 
 func TestTreeNode_Hovered(t *testing.T) {
 	data := make(map[string][]string)
-	AddTreePath(data, "A", "B", "C")
+	widget.AddTreePath(data, "A", "B", "C")
 	tree := NewTreeWithStrings(data)
 	tree.OpenAllBranches()
 	tree.Resize(fyne.NewSize(150, 200))
@@ -374,7 +375,7 @@ func TestTreeNode_Hovered(t *testing.T) {
 
 func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	data := make(map[string][]string)
-	AddTreePath(data, "A", "B")
+	widget.AddTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
 	tree.OpenAllBranches()
 	t.Run("Branch", func(t *testing.T) {
@@ -391,7 +392,7 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 
 func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 	data := make(map[string][]string)
-	AddTreePath(data, "A", "B")
+	widget.AddTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
 	tree.OpenAllBranches()
 	t.Run("Branch", func(t *testing.T) {

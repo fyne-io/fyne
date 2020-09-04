@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -142,16 +143,16 @@ func makeSplitTab() fyne.CanvasObject {
 
 func makeTreeTab() fyne.CanvasObject {
 	left := make(map[string][]string)
-	widget.AddTreePath(left, "A", "B", "C", "abc")
-	widget.AddTreePath(left, "A", "D", "E", "F", "adef")
-	widget.AddTreePath(left, "A", "D", "E", "G", "adeg")
-	widget.AddTreePath(left, "A", "H", "I", "ahi")
-	widget.AddTreePath(left, "A", "J", "K", "ajk")
-	widget.AddTreePath(left, "A", "L", "M", "N", "almn")
-	widget.AddTreePath(left, "A", "O", "ao")
-	widget.AddTreePath(left, "A", "P", "Q", "R", "apqr")
-	widget.AddTreePath(left, "A", "S", "T", "U", "astu")
-	widget.AddTreePath(left, "A", "V", "W", "X", "Y", "Z", "avwxyz")
+	internalwidget.AddTreePath(left, "A", "B", "C", "abc")
+	internalwidget.AddTreePath(left, "A", "D", "E", "F", "adef")
+	internalwidget.AddTreePath(left, "A", "D", "E", "G", "adeg")
+	internalwidget.AddTreePath(left, "A", "H", "I", "ahi")
+	internalwidget.AddTreePath(left, "A", "J", "K", "ajk")
+	internalwidget.AddTreePath(left, "A", "L", "M", "N", "almn")
+	internalwidget.AddTreePath(left, "A", "O", "ao")
+	internalwidget.AddTreePath(left, "A", "P", "Q", "R", "apqr")
+	internalwidget.AddTreePath(left, "A", "S", "T", "U", "astu")
+	internalwidget.AddTreePath(left, "A", "V", "W", "X", "Y", "Z", "avwxyz")
 
 	l := widget.NewTreeWithStrings(left)
 	l.OnNodeSelected = func(id string, node fyne.CanvasObject) {

@@ -163,25 +163,6 @@ func NewTreeWithFiles(root fyne.URI) (t *TreeContainer) {
 	return
 }
 
-// AddTreePath adds the given path to the given parent->children map
-func AddTreePath(data map[string][]string, path ...string) {
-	parent := ""
-	for _, p := range path {
-		children := data[parent]
-		add := true
-		for _, c := range children {
-			if c == p {
-				add = false
-				break
-			}
-		}
-		if add {
-			data[parent] = append(children, p)
-		}
-		parent = p
-	}
-}
-
 // IsBranchOpen returns true if the branch with the given ID is expanded.
 func (t *TreeContainer) IsBranchOpen(id string) bool {
 	if id == t.Root {

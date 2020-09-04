@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne"
 	//"fyne.io/fyne/storage"
+	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -27,7 +28,7 @@ func TestTreeContainer(t *testing.T) {
 	})
 	t.Run("NewTreeWithStrings", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "foo", "foobar")
+		internalwidget.AddTreePath(data, "foo", "foobar")
 		tree := widget.NewTreeWithStrings(data)
 		tree.OpenBranch("foo")
 		var branches []string
@@ -83,7 +84,7 @@ func TestTreeContainer(t *testing.T) {
 func TestTreeContainer_OpenClose(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "foo", "foobar")
+		internalwidget.AddTreePath(data, "foo", "foobar")
 		tree := widget.NewTreeWithStrings(data)
 
 		assert.False(t, tree.IsBranchOpen("foo"))
@@ -102,7 +103,7 @@ func TestTreeContainer_OpenClose(t *testing.T) {
 	})
 	t.Run("Missing", func(t *testing.T) {
 		data := make(map[string][]string)
-		widget.AddTreePath(data, "foo", "foobar")
+		internalwidget.AddTreePath(data, "foo", "foobar")
 		tree := widget.NewTreeWithStrings(data)
 
 		assert.False(t, tree.IsBranchOpen("foo"))
@@ -123,9 +124,9 @@ func TestTreeContainer_OpenClose(t *testing.T) {
 
 func TestTreeContainer_OpenCloseAll(t *testing.T) {
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "foo0", "foobar0")
-	widget.AddTreePath(data, "foo1", "foobar1")
-	widget.AddTreePath(data, "foo2", "foobar2")
+	internalwidget.AddTreePath(data, "foo0", "foobar0")
+	internalwidget.AddTreePath(data, "foo1", "foobar1")
+	internalwidget.AddTreePath(data, "foo2", "foobar2")
 	tree := widget.NewTreeWithStrings(data)
 
 	tree.OpenAllBranches()
@@ -467,7 +468,7 @@ func TestTreeContainer_Layout(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			data := make(map[string][]string)
 			for _, d := range tt.items {
-				widget.AddTreePath(data, d...)
+				internalwidget.AddTreePath(data, d...)
 			}
 			tree := widget.NewTreeWithStrings(data)
 			for _, o := range tt.opened {
@@ -493,7 +494,7 @@ func TestTree_ChangeTheme(t *testing.T) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "foo", "foobar")
+	internalwidget.AddTreePath(data, "foo", "foobar")
 	tree := widget.NewTreeWithStrings(data)
 	tree.OpenBranch("foo")
 
@@ -516,7 +517,7 @@ func TestTree_Move(t *testing.T) {
 	app.Settings().SetTheme(theme.LightTheme())
 
 	data := make(map[string][]string)
-	widget.AddTreePath(data, "foo", "foobar")
+	internalwidget.AddTreePath(data, "foo", "foobar")
 	tree := widget.NewTreeWithStrings(data)
 	tree.OpenBranch("foo")
 
