@@ -47,10 +47,15 @@ func TestEffectiveStartingDir(t *testing.T) {
 		t.Skipf("os.UserHomeDir) failed, cannot run this test on this system, error was '%s'", err)
 	}
 
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Skipf("os.Getwd() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
+	}
+
 	parent := filepath.Dir(wd)
 	_, err = os.Stat(parent)
 	if err != nil {
-		t.Skipf("os.Getwd() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
+		t.Skipf("os.Stat(wd) failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
 	}
 
 	dialog := &FileDialog{}
@@ -64,36 +69,33 @@ func TestEffectiveStartingDir(t *testing.T) {
 	}
 
 	// this should always be equivalent to the preceding test
-	dialog.StartingDirectory = ""
+	dialog.StartingLocation = nil
 	res = dialog.effectiveStartingDir()
 	expect = wd
-	if err != nil {
-		t.Skipf("os.Getwd() failed, cannot run this test on this system, error was '%s'", err)
-	}
 	if !comparePaths(t, res, expect) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
 
 	// check using StartingDirectory with some other directory
-	dialog.StartingDirectory = parent
+	dialog.StartingLocation, err = storage.ListerForURI(storage.NewURI("file://" + parent))
+	if err != nil {
+		t.Error(err)
+	}
 	res = dialog.effectiveStartingDir()
 	expect = parent
-	if err != nil {
-		t.Skipf("os.Getwd() failed, cannot run this test on this system, error was '%s'", err)
-	}
 	if res != expect {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
 
 	// make sure we fail over if the specified directory does not exist
-	dialog.StartingDirectory = "/some/file/that/does/not/exist"
+	dialog.StartingLocation, err = storage.ListerForURI(storage.NewURI("file:///some/file/that/does/not/exist"))
+	if err != nil {
+		t.Error(err)
+	}
 	res = dialog.effectiveStartingDir()
 	expect = wd
-	if err != nil {
-		t.Skipf("os.Getwd() failed, cannot run this test on this system, error was '%s'", err)
-	}
 	if res != expect {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
