@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -175,6 +176,8 @@ func makeInputTab() fyne.Widget {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
+	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
+	entryValidated.SetPlaceHolder("Must contain a number")
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
@@ -189,6 +192,7 @@ func makeInputTab() fyne.Widget {
 	return widget.NewVBox(
 		entry,
 		entryDisabled,
+		entryValidated,
 		entryMultiLine,
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,

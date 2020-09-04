@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/driver/mobile"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -40,6 +39,10 @@ type Entry struct {
 	ReadOnly    bool // Deprecated: Use Disable() instead
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
+
+	Validator        fyne.Validator
+	validationStatus *validationStatus
+	validationError  error
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -111,9 +114,15 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		e.ActionItem = newPasswordRevealer(e)
 	}
 
+	if e.Validator != nil {
+		e.validationStatus = newValidationStatus(e)
+		objects = append(objects, e.validationStatus)
+	}
+
 	if e.ActionItem != nil {
 		objects = append(objects, e.ActionItem)
 	}
+
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
 
@@ -271,6 +280,9 @@ func (e *Entry) MinSize() fyne.Size {
 
 	min := e.BaseWidget.MinSize()
 	if e.ActionItem != nil {
+		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+	}
+	if e.Validator != nil {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
 
@@ -963,6 +975,11 @@ func (e *Entry) updateText(text string) {
 		}
 	})
 
+	if e.Validator != nil {
+		e.validationError = e.Validator.Validate(text)
+		e.validationStatus.Refresh()
+	}
+
 	if callback != nil {
 		callback(text)
 	}
@@ -994,6 +1011,18 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		actionIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
 		r.entry.ActionItem.Resize(actionIconSize)
 		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+	}
+
+	validatorIconSize := fyne.NewSize(0, 0)
+	if r.entry.Validator != nil {
+		validatorIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		r.entry.validationStatus.Resize(validatorIconSize)
+
+		if r.entry.ActionItem == nil {
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+		} else {
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
+		}
 	}
 
 	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
@@ -1082,6 +1111,13 @@ func (r *entryRenderer) Refresh() {
 	r.entry.placeholder.Refresh()
 	if r.entry.ActionItem != nil {
 		r.entry.ActionItem.Refresh()
+	}
+	if r.entry.Validator != nil {
+		if !r.entry.Focused() && r.entry.Text != "" && r.entry.validationError != nil {
+			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
+		}
+
+		r.entry.validationStatus.Refresh()
 	}
 	canvas.Refresh(r.entry.super())
 }
@@ -1194,73 +1230,6 @@ func (r *entryRenderer) moveCursor() {
 	if callback != nil {
 		callback()
 	}
-}
-
-var _ desktop.Cursorable = (*passwordRevealer)(nil)
-var _ fyne.Tappable = (*passwordRevealer)(nil)
-var _ fyne.Widget = (*passwordRevealer)(nil)
-
-type passwordRevealer struct {
-	BaseWidget
-
-	icon  *canvas.Image
-	entry *Entry
-}
-
-func newPasswordRevealer(e *Entry) *passwordRevealer {
-	pr := &passwordRevealer{
-		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
-		entry: e,
-	}
-	pr.ExtendBaseWidget(pr)
-	return pr
-}
-
-func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
-	return &passwordRevealerRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
-		icon:         r.icon,
-		entry:        r.entry,
-	}
-}
-
-func (r *passwordRevealer) Cursor() desktop.Cursor {
-	return desktop.DefaultCursor
-}
-
-func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
-	r.entry.setFieldsAndRefresh(func() {
-		r.entry.Password = !r.entry.Password
-	})
-	fyne.CurrentApp().Driver().CanvasForObject(r).Focus(r.entry)
-}
-
-var _ fyne.WidgetRenderer = (*passwordRevealerRenderer)(nil)
-
-type passwordRevealerRenderer struct {
-	widget.BaseRenderer
-	entry *Entry
-	icon  *canvas.Image
-}
-
-func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
-	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
-}
-
-func (r *passwordRevealerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-}
-
-func (r *passwordRevealerRenderer) Refresh() {
-	r.entry.propertyLock.RLock()
-	defer r.entry.propertyLock.RUnlock()
-	if !r.entry.Password {
-		r.icon.Resource = theme.VisibilityIcon()
-	} else {
-		r.icon.Resource = theme.VisibilityOffIcon()
-	}
-	canvas.Refresh(r.icon)
 }
 
 type placeholderPresenter struct {
