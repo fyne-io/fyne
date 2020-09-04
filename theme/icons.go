@@ -152,6 +152,7 @@ func colorizeResource(res fyne.Resource, clr color.Color) []byte {
 var (
 	cancel, confirm, delete, search, searchReplace, menu, menuExpand                *ThemedResource
 	checked, unchecked, radioButton, radioButtonChecked                             *ThemedResource
+	colorAchromatic, colorChromatic, colorPalette                                   *ThemedResource
 	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                *ThemedResource
 	contentRedo, contentUndo, info, question, warning, errori                       *ThemedResource
 	document, documentCreate, documentPrint, documentSave                           *ThemedResource
@@ -160,7 +161,7 @@ var (
 	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                      *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
 	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
-	folder, folderNew, folderOpen, help, home, settings, storage                    *ThemedResource
+	folder, folderNew, folderOpen, help, history, home, settings, storage           *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               *ThemedResource
 	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
 )
@@ -186,6 +187,10 @@ func init() {
 	contentPaste = NewThemedResource(contentpasteIconRes, nil)
 	contentRedo = NewThemedResource(contentredoIconRes, nil)
 	contentUndo = NewThemedResource(contentundoIconRes, nil)
+
+	colorAchromatic = NewThemedResource(colorachromaticIconRes, nil)
+	colorChromatic = NewThemedResource(colorchromaticIconRes, nil)
+	colorPalette = NewThemedResource(colorpaletteIconRes, nil)
 
 	document = NewThemedResource(documentIconRes, nil)
 	documentCreate = NewThemedResource(documentcreateIconRes, nil)
@@ -230,6 +235,7 @@ func init() {
 	folderNew = NewThemedResource(foldernewIconRes, nil)
 	folderOpen = NewThemedResource(folderopenIconRes, nil)
 	help = NewThemedResource(helpIconRes, nil)
+	history = NewThemedResource(historyIconRes, nil)
 	home = NewThemedResource(homeIconRes, nil)
 	settings = NewThemedResource(settingsIconRes, nil)
 
@@ -351,6 +357,21 @@ func ContentUndoIcon() fyne.Resource {
 	return contentUndo
 }
 
+// ColorAchromaticIcon returns a resource containing the standard achromatic color icon for the current theme
+func ColorAchromaticIcon() fyne.Resource {
+	return colorAchromatic
+}
+
+// ColorChromaticIcon returns a resource containing the standard chromatic color icon for the current theme
+func ColorChromaticIcon() fyne.Resource {
+	return colorChromatic
+}
+
+// ColorPaletteIcon returns a resource containing the standard color palette icon for the current theme
+func ColorPaletteIcon() fyne.Resource {
+	return colorPalette
+}
+
 // DocumentIcon returns a resource containing the standard document icon for the current theme
 func DocumentIcon() fyne.Resource {
 	return document
@@ -439,6 +460,11 @@ func FolderOpenIcon() fyne.Resource {
 // HelpIcon returns a resource containing the standard help icon for the current theme
 func HelpIcon() fyne.Resource {
 	return help
+}
+
+// HistoryIcon returns a resource containing the standard history icon for the current theme
+func HistoryIcon() fyne.Resource {
+	return history
 }
 
 // HomeIcon returns a resource containing the standard home folder icon for the current theme
