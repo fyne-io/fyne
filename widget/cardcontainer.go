@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
@@ -12,7 +10,7 @@ import (
 // CardContainer widget groups title, subtitle with content and a header image
 type CardContainer struct {
 	BaseWidget
-	Title, SubTitle string
+	Title, Subtitle string
 	Image           *canvas.Image
 	Content         fyne.CanvasObject
 }
@@ -21,7 +19,7 @@ type CardContainer struct {
 func NewCardContainer(title, subtitle string, content fyne.CanvasObject) *CardContainer {
 	card := &CardContainer{
 		Title:    title,
-		SubTitle: subtitle,
+		Subtitle: subtitle,
 		Content:  content,
 	}
 
@@ -35,7 +33,7 @@ func (c *CardContainer) CreateRenderer() fyne.WidgetRenderer {
 
 	header := canvas.NewText(c.Title, theme.TextColor())
 	header.TextStyle.Bold = true
-	subHeader := canvas.NewText(c.SubTitle, theme.TextColor())
+	subHeader := canvas.NewText(c.Subtitle, theme.TextColor())
 
 	objects := []fyne.CanvasObject{header, subHeader}
 	if c.Image != nil {
@@ -72,7 +70,7 @@ func (c *CardContainer) SetImage(img *canvas.Image) {
 
 // SetSubTitle updates the secondary title for this card.
 func (c *CardContainer) SetSubTitle(text string) {
-	c.SubTitle = text
+	c.Subtitle = text
 
 	c.Refresh()
 }
@@ -95,10 +93,6 @@ type cardRenderer struct {
 const (
 	cardMediaHeight = 128
 )
-
-func (c *cardRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
 
 // Layout the components of the card container.
 func (c *cardRenderer) Layout(size fyne.Size) {
@@ -125,7 +119,7 @@ func (c *cardRenderer) Layout(size fyne.Size) {
 		pos.Y += height + theme.Padding()
 	}
 
-	if c.card.SubTitle != "" {
+	if c.card.Subtitle != "" {
 		height := c.subHeader.MinSize().Height
 		c.subHeader.Move(pos)
 		c.subHeader.Resize(fyne.NewSize(size.Width, height))
@@ -147,7 +141,7 @@ func (c *cardRenderer) Layout(size fyne.Size) {
 // This is based on the contained text, image and content.
 func (c *cardRenderer) MinSize() fyne.Size {
 	hasHeader := c.card.Title != ""
-	hasSubHeader := c.card.SubTitle != ""
+	hasSubHeader := c.card.Subtitle != ""
 	hasImage := c.card.Image != nil
 	hasContent := c.card.Content != nil
 
@@ -190,7 +184,7 @@ func (c *cardRenderer) MinSize() fyne.Size {
 func (c *cardRenderer) Refresh() {
 	c.header.Text = c.card.Title
 	c.header.Refresh()
-	c.subHeader.Text = c.card.SubTitle
+	c.subHeader.Text = c.card.Subtitle
 	c.subHeader.Refresh()
 
 	objects := []fyne.CanvasObject{c.header, c.subHeader}
