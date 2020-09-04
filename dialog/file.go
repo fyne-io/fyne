@@ -139,16 +139,16 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	})
 	buttons := widget.NewHBox(f.dismiss, f.open)
+	f.showHiddenCheck = widget.NewCheck("Show Hidden Files", func(_ bool) {
+		f.refreshDir(f.dir)
+	})
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
-		buttons, widget.NewHScrollContainer(f.fileName))
+		buttons, widget.NewHScrollContainer(f.fileName), f.showHiddenCheck)
 
 	f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(fileIconCellWidth,
 		fileIconSize+theme.Padding()+fileTextSize)),
 	)
 	f.fileScroll = widget.NewScrollContainer(f.files)
-	f.showHiddenCheck = widget.NewCheck("Show Hidden Files", func(_ bool) {
-		f.refreshDir(f.dir)
-	})
 	verticalExtra := int(float64(fileIconSize) * 0.25)
 	f.fileScroll.SetMinSize(fyne.NewSize(fileIconCellWidth*2+theme.Padding(),
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
@@ -157,8 +157,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	scrollBread := widget.NewHScrollContainer(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, f.fileScroll)
-	headerLabel := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	header := widget.NewHBox(headerLabel, f.showHiddenCheck)
+	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	favorites := widget.NewGroup("Favorites", f.loadFavorites()...)
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favorites, nil),
 		favorites, header, footer, body)

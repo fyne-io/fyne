@@ -129,6 +129,8 @@ func TestShowFileOpen(t *testing.T) {
 	nameLabel := ui.Objects[2].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*widget.Label)
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
+	hidden := ui.Objects[2].(*fyne.Container).Objects[2].(*widget.Check)
+	assert.Equal(t, hidden.Text, "Show Hidden Files")
 
 	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
