@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/driver/mobile"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -40,6 +39,10 @@ type Entry struct {
 	ReadOnly    bool // Deprecated: Use Disable() instead
 	MultiLine   bool
 	Wrapping    fyne.TextWrap
+
+	Validator        fyne.Validator
+	validationStatus *validationStatus
+	validationError  error
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -92,13 +95,18 @@ func NewPasswordEntry() *Entry {
 func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	e.ExtendBaseWidget(e)
 
-	line := canvas.NewRectangle(theme.ButtonColor())
+	line := canvas.NewRectangle(theme.ShadowColor())
 	cursor := canvas.NewRectangle(theme.FocusColor())
 	cursor.Hide()
 
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
-	objects := []fyne.CanvasObject{line, e.placeholderProvider(), e.textProvider(), cursor}
+	provider := e.textProvider()
+	placeholder := e.placeholderProvider()
+	if provider.len() != 0 {
+		placeholder.Hide()
+	}
+	objects := []fyne.CanvasObject{line, placeholder, provider, cursor}
 
 	if e.Password && e.ActionItem == nil {
 		// An entry widget has been created via struct setting manually
@@ -106,9 +114,15 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		e.ActionItem = newPasswordRevealer(e)
 	}
 
+	if e.Validator != nil {
+		e.validationStatus = newValidationStatus(e)
+		objects = append(objects, e.validationStatus)
+	}
+
 	if e.ActionItem != nil {
 		objects = append(objects, e.ActionItem)
 	}
+
 	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
 }
 
@@ -143,7 +157,7 @@ func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 	}
 
 	e.setFieldsAndRefresh(func() {
-		if e.selectKeyDown == false {
+		if !e.selectKeyDown {
 			e.selectRow = e.CursorRow
 			e.selectColumn = start
 		}
@@ -241,7 +255,7 @@ func (e *Entry) KeyDown(key *fyne.KeyEvent) {
 	// Note: selection start is where the highlight started (if the user moves the selection up or left then
 	// the selectRow/Column will not match SelectionStart)
 	if key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight {
-		if e.selecting == false {
+		if !e.selecting {
 			e.selectRow = e.CursorRow
 			e.selectColumn = e.CursorColumn
 		}
@@ -268,6 +282,9 @@ func (e *Entry) MinSize() fyne.Size {
 	if e.ActionItem != nil {
 		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
 	}
+	if e.Validator != nil {
+		min = min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
+	}
 
 	return min
 }
@@ -280,7 +297,7 @@ func (e *Entry) MouseDown(m *desktop.MouseEvent) {
 	if e.selectKeyDown {
 		e.selecting = true
 	}
-	if e.selecting && e.selectKeyDown == false && m.Button == desktop.LeftMouseButton {
+	if e.selecting && !e.selectKeyDown && m.Button == desktop.LeftMouseButton {
 		e.selecting = false
 	}
 	e.propertyLock.Unlock()
@@ -297,7 +314,7 @@ func (e *Entry) MouseUp(_ *desktop.MouseEvent) {
 
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
-	if start == -1 && e.selecting && e.selectKeyDown == false {
+	if start == -1 && e.selecting && !e.selectKeyDown {
 		e.selecting = false
 	}
 }
@@ -775,6 +792,9 @@ func (e *Entry) rowColFromTextPos(pos int) (row int, col int) {
 
 // selectAll selects all text in entry
 func (e *Entry) selectAll() {
+	if e.textProvider().len() == 0 {
+		return
+	}
 	e.setFieldsAndRefresh(func() {
 		e.selectRow = 0
 		e.selectColumn = 0
@@ -791,7 +811,7 @@ func (e *Entry) selectAll() {
 // returns true if the keypress has been fully handled
 func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 
-	if e.selectKeyDown && e.selecting == false {
+	if e.selectKeyDown && !e.selecting {
 		switch key.Name {
 		case fyne.KeyUp, fyne.KeyDown,
 			fyne.KeyLeft, fyne.KeyRight,
@@ -801,7 +821,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		}
 	}
 
-	if e.selecting == false {
+	if !e.selecting {
 		return false
 	}
 
@@ -816,7 +836,7 @@ func (e *Entry) selectingKeyHandler(key *fyne.KeyEvent) bool {
 		return false
 	}
 
-	if e.selectKeyDown == false {
+	if !e.selectKeyDown {
 		switch key.Name {
 		case fyne.KeyLeft:
 			// seek to the start of the selection -- return handled
@@ -955,6 +975,11 @@ func (e *Entry) updateText(text string) {
 		}
 	})
 
+	if e.Validator != nil {
+		e.validationError = e.Validator.Validate(text)
+		e.validationStatus.Refresh()
+	}
+
 	if callback != nil {
 		callback(text)
 	}
@@ -988,6 +1013,18 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 		r.entry.ActionItem.Move(fyne.NewPos(size.Width-actionIconSize.Width-2*theme.Padding(), theme.Padding()*2))
 	}
 
+	validatorIconSize := fyne.NewSize(0, 0)
+	if r.entry.Validator != nil {
+		validatorIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+		r.entry.validationStatus.Resize(validatorIconSize)
+
+		if r.entry.ActionItem == nil {
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-2*theme.Padding(), theme.Padding()*2))
+		} else {
+			r.entry.validationStatus.Move(fyne.NewPos(size.Width-validatorIconSize.Width-actionIconSize.Width-4*theme.Padding(), theme.Padding()*2))
+		}
+	}
+
 	entrySize := size.Subtract(fyne.NewSize(theme.Padding()*2-actionIconSize.Width, theme.Padding()*2))
 	entryPos := fyne.NewPos(theme.Padding(), theme.Padding())
 	r.entry.text.Resize(entrySize)
@@ -1006,7 +1043,7 @@ func (r *entryRenderer) MinSize() fyne.Size {
 		minSize = r.entry.text.MinSize()
 	}
 
-	if r.entry.MultiLine == true {
+	if r.entry.MultiLine {
 		// ensure multiline height is at least charMinSize * multilineRows
 		minSize.Height = fyne.Max(minSize.Height, r.entry.text.charMinSize().Height*multiLineRows)
 	}
@@ -1034,11 +1071,11 @@ func (r *entryRenderer) Refresh() {
 	r.entry.propertyLock.RUnlock()
 
 	if content != string(provider.buffer) {
-		provider.setText(content)
+		r.entry.SetText(content)
 		return
 	}
 
-	if provider.len() == 0 && r.entry.Visible() {
+	if provider.len() == 0 {
 		placeholder.Show()
 	} else if placeholder.Visible() {
 		placeholder.Hide()
@@ -1051,9 +1088,9 @@ func (r *entryRenderer) Refresh() {
 	} else {
 		r.cursor.Hide()
 		if r.entry.Disabled() {
-			r.line.FillColor = theme.DisabledButtonColor()
+			r.line.FillColor = theme.DisabledTextColor()
 		} else {
-			r.line.FillColor = theme.ButtonColor()
+			r.line.FillColor = theme.ShadowColor()
 		}
 	}
 	r.moveCursor()
@@ -1074,6 +1111,13 @@ func (r *entryRenderer) Refresh() {
 	r.entry.placeholder.Refresh()
 	if r.entry.ActionItem != nil {
 		r.entry.ActionItem.Refresh()
+	}
+	if r.entry.Validator != nil {
+		if !r.entry.Focused() && r.entry.Text != "" && r.entry.validationError != nil {
+			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
+		}
+
+		r.entry.validationStatus.Refresh()
 	}
 	canvas.Refresh(r.entry.super())
 }
@@ -1186,73 +1230,6 @@ func (r *entryRenderer) moveCursor() {
 	if callback != nil {
 		callback()
 	}
-}
-
-var _ desktop.Cursorable = (*passwordRevealer)(nil)
-var _ fyne.Tappable = (*passwordRevealer)(nil)
-var _ fyne.Widget = (*passwordRevealer)(nil)
-
-type passwordRevealer struct {
-	BaseWidget
-
-	icon  *canvas.Image
-	entry *Entry
-}
-
-func newPasswordRevealer(e *Entry) *passwordRevealer {
-	pr := &passwordRevealer{
-		icon:  canvas.NewImageFromResource(theme.VisibilityOffIcon()),
-		entry: e,
-	}
-	pr.ExtendBaseWidget(pr)
-	return pr
-}
-
-func (r *passwordRevealer) CreateRenderer() fyne.WidgetRenderer {
-	return &passwordRevealerRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
-		icon:         r.icon,
-		entry:        r.entry,
-	}
-}
-
-func (r *passwordRevealer) Cursor() desktop.Cursor {
-	return desktop.DefaultCursor
-}
-
-func (r *passwordRevealer) Tapped(*fyne.PointEvent) {
-	r.entry.setFieldsAndRefresh(func() {
-		r.entry.Password = !r.entry.Password
-	})
-	fyne.CurrentApp().Driver().CanvasForObject(r).Focus(r.entry)
-}
-
-var _ fyne.WidgetRenderer = (*passwordRevealerRenderer)(nil)
-
-type passwordRevealerRenderer struct {
-	widget.BaseRenderer
-	entry *Entry
-	icon  *canvas.Image
-}
-
-func (r *passwordRevealerRenderer) Layout(size fyne.Size) {
-	r.icon.Resize(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
-	r.icon.Move(fyne.NewPos((size.Width-theme.IconInlineSize())/2, (size.Height-theme.IconInlineSize())/2))
-}
-
-func (r *passwordRevealerRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
-}
-
-func (r *passwordRevealerRenderer) Refresh() {
-	r.entry.propertyLock.RLock()
-	defer r.entry.propertyLock.RUnlock()
-	if !r.entry.Password {
-		r.icon.Resource = theme.VisibilityIcon()
-	} else {
-		r.icon.Resource = theme.VisibilityOffIcon()
-	}
-	canvas.Refresh(r.icon)
 }
 
 type placeholderPresenter struct {

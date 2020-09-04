@@ -1,4 +1,4 @@
-// Package main provides various examples of Fyne API capabilities
+// Package main provides various examples of Fyne API capabilities.
 package main
 
 import (
@@ -55,7 +55,7 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 		),
 		layout.NewSpacer(),
 
-		widget.NewGroup("Theme",
+		widget.NewCardContainer("Choose theme", "",
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 				widget.NewButton("Dark", func() {
 					a.Settings().SetTheme(theme.DarkTheme())

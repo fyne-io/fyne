@@ -51,3 +51,7 @@ func rootConfigDir() string {
 	desktopConfig := filepath.Join(homeDir, ".config")
 	return filepath.Join(desktopConfig, "fyne")
 }
+
+func watchTheme() {
+	// no-op, not able to read linux theme in a standard way
+}

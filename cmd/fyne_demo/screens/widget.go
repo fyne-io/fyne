@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -27,6 +28,7 @@ Suspendisse id maximus felis. Sed mauris odio, mattis eget mi eu, consequat temp
 
 var (
 	progress    *widget.ProgressBar
+	fprogress   *widget.ProgressBar
 	infProgress *widget.ProgressBarInfinite
 	endProgress chan interface{}
 )
@@ -70,14 +72,12 @@ func makeButtonTab() fyne.Widget {
 
 func makeTextGrid() *widget.TextGrid {
 	grid := widget.NewTextGridFromString("TextGrid\n  Content\nZebra")
-	grid.SetStyleRange(0, 0, 0, 3,
-		&widget.CustomTextGridStyle{FGColor: color.NRGBA{R: 0, G: 0, B: 128, A: 255}})
 	grid.SetStyleRange(0, 4, 0, 7,
-		&widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 128, G: 0, B: 0, A: 255}})
-	grid.Rows[1].Style = &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 64, B: 64, A: 128}}
+		&widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 64, B: 192, A: 128}})
+	grid.Rows[1].Style = &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 192, B: 64, A: 128}}
 
-	white := &widget.CustomTextGridStyle{FGColor: &color.NRGBA{R: 255, G: 255, B: 255, A: 255}}
-	black := &widget.CustomTextGridStyle{FGColor: &color.NRGBA{R: 0, G: 0, B: 0, A: 255}}
+	white := &widget.CustomTextGridStyle{FGColor: color.White, BGColor: color.Black}
+	black := &widget.CustomTextGridStyle{FGColor: color.Black, BGColor: color.White}
 	grid.Rows[2].Cells[0].Style = white
 	grid.Rows[2].Cells[1].Style = black
 	grid.Rows[2].Cells[2].Style = white
@@ -176,6 +176,8 @@ func makeInputTab() fyne.Widget {
 	entryDisabled := widget.NewEntry()
 	entryDisabled.SetText("Entry (disabled)")
 	entryDisabled.Disable()
+	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
+	entryValidated.SetPlaceHolder("Must contain a number")
 	entryMultiLine := widget.NewMultiLineEntry()
 	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
@@ -190,6 +192,7 @@ func makeInputTab() fyne.Widget {
 	return widget.NewVBox(
 		entry,
 		entryDisabled,
+		entryValidated,
 		entryMultiLine,
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
@@ -203,11 +206,18 @@ func makeInputTab() fyne.Widget {
 
 func makeProgressTab() fyne.Widget {
 	progress = widget.NewProgressBar()
+
+	fprogress = widget.NewProgressBar()
+	fprogress.TextFormatter = func() string {
+		return fmt.Sprintf("%.2f out of %.2f", fprogress.Value, fprogress.Max)
+	}
+
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
 
 	return widget.NewVBox(
 		widget.NewLabel("Percent"), progress,
+		widget.NewLabel("Formatted"), fprogress,
 		widget.NewLabel("Infinite"), infProgress)
 }
 
@@ -243,6 +253,7 @@ func makeFormTab() fyne.Widget {
 
 func startProgress() {
 	progress.SetValue(0)
+	fprogress.SetValue(0)
 	select { // ignore stale end message
 	case <-endProgress:
 	default:
@@ -259,10 +270,12 @@ func startProgress() {
 			}
 
 			progress.SetValue(num)
+			fprogress.SetValue(num)
 			num += 0.01
 		}
 
 		progress.SetValue(1)
+		fprogress.SetValue(1)
 	}()
 	infProgress.Start()
 }

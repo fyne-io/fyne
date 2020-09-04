@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -41,6 +42,18 @@ func TestEntry_Cursor(t *testing.T) {
 func TestEntry_passwordRevealerCursor(t *testing.T) {
 	pr := widget.NewPasswordEntry().ActionItem.(desktop.Cursorable)
 	assert.Equal(t, desktop.DefaultCursor, pr.Cursor())
+}
+
+func TestEntry_ValidatedEntry(t *testing.T) {
+	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
+	entry := &widget.Entry{Validator: r}
+	entry.ExtendBaseWidget(entry)
+
+	test.Type(entry, "2020-02")
+	assert.Error(t, r.Validate(entry.Text))
+
+	test.Type(entry, "-12")
+	assert.NoError(t, r.Validate(entry.Text))
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
@@ -132,6 +145,22 @@ func TestEntry_SetText_Manual(t *testing.T) {
 	entry.Text = "Test"
 	entry.Refresh()
 	test.AssertImageMatches(t, "entry/set_text_changed.png", c.Capture())
+}
+
+func TestEntry_SetText_Underflow(t *testing.T) {
+	entry := widget.NewEntry()
+	test.Type(entry, "test")
+	assert.Equal(t, 4, entry.CursorColumn)
+
+	entry.Text = ""
+	entry.Refresh()
+	assert.Equal(t, 0, entry.CursorColumn)
+
+	key := &fyne.KeyEvent{Name: fyne.KeyBackspace}
+	entry.TypedKey(key)
+
+	assert.Equal(t, 0, entry.CursorColumn)
+	assert.Equal(t, "", entry.Text)
 }
 
 func TestEntry_OnKeyDown(t *testing.T) {
@@ -864,6 +893,23 @@ func TestEntry_PasteOverSelection(t *testing.T) {
 	assert.Equal(t, "TeInsertng", e.Text)
 }
 
+func TestEntry_Placeholder(t *testing.T) {
+	entry := &widget.Entry{}
+	entry.Text = "Text"
+	entry.PlaceHolder = "Placehold"
+
+	window := test.NewWindow(entry)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.Equal(t, "Text", entry.Text)
+	test.AssertImageMatches(t, "entry/placeholder_withtext.png", c.Capture())
+
+	entry.SetText("")
+	assert.Equal(t, "", entry.Text)
+	test.AssertImageMatches(t, "entry/placeholder_initial.png", c.Capture())
+}
+
 func TestPasswordEntry_Placeholder(t *testing.T) {
 	entry, window := setupPasswordImageTest()
 	defer teardownImageTest(window)
@@ -1056,6 +1102,13 @@ func TestEntry_SelectAll(t *testing.T) {
 	test.AssertImageMatches(t, "entry/select_all_selected.png", c.Capture())
 	assert.Equal(t, 2, e.CursorRow)
 	assert.Equal(t, 9, e.CursorColumn)
+}
+
+func TestEntry_SelectAll_EmptyEntry(t *testing.T) {
+	entry := widget.NewEntry()
+	entry.TypedShortcut(&fyne.ShortcutSelectAll{})
+
+	assert.Equal(t, "", entry.SelectedText())
 }
 
 func TestEntry_SelectSnapRight(t *testing.T) {

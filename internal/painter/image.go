@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"image"
-	"image/draw"
 	_ "image/jpeg" // avoid users having to import when using image widget
 	_ "image/png"  // avoid the same for PNG images
 	"io"
@@ -15,8 +14,10 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
+
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
+	"golang.org/x/image/draw"
 )
 
 // PaintImage renders a given fyne Image to a Go standard image
@@ -99,10 +100,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 			checkImageMinSize(img, c, origSize.X, origSize.Y)
 		}
 
-		tex := image.NewNRGBA(image.Rect(0, 0, pixels.Bounds().Dx(), pixels.Bounds().Dy()))
-		draw.Draw(tex, tex.Bounds(), pixels, pixels.Bounds().Min, draw.Src)
-
-		return tex
+		return scaleImage(pixels, width, height, img.ScaleMode)
 	case img.Image != nil:
 		origSize := img.Image.Bounds().Size()
 		// this is used by our render code, so let's set it to the file aspect
@@ -112,20 +110,34 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 			checkImageMinSize(img, c, origSize.X, origSize.Y)
 		}
 
-		tex := image.NewNRGBA(image.Rect(0, 0, origSize.X, origSize.Y))
-		draw.Draw(tex, tex.Bounds(), img.Image, img.Image.Bounds().Min, draw.Src)
-
-		return tex
+		return scaleImage(img.Image, width, height, img.ScaleMode)
 	default:
 		return image.NewNRGBA(image.Rect(0, 0, 1, 1))
 	}
+}
+
+func scaleImage(pixels image.Image, scaledW, scaledH int, scale canvas.ImageScale) image.Image {
+	pixW := fyne.Min(scaledW, pixels.Bounds().Dx()) // don't push more pixels than we have to
+	pixH := fyne.Min(scaledH, pixels.Bounds().Dy()) // the GL calls will scale this up on GPU.
+	scaledBounds := image.Rect(0, 0, pixW, pixH)
+	tex := image.NewNRGBA(scaledBounds)
+	switch scale {
+	case canvas.ImageScalePixels:
+		draw.NearestNeighbor.Scale(tex, scaledBounds, pixels, pixels.Bounds(), draw.Over, nil)
+	default:
+		if scale != canvas.ImageScaleSmooth {
+			fyne.LogError("Invalid canvas.ImageScale value, using canvas.ImageScaleSmooth", nil)
+		}
+		draw.CatmullRom.Scale(tex, scaledBounds, pixels, pixels.Bounds(), draw.Over, nil)
+	}
+	return tex
 }
 
 func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
-			err = errors.New("Crash when rendering SVG")
+			err = errors.New("crash when rendering svg")
 		}
 	}()
 	icon.Draw(raster, 1)
@@ -134,10 +146,10 @@ func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
 }
 
 func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) {
-	pixSize := fyne.NewSize(internal.UnscaleInt(c, pixX), internal.UnscaleInt(c, pixY))
+	dpSize := fyne.NewSize(internal.UnscaleInt(c, pixX), internal.UnscaleInt(c, pixY))
 
-	if img.MinSize() != pixSize {
-		img.SetMinSize(pixSize)
+	if img.MinSize() != dpSize {
+		img.SetMinSize(dpSize)
 		canvas.Refresh(img) // force the initial size to be respected
 	}
 }

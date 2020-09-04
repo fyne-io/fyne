@@ -26,6 +26,7 @@ type gLDriver struct {
 	windows    []fyne.Window
 	device     *glDevice
 	done       chan interface{}
+	drawDone   chan interface{}
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
@@ -92,7 +93,7 @@ func (d *gLDriver) focusPreviousWindow() {
 		}
 	}
 
-	if chosen == nil {
+	if chosen == nil || chosen.(*window).view() == nil {
 		return
 	}
 	chosen.RequestFocus()
@@ -118,6 +119,7 @@ func goroutineID() int {
 func NewGLDriver() fyne.Driver {
 	d := new(gLDriver)
 	d.done = make(chan interface{})
+	d.drawDone = make(chan interface{})
 
 	return d
 }

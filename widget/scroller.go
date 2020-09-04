@@ -39,7 +39,7 @@ func (r *scrollBarRenderer) BackgroundColor() color.Color {
 	return theme.ScrollBarColor()
 }
 
-func (r *scrollBarRenderer) Layout(size fyne.Size) {
+func (r *scrollBarRenderer) Layout(_ fyne.Size) {
 }
 
 func (r *scrollBarRenderer) MinSize() fyne.Size {
@@ -63,6 +63,10 @@ type scrollBar struct {
 
 func (b *scrollBar) CreateRenderer() fyne.WidgetRenderer {
 	return &scrollBarRenderer{scrollBar: b}
+}
+
+func (b *scrollBar) Cursor() desktop.Cursor {
+	return desktop.DefaultCursor
 }
 
 func (b *scrollBar) DragEnd() {
@@ -116,7 +120,7 @@ func (r *scrollBarAreaRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
-func (r *scrollBarAreaRenderer) Layout(size fyne.Size) {
+func (r *scrollBarAreaRenderer) Layout(_ fyne.Size) {
 	var barHeight, barWidth, barX, barY int
 	switch r.area.orientation {
 	case scrollBarOrientationHorizontal:
@@ -229,9 +233,10 @@ type scrollContainerRenderer struct {
 	horizArea               *scrollBarArea
 	leftShadow, rightShadow *widget.Shadow
 	topShadow, bottomShadow *widget.Shadow
+	oldMinSize              fyne.Size
 }
 
-func (r *scrollContainerRenderer) Layout(size fyne.Size) {
+func (r *scrollContainerRenderer) layoutBars(size fyne.Size) {
 	if r.scroll.Direction != ScrollHorizontalOnly {
 		r.vertArea.Resize(fyne.NewSize(r.vertArea.MinSize().Width, size.Height))
 		r.vertArea.Move(fyne.NewPos(r.scroll.Size().Width-r.vertArea.Size().Width, 0))
@@ -248,10 +253,14 @@ func (r *scrollContainerRenderer) Layout(size fyne.Size) {
 		r.rightShadow.Move(fyne.NewPos(r.scroll.size.Width, 0))
 	}
 
-	c := r.scroll.Content
-	c.Resize(c.MinSize().Union(size))
-
 	r.updatePosition()
+}
+
+func (r *scrollContainerRenderer) Layout(size fyne.Size) {
+	c := r.scroll.Content
+	c.Resize(c.MinSize().Max(size))
+
+	r.layoutBars(size)
 }
 
 func (r *scrollContainerRenderer) MinSize() fyne.Size {
@@ -259,6 +268,12 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
+	if r.oldMinSize == r.scroll.Content.MinSize() && r.scroll.Content.Size() == r.oldMinSize {
+		r.layoutBars(r.scroll.Size())
+		return
+	}
+
+	r.oldMinSize = r.scroll.Content.MinSize()
 	r.Layout(r.scroll.Size())
 }
 
@@ -343,6 +358,18 @@ func (s *ScrollContainer) CreateRenderer() fyne.WidgetRenderer {
 	return scr
 }
 
+//ScrollToBottom will scroll content to container bottom - to show latest info which end user just added
+func (s *ScrollContainer) ScrollToBottom() {
+	s.Offset.Y = s.Content.Size().Height - s.Size().Height
+	s.Refresh()
+}
+
+//ScrollToTop will scroll content to container top
+func (s *ScrollContainer) ScrollToTop() {
+	s.Offset.Y = 0
+	s.Refresh()
+}
+
 // DragEnd will stop scrolling on mobile has stopped
 func (s *ScrollContainer) DragEnd() {
 }
@@ -360,7 +387,7 @@ func (s *ScrollContainer) Dragged(e *fyne.DragEvent) {
 
 // MinSize returns the smallest size this widget can shrink to
 func (s *ScrollContainer) MinSize() fyne.Size {
-	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Union(s.minSize)
+	min := fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize).Max(s.minSize)
 	switch s.Direction {
 	case ScrollHorizontalOnly:
 		min.Height = fyne.Max(min.Height, s.Content.MinSize().Height)
@@ -372,7 +399,7 @@ func (s *ScrollContainer) MinSize() fyne.Size {
 
 // SetMinSize specifies a minimum size for this scroll container.
 // If the specified size is larger than the content size then scrolling will not be enabled
-// This can be helpful to set scrolling in only 1 direction.
+// This can be helpful to appear larger than default if the layout is collapsing this widget.
 func (s *ScrollContainer) SetMinSize(size fyne.Size) {
 	s.minSize = size
 }

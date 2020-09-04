@@ -62,10 +62,6 @@ func (b *Box) CreateRenderer() fyne.WidgetRenderer {
 	return &boxRenderer{BaseRenderer: widget.NewBaseRenderer(b.Children), layout: lay, box: b}
 }
 
-func (b *Box) setBackgroundColor(bg color.Color) {
-	b.background = bg
-}
-
 // NewHBox creates a new horizontally aligned box widget with the specified list of child objects
 func NewHBox(children ...fyne.CanvasObject) *Box {
 	return &Box{BaseWidget: BaseWidget{}, Horizontal: true, Children: children}

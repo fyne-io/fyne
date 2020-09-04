@@ -24,10 +24,12 @@ type ElevationLevel int
 // https://storage.googleapis.com/spec-host/mio-staging%2Fmio-design%2F1584058305895%2Fassets%2F0B6xUSjjSulxceF9udnA4Sk5tdU0%2Fbaselineelevation-chart.png
 const (
 	BaseLevel             ElevationLevel = 0
+	CardLevel             ElevationLevel = 1
 	ButtonLevel           ElevationLevel = 2
 	MenuLevel             ElevationLevel = 4
 	PopUpLevel            ElevationLevel = 8
 	SubmergedContentLevel ElevationLevel = 8
+	DialogLevel           ElevationLevel = 24
 )
 
 // ShadowType specifies the type of the shadow.

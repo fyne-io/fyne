@@ -2,9 +2,8 @@ package gomobile
 
 import (
 	"errors"
+	"fmt"
 	"io"
-	"net/url"
-	"path/filepath"
 
 	"github.com/fyne-io/mobile/app"
 
@@ -19,7 +18,7 @@ type fileOpen struct {
 }
 
 func (f *fileOpen) Name() string {
-	return nameFromURI(f.uri)
+	return f.uri.Name()
 }
 
 func (f *fileOpen) URI() fyne.URI {
@@ -34,6 +33,10 @@ func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.URIReadCloser, error) 
 	}
 	file.ReadCloser = read
 	return file, err
+}
+
+func (d *mobileDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
+	return nil, fmt.Errorf("mobile driver does support creating listable URIs yet")
 }
 
 func (d *mobileDriver) FileWriterForURI(u fyne.URI) (fyne.URIWriteCloser, error) {
@@ -52,15 +55,6 @@ func mobileFilter(filter storage.FileFilter) *app.FileFilter {
 	}
 
 	return mobile
-}
-
-func nameFromURI(uri fyne.URI) string {
-	u, err := url.Parse(uri.String())
-	if err != nil {
-		return "unknown"
-	}
-
-	return filepath.Base(u.Path)
 }
 
 type hasPicker interface {

@@ -74,7 +74,7 @@ func (p *glPainter) imgToTexture(img image.Image, textureFilter canvas.ImageScal
 		return texture
 	default:
 		rgba := image.NewRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
-		draw.Draw(rgba, rgba.Rect, img, image.ZP, draw.Over)
+		draw.Draw(rgba, rgba.Rect, img, image.Point{}, draw.Over)
 		return p.imgToTexture(rgba, textureFilter)
 	}
 }
@@ -85,13 +85,15 @@ func (p *glPainter) SetOutputSize(width, height int) {
 }
 
 func (p *glPainter) freeTexture(obj fyne.CanvasObject) {
-	texture := textures[obj]
-	if texture != 0 {
-		tex := uint32(texture)
-		gl.DeleteTextures(1, &tex)
-		logError()
-		delete(textures, obj)
+	texture, ok := textures[obj]
+	if !ok {
+		return
 	}
+
+	tex := uint32(texture)
+	gl.DeleteTextures(1, &tex)
+	logError()
+	delete(textures, obj)
 }
 
 func glInit() {

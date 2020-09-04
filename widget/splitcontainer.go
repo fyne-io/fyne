@@ -33,7 +33,7 @@ func NewVSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
 
 func newSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *SplitContainer {
 	s := &SplitContainer{
-		Offset:     0.5, // Sensible default, can be overriden with SetOffset
+		Offset:     0.5, // Sensible default, can be overridden with SetOffset
 		Horizontal: horizontal,
 		Leading:    leading,
 		Trailing:   trailing,
@@ -273,7 +273,7 @@ func (r *dividerRenderer) BackgroundColor() color.Color {
 	if r.divider.hovered {
 		return theme.HoverColor()
 	}
-	return theme.ButtonColor()
+	return theme.ShadowColor()
 }
 
 func (r *dividerRenderer) Destroy() {

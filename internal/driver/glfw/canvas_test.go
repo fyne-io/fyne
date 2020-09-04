@@ -148,7 +148,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 	if hasNativeMenu() {
 		menuHeight = 0
 	} else {
-		menuHeight = widget.NewToolbar(widget.NewToolbarAction(theme.ContentCutIcon(), func() {})).MinSize().Height
+		menuHeight = NewMenuBar(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Empty", func() {}))), nil).MinSize().Height
 	}
 	tests := []struct {
 		name               string
@@ -365,7 +365,7 @@ func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) 
 func Test_glCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
-	c.Resize(fyne.NewSize(100, 100))
+	w.Resize(fyne.NewSize(200, 100))
 	popUpContent := canvas.NewRectangle(color.Black)
 	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
 	popUp := widget.NewPopUp(popUpContent, c)
@@ -376,12 +376,12 @@ func Test_glCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t 
 
 	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
 	assert.Equal(t, fyne.NewSize(1000, 10).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), popUp.MinSize())
-	assert.Equal(t, fyne.NewSize(100, 100), popUp.Size())
+	assert.Equal(t, fyne.NewSize(200, 100), popUp.Size())
 
 	repaintWindow(w)
 
 	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
-	assert.Equal(t, fyne.NewSize(100, 100), popUp.Size())
+	assert.Equal(t, fyne.NewSize(200, 100), popUp.Size())
 }
 
 func Test_glCanvas_walkTree(t *testing.T) {
@@ -429,7 +429,6 @@ func Test_glCanvas_walkTree(t *testing.T) {
 	// test that first walk calls the hooks correctly
 	//
 	type beforeCall struct {
-		node   *renderCacheNode
 		obj    fyne.CanvasObject
 		parent fyne.CanvasObject
 		pos    fyne.Position

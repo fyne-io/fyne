@@ -170,8 +170,7 @@ func (w *BaseWidget) super() fyne.Widget {
 	impl := w.getImpl()
 
 	if impl == nil {
-		var x interface{}
-		x = w
+		var x interface{} = w
 		return x.(fyne.Widget)
 	}
 

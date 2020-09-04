@@ -53,7 +53,7 @@ func loadImage(f fyne.URIReadCloser) *canvas.Image {
 		fyne.LogError("Failed to load image data", err)
 		return nil
 	}
-	res := fyne.NewStaticResource(f.Name(), data)
+	res := fyne.NewStaticResource(f.URI().Name(), data)
 
 	return canvas.NewImageFromResource(res)
 }
@@ -65,7 +65,7 @@ func showImage(f fyne.URIReadCloser) {
 	}
 	img.FillMode = canvas.ImageFillOriginal
 
-	w := fyne.CurrentApp().NewWindow(f.Name())
+	w := fyne.CurrentApp().NewWindow(f.URI().Name())
 	w.SetContent(widget.NewScrollContainer(img))
 	w.Resize(fyne.NewSize(320, 240))
 	w.Show()
@@ -88,19 +88,19 @@ func showText(f fyne.URIReadCloser) {
 	text := widget.NewLabel(loadText(f))
 	text.Wrapping = fyne.TextWrapWord
 
-	w := fyne.CurrentApp().NewWindow(f.Name())
+	w := fyne.CurrentApp().NewWindow(f.URI().Name())
 	w.SetContent(widget.NewScrollContainer(text))
 	w.Resize(fyne.NewSize(320, 240))
 	w.Show()
 }
 
-func loadDialogGroup(win fyne.Window) *widget.Group {
-	return widget.NewGroup("Dialogs",
+func loadDialogGroup(win fyne.Window) *widget.CardContainer {
+	return widget.NewCardContainer("Dialogs", "", widget.NewVBox(
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
 		}),
 		widget.NewButton("Error", func() {
-			err := errors.New("A dummy error message")
+			err := errors.New("a dummy error message")
 			dialog.ShowError(err, win)
 		}),
 		widget.NewButton("Confirm", func() {
@@ -175,11 +175,18 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				log.Println("Please Authenticate", username.Text, password.Text)
 			}, win)
 		}),
-	)
+		widget.NewButton("Text Entry Dialog", func() {
+			dialog.ShowEntryDialog("Text Entry", "Enter some text: ",
+				func(response string) {
+					fmt.Printf("User entered text, response was: %v\n", response)
+				},
+				win)
+		}),
+	))
 }
 
 func loadWindowGroup() fyne.Widget {
-	windowGroup := widget.NewGroup("Windows",
+	windowGroup := widget.NewVBox(
 		widget.NewButton("New window", func() {
 			w := fyne.CurrentApp().NewWindow("Hello")
 			w.SetContent(widget.NewLabel("Hello World!"))
@@ -217,7 +224,7 @@ func loadWindowGroup() fyne.Widget {
 			}))
 	}
 
-	otherGroup := widget.NewGroup("Other",
+	otherGroup := widget.NewCardContainer("Other", "",
 		widget.NewButton("Notification", func() {
 			fyne.CurrentApp().SendNotification(&fyne.Notification{
 				Title:   "Fyne Demo",
@@ -225,7 +232,7 @@ func loadWindowGroup() fyne.Widget {
 			})
 		}))
 
-	return widget.NewVBox(windowGroup, otherGroup)
+	return widget.NewVBox(widget.NewCardContainer("Windows", "", windowGroup), otherGroup)
 }
 
 // DialogScreen loads a panel that lists the dialog windows that can be tested.

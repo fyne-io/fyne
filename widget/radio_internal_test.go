@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/test"
-	_ "fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -153,11 +152,16 @@ func TestRadio_Remove(t *testing.T) {
 }
 
 func TestRadio_SetSelected(t *testing.T) {
-	radio := NewRadio([]string{"Hi", "Another"}, nil)
+	changed := false
+
+	radio := NewRadio([]string{"Hi", "Another"}, func(_ string) {
+		changed = true
+	})
 
 	radio.SetSelected("Another")
 
 	assert.Equal(t, "Another", radio.Selected)
+	assert.Equal(t, true, changed)
 }
 
 func TestRadio_SetSelectedWithSameOption(t *testing.T) {

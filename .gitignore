@@ -1,6 +1,7 @@
 ### Project Specific
 cmd/fyne/fyne
 cmd/fyne_demo/fyne_demo
+cmd/fyne_settings/fyne_settings
 cmd/hello/hello
 
 ### Tests

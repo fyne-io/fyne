@@ -7,13 +7,14 @@ package app
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"golang.org/x/sys/windows/registry"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
@@ -33,8 +34,26 @@ $xml.LoadXml($toastXml.OuterXml)
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("appID").Show($toast);`
 
+func isDark() bool {
+	k, err := registry.OpenKey(registry.CURRENT_USER, `SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize`, registry.QUERY_VALUE)
+	if err != nil { // older version of Windows will not have this key
+		return false
+	}
+	defer k.Close()
+
+	useLight, _, err := k.GetIntegerValue("AppsUseLightTheme")
+	if err != nil { // older version of Windows will not have this value
+		return false
+	}
+
+	return useLight == 0
+}
+
 func defaultTheme() fyne.Theme {
-	return theme.DarkTheme()
+	if isDark() {
+		return theme.DarkTheme()
+	}
+	return theme.LightTheme()
 }
 
 func rootConfigDir() string {
@@ -69,7 +88,6 @@ func runScript(name, script string) {
 	scriptNum++
 	appID := fyne.CurrentApp().UniqueID()
 	fileName := fmt.Sprintf("fyne-%s-%s-%d.ps1", appID, name, scriptNum)
-	log.Println(fileName)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
 	err := ioutil.WriteFile(tmpFilePath, []byte(script), 0600)
@@ -77,13 +95,16 @@ func runScript(name, script string) {
 		fyne.LogError("Could not write script to show notification", err)
 		return
 	}
-	log.Println("PATH", tmpFilePath)
 	defer os.Remove(tmpFilePath)
 
-	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", "-File", tmpFilePath)
+	launch := "(Get-Content -Encoding UTF8 -Path " + tmpFilePath + " -Raw) | Invoke-Expression"
+	cmd := exec.Command("PowerShell", "-ExecutionPolicy", "Bypass", launch)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	err = cmd.Run()
 	if err != nil {
 		fyne.LogError("Failed to launch windows notify script", err)
 	}
+}
+func watchTheme() {
+	// TODO monitor the Windows theme
 }

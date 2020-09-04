@@ -2,8 +2,10 @@ package settings
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -11,6 +13,10 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+)
+
+const (
+	systemThemeName = "system default"
 )
 
 // Settings gives access to user interfaces to control Fyne settings
@@ -39,7 +45,14 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	s.preview.FillMode = canvas.ImageFillContain
 
 	def := s.fyneSettings.ThemeName
-	themes := widget.NewSelect([]string{"dark", "light"}, s.chooseTheme)
+	themeNames := []string{"dark", "light"}
+	if runtime.GOOS == "darwin" || runtime.GOOS == "windows" {
+		themeNames = append(themeNames, systemThemeName)
+		if s.fyneSettings.ThemeName == "" {
+			def = systemThemeName
+		}
+	}
+	themes := widget.NewSelect(themeNames, s.chooseTheme)
 	themes.SetSelected(def)
 
 	scale := s.makeScaleGroup(w.Canvas().Scale())
@@ -60,6 +73,9 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 }
 
 func (s *Settings) chooseTheme(name string) {
+	if name == systemThemeName {
+		name = ""
+	}
 	s.fyneSettings.ThemeName = name
 
 	switch name {
@@ -105,17 +121,10 @@ func (s *Settings) saveToFile(path string) error {
 		return err
 	}
 
-	file, err := os.Create(path)
+	data, err := json.Marshal(&s.fyneSettings)
 	if err != nil {
-		if !os.IsExist(err) {
-			return err
-		}
-		file, err = os.Open(path) // #nosec
-		if err != nil {
-			return err
-		}
+		return err
 	}
-	encode := json.NewEncoder(file)
 
-	return encode.Encode(&s.fyneSettings)
+	return ioutil.WriteFile(path, data, 0644)
 }
