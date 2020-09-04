@@ -139,8 +139,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		}
 	})
 	buttons := widget.NewHBox(f.dismiss, f.open)
-	f.showHiddenCheck = widget.NewCheck("Show Hidden Files", func(_ bool) {
-		f.refreshDir(f.dir)
+	f.showHiddenCheck = widget.NewCheck("Show Hidden Files", func(changed bool) {
+		if changed {
+			f.refreshDir(f.dir, f.showHiddenCheck.Checked)
+		}
 	})
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
 		buttons, widget.NewHScrollContainer(f.fileName), f.showHiddenCheck)
@@ -181,7 +183,7 @@ func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
 	return places
 }
 
-func (f *fileDialog) refreshDir(dir string) {
+func (f *fileDialog) refreshDir(dir string, showHidden bool) {
 	f.files.Objects = nil
 
 	files, err := ioutil.ReadDir(dir)
@@ -199,7 +201,7 @@ func (f *fileDialog) refreshDir(dir string) {
 		icons = append(icons, fi)
 	}
 	for _, file := range files {
-		if !f.showHiddenCheck.Checked && isHidden(file.Name(), dir) {
+		if !showHidden && isHidden(file.Name(), dir) {
 			continue
 		}
 		itemPath := filepath.Join(dir, file.Name())
@@ -244,7 +246,7 @@ func (f *fileDialog) setDirectory(dir string) {
 		)
 	}
 
-	f.refreshDir(dir)
+	f.refreshDir(dir, f.showHiddenCheck.Checked)
 }
 
 func (f *fileDialog) setSelected(file *fileDialogItem) {
@@ -395,7 +397,7 @@ func (f *FileDialog) SetOnClosed(closed func()) {
 func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 	f.filter = filter
 	if f.dialog != nil {
-		f.dialog.refreshDir(f.dialog.dir)
+		f.dialog.refreshDir(f.dialog.dir, f.dialog.showHiddenCheck.Checked)
 	}
 }
 
