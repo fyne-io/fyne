@@ -58,6 +58,12 @@ func TestCard_Layout(t *testing.T) {
 			icon:     nil,
 			content:  nil,
 		},
+		"titles_image": {
+			title:    "Title",
+			subtitle: "Subtitle",
+			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			content:  nil,
+		},
 		"just_image": {
 			title:    "",
 			subtitle: "",
@@ -79,6 +85,12 @@ func TestCard_Layout(t *testing.T) {
 		"image_content": {
 			title:    "",
 			subtitle: "",
+			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
+			content:  widget.NewHyperlink("link", nil),
+		},
+		"all_items": {
+			title:    "Longer title",
+			subtitle: "subtitle with length",
 			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
 			content:  widget.NewHyperlink("link", nil),
 		},
