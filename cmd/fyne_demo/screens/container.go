@@ -16,6 +16,7 @@ import (
 func ContainerScreen() fyne.CanvasObject {
 	return widget.NewTabContainer(
 		widget.NewTabItem("Accordion", makeAccordionTab()),
+		widget.NewTabItem("Card", makeCardTab()),
 		widget.NewTabItem("Split", makeSplitTab()),
 		widget.NewTabItem("Scroll", makeScrollTab()),
 		// layouts
@@ -79,6 +80,17 @@ func makeButtonList(count int) []fyne.CanvasObject {
 	}
 
 	return items
+}
+
+func makeCardTab() fyne.CanvasObject {
+	card1 := widget.NewCardContainer("Book a table", "Which time suits?",
+		widget.NewRadio([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
+	card2 := widget.NewCardContainer("With media", "No content, with image", nil)
+	card2.Image = canvas.NewImageFromResource(theme.FyneLogo())
+	card3 := widget.NewCardContainer("Title 3", "Subtitle", widget.NewCheck("Check me", func(bool) {}))
+	card4 := widget.NewCardContainer("Title 4", "Another card", widget.NewLabel("Content"))
+	return fyne.NewContainerWithLayout(layout.NewGridLayout(3), widget.NewVBox(card1, card4),
+		widget.NewVBox(card2), widget.NewVBox(card3))
 }
 
 func makeCell() fyne.CanvasObject {
