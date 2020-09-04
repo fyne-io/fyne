@@ -37,13 +37,14 @@ type fileDialog struct {
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
 type FileDialog struct {
-	save             bool
-	callback         interface{}
-	onClosedCallback func(bool)
-	filter           storage.FileFilter
-	parent           fyne.Window
-	dialog           *fileDialog
-	dismissText      string
+	save               bool
+	callback           interface{}
+	onClosedCallback   func(bool)
+	filter             storage.FileFilter
+	parent             fyne.Window
+	dialog             *fileDialog
+	dismissText        string
+	showHiddenShortcut *desktop.CustomShortcut
 }
 
 // Declare conformity to Dialog interface
@@ -298,8 +299,8 @@ func showFile(file *FileDialog) *fileDialog {
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
 
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
-	showHiddenShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: desktop.ControlModifier}
-	d.win.Canvas.AddShortcut(showHiddenShortcut, func(shortcut fyne.Shortcut) {
+	file.showHiddenShortcut = &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: desktop.ControlModifier}
+	d.win.Canvas.AddShortcut(file.showHiddenShortcut, func(shortcut fyne.Shortcut) {
 		d.showHiddenCheck.Checked = !d.showHiddenCheck.Checked
 		d.showHiddenCheck.OnChanged(true)
 		d.showHiddenCheck.Refresh()
@@ -326,6 +327,13 @@ func (f *FileDialog) Show() {
 		return
 	}
 	f.dialog = showFile(f)
+
+	// Cleanup references in hidden files shortcut closure. Requires non-nil dialog.
+	f.SetOnClosed(func() {
+		if f.showHiddenShortcut != nil {
+			f.dialog.win.Canvas.RemoveShortcut(f.showHiddenShortcut)
+		}
+	})
 }
 
 // Resize dialog, call this function after dialog show
