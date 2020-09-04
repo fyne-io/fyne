@@ -294,7 +294,7 @@ func (f *FileDialog) effectiveStartingDir() string {
 
 	// Try to get ./
 	wd, err := os.Getwd()
-	if err != nil {
+	if err == nil {
 		return wd
 	}
 
