@@ -153,7 +153,7 @@ func makeTreeTab() fyne.CanvasObject {
 	widget.AddTreePath(left, "A", "S", "T", "U", "astu")
 	widget.AddTreePath(left, "A", "V", "W", "X", "Y", "Z", "avwxyz")
 
-	l := widget.NewTreeOfStrings(left)
+	l := widget.NewTreeWithStrings(left)
 	l.OnNodeSelected = func(id string, node fyne.CanvasObject) {
 		fmt.Println("LeftTreeNodeSelected:", id)
 	}
@@ -167,7 +167,7 @@ func makeTreeTab() fyne.CanvasObject {
 	if err != nil {
 		fyne.LogError("Could not get user home dir", err)
 	}
-	r := widget.NewTreeOfFiles(storage.NewURI("file://" + dir))
+	r := widget.NewTreeWithFiles(storage.NewURI("file://" + dir))
 	r.OnNodeSelected = func(id string, node fyne.CanvasObject) {
 		fmt.Println("RightTreeNodeSelected:", id)
 	}

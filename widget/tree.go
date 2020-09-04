@@ -40,8 +40,8 @@ type TreeContainer struct {
 	OnNodeSelected func(id string, node fyne.CanvasObject)              // Called when the Node with the given ID is selected.
 }
 
-// NewTreeOfStrings creates a new tree with the given string map.
-func NewTreeOfStrings(ss map[string][]string) (t *TreeContainer) {
+// NewTreeWithStrings creates a new tree with the given string map.
+func NewTreeWithStrings(ss map[string][]string) (t *TreeContainer) {
 	t = &TreeContainer{
 		open: make(map[string]bool),
 		Children: func(id string) (c []string) {
@@ -70,9 +70,9 @@ func NewTreeOfStrings(ss map[string][]string) (t *TreeContainer) {
 	return
 }
 
-// NewTreeOfFiles creates a new tree with the given file system URI.
+// NewTreeWithFiles creates a new tree with the given file system URI.
 // TODO contents of a directory are sorted with the given sorter
-func NewTreeOfFiles(root fyne.URI) (t *TreeContainer) {
+func NewTreeWithFiles(root fyne.URI) (t *TreeContainer) {
 	t = &TreeContainer{
 		Root: root.String(),
 		open: make(map[string]bool),

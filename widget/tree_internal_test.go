@@ -56,7 +56,7 @@ func getLeaf(t *testing.T, tree *TreeContainer, id string) (leaf *leaf) {
 func TestTreeContainer_Indentation(t *testing.T) {
 	s := 100
 	data := make(map[string][]string)
-	tree := NewTreeOfStrings(data)
+	tree := NewTreeWithStrings(data)
 	tree.Resize(fyne.NewSize(s, s))
 	assert.Equal(t, s, tree.Size().Width)
 	assert.Equal(t, s, tree.Size().Height)
@@ -77,7 +77,7 @@ func TestTreeContainer_Indentation(t *testing.T) {
 func TestTreeContainer_Resize(t *testing.T) {
 	s := 100
 	data := make(map[string][]string)
-	tree := NewTreeOfStrings(data)
+	tree := NewTreeWithStrings(data)
 	tree.Resize(fyne.NewSize(s, s))
 	assert.Equal(t, s, tree.Size().Width)
 	assert.Equal(t, s, tree.Size().Height)
@@ -208,7 +208,7 @@ func TestTreeContainer_MinSize(t *testing.T) {
 			for _, d := range tt.items {
 				AddTreePath(data, d...)
 			}
-			tree := NewTreeOfStrings(data)
+			tree := NewTreeWithStrings(data)
 			for _, o := range tt.opened {
 				tree.OpenBranch(o)
 			}
@@ -223,7 +223,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 	t.Run("Branch", func(t *testing.T) {
 		data := make(map[string][]string)
 		AddTreePath(data, "A", "B")
-		tree := NewTreeOfStrings(data)
+		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
 
@@ -243,7 +243,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 	t.Run("BranchIcon", func(t *testing.T) {
 		data := make(map[string][]string)
 		AddTreePath(data, "A", "B")
-		tree := NewTreeOfStrings(data)
+		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
 
@@ -262,7 +262,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 	t.Run("Leaf", func(t *testing.T) {
 		data := make(map[string][]string)
 		AddTreePath(data, "A")
-		tree := NewTreeOfStrings(data)
+		tree := NewTreeWithStrings(data)
 
 		tree.Refresh() // Force layout
 
@@ -284,7 +284,7 @@ func TestTreeContainer_Walk(t *testing.T) {
 		data := make(map[string][]string)
 		AddTreePath(data, "A", "B", "C")
 		AddTreePath(data, "D", "E", "F")
-		tree := NewTreeOfStrings(data)
+		tree := NewTreeWithStrings(data)
 		tree.OpenBranch("A")
 		tree.OpenBranch("B")
 		tree.OpenBranch("D")
@@ -315,7 +315,7 @@ func TestTreeContainer_Walk(t *testing.T) {
 		data := make(map[string][]string)
 		AddTreePath(data, "A", "B", "C")
 		AddTreePath(data, "D", "E", "F")
-		tree := NewTreeOfStrings(data)
+		tree := NewTreeWithStrings(data)
 		var branches []string
 		var leaves []string
 		tree.Walk(func(id string, branch bool, depth int) {
@@ -338,7 +338,7 @@ func TestTreeContainer_Walk(t *testing.T) {
 func TestTreeNode_Hovered(t *testing.T) {
 	data := make(map[string][]string)
 	AddTreePath(data, "A", "B", "C")
-	tree := NewTreeOfStrings(data)
+	tree := NewTreeWithStrings(data)
 	tree.OpenAllBranches()
 	tree.Resize(fyne.NewSize(150, 200))
 	a := getBranch(t, tree, "A")
@@ -375,7 +375,7 @@ func TestTreeNode_Hovered(t *testing.T) {
 func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	data := make(map[string][]string)
 	AddTreePath(data, "A", "B")
-	tree := NewTreeOfStrings(data)
+	tree := NewTreeWithStrings(data)
 	tree.OpenAllBranches()
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")
@@ -392,7 +392,7 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 	data := make(map[string][]string)
 	AddTreePath(data, "A", "B")
-	tree := NewTreeOfStrings(data)
+	tree := NewTreeWithStrings(data)
 	tree.OpenAllBranches()
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")

@@ -25,10 +25,10 @@ func TestTreeContainer(t *testing.T) {
 		})
 		assert.Equal(t, 0, len(nodes))
 	})
-	t.Run("NewTreeOfStrings", func(t *testing.T) {
+	t.Run("NewTreeWithStrings", func(t *testing.T) {
 		data := make(map[string][]string)
 		widget.AddTreePath(data, "foo", "foobar")
-		tree := widget.NewTreeOfStrings(data)
+		tree := widget.NewTreeWithStrings(data)
 		tree.OpenBranch("foo")
 		var branches []string
 		var leaves []string
@@ -48,7 +48,7 @@ func TestTreeContainer(t *testing.T) {
 	/* TODO Not currently possible as testDriver doesn't support listable URIs:
 	2020/08/31 16:49:18 Fyne error:  Unable to get lister for /var/folders/8n/1dd15fbn79s2w3l4x43v5c7w0000gn/T/test011812343
 	2020/08/31 16:49:18   Cause: test driver does support creating listable URIs yet
-	t.Run("NewTreeOfFiles", func(t *testing.T) {
+	t.Run("NewTreeWithFiles", func(t *testing.T) {
 		tempDir, err := ioutil.TempDir("", "test")
 		assert.NoError(t, err)
 		defer os.RemoveAll(tempDir)
@@ -59,7 +59,7 @@ func TestTreeContainer(t *testing.T) {
 		err = ioutil.WriteFile(path.Join(tempDir, "B", "C"), []byte("c"), os.ModePerm)
 		assert.NoError(t, err)
 
-		tree := widget.NewTreeOfFiles(storage.NewURI("file://" + tempDir))
+		tree := widget.NewTreeWithFiles(storage.NewURI("file://" + tempDir))
 		tree.OpenAllBranches()
 		var branches []string
 		var leaves []string
@@ -84,7 +84,7 @@ func TestTreeContainer_OpenClose(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
 		data := make(map[string][]string)
 		widget.AddTreePath(data, "foo", "foobar")
-		tree := widget.NewTreeOfStrings(data)
+		tree := widget.NewTreeWithStrings(data)
 
 		assert.False(t, tree.IsBranchOpen("foo"))
 
@@ -103,7 +103,7 @@ func TestTreeContainer_OpenClose(t *testing.T) {
 	t.Run("Missing", func(t *testing.T) {
 		data := make(map[string][]string)
 		widget.AddTreePath(data, "foo", "foobar")
-		tree := widget.NewTreeOfStrings(data)
+		tree := widget.NewTreeWithStrings(data)
 
 		assert.False(t, tree.IsBranchOpen("foo"))
 
@@ -126,7 +126,7 @@ func TestTreeContainer_OpenCloseAll(t *testing.T) {
 	widget.AddTreePath(data, "foo0", "foobar0")
 	widget.AddTreePath(data, "foo1", "foobar1")
 	widget.AddTreePath(data, "foo2", "foobar2")
-	tree := widget.NewTreeOfStrings(data)
+	tree := widget.NewTreeWithStrings(data)
 
 	tree.OpenAllBranches()
 	assert.True(t, tree.IsBranchOpen("foo0"))
@@ -469,7 +469,7 @@ func TestTreeContainer_Layout(t *testing.T) {
 			for _, d := range tt.items {
 				widget.AddTreePath(data, d...)
 			}
-			tree := widget.NewTreeOfStrings(data)
+			tree := widget.NewTreeWithStrings(data)
 			for _, o := range tt.opened {
 				tree.OpenBranch(o)
 			}
@@ -494,7 +494,7 @@ func TestTree_ChangeTheme(t *testing.T) {
 
 	data := make(map[string][]string)
 	widget.AddTreePath(data, "foo", "foobar")
-	tree := widget.NewTreeOfStrings(data)
+	tree := widget.NewTreeWithStrings(data)
 	tree.OpenBranch("foo")
 
 	w := test.NewWindow(tree)
@@ -517,7 +517,7 @@ func TestTree_Move(t *testing.T) {
 
 	data := make(map[string][]string)
 	widget.AddTreePath(data, "foo", "foobar")
-	tree := widget.NewTreeOfStrings(data)
+	tree := widget.NewTreeWithStrings(data)
 	tree.OpenBranch("foo")
 
 	w := test.NewWindow(tree)
