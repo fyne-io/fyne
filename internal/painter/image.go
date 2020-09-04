@@ -22,7 +22,7 @@ import (
 // PaintImage renders a given fyne Image to a Go standard image
 func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image {
 	if width <= 0 || height <= 0 {
-		return image.NewNRGBA(image.Rect(0, 0, 0, 0))
+		return nil
 	}
 
 	switch {
