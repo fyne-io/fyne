@@ -193,6 +193,15 @@ func (c *cardRenderer) Refresh() {
 	c.subHeader.Text = c.card.SubTitle
 	c.subHeader.Refresh()
 
+	objects := []fyne.CanvasObject{c.header, c.subHeader}
+	if c.card.Image != nil {
+		objects = append(objects, c.card.Image)
+	}
+	if c.card.Content != nil {
+		objects = append(objects, c.card.Content)
+	}
+	c.ShadowingRenderer.SetObjects(objects)
+
 	c.applyTheme()
 	c.Layout(c.card.Size())
 	canvas.Refresh(c.card.super())

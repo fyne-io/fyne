@@ -8,7 +8,28 @@ import (
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestCard_SetImage(t *testing.T) {
+	c := widget.NewCardContainer("Title", "sub", widget.NewLabel("Content"))
+	r := test.WidgetRenderer(c)
+	assert.Equal(t, 4, len(r.Objects())) // the 3 above plus shadow
+
+	c.SetImage(canvas.NewImageFromResource(theme.FyneLogo()))
+	assert.Equal(t, 5, len(r.Objects()))
+}
+
+func TestCard_SetContent(t *testing.T) {
+	c := widget.NewCardContainer("Title", "sub", widget.NewLabel("Content"))
+	r := test.WidgetRenderer(c)
+	assert.Equal(t, 4, len(r.Objects())) // the 3 above plus shadow
+
+	newContent := widget.NewLabel("New")
+	c.SetContent(newContent)
+	assert.Equal(t, 4, len(r.Objects()))
+	assert.Equal(t, newContent, r.Objects()[3])
+}
 
 func TestCard_Layout(t *testing.T) {
 	test.NewApp()
