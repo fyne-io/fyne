@@ -314,12 +314,11 @@ func (r *treeContainerRenderer) Layout(size fyne.Size) {
 
 func (r *treeContainerRenderer) Refresh() {
 	//log.Println("treeContainerRenderer.Refresh")
-	r.content.Refresh()
 	s := r.tree.Size()
 	if s.IsZero() {
 		r.tree.Resize(r.tree.MinSize())
 	}
-	r.content.Resize(r.content.MinSize().Max(s))
+	r.content.Refresh()
 	canvas.Refresh(r.tree.super())
 }
 
@@ -376,35 +375,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 			}
 		}
 		// TODO FIXME this assumes a node with the given ID will always have the same MinSize.
-		m, ok := r.minSizes[id]
-		if !ok {
-			var c, n fyne.CanvasObject
-			if isBranch {
-				b := r.getBranch()
-				b.Update(id, depth)
-				c = b.Content()
-				n = b
-			} else {
-				l := r.getLeaf()
-				l.Update(id, depth)
-				c = l.Content()
-				n = l
-			}
-			if c != nil {
-				r.treeContent.tree.UpdateNode(id, isBranch, c)
-			}
-			if n != nil {
-				m = n.MinSize()
-				if isBranch {
-					r.branchPool.Release(n)
-				} else {
-					r.leafPool.Release(n)
-				}
-			} else {
-				m = fyne.Size{}
-			}
-			r.minSizes[id] = m
-		}
+		m := r.minSizeOf(id, isBranch, depth)
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height = min.Height + m.Height
 	})
@@ -420,6 +391,9 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
 
+	branches := make(map[string]*branch)
+	leaves := make(map[string]*leaf)
+
 	offsetY := r.treeContent.tree.Offset.Y
 	y := theme.Padding()
 	// Walk open branches and obtain nodes to render in scroller's viewport
@@ -432,16 +406,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				return
 			}
 		}
-		m, ok := r.minSizes[id]
-		if !ok {
-			m = fyne.Size{}
-		}
+		m := r.minSizeOf(id, isBranch, depth)
 		if y+m.Height < offsetY {
 			// node is above viewport and not visible
-			r.release(id, isBranch)
 		} else if y > offsetY+size.Height {
 			// node is below viewport and not visible
-			r.release(id, isBranch)
 		} else {
 			// node is in viewport
 			var n *treeNode
@@ -451,8 +420,8 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 					b = r.getBranch()
 					b.Update(id, depth)
 					r.treeContent.tree.UpdateNode(id, true, b.Content())
-					r.branches[id] = b
 				}
+				branches[id] = b
 				n = b.treeNode
 			} else {
 				l, ok := r.leaves[id]
@@ -460,8 +429,8 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 					l = r.getLeaf()
 					l.Update(id, depth)
 					r.treeContent.tree.UpdateNode(id, false, l.Content())
-					r.leaves[id] = l
 				}
+				leaves[id] = l
 				n = l.treeNode
 			}
 			if n != nil {
@@ -469,17 +438,34 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				//log.Println("Node", id, "Pos", n.Position())
 				n.Resize(fyne.NewSize(size.Width-n.Position().X-theme.Padding(), m.Height))
 				//log.Println("Node", id, "Size", n.Size())
-				n.Refresh()
 			}
 		}
 		y += m.Height
 	})
+
+	// Release any treeNodes that haven't been reused
+	for id, b := range r.branches {
+		if _, ok := branches[id]; !ok {
+			r.branchPool.Release(b)
+		}
+	}
+	for id, l := range r.leaves {
+		if _, ok := leaves[id]; !ok {
+			r.leafPool.Release(l)
+		}
+	}
+
+	r.branches = branches
+	r.leaves = leaves
 }
 
 func (r *treeContentRenderer) Refresh() {
 	//log.Println("treeContentRenderer.Refresh")
-	if s := r.treeContent.Size(); s.IsZero() {
+	s := r.treeContent.Size()
+	if s.IsZero() {
 		r.treeContent.Resize(r.treeContent.MinSize())
+	} else {
+		r.Layout(s)
 	}
 	r.treeContent.propertyLock.RLock()
 	for _, b := range r.branches {
@@ -525,18 +511,30 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	return
 }
 
-func (r *treeContentRenderer) release(id string, isBranch bool) {
-	if isBranch {
-		if b, ok := r.branches[id]; ok {
-			r.branchPool.Release(b)
-			delete(r.branches, id)
+func (r *treeContentRenderer) minSizeOf(id string, isBranch bool, depth int) fyne.Size {
+	m, ok := r.minSizes[id]
+	if !ok {
+		var n fyne.CanvasObject
+		if isBranch {
+			b := r.getBranch()
+			b.Update(id, depth)
+			r.treeContent.tree.UpdateNode(id, true, b.Content())
+			n = b
+		} else {
+			l := r.getLeaf()
+			l.Update(id, depth)
+			r.treeContent.tree.UpdateNode(id, false, l.Content())
+			n = l
 		}
-	} else {
-		if l, ok := r.leaves[id]; ok {
-			r.leafPool.Release(l)
-			delete(r.leaves, id)
+		m = n.MinSize()
+		if isBranch {
+			r.branchPool.Release(n)
+		} else {
+			r.leafPool.Release(n)
 		}
+		r.minSizes[id] = m
 	}
+	return m
 }
 
 var _ fyne.CanvasObject = (*treeNode)(nil)
@@ -721,7 +719,7 @@ func newBranch(tree *TreeContainer, content fyne.CanvasObject) (b *branch) {
 
 func (b *branch) Update(id string, depth int) {
 	b.treeNode.Update(id, depth)
-	b.icon.(*branchIcon).id = id
+	b.icon.(*branchIcon).Update(id, depth)
 }
 
 func (b *branch) DoubleTapped(*fyne.PointEvent) {
@@ -744,6 +742,11 @@ func newBranchIcon(tree *TreeContainer) (i *branchIcon) {
 	}
 	i.ExtendBaseWidget(i)
 	return
+}
+
+func (i *branchIcon) Update(id string, depth int) {
+	i.id = id
+	i.Refresh()
 }
 
 func (i *branchIcon) Tapped(*fyne.PointEvent) {
