@@ -1596,9 +1596,9 @@ func setupImageTest(multiLine bool) (*widget.Entry, fyne.Window) {
 	w.Resize(fyne.NewSize(150, 200))
 
 	if multiLine {
-		entry.Resize(fyne.NewSize(100, 100))
+		entry.Resize(fyne.NewSize(120, 100))
 	} else {
-		entry.Resize(entry.MinSize().Max(fyne.NewSize(100, 0)))
+		entry.Resize(entry.MinSize().Max(fyne.NewSize(120, 0)))
 	}
 	entry.Move(fyne.NewPos(10, 10))
 
