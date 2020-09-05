@@ -45,15 +45,22 @@ func TestEntry_passwordRevealerCursor(t *testing.T) {
 }
 
 func TestEntry_ValidatedEntry(t *testing.T) {
+	entry, window := setupImageTest(false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
 	r := validation.NewRegexp(`^\d{4}-\d{2}-\d{2}`, "Input is not a valid date")
-	entry := &widget.Entry{Validator: r}
-	entry.ExtendBaseWidget(entry)
+	entry.Validator = r
+	test.AssertImageMatches(t, "entry/validate_initial.png", c.Capture())
 
 	test.Type(entry, "2020-02")
 	assert.Error(t, r.Validate(entry.Text))
+	entry.FocusLost()
+	test.AssertImageMatches(t, "entry/validate_invalid.png", c.Capture())
 
 	test.Type(entry, "-12")
 	assert.NoError(t, r.Validate(entry.Text))
+	test.AssertImageMatches(t, "entry/validate_valid.png", c.Capture())
 }
 
 func TestMultiLineEntry_MinSize(t *testing.T) {
