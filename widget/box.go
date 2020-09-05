@@ -12,8 +12,7 @@ import (
 
 // Box widget is a simple list where the child elements are arranged in a single column
 // for vertical or a single row for horizontal arrangement.
-// Deprecated: Use fyne.NewContainerWithLayout(layout.NewVBoxLayout()) or
-// fyne.NewContainerWithLayout(layout.NewHBoxLayout()).
+// Deprecated: Use layout.NewVBoxContainer() or layout.NewHBoxContainer().
 type Box struct {
 	BaseWidget
 	background color.Color
@@ -65,13 +64,13 @@ func (b *Box) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // NewHBox creates a new horizontally aligned box widget with the specified list of child objects.
-// Deprecated: Use fyne.NewContainerWithLayout(layout.NewHBoxLayout()).
+// Deprecated: Use layout.NewHBoxContainer() instead.
 func NewHBox(children ...fyne.CanvasObject) *Box {
 	return &Box{BaseWidget: BaseWidget{}, Horizontal: true, Children: children}
 }
 
 // NewVBox creates a new vertically aligned box widget with the specified list of child objects.
-// Deprecated: Use fyne.NewContainerWithLayout(layout.NewVBoxLayout()).
+// Deprecated: Use layout.NewVBoxContainer() instead.
 func NewVBox(children ...fyne.CanvasObject) *Box {
 	return &Box{BaseWidget: BaseWidget{}, Horizontal: false, Children: children}
 }
