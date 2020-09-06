@@ -8,7 +8,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -37,14 +36,13 @@ type fileDialog struct {
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
 type FileDialog struct {
-	save               bool
-	callback           interface{}
-	onClosedCallback   func(bool)
-	filter             storage.FileFilter
-	parent             fyne.Window
-	dialog             *fileDialog
-	dismissText        string
-	showHiddenShortcut *desktop.CustomShortcut
+	save             bool
+	callback         interface{}
+	onClosedCallback func(bool)
+	filter           storage.FileFilter
+	parent           fyne.Window
+	dialog           *fileDialog
+	dismissText      string
 }
 
 // Declare conformity to Dialog interface
@@ -140,9 +138,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	})
 	buttons := widget.NewHBox(f.dismiss, f.open)
 	f.showHiddenCheck = widget.NewCheck("Show Hidden Files", func(changed bool) {
-		if changed {
-			f.refreshDir(f.dir, f.showHiddenCheck.Checked)
-		}
+		f.refreshDir(f.dir, changed)
 	})
 	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
 		buttons, widget.NewHScrollContainer(f.fileName), f.showHiddenCheck)
@@ -300,12 +296,6 @@ func showFile(file *FileDialog) *fileDialog {
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
 
 	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
-	file.showHiddenShortcut = &desktop.CustomShortcut{KeyName: fyne.KeyH, Modifier: desktop.ControlModifier}
-	d.win.Canvas.AddShortcut(file.showHiddenShortcut, func(shortcut fyne.Shortcut) {
-		d.showHiddenCheck.Checked = !d.showHiddenCheck.Checked
-		d.showHiddenCheck.OnChanged(true)
-		d.showHiddenCheck.Refresh()
-	})
 	d.win.Resize(size)
 
 	d.win.Show()
@@ -328,13 +318,6 @@ func (f *FileDialog) Show() {
 		return
 	}
 	f.dialog = showFile(f)
-
-	// Cleanup references in hidden files shortcut closure. Requires non-nil dialog.
-	f.SetOnClosed(func() {
-		if f.showHiddenShortcut != nil {
-			f.dialog.win.Canvas.RemoveShortcut(f.showHiddenShortcut)
-		}
-	})
 }
 
 // Resize dialog, call this function after dialog show

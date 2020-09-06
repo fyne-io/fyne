@@ -42,7 +42,6 @@ type Canvas interface {
 	OnTypedKey() func(*KeyEvent)
 	SetOnTypedKey(func(*KeyEvent))
 	AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut))
-	RemoveShortcut(shortcut Shortcut)
 
 	Capture() image.Image
 
