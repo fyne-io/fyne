@@ -31,6 +31,7 @@ func newValidationStatus(e *Entry) *validationStatus {
 	}
 
 	rs.ExtendBaseWidget(rs)
+	rs.icon.Hide()
 	return rs
 }
 
@@ -62,21 +63,20 @@ func (r *validationStatusRenderer) MinSize() fyne.Size {
 func (r *validationStatusRenderer) Refresh() {
 	r.entry.propertyLock.RLock()
 	defer r.entry.propertyLock.RUnlock()
+	if r.entry.Text == "" {
+		r.icon.Hide()
+		canvas.Refresh(r.icon)
+		return
+	}
+
 	if r.entry.validationError == nil {
 		r.icon.Resource = theme.ConfirmIcon()
 		r.icon.Show()
+	} else if !r.entry.Focused() {
+		r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
+		r.icon.Show()
 	} else {
 		r.icon.Hide()
-	}
-
-	if !r.entry.Focused() && r.entry.Text != "" {
-		if r.entry.validationError != nil {
-			r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
-		} else {
-			r.icon.Resource = theme.ConfirmIcon()
-		}
-
-		r.icon.Show()
 	}
 
 	canvas.Refresh(r.icon)

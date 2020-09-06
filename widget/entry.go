@@ -114,11 +114,6 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		e.ActionItem = newPasswordRevealer(e)
 	}
 
-	if e.Validator != nil {
-		e.validationStatus = newValidationStatus(e)
-		objects = append(objects, e.validationStatus)
-	}
-
 	if e.ActionItem != nil {
 		objects = append(objects, e.ActionItem)
 	}
@@ -1117,7 +1112,14 @@ func (r *entryRenderer) Refresh() {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
 		}
 
+		if r.entry.validationStatus == nil {
+			r.entry.validationStatus = newValidationStatus(r.entry)
+			r.objects = append(r.objects, r.entry.validationStatus)
+			r.Layout(r.entry.size)
+		}
 		r.entry.validationStatus.Refresh()
+	} else if r.entry.validationStatus != nil {
+		r.entry.validationStatus.Hide()
 	}
 	canvas.Refresh(r.entry.super())
 }
