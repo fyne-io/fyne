@@ -1011,6 +1011,8 @@ func (r *entryRenderer) Layout(size fyne.Size) {
 	validatorIconSize := fyne.NewSize(0, 0)
 	if r.entry.Validator != nil {
 		validatorIconSize = fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize())
+
+		r.ensureValidationSetup()
 		r.entry.validationStatus.Resize(validatorIconSize)
 
 		if r.entry.ActionItem == nil {
@@ -1112,11 +1114,7 @@ func (r *entryRenderer) Refresh() {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
 		}
 
-		if r.entry.validationStatus == nil {
-			r.entry.validationStatus = newValidationStatus(r.entry)
-			r.objects = append(r.objects, r.entry.validationStatus)
-			r.Layout(r.entry.size)
-		}
+		r.ensureValidationSetup()
 		r.entry.validationStatus.Refresh()
 	} else if r.entry.validationStatus != nil {
 		r.entry.validationStatus.Hide()
@@ -1206,6 +1204,14 @@ func (r *entryRenderer) buildSelection() {
 		// resize and reposition each rectangle
 		r.selection[i].Resize(fyne.NewSize(x2-x1+1, lineHeight))
 		r.selection[i].Move(fyne.NewPos(x1-1, y1))
+	}
+}
+
+func (r *entryRenderer) ensureValidationSetup() {
+	if r.entry.validationStatus == nil {
+		r.entry.validationStatus = newValidationStatus(r.entry)
+		r.objects = append(r.objects, r.entry.validationStatus)
+		r.Layout(r.entry.size)
 	}
 }
 
