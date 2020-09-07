@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 )
 
@@ -49,16 +48,8 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 
 	scroller := NewVScrollContainer(layout)
 
-	scroller.onOffsetChanged = func() {
-		if l.offsetY == scroller.Offset.Y {
-			return
-		}
-		l.offsetY = scroller.Offset.Y
-		l.BaseWidget.Refresh()
-	}
-
 	objects := []fyne.CanvasObject{scroller}
-	return &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l, scroller: scroller, layout: layout}
+	return newListRenderer(objects, l, scroller, layout)
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -81,6 +72,19 @@ type listRenderer struct {
 	size             fyne.Size
 }
 
+func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *ScrollContainer, layout *fyne.Container) *listRenderer {
+	lr := &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l, scroller: scroller, layout: layout}
+	lr.scroller.onOffsetChanged = func() {
+		if l.offsetY == lr.scroller.Offset.Y {
+			return
+		}
+		l.offsetY = lr.scroller.Offset.Y
+		lr.offsetChanged()
+		//l.BaseWidget.Refresh()
+	}
+	return lr
+}
+
 func (l *listRenderer) Layout(size fyne.Size) {
 	if size != l.size {
 		if size.Width != l.size.Width {
@@ -97,24 +101,8 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	if l.itemPool == nil {
 		l.itemPool = &listPool{}
 	}
-	offsetChange := l.list.previousOffsetY - l.list.offsetY
-
-	if offsetChange < 0 {
-		// Scrolling Down
-		l.scrollDown(offsetChange)
-		return
-
-	} else if offsetChange > 0 {
-		// Scrolling Up
-		l.scrollUp(offsetChange)
-		return
-	}
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize
-	for _, child := range l.children {
-		l.itemPool.Release(child)
-	}
-	l.children = nil
 	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
 	if len(l.children) >= l.visibleItemCount || len(l.children) >= l.list.Length() {
 		return
@@ -134,6 +122,11 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		// Make sure to keep extra items in the pool
 		item := newListItem(l.list.CreateItem(), nil)
 		l.itemPool.Release(item)
+	}
+	i := l.firstItemIndex
+	for _, child := range l.children {
+		l.list.UpdateItem(i, child.(*listItem).child)
+		i++
 	}
 }
 
@@ -165,6 +158,21 @@ func (l *listRenderer) getItem() fyne.CanvasObject {
 	return item
 }
 
+func (l *listRenderer) offsetChanged() {
+	offsetChange := int(math.Abs(float64(l.list.previousOffsetY - l.list.offsetY)))
+
+	if l.list.previousOffsetY < l.list.offsetY {
+		// Scrolling Down
+		l.scrollDown(offsetChange)
+		return
+
+	} else if l.list.previousOffsetY > l.list.offsetY {
+		// Scrolling Up
+		l.scrollUp(offsetChange)
+		return
+	}
+}
+
 func (l *listRenderer) prependItem(index int) {
 	item := l.getItem()
 	l.children = append([]fyne.CanvasObject{item}, l.children...)
@@ -179,10 +187,10 @@ func (l *listRenderer) scrollDown(offsetChange int) {
 	scrollerEndY := l.scroller.Offset.Y + l.scroller.Size().Height
 	if layoutEndY < scrollerEndY {
 		itemChange = int(math.Ceil(float64(scrollerEndY-layoutEndY) / float64(l.list.itemMin.Height)))
-	} else if offsetChange*-1 < l.list.itemMin.Height {
+	} else if offsetChange < l.list.itemMin.Height {
 		return
 	} else {
-		itemChange = int(math.Floor(float64(offsetChange*-1) / float64(l.list.itemMin.Height)))
+		itemChange = int(math.Floor(float64(offsetChange) / float64(l.list.itemMin.Height)))
 	}
 	l.list.previousOffsetY = l.list.offsetY
 	for i := 0; i < itemChange && l.lastItemIndex != l.list.Length()-1; i++ {
@@ -235,15 +243,15 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 			l.list.OnItemSelected(index, item.(*listItem).child)
 		}
 	}
-	item.Refresh()
 }
 
 type listItem struct {
-	DisableableWidget
+	BaseWidget
 
 	onTapped          func()
 	statusIndicator   *canvas.Rectangle
 	child             fyne.CanvasObject
+	divider           *canvas.Rectangle
 	hovered, selected bool
 }
 
@@ -262,10 +270,11 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
 	li.statusIndicator = canvas.NewRectangle(theme.BackgroundColor())
+	li.divider = canvas.NewRectangle(theme.ShadowColor())
 
-	objects := []fyne.CanvasObject{li.statusIndicator, li.child}
+	objects := []fyne.CanvasObject{li.statusIndicator, li.child, li.divider}
 
-	return &listItemRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), li, layout.NewHBoxLayout()}
+	return &listItemRenderer{widget.NewBaseRenderer(objects), li}
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -292,7 +301,7 @@ func (li *listItem) MouseOut() {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (li *listItem) Tapped(*fyne.PointEvent) {
-	if li.onTapped != nil && !li.Disabled() {
+	if li.onTapped != nil {
 		li.selected = true
 		li.Refresh()
 		li.onTapped()
@@ -300,30 +309,43 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 }
 
 type listItemRenderer struct {
-	*widget.ShadowingRenderer
+	widget.BaseRenderer
 
-	item   *listItem
-	layout fyne.Layout
+	item *listItem
 }
 
 // MinSize calculates the minimum size of a listItem.
 // This is based on the size of the status indicator and the size of the child object.
 func (li *listItemRenderer) MinSize() (size fyne.Size) {
-	li.item.statusIndicator.SetMinSize(fyne.NewSize(theme.Padding(), li.item.child.Size().Height))
-	size = fyne.NewSize(theme.Padding()+li.item.child.Size().Width, li.item.child.Size().Height)
+	size = fyne.NewSize((theme.Padding()*2)+li.item.child.Size().Width,
+		li.item.child.Size().Height+theme.Padding()*2)
 	return
 }
 
-// Layout the components of the button widget
+// Layout the components of the listItem widget
 func (li *listItemRenderer) Layout(size fyne.Size) {
-	li.LayoutShadow(size, fyne.NewPos(0, 0))
-	li.layout.Layout([]fyne.CanvasObject{li.item.statusIndicator, li.item.child}, size)
+	li.item.statusIndicator.Move(fyne.NewPos(0, 0))
+	s := fyne.NewSize(theme.Padding(), size.Height-1)
+	li.item.statusIndicator.SetMinSize(s)
+	li.item.statusIndicator.Resize(s)
+
+	x := theme.Padding() * 2
+	li.item.child.Move(fyne.NewPos(x, theme.Padding()))
+	li.item.child.Resize(fyne.NewSize(size.Width-x, size.Height-(2*theme.Padding())))
+
+	li.item.divider.Move(fyne.NewPos(0, size.Height-1))
+	s = fyne.NewSize(size.Width, 1)
+	li.item.divider.SetMinSize(s)
+	li.item.divider.Resize(s)
 }
 
 func (li *listItemRenderer) Refresh() {
 	if li.item.selected {
 		li.item.statusIndicator.FillColor = theme.FocusColor()
-	} else if li.item.hovered {
+		canvas.Refresh(li.item.super())
+		return
+	}
+	if li.item.hovered {
 		li.item.statusIndicator.FillColor = theme.HoverColor()
 	} else {
 		li.item.statusIndicator.FillColor = theme.BackgroundColor()
@@ -348,9 +370,9 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 	y := 0
 	for _, child := range objects {
-		child.Move(fyne.NewPos(0, y))
+		child.Move(fyne.NewPos(theme.Padding(), y))
 		y += l.list.itemMin.Height
-		child.Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
+		child.Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
 	}
 }
 
@@ -362,16 +384,16 @@ func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 
 func (l *listLayout) itemAppended(objects []fyne.CanvasObject) {
 	if len(objects) > 1 {
-		objects[len(objects)-1].Move(fyne.NewPos(0, objects[len(objects)-2].Position().Y+l.list.itemMin.Height))
+		objects[len(objects)-1].Move(fyne.NewPos(theme.Padding(), objects[len(objects)-2].Position().Y+l.list.itemMin.Height))
 	} else {
-		objects[len(objects)-1].Move(fyne.NewPos(0, 0))
+		objects[len(objects)-1].Move(fyne.NewPos(theme.Padding(), 0))
 	}
-	objects[len(objects)-1].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
+	objects[len(objects)-1].Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
 }
 
 func (l *listLayout) itemPrepended(objects []fyne.CanvasObject) {
-	objects[0].Move(fyne.NewPos(0, objects[1].Position().Y-l.list.itemMin.Height))
-	objects[0].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
+	objects[0].Move(fyne.NewPos(theme.Padding(), objects[1].Position().Y-l.list.itemMin.Height))
+	objects[0].Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
 }
 
 type pool interface {
