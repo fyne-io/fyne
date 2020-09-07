@@ -82,6 +82,16 @@ func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *ScrollConta
 }
 
 func (l *listRenderer) Layout(size fyne.Size) {
+	if l.list.Length() == 0 {
+		if len(l.children) > 0 {
+			for _, child := range l.children {
+				l.itemPool.Release(child)
+			}
+			l.children = nil
+			l.list.Refresh()
+		}
+		return
+	}
 	if size != l.size {
 		if size.Width != l.size.Width {
 			for _, child := range l.children {
@@ -91,18 +101,11 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		l.scroller.Resize(size)
 		l.size = size
 	}
-	if l.list.Length() == 0 {
-		return
-	}
 	if l.itemPool == nil {
 		l.itemPool = &listPool{}
 	}
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize
-	for _, child := range l.children {
-		l.itemPool.Release(child)
-	}
-	l.children = nil
 	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
 	if len(l.children) > l.visibleItemCount {
 		for i := len(l.children); i > l.visibleItemCount; i-- {
