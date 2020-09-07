@@ -20,11 +20,10 @@ type List struct {
 	CreateItem     func() fyne.CanvasObject
 	UpdateItem     func(index int, item fyne.CanvasObject)
 	OnItemSelected func(index int, item fyne.CanvasObject)
-	offsetY         int
-	previousOffsetY int
-	selectedItem    *listItem
-	selectedIndex   int
-	itemMin         fyne.Size
+	selectedItem   *listItem
+	selectedIndex  int
+	itemMin        fyne.Size
+	offsetY        int
 }
 
 // NewList creates and returns a list widget for displaying items in
@@ -67,17 +66,17 @@ type listRenderer struct {
 	firstItemIndex   int
 	lastItemIndex    int
 	size             fyne.Size
+	previousOffsetY  int
 }
 
 func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *ScrollContainer, layout *fyne.Container) *listRenderer {
 	lr := &listRenderer{BaseRenderer: widget.NewBaseRenderer(objects), list: l, scroller: scroller, layout: layout}
 	lr.scroller.onOffsetChanged = func() {
-		if l.offsetY == lr.scroller.Offset.Y {
+		if lr.list.offsetY == lr.scroller.Offset.Y {
 			return
 		}
-		l.offsetY = lr.scroller.Offset.Y
+		lr.list.offsetY = lr.scroller.Offset.Y
 		lr.offsetChanged()
-		//l.BaseWidget.Refresh()
 	}
 	return lr
 }
@@ -169,14 +168,14 @@ func (l *listRenderer) getItem() fyne.CanvasObject {
 }
 
 func (l *listRenderer) offsetChanged() {
-	offsetChange := int(math.Abs(float64(l.list.previousOffsetY - l.list.offsetY)))
+	offsetChange := int(math.Abs(float64(l.previousOffsetY - l.list.offsetY)))
 
-	if l.list.previousOffsetY < l.list.offsetY {
+	if l.previousOffsetY < l.list.offsetY {
 		// Scrolling Down
 		l.scrollDown(offsetChange)
 		return
 
-	} else if l.list.previousOffsetY > l.list.offsetY {
+	} else if l.previousOffsetY > l.list.offsetY {
 		// Scrolling Up
 		l.scrollUp(offsetChange)
 		return
@@ -202,7 +201,7 @@ func (l *listRenderer) scrollDown(offsetChange int) {
 	} else {
 		itemChange = int(math.Floor(float64(offsetChange) / float64(l.list.itemMin.Height)))
 	}
-	l.list.previousOffsetY = l.list.offsetY
+	l.previousOffsetY = l.list.offsetY
 	for i := 0; i < itemChange && l.lastItemIndex != l.list.Length()-1; i++ {
 		l.itemPool.Release(l.children[0])
 		l.children = l.children[1:]
@@ -222,7 +221,7 @@ func (l *listRenderer) scrollUp(offsetChange int) {
 	} else {
 		itemChange = int(math.Floor(float64(offsetChange) / float64(l.list.itemMin.Height)))
 	}
-	l.list.previousOffsetY = l.list.offsetY
+	l.previousOffsetY = l.list.offsetY
 	for i := 0; i < itemChange && l.firstItemIndex != 0; i++ {
 		l.itemPool.Release(l.children[len(l.children)-1])
 		l.children = l.children[:len(l.children)-1]
@@ -233,11 +232,15 @@ func (l *listRenderer) scrollUp(offsetChange int) {
 }
 
 func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
+	previousIndicator := item.(*listItem).selected
 	if index != l.list.selectedIndex {
 		item.(*listItem).selected = false
 	} else {
 		item.(*listItem).selected = true
 		l.list.selectedItem = item.(*listItem)
+	}
+	if previousIndicator != item.(*listItem).selected {
+		item.Refresh()
 	}
 	l.list.UpdateItem(index, item.(*listItem).child)
 	item.(*listItem).onTapped = func() {
@@ -364,8 +367,10 @@ func (li *listItemRenderer) Refresh() {
 }
 
 type listLayout struct {
-	list      *List
-	itemCount int
+	list       *List
+	itemCount  int
+	layoutEndY int
+	offsetY    int
 }
 
 var _ fyne.Layout = (*listLayout)(nil)
