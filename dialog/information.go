@@ -34,7 +34,7 @@ func ShowInformation(title, message string, parent fyne.Window) {
 // error. The title and message are extracted from the provided error.
 // After creation you should call Show().
 func NewError(err error, parent fyne.Window) Dialog {
-	return createTextDialog("Error", err.Error(), theme.WarningIcon(), parent)
+	return createTextDialog("Error", err.Error(), theme.ErrorIcon(), parent)
 }
 
 // ShowError shows a dialog over the specified window for an application

@@ -134,12 +134,12 @@ func (b *buttonRenderer) applyTheme() {
 		switch res := b.icon.Resource.(type) {
 		case *theme.ThemedResource:
 			if b.button.Style == PrimaryButton {
-				b.icon.Resource = res.Invert()
+				b.icon.Resource = theme.NewInvertedThemedResource(res)
 				b.icon.Refresh()
 			}
 		case *theme.InvertedThemedResource:
 			if b.button.Style != PrimaryButton {
-				b.icon.Resource = res.Invert()
+				b.icon.Resource = res.Original()
 				b.icon.Refresh()
 			}
 		}
