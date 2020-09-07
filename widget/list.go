@@ -126,15 +126,8 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	l.layout.Layout.Layout(l.layout.Objects, l.list.itemMin)
 	l.lastItemIndex = l.firstItemIndex + len(l.children) - 1
 
-	poolCapacity := 5
-	if l.list.Length()-len(l.children) < 5 {
-		poolCapacity = l.list.Length() - len(l.children)
-	}
-	for i := l.itemPool.Count(); i < poolCapacity; i++ {
-		// Make sure to keep extra items in the pool
-		item := newListItem(l.list.CreateItem(), nil)
-		l.itemPool.Release(item)
-	}
+	l.ensurePoolCapacity()
+
 	i := l.firstItemIndex
 	for _, child := range l.children {
 		l.list.UpdateItem(i, child.(*listItem).child)
@@ -160,6 +153,17 @@ func (l *listRenderer) appendItem(index int) {
 	l.setupListItem(item, index)
 	l.layout.Objects = l.children
 	l.layout.Layout.(*listLayout).appendedItem(l.layout.Objects)
+}
+
+func (l *listRenderer) ensurePoolCapacity() {
+	poolCapacity := 5
+	if l.list.Length()-len(l.children) < 5 {
+		poolCapacity = l.list.Length() - len(l.children)
+	}
+	for i := l.itemPool.Count(); i < poolCapacity; i++ {
+		item := newListItem(l.list.CreateItem(), nil)
+		l.itemPool.Release(item)
+	}
 }
 
 func (l *listRenderer) getItem() fyne.CanvasObject {
