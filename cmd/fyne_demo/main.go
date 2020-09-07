@@ -109,7 +109,19 @@ func main() {
 	})
 	findItem := fyne.NewMenuItem("Find", func() { fmt.Println("Menu Find") })
 
-	helpMenu := fyne.NewMenu("Help", fyne.NewMenuItem("Help", func() { fmt.Println("Help Menu") }))
+	helpMenu := fyne.NewMenu("Help", fyne.NewMenuItem("Documentation", func() {
+		u, _ := url.Parse("https://developer.fyne.io")
+		_ = a.OpenURL(u)
+	}),
+		fyne.NewMenuItem("Support", func() {
+			u, _ := url.Parse("https://fyne.io/support/")
+			_ = a.OpenURL(u)
+		}),
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Sponsor", func() {
+			u, _ := url.Parse("https://github.com/sponsors/fyne-io")
+			_ = a.OpenURL(u)
+		}))
 	mainMenu := fyne.NewMainMenu(
 		// a quit item will be appended to our first menu
 		fyne.NewMenu("File", newItem, fyne.NewMenuItemSeparator(), settingsItem),
