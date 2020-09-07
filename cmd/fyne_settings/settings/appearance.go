@@ -2,6 +2,8 @@ package settings
 
 import (
 	"encoding/json"
+	"fmt"
+	"image"
 	"image/color"
 	"io/ioutil"
 	"os"
@@ -11,8 +13,10 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/tools/playground"
 	"fyne.io/fyne/widget"
 )
 
@@ -56,7 +60,7 @@ func (s *Settings) AppearanceIcon() fyne.Resource {
 
 // LoadAppearanceScreen creates a new settings screen to handle appearance configuration
 func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
-	s.preview = canvas.NewImageFromResource(themeDarkPreview)
+	s.preview = canvas.NewImageFromImage(s.createPreview())
 	s.preview.FillMode = canvas.ImageFillContain
 
 	def := s.fyneSettings.ThemeName
@@ -105,13 +109,43 @@ func (s *Settings) chooseTheme(name string) {
 	}
 	s.fyneSettings.ThemeName = name
 
-	switch name {
-	case "light":
-		s.preview.Resource = themeLightPreview
-	default:
-		s.preview.Resource = themeDarkPreview
-	}
+	s.preview.Image = s.createPreview()
 	canvas.Refresh(s.preview)
+}
+
+type overrideTheme interface {
+	OverrideTheme(fyne.Theme, string)
+}
+
+func (s *Settings) createPreview() image.Image {
+	c := playground.NewSoftwareCanvas()
+	oldTheme := fyne.CurrentApp().Settings().Theme()
+	oldColor := fyne.CurrentApp().Settings().PrimaryColor()
+
+	th := theme.DarkTheme()
+	if s.fyneSettings.ThemeName == "light" {
+		th = theme.LightTheme()
+	}
+	painter.SvgCacheReset() // reset icon cache
+	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
+
+	empty := widget.NewLabel("")
+	tabs := widget.NewTabContainer(
+		widget.NewTabItemWithIcon("Welcome", theme.HomeIcon(), empty),
+		widget.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), empty),
+		widget.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), makeProgressTab()),
+		widget.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), empty),
+		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), empty))
+	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs.SelectTabIndex(2)
+
+	c.SetContent(tabs)
+	c.Resize(fyne.NewSize(380, 380))
+	img := c.Capture()
+
+	painter.SvgCacheReset() // ensure we re-create the correct cached assets
+	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(oldTheme, oldColor)
+	return img
 }
 
 func (s *Settings) load() {
@@ -136,6 +170,24 @@ func (s *Settings) loadFromFile(path string) error {
 	decode := json.NewDecoder(file)
 
 	return decode.Decode(&s.fyneSettings)
+}
+
+func makeProgressTab() fyne.Widget {
+	progress := widget.NewProgressBar()
+	progress.Value = 0.5
+
+	fprogress := widget.NewProgressBar()
+	fprogress.Value = 0.3
+	fprogress.TextFormatter = func() string {
+		return fmt.Sprintf("%.2f out of %.2f", fprogress.Value, fprogress.Max)
+	}
+
+	infProgress := widget.NewProgressBarInfinite()
+
+	return widget.NewVBox(
+		widget.NewLabel("Percent"), progress,
+		widget.NewLabel("Formatted"), fprogress,
+		widget.NewLabel("Infinite"), infProgress)
 }
 
 func (s *Settings) save() error {
@@ -187,6 +239,9 @@ func (c *colorButton) Tapped(_ *fyne.PointEvent) {
 	for _, child := range c.s.colors {
 		child.Refresh()
 	}
+
+	c.s.preview.Image = c.s.createPreview()
+	canvas.Refresh(c.s.preview)
 }
 
 type colorRenderer struct {
