@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/cmd/fyne_demo/data"
 	"fyne.io/fyne/cmd/fyne_demo/screens"
+	"fyne.io/fyne/cmd/fyne_settings/settings"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -85,7 +86,11 @@ func main() {
 		fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") }),
 		otherItem,
 	)
-	settingsItem := fyne.NewMenuItem("Settings", func() { fmt.Println("Menu Settings") })
+	settingsItem := fyne.NewMenuItem("Settings", func() {
+		w := a.NewWindow("Fyne Settings")
+		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
+		w.Show()
+	})
 
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		shortcutFocused(&fyne.ShortcutCut{
