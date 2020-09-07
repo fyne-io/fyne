@@ -16,7 +16,7 @@ import (
 func TestNewList(t *testing.T) {
 	list := createList()
 
-	template := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
 	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
@@ -30,7 +30,7 @@ func TestNewList(t *testing.T) {
 
 func TestList_Resize(t *testing.T) {
 	list := createList()
-	template := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
@@ -60,7 +60,7 @@ func TestList_Resize(t *testing.T) {
 
 func TestList_OffsetChange(t *testing.T) {
 	list := createList()
-	template := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 	test.WidgetRenderer(list).(*listRenderer).Layout(fyne.NewSize(100, 1000))
 
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
