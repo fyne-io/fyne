@@ -156,7 +156,7 @@ func (l *listRenderer) appendItem(index int) {
 	l.children = append(l.children, item)
 	l.setupListItem(item, index)
 	l.layout.Objects = l.children
-	l.layout.Layout.(*listLayout).itemAppended(l.layout.Objects)
+	l.layout.Layout.(*listLayout).appendedItem(l.layout.Objects)
 }
 
 func (l *listRenderer) getItem() fyne.CanvasObject {
@@ -187,7 +187,7 @@ func (l *listRenderer) prependItem(index int) {
 	l.children = append([]fyne.CanvasObject{item}, l.children...)
 	l.setupListItem(item, index)
 	l.layout.Objects = l.children
-	l.layout.Layout.(*listLayout).itemPrepended(l.layout.Objects)
+	l.layout.Layout.(*listLayout).prependedItem(l.layout.Objects)
 }
 
 func (l *listRenderer) scrollDown(offsetChange int) {
@@ -398,7 +398,7 @@ func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		l.list.itemMin.Height*l.list.Length())
 }
 
-func (l *listLayout) itemAppended(objects []fyne.CanvasObject) {
+func (l *listLayout) appendedItem(objects []fyne.CanvasObject) {
 	if len(objects) > 1 {
 		objects[len(objects)-1].Move(fyne.NewPos(theme.Padding(), objects[len(objects)-2].Position().Y+l.list.itemMin.Height))
 	} else {
@@ -407,7 +407,7 @@ func (l *listLayout) itemAppended(objects []fyne.CanvasObject) {
 	objects[len(objects)-1].Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
 }
 
-func (l *listLayout) itemPrepended(objects []fyne.CanvasObject) {
+func (l *listLayout) prependedItem(objects []fyne.CanvasObject) {
 	objects[0].Move(fyne.NewPos(theme.Padding(), objects[1].Position().Y-l.list.itemMin.Height))
 	objects[0].Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
 }
