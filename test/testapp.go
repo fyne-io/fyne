@@ -127,6 +127,10 @@ func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
 	s.changeListeners = append(s.changeListeners, listener)
 }
 
+func (t *testSettings) PrimaryColor() string {
+	return theme.COLOR_BLUE
+}
+
 func (s *testSettings) SetTheme(theme fyne.Theme) {
 	s.propertyLock.Lock()
 	s.theme = theme
