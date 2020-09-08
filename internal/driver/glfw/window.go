@@ -430,7 +430,7 @@ func (w *window) ShowAndRun() {
 	fyne.CurrentApp().Driver().Run()
 }
 
-//Clipboard returns the system clipboard
+// Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
 	if w.viewport == nil {
 		return nil
