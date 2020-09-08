@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -24,7 +23,7 @@ type fileDialogItem struct {
 
 	icon fyne.CanvasObject
 	name string
-	path string
+	path fyne.URI
 	dir  bool
 }
 
@@ -56,15 +55,15 @@ func (i *fileDialogItem) isDirectory() bool {
 	return i.dir
 }
 
-func (f *fileDialog) newFileItem(path string, dir bool) *fileDialogItem {
+func (f *fileDialog) newFileItem(path fyne.URI, dir bool) *fileDialogItem {
 	var icon fyne.CanvasObject
 	var name string
 	if dir {
 		icon = canvas.NewImageFromResource(theme.FolderIcon())
-		name = filepath.Base(path)
+		name = path.Name()
 	} else {
-		icon = NewFileIcon(storage.NewURI("file://" + path))
-		name = fileName(path)
+		icon = NewFileIcon(path)
+		name = path.Name()
 	}
 
 	ret := &fileDialogItem{

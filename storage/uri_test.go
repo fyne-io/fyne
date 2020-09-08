@@ -82,3 +82,11 @@ func TestURI_Extension(t *testing.T) {
 	assert.Equal(t, ".JPEG", storage.NewURI("file://C:/image.JPEG").Extension())
 	assert.Equal(t, "", storage.NewURI("file://C:/directory/").Extension())
 }
+
+func TestURI_Join(t *testing.T) {
+	p := storage.Join(storage.NewURI("file:///foo/bar"), "baz")
+	assert.Equal(t, "file:///foo/bar/baz", p.String())
+
+	p = storage.Join(storage.NewURI("file:///foo/bar/"), "baz")
+	assert.Equal(t, "file:///foo/bar/baz", p.String())
+}

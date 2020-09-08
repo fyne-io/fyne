@@ -109,3 +109,15 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	parent = parent + strings.Join(components[0:len(components)-1], "/") + "/"
 	return NewURI(parent), nil
 }
+
+// Join appends a new path element to a URI, separated by a '/' character.
+func Join(u fyne.URI, component string) fyne.URI {
+	s := u.String()
+
+	// guarantee that there will be a path separator
+	if s[len(s)-1:] != "/" {
+		s += "/"
+	}
+
+	return NewURI(s + component)
+}
