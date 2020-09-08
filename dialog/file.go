@@ -140,7 +140,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	f.showHiddenCheck = widget.NewCheck("Show Hidden Files", func(changed bool) {
 		f.refreshDir(f.dir, changed)
 	})
-	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, buttons),
+	footer := fyne.NewContainerWithLayout(layout.NewBorderLayout(f.showHiddenCheck, nil, nil, buttons),
 		buttons, widget.NewHScrollContainer(f.fileName), f.showHiddenCheck)
 
 	f.files = fyne.NewContainerWithLayout(layout.NewGridWrapLayout(fyne.NewSize(fileIconCellWidth,
