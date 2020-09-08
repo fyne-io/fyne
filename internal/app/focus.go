@@ -29,7 +29,7 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 			return true
 		}
 
-		if !found && obj == current.(fyne.CanvasObject) {
+		if obj == current.(fyne.CanvasObject) {
 			found = true
 		}
 		if first == nil {
