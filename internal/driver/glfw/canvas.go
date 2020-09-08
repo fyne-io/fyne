@@ -110,7 +110,7 @@ func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 
 	c.content.Resize(c.content.MinSize()) // give it the space it wants then calculate the real min
 	// the pass above makes some layouts wide enough to wrap, so we ask again what the true min is.
-	newSize := c.size.Union(c.canvasSize(c.content.MinSize()))
+	newSize := c.size.Max(c.canvasSize(c.content.MinSize()))
 	c.Unlock()
 
 	c.Resize(newSize)
@@ -375,7 +375,7 @@ func (c *glCanvas) ensureMinSize() bool {
 			} else {
 				windowNeedsMinSizeUpdate = true
 				size := obj.Size()
-				expectedSize := minSize.Union(size)
+				expectedSize := minSize.Max(size)
 				if expectedSize != size && size != c.size {
 					objToLayout = nil
 					obj.Resize(expectedSize)
@@ -395,7 +395,7 @@ func (c *glCanvas) ensureMinSize() bool {
 	shouldResize := windowNeedsMinSizeUpdate && (c.size.Width < min.Width || c.size.Height < min.Height)
 	c.RUnlock()
 	if shouldResize {
-		c.Resize(c.Size().Union(c.MinSize()))
+		c.Resize(c.Size().Max(c.MinSize()))
 	}
 
 	if lastParent != nil {
