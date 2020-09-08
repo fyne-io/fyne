@@ -27,7 +27,6 @@ type glCanvas struct {
 	overlays *overlayStack
 	padded   bool
 	size     fyne.Size
-	focused  fyne.Focusable
 	focusMgr *app.FocusManager
 
 	onTypedRune func(rune)
@@ -105,8 +104,7 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.Lock()
-	c.content = content
-	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
+	c.setContent(content)
 
 	c.content.Resize(c.content.MinSize()) // give it the space it wants then calculate the real min
 	// the pass above makes some layouts wide enough to wrap, so we ask again what the true min is.
@@ -165,8 +163,9 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
 	c.RLock()
-	focused := c.focused
+	mgr := c.focusMgr
 	c.RUnlock()
+	focused := mgr.Focused()
 
 	if focused == obj || obj == nil {
 		return
@@ -181,19 +180,32 @@ func (c *glCanvas) Focus(obj fyne.Focusable) {
 		focused.FocusLost()
 	}
 
-	c.Lock()
-	c.focused = obj
-	c.Unlock()
+	mgr.Focus(obj)
 	obj.FocusGained()
 }
 
+func (c *glCanvas) FocusNext() {
+	c.RLock()
+	mgr := c.focusMgr
+	c.RUnlock()
+	mgr.FocusNext()
+}
+
+func (c *glCanvas) FocusPrevious() {
+	c.RLock()
+	mgr := c.focusMgr
+	c.RUnlock()
+	mgr.FocusPrevious()
+}
+
 func (c *glCanvas) Unfocus() {
-	c.Lock()
-	focused := c.focused
-	c.focused = nil
-	c.Unlock()
+	c.RLock()
+	mgr := c.focusMgr
+	c.RUnlock()
+	focused := mgr.Focused()
 
 	if focused != nil {
+		mgr.Focus(nil)
 		focused.FocusLost()
 	}
 }
@@ -201,7 +213,7 @@ func (c *glCanvas) Unfocus() {
 func (c *glCanvas) Focused() fyne.Focusable {
 	c.RLock()
 	defer c.RUnlock()
-	return c.focused
+	return c.focusMgr.Focused()
 }
 
 func (c *glCanvas) Resize(size fyne.Size) {
@@ -464,6 +476,12 @@ func (c *glCanvas) paint(size fyne.Size) {
 	c.walkTrees(paint, afterPaint)
 }
 
+func (c *glCanvas) setContent(content fyne.CanvasObject) {
+	c.content = content
+	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
+	c.focusMgr = app.NewFocusManager(c.content)
+}
+
 func (c *glCanvas) setDirty(dirty bool) {
 	c.dirtyMutex.Lock()
 	defer c.dirtyMutex.Unlock()
@@ -564,13 +582,11 @@ func (c *glCanvas) walkTrees(
 
 func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0}
-	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
-	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
+	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
 	c.padded = true
 
 	c.overlays = &overlayStack{onChange: func() { c.setDirty(true) }}
 
-	c.focusMgr = app.NewFocusManager(c.content)
 	c.refreshQueue = make(chan fyne.CanvasObject, 4096)
 	c.dirtyMutex = &sync.Mutex{}
 

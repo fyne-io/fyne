@@ -906,12 +906,12 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	if keyName == fyne.KeyTab {
 		if keyDesktopModifier == 0 {
 			if action != glfw.Release {
-				w.canvas.focusMgr.FocusNext(w.canvas.focused)
+				w.canvas.FocusNext()
 			}
 			return
 		} else if keyDesktopModifier == desktop.ShiftModifier {
 			if action != glfw.Release {
-				w.canvas.focusMgr.FocusPrevious(w.canvas.focused)
+				w.canvas.FocusPrevious()
 			}
 			return
 		}
@@ -1038,15 +1038,16 @@ func (w *window) charInput(_ *glfw.Window, char rune) {
 	}
 }
 
-func (w *window) focused(_ *glfw.Window, focused bool) {
-	if w.canvas.focused == nil {
+func (w *window) focused(_ *glfw.Window, isFocused bool) {
+	focused := w.canvas.Focused()
+	if focused == nil {
 		return
 	}
 
-	if focused {
-		w.canvas.focused.FocusGained()
+	if isFocused {
+		focused.FocusGained()
 	} else {
-		w.canvas.focused.FocusLost()
+		focused.FocusLost()
 	}
 }
 
