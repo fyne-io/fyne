@@ -34,22 +34,22 @@ func assertTreeMinSize(t *testing.T, tree *TreeContainer, expected fyne.Size) {
 	assert.Equal(t, expected, tr.content.MinSize())
 }
 
-func getBranch(t *testing.T, tree *TreeContainer, id string) (branch *branch) {
+func getBranch(t *testing.T, tree *TreeContainer, uid string) (branch *branch) {
 	t.Helper()
 	tr := test.WidgetRenderer(tree).(*treeContainerRenderer)
 	cr := test.WidgetRenderer(tr.content).(*treeContentRenderer)
 	log.Println(cr.branches)
-	branch = cr.branches[id]
+	branch = cr.branches[uid]
 	assert.NotNil(t, branch)
 	return branch
 }
 
-func getLeaf(t *testing.T, tree *TreeContainer, id string) (leaf *leaf) {
+func getLeaf(t *testing.T, tree *TreeContainer, uid string) (leaf *leaf) {
 	t.Helper()
 	tr := test.WidgetRenderer(tree).(*treeContainerRenderer)
 	cr := test.WidgetRenderer(tr.content).(*treeContentRenderer)
 	log.Println(cr.leaves)
-	leaf = cr.leaves[id]
+	leaf = cr.leaves[uid]
 	assert.NotNil(t, leaf)
 	return leaf
 }
@@ -229,7 +229,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		tapped := make(chan bool)
-		tree.OnBranchOpened = func(id string) {
+		tree.OnBranchOpened = func(uid string) {
 			tapped <- true
 		}
 		go test.DoubleTap(getBranch(t, tree, "A"))
@@ -249,7 +249,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		tapped := make(chan bool)
-		tree.OnBranchOpened = func(id string) {
+		tree.OnBranchOpened = func(uid string) {
 			tapped <- true
 		}
 		go test.Tap(getBranch(t, tree, "A").icon.(*branchIcon))
@@ -268,7 +268,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		selected := make(chan bool)
-		tree.OnNodeSelected = func(id string, node fyne.CanvasObject) {
+		tree.OnNodeSelected = func(uid string, node fyne.CanvasObject) {
 			selected <- true
 		}
 		go test.Tap(getLeaf(t, tree, "A"))
@@ -292,11 +292,11 @@ func TestTreeContainer_Walk(t *testing.T) {
 		tree.OpenBranch("E")
 		var branches []string
 		var leaves []string
-		tree.Walk(func(id string, branch bool, depth int) {
+		tree.Walk(func(uid string, branch bool, depth int) {
 			if branch {
-				branches = append(branches, id)
+				branches = append(branches, uid)
 			} else {
-				leaves = append(leaves, id)
+				leaves = append(leaves, uid)
 			}
 		})
 
@@ -319,11 +319,11 @@ func TestTreeContainer_Walk(t *testing.T) {
 		tree := NewTreeWithStrings(data)
 		var branches []string
 		var leaves []string
-		tree.Walk(func(id string, branch bool, depth int) {
+		tree.Walk(func(uid string, branch bool, depth int) {
 			if branch {
-				branches = append(branches, id)
+				branches = append(branches, uid)
 			} else {
-				leaves = append(leaves, id)
+				leaves = append(leaves, uid)
 			}
 		})
 

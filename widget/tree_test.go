@@ -21,8 +21,8 @@ func TestTreeContainer(t *testing.T) {
 	t.Run("Initializer", func(t *testing.T) {
 		tree := &widget.TreeContainer{}
 		var nodes []string
-		tree.Walk(func(id string, branch bool, depth int) {
-			nodes = append(nodes, id)
+		tree.Walk(func(uid string, branch bool, depth int) {
+			nodes = append(nodes, uid)
 		})
 		assert.Equal(t, 0, len(nodes))
 	})
@@ -33,11 +33,11 @@ func TestTreeContainer(t *testing.T) {
 		tree.OpenBranch("foo")
 		var branches []string
 		var leaves []string
-		tree.Walk(func(id string, branch bool, depth int) {
+		tree.Walk(func(uid string, branch bool, depth int) {
 			if branch {
-				branches = append(branches, id)
+				branches = append(branches, uid)
 			} else {
-				leaves = append(leaves, id)
+				leaves = append(leaves, uid)
 			}
 		})
 		assert.Equal(t, 2, len(branches))
@@ -64,11 +64,11 @@ func TestTreeContainer(t *testing.T) {
 		tree.OpenAllBranches()
 		var branches []string
 		var leaves []string
-		tree.Walk(func(id string, branch bool, depth int) {
+		tree.Walk(func(uid string, branch bool, depth int) {
 			if branch {
-				branches = append(branches, id)
+				branches = append(branches, uid)
 			} else {
-				leaves = append(leaves, id)
+				leaves = append(leaves, uid)
 			}
 		})
 		assert.Equal(t, 3, len(branches))
