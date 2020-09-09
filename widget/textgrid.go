@@ -131,7 +131,7 @@ func (t *TextGrid) Text() string {
 	return string(runes)
 }
 
-// Row returns the content of a specified row as a TextGridRow.
+// Row returns a copy of the content in a specified row as a TextGridRow.
 // If the index is out of bounds it returns an empty row object.
 func (t *TextGrid) Row(row int) TextGridRow {
 	if row < 0 || row >= len(t.Rows) {
@@ -139,6 +139,20 @@ func (t *TextGrid) Row(row int) TextGridRow {
 	}
 
 	return t.Rows[row]
+}
+
+// RowText returns a string representation of the content at the row specified.
+// If the index is out of bounds it returns an empty string.
+func (t *TextGrid) RowText(row int) string {
+	rowData := t.Row(row)
+	runes := make([]rune, len(rowData.Cells))
+	c := 0
+	for _, r := range rowData.Cells {
+		runes[c] = r.Rune
+		c++
+	}
+
+	return string(runes)
 }
 
 // SetRow updates the specified row of the grid's contents using the specified content and style and then refreshes.

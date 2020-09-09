@@ -30,12 +30,29 @@ func TestTextGrid_CreateRendererRows(t *testing.T) {
 	assert.Equal(t, 10, len(rend.objects))
 }
 
+func TestTextGrid_Row(t *testing.T) {
+	grid := NewTextGridFromString("Ab\nC")
+	test.WidgetRenderer(grid).Refresh()
+
+	assert.NotNil(t, grid.Row(0))
+	assert.Equal(t, 2, len(grid.Row(0).Cells))
+	assert.Equal(t, 'b', grid.Row(0).Cells[1].Rune)
+}
+
 func TestTextGrid_Rows(t *testing.T) {
 	grid := NewTextGridFromString("Ab\nC")
 	test.WidgetRenderer(grid).Refresh()
 
 	assert.Equal(t, 2, len(grid.Rows))
 	assert.Equal(t, 2, len(grid.Rows[0].Cells))
+}
+
+func TestTextGrid_RowText(t *testing.T) {
+	grid := NewTextGridFromString("Ab\nC")
+	test.WidgetRenderer(grid).Refresh()
+
+	assert.Equal(t, "Ab", grid.RowText(0))
+	assert.Equal(t, "C", grid.RowText(1))
 }
 
 func TestTextGrid_SetText(t *testing.T) {
