@@ -56,6 +56,15 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 	assert.Equal(t, 5, len(grid.Rows[1].Cells))
 }
 
+func TestTextGrid_SetRowStyle(t *testing.T) {
+	grid := NewTextGridFromString("Abc")
+	grid.SetRowStyle(0, &CustomTextGridStyle{FGColor: color.White, BGColor: color.Black})
+
+	assert.NotNil(t, grid.Rows[0].Style)
+	assert.Equal(t, color.White, grid.Rows[0].Style.TextColor())
+	assert.Equal(t, color.Black, grid.Rows[0].Style.BackgroundColor())
+}
+
 func TestTextGrid_SetStyle(t *testing.T) {
 	grid := NewTextGridFromString("Abc")
 	grid.SetStyle(0, 1, &CustomTextGridStyle{FGColor: color.White, BGColor: color.Black})

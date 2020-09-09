@@ -155,7 +155,19 @@ func (t *TextGrid) SetRow(row int, content TextGridRow) {
 	t.Refresh()
 }
 
-// SetStyle sets a grid style to the cell at named row and column
+// SetRowStyle sets a grid style to all the cells cell at the specified row.
+// Any cells in this row with their own style will override this value when displayed.
+func (t *TextGrid) SetRowStyle(row int, style TextGridStyle) {
+	if row < 0 {
+		return
+	}
+	for len(t.Rows) <= row {
+		t.Rows = append(t.Rows, TextGridRow{})
+	}
+	t.Rows[row].Style = style
+}
+
+// SetStyle sets a grid style to the cell at named row and column.
 func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
 	if row < 0 || col < 0 {
 		return
