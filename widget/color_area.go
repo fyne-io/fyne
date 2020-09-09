@@ -231,7 +231,9 @@ func (r *colorAreaRenderer) Refresh() {
 	} else {
 		r.Layout(s)
 	}
+	r.x.StrokeColor = theme.IconColor()
 	r.x.Refresh()
+	r.y.StrokeColor = theme.IconColor()
 	r.y.Refresh()
 	r.raster.Refresh()
 	canvas.Refresh(r.area.super())
