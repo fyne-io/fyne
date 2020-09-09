@@ -15,7 +15,7 @@ import (
 func TestPaddedLayout(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 
-	obj := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	obj := canvas.NewRectangle(color.Black)
 	container := &fyne.Container{
 		Objects: []fyne.CanvasObject{obj},
 	}
@@ -28,7 +28,7 @@ func TestPaddedLayout(t *testing.T) {
 }
 
 func TestPaddedLayout_MinSize(t *testing.T) {
-	text := canvas.NewText("FooBar", color.NRGBA{0, 0xff, 0, 0})
+	text := canvas.NewText("FooBar", color.Black)
 	minSize := text.MinSize()
 
 	container := fyne.NewContainer(text)
@@ -39,7 +39,7 @@ func TestPaddedLayout_MinSize(t *testing.T) {
 }
 
 func TestContainer_PaddedLayout_MinSize(t *testing.T) {
-	text := canvas.NewText("FooBar", color.NRGBA{0, 0xff, 0, 0})
+	text := canvas.NewText("FooBar", color.Black)
 	minSize := text.MinSize()
 
 	container := fyne.NewContainer(text)
