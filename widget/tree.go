@@ -42,16 +42,17 @@ type TreeContainer struct {
 }
 
 // NewTreeWithStrings creates a new tree with the given string map.
-func NewTreeWithStrings(ss map[string][]string) (t *TreeContainer) {
+// Data must contain a mapping for the root, which defaults to empty string ("").
+func NewTreeWithStrings(data map[string][]string) (t *TreeContainer) {
 	t = &TreeContainer{
 		open: make(map[string]bool),
 		Children: func(uid string) (c []string) {
-			c, _ = ss[uid]
+			c, _ = data[uid]
 			//log.Println("StringTree.Children:", uid, c)
 			return
 		},
 		IsBranch: func(uid string) (b bool) {
-			_, b = ss[uid]
+			_, b = data[uid]
 			//log.Println("StringTree.IsBranch:", uid, b)
 			return
 		},
