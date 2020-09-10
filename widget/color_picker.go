@@ -55,7 +55,7 @@ type ColorAdvancedPicker struct {
 	onChange func(color.Color)
 }
 
-// NewColorAdvancedPicker returns a new color widget set to the given color
+// NewColorAdvancedPicker returns a new color widget set to the given color.
 func NewColorAdvancedPicker(color color.Color, onChange func(color.Color)) *ColorAdvancedPicker {
 	c := &ColorAdvancedPicker{
 		onChange: onChange,
@@ -65,7 +65,7 @@ func NewColorAdvancedPicker(color color.Color, onChange func(color.Color)) *Colo
 	return c
 }
 
-// Color returns the currently selected color
+// Color returns the currently selected color.
 func (p *ColorAdvancedPicker) Color() color.Color {
 	return &color.NRGBA{
 		uint8(p.Red * 255),
@@ -75,7 +75,7 @@ func (p *ColorAdvancedPicker) Color() color.Color {
 	}
 }
 
-// SetColor updates the color selected in this color widget
+// SetColor updates the color selected in this color widget.
 func (p *ColorAdvancedPicker) SetColor(color color.Color) {
 	if p.updateColor(color) {
 		p.Refresh()
@@ -98,10 +98,12 @@ func (p *ColorAdvancedPicker) updateColor(color color.Color) bool {
 	return true
 }
 
+// RGBA return the Red, Green, Blue, and Alpha components of the currently selected color.
 func (p *ColorAdvancedPicker) RGBA() (float64, float64, float64, float64) {
 	return p.Red, p.Green, p.Blue, p.Alpha
 }
 
+// SetRGBA updated the Red, Green, Blue, and Alpha components of the currently selected color.
 func (p *ColorAdvancedPicker) SetRGBA(r, g, b, a float64) {
 	r = colorClamp(r)
 	g = colorClamp(g)
@@ -121,10 +123,12 @@ func (p *ColorAdvancedPicker) SetRGBA(r, g, b, a float64) {
 	}
 }
 
+// HSLA return the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
 func (p *ColorAdvancedPicker) HSLA() (float64, float64, float64, float64) {
 	return p.Hue, p.Saturation, p.Lightness, p.Alpha
 }
 
+// SetHSLA updated the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
 func (p *ColorAdvancedPicker) SetHSLA(h, s, l, a float64) {
 	h = colorClamp(h)
 	s = colorClamp(s)
@@ -144,13 +148,13 @@ func (p *ColorAdvancedPicker) SetHSLA(h, s, l, a float64) {
 	}
 }
 
-// MinSize returns the size that this widget should not shrink below
+// MinSize returns the size that this widget should not shrink below.
 func (p *ColorAdvancedPicker) MinSize() fyne.Size {
 	p.ExtendBaseWidget(p)
 	return p.BaseWidget.MinSize()
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (p *ColorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 
