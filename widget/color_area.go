@@ -213,7 +213,6 @@ func (r *colorAreaRenderer) Layout(size fyne.Size) {
 	}
 	r.raster.Move(fyne.NewPos(p, p))
 	r.raster.Resize(fyne.NewSize(w, h))
-	return
 }
 
 func (r *colorAreaRenderer) MinSize() (min fyne.Size) {

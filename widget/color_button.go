@@ -117,7 +117,6 @@ func (r *colorButtonRenderer) BackgroundColor() color.Color {
 func (r *colorButtonRenderer) Layout(size fyne.Size) {
 	r.rectangle.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	r.rectangle.Resize(fyne.NewSize(size.Width-2*theme.Padding(), size.Height-2*theme.Padding()))
-	return
 }
 
 func (r *colorButtonRenderer) MinSize() (min fyne.Size) {
