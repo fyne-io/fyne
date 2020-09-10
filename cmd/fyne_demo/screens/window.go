@@ -94,7 +94,7 @@ func showText(f fyne.URIReadCloser) {
 	w.Show()
 }
 
-func loadDialogGroup(win fyne.Window) *widget.CardContainer {
+func loadDialogGroup(win fyne.Window) *widget.Card {
 	return widget.NewCardContainer("Dialogs", "", widget.NewVBox(
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)

@@ -13,7 +13,7 @@ import (
 func TestAccordionContainer_Toggle(t *testing.T) {
 	ai := NewAccordionItem("foo", NewLabel("foobar"))
 	ac := NewAccordionContainer(ai)
-	acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+	acr := test.WidgetRenderer(ac).(*accordionRenderer)
 	aih := acr.headers[0]
 	assert.False(t, ai.Open)
 
@@ -35,7 +35,7 @@ func TestAccordionContainerRenderer_Layout(t *testing.T) {
 	ac.Append(ai1)
 	ac.Append(ai2)
 
-	acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+	acr := test.WidgetRenderer(ac).(*accordionRenderer)
 	aih0 := acr.headers[0]
 	aih1 := acr.headers[1]
 	aih2 := acr.headers[2]
@@ -143,7 +143,7 @@ func TestAccordionContainerRenderer_Layout(t *testing.T) {
 func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		ac := NewAccordionContainer()
-		acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+		acr := test.WidgetRenderer(ac).(*accordionRenderer)
 		min := acr.MinSize()
 		assert.Equal(t, 0, min.Width)
 		assert.Equal(t, 0, min.Height)
@@ -154,7 +154,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			ac := NewAccordionContainer()
 			ac.Append(ai)
 			ac.Open(0)
-			acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+			acr := test.WidgetRenderer(ac).(*accordionRenderer)
 			min := acr.MinSize()
 			aih := acr.headers[0].MinSize()
 			aid := ai.Detail.MinSize()
@@ -165,7 +165,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			ac := NewAccordionContainer()
 			ac.Append(ai)
 			ac.Close(0)
-			acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+			acr := test.WidgetRenderer(ac).(*accordionRenderer)
 			min := acr.MinSize()
 			aih := acr.headers[0].MinSize()
 			assert.Equal(t, aih.Width, min.Width)
@@ -184,7 +184,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			ac.Open(0)
 			ac.Close(1)
 			ac.Close(2)
-			acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+			acr := test.WidgetRenderer(ac).(*accordionRenderer)
 			min := acr.MinSize()
 			aih0 := acr.headers[0].MinSize()
 			aih1 := acr.headers[1].MinSize()
@@ -211,7 +211,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			ac.Append(ai1)
 			ac.Append(ai2)
 			ac.OpenAll()
-			acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+			acr := test.WidgetRenderer(ac).(*accordionRenderer)
 			min := acr.MinSize()
 			aih0 := acr.headers[0].MinSize()
 			aih1 := acr.headers[1].MinSize()
@@ -246,7 +246,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			ac.Open(0)
 			ac.Open(1)
 			ac.Close(2)
-			acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+			acr := test.WidgetRenderer(ac).(*accordionRenderer)
 			min := acr.MinSize()
 			aih0 := acr.headers[0].MinSize()
 			aih1 := acr.headers[1].MinSize()
@@ -274,7 +274,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			ac.Append(ai1)
 			ac.Append(ai2)
 			ac.CloseAll()
-			acr := test.WidgetRenderer(ac).(*accordionContainerRenderer)
+			acr := test.WidgetRenderer(ac).(*accordionRenderer)
 			min := acr.MinSize()
 			aih0 := acr.headers[0].MinSize()
 			aih1 := acr.headers[1].MinSize()

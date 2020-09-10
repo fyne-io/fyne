@@ -96,7 +96,7 @@ func TestCard_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			card := &widget.CardContainer{
+			card := &widget.Card{
 				Title:    tt.title,
 				Subtitle: tt.subtitle,
 				Image:    tt.icon,
