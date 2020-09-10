@@ -8,6 +8,16 @@ var _ fyne.Layout = (*centerLayout)(nil)
 type centerLayout struct {
 }
 
+// NewCenterContainer creates a new container with the specified objects centered in the available space.
+func NewCenterContainer(objects ...fyne.CanvasObject) *fyne.Container {
+	return fyne.NewContainerWithLayout(NewCenterLayout(), objects...)
+}
+
+// NewCenterLayout creates a new CenterLayout instance
+func NewCenterLayout() fyne.Layout {
+	return &centerLayout{}
+}
+
 // Layout is called to pack all child objects into a specified size.
 // For CenterLayout this sets all children to their minimum size, centered within the space.
 func (c *centerLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
@@ -31,9 +41,4 @@ func (c *centerLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	}
 
 	return minSize
-}
-
-// NewCenterLayout creates a new CenterLayout instance
-func NewCenterLayout() fyne.Layout {
-	return &centerLayout{}
 }

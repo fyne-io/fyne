@@ -21,6 +21,40 @@ func TestNewTextGrid(t *testing.T) {
 	assert.Equal(t, 1, len(grid.Rows[0].Cells))
 }
 
+func TestTextGrid_CreateRendererRows(t *testing.T) {
+	grid := NewTextGrid()
+	grid.Resize(fyne.NewSize(56, 22))
+	rend := test.WidgetRenderer(grid).(*textGridRenderer)
+	rend.Refresh()
+
+	assert.Equal(t, 10, len(rend.objects))
+}
+
+func TestTextGrid_Row(t *testing.T) {
+	grid := NewTextGridFromString("Ab\nC")
+	test.WidgetRenderer(grid).Refresh()
+
+	assert.NotNil(t, grid.Row(0))
+	assert.Equal(t, 2, len(grid.Row(0).Cells))
+	assert.Equal(t, 'b', grid.Row(0).Cells[1].Rune)
+}
+
+func TestTextGrid_Rows(t *testing.T) {
+	grid := NewTextGridFromString("Ab\nC")
+	test.WidgetRenderer(grid).Refresh()
+
+	assert.Equal(t, 2, len(grid.Rows))
+	assert.Equal(t, 2, len(grid.Rows[0].Cells))
+}
+
+func TestTextGrid_RowText(t *testing.T) {
+	grid := NewTextGridFromString("Ab\nC")
+	test.WidgetRenderer(grid).Refresh()
+
+	assert.Equal(t, "Ab", grid.RowText(0))
+	assert.Equal(t, "C", grid.RowText(1))
+}
+
 func TestTextGrid_SetText(t *testing.T) {
 	grid := NewTextGrid()
 	grid.Resize(fyne.NewSize(20, 20))
@@ -39,19 +73,13 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 	assert.Equal(t, 5, len(grid.Rows[1].Cells))
 }
 
-func TestTextGrid_Text(t *testing.T) {
-	input := "Hello\nthere"
-	grid := NewTextGrid()
-	grid.SetText(input)
-	assert.Equal(t, input, grid.Text())
-}
+func TestTextGrid_SetRowStyle(t *testing.T) {
+	grid := NewTextGridFromString("Abc")
+	grid.SetRowStyle(0, &CustomTextGridStyle{FGColor: color.White, BGColor: color.Black})
 
-func TestTextGrid_Rows(t *testing.T) {
-	grid := NewTextGridFromString("Ab\nC")
-	test.WidgetRenderer(grid).Refresh()
-
-	assert.Equal(t, 2, len(grid.Rows))
-	assert.Equal(t, 2, len(grid.Rows[0].Cells))
+	assert.NotNil(t, grid.Rows[0].Style)
+	assert.Equal(t, color.White, grid.Rows[0].Style.TextColor())
+	assert.Equal(t, color.Black, grid.Rows[0].Style.BackgroundColor())
 }
 
 func TestTextGrid_SetStyle(t *testing.T) {
@@ -95,13 +123,11 @@ func TestTextGrid_SetStyleRange_Overflow(t *testing.T) {
 	assert.Equal(t, color.Black, grid.Rows[1].Cells[1].Style.BackgroundColor())
 }
 
-func TestTextGrid_CreateRendererRows(t *testing.T) {
+func TestTextGrid_Text(t *testing.T) {
+	input := "Hello\nthere"
 	grid := NewTextGrid()
-	grid.Resize(fyne.NewSize(56, 22))
-	rend := test.WidgetRenderer(grid).(*textGridRenderer)
-	rend.Refresh()
-
-	assert.Equal(t, 10, len(rend.objects))
+	grid.SetText(input)
+	assert.Equal(t, input, grid.Text())
 }
 
 func TestTextGridRenderer_Resize(t *testing.T) {
