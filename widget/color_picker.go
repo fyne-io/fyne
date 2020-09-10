@@ -227,8 +227,7 @@ func (p *ColorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	contents := NewVBox(
 		modelTabContainer,
 		NewHBox(
-			// TODO fyne.NewContainerWithLayout(layout.NewPaddedLayout(), newCheckeredBackground(), preview),
-			fyne.NewContainerWithLayout(layout.NewMaxLayout(), newCheckeredBackground(), preview),
+			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), newCheckeredBackground(), preview),
 			NewVBox(
 				alphaChannel,
 				// TODO Hex color code entry
