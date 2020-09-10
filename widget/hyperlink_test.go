@@ -18,12 +18,17 @@ func TestHyperlink_MinSize(t *testing.T) {
 	assert.Nil(t, err)
 
 	hyperlink := NewHyperlink("Test", u)
-	min := hyperlink.MinSize()
+	minA := hyperlink.MinSize()
 
-	assert.True(t, min.Width > theme.Padding()*2)
+	assert.Less(t, theme.Padding()*2, minA.Width)
 
 	hyperlink.SetText("Longer")
-	assert.True(t, hyperlink.MinSize().Width > min.Width)
+	minB := hyperlink.MinSize()
+	assert.Less(t, minA.Width, minB.Width)
+
+	hyperlink.Text = "."
+	minC := hyperlink.MinSize()
+	assert.Greater(t, minB.Width, minC.Width)
 }
 
 func TestHyperlink_Cursor(t *testing.T) {

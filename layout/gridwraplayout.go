@@ -16,6 +16,18 @@ type gridWrapLayout struct {
 	rowCount int
 }
 
+// NewGridWrapContainer creates a new container with the specified objects and using the gridwrap layout.
+// Every element will be resized to the size parameter and the content will arrange along a row and flow to a
+// new row if the elements don't fit.
+func NewGridWrapContainers(size fyne.Size, objects ...fyne.CanvasObject) *fyne.Container {
+	return fyne.NewContainerWithLayout(NewGridWrapLayout(size), objects...)
+}
+
+// NewGridWrapLayout returns a new GridWrapLayout instance
+func NewGridWrapLayout(size fyne.Size) fyne.Layout {
+	return &gridWrapLayout{size, 1, 1}
+}
+
 // Layout is called to pack all child objects into a specified size.
 // For a GridWrapLayout this will attempt to lay all the child objects in a row
 // and wrap to a new row if the size is not large enough.
@@ -56,9 +68,4 @@ func (g *gridWrapLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 func (g *gridWrapLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(g.CellSize.Width,
 		(g.CellSize.Height*g.rowCount)+((g.rowCount-1)*theme.Padding()))
-}
-
-// NewGridWrapLayout returns a new GridWrapLayout instance
-func NewGridWrapLayout(size fyne.Size) fyne.Layout {
-	return &gridWrapLayout{size, 1, 1}
 }
