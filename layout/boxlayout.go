@@ -12,6 +12,30 @@ type boxLayout struct {
 	horizontal bool
 }
 
+// NewHBoxContainer creates a new container with the specified objects and using the HBox layout.
+// The objects will be placed in the container from left to right.
+func NewHBoxContainer(objects ...fyne.CanvasObject) *fyne.Container {
+	return fyne.NewContainerWithLayout(NewHBoxLayout(), objects...)
+}
+
+// NewHBoxLayout returns a horizontal box layout for stacking a number of child
+// canvas objects or widgets left to right.
+func NewHBoxLayout() fyne.Layout {
+	return &boxLayout{true}
+}
+
+// NewVBoxContainer creates a new container with the specified objects and using the VBox layout.
+// The objects will be stacked in the container from top to bottom.
+func NewVBoxContainer(objects ...fyne.CanvasObject) *fyne.Container {
+	return fyne.NewContainerWithLayout(NewHBoxLayout(), objects...)
+}
+
+// NewVBoxLayout returns a vertical box layout for stacking a number of child
+// canvas objects or widgets top to bottom.
+func NewVBoxLayout() fyne.Layout {
+	return &boxLayout{false}
+}
+
 func isVerticalSpacer(obj fyne.CanvasObject) bool {
 	if spacer, ok := obj.(SpacerObject); ok {
 		return spacer.ExpandVertical()
@@ -134,16 +158,4 @@ func (g *boxLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 		addPadding = true
 	}
 	return minSize
-}
-
-// NewHBoxLayout returns a horizontal box layout for stacking a number of child
-// canvas objects or widgets left to right.
-func NewHBoxLayout() fyne.Layout {
-	return &boxLayout{true}
-}
-
-// NewVBoxLayout returns a vertical box layout for stacking a number of child
-// canvas objects or widgets top to bottom.
-func NewVBoxLayout() fyne.Layout {
-	return &boxLayout{false}
 }
