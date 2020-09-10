@@ -25,18 +25,18 @@ var (
 	minSize4 = NewLabel("44444444444444444444").MinSize()
 )
 
-func assertTreeMinSize(t *testing.T, tree *TreeContainer, expected fyne.Size) {
+func assertTreeMinSize(t *testing.T, tree *Tree, expected fyne.Size) {
 	t.Helper()
 
-	// TreeContainer.MinSize() will always be 32 x 32 as this is the ScrollContainer's min size, instead check treeContentContainer.MinSize()
+	// Tree.MinSize() will always be 32 x 32 as this is the Scroller's min size, instead check treeContent.MinSize()
 
-	tr := test.WidgetRenderer(tree).(*treeContainerRenderer)
+	tr := test.WidgetRenderer(tree).(*treeRenderer)
 	assert.Equal(t, expected, tr.content.MinSize())
 }
 
-func getBranch(t *testing.T, tree *TreeContainer, uid string) (branch *branch) {
+func getBranch(t *testing.T, tree *Tree, uid string) (branch *branch) {
 	t.Helper()
-	tr := test.WidgetRenderer(tree).(*treeContainerRenderer)
+	tr := test.WidgetRenderer(tree).(*treeRenderer)
 	cr := test.WidgetRenderer(tr.content).(*treeContentRenderer)
 	log.Println(cr.branches)
 	branch = cr.branches[uid]
@@ -44,9 +44,9 @@ func getBranch(t *testing.T, tree *TreeContainer, uid string) (branch *branch) {
 	return branch
 }
 
-func getLeaf(t *testing.T, tree *TreeContainer, uid string) (leaf *leaf) {
+func getLeaf(t *testing.T, tree *Tree, uid string) (leaf *leaf) {
 	t.Helper()
-	tr := test.WidgetRenderer(tree).(*treeContainerRenderer)
+	tr := test.WidgetRenderer(tree).(*treeRenderer)
 	cr := test.WidgetRenderer(tr.content).(*treeContentRenderer)
 	log.Println(cr.leaves)
 	leaf = cr.leaves[uid]
@@ -54,7 +54,7 @@ func getLeaf(t *testing.T, tree *TreeContainer, uid string) (leaf *leaf) {
 	return leaf
 }
 
-func TestTreeContainer_Indentation(t *testing.T) {
+func TestTree_Indentation(t *testing.T) {
 	s := 100
 	data := make(map[string][]string)
 	tree := NewTreeWithStrings(data)
@@ -75,7 +75,7 @@ func TestTreeContainer_Indentation(t *testing.T) {
 	assert.Equal(t, 2*(indentation*theme.Padding()), c.Indent())
 }
 
-func TestTreeContainer_Resize(t *testing.T) {
+func TestTree_Resize(t *testing.T) {
 	s := 100
 	data := make(map[string][]string)
 	tree := NewTreeWithStrings(data)
@@ -121,7 +121,7 @@ func TestTreeContainer_Resize(t *testing.T) {
 	assert.Equal(t, minSizeC.Height+(2*theme.Padding()), c.Size().Height)
 }
 
-func TestTreeContainer_MinSize(t *testing.T) {
+func TestTree_MinSize(t *testing.T) {
 	contentPadding := 2 * theme.Padding()
 	nodePadding := 2 * theme.Padding()
 
@@ -219,7 +219,7 @@ func TestTreeContainer_MinSize(t *testing.T) {
 	}
 }
 
-func TestTreeContainer_Tap(t *testing.T) {
+func TestTree_Tap(t *testing.T) {
 	/* TODO needs "fyne.io/fyne/test".DoubleTap(obj fyne.DoubleTappable)
 	t.Run("Branch", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -280,7 +280,7 @@ func TestTreeContainer_Tap(t *testing.T) {
 	})
 }
 
-func TestTreeContainer_Walk(t *testing.T) {
+func TestTree_Walk(t *testing.T) {
 	t.Run("Open", func(t *testing.T) {
 		data := make(map[string][]string)
 		widget.AddTreePath(data, "A", "B", "C")

@@ -17,9 +17,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTreeContainer(t *testing.T) {
+func TestTree(t *testing.T) {
 	t.Run("Initializer", func(t *testing.T) {
-		tree := &widget.TreeContainer{}
+		tree := &widget.Tree{}
 		var nodes []string
 		tree.Walk(func(uid string, branch bool, depth int) {
 			nodes = append(nodes, uid)
@@ -81,7 +81,7 @@ func TestTreeContainer(t *testing.T) {
 	*/
 }
 
-func TestTreeContainer_OpenClose(t *testing.T) {
+func TestTree_OpenClose(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
 		data := make(map[string][]string)
 		internalwidget.AddTreePath(data, "foo", "foobar")
@@ -122,7 +122,7 @@ func TestTreeContainer_OpenClose(t *testing.T) {
 	})
 }
 
-func TestTreeContainer_OpenCloseAll(t *testing.T) {
+func TestTree_OpenCloseAll(t *testing.T) {
 	data := make(map[string][]string)
 	internalwidget.AddTreePath(data, "foo0", "foobar0")
 	internalwidget.AddTreePath(data, "foo1", "foobar1")
@@ -140,7 +140,7 @@ func TestTreeContainer_OpenCloseAll(t *testing.T) {
 	assert.False(t, tree.IsBranchOpen("foo2"))
 }
 
-func TestTreeContainer_Layout(t *testing.T) {
+func TestTree_Layout(t *testing.T) {
 	test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
 

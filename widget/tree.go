@@ -19,11 +19,11 @@ const (
 	indentation = 4 // Multiplier of theme.Padding() to indent children by. // TODO consider moving to theme.Indentation()
 )
 
-var _ fyne.Widget = (*TreeContainer)(nil)
+var _ fyne.Widget = (*Tree)(nil)
 
-// TreeContainer widget displays hierarchical data.
+// Tree widget displays hierarchical data.
 // Each node of the tree must be identified by a Unique ID.
-type TreeContainer struct {
+type Tree struct {
 	BaseWidget
 	Root     string
 	Selected string
@@ -42,8 +42,8 @@ type TreeContainer struct {
 
 // NewTreeWithStrings creates a new tree with the given string map.
 // Data must contain a mapping for the root, which defaults to empty string ("").
-func NewTreeWithStrings(data map[string][]string) (t *TreeContainer) {
-	t = &TreeContainer{
+func NewTreeWithStrings(data map[string][]string) (t *Tree) {
+	t = &Tree{
 		open: make(map[string]bool),
 		Children: func(uid string) (c []string) {
 			c, _ = data[uid]
@@ -73,8 +73,8 @@ func NewTreeWithStrings(data map[string][]string) (t *TreeContainer) {
 
 // NewTreeWithFiles creates a new tree with the given file system URI.
 // TODO contents of a directory are sorted with the given sorter
-func NewTreeWithFiles(root fyne.URI) (t *TreeContainer) {
-	t = &TreeContainer{
+func NewTreeWithFiles(root fyne.URI) (t *Tree) {
+	t = &Tree{
 		Root: root.String(),
 		open: make(map[string]bool),
 	}
@@ -165,7 +165,7 @@ func NewTreeWithFiles(root fyne.URI) (t *TreeContainer) {
 }
 
 // IsBranchOpen returns true if the branch with the given Unique ID is expanded.
-func (t *TreeContainer) IsBranchOpen(uid string) bool {
+func (t *Tree) IsBranchOpen(uid string) bool {
 	if uid == t.Root {
 		return true // Root is always open
 	}
@@ -175,7 +175,7 @@ func (t *TreeContainer) IsBranchOpen(uid string) bool {
 }
 
 // OpenBranch opens the branch with the given Unique ID.
-func (t *TreeContainer) OpenBranch(uid string) {
+func (t *Tree) OpenBranch(uid string) {
 	t.propertyLock.Lock()
 	t.open[uid] = true
 	t.propertyLock.Unlock()
@@ -186,7 +186,7 @@ func (t *TreeContainer) OpenBranch(uid string) {
 }
 
 // CloseBranch closes the branch with the given Unique ID.
-func (t *TreeContainer) CloseBranch(uid string) {
+func (t *Tree) CloseBranch(uid string) {
 	t.propertyLock.Lock()
 	t.open[uid] = false
 	t.propertyLock.Unlock()
@@ -197,7 +197,7 @@ func (t *TreeContainer) CloseBranch(uid string) {
 }
 
 // ToggleBranch flips the state of the branch with the given Unique ID.
-func (t *TreeContainer) ToggleBranch(uid string) {
+func (t *Tree) ToggleBranch(uid string) {
 	if t.IsBranchOpen(uid) {
 		t.CloseBranch(uid)
 	} else {
@@ -206,7 +206,7 @@ func (t *TreeContainer) ToggleBranch(uid string) {
 }
 
 // OpenAllBranches opens all branches in the tree.
-func (t *TreeContainer) OpenAllBranches() {
+func (t *Tree) OpenAllBranches() {
 	t.Walk(func(uid string, branch bool, depth int) {
 		if branch {
 			// TODO this triggers a refresh for each branch
@@ -217,7 +217,7 @@ func (t *TreeContainer) OpenAllBranches() {
 }
 
 // CloseAllBranches closes all branches in the tree.
-func (t *TreeContainer) CloseAllBranches() {
+func (t *Tree) CloseAllBranches() {
 	t.propertyLock.Lock()
 	t.open = make(map[string]bool)
 	t.propertyLock.Unlock()
@@ -225,18 +225,18 @@ func (t *TreeContainer) CloseAllBranches() {
 }
 
 // SetSelectedNode updates the current selection to the node with the given Unique ID.
-func (t *TreeContainer) SetSelectedNode(uid string) {
+func (t *Tree) SetSelectedNode(uid string) {
 	t.Selected = uid
 	t.Refresh()
 }
 
 // Walk visits every open node of the tree and calls the given callback with node Unique ID, whether node is branch, and the depth of node.
-func (t *TreeContainer) Walk(onNode func(string, bool, int)) {
+func (t *Tree) Walk(onNode func(string, bool, int)) {
 	t.walk(t.Root, 0, onNode)
 }
 
-func (t *TreeContainer) walk(uid string, depth int, onNode func(string, bool, int)) {
-	//log.Println("TreeContainer.walk:", uid, depth)
+func (t *Tree) walk(uid string, depth int, onNode func(string, bool, int)) {
+	//log.Println("Tree.walk:", uid, depth)
 	if isBranch := t.IsBranch; isBranch != nil {
 		if isBranch(uid) {
 			onNode(uid, true, depth)
@@ -254,11 +254,11 @@ func (t *TreeContainer) walk(uid string, depth int, onNode func(string, bool, in
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
-func (t *TreeContainer) CreateRenderer() fyne.WidgetRenderer {
+func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	c := newTreeContentContainer(t)
+	c := newTreeContent(t)
 	s := NewScrollContainer(c)
-	r := &treeContainerRenderer{
+	r := &treeRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{s}),
 		tree:         t,
 		content:      c,
@@ -274,28 +274,28 @@ func (t *TreeContainer) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-var _ fyne.WidgetRenderer = (*treeContainerRenderer)(nil)
+var _ fyne.WidgetRenderer = (*treeRenderer)(nil)
 
-type treeContainerRenderer struct {
+type treeRenderer struct {
 	widget.BaseRenderer
-	tree     *TreeContainer
-	content  *treeContentContainer
+	tree     *Tree
+	content  *treeContent
 	scroller *ScrollContainer
 }
 
-func (r *treeContainerRenderer) MinSize() (min fyne.Size) {
+func (r *treeRenderer) MinSize() (min fyne.Size) {
 	min = r.scroller.MinSize()
-	//log.Println("treeContainerRenderer.MinSize:", min)
+	//log.Println("treeRenderer.MinSize:", min)
 	return
 }
 
-func (r *treeContainerRenderer) Layout(size fyne.Size) {
-	//log.Println("treeContainerRenderer.Layout:", size)
+func (r *treeRenderer) Layout(size fyne.Size) {
+	//log.Println("treeRenderer.Layout:", size)
 	r.scroller.Resize(size)
 }
 
-func (r *treeContainerRenderer) Refresh() {
-	//log.Println("treeContainerRenderer.Refresh")
+func (r *treeRenderer) Refresh() {
+	//log.Println("treeRenderer.Refresh")
 	s := r.tree.Size()
 	if s.IsZero() {
 		r.tree.Resize(r.tree.MinSize())
@@ -304,22 +304,22 @@ func (r *treeContainerRenderer) Refresh() {
 	canvas.Refresh(r.tree.super())
 }
 
-var _ fyne.Widget = (*treeContentContainer)(nil)
+var _ fyne.Widget = (*treeContent)(nil)
 
-type treeContentContainer struct {
+type treeContent struct {
 	BaseWidget
-	tree *TreeContainer
+	tree *Tree
 }
 
-func newTreeContentContainer(tree *TreeContainer) (c *treeContentContainer) {
-	c = &treeContentContainer{
+func newTreeContent(tree *Tree) (c *treeContent) {
+	c = &treeContent{
 		tree: tree,
 	}
 	c.ExtendBaseWidget(c)
 	return
 }
 
-func (c *treeContentContainer) CreateRenderer() fyne.WidgetRenderer {
+func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
 	return &treeContentRenderer{
 		BaseRenderer: widget.BaseRenderer{},
 		treeContent:  c,
@@ -335,7 +335,7 @@ var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 
 type treeContentRenderer struct {
 	widget.BaseRenderer
-	treeContent *treeContentContainer
+	treeContent *treeContent
 	minSizes    map[string]fyne.Size // Holds cache of children min sizes updated by MinSize and used by Layout
 	branches    map[string]*branch
 	leaves      map[string]*leaf
@@ -525,7 +525,7 @@ var _ desktop.Hoverable = (*treeNode)(nil)
 
 type treeNode struct {
 	BaseWidget
-	tree    *TreeContainer
+	tree    *Tree
 	uid     string
 	depth   int
 	hovered bool
@@ -687,7 +687,7 @@ type branch struct {
 	*treeNode
 }
 
-func newBranch(tree *TreeContainer, content fyne.CanvasObject) (b *branch) {
+func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 	b = &branch{
 		treeNode: &treeNode{
 			tree:    tree,
@@ -714,11 +714,11 @@ var _ fyne.DoubleTappable = (*branchIcon)(nil)
 
 type branchIcon struct {
 	Icon
-	tree *TreeContainer
+	tree *Tree
 	uid  string
 }
 
-func newBranchIcon(tree *TreeContainer) (i *branchIcon) {
+func newBranchIcon(tree *Tree) (i *branchIcon) {
 	i = &branchIcon{
 		tree: tree,
 	}
@@ -757,7 +757,7 @@ type leaf struct {
 	*treeNode
 }
 
-func newLeaf(tree *TreeContainer, content fyne.CanvasObject) (l *leaf) {
+func newLeaf(tree *Tree, content fyne.CanvasObject) (l *leaf) {
 	l = &leaf{
 		&treeNode{
 			tree:    tree,
