@@ -103,7 +103,7 @@ func TestNewDisabledResource(t *testing.T) {
 
 func TestThemedResource_Invert(t *testing.T) {
 	staticResource := helperLoadRes(t, "cancel_Paths.svg")
-	inverted := NewThemedResource(staticResource, nil).Invert()
+	inverted := NewInvertedThemedResource(staticResource)
 	assert.Equal(t, "inverted-"+staticResource.Name(), inverted.Name())
 }
 

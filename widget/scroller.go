@@ -155,6 +155,9 @@ func (r *scrollBarAreaRenderer) barSizeAndOffset(contentOffset, contentLength, s
 	if scrollLength < contentLength {
 		portion := float64(scrollLength) / float64(contentLength)
 		length = int(float64(scrollLength) * portion)
+		if length < theme.ScrollBarSize() {
+			length = theme.ScrollBarSize()
+		}
 	} else {
 		length = scrollLength
 	}
