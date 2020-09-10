@@ -47,10 +47,10 @@ func TestColorArea_Layout(t *testing.T) {
 	for name, tt := range map[string]struct {
 		area *widget.ColorArea
 	}{
-		"rgba": {
+		"rgb": {
 			area: widget.NewRGBAColorArea(holder),
 		},
-		"hsla": {
+		"hsl": {
 			area: widget.NewHSLAColorArea(holder),
 		},
 	} {
