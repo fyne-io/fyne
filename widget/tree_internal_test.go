@@ -25,7 +25,7 @@ var (
 	minSize4 = NewLabel("44444444444444444444").MinSize()
 )
 
-func assertTreeMinSize(t *testing.T, tree *Tree, expected fyne.Size) {
+func assertTreeContentMinSize(t *testing.T, tree *Tree, expected fyne.Size) {
 	t.Helper()
 
 	// Tree.MinSize() will always be 32 x 32 as this is the Scroller's min size, instead check treeContent.MinSize()
@@ -99,7 +99,7 @@ func TestTree_Resize(t *testing.T) {
 	height = height + fyne.Max(minSizeA.Height, theme.IconInlineSize()) + 2*theme.Padding()
 	height = height + fyne.Max(minSizeB.Height, theme.IconInlineSize()) + 2*theme.Padding()
 	height = height + fyne.Max(minSizeC.Height, theme.IconInlineSize()) + 2*theme.Padding()
-	assertTreeMinSize(t, tree, fyne.NewSize(width, height))
+	assertTreeContentMinSize(t, tree, fyne.NewSize(width, height))
 
 	a := getLeaf(t, tree, "A")
 	b := getBranch(t, tree, "B")
@@ -124,6 +124,27 @@ func TestTree_Resize(t *testing.T) {
 func TestTree_MinSize(t *testing.T) {
 	contentPadding := 2 * theme.Padding()
 	nodePadding := 2 * theme.Padding()
+
+	t.Run("Default", func(t *testing.T) {
+		tree := &Tree{}
+		min := tree.MinSize()
+		assert.Equal(t, 32, min.Width)
+		assert.Equal(t, 32, min.Height)
+	})
+	t.Run("Callback", func(t *testing.T) {
+		tree := &Tree{
+			NewNode: func(isBranch bool) fyne.CanvasObject {
+				if isBranch {
+					return NewLabel("Branch")
+				}
+				return NewLabel("Leaf")
+			},
+		}
+		tMin := tree.MinSize()
+		bMin := NewLabel("Branch").MinSize()
+		assert.Equal(t, fyne.Max(32, bMin.Width)+nodePadding, tMin.Width)
+		assert.Equal(t, fyne.Max(32, bMin.Height)+nodePadding, tMin.Height)
+	})
 
 	for name, tt := range map[string]struct {
 		items  [][]string
@@ -214,7 +235,7 @@ func TestTree_MinSize(t *testing.T) {
 				tree.OpenBranch(o)
 			}
 
-			assertTreeMinSize(t, tree, tt.want)
+			assertTreeContentMinSize(t, tree, tt.want)
 		})
 	}
 }

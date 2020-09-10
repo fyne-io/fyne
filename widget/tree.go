@@ -230,6 +230,12 @@ func (t *Tree) SetSelectedNode(uid string) {
 	t.Refresh()
 }
 
+// MinSize returns the size that this widget should not shrink below.
+func (t *Tree) MinSize() fyne.Size {
+	t.ExtendBaseWidget(t)
+	return t.BaseWidget.MinSize()
+}
+
 // Walk visits every open node of the tree and calls the given callback with node Unique ID, whether node is branch, and the depth of node.
 func (t *Tree) Walk(onNode func(string, bool, int)) {
 	t.walk(t.Root, 0, onNode)
@@ -285,6 +291,12 @@ type treeRenderer struct {
 
 func (r *treeRenderer) MinSize() (min fyne.Size) {
 	min = r.scroller.MinSize()
+	if f := r.tree.NewNode; f != nil {
+		if n := f(true); n != nil {
+			min = min.Max(n.MinSize())
+			min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
+		}
+	}
 	//log.Println("treeRenderer.MinSize:", min)
 	return
 }
