@@ -15,8 +15,8 @@ type Card struct {
 	Content         fyne.CanvasObject
 }
 
-// NewCardContainer creates a new card widget with the specified title, subtitle and content (all optional).
-func NewCardContainer(title, subtitle string, content fyne.CanvasObject) *Card {
+// NewCard creates a new card widget with the specified title, subtitle and content (all optional).
+func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
 	card := &Card{
 		Title:    title,
 		Subtitle: subtitle,
