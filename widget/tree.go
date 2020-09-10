@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -327,8 +326,8 @@ func (c *treeContentContainer) CreateRenderer() fyne.WidgetRenderer {
 		minSizes:     make(map[string]fyne.Size),
 		branches:     make(map[string]*branch),
 		leaves:       make(map[string]*leaf),
-		branchPool:   &libPool{},
-		leafPool:     &libPool{},
+		branchPool:   &syncPool{},
+		leafPool:     &syncPool{},
 	}
 }
 
@@ -767,56 +766,4 @@ func newLeaf(tree *TreeContainer, content fyne.CanvasObject) (l *leaf) {
 	}
 	l.ExtendBaseWidget(l)
 	return
-}
-
-type pool interface {
-	Obtain() fyne.CanvasObject
-	Release(fyne.CanvasObject)
-}
-
-var _ pool = (*libPool)(nil)
-
-type libPool struct {
-	sync.Pool
-}
-
-// Obtain returns an item from the pool for use
-func (p *libPool) Obtain() (item fyne.CanvasObject) {
-	o := p.Get()
-	if o != nil {
-		item = o.(fyne.CanvasObject)
-		//item.Show()
-	}
-	return
-}
-
-// Release adds an item into the pool to be used later
-func (p *libPool) Release(item fyne.CanvasObject) {
-	//item.Hide()
-	p.Put(item)
-}
-
-var _ pool = (*slicePool)(nil)
-
-type slicePool struct {
-	contents []fyne.CanvasObject
-}
-
-// Obtain returns an item from the pool for use
-func (p *slicePool) Obtain() fyne.CanvasObject {
-	//log.Println("slicePool:", len(p.contents))
-	if len(p.contents) == 0 {
-		return nil
-	}
-	item := p.contents[0]
-	p.contents = p.contents[1:]
-	//item.Show()
-	return item
-}
-
-// Release adds an item into the pool to be used later
-func (p *slicePool) Release(item fyne.CanvasObject) {
-	//log.Println("Pool.Release:", item)
-	p.contents = append(p.contents, item)
-	//item.Hide()
 }
