@@ -73,3 +73,9 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 	d.setButtons(newButtonList(d.dismiss, confirm))
 	return p
 }
+
+// ShowColorPicker creates and shows a color dialog.
+// The callback is triggered when the user selects a color.
+func ShowColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) {
+	NewColorPicker(title, message, callback, parent).Show()
+}
