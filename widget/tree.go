@@ -198,8 +198,9 @@ func (t *Tree) ToggleBranch(uid string) {
 func (t *Tree) OpenAllBranches() {
 	t.Walk(func(uid string, branch bool, depth int) {
 		if branch {
-			// TODO this triggers a refresh for each branch
-			t.OpenBranch(uid)
+			t.propertyLock.Lock()
+			t.open[uid] = true
+			t.propertyLock.Unlock()
 		}
 	})
 	t.Refresh()
