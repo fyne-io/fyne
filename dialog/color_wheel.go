@@ -1,0 +1,199 @@
+package dialog
+
+import (
+	"image"
+	"image/color"
+	"image/draw"
+	"math"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
+	internalwidget "fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
+)
+
+var _ fyne.Widget = (*colorWheel)(nil)
+var _ fyne.Tappable = (*colorWheel)(nil)
+var _ fyne.Draggable = (*colorWheel)(nil)
+
+// colorWheel displays a circular color gradient and triggers the callback when tapped.
+type colorWheel struct {
+	widget.BaseWidget
+	generator func(w, h int) image.Image
+	cache     draw.Image
+	onChange  func(float64, float64, float64, float64)
+
+	Hue, Saturation, Lightness, Alpha float64
+}
+
+// newColorWheel returns a new color area that triggers the given onChange callback when tapped.
+func newColorWheel(onChange func(float64, float64, float64, float64)) *colorWheel {
+	a := &colorWheel{
+		onChange: onChange,
+	}
+	a.generator = func(w, h int) image.Image {
+		if a.cache == nil || a.cache.Bounds().Dx() != w || a.cache.Bounds().Dy() != h {
+			rect := image.Rect(0, 0, w, h)
+			a.cache = image.NewRGBA(rect)
+		}
+		for x := 0; x < w; x++ {
+			for y := 0; y < h; y++ {
+				if c := a.colorAt(x, y, w, h); c != nil {
+					a.cache.Set(x, y, c)
+				}
+			}
+		}
+		return a.cache
+	}
+	a.ExtendBaseWidget(a)
+	return a
+}
+
+// Cursor returns the cursor type of this widget.
+func (a *colorWheel) Cursor() desktop.Cursor {
+	return desktop.CrosshairCursor
+}
+
+// CreateRenderer is a private method to Fyne which links this widget to its renderer.
+func (a *colorWheel) CreateRenderer() fyne.WidgetRenderer {
+	raster := &canvas.Raster{
+		Generator: a.generator,
+	}
+	x := canvas.NewLine(color.Black)
+	y := canvas.NewLine(color.Black)
+	return &colorWheelRenderer{
+		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{raster, x, y}),
+		area:         a,
+		raster:       raster,
+		x:            x,
+		y:            y,
+	}
+}
+
+// MinSize returns the size that this widget should not shrink below.
+func (a *colorWheel) MinSize() fyne.Size {
+	a.ExtendBaseWidget(a)
+	return a.BaseWidget.MinSize()
+}
+
+// SetHSLA updates the selected color in the wheel.
+func (a *colorWheel) SetHSLA(hue, saturation, lightness, alpha float64) {
+	if a.Hue == hue && a.Saturation == saturation && a.Lightness == lightness && a.Alpha == alpha {
+		return
+	}
+	a.Hue = hue
+	a.Saturation = saturation
+	a.Lightness = lightness
+	a.Alpha = alpha
+	a.Refresh()
+}
+
+// Tapped is called when a pointer tapped event is captured and triggers any change handler.
+func (a *colorWheel) Tapped(event *fyne.PointEvent) {
+	a.trigger(event.Position)
+}
+
+// Dragged is called when a pointer drag event is captured and triggers any change handler
+func (a *colorWheel) Dragged(event *fyne.DragEvent) {
+	a.trigger(event.Position)
+}
+
+// DragEnd is called when a pointer drag ends
+func (a *colorWheel) DragEnd() {
+}
+
+func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
+	angle, radius, limit := cartesianToPolar(float64(x), float64(y), float64(w), float64(h))
+	if radius > limit {
+		// Out of bounds
+		return theme.BackgroundColor()
+	}
+	hue, saturation := polarToHS(angle, radius, limit)
+	red, green, blue := hslToRgb(hue, saturation, a.Lightness)
+	return &color.NRGBA{
+		R: uint8(red * 255.0),
+		G: uint8(green * 255.0),
+		B: uint8(blue * 255.0),
+		A: uint8(a.Alpha * 255.0),
+	}
+}
+
+func (a *colorWheel) locationForPosition(pos fyne.Position) (x, y int) {
+	can := fyne.CurrentApp().Driver().CanvasForObject(a)
+	x, y = pos.X, pos.Y
+	if can != nil {
+		x, y = can.PixelCoordinateForPosition(pos)
+	}
+	return
+}
+
+func (a *colorWheel) selection(w, h int) (int, int) {
+	angle := a.Hue * 2 * math.Pi
+	limit := math.Min(float64(w), float64(h)) / 2.0
+	radius := a.Saturation * limit
+	x, y := polarToCartesian(angle, radius, float64(w), float64(h))
+	return int(x), int(y)
+}
+
+func (a *colorWheel) trigger(pos fyne.Position) {
+	x, y := a.locationForPosition(pos)
+	if c := a.cache; c != nil {
+		b := c.Bounds()
+		if f := a.onChange; f != nil {
+			angle, radius, limit := cartesianToPolar(float64(x), float64(y), float64(b.Dx()), float64(b.Dy()))
+			if radius > limit {
+				// Out of bounds
+				return
+			}
+			a.Hue, a.Saturation = polarToHS(angle, radius, limit)
+			f(a.Hue, a.Saturation, a.Lightness, a.Alpha)
+		}
+	}
+	a.Refresh()
+}
+
+type colorWheelRenderer struct {
+	internalwidget.BaseRenderer
+	area   *colorWheel
+	raster *canvas.Raster
+	x, y   *canvas.Line
+}
+
+func (r *colorWheelRenderer) Layout(size fyne.Size) {
+	p := theme.Padding()
+	w := size.Width - 2*p
+	h := size.Height - 2*p
+	if f := r.area.selection; f != nil {
+		x, y := f(w, h)
+		r.x.Position1 = fyne.NewPos(p, y+p)
+		r.x.Position2 = fyne.NewPos(w+p, y+p)
+		r.y.Position1 = fyne.NewPos(x+p, p)
+		r.y.Position2 = fyne.NewPos(x+p, h+p)
+	}
+	r.raster.Move(fyne.NewPos(p, p))
+	r.raster.Resize(fyne.NewSize(w, h))
+}
+
+func (r *colorWheelRenderer) MinSize() (min fyne.Size) {
+	min = r.raster.MinSize()
+	min = min.Max(fyne.NewSize(128, 128))
+	min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
+	return
+}
+
+func (r *colorWheelRenderer) Refresh() {
+	s := r.area.Size()
+	if s.IsZero() {
+		r.area.Resize(r.area.MinSize())
+	} else {
+		r.Layout(s)
+	}
+	r.x.StrokeColor = theme.IconColor()
+	r.x.Refresh()
+	r.y.StrokeColor = theme.IconColor()
+	r.y.Refresh()
+	r.raster.Refresh()
+	canvas.Refresh(r.area)
+}

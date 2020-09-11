@@ -99,11 +99,6 @@ func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
 	return true
 }
 
-// RGBA return the Red, Green, Blue, and Alpha components of the currently selected color.
-func (p *colorAdvancedPicker) RGBA() (float64, float64, float64, float64) {
-	return p.Red, p.Green, p.Blue, p.Alpha
-}
-
 // SetRGBA updated the Red, Green, Blue, and Alpha components of the currently selected color.
 func (p *colorAdvancedPicker) SetRGBA(r, g, b, a float64) {
 	r = colorClamp(r)
@@ -122,11 +117,6 @@ func (p *colorAdvancedPicker) SetRGBA(r, g, b, a float64) {
 	if f := p.onChange; f != nil {
 		f(p.Color())
 	}
-}
-
-// HSLA return the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
-func (p *colorAdvancedPicker) HSLA() (float64, float64, float64, float64) {
-	return p.Hue, p.Saturation, p.Lightness, p.Alpha
 }
 
 // SetHSLA updated the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
@@ -160,7 +150,6 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 
 	// RGB
-	rgbArea := newRGBAColorArea(p)
 	redChannel := newColorChannel("R:", p.Red, func(r float64) {
 		p.SetRGBA(r, p.Green, p.Blue, p.Alpha)
 	})
@@ -172,18 +161,14 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	})
 	rgbTab := widget.NewTabItem(
 		"RGB",
-		widget.NewHBox(
-			rgbArea,
-			widget.NewVBox(
-				redChannel,
-				greenChannel,
-				blueChannel,
-			),
+		widget.NewVBox(
+			redChannel,
+			greenChannel,
+			blueChannel,
 		),
 	)
 
 	// HSL
-	hslArea := newHSLAColorArea(p)
 	hueChannel := newColorChannel("H:", p.Hue, func(h float64) {
 		p.SetHSLA(h, p.Saturation, p.Lightness, p.Alpha)
 	})
@@ -195,13 +180,10 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	})
 	hslTab := widget.NewTabItem(
 		"HSL",
-		widget.NewHBox(
-			hslArea,
-			widget.NewVBox(
-				hueChannel,
-				saturationChannel,
-				lightnessChannel,
-			),
+		widget.NewVBox(
+			hueChannel,
+			saturationChannel,
+			lightnessChannel,
 		),
 	)
 
@@ -212,6 +194,11 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	modelTabContainer.OnChanged = func(item *widget.TabItem) {
 		p.ColorModel = item.Text
 	}
+
+	// Wheel
+	wheel := newColorWheel(func(hue, saturation, lightness, alpha float64) {
+		p.SetHSLA(hue, saturation, lightness, alpha)
+	})
 
 	// Preview
 	preview := &canvas.Rectangle{}
@@ -224,14 +211,15 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// TODO Hex color code entry
 
-	contents := widget.NewVBox(
-		modelTabContainer,
-		widget.NewHBox(
+	contents := widget.NewHBox(
+		widget.NewVBox(
+			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), wheel),
 			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), newCheckeredBackground(), preview),
-			widget.NewVBox(
-				alphaChannel,
-				// TODO Hex color code entry
-			),
+		),
+		widget.NewVBox(
+			modelTabContainer,
+			alphaChannel,
+			// TODO Hex color code entry
 		),
 	)
 	r := &colorPickerRenderer{
@@ -239,15 +227,14 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		picker:            p,
 		modelTabContainer: modelTabContainer,
 		rgbTab:            rgbTab,
-		rgbArea:           rgbArea,
 		redChannel:        redChannel,
 		greenChannel:      greenChannel,
 		blueChannel:       blueChannel,
 		hslTab:            hslTab,
-		hslArea:           hslArea,
 		hueChannel:        hueChannel,
 		saturationChannel: saturationChannel,
 		lightnessChannel:  lightnessChannel,
+		wheel:             wheel,
 		preview:           preview,
 		alphaChannel:      alphaChannel,
 		contents:          contents,
@@ -271,15 +258,14 @@ type colorPickerRenderer struct {
 	picker            *colorAdvancedPicker
 	modelTabContainer *widget.TabContainer
 	rgbTab            *widget.TabItem
-	rgbArea           *colorArea
 	redChannel        *colorChannel
 	greenChannel      *colorChannel
 	blueChannel       *colorChannel
 	hslTab            *widget.TabItem
-	hslArea           *colorArea
 	hueChannel        *colorChannel
 	saturationChannel *colorChannel
 	lightnessChannel  *colorChannel
+	wheel             *colorWheel
 	preview           *canvas.Rectangle
 	alphaChannel      *colorChannel
 	contents          fyne.CanvasObject
@@ -313,16 +299,17 @@ func (r *colorPickerRenderer) updateObjects() {
 	}
 
 	// RGB
-	r.rgbArea.Refresh()
 	r.redChannel.SetValue(r.picker.Red)
 	r.greenChannel.SetValue(r.picker.Green)
 	r.blueChannel.SetValue(r.picker.Blue)
 
 	// HSL
-	r.hslArea.Refresh()
 	r.hueChannel.SetValue(r.picker.Hue)
 	r.saturationChannel.SetValue(r.picker.Saturation)
 	r.lightnessChannel.SetValue(r.picker.Lightness)
+
+	// Wheel
+	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, r.picker.Alpha)
 
 	// Preview
 	r.preview.FillColor = r.picker.Color()
