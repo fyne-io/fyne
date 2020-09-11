@@ -7,17 +7,17 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// CardContainer widget groups title, subtitle with content and a header image
-type CardContainer struct {
+// Card widget groups title, subtitle with content and a header image
+type Card struct {
 	BaseWidget
 	Title, Subtitle string
 	Image           *canvas.Image
 	Content         fyne.CanvasObject
 }
 
-// NewCardContainer creates a new card widget with the specified title, subtitle and content (all optional).
-func NewCardContainer(title, subtitle string, content fyne.CanvasObject) *CardContainer {
-	card := &CardContainer{
+// NewCard creates a new card widget with the specified title, subtitle and content (all optional).
+func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
+	card := &Card{
 		Title:    title,
 		Subtitle: subtitle,
 		Content:  content,
@@ -28,7 +28,7 @@ func NewCardContainer(title, subtitle string, content fyne.CanvasObject) *CardCo
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (c *CardContainer) CreateRenderer() fyne.WidgetRenderer {
+func (c *Card) CreateRenderer() fyne.WidgetRenderer {
 	c.ExtendBaseWidget(c)
 
 	header := canvas.NewText(c.Title, theme.TextColor())
@@ -49,34 +49,34 @@ func (c *CardContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // MinSize returns the size that this widget should not shrink below
-func (c *CardContainer) MinSize() fyne.Size {
+func (c *Card) MinSize() fyne.Size {
 	c.ExtendBaseWidget(c)
 	return c.BaseWidget.MinSize()
 }
 
 // SetContent changes the body of this card to have the specified content.
-func (c *CardContainer) SetContent(obj fyne.CanvasObject) {
+func (c *Card) SetContent(obj fyne.CanvasObject) {
 	c.Content = obj
 
 	c.Refresh()
 }
 
 // SetImage changes the image displayed above the title for this card.
-func (c *CardContainer) SetImage(img *canvas.Image) {
+func (c *Card) SetImage(img *canvas.Image) {
 	c.Image = img
 
 	c.Refresh()
 }
 
 // SetSubTitle updates the secondary title for this card.
-func (c *CardContainer) SetSubTitle(text string) {
+func (c *Card) SetSubTitle(text string) {
 	c.Subtitle = text
 
 	c.Refresh()
 }
 
 // SetTitle updates the main title for this card.
-func (c *CardContainer) SetTitle(text string) {
+func (c *Card) SetTitle(text string) {
 	c.Title = text
 
 	c.Refresh()
@@ -87,7 +87,7 @@ type cardRenderer struct {
 
 	header, subHeader *canvas.Text
 
-	card *CardContainer
+	card *Card
 }
 
 const (

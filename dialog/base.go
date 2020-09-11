@@ -116,7 +116,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	btnMin := obj[3].MinSize().Union(obj[3].Size())
 
 	// icon
-	iconHeight := padHeight*2 + textMin.Height + d.label.MinSize().Height - theme.Padding()
+	iconHeight := padHeight*2 + d.label.MinSize().Height*2 - theme.Padding()
 	obj[0].Resize(fyne.NewSize(iconHeight, iconHeight))
 	obj[0].Move(fyne.NewPos(size.Width-iconHeight+theme.Padding(), -theme.Padding()))
 

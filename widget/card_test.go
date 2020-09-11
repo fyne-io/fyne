@@ -12,7 +12,7 @@ import (
 )
 
 func TestCard_SetImage(t *testing.T) {
-	c := widget.NewCardContainer("Title", "sub", widget.NewLabel("Content"))
+	c := widget.NewCard("Title", "sub", widget.NewLabel("Content"))
 	r := test.WidgetRenderer(c)
 	assert.Equal(t, 4, len(r.Objects())) // the 3 above plus shadow
 
@@ -21,7 +21,7 @@ func TestCard_SetImage(t *testing.T) {
 }
 
 func TestCard_SetContent(t *testing.T) {
-	c := widget.NewCardContainer("Title", "sub", widget.NewLabel("Content"))
+	c := widget.NewCard("Title", "sub", widget.NewLabel("Content"))
 	r := test.WidgetRenderer(c)
 	assert.Equal(t, 4, len(r.Objects())) // the 3 above plus shadow
 
@@ -96,7 +96,7 @@ func TestCard_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			card := &widget.CardContainer{
+			card := &widget.Card{
 				Title:    tt.title,
 				Subtitle: tt.subtitle,
 				Image:    tt.icon,
