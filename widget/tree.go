@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	//"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,25 +46,20 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 		open: make(map[string]bool),
 		Children: func(uid string) (c []string) {
 			c, _ = data[uid]
-			//log.Println("StringTree.Children:", uid, c)
 			return
 		},
 		IsBranch: func(uid string) (b bool) {
 			_, b = data[uid]
-			//log.Println("StringTree.IsBranch:", uid, b)
 			return
 		},
 		NewNode: func(branch bool) (o fyne.CanvasObject) {
 			o = NewLabel("")
-			//log.Println("StringTree.NewNode:", branch, o)
 			return
 		},
 	}
 	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
-		//log.Println("StringTree.UpdateNode:", uid, branch, node)
 		l := node.(*Label)
 		l.SetText(uid)
-		//log.Println("StringTree.Label:", l.Text)
 	}
 	t.ExtendBaseWidget(t)
 	return
@@ -93,7 +87,6 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 				}
 			}
 		}
-		//log.Println("FileTree.Children:", uid, c)
 		return
 	}
 	t.IsBranch = func(uid string) (b bool) {
@@ -106,18 +99,15 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 		} else {
 			b = fi.IsDir()
 		}
-		//log.Println("FileTree.IsBranch:", uid, b)
 		return
 	}
 	t.NewNode = func(branch bool) (o fyne.CanvasObject) {
-		//log.Println("FileTree.NewNode:", branch, o)
 		i := NewIcon(theme.FileIcon())
 		l := NewLabel("Name")
 		o = NewHBox(i, l)
 		return
 	}
 	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
-		//log.Println("FileTree.UpdateNode:", uid, branch, node)
 		b := node.(*Box)
 		i := b.Children[0].(*Icon)
 		var r fyne.Resource
@@ -158,7 +148,6 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 		} else {
 			l.SetText(filepath.Base(uid))
 		}
-		//log.Println("FileTree.Label:", l.Text)
 	}
 	t.ExtendBaseWidget(t)
 	return
@@ -242,7 +231,6 @@ func (t *Tree) Walk(onNode func(string, bool, int)) {
 }
 
 func (t *Tree) walk(uid string, depth int, onNode func(string, bool, int)) {
-	//log.Println("Tree.walk:", uid, depth)
 	if isBranch := t.IsBranch; isBranch != nil {
 		if isBranch(uid) {
 			onNode(uid, true, depth)
@@ -297,17 +285,14 @@ func (r *treeRenderer) MinSize() (min fyne.Size) {
 			min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
 		}
 	}
-	//log.Println("treeRenderer.MinSize:", min)
 	return
 }
 
 func (r *treeRenderer) Layout(size fyne.Size) {
-	//log.Println("treeRenderer.Layout:", size)
 	r.scroller.Resize(size)
 }
 
 func (r *treeRenderer) Refresh() {
-	//log.Println("treeRenderer.Refresh")
 	s := r.tree.Size()
 	if s.IsZero() {
 		r.tree.Resize(r.tree.MinSize())
@@ -375,12 +360,10 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 	})
 	min.Width += 2 * theme.Padding()
 	min.Height += 2 * theme.Padding()
-	//log.Println("treeContentRenderer.MinSize:", min)
 	return
 }
 
 func (r *treeContentRenderer) Layout(size fyne.Size) {
-	//log.Println("treeContentRenderer.Layout:", size)
 
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
@@ -402,11 +385,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		}
 		m := r.minSizeOf(uid, isBranch, depth)
 		if y+m.Height < offsetY {
-			// node is above viewport and not visible
+			// Node is above viewport and not visible
 		} else if y > offsetY+size.Height {
-			// node is below viewport and not visible
+			// Node is below viewport and not visible
 		} else {
-			// node is in viewport
+			// Node is in viewport
 			var n *treeNode
 			if isBranch {
 				b, ok := r.branches[uid]
@@ -429,15 +412,13 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			}
 			if n != nil {
 				n.Move(fyne.NewPos(theme.Padding(), y))
-				//log.Println("Node", uid, "Pos", n.Position())
 				n.Resize(fyne.NewSize(size.Width-n.Position().X-theme.Padding(), m.Height))
-				//log.Println("Node", uid, "Size", n.Size())
 			}
 		}
 		y += m.Height
 	})
 
-	// Release any treeNodes that haven't been reused
+	// Release any nodes that haven't been reused
 	for uid, b := range r.branches {
 		if _, ok := branches[uid]; !ok {
 			r.branchPool.Release(b)
@@ -454,7 +435,6 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 }
 
 func (r *treeContentRenderer) Refresh() {
-	//log.Println("treeContentRenderer.Refresh")
 	s := r.treeContent.Size()
 	if s.IsZero() {
 		r.treeContent.Resize(r.treeContent.MinSize())
@@ -481,7 +461,6 @@ func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
 		objects = append(objects, l)
 	}
 	r.treeContent.propertyLock.RUnlock()
-	//log.Println("treeContentRenderer.Objects:", objects)
 	return
 }
 
@@ -559,7 +538,6 @@ func (n *treeNode) Indent() int {
 }
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
-	//log.Println("treeNode.Tapped")
 	n.tree.SetSelectedNode(n.uid)
 	if f := n.tree.OnNodeSelected; f != nil {
 		f(n.uid, n.content)
@@ -616,12 +594,10 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 	min.Height = fyne.Max(min.Height, theme.IconInlineSize())
 	min.Width += 2 * theme.Padding()
 	min.Height += 2 * theme.Padding()
-	//log.Println("treeNodeRenderer.MinSize:", min)
 	return
 }
 
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
-	//log.Println("treeNodeRenderer.Layout:", size)
 	if d := r.divider; d != nil {
 		d.Move(fyne.NewPos(0, size.Height-1))
 		s := fyne.NewSize(size.Width, 1)
@@ -650,7 +626,6 @@ func (r *treeNodeRenderer) Layout(size fyne.Size) {
 }
 
 func (r *treeNodeRenderer) Refresh() {
-	//log.Println(r.treeNode.uid, "treeNodeRenderer.Refresh")
 	if i := r.treeNode.icon; i != nil {
 		i.Refresh()
 	}
@@ -659,7 +634,6 @@ func (r *treeNodeRenderer) Refresh() {
 		i.Refresh()
 	}
 	if i := r.indicator; i != nil {
-		//log.Println(r.treeNode.uid, "treeNodeRenderer.Refresh:", r.treeNode.tree.Selected)
 		if r.treeNode.uid == r.treeNode.tree.Selected {
 			i.FillColor = theme.PrimaryColor()
 		} else if r.treeNode.hovered {
@@ -688,7 +662,6 @@ func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
 	if c := r.treeNode.content; c != nil {
 		objects = append(objects, c)
 	}
-	//log.Println("branchRenderer.Objects:", objects)
 	return
 }
 
@@ -717,7 +690,6 @@ func (b *branch) Update(uid string, depth int) {
 }
 
 func (b *branch) DoubleTapped(*fyne.PointEvent) {
-	//log.Println("branch.DoubleTapped")
 	b.tree.ToggleBranch(b.uid)
 }
 
@@ -744,17 +716,14 @@ func (i *branchIcon) Update(uid string, depth int) {
 }
 
 func (i *branchIcon) Tapped(*fyne.PointEvent) {
-	//log.Println("branchIcon.Tapped")
 	i.tree.ToggleBranch(i.uid)
 }
 
 func (i *branchIcon) DoubleTapped(*fyne.PointEvent) {
-	//log.Println("branchIcon.DoubleTapped")
 	// Do nothing - this stops the event propagating to branch
 }
 
 func (i *branchIcon) Refresh() {
-	//log.Println(i.uid, "branchIcon.Refresh")
 	if i.tree.IsBranchOpen(i.uid) {
 		i.Resource = theme.MoveDownIcon()
 	} else {

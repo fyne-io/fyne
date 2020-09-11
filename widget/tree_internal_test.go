@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -38,7 +37,6 @@ func getBranch(t *testing.T, tree *Tree, uid string) (branch *branch) {
 	t.Helper()
 	tr := test.WidgetRenderer(tree).(*treeRenderer)
 	cr := test.WidgetRenderer(tr.content).(*treeContentRenderer)
-	log.Println(cr.branches)
 	branch = cr.branches[uid]
 	assert.NotNil(t, branch)
 	return branch
@@ -48,7 +46,6 @@ func getLeaf(t *testing.T, tree *Tree, uid string) (leaf *leaf) {
 	t.Helper()
 	tr := test.WidgetRenderer(tree).(*treeRenderer)
 	cr := test.WidgetRenderer(tr.content).(*treeContentRenderer)
-	log.Println(cr.leaves)
 	leaf = cr.leaves[uid]
 	assert.NotNil(t, leaf)
 	return leaf
