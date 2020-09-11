@@ -233,13 +233,18 @@ func Test_colorToString(t *testing.T) {
 func Test_stringToColor(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
-			c := stringToColor(tt.hex)
+			c, err := stringToColor(tt.hex)
+			assert.NoError(t, err)
 			r, g, b, _ := c.RGBA()
 			assert.InDelta(t, tt.r*65535, r, 0.0001)
 			assert.InDelta(t, tt.g*65535, g, 0.0001)
 			assert.InDelta(t, tt.b*65535, b, 0.0001)
 		})
 	}
+	t.Run("Invalid", func(t *testing.T) {
+		_, err := stringToColor("potato")
+		assert.Error(t, err)
+	})
 }
 
 func Test_colorToHSLA(t *testing.T) {

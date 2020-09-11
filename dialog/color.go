@@ -163,7 +163,7 @@ func colorToString(c color.Color) string {
 	return fmt.Sprintf("#%02x%02x%02x%02x", red, green, blue, alpha)
 }
 
-func stringToColor(s string) color.Color {
+func stringToColor(s string) (color.Color, error) {
 	var c color.NRGBA
 	var err error
 	if len(s) == 7 {
@@ -172,10 +172,7 @@ func stringToColor(s string) color.Color {
 	} else {
 		_, err = fmt.Sscanf(s, "#%02x%02x%02x%02x", &c.R, &c.G, &c.B, &c.A)
 	}
-	if err != nil {
-		fyne.LogError("Couldn't parse color:", err)
-	}
-	return c
+	return c, err
 }
 
 func stringsToColors(ss ...string) (colors []color.Color) {
@@ -183,7 +180,12 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 		if s == "" {
 			continue
 		}
-		colors = append(colors, stringToColor(s))
+		c, err := stringToColor(s)
+		if err != nil {
+			fyne.LogError("Couldn't parse color:", err)
+		} else {
+			colors = append(colors, c)
+		}
 	}
 	return
 }

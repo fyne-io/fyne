@@ -209,17 +209,26 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		p.SetRGBA(p.Red, p.Green, p.Blue, a)
 	})
 
-	// TODO Hex color code entry
+	hex := &widget.Entry{
+		OnChanged: func(text string) {
+			c, err := stringToColor(text)
+			if err != nil {
+				// TODO trigger entry invalid state
+			} else {
+				p.SetColor(c)
+			}
+		},
+	}
 
 	contents := widget.NewHBox(
 		widget.NewVBox(
 			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), wheel),
 			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), newCheckeredBackground(), preview),
+			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), hex),
 		),
 		widget.NewVBox(
 			modelTabContainer,
 			alphaChannel,
-			// TODO Hex color code entry
 		),
 	)
 	r := &colorPickerRenderer{
@@ -237,6 +246,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		wheel:             wheel,
 		preview:           preview,
 		alphaChannel:      alphaChannel,
+		hex:               hex,
 		contents:          contents,
 	}
 	r.updateObjects()
@@ -268,6 +278,7 @@ type colorPickerRenderer struct {
 	wheel             *colorWheel
 	preview           *canvas.Rectangle
 	alphaChannel      *colorChannel
+	hex               *widget.Entry
 	contents          fyne.CanvasObject
 }
 
@@ -311,12 +322,14 @@ func (r *colorPickerRenderer) updateObjects() {
 	// Wheel
 	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, r.picker.Alpha)
 
+	color := r.picker.Color()
+
 	// Preview
-	r.preview.FillColor = r.picker.Color()
+	r.preview.FillColor = color
 	r.preview.Refresh()
 
 	// Alpha
 	r.alphaChannel.SetValue(r.picker.Alpha)
 
-	// TODO Hex color code entry
+	r.hex.SetText(colorToString(color))
 }
