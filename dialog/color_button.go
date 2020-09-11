@@ -1,4 +1,4 @@
-package widget
+package dialog
 
 import (
 	"image/color"
@@ -6,25 +6,25 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/widget"
+	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
-var _ fyne.Widget = (*ColorButton)(nil)
-var _ desktop.Hoverable = (*ColorButton)(nil)
+var _ fyne.Widget = (*colorButton)(nil)
+var _ desktop.Hoverable = (*colorButton)(nil)
 
-// ColorButton displays a color and triggers the callback when tapped.
-type ColorButton struct {
-	BaseWidget
+// colorButton displays a color and triggers the callback when tapped.
+type colorButton struct {
+	widget.BaseWidget
 	color   color.Color
-	minSize fyne.Size
 	onTap   func(color.Color)
 	hovered bool
 }
 
-// NewColorButton creates a ColorButton with the given color and callback.
-func NewColorButton(color color.Color, onTap func(color.Color)) *ColorButton {
-	b := &ColorButton{
+// newColorButton creates a colorButton with the given color and callback.
+func newColorButton(color color.Color, onTap func(color.Color)) *colorButton {
+	b := &colorButton{
 		color: color,
 		onTap: onTap,
 	}
@@ -33,14 +33,14 @@ func NewColorButton(color color.Color, onTap func(color.Color)) *ColorButton {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (b *ColorButton) CreateRenderer() fyne.WidgetRenderer {
+func (b *colorButton) CreateRenderer() fyne.WidgetRenderer {
 	b.ExtendBaseWidget(b)
 	background := newCheckeredBackground()
 	rectangle := &canvas.Rectangle{
 		FillColor: b.color,
 	}
 	return &colorButtonRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{background, rectangle}),
+		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{background, rectangle}),
 		button:       b,
 		background:   background,
 		rectangle:    rectangle,
@@ -48,43 +48,28 @@ func (b *ColorButton) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // MouseIn is called when a desktop pointer enters the widget
-func (b *ColorButton) MouseIn(*desktop.MouseEvent) {
+func (b *colorButton) MouseIn(*desktop.MouseEvent) {
 	b.hovered = true
 	b.Refresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
-func (b *ColorButton) MouseOut() {
+func (b *colorButton) MouseOut() {
 	b.hovered = false
 	b.Refresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
-func (b *ColorButton) MouseMoved(*desktop.MouseEvent) {
+func (b *colorButton) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MinSize returns the size that this widget should not shrink below
-func (b *ColorButton) MinSize() (min fyne.Size) {
-	b.ExtendBaseWidget(b)
-	b.propertyLock.RLock()
-	min = b.minSize
-	b.propertyLock.RUnlock()
-	if min.IsZero() {
-		min = b.BaseWidget.MinSize()
-	}
-	return
-}
-
-// SetMinSize specifies the smallest size this object should be
-func (b *ColorButton) SetMinSize(size fyne.Size) {
-	b.propertyLock.Lock()
-	defer b.propertyLock.Unlock()
-
-	b.minSize = size
+func (b *colorButton) MinSize() fyne.Size {
+	return b.BaseWidget.MinSize()
 }
 
 // SetColor updates the color selected in this color widget
-func (b *ColorButton) SetColor(color color.Color) {
+func (b *colorButton) SetColor(color color.Color) {
 	if b.color == color {
 		return
 	}
@@ -93,7 +78,7 @@ func (b *ColorButton) SetColor(color color.Color) {
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
-func (b *ColorButton) Tapped(*fyne.PointEvent) {
+func (b *colorButton) Tapped(*fyne.PointEvent) {
 	writeRecentColor(colorToString(b.color))
 	if f := b.onTap; f != nil {
 		f(b.color)
@@ -101,8 +86,8 @@ func (b *ColorButton) Tapped(*fyne.PointEvent) {
 }
 
 type colorButtonRenderer struct {
-	widget.BaseRenderer
-	button     *ColorButton
+	internalwidget.BaseRenderer
+	button     *colorButton
 	background *canvas.Raster
 	rectangle  *canvas.Rectangle
 }
@@ -130,5 +115,5 @@ func (r *colorButtonRenderer) MinSize() (min fyne.Size) {
 func (r *colorButtonRenderer) Refresh() {
 	r.rectangle.FillColor = r.button.color
 	r.rectangle.Refresh()
-	canvas.Refresh(r.button.super())
+	canvas.Refresh(r.button)
 }

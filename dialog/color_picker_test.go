@@ -1,4 +1,4 @@
-package widget_test
+package dialog
 
 import (
 	"image/color"
@@ -8,15 +8,14 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 )
 
-func TestColorGreyscalePicker_Layout(t *testing.T) {
+func TestcolorGreyscalePicker_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
 
-	color := widget.NewColorGreyscalePicker(nil)
+	color := newColorGreyscalePicker(nil)
 
 	window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
 	window.Resize(color.MinSize().Max(fyne.NewSize(100, 50)))
@@ -31,7 +30,7 @@ func TestColorBasicPicker_Layout(t *testing.T) {
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
 
-	color := widget.NewColorBasicPicker(nil)
+	color := newColorBasicPicker(nil)
 
 	window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
 	window.Resize(color.MinSize().Max(fyne.NewSize(100, 50)))
@@ -49,7 +48,7 @@ func TestColorRecentPicker_Layout(t *testing.T) {
 	// Inject recent preferences
 	a.Preferences().SetString("color_recents", "#0000FF,#008000,#FF0000")
 
-	color := widget.NewColorRecentPicker(nil)
+	color := newColorRecentPicker(nil)
 
 	window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
 	window.Resize(color.MinSize().Max(fyne.NewSize(100, 50)))
@@ -78,7 +77,7 @@ func TestColorAdvancedPicker_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			color := widget.NewColorAdvancedPicker(tt.color, nil)
+			color := newColorAdvancedPicker(tt.color, nil)
 
 			if tt.model != "" {
 				color.ColorModel = tt.model

@@ -1,4 +1,4 @@
-package widget_test
+package dialog
 
 import (
 	"testing"
@@ -7,10 +7,9 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 )
 
-func TestColorChannel_Layout(t *testing.T) {
+func TestcolorChannel_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -33,7 +32,7 @@ func TestColorChannel_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			color := widget.NewColorChannel(tt.name, tt.value, nil)
+			color := newColorChannel(tt.name, tt.value, nil)
 
 			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
 			window.Resize(color.MinSize().Max(fyne.NewSize(100, 100)))

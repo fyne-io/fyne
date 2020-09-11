@@ -1,4 +1,4 @@
-package widget
+package dialog
 
 import (
 	"fmt"
@@ -6,24 +6,25 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
+	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
-var _ fyne.Widget = (*ColorChannel)(nil)
+var _ fyne.Widget = (*colorChannel)(nil)
 
-// ColorChannel controls a channel of a color and triggers the callback when changed.
-type ColorChannel struct {
-	BaseWidget
+// colorChannel controls a channel of a color and triggers the callback when changed.
+type colorChannel struct {
+	widget.BaseWidget
 	name      string
 	value     float64
 	onChanged func(float64)
 }
 
-// NewColorChannel returns a new color channel control for the channel with the given name.
-func NewColorChannel(name string, value float64, onChanged func(float64)) *ColorChannel {
-	c := &ColorChannel{
+// newColorChannel returns a new color channel control for the channel with the given name.
+func newColorChannel(name string, value float64, onChanged func(float64)) *colorChannel {
+	c := &colorChannel{
 		name:      name,
 		value:     colorClamp(value),
 		onChanged: onChanged,
@@ -33,9 +34,9 @@ func NewColorChannel(name string, value float64, onChanged func(float64)) *Color
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (c *ColorChannel) CreateRenderer() fyne.WidgetRenderer {
-	label := NewLabel(c.name)
-	entry := &Entry{
+func (c *colorChannel) CreateRenderer() fyne.WidgetRenderer {
+	label := widget.NewLabel(c.name)
+	entry := &widget.Entry{
 		Text: "0.00",
 		OnChanged: func(text string) {
 			var value float64
@@ -48,18 +49,18 @@ func (c *ColorChannel) CreateRenderer() fyne.WidgetRenderer {
 		},
 		// TODO add number 0.0-1.0 validator
 	}
-	slider := &Slider{
+	slider := &widget.Slider{
 		Value:       0,
 		Min:         0,
 		Max:         1.0,
 		Step:        0.000001,
-		Orientation: Horizontal,
+		Orientation: widget.Horizontal,
 		OnChanged: func(value float64) {
 			c.SetValue(value)
 		},
 	}
-	contents := NewVBox(
-		NewHBox(
+	contents := widget.NewVBox(
+		widget.NewHBox(
 			label,
 			layout.NewSpacer(),
 			entry,
@@ -67,7 +68,7 @@ func (c *ColorChannel) CreateRenderer() fyne.WidgetRenderer {
 		slider,
 	)
 	r := &colorChannelRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{contents}),
+		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{contents}),
 		control:      c,
 		label:        label,
 		entry:        entry,
@@ -79,13 +80,13 @@ func (c *ColorChannel) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // MinSize returns the size that this widget should not shrink below
-func (c *ColorChannel) MinSize() fyne.Size {
+func (c *colorChannel) MinSize() fyne.Size {
 	c.ExtendBaseWidget(c)
 	return c.BaseWidget.MinSize()
 }
 
 // SetValue updates the value in this color widget
-func (c *ColorChannel) SetValue(value float64) {
+func (c *colorChannel) SetValue(value float64) {
 	value = colorClamp(value)
 	if math.Abs(c.value-value) < 0.000001 {
 		return
@@ -98,11 +99,11 @@ func (c *ColorChannel) SetValue(value float64) {
 }
 
 type colorChannelRenderer struct {
-	widget.BaseRenderer
-	control  *ColorChannel
-	label    *Label
-	entry    *Entry
-	slider   *Slider
+	internalwidget.BaseRenderer
+	control  *colorChannel
+	label    *widget.Label
+	entry    *widget.Entry
+	slider   *widget.Slider
 	contents fyne.CanvasObject
 }
 
@@ -120,7 +121,7 @@ func (r *colorChannelRenderer) MinSize() (min fyne.Size) {
 func (r *colorChannelRenderer) Refresh() {
 	r.updateObjects()
 	r.Layout(r.control.Size())
-	canvas.Refresh(r.control.super())
+	canvas.Refresh(r.control)
 }
 
 func (r *colorChannelRenderer) updateObjects() {

@@ -1,4 +1,4 @@
-package widget_test
+package dialog
 
 import (
 	"image/color"
@@ -8,10 +8,9 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 )
 
-func TestColorButton_Layout(t *testing.T) {
+func TestcolorButton_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -29,7 +28,7 @@ func TestColorButton_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			color := widget.NewColorButton(tt.color, nil)
+			color := newColorButton(tt.color, nil)
 
 			if tt.hovered {
 				color.MouseIn(nil)

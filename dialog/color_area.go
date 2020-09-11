@@ -1,4 +1,4 @@
-package widget
+package dialog
 
 import (
 	"image"
@@ -9,8 +9,9 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
-	"fyne.io/fyne/internal/widget"
+	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 // RGBAHolder defines getters and setters for RGBA colors.
@@ -19,8 +20,8 @@ type RGBAHolder interface {
 	SetRGBA(float64, float64, float64, float64)
 }
 
-// NewRGBAColorArea returns a new RGBA color area using the given holder.
-func NewRGBAColorArea(holder RGBAHolder) *ColorArea {
+// newRGBAColorArea returns a new RGBA color area using the given holder.
+func newRGBAColorArea(holder RGBAHolder) *colorArea {
 	lookup := func(x, y, w, h int) color.Color {
 		// TODO translate x,y into Red/Green/Blue
 		return nil
@@ -29,7 +30,7 @@ func NewRGBAColorArea(holder RGBAHolder) *ColorArea {
 		// TODO translate current color into x,y coords
 		return
 	}
-	return NewColorArea(lookup, selection, func(x, y, w, h int) {
+	return newColorArea(lookup, selection, func(x, y, w, h int) {
 		// TODO if in bounds
 		// TODO   holder.SetRGBA
 	})
@@ -41,8 +42,8 @@ type HSLAHolder interface {
 	SetHSLA(float64, float64, float64, float64)
 }
 
-// NewHSLAColorArea returns a new HSLA color area using the given holder.
-func NewHSLAColorArea(holder HSLAHolder) *ColorArea {
+// newHSLAColorArea returns a new HSLA color area using the given holder.
+func newHSLAColorArea(holder HSLAHolder) *colorArea {
 	lookup := func(x, y, w, h int) color.Color {
 		angle, radius, limit := cartesianToPolar(float64(x), float64(y), float64(w), float64(h))
 		if radius > limit {
@@ -67,7 +68,7 @@ func NewHSLAColorArea(holder HSLAHolder) *ColorArea {
 		x, y := polarToCartesian(angle, radius, float64(w), float64(h))
 		return int(x), int(y)
 	}
-	return NewColorArea(lookup, selection, func(x, y, w, h int) {
+	return newColorArea(lookup, selection, func(x, y, w, h int) {
 		angle, radius, limit := cartesianToPolar(float64(x), float64(y), float64(w), float64(h))
 		if radius > limit {
 			// Out of bounds
@@ -79,23 +80,22 @@ func NewHSLAColorArea(holder HSLAHolder) *ColorArea {
 	})
 }
 
-var _ fyne.Widget = (*ColorArea)(nil)
-var _ fyne.Tappable = (*ColorArea)(nil)
-var _ fyne.Draggable = (*ColorArea)(nil)
+var _ fyne.Widget = (*colorArea)(nil)
+var _ fyne.Tappable = (*colorArea)(nil)
+var _ fyne.Draggable = (*colorArea)(nil)
 
-// ColorArea displays a color gradient and triggers the callback when tapped.
-type ColorArea struct {
-	BaseWidget
+// colorArea displays a color gradient and triggers the callback when tapped.
+type colorArea struct {
+	widget.BaseWidget
 	generator func(w, h int) image.Image
 	cache     draw.Image
-	minSize   fyne.Size
 	selection func(int, int) (int, int)
 	onChange  func(int, int, int, int)
 }
 
-// NewColorArea returns a new color area with the given lookup and selection callbacks, and triggers the given onChange callback.
-func NewColorArea(lookup func(int, int, int, int) color.Color, selection func(int, int) (int, int), onChange func(int, int, int, int)) *ColorArea {
-	a := &ColorArea{
+// newColorArea returns a new color area with the given lookup and selection callbacks, and triggers the given onChange callback.
+func newColorArea(lookup func(int, int, int, int) color.Color, selection func(int, int) (int, int), onChange func(int, int, int, int)) *colorArea {
+	a := &colorArea{
 		selection: selection,
 		onChange:  onChange,
 	}
@@ -118,19 +118,19 @@ func NewColorArea(lookup func(int, int, int, int) color.Color, selection func(in
 }
 
 // Cursor returns the cursor type of this widget
-func (a *ColorArea) Cursor() desktop.Cursor {
+func (a *colorArea) Cursor() desktop.Cursor {
 	return desktop.CrosshairCursor
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (a *ColorArea) CreateRenderer() fyne.WidgetRenderer {
+func (a *colorArea) CreateRenderer() fyne.WidgetRenderer {
 	raster := &canvas.Raster{
 		Generator: a.generator,
 	}
 	x := canvas.NewLine(color.Black)
 	y := canvas.NewLine(color.Black)
 	return &colorAreaRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{raster, x, y}),
+		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{raster, x, y}),
 		area:         a,
 		raster:       raster,
 		x:            x,
@@ -139,27 +139,13 @@ func (a *ColorArea) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // MinSize returns the size that this widget should not shrink below
-func (a *ColorArea) MinSize() (min fyne.Size) {
+func (a *colorArea) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
-	a.propertyLock.RLock()
-	min = a.minSize
-	a.propertyLock.RUnlock()
-	if min.IsZero() {
-		min = a.BaseWidget.MinSize()
-	}
-	return
-}
-
-// SetMinSize specifies the smallest size this object should be
-func (a *ColorArea) SetMinSize(size fyne.Size) {
-	a.propertyLock.Lock()
-	defer a.propertyLock.Unlock()
-
-	a.minSize = size
+	return a.BaseWidget.MinSize()
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
-func (a *ColorArea) Tapped(event *fyne.PointEvent) {
+func (a *colorArea) Tapped(event *fyne.PointEvent) {
 	x, y := a.locationForPosition(event.Position)
 	if c := a.cache; c != nil {
 		b := c.Bounds()
@@ -170,7 +156,7 @@ func (a *ColorArea) Tapped(event *fyne.PointEvent) {
 }
 
 // Dragged is called when a pointer drag event is captured and triggers any change handler
-func (a *ColorArea) Dragged(event *fyne.DragEvent) {
+func (a *colorArea) Dragged(event *fyne.DragEvent) {
 	x, y := a.locationForPosition(event.Position)
 	if c := a.cache; c != nil {
 		b := c.Bounds()
@@ -181,10 +167,10 @@ func (a *ColorArea) Dragged(event *fyne.DragEvent) {
 }
 
 // DragEnd is called when a pointer drag ends
-func (a *ColorArea) DragEnd() {
+func (a *colorArea) DragEnd() {
 }
 
-func (a *ColorArea) locationForPosition(pos fyne.Position) (x, y int) {
+func (a *colorArea) locationForPosition(pos fyne.Position) (x, y int) {
 	can := fyne.CurrentApp().Driver().CanvasForObject(a)
 	x, y = pos.X, pos.Y
 	if can != nil {
@@ -194,8 +180,8 @@ func (a *ColorArea) locationForPosition(pos fyne.Position) (x, y int) {
 }
 
 type colorAreaRenderer struct {
-	widget.BaseRenderer
-	area   *ColorArea
+	internalwidget.BaseRenderer
+	area   *colorArea
 	raster *canvas.Raster
 	x, y   *canvas.Line
 }
@@ -235,5 +221,5 @@ func (r *colorAreaRenderer) Refresh() {
 	r.y.StrokeColor = theme.IconColor()
 	r.y.Refresh()
 	r.raster.Refresh()
-	canvas.Refresh(r.area.super())
+	canvas.Refresh(r.area)
 }

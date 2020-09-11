@@ -1,4 +1,4 @@
-package widget_test
+package dialog
 
 import (
 	"testing"
@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
 )
 
 type dummyHolder struct {
@@ -29,7 +28,7 @@ func (d *dummyHolder) SetHSLA(float64, float64, float64, float64) {
 	// Do nothing
 }
 
-func TestColorArea_Layout(t *testing.T) {
+func TestcolorArea_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -45,13 +44,13 @@ func TestColorArea_Layout(t *testing.T) {
 	}
 
 	for name, tt := range map[string]struct {
-		area *widget.ColorArea
+		area *colorArea
 	}{
 		"rgb": {
-			area: widget.NewRGBAColorArea(holder),
+			area: newRGBAColorArea(holder),
 		},
 		"hsl": {
-			area: widget.NewHSLAColorArea(holder),
+			area: newHSLAColorArea(holder),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
