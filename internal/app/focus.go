@@ -24,7 +24,33 @@ func NewFocusManager(c fyne.CanvasObject) *FocusManager {
 func (f *FocusManager) Focus(obj fyne.Focusable) {
 	f.Lock()
 	defer f.Unlock()
+	f.focus(obj)
+}
 
+// Focused returns the currently focused object or nil if none.
+func (f *FocusManager) Focused() fyne.Focusable {
+	f.RLock()
+	defer f.RUnlock()
+	return f.focused
+}
+
+// FocusNext will find the item after the current that can be focused and focus it.
+// If current is nil then the first focusable item in the canvas will be focused.
+func (f *FocusManager) FocusNext() {
+	f.Lock()
+	defer f.Unlock()
+	f.focus(f.nextInChain(f.focused))
+}
+
+// FocusPrevious will find the item before the current that can be focused and focus it.
+// If current is nil then the last focusable item in the canvas will be focused.
+func (f *FocusManager) FocusPrevious() {
+	f.Lock()
+	defer f.Unlock()
+	f.focus(f.previousInChain(f.focused))
+}
+
+func (f *FocusManager) focus(obj fyne.Focusable) {
 	if f.focused == obj {
 		return
 	}
@@ -40,29 +66,6 @@ func (f *FocusManager) Focus(obj fyne.Focusable) {
 	if obj != nil {
 		obj.FocusGained()
 	}
-}
-
-// Focused returns the currently focused object or nil if none.
-func (f *FocusManager) Focused() fyne.Focusable {
-	f.RLock()
-	defer f.RUnlock()
-	return f.focused
-}
-
-// FocusNext will find the item after the current that can be focused and focus it.
-// If current is nil then the first focusable item in the canvas will be focused.
-func (f *FocusManager) FocusNext() {
-	f.Lock()
-	defer f.Unlock()
-	f.focused = f.nextInChain(f.focused)
-}
-
-// FocusPrevious will find the item before the current that can be focused and focus it.
-// If current is nil then the last focusable item in the canvas will be focused.
-func (f *FocusManager) FocusPrevious() {
-	f.Lock()
-	defer f.Unlock()
-	f.focused = f.previousInChain(f.focused)
 }
 
 func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
