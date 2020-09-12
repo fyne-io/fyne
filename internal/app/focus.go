@@ -24,7 +24,22 @@ func NewFocusManager(c fyne.CanvasObject) *FocusManager {
 func (f *FocusManager) Focus(obj fyne.Focusable) {
 	f.Lock()
 	defer f.Unlock()
+
+	if f.focused == obj {
+		return
+	}
+
+	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
+		obj = nil
+	}
+
+	if f.focused != nil {
+		f.focused.FocusLost()
+	}
 	f.focused = obj
+	if obj != nil {
+		obj.FocusGained()
+	}
 }
 
 // Focused returns the currently focused object or nil if none.

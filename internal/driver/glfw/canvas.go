@@ -162,58 +162,23 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 }
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
-	c.RLock()
-	mgr := c.focusMgr
-	c.RUnlock()
-	focused := mgr.Focused()
-
-	if focused == obj || obj == nil {
-		return
-	}
-
-	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-		c.Unfocus()
-		return
-	}
-
-	if focused != nil {
-		focused.FocusLost()
-	}
-
-	mgr.Focus(obj)
-	obj.FocusGained()
+	c.focusManager().Focus(obj)
 }
 
 func (c *glCanvas) FocusNext() {
-	c.RLock()
-	mgr := c.focusMgr
-	c.RUnlock()
-	mgr.FocusNext()
+	c.focusManager().FocusNext()
 }
 
 func (c *glCanvas) FocusPrevious() {
-	c.RLock()
-	mgr := c.focusMgr
-	c.RUnlock()
-	mgr.FocusPrevious()
+	c.focusManager().FocusPrevious()
 }
 
 func (c *glCanvas) Unfocus() {
-	c.RLock()
-	mgr := c.focusMgr
-	c.RUnlock()
-	focused := mgr.Focused()
-
-	if focused != nil {
-		mgr.Focus(nil)
-		focused.FocusLost()
-	}
+	c.focusManager().Focus(nil)
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {
-	c.RLock()
-	defer c.RUnlock()
-	return c.focusMgr.Focused()
+	return c.focusManager().Focused()
 }
 
 func (c *glCanvas) Resize(size fyne.Size) {
@@ -416,6 +381,12 @@ func (c *glCanvas) ensureMinSize() bool {
 		c.RUnlock()
 	}
 	return windowNeedsMinSizeUpdate
+}
+
+func (c *glCanvas) focusManager() *app.FocusManager {
+	c.RLock()
+	defer c.RUnlock()
+	return c.focusMgr
 }
 
 func (c *glCanvas) isDirty() bool {
