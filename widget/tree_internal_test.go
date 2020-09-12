@@ -24,6 +24,10 @@ var (
 	minSize4 = NewLabel("44444444444444444444").MinSize()
 )
 
+func indentation() int {
+	return theme.IconInlineSize() + theme.Padding()
+}
+
 func assertTreeContentMinSize(t *testing.T, tree *Tree, expected fyne.Size) {
 	t.Helper()
 
@@ -67,9 +71,9 @@ func TestTree_Indentation(t *testing.T) {
 	b := getBranch(t, tree, "B")
 	c := getLeaf(t, tree, "C")
 
-	assert.Equal(t, 0*(indentation*theme.Padding()), a.Indent())
-	assert.Equal(t, 1*(indentation*theme.Padding()), b.Indent())
-	assert.Equal(t, 2*(indentation*theme.Padding()), c.Indent())
+	assert.Equal(t, 0*indentation(), a.Indent())
+	assert.Equal(t, 1*indentation(), b.Indent())
+	assert.Equal(t, 2*indentation(), c.Indent())
 }
 
 func TestTree_Resize(t *testing.T) {
@@ -90,7 +94,7 @@ func TestTree_Resize(t *testing.T) {
 			minSizeA.Width,
 			minSizeB.Width,
 		),
-		minSizeC.Width+(indentation*theme.Padding()),
+		minSizeC.Width+indentation(),
 	) + theme.IconInlineSize() + 5*theme.Padding()
 	height := 2 * theme.Padding()
 	height = height + fyne.Max(minSizeA.Height, theme.IconInlineSize()) + 2*theme.Padding()
@@ -167,7 +171,7 @@ func TestTree_MinSize(t *testing.T) {
 			},
 			opened: []string{"A"},
 			want: fyne.NewSize(
-				fyne.Max(minSizeA.Width, minSize1.Width+(indentation*theme.Padding()))+theme.Padding()+theme.IconInlineSize()+nodePadding+contentPadding,
+				fyne.Max(minSizeA.Width, minSize1.Width+indentation())+theme.Padding()+theme.IconInlineSize()+nodePadding+contentPadding,
 				fyne.Max(minSizeA.Height, theme.IconInlineSize())+nodePadding+minSize1.Height+nodePadding+contentPadding,
 			),
 		},
@@ -208,14 +212,14 @@ func TestTree_MinSize(t *testing.T) {
 							minSizeA.Width,
 							minSizeB.Width,
 						),
-						minSizeC.Width+(indentation*theme.Padding()),
+						minSizeC.Width+indentation(),
 					),
 					fyne.Max(
 						fyne.Max(
-							minSize1.Width+(indentation*theme.Padding()),
-							minSize2.Width+(indentation*theme.Padding()),
+							minSize1.Width+indentation(),
+							minSize2.Width+indentation(),
 						),
-						minSize3.Width+(2*indentation*theme.Padding()),
+						minSize3.Width+(2*indentation()),
 					),
 				)+nodePadding+contentPadding+theme.IconInlineSize()+theme.Padding(),
 				fyne.Max(minSizeA.Height, theme.IconInlineSize())+fyne.Max(minSizeB.Height, theme.IconInlineSize())+fyne.Max(minSizeC.Height, theme.IconInlineSize())+minSize1.Height+minSize2.Height+minSize3.Height+(6*nodePadding)+contentPadding,

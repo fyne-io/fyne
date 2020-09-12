@@ -14,10 +14,6 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const (
-	indentation = 4 // Multiplier of theme.Padding() to indent children by. // TODO consider moving to theme.Indentation()
-)
-
 var _ fyne.Widget = (*Tree)(nil)
 
 // Tree widget displays hierarchical data.
@@ -530,7 +526,7 @@ func (n *treeNode) Content() fyne.CanvasObject {
 }
 
 func (n *treeNode) Indent() int {
-	return n.depth * indentation * theme.Padding()
+	return n.depth * (theme.IconInlineSize() + theme.Padding())
 }
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
