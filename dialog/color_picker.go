@@ -118,7 +118,6 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 
 	// Preview
 	preview := &canvas.Rectangle{}
-	preview.SetMinSize(fyne.NewSize(128, 128))
 
 	// HSL
 	hueChannel := newColorChannel("H:", p.Hue, func(h float64) {
@@ -130,13 +129,14 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	lightnessChannel := newColorChannel("L:", p.Lightness, func(l float64) {
 		p.SetHSLA(p.Hue, p.Saturation, l, p.Alpha)
 	})
+	hslBox := widget.NewVBox(
+		hueChannel,
+		saturationChannel,
+		lightnessChannel,
+	)
 	hslTab := widget.NewTabItem(
 		"HSL",
-		widget.NewVBox(
-			hueChannel,
-			saturationChannel,
-			lightnessChannel,
-		),
+		hslBox,
 	)
 
 	// RGB
@@ -149,13 +149,14 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	blueChannel := newColorChannel("B:", p.Blue, func(b float64) {
 		p.SetRGBA(p.Red, p.Green, b, p.Alpha)
 	})
+	rgbBox := widget.NewVBox(
+		redChannel,
+		greenChannel,
+		blueChannel,
+	)
 	rgbTab := widget.NewTabItem(
 		"RGB",
-		widget.NewVBox(
-			redChannel,
-			greenChannel,
-			blueChannel,
-		),
+		rgbBox,
 	)
 
 	modelTabContainer := widget.NewTabContainer(
@@ -187,17 +188,30 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		},
 	}
 
-	contents := widget.NewHBox(
-		widget.NewVBox(
+	contents := widget.NewVBox(
+		layout.NewGridContainerWithColumns(3,
 			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), wheel),
-			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), newCheckeredBackground(), preview),
-			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), hex),
-		),
-		widget.NewVBox(
-			modelTabContainer,
+			hslBox,
+			rgbBox),
+		layout.NewGridContainerWithColumns(3,
+			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), preview),
+			fyne.NewContainerWithLayout(layout.NewCenterLayout(), hex),
 			alphaChannel,
 		),
 	)
+	/*
+		contents := widget.NewHBox(
+			widget.NewVBox(
+				fyne.NewContainerWithLayout(layout.NewPaddedLayout(), wheel),
+				fyne.NewContainerWithLayout(layout.NewPaddedLayout(), newCheckeredBackground(), preview),
+				fyne.NewContainerWithLayout(layout.NewPaddedLayout(), hex),
+			),
+			widget.NewVBox(
+				modelTabContainer,
+				alphaChannel,
+			),
+		)
+	*/
 	r := &colorPickerRenderer{
 		BaseRenderer:      internalwidget.NewBaseRenderer([]fyne.CanvasObject{contents}),
 		picker:            p,

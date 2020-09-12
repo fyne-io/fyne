@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func TestcolorButton_Layout(t *testing.T) {
+func Test_colorButton_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())

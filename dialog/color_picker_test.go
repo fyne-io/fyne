@@ -1,7 +1,6 @@
 package dialog
 
 import (
-	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
@@ -10,7 +9,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func TestcolorGreyscalePicker_Layout(t *testing.T) {
+func Test_colorGreyscalePicker_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -25,7 +24,7 @@ func TestcolorGreyscalePicker_Layout(t *testing.T) {
 	window.Close()
 }
 
-func TestcolorBasicPicker_Layout(t *testing.T) {
+func Test_colorBasicPicker_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -40,7 +39,7 @@ func TestcolorBasicPicker_Layout(t *testing.T) {
 	window.Close()
 }
 
-func TestcolorRecentPicker_Layout(t *testing.T) {
+func Test_colorRecentPicker_Layout(t *testing.T) {
 	a := test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -58,39 +57,19 @@ func TestcolorRecentPicker_Layout(t *testing.T) {
 	window.Close()
 }
 
-func TestcolorAdvancedPicker_Layout(t *testing.T) {
+func Test_colorAdvancedPicker_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
 
-	for name, tt := range map[string]struct {
-		color color.Color
-		model string
-	}{
-		"primary_rgb": {
-			color: theme.PrimaryColor(),
-			model: "RGB",
-		},
-		"primary_hsl": {
-			color: theme.PrimaryColor(),
-			model: "HSL",
-		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			color := newColorAdvancedPicker(tt.color, nil)
+	color := newColorAdvancedPicker(theme.PrimaryColor(), nil)
 
-			if tt.model != "" {
-				color.ColorModel = tt.model
-			}
+	color.Refresh()
 
-			color.Refresh()
+	window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
+	window.Resize(color.MinSize().Max(fyne.NewSize(200, 200)))
 
-			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
-			window.Resize(color.MinSize().Max(fyne.NewSize(200, 200)))
+	test.AssertImageMatches(t, "color/advanced_picker_layout.png", window.Canvas().Capture())
 
-			test.AssertImageMatches(t, "color/advanced_picker_layout_"+name+".png", window.Canvas().Capture())
-
-			window.Close()
-		})
-	}
+	window.Close()
 }

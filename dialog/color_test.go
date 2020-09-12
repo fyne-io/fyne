@@ -21,7 +21,7 @@ func TestColorDialog_Theme(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
-	w.Resize(fyne.NewSize(500, 300))
+	w.Resize(fyne.NewSize(600, 400))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
@@ -65,7 +65,7 @@ func TestColorDialog_Recents(t *testing.T) {
 	a.Preferences().SetString("color_recents", "#2196f3,#4caf50,#f44336")
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
-	w.Resize(fyne.NewSize(500, 300))
+	w.Resize(fyne.NewSize(600, 400))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()

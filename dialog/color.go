@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -94,14 +95,14 @@ func colorClamp(value float64) float64 {
 }
 
 func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(color.Color)) fyne.CanvasObject {
-	box := widget.NewHBox()
+	var objects []fyne.CanvasObject
 	if icon != nil && len(colors) > 0 {
-		box.Children = append(box.Children, widget.NewIcon(icon))
+		objects = append(objects, widget.NewIcon(icon))
 	}
 	for _, c := range colors {
-		box.Children = append(box.Children, newColorButton(c, callback))
+		objects = append(objects, newColorButton(c, callback))
 	}
-	return box
+	return fyne.NewContainerWithLayout(layout.NewGridLayoutWithColumns(9), objects...)
 }
 
 func newCheckeredBackground() *canvas.Raster {

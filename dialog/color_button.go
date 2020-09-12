@@ -106,8 +106,7 @@ func (r *colorButtonRenderer) Layout(size fyne.Size) {
 
 func (r *colorButtonRenderer) MinSize() (min fyne.Size) {
 	min = r.rectangle.MinSize()
-	size := theme.IconInlineSize()
-	min = min.Max(fyne.NewSize(size, size))
+	min = min.Max(fyne.NewSize(32, 32))
 	min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
 	return
 }
