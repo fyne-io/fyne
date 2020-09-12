@@ -254,35 +254,35 @@ func rgbToHsl(r, g, b float64) (float64, float64, float64) {
 
 	var h, s float64
 
-	if del == 0.0 { // Achromatic
-		h = 0.0
-		s = 0.0
-	} else { // Chromatic
-		if l < 0.5 {
-			s = del / (max + min)
-		} else {
-			s = del / (2.0 - max - min)
-		}
+	if del == 0.0 {
+		// Achromatic
+		return 0.0, 0.0, l
+	}
 
-		delR := (((max - r) / 6.0) + (del / 2.0)) / del
-		delG := (((max - g) / 6.0) + (del / 2.0)) / del
-		delB := (((max - b) / 6.0) + (del / 2.0)) / del
+	// Chromatic
+	if l < 0.5 {
+		s = del / (max + min)
+	} else {
+		s = del / (2.0 - max - min)
+	}
 
-		if r == max {
-			h = delB - delG
-		} else if g == max {
-			h = (1.0 / 3.0) + delR - delB
-		} else if b == max {
-			h = (2.0 / 3.0) + delG - delR
-		}
+	delR := (((max - r) / 6.0) + (del / 2.0)) / del
+	delG := (((max - g) / 6.0) + (del / 2.0)) / del
+	delB := (((max - b) / 6.0) + (del / 2.0)) / del
 
-		if h < 0.0 {
-			h += 1.0
-		}
-		if h > 1.0 {
-			h -= 1.0
-		}
+	if r == max {
+		h = delB - delG
+	} else if g == max {
+		h = (1.0 / 3.0) + delR - delB
+	} else if b == max {
+		h = (2.0 / 3.0) + delG - delR
+	}
 
+	if h < 0.0 {
+		h += 1.0
+	}
+	if h > 1.0 {
+		h -= 1.0
 	}
 	return h, s, l
 }
