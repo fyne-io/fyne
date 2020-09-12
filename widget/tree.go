@@ -52,9 +52,8 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 			_, b = data[uid]
 			return
 		},
-		NewNode: func(branch bool) (o fyne.CanvasObject) {
-			o = NewLabel("")
-			return
+		NewNode: func(branch bool) fyne.CanvasObject {
+			return NewLabel("")
 		},
 	}
 	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
@@ -89,23 +88,19 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 		}
 		return
 	}
-	t.IsBranch = func(uid string) (b bool) {
+	t.IsBranch = func(uid string) bool {
 		if strings.HasPrefix(uid, "file://") {
 			uid = uid[7:]
 		}
 		fi, err := os.Lstat(uid)
 		if err != nil {
 			fyne.LogError("Unable to stat path "+uid, err)
-		} else {
-			b = fi.IsDir()
+			return false
 		}
-		return
+		return fi.IsDir()
 	}
-	t.NewNode = func(branch bool) (o fyne.CanvasObject) {
-		i := NewIcon(theme.FileIcon())
-		l := NewLabel("Name")
-		o = NewHBox(i, l)
-		return
+	t.NewNode = func(branch bool) fyne.CanvasObject {
+		return NewHBox(NewIcon(theme.FileIcon()), NewLabel("Name"))
 	}
 	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
 		b := node.(*Box)
