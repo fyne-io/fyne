@@ -62,12 +62,12 @@ func TestURI_Parent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "file://C:/foo/bar/", parent.String())
 
-	parent, err = storage.Parent(storage.NewURI("file:///"))
+	_, err = storage.Parent(storage.NewURI("file:///"))
 	assert.Equal(t, storage.URIRootError, err)
 
 	// This should cause an error, since this is a Windows-style path and
 	// thus we can't get the parent of a drive letter.
-	parent, err = storage.Parent(storage.NewURI("file://C:/"))
+	_, err = storage.Parent(storage.NewURI("file://C:/"))
 	assert.Equal(t, storage.URIRootError, err)
 
 	// Windows supports UNIX-style paths. /C:/ is also a valid path.

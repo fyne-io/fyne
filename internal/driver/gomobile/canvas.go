@@ -24,8 +24,6 @@ type mobileCanvas struct {
 	scale            float32
 	size             fyne.Size
 
-	insetTop, insetBottom, insetLeft, insetRight int
-
 	focused fyne.Focusable
 	touched map[int]mobile.Touchable
 	padded  bool
