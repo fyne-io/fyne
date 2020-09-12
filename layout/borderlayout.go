@@ -12,6 +12,33 @@ type borderLayout struct {
 	top, bottom, left, right fyne.CanvasObject
 }
 
+// NewBorderContainer creates a new container with the specified objects and using the border layout.
+// The top, bottom, left and right parameters specify the items that should be placed around edges,
+// the remaining elements will be in the center. Nil can be used to an edge if it should not be filled.
+func NewBorderContainer(top, bottom, left, right fyne.CanvasObject, objects ...fyne.CanvasObject) *fyne.Container {
+	all := objects
+	if top != nil {
+		all = append(all, top)
+	}
+	if bottom != nil {
+		all = append(all, bottom)
+	}
+	if left != nil {
+		all = append(all, left)
+	}
+	if right != nil {
+		all = append(all, right)
+	}
+	return fyne.NewContainerWithLayout(NewBorderLayout(top, bottom, left, right), all...)
+}
+
+// NewBorderLayout creates a new BorderLayout instance with top, bottom, left
+// and right objects set. All other items in the container will fill the centre
+// space
+func NewBorderLayout(top, bottom, left, right fyne.CanvasObject) fyne.Layout {
+	return &borderLayout{top, bottom, left, right}
+}
+
 // Layout is called to pack all child objects into a specified size.
 // For BorderLayout this arranges the top, bottom, left and right widgets at
 // the sides and any remaining widgets are maximised in the middle space.
@@ -87,11 +114,4 @@ func (b *borderLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	}
 
 	return minSize
-}
-
-// NewBorderLayout creates a new BorderLayout instance with top, left, bottom
-// and right objects set. All other items in the container will fill the centre
-// space
-func NewBorderLayout(top, bottom, left, right fyne.CanvasObject) fyne.Layout {
-	return &borderLayout{top, bottom, left, right}
 }

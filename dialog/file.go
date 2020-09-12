@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -148,7 +147,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		(fileIconSize+fileTextSize)+theme.Padding()*2+verticalExtra))
 
 	f.breadcrumb = widget.NewHBox()
-	scrollBread := widget.NewScrollContainer(f.breadcrumb)
+	scrollBread := widget.NewHScrollContainer(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, f.fileScroll)
 	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
@@ -187,8 +186,7 @@ func (f *fileDialog) refreshDir(dir string) {
 	var icons []fyne.CanvasObject
 	parent := filepath.Dir(dir)
 	if parent != dir {
-		fi := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
-			name: "(Parent)", path: filepath.Dir(dir), dir: true}
+		fi := &fileDialogItem{picker: f, name: "(Parent)", path: filepath.Dir(dir), dir: true}
 		fi.ExtendBaseWidget(fi)
 		icons = append(icons, fi)
 	}

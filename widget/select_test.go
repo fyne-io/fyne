@@ -28,7 +28,7 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
 	defer w.Close()
-	w.Resize(fyne.NewSize(200, 200))
+	w.Resize(fyne.NewSize(220, 220))
 	combo.Resize(combo.MinSize())
 	combo.Move(fyne.NewPos(10, 10))
 	test.Tap(combo)
@@ -36,9 +36,9 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	test.AssertImageMatches(t, "select/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
+		combo.Resize(combo.MinSize())
 		combo.Refresh()
 		time.Sleep(100 * time.Millisecond)
-		// Looks weird but the test infrastructure does not adjust min-sizes.
 		test.AssertImageMatches(t, "select/theme_changed.png", w.Canvas().Capture())
 	})
 }
@@ -96,6 +96,18 @@ func TestSelect_PlaceHolder(t *testing.T) {
 	assert.Equal(t, "changed!", combo.PlaceHolder)
 }
 
+func TestSelect_SelectedIndex(t *testing.T) {
+	combo := widget.NewSelect([]string{"1", "2"}, func(string) {})
+
+	assert.Equal(t, -1, combo.SelectedIndex())
+
+	combo.SetSelected("2")
+	assert.Equal(t, 1, combo.SelectedIndex())
+
+	combo.Selected = "invalid"
+	assert.Equal(t, -1, combo.SelectedIndex())
+}
+
 func TestSelect_SetSelected(t *testing.T) {
 	var triggered bool
 	var triggeredValue string
@@ -150,6 +162,33 @@ func TestSelect_SetSelected_NoChangeOnEmpty(t *testing.T) {
 	combo := widget.NewSelect([]string{"1", "2"}, func(string) { triggered = true })
 	combo.SetSelected("")
 
+	assert.False(t, triggered)
+}
+
+func TestSelect_SetSelectedIndex(t *testing.T) {
+	var triggered bool
+	var triggeredValue string
+	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {
+		triggered = true
+		triggeredValue = s
+	})
+	combo.SetSelectedIndex(1)
+
+	assert.Equal(t, "2", combo.Selected)
+	assert.True(t, triggered)
+	assert.Equal(t, "2", triggeredValue)
+}
+
+func TestSelect_SetSelectedIndex_Invalid(t *testing.T) {
+	var triggered bool
+	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {
+		triggered = true
+	})
+	combo.SetSelectedIndex(-1)
+	assert.Equal(t, -1, combo.SelectedIndex())
+	assert.False(t, triggered)
+	combo.SetSelectedIndex(2)
+	assert.Equal(t, -1, combo.SelectedIndex())
 	assert.False(t, triggered)
 }
 

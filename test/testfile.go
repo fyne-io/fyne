@@ -55,3 +55,7 @@ func (d *testDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) 
 func (d *testDriver) FileWriterForURI(uri fyne.URI) (fyne.URIWriteCloser, error) {
 	return openFile(uri, true)
 }
+
+func (d *testDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
+	return nil, fmt.Errorf("test driver does support creating listable URIs yet")
+}

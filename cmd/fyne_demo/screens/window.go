@@ -94,8 +94,8 @@ func showText(f fyne.URIReadCloser) {
 	w.Show()
 }
 
-func loadDialogGroup(win fyne.Window) *widget.Group {
-	return widget.NewGroup("Dialogs",
+func loadDialogGroup(win fyne.Window) *widget.Card {
+	return widget.NewCard("Dialogs", "", widget.NewVBox(
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
 		}),
@@ -182,11 +182,11 @@ func loadDialogGroup(win fyne.Window) *widget.Group {
 				},
 				win)
 		}),
-	)
+	))
 }
 
 func loadWindowGroup() fyne.Widget {
-	windowGroup := widget.NewGroup("Windows",
+	windowGroup := widget.NewVBox(
 		widget.NewButton("New window", func() {
 			w := fyne.CurrentApp().NewWindow("Hello")
 			w.SetContent(widget.NewLabel("Hello World!"))
@@ -224,7 +224,7 @@ func loadWindowGroup() fyne.Widget {
 			}))
 	}
 
-	otherGroup := widget.NewGroup("Other",
+	otherGroup := widget.NewCard("Other", "",
 		widget.NewButton("Notification", func() {
 			fyne.CurrentApp().SendNotification(&fyne.Notification{
 				Title:   "Fyne Demo",
@@ -232,7 +232,7 @@ func loadWindowGroup() fyne.Widget {
 			})
 		}))
 
-	return widget.NewVBox(windowGroup, otherGroup)
+	return widget.NewVBox(widget.NewCard("Windows", "", windowGroup), otherGroup)
 }
 
 // DialogScreen loads a panel that lists the dialog windows that can be tested.

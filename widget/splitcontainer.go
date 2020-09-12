@@ -21,12 +21,14 @@ type SplitContainer struct {
 	Trailing   fyne.CanvasObject
 }
 
-// NewHSplitContainer create a splitable parent wrapping the specified children.
-func NewHSplitContainer(left, right fyne.CanvasObject) *SplitContainer {
-	return newSplitContainer(true, left, right)
+// NewHSplitContainer creates a horizontally arranged container with the specified leading and trailing elements.
+// A vertical split bar that can be dragged will be added between the elements.
+func NewHSplitContainer(leading, trailing fyne.CanvasObject) *SplitContainer {
+	return newSplitContainer(true, leading, trailing)
 }
 
-// NewVSplitContainer create a splitable parent wrapping the specified children.
+// NewVSplitContainer creates a vertically arranged container with the specified top and bottom elements.
+// A horizontal split bar that can be dragged will be added between the elements.
 func NewVSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
 	return newSplitContainer(false, top, bottom)
 }
