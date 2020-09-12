@@ -216,21 +216,6 @@ func colorToRGBA(c color.Color) (r, g, b, a float64) {
 	return
 }
 
-func cartesianToPolar(x, y, width, height float64) (angle, radius, limit float64) {
-	dx := float64(x - (width / 2))
-	dy := float64(y - (height / 2))
-	angle = math.Atan2(dy, dx)
-	radius = math.Sqrt(dx*dx + dy*dy)
-	limit = math.Min(width, height) / 2.0
-	return
-}
-
-func polarToCartesian(angle, radius, width, height float64) (x, y float64) {
-	x = (radius * math.Cos(angle)) + (width / 2)
-	y = (radius * math.Sin(angle)) + (height / 2)
-	return
-}
-
 func polarToHS(angle, radius, limit float64) (hue, saturation float64) {
 	hue = angle / (2.0 * math.Pi)
 	if hue < 0.0 {

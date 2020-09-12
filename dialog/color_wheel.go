@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"math/cmplx"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -105,7 +106,11 @@ func (a *colorWheel) DragEnd() {
 }
 
 func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
-	angle, radius, limit := cartesianToPolar(float64(x), float64(y), float64(w), float64(h))
+	width, height := float64(w), float64(h)
+	dx := float64(x) - (width / 2.0)
+	dy := float64(y) - (height / 2.0)
+	radius, angle := cmplx.Polar(complex(dx, dy))
+	limit := math.Min(width, height) / 2.0
 	if radius > limit {
 		// Out of bounds
 		return theme.BackgroundColor()
@@ -129,12 +134,12 @@ func (a *colorWheel) locationForPosition(pos fyne.Position) (x, y int) {
 	return
 }
 
-func (a *colorWheel) selection(w, h int) (int, int) {
+func (a *colorWheel) selection(width, height int) (int, int) {
+	w, h := float64(width), float64(height)
+	radius := a.Saturation * math.Min(w, h) / 2.0
 	angle := a.Hue * 2 * math.Pi
-	limit := math.Min(float64(w), float64(h)) / 2.0
-	radius := a.Saturation * limit
-	x, y := polarToCartesian(angle, radius, float64(w), float64(h))
-	return int(x), int(y)
+	c := cmplx.Rect(radius, angle)
+	return int(real(c) + w/2.0), int(imag(c) + h/2.0)
 }
 
 func (a *colorWheel) trigger(pos fyne.Position) {
@@ -142,7 +147,11 @@ func (a *colorWheel) trigger(pos fyne.Position) {
 	if c := a.cache; c != nil {
 		b := c.Bounds()
 		if f := a.onChange; f != nil {
-			angle, radius, limit := cartesianToPolar(float64(x), float64(y), float64(b.Dx()), float64(b.Dy()))
+			width, height := float64(b.Dx()), float64(b.Dy())
+			dx := float64(x) - (width / 2)
+			dy := float64(y) - (height / 2)
+			radius, angle := cmplx.Polar(complex(dx, dy))
+			limit := math.Min(width, height) / 2.0
 			if radius > limit {
 				// Out of bounds
 				return

@@ -4,8 +4,6 @@ import (
 	"image/color"
 	"testing"
 
-	"math"
-
 	"fyne.io/fyne/test"
 
 	"github.com/stretchr/testify/assert"
@@ -280,94 +278,6 @@ func Test_colorToRGBA(t *testing.T) {
 			assert.InDelta(t, tt.g, g, 0.0001)
 			assert.InDelta(t, tt.b, b, 0.0001)
 			assert.InDelta(t, 1.0, a, 0.0001)
-		})
-	}
-}
-
-type xyarl struct {
-	x, y    int
-	a, r, l float64
-}
-
-var (
-	width    = 100.0
-	height   = 100.0
-	xyarlMap = map[string]xyarl{
-		"north": {
-			x: 50,
-			y: 90,
-			a: math.Pi / 2,
-			r: 40,
-			l: 50,
-		},
-		"northeast": {
-			x: 90,
-			y: 90,
-			a: math.Pi / 4,
-			r: math.Sqrt(40 * 40 * 2),
-			l: 50,
-		},
-		"east": {
-			x: 90,
-			y: 50,
-			r: 40,
-			l: 50,
-		},
-		"southeast": {
-			x: 90,
-			y: 10,
-			a: -math.Pi / 4,
-			r: math.Sqrt(40 * 40 * 2),
-			l: 50,
-		},
-		"south": {
-			x: 50,
-			y: 10,
-			a: -math.Pi / 2,
-			r: 40,
-			l: 50,
-		},
-		"southwest": {
-			x: 10,
-			y: 10,
-			a: -math.Pi * 3 / 4,
-			r: math.Sqrt(40 * 40 * 2),
-			l: 50,
-		},
-		"west": {
-			x: 10,
-			y: 50,
-			a: math.Pi,
-			r: 40,
-			l: 50,
-		},
-		"northwest": {
-			x: 10,
-			y: 90,
-			a: math.Pi * 3 / 4,
-			r: math.Sqrt(40 * 40 * 2),
-			l: 50,
-		},
-	}
-)
-
-func Test_cartesianToPolar(t *testing.T) {
-	for name, tt := range xyarlMap {
-		t.Run(name, func(t *testing.T) {
-			a, r, l := cartesianToPolar(float64(tt.x), float64(tt.y), width, height)
-			assert.InDelta(t, tt.a, a, 0.0001)
-			assert.InDelta(t, tt.r, r, 0.0001)
-			assert.InDelta(t, tt.l, l, 0.0001)
-		})
-	}
-}
-
-func Test_polarToCartesian(t *testing.T) {
-	for name, tt := range xyarlMap {
-		t.Run(name, func(t *testing.T) {
-			x, y := polarToCartesian(tt.a, tt.r, width, height)
-			assert.InDelta(t, tt.x, x, 0.0001)
-			assert.InDelta(t, tt.y, y, 0.0001)
 		})
 	}
 }
