@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/canvas"
 	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
@@ -108,14 +107,12 @@ type colorChannelRenderer struct {
 }
 
 func (r *colorChannelRenderer) Layout(size fyne.Size) {
-	r.contents.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	r.contents.Resize(fyne.NewSize(size.Width-2*theme.Padding(), size.Height-2*theme.Padding()))
+	r.contents.Move(fyne.NewPos(0, 0))
+	r.contents.Resize(fyne.NewSize(size.Width, size.Height))
 }
 
-func (r *colorChannelRenderer) MinSize() (min fyne.Size) {
-	min = r.contents.MinSize()
-	min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
-	return
+func (r *colorChannelRenderer) MinSize() fyne.Size {
+	return r.contents.MinSize()
 }
 
 func (r *colorChannelRenderer) Refresh() {

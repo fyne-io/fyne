@@ -171,25 +171,19 @@ type colorWheelRenderer struct {
 }
 
 func (r *colorWheelRenderer) Layout(size fyne.Size) {
-	p := theme.Padding()
-	w := size.Width - 2*p
-	h := size.Height - 2*p
 	if f := r.area.selection; f != nil {
-		x, y := f(w, h)
-		r.x.Position1 = fyne.NewPos(p, y+p)
-		r.x.Position2 = fyne.NewPos(w+p, y+p)
-		r.y.Position1 = fyne.NewPos(x+p, p)
-		r.y.Position2 = fyne.NewPos(x+p, h+p)
+		x, y := f(size.Width, size.Height)
+		r.x.Position1 = fyne.NewPos(0, y)
+		r.x.Position2 = fyne.NewPos(size.Width, y)
+		r.y.Position1 = fyne.NewPos(x, 0)
+		r.y.Position2 = fyne.NewPos(x, size.Height)
 	}
-	r.raster.Move(fyne.NewPos(p, p))
-	r.raster.Resize(fyne.NewSize(w, h))
+	r.raster.Move(fyne.NewPos(0, 0))
+	r.raster.Resize(size)
 }
 
-func (r *colorWheelRenderer) MinSize() (min fyne.Size) {
-	min = r.raster.MinSize()
-	min = min.Max(fyne.NewSize(128, 128))
-	min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
-	return
+func (r *colorWheelRenderer) MinSize() fyne.Size {
+	return r.raster.MinSize().Max(fyne.NewSize(128, 128))
 }
 
 func (r *colorWheelRenderer) Refresh() {

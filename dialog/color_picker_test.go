@@ -17,9 +17,9 @@ func Test_colorGreyscalePicker_Layout(t *testing.T) {
 	color := newColorGreyscalePicker(nil)
 
 	window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
-	window.Resize(color.MinSize().Max(fyne.NewSize(100, 50)))
+	window.Resize(color.MinSize().Max(fyne.NewSize(250, 50)))
 
-	test.AssertImageMatches(t, "color/greyscale_picker_layout.png", window.Canvas().Capture())
+	test.AssertImageMatches(t, "color/picker_layout_greyscale.png", window.Canvas().Capture())
 
 	window.Close()
 }
@@ -32,9 +32,9 @@ func Test_colorBasicPicker_Layout(t *testing.T) {
 	color := newColorBasicPicker(nil)
 
 	window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
-	window.Resize(color.MinSize().Max(fyne.NewSize(100, 50)))
+	window.Resize(color.MinSize().Max(fyne.NewSize(250, 50)))
 
-	test.AssertImageMatches(t, "color/basic_picker_layout.png", window.Canvas().Capture())
+	test.AssertImageMatches(t, "color/picker_layout_basic.png", window.Canvas().Capture())
 
 	window.Close()
 }
@@ -50,9 +50,9 @@ func Test_colorRecentPicker_Layout(t *testing.T) {
 	color := newColorRecentPicker(nil)
 
 	window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
-	window.Resize(color.MinSize().Max(fyne.NewSize(100, 50)))
+	window.Resize(color.MinSize().Max(fyne.NewSize(250, 50)))
 
-	test.AssertImageMatches(t, "color/recent_picker_layout.png", window.Canvas().Capture())
+	test.AssertImageMatches(t, "color/picker_layout_recent.png", window.Canvas().Capture())
 
 	window.Close()
 }
@@ -69,7 +69,7 @@ func Test_colorAdvancedPicker_Layout(t *testing.T) {
 	window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
 	window.Resize(color.MinSize().Max(fyne.NewSize(200, 200)))
 
-	test.AssertImageMatches(t, "color/advanced_picker_layout.png", window.Canvas().Capture())
+	test.AssertImageMatches(t, "color/picker_layout_advanced.png", window.Canvas().Capture())
 
 	window.Close()
 }

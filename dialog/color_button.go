@@ -100,15 +100,12 @@ func (r *colorButtonRenderer) BackgroundColor() color.Color {
 }
 
 func (r *colorButtonRenderer) Layout(size fyne.Size) {
-	r.rectangle.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	r.rectangle.Resize(fyne.NewSize(size.Width-2*theme.Padding(), size.Height-2*theme.Padding()))
+	r.rectangle.Move(fyne.NewPos(0, 0))
+	r.rectangle.Resize(size)
 }
 
-func (r *colorButtonRenderer) MinSize() (min fyne.Size) {
-	min = r.rectangle.MinSize()
-	min = min.Max(fyne.NewSize(32, 32))
-	min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
-	return
+func (r *colorButtonRenderer) MinSize() fyne.Size {
+	return r.rectangle.MinSize().Max(fyne.NewSize(theme.IconInlineSize(), theme.IconInlineSize()))
 }
 
 func (r *colorButtonRenderer) Refresh() {
