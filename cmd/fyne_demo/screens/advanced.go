@@ -31,7 +31,7 @@ func setScaleText(obj *widget.Label, win fyne.Window) {
 func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
 	scale := widget.NewLabel("")
 
-	screen := widget.NewGroup("Screen", widget.NewForm(
+	screen := widget.NewCard("Screen info", "", widget.NewForm(
 		&widget.FormItem{Text: "Scale", Widget: scale},
 	))
 

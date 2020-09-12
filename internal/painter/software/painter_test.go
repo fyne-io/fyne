@@ -208,6 +208,49 @@ func TestPainter_paintLine(t *testing.T) {
 	test.AssertImageMatches(t, "draw_line.png", p.Paint(c))
 }
 
+func TestPainter_paintRaster(t *testing.T) {
+	img := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+		x = x / 5
+		y = y / 5
+		if x%2 == y%2 {
+			return color.White
+		} else {
+			return color.Black
+		}
+	})
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.Resize(fyne.NewSize(50, 50))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_raster.png", target)
+}
+
+func TestPainter_paintRaster_scaled(t *testing.T) {
+	img := canvas.NewRasterWithPixels(func(x, y, w, h int) color.Color {
+		x = x / 5
+		y = y / 5
+		if x%2 == y%2 {
+			return color.White
+		} else {
+			return color.Black
+		}
+	})
+
+	c := test.NewCanvas()
+	c.SetPadded(false)
+	c.SetContent(img)
+	c.SetScale(5.0)
+	c.Resize(fyne.NewSize(5, 5))
+	p := software.NewPainter()
+
+	target := p.Paint(c)
+	test.AssertImageMatches(t, "draw_raster_scale.png", target)
+}
+
 func TestPainter_paintRectangle_clipped(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 	red1 := canvas.NewRectangle(color.NRGBA{R: 200, A: 255})

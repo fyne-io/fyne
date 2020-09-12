@@ -247,6 +247,17 @@ func (s *Select) ClearSelected() {
 	s.updateSelected("")
 }
 
+// SelectedIndex returns the index value of the currently selected item in Options list.
+// It will return -1 if there is no selection.
+func (s *Select) SelectedIndex() int {
+	for i, option := range s.Options {
+		if s.Selected == option {
+			return i
+		}
+	}
+	return -1 // not selected/found
+}
+
 // SetSelected sets the current option of the select widget
 func (s *Select) SetSelected(text string) {
 	for _, option := range s.Options {
@@ -254,6 +265,15 @@ func (s *Select) SetSelected(text string) {
 			s.updateSelected(text)
 		}
 	}
+}
+
+// SetSelectedIndex will set the Selected option from the value in Options list at index position.
+func (s *Select) SetSelectedIndex(index int) {
+	if index < 0 || index >= len(s.Options) {
+		return
+	}
+
+	s.SetSelected(s.Options[index])
 }
 
 func (s *Select) updateSelected(text string) {

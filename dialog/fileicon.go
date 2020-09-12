@@ -15,6 +15,7 @@ type fileIcon struct {
 
 	extension, mimeType, mimeSubType string
 	resource                         fyne.Resource
+	current                          bool
 }
 
 type fileIconRenderer struct {
@@ -67,6 +68,11 @@ func (i *fileIcon) CreateRenderer() fyne.WidgetRenderer {
 		img: img, ext: extText, objects: []fyne.CanvasObject{img, extText}}
 }
 
+func (i *fileIcon) setCurrent(cur bool) {
+	i.current = cur
+	i.Refresh()
+}
+
 func (s fileIconRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
@@ -92,6 +98,17 @@ func (s fileIconRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (s fileIconRenderer) Refresh() {
+	if s.item.current {
+		s.ext.Color = theme.PrimaryColor()
+		if _, ok := s.img.Resource.(*theme.InvertedThemedResource); !ok {
+			s.img.Resource = theme.NewInvertedThemedResource(s.img.Resource)
+		}
+	} else {
+		s.ext.Color = theme.BackgroundColor()
+		if res, ok := s.img.Resource.(*theme.InvertedThemedResource); ok {
+			s.img.Resource = res.Original()
+		}
+	}
 	canvas.Refresh(s.item)
 }
 
