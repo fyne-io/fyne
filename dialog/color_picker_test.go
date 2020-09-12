@@ -25,7 +25,7 @@ func TestcolorGreyscalePicker_Layout(t *testing.T) {
 	window.Close()
 }
 
-func TestColorBasicPicker_Layout(t *testing.T) {
+func TestcolorBasicPicker_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -40,7 +40,7 @@ func TestColorBasicPicker_Layout(t *testing.T) {
 	window.Close()
 }
 
-func TestColorRecentPicker_Layout(t *testing.T) {
+func TestcolorRecentPicker_Layout(t *testing.T) {
 	a := test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -58,7 +58,7 @@ func TestColorRecentPicker_Layout(t *testing.T) {
 	window.Close()
 }
 
-func TestColorAdvancedPicker_Layout(t *testing.T) {
+func TestcolorAdvancedPicker_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
@@ -69,11 +69,11 @@ func TestColorAdvancedPicker_Layout(t *testing.T) {
 	}{
 		"primary_rgb": {
 			color: theme.PrimaryColor(),
-			model: "rgb",
+			model: "RGB",
 		},
 		"primary_hsl": {
 			color: theme.PrimaryColor(),
-			model: "hsl",
+			model: "HSL",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

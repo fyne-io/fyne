@@ -86,56 +86,23 @@ func (p *colorAdvancedPicker) SetColor(color color.Color) {
 	}
 }
 
-func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
-	r, g, b, a := colorToRGBA(color)
-	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
-		return false
+// SetHSLA updated the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
+func (p *colorAdvancedPicker) SetHSLA(h, s, l, a float64) {
+	if p.updateHSLA(h, s, l, a) {
+		p.Refresh()
+		if f := p.onChange; f != nil {
+			f(p.Color())
+		}
 	}
-	p.Red = r
-	p.Green = g
-	p.Blue = b
-	p.Alpha = a
-	p.rgbToHsl()
-	return true
 }
 
 // SetRGBA updated the Red, Green, Blue, and Alpha components of the currently selected color.
 func (p *colorAdvancedPicker) SetRGBA(r, g, b, a float64) {
-	r = colorClamp(r)
-	g = colorClamp(g)
-	b = colorClamp(b)
-	a = colorClamp(a)
-	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
-		return
-	}
-	p.Red = r
-	p.Green = g
-	p.Blue = b
-	p.Alpha = a
-	p.rgbToHsl()
-	p.Refresh()
-	if f := p.onChange; f != nil {
-		f(p.Color())
-	}
-}
-
-// SetHSLA updated the Hue, Saturation, Lightness, and Alpha components of the currently selected color.
-func (p *colorAdvancedPicker) SetHSLA(h, s, l, a float64) {
-	h = colorClamp(h)
-	s = colorClamp(s)
-	l = colorClamp(l)
-	a = colorClamp(a)
-	if p.Hue == h && p.Saturation == s && p.Lightness == l && p.Alpha == a {
-		return
-	}
-	p.Hue = h
-	p.Saturation = s
-	p.Lightness = l
-	p.Alpha = a
-	p.hslToRgb()
-	p.Refresh()
-	if f := p.onChange; f != nil {
-		f(p.Color())
+	if p.updateRGBA(r, g, b, a) {
+		p.Refresh()
+		if f := p.onChange; f != nil {
+			f(p.Color())
+		}
 	}
 }
 
@@ -149,24 +116,9 @@ func (p *colorAdvancedPicker) MinSize() fyne.Size {
 func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	p.ExtendBaseWidget(p)
 
-	// RGB
-	redChannel := newColorChannel("R:", p.Red, func(r float64) {
-		p.SetRGBA(r, p.Green, p.Blue, p.Alpha)
-	})
-	greenChannel := newColorChannel("G:", p.Green, func(g float64) {
-		p.SetRGBA(p.Red, g, p.Blue, p.Alpha)
-	})
-	blueChannel := newColorChannel("B:", p.Blue, func(b float64) {
-		p.SetRGBA(p.Red, p.Green, b, p.Alpha)
-	})
-	rgbTab := widget.NewTabItem(
-		"RGB",
-		widget.NewVBox(
-			redChannel,
-			greenChannel,
-			blueChannel,
-		),
-	)
+	// Preview
+	preview := &canvas.Rectangle{}
+	preview.SetMinSize(fyne.NewSize(128, 128))
 
 	// HSL
 	hueChannel := newColorChannel("H:", p.Hue, func(h float64) {
@@ -187,9 +139,28 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		),
 	)
 
+	// RGB
+	redChannel := newColorChannel("R:", p.Red, func(r float64) {
+		p.SetRGBA(r, p.Green, p.Blue, p.Alpha)
+	})
+	greenChannel := newColorChannel("G:", p.Green, func(g float64) {
+		p.SetRGBA(p.Red, g, p.Blue, p.Alpha)
+	})
+	blueChannel := newColorChannel("B:", p.Blue, func(b float64) {
+		p.SetRGBA(p.Red, p.Green, b, p.Alpha)
+	})
+	rgbTab := widget.NewTabItem(
+		"RGB",
+		widget.NewVBox(
+			redChannel,
+			greenChannel,
+			blueChannel,
+		),
+	)
+
 	modelTabContainer := widget.NewTabContainer(
-		rgbTab,
 		hslTab,
+		rgbTab,
 	)
 	modelTabContainer.OnChanged = func(item *widget.TabItem) {
 		p.ColorModel = item.Text
@@ -199,10 +170,6 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	wheel := newColorWheel(func(hue, saturation, lightness, alpha float64) {
 		p.SetHSLA(hue, saturation, lightness, alpha)
 	})
-
-	// Preview
-	preview := &canvas.Rectangle{}
-	preview.SetMinSize(fyne.NewSize(128, 128))
 
 	// Alpha
 	alphaChannel := newColorChannel("A:", p.Alpha, func(a float64) {
@@ -253,12 +220,44 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-func (p *colorAdvancedPicker) rgbToHsl() {
-	p.Hue, p.Saturation, p.Lightness = rgbToHsl(p.Red, p.Green, p.Blue)
+func (p *colorAdvancedPicker) updateColor(color color.Color) bool {
+	r, g, b, a := colorToRGBA(color)
+	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
+		return false
+	}
+	return p.updateRGBA(r, g, b, a)
 }
 
-func (p *colorAdvancedPicker) hslToRgb() {
+func (p *colorAdvancedPicker) updateHSLA(h, s, l, a float64) bool {
+	h = colorClamp(h)
+	s = colorClamp(s)
+	l = colorClamp(l)
+	a = colorClamp(a)
+	if p.Hue == h && p.Saturation == s && p.Lightness == l && p.Alpha == a {
+		return false
+	}
+	p.Hue = h
+	p.Saturation = s
+	p.Lightness = l
+	p.Alpha = a
 	p.Red, p.Green, p.Blue = hslToRgb(p.Hue, p.Saturation, p.Lightness)
+	return true
+}
+
+func (p *colorAdvancedPicker) updateRGBA(r, g, b, a float64) bool {
+	r = colorClamp(r)
+	g = colorClamp(g)
+	b = colorClamp(b)
+	a = colorClamp(a)
+	if p.Red == r && p.Green == g && p.Blue == b && p.Alpha == a {
+		return false
+	}
+	p.Red = r
+	p.Green = g
+	p.Blue = b
+	p.Alpha = a
+	p.Hue, p.Saturation, p.Lightness = rgbToHsl(p.Red, p.Green, p.Blue)
+	return true
 }
 
 var _ fyne.WidgetRenderer = (*colorPickerRenderer)(nil)
@@ -302,22 +301,22 @@ func (r *colorPickerRenderer) Refresh() {
 func (r *colorPickerRenderer) updateObjects() {
 	if r.picker.ColorModel != r.modelTabContainer.CurrentTab().Text {
 		switch r.picker.ColorModel {
-		case "hsl":
+		case "HSL":
 			r.modelTabContainer.SelectTab(r.hslTab)
-		case "rgb":
+		case "RGB":
 			r.modelTabContainer.SelectTab(r.rgbTab)
 		}
 	}
-
-	// RGB
-	r.redChannel.SetValue(r.picker.Red)
-	r.greenChannel.SetValue(r.picker.Green)
-	r.blueChannel.SetValue(r.picker.Blue)
 
 	// HSL
 	r.hueChannel.SetValue(r.picker.Hue)
 	r.saturationChannel.SetValue(r.picker.Saturation)
 	r.lightnessChannel.SetValue(r.picker.Lightness)
+
+	// RGB
+	r.redChannel.SetValue(r.picker.Red)
+	r.greenChannel.SetValue(r.picker.Green)
+	r.blueChannel.SetValue(r.picker.Blue)
 
 	// Wheel
 	r.wheel.SetHSLA(r.picker.Hue, r.picker.Saturation, r.picker.Lightness, r.picker.Alpha)

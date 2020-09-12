@@ -26,10 +26,10 @@ func TestColorDialog_Theme(t *testing.T) {
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
 
-	test.AssertImageMatches(t, "color/light.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "color/dialog_theme_light.png", w.Canvas().Capture())
 
 	test.ApplyTheme(t, theme.DarkTheme())
-	test.AssertImageMatches(t, "color/dark.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "color/dialog_theme_dark.png", w.Canvas().Capture())
 
 	w.Close()
 }
@@ -48,10 +48,10 @@ func TestColorDialog_Advanced_Theme(t *testing.T) {
 	d.advanced.Open(0)
 	d.Resize(d.win.MinSize()) // TODO FIXME Hack
 
-	test.AssertImageMatches(t, "color/advanced_light.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "color/dialog_theme_advanced_light.png", w.Canvas().Capture())
 
 	test.ApplyTheme(t, theme.DarkTheme())
-	test.AssertImageMatches(t, "color/advanced_dark.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "color/dialog_theme_advanced_dark.png", w.Canvas().Capture())
 
 	w.Close()
 }
@@ -70,7 +70,10 @@ func TestColorDialog_Recents(t *testing.T) {
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
 
-	test.AssertImageMatches(t, "color/recents.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "color/dialog_theme_recents_light.png", w.Canvas().Capture())
+
+	test.ApplyTheme(t, theme.DarkTheme())
+	test.AssertImageMatches(t, "color/dialog_theme_recents_dark.png", w.Canvas().Capture())
 
 	w.Close()
 }

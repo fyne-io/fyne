@@ -14,7 +14,7 @@ func TestcolorWheel_Layout(t *testing.T) {
 	test.ApplyTheme(t, theme.LightTheme())
 
 	wheel := newColorWheel(func(h, s, l, a float64) {
-		//
+		// Do nothing
 	})
 	window := test.NewWindow(wheel)
 	window.Resize(wheel.MinSize().Max(fyne.NewSize(100, 100)))
