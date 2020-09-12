@@ -59,7 +59,7 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 		basic,
 		greyscale,
 	}
-	if !recent.MinSize().IsZero() {
+	if len(recent.(*fyne.Container).Objects) > 0 {
 		// Add divider and recents if there are any
 		contents = append(contents, canvas.NewLine(theme.ShadowColor()), recent)
 	}
