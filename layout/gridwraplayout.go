@@ -19,7 +19,7 @@ type gridWrapLayout struct {
 // NewGridWrapContainer creates a new container with the specified objects and using the gridwrap layout.
 // Every element will be resized to the size parameter and the content will arrange along a row and flow to a
 // new row if the elements don't fit.
-func NewGridWrapContainers(size fyne.Size, objects ...fyne.CanvasObject) *fyne.Container {
+func NewGridWrapContainer(size fyne.Size, objects ...fyne.CanvasObject) *fyne.Container {
 	return fyne.NewContainerWithLayout(NewGridWrapLayout(size), objects...)
 }
 
