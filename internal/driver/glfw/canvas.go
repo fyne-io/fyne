@@ -72,6 +72,14 @@ func (c *glCanvas) Focused() fyne.Focusable {
 	return c.focusManager().Focused()
 }
 
+func (c *glCanvas) FocusGained() {
+	c.focusManager().FocusGained()
+}
+
+func (c *glCanvas) FocusLost() {
+	c.focusManager().FocusLost()
+}
+
 func (c *glCanvas) FocusNext() {
 	c.focusManager().FocusNext()
 }
