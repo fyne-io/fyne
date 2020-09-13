@@ -106,6 +106,7 @@ func (p *PopUpMenu) adjustedPosition(pos fyne.Position, size fyne.Size) fyne.Pos
 
 // NewPopUpMenuAtPosition creates a PopUp widget populated with menu items from the passed menu structure.
 // It will automatically be positioned at the provided location and shown as an overlay on the specified canvas.
+//
 // Deprecated: Use ShowPopUpMenuAtPosition instead.
 func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *PopUp {
 	options := NewVBox()
@@ -136,6 +137,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 
 // NewPopUpMenu creates a PopUp widget populated with menu items from the passed menu structure.
 // It will automatically be shown as an overlay on the specified canvas.
+//
 // Deprecated: Use ShowPopUpMenuAtPosition instead.
 func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 	return NewPopUpMenuAtPosition(menu, c, fyne.NewPos(0, 0))

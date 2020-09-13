@@ -36,9 +36,10 @@ type Entry struct {
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 	Password    bool
-	ReadOnly    bool // Deprecated: Use Disable() instead
-	MultiLine   bool
-	Wrapping    fyne.TextWrap
+	// Deprecated: Use Disable() instead
+	ReadOnly  bool
+	MultiLine bool
+	Wrapping  fyne.TextWrap
 
 	Validator        fyne.Validator
 	validationStatus *validationStatus
@@ -206,6 +207,7 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 
 // Focused returns whether or not this Entry has focus.
 // Implements: fyne.Focusable
+//
 // Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
 func (e *Entry) Focused() bool {
 	e.propertyLock.RLock()
@@ -340,6 +342,7 @@ func (e *Entry) SetPlaceHolder(text string) {
 }
 
 // SetReadOnly sets whether or not the Entry should not be editable
+//
 // Deprecated: Use Disable() instead.
 func (e *Entry) SetReadOnly(ro bool) {
 	if ro {

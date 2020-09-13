@@ -113,6 +113,7 @@ func (p *PopUp) CreateRenderer() fyne.WidgetRenderer {
 
 // NewPopUpAtPosition creates a new popUp for the specified content at the specified absolute position.
 // It will then display the popup on the passed canvas.
+//
 // Deprecated: Use ShowPopUpAtPosition() instead.
 func NewPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, pos fyne.Position) *PopUp {
 	p := newPopUp(content, canvas)
@@ -133,6 +134,7 @@ func newPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 }
 
 // NewPopUp creates a new popUp for the specified content and displays it on the passed canvas.
+//
 // Deprecated: This will no longer show the pop-up in 2.0. Use ShowPopUp() instead.
 func NewPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 	return NewPopUpAtPosition(content, canvas, fyne.NewPos(0, 0))
@@ -151,6 +153,7 @@ func newModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 
 // NewModalPopUp creates a new popUp for the specified content and displays it on the passed canvas.
 // A modal PopUp blocks interactions with underlying elements, covered with a semi-transparent overlay.
+//
 // Deprecated: This will no longer show the pop-up in 2.0. Use ShowModalPopUp instead.
 func NewModalPopUp(content fyne.CanvasObject, canvas fyne.Canvas) *PopUp {
 	p := newModalPopUp(content, canvas)
