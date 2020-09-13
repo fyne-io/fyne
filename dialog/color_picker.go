@@ -134,10 +134,6 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		saturationChannel,
 		lightnessChannel,
 	)
-	hslTab := widget.NewTabItem(
-		"HSL",
-		hslBox,
-	)
 
 	// RGB
 	redChannel := newColorChannel("R:", p.Red, func(r float64) {
@@ -154,18 +150,6 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		greenChannel,
 		blueChannel,
 	)
-	rgbTab := widget.NewTabItem(
-		"RGB",
-		rgbBox,
-	)
-
-	modelTabContainer := widget.NewTabContainer(
-		hslTab,
-		rgbTab,
-	)
-	modelTabContainer.OnChanged = func(item *widget.TabItem) {
-		p.ColorModel = item.Text
-	}
 
 	// Wheel
 	wheel := newColorWheel(func(hue, saturation, lightness, alpha float64) {
@@ -177,10 +161,12 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		p.SetRGBA(p.Red, p.Green, p.Blue, a)
 	})
 
+	// Hex
 	hex := &widget.Entry{
 		OnChanged: func(text string) {
 			c, err := stringToColor(text)
 			if err != nil {
+				fyne.LogError("Error parsing color: "+text, err)
 				// TODO trigger entry invalid state
 			} else {
 				p.SetColor(c)
@@ -188,7 +174,7 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 		},
 	}
 
-	contents := widget.NewVBox(
+	contents := fyne.NewContainerWithLayout(layout.NewPaddedLayout(), widget.NewVBox(
 		layout.NewGridContainerWithColumns(3,
 			fyne.NewContainerWithLayout(layout.NewPaddedLayout(), wheel),
 			hslBox,
@@ -198,29 +184,14 @@ func (p *colorAdvancedPicker) CreateRenderer() fyne.WidgetRenderer {
 			fyne.NewContainerWithLayout(layout.NewCenterLayout(), hex),
 			alphaChannel,
 		),
-	)
-	/*
-		contents := widget.NewHBox(
-			widget.NewVBox(
-				fyne.NewContainerWithLayout(layout.NewPaddedLayout(), wheel),
-				fyne.NewContainerWithLayout(layout.NewPaddedLayout(), newCheckeredBackground(), preview),
-				fyne.NewContainerWithLayout(layout.NewPaddedLayout(), hex),
-			),
-			widget.NewVBox(
-				modelTabContainer,
-				alphaChannel,
-			),
-		)
-	*/
+	))
+
 	r := &colorPickerRenderer{
 		BaseRenderer:      internalwidget.NewBaseRenderer([]fyne.CanvasObject{contents}),
 		picker:            p,
-		modelTabContainer: modelTabContainer,
-		rgbTab:            rgbTab,
 		redChannel:        redChannel,
 		greenChannel:      greenChannel,
 		blueChannel:       blueChannel,
-		hslTab:            hslTab,
 		hueChannel:        hueChannel,
 		saturationChannel: saturationChannel,
 		lightnessChannel:  lightnessChannel,
@@ -279,12 +250,9 @@ var _ fyne.WidgetRenderer = (*colorPickerRenderer)(nil)
 type colorPickerRenderer struct {
 	internalwidget.BaseRenderer
 	picker            *colorAdvancedPicker
-	modelTabContainer *widget.TabContainer
-	rgbTab            *widget.TabItem
 	redChannel        *colorChannel
 	greenChannel      *colorChannel
 	blueChannel       *colorChannel
-	hslTab            *widget.TabItem
 	hueChannel        *colorChannel
 	saturationChannel *colorChannel
 	lightnessChannel  *colorChannel
@@ -296,14 +264,12 @@ type colorPickerRenderer struct {
 }
 
 func (r *colorPickerRenderer) Layout(size fyne.Size) {
-	r.contents.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	r.contents.Resize(fyne.NewSize(size.Width-2*theme.Padding(), size.Height-2*theme.Padding()))
+	r.contents.Move(fyne.NewPos(0, 0))
+	r.contents.Resize(size)
 }
 
-func (r *colorPickerRenderer) MinSize() (min fyne.Size) {
-	min = r.contents.MinSize()
-	min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
-	return
+func (r *colorPickerRenderer) MinSize() fyne.Size {
+	return r.contents.MinSize()
 }
 
 func (r *colorPickerRenderer) Refresh() {
@@ -313,15 +279,6 @@ func (r *colorPickerRenderer) Refresh() {
 }
 
 func (r *colorPickerRenderer) updateObjects() {
-	if r.picker.ColorModel != r.modelTabContainer.CurrentTab().Text {
-		switch r.picker.ColorModel {
-		case "HSL":
-			r.modelTabContainer.SelectTab(r.hslTab)
-		case "RGB":
-			r.modelTabContainer.SelectTab(r.rgbTab)
-		}
-	}
-
 	// HSL
 	r.hueChannel.SetValue(r.picker.Hue)
 	r.saturationChannel.SetValue(r.picker.Saturation)
@@ -344,5 +301,6 @@ func (r *colorPickerRenderer) updateObjects() {
 	// Alpha
 	r.alphaChannel.SetValue(r.picker.Alpha)
 
+	// Hex
 	r.hex.SetText(colorToString(color))
 }
