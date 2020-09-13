@@ -9,7 +9,7 @@ const (
 	// LeftMouseButton is the most common mouse button - on some systems the only one
 	LeftMouseButton MouseButton = iota + 1
 	// Don't currently expose this button
-	middleMouseButton
+	// middleMouseButton
 	// RightMouseButton is the secondary button on most mouse input devices.
 	RightMouseButton
 )
