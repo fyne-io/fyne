@@ -17,64 +17,54 @@ import (
 type ColorPickerDialog struct {
 	*dialog
 	color    color.Color
+	callback func(c color.Color)
 	advanced *widget.AccordionContainer
 	picker   *colorAdvancedPicker
-}
-
-// SetColor updates the color of the color picker.
-func (p *ColorPickerDialog) SetColor(c color.Color) {
-	p.picker.SetColor(c)
 }
 
 // NewColorPicker creates a color dialog and returns the handle.
 // Using the returned type you should call Show() and then set its color through SetColor().
 // The callback is triggered when the user selects a color.
 func NewColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) *ColorPickerDialog {
-	d := newDialog(title, message, theme.ColorPaletteIcon(), nil /*cancel?*/, parent)
-
-	cb := func(c color.Color) {
-		d.Hide()
-		// TODO FIXME writeRecentColor(colorToString(p.color))
-		callback(c)
-	}
-
-	basic := newColorBasicPicker(cb)
-
-	greyscale := newColorGreyscalePicker(cb)
-
-	recent := newColorRecentPicker(cb)
-
 	p := &ColorPickerDialog{
-		dialog: d,
-		color:  theme.PrimaryColor(),
+		dialog:   newDialog(title, message, theme.ColorPaletteIcon(), nil /*cancel?*/, parent),
+		color:    theme.PrimaryColor(),
+		callback: callback,
 	}
 
 	p.picker = newColorAdvancedPicker(theme.PrimaryColor(), func(c color.Color) {
 		p.color = c
 	})
-
 	p.advanced = widget.NewAccordionContainer(widget.NewAccordionItem("Advanced", p.picker))
 
-	contents := []fyne.CanvasObject{
-		basic,
-		greyscale,
-	}
-	if len(recent.(*fyne.Container).Objects) > 0 {
-		// Add divider and recents if there are any
-		contents = append(contents, canvas.NewLine(theme.ShadowColor()), recent)
-	}
+	p.dialog.content = widget.NewVBox(fyne.NewContainerWithLayout(layout.NewCenterLayout(), widget.NewVBox(p.createSimplePickers()...)), p.advanced)
 
-	d.content = widget.NewVBox(append(contents, p.advanced)...)
-
-	d.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
-		OnTapped: d.Hide,
+	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
+		OnTapped: p.dialog.Hide,
 	}
 	confirm := &widget.Button{Text: "Confirm", Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
 		OnTapped: func() {
-			cb(p.color)
+			p.selectColor(p.color)
 		},
 	}
-	d.setButtons(newButtonList(d.dismiss, confirm))
+	p.dialog.setButtons(newButtonList(p.dialog.dismiss, confirm))
+	return p
+}
+
+// NewSimpleColorPicker creates a simple color dialog and returns the handle.
+// Using the returned type you should call Show() and then set its color through SetColor().
+// The callback is triggered when the user selects a color.
+func NewSimpleColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) *ColorPickerDialog {
+	p := &ColorPickerDialog{
+		dialog:   newDialog(title, message, theme.ColorPaletteIcon(), nil /*cancel?*/, parent),
+		color:    theme.PrimaryColor(),
+		callback: callback,
+	}
+	p.dialog.content = widget.NewVBox(p.createSimplePickers()...)
+	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
+		OnTapped: p.dialog.Hide,
+	}
+	p.dialog.setButtons(newButtonList(p.dialog.dismiss))
 	return p
 }
 
@@ -82,6 +72,35 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 // The callback is triggered when the user selects a color.
 func ShowColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) {
 	NewColorPicker(title, message, callback, parent).Show()
+}
+
+// ShowSimpleColorPicker creates and shows a simple color dialog.
+// The callback is triggered when the user selects a color.
+func ShowSimpleColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) {
+	NewSimpleColorPicker(title, message, callback, parent).Show()
+}
+
+// SetColor updates the color of the color picker.
+func (p *ColorPickerDialog) SetColor(c color.Color) {
+	p.picker.SetColor(c)
+}
+
+func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject) {
+	contents = append(contents, newColorBasicPicker(p.selectColor))
+	contents = append(contents, newColorGreyscalePicker(p.selectColor))
+	if recent := newColorRecentPicker(p.selectColor); len(recent.(*fyne.Container).Objects) > 0 {
+		// Add divider and recents if there are any
+		contents = append(contents, canvas.NewLine(theme.ShadowColor()), recent)
+	}
+	return
+}
+
+func (p *ColorPickerDialog) selectColor(c color.Color) {
+	p.dialog.Hide()
+	writeRecentColor(colorToString(p.color))
+	if f := p.callback; f != nil {
+		f(c)
+	}
 }
 
 func colorClamp(value float64) float64 {
