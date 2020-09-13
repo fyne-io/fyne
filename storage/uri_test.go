@@ -83,10 +83,10 @@ func TestURI_Extension(t *testing.T) {
 	assert.Equal(t, "", storage.NewURI("file://C:/directory/").Extension())
 }
 
-func TestURI_Join(t *testing.T) {
-	p := storage.Join(storage.NewURI("file:///foo/bar"), "baz")
+func TestURI_Child(t *testing.T) {
+	p, _ := storage.Child(storage.NewURI("file:///foo/bar"), "baz")
 	assert.Equal(t, "file:///foo/bar/baz", p.String())
 
-	p = storage.Join(storage.NewURI("file:///foo/bar/"), "baz")
+	p, _ = storage.Child(storage.NewURI("file:///foo/bar/"), "baz")
 	assert.Equal(t, "file:///foo/bar/baz", p.String())
 }

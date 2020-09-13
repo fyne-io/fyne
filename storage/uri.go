@@ -2,7 +2,9 @@ package storage
 
 import (
 	"bufio"
+	"fmt"
 	"mime"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -110,8 +112,13 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	return NewURI(parent), nil
 }
 
-// Join appends a new path element to a URI, separated by a '/' character.
-func Join(u fyne.URI, component string) fyne.URI {
+// Child appends a new path element to a URI, separated by a '/' character.
+func Child(u fyne.URI, component string) (fyne.URI, error) {
+	// While as implemented this does not need to return an error, it is
+	// reasonable to expect that future implementations of this, especially
+	// once it gets moved into the URI interface will need to do so. This
+	// also brings it in line with Parent().
+
 	s := u.String()
 
 	// guarantee that there will be a path separator
@@ -119,5 +126,25 @@ func Join(u fyne.URI, component string) fyne.URI {
 		s += "/"
 	}
 
-	return NewURI(s + component)
+	return NewURI(s + component), nil
+}
+
+// Exists will return true if the resource the URI refers to exists, and false
+// otherwise. If an error occurs while checking, false is returned as the first
+// return.
+func Exists(u fyne.URI) (bool, error) {
+	if u.Scheme() != "file" {
+		return false, fmt.Errorf("Don't know how to check existence of %s scheme", u.Scheme())
+	}
+
+	_, err := os.Stat(u.String()[len(u.Scheme())+3:])
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

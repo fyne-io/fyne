@@ -97,8 +97,8 @@ func TestEffectiveStartingDir(t *testing.T) {
 
 	// make sure we fail over if the specified directory does not exist
 	dialog.StartingLocation, err = storage.ListerForURI(storage.NewURI("file:///some/file/that/does/not/exist"))
-	if err != nil {
-		t.Error(err)
+	if err == nil {
+		t.Errorf("Should have failed to create lister for nonexistant file")
 	}
 	res = dialog.effectiveStartingDir()
 	expect = wd
@@ -202,13 +202,13 @@ func TestShowFileOpen(t *testing.T) {
 	// This will only execute if we have a file in the home path.
 	// Until we have a way to set the directory of an open file dialog.
 	test.Tap(target)
-	assert.Equal(t, target.path.Name(), nameLabel.Text)
+	assert.Equal(t, target.location.Name(), nameLabel.Text)
 	assert.False(t, open.Disabled())
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, openErr)
-	assert.Equal(t, target.path.String(), chosen.URI().String())
+	assert.Equal(t, target.location.String(), chosen.URI().String())
 
 	err := chosen.Close()
 	assert.Nil(t, err)
@@ -257,7 +257,7 @@ func TestShowFileSave(t *testing.T) {
 	// This will only execute if we have a file in the home path.
 	// Until we have a way to set the directory of an open file dialog.
 	test.Tap(target)
-	assert.Equal(t, target.path.Name(), nameEntry.Text)
+	assert.Equal(t, target.location.Name(), nameEntry.Text)
 	assert.False(t, save.Disabled())
 
 	// we are about to overwrite, a warning will show
@@ -271,11 +271,11 @@ func TestShowFileSave(t *testing.T) {
 	test.Tap(save)
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, saveErr)
-	targetParent, err := storage.Parent(target.path)
+	targetParent, err := storage.Parent(target.location)
 	if err != nil {
 		t.Error(err)
 	}
-	expectedPath := storage.Join(targetParent, "v2_"+target.path.Name())
+	expectedPath, _ := storage.Child(targetParent, "v2_"+target.location.Name())
 	assert.Equal(t, expectedPath.String(), chosen.URI().String())
 
 	err = chosen.Close()
@@ -309,7 +309,7 @@ func TestFileFilters(t *testing.T) {
 	count := 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := icon.(*fileDialogItem).path
+			uri := icon.(*fileDialogItem).location
 			assert.Equal(t, uri.Extension(), ".png")
 			count++
 		}
@@ -321,7 +321,7 @@ func TestFileFilters(t *testing.T) {
 	count = 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := icon.(*fileDialogItem).path
+			uri := icon.(*fileDialogItem).location
 			assert.Equal(t, uri.MimeType(), "image/jpeg")
 			count++
 		}
@@ -333,7 +333,7 @@ func TestFileFilters(t *testing.T) {
 	count = 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := icon.(*fileDialogItem).path
+			uri := icon.(*fileDialogItem).location
 			mimeType := strings.Split(uri.MimeType(), "/")[0]
 			assert.Equal(t, mimeType, "image")
 			count++

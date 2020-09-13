@@ -89,7 +89,7 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 	f.setDirectory(currentLister)
 
 	item := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
-		name: "(Parent)", path: parentDir, dir: true}
+		name: "(Parent)", location: parentDir, dir: true}
 	item.ExtendBaseWidget(item)
 
 	assert.Equal(t, "(Parent)", item.name)
