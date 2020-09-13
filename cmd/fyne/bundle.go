@@ -1,8 +1,6 @@
-// Run a command line helper for various Fyne tools.
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,10 +9,8 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
+	"github.com/spf13/cobra"
 )
-
-// Declare conformity to command interface
-var _ command = (*bundler)(nil)
 
 type bundler struct {
 	name, pkg string
@@ -85,23 +81,9 @@ func dirBundle(pkg, prefix string, noheader bool, dirpath string) {
 	}
 }
 
-func (b *bundler) addFlags() {
-	flag.StringVar(&b.name, "name", "", "The variable name to assign the resource (file mode only)")
-	flag.StringVar(&b.pkg, "package", "main", "The package to output in headers (if not appending)")
-	flag.StringVar(&b.prefix, "prefix", "resource", "A prefix for variables (ignored if name is set)")
-	flag.BoolVar(&b.noheader, "append", false, "Append an existing go file (don't output headers)")
-}
-
-func (b *bundler) printHelp(indent string) {
-	fmt.Println(indent, "The bundle command embeds static content into your go application.")
-	fmt.Println(indent, "Each resource will have a generated filename unless specified")
-	fmt.Println(indent, "Command usage: fyne bundle [parameters] file|directory")
-}
-
-func (b *bundler) run(args []string) {
+func (b *bundler) bundle(ccmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		fyne.LogError("Missing required file or directory parameter after flags", nil)
-		return
+		return fmt.Errorf("Missing required file or directory parameter after flags")
 	}
 
 	switch stat, err := os.Stat(args[0]); {
@@ -115,4 +97,23 @@ func (b *bundler) run(args []string) {
 	default:
 		doBundle(b.name, b.pkg, b.prefix, b.noheader, args[0])
 	}
+
+	return nil
+}
+
+func bundleCmd() *cobra.Command {
+	b := bundler{}
+	cmd := &cobra.Command{
+		Use:   "bundle",
+		Short: "Embeds static content into your go application",
+		Long:  "The bundle command embeds static content into your go application. Each resource will have a generated filename unless specified.",
+		RunE:  b.bundle,
+	}
+
+	cmd.PersistentFlags().StringVar(&b.name, "name", "", "the variable name to assign the resource (file mode only)")
+	cmd.PersistentFlags().StringVar(&b.pkg, "package", "main", "the package to output in headers (if not appending)")
+	cmd.PersistentFlags().StringVar(&b.prefix, "prefix", "resource", "a prefix for variables (ignored if name is set)")
+	cmd.PersistentFlags().BoolVar(&b.noheader, "append", false, "Append an existing go file (don't output headers)")
+
+	return cmd
 }

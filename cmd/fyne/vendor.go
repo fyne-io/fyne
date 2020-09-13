@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"strings"
 
-	"fyne.io/fyne"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -27,21 +27,6 @@ const (
 	// glfwModSrcDir is the glfw dir containing the c source code to copy
 	glfwModSrcDir = "glfw"
 )
-
-// Declare conformity to command interface
-var _ command = (*vendor)(nil)
-
-type vendor struct {
-}
-
-func (v *vendor) addFlags() {
-}
-
-func (v *vendor) printHelp(indent string) {
-	fmt.Println(indent, "The vendor command packages an application's dependencies and all the extra")
-	fmt.Println(indent, "files required into it's vendor folder. Your project must have a "+goModFile+" file.")
-	fmt.Println(indent, "Command usage: fyne vendor")
-}
 
 // cacheModPath returns the cache path and target directory for the GLFW module
 func cacheModPath(r io.Reader) (string, string, error) {
@@ -95,6 +80,7 @@ func recursiveCopy(src, target string) error {
 		if err != nil {
 			return err
 		}
+
 	}
 	return nil
 }
@@ -109,47 +95,42 @@ func ensureDir(dir string) error {
 	return nil
 }
 
-func (v *vendor) main() {
+func vendor(ccmd *cobra.Command, args []string) error {
 	wd, _ := os.Getwd()
 
 	if _, err := os.Stat(filepath.Join(wd, goModFile)); os.IsNotExist(err) {
-		fmt.Println("This program must be invoked in the project root")
-		os.Exit(1)
+		return fmt.Errorf("this program must be invoked in the project root: %v", err)
 	}
 
 	fmt.Println("Add missing and remove unused modules using 'go mod tidy'")
 	cmd := exec.Command("go", "mod", "tidy", "-v")
 	err := cmd.Run()
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		os.Exit(1)
+		return err
 	}
 
 	fmt.Println("Reset vendor content using 'go mod vendor'")
 	cmd = exec.Command("go", "mod", "vendor", "-v")
 	err = cmd.Run()
 	if err != nil {
-		fmt.Printf("%v\n", err)
-		os.Exit(1)
+		return err
 	}
 
 	fmt.Printf("Parsing %s to detect dependency module path for GLFW\n", goModVendorFile)
 	f, err := os.Open(filepath.Join(wd, goModVendorFile)) // #nosec
 	if err != nil {
-		fmt.Printf("Cannot open %s: %v\n", goModVendorFile, err)
-		os.Exit(1)
+		return fmt.Errorf("cannot open %s: %v\n", goModVendorFile, err)
 	}
 	defer f.Close()
 
 	glwfModPath, glfwModDest, err := cacheModPath(f)
 	if err != nil {
-		fmt.Printf("Cannot read %s: %v\n", goModVendorFile, err)
-		os.Exit(1)
+		return fmt.Errorf("cannot read %s: %v\n", goModVendorFile, err)
 	}
 	if glwfModPath == "" {
-		fmt.Printf("Cannot find GLFW module in %s\n", goModVendorFile)
-		os.Exit(1)
+		return fmt.Errorf("cannot find GLFW module in %s\n", goModVendorFile)
 	}
+
 	fmt.Printf("Package module path: %s\n", glwfModPath)
 
 	// glwfModSrc is the path containing glfw c source code
@@ -161,18 +142,18 @@ func (v *vendor) main() {
 	fmt.Printf("Copying glwf c source code: %s -> %s\n", glwfModSrc, glwfModTarget)
 	err = recursiveCopy(glwfModSrc, glwfModTarget)
 	if err != nil {
-		fmt.Printf("Cannot copy glfw c source code: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("cannot copy glfw c source code: %v\n", err)
 	}
 
 	fmt.Println("All set. To test using vendor dependencies: go test ./... -mod=vendor -v -count=1")
+	return nil
 }
 
-func (v *vendor) run(args []string) {
-	if len(args) != 0 {
-		fyne.LogError("Unexpected parameter after flags", nil)
-		return
+func vendorCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "vendor",
+		Short: "Packages application dependencies to vendor folder",
+		Long:  "The vendor command packages an application's dependencies and all the extra files required into it's vendor folder. Your project must have a " + goModFile + " file.",
+		RunE:  vendor,
 	}
-
-	v.main()
 }

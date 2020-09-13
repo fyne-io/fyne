@@ -83,9 +83,6 @@ func runAsAdminWindows(args ...string) error {
 	return exec.Command("powershell.exe", "Start-Process", "cmd.exe", "-Verb", "runAs", "-ArgumentList", cmd).Run()
 }
 
-// Declare conformity to command interface
-var _ command = (*packager)(nil)
-
 type packager struct {
 	name, srcDir, dir, exe, icon string
 	os, appID                    string
@@ -353,9 +350,8 @@ func (*packager) printHelp(indent string) {
 
 func (p *packager) buildPackage() error {
 	b := &builder{
-		os:      p.os,
-		srcdir:  p.srcDir,
-		release: p.release,
+		os:     p.os,
+		srcdir: p.srcDir,
 	}
 
 	return b.build()
@@ -445,6 +441,10 @@ func calculateExeName(sourceDir, os string) string {
 	return exeName
 }
 
+func (p *packager) isMobile() bool {
+	return p.os == "ios" || strings.HasPrefix(p.os, "android")
+}
+
 func (p *packager) doPackage() error {
 	if !exists(p.exe) && !p.isMobile() {
 		err := p.buildPackage()
@@ -470,8 +470,4 @@ func (p *packager) doPackage() error {
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
-}
-
-func (p *packager) isMobile() bool {
-	return p.os == "ios" || strings.HasPrefix(p.os, "android")
 }

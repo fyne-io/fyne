@@ -1,75 +1,55 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
-
-type getter struct {
-	pkg string
-}
-
-// Declare conformity to command interface
-var _ command = (*getter)(nil)
 
 func goPath() string {
 	cmd := exec.Command("go", "env", "GOPATH")
 	out, err := cmd.CombinedOutput()
-
 	if err != nil {
 		home, _ := os.UserHomeDir()
 		return filepath.Join(home, "go")
 	}
 
-	return strings.TrimSpace(string(out[0 : len(out)-1]))
+	return strings.TrimSpace(string(out[:len(out)-1]))
 }
 
-func (g *getter) get() error {
-	path := filepath.Join(goPath(), "src", g.pkg)
+func get(ccmd *cobra.Command, args []string) error {
+	path := filepath.Join(goPath(), "src", args[0])
 
-	cmd := exec.Command("go", "get", "-u", g.pkg)
-
-	out, err := cmd.CombinedOutput()
+	cmd := exec.Command("go", "get", "-u", args[0])
+	_, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 		return err
 	}
 
 	if !exists(path) {
-		return errors.New("Package download not found in expected location")
+		return errors.New("package download not found in expected location")
 	}
 
 	install := &installer{srcDir: path}
 	err = install.validate()
 	if err != nil {
-		return errors.Wrap(err, "Failed to set up installer")
+		return fmt.Errorf("failed to set up installer: %v", err)
 	}
-	return install.install()
+	return install.install(nil, nil)
+
+	return nil
 }
 
-func (g *getter) addFlags() {
-}
-
-func (g *getter) printHelp(indent string) {
-	fmt.Println(indent, "The get command downloads and installs a Fyne application.")
-	fmt.Println(indent, "A single parameter is required to specify the Go package, as with \"go get\"")
-}
-
-func (g *getter) run(args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "Missing \"package\" argument to define the application to get")
-		os.Exit(1)
-	}
-	g.pkg = args[0]
-
-	err := g.get()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
+func getCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "get",
+		Short: "Downloads and installs a Fyne application",
+		Long:  `The get command downloads and installs a Fyne application. A single parameter is required to specify the Go package, as with "go get"`,
+		RunE:  get,
 	}
 }
