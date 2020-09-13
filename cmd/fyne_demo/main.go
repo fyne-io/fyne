@@ -55,7 +55,7 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 		),
 		layout.NewSpacer(),
 
-		widget.NewCardContainer("Choose theme", "",
+		widget.NewCard("Choose theme", "",
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 				widget.NewButton("Dark", func() {
 					a.Settings().SetTheme(theme.DarkTheme())

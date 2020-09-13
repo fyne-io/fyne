@@ -4,11 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/storage"
-	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 
+	"fyne.io/fyne/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,8 +86,7 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 	parentDir := storage.NewURI("file://" + filepath.Dir(currentDir))
 	f.setDirectory(currentLister)
 
-	item := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
-		name: "(Parent)", location: parentDir, dir: true}
+	item := &fileDialogItem{picker: f, name: "(Parent)", location: parentDir, dir: true}
 	item.ExtendBaseWidget(item)
 
 	assert.Equal(t, "(Parent)", item.name)

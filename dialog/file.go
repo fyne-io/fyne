@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -236,7 +235,7 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 		return
 	}
 	if parent.String() != dir.String() {
-		fi := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
+		fi := &fileDialogItem{picker: f,
 			name: "(Parent)", location: parent, dir: true}
 		fi.ExtendBaseWidget(fi)
 		icons = append(icons, fi)
