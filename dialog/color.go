@@ -113,6 +113,16 @@ func colorClamp(value float64) float64 {
 	return value
 }
 
+func hueClamp(hue float64) float64 {
+	for hue < 0.0 {
+		hue += 1.0
+	}
+	for hue > 1.0 {
+		hue -= 1.0
+	}
+	return hue
+}
+
 func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(color.Color)) fyne.CanvasObject {
 	var objects []fyne.CanvasObject
 	if icon != nil && len(colors) > 0 {
@@ -232,18 +242,6 @@ func colorToRGBA(c color.Color) (r, g, b, a float64) {
 		b = float64(blue) / 65535.0
 		a = float64(alpha) / 65535.0
 	}
-	return
-}
-
-func polarToHS(angle, radius, limit float64) (hue, saturation float64) {
-	hue = angle / (2.0 * math.Pi)
-	if hue < 0.0 {
-		hue += 1.0
-	}
-	if hue > 1.0 {
-		hue -= 1.0
-	}
-	saturation = radius / limit
 	return
 }
 

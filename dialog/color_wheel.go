@@ -115,7 +115,8 @@ func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
 		// Out of bounds
 		return theme.BackgroundColor()
 	}
-	hue, saturation := polarToHS(angle, radius, limit)
+	hue := hueClamp(angle / (2.0 * math.Pi))
+	saturation := radius / limit
 	red, green, blue := hslToRgb(hue, saturation, a.Lightness)
 	return &color.NRGBA{
 		R: uint8(red * 255.0),
@@ -156,7 +157,8 @@ func (a *colorWheel) trigger(pos fyne.Position) {
 				// Out of bounds
 				return
 			}
-			a.Hue, a.Saturation = polarToHS(angle, radius, limit)
+			a.Hue = hueClamp(angle / (2.0 * math.Pi))
+			a.Saturation = radius / limit
 			f(a.Hue, a.Saturation, a.Lightness, a.Alpha)
 		}
 	}

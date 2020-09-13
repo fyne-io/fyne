@@ -174,11 +174,24 @@ func Test_recent_color(t *testing.T) {
 
 func Test_colorClamp(t *testing.T) {
 	// No Change
-	assert.Equal(t, 0.5, colorClamp(0.5))
+	assert.InDelta(t, 0.5, colorClamp(0.5), 0.0001)
 	// Clamp 0.0
-	assert.Equal(t, 0.0, colorClamp(-0.1))
+	assert.InDelta(t, 0.0, colorClamp(-0.1), 0.0001)
 	// Clamp 1.0
-	assert.Equal(t, 1.0, colorClamp(1.1))
+	assert.InDelta(t, 1.0, colorClamp(1.1), 0.0001)
+}
+
+func Test_hueClamp(t *testing.T) {
+	// No Change
+	assert.InDelta(t, 0.5, hueClamp(0.5), 0.0001)
+	// Wrap to 0.9
+	assert.InDelta(t, 0.9, hueClamp(-0.1), 0.0001)
+	// Wrap to 0.1
+	assert.InDelta(t, 0.1, hueClamp(1.1), 0.0001)
+	// Wrap to 0.9
+	assert.InDelta(t, 0.9, hueClamp(-10.1), 0.0001)
+	// Wrap to 0.1
+	assert.InDelta(t, 0.1, hueClamp(11.1), 0.0001)
 }
 
 type rgbhsl struct {
@@ -307,10 +320,6 @@ func Test_colorToRGBA(t *testing.T) {
 			assert.InDelta(t, 1.0, a, 0.0001)
 		})
 	}
-}
-
-func Test_polarToHS(t *testing.T) {
-	// TODO
 }
 
 func Test_rgbToHsl(t *testing.T) {
