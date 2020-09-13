@@ -46,6 +46,7 @@ func (p *PopUp) Move(pos fyne.Position) {
 // Resize changes the size of the PopUp.
 // PopUps always have the size of their canvas.
 // However, Resize changes the size of the PopUp's content.
+//
 // Implements: fyne.Widget
 func (p *PopUp) Resize(size fyne.Size) {
 	p.innerSize = size
