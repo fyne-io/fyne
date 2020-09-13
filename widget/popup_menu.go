@@ -43,12 +43,14 @@ func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 }
 
 // CreateRenderer returns a new renderer for the pop-up menu.
+//
 // Implements: fyne.Widget
 func (p *PopUpMenu) CreateRenderer() fyne.WidgetRenderer {
 	return p.overlay.CreateRenderer()
 }
 
 // Hide hides the pop-up menu.
+//
 // Implements: fyne.Widget
 func (p *PopUpMenu) Hide() {
 	p.overlay.Hide()
@@ -57,12 +59,14 @@ func (p *PopUpMenu) Hide() {
 
 // Move moves the pop-up menu.
 // The position is absolute because pop-up menus are shown in an overlay which covers the whole canvas.
+//
 // Implements: fyne.Widget
 func (p *PopUpMenu) Move(pos fyne.Position) {
 	widget.MoveWidget(&p.Base, p, p.adjustedPosition(pos, p.Size()))
 }
 
 // Resize changes the size of the pop-up menu.
+//
 // Implements: fyne.Widget
 func (p *PopUpMenu) Resize(size fyne.Size) {
 	widget.MoveWidget(&p.Base, p, p.adjustedPosition(p.Position(), size))
@@ -70,6 +74,7 @@ func (p *PopUpMenu) Resize(size fyne.Size) {
 }
 
 // Show makes the pop-up menu visible.
+//
 // Implements: fyne.Widget
 func (p *PopUpMenu) Show() {
 	p.overlay.Show()
