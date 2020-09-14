@@ -520,8 +520,9 @@ func (c *glCanvas) walkTrees(
 type overlayStack struct {
 	internal.OverlayStack
 
-	onChange     func()
-	renderCaches []*renderCacheTree
+	focusManagers []*app.FocusManager
+	onChange      func()
+	renderCaches  []*renderCacheTree
 }
 
 func (o *overlayStack) Add(overlay fyne.CanvasObject) {
@@ -530,12 +531,15 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	}
 	o.OverlayStack.Add(overlay)
 	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &renderCacheNode{obj: overlay}})
+	o.focusManagers = append(o.focusManagers, app.NewFocusManager(overlay))
 	o.onChange()
 }
 
 func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
-	o.renderCaches = o.renderCaches[:len(o.List())]
+	overlayCount := len(o.List())
+	o.renderCaches = o.renderCaches[:overlayCount]
+	o.focusManagers = o.focusManagers[:overlayCount]
 	o.onChange()
 }
 
