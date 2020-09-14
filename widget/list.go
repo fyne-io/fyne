@@ -60,7 +60,7 @@ type listRenderer struct {
 	list             *List
 	scroller         *ScrollContainer
 	layout           *fyne.Container
-	itemPool         *listPool
+	itemPool         *syncPool
 	children         []fyne.CanvasObject
 	visibleItemCount int
 	firstItemIndex   int
@@ -102,7 +102,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		l.size = size
 	}
 	if l.itemPool == nil {
-		l.itemPool = &listPool{}
+		l.itemPool = &syncPool{}
 	}
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize
@@ -125,8 +125,6 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	l.layout.Objects = l.children
 	l.layout.Layout.Layout(l.layout.Objects, l.list.itemMin)
 	l.lastItemIndex = l.firstItemIndex + len(l.children) - 1
-
-	l.ensurePoolCapacity()
 
 	i := l.firstItemIndex
 	for _, child := range l.children {
@@ -153,17 +151,6 @@ func (l *listRenderer) appendItem(index int) {
 	l.setupListItem(item, index)
 	l.layout.Objects = l.children
 	l.layout.Layout.(*listLayout).appendedItem(l.layout.Objects)
-}
-
-func (l *listRenderer) ensurePoolCapacity() {
-	poolCapacity := 5
-	if l.list.Length()-len(l.children) < 5 {
-		poolCapacity = l.list.Length() - len(l.children)
-	}
-	for i := l.itemPool.Count(); i < poolCapacity; i++ {
-		item := newListItem(l.list.CreateItem(), nil)
-		l.itemPool.Release(item)
-	}
 }
 
 func (l *listRenderer) getItem() fyne.CanvasObject {
@@ -416,34 +403,4 @@ func (l *listLayout) appendedItem(objects []fyne.CanvasObject) {
 func (l *listLayout) prependedItem(objects []fyne.CanvasObject) {
 	objects[0].Move(fyne.NewPos(theme.Padding(), objects[1].Position().Y-l.list.itemMin.Height))
 	objects[0].Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
-}
-
-type pool interface {
-	Count() int
-	Obtain() fyne.CanvasObject
-	Release(fyne.CanvasObject)
-}
-
-type listPool struct {
-	contents []fyne.CanvasObject
-}
-
-// Count returns the number of available items in the pool
-func (lc *listPool) Count() int {
-	return len(lc.contents)
-}
-
-// Obtain returns an item from the pool for use
-func (lc *listPool) Obtain() fyne.CanvasObject {
-	if len(lc.contents) == 0 {
-		return nil
-	}
-	item := lc.contents[0]
-	lc.contents = lc.contents[1:]
-	return item
-}
-
-// Release adds an item into the pool to be used later
-func (lc *listPool) Release(item fyne.CanvasObject) {
-	lc.contents = append(lc.contents, item)
 }
