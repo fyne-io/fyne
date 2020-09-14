@@ -348,8 +348,12 @@ type listItemRenderer struct {
 // MinSize calculates the minimum size of a listItem.
 // This is based on the size of the status indicator and the size of the child object.
 func (li *listItemRenderer) MinSize() (size fyne.Size) {
-	size = fyne.NewSize(li.item.child.Size().Width+theme.Padding()*2,
-		li.item.child.Size().Height+theme.Padding()*2)
+	itemSize := li.item.child.Size()
+	if itemSize.IsZero() {
+		itemSize = li.item.MinSize()
+	}
+	size = fyne.NewSize(itemSize.Width+theme.Padding()*3,
+		itemSize.Height+theme.Padding()*2)
 	return
 }
 
