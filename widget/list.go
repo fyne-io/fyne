@@ -38,8 +38,10 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
-	if l.itemMin.IsZero() && l.CreateItem != nil {
-		l.itemMin = newListItem(l.CreateItem(), nil).MinSize()
+	if f := l.CreateItem; f != nil {
+		if l.itemMin.IsZero() {
+			l.itemMin = newListItem(f(), nil).MinSize()
+		}
 	}
 	layout := fyne.NewContainerWithLayout(newListLayout(l))
 	layout.Resize(layout.MinSize())
@@ -57,6 +59,7 @@ func (l *List) MinSize() fyne.Size {
 
 type listRenderer struct {
 	widget.BaseRenderer
+
 	list             *List
 	scroller         *ScrollContainer
 	layout           *fyne.Container
@@ -128,7 +131,9 @@ func (l *listRenderer) Layout(size fyne.Size) {
 
 	i := l.firstItemIndex
 	for _, child := range l.children {
-		l.list.UpdateItem(i, child.(*listItem).child)
+		if f := l.list.UpdateItem; f != nil {
+			f(i, child.(*listItem).child)
+		}
 		i++
 	}
 }
@@ -138,8 +143,8 @@ func (l *listRenderer) MinSize() fyne.Size {
 }
 
 func (l *listRenderer) Refresh() {
-	if l.list.CreateItem != nil {
-		l.list.itemMin = newListItem(l.list.CreateItem(), nil).MinSize()
+	if f := l.list.CreateItem; f != nil {
+		l.list.itemMin = newListItem(f(), nil).MinSize()
 	}
 	l.Layout(l.list.Size())
 	canvas.Refresh(l.list.super())
@@ -156,7 +161,9 @@ func (l *listRenderer) appendItem(index int) {
 func (l *listRenderer) getItem() fyne.CanvasObject {
 	item := l.itemPool.Obtain()
 	if item == nil {
-		item = newListItem(l.list.CreateItem(), nil)
+		if f := l.list.CreateItem; f != nil {
+			item = newListItem(f(), nil)
+		}
 	}
 	return item
 }
@@ -236,7 +243,9 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 	if previousIndicator != item.(*listItem).selected {
 		item.Refresh()
 	}
-	l.list.UpdateItem(index, item.(*listItem).child)
+	if f := l.list.UpdateItem; f != nil {
+		f(index, item.(*listItem).child)
+	}
 	item.(*listItem).onTapped = func() {
 		if l.list.selectedItem != nil && l.list.selectedIndex >= l.firstItemIndex && l.list.selectedIndex <= l.lastItemIndex {
 			l.list.selectedItem.selected = false
@@ -246,8 +255,8 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 		l.list.selectedIndex = index
 		l.list.selectedItem.selected = true
 		l.list.selectedItem.Refresh()
-		if l.list.OnItemSelected != nil {
-			l.list.OnItemSelected(index)
+		if f := l.list.OnItemSelected; f != nil {
+			f(index)
 		}
 	}
 }
@@ -324,7 +333,7 @@ type listItemRenderer struct {
 // MinSize calculates the minimum size of a listItem.
 // This is based on the size of the status indicator and the size of the child object.
 func (li *listItemRenderer) MinSize() (size fyne.Size) {
-	size = fyne.NewSize((theme.Padding()*2)+li.item.child.Size().Width,
+	size = fyne.NewSize(li.item.child.Size().Width+theme.Padding()*2,
 		li.item.child.Size().Height+theme.Padding()*2)
 	return
 }
@@ -336,12 +345,11 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.item.statusIndicator.SetMinSize(s)
 	li.item.statusIndicator.Resize(s)
 
-	x := theme.Padding() * 2
-	li.item.child.Move(fyne.NewPos(x, theme.Padding()))
-	li.item.child.Resize(fyne.NewSize(size.Width-x, size.Height-(2*theme.Padding())))
+	li.item.child.Move(fyne.NewPos(theme.Padding()*2, theme.Padding()))
+	li.item.child.Resize(fyne.NewSize(size.Width-theme.Padding()*3, size.Height-theme.Padding()*2))
 
-	li.item.divider.Move(fyne.NewPos(0, size.Height-1))
-	s = fyne.NewSize(size.Width, 1)
+	li.item.divider.Move(fyne.NewPos(theme.Padding(), size.Height-1))
+	s = fyne.NewSize(size.Width-theme.Padding()*2, 1)
 	li.item.divider.SetMinSize(s)
 	li.item.divider.Resize(s)
 }
@@ -376,15 +384,15 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 	}
 	y := 0
 	for _, child := range objects {
-		child.Move(fyne.NewPos(theme.Padding(), y))
+		child.Move(fyne.NewPos(0, y))
 		y += l.list.itemMin.Height
-		child.Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
+		child.Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 	}
 	l.layoutEndY = y
 }
 
 func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return fyne.NewSize(l.list.itemMin.Width+theme.Padding(),
+	return fyne.NewSize(l.list.itemMin.Width,
 		l.list.itemMin.Height*l.list.Length())
 }
 
