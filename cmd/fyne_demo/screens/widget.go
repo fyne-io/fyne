@@ -74,7 +74,7 @@ func makeTextGrid() *widget.TextGrid {
 	grid := widget.NewTextGridFromString("TextGrid\n  Content\nZebra")
 	grid.SetStyleRange(0, 4, 0, 7,
 		&widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 64, B: 192, A: 128}})
-	grid.Rows[1].Style = &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 192, B: 64, A: 128}}
+	grid.SetRowStyle(1, &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 192, B: 64, A: 128}})
 
 	white := &widget.CustomTextGridStyle{FGColor: color.White, BGColor: color.Black}
 	black := &widget.CustomTextGridStyle{FGColor: color.Black, BGColor: color.White}
