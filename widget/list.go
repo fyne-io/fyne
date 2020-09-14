@@ -19,7 +19,7 @@ type List struct {
 	Length         func() int
 	CreateItem     func() fyne.CanvasObject
 	UpdateItem     func(index int, item fyne.CanvasObject)
-	OnItemSelected func(index int, item fyne.CanvasObject)
+	OnItemSelected func(index int)
 	selectedItem   *listItem
 	selectedIndex  int
 	itemMin        fyne.Size
@@ -247,7 +247,7 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 		l.list.selectedItem.selected = true
 		l.list.selectedItem.Refresh()
 		if l.list.OnItemSelected != nil {
-			l.list.OnItemSelected(index, item.(*listItem).child)
+			l.list.OnItemSelected(index)
 		}
 	}
 }
