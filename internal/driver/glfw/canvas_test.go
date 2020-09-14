@@ -15,6 +15,113 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(100, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(100, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(100, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(100, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	content := widget.NewHBox(leftCol, rightCol)
+	w.SetContent(content)
+	repaintWindow(w)
+
+	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
+	assert.Equal(t, oldCanvasSize, c.Size())
+
+	leftObj1.SetMinSize(fyne.NewSize(110, 60))
+	c.Refresh(leftObj1)
+	repaintWindow(w)
+
+	expectedCanvasSize := oldCanvasSize.Add(fyne.NewSize(10, 10))
+	assert.Equal(t, expectedCanvasSize, c.Size())
+}
+
+func TestGlCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(50, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(50, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(50, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(50, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	rightColScroll := widget.NewScrollContainer(rightCol)
+	content := widget.NewHBox(leftCol, rightColScroll)
+	w.SetContent(content)
+
+	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
+	w.Resize(oldCanvasSize)
+	repaintWindow(w)
+
+	// child size change affects ancestors up to scroll
+	oldCanvasSize = c.Size()
+	oldRightScrollSize := rightColScroll.Size()
+	oldRightColSize := rightCol.Size()
+	rightObj1.SetMinSize(fyne.NewSize(50, 100))
+	c.Refresh(rightObj1)
+	repaintWindow(w)
+
+	assert.Equal(t, oldCanvasSize, c.Size())
+	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
+	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 50))
+	assert.Equal(t, expectedRightColSize, rightCol.Size())
+}
+
+func TestGlCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(50, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(50, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	leftColScroll := widget.NewScrollContainer(leftCol)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(50, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(50, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	rightColScroll := widget.NewScrollContainer(rightCol)
+	content := widget.NewHBox(leftColScroll, rightColScroll)
+	w.SetContent(content)
+
+	oldCanvasSize := fyne.NewSize(
+		2*leftColScroll.MinSize().Width+3*theme.Padding(),
+		leftColScroll.MinSize().Height+2*theme.Padding(),
+	)
+	w.Resize(oldCanvasSize)
+	repaintWindow(w)
+
+	oldLeftColSize := leftCol.Size()
+	oldLeftScrollSize := leftColScroll.Size()
+	oldRightColSize := rightCol.Size()
+	oldRightScrollSize := rightColScroll.Size()
+	leftObj2.SetMinSize(fyne.NewSize(50, 100))
+	rightObj2.SetMinSize(fyne.NewSize(50, 200))
+	c.Refresh(leftObj2)
+	c.Refresh(rightObj2)
+	repaintWindow(w)
+
+	assert.Equal(t, oldCanvasSize, c.Size())
+	assert.Equal(t, oldLeftScrollSize, leftColScroll.Size())
+	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
+	expectedLeftColSize := oldLeftColSize.Add(fyne.NewSize(0, 50))
+	assert.Equal(t, expectedLeftColSize, leftCol.Size())
+	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 150))
+	assert.Equal(t, expectedRightColSize, rightCol.Size())
+}
+
 func TestGlCanvas_Content(t *testing.T) {
 	content := &canvas.Circle{}
 	w := createWindow("Test")
@@ -23,10 +130,119 @@ func TestGlCanvas_Content(t *testing.T) {
 	assert.Equal(t, content, w.Content())
 }
 
+func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(50, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(50, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(50, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(50, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	content := fyne.NewContainer(leftCol, rightCol)
+	layout := &recordingLayout{}
+	content.Layout = layout
+	w.SetContent(content)
+
+	repaintWindow(w)
+	// clear the recorded layouts
+	for layout.popLayoutEvent() != nil {
+	}
+	assert.Nil(t, layout.popLayoutEvent())
+
+	leftObj1.FillColor = color.White
+	rightObj1.FillColor = color.White
+	rightObj2.FillColor = color.White
+	c.Refresh(leftObj1)
+	c.Refresh(rightObj1)
+	c.Refresh(rightObj2)
+
+	assert.Nil(t, layout.popLayoutEvent())
+}
+
+func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+	w.Resize(fyne.NewSize(200, 100))
+	popUpContent := canvas.NewRectangle(color.Black)
+	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
+	popUp := widget.NewPopUp(popUpContent, c)
+
+	// This is because of a bug in PopUp size handling that will be fixed later.
+	// This line will vanish then.
+	popUp.Resize(popUpContent.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+
+	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
+	assert.Equal(t, fyne.NewSize(1000, 10).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), popUp.MinSize())
+	assert.Equal(t, fyne.NewSize(200, 100), popUp.Size())
+
+	repaintWindow(w)
+
+	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
+	assert.Equal(t, fyne.NewSize(200, 100), popUp.Size())
+}
+
+func TestGlCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+	leftObj1 := canvas.NewRectangle(color.Black)
+	leftObj1.SetMinSize(fyne.NewSize(100, 50))
+	leftObj2 := canvas.NewRectangle(color.Black)
+	leftObj2.SetMinSize(fyne.NewSize(100, 50))
+	leftCol := widget.NewVBox(leftObj1, leftObj2)
+	rightObj1 := canvas.NewRectangle(color.Black)
+	rightObj1.SetMinSize(fyne.NewSize(100, 50))
+	rightObj2 := canvas.NewRectangle(color.Black)
+	rightObj2.SetMinSize(fyne.NewSize(100, 50))
+	rightCol := widget.NewVBox(rightObj1, rightObj2)
+	content := widget.NewHBox(leftCol, rightCol)
+	w.SetContent(content)
+
+	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
+	assert.Equal(t, oldCanvasSize, c.Size())
+	repaintWindow(w)
+
+	oldRightColSize := rightCol.Size()
+	leftObj1.SetMinSize(fyne.NewSize(90, 40))
+	rightObj1.SetMinSize(fyne.NewSize(80, 30))
+	rightObj2.SetMinSize(fyne.NewSize(80, 20))
+	c.Refresh(leftObj1)
+	c.Refresh(rightObj1)
+	c.Refresh(rightObj2)
+	repaintWindow(w)
+
+	assert.Equal(t, oldCanvasSize, c.Size())
+	expectedRightColSize := oldRightColSize.Subtract(fyne.NewSize(20, 0))
+	assert.Equal(t, expectedRightColSize, rightCol.Size())
+	assert.Equal(t, fyne.NewSize(100, 40), leftObj1.Size())
+	assert.Equal(t, fyne.NewSize(80, 30), rightObj1.Size())
+	assert.Equal(t, fyne.NewSize(80, 20), rightObj2.Size())
+}
+
 func TestGlCanvas_NilContent(t *testing.T) {
 	w := createWindow("Test")
 
 	assert.NotNil(t, w.Content()) // never a nil canvas so we have a sensible fallback
+}
+
+func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
+	w := createWindow("Test").(*window)
+	c := w.Canvas().(*glCanvas)
+
+	pos := fyne.NewPos(4, 4)
+	c.scale = 2.5
+	x, y := c.PixelCoordinateForPosition(pos)
+	assert.Equal(t, int(10*c.texScale), x)
+	assert.Equal(t, int(10*c.texScale), y)
+
+	c.texScale = 2.0
+	x, y = c.PixelCoordinateForPosition(pos)
+	assert.Equal(t, 20, x)
+	assert.Equal(t, 20, y)
 }
 
 func TestGlCanvas_Resize(t *testing.T) {
@@ -41,28 +257,6 @@ func TestGlCanvas_Resize(t *testing.T) {
 
 	w.Resize(size)
 	assert.Equal(t, size, content.Size())
-}
-
-// TODO: this can be removed when #707 is addressed
-func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
-	w := createWindow("Test")
-	w.SetPadded(false)
-
-	content := widget.NewLabel("Content")
-	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
-	w.SetContent(content)
-	w.Canvas().Overlays().Add(over)
-
-	size := fyne.NewSize(200, 100)
-	overContentSize := over.Content.Size()
-	assert.NotEqual(t, size, content.Size())
-	assert.NotEqual(t, size, over.Size())
-	assert.NotEqual(t, size, overContentSize)
-
-	w.Resize(size)
-	assert.Equal(t, size, content.Size(), "canvas content is resized")
-	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
-	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
 }
 
 // TODO: this can be removed when #707 is addressed
@@ -118,6 +312,28 @@ func TestGlCanvas_ResizeWithOverlays(t *testing.T) {
 	assert.Equal(t, size, o3.Size(), "canvas overlay 3 is resized")
 }
 
+// TODO: this can be removed when #707 is addressed
+func TestGlCanvas_ResizeWithPopUpOverlay(t *testing.T) {
+	w := createWindow("Test")
+	w.SetPadded(false)
+
+	content := widget.NewLabel("Content")
+	over := widget.NewPopUp(widget.NewLabel("Over"), w.Canvas())
+	w.SetContent(content)
+	w.Canvas().Overlays().Add(over)
+
+	size := fyne.NewSize(200, 100)
+	overContentSize := over.Content.Size()
+	assert.NotEqual(t, size, content.Size())
+	assert.NotEqual(t, size, over.Size())
+	assert.NotEqual(t, size, overContentSize)
+
+	w.Resize(size)
+	assert.Equal(t, size, content.Size(), "canvas content is resized")
+	assert.Equal(t, size, over.Size(), "canvas overlay is resized")
+	assert.Equal(t, overContentSize, over.Content.Size(), "canvas overlay content is _not_ resized")
+}
+
 func TestGlCanvas_Scale(t *testing.T) {
 	w := createWindow("Test").(*window)
 	c := w.Canvas().(*glCanvas)
@@ -126,23 +342,7 @@ func TestGlCanvas_Scale(t *testing.T) {
 	assert.Equal(t, 5, int(2*c.Scale()))
 }
 
-func TestGlCanvas_PixelCoordinateAtPosition(t *testing.T) {
-	w := createWindow("Test").(*window)
-	c := w.Canvas().(*glCanvas)
-
-	pos := fyne.NewPos(4, 4)
-	c.scale = 2.5
-	x, y := c.PixelCoordinateForPosition(pos)
-	assert.Equal(t, int(10*c.texScale), x)
-	assert.Equal(t, int(10*c.texScale), y)
-
-	c.texScale = 2.0
-	x, y = c.PixelCoordinateForPosition(pos)
-	assert.Equal(t, 20, x)
-	assert.Equal(t, 20, y)
-}
-
-func Test_glCanvas_SetContent(t *testing.T) {
+func TestGlCanvas_SetContent(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 	var menuHeight int
 	if hasNativeMenu() {
@@ -184,207 +384,7 @@ func Test_glCanvas_SetContent(t *testing.T) {
 	}
 }
 
-func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToRoot(t *testing.T) {
-	w := createWindow("Test").(*window)
-	c := w.Canvas().(*glCanvas)
-	leftObj1 := canvas.NewRectangle(color.Black)
-	leftObj1.SetMinSize(fyne.NewSize(100, 50))
-	leftObj2 := canvas.NewRectangle(color.Black)
-	leftObj2.SetMinSize(fyne.NewSize(100, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
-	rightObj1 := canvas.NewRectangle(color.Black)
-	rightObj1.SetMinSize(fyne.NewSize(100, 50))
-	rightObj2 := canvas.NewRectangle(color.Black)
-	rightObj2.SetMinSize(fyne.NewSize(100, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	content := widget.NewHBox(leftCol, rightCol)
-	w.SetContent(content)
-	repaintWindow(w)
-
-	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
-	assert.Equal(t, oldCanvasSize, c.Size())
-
-	leftObj1.SetMinSize(fyne.NewSize(110, 60))
-	c.Refresh(leftObj1)
-	repaintWindow(w)
-
-	expectedCanvasSize := oldCanvasSize.Add(fyne.NewSize(10, 10))
-	assert.Equal(t, expectedCanvasSize, c.Size())
-}
-
-func Test_glCanvas_ChildMinSizeChangeAffectsAncestorsUpToScroll(t *testing.T) {
-	w := createWindow("Test").(*window)
-	c := w.Canvas().(*glCanvas)
-	leftObj1 := canvas.NewRectangle(color.Black)
-	leftObj1.SetMinSize(fyne.NewSize(50, 50))
-	leftObj2 := canvas.NewRectangle(color.Black)
-	leftObj2.SetMinSize(fyne.NewSize(50, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
-	rightObj1 := canvas.NewRectangle(color.Black)
-	rightObj1.SetMinSize(fyne.NewSize(50, 50))
-	rightObj2 := canvas.NewRectangle(color.Black)
-	rightObj2.SetMinSize(fyne.NewSize(50, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	rightColScroll := widget.NewScrollContainer(rightCol)
-	content := widget.NewHBox(leftCol, rightColScroll)
-	w.SetContent(content)
-
-	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
-	w.Resize(oldCanvasSize)
-	repaintWindow(w)
-
-	// child size change affects ancestors up to scroll
-	oldCanvasSize = c.Size()
-	oldRightScrollSize := rightColScroll.Size()
-	oldRightColSize := rightCol.Size()
-	rightObj1.SetMinSize(fyne.NewSize(50, 100))
-	c.Refresh(rightObj1)
-	repaintWindow(w)
-
-	assert.Equal(t, oldCanvasSize, c.Size())
-	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
-	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 50))
-	assert.Equal(t, expectedRightColSize, rightCol.Size())
-}
-
-func Test_glCanvas_ChildMinSizeChangesInDifferentScrollAffectAncestorsUpToScroll(t *testing.T) {
-	w := createWindow("Test").(*window)
-	c := w.Canvas().(*glCanvas)
-	leftObj1 := canvas.NewRectangle(color.Black)
-	leftObj1.SetMinSize(fyne.NewSize(50, 50))
-	leftObj2 := canvas.NewRectangle(color.Black)
-	leftObj2.SetMinSize(fyne.NewSize(50, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
-	leftColScroll := widget.NewScrollContainer(leftCol)
-	rightObj1 := canvas.NewRectangle(color.Black)
-	rightObj1.SetMinSize(fyne.NewSize(50, 50))
-	rightObj2 := canvas.NewRectangle(color.Black)
-	rightObj2.SetMinSize(fyne.NewSize(50, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	rightColScroll := widget.NewScrollContainer(rightCol)
-	content := widget.NewHBox(leftColScroll, rightColScroll)
-	w.SetContent(content)
-
-	oldCanvasSize := fyne.NewSize(
-		2*leftColScroll.MinSize().Width+3*theme.Padding(),
-		leftColScroll.MinSize().Height+2*theme.Padding(),
-	)
-	w.Resize(oldCanvasSize)
-	repaintWindow(w)
-
-	oldLeftColSize := leftCol.Size()
-	oldLeftScrollSize := leftColScroll.Size()
-	oldRightColSize := rightCol.Size()
-	oldRightScrollSize := rightColScroll.Size()
-	leftObj2.SetMinSize(fyne.NewSize(50, 100))
-	rightObj2.SetMinSize(fyne.NewSize(50, 200))
-	c.Refresh(leftObj2)
-	c.Refresh(rightObj2)
-	repaintWindow(w)
-
-	assert.Equal(t, oldCanvasSize, c.Size())
-	assert.Equal(t, oldLeftScrollSize, leftColScroll.Size())
-	assert.Equal(t, oldRightScrollSize, rightColScroll.Size())
-	expectedLeftColSize := oldLeftColSize.Add(fyne.NewSize(0, 50))
-	assert.Equal(t, expectedLeftColSize, leftCol.Size())
-	expectedRightColSize := oldRightColSize.Add(fyne.NewSize(0, 150))
-	assert.Equal(t, expectedRightColSize, rightCol.Size())
-}
-
-func Test_glCanvas_MinSizeShrinkTriggersLayout(t *testing.T) {
-	w := createWindow("Test").(*window)
-	c := w.Canvas().(*glCanvas)
-	leftObj1 := canvas.NewRectangle(color.Black)
-	leftObj1.SetMinSize(fyne.NewSize(100, 50))
-	leftObj2 := canvas.NewRectangle(color.Black)
-	leftObj2.SetMinSize(fyne.NewSize(100, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
-	rightObj1 := canvas.NewRectangle(color.Black)
-	rightObj1.SetMinSize(fyne.NewSize(100, 50))
-	rightObj2 := canvas.NewRectangle(color.Black)
-	rightObj2.SetMinSize(fyne.NewSize(100, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	content := widget.NewHBox(leftCol, rightCol)
-	w.SetContent(content)
-
-	oldCanvasSize := fyne.NewSize(200+3*theme.Padding(), 100+3*theme.Padding())
-	assert.Equal(t, oldCanvasSize, c.Size())
-	repaintWindow(w)
-
-	oldRightColSize := rightCol.Size()
-	leftObj1.SetMinSize(fyne.NewSize(90, 40))
-	rightObj1.SetMinSize(fyne.NewSize(80, 30))
-	rightObj2.SetMinSize(fyne.NewSize(80, 20))
-	c.Refresh(leftObj1)
-	c.Refresh(rightObj1)
-	c.Refresh(rightObj2)
-	repaintWindow(w)
-
-	assert.Equal(t, oldCanvasSize, c.Size())
-	expectedRightColSize := oldRightColSize.Subtract(fyne.NewSize(20, 0))
-	assert.Equal(t, expectedRightColSize, rightCol.Size())
-	assert.Equal(t, fyne.NewSize(100, 40), leftObj1.Size())
-	assert.Equal(t, fyne.NewSize(80, 30), rightObj1.Size())
-	assert.Equal(t, fyne.NewSize(80, 20), rightObj2.Size())
-}
-
-func Test_glCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
-	w := createWindow("Test").(*window)
-	c := w.Canvas().(*glCanvas)
-	leftObj1 := canvas.NewRectangle(color.Black)
-	leftObj1.SetMinSize(fyne.NewSize(50, 50))
-	leftObj2 := canvas.NewRectangle(color.Black)
-	leftObj2.SetMinSize(fyne.NewSize(50, 50))
-	leftCol := widget.NewVBox(leftObj1, leftObj2)
-	rightObj1 := canvas.NewRectangle(color.Black)
-	rightObj1.SetMinSize(fyne.NewSize(50, 50))
-	rightObj2 := canvas.NewRectangle(color.Black)
-	rightObj2.SetMinSize(fyne.NewSize(50, 50))
-	rightCol := widget.NewVBox(rightObj1, rightObj2)
-	content := fyne.NewContainer(leftCol, rightCol)
-	layout := &recordingLayout{}
-	content.Layout = layout
-	w.SetContent(content)
-
-	repaintWindow(w)
-	// clear the recorded layouts
-	for layout.popLayoutEvent() != nil {
-	}
-	assert.Nil(t, layout.popLayoutEvent())
-
-	leftObj1.FillColor = color.White
-	rightObj1.FillColor = color.White
-	rightObj2.FillColor = color.White
-	c.Refresh(leftObj1)
-	c.Refresh(rightObj1)
-	c.Refresh(rightObj2)
-
-	assert.Nil(t, layout.popLayoutEvent())
-}
-
-func Test_glCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
-	w := createWindow("Test").(*window)
-	c := w.Canvas().(*glCanvas)
-	w.Resize(fyne.NewSize(200, 100))
-	popUpContent := canvas.NewRectangle(color.Black)
-	popUpContent.SetMinSize(fyne.NewSize(1000, 10))
-	popUp := widget.NewPopUp(popUpContent, c)
-
-	// This is because of a bug in PopUp size handling that will be fixed later.
-	// This line will vanish then.
-	popUp.Resize(popUpContent.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-
-	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
-	assert.Equal(t, fyne.NewSize(1000, 10).Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)), popUp.MinSize())
-	assert.Equal(t, fyne.NewSize(200, 100), popUp.Size())
-
-	repaintWindow(w)
-
-	assert.Equal(t, fyne.NewSize(1000, 10), popUpContent.Size())
-	assert.Equal(t, fyne.NewSize(200, 100), popUp.Size())
-}
-
-func Test_glCanvas_walkTree(t *testing.T) {
+func TestGlCanvas_walkTree(t *testing.T) {
 	leftObj1 := canvas.NewRectangle(color.Gray16{Y: 1})
 	leftObj2 := canvas.NewRectangle(color.Gray16{Y: 2})
 	leftCol := &modifiableBox{Box: widget.NewVBox(leftObj1, leftObj2)}
