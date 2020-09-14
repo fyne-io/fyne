@@ -10,6 +10,9 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// Declare conformity with Widget interface
+var _ fyne.Widget = (*List)(nil)
+
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
 // List requires that all items are the same size
@@ -56,6 +59,9 @@ func (l *List) MinSize() fyne.Size {
 
 	return l.BaseWidget.MinSize()
 }
+
+// Declare conformity with WidgetRenderer interface
+var _ fyne.WidgetRenderer = (*listRenderer)(nil)
 
 type listRenderer struct {
 	widget.BaseRenderer
@@ -261,6 +267,11 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 	}
 }
 
+// Declare conformity with interfaces
+var _ fyne.Widget = (*listItem)(nil)
+var _ fyne.Tappable = (*listItem)(nil)
+var _ desktop.Hoverable = (*listItem)(nil)
+
 type listItem struct {
 	BaseWidget
 
@@ -324,6 +335,9 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 	}
 }
 
+// Declare conformity with the WidgetRenderer interface
+var _ fyne.WidgetRenderer = (*listItemRenderer)(nil)
+
 type listItemRenderer struct {
 	widget.BaseRenderer
 
@@ -365,14 +379,15 @@ func (li *listItemRenderer) Refresh() {
 	canvas.Refresh(li.item.super())
 }
 
+// Declare conformity with Layout interface
+var _ fyne.Layout = (*listLayout)(nil)
+
 type listLayout struct {
 	list       *List
 	itemCount  int
 	layoutEndY int
 	offsetY    int
 }
-
-var _ fyne.Layout = (*listLayout)(nil)
 
 func newListLayout(list *List) fyne.Layout {
 	return &listLayout{list: list}
@@ -398,14 +413,14 @@ func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 
 func (l *listLayout) appendedItem(objects []fyne.CanvasObject) {
 	if len(objects) > 1 {
-		objects[len(objects)-1].Move(fyne.NewPos(theme.Padding(), objects[len(objects)-2].Position().Y+l.list.itemMin.Height))
+		objects[len(objects)-1].Move(fyne.NewPos(0, objects[len(objects)-2].Position().Y+l.list.itemMin.Height))
 	} else {
-		objects[len(objects)-1].Move(fyne.NewPos(theme.Padding(), 0))
+		objects[len(objects)-1].Move(fyne.NewPos(0, 0))
 	}
-	objects[len(objects)-1].Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
+	objects[len(objects)-1].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 }
 
 func (l *listLayout) prependedItem(objects []fyne.CanvasObject) {
-	objects[0].Move(fyne.NewPos(theme.Padding(), objects[1].Position().Y-l.list.itemMin.Height))
-	objects[0].Resize(fyne.NewSize(l.list.size.Width-theme.Padding()*2, l.list.itemMin.Height))
+	objects[0].Move(fyne.NewPos(0, objects[1].Position().Y-l.list.itemMin.Height))
+	objects[0].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 }
