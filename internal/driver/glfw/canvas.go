@@ -27,7 +27,6 @@ type glCanvas struct {
 	overlays *overlayStack
 	padded   bool
 	size     fyne.Size
-	focused  fyne.Focusable
 	focusMgr *app.FocusManager
 
 	onTypedRune func(rune)
@@ -105,12 +104,11 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 
 func (c *glCanvas) SetContent(content fyne.CanvasObject) {
 	c.Lock()
-	c.content = content
-	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
+	c.setContent(content)
 
 	c.content.Resize(c.content.MinSize()) // give it the space it wants then calculate the real min
 	// the pass above makes some layouts wide enough to wrap, so we ask again what the true min is.
-	newSize := c.size.Union(c.canvasSize(c.content.MinSize()))
+	newSize := c.size.Max(c.canvasSize(c.content.MinSize()))
 	c.Unlock()
 
 	c.Resize(newSize)
@@ -164,44 +162,23 @@ func (c *glCanvas) Refresh(obj fyne.CanvasObject) {
 }
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
-	c.RLock()
-	focused := c.focused
-	c.RUnlock()
+	c.focusManager().Focus(obj)
+}
 
-	if focused == obj || obj == nil {
-		return
-	}
+func (c *glCanvas) FocusNext() {
+	c.focusManager().FocusNext()
+}
 
-	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-		c.Unfocus()
-		return
-	}
-
-	if focused != nil {
-		focused.FocusLost()
-	}
-
-	c.Lock()
-	c.focused = obj
-	c.Unlock()
-	obj.FocusGained()
+func (c *glCanvas) FocusPrevious() {
+	c.focusManager().FocusPrevious()
 }
 
 func (c *glCanvas) Unfocus() {
-	c.Lock()
-	focused := c.focused
-	c.focused = nil
-	c.Unlock()
-
-	if focused != nil {
-		focused.FocusLost()
-	}
+	c.focusManager().Focus(nil)
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {
-	c.RLock()
-	defer c.RUnlock()
-	return c.focused
+	return c.focusManager().Focused()
 }
 
 func (c *glCanvas) Resize(size fyne.Size) {
@@ -310,14 +287,43 @@ func (c *glCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyn
 	c.shortcut.AddShortcut(shortcut, handler)
 }
 
-func (c *glCanvas) objectTrees() []fyne.CanvasObject {
-	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+2)
-	trees = append(trees, c.content)
-	if c.menu != nil {
-		trees = append(trees, c.menu)
+func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
+	c.setMenuOverlay(nil)
+	if m == nil {
+		return
 	}
-	trees = append(trees, c.Overlays().List()...)
-	return trees
+	if hasNativeMenu() {
+		setupNativeMenu(w, m)
+	} else {
+		c.setMenuOverlay(buildMenuOverlay(m, c))
+	}
+}
+
+// canvasSize computes the needed canvas size for the given content size
+func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
+	canvasSize := contentSize.Add(fyne.NewSize(0, c.menuHeight()))
+	if c.Padded() {
+		pad := theme.Padding() * 2
+		canvasSize = canvasSize.Add(fyne.NewSize(pad, pad))
+	}
+	return canvasSize
+}
+
+func (c *glCanvas) contentPos() fyne.Position {
+	contentPos := fyne.NewPos(0, c.menuHeight())
+	if c.Padded() {
+		contentPos = contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
+	}
+	return contentPos
+}
+
+func (c *glCanvas) contentSize(canvasSize fyne.Size) fyne.Size {
+	contentSize := fyne.NewSize(canvasSize.Width, canvasSize.Height-c.menuHeight())
+	if c.Padded() {
+		pad := theme.Padding() * 2
+		contentSize = contentSize.Subtract(fyne.NewSize(pad, pad))
+	}
+	return contentSize
 }
 
 func (c *glCanvas) ensureMinSize() bool {
@@ -346,7 +352,7 @@ func (c *glCanvas) ensureMinSize() bool {
 			} else {
 				windowNeedsMinSizeUpdate = true
 				size := obj.Size()
-				expectedSize := minSize.Union(size)
+				expectedSize := minSize.Max(size)
 				if expectedSize != size && size != c.size {
 					objToLayout = nil
 					obj.Resize(expectedSize)
@@ -366,7 +372,7 @@ func (c *glCanvas) ensureMinSize() bool {
 	shouldResize := windowNeedsMinSizeUpdate && (c.size.Width < min.Width || c.size.Height < min.Height)
 	c.RUnlock()
 	if shouldResize {
-		c.Resize(c.Size().Union(c.MinSize()))
+		c.Resize(c.Size().Max(c.MinSize()))
 	}
 
 	if lastParent != nil {
@@ -377,15 +383,41 @@ func (c *glCanvas) ensureMinSize() bool {
 	return windowNeedsMinSizeUpdate
 }
 
-func updateLayout(objToLayout fyne.CanvasObject) {
-	switch cont := objToLayout.(type) {
-	case *fyne.Container:
-		if cont.Layout != nil {
-			cont.Layout.Layout(cont.Objects, cont.Size())
-		}
-	case fyne.Widget:
-		cache.Renderer(cont).Layout(cont.Size())
+func (c *glCanvas) focusManager() *app.FocusManager {
+	c.RLock()
+	defer c.RUnlock()
+	return c.focusMgr
+}
+
+func (c *glCanvas) isDirty() bool {
+	c.dirtyMutex.Lock()
+	defer c.dirtyMutex.Unlock()
+
+	return c.dirty
+}
+
+func (c *glCanvas) menuHeight() int {
+	switch c.menuOverlay() {
+	case nil:
+		// no menu or native menu -> does not consume space on the canvas
+		return 0
+	default:
+		return c.menuOverlay().MinSize().Height
 	}
+}
+
+func (c *glCanvas) menuOverlay() fyne.CanvasObject {
+	return c.menu
+}
+
+func (c *glCanvas) objectTrees() []fyne.CanvasObject {
+	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+2)
+	trees = append(trees, c.content)
+	if c.menu != nil {
+		trees = append(trees, c.menu)
+	}
+	trees = append(trees, c.Overlays().List()...)
+	return trees
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
@@ -415,19 +447,39 @@ func (c *glCanvas) paint(size fyne.Size) {
 	c.walkTrees(paint, afterPaint)
 }
 
-func (c *glCanvas) walkTrees(
-	beforeChildren func(*renderCacheNode, fyne.Position),
-	afterChildren func(*renderCacheNode),
-) {
-	c.walkTree(c.contentTree, beforeChildren, afterChildren)
-	if c.menu != nil {
-		c.walkTree(c.menuTree, beforeChildren, afterChildren)
-	}
-	for _, tree := range c.overlays.renderCaches {
-		if tree != nil {
-			c.walkTree(tree, beforeChildren, afterChildren)
+func (c *glCanvas) setContent(content fyne.CanvasObject) {
+	c.content = content
+	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
+	c.focusMgr = app.NewFocusManager(c.content)
+}
+
+func (c *glCanvas) setDirty(dirty bool) {
+	c.dirtyMutex.Lock()
+	defer c.dirtyMutex.Unlock()
+
+	c.dirty = dirty
+}
+
+func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
+	c.Lock()
+	c.menu = b
+	c.menuTree = &renderCacheTree{root: &renderCacheNode{obj: c.menu}}
+	c.Unlock()
+}
+
+func (c *glCanvas) setupThemeListener() {
+	listener := make(chan fyne.Settings)
+	fyne.CurrentApp().Settings().AddChangeListener(listener)
+	go func() {
+		for {
+			<-listener
+			if c.menu != nil {
+				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
+			}
+
+			c.SetPadded(c.padded) // refresh the padding for potential theme differences
 		}
-	}
+	}()
 }
 
 func (c *glCanvas) walkTree(
@@ -484,108 +536,43 @@ func (c *glCanvas) walkTree(
 	driver.WalkVisibleObjectTree(tree.root.obj, bc, ac)
 }
 
-func (c *glCanvas) setDirty(dirty bool) {
-	c.dirtyMutex.Lock()
-	defer c.dirtyMutex.Unlock()
-
-	c.dirty = dirty
-}
-
-func (c *glCanvas) isDirty() bool {
-	c.dirtyMutex.Lock()
-	defer c.dirtyMutex.Unlock()
-
-	return c.dirty
-}
-
-func (c *glCanvas) setupThemeListener() {
-	listener := make(chan fyne.Settings)
-	fyne.CurrentApp().Settings().AddChangeListener(listener)
-	go func() {
-		for {
-			<-listener
-			if c.menu != nil {
-				app.ApplyThemeTo(c.menu, c) // Ensure our menu gets the theme change message as it's out-of-tree
-			}
-
-			c.SetPadded(c.padded) // refresh the padding for potential theme differences
+func (c *glCanvas) walkTrees(
+	beforeChildren func(*renderCacheNode, fyne.Position),
+	afterChildren func(*renderCacheNode),
+) {
+	c.walkTree(c.contentTree, beforeChildren, afterChildren)
+	if c.menu != nil {
+		c.walkTree(c.menuTree, beforeChildren, afterChildren)
+	}
+	for _, tree := range c.overlays.renderCaches {
+		if tree != nil {
+			c.walkTree(tree, beforeChildren, afterChildren)
 		}
-	}()
-}
-
-func (c *glCanvas) buildMenu(w *window, m *fyne.MainMenu) {
-	c.setMenuOverlay(nil)
-	if m == nil {
-		return
 	}
-	if hasNativeMenu() {
-		setupNativeMenu(w, m)
-	} else {
-		c.setMenuOverlay(buildMenuOverlay(m, c))
-	}
-}
-
-func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
-	c.Lock()
-	c.menu = b
-	c.menuTree = &renderCacheTree{root: &renderCacheNode{obj: c.menu}}
-	c.Unlock()
-}
-
-func (c *glCanvas) menuOverlay() fyne.CanvasObject {
-	return c.menu
-}
-
-func (c *glCanvas) menuHeight() int {
-	switch c.menuOverlay() {
-	case nil:
-		// no menu or native menu -> does not consume space on the canvas
-		return 0
-	default:
-		return c.menuOverlay().MinSize().Height
-	}
-}
-
-// canvasSize computes the needed canvas size for the given content size
-func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
-	canvasSize := contentSize.Add(fyne.NewSize(0, c.menuHeight()))
-	if c.Padded() {
-		pad := theme.Padding() * 2
-		canvasSize = canvasSize.Add(fyne.NewSize(pad, pad))
-	}
-	return canvasSize
-}
-
-func (c *glCanvas) contentSize(canvasSize fyne.Size) fyne.Size {
-	contentSize := fyne.NewSize(canvasSize.Width, canvasSize.Height-c.menuHeight())
-	if c.Padded() {
-		pad := theme.Padding() * 2
-		contentSize = contentSize.Subtract(fyne.NewSize(pad, pad))
-	}
-	return contentSize
-}
-
-func (c *glCanvas) contentPos() fyne.Position {
-	contentPos := fyne.NewPos(0, c.menuHeight())
-	if c.Padded() {
-		contentPos = contentPos.Add(fyne.NewPos(theme.Padding(), theme.Padding()))
-	}
-	return contentPos
 }
 
 func newCanvas() *glCanvas {
 	c := &glCanvas{scale: 1.0, texScale: 1.0}
-	c.content = &canvas.Rectangle{FillColor: theme.BackgroundColor()}
-	c.contentTree = &renderCacheTree{root: &renderCacheNode{obj: c.content}}
+	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
 	c.padded = true
 
 	c.overlays = &overlayStack{onChange: func() { c.setDirty(true) }}
 
-	c.focusMgr = app.NewFocusManager(c)
 	c.refreshQueue = make(chan fyne.CanvasObject, 4096)
 	c.dirtyMutex = &sync.Mutex{}
 
 	c.setupThemeListener()
 
 	return c
+}
+
+func updateLayout(objToLayout fyne.CanvasObject) {
+	switch cont := objToLayout.(type) {
+	case *fyne.Container:
+		if cont.Layout != nil {
+			cont.Layout.Layout(cont.Objects, cont.Size())
+		}
+	case fyne.Widget:
+		cache.Renderer(cont).Layout(cont.Size())
+	}
 }
