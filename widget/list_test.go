@@ -35,11 +35,8 @@ func TestList_Resize(t *testing.T) {
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
 	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
-	poolCount := test.WidgetRenderer(list).(*listRenderer).itemPool.Count()
-
 	assert.Equal(t, 0, firstItemIndex)
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
-	assert.Equal(t, poolCount, 5)
 
 	list.Resize(fyne.NewSize(200, 2000))
 
@@ -48,14 +45,12 @@ func TestList_Resize(t *testing.T) {
 	newFirstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	newLastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
 	newVisibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
-	poolCount = test.WidgetRenderer(list).(*listRenderer).itemPool.Count()
 
 	assert.Equal(t, firstItemIndex, newFirstItemIndex)
 	assert.NotEqual(t, lastItemIndex, newLastItemIndex)
 	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange)
 	assert.NotEqual(t, visibleCount, newVisibleCount)
 	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex+1)
-	assert.Equal(t, poolCount, 5)
 }
 
 func TestList_OffsetChange(t *testing.T) {
@@ -66,11 +61,9 @@ func TestList_OffsetChange(t *testing.T) {
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
 	visibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
-	poolCount := test.WidgetRenderer(list).(*listRenderer).itemPool.Count()
 
 	assert.Equal(t, 0, firstItemIndex)
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex)
-	assert.Equal(t, poolCount, 5)
 
 	scroll := test.WidgetRenderer(list).(*listRenderer).scroller
 	scroll.Scrolled(&fyne.ScrollEvent{DeltaX: 0, DeltaY: -300})
@@ -80,7 +73,6 @@ func TestList_OffsetChange(t *testing.T) {
 	newFirstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	newLastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
 	newVisibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
-	poolCount = test.WidgetRenderer(list).(*listRenderer).itemPool.Count()
 
 	assert.NotEqual(t, firstItemIndex, newFirstItemIndex)
 	assert.Equal(t, newFirstItemIndex, firstItemIndex+indexChange-1)
@@ -88,7 +80,6 @@ func TestList_OffsetChange(t *testing.T) {
 	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange-1)
 	assert.Equal(t, visibleCount, newVisibleCount)
 	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex)
-	assert.Equal(t, poolCount, 5)
 }
 
 func TestList_Hover(t *testing.T) {
