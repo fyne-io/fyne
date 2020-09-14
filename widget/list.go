@@ -153,6 +153,7 @@ func (l *listRenderer) Refresh() {
 		l.list.itemMin = newListItem(f(), nil).MinSize()
 	}
 	l.Layout(l.list.Size())
+	l.scroller.Refresh()
 	canvas.Refresh(l.list.super())
 }
 
