@@ -4,10 +4,8 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
@@ -16,22 +14,11 @@ import (
 type preferences struct {
 	*internal.InMemoryPreferences
 
-	appID string
-	app   *fyneApp
+	app *fyneApp
 }
 
 // Declare conformity with Preferences interface
 var _ fyne.Preferences = (*preferences)(nil)
-
-func (p *preferences) uniqueID() string {
-	if p.appID != "" {
-		return p.appID
-	}
-
-	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
-	p.appID = fmt.Sprintf("missing-id-%d", time.Now().Unix()) // This is a fake unique - it just has to not be reused...
-	return p.appID
-}
 
 func (p *preferences) save() error {
 	return p.saveToFile(p.storagePath())
@@ -59,8 +46,7 @@ func (p *preferences) saveToFile(path string) error {
 	return encode.Encode(&values)
 }
 
-func (p *preferences) load(appID string) {
-	p.appID = appID
+func (p *preferences) load(_ string) {
 	err := p.loadFromFile(p.storagePath())
 	if err != nil {
 		fyne.LogError("Preferences load error:", err)
