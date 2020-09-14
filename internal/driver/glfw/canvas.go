@@ -352,6 +352,9 @@ func (c *glCanvas) ensureMinSize() bool {
 func (c *glCanvas) focusManager() *app.FocusManager {
 	c.RLock()
 	defer c.RUnlock()
+	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
+		return focusMgr
+	}
 	return c.focusMgr
 }
 
@@ -384,6 +387,21 @@ func (c *glCanvas) objectTrees() []fyne.CanvasObject {
 	}
 	trees = append(trees, c.Overlays().List()...)
 	return trees
+}
+
+func (c *glCanvas) overlayChanged(prevFocusMgr *app.FocusManager) {
+	c.setDirty(true)
+	c.RLock()
+	if prevFocusMgr == nil {
+		prevFocusMgr = c.focusMgr
+	}
+	focusMgr := c.overlays.TopFocusManager()
+	if focusMgr == nil {
+		focusMgr = c.focusMgr
+	}
+	c.RUnlock()
+	prevFocusMgr.FocusLost()
+	focusMgr.FocusGained()
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
@@ -521,7 +539,7 @@ type overlayStack struct {
 	internal.OverlayStack
 
 	focusManagers []*app.FocusManager
-	onChange      func()
+	onChange      func(prevFocusMgr *app.FocusManager)
 	renderCaches  []*renderCacheTree
 }
 
@@ -529,18 +547,28 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
+	pfm := o.TopFocusManager()
 	o.OverlayStack.Add(overlay)
 	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &renderCacheNode{obj: overlay}})
 	o.focusManagers = append(o.focusManagers, app.NewFocusManager(overlay))
-	o.onChange()
+	o.onChange(pfm)
 }
 
 func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
+	top := o.TopFocusManager()
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 	o.renderCaches = o.renderCaches[:overlayCount]
 	o.focusManagers = o.focusManagers[:overlayCount]
-	o.onChange()
+	o.onChange(top)
+}
+
+func (o *overlayStack) TopFocusManager() *app.FocusManager {
+	var pfm *app.FocusManager
+	if len(o.focusManagers) > 0 {
+		pfm = o.focusManagers[len(o.focusManagers)-1]
+	}
+	return pfm
 }
 
 type renderCacheNode struct {
@@ -568,7 +596,7 @@ func newCanvas() *glCanvas {
 	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
 	c.padded = true
 
-	c.overlays = &overlayStack{onChange: func() { c.setDirty(true) }}
+	c.overlays = &overlayStack{onChange: c.overlayChanged}
 
 	c.refreshQueue = make(chan fyne.CanvasObject, 4096)
 	c.dirtyMutex = &sync.Mutex{}

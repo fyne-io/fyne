@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
@@ -162,6 +163,77 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	c.Refresh(rightObj2)
 
 	assert.Nil(t, layout.popLayoutEvent())
+}
+
+func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
+	w := createWindow("Test")
+	w.SetPadded(false)
+	c := w.Canvas().(*glCanvas)
+
+	ce1 := &focusable{id: "ce1"}
+	ce2 := &focusable{id: "ce2"}
+	content := layout.NewVBoxContainer(ce1, ce2)
+	o1e1 := &focusable{id: "o1e1"}
+	o1e2 := &focusable{id: "o1e2"}
+	overlay1 := layout.NewVBoxContainer(o1e1, o1e2)
+	o2e1 := &focusable{id: "o2e1"}
+	o2e2 := &focusable{id: "o2e2"}
+	overlay2 := layout.NewVBoxContainer(o2e1, o2e2)
+	w.SetContent(content)
+
+	assert.Nil(t, c.Focused())
+
+	c.FocusPrevious()
+	assert.Equal(t, ce2, c.Focused())
+	assert.True(t, ce2.focused)
+
+	c.Overlays().Add(overlay1)
+	ctxt := "adding overlay removes focus from content"
+	assert.Nil(t, c.Focused(), ctxt)
+	assert.False(t, ce2.focused, ctxt)
+
+	c.FocusNext()
+	ctxt = "changing focus affects overlay instead of content"
+	assert.Equal(t, o1e1, c.Focused(), ctxt)
+	assert.False(t, ce1.focused, ctxt)
+	assert.False(t, ce2.focused, ctxt)
+	assert.True(t, o1e1.focused, ctxt)
+
+	c.Overlays().Add(overlay2)
+	ctxt = "adding overlay removes focus from previous overlay"
+	assert.Nil(t, c.Focused(), ctxt)
+	assert.False(t, o1e1.focused, ctxt)
+
+	c.FocusPrevious()
+	ctxt = "changing focus affects top overlay only"
+	assert.Equal(t, o2e2, c.Focused(), ctxt)
+	assert.False(t, o1e1.focused, ctxt)
+	assert.False(t, o1e2.focused, ctxt)
+	assert.True(t, o2e2.focused, ctxt)
+
+	c.FocusNext()
+	assert.Equal(t, o2e1, c.Focused())
+	assert.False(t, o2e2.focused)
+	assert.True(t, o2e1.focused)
+
+	c.Overlays().Remove(overlay2)
+	ctxt = "removing overlay removes focus from removed overlay and restores focus on new top overlay"
+	assert.Equal(t, o1e1, c.Focused(), ctxt)
+	assert.False(t, o2e1.focused, ctxt)
+	assert.False(t, o2e2.focused, ctxt)
+	assert.True(t, o1e1.focused, ctxt)
+
+	c.FocusPrevious()
+	assert.Equal(t, o1e2, c.Focused())
+	assert.False(t, o1e1.focused)
+	assert.True(t, o1e2.focused)
+
+	c.Overlays().Remove(overlay1)
+	ctxt = "removing last overlay removes focus from removed overlay and restores focus on content"
+	assert.Equal(t, ce2, c.Focused(), ctxt)
+	assert.False(t, o1e1.focused, ctxt)
+	assert.False(t, o1e2.focused, ctxt)
+	assert.True(t, ce2.focused, ctxt)
 }
 
 func TestGlCanvas_InsufficientSizeDoesntTriggerResizeIfSizeIsAlreadyMaxedOut(t *testing.T) {
