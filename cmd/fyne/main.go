@@ -29,6 +29,7 @@ func main() {
 	rootCmd.AddCommand(envCmd())
 	rootCmd.AddCommand(installCmd())
 	rootCmd.AddCommand(bundleCmd())
+	rootCmd.AddCommand(packageCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

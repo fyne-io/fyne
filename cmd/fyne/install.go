@@ -21,7 +21,9 @@ func (i *installer) validate() error {
 }
 
 func (i *installer) install(ccmd *cobra.Command, args []string) error {
-	return i.validate()
+	if err := i.validate(); err != nil {
+		return err
+	}
 
 	p := i.packager
 

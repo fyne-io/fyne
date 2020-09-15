@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"github.com/spf13/cobra"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -332,22 +332,6 @@ func (p *packager) packageIOS() error {
 	return copyFile(p.icon, iconPath)
 }
 
-func (p *packager) addFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, ios, linux, windows)")
-	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
-	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
-	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
-	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
-	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
-	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
-}
-
-func (*packager) printHelp(indent string) {
-	fmt.Println(indent, "The package command prepares an application for distribution.")
-	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
-	fmt.Println(indent, "Command usage: fyne package [parameters]")
-}
-
 func (p *packager) buildPackage() error {
 	b := &builder{
 		os:     p.os,
@@ -355,20 +339,6 @@ func (p *packager) buildPackage() error {
 	}
 
 	return b.build()
-}
-
-func (p *packager) run(_ []string) {
-	err := p.validate()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
-
-	err = p.doPackage()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
-	}
 }
 
 func (p *packager) validate() error {
@@ -470,4 +440,36 @@ func (p *packager) doPackage() error {
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
+}
+
+func (p *packager) run(ccmd *cobra.Command, args []string) error {
+	if err := p.validate(); err != nil {
+		return err
+	}
+
+	if err := p.doPackage(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func packageCmd() *cobra.Command {
+	p := &packager{}
+	cmd := &cobra.Command{
+		Use:   "package",
+		Short: "Prepares an application for distribution",
+		Long:  "The package command prepares an application for distribution. You may specify the -executable to package, otherwise -sourceDir will be built.",
+		RunE:  p.run,
+	}
+
+	cmd.PersistentFlags().StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, ios, linux, windows)")
+	cmd.PersistentFlags().StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
+	cmd.PersistentFlags().StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
+	cmd.PersistentFlags().StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
+	cmd.PersistentFlags().StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
+	cmd.PersistentFlags().StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	cmd.PersistentFlags().BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
+
+	return cmd
 }

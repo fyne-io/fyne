@@ -41,8 +41,6 @@ func get(ccmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to set up installer: %v", err)
 	}
 	return install.install(nil, nil)
-
-	return nil
 }
 
 func getCmd() *cobra.Command {
