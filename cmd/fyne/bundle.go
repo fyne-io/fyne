@@ -83,7 +83,7 @@ func dirBundle(pkg, prefix string, noheader bool, dirpath string) {
 
 func (b *bundler) bundle(ccmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("Missing required file or directory parameter after flags")
+		return fmt.Errorf("missing required file or directory parameter after flags")
 	}
 
 	switch stat, err := os.Stat(args[0]); {

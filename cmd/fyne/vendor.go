@@ -119,16 +119,16 @@ func vendor(ccmd *cobra.Command, args []string) error {
 	fmt.Printf("Parsing %s to detect dependency module path for GLFW\n", goModVendorFile)
 	f, err := os.Open(filepath.Join(wd, goModVendorFile)) // #nosec
 	if err != nil {
-		return fmt.Errorf("cannot open %s: %v\n", goModVendorFile, err)
+		return fmt.Errorf("cannot open %s: %v", goModVendorFile, err)
 	}
 	defer f.Close()
 
 	glwfModPath, glfwModDest, err := cacheModPath(f)
 	if err != nil {
-		return fmt.Errorf("cannot read %s: %v\n", goModVendorFile, err)
+		return fmt.Errorf("cannot read %s: %v", goModVendorFile, err)
 	}
 	if glwfModPath == "" {
-		return fmt.Errorf("cannot find GLFW module in %s\n", goModVendorFile)
+		return fmt.Errorf("cannot find GLFW module in %s", goModVendorFile)
 	}
 
 	fmt.Printf("Package module path: %s\n", glwfModPath)
@@ -142,7 +142,7 @@ func vendor(ccmd *cobra.Command, args []string) error {
 	fmt.Printf("Copying glwf c source code: %s -> %s\n", glwfModSrc, glwfModTarget)
 	err = recursiveCopy(glwfModSrc, glwfModTarget)
 	if err != nil {
-		return fmt.Errorf("cannot copy glfw c source code: %v\n", err)
+		return fmt.Errorf("cannot copy glfw c source code: %v", err)
 	}
 
 	fmt.Println("All set. To test using vendor dependencies: go test ./... -mod=vendor -v -count=1")
