@@ -21,24 +21,23 @@ var _ fyne.Widget = (*validationStatus)(nil)
 type validationStatus struct {
 	BaseWidget
 	entry *Entry
-	icon  *canvas.Image
 }
 
 func newValidationStatus(e *Entry) *validationStatus {
 	rs := &validationStatus{
-		icon:  canvas.NewImageFromResource(theme.ConfirmIcon()),
 		entry: e,
 	}
 
 	rs.ExtendBaseWidget(rs)
-	rs.icon.Hide()
 	return rs
 }
 
 func (r *validationStatus) CreateRenderer() fyne.WidgetRenderer {
+	icon := &canvas.Image{}
+	icon.Hide()
 	return &validationStatusRenderer{
-		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{r.icon}),
-		icon:         r.icon,
+		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{icon}),
+		icon:         icon,
 		entry:        r.entry,
 	}
 }
@@ -72,7 +71,7 @@ func (r *validationStatusRenderer) Refresh() {
 	if r.entry.validationError == nil {
 		r.icon.Resource = theme.ConfirmIcon()
 		r.icon.Show()
-	} else if !r.entry.Focused() {
+	} else if !r.entry.focused {
 		r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
 		r.icon.Show()
 	} else {

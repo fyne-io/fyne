@@ -74,6 +74,7 @@ func (s Size) Subtract(s2 Size) Size {
 }
 
 // Union returns a new Size that is the maximum of the current Size and s2.
+//
 // Deprecated: use Max() instead
 func (s Size) Union(s2 Size) Size {
 	return s.Max(s2)

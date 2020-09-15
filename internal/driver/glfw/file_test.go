@@ -17,9 +17,10 @@ import (
 func TestGLDriver_FileReaderForURI(t *testing.T) {
 	uri, _ := testURI("text.txt")
 	read, err := NewGLDriver().FileReaderForURI(uri)
+	assert.Nil(t, err)
+
 	defer read.Close()
 
-	assert.Nil(t, err)
 	assert.Equal(t, uri, read.URI())
 
 	data, err := ioutil.ReadAll(read)
@@ -35,9 +36,10 @@ func TestGLDriver_FileWriterForURI(t *testing.T) {
 	uri, path := testURI("text2.txt")
 	defer os.Remove(path)
 	write, err := NewGLDriver().FileWriterForURI(uri)
+	assert.Nil(t, err)
+
 	defer write.Close()
 
-	assert.Nil(t, err)
 	assert.Equal(t, uri, write.URI())
 
 	count, err := write.Write([]byte("another"))

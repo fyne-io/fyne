@@ -4,62 +4,121 @@ import (
 	"testing"
 
 	"fyne.io/fyne/internal/app"
-	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFocusManager_FocusNext(t *testing.T) {
-	c := test.NewCanvas()
-	entry1 := widget.NewEntry()
+func TestFocusManager_Focus(t *testing.T) {
+	entry1 := &focusable{}
 	hidden := widget.NewCheck("test", func(bool) {})
 	hidden.Hide()
-	entry2 := widget.NewEntry()
+	entry2 := &focusable{}
 	disabled := widget.NewCheck("test", func(bool) {})
 	disabled.Disable()
-	entry3 := widget.NewEntry()
-	c.SetContent(widget.NewVBox(entry1, hidden, entry2, disabled, entry3))
+	entry3 := &focusable{}
+	c := widget.NewVBox(entry1, hidden, entry2, disabled, entry3)
 
 	manager := app.NewFocusManager(c)
-	assert.Nil(t, c.Focused())
+	assert.Nil(t, manager.Focused())
 
-	manager.FocusNext(nil)
-	assert.Equal(t, entry1, c.Focused())
+	manager.Focus(entry2)
+	assert.Equal(t, entry2, manager.Focused())
+	assert.True(t, entry2.focused)
 
-	manager.FocusNext(entry1)
-	assert.Equal(t, entry2, c.Focused())
+	manager.Focus(entry1)
+	assert.Equal(t, entry1, manager.Focused())
+	assert.True(t, entry1.focused)
+	assert.False(t, entry2.focused)
 
-	manager.FocusNext(entry2)
-	assert.Equal(t, entry3, c.Focused())
+	manager.Focus(entry3)
+	assert.Equal(t, entry3, manager.Focused())
+	assert.True(t, entry3.focused)
+	assert.False(t, entry1.focused)
 
-	manager.FocusNext(entry3)
-	assert.Equal(t, entry1, c.Focused())
+	manager.Focus(nil)
+	assert.Nil(t, manager.Focused())
+	assert.False(t, entry3.focused)
+}
+
+func TestFocusManager_FocusNext(t *testing.T) {
+	entry1 := &focusable{}
+	hidden := widget.NewCheck("test", func(bool) {})
+	hidden.Hide()
+	entry2 := &focusable{}
+	disabled := widget.NewCheck("test", func(bool) {})
+	disabled.Disable()
+	entry3 := &focusable{}
+	c := widget.NewVBox(entry1, hidden, entry2, disabled, entry3)
+
+	manager := app.NewFocusManager(c)
+	assert.Nil(t, manager.Focused())
+
+	manager.FocusNext()
+	assert.Equal(t, entry1, manager.Focused())
+	assert.True(t, entry1.focused)
+
+	manager.FocusNext()
+	assert.Equal(t, entry2, manager.Focused())
+	assert.True(t, entry2.focused)
+	assert.False(t, entry1.focused)
+
+	manager.FocusNext()
+	assert.Equal(t, entry3, manager.Focused())
+	assert.True(t, entry3.focused)
+	assert.False(t, entry2.focused)
+
+	manager.FocusNext()
+	assert.Equal(t, entry1, manager.Focused())
+	assert.True(t, entry1.focused)
+	assert.False(t, entry3.focused)
 }
 
 func TestFocusManager_FocusPrevious(t *testing.T) {
-	c := test.NewCanvas()
-	entry1 := widget.NewEntry()
+	entry1 := &focusable{}
 	hidden := widget.NewCheck("test", func(bool) {})
 	hidden.Hide()
-	entry2 := widget.NewEntry()
+	entry2 := &focusable{}
 	disabled := widget.NewCheck("test", func(bool) {})
 	disabled.Disable()
-	entry3 := widget.NewEntry()
-	c.SetContent(widget.NewVBox(entry1, hidden, entry2, disabled, entry3))
+	entry3 := &focusable{}
+	c := widget.NewVBox(entry1, hidden, entry2, disabled, entry3)
 
 	manager := app.NewFocusManager(c)
-	assert.Nil(t, c.Focused())
+	assert.Nil(t, manager.Focused())
 
-	manager.FocusPrevious(nil)
-	assert.Equal(t, entry3, c.Focused())
+	manager.FocusPrevious()
+	assert.Equal(t, entry3, manager.Focused())
+	assert.True(t, entry3.focused)
 
-	manager.FocusPrevious(entry3)
-	assert.Equal(t, entry2, c.Focused())
+	manager.FocusPrevious()
+	assert.Equal(t, entry2, manager.Focused())
+	assert.True(t, entry2.focused)
+	assert.False(t, entry3.focused)
 
-	manager.FocusPrevious(entry2)
-	assert.Equal(t, entry1, c.Focused())
+	manager.FocusPrevious()
+	assert.Equal(t, entry1, manager.Focused())
+	assert.True(t, entry1.focused)
+	assert.False(t, entry2.focused)
 
-	manager.FocusPrevious(entry1)
-	assert.Equal(t, entry3, c.Focused())
+	manager.FocusPrevious()
+	assert.Equal(t, entry3, manager.Focused())
+	assert.True(t, entry3.focused)
+	assert.False(t, entry1.focused)
+}
+
+type focusable struct {
+	widget.Entry
+	focused bool
+}
+
+func (f *focusable) FocusGained() {
+	if f.Disabled() {
+		return
+	}
+	f.focused = true
+}
+
+func (f *focusable) FocusLost() {
+	f.focused = false
 }
