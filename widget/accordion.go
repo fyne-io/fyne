@@ -138,17 +138,17 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	y := 0
 	for i, ai := range r.container.Items {
 		if i != 0 {
-			y += theme.Padding() * 2
-
 			div := r.dividers[i-1]
-			div.Move(fyne.NewPos(x, y-1-theme.Padding())) // middle of padding gap between items
+			div.Move(fyne.NewPos(x, y))
 			div.Resize(fyne.NewSize(size.Width, divHeight))
+			y += divHeight + theme.Padding()
 		}
+
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
 		min := h.MinSize().Height
 		h.Resize(fyne.NewSize(size.Width, min))
-		y += min + divHeight
+		y += min
 		if ai.Open {
 			y += theme.Padding()
 			d := ai.Detail
@@ -156,6 +156,10 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 			min := d.MinSize().Height
 			d.Resize(fyne.NewSize(size.Width, min))
 			y += min
+		}
+
+		if i < len(r.container.Items)-1 {
+			y += theme.Padding()
 		}
 	}
 }
