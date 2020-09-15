@@ -71,7 +71,7 @@ func (r *validationStatusRenderer) Refresh() {
 	if r.entry.validationError == nil {
 		r.icon.Resource = theme.ConfirmIcon()
 		r.icon.Show()
-	} else if !r.entry.Focused() {
+	} else if !r.entry.focused {
 		r.icon.Resource = theme.NewErrorThemedResource(theme.ErrorIcon())
 		r.icon.Show()
 	} else {
