@@ -39,7 +39,6 @@ type Tree struct {
 // Data must contain a mapping for the root, which defaults to empty string ("").
 func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 	t = &Tree{
-		open: make(map[string]bool),
 		Children: func(uid string) (c []string) {
 			c, _ = data[uid]
 			return
@@ -51,10 +50,9 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 		NewNode: func(branch bool) fyne.CanvasObject {
 			return NewLabel("")
 		},
-	}
-	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
-		l := node.(*Label)
-		l.SetText(uid)
+		UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {
+			node.(*Label).SetText(uid)
+		},
 	}
 	t.ExtendBaseWidget(t)
 	return
@@ -65,38 +63,37 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 	t = &Tree{
 		Root: root.String(),
-		open: make(map[string]bool),
-	}
-	t.Children = func(uid string) (c []string) {
-		luri, err := storage.ListerForURI(storage.NewURI(uid))
-		if err != nil {
-			fyne.LogError("Unable to get lister for "+uid, err)
-		} else {
-			uris, err := luri.List()
+		Children: func(uid string) (c []string) {
+			luri, err := storage.ListerForURI(storage.NewURI(uid))
 			if err != nil {
-				fyne.LogError("Unable to list "+luri.String(), err)
+				fyne.LogError("Unable to get lister for "+uid, err)
 			} else {
-				// TODO sort.Slice(uris, sorter)
-				for _, u := range uris {
-					c = append(c, u.String())
+				uris, err := luri.List()
+				if err != nil {
+					fyne.LogError("Unable to list "+luri.String(), err)
+				} else {
+					// TODO sort.Slice(uris, sorter)
+					for _, u := range uris {
+						c = append(c, u.String())
+					}
 				}
 			}
-		}
-		return
-	}
-	t.IsBranch = func(uid string) bool {
-		if strings.HasPrefix(uid, "file://") {
-			uid = uid[7:]
-		}
-		fi, err := os.Lstat(uid)
-		if err != nil {
-			fyne.LogError("Unable to stat path "+uid, err)
-			return false
-		}
-		return fi.IsDir()
-	}
-	t.NewNode = func(branch bool) fyne.CanvasObject {
-		return NewHBox(NewIcon(theme.FileIcon()), NewLabel("Name"))
+			return
+		},
+		IsBranch: func(uid string) bool {
+			if strings.HasPrefix(uid, "file://") {
+				uid = uid[7:]
+			}
+			fi, err := os.Lstat(uid)
+			if err != nil {
+				fyne.LogError("Unable to stat path "+uid, err)
+				return false
+			}
+			return fi.IsDir()
+		},
+		NewNode: func(branch bool) fyne.CanvasObject {
+			return NewHBox(NewIcon(theme.FileIcon()), NewLabel("Name"))
+		},
 	}
 	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
 		b := node.(*Box)
@@ -149,6 +146,7 @@ func (t *Tree) IsBranchOpen(uid string) bool {
 	if uid == t.Root {
 		return true // Root is always open
 	}
+	t.ensureOpenMap()
 	t.propertyLock.RLock()
 	defer t.propertyLock.RUnlock()
 	return t.open[uid]
@@ -156,6 +154,7 @@ func (t *Tree) IsBranchOpen(uid string) bool {
 
 // OpenBranch opens the branch with the given Unique ID.
 func (t *Tree) OpenBranch(uid string) {
+	t.ensureOpenMap()
 	t.propertyLock.Lock()
 	t.open[uid] = true
 	t.propertyLock.Unlock()
@@ -167,6 +166,7 @@ func (t *Tree) OpenBranch(uid string) {
 
 // CloseBranch closes the branch with the given Unique ID.
 func (t *Tree) CloseBranch(uid string) {
+	t.ensureOpenMap()
 	t.propertyLock.Lock()
 	t.open[uid] = false
 	t.propertyLock.Unlock()
@@ -187,6 +187,7 @@ func (t *Tree) ToggleBranch(uid string) {
 
 // OpenAllBranches opens all branches in the tree.
 func (t *Tree) OpenAllBranches() {
+	t.ensureOpenMap()
 	t.Walk(func(uid string, branch bool, depth int) {
 		if branch {
 			t.propertyLock.Lock()
@@ -236,6 +237,14 @@ func (t *Tree) walk(uid string, depth int, onNode func(string, bool, int)) {
 		} else {
 			onNode(uid, false, depth)
 		}
+	}
+}
+
+func (t *Tree) ensureOpenMap() {
+	t.propertyLock.Lock()
+	defer t.propertyLock.Unlock()
+	if t.open == nil {
+		t.open = make(map[string]bool)
 	}
 }
 

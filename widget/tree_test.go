@@ -18,13 +18,53 @@ import (
 )
 
 func TestTree(t *testing.T) {
-	t.Run("Initializer", func(t *testing.T) {
+	t.Run("Initializer_Empty", func(t *testing.T) {
 		tree := &widget.Tree{}
 		var nodes []string
 		tree.Walk(func(uid string, branch bool, depth int) {
 			nodes = append(nodes, uid)
 		})
 		assert.Equal(t, 0, len(nodes))
+	})
+	t.Run("Initializer_Populated", func(t *testing.T) {
+		tree := &widget.Tree{
+			Children: func(uid string) (children []string) {
+				if uid == "" {
+					children = append(children, "a", "b", "c")
+				} else if uid == "c" {
+					children = append(children, "d", "e", "f")
+				}
+				return
+			},
+			IsBranch: func(uid string) bool {
+				return uid == "" || uid == "c"
+			},
+			NewNode: func(branch bool) fyne.CanvasObject {
+				return &widget.Label{}
+			},
+			UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {
+				node.(*widget.Label).SetText(uid)
+			},
+		}
+		tree.OpenBranch("c")
+		var branches []string
+		var leaves []string
+		tree.Walk(func(uid string, branch bool, depth int) {
+			if branch {
+				branches = append(branches, uid)
+			} else {
+				leaves = append(leaves, uid)
+			}
+		})
+		assert.Equal(t, 2, len(branches))
+		assert.Equal(t, "", branches[0])
+		assert.Equal(t, "c", branches[1])
+		assert.Equal(t, 5, len(leaves))
+		assert.Equal(t, "a", leaves[0])
+		assert.Equal(t, "b", leaves[1])
+		assert.Equal(t, "d", leaves[2])
+		assert.Equal(t, "e", leaves[3])
+		assert.Equal(t, "f", leaves[4])
 	})
 	t.Run("NewTreeWithStrings", func(t *testing.T) {
 		data := make(map[string][]string)
