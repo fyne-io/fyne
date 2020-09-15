@@ -68,7 +68,7 @@ matrix:
   include:
     - go: 1.12.x
       os: linux
-      env: RUN_CODE_CHECKS=on GO111MODULE=on GOFLAGS=
+      env: GO111MODULE=on GOFLAGS=
     - go: 1.14.x
       os: linux
       env: GO111MODULE=off GOFLAGS=
@@ -89,4 +89,4 @@ matrix:
       env: GO111MODULE=off GOFLAGS=
     - go: 1.15.x
       os: linux
-      env: GO111MODULE=on GOFLAGS=-tags=mobile
+      env: RUN_CODE_CHECKS=on GO111MODULE=on GOFLAGS=-tags=mobile
