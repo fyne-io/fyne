@@ -22,10 +22,9 @@ func versionCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Deprecated: Prints version information",
-		RunE: func(ccmd *cobra.Command, args []string) error {
+		Run: func(ccmd *cobra.Command, args []string) {
 			fmt.Println("fyne cli version", version)
 			fmt.Println("Deprecated: use --version or -v in the future")
-			return nil
 		},
 	}
 }
@@ -38,12 +37,12 @@ func main() {
 	version = info.Main.Version
 	rootCmd.Version = version
 
-	rootCmd.AddCommand(getCmd())
-	rootCmd.AddCommand(vendorCmd())
-	rootCmd.AddCommand(envCmd())
-	rootCmd.AddCommand(installCmd())
 	rootCmd.AddCommand(bundleCmd())
+	rootCmd.AddCommand(envCmd())
+	rootCmd.AddCommand(getCmd())
+	rootCmd.AddCommand(installCmd())
 	rootCmd.AddCommand(packageCmd())
+	rootCmd.AddCommand(vendorCmd())
 	rootCmd.AddCommand(versionCmd())
 
 	if err := rootCmd.Execute(); err != nil {

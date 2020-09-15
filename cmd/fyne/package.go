@@ -334,8 +334,9 @@ func (p *packager) packageIOS() error {
 
 func (p *packager) buildPackage() error {
 	b := &builder{
-		os:     p.os,
-		srcdir: p.srcDir,
+		os:      p.os,
+		srcdir:  p.srcDir,
+		release: p.release,
 	}
 
 	return b.build()
@@ -463,7 +464,7 @@ func packageCmd() *cobra.Command {
 		RunE:  p.run,
 	}
 
-	cmd.PersistentFlags().StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, ios, linux, windows)")
+	cmd.PersistentFlags().StringVar(&p.os, "target", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, ios, linux, windows)")
 	cmd.PersistentFlags().StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	cmd.PersistentFlags().StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	cmd.PersistentFlags().StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
