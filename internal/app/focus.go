@@ -34,6 +34,20 @@ func (f *FocusManager) Focused() fyne.Focusable {
 	return f.focused
 }
 
+// FocusGained signals to the manager that its content got focus (due to window/overlay switch for instance).
+func (f *FocusManager) FocusGained() {
+	if focused := f.Focused(); focused != nil {
+		focused.FocusGained()
+	}
+}
+
+// FocusLost signals to the manager that its content lost focus (due to window/overlay switch for instance).
+func (f *FocusManager) FocusLost() {
+	if focused := f.Focused(); focused != nil {
+		focused.FocusLost()
+	}
+}
+
 // FocusNext will find the item after the current that can be focused and focus it.
 // If current is nil then the first focusable item in the canvas will be focused.
 func (f *FocusManager) FocusNext() {
