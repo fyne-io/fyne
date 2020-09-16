@@ -17,11 +17,9 @@ var (
 	minSizeA = NewLabel("A").MinSize()
 	minSizeB = NewLabel("B").MinSize()
 	minSizeC = NewLabel("C").MinSize()
-	minSizeD = NewLabel("D").MinSize()
 	minSize1 = NewLabel("11111").MinSize()
 	minSize2 = NewLabel("2222222222").MinSize()
 	minSize3 = NewLabel("333333333333333").MinSize()
-	minSize4 = NewLabel("44444444444444444444").MinSize()
 )
 
 func indentation() int {

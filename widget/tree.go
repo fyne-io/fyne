@@ -40,7 +40,7 @@ type Tree struct {
 func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 	t = &Tree{
 		Children: func(uid string) (c []string) {
-			c, _ = data[uid]
+			c = data[uid]
 			return
 		},
 		IsBranch: func(uid string) (b bool) {
@@ -81,12 +81,10 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 			return
 		},
 		IsBranch: func(uid string) bool {
-			if strings.HasPrefix(uid, "file://") {
-				uid = uid[7:]
-			}
-			fi, err := os.Lstat(uid)
+			path := strings.TrimPrefix(uid, "file://")
+			fi, err := os.Lstat(path)
 			if err != nil {
-				fyne.LogError("Unable to stat path "+uid, err)
+				fyne.LogError("Unable to stat path "+path, err)
 				return false
 			}
 			return fi.IsDir()
