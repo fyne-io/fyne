@@ -10,12 +10,12 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// Declare conformity with Widget interface
+// Declare conformity with Widget interface.
 var _ fyne.Widget = (*List)(nil)
 
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
-// List requires that all items are the same size
+// List requires that all items are the same size.
 type List struct {
 	BaseWidget
 
@@ -30,14 +30,14 @@ type List struct {
 }
 
 // NewList creates and returns a list widget for displaying items in
-// a vertical layout with scrolling and caching for performance
+// a vertical layout with scrolling and caching for performance.
 func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem func(index int, item fyne.CanvasObject)) *List {
 	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem, selectedIndex: -1}
 	list.ExtendBaseWidget(list)
 	return list
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 
@@ -53,14 +53,14 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	return newListRenderer(objects, l, scroller, layout)
 }
 
-// MinSize returns the size that this widget should not shrink below
+// MinSize returns the size that this widget should not shrink below.
 func (l *List) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
 
 	return l.BaseWidget.MinSize()
 }
 
-// Declare conformity with WidgetRenderer interface
+// Declare conformity with WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*listRenderer)(nil)
 
 type listRenderer struct {
@@ -114,7 +114,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 		l.itemPool = &syncPool{}
 	}
 
-	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize
+	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize.
 	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
 	if len(l.children) > l.visibleItemCount {
 		for i := len(l.children); i > l.visibleItemCount; i-- {
@@ -179,12 +179,12 @@ func (l *listRenderer) offsetChanged() {
 	offsetChange := int(math.Abs(float64(l.previousOffsetY - l.list.offsetY)))
 
 	if l.previousOffsetY < l.list.offsetY {
-		// Scrolling Down
+		// Scrolling Down.
 		l.scrollDown(offsetChange)
 		return
 
 	} else if l.previousOffsetY > l.list.offsetY {
-		// Scrolling Up
+		// Scrolling Up.
 		l.scrollUp(offsetChange)
 		return
 	}
@@ -268,7 +268,7 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 	}
 }
 
-// Declare conformity with interfaces
+// Declare conformity with interfaces.
 var _ fyne.Widget = (*listItem)(nil)
 var _ fyne.Tappable = (*listItem)(nil)
 var _ desktop.Hoverable = (*listItem)(nil)
@@ -293,7 +293,7 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 	return li
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
+// CreateRenderer is a private method to Fyne which links this widget to its renderer.
 func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
@@ -305,29 +305,29 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	return &listItemRenderer{widget.NewBaseRenderer(objects), li}
 }
 
-// MinSize returns the size that this widget should not shrink below
+// MinSize returns the size that this widget should not shrink below.
 func (li *listItem) MinSize() fyne.Size {
 	li.ExtendBaseWidget(li)
 	return li.BaseWidget.MinSize()
 }
 
-// MouseIn is called when a desktop pointer enters the widget
+// MouseIn is called when a desktop pointer enters the widget.
 func (li *listItem) MouseIn(*desktop.MouseEvent) {
 	li.hovered = true
 	li.Refresh()
 }
 
-// MouseMoved is called when a desktop pointer hovers over the widget
+// MouseMoved is called when a desktop pointer hovers over the widget.
 func (li *listItem) MouseMoved(*desktop.MouseEvent) {
 }
 
-// MouseOut is called when a desktop pointer exits the widget
+// MouseOut is called when a desktop pointer exits the widget.
 func (li *listItem) MouseOut() {
 	li.hovered = false
 	li.Refresh()
 }
 
-// Tapped is called when a pointer tapped event is captured and triggers any tap handler
+// Tapped is called when a pointer tapped event is captured and triggers any tap handler.
 func (li *listItem) Tapped(*fyne.PointEvent) {
 	if li.onTapped != nil {
 		li.selected = true
@@ -336,7 +336,7 @@ func (li *listItem) Tapped(*fyne.PointEvent) {
 	}
 }
 
-// Declare conformity with the WidgetRenderer interface
+// Declare conformity with the WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*listItemRenderer)(nil)
 
 type listItemRenderer struct {
@@ -354,7 +354,7 @@ func (li *listItemRenderer) MinSize() (size fyne.Size) {
 	return
 }
 
-// Layout the components of the listItem widget
+// Layout the components of the listItem widget.
 func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.item.statusIndicator.Move(fyne.NewPos(0, 0))
 	s := fyne.NewSize(theme.Padding(), size.Height-1)
@@ -381,7 +381,7 @@ func (li *listItemRenderer) Refresh() {
 	canvas.Refresh(li.item.super())
 }
 
-// Declare conformity with Layout interface
+// Declare conformity with Layout interface.
 var _ fyne.Layout = (*listLayout)(nil)
 
 type listLayout struct {
