@@ -1039,15 +1039,10 @@ func (w *window) charInput(_ *glfw.Window, char rune) {
 }
 
 func (w *window) focused(_ *glfw.Window, isFocused bool) {
-	focused := w.canvas.Focused()
-	if focused == nil {
-		return
-	}
-
 	if isFocused {
-		focused.FocusGained()
+		w.canvas.FocusGained()
 	} else {
-		focused.FocusLost()
+		w.canvas.FocusLost()
 	}
 }
 
