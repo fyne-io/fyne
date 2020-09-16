@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -53,9 +52,7 @@ func makeBorderLayout() *fyne.Container {
 	right := makeCell()
 	middle := widget.NewLabelWithStyle("BorderLayout", fyne.TextAlignCenter, fyne.TextStyle{})
 
-	borderLayout := layout.NewBorderLayout(top, bottom, left, right)
-	return fyne.NewContainerWithLayout(borderLayout,
-		top, bottom, left, right, middle)
+	return container.NewBorder(top, bottom, left, right, middle)
 }
 
 func makeBoxLayout() *fyne.Container {
@@ -65,11 +62,9 @@ func makeBoxLayout() *fyne.Container {
 	center := makeCell()
 	right := makeCell()
 
-	col := fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
-		top, middle, bottom)
+	col := container.NewVBox(top, middle, bottom)
 
-	return fyne.NewContainerWithLayout(layout.NewHBoxLayout(),
-		col, center, right)
+	return container.NewHBox(col, center, right)
 }
 
 func makeButtonList(count int) []fyne.CanvasObject {
@@ -91,8 +86,8 @@ func makeCardTab() fyne.CanvasObject {
 	card2.Image = canvas.NewImageFromResource(theme.FyneLogo())
 	card3 := widget.NewCard("Title 3", "Subtitle", widget.NewCheck("Check me", func(bool) {}))
 	card4 := widget.NewCard("Title 4", "Another card", widget.NewLabel("Content"))
-	return fyne.NewContainerWithLayout(layout.NewGridLayout(3), widget.NewVBox(card1, card4),
-		widget.NewVBox(card2), widget.NewVBox(card3))
+	return container.NewGridWithColumns(3, container.NewVBox(card1, card4),
+		container.NewVBox(card2), container.NewVBox(card3))
 }
 
 func makeCell() fyne.CanvasObject {
@@ -104,8 +99,7 @@ func makeCell() fyne.CanvasObject {
 func makeCenterLayout() *fyne.Container {
 	middle := widget.NewButton("CenterLayout", func() {})
 
-	return fyne.NewContainerWithLayout(layout.NewCenterLayout(),
-		middle)
+	return container.NewCenter(middle)
 }
 
 func makeGridLayout() *fyne.Container {
@@ -114,7 +108,7 @@ func makeGridLayout() *fyne.Container {
 	box3 := makeCell()
 	box4 := makeCell()
 
-	return fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+	return container.NewGridWithColumns(2,
 		box1, box2, box3, box4)
 }
 
