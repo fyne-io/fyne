@@ -12,6 +12,13 @@ type Scroll = widget.ScrollContainer
 // ScrollDirection represents the directions in which a Scroll container can scroll its child content.
 type ScrollDirection = widget.ScrollDirection
 
+// Constants for valid values of ScrollDirection.
+const (
+	ScrollBoth ScrollDirection = iota
+	ScrollHorizontalOnly
+	ScrollVerticalOnly
+)
+
 // NewScroll creates a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize to be smaller than that of the passed object.
 func NewScroll(content fyne.CanvasObject) *Scroll {
@@ -24,7 +31,7 @@ func NewHScroll(content fyne.CanvasObject) *Scroll {
 	return widget.NewHScrollContainer(content)
 }
 
-// NewVScrollcreate a scrollable parent wrapping the specified content.
+// NewVScroll a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Height to be smaller than that of the passed object.
 func NewVScroll(content fyne.CanvasObject) *Scroll {
 	return widget.NewVScrollContainer(content)

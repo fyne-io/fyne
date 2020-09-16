@@ -16,6 +16,7 @@ type TabItem = widget.TabItem
 // TabLocation is the location where the tabs of a tab container should be rendered
 type TabLocation = widget.TabLocation
 
+// TabLocation values
 const (
 	TabLocationTop TabLocation = iota
 	TabLocationLeading
