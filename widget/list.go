@@ -386,9 +386,7 @@ var _ fyne.Layout = (*listLayout)(nil)
 
 type listLayout struct {
 	list       *List
-	itemCount  int
 	layoutEndY int
-	offsetY    int
 }
 
 func newListLayout(list *List) fyne.Layout {
