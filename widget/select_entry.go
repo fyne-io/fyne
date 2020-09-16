@@ -21,6 +21,7 @@ func NewSelectEntry(options []string) *SelectEntry {
 }
 
 // MinSize returns the minimal size of the select entry.
+//
 // Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
 	min := e.Entry.MinSize()
@@ -35,6 +36,7 @@ func (e *SelectEntry) MinSize() fyne.Size {
 }
 
 // Resize changes the size of the select entry.
+//
 // Implements: fyne.Widget
 func (e *SelectEntry) Resize(size fyne.Size) {
 	e.Entry.Resize(size)

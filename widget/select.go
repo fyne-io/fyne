@@ -128,6 +128,7 @@ type Select struct {
 var _ fyne.Widget = (*Select)(nil)
 
 // Hide hides the select.
+//
 // Implements: fyne.Widget
 func (s *Select) Hide() {
 	if s.popUp != nil {
@@ -138,6 +139,7 @@ func (s *Select) Hide() {
 }
 
 // Move changes the relative position of the select.
+//
 // Implements: fyne.Widget
 func (s *Select) Move(pos fyne.Position) {
 	s.BaseWidget.Move(pos)
