@@ -22,6 +22,7 @@ type Dialog interface {
 	Hide()
 	SetDismissText(label string)
 	SetOnClosed(closed func())
+	Resize(size fyne.Size)
 }
 
 // Declare conformity to Dialog interface
@@ -115,7 +116,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	btnMin := obj[3].MinSize().Union(obj[3].Size())
 
 	// icon
-	iconHeight := padHeight*2 + textMin.Height + d.label.MinSize().Height - theme.Padding()
+	iconHeight := padHeight*2 + d.label.MinSize().Height*2 - theme.Padding()
 	obj[0].Resize(fyne.NewSize(iconHeight, iconHeight))
 	obj[0].Move(fyne.NewPos(size.Width-iconHeight+theme.Padding(), -theme.Padding()))
 
@@ -169,6 +170,25 @@ func newButtonList(buttons ...*widget.Button) fyne.CanvasObject {
 func (d *dialog) Show() {
 	d.sendResponse = true
 	d.win.Show()
+}
+
+// Resize dialog, call this function after dialog show
+func (d *dialog) Resize(size fyne.Size) {
+	maxSize := d.win.Size()
+	minSize := d.win.MinSize()
+	newWidth := size.Width
+	if size.Width > maxSize.Width {
+		newWidth = maxSize.Width
+	} else if size.Width < minSize.Width {
+		newWidth = minSize.Width
+	}
+	newHeight := size.Height
+	if size.Height > maxSize.Height {
+		newHeight = maxSize.Height
+	} else if size.Height < minSize.Height {
+		newHeight = minSize.Height
+	}
+	d.win.Resize(fyne.NewSize(newWidth, newHeight))
 }
 
 func (d *dialog) Hide() {

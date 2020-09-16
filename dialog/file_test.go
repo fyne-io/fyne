@@ -10,8 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
@@ -55,6 +57,56 @@ func TestEffectiveStartingDir(t *testing.T) {
 			expect, res)
 	}
 
+}
+
+func TestFileDialogResize(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+	win.Resize(fyne.NewSize(600, 400))
+	file := NewFileOpen(func(file fyne.URIReadCloser, err error) {}, win)
+	file.SetFilter(storage.NewExtensionFileFilter([]string{".png"}))
+
+	//Mimic the fileopen dialog
+	d := &fileDialog{file: file}
+	open := widget.NewButton("open", func() {})
+	ui := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, open), open)
+	originalSize := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
+		(fileIconSize+fileTextSize)+theme.Padding()*4))
+	d.win = widget.NewModalPopUp(ui, file.parent.Canvas())
+	d.win.Resize(originalSize)
+	file.dialog = d
+
+	//Test resize - normal size scenario
+	size := fyne.NewSize(200, 180) //normal size to fit (600,400)
+	file.Resize(size)
+	expectedWidth := 200
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
+	expectedHeight := 180
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
+	//Test resize - normal size scenario again
+	size = fyne.NewSize(300, 280) //normal size to fit (600,400)
+	file.Resize(size)
+	expectedWidth = 300
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
+	expectedHeight = 280
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
+
+	//Test resize - greater than max size scenario
+	size = fyne.NewSize(800, 600)
+	file.Resize(size)
+	expectedWidth = 600                                          //since win width only 600
+	assert.Equal(t, expectedWidth, file.dialog.win.Size().Width) //max, also work
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width+theme.Padding()*2)
+	expectedHeight = 400                                           //since win heigh only 400
+	assert.Equal(t, expectedHeight, file.dialog.win.Size().Height) //max, also work
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height+theme.Padding()*2)
+
+	//Test again - extreme small size
+	size = fyne.NewSize(1, 1)
+	file.Resize(size)
+	expectedWidth = file.dialog.win.Content.MinSize().Width
+	assert.Equal(t, expectedWidth, file.dialog.win.Content.Size().Width)
+	expectedHeight = file.dialog.win.Content.MinSize().Height
+	assert.Equal(t, expectedHeight, file.dialog.win.Content.Size().Height)
 }
 
 func TestShowFileOpen(t *testing.T) {

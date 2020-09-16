@@ -28,18 +28,18 @@ func TestSelect_ChangeTheme(t *testing.T) {
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
 	defer w.Close()
-	w.Resize(fyne.NewSize(200, 200))
+	w.Resize(fyne.NewSize(220, 220))
 	combo.Resize(combo.MinSize())
 	combo.Move(fyne.NewPos(10, 10))
 	test.Tap(combo)
 
-	test.AssertImageMatches(t, "select_theme_initial.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "select/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
+		combo.Resize(combo.MinSize())
 		combo.Refresh()
 		time.Sleep(100 * time.Millisecond)
-		// Looks weird but the test infrastructure does not adjust min-sizes.
-		test.AssertImageMatches(t, "select_theme_changed.png", w.Canvas().Capture())
+		test.AssertImageMatches(t, "select/theme_changed.png", w.Canvas().Capture())
 	})
 }
 
@@ -79,13 +79,13 @@ func TestSelect_Move(t *testing.T) {
 
 	combo.Resize(combo.MinSize())
 	combo.Move(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "select_move_initial.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "select/move_initial.png", w.Canvas().Capture())
 
 	combo.Tapped(&fyne.PointEvent{})
-	test.AssertImageMatches(t, "select_move_tapped.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "select/move_tapped.png", w.Canvas().Capture())
 
 	combo.Move(fyne.NewPos(20, 20))
-	test.AssertImageMatches(t, "select_move_moved.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "select/move_moved.png", w.Canvas().Capture())
 }
 
 func TestSelect_PlaceHolder(t *testing.T) {
@@ -94,6 +94,18 @@ func TestSelect_PlaceHolder(t *testing.T) {
 
 	combo.PlaceHolder = "changed!"
 	assert.Equal(t, "changed!", combo.PlaceHolder)
+}
+
+func TestSelect_SelectedIndex(t *testing.T) {
+	combo := widget.NewSelect([]string{"1", "2"}, func(string) {})
+
+	assert.Equal(t, -1, combo.SelectedIndex())
+
+	combo.SetSelected("2")
+	assert.Equal(t, 1, combo.SelectedIndex())
+
+	combo.Selected = "invalid"
+	assert.Equal(t, -1, combo.SelectedIndex())
 }
 
 func TestSelect_SetSelected(t *testing.T) {
@@ -153,6 +165,33 @@ func TestSelect_SetSelected_NoChangeOnEmpty(t *testing.T) {
 	assert.False(t, triggered)
 }
 
+func TestSelect_SetSelectedIndex(t *testing.T) {
+	var triggered bool
+	var triggeredValue string
+	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {
+		triggered = true
+		triggeredValue = s
+	})
+	combo.SetSelectedIndex(1)
+
+	assert.Equal(t, "2", combo.Selected)
+	assert.True(t, triggered)
+	assert.Equal(t, "2", triggeredValue)
+}
+
+func TestSelect_SetSelectedIndex_Invalid(t *testing.T) {
+	var triggered bool
+	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {
+		triggered = true
+	})
+	combo.SetSelectedIndex(-1)
+	assert.Equal(t, -1, combo.SelectedIndex())
+	assert.False(t, triggered)
+	combo.SetSelectedIndex(2)
+	assert.Equal(t, -1, combo.SelectedIndex())
+	assert.False(t, triggered)
+}
+
 func TestSelect_Tapped(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
@@ -167,7 +206,7 @@ func TestSelect_Tapped(t *testing.T) {
 	test.Tap(combo)
 	canvas := fyne.CurrentApp().Driver().CanvasForObject(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	test.AssertImageMatches(t, "select_tapped.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "select/tapped.png", w.Canvas().Capture())
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
@@ -185,7 +224,7 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 	combo.Move(fyne.NewPos(canvas.Size().Width-10, canvas.Size().Height-10))
 	test.Tap(combo)
 	assert.Equal(t, 1, len(canvas.Overlays().List()))
-	test.AssertImageMatches(t, "select_tapped_constrained.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "select/tapped_constrained.png", w.Canvas().Capture())
 }
 
 func TestSelect_Layout(t *testing.T) {

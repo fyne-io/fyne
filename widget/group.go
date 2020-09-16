@@ -41,7 +41,7 @@ func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 	g.ExtendBaseWidget(g)
 	label := NewLabel(g.Text)
 	labelBg := canvas.NewRectangle(theme.BackgroundColor())
-	line := canvas.NewRectangle(theme.ButtonColor())
+	line := canvas.NewRectangle(theme.ShadowColor())
 	return &groupRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{line, labelBg, label, g.content}),
 		label:        label,
@@ -52,6 +52,7 @@ func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // NewGroup creates a new grouped list widget with a title and the specified list of child objects.
+// Deprecated: Consider using the Card instead.
 func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
 	group := &Group{BaseWidget{}, title, box, box}
@@ -62,6 +63,7 @@ func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 
 // NewGroupWithScroller creates a new grouped list widget with a title and the specified list of child objects.
 // This group will scroll when the available space is less than needed to display the items it contains.
+// Deprecated: Consider using the Card instead.
 func NewGroupWithScroller(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
 	group := &Group{BaseWidget{}, title, box, NewVScrollContainer(box)}
@@ -102,7 +104,7 @@ func (g *groupRenderer) Layout(size fyne.Size) {
 }
 
 func (g *groupRenderer) Refresh() {
-	g.line.FillColor = theme.ButtonColor()
+	g.line.FillColor = theme.ShadowColor()
 	g.labelBg.FillColor = theme.BackgroundColor()
 
 	g.label.SetText(g.group.Text)

@@ -27,12 +27,17 @@ func TestLabel_Hide(t *testing.T) {
 
 func TestLabel_MinSize(t *testing.T) {
 	label := NewLabel("Test")
-	min := label.MinSize()
+	minA := label.MinSize()
 
-	assert.True(t, min.Width > theme.Padding()*2)
+	assert.Less(t, theme.Padding()*2, minA.Width)
 
 	label.SetText("Longer")
-	assert.True(t, label.MinSize().Width > min.Width)
+	minB := label.MinSize()
+	assert.Less(t, minA.Width, minB.Width)
+
+	label.Text = "."
+	minC := label.MinSize()
+	assert.Greater(t, minB.Width, minC.Width)
 }
 
 func TestLabel_Resize(t *testing.T) {

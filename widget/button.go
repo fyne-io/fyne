@@ -20,15 +20,19 @@ type buttonRenderer struct {
 
 	icon   *canvas.Image
 	label  *canvas.Text
+	bg     *canvas.Rectangle
 	button *Button
 	layout fyne.Layout
 }
 
 func (b *buttonRenderer) padding() fyne.Size {
-	if b.button.Text == "" {
+	if b.button.HideShadow {
 		return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 	}
-	return fyne.NewSize(theme.Padding()*4, theme.Padding()*2)
+	if b.button.Text == "" {
+		return fyne.NewSize(theme.Padding()*4, theme.Padding()*4)
+	}
+	return fyne.NewSize(theme.Padding()*6, theme.Padding()*4)
 }
 
 // MinSize calculates the minimum size of a button.
@@ -55,7 +59,17 @@ func (b *buttonRenderer) MinSize() (size fyne.Size) {
 
 // Layout the components of the button widget
 func (b *buttonRenderer) Layout(size fyne.Size) {
-	b.LayoutShadow(size, fyne.NewPos(0, 0))
+	var inset fyne.Position
+	bgSize := size
+	if !b.button.HideShadow {
+		inset = fyne.NewPos(theme.Padding()/2, theme.Padding()/2)
+		bgSize = size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding()))
+	}
+	b.LayoutShadow(bgSize, inset)
+
+	b.bg.Move(inset)
+	b.bg.Resize(bgSize)
+
 	hasIcon := b.icon != nil
 	hasLabel := b.label.Text != ""
 	if !hasIcon && !hasLabel {
@@ -107,29 +121,38 @@ func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Siz
 
 // applyTheme updates this button to match the current theme
 func (b *buttonRenderer) applyTheme() {
+	b.bg.FillColor = b.buttonColor()
 	b.label.TextSize = theme.TextSize()
 	b.label.Color = theme.TextColor()
-	if b.button.Disabled() {
+	switch {
+	case b.button.disabled:
 		b.label.Color = theme.DisabledTextColor()
+	case b.button.Style == PrimaryButton:
+		b.label.Color = theme.BackgroundColor()
+	}
+	if b.icon != nil && b.icon.Resource != nil {
+		switch res := b.icon.Resource.(type) {
+		case *theme.ThemedResource:
+			if b.button.Style == PrimaryButton {
+				b.icon.Resource = theme.NewInvertedThemedResource(res)
+				b.icon.Refresh()
+			}
+		case *theme.InvertedThemedResource:
+			if b.button.Style != PrimaryButton {
+				b.icon.Resource = res.Original()
+				b.icon.Refresh()
+			}
+		}
 	}
 }
 
 func (b *buttonRenderer) BackgroundColor() color.Color {
-	switch {
-	case b.button.Disabled():
-		return theme.DisabledButtonColor()
-	case b.button.Style == PrimaryButton:
-		return theme.PrimaryColor()
-	case b.button.hovered, b.button.tapped: // TODO tapped will be different to hovered when we have animation
-		return theme.HoverColor()
-	default:
-		return theme.ButtonColor()
-	}
+	return color.Transparent
 }
 
 func (b *buttonRenderer) Refresh() {
-	b.applyTheme()
 	b.label.Text = b.button.Text
+	b.bg.Refresh()
 
 	if b.button.Icon != nil && b.button.Visible() {
 		if b.icon == nil {
@@ -154,8 +177,22 @@ func (b *buttonRenderer) Refresh() {
 		b.icon.Hide()
 	}
 
+	b.applyTheme()
 	b.Layout(b.button.Size())
 	canvas.Refresh(b.button.super())
+}
+
+func (b *buttonRenderer) buttonColor() color.Color {
+	switch {
+	case b.button.Disabled():
+		return theme.DisabledButtonColor()
+	case b.button.Style == PrimaryButton:
+		return theme.PrimaryColor()
+	case b.button.hovered, b.button.tapped: // TODO tapped will be different to hovered when we have animation
+		return theme.HoverColor()
+	default:
+		return theme.ButtonColor()
+	}
 }
 
 // Button widget has a text label and triggers an event func when clicked
@@ -253,8 +290,11 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 	}
 
 	text := canvas.NewText(b.Text, theme.TextColor())
+	text.TextStyle.Bold = true
 
+	bg := canvas.NewRectangle(color.Transparent)
 	objects := []fyne.CanvasObject{
+		bg,
 		text,
 	}
 	shadowLevel := widget.ButtonLevel
@@ -265,7 +305,10 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, icon)
 	}
 
-	return &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, b, layout.NewHBoxLayout()}
+	r := &buttonRenderer{widget.NewShadowingRenderer(objects, shadowLevel), icon, text, bg, b, layout.NewHBoxLayout()}
+	bg.FillColor = r.buttonColor()
+	r.applyTheme()
+	return r
 }
 
 // SetText allows the button label to be changed

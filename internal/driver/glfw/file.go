@@ -2,6 +2,7 @@ package glfw
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -14,12 +15,58 @@ type file struct {
 	path string
 }
 
+type directory struct {
+	fyne.URI
+}
+
+// Declare conformity to the ListableURI interface
+var _ fyne.ListableURI = (*directory)(nil)
+
+func (d *directory) List() ([]fyne.URI, error) {
+	if d.Scheme() != "file" {
+		return nil, fmt.Errorf("unsupported URL protocol")
+	}
+
+	path := d.String()[len(d.Scheme())+3 : len(d.String())]
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	urilist := []fyne.URI{}
+
+	for _, f := range files {
+		uri := storage.NewURI("file://" + filepath.Join(path, f.Name()))
+		urilist = append(urilist, uri)
+	}
+
+	return urilist, nil
+}
+
+func (d *gLDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
+	if uri.Scheme() != "file" {
+		return nil, fmt.Errorf("unsupported URL protocol")
+	}
+
+	path := uri.String()[len(uri.Scheme())+3 : len(uri.String())]
+	s, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if !s.IsDir() {
+		return nil, fmt.Errorf("path '%s' is not a directory, cannot convert to listable URI", path)
+	}
+
+	return &directory{URI: uri}, nil
+}
+
 func (d *gLDriver) FileReaderForURI(uri fyne.URI) (fyne.URIReadCloser, error) {
 	return openFile(uri, false)
 }
 
 func (f *file) Name() string {
-	return filepath.Base(f.path)
+	return f.URI().Name()
 }
 
 func (f *file) URI() fyne.URI {

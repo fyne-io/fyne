@@ -131,7 +131,7 @@ func (s *Slider) MinSize() fyne.Size {
 // CreateRenderer links this widget to its renderer.
 func (s *Slider) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
-	track := canvas.NewRectangle(theme.ButtonColor())
+	track := canvas.NewRectangle(theme.ShadowColor())
 	active := canvas.NewRectangle(theme.TextColor())
 	thumb := &canvas.Circle{
 		FillColor:   theme.TextColor(),
@@ -159,7 +159,7 @@ type sliderRenderer struct {
 
 // Refresh updates the widget state for drawing.
 func (s *sliderRenderer) Refresh() {
-	s.track.FillColor = theme.ButtonColor()
+	s.track.FillColor = theme.ShadowColor()
 	s.thumb.FillColor = theme.TextColor()
 	s.active.FillColor = theme.TextColor()
 

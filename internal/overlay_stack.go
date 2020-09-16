@@ -15,6 +15,7 @@ type OverlayStack struct {
 var _ fyne.OverlayStack = (*OverlayStack)(nil)
 
 // Add puts an overlay on the stack.
+//
 // Implements: fyne.OverlayStack
 func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	s.propertyLock.Lock()
@@ -27,6 +28,7 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 }
 
 // List returns all overlays on the stack from bottom to top.
+//
 // Implements: fyne.OverlayStack
 func (s *OverlayStack) List() []fyne.CanvasObject {
 	s.propertyLock.RLock()
@@ -36,6 +38,7 @@ func (s *OverlayStack) List() []fyne.CanvasObject {
 }
 
 // Remove deletes an overlay and all overlays above it from the stack.
+//
 // Implements: fyne.OverlayStack
 func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 	s.propertyLock.Lock()
@@ -50,6 +53,7 @@ func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 }
 
 // Top returns the top-most overlay of the stack.
+//
 // Implements: fyne.OverlayStack
 func (s *OverlayStack) Top() fyne.CanvasObject {
 	s.propertyLock.RLock()

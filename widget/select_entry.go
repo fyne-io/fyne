@@ -21,6 +21,7 @@ func NewSelectEntry(options []string) *SelectEntry {
 }
 
 // MinSize returns the minimal size of the select entry.
+//
 // Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
 	min := e.Entry.MinSize()
@@ -35,11 +36,12 @@ func (e *SelectEntry) MinSize() fyne.Size {
 }
 
 // Resize changes the size of the select entry.
+//
 // Implements: fyne.Widget
 func (e *SelectEntry) Resize(size fyne.Size) {
 	e.Entry.Resize(size)
 	if e.popUp != nil {
-		e.popUp.Resize(fyne.NewSize(size.Width, e.popUp.Size().Height))
+		e.popUp.Resize(fyne.NewSize(size.Width-theme.Padding()*2, e.popUp.Size().Height))
 	}
 }
 
@@ -60,12 +62,13 @@ func (e *SelectEntry) SetOptions(options []string) {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
 		entryPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(e.super())
-		popUpPos := entryPos.Add(fyne.NewPos(0, e.Size().Height))
+		popUpPos := entryPos.Add(fyne.NewPos(theme.Padding(), e.Size().Height))
 
 		e.popUp = newPopUpMenu(e.dropDown, c)
 		e.popUp.ShowAtPosition(popUpPos)
-		e.popUp.Resize(fyne.NewSize(e.Size().Width, e.popUp.MinSize().Height))
+		e.popUp.Resize(fyne.NewSize(e.Size().Width-theme.Padding()*2, e.popUp.MinSize().Height))
 	})
+	dropDownButton.HideShadow = true
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())
 	e.ActionItem = dropDownButton
 }

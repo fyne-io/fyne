@@ -74,6 +74,7 @@ type window struct {
 	mouseLastClick     fyne.CanvasObject
 	mousePressed       fyne.CanvasObject
 	onClosed           func()
+	onCloseIntercepted func()
 
 	xpos, ypos    int
 	width, height int
@@ -292,6 +293,10 @@ func (w *window) SetOnClosed(closed func()) {
 	w.onClosed = closed
 }
 
+func (w *window) SetCloseIntercept(callback func()) {
+	w.onCloseIntercepted = callback
+}
+
 func (w *window) getMonitorForWindow() *glfw.Monitor {
 	xOff := w.xpos + (w.width / 2)
 	yOff := w.ypos + (w.height / 2)
@@ -404,7 +409,20 @@ func (w *window) Close() {
 	if w.viewport == nil {
 		return
 	}
-	w.closed(w.viewport)
+
+	w.viewport.SetShouldClose(true)
+
+	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
+		switch co := node.obj.(type) {
+		case fyne.Widget:
+			cache.DestroyRenderer(co)
+		}
+	})
+
+	// trigger callbacks
+	if w.onClosed != nil {
+		w.queueEvent(w.onClosed)
+	}
 }
 
 func (w *window) ShowAndRun() {
@@ -412,7 +430,7 @@ func (w *window) ShowAndRun() {
 	fyne.CurrentApp().Driver().Run()
 }
 
-//Clipboard returns the system clipboard
+// Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
 	if w.viewport == nil {
 		return nil
@@ -446,19 +464,14 @@ func (w *window) Canvas() fyne.Canvas {
 }
 
 func (w *window) closed(viewport *glfw.Window) {
-	viewport.SetShouldClose(true)
+	viewport.SetShouldClose(false)
 
-	w.canvas.walkTrees(nil, func(node *renderCacheNode) {
-		switch co := node.obj.(type) {
-		case fyne.Widget:
-			cache.DestroyRenderer(co)
-		}
-	})
-
-	// trigger callbacks
-	if w.onClosed != nil {
-		w.queueEvent(w.onClosed)
+	if w.onCloseIntercepted != nil {
+		w.queueEvent(w.onCloseIntercepted)
+		return
 	}
+
+	w.Close()
 }
 
 // destroy this window and, if it's the last window quit the app
@@ -893,12 +906,12 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	if keyName == fyne.KeyTab {
 		if keyDesktopModifier == 0 {
 			if action != glfw.Release {
-				w.canvas.focusMgr.FocusNext(w.canvas.focused)
+				w.canvas.FocusNext()
 			}
 			return
 		} else if keyDesktopModifier == desktop.ShiftModifier {
 			if action != glfw.Release {
-				w.canvas.focusMgr.FocusPrevious(w.canvas.focused)
+				w.canvas.FocusPrevious()
 			}
 			return
 		}
@@ -1025,15 +1038,11 @@ func (w *window) charInput(_ *glfw.Window, char rune) {
 	}
 }
 
-func (w *window) focused(_ *glfw.Window, focused bool) {
-	if w.canvas.focused == nil {
-		return
-	}
-
-	if focused {
-		w.canvas.focused.FocusGained()
+func (w *window) focused(_ *glfw.Window, isFocused bool) {
+	if isFocused {
+		w.canvas.FocusGained()
 	} else {
-		w.canvas.focused.FocusLost()
+		w.canvas.FocusLost()
 	}
 }
 

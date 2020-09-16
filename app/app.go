@@ -4,8 +4,10 @@
 package app // import "fyne.io/fyne/app"
 
 import (
+	"fmt"
 	"os/exec"
 	"sync"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
@@ -21,6 +23,7 @@ type fyneApp struct {
 	uniqueID string
 
 	settings *settings
+	storage  *store
 	prefs    fyne.Preferences
 	running  bool
 	runMutex sync.Mutex
@@ -36,6 +39,12 @@ func (app *fyneApp) SetIcon(icon fyne.Resource) {
 }
 
 func (app *fyneApp) UniqueID() string {
+	if app.uniqueID != "" {
+		return app.uniqueID
+	}
+
+	fyne.LogError("Preferences API requires a unique ID, use app.NewWithID()", nil)
+	app.uniqueID = fmt.Sprintf("missing-id-%d", time.Now().Unix()) // This is a fake unique - it just has to not be reused...
 	return app.uniqueID
 }
 
@@ -76,6 +85,10 @@ func (app *fyneApp) Settings() fyne.Settings {
 	return app.settings
 }
 
+func (app *fyneApp) Storage() fyne.Storage {
+	return app.storage
+}
+
 func (app *fyneApp) Preferences() fyne.Preferences {
 	return app.prefs
 }
@@ -89,22 +102,22 @@ func New() fyne.App {
 // NewAppWithDriver initialises a new Fyne application using the specified
 // driver and returns a handle to that App. The id should be globally unique to this app
 // Built in drivers are provided in the "driver" package.
+//
 // Deprecated: Developers should not specify a driver manually but use NewAppWithID()
 func NewAppWithDriver(d fyne.Driver, id string) fyne.App {
 	return newAppWithDriver(d, id)
 }
 
 func newAppWithDriver(d fyne.Driver, id string) fyne.App {
-	var prefs fyne.Preferences
-	if id == "" {
-		prefs = newPreferences()
-	} else {
-		prefs = loadPreferences(id)
-	}
-	newApp := &fyneApp{uniqueID: id, driver: d,
-		prefs: prefs, exec: exec.Command}
+	newApp := &fyneApp{uniqueID: id, driver: d, exec: exec.Command}
 	fyne.SetCurrentApp(newApp)
+
+	newApp.prefs = newPreferences(newApp)
+	if pref, ok := newApp.prefs.(interface{ load(string) }); ok && id != "" {
+		pref.load(id)
+	}
 	newApp.settings = loadSettings()
+	newApp.storage = &store{a: newApp}
 
 	listener := make(chan fyne.Settings)
 	newApp.Settings().AddChangeListener(listener)
