@@ -1,0 +1,28 @@
+name: Code checks
+
+on: [push, pull_request]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.15.x'     
+    - name: get dependencies
+      run: |
+        GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
+        GO111MODULE=off go get github.com/fzipp/gocyclo
+        GO111MODULE=off go get golang.org/x/lint/golint
+        GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
+    - name: cleanup repository
+      run: rm -rf vendor/
+    - name: goimports
+      run: test -z $(goimports -e -d . | tee /dev/stderr)
+    - name: gocyclo
+      run: gocyclo -over 50 .
+    - name: golint
+      run: golint -set_exit_status $(go list -tags ci ./...)
+    - name: staticcheck
+      run: staticcheck -debug.no-compile-errors -f stylish $(go list ./... | grep -F -e cmd/fyne/internal/mobile -v)
