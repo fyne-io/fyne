@@ -19,17 +19,20 @@ func NewBaseRenderer(objects []fyne.CanvasObject) BaseRenderer {
 }
 
 // BackgroundColor returns the theme background color.
+//
 // Implements: fyne.WidgetRenderer
 func (r *BaseRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
 
 // Destroy does nothing in the base implementation.
+//
 // Implements: fyne.WidgetRenderer
 func (r *BaseRenderer) Destroy() {
 }
 
 // Objects returns the objects that should be rendered.
+//
 // Implements: fyne.WidgetRenderer
 func (r *BaseRenderer) Objects() []fyne.CanvasObject {
 	return r.objects

@@ -50,6 +50,7 @@ func NewShadow(typ ShadowType, level ElevationLevel) *Shadow {
 }
 
 // CreateRenderer returns a new renderer for the shadow.
+//
 // Implements: fyne.Widget
 func (s *Shadow) CreateRenderer() fyne.WidgetRenderer {
 	r := &shadowRenderer{s: s}
@@ -58,36 +59,42 @@ func (s *Shadow) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // Hide hides the shadow.
+//
 // Implements: fyne.Widget
 func (s *Shadow) Hide() {
 	HideWidget(&s.Base, s)
 }
 
 // MinSize returns the minimal size of the shadow.
+//
 // Implements: fyne.Widget
 func (s *Shadow) MinSize() fyne.Size {
 	return MinSizeOf(s)
 }
 
 // Move sets the position of the widget relative to its parent.
+//
 // Implements: fyne.Widget
 func (s *Shadow) Move(pos fyne.Position) {
 	MoveWidget(&s.Base, s, pos)
 }
 
 // Refresh triggers a redraw of the shadow.
+//
 // Implements: fyne.Widget
 func (s *Shadow) Refresh() {
 	RefreshWidget(s)
 }
 
 // Resize changes the size of the shadow.
+//
 // Implements: fyne.Widget
 func (s *Shadow) Resize(size fyne.Size) {
 	ResizeWidget(&s.Base, s, size)
 }
 
 // Show makes the shadow visible.
+//
 // Implements: fyne.Widget
 func (s *Shadow) Show() {
 	ShowWidget(&s.Base, s)
