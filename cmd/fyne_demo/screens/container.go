@@ -19,7 +19,6 @@ func ContainerScreen() fyne.CanvasObject {
 		container.NewTabItem("Card", makeCardTab()),
 		container.NewTabItem("Split", makeSplitTab()),
 		container.NewTabItem("Scroll", makeScrollTab()),
-		container.NewTabItem("Table", makeTableTab()),
 		// layouts
 		container.NewTabItem("Border", makeBorderLayout()),
 		container.NewTabItem("Box", makeBoxLayout()),
