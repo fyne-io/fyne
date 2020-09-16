@@ -39,7 +39,7 @@ func TestTree(t *testing.T) {
 			IsBranch: func(uid string) bool {
 				return uid == "" || uid == "c"
 			},
-			NewNode: func(branch bool) fyne.CanvasObject {
+			CreateNode: func(branch bool) fyne.CanvasObject {
 				return &widget.Label{}
 			},
 			UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {

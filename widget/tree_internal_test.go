@@ -132,7 +132,7 @@ func TestTree_MinSize(t *testing.T) {
 	})
 	t.Run("Callback", func(t *testing.T) {
 		tree := &Tree{
-			NewNode: func(isBranch bool) fyne.CanvasObject {
+			CreateNode: func(isBranch bool) fyne.CanvasObject {
 				if isBranch {
 					return NewLabel("Branch")
 				}

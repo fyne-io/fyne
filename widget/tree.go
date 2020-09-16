@@ -28,7 +28,7 @@ type Tree struct {
 
 	Children       func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
 	IsBranch       func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
-	NewNode        func(branch bool) (o fyne.CanvasObject)               // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
+	CreateNode     func(branch bool) (o fyne.CanvasObject)               // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
 	UpdateNode     func(uid string, branch bool, node fyne.CanvasObject) // Update the given CanvasObject to represent the data at the given Unique ID
 	OnBranchOpened func(uid string)                                      // Called when a Branch is opened
 	OnBranchClosed func(uid string)                                      // Called when a Branch is closed
@@ -47,7 +47,7 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 			_, b = data[uid]
 			return
 		},
-		NewNode: func(branch bool) fyne.CanvasObject {
+		CreateNode: func(branch bool) fyne.CanvasObject {
 			return NewLabel("")
 		},
 		UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {
@@ -89,7 +89,7 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 			}
 			return fi.IsDir()
 		},
-		NewNode: func(branch bool) fyne.CanvasObject {
+		CreateNode: func(branch bool) fyne.CanvasObject {
 			return NewHBox(NewIcon(theme.FileIcon()), NewLabel("Name"))
 		},
 	}
@@ -278,7 +278,7 @@ type treeRenderer struct {
 
 func (r *treeRenderer) MinSize() (min fyne.Size) {
 	min = r.scroller.MinSize()
-	if f := r.tree.NewNode; f != nil {
+	if f := r.tree.CreateNode; f != nil {
 		if n := f(true); n != nil {
 			min = min.Max(n.MinSize())
 			min = min.Add(fyne.NewSize(2*theme.Padding(), 2*theme.Padding()))
@@ -468,7 +468,7 @@ func (r *treeContentRenderer) getBranch() (b *branch) {
 	if o != nil {
 		b = o.(*branch)
 	} else {
-		b = newBranch(r.treeContent.tree, r.treeContent.tree.NewNode(true))
+		b = newBranch(r.treeContent.tree, r.treeContent.tree.CreateNode(true))
 	}
 	return
 }
@@ -478,7 +478,7 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	if o != nil {
 		l = o.(*leaf)
 	} else {
-		l = newLeaf(r.treeContent.tree, r.treeContent.tree.NewNode(false))
+		l = newLeaf(r.treeContent.tree, r.treeContent.tree.CreateNode(false))
 	}
 	return
 }
