@@ -1,10 +1,9 @@
 package dialog
 
 import (
+	"fyne.io/fyne/test"
 	"image/color"
 	"testing"
-
-	"fyne.io/fyne/test"
 
 	"github.com/stretchr/testify/assert"
 
@@ -172,32 +171,32 @@ func Test_recent_color(t *testing.T) {
 	})
 }
 
-func Test_colorClamp(t *testing.T) {
+func Test_clamp(t *testing.T) {
 	// No Change
-	assert.InDelta(t, 0.5, colorClamp(0.5), 0.0001)
-	// Clamp 0.0
-	assert.InDelta(t, 0.0, colorClamp(-0.1), 0.0001)
-	// Clamp 1.0
-	assert.InDelta(t, 1.0, colorClamp(1.1), 0.0001)
+	assert.Equal(t, 5, clamp(5, 0, 5))
+	// Clamp min
+	assert.Equal(t, 0, clamp(-1, 0, 5))
+	// Clamp max
+	assert.Equal(t, 5, clamp(6, 0, 5))
 }
 
-func Test_hueClamp(t *testing.T) {
+func Test_wrapHue(t *testing.T) {
 	// No Change
-	assert.InDelta(t, 0.5, hueClamp(0.5), 0.0001)
-	// Wrap to 0.9
-	assert.InDelta(t, 0.9, hueClamp(-0.1), 0.0001)
-	// Wrap to 0.1
-	assert.InDelta(t, 0.1, hueClamp(1.1), 0.0001)
-	// Wrap to 0.9
-	assert.InDelta(t, 0.9, hueClamp(-10.1), 0.0001)
-	// Wrap to 0.1
-	assert.InDelta(t, 0.1, hueClamp(11.1), 0.0001)
+	assert.Equal(t, 180, wrapHue(180))
+	// Wrap to 359
+	assert.Equal(t, 359, wrapHue(-1))
+	// Wrap to 1
+	assert.Equal(t, 1, wrapHue(361))
+	// Wrap to 359
+	assert.Equal(t, 359, wrapHue(-361))
+	// Wrap to 1
+	assert.Equal(t, 1, wrapHue(721))
 }
 
 type rgbhsl struct {
 	hex     string
-	r, g, b float64
-	h, s, l float64
+	r, g, b int
+	h, s, l int
 }
 
 var rgbhslMap = map[string]rgbhsl{
@@ -206,54 +205,54 @@ var rgbhslMap = map[string]rgbhsl{
 	},
 	"white": {
 		hex: "#ffffff",
-		r:   1.0,
-		g:   1.0,
-		b:   1.0,
-		l:   1.0,
+		r:   255,
+		g:   255,
+		b:   255,
+		l:   100,
 	},
 	"red": {
 		hex: "#ff0000",
-		r:   1.0,
-		s:   1.0,
-		l:   0.5,
+		r:   255,
+		s:   100,
+		l:   50,
 	},
 	"green": {
 		hex: "#00ff00",
-		g:   1.0,
-		h:   120.0 / 360.0,
-		s:   1.0,
-		l:   0.5,
+		g:   255,
+		h:   120,
+		s:   100,
+		l:   50,
 	},
 	"blue": {
 		hex: "#0000ff",
-		b:   1.0,
-		h:   240.0 / 360.0,
-		s:   1.0,
-		l:   0.5,
+		b:   255,
+		h:   240,
+		s:   100,
+		l:   50,
 	},
 	"yellow": {
 		hex: "#ffff00",
-		r:   1.0,
-		g:   1.0,
-		h:   60.0 / 360.0,
-		s:   1.0,
-		l:   0.5,
+		r:   255,
+		g:   255,
+		h:   60,
+		s:   100,
+		l:   50,
 	},
 	"cyan": {
 		hex: "#00ffff",
-		g:   1.0,
-		b:   1.0,
-		h:   180.0 / 360.0,
-		s:   1.0,
-		l:   0.5,
+		g:   255,
+		b:   255,
+		h:   180,
+		s:   100,
+		l:   50,
 	},
 	"magenta": {
 		hex: "#ff00ff",
-		r:   1.0,
-		b:   1.0,
-		h:   300.0 / 360.0,
-		s:   1.0,
-		l:   0.5,
+		r:   255,
+		b:   255,
+		h:   300,
+		s:   100,
+		l:   50,
 	},
 }
 
@@ -261,9 +260,9 @@ func Test_colorToString(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			hex := colorToString(&color.NRGBA{
-				R: uint8(tt.r * 255),
-				G: uint8(tt.g * 255),
-				B: uint8(tt.b * 255),
+				R: uint8(tt.r),
+				G: uint8(tt.g),
+				B: uint8(tt.b),
 				A: 0xff,
 			})
 			assert.Equal(t, tt.hex, hex)
@@ -276,10 +275,7 @@ func Test_stringToColor(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			c, err := stringToColor(tt.hex)
 			assert.NoError(t, err)
-			r, g, b, _ := c.RGBA()
-			assert.InDelta(t, tt.r*65535, r, 0.0001)
-			assert.InDelta(t, tt.g*65535, g, 0.0001)
-			assert.InDelta(t, tt.b*65535, b, 0.0001)
+			assert.Equal(t, tt.hex, colorToString(c))
 		})
 	}
 	t.Run("Invalid", func(t *testing.T) {
@@ -292,15 +288,15 @@ func Test_colorToHSLA(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			h, s, l, a := colorToHSLA(&color.NRGBA{
-				R: uint8(tt.r * 255),
-				G: uint8(tt.g * 255),
-				B: uint8(tt.b * 255),
+				R: uint8(tt.r),
+				G: uint8(tt.g),
+				B: uint8(tt.b),
 				A: 0xff,
 			})
-			assert.InDelta(t, tt.h, h, 0.0001)
-			assert.InDelta(t, tt.s, s, 0.0001)
-			assert.InDelta(t, tt.l, l, 0.0001)
-			assert.InDelta(t, 1.0, a, 0.0001)
+			assert.Equal(t, tt.h, h)
+			assert.Equal(t, tt.s, s)
+			assert.Equal(t, tt.l, l)
+			assert.Equal(t, 255, a)
 		})
 	}
 }
@@ -309,15 +305,15 @@ func Test_colorToRGBA(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			r, g, b, a := colorToRGBA(&color.NRGBA{
-				R: uint8(tt.r * 255),
-				G: uint8(tt.g * 255),
-				B: uint8(tt.b * 255),
+				R: uint8(tt.r),
+				G: uint8(tt.g),
+				B: uint8(tt.b),
 				A: 0xff,
 			})
-			assert.InDelta(t, tt.r, r, 0.0001)
-			assert.InDelta(t, tt.g, g, 0.0001)
-			assert.InDelta(t, tt.b, b, 0.0001)
-			assert.InDelta(t, 1.0, a, 0.0001)
+			assert.Equal(t, tt.r, r)
+			assert.Equal(t, tt.g, g)
+			assert.Equal(t, tt.b, b)
+			assert.Equal(t, 255, a)
 		})
 	}
 }
@@ -326,9 +322,9 @@ func Test_rgbToHsl(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			h, s, l := rgbToHsl(tt.r, tt.g, tt.b)
-			assert.InDelta(t, tt.h, h, 0.0001)
-			assert.InDelta(t, tt.s, s, 0.0001)
-			assert.InDelta(t, tt.l, l, 0.0001)
+			assert.Equal(t, tt.h, h)
+			assert.Equal(t, tt.s, s)
+			assert.Equal(t, tt.l, l)
 		})
 	}
 }
@@ -337,9 +333,9 @@ func Test_hslToRgb(t *testing.T) {
 	for name, tt := range rgbhslMap {
 		t.Run(name, func(t *testing.T) {
 			r, g, b := hslToRgb(tt.h, tt.s, tt.l)
-			assert.InDelta(t, tt.r, r, 0.0001)
-			assert.InDelta(t, tt.g, g, 0.0001)
-			assert.InDelta(t, tt.b, b, 0.0001)
+			assert.Equal(t, tt.r, r)
+			assert.Equal(t, tt.g, g)
+			assert.Equal(t, tt.b, b)
 		})
 	}
 }

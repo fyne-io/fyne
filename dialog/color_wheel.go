@@ -24,13 +24,15 @@ type colorWheel struct {
 	widget.BaseWidget
 	generator func(w, h int) image.Image
 	cache     draw.Image
-	onChange  func(float64, float64, float64, float64)
+	onChange  func(int, int, int, int)
 
-	Hue, Saturation, Lightness, Alpha float64
+	Hue                   int // Range 0-360 (degrees)
+	Saturation, Lightness int // Range 0-100 (percent)
+	Alpha                 int // Range 0-255
 }
 
 // newColorWheel returns a new color area that triggers the given onChange callback when tapped.
-func newColorWheel(onChange func(float64, float64, float64, float64)) *colorWheel {
+func newColorWheel(onChange func(int, int, int, int)) *colorWheel {
 	a := &colorWheel{
 		onChange: onChange,
 	}
@@ -80,7 +82,7 @@ func (a *colorWheel) MinSize() fyne.Size {
 }
 
 // SetHSLA updates the selected color in the wheel.
-func (a *colorWheel) SetHSLA(hue, saturation, lightness, alpha float64) {
+func (a *colorWheel) SetHSLA(hue, saturation, lightness, alpha int) {
 	if a.Hue == hue && a.Saturation == saturation && a.Lightness == lightness && a.Alpha == alpha {
 		return
 	}
@@ -109,20 +111,21 @@ func (a *colorWheel) colorAt(x, y, w, h int) color.Color {
 	width, height := float64(w), float64(h)
 	dx := float64(x) - (width / 2.0)
 	dy := float64(y) - (height / 2.0)
-	radius, angle := cmplx.Polar(complex(dx, dy))
+	radius, radians := cmplx.Polar(complex(dx, dy))
 	limit := math.Min(width, height) / 2.0
 	if radius > limit {
 		// Out of bounds
 		return theme.BackgroundColor()
 	}
-	hue := hueClamp(angle / (2.0 * math.Pi))
-	saturation := radius / limit
+	degrees := radians * (180.0 / math.Pi)
+	hue := wrapHue(int(degrees))
+	saturation := int(radius / limit * 100.0)
 	red, green, blue := hslToRgb(hue, saturation, a.Lightness)
 	return &color.NRGBA{
-		R: uint8(red * 255.0),
-		G: uint8(green * 255.0),
-		B: uint8(blue * 255.0),
-		A: uint8(a.Alpha * 255.0),
+		R: uint8(red),
+		G: uint8(green),
+		B: uint8(blue),
+		A: uint8(a.Alpha),
 	}
 }
 
@@ -137,9 +140,10 @@ func (a *colorWheel) locationForPosition(pos fyne.Position) (x, y int) {
 
 func (a *colorWheel) selection(width, height int) (int, int) {
 	w, h := float64(width), float64(height)
-	radius := a.Saturation * math.Min(w, h) / 2.0
-	angle := a.Hue * 2 * math.Pi
-	c := cmplx.Rect(radius, angle)
+	radius := float64(a.Saturation) / 100.0 * math.Min(w, h) / 2.0
+	degrees := float64(a.Hue)
+	radians := degrees * math.Pi / 180.0
+	c := cmplx.Rect(radius, radians)
 	return int(real(c) + w/2.0), int(imag(c) + h/2.0)
 }
 
@@ -151,14 +155,15 @@ func (a *colorWheel) trigger(pos fyne.Position) {
 			width, height := float64(b.Dx()), float64(b.Dy())
 			dx := float64(x) - (width / 2)
 			dy := float64(y) - (height / 2)
-			radius, angle := cmplx.Polar(complex(dx, dy))
+			radius, radians := cmplx.Polar(complex(dx, dy))
 			limit := math.Min(width, height) / 2.0
 			if radius > limit {
 				// Out of bounds
 				return
 			}
-			a.Hue = hueClamp(angle / (2.0 * math.Pi))
-			a.Saturation = radius / limit
+			degrees := radians * (180.0 / math.Pi)
+			a.Hue = wrapHue(int(degrees))
+			a.Saturation = int(radius / limit * 100.0)
 			f(a.Hue, a.Saturation, a.Lightness, a.Alpha)
 		}
 	}

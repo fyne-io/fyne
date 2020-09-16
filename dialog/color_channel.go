@@ -1,13 +1,11 @@
 package dialog
 
 import (
-	"fmt"
-	"math"
+	"strconv"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	internalwidget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 )
 
@@ -17,15 +15,18 @@ var _ fyne.Widget = (*colorChannel)(nil)
 type colorChannel struct {
 	widget.BaseWidget
 	name      string
-	value     float64
-	onChanged func(float64)
+	min, max  int
+	value     int
+	onChanged func(int)
 }
 
 // newColorChannel returns a new color channel control for the channel with the given name.
-func newColorChannel(name string, value float64, onChanged func(float64)) *colorChannel {
+func newColorChannel(name string, min, max, value int, onChanged func(int)) *colorChannel {
 	c := &colorChannel{
 		name:      name,
-		value:     colorClamp(value),
+		min:       min,
+		max:       max,
+		value:     clamp(value, min, max),
 		onChanged: onChanged,
 	}
 	c.ExtendBaseWidget(c)
@@ -34,45 +35,39 @@ func newColorChannel(name string, value float64, onChanged func(float64)) *color
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *colorChannel) CreateRenderer() fyne.WidgetRenderer {
-	label := widget.NewLabel(c.name)
+	label := widget.NewLabelWithStyle(c.name, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
 	entry := &widget.Entry{
-		Text: "0.00",
+		Text: "0",
 		OnChanged: func(text string) {
-			var value float64
-			n, err := fmt.Sscanf(text, "%f", &value)
+			value, err := strconv.Atoi(text)
 			if err != nil {
-				fyne.LogError("Couldn't parse value", err)
-			} else if n == 1 {
+				fyne.LogError("Couldn't parse: "+text, err)
+			} else {
 				c.SetValue(value)
 			}
 		},
-		// TODO add number 0.0-1.0 validator
+		// TODO add number min/max validator
 	}
 	slider := &widget.Slider{
-		Value:       0,
-		Min:         0,
-		Max:         1.0,
-		Step:        0.000001,
+		Value:       0.0,
+		Min:         float64(c.min),
+		Max:         float64(c.max),
+		Step:        1.0,
 		Orientation: widget.Horizontal,
 		OnChanged: func(value float64) {
-			c.SetValue(value)
+			c.SetValue(int(value))
 		},
 	}
-	contents := widget.NewVBox(
-		widget.NewHBox(
-			label,
-			layout.NewSpacer(),
-			entry,
-		),
-		slider,
-	)
 	r := &colorChannelRenderer{
-		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{contents}),
-		control:      c,
-		label:        label,
-		entry:        entry,
-		slider:       slider,
-		contents:     contents,
+		BaseRenderer: internalwidget.NewBaseRenderer([]fyne.CanvasObject{
+			label,
+			slider,
+			entry,
+		}),
+		control: c,
+		label:   label,
+		entry:   entry,
+		slider:  slider,
 	}
 	r.updateObjects()
 	return r
@@ -85,9 +80,9 @@ func (c *colorChannel) MinSize() fyne.Size {
 }
 
 // SetValue updates the value in this color widget
-func (c *colorChannel) SetValue(value float64) {
-	value = colorClamp(value)
-	if math.Abs(c.value-value) < 0.000001 {
+func (c *colorChannel) SetValue(value int) {
+	value = clamp(value, c.min, c.max)
+	if c.value == value {
 		return
 	}
 	c.value = value
@@ -99,20 +94,31 @@ func (c *colorChannel) SetValue(value float64) {
 
 type colorChannelRenderer struct {
 	internalwidget.BaseRenderer
-	control  *colorChannel
-	label    *widget.Label
-	entry    *widget.Entry
-	slider   *widget.Slider
-	contents fyne.CanvasObject
+	control *colorChannel
+	label   *widget.Label
+	entry   *widget.Entry
+	slider  *widget.Slider
 }
 
 func (r *colorChannelRenderer) Layout(size fyne.Size) {
-	r.contents.Move(fyne.NewPos(0, 0))
-	r.contents.Resize(fyne.NewSize(size.Width, size.Height))
+	lMin := r.label.MinSize()
+	eMin := r.entry.MinSize()
+	r.label.Move(fyne.NewPos(0, (size.Height-lMin.Height)/2))
+	r.label.Resize(fyne.NewSize(lMin.Width, lMin.Height))
+	r.slider.Move(fyne.NewPos(lMin.Width, 0))
+	r.slider.Resize(fyne.NewSize(size.Width-lMin.Width-eMin.Width, size.Height))
+	r.entry.Move(fyne.NewPos(size.Width-eMin.Width, 0))
+	r.entry.Resize(fyne.NewSize(eMin.Width, size.Height))
 }
 
 func (r *colorChannelRenderer) MinSize() fyne.Size {
-	return r.contents.MinSize()
+	lMin := r.label.MinSize()
+	sMin := r.slider.MinSize()
+	eMin := r.entry.MinSize()
+	return fyne.NewSize(
+		lMin.Width+sMin.Width+eMin.Width,
+		fyne.Max(lMin.Height, fyne.Max(sMin.Height, eMin.Height)),
+	)
 }
 
 func (r *colorChannelRenderer) Refresh() {
@@ -122,7 +128,7 @@ func (r *colorChannelRenderer) Refresh() {
 }
 
 func (r *colorChannelRenderer) updateObjects() {
-	r.entry.SetText(fmt.Sprintf("%.6f", r.control.value))
-	r.slider.Value = r.control.value
+	r.entry.SetText(strconv.Itoa(r.control.value))
+	r.slider.Value = float64(r.control.value)
 	r.slider.Refresh()
 }

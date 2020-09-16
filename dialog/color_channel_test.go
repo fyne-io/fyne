@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 )
@@ -14,28 +13,32 @@ func Test_colorChannel_Layout(t *testing.T) {
 	defer test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
 
+	min := 0
+	max := 100
+	size := fyne.NewSize(250, 50)
+
 	for name, tt := range map[string]struct {
 		name  string
-		value float64
+		value int
 	}{
-		"foobar_0.0": {
+		"foobar_0": {
 			name:  "foobar",
-			value: 0.0,
+			value: 0,
 		},
-		"foobar_0.5": {
+		"foobar_50": {
 			name:  "foobar",
-			value: 0.5,
+			value: 50,
 		},
-		"foobar_1.0": {
+		"foobar_100": {
 			name:  "foobar",
-			value: 1.0,
+			value: 100,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			color := newColorChannel(tt.name, tt.value, nil)
+			color := newColorChannel(tt.name, min, max, tt.value, nil)
+			color.Resize(size)
 
-			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), color))
-			window.Resize(color.MinSize().Max(fyne.NewSize(100, 100)))
+			window := test.NewWindow(color)
 
 			test.AssertImageMatches(t, "color/channel_layout_"+name+".png", window.Canvas().Capture())
 

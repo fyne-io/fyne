@@ -103,22 +103,22 @@ func (p *ColorPickerDialog) selectColor(c color.Color) {
 	}
 }
 
-func colorClamp(value float64) float64 {
-	if value < 0.0 {
-		value = 0.0
+func clamp(value, min, max int) int {
+	if value < min {
+		value = min
 	}
-	if value > 1.0 {
-		value = 1.0
+	if value > max {
+		value = max
 	}
 	return value
 }
 
-func hueClamp(hue float64) float64 {
-	for hue < 0.0 {
-		hue += 1.0
+func wrapHue(hue int) int {
+	for hue < 0 {
+		hue += 360
 	}
-	for hue > 1.0 {
-		hue -= 1.0
+	for hue > 360 {
+		hue -= 360
 	}
 	return hue
 }
@@ -136,7 +136,7 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 
 func newCheckeredBackground() *canvas.Raster {
 	return canvas.NewRasterWithPixels(func(x, y, _, _ int) color.Color {
-		const boxSize = 25
+		const boxSize = 10
 
 		if (x/boxSize)%2 == (y/boxSize)%2 {
 			return color.Gray{Y: 58}
@@ -175,18 +175,7 @@ func writeRecentColor(color string) {
 }
 
 func colorToString(c color.Color) string {
-	var red, green, blue, alpha uint8
-	switch col := c.(type) {
-	case *color.NRGBA:
-		red, green, blue, alpha = col.R, col.G, col.B, col.A
-	default:
-		r, g, b, a := c.RGBA() // TODO FIXME this returns alpha-pre-multiplied
-		// TODO FIXME possible loss of precision, should this be x/65535*255?
-		red = uint8(r)
-		green = uint8(g)
-		blue = uint8(b)
-		alpha = uint8(a)
-	}
+	red, green, blue, alpha := colorToRGBA(c)
 	if alpha == 0xff {
 		return fmt.Sprintf("#%02x%02x%02x", red, green, blue)
 	}
@@ -220,113 +209,126 @@ func stringsToColors(ss ...string) (colors []color.Color) {
 	return
 }
 
-func colorToHSLA(c color.Color) (float64, float64, float64, float64) {
+func colorToHSLA(c color.Color) (int, int, int, int) {
 	r, g, b, a := colorToRGBA(c)
 	h, s, l := rgbToHsl(r, g, b)
 	return h, s, l, a
 }
 
-func colorToRGBA(c color.Color) (r, g, b, a float64) {
+func colorToRGBA(c color.Color) (r, g, b, a int) {
 	switch col := c.(type) {
+	case color.NRGBA:
+		r = int(col.R)
+		g = int(col.G)
+		b = int(col.B)
+		a = int(col.A)
 	case *color.NRGBA:
-		// Convert to range 0.0-1.0
-		r = float64(col.R) / 255.0
-		g = float64(col.G) / 255.0
-		b = float64(col.B) / 255.0
-		a = float64(col.A) / 255.0
+		r = int(col.R)
+		g = int(col.G)
+		b = int(col.B)
+		a = int(col.A)
 	default:
 		red, green, blue, alpha := c.RGBA() // TODO FIXME this returns alpha-pre-multiplied
-		// Convert to range 0.0-1.0
-		r = float64(red) / 65535.0
-		g = float64(green) / 65535.0
-		b = float64(blue) / 65535.0
-		a = float64(alpha) / 65535.0
+		// Convert from range 0-65535 to range 0-255
+		r = int(float64(red) / 255.0)
+		g = int(float64(green) / 255.0)
+		b = int(float64(blue) / 255.0)
+		a = int(float64(alpha) / 255.0)
 	}
 	return
 }
 
-// The next three functions are adpated from https://play.golang.org/p/9q5yBNDh3W
+// https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 
-func rgbToHsl(r, g, b float64) (float64, float64, float64) {
-	min := math.Min(r, math.Min(g, b)) //Min. value of RGB
-	max := math.Max(r, math.Max(g, b)) //Max. value of RGB
-	del := max - min                   //Delta RGB value
+func rgbToHsl(r, g, b int) (int, int, int) {
+	red := float64(r) / 255.0
+	green := float64(g) / 255.0
+	blue := float64(b) / 255.0
 
-	l := (max + min) / 2.0
+	min := math.Min(red, math.Min(green, blue))
+	max := math.Max(red, math.Max(green, blue))
 
-	var h, s float64
+	lightness := (max + min) / 2.0
 
-	if del == 0.0 {
+	delta := max - min
+
+	if delta == 0.0 {
 		// Achromatic
-		return 0.0, 0.0, l
+		return 0, 0, int(lightness * 100.0)
 	}
 
 	// Chromatic
-	if l < 0.5 {
-		s = del / (max + min)
+
+	var saturation float64
+
+	if lightness < 0.5 {
+		saturation = (max - min) / (max + min)
 	} else {
-		s = del / (2.0 - max - min)
+		saturation = (max - min) / (2.0 - max - min)
 	}
 
-	delR := (((max - r) / 6.0) + (del / 2.0)) / del
-	delG := (((max - g) / 6.0) + (del / 2.0)) / del
-	delB := (((max - b) / 6.0) + (del / 2.0)) / del
+	var hue float64
 
-	if r == max {
-		h = delB - delG
-	} else if g == max {
-		h = (1.0 / 3.0) + delR - delB
-	} else if b == max {
-		h = (2.0 / 3.0) + delG - delR
+	if red == max {
+		hue = (green - blue) / delta
+	} else if green == max {
+		hue = 2.0 + (blue-red)/delta
+	} else if blue == max {
+		hue = 4.0 + (red-green)/delta
 	}
 
-	if h < 0.0 {
-		h += 1.0
-	}
-	if h > 1.0 {
-		h -= 1.0
-	}
+	h := wrapHue(int(hue * 60.0))
+	s := int(saturation * 100.0)
+	l := int(lightness * 100.0)
 	return h, s, l
 }
 
-func hslToRgb(h, s, l float64) (float64, float64, float64) {
-	var r, g, b float64
-	if s == 0.0 {
-		r = l
-		g = l
-		b = l
-	} else {
-		var v1, v2 float64
-		if l < 0.5 {
-			v2 = l * (1.0 + s)
-		} else {
-			v2 = (l + s) - (s * l)
-		}
+func hslToRgb(h, s, l int) (int, int, int) {
+	hue := float64(h) / 360.0
+	saturation := float64(s) / 100.0
+	lightness := float64(l) / 100.0
 
-		v1 = 2.0*l - v2
-
-		r = hueToRgb(v1, v2, h+(1.0/3.0))
-		g = hueToRgb(v1, v2, h)
-		b = hueToRgb(v1, v2, h-(1.0/3.0))
+	if saturation == 0.0 {
+		// Greyscale
+		g := int(lightness * 255.0)
+		return g, g, g
 	}
+
+	var v1 float64
+	if lightness < 0.5 {
+		v1 = lightness * (1.0 + saturation)
+	} else {
+		v1 = (lightness + saturation) - (lightness * saturation)
+	}
+
+	v2 := 2.0*lightness - v1
+
+	red := hueToRgb(hue+(1.0/3.0), v1, v2)
+	green := hueToRgb(hue, v1, v2)
+	blue := hueToRgb(hue-(1.0/3.0), v1, v2)
+
+	r := int(math.Round(255.0 * red))
+	g := int(math.Round(255.0 * green))
+	b := int(math.Round(255.0 * blue))
+
 	return r, g, b
 }
 
-func hueToRgb(v1, v2, vH float64) float64 {
-	if vH < 0.0 {
-		vH += 1.0
+func hueToRgb(h, v1, v2 float64) float64 {
+	for h < 0.0 {
+		h += 1.0
 	}
-	if vH > 1.0 {
-		vH -= 1.0
+	for h > 1.0 {
+		h -= 1.0
 	}
-	if (6.0 * vH) < 1.0 {
-		return (v1 + (v2-v1)*6.0*vH)
+	if 6.0*h < 1.0 {
+		return v2 + (v1-v2)*6*h
 	}
-	if (2.0 * vH) < 1.0 {
-		return v2
+	if 2.0*h < 1.0 {
+		return v1
 	}
-	if (3.0 * vH) < 2.0 {
-		return (v1 + (v2-v1)*((2.0/3.0)-vH)*6.0)
+	if 3.0*h < 2.0 {
+		return v2 + (v1-v2)*6*((2.0/3.0)-h)
 	}
-	return v1
+	return v2
 }
