@@ -8,22 +8,24 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
 // ContainerScreen loads a tab panel for containers and layouts
 func ContainerScreen() fyne.CanvasObject {
-	return widget.NewTabContainer(
-		widget.NewTabItem("Accordion", makeAccordionTab()),
-		widget.NewTabItem("Card", makeCardTab()),
-		widget.NewTabItem("Split", makeSplitTab()),
-		widget.NewTabItem("Scroll", makeScrollTab()),
+	return container.NewTabs(
+		container.NewTabItem("Accordion", makeAccordionTab()),
+		container.NewTabItem("Card", makeCardTab()),
+		container.NewTabItem("Split", makeSplitTab()),
+		container.NewTabItem("Scroll", makeScrollTab()),
+		container.NewTabItem("Table", makeTableTab()),
 		// layouts
-		widget.NewTabItem("Border", makeBorderLayout()),
-		widget.NewTabItem("Box", makeBoxLayout()),
-		widget.NewTabItem("Center", makeCenterLayout()),
-		widget.NewTabItem("Grid", makeGridLayout()),
+		container.NewTabItem("Border", makeBorderLayout()),
+		container.NewTabItem("Box", makeBoxLayout()),
+		container.NewTabItem("Center", makeCenterLayout()),
+		container.NewTabItem("Grid", makeGridLayout()),
 	)
 }
 
@@ -120,11 +122,11 @@ func makeScrollTab() fyne.CanvasObject {
 	hlist := makeButtonList(20)
 	vlist := makeButtonList(50)
 
-	horiz := widget.NewHScrollContainer(widget.NewHBox(hlist...))
-	vert := widget.NewVScrollContainer(widget.NewVBox(vlist...))
+	horiz := container.NewHScroll(widget.NewHBox(hlist...))
+	vert := container.NewVScroll(widget.NewVBox(vlist...))
 
-	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
-		fyne.NewContainerWithLayout(layout.NewBorderLayout(horiz, nil, nil, nil), horiz, vert),
+	return container.NewAdaptiveGrid(2,
+		container.NewBorder(horiz, nil, nil, nil, vert),
 		makeScrollBothTab())
 }
 
@@ -132,7 +134,7 @@ func makeScrollBothTab() fyne.CanvasObject {
 	logo := canvas.NewImageFromResource(theme.FyneLogo())
 	logo.SetMinSize(fyne.NewSize(800, 800))
 
-	scroll := widget.NewScrollContainer(logo)
+	scroll := container.NewScroll(logo)
 	scroll.Resize(fyne.NewSize(400, 400))
 
 	return scroll
@@ -142,9 +144,9 @@ func makeSplitTab() fyne.CanvasObject {
 	left := widget.NewMultiLineEntry()
 	left.Wrapping = fyne.TextWrapWord
 	left.SetText("Long text is looooooooooooooong")
-	right := widget.NewVSplitContainer(
+	right := container.NewVSplit(
 		widget.NewLabel("Label"),
 		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
 	)
-	return widget.NewHSplitContainer(widget.NewVScrollContainer(left), right)
+	return container.NewHSplit(container.NewVScroll(left), right)
 }
