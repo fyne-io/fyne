@@ -1,15 +1,15 @@
 package dialog
 
 import (
-	"fyne.io/fyne/test"
 	"image/color"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestColorDialog_Theme(t *testing.T) {
