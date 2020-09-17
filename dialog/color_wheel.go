@@ -149,23 +149,21 @@ func (a *colorWheel) selection(width, height int) (int, int) {
 
 func (a *colorWheel) trigger(pos fyne.Position) {
 	x, y := a.locationForPosition(pos)
-	if c := a.cache; c != nil {
+	if c, f := a.cache, a.onChange; c != nil && f != nil {
 		b := c.Bounds()
-		if f := a.onChange; f != nil {
-			width, height := float64(b.Dx()), float64(b.Dy())
-			dx := float64(x) - (width / 2)
-			dy := float64(y) - (height / 2)
-			radius, radians := cmplx.Polar(complex(dx, dy))
-			limit := math.Min(width, height) / 2.0
-			if radius > limit {
-				// Out of bounds
-				return
-			}
-			degrees := radians * (180.0 / math.Pi)
-			a.Hue = wrapHue(int(degrees))
-			a.Saturation = int(radius / limit * 100.0)
-			f(a.Hue, a.Saturation, a.Lightness, a.Alpha)
+		width, height := float64(b.Dx()), float64(b.Dy())
+		dx := float64(x) - (width / 2)
+		dy := float64(y) - (height / 2)
+		radius, radians := cmplx.Polar(complex(dx, dy))
+		limit := math.Min(width, height) / 2.0
+		if radius > limit {
+			// Out of bounds
+			return
 		}
+		degrees := radians * (180.0 / math.Pi)
+		a.Hue = wrapHue(int(degrees))
+		a.Saturation = int(radius / limit * 100.0)
+		f(a.Hue, a.Saturation, a.Lightness, a.Alpha)
 	}
 	a.Refresh()
 }
