@@ -6,7 +6,7 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
-	"regexp"
+	"runtime"
 	"strings"
 	"unicode/utf8"
 
@@ -61,6 +61,43 @@ func (u *uri) String() string {
 	return u.raw
 }
 
+// parentGeneric is a generic function that returns the last element of a
+// path after splitting it on "/". It should be suitable for most URIs.
+func parentGeneric(location string) (string, error) {
+
+	// trim leading forward slashes
+	trimmed := 0
+	for location[0] == '/' {
+		location = location[1:len(location)]
+		trimmed++
+
+		// if all we have left is an empty string, than this URI
+		// pointed to a UNIX-style root
+		if len(location) == 0 {
+			return "", URIRootError
+		}
+	}
+
+	components := strings.Split(location, "/")
+
+	if len(components) == 1 {
+		// trimmed <= 2 makes sure we handle UNIX-style paths on
+		// Windows correctly
+		return "", URIRootError
+	}
+
+	parent := ""
+	if trimmed > 2 && len(components) > 1 {
+		// Because we trimmed all the leading '/' characters, for UNIX
+		// style paths we want to insert one back in. Presumably we
+		// trimmed two instances of / for the scheme.
+		parent = parent + "/"
+	}
+	parent = parent + strings.Join(components[0:len(components)-1], "/") + "/"
+
+	return parent, nil
+}
+
 // Parent gets the parent of a URI by splitting it along '/' separators and
 // removing the last item.
 func Parent(u fyne.URI) (fyne.URI, error) {
@@ -71,45 +108,41 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 		s = s[0 : len(s)-1]
 	}
 
-	// trim the scheme (and +1 for the :)
-	s = s[len(u.Scheme())+1 : len(s)]
+	// trim the scheme
+	s = s[len(u.Scheme())+3:]
 
 	// Completely empty URI with just a scheme
 	if len(s) == 0 {
 		return nil, URIRootError
 	}
 
-	// trim leading forward slashes
-	trimmed := 0
-	for s[0] == '/' {
-		s = s[1:len(s)]
-		trimmed++
+	parent := ""
+	if u.Scheme() == "file" {
+		// use the system native path resolution
+		parent = filepath.Dir(s)
 
-		// if all we have left is an empty string, than this URI
-		// pointed to a UNIX-style root
-		if len(s) == 0 {
+		// only root is it's own parent
+		if filepath.Clean(parent) == filepath.Clean(s) {
 			return nil, URIRootError
+		}
+
+		// URIs are supposed to use forward slashes. On Windows, it
+		// should be OK to use the platform native filepath with UNIX
+		// or NT sytle paths, with / or \, but when we reconstruct
+		// the URI, we want to have / only.
+		if runtime.GOOS == "windows" {
+			s = strings.ReplaceAll(s, "\\", "/")
+		}
+
+	} else {
+		var err error
+		parent, err = parentGeneric(s)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	// handle Windows drive letters
-	r := regexp.MustCompile("[A-Za-z][:]")
-	components := strings.Split(s, "/")
-	if len(components) == 1 && r.MatchString(components[0]) && trimmed <= 2 {
-		// trimmed <= 2 makes sure we handle UNIX-style paths on
-		// Windows correctly
-		return nil, URIRootError
-	}
-
-	parent := u.Scheme() + "://"
-	if trimmed > 2 && len(components) > 1 {
-		// Because we trimmed all the leading '/' characters, for UNIX
-		// style paths we want to insert one back in. Presumably we
-		// trimmed two instances of / for the scheme.
-		parent = parent + "/"
-	}
-	parent = parent + strings.Join(components[0:len(components)-1], "/") + "/"
-	return NewURI(parent), nil
+	return NewURI(u.Scheme() + "://" + parent), nil
 }
 
 // Child appends a new path element to a URI, separated by a '/' character.

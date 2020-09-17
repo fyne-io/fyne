@@ -1,6 +1,7 @@
 package storage_test
 
 import (
+	"runtime"
 	"testing"
 
 	"fyne.io/fyne/storage"
@@ -52,23 +53,37 @@ func TestURI_Parent(t *testing.T) {
 
 	parent, err := storage.Parent(storage.NewURI("file:///foo/bar/baz"))
 	assert.Nil(t, err)
-	assert.Equal(t, "file:///foo/bar/", parent.String())
+	assert.Equal(t, "file:///foo/bar", parent.String())
 
 	parent, err = storage.Parent(storage.NewURI("file:///foo/bar/baz/"))
 	assert.Nil(t, err)
-	assert.Equal(t, "file:///foo/bar/", parent.String())
+	assert.Equal(t, "file:///foo/bar", parent.String())
 
 	parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
 	assert.Nil(t, err)
-	assert.Equal(t, "file://C:/foo/bar/", parent.String())
+	assert.Equal(t, "file://C:/foo/bar", parent.String())
+
+	if runtime.GOOS == "windows" {
+		// Only the Windows version of filepath will know how to handle
+		// backslashes.
+		parent, err = storage.Parent(storage.NewURI("file://C:\\foo\\bar\\baz\\"))
+		assert.Nil(t, err)
+		assert.Equal(t, "file://C:/foo/bar", parent.String())
+	}
 
 	parent, err = storage.Parent(storage.NewURI("file:///"))
 	assert.Equal(t, storage.URIRootError, err)
 
-	// This should cause an error, since this is a Windows-style path and
-	// thus we can't get the parent of a drive letter.
-	parent, err = storage.Parent(storage.NewURI("file://C:/"))
-	assert.Equal(t, storage.URIRootError, err)
+	if runtime.GOOS == "windows" {
+		// This is only an error under Windows, on *NIX this is a
+		// relative path to a directory named "C:", which is completely
+		// valid.
+
+		// This should cause an error, since this is a Windows-style
+		// path and thus we can't get the parent of a drive letter.
+		parent, err = storage.Parent(storage.NewURI("file://C:/"))
+		assert.Equal(t, storage.URIRootError, err)
+	}
 
 	// Windows supports UNIX-style paths. /C:/ is also a valid path.
 	parent, err = storage.Parent(storage.NewURI("file:///C:/"))
