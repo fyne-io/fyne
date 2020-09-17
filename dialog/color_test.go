@@ -340,6 +340,44 @@ func Test_hslToRgb(t *testing.T) {
 	}
 }
 
-func Test_hueToRgb(t *testing.T) {
-	// TODO
+func Test_hueToChannel(t *testing.T) {
+	for name, tt := range map[string]struct {
+		h, v1, v2 float64
+		expected  float64
+	}{
+		"red": {
+			h:        0,
+			v1:       1,
+			expected: 0,
+		},
+		"green": {
+			h:        0.3333333333333333,
+			v1:       1,
+			expected: 1,
+		},
+		"blue": {
+			h:        0.6666666666666666,
+			v1:       1,
+			expected: 0,
+		},
+		"cyan": {
+			h:        0.5,
+			v1:       1,
+			expected: 1,
+		},
+		"yellow": {
+			h:        0.16666666666666666,
+			v1:       1,
+			expected: 1,
+		},
+		"magenta": {
+			h:        0.8333333333333334,
+			v1:       1,
+			expected: 0,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.InDelta(t, tt.expected, hueToChannel(tt.h, tt.v1, tt.v2), 0.000000000000001)
+		})
+	}
 }

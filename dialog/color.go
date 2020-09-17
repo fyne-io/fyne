@@ -308,9 +308,9 @@ func hslToRgb(h, s, l int) (int, int, int) {
 
 	v2 := 2.0*lightness - v1
 
-	red := hueToRgb(hue+(1.0/3.0), v1, v2)
-	green := hueToRgb(hue, v1, v2)
-	blue := hueToRgb(hue-(1.0/3.0), v1, v2)
+	red := hueToChannel(hue+(1.0/3.0), v1, v2)
+	green := hueToChannel(hue, v1, v2)
+	blue := hueToChannel(hue-(1.0/3.0), v1, v2)
 
 	r := int(math.Round(255.0 * red))
 	g := int(math.Round(255.0 * green))
@@ -319,7 +319,7 @@ func hslToRgb(h, s, l int) (int, int, int) {
 	return r, g, b
 }
 
-func hueToRgb(h, v1, v2 float64) float64 {
+func hueToChannel(h, v1, v2 float64) float64 {
 	for h < 0.0 {
 		h += 1.0
 	}
