@@ -71,7 +71,7 @@ func TestURI_Parent(t *testing.T) {
 		assert.Equal(t, "file://C:/foo/bar", parent.String())
 	}
 
-	parent, err = storage.Parent(storage.NewURI("file:///"))
+	_, err = storage.Parent(storage.NewURI("file:///"))
 	assert.Equal(t, storage.URIRootError, err)
 
 	if runtime.GOOS == "windows" {

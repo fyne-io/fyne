@@ -21,14 +21,6 @@ cache:
   apt: true
 
 before_script:
-  - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/)
-  - |
-    if [ "$RUN_CODE_CHECKS" = "on" ]
-    then
-      GO111MODULE=off go get golang.org/x/tools/cmd/goimports
-      GO111MODULE=off go get github.com/fzipp/gocyclo
-      GO111MODULE=off go get golang.org/x/lint/golint
-    fi
   - GO111MODULE=off go get github.com/mattn/goveralls
 
 script:
@@ -39,14 +31,6 @@ script:
       git diff
       # check that go mod tidy does not change go.mod/go.sum
       go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
-    fi
-  - |
-    # No reason to run code checks on every operating system.
-    if [[ "$RUN_CODE_CHECKS" = "on" && "$TRAVIS_OS_NAME" != "windows" ]] # Goimports pseaudo diffs on windows and https://github.com/golang/lint/issues/157
-    then
-      test -z $(goimports -e -d $GO_FILES | tee /dev/stderr)
-      golint -set_exit_status $(go list -tags ci ./...)
-      gocyclo -over 50 $GO_FILES
     fi
   - go test -tags ci ./...
   - go vet -tags ci -unsafeptr=false ./...
@@ -89,4 +73,4 @@ matrix:
       env: GO111MODULE=off GOFLAGS=
     - go: 1.15.x
       os: linux
-      env: RUN_CODE_CHECKS=on GO111MODULE=on GOFLAGS=-tags=mobile
+      env: GO111MODULE=on GOFLAGS=-tags=mobile
