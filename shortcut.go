@@ -37,9 +37,8 @@ func (sh *ShortcutHandler) RemoveShortcut(shortcut Shortcut) {
 	if sh.entry == nil {
 		return
 	}
-	if _, ok := sh.entry[shortcut.ShortcutName()]; ok {
-		delete(sh.entry, shortcut.ShortcutName())
-	}
+
+	delete(sh.entry, shortcut.ShortcutName())
 }
 
 // Shortcut is the interface used to describe a shortcut action
