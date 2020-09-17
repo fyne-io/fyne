@@ -228,7 +228,12 @@ func colorToRGBA(c color.Color) (r, g, b, a int) {
 		b = int(col.B)
 		a = int(col.A)
 	default:
-		red, green, blue, alpha := c.RGBA() // TODO FIXME this returns alpha-pre-multiplied
+		red, green, blue, alpha := c.RGBA()
+		if alpha != 0 && alpha != 1 {
+			red /= alpha
+			green /= alpha
+			blue /= alpha
+		}
 		// Convert from range 0-65535 to range 0-255
 		r = int(float64(red) / 255.0)
 		g = int(float64(green) / 255.0)
