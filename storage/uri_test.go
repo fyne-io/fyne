@@ -81,7 +81,7 @@ func TestURI_Parent(t *testing.T) {
 
 		// This should cause an error, since this is a Windows-style
 		// path and thus we can't get the parent of a drive letter.
-		parent, err = storage.Parent(storage.NewURI("file://C:/"))
+		_, err = storage.Parent(storage.NewURI("file://C:/"))
 		assert.Equal(t, storage.URIRootError, err)
 	}
 

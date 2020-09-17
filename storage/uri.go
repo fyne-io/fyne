@@ -68,7 +68,7 @@ func parentGeneric(location string) (string, error) {
 	// trim leading forward slashes
 	trimmed := 0
 	for location[0] == '/' {
-		location = location[1:len(location)]
+		location = location[1:]
 		trimmed++
 
 		// if all we have left is an empty string, than this URI
@@ -131,7 +131,7 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 		// or NT sytle paths, with / or \, but when we reconstruct
 		// the URI, we want to have / only.
 		if runtime.GOOS == "windows" {
-			s = strings.ReplaceAll(s, "\\", "/")
+			parent = strings.ReplaceAll(parent, "\\", "/")
 		}
 
 	} else {

@@ -268,7 +268,7 @@ func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
 	f.breadcrumb.Children = nil
 
 	if dir.Scheme() != "file" {
-		return fmt.Errorf("Scheme for directory was not file://")
+		return fmt.Errorf("scheme for directory was not file://")
 	}
 
 	localdir := dir.String()[len(dir.Scheme())+3:]
