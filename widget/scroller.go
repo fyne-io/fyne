@@ -213,6 +213,9 @@ func (a *scrollBarArea) moveBar(offset int, barSize fyne.Size) {
 	default:
 		a.scroll.Offset.Y = a.computeScrollOffset(barSize.Height, offset, a.scroll.Size().Height, a.scroll.Content.Size().Height)
 	}
+	if f := a.scroll.onOffsetChanged; f != nil {
+		f()
+	}
 	a.scroll.refreshWithoutOffsetUpdate()
 }
 
@@ -340,10 +343,11 @@ func (r *scrollContainerRenderer) updatePosition() {
 // Deprecated: use container.Scroll instead.
 type ScrollContainer struct {
 	BaseWidget
-	minSize   fyne.Size
-	Direction ScrollDirection
-	Content   fyne.CanvasObject
-	Offset    fyne.Position
+	minSize         fyne.Size
+	Direction       ScrollDirection
+	Content         fyne.CanvasObject
+	Offset          fyne.Position
+	onOffsetChanged func()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -454,6 +458,9 @@ func (s *ScrollContainer) updateOffset(deltaX, deltaY int) bool {
 	}
 	s.Offset.X = computeOffset(s.Offset.X, -deltaX, s.Size().Width, s.Content.MinSize().Width)
 	s.Offset.Y = computeOffset(s.Offset.Y, -deltaY, s.Size().Height, s.Content.MinSize().Height)
+	if f := s.onOffsetChanged; f != nil {
+		f()
+	}
 	return true
 }
 

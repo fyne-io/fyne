@@ -7,6 +7,8 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+const accordionDividerHeight = 1
+
 var _ fyne.Widget = (*Accordion)(nil)
 
 // AccordionContainer displays a list of AccordionItems.
@@ -129,6 +131,7 @@ type accordionRenderer struct {
 	widget.BaseRenderer
 	container *Accordion
 	headers   []*Button
+	dividers  []*canvas.Rectangle
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
@@ -136,8 +139,12 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	y := 0
 	for i, ai := range r.container.Items {
 		if i != 0 {
-			y += theme.Padding()
+			div := r.dividers[i-1]
+			div.Move(fyne.NewPos(x, y))
+			div.Resize(fyne.NewSize(size.Width, accordionDividerHeight))
+			y += accordionDividerHeight + theme.Padding()
 		}
+
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
 		min := h.MinSize().Height
@@ -151,13 +158,17 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 			d.Resize(fyne.NewSize(size.Width, min))
 			y += min
 		}
+
+		if i < len(r.container.Items)-1 {
+			y += theme.Padding()
+		}
 	}
 }
 
 func (r *accordionRenderer) MinSize() (size fyne.Size) {
 	for i, ai := range r.container.Items {
 		if i != 0 {
-			size.Height += theme.Padding()
+			size.Height += theme.Padding()*2 + accordionDividerHeight
 		}
 		min := r.headers[i].MinSize()
 		size.Width = fyne.Max(size.Width, min.Width)
@@ -194,6 +205,7 @@ func (r *accordionRenderer) updateObjects() {
 		h.Alignment = ButtonAlignLeading
 		h.IconPlacement = ButtonIconLeadingText
 		h.Hidden = false
+		h.HideShadow = true
 		h.Text = ai.Title
 		index := i // capture
 		h.OnTapped = func() {
@@ -223,6 +235,16 @@ func (r *accordionRenderer) updateObjects() {
 	}
 	for _, i := range r.container.Items {
 		objects = append(objects, i.Detail)
+	}
+	// add dividers
+	for i = 0; i < len(r.dividers); i++ {
+		objects = append(objects, r.dividers[i])
+	}
+	// make new dividers
+	for ; i < is-1; i++ {
+		div := canvas.NewRectangle(theme.ShadowColor())
+		r.dividers = append(r.dividers, div)
+		objects = append(objects, div)
 	}
 	r.SetObjects(objects)
 }
