@@ -131,6 +131,9 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 		// or NT sytle paths, with / or \, but when we reconstruct
 		// the URI, we want to have / only.
 		if runtime.GOOS == "windows" {
+			// seems that sometimes we end up with
+			// double-backslashes
+			parent = strings.ReplaceAll(parent, "\\\\", "/")
 			parent = strings.ReplaceAll(parent, "\\", "/")
 		}
 
@@ -167,7 +170,7 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 // return.
 func Exists(u fyne.URI) (bool, error) {
 	if u.Scheme() != "file" {
-		return false, fmt.Errorf("Don't know how to check existence of %s scheme", u.Scheme())
+		return false, fmt.Errorf("don't know how to check existence of %s scheme", u.Scheme())
 	}
 
 	_, err := os.Stat(u.String()[len(u.Scheme())+3:])
