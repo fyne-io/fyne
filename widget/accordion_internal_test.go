@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAccordionContainer_Toggle(t *testing.T) {
+func TestAccordion_Toggle(t *testing.T) {
 	ai := NewAccordionItem("foo", NewLabel("foobar"))
-	ac := NewAccordionContainer(ai)
+	ac := NewAccordion(ai)
 	ar := test.WidgetRenderer(ac).(*accordionRenderer)
 	aih := ar.headers[0]
 	assert.False(t, ai.Open)
@@ -23,14 +23,14 @@ func TestAccordionContainer_Toggle(t *testing.T) {
 	assert.False(t, ai.Open)
 }
 
-func TestAccordionContainerRenderer_Layout(t *testing.T) {
+func TestAccordionRenderer_Layout(t *testing.T) {
 	ai0 := NewAccordionItem("foo0", NewLabel("foobar0"))
 	ai1 := NewAccordionItem("foo1", NewLabel("foobar1"))
 	ai2 := NewAccordionItem("foo2", NewLabel("foobar2"))
 	aid0 := ai0.Detail
 	aid1 := ai1.Detail
 	aid2 := ai2.Detail
-	ac := NewAccordionContainer()
+	ac := NewAccordion()
 	ac.Append(ai0)
 	ac.Append(ai1)
 	ac.Append(ai2)
@@ -140,9 +140,9 @@ func TestAccordionContainerRenderer_Layout(t *testing.T) {
 	})
 }
 
-func TestAccordionContainerRenderer_MinSize(t *testing.T) {
+func TestAccordionRenderer_MinSize(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
-		ac := NewAccordionContainer()
+		ac := NewAccordion()
 		ar := test.WidgetRenderer(ac).(*accordionRenderer)
 		min := ar.MinSize()
 		assert.Equal(t, 0, min.Width)
@@ -151,7 +151,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 	t.Run("Single", func(t *testing.T) {
 		ai := NewAccordionItem("foo", NewLabel("foobar"))
 		t.Run("Open", func(t *testing.T) {
-			ac := NewAccordionContainer()
+			ac := NewAccordion()
 			ac.Append(ai)
 			ac.Open(0)
 			ar := test.WidgetRenderer(ac).(*accordionRenderer)
@@ -162,7 +162,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			assert.Equal(t, aih.Height+aid.Height+theme.Padding(), min.Height)
 		})
 		t.Run("Closed", func(t *testing.T) {
-			ac := NewAccordionContainer()
+			ac := NewAccordion()
 			ac.Append(ai)
 			ac.Close(0)
 			ar := test.WidgetRenderer(ac).(*accordionRenderer)
@@ -177,7 +177,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 		ai1 := NewAccordionItem("foo1", NewLabel("foobar1"))
 		ai2 := NewAccordionItem("foo2", NewLabel("foobar2"))
 		t.Run("One_Open", func(t *testing.T) {
-			ac := NewAccordionContainer()
+			ac := NewAccordion()
 			ac.Append(ai0)
 			ac.Append(ai1)
 			ac.Append(ai2)
@@ -204,7 +204,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			assert.Equal(t, height, min.Height)
 		})
 		t.Run("All_Open", func(t *testing.T) {
-			ac := &AccordionContainer{
+			ac := &Accordion{
 				MultiOpen: true,
 			}
 			ac.Append(ai0)
@@ -237,7 +237,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			assert.Equal(t, height, min.Height)
 		})
 		t.Run("One_Closed", func(t *testing.T) {
-			ac := &AccordionContainer{
+			ac := &Accordion{
 				MultiOpen: true,
 			}
 			ac.Append(ai0)
@@ -269,7 +269,7 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 			assert.Equal(t, height, min.Height)
 		})
 		t.Run("All_Closed", func(t *testing.T) {
-			ac := NewAccordionContainer()
+			ac := NewAccordion()
 			ac.Append(ai0)
 			ac.Append(ai1)
 			ac.Append(ai2)
@@ -293,8 +293,8 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 	})
 }
 
-func TestAccordionContainerRenderer_AddRemove(t *testing.T) {
-	ac := NewAccordionContainer()
+func TestAccordionRenderer_AddRemove(t *testing.T) {
+	ac := NewAccordion()
 	ar := test.WidgetRenderer(ac).(*accordionRenderer)
 	ac.Append(NewAccordionItem("foo0", NewLabel("foobar0")))
 	ac.Append(NewAccordionItem("foo1", NewLabel("foobar1")))
