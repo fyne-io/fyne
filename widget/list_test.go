@@ -147,9 +147,24 @@ func TestList_ThemeChange(t *testing.T) {
 }
 
 func TestList_SmallList(t *testing.T) {
-	list := createList(1)
+	var data []string
+	data = append(data, "Test Item 0")
+
+	list := NewList(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+		},
+		func(index int, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		},
+	)
+	list.Resize(fyne.NewSize(200, 1000))
+
+	data = append(data, "Test Item 1")
 	list.Refresh()
-	assert.Equal(t, list.Length(), 1)
 }
 
 func createList(items int) *List {
