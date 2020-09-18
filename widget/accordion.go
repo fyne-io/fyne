@@ -13,10 +13,12 @@ var _ fyne.Widget = (*Accordion)(nil)
 
 // AccordionContainer displays a list of AccordionItems.
 // Each item is represented by a button that reveals a detailed view when tapped.
+//
 // Deprecated: This has been renamed to Accordion
 type AccordionContainer = Accordion
 
 // NewAccordionContainer creates a new accordion widget.
+//
 // Deprecated: Use NewAccordion instead
 func NewAccordionContainer(items ...*AccordionItem) *AccordionContainer {
 	a := &Accordion{
@@ -202,6 +204,7 @@ func (r *accordionRenderer) updateObjects() {
 		var h *Button
 		if i < hs {
 			h = r.headers[i]
+			h.Show()
 		} else {
 			h = &Button{}
 			r.headers = append(r.headers, h)
@@ -242,6 +245,11 @@ func (r *accordionRenderer) updateObjects() {
 	}
 	// add dividers
 	for i = 0; i < len(r.dividers); i++ {
+		if i < len(r.container.Items)-1 {
+			r.dividers[i].Show()
+		} else {
+			r.dividers[i].Hide()
+		}
 		objects = append(objects, r.dividers[i])
 	}
 	// make new dividers
