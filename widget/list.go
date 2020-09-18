@@ -122,7 +122,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 			l.children = l.children[:len(l.children)-1]
 		}
 	}
-	if l.visibleItemCount > 0 && l.list.Length() < l.visibleItemCount && len(l.children) > 0 {
+	if l.visibleItemCount > 0 && l.list.Length() < l.visibleItemCount && len(l.children) > l.visibleItemCount-1 {
 		for i := l.visibleItemCount; i >= l.list.Length(); i-- {
 			l.itemPool.Release(l.children[len(l.children)-1])
 			l.children = l.children[:len(l.children)-1]
