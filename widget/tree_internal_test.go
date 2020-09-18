@@ -14,12 +14,8 @@ import (
 )
 
 var (
-	minSizeA = NewLabel("A").MinSize()
-	minSizeB = NewLabel("B").MinSize()
-	minSizeC = NewLabel("C").MinSize()
-	minSize1 = NewLabel("11111").MinSize()
-	minSize2 = NewLabel("2222222222").MinSize()
-	minSize3 = NewLabel("333333333333333").MinSize()
+	templateMinSize = NewLabel("Template Object").MinSize()
+	doublePadding   = 2 * theme.Padding()
 )
 
 func indentation() int {
@@ -54,7 +50,7 @@ func getLeaf(t *testing.T, tree *Tree, uid string) (leaf *leaf) {
 }
 
 func TestTree_Indentation(t *testing.T) {
-	s := 100
+	s := 200
 	data := make(map[string][]string)
 	tree := NewTreeWithStrings(data)
 	tree.Resize(fyne.NewSize(s, s))
@@ -75,7 +71,7 @@ func TestTree_Indentation(t *testing.T) {
 }
 
 func TestTree_Resize(t *testing.T) {
-	s := 100
+	s := 200
 	data := make(map[string][]string)
 	tree := NewTreeWithStrings(data)
 	tree.Resize(fyne.NewSize(s, s))
@@ -87,18 +83,8 @@ func TestTree_Resize(t *testing.T) {
 
 	tree.OpenBranch("B")
 
-	width := fyne.Max(
-		fyne.Max(
-			minSizeA.Width,
-			minSizeB.Width,
-		),
-		minSizeC.Width+indentation(),
-	) + theme.IconInlineSize() + 3*theme.Padding()
-	height := fyne.Max(minSizeA.Height, theme.IconInlineSize()) + 2*theme.Padding()
-	height = height + treeDividerHeight
-	height = height + fyne.Max(minSizeB.Height, theme.IconInlineSize()) + 2*theme.Padding()
-	height = height + treeDividerHeight
-	height = height + fyne.Max(minSizeC.Height, theme.IconInlineSize()) + 2*theme.Padding()
+	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + 2*doublePadding
+	height := (fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*3 + treeDividerHeight*2
 	assertTreeContentMinSize(t, tree, fyne.NewSize(width, height))
 
 	a := getLeaf(t, tree, "A")
@@ -108,22 +94,20 @@ func TestTree_Resize(t *testing.T) {
 	assert.Equal(t, 0, a.Position().X)
 	assert.Equal(t, 0, a.Position().Y)
 	assert.Equal(t, s, a.Size().Width)
-	assert.Equal(t, minSizeA.Height+(2*theme.Padding()), a.Size().Height)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, a.Size().Height)
 
 	assert.Equal(t, 0, b.Position().X)
-	assert.Equal(t, minSizeA.Height+(2*theme.Padding())+treeDividerHeight, b.Position().Y)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+treeDividerHeight, b.Position().Y)
 	assert.Equal(t, s, b.Size().Width)
-	assert.Equal(t, minSizeB.Height+(2*theme.Padding()), b.Size().Height)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, b.Size().Height)
 
 	assert.Equal(t, 0, c.Position().X)
-	assert.Equal(t, minSizeA.Height+minSizeB.Height+(4*theme.Padding())+2*treeDividerHeight, c.Position().Y)
+	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+treeDividerHeight), c.Position().Y)
 	assert.Equal(t, s, c.Size().Width)
-	assert.Equal(t, minSizeC.Height+(2*theme.Padding()), c.Size().Height)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, c.Size().Height)
 }
 
 func TestTree_MinSize(t *testing.T) {
-	nodePadding := 2 * theme.Padding()
-
 	t.Run("Default", func(t *testing.T) {
 		tree := &Tree{}
 		min := tree.MinSize()
@@ -141,8 +125,8 @@ func TestTree_MinSize(t *testing.T) {
 		}
 		tMin := tree.MinSize()
 		bMin := NewLabel("Branch").MinSize()
-		assert.Equal(t, fyne.Max(32, bMin.Width)+nodePadding, tMin.Width)
-		assert.Equal(t, fyne.Max(32, bMin.Height)+nodePadding, tMin.Height)
+		assert.Equal(t, fyne.Max(32, bMin.Width), tMin.Width)
+		assert.Equal(t, fyne.Max(32, bMin.Height), tMin.Height)
 	})
 
 	for name, tt := range map[string]struct {
@@ -157,8 +141,8 @@ func TestTree_MinSize(t *testing.T) {
 				},
 			},
 			want: fyne.NewSize(
-				minSizeA.Width+theme.Padding()+theme.IconInlineSize()+nodePadding,
-				fyne.Max(minSizeA.Height, theme.IconInlineSize())+nodePadding,
+				templateMinSize.Width+theme.Padding()+theme.IconInlineSize()+doublePadding,
+				fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding,
 			),
 		},
 		"single_item_opened": {
@@ -169,8 +153,8 @@ func TestTree_MinSize(t *testing.T) {
 			},
 			opened: []string{"A"},
 			want: fyne.NewSize(
-				fyne.Max(minSizeA.Width, minSize1.Width+indentation())+theme.Padding()+theme.IconInlineSize()+nodePadding,
-				fyne.Max(minSizeA.Height, theme.IconInlineSize())+nodePadding+minSize1.Height+nodePadding+treeDividerHeight,
+				templateMinSize.Width+indentation()+theme.Padding()+theme.IconInlineSize()+doublePadding,
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*2+treeDividerHeight,
 			),
 		},
 		"multiple_items": {
@@ -186,8 +170,8 @@ func TestTree_MinSize(t *testing.T) {
 				},
 			},
 			want: fyne.NewSize(
-				fyne.Max(minSizeA.Width, minSizeB.Width)+theme.Padding()+theme.IconInlineSize()+nodePadding,
-				fyne.Max(minSizeA.Height, theme.IconInlineSize())+fyne.Max(minSizeB.Height, theme.IconInlineSize())+(2*nodePadding)+treeDividerHeight,
+				templateMinSize.Width+theme.Padding()+theme.IconInlineSize()+doublePadding,
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*2+treeDividerHeight,
 			),
 		},
 		"multiple_items_opened": {
@@ -204,23 +188,8 @@ func TestTree_MinSize(t *testing.T) {
 			},
 			opened: []string{"A", "B", "C"},
 			want: fyne.NewSize(
-				fyne.Max(
-					fyne.Max(
-						fyne.Max(
-							minSizeA.Width,
-							minSizeB.Width,
-						),
-						minSizeC.Width+indentation(),
-					),
-					fyne.Max(
-						fyne.Max(
-							minSize1.Width+indentation(),
-							minSize2.Width+indentation(),
-						),
-						minSize3.Width+(2*indentation()),
-					),
-				)+nodePadding+theme.IconInlineSize()+theme.Padding(),
-				fyne.Max(minSizeA.Height, theme.IconInlineSize())+fyne.Max(minSizeB.Height, theme.IconInlineSize())+fyne.Max(minSizeC.Height, theme.IconInlineSize())+minSize1.Height+minSize2.Height+minSize3.Height+(6*nodePadding)+(5*treeDividerHeight),
+				templateMinSize.Width+2*indentation()+doublePadding+theme.IconInlineSize()+theme.Padding(),
+				(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*6+(5*treeDividerHeight),
 			),
 		},
 	} {

@@ -519,7 +519,7 @@ func TestTree_Layout(t *testing.T) {
 			// TODO tree.Hovered = tt.hovered
 
 			window := test.NewWindow(tree)
-			window.Resize(tree.MinSize().Max(fyne.NewSize(200, 300)))
+			window.Resize(fyne.NewSize(200, 300))
 
 			test.AssertImageMatches(t, "tree/layout_"+name+".png", window.Canvas().Capture())
 
@@ -538,16 +538,16 @@ func TestTree_ChangeTheme(t *testing.T) {
 	tree := widget.NewTreeWithStrings(data)
 	tree.OpenBranch("foo")
 
-	w := test.NewWindow(tree)
-	defer w.Close()
-	w.Resize(fyne.NewSize(220, 220))
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(fyne.NewSize(220, 220))
 
-	test.AssertImageMatches(t, "tree/theme_initial.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "tree/theme_initial.png", window.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
 		tree.Refresh()
 		time.Sleep(100 * time.Millisecond)
-		test.AssertImageMatches(t, "tree/theme_changed.png", w.Canvas().Capture())
+		test.AssertImageMatches(t, "tree/theme_changed.png", window.Canvas().Capture())
 	})
 }
 
@@ -561,11 +561,11 @@ func TestTree_Move(t *testing.T) {
 	tree := widget.NewTreeWithStrings(data)
 	tree.OpenBranch("foo")
 
-	w := test.NewWindow(tree)
-	defer w.Close()
-	w.Resize(fyne.NewSize(220, 220))
-	test.AssertImageMatches(t, "tree/move_initial.png", w.Canvas().Capture())
+	window := test.NewWindow(tree)
+	defer window.Close()
+	window.Resize(fyne.NewSize(220, 220))
+	test.AssertImageMatches(t, "tree/move_initial.png", window.Canvas().Capture())
 
 	tree.Move(fyne.NewPos(20, 20))
-	test.AssertImageMatches(t, "tree/move_moved.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "tree/move_moved.png", window.Canvas().Capture())
 }
