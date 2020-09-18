@@ -292,3 +292,27 @@ func TestAccordionContainerRenderer_MinSize(t *testing.T) {
 		})
 	})
 }
+
+func TestAccordionContainerRenderer_AddRemove(t *testing.T) {
+	ac := NewAccordionContainer()
+	ar := test.WidgetRenderer(ac).(*accordionRenderer)
+	ac.Append(NewAccordionItem("foo0", NewLabel("foobar0")))
+	ac.Append(NewAccordionItem("foo1", NewLabel("foobar1")))
+	ac.Append(NewAccordionItem("foo2", NewLabel("foobar2")))
+
+	assert.Equal(t, 3, len(ac.Items))
+	assert.Equal(t, 3, len(ar.headers))
+	assert.Equal(t, 2, len(ar.dividers))
+	assert.True(t, ar.headers[2].Visible())
+	assert.True(t, ar.dividers[1].Visible())
+
+	ac.RemoveIndex(2)
+	assert.Equal(t, 2, len(ac.Items))
+	assert.False(t, ar.headers[2].Visible())
+	assert.False(t, ar.dividers[1].Visible())
+
+	ac.Append(NewAccordionItem("foo3", NewLabel("foobar3")))
+	assert.Equal(t, 3, len(ac.Items))
+	assert.True(t, ar.headers[2].Visible())
+	assert.True(t, ar.dividers[1].Visible())
+}

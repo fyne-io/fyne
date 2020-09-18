@@ -198,6 +198,7 @@ func (r *accordionRenderer) updateObjects() {
 		var h *Button
 		if i < hs {
 			h = r.headers[i]
+			h.Show()
 		} else {
 			h = &Button{}
 			r.headers = append(r.headers, h)
@@ -238,6 +239,11 @@ func (r *accordionRenderer) updateObjects() {
 	}
 	// add dividers
 	for i = 0; i < len(r.dividers); i++ {
+		if i < len(r.container.Items)-1 {
+			r.dividers[i].Show()
+		} else {
+			r.dividers[i].Hide()
+		}
 		objects = append(objects, r.dividers[i])
 	}
 	// make new dividers
