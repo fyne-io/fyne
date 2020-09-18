@@ -357,8 +357,6 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height = min.Height + m.Height
 	})
-	min.Width += 2 * theme.Padding()
-	min.Height += 2 * theme.Padding()
 	return
 }
 
@@ -371,7 +369,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	leaves := make(map[string]*leaf)
 
 	offsetY := r.treeContent.tree.Offset.Y
-	y := theme.Padding()
+	y := 0
 	// Walk open branches and obtain nodes to render in scroller's viewport
 	r.treeContent.tree.Walk(func(uid string, isBranch bool, depth int) {
 		// Root node is not rendered unless it has been customized
@@ -410,8 +408,8 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				n = l.treeNode
 			}
 			if n != nil {
-				n.Move(fyne.NewPos(theme.Padding(), y))
-				n.Resize(fyne.NewSize(size.Width-n.Position().X-theme.Padding(), m.Height))
+				n.Move(fyne.NewPos(0, y))
+				n.Resize(fyne.NewSize(size.Width, m.Height))
 			}
 		}
 		y += m.Height
@@ -436,7 +434,8 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 func (r *treeContentRenderer) Refresh() {
 	s := r.treeContent.Size()
 	if s.IsZero() {
-		r.treeContent.Resize(r.treeContent.MinSize())
+		m := r.treeContent.MinSize().Max(r.treeContent.tree.Size())
+		r.treeContent.Resize(m)
 	} else {
 		r.Layout(s)
 	}
