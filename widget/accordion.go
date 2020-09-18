@@ -166,7 +166,7 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 
 func (r *accordionRenderer) MinSize() (size fyne.Size) {
 	for i, ai := range r.container.Items {
-		size.Height += theme.Padding()*2
+		size.Height += theme.Padding() * 2
 		if i != 0 {
 			size.Height += accordionDividerHeight
 		}
@@ -184,6 +184,10 @@ func (r *accordionRenderer) MinSize() (size fyne.Size) {
 }
 
 func (r *accordionRenderer) Refresh() {
+	for _, d := range r.dividers {
+		d.FillColor = theme.ShadowColor()
+	}
+
 	r.updateObjects()
 	r.Layout(r.container.Size())
 	canvas.Refresh(r.container)

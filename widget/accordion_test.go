@@ -2,6 +2,7 @@ package widget_test
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
@@ -28,6 +29,29 @@ func TestAccordionContainer_Append(t *testing.T) {
 	ac := widget.NewAccordionContainer()
 	ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 	assert.Equal(t, 1, len(ac.Items))
+}
+
+func TestAccordionContainer_ChangeTheme(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	ac := widget.NewAccordionContainer()
+	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
+	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
+
+	w := test.NewWindow(ac)
+	defer w.Close()
+	w.Resize(ac.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+
+	test.AssertImageMatches(t, "accordion_theme_initial.png", w.Canvas().Capture())
+
+	test.WithTestTheme(t, func() {
+		ac.Resize(ac.MinSize())
+		ac.Refresh()
+		time.Sleep(100 * time.Millisecond)
+		test.AssertImageMatches(t, "accordion_theme_changed.png", w.Canvas().Capture())
+	})
 }
 
 func TestAccordionContainer_Close(t *testing.T) {
