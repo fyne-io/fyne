@@ -389,13 +389,12 @@ func (c *glCanvas) objectTrees() []fyne.CanvasObject {
 	return trees
 }
 
-func (c *glCanvas) overlayChanged(prevFocusMgr *app.FocusManager) {
+func (c *glCanvas) overlayChanged(focusMgr, prevFocusMgr *app.FocusManager) {
 	c.setDirty(true)
 	c.RLock()
 	if prevFocusMgr == nil {
 		prevFocusMgr = c.focusMgr
 	}
-	focusMgr := c.overlays.TopFocusManager()
 	if focusMgr == nil {
 		focusMgr = c.focusMgr
 	}
@@ -539,7 +538,7 @@ type overlayStack struct {
 	internal.OverlayStack
 
 	focusManagers []*app.FocusManager
-	onChange      func(prevFocusMgr *app.FocusManager)
+	onChange      func(focusMgr, prevFocusMgr *app.FocusManager)
 	propertyLock  sync.RWMutex
 	renderCaches  []*renderCacheTree
 }
@@ -554,23 +553,24 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	pfm := o.topFocusManager()
 	o.OverlayStack.Add(overlay)
 	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &renderCacheNode{obj: overlay}})
-	o.focusManagers = append(o.focusManagers, app.NewFocusManager(overlay))
-	o.onChange(pfm)
+	fm := app.NewFocusManager(overlay)
+	o.focusManagers = append(o.focusManagers, fm)
+	o.onChange(fm, pfm)
 }
 
 func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
-	if overlay == nil {
+	if overlay == nil || len(o.List()) == 0 {
 		return
 	}
 	o.propertyLock.Lock()
 	defer o.propertyLock.Unlock()
 
-	top := o.topFocusManager()
+	pfm := o.topFocusManager()
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 	o.renderCaches = o.renderCaches[:overlayCount]
 	o.focusManagers = o.focusManagers[:overlayCount]
-	o.onChange(top)
+	o.onChange(o.topFocusManager(), pfm)
 }
 
 func (o *overlayStack) TopFocusManager() *app.FocusManager {
