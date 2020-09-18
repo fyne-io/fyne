@@ -540,6 +540,7 @@ type overlayStack struct {
 
 	focusManagers []*app.FocusManager
 	onChange      func(prevFocusMgr *app.FocusManager)
+	propertyLock  sync.RWMutex
 	renderCaches  []*renderCacheTree
 }
 
@@ -547,7 +548,10 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	if overlay == nil {
 		return
 	}
-	pfm := o.TopFocusManager()
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
+
+	pfm := o.topFocusManager()
 	o.OverlayStack.Add(overlay)
 	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &renderCacheNode{obj: overlay}})
 	o.focusManagers = append(o.focusManagers, app.NewFocusManager(overlay))
@@ -555,7 +559,13 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 }
 
 func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
-	top := o.TopFocusManager()
+	if overlay == nil {
+		return
+	}
+	o.propertyLock.Lock()
+	defer o.propertyLock.Unlock()
+
+	top := o.topFocusManager()
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 	o.renderCaches = o.renderCaches[:overlayCount]
@@ -564,11 +574,17 @@ func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 }
 
 func (o *overlayStack) TopFocusManager() *app.FocusManager {
-	var pfm *app.FocusManager
+	o.propertyLock.RLock()
+	defer o.propertyLock.RUnlock()
+	return o.topFocusManager()
+}
+
+func (o *overlayStack) topFocusManager() *app.FocusManager {
+	var fm *app.FocusManager
 	if len(o.focusManagers) > 0 {
-		pfm = o.focusManagers[len(o.focusManagers)-1]
+		fm = o.focusManagers[len(o.focusManagers)-1]
 	}
-	return pfm
+	return fm
 }
 
 type renderCacheNode struct {
