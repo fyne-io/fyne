@@ -37,7 +37,15 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 	})
 	p.advanced = widget.NewAccordionContainer(widget.NewAccordionItem("Advanced", p.picker))
 
-	p.dialog.content = widget.NewVBox(fyne.NewContainerWithLayout(layout.NewCenterLayout(), widget.NewVBox(p.createSimplePickers()...)), p.advanced)
+	p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+		fyne.NewContainerWithLayout(layout.NewCenterLayout(),
+			fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+				p.createSimplePickers()...,
+			),
+		),
+		canvas.NewLine(theme.ShadowColor()),
+		p.advanced,
+	)
 
 	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
 		OnTapped: p.dialog.Hide,
@@ -60,7 +68,7 @@ func NewSimpleColorPicker(title, message string, callback func(c color.Color), p
 		color:    theme.PrimaryColor(),
 		callback: callback,
 	}
-	p.dialog.content = widget.NewVBox(p.createSimplePickers()...)
+	p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(), p.createSimplePickers()...)
 	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
 		OnTapped: p.dialog.Hide,
 	}

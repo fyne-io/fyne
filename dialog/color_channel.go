@@ -46,6 +46,7 @@ func (c *colorChannel) CreateRenderer() fyne.WidgetRenderer {
 				c.SetValue(value)
 			}
 		},
+		// TODO extend Entry to force MinSize to always be wide enough for 3 chars
 		// TODO add number min/max validator
 	}
 	slider := &widget.Slider{
