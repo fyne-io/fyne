@@ -83,7 +83,7 @@ func TestTree_Resize(t *testing.T) {
 
 	tree.OpenBranch("B")
 
-	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + 2*doublePadding
+	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + doublePadding + theme.Padding()
 	height := (fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*3 + treeDividerHeight*2
 	assertTreeContentMinSize(t, tree, fyne.NewSize(width, height))
 
