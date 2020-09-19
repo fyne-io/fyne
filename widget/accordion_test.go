@@ -2,6 +2,7 @@ package widget_test
 
 import (
 	"testing"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
@@ -12,27 +13,50 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAccordionContainer(t *testing.T) {
+func TestAccordion(t *testing.T) {
 	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
 	t.Run("Initializer", func(t *testing.T) {
-		ac := &widget.AccordionContainer{Items: []*widget.AccordionItem{ai}}
+		ac := &widget.Accordion{Items: []*widget.AccordionItem{ai}}
 		assert.Equal(t, 1, len(ac.Items))
 	})
 	t.Run("Constructor", func(t *testing.T) {
-		ac := widget.NewAccordionContainer(ai)
+		ac := widget.NewAccordion(ai)
 		assert.Equal(t, 1, len(ac.Items))
 	})
 }
 
-func TestAccordionContainer_Append(t *testing.T) {
-	ac := widget.NewAccordionContainer()
+func TestAccordion_Append(t *testing.T) {
+	ac := widget.NewAccordion()
 	ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 	assert.Equal(t, 1, len(ac.Items))
 }
 
+func TestAccordionContainer_ChangeTheme(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	ac := widget.NewAccordionContainer()
+	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
+	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
+
+	w := test.NewWindow(ac)
+	defer w.Close()
+	w.Resize(ac.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+
+	test.AssertImageMatches(t, "accordion_theme_initial.png", w.Canvas().Capture())
+
+	test.WithTestTheme(t, func() {
+		ac.Resize(ac.MinSize())
+		ac.Refresh()
+		time.Sleep(100 * time.Millisecond)
+		test.AssertImageMatches(t, "accordion_theme_changed.png", w.Canvas().Capture())
+	})
+}
+
 func TestAccordionContainer_Close(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
+		ac := widget.NewAccordion()
 		ac.Append(&widget.AccordionItem{
 			Title:  "foo",
 			Detail: widget.NewLabel("foobar"),
@@ -43,7 +67,7 @@ func TestAccordionContainer_Close(t *testing.T) {
 		assert.False(t, ac.Items[0].Detail.Visible())
 	})
 	t.Run("BelowBounds", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
+		ac := widget.NewAccordion()
 		ac.Append(&widget.AccordionItem{
 			Title:  "foo",
 			Detail: widget.NewLabel("foobar"),
@@ -53,7 +77,7 @@ func TestAccordionContainer_Close(t *testing.T) {
 		assert.True(t, ac.Items[0].Open)
 	})
 	t.Run("AboveBounds", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
+		ac := widget.NewAccordion()
 		ac.Append(&widget.AccordionItem{
 			Title:  "foo",
 			Detail: widget.NewLabel("foobar"),
@@ -64,8 +88,8 @@ func TestAccordionContainer_Close(t *testing.T) {
 	})
 }
 
-func TestAccordionContainer_CloseAll(t *testing.T) {
-	ac := widget.NewAccordionContainer()
+func TestAccordion_CloseAll(t *testing.T) {
+	ac := widget.NewAccordion()
 	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
 	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
 	ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
@@ -76,7 +100,7 @@ func TestAccordionContainer_CloseAll(t *testing.T) {
 	assert.False(t, ac.Items[2].Open)
 }
 
-func TestAccordionContainer_Layout(t *testing.T) {
+func TestAccordion_Layout(t *testing.T) {
 	test.NewApp()
 	test.ApplyTheme(t, theme.LightTheme())
 
@@ -87,7 +111,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 	}{
 		"single_open_one_item": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -95,7 +119,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		},
 		"single_open_one_item_opened": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -104,11 +128,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		},
 		"single_open_multiple_items": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -116,11 +140,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		},
 		"single_open_multiple_items_opened": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -130,7 +154,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		"multiple_open_one_item": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -139,7 +163,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		"multiple_open_one_item_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
@@ -149,11 +173,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		"multiple_open_multiple_items": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -162,11 +186,11 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		"multiple_open_multiple_items_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("11111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
@@ -175,7 +199,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			accordion := &widget.AccordionContainer{
+			accordion := &widget.Accordion{
 				MultiOpen: tt.multiOpen,
 			}
 			for _, ai := range tt.items {
@@ -195,7 +219,7 @@ func TestAccordionContainer_Layout(t *testing.T) {
 	}
 }
 
-func TestAccordionContainer_MinSize(t *testing.T) {
+func TestAccordion_MinSize(t *testing.T) {
 	minSizeA := fyne.MeasureText("A", theme.TextSize(), fyne.TextStyle{})
 	minSizeA.Width += theme.IconInlineSize() + theme.Padding()*5
 	minSizeA.Height = fyne.Max(minSizeA.Height, theme.IconInlineSize()) + theme.Padding()*2
@@ -223,103 +247,103 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 	}{
 		"single_open_one_item": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("111111"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1, minSizeA.Height),
+			want: fyne.NewSize(minWidthA1, minSizeA.Height+theme.Padding()*2),
 		},
 		"single_open_one_item_opened": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("111111"),
 				},
 			},
 			opened: []int{0},
-			want:   fyne.NewSize(minWidthA1, minHeightA1),
+			want:   fyne.NewSize(minWidthA1, minHeightA1+theme.Padding()*2),
 		},
 		"single_open_multiple_items": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("111111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.Padding()*2+1),
+			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.Padding()*4+1),
 		},
 		"single_open_multiple_items_opened": {
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("111111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
 			opened: []int{0, 1},
-			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize2.Height+theme.Padding()*3+1),
+			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize2.Height+theme.Padding()*5+1),
 		},
 		"multiple_open_one_item": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("111111"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1, minSizeA.Height),
+			want: fyne.NewSize(minWidthA1, minSizeA.Height+theme.Padding()*2),
 		},
 		"multiple_open_one_item_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("111111"),
 				},
 			},
 			opened: []int{0},
-			want:   fyne.NewSize(minWidthA1, minHeightA1),
+			want:   fyne.NewSize(minWidthA1, minHeightA1+theme.Padding()*2),
 		},
 		"multiple_open_multiple_items": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("111111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
-			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.Padding()*2+1),
+			want: fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+theme.Padding()*4+1),
 		},
 		"multiple_open_multiple_items_opened": {
 			multiOpen: true,
 			items: []*widget.AccordionItem{
-				&widget.AccordionItem{
+				{
 					Title:  "A",
 					Detail: widget.NewLabel("111111"),
 				},
-				&widget.AccordionItem{
+				{
 					Title:  "B",
 					Detail: widget.NewLabel("2222222222"),
 				},
 			},
 			opened: []int{0, 1},
-			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.Padding()*4+1),
+			want:   fyne.NewSize(minWidthA1B2, minSizeA.Height+minSizeB.Height+minSize1.Height+minSize2.Height+theme.Padding()*6+1),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			accordion := &widget.AccordionContainer{
+			accordion := &widget.Accordion{
 				MultiOpen: tt.multiOpen,
 			}
 			for _, ai := range tt.items {
@@ -334,9 +358,9 @@ func TestAccordionContainer_MinSize(t *testing.T) {
 	}
 }
 
-func TestAccordionContainer_Open(t *testing.T) {
+func TestAccordion_Open(t *testing.T) {
 	t.Run("Exists", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
+		ac := widget.NewAccordion()
 		ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
 		ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
 		ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
@@ -363,14 +387,14 @@ func TestAccordionContainer_Open(t *testing.T) {
 		assert.True(t, ac.Items[2].Open)
 	})
 	t.Run("BelowBounds", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
+		ac := widget.NewAccordion()
 		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 		assert.False(t, ac.Items[0].Open)
 		ac.Open(-1)
 		assert.False(t, ac.Items[0].Open)
 	})
 	t.Run("AboveBounds", func(t *testing.T) {
-		ac := widget.NewAccordionContainer()
+		ac := widget.NewAccordion()
 		ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 		assert.False(t, ac.Items[0].Open)
 		ac.Open(1)
@@ -378,8 +402,8 @@ func TestAccordionContainer_Open(t *testing.T) {
 	})
 }
 
-func TestAccordionContainer_OpenAll(t *testing.T) {
-	ac := widget.NewAccordionContainer()
+func TestAccordion_OpenAll(t *testing.T) {
+	ac := widget.NewAccordion()
 	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
 	ac.Append(widget.NewAccordionItem("foo1", widget.NewLabel("foobar1")))
 	ac.Append(widget.NewAccordionItem("foo2", widget.NewLabel("foobar2")))
@@ -398,14 +422,14 @@ func TestAccordionContainer_OpenAll(t *testing.T) {
 	assert.True(t, ac.Items[2].Open)
 }
 
-func TestAccordionContainer_Remove(t *testing.T) {
+func TestAccordion_Remove(t *testing.T) {
 	ai := widget.NewAccordionItem("foo", widget.NewLabel("foobar"))
-	ac := widget.NewAccordionContainer(ai)
+	ac := widget.NewAccordion(ai)
 	ac.Remove(ai)
 	assert.Equal(t, 0, len(ac.Items))
 }
 
-func TestAccordionContainer_RemoveIndex(t *testing.T) {
+func TestAccordion_RemoveIndex(t *testing.T) {
 	for name, tt := range map[string]struct {
 		index  int
 		length int
@@ -415,7 +439,7 @@ func TestAccordionContainer_RemoveIndex(t *testing.T) {
 		"AboveBounds": {index: 1, length: 1},
 	} {
 		t.Run(name, func(t *testing.T) {
-			ac := widget.NewAccordionContainer()
+			ac := widget.NewAccordion()
 			ac.Append(widget.NewAccordionItem("foo", widget.NewLabel("foobar")))
 			ac.RemoveIndex(tt.index)
 			assert.Equal(t, tt.length, len(ac.Items))
