@@ -15,7 +15,7 @@ import (
 )
 
 func TestNewList(t *testing.T) {
-	list := createList()
+	list := createList(1000)
 
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
@@ -30,7 +30,7 @@ func TestNewList(t *testing.T) {
 }
 
 func TestList_Resize(t *testing.T) {
-	list := createList()
+	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 1000))
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
@@ -59,7 +59,7 @@ func TestList_Resize(t *testing.T) {
 }
 
 func TestList_OffsetChange(t *testing.T) {
-	list := createList()
+	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 1000))
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
@@ -91,7 +91,7 @@ func TestList_OffsetChange(t *testing.T) {
 }
 
 func TestList_Hover(t *testing.T) {
-	list := createList()
+	list := createList(1000)
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	for i := 0; i < 2; i++ {
@@ -104,7 +104,7 @@ func TestList_Hover(t *testing.T) {
 }
 
 func TestList_Selection(t *testing.T) {
-	list := createList()
+	list := createList(1000)
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
@@ -118,7 +118,7 @@ func TestList_Selection(t *testing.T) {
 }
 
 func TestList_DataChange(t *testing.T) {
-	list := createList()
+	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 1000))
 	children := test.WidgetRenderer(list).(*listRenderer).children
@@ -133,7 +133,7 @@ func TestList_DataChange(t *testing.T) {
 }
 
 func TestList_ThemeChange(t *testing.T) {
-	list := createList()
+	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 1000))
 
@@ -146,9 +146,30 @@ func TestList_ThemeChange(t *testing.T) {
 	})
 }
 
-func createList() *List {
+func TestList_SmallList(t *testing.T) {
 	var data []string
-	for i := 0; i < 1000; i++ {
+	data = append(data, "Test Item 0")
+
+	list := NewList(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+		},
+		func(index int, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		},
+	)
+	list.Resize(fyne.NewSize(200, 1000))
+
+	data = append(data, "Test Item 1")
+	list.Refresh()
+}
+
+func createList(items int) *List {
+	var data []string
+	for i := 0; i < items; i++ {
 		data = append(data, fmt.Sprintf("Test Item %d", i))
 	}
 
