@@ -124,7 +124,7 @@ func TestTree_MinSize(t *testing.T) {
 			},
 		}
 		tMin := tree.MinSize()
-		bMin := NewLabel("Branch").MinSize()
+		bMin := newBranch(tree, NewLabel("Branch")).MinSize()
 		assert.Equal(t, fyne.Max(32, bMin.Width), tMin.Width)
 		assert.Equal(t, fyne.Max(32, bMin.Height), tMin.Height)
 	})

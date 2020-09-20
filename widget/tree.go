@@ -2,6 +2,7 @@ package widget
 
 import (
 	"image/color"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,7 +27,9 @@ type Tree struct {
 	Selected string
 	Offset   fyne.Position
 
-	open map[string]bool
+	open          map[string]bool
+	branchMinSize fyne.Size
+	leafMinSize   fyne.Size
 
 	Children       func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
 	IsBranch       func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
@@ -50,6 +53,7 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 			return
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
+			log.Println("Creating Node:", branch)
 			return NewLabel("Template Object")
 		},
 		UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {
@@ -266,6 +270,7 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 		t.Offset = s.Offset
 		t.Refresh()
 	}
+	r.updateMinSizes()
 	return r
 }
 
@@ -280,14 +285,8 @@ type treeRenderer struct {
 
 func (r *treeRenderer) MinSize() (min fyne.Size) {
 	min = r.scroller.MinSize()
-	if f := r.tree.CreateNode; f != nil {
-		if n := f(true); n != nil {
-			min = min.Max(n.MinSize())
-		}
-		if n := f(false); n != nil {
-			min = min.Max(n.MinSize())
-		}
-	}
+	min = min.Max(r.tree.branchMinSize)
+	min = min.Max(r.tree.leafMinSize)
 	return
 }
 
@@ -296,12 +295,23 @@ func (r *treeRenderer) Layout(size fyne.Size) {
 }
 
 func (r *treeRenderer) Refresh() {
+	r.updateMinSizes()
 	s := r.tree.Size()
 	if s.IsZero() {
 		r.tree.Resize(r.tree.MinSize())
 	}
 	r.content.Refresh()
 	canvas.Refresh(r.tree.super())
+}
+
+func (r *treeRenderer) updateMinSizes() {
+	r.tree.propertyLock.RLock()
+	defer r.tree.propertyLock.RUnlock()
+	if f := r.tree.CreateNode; f != nil {
+		log.Println("UpdateMinSizes")
+		r.tree.branchMinSize = newBranch(r.tree, f(true)).MinSize()
+		r.tree.leafMinSize = newLeaf(r.tree, f(false)).MinSize()
+	}
 }
 
 var _ fyne.Widget = (*treeContent)(nil)
@@ -320,7 +330,7 @@ func newTreeContent(tree *Tree) (c *treeContent) {
 }
 
 func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
-	r := &treeContentRenderer{
+	return &treeContentRenderer{
 		BaseRenderer: widget.BaseRenderer{},
 		treeContent:  c,
 		branches:     make(map[string]*branch),
@@ -328,22 +338,18 @@ func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
 		branchPool:   &syncPool{},
 		leafPool:     &syncPool{},
 	}
-	r.updateMinSizes()
-	return r
 }
 
 var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 
 type treeContentRenderer struct {
 	widget.BaseRenderer
-	treeContent   *treeContent
-	dividers      []*canvas.Rectangle
-	branchMinSize fyne.Size
-	leafMinSize   fyne.Size
-	branches      map[string]*branch
-	leaves        map[string]*leaf
-	branchPool    pool
-	leafPool      pool
+	treeContent *treeContent
+	dividers    []*canvas.Rectangle
+	branches    map[string]*branch
+	leaves      map[string]*leaf
+	branchPool  pool
+	leafPool    pool
 }
 
 func (r *treeContentRenderer) MinSize() (min fyne.Size) {
@@ -367,9 +373,9 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 			min.Height += treeDividerHeight
 		}
 
-		m := r.leafMinSize
+		m := r.treeContent.tree.leafMinSize
 		if isBranch {
-			m = r.branchMinSize
+			m = r.treeContent.tree.branchMinSize
 		}
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height += m.Height
@@ -418,9 +424,9 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			numDividers++
 		}
 
-		m := r.leafMinSize
+		m := r.treeContent.tree.leafMinSize
 		if isBranch {
-			m = r.branchMinSize
+			m = r.treeContent.tree.branchMinSize
 		}
 		if y+m.Height < offsetY {
 			// Node is above viewport and not visible
@@ -466,12 +472,14 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	for uid, b := range r.branches {
 		if _, ok := branches[uid]; !ok {
 			b.Hide()
+			log.Println("Branch Released")
 			r.branchPool.Release(b)
 		}
 	}
 	for uid, l := range r.leaves {
 		if _, ok := leaves[uid]; !ok {
 			l.Hide()
+			log.Println("Leaf Released")
 			r.leafPool.Release(l)
 		}
 	}
@@ -481,7 +489,6 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 }
 
 func (r *treeContentRenderer) Refresh() {
-	r.updateMinSizes()
 	s := r.treeContent.Size()
 	if s.IsZero() {
 		m := r.treeContent.MinSize().Max(r.treeContent.tree.Size())
@@ -518,24 +525,13 @@ func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
 	return
 }
 
-func (r *treeContentRenderer) updateMinSizes() {
-	r.treeContent.propertyLock.RLock()
-	defer r.treeContent.propertyLock.RUnlock()
-	b := newBranch(r.treeContent.tree, r.treeContent.tree.CreateNode(true))
-	l := newLeaf(r.treeContent.tree, r.treeContent.tree.CreateNode(false))
-	r.branchMinSize = b.MinSize()
-	r.leafMinSize = l.MinSize()
-	b.Hide()
-	l.Hide()
-	r.branchPool.Release(b)
-	r.leafPool.Release(l)
-}
-
 func (r *treeContentRenderer) getBranch() (b *branch) {
 	o := r.branchPool.Obtain()
 	if o != nil {
+		log.Println("Branch Obtained")
 		b = o.(*branch)
 	} else {
+		log.Println("Branch Created")
 		b = newBranch(r.treeContent.tree, r.treeContent.tree.CreateNode(true))
 	}
 	return
@@ -544,8 +540,10 @@ func (r *treeContentRenderer) getBranch() (b *branch) {
 func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	o := r.leafPool.Obtain()
 	if o != nil {
+		log.Println("Leaf Obtained")
 		l = o.(*leaf)
 	} else {
+		log.Println("Leaf Created")
 		l = newLeaf(r.treeContent.tree, r.treeContent.tree.CreateNode(false))
 	}
 	return
