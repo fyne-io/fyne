@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -571,14 +572,10 @@ type treeNode struct {
 func (n *treeNode) Update(uid string, depth int) {
 	n.uid = uid
 	n.depth = depth
-	temp := n.content
-	n.content = nil
-	if n.Visible() {
-		n.Refresh()
-	} else {
-		n.Show()
-	}
-	n.content = temp
+	n.propertyLock.Lock()
+	n.Hidden = false
+	n.propertyLock.Unlock()
+	n.partialRefresh()
 }
 
 func (n *treeNode) Content() fyne.CanvasObject {
@@ -599,13 +596,13 @@ func (n *treeNode) Tapped(*fyne.PointEvent) {
 // MouseIn is called when a desktop pointer enters the widget
 func (n *treeNode) MouseIn(*desktop.MouseEvent) {
 	n.hovered = true
-	n.Refresh()
+	n.partialRefresh()
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 func (n *treeNode) MouseOut() {
 	n.hovered = false
-	n.Refresh()
+	n.partialRefresh()
 }
 
 // MouseMoved is called when a desktop pointer hovers over the widget
@@ -617,6 +614,12 @@ func (n *treeNode) CreateRenderer() fyne.WidgetRenderer {
 		BaseRenderer: widget.BaseRenderer{},
 		treeNode:     n,
 		indicator:    canvas.NewRectangle(theme.BackgroundColor()),
+	}
+}
+
+func (n *treeNode) partialRefresh() {
+	if r := cache.Renderer(n.super()); r != nil {
+		r.(*treeNodeRenderer).partialRefresh()
 	}
 }
 
@@ -673,23 +676,10 @@ func (r *treeNodeRenderer) Layout(size fyne.Size) {
 }
 
 func (r *treeNodeRenderer) Refresh() {
-	if i := r.treeNode.icon; i != nil {
-		i.Refresh()
-	}
-	if i := r.indicator; i != nil {
-		if r.treeNode.uid == r.treeNode.tree.Selected {
-			i.FillColor = theme.PrimaryColor()
-		} else if r.treeNode.hovered {
-			i.FillColor = theme.HoverColor()
-		} else {
-			i.FillColor = theme.BackgroundColor()
-		}
-		i.Refresh()
-	}
 	if c := r.treeNode.content; c != nil {
 		c.Refresh()
 	}
-	canvas.Refresh(r.treeNode.super())
+	r.partialRefresh()
 }
 
 func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
@@ -703,6 +693,23 @@ func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
 		objects = append(objects, c)
 	}
 	return
+}
+
+func (r *treeNodeRenderer) partialRefresh() {
+	if i := r.treeNode.icon; i != nil {
+		i.Refresh()
+	}
+	if i := r.indicator; i != nil {
+		if r.treeNode.uid == r.treeNode.tree.Selected {
+			i.FillColor = theme.PrimaryColor()
+		} else if r.treeNode.hovered {
+			i.FillColor = theme.HoverColor()
+		} else {
+			i.FillColor = theme.BackgroundColor()
+		}
+		i.Refresh()
+	}
+	canvas.Refresh(r.treeNode.super())
 }
 
 var _ fyne.DoubleTappable = (*branch)(nil)
