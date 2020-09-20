@@ -457,11 +457,6 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			if n != nil {
 				n.Move(fyne.NewPos(0, y))
 				n.Resize(fyne.NewSize(size.Width, m.Height))
-				if n.Visible() {
-					n.Refresh()
-				} else {
-					n.Show()
-				}
 			}
 		}
 		y += m.Height
@@ -570,6 +565,14 @@ type treeNode struct {
 func (n *treeNode) Update(uid string, depth int) {
 	n.uid = uid
 	n.depth = depth
+	temp := n.content
+	n.content = nil
+	if n.Visible() {
+		n.Refresh()
+	} else {
+		n.Show()
+	}
+	n.content = temp
 }
 
 func (n *treeNode) Content() fyne.CanvasObject {
