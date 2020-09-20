@@ -13,6 +13,8 @@ import (
 
 // TabContainer widget allows switching visible content from a list of TabItems.
 // Each item is represented by a button at the top of the widget.
+//
+// Deprecated: use container.Tabs instead.
 type TabContainer struct {
 	BaseWidget
 
@@ -24,20 +26,28 @@ type TabContainer struct {
 
 // TabItem represents a single view in a TabContainer.
 // The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
+//
+// Deprecated: use container.TabItem instead.
 type TabItem struct {
 	Text    string
 	Icon    fyne.Resource
 	Content fyne.CanvasObject
 }
 
-// TabLocation is the location where the tabs of a tab container should be rendered
+// TabLocation is the location where the tabs of a tab container should be rendered.
+//
+// Deprecated: use container.TabLocation instead.
 type TabLocation int
 
 // TabLocation values
 const (
+	// Deprecated: use container.TabLocationTop
 	TabLocationTop TabLocation = iota
+	// Deprecated: use container.TabLocationLeading
 	TabLocationLeading
+	// Deprecated: use container.TabLocationBottom
 	TabLocationBottom
+	// Deprecated: use container.TabLocationTrailing
 	TabLocationTrailing
 )
 

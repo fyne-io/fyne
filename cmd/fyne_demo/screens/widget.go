@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -33,7 +34,7 @@ var (
 	endProgress chan interface{}
 )
 
-func makeButtonTab() fyne.Widget {
+func makeButtonTab() fyne.CanvasObject {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
 
@@ -47,7 +48,7 @@ func makeButtonTab() fyne.Widget {
 		shareItem,
 	))
 
-	return widget.NewVBox(
+	return container.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("Button (text & leading icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & leading icon button") }),
 		&widget.Button{
@@ -101,7 +102,7 @@ func makeTextTab() fyne.CanvasObject {
 
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
-	entryLoremIpsumScroller := widget.NewVScrollContainer(entryLoremIpsum)
+	entryLoremIpsumScroller := container.NewVScroll(entryLoremIpsum)
 
 	label.Alignment = fyne.TextAlignLeading
 	hyperlink.Alignment = fyne.TextAlignLeading
@@ -155,8 +156,8 @@ func makeTextTab() fyne.CanvasObject {
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 
-	fixed := widget.NewVBox(
-		widget.NewHBox(
+	fixed := container.NewVBox(
+		container.NewHBox(
 			radioAlign,
 			layout.NewSpacer(),
 			radioWrap,
@@ -170,7 +171,7 @@ func makeTextTab() fyne.CanvasObject {
 		fixed, entryLoremIpsumScroller, grid)
 }
 
-func makeInputTab() fyne.Widget {
+func makeInputTab() fyne.CanvasObject {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Entry")
 	entryDisabled := widget.NewEntry()
@@ -189,7 +190,7 @@ func makeInputTab() fyne.Widget {
 	disabledRadio := widget.NewRadio([]string{"Disabled radio"}, func(string) {})
 	disabledRadio.Disable()
 
-	return widget.NewVBox(
+	return container.NewVBox(
 		entry,
 		entryDisabled,
 		entryValidated,
@@ -204,7 +205,7 @@ func makeInputTab() fyne.Widget {
 	)
 }
 
-func makeProgressTab() fyne.Widget {
+func makeProgressTab() fyne.CanvasObject {
 	progress = widget.NewProgressBar()
 
 	fprogress = widget.NewProgressBar()
@@ -215,7 +216,7 @@ func makeProgressTab() fyne.Widget {
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
 
-	return widget.NewVBox(
+	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,
 		widget.NewLabel("Formatted"), fprogress,
 		widget.NewLabel("Infinite"), infProgress)
@@ -329,15 +330,15 @@ func WidgetScreen() fyne.CanvasObject {
 	)
 
 	progress := makeProgressTab()
-	tabs := widget.NewTabContainer(
-		widget.NewTabItem("Buttons", makeButtonTab()),
-		widget.NewTabItem("Text", makeTextTab()),
-		widget.NewTabItem("Input", makeInputTab()),
-		widget.NewTabItem("Progress", progress),
-		widget.NewTabItem("Form", makeFormTab()),
-		widget.NewTabItem("List", makeListTab()),
+	tabs := container.NewTabs(
+		container.NewTabItem("Buttons", makeButtonTab()),
+		container.NewTabItem("Text", makeTextTab()),
+		container.NewTabItem("Input", makeInputTab()),
+		container.NewTabItem("Progress", progress),
+		container.NewTabItem("Form", makeFormTab()),
+		container.NewTabItem("List", makeListTab()),
 	)
-	tabs.OnChanged = func(t *widget.TabItem) {
+	tabs.OnChanged = func(t *container.TabItem) {
 		if t.Content == progress {
 			startProgress()
 		} else {
