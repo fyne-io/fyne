@@ -344,12 +344,14 @@ var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 
 type treeContentRenderer struct {
 	widget.BaseRenderer
-	treeContent *treeContent
-	dividers    []*canvas.Rectangle
-	branches    map[string]*branch
-	leaves      map[string]*leaf
-	branchPool  pool
-	leafPool    pool
+	treeContent   *treeContent
+	dividers      []*canvas.Rectangle
+	branches      map[string]*branch
+	leaves        map[string]*leaf
+	branchPool    pool
+	leafPool      pool
+	branchMinSize fyne.Size
+	leafMinSize   fyne.Size
 }
 
 func (r *treeContentRenderer) MinSize() (min fyne.Size) {
@@ -493,7 +495,11 @@ func (r *treeContentRenderer) Refresh() {
 		m := r.treeContent.MinSize().Max(r.treeContent.tree.Size())
 		r.treeContent.Resize(m)
 	} else {
-		r.Layout(s)
+		if r.branchMinSize != r.treeContent.tree.branchMinSize || r.leafMinSize != r.treeContent.tree.leafMinSize {
+			r.branchMinSize = r.treeContent.tree.branchMinSize
+			r.leafMinSize = r.treeContent.tree.leafMinSize
+			r.Layout(s)
+		}
 	}
 	r.treeContent.propertyLock.RLock()
 	for _, d := range r.dividers {
