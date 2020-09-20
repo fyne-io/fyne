@@ -457,7 +457,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			if n != nil {
 				n.Move(fyne.NewPos(0, y))
 				n.Resize(fyne.NewSize(size.Width, m.Height))
-				n.Show()
+				if n.Visible() {
+					n.Refresh()
+				} else {
+					n.Show()
+				}
 			}
 		}
 		y += m.Height
