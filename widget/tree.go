@@ -268,7 +268,7 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 			return
 		}
 		t.Offset = s.Offset
-		t.Refresh()
+		c.Refresh()
 	}
 	r.updateMinSizes()
 	return r
