@@ -84,7 +84,16 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			name := f.fileName.(*widget.Entry).Text
 			path, _ := storage.Child(f.dir, name)
 
+			// On windows replace '\\' with '/'
+			if runtime.GOOS == "windows" {
+				pathString := path.String()
+				pathString = strings.ReplaceAll(pathString, "\\\\", "/")
+				pathString = strings.ReplaceAll(pathString, "\\", "/")
+				path = storage.NewURI(pathString)
+			}
+
 			exists, _ := storage.Exists(path)
+
 			_, err := storage.ListerForURI(path)
 
 			if !exists {
@@ -120,7 +129,15 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			if f.file.onClosedCallback != nil {
 				f.file.onClosedCallback(true)
 			}
-			callback(storage.OpenFileFromURI(f.selected.location))
+			path := f.selected.location
+			// On windows replace '\\' with '/'
+			if runtime.GOOS == "windows" {
+				pathString := path.String()
+				pathString = strings.ReplaceAll(pathString, "\\\\", "/")
+				pathString = strings.ReplaceAll(pathString, "\\", "/")
+				path = storage.NewURI(pathString)
+			}
+			callback(storage.OpenFileFromURI(path))
 		}
 	})
 	f.open.Style = widget.PrimaryButton
@@ -263,6 +280,10 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 }
 
 func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
+	if dir == nil {
+		return fmt.Errorf("failed to open nil directory")
+	}
+
 	f.setSelected(nil)
 	f.dir = dir
 
