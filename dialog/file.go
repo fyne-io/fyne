@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -272,6 +273,10 @@ func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
 	}
 
 	localdir := dir.String()[len(dir.Scheme())+3:]
+	if runtime.GOOS == "windows" {
+		localdir = strings.ReplaceAll(localdir, "/", "\\")
+	}
+
 	buildDir := filepath.VolumeName(localdir)
 	for i, d := range strings.Split(localdir, string(filepath.Separator)) {
 		if d == "" {
