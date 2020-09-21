@@ -273,6 +273,7 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 		c.Refresh()
 	}
 	r.updateMinSizes()
+	r.content.viewport = r.MinSize()
 	return r
 }
 
@@ -324,8 +325,7 @@ type treeContent struct {
 
 func newTreeContent(tree *Tree) (c *treeContent) {
 	c = &treeContent{
-		tree:     tree,
-		viewport: tree.Size(),
+		tree: tree,
 	}
 	c.ExtendBaseWidget(c)
 	return
