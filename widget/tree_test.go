@@ -5,7 +5,6 @@ import (
 	//"os"
 	//"path"
 	//"path/filepath"
-	"log"
 	"testing"
 	"time"
 
@@ -507,7 +506,6 @@ func TestTree_Layout(t *testing.T) {
 		*/
 	} {
 		t.Run(name, func(t *testing.T) {
-			log.Println("********************************", name, "********************************")
 			data := make(map[string][]string)
 			for _, d := range tt.items {
 				internalwidget.AddTreePath(data, d...)

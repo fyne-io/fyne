@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,7 +54,6 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 			return
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
-			log.Println("Creating Node:", branch)
 			return NewLabel("Template Object")
 		},
 		UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {
@@ -472,14 +470,12 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	for uid, b := range r.branches {
 		if _, ok := branches[uid]; !ok {
 			b.Hide()
-			log.Println("Branch Released")
 			r.branchPool.Release(b)
 		}
 	}
 	for uid, l := range r.leaves {
 		if _, ok := leaves[uid]; !ok {
 			l.Hide()
-			log.Println("Leaf Released")
 			r.leafPool.Release(l)
 		}
 	}
@@ -528,11 +524,13 @@ func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
 func (r *treeContentRenderer) getBranch() (b *branch) {
 	o := r.branchPool.Obtain()
 	if o != nil {
-		log.Println("Branch Obtained")
 		b = o.(*branch)
 	} else {
-		log.Println("Branch Created")
-		b = newBranch(r.treeContent.tree, r.treeContent.tree.CreateNode(true))
+		var content fyne.CanvasObject
+		if f := r.treeContent.tree.CreateNode; f != nil {
+			content = f(true)
+		}
+		b = newBranch(r.treeContent.tree, content)
 	}
 	return
 }
@@ -540,11 +538,13 @@ func (r *treeContentRenderer) getBranch() (b *branch) {
 func (r *treeContentRenderer) getLeaf() (l *leaf) {
 	o := r.leafPool.Obtain()
 	if o != nil {
-		log.Println("Leaf Obtained")
 		l = o.(*leaf)
 	} else {
-		log.Println("Leaf Created")
-		l = newLeaf(r.treeContent.tree, r.treeContent.tree.CreateNode(false))
+		var content fyne.CanvasObject
+		if f := r.treeContent.tree.CreateNode; f != nil {
+			content = f(false)
+		}
+		l = newLeaf(r.treeContent.tree, content)
 	}
 	return
 }
