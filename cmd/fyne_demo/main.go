@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/cmd/fyne_demo/data"
 	"fyne.io/fyne/cmd/fyne_demo/screens"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -114,17 +115,17 @@ func main() {
 	w.SetMainMenu(mainMenu)
 	w.SetMaster()
 
-	tabs := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
-		widget.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
-		widget.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),
-		widget.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), screens.ContainerScreen()),
-		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)))
+	tabs := container.NewTabs(
+		container.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
+		container.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
+		container.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),
+		container.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), screens.ContainerScreen()),
+		container.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)))
 
 	if !fyne.CurrentDevice().IsMobile() {
-		tabs.Append(widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
+		tabs.Append(container.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
 	}
-	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs.SetTabLocation(container.TabLocationLeading)
 	tabs.SelectTabIndex(a.Preferences().Int(preferenceCurrentTab))
 	w.SetContent(tabs)
 
