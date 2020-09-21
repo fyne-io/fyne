@@ -302,6 +302,7 @@ func (r *treeRenderer) Refresh() {
 	if s.IsZero() {
 		r.tree.Resize(r.tree.MinSize())
 	}
+	r.scroller.Refresh()
 	r.content.Refresh()
 	canvas.Refresh(r.tree.super())
 }
