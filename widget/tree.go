@@ -292,6 +292,7 @@ func (r *treeRenderer) MinSize() (min fyne.Size) {
 }
 
 func (r *treeRenderer) Layout(size fyne.Size) {
+	r.content.viewport = size
 	r.scroller.Resize(size)
 }
 
@@ -306,10 +307,7 @@ func (r *treeRenderer) Refresh() {
 }
 
 func (r *treeRenderer) updateMinSizes() {
-	r.tree.propertyLock.RLock()
-	defer r.tree.propertyLock.RUnlock()
 	if f := r.tree.CreateNode; f != nil {
-		log.Println("UpdateMinSizes")
 		r.tree.branchMinSize = newBranch(r.tree, f(true)).MinSize()
 		r.tree.leafMinSize = newLeaf(r.tree, f(false)).MinSize()
 	}
@@ -319,12 +317,14 @@ var _ fyne.Widget = (*treeContent)(nil)
 
 type treeContent struct {
 	BaseWidget
-	tree *Tree
+	tree     *Tree
+	viewport fyne.Size
 }
 
 func newTreeContent(tree *Tree) (c *treeContent) {
 	c = &treeContent{
-		tree: tree,
+		tree:     tree,
+		viewport: tree.Size(),
 	}
 	c.ExtendBaseWidget(c)
 	return
@@ -345,21 +345,18 @@ var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 
 type treeContentRenderer struct {
 	widget.BaseRenderer
-	treeContent   *treeContent
-	dividers      []*canvas.Rectangle
-	branches      map[string]*branch
-	leaves        map[string]*leaf
-	branchPool    pool
-	leafPool      pool
-	branchMinSize fyne.Size
-	leafMinSize   fyne.Size
+	treeContent *treeContent
+	dividers    []*canvas.Rectangle
+	branches    map[string]*branch
+	leaves      map[string]*leaf
+	branchPool  pool
+	leafPool    pool
 }
 
 func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
 
-	maxDepth := 0
 	r.treeContent.tree.Walk(func(uid string, isBranch bool, depth int) {
 		// Root node is not rendered unless it has been customized
 		if r.treeContent.tree.Root == "" {
@@ -369,7 +366,6 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 				return
 			}
 		}
-		maxDepth = fyne.Max(maxDepth, depth)
 
 		// If this is not the first item, add a divider
 		if min.Height > 0 {
@@ -380,15 +376,14 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 		if isBranch {
 			m = r.treeContent.tree.branchMinSize
 		}
+		m.Width += depth * (theme.IconInlineSize() + theme.Padding())
 		min.Width = fyne.Max(min.Width, m.Width)
 		min.Height += m.Height
 	})
-	min.Width += maxDepth * (theme.IconInlineSize() + theme.Padding())
 	return
 }
 
 func (r *treeContentRenderer) Layout(size fyne.Size) {
-
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
 
@@ -396,6 +391,8 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	leaves := make(map[string]*leaf)
 
 	offsetY := r.treeContent.tree.Offset.Y
+	viewport := r.treeContent.viewport
+	width := fyne.Max(size.Width, viewport.Width)
 	y := 0
 	numDividers := 0
 	// Walk open branches and obtain nodes to render in scroller's viewport
@@ -419,7 +416,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				r.dividers = append(r.dividers, divider)
 			}
 			divider.Move(fyne.NewPos(theme.Padding(), y))
-			s := fyne.NewSize(size.Width-2*theme.Padding(), treeDividerHeight)
+			s := fyne.NewSize(width-2*theme.Padding(), treeDividerHeight)
 			divider.SetMinSize(s)
 			divider.Resize(s)
 			divider.Show()
@@ -433,7 +430,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 		}
 		if y+m.Height < offsetY {
 			// Node is above viewport and not visible
-		} else if y > offsetY+size.Height {
+		} else if y > offsetY+viewport.Height {
 			// Node is below viewport and not visible
 		} else {
 			// Node is in viewport
@@ -459,7 +456,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			}
 			if n != nil {
 				n.Move(fyne.NewPos(0, y))
-				n.Resize(fyne.NewSize(size.Width, m.Height))
+				n.Resize(fyne.NewSize(width, m.Height))
 			}
 		}
 		y += m.Height
@@ -496,11 +493,7 @@ func (r *treeContentRenderer) Refresh() {
 		m := r.treeContent.MinSize().Max(r.treeContent.tree.Size())
 		r.treeContent.Resize(m)
 	} else {
-		if r.branchMinSize != r.treeContent.tree.branchMinSize || r.leafMinSize != r.treeContent.tree.leafMinSize {
-			r.branchMinSize = r.treeContent.tree.branchMinSize
-			r.leafMinSize = r.treeContent.tree.leafMinSize
-			r.Layout(s)
-		}
+		r.Layout(s)
 	}
 	r.treeContent.propertyLock.RLock()
 	for _, d := range r.dividers {

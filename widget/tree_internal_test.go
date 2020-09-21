@@ -14,6 +14,7 @@ import (
 )
 
 var (
+	treeSize        = 200
 	templateMinSize = NewLabel("Template Object").MinSize()
 	doublePadding   = 2 * theme.Padding()
 )
@@ -50,12 +51,11 @@ func getLeaf(t *testing.T, tree *Tree, uid string) (leaf *leaf) {
 }
 
 func TestTree_Indentation(t *testing.T) {
-	s := 200
 	data := make(map[string][]string)
 	tree := NewTreeWithStrings(data)
-	tree.Resize(fyne.NewSize(s, s))
-	assert.Equal(t, s, tree.Size().Width)
-	assert.Equal(t, s, tree.Size().Height)
+	tree.Resize(fyne.NewSize(treeSize, treeSize))
+	assert.Equal(t, treeSize, tree.Size().Width)
+	assert.Equal(t, treeSize, tree.Size().Height)
 
 	widget.AddTreePath(data, "A", "B", "C")
 
@@ -71,12 +71,11 @@ func TestTree_Indentation(t *testing.T) {
 }
 
 func TestTree_Resize(t *testing.T) {
-	s := 200
 	data := make(map[string][]string)
 	tree := NewTreeWithStrings(data)
-	tree.Resize(fyne.NewSize(s, s))
-	assert.Equal(t, s, tree.Size().Width)
-	assert.Equal(t, s, tree.Size().Height)
+	tree.Resize(fyne.NewSize(treeSize, treeSize))
+	assert.Equal(t, treeSize, tree.Size().Width)
+	assert.Equal(t, treeSize, tree.Size().Height)
 
 	widget.AddTreePath(data, "A")
 	widget.AddTreePath(data, "B", "C")
@@ -93,17 +92,17 @@ func TestTree_Resize(t *testing.T) {
 
 	assert.Equal(t, 0, a.Position().X)
 	assert.Equal(t, 0, a.Position().Y)
-	assert.Equal(t, s, a.Size().Width)
+	assert.Equal(t, treeSize, a.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, a.Size().Height)
 
 	assert.Equal(t, 0, b.Position().X)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+treeDividerHeight, b.Position().Y)
-	assert.Equal(t, s, b.Size().Width)
+	assert.Equal(t, treeSize, b.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, b.Size().Height)
 
 	assert.Equal(t, 0, c.Position().X)
 	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+treeDividerHeight), c.Position().Y)
-	assert.Equal(t, s, c.Size().Width)
+	assert.Equal(t, treeSize, c.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, c.Size().Height)
 }
 
@@ -329,8 +328,8 @@ func TestTreeNode_Hovered(t *testing.T) {
 	data := make(map[string][]string)
 	widget.AddTreePath(data, "A", "B", "C")
 	tree := NewTreeWithStrings(data)
+	tree.Resize(fyne.NewSize(treeSize, treeSize))
 	tree.OpenAllBranches()
-	tree.Resize(fyne.NewSize(150, 200))
 	a := getBranch(t, tree, "A")
 	b := getBranch(t, tree, "B")
 	c := getLeaf(t, tree, "C")
@@ -366,6 +365,7 @@ func TestTreeNodeRenderer_BackgroundColor(t *testing.T) {
 	data := make(map[string][]string)
 	widget.AddTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
+	tree.Resize(fyne.NewSize(treeSize, treeSize))
 	tree.OpenAllBranches()
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")
@@ -383,6 +383,7 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 	data := make(map[string][]string)
 	widget.AddTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
+	tree.Resize(fyne.NewSize(treeSize, treeSize))
 	tree.OpenAllBranches()
 	t.Run("Branch", func(t *testing.T) {
 		a := getBranch(t, tree, "A")

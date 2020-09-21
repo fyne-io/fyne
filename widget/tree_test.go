@@ -5,6 +5,7 @@ import (
 	//"os"
 	//"path"
 	//"path/filepath"
+	"log"
 	"testing"
 	"time"
 
@@ -506,6 +507,7 @@ func TestTree_Layout(t *testing.T) {
 		*/
 	} {
 		t.Run(name, func(t *testing.T) {
+			log.Println("********************************", name, "********************************")
 			data := make(map[string][]string)
 			for _, d := range tt.items {
 				internalwidget.AddTreePath(data, d...)
@@ -519,11 +521,12 @@ func TestTree_Layout(t *testing.T) {
 			// TODO tree.Hovered = tt.hovered
 
 			window := test.NewWindow(tree)
+			defer window.Close()
 			window.Resize(fyne.NewSize(200, 300))
 
-			test.AssertImageMatches(t, "tree/layout_"+name+".png", window.Canvas().Capture())
+			tree.Refresh() // Force layout
 
-			window.Close()
+			test.AssertImageMatches(t, "tree/layout_"+name+".png", window.Canvas().Capture())
 		})
 	}
 }
@@ -541,6 +544,8 @@ func TestTree_ChangeTheme(t *testing.T) {
 	window := test.NewWindow(tree)
 	defer window.Close()
 	window.Resize(fyne.NewSize(220, 220))
+
+	tree.Refresh() // Force layout
 
 	test.AssertImageMatches(t, "tree/theme_initial.png", window.Canvas().Capture())
 
@@ -564,6 +569,9 @@ func TestTree_Move(t *testing.T) {
 	window := test.NewWindow(tree)
 	defer window.Close()
 	window.Resize(fyne.NewSize(220, 220))
+
+	tree.Refresh() // Force layout
+
 	test.AssertImageMatches(t, "tree/move_initial.png", window.Canvas().Capture())
 
 	tree.Move(fyne.NewPos(20, 20))
