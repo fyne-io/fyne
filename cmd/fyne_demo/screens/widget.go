@@ -304,10 +304,10 @@ func makeListTab() fyne.CanvasObject {
 			return len(data)
 		},
 		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), layout.NewSpacer(), widget.NewLabel("Template Object"))
 		},
 		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[index])
+			item.(*fyne.Container).Objects[2].(*widget.Label).SetText(data[index])
 		},
 	)
 	list.OnItemSelected = func(index int) {
