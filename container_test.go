@@ -24,9 +24,6 @@ func TestContainer_CustomLayout(t *testing.T) {
 	assert.Equal(t, size, container.MinSize())
 	assert.Equal(t, size, container.Size())
 	assert.Equal(t, size, box.Size())
-
-	container.AddObject(box)
-	assert.Equal(t, size, box.Size())
 }
 
 func TestContainer_Hide(t *testing.T) {
@@ -45,9 +42,6 @@ func TestContainer_MinSize(t *testing.T) {
 	minSize := box.MinSize()
 
 	container := NewContainerWithoutLayout(box)
-	assert.Equal(t, minSize, container.MinSize())
-
-	container.AddObject(box)
 	assert.Equal(t, minSize, container.MinSize())
 }
 
@@ -77,9 +71,6 @@ func TestContainer_NilLayout(t *testing.T) {
 	size := NewSize(100, 100)
 	container.Resize(size)
 	assert.Equal(t, size, container.Size())
-	assert.Equal(t, boxSize, box.Size())
-
-	container.AddObject(box)
 	assert.Equal(t, boxSize, box.Size())
 }
 
