@@ -15,6 +15,22 @@ func TestShortcutHandler_AddShortcut(t *testing.T) {
 	assert.Equal(t, 2, len(handle.entry))
 }
 
+func TestShortcutHandler_RemoveShortcut(t *testing.T) {
+	handler := &ShortcutHandler{}
+	handler.AddShortcut(&ShortcutCopy{}, func(shortcut Shortcut) {})
+	handler.AddShortcut(&ShortcutPaste{}, func(shortcut Shortcut) {})
+
+	assert.Equal(t, 2, len(handler.entry))
+
+	handler.RemoveShortcut(&ShortcutCopy{})
+
+	assert.Equal(t, 1, len(handler.entry))
+
+	handler.RemoveShortcut(&ShortcutPaste{})
+
+	assert.Equal(t, 0, len(handler.entry))
+}
+
 func TestShortcutHandler_HandleShortcut(t *testing.T) {
 	handle := &ShortcutHandler{}
 	cutCalled, copyCalled, pasteCalled := false, false, false
