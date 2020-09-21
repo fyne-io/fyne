@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 )
@@ -97,12 +98,12 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 			return fi.IsDir()
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
-			return NewHBox(NewIcon(theme.FileIcon()), NewLabel("Template Object"))
+			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.FileIcon()), NewLabel("Template Object"))
 		},
 	}
 	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
-		b := node.(*Box)
-		i := b.Children[0].(*Icon)
+		c := node.(*fyne.Container)
+		i := c.Objects[0].(*Icon)
 		var r fyne.Resource
 		if branch {
 			if t.IsBranchOpen(uid) {
@@ -135,7 +136,7 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 			*/
 		}
 		i.SetResource(r)
-		l := b.Children[1].(*Label)
+		l := c.Objects[1].(*Label)
 		if t.Root == uid {
 			l.SetText(uid)
 		} else {
