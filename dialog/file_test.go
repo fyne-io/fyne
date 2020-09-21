@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -208,7 +209,15 @@ func TestShowFileOpen(t *testing.T) {
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, openErr)
-	assert.Equal(t, target.location.String(), chosen.URI().String())
+
+	targetLocationString := target.location.String()
+	// Replace all '\\' with '/' on windows since the dialog
+	// will return a URI with only '/'
+	if runtime.GOOS == "windows" {
+		targetLocationString = strings.ReplaceAll(targetLocationString, "\\\\", "/")
+		targetLocationString = strings.ReplaceAll(targetLocationString, "\\", "/")
+	}
+	assert.Equal(t, targetLocationString, chosen.URI().String())
 
 	err := chosen.Close()
 	assert.Nil(t, err)

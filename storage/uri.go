@@ -104,6 +104,11 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
 
 	// trim trailing slash
+	if runtime.GOOS == "windows" {
+		if s[len(s)-1] == '\\' {
+			s = s[0 : len(s)-1]
+		}
+	}
 	if s[len(s)-1] == '/' {
 		s = s[0 : len(s)-1]
 	}

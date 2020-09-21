@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -83,7 +84,16 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			name := f.fileName.(*widget.Entry).Text
 			path, _ := storage.Child(f.dir, name)
 
+			// On windows replace '\\' with '/'
+			if runtime.GOOS == "windows" {
+				pathString := path.String()
+				pathString = strings.ReplaceAll(pathString, "\\\\", "/")
+				pathString = strings.ReplaceAll(pathString, "\\", "/")
+				path = storage.NewURI(pathString)
+			}
+
 			exists, _ := storage.Exists(path)
+
 			_, err := storage.ListerForURI(path)
 
 			if !exists {
@@ -119,7 +129,15 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			if f.file.onClosedCallback != nil {
 				f.file.onClosedCallback(true)
 			}
-			callback(storage.OpenFileFromURI(f.selected.location))
+			path := f.selected.location
+			// On windows replace '\\' with '/'
+			if runtime.GOOS == "windows" {
+				pathString := path.String()
+				pathString = strings.ReplaceAll(pathString, "\\\\", "/")
+				pathString = strings.ReplaceAll(pathString, "\\", "/")
+				path = storage.NewURI(pathString)
+			}
+			callback(storage.OpenFileFromURI(path))
 		}
 	})
 	f.open.Style = widget.PrimaryButton
@@ -230,11 +248,11 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 
 	var icons []fyne.CanvasObject
 	parent, err := storage.Parent(dir)
-	if err != nil {
+	if err != nil && err != storage.URIRootError {
 		fyne.LogError("Unable to get parent of "+dir.String(), err)
 		return
 	}
-	if parent.String() != dir.String() {
+	if parent != nil && parent.String() != dir.String() {
 		fi := &fileDialogItem{picker: f,
 			name: "(Parent)", location: parent, dir: true}
 		fi.ExtendBaseWidget(fi)
@@ -262,6 +280,10 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 }
 
 func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
+	if dir == nil {
+		return fmt.Errorf("failed to open nil directory")
+	}
+
 	f.setSelected(nil)
 	f.dir = dir
 
@@ -272,6 +294,10 @@ func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
 	}
 
 	localdir := dir.String()[len(dir.Scheme())+3:]
+	if runtime.GOOS == "windows" {
+		localdir = strings.ReplaceAll(localdir, "/", "\\")
+	}
+
 	buildDir := filepath.VolumeName(localdir)
 	for i, d := range strings.Split(localdir, string(filepath.Separator)) {
 		if d == "" {
