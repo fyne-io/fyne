@@ -275,6 +275,10 @@ func (c *glCanvas) canvasSize(contentSize fyne.Size) fyne.Size {
 	return canvasSize
 }
 
+func (c *glCanvas) RemoveShortcut(shortcut fyne.Shortcut) {
+	c.shortcut.RemoveShortcut(shortcut)
+}
+
 func (c *glCanvas) contentPos() fyne.Position {
 	contentPos := fyne.NewPos(0, c.menuHeight())
 	if c.Padded() {

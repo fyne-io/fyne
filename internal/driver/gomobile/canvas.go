@@ -202,6 +202,10 @@ func (c *mobileCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut
 	c.shortcut.AddShortcut(shortcut, handler)
 }
 
+func (c *mobileCanvas) RemoveShortcut(shortcut fyne.Shortcut) {
+	c.shortcut.RemoveShortcut(shortcut)
+}
+
 func (c *mobileCanvas) Capture() image.Image {
 	return c.painter.Capture(c)
 }
