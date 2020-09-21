@@ -7,14 +7,18 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+const accordionDividerHeight = 1
+
 var _ fyne.Widget = (*Accordion)(nil)
 
 // AccordionContainer displays a list of AccordionItems.
 // Each item is represented by a button that reveals a detailed view when tapped.
+//
 // Deprecated: This has been renamed to Accordion
 type AccordionContainer = Accordion
 
 // NewAccordionContainer creates a new accordion widget.
+//
 // Deprecated: Use NewAccordion instead
 func NewAccordionContainer(items ...*AccordionItem) *AccordionContainer {
 	a := &Accordion{
@@ -129,6 +133,7 @@ type accordionRenderer struct {
 	widget.BaseRenderer
 	container *Accordion
 	headers   []*Button
+	dividers  []*canvas.Rectangle
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
@@ -136,8 +141,13 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 	y := 0
 	for i, ai := range r.container.Items {
 		if i != 0 {
-			y += theme.Padding()
+			div := r.dividers[i-1]
+			div.Move(fyne.NewPos(x, y))
+			div.Resize(fyne.NewSize(size.Width, accordionDividerHeight))
+			y += accordionDividerHeight
 		}
+		y += theme.Padding()
+
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
 		min := h.MinSize().Height
@@ -151,13 +161,16 @@ func (r *accordionRenderer) Layout(size fyne.Size) {
 			d.Resize(fyne.NewSize(size.Width, min))
 			y += min
 		}
+
+		y += theme.Padding()
 	}
 }
 
 func (r *accordionRenderer) MinSize() (size fyne.Size) {
 	for i, ai := range r.container.Items {
+		size.Height += theme.Padding() * 2
 		if i != 0 {
-			size.Height += theme.Padding()
+			size.Height += accordionDividerHeight
 		}
 		min := r.headers[i].MinSize()
 		size.Width = fyne.Max(size.Width, min.Width)
@@ -173,6 +186,10 @@ func (r *accordionRenderer) MinSize() (size fyne.Size) {
 }
 
 func (r *accordionRenderer) Refresh() {
+	for _, d := range r.dividers {
+		d.FillColor = theme.ShadowColor()
+	}
+
 	r.updateObjects()
 	r.Layout(r.container.Size())
 	canvas.Refresh(r.container)
@@ -187,6 +204,7 @@ func (r *accordionRenderer) updateObjects() {
 		var h *Button
 		if i < hs {
 			h = r.headers[i]
+			h.Show()
 		} else {
 			h = &Button{}
 			r.headers = append(r.headers, h)
@@ -194,6 +212,7 @@ func (r *accordionRenderer) updateObjects() {
 		h.Alignment = ButtonAlignLeading
 		h.IconPlacement = ButtonIconLeadingText
 		h.Hidden = false
+		h.HideShadow = true
 		h.Text = ai.Title
 		index := i // capture
 		h.OnTapped = func() {
@@ -223,6 +242,21 @@ func (r *accordionRenderer) updateObjects() {
 	}
 	for _, i := range r.container.Items {
 		objects = append(objects, i.Detail)
+	}
+	// add dividers
+	for i = 0; i < len(r.dividers); i++ {
+		if i < len(r.container.Items)-1 {
+			r.dividers[i].Show()
+		} else {
+			r.dividers[i].Hide()
+		}
+		objects = append(objects, r.dividers[i])
+	}
+	// make new dividers
+	for ; i < is-1; i++ {
+		div := canvas.NewRectangle(theme.ShadowColor())
+		r.dividers = append(r.dividers, div)
+		objects = append(objects, div)
 	}
 	r.SetObjects(objects)
 }
