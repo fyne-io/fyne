@@ -230,11 +230,11 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 
 	var icons []fyne.CanvasObject
 	parent, err := storage.Parent(dir)
-	if err != nil {
+	if err != nil && err != storage.URIRootError {
 		fyne.LogError("Unable to get parent of "+dir.String(), err)
 		return
 	}
-	if parent.String() != dir.String() {
+	if parent != nil && parent.String() != dir.String() {
 		fi := &fileDialogItem{picker: f,
 			name: "(Parent)", location: parent, dir: true}
 		fi.ExtendBaseWidget(fi)
