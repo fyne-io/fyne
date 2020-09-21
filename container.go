@@ -29,8 +29,6 @@ func NewContainerWithoutLayout(objects ...CanvasObject) *Container {
 	}
 
 	ret.size = ret.MinSize()
-	ret.layout()
-
 	return ret
 }
 
