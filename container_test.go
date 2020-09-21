@@ -6,6 +6,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestContainer_Add(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainerWithoutLayout()
+	assert.Equal(t, 0, len(container.Objects))
+
+	container.Add(box)
+	assert.Equal(t, 1, len(container.Objects))
+}
+
 func TestContainer_CustomLayout(t *testing.T) {
 	box := new(dummyObject)
 	layout := new(customLayout)
@@ -72,6 +81,15 @@ func TestContainer_NilLayout(t *testing.T) {
 
 	container.AddObject(box)
 	assert.Equal(t, boxSize, box.Size())
+}
+
+func TestContainer_Remove(t *testing.T) {
+	box := new(dummyObject)
+	container := NewContainerWithoutLayout(box)
+	assert.Equal(t, 1, len(container.Objects))
+
+	container.Remove(box)
+	assert.Equal(t, 0, len(container.Objects))
 }
 
 func TestContainer_Show(t *testing.T) {

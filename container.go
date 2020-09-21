@@ -47,7 +47,15 @@ func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 	return ret
 }
 
+// Add appends the specified object to the items this container manages.
+func (c *Container) Add(add CanvasObject) {
+	c.Objects = append(c.Objects, add)
+	c.layout()
+}
+
 // AddObject adds another CanvasObject to the set this Container holds.
+//
+// Deprecated: Use replacement Add() function
 func (c *Container) AddObject(o CanvasObject) {
 	c.Add(o)
 }
@@ -125,6 +133,24 @@ func (c *Container) Refresh() {
 		return
 	}
 	o.Refresh(c)
+}
+
+// Remove updates the contents of this container to no longer include the specified object.
+func (c *Container) Remove(rem CanvasObject) {
+	if len(c.Objects) == 0 {
+		return
+	}
+
+	for i, o := range c.Objects {
+		if o != rem {
+			continue
+		}
+
+		copy(c.Objects[i:], c.Objects[i+1:])
+		c.Objects[len(c.Objects)-1] = nil
+		c.Objects = c.Objects[:len(c.Objects)-1]
+		return
+	}
 }
 
 // Visible returns true if the container is currently visible, false otherwise.
