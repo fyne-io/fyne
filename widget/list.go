@@ -97,6 +97,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 				l.itemPool.Release(child)
 			}
 			l.children = nil
+			l.layout.Objects = nil
 			l.list.Refresh()
 		}
 		return
@@ -176,6 +177,15 @@ func (l *listRenderer) getItem() fyne.CanvasObject {
 }
 
 func (l *listRenderer) offsetChanged() {
+	if l.list.Length() == 0 {
+		l.previousOffsetY = 0
+		l.firstItemIndex = 0
+		l.lastItemIndex = 0
+		l.visibleItemCount = 0
+		l.list.offsetY = 0
+		l.layout.Layout.(*listLayout).layoutEndY = 0
+		return
+	}
 	offsetChange := int(math.Abs(float64(l.previousOffsetY - l.list.offsetY)))
 
 	if l.previousOffsetY < l.list.offsetY {
