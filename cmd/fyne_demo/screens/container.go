@@ -14,7 +14,7 @@ import (
 
 // ContainerScreen loads a tab panel for containers and layouts
 func ContainerScreen() fyne.CanvasObject {
-	return container.NewTabs(
+	return container.NewAppTabs( // TODO not best use of tabs here either
 		container.NewTabItem("Accordion", makeAccordionTab()),
 		container.NewTabItem("Card", makeCardTab()),
 		container.NewTabItem("Split", makeSplitTab()),
