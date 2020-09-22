@@ -115,7 +115,7 @@ func main() {
 	w.SetMainMenu(mainMenu)
 	w.SetMaster()
 
-	tabs := container.NewTabs(
+	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
 		container.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
 		container.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),

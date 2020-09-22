@@ -301,6 +301,7 @@ func (r *tabContainerRenderer) Refresh() {
 	} else {
 		current := r.container.current
 		if current >= 0 && current < len(r.objects) && !r.objects[current].Visible() {
+			r.Layout(r.container.Size())
 			for i, o := range r.objects {
 				if i == current {
 					o.Show()
@@ -308,7 +309,6 @@ func (r *tabContainerRenderer) Refresh() {
 					o.Hide()
 				}
 			}
-			r.Layout(r.container.Size())
 		}
 		for i, button := range r.tabBar.Objects {
 			if i == current {
