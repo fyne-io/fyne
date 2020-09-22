@@ -778,7 +778,7 @@ func TestWindow_Focus(t *testing.T) {
 
 func TestWindow_ManualFocus(t *testing.T) {
 	w := createWindow("Test").(*window)
-	content := &focusable{Rectangle: canvas.NewRectangle(color.Black)}
+	content := &focusable{}
 	content.SetMinSize(fyne.NewSize(10, 10))
 	w.SetContent(content)
 	repaintWindow(w)
@@ -1035,7 +1035,9 @@ var _ fyne.Focusable = (*focusable)(nil)
 var _ fyne.Disableable = (*focusable)(nil)
 
 type focusable struct {
-	*canvas.Rectangle
+	canvas.Rectangle
+	id             string // helps identifying instances in comparisons
+	focused        bool
 	focusedTimes   int
 	unfocusedTimes int
 	disabled       bool
@@ -1053,10 +1055,15 @@ func (f *focusable) TypedKey(*fyne.KeyEvent) {
 
 func (f *focusable) FocusGained() {
 	f.focusedTimes++
+	if f.Disabled() {
+		return
+	}
+	f.focused = true
 }
 
 func (f *focusable) FocusLost() {
 	f.unfocusedTimes++
+	f.focused = false
 }
 
 func (f *focusable) Enable() {
