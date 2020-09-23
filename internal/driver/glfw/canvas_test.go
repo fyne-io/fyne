@@ -9,7 +9,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/layout"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
@@ -172,13 +172,13 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 
 	ce1 := &focusable{id: "ce1"}
 	ce2 := &focusable{id: "ce2"}
-	content := layout.NewVBoxContainer(ce1, ce2)
+	content := container.NewVBox(ce1, ce2)
 	o1e1 := &focusable{id: "o1e1"}
 	o1e2 := &focusable{id: "o1e2"}
-	overlay1 := layout.NewVBoxContainer(o1e1, o1e2)
+	overlay1 := container.NewVBox(o1e1, o1e2)
 	o2e1 := &focusable{id: "o2e1"}
 	o2e2 := &focusable{id: "o2e2"}
-	overlay2 := layout.NewVBoxContainer(o2e1, o2e2)
+	overlay2 := container.NewVBox(o2e1, o2e2)
 	w.SetContent(content)
 
 	assert.Nil(t, c.Focused())
