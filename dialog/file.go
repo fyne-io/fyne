@@ -178,49 +178,46 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 }
 
 func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
+	var home fyne.ListableURI
+	var documents fyne.ListableURI
+	var downloads fyne.ListableURI
+
 	osHome, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
+
+	if err == nil {
+		home, err = storage.ListerForURI(storage.NewURI("file://" + osHome))
+		if err == nil {
+			documentsURI, err := storage.Child(home, "Documents")
+			if err == nil {
+				documents, err = storage.ListerForURI(documentsURI)
+			}
+			downloadsURI, err := storage.Child(home, "Downloads")
+			if err == nil {
+				downloads, err = storage.ListerForURI(downloadsURI)
+			}
+		}
 	}
 
-	home, err := storage.ListerForURI(storage.NewURI("file://" + osHome))
-	if err != nil {
-		return nil, err
-	}
+	var places []fyne.CanvasObject
 
-	documentsURI, err := storage.Child(home, "Documents")
-	if err != nil {
-		return nil, err
-	}
-	documents, err := storage.ListerForURI(documentsURI)
-	if err != nil {
-		return nil, err
-	}
-
-	downloadsURI, err := storage.Child(home, "Downloads")
-	if err != nil {
-		return nil, err
-	}
-	downloads, err := storage.ListerForURI(downloadsURI)
-	if err != nil {
-		return nil, err
-	}
-
-	places := []fyne.CanvasObject{
-
-		makeFavoriteButton("Home", theme.HomeIcon(), func() {
+	if home != nil {
+		places = append(places, makeFavoriteButton("Home", theme.HomeIcon(), func() {
 			f.setDirectory(home)
-		}),
-		makeFavoriteButton("Documents", theme.DocumentIcon(), func() {
+		}))
+	}
+	if documents != nil {
+		places = append(places, makeFavoriteButton("Documents", theme.DocumentIcon(), func() {
 			f.setDirectory(documents)
-		}),
-		makeFavoriteButton("Downloads", theme.DownloadIcon(), func() {
+		}))
+	}
+	if downloads != nil {
+		places = append(places, makeFavoriteButton("Downloads", theme.DownloadIcon(), func() {
 			f.setDirectory(downloads)
-		}),
+		}))
 	}
 
 	places = append(places, f.loadPlaces()...)
-	return places, nil
+	return places, err
 }
 
 func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
