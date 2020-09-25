@@ -53,15 +53,15 @@ func TestURI_Parent(t *testing.T) {
 
 	parent, err := storage.Parent(storage.NewURI("file:///foo/bar/baz"))
 	assert.Nil(t, err)
-	assert.Equal(t, "file:///foo/bar", parent.String())
+	assert.Equal(t, "file:///foo/bar/", parent.String())
 
 	parent, err = storage.Parent(storage.NewURI("file:///foo/bar/baz/"))
 	assert.Nil(t, err)
-	assert.Equal(t, "file:///foo/bar", parent.String())
+	assert.Equal(t, "file:///foo/bar/", parent.String())
 
 	parent, err = storage.Parent(storage.NewURI("file://C:/foo/bar/baz/"))
 	assert.Nil(t, err)
-	assert.Equal(t, "file://C:/foo/bar", parent.String())
+	assert.Equal(t, "file://C:/foo/bar/", parent.String())
 
 	parent, err = storage.Parent(storage.NewURI("http://foo/bar/baz/"))
 	assert.Nil(t, err)
@@ -84,9 +84,12 @@ func TestURI_Parent(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		// Only the Windows version of filepath will know how to handle
 		// backslashes.
-		parent, err = storage.Parent(storage.NewURI("file://C:\\foo\\bar\\baz\\"))
+		uri := storage.NewURI("file://C:\\foo\\bar\\baz\\")
+		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
+
+		parent, err = storage.Parent(uri)
 		assert.Nil(t, err)
-		assert.Equal(t, "file://C:/foo/bar", parent.String())
+		assert.Equal(t, "file://C:/foo/bar/", parent.String())
 	}
 
 	_, err = storage.Parent(storage.NewURI("file:///"))
@@ -126,7 +129,10 @@ func TestURI_Child(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		// Only the Windows version of filepath will know how to handle
 		// backslashes.
-		p, _ = storage.Child(storage.NewURI("file://C:\\foo\\bar\\"), "baz")
+		uri := storage.NewURI("file://C:\\foo\\bar\\")
+		assert.Equal(t, "file://C:/foo/bar/", uri.String())
+
+		p, _ = storage.Child(uri, "baz")
 		assert.Equal(t, "file://C:/foo/bar/baz", p.String())
 	}
 }

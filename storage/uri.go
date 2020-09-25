@@ -91,8 +91,6 @@ func parentGeneric(location string) (string, error) {
 	components := strings.Split(location, "/")
 
 	if len(components) == 1 {
-		// trimmed <= 2 makes sure we handle UNIX-style paths on
-		// Windows correctly
 		return "", URIRootError
 	}
 
@@ -130,6 +128,9 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	if u.Scheme() == "file" {
 		// use the system native path resolution
 		parent = filepath.Dir(s)
+		if parent[len(parent)-1] != filepath.Separator {
+			parent += "/"
+		}
 
 		// only root is it's own parent
 		if filepath.Clean(parent) == filepath.Clean(s) {
