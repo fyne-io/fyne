@@ -71,10 +71,10 @@ func TestURI_Parent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "http://foo/bar/", parent.String())
 
-	parent, err = storage.Parent(storage.NewURI("http://foo"))
+	_, err = storage.Parent(storage.NewURI("http://foo"))
 	assert.Equal(t, storage.URIRootError, err)
 
-	parent, err = storage.Parent(storage.NewURI("http:///"))
+	_, err = storage.Parent(storage.NewURI("http:///"))
 	assert.Equal(t, storage.URIRootError, err)
 
 	parent, err = storage.Parent(storage.NewURI("https://///foo/bar/"))

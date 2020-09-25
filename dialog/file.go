@@ -180,20 +180,36 @@ func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
 	var home fyne.ListableURI
 	var documents fyne.ListableURI
 	var downloads fyne.ListableURI
+	var osHome string
+	var err, err1 error
 
-	osHome, err := os.UserHomeDir()
+	osHome, err = os.UserHomeDir()
 
 	if err == nil {
-		home, err = storage.ListerForURI(storage.NewURI("file://" + osHome))
-		if err == nil {
-			documentsURI, err := storage.Child(home, "Documents")
-			if err == nil {
-				documents, err = storage.ListerForURI(documentsURI)
+		home, err1 = storage.ListerForURI(storage.NewURI("file://" + osHome))
+		if err1 == nil {
+			var documentsURI fyne.URI
+			documentsURI, err1 = storage.Child(home, "Documents")
+			if err1 == nil {
+				documents, err1 = storage.ListerForURI(documentsURI)
+				if err1 != nil {
+					err = err1
+				}
+			} else {
+				err = err1
 			}
-			downloadsURI, err := storage.Child(home, "Downloads")
-			if err == nil {
-				downloads, err = storage.ListerForURI(downloadsURI)
+			var downloadsURI fyne.URI
+			downloadsURI, err1 = storage.Child(home, "Downloads")
+			if err1 == nil {
+				downloads, err1 = storage.ListerForURI(downloadsURI)
+				if err1 != nil {
+					err = err1
+				}
+			} else {
+				err = err1
 			}
+		} else {
+			err = err1
 		}
 	}
 
