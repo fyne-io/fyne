@@ -84,14 +84,6 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			name := f.fileName.(*widget.Entry).Text
 			path, _ := storage.Child(f.dir, name)
 
-			// On windows replace '\\' with '/'
-			if runtime.GOOS == "windows" {
-				pathString := path.String()
-				pathString = strings.ReplaceAll(pathString, "\\\\", "/")
-				pathString = strings.ReplaceAll(pathString, "\\", "/")
-				path = storage.NewURI(pathString)
-			}
-
 			exists, _ := storage.Exists(path)
 
 			_, err := storage.ListerForURI(path)
@@ -131,12 +123,6 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 			path := f.selected.location
 			// On windows replace '\\' with '/'
-			if runtime.GOOS == "windows" {
-				pathString := path.String()
-				pathString = strings.ReplaceAll(pathString, "\\\\", "/")
-				pathString = strings.ReplaceAll(pathString, "\\", "/")
-				path = storage.NewURI(pathString)
-			}
 			callback(storage.OpenFileFromURI(path))
 		}
 	})
