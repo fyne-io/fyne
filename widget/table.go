@@ -9,6 +9,9 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// Table widget is a grid of items that can be scrolled and a cell selected.
+// It's performance is provided by caching cell templates created with NewCell and re-using them with UpdateCell.
+// The size of the content rows/columns is returned by the DataSize callback.
 type Table struct {
 	BaseWidget
 
@@ -21,10 +24,17 @@ type Table struct {
 	SelectedRow, SelectedColumn int
 }
 
+// NewTable returns a new performant table widget defined by the passed functions.
+// The first returns the data size in rows and columns, second parameter is a function that returns cell
+// template objects that can be cached and the third is used to apply data at specified data location to the
+// passed template CanvasObject.
 func NewTable(size func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
 	return &Table{DataSize: size, NewCell: create, UpdateCell: update}
 }
 
+// CreateRenderer returns a new renderer for the table.
+//
+// Implements: fyne.Widget
 func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	marker1 := canvas.NewRectangle(theme.PrimaryColor())
 	marker2 := canvas.NewRectangle(theme.PrimaryColor())
@@ -38,6 +48,9 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
+// Resize updates this table size and adjusts the content scroller to fit.
+//
+// Implements: fyne.Widget
 func (t *Table) Resize(s fyne.Size) {
 	t.BaseWidget.Resize(s)
 
