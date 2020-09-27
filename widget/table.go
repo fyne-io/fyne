@@ -29,7 +29,7 @@ type Table struct {
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
 func NewTable(size func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
-	return &Table{DataSize: size, NewCell: create, UpdateCell: update}
+	return &Table{DataSize: size, NewCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
 }
 
 // CreateRenderer returns a new renderer for the table.
@@ -72,30 +72,38 @@ func (t *tableRenderer) moveOverlay() {
 	template := t.t.NewCell()
 	cellSize := template.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
-	offX := t.t.SelectedColumn*(cellSize.Width+1) - t.t.scroll.Offset.X
-	x1 := theme.Padding() + offX
-	x2 := x1 + cellSize.Width
-	if x2 < theme.Padding() || x1 > t.t.size.Width {
+	if t.t.SelectedColumn == -1 {
 		t.colMarker.Hide()
 	} else {
-		t.colMarker.Show()
+		offX := t.t.SelectedColumn*(cellSize.Width+1) - t.t.scroll.Offset.X
+		x1 := theme.Padding() + offX
+		x2 := x1 + cellSize.Width
+		if x2 < theme.Padding() || x1 > t.t.size.Width {
+			t.colMarker.Hide()
+		} else {
+			t.colMarker.Show()
 
-		left := fyne.Max(theme.Padding(), x1)
-		t.colMarker.Move(fyne.NewPos(left, 0))
-		t.colMarker.Resize(fyne.NewSize(fyne.Min(x2, t.t.size.Width)-left, theme.Padding()))
+			left := fyne.Max(theme.Padding(), x1)
+			t.colMarker.Move(fyne.NewPos(left, 0))
+			t.colMarker.Resize(fyne.NewSize(fyne.Min(x2, t.t.size.Width)-left, theme.Padding()))
+		}
 	}
 
-	offY := t.t.SelectedRow*(cellSize.Height+1) - t.t.scroll.Offset.Y
-	y1 := theme.Padding() + offY
-	y2 := y1 + cellSize.Height
-	if y2 < theme.Padding() || y1 > t.t.size.Height {
-		t.rowMarker.Hide()
+	if t.t.SelectedRow == -1 {
+		t.colMarker.Hide()
 	} else {
-		t.rowMarker.Show()
+		offY := t.t.SelectedRow*(cellSize.Height+1) - t.t.scroll.Offset.Y
+		y1 := theme.Padding() + offY
+		y2 := y1 + cellSize.Height
+		if y2 < theme.Padding() || y1 > t.t.size.Height {
+			t.rowMarker.Hide()
+		} else {
+			t.rowMarker.Show()
 
-		top := fyne.Max(theme.Padding(), y1)
-		t.rowMarker.Move(fyne.NewPos(0, top))
-		t.rowMarker.Resize(fyne.NewSize(theme.Padding(), fyne.Min(y2, t.t.size.Height)-top))
+			top := fyne.Max(theme.Padding(), y1)
+			t.rowMarker.Move(fyne.NewPos(0, top))
+			t.rowMarker.Resize(fyne.NewSize(theme.Padding(), fyne.Min(y2, t.t.size.Height)-top))
+		}
 	}
 
 	colDivs := int(math.Ceil(float64(t.t.size.Width+1) / float64(cellSize.Width+1)))   // +1 for div width
