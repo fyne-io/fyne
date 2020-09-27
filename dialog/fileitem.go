@@ -108,7 +108,7 @@ func (s fileItemRenderer) Refresh() {
 				i.Resource = theme.NewInvertedThemedResource(i.Resource)
 			}
 		} else if i, ok := s.icon.(*widget.FileIcon); ok {
-			i.SetCurrent(true)
+			i.SetSelected(true)
 		}
 	} else {
 		if i, ok := s.icon.(*canvas.Image); ok {
@@ -116,7 +116,7 @@ func (s fileItemRenderer) Refresh() {
 				i.Resource = res.Original()
 			}
 		} else if i, ok := s.icon.(*widget.FileIcon); ok {
-			i.SetCurrent(false)
+			i.SetSelected(false)
 		}
 	}
 	canvas.Refresh(s.item)
