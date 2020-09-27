@@ -103,6 +103,13 @@ void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jobject uri = (jobject)(*env)->CallStaticObjectMethod(env, uriClass, parse, uriStr);
 
 	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, openInputStream, uri);
+    jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+    if (loadErr != NULL) {
+		(*env)->ExceptionClear(env);
+		return NULL;
+    }
+
 	return (*env)->NewGlobalRef(env, stream);
 }
 
