@@ -128,7 +128,7 @@ func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
 }
 
 func (t *testSettings) PrimaryColor() string {
-	return theme.COLOR_BLUE
+	return theme.ColorBlue
 }
 
 func (s *testSettings) SetTheme(theme fyne.Theme) {

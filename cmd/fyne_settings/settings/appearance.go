@@ -24,15 +24,15 @@ const (
 )
 
 var (
-	colorNames = []string{theme.COLOR_BLUE, theme.COLOR_GREEN, theme.COLOR_YELLOW,
-		theme.COLOR_ORANGE, theme.COLOR_RED, theme.COLOR_GREY}
+	colorNames = []string{theme.ColorBlue, theme.ColorGreen, theme.ColorYellow,
+		theme.ColorOrange, theme.ColorRed, theme.ColorGray}
 	colorValues = map[string]color.Color{
-		theme.COLOR_BLUE:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
-		theme.COLOR_GREEN:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
-		theme.COLOR_YELLOW: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
-		theme.COLOR_ORANGE: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
-		theme.COLOR_RED:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
-		theme.COLOR_GREY:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
+		theme.ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
+		theme.ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
+		theme.ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
+		theme.ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
+		theme.ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
+		theme.ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
 	}
 )
 
@@ -77,7 +77,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 
 	current := s.fyneSettings.PrimaryColor
 	if current == "" {
-		current = theme.COLOR_BLUE
+		current = theme.ColorBlue
 	}
 	for _, c := range theme.PrimaryColorNames() {
 		b := newColorButton(c, theme.PrimaryColorNamed(c), s)

@@ -57,7 +57,7 @@ func (t *themedApp) Preferences() fyne.Preferences {
 }
 
 func (t *themedApp) PrimaryColor() string {
-	return COLOR_BLUE
+	return ColorBlue
 }
 
 func (t *themedApp) Theme() fyne.Theme {
