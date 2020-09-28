@@ -109,10 +109,11 @@ func main() {
 	})
 	findItem := fyne.NewMenuItem("Find", func() { fmt.Println("Menu Find") })
 
-	helpMenu := fyne.NewMenu("Help", fyne.NewMenuItem("Documentation", func() {
-		u, _ := url.Parse("https://developer.fyne.io")
-		_ = a.OpenURL(u)
-	}),
+	helpMenu := fyne.NewMenu("Help",
+		fyne.NewMenuItem("Documentation", func() {
+			u, _ := url.Parse("https://developer.fyne.io")
+			_ = a.OpenURL(u)
+		}),
 		fyne.NewMenuItem("Support", func() {
 			u, _ := url.Parse("https://fyne.io/support/")
 			_ = a.OpenURL(u)
