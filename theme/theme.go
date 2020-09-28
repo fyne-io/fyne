@@ -14,7 +14,7 @@ const (
 	ColorBlue = "blue"
 	// ColorGreen is the green primary color name
 	ColorGreen = "green"
-	// ColorYellopw is the yellow primary color name
+	// ColorYellow is the yellow primary color name
 	ColorYellow = "yellow"
 	// ColorOrange is the orange primary color name
 	ColorOrange = "orange"
