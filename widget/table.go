@@ -45,6 +45,8 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	obj := []fyne.CanvasObject{marker1, marker2, t.scroll}
 	r := &tableRenderer{t: t, rowMarker: marker1, colMarker: marker2, objects: obj}
 	t.scroll.onOffsetChanged = r.moveOverlay
+
+	r.Layout(t.Size())
 	return r
 }
 

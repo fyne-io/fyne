@@ -11,6 +11,7 @@ import (
 func TestTable_ChangeTheme(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
@@ -20,7 +21,6 @@ func TestTable_ChangeTheme(t *testing.T) {
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
-	app.Settings().SetTheme(theme.LightTheme())
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
@@ -32,6 +32,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 func TestTable_Selected(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
@@ -43,6 +44,5 @@ func TestTable_Selected(t *testing.T) {
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
-	app.Settings().SetTheme(theme.LightTheme())
 	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
 }
