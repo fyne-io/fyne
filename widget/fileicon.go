@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"image/color"
 	"strings"
 
@@ -65,6 +66,8 @@ func (i *FileIcon) updateURI(uri fyne.URI) {
 	i.extension = trimmedExtension(uri)
 	i.cachedURI = uri
 	i.URI = uri
+
+	fmt.Println(i.extension, i.mimeType, i.mimeSubType, i.resource)
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -79,6 +82,7 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
 
+	i.updateURI(i.URI)
 	s := &fileIconRenderer{file: i}
 	s.updateObjects()
 

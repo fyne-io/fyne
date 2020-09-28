@@ -78,10 +78,10 @@ func TestNewFileIconNoExtension(t *testing.T) {
 func TestUpdateURI(t *testing.T) {
 	item := NewFileIcon(storage.NewURI("file:///path/to/filename.zip"))
 
-	// assert.Equal(t, ".zip", item.extension)
-	// assert.Equal(t, "application", item.mimeType)
-	// assert.Equal(t, "zip", item.mimeSubType)
-	// assert.Equal(t, theme.FileApplicationIcon(), item.resource)
+	assert.Equal(t, ".zip", item.extension)
+	assert.Equal(t, "application", item.mimeType)
+	assert.Equal(t, "zip", item.mimeSubType)
+	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
 
 	item.UpdateURI(storage.NewURI("file:///path/to/filename.mp3"))
 
@@ -109,5 +109,5 @@ func TestUpdateURI(t *testing.T) {
 	assert.Equal(t, ".mp4", item.extension)
 	assert.Equal(t, "video", item.mimeType)
 	assert.Equal(t, "mp4", item.mimeSubType)
-	assert.Equal(t, theme.FileVideoIcon(), "mp4")
+	assert.Equal(t, theme.FileVideoIcon(), item.resource)
 }
