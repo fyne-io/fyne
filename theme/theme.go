@@ -26,14 +26,16 @@ type builtinTheme struct {
 }
 
 var (
-	blueColor   = color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff}
-	greenColor  = color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff}
-	yellowColor = color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff}
-	orangeColor = color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff}
-	redColor    = color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff}
-	greyColor   = color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff}
+	primaryColors = map[string]color.Color{
+		COLOR_BLUE:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
+		COLOR_GREEN:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
+		COLOR_YELLOW: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
+		COLOR_ORANGE: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
+		COLOR_RED:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
+		COLOR_GREY:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
+	}
 
-//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
+	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
 )
 
 // LightTheme defines the built in light theme colors and sizes
@@ -121,20 +123,7 @@ func (t *builtinTheme) PlaceHolderColor() color.Color {
 
 // PrimaryColor returns the color used to highlight primary features
 func (t *builtinTheme) PrimaryColor() color.Color {
-	switch fyne.CurrentApp().Settings().PrimaryColor() {
-	case COLOR_GREEN:
-		return greenColor
-	case COLOR_YELLOW:
-		return yellowColor
-	case COLOR_ORANGE:
-		return orangeColor
-	case COLOR_RED:
-		return redColor
-	case COLOR_GREY:
-		return greyColor
-	default:
-		return blueColor
-	}
+	return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor
@@ -395,4 +384,16 @@ func DefaultTextBoldItalicFont() fyne.Resource {
 // DefaultTextMonospaceFont retutns the font resource for the built-in monospace font face
 func DefaultTextMonospaceFont() fyne.Resource {
 	return monospace
+}
+
+func PrimaryColorNames() []string {
+	return []string{COLOR_BLUE, COLOR_GREEN, COLOR_YELLOW, COLOR_ORANGE, COLOR_RED, COLOR_GREY}
+}
+
+func PrimaryColorNamed(name string) color.Color {
+	col, ok := primaryColors[name]
+	if !ok {
+		return primaryColors[COLOR_BLUE]
+	}
+	return col
 }

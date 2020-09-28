@@ -80,8 +80,8 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 	if current == "" {
 		current = theme.COLOR_BLUE
 	}
-	for _, c := range colorNames {
-		b := newColorButton(c, colorValues[c], s)
+	for _, c := range theme.PrimaryColorNames() {
+		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
 		s.colors = append(s.colors, b)
 	}
 	swatch := fyne.NewContainerWithLayout(layout.NewGridLayout(6), s.colors...)
