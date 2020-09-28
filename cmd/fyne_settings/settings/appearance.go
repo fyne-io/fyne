@@ -125,6 +125,10 @@ func (s *Settings) createPreview() image.Image {
 	th := theme.DarkTheme()
 	if s.fyneSettings.ThemeName == "light" {
 		th = theme.LightTheme()
+	} else if s.fyneSettings.ThemeName == "dark" {
+		th = theme.DarkTheme()
+	} else {
+		th = oldTheme
 	}
 	painter.SvgCacheReset() // reset icon cache
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
