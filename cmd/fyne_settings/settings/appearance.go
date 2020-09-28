@@ -2,7 +2,6 @@ package settings
 
 import (
 	"encoding/json"
-	"fmt"
 	"image"
 	"image/color"
 	"io/ioutil"
@@ -135,13 +134,12 @@ func (s *Settings) createPreview() image.Image {
 
 	empty := widget.NewLabel("")
 	tabs := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Welcome", theme.HomeIcon(), empty),
-		widget.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), empty),
-		widget.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), makeProgressTab()),
-		widget.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), empty),
-		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), empty))
+		widget.NewTabItemWithIcon("Home", theme.HomeIcon(), makeHomeTab()),
+		widget.NewTabItemWithIcon("Browse", theme.ComputerIcon(), empty),
+		widget.NewTabItemWithIcon("Settings", theme.SettingsIcon(), empty),
+		widget.NewTabItemWithIcon("Help", theme.HelpIcon(), empty))
 	tabs.SetTabLocation(widget.TabLocationLeading)
-	tabs.SelectTabIndex(2)
+	showOverlay(c)
 
 	c.SetContent(tabs)
 	c.Resize(fyne.NewSize(380, 380))
@@ -174,24 +172,6 @@ func (s *Settings) loadFromFile(path string) error {
 	decode := json.NewDecoder(file)
 
 	return decode.Decode(&s.fyneSettings)
-}
-
-func makeProgressTab() fyne.Widget {
-	progress := widget.NewProgressBar()
-	progress.Value = 0.5
-
-	fprogress := widget.NewProgressBar()
-	fprogress.Value = 0.3
-	fprogress.TextFormatter = func() string {
-		return fmt.Sprintf("%.2f out of %.2f", fprogress.Value, fprogress.Max)
-	}
-
-	infProgress := widget.NewProgressBarInfinite()
-
-	return widget.NewVBox(
-		widget.NewLabel("Percent"), progress,
-		widget.NewLabel("Formatted"), fprogress,
-		widget.NewLabel("Infinite"), infProgress)
 }
 
 func (s *Settings) save() error {
@@ -281,4 +261,29 @@ func (c *colorRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (c *colorRenderer) Destroy() {
+}
+
+func makeHomeTab() fyne.CanvasObject {
+	return widget.NewLabel("Home")
+}
+
+func showOverlay(c fyne.Canvas) {
+	username := widget.NewEntry()
+	password := widget.NewPasswordEntry()
+	form := widget.NewForm(widget.NewFormItem("Username", username),
+		widget.NewFormItem("Password", password))
+	form.OnCancel = func() {}
+	form.OnSubmit = func() {}
+	content := widget.NewVBox(
+		widget.NewLabelWithStyle("Login demo", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}), form)
+	wrap := fyne.NewContainerWithoutLayout(content)
+	wrap.Resize(content.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	content.Resize(content.MinSize())
+	content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+
+	over := fyne.NewContainerWithLayout(layout.NewMaxLayout(),
+		canvas.NewRectangle(theme.ShadowColor()), fyne.NewContainerWithLayout(layout.NewCenterLayout(),
+			wrap))
+
+	c.Overlays().Add(over)
 }
