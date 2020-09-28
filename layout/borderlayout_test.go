@@ -13,6 +13,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewBorderContainer(t *testing.T) {
+	top := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	top.SetMinSize(fyne.NewSize(10, 10))
+	right := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	right.SetMinSize(fyne.NewSize(10, 10))
+	middle := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+
+	c := fyne.NewContainerWithLayout(layout.NewBorderLayout(top, nil, nil, right), top, right, middle)
+	assert.Equal(t, 3, len(c.Objects))
+
+	c.Resize(fyne.NewSize(100, 100))
+	assert.Equal(t, 0, top.Position().X)
+	assert.Equal(t, 0, top.Position().Y)
+	assert.Equal(t, 90, right.Position().X)
+	assert.Equal(t, 10+theme.Padding(), right.Position().Y)
+	assert.Equal(t, 0, middle.Position().X)
+	assert.Equal(t, 10+theme.Padding(), middle.Position().Y)
+	assert.Equal(t, 90-theme.Padding(), middle.Size().Width)
+	assert.Equal(t, 90-theme.Padding(), middle.Size().Height)
+}
+
 func TestBorderLayout_Size_Empty(t *testing.T) {
 	size := fyne.NewSize(100, 100)
 

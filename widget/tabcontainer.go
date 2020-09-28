@@ -13,6 +13,8 @@ import (
 
 // TabContainer widget allows switching visible content from a list of TabItems.
 // Each item is represented by a button at the top of the widget.
+//
+// Deprecated: use container.Tabs instead.
 type TabContainer struct {
 	BaseWidget
 
@@ -24,20 +26,28 @@ type TabContainer struct {
 
 // TabItem represents a single view in a TabContainer.
 // The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
+//
+// Deprecated: use container.TabItem instead.
 type TabItem struct {
 	Text    string
 	Icon    fyne.Resource
 	Content fyne.CanvasObject
 }
 
-// TabLocation is the location where the tabs of a tab container should be rendered
+// TabLocation is the location where the tabs of a tab container should be rendered.
+//
+// Deprecated: use container.TabLocation instead.
 type TabLocation int
 
 // TabLocation values
 const (
+	// Deprecated: use container.TabLocationTop
 	TabLocationTop TabLocation = iota
+	// Deprecated: use container.TabLocationLeading
 	TabLocationLeading
+	// Deprecated: use container.TabLocationBottom
 	TabLocationBottom
+	// Deprecated: use container.TabLocationTrailing
 	TabLocationTrailing
 )
 
@@ -291,6 +301,7 @@ func (r *tabContainerRenderer) Refresh() {
 	} else {
 		current := r.container.current
 		if current >= 0 && current < len(r.objects) && !r.objects[current].Visible() {
+			r.Layout(r.container.Size())
 			for i, o := range r.objects {
 				if i == current {
 					o.Show()
@@ -298,7 +309,6 @@ func (r *tabContainerRenderer) Refresh() {
 					o.Hide()
 				}
 			}
-			r.Layout(r.container.Size())
 		}
 		for i, button := range r.tabBar.Objects {
 			if i == current {

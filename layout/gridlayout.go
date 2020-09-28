@@ -15,6 +15,27 @@ type gridLayout struct {
 	vertical, adapt bool
 }
 
+// NewAdaptiveGridLayout returns a new grid layout which uses columns when horizontal but rows when vertical.
+func NewAdaptiveGridLayout(rowcols int) fyne.Layout {
+	return &gridLayout{Cols: rowcols, adapt: true}
+}
+
+// NewGridLayout returns a grid layout arranged in a specified number of columns.
+// The number of rows will depend on how many children are in the container that uses this layout.
+func NewGridLayout(cols int) fyne.Layout {
+	return NewGridLayoutWithColumns(cols)
+}
+
+// NewGridLayoutWithColumns returns a new grid layout that specifies a column count and wrap to new rows when needed.
+func NewGridLayoutWithColumns(cols int) fyne.Layout {
+	return &gridLayout{Cols: cols}
+}
+
+// NewGridLayoutWithRows returns a new grid layout that specifies a row count that creates new columns as required.
+func NewGridLayoutWithRows(rows int) fyne.Layout {
+	return &gridLayout{Cols: rows, vertical: true}
+}
+
 func (g *gridLayout) horizontal() bool {
 	if g.adapt {
 		return fyne.IsHorizontal(fyne.CurrentDevice().Orientation())
@@ -121,25 +142,4 @@ func (g *gridLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 
 	minContentSize := fyne.NewSize(minSize.Width*rows, minSize.Height*g.Cols)
 	return minContentSize.Add(fyne.NewSize(theme.Padding()*fyne.Max(rows-1, 0), theme.Padding()*fyne.Max(g.Cols-1, 0)))
-}
-
-// NewGridLayout returns a grid layout arranged in a specified number of columns.
-// The number of rows will depend on how many children are in the container that uses this layout.
-func NewGridLayout(cols int) fyne.Layout {
-	return NewGridLayoutWithColumns(cols)
-}
-
-// NewGridLayoutWithColumns returns a new grid layout that specifies a column count and wrap to new rows when needed.
-func NewGridLayoutWithColumns(cols int) fyne.Layout {
-	return &gridLayout{Cols: cols}
-}
-
-// NewGridLayoutWithRows returns a new grid layout that specifies a row count that creates new columns as required.
-func NewGridLayoutWithRows(rows int) fyne.Layout {
-	return &gridLayout{Cols: rows, vertical: true}
-}
-
-// NewAdaptiveGridLayout returns a new grid layout which uses columns when horizontal but rows when vertical.
-func NewAdaptiveGridLayout(rowcols int) fyne.Layout {
-	return &gridLayout{Cols: rowcols, adapt: true}
 }

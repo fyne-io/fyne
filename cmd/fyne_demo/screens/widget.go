@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -33,7 +34,7 @@ var (
 	endProgress chan interface{}
 )
 
-func makeButtonTab() fyne.Widget {
+func makeButtonTab() fyne.CanvasObject {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
 
@@ -47,7 +48,7 @@ func makeButtonTab() fyne.Widget {
 		shareItem,
 	))
 
-	return widget.NewVBox(
+	return container.NewVBox(
 		widget.NewButton("Button (text only)", func() { fmt.Println("tapped text button") }),
 		widget.NewButtonWithIcon("Button (text & leading icon)", theme.ConfirmIcon(), func() { fmt.Println("tapped text & leading icon button") }),
 		&widget.Button{
@@ -74,7 +75,7 @@ func makeTextGrid() *widget.TextGrid {
 	grid := widget.NewTextGridFromString("TextGrid\n  Content\nZebra")
 	grid.SetStyleRange(0, 4, 0, 7,
 		&widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 64, B: 192, A: 128}})
-	grid.Rows[1].Style = &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 192, B: 64, A: 128}}
+	grid.SetRowStyle(1, &widget.CustomTextGridStyle{BGColor: &color.NRGBA{R: 64, G: 192, B: 64, A: 128}})
 
 	white := &widget.CustomTextGridStyle{FGColor: color.White, BGColor: color.Black}
 	black := &widget.CustomTextGridStyle{FGColor: color.Black, BGColor: color.White}
@@ -101,7 +102,7 @@ func makeTextTab() fyne.CanvasObject {
 
 	entryLoremIpsum := widget.NewMultiLineEntry()
 	entryLoremIpsum.SetText(loremIpsum)
-	entryLoremIpsumScroller := widget.NewVScrollContainer(entryLoremIpsum)
+	entryLoremIpsumScroller := container.NewVScroll(entryLoremIpsum)
 
 	label.Alignment = fyne.TextAlignLeading
 	hyperlink.Alignment = fyne.TextAlignLeading
@@ -155,8 +156,8 @@ func makeTextTab() fyne.CanvasObject {
 	})
 	radioWrap.SetSelected("Text Wrapping Word")
 
-	fixed := widget.NewVBox(
-		widget.NewHBox(
+	fixed := container.NewVBox(
+		container.NewHBox(
 			radioAlign,
 			layout.NewSpacer(),
 			radioWrap,
@@ -170,7 +171,7 @@ func makeTextTab() fyne.CanvasObject {
 		fixed, entryLoremIpsumScroller, grid)
 }
 
-func makeInputTab() fyne.Widget {
+func makeInputTab() fyne.CanvasObject {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Entry")
 	entryDisabled := widget.NewEntry()
@@ -189,7 +190,7 @@ func makeInputTab() fyne.Widget {
 	disabledRadio := widget.NewRadio([]string{"Disabled radio"}, func(string) {})
 	disabledRadio.Disable()
 
-	return widget.NewVBox(
+	return container.NewVBox(
 		entry,
 		entryDisabled,
 		entryValidated,
@@ -204,7 +205,7 @@ func makeInputTab() fyne.Widget {
 	)
 }
 
-func makeProgressTab() fyne.Widget {
+func makeProgressTab() fyne.CanvasObject {
 	progress = widget.NewProgressBar()
 
 	fprogress = widget.NewProgressBar()
@@ -215,7 +216,7 @@ func makeProgressTab() fyne.Widget {
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
 
-	return widget.NewVBox(
+	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,
 		widget.NewLabel("Formatted"), fprogress,
 		widget.NewLabel("Infinite"), infProgress)
@@ -289,6 +290,35 @@ func stopProgress() {
 	endProgress <- struct{}{}
 }
 
+func makeListTab() fyne.CanvasObject {
+	var data []string
+	for i := 0; i < 1000; i++ {
+		data = append(data, fmt.Sprintf("Test Item %d", i))
+	}
+
+	icon := widget.NewIcon(nil)
+	label := widget.NewLabel("Select An Item From The List")
+	hbox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, label)
+
+	list := widget.NewList(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
+		},
+		func(index int, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[index])
+		},
+	)
+	list.OnItemSelected = func(index int) {
+		label.SetText(data[index])
+		icon.SetResource(theme.DocumentIcon())
+	}
+	split := widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
+	return fyne.NewContainerWithLayout(layout.NewMaxLayout(), split)
+}
+
 // WidgetScreen shows a panel containing widget demos
 func WidgetScreen() fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
@@ -300,14 +330,15 @@ func WidgetScreen() fyne.CanvasObject {
 	)
 
 	progress := makeProgressTab()
-	tabs := widget.NewTabContainer(
-		widget.NewTabItem("Buttons", makeButtonTab()),
-		widget.NewTabItem("Text", makeTextTab()),
-		widget.NewTabItem("Input", makeInputTab()),
-		widget.NewTabItem("Progress", progress),
-		widget.NewTabItem("Form", makeFormTab()),
+	tabs := container.NewAppTabs( // TODO move to something better suited to this content
+		container.NewTabItem("Buttons", makeButtonTab()),
+		container.NewTabItem("Text", makeTextTab()),
+		container.NewTabItem("Input", makeInputTab()),
+		container.NewTabItem("Progress", progress),
+		container.NewTabItem("Form", makeFormTab()),
+		container.NewTabItem("List", makeListTab()),
 	)
-	tabs.OnChanged = func(t *widget.TabItem) {
+	tabs.OnChanged = func(t *container.TabItem) {
 		if t.Content == progress {
 			startProgress()
 		} else {

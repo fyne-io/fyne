@@ -52,7 +52,7 @@ func (g *Group) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // NewGroup creates a new grouped list widget with a title and the specified list of child objects.
-// Deprecated: Consider using the CardContainer instead.
+// Deprecated: Consider using the Card instead.
 func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
 	group := &Group{BaseWidget{}, title, box, box}
@@ -63,7 +63,7 @@ func NewGroup(title string, children ...fyne.CanvasObject) *Group {
 
 // NewGroupWithScroller creates a new grouped list widget with a title and the specified list of child objects.
 // This group will scroll when the available space is less than needed to display the items it contains.
-// Deprecated: Consider using the CardContainer instead.
+// Deprecated: Consider using the Card instead.
 func NewGroupWithScroller(title string, children ...fyne.CanvasObject) *Group {
 	box := NewVBox(children...)
 	group := &Group{BaseWidget{}, title, box, NewVScrollContainer(box)}

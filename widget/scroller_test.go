@@ -163,6 +163,11 @@ func TestScrollContainer_Refresh(t *testing.T) {
 	Refresh(scroll)
 	assert.Equal(t, 400, scroll.Offset.X)
 	assert.Equal(t, fyne.NewSize(500, 500), rect.Size())
+
+	rect2 := canvas.NewRectangle(color.White)
+	scroll.Content = rect2
+	scroll.Refresh()
+	assert.Equal(t, rect2, test.WidgetRenderer(scroll).Objects()[0])
 }
 
 func TestScrollContainer_Scrolled(t *testing.T) {
@@ -576,7 +581,7 @@ func TestScrollContainerRenderer_SetMinSize_Direction(t *testing.T) {
 
 func TestScrollBar_Dragged_ClickedInside(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	rect.SetMinSize(fyne.NewSize(1000, 1000))
+	rect.SetMinSize(fyne.NewSize(500, 500))
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	scrollBarHoriz := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).horizArea).(*scrollBarAreaRenderer).bar
@@ -586,17 +591,17 @@ func TestScrollBar_Dragged_ClickedInside(t *testing.T) {
 	dragEvent := fyne.DragEvent{DraggedX: 20}
 	assert.Equal(t, 0, scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
-	assert.Equal(t, 200, scroll.Offset.X)
+	assert.Equal(t, 100, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: 20}
 	assert.Equal(t, 0, scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
-	assert.Equal(t, 200, scroll.Offset.Y)
+	assert.Equal(t, 100, scroll.Offset.Y)
 }
 
 func TestScrollBar_DraggedBack_ClickedInside(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
-	rect.SetMinSize(fyne.NewSize(1000, 1000))
+	rect.SetMinSize(fyne.NewSize(500, 500))
 	scroll := NewScrollContainer(rect)
 	scroll.Resize(fyne.NewSize(100, 100))
 	scrollBarHoriz := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).horizArea).(*scrollBarAreaRenderer).bar
@@ -610,21 +615,21 @@ func TestScrollBar_DraggedBack_ClickedInside(t *testing.T) {
 
 	// Drag back
 	dragEvent = fyne.DragEvent{DraggedX: -10}
-	assert.Equal(t, 200, scroll.Offset.X)
-	scrollBarHoriz.Dragged(&dragEvent)
 	assert.Equal(t, 100, scroll.Offset.X)
+	scrollBarHoriz.Dragged(&dragEvent)
+	assert.Equal(t, 50, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: -10}
-	assert.Equal(t, 200, scroll.Offset.Y)
-	scrollBarVert.Dragged(&dragEvent)
 	assert.Equal(t, 100, scroll.Offset.Y)
+	scrollBarVert.Dragged(&dragEvent)
+	assert.Equal(t, 50, scroll.Offset.Y)
 }
 
 func TestScrollBar_Dragged_Limit(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
 	scroll := NewScrollContainer(rect)
-	scroll.Resize(fyne.NewSize(100, 100))
+	scroll.Resize(fyne.NewSize(200, 200))
 	scrollBarHoriz := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).horizArea).(*scrollBarAreaRenderer).bar
 	scrollBarVert := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
@@ -632,50 +637,50 @@ func TestScrollBar_Dragged_Limit(t *testing.T) {
 	dragEvent := fyne.DragEvent{DraggedX: 2000}
 	assert.Equal(t, 0, scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
-	assert.Equal(t, 900, scroll.Offset.X)
+	assert.Equal(t, 800, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: 2000}
 	assert.Equal(t, 0, scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
-	assert.Equal(t, 900, scroll.Offset.Y)
+	assert.Equal(t, 800, scroll.Offset.Y)
 
 	// Drag again
 	dragEvent = fyne.DragEvent{DraggedX: 100}
 	// Offset doesn't go over limit
-	assert.Equal(t, 900, scroll.Offset.X)
+	assert.Equal(t, 800, scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
-	assert.Equal(t, 900, scroll.Offset.X)
+	assert.Equal(t, 800, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: 100}
 	// Offset doesn't go over limit
-	assert.Equal(t, 900, scroll.Offset.Y)
+	assert.Equal(t, 800, scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
-	assert.Equal(t, 900, scroll.Offset.Y)
+	assert.Equal(t, 800, scroll.Offset.Y)
 
 	// Drag back (still outside limit)
 	dragEvent = fyne.DragEvent{DraggedX: -1000}
 	scrollBarHoriz.Dragged(&dragEvent)
-	assert.Equal(t, 900, scroll.Offset.X)
+	assert.Equal(t, 800, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: -1000}
 	scrollBarVert.Dragged(&dragEvent)
-	assert.Equal(t, 900, scroll.Offset.Y)
+	assert.Equal(t, 800, scroll.Offset.Y)
 
 	// Drag back (inside limit)
 	dragEvent = fyne.DragEvent{DraggedX: -1040}
 	scrollBarHoriz.Dragged(&dragEvent)
-	assert.Equal(t, 600, scroll.Offset.X)
+	assert.Equal(t, 300, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: -1040}
 	scrollBarVert.Dragged(&dragEvent)
-	assert.Equal(t, 600, scroll.Offset.Y)
+	assert.Equal(t, 300, scroll.Offset.Y)
 }
 
 func TestScrollBar_Dragged_BackLimit(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
 	scroll := NewScrollContainer(rect)
-	scroll.Resize(fyne.NewSize(100, 100))
+	scroll.Resize(fyne.NewSize(200, 200))
 	scrollBarHoriz := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).horizArea).(*scrollBarAreaRenderer).bar
 	scrollBarVert := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
@@ -704,37 +709,37 @@ func TestScrollBar_Dragged_BackLimit(t *testing.T) {
 	// Drag (inside limit)
 	dragEvent = fyne.DragEvent{DraggedX: 520}
 	scrollBarHoriz.Dragged(&dragEvent)
-	assert.Equal(t, 200, scroll.Offset.X)
+	assert.Equal(t, 100, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: 520}
 	scrollBarVert.Dragged(&dragEvent)
-	assert.Equal(t, 200, scroll.Offset.Y)
+	assert.Equal(t, 100, scroll.Offset.Y)
 }
 
 func TestScrollBar_DraggedWithNonZeroStartPosition(t *testing.T) {
 	rect := canvas.NewRectangle(color.Black)
 	rect.SetMinSize(fyne.NewSize(1000, 1000))
 	scroll := NewScrollContainer(rect)
-	scroll.Resize(fyne.NewSize(100, 100))
+	scroll.Resize(fyne.NewSize(200, 200))
 	scrollBarHoriz := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).horizArea).(*scrollBarAreaRenderer).bar
 	scrollBarVert := test.WidgetRenderer(test.WidgetRenderer(scroll).(*scrollContainerRenderer).vertArea).(*scrollBarAreaRenderer).bar
 
 	dragEvent := fyne.DragEvent{DraggedX: 50}
 	assert.Equal(t, 0, scroll.Offset.X)
 	scrollBarHoriz.Dragged(&dragEvent)
-	assert.Equal(t, 500, scroll.Offset.X)
+	assert.Equal(t, 250, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: 50}
 	assert.Equal(t, 0, scroll.Offset.Y)
 	scrollBarVert.Dragged(&dragEvent)
-	assert.Equal(t, 500, scroll.Offset.Y)
+	assert.Equal(t, 250, scroll.Offset.Y)
 
 	// Drag again (after releasing mouse button)
 	dragEvent = fyne.DragEvent{DraggedX: 20}
 	scrollBarHoriz.Dragged(&dragEvent)
-	assert.Equal(t, 700, scroll.Offset.X)
+	assert.Equal(t, 350, scroll.Offset.X)
 
 	dragEvent = fyne.DragEvent{DraggedY: 20}
 	scrollBarVert.Dragged(&dragEvent)
-	assert.Equal(t, 700, scroll.Offset.Y)
+	assert.Equal(t, 350, scroll.Offset.Y)
 }

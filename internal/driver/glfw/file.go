@@ -55,7 +55,7 @@ func (d *gLDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
 	}
 
 	if !s.IsDir() {
-		return nil, fmt.Errorf("Path '%s' is not a directory, cannot convert to listable URI", path)
+		return nil, fmt.Errorf("path '%s' is not a directory, cannot convert to listable URI", path)
 	}
 
 	return &directory{URI: uri}, nil

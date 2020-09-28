@@ -89,6 +89,7 @@ func (t *builtinTheme) DisabledButtonColor() color.Color {
 }
 
 // HyperlinkColor returns the theme's standard hyperlink color.
+//
 // Deprecated: Hyperlinks now use the primary color for consistency.
 func (t *builtinTheme) HyperlinkColor() color.Color {
 	return t.PrimaryColor()
@@ -105,12 +106,14 @@ func (t *builtinTheme) DisabledTextColor() color.Color {
 }
 
 // IconColor returns the theme's standard text color.
+//
 // Deprecated: Icons now use the text colour for consistency.
 func (t *builtinTheme) IconColor() color.Color {
 	return t.text
 }
 
 // DisabledIconColor returns the color for a disabledIcon UI element.
+//
 // Deprecated: Disabled icons match disabled text color for consistency.
 func (t *builtinTheme) DisabledIconColor() color.Color {
 	return t.disabled
@@ -253,6 +256,7 @@ func DisabledButtonColor() color.Color {
 }
 
 // HyperlinkColor returns the theme's standard hyperlink color.
+//
 // Deprecated: Hyperlinks now use the primary color for consistency.
 func HyperlinkColor() color.Color {
 	return current().HyperlinkColor()
@@ -269,12 +273,14 @@ func DisabledTextColor() color.Color {
 }
 
 // IconColor returns the theme's standard text color.
+//
 // Deprecated: Icons now use the text colour for consistency.
 func IconColor() color.Color {
 	return current().IconColor()
 }
 
 // DisabledIconColor returns the color for a disabledIcon UI element.
+//
 // Deprecated: Disabled icons match disabled text color for consistency.
 func DisabledIconColor() color.Color {
 	return current().DisabledIconColor()

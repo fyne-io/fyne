@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/cmd/fyne_demo/data"
 	"fyne.io/fyne/cmd/fyne_demo/screens"
 	"fyne.io/fyne/cmd/fyne_settings/settings"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -56,7 +57,7 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 		),
 		layout.NewSpacer(),
 
-		widget.NewCardContainer("Choose theme", "",
+		widget.NewCard("Choose theme", "",
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 				widget.NewButton("Dark", func() {
 					a.Settings().SetTheme(theme.DarkTheme())
@@ -132,17 +133,17 @@ func main() {
 	w.SetMainMenu(mainMenu)
 	w.SetMaster()
 
-	tabs := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
-		widget.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
-		widget.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),
-		widget.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), screens.ContainerScreen()),
-		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)))
+	tabs := container.NewAppTabs(
+		container.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
+		container.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
+		container.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),
+		container.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), screens.ContainerScreen()),
+		container.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)))
 
 	if !fyne.CurrentDevice().IsMobile() {
-		tabs.Append(widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
+		tabs.Append(container.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
 	}
-	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs.SetTabLocation(container.TabLocationLeading)
 	tabs.SelectTabIndex(a.Preferences().Int(preferenceCurrentTab))
 	w.SetContent(tabs)
 

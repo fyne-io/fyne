@@ -19,6 +19,12 @@ type Spacer struct {
 	hidden bool
 }
 
+// NewSpacer returns a spacer object which can fill vertical and horizontal
+// space. This is primarily used with a box layout.
+func NewSpacer() fyne.CanvasObject {
+	return &Spacer{}
+}
+
 // ExpandVertical returns whether or not this spacer expands on the vertical axis
 func (s *Spacer) ExpandVertical() bool {
 	return !s.FixVertical
@@ -71,10 +77,4 @@ func (s *Spacer) Hide() {
 
 // Refresh does nothing for a spacer but is part of the CanvasObject definition
 func (s *Spacer) Refresh() {
-}
-
-// NewSpacer returns a spacer object which can fill vertical and horizontal
-// space. This is primarily used with a box layout.
-func NewSpacer() fyne.CanvasObject {
-	return &Spacer{}
 }

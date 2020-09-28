@@ -18,8 +18,6 @@ type Raster struct {
 	Generator func(w, h int) image.Image // Render the raster image from code
 
 	Translucency float64 // Set a translucency value > 0.0 to fade the raster
-
-	img draw.Image // internal cache for pixel based generator functions
 }
 
 // Alpha is a convenience function that returns the alpha value for a raster

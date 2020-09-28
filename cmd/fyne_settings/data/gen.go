@@ -54,5 +54,7 @@ func main() {
 	}
 
 	bundleFile("appearanceIcon", "appearance.svg", f)
-	bundleFile("languageIcon", "language.svg", f)
+
+	// TODO: Add in language support and icon
+	//bundleFile("languageIcon", "language.svg", f)
 }
