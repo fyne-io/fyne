@@ -997,7 +997,7 @@ func (e *Entry) updateText(text string) {
 	})
 
 	if e.Validator != nil {
-		e.validationError = e.Validator.Validate(text)
+		e.validationError = e.Validator(text)
 		e.validationStatus.Refresh()
 	}
 
