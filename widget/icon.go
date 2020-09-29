@@ -35,6 +35,7 @@ func (i *iconRenderer) Refresh() {
 	if i.image.Resource != i.image.cachedRes {
 		i.image.propertyLock.RLock()
 		i.updateObjects()
+		i.image.cachedRes = i.image.Resource
 		i.image.propertyLock.RUnlock()
 	}
 
