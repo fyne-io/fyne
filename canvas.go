@@ -7,7 +7,11 @@ import "image"
 type Canvas interface {
 	Content() CanvasObject
 	SetContent(CanvasObject)
+	
 	Refresh(CanvasObject)
+	
+	// Focus makes the provided item focused
+	// Must be called after the item has been added to the contents of the canvas.
 	Focus(Focusable)
 	Unfocus()
 	Focused() Focusable
