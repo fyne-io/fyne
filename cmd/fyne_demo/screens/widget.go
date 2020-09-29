@@ -315,17 +315,25 @@ func makeListTab() fyne.CanvasObject {
 		label.SetText(data[index])
 		icon.SetResource(theme.DocumentIcon())
 	}
+	appendButton := widget.NewButton("Append Item",
+		func() {
+			data = append(data, fmt.Sprintf("Test Item %d", len(data)))
+			list.Refresh()
+		})
+	removeButton := widget.NewButton("Remove Item",
+		func() {
+			if len(data) == 0 {
+				return
+			}
+			data = data[:len(data)-1]
+			list.Refresh()
+		})
 	clearButton := widget.NewButton("Clear Contents",
 		func() {
 			data = nil
 			list.Refresh()
 		})
-	appendButton := widget.NewButton("Append Item",
-		func() {
-			data = append(data, "Appended Item")
-			list.Refresh()
-		})
-	buttonBox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), clearButton, appendButton)
+	buttonBox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), layout.NewSpacer(), appendButton, removeButton, clearButton, layout.NewSpacer())
 	split := widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, buttonBox, nil, nil), buttonBox, split)
 }
