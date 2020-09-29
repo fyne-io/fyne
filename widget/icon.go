@@ -64,7 +64,7 @@ type Icon struct {
 // SetResource updates the resource rendered in this icon widget
 func (i *Icon) SetResource(res fyne.Resource) {
 	i.Resource = res
-	i.cachedRes = res
+	i.cachedRes = nil
 	i.Refresh()
 }
 
