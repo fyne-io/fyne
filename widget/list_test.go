@@ -193,8 +193,6 @@ func TestList_ClearList(t *testing.T) {
 	}
 	list.Refresh()
 
-	firstItemIndex = test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex = test.WidgetRenderer(list).(*listRenderer).lastItemIndex
 	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
 
 	assert.Equal(t, visibleCount, 0)
