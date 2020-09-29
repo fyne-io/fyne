@@ -163,6 +163,11 @@ func TestScrollContainer_Refresh(t *testing.T) {
 	Refresh(scroll)
 	assert.Equal(t, 400, scroll.Offset.X)
 	assert.Equal(t, fyne.NewSize(500, 500), rect.Size())
+
+	rect2 := canvas.NewRectangle(color.White)
+	scroll.Content = rect2
+	scroll.Refresh()
+	assert.Equal(t, rect2, test.WidgetRenderer(scroll).Objects()[0])
 }
 
 func TestScrollContainer_Scrolled(t *testing.T) {

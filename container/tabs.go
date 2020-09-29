@@ -5,9 +5,10 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-// Tabs container allows switching visible content from a list of TabItems.
-// Each item is represented by a button at the top of the widget.
-type Tabs = widget.TabContainer
+// AppTabs container is used to split your application into various different areas identified by tabs.
+// The tabs contain text and/or an icon and allow the user to switch between the content specified in each TabItem.
+// Each item is represented by a button at the edge of the container.
+type AppTabs = widget.TabContainer
 
 // TabItem represents a single view in a TabContainer.
 // The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
@@ -24,8 +25,8 @@ const (
 	TabLocationTrailing
 )
 
-// NewTabs creates a new tab bar widget that allows the user to choose between different visible containers
-func NewTabs(items ...*TabItem) *Tabs {
+// NewAppTabs creates a new tab container that allows the user to choose between different areas of an app.
+func NewAppTabs(items ...*TabItem) *AppTabs {
 	return widget.NewTabContainer(items...)
 }
 
