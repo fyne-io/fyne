@@ -996,11 +996,6 @@ func (e *Entry) updateText(text string) {
 		}
 	})
 
-	if e.Validator != nil {
-		e.validationError = e.Validator(text)
-		e.validationStatus.Refresh()
-	}
-
 	if callback != nil {
 		callback(text)
 	}
@@ -1136,6 +1131,7 @@ func (r *entryRenderer) Refresh() {
 		r.entry.ActionItem.Refresh()
 	}
 	if r.entry.Validator != nil {
+		r.entry.validationError = r.entry.Validator(content)
 		if !r.entry.focused && r.entry.Text != "" && r.entry.validationError != nil {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
 		}
