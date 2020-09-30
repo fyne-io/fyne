@@ -27,7 +27,7 @@ type FileIcon struct {
 
 // NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
 func NewFileIcon(uri fyne.URI) *FileIcon {
-	i := &FileIcon{IconSize: 64, TextSize: 24, URI: uri}
+	i := &FileIcon{URI: uri}
 	i.ExtendBaseWidget(i)
 	return i
 }
@@ -77,6 +77,13 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.ExtendBaseWidget(i)
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
+
+	if i.IconSize == 0 {
+		i.IconSize = 64
+	}
+	if i.TextSize == 0 {
+		i.TextSize = 24
+	}
 
 	i.setURI(i.URI)
 
@@ -172,7 +179,6 @@ func trimmedExtension(uri fyne.URI) string {
 
 func splitMimeType(uri fyne.URI) string {
 	mimeTypeSplit := strings.Split(uri.MimeType(), "/")
-
 	if len(mimeTypeSplit) <= 1 {
 		return ""
 	}
