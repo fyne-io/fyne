@@ -76,6 +76,7 @@ func runBuild(cmd *command) (err error) {
 	return
 }
 
+// AppOutputName provides the name of a build resource for a given os - "ios" or "android".
 func AppOutputName(os, name string) string {
 	switch os {
 	case "android":
