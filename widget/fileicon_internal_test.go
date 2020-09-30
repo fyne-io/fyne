@@ -14,41 +14,33 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func TestNewFileIcon(t *testing.T) {
-	item := NewFileIcon(storage.NewURI("file:///path/to/filename.zip"))
+// Simulate being rendered by calling CreateRenderer() to update icon
+func newRenderedFileIcon(uri fyne.URI) *FileIcon {
+	f := NewFileIcon(uri)
+	f.CreateRenderer()
+	return f
+}
 
+func TestNewFileIcon(t *testing.T) {
+	item := newRenderedFileIcon(storage.NewURI("file:///path/to/filename.zip"))
 	assert.Equal(t, ".zip", item.extension)
-	assert.Equal(t, "application", item.mimeType)
-	assert.Equal(t, "zip", item.mimeSubType)
 	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
 
-	item = NewFileIcon(storage.NewURI("file:///path/to/filename.mp3"))
-
+	item = newRenderedFileIcon(storage.NewURI("file:///path/to/filename.mp3"))
 	assert.Equal(t, ".mp3", item.extension)
-	assert.Equal(t, "audio", item.mimeType)
-	assert.Equal(t, "mpeg", item.mimeSubType)
 	assert.Equal(t, theme.FileAudioIcon(), item.resource)
 
-	item = NewFileIcon(storage.NewURI("file:///path/to/filename.png"))
-
+	item = newRenderedFileIcon(storage.NewURI("file:///path/to/filename.png"))
 	assert.Equal(t, ".png", item.extension)
-	assert.Equal(t, "image", item.mimeType)
-	assert.Equal(t, "png", item.mimeSubType)
 	assert.Equal(t, theme.FileImageIcon(), item.resource)
 
-	item = NewFileIcon(storage.NewURI("file:///path/to/filename.txt"))
-
+	item = newRenderedFileIcon(storage.NewURI("file:///path/to/filename.txt"))
 	assert.Equal(t, ".txt", item.extension)
-	assert.Equal(t, "text", item.mimeType)
-	assert.Equal(t, "plain", item.mimeSubType)
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
 
-	item = NewFileIcon(storage.NewURI("file:///path/to/filename.mp4"))
-
+	item = newRenderedFileIcon(storage.NewURI("file:///path/to/filename.mp4"))
 	assert.Equal(t, ".mp4", item.extension)
-	assert.Equal(t, "video", item.mimeType)
-	assert.Equal(t, "mp4", item.mimeSubType)
-	assert.Equal(t, theme.FileVideoIcon(), "mp4")
+	assert.Equal(t, theme.FileVideoIcon(), item.resource)
 }
 
 func TestNewFileIconNoExtension(t *testing.T) {
@@ -60,54 +52,33 @@ func TestNewFileIconNoExtension(t *testing.T) {
 	binFileWithNoExt := filepath.Join(workingDir, "testdata/bin")
 	textFileWithNoExt := filepath.Join(workingDir, "testdata/text")
 
-	item := NewFileIcon(storage.NewURI("file://" + binFileWithNoExt))
-
+	item := newRenderedFileIcon(storage.NewURI("file://" + binFileWithNoExt))
 	assert.Equal(t, "", item.extension)
-	assert.Equal(t, "application", item.mimeType)
-	assert.Equal(t, "octet-stream", item.mimeSubType)
 	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
 
-	item = NewFileIcon(storage.NewURI("file://" + textFileWithNoExt))
-
-	assert.Equal(t, ".txt", item.extension)
-	assert.Equal(t, "text", item.mimeType)
-	assert.Equal(t, "plain", item.mimeSubType)
+	item = newRenderedFileIcon(storage.NewURI("file://" + textFileWithNoExt))
+	assert.Equal(t, "", item.extension)
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
 }
 
-func TestUpdateURI(t *testing.T) {
-	item := NewFileIcon(storage.NewURI("file:///path/to/filename.zip"))
-
+func TestSetURI(t *testing.T) {
+	item := newRenderedFileIcon(storage.NewURI("file:///path/to/filename.zip"))
 	assert.Equal(t, ".zip", item.extension)
-	assert.Equal(t, "application", item.mimeType)
-	assert.Equal(t, "zip", item.mimeSubType)
 	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
 
-	item.UpdateURI(storage.NewURI("file:///path/to/filename.mp3"))
-
+	item.SetURI(storage.NewURI("file:///path/to/filename.mp3"))
 	assert.Equal(t, ".mp3", item.extension)
-	assert.Equal(t, "audio", item.mimeType)
-	assert.Equal(t, "mpeg", item.mimeSubType)
 	assert.Equal(t, theme.FileAudioIcon(), item.resource)
 
-	item.UpdateURI(storage.NewURI("file:///path/to/filename.png"))
-
+	item.SetURI(storage.NewURI("file:///path/to/filename.png"))
 	assert.Equal(t, ".png", item.extension)
-	assert.Equal(t, "image", item.mimeType)
-	assert.Equal(t, "png", item.mimeSubType)
 	assert.Equal(t, theme.FileImageIcon(), item.resource)
 
-	item.UpdateURI(storage.NewURI("file:///path/to/filename.txt"))
-
+	item.SetURI(storage.NewURI("file:///path/to/filename.txt"))
 	assert.Equal(t, ".txt", item.extension)
-	assert.Equal(t, "text", item.mimeType)
-	assert.Equal(t, "plain", item.mimeSubType)
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
 
-	item.UpdateURI(storage.NewURI("file:///path/to/filename.mp4"))
-
+	item.SetURI(storage.NewURI("file:///path/to/filename.mp4"))
 	assert.Equal(t, ".mp4", item.extension)
-	assert.Equal(t, "video", item.mimeType)
-	assert.Equal(t, "mp4", item.mimeSubType)
 	assert.Equal(t, theme.FileVideoIcon(), item.resource)
 }

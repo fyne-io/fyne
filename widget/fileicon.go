@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"fmt"
 	"image/color"
 	"strings"
 
@@ -21,9 +20,9 @@ type FileIcon struct {
 	Selected           bool
 	URI                fyne.URI
 
-	extension, mimeType, mimeSubType string
-	resource                         fyne.Resource
-	cachedURI                        fyne.URI
+	resource  fyne.Resource
+	extension string
+	cachedURI fyne.URI
 }
 
 // NewFileIcon takes a filepath and creates an icon with an overlayed label using the detected mimetype and extension
@@ -33,22 +32,21 @@ func NewFileIcon(uri fyne.URI) *FileIcon {
 	return i
 }
 
-// UpdateURI changes the URI and makes the icon reflect a different file
-func (i *FileIcon) UpdateURI(uri fyne.URI) {
+// SetURI changes the URI and makes the icon reflect a different file
+func (i *FileIcon) SetURI(uri fyne.URI) {
 	if uri != i.URI {
 		i.URI = uri
 		i.Refresh()
 	}
 }
 
-func (i *FileIcon) updateURI(uri fyne.URI) {
+func (i *FileIcon) setURI(uri fyne.URI) {
 	if uri == nil {
 		i.resource = theme.FileIcon()
 		return
 	}
 
-	i.mimeType, i.mimeSubType = splitMimeType(uri)
-	switch i.mimeType {
+	switch splitMimeType(uri) {
 	case "application":
 		i.resource = theme.FileApplicationIcon()
 	case "audio":
@@ -63,11 +61,9 @@ func (i *FileIcon) updateURI(uri fyne.URI) {
 		i.resource = theme.FileIcon()
 	}
 
-	i.extension = trimmedExtension(uri)
-	i.cachedURI = uri
 	i.URI = uri
-
-	fmt.Println(i.extension, i.mimeType, i.mimeSubType, i.resource)
+	i.cachedURI = nil
+	i.extension = trimmedExtension(uri)
 }
 
 // MinSize returns the size that this widget should not shrink below
@@ -82,9 +78,11 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
 
-	i.updateURI(i.URI)
+	i.setURI(i.URI)
+
 	s := &fileIconRenderer{file: i}
 	s.updateObjects()
+	i.cachedURI = i.URI
 
 	return s
 }
@@ -131,8 +129,9 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 func (s *fileIconRenderer) Refresh() {
 	if s.file.URI != s.file.cachedURI {
 		s.file.propertyLock.RLock()
-		s.file.updateURI(s.file.URI)
+		s.file.setURI(s.file.URI)
 		s.updateObjects()
+		s.file.cachedURI = s.file.URI
 		s.file.propertyLock.RUnlock()
 	}
 
@@ -171,10 +170,11 @@ func trimmedExtension(uri fyne.URI) string {
 	return ext
 }
 
-func splitMimeType(uri fyne.URI) (string, string) {
+func splitMimeType(uri fyne.URI) string {
 	mimeTypeSplit := strings.Split(uri.MimeType(), "/")
+
 	if len(mimeTypeSplit) <= 1 {
-		return "", ""
+		return ""
 	}
-	return mimeTypeSplit[0], mimeTypeSplit[1]
+	return mimeTypeSplit[0]
 }
