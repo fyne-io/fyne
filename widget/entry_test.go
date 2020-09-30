@@ -54,12 +54,12 @@ func TestEntry_ValidatedEntry(t *testing.T) {
 	test.AssertImageMatches(t, "entry/validate_initial.png", c.Capture())
 
 	test.Type(entry, "2020-02")
-	assert.Error(t, r.Validate(entry.Text))
+	assert.Error(t, r(entry.Text))
 	entry.FocusLost()
 	test.AssertImageMatches(t, "entry/validate_invalid.png", c.Capture())
 
 	test.Type(entry, "-12")
-	assert.NoError(t, r.Validate(entry.Text))
+	assert.NoError(t, r(entry.Text))
 	test.AssertImageMatches(t, "entry/validate_valid.png", c.Capture())
 }
 
