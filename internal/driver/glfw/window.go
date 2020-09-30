@@ -298,7 +298,10 @@ func (w *window) SetCloseIntercept(callback func()) {
 }
 
 func (w *window) getMonitorForWindow() *glfw.Monitor {
-	x, y := w.viewport.GetPos()
+	x, y := w.xpos, w.ypos
+	if w.fullScreen {
+		x, y = w.viewport.GetPos()
+	}
 	xOff := x + (w.width / 2)
 	yOff := y + (w.height / 2)
 
