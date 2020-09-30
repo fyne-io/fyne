@@ -122,6 +122,19 @@ func (s *Slider) updateValue(ratio float64) {
 	s.clampValueToRange()
 }
 
+func (s *Slider) SetValue(value float64) {
+	if s.Value == value {
+		return
+	}
+
+	if s.OnChanged != nil {
+		s.OnChanged(value)
+	}
+
+	s.Value = value
+	s.Refresh()
+}
+
 // MinSize returns the size that this widget should not shrink below
 func (s *Slider) MinSize() fyne.Size {
 	s.ExtendBaseWidget(s)
