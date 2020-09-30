@@ -1,6 +1,7 @@
 package dialog
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -316,6 +317,10 @@ func (f *FileDialog) Show() {
 
 // Resize dialog, call this function after dialog show
 func (f *FileDialog) Resize(size fyne.Size) {
+	if f.dialog == nil {
+		fyne.LogError("FileDialog.Resize", errors.New("is called before Show"))
+		return
+	}
 	maxSize := f.dialog.win.Size()
 	minSize := f.dialog.win.MinSize()
 	newWidth := size.Width
