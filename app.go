@@ -5,6 +5,10 @@ import (
 	"sync"
 )
 
+func init() {
+	hideConsoleOnWindows()
+}
+
 // An App is the definition of a graphical application.
 // Apps can have multiple windows, it will exit when the first window to be
 // shown is closed. You can also cause the app to exit by calling Quit().

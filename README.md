@@ -97,7 +97,7 @@ It should look like this:
   </table>
 </div>
 
-> Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
+> Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window. Fyne hides this for you at the start of the program but it might still be visible for a split second.
 > To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
 
 # Documentation
