@@ -132,7 +132,7 @@ func (s *Slider) SetValue(value float64) {
 	s.clampValueToRange()
 
 	if s.OnChanged != nil {
-		s.OnChanged(value)
+		s.OnChanged(s.Value)
 	}
 
 	s.Refresh()
