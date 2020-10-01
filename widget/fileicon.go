@@ -109,12 +109,13 @@ func (s *fileIconRenderer) MinSize() fyne.Size {
 }
 
 func (s *fileIconRenderer) Layout(size fyne.Size) {
-	alignHeight := int(float64(size.Height) * 0.40)
-	s.ext.TextSize = int(float64((size.Width+size.Height)/2) * 0.22)
-	s.ext.Resize(fyne.NewSize(size.Width, alignHeight))
-	s.ext.Move(fyne.NewPos(0, alignHeight))
-
 	s.Objects()[0].Resize(size)
+
+	isize := s.Objects()[0].Size()
+	alignHeight := int(float64(isize.Height) * 0.40)
+	s.ext.TextSize = int(float64((isize.Width+isize.Height)/2) * 0.22)
+	s.ext.Resize(fyne.NewSize(isize.Width, alignHeight))
+	s.ext.Move(fyne.NewPos(0, alignHeight))
 }
 
 func (s *fileIconRenderer) Refresh() {
