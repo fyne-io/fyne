@@ -17,7 +17,7 @@ type selectRenderer struct {
 	*widget.ShadowingRenderer
 
 	icon  *Icon
-	label *canvas.Text
+	label *Label
 	bg    *canvas.Rectangle
 	combo *Select
 }
@@ -28,12 +28,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	min := fyne.MeasureText(s.combo.PlaceHolder, s.label.TextSize, s.label.TextStyle)
-
-	for _, option := range s.combo.Options {
-		optionMin := fyne.MeasureText(option, s.label.TextSize, s.label.TextStyle)
-		min = min.Union(optionMin)
-	}
+	min := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.label.TextStyle)
 
 	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
 	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
@@ -90,9 +85,6 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) updateLabel() {
-	s.label.Color = theme.TextColor()
-	s.label.TextSize = theme.TextSize()
-
 	if s.combo.PlaceHolder == "" {
 		s.combo.PlaceHolder = defaultPlaceHolder
 	}
@@ -222,8 +214,9 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
 	icon := NewIcon(theme.MenuDropDownIcon())
-	text := canvas.NewText(s.Selected, theme.TextColor())
+	text := NewLabel(s.Selected)
 	text.TextStyle.Bold = true
+	text.Wrapping = fyne.TextTruncate
 
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
