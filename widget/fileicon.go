@@ -10,15 +10,12 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const ratioDown = 0.45
-
 // FileIcon is an adaption of widget.Icon for showing file information
 type FileIcon struct {
 	BaseWidget
 
-	IconSize, TextSize int
-	Selected           bool
-	URI                fyne.URI
+	Selected bool
+	URI      fyne.URI
 
 	resource  fyne.Resource
 	extension string
@@ -78,13 +75,6 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 	i.propertyLock.RLock()
 	defer i.propertyLock.RUnlock()
 
-	if i.IconSize == 0 {
-		i.IconSize = 64
-	}
-	if i.TextSize == 0 {
-		i.TextSize = 24
-	}
-
 	i.setURI(i.URI)
 
 	s := &fileIconRenderer{file: i}
@@ -97,13 +87,6 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 // SetSelected makes the file look like it is selected
 func (i *FileIcon) SetSelected(selected bool) {
 	i.Selected = selected
-	i.Refresh()
-}
-
-// SetSize sets the size for the icon and text
-func (i *FileIcon) SetSize(icon, text int) {
-	i.IconSize = icon
-	i.TextSize = text
 	i.Refresh()
 }
 
@@ -121,14 +104,15 @@ func (s *fileIconRenderer) BackgroundColor() color.Color {
 }
 
 func (s *fileIconRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(s.file.IconSize, s.file.IconSize+s.file.TextSize+theme.Padding())
+	size := theme.IconInlineSize()
+	return fyne.NewSize(size, size)
 }
 
 func (s *fileIconRenderer) Layout(size fyne.Size) {
-	iconAlign := (size.Width - s.file.IconSize) / 2
-	s.ext.Resize(fyne.NewSize(s.file.IconSize, s.file.TextSize))
-	alignHeight := float64(s.file.IconSize) * ratioDown
-	s.ext.Move(fyne.NewPos(iconAlign, int(alignHeight)))
+	alignHeight := int(float64(size.Height) * 0.40)
+	s.ext.TextSize = int(float64((size.Width+size.Height)/2) * 0.22)
+	s.ext.Resize(fyne.NewSize(size.Width, alignHeight))
+	s.ext.Move(fyne.NewPos(0, alignHeight))
 
 	s.Objects()[0].Resize(size)
 }
@@ -155,10 +139,12 @@ func (s *fileIconRenderer) Refresh() {
 	}
 
 	canvas.Refresh(s.file.super())
+	canvas.Refresh(s.ext)
 }
 
 func (s *fileIconRenderer) updateObjects() {
 	s.img = canvas.NewImageFromResource(s.file.resource)
+	s.img.FillMode = canvas.ImageFillContain
 	s.ext = canvas.NewText(s.file.extension, theme.BackgroundColor())
 	s.ext.Alignment = fyne.TextAlignCenter
 	s.ext.TextSize = theme.TextSize()
