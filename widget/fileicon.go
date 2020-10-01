@@ -109,10 +109,17 @@ func (s *fileIconRenderer) MinSize() fyne.Size {
 }
 
 func (s *fileIconRenderer) Layout(size fyne.Size) {
-	alignHeight := int(float64(size.Height) * 0.40)
-	s.ext.TextSize = int(float64((size.Width+size.Height)/2) * 0.22)
-	s.ext.Resize(fyne.NewSize(size.Width, alignHeight))
-	s.ext.Move(fyne.NewPos(0, alignHeight))
+	isize := min(size.Width, size.Height)
+
+	xoff := 0
+	if size.Width > size.Height {
+		xoff = (size.Width - isize) / 2
+	}
+
+	yoff := int(float64(isize) * 0.40)
+	s.ext.TextSize = int(float64(isize) * 0.22)
+	s.ext.Resize(fyne.NewSize(isize, yoff))
+	s.ext.Move(fyne.NewPos(xoff, yoff))
 
 	s.Objects()[0].Resize(size)
 }
@@ -169,4 +176,11 @@ func splitMimeType(uri fyne.URI) string {
 		return ""
 	}
 	return mimeTypeSplit[0]
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
