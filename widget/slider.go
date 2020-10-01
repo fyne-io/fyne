@@ -122,16 +122,19 @@ func (s *Slider) updateValue(ratio float64) {
 	s.clampValueToRange()
 }
 
+// SetValue updates the value of the slider and clamps the value to be within the range.
 func (s *Slider) SetValue(value float64) {
 	if s.Value == value {
 		return
 	}
 
+	s.Value = value
+	s.clampValueToRange()
+
 	if s.OnChanged != nil {
 		s.OnChanged(value)
 	}
 
-	s.Value = value
 	s.Refresh()
 }
 
