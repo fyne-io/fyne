@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/app"
 	"fyne.io/fyne/theme"
 )
 
@@ -31,7 +32,7 @@ type testCanvas struct {
 
 	content  fyne.CanvasObject
 	overlays *internal.OverlayStack
-	focused  fyne.Focusable
+	focusMgr *app.FocusManager
 	hovered  desktop.Hoverable
 	padded   bool
 
@@ -62,8 +63,13 @@ func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 
 // NewCanvas returns a single use in-memory canvas used for testing
 func NewCanvas() WindowlessCanvas {
-	padding := fyne.NewSize(10, 10)
-	return &testCanvas{size: padding, padded: true, scale: 1.0, overlays: &internal.OverlayStack{}}
+	return &testCanvas{
+		focusMgr: app.NewFocusManager(nil),
+		overlays: &internal.OverlayStack{},
+		padded:   true,
+		scale:    1.0,
+		size:     fyne.NewSize(10, 10),
+	}
 }
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
@@ -96,29 +102,11 @@ func (c *testCanvas) Content() fyne.CanvasObject {
 }
 
 func (c *testCanvas) Focus(obj fyne.Focusable) {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
-
-	if obj == c.focused {
-		return
-	}
-
-	if c.focused != nil {
-		c.focused.FocusLost()
-	}
-
-	c.focused = obj
-
-	if obj != nil {
-		obj.FocusGained()
-	}
+	c.focusManager().Focus(obj)
 }
 
 func (c *testCanvas) Focused() fyne.Focusable {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
-
-	return c.focused
+	return c.focusManager().Focused()
 }
 
 func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {
@@ -197,6 +185,7 @@ func (c *testCanvas) Scale() float32 {
 func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	c.propertyLock.Lock()
 	c.content = content
+	c.focusMgr = app.NewFocusManager(c.content)
 	c.propertyLock.Unlock()
 
 	if content == nil {
@@ -252,13 +241,16 @@ func (c *testCanvas) Size() fyne.Size {
 }
 
 func (c *testCanvas) Unfocus() {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
+	c.focusManager().Focus(nil)
+}
 
-	if c.focused != nil {
-		c.focused.FocusLost()
+func (c *testCanvas) focusManager() *app.FocusManager {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+	if focusMgr := c.overlays.TopFocusManager(); focusMgr != nil {
+		return focusMgr
 	}
-	c.focused = nil
+	return c.focusMgr
 }
 
 func (c *testCanvas) objectTrees() []fyne.CanvasObject {
