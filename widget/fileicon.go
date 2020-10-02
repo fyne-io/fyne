@@ -112,11 +112,12 @@ func (s *fileIconRenderer) Layout(size fyne.Size) {
 	isize := min(size.Width, size.Height)
 
 	xoff := 0
+	yoff := int(float64(size.Height) * 0.40)
+
 	if size.Width > size.Height {
 		xoff = (size.Width - isize) / 2
 	}
 
-	yoff := int(float64(isize) * 0.40)
 	s.ext.TextSize = int(float64(isize) * 0.22)
 	s.ext.Resize(fyne.NewSize(isize, yoff))
 	s.ext.Move(fyne.NewPos(xoff, yoff))
