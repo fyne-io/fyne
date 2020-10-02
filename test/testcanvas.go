@@ -43,47 +43,56 @@ type testCanvas struct {
 	propertyLock sync.RWMutex
 }
 
+// Canvas returns a reusable in-memory canvas used for testing
+func Canvas() fyne.Canvas {
+	if dummyCanvas == nil {
+		dummyCanvas = NewCanvas()
+	}
+
+	return dummyCanvas
+}
+
+// LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
+func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
+	if o != nil {
+		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
+	}
+	return objects
+}
+
+// NewCanvas returns a single use in-memory canvas used for testing
+func NewCanvas() WindowlessCanvas {
+	padding := fyne.NewSize(10, 10)
+	return &testCanvas{size: padding, padded: true, scale: 1.0, overlays: &internal.OverlayStack{}}
+}
+
+// NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
+// The painter will be used to render in the Capture() call.
+func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
+	canvas := NewCanvas().(*testCanvas)
+	canvas.painter = painter
+
+	return canvas
+}
+
+func (c *testCanvas) Capture() image.Image {
+	if c.painter != nil {
+		return c.painter.Paint(c)
+	}
+	theme := fyne.CurrentApp().Settings().Theme()
+
+	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
+	img := image.NewNRGBA(bounds)
+	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
+
+	return img
+}
+
 func (c *testCanvas) Content() fyne.CanvasObject {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 
 	return c.content
-}
-
-func (c *testCanvas) SetContent(content fyne.CanvasObject) {
-	c.propertyLock.Lock()
-	c.content = content
-	c.propertyLock.Unlock()
-
-	if content == nil {
-		return
-	}
-
-	padding := fyne.NewSize(0, 0)
-	if c.padded {
-		padding = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
-	}
-	c.Resize(content.MinSize().Add(padding))
-}
-
-// Deprecated
-func (c *testCanvas) Overlay() fyne.CanvasObject {
-	panic("deprecated method should not be used")
-}
-
-func (c *testCanvas) Overlays() fyne.OverlayStack {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
-
-	return c.overlays
-}
-
-// Deprecated
-func (c *testCanvas) SetOverlay(_ fyne.CanvasObject) {
-	panic("deprecated method should not be used")
-}
-
-func (c *testCanvas) Refresh(fyne.CanvasObject) {
 }
 
 func (c *testCanvas) Focus(obj fyne.Focusable) {
@@ -105,16 +114,6 @@ func (c *testCanvas) Focus(obj fyne.Focusable) {
 	}
 }
 
-func (c *testCanvas) Unfocus() {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
-
-	if c.focused != nil {
-		c.focused.FocusLost()
-	}
-	c.focused = nil
-}
-
 func (c *testCanvas) Focused() fyne.Focusable {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
@@ -122,11 +121,44 @@ func (c *testCanvas) Focused() fyne.Focusable {
 	return c.focused
 }
 
-func (c *testCanvas) Size() fyne.Size {
+func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
 
-	return c.size
+	return c.onTypedKey
+}
+
+func (c *testCanvas) OnTypedRune() func(rune) {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
+	return c.onTypedRune
+}
+
+// Deprecated
+func (c *testCanvas) Overlay() fyne.CanvasObject {
+	panic("deprecated method should not be used")
+}
+
+func (c *testCanvas) Overlays() fyne.OverlayStack {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
+	return c.overlays
+}
+
+func (c *testCanvas) Padded() bool {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
+	return c.padded
+}
+
+func (c *testCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
+	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
+}
+
+func (c *testCanvas) Refresh(fyne.CanvasObject) {
 }
 
 func (c *testCanvas) Resize(size fyne.Size) {
@@ -162,36 +194,20 @@ func (c *testCanvas) Scale() float32 {
 	return c.scale
 }
 
-func (c *testCanvas) SetScale(scale float32) {
+func (c *testCanvas) SetContent(content fyne.CanvasObject) {
 	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
+	c.content = content
+	c.propertyLock.Unlock()
 
-	c.scale = scale
-}
+	if content == nil {
+		return
+	}
 
-func (c *testCanvas) PixelCoordinateForPosition(pos fyne.Position) (int, int) {
-	return int(float32(pos.X) * c.scale), int(float32(pos.Y) * c.scale)
-}
-
-func (c *testCanvas) OnTypedRune() func(rune) {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
-
-	return c.onTypedRune
-}
-
-func (c *testCanvas) SetOnTypedRune(handler func(rune)) {
-	c.propertyLock.Lock()
-	defer c.propertyLock.Unlock()
-
-	c.onTypedRune = handler
-}
-
-func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
-
-	return c.onTypedKey
+	padding := fyne.NewSize(0, 0)
+	if c.padded {
+		padding = fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
+	}
+	c.Resize(content.MinSize().Add(padding))
 }
 
 func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
@@ -201,11 +217,16 @@ func (c *testCanvas) SetOnTypedKey(handler func(*fyne.KeyEvent)) {
 	c.onTypedKey = handler
 }
 
-func (c *testCanvas) Padded() bool {
-	c.propertyLock.RLock()
-	defer c.propertyLock.RUnlock()
+func (c *testCanvas) SetOnTypedRune(handler func(rune)) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
 
-	return c.padded
+	c.onTypedRune = handler
+}
+
+// Deprecated
+func (c *testCanvas) SetOverlay(_ fyne.CanvasObject) {
+	panic("deprecated method should not be used")
 }
 
 func (c *testCanvas) SetPadded(padded bool) {
@@ -216,25 +237,37 @@ func (c *testCanvas) SetPadded(padded bool) {
 	c.Resize(c.Size())
 }
 
-func (c *testCanvas) Capture() image.Image {
-	if c.painter != nil {
-		return c.painter.Paint(c)
-	}
-	theme := fyne.CurrentApp().Settings().Theme()
+func (c *testCanvas) SetScale(scale float32) {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
 
-	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
-	img := image.NewNRGBA(bounds)
-	draw.Draw(img, bounds, image.NewUniform(theme.BackgroundColor()), image.Point{}, draw.Src)
-
-	return img
+	c.scale = scale
 }
 
-// LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
-func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
-	if o != nil {
-		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
+func (c *testCanvas) Size() fyne.Size {
+	c.propertyLock.RLock()
+	defer c.propertyLock.RUnlock()
+
+	return c.size
+}
+
+func (c *testCanvas) Unfocus() {
+	c.propertyLock.Lock()
+	defer c.propertyLock.Unlock()
+
+	if c.focused != nil {
+		c.focused.FocusLost()
 	}
-	return objects
+	c.focused = nil
+}
+
+func (c *testCanvas) objectTrees() []fyne.CanvasObject {
+	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+1)
+	if c.content != nil {
+		trees = append(trees, c.content)
+	}
+	trees = append(trees, c.Overlays().List()...)
+	return trees
 }
 
 func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyne.Size) []fyne.CanvasObject {
@@ -255,37 +288,4 @@ func layoutAndCollect(objects []fyne.CanvasObject, o fyne.CanvasObject, size fyn
 		}
 	}
 	return objects
-}
-
-func (c *testCanvas) objectTrees() []fyne.CanvasObject {
-	trees := make([]fyne.CanvasObject, 0, len(c.Overlays().List())+1)
-	if c.content != nil {
-		trees = append(trees, c.content)
-	}
-	trees = append(trees, c.Overlays().List()...)
-	return trees
-}
-
-// NewCanvas returns a single use in-memory canvas used for testing
-func NewCanvas() WindowlessCanvas {
-	padding := fyne.NewSize(10, 10)
-	return &testCanvas{size: padding, padded: true, scale: 1.0, overlays: &internal.OverlayStack{}}
-}
-
-// NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
-// The painter will be used to render in the Capture() call.
-func NewCanvasWithPainter(painter SoftwarePainter) WindowlessCanvas {
-	canvas := NewCanvas().(*testCanvas)
-	canvas.painter = painter
-
-	return canvas
-}
-
-// Canvas returns a reusable in-memory canvas used for testing
-func Canvas() fyne.Canvas {
-	if dummyCanvas == nil {
-		dummyCanvas = NewCanvas()
-	}
-
-	return dummyCanvas
 }
