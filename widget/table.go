@@ -15,9 +15,10 @@ import (
 type Table struct {
 	BaseWidget
 
-	DataSize   func() (int, int)
-	NewCell    func() fyne.CanvasObject
-	UpdateCell func(int, int, fyne.CanvasObject)
+	DataSize       func() (int, int)
+	NewCell        func() fyne.CanvasObject
+	UpdateCell     func(row int, col int, template fyne.CanvasObject)
+	OnCellSelected func(row int, col int)
 
 	cells                       *tableCells
 	scroll                      *ScrollContainer
@@ -82,6 +83,7 @@ func (t *tableRenderer) moveOverlay() {
 			t.colMarker.Resize(fyne.NewSize(fyne.Min(x2, t.t.size.Width)-left, theme.Padding()))
 		}
 	}
+	t.colMarker.Refresh()
 
 	if t.t.SelectedRow == -1 {
 		t.colMarker.Hide()
@@ -99,6 +101,7 @@ func (t *tableRenderer) moveOverlay() {
 			t.rowMarker.Resize(fyne.NewSize(theme.Padding(), fyne.Min(y2, t.t.size.Height)-top))
 		}
 	}
+	t.rowMarker.Refresh()
 
 	colDivs := int(math.Ceil(float64(t.t.size.Width+1) / float64(t.cellSize.Width+1)))   // +1 for div width
 	rowDivs := int(math.Ceil(float64(t.t.size.Height+1) / float64(t.cellSize.Height+1))) // +1 for div width
@@ -159,6 +162,8 @@ func (t *tableRenderer) MinSize() fyne.Size {
 func (t *tableRenderer) Refresh() {
 	template := t.t.NewCell()
 	t.cellSize = template.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	t.moveOverlay()
+
 	t.colMarker.FillColor = theme.PrimaryColor()
 	t.colMarker.Refresh()
 	t.rowMarker.FillColor = theme.PrimaryColor()
@@ -196,6 +201,26 @@ func newTableCells(t *Table, s fyne.Size) *tableCells {
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	return &tableCellsRenderer{cells: c, pool: &syncPool{}, objects: []fyne.CanvasObject{}}
+}
+
+func (c *tableCells) Tapped(e *fyne.PointEvent) {
+	if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
+		c.t.SelectedColumn = -1
+		c.t.SelectedRow = -1
+		c.t.Refresh()
+		return
+	}
+
+	c.t.SelectedColumn = e.Position.X / (c.cellSize.Width + 1)
+	c.t.SelectedRow = e.Position.Y / (c.cellSize.Height + 1)
+
+	if c.t.OnCellSelected != nil {
+		c.t.OnCellSelected(c.t.SelectedRow, c.t.SelectedColumn)
+	}
+
+	if c.t.scroll != nil {
+		c.t.scroll.onOffsetChanged()
+	}
 }
 
 type tableCellsRenderer struct {

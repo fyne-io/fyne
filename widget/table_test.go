@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTable_ChangeTheme(t *testing.T) {
@@ -39,10 +40,23 @@ func TestTable_Selected(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		}, func(int, int, fyne.CanvasObject) {})
-	table.SelectedRow = 1
-	table.SelectedColumn = 0
+	assert.Equal(t, -1, table.SelectedColumn)
+	assert.Equal(t, -1, table.SelectedRow)
+
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
+
+	selectedCol, selectedRow := 0, 0
+	table.OnCellSelected = func(row, col int) {
+		selectedCol = col
+		selectedRow = row
+	}
+	test.TapCanvas(w.Canvas(), fyne.NewPos(35, 50))
+	assert.Equal(t, 0, table.SelectedColumn)
+	assert.Equal(t, 1, table.SelectedRow)
+	assert.Equal(t, 0, selectedCol)
+	assert.Equal(t, 1, selectedRow)
+
 	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
 }

@@ -146,7 +146,7 @@ func makeSplitTab() fyne.CanvasObject {
 }
 
 func makeTableTab() fyne.CanvasObject {
-	t := widget.NewTable(
+	return widget.NewTable(
 		func() (int, int) { return 50, 15 },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Cell 00, 00")
@@ -155,7 +155,4 @@ func makeTableTab() fyne.CanvasObject {
 			label := cell.(*widget.Label)
 			label.SetText(fmt.Sprintf("Cell %d, %d", row+1, col+1))
 		})
-	t.SelectedColumn = 2
-	t.SelectedRow = 2
-	return t
 }
