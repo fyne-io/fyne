@@ -70,12 +70,16 @@ type Draggable interface {
 // Note: You must not change canvas state (including overlays or focus) in FocusGained or FocusLost
 // or you would end up with a dead-lock.
 type Focusable interface {
+	// FocusGained is a hook called by the focus handling logic after this object gained the focus.
 	FocusGained()
+	// FocusLost is a hook called by the focus handling logic after this object lost the focus.
 	FocusLost()
 	// Deprecated: this is an internal detail, canvas tracks current focused object
 	Focused() bool
 
+	// TypedRune is a hook called by the input handling logic on text input events if this object is focused.
 	TypedRune(rune)
+	// TypedKey is a hook called by the input handling logic on key events if this object is focused.
 	TypedKey(*KeyEvent)
 }
 
