@@ -26,6 +26,8 @@ type Radio struct {
 	hovered          bool
 }
 
+var _ fyne.Widget = (*Radio)(nil)
+
 // NewRadio creates a new radio widget with the set options and change handler
 func NewRadio(options []string, changed func(string)) *Radio {
 	r := &Radio{
