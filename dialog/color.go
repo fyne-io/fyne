@@ -47,6 +47,7 @@ func (p *ColorPickerDialog) SetColor(c color.Color) {
 	p.picker.SetColor(c)
 }
 
+// Refresh causes this dialog to be updated
 func (p *ColorPickerDialog) Refresh() {
 	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
 		OnTapped: p.dialog.Hide,

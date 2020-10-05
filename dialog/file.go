@@ -319,6 +319,7 @@ func (f *FileDialog) Show() {
 	}
 }
 
+// Refresh causes this dialog to be updated
 func (f *FileDialog) Refresh() {
 	f.dialog.win.Refresh()
 }
