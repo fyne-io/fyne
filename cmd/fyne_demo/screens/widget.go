@@ -330,7 +330,7 @@ func WidgetScreen() fyne.CanvasObject {
 	)
 
 	progress := makeProgressTab()
-	tabs := container.NewTabs(
+	tabs := container.NewAppTabs( // TODO move to something better suited to this content
 		container.NewTabItem("Buttons", makeButtonTab()),
 		container.NewTabItem("Text", makeTextTab()),
 		container.NewTabItem("Input", makeInputTab()),
