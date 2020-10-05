@@ -10,6 +10,11 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+const (
+	ratioDown     = 0.45
+	ratioTextSize = 0.22
+)
+
 // FileIcon is an adaption of widget.Icon for showing file information
 type FileIcon struct {
 	BaseWidget
@@ -109,17 +114,18 @@ func (s *fileIconRenderer) MinSize() fyne.Size {
 }
 
 func (s *fileIconRenderer) Layout(size fyne.Size) {
-	isize := min(size.Width, size.Height)
+	isize := fyne.Min(size.Width, size.Height)
 
 	xoff := 0
-	yoff := int(float64(size.Height) * 0.40)
+	yoff := (size.Height - isize) / 2
 
 	if size.Width > size.Height {
 		xoff = (size.Width - isize) / 2
 	}
+	yoff += int(float64(isize) * ratioDown)
 
-	s.ext.TextSize = int(float64(isize) * 0.22)
-	s.ext.Resize(fyne.NewSize(isize, yoff))
+	s.ext.TextSize = int(float64(isize) * ratioTextSize)
+	s.ext.Resize(fyne.NewSize(isize, s.ext.MinSize().Height))
 	s.ext.Move(fyne.NewPos(xoff, yoff))
 
 	s.Objects()[0].Resize(size)
@@ -177,11 +183,4 @@ func splitMimeType(uri fyne.URI) string {
 		return ""
 	}
 	return mimeTypeSplit[0]
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
