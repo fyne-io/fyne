@@ -38,7 +38,7 @@ type Tree struct {
 	UpdateNode     func(uid string, branch bool, node fyne.CanvasObject) // Update the given CanvasObject to represent the data at the given Unique ID
 	OnBranchOpened func(uid string)                                      // Called when a Branch is opened
 	OnBranchClosed func(uid string)                                      // Called when a Branch is closed
-	OnNodeSelected func(uid string, node fyne.CanvasObject)              // Called when the Node with the given Unique ID is selected.
+	OnNodeSelected func(uid string)                                      // Called when the Node with the given Unique ID is selected.
 }
 
 // NewTreeWithStrings creates a new tree with the given string map.
@@ -584,7 +584,7 @@ func (n *treeNode) Indent() int {
 func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.SetSelectedNode(n.uid)
 	if f := n.tree.OnNodeSelected; f != nil {
-		f(n.uid, n.content)
+		f(n.uid)
 	}
 }
 
