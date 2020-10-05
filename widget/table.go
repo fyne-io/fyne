@@ -21,7 +21,7 @@ type Table struct {
 	OnCellSelected func(row int, col int)
 
 	cells                       *tableCells
-	scroll                      *ScrollContainer
+	updateMarkers               func()
 	SelectedRow, SelectedColumn int
 }
 
@@ -46,11 +46,12 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	template := t.NewCell()
 	cellSize := template.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	t.cells = newTableCells(t, cellSize)
-	t.scroll = NewScrollContainer(t.cells)
+	scroll := NewScrollContainer(t.cells)
 
-	obj := []fyne.CanvasObject{marker1, marker2, t.scroll}
-	r := &tableRenderer{t: t, rowMarker: marker1, colMarker: marker2, objects: obj, cellSize: cellSize}
-	t.scroll.onOffsetChanged = r.moveOverlay
+	obj := []fyne.CanvasObject{marker1, marker2, scroll}
+	r := &tableRenderer{t: t, scroll: scroll, rowMarker: marker1, colMarker: marker2, objects: obj, cellSize: cellSize}
+	t.updateMarkers = r.moveOverlay
+	scroll.onOffsetChanged = r.moveOverlay
 
 	r.Layout(t.Size())
 	return r
@@ -59,6 +60,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 type tableRenderer struct {
 	t *Table
 
+	scroll               *ScrollContainer
 	rowMarker, colMarker *canvas.Rectangle
 	dividers             []fyne.CanvasObject
 
@@ -70,7 +72,7 @@ func (t *tableRenderer) moveOverlay() {
 	if t.t.SelectedColumn == -1 {
 		t.colMarker.Hide()
 	} else {
-		offX := t.t.SelectedColumn*(t.cellSize.Width+1) - t.t.scroll.Offset.X
+		offX := t.t.SelectedColumn*(t.cellSize.Width+1) - t.scroll.Offset.X
 		x1 := theme.Padding() + offX
 		x2 := x1 + t.cellSize.Width
 		if x2 < theme.Padding() || x1 > t.t.size.Width {
@@ -88,7 +90,7 @@ func (t *tableRenderer) moveOverlay() {
 	if t.t.SelectedRow == -1 {
 		t.colMarker.Hide()
 	} else {
-		offY := t.t.SelectedRow*(t.cellSize.Height+1) - t.t.scroll.Offset.Y
+		offY := t.t.SelectedRow*(t.cellSize.Height+1) - t.scroll.Offset.Y
 		y1 := theme.Padding() + offY
 		y2 := y1 + t.cellSize.Height
 		if y2 < theme.Padding() || y1 > t.t.size.Height {
@@ -111,33 +113,33 @@ func (t *tableRenderer) moveOverlay() {
 			t.dividers = append(t.dividers, canvas.NewRectangle(theme.ShadowColor()))
 		}
 
-		obj := []fyne.CanvasObject{t.t.scroll, t.colMarker, t.rowMarker}
+		obj := []fyne.CanvasObject{t.scroll, t.colMarker, t.rowMarker}
 		t.objects = append(obj, t.dividers...)
 	}
 
 	divs := 0
 	i := 0
 	rows, cols := t.t.DataSize()
-	for x := theme.Padding() + t.t.scroll.Offset.X - (t.t.scroll.Offset.X % (t.cellSize.Width + 1)) - 1; x < t.t.scroll.Offset.X+t.t.size.Width && i < cols-1; x += t.cellSize.Width + 1 {
-		if x <= theme.Padding()+t.t.scroll.Offset.X {
+	for x := theme.Padding() + t.scroll.Offset.X - (t.scroll.Offset.X % (t.cellSize.Width + 1)) - 1; x < t.scroll.Offset.X+t.t.size.Width && i < cols-1; x += t.cellSize.Width + 1 {
+		if x <= theme.Padding()+t.scroll.Offset.X {
 			continue
 		}
 		i++
 
-		t.dividers[divs].Move(fyne.NewPos(x-t.t.scroll.Offset.X, theme.Padding()))
+		t.dividers[divs].Move(fyne.NewPos(x-t.scroll.Offset.X, theme.Padding()))
 		t.dividers[divs].Resize(fyne.NewSize(1, t.t.size.Height-theme.Padding()*2))
 		t.dividers[divs].Show()
 		divs++
 	}
 
 	i = 0
-	for y := theme.Padding() + t.t.scroll.Offset.Y - (t.t.scroll.Offset.Y % (t.cellSize.Height + 1)) - 1; y < t.t.scroll.Offset.Y+t.t.size.Height && i < rows-1; y += t.cellSize.Height + 1 {
-		if y <= theme.Padding()+t.t.scroll.Offset.Y {
+	for y := theme.Padding() + t.scroll.Offset.Y - (t.scroll.Offset.Y % (t.cellSize.Height + 1)) - 1; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1; y += t.cellSize.Height + 1 {
+		if y <= theme.Padding()+t.scroll.Offset.Y {
 			continue
 		}
 		i++
 
-		t.dividers[divs].Move(fyne.NewPos(theme.Padding(), y-t.t.scroll.Offset.Y))
+		t.dividers[divs].Move(fyne.NewPos(theme.Padding(), y-t.scroll.Offset.Y))
 		t.dividers[divs].Resize(fyne.NewSize(t.t.size.Width-theme.Padding()*2, 1))
 		t.dividers[divs].Show()
 		divs++
@@ -151,8 +153,8 @@ func (t *tableRenderer) moveOverlay() {
 func (t *tableRenderer) Layout(s fyne.Size) {
 	t.moveOverlay()
 
-	t.t.scroll.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	t.t.scroll.Resize(s.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
+	t.scroll.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	t.scroll.Resize(s.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
 }
 
 func (t *tableRenderer) MinSize() fyne.Size {
@@ -218,8 +220,8 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 		c.t.OnCellSelected(c.t.SelectedRow, c.t.SelectedColumn)
 	}
 
-	if c.t.scroll != nil {
-		c.t.scroll.onOffsetChanged()
+	if c.t.updateMarkers != nil {
+		c.t.updateMarkers()
 	}
 }
 
