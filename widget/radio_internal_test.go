@@ -6,8 +6,10 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -50,7 +52,7 @@ func TestRadio_Selected(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, func(sel string) {
 		selected = sel
 	})
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "Hi", selected)
 }
@@ -61,7 +63,7 @@ func TestRadio_Unselected(t *testing.T) {
 		selected = sel
 	})
 	radio.Selected = selected
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "", selected)
 }
@@ -69,25 +71,25 @@ func TestRadio_Unselected(t *testing.T) {
 func TestRadio_DisableWhenSelected(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
 	radio.SetSelected("Hi")
-	render := test.WidgetRenderer(radio).(*radioRenderer)
-	resName := render.items[0].icon.Resource.Name()
+	render := test.WidgetRenderer(radio.items[0]).(*radioItemRenderer)
+	resName := render.icon.Resource.Name()
 
 	assert.Equal(t, resName, theme.RadioButtonCheckedIcon().Name())
 
 	radio.Disable()
-	resName = render.items[0].icon.Resource.Name()
+	resName = render.icon.Resource.Name()
 	assert.Equal(t, resName, fmt.Sprintf("disabled_%v", theme.RadioButtonCheckedIcon().Name()))
 }
 
 func TestRadio_DisableWhenNotSelected(t *testing.T) {
 	radio := NewRadio([]string{"Hi"}, nil)
-	render := test.WidgetRenderer(radio).(*radioRenderer)
-	resName := render.items[0].icon.Resource.Name()
+	render := test.WidgetRenderer(radio.items[0]).(*radioItemRenderer)
+	resName := render.icon.Resource.Name()
 
 	assert.Equal(t, resName, theme.RadioButtonIcon().Name())
 
 	radio.Disable()
-	resName = render.items[0].icon.Resource.Name()
+	resName = render.icon.Resource.Name()
 	assert.Equal(t, resName, fmt.Sprintf("disabled_%v", theme.RadioButtonIcon().Name()))
 }
 
@@ -96,33 +98,9 @@ func TestRadio_SelectedOther(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Hi2"}, func(sel string) {
 		selected = sel
 	})
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())})
+	radio.items[1].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())})
 
 	assert.Equal(t, "Hi2", selected)
-}
-
-func TestRadio_SelectedHorizontal(t *testing.T) {
-	selected := "Hi"
-	radio := NewRadio([]string{"Hi", "Hi2"}, func(sel string) {
-		selected = sel
-	})
-	radio.Horizontal = true
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(radio.MinSize().Width-theme.Padding(), theme.Padding())})
-
-	assert.Equal(t, "Hi2", selected)
-}
-
-func TestRadio_SelectedNone(t *testing.T) {
-	selected := ""
-	radio := NewRadio([]string{"Hi"}, func(sel string) {
-		selected = sel
-	})
-
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, -2)})
-	assert.Equal(t, "", selected)
-
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(0, radio.size.Height-2)})
-	assert.Equal(t, "", selected)
 }
 
 func TestRadio_Append(t *testing.T) {
@@ -209,7 +187,7 @@ func TestRadio_Disable(t *testing.T) {
 	})
 
 	radio.Disable()
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "", selected, "Radio should have been disabled.")
 }
@@ -221,11 +199,11 @@ func TestRadio_Enable(t *testing.T) {
 	})
 
 	radio.Disable()
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 	assert.Equal(t, "", selected, "Radio should have been disabled.")
 
 	radio.Enable()
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 	assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
 }
 
@@ -261,89 +239,35 @@ func TestRadio_Hovered(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			radio := NewRadio(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
-			render := test.WidgetRenderer(radio).(*radioRenderer)
+			item1 := radio.items[0]
+			render1 := cache.Renderer(item1).(*radioItemRenderer)
+			render2 := cache.Renderer(radio.items[1]).(*radioItemRenderer)
 
-			assert.Equal(t, false, radio.hovered)
-			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+			assert.False(t, item1.hovered)
+			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 
 			radio.SetSelected("Hi")
-			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 
 			radio.SetSelected("Another")
-			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 
-			radio.MouseIn(&desktop.MouseEvent{
+			item1.MouseIn(&desktop.MouseEvent{
 				PointEvent: fyne.PointEvent{
 					Position: fyne.NewPos(theme.Padding(), theme.Padding()),
 				},
 			})
-			assert.Equal(t, 0, radio.hoveredItemIndex)
-			assert.Equal(t, theme.HoverColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+			assert.True(t, item1.hovered)
+			assert.Equal(t, theme.HoverColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 
-			var mouseMove fyne.Position
-			if tt.isHorizontal {
-				mouseMove = fyne.NewPos(radio.MinSize().Width-theme.Padding(), theme.Padding())
-			} else {
-				mouseMove = fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())
-			}
-
-			radio.MouseMoved(&desktop.MouseEvent{
-				PointEvent: fyne.PointEvent{
-					Position: mouseMove,
-				},
-			})
-			assert.Equal(t, 1, radio.hoveredItemIndex)
-			assert.Equal(t, true, radio.hovered)
-			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.HoverColor(), render.items[1].focusIndicator.FillColor)
-		})
-	}
-}
-
-func TestRadio_FocusIndicator_Centered_Vertically(t *testing.T) {
-	focusIndicatorSize := theme.IconInlineSize() + theme.Padding()*2
-
-	tests := []struct {
-		name         string
-		options      []string
-		isHorizontal bool
-	}{
-		{
-			name:         "Horizontal",
-			options:      []string{"Hi", "Another"},
-			isHorizontal: true,
-		},
-		{
-			name:         "Vertical",
-			options:      []string{"Hi", "Another"},
-			isHorizontal: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			radio := NewRadio(tt.options, nil)
-			radio.Horizontal = tt.isHorizontal
-			render := test.WidgetRenderer(radio).(*radioRenderer)
-			render.Layout(radio.MinSize())
-
-			heightCenterOffset := (radio.itemHeight() - focusIndicatorSize) / 2
-
-			for i, item := range render.items {
-				x, y := 0, heightCenterOffset
-
-				if tt.isHorizontal {
-					x = i * radio.itemWidth()
-				} else {
-					y = i*radio.itemHeight() + heightCenterOffset
-				}
-
-				assert.Equal(t, fyne.NewPos(x, y), item.focusIndicator.Position1)
-			}
+			item1.MouseOut()
+			assert.False(t, item1.hovered)
+			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 		})
 	}
 }
@@ -369,22 +293,21 @@ func TestRadio_Required(t *testing.T) {
 	radio.Resize(radio.MinSize())
 	radio.SetSelected("Hi")
 	require.Equal(t, "Hi", radio.Selected)
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 	assert.Equal(t, "Hi", radio.Selected, "tapping selected option of required radio does nothing")
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.Size().Height-theme.Padding())})
+	radio.items[1].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), radio.Size().Height-theme.Padding())})
 	assert.Equal(t, "There", radio.Selected)
 }
 
 func TestRadioRenderer_ApplyTheme(t *testing.T) {
 	radio := NewRadio([]string{"Test"}, func(string) {})
-	render := test.WidgetRenderer(radio).(*radioRenderer)
+	render := cache.Renderer(radio.items[0]).(*radioItemRenderer)
 
-	item := render.items[0]
-	textSize := item.label.TextSize
+	textSize := render.label.TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
-		customTextSize = item.label.TextSize
+		render.Refresh()
+		customTextSize = render.label.TextSize
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)
