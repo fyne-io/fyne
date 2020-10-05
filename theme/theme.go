@@ -10,16 +10,20 @@ import (
 )
 
 const (
-	// ColorBlue is the blue primary color name
-	ColorBlue = "blue"
-	// ColorGreen is the green primary color name
-	ColorGreen = "green"
-	// ColorYellow is the yellow primary color name
-	ColorYellow = "yellow"
-	// ColorOrange is the orange primary color name
-	ColorOrange = "orange"
 	// ColorRed is the red primary color name
 	ColorRed = "red"
+	// ColorOrange is the orange primary color name
+	ColorOrange = "orange"
+	// ColorYellow is the yellow primary color name
+	ColorYellow = "yellow"
+	// ColorGreen is the green primary color name
+	ColorGreen = "green"
+	// ColorBlue is the blue primary color name
+	ColorBlue = "blue"
+	// ColorPurple is the purple primary color name
+	ColorPurple = "purple"
+	// ColorBrown is the brown primary color name
+	ColorBrown = "brown"
 	// ColorGray is the gray primary color name
 	ColorGray = "gray"
 )
@@ -33,11 +37,13 @@ type builtinTheme struct {
 
 var (
 	primaryColors = map[string]color.Color{
-		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
-		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
-		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
-		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
 		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
+		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
+		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
+		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
+		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
+		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff},
+		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff},
 		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
 	}
 
@@ -400,7 +406,7 @@ func DefaultTextMonospaceFont() fyne.Resource {
 
 // PrimaryColorNames returns a list of the standard primary color options.
 func PrimaryColorNames() []string {
-	return []string{ColorBlue, ColorGreen, ColorYellow, ColorOrange, ColorRed, ColorGray}
+	return []string{ColorRed, ColorOrange, ColorYellow, ColorGreen, ColorBlue, ColorPurple, ColorBrown, ColorGray}
 }
 
 // PrimaryColorNamed returns a theme specific color value for a named primary color.

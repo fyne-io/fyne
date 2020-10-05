@@ -23,19 +23,6 @@ const (
 	systemThemeName = "system default"
 )
 
-var (
-	colorNames = []string{theme.ColorBlue, theme.ColorGreen, theme.ColorYellow,
-		theme.ColorOrange, theme.ColorRed, theme.ColorGray}
-	colorValues = map[string]color.Color{
-		theme.ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
-		theme.ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
-		theme.ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
-		theme.ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
-		theme.ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
-		theme.ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
-	}
-)
-
 // Settings gives access to user interfaces to control Fyne settings
 type Settings struct {
 	fyneSettings app.SettingsSchema
@@ -83,7 +70,7 @@ func (s *Settings) LoadAppearanceScreen(w fyne.Window) fyne.CanvasObject {
 		b := newColorButton(c, theme.PrimaryColorNamed(c), s)
 		s.colors = append(s.colors, b)
 	}
-	swatch := fyne.NewContainerWithLayout(layout.NewGridLayout(6), s.colors...)
+	swatch := fyne.NewContainerWithLayout(layout.NewGridLayout(len(s.colors)), s.colors...)
 
 	scale.Append(widget.NewGroup("Main Color", swatch))
 	scale.Append(widget.NewGroup("Theme", themes))
