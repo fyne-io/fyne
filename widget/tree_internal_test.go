@@ -1,17 +1,12 @@
 package widget
 
 import (
-	//"io/ioutil"
-	//"os"
-	//"path"
-	//"path/filepath"
 	"testing"
 	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
-	//"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -127,6 +122,11 @@ func TestTree(t *testing.T) {
 	/* TODO Not currently possible as testDriver doesn't support listable URIs:
 	2020/08/31 16:49:18 Fyne error:  Unable to get lister for /var/folders/8n/1dd15fbn79s2w3l4x43v5c7w0000gn/T/test011812343
 	2020/08/31 16:49:18   Cause: test driver does support creating listable URIs yet
+	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
+	"fyne.io/fyne/storage"
 	t.Run("NewTreeWithFiles", func(t *testing.T) {
 		tempDir, err := ioutil.TempDir("", "test")
 		assert.NoError(t, err)
