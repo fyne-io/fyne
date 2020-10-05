@@ -20,9 +20,9 @@ type Table struct {
 	UpdateCell     func(row int, col int, template fyne.CanvasObject)
 	OnCellSelected func(row int, col int)
 
-	cells                       *tableCells
-	updateMarkers               func()
 	SelectedRow, SelectedColumn int
+	cells                       *tableCells
+	moveCallback                func()
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
@@ -50,8 +50,8 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	obj := []fyne.CanvasObject{marker1, marker2, scroll}
 	r := &tableRenderer{t: t, scroll: scroll, rowMarker: marker1, colMarker: marker2, objects: obj, cellSize: cellSize}
-	t.updateMarkers = r.moveOverlay
-	scroll.onOffsetChanged = r.moveOverlay
+	t.moveCallback = r.moveIndicators
+	scroll.onOffsetChanged = r.moveIndicators
 
 	r.Layout(t.Size())
 	return r
@@ -68,7 +68,7 @@ type tableRenderer struct {
 	cellSize fyne.Size
 }
 
-func (t *tableRenderer) moveOverlay() {
+func (t *tableRenderer) moveIndicators() {
 	if t.t.SelectedColumn == -1 {
 		t.colMarker.Hide()
 	} else {
@@ -151,7 +151,7 @@ func (t *tableRenderer) moveOverlay() {
 }
 
 func (t *tableRenderer) Layout(s fyne.Size) {
-	t.moveOverlay()
+	t.moveIndicators()
 
 	t.scroll.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	t.scroll.Resize(s.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
@@ -164,7 +164,7 @@ func (t *tableRenderer) MinSize() fyne.Size {
 func (t *tableRenderer) Refresh() {
 	template := t.t.NewCell()
 	t.cellSize = template.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-	t.moveOverlay()
+	t.moveIndicators()
 
 	t.colMarker.FillColor = theme.PrimaryColor()
 	t.colMarker.Refresh()
@@ -220,8 +220,8 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 		c.t.OnCellSelected(c.t.SelectedRow, c.t.SelectedColumn)
 	}
 
-	if c.t.updateMarkers != nil {
-		c.t.updateMarkers()
+	if c.t.moveCallback != nil {
+		c.t.moveCallback()
 	}
 }
 
@@ -269,10 +269,10 @@ func (r *tableCellsRenderer) Objects() []fyne.CanvasObject {
 }
 
 func (r *tableCellsRenderer) Destroy() {
-	r.clearPool()
+	// pool cannot be cleared, GC should tidy it up
 }
 
-func (r *tableCellsRenderer) clearPool() {
+func (r *tableCellsRenderer) returnAllToPool() {
 	for _, cell := range r.objects {
 		r.pool.Release(cell)
 	}
@@ -280,7 +280,7 @@ func (r *tableCellsRenderer) clearPool() {
 }
 
 func (r *tableCellsRenderer) ensureCells() {
-	r.clearPool()
+	r.returnAllToPool()
 
 	rows, cols := r.cells.t.DataSize()
 	var cells []fyne.CanvasObject
