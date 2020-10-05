@@ -9,19 +9,28 @@ package fyne
 // Resize(Size) or Move(Position).
 type CanvasObject interface {
 	// geometry
-	Size() Size
-	Resize(Size)
-	Position() Position
-	Move(Position)
+
+	// MinSize returns the minimum size this object needs to be drawn.
 	MinSize() Size
+	// Move moves this object to the given position relative to its parent.
+	Move(Position)
+	// Position returns the current position of the object relative to its parent.
+	Position() Position
+	// Resize resizes this object to the given size.
+	Resize(Size)
+	// Size returns the current size of this object.
+	Size() Size
 
 	// visibility
+
+	// Hide hides this object.
+	Hide()
+	// Visible returns whether this object is visible or not.
 	Visible() bool
 	// Show shows this object.
 	Show()
-	// Hide hides this object.
-	Hide()
 
+	// Refresh must be called if this object should be redrawn because its inner state changed.
 	Refresh()
 }
 
