@@ -15,6 +15,7 @@ import "C"
 import (
 	"errors"
 	"io"
+	"os"
 	"unsafe"
 
 	"github.com/fyne-io/mobile/app"
@@ -64,8 +65,12 @@ func openStream(uri string) unsafe.Pointer {
 
 	var stream unsafe.Pointer
 	app.RunOnJVM(func(_, env, ctx uintptr) error {
-		stream = unsafe.Pointer(C.openStream(C.uintptr_t(env), C.uintptr_t(ctx), uriStr))
+		streamPtr := C.openStream(C.uintptr_t(env), C.uintptr_t(ctx), uriStr)
+		if streamPtr == C.NULL {
+			return os.ErrNotExist
+		}
 
+		stream = unsafe.Pointer(streamPtr)
 		return nil
 	})
 	return stream
