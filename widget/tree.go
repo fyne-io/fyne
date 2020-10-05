@@ -2,7 +2,6 @@ package widget
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 
 	"fyne.io/fyne"
@@ -117,7 +116,7 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 		if t.Root == uid {
 			l.SetText(uid)
 		} else {
-			l.SetText(filepath.Base(uid))
+			l.SetText(storage.NewURI(uid).Name())
 		}
 	}
 	t.ExtendBaseWidget(t)
