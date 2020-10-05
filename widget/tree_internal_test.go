@@ -389,11 +389,7 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 		a := getBranch(t, tree, "A")
 		ar := test.WidgetRenderer(a).(*treeNodeRenderer)
 		a.MouseIn(&desktop.MouseEvent{})
-		/* TODO FIXME removed for now
-		assert.Equal(t, theme.HoverColor(), ar.BackgroundColor())
-		replaced with:*/
 		assert.Equal(t, theme.HoverColor(), ar.indicator.FillColor)
-		/* EMXIF ODOT */
 		a.MouseOut()
 		assert.Equal(t, theme.BackgroundColor(), ar.BackgroundColor())
 	})
@@ -401,11 +397,7 @@ func TestTreeNodeRenderer_BackgroundColor_Hovered(t *testing.T) {
 		b := getLeaf(t, tree, "B")
 		br := test.WidgetRenderer(b).(*treeNodeRenderer)
 		b.MouseIn(&desktop.MouseEvent{})
-		/* TODO FIXME removed for now
-		assert.Equal(t, theme.HoverColor(), br.BackgroundColor())
-		replaced with:*/
 		assert.Equal(t, theme.HoverColor(), br.indicator.FillColor)
-		/* EMXIF ODOT */
 		b.MouseOut()
 		assert.Equal(t, theme.BackgroundColor(), br.BackgroundColor())
 	})

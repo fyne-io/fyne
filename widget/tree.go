@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"image/color"
 	"os"
 	"path/filepath"
 	"strings"
@@ -65,7 +64,6 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 }
 
 // NewTreeWithFiles creates a new tree with the given file system URI.
-// TODO contents of a directory are sorted with the given sorter
 func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 	t = &Tree{
 		Root: root.String(),
@@ -78,7 +76,6 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 				if err != nil {
 					fyne.LogError("Unable to list "+luri.String(), err)
 				} else {
-					// TODO sort.Slice(uris, sorter)
 					for _, u := range uris {
 						c = append(c, u.String())
 					}
@@ -114,24 +111,6 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 		} else {
 			// Set file icon
 			r = theme.FileIcon()
-
-			/* TODO Copied from dialog/fileicon.go - perhaps this should be a utility?
-			var res fyne.Resource
-			switch strings.Split(mime.TypeByExtension(filepath.Extension(uid)), "/")[0] {
-			case "application":
-				res = theme.FileApplicationIcon()
-			case "audio":
-				res = theme.FileAudioIcon()
-			case "image":
-				res = theme.FileImageIcon()
-			case "text":
-				res = theme.FileTextIcon()
-			case "video":
-				res = theme.FileVideoIcon()
-			default:
-				res = theme.FileIcon()
-			}
-			*/
 		}
 		i.SetResource(r)
 		l := c.Objects[1].(*Label)
@@ -624,15 +603,6 @@ type treeNodeRenderer struct {
 	widget.BaseRenderer
 	treeNode  *treeNode
 	indicator *canvas.Rectangle
-}
-
-func (r *treeNodeRenderer) BackgroundColor() color.Color {
-	/* TODO FIXME removed until transparent BG becomes the default
-	if r.treeNode.hovered {
-		return theme.HoverColor()
-	}
-	*/
-	return theme.BackgroundColor()
 }
 
 func (r *treeNodeRenderer) MinSize() (min fyne.Size) {

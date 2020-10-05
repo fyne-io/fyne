@@ -187,8 +187,7 @@ func TestTree_Layout(t *testing.T) {
 	for name, tt := range map[string]struct {
 		items    [][]string
 		selected string
-		// TODO hovered  string
-		opened []string
+		opened   []string
 	}{
 		"single_leaf": {
 			items: [][]string{
@@ -197,16 +196,6 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 		},
-		/*
-			"single_leaf_hovered": {
-				items: [][]string{
-					[]string{
-						"11111",
-					},
-				},
-				hovered: "11111",
-			},
-		*/
 		"single_leaf_selected": {
 			items: [][]string{
 				[]string{
@@ -222,16 +211,6 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 		},
-		/*
-			"single_branch_hovered": {
-				items: [][]string{
-					[]string{
-						"A", "11111",
-					},
-				},
-				hovered: "A",
-			},
-		*/
 		"single_branch_selected": {
 			items: [][]string{
 				[]string{
@@ -257,17 +236,6 @@ func TestTree_Layout(t *testing.T) {
 			opened:   []string{"A"},
 			selected: "A",
 		},
-		/*
-			"single_branch_opened_hovered": {
-				items: [][]string{
-					[]string{
-						"A", "11111",
-					},
-				},
-				opened:  []string{"A"},
-				hovered: "A",
-			},
-		*/
 		"single_branch_opened_leaf_selected": {
 			items: [][]string{
 				[]string{
@@ -277,17 +245,6 @@ func TestTree_Layout(t *testing.T) {
 			opened:   []string{"A"},
 			selected: "11111",
 		},
-		/*
-			"single_branch_opened_leaf_hovered": {
-				items: [][]string{
-					[]string{
-						"A", "11111",
-					},
-				},
-				opened:  []string{"A"},
-				hovered: "11111",
-			},
-		*/
 		"multiple": {
 			items: [][]string{
 				[]string{
@@ -301,22 +258,6 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 		},
-		/*
-			"multiple_hovered": {
-				items: [][]string{
-					[]string{
-						"A", "11111",
-					},
-					[]string{
-						"B", "2222222222",
-					},
-					[]string{
-						"44444444444444444444",
-					},
-				},
-				hovered: "44444444444444444444",
-			},
-		*/
 		"multiple_selected": {
 			items: [][]string{
 				[]string{
@@ -347,25 +288,6 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 		},
-		/*
-			"multiple_leaf_hovered": {
-				items: [][]string{
-					[]string{
-						"11111",
-					},
-					[]string{
-						"2222222222",
-					},
-					[]string{
-						"333333333333333",
-					},
-					[]string{
-						"44444444444444444444",
-					},
-				},
-				hovered: "2222222222",
-			},
-		*/
 		"multiple_leaf_selected": {
 			items: [][]string{
 				[]string{
@@ -396,22 +318,6 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 		},
-		/*
-			"multiple_branch_hovered": {
-				items: [][]string{
-					[]string{
-						"A", "11111",
-					},
-					[]string{
-						"B", "2222222222",
-					},
-					[]string{
-						"B", "C", "333333333333333",
-					},
-				},
-				hovered: "B",
-			},
-		*/
 		"multiple_branch_selected": {
 			items: [][]string{
 				[]string{
@@ -455,23 +361,6 @@ func TestTree_Layout(t *testing.T) {
 			opened:   []string{"A", "B", "C"},
 			selected: "B",
 		},
-		/*
-			"multiple_branch_opened_hovered": {
-				items: [][]string{
-					[]string{
-						"A", "11111",
-					},
-					[]string{
-						"B", "2222222222",
-					},
-					[]string{
-						"B", "C", "333333333333333",
-					},
-				},
-				opened:  []string{"A", "B", "C"},
-				hovered: "B",
-			},
-		*/
 		"multiple_branch_opened_leaf_selected": {
 			items: [][]string{
 				[]string{
@@ -487,23 +376,6 @@ func TestTree_Layout(t *testing.T) {
 			opened:   []string{"A", "B", "C"},
 			selected: "2222222222",
 		},
-		/*
-			"multiple_branch_opened_leaf_hovered": {
-				items: [][]string{
-					[]string{
-						"A", "11111",
-					},
-					[]string{
-						"B", "2222222222",
-					},
-					[]string{
-						"B", "C", "333333333333333",
-					},
-				},
-				opened:  []string{"A", "B", "C"},
-				hovered: "2222222222",
-			},
-		*/
 	} {
 		t.Run(name, func(t *testing.T) {
 			data := make(map[string][]string)
@@ -515,8 +387,6 @@ func TestTree_Layout(t *testing.T) {
 				tree.OpenBranch(o)
 			}
 			tree.SetSelectedNode(tt.selected)
-
-			// TODO tree.Hovered = tt.hovered
 
 			window := test.NewWindow(tree)
 			defer window.Close()
