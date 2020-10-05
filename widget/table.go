@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+const tableDividerThickness = 1
+
 // Table widget is a grid of items that can be scrolled and a cell selected.
 // It's performance is provided by caching cell templates created with NewCell and re-using them with UpdateCell.
 // The size of the content rows/columns is returned by the DataSize callback.
@@ -72,7 +74,7 @@ func (t *tableRenderer) moveIndicators() {
 	if t.t.SelectedColumn == -1 {
 		t.colMarker.Hide()
 	} else {
-		offX := t.t.SelectedColumn*(t.cellSize.Width+1) - t.scroll.Offset.X
+		offX := t.t.SelectedColumn*(t.cellSize.Width+tableDividerThickness) - t.scroll.Offset.X
 		x1 := theme.Padding() + offX
 		x2 := x1 + t.cellSize.Width
 		if x2 < theme.Padding() || x1 > t.t.size.Width {
@@ -90,7 +92,7 @@ func (t *tableRenderer) moveIndicators() {
 	if t.t.SelectedRow == -1 {
 		t.colMarker.Hide()
 	} else {
-		offY := t.t.SelectedRow*(t.cellSize.Height+1) - t.scroll.Offset.Y
+		offY := t.t.SelectedRow*(t.cellSize.Height+tableDividerThickness) - t.scroll.Offset.Y
 		y1 := theme.Padding() + offY
 		y2 := y1 + t.cellSize.Height
 		if y2 < theme.Padding() || y1 > t.t.size.Height {
@@ -105,8 +107,8 @@ func (t *tableRenderer) moveIndicators() {
 	}
 	t.rowMarker.Refresh()
 
-	colDivs := int(math.Ceil(float64(t.t.size.Width+1) / float64(t.cellSize.Width+1)))   // +1 for div width
-	rowDivs := int(math.Ceil(float64(t.t.size.Height+1) / float64(t.cellSize.Height+1))) // +1 for div width
+	colDivs := int(math.Ceil(float64(t.t.size.Width+tableDividerThickness) / float64(t.cellSize.Width+1)))
+	rowDivs := int(math.Ceil(float64(t.t.size.Height+tableDividerThickness) / float64(t.cellSize.Height+1)))
 
 	if len(t.dividers) < colDivs+rowDivs {
 		for i := len(t.dividers); i < colDivs+rowDivs; i++ {
@@ -120,27 +122,27 @@ func (t *tableRenderer) moveIndicators() {
 	divs := 0
 	i := 0
 	rows, cols := t.t.DataSize()
-	for x := theme.Padding() + t.scroll.Offset.X - (t.scroll.Offset.X % (t.cellSize.Width + 1)) - 1; x < t.scroll.Offset.X+t.t.size.Width && i < cols-1; x += t.cellSize.Width + 1 {
+	for x := theme.Padding() + t.scroll.Offset.X - (t.scroll.Offset.X % (t.cellSize.Width + tableDividerThickness)) - tableDividerThickness; x < t.scroll.Offset.X+t.t.size.Width && i < cols-1; x += t.cellSize.Width + tableDividerThickness {
 		if x <= theme.Padding()+t.scroll.Offset.X {
 			continue
 		}
 		i++
 
 		t.dividers[divs].Move(fyne.NewPos(x-t.scroll.Offset.X, theme.Padding()))
-		t.dividers[divs].Resize(fyne.NewSize(1, t.t.size.Height-theme.Padding()*2))
+		t.dividers[divs].Resize(fyne.NewSize(tableDividerThickness, t.t.size.Height-theme.Padding()*2))
 		t.dividers[divs].Show()
 		divs++
 	}
 
 	i = 0
-	for y := theme.Padding() + t.scroll.Offset.Y - (t.scroll.Offset.Y % (t.cellSize.Height + 1)) - 1; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1; y += t.cellSize.Height + 1 {
+	for y := theme.Padding() + t.scroll.Offset.Y - (t.scroll.Offset.Y % (t.cellSize.Height + tableDividerThickness)) - tableDividerThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1; y += t.cellSize.Height + tableDividerThickness {
 		if y <= theme.Padding()+t.scroll.Offset.Y {
 			continue
 		}
 		i++
 
 		t.dividers[divs].Move(fyne.NewPos(theme.Padding(), y-t.scroll.Offset.Y))
-		t.dividers[divs].Resize(fyne.NewSize(t.t.size.Width-theme.Padding()*2, 1))
+		t.dividers[divs].Resize(fyne.NewSize(t.t.size.Width-theme.Padding()*2, tableDividerThickness))
 		t.dividers[divs].Show()
 		divs++
 	}
@@ -213,8 +215,8 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 		return
 	}
 
-	c.t.SelectedColumn = e.Position.X / (c.cellSize.Width + 1)
-	c.t.SelectedRow = e.Position.Y / (c.cellSize.Height + 1)
+	c.t.SelectedColumn = e.Position.X / (c.cellSize.Width + tableDividerThickness)
+	c.t.SelectedRow = e.Position.Y / (c.cellSize.Height + tableDividerThickness)
 
 	if c.t.OnCellSelected != nil {
 		c.t.OnCellSelected(c.t.SelectedRow, c.t.SelectedColumn)
@@ -242,7 +244,8 @@ func (r *tableCellsRenderer) Layout(s fyne.Size) {
 	for y := 0; y < rows; y++ {
 		for x := 0; x < cols; x++ {
 			c := r.objects[i]
-			c.Move(fyne.NewPos(theme.Padding()+x*r.cells.cellSize.Width+(x-1), theme.Padding()+y*r.cells.cellSize.Height+(y-1)))
+			c.Move(fyne.NewPos(theme.Padding()+x*r.cells.cellSize.Width+(x-1)*tableDividerThickness,
+				theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
 			c.Resize(r.cells.cellSize)
 			i++
 		}
