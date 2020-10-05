@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"net/url"
 	"os"
-	"path/filepath"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
@@ -172,7 +171,10 @@ func makeTreeTab() fyne.CanvasObject {
 	l.OpenBranch("L")
 	l.OpenBranch("M")
 
-	dir := filepath.Join(os.Getenv("GOPATH"), "src", "fyne.io", "fyne")
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		fyne.LogError("Could not get user home dir", err)
+	}
 	r := widget.NewTreeWithFiles(storage.NewURI("file://" + dir))
 	r.OnNodeSelected = func(id string) {
 		fmt.Println("RightTreeNodeSelected:", id)
