@@ -11,12 +11,17 @@ import (
 )
 
 // ScrollDirection represents the directions in which a ScrollContainer can scroll its child content.
+//
+// Deprecated: use container.ScrollDirection instead.
 type ScrollDirection int
 
 // Constants for valid values of ScrollDirection.
 const (
+	// Deprecated: use container.ScrollBoth instead
 	ScrollBoth ScrollDirection = iota
+	// Deprecated: use container.ScrollHorizontalOnly instead
 	ScrollHorizontalOnly
+	// Deprecated: use container.ScrollVerticalOnly instead
 	ScrollVerticalOnly
 )
 
@@ -274,6 +279,10 @@ func (r *scrollContainerRenderer) MinSize() fyne.Size {
 }
 
 func (r *scrollContainerRenderer) Refresh() {
+	if len(r.BaseRenderer.Objects()) == 0 || r.BaseRenderer.Objects()[0] != r.scroll.Content {
+		// push updated content object to baseRenderer
+		r.BaseRenderer.SetObjects([]fyne.CanvasObject{r.scroll.Content})
+	}
 	if r.oldMinSize == r.scroll.Content.MinSize() && r.scroll.Content.Size() == r.oldMinSize {
 		r.layoutBars(r.scroll.Size())
 		return
@@ -334,6 +343,8 @@ func (r *scrollContainerRenderer) updatePosition() {
 
 // ScrollContainer defines a container that is smaller than the Content.
 // The Offset is used to determine the position of the child widgets within the container.
+//
+// Deprecated: use container.Scroll instead.
 type ScrollContainer struct {
 	BaseWidget
 	minSize         fyne.Size
@@ -470,18 +481,24 @@ func computeOffset(start, delta, outerWidth, innerWidth int) int {
 
 // NewScrollContainer creates a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize to be smaller than that of the passed object.
+//
+// Deprecated: use container.NewScroll instead.
 func NewScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollBoth, content)
 }
 
 // NewHScrollContainer create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Width to be smaller than that of the passed object.
+//
+// Deprecated: use container.NewHScroll instead.
 func NewHScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollHorizontalOnly, content)
 }
 
 // NewVScrollContainer create a scrollable parent wrapping the specified content.
 // Note that this may cause the MinSize.Height to be smaller than that of the passed object.
+//
+// Deprecated: use container.NewVScroll instead.
 func NewVScrollContainer(content fyne.CanvasObject) *ScrollContainer {
 	return newScrollContainerWithDirection(ScrollVerticalOnly, content)
 }

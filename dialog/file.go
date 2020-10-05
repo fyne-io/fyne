@@ -41,6 +41,7 @@ type FileDialog struct {
 	parent           fyne.Window
 	dialog           *fileDialog
 	dismissText      string
+	desiredSize      *fyne.Size
 }
 
 // Declare conformity to Dialog interface
@@ -312,10 +313,18 @@ func (f *FileDialog) Show() {
 		return
 	}
 	f.dialog = showFile(f)
+	if f.desiredSize != nil {
+		f.Resize(*f.desiredSize)
+		f.desiredSize = nil
+	}
 }
 
 // Resize dialog, call this function after dialog show
 func (f *FileDialog) Resize(size fyne.Size) {
+	if f.dialog == nil {
+		f.desiredSize = &size
+		return
+	}
 	maxSize := f.dialog.win.Size()
 	minSize := f.dialog.win.MinSize()
 	newWidth := size.Width
