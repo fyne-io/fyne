@@ -170,7 +170,7 @@ func (t *Tree) ToggleBranch(uid string) {
 // OpenAllBranches opens all branches in the tree.
 func (t *Tree) OpenAllBranches() {
 	t.ensureOpenMap()
-	t.Walk(func(uid string, branch bool, depth int) {
+	t.walkAll(func(uid string, branch bool, depth int) {
 		if branch {
 			t.propertyLock.Lock()
 			t.open[uid] = true
@@ -200,8 +200,8 @@ func (t *Tree) MinSize() fyne.Size {
 	return t.BaseWidget.MinSize()
 }
 
-// Walk visits every open node of the tree and calls the given callback with node Unique ID, whether node is branch, and the depth of node.
-func (t *Tree) Walk(onNode func(string, bool, int)) {
+// walkAll visits every open node of the tree and calls the given callback with node Unique ID, whether node is branch, and the depth of node.
+func (t *Tree) walkAll(onNode func(string, bool, int)) {
 	t.walk(t.Root, 0, onNode)
 }
 
@@ -335,7 +335,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
 
-	r.treeContent.tree.Walk(func(uid string, isBranch bool, depth int) {
+	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
 		// Root node is not rendered unless it has been customized
 		if r.treeContent.tree.Root == "" {
 			depth = depth - 1
@@ -373,8 +373,8 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	width := fyne.Max(size.Width, viewport.Width)
 	y := 0
 	numDividers := 0
-	// Walk open branches and obtain nodes to render in scroller's viewport
-	r.treeContent.tree.Walk(func(uid string, isBranch bool, depth int) {
+	// walkAll open branches and obtain nodes to render in scroller's viewport
+	r.treeContent.tree.walkAll(func(uid string, isBranch bool, depth int) {
 		// Root node is not rendered unless it has been customized
 		if r.treeContent.tree.Root == "" {
 			depth = depth - 1
