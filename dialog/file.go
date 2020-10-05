@@ -319,6 +319,10 @@ func (f *FileDialog) Show() {
 	}
 }
 
+func (f *FileDialog) Refresh() {
+	f.dialog.win.Refresh()
+}
+
 // Resize dialog, call this function after dialog show
 func (f *FileDialog) Resize(size fyne.Size) {
 	if f.dialog == nil {

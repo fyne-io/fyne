@@ -172,7 +172,7 @@ func loadDialogGroup(win fyne.Window) *widget.Card {
 			}, win)
 		}),
 		widget.NewButton("Simple Color Picker", func() {
-			picker := dialog.NewSimpleColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
+			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
 				colorPicked(c, win)
 			}, win)
 			picker.Show()
@@ -181,6 +181,8 @@ func loadDialogGroup(win fyne.Window) *widget.Card {
 			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
 				colorPicked(c, win)
 			}, win)
+			picker.Advanced = true
+			picker.Refresh()
 			picker.Show()
 		}),
 		widget.NewButton("Custom Dialog (Login Form)", func() {

@@ -21,6 +21,8 @@ func TestColorDialog_Theme(t *testing.T) {
 	w.Resize(fyne.NewSize(800, 600))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
+	d.Advanced = true
+	d.Refresh()
 	d.Show()
 
 	test.AssertImageMatches(t, "color/dialog_theme_light.png", w.Canvas().Capture())
@@ -51,6 +53,8 @@ func TestColorDialog_Recents(t *testing.T) {
 	w.Resize(fyne.NewSize(600, 400))
 
 	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
+	d.Advanced = true
+	d.Refresh()
 	d.Show()
 
 	test.AssertImageMatches(t, "color/dialog_recents_theme_light.png", w.Canvas().Capture())
@@ -69,7 +73,7 @@ func TestColorDialogSimple_Theme(t *testing.T) {
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(600, 400))
 
-	d := NewSimpleColorPicker("Color Picker", "Pick a Color", nil, w)
+	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
 
 	test.AssertImageMatches(t, "color/dialog_simple_theme_light.png", w.Canvas().Capture())
@@ -91,7 +95,7 @@ func TestColorDialogSimple_Recents(t *testing.T) {
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(600, 400))
 
-	d := NewSimpleColorPicker("Color Picker", "Pick a Color", nil, w)
+	d := NewColorPicker("Color Picker", "Pick a Color", nil, w)
 	d.Show()
 
 	test.AssertImageMatches(t, "color/dialog_simple_recents_theme_light.png", w.Canvas().Capture())

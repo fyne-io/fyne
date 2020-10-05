@@ -16,6 +16,7 @@ import (
 // ColorPickerDialog is a simple dialog window that displays a color picker.
 type ColorPickerDialog struct {
 	*dialog
+	Advanced bool
 	color    color.Color
 	callback func(c color.Color)
 	advanced *widget.AccordionContainer
@@ -31,48 +32,7 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 		color:    theme.PrimaryColor(),
 		callback: callback,
 	}
-
-	p.picker = newColorAdvancedPicker(theme.PrimaryColor(), func(c color.Color) {
-		p.color = c
-	})
-	p.advanced = widget.NewAccordionContainer(widget.NewAccordionItem("Advanced", p.picker))
-
-	p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
-		fyne.NewContainerWithLayout(layout.NewCenterLayout(),
-			fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
-				p.createSimplePickers()...,
-			),
-		),
-		canvas.NewLine(theme.ShadowColor()),
-		p.advanced,
-	)
-
-	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
-		OnTapped: p.dialog.Hide,
-	}
-	confirm := &widget.Button{Text: "Confirm", Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
-		OnTapped: func() {
-			p.selectColor(p.color)
-		},
-	}
-	p.dialog.setButtons(newButtonList(p.dialog.dismiss, confirm))
-	return p
-}
-
-// NewSimpleColorPicker creates a simple color dialog and returns the handle.
-// Using the returned type you should call Show() and then set its color through SetColor().
-// The callback is triggered when the user selects a color.
-func NewSimpleColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) *ColorPickerDialog {
-	p := &ColorPickerDialog{
-		dialog:   newDialog(title, message, theme.ColorPaletteIcon(), nil /*cancel?*/, parent),
-		color:    theme.PrimaryColor(),
-		callback: callback,
-	}
-	p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(), p.createSimplePickers()...)
-	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
-		OnTapped: p.dialog.Hide,
-	}
-	p.dialog.setButtons(newButtonList(p.dialog.dismiss))
+	p.Refresh()
 	return p
 }
 
@@ -82,15 +42,41 @@ func ShowColorPicker(title, message string, callback func(c color.Color), parent
 	NewColorPicker(title, message, callback, parent).Show()
 }
 
-// ShowSimpleColorPicker creates and shows a simple color dialog.
-// The callback is triggered when the user selects a color.
-func ShowSimpleColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) {
-	NewSimpleColorPicker(title, message, callback, parent).Show()
-}
-
 // SetColor updates the color of the color picker.
 func (p *ColorPickerDialog) SetColor(c color.Color) {
 	p.picker.SetColor(c)
+}
+
+func (p *ColorPickerDialog) Refresh() {
+	p.dialog.dismiss = &widget.Button{Text: "Cancel", Icon: theme.CancelIcon(),
+		OnTapped: p.dialog.Hide,
+	}
+	if p.Advanced {
+		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
+			p.color = c
+		})
+		p.advanced = widget.NewAccordionContainer(widget.NewAccordionItem("Advanced", p.picker))
+
+		p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+			fyne.NewContainerWithLayout(layout.NewCenterLayout(),
+				fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
+					p.createSimplePickers()...,
+				),
+			),
+			canvas.NewLine(theme.ShadowColor()),
+			p.advanced,
+		)
+
+		confirm := &widget.Button{Text: "Confirm", Icon: theme.ConfirmIcon(), Style: widget.PrimaryButton,
+			OnTapped: func() {
+				p.selectColor(p.color)
+			},
+		}
+		p.dialog.setButtons(newButtonList(p.dialog.dismiss, confirm))
+	} else {
+		p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(), p.createSimplePickers()...)
+		p.dialog.setButtons(newButtonList(p.dialog.dismiss))
+	}
 }
 
 func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject) {
