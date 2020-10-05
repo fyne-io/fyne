@@ -96,7 +96,14 @@ func (l *listRenderer) Layout(size fyne.Size) {
 			for _, child := range l.children {
 				l.itemPool.Release(child)
 			}
+			l.previousOffsetY = 0
+			l.firstItemIndex = 0
+			l.lastItemIndex = 0
+			l.visibleItemCount = 0
+			l.list.offsetY = 0
+			l.layout.Layout.(*listLayout).layoutEndY = 0
 			l.children = nil
+			l.layout.Objects = nil
 			l.list.Refresh()
 		}
 		return
@@ -116,17 +123,12 @@ func (l *listRenderer) Layout(size fyne.Size) {
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize.
 	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
-	if len(l.children) > l.visibleItemCount {
-		for i := len(l.children); i > l.visibleItemCount; i-- {
-			l.itemPool.Release(l.children[len(l.children)-1])
-			l.children = l.children[:len(l.children)-1]
+	min := int(math.Min(float64(l.list.Length()), float64(l.visibleItemCount)))
+	if len(l.children) > min {
+		for i := len(l.children); i >= min; i-- {
+			l.itemPool.Release(l.children[i-1])
 		}
-	}
-	if l.visibleItemCount > 0 && l.list.Length() < l.visibleItemCount && len(l.children) > l.visibleItemCount-1 {
-		for i := l.visibleItemCount; i >= l.list.Length(); i-- {
-			l.itemPool.Release(l.children[len(l.children)-1])
-			l.children = l.children[:len(l.children)-1]
-		}
+		l.children = l.children[:min-1]
 	}
 	for i := len(l.children) + l.firstItemIndex; len(l.children) <= l.visibleItemCount && i < l.list.Length(); i++ {
 		l.appendItem(i)
