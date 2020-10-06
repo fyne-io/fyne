@@ -12,15 +12,6 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// Canvas returns a reusable in-memory canvas used for testing
-func Canvas() fyne.Canvas {
-	if dummyCanvas == nil {
-		dummyCanvas = NewCanvas()
-	}
-
-	return dummyCanvas
-}
-
 // LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
 func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
 	if o != nil {
@@ -59,6 +50,15 @@ type testCanvas struct {
 	fyne.ShortcutHandler
 	painter      SoftwarePainter
 	propertyLock sync.RWMutex
+}
+
+// Canvas returns a reusable in-memory canvas used for testing
+func Canvas() fyne.Canvas {
+	if dummyCanvas == nil {
+		dummyCanvas = NewCanvas()
+	}
+
+	return dummyCanvas
 }
 
 // NewCanvas returns a single use in-memory canvas used for testing
