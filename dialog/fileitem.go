@@ -43,7 +43,7 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	if i.dir {
 		icon = canvas.NewImageFromResource(theme.FolderIcon())
 	} else {
-		icon = NewFileIcon(storage.NewURI("file://" + i.path))
+		icon = widget.NewFileIcon(storage.NewURI("file://" + i.path))
 	}
 
 	return &fileItemRenderer{item: i,
@@ -107,16 +107,16 @@ func (s fileItemRenderer) Refresh() {
 			if _, ok := i.Resource.(*theme.InvertedThemedResource); !ok {
 				i.Resource = theme.NewInvertedThemedResource(i.Resource)
 			}
-		} else if i, ok := s.icon.(*fileIcon); ok {
-			i.setCurrent(true)
+		} else if i, ok := s.icon.(*widget.FileIcon); ok {
+			i.SetSelected(true)
 		}
 	} else {
 		if i, ok := s.icon.(*canvas.Image); ok {
 			if res, ok := i.Resource.(*theme.InvertedThemedResource); ok {
 				i.Resource = res.Original()
 			}
-		} else if i, ok := s.icon.(*fileIcon); ok {
-			i.setCurrent(false)
+		} else if i, ok := s.icon.(*widget.FileIcon); ok {
+			i.SetSelected(false)
 		}
 	}
 	canvas.Refresh(s.item)
