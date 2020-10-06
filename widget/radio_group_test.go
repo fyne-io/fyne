@@ -10,6 +10,51 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+func TestRadioGroup_FocusRendering(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	t.Run("gain/lose focus", func(t *testing.T) {
+		radio := widget.NewRadioGroup([]string{"Option A", "Option B", "Option C"}, nil)
+		window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), radio))
+		defer window.Close()
+		window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
+
+		canvas := window.Canvas().(test.WindowlessCanvas)
+		test.AssertImageMatches(t, "radio/focus_none_focused_none_selected.png", canvas.Capture())
+		canvas.FocusNext()
+		test.AssertImageMatches(t, "radio/focus_a_focused_none_selected.png", canvas.Capture())
+		canvas.FocusNext()
+		test.AssertImageMatches(t, "radio/focus_b_focused_none_selected.png", canvas.Capture())
+		canvas.Unfocus()
+		test.AssertImageMatches(t, "radio/focus_none_focused_none_selected.png", canvas.Capture())
+
+		radio.SetSelected("Option B")
+		test.AssertImageMatches(t, "radio/focus_none_focused_b_selected.png", canvas.Capture())
+		canvas.FocusNext()
+		test.AssertImageMatches(t, "radio/focus_a_focused_b_selected.png", canvas.Capture())
+		canvas.FocusNext()
+		test.AssertImageMatches(t, "radio/focus_b_focused_b_selected.png", canvas.Capture())
+		canvas.Unfocus()
+		test.AssertImageMatches(t, "radio/focus_none_focused_b_selected.png", canvas.Capture())
+	})
+
+	t.Run("disable/enable focused", func(t *testing.T) {
+		radio := &widget.RadioGroup{Options: []string{"Option A", "Option B", "Option C"}}
+		window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), radio))
+		defer window.Close()
+		window.Resize(radio.MinSize().Max(fyne.NewSize(150, 200)))
+
+		canvas := window.Canvas().(test.WindowlessCanvas)
+		canvas.FocusNext()
+		radio.Disable()
+		test.AssertImageMatches(t, "radio/focus_disabled_none_selected.png", canvas.Capture())
+		radio.Enable()
+		test.AssertImageMatches(t, "radio/focus_a_focused_none_selected.png", canvas.Capture())
+	})
+}
+
 func TestRadioGroup_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()

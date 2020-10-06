@@ -64,6 +64,7 @@ func (i *radioItem) Focused() bool {
 // Implements: fyne.Focusable
 func (i *radioItem) FocusGained() {
 	i.focused = true
+	i.Refresh()
 }
 
 // FocusLost is called when this item lost the focus.
@@ -71,6 +72,7 @@ func (i *radioItem) FocusGained() {
 // Implements: fyne.Focusable
 func (i *radioItem) FocusLost() {
 	i.focused = false
+	i.Refresh()
 }
 
 // MouseIn is called when a desktop pointer enters the widget.
@@ -194,6 +196,8 @@ func (r *radioItemRenderer) update() {
 
 	if r.item.Disabled() {
 		r.focusIndicator.FillColor = theme.BackgroundColor()
+	} else if r.item.focused {
+		r.focusIndicator.FillColor = theme.FocusColor()
 	} else if r.item.hovered {
 		r.focusIndicator.FillColor = theme.HoverColor()
 	} else {
