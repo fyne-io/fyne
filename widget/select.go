@@ -27,6 +27,8 @@ type Select struct {
 }
 
 var _ fyne.Widget = (*Select)(nil)
+var _ desktop.Hoverable = (*Select)(nil)
+var _ fyne.Tappable = (*Select)(nil)
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
