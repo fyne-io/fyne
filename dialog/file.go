@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -84,14 +83,6 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			name := f.fileName.(*widget.Entry).Text
 			path, _ := storage.Child(f.dir, name)
 
-			// On windows replace '\\' with '/'
-			if runtime.GOOS == "windows" {
-				pathString := path.String()
-				pathString = strings.ReplaceAll(pathString, "\\\\", "/")
-				pathString = strings.ReplaceAll(pathString, "\\", "/")
-				path = storage.NewURI(pathString)
-			}
-
 			exists, _ := storage.Exists(path)
 
 			_, err := storage.ListerForURI(path)
@@ -131,12 +122,6 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			}
 			path := f.selected.location
 			// On windows replace '\\' with '/'
-			if runtime.GOOS == "windows" {
-				pathString := path.String()
-				pathString = strings.ReplaceAll(pathString, "\\\\", "/")
-				pathString = strings.ReplaceAll(pathString, "\\", "/")
-				path = storage.NewURI(pathString)
-			}
 			callback(storage.OpenFileFromURI(path))
 		}
 	})
@@ -192,49 +177,62 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 }
 
 func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
-	osHome, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
+	var home fyne.ListableURI
+	var documents fyne.ListableURI
+	var downloads fyne.ListableURI
+	var osHome string
+	var err, err1 error
+
+	osHome, err = os.UserHomeDir()
+
+	if err == nil {
+		home, err1 = storage.ListerForURI(storage.NewURI("file://" + osHome))
+		if err1 == nil {
+			var documentsURI fyne.URI
+			documentsURI, err1 = storage.Child(home, "Documents")
+			if err1 == nil {
+				documents, err1 = storage.ListerForURI(documentsURI)
+				if err1 != nil {
+					err = err1
+				}
+			} else {
+				err = err1
+			}
+			var downloadsURI fyne.URI
+			downloadsURI, err1 = storage.Child(home, "Downloads")
+			if err1 == nil {
+				downloads, err1 = storage.ListerForURI(downloadsURI)
+				if err1 != nil {
+					err = err1
+				}
+			} else {
+				err = err1
+			}
+		} else {
+			err = err1
+		}
 	}
 
-	home, err := storage.ListerForURI(storage.NewURI("file://" + osHome))
-	if err != nil {
-		return nil, err
-	}
+	var places []fyne.CanvasObject
 
-	documentsURI, err := storage.Child(home, "Documents")
-	if err != nil {
-		return nil, err
-	}
-	documents, err := storage.ListerForURI(documentsURI)
-	if err != nil {
-		return nil, err
-	}
-
-	downloadsURI, err := storage.Child(home, "Downloads")
-	if err != nil {
-		return nil, err
-	}
-	downloads, err := storage.ListerForURI(downloadsURI)
-	if err != nil {
-		return nil, err
-	}
-
-	places := []fyne.CanvasObject{
-
-		makeFavoriteButton("Home", theme.HomeIcon(), func() {
+	if home != nil {
+		places = append(places, makeFavoriteButton("Home", theme.HomeIcon(), func() {
 			f.setDirectory(home)
-		}),
-		makeFavoriteButton("Documents", theme.DocumentIcon(), func() {
+		}))
+	}
+	if documents != nil {
+		places = append(places, makeFavoriteButton("Documents", theme.DocumentIcon(), func() {
 			f.setDirectory(documents)
-		}),
-		makeFavoriteButton("Downloads", theme.DownloadIcon(), func() {
+		}))
+	}
+	if downloads != nil {
+		places = append(places, makeFavoriteButton("Downloads", theme.DownloadIcon(), func() {
 			f.setDirectory(downloads)
-		}),
+		}))
 	}
 
 	places = append(places, f.loadPlaces()...)
-	return places, nil
+	return places, err
 }
 
 func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
@@ -289,17 +287,10 @@ func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
 
 	f.breadcrumb.Children = nil
 
-	if dir.Scheme() != "file" {
-		return fmt.Errorf("scheme for directory was not file://")
-	}
-
 	localdir := dir.String()[len(dir.Scheme())+3:]
-	if runtime.GOOS == "windows" {
-		localdir = strings.ReplaceAll(localdir, "/", "\\")
-	}
 
 	buildDir := filepath.VolumeName(localdir)
-	for i, d := range strings.Split(localdir, string(filepath.Separator)) {
+	for i, d := range strings.Split(localdir, "/") {
 		if d == "" {
 			if i > 0 { // what we get if we split "/"
 				break

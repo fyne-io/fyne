@@ -72,7 +72,7 @@ func TestNewFileItem_Folder(t *testing.T) {
 	test.Tap(item)
 	assert.False(t, item.isCurrent)
 	assert.Equal(t, (*fileDialogItem)(nil), f.selected)
-	assert.Equal(t, currentDir, f.dir.String()[len(f.dir.Scheme())+3:])
+	assert.Equal(t, storage.NewURI("file://"+currentDir).String(), f.dir.String())
 }
 
 func TestNewFileItem_ParentFolder(t *testing.T) {

@@ -20,6 +20,16 @@ type uri struct {
 // NewURI creates a new URI from the given string representation.
 // This could be a URI from an external source or one saved from URI.String()
 func NewURI(u string) fyne.URI {
+	// URIs are supposed to use forward slashes. On Windows, it
+	// should be OK to use the platform native filepath with UNIX
+	// or NT sytle paths, with / or \, but when we reconstruct
+	// the URI, we want to have / only.
+	if runtime.GOOS == "windows" {
+		// seems that sometimes we end up with
+		// double-backslashes
+		u = strings.ReplaceAll(u, "\\\\", "/")
+		u = strings.ReplaceAll(u, "\\", "/")
+	}
 	return &uri{raw: u}
 }
 
@@ -81,8 +91,6 @@ func parentGeneric(location string) (string, error) {
 	components := strings.Split(location, "/")
 
 	if len(components) == 1 {
-		// trimmed <= 2 makes sure we handle UNIX-style paths on
-		// Windows correctly
 		return "", URIRootError
 	}
 
@@ -104,11 +112,6 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
 
 	// trim trailing slash
-	if runtime.GOOS == "windows" {
-		if s[len(s)-1] == '\\' {
-			s = s[0 : len(s)-1]
-		}
-	}
 	if s[len(s)-1] == '/' {
 		s = s[0 : len(s)-1]
 	}
@@ -125,21 +128,13 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	if u.Scheme() == "file" {
 		// use the system native path resolution
 		parent = filepath.Dir(s)
+		if parent[len(parent)-1] != filepath.Separator {
+			parent += "/"
+		}
 
 		// only root is it's own parent
 		if filepath.Clean(parent) == filepath.Clean(s) {
 			return nil, URIRootError
-		}
-
-		// URIs are supposed to use forward slashes. On Windows, it
-		// should be OK to use the platform native filepath with UNIX
-		// or NT sytle paths, with / or \, but when we reconstruct
-		// the URI, we want to have / only.
-		if runtime.GOOS == "windows" {
-			// seems that sometimes we end up with
-			// double-backslashes
-			parent = strings.ReplaceAll(parent, "\\\\", "/")
-			parent = strings.ReplaceAll(parent, "\\", "/")
 		}
 
 	} else {

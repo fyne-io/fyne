@@ -181,6 +181,22 @@ func TestShowFileOpen(t *testing.T) {
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
 
+	breadcrumb := ui.Objects[3].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
+	assert.Greater(t, len(breadcrumb.Children), 0)
+
+	wd, err := os.Getwd()
+	if runtime.GOOS == "windows" {
+		// on windows os.Getwd() returns '\'
+		wd = strings.ReplaceAll(wd, "\\", "/")
+	}
+	assert.Nil(t, err)
+	components := strings.Split(wd, "/")
+	if assert.Equal(t, len(components), len(breadcrumb.Children)) {
+		for i := range components {
+			assert.Equal(t, components[i], breadcrumb.Children[i].(*widget.Button).Text)
+		}
+	}
+
 	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
@@ -210,16 +226,9 @@ func TestShowFileOpen(t *testing.T) {
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, openErr)
 
-	targetLocationString := target.location.String()
-	// Replace all '\\' with '/' on windows since the dialog
-	// will return a URI with only '/'
-	if runtime.GOOS == "windows" {
-		targetLocationString = strings.ReplaceAll(targetLocationString, "\\\\", "/")
-		targetLocationString = strings.ReplaceAll(targetLocationString, "\\", "/")
-	}
-	assert.Equal(t, targetLocationString, chosen.URI().String())
+	assert.Equal(t, target.location.String(), chosen.URI().String())
 
-	err := chosen.Close()
+	err = chosen.Close()
 	assert.Nil(t, err)
 }
 
