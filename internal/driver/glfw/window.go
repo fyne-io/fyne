@@ -1030,12 +1030,7 @@ func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
 //
 // Characters do not map 1:1 to physical keys, as a key may produce zero, one or more characters.
 func (w *window) charInput(_ *glfw.Window, char rune) {
-	if w.canvas.Focused() == nil && w.canvas.onTypedRune == nil {
-		return
-	}
-
-	focused := w.canvas.Focused()
-	if focused != nil {
+	if focused := w.canvas.Focused(); focused != nil {
 		w.queueEvent(func() { focused.TypedRune(char) })
 	} else if w.canvas.onTypedRune != nil {
 		w.queueEvent(func() { w.canvas.onTypedRune(char) })
