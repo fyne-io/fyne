@@ -33,6 +33,8 @@ var _ desktop.Hoverable = (*Select)(nil)
 var _ fyne.Tappable = (*Select)(nil)
 var _ fyne.Focusable = (*Select)(nil)
 
+var _ textPresenter = (*Select)(nil)
+
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
 	s := &Select{
@@ -57,21 +59,19 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
 	icon := NewIcon(theme.MenuDropDownIcon())
-	text := NewLabel(s.Selected)
-	text.TextStyle.Bold = true
-	text.Wrapping = fyne.TextTruncate
-
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
 	}
-	if s.Selected == "" {
-		text.Text = s.PlaceHolder
+	text := s.Selected
+	if text == "" {
+		text = s.PlaceHolder
 	}
-	text.Alignment = fyne.TextAlignLeading
+	txtProv := newTextProvider(s.Selected, s)
+	txtProv.ExtendBaseWidget(txtProv)
 
 	bg := canvas.NewRectangle(color.Transparent)
-	objects := []fyne.CanvasObject{bg, text, icon}
-	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, text, bg, s}
+	objects := []fyne.CanvasObject{bg, txtProv, icon}
+	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, bg, s}
 	bg.FillColor = r.buttonColor()
 	r.updateLabel()
 	r.updateIcon()
@@ -228,6 +228,14 @@ func (s *Select) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
+func (s *Select) concealed() bool {
+	return false
+}
+
+func (s *Select) object() fyne.Widget {
+	return nil
+}
+
 func (s *Select) optionTapped(text string) {
 	s.SetSelected(text)
 	s.popUp = nil
@@ -254,6 +262,22 @@ func (s *Select) showPopUp() {
 	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
 }
 
+func (s *Select) textAlign() fyne.TextAlign {
+	return fyne.TextAlignLeading
+}
+
+func (s *Select) textColor() color.Color {
+	return theme.TextColor()
+}
+
+func (s *Select) textStyle() fyne.TextStyle {
+	return fyne.TextStyle{Bold: true}
+}
+
+func (s *Select) textWrap() fyne.TextWrap {
+	return fyne.TextTruncate
+}
+
 func (s *Select) updateSelected(text string) {
 	s.Selected = text
 
@@ -268,7 +292,7 @@ type selectRenderer struct {
 	*widget.ShadowingRenderer
 
 	icon  *Icon
-	label *Label
+	label *textProvider
 	bg    *canvas.Rectangle
 	combo *Select
 }
@@ -307,7 +331,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	min := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.label.TextStyle)
+	min := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.combo.textStyle())
 
 	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
 	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
@@ -352,8 +376,8 @@ func (s *selectRenderer) updateLabel() {
 	}
 
 	if s.combo.Selected == "" {
-		s.label.SetText(s.combo.PlaceHolder)
+		s.label.setText(s.combo.PlaceHolder)
 	} else {
-		s.label.SetText(s.combo.Selected)
+		s.label.setText(s.combo.Selected)
 	}
 }
