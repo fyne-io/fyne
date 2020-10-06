@@ -315,8 +315,7 @@ func makeListTab() fyne.CanvasObject {
 		label.SetText(data[index])
 		icon.SetResource(theme.DocumentIcon())
 	}
-	split := widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
-	return fyne.NewContainerWithLayout(layout.NewMaxLayout(), split)
+	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
 }
 
 // WidgetScreen shows a panel containing widget demos
