@@ -49,6 +49,80 @@ func TestDrag(t *testing.T) {
 	assert.True(t, d.wasDragged)
 }
 
+func TestFocusNext(t *testing.T) {
+	c := test.NewCanvas()
+	f1 := &focusable{}
+	f2 := &focusable{}
+	f3 := &focusable{}
+	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
+
+	assert.Nil(t, c.Focused())
+	assert.False(t, f1.Focused())
+	assert.False(t, f2.Focused())
+	assert.False(t, f3.Focused())
+
+	test.FocusNext(c)
+	assert.Equal(t, f1, c.Focused())
+	assert.True(t, f1.Focused())
+	assert.False(t, f2.Focused())
+	assert.False(t, f3.Focused())
+
+	test.FocusNext(c)
+	assert.Equal(t, f2, c.Focused())
+	assert.False(t, f1.Focused())
+	assert.True(t, f2.Focused())
+	assert.False(t, f3.Focused())
+
+	test.FocusNext(c)
+	assert.Equal(t, f3, c.Focused())
+	assert.False(t, f1.Focused())
+	assert.False(t, f2.Focused())
+	assert.True(t, f3.Focused())
+
+	test.FocusNext(c)
+	assert.Equal(t, f1, c.Focused())
+	assert.True(t, f1.Focused())
+	assert.False(t, f2.Focused())
+	assert.False(t, f3.Focused())
+}
+
+func TestFocusPrevious(t *testing.T) {
+	c := test.NewCanvas()
+	f1 := &focusable{}
+	f2 := &focusable{}
+	f3 := &focusable{}
+	c.SetContent(fyne.NewContainerWithoutLayout(f1, f2, f3))
+
+	assert.Nil(t, c.Focused())
+	assert.False(t, f1.Focused())
+	assert.False(t, f2.Focused())
+	assert.False(t, f3.Focused())
+
+	test.FocusPrevious(c)
+	assert.Equal(t, f3, c.Focused())
+	assert.False(t, f1.Focused())
+	assert.False(t, f2.Focused())
+	assert.True(t, f3.Focused())
+
+	test.FocusPrevious(c)
+	assert.Equal(t, f2, c.Focused())
+	assert.False(t, f1.Focused())
+	assert.True(t, f2.Focused())
+	assert.False(t, f3.Focused())
+
+	test.FocusPrevious(c)
+	assert.Equal(t, f1, c.Focused())
+	assert.True(t, f1.Focused())
+	assert.False(t, f2.Focused())
+	assert.False(t, f3.Focused())
+
+	test.FocusPrevious(c)
+	assert.Equal(t, f3, c.Focused())
+	assert.False(t, f1.Focused())
+	assert.False(t, f2.Focused())
+	assert.True(t, f3.Focused())
+}
+
 func TestScroll(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
@@ -79,6 +153,31 @@ func (d *draggable) Dragged(event *fyne.DragEvent) {
 
 func (d *draggable) DragEnd() {
 	d.wasDragged = true
+}
+
+type focusable struct {
+	widget.BaseWidget
+	focused bool
+}
+
+var _ fyne.Focusable = (*focusable)(nil)
+
+func (f *focusable) Focused() bool {
+	return f.focused
+}
+
+func (f *focusable) FocusGained() {
+	f.focused = true
+}
+
+func (f *focusable) FocusLost() {
+	f.focused = false
+}
+
+func (f *focusable) TypedKey(event *fyne.KeyEvent) {
+}
+
+func (f *focusable) TypedRune(r rune) {
 }
 
 type scrollable struct {
