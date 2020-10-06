@@ -92,6 +92,7 @@ func (s *Select) Focused() bool {
 // Implements: fyne.Focusable
 func (s *Select) FocusGained() {
 	s.focused = true
+	s.Refresh()
 }
 
 // FocusLost is called after this Select has lost focus.
@@ -99,6 +100,7 @@ func (s *Select) FocusGained() {
 // Implements: fyne.Focusable
 func (s *Select) FocusLost() {
 	s.focused = false
+	s.Refresh()
 }
 
 // Hide hides the select.
@@ -181,7 +183,7 @@ func (s *Select) SetSelectedIndex(index int) {
 		return
 	}
 
-	s.SetSelected(s.Options[index])
+	s.updateSelected(s.Options[index])
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
@@ -306,6 +308,9 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) buttonColor() color.Color {
+	if s.combo.focused {
+		return theme.FocusColor()
+	}
 	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	}
