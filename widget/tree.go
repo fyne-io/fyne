@@ -92,14 +92,20 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 			return fi.IsDir()
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.FileIcon()), NewLabel("Template Object"))
+			var icon fyne.CanvasObject
+			if branch {
+				icon = NewIcon(nil)
+			} else {
+				icon = NewFileIcon(nil)
+			}
+			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, NewLabel("Template Object"))
 		},
 	}
 	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
+		uri := storage.NewURI(uid)
 		c := node.(*fyne.Container)
-		i := c.Objects[0].(*Icon)
-		var r fyne.Resource
 		if branch {
+			var r fyne.Resource
 			if t.IsBranchOpen(uid) {
 				// Set open folder icon
 				r = theme.FolderOpenIcon()
@@ -107,16 +113,16 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 				// Set folder icon
 				r = theme.FolderIcon()
 			}
+			c.Objects[0].(*Icon).SetResource(r)
 		} else {
-			// Set file icon
-			r = theme.FileIcon()
+			// Set file uri to update icon
+			c.Objects[0].(*FileIcon).SetURI(uri)
 		}
-		i.SetResource(r)
 		l := c.Objects[1].(*Label)
 		if t.Root == uid {
 			l.SetText(uid)
 		} else {
-			l.SetText(storage.NewURI(uid).Name())
+			l.SetText(uri.Name())
 		}
 	}
 	t.ExtendBaseWidget(t)
