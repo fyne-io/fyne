@@ -31,12 +31,7 @@ func newPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUpMenu {
 	o := widget.NewOverlayContainer(p.Menu, c, p.Dismiss)
 	o.Resize(o.MinSize())
 	p.overlay = o
-
-	focused := c.Focused()
 	p.OnDismiss = func() {
-		if c.Focused() == nil {
-			c.Focus(focused)
-		}
 		p.Hide()
 	}
 	return p
@@ -124,14 +119,10 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 		}
 	}
 	pop := NewPopUpAtPosition(options, c, pos)
-	focused := c.Focused()
 	for i, o := range options.Children {
 		if label, ok := o.(*menuItemWidget); ok {
 			item := menu.Items[i]
 			label.OnTapped = func() {
-				if c.Focused() == nil {
-					c.Focus(focused)
-				}
 				pop.Hide()
 				item.Action()
 			}

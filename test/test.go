@@ -54,6 +54,14 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
 	o.(fyne.Draggable).DragEnd()
 }
 
+// LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
+func LaidOutObjects(o fyne.CanvasObject) (objects []fyne.CanvasObject) {
+	if o != nil {
+		objects = layoutAndCollect(objects, o, o.MinSize().Max(o.Size()))
+	}
+	return objects
+}
+
 // MoveMouse simulates a mouse movement to the given position.
 func MoveMouse(c fyne.Canvas, pos fyne.Position) {
 	if fyne.CurrentDevice().IsMobile() {
