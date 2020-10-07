@@ -10,20 +10,31 @@ type SelectEntry struct {
 	Entry
 	dropDown *fyne.Menu
 	popUp    *PopUpMenu
+	options  []string
 }
 
 // NewSelectEntry creates a SelectEntry.
 func NewSelectEntry(options []string) *SelectEntry {
 	e := &SelectEntry{}
 	e.ExtendBaseWidget(e)
-	e.SetOptions(options)
+	e.options = options
 	return e
+}
+
+// CreateRenderer returns a new renderer for this select entry.
+//
+// Implements: fyne.Widget
+func (e *SelectEntry) CreateRenderer() fyne.WidgetRenderer {
+	e.ExtendBaseWidget(e)
+	e.SetOptions(e.options)
+	return e.Entry.CreateRenderer()
 }
 
 // MinSize returns the minimal size of the select entry.
 //
 // Implements: fyne.Widget
 func (e *SelectEntry) MinSize() fyne.Size {
+	e.ExtendBaseWidget(e)
 	min := e.Entry.MinSize()
 
 	if e.dropDown != nil {
@@ -47,6 +58,7 @@ func (e *SelectEntry) Resize(size fyne.Size) {
 
 // SetOptions sets the options the user might select from.
 func (e *SelectEntry) SetOptions(options []string) {
+	e.options = options
 	var items []*fyne.MenuItem
 	for _, option := range options {
 		option := option // capture
