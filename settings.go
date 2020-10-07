@@ -11,6 +11,7 @@ type Settings interface {
 	Theme() Theme
 	SetTheme(Theme)
 	Scale() float32
+	PrimaryColor() string
 
 	AddChangeListener(chan Settings)
 }

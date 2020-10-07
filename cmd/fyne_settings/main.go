@@ -19,6 +19,6 @@ func main() {
 	tabs.SetTabLocation(widget.TabLocationLeading)
 	w.SetContent(tabs)
 
-	w.Resize(fyne.NewSize(480, 320))
+	w.Resize(fyne.NewSize(480, 480))
 	w.ShowAndRun()
 }
