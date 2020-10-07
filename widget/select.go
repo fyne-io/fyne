@@ -206,6 +206,18 @@ func (s *Select) TypedKey(event *fyne.KeyEvent) {
 	switch event.Name {
 	case fyne.KeySpace, fyne.KeyUp, fyne.KeyDown:
 		s.showPopUp()
+	case fyne.KeyRight:
+		i := s.SelectedIndex() + 1
+		if i >= len(s.Options) {
+			i = 0
+		}
+		s.SetSelectedIndex(i)
+	case fyne.KeyLeft:
+		i := s.SelectedIndex() - 1
+		if i < 0 {
+			i = len(s.Options) - 1
+		}
+		s.SetSelectedIndex(i)
 	}
 }
 
