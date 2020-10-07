@@ -56,16 +56,12 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
 
 // FocusNext focuses the next focusable on the canvas.
 func FocusNext(c fyne.Canvas) {
-	if tc, ok := c.(*testCanvas); ok {
-		tc.focusManager().FocusNext()
-	}
+	c.(*testCanvas).focusManager().FocusNext()
 }
 
 // FocusPrevious focuses the previous focusable on the canvas.
 func FocusPrevious(c fyne.Canvas) {
-	if tc, ok := c.(*testCanvas); ok {
-		tc.focusManager().FocusPrevious()
-	}
+	c.(*testCanvas).focusManager().FocusPrevious()
 }
 
 // LaidOutObjects returns all fyne.CanvasObject starting at the given fyne.CanvasObject which is laid out previously.
