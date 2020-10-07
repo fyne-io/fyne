@@ -95,6 +95,38 @@ func TestSelect_FocusRendering(t *testing.T) {
 	})
 }
 
+func TestSelect_KeyboardControl(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
+	w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+	defer w.Close()
+	w.Resize(fyne.NewSize(150, 250))
+
+	c := w.Canvas()
+	c.Focus(sel)
+	test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+	sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+	test.TapCanvas(c, fyne.NewPos(0, 0))
+
+	test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+	sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
+	test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+	test.TapCanvas(c, fyne.NewPos(0, 0))
+
+	test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+	sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+	test.TapCanvas(c, fyne.NewPos(0, 0))
+
+	test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+	sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+	test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+}
+
 func TestSelect_Move(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()

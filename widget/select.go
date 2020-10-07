@@ -188,7 +188,6 @@ func (s *Select) SetSelectedIndex(index int) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (s *Select) Tapped(*fyne.PointEvent) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
 	s.tapped = true
 	defer func() { // TODO move to a real animation
 		time.Sleep(time.Millisecond * buttonTapDuration)
@@ -197,30 +196,24 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 	}()
 	s.Refresh()
 
-	var items []*fyne.MenuItem
-	for _, option := range s.Options {
-		text := option // capture
-		item := fyne.NewMenuItem(option, func() {
-			s.optionTapped(text)
-		})
-		items = append(items, item)
-	}
-
-	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
-	s.popUp.ShowAtPosition(s.popUpPos())
-	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
+	s.showPopUp()
 }
 
 // TypedKey is called if a key event happens while this Select is focused.
 //
 // Implements: fyne.Focusable
 func (s *Select) TypedKey(event *fyne.KeyEvent) {
+	switch event.Name {
+	case fyne.KeySpace, fyne.KeyUp, fyne.KeyDown:
+		s.showPopUp()
+	}
 }
 
 // TypedRune is called if a text event happens while this Select is focused.
 //
 // Implements: fyne.Focusable
 func (s *Select) TypedRune(_ rune) {
+	// intentionally left blank
 }
 
 func (s *Select) optionTapped(text string) {
@@ -231,6 +224,22 @@ func (s *Select) optionTapped(text string) {
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
 	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height-theme.Padding()))
+}
+
+func (s *Select) showPopUp() {
+	var items []*fyne.MenuItem
+	for _, option := range s.Options {
+		text := option // capture
+		item := fyne.NewMenuItem(option, func() {
+			s.optionTapped(text)
+		})
+		items = append(items, item)
+	}
+
+	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
+	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp.ShowAtPosition(s.popUpPos())
+	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
 }
 
 func (s *Select) updateSelected(text string) {
