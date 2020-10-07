@@ -41,9 +41,10 @@ type Entry struct {
 	MultiLine bool
 	Wrapping  fyne.TextWrap
 
-	Validator        fyne.Validator
-	validationStatus *validationStatus
-	validationError  error
+	Validator           fyne.Validator
+	validationStatus    *validationStatus
+	onValidationUpdated func(error)
+	validationError     error
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -1137,6 +1138,11 @@ func (r *entryRenderer) Refresh() {
 		}
 
 		r.ensureValidationSetup()
+
+		if r.entry.onValidationUpdated != nil {
+			r.entry.onValidationUpdated(r.entry.validationError)
+		}
+
 		r.entry.validationStatus.Refresh()
 	} else if r.entry.validationStatus != nil {
 		r.entry.validationStatus.Hide()

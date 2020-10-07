@@ -12,11 +12,12 @@ import (
 type FormItem struct {
 	Text   string
 	Widget fyne.CanvasObject
+	valid  error
 }
 
 // NewFormItem creates a new form item with the specified label text and input widget
 func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
-	return &FormItem{text, widget}
+	return &FormItem{text, widget, nil}
 }
 
 // Form widget is two column grid where each row has a label and a widget (usually an input).
@@ -59,6 +60,14 @@ func (f *Form) AppendItem(item *FormItem) {
 	if f.itemGrid != nil {
 		f.itemGrid.AddObject(f.createLabel(item.Text))
 		f.itemGrid.AddObject(item.Widget)
+	}
+
+	index := len(f.Items) - 1
+	if e, ok := item.Widget.(*Entry); ok && e.Validator != nil {
+		e.onValidationUpdated = func(err error) {
+			f.Items[index].valid = err
+			f.updateButtons()
+		}
 	}
 
 	f.Refresh()
@@ -107,6 +116,15 @@ func (f *Form) updateButtons() {
 	} else {
 		f.buttonBox.Show()
 	}
+
+	for i, item := range f.Items {
+		if item.valid != nil {
+			f.submitButton.Disable()
+			break
+		} else if i == len(f.Items)-1 {
+			f.submitButton.Enable()
+		}
+	}
 }
 
 func (f *Form) updateLabels() {
@@ -124,9 +142,16 @@ func (f *Form) updateLabels() {
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
 	itemGrid := fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
-	for _, item := range f.Items {
+	for i, item := range f.Items {
 		itemGrid.AddObject(f.createLabel(item.Text))
 		itemGrid.AddObject(item.Widget)
+
+		if e, ok := item.Widget.(*Entry); ok && e.Validator != nil {
+			e.onValidationUpdated = func(err error) {
+				f.Items[i].valid = err
+				f.updateButtons()
+			}
+		}
 	}
 	f.itemGrid = itemGrid
 
