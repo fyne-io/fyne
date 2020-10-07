@@ -47,11 +47,6 @@ func (e *SelectEntry) Resize(size fyne.Size) {
 
 // SetOptions sets the options the user might select from.
 func (e *SelectEntry) SetOptions(options []string) {
-	if len(options) == 0 {
-		e.ActionItem = nil
-		return
-	}
-
 	var items []*fyne.MenuItem
 	for _, option := range options {
 		option := option // capture
