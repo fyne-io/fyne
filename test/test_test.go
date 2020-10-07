@@ -139,31 +139,27 @@ func TestScroll(t *testing.T) {
 	assert.Equal(t, &fyne.ScrollEvent{DeltaX: 17, DeltaY: 42}, s.event)
 }
 
+var _ fyne.Draggable = (*draggable)(nil)
+
 type draggable struct {
 	widget.BaseWidget
 	event      *fyne.DragEvent
 	wasDragged bool
 }
 
-var _ fyne.Draggable = (*draggable)(nil)
+func (d *draggable) DragEnd() {
+	d.wasDragged = true
+}
 
 func (d *draggable) Dragged(event *fyne.DragEvent) {
 	d.event = event
 }
 
-func (d *draggable) DragEnd() {
-	d.wasDragged = true
-}
+var _ fyne.Focusable = (*focusable)(nil)
 
 type focusable struct {
 	widget.BaseWidget
 	focused bool
-}
-
-var _ fyne.Focusable = (*focusable)(nil)
-
-func (f *focusable) Focused() bool {
-	return f.focused
 }
 
 func (f *focusable) FocusGained() {
@@ -174,18 +170,22 @@ func (f *focusable) FocusLost() {
 	f.focused = false
 }
 
+func (f *focusable) Focused() bool {
+	return f.focused
+}
+
 func (f *focusable) TypedKey(event *fyne.KeyEvent) {
 }
 
 func (f *focusable) TypedRune(r rune) {
 }
 
+var _ fyne.Scrollable = (*scrollable)(nil)
+
 type scrollable struct {
 	widget.BaseWidget
 	event *fyne.ScrollEvent
 }
-
-var _ fyne.Scrollable = (*scrollable)(nil)
 
 func (s *scrollable) Scrolled(event *fyne.ScrollEvent) {
 	s.event = event
