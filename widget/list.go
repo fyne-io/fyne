@@ -123,6 +123,9 @@ func (l *listRenderer) Layout(size fyne.Size) {
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize.
 	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
+	if l.visibleItemCount == 0 {
+		return
+	}
 	min := int(math.Min(float64(l.list.Length()), float64(l.visibleItemCount)))
 	if len(l.children) > min {
 		for i := len(l.children); i >= min; i-- {
