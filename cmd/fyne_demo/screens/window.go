@@ -182,7 +182,6 @@ func loadDialogGroup(win fyne.Window) *widget.Card {
 				colorPicked(c, win)
 			}, win)
 			picker.Advanced = true
-			picker.Refresh()
 			picker.Show()
 		}),
 		widget.NewButton("Custom Dialog (Login Form)", func() {
