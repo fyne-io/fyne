@@ -121,7 +121,7 @@ func (s *Settings) createPreview() image.Image {
 
 	empty := widget.NewLabel("")
 	tabs := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Home", theme.HomeIcon(), makeHomeTab()),
+		widget.NewTabItemWithIcon("Home", theme.HomeIcon(), widget.NewLabel("Home")),
 		widget.NewTabItemWithIcon("Browse", theme.ComputerIcon(), empty),
 		widget.NewTabItemWithIcon("Settings", theme.SettingsIcon(), empty),
 		widget.NewTabItemWithIcon("Help", theme.HelpIcon(), empty))
@@ -250,10 +250,6 @@ func (c *colorRenderer) Objects() []fyne.CanvasObject {
 func (c *colorRenderer) Destroy() {
 }
 
-func makeHomeTab() fyne.CanvasObject {
-	return widget.NewLabel("Home")
-}
-
 func showOverlay(c fyne.Canvas) {
 	username := widget.NewEntry()
 	password := widget.NewPasswordEntry()
@@ -273,4 +269,5 @@ func showOverlay(c fyne.Canvas) {
 			wrap))
 
 	c.Overlays().Add(over)
+	c.Focus(username)
 }
