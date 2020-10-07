@@ -31,7 +31,7 @@ func TestDrag(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	d := &draggable{}
-	c.SetContent(fyne.NewContainer(d))
+	c.SetContent(fyne.NewContainerWithoutLayout(d))
 	c.Resize(fyne.NewSize(30, 30))
 	d.Resize(fyne.NewSize(20, 20))
 	d.Move(fyne.NewPos(10, 10))
@@ -127,7 +127,7 @@ func TestScroll(t *testing.T) {
 	c := test.NewCanvas()
 	c.SetPadded(false)
 	s := &scrollable{}
-	c.SetContent(fyne.NewContainer(s))
+	c.SetContent(fyne.NewContainerWithoutLayout(s))
 	c.Resize(fyne.NewSize(30, 30))
 	s.Resize(fyne.NewSize(20, 20))
 	s.Move(fyne.NewPos(10, 10))
