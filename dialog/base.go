@@ -124,9 +124,9 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	obj[3].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
 
 	// content
-	contentStart := d.label.Position().Y + d.label.MinSize().Height + theme.Padding()
+	contentStart := d.label.Position().Y + d.label.MinSize().Height + padHeight
 	contentEnd := obj[3].Position().Y - theme.Padding()
-	obj[2].Move(fyne.NewPos((padWidth / 2), d.label.MinSize().Height+theme.Padding()))
+	obj[2].Move(fyne.NewPos((padWidth / 2), d.label.MinSize().Height+padHeight))
 	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 
@@ -135,7 +135,7 @@ func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
 	btnMin := obj[3].MinSize().Union(obj[3].Size())
 
 	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
-	height := contentMin.Height + btnMin.Height + d.label.MinSize().Height + (theme.Padding() * 2) + padHeight
+	height := contentMin.Height + btnMin.Height + d.label.MinSize().Height + theme.Padding() + padHeight*2
 
 	return fyne.NewSize(width, height)
 }
