@@ -140,7 +140,7 @@ func newColorButtonBox(colors []color.Color, icon fyne.Resource, callback func(c
 	for _, c := range colors {
 		objects = append(objects, newColorButton(c, callback))
 	}
-	return fyne.NewContainerWithLayout(layout.NewGridLayoutWithColumns(9), objects...)
+	return fyne.NewContainerWithLayout(layout.NewGridLayoutWithColumns(8), objects...)
 }
 
 func newCheckeredBackground() *canvas.Raster {

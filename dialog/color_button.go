@@ -92,10 +92,6 @@ type colorButtonRenderer struct {
 	rectangle  *canvas.Rectangle
 }
 
-func (r *colorButtonRenderer) BackgroundColor() color.Color {
-	return r.BaseRenderer.BackgroundColor()
-}
-
 func (r *colorButtonRenderer) Layout(size fyne.Size) {
 	r.rectangle.Move(fyne.NewPos(0, 0))
 	r.rectangle.Resize(size)
@@ -113,6 +109,5 @@ func (r *colorButtonRenderer) Refresh() {
 		r.rectangle.StrokeWidth = 0
 	}
 	r.rectangle.FillColor = r.button.color
-	r.rectangle.Refresh()
 	canvas.Refresh(r.button)
 }

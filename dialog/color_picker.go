@@ -14,28 +14,26 @@ import (
 
 // newColorBasicPicker returns a component for selecting basic colors.
 func newColorBasicPicker(callback func(color.Color)) fyne.CanvasObject {
-	return newColorButtonBox(stringsToColors([]string{
-		"#f44336", //Red
-		"#ff9800", //Orange
-		"#ffeb3b", //Yellow
-		"#4caf50", //Green
-		"#2196f3", //Blue
-		"#3f51b5", //Indigo
-		"#9c27b0", //Purple
-		"#795548", //Brown
-	}...), theme.ColorChromaticIcon(), callback)
+	return newColorButtonBox([]color.Color{
+		theme.PrimaryColorNamed(theme.ColorRed),
+		theme.PrimaryColorNamed(theme.ColorOrange),
+		theme.PrimaryColorNamed(theme.ColorYellow),
+		theme.PrimaryColorNamed(theme.ColorGreen),
+		theme.PrimaryColorNamed(theme.ColorBlue),
+		theme.PrimaryColorNamed(theme.ColorPurple),
+		theme.PrimaryColorNamed(theme.ColorBrown),
+	}, theme.ColorChromaticIcon(), callback)
 }
 
 // newColorGreyscalePicker returns a component for selecting greyscale colors.
 func newColorGreyscalePicker(callback func(color.Color)) fyne.CanvasObject {
 	return newColorButtonBox(stringsToColors([]string{
 		"#ffffff",
-		"#dddddd",
-		"#bbbbbb",
-		"#999999",
-		"#666666",
-		"#444444",
-		"#222222",
+		"#cccccc",
+		"#aaaaaa",
+		"#888888",
+		"#555555",
+		"#333333",
 		"#000000",
 	}...), theme.ColorAchromaticIcon(), callback)
 }
