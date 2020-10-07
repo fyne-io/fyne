@@ -32,7 +32,6 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 		color:    theme.PrimaryColor(),
 		callback: callback,
 	}
-	p.Refresh()
 	return p
 }
 
@@ -42,13 +41,43 @@ func ShowColorPicker(title, message string, callback func(c color.Color), parent
 	NewColorPicker(title, message, callback, parent).Show()
 }
 
+// Refresh causes this dialog to be updated
+func (p *ColorPickerDialog) Refresh() {
+	p.updateUI()
+}
+
 // SetColor updates the color of the color picker.
 func (p *ColorPickerDialog) SetColor(c color.Color) {
 	p.picker.SetColor(c)
 }
 
-// Refresh causes this dialog to be updated
-func (p *ColorPickerDialog) Refresh() {
+// Show causes this dialog to be displayed
+func (p *ColorPickerDialog) Show() {
+	if p.win == nil || p.Advanced != (p.advanced != nil) {
+		p.updateUI()
+	}
+	p.dialog.Show()
+}
+
+func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject) {
+	contents = append(contents, newColorBasicPicker(p.selectColor))
+	contents = append(contents, newColorGreyscalePicker(p.selectColor))
+	if recent := newColorRecentPicker(p.selectColor); len(recent.(*fyne.Container).Objects) > 0 {
+		// Add divider and recents if there are any
+		contents = append(contents, canvas.NewLine(theme.ShadowColor()), recent)
+	}
+	return
+}
+
+func (p *ColorPickerDialog) selectColor(c color.Color) {
+	p.dialog.Hide()
+	writeRecentColor(colorToString(p.color))
+	if f := p.callback; f != nil {
+		f(c)
+	}
+}
+
+func (p *ColorPickerDialog) updateUI() {
 	if w := p.win; w != nil {
 		w.Hide()
 	}
@@ -80,24 +109,6 @@ func (p *ColorPickerDialog) Refresh() {
 	} else {
 		p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(), p.createSimplePickers()...)
 		p.dialog.setButtons(newButtonList(p.dialog.dismiss))
-	}
-}
-
-func (p *ColorPickerDialog) createSimplePickers() (contents []fyne.CanvasObject) {
-	contents = append(contents, newColorBasicPicker(p.selectColor))
-	contents = append(contents, newColorGreyscalePicker(p.selectColor))
-	if recent := newColorRecentPicker(p.selectColor); len(recent.(*fyne.Container).Objects) > 0 {
-		// Add divider and recents if there are any
-		contents = append(contents, canvas.NewLine(theme.ShadowColor()), recent)
-	}
-	return
-}
-
-func (p *ColorPickerDialog) selectColor(c color.Color) {
-	p.dialog.Hide()
-	writeRecentColor(colorToString(p.color))
-	if f := p.callback; f != nil {
-		f(c)
 	}
 }
 
