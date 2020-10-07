@@ -26,7 +26,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 		want        fyne.Size
 	}{
 		"empty": {
-			want: fyne.NewSize(emptyTextWidth()+4*theme.Padding(), minTextHeight+2*theme.Padding()),
+			want: fyne.NewSize(emptyTextWidth()+dropDownIconWidth()+4*theme.Padding(), minTextHeight+2*theme.Padding()),
 		},
 		"empty + small options": {
 			options: smallOptions,
@@ -38,7 +38,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 		},
 		"value": {
 			value: "foo",
-			want:  widget.NewLabel("foo").MinSize().Add(fyne.NewSize(4*theme.Padding(), 2*theme.Padding())),
+			want:  widget.NewLabel("foo").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
 		},
 		"large value + small options": {
 			value:   "large",
@@ -52,7 +52,7 @@ func TestSelectEntry_MinSize(t *testing.T) {
 		},
 		"placeholder": {
 			placeholder: "example",
-			want:        widget.NewLabel("example").MinSize().Add(fyne.NewSize(4*theme.Padding(), 2*theme.Padding())),
+			want:        widget.NewLabel("example").MinSize().Add(fyne.NewSize(dropDownIconWidth()+4*theme.Padding(), 2*theme.Padding())),
 		},
 		"large placeholder + small options": {
 			placeholder: "large",
@@ -154,6 +154,25 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened.png", c.Capture())
 	test.TapCanvas(c, switchPos)
 
+	e.SetOptions([]string{"1", "2", "3"})
+	test.TapCanvas(c, switchPos)
+	test.AssertImageMatches(t, "select_entry_dropdown_empty_setopts.png", c.Capture())
+}
+
+func TestSelectEntry_SetOptions_Empty(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	e := widget.NewSelectEntry([]string{})
+	w := test.NewWindow(e)
+	defer w.Close()
+	w.Resize(fyne.NewSize(150, 200))
+	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
+	e.Move(fyne.NewPos(10, 10))
+	c := w.Canvas()
+
+	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	e.SetOptions([]string{"1", "2", "3"})
 	test.TapCanvas(c, switchPos)
 	test.AssertImageMatches(t, "select_entry_dropdown_empty_setopts.png", c.Capture())
