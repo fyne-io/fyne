@@ -109,8 +109,8 @@ func (d *dialog) setButtons(buttons fyne.CanvasObject) {
 }
 
 func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
-	d.bg.Move(fyne.NewPos(-theme.Padding(), -theme.Padding()))
-	d.bg.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+	d.bg.Move(fyne.NewPos(0, 0))
+	d.bg.Resize(size)
 
 	btnMin := obj[3].MinSize().Union(obj[3].Size())
 
@@ -123,19 +123,19 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	obj[3].Resize(btnMin)
 	obj[3].Move(fyne.NewPos(size.Width/2-(btnMin.Width/2), size.Height-padHeight-btnMin.Height))
 
-	// content (text)
+	// content
 	contentStart := d.label.Position().Y + d.label.MinSize().Height + theme.Padding()
 	contentEnd := obj[3].Position().Y - theme.Padding()
-	obj[2].Move(fyne.NewPos((padWidth/2)-theme.Padding(), d.label.MinSize().Height+theme.Padding()))
-	obj[2].Resize(fyne.NewSize(d.bg.Size().Width-padWidth, contentEnd-contentStart))
+	obj[2].Move(fyne.NewPos((padWidth / 2), d.label.MinSize().Height+theme.Padding()))
+	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 
 func (d *dialog) MinSize(obj []fyne.CanvasObject) fyne.Size {
-	textMin := obj[2].MinSize()
+	contentMin := obj[2].MinSize()
 	btnMin := obj[3].MinSize().Union(obj[3].Size())
 
-	width := fyne.Max(fyne.Max(textMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth*2
-	height := textMin.Height + btnMin.Height + d.label.MinSize().Height + theme.Padding() + padHeight*2
+	width := fyne.Max(fyne.Max(contentMin.Width, btnMin.Width), obj[4].MinSize().Width) + padWidth
+	height := contentMin.Height + btnMin.Height + d.label.MinSize().Height + (theme.Padding() * 2) + padHeight
 
 	return fyne.NewSize(width, height)
 }
