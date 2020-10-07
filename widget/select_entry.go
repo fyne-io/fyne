@@ -16,8 +16,6 @@ type SelectEntry struct {
 func NewSelectEntry(options []string) *SelectEntry {
 	e := &SelectEntry{}
 	e.ExtendBaseWidget(e)
-
-	e.ActionItem = e.setupDropDown()
 	e.SetOptions(options)
 	return e
 }
@@ -55,6 +53,10 @@ func (e *SelectEntry) SetOptions(options []string) {
 		items = append(items, fyne.NewMenuItem(option, func() { e.SetText(option) }))
 	}
 	e.dropDown = fyne.NewMenu("", items...)
+
+	if e.ActionItem == nil {
+		e.ActionItem = e.setupDropDown()
+	}
 }
 
 func (e *SelectEntry) setupDropDown() fyne.CanvasObject {
