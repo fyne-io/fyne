@@ -9,7 +9,7 @@ import (
 
 // OverlayStack implements fyne.OverlayStack
 type OverlayStack struct {
-	OnChange      func(focusMgr, prevFocusMgr *app.FocusManager)
+	OnChange      func()
 	focusManagers []*app.FocusManager
 	overlays      []fyne.CanvasObject
 	propertyLock  sync.RWMutex
@@ -24,12 +24,14 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
 
-	defer s.notifyAboutChange(s.topFocusManager())
 	if overlay == nil {
 		return
 	}
 	s.overlays = append(s.overlays, overlay)
 	s.focusManagers = append(s.focusManagers, app.NewFocusManager(overlay))
+	if s.OnChange != nil {
+		s.OnChange()
+	}
 }
 
 // List returns all overlays on the stack from bottom to top.
@@ -49,13 +51,15 @@ func (s *OverlayStack) Remove(overlay fyne.CanvasObject) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
 
-	defer s.notifyAboutChange(s.topFocusManager())
 	for i, o := range s.overlays {
 		if o == overlay {
 			s.overlays = s.overlays[:i]
 			s.focusManagers = s.focusManagers[:i]
 			break
 		}
+	}
+	if s.OnChange != nil {
+		s.OnChange()
 	}
 }
 
@@ -77,13 +81,6 @@ func (s *OverlayStack) TopFocusManager() *app.FocusManager {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
 	return s.topFocusManager()
-}
-
-func (s *OverlayStack) notifyAboutChange(pfm *app.FocusManager) {
-	if s.OnChange == nil {
-		return
-	}
-	s.OnChange(s.topFocusManager(), pfm)
 }
 
 func (s *OverlayStack) topFocusManager() *app.FocusManager {
