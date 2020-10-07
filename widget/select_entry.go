@@ -16,6 +16,8 @@ type SelectEntry struct {
 func NewSelectEntry(options []string) *SelectEntry {
 	e := &SelectEntry{}
 	e.ExtendBaseWidget(e)
+
+	e.ActionItem = e.setupDropDown()
 	e.SetOptions(options)
 	return e
 }
@@ -53,6 +55,9 @@ func (e *SelectEntry) SetOptions(options []string) {
 		items = append(items, fyne.NewMenuItem(option, func() { e.SetText(option) }))
 	}
 	e.dropDown = fyne.NewMenu("", items...)
+}
+
+func (e *SelectEntry) setupDropDown() fyne.CanvasObject {
 	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 
@@ -65,5 +70,5 @@ func (e *SelectEntry) SetOptions(options []string) {
 	})
 	dropDownButton.HideShadow = true
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())
-	e.ActionItem = dropDownButton
+	return dropDownButton
 }
