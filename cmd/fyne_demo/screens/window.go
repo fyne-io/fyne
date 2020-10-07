@@ -3,6 +3,7 @@ package screens
 import (
 	"errors"
 	"fmt"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
@@ -94,6 +96,14 @@ func showText(f fyne.URIReadCloser) {
 	w.Show()
 }
 
+func colorPicked(c color.Color, w fyne.Window) {
+	log.Println("Color picked:", c)
+	rectangle := canvas.NewRectangle(c)
+	size := 2 * theme.IconInlineSize()
+	rectangle.SetMinSize(fyne.NewSize(size, size))
+	dialog.ShowCustom("Color Picked", "Ok", rectangle, w)
+}
+
 func loadDialogGroup(win fyne.Window) *widget.Card {
 	return widget.NewCard("Dialogs", "", widget.NewVBox(
 		widget.NewButton("Info", func() {
@@ -160,6 +170,19 @@ func loadDialogGroup(win fyne.Window) *widget.Card {
 
 				fileSaved(writer)
 			}, win)
+		}),
+		widget.NewButton("Color Picker", func() {
+			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
+				colorPicked(c, win)
+			}, win)
+			picker.Show()
+		}),
+		widget.NewButton("Advanced Color Picker", func() {
+			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
+				colorPicked(c, win)
+			}, win)
+			picker.Advanced = true
+			picker.Show()
 		}),
 		widget.NewButton("Custom Dialog (Login Form)", func() {
 			username := widget.NewEntry()
