@@ -60,3 +60,17 @@ func TestTable_Selected(t *testing.T) {
 
 	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
 }
+
+func TestTable_ShowVisible(t *testing.T) {
+	table := NewTable(
+		func() (int, int) { return 50, 50 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		}, func(int, int, fyne.CanvasObject) {})
+	table.Resize(fyne.NewSize(120, 120))
+
+	renderer := test.WidgetRenderer(table).(*tableRenderer)
+	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer.Refresh()
+	assert.Equal(t, 15, len(cellRenderer.Objects()))
+}
