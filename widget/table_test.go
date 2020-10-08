@@ -10,6 +10,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestTable_Empty(t *testing.T) {
+	table := &Table{}
+	table.Resize(fyne.NewSize(120, 120))
+
+	renderer := test.WidgetRenderer(table).(*tableRenderer)
+	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer.Refresh() // let's not crash :)
+}
+
 func TestTable_Cache(t *testing.T) {
 	c := test.NewCanvas()
 	table := NewTable(

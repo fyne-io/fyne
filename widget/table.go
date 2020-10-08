@@ -12,13 +12,13 @@ import (
 const tableDividerThickness = 1
 
 // Table widget is a grid of items that can be scrolled and a cell selected.
-// It's performance is provided by caching cell templates created with NewCell and re-using them with UpdateCell.
+// It's performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
 // The size of the content rows/columns is returned by the DataSize callback.
 type Table struct {
 	BaseWidget
 
 	DataSize       func() (int, int)
-	NewCell        func() fyne.CanvasObject
+	CreateCell     func() fyne.CanvasObject
 	UpdateCell     func(row int, col int, template fyne.CanvasObject)
 	OnCellSelected func(row int, col int)
 
@@ -33,7 +33,7 @@ type Table struct {
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
 func NewTable(size func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
-	t := &Table{DataSize: size, NewCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
+	t := &Table{DataSize: size, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
 	t.ExtendBaseWidget(t)
 	return t
 }
@@ -46,8 +46,7 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	marker1 := canvas.NewRectangle(theme.PrimaryColor())
 	marker2 := canvas.NewRectangle(theme.PrimaryColor())
 
-	template := t.NewCell()
-	cellSize := template.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	cellSize := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	t.cells = newTableCells(t, cellSize)
 	scroll := NewScrollContainer(t.cells)
 
@@ -62,6 +61,16 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	r.Layout(t.Size())
 	return r
+}
+
+func (t *Table) templateSize() fyne.Size {
+	if t.CreateCell == nil {
+		fyne.LogError("Missing CreateCell callback required for Table", nil)
+		return fyne.Size{}
+	}
+
+	template := t.CreateCell() // don't use cache, we need new template
+	return template.MinSize()
 }
 
 type tableRenderer struct {
@@ -126,7 +135,10 @@ func (t *tableRenderer) moveIndicators() {
 
 	divs := 0
 	i := 0
-	rows, cols := t.t.DataSize()
+	rows, cols := 0, 0
+	if f := t.t.DataSize; f != nil {
+		rows, cols = t.t.DataSize()
+	}
 	for x := theme.Padding() + t.scroll.Offset.X - (t.scroll.Offset.X % (t.cellSize.Width + tableDividerThickness)) - tableDividerThickness; x < t.scroll.Offset.X+t.t.size.Width && i < cols-1; x += t.cellSize.Width + tableDividerThickness {
 		if x <= theme.Padding()+t.scroll.Offset.X {
 			continue
@@ -169,8 +181,7 @@ func (t *tableRenderer) MinSize() fyne.Size {
 }
 
 func (t *tableRenderer) Refresh() {
-	template := t.t.NewCell()
-	t.cellSize = template.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	t.cellSize = t.t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	t.moveIndicators()
 
 	t.colMarker.FillColor = theme.PrimaryColor()
@@ -248,14 +259,18 @@ func (r *tableCellsRenderer) Layout(_ fyne.Size) {
 }
 
 func (r *tableCellsRenderer) MinSize() fyne.Size {
-	rows, cols := r.cells.t.DataSize()
+	rows, cols := 0, 0
+	if f := r.cells.t.DataSize; f != nil {
+		rows, cols = r.cells.t.DataSize()
+	} else {
+		fyne.LogError("Missing DataSize callback required for Table", nil)
+	}
 	return fyne.NewSize(r.cells.cellSize.Width*cols+(cols-1), r.cells.cellSize.Height*rows+(rows-1))
 }
 
 func (r *tableCellsRenderer) Refresh() {
-	template := r.cells.t.NewCell() // don't use cache, we need new template
 	oldSize := r.cells.cellSize
-	r.cells.cellSize = template.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	r.cells.cellSize = r.cells.t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	if oldSize != r.cells.cellSize { // theme changed probably
 		r.returnAllToPool()
 	}
@@ -275,15 +290,22 @@ func (r *tableCellsRenderer) Refresh() {
 			c, ok := wasVisible[id]
 			if !ok {
 				c = r.pool.Obtain()
-				if c == nil {
-					c = r.cells.t.NewCell()
+				if c == nil && r.cells.t.CreateCell != nil {
+					c = r.cells.t.CreateCell()
 					c.Resize(r.cells.cellSize)
+				}
+				if c == nil {
+					continue
 				}
 
 				c.Move(fyne.NewPos(theme.Padding()+x*r.cells.cellSize.Width+(x-1)*tableDividerThickness,
 					theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
 
-				r.cells.t.UpdateCell(minRow+y, minCol+x, c)
+				if f := r.cells.t.UpdateCell; f != nil {
+					r.cells.t.UpdateCell(minRow+y, minCol+x, c)
+				} else {
+					fyne.LogError("Missing UpdateCell callback required for Table", nil)
+				}
 			}
 
 			r.visible[id] = c
@@ -323,6 +345,9 @@ func (r *tableCellsRenderer) visibleCount() (int, int) {
 	cols := math.Ceil(float64(r.cells.t.Size().Width)/float64(r.cells.cellSize.Width+tableDividerThickness) + 1)
 	rows := math.Ceil(float64(r.cells.t.Size().Height)/float64(r.cells.cellSize.Height+tableDividerThickness) + 1)
 
-	dataRows, dataCols := r.cells.t.DataSize()
+	dataRows, dataCols := 0, 0
+	if f := r.cells.t.DataSize; f != nil {
+		dataRows, dataCols = r.cells.t.DataSize()
+	}
 	return fyne.Min(int(rows), dataRows), fyne.Min(int(cols), dataCols)
 }
