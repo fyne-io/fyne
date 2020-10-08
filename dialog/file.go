@@ -96,11 +96,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 			ShowConfirm("Overwrite?", "Are you sure you want to overwrite the file\n"+name+"?",
 				func(ok bool) {
-					f.win.Hide()
 					if !ok {
-						callback(nil, nil)
 						return
 					}
+					f.win.Hide()
 
 					callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
 					if f.file.onClosedCallback != nil {
@@ -317,6 +316,11 @@ func (f *FileDialog) Show() {
 		f.Resize(*f.desiredSize)
 		f.desiredSize = nil
 	}
+}
+
+// Refresh causes this dialog to be updated
+func (f *FileDialog) Refresh() {
+	f.dialog.win.Refresh()
 }
 
 // Resize dialog, call this function after dialog show

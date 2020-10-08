@@ -9,6 +9,7 @@ type Widget interface {
 	CanvasObject
 
 	// CreateRenderer returns a new WidgetRenderer for this widget.
+	// This should not be called by regular code, it is used internally to render a widget.
 	CreateRenderer() WidgetRenderer
 }
 
