@@ -58,6 +58,8 @@ func Drag(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
 func FocusNext(c fyne.Canvas) {
 	if tc, ok := c.(*testCanvas); ok {
 		tc.focusManager().FocusNext()
+	} else {
+		fyne.LogError("FocusNext can only be called with a test canvas", nil)
 	}
 }
 
@@ -65,6 +67,8 @@ func FocusNext(c fyne.Canvas) {
 func FocusPrevious(c fyne.Canvas) {
 	if tc, ok := c.(*testCanvas); ok {
 		tc.focusManager().FocusPrevious()
+	} else {
+		fyne.LogError("FocusPrevious can only be called with a test canvas", nil)
 	}
 }
 
