@@ -22,6 +22,7 @@ func ContainerScreen() fyne.CanvasObject {
 		container.NewTabItem("Card", makeCardTab()),
 		container.NewTabItem("Split", makeSplitTab()),
 		container.NewTabItem("Scroll", makeScrollTab()),
+		container.NewTabItem("Table", makeTableTab()),
 		container.NewTabItem("Tree", makeTreeTab()),
 		// layouts
 		container.NewTabItem("Border", makeBorderLayout()),
@@ -146,6 +147,18 @@ func makeSplitTab() fyne.CanvasObject {
 		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
 	)
 	return container.NewHSplit(container.NewVScroll(left), right)
+}
+
+func makeTableTab() fyne.CanvasObject {
+	return widget.NewTable(
+		func() (int, int) { return 500, 150 },
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Cell 00, 00")
+		},
+		func(row, col int, cell fyne.CanvasObject) {
+			label := cell.(*widget.Label)
+			label.SetText(fmt.Sprintf("Cell %d, %d", row+1, col+1))
+		})
 }
 
 func makeTreeTab() fyne.CanvasObject {
