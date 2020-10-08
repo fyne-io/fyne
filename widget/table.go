@@ -1,11 +1,11 @@
 package widget
 
 import (
-	"image/color"
 	"math"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -54,7 +54,8 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	scroll := NewScrollContainer(t.cells)
 
 	obj := []fyne.CanvasObject{marker1, marker2, scroll}
-	r := &tableRenderer{t: t, scroll: scroll, rowMarker: marker1, colMarker: marker2, objects: obj, cellSize: cellSize}
+	r := &tableRenderer{t: t, scroll: scroll, rowMarker: marker1, colMarker: marker2, cellSize: cellSize}
+	r.SetObjects(obj)
 	t.moveCallback = r.moveIndicators
 	scroll.onOffsetChanged = func() {
 		t.offset = scroll.Offset
@@ -80,13 +81,13 @@ func (t *Table) templateSize() fyne.Size {
 var _ fyne.WidgetRenderer = (*tableRenderer)(nil)
 
 type tableRenderer struct {
+	widget.BaseRenderer
 	t *Table
 
 	scroll               *ScrollContainer
 	rowMarker, colMarker *canvas.Rectangle
 	dividers             []fyne.CanvasObject
 
-	objects  []fyne.CanvasObject
 	cellSize fyne.Size
 }
 
@@ -115,17 +116,6 @@ func (t *tableRenderer) Refresh() {
 		div.Refresh()
 	}
 	t.t.cells.Refresh()
-}
-
-func (t *tableRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (t *tableRenderer) Objects() []fyne.CanvasObject {
-	return t.objects
-}
-
-func (t *tableRenderer) Destroy() {
 }
 
 func (t *tableRenderer) moveIndicators() {
@@ -174,7 +164,7 @@ func (t *tableRenderer) moveIndicators() {
 		}
 
 		obj := []fyne.CanvasObject{t.scroll, t.colMarker, t.rowMarker}
-		t.objects = append(obj, t.dividers...)
+		t.SetObjects(append(obj, t.dividers...))
 	}
 
 	divs := 0
@@ -211,10 +201,14 @@ func (t *tableRenderer) moveIndicators() {
 	for i := divs; i < len(t.dividers); i++ {
 		t.dividers[divs].Hide()
 	}
+	canvas.Refresh(t.t)
 }
 
 // Declare conformity with Widget interface.
 var _ fyne.Widget = (*tableCells)(nil)
+
+// Declare conformity with Tappable interface.
+var _ fyne.Tappable = (*tableCells)(nil)
 
 type tableCells struct {
 	BaseWidget
@@ -229,7 +223,7 @@ func newTableCells(t *Table, s fyne.Size) *tableCells {
 }
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
-	return &tableCellsRenderer{cells: c, pool: &syncPool{}, objects: []fyne.CanvasObject{}, visible: make(map[cellID]fyne.CanvasObject)}
+	return &tableCellsRenderer{cells: c, pool: &syncPool{}, visible: make(map[cellID]fyne.CanvasObject)}
 }
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
@@ -260,9 +254,10 @@ type cellID struct {
 var _ fyne.WidgetRenderer = (*tableCellsRenderer)(nil)
 
 type tableCellsRenderer struct {
+	widget.BaseRenderer
+
 	cells   *tableCells
 	pool    pool
-	objects []fyne.CanvasObject
 	visible map[cellID]fyne.CanvasObject
 }
 
@@ -330,27 +325,15 @@ func (r *tableCellsRenderer) Refresh() {
 			r.pool.Release(old)
 		}
 	}
-	r.objects = cells
-}
-
-func (r *tableCellsRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (r *tableCellsRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
-}
-
-func (r *tableCellsRenderer) Destroy() {
-	// pool cannot be cleared, GC should tidy it up
+	r.SetObjects(cells)
 }
 
 func (r *tableCellsRenderer) returnAllToPool() {
-	for _, cell := range r.objects {
+	for _, cell := range r.BaseRenderer.Objects() {
 		r.pool.Release(cell)
 	}
 	r.visible = make(map[cellID]fyne.CanvasObject)
-	r.objects = nil
+	r.SetObjects(nil)
 }
 
 func (r *tableCellsRenderer) visibleCount() (int, int) {
