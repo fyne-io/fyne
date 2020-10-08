@@ -91,11 +91,11 @@ func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *ScrollConta
 }
 
 func (l *listRenderer) Layout(size fyne.Size) {
-	lengthFunc := l.list.Length
-	if lengthFunc == nil {
-		return
+	length := 0
+	if f := l.list.Length; f != nil {
+		length = f()
 	}
-	if lengthFunc() == 0 {
+	if length == 0 {
 		if len(l.children) > 0 {
 			for _, child := range l.children {
 				l.itemPool.Release(child)
@@ -130,14 +130,14 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	if l.visibleItemCount == 0 {
 		return
 	}
-	min := int(math.Min(float64(lengthFunc()), float64(l.visibleItemCount)))
+	min := int(math.Min(float64(length), float64(l.visibleItemCount)))
 	if len(l.children) > min {
 		for i := len(l.children); i >= min; i-- {
 			l.itemPool.Release(l.children[i-1])
 		}
 		l.children = l.children[:min-1]
 	}
-	for i := len(l.children) + l.firstItemIndex; len(l.children) <= l.visibleItemCount && i < lengthFunc(); i++ {
+	for i := len(l.children) + l.firstItemIndex; len(l.children) <= l.visibleItemCount && i < length; i++ {
 		l.appendItem(i)
 	}
 	l.layout.Objects = l.children
@@ -219,11 +219,14 @@ func (l *listRenderer) scrollDown(offsetChange int) {
 		itemChange = int(math.Floor(float64(offsetChange) / float64(l.list.itemMin.Height)))
 	}
 	l.previousOffsetY = l.list.offsetY
-	lengthFunc := l.list.Length
-	if lengthFunc == nil {
+	length := 0
+	if f := l.list.Length; f != nil {
+		length = f()
+	}
+	if length == 0 {
 		return
 	}
-	for i := 0; i < itemChange && l.lastItemIndex != lengthFunc()-1; i++ {
+	for i := 0; i < itemChange && l.lastItemIndex != length-1; i++ {
 		l.itemPool.Release(l.children[0])
 		l.children = l.children[1:]
 		l.firstItemIndex++
