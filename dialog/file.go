@@ -356,8 +356,8 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 //
 // * file.StartingDirectory if non-empty, os.Stat()-able, and uses the file://
 //   URI scheme
-// * os.Getwd()
 // * os.UserHomeDir()
+// * os.Getwd()
 // * "/" (should be filesystem root on all supported platforms)
 //
 func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
@@ -381,16 +381,6 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 
 	}
 
-	// Try to get ./
-	wd, err := os.Getwd()
-	if err == nil {
-		lister, err := storage.ListerForURI(storage.NewURI("file://" + wd))
-		if err == nil {
-			return lister
-		}
-		fyne.LogError("Could not create lister for working dir", err)
-	}
-
 	// Try home dir
 	dir, err := os.UserHomeDir()
 	if err == nil {
@@ -401,6 +391,16 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 		fyne.LogError("Could not create lister for user home dir", err)
 	}
 	fyne.LogError("Could not load user home dir", err)
+
+	// Try to get ./
+	wd, err := os.Getwd()
+	if err == nil {
+		lister, err := storage.ListerForURI(storage.NewURI("file://" + wd))
+		if err == nil {
+			return lister
+		}
+		fyne.LogError("Could not create lister for working dir", err)
+	}
 
 	lister, err := storage.ListerForURI(storage.NewURI("file:///"))
 	if err != nil {
@@ -533,17 +533,6 @@ func ShowFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) 
 	dialog.Show()
 }
 
-// ShowFileOpenAt works similarly to ShowFileOpen(), but with a custom starting
-// location.
-func ShowFileOpenAt(callback func(fyne.URIReadCloser, error), parent fyne.Window, startlocation fyne.ListableURI) {
-	dialog := NewFileOpen(callback, parent)
-	if fileOpenOSOverride(dialog) {
-		return
-	}
-	dialog.StartingLocation = startlocation
-	dialog.Show()
-}
-
 // ShowFileSave creates and shows a file dialog allowing the user to choose a file to save to (new or overwrite).
 // If the user chooses an existing file they will be asked if they are sure.
 // The dialog will appear over the window specified.
@@ -552,17 +541,6 @@ func ShowFileSave(callback func(fyne.URIWriteCloser, error), parent fyne.Window)
 	if fileSaveOSOverride(dialog) {
 		return
 	}
-	dialog.Show()
-}
-
-// ShowFileSaveAt works simialrly to ShowFileSave(), but with a custom starting
-// location.
-func ShowFileSaveAt(callback func(fyne.URIWriteCloser, error), parent fyne.Window, startlocation fyne.ListableURI) {
-	dialog := NewFileSave(callback, parent)
-	if fileSaveOSOverride(dialog) {
-		return
-	}
-	dialog.StartingLocation = startlocation
 	dialog.Show()
 }
 
