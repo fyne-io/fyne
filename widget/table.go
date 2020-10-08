@@ -55,9 +55,6 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	r := &tableRenderer{t: t, scroll: scroll, rowMarker: marker1, colMarker: marker2, objects: obj, cellSize: cellSize}
 	t.moveCallback = r.moveIndicators
 	scroll.onOffsetChanged = func() {
-		if t.offset == scroll.Offset {
-			return
-		}
 		t.offset = scroll.Offset
 		t.cells.Refresh()
 		r.moveIndicators()
@@ -319,5 +316,6 @@ func (r *tableCellsRenderer) visibleCount() (int, int) {
 	cols := math.Ceil(float64(r.cells.t.Size().Width)/float64(r.cells.cellSize.Width+tableDividerThickness) + 1)
 	rows := math.Ceil(float64(r.cells.t.Size().Height)/float64(r.cells.cellSize.Height+tableDividerThickness) + 1)
 
-	return int(rows), int(cols)
+	dataRows, dataCols := r.cells.t.DataSize()
+	return fyne.Min(int(rows), dataRows), fyne.Min(int(cols), dataCols)
 }

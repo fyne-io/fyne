@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"testing"
 
 	"fyne.io/fyne"
@@ -18,7 +19,10 @@ func TestTable_ChangeTheme(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(int, int, fyne.CanvasObject) {})
+		}, func(row, col int, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", row, col)
+			c.(*Label).SetText(text)
+		})
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
@@ -39,7 +43,10 @@ func TestTable_Selected(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(int, int, fyne.CanvasObject) {})
+		}, func(row, col int, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", row, col)
+			c.(*Label).SetText(text)
+		})
 	assert.Equal(t, -1, table.SelectedColumn)
 	assert.Equal(t, -1, table.SelectedRow)
 
