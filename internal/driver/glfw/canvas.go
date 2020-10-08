@@ -388,18 +388,10 @@ func (c *glCanvas) objectTrees() []fyne.CanvasObject {
 	return trees
 }
 
-func (c *glCanvas) overlayChanged(focusMgr, prevFocusMgr *app.FocusManager) {
+func (c *glCanvas) overlayChanged() {
 	c.Lock()
 	defer c.Unlock()
 	c.dirty = true
-	if prevFocusMgr == nil {
-		prevFocusMgr = c.focusMgr
-	}
-	if focusMgr == nil {
-		focusMgr = c.focusMgr
-	}
-	prevFocusMgr.FocusLost()
-	focusMgr.FocusGained()
 }
 
 func (c *glCanvas) paint(size fyne.Size) {
@@ -536,10 +528,8 @@ func (c *glCanvas) walkTrees(
 type overlayStack struct {
 	internal.OverlayStack
 
-	focusManagers []*app.FocusManager
-	onChange      func(focusMgr, prevFocusMgr *app.FocusManager)
-	propertyLock  sync.RWMutex
-	renderCaches  []*renderCacheTree
+	propertyLock sync.RWMutex
+	renderCaches []*renderCacheTree
 }
 
 func (o *overlayStack) Add(overlay fyne.CanvasObject) {
@@ -548,9 +538,7 @@ func (o *overlayStack) Add(overlay fyne.CanvasObject) {
 	}
 	o.propertyLock.Lock()
 	defer o.propertyLock.Unlock()
-	pfm := o.topFocusManager()
 	o.add(overlay)
-	o.onChange(o.topFocusManager(), pfm)
 }
 
 func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
@@ -559,28 +547,18 @@ func (o *overlayStack) Remove(overlay fyne.CanvasObject) {
 	}
 	o.propertyLock.Lock()
 	defer o.propertyLock.Unlock()
-	pfm := o.topFocusManager()
 	o.remove(overlay)
-	o.onChange(o.topFocusManager(), pfm)
-}
-
-func (o *overlayStack) TopFocusManager() *app.FocusManager {
-	o.propertyLock.RLock()
-	defer o.propertyLock.RUnlock()
-	return o.topFocusManager()
 }
 
 func (o *overlayStack) add(overlay fyne.CanvasObject) {
-	o.OverlayStack.Add(overlay)
 	o.renderCaches = append(o.renderCaches, &renderCacheTree{root: &renderCacheNode{obj: overlay}})
-	o.focusManagers = append(o.focusManagers, app.NewFocusManager(overlay))
+	o.OverlayStack.Add(overlay)
 }
 
 func (o *overlayStack) remove(overlay fyne.CanvasObject) {
 	o.OverlayStack.Remove(overlay)
 	overlayCount := len(o.List())
 	o.renderCaches = o.renderCaches[:overlayCount]
-	o.focusManagers = o.focusManagers[:overlayCount]
 }
 
 // concurrency safe implementation of deprecated c.SetOverlay
@@ -588,22 +566,12 @@ func (o *overlayStack) setOverlay(overlay fyne.CanvasObject) {
 	o.propertyLock.Lock()
 	defer o.propertyLock.Unlock()
 
-	pfm := o.topFocusManager()
 	if len(o.List()) > 0 {
 		o.remove(o.List()[0])
 	}
 	if overlay != nil {
 		o.add(overlay)
 	}
-	o.onChange(o.topFocusManager(), pfm)
-}
-
-func (o *overlayStack) topFocusManager() *app.FocusManager {
-	var fm *app.FocusManager
-	if len(o.focusManagers) > 0 {
-		fm = o.focusManagers[len(o.focusManagers)-1]
-	}
-	return fm
 }
 
 type renderCacheNode struct {
@@ -631,7 +599,11 @@ func newCanvas() *glCanvas {
 	c.setContent(&canvas.Rectangle{FillColor: theme.BackgroundColor()})
 	c.padded = true
 
-	c.overlays = &overlayStack{onChange: c.overlayChanged}
+	c.overlays = &overlayStack{
+		OverlayStack: internal.OverlayStack{
+			OnChange: c.overlayChanged,
+		},
+	}
 
 	c.refreshQueue = make(chan fyne.CanvasObject, 4096)
 	c.dirtyMutex = &sync.Mutex{}

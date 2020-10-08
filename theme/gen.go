@@ -117,6 +117,10 @@ func main() {
 	bundleIcon("content-redo", f)
 	bundleIcon("content-undo", f)
 
+	bundleIcon("color-achromatic", f)
+	bundleIcon("color-chromatic", f)
+	bundleIcon("color-palette", f)
+
 	bundleIcon("document", f)
 	bundleIcon("document-create", f)
 	bundleIcon("document-print", f)
@@ -144,6 +148,7 @@ func main() {
 	bundleIcon("folder-new", f)
 	bundleIcon("folder-open", f)
 	bundleIcon("help", f)
+	bundleIcon("history", f)
 	bundleIcon("home", f)
 	bundleIcon("settings", f)
 

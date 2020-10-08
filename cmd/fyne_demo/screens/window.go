@@ -3,16 +3,19 @@ package screens
 import (
 	"errors"
 	"fmt"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
@@ -66,7 +69,7 @@ func showImage(f fyne.URIReadCloser) {
 	img.FillMode = canvas.ImageFillOriginal
 
 	w := fyne.CurrentApp().NewWindow(f.URI().Name())
-	w.SetContent(widget.NewScrollContainer(img))
+	w.SetContent(container.NewScroll(img))
 	w.Resize(fyne.NewSize(320, 240))
 	w.Show()
 }
@@ -89,13 +92,21 @@ func showText(f fyne.URIReadCloser) {
 	text.Wrapping = fyne.TextWrapWord
 
 	w := fyne.CurrentApp().NewWindow(f.URI().Name())
-	w.SetContent(widget.NewScrollContainer(text))
+	w.SetContent(container.NewScroll(text))
 	w.Resize(fyne.NewSize(320, 240))
 	w.Show()
 }
 
+func colorPicked(c color.Color, w fyne.Window) {
+	log.Println("Color picked:", c)
+	rectangle := canvas.NewRectangle(c)
+	size := 2 * theme.IconInlineSize()
+	rectangle.SetMinSize(fyne.NewSize(size, size))
+	dialog.ShowCustom("Color Picked", "Ok", rectangle, w)
+}
+
 func loadDialogGroup(win fyne.Window) *widget.Card {
-	return widget.NewCard("Dialogs", "", widget.NewVBox(
+	return widget.NewCard("Dialogs", "", container.NewVBox(
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
 		}),
@@ -161,6 +172,19 @@ func loadDialogGroup(win fyne.Window) *widget.Card {
 				fileSaved(writer)
 			}, win)
 		}),
+		widget.NewButton("Color Picker", func() {
+			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
+				colorPicked(c, win)
+			}, win)
+			picker.Show()
+		}),
+		widget.NewButton("Advanced Color Picker", func() {
+			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
+				colorPicked(c, win)
+			}, win)
+			picker.Advanced = true
+			picker.Show()
+		}),
 		widget.NewButton("Custom Dialog (Login Form)", func() {
 			username := widget.NewEntry()
 			password := widget.NewPasswordEntry()
@@ -185,8 +209,8 @@ func loadDialogGroup(win fyne.Window) *widget.Card {
 	))
 }
 
-func loadWindowGroup() fyne.Widget {
-	windowGroup := widget.NewVBox(
+func loadWindowGroup() fyne.CanvasObject {
+	windowGroup := container.NewVBox(
 		widget.NewButton("New window", func() {
 			w := fyne.CurrentApp().NewWindow("Hello")
 			w.SetContent(widget.NewLabel("Hello World!"))
@@ -210,7 +234,7 @@ func loadWindowGroup() fyne.Widget {
 
 	drv := fyne.CurrentApp().Driver()
 	if drv, ok := drv.(desktop.Driver); ok {
-		windowGroup.Append(
+		windowGroup.Objects = append(windowGroup.Objects,
 			widget.NewButton("Splash Window (only use on start)", func() {
 				w := drv.CreateSplashWindow()
 				w.SetContent(widget.NewLabelWithStyle("Hello World!\n\nMake a splash!",
@@ -232,12 +256,12 @@ func loadWindowGroup() fyne.Widget {
 			})
 		}))
 
-	return widget.NewVBox(widget.NewCard("Windows", "", windowGroup), otherGroup)
+	return container.NewVBox(widget.NewCard("Windows", "", windowGroup), otherGroup)
 }
 
 // DialogScreen loads a panel that lists the dialog windows that can be tested.
 func DialogScreen(win fyne.Window) fyne.CanvasObject {
 	return fyne.NewContainerWithLayout(layout.NewAdaptiveGridLayout(2),
-		widget.NewScrollContainer(loadDialogGroup(win)),
-		widget.NewScrollContainer(loadWindowGroup()))
+		container.NewVScroll(loadDialogGroup(win)),
+		container.NewVScroll(loadWindowGroup()))
 }

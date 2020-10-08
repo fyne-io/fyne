@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/cmd/fyne_demo/data"
 	"fyne.io/fyne/cmd/fyne_demo/screens"
+	"fyne.io/fyne/cmd/fyne_settings/settings"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -86,7 +87,11 @@ func main() {
 		fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") }),
 		otherItem,
 	)
-	settingsItem := fyne.NewMenuItem("Settings", func() { fmt.Println("Menu Settings") })
+	settingsItem := fyne.NewMenuItem("Settings", func() {
+		w := a.NewWindow("Fyne Settings")
+		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
+		w.Show()
+	})
 
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		shortcutFocused(&fyne.ShortcutCut{
@@ -105,7 +110,20 @@ func main() {
 	})
 	findItem := fyne.NewMenuItem("Find", func() { fmt.Println("Menu Find") })
 
-	helpMenu := fyne.NewMenu("Help", fyne.NewMenuItem("Help", func() { fmt.Println("Help Menu") }))
+	helpMenu := fyne.NewMenu("Help",
+		fyne.NewMenuItem("Documentation", func() {
+			u, _ := url.Parse("https://developer.fyne.io")
+			_ = a.OpenURL(u)
+		}),
+		fyne.NewMenuItem("Support", func() {
+			u, _ := url.Parse("https://fyne.io/support/")
+			_ = a.OpenURL(u)
+		}),
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Sponsor", func() {
+			u, _ := url.Parse("https://github.com/sponsors/fyne-io")
+			_ = a.OpenURL(u)
+		}))
 	mainMenu := fyne.NewMainMenu(
 		// a quit item will be appended to our first menu
 		fyne.NewMenu("File", newItem, fyne.NewMenuItemSeparator(), settingsItem),

@@ -32,7 +32,7 @@ func TestNewList(t *testing.T) {
 func TestList_Resize(t *testing.T) {
 	list := createList(1000)
 	w := test.NewWindow(list)
-	w.Resize(fyne.NewSize(200, 1000))
+	w.Resize(fyne.NewSize(200, 400))
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
@@ -42,9 +42,9 @@ func TestList_Resize(t *testing.T) {
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
 	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 
-	w.Resize(fyne.NewSize(200, 2000))
+	w.Resize(fyne.NewSize(200, 600))
 
-	indexChange := int(math.Floor(float64(1000) / float64(template.MinSize().Height)))
+	indexChange := int(math.Floor(float64(200) / float64(template.MinSize().Height)))
 
 	newFirstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
 	newLastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
@@ -61,7 +61,7 @@ func TestList_Resize(t *testing.T) {
 func TestList_OffsetChange(t *testing.T) {
 	list := createList(1000)
 	w := test.NewWindow(list)
-	w.Resize(fyne.NewSize(200, 1000))
+	w.Resize(fyne.NewSize(200, 400))
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
 	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
@@ -120,7 +120,7 @@ func TestList_Selection(t *testing.T) {
 func TestList_DataChange(t *testing.T) {
 	list := createList(1000)
 	w := test.NewWindow(list)
-	w.Resize(fyne.NewSize(200, 1000))
+	w.Resize(fyne.NewSize(200, 400))
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
 	assert.Equal(t, children[0].(*listItem).child.(*fyne.Container).Objects[1].(*Label).Text, "Test Item 0")
@@ -135,7 +135,7 @@ func TestList_DataChange(t *testing.T) {
 func TestList_ThemeChange(t *testing.T) {
 	list := createList(1000)
 	w := test.NewWindow(list)
-	w.Resize(fyne.NewSize(200, 1000))
+	w.Resize(fyne.NewSize(200, 400))
 
 	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
 
@@ -161,10 +161,74 @@ func TestList_SmallList(t *testing.T) {
 			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
 		},
 	)
-	list.Resize(fyne.NewSize(200, 1000))
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(200, 400))
+
+	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
+	assert.Equal(t, visibleCount, 1)
 
 	data = append(data, "Test Item 1")
 	list.Refresh()
+
+	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
+	assert.Equal(t, visibleCount, 2)
+
+	test.AssertImageMatches(t, "list/list_small_list.png", w.Canvas().Capture())
+}
+
+func TestList_ClearList(t *testing.T) {
+	list := createList(1000)
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(200, 400))
+	assert.Equal(t, 1000, list.Length())
+
+	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
+	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
+	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
+
+	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
+
+	list.Length = func() int {
+		return 0
+	}
+	list.Refresh()
+
+	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
+
+	assert.Equal(t, visibleCount, 0)
+
+	test.AssertImageMatches(t, "list/list_cleared.png", w.Canvas().Capture())
+}
+
+func TestList_RemoveItem(t *testing.T) {
+	var data []string
+	data = append(data, "Test Item 0")
+	data = append(data, "Test Item 1")
+	data = append(data, "Test Item 2")
+
+	list := NewList(
+		func() int {
+			return len(data)
+		},
+		func() fyne.CanvasObject {
+			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
+		},
+		func(index int, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		},
+	)
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(200, 400))
+
+	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
+	assert.Equal(t, visibleCount, 3)
+
+	data = data[:len(data)-1]
+	list.Refresh()
+
+	visibleCount = len(test.WidgetRenderer(list).(*listRenderer).children)
+	assert.Equal(t, visibleCount, 2)
+	test.AssertImageMatches(t, "list/list_item_removed.png", w.Canvas().Capture())
 }
 
 func createList(items int) *List {
