@@ -1,7 +1,6 @@
 package dialog
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -377,17 +376,26 @@ func TestFileFavorites(t *testing.T) {
 
 	dlg.Show()
 
+	// error can be ignored. It just tells you why the fallback
+	// paths are used if they are.
+	favoriteLocations, _ := getFavoriteLocations()
 	favorites := dlg.dialog.loadFavorites()
 	places := dlg.dialog.loadPlaces()
 	assert.Equal(t, 3+len(places), len(favorites))
 
-	curDir := ""
 	for _, f := range favorites {
 		btn := f.(*widget.Button)
-		t.Log(fmt.Sprint("Changing from ", curDir, " to ", btn.Text))
 		test.Tap(btn)
-		assert.NotEqual(t, curDir, dlg.dialog.dir)
-		curDir = dlg.dialog.dir
+		loc, ok := favoriteLocations[btn.Text]
+		if ok {
+			// button is Home, Documents, Downloads
+			assert.Equal(t, loc, dlg.dialog.dir)
+		} else {
+			// button is (on windows) C:\, D:\, etc.
+			assert.NotEqual(t, "Home", btn.Text)
+			assert.NotEqual(t, "Documents", btn.Text)
+			assert.NotEqual(t, "Downloads", btn.Text)
+		}
 	}
 
 	test.Tap(dlg.dialog.dismiss)
