@@ -213,18 +213,6 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 	e.registerShortcut()
 }
 
-// Focused returns whether or not this Entry has focus.
-//
-// Implements: fyne.Focusable
-//
-// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
-func (e *Entry) Focused() bool {
-	e.propertyLock.RLock()
-	defer e.propertyLock.RUnlock()
-
-	return e.focused
-}
-
 // FocusGained is called when the Entry has been given focus.
 //
 // Implements: fyne.Focusable
@@ -246,6 +234,18 @@ func (e *Entry) FocusLost() {
 	})
 }
 
+// Focused returns whether or not this Entry has focus.
+//
+// Implements: fyne.Focusable
+//
+// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
+func (e *Entry) Focused() bool {
+	e.propertyLock.RLock()
+	defer e.propertyLock.RUnlock()
+
+	return e.focused
+}
+
 // Hide hides the entry.
 //
 // Implements: fyne.Widget
@@ -255,6 +255,20 @@ func (e *Entry) Hide() {
 		e.popUp = nil
 	}
 	e.DisableableWidget.Hide()
+}
+
+// Keyboard implements the Keyboardable interface
+//
+// Implements: mobile.Keyboardable
+func (e *Entry) Keyboard() mobile.KeyboardType {
+	e.propertyLock.RLock()
+	defer e.propertyLock.RUnlock()
+
+	if e.MultiLine {
+		return mobile.DefaultKeyboard
+	}
+
+	return mobile.SingleLineKeyboard
 }
 
 // KeyDown handler for keypress events - used to store shift modifier state for text selection
@@ -628,20 +642,6 @@ func (e *Entry) TypedRune(r rune) {
 // Implements: fyne.Shortcutable
 func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 	e.shortcut.TypedShortcut(shortcut)
-}
-
-// Keyboard implements the Keyboardable interface
-//
-// Implements: mobile.Keyboardable
-func (e *Entry) Keyboard() mobile.KeyboardType {
-	e.propertyLock.RLock()
-	defer e.propertyLock.RUnlock()
-
-	if e.MultiLine {
-		return mobile.DefaultKeyboard
-	}
-
-	return mobile.SingleLineKeyboard
 }
 
 // concealed tells the rendering textProvider if we are a concealed field
