@@ -423,12 +423,11 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 }
 
 func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	size := fyne.NewSize(0, 0)
 	if f := l.list.Length; f != nil {
-		size = fyne.NewSize(l.list.itemMin.Width,
+		return fyne.NewSize(l.list.itemMin.Width,
 			l.list.itemMin.Height*f())
 	}
-	return size
+	return fyne.NewSize(0, 0)
 }
 
 func (l *listLayout) appendedItem(objects []fyne.CanvasObject) {
