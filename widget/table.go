@@ -129,7 +129,7 @@ func (t *tableRenderer) moveIndicators() {
 		i++
 
 		t.dividers[divs].Move(fyne.NewPos(x-t.scroll.Offset.X, theme.Padding()))
-		t.dividers[divs].Resize(fyne.NewSize(tableDividerThickness, t.t.size.Height-theme.Padding()*2))
+		t.dividers[divs].Resize(fyne.NewSize(tableDividerThickness, t.t.size.Height-theme.Padding()))
 		t.dividers[divs].Show()
 		divs++
 	}
@@ -142,7 +142,7 @@ func (t *tableRenderer) moveIndicators() {
 		i++
 
 		t.dividers[divs].Move(fyne.NewPos(theme.Padding(), y-t.scroll.Offset.Y))
-		t.dividers[divs].Resize(fyne.NewSize(t.t.size.Width-theme.Padding()*2, tableDividerThickness))
+		t.dividers[divs].Resize(fyne.NewSize(t.t.size.Width-theme.Padding(), tableDividerThickness))
 		t.dividers[divs].Show()
 		divs++
 	}
