@@ -47,16 +47,16 @@ func comparePaths(t *testing.T, u1, u2 fyne.ListableURI) bool {
 
 func TestEffectiveStartingDir(t *testing.T) {
 
-	wdString, err := os.Getwd()
+	homeString, err := os.UserHomeDir()
 	if err != nil {
-		t.Skipf("os.Getwd() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
+		t.Skipf("os.Gethome() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
 	}
-	wd, err := storage.ListerForURI(storage.NewURI("file://" + wdString))
+	home, err := storage.ListerForURI(storage.NewURI("file://" + homeString))
 	if err != nil {
 		t.Skipf("could not get lister for working directory: %s", err)
 	}
 
-	parentURI, err := storage.Parent(wd)
+	parentURI, err := storage.Parent(home)
 	if err != nil {
 		t.Skipf("Could not get parent of working directory: %s", err)
 	}
@@ -72,7 +72,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 
 	// test that we get wd when running with the default struct values
 	res := dialog.effectiveStartingDir()
-	expect := wd
+	expect := home
 	if !comparePaths(t, res, expect) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
@@ -81,7 +81,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	// this should always be equivalent to the preceding test
 	dialog.StartingLocation = nil
 	res = dialog.effectiveStartingDir()
-	expect = wd
+	expect = home
 	if !comparePaths(t, res, expect) {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
@@ -102,7 +102,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 		t.Errorf("Should have failed to create lister for nonexistant file")
 	}
 	res = dialog.effectiveStartingDir()
-	expect = wd
+	expect = home
 	if res.String() != expect.String() {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
@@ -184,15 +184,20 @@ func TestShowFileOpen(t *testing.T) {
 	breadcrumb := ui.Objects[3].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
 	assert.Greater(t, len(breadcrumb.Children), 0)
 
-	wd, err := os.Getwd()
+	home, err := os.UserHomeDir()
 	if runtime.GOOS == "windows" {
-		// on windows os.Getwd() returns '\'
-		wd = strings.ReplaceAll(wd, "\\", "/")
+		// on windows os.Gethome() returns '\'
+		home = strings.ReplaceAll(home, "\\", "/")
 	}
+	t.Logf("home='%s'", home)
 	assert.Nil(t, err)
-	components := strings.Split(wd, "/")
+	components := strings.Split(home, "/")
+	// note that normally when we do a string split, it's going to come up
+	// "", but we actually want the path bar to show "/".
+	components[0] = "/"
 	if assert.Equal(t, len(components), len(breadcrumb.Children)) {
 		for i := range components {
+			t.Logf("i=%d components[i]='%s' breadcrumb...Text[i]='%s'", i, components[i], breadcrumb.Children[i].(*widget.Button).Text)
 			assert.Equal(t, components[i], breadcrumb.Children[i].(*widget.Button).Text)
 		}
 	}
