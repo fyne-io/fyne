@@ -617,30 +617,28 @@ type treeNodeRenderer struct {
 func (r *treeNodeRenderer) Layout(size fyne.Size) {
 	x := 0
 	y := 0
-	if i := r.indicator; i != nil {
-		i.Move(fyne.NewPos(x, y))
-		s := fyne.NewSize(theme.Padding(), size.Height)
-		i.SetMinSize(s)
-		i.Resize(s)
-	}
+	r.indicator.Move(fyne.NewPos(x, y))
+	s := fyne.NewSize(theme.Padding(), size.Height)
+	r.indicator.SetMinSize(s)
+	r.indicator.Resize(s)
 	h := size.Height - 2*theme.Padding()
 	x += theme.Padding() + r.treeNode.Indent()
 	y += theme.Padding()
-	if i := r.treeNode.icon; i != nil {
-		i.Move(fyne.NewPos(x, y))
-		i.Resize(fyne.NewSize(theme.IconInlineSize(), h))
+	if r.treeNode.icon != nil {
+		r.treeNode.icon.Move(fyne.NewPos(x, y))
+		r.treeNode.icon.Resize(fyne.NewSize(theme.IconInlineSize(), h))
 	}
 	x += theme.IconInlineSize()
 	x += theme.Padding()
-	if c := r.treeNode.content; c != nil {
-		c.Move(fyne.NewPos(x, y))
-		c.Resize(fyne.NewSize(size.Width-x-theme.Padding(), h))
+	if r.treeNode.content != nil {
+		r.treeNode.content.Move(fyne.NewPos(x, y))
+		r.treeNode.content.Resize(fyne.NewSize(size.Width-x-theme.Padding(), h))
 	}
 }
 
 func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
-	if c := r.treeNode.content; c != nil {
-		min = c.MinSize()
+	if r.treeNode.content != nil {
+		min = r.treeNode.content.MinSize()
 	}
 	min.Width += theme.Padding() + r.treeNode.Indent() + theme.IconInlineSize()
 	min.Width += 2 * theme.Padding()
@@ -650,15 +648,13 @@ func (r *treeNodeRenderer) MinSize() (min fyne.Size) {
 }
 
 func (r *treeNodeRenderer) Objects() (objects []fyne.CanvasObject) {
-	if i := r.treeNode.icon; i != nil {
-		objects = append(objects, i)
+	if r.treeNode.content != nil {
+		objects = append(objects, r.treeNode.content)
 	}
-	if i := r.indicator; i != nil {
-		objects = append(objects, i)
+	if r.treeNode.icon != nil {
+		objects = append(objects, r.treeNode.icon)
 	}
-	if c := r.treeNode.content; c != nil {
-		objects = append(objects, c)
-	}
+	objects = append(objects, r.indicator)
 	return
 }
 
@@ -670,19 +666,17 @@ func (r *treeNodeRenderer) Refresh() {
 }
 
 func (r *treeNodeRenderer) partialRefresh() {
-	if i := r.treeNode.icon; i != nil {
-		i.Refresh()
+	if r.treeNode.icon != nil {
+		r.treeNode.icon.Refresh()
 	}
-	if i := r.indicator; i != nil {
-		if r.treeNode.uid == r.treeNode.tree.Selected {
-			i.FillColor = theme.PrimaryColor()
-		} else if r.treeNode.hovered {
-			i.FillColor = theme.HoverColor()
-		} else {
-			i.FillColor = theme.BackgroundColor()
-		}
-		i.Refresh()
+	if r.treeNode.uid == r.treeNode.tree.Selected {
+		r.indicator.FillColor = theme.PrimaryColor()
+	} else if r.treeNode.hovered {
+		r.indicator.FillColor = theme.HoverColor()
+	} else {
+		r.indicator.FillColor = theme.BackgroundColor()
 	}
+	r.indicator.Refresh()
 	canvas.Refresh(r.treeNode.super())
 }
 
