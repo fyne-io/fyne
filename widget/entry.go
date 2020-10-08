@@ -1285,6 +1285,9 @@ func (p *placeholderPresenter) textAlign() fyne.TextAlign {
 
 // textColor tells the rendering textProvider our color
 func (p *placeholderPresenter) textColor() color.Color {
+	if p.e.Disabled() {
+		return theme.DisabledTextColor()
+	}
 	return theme.PlaceHolderColor()
 }
 

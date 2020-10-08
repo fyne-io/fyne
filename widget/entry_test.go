@@ -117,6 +117,47 @@ func TestEntry_CursorRow(t *testing.T) {
 	assert.Equal(t, 0, entry.CursorRow)
 }
 
+func TestEntry_Disableable(t *testing.T) {
+	entry, window := setupImageTest(false)
+	defer teardownImageTest(window)
+	c := window.Canvas()
+
+	assert.False(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_enabled_empty.png", c.Capture())
+
+	entry.Disable()
+	assert.True(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_disabled_empty.png", c.Capture())
+
+	entry.Enable()
+	assert.False(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_enabled_empty.png", c.Capture())
+
+	entry.SetPlaceHolder("Type!")
+	assert.False(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_enabled_placeholder.png", c.Capture())
+
+	entry.Disable()
+	assert.True(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_disabled_placeholder.png", c.Capture())
+
+	entry.Enable()
+	assert.False(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_enabled_placeholder.png", c.Capture())
+
+	entry.SetText("Hello")
+	assert.False(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_enabled_custom_value.png", c.Capture())
+
+	entry.Disable()
+	assert.True(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_disabled_custom_value.png", c.Capture())
+
+	entry.Enable()
+	assert.False(t, entry.Disabled())
+	test.AssertImageMatches(t, "entry/disableable_enabled_custom_value.png", c.Capture())
+}
+
 func TestEntry_DoubleTapped(t *testing.T) {
 	entry := widget.NewEntry()
 	entry.SetText("The quick brown fox\njumped    over the lazy dog\n")
