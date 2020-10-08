@@ -16,11 +16,11 @@ var _ fyne.Widget = (*Table)(nil)
 
 // Table widget is a grid of items that can be scrolled and a cell selected.
 // It's performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
-// The size of the content rows/columns is returned by the DataSize callback.
+// The size of the content rows/columns is returned by the Length callback.
 type Table struct {
 	BaseWidget
 
-	DataSize       func() (int, int)
+	Length         func() (int, int)
 	CreateCell     func() fyne.CanvasObject
 	UpdateCell     func(row int, col int, template fyne.CanvasObject)
 	OnCellSelected func(row int, col int)
@@ -35,8 +35,8 @@ type Table struct {
 // The first returns the data size in rows and columns, second parameter is a function that returns cell
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
-func NewTable(size func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
-	t := &Table{DataSize: size, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
+func NewTable(len func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
+	t := &Table{Length: len, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
 	t.ExtendBaseWidget(t)
 	return t
 }
@@ -170,8 +170,8 @@ func (t *tableRenderer) moveIndicators() {
 	divs := 0
 	i := 0
 	rows, cols := 0, 0
-	if f := t.t.DataSize; f != nil {
-		rows, cols = t.t.DataSize()
+	if f := t.t.Length; f != nil {
+		rows, cols = t.t.Length()
 	}
 	for x := theme.Padding() + t.scroll.Offset.X - (t.scroll.Offset.X % (t.cellSize.Width + tableDividerThickness)) - tableDividerThickness; x < t.scroll.Offset.X+t.t.size.Width && i < cols-1; x += t.cellSize.Width + tableDividerThickness {
 		if x <= theme.Padding()+t.scroll.Offset.X {
@@ -267,10 +267,10 @@ func (r *tableCellsRenderer) Layout(_ fyne.Size) {
 
 func (r *tableCellsRenderer) MinSize() fyne.Size {
 	rows, cols := 0, 0
-	if f := r.cells.t.DataSize; f != nil {
-		rows, cols = r.cells.t.DataSize()
+	if f := r.cells.t.Length; f != nil {
+		rows, cols = r.cells.t.Length()
 	} else {
-		fyne.LogError("Missing DataSize callback required for Table", nil)
+		fyne.LogError("Missing Length callback required for Table", nil)
 	}
 	return fyne.NewSize(r.cells.cellSize.Width*cols+(cols-1), r.cells.cellSize.Height*rows+(rows-1))
 }
@@ -341,8 +341,8 @@ func (r *tableCellsRenderer) visibleCount() (int, int) {
 	rows := math.Ceil(float64(r.cells.t.Size().Height)/float64(r.cells.cellSize.Height+tableDividerThickness) + 1)
 
 	dataRows, dataCols := 0, 0
-	if f := r.cells.t.DataSize; f != nil {
-		dataRows, dataCols = r.cells.t.DataSize()
+	if f := r.cells.t.Length; f != nil {
+		dataRows, dataCols = r.cells.t.Length()
 	}
 	return fyne.Min(int(rows), dataRows), fyne.Min(int(cols), dataCols)
 }
