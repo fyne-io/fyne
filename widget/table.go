@@ -90,6 +90,44 @@ type tableRenderer struct {
 	cellSize fyne.Size
 }
 
+func (t *tableRenderer) Layout(s fyne.Size) {
+	t.moveIndicators()
+
+	t.scroll.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
+	t.scroll.Resize(s.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
+}
+
+func (t *tableRenderer) MinSize() fyne.Size {
+	return t.cellSize
+}
+
+func (t *tableRenderer) Refresh() {
+	t.cellSize = t.t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	t.moveIndicators()
+
+	t.colMarker.FillColor = theme.PrimaryColor()
+	t.colMarker.Refresh()
+	t.rowMarker.FillColor = theme.PrimaryColor()
+	t.rowMarker.Refresh()
+
+	for _, div := range t.dividers {
+		div.(*canvas.Rectangle).FillColor = theme.ShadowColor()
+		div.Refresh()
+	}
+	t.t.cells.Refresh()
+}
+
+func (t *tableRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+func (t *tableRenderer) Objects() []fyne.CanvasObject {
+	return t.objects
+}
+
+func (t *tableRenderer) Destroy() {
+}
+
 func (t *tableRenderer) moveIndicators() {
 	if t.t.SelectedColumn == -1 {
 		t.colMarker.Hide()
@@ -100,17 +138,17 @@ func (t *tableRenderer) moveIndicators() {
 		if x2 < theme.Padding() || x1 > t.t.size.Width {
 			t.colMarker.Hide()
 		} else {
-			t.colMarker.Show()
-
 			left := fyne.Max(theme.Padding(), x1)
 			t.colMarker.Move(fyne.NewPos(left, 0))
 			t.colMarker.Resize(fyne.NewSize(fyne.Min(x2, t.t.size.Width)-left, theme.Padding()))
+
+			t.colMarker.Show()
 		}
 	}
 	t.colMarker.Refresh()
 
 	if t.t.SelectedRow == -1 {
-		t.colMarker.Hide()
+		t.rowMarker.Hide()
 	} else {
 		offY := t.t.SelectedRow*(t.cellSize.Height+tableDividerThickness) - t.scroll.Offset.Y
 		y1 := theme.Padding() + offY
@@ -118,11 +156,11 @@ func (t *tableRenderer) moveIndicators() {
 		if y2 < theme.Padding() || y1 > t.t.size.Height {
 			t.rowMarker.Hide()
 		} else {
-			t.rowMarker.Show()
-
 			top := fyne.Max(theme.Padding(), y1)
 			t.rowMarker.Move(fyne.NewPos(0, top))
 			t.rowMarker.Resize(fyne.NewSize(theme.Padding(), fyne.Min(y2, t.t.size.Height)-top))
+
+			t.rowMarker.Show()
 		}
 	}
 	t.rowMarker.Refresh()
@@ -173,44 +211,6 @@ func (t *tableRenderer) moveIndicators() {
 	for i := divs; i < len(t.dividers); i++ {
 		t.dividers[divs].Hide()
 	}
-}
-
-func (t *tableRenderer) Layout(s fyne.Size) {
-	t.moveIndicators()
-
-	t.scroll.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
-	t.scroll.Resize(s.Subtract(fyne.NewSize(theme.Padding(), theme.Padding())))
-}
-
-func (t *tableRenderer) MinSize() fyne.Size {
-	return t.cellSize
-}
-
-func (t *tableRenderer) Refresh() {
-	t.cellSize = t.t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-	t.moveIndicators()
-
-	t.colMarker.FillColor = theme.PrimaryColor()
-	t.colMarker.Refresh()
-	t.rowMarker.FillColor = theme.PrimaryColor()
-	t.rowMarker.Refresh()
-
-	for _, div := range t.dividers {
-		div.(*canvas.Rectangle).FillColor = theme.ShadowColor()
-		div.Refresh()
-	}
-	t.t.cells.Refresh()
-}
-
-func (t *tableRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (t *tableRenderer) Objects() []fyne.CanvasObject {
-	return t.objects
-}
-
-func (t *tableRenderer) Destroy() {
 }
 
 // Declare conformity with Widget interface.
