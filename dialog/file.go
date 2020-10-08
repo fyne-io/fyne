@@ -105,7 +105,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				func(ok bool) {
 					f.win.Hide()
 					if !ok {
-						// callback(nil, nil)
+						callback(nil, nil)
 						return
 					}
 
