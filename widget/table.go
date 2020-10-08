@@ -11,6 +11,9 @@ import (
 
 const tableDividerThickness = 1
 
+// Declare conformity with Widget interface.
+var _ fyne.Widget = (*Table)(nil)
+
 // Table widget is a grid of items that can be scrolled and a cell selected.
 // It's performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
 // The size of the content rows/columns is returned by the DataSize callback.
@@ -72,6 +75,9 @@ func (t *Table) templateSize() fyne.Size {
 	template := t.CreateCell() // don't use cache, we need new template
 	return template.MinSize()
 }
+
+// Declare conformity with WidgetRenderer interface.
+var _ fyne.WidgetRenderer = (*tableRenderer)(nil)
 
 type tableRenderer struct {
 	t *Table
@@ -207,6 +213,9 @@ func (t *tableRenderer) Objects() []fyne.CanvasObject {
 func (t *tableRenderer) Destroy() {
 }
 
+// Declare conformity with Widget interface.
+var _ fyne.Widget = (*tableCells)(nil)
+
 type tableCells struct {
 	BaseWidget
 	t        *Table
@@ -246,6 +255,9 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 type cellID struct {
 	row, col int
 }
+
+// Declare conformity with WidgetRenderer interface.
+var _ fyne.WidgetRenderer = (*tableCellsRenderer)(nil)
 
 type tableCellsRenderer struct {
 	cells   *tableCells
