@@ -188,26 +188,26 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	assert.True(t, ce2.focused)
 
 	c.Overlays().Add(overlay1)
-	ctxt := "adding overlay removes focus from content"
+	ctxt := "adding overlay changes focus handler but does not remove focus from content"
 	assert.Nil(t, c.Focused(), ctxt)
-	assert.False(t, ce2.focused, ctxt)
+	assert.True(t, ce2.focused, ctxt)
 
 	c.FocusNext()
 	ctxt = "changing focus affects overlay instead of content"
 	assert.Equal(t, o1e1, c.Focused(), ctxt)
 	assert.False(t, ce1.focused, ctxt)
-	assert.False(t, ce2.focused, ctxt)
+	assert.True(t, ce2.focused, ctxt)
 	assert.True(t, o1e1.focused, ctxt)
 
 	c.Overlays().Add(overlay2)
-	ctxt = "adding overlay removes focus from previous overlay"
+	ctxt = "adding overlay changes focus handler but does not remove focus from previous overlay"
 	assert.Nil(t, c.Focused(), ctxt)
-	assert.False(t, o1e1.focused, ctxt)
+	assert.True(t, o1e1.focused, ctxt)
 
 	c.FocusPrevious()
 	ctxt = "changing focus affects top overlay only"
 	assert.Equal(t, o2e2, c.Focused(), ctxt)
-	assert.False(t, o1e1.focused, ctxt)
+	assert.True(t, o1e1.focused, ctxt)
 	assert.False(t, o1e2.focused, ctxt)
 	assert.True(t, o2e2.focused, ctxt)
 
@@ -217,9 +217,9 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	assert.True(t, o2e1.focused)
 
 	c.Overlays().Remove(overlay2)
-	ctxt = "removing overlay removes focus from removed overlay and restores focus on new top overlay"
+	ctxt = "removing overlay restores focus handler from previous overlay but does not remove focus from removed overlay"
 	assert.Equal(t, o1e1, c.Focused(), ctxt)
-	assert.False(t, o2e1.focused, ctxt)
+	assert.True(t, o2e1.focused, ctxt)
 	assert.False(t, o2e2.focused, ctxt)
 	assert.True(t, o1e1.focused, ctxt)
 
@@ -229,10 +229,10 @@ func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	assert.True(t, o1e2.focused)
 
 	c.Overlays().Remove(overlay1)
-	ctxt = "removing last overlay removes focus from removed overlay and restores focus on content"
+	ctxt = "removing last overlay restores focus handler from content but does not remove focus from removed overlay"
 	assert.Equal(t, ce2, c.Focused(), ctxt)
 	assert.False(t, o1e1.focused, ctxt)
-	assert.False(t, o1e2.focused, ctxt)
+	assert.True(t, o1e2.focused, ctxt)
 	assert.True(t, ce2.focused, ctxt)
 }
 

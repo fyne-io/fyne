@@ -31,7 +31,10 @@ type Mouseable interface {
 
 // Hoverable is used when a canvas object wishes to know if a pointer device moves over it.
 type Hoverable interface {
+	// MouseIn is a hook that is called if the mouse pointer enters the element.
 	MouseIn(*MouseEvent)
-	MouseOut()
+	// MouseMoved is a hook that is called if the mouse pointer moved over the element.
 	MouseMoved(*MouseEvent)
+	// MouseOut is a hook that is called if the mouse pointer leaves the element.
+	MouseOut()
 }

@@ -53,9 +53,6 @@ func main() {
 		return
 	}
 
-	bundleFile("themeDarkPreview", "widgets-dark.png", f)
-	bundleFile("themeLightPreview", "widgets-light.png", f)
-
 	bundleFile("appearanceIcon", "appearance.svg", f)
 
 	// TODO: Add in language support and icon
