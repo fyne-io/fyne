@@ -6,6 +6,7 @@ package dialog
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,9 @@ func TestFavoriteLocations(t *testing.T) {
 			} else {
 				assert.Equal(t, homeDir, filepath.Dir(fav))
 				if _, err := os.Stat(fav); os.IsNotExist(err) {
-					assert.Equal(t, expected[e], filepath.Base(fav))
+					if !strings.EqualFold(expected[e], filepath.Base(fav)) {
+						t.Errorf("%s should equal fold with %s", expected[e], filepath.Base(fav))
+					}
 				}
 			}
 		}
