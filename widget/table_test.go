@@ -10,6 +10,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestTable_Cache(t *testing.T) {
+	c := test.NewCanvas()
+	table := NewTable(
+		func() (int, int) { return 3, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		}, func(row, col int, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", row, col)
+			c.(*Label).SetText(text)
+		})
+	c.SetContent(table)
+	c.SetPadded(false)
+	c.Resize(fyne.NewSize(120, 120))
+
+	renderer := test.WidgetRenderer(table).(*tableRenderer)
+	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer.Refresh()
+	assert.Equal(t, 9, len(cellRenderer.Objects()))
+	assert.Equal(t, "Cell 0, 0", cellRenderer.Objects()[0].(*Label).Text)
+	objRef := cellRenderer.Objects()[0].(*Label)
+
+	test.Scroll(c, fyne.NewPos(10, 10), -150, -150)
+	assert.Equal(t, 0, renderer.scroll.Offset.Y) // we didn't scroll as data shorter
+	assert.Equal(t, 150, renderer.scroll.Offset.X)
+	assert.Equal(t, 9, len(cellRenderer.Objects()))
+	assert.Equal(t, "Cell 0, 1", cellRenderer.Objects()[0].(*Label).Text)
+	assert.NotEqual(t, objRef, cellRenderer.Objects()[0].(*Label)) // we want to re-use visible cells without rewriting them
+}
+
 func TestTable_ChangeTheme(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()

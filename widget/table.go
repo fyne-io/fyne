@@ -209,7 +209,7 @@ func newTableCells(t *Table, s fyne.Size) *tableCells {
 }
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
-	return &tableCellsRenderer{cells: c, pool: &syncPool{}, objects: []fyne.CanvasObject{}}
+	return &tableCellsRenderer{cells: c, pool: &syncPool{}, objects: []fyne.CanvasObject{}, visible: make(map[cellID]fyne.CanvasObject)}
 }
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
@@ -232,10 +232,15 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	}
 }
 
+type cellID struct {
+	row, col int
+}
+
 type tableCellsRenderer struct {
 	cells   *tableCells
 	pool    pool
 	objects []fyne.CanvasObject
+	visible map[cellID]fyne.CanvasObject
 }
 
 func (r *tableCellsRenderer) Layout(_ fyne.Size) {
@@ -248,28 +253,50 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 }
 
 func (r *tableCellsRenderer) Refresh() {
-	template := r.cells.t.NewCell()
+	template := r.cells.t.NewCell() // don't use cache, we need new template
+	oldSize := r.cells.cellSize
 	r.cells.cellSize = template.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-	r.ensureCells() // TODO don't refresh whole screen if we can avoid it
+	if oldSize != r.cells.cellSize { // theme changed probably
+		r.returnAllToPool()
+	}
 
 	rows, cols := r.visibleCount()
 	offX := r.cells.t.offset.X - (r.cells.t.offset.X % (r.cells.cellSize.Width + tableDividerThickness))
 	minCol := offX / (r.cells.cellSize.Width + tableDividerThickness)
-	offX += theme.Padding()
 	offY := r.cells.t.offset.Y - (r.cells.t.offset.Y % (r.cells.cellSize.Height + tableDividerThickness))
 	minRow := offY / (r.cells.cellSize.Height + tableDividerThickness)
-	offY += theme.Padding()
-	i := 0
-	for y := 0; y < rows; y++ {
-		for x := 0; x < cols; x++ {
-			c := r.objects[i]
-			c.Move(fyne.NewPos(offX+x*r.cells.cellSize.Width+(x-1)*tableDividerThickness,
-				offY+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
 
-			r.cells.t.UpdateCell(minRow+y, minCol+x, c)
-			i++
+	wasVisible := r.visible
+	r.visible = make(map[cellID]fyne.CanvasObject)
+	var cells []fyne.CanvasObject
+	for y := minRow; y < minRow+rows; y++ {
+		for x := minCol; x < minCol+cols; x++ {
+			id := cellID{y, x}
+			c, ok := wasVisible[id]
+			if !ok {
+				c = r.pool.Obtain()
+				if c == nil {
+					c = r.cells.t.NewCell()
+					c.Resize(r.cells.cellSize)
+				}
+
+				c.Move(fyne.NewPos(theme.Padding()+x*r.cells.cellSize.Width+(x-1)*tableDividerThickness,
+					theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
+
+				r.cells.t.UpdateCell(minRow+y, minCol+x, c)
+			}
+
+			r.visible[id] = c
+			cells = append(cells, c)
 		}
 	}
+
+	for id, old := range wasVisible {
+		if _, ok := r.visible[id]; !ok {
+			r.pool.Release(old)
+		}
+	}
+	r.objects = cells
 }
 
 func (r *tableCellsRenderer) BackgroundColor() color.Color {
@@ -288,28 +315,8 @@ func (r *tableCellsRenderer) returnAllToPool() {
 	for _, cell := range r.objects {
 		r.pool.Release(cell)
 	}
+	r.visible = make(map[cellID]fyne.CanvasObject)
 	r.objects = nil
-}
-
-func (r *tableCellsRenderer) ensureCells() {
-	r.returnAllToPool()
-
-	rows, cols := r.visibleCount()
-	var cells []fyne.CanvasObject
-	i := 0
-	for y := 0; y < rows; y++ {
-		for x := 0; x < cols; x++ {
-			c := r.pool.Obtain()
-			if c == nil {
-				c = r.cells.t.NewCell()
-			}
-
-			c.Resize(r.cells.cellSize)
-			cells = append(cells, c)
-			i++
-		}
-	}
-	r.objects = cells
 }
 
 func (r *tableCellsRenderer) visibleCount() (int, int) {
