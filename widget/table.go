@@ -309,7 +309,7 @@ func (r *tableCellsRenderer) Refresh() {
 					theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
 
 				if f := r.cells.t.UpdateCell; f != nil {
-					r.cells.t.UpdateCell(minRow+y, minCol+x, c)
+					r.cells.t.UpdateCell(y, x, c)
 				} else {
 					fyne.LogError("Missing UpdateCell callback required for Table", nil)
 				}
