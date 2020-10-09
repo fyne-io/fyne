@@ -19,6 +19,9 @@ type ButtonAlign int
 // ButtonIconPlacement represents the ordering of icon & text within a button.
 type ButtonIconPlacement int
 
+// ButtonImportance represents how prominent the button should appear
+type ButtonImportance int
+
 // ButtonStyle determines the behaviour and rendering of a button.
 type ButtonStyle int
 
@@ -39,9 +42,20 @@ const (
 )
 
 const (
-	// DefaultButton is the standard button style
+	// MediumImportance applies a standard appearance.
+	MediumImportance ButtonImportance = iota
+	// HighImportance applies a prominent appearance.
+	HighImportance
+	// LowImportance applies a subtle appearance.
+	LowImportance
+)
+
+const (
+	// DefaultButton is the standard button style.
+	// Deprecated: use Importance = MediumImportance instead.
 	DefaultButton ButtonStyle = iota
-	// PrimaryButton that should be more prominent to the user
+	// PrimaryButton that should be more prominent to the user.
+	// Deprecated: use Importance = HighImportance instead.
 	PrimaryButton
 
 	buttonTapDuration = 250
@@ -53,11 +67,13 @@ type Button struct {
 	Text          string
 	Style         ButtonStyle
 	Icon          fyne.Resource
+	Importance    ButtonImportance
 	disabledIcon  fyne.Resource
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement
 
-	OnTapped   func() `json:"-"`
+	OnTapped func() `json:"-"`
+	// Deprecated: use Importance = LowImportance instead of HideShadow = true.
 	HideShadow bool
 
 	hovered, tapped bool
@@ -105,7 +121,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 		text,
 	}
 	shadowLevel := widget.ButtonLevel
-	if b.HideShadow {
+	if b.HideShadow || b.Importance == LowImportance {
 		shadowLevel = widget.BaseLevel
 	}
 	if icon != nil {
@@ -198,7 +214,7 @@ func (b *buttonRenderer) BackgroundColor() color.Color {
 func (b *buttonRenderer) Layout(size fyne.Size) {
 	var inset fyne.Position
 	bgSize := size
-	if !b.button.HideShadow {
+	if !b.button.HideShadow || b.button.Importance != LowImportance {
 		inset = fyne.NewPos(theme.Padding()/2, theme.Padding()/2)
 		bgSize = size.Subtract(fyne.NewSize(theme.Padding(), theme.Padding()))
 	}
@@ -318,18 +334,18 @@ func (b *buttonRenderer) applyTheme() {
 	switch {
 	case b.button.disabled:
 		b.label.Color = theme.DisabledTextColor()
-	case b.button.Style == PrimaryButton:
+	case b.button.Style == PrimaryButton || b.button.Importance == HighImportance:
 		b.label.Color = theme.BackgroundColor()
 	}
 	if b.icon != nil && b.icon.Resource != nil {
 		switch res := b.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if b.button.Style == PrimaryButton {
+			if b.button.Style == PrimaryButton || b.button.Importance == HighImportance {
 				b.icon.Resource = theme.NewInvertedThemedResource(res)
 				b.icon.Refresh()
 			}
 		case *theme.InvertedThemedResource:
-			if b.button.Style != PrimaryButton {
+			if b.button.Style != PrimaryButton || b.button.Importance != HighImportance {
 				b.icon.Resource = res.Original()
 				b.icon.Refresh()
 			}
@@ -341,7 +357,7 @@ func (b *buttonRenderer) buttonColor() color.Color {
 	switch {
 	case b.button.Disabled():
 		return theme.DisabledButtonColor()
-	case b.button.Style == PrimaryButton:
+	case b.button.Style == PrimaryButton, b.button.Importance == HighImportance:
 		return theme.PrimaryColor()
 	case b.button.hovered, b.button.tapped: // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
@@ -351,7 +367,7 @@ func (b *buttonRenderer) buttonColor() color.Color {
 }
 
 func (b *buttonRenderer) padding() fyne.Size {
-	if b.button.HideShadow {
+	if b.button.HideShadow || b.button.Importance == LowImportance {
 		return fyne.NewSize(theme.Padding()*2, theme.Padding()*2)
 	}
 	if b.button.Text == "" {

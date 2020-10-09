@@ -47,7 +47,7 @@ func TestAccordionContainer_ChangeTheme(t *testing.T) {
 	test.AssertImageMatches(t, "accordion_theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
-		ac.Resize(ac.MinSize())
+		w.Resize(ac.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		ac.Refresh()
 		time.Sleep(100 * time.Millisecond)
 		test.AssertImageMatches(t, "accordion_theme_changed.png", w.Canvas().Capture())

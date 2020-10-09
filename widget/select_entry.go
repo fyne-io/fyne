@@ -82,7 +82,7 @@ func (e *SelectEntry) setupDropDown() fyne.CanvasObject {
 		e.popUp.ShowAtPosition(popUpPos)
 		e.popUp.Resize(fyne.NewSize(e.Size().Width-theme.Padding()*2, e.popUp.MinSize().Height))
 	})
-	dropDownButton.HideShadow = true
+	dropDownButton.Importance = LowImportance
 	dropDownButton.SetIcon(theme.MenuDropDownIcon())
 	return dropDownButton
 }
