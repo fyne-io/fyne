@@ -720,13 +720,20 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 
 	// Check for double click/tap on left mouse button
 	if action == glfw.Release && button == desktop.LeftMouseButton {
-		w.mouseClickCount++
-		w.mouseLastClick = co
-		if w.mouseCancelFunc != nil {
-			w.mouseCancelFunc()
-			return
+		_, doubleTap := co.(fyne.DoubleTappable)
+		if doubleTap {
+			w.mouseClickCount++
+			w.mouseLastClick = co
+			if w.mouseCancelFunc != nil {
+				w.mouseCancelFunc()
+			}
+			go w.waitForDoubleTap(co, ev, action, button)
+		} else {
+			if wid, ok := co.(fyne.Tappable); ok {
+				w.queueEvent(func() { wid.Tapped(ev) })
+			}
 		}
-		go w.waitForDoubleTap(co, ev, action, button)
+		w.mousePressed = nil
 	}
 }
 
@@ -746,7 +753,6 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, act
 			}
 		}
 		w.mouseClickCount = 0
-		w.mousePressed = nil
 		w.mouseCancelFunc = nil
 		w.mouseLastClick = nil
 		return
