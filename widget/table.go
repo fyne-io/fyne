@@ -35,8 +35,8 @@ type Table struct {
 // The first returns the data size in rows and columns, second parameter is a function that returns cell
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
-func NewTable(len func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
-	t := &Table{Length: len, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
+func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
 	t.ExtendBaseWidget(t)
 	return t
 }
@@ -224,6 +224,14 @@ func newTableCells(t *Table, s fyne.Size) *tableCells {
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	return &tableCellsRenderer{cells: c, pool: &syncPool{}, visible: make(map[cellID]fyne.CanvasObject)}
+}
+
+func (c *tableCells) Resize(s fyne.Size) {
+	if s == c.size {
+		return
+	}
+	c.BaseWidget.Resize(s)
+	c.Refresh() // trigger a redraw
 }
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
