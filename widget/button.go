@@ -64,9 +64,11 @@ const (
 // Button widget has a text label and triggers an event func when clicked
 type Button struct {
 	DisableableWidget
-	Text          string
-	Style         ButtonStyle
-	Icon          fyne.Resource
+	Text string
+	// Deprecated, use Importance instead, where HighImportance matches PrimaryButton
+	Style ButtonStyle
+	Icon  fyne.Resource
+	// Specify how prominent the button should be, High will highlight the button and Low will remove some decoration.
 	Importance    ButtonImportance
 	disabledIcon  fyne.Resource
 	Alignment     ButtonAlign
