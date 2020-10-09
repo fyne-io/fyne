@@ -290,17 +290,23 @@ func (r *tableCellsRenderer) Refresh() {
 		r.returnAllToPool()
 	}
 
+	dataRows, dataCols := 0, 0
+	if f := r.cells.t.Length; f != nil {
+		dataRows, dataCols = r.cells.t.Length()
+	}
 	rows, cols := r.visibleCount()
 	offX := r.cells.t.offset.X - (r.cells.t.offset.X % (r.cells.cellSize.Width + tableDividerThickness))
 	minCol := offX / (r.cells.cellSize.Width + tableDividerThickness)
+	maxCol := fyne.Min(minCol+cols, dataCols)
 	offY := r.cells.t.offset.Y - (r.cells.t.offset.Y % (r.cells.cellSize.Height + tableDividerThickness))
 	minRow := offY / (r.cells.cellSize.Height + tableDividerThickness)
+	maxRow := fyne.Min(minRow+rows, dataRows)
 
 	wasVisible := r.visible
 	r.visible = make(map[cellID]fyne.CanvasObject)
 	var cells []fyne.CanvasObject
-	for y := minRow; y < minRow+rows; y++ {
-		for x := minCol; x < minCol+cols; x++ {
+	for y := minRow; y < maxRow; y++ {
+		for x := minCol; x < maxCol; x++ {
 			id := cellID{y, x}
 			c, ok := wasVisible[id]
 			if !ok {
