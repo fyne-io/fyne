@@ -149,7 +149,7 @@ func makeTableTab() fyne.CanvasObject {
 	return widget.NewTable(
 		func() (int, int) { return 500, 150 },
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Cell 00, 00")
+			return widget.NewLabel("Cell 000, 000")
 		},
 		func(row, col int, cell fyne.CanvasObject) {
 			label := cell.(*widget.Label)
