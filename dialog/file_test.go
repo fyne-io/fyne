@@ -192,9 +192,10 @@ func TestShowFileOpen(t *testing.T) {
 	t.Logf("home='%s'", home)
 	assert.Nil(t, err)
 	components := strings.Split(home, "/")
-	// note that normally when we do a string split, it's going to come up
-	// "", but we actually want the path bar to show "/".
-	components[0] = "/"
+	if components[0] == "" {
+		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
+		components[0] = "/"
+	}
 	if assert.Equal(t, len(components), len(breadcrumb.Children)) {
 		for i := range components {
 			t.Logf("i=%d components[i]='%s' breadcrumb...Text[i]='%s'", i, components[i], breadcrumb.Children[i].(*widget.Button).Text)
