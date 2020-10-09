@@ -427,6 +427,7 @@ func TestWindow_Tapped(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.waitForEvents()
+	time.Sleep(time.Second)
 
 	assert.Nil(t, o.popSecondaryTapEvent(), "no secondary tap")
 	if e, _ := o.popTapEvent().(*fyne.PointEvent); assert.NotNil(t, e, "tapped") {
@@ -464,12 +465,13 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 	w.mousePos = fyne.NewPos(10, 25)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
-	w.waitForEvents()
+	time.Sleep(time.Second)
 	assert.False(t, tapped)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.waitForEvents()
+	time.Sleep(time.Second)
 	assert.True(t, tapped)
 }
 
@@ -497,6 +499,8 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+	time.Sleep(time.Second)
+
 	assert.False(t, tapped, "Tapped button that was clipped")
 
 	w.mousePos = fyne.NewPos(10, 120)
@@ -504,6 +508,8 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+	time.Sleep(time.Second)
+
 	assert.True(t, tapped, "Tapped button that was clipped")
 }
 
@@ -519,6 +525,8 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+	time.Sleep(time.Second)
+
 	assert.Equal(t, 1, tapped, "Button 1 should be tapped")
 	tapped = 0
 
@@ -527,12 +535,16 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+	time.Sleep(time.Second)
+
 	assert.Equal(t, 0, tapped, "button was tapped without mouse press & release on it %d", tapped)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+	time.Sleep(time.Second)
+
 	assert.Equal(t, 2, tapped, "Button 2 should be tapped")
 }
 
