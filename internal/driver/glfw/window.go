@@ -298,8 +298,12 @@ func (w *window) SetCloseIntercept(callback func()) {
 }
 
 func (w *window) getMonitorForWindow() *glfw.Monitor {
-	xOff := w.xpos + (w.width / 2)
-	yOff := w.ypos + (w.height / 2)
+	x, y := w.xpos, w.ypos
+	if w.fullScreen {
+		x, y = w.viewport.GetPos()
+	}
+	xOff := x + (w.width / 2)
+	yOff := y + (w.height / 2)
 
 	for _, monitor := range glfw.GetMonitors() {
 		x, y := monitor.GetPos()
@@ -430,7 +434,7 @@ func (w *window) ShowAndRun() {
 	fyne.CurrentApp().Driver().Run()
 }
 
-//Clipboard returns the system clipboard
+// Clipboard returns the system clipboard
 func (w *window) Clipboard() fyne.Clipboard {
 	if w.viewport == nil {
 		return nil
@@ -906,12 +910,12 @@ func (w *window) keyPressed(_ *glfw.Window, key glfw.Key, scancode int, action g
 	if keyName == fyne.KeyTab {
 		if keyDesktopModifier == 0 {
 			if action != glfw.Release {
-				w.canvas.focusMgr.FocusNext(w.canvas.focused)
+				w.canvas.FocusNext()
 			}
 			return
 		} else if keyDesktopModifier == desktop.ShiftModifier {
 			if action != glfw.Release {
-				w.canvas.focusMgr.FocusPrevious(w.canvas.focused)
+				w.canvas.FocusPrevious()
 			}
 			return
 		}
@@ -1026,27 +1030,18 @@ func desktopModifier(mods glfw.ModifierKey) desktop.Modifier {
 //
 // Characters do not map 1:1 to physical keys, as a key may produce zero, one or more characters.
 func (w *window) charInput(_ *glfw.Window, char rune) {
-	if w.canvas.Focused() == nil && w.canvas.onTypedRune == nil {
-		return
-	}
-
-	focused := w.canvas.Focused()
-	if focused != nil {
+	if focused := w.canvas.Focused(); focused != nil {
 		w.queueEvent(func() { focused.TypedRune(char) })
 	} else if w.canvas.onTypedRune != nil {
 		w.queueEvent(func() { w.canvas.onTypedRune(char) })
 	}
 }
 
-func (w *window) focused(_ *glfw.Window, focused bool) {
-	if w.canvas.focused == nil {
-		return
-	}
-
-	if focused {
-		w.canvas.focused.FocusGained()
+func (w *window) focused(_ *glfw.Window, isFocused bool) {
+	if isFocused {
+		w.canvas.FocusGained()
 	} else {
-		w.canvas.focused.FocusLost()
+		w.canvas.FocusLost()
 	}
 }
 

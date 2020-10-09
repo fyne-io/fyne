@@ -285,7 +285,13 @@ func (p *packager) packageWindows() error {
 
 	vi.Build()
 	vi.Walk()
-	err = vi.WriteSyso(outPath, runtime.GOARCH)
+
+	arch, ok := os.LookupEnv("GOARCH")
+	if !ok {
+		arch = runtime.GOARCH
+	}
+
+	err = vi.WriteSyso(outPath, arch)
 	if err != nil {
 		return errors.Wrap(err, "Failed to write .syso file")
 	}

@@ -10,6 +10,8 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/cmd/fyne_demo/data"
 	"fyne.io/fyne/cmd/fyne_demo/screens"
+	"fyne.io/fyne/cmd/fyne_settings/settings"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -55,7 +57,7 @@ func welcomeScreen(a fyne.App) fyne.CanvasObject {
 		),
 		layout.NewSpacer(),
 
-		widget.NewGroup("Theme",
+		widget.NewCard("Choose theme", "",
 			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 				widget.NewButton("Dark", func() {
 					a.Settings().SetTheme(theme.DarkTheme())
@@ -85,7 +87,11 @@ func main() {
 		fyne.NewMenuItem("Directory", func() { fmt.Println("Menu New->Directory") }),
 		otherItem,
 	)
-	settingsItem := fyne.NewMenuItem("Settings", func() { fmt.Println("Menu Settings") })
+	settingsItem := fyne.NewMenuItem("Settings", func() {
+		w := a.NewWindow("Fyne Settings")
+		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
+		w.Show()
+	})
 
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		shortcutFocused(&fyne.ShortcutCut{
@@ -104,7 +110,20 @@ func main() {
 	})
 	findItem := fyne.NewMenuItem("Find", func() { fmt.Println("Menu Find") })
 
-	helpMenu := fyne.NewMenu("Help", fyne.NewMenuItem("Help", func() { fmt.Println("Help Menu") }))
+	helpMenu := fyne.NewMenu("Help",
+		fyne.NewMenuItem("Documentation", func() {
+			u, _ := url.Parse("https://developer.fyne.io")
+			_ = a.OpenURL(u)
+		}),
+		fyne.NewMenuItem("Support", func() {
+			u, _ := url.Parse("https://fyne.io/support/")
+			_ = a.OpenURL(u)
+		}),
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Sponsor", func() {
+			u, _ := url.Parse("https://github.com/sponsors/fyne-io")
+			_ = a.OpenURL(u)
+		}))
 	mainMenu := fyne.NewMainMenu(
 		// a quit item will be appended to our first menu
 		fyne.NewMenu("File", newItem, fyne.NewMenuItemSeparator(), settingsItem),
@@ -114,17 +133,17 @@ func main() {
 	w.SetMainMenu(mainMenu)
 	w.SetMaster()
 
-	tabs := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
-		widget.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
-		widget.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),
-		widget.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), screens.ContainerScreen()),
-		widget.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)))
+	tabs := container.NewAppTabs(
+		container.NewTabItemWithIcon("Welcome", theme.HomeIcon(), welcomeScreen(a)),
+		container.NewTabItemWithIcon("Graphics", theme.DocumentCreateIcon(), screens.GraphicsScreen()),
+		container.NewTabItemWithIcon("Widgets", theme.CheckButtonCheckedIcon(), screens.WidgetScreen()),
+		container.NewTabItemWithIcon("Containers", theme.ViewRestoreIcon(), screens.ContainerScreen()),
+		container.NewTabItemWithIcon("Windows", theme.ViewFullScreenIcon(), screens.DialogScreen(w)))
 
 	if !fyne.CurrentDevice().IsMobile() {
-		tabs.Append(widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
+		tabs.Append(container.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
 	}
-	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs.SetTabLocation(container.TabLocationLeading)
 	tabs.SelectTabIndex(a.Preferences().Int(preferenceCurrentTab))
 	w.SetContent(tabs)
 

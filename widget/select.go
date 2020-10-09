@@ -17,7 +17,7 @@ type selectRenderer struct {
 	*widget.ShadowingRenderer
 
 	icon  *Icon
-	label *canvas.Text
+	label *Label
 	bg    *canvas.Rectangle
 	combo *Select
 }
@@ -28,12 +28,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	min := fyne.MeasureText(s.combo.PlaceHolder, s.label.TextSize, s.label.TextStyle)
-
-	for _, option := range s.combo.Options {
-		optionMin := fyne.MeasureText(option, s.label.TextSize, s.label.TextStyle)
-		min = min.Union(optionMin)
-	}
+	min := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.label.TextStyle)
 
 	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
 	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
@@ -90,9 +85,6 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) updateLabel() {
-	s.label.Color = theme.TextColor()
-	s.label.TextSize = theme.TextSize()
-
 	if s.combo.PlaceHolder == "" {
 		s.combo.PlaceHolder = defaultPlaceHolder
 	}
@@ -128,6 +120,7 @@ type Select struct {
 var _ fyne.Widget = (*Select)(nil)
 
 // Hide hides the select.
+//
 // Implements: fyne.Widget
 func (s *Select) Hide() {
 	if s.popUp != nil {
@@ -138,6 +131,7 @@ func (s *Select) Hide() {
 }
 
 // Move changes the relative position of the select.
+//
 // Implements: fyne.Widget
 func (s *Select) Move(pos fyne.Position) {
 	s.BaseWidget.Move(pos)
@@ -220,8 +214,9 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
 	icon := NewIcon(theme.MenuDropDownIcon())
-	text := canvas.NewText(s.Selected, theme.TextColor())
+	text := NewLabel(s.Selected)
 	text.TextStyle.Bold = true
+	text.Wrapping = fyne.TextTruncate
 
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
@@ -247,6 +242,17 @@ func (s *Select) ClearSelected() {
 	s.updateSelected("")
 }
 
+// SelectedIndex returns the index value of the currently selected item in Options list.
+// It will return -1 if there is no selection.
+func (s *Select) SelectedIndex() int {
+	for i, option := range s.Options {
+		if s.Selected == option {
+			return i
+		}
+	}
+	return -1 // not selected/found
+}
+
 // SetSelected sets the current option of the select widget
 func (s *Select) SetSelected(text string) {
 	for _, option := range s.Options {
@@ -254,6 +260,15 @@ func (s *Select) SetSelected(text string) {
 			s.updateSelected(text)
 		}
 	}
+}
+
+// SetSelectedIndex will set the Selected option from the value in Options list at index position.
+func (s *Select) SetSelectedIndex(index int) {
+	if index < 0 || index >= len(s.Options) {
+		return
+	}
+
+	s.SetSelected(s.Options[index])
 }
 
 func (s *Select) updateSelected(text string) {

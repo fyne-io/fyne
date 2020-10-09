@@ -101,11 +101,15 @@ func (l *Label) object() fyne.Widget {
 func (l *Label) CreateRenderer() fyne.WidgetRenderer {
 	l.ExtendBaseWidget(l)
 	l.provider = newTextProvider(l.Text, l)
+	l.provider.size = l.size
 	return l.provider.CreateRenderer()
 }
 
 // MinSize returns the size that this widget should not shrink below
 func (l *Label) MinSize() fyne.Size {
 	l.ExtendBaseWidget(l)
+	if p := l.provider; p != nil && l.Text != string(p.buffer) {
+		p.setText(l.Text)
+	}
 	return l.BaseWidget.MinSize()
 }

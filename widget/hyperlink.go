@@ -127,5 +127,8 @@ func (hl *Hyperlink) CreateRenderer() fyne.WidgetRenderer {
 // MinSize returns the smallest size this widget can shrink to
 func (hl *Hyperlink) MinSize() fyne.Size {
 	hl.ExtendBaseWidget(hl)
+	if p := hl.provider; p != nil && hl.Text != string(p.buffer) {
+		p.setText(hl.Text)
+	}
 	return hl.BaseWidget.MinSize()
 }

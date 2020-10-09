@@ -24,8 +24,6 @@ type mobileCanvas struct {
 	scale            float32
 	size             fyne.Size
 
-	insetTop, insetBottom, insetLeft, insetRight int
-
 	focused fyne.Focusable
 	touched map[int]mobile.Touchable
 	padded  bool
@@ -202,6 +200,10 @@ func (c *mobileCanvas) SetOnTypedKey(typed func(*fyne.KeyEvent)) {
 
 func (c *mobileCanvas) AddShortcut(shortcut fyne.Shortcut, handler func(shortcut fyne.Shortcut)) {
 	c.shortcut.AddShortcut(shortcut, handler)
+}
+
+func (c *mobileCanvas) RemoveShortcut(shortcut fyne.Shortcut) {
+	c.shortcut.RemoveShortcut(shortcut)
 }
 
 func (c *mobileCanvas) Capture() image.Image {

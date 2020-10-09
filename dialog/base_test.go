@@ -15,7 +15,11 @@ func TestShowCustom_ApplyTheme(t *testing.T) {
 	test.ApplyTheme(t, theme.DarkTheme())
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(300, 200))
-	d := NewCustom("Title", "OK", widget.NewLabel("Content"), w)
+
+	label := widget.NewLabel("Content")
+	label.Alignment = fyne.TextAlignCenter
+
+	d := NewCustom("Title", "OK", label, w)
 
 	d.Show()
 	test.AssertImageMatches(t, "dialog-custom-dark.png", w.Canvas().Capture())

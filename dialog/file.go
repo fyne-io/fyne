@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -42,6 +41,7 @@ type FileDialog struct {
 	parent           fyne.Window
 	dialog           *fileDialog
 	dismissText      string
+	desiredSize      *fyne.Size
 }
 
 // Declare conformity to Dialog interface
@@ -96,11 +96,10 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 			ShowConfirm("Overwrite?", "Are you sure you want to overwrite the file\n"+name+"?",
 				func(ok bool) {
-					f.win.Hide()
 					if !ok {
-						callback(nil, nil)
 						return
 					}
+					f.win.Hide()
 
 					callback(storage.SaveFileToURI(storage.NewURI("file://" + path)))
 					if f.file.onClosedCallback != nil {
@@ -187,8 +186,7 @@ func (f *fileDialog) refreshDir(dir string) {
 	var icons []fyne.CanvasObject
 	parent := filepath.Dir(dir)
 	if parent != dir {
-		fi := &fileDialogItem{picker: f, icon: canvas.NewImageFromResource(theme.FolderOpenIcon()),
-			name: "(Parent)", path: filepath.Dir(dir), dir: true}
+		fi := &fileDialogItem{picker: f, name: "(Parent)", path: filepath.Dir(dir), dir: true}
 		fi.ExtendBaseWidget(fi)
 		icons = append(icons, fi)
 	}
@@ -314,10 +312,23 @@ func (f *FileDialog) Show() {
 		return
 	}
 	f.dialog = showFile(f)
+	if f.desiredSize != nil {
+		f.Resize(*f.desiredSize)
+		f.desiredSize = nil
+	}
+}
+
+// Refresh causes this dialog to be updated
+func (f *FileDialog) Refresh() {
+	f.dialog.win.Refresh()
 }
 
 // Resize dialog, call this function after dialog show
 func (f *FileDialog) Resize(size fyne.Size) {
+	if f.dialog == nil {
+		f.desiredSize = &size
+		return
+	}
 	maxSize := f.dialog.win.Size()
 	minSize := f.dialog.win.MinSize()
 	newWidth := size.Width

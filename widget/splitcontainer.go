@@ -13,6 +13,8 @@ import (
 var _ fyne.CanvasObject = (*SplitContainer)(nil)
 
 // SplitContainer defines a container whose size is split between two children.
+//
+// Deprecated: use container.Split instead.
 type SplitContainer struct {
 	BaseWidget
 	Offset     float64
@@ -21,12 +23,18 @@ type SplitContainer struct {
 	Trailing   fyne.CanvasObject
 }
 
-// NewHSplitContainer create a splitable parent wrapping the specified children.
-func NewHSplitContainer(left, right fyne.CanvasObject) *SplitContainer {
-	return newSplitContainer(true, left, right)
+// NewHSplitContainer creates a horizontally arranged container with the specified leading and trailing elements.
+// A vertical split bar that can be dragged will be added between the elements.
+//
+// Deprecated: use container.NewHSplit instead.
+func NewHSplitContainer(leading, trailing fyne.CanvasObject) *SplitContainer {
+	return newSplitContainer(true, leading, trailing)
 }
 
-// NewVSplitContainer create a splitable parent wrapping the specified children.
+// NewVSplitContainer creates a vertically arranged container with the specified top and bottom elements.
+// A horizontal split bar that can be dragged will be added between the elements.
+//
+// Deprecated: use container.NewVSplit instead.
 func NewVSplitContainer(top, bottom fyne.CanvasObject) *SplitContainer {
 	return newSplitContainer(false, top, bottom)
 }

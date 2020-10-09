@@ -23,7 +23,7 @@ func defaultTheme() fyne.Theme {
 func (app *fyneApp) OpenURL(url *url.URL) error {
 	cmd := app.exec("xdg-open", url.String())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	return cmd.Run()
+	return cmd.Start()
 }
 
 func (app *fyneApp) SendNotification(n *fyne.Notification) {

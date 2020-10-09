@@ -8,6 +8,8 @@ import "image/color"
 type Widget interface {
 	CanvasObject
 
+	// CreateRenderer returns a new WidgetRenderer for this widget.
+	// This should not be called by regular code, it is used internally to render a widget.
 	CreateRenderer() WidgetRenderer
 }
 
@@ -15,11 +17,18 @@ type Widget interface {
 // This is returned from a widget's declarative object through the Render()
 // function and should be exactly one instance per widget in memory.
 type WidgetRenderer interface {
-	Layout(Size)
-	MinSize() Size
-
-	Refresh()
+	// BackgroundColor returns the color that should be used to draw the background of this renderer’s widget.
 	BackgroundColor() color.Color
-	Objects() []CanvasObject
+	// Destroy is for internal use.
 	Destroy()
+	// Layout is a hook that is called if the widget needs to be laid out.
+	// This should never call Refresh.
+	Layout(Size)
+	// MinSize returns the minimum size of the widget that is rendered by this renderer.
+	MinSize() Size
+	// Objects returns all objects that should be drawn.
+	Objects() []CanvasObject
+	// Refresh is a hook that is called if the widget has updated and needs to be redrawn.
+	// This might trigger a Layout.
+	Refresh()
 }

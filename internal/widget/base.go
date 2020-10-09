@@ -18,6 +18,7 @@ type Base struct {
 }
 
 // Position returns the position of the widget relative to its parent.
+//
 // Implements: fyne.Widget
 func (b *Base) Position() fyne.Position {
 	b.propertyLock.RLock()
@@ -27,6 +28,7 @@ func (b *Base) Position() fyne.Position {
 }
 
 // Size returns the current size of the widget.
+//
 // Implements: fyne.Widget
 func (b *Base) Size() fyne.Size {
 	b.propertyLock.RLock()
@@ -36,6 +38,7 @@ func (b *Base) Size() fyne.Size {
 }
 
 // Visible returns whether the widget is visible or not.
+//
 // Implements: fyne.Widget
 func (b *Base) Visible() bool {
 	b.propertyLock.RLock()

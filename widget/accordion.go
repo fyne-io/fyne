@@ -7,33 +7,52 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-var _ fyne.Widget = (*AccordionContainer)(nil)
+const accordionDividerHeight = 1
+
+var _ fyne.Widget = (*Accordion)(nil)
 
 // AccordionContainer displays a list of AccordionItems.
 // Each item is represented by a button that reveals a detailed view when tapped.
-type AccordionContainer struct {
-	BaseWidget
-	Items     []*AccordionItem
-	MultiOpen bool
-}
+//
+// Deprecated: This has been renamed to Accordion
+type AccordionContainer = Accordion
 
 // NewAccordionContainer creates a new accordion widget.
+//
+// Deprecated: Use NewAccordion instead
 func NewAccordionContainer(items ...*AccordionItem) *AccordionContainer {
-	a := &AccordionContainer{
+	a := &Accordion{
 		Items: items,
 	}
 	a.ExtendBaseWidget(a)
 	return a
 }
 
-// Append adds the given item to this AccordionContainer.
-func (a *AccordionContainer) Append(item *AccordionItem) {
+// Accordion displays a list of AccordionItems.
+// Each item is represented by a button that reveals a detailed view when tapped.
+type Accordion struct {
+	BaseWidget
+	Items     []*AccordionItem
+	MultiOpen bool
+}
+
+// NewAccordion creates a new accordion widget.
+func NewAccordion(items ...*AccordionItem) *Accordion {
+	a := &Accordion{
+		Items: items,
+	}
+	a.ExtendBaseWidget(a)
+	return a
+}
+
+// Append adds the given item to this Accordion.
+func (a *Accordion) Append(item *AccordionItem) {
 	a.Items = append(a.Items, item)
 	a.Refresh()
 }
 
 // Close collapses the item at the given index.
-func (a *AccordionContainer) Close(index int) {
+func (a *Accordion) Close(index int) {
 	if index < 0 || index >= len(a.Items) {
 		return
 	}
@@ -42,7 +61,7 @@ func (a *AccordionContainer) Close(index int) {
 }
 
 // CloseAll collapses all items.
-func (a *AccordionContainer) CloseAll() {
+func (a *Accordion) CloseAll() {
 	for _, i := range a.Items {
 		i.Open = false
 	}
@@ -50,9 +69,9 @@ func (a *AccordionContainer) CloseAll() {
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (a *AccordionContainer) CreateRenderer() fyne.WidgetRenderer {
+func (a *Accordion) CreateRenderer() fyne.WidgetRenderer {
 	a.ExtendBaseWidget(a)
-	r := &accordionContainerRenderer{
+	r := &accordionRenderer{
 		container: a,
 	}
 	r.updateObjects()
@@ -60,13 +79,13 @@ func (a *AccordionContainer) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // MinSize returns the size that this widget should not shrink below.
-func (a *AccordionContainer) MinSize() fyne.Size {
+func (a *Accordion) MinSize() fyne.Size {
 	a.ExtendBaseWidget(a)
 	return a.BaseWidget.MinSize()
 }
 
 // Open expands the item at the given index.
-func (a *AccordionContainer) Open(index int) {
+func (a *Accordion) Open(index int) {
 	if index < 0 || index >= len(a.Items) {
 		return
 	}
@@ -81,7 +100,7 @@ func (a *AccordionContainer) Open(index int) {
 }
 
 // OpenAll expands all items.
-func (a *AccordionContainer) OpenAll() {
+func (a *Accordion) OpenAll() {
 	if !a.MultiOpen {
 		return
 	}
@@ -91,8 +110,8 @@ func (a *AccordionContainer) OpenAll() {
 	a.Refresh()
 }
 
-// Remove deletes the given item from this AccordionContainer.
-func (a *AccordionContainer) Remove(item *AccordionItem) {
+// Remove deletes the given item from this Accordion.
+func (a *Accordion) Remove(item *AccordionItem) {
 	for i, ai := range a.Items {
 		if ai == item {
 			a.RemoveIndex(i)
@@ -101,8 +120,8 @@ func (a *AccordionContainer) Remove(item *AccordionItem) {
 	}
 }
 
-// RemoveIndex deletes the item at the given index from this AccordionContainer.
-func (a *AccordionContainer) RemoveIndex(index int) {
+// RemoveIndex deletes the item at the given index from this Accordion.
+func (a *Accordion) RemoveIndex(index int) {
 	if index < 0 || index >= len(a.Items) {
 		return
 	}
@@ -110,19 +129,25 @@ func (a *AccordionContainer) RemoveIndex(index int) {
 	a.Refresh()
 }
 
-type accordionContainerRenderer struct {
+type accordionRenderer struct {
 	widget.BaseRenderer
-	container *AccordionContainer
+	container *Accordion
 	headers   []*Button
+	dividers  []*canvas.Rectangle
 }
 
-func (r *accordionContainerRenderer) Layout(size fyne.Size) {
+func (r *accordionRenderer) Layout(size fyne.Size) {
 	x := 0
 	y := 0
 	for i, ai := range r.container.Items {
 		if i != 0 {
-			y += theme.Padding()
+			div := r.dividers[i-1]
+			div.Move(fyne.NewPos(x, y))
+			div.Resize(fyne.NewSize(size.Width, accordionDividerHeight))
+			y += accordionDividerHeight
 		}
+		y += theme.Padding()
+
 		h := r.headers[i]
 		h.Move(fyne.NewPos(x, y))
 		min := h.MinSize().Height
@@ -136,13 +161,16 @@ func (r *accordionContainerRenderer) Layout(size fyne.Size) {
 			d.Resize(fyne.NewSize(size.Width, min))
 			y += min
 		}
+
+		y += theme.Padding()
 	}
 }
 
-func (r *accordionContainerRenderer) MinSize() (size fyne.Size) {
+func (r *accordionRenderer) MinSize() (size fyne.Size) {
 	for i, ai := range r.container.Items {
+		size.Height += theme.Padding() * 2
 		if i != 0 {
-			size.Height += theme.Padding()
+			size.Height += accordionDividerHeight
 		}
 		min := r.headers[i].MinSize()
 		size.Width = fyne.Max(size.Width, min.Width)
@@ -157,13 +185,17 @@ func (r *accordionContainerRenderer) MinSize() (size fyne.Size) {
 	return
 }
 
-func (r *accordionContainerRenderer) Refresh() {
+func (r *accordionRenderer) Refresh() {
+	for _, d := range r.dividers {
+		d.FillColor = theme.ShadowColor()
+	}
+
 	r.updateObjects()
 	r.Layout(r.container.Size())
 	canvas.Refresh(r.container)
 }
 
-func (r *accordionContainerRenderer) updateObjects() {
+func (r *accordionRenderer) updateObjects() {
 	is := len(r.container.Items)
 	hs := len(r.headers)
 	i := 0
@@ -172,6 +204,7 @@ func (r *accordionContainerRenderer) updateObjects() {
 		var h *Button
 		if i < hs {
 			h = r.headers[i]
+			h.Show()
 		} else {
 			h = &Button{}
 			r.headers = append(r.headers, h)
@@ -179,6 +212,7 @@ func (r *accordionContainerRenderer) updateObjects() {
 		h.Alignment = ButtonAlignLeading
 		h.IconPlacement = ButtonIconLeadingText
 		h.Hidden = false
+		h.HideShadow = true
 		h.Text = ai.Title
 		index := i // capture
 		h.OnTapped = func() {
@@ -209,10 +243,25 @@ func (r *accordionContainerRenderer) updateObjects() {
 	for _, i := range r.container.Items {
 		objects = append(objects, i.Detail)
 	}
+	// add dividers
+	for i = 0; i < len(r.dividers); i++ {
+		if i < len(r.container.Items)-1 {
+			r.dividers[i].Show()
+		} else {
+			r.dividers[i].Hide()
+		}
+		objects = append(objects, r.dividers[i])
+	}
+	// make new dividers
+	for ; i < is-1; i++ {
+		div := canvas.NewRectangle(theme.ShadowColor())
+		r.dividers = append(r.dividers, div)
+		objects = append(objects, div)
+	}
 	r.SetObjects(objects)
 }
 
-// AccordionItem represents a single item in an AccordionContainer.
+// AccordionItem represents a single item in an Accordion.
 type AccordionItem struct {
 	Title  string
 	Detail fyne.CanvasObject

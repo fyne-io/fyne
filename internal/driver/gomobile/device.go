@@ -11,6 +11,7 @@ type device struct {
 	insetTop, insetBottom, insetLeft, insetRight int
 }
 
+//lint:file-ignore U1000 Var currentDPI is used in other files, but not here
 var (
 	currentOrientation size.Orientation
 	currentDPI         float32

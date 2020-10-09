@@ -161,6 +161,18 @@ func drawText(c fyne.Canvas, text *canvas.Text, pos fyne.Position, base *image.N
 	draw.Draw(base, clippedBounds, txtImg, srcPt, draw.Over)
 }
 
+func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
+	bounds := rast.Size()
+	if bounds.IsZero() {
+		return
+	}
+	width := internal.ScaleInt(c, bounds.Width)
+	height := internal.ScaleInt(c, bounds.Height)
+	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
+
+	drawTex(scaledX, scaledY, width, height, base, rast.Generator(width, height), clip)
+}
+
 func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
 	pad := painter.VectorPad(rect)
 	scaledWidth := internal.ScaleInt(c, rect.Size().Width+pad*2)

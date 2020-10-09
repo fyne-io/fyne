@@ -70,7 +70,7 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	}
 
 	// trim the scheme (and +1 for the :)
-	s = s[len(u.Scheme())+1 : len(s)]
+	s = s[len(u.Scheme())+1:]
 
 	// Completely empty URI with just a scheme
 	if len(s) == 0 {
@@ -80,7 +80,7 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 	// trim leading forward slashes
 	trimmed := 0
 	for s[0] == '/' {
-		s = s[1:len(s)]
+		s = s[1:]
 		trimmed++
 
 		// if all we have left is an empty string, than this URI
