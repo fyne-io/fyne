@@ -22,7 +22,7 @@ import (
 
 const (
 	scrollSpeed      = 10
-	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
+	doubleClickDelay = 300 // ms (maximum interval between clicks for double click detection)
 )
 
 var (
