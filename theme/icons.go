@@ -143,7 +143,7 @@ func (res *DisabledResource) Name() string {
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	clr := fyne.CurrentApp().Settings().Theme().DisabledIconColor()
+	clr := fyne.CurrentApp().Settings().Theme().DisabledTextColor()
 	return colorizeResource(res.source, clr)
 }
 
