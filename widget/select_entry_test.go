@@ -11,6 +11,45 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestSelectEntry_Disableable(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	options := []string{"A", "B", "C"}
+	e := widget.NewSelectEntry(options)
+	w := test.NewWindow(e)
+	defer w.Close()
+	w.Resize(fyne.NewSize(150, 200))
+	e.Resize(e.MinSize().Max(fyne.NewSize(130, 0)))
+	e.Move(fyne.NewPos(10, 10))
+	c := w.Canvas()
+
+	assert.False(t, e.Disabled())
+	test.AssertImageMatches(t, "select_entry/disableable_enabled.png", c.Capture())
+
+	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
+	test.TapCanvas(c, switchPos)
+	test.AssertImageMatches(t, "select_entry/disableable_enabled_opened.png", c.Capture())
+
+	test.TapCanvas(c, fyne.NewPos(0, 0))
+	test.AssertImageMatches(t, "select_entry/disableable_enabled.png", c.Capture())
+
+	e.Disable()
+	assert.True(t, e.Disabled())
+	test.AssertImageMatches(t, "select_entry/disableable_disabled.png", c.Capture())
+
+	test.TapCanvas(c, switchPos)
+	test.AssertImageMatches(t, "select_entry/disableable_disabled.png", c.Capture(), "no drop-down when disabled")
+
+	e.Enable()
+	assert.False(t, e.Disabled())
+	test.AssertImageMatches(t, "select_entry/disableable_enabled.png", c.Capture())
+
+	test.TapCanvas(c, switchPos)
+	test.AssertImageMatches(t, "select_entry/disableable_enabled_opened.png", c.Capture())
+}
+
 func TestSelectEntry_DropDown(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
