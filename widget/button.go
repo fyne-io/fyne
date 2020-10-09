@@ -313,19 +313,6 @@ func (b *buttonRenderer) Refresh() {
 	canvas.Refresh(b.button.super())
 }
 
-func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Size) (pos fyne.Position) {
-	pos.Y = (layoutSize.Height - objectSize.Height) / 2
-	switch align {
-	case ButtonAlignCenter:
-		pos.X = (layoutSize.Width - objectSize.Width) / 2
-	case ButtonAlignLeading:
-		pos.X = padding.Width / 2
-	case ButtonAlignTrailing:
-		pos.X = layoutSize.Width - objectSize.Width - padding.Width/2
-	}
-	return
-}
-
 // applyTheme updates this button to match the current theme
 func (b *buttonRenderer) applyTheme() {
 	b.bg.FillColor = b.buttonColor()
@@ -374,4 +361,17 @@ func (b *buttonRenderer) padding() fyne.Size {
 		return fyne.NewSize(theme.Padding()*4, theme.Padding()*4)
 	}
 	return fyne.NewSize(theme.Padding()*6, theme.Padding()*4)
+}
+
+func alignedPosition(align ButtonAlign, padding, objectSize, layoutSize fyne.Size) (pos fyne.Position) {
+	pos.Y = (layoutSize.Height - objectSize.Height) / 2
+	switch align {
+	case ButtonAlignCenter:
+		pos.X = (layoutSize.Width - objectSize.Width) / 2
+	case ButtonAlignLeading:
+		pos.X = padding.Width / 2
+	case ButtonAlignTrailing:
+		pos.X = layoutSize.Width - objectSize.Width - padding.Width/2
+	}
+	return
 }
