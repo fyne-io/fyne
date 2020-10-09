@@ -141,7 +141,7 @@ func TestButton_Shadow(t *testing.T) {
 	}
 	{
 		button := NewButton("Test", func() {})
-		button.Style = LowEmphasisButton
+		button.HideShadow = true
 		for _, o := range test.LaidOutObjects(button) {
 			if _, ok := o.(*widget.Shadow); ok {
 				assert.Fail(t, "button with HideShadow == true should not create a shadow")
