@@ -186,7 +186,7 @@ func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
 	osHome, err = os.UserHomeDir()
 
 	if err == nil {
-		home, err1 = storage.ListerForURI(storage.NewURI("file://" + osHome))
+		home, err1 = storage.ListerForURI(storage.NewFileURI(osHome))
 		if err1 == nil {
 			var documentsURI fyne.URI
 			documentsURI, err1 = storage.Child(home, "Documents")
@@ -304,7 +304,7 @@ func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
 			buildDir = d + string(os.PathSeparator)
 		}
 
-		newDir, err := storage.ListerForURI(storage.NewURI("file://" + buildDir))
+		newDir, err := storage.ListerForURI(storage.NewFileURI(buildDir))
 		if err != nil {
 			return err
 		}
@@ -384,7 +384,7 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 	// Try home dir
 	dir, err := os.UserHomeDir()
 	if err == nil {
-		lister, err := storage.ListerForURI(storage.NewURI("file://" + dir))
+		lister, err := storage.ListerForURI(storage.NewFileURI(dir))
 		if err == nil {
 			return lister
 		}
@@ -395,14 +395,14 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 	// Try to get ./
 	wd, err := os.Getwd()
 	if err == nil {
-		lister, err := storage.ListerForURI(storage.NewURI("file://" + wd))
+		lister, err := storage.ListerForURI(storage.NewFileURI(wd))
 		if err == nil {
 			return lister
 		}
 		fyne.LogError("Could not create lister for working dir", err)
 	}
 
-	lister, err := storage.ListerForURI(storage.NewURI("file:///"))
+	lister, err := storage.ListerForURI(storage.NewFileURI("/"))
 	if err != nil {
 		fyne.LogError("could not create lister for /", err)
 		return nil

@@ -51,7 +51,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	if err != nil {
 		t.Skipf("os.Gethome() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
 	}
-	home, err := storage.ListerForURI(storage.NewURI("file://" + homeString))
+	home, err := storage.ListerForURI(storage.NewFileURI(homeString))
 	if err != nil {
 		t.Skipf("could not get lister for working directory: %s", err)
 	}
@@ -97,7 +97,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	}
 
 	// make sure we fail over if the specified directory does not exist
-	dialog.StartingLocation, err = storage.ListerForURI(storage.NewURI("file:///some/file/that/does/not/exist"))
+	dialog.StartingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
 	if err == nil {
 		t.Errorf("Should have failed to create lister for nonexistant file")
 	}
@@ -322,7 +322,7 @@ func TestFileFilters(t *testing.T) {
 		fyne.LogError("Could not get current working directory", err)
 		t.FailNow()
 	}
-	testDataDir := storage.NewURI("file://" + filepath.Join(workingDir, "testdata"))
+	testDataDir := storage.NewFileURI(filepath.Join(workingDir, "testdata"))
 	testDataLister, err := storage.ListerForURI(testDataDir)
 	if err != nil {
 		t.Error(err)

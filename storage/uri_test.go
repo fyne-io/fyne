@@ -36,15 +36,15 @@ func TestNewURI_Content(t *testing.T) {
 func TestURI_Scheme(t *testing.T) {
 	assert.Equal(t, "http", storage.NewURI("http://google.com").Scheme())
 	assert.Equal(t, "http", storage.NewURI("hTtP://google.com").Scheme())
-	assert.Equal(t, "file", storage.NewURI("file:///home/user/file.txt").Scheme())
 	assert.Equal(t, "file", storage.NewURI("FILE://C:/autoexec.bat").Scheme())
+	assert.Equal(t, "file", storage.NewFileURI("/home/user/file.txt").Scheme())
 }
 
 func TestURI_Name(t *testing.T) {
 	assert.Equal(t, "text.txt", storage.NewURI("file:///text.txt").Name())
 	assert.Equal(t, "library.a", storage.NewURI("file:///library.a").Name())
-	assert.Equal(t, "image.JPEG", storage.NewURI("file://C:/image.JPEG").Name())
 	assert.Equal(t, "directory", storage.NewURI("file://C:/directory/").Name())
+	assert.Equal(t, "image.JPEG", storage.NewFileURI("C:/image.JPEG").Name())
 }
 
 func TestURI_Parent(t *testing.T) {
@@ -55,7 +55,7 @@ func TestURI_Parent(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
-	parent, err = storage.Parent(storage.NewURI("file:///foo/bar/baz/"))
+	parent, err = storage.Parent(storage.NewFileURI("/foo/bar/baz/"))
 	assert.Nil(t, err)
 	assert.Equal(t, "file:///foo/bar/", parent.String())
 
@@ -86,6 +86,8 @@ func TestURI_Parent(t *testing.T) {
 		// backslashes.
 		uri := storage.NewURI("file://C:\\foo\\bar\\baz\\")
 		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
+		uri = storage.NewFileURI("C:\\foo\\bar\\baz\\")
+		assert.Equal(t, "file://C:/foo/bar/baz/", uri.String())
 
 		parent, err = storage.Parent(uri)
 		assert.Nil(t, err)
@@ -114,9 +116,9 @@ func TestURI_Parent(t *testing.T) {
 
 func TestURI_Extension(t *testing.T) {
 	assert.Equal(t, ".txt", storage.NewURI("file:///text.txt").Extension())
-	assert.Equal(t, ".a", storage.NewURI("file:///library.a").Extension())
 	assert.Equal(t, ".JPEG", storage.NewURI("file://C:/image.JPEG").Extension())
 	assert.Equal(t, "", storage.NewURI("file://C:/directory/").Extension())
+	assert.Equal(t, ".a", storage.NewFileURI("/library.a").Extension())
 }
 
 func TestURI_Child(t *testing.T) {

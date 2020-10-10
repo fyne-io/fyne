@@ -17,19 +17,31 @@ type uri struct {
 	raw string
 }
 
-// NewURI creates a new URI from the given string representation.
-// This could be a URI from an external source or one saved from URI.String()
-func NewURI(u string) fyne.URI {
+func NewFileURI(path string) fyne.URI {
 	// URIs are supposed to use forward slashes. On Windows, it
 	// should be OK to use the platform native filepath with UNIX
-	// or NT sytle paths, with / or \, but when we reconstruct
+	// or NT style paths, with / or \, but when we reconstruct
 	// the URI, we want to have / only.
 	if runtime.GOOS == "windows" {
 		// seems that sometimes we end up with
 		// double-backslashes
-		u = strings.ReplaceAll(u, "\\\\", "/")
-		u = strings.ReplaceAll(u, "\\", "/")
+		path = strings.ReplaceAll(path, "\\\\", "/")
+		path = strings.ReplaceAll(path, "\\", "/")
 	}
+	return &uri{raw: "file://" + path}
+}
+
+// NewURI creates a new URI from the given string representation.
+// This could be a URI from an external source or one saved from URI.String()
+func NewURI(u string) fyne.URI {
+	if len(u) > 5 && u[:5] == "file:" {
+		path := u[5:]
+		if len(path) > 2 && path[:2] == "//" {
+			path = path[2:]
+		}
+		return NewFileURI(path)
+	}
+
 	return &uri{raw: u}
 }
 
