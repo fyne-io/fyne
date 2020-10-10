@@ -744,20 +744,20 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	defer w.mouseCancelFunc()
 
 	<-ctx.Done()
-		if w.mouseClickCount == 2 && w.mouseLastClick == co {
-			if wid, ok := co.(fyne.DoubleTappable); ok {
-				w.queueEvent(func() { wid.DoubleTapped(ev) })
-			}
-		} else if co == w.mousePressed {
-			if wid, ok := co.(fyne.Tappable); ok {
-				w.queueEvent(func() { wid.Tapped(ev) })
-			}
+	if w.mouseClickCount == 2 && w.mouseLastClick == co {
+		if wid, ok := co.(fyne.DoubleTappable); ok {
+			w.queueEvent(func() { wid.DoubleTapped(ev) })
 		}
-		w.mouseClickCount = 0
-		w.mousePressed = nil
-		w.mouseCancelFunc = nil
-		w.mouseLastClick = nil
-		return
+	} else if co == w.mousePressed {
+		if wid, ok := co.(fyne.Tappable); ok {
+			w.queueEvent(func() { wid.Tapped(ev) })
+		}
+	}
+	w.mouseClickCount = 0
+	w.mousePressed = nil
+	w.mouseCancelFunc = nil
+	w.mouseLastClick = nil
+	return
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {

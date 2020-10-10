@@ -479,19 +479,19 @@ func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEven
 	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
 	defer c.touchCancelFunc()
 	<-ctx.Done()
-		if c.touchTapCount == 2 && c.touchLastTapped == co {
-			if wid, ok := co.(fyne.DoubleTappable); ok {
-				doubleTapCallback(wid, ev)
-			}
-		} else {
-			if wid, ok := co.(fyne.Tappable); ok {
-				tapCallback(wid, ev)
-			}
+	if c.touchTapCount == 2 && c.touchLastTapped == co {
+		if wid, ok := co.(fyne.DoubleTappable); ok {
+			doubleTapCallback(wid, ev)
 		}
-		c.touchTapCount = 0
-		c.touchCancelFunc = nil
-		c.touchLastTapped = nil
-		return
+	} else {
+		if wid, ok := co.(fyne.Tappable); ok {
+			tapCallback(wid, ev)
+		}
+	}
+	c.touchTapCount = 0
+	c.touchCancelFunc = nil
+	c.touchLastTapped = nil
+	return
 }
 
 func (c *mobileCanvas) setupThemeListener() {
