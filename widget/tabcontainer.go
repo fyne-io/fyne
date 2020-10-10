@@ -312,9 +312,9 @@ func (r *tabContainerRenderer) Refresh() {
 		}
 		for i, button := range r.tabBar.Objects {
 			if i == current {
-				button.(*tabButton).Style = PrimaryButton
+				button.(*tabButton).Importance = HighImportance
 			} else {
-				button.(*tabButton).Style = DefaultButton
+				button.(*tabButton).Importance = MediumImportance
 			}
 
 			button.Refresh()
@@ -424,7 +424,7 @@ func (r *tabContainerRenderer) updateTabs() bool {
 	for i, item := range r.container.Items {
 		button := r.buildButton(item, iconPos)
 		if i == r.container.current {
-			button.Style = PrimaryButton
+			button.Importance = HighImportance
 			item.Content.Show()
 		} else {
 			item.Content.Hide()
@@ -454,8 +454,8 @@ type tabButton struct {
 	hovered      bool
 	Icon         fyne.Resource
 	IconPosition buttonIconPosition
+	Importance   ButtonImportance
 	OnTap        func()
-	Style        ButtonStyle
 	Text         string
 }
 
@@ -464,13 +464,13 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
-		if b.Style == PrimaryButton {
+		if b.Importance == HighImportance {
 			icon.Resource = theme.NewPrimaryThemedResource(b.Icon)
 		}
 	}
 
 	label := canvas.NewText(b.Text, theme.TextColor())
-	if b.Style == PrimaryButton {
+	if b.Importance == HighImportance {
 		label.Color = theme.PrimaryColor()
 	}
 	label.TextStyle.Bold = true
@@ -605,7 +605,7 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabButtonRenderer) Refresh() {
 	r.label.Text = r.button.Text
-	if r.button.Style == PrimaryButton {
+	if r.button.Importance == HighImportance {
 		r.label.Color = theme.PrimaryColor()
 	} else {
 		r.label.Color = theme.TextColor()
@@ -615,12 +615,12 @@ func (r *tabButtonRenderer) Refresh() {
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if r.button.Style == PrimaryButton {
+			if r.button.Importance == HighImportance {
 				r.icon.Resource = theme.NewPrimaryThemedResource(res)
 				r.icon.Refresh()
 			}
 		case *theme.PrimaryThemedResource:
-			if r.button.Style != PrimaryButton {
+			if r.button.Importance != HighImportance {
 				r.icon.Resource = res.Original()
 				r.icon.Refresh()
 			}

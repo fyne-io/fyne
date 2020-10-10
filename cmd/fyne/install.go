@@ -62,7 +62,7 @@ func (i *installer) install() error {
 		switch p.os {
 		case "darwin":
 			i.installDir = "/Applications"
-		case "linux":
+		case "linux", "openbsd", "freebsd", "netbsd":
 			i.installDir = "/" // the tarball contains the structure starting at usr/local
 		case "windows":
 			i.installDir = filepath.Join(os.Getenv("ProgramFiles"), p.name)

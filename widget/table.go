@@ -35,8 +35,8 @@ type Table struct {
 // The first returns the data size in rows and columns, second parameter is a function that returns cell
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
-func NewTable(len func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
-	t := &Table{Length: len, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
+func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
 	t.ExtendBaseWidget(t)
 	return t
 }
@@ -226,6 +226,14 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	return &tableCellsRenderer{cells: c, pool: &syncPool{}, visible: make(map[cellID]fyne.CanvasObject)}
 }
 
+func (c *tableCells) Resize(s fyne.Size) {
+	if s == c.size {
+		return
+	}
+	c.BaseWidget.Resize(s)
+	c.Refresh() // trigger a redraw
+}
+
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
 		c.t.SelectedColumn = -1
@@ -282,17 +290,23 @@ func (r *tableCellsRenderer) Refresh() {
 		r.returnAllToPool()
 	}
 
+	dataRows, dataCols := 0, 0
+	if f := r.cells.t.Length; f != nil {
+		dataRows, dataCols = r.cells.t.Length()
+	}
 	rows, cols := r.visibleCount()
 	offX := r.cells.t.offset.X - (r.cells.t.offset.X % (r.cells.cellSize.Width + tableDividerThickness))
 	minCol := offX / (r.cells.cellSize.Width + tableDividerThickness)
+	maxCol := fyne.Min(minCol+cols, dataCols)
 	offY := r.cells.t.offset.Y - (r.cells.t.offset.Y % (r.cells.cellSize.Height + tableDividerThickness))
 	minRow := offY / (r.cells.cellSize.Height + tableDividerThickness)
+	maxRow := fyne.Min(minRow+rows, dataRows)
 
 	wasVisible := r.visible
 	r.visible = make(map[cellID]fyne.CanvasObject)
 	var cells []fyne.CanvasObject
-	for y := minRow; y < minRow+rows; y++ {
-		for x := minCol; x < minCol+cols; x++ {
+	for y := minRow; y < maxRow; y++ {
+		for x := minCol; x < maxCol; x++ {
 			id := cellID{y, x}
 			c, ok := wasVisible[id]
 			if !ok {
@@ -309,7 +323,7 @@ func (r *tableCellsRenderer) Refresh() {
 					theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
 
 				if f := r.cells.t.UpdateCell; f != nil {
-					r.cells.t.UpdateCell(minRow+y, minCol+x, c)
+					r.cells.t.UpdateCell(y, x, c)
 				} else {
 					fyne.LogError("Missing UpdateCell callback required for Table", nil)
 				}
