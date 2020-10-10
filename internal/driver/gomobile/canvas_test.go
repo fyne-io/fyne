@@ -78,7 +78,7 @@ func TestCanvas_Tapped(t *testing.T) {
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
 		altTapped = true
 		wid.TappedSecondary(ev)
-	}, func (wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
@@ -108,7 +108,7 @@ func TestCanvas_Tapped_Multi(t *testing.T) {
 	c.tapUp(tapPos, 1, func(wid fyne.Tappable, ev *fyne.PointEvent) { // different tapID
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func (wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
@@ -137,7 +137,7 @@ func TestCanvas_TappedSecondary(t *testing.T) {
 		altTappedObj = wid
 		pointEvent = ev
 		wid.TappedSecondary(ev)
-	}, func (wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
@@ -190,7 +190,7 @@ func TestCanvas_Tappable(t *testing.T) {
 
 	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func (wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
 	assert.True(t, content.up)
@@ -220,7 +220,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func (wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
@@ -231,7 +231,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func (wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
@@ -239,7 +239,7 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	c.tapUp(fyne.NewPos(15, 15), 0, func(wid fyne.Tappable, ev *fyne.PointEvent) {
 		wid.Tapped(ev)
 	}, func(wid fyne.SecondaryTappable, ev *fyne.PointEvent) {
-	}, func (wid fyne.DoubleTappable, ev *fyne.PointEvent) {
+	}, func(wid fyne.DoubleTappable, ev *fyne.PointEvent) {
 		wid.DoubleTapped(ev)
 	}, func(wid fyne.Draggable, ev *fyne.DragEvent) {
 	})
