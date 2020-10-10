@@ -388,18 +388,10 @@ func (c *glCanvas) objectTrees() []fyne.CanvasObject {
 	return trees
 }
 
-func (c *glCanvas) overlayChanged(focusMgr, prevFocusMgr *app.FocusManager) {
+func (c *glCanvas) overlayChanged() {
 	c.Lock()
 	defer c.Unlock()
 	c.dirty = true
-	if prevFocusMgr == nil {
-		prevFocusMgr = c.focusMgr
-	}
-	if focusMgr == nil {
-		focusMgr = c.focusMgr
-	}
-	prevFocusMgr.FocusLost()
-	focusMgr.FocusGained()
 }
 
 func (c *glCanvas) paint(size fyne.Size) {

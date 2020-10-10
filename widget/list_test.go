@@ -231,6 +231,13 @@ func TestList_RemoveItem(t *testing.T) {
 	test.AssertImageMatches(t, "list/list_item_removed.png", w.Canvas().Capture())
 }
 
+func TestList_NoFunctionsSet(t *testing.T) {
+	list := &List{}
+	w := test.NewWindow(list)
+	w.Resize(fyne.NewSize(200, 400))
+	list.Refresh()
+}
+
 func createList(items int) *List {
 	var data []string
 	for i := 0; i < items; i++ {

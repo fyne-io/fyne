@@ -16,14 +16,14 @@ func TestButton_Style(t *testing.T) {
 	button := NewButton("Test", nil)
 	bg := test.WidgetRenderer(button).(*buttonRenderer).buttonColor()
 
-	button.Style = PrimaryButton
+	button.Importance = HighImportance
 	assert.NotEqual(t, bg, test.WidgetRenderer(button).(*buttonRenderer).buttonColor())
 }
 
 func TestButton_DisabledColor(t *testing.T) {
 	button := NewButton("Test", nil)
 	bg := test.WidgetRenderer(button).(*buttonRenderer).buttonColor()
-	button.Style = DefaultButton
+	button.Importance = MediumImportance
 	assert.Equal(t, bg, theme.ButtonColor())
 
 	button.Disable()
@@ -141,10 +141,10 @@ func TestButton_Shadow(t *testing.T) {
 	}
 	{
 		button := NewButton("Test", func() {})
-		button.HideShadow = true
+		button.Importance = LowImportance
 		for _, o := range test.LaidOutObjects(button) {
 			if _, ok := o.(*widget.Shadow); ok {
-				assert.Fail(t, "button with HideShadow == true should not create a shadow")
+				assert.Fail(t, "button with LowImportance should not create a shadow")
 			}
 		}
 	}
