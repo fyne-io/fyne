@@ -39,7 +39,6 @@ func (v *env) main() {
 	reporters := []goinfo.Reporter{
 		&fyneReport{GoMod: &report.GoMod{WorkDir: workDir, Module: fyneModule}},
 		&report.GoVersion{},
-		&report.OS{},
 		&report.GoEnv{Filter: []string{"GOOS", "GOARCH", "CGO_ENABLED", "GO111MODULE"}},
 	}
 
