@@ -12,9 +12,8 @@ import (
 )
 
 func TestSelectEntry_Disableable(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	options := []string{"A", "B", "C"}
 	e := widget.NewSelectEntry(options)
@@ -51,9 +50,8 @@ func TestSelectEntry_Disableable(t *testing.T) {
 }
 
 func TestSelectEntry_DropDown(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	options := []string{"A", "B", "C"}
 	e := widget.NewSelectEntry(options)
@@ -84,9 +82,8 @@ func TestSelectEntry_DropDown(t *testing.T) {
 }
 
 func TestSelectEntry_DropDownResize(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	options := []string{"A", "B", "C"}
 	e := widget.NewSelectEntry(options)
@@ -176,9 +173,8 @@ func TestSelectEntry_MinSize(t *testing.T) {
 }
 
 func TestSelectEntry_SetOptions(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	e := widget.NewSelectEntry([]string{"A", "B", "C"})
 	w := test.NewWindow(e)
@@ -199,9 +195,8 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 }
 
 func TestSelectEntry_SetOptions_Empty(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	e := widget.NewSelectEntry([]string{})
 	w := test.NewWindow(e)
