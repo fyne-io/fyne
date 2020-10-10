@@ -726,6 +726,7 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			w.mouseLastClick = co
 			if w.mouseCancelFunc != nil {
 				w.mouseCancelFunc()
+				return
 			}
 			go w.waitForDoubleTap(co, ev)
 		} else {
