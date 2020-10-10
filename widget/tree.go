@@ -39,29 +39,6 @@ type Tree struct {
 	leafMinSize   fyne.Size
 }
 
-// NewTreeWithStrings creates a new tree with the given string map.
-// Data must contain a mapping for the root, which defaults to empty string ("").
-func NewTreeWithStrings(data map[string][]string) (t *Tree) {
-	t = &Tree{
-		Children: func(uid string) (c []string) {
-			c = data[uid]
-			return
-		},
-		IsBranch: func(uid string) (b bool) {
-			_, b = data[uid]
-			return
-		},
-		CreateNode: func(branch bool) fyne.CanvasObject {
-			return NewLabel("Template Object")
-		},
-		UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {
-			node.(*Label).SetText(uid)
-		},
-	}
-	t.ExtendBaseWidget(t)
-	return
-}
-
 // NewTreeWithFiles creates a new tree with the given file system URI.
 func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 	t = &Tree{
@@ -124,6 +101,29 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 		} else {
 			l.SetText(uri.Name())
 		}
+	}
+	t.ExtendBaseWidget(t)
+	return
+}
+
+// NewTreeWithStrings creates a new tree with the given string map.
+// Data must contain a mapping for the root, which defaults to empty string ("").
+func NewTreeWithStrings(data map[string][]string) (t *Tree) {
+	t = &Tree{
+		Children: func(uid string) (c []string) {
+			c = data[uid]
+			return
+		},
+		IsBranch: func(uid string) (b bool) {
+			_, b = data[uid]
+			return
+		},
+		CreateNode: func(branch bool) fyne.CanvasObject {
+			return NewLabel("Template Object")
+		},
+		UpdateNode: func(uid string, branch bool, node fyne.CanvasObject) {
+			node.(*Label).SetText(uid)
+		},
 	}
 	t.ExtendBaseWidget(t)
 	return
