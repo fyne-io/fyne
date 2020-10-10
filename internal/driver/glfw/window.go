@@ -727,17 +727,17 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 			if w.mouseCancelFunc != nil {
 				w.mouseCancelFunc()
 			}
-			go w.waitForDoubleTap(co, ev, action, button)
+			go w.waitForDoubleTap(co, ev)
 		} else {
-			if wid, ok := co.(fyne.Tappable); ok {
+			if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
 				w.queueEvent(func() { wid.Tapped(ev) })
 			}
+			w.mousePressed = nil
 		}
-		w.mousePressed = nil
 	}
 }
 
-func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, action glfw.Action, button desktop.MouseButton) {
+func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	var ctx context.Context
 	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
 	defer w.mouseCancelFunc()
@@ -753,6 +753,7 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, act
 			}
 		}
 		w.mouseClickCount = 0
+		w.mousePressed = nil
 		w.mouseCancelFunc = nil
 		w.mouseLastClick = nil
 		return
