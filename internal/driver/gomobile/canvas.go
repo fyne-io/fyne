@@ -40,9 +40,9 @@ type mobileCanvas struct {
 	refreshQueue   chan fyne.CanvasObject
 	minSizeCache   map[fyne.CanvasObject]fyne.Size
 
-	touchTapCount    int
-	touchCancelFunc  context.CancelFunc
-	touchLastTapped  fyne.CanvasObject
+	touchTapCount   int
+	touchCancelFunc context.CancelFunc
+	touchLastTapped fyne.CanvasObject
 }
 
 const (
