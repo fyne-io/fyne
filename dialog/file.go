@@ -82,18 +82,18 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		if f.file.save {
 			callback := f.file.callback.(func(fyne.URIWriteCloser, error))
 			name := f.fileName.(*widget.Entry).Text
-			path, _ := storage.Child(f.dir, name)
+			location, _ := storage.Child(f.dir, name)
 
-			exists, _ := storage.Exists(path)
+			exists, _ := storage.Exists(location)
 
-			_, err := storage.ListerForURI(path)
+			_, err := storage.ListerForURI(location)
 
 			if !exists {
 				f.win.Hide()
 				if f.file.onClosedCallback != nil {
 					f.file.onClosedCallback(true)
 				}
-				callback(storage.SaveFileToURI(path))
+				callback(storage.SaveFileToURI(location))
 				return
 			} else if err != nil {
 				// check if the directory exists
@@ -109,7 +109,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 					}
 					f.win.Hide()
 
-					callback(storage.SaveFileToURI(path))
+					callback(storage.SaveFileToURI(location))
 					if f.file.onClosedCallback != nil {
 						f.file.onClosedCallback(true)
 					}
@@ -120,9 +120,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 			if f.file.onClosedCallback != nil {
 				f.file.onClosedCallback(true)
 			}
-			path := f.selected.location
-			// On windows replace '\\' with '/'
-			callback(storage.OpenFileFromURI(path))
+			callback(storage.OpenFileFromURI(f.selected.location))
 		}
 	})
 	f.open.Style = widget.PrimaryButton
@@ -240,7 +238,7 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 
 	files, err := dir.List()
 	if err != nil {
-		fyne.LogError("Unable to read path "+dir.String(), err)
+		fyne.LogError("Unable to read ListableURI "+dir.String(), err)
 		return
 	}
 
