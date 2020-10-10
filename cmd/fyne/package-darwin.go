@@ -4,8 +4,8 @@ import (
 	"image"
 	"os"
 	"path/filepath"
-	"text/template"
 
+	"fyne.io/fyne/cmd/fyne/internal/templates"
 	"github.com/jackmordaunt/icns"
 	"github.com/pkg/errors"
 )
@@ -23,9 +23,8 @@ func (p *packager) packageDarwin() error {
 	info := filepath.Join(contentsDir, "Info.plist")
 	infoFile, _ := os.Create(info)
 
-	tpl := template.Must(template.ParseFiles(filepath.Join("templates", "Info.Plist")))
 	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID}
-	err := tpl.Execute(infoFile, tplData)
+	err := templates.PlistDarwin.Execute(infoFile, tplData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to write plist template")
 	}

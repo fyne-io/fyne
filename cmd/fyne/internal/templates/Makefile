@@ -6,7 +6,7 @@ LOCAL ?= $(shell test -d /usr/local && echo "/local" || echo "")
 PREFIX ?= /usr$(LOCAL)
 
 default:
-    # Run "sudo make install" to install the application.
+	# Run "sudo make install" to install the application.
 
 install:
 	install -Dm00644 usr/{{.Local}}share/applications/{{.Name}}.desktop $(DESTDIR)$(PREFIX)/share/applications/{{.Name}}.desktop

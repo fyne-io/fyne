@@ -1,11 +1,11 @@
 package main
 
 import (
-	"html/template"
 	"os"
 	"os/exec"
 	"path/filepath"
 
+	"fyne.io/fyne/cmd/fyne/internal/templates"
 	"github.com/pkg/errors"
 )
 
@@ -46,13 +46,12 @@ func (p *packager) packageUNIX() error {
 		return errors.Wrap(err, "Failed to copy icon")
 	}
 
-	tpl := template.Must(template.ParseFiles(filepath.Join("templates", "application.desktop"), filepath.Join("templates", "Makefile")))
 	appsDir := ensureSubDir(shareDir, "applications")
 	desktop := filepath.Join(appsDir, p.name+".desktop")
 	deskFile, _ := os.Create(desktop)
 
 	tplData := unixData{Name: p.name, Exec: filepath.Base(p.exe), Icon: p.name + filepath.Ext(p.icon), Local: local}
-	err = tpl.ExecuteTemplate(deskFile, "template.desktop", tplData)
+	err = templates.DesktopFileUNIX.Execute(deskFile, tplData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to write desktop entry string")
 	}
@@ -61,7 +60,7 @@ func (p *packager) packageUNIX() error {
 		defer os.RemoveAll(filepath.Join(p.dir, tempDir))
 
 		makefile, _ := os.Create(filepath.Join(p.dir, tempDir, "Makefile"))
-		err := tpl.ExecuteTemplate(makefile, "template.makefile", tplData)
+		err := templates.MakefileUNIX.Execute(makefile, tplData)
 		if err != nil {
 			return errors.Wrap(err, "Failed to write Makefile string")
 		}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"html/template"
 	"image"
 	"io/ioutil"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	"fyne.io/fyne/cmd/fyne/internal/templates"
 	ico "github.com/Kodeworks/golang-image-ico"
 	"github.com/josephspurrier/goversioninfo"
 	"github.com/pkg/errors"
@@ -58,9 +58,8 @@ func (p *packager) packageWindows() error {
 		manifestGenerated = true
 		manifestFile, _ := os.Create(manifest)
 
-		tpl := template.Must(template.ParseFiles(filepath.Join("templates", "application.manifest")))
 		tplData := windowsData{Name: p.name}
-		err := tpl.Execute(manifestFile, tplData)
+		err := templates.ManifestWindows.Execute(manifestFile, tplData)
 		if err != nil {
 			return errors.Wrap(err, "Failed to write manifest template")
 		}
