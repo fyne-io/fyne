@@ -214,6 +214,7 @@ func (t *Tree) OpenBranch(uid string) {
 	t.Refresh()
 }
 
+// Resize sets a new size for a widget.
 func (t *Tree) Resize(size fyne.Size) {
 	t.propertyLock.RLock()
 	s := t.size
