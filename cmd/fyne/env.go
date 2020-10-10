@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"runtime"
-	"strings"
 
 	"fyne.io/fyne"
 
@@ -41,14 +39,8 @@ func (v *env) main() {
 	reporters := []goinfo.Reporter{
 		&fyneReport{GoMod: &report.GoMod{WorkDir: workDir, Module: fyneModule}},
 		&report.GoVersion{},
-	}
-	if strings.Index(runtime.GOOS, "bsd") == -1 {
-		reporters = append(reporters, &report.OS{})
-	}
-
-	reporters = append(reporters,
 		&report.GoEnv{Filter: []string{"GOOS", "GOARCH", "CGO_ENABLED", "GO111MODULE"}},
-	)
+	}
 
 	err = goinfo.Write(os.Stdout, reporters, &format.Text{})
 	if err != nil {
