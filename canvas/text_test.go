@@ -37,7 +37,6 @@ func TestText_MinSize_NoMultiLine(t *testing.T) {
 func TestText_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		text  string
