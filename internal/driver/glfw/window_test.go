@@ -547,10 +547,10 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w := createWindow("Test").(*window)
 	tapped := 0
 	but := newDoubleTappableButton()
-	but.OnTapped = func () {
+	but.OnTapped = func() {
 		tapped = 1
 	}
-	but.onDoubleTap = func () {
+	but.onDoubleTap = func() {
 		tapped = 2
 	}
 	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil), but))
