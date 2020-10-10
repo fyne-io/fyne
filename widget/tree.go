@@ -214,6 +214,22 @@ func (t *Tree) OpenBranch(uid string) {
 	t.Refresh()
 }
 
+func (t *Tree) Resize(size fyne.Size) {
+	t.propertyLock.RLock()
+	s := t.size
+	t.propertyLock.RUnlock()
+
+	if s == size {
+		return
+	}
+
+	t.propertyLock.Lock()
+	t.size = size
+	t.propertyLock.Unlock()
+
+	t.Refresh() // trigger a redraw
+}
+
 // SetSelectedNode updates the current selection to the node with the given Unique ID.
 func (t *Tree) SetSelectedNode(uid string) {
 	t.Selected = uid
@@ -285,6 +301,8 @@ func (r *treeRenderer) Refresh() {
 	s := r.tree.Size()
 	if s.IsZero() {
 		r.tree.Resize(r.tree.MinSize())
+	} else {
+		r.Layout(s)
 	}
 	r.scroller.Refresh()
 	r.content.Refresh()
@@ -323,6 +341,22 @@ func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
 		branchPool:   &syncPool{},
 		leafPool:     &syncPool{},
 	}
+}
+
+func (c *treeContent) Resize(size fyne.Size) {
+	c.propertyLock.RLock()
+	s := c.size
+	c.propertyLock.RUnlock()
+
+	if s == size {
+		return
+	}
+
+	c.propertyLock.Lock()
+	c.size = size
+	c.propertyLock.Unlock()
+
+	c.Refresh() // trigger a redraw
 }
 
 var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
@@ -491,8 +525,7 @@ func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
 func (r *treeContentRenderer) Refresh() {
 	s := r.treeContent.Size()
 	if s.IsZero() {
-		m := r.treeContent.MinSize().Max(r.treeContent.tree.Size())
-		r.treeContent.Resize(m)
+		r.treeContent.Resize(r.treeContent.MinSize().Max(r.treeContent.tree.Size()))
 	} else {
 		r.Layout(s)
 	}
