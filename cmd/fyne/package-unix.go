@@ -46,11 +46,7 @@ func (p *packager) packageUNIX() error {
 		return errors.Wrap(err, "Failed to copy icon")
 	}
 
-	tpl, err := template.ParseFiles("templates/application.desktop", "templates/Makefile")
-	if err != nil {
-		return errors.Wrap(err, "Failed to parse templates")
-	}
-
+	tpl := template.Must(template.ParseFiles(filepath.Join("templates", "application.desktop"), filepath.Join("templates", "Makefile")))
 	appsDir := ensureSubDir(shareDir, "applications")
 	desktop := filepath.Join(appsDir, p.name+".desktop")
 	deskFile, _ := os.Create(desktop)

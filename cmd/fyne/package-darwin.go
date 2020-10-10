@@ -23,13 +23,9 @@ func (p *packager) packageDarwin() error {
 	info := filepath.Join(contentsDir, "Info.plist")
 	infoFile, _ := os.Create(info)
 
-	tpl, err := template.ParseFiles("templates/Info.Plist")
-	if err != nil {
-		return errors.Wrap(err, "Failed to parse plist template")
-	}
-
+	tpl := template.Must(template.ParseFiles(filepath.Join("templates", "Info.Plist")))
 	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID}
-	err = tpl.Execute(infoFile, tplData)
+	err := tpl.Execute(infoFile, tplData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to write plist template")
 	}

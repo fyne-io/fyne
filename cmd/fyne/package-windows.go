@@ -58,13 +58,9 @@ func (p *packager) packageWindows() error {
 		manifestGenerated = true
 		manifestFile, _ := os.Create(manifest)
 
-		tpl, err := template.ParseFiles("templates/application.manifest")
-		if err != nil {
-			return errors.Wrap(err, "Failed to parse manifest template")
-		}
-
+		tpl := template.Must(template.ParseFiles(filepath.Join("templates", "application.manifest")))
 		tplData := windowsData{Name: p.name}
-		err = tpl.Execute(manifestFile, tplData)
+		err := tpl.Execute(manifestFile, tplData)
 		if err != nil {
 			return errors.Wrap(err, "Failed to write manifest template")
 		}
