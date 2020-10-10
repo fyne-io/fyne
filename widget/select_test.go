@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
@@ -21,9 +20,8 @@ func TestNewSelect(t *testing.T) {
 }
 
 func TestSelect_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
@@ -68,9 +66,8 @@ func TestSelect_ClearSelected(t *testing.T) {
 }
 
 func TestSelect_Move(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, nil)
 	w := test.NewWindow(combo)
@@ -193,9 +190,8 @@ func TestSelect_SetSelectedIndex_Invalid(t *testing.T) {
 }
 
 func TestSelect_Tapped(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
@@ -210,9 +206,8 @@ func TestSelect_Tapped(t *testing.T) {
 }
 
 func TestSelect_Tapped_Constrained(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {})
 	w := test.NewWindow(combo)
@@ -230,7 +225,6 @@ func TestSelect_Tapped_Constrained(t *testing.T) {
 func TestSelect_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		placeholder string
