@@ -17,6 +17,7 @@ type uri struct {
 	raw string
 }
 
+// NewFileURI creates a new URI from the given file path.
 func NewFileURI(path string) fyne.URI {
 	// URIs are supposed to use forward slashes. On Windows, it
 	// should be OK to use the platform native filepath with UNIX
