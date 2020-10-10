@@ -742,8 +742,8 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	var ctx context.Context
 	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
 	defer w.mouseCancelFunc()
-	select {
-	case <-ctx.Done():
+
+	<-ctx.Done()
 		if w.mouseClickCount == 2 && w.mouseLastClick == co {
 			if wid, ok := co.(fyne.DoubleTappable); ok {
 				w.queueEvent(func() { wid.DoubleTapped(ev) })
@@ -758,7 +758,6 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 		w.mouseCancelFunc = nil
 		w.mouseLastClick = nil
 		return
-	}
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
