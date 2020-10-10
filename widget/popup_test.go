@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/cache"
+	internalTest "fyne.io/fyne/internal/test"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -26,6 +27,9 @@ func TestNewPopUp(t *testing.T) {
 }
 
 func TestShowPopUp(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 200))
 	require.Nil(t, w.Canvas().Overlays().Top())
@@ -58,7 +62,14 @@ func TestShowPopUpAtPosition(t *testing.T) {
 }
 
 func TestShowModalPopUp(t *testing.T) {
-	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
+	test.NewApp()
+	defer test.NewApp()
+
+	img := canvas.NewImageFromImage(internalTest.NewCheckedImage(100, 100, 10, 10))
+	img.ScaleMode = canvas.ImageScalePixels
+	img.SetMinSize(fyne.NewSize(100, 100))
+
+	w := test.NewWindow(img)
 	w.Resize(fyne.NewSize(200, 200))
 	require.Nil(t, w.Canvas().Overlays().Top())
 
