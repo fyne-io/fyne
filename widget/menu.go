@@ -35,6 +35,7 @@ func NewMenu(menu *fyne.Menu) *Menu {
 }
 
 // CreateRenderer returns a new renderer for the menu.
+//
 // Implements: fyne.Widget
 func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	box := newMenuBox(m.Items)
@@ -64,42 +65,49 @@ func (m *Menu) DeactivateChild() {
 }
 
 // Hide hides the menu.
+//
 // Implements: fyne.Widget
 func (m *Menu) Hide() {
 	widget.HideWidget(&m.Base, m)
 }
 
 // MinSize returns the minimal size of the menu.
+//
 // Implements: fyne.Widget
 func (m *Menu) MinSize() fyne.Size {
 	return widget.MinSizeOf(m)
 }
 
 // Move sets the position of the widget relative to its parent.
+//
 // Implements: fyne.Widget
 func (m *Menu) Move(pos fyne.Position) {
 	widget.MoveWidget(&m.Base, m, pos)
 }
 
 // Refresh triggers a redraw of the menu.
+//
 // Implements: fyne.Widget
 func (m *Menu) Refresh() {
 	widget.RefreshWidget(m)
 }
 
 // Resize has no effect because menus are always displayed with their minimal size.
+//
 // Implements: fyne.Widget
 func (m *Menu) Resize(size fyne.Size) {
 	widget.ResizeWidget(&m.Base, m, size)
 }
 
 // Show makes the menu visible.
+//
 // Implements: fyne.Widget
 func (m *Menu) Show() {
 	widget.ShowWidget(&m.Base, m)
 }
 
 // Tapped catches taps on separators and the menu background. It doesn’t perform any action.
+//
 // Implements: fyne.Tappable
 func (m *Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.

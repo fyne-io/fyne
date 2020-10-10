@@ -8,31 +8,20 @@ import (
 	"fyne.io/fyne"
 )
 
-// Regexp is a regexp implementation of fyne.Validator
-type Regexp struct {
-	Reason string
-	Regexp *regexp.Regexp
-}
-
-// NewRegexp creates a new validator that uses regular expression parsing
-func NewRegexp(regexpstr, reason string) *Regexp {
-	r := &Regexp{Reason: reason}
+// NewRegexp creates a new validator that uses regular expression parsing.
+// The validator will return nil if valid, otherwise returns an error with a reason text.
+func NewRegexp(regexpstr, reason string) fyne.Validator {
 	expression, err := regexp.Compile(regexpstr)
 	if err != nil {
 		fyne.LogError("Regexp did not compile", err)
 		return nil
 	}
 
-	r.Regexp = expression
-	return r
-}
+	return func(text string) error {
+		if expression != nil && !expression.MatchString(text) {
+			return errors.New(reason)
+		}
 
-// Validate will validate the provided string with a regular expression
-// Returns nil if valid, otherwise returns an error with a reason text
-func (r Regexp) Validate(text string) error {
-	if r.Regexp != nil && !r.Regexp.MatchString(text) {
-		return errors.New(r.Reason)
+		return nil // Nothing to validate with, same as having no validator.
 	}
-
-	return nil // Nothing to validate with, same as having no validator.
 }

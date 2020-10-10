@@ -54,3 +54,34 @@ func TestSlider_VerticalLayout(t *testing.T) {
 	assert.Greater(t, wSize.Height, aSize.Height)
 	assert.Equal(t, theme.Padding(), aSize.Width)
 }
+
+func TestSlider_OnChanged(t *testing.T) {
+	slider := NewSlider(0, 1)
+	assert.Empty(t, slider.OnChanged)
+
+	changes := 0
+
+	slider.OnChanged = func(_ float64) {
+		changes++
+	}
+
+	assert.Equal(t, 0, changes)
+
+	slider.SetValue(0.5)
+	assert.Equal(t, 1, changes)
+
+	drag := &fyne.DragEvent{DraggedX: 10, DraggedY: 2}
+	slider.Dragged(drag)
+	assert.Equal(t, 2, changes)
+}
+
+func TestSlider_SetValue(t *testing.T) {
+	slider := NewSlider(0, 2)
+	assert.Equal(t, 0.0, slider.Value)
+
+	slider.SetValue(1.0)
+	assert.Equal(t, 1.0, slider.Value)
+
+	slider.SetValue(2.0)
+	assert.Equal(t, 2.0, slider.Value)
+}

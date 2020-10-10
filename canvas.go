@@ -7,7 +7,11 @@ import "image"
 type Canvas interface {
 	Content() CanvasObject
 	SetContent(CanvasObject)
+
 	Refresh(CanvasObject)
+
+	// Focus makes the provided item focused.
+	// The item has to be added to the contents of the canvas before calling this.
 	Focus(Focusable)
 	Unfocus()
 	Focused() Focusable
@@ -42,6 +46,7 @@ type Canvas interface {
 	OnTypedKey() func(*KeyEvent)
 	SetOnTypedKey(func(*KeyEvent))
 	AddShortcut(shortcut Shortcut, handler func(shortcut Shortcut))
+	RemoveShortcut(shortcut Shortcut)
 
 	Capture() image.Image
 

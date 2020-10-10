@@ -9,11 +9,6 @@ var _ fyne.Layout = (*maxLayout)(nil)
 type maxLayout struct {
 }
 
-// NewMaxContainer creates a new container with the specified objects filling the available space.
-func NewMaxContainer(objects ...fyne.CanvasObject) *fyne.Container {
-	return fyne.NewContainerWithLayout(NewMaxLayout(), objects...)
-}
-
 // NewMaxLayout creates a new MaxLayout instance
 func NewMaxLayout() fyne.Layout {
 	return &maxLayout{}

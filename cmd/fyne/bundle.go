@@ -17,27 +17,27 @@ import (
 var _ command = (*bundler)(nil)
 
 type bundler struct {
-	name, pkg string
-	prefix    string
-	noheader  bool
+	name, pkg, out string
+	prefix         string
+	noheader       bool
 }
 
-func writeResource(file, name string) {
+func writeResource(file, name string, out *os.File) {
 	res, err := fyne.LoadResourceFromPath(file)
 	if err != nil {
 		fyne.LogError("Unable to load file "+file, err)
 		return
 	}
 
-	fmt.Printf("var %s = %#v\n", name, res)
+	fmt.Fprintf(out, "var %s = %#v\n", name, res)
 }
 
-func writeHeader(pkg string) {
-	fmt.Println("// auto-generated")
-	fmt.Println()
-	fmt.Println("package", pkg)
-	fmt.Println()
-	fmt.Println("import \"fyne.io/fyne\"")
+func writeHeader(pkg string, out *os.File) {
+	fmt.Fprintln(out, "// auto-generated")
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, "package", pkg)
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, "import \"fyne.io/fyne\"")
 }
 
 func sanitiseName(file, prefix string) string {
@@ -54,39 +54,42 @@ func sanitiseName(file, prefix string) string {
 // (pkg) and the data will be assigned to variable named "name". If you are
 // appending an existing resource file then pass true to noheader as the headers
 // should only be output once per file.
-func doBundle(name, pkg, prefix string, noheader bool, filepath string) {
-	if !noheader {
-		writeHeader(pkg)
+func (b *bundler) doBundle(filepath string, out *os.File) {
+	if !b.noheader {
+		writeHeader(b.pkg, out)
 	}
-	fmt.Println()
+	fmt.Fprintln(out)
 
-	if name == "" {
-		name = sanitiseName(path.Base(filepath), prefix)
+	if b.name == "" {
+		b.name = sanitiseName(path.Base(filepath), b.prefix)
 	}
-	writeResource(filepath, name)
+	writeResource(filepath, b.name, out)
 }
 
-func dirBundle(pkg, prefix string, noheader bool, dirpath string) {
+func (b *bundler) dirBundle(dirpath string, out *os.File) {
 	files, err := ioutil.ReadDir(dirpath)
 	if err != nil {
 		fyne.LogError("Error reading specified directory", err)
 		return
 	}
 
-	omitHeader := noheader
-	for _, file := range files {
+	for i, file := range files {
 		filename := file.Name()
 		if path.Ext(filename) == ".go" {
 			continue
 		}
 
-		doBundle("", pkg, prefix, omitHeader, path.Join(dirpath, filename))
-		omitHeader = true // only output header once at most
+		b.name = ""
+		b.doBundle(path.Join(dirpath, filename), out)
+		if i == 0 { // only show header on first iteration
+			b.noheader = true
+		}
 	}
 }
 
 func (b *bundler) addFlags() {
 	flag.StringVar(&b.name, "name", "", "The variable name to assign the resource (file mode only)")
+	flag.StringVar(&b.out, "o", "", "Specify an output file instead of printing to standard output")
 	flag.StringVar(&b.pkg, "package", "main", "The package to output in headers (if not appending)")
 	flag.StringVar(&b.prefix, "prefix", "resource", "A prefix for variables (ignored if name is set)")
 	flag.BoolVar(&b.noheader, "append", false, "Append an existing go file (don't output headers)")
@@ -104,15 +107,42 @@ func (b *bundler) run(args []string) {
 		return
 	}
 
+	outFile := os.Stdout
+	if b.out != "" {
+		fileModes := os.O_RDWR | os.O_CREATE | os.O_TRUNC
+		if b.noheader {
+			fileModes = os.O_RDWR | os.O_APPEND
+		}
+
+		f, err := os.OpenFile(b.out, fileModes, 0666)
+		if err == nil {
+			outFile = f
+		} else {
+			if os.IsNotExist(err) {
+				f, err = os.Create(b.out)
+				if err == nil {
+					outFile = f
+				} else {
+					fyne.LogError("Unable to read, or create, output file : "+b.out, err)
+					return
+				}
+			} else {
+				fyne.LogError("Unable to open output file", err)
+				return
+			}
+		}
+	}
+
 	switch stat, err := os.Stat(args[0]); {
 	case os.IsNotExist(err):
 		fyne.LogError("Specified file could not be found", err)
 	case stat.IsDir():
-		dirBundle(b.pkg, b.prefix, b.noheader, args[0])
+		b.noheader = false
+		b.dirBundle(args[0], outFile)
 	case b.name != "":
 		b.prefix = ""
 		fallthrough
 	default:
-		doBundle(b.name, b.pkg, b.prefix, b.noheader, args[0])
+		b.doBundle(args[0], outFile)
 	}
 }

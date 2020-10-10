@@ -218,6 +218,7 @@ func (c *Check) FocusLost() {
 }
 
 // Focused returns whether or not this Check has focus.
+//
 // Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
 func (c *Check) Focused() bool {
 	if c.Disabled() {

@@ -130,10 +130,8 @@ func (p *infProgressRenderer) infiniteProgressLoop() {
 		ticker := p.ticker.C
 		p.progress.propertyLock.RUnlock()
 
-		select {
-		case <-ticker:
-			p.doRefresh()
-		}
+		<-ticker
+		p.doRefresh()
 	}
 
 	p.progress.propertyLock.RLock()

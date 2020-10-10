@@ -20,7 +20,7 @@ func TestNewBorderContainer(t *testing.T) {
 	right.SetMinSize(fyne.NewSize(10, 10))
 	middle := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
 
-	c := layout.NewBorderContainer(top, nil, nil, right, []fyne.CanvasObject{middle}...)
+	c := fyne.NewContainerWithLayout(layout.NewBorderLayout(top, nil, nil, right), top, right, middle)
 	assert.Equal(t, 3, len(c.Objects))
 
 	c.Resize(fyne.NewSize(100, 100))

@@ -13,6 +13,8 @@ import (
 
 // TabContainer widget allows switching visible content from a list of TabItems.
 // Each item is represented by a button at the top of the widget.
+//
+// Deprecated: use container.Tabs instead.
 type TabContainer struct {
 	BaseWidget
 
@@ -24,20 +26,28 @@ type TabContainer struct {
 
 // TabItem represents a single view in a TabContainer.
 // The Text and Icon are used for the tab button and the Content is shown when the corresponding tab is active.
+//
+// Deprecated: use container.TabItem instead.
 type TabItem struct {
 	Text    string
 	Icon    fyne.Resource
 	Content fyne.CanvasObject
 }
 
-// TabLocation is the location where the tabs of a tab container should be rendered
+// TabLocation is the location where the tabs of a tab container should be rendered.
+//
+// Deprecated: use container.TabLocation instead.
 type TabLocation int
 
 // TabLocation values
 const (
+	// Deprecated: use container.TabLocationTop
 	TabLocationTop TabLocation = iota
+	// Deprecated: use container.TabLocationLeading
 	TabLocationLeading
+	// Deprecated: use container.TabLocationBottom
 	TabLocationBottom
+	// Deprecated: use container.TabLocationTrailing
 	TabLocationTrailing
 )
 
@@ -291,6 +301,7 @@ func (r *tabContainerRenderer) Refresh() {
 	} else {
 		current := r.container.current
 		if current >= 0 && current < len(r.objects) && !r.objects[current].Visible() {
+			r.Layout(r.container.Size())
 			for i, o := range r.objects {
 				if i == current {
 					o.Show()
@@ -298,13 +309,12 @@ func (r *tabContainerRenderer) Refresh() {
 					o.Hide()
 				}
 			}
-			r.Layout(r.container.Size())
 		}
 		for i, button := range r.tabBar.Objects {
 			if i == current {
-				button.(*tabButton).Style = PrimaryButton
+				button.(*tabButton).Importance = HighImportance
 			} else {
-				button.(*tabButton).Style = DefaultButton
+				button.(*tabButton).Importance = MediumImportance
 			}
 
 			button.Refresh()
@@ -414,7 +424,7 @@ func (r *tabContainerRenderer) updateTabs() bool {
 	for i, item := range r.container.Items {
 		button := r.buildButton(item, iconPos)
 		if i == r.container.current {
-			button.Style = PrimaryButton
+			button.Importance = HighImportance
 			item.Content.Show()
 		} else {
 			item.Content.Hide()
@@ -444,8 +454,8 @@ type tabButton struct {
 	hovered      bool
 	Icon         fyne.Resource
 	IconPosition buttonIconPosition
+	Importance   ButtonImportance
 	OnTap        func()
-	Style        ButtonStyle
 	Text         string
 }
 
@@ -454,13 +464,13 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
-		if b.Style == PrimaryButton {
+		if b.Importance == HighImportance {
 			icon.Resource = theme.NewPrimaryThemedResource(b.Icon)
 		}
 	}
 
 	label := canvas.NewText(b.Text, theme.TextColor())
-	if b.Style == PrimaryButton {
+	if b.Importance == HighImportance {
 		label.Color = theme.PrimaryColor()
 	}
 	label.TextStyle.Bold = true
@@ -595,7 +605,7 @@ func (r *tabButtonRenderer) Objects() []fyne.CanvasObject {
 
 func (r *tabButtonRenderer) Refresh() {
 	r.label.Text = r.button.Text
-	if r.button.Style == PrimaryButton {
+	if r.button.Importance == HighImportance {
 		r.label.Color = theme.PrimaryColor()
 	} else {
 		r.label.Color = theme.TextColor()
@@ -605,12 +615,12 @@ func (r *tabButtonRenderer) Refresh() {
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {
 		case *theme.ThemedResource:
-			if r.button.Style == PrimaryButton {
+			if r.button.Importance == HighImportance {
 				r.icon.Resource = theme.NewPrimaryThemedResource(res)
 				r.icon.Refresh()
 			}
 		case *theme.PrimaryThemedResource:
-			if r.button.Style != PrimaryButton {
+			if r.button.Importance != HighImportance {
 				r.icon.Resource = res.Original()
 				r.icon.Refresh()
 			}

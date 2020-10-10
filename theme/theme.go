@@ -9,17 +9,45 @@ import (
 	"fyne.io/fyne"
 )
 
+const (
+	// ColorRed is the red primary color name
+	ColorRed = "red"
+	// ColorOrange is the orange primary color name
+	ColorOrange = "orange"
+	// ColorYellow is the yellow primary color name
+	ColorYellow = "yellow"
+	// ColorGreen is the green primary color name
+	ColorGreen = "green"
+	// ColorBlue is the blue primary color name
+	ColorBlue = "blue"
+	// ColorPurple is the purple primary color name
+	ColorPurple = "purple"
+	// ColorBrown is the brown primary color name
+	ColorBrown = "brown"
+	// ColorGray is the gray primary color name
+	ColorGray = "gray"
+)
+
 type builtinTheme struct {
 	background color.Color
 
-	button, disabledButton, text, placeholder, primary, hover, shadow, disabled, scrollBar color.Color
-	regular, bold, italic, boldItalic, monospace                                           fyne.Resource
+	button, disabledButton, text, placeholder, hover, shadow, disabled, scrollBar color.Color
+	regular, bold, italic, boldItalic, monospace                                  fyne.Resource
 }
 
 var (
-	themePrimaryColor = color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff}
+	primaryColors = map[string]color.Color{
+		ColorRed:    color.NRGBA{R: 0xf4, G: 0x43, B: 0x36, A: 0xff},
+		ColorOrange: color.NRGBA{R: 0xff, G: 0x98, B: 0x00, A: 0xff},
+		ColorYellow: color.NRGBA{R: 0xff, G: 0xeb, B: 0x3b, A: 0xff},
+		ColorGreen:  color.NRGBA{R: 0x8b, G: 0xc3, B: 0x4a, A: 0xff},
+		ColorBlue:   color.NRGBA{R: 0x21, G: 0x96, B: 0xf3, A: 0xff},
+		ColorPurple: color.NRGBA{R: 0x9c, G: 0x27, B: 0xb0, A: 0xff},
+		ColorBrown:  color.NRGBA{R: 0x79, G: 0x55, B: 0x48, A: 0xff},
+		ColorGray:   color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff},
+	}
 
-//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
+	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
 )
 
 // LightTheme defines the built in light theme colors and sizes
@@ -31,7 +59,6 @@ func LightTheme() fyne.Theme {
 		disabledButton: color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
 		text:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		placeholder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		primary:        themePrimaryColor,
 		hover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
@@ -50,7 +77,6 @@ func DarkTheme() fyne.Theme {
 		disabledButton: color.NRGBA{0x26, 0x26, 0x26, 0xff},
 		text:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
 		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		primary:        themePrimaryColor,
 		hover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
@@ -75,9 +101,10 @@ func (t *builtinTheme) DisabledButtonColor() color.Color {
 }
 
 // HyperlinkColor returns the theme's standard hyperlink color.
+//
 // Deprecated: Hyperlinks now use the primary color for consistency.
 func (t *builtinTheme) HyperlinkColor() color.Color {
-	return t.primary
+	return t.PrimaryColor()
 }
 
 // TextColor returns the theme's standard text color
@@ -91,12 +118,14 @@ func (t *builtinTheme) DisabledTextColor() color.Color {
 }
 
 // IconColor returns the theme's standard text color.
+//
 // Deprecated: Icons now use the text colour for consistency.
 func (t *builtinTheme) IconColor() color.Color {
 	return t.text
 }
 
 // DisabledIconColor returns the color for a disabledIcon UI element.
+//
 // Deprecated: Disabled icons match disabled text color for consistency.
 func (t *builtinTheme) DisabledIconColor() color.Color {
 	return t.disabled
@@ -109,7 +138,7 @@ func (t *builtinTheme) PlaceHolderColor() color.Color {
 
 // PrimaryColor returns the color used to highlight primary features
 func (t *builtinTheme) PrimaryColor() color.Color {
-	return t.primary
+	return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor
@@ -119,7 +148,7 @@ func (t *builtinTheme) HoverColor() color.Color {
 
 // FocusColor returns the color used to highlight a focused widget
 func (t *builtinTheme) FocusColor() color.Color {
-	return t.primary
+	return t.PrimaryColor()
 }
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar
@@ -239,6 +268,7 @@ func DisabledButtonColor() color.Color {
 }
 
 // HyperlinkColor returns the theme's standard hyperlink color.
+//
 // Deprecated: Hyperlinks now use the primary color for consistency.
 func HyperlinkColor() color.Color {
 	return current().HyperlinkColor()
@@ -255,12 +285,14 @@ func DisabledTextColor() color.Color {
 }
 
 // IconColor returns the theme's standard text color.
+//
 // Deprecated: Icons now use the text colour for consistency.
 func IconColor() color.Color {
 	return current().IconColor()
 }
 
 // DisabledIconColor returns the color for a disabledIcon UI element.
+//
 // Deprecated: Disabled icons match disabled text color for consistency.
 func DisabledIconColor() color.Color {
 	return current().DisabledIconColor()
@@ -370,4 +402,18 @@ func DefaultTextBoldItalicFont() fyne.Resource {
 // DefaultTextMonospaceFont retutns the font resource for the built-in monospace font face
 func DefaultTextMonospaceFont() fyne.Resource {
 	return monospace
+}
+
+// PrimaryColorNames returns a list of the standard primary color options.
+func PrimaryColorNames() []string {
+	return []string{ColorRed, ColorOrange, ColorYellow, ColorGreen, ColorBlue, ColorPurple, ColorBrown, ColorGray}
+}
+
+// PrimaryColorNamed returns a theme specific color value for a named primary color.
+func PrimaryColorNamed(name string) color.Color {
+	col, ok := primaryColors[name]
+	if !ok {
+		return primaryColors[ColorBlue]
+	}
+	return col
 }

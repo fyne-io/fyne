@@ -8,11 +8,6 @@ var _ fyne.Layout = (*centerLayout)(nil)
 type centerLayout struct {
 }
 
-// NewCenterContainer creates a new container with the specified objects centered in the available space.
-func NewCenterContainer(objects ...fyne.CanvasObject) *fyne.Container {
-	return fyne.NewContainerWithLayout(NewCenterLayout(), objects...)
-}
-
 // NewCenterLayout creates a new CenterLayout instance
 func NewCenterLayout() fyne.Layout {
 	return &centerLayout{}

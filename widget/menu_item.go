@@ -46,6 +46,7 @@ func (i *menuItem) Child() *Menu {
 }
 
 // CreateRenderer returns a new renderer for the menu item.
+//
 // Implements: fyne.Widget
 func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 	text := canvas.NewText(i.Item.Label, theme.TextColor())
@@ -64,12 +65,14 @@ func (i *menuItem) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // Hide hides the menu item.
+//
 // Implements: fyne.Widget
 func (i *menuItem) Hide() {
 	widget.HideWidget(&i.Base, i)
 }
 
 // MinSize returns the minimal size of the menu item.
+//
 // Implements: fyne.Widget
 func (i *menuItem) MinSize() fyne.Size {
 	return widget.MinSizeOf(i)
@@ -77,6 +80,7 @@ func (i *menuItem) MinSize() fyne.Size {
 
 // MouseIn changes the item to be hovered and shows the submenu if the item has one.
 // The submenu of any sibling of the item will be hidden.
+//
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 	i.hovered = true
@@ -85,11 +89,13 @@ func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 }
 
 // MouseMoved does nothing.
+//
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseMoved(*desktop.MouseEvent) {
 }
 
 // MouseOut changes the item to not be hovered but has no effect on the visibility of the item's submenu.
+//
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseOut() {
 	i.hovered = false
@@ -97,24 +103,28 @@ func (i *menuItem) MouseOut() {
 }
 
 // Move sets the position of the widget relative to its parent.
+//
 // Implements: fyne.Widget
 func (i *menuItem) Move(pos fyne.Position) {
 	widget.MoveWidget(&i.Base, i, pos)
 }
 
 // Refresh triggers a redraw of the menu item.
+//
 // Implements: fyne.Widget
 func (i *menuItem) Refresh() {
 	widget.RefreshWidget(i)
 }
 
 // Resize changes the size of the menu item.
+//
 // Implements: fyne.Widget
 func (i *menuItem) Resize(size fyne.Size) {
 	widget.ResizeWidget(&i.Base, i, size)
 }
 
 // Show makes the menu item visible.
+//
 // Implements: fyne.Widget
 func (i *menuItem) Show() {
 	widget.ShowWidget(&i.Base, i)
@@ -122,6 +132,7 @@ func (i *menuItem) Show() {
 
 // Tapped performs the action of the item and dismisses the menu.
 // It does nothing if the item doesn’t have an action.
+//
 // Implements: fyne.Tappable
 func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
