@@ -42,10 +42,8 @@ type FileDialog struct {
 	dialog           *fileDialog
 	dismissText      string
 	desiredSize      *fyne.Size
-
-	// StartingLocation allows overriding the default location where the
-	// file dialog should "view" when it is first opened.
-	StartingLocation fyne.ListableURI
+	// this will be applied to dialog.dir when it's loaded
+	startingLocation fyne.ListableURI
 }
 
 // Declare conformity to Dialog interface
@@ -215,17 +213,17 @@ func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
 
 	if home != nil {
 		places = append(places, makeFavoriteButton("Home", theme.HomeIcon(), func() {
-			f.setDirectory(home)
+			f.setLocation(home)
 		}))
 	}
 	if documents != nil {
 		places = append(places, makeFavoriteButton("Documents", theme.DocumentIcon(), func() {
-			f.setDirectory(documents)
+			f.setLocation(documents)
 		}))
 	}
 	if downloads != nil {
 		places = append(places, makeFavoriteButton("Downloads", theme.DownloadIcon(), func() {
-			f.setDirectory(downloads)
+			f.setLocation(downloads)
 		}))
 	}
 
@@ -275,7 +273,7 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 	f.fileScroll.Refresh()
 }
 
-func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
+func (f *fileDialog) setLocation(dir fyne.ListableURI) error {
 	if dir == nil {
 		return fmt.Errorf("failed to open nil directory")
 	}
@@ -308,7 +306,7 @@ func (f *fileDialog) setDirectory(dir fyne.ListableURI) error {
 		}
 		f.breadcrumb.Append(
 			widget.NewButton(d, func() {
-				err := f.setDirectory(newDir)
+				err := f.setLocation(newDir)
 				if err != nil {
 					fyne.LogError("Failed to set directory", err)
 				}
@@ -331,7 +329,7 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 		if err != nil {
 			fyne.LogError("Failed to create lister for URI"+file.location.String(), err)
 		}
-		f.setDirectory(lister)
+		f.setLocation(lister)
 		return
 	}
 	f.selected = file
@@ -347,12 +345,12 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 }
 
 // effectiveStartingDir calculates the directory at which the file dialog should
-// open, based on the values of StartingDirectory, CWD, home, and any error
+// open, based on the values of startingDirectory, CWD, home, and any error
 // conditions which occur.
 //
 // Order of precedence is:
 //
-// * file.StartingDirectory if non-empty, os.Stat()-able, and uses the file://
+// * file.startingDirectory if non-empty, os.Stat()-able, and uses the file://
 //   URI scheme
 // * os.UserHomeDir()
 // * os.Getwd()
@@ -361,8 +359,8 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 	var startdir fyne.ListableURI = nil
 
-	if f.StartingLocation != nil {
-		startdir = f.StartingLocation
+	if f.startingLocation != nil {
+		startdir = f.startingLocation
 	}
 
 	if startdir != nil {
@@ -412,7 +410,7 @@ func showFile(file *FileDialog) *fileDialog {
 	d := &fileDialog{file: file}
 	ui := d.makeUI()
 
-	d.setDirectory(file.effectiveStartingDir())
+	d.setLocation(file.effectiveStartingDir())
 
 	size := ui.MinSize().Add(fyne.NewSize(fileIconCellWidth*2+theme.Padding()*4,
 		(fileIconSize+fileTextSize)+theme.Padding()*4))
@@ -492,6 +490,15 @@ func (f *FileDialog) SetDismissText(label string) {
 	}
 	f.dialog.dismiss.SetText(label)
 	widget.Refresh(f.dialog.win)
+}
+
+// SetLocation tells this FileDirectory which location to display.
+// This is normally called before the dialog is shown.
+func (f *FileDialog) SetLocation(u fyne.ListableURI) {
+	f.startingLocation = u
+	if f.dialog != nil {
+		f.dialog.setLocation(u)
+	}
 }
 
 // SetOnClosed sets a callback function that is called when

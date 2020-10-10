@@ -79,7 +79,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	}
 
 	// this should always be equivalent to the preceding test
-	dialog.StartingLocation = nil
+	dialog.startingLocation = nil
 	res = dialog.effectiveStartingDir()
 	expect = home
 	if !comparePaths(t, res, expect) {
@@ -88,7 +88,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	}
 
 	// check using StartingDirectory with some other directory
-	dialog.StartingLocation = parent
+	dialog.startingLocation = parent
 	res = dialog.effectiveStartingDir()
 	expect = parent
 	if res != expect {
@@ -97,7 +97,7 @@ func TestEffectiveStartingDir(t *testing.T) {
 	}
 
 	// make sure we fail over if the specified directory does not exist
-	dialog.StartingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
+	dialog.startingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
 	if err == nil {
 		t.Errorf("Should have failed to create lister for nonexistant file")
 	}
@@ -328,7 +328,7 @@ func TestFileFilters(t *testing.T) {
 		t.Error(err)
 	}
 
-	f.dialog.setDirectory(testDataLister)
+	f.dialog.setLocation(testDataLister)
 
 	count := 0
 	for _, icon := range f.dialog.files.Objects {

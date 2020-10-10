@@ -64,7 +64,7 @@ func TestNewFileItem_Folder(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	f.setDirectory(parentLister)
+	f.setLocation(parentLister)
 	item := f.newFileItem(currentLister, true)
 
 	assert.Equal(t, filepath.Base(currentDir), item.name)
@@ -84,7 +84,7 @@ func TestNewFileItem_ParentFolder(t *testing.T) {
 		t.Error(err)
 	}
 	parentDir := storage.NewURI("file://" + filepath.Dir(currentDir))
-	f.setDirectory(currentLister)
+	f.setLocation(currentLister)
 
 	item := &fileDialogItem{picker: f, name: "(Parent)", location: parentDir, dir: true}
 	item.ExtendBaseWidget(item)

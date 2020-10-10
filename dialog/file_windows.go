@@ -53,7 +53,7 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 		driveRoot := drive + string(os.PathSeparator) // capture loop var
 		driveRootURI, _ := storage.ListerForURI(storage.NewURI("file://" + driveRoot))
 		places = append(places, makeFavoriteButton(drive, theme.StorageIcon(), func() {
-			f.setDirectory(driveRootURI)
+			f.setLocation(driveRootURI)
 		}))
 	}
 	return places

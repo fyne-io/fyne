@@ -15,7 +15,7 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 			fyne.LogError("could not create lister for /", err)
 			return
 		}
-		f.setDirectory(lister)
+		f.setLocation(lister)
 	})}
 }
 
