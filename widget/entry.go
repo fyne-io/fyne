@@ -41,9 +41,9 @@ type Entry struct {
 	MultiLine bool
 	Wrapping  fyne.TextWrap
 
-	Validator           fyne.Validator
+	Validator           fyne.StringValidator
 	validationStatus    *validationStatus
-	onValidationUpdated func(error)
+	onValidationChanged func(error)
 	validationError     error
 
 	CursorRow, CursorColumn int
@@ -1131,22 +1131,28 @@ func (r *entryRenderer) Refresh() {
 	if r.entry.ActionItem != nil {
 		r.entry.ActionItem.Refresh()
 	}
+
 	if r.entry.Validator != nil {
-		r.entry.validationError = r.entry.Validator(content)
+		err := r.entry.Validator(content)
+		if err != r.entry.validationError {
+			r.entry.validationError = err
+
+			if r.entry.onValidationChanged != nil {
+				r.entry.onValidationChanged(r.entry.validationError)
+			}
+		}
+
 		if !r.entry.focused && r.entry.Text != "" && r.entry.validationError != nil {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
 		}
 
 		r.ensureValidationSetup()
 
-		if r.entry.onValidationUpdated != nil {
-			r.entry.onValidationUpdated(r.entry.validationError)
-		}
-
 		r.entry.validationStatus.Refresh()
 	} else if r.entry.validationStatus != nil {
 		r.entry.validationStatus.Hide()
 	}
+
 	canvas.Refresh(r.entry.super())
 }
 

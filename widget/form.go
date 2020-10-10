@@ -10,9 +10,9 @@ import (
 
 // FormItem provides the details for a row in a form
 type FormItem struct {
-	Text   string
-	Widget fyne.CanvasObject
-	valid  error
+	Text            string
+	Widget          fyne.CanvasObject
+	validationError error
 }
 
 // NewFormItem creates a new form item with the specified label text and input widget
@@ -62,13 +62,7 @@ func (f *Form) AppendItem(item *FormItem) {
 		f.itemGrid.AddObject(item.Widget)
 	}
 
-	index := len(f.Items) - 1
-	if e, ok := item.Widget.(*Entry); ok && e.Validator != nil {
-		e.onValidationUpdated = func(err error) {
-			f.Items[index].valid = err
-			f.updateButtons()
-		}
-	}
+	f.setUpValidation(item.Widget, len(f.Items)-1)
 
 	f.Refresh()
 }
@@ -117,13 +111,28 @@ func (f *Form) updateButtons() {
 		f.buttonBox.Show()
 	}
 
+	f.checkValidation()
+}
+
+func (f *Form) checkValidation() {
 	for i, item := range f.Items {
-		if item.valid != nil {
-			f.submitButton.Disable()
-			break
-		} else if i == len(f.Items)-1 {
+		if item.validationError == nil && i == len(f.Items)-1 {
 			f.submitButton.Enable()
 		}
+	}
+}
+
+func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
+	var w interface{} = widget
+	if w, ok := w.(fyne.Validatable); ok {
+		w.SetOnValidationChanged(func(err error) {
+			f.Items[i].validationError = err
+			if f.Items[i].validationError != nil {
+				f.submitButton.Disable()
+			} else {
+				f.checkValidation()
+			}
+		})
 	}
 }
 
@@ -145,13 +154,7 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	for i, item := range f.Items {
 		itemGrid.AddObject(f.createLabel(item.Text))
 		itemGrid.AddObject(item.Widget)
-
-		if e, ok := item.Widget.(*Entry); ok && e.Validator != nil {
-			e.onValidationUpdated = func(err error) {
-				f.Items[i].valid = err
-				f.updateButtons()
-			}
-		}
+		f.setUpValidation(item.Widget, i)
 	}
 	f.itemGrid = itemGrid
 
