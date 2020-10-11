@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -27,7 +28,10 @@ import (
 // abstracts out the requisite error handling.
 //
 // You should only call this function on paths that you expect to be valid.
-func comparePaths(t *testing.T, p1, p2 string) bool {
+func comparePaths(t *testing.T, u1, u2 fyne.ListableURI) bool {
+	p1 := u1.String()[len(u1.Scheme())+3:]
+	p2 := u2.String()[len(u2.Scheme())+3:]
+
 	a1, err := filepath.Abs(p1)
 	if err != nil {
 		t.Fatalf("Failed to normalize path '%s'", p1)
@@ -42,17 +46,64 @@ func comparePaths(t *testing.T, p1, p2 string) bool {
 }
 
 func TestEffectiveStartingDir(t *testing.T) {
-	home, err := os.UserHomeDir()
+
+	homeString, err := os.UserHomeDir()
 	if err != nil {
-		t.Skipf("os.UserHomeDir) failed, cannot run this test on this system, error was '%s'", err)
+		t.Skipf("os.Gethome() failed, cannot run this test on this system (error stat()-ing ../) error was '%s'", err)
+	}
+	home, err := storage.ListerForURI(storage.NewFileURI(homeString))
+	if err != nil {
+		t.Skipf("could not get lister for working directory: %s", err)
+	}
+
+	parentURI, err := storage.Parent(home)
+	if err != nil {
+		t.Skipf("Could not get parent of working directory: %s", err)
+	}
+
+	parent, err := storage.ListerForURI(parentURI)
+	t.Log(parentURI)
+	t.Log(parent)
+	if err != nil {
+		t.Skipf("Could not get lister for parent of working directory: %s", err)
 	}
 
 	dialog := &FileDialog{}
 
-	// test that we get $HOME when running with the default struct values
+	// test that we get wd when running with the default struct values
 	res := dialog.effectiveStartingDir()
 	expect := home
 	if !comparePaths(t, res, expect) {
+		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
+			expect, res)
+	}
+
+	// this should always be equivalent to the preceding test
+	dialog.startingLocation = nil
+	res = dialog.effectiveStartingDir()
+	expect = home
+	if !comparePaths(t, res, expect) {
+		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
+			expect, res)
+	}
+
+	// check using StartingDirectory with some other directory
+	dialog.startingLocation = parent
+	res = dialog.effectiveStartingDir()
+	expect = parent
+	if res != expect {
+		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
+			expect, res)
+	}
+
+	// make sure we fail over if the specified directory does not exist
+	dialog.startingLocation, err = storage.ListerForURI(storage.NewFileURI("/some/file/that/does/not/exist"))
+	if err == nil {
+		t.Errorf("Should have failed to create lister for nonexistant file")
+	}
+	res = dialog.effectiveStartingDir()
+	expect = home
+	if res.String() != expect.String() {
 		t.Errorf("Expected effectiveStartingDir() to be '%s', but it was '%s'",
 			expect, res)
 	}
@@ -130,6 +181,28 @@ func TestShowFileOpen(t *testing.T) {
 	buttons := ui.Objects[2].(*fyne.Container).Objects[0].(*widget.Box)
 	open := buttons.Children[1].(*widget.Button)
 
+	breadcrumb := ui.Objects[3].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
+	assert.Greater(t, len(breadcrumb.Children), 0)
+
+	home, err := os.UserHomeDir()
+	if runtime.GOOS == "windows" {
+		// on windows os.Gethome() returns '\'
+		home = strings.ReplaceAll(home, "\\", "/")
+	}
+	t.Logf("home='%s'", home)
+	assert.Nil(t, err)
+	components := strings.Split(home, "/")
+	if components[0] == "" {
+		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
+		components[0] = "/"
+	}
+	if assert.Equal(t, len(components), len(breadcrumb.Children)) {
+		for i := range components {
+			t.Logf("i=%d components[i]='%s' breadcrumb...Text[i]='%s'", i, components[i], breadcrumb.Children[i].(*widget.Button).Text)
+			assert.Equal(t, components[i], breadcrumb.Children[i].(*widget.Button).Text)
+		}
+	}
+
 	files := ui.Objects[3].(*fyne.Container).Objects[1].(*widget.ScrollContainer).Content.(*fyne.Container)
 	assert.Greater(t, len(files.Objects), 0)
 
@@ -152,15 +225,16 @@ func TestShowFileOpen(t *testing.T) {
 	// This will only execute if we have a file in the home path.
 	// Until we have a way to set the directory of an open file dialog.
 	test.Tap(target)
-	assert.Equal(t, filepath.Base(target.path), nameLabel.Text)
+	assert.Equal(t, target.location.Name(), nameLabel.Text)
 	assert.False(t, open.Disabled())
 
 	test.Tap(open)
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, openErr)
-	assert.Equal(t, "file://"+target.path, chosen.URI().String())
 
-	err := chosen.Close()
+	assert.Equal(t, target.location.String(), chosen.URI().String())
+
+	err = chosen.Close()
 	assert.Nil(t, err)
 }
 
@@ -207,7 +281,7 @@ func TestShowFileSave(t *testing.T) {
 	// This will only execute if we have a file in the home path.
 	// Until we have a way to set the directory of an open file dialog.
 	test.Tap(target)
-	assert.Equal(t, filepath.Base(target.path), nameEntry.Text)
+	assert.Equal(t, target.location.Name(), nameEntry.Text)
 	assert.False(t, save.Disabled())
 
 	// we are about to overwrite, a warning will show
@@ -221,12 +295,17 @@ func TestShowFileSave(t *testing.T) {
 	test.Tap(save)
 	assert.Nil(t, win.Canvas().Overlays().Top())
 	assert.Nil(t, saveErr)
-	expectedPath := filepath.Join(filepath.Dir(target.path), "v2_"+filepath.Base(target.path))
-	assert.Equal(t, "file://"+expectedPath, chosen.URI().String())
+	targetParent, err := storage.Parent(target.location)
+	if err != nil {
+		t.Error(err)
+	}
+	expectedPath, _ := storage.Child(targetParent, "v2_"+target.location.Name())
+	assert.Equal(t, expectedPath.String(), chosen.URI().String())
 
-	err := chosen.Close()
+	err = chosen.Close()
 	assert.Nil(t, err)
-	err = os.Remove(expectedPath)
+	pathString := expectedPath.String()[len(expectedPath.Scheme())+3:]
+	err = os.Remove(pathString)
 	assert.Nil(t, err)
 }
 
@@ -243,14 +322,18 @@ func TestFileFilters(t *testing.T) {
 		fyne.LogError("Could not get current working directory", err)
 		t.FailNow()
 	}
-	testDataDir := filepath.Join(workingDir, "testdata")
+	testDataDir := storage.NewFileURI(filepath.Join(workingDir, "testdata"))
+	testDataLister, err := storage.ListerForURI(testDataDir)
+	if err != nil {
+		t.Error(err)
+	}
 
-	f.dialog.setDirectory(testDataDir)
+	f.dialog.setLocation(testDataLister)
 
 	count := 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
+			uri := icon.(*fileDialogItem).location
 			assert.Equal(t, uri.Extension(), ".png")
 			count++
 		}
@@ -262,7 +345,7 @@ func TestFileFilters(t *testing.T) {
 	count = 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
+			uri := icon.(*fileDialogItem).location
 			assert.Equal(t, uri.MimeType(), "image/jpeg")
 			count++
 		}
@@ -274,7 +357,7 @@ func TestFileFilters(t *testing.T) {
 	count = 0
 	for _, icon := range f.dialog.files.Objects {
 		if icon.(*fileDialogItem).dir == false {
-			uri := storage.NewURI("file://" + icon.(*fileDialogItem).path)
+			uri := icon.(*fileDialogItem).location
 			mimeType := strings.Split(uri.MimeType(), "/")[0]
 			assert.Equal(t, mimeType, "image")
 			count++

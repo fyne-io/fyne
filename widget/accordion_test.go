@@ -44,13 +44,13 @@ func TestAccordionContainer_ChangeTheme(t *testing.T) {
 	defer w.Close()
 	w.Resize(ac.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 
-	test.AssertImageMatches(t, "accordion_theme_initial.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "accordion/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
 		w.Resize(ac.MinSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		ac.Refresh()
 		time.Sleep(100 * time.Millisecond)
-		test.AssertImageMatches(t, "accordion_theme_changed.png", w.Canvas().Capture())
+		test.AssertImageMatches(t, "accordion/theme_changed.png", w.Canvas().Capture())
 	})
 }
 
@@ -212,7 +212,7 @@ func TestAccordion_Layout(t *testing.T) {
 			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), accordion))
 			window.Resize(accordion.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertImageMatches(t, "accordion_layout_"+name+".png", window.Canvas().Capture())
+			test.AssertImageMatches(t, "accordion/layout_"+name+".png", window.Canvas().Capture())
 
 			window.Close()
 		})
