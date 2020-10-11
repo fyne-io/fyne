@@ -92,6 +92,7 @@ func (l *List) SetSelected(index int) {
 	}
 	l.scroller.onOffsetChanged()
 	l.Refresh()
+	l.OnItemSelected(index)
 }
 
 // Declare conformity with WidgetRenderer interface.
