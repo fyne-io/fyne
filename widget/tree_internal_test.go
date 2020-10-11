@@ -1,12 +1,17 @@
 package widget
 
 import (
+	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -99,34 +104,6 @@ func TestTree(t *testing.T) {
 		assert.Equal(t, "e", leaves[3])
 		assert.Equal(t, "f", leaves[4])
 	})
-	t.Run("NewTreeWithStrings", func(t *testing.T) {
-		data := make(map[string][]string)
-		widget.AddTreePath(data, "foo", "foobar")
-		tree := NewTreeWithStrings(data)
-		tree.OpenBranch("foo")
-		var branches []string
-		var leaves []string
-		tree.walkAll(func(uid string, branch bool, depth int) {
-			if branch {
-				branches = append(branches, uid)
-			} else {
-				leaves = append(leaves, uid)
-			}
-		})
-		assert.Equal(t, 2, len(branches))
-		assert.Equal(t, "", branches[0]) // Root
-		assert.Equal(t, "foo", branches[1])
-		assert.Equal(t, 1, len(leaves))
-		assert.Equal(t, "foobar", leaves[0])
-	})
-	/* TODO Not currently possible as testDriver doesn't support listable URIs:
-	2020/08/31 16:49:18 Fyne error:  Unable to get lister for /var/folders/8n/1dd15fbn79s2w3l4x43v5c7w0000gn/T/test011812343
-	2020/08/31 16:49:18   Cause: test driver does support creating listable URIs yet
-	"io/ioutil"
-	"os"
-	"path"
-	"path/filepath"
-	"fyne.io/fyne/storage"
 	t.Run("NewTreeWithFiles", func(t *testing.T) {
 		tempDir, err := ioutil.TempDir("", "test")
 		assert.NoError(t, err)
@@ -156,7 +133,26 @@ func TestTree(t *testing.T) {
 		assert.Equal(t, 1, len(leaves))
 		assert.Equal(t, filepath.Join(tempDir, "B", "C"), leaves[0])
 	})
-	*/
+	t.Run("NewTreeWithStrings", func(t *testing.T) {
+		data := make(map[string][]string)
+		widget.AddTreePath(data, "foo", "foobar")
+		tree := NewTreeWithStrings(data)
+		tree.OpenBranch("foo")
+		var branches []string
+		var leaves []string
+		tree.walkAll(func(uid string, branch bool, depth int) {
+			if branch {
+				branches = append(branches, uid)
+			} else {
+				leaves = append(leaves, uid)
+			}
+		})
+		assert.Equal(t, 2, len(branches))
+		assert.Equal(t, "", branches[0]) // Root
+		assert.Equal(t, "foo", branches[1])
+		assert.Equal(t, 1, len(leaves))
+		assert.Equal(t, "foobar", leaves[0])
+	})
 }
 
 func TestTree_Indentation(t *testing.T) {
@@ -317,7 +313,6 @@ func TestTree_MinSize(t *testing.T) {
 }
 
 func TestTree_Tap(t *testing.T) {
-	/* TODO needs "fyne.io/fyne/test".DoubleTap(obj fyne.DoubleTappable)
 	t.Run("Branch", func(t *testing.T) {
 		data := make(map[string][]string)
 		widget.AddTreePath(data, "A", "B")
@@ -337,7 +332,6 @@ func TestTree_Tap(t *testing.T) {
 			assert.Fail(t, "Branch should have been changed")
 		}
 	})
-	*/
 	t.Run("BranchIcon", func(t *testing.T) {
 		data := make(map[string][]string)
 		widget.AddTreePath(data, "A", "B")
