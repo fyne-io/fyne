@@ -1,9 +1,6 @@
 package widget
 
 import (
-	"os"
-	"strings"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
@@ -60,13 +57,8 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 			return
 		},
 		IsBranch: func(uid string) bool {
-			path := strings.TrimPrefix(uid, "file://")
-			fi, err := os.Lstat(path)
-			if err != nil {
-				fyne.LogError("Unable to stat path "+path, err)
-				return false
-			}
-			return fi.IsDir()
+			_, err := storage.ListerForURI(storage.NewURI(uid))
+			return err == nil
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
 			var icon fyne.CanvasObject
