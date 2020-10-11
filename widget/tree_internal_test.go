@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -115,7 +114,8 @@ func TestTree(t *testing.T) {
 		err = ioutil.WriteFile(path.Join(tempDir, "B", "C"), []byte("c"), os.ModePerm)
 		assert.NoError(t, err)
 
-		tree := NewTreeWithFiles(storage.NewURI("file://" + tempDir))
+		root := storage.NewURI("file://" + tempDir)
+		tree := NewTreeWithFiles(root)
 		tree.OpenAllBranches()
 		var branches []string
 		var leaves []string
@@ -127,11 +127,19 @@ func TestTree(t *testing.T) {
 			}
 		})
 		assert.Equal(t, 3, len(branches))
-		assert.Equal(t, tempDir, branches[0]) // Root
-		assert.Equal(t, filepath.Join(tempDir, "A"), branches[1])
-		assert.Equal(t, filepath.Join(tempDir, "B"), branches[2])
+		assert.Equal(t, root.String(), branches[0]) // Root
+		b1, err := storage.Child(root, "A")
+		assert.NoError(t, err)
+		assert.Equal(t, b1.String(), branches[1])
+		b2, err := storage.Child(root, "B")
+		assert.NoError(t, err)
+		assert.Equal(t, b2.String(), branches[2])
 		assert.Equal(t, 1, len(leaves))
-		assert.Equal(t, filepath.Join(tempDir, "B", "C"), leaves[0])
+		l1, err := storage.Child(root, "B")
+		assert.NoError(t, err)
+		l1, err = storage.Child(l1, "C")
+		assert.NoError(t, err)
+		assert.Equal(t, l1.String(), leaves[0])
 	})
 	t.Run("NewTreeWithStrings", func(t *testing.T) {
 		data := make(map[string][]string)
