@@ -420,7 +420,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				b, ok := r.branches[uid]
 				if !ok {
 					b = r.getBranch()
-					b.Update(uid, depth)
+					b.update(uid, depth)
 					if f := r.treeContent.tree.UpdateNode; f != nil {
 						f(uid, true, b.Content())
 					}
@@ -431,7 +431,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				l, ok := r.leaves[uid]
 				if !ok {
 					l = r.getLeaf()
-					l.Update(uid, depth)
+					l.update(uid, depth)
 					if f := r.treeContent.tree.UpdateNode; f != nil {
 						f(uid, false, l.Content())
 					}
@@ -617,19 +617,19 @@ func (n *treeNode) Tapped(*fyne.PointEvent) {
 	}
 }
 
-func (n *treeNode) Update(uid string, depth int) {
+func (n *treeNode) partialRefresh() {
+	if r := cache.Renderer(n.super()); r != nil {
+		r.(*treeNodeRenderer).partialRefresh()
+	}
+}
+
+func (n *treeNode) update(uid string, depth int) {
 	n.uid = uid
 	n.depth = depth
 	n.propertyLock.Lock()
 	n.Hidden = false
 	n.propertyLock.Unlock()
 	n.partialRefresh()
-}
-
-func (n *treeNode) partialRefresh() {
-	if r := cache.Renderer(n.super()); r != nil {
-		r.(*treeNodeRenderer).partialRefresh()
-	}
 }
 
 var _ fyne.WidgetRenderer = (*treeNodeRenderer)(nil)
@@ -729,9 +729,9 @@ func (b *branch) DoubleTapped(*fyne.PointEvent) {
 	b.tree.ToggleBranch(b.uid)
 }
 
-func (b *branch) Update(uid string, depth int) {
-	b.treeNode.Update(uid, depth)
-	b.icon.(*branchIcon).Update(uid, depth)
+func (b *branch) update(uid string, depth int) {
+	b.treeNode.update(uid, depth)
+	b.icon.(*branchIcon).update(uid, depth)
 }
 
 var _ fyne.DoubleTappable = (*branchIcon)(nil)
@@ -768,7 +768,7 @@ func (i *branchIcon) Tapped(*fyne.PointEvent) {
 	i.tree.ToggleBranch(i.uid)
 }
 
-func (i *branchIcon) Update(uid string, depth int) {
+func (i *branchIcon) update(uid string, depth int) {
 	i.uid = uid
 	i.Refresh()
 }
