@@ -18,7 +18,7 @@ type FormItem struct {
 
 // NewFormItem creates a new form item with the specified label text and input widget
 func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
-	return &FormItem{Text: text, Widget: widget, validationError: nil}
+	return &FormItem{Text: text, Widget: widget}
 }
 
 // Form widget is two column grid where each row has a label and a widget (usually an input).
