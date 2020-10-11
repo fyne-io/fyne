@@ -41,9 +41,10 @@ type Entry struct {
 	MultiLine bool
 	Wrapping  fyne.TextWrap
 
-	Validator        fyne.Validator
-	validationStatus *validationStatus
-	validationError  error
+	Validator           fyne.StringValidator
+	validationStatus    *validationStatus
+	onValidationChanged func(error)
+	validationError     error
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -1130,17 +1131,28 @@ func (r *entryRenderer) Refresh() {
 	if r.entry.ActionItem != nil {
 		r.entry.ActionItem.Refresh()
 	}
+
 	if r.entry.Validator != nil {
-		r.entry.validationError = r.entry.Validator(content)
+		err := r.entry.Validator(content)
+		if err != r.entry.validationError {
+			r.entry.validationError = err
+
+			if f := r.entry.onValidationChanged; f != nil {
+				f(err)
+			}
+		}
+
 		if !r.entry.focused && r.entry.Text != "" && r.entry.validationError != nil {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
 		}
 
 		r.ensureValidationSetup()
+
 		r.entry.validationStatus.Refresh()
 	} else if r.entry.validationStatus != nil {
 		r.entry.validationStatus.Hide()
 	}
+
 	canvas.Refresh(r.entry.super())
 }
 

@@ -7,6 +7,25 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+var _ fyne.Validatable = (*Entry)(nil)
+
+// Validate validates the current text in the widget
+func (e *Entry) Validate() error {
+	if e.Validator == nil {
+		return nil
+	}
+
+	return e.Validator(e.Text)
+}
+
+// SetOnValidationChanged is intended for parent widgets or containers to hook into the validation.
+// The function might be overwritten by a parent that cares about child validation (e.g. widget.Form).
+func (e *Entry) SetOnValidationChanged(callback func(error)) {
+	if callback != nil {
+		e.onValidationChanged = callback
+	}
+}
+
 // SetValidationError manually updates the validation status until the next input change
 func (e *Entry) SetValidationError(err error) {
 	e.validationError = err

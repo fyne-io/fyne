@@ -10,7 +10,7 @@ import (
 
 // NewRegexp creates a new validator that uses regular expression parsing.
 // The validator will return nil if valid, otherwise returns an error with a reason text.
-func NewRegexp(regexpstr, reason string) fyne.Validator {
+func NewRegexp(regexpstr, reason string) fyne.StringValidator {
 	expression, err := regexp.Compile(regexpstr)
 	if err != nil {
 		fyne.LogError("Regexp did not compile", err)
