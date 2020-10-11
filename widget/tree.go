@@ -23,7 +23,7 @@ type Tree struct {
 	Selected string
 	Offset   fyne.Position
 
-	Children       func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
+	ChildUIDs      func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
 	IsBranch       func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
 	CreateNode     func(branch bool) (o fyne.CanvasObject)               // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
 	UpdateNode     func(uid string, branch bool, node fyne.CanvasObject) // Update the given CanvasObject to represent the data at the given Unique ID
@@ -40,7 +40,7 @@ type Tree struct {
 func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 	t = &Tree{
 		Root: root.String(),
-		Children: func(uid string) (c []string) {
+		ChildUIDs: func(uid string) (c []string) {
 			luri, err := storage.ListerForURI(storage.NewURI(uid))
 			if err != nil {
 				fyne.LogError("Unable to get lister for "+uid, err)
@@ -102,7 +102,7 @@ func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 // Data must contain a mapping for the root, which defaults to empty string ("").
 func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 	t = &Tree{
-		Children: func(uid string) (c []string) {
+		ChildUIDs: func(uid string) (c []string) {
 			c = data[uid]
 			return
 		},
@@ -251,8 +251,8 @@ func (t *Tree) walk(uid string, depth int, onNode func(string, bool, int)) {
 		if isBranch(uid) {
 			onNode(uid, true, depth)
 			if t.IsBranchOpen(uid) {
-				if children := t.Children; children != nil {
-					for _, c := range children(uid) {
+				if childUIDs := t.ChildUIDs; childUIDs != nil {
+					for _, c := range childUIDs(uid) {
 						t.walk(c, depth+1, onNode)
 					}
 				}
