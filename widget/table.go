@@ -44,6 +44,20 @@ func NewTable(length func() (int, int), create func() fyne.CanvasObject, update 
 	return t
 }
 
+// ClearSelection will clear any cell selection.
+func (t *Table) ClearSelection() {
+	t.SelectedRow = -1
+	t.SelectedColumn = -1
+
+	if t.OnCellSelected != nil {
+		t.OnCellSelected(-1, -1)
+	}
+
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+}
+
 // CreateRenderer returns a new renderer for the table.
 //
 // Implements: fyne.Widget
