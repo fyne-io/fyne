@@ -140,6 +140,13 @@ func Scroll(c fyne.Canvas, pos fyne.Position, deltaX, deltaY int) {
 	o.(fyne.Scrollable).Scrolled(e)
 }
 
+// DoubleTap simulates a double left mouse click on the specified object.
+func DoubleTap(obj fyne.DoubleTappable) {
+	ev, c := prepareTap(obj, fyne.NewPos(1, 1))
+	handleFocusOnTap(c, obj)
+	obj.DoubleTapped(ev)
+}
+
 // Tap simulates a left mouse click on the specified object.
 func Tap(obj fyne.Tappable) {
 	TapAt(obj, fyne.NewPos(1, 1))

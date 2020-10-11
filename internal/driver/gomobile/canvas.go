@@ -1,6 +1,7 @@
 package gomobile
 
 import (
+	"context"
 	"image"
 	"math"
 	"time"
@@ -38,7 +39,15 @@ type mobileCanvas struct {
 	dragging       fyne.Draggable
 	refreshQueue   chan fyne.CanvasObject
 	minSizeCache   map[fyne.CanvasObject]fyne.Size
+
+	touchTapCount   int
+	touchCancelFunc context.CancelFunc
+	touchLastTapped fyne.CanvasObject
 }
+
+const (
+	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
+)
 
 func (c *mobileCanvas) Content() fyne.CanvasObject {
 	return c.content
@@ -396,6 +405,7 @@ func (c *mobileCanvas) tapMove(pos fyne.Position, tapID int,
 func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 	tapCallback func(fyne.Tappable, *fyne.PointEvent),
 	tapAltCallback func(fyne.SecondaryTappable, *fyne.PointEvent),
+	doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent),
 	dragCallback func(fyne.Draggable, *fyne.DragEvent)) {
 	if c.dragging != nil {
 		c.dragging.DragEnd()
@@ -422,6 +432,8 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 			return true
 		} else if _, ok := object.(fyne.Focusable); ok {
 			return true
+		} else if _, ok := object.(fyne.DoubleTappable); ok {
+			return true
 		}
 
 		return false
@@ -441,14 +453,45 @@ func (c *mobileCanvas) tapUp(pos fyne.Position, tapID int,
 
 	// TODO move event queue to common code w.queueEvent(func() { wid.Tapped(ev) })
 	if duration < tapSecondaryDelay {
-		if wid, ok := co.(fyne.Tappable); ok {
-			tapCallback(wid, ev)
+		_, doubleTap := co.(fyne.DoubleTappable)
+		if doubleTap {
+			c.touchTapCount++
+			c.touchLastTapped = co
+			if c.touchCancelFunc != nil {
+				c.touchCancelFunc()
+				return
+			}
+			go c.waitForDoubleTap(co, ev, tapCallback, doubleTapCallback)
+		} else {
+			if wid, ok := co.(fyne.Tappable); ok {
+				tapCallback(wid, ev)
+			}
 		}
 	} else {
 		if wid, ok := co.(fyne.SecondaryTappable); ok {
 			tapAltCallback(wid, ev)
 		}
 	}
+}
+
+func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent, tapCallback func(fyne.Tappable, *fyne.PointEvent), doubleTapCallback func(fyne.DoubleTappable, *fyne.PointEvent)) {
+	var ctx context.Context
+	ctx, c.touchCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	defer c.touchCancelFunc()
+	<-ctx.Done()
+	if c.touchTapCount == 2 && c.touchLastTapped == co {
+		if wid, ok := co.(fyne.DoubleTappable); ok {
+			doubleTapCallback(wid, ev)
+		}
+	} else {
+		if wid, ok := co.(fyne.Tappable); ok {
+			tapCallback(wid, ev)
+		}
+	}
+	c.touchTapCount = 0
+	c.touchCancelFunc = nil
+	c.touchLastTapped = nil
+	return
 }
 
 func (c *mobileCanvas) setupThemeListener() {
