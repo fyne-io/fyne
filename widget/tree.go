@@ -26,7 +26,7 @@ type Tree struct {
 	ChildUIDs      func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
 	IsBranch       func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
 	CreateNode     func(branch bool) (o fyne.CanvasObject)               // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
-	UpdateNode     func(uid string, branch bool, node fyne.CanvasObject) // Update the given CanvasObject to represent the data at the given Unique ID
+	UpdateNode     func(uid string, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given Unique ID
 	OnBranchOpened func(uid string)                                      // Called when a Branch is opened
 	OnBranchClosed func(uid string)                                      // Called when a Branch is closed
 	OnNodeSelected func(uid string)                                      // Called when the Node with the given Unique ID is selected.
