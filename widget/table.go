@@ -31,6 +31,7 @@ type Table struct {
 	cells                       *tableCells
 	moveCallback                func()
 	offset                      fyne.Position
+	scroll                      *ScrollContainer
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
@@ -57,21 +58,65 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 	cellSize := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	t.cells = newTableCells(t, cellSize)
-	scroll := NewScrollContainer(t.cells)
+	t.scroll = NewScrollContainer(t.cells)
 
-	obj := []fyne.CanvasObject{colMarker, rowMarker, colHover, rowHover, scroll}
-	r := &tableRenderer{t: t, scroll: scroll, rowMarker: rowMarker, colMarker: colMarker,
+	obj := []fyne.CanvasObject{colMarker, rowMarker, colHover, rowHover, t.scroll}
+	r := &tableRenderer{t: t, scroll: t.scroll, rowMarker: rowMarker, colMarker: colMarker,
 		rowHover: rowHover, colHover: colHover, cellSize: cellSize}
 	r.SetObjects(obj)
 	t.moveCallback = r.moveIndicators
-	scroll.onOffsetChanged = func() {
-		t.offset = scroll.Offset
+	t.scroll.onOffsetChanged = func() {
+		t.offset = t.scroll.Offset
 		t.cells.Refresh()
 		r.moveIndicators()
 	}
 
 	r.Layout(t.Size())
 	return r
+}
+
+// SetSelected will mark the specified cell (at row, col) to be marked as selected.
+func (t *Table) SetSelected(row, col int) {
+	t.SelectedRow = row
+	t.SelectedColumn = col
+
+	t.scrollToVisible(row, col)
+	if t.OnCellSelected != nil {
+		t.OnCellSelected(row, col)
+	}
+
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+}
+
+func (t *Table) scrollToVisible(row, col int) {
+	if row == -1 || col == -1 || t.scroll == nil {
+		return
+	}
+	scrollPos := t.offset
+
+	cellPadded := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	cellX := col * (cellPadded.Width + tableDividerThickness)
+	if cellX < scrollPos.X {
+		scrollPos.X = cellX
+	} else if cellX+cellPadded.Width > scrollPos.X+t.scroll.size.Width {
+		scrollPos.X = cellX + cellPadded.Width - t.scroll.size.Width
+	}
+
+	cellY := col * (cellPadded.Height + tableDividerThickness)
+	if cellY < scrollPos.Y {
+		scrollPos.Y = cellY
+	} else if cellY+cellPadded.Height > scrollPos.Y+t.scroll.size.Height {
+		scrollPos.Y = cellY + t.scroll.size.Height - cellPadded.Height
+	}
+	t.scroll.Offset = scrollPos
+	t.offset = scrollPos
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+	t.scroll.Refresh()
+	t.cells.Refresh()
 }
 
 func (t *Table) templateSize() fyne.Size {
