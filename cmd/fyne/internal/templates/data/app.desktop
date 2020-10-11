@@ -3,3 +3,4 @@ Type=Application
 Name={{.Name}}
 Exec={{.Exec}}
 Icon={{.Name}}
+Name[en_US]=app.desktop
