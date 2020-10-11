@@ -88,8 +88,7 @@ func (l *List) SetSelected(index int) {
 	if index < l.firstItemIndex {
 		l.scroller.Offset.Y = index * l.itemMin.Height
 	} else {
-		l.scroller.Offset.Y = (index * l.itemMin.Height) - ((l.visibleItemCount - 1) * l.itemMin.Height)
-		l.scroller.Offset.Y -= l.scroller.Size().Height - (l.visibleItemCount * l.itemMin.Height)
+		l.scroller.Offset.Y = ((index + 1) * l.itemMin.Height) - l.scroller.Size().Height
 	}
 	l.scroller.onOffsetChanged()
 	l.Refresh()
