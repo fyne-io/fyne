@@ -25,13 +25,13 @@ func TestShadow_ApplyTheme(t *testing.T) {
 
 	s.Resize(fyne.NewSize(30, 30))
 	s.Move(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "shadow_theme_dark.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "shadow/theme_dark.png", w.Canvas().Capture())
 
 	test.ApplyTheme(t, theme.LightTheme())
-	test.AssertImageMatches(t, "shadow_theme_light.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "shadow/theme_light.png", w.Canvas().Capture())
 
 	test.ApplyTheme(t, theme.DarkTheme())
-	test.AssertImageMatches(t, "shadow_theme_dark.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "shadow/theme_dark.png", w.Canvas().Capture())
 }
 
 func TestShadow_AroundShadow(t *testing.T) {
@@ -46,7 +46,7 @@ func TestShadow_AroundShadow(t *testing.T) {
 
 	s.Resize(fyne.NewSize(30, 30))
 	s.Move(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "shadow_around.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "shadow/around.png", w.Canvas().Capture())
 }
 
 func TestShadow_Transparency(t *testing.T) {
@@ -65,7 +65,7 @@ func TestShadow_Transparency(t *testing.T) {
 	w.Canvas().Overlays().Add(s2)
 	s2.Resize(fyne.NewSize(20, 40))
 	s2.Move(fyne.NewPos(15, 5))
-	test.AssertImageMatches(t, "shadow_transparency.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "shadow/transparency.png", w.Canvas().Capture())
 }
 
 func TestShadow_BottomShadow(t *testing.T) {
@@ -80,7 +80,7 @@ func TestShadow_BottomShadow(t *testing.T) {
 
 	s.Resize(fyne.NewSize(30, 30))
 	s.Move(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "shadow_bottom.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "shadow/bottom.png", w.Canvas().Capture())
 }
 
 func TestShadow_MinSize(t *testing.T) {
@@ -99,5 +99,5 @@ func TestShadow_TopShadow(t *testing.T) {
 
 	s.Resize(fyne.NewSize(30, 30))
 	s.Move(fyne.NewPos(10, 10))
-	test.AssertImageMatches(t, "shadow_top.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "shadow/top.png", w.Canvas().Capture())
 }
