@@ -19,14 +19,18 @@ var _ fyne.Widget = (*List)(nil)
 type List struct {
 	BaseWidget
 
-	Length         func() int
-	CreateItem     func() fyne.CanvasObject
-	UpdateItem     func(index int, item fyne.CanvasObject)
-	OnItemSelected func(index int)
-	selectedItem   *listItem
-	selectedIndex  int
-	itemMin        fyne.Size
-	offsetY        int
+	Length           func() int
+	CreateItem       func() fyne.CanvasObject
+	UpdateItem       func(index int, item fyne.CanvasObject)
+	OnItemSelected   func(index int)
+	visibleItemCount int
+	firstItemIndex   int
+	lastItemIndex    int
+	scroller         *ScrollContainer
+	selectedItem     *listItem
+	selectedIndex    int
+	itemMin          fyne.Size
+	offsetY          int
 }
 
 // NewList creates and returns a list widget for displaying items in
@@ -35,6 +39,13 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem, selectedIndex: -1}
 	list.ExtendBaseWidget(list)
 	return list
+}
+
+// ClearSelection clears the selected item in list to ensure no item is currently selected.
+func (l *List) ClearSelected() {
+	l.selectedIndex = -1
+	l.selectedItem = nil
+	l.Refresh()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
@@ -48,9 +59,9 @@ func (l *List) CreateRenderer() fyne.WidgetRenderer {
 	}
 	layout := fyne.NewContainerWithLayout(newListLayout(l))
 	layout.Resize(layout.MinSize())
-	scroller := NewVScrollContainer(layout)
-	objects := []fyne.CanvasObject{scroller}
-	return newListRenderer(objects, l, scroller, layout)
+	l.scroller = NewVScrollContainer(layout)
+	objects := []fyne.CanvasObject{l.scroller}
+	return newListRenderer(objects, l, l.scroller, layout)
 }
 
 // MinSize returns the size that this widget should not shrink below.
@@ -60,22 +71,43 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
+// SetSelected sets the index of the data that is to be selected, refreshes, and calls the OnSelected callback.
+func (l *List) SetSelected(index int) {
+	length := 0
+	if f := l.Length; f != nil {
+		length = f()
+	}
+	if index < 0 || index >= length {
+		return
+	}
+	l.selectedIndex = index
+	if index >= l.firstItemIndex && index <= l.lastItemIndex {
+		l.Refresh()
+		return
+	}
+	if index < l.firstItemIndex {
+		l.scroller.Offset.Y = index * l.itemMin.Height
+	} else {
+		l.scroller.Offset.Y = (index * l.itemMin.Height) - ((l.visibleItemCount - 1) * l.itemMin.Height)
+		l.scroller.Offset.Y -= l.scroller.Size().Height - (l.visibleItemCount * l.itemMin.Height)
+	}
+	l.scroller.onOffsetChanged()
+	l.Refresh()
+}
+
 // Declare conformity with WidgetRenderer interface.
 var _ fyne.WidgetRenderer = (*listRenderer)(nil)
 
 type listRenderer struct {
 	widget.BaseRenderer
 
-	list             *List
-	scroller         *ScrollContainer
-	layout           *fyne.Container
-	itemPool         *syncPool
-	children         []fyne.CanvasObject
-	visibleItemCount int
-	firstItemIndex   int
-	lastItemIndex    int
-	size             fyne.Size
-	previousOffsetY  int
+	list            *List
+	scroller        *ScrollContainer
+	layout          *fyne.Container
+	itemPool        *syncPool
+	children        []fyne.CanvasObject
+	size            fyne.Size
+	previousOffsetY int
 }
 
 func newListRenderer(objects []fyne.CanvasObject, l *List, scroller *ScrollContainer, layout *fyne.Container) *listRenderer {
@@ -101,9 +133,9 @@ func (l *listRenderer) Layout(size fyne.Size) {
 				l.itemPool.Release(child)
 			}
 			l.previousOffsetY = 0
-			l.firstItemIndex = 0
-			l.lastItemIndex = 0
-			l.visibleItemCount = 0
+			l.list.firstItemIndex = 0
+			l.list.lastItemIndex = 0
+			l.list.visibleItemCount = 0
 			l.list.offsetY = 0
 			l.layout.Layout.(*listLayout).layoutEndY = 0
 			l.children = nil
@@ -126,29 +158,30 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	}
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize.
-	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
-	if l.visibleItemCount == 0 {
+	l.list.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height)))
+	if l.list.visibleItemCount == 0 {
 		return
 	}
-	min := int(math.Min(float64(length), float64(l.visibleItemCount)))
+	min := int(math.Min(float64(length), float64(l.list.visibleItemCount)))
 	if len(l.children) > min {
 		for i := len(l.children); i >= min; i-- {
 			l.itemPool.Release(l.children[i-1])
 		}
 		l.children = l.children[:min-1]
 	}
-	for i := len(l.children) + l.firstItemIndex; len(l.children) <= l.visibleItemCount && i < length; i++ {
+	for i := len(l.children) + l.list.firstItemIndex; len(l.children) <= l.list.visibleItemCount && i < length; i++ {
 		l.appendItem(i)
 	}
 	l.layout.Objects = l.children
 	l.layout.Layout.Layout(l.layout.Objects, l.list.itemMin)
-	l.lastItemIndex = l.firstItemIndex + len(l.children) - 1
+	l.list.lastItemIndex = l.list.firstItemIndex + len(l.children) - 1
 
-	i := l.firstItemIndex
+	i := l.list.firstItemIndex
 	for _, child := range l.children {
 		if f := l.list.UpdateItem; f != nil {
 			f(i, child.(*listItem).child)
 		}
+		l.setupListItem(child, i)
 		i++
 	}
 }
@@ -226,12 +259,12 @@ func (l *listRenderer) scrollDown(offsetChange int) {
 	if length == 0 {
 		return
 	}
-	for i := 0; i < itemChange && l.lastItemIndex != length-1; i++ {
+	for i := 0; i < itemChange && l.list.lastItemIndex != length-1; i++ {
 		l.itemPool.Release(l.children[0])
 		l.children = l.children[1:]
-		l.firstItemIndex++
-		l.lastItemIndex++
-		l.appendItem(l.lastItemIndex)
+		l.list.firstItemIndex++
+		l.list.lastItemIndex++
+		l.appendItem(l.list.lastItemIndex)
 	}
 }
 
@@ -246,12 +279,12 @@ func (l *listRenderer) scrollUp(offsetChange int) {
 		itemChange = int(math.Floor(float64(offsetChange) / float64(l.list.itemMin.Height)))
 	}
 	l.previousOffsetY = l.list.offsetY
-	for i := 0; i < itemChange && l.firstItemIndex != 0; i++ {
+	for i := 0; i < itemChange && l.list.firstItemIndex != 0; i++ {
 		l.itemPool.Release(l.children[len(l.children)-1])
 		l.children = l.children[:len(l.children)-1]
-		l.firstItemIndex--
-		l.lastItemIndex--
-		l.prependItem(l.firstItemIndex)
+		l.list.firstItemIndex--
+		l.list.lastItemIndex--
+		l.prependItem(l.list.firstItemIndex)
 	}
 }
 
@@ -270,7 +303,7 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 		f(index, item.(*listItem).child)
 	}
 	item.(*listItem).onTapped = func() {
-		if l.list.selectedItem != nil && l.list.selectedIndex >= l.firstItemIndex && l.list.selectedIndex <= l.lastItemIndex {
+		if l.list.selectedItem != nil && l.list.selectedIndex >= l.list.firstItemIndex && l.list.selectedIndex <= l.list.lastItemIndex {
 			l.list.selectedItem.selected = false
 			l.list.selectedItem.Refresh()
 		}

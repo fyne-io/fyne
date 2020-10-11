@@ -18,8 +18,8 @@ func TestNewList(t *testing.T) {
 	list := createList(1000)
 
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
-	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
+	firstItemIndex := list.firstItemIndex
+	lastItemIndex := list.lastItemIndex
 	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
 
 	assert.Equal(t, 1000, list.Length())
@@ -35,8 +35,8 @@ func TestList_Resize(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 400))
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
-	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
+	firstItemIndex := list.firstItemIndex
+	lastItemIndex := list.lastItemIndex
 	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
 	assert.Equal(t, 0, firstItemIndex)
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
@@ -46,8 +46,8 @@ func TestList_Resize(t *testing.T) {
 
 	indexChange := int(math.Floor(float64(200) / float64(template.MinSize().Height)))
 
-	newFirstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	newLastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
+	newFirstItemIndex := list.firstItemIndex
+	newLastItemIndex := list.lastItemIndex
 	newVisibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
 
 	assert.Equal(t, firstItemIndex, newFirstItemIndex)
@@ -64,9 +64,9 @@ func TestList_OffsetChange(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 400))
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
-	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	visibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
+	firstItemIndex := list.firstItemIndex
+	lastItemIndex := list.lastItemIndex
+	visibleCount := list.visibleItemCount
 
 	assert.Equal(t, 0, firstItemIndex)
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex)
@@ -77,9 +77,9 @@ func TestList_OffsetChange(t *testing.T) {
 
 	indexChange := int(math.Floor(float64(300) / float64(template.MinSize().Height)))
 
-	newFirstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	newLastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
-	newVisibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
+	newFirstItemIndex := list.firstItemIndex
+	newLastItemIndex := list.lastItemIndex
+	newVisibleCount := list.visibleItemCount
 
 	assert.NotEqual(t, firstItemIndex, newFirstItemIndex)
 	assert.Equal(t, newFirstItemIndex, firstItemIndex+indexChange-1)
@@ -115,6 +115,30 @@ func TestList_Selection(t *testing.T) {
 	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
 	assert.Equal(t, list.selectedIndex, 1)
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	list.ClearSelected()
+	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.Equal(t, list.selectedIndex, -1)
+}
+
+func TestList_SetSelection(t *testing.T) {
+	list := createList(1000)
+
+	assert.Equal(t, list.firstItemIndex, 0)
+	list.SetSelected(50)
+	assert.Equal(t, list.lastItemIndex, 50)
+	children := test.WidgetRenderer(list).(*listRenderer).children
+	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+
+	list.SetSelected(5)
+	assert.Equal(t, list.firstItemIndex, 5)
+	children = test.WidgetRenderer(list).(*listRenderer).children
+	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+
+	list.SetSelected(6)
+	assert.Equal(t, list.firstItemIndex, 5)
+	children = test.WidgetRenderer(list).(*listRenderer).children
+	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
 }
 
 func TestList_DataChange(t *testing.T) {
@@ -182,8 +206,8 @@ func TestList_ClearList(t *testing.T) {
 	w.Resize(fyne.NewSize(200, 400))
 	assert.Equal(t, 1000, list.Length())
 
-	firstItemIndex := test.WidgetRenderer(list).(*listRenderer).firstItemIndex
-	lastItemIndex := test.WidgetRenderer(list).(*listRenderer).lastItemIndex
+	firstItemIndex := list.firstItemIndex
+	lastItemIndex := list.lastItemIndex
 	visibleCount := len(test.WidgetRenderer(list).(*listRenderer).children)
 
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
