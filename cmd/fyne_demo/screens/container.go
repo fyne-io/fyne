@@ -186,7 +186,15 @@ func makeTreeTab() fyne.CanvasObject {
 
 	dir, err := os.UserHomeDir()
 	if err != nil {
-		fyne.LogError("Could not get user home dir", err)
+		fyne.LogError("Could not get user home directory", err)
+		dir, err = os.Getwd()
+		if err != nil {
+			fyne.LogError("Could not get current working directory", err)
+		}
+	}
+	if dir == "" {
+		// Can't get any useful directory, so only show Tree of strings
+		return l
 	}
 	r := widget.NewTreeWithFiles(storage.NewURI("file://" + dir))
 	r.OnNodeSelected = func(id string) {
