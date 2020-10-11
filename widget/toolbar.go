@@ -24,7 +24,7 @@ type ToolbarAction struct {
 // ToolbarObject gets a button to render this ToolbarAction
 func (t *ToolbarAction) ToolbarObject() fyne.CanvasObject {
 	button := NewButtonWithIcon("", t.Icon, t.OnActivated)
-	button.HideShadow = true
+	button.Importance = LowImportance
 
 	return button
 }

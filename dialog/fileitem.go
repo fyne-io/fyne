@@ -6,7 +6,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -22,9 +21,9 @@ type fileDialogItem struct {
 	picker    *fileDialog
 	isCurrent bool
 
-	name string
-	path string
-	dir  bool
+	name     string
+	location fyne.URI
+	dir      bool
 }
 
 func (i *fileDialogItem) Tapped(_ *fyne.PointEvent) {
@@ -43,15 +42,16 @@ func (i *fileDialogItem) CreateRenderer() fyne.WidgetRenderer {
 	if i.dir {
 		icon = canvas.NewImageFromResource(theme.FolderIcon())
 	} else {
-		icon = widget.NewFileIcon(storage.NewURI("file://" + i.path))
+		icon = widget.NewFileIcon(i.location)
 	}
 
 	return &fileItemRenderer{item: i,
 		icon: icon, text: text, objects: []fyne.CanvasObject{icon, text}}
 }
 
-func fileName(path string) (name string) {
-	name = filepath.Base(path)
+func fileName(path fyne.URI) (name string) {
+	pathstr := path.String()[len(path.Scheme())+3:]
+	name = filepath.Base(pathstr)
 	ext := filepath.Ext(name[1:])
 	name = name[:len(name)-len(ext)]
 
@@ -62,19 +62,19 @@ func (i *fileDialogItem) isDirectory() bool {
 	return i.dir
 }
 
-func (f *fileDialog) newFileItem(path string, dir bool) *fileDialogItem {
+func (f *fileDialog) newFileItem(location fyne.URI, dir bool) *fileDialogItem {
 	var name string
 	if dir {
-		name = filepath.Base(path)
+		name = location.Name()
 	} else {
-		name = fileName(path)
+		name = fileName(location)
 	}
 
 	ret := &fileDialogItem{
-		picker: f,
-		name:   name,
-		path:   path,
-		dir:    dir,
+		picker:   f,
+		name:     name,
+		location: location,
+		dir:      dir,
 	}
 	ret.ExtendBaseWidget(ret)
 	return ret

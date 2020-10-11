@@ -140,18 +140,17 @@ func (p *packager) packageLinux() error {
 		defer os.RemoveAll(filepath.Join(p.dir, tempDir))
 
 		makefile, _ := os.Create(filepath.Join(p.dir, tempDir, "Makefile"))
-		_, err := io.WriteString(makefile, `ifneq ("$(wildcard /usr/local)","")`+"\n"+
-			"PREFIX ?= /usr/local\n"+
-			"else\n"+
-			"PREFIX ?= /usr\n"+
-			"endif\n"+
-			"\n"+
-			"default:\n"+
-			`	# Run "sudo make install" to install the application.`+"\n"+
-			"install:\n"+
-			"	install -Dm00644 usr/"+local+"share/applications/"+p.name+`.desktop $(DESTDIR)$(PREFIX)/share/applications/`+p.name+".desktop\n"+
-			"	install -Dm00755 usr/"+local+"bin/"+filepath.Base(p.exe)+` $(DESTDIR)$(PREFIX)/bin/`+filepath.Base(p.exe)+"\n"+
-			"	install -Dm00644 usr/"+local+"share/pixmaps/"+p.name+filepath.Ext(p.icon)+` $(DESTDIR)$(PREFIX)/share/pixmaps/`+p.name+filepath.Ext(p.icon)+"\n")
+		_, err := io.WriteString(makefile,
+			`LOCAL != test -d /usr/local && echo -n "/local" || echo -n ""`+"\n"+
+				`LOCAL ?= $(shell test -d /usr/local && echo "/local" || echo "")`+"\n"+
+				"PREFIX ?= /usr$(LOCAL)\n"+
+				"\n"+
+				"default:\n"+
+				`	# Run "sudo make install" to install the application.`+"\n"+
+				"install:\n"+
+				"	install -Dm00644 usr/"+local+"share/applications/"+p.name+`.desktop $(DESTDIR)$(PREFIX)/share/applications/`+p.name+".desktop\n"+
+				"	install -Dm00755 usr/"+local+"bin/"+filepath.Base(p.exe)+` $(DESTDIR)$(PREFIX)/bin/`+filepath.Base(p.exe)+"\n"+
+				"	install -Dm00644 usr/"+local+"share/pixmaps/"+p.name+filepath.Ext(p.icon)+` $(DESTDIR)$(PREFIX)/share/pixmaps/`+p.name+filepath.Ext(p.icon)+"\n")
 		if err != nil {
 			return errors.Wrap(err, "Failed to write Makefile string")
 		}
@@ -336,7 +335,7 @@ func (p *packager) packageIOS() error {
 }
 
 func (p *packager) addFlags() {
-	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, ios, linux, windows)")
+	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
@@ -459,7 +458,7 @@ func (p *packager) doPackage() error {
 	switch p.os {
 	case "darwin":
 		return p.packageDarwin()
-	case "linux":
+	case "linux", "openbsd", "freebsd", "netbsd":
 		return p.packageLinux()
 	case "windows":
 		return p.packageWindows()
