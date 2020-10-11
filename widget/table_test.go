@@ -72,6 +72,32 @@ func TestTable_ChangeTheme(t *testing.T) {
 	})
 }
 
+func TestTable_Hovered(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 3, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		}, func(row, col int, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", row, col)
+			c.(*Label).SetText(text)
+		})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(180, 180))
+
+	test.MoveMouse(w.Canvas(), fyne.NewPos(35, 50))
+
+	assert.Equal(t, 0, table.hoveredColumn)
+	assert.Equal(t, 1, table.hoveredRow)
+
+	test.AssertImageMatches(t, "table/hovered.png", w.Canvas().Capture())
+}
+
 func TestTable_Selected(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
