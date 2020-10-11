@@ -1137,8 +1137,8 @@ func (r *entryRenderer) Refresh() {
 		if err != r.entry.validationError {
 			r.entry.validationError = err
 
-			if r.entry.onValidationChanged != nil {
-				r.entry.onValidationChanged(r.entry.validationError)
+			if f := r.entry.onValidationChanged; f != nil {
+				f(r.entry.validationError)
 			}
 		}
 

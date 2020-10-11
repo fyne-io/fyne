@@ -10,14 +10,15 @@ import (
 
 // FormItem provides the details for a row in a form
 type FormItem struct {
-	Text            string
-	Widget          fyne.CanvasObject
+	Text   string
+	Widget fyne.CanvasObject
+
 	validationError error
 }
 
 // NewFormItem creates a new form item with the specified label text and input widget
 func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
-	return &FormItem{text, widget, nil}
+	return &FormItem{Text: text, Widget: widget, validationError: nil}
 }
 
 // Form widget is two column grid where each row has a label and a widget (usually an input).
@@ -116,18 +117,20 @@ func (f *Form) updateButtons() {
 
 func (f *Form) checkValidation() {
 	for i, item := range f.Items {
-		if item.validationError == nil && i == len(f.Items)-1 {
+		if item.validationError != nil {
+			f.submitButton.Disable()
+			break
+		} else if i == len(f.Items)-1 {
 			f.submitButton.Enable()
 		}
 	}
 }
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
-	var w interface{} = widget
-	if w, ok := w.(fyne.Validatable); ok {
+	if w, ok := widget.(fyne.Validatable); ok {
 		w.SetOnValidationChanged(func(err error) {
 			f.Items[i].validationError = err
-			if f.Items[i].validationError != nil {
+			if err != nil {
 				f.submitButton.Disable()
 			} else {
 				f.checkValidation()
