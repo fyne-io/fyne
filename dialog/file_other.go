@@ -4,12 +4,18 @@ package dialog
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 )
 
 func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 	return []fyne.CanvasObject{makeFavoriteButton("Computer", theme.ComputerIcon(), func() {
-		f.setDirectory("/")
+		lister, err := storage.ListerForURI(storage.NewURI("file:///"))
+		if err != nil {
+			fyne.LogError("could not create lister for /", err)
+			return
+		}
+		f.setLocation(lister)
 	})}
 }
 
