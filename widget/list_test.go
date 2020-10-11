@@ -115,7 +115,7 @@ func TestList_Selection(t *testing.T) {
 	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
 	assert.Equal(t, list.selectedIndex, 1)
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
-	list.ClearSelected()
+	list.ClearSelection()
 	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
 	assert.Equal(t, list.selectedIndex, -1)
 }

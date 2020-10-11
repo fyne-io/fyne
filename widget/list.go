@@ -42,7 +42,7 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 }
 
 // ClearSelection clears the selected item in list to ensure no item is currently selected.
-func (l *List) ClearSelected() {
+func (l *List) ClearSelection() {
 	l.selectedIndex = -1
 	l.selectedItem = nil
 	l.Refresh()
