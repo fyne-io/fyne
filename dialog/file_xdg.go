@@ -43,16 +43,16 @@ func getFavoriteLocation(homeURI fyne.URI, name string) (fyne.URI, error) {
 	loc := stdout.String()
 	// Remove \n at the end
 	loc = loc[:len(loc)-1]
-	loc = "file://" + loc
+	locURI := storage.NewFileURI(loc)
 
-	if loc == homeURI.String() {
+	if locURI.String() == homeURI.String() {
 		if fallbackErr != nil {
 			return nil, fallbackErr
 		}
 		return fallback, fmt.Errorf("this computer does not have a %s folder", name)
 	}
 
-	return storage.NewURI(loc), nil
+	return locURI, nil
 }
 
 func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
@@ -60,7 +60,7 @@ func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 	if err != nil {
 		return nil, err
 	}
-	homeURI := storage.NewURI("file://" + homeDir)
+	homeURI := storage.NewFileURI(homeDir)
 
 	favoriteNames := getFavoriteOrder()
 	arguments := map[string]string{
