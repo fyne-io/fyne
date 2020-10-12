@@ -208,7 +208,6 @@ func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
 			err = err1
 		}
 	}
-
 	var places []fyne.CanvasObject
 
 	if home != nil {
@@ -567,4 +566,20 @@ func makeFavoriteButton(title string, icon fyne.Resource, f func()) *widget.Butt
 
 	b.Alignment = widget.ButtonAlignLeading
 	return b
+}
+
+func getFavoriteIcons() map[string]fyne.Resource {
+	return map[string]fyne.Resource{
+		"Home":      theme.HomeIcon(),
+		"Documents": theme.DocumentIcon(),
+		"Downloads": theme.DownloadIcon(),
+	}
+}
+
+func getFavoriteOrder() []string {
+	return []string{
+		"Home",
+		"Documents",
+		"Downloads",
+	}
 }
