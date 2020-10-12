@@ -8,7 +8,7 @@ import (
 )
 
 type device struct {
-	insetTop, insetBottom, insetLeft, insetRight int
+	safeTop, safeLeft, safeWidth, safeHeight int
 }
 
 //lint:file-ignore U1000 Var currentDPI is used in other files, but not here
@@ -20,16 +20,21 @@ var (
 // Declare conformity with Device
 var _ fyne.Device = (*device)(nil)
 
-func (*device) ScreenInsets() (topLeft, bottomRight fyne.Size) {
+func (*device) ScreenInteractiveArea() (fyne.Position, fyne.Size) {
 	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
 
 	dev, ok := fyne.CurrentDevice().(*device)
 	if !ok {
-		return fyne.NewSize(0, 0), fyne.NewSize(0, 0) // running in test mode
+		wins := fyne.CurrentApp().Driver().AllWindows()
+		size := fyne.Size{}
+		if len(wins) > 0 {
+			size = wins[0].Canvas().Size()
+		}
+		return fyne.NewPos(0, 0), size // running in test mode
 	}
 
-	return fyne.NewSize(int(float32(dev.insetLeft)/scale), int(float32(dev.insetTop)/scale)),
-		fyne.NewSize(int(float32(dev.insetRight)/scale), int(float32(dev.insetBottom)/scale))
+	return fyne.NewPos(int(float32(dev.safeLeft)/scale), int(float32(dev.safeTop)/scale)),
+		fyne.NewSize(int(float32(dev.safeWidth)/scale), int(float32(dev.safeHeight)/scale))
 }
 
 func (*device) Orientation() fyne.DeviceOrientation {

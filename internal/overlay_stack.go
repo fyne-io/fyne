@@ -32,17 +32,15 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	}
 	s.overlays = append(s.overlays, overlay)
 
-	devicePadTopLeft, devicePadBottomRight := fyne.Size{}, fyne.Size{}
+	safePos, safeSize := fyne.Position{}, s.Canvas.Size()
 	if dev, ok := fyne.CurrentDevice().(mobile.Device); ok { // not present in testing
-		devicePadTopLeft, devicePadBottomRight = dev.ScreenInsets()
+		safePos, safeSize = dev.ScreenInteractiveArea()
 	}
-	innerSize := s.Canvas.Size().Subtract(devicePadTopLeft).Subtract(devicePadBottomRight)
-	topLeft := fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height)
 
 	// TODO this should probably apply to all once #707 is addressed
 	if _, ok := overlay.(*widget.OverlayContainer); ok {
-		overlay.Resize(innerSize)
-		overlay.Move(topLeft)
+		overlay.Resize(safeSize)
+		overlay.Move(safePos)
 	}
 
 	s.focusManagers = append(s.focusManagers, app.NewFocusManager(overlay))

@@ -163,8 +163,8 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 		ap := fyne.CurrentApp().Driver().AbsolutePositionForObject(r.m)
 		bottomEdge := 0
 		if dev, ok := fyne.CurrentDevice().(mobile.Device); ok {
-			_, bottomRight := dev.ScreenInsets()
-			bottomEdge = bottomRight.Height
+			pos, size := dev.ScreenInteractiveArea()
+			bottomEdge = c.Size().Height - pos.Y - size.Height
 		}
 		if ah := c.Size().Height - bottomEdge - ap.Y; ah < boxSize.Height {
 			scrollSize = fyne.NewSize(boxSize.Width, ah)

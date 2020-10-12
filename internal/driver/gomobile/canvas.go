@@ -91,32 +91,30 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	}
 
 	offset := fyne.NewPos(0, 0)
-	devicePadTopLeft, devicePadBottomRight := fyne.Size{}, fyne.Size{}
+	areaPos, areaSize := fyne.Position{}, size
 	if dev, ok := fyne.CurrentDevice().(mobile.Device); ok { // not present in testing
-		devicePadTopLeft, devicePadBottomRight = dev.ScreenInsets()
+		areaPos, areaSize = dev.ScreenInteractiveArea()
 	}
 
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height
 
 		if len(c.windowHead.(*widget.Box).Children) > 1 {
-			c.windowHead.Resize(fyne.NewSize(size.Width-devicePadTopLeft.Width-devicePadBottomRight.Width, topHeight))
+			c.windowHead.Resize(fyne.NewSize(areaSize.Width, topHeight))
 			offset = fyne.NewPos(0, topHeight)
 		} else {
 			c.windowHead.Resize(c.windowHead.MinSize())
 		}
-		c.windowHead.Move(fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height))
+		c.windowHead.Move(areaPos)
 	}
 
-	innerSize := size.Subtract(devicePadTopLeft).Subtract(devicePadBottomRight)
-	topLeft := offset.Add(fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height))
-
+	topLeft := areaPos.Add(offset)
 	c.size = size
 	if c.padded {
-		c.content.Resize(innerSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		c.content.Resize(areaSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		c.content.Move(topLeft.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
 	} else {
-		c.content.Resize(innerSize)
+		c.content.Resize(areaSize)
 		c.content.Move(topLeft)
 	}
 }

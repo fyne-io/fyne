@@ -5,8 +5,9 @@ import "fyne.io/fyne"
 
 // Device describes functionality only available on mobile
 type Device interface {
-	// ScreenInsets returns the space around a mobile screen that should not be drawn used for interactive elements
-	ScreenInsets() (topLeft, bottomRight fyne.Size)
+	// ScreenInteractiveArea returns the position and size of the central interactive area.
+	// Operating system elements may overlap the portions outside this area.
+	ScreenInteractiveArea() (fyne.Position, fyne.Size)
 
 	// Request that the mobile device show the touch screen keyboard (standard layout)
 	ShowVirtualKeyboard()
