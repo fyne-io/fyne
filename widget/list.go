@@ -19,10 +19,11 @@ var _ fyne.Widget = (*List)(nil)
 type List struct {
 	BaseWidget
 
-	Length           func() int
-	CreateItem       func() fyne.CanvasObject
-	UpdateItem       func(index int, item fyne.CanvasObject)
-	OnItemSelected   func(index int)
+	Length            func() int
+	CreateItem        func() fyne.CanvasObject
+	UpdateItem        func(index int, item fyne.CanvasObject)
+	OnSelectionChange func(index int)
+
 	visibleItemCount int
 	firstItemIndex   int
 	lastItemIndex    int
@@ -46,6 +47,9 @@ func (l *List) ClearSelection() {
 	l.selectedIndex = -1
 	l.selectedItem = nil
 	l.Refresh()
+	if f := l.OnSelectionChange; f != nil {
+		f(index)
+	}
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
@@ -92,7 +96,9 @@ func (l *List) SetSelected(index int) {
 	}
 	l.scroller.onOffsetChanged()
 	l.Refresh()
-	l.OnItemSelected(index)
+	if f := l.OnSelectionChange; f != nil {
+		f(index)
+	}
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -311,7 +317,7 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 		l.list.selectedIndex = index
 		l.list.selectedItem.selected = true
 		l.list.selectedItem.Refresh()
-		if f := l.list.OnItemSelected; f != nil {
+		if f := l.list.OnSelectionChange; f != nil {
 			f(index)
 		}
 	}
