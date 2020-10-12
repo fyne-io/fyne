@@ -26,18 +26,28 @@ func TestFavoriteLocations(t *testing.T) {
 	homeDir, err := os.UserHomeDir()
 	assert.Nil(t, err)
 
-	for e := range expected {
-		fav, ok := favoriteLocations[e]
-		if assert.True(t, ok) {
-			if expected[e] == "" {
-				assert.Equal(t, homeDir, fav)
-			} else {
-				assert.Equal(t, homeDir, filepath.Dir(fav))
-				if _, err := os.Stat(fav); os.IsNotExist(err) {
-					if !strings.EqualFold(expected[e], filepath.Base(fav)) {
-						t.Errorf("%s should equal fold with %s", expected[e], filepath.Base(fav))
-					}
-				}
+	for name, subdir := range expected {
+		fav, ok := favoriteLocations[name]
+		if !ok {
+			t.Errorf("missing favourite location: %s", name)
+			continue
+		}
+
+		if subdir == "" {
+			assert.Equal(t, homeDir, fav)
+		} else {
+			//			assert.Equal(t, homeDir, filepath.Dir(fav)) // I don't think this assertion must be true, the user could specify a different parent directory
+			_, err := os.Stat(fav)
+			if err == nil {
+				continue // folder found
+			}
+			if !os.IsNotExist(err) {
+				t.Errorf("failed to read directory %s", fav)
+				continue
+			}
+			fallbackName := filepath.Base(fav)
+			if !strings.EqualFold(subdir, fallbackName) {
+				t.Errorf("%s should equal fold with %s", subdir, fallbackName)
 			}
 		}
 	}
