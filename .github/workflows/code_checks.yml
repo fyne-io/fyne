@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   checks:
-    runs-on: lucor/fyne-cross:base-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-go@v2
@@ -12,6 +12,7 @@ jobs:
         go-version: '^1.15.x'     
     - name: get dependencies
       run: |
+        sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
         GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
         GO111MODULE=off go get github.com/fzipp/gocyclo
         GO111MODULE=off go get golang.org/x/lint/golint
