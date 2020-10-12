@@ -5,10 +5,10 @@ package dialog
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
+	"fyne.io/fyne/storage"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,27 +25,25 @@ func TestFavoriteLocations(t *testing.T) {
 
 	homeDir, err := os.UserHomeDir()
 	assert.Nil(t, err)
+	homeURI := storage.NewFileURI(homeDir)
 
 	for name, subdir := range expected {
 		fav, ok := favoriteLocations[name]
 		if !ok {
-			t.Errorf("missing favourite location: %s", name)
+			t.Errorf("missing favorite location: %s", name)
 			continue
 		}
 
 		if subdir == "" {
-			assert.Equal(t, homeDir, fav)
+			assert.Equal(t, homeURI.String(), fav.String())
 		} else {
-			//			assert.Equal(t, homeDir, filepath.Dir(fav)) // I don't think this assertion must be true, the user could specify a different parent directory
-			_, err := os.Stat(fav)
-			if err == nil {
-				continue // folder found
-			}
-			if !os.IsNotExist(err) {
-				t.Errorf("failed to read directory %s", fav)
+			ok, err := storage.Exists(fav)
+			assert.Nil(t, err)
+			if ok {
+				// folder found
 				continue
 			}
-			fallbackName := filepath.Base(fav)
+			fallbackName := storage.Name(fav)
 			if !strings.EqualFold(subdir, fallbackName) {
 				t.Errorf("%s should equal fold with %s", subdir, fallbackName)
 			}
