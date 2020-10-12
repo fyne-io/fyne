@@ -43,7 +43,7 @@ func TestFavoriteLocations(t *testing.T) {
 				// folder found
 				continue
 			}
-			fallbackName := storage.Name(fav)
+			fallbackName := fav.Name()
 			if !strings.EqualFold(subdir, fallbackName) {
 				t.Errorf("%s should equal fold with %s", subdir, fallbackName)
 			}
