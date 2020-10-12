@@ -379,7 +379,8 @@ func TestFileFavorites(t *testing.T) {
 	// error can be ignored. It just tells you why the fallback
 	// paths are used if they are.
 	favoriteLocations, _ := getFavoriteLocations()
-	favorites := dlg.dialog.loadFavorites()
+	favorites, err := dlg.dialog.loadFavorites()
+	assert.Nil(t, err)
 	places := dlg.dialog.loadPlaces()
 	assert.Equal(t, 3+len(places), len(favorites))
 
@@ -387,9 +388,10 @@ func TestFileFavorites(t *testing.T) {
 		btn := f.(*widget.Button)
 		test.Tap(btn)
 		loc, ok := favoriteLocations[btn.Text]
+		locURI := storage.NewURI("file://" + loc)
 		if ok {
 			// button is Home, Documents, Downloads
-			assert.Equal(t, loc, dlg.dialog.dir)
+			assert.Equal(t, locURI.String(), dlg.dialog.dir.String())
 		} else {
 			// button is (on windows) C:\, D:\, etc.
 			assert.NotEqual(t, "Home", btn.Text)

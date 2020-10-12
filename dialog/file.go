@@ -173,59 +173,26 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 }
 
 func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
-	var home fyne.ListableURI
-	var documents fyne.ListableURI
-	var downloads fyne.ListableURI
-	var osHome string
-	var err, err1 error
-
-	osHome, err = os.UserHomeDir()
-
-	if err == nil {
-		home, err1 = storage.ListerForURI(storage.NewFileURI(osHome))
-		if err1 == nil {
-			var documentsURI fyne.URI
-			documentsURI, err1 = storage.Child(home, "Documents")
-			if err1 == nil {
-				documents, err1 = storage.ListerForURI(documentsURI)
-				if err1 != nil {
-					err = err1
-				}
-			} else {
-				err = err1
-			}
-			var downloadsURI fyne.URI
-			downloadsURI, err1 = storage.Child(home, "Downloads")
-			if err1 == nil {
-				downloads, err1 = storage.ListerForURI(downloadsURI)
-				if err1 != nil {
-					err = err1
-				}
-			} else {
-				err = err1
-			}
-		} else {
-			err = err1
-		}
+	favoriteLocations, err := getFavoriteLocations()
+	if err != nil {
+		fyne.LogError("Getting favorite locations", err)
 	}
+	favoriteIcons := getFavoriteIcons()
+	favoriteOrder := getFavoriteOrder()
+
 	var places []fyne.CanvasObject
-
-	if home != nil {
-		places = append(places, makeFavoriteButton("Home", theme.HomeIcon(), func() {
-			f.setLocation(home)
+	for _, locName := range favoriteOrder {
+		loc := favoriteLocations[locName]
+		icon := favoriteIcons[locName]
+		uri, err1 := storage.ListerForURI(storage.NewURI("file://" + loc))
+		if err1 != nil {
+			err = err1
+			continue
+		}
+		places = append(places, makeFavoriteButton(locName, icon, func() {
+			f.setLocation(uri)
 		}))
 	}
-	if documents != nil {
-		places = append(places, makeFavoriteButton("Documents", theme.DocumentIcon(), func() {
-			f.setLocation(documents)
-		}))
-	}
-	if downloads != nil {
-		places = append(places, makeFavoriteButton("Downloads", theme.DownloadIcon(), func() {
-			f.setLocation(downloads)
-		}))
-	}
-
 	places = append(places, f.loadPlaces()...)
 	return places, err
 }
