@@ -40,7 +40,7 @@ func TestShowPopUp(t *testing.T) {
 		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
 	}
 
-	test.AssertImageMatches(t, "popup.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "popup/normal.png", w.Canvas().Capture())
 }
 
 func TestShowPopUpAtPosition(t *testing.T) {
@@ -72,7 +72,7 @@ func TestShowModalPopUp(t *testing.T) {
 		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
 	}
 
-	test.AssertImageMatches(t, "popup-modal.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "popup/modal.png", w.Canvas().Capture())
 }
 
 func TestPopUp_Show(t *testing.T) {

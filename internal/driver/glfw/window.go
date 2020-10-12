@@ -3,6 +3,7 @@ package glfw
 import "C"
 import (
 	"bytes"
+	"context"
 	"image"
 	_ "image/png" // for the icon
 	"runtime"
@@ -21,7 +22,7 @@ import (
 
 const (
 	scrollSpeed      = 10
-	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
+	doubleClickDelay = 300 // ms (maximum interval between clicks for double click detection)
 )
 
 var (
@@ -73,6 +74,8 @@ type window struct {
 	mouseClickTime     time.Time
 	mouseLastClick     fyne.CanvasObject
 	mousePressed       fyne.CanvasObject
+	mouseClickCount    int
+	mouseCancelFunc    context.CancelFunc
 	onClosed           func()
 	onCloseIntercepted func()
 
@@ -640,7 +643,7 @@ func (w *window) mouseOut() {
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 	co, pos, layer := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
-		case fyne.Tappable, fyne.SecondaryTappable, fyne.Focusable, fyne.Draggable, desktop.Mouseable, desktop.Hoverable:
+		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, fyne.Draggable, desktop.Mouseable, desktop.Hoverable:
 			return true
 		}
 
@@ -656,7 +659,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		co, _ = w.mouseDragged.(fyne.CanvasObject)
 		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
 	}
-
 	button, modifiers := convertMouseButton(btn, mods)
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
@@ -685,38 +687,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseButton = 0
 	}
 
-	// Check for double click/tap
-	doubleTapped := false
-	if action == glfw.Release && button == desktop.LeftMouseButton {
-		now := time.Now()
-		// we can safely subtract the first "zero" time as it'll be much larger than doubleClickDelay
-		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay && w.mouseLastClick == co {
-			if wid, ok := co.(fyne.DoubleTappable); ok {
-				doubleTapped = true
-				w.queueEvent(func() { wid.DoubleTapped(ev) })
-			}
-		}
-		w.mouseClickTime = now
-		w.mouseLastClick = co
-	}
-
-	_, tap := co.(fyne.Tappable)
-	_, altTap := co.(fyne.SecondaryTappable)
-	// Prevent Tapped from triggering if DoubleTapped has been sent
-	if (tap || altTap) && !doubleTapped {
-		if action == glfw.Press {
-			w.mousePressed = co
-		} else if action == glfw.Release {
-			if co == w.mousePressed {
-				if button == desktop.RightMouseButton && altTap {
-					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
-				} else if button == desktop.LeftMouseButton && tap {
-					w.queueEvent(func() { co.(fyne.Tappable).Tapped(ev) })
-				}
-			}
-			w.mousePressed = nil
-		}
-	}
 	if wid, ok := co.(fyne.Draggable); ok {
 		if action == glfw.Press {
 			w.mouseDragPos = w.mousePos
@@ -734,6 +704,60 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		}
 		w.mouseDragged = nil
 	}
+	_, tap := co.(fyne.Tappable)
+	_, altTap := co.(fyne.SecondaryTappable)
+	if tap || altTap {
+		if action == glfw.Press {
+			w.mousePressed = co
+		} else if action == glfw.Release {
+			if co == w.mousePressed {
+				if button == desktop.RightMouseButton && altTap {
+					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
+				}
+			}
+		}
+	}
+
+	// Check for double click/tap on left mouse button
+	if action == glfw.Release && button == desktop.LeftMouseButton {
+		_, doubleTap := co.(fyne.DoubleTappable)
+		if doubleTap {
+			w.mouseClickCount++
+			w.mouseLastClick = co
+			if w.mouseCancelFunc != nil {
+				w.mouseCancelFunc()
+				return
+			}
+			go w.waitForDoubleTap(co, ev)
+		} else {
+			if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
+				w.queueEvent(func() { wid.Tapped(ev) })
+			}
+			w.mousePressed = nil
+		}
+	}
+}
+
+func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
+	var ctx context.Context
+	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	defer w.mouseCancelFunc()
+
+	<-ctx.Done()
+	if w.mouseClickCount == 2 && w.mouseLastClick == co {
+		if wid, ok := co.(fyne.DoubleTappable); ok {
+			w.queueEvent(func() { wid.DoubleTapped(ev) })
+		}
+	} else if co == w.mousePressed {
+		if wid, ok := co.(fyne.Tappable); ok {
+			w.queueEvent(func() { wid.Tapped(ev) })
+		}
+	}
+	w.mouseClickCount = 0
+	w.mousePressed = nil
+	w.mouseCancelFunc = nil
+	w.mouseLastClick = nil
+	return
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {

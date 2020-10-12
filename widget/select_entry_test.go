@@ -89,22 +89,22 @@ func TestSelectEntry_DropDown(t *testing.T) {
 	e.Move(fyne.NewPos(10, 10))
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "select_entry_dropdown_initial.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_initial.png", c.Capture())
 	assert.Nil(t, c.Overlays().Top())
 
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened.png", c.Capture())
 
 	test.TapCanvas(c, fyne.NewPos(50, 15+2*(theme.Padding()+e.Size().Height)))
-	test.AssertImageMatches(t, "select_entry_dropdown_tapped_B.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_tapped_B.png", c.Capture())
 	assert.Equal(t, "B", e.Text)
 
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry_dropdown_B_opened.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_B_opened.png", c.Capture())
 
 	test.TapCanvas(c, fyne.NewPos(50, 15+3*(theme.Padding()+e.Size().Height)))
-	test.AssertImageMatches(t, "select_entry_dropdown_tapped_C.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_tapped_C.png", c.Capture())
 	assert.Equal(t, "C", e.Text)
 }
 
@@ -122,18 +122,18 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 	e.Move(fyne.NewPos(10, 10))
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "select_entry_dropdown_initial.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_initial.png", c.Capture())
 	assert.Nil(t, c.Overlays().Top())
 
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened.png", c.Capture())
 
 	e.Resize(e.Size().Subtract(fyne.NewSize(20, 0)))
-	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened_shrunk.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened_shrunk.png", c.Capture())
 
 	e.Resize(e.Size().Add(fyne.NewSize(20, 0)))
-	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened.png", c.Capture())
 }
 
 func TestSelectEntry_SetOptions(t *testing.T) {
@@ -151,12 +151,12 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry_dropdown_empty_opened.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened.png", c.Capture())
 	test.TapCanvas(c, switchPos)
 
 	e.SetOptions([]string{"1", "2", "3"})
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry_dropdown_empty_setopts.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_empty_setopts.png", c.Capture())
 }
 
 func TestSelectEntry_SetOptions_Empty(t *testing.T) {
@@ -175,7 +175,7 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	e.SetOptions([]string{"1", "2", "3"})
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry_dropdown_empty_setopts.png", c.Capture())
+	test.AssertImageMatches(t, "select_entry/dropdown_empty_setopts.png", c.Capture())
 }
 
 func dropDownIconWidth() int {
