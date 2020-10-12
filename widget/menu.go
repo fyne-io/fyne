@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -160,7 +161,12 @@ func (r *menuRenderer) Layout(s fyne.Size) {
 	scrollSize := boxSize
 	if c := fyne.CurrentApp().Driver().CanvasForObject(r.m); c != nil {
 		ap := fyne.CurrentApp().Driver().AbsolutePositionForObject(r.m)
-		if ah := c.Size().Height - ap.Y; ah < boxSize.Height {
+		bottomEdge := 0
+		if dev, ok := fyne.CurrentDevice().(mobile.Device); ok {
+			_, bottomRight := dev.ScreenInsets()
+			bottomEdge = bottomRight.Height
+		}
+		if ah := c.Size().Height - bottomEdge - ap.Y; ah < boxSize.Height {
 			scrollSize = fyne.NewSize(boxSize.Width, ah)
 		}
 	}

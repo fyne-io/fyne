@@ -85,25 +85,16 @@ func (c *mobileCanvas) Refresh(obj fyne.CanvasObject) {
 	}
 }
 
-func (c *mobileCanvas) edgePadding() (topLeft, bottomRight fyne.Size) {
-	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-
-	dev, ok := fyne.CurrentDevice().(*device)
-	if !ok {
-		return fyne.NewSize(0, 0), fyne.NewSize(0, 0) // running in test mode
-	}
-
-	return fyne.NewSize(int(float32(dev.insetLeft)/scale), int(float32(dev.insetTop)/scale)),
-		fyne.NewSize(int(float32(dev.insetRight)/scale), int(float32(dev.insetBottom)/scale))
-}
-
 func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	if c.content == nil { // window may not be configured yet
 		return
 	}
 
 	offset := fyne.NewPos(0, 0)
-	devicePadTopLeft, devicePadBottomRight := c.edgePadding()
+	devicePadTopLeft, devicePadBottomRight := fyne.Size{}, fyne.Size{}
+	if dev, ok := fyne.CurrentDevice().(mobile.Device); ok { // not present in testing
+		devicePadTopLeft, devicePadBottomRight = dev.ScreenInsets()
+	}
 
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height
@@ -519,7 +510,7 @@ func NewCanvas() fyne.Canvas {
 	ret.lastTapDownPos = make(map[int]fyne.Position)
 	ret.lastTapDown = make(map[int]time.Time)
 	ret.minSizeCache = make(map[fyne.CanvasObject]fyne.Size)
-	ret.overlays = &internal.OverlayStack{}
+	ret.overlays = &internal.OverlayStack{Canvas: ret}
 
 	ret.setupThemeListener()
 

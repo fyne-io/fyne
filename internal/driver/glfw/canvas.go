@@ -602,6 +602,7 @@ func newCanvas() *glCanvas {
 	c.overlays = &overlayStack{
 		OverlayStack: internal.OverlayStack{
 			OnChange: c.overlayChanged,
+			Canvas:   c,
 		},
 	}
 

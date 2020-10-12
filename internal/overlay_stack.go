@@ -4,12 +4,15 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/internal/app"
+	"fyne.io/fyne/internal/widget"
 )
 
 // OverlayStack implements fyne.OverlayStack
 type OverlayStack struct {
 	OnChange      func()
+	Canvas        fyne.Canvas
 	focusManagers []*app.FocusManager
 	overlays      []fyne.CanvasObject
 	propertyLock  sync.RWMutex
@@ -28,6 +31,20 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 		return
 	}
 	s.overlays = append(s.overlays, overlay)
+
+	devicePadTopLeft, devicePadBottomRight := fyne.Size{}, fyne.Size{}
+	if dev, ok := fyne.CurrentDevice().(mobile.Device); ok { // not present in testing
+		devicePadTopLeft, devicePadBottomRight = dev.ScreenInsets()
+	}
+	innerSize := s.Canvas.Size().Subtract(devicePadTopLeft).Subtract(devicePadBottomRight)
+	topLeft := fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height)
+
+	// TODO this should probably apply to all once #707 is addressed
+	if _, ok := overlay.(*widget.OverlayContainer); ok {
+		overlay.Resize(innerSize)
+		overlay.Move(topLeft)
+	}
+
 	s.focusManagers = append(s.focusManagers, app.NewFocusManager(overlay))
 	if s.OnChange != nil {
 		s.OnChange()

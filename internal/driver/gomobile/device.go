@@ -20,6 +20,18 @@ var (
 // Declare conformity with Device
 var _ fyne.Device = (*device)(nil)
 
+func (*device) ScreenInsets() (topLeft, bottomRight fyne.Size) {
+	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
+
+	dev, ok := fyne.CurrentDevice().(*device)
+	if !ok {
+		return fyne.NewSize(0, 0), fyne.NewSize(0, 0) // running in test mode
+	}
+
+	return fyne.NewSize(int(float32(dev.insetLeft)/scale), int(float32(dev.insetTop)/scale)),
+		fyne.NewSize(int(float32(dev.insetRight)/scale), int(float32(dev.insetBottom)/scale))
+}
+
 func (*device) Orientation() fyne.DeviceOrientation {
 	switch currentOrientation {
 	case size.OrientationLandscape:
