@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    runs-on: lucor/fyne-cross:base-latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-go@v2
@@ -25,4 +25,4 @@ jobs:
     - name: golint
       run: golint -set_exit_status $(go list -tags ci ./...)
     - name: staticcheck
-      run: staticcheck -debug.no-compile-errors -f stylish $(go list ./... | grep -F -e cmd/fyne/internal/mobile -v)
+      run: staticcheck -f stylish $(go list ./... | grep -F -e cmd/fyne/internal/mobile -v)
