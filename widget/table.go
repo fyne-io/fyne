@@ -21,10 +21,12 @@ var _ fyne.Widget = (*Table)(nil)
 type Table struct {
 	BaseWidget
 
-	Length         func() (int, int)
-	CreateCell     func() fyne.CanvasObject
-	UpdateCell     func(row int, col int, template fyne.CanvasObject)
-	OnCellSelected func(row int, col int)
+	Length     func() (int, int)
+	CreateCell func() fyne.CanvasObject
+	UpdateCell func(row, col int, template fyne.CanvasObject)
+	// OnSelectionChanged is called whenever the selection changes, such as through user tap.
+	// The row and col values will be -1 if no cell is currently selected.
+	OnSelectionChanged func(row, col int)
 
 	SelectedRow, SelectedColumn int
 	hoveredRow, hoveredColumn   int
@@ -49,8 +51,8 @@ func (t *Table) ClearSelection() {
 	t.SelectedRow = -1
 	t.SelectedColumn = -1
 
-	if t.OnCellSelected != nil {
-		t.OnCellSelected(-1, -1)
+	if t.OnSelectionChanged != nil {
+		t.OnSelectionChanged(-1, -1)
 	}
 
 	if t.moveCallback != nil {
@@ -95,8 +97,8 @@ func (t *Table) SetSelected(row, col int) {
 	t.SelectedColumn = col
 
 	t.scrollToVisible(row, col)
-	if t.OnCellSelected != nil {
-		t.OnCellSelected(row, col)
+	if t.OnSelectionChanged != nil {
+		t.OnSelectionChanged(row, col)
 	}
 
 	if t.moveCallback != nil {
@@ -341,8 +343,8 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	c.t.SelectedColumn = e.Position.X / (c.cellSize.Width + tableDividerThickness)
 	c.t.SelectedRow = e.Position.Y / (c.cellSize.Height + tableDividerThickness)
 
-	if c.t.OnCellSelected != nil {
-		c.t.OnCellSelected(c.t.SelectedRow, c.t.SelectedColumn)
+	if c.t.OnSelectionChanged != nil {
+		c.t.OnSelectionChanged(c.t.SelectedRow, c.t.SelectedColumn)
 	}
 
 	if c.t.moveCallback != nil {

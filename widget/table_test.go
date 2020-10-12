@@ -142,7 +142,7 @@ func TestTable_Selected(t *testing.T) {
 	w.Resize(fyne.NewSize(180, 180))
 
 	selectedCol, selectedRow := 0, 0
-	table.OnCellSelected = func(row, col int) {
+	table.OnSelectionChanged = func(row, col int) {
 		selectedCol = col
 		selectedRow = row
 	}
@@ -174,7 +174,7 @@ func TestTable_SetSelected(t *testing.T) {
 	w.Resize(fyne.NewSize(180, 180))
 
 	selectedCol, selectedRow := 0, 0
-	table.OnCellSelected = func(row, col int) {
+	table.OnSelectionChanged = func(row, col int) {
 		selectedCol = col
 		selectedRow = row
 	}
