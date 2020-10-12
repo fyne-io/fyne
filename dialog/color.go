@@ -97,7 +97,7 @@ func (p *ColorPickerDialog) updateUI() {
 					p.createSimplePickers()...,
 				),
 			),
-			internalWidget.NewSeparator(fyne.NewSize(1, 1), theme.ShadowColor),
+			internalWidget.NewDivider(fyne.NewSize(1, 1), theme.ShadowColor),
 			p.advanced,
 		)
 
