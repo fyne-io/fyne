@@ -94,6 +94,7 @@ func NewApp() fyne.App {
 	settings := &testSettings{scale: 1.0}
 	prefs := internal.NewInMemoryPreferences()
 	test := &testApp{settings: settings, prefs: prefs, storage: &testStorage{}, driver: NewDriver().(*testDriver)}
+	painter.SvgCacheReset()
 	fyne.SetCurrentApp(test)
 
 	listener := make(chan fyne.Settings)
