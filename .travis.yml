@@ -38,10 +38,14 @@ script:
 after_success:
   - |
     set -e
-    if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PULL_REQUEST" == "false" && -n "$COVERALLS_TOKEN" ]]
-    then
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
-      $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+      if [ $coverage -lt 69 ]; then echo "Test coverage lowered"; exit 1; fi
+
+      if [[ "$TRAVIS_PULL_REQUEST" == "false" && -n "$COVERALLS_TOKEN" ]]
+      then
+        $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+      fi
     fi
 
 env:
