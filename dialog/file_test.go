@@ -1,6 +1,7 @@
 package dialog
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -364,4 +365,30 @@ func TestFileFilters(t *testing.T) {
 		}
 	}
 	assert.Equal(t, 4, count)
+}
+
+func TestFileFavorites(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+
+	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		assert.Nil(t, err)
+		assert.Nil(t, reader)
+	}, win)
+
+	dlg.Show()
+
+	favorites := dlg.dialog.loadFavorites()
+	places := dlg.dialog.loadPlaces()
+	assert.Equal(t, 3+len(places), len(favorites))
+
+	curDir := ""
+	for _, f := range favorites {
+		btn := f.(*widget.Button)
+		t.Log(fmt.Sprint("Changing from ", curDir, " to ", btn.Text))
+		test.Tap(btn)
+		assert.NotEqual(t, curDir, dlg.dialog.dir)
+		curDir = dlg.dialog.dir
+	}
+
+	test.Tap(dlg.dialog.dismiss)
 }
