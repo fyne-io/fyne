@@ -225,10 +225,14 @@ func makeProgressTab() fyne.CanvasObject {
 func makeFormTab() fyne.Widget {
 	name := widget.NewEntry()
 	name.SetPlaceHolder("John Smith")
+
 	email := widget.NewEntry()
 	email.SetPlaceHolder("test@example.com")
+	email.Validator = validation.NewRegexp(`\w{1,}@\w{1,}\.\w{1,4}`, "not a valid email")
+
 	password := widget.NewPasswordEntry()
 	password.SetPlaceHolder("Password")
+
 	largeText := widget.NewMultiLineEntry()
 
 	form := &widget.Form{
