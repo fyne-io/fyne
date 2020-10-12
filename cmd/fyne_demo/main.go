@@ -144,9 +144,9 @@ func main() {
 		tabs.Append(container.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), screens.AdvancedScreen(w)))
 	}
 	tabs.SetTabLocation(container.TabLocationLeading)
-	tabs.SelectTabIndex(a.Preferences().Int(preferenceCurrentTab))
+	tabs.SetSelectionByIndex(a.Preferences().Int(preferenceCurrentTab))
 	w.SetContent(tabs)
 
 	w.ShowAndRun()
-	a.Preferences().SetInt(preferenceCurrentTab, tabs.CurrentTabIndex())
+	a.Preferences().SetInt(preferenceCurrentTab, tabs.SelectionIndex())
 }
