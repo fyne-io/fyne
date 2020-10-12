@@ -84,15 +84,35 @@ func fileSaveOSOverride(*FileDialog) bool {
 	return false
 }
 
-func getFavoriteLocations() (map[string]string, error) {
+func getFavoriteLocations() (map[string]fyne.ListableURI, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
+	homeURI := storage.NewURI("file://" + homeDir)
 
-	return map[string]string{
-		"Home":      homeDir,
-		"Documents": filepath.Join(homeDir, "Documents"),
-		"Downloads": filepath.Join(homeDir, "Downloads"),
-	}, nil
+	favoriteNames := getFavoriteOrder()
+	favoriteLocations := make(map[string]fyne.ListableURI)
+	for _, favName := range favoriteNames {
+		var uri fyne.URI
+		var err1 error
+		if favName == "Home" {
+			uri = homeURI
+		} else {
+			uri, err1 = storage.Child(homeURI, favName)
+		}
+		if err1 != nil {
+			err = err1
+			continue
+		}
+
+		listURI, err1 := storage.ListerForURI(uri)
+		if err1 != nil {
+			err = err1
+			continue
+		}
+		favoriteLocations[favName] = listURI
+	}
+
+	return favoriteLocations, err
 }

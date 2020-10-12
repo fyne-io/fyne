@@ -388,10 +388,9 @@ func TestFileFavorites(t *testing.T) {
 		btn := f.(*widget.Button)
 		test.Tap(btn)
 		loc, ok := favoriteLocations[btn.Text]
-		locURI := storage.NewURI("file://" + loc)
 		if ok {
 			// button is Home, Documents, Downloads
-			assert.Equal(t, locURI.String(), dlg.dialog.dir.String())
+			assert.Equal(t, loc.String(), dlg.dialog.dir.String())
 		} else {
 			// button is (on windows) C:\, D:\, etc.
 			assert.NotEqual(t, "Home", btn.Text)

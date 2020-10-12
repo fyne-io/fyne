@@ -184,13 +184,8 @@ func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
 	for _, locName := range favoriteOrder {
 		loc := favoriteLocations[locName]
 		icon := favoriteIcons[locName]
-		uri, err1 := storage.ListerForURI(storage.NewURI("file://" + loc))
-		if err1 != nil {
-			err = err1
-			continue
-		}
 		places = append(places, makeFavoriteButton(locName, icon, func() {
-			f.setLocation(uri)
+			f.setLocation(loc)
 		}))
 	}
 	places = append(places, f.loadPlaces()...)
