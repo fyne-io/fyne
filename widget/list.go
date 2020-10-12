@@ -43,12 +43,13 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 }
 
 // ClearSelection clears the selected item in list to ensure no item is currently selected.
+// This calls OnSelectionChange with -1 as the index to notify the dev that no item is selected.
 func (l *List) ClearSelection() {
 	l.selectedIndex = -1
 	l.selectedItem = nil
 	l.Refresh()
 	if f := l.OnSelectionChange; f != nil {
-		f(index)
+		f(-1)
 	}
 }
 
