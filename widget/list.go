@@ -314,7 +314,7 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
 	li.statusIndicator = canvas.NewRectangle(theme.BackgroundColor())
-	li.divider = widget.NewDivider(fyne.NewSize(1, 1), theme.ShadowColor)
+	li.divider = widget.NewDivider()
 
 	objects := []fyne.CanvasObject{li.statusIndicator, li.child, li.divider}
 

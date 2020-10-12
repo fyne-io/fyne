@@ -12,7 +12,10 @@ import (
 
 // newMenuItemSeparator creates a separator meant to separate MenuItems.
 func newMenuItemSeparator() fyne.CanvasObject {
-	return widget.NewDivider(fyne.NewSize(1, 2), theme.DisabledTextColor)
+	d := widget.NewDivider()
+	d.MinSz = fyne.NewSize(1, 2)
+	d.ColorFn = theme.DisabledTextColor
+	return d
 }
 
 var _ fyne.Widget = (*menuItem)(nil)
