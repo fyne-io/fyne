@@ -108,14 +108,13 @@ func (s *Settings) createPreview() image.Image {
 	oldTheme := fyne.CurrentApp().Settings().Theme()
 	oldColor := fyne.CurrentApp().Settings().PrimaryColor()
 
-	th := theme.DarkTheme()
+	th := oldTheme
 	if s.fyneSettings.ThemeName == "light" {
 		th = theme.LightTheme()
 	} else if s.fyneSettings.ThemeName == "dark" {
 		th = theme.DarkTheme()
-	} else {
-		th = oldTheme
 	}
+
 	painter.SvgCacheReset() // reset icon cache
 	fyne.CurrentApp().Settings().(overrideTheme).OverrideTheme(th, s.fyneSettings.PrimaryColor)
 
@@ -181,9 +180,8 @@ func (s *Settings) saveToFile(path string) error {
 
 type colorButton struct {
 	widget.BaseWidget
-	name    string
-	color   color.Color
-	current bool
+	name  string
+	color color.Color
 
 	s *Settings
 }

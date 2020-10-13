@@ -25,7 +25,8 @@ func TestTable_Cache(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
@@ -57,7 +58,8 @@ func TestTable_ChangeTheme(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
@@ -72,7 +74,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 	})
 }
 
-func TestTable_Selected(t *testing.T) {
+func TestTable_ClearSelection(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
@@ -81,29 +83,120 @@ func TestTable_Selected(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
-	assert.Equal(t, -1, table.SelectedColumn)
-	assert.Equal(t, -1, table.SelectedRow)
+	table.selectedColumn = 1
+	table.selectedRow = 1
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(180, 180))
+
+	table.ClearSelection()
+	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
+}
+
+func TestTable_Hovered(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 3, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(row, col int, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", row, col)
+			c.(*Label).SetText(text)
+		})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(180, 180))
+
+	test.MoveMouse(w.Canvas(), fyne.NewPos(35, 50))
+
+	assert.Equal(t, 0, table.hoveredColumn)
+	assert.Equal(t, 1, table.hoveredRow)
+
+	test.AssertImageMatches(t, "table/hovered.png", w.Canvas().Capture())
+}
+
+func TestTable_Selection(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(row, col int, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", row, col)
+			c.(*Label).SetText(text)
+		})
+	assert.Equal(t, -1, table.selectedColumn)
+	assert.Equal(t, -1, table.selectedRow)
 
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 
 	selectedCol, selectedRow := 0, 0
-	table.OnCellSelected = func(row, col int) {
+	table.OnSelectionChanged = func(row, col int) {
 		selectedCol = col
 		selectedRow = row
 	}
 	test.TapCanvas(w.Canvas(), fyne.NewPos(35, 50))
-	assert.Equal(t, 0, table.SelectedColumn)
-	assert.Equal(t, 1, table.SelectedRow)
+	assert.Equal(t, 0, table.selectedColumn)
+	assert.Equal(t, 1, table.selectedRow)
 	assert.Equal(t, 0, selectedCol)
 	assert.Equal(t, 1, selectedRow)
 
 	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
+}
+
+func TestTable_SetSelection(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(row, col int, c fyne.CanvasObject) {
+			text := fmt.Sprintf("Cell %d, %d", row, col)
+			c.(*Label).SetText(text)
+		})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(180, 180))
+
+	selectedCol, selectedRow := 0, 0
+	table.OnSelectionChanged = func(row, col int) {
+		selectedCol = col
+		selectedRow = row
+	}
+	table.SetSelection(1, 0)
+	assert.Equal(t, 0, table.selectedColumn)
+	assert.Equal(t, 1, table.selectedRow)
+	assert.Equal(t, 0, selectedCol)
+	assert.Equal(t, 1, selectedRow)
+	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
+
+	table.SetSelection(3, 3)
+	assert.Equal(t, 3, table.selectedColumn)
+	assert.Equal(t, 3, table.selectedRow)
+	assert.Equal(t, 3, selectedCol)
+	assert.Equal(t, 3, selectedRow)
+	test.AssertImageMatches(t, "table/selected_scrolled.png", w.Canvas().Capture())
 }
 
 func TestTable_ShowVisible(t *testing.T) {
@@ -111,7 +204,8 @@ func TestTable_ShowVisible(t *testing.T) {
 		func() (int, int) { return 50, 50 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(int, int, fyne.CanvasObject) {})
+		},
+		func(int, int, fyne.CanvasObject) {})
 	table.Resize(fyne.NewSize(120, 120))
 
 	renderer := test.WidgetRenderer(table).(*tableRenderer)

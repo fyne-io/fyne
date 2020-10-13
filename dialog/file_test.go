@@ -365,3 +365,39 @@ func TestFileFilters(t *testing.T) {
 	}
 	assert.Equal(t, 4, count)
 }
+
+func TestFileFavorites(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+
+	dlg := NewFileOpen(func(reader fyne.URIReadCloser, err error) {
+		assert.Nil(t, err)
+		assert.Nil(t, reader)
+	}, win)
+
+	dlg.Show()
+
+	// error can be ignored. It just tells you why the fallback
+	// paths are used if they are.
+	favoriteLocations, _ := getFavoriteLocations()
+	favorites := dlg.dialog.loadFavorites()
+	places := dlg.dialog.loadPlaces()
+	assert.Len(t, favorites, len(favoriteLocations)+len(places))
+
+	for _, f := range favorites {
+		btn := f.(*widget.Button)
+		test.Tap(btn)
+		loc, ok := favoriteLocations[btn.Text]
+		if ok {
+			// button is Home, Documents, Downloads
+			assert.Equal(t, loc.String(), dlg.dialog.dir.String())
+		} else {
+			// button is (on windows) C:\, D:\, etc.
+			assert.NotEqual(t, "Home", btn.Text)
+		}
+		ok, err := storage.Exists(dlg.dialog.dir)
+		assert.Nil(t, err)
+		assert.True(t, ok)
+	}
+
+	test.Tap(dlg.dialog.dismiss)
+}
