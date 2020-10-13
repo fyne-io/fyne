@@ -15,7 +15,7 @@ type builder struct {
 func (b *builder) build() error {
 	goos := b.os
 	if goos == "" {
-		goos = runtime.GOOS
+		goos = targetOS()
 	}
 
 	var cmd *exec.Cmd
@@ -46,4 +46,13 @@ func (b *builder) build() error {
 		fmt.Fprintf(os.Stderr, "%s\n", string(out))
 	}
 	return err
+}
+
+func targetOS() string {
+	osEnv, ok := os.LookupEnv("GOOS")
+	if ok {
+		return osEnv
+	}
+
+	return runtime.GOOS
 }

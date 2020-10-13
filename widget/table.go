@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -20,15 +21,19 @@ var _ fyne.Widget = (*Table)(nil)
 type Table struct {
 	BaseWidget
 
-	Length         func() (int, int)
-	CreateCell     func() fyne.CanvasObject
-	UpdateCell     func(row int, col int, template fyne.CanvasObject)
-	OnCellSelected func(row int, col int)
+	Length     func() (int, int)
+	CreateCell func() fyne.CanvasObject
+	UpdateCell func(row, col int, template fyne.CanvasObject)
+	// OnSelectionChanged is called whenever the selection changes, such as through user tap.
+	// The row and col values will be -1 if no cell is currently selected.
+	OnSelectionChanged func(row, col int)
 
-	SelectedRow, SelectedColumn int
+	selectedRow, selectedColumn int
+	hoveredRow, hoveredColumn   int
 	cells                       *tableCells
 	moveCallback                func()
 	offset                      fyne.Position
+	scroll                      *ScrollContainer
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
@@ -36,9 +41,22 @@ type Table struct {
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
 func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
-	t := &Table{Length: length, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update, selectedRow: -1, selectedColumn: -1}
 	t.ExtendBaseWidget(t)
 	return t
+}
+
+// ClearSelection will clear any cell selection.
+func (t *Table) ClearSelection() {
+	t.selectedRow = -1
+	t.selectedColumn = -1
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+
+	if t.OnSelectionChanged != nil {
+		t.OnSelectionChanged(-1, -1)
+	}
 }
 
 // CreateRenderer returns a new renderer for the table.
@@ -46,25 +64,79 @@ func NewTable(length func() (int, int), create func() fyne.CanvasObject, update 
 // Implements: fyne.Widget
 func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
-	marker1 := canvas.NewRectangle(theme.PrimaryColor())
-	marker2 := canvas.NewRectangle(theme.PrimaryColor())
+	colMarker := canvas.NewRectangle(theme.PrimaryColor())
+	rowMarker := canvas.NewRectangle(theme.PrimaryColor())
+	colHover := canvas.NewRectangle(theme.HoverColor())
+	rowHover := canvas.NewRectangle(theme.HoverColor())
+	t.hoveredColumn = -1
+	t.hoveredRow = -1
 
 	cellSize := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	t.cells = newTableCells(t, cellSize)
-	scroll := NewScrollContainer(t.cells)
+	t.scroll = NewScrollContainer(t.cells)
 
-	obj := []fyne.CanvasObject{marker1, marker2, scroll}
-	r := &tableRenderer{t: t, scroll: scroll, rowMarker: marker1, colMarker: marker2, cellSize: cellSize}
+	obj := []fyne.CanvasObject{colMarker, rowMarker, colHover, rowHover, t.scroll}
+	r := &tableRenderer{t: t, scroll: t.scroll, rowMarker: rowMarker, colMarker: colMarker,
+		rowHover: rowHover, colHover: colHover, cellSize: cellSize}
 	r.SetObjects(obj)
 	t.moveCallback = r.moveIndicators
-	scroll.onOffsetChanged = func() {
-		t.offset = scroll.Offset
+	t.scroll.onOffsetChanged = func() {
+		t.offset = t.scroll.Offset
 		t.cells.Refresh()
 		r.moveIndicators()
 	}
 
 	r.Layout(t.Size())
 	return r
+}
+
+// Selection will mark the specified cell (at row, col) to be marked as selected.
+func (t *Table) Selection() (row, col int) {
+	return t.selectedRow, t.selectedColumn
+}
+
+// SetSelection will mark the specified cell (at row, col) to be marked as selected.
+func (t *Table) SetSelection(row, col int) {
+	t.selectedRow = row
+	t.selectedColumn = col
+
+	t.scrollTo(row, col)
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+
+	if t.OnSelectionChanged != nil {
+		t.OnSelectionChanged(row, col)
+	}
+}
+
+func (t *Table) scrollTo(row, col int) {
+	if row == -1 || col == -1 || t.scroll == nil {
+		return
+	}
+	scrollPos := t.offset
+
+	cellPadded := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	cellX := col * (cellPadded.Width + tableDividerThickness)
+	if cellX < scrollPos.X {
+		scrollPos.X = cellX
+	} else if cellX+cellPadded.Width > scrollPos.X+t.scroll.size.Width {
+		scrollPos.X = cellX + cellPadded.Width - t.scroll.size.Width
+	}
+
+	cellY := col * (cellPadded.Height + tableDividerThickness)
+	if cellY < scrollPos.Y {
+		scrollPos.Y = cellY
+	} else if cellY+cellPadded.Height > scrollPos.Y+t.scroll.size.Height {
+		scrollPos.Y = cellY + t.scroll.size.Height - cellPadded.Height
+	}
+	t.scroll.Offset = scrollPos
+	t.offset = scrollPos
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+	t.scroll.Refresh()
+	t.cells.Refresh()
 }
 
 func (t *Table) templateSize() fyne.Size {
@@ -86,6 +158,7 @@ type tableRenderer struct {
 
 	scroll               *ScrollContainer
 	rowMarker, colMarker *canvas.Rectangle
+	rowHover, colHover   *canvas.Rectangle
 	dividers             []fyne.CanvasObject
 
 	cellSize fyne.Size
@@ -111,6 +184,11 @@ func (t *tableRenderer) Refresh() {
 	t.rowMarker.FillColor = theme.PrimaryColor()
 	t.rowMarker.Refresh()
 
+	t.colHover.FillColor = theme.HoverColor()
+	t.colHover.Refresh()
+	t.rowHover.FillColor = theme.HoverColor()
+	t.rowHover.Refresh()
+
 	for _, div := range t.dividers {
 		div.(*canvas.Rectangle).FillColor = theme.ShadowColor()
 		div.Refresh()
@@ -118,42 +196,31 @@ func (t *tableRenderer) Refresh() {
 	t.t.cells.Refresh()
 }
 
-func (t *tableRenderer) moveIndicators() {
-	if t.t.SelectedColumn == -1 {
-		t.colMarker.Hide()
+func (t *tableRenderer) moveColumnMarker(marker fyne.CanvasObject, col int) {
+	if col == -1 {
+		marker.Hide()
 	} else {
-		offX := t.t.SelectedColumn*(t.cellSize.Width+tableDividerThickness) - t.scroll.Offset.X
+		offX := col*(t.cellSize.Width+tableDividerThickness) - t.scroll.Offset.X
 		x1 := theme.Padding() + offX
 		x2 := x1 + t.cellSize.Width
 		if x2 < theme.Padding() || x1 > t.t.size.Width {
-			t.colMarker.Hide()
+			marker.Hide()
 		} else {
 			left := fyne.Max(theme.Padding(), x1)
-			t.colMarker.Move(fyne.NewPos(left, 0))
-			t.colMarker.Resize(fyne.NewSize(fyne.Min(x2, t.t.size.Width)-left, theme.Padding()))
+			marker.Move(fyne.NewPos(left, 0))
+			marker.Resize(fyne.NewSize(fyne.Min(x2, t.t.size.Width)-left, theme.Padding()))
 
-			t.colMarker.Show()
+			marker.Show()
 		}
 	}
-	t.colMarker.Refresh()
+	marker.Refresh()
+}
 
-	if t.t.SelectedRow == -1 {
-		t.rowMarker.Hide()
-	} else {
-		offY := t.t.SelectedRow*(t.cellSize.Height+tableDividerThickness) - t.scroll.Offset.Y
-		y1 := theme.Padding() + offY
-		y2 := y1 + t.cellSize.Height
-		if y2 < theme.Padding() || y1 > t.t.size.Height {
-			t.rowMarker.Hide()
-		} else {
-			top := fyne.Max(theme.Padding(), y1)
-			t.rowMarker.Move(fyne.NewPos(0, top))
-			t.rowMarker.Resize(fyne.NewSize(theme.Padding(), fyne.Min(y2, t.t.size.Height)-top))
-
-			t.rowMarker.Show()
-		}
-	}
-	t.rowMarker.Refresh()
+func (t *tableRenderer) moveIndicators() {
+	t.moveColumnMarker(t.colMarker, t.t.selectedColumn)
+	t.moveColumnMarker(t.colHover, t.t.hoveredColumn)
+	t.moveRowMarker(t.rowMarker, t.t.selectedRow)
+	t.moveRowMarker(t.rowHover, t.t.hoveredRow)
 
 	colDivs := int(math.Ceil(float64(t.t.size.Width+tableDividerThickness) / float64(t.cellSize.Width+1)))
 	rowDivs := int(math.Ceil(float64(t.t.size.Height+tableDividerThickness) / float64(t.cellSize.Height+1)))
@@ -163,7 +230,7 @@ func (t *tableRenderer) moveIndicators() {
 			t.dividers = append(t.dividers, canvas.NewRectangle(theme.ShadowColor()))
 		}
 
-		obj := []fyne.CanvasObject{t.scroll, t.colMarker, t.rowMarker}
+		obj := []fyne.CanvasObject{t.scroll, t.colMarker, t.rowMarker, t.colHover, t.rowHover}
 		t.SetObjects(append(obj, t.dividers...))
 	}
 
@@ -204,11 +271,34 @@ func (t *tableRenderer) moveIndicators() {
 	canvas.Refresh(t.t)
 }
 
-// Declare conformity with Widget interface.
-var _ fyne.Widget = (*tableCells)(nil)
+func (t *tableRenderer) moveRowMarker(marker fyne.CanvasObject, row int) {
+	if row == -1 {
+		marker.Hide()
+	} else {
+		offY := row*(t.cellSize.Height+tableDividerThickness) - t.scroll.Offset.Y
+		y1 := theme.Padding() + offY
+		y2 := y1 + t.cellSize.Height
+		if y2 < theme.Padding() || y1 > t.t.size.Height {
+			marker.Hide()
+		} else {
+			top := fyne.Max(theme.Padding(), y1)
+			marker.Move(fyne.NewPos(0, top))
+			marker.Resize(fyne.NewSize(theme.Padding(), fyne.Min(y2, t.t.size.Height)-top))
+
+			marker.Show()
+		}
+	}
+	marker.Refresh()
+}
+
+// Declare conformity with Hoverable interface.
+var _ desktop.Hoverable = (*tableCells)(nil)
 
 // Declare conformity with Tappable interface.
 var _ fyne.Tappable = (*tableCells)(nil)
+
+// Declare conformity with Widget interface.
+var _ fyne.Widget = (*tableCells)(nil)
 
 type tableCells struct {
 	BaseWidget
@@ -226,6 +316,18 @@ func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
 	return &tableCellsRenderer{cells: c, pool: &syncPool{}, visible: make(map[cellID]fyne.CanvasObject)}
 }
 
+func (c *tableCells) MouseIn(ev *desktop.MouseEvent) {
+	c.hoverAt(ev.Position)
+}
+
+func (c *tableCells) MouseMoved(ev *desktop.MouseEvent) {
+	c.hoverAt(ev.Position)
+}
+
+func (c *tableCells) MouseOut() {
+	c.hoverOut()
+}
+
 func (c *tableCells) Resize(s fyne.Size) {
 	if s == c.size {
 		return
@@ -236,18 +338,40 @@ func (c *tableCells) Resize(s fyne.Size) {
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
-		c.t.SelectedColumn = -1
-		c.t.SelectedRow = -1
+		c.t.selectedColumn = -1
+		c.t.selectedRow = -1
 		c.t.Refresh()
 		return
 	}
 
-	c.t.SelectedColumn = e.Position.X / (c.cellSize.Width + tableDividerThickness)
-	c.t.SelectedRow = e.Position.Y / (c.cellSize.Height + tableDividerThickness)
-
-	if c.t.OnCellSelected != nil {
-		c.t.OnCellSelected(c.t.SelectedRow, c.t.SelectedColumn)
+	c.t.selectedColumn = e.Position.X / (c.cellSize.Width + tableDividerThickness)
+	c.t.selectedRow = e.Position.Y / (c.cellSize.Height + tableDividerThickness)
+	if c.t.moveCallback != nil {
+		c.t.moveCallback()
 	}
+
+	if c.t.OnSelectionChanged != nil {
+		c.t.OnSelectionChanged(c.t.selectedRow, c.t.selectedColumn)
+	}
+}
+
+func (c *tableCells) hoverAt(pos fyne.Position) {
+	if pos.X < 0 || pos.X >= c.Size().Width || pos.Y < 0 || pos.Y >= c.Size().Height {
+		c.hoverOut()
+		return
+	}
+
+	c.t.hoveredColumn = pos.X / (c.cellSize.Width + tableDividerThickness)
+	c.t.hoveredRow = pos.Y / (c.cellSize.Height + tableDividerThickness)
+
+	if c.t.moveCallback != nil {
+		c.t.moveCallback()
+	}
+}
+
+func (c *tableCells) hoverOut() {
+	c.t.hoveredRow = -1
+	c.t.hoveredRow = -1
 
 	if c.t.moveCallback != nil {
 		c.t.moveCallback()

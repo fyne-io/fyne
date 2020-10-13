@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"go/build"
 	"io"
 	"os"
 	"os/exec"
@@ -216,16 +215,6 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 	return nmpkgs, nil
 }
 
-func importsApp(pkg *build.Package) error {
-	// Building a program, make sure it is appropriate for mobile.
-	for _, path := range pkg.Imports {
-		if path == "github.com/fyne-io/mobile/app" {
-			return nil
-		}
-	}
-	return fmt.Errorf(`%s does not import "github.com/fyne-io/mobile/app"`, pkg.ImportPath)
-}
-
 var xout io.Writer = os.Stderr
 
 func printcmd(format string, args ...interface{}) {
@@ -303,11 +292,6 @@ func addBuildFlagsNVXWork(cmd *command) {
 	cmd.Flag.BoolVar(&buildWork, "work", false, "")
 }
 
-type binInfo struct {
-	hasPkgApp bool
-	hasPkgAL  bool
-}
-
 func init() {
 	addBuildFlags(cmdBuild)
 	addBuildFlagsNVXWork(cmdBuild)
@@ -317,10 +301,6 @@ func init() {
 
 func goBuild(src string, env []string, args ...string) error {
 	return goCmd("build", []string{src}, env, args...)
-}
-
-func goBuildAt(at string, src string, env []string, args ...string) error {
-	return goCmdAt(at, "build", []string{src}, env, args...)
 }
 
 func goCmd(subcmd string, srcs []string, env []string, args ...string) error {

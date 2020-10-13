@@ -12,6 +12,7 @@ jobs:
         go-version: '^1.15.x'     
     - name: get dependencies
       run: |
+        sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev xorg-dev
         GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
         GO111MODULE=off go get github.com/fzipp/gocyclo
         GO111MODULE=off go get golang.org/x/lint/golint
@@ -25,4 +26,4 @@ jobs:
     - name: golint
       run: golint -set_exit_status $(go list -tags ci ./...)
     - name: staticcheck
-      run: staticcheck -debug.no-compile-errors -f stylish $(go list ./... | grep -F -e cmd/fyne/internal/mobile -v)
+      run: CGO_ENABLED=1 staticcheck -debug.no-compile-errors -f stylish ./...
