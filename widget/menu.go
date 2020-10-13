@@ -26,7 +26,7 @@ func NewMenu(menu *fyne.Menu) *Menu {
 	m := &Menu{Items: items}
 	for i, item := range menu.Items {
 		if item.IsSeparator {
-			items[i] = newMenuItemSeparator()
+			items[i] = widget.NewDivider()
 		} else {
 			items[i] = newMenuItem(item, m, m.activateChild)
 		}

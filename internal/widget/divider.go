@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"image/color"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
@@ -13,20 +11,18 @@ var _ fyne.Widget = (*Divider)(nil)
 // Divider is a widget for displaying a divider with themeable color.
 type Divider struct {
 	Base
-	ColorFn func() color.Color
-	MinSz   fyne.Size
 }
 
 // NewDivider creates a new divider.
 func NewDivider() *Divider {
-	return &Divider{ColorFn: theme.ShadowColor, MinSz: fyne.NewSize(1, 1)}
+	return &Divider{}
 }
 
 // CreateRenderer returns a new renderer for the divider.
 //
 // Implements: fyne.Widget
 func (d *Divider) CreateRenderer() fyne.WidgetRenderer {
-	bar := canvas.NewRectangle(d.ColorFn())
+	bar := canvas.NewRectangle(theme.DisabledTextColor())
 	objects := []fyne.CanvasObject{bar}
 	return &dividerRenderer{
 		BaseRenderer: NewBaseRenderer(objects),
@@ -90,10 +86,10 @@ func (r *dividerRenderer) Layout(size fyne.Size) {
 }
 
 func (r *dividerRenderer) MinSize() fyne.Size {
-	return r.d.MinSz
+	return fyne.NewSize(1, 1)
 }
 
 func (r *dividerRenderer) Refresh() {
-	r.bar.FillColor = r.d.ColorFn()
+	r.bar.FillColor = theme.DisabledTextColor()
 	canvas.Refresh(r.d)
 }

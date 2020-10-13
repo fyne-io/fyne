@@ -10,14 +10,6 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// newMenuItemSeparator creates a separator meant to separate MenuItems.
-func newMenuItemSeparator() fyne.CanvasObject {
-	d := widget.NewDivider()
-	d.MinSz = fyne.NewSize(1, 2)
-	d.ColorFn = theme.DisabledTextColor
-	return d
-}
-
 var _ fyne.Widget = (*menuItem)(nil)
 
 // menuItem is a widget for displaying a fyne.menuItem.
