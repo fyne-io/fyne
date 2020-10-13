@@ -42,7 +42,7 @@ func (d *Divider) Hide() {
 //
 // Implements: fyne.Widget
 func (d *Divider) MinSize() fyne.Size {
-	return MinSizeOf(d)
+	return fyne.NewSize(1, 1)
 }
 
 // Move sets the position of the divider relative to its parent.

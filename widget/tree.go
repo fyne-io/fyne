@@ -501,7 +501,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
 	r.treeContent.propertyLock.RLock()
-	objects = append(objects, r.dividers...)
+	objects = r.dividers
 	for _, b := range r.branches {
 		objects = append(objects, b)
 	}
