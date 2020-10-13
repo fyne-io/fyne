@@ -381,7 +381,7 @@ func TestFileFavorites(t *testing.T) {
 	favoriteLocations, _ := getFavoriteLocations()
 	favorites := dlg.dialog.loadFavorites()
 	places := dlg.dialog.loadPlaces()
-	assert.Equal(t, 3+len(places), len(favorites))
+	assert.Len(t, favorites, len(favoriteLocations)+len(places))
 
 	for _, f := range favorites {
 		btn := f.(*widget.Button)
@@ -394,6 +394,9 @@ func TestFileFavorites(t *testing.T) {
 			// button is (on windows) C:\, D:\, etc.
 			assert.NotEqual(t, "Home", btn.Text)
 		}
+		ok, err := storage.Exists(dlg.dialog.dir)
+		assert.Nil(t, err)
+		assert.True(t, ok)
 	}
 
 	test.Tap(dlg.dialog.dismiss)

@@ -176,7 +176,10 @@ func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
 
 	var places []fyne.CanvasObject
 	for _, locName := range favoriteOrder {
-		loc := favoriteLocations[locName]
+		loc, ok := favoriteLocations[locName]
+		if !ok {
+			continue
+		}
 		icon := favoriteIcons[locName]
 		places = append(places, makeFavoriteButton(locName, icon, func() {
 			f.setLocation(loc)
