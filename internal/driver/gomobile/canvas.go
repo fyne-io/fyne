@@ -119,6 +119,18 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	}
 
 	topLeft := areaPos.Add(offset)
+	for _, overlay := range c.overlays.List() {
+		if p, ok := overlay.(*widget.PopUp); ok {
+			// TODO: remove this when #707 is being addressed.
+			// “Notifies” the PopUp of the canvas size change.
+			size := p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)).Min(innerSize)
+			p.Resize(size)
+		} else {
+			overlay.Resize(innerSize)
+			overlay.Move(topLeft)
+		}
+	}
+
 	if c.padded {
 		c.content.Resize(areaSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		c.content.Move(topLeft.Add(fyne.NewPos(theme.Padding(), theme.Padding())))
@@ -489,7 +501,6 @@ func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEven
 	c.touchTapCount = 0
 	c.touchCancelFunc = nil
 	c.touchLastTapped = nil
-	return
 }
 
 func (c *mobileCanvas) setupThemeListener() {
