@@ -5,11 +5,13 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/app"
+	"fyne.io/fyne/internal/widget"
 )
 
 // OverlayStack implements fyne.OverlayStack
 type OverlayStack struct {
 	OnChange      func()
+	Canvas        fyne.Canvas
 	focusManagers []*app.FocusManager
 	overlays      []fyne.CanvasObject
 	propertyLock  sync.RWMutex
@@ -28,6 +30,15 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 		return
 	}
 	s.overlays = append(s.overlays, overlay)
+
+	// TODO this should probably apply to all once #707 is addressed
+	if _, ok := overlay.(*widget.OverlayContainer); ok {
+		safePos, safeSize := s.Canvas.InteractiveArea()
+
+		overlay.Resize(safeSize)
+		overlay.Move(safePos)
+	}
+
 	s.focusManagers = append(s.focusManagers, app.NewFocusManager(overlay))
 	if s.OnChange != nil {
 		s.OnChange()
