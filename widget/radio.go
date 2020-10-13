@@ -44,7 +44,7 @@ func (r *Radio) Append(option string) {
 func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	r.ExtendBaseWidget(r)
 	r.propertyLock.Lock()
-	r.propertyLock.Unlock()
+	defer r.propertyLock.Unlock()
 
 	r.update()
 	var objects []fyne.CanvasObject
