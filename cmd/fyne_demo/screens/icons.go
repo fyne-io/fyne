@@ -66,7 +66,7 @@ func checkerPattern(x, y, _, _ int) color.Color {
 		return theme.BackgroundColor()
 	}
 
-	return theme.ButtonColor()
+	return theme.ShadowColor()
 }
 
 func iconList() []string {

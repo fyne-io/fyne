@@ -84,6 +84,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 			exists, _ := storage.Exists(location)
 
+			// check if a directory is selected
 			_, err := storage.ListerForURI(location)
 
 			if !exists {
@@ -93,8 +94,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				}
 				callback(storage.SaveFileToURI(location))
 				return
-			} else if err != nil {
-				// check if the directory exists
+			} else if err == nil {
+				// a directory has been selected
 				ShowInformation("Cannot overwrite",
 					"Files cannot replace a directory,\ncheck the file name and try again", f.file.parent)
 				return
