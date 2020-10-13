@@ -393,8 +393,6 @@ func TestFileFavorites(t *testing.T) {
 		} else {
 			// button is (on windows) C:\, D:\, etc.
 			assert.NotEqual(t, "Home", btn.Text)
-			assert.NotEqual(t, "Documents", btn.Text)
-			assert.NotEqual(t, "Downloads", btn.Text)
 		}
 	}
 
