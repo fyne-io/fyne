@@ -357,7 +357,7 @@ var _ fyne.WidgetRenderer = (*treeContentRenderer)(nil)
 type treeContentRenderer struct {
 	widget.BaseRenderer
 	treeContent *treeContent
-	dividers    []*canvas.Rectangle
+	dividers    []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
 	branchPool  pool
@@ -389,16 +389,15 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 
 		// If this is not the first item, add a divider
 		if y > 0 {
-			var divider *canvas.Rectangle
+			var divider fyne.CanvasObject
 			if numDividers < len(r.dividers) {
 				divider = r.dividers[numDividers]
 			} else {
-				divider = canvas.NewRectangle(theme.ShadowColor())
+				divider = widget.NewDivider()
 				r.dividers = append(r.dividers, divider)
 			}
 			divider.Move(fyne.NewPos(theme.Padding(), y))
 			s := fyne.NewSize(width-2*theme.Padding(), treeDividerHeight)
-			divider.SetMinSize(s)
 			divider.Resize(s)
 			divider.Show()
 			y += treeDividerHeight
@@ -502,9 +501,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
 	r.treeContent.propertyLock.RLock()
-	for _, d := range r.dividers {
-		objects = append(objects, d)
-	}
+	objects = r.dividers
 	for _, b := range r.branches {
 		objects = append(objects, b)
 	}
@@ -523,9 +520,6 @@ func (r *treeContentRenderer) Refresh() {
 		r.Layout(s)
 	}
 	r.treeContent.propertyLock.RLock()
-	for _, d := range r.dividers {
-		d.FillColor = theme.ShadowColor()
-	}
 	for _, b := range r.branches {
 		b.Refresh()
 	}

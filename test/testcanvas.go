@@ -55,13 +55,14 @@ func Canvas() fyne.Canvas {
 
 // NewCanvas returns a single use in-memory canvas used for testing
 func NewCanvas() WindowlessCanvas {
-	return &testCanvas{
+	c := &testCanvas{
 		focusMgr: app.NewFocusManager(nil),
-		overlays: &internal.OverlayStack{},
 		padded:   true,
 		scale:    1.0,
 		size:     fyne.NewSize(10, 10),
 	}
+	c.overlays = &internal.OverlayStack{Canvas: c}
+	return c
 }
 
 // NewCanvasWithPainter allows creation of an in-memory canvas with a specific painter.
@@ -99,6 +100,10 @@ func (c *testCanvas) Focus(obj fyne.Focusable) {
 
 func (c *testCanvas) Focused() fyne.Focusable {
 	return c.focusManager().Focused()
+}
+
+func (c *testCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
+	return fyne.Position{}, c.Size()
 }
 
 func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {

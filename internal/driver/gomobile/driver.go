@@ -125,10 +125,10 @@ func (d *mobileDriver) Run() {
 				currentDPI = e.PixelsPerPt * 72
 
 				dev := d.device
-				dev.insetTop = e.InsetTopPx
-				dev.insetBottom = e.InsetBottomPx
-				dev.insetLeft = e.InsetLeftPx
-				dev.insetRight = e.InsetRightPx
+				dev.safeTop = e.InsetTopPx
+				dev.safeLeft = e.InsetLeftPx
+				dev.safeHeight = e.HeightPx - e.InsetTopPx - e.InsetBottomPx
+				dev.safeWidth = e.WidthPx - e.InsetLeftPx - e.InsetRightPx
 				canvas.SetScale(0) // value is ignored
 
 				// make sure that we paint on the next frame
