@@ -20,7 +20,7 @@ var _ fyne.Widget = (*Tree)(nil)
 type Tree struct {
 	BaseWidget
 	Root     string
-	Selected string
+	selected string
 	Offset   fyne.Position
 
 	ChildUIDs         func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
@@ -223,9 +223,9 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.Refresh() // trigger a redraw
 }
 
-// SetSelectedNode updates the current selection to the node with the given Unique ID.
-func (t *Tree) SetSelectedNode(uid string) {
-	t.Selected = uid
+// SetSelection updates the current selection to the node with the given Unique ID.
+func (t *Tree) SetSelection(uid string) {
+	t.selected = uid
 	t.Refresh()
 }
 
@@ -611,7 +611,7 @@ func (n *treeNode) MouseOut() {
 }
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
-	n.tree.SetSelectedNode(n.uid)
+	n.tree.SetSelection(n.uid)
 	if f := n.tree.OnSelectionChange; f != nil {
 		f(n.uid)
 	}
@@ -695,7 +695,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Refresh()
 	}
-	if r.treeNode.uid == r.treeNode.tree.Selected {
+	if r.treeNode.uid == r.treeNode.tree.selected {
 		r.indicator.FillColor = theme.PrimaryColor()
 	} else if r.treeNode.hovered {
 		r.indicator.FillColor = theme.HoverColor()

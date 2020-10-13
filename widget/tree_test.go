@@ -277,7 +277,7 @@ func TestTree_Layout(t *testing.T) {
 			for _, o := range tt.opened {
 				tree.OpenBranch(o)
 			}
-			tree.SetSelectedNode(tt.selected)
+			tree.SetSelection(tt.selected)
 
 			window := test.NewWindow(tree)
 			defer window.Close()

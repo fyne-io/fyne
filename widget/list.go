@@ -29,7 +29,7 @@ type List struct {
 	lastItemIndex    int
 	scroller         *ScrollContainer
 	selectedItem     *listItem
-	selectedIndex    int
+	selected         int
 	itemMin          fyne.Size
 	offsetY          int
 }
@@ -37,7 +37,7 @@ type List struct {
 // NewList creates and returns a list widget for displaying items in
 // a vertical layout with scrolling and caching for performance.
 func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem func(index int, item fyne.CanvasObject)) *List {
-	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem, selectedIndex: -1}
+	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem, selected: -1}
 	list.ExtendBaseWidget(list)
 	return list
 }
@@ -45,7 +45,7 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 // ClearSelection clears the selected item in list to ensure no item is currently selected.
 // This calls OnSelectionChange with -1 as the index to notify the dev that no item is selected.
 func (l *List) ClearSelection() {
-	l.selectedIndex = -1
+	l.selected = -1
 	l.selectedItem = nil
 	l.Refresh()
 	if f := l.OnSelectionChange; f != nil {
@@ -76,8 +76,8 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
-// SetSelected sets the index of the data that is to be selected, refreshes, and calls the OnSelected callback.
-func (l *List) SetSelected(index int) {
+// SetSelection sets the index of the data that is to be selected, refreshes, and calls the OnSelected callback.
+func (l *List) SetSelection(index int) {
 	length := 0
 	if f := l.Length; f != nil {
 		length = f()
@@ -85,7 +85,7 @@ func (l *List) SetSelected(index int) {
 	if index < 0 || index >= length {
 		return
 	}
-	l.selectedIndex = index
+	l.selected = index
 	if index >= l.firstItemIndex && index <= l.lastItemIndex {
 		l.Refresh()
 		return
@@ -297,7 +297,7 @@ func (l *listRenderer) scrollUp(offsetChange int) {
 
 func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 	previousIndicator := item.(*listItem).selected
-	if index != l.list.selectedIndex {
+	if index != l.list.selected {
 		item.(*listItem).selected = false
 	} else {
 		item.(*listItem).selected = true
@@ -310,12 +310,12 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, index int) {
 		f(index, item.(*listItem).child)
 	}
 	item.(*listItem).onTapped = func() {
-		if l.list.selectedItem != nil && l.list.selectedIndex >= l.list.firstItemIndex && l.list.selectedIndex <= l.list.lastItemIndex {
+		if l.list.selectedItem != nil && l.list.selected >= l.list.firstItemIndex && l.list.selected <= l.list.lastItemIndex {
 			l.list.selectedItem.selected = false
 			l.list.selectedItem.Refresh()
 		}
 		l.list.selectedItem = item.(*listItem)
-		l.list.selectedIndex = index
+		l.list.selected = index
 		l.list.selectedItem.selected = true
 		l.list.selectedItem.Refresh()
 		if f := l.list.OnSelectionChange; f != nil {
