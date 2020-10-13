@@ -34,13 +34,6 @@ func TestFavoriteLocations(t *testing.T) {
 
 		if subdir == "" {
 			assert.Equal(t, homeURI.String(), fav.String())
-		} else {
-			ok, err := storage.Exists(fav)
-			assert.Nil(t, err)
-			if ok {
-				// folder found
-				continue
-			}
 		}
 	}
 }
