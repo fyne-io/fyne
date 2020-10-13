@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -36,9 +35,9 @@ func (i *installer) printHelp(indent string) {
 }
 
 func (i *installer) validate() error {
-	os := runtime.GOOS
-	if i.os != "" {
-		os = i.os
+	os := i.os
+	if os == "" {
+		os = targetOS()
 	}
 	i.packager = &packager{appID: i.appID, os: os, install: true, srcDir: i.srcDir}
 	i.packager.icon = i.icon
