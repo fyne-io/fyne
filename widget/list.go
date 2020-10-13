@@ -19,10 +19,10 @@ var _ fyne.Widget = (*List)(nil)
 type List struct {
 	BaseWidget
 
-	Length            func() int
-	CreateItem        func() fyne.CanvasObject
-	UpdateItem        func(index int, item fyne.CanvasObject)
-	OnSelectionChange func(index int)
+	Length             func() int
+	CreateItem         func() fyne.CanvasObject
+	UpdateItem         func(index int, item fyne.CanvasObject)
+	OnSelectionChanged func(index int)
 
 	visibleItemCount int
 	firstItemIndex   int
@@ -43,12 +43,12 @@ func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem 
 }
 
 // ClearSelection clears the selected item in list to ensure no item is currently selected.
-// This calls OnSelectionChange with -1 as the index to notify the dev that no item is selected.
+// This calls OnSelectionChanged with -1 as the index to notify the dev that no item is selected.
 func (l *List) ClearSelection() {
 	l.selected = -1
 	l.selectedItem = nil
 	l.Refresh()
-	if f := l.OnSelectionChange; f != nil {
+	if f := l.OnSelectionChanged; f != nil {
 		f(-1)
 	}
 }
@@ -95,6 +95,12 @@ func (l *List) SetSelection(index int) {
 		l.Refresh()
 		return
 	}
+	if f := l.OnSelectionChanged; f != nil {
+		f(index)
+	}
+	if l.scroller == nil {
+		return
+	}
 	if index < l.firstItemIndex {
 		l.scroller.Offset.Y = index * l.itemMin.Height
 	} else {
@@ -102,9 +108,6 @@ func (l *List) SetSelection(index int) {
 	}
 	l.scroller.onOffsetChanged()
 	l.Refresh()
-	if f := l.OnSelectionChange; f != nil {
-		f(index)
-	}
 }
 
 // Declare conformity with WidgetRenderer interface.
