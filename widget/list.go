@@ -91,14 +91,10 @@ func (l *List) SetSelection(index int) {
 		return
 	}
 	l.selected = index
-	if f := l.OnSelectionChanged; f != nil {
-		f(index)
-	}
-	if index >= l.firstItemIndex && index <= l.lastItemIndex {
-		l.Refresh()
-		return
-	}
 	if l.scroller == nil {
+		if f := l.OnSelectionChanged; f != nil {
+			f(index)
+		}
 		return
 	}
 	if index < l.firstItemIndex {
@@ -108,6 +104,9 @@ func (l *List) SetSelection(index int) {
 	}
 	l.scroller.onOffsetChanged()
 	l.Refresh()
+	if f := l.OnSelectionChanged; f != nil {
+		f(index)
+	}
 }
 
 // Declare conformity with WidgetRenderer interface.
