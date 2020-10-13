@@ -111,10 +111,6 @@ func (t *tableRenderer) Refresh() {
 	t.rowMarker.FillColor = theme.PrimaryColor()
 	t.rowMarker.Refresh()
 
-	for _, div := range t.dividers {
-		div.(*canvas.Rectangle).FillColor = theme.ShadowColor()
-		div.Refresh()
-	}
 	t.t.cells.Refresh()
 }
 
@@ -160,7 +156,7 @@ func (t *tableRenderer) moveIndicators() {
 
 	if len(t.dividers) < colDivs+rowDivs {
 		for i := len(t.dividers); i < colDivs+rowDivs; i++ {
-			t.dividers = append(t.dividers, canvas.NewRectangle(theme.ShadowColor()))
+			t.dividers = append(t.dividers, widget.NewDivider())
 		}
 
 		obj := []fyne.CanvasObject{t.scroll, t.colMarker, t.rowMarker}
