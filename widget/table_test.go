@@ -25,7 +25,8 @@ func TestTable_Cache(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
@@ -57,7 +58,8 @@ func TestTable_ChangeTheme(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
@@ -81,7 +83,8 @@ func TestTable_ClearSelection(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
@@ -104,7 +107,8 @@ func TestTable_Hovered(t *testing.T) {
 		func() (int, int) { return 3, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
@@ -130,7 +134,8 @@ func TestTable_Selection(t *testing.T) {
 		func() (int, int) { return 5, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
@@ -164,7 +169,8 @@ func TestTable_SetSelection(t *testing.T) {
 		func() (int, int) { return 5, 5 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(row, col int, c fyne.CanvasObject) {
+		},
+		func(row, col int, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
@@ -198,7 +204,8 @@ func TestTable_ShowVisible(t *testing.T) {
 		func() (int, int) { return 50, 50 },
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
-		}, func(int, int, fyne.CanvasObject) {})
+		},
+		func(int, int, fyne.CanvasObject) {})
 	table.Resize(fyne.NewSize(120, 120))
 
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
