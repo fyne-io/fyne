@@ -100,7 +100,7 @@ func (t *Table) SetSelection(row, col int) {
 	t.selectedRow = row
 	t.selectedColumn = col
 
-	t.scrollToVisible(row, col)
+	t.scrollTo(row, col)
 	if t.moveCallback != nil {
 		t.moveCallback()
 	}
@@ -110,7 +110,7 @@ func (t *Table) SetSelection(row, col int) {
 	}
 }
 
-func (t *Table) scrollToVisible(row, col int) {
+func (t *Table) scrollTo(row, col int) {
 	if row == -1 || col == -1 || t.scroll == nil {
 		return
 	}
