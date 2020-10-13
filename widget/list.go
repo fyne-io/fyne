@@ -91,12 +91,12 @@ func (l *List) SetSelection(index int) {
 		return
 	}
 	l.selected = index
+	if f := l.OnSelectionChanged; f != nil {
+		f(index)
+	}
 	if index >= l.firstItemIndex && index <= l.lastItemIndex {
 		l.Refresh()
 		return
-	}
-	if f := l.OnSelectionChanged; f != nil {
-		f(index)
 	}
 	if l.scroller == nil {
 		return
