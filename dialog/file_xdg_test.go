@@ -5,7 +5,6 @@ package dialog
 
 import (
 	"os"
-	"strings"
 	"testing"
 
 	"fyne.io/fyne/storage"
@@ -30,7 +29,6 @@ func TestFavoriteLocations(t *testing.T) {
 	for name, subdir := range expected {
 		fav, ok := favoriteLocations[name]
 		if !ok {
-			t.Errorf("missing favorite location: %s", name)
 			continue
 		}
 
@@ -42,10 +40,6 @@ func TestFavoriteLocations(t *testing.T) {
 			if ok {
 				// folder found
 				continue
-			}
-			fallbackName := fav.Name()
-			if !strings.EqualFold(subdir, fallbackName) {
-				t.Errorf("%s should equal fold with %s", subdir, fallbackName)
 			}
 		}
 	}
