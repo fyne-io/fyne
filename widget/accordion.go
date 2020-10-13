@@ -133,7 +133,7 @@ type accordionRenderer struct {
 	widget.BaseRenderer
 	container *Accordion
 	headers   []*Button
-	dividers  []*canvas.Rectangle
+	dividers  []fyne.CanvasObject
 }
 
 func (r *accordionRenderer) Layout(size fyne.Size) {
@@ -186,10 +186,6 @@ func (r *accordionRenderer) MinSize() (size fyne.Size) {
 }
 
 func (r *accordionRenderer) Refresh() {
-	for _, d := range r.dividers {
-		d.FillColor = theme.ShadowColor()
-	}
-
 	r.updateObjects()
 	r.Layout(r.container.Size())
 	canvas.Refresh(r.container)
@@ -254,7 +250,7 @@ func (r *accordionRenderer) updateObjects() {
 	}
 	// make new dividers
 	for ; i < is-1; i++ {
-		div := canvas.NewRectangle(theme.ShadowColor())
+		div := widget.NewDivider()
 		r.dividers = append(r.dividers, div)
 		objects = append(objects, div)
 	}
