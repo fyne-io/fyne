@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"fyne.io/fyne"
@@ -115,7 +114,7 @@ func (p *packager) run(_ []string) {
 
 func (p *packager) validate() error {
 	if p.os == "" {
-		p.os = runtime.GOOS
+		p.os = targetOS()
 	}
 	baseDir, err := os.Getwd()
 	if err != nil {
