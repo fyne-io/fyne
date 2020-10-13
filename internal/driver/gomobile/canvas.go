@@ -502,7 +502,6 @@ func (c *mobileCanvas) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEven
 	c.touchTapCount = 0
 	c.touchCancelFunc = nil
 	c.touchLastTapped = nil
-	return
 }
 
 func (c *mobileCanvas) setupThemeListener() {

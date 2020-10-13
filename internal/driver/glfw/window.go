@@ -71,7 +71,6 @@ type window struct {
 	mouseDragStarted   bool
 	mouseButton        desktop.MouseButton
 	mouseOver          desktop.Hoverable
-	mouseClickTime     time.Time
 	mouseLastClick     fyne.CanvasObject
 	mousePressed       fyne.CanvasObject
 	mouseClickCount    int
@@ -757,7 +756,6 @@ func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
 	w.mousePressed = nil
 	w.mouseCancelFunc = nil
 	w.mouseLastClick = nil
-	return
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
