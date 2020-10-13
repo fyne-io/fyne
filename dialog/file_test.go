@@ -379,8 +379,7 @@ func TestFileFavorites(t *testing.T) {
 	// error can be ignored. It just tells you why the fallback
 	// paths are used if they are.
 	favoriteLocations, _ := getFavoriteLocations()
-	favorites, err := dlg.dialog.loadFavorites()
-	assert.Nil(t, err)
+	favorites := dlg.dialog.loadFavorites()
 	places := dlg.dialog.loadPlaces()
 	assert.Equal(t, 3+len(places), len(favorites))
 

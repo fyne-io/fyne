@@ -158,13 +158,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		scrollBread, f.fileScroll)
 	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
-	favorites, err := f.loadFavorites()
-	if err != nil {
-		// only generate the Favorites group if we were able to load
-		// them successfully
-		favorites = []fyne.CanvasObject{}
-		fyne.LogError("Unable to load favorites", err)
-	}
+	favorites := f.loadFavorites()
 
 	favoritesGroup := widget.NewGroup("Favorites", favorites...)
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favoritesGroup, nil),
@@ -172,7 +166,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 }
 
-func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
+func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
 	favoriteLocations, err := getFavoriteLocations()
 	if err != nil {
 		fyne.LogError("Getting favorite locations", err)
@@ -189,7 +183,7 @@ func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
 		}))
 	}
 	places = append(places, f.loadPlaces()...)
-	return places, err
+	return places
 }
 
 func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
