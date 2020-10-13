@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,6 +31,9 @@ func TestNewList(t *testing.T) {
 }
 
 func TestList_Resize(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
@@ -59,6 +63,9 @@ func TestList_Resize(t *testing.T) {
 }
 
 func TestList_OffsetChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
@@ -118,6 +125,9 @@ func TestList_Selection(t *testing.T) {
 }
 
 func TestList_DataChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
@@ -133,6 +143,9 @@ func TestList_DataChange(t *testing.T) {
 }
 
 func TestList_ThemeChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
@@ -147,6 +160,9 @@ func TestList_ThemeChange(t *testing.T) {
 }
 
 func TestList_SmallList(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	var data []string
 	data = append(data, "Test Item 0")
 
@@ -177,6 +193,9 @@ func TestList_SmallList(t *testing.T) {
 }
 
 func TestList_ClearList(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
@@ -201,6 +220,9 @@ func TestList_ClearList(t *testing.T) {
 }
 
 func TestList_RemoveItem(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	var data []string
 	data = append(data, "Test Item 0")
 	data = append(data, "Test Item 1")
