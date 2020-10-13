@@ -14,7 +14,11 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 	return nil
 }
 
-func isHidden(file, _ string) bool {
+func isHidden(file fyne.URI) bool {
+	if file.Scheme() != "file" {
+		fyne.LogError("Cannot check if non file is hidden", nil)
+		return false
+	}
 	return false
 }
 
