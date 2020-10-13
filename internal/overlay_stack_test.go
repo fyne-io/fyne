@@ -7,11 +7,12 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
 )
 
 func TestOverlayStack(t *testing.T) {
-	s := &internal.OverlayStack{}
+	s := &internal.OverlayStack{Canvas: test.NewCanvas()}
 	o1 := widget.NewLabel("A")
 	o2 := widget.NewLabel("B")
 	o3 := widget.NewLabel("C")
