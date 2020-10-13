@@ -76,6 +76,11 @@ func (l *List) MinSize() fyne.Size {
 	return l.BaseWidget.MinSize()
 }
 
+// Selection returns the index of the data that is currently selected or -1 if there is no selection.
+func (l *List) Selection() int {
+	return l.selected
+}
+
 // SetSelection sets the index of the data that is to be selected, refreshes, and calls the OnSelected callback.
 func (l *List) SetSelection(index int) {
 	length := 0
