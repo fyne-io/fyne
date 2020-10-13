@@ -32,9 +32,8 @@ func TestAccordion_Append(t *testing.T) {
 }
 
 func TestAccordionContainer_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	ac := widget.NewAccordionContainer()
 	ac.Append(widget.NewAccordionItem("foo0", widget.NewLabel("foobar0")))
@@ -102,7 +101,6 @@ func TestAccordion_CloseAll(t *testing.T) {
 
 func TestAccordion_Layout(t *testing.T) {
 	test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		multiOpen bool
