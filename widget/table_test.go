@@ -6,7 +6,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,9 +50,8 @@ func TestTable_Cache(t *testing.T) {
 }
 
 func TestTable_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
@@ -75,9 +74,8 @@ func TestTable_ChangeTheme(t *testing.T) {
 }
 
 func TestTable_ClearSelection(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
@@ -99,9 +97,8 @@ func TestTable_ClearSelection(t *testing.T) {
 }
 
 func TestTable_Hovered(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 3, 5 },
@@ -126,9 +123,8 @@ func TestTable_Hovered(t *testing.T) {
 }
 
 func TestTable_Selection(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
@@ -161,9 +157,8 @@ func TestTable_Selection(t *testing.T) {
 }
 
 func TestTable_SetSelection(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
