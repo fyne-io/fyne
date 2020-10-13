@@ -265,11 +265,11 @@ func (w *fileWriter) Write(p []byte) (n int, err error) {
 	}
 	_, err = w.sha1.Write(p)
 	if err != nil {
-		err = fmt.Errorf("apk: sha1 write %s", err)
+		return 0, fmt.Errorf("apk: sha1 write %s", err)
 	}
 	n, err = w.w.Write(p)
 	if err != nil {
-		err = fmt.Errorf("apk: %v", err)
+		return 0, fmt.Errorf("apk: %v", err)
 	}
 	return n, err
 }
