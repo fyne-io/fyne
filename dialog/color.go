@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -96,7 +97,7 @@ func (p *ColorPickerDialog) updateUI() {
 					p.createSimplePickers()...,
 				),
 			),
-			canvas.NewLine(theme.ShadowColor()),
+			internalWidget.NewDivider(),
 			p.advanced,
 		)
 
