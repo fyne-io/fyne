@@ -150,7 +150,6 @@ type issuerAndSerialNumber struct {
 
 // Various ASN.1 Object Identifies, mostly from rfc3852.
 var (
-	oidPKCS7         = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7}
 	oidData          = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 1}
 	oidSignedData    = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 2}
 	oidSHA1          = asn1.ObjectIdentifier{1, 3, 14, 3, 2, 26}

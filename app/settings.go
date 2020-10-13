@@ -31,7 +31,6 @@ type settings struct {
 	propertyLock   sync.RWMutex
 	theme          fyne.Theme
 	themeSpecified bool
-	color          string
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
