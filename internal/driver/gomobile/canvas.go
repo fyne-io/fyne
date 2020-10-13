@@ -53,10 +53,22 @@ func (c *mobileCanvas) Content() fyne.CanvasObject {
 	return c.content
 }
 
+func (c *mobileCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
+	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
+
+	dev, ok := fyne.CurrentDevice().(*device)
+	if !ok || dev.safeWidth == 0 || dev.safeHeight == 0 {
+		return fyne.NewPos(0, 0), c.Size() // running in test mode
+	}
+
+	return fyne.NewPos(int(float32(dev.safeLeft)/scale), int(float32(dev.safeTop)/scale)),
+		fyne.NewSize(int(float32(dev.safeWidth)/scale), int(float32(dev.safeHeight)/scale))
+}
+
 func (c *mobileCanvas) SetContent(content fyne.CanvasObject) {
 	c.content = content
 
-	c.sizeContent(c.Size().Union(content.MinSize()))
+	c.sizeContent(c.Size().Max(content.MinSize()))
 }
 
 // Deprecated: Use Overlays() instead.
@@ -89,12 +101,10 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	if c.content == nil { // window may not be configured yet
 		return
 	}
+	c.size = size
 
 	offset := fyne.NewPos(0, 0)
-	areaPos, areaSize := fyne.Position{}, size
-	if dev, ok := fyne.CurrentDevice().(mobile.Device); ok { // not present in testing
-		areaPos, areaSize = dev.ScreenInteractiveArea()
-	}
+	areaPos, areaSize := c.InteractiveArea()
 
 	if c.windowHead != nil {
 		topHeight := c.windowHead.MinSize().Height
@@ -109,7 +119,6 @@ func (c *mobileCanvas) sizeContent(size fyne.Size) {
 	}
 
 	topLeft := areaPos.Add(offset)
-	c.size = size
 	if c.padded {
 		c.content.Resize(areaSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		c.content.Move(topLeft.Add(fyne.NewPos(theme.Padding(), theme.Padding())))

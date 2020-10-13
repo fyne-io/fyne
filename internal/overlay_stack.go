@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/driver/mobile"
 	"fyne.io/fyne/internal/app"
 	"fyne.io/fyne/internal/widget"
 )
@@ -32,13 +31,10 @@ func (s *OverlayStack) Add(overlay fyne.CanvasObject) {
 	}
 	s.overlays = append(s.overlays, overlay)
 
-	safePos, safeSize := fyne.Position{}, s.Canvas.Size()
-	if dev, ok := fyne.CurrentDevice().(mobile.Device); ok { // not present in testing
-		safePos, safeSize = dev.ScreenInteractiveArea()
-	}
-
 	// TODO this should probably apply to all once #707 is addressed
 	if _, ok := overlay.(*widget.OverlayContainer); ok {
+		safePos, safeSize := s.Canvas.InteractiveArea()
+
 		overlay.Resize(safeSize)
 		overlay.Move(safePos)
 	}

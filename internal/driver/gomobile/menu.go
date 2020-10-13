@@ -59,10 +59,7 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
 	c.menu = fyne.NewContainer(panel, shadow)
 
-	safePos, safeSize := fyne.Position{}, c.size
-	if dev, ok := fyne.CurrentDevice().(*device); ok { // not present in testing
-		safePos, safeSize = dev.ScreenInteractiveArea()
-	}
+	safePos, safeSize := c.InteractiveArea()
 	panel.Move(safePos)
 	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), safeSize.Height))
 	shadow.Resize(fyne.NewSize(theme.Padding()/2, safeSize.Height))

@@ -88,6 +88,10 @@ func (c *glCanvas) FocusPrevious() {
 	c.focusManager().FocusPrevious()
 }
 
+func (c *glCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
+	return fyne.Position{}, c.Size()
+}
+
 func (c *glCanvas) MinSize() fyne.Size {
 	c.RLock()
 	defer c.RUnlock()

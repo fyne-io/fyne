@@ -20,23 +20,6 @@ var (
 // Declare conformity with Device
 var _ fyne.Device = (*device)(nil)
 
-func (*device) ScreenInteractiveArea() (fyne.Position, fyne.Size) {
-	scale := fyne.CurrentDevice().SystemScaleForWindow(nil) // we don't need a window parameter on mobile
-
-	dev, ok := fyne.CurrentDevice().(*device)
-	if !ok {
-		wins := fyne.CurrentApp().Driver().AllWindows()
-		size := fyne.Size{}
-		if len(wins) > 0 {
-			size = wins[0].Canvas().Size()
-		}
-		return fyne.NewPos(0, 0), size // running in test mode
-	}
-
-	return fyne.NewPos(int(float32(dev.safeLeft)/scale), int(float32(dev.safeTop)/scale)),
-		fyne.NewSize(int(float32(dev.safeWidth)/scale), int(float32(dev.safeHeight)/scale))
-}
-
 func (*device) Orientation() fyne.DeviceOrientation {
 	switch currentOrientation {
 	case size.OrientationLandscape:

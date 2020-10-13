@@ -102,6 +102,10 @@ func (c *testCanvas) Focused() fyne.Focusable {
 	return c.focusManager().Focused()
 }
 
+func (c *testCanvas) InteractiveArea() (fyne.Position, fyne.Size) {
+	return fyne.Position{}, c.Size()
+}
+
 func (c *testCanvas) OnTypedKey() func(*fyne.KeyEvent) {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
