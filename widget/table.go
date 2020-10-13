@@ -50,13 +50,12 @@ func NewTable(length func() (int, int), create func() fyne.CanvasObject, update 
 func (t *Table) ClearSelection() {
 	t.selectedRow = -1
 	t.selectedColumn = -1
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
 
 	if t.OnSelectionChanged != nil {
 		t.OnSelectionChanged(-1, -1)
-	}
-
-	if t.moveCallback != nil {
-		t.moveCallback()
 	}
 }
 
@@ -102,12 +101,12 @@ func (t *Table) SetSelection(row, col int) {
 	t.selectedColumn = col
 
 	t.scrollToVisible(row, col)
-	if t.OnSelectionChanged != nil {
-		t.OnSelectionChanged(row, col)
-	}
-
 	if t.moveCallback != nil {
 		t.moveCallback()
+	}
+
+	if t.OnSelectionChanged != nil {
+		t.OnSelectionChanged(row, col)
 	}
 }
 
@@ -347,13 +346,12 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 
 	c.t.selectedColumn = e.Position.X / (c.cellSize.Width + tableDividerThickness)
 	c.t.selectedRow = e.Position.Y / (c.cellSize.Height + tableDividerThickness)
+	if c.t.moveCallback != nil {
+		c.t.moveCallback()
+	}
 
 	if c.t.OnSelectionChanged != nil {
 		c.t.OnSelectionChanged(c.t.selectedRow, c.t.selectedColumn)
-	}
-
-	if c.t.moveCallback != nil {
-		c.t.moveCallback()
 	}
 }
 
