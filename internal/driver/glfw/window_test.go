@@ -465,11 +465,13 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
 	w.waitForEvents()
+
 	assert.False(t, tapped)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 	w.waitForEvents()
+
 	assert.True(t, tapped)
 }
 
@@ -497,6 +499,7 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+
 	assert.False(t, tapped, "Tapped button that was clipped")
 
 	w.mousePos = fyne.NewPos(10, 120)
@@ -504,6 +507,7 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+
 	assert.True(t, tapped, "Tapped button that was clipped")
 }
 
@@ -519,6 +523,7 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+
 	assert.Equal(t, 1, tapped, "Button 1 should be tapped")
 	tapped = 0
 
@@ -527,13 +532,49 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+
 	assert.Equal(t, 0, tapped, "button was tapped without mouse press & release on it %d", tapped)
 
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
 	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
 
 	w.waitForEvents()
+
 	assert.Equal(t, 2, tapped, "Button 2 should be tapped")
+}
+
+func TestWindow_TappedAndDoubleTapped(t *testing.T) {
+	w := createWindow("Test").(*window)
+	tapped := 0
+	but := newDoubleTappableButton()
+	but.OnTapped = func() {
+		tapped = 1
+	}
+	but.onDoubleTap = func() {
+		tapped = 2
+	}
+	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil), but))
+
+	w.mouseMoved(w.viewport, 15, 25)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	w.waitForEvents()
+	time.Sleep(500 * time.Millisecond)
+
+	assert.Equal(t, 1, tapped, "Single tap should have fired")
+	tapped = 0
+
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.waitForEvents()
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+
+	w.waitForEvents()
+	time.Sleep(500 * time.Millisecond)
+
+	assert.Equal(t, 2, tapped, "Double tap should have fired")
 }
 
 func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
@@ -1087,4 +1128,21 @@ func pop(s []interface{}) (interface{}, []interface{}) {
 		return nil, s
 	}
 	return s[0], s[1:]
+}
+
+type doubleTappableButton struct {
+	widget.Button
+
+	onDoubleTap func()
+}
+
+func (t *doubleTappableButton) DoubleTapped(_ *fyne.PointEvent) {
+	t.onDoubleTap()
+}
+
+func newDoubleTappableButton() *doubleTappableButton {
+	but := &doubleTappableButton{}
+	but.ExtendBaseWidget(but)
+
+	return but
 }

@@ -163,11 +163,11 @@ func TestLabel_ChangeTruncate(t *testing.T) {
 	text := NewLabel("Hello")
 	c.SetContent(text)
 	c.Resize(text.MinSize())
-	test.AssertImageMatches(t, "label-default.png", c.Capture())
+	test.AssertImageMatches(t, "label/default.png", c.Capture())
 
 	truncSize := text.MinSize().Subtract(fyne.NewSize(10, 0))
 	text.Resize(truncSize)
 	text.Wrapping = fyne.TextTruncate
 	text.Refresh()
-	test.AssertImageMatches(t, "label-truncate.png", c.Capture())
+	test.AssertImageMatches(t, "label/truncate.png", c.Capture())
 }
