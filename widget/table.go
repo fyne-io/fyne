@@ -28,7 +28,7 @@ type Table struct {
 	// The row and col values will be -1 if no cell is currently selected.
 	OnSelectionChanged func(row, col int)
 
-	SelectedRow, SelectedColumn int
+	selectedRow, selectedColumn int
 	hoveredRow, hoveredColumn   int
 	cells                       *tableCells
 	moveCallback                func()
@@ -41,15 +41,15 @@ type Table struct {
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
 func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
-	t := &Table{Length: length, CreateCell: create, UpdateCell: update, SelectedRow: -1, SelectedColumn: -1}
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update, selectedRow: -1, selectedColumn: -1}
 	t.ExtendBaseWidget(t)
 	return t
 }
 
 // ClearSelection will clear any cell selection.
 func (t *Table) ClearSelection() {
-	t.SelectedRow = -1
-	t.SelectedColumn = -1
+	t.selectedRow = -1
+	t.selectedColumn = -1
 
 	if t.OnSelectionChanged != nil {
 		t.OnSelectionChanged(-1, -1)
@@ -91,10 +91,15 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// SetSelected will mark the specified cell (at row, col) to be marked as selected.
-func (t *Table) SetSelected(row, col int) {
-	t.SelectedRow = row
-	t.SelectedColumn = col
+// Selection will mark the specified cell (at row, col) to be marked as selected.
+func (t *Table) Selection() (row, col int) {
+	return t.selectedRow, t.selectedColumn
+}
+
+// SetSelection will mark the specified cell (at row, col) to be marked as selected.
+func (t *Table) SetSelection(row, col int) {
+	t.selectedRow = row
+	t.selectedColumn = col
 
 	t.scrollToVisible(row, col)
 	if t.OnSelectionChanged != nil {
@@ -213,9 +218,9 @@ func (t *tableRenderer) moveColumnMarker(marker fyne.CanvasObject, col int) {
 }
 
 func (t *tableRenderer) moveIndicators() {
-	t.moveColumnMarker(t.colMarker, t.t.SelectedColumn)
+	t.moveColumnMarker(t.colMarker, t.t.selectedColumn)
 	t.moveColumnMarker(t.colHover, t.t.hoveredColumn)
-	t.moveRowMarker(t.rowMarker, t.t.SelectedRow)
+	t.moveRowMarker(t.rowMarker, t.t.selectedRow)
 	t.moveRowMarker(t.rowHover, t.t.hoveredRow)
 
 	colDivs := int(math.Ceil(float64(t.t.size.Width+tableDividerThickness) / float64(t.cellSize.Width+1)))
@@ -334,17 +339,17 @@ func (c *tableCells) Resize(s fyne.Size) {
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
-		c.t.SelectedColumn = -1
-		c.t.SelectedRow = -1
+		c.t.selectedColumn = -1
+		c.t.selectedRow = -1
 		c.t.Refresh()
 		return
 	}
 
-	c.t.SelectedColumn = e.Position.X / (c.cellSize.Width + tableDividerThickness)
-	c.t.SelectedRow = e.Position.Y / (c.cellSize.Height + tableDividerThickness)
+	c.t.selectedColumn = e.Position.X / (c.cellSize.Width + tableDividerThickness)
+	c.t.selectedRow = e.Position.Y / (c.cellSize.Height + tableDividerThickness)
 
 	if c.t.OnSelectionChanged != nil {
-		c.t.OnSelectionChanged(c.t.SelectedRow, c.t.SelectedColumn)
+		c.t.OnSelectionChanged(c.t.selectedRow, c.t.selectedColumn)
 	}
 
 	if c.t.moveCallback != nil {

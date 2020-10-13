@@ -72,7 +72,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 	})
 }
 
-func TestTable_ClearSelected(t *testing.T) {
+func TestTable_ClearSelection(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
@@ -85,8 +85,8 @@ func TestTable_ClearSelected(t *testing.T) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
-	table.SelectedColumn = 1
-	table.SelectedRow = 1
+	table.selectedColumn = 1
+	table.selectedRow = 1
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
@@ -121,7 +121,7 @@ func TestTable_Hovered(t *testing.T) {
 	test.AssertImageMatches(t, "table/hovered.png", w.Canvas().Capture())
 }
 
-func TestTable_Selected(t *testing.T) {
+func TestTable_Selection(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
@@ -134,8 +134,8 @@ func TestTable_Selected(t *testing.T) {
 			text := fmt.Sprintf("Cell %d, %d", row, col)
 			c.(*Label).SetText(text)
 		})
-	assert.Equal(t, -1, table.SelectedColumn)
-	assert.Equal(t, -1, table.SelectedRow)
+	assert.Equal(t, -1, table.selectedColumn)
+	assert.Equal(t, -1, table.selectedRow)
 
 	w := test.NewWindow(table)
 	defer w.Close()
@@ -147,15 +147,15 @@ func TestTable_Selected(t *testing.T) {
 		selectedRow = row
 	}
 	test.TapCanvas(w.Canvas(), fyne.NewPos(35, 50))
-	assert.Equal(t, 0, table.SelectedColumn)
-	assert.Equal(t, 1, table.SelectedRow)
+	assert.Equal(t, 0, table.selectedColumn)
+	assert.Equal(t, 1, table.selectedRow)
 	assert.Equal(t, 0, selectedCol)
 	assert.Equal(t, 1, selectedRow)
 
 	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
 }
 
-func TestTable_SetSelected(t *testing.T) {
+func TestTable_SetSelection(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
 	app.Settings().SetTheme(theme.LightTheme())
@@ -178,16 +178,16 @@ func TestTable_SetSelected(t *testing.T) {
 		selectedCol = col
 		selectedRow = row
 	}
-	table.SetSelected(1, 0)
-	assert.Equal(t, 0, table.SelectedColumn)
-	assert.Equal(t, 1, table.SelectedRow)
+	table.SetSelection(1, 0)
+	assert.Equal(t, 0, table.selectedColumn)
+	assert.Equal(t, 1, table.selectedRow)
 	assert.Equal(t, 0, selectedCol)
 	assert.Equal(t, 1, selectedRow)
 	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
 
-	table.SetSelected(3, 3)
-	assert.Equal(t, 3, table.SelectedColumn)
-	assert.Equal(t, 3, table.SelectedRow)
+	table.SetSelection(3, 3)
+	assert.Equal(t, 3, table.selectedColumn)
+	assert.Equal(t, 3, table.selectedRow)
 	assert.Equal(t, 3, selectedCol)
 	assert.Equal(t, 3, selectedRow)
 	test.AssertImageMatches(t, "table/selected_scrolled.png", w.Canvas().Capture())
