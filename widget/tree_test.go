@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne"
 	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/stretchr/testify/assert"
 )
@@ -73,7 +72,6 @@ func TestTree_OpenCloseAll(t *testing.T) {
 
 func TestTree_Layout(t *testing.T) {
 	test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		items    [][]string
@@ -291,9 +289,8 @@ func TestTree_Layout(t *testing.T) {
 }
 
 func TestTree_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	data := make(map[string][]string)
 	internalwidget.AddTreePath(data, "foo", "foobar")
@@ -316,9 +313,8 @@ func TestTree_ChangeTheme(t *testing.T) {
 }
 
 func TestTree_Move(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	data := make(map[string][]string)
 	internalwidget.AddTreePath(data, "foo", "foobar")
