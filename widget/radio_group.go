@@ -1,14 +1,10 @@
 package widget
 
 import (
-	"math"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
 )
-
-const noRadioGroupItemIndex = -1
 
 // RadioGroup widget has a list of text labels and radio check icons next to each.
 // Changing the selection (only one can be selected) will trigger the changed func.
@@ -87,20 +83,6 @@ func (r *RadioGroup) SetSelected(option string) {
 	}
 
 	r.Refresh()
-}
-
-// indexByPosition returns the item index for a specified position or noRadioItemIndex if any
-func (r *RadioGroup) indexByPosition(pos fyne.Position) int {
-	index := 0
-	if r.Horizontal {
-		index = int(math.Floor(float64(pos.X) / float64(r.itemWidth())))
-	} else {
-		index = int(math.Floor(float64(pos.Y) / float64(r.itemHeight())))
-	}
-	if index < 0 || index >= len(r.Options) { // in the padding
-		return noRadioGroupItemIndex
-	}
-	return index
 }
 
 func (r *RadioGroup) itemHeight() int {
