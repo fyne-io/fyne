@@ -36,6 +36,17 @@ type Tree struct {
 	leafMinSize   fyne.Size
 }
 
+// NewTree returns a new performant tree widget defined by the passed functions.
+// childUIDs returns the child Unique IDs of the given node.
+// isBranch returns true if the given node is a branch, false if it is a leaf.
+// create returns a new template object that can be cached.
+// update is used to apply data at specified data location to the passed template CanvasObject.
+func NewTree(childUIDs func(uid string) (c []string), isBranch func(uid string) (ok bool), create func(branch bool) (o fyne.CanvasObject), update func(uid string, branch bool, node fyne.CanvasObject)) *Tree {
+	t := &Tree{ChildUIDs: childUIDs, IsBranch: isBranch, CreateNode: create, UpdateNode: update}
+	t.ExtendBaseWidget(t)
+	return t
+}
+
 // NewTreeWithFiles creates a new tree with the given file system URI.
 func NewTreeWithFiles(root fyne.URI) (t *Tree) {
 	t = &Tree{
