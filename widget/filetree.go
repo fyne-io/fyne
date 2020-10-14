@@ -13,8 +13,8 @@ import (
 // Each node of the tree must be identified by a Unique ID.
 type FileTree struct {
 	Tree
-	Filter func(string) bool
-	Sorter func(string, string) bool
+	Filter func(fyne.URI) bool
+	Sorter func(fyne.URI, fyne.URI) bool
 }
 
 // NewFileTree creates a new tree with the given file system URI.
@@ -46,18 +46,25 @@ func NewFileTree(root fyne.URI) *FileTree {
 			if err != nil {
 				fyne.LogError("Unable to list "+luri.String(), err)
 			} else {
+				// Filter URIs
+				f := t.Filter
+				var us []fyne.URI
 				for _, u := range uris {
-					s := u.String()
-					if f := t.Filter; f == nil || f(s) {
-						c = append(c, s)
+					if f == nil || f(u) {
+						us = append(us, u)
 					}
 				}
+				// Sort URIs
+				if s := t.Sorter; s != nil {
+					sort.Slice(us, func(i, j int) bool {
+						return s(us[i], us[j])
+					})
+				}
+				// Convert to Strings
+				for _, u := range us {
+					c = append(c, u.String())
+				}
 			}
-		}
-		if s := t.Sorter; s != nil {
-			sort.Slice(c, func(i, j int) bool {
-				return s(c[i], c[j])
-			})
 		}
 		return
 	}
