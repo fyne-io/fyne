@@ -315,10 +315,15 @@ func makeListTab() fyne.CanvasObject {
 			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[index])
 		},
 	)
-	list.OnItemSelected = func(index int) {
+	list.OnSelectionChanged = func(index int) {
+		if index == -1 {
+			label.SetText("Select An Item From The List")
+			icon.SetResource(nil)
+		}
 		label.SetText(data[index])
 		icon.SetResource(theme.DocumentIcon())
 	}
+	list.SetSelection(125)
 	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
 }
 

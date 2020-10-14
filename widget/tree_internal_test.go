@@ -367,7 +367,7 @@ func TestTree_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		selected := make(chan bool)
-		tree.OnNodeSelected = func(uid string) {
+		tree.OnSelectionChanged = func(uid string) {
 			selected <- true
 		}
 		go test.Tap(getLeaf(t, tree, "A"))

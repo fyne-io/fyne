@@ -175,7 +175,7 @@ func makeTreeTab() fyne.CanvasObject {
 	internalwidget.AddTreePath(left, "A", "V", "W", "X", "Y", "Z", "avwxyz")
 
 	l := widget.NewTreeWithStrings(left)
-	l.OnNodeSelected = func(id string) {
+	l.OnSelectionChanged = func(id string) {
 		fmt.Println("LeftTreeNodeSelected:", id)
 	}
 	l.OpenBranch("A")
@@ -197,7 +197,7 @@ func makeTreeTab() fyne.CanvasObject {
 		return l
 	}
 	r := widget.NewTreeWithFiles(storage.NewURI("file://" + dir))
-	r.OnNodeSelected = func(id string) {
+	r.OnSelectionChanged = func(id string) {
 		fmt.Println("RightTreeNodeSelected:", id)
 	}
 	return widget.NewHSplitContainer(l, r)

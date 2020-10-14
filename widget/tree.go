@@ -20,16 +20,16 @@ var _ fyne.Widget = (*Tree)(nil)
 type Tree struct {
 	BaseWidget
 	Root     string
-	Selected string
+	selected string
 	Offset   fyne.Position
 
-	ChildUIDs      func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
-	IsBranch       func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
-	CreateNode     func(branch bool) (o fyne.CanvasObject)               // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
-	UpdateNode     func(uid string, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given Unique ID
-	OnBranchOpened func(uid string)                                      // Called when a Branch is opened
-	OnBranchClosed func(uid string)                                      // Called when a Branch is closed
-	OnNodeSelected func(uid string)                                      // Called when the Node with the given Unique ID is selected.
+	ChildUIDs          func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
+	IsBranch           func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
+	CreateNode         func(branch bool) (o fyne.CanvasObject)               // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
+	UpdateNode         func(uid string, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given Unique ID
+	OnBranchOpened     func(uid string)                                      // Called when a Branch is opened
+	OnBranchClosed     func(uid string)                                      // Called when a Branch is closed
+	OnSelectionChanged func(uid string)                                      // Called when the Node with the given Unique ID is selected.
 
 	open          map[string]bool
 	branchMinSize fyne.Size
@@ -223,9 +223,9 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.Refresh() // trigger a redraw
 }
 
-// SetSelectedNode updates the current selection to the node with the given Unique ID.
-func (t *Tree) SetSelectedNode(uid string) {
-	t.Selected = uid
+// SetSelection updates the current selection to the node with the given Unique ID.
+func (t *Tree) SetSelection(uid string) {
+	t.selected = uid
 	t.Refresh()
 }
 
@@ -605,8 +605,8 @@ func (n *treeNode) MouseOut() {
 }
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
-	n.tree.SetSelectedNode(n.uid)
-	if f := n.tree.OnNodeSelected; f != nil {
+	n.tree.SetSelection(n.uid)
+	if f := n.tree.OnSelectionChanged; f != nil {
 		f(n.uid)
 	}
 }
@@ -689,7 +689,7 @@ func (r *treeNodeRenderer) partialRefresh() {
 	if r.treeNode.icon != nil {
 		r.treeNode.icon.Refresh()
 	}
-	if r.treeNode.uid == r.treeNode.tree.Selected {
+	if r.treeNode.uid == r.treeNode.tree.selected {
 		r.indicator.FillColor = theme.PrimaryColor()
 	} else if r.treeNode.hovered {
 		r.indicator.FillColor = theme.HoverColor()
