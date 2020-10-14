@@ -19,8 +19,13 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 	})}
 }
 
-func isHidden(file, _ string) bool {
-	return len(file) == 0 || file[0] == '.'
+func isHidden(file fyne.URI) bool {
+	if file.Scheme() != "file" {
+		fyne.LogError("Cannot check if non file is hidden", nil)
+		return false
+	}
+	filePath := file.String()[len(file.Scheme())+3:]
+	return len(filePath) == 0 || filePath[0] == '.'
 }
 
 func fileOpenOSOverride(*FileDialog) bool {
