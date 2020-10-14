@@ -196,7 +196,7 @@ func makeTreeTab() fyne.CanvasObject {
 		// Can't get any useful directory, so only show Tree of strings
 		return l
 	}
-	r := widget.NewTreeWithFiles(storage.NewURI("file://" + dir))
+	r := widget.NewFileTree(storage.NewURI("file://" + dir))
 	r.OnSelectionChanged = func(id string) {
 		fmt.Println("RightTreeNodeSelected:", id)
 	}
