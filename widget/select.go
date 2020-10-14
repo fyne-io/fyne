@@ -284,8 +284,8 @@ func (s *selectRenderer) updateLabel() {
 	}
 
 	if s.combo.Selected == "" {
-		s.label.Text = s.combo.PlaceHolder
+		s.label.SetText(s.combo.PlaceHolder)
 	} else {
-		s.label.Text = s.combo.Selected
+		s.label.SetText(s.combo.Selected)
 	}
 }
