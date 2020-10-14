@@ -85,30 +85,6 @@ func (r *RadioGroup) SetSelected(option string) {
 	r.Refresh()
 }
 
-func (r *RadioGroup) itemHeight() int {
-	if r.Horizontal {
-		return r.MinSize().Height
-	}
-
-	count := 1
-	if r.Options != nil && len(r.Options) > 0 {
-		count = len(r.Options)
-	}
-	return r.MinSize().Height / count
-}
-
-func (r *RadioGroup) itemWidth() int {
-	if !r.Horizontal {
-		return r.MinSize().Width
-	}
-
-	count := 1
-	if r.Options != nil && len(r.Options) > 0 {
-		count = len(r.Options)
-	}
-	return r.MinSize().Width / count
-}
-
 func (r *RadioGroup) itemTapped(item *RadioItem) {
 	if r.Disabled() {
 		return
@@ -157,8 +133,20 @@ type radioGroupRenderer struct {
 
 // Layout the components of the radio widget
 func (r *radioGroupRenderer) Layout(_ fyne.Size) {
-	itemWidth := r.radio.itemWidth()
-	itemHeight := r.radio.itemHeight()
+	count := 1
+	if r.items != nil && len(r.items) > 0 {
+		count = len(r.items)
+	}
+	var itemHeight, itemWidth int
+	minSize := r.radio.MinSize()
+	if r.radio.Horizontal {
+		itemHeight = minSize.Height
+		itemWidth = minSize.Width / count
+	} else {
+		itemHeight = minSize.Height / count
+		itemWidth = minSize.Width
+	}
+
 	itemSize := fyne.NewSize(itemWidth, itemHeight)
 	x, y := 0, 0
 	for _, item := range r.items {
