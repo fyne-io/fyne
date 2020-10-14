@@ -148,10 +148,15 @@ func (p *packager) packageLinux() error {
 			"\n"+
 			"default:\n"+
 			`	# Run "sudo make install" to install the application.`+"\n"+
+			`	# Run "sudo make uninstall" to uninstall the application.`+"\n"+
 			"install:\n"+
 			"	install -Dm00644 usr/"+local+"share/applications/"+p.name+`.desktop $(DESTDIR)$(PREFIX)/share/applications/`+p.name+".desktop\n"+
 			"	install -Dm00755 usr/"+local+"bin/"+filepath.Base(p.exe)+` $(DESTDIR)$(PREFIX)/bin/`+filepath.Base(p.exe)+"\n"+
-			"	install -Dm00644 usr/"+local+"share/pixmaps/"+p.name+filepath.Ext(p.icon)+` $(DESTDIR)$(PREFIX)/share/pixmaps/`+p.name+filepath.Ext(p.icon)+"\n")
+			"	install -Dm00644 usr/"+local+"share/pixmaps/"+p.name+filepath.Ext(p.icon)+` $(DESTDIR)$(PREFIX)/share/pixmaps/`+p.name+filepath.Ext(p.icon)+"\n"+
+			"uninstall:\n"+
+			"	-rm "+`$(DESTDIR)$(PREFIX)/share/applications/`+p.name+".desktop\n"+
+			"	-rm "+`$(DESTDIR)$(PREFIX)/bin/`+filepath.Base(p.exe)+"\n"+
+			"	-rm "+`$(DESTDIR)$(PREFIX)/share/pixmaps/`+p.name+filepath.Ext(p.icon)+"\n")
 		if err != nil {
 			return errors.Wrap(err, "Failed to write Makefile string")
 		}
