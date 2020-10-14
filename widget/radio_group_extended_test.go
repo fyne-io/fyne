@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,6 +21,7 @@ func newextendedRadioGroup(opts []string, f func(string)) *extendedRadioGroup {
 	ret.Options = opts
 	ret.OnChanged = f
 	ret.ExtendBaseWidget(ret)
+	ret.update() // Not needed for extending Radio but for the tests to be able to access items without creating a renderer first.
 
 	return ret
 }
@@ -36,7 +38,7 @@ func TestRadioGroup_Extended_Selected(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Hi"}, func(sel string) {
 		selected = sel
 	})
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "Hi", selected)
 }
@@ -47,7 +49,7 @@ func TestRadioGroup_Extended_Unselected(t *testing.T) {
 		selected = sel
 	})
 	radio.Selected = selected
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "", selected)
 }
@@ -93,7 +95,7 @@ func TestRadioGroup_Extended_Disable(t *testing.T) {
 	})
 
 	radio.Disable()
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
 
 	assert.Equal(t, "", selected, "RadioGroup should have been disabled.")
 }
@@ -105,12 +107,12 @@ func TestRadioGroup_Extended_Enable(t *testing.T) {
 	})
 
 	radio.Disable()
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
-	assert.Equal(t, "", selected, "RadioGroup should have been disabled.")
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	assert.Equal(t, "", selected, "Radio should have been disabled.")
 
 	radio.Enable()
-	radio.Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
-	assert.Equal(t, "Hi", selected, "RadioGroup should have been re-enabled.")
+	radio.items[0].Tapped(&fyne.PointEvent{Position: fyne.NewPos(theme.Padding(), theme.Padding())})
+	assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
 }
 
 func TestRadioGroup_Extended_Hovered(t *testing.T) {
@@ -135,59 +137,48 @@ func TestRadioGroup_Extended_Hovered(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			radio := newextendedRadioGroup(tt.options, nil)
 			radio.Horizontal = tt.isHorizontal
-			render := cache.Renderer(radio).(*radioGroupRenderer)
+			item1 := radio.items[0]
+			render1 := cache.Renderer(item1).(*radioItemRenderer)
+			render2 := cache.Renderer(radio.items[1]).(*radioItemRenderer)
 
-			assert.Equal(t, false, radio.hovered)
-			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+			assert.False(t, item1.hovered)
+			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 
 			radio.SetSelected("Hi")
-			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 
 			radio.SetSelected("Another")
-			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 
-			radio.MouseIn(&desktop.MouseEvent{
+			item1.MouseIn(&desktop.MouseEvent{
 				PointEvent: fyne.PointEvent{
 					Position: fyne.NewPos(theme.Padding(), theme.Padding()),
 				},
 			})
-			assert.Equal(t, 0, radio.hoveredItemIndex)
-			assert.Equal(t, true, radio.hovered)
-			assert.Equal(t, theme.HoverColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.BackgroundColor(), render.items[1].focusIndicator.FillColor)
+			assert.True(t, item1.hovered)
+			assert.Equal(t, theme.HoverColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 
-			var mouseMove fyne.Position
-			if tt.isHorizontal {
-				mouseMove = fyne.NewPos(radio.MinSize().Width-theme.Padding(), theme.Padding())
-			} else {
-				mouseMove = fyne.NewPos(theme.Padding(), radio.MinSize().Height-theme.Padding())
-			}
-
-			radio.MouseMoved(&desktop.MouseEvent{
-				PointEvent: fyne.PointEvent{
-					Position: mouseMove,
-				},
-			})
-			assert.Equal(t, 1, radio.hoveredItemIndex)
-			assert.Equal(t, theme.BackgroundColor(), render.items[0].focusIndicator.FillColor)
-			assert.Equal(t, theme.HoverColor(), render.items[1].focusIndicator.FillColor)
+			item1.MouseOut()
+			assert.False(t, item1.hovered)
+			assert.Equal(t, theme.BackgroundColor(), render1.focusIndicator.FillColor)
+			assert.Equal(t, theme.BackgroundColor(), render2.focusIndicator.FillColor)
 		})
 	}
 }
 
 func TestRadioGroupRenderer_Extended_ApplyTheme(t *testing.T) {
 	radio := newextendedRadioGroup([]string{"Test"}, func(string) {})
-	render := cache.Renderer(radio).(*radioGroupRenderer)
+	render := cache.Renderer(radio.items[0]).(*radioItemRenderer)
 
-	item := render.items[0]
-	textSize := item.label.TextSize
+	textSize := render.label.TextSize
 	customTextSize := textSize
 	test.WithTestTheme(t, func() {
-		render.applyTheme()
-		customTextSize = item.label.TextSize
+		render.Refresh()
+		customTextSize = render.label.TextSize
 	})
 
 	assert.NotEqual(t, textSize, customTextSize)
