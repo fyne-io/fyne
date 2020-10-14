@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// FileTree widget displays a hierarchical file system.
+// Each node of the tree must be identified by a Unique ID.
 type FileTree struct {
 	Tree
 	Filter func(string) bool
