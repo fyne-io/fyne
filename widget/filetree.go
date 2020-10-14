@@ -13,8 +13,8 @@ import (
 // Each node of the tree must be identified by a Unique ID.
 type FileTree struct {
 	Tree
-	Filter func(fyne.URI) bool
-	Sorter func(fyne.URI, fyne.URI) bool
+	Filter func(fyne.URI) bool           // Returns true if the given URI passes the filter, false if it should be dropped
+	Sorter func(fyne.URI, fyne.URI) bool // Returns true if the first parameter should be sorted above the second
 }
 
 // NewFileTree creates a new tree with the given file system URI.
