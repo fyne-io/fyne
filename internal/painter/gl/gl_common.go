@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/painter"
 	"fyne.io/fyne/theme"
@@ -19,7 +20,7 @@ import (
 var textures = make(map[fyne.CanvasObject]Texture, 1024)
 
 func logGLError(err uint32) {
-	if err == 0 {
+	if err == 0 || !internal.HintsEnabled() {
 		return
 	}
 

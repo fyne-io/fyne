@@ -2,7 +2,6 @@ package dialog
 
 import (
 	"os"
-	"path/filepath"
 	"syscall"
 
 	"fyne.io/fyne"
@@ -59,8 +58,13 @@ func (f *fileDialog) loadPlaces() []fyne.CanvasObject {
 	return places
 }
 
-func isHidden(file, dir string) bool {
-	path := filepath.Join(dir, file)
+func isHidden(file fyne.URI) bool {
+	if file.Scheme() != "file" {
+		fyne.LogError("Cannot check if non file is hidden", nil)
+		return false
+	}
+
+	path := file.String()[len(file.Scheme())+3:]
 
 	point, err := syscall.UTF16PtrFromString(path)
 	if err != nil {

@@ -212,7 +212,7 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 		icons = append(icons, fi)
 	}
 	for _, file := range files {
-		if isHidden(file.Name(), dir.Name()) {
+		if isHidden(file) {
 			continue
 		}
 
