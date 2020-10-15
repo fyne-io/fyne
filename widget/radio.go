@@ -51,8 +51,8 @@ func (r *Radio) Append(option string) {
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (r *Radio) CreateRenderer() fyne.WidgetRenderer {
 	r.ExtendBaseWidget(r)
-	r.propertyLock.Lock()
-	defer r.propertyLock.Unlock()
+	r.propertyLock.RLock()
+	defer r.propertyLock.RUnlock()
 	var items []*radioRenderItem
 	var objects []fyne.CanvasObject
 
@@ -258,11 +258,11 @@ func (r *radioRenderer) MinSize() fyne.Size {
 }
 
 func (r *radioRenderer) Refresh() {
-	r.radio.propertyLock.Lock()
+	r.radio.propertyLock.RLock()
 	r.applyTheme()
 	r.radio.removeDuplicateOptions()
 	r.updateItems()
-	r.radio.propertyLock.Unlock()
+	r.radio.propertyLock.RUnlock()
 	canvas.Refresh(r.radio.super())
 }
 
