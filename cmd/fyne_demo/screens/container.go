@@ -16,7 +16,7 @@ import (
 )
 
 // ContainerScreen loads a tab panel for containers and layouts
-func ContainerScreen() fyne.CanvasObject {
+func ContainerScreen(_ fyne.Window) fyne.CanvasObject {
 	return container.NewAppTabs( // TODO not best use of tabs here either
 		container.NewTabItem("Accordion", makeAccordionTab()),
 		container.NewTabItem("Card", makeCardTab()),

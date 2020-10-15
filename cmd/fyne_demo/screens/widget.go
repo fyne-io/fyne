@@ -328,7 +328,7 @@ func makeListTab() fyne.CanvasObject {
 }
 
 // WidgetScreen shows a panel containing widget demos
-func WidgetScreen() fyne.CanvasObject {
+func WidgetScreen(_ fyne.Window) fyne.CanvasObject {
 	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
 		widget.NewToolbarSeparator(),
 		widget.NewToolbarSpacer(),
