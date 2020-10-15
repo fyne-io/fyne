@@ -42,12 +42,12 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 		logo.SetMinSize(fyne.NewSize(228, 167))
 	}
 
-	return widget.NewVBox(
+	return container.NewVBox(
 		layout.NewSpacer(),
 		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-		widget.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
+		container.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
 
-		widget.NewHBox(layout.NewSpacer(),
+		container.NewHBox(layout.NewSpacer(),
 			widget.NewHyperlink("fyne.io", parseURL("https://fyne.io/")),
 			widget.NewLabel("-"),
 			widget.NewHyperlink("documentation", parseURL("https://fyne.io/develop/")),
@@ -171,7 +171,7 @@ func main() {
 	}
 	currentPref := a.Preferences().StringWithFallback(preferenceCurrentTutorial, "welcome")
 	tree.SetSelection(currentPref)
-	setTutorial(tutorials["welcome"]) // Remove after list SetSelection callback is fixed
+	setTutorial(tutorials["welcome"]) // Remove after tree SetSelection callback is fixed
 
 	tutorial := container.NewVBox(
 		title,
