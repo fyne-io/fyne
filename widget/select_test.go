@@ -109,14 +109,24 @@ func TestSelect_SelectedIndex(t *testing.T) {
 }
 
 func TestSelect_SetSelected(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
 	var triggered bool
 	var triggeredValue string
 	combo := widget.NewSelect([]string{"1", "2"}, func(s string) {
 		triggered = true
 		triggeredValue = s
 	})
-	combo.SetSelected("2")
+	w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), combo))
+	defer w.Close()
+	w.Resize(fyne.NewSize(200, 150))
 
+	c := w.Canvas()
+	test.AssertImageMatches(t, "select/set_selected_none_selected.png", c.Capture())
+	combo.SetSelected("2")
+	test.AssertImageMatches(t, "select/set_selected_2nd_selected.png", c.Capture())
 	assert.Equal(t, "2", combo.Selected)
 	assert.True(t, triggered)
 	assert.Equal(t, "2", triggeredValue)

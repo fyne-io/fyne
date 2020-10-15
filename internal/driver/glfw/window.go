@@ -839,16 +839,26 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyF12: fyne.KeyF12,
 
 	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
-	glfw.Key0: fyne.Key0,
-	glfw.Key1: fyne.Key1,
-	glfw.Key2: fyne.Key2,
-	glfw.Key3: fyne.Key3,
-	glfw.Key4: fyne.Key4,
-	glfw.Key5: fyne.Key5,
-	glfw.Key6: fyne.Key6,
-	glfw.Key7: fyne.Key7,
-	glfw.Key8: fyne.Key8,
-	glfw.Key9: fyne.Key9,
+	glfw.Key0:   fyne.Key0,
+	glfw.KeyKP0: fyne.Key0,
+	glfw.Key1:   fyne.Key1,
+	glfw.KeyKP1: fyne.Key1,
+	glfw.Key2:   fyne.Key2,
+	glfw.KeyKP2: fyne.Key2,
+	glfw.Key3:   fyne.Key3,
+	glfw.KeyKP3: fyne.Key3,
+	glfw.Key4:   fyne.Key4,
+	glfw.KeyKP4: fyne.Key4,
+	glfw.Key5:   fyne.Key5,
+	glfw.KeyKP5: fyne.Key5,
+	glfw.Key6:   fyne.Key6,
+	glfw.KeyKP6: fyne.Key6,
+	glfw.Key7:   fyne.Key7,
+	glfw.KeyKP7: fyne.Key7,
+	glfw.Key8:   fyne.Key8,
+	glfw.KeyKP8: fyne.Key8,
+	glfw.Key9:   fyne.Key9,
+	glfw.KeyKP9: fyne.Key9,
 
 	// desktop
 	glfw.KeyLeftShift:    desktop.KeyShiftLeft,
@@ -860,6 +870,7 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyLeftSuper:    desktop.KeySuperLeft,
 	glfw.KeyRightSuper:   desktop.KeySuperRight,
 	glfw.KeyMenu:         desktop.KeyMenu,
+	glfw.KeyPrintScreen:  desktop.KeyPrintScreen,
 	glfw.KeyCapsLock:     desktop.KeyCapsLock,
 }
 
@@ -869,9 +880,11 @@ var keyNameMap = map[string]fyne.KeyName{
 	"-": fyne.KeyMinus,
 	".": fyne.KeyPeriod,
 	"/": fyne.KeySlash,
+	"*": fyne.KeyAsterisk,
 	"`": fyne.KeyBackTick,
 
 	";": fyne.KeySemicolon,
+	"+": fyne.KeyPlus,
 	"=": fyne.KeyEqual,
 
 	"a": fyne.KeyA,
@@ -907,6 +920,10 @@ var keyNameMap = map[string]fyne.KeyName{
 }
 
 func keyToName(code glfw.Key, scancode int) fyne.KeyName {
+	if runtime.GOOS == "darwin" && scancode == 0x69 { // TODO remove once fixed upstream glfw/glfw#1786
+		code = glfw.KeyPrintScreen
+	}
+
 	ret, ok := keyCodeMap[code]
 	if ok {
 		return ret
