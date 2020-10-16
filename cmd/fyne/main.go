@@ -59,6 +59,7 @@ func loadCommands() {
 		{"env", &env{}},
 		{"package", &packager{}},
 		{"install", &installer{}},
+		{"release", &releaser{}},
 		{"vendor", &vendor{}},
 		{"version", &version{}},
 	}
