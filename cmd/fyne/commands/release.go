@@ -4,6 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
+
+	"fyne.io/fyne/cmd/fyne/internal/mobile"
+	"fyne.io/fyne/cmd/fyne/internal/util"
 )
 
 // Declare conformity to Command interface
@@ -44,9 +49,35 @@ func (r *releaser) Run(params []string) {
 }
 
 func (r *releaser) afterPackage() error {
+	if util.IsAndroid(r.os) {
+		target := mobile.AppOutputName(r.os, r.packager.name)
+		return r.zipAlign(filepath.Join(r.dir, target))
+	}
+
 	return nil
 }
 
 func (r *releaser) beforePackage() error {
+	if util.IsAndroid(r.os) {
+		return util.RequireAndroidSDK()
+	}
+
 	return nil
+}
+
+func (r *releaser) zipAlign(path string) error {
+	buildTools := util.AndroidBuildToolsPath()
+	unaligned := filepath.Join(filepath.Dir(path), "unaligned.apk")
+	err := os.Rename(path, unaligned)
+	if err != nil {
+		return nil
+	}
+
+	cmd := filepath.Join(buildTools, "zipalign")
+	err = exec.Command(cmd, "4", unaligned, path).Run()
+	if err != nil {
+		_ = os.Rename(path, unaligned) // ignore error, return previous
+		return err
+	}
+	return os.Remove(unaligned)
 }
