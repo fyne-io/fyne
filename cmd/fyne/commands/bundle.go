@@ -1,5 +1,5 @@
-// Run a command line helper for various Fyne tools.
-package main
+// Package commands provides functionality for managing fyne packages and the build process
+package commands
 
 import (
 	"flag"
@@ -13,8 +13,8 @@ import (
 	"fyne.io/fyne"
 )
 
-// Declare conformity to command interface
-var _ command = (*bundler)(nil)
+// Declare conformity to Command interface
+var _ Command = (*bundler)(nil)
 
 type bundler struct {
 	name, pkg, out string
@@ -22,31 +22,9 @@ type bundler struct {
 	noheader       bool
 }
 
-func writeResource(file, name string, out *os.File) {
-	res, err := fyne.LoadResourceFromPath(file)
-	if err != nil {
-		fyne.LogError("Unable to load file "+file, err)
-		return
-	}
-
-	fmt.Fprintf(out, "var %s = %#v\n", name, res)
-}
-
-func writeHeader(pkg string, out *os.File) {
-	fmt.Fprintln(out, "// auto-generated")
-	fmt.Fprintln(out)
-	fmt.Fprintln(out, "package", pkg)
-	fmt.Fprintln(out)
-	fmt.Fprintln(out, "import \"fyne.io/fyne\"")
-}
-
-func sanitiseName(file, prefix string) string {
-	titled := strings.Title(file)
-
-	reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
-	name := reg.ReplaceAllString(titled, "")
-
-	return prefix + name
+// NewBundler returns a command that can bundle resources into a Go code.
+func NewBundler() Command {
+	return &bundler{}
 }
 
 // Bundle takes a file (at filepath) and serialises it into Go to be output into
@@ -87,7 +65,7 @@ func (b *bundler) dirBundle(dirpath string, out *os.File) {
 	}
 }
 
-func (b *bundler) addFlags() {
+func (b *bundler) AddFlags() {
 	flag.StringVar(&b.name, "name", "", "The variable name to assign the resource (file mode only)")
 	flag.StringVar(&b.out, "o", "", "Specify an output file instead of printing to standard output")
 	flag.StringVar(&b.pkg, "package", "main", "The package to output in headers (if not appending)")
@@ -95,13 +73,13 @@ func (b *bundler) addFlags() {
 	flag.BoolVar(&b.noheader, "append", false, "Append an existing go file (don't output headers)")
 }
 
-func (b *bundler) printHelp(indent string) {
+func (b *bundler) PrintHelp(indent string) {
 	fmt.Println(indent, "The bundle command embeds static content into your go application.")
 	fmt.Println(indent, "Each resource will have a generated filename unless specified")
 	fmt.Println(indent, "Command usage: fyne bundle [parameters] file|directory")
 }
 
-func (b *bundler) run(args []string) {
+func (b *bundler) Run(args []string) {
 	if len(args) != 1 {
 		fyne.LogError("Missing required file or directory parameter after flags", nil)
 		return
@@ -145,4 +123,31 @@ func (b *bundler) run(args []string) {
 	default:
 		b.doBundle(args[0], outFile)
 	}
+}
+
+func sanitiseName(file, prefix string) string {
+	titled := strings.Title(file)
+
+	reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
+	name := reg.ReplaceAllString(titled, "")
+
+	return prefix + name
+}
+
+func writeHeader(pkg string, out *os.File) {
+	fmt.Fprintln(out, "// auto-generated")
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, "package", pkg)
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, "import \"fyne.io/fyne\"")
+}
+
+func writeResource(file, name string, out *os.File) {
+	res, err := fyne.LoadResourceFromPath(file)
+	if err != nil {
+		fyne.LogError("Unable to load file "+file, err)
+		return
+	}
+
+	fmt.Fprintf(out, "var %s = %#v\n", name, res)
 }

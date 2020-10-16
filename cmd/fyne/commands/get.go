@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"fmt"
@@ -8,14 +8,27 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+
+	"fyne.io/fyne/cmd/fyne/internal/util"
 )
+
+// Declare conformity to Command interface
+var _ Command = (*getter)(nil)
 
 type getter struct {
 	pkg string
 }
 
-// Declare conformity to command interface
-var _ command = (*getter)(nil)
+// NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.
+// It depends on a Go and C compiler installed at this stage and takes a single, package, parameter to identify the app.
+func NewGetter() Command {
+	return &getter{}
+}
+
+func (g *getter) Get(pkg string) error {
+	g.pkg = pkg
+	return g.get()
+}
 
 func goPath() string {
 	cmd := exec.Command("go", "env", "GOPATH")
@@ -40,7 +53,7 @@ func (g *getter) get() error {
 		return err
 	}
 
-	if !exists(path) {
+	if !util.Exists(path) {
 		return errors.New("Package download not found in expected location")
 	}
 
@@ -52,15 +65,15 @@ func (g *getter) get() error {
 	return install.install()
 }
 
-func (g *getter) addFlags() {
+func (g *getter) AddFlags() {
 }
 
-func (g *getter) printHelp(indent string) {
+func (g *getter) PrintHelp(indent string) {
 	fmt.Println(indent, "The get command downloads and installs a Fyne application.")
 	fmt.Println(indent, "A single parameter is required to specify the Go package, as with \"go get\"")
 }
 
-func (g *getter) run(args []string) {
+func (g *getter) Run(args []string) {
 	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, "Missing \"package\" argument to define the application to get")
 		os.Exit(1)

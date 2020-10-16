@@ -13,6 +13,8 @@ import (
 	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/cmd/fyne/commands"
+	"fyne.io/fyne/cmd/fyne/internal/util"
 )
 
 const (
@@ -29,15 +31,15 @@ const (
 )
 
 // Declare conformity to command interface
-var _ command = (*vendor)(nil)
+var _ commands.Command = (*vendor)(nil)
 
 type vendor struct {
 }
 
-func (v *vendor) addFlags() {
+func (v *vendor) AddFlags() {
 }
 
-func (v *vendor) printHelp(indent string) {
+func (v *vendor) PrintHelp(indent string) {
 	fmt.Println(indent, "The vendor command packages an application's dependencies and all the extra")
 	fmt.Println(indent, "files required into it's vendor folder. Your project must have a "+goModFile+" file.")
 	fmt.Println(indent, "Command usage: fyne vendor")
@@ -91,7 +93,7 @@ func recursiveCopy(src, target string) error {
 			continue
 		}
 
-		err = copyFile(srcFile, targetFile)
+		err = util.CopyFile(srcFile, targetFile)
 		if err != nil {
 			return err
 		}
@@ -168,7 +170,7 @@ func (v *vendor) main() {
 	fmt.Println("All set. To test using vendor dependencies: go test ./... -mod=vendor -v -count=1")
 }
 
-func (v *vendor) run(args []string) {
+func (v *vendor) Run(args []string) {
 	if len(args) != 0 {
 		fyne.LogError("Unexpected parameter after flags", nil)
 		return

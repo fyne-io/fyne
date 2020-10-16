@@ -1,70 +1,22 @@
-package main
+package commands
 
 import (
 	"flag"
 	"fmt"
+
+	// import image encodings
 	_ "image/jpeg"
 	_ "image/png"
-	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"fyne.io/fyne"
+	"fyne.io/fyne/cmd/fyne/internal/util"
+
 	"github.com/pkg/errors"
 )
 
-func exists(path string) bool {
-	_, err := os.Stat(path)
-	if err != nil {
-		return !os.IsNotExist(err)
-	}
-	return true
-}
-
-func ensureSubDir(parent, name string) string {
-	path := filepath.Join(parent, name)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err := os.Mkdir(path, os.ModePerm)
-		if err != nil {
-			fyne.LogError("Failed to create dirrectory", err)
-		}
-	}
-	return path
-}
-
-func copyFile(src, tgt string) error {
-	return copyFileMode(src, tgt, 0644)
-}
-
-func copyExeFile(src, tgt string) error {
-	return copyFileMode(src, tgt, 0755)
-}
-
-func copyFileMode(src, tgt string, perm os.FileMode) error {
-	_, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-
-	source, err := os.Open(filepath.Clean(src))
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-
-	target, err := os.OpenFile(tgt, os.O_RDWR|os.O_CREATE, perm)
-	if err != nil {
-		return err
-	}
-	defer target.Close()
-
-	_, err = io.Copy(target, source)
-	return err
-}
-
-// Declare conformity to command interface
-var _ command = (*packager)(nil)
+// Declare conformity to Command interface
+var _ Command = (*packager)(nil)
 
 type packager struct {
 	name, srcDir, dir, exe, icon string
@@ -72,7 +24,12 @@ type packager struct {
 	install, release             bool
 }
 
-func (p *packager) addFlags() {
+// NewPackager returns a packager command that can wrap executables into full GUI app packages.
+func NewPackager() Command {
+	return &packager{}
+}
+
+func (p *packager) AddFlags() {
 	flag.StringVar(&p.os, "os", "", "The operating system to target (android, android/arm, android/arm64, android/amd64, android/386, darwin, freebsd, ios, linux, netbsd, openbsd, windows)")
 	flag.StringVar(&p.exe, "executable", "", "The path to the executable, default is the current dir main binary")
 	flag.StringVar(&p.srcDir, "sourceDir", "", "The directory to package, if executable is not set")
@@ -82,7 +39,7 @@ func (p *packager) addFlags() {
 	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
 }
 
-func (*packager) printHelp(indent string) {
+func (*packager) PrintHelp(indent string) {
 	fmt.Println(indent, "The package command prepares an application for distribution.")
 	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
 	fmt.Println(indent, "Command usage: fyne package [parameters]")
@@ -98,7 +55,7 @@ func (p *packager) buildPackage() error {
 	return b.build()
 }
 
-func (p *packager) run(_ []string) {
+func (p *packager) Run(_ []string) {
 	err := p.validate()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
@@ -144,7 +101,7 @@ func (p *packager) validate() error {
 	if p.icon == "" || p.icon == "Icon.png" {
 		p.icon = filepath.Join(p.srcDir, "Icon.png")
 	}
-	if !exists(p.icon) {
+	if !util.Exists(p.icon) {
 		return errors.New("Missing application icon at \"" + p.icon + "\"")
 	}
 
@@ -161,12 +118,12 @@ func (p *packager) validate() error {
 }
 
 func (p *packager) doPackage() error {
-	if !exists(p.exe) && !p.isMobile() {
+	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
 		err := p.buildPackage()
 		if err != nil {
 			return errors.Wrap(err, "Error building application")
 		}
-		if !exists(p.exe) {
+		if !util.Exists(p.exe) {
 			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
 		}
 	}
@@ -185,8 +142,4 @@ func (p *packager) doPackage() error {
 	default:
 		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
-}
-
-func (p *packager) isMobile() bool {
-	return p.os == "ios" || strings.HasPrefix(p.os, "android")
 }

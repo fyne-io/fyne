@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/cmd/fyne/commands"
 
 	"github.com/lucor/goinfo"
 	"github.com/lucor/goinfo/format"
@@ -15,16 +16,16 @@ const (
 	fyneModule = "fyne.io/fyne"
 )
 
-// Declare conformity to command interface
-var _ command = (*env)(nil)
+// Declare conformity to Command interface
+var _ commands.Command = (*env)(nil)
 
 type env struct {
 }
 
-func (v *env) addFlags() {
+func (v *env) AddFlags() {
 }
 
-func (v *env) printHelp(indent string) {
+func (v *env) PrintHelp(indent string) {
 	fmt.Println(indent, "The env command prints the Fyne module and environment information")
 	fmt.Println(indent, "Command usage: fyne env")
 }
@@ -49,7 +50,7 @@ func (v *env) main() {
 	}
 }
 
-func (v *env) run(args []string) {
+func (v *env) Run(args []string) {
 	if len(args) != 0 {
 		fyne.LogError("Unexpected parameter after flags", nil)
 		return

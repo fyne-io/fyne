@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"image"
@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/cmd/fyne/internal/templates"
+	"fyne.io/fyne/cmd/fyne/internal/util"
+
 	"github.com/jackmordaunt/icns"
 	"github.com/pkg/errors"
 )
@@ -16,10 +18,10 @@ type darwinData struct {
 }
 
 func (p *packager) packageDarwin() error {
-	appDir := ensureSubDir(p.dir, p.name+".app")
+	appDir := util.EnsureSubDir(p.dir, p.name+".app")
 	exeName := filepath.Base(p.exe)
 
-	contentsDir := ensureSubDir(appDir, "Contents")
+	contentsDir := util.EnsureSubDir(appDir, "Contents")
 	info := filepath.Join(contentsDir, "Info.plist")
 	infoFile, _ := os.Create(info)
 
@@ -29,14 +31,14 @@ func (p *packager) packageDarwin() error {
 		return errors.Wrap(err, "Failed to write plist template")
 	}
 
-	macOSDir := ensureSubDir(contentsDir, "MacOS")
+	macOSDir := util.EnsureSubDir(contentsDir, "MacOS")
 	binName := filepath.Join(macOSDir, exeName)
-	err = copyExeFile(p.exe, binName)
+	err = util.CopyExeFile(p.exe, binName)
 	if err != nil {
 		return errors.Wrap(err, "Failed to copy exe file")
 	}
 
-	resDir := ensureSubDir(contentsDir, "Resources")
+	resDir := util.EnsureSubDir(contentsDir, "Resources")
 	icnsPath := filepath.Join(resDir, "icon.icns")
 
 	img, err := os.Open(p.icon)

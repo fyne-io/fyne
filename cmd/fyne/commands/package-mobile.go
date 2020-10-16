@@ -1,9 +1,10 @@
-package main
+package commands
 
 import (
 	"path/filepath"
 
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
+	"fyne.io/fyne/cmd/fyne/internal/util"
 )
 
 func (p *packager) packageAndroid(arch string) error {
@@ -18,5 +19,5 @@ func (p *packager) packageIOS() error {
 
 	appDir := filepath.Join(p.dir, p.name+".app")
 	iconPath := filepath.Join(appDir, "Icon.png")
-	return copyFile(p.icon, iconPath)
+	return util.CopyFile(p.icon, iconPath)
 }
