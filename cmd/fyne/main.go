@@ -7,44 +7,24 @@ import (
 	"os"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/cmd/fyne/commands"
 )
 
-var commands []idCommandPair
-var provider command
+var commandList []idCommandPair
+var provider commands.Command
 
 type idCommandPair struct {
 	id       string
-	provider command
+	provider commands.Command
 }
 
-func printUsage() {
-	fmt.Println("Usage: fyne [command] [parameters], where command is one of:")
-	fmt.Print("  ")
-
-	i := 0
-	for _, c := range commands {
-		fmt.Print(c.id)
-
-		if i < len(commands)-1 {
-			fmt.Print(", ")
-		}
-		i++
-	}
-
-	fmt.Println(" or help")
-	fmt.Println()
-
-	if provider != nil {
-		provider.printHelp(" ")
-	} else {
-		for _, c := range commands {
-			fmt.Printf("  %s\n", c.id)
-			c.provider.printHelp("   ")
-			fmt.Printf("    For more information run \"fyne help %s\"\n", c.id)
-			fmt.Println("")
+func getCommand(id string) commands.Command {
+	for _, c := range commandList {
+		if c.id == id {
+			return c.provider
 		}
 	}
-	flag.PrintDefaults()
+	return nil
 }
 
 func help() {
@@ -53,25 +33,16 @@ func help() {
 }
 
 func loadCommands() {
-	commands = []idCommandPair{
-		{"bundle", &bundler{}},
-		{"get", &getter{}},
+	commandList = []idCommandPair{
+		{"bundle", commands.NewBundler()},
+		{"get", commands.NewGetter()},
 		{"env", &env{}},
-		{"package", &packager{}},
-		{"install", &installer{}},
-		{"release", &releaser{}},
+		{"package", commands.NewPackager()},
+		{"install", commands.NewInstaller()},
+		{"release", commands.NewReleaser()},
 		{"vendor", &vendor{}},
 		{"version", &version{}},
 	}
-}
-
-func getCommand(id string) command {
-	for _, c := range commands {
-		if c.id == id {
-			return c.provider
-		}
-	}
-	return nil
 }
 
 func main() {
@@ -91,7 +62,7 @@ func main() {
 	if command == "help" {
 		if len(args) >= 2 {
 			if provider = getCommand(args[1]); provider != nil {
-				provider.addFlags()
+				provider.AddFlags()
 			}
 		}
 		help()
@@ -102,7 +73,7 @@ func main() {
 			return
 		}
 
-		provider.addFlags()
+		provider.AddFlags()
 
 		// then parse the remaining args
 		err := flag.CommandLine.Parse(args[1:])
@@ -111,6 +82,36 @@ func main() {
 			return
 		}
 
-		provider.run(flag.Args())
+		provider.Run(flag.Args())
 	}
+}
+
+func printUsage() {
+	fmt.Println("Usage: fyne [command] [parameters], where command is one of:")
+	fmt.Print("  ")
+
+	i := 0
+	for _, c := range commandList {
+		fmt.Print(c.id)
+
+		if i < len(commandList)-1 {
+			fmt.Print(", ")
+		}
+		i++
+	}
+
+	fmt.Println(" or help")
+	fmt.Println()
+
+	if provider != nil {
+		provider.PrintHelp(" ")
+	} else {
+		for _, c := range commandList {
+			fmt.Printf("  %s\n", c.id)
+			c.provider.PrintHelp("   ")
+			fmt.Printf("    For more information run \"fyne help %s\"\n", c.id)
+			fmt.Println("")
+		}
+	}
+	flag.PrintDefaults()
 }

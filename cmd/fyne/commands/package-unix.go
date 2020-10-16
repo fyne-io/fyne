@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"os"
@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/cmd/fyne/internal/templates"
+	"fyne.io/fyne/cmd/fyne/internal/util"
+
 	"github.com/pkg/errors"
 )
 
@@ -24,29 +26,29 @@ func (p *packager) packageUNIX() error {
 	}
 
 	if _, err := os.Stat(filepath.Join("/", "usr", "local")); os.IsNotExist(err) {
-		prefixDir = ensureSubDir(ensureSubDir(p.dir, tempDir), "usr")
+		prefixDir = util.EnsureSubDir(util.EnsureSubDir(p.dir, tempDir), "usr")
 		local = ""
 	} else {
-		prefixDir = ensureSubDir(ensureSubDir(ensureSubDir(p.dir, tempDir), "usr"), "local")
+		prefixDir = util.EnsureSubDir(util.EnsureSubDir(util.EnsureSubDir(p.dir, tempDir), "usr"), "local")
 	}
 
-	shareDir := ensureSubDir(prefixDir, "share")
+	shareDir := util.EnsureSubDir(prefixDir, "share")
 
-	binDir := ensureSubDir(prefixDir, "bin")
+	binDir := util.EnsureSubDir(prefixDir, "bin")
 	binName := filepath.Join(binDir, filepath.Base(p.exe))
-	err := copyExeFile(p.exe, binName)
+	err := util.CopyExeFile(p.exe, binName)
 	if err != nil {
 		return errors.Wrap(err, "Failed to copy application binary file")
 	}
 
-	iconDir := ensureSubDir(shareDir, "pixmaps")
+	iconDir := util.EnsureSubDir(shareDir, "pixmaps")
 	iconPath := filepath.Join(iconDir, p.name+filepath.Ext(p.icon))
-	err = copyFile(p.icon, iconPath)
+	err = util.CopyFile(p.icon, iconPath)
 	if err != nil {
 		return errors.Wrap(err, "Failed to copy icon")
 	}
 
-	appsDir := ensureSubDir(shareDir, "applications")
+	appsDir := util.EnsureSubDir(shareDir, "applications")
 	desktop := filepath.Join(appsDir, p.name+".desktop")
 	deskFile, _ := os.Create(desktop)
 

@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"errors"
@@ -13,35 +13,49 @@ import (
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
 )
 
-// Declare conformity to command interface
-var _ command = (*installer)(nil)
+// Declare conformity to Command interface
+var _ Command = (*installer)(nil)
 
 type installer struct {
 	installDir, srcDir, icon, os, appID string
 	packager                            *packager
 }
 
-func (i *installer) addFlags() {
+// NewInstaller returns an install command that can install locally built Fyne apps.
+func NewInstaller() Command {
+	return &installer{}
+}
+
+func (i *installer) AddFlags() {
 	flag.StringVar(&i.os, "os", "", "The mobile platform to target (android, android/arm, android/arm64, android/amd64, android/386, ios)")
 	flag.StringVar(&i.installDir, "installDir", "", "A specific location to install to, rather than the OS default")
 	flag.StringVar(&i.icon, "icon", "Icon.png", "The name of the application icon file")
 	flag.StringVar(&i.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
 }
 
-func (i *installer) printHelp(indent string) {
+func (i *installer) PrintHelp(indent string) {
 	fmt.Println(indent, "The install command packages an application for the current platform and copies it")
 	fmt.Println(indent, "into the system location for applications. This can be overridden with installDir")
 	fmt.Println(indent, "Command usage: fyne install [parameters]")
 }
 
-func (i *installer) validate() error {
-	os := i.os
-	if os == "" {
-		os = targetOS()
+func (i *installer) Run(args []string) {
+	if len(args) != 0 {
+		fyne.LogError("Unexpected parameter after flags", nil)
+		return
 	}
-	i.packager = &packager{appID: i.appID, os: os, install: true, srcDir: i.srcDir}
-	i.packager.icon = i.icon
-	return i.packager.validate()
+
+	err := i.validate()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
+	}
+
+	err = i.install()
+	if err != nil {
+		fyne.LogError("Unable to install application", err)
+		os.Exit(1)
+	}
 }
 
 func (i *installer) install() error {
@@ -79,19 +93,6 @@ func (i *installer) install() error {
 	return p.doPackage()
 }
 
-func (i *installer) installIOS() error {
-	target := mobile.AppOutputName(i.os, i.packager.name)
-	_, err := os.Stat(target)
-	if os.IsNotExist(err) {
-		err := i.packager.doPackage()
-		if err != nil {
-			return nil
-		}
-	}
-
-	return i.runMobileInstall("ios-deploy", target, "--bundle")
-}
-
 func (i *installer) installAndroid() error {
 	target := mobile.AppOutputName(i.os, i.packager.name)
 
@@ -106,23 +107,17 @@ func (i *installer) installAndroid() error {
 	return i.runMobileInstall("adb", target, "install")
 }
 
-func (i *installer) run(args []string) {
-	if len(args) != 0 {
-		fyne.LogError("Unexpected parameter after flags", nil)
-		return
+func (i *installer) installIOS() error {
+	target := mobile.AppOutputName(i.os, i.packager.name)
+	_, err := os.Stat(target)
+	if os.IsNotExist(err) {
+		err := i.packager.doPackage()
+		if err != nil {
+			return nil
+		}
 	}
 
-	err := i.validate()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
-	}
-
-	err = i.install()
-	if err != nil {
-		fyne.LogError("Unable to install application", err)
-		os.Exit(1)
-	}
+	return i.runMobileInstall("ios-deploy", target, "--bundle")
 }
 
 func (i *installer) runMobileInstall(tool, target string, args ...string) error {
@@ -135,4 +130,14 @@ func (i *installer) runMobileInstall(tool, target string, args ...string) error 
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
+}
+
+func (i *installer) validate() error {
+	os := i.os
+	if os == "" {
+		os = targetOS()
+	}
+	i.packager = &packager{appID: i.appID, os: os, install: true, srcDir: i.srcDir}
+	i.packager.icon = i.icon
+	return i.packager.validate()
 }
