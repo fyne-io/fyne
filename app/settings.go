@@ -39,6 +39,10 @@ type settings struct {
 	schema SettingsSchema
 }
 
+func (a *settings) BuildType() fyne.BuildType {
+	return buildMode
+}
+
 func (s *settings) PrimaryColor() string {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()

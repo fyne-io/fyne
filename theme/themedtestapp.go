@@ -12,6 +12,10 @@ type themedApp struct {
 	theme fyne.Theme
 }
 
+func (a *themedApp) BuildType() fyne.BuildType {
+	return fyne.StandardBuild
+}
+
 func (t *themedApp) NewWindow(title string) fyne.Window {
 	return nil
 }
