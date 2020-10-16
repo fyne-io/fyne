@@ -13,32 +13,38 @@ import (
 )
 
 // Declare conformity to Command interface
-var _ Command = (*getter)(nil)
+var _ Command = (*Getter)(nil)
 
-type getter struct {
+// Getter is the command that can handle downloading and installing Fyne apps to the current platform.
+type Getter struct {
 	pkg string
 }
 
 // NewGetter returns a command that can handle the download and install of GUI apps built using Fyne.
 // It depends on a Go and C compiler installed at this stage and takes a single, package, parameter to identify the app.
-func NewGetter() Command {
-	return &getter{}
+func NewGetter() *Getter {
+	return &Getter{}
 }
 
-func (g *getter) Get(pkg string) error {
+// Get automates the download and install of a named GUI app package.
+func (g *Getter) Get(pkg string) error {
 	g.pkg = pkg
 	return g.get()
 }
 
-func (g *getter) AddFlags() {
+// AddFlags adds available flags to the current flags parser
+func (g *Getter) AddFlags() {
 }
 
-func (g *getter) PrintHelp(indent string) {
+// PrintHelp prints help for this command when used in a command-line context
+func (g *Getter) PrintHelp(indent string) {
 	fmt.Println(indent, "The get command downloads and installs a Fyne application.")
 	fmt.Println(indent, "A single parameter is required to specify the Go package, as with \"go get\"")
 }
 
-func (g *getter) Run(args []string) {
+// Run is the command-line version of the Get(pkg) command, the first of the passed arguments will be used
+// as the package to get.
+func (g *Getter) Run(args []string) {
 	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, "Missing \"package\" argument to define the application to get")
 		os.Exit(1)
@@ -52,7 +58,7 @@ func (g *getter) Run(args []string) {
 	}
 }
 
-func (g *getter) get() error {
+func (g *Getter) get() error {
 	path := filepath.Join(goPath(), "src", g.pkg)
 
 	cmd := exec.Command("go", "get", "-u", g.pkg)
