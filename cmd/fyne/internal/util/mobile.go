@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// AndroidBuildToolsPath tries to find the location of the "build-tools" directory.
+// This depends on ANDROID_HOME variable, so you should call RequireAndroidSDK() first.
 func AndroidBuildToolsPath() string {
 	env := os.Getenv("ANDROID_HOME")
 	dir := filepath.Join(env, "build-tools")
@@ -44,6 +46,8 @@ func IsMobile(os string) bool {
 	return os == "ios" || strings.HasPrefix(os, "android")
 }
 
+// RequireAndroidSDK will return an error if it cannot establish the location of a valid Android SDK installation.
+// This is currently deduced using ANDROID_HOME environment variable.
 func RequireAndroidSDK() error {
 	if env, ok := os.LookupEnv("ANDROID_HOME"); !ok || env == "" {
 		return fmt.Errorf("could not find android tools, missing ANDROID_HOME")
