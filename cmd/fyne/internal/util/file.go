@@ -17,6 +17,16 @@ func Exists(path string) bool {
 	return true
 }
 
+// CopyFile copies the content of a regular file, source, into target path.
+func CopyFile(source, target string) error {
+	return copyFileMode(source, target, 0644)
+}
+
+// CopyExeFile copies the content of an executable file, source, into target path.
+func CopyExeFile(src, tgt string) error {
+	return copyFileMode(src, tgt, 0755)
+}
+
 // EnsureSubDir will make sure a named directory exists within the parent - creating it if not.
 func EnsureSubDir(parent, name string) string {
 	path := filepath.Join(parent, name)
@@ -27,16 +37,6 @@ func EnsureSubDir(parent, name string) string {
 		}
 	}
 	return path
-}
-
-// CopyFile copies the content of a regular file, source, into target path.
-func CopyFile(source, target string) error {
-	return copyFileMode(source, target, 0644)
-}
-
-// CopyExeFile copies the content of an executable file, source, into target path.
-func CopyExeFile(src, tgt string) error {
-	return copyFileMode(src, tgt, 0755)
 }
 
 func copyFileMode(src, tgt string, perm os.FileMode) error {

@@ -30,6 +30,15 @@ func (v *env) PrintHelp(indent string) {
 	fmt.Println(indent, "Command usage: fyne env")
 }
 
+func (v *env) Run(args []string) {
+	if len(args) != 0 {
+		fyne.LogError("Unexpected parameter after flags", nil)
+		return
+	}
+
+	v.main()
+}
+
 func (v *env) main() {
 	workDir, err := os.Getwd()
 	if err != nil {
@@ -50,23 +59,9 @@ func (v *env) main() {
 	}
 }
 
-func (v *env) Run(args []string) {
-	if len(args) != 0 {
-		fyne.LogError("Unexpected parameter after flags", nil)
-		return
-	}
-
-	v.main()
-}
-
 // fyneReport defines a custom report for fyne
 type fyneReport struct {
 	*report.GoMod
-}
-
-// Summary returns the summary for the fyneReport
-func (r *fyneReport) Summary() string {
-	return "Fyne info"
 }
 
 // Info returns the collected info
@@ -85,4 +80,9 @@ func (r *fyneReport) Info() (goinfo.Info, error) {
 	}
 	info["cli_version"] = cliVersion
 	return info, nil
+}
+
+// Summary returns the summary for the fyneReport
+func (r *fyneReport) Summary() string {
+	return "Fyne info"
 }

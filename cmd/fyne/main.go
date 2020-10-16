@@ -18,34 +18,13 @@ type idCommandPair struct {
 	provider commands.Command
 }
 
-func printUsage() {
-	fmt.Println("Usage: fyne [command] [parameters], where command is one of:")
-	fmt.Print("  ")
-
-	i := 0
+func getCommand(id string) commands.Command {
 	for _, c := range commandList {
-		fmt.Print(c.id)
-
-		if i < len(commandList)-1 {
-			fmt.Print(", ")
-		}
-		i++
-	}
-
-	fmt.Println(" or help")
-	fmt.Println()
-
-	if provider != nil {
-		provider.PrintHelp(" ")
-	} else {
-		for _, c := range commandList {
-			fmt.Printf("  %s\n", c.id)
-			c.provider.PrintHelp("   ")
-			fmt.Printf("    For more information run \"fyne help %s\"\n", c.id)
-			fmt.Println("")
+		if c.id == id {
+			return c.provider
 		}
 	}
-	flag.PrintDefaults()
+	return nil
 }
 
 func help() {
@@ -63,15 +42,6 @@ func loadCommands() {
 		{"vendor", &vendor{}},
 		{"version", &version{}},
 	}
-}
-
-func getCommand(id string) commands.Command {
-	for _, c := range commandList {
-		if c.id == id {
-			return c.provider
-		}
-	}
-	return nil
 }
 
 func main() {
@@ -113,4 +83,34 @@ func main() {
 
 		provider.Run(flag.Args())
 	}
+}
+
+func printUsage() {
+	fmt.Println("Usage: fyne [command] [parameters], where command is one of:")
+	fmt.Print("  ")
+
+	i := 0
+	for _, c := range commandList {
+		fmt.Print(c.id)
+
+		if i < len(commandList)-1 {
+			fmt.Print(", ")
+		}
+		i++
+	}
+
+	fmt.Println(" or help")
+	fmt.Println()
+
+	if provider != nil {
+		provider.PrintHelp(" ")
+	} else {
+		for _, c := range commandList {
+			fmt.Printf("  %s\n", c.id)
+			c.provider.PrintHelp("   ")
+			fmt.Printf("    For more information run \"fyne help %s\"\n", c.id)
+			fmt.Println("")
+		}
+	}
+	flag.PrintDefaults()
 }

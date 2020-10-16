@@ -30,16 +30,26 @@ func (g *getter) Get(pkg string) error {
 	return g.get()
 }
 
-func goPath() string {
-	cmd := exec.Command("go", "env", "GOPATH")
-	out, err := cmd.CombinedOutput()
+func (g *getter) AddFlags() {
+}
 
-	if err != nil {
-		home, _ := os.UserHomeDir()
-		return filepath.Join(home, "go")
+func (g *getter) PrintHelp(indent string) {
+	fmt.Println(indent, "The get command downloads and installs a Fyne application.")
+	fmt.Println(indent, "A single parameter is required to specify the Go package, as with \"go get\"")
+}
+
+func (g *getter) Run(args []string) {
+	if len(args) != 1 {
+		fmt.Fprintln(os.Stderr, "Missing \"package\" argument to define the application to get")
+		os.Exit(1)
 	}
+	g.pkg = args[0]
 
-	return strings.TrimSpace(string(out[0 : len(out)-1]))
+	err := g.get()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
+	}
 }
 
 func (g *getter) get() error {
@@ -65,24 +75,14 @@ func (g *getter) get() error {
 	return install.install()
 }
 
-func (g *getter) AddFlags() {
-}
+func goPath() string {
+	cmd := exec.Command("go", "env", "GOPATH")
+	out, err := cmd.CombinedOutput()
 
-func (g *getter) PrintHelp(indent string) {
-	fmt.Println(indent, "The get command downloads and installs a Fyne application.")
-	fmt.Println(indent, "A single parameter is required to specify the Go package, as with \"go get\"")
-}
-
-func (g *getter) Run(args []string) {
-	if len(args) != 1 {
-		fmt.Fprintln(os.Stderr, "Missing \"package\" argument to define the application to get")
-		os.Exit(1)
-	}
-	g.pkg = args[0]
-
-	err := g.get()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
+		home, _ := os.UserHomeDir()
+		return filepath.Join(home, "go")
 	}
+
+	return strings.TrimSpace(string(out[0 : len(out)-1]))
 }

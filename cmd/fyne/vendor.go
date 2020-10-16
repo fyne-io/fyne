@@ -45,6 +45,74 @@ func (v *vendor) PrintHelp(indent string) {
 	fmt.Println(indent, "Command usage: fyne vendor")
 }
 
+func (v *vendor) Run(args []string) {
+	if len(args) != 0 {
+		fyne.LogError("Unexpected parameter after flags", nil)
+		return
+	}
+
+	v.main()
+}
+
+func (v *vendor) main() {
+	wd, _ := os.Getwd()
+
+	if _, err := os.Stat(filepath.Join(wd, goModFile)); os.IsNotExist(err) {
+		fmt.Println("This program must be invoked in the project root")
+		os.Exit(1)
+	}
+
+	fmt.Println("Add missing and remove unused modules using 'go mod tidy'")
+	cmd := exec.Command("go", "mod", "tidy", "-v")
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Reset vendor content using 'go mod vendor'")
+	cmd = exec.Command("go", "mod", "vendor", "-v")
+	err = cmd.Run()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Parsing %s to detect dependency module path for GLFW\n", goModVendorFile)
+	f, err := os.Open(filepath.Join(wd, goModVendorFile)) // #nosec
+	if err != nil {
+		fmt.Printf("Cannot open %s: %v\n", goModVendorFile, err)
+		os.Exit(1)
+	}
+	defer f.Close()
+
+	glwfModPath, glfwModDest, err := cacheModPath(f)
+	if err != nil {
+		fmt.Printf("Cannot read %s: %v\n", goModVendorFile, err)
+		os.Exit(1)
+	}
+	if glwfModPath == "" {
+		fmt.Printf("Cannot find GLFW module in %s\n", goModVendorFile)
+		os.Exit(1)
+	}
+	fmt.Printf("Package module path: %s\n", glwfModPath)
+
+	// glwfModSrc is the path containing glfw c source code
+	// $GOPATH/pkg/mod/github.com/go-gl/glfw@v...../v3.3/glfw/glfw
+	glwfModSrc := filepath.Join(glwfModPath, glfwModSrcDir)
+	// glwfModTarget is the path under the vendor folder where glfw c source code will be copied
+	// vendor/github.com/go-gl/v3.3/glfw/glfw
+	glwfModTarget := filepath.Join(wd, "vendor", glfwModDest, glfwModSrcDir)
+	fmt.Printf("Copying glwf c source code: %s -> %s\n", glwfModSrc, glwfModTarget)
+	err = recursiveCopy(glwfModSrc, glwfModTarget)
+	if err != nil {
+		fmt.Printf("Cannot copy glfw c source code: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("All set. To test using vendor dependencies: go test ./... -mod=vendor -v -count=1")
+}
+
 // cacheModPath returns the cache path and target directory for the GLFW module
 func cacheModPath(r io.Reader) (string, string, error) {
 	scanner := bufio.NewScanner(r)
@@ -109,72 +177,4 @@ func ensureDir(dir string) error {
 		}
 	}
 	return nil
-}
-
-func (v *vendor) main() {
-	wd, _ := os.Getwd()
-
-	if _, err := os.Stat(filepath.Join(wd, goModFile)); os.IsNotExist(err) {
-		fmt.Println("This program must be invoked in the project root")
-		os.Exit(1)
-	}
-
-	fmt.Println("Add missing and remove unused modules using 'go mod tidy'")
-	cmd := exec.Command("go", "mod", "tidy", "-v")
-	err := cmd.Run()
-	if err != nil {
-		fmt.Printf("%v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("Reset vendor content using 'go mod vendor'")
-	cmd = exec.Command("go", "mod", "vendor", "-v")
-	err = cmd.Run()
-	if err != nil {
-		fmt.Printf("%v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("Parsing %s to detect dependency module path for GLFW\n", goModVendorFile)
-	f, err := os.Open(filepath.Join(wd, goModVendorFile)) // #nosec
-	if err != nil {
-		fmt.Printf("Cannot open %s: %v\n", goModVendorFile, err)
-		os.Exit(1)
-	}
-	defer f.Close()
-
-	glwfModPath, glfwModDest, err := cacheModPath(f)
-	if err != nil {
-		fmt.Printf("Cannot read %s: %v\n", goModVendorFile, err)
-		os.Exit(1)
-	}
-	if glwfModPath == "" {
-		fmt.Printf("Cannot find GLFW module in %s\n", goModVendorFile)
-		os.Exit(1)
-	}
-	fmt.Printf("Package module path: %s\n", glwfModPath)
-
-	// glwfModSrc is the path containing glfw c source code
-	// $GOPATH/pkg/mod/github.com/go-gl/glfw@v...../v3.3/glfw/glfw
-	glwfModSrc := filepath.Join(glwfModPath, glfwModSrcDir)
-	// glwfModTarget is the path under the vendor folder where glfw c source code will be copied
-	// vendor/github.com/go-gl/v3.3/glfw/glfw
-	glwfModTarget := filepath.Join(wd, "vendor", glfwModDest, glfwModSrcDir)
-	fmt.Printf("Copying glwf c source code: %s -> %s\n", glwfModSrc, glwfModTarget)
-	err = recursiveCopy(glwfModSrc, glwfModTarget)
-	if err != nil {
-		fmt.Printf("Cannot copy glfw c source code: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("All set. To test using vendor dependencies: go test ./... -mod=vendor -v -count=1")
-}
-
-func (v *vendor) Run(args []string) {
-	if len(args) != 0 {
-		fyne.LogError("Unexpected parameter after flags", nil)
-		return
-	}
-
-	v.main()
 }

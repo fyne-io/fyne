@@ -45,16 +45,6 @@ func (*packager) PrintHelp(indent string) {
 	fmt.Println(indent, "Command usage: fyne package [parameters]")
 }
 
-func (p *packager) buildPackage() error {
-	b := &builder{
-		os:      p.os,
-		srcdir:  p.srcDir,
-		release: p.release,
-	}
-
-	return b.build()
-}
-
 func (p *packager) Run(_ []string) {
 	err := p.validate()
 	if err != nil {
@@ -66,6 +56,43 @@ func (p *packager) Run(_ []string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
+	}
+}
+
+func (p *packager) buildPackage() error {
+	b := &builder{
+		os:      p.os,
+		srcdir:  p.srcDir,
+		release: p.release,
+	}
+
+	return b.build()
+}
+
+func (p *packager) doPackage() error {
+	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
+		err := p.buildPackage()
+		if err != nil {
+			return errors.Wrap(err, "Error building application")
+		}
+		if !util.Exists(p.exe) {
+			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
+		}
+	}
+
+	switch p.os {
+	case "darwin":
+		return p.packageDarwin()
+	case "linux", "openbsd", "freebsd", "netbsd":
+		return p.packageUNIX()
+	case "windows":
+		return p.packageWindows()
+	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
+		return p.packageAndroid(p.os)
+	case "ios":
+		return p.packageIOS()
+	default:
+		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
 	}
 }
 
@@ -115,31 +142,4 @@ func (p *packager) validate() error {
 	}
 
 	return nil
-}
-
-func (p *packager) doPackage() error {
-	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
-		err := p.buildPackage()
-		if err != nil {
-			return errors.Wrap(err, "Error building application")
-		}
-		if !util.Exists(p.exe) {
-			return fmt.Errorf("unable to build directory to expected executable, %s", p.exe)
-		}
-	}
-
-	switch p.os {
-	case "darwin":
-		return p.packageDarwin()
-	case "linux", "openbsd", "freebsd", "netbsd":
-		return p.packageUNIX()
-	case "windows":
-		return p.packageWindows()
-	case "android/arm", "android/arm64", "android/amd64", "android/386", "android":
-		return p.packageAndroid(p.os)
-	case "ios":
-		return p.packageIOS()
-	default:
-		return fmt.Errorf("unsupported target operating system \"%s\"", p.os)
-	}
 }

@@ -27,44 +27,6 @@ func NewBundler() Command {
 	return &bundler{}
 }
 
-// Bundle takes a file (at filepath) and serialises it into Go to be output into
-// a generated bundle file. The go file will be part of the specified package
-// (pkg) and the data will be assigned to variable named "name". If you are
-// appending an existing resource file then pass true to noheader as the headers
-// should only be output once per file.
-func (b *bundler) doBundle(filepath string, out *os.File) {
-	if !b.noheader {
-		writeHeader(b.pkg, out)
-	}
-	fmt.Fprintln(out)
-
-	if b.name == "" {
-		b.name = sanitiseName(path.Base(filepath), b.prefix)
-	}
-	writeResource(filepath, b.name, out)
-}
-
-func (b *bundler) dirBundle(dirpath string, out *os.File) {
-	files, err := ioutil.ReadDir(dirpath)
-	if err != nil {
-		fyne.LogError("Error reading specified directory", err)
-		return
-	}
-
-	for i, file := range files {
-		filename := file.Name()
-		if path.Ext(filename) == ".go" {
-			continue
-		}
-
-		b.name = ""
-		b.doBundle(path.Join(dirpath, filename), out)
-		if i == 0 { // only show header on first iteration
-			b.noheader = true
-		}
-	}
-}
-
 func (b *bundler) AddFlags() {
 	flag.StringVar(&b.name, "name", "", "The variable name to assign the resource (file mode only)")
 	flag.StringVar(&b.out, "o", "", "Specify an output file instead of printing to standard output")
@@ -123,6 +85,44 @@ func (b *bundler) Run(args []string) {
 	default:
 		b.doBundle(args[0], outFile)
 	}
+}
+
+func (b *bundler) dirBundle(dirpath string, out *os.File) {
+	files, err := ioutil.ReadDir(dirpath)
+	if err != nil {
+		fyne.LogError("Error reading specified directory", err)
+		return
+	}
+
+	for i, file := range files {
+		filename := file.Name()
+		if path.Ext(filename) == ".go" {
+			continue
+		}
+
+		b.name = ""
+		b.doBundle(path.Join(dirpath, filename), out)
+		if i == 0 { // only show header on first iteration
+			b.noheader = true
+		}
+	}
+}
+
+// Bundle takes a file (at filepath) and serialises it into Go to be output into
+// a generated bundle file. The go file will be part of the specified package
+// (pkg) and the data will be assigned to variable named "name". If you are
+// appending an existing resource file then pass true to noheader as the headers
+// should only be output once per file.
+func (b *bundler) doBundle(filepath string, out *os.File) {
+	if !b.noheader {
+		writeHeader(b.pkg, out)
+	}
+	fmt.Fprintln(out)
+
+	if b.name == "" {
+		b.name = sanitiseName(path.Base(filepath), b.prefix)
+	}
+	writeResource(filepath, b.name, out)
 }
 
 func sanitiseName(file, prefix string) string {

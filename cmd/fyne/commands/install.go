@@ -39,14 +39,23 @@ func (i *installer) PrintHelp(indent string) {
 	fmt.Println(indent, "Command usage: fyne install [parameters]")
 }
 
-func (i *installer) validate() error {
-	os := i.os
-	if os == "" {
-		os = targetOS()
+func (i *installer) Run(args []string) {
+	if len(args) != 0 {
+		fyne.LogError("Unexpected parameter after flags", nil)
+		return
 	}
-	i.packager = &packager{appID: i.appID, os: os, install: true, srcDir: i.srcDir}
-	i.packager.icon = i.icon
-	return i.packager.validate()
+
+	err := i.validate()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
+	}
+
+	err = i.install()
+	if err != nil {
+		fyne.LogError("Unable to install application", err)
+		os.Exit(1)
+	}
 }
 
 func (i *installer) install() error {
@@ -84,19 +93,6 @@ func (i *installer) install() error {
 	return p.doPackage()
 }
 
-func (i *installer) installIOS() error {
-	target := mobile.AppOutputName(i.os, i.packager.name)
-	_, err := os.Stat(target)
-	if os.IsNotExist(err) {
-		err := i.packager.doPackage()
-		if err != nil {
-			return nil
-		}
-	}
-
-	return i.runMobileInstall("ios-deploy", target, "--bundle")
-}
-
 func (i *installer) installAndroid() error {
 	target := mobile.AppOutputName(i.os, i.packager.name)
 
@@ -111,23 +107,17 @@ func (i *installer) installAndroid() error {
 	return i.runMobileInstall("adb", target, "install")
 }
 
-func (i *installer) Run(args []string) {
-	if len(args) != 0 {
-		fyne.LogError("Unexpected parameter after flags", nil)
-		return
+func (i *installer) installIOS() error {
+	target := mobile.AppOutputName(i.os, i.packager.name)
+	_, err := os.Stat(target)
+	if os.IsNotExist(err) {
+		err := i.packager.doPackage()
+		if err != nil {
+			return nil
+		}
 	}
 
-	err := i.validate()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-		os.Exit(1)
-	}
-
-	err = i.install()
-	if err != nil {
-		fyne.LogError("Unable to install application", err)
-		os.Exit(1)
-	}
+	return i.runMobileInstall("ios-deploy", target, "--bundle")
 }
 
 func (i *installer) runMobileInstall(tool, target string, args ...string) error {
@@ -140,4 +130,14 @@ func (i *installer) runMobileInstall(tool, target string, args ...string) error 
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()
+}
+
+func (i *installer) validate() error {
+	os := i.os
+	if os == "" {
+		os = targetOS()
+	}
+	i.packager = &packager{appID: i.appID, os: os, install: true, srcDir: i.srcDir}
+	i.packager.icon = i.icon
+	return i.packager.validate()
 }
