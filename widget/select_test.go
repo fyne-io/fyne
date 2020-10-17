@@ -67,6 +67,34 @@ func TestSelect_ClearSelected(t *testing.T) {
 	assert.Equal(t, optClear, triggeredValue)
 }
 
+func TestSelect_FocusRendering(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	t.Run("gain/lose focus", func(t *testing.T) {
+		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
+		w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+		defer w.Close()
+		w.Resize(fyne.NewSize(200, 150))
+
+		c := w.Canvas()
+		test.AssertImageMatches(t, "select/focus_unfocused_none_selected.png", c.Capture())
+		c.Focus(sel)
+		test.AssertImageMatches(t, "select/focus_focused_none_selected.png", c.Capture())
+		c.Unfocus()
+		test.AssertImageMatches(t, "select/focus_unfocused_none_selected.png", c.Capture())
+
+		sel.SetSelected("Option B")
+		assert.Equal(t, "Option B", sel.Selected)
+		test.AssertImageMatches(t, "select/focus_unfocused_b_selected.png", c.Capture())
+		c.Focus(sel)
+		test.AssertImageMatches(t, "select/focus_focused_b_selected.png", c.Capture())
+		c.Unfocus()
+		test.AssertImageMatches(t, "select/focus_unfocused_b_selected.png", c.Capture())
+	})
+}
+
 func TestSelect_Move(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
