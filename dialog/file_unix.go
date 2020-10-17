@@ -3,6 +3,8 @@
 package dialog
 
 import (
+	"path/filepath"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -24,8 +26,9 @@ func isHidden(file fyne.URI) bool {
 		fyne.LogError("Cannot check if non file is hidden", nil)
 		return false
 	}
-	filePath := file.String()[len(file.Scheme())+3:]
-	return len(filePath) == 0 || filePath[0] == '.'
+	path := file.String()[len(file.Scheme())+3:]
+	name := filepath.Base(path)
+	return len(name) == 0 || name[0] == '.'
 }
 
 func fileOpenOSOverride(*FileDialog) bool {
