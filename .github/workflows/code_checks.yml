@@ -14,7 +14,7 @@ jobs:
       run: |
         sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev xorg-dev
         GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
-        GO111MODULE=off go get github.com/fzipp/gocyclo
+        GO111MODULE=off go get github.com/fzipp/gocyclo/cmd/gocyclo
         GO111MODULE=off go get golang.org/x/lint/golint
         GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
     - name: cleanup repository
