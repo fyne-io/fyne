@@ -185,7 +185,7 @@ func makeInputTab() fyne.CanvasObject {
 	selectEntry.PlaceHolder = "Type or select"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
 	disabledCheck.Disable()
-	radio := widget.NewRadioGroup([]string{"RadioGroup Item 1", "RadioGroup Item 2"}, func(s string) { fmt.Println("selected", s) })
+	radio := widget.NewRadioGroup([]string{"Radio Item 1", "Radio Item 2"}, func(s string) { fmt.Println("selected", s) })
 	radio.Horizontal = true
 	disabledRadio := widget.NewRadioGroup([]string{"Disabled radio"}, func(string) {})
 	disabledRadio.Disable()
