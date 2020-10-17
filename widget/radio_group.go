@@ -16,7 +16,7 @@ type RadioGroup struct {
 	Options    []string
 	Selected   string
 
-	items []*RadioItem
+	items []*radioItem
 }
 
 var _ fyne.Widget = (*RadioGroup)(nil)
@@ -85,7 +85,7 @@ func (r *RadioGroup) SetSelected(option string) {
 	r.Refresh()
 }
 
-func (r *RadioGroup) itemTapped(item *RadioItem) {
+func (r *RadioGroup) itemTapped(item *radioItem) {
 	if r.Disabled() {
 		return
 	}
@@ -127,7 +127,7 @@ func (r *RadioGroup) update() {
 
 type radioGroupRenderer struct {
 	widget.BaseRenderer
-	items []*RadioItem
+	items []*radioItem
 	radio *RadioGroup
 }
 

@@ -8,31 +8,31 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-var _ fyne.Widget = (*RadioItem)(nil)
-var _ desktop.Hoverable = (*RadioItem)(nil)
-var _ fyne.Tappable = (*RadioItem)(nil)
+var _ fyne.Widget = (*radioItem)(nil)
+var _ desktop.Hoverable = (*radioItem)(nil)
+var _ fyne.Tappable = (*radioItem)(nil)
 
-func newRadioItem(label string, onTap func(*RadioItem)) *RadioItem {
-	i := &RadioItem{Label: label, onTap: onTap}
+func newRadioItem(label string, onTap func(*radioItem)) *radioItem {
+	i := &radioItem{Label: label, onTap: onTap}
 	i.ExtendBaseWidget(i)
 	return i
 }
 
-// RadioItem is a single radio item to be used by RadioGroup.
-type RadioItem struct {
+// radioItem is a single radio item to be used by RadioGroup.
+type radioItem struct {
 	DisableableWidget
 
 	Label    string
 	Selected bool
 
 	hovered bool
-	onTap   func(item *RadioItem)
+	onTap   func(item *radioItem)
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer.
 //
 // Implements: fyne.Widget
-func (i *RadioItem) CreateRenderer() fyne.WidgetRenderer {
+func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	focusIndicator := canvas.NewCircle(theme.BackgroundColor())
 	icon := canvas.NewImageFromResource(theme.RadioButtonIcon())
 	label := canvas.NewText(i.Label, theme.TextColor())
@@ -51,7 +51,7 @@ func (i *RadioItem) CreateRenderer() fyne.WidgetRenderer {
 // MouseIn is called when a desktop pointer enters the widget.
 //
 // Implements: desktop.Hoverable
-func (i *RadioItem) MouseIn(_ *desktop.MouseEvent) {
+func (i *radioItem) MouseIn(_ *desktop.MouseEvent) {
 	if i.Disabled() {
 		return
 	}
@@ -63,13 +63,13 @@ func (i *RadioItem) MouseIn(_ *desktop.MouseEvent) {
 // MouseMoved is called when a desktop pointer hovers over the widget.
 //
 // Implements: desktop.Hoverable
-func (i *RadioItem) MouseMoved(_ *desktop.MouseEvent) {
+func (i *radioItem) MouseMoved(_ *desktop.MouseEvent) {
 }
 
 // MouseOut is called when a desktop pointer exits the widget
 //
 // Implements: desktop.Hoverable
-func (i *RadioItem) MouseOut() {
+func (i *radioItem) MouseOut() {
 	if i.Disabled() {
 		return
 	}
@@ -79,7 +79,7 @@ func (i *RadioItem) MouseOut() {
 }
 
 // SetSelected sets whether this radio item is selected or not.
-func (i *RadioItem) SetSelected(selected bool) {
+func (i *radioItem) SetSelected(selected bool) {
 	if i.Disabled() {
 		return
 	}
@@ -93,7 +93,7 @@ func (i *RadioItem) SetSelected(selected bool) {
 // Tapped is called when a pointer tapped event is captured and triggers any change handler
 //
 // Implements: fyne.Tappable
-func (i *RadioItem) Tapped(_ *fyne.PointEvent) {
+func (i *radioItem) Tapped(_ *fyne.PointEvent) {
 	if i.Disabled() {
 		return
 	}
@@ -109,7 +109,7 @@ type radioItemRenderer struct {
 
 	focusIndicator *canvas.Circle
 	icon           *canvas.Image
-	item           *RadioItem
+	item           *radioItem
 	label          *canvas.Text
 }
 
