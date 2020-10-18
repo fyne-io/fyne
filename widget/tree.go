@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	noSelection       = "nothing-selected"
+	TreeNoSelection   = "nothing-selected"
 	treeDividerHeight = 1
 )
 
@@ -73,7 +73,7 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 
 // ClearSelection clears the current selection.
 func (t *Tree) ClearSelection() {
-	t.SetSelection(noSelection)
+	t.SetSelection(TreeNoSelection)
 }
 
 // CloseAllBranches closes all branches in the tree.
