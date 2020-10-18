@@ -6,8 +6,6 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 )
 
@@ -45,68 +43,6 @@ func NewTree(childUIDs func(string) []string, isBranch func(string) bool, create
 	t := &Tree{ChildUIDs: childUIDs, IsBranch: isBranch, CreateNode: create, UpdateNode: update}
 	t.ExtendBaseWidget(t)
 	return t
-}
-
-// NewTreeWithFiles creates a new tree with the given file system URI.
-func NewTreeWithFiles(root fyne.URI) (t *Tree) {
-	t = &Tree{
-		Root: root.String(),
-		ChildUIDs: func(uid string) (c []string) {
-			luri, err := storage.ListerForURI(storage.NewURI(uid))
-			if err != nil {
-				fyne.LogError("Unable to get lister for "+uid, err)
-			} else {
-				uris, err := luri.List()
-				if err != nil {
-					fyne.LogError("Unable to list "+luri.String(), err)
-				} else {
-					for _, u := range uris {
-						c = append(c, u.String())
-					}
-				}
-			}
-			return
-		},
-		IsBranch: func(uid string) bool {
-			_, err := storage.ListerForURI(storage.NewURI(uid))
-			return err == nil
-		},
-		CreateNode: func(branch bool) fyne.CanvasObject {
-			var icon fyne.CanvasObject
-			if branch {
-				icon = NewIcon(nil)
-			} else {
-				icon = NewFileIcon(nil)
-			}
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, NewLabel("Template Object"))
-		},
-	}
-	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
-		uri := storage.NewURI(uid)
-		c := node.(*fyne.Container)
-		if branch {
-			var r fyne.Resource
-			if t.IsBranchOpen(uid) {
-				// Set open folder icon
-				r = theme.FolderOpenIcon()
-			} else {
-				// Set folder icon
-				r = theme.FolderIcon()
-			}
-			c.Objects[0].(*Icon).SetResource(r)
-		} else {
-			// Set file uri to update icon
-			c.Objects[0].(*FileIcon).SetURI(uri)
-		}
-		l := c.Objects[1].(*Label)
-		if t.Root == uid {
-			l.SetText(uid)
-		} else {
-			l.SetText(uri.Name())
-		}
-	}
-	t.ExtendBaseWidget(t)
-	return
 }
 
 // NewTreeWithStrings creates a new tree with the given string map.
