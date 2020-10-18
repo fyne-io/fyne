@@ -9,7 +9,10 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const treeDividerHeight = 1
+const (
+	noSelection       = "nothing-selected"
+	treeDividerHeight = 1
+)
 
 var _ fyne.Widget = (*Tree)(nil)
 
@@ -66,6 +69,11 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 	}
 	t.ExtendBaseWidget(t)
 	return
+}
+
+// ClearSelection clears the current selection.
+func (t *Tree) ClearSelection() {
+	t.SetSelection(noSelection)
 }
 
 // CloseAllBranches closes all branches in the tree.
