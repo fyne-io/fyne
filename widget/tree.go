@@ -174,6 +174,9 @@ func (t *Tree) Resize(size fyne.Size) {
 func (t *Tree) SetSelection(uid string) {
 	t.selected = uid
 	t.Refresh()
+	if f := t.OnSelectionChanged; f != nil {
+		f(uid)
+	}
 }
 
 // ToggleBranch flips the state of the branch with the given Unique ID.
@@ -553,9 +556,6 @@ func (n *treeNode) MouseOut() {
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.SetSelection(n.uid)
-	if f := n.tree.OnSelectionChanged; f != nil {
-		f(n.uid)
-	}
 }
 
 func (n *treeNode) partialRefresh() {
