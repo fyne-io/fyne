@@ -121,14 +121,7 @@ func (i *radioItem) SetSelected(selected bool) {
 //
 // Implements: fyne.Tappable
 func (i *radioItem) Tapped(_ *fyne.PointEvent) {
-	if i.Disabled() {
-		return
-	}
-	if i.onTap == nil {
-		return
-	}
-
-	i.onTap(i)
+	i.toggle()
 }
 
 // TypedKey is called when this item receives a key event.
@@ -140,7 +133,21 @@ func (i *radioItem) TypedKey(_ *fyne.KeyEvent) {
 // TypedRune is called when this item receives a char event.
 //
 // Implements: fyne.Focusable
-func (i *radioItem) TypedRune(_ rune) {
+func (i *radioItem) TypedRune(r rune) {
+	if r == ' ' {
+		i.toggle()
+	}
+}
+
+func (i *radioItem) toggle() {
+	if i.Disabled() {
+		return
+	}
+	if i.onTap == nil {
+		return
+	}
+
+	i.onTap(i)
 }
 
 type radioItemRenderer struct {

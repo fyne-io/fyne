@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRadioGroup_FocusRendering(t *testing.T) {
@@ -157,4 +158,38 @@ func TestRadioGroup_Layout(t *testing.T) {
 			window.Close()
 		})
 	}
+}
+
+func TestRadioGroup_ToggleSelectionWithSpaceKey(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	radio := &widget.RadioGroup{Options: []string{"Option A", "Option B", "Option C"}}
+	window := test.NewWindow(radio)
+	defer window.Close()
+
+	assert.Equal(t, "", radio.Selected)
+
+	canvas := window.Canvas().(test.WindowlessCanvas)
+	canvas.FocusNext()
+	canvas.FocusNext()
+	test.Type(canvas.Focused(), " ")
+	assert.Equal(t, "Option B", radio.Selected)
+
+	canvas.FocusNext()
+	canvas.FocusNext()
+	test.Type(canvas.Focused(), " ")
+	assert.Equal(t, "Option A", radio.Selected)
+
+	test.Type(canvas.Focused(), " ")
+	assert.Equal(t, "", radio.Selected)
+
+	canvas.FocusNext()
+	canvas.FocusNext()
+	test.Type(canvas.Focused(), " ")
+	assert.Equal(t, "Option C", radio.Selected)
+
+	radio.Required = true
+	test.Type(canvas.Focused(), " ")
+	assert.Equal(t, "Option C", radio.Selected, "cannot unselect required radio")
 }
