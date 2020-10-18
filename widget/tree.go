@@ -9,10 +9,10 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-const (
-	TreeNoSelection   = "nothing-selected"
-	treeDividerHeight = 1
-)
+// TreeNoSelection is the UID used to indicate that nothing is currently selected.
+const TreeNoSelection = "nothing-selected"
+
+const treeDividerHeight = 1
 
 var _ fyne.Widget = (*Tree)(nil)
 
