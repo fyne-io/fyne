@@ -111,7 +111,7 @@ func makeTextTab() fyne.CanvasObject {
 	hyperlink.Wrapping = fyne.TextWrapWord
 	entryLoremIpsum.Wrapping = fyne.TextWrapWord
 
-	radioAlign := widget.NewRadio([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
+	radioAlign := widget.NewRadioGroup([]string{"Text Alignment Leading", "Text Alignment Center", "Text Alignment Trailing"}, func(s string) {
 		var align fyne.TextAlign
 		switch s {
 		case "Text Alignment Leading":
@@ -130,7 +130,7 @@ func makeTextTab() fyne.CanvasObject {
 	})
 	radioAlign.SetSelected("Text Alignment Leading")
 
-	radioWrap := widget.NewRadio([]string{"Text Wrapping Off", "Text Wrapping Truncate", "Text Wrapping Break", "Text Wrapping Word"}, func(s string) {
+	radioWrap := widget.NewRadioGroup([]string{"Text Wrapping Off", "Text Wrapping Truncate", "Text Wrapping Break", "Text Wrapping Word"}, func(s string) {
 		var wrap fyne.TextWrap
 		switch s {
 		case "Text Wrapping Off":
@@ -185,9 +185,9 @@ func makeInputTab() fyne.CanvasObject {
 	selectEntry.PlaceHolder = "Type or select"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
 	disabledCheck.Disable()
-	radio := widget.NewRadio([]string{"Radio Item 1", "Radio Item 2"}, func(s string) { fmt.Println("selected", s) })
+	radio := widget.NewRadioGroup([]string{"Radio Item 1", "Radio Item 2"}, func(s string) { fmt.Println("selected", s) })
 	radio.Horizontal = true
-	disabledRadio := widget.NewRadio([]string{"Disabled radio"}, func(string) {})
+	disabledRadio := widget.NewRadioGroup([]string{"Disabled radio"}, func(string) {})
 	disabledRadio.Disable()
 
 	return container.NewVBox(
