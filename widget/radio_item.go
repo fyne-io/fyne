@@ -11,6 +11,7 @@ import (
 var _ fyne.Widget = (*radioItem)(nil)
 var _ desktop.Hoverable = (*radioItem)(nil)
 var _ fyne.Tappable = (*radioItem)(nil)
+var _ fyne.Focusable = (*radioItem)(nil)
 
 func newRadioItem(label string, onTap func(*radioItem)) *radioItem {
 	i := &radioItem{Label: label, onTap: onTap}
@@ -25,6 +26,7 @@ type radioItem struct {
 	Label    string
 	Selected bool
 
+	focused bool
 	hovered bool
 	onTap   func(item *radioItem)
 }
@@ -46,6 +48,29 @@ func (i *radioItem) CreateRenderer() fyne.WidgetRenderer {
 	}
 	r.update()
 	return r
+}
+
+// Focused returns whether this item is focused or not.
+//
+// Implements: fyne.Focusable
+//
+// Deprecated: Use fyne.Canvas.Focused() instead.
+func (i *radioItem) Focused() bool {
+	return i.focused
+}
+
+// FocusGained is called when this item gained the focus.
+//
+// Implements: fyne.Focusable
+func (i *radioItem) FocusGained() {
+	i.focused = true
+}
+
+// FocusLost is called when this item lost the focus.
+//
+// Implements: fyne.Focusable
+func (i *radioItem) FocusLost() {
+	i.focused = false
 }
 
 // MouseIn is called when a desktop pointer enters the widget.
@@ -102,6 +127,18 @@ func (i *radioItem) Tapped(_ *fyne.PointEvent) {
 	}
 
 	i.onTap(i)
+}
+
+// TypedKey is called when this item receives a key event.
+//
+// Implements: fyne.Focusable
+func (i *radioItem) TypedKey(_ *fyne.KeyEvent) {
+}
+
+// TypedRune is called when this item receives a char event.
+//
+// Implements: fyne.Focusable
+func (i *radioItem) TypedRune(_ rune) {
 }
 
 type radioItemRenderer struct {
