@@ -40,7 +40,7 @@ func (p *packager) AddFlags() {
 }
 
 func (*packager) PrintHelp(indent string) {
-	fmt.Println(indent, "The package command prepares an application for distribution.")
+	fmt.Println(indent, "The package command prepares an application for installation and testing.")
 	fmt.Println(indent, "You may specify the -executable to package, otherwise -sourceDir will be built.")
 	fmt.Println(indent, "Command usage: fyne package [parameters]")
 }

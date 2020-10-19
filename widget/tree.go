@@ -9,6 +9,9 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+// TreeNoSelection is the Unique ID used to indicate that nothing is currently selected.
+const TreeNoSelection = "nothing-selected"
+
 const treeDividerHeight = 1
 
 var _ fyne.Widget = (*Tree)(nil)
@@ -66,6 +69,11 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 	}
 	t.ExtendBaseWidget(t)
 	return
+}
+
+// ClearSelection clears the current selection.
+func (t *Tree) ClearSelection() {
+	t.SetSelection(TreeNoSelection)
 }
 
 // CloseAllBranches closes all branches in the tree.
@@ -170,10 +178,18 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.Refresh() // trigger a redraw
 }
 
+// Selection returns the Unique ID of the currently selected node, or TreeNoSelection if nothing is selected.
+func (t *Tree) Selection() string {
+	return t.selected
+}
+
 // SetSelection updates the current selection to the node with the given Unique ID.
 func (t *Tree) SetSelection(uid string) {
 	t.selected = uid
 	t.Refresh()
+	if f := t.OnSelectionChanged; f != nil {
+		f(uid)
+	}
 }
 
 // ToggleBranch flips the state of the branch with the given Unique ID.
@@ -553,9 +569,6 @@ func (n *treeNode) MouseOut() {
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.SetSelection(n.uid)
-	if f := n.tree.OnSelectionChanged; f != nil {
-		f(n.uid)
-	}
 }
 
 func (n *treeNode) partialRefresh() {

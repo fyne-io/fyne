@@ -5,10 +5,20 @@ import (
 	"path/filepath"
 	"testing"
 
+	"fyne.io/fyne"
 	"github.com/stretchr/testify/assert"
 
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 )
+
+func TestSettingsBuildType(t *testing.T) {
+	set := test.NewApp().Settings()
+	assert.Equal(t, fyne.StandardBuild, set.BuildType()) // during test we should have a normal build
+
+	set = &settings{}
+	assert.Equal(t, buildMode, set.BuildType()) // when testing this package only it could be debug or release
+}
 
 func TestSettingsLoad(t *testing.T) {
 	settings := &settings{}
