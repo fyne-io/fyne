@@ -8,7 +8,7 @@ github.com/akavel/rsrc/ico
 github.com/davecgh/go-spew/spew
 # github.com/fsnotify/fsnotify v1.4.9
 github.com/fsnotify/fsnotify
-# github.com/fyne-io/mobile v0.0.2
+# github.com/fyne-io/mobile v0.0.3-0.20201019161654-100e04019c3d
 github.com/fyne-io/mobile/app
 github.com/fyne-io/mobile/app/internal/callfn
 github.com/fyne-io/mobile/event/key

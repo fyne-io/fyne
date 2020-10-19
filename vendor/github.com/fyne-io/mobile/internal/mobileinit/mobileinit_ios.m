@@ -4,5 +4,5 @@
 #import <Foundation/Foundation.h>
 
 void log_wrap(const char *logStr) {
-    NSLog(@"GoLog: %s", logStr);
+    NSLog(@"Fyne: %s", logStr);
 }
