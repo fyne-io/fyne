@@ -38,12 +38,12 @@ func AndroidBuildToolsPath() string {
 
 // IsAndroid returns true if the given os parameter represents one of the Android targets.
 func IsAndroid(os string) bool {
-	return strings.Index(os, "android") == 0
+	return strings.HasPrefix(os, "android")
 }
 
 // IsMobile returns true if the given os parameter represents a platform handled by gomobile.
 func IsMobile(os string) bool {
-	return os == "ios" || strings.HasPrefix(os, "android")
+	return os == "ios" || IsAndroid(os)
 }
 
 // RequireAndroidSDK will return an error if it cannot establish the location of a valid Android SDK installation.

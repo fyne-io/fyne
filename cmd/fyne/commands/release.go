@@ -36,14 +36,12 @@ func (r *releaser) PrintHelp(indent string) {
 func (r *releaser) Run(params []string) {
 	r.packager.release = true
 
-	err := r.beforePackage()
-	if err != nil {
+	if err := r.beforePackage(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
 	}
 	r.packager.Run(params)
-	err = r.afterPackage()
-	if err != nil {
+	if err := r.afterPackage(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 	}
 }
@@ -66,14 +64,13 @@ func (r *releaser) beforePackage() error {
 }
 
 func (r *releaser) zipAlign(path string) error {
-	buildTools := util.AndroidBuildToolsPath()
 	unaligned := filepath.Join(filepath.Dir(path), "unaligned.apk")
 	err := os.Rename(path, unaligned)
 	if err != nil {
 		return nil
 	}
 
-	cmd := filepath.Join(buildTools, "zipalign")
+	cmd := filepath.Join(util.AndroidBuildToolsPath(), "zipalign")
 	err = exec.Command(cmd, "4", unaligned, path).Run()
 	if err != nil {
 		_ = os.Rename(path, unaligned) // ignore error, return previous
