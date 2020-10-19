@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// TreeNoSelection is the UID used to indicate that nothing is currently selected.
+// TreeNoSelection is the Unique ID used to indicate that nothing is currently selected.
 const TreeNoSelection = "nothing-selected"
 
 const treeDividerHeight = 1
