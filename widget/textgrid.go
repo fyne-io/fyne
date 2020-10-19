@@ -114,7 +114,11 @@ func (t *TextGrid) Text() string {
 		count += len(row.Cells)
 	}
 
-	runes := make([]rune, int(math.Max(0, float64(count))))
+	if count < 0 {
+		return ""
+	}
+
+	runes := make([]rune, count)
 	c := 0
 	for i, row := range t.Rows {
 		for _, r := range row.Cells {
