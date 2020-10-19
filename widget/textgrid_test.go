@@ -40,8 +40,10 @@ func TestTextGrid_SetText_Overflow(t *testing.T) {
 }
 
 func TestTextGrid_Text(t *testing.T) {
-	input := "Hello\nthere"
 	grid := NewTextGrid()
+	assert.Equal(t, "", grid.Text())
+
+	input := "Hello\nthere"
 	grid.SetText(input)
 	assert.Equal(t, input, grid.Text())
 }
