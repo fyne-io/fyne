@@ -278,6 +278,37 @@ func TestTree_MinSize(t *testing.T) {
 	}
 }
 
+func TestTree_Selection(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+
+	selection := make(chan string, 2)
+	tree.OnSelectionChanged = func(uid string) {
+		selection <- uid
+	}
+
+	tree.SetSelection("A")
+	assert.Equal(t, "A", tree.Selection())
+	select {
+	case s := <-selection:
+		assert.Equal(t, "A", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have occured")
+	}
+
+	tree.ClearSelection()
+	assert.Equal(t, TreeNoSelection, tree.Selection())
+	select {
+	case s := <-selection:
+		assert.Equal(t, TreeNoSelection, s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have been cleared")
+	}
+}
+
 func TestTree_Tap(t *testing.T) {
 	t.Run("Branch", func(t *testing.T) {
 		data := make(map[string][]string)
