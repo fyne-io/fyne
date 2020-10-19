@@ -291,6 +291,7 @@ func TestTree_Selection(t *testing.T) {
 	}
 
 	tree.SetSelection("A")
+	assert.Equal(t, "A", tree.Selection())
 	select {
 	case s := <-selection:
 		assert.Equal(t, "A", s)
@@ -299,6 +300,7 @@ func TestTree_Selection(t *testing.T) {
 	}
 
 	tree.ClearSelection()
+	assert.Equal(t, TreeNoSelection, tree.Selection())
 	select {
 	case s := <-selection:
 		assert.Equal(t, TreeNoSelection, s)

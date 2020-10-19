@@ -178,6 +178,11 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.Refresh() // trigger a redraw
 }
 
+// Selection returns the Unique ID of the currently selected node, or TreeNoSelection if nothing is selected.
+func (t *Tree) Selection() string {
+	return t.selected
+}
+
 // SetSelection updates the current selection to the node with the given Unique ID.
 func (t *Tree) SetSelection(uid string) {
 	t.selected = uid
