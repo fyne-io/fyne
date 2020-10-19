@@ -39,7 +39,7 @@ type settings struct {
 	schema SettingsSchema
 }
 
-func (a *settings) BuildType() fyne.BuildType {
+func (s *settings) BuildType() fyne.BuildType {
 	return buildMode
 }
 

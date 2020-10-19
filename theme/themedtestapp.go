@@ -12,7 +12,7 @@ type themedApp struct {
 	theme fyne.Theme
 }
 
-func (a *themedApp) BuildType() fyne.BuildType {
+func (t *themedApp) BuildType() fyne.BuildType {
 	return fyne.StandardBuild
 }
 
