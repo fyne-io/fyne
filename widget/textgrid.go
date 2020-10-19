@@ -114,7 +114,7 @@ func (t *TextGrid) Text() string {
 		count += len(row.Cells)
 	}
 
-	if count < 0 {
+	if count <= 0 {
 		return ""
 	}
 
