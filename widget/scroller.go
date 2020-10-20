@@ -75,6 +75,7 @@ func (b *scrollBar) Cursor() desktop.Cursor {
 }
 
 func (b *scrollBar) DragEnd() {
+	b.isDragged = false
 }
 
 func (b *scrollBar) Dragged(e *fyne.DragEvent) {
@@ -335,8 +336,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 
 	if r.scroll.Direction != ScrollHorizontalOnly {
 		canvas.Refresh(r.vertArea) // this is required to force the canvas to update, we have no "Redraw()"
-	}
-	if r.scroll.Direction != ScrollVerticalOnly {
+	} else {
 		canvas.Refresh(r.horizArea) // this is required like above but if we are horizontal
 	}
 }
