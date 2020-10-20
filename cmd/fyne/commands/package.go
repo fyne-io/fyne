@@ -3,6 +3,8 @@ package commands
 import (
 	"flag"
 	"fmt"
+	"strconv"
+	"strings"
 
 	// import image encodings
 	_ "image/jpeg"
@@ -15,12 +17,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	defaultAppBuild   = 1
+	defaultAppVersion = "1.0"
+)
+
 // Declare conformity to Command interface
 var _ Command = (*packager)(nil)
 
 type packager struct {
 	name, srcDir, dir, exe, icon string
-	os, appID                    string
+	os, appID, appVersion        string
+	appBuild                     int
 	install, release             bool
 }
 
@@ -36,6 +44,8 @@ func (p *packager) AddFlags() {
 	flag.StringVar(&p.name, "name", "", "The name of the application, default is the executable file name")
 	flag.StringVar(&p.icon, "icon", "Icon.png", "The name of the application icon file")
 	flag.StringVar(&p.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
+	flag.StringVar(&p.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
+	flag.IntVar(&p.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
 }
 
@@ -69,7 +79,19 @@ func (p *packager) buildPackage() error {
 	return b.build()
 }
 
+func (p *packager) combinedVersion() string {
+	return fmt.Sprintf("%s.%d", p.appVersion, p.appBuild)
+}
+
 func (p *packager) doPackage() error {
+	// sensible defaults - validation deemed them optional
+	if p.appVersion == "" {
+		p.appVersion = defaultAppVersion
+	}
+	if p.appBuild <= 0 {
+		p.appBuild = defaultAppBuild
+	}
+
 	if !util.Exists(p.exe) && !util.IsMobile(p.os) {
 		err := p.buildPackage()
 		if err != nil {
@@ -140,6 +162,22 @@ func (p *packager) validate() error {
 			return errors.New("Missing appID parameter for mobile package")
 		}
 	}
+	if p.appVersion != "" && !isValidVersion(p.appVersion) {
+		return errors.New("invalid -appVersion parameter, integer and '.' characters only up to x.y.z")
+	}
 
 	return nil
+}
+
+func isValidVersion(ver string) bool {
+	nums := strings.Split(ver, ".")
+	if len(nums) == 0 || len(nums) > 3 {
+		return false
+	}
+	for _, num := range nums {
+		if _, err := strconv.Atoi(num); err != nil {
+			return false
+		}
+	}
+	return true
 }

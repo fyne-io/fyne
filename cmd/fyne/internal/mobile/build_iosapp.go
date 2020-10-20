@@ -20,7 +20,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-func goIOSBuild(pkg *packages.Package, bundleID string, archs []string, appName string) (map[string]bool, error) {
+func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
+	appName, version string, build int) (map[string]bool, error) {
 	src := pkg.PkgPath
 	buildO = rfc1034Label(appName) + ".app"
 
@@ -35,6 +36,8 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string, appName 
 	if err := infoplistTmpl.Execute(infoplist, infoplistTmplData{
 		BundleID: bundleID,
 		Name:     strings.Title(appName),
+		Version:  version,
+		Build:    build,
 	}); err != nil {
 		return nil, err
 	}
@@ -229,6 +232,8 @@ func iosCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
 type infoplistTmplData struct {
 	BundleID string
 	Name     string
+	Version  string
+	Build    int
 }
 
 var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
@@ -248,11 +253,11 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>1.0</string>
+  <string>{{.Version}}</string>
   <key>CFBundleSignature</key>
   <string>????</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>{{.Build}}</string>
   <key>LSRequiresIPhoneOS</key>
   <true/>
   <key>UILaunchStoryboardName</key>
