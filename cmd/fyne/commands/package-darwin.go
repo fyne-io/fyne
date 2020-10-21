@@ -15,6 +15,8 @@ import (
 type darwinData struct {
 	Name, ExeName string
 	AppID         string
+	Version       string
+	Build         int
 }
 
 func (p *packager) packageDarwin() error {
@@ -25,7 +27,7 @@ func (p *packager) packageDarwin() error {
 	info := filepath.Join(contentsDir, "Info.plist")
 	infoFile, _ := os.Create(info)
 
-	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID}
+	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID, Version: p.appVersion, Build: p.appBuild}
 	err := templates.PlistDarwin.Execute(infoFile, tplData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to write plist template")

@@ -143,7 +143,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName)
+		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName, cmd.Version, cmd.Build)
 		if err != nil {
 			return nil, err
 		}
@@ -163,7 +163,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName)
+		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName, cmd.Version, cmd.Build)
 		if err != nil {
 			return nil, err
 		}
@@ -258,7 +258,7 @@ var (
 )
 
 // RunNewBuild executes a new mobile build for the specified configuration
-func RunNewBuild(target, appID, icon, name string, release bool) error {
+func RunNewBuild(target, appID, icon, name, version string, build int, release bool) error {
 	buildTarget = target
 	buildBundleID = appID
 	buildRelease = release
@@ -267,6 +267,8 @@ func RunNewBuild(target, appID, icon, name string, release bool) error {
 	cmd.Flag = flag.FlagSet{}
 	cmd.IconPath = icon
 	cmd.AppName = name
+	cmd.Version = version
+	cmd.Build = build
 	return runBuild(cmd)
 }
 

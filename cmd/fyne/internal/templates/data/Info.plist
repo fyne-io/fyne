@@ -11,7 +11,9 @@
 <key>CFBundleIconFile</key>
 <string>icon.icns</string>
 <key>CFBundleShortVersionString</key>
-<string>1.0</string>
+<string>{{.Version}}</string>
+<key>CFBundleVersion</key>
+<string>{{.Build}}</string>
 <key>NSHighResolutionCapable</key>
 <true/>
 <key>CFBundleInfoDictionaryVersion</key>
