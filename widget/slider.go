@@ -210,7 +210,7 @@ func (s *sliderRenderer) Layout(size fyne.Size) {
 	switch s.slider.Orientation {
 	case Vertical:
 		activePos = fyne.NewPos(trackPos.X, activeOffset)
-		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset-endPad)
+		activeSize = fyne.NewSize(trackWidth, trackSize.Height-activeOffset+endPad)
 
 		thumbPos = fyne.NewPos(
 			trackPos.X-(diameter-trackSize.Width)/2, activeOffset-((diameter-theme.Padding())/2))
@@ -248,7 +248,12 @@ func (s *sliderRenderer) getOffset() int {
 	w := s.slider
 	size := s.track.Size()
 	if w.Value == w.Min || w.Min == w.Max {
-		return endPad
+		switch w.Orientation {
+		case Vertical:
+			return size.Height + endPad
+		case Horizontal:
+			return endPad
+		}
 	}
 	ratio := (w.Value - w.Min) / (w.Max - w.Min)
 
