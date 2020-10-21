@@ -6,7 +6,7 @@ package mobileinit
 
 /*
 To view the log output run:
-adb logcat GoLog:I *:S
+adb logcat Fyne:I *:S
 */
 
 // Android redirects stdout and stderr to /dev/null.
@@ -33,7 +33,7 @@ import (
 )
 
 var (
-	ctag = C.CString("GoLog")
+	ctag = C.CString("Fyne")
 	// Store the writer end of the redirected stderr and stdout
 	// so that they are not garbage collected and closed.
 	stderr, stdout *os.File

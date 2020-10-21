@@ -4,4 +4,4 @@ package app
 
 import "fyne.io/fyne"
 
-const buildMode = fyne.StandardBuild
+const buildMode = fyne.BuildStandard

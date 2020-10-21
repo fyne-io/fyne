@@ -17,7 +17,7 @@ func (p *packager) packageIOS() error {
 		return err
 	}
 
-	appDir := filepath.Join(p.dir, p.name+".app")
+	appDir := filepath.Join(p.dir, mobile.AppOutputName("os", p.name))
 	iconPath := filepath.Join(appDir, "Icon.png")
 	return util.CopyFile(p.icon, iconPath)
 }

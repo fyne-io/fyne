@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"image/color"
 	"net/url"
-	"os"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
-	internalwidget "fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/storage"
+	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -85,7 +83,7 @@ func makeButtonList(count int) []fyne.CanvasObject {
 
 func makeCardTab() fyne.CanvasObject {
 	card1 := widget.NewCard("Book a table", "Which time suits?",
-		widget.NewRadio([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
+		widget.NewRadioGroup([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
 	card2 := widget.NewCard("With media", "No content, with image", nil)
 	card2.Image = canvas.NewImageFromResource(theme.FyneLogo())
 	card3 := widget.NewCard("Title 3", "Subtitle", widget.NewCheck("Check me", func(bool) {}))
@@ -162,43 +160,26 @@ func makeTableTab() fyne.CanvasObject {
 }
 
 func makeTreeTab() fyne.CanvasObject {
-	left := make(map[string][]string)
-	internalwidget.AddTreePath(left, "A", "B", "C", "abc")
-	internalwidget.AddTreePath(left, "A", "D", "E", "F", "adef")
-	internalwidget.AddTreePath(left, "A", "D", "E", "G", "adeg")
-	internalwidget.AddTreePath(left, "A", "H", "I", "ahi")
-	internalwidget.AddTreePath(left, "A", "J", "K", "ajk")
-	internalwidget.AddTreePath(left, "A", "L", "M", "N", "almn")
-	internalwidget.AddTreePath(left, "A", "O", "ao")
-	internalwidget.AddTreePath(left, "A", "P", "Q", "R", "apqr")
-	internalwidget.AddTreePath(left, "A", "S", "T", "U", "astu")
-	internalwidget.AddTreePath(left, "A", "V", "W", "X", "Y", "Z", "avwxyz")
+	data := make(map[string][]string)
+	internalWidget.AddTreePath(data, "A", "B", "C", "abc")
+	internalWidget.AddTreePath(data, "A", "D", "E", "F", "adef")
+	internalWidget.AddTreePath(data, "A", "D", "E", "G", "adeg")
+	internalWidget.AddTreePath(data, "A", "H", "I", "ahi")
+	internalWidget.AddTreePath(data, "A", "J", "K", "ajk")
+	internalWidget.AddTreePath(data, "A", "L", "M", "N", "almn")
+	internalWidget.AddTreePath(data, "A", "O", "ao")
+	internalWidget.AddTreePath(data, "A", "P", "Q", "R", "apqr")
+	internalWidget.AddTreePath(data, "A", "S", "T", "U", "astu")
+	internalWidget.AddTreePath(data, "A", "V", "W", "X", "Y", "Z", "avwxyz")
 
-	l := widget.NewTreeWithStrings(left)
-	l.OnSelectionChanged = func(id string) {
-		fmt.Println("LeftTreeNodeSelected:", id)
+	tree := widget.NewTreeWithStrings(data)
+	tree.OnSelectionChanged = func(id string) {
+		fmt.Println("TreeNodeSelected:", id)
 	}
-	l.OpenBranch("A")
-	l.OpenBranch("D")
-	l.OpenBranch("E")
-	l.OpenBranch("L")
-	l.OpenBranch("M")
-
-	dir, err := os.UserHomeDir()
-	if err != nil {
-		fyne.LogError("Could not get user home directory", err)
-		dir, err = os.Getwd()
-		if err != nil {
-			fyne.LogError("Could not get current working directory", err)
-		}
-	}
-	if dir == "" {
-		// Can't get any useful directory, so only show Tree of strings
-		return l
-	}
-	r := widget.NewTreeWithFiles(storage.NewURI("file://" + dir))
-	r.OnSelectionChanged = func(id string) {
-		fmt.Println("RightTreeNodeSelected:", id)
-	}
-	return widget.NewHSplitContainer(l, r)
+	tree.OpenBranch("A")
+	tree.OpenBranch("D")
+	tree.OpenBranch("E")
+	tree.OpenBranch("L")
+	tree.OpenBranch("M")
+	return tree
 }

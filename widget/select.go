@@ -22,17 +22,24 @@ type Select struct {
 	PlaceHolder string
 	OnChanged   func(string) `json:"-"`
 
-	hovered, tapped bool
-	popUp           *PopUpMenu
+	focused bool
+	hovered bool
+	popUp   *PopUpMenu
+	tapped  bool
 }
 
 var _ fyne.Widget = (*Select)(nil)
 var _ desktop.Hoverable = (*Select)(nil)
 var _ fyne.Tappable = (*Select)(nil)
+var _ fyne.Focusable = (*Select)(nil)
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
-	s := &Select{BaseWidget{}, "", options, defaultPlaceHolder, changed, false, false, nil}
+	s := &Select{
+		OnChanged:   changed,
+		Options:     options,
+		PlaceHolder: defaultPlaceHolder,
+	}
 	s.ExtendBaseWidget(s)
 	return s
 }
@@ -69,6 +76,31 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	r.updateLabel()
 	r.updateIcon()
 	return r
+}
+
+// Focused returns whether this Select is focused or not.
+//
+// Implements: fyne.Focusable
+//
+// Deprecated: internal detail, don’t use
+func (s *Select) Focused() bool {
+	return s.focused
+}
+
+// FocusGained is called after this Select has gained focus.
+//
+// Implements: fyne.Focusable
+func (s *Select) FocusGained() {
+	s.focused = true
+	s.Refresh()
+}
+
+// FocusLost is called after this Select has lost focus.
+//
+// Implements: fyne.Focusable
+func (s *Select) FocusLost() {
+	s.focused = false
+	s.Refresh()
 }
 
 // Hide hides the select.
@@ -151,12 +183,11 @@ func (s *Select) SetSelectedIndex(index int) {
 		return
 	}
 
-	s.SetSelected(s.Options[index])
+	s.updateSelected(s.Options[index])
 }
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (s *Select) Tapped(*fyne.PointEvent) {
-	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
 	s.tapped = true
 	defer func() { // TODO move to a real animation
 		time.Sleep(time.Millisecond * buttonTapDuration)
@@ -165,18 +196,36 @@ func (s *Select) Tapped(*fyne.PointEvent) {
 	}()
 	s.Refresh()
 
-	var items []*fyne.MenuItem
-	for _, option := range s.Options {
-		text := option // capture
-		item := fyne.NewMenuItem(option, func() {
-			s.optionTapped(text)
-		})
-		items = append(items, item)
-	}
+	s.showPopUp()
+}
 
-	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
-	s.popUp.ShowAtPosition(s.popUpPos())
-	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
+// TypedKey is called if a key event happens while this Select is focused.
+//
+// Implements: fyne.Focusable
+func (s *Select) TypedKey(event *fyne.KeyEvent) {
+	switch event.Name {
+	case fyne.KeySpace, fyne.KeyUp, fyne.KeyDown:
+		s.showPopUp()
+	case fyne.KeyRight:
+		i := s.SelectedIndex() + 1
+		if i >= len(s.Options) {
+			i = 0
+		}
+		s.SetSelectedIndex(i)
+	case fyne.KeyLeft:
+		i := s.SelectedIndex() - 1
+		if i < 0 {
+			i = len(s.Options) - 1
+		}
+		s.SetSelectedIndex(i)
+	}
+}
+
+// TypedRune is called if a text event happens while this Select is focused.
+//
+// Implements: fyne.Focusable
+func (s *Select) TypedRune(_ rune) {
+	// intentionally left blank
 }
 
 func (s *Select) optionTapped(text string) {
@@ -187,6 +236,22 @@ func (s *Select) optionTapped(text string) {
 func (s *Select) popUpPos() fyne.Position {
 	buttonPos := fyne.CurrentApp().Driver().AbsolutePositionForObject(s.super())
 	return buttonPos.Add(fyne.NewPos(theme.Padding(), s.Size().Height-theme.Padding()))
+}
+
+func (s *Select) showPopUp() {
+	var items []*fyne.MenuItem
+	for _, option := range s.Options {
+		text := option // capture
+		item := fyne.NewMenuItem(option, func() {
+			s.optionTapped(text)
+		})
+		items = append(items, item)
+	}
+
+	c := fyne.CurrentApp().Driver().CanvasForObject(s.super())
+	s.popUp = newPopUpMenu(fyne.NewMenu("", items...), c)
+	s.popUp.ShowAtPosition(s.popUpPos())
+	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
 }
 
 func (s *Select) updateSelected(text string) {
@@ -264,6 +329,9 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) buttonColor() color.Color {
+	if s.combo.focused {
+		return theme.FocusColor()
+	}
 	if s.combo.hovered || s.combo.tapped { // TODO tapped will be different to hovered when we have animation
 		return theme.HoverColor()
 	}

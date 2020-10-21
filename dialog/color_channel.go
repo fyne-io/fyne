@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	internalwidget "fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
@@ -36,19 +37,7 @@ func newColorChannel(name string, min, max, value int, onChanged func(int)) *col
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 func (c *colorChannel) CreateRenderer() fyne.WidgetRenderer {
 	label := widget.NewLabelWithStyle(c.name, fyne.TextAlignTrailing, fyne.TextStyle{Bold: true})
-	entry := &widget.Entry{
-		Text: "0",
-		OnChanged: func(text string) {
-			value, err := strconv.Atoi(text)
-			if err != nil {
-				fyne.LogError("Couldn't parse: "+text, err)
-			} else {
-				c.SetValue(value)
-			}
-		},
-		// TODO extend Entry to force MinSize to always be wide enough for 3 chars
-		// TODO add number min/max validator
-	}
+	entry := newColorChannelEntry(c)
 	slider := &widget.Slider{
 		Value:       0.0,
 		Min:         float64(c.min),
@@ -97,7 +86,7 @@ type colorChannelRenderer struct {
 	internalwidget.BaseRenderer
 	control *colorChannel
 	label   *widget.Label
-	entry   *widget.Entry
+	entry   *colorChannelEntry
 	slider  *widget.Slider
 }
 
@@ -132,4 +121,34 @@ func (r *colorChannelRenderer) updateObjects() {
 	r.entry.SetText(strconv.Itoa(r.control.value))
 	r.slider.Value = float64(r.control.value)
 	r.slider.Refresh()
+}
+
+type colorChannelEntry struct {
+	widget.Entry
+}
+
+func newColorChannelEntry(c *colorChannel) *colorChannelEntry {
+	e := &colorChannelEntry{
+		Entry: widget.Entry{
+			Text: "0",
+			OnChanged: func(text string) {
+				value, err := strconv.Atoi(text)
+				if err != nil {
+					fyne.LogError("Couldn't parse: "+text, err)
+				} else {
+					c.SetValue(value)
+				}
+			},
+			// TODO add number min/max validator
+		},
+	}
+	e.ExtendBaseWidget(e)
+	return e
+}
+
+func (e *colorChannelEntry) MinSize() fyne.Size {
+	// Ensure space for 3 digits
+	min := fyne.MeasureText("000", theme.TextSize(), fyne.TextStyle{})
+	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
+	return min.Max(e.Entry.MinSize())
 }

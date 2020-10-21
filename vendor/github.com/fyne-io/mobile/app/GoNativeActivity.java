@@ -94,7 +94,7 @@ public class GoNativeActivity extends NativeActivity {
                         inputType = DEFAULT_INPUT_TYPE | InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
                         break;
                     default:
-                        Log.e("GoLog", "unknown keyboard type, use default");
+                        Log.e("Fyne", "unknown keyboard type, use default");
                 }
                 mTextEdit.setImeOptions(imeOptions);
                 mTextEdit.setInputType(inputType);
@@ -154,7 +154,7 @@ public class GoNativeActivity extends NativeActivity {
 		} catch (KeyCharacterMap.UnavailableException e) {
 			return -1;
 		} catch (Exception e) {
-			Log.e("GoLog", "exception reading KeyCharacterMap", e);
+			Log.e("Fyne", "exception reading KeyCharacterMap", e);
 			return -1;
 		}
 	}
@@ -172,13 +172,13 @@ public class GoNativeActivity extends NativeActivity {
 			ActivityInfo ai = getPackageManager().getActivityInfo(
 					getIntent().getComponent(), PackageManager.GET_META_DATA);
 			if (ai.metaData == null) {
-				Log.e("GoLog", "loadLibrary: no manifest metadata found");
+				Log.e("Fyne", "loadLibrary: no manifest metadata found");
 				return;
 			}
 			String libName = ai.metaData.getString("android.app.lib_name");
 			System.loadLibrary(libName);
 		} catch (Exception e) {
-			Log.e("GoLog", "loadLibrary failed", e);
+			Log.e("Fyne", "loadLibrary failed", e);
 		}
 	}
 

@@ -128,7 +128,7 @@ func (s *testSettings) AddChangeListener(listener chan fyne.Settings) {
 }
 
 func (s *testSettings) BuildType() fyne.BuildType {
-	return fyne.StandardBuild
+	return fyne.BuildStandard
 }
 
 func (s *testSettings) PrimaryColor() string {
