@@ -2,6 +2,7 @@ package test
 
 import (
 	"image"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/test"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,6 +32,18 @@ func AssertCanvasTappableAt(t *testing.T, c fyne.Canvas, pos fyne.Position) bool
 // This path is also reported, thus the file can be used as new master.
 func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, msgAndArgs ...interface{}) bool {
 	return test.AssertImageMatches(t, masterFilename, img, msgAndArgs...)
+}
+
+// AssertRendersToMarkup asserts that the given canvas renders the expected markup.
+// The expected markup is stripped by leading common whitespace retaining the relative indentation
+// and thus matching the indentation of the output of the used markup renderer.
+//
+// Be aware, that the indentation has to use tab characters ('\t') instead of spaces.
+// Every element starts on a new line indented one more than its parent.
+// Closing elements stand on their own line, too, using the same indentation as the opening element.
+// The only exception to this are text elements which do not contain line breaks unless the text includes them.
+func AssertRendersToMarkup(t *testing.T, expected string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
+	return assert.Equal(t, removeCommonIndent(expected), snapshot(c), msgAndArgs...)
 }
 
 // Drag drags at an absolute position on the canvas.
@@ -266,4 +280,68 @@ func typeChars(chars []rune, keyDown func(rune)) {
 	for _, char := range chars {
 		keyDown(char)
 	}
+}
+
+func removeCommonIndent(raw string) string {
+	skipFirstLine := false
+	if len(raw) > 0 && raw[0] == '\n' {
+		raw = raw[1:]
+	} else {
+		skipFirstLine = true
+	}
+	lines := strings.Split(raw, "\n")
+	minIndentSize := getMinIndent(lines, skipFirstLine)
+	lines = removeIndent(lines, minIndentSize, skipFirstLine)
+	return strings.Join(lines, "\n")
+}
+
+func isSpace(r rune) bool {
+	switch r {
+	case ' ', '\t':
+		return true
+	default:
+		return false
+	}
+}
+
+func getMinIndent(lines []string, skipFirstLine bool) int {
+	const maxInt = int(^uint(0) >> 1)
+	minIndentSize := maxInt
+
+	for i, line := range lines {
+		if i == 0 && skipFirstLine {
+			continue
+		}
+
+		indentSize := 0
+		for _, r := range line {
+			if isSpace(r) {
+				indentSize++
+			} else {
+				break
+			}
+		}
+
+		if len(line) == indentSize {
+			if i == len(lines)-1 && indentSize < minIndentSize {
+				lines[i] = ""
+			}
+		} else if indentSize < minIndentSize {
+			minIndentSize = indentSize
+		}
+	}
+	return minIndentSize
+}
+
+func removeIndent(lines []string, n int, skipFirstLine bool) []string {
+	for i, line := range lines {
+		if i == 0 && skipFirstLine {
+			continue
+		}
+
+		if len(lines[i]) >= n {
+			lines[i] = line[n:]
+		}
+	}
+	return lines
 }
