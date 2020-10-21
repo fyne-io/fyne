@@ -3,9 +3,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"os"
+	"go/format"
+	"io"
+	"io/ioutil"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -22,20 +26,26 @@ func formatVariable(name string) string {
 	return strings.Replace(str, "_", "", -1)
 }
 
-func bundleFile(name string, filepath string, f *os.File) {
+func bundleFile(name string, filepath string, f io.Writer) {
 	res, err := fyne.LoadResourceFromPath(filepath)
 	if err != nil {
 		fyne.LogError("Unable to load file "+filepath, err)
 		return
 	}
-
-	_, err = f.WriteString(fmt.Sprintf("var %s = %#v\n", formatVariable(name), res))
+	staticRes, ok := res.(*fyne.StaticResource)
+	if !ok {
+		fyne.LogError("Unable to format resource", fmt.Errorf("unexpected resource type %T", res))
+		return
+	}
+	v := fmt.Sprintf("var %s = &fyne.StaticResource{\n\tStaticName: %q,\n\tStaticContent: []byte(%q),\n}\n\n",
+		formatVariable(name), staticRes.StaticName, staticRes.StaticContent)
+	_, err = f.Write([]byte(v))
 	if err != nil {
 		fyne.LogError("Unable to write to bundled file", err)
 	}
 }
 
-func bundleFont(font, name string, f *os.File) {
+func bundleFont(font, name string, f io.Writer) {
 	_, dirname, _, _ := runtime.Caller(0)
 	path := path.Join(path.Dir(dirname), "font", fmt.Sprintf("%s-%s.ttf", font, name))
 
@@ -51,48 +61,38 @@ func iconDir() string {
 	return path.Join(path.Dir(dirname), "icons")
 }
 
-func bundleIcon(name string, f *os.File) {
+func bundleIcon(name string, f io.Writer) {
 	path := path.Join(iconDir(), fmt.Sprintf("%s.svg", name))
 
 	formatted := fmt.Sprintf("%sIconRes", strings.ToLower(name))
 	bundleFile(formatted, path, f)
 }
 
-func openFile(filename string) *os.File {
-	os.Remove(filename)
+func writeFile(filename string, contents []byte) error {
+	formatted, err := format.Source(contents)
+	if err != nil {
+		return err
+	}
 	_, dirname, _, _ := runtime.Caller(0)
-	f, err := os.Create(path.Join(path.Dir(dirname), filename))
-	if err != nil {
-		fyne.LogError("Unable to open file "+filename, err)
-		return nil
-	}
-
-	_, err = f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne\"\n\n")
-	if err != nil {
-		fyne.LogError("Unable to write file "+filename, err)
-		return nil
-	}
-
-	return f
+	return ioutil.WriteFile(filepath.Join(filepath.Dir(dirname), filename), formatted, 0644)
 }
 
 func main() {
-	f := openFile("bundled-fonts.go")
-	if f == nil {
-		return
-	}
+	f := &bytes.Buffer{}
+	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne\"\n\n")
 	bundleFont(fontFace, "Regular", f)
 	bundleFont(fontFace, "Bold", f)
 	bundleFont(fontFace, "Italic", f)
 	bundleFont(fontFace, "BoldItalic", f)
 	bundleFont("DejaVuSansMono", "Powerline", f)
-	f.Close()
-
-	f = openFile("bundled-icons.go")
-	if f == nil {
+	err := writeFile("bundled-fonts.go", f.Bytes())
+	if err != nil {
+		fyne.LogError("Unable to write file:", err)
 		return
 	}
 
+	f = &bytes.Buffer{}
+	f.WriteString(fileHeader + "\n\npackage theme\n\nimport \"fyne.io/fyne\"\n\n")
 	icon := path.Join(iconDir(), "fyne.png")
 	bundleFile("fyne-logo", icon, f)
 
@@ -187,5 +187,9 @@ func main() {
 	bundleIcon("storage", f)
 	bundleIcon("upload", f)
 
-	f.Close()
+	err = writeFile("bundled-icons.go", f.Bytes())
+	if err != nil {
+		fyne.LogError("Unable to write file: ", err)
+		return
+	}
 }
