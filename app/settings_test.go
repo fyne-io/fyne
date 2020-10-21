@@ -14,7 +14,7 @@ import (
 
 func TestSettingsBuildType(t *testing.T) {
 	set := test.NewApp().Settings()
-	assert.Equal(t, fyne.StandardBuild, set.BuildType()) // during test we should have a normal build
+	assert.Equal(t, fyne.BuildStandard, set.BuildType()) // during test we should have a normal build
 
 	set = &settings{}
 	assert.Equal(t, buildMode, set.BuildType()) // when testing this package only it could be debug or release

@@ -13,7 +13,7 @@ type themedApp struct {
 }
 
 func (t *themedApp) BuildType() fyne.BuildType {
-	return fyne.StandardBuild
+	return fyne.BuildStandard
 }
 
 func (t *themedApp) NewWindow(title string) fyne.Window {
