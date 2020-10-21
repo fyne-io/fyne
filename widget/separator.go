@@ -3,6 +3,7 @@ package widget
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
 
@@ -10,7 +11,7 @@ var _ fyne.Widget = (*Separator)(nil)
 
 // Separator is a widget for displaying a separator with themeable color.
 type Separator struct {
-	Base
+	widget.Base
 }
 
 // NewSeparator creates a new separator.
@@ -25,7 +26,7 @@ func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 	bar := canvas.NewRectangle(theme.DisabledTextColor())
 	objects := []fyne.CanvasObject{bar}
 	return &separatorRenderer{
-		BaseRenderer: NewBaseRenderer(objects),
+		BaseRenderer: widget.NewBaseRenderer(objects),
 		bar:          bar,
 		d:            s,
 	}
@@ -35,7 +36,7 @@ func (s *Separator) CreateRenderer() fyne.WidgetRenderer {
 //
 // Implements: fyne.Widget
 func (s *Separator) Hide() {
-	HideWidget(&s.Base, s)
+	widget.HideWidget(&s.Base, s)
 }
 
 // MinSize returns the minimal size of the separator.
@@ -49,34 +50,34 @@ func (s *Separator) MinSize() fyne.Size {
 //
 // Implements: fyne.Widget
 func (s *Separator) Move(pos fyne.Position) {
-	MoveWidget(&s.Base, s, pos)
+	widget.MoveWidget(&s.Base, s, pos)
 }
 
 // Refresh triggers a redraw of the separator.
 //
 // Implements: fyne.Widget
 func (s *Separator) Refresh() {
-	RefreshWidget(s)
+	widget.RefreshWidget(s)
 }
 
 // Resize changes the size of the separator.
 //
 // Implements: fyne.Widget
 func (s *Separator) Resize(size fyne.Size) {
-	ResizeWidget(&s.Base, s, size)
+	widget.ResizeWidget(&s.Base, s, size)
 }
 
 // Show makes the separator visible.
 //
 // Implements: fyne.Widget
 func (s *Separator) Show() {
-	ShowWidget(&s.Base, s)
+	widget.ShowWidget(&s.Base, s)
 }
 
 var _ fyne.WidgetRenderer = (*separatorRenderer)(nil)
 
 type separatorRenderer struct {
-	BaseRenderer
+	widget.BaseRenderer
 	bar *canvas.Rectangle
 	d   *Separator
 }

@@ -343,7 +343,7 @@ type listItem struct {
 	onTapped          func()
 	statusIndicator   *canvas.Rectangle
 	child             fyne.CanvasObject
-	divider           *widget.Separator
+	divider           *Separator
 	hovered, selected bool
 }
 
@@ -362,7 +362,7 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
 	li.statusIndicator = canvas.NewRectangle(theme.BackgroundColor())
-	li.divider = widget.NewSeparator()
+	li.divider = NewSeparator()
 
 	objects := []fyne.CanvasObject{li.statusIndicator, li.child, li.divider}
 

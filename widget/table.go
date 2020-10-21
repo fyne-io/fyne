@@ -223,7 +223,7 @@ func (t *tableRenderer) moveIndicators() {
 
 	if len(t.dividers) < colDivs+rowDivs {
 		for i := len(t.dividers); i < colDivs+rowDivs; i++ {
-			t.dividers = append(t.dividers, widget.NewSeparator())
+			t.dividers = append(t.dividers, NewSeparator())
 		}
 
 		obj := []fyne.CanvasObject{t.scroll, t.colMarker, t.rowMarker, t.colHover, t.rowHover}

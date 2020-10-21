@@ -250,7 +250,7 @@ func (r *accordionRenderer) updateObjects() {
 	}
 	// make new dividers
 	for ; i < is-1; i++ {
-		div := widget.NewSeparator()
+		div := NewSeparator()
 		r.dividers = append(r.dividers, div)
 		objects = append(objects, div)
 	}
