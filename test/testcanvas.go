@@ -20,9 +20,10 @@ var (
 type WindowlessCanvas interface {
 	fyne.Canvas
 
-	Resize(fyne.Size)
-
+	FocusNext()
+	FocusPrevious()
 	Padded() bool
+	Resize(fyne.Size)
 	SetPadded(bool)
 }
 
@@ -96,6 +97,14 @@ func (c *testCanvas) Content() fyne.CanvasObject {
 
 func (c *testCanvas) Focus(obj fyne.Focusable) {
 	c.focusManager().Focus(obj)
+}
+
+func (c *testCanvas) FocusNext() {
+	c.focusManager().FocusNext()
+}
+
+func (c *testCanvas) FocusPrevious() {
+	c.focusManager().FocusPrevious()
 }
 
 func (c *testCanvas) Focused() fyne.Focusable {
