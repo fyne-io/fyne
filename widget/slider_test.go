@@ -10,6 +10,10 @@ import (
 )
 
 func TestSlider_HorizontalLayout(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
 	slider := NewSlider(0, 1)
 	slider.Resize(fyne.NewSize(100, 10))
 
@@ -26,6 +30,12 @@ func TestSlider_HorizontalLayout(t *testing.T) {
 
 	assert.Greater(t, wSize.Width, aSize.Width)
 	assert.Equal(t, theme.Padding(), aSize.Height)
+
+	w := test.NewWindow(slider)
+	defer w.Close()
+	w.Resize(fyne.NewSize(220, 50))
+
+	test.AssertImageMatches(t, "slider/horizontal.png", w.Canvas().Capture())
 }
 
 func TestSlider_OutOfRange(t *testing.T) {
@@ -36,6 +46,10 @@ func TestSlider_OutOfRange(t *testing.T) {
 }
 
 func TestSlider_VerticalLayout(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
 	slider := NewSlider(0, 1)
 	slider.Orientation = Vertical
 	slider.Resize(fyne.NewSize(10, 100))
@@ -53,6 +67,12 @@ func TestSlider_VerticalLayout(t *testing.T) {
 
 	assert.Greater(t, wSize.Height, aSize.Height)
 	assert.Equal(t, theme.Padding(), aSize.Width)
+
+	w := test.NewWindow(slider)
+	defer w.Close()
+	w.Resize(fyne.NewSize(50, 220))
+
+	test.AssertImageMatches(t, "slider/vertical.png", w.Canvas().Capture())
 }
 
 func TestSlider_OnChanged(t *testing.T) {
