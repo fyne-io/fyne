@@ -17,6 +17,8 @@ var _ Command = (*releaser)(nil)
 
 type releaser struct {
 	packager
+
+	keyStore string
 }
 
 // NewReleaser returns a command that can adapt app packages for distribution
@@ -30,6 +32,7 @@ func (r *releaser) AddFlags() {
 	flag.StringVar(&r.appID, "appID", "", "For ios or darwin targets an appID is required, for ios this must \nmatch a valid provisioning profile")
 	flag.StringVar(&r.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
 	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
+	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
 }
 
 func (r *releaser) PrintHelp(indent string) {
@@ -56,7 +59,11 @@ func (r *releaser) Run(params []string) {
 func (r *releaser) afterPackage() error {
 	if util.IsAndroid(r.os) {
 		target := mobile.AppOutputName(r.os, r.packager.name)
-		return r.zipAlign(filepath.Join(r.dir, target))
+		apk := filepath.Join(r.dir, target)
+		if err := r.zipAlign(apk); err != nil {
+			return err
+		}
+		return r.sign(apk)
 	}
 
 	return nil
@@ -64,10 +71,21 @@ func (r *releaser) afterPackage() error {
 
 func (r *releaser) beforePackage() error {
 	if util.IsAndroid(r.os) {
-		return util.RequireAndroidSDK()
+		if err := util.RequireAndroidSDK(); err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+func (r *releaser) sign(path string) error {
+	signer := filepath.Join(util.AndroidBuildToolsPath(), "/apksigner")
+	cmd := exec.Command(signer, "sign", "--ks", r.keyStore, path)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	return cmd.Run()
 }
 
 func (r *releaser) validate() error {
@@ -79,7 +97,11 @@ func (r *releaser) validate() error {
 			return errors.New("missing required -appBuild parameter")
 		}
 	}
-
+	if util.IsAndroid(r.os) {
+		if r.keyStore == "" {
+			return errors.New("missing required -keyStore parameter for android release")
+		}
+	}
 	return nil
 }
 
