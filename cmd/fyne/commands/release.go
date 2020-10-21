@@ -60,8 +60,7 @@ func (r *releaser) afterPackage() error {
 	if util.IsAndroid(r.os) {
 		target := mobile.AppOutputName(r.os, r.packager.name)
 		apk := filepath.Join(r.dir, target)
-		err := r.zipAlign(apk)
-		if err != nil {
+		if err := r.zipAlign(apk); err != nil {
 			return err
 		}
 		return r.sign(apk)
@@ -72,8 +71,7 @@ func (r *releaser) afterPackage() error {
 
 func (r *releaser) beforePackage() error {
 	if util.IsAndroid(r.os) {
-		err := util.RequireAndroidSDK()
-		if err != nil {
+		if err := util.RequireAndroidSDK(); err != nil {
 			return err
 		}
 	}
