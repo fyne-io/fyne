@@ -67,7 +67,9 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 				aspects[img.Resource] = aspect
 				// if the image specifies it should be original size we need at least that many pixels on screen
 				if img.FillMode == canvas.ImageFillOriginal {
-					checkImageMinSize(img, c, origW, origH)
+					if !checkImageMinSize(img, c, origW, origH) {
+						return nil
+					}
 				}
 
 				tex = image.NewNRGBA(image.Rect(0, 0, texW, texH))
@@ -79,6 +81,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 					fyne.LogError("SVG Render error:", err)
 					return nil
 				}
+
 				svgCachePut(img.Resource, tex, width, height)
 			}
 
@@ -97,7 +100,9 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 		aspects[img] = float32(origSize.X) / float32(origSize.Y)
 		// if the image specifies it should be original size we need at least that many pixels on screen
 		if img.FillMode == canvas.ImageFillOriginal {
-			checkImageMinSize(img, c, origSize.X, origSize.Y)
+			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
+				return nil
+			}
 		}
 
 		return scaleImage(pixels, width, height, img.ScaleMode)
@@ -107,7 +112,9 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 		aspects[img] = float32(origSize.X) / float32(origSize.Y)
 		// if the image specifies it should be original size we need at least that many pixels on screen
 		if img.FillMode == canvas.ImageFillOriginal {
-			checkImageMinSize(img, c, origSize.X, origSize.Y)
+			if !checkImageMinSize(img, c, origSize.X, origSize.Y) {
+				return nil
+			}
 		}
 
 		return scaleImage(img.Image, width, height, img.ScaleMode)
@@ -145,11 +152,14 @@ func drawSVGSafely(icon *oksvg.SvgIcon, raster *rasterx.Dasher) error {
 	return err
 }
 
-func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) {
+func checkImageMinSize(img *canvas.Image, c fyne.Canvas, pixX, pixY int) bool {
 	dpSize := fyne.NewSize(internal.UnscaleInt(c, pixX), internal.UnscaleInt(c, pixY))
 
 	if img.MinSize() != dpSize {
 		img.SetMinSize(dpSize)
 		canvas.Refresh(img) // force the initial size to be respected
+		return false
 	}
+
+	return true
 }

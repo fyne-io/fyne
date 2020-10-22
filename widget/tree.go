@@ -356,7 +356,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			if numDividers < len(r.dividers) {
 				divider = r.dividers[numDividers]
 			} else {
-				divider = widget.NewDivider()
+				divider = NewSeparator()
 				r.dividers = append(r.dividers, divider)
 			}
 			divider.Move(fyne.NewPos(theme.Padding(), y))
