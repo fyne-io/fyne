@@ -542,8 +542,11 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 	}
 
 	winWidth, _ := viewport.GetSize()
-	w.canvas.texScale = float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	w.canvas.Refresh(w.canvas.Content())                   // apply texture scale
+	newTexScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
+	if w.canvas.texScale != newTexScale {
+		w.canvas.texScale = newTexScale
+		w.canvas.Refresh(w.canvas.Content()) // reset graphics to apply texture scale
+	}
 }
 
 func (w *window) refresh(_ *glfw.Window) {
