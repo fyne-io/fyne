@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewSelect(t *testing.T) {
@@ -67,6 +68,51 @@ func TestSelect_ClearSelected(t *testing.T) {
 	assert.Equal(t, optClear, triggeredValue)
 }
 
+func TestSelect_Disable(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	sel := widget.NewSelect([]string{"Hi"}, func(string) {})
+	w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+	defer w.Close()
+	w.Resize(fyne.NewSize(200, 150))
+	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
+
+	sel.Disable()
+	test.AssertImageMatches(t, "select/disabled.png", w.Canvas().Capture())
+	test.Tap(sel)
+	assert.Nil(t, c.Overlays().Top(), "no pop-up for disabled Select")
+	test.AssertImageMatches(t, "select/disabled.png", w.Canvas().Capture())
+}
+
+func TestSelect_Disabled(t *testing.T) {
+	sel := widget.NewSelect([]string{"Hi"}, func(string) {})
+	assert.False(t, sel.Disabled())
+	sel.Disable()
+	assert.True(t, sel.Disabled())
+	sel.Enable()
+	assert.False(t, sel.Disabled())
+}
+
+func TestSelect_Enable(t *testing.T) {
+	selected := ""
+	sel := widget.NewSelect([]string{"Hi"}, func(sel string) {
+		selected = sel
+	})
+	sel.Disable()
+	require.True(t, sel.Disabled())
+
+	sel.Enable()
+	test.Tap(sel)
+	c := fyne.CurrentApp().Driver().CanvasForObject(sel)
+	ovl := c.Overlays().Top()
+	if assert.NotNil(t, ovl, "pop-up for enabled Select") {
+		test.TapCanvas(c, ovl.Position().Add(fyne.NewPos(theme.Padding()*2, theme.Padding()*2)))
+		assert.Equal(t, "Hi", selected, "Radio should have been re-enabled.")
+	}
+}
+
 func TestSelect_FocusRendering(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
@@ -92,6 +138,20 @@ func TestSelect_FocusRendering(t *testing.T) {
 		test.AssertImageMatches(t, "select/focus_focused_b_selected.png", c.Capture())
 		c.Unfocus()
 		test.AssertImageMatches(t, "select/focus_unfocused_b_selected.png", c.Capture())
+	})
+	t.Run("disable/enable focused", func(t *testing.T) {
+		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
+		w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+		defer w.Close()
+		w.Resize(fyne.NewSize(200, 150))
+
+		c := w.Canvas().(test.WindowlessCanvas)
+		c.FocusNext()
+		test.AssertImageMatches(t, "select/focus_focused_none_selected.png", c.Capture())
+		sel.Disable()
+		test.AssertImageMatches(t, "select/disabled.png", c.Capture())
+		sel.Enable()
+		test.AssertImageMatches(t, "select/focus_focused_none_selected.png", c.Capture())
 	})
 }
 

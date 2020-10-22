@@ -15,7 +15,7 @@ const defaultPlaceHolder string = "(Select one)"
 
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
-	BaseWidget
+	DisableableWidget
 
 	Selected    string
 	Options     []string
@@ -32,6 +32,7 @@ var _ fyne.Widget = (*Select)(nil)
 var _ desktop.Hoverable = (*Select)(nil)
 var _ fyne.Tappable = (*Select)(nil)
 var _ fyne.Focusable = (*Select)(nil)
+var _ fyne.Disableable = (*Select)(nil)
 
 var _ textPresenter = (*Select)(nil)
 
@@ -188,6 +189,10 @@ func (s *Select) SetSelectedIndex(index int) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (s *Select) Tapped(*fyne.PointEvent) {
+	if s.Disabled() {
+		return
+	}
+
 	s.tapped = true
 	defer func() { // TODO move to a real animation
 		time.Sleep(time.Millisecond * buttonTapDuration)
@@ -267,6 +272,9 @@ func (s *Select) textAlign() fyne.TextAlign {
 }
 
 func (s *Select) textColor() color.Color {
+	if s.Disabled() {
+		return theme.DisabledTextColor()
+	}
 	return theme.TextColor()
 }
 
@@ -353,6 +361,9 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) buttonColor() color.Color {
+	if s.combo.Disabled() {
+		return theme.ButtonColor()
+	}
 	if s.combo.focused {
 		return theme.FocusColor()
 	}
@@ -363,11 +374,12 @@ func (s *selectRenderer) buttonColor() color.Color {
 }
 
 func (s *selectRenderer) updateIcon() {
-	if false { // s.combo.down {
-		s.icon.Resource = theme.MenuDropUpIcon()
+	if s.combo.Disabled() {
+		s.icon.Resource = theme.NewDisabledResource(theme.MenuDropDownIcon())
 	} else {
 		s.icon.Resource = theme.MenuDropDownIcon()
 	}
+	s.icon.Refresh()
 }
 
 func (s *selectRenderer) updateLabel() {
