@@ -284,7 +284,8 @@ func (r *scrollContainerRenderer) Refresh() {
 		// push updated content object to baseRenderer
 		r.BaseRenderer.SetObjects([]fyne.CanvasObject{r.scroll.Content})
 	}
-	if r.oldMinSize == r.scroll.Content.MinSize() && r.scroll.Content.Size() == r.oldMinSize {
+	if r.oldMinSize == r.scroll.Content.MinSize() && r.oldMinSize == r.scroll.Content.Size() &&
+		(r.scroll.Size().Width <= r.oldMinSize.Width && r.scroll.Size().Height <= r.oldMinSize.Height) {
 		r.layoutBars(r.scroll.Size())
 		return
 	}
