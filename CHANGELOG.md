@@ -23,6 +23,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Support to install on iOS and android with 'fyne install'
 * Support asset bundling with go:generate
 * Add fyne release command for preparing signed apps
+* Add keyboard and focus support to Radio and Select widgets 
 
 ### Changed
 
@@ -56,6 +57,9 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Respect SelectEntry datta changes on refresh (#1462)
 * Incorrect SelectEntry dropdown button position (#1361)
 * don't allow both single and double tap events to fire (#1381)
+* Weird behaviour when resizing or minimizing a ScrollContainer (#1245)
+* Fix panic on NewTextGrid().Text()
+* Fix issue where scrollbar could jump after mousewheel scroll
 * Add missing raster support in software render
 * Respect GOOS/GOARCH in fyne command utilities
 * BSD support in build tools
