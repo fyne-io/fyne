@@ -167,8 +167,9 @@ func TestShowFileOpen(t *testing.T) {
 		chosen = file
 		openErr = err
 	}, win)
-	testData, _ := filepath.Abs("testdata")
-	dir, err := storage.ListerForURI(storage.NewFileURI(testData))
+	testDataPath, _ := filepath.Abs("testdata")
+	testData := storage.NewFileURI(testDataPath)
+	dir, err := storage.ListerForURI(testData)
 	if err != nil {
 		t.Error("Failed to open testdata dir", err)
 	}
@@ -191,7 +192,7 @@ func TestShowFileOpen(t *testing.T) {
 	assert.Greater(t, len(breadcrumb.Children), 0)
 
 	assert.Nil(t, err)
-	components := strings.Split(testData, "/")
+	components := strings.Split(testData.String()[7:], "/")
 	if components[0] == "" {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
 		components[0] = "/"
