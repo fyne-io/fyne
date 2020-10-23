@@ -134,13 +134,17 @@ public class GoNativeActivity extends NativeActivity {
 
     void doShowFileOpen(String mimes) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if ("application/x-directory".equals(mimes) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE); // ask for a directory picker if OS supports it
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             intent.setType("*/*");
             intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
         } else {
             intent.setType(mimes);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
         }
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
