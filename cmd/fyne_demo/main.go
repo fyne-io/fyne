@@ -165,13 +165,13 @@ func main() {
 		},
 		OnSelectionChanged: func(uid string) {
 			if tutorial, ok := tutorials[uid]; ok {
+				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(tutorial)
 			}
 		},
 	}
 	currentPref := a.Preferences().StringWithFallback(preferenceCurrentTutorial, "welcome")
 	tree.SetSelection(currentPref)
-	setTutorial(tutorials["welcome"]) // Remove after tree SetSelection callback is fixed
 
 	tutorial := container.NewVBox(
 		title,
@@ -187,5 +187,4 @@ func main() {
 	w.Resize(fyne.NewSize(860, 460))
 
 	w.ShowAndRun()
-	//	a.Preferences().SetString(preferenceCurrentTutorial, tree.Selection())
 }
