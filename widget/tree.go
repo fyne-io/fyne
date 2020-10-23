@@ -202,12 +202,9 @@ func (t *Tree) SetSelection(uid string) {
 				size = m
 			} else if !found {
 				// Root node is not rendered unless it has been customized
-				if t.Root == "" {
-					depth = depth - 1
-					if uid == "" {
-						// This is root node, skip
-						return
-					}
+				if t.Root == "" && uid == "" {
+					// This is root node, skip
+					return
 				}
 				// If this is not the first item, add a divider
 				if y > 0 {
