@@ -115,30 +115,40 @@ func TestList_Selection(t *testing.T) {
 	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
 	assert.Equal(t, list.selected, 1)
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
-	list.ClearSelection()
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
-	assert.Equal(t, list.selected, -1)
 }
 
-func TestList_SetSelection(t *testing.T) {
+func TestList_Select(t *testing.T) {
 	list := createList(1000)
 
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 0)
-	list.SetSelection(50)
+	list.Select(50)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).lastItemIndex, 50)
 	children := test.WidgetRenderer(list).(*listRenderer).children
 	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
 
-	list.SetSelection(5)
+	list.Select(5)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
 
-	list.SetSelection(6)
+	list.Select(6)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
 	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+}
+
+func TestList_Unselect(t *testing.T) {
+	list := createList(1000)
+
+	list.Select(10)
+	children := test.WidgetRenderer(list).(*listRenderer).children
+	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+
+	list.Unselect(10)
+	children = test.WidgetRenderer(list).(*listRenderer).children
+	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.Equal(t, list.selected, -1)
 }
 
 func TestList_DataChange(t *testing.T) {
