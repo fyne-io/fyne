@@ -44,7 +44,6 @@ func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
 
 	return container.NewVBox(
 		layout.NewSpacer(),
-		widget.NewLabelWithStyle("Welcome to the Fyne toolkit demo app", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		container.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
 
 		container.NewHBox(layout.NewSpacer(),
@@ -135,8 +134,10 @@ func main() {
 
 	content := container.NewMax()
 	title := widget.NewLabel("Component name")
+	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
 	setTutorial := func(t tutorial) {
 		title.SetText(t.title)
+		intro.SetText(t.intro)
 
 		view := t.view(w)
 		content.Objects = []fyne.CanvasObject{view}
@@ -173,18 +174,12 @@ func main() {
 	currentPref := a.Preferences().StringWithFallback(preferenceCurrentTutorial, "welcome")
 	tree.SetSelection(currentPref)
 
-	tutorial := container.NewVBox(
-		title,
-		canvas.NewLine(theme.DisabledTextColor()),
-		widget.NewLabel("An introduction would probably go\nhere, as well as a"),
-		widget.NewTextGridFromString("Code sample\nsyntax in the future"))
-	contentSplit := container.NewHSplit(content, tutorial)
-	contentSplit.Offset = 0.5
-
-	split := container.NewHSplit(tree, contentSplit)
+	tutorial := container.NewBorder(
+		container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, content)
+	split := container.NewHSplit(tree, tutorial)
 	split.Offset = 0.2
 	w.SetContent(split)
-	w.Resize(fyne.NewSize(860, 460))
+	w.Resize(fyne.NewSize(640, 460))
 
 	w.ShowAndRun()
 }

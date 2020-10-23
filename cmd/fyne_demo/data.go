@@ -6,28 +6,34 @@ import (
 )
 
 type tutorial struct {
-	title string // TODO add code intro text and snippets later
-	view  func(w fyne.Window) fyne.CanvasObject
+	title, intro string
+	view         func(w fyne.Window) fyne.CanvasObject
 }
 
 var (
 	tutorials = map[string]tutorial{
 		"welcome": {"Welcome",
+			"Welcome to the Fyne toolkit tutorials.\nChoose an area from the options on the left.",
 			welcomeScreen,
 		},
 		"graphics": {"Graphics",
+			"See the canvas and graphics capabilities",
 			screens.GraphicsScreen,
 		},
 		"widgets": {"Widgets",
+			"Browse the toolkit widgets",
 			screens.WidgetScreen,
 		},
 		"containers": {"Containers",
+			"Containers and collections",
 			screens.ContainerScreen,
 		},
 		"windows": {"Windows",
+			"Window and dialog demos",
 			screens.DialogScreen,
 		},
 		"advanced": {"Advanced",
+			"Debug and advanced information",
 			screens.AdvancedScreen,
 		},
 	}
