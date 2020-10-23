@@ -13,10 +13,7 @@ type Tutorial struct {
 var (
 	// Tutorials defines the metadata for each tutorial
 	Tutorials = map[string]Tutorial{
-		"welcome": {"Welcome",
-			"Welcome to the Fyne toolkit tutorials.\nChoose an area from the options on the left.",
-			welcomeScreen,
-		},
+		"welcome": {"Welcome", "", welcomeScreen},
 		"canvas": {"Canvas",
 			"See the canvas capabilities.",
 			canvasScreen,
