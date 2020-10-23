@@ -74,3 +74,15 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 		}, mobileFilter(filter))
 	}
 }
+
+// ShowFolderOpenPicker loads the native folder open dialog and calls back the chosen directory path as a ListableURI.
+func ShowFolderOpenPicker(callback func(fyne.ListableURI, error)) {
+	filter := storage.NewMimeTypeFileFilter([]string{"application/x-directory"})
+	drv := fyne.CurrentApp().Driver().(*mobileDriver)
+	if a, ok := drv.app.(hasPicker); ok {
+		a.ShowFileOpenPicker(func(uri string, _ func()) {
+			f, err := drv.ListerForURI(storage.NewURI(uri))
+			callback(f, err)
+		}, mobileFilter(filter))
+	}
+}

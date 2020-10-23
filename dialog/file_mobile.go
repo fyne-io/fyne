@@ -23,7 +23,11 @@ func isHidden(file fyne.URI) bool {
 }
 
 func fileOpenOSOverride(f *FileDialog) bool {
-	gomobile.ShowFileOpenPicker(f.callback.(func(fyne.URIReadCloser, error)), f.filter)
+	if f.isDirectory() {
+		gomobile.ShowFolderOpenPicker(f.callback.(func(fyne.ListableURI, error)))
+	} else {
+		gomobile.ShowFileOpenPicker(f.callback.(func(fyne.URIReadCloser, error)), f.filter)
+	}
 	return true
 }
 

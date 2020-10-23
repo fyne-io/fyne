@@ -32,6 +32,7 @@ type Tree struct {
 	OnBranchClosed     func(uid string)                                      // Called when a Branch is closed
 	OnSelectionChanged func(uid string)                                      // Called when the Node with the given Unique ID is selected.
 
+	scroller      *ScrollContainer
 	open          map[string]bool
 	branchMinSize fyne.Size
 	leafMinSize   fyne.Size
@@ -101,6 +102,7 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	c := newTreeContent(t)
 	s := NewScrollContainer(c)
+	t.scroller = s
 	r := &treeRenderer{
 		BaseRenderer: widget.NewBaseRenderer([]fyne.CanvasObject{s}),
 		tree:         t,
@@ -186,6 +188,40 @@ func (t *Tree) Selection() string {
 // SetSelection updates the current selection to the node with the given Unique ID.
 func (t *Tree) SetSelection(uid string) {
 	t.selected = uid
+	if t.selected != TreeNoSelection && t.scroller != nil {
+		var found bool
+		var y int
+		var size fyne.Size
+		t.walkAll(func(uid string, branch bool, depth int) {
+			m := t.leafMinSize
+			if branch {
+				m = t.branchMinSize
+			}
+			if uid == t.selected {
+				found = true
+				size = m
+			} else if !found {
+				// Root node is not rendered unless it has been customized
+				if t.Root == "" && uid == "" {
+					// This is root node, skip
+					return
+				}
+				// If this is not the first item, add a divider
+				if y > 0 {
+					y += treeDividerHeight
+				}
+
+				y += m.Height
+			}
+		})
+		if y < t.scroller.Offset.Y {
+			t.scroller.Offset.Y = y
+		} else if y+size.Height > t.scroller.Offset.Y+t.scroller.Size().Height {
+			t.scroller.Offset.Y = y + size.Height - t.scroller.Size().Height
+		}
+		t.scroller.onOffsetChanged()
+		// TODO Setting a node as selected should open all parents if they aren't already
+	}
 	t.Refresh()
 	if f := t.OnSelectionChanged; f != nil {
 		f(uid)

@@ -97,6 +97,18 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 				fileSaved(writer)
 			}, win)
 		}),
+		widget.NewButton("Folder Open", func() {
+			dialog.ShowFolderOpen(func(list fyne.ListableURI, err error) {
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+				if list == nil {
+					return
+				}
+				dialog.ShowInformation("Folder Open", list.String(), win)
+			}, win)
+		}),
 		widget.NewButton("Color Picker", func() {
 			picker := dialog.NewColorPicker("Pick a Color", "What is your favorite color?", func(c color.Color) {
 				colorPicked(c, win)
