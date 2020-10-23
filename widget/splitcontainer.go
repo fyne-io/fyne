@@ -162,6 +162,7 @@ func (r *splitContainerRenderer) MinSize() fyne.Size {
 
 func (r *splitContainerRenderer) Refresh() {
 	r.Layout(r.split.Size())
+	canvas.Refresh(r.split)
 }
 
 func (r *splitContainerRenderer) Objects() []fyne.CanvasObject {
