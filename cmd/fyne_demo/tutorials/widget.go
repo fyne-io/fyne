@@ -244,13 +244,7 @@ func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
 
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
-
-	// TODO make sure this resets when we hide etc...
-	//	if t.Content == progress {
 	startProgress()
-	//	} else {
-	//		stopProgress()
-	//	}
 
 	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,
@@ -329,6 +323,9 @@ func startProgress() {
 
 		progress.SetValue(1)
 		fprogress.SetValue(1)
+
+		// TODO make sure this resets when we hide etc...
+		stopProgress()
 	}()
 	infProgress.Start()
 }
