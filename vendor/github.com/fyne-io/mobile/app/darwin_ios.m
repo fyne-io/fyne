@@ -299,12 +299,17 @@ void showFileOpenPicker(char* mimes, char *exts) {
     NSMutableArray *docTypes = [NSMutableArray array];
     if (mimes != NULL && strlen(mimes) > 0) {
         NSString *mimeList = [NSString stringWithUTF8String:mimes];
-        NSArray *mimeItems = [mimeList componentsSeparatedByString:@"|"];
 
-        for (NSString *mime in mimeItems)  {
-            CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
+        if ([mimeList isEqualToString:@"application/x-directory"]) {
+            [docTypes addObject:kUTTypeFolder];
+        } else {
+            NSArray *mimeItems = [mimeList componentsSeparatedByString:@"|"];
 
-            [docTypes addObject:UTI];
+            for (NSString *mime in mimeItems)  {
+                CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
+
+                [docTypes addObject:UTI];
+            }
         }
     } else if (exts != NULL && strlen(exts) > 0) {
         NSString *extList = [NSString stringWithUTF8String:exts];
