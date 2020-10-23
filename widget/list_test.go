@@ -191,8 +191,8 @@ func TestList_SmallList(t *testing.T) {
 		func() fyne.CanvasObject {
 			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 		},
-		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 		},
 	)
 	w := test.NewWindow(list)
@@ -247,8 +247,8 @@ func TestList_RemoveItem(t *testing.T) {
 		func() fyne.CanvasObject {
 			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 		},
-		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 		},
 	)
 	w := test.NewWindow(list)
@@ -285,8 +285,8 @@ func createList(items int) *List {
 		func() fyne.CanvasObject {
 			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 		},
-		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 		},
 	)
 	list.Resize(fyne.NewSize(200, 1000))
@@ -298,7 +298,7 @@ func changeData(list *List) {
 	list.Length = func() int {
 		return len(data)
 	}
-	list.UpdateItem = func(index int, item fyne.CanvasObject) {
-		item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+	list.UpdateItem = func(id ListItemID, item fyne.CanvasObject) {
+		item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 	}
 }
