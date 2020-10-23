@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -164,10 +163,17 @@ func TestShowFileOpen(t *testing.T) {
 	var chosen fyne.URIReadCloser
 	var openErr error
 	win := test.NewWindow(widget.NewLabel("Content"))
-	ShowFileOpen(func(file fyne.URIReadCloser, err error) {
+	d := NewFileOpen(func(file fyne.URIReadCloser, err error) {
 		chosen = file
 		openErr = err
 	}, win)
+	testData, _ := filepath.Abs("testdata")
+	dir, err := storage.ListerForURI(storage.NewFileURI(testData))
+	if err != nil {
+		t.Error("Failed to open testdata dir", err)
+	}
+	d.SetLocation(dir)
+	d.Show()
 
 	popup := win.Canvas().Overlays().Top().(*widget.PopUp)
 	defer win.Canvas().Overlays().Remove(popup)
@@ -184,21 +190,14 @@ func TestShowFileOpen(t *testing.T) {
 	breadcrumb := ui.Objects[3].(*fyne.Container).Objects[0].(*widget.ScrollContainer).Content.(*widget.Box)
 	assert.Greater(t, len(breadcrumb.Children), 0)
 
-	home, err := os.UserHomeDir()
-	if runtime.GOOS == "windows" {
-		// on windows os.Gethome() returns '\'
-		home = strings.ReplaceAll(home, "\\", "/")
-	}
-	t.Logf("home='%s'", home)
 	assert.Nil(t, err)
-	components := strings.Split(home, "/")
+	components := strings.Split(testData, "/")
 	if components[0] == "" {
 		// Splitting a unix path will give a "" at the beginning, but we actually want the path bar to show "/".
 		components[0] = "/"
 	}
 	if assert.Equal(t, len(components), len(breadcrumb.Children)) {
 		for i := range components {
-			t.Logf("i=%d components[i]='%s' breadcrumb...Text[i]='%s'", i, components[i], breadcrumb.Children[i].(*widget.Button).Text)
 			assert.Equal(t, components[i], breadcrumb.Children[i].(*widget.Button).Text)
 		}
 	}
@@ -216,14 +215,7 @@ func TestShowFileOpen(t *testing.T) {
 			target = icon.(*fileDialogItem)
 		}
 	}
-
-	if target == nil {
-		log.Println("Could not find a file in the default directory to tap :(")
-		return
-	}
-
-	// This will only execute if we have a file in the home path.
-	// Until we have a way to set the directory of an open file dialog.
+	assert.NotNil(t, target, "Failed to find file in testdata")
 	test.Tap(target)
 	assert.Equal(t, target.location.Name(), nameLabel.Text)
 	assert.False(t, open.Disabled())
