@@ -338,7 +338,7 @@ func TestTree_ScrollToSelection(t *testing.T) {
 	tree.scroller.Offset.Y = 0 // Showing "A" & "B"
 	tree.Refresh()             // Force layout
 	tree.SetSelection("F")
-	// Tree should scroll to the top to show F
+	// Tree should scroll to the bottom to show F
 	assert.Equal(t, m.Height*4+treeDividerHeight*3, tree.scroller.Offset.Y)
 }
 
