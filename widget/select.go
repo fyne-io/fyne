@@ -63,10 +63,6 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
 	}
-	text := s.Selected
-	if text == "" {
-		text = s.PlaceHolder
-	}
 	txtProv := newTextProvider(s.Selected, s)
 	txtProv.ExtendBaseWidget(txtProv)
 
