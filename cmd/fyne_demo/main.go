@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/cmd/fyne_settings/settings"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
@@ -88,6 +89,7 @@ func main() {
 	content := container.NewMax()
 	title := widget.NewLabel("Component name")
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
+	intro.Wrapping = fyne.TextWrapWord
 	setTutorial := func(t tutorials.Tutorial) {
 		title.SetText(t.Title)
 		intro.SetText(t.Intro)
@@ -96,6 +98,19 @@ func main() {
 		content.Objects = []fyne.CanvasObject{view}
 		content.Refresh()
 	}
+
+	tutorial := container.NewBorder(
+		container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, content)
+	split := container.NewHSplit(makeNav(setTutorial), tutorial)
+	split.Offset = 0.2
+	w.SetContent(split)
+	w.Resize(fyne.NewSize(640, 460))
+
+	w.ShowAndRun()
+}
+
+func makeNav(setTutorial func(tutorial tutorials.Tutorial)) fyne.CanvasObject {
+	a := fyne.CurrentApp()
 
 	tree := &widget.Tree{
 		ChildUIDs: func(uid string) []string {
@@ -107,7 +122,7 @@ func main() {
 			return ok && len(children) > 0
 		},
 		CreateNode: func(branch bool) fyne.CanvasObject {
-			return widget.NewLabel("")
+			return widget.NewLabel("Collection Widgets")
 		},
 		UpdateNode: func(uid string, branch bool, obj fyne.CanvasObject) {
 			t, ok := tutorials.Tutorials[uid]
@@ -127,12 +142,14 @@ func main() {
 	currentPref := a.Preferences().StringWithFallback(preferenceCurrentTutorial, "welcome")
 	tree.SetSelection(currentPref)
 
-	tutorial := container.NewBorder(
-		container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, content)
-	split := container.NewHSplit(tree, tutorial)
-	split.Offset = 0.2
-	w.SetContent(split)
-	w.Resize(fyne.NewSize(640, 460))
+	themes := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
+		widget.NewButton("Dark", func() {
+			a.Settings().SetTheme(theme.DarkTheme())
+		}),
+		widget.NewButton("Light", func() {
+			a.Settings().SetTheme(theme.LightTheme())
+		}),
+	)
 
-	w.ShowAndRun()
+	return container.NewBorder(nil, themes, nil, nil, tree)
 }
