@@ -1,4 +1,4 @@
-package screens
+package tutorials
 
 import (
 	"errors"

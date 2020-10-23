@@ -7,66 +7,19 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
-	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/cmd/fyne_demo/data"
+	"fyne.io/fyne/cmd/fyne_demo/tutorials"
 	"fyne.io/fyne/cmd/fyne_settings/settings"
 	"fyne.io/fyne/container"
-	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
 const preferenceCurrentTutorial = "currentTutorial"
 
-func parseURL(urlStr string) *url.URL {
-	link, err := url.Parse(urlStr)
-	if err != nil {
-		fyne.LogError("Could not parse URL", err)
-	}
-
-	return link
-}
-
 func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)
 	}
-}
-
-func welcomeScreen(_ fyne.Window) fyne.CanvasObject {
-	a := fyne.CurrentApp()
-	logo := canvas.NewImageFromResource(data.FyneScene)
-	if fyne.CurrentDevice().IsMobile() {
-		logo.SetMinSize(fyne.NewSize(171, 125))
-	} else {
-		logo.SetMinSize(fyne.NewSize(228, 167))
-	}
-
-	return container.NewVBox(
-		layout.NewSpacer(),
-		container.NewHBox(layout.NewSpacer(), logo, layout.NewSpacer()),
-
-		container.NewHBox(layout.NewSpacer(),
-			widget.NewHyperlink("fyne.io", parseURL("https://fyne.io/")),
-			widget.NewLabel("-"),
-			widget.NewHyperlink("documentation", parseURL("https://fyne.io/develop/")),
-			widget.NewLabel("-"),
-			widget.NewHyperlink("sponsor", parseURL("https://github.com/sponsors/fyne-io")),
-			layout.NewSpacer(),
-		),
-		layout.NewSpacer(),
-
-		widget.NewCard("Choose theme", "",
-			fyne.NewContainerWithLayout(layout.NewGridLayout(2),
-				widget.NewButton("Dark", func() {
-					a.Settings().SetTheme(theme.DarkTheme())
-				}),
-				widget.NewButton("Light", func() {
-					a.Settings().SetTheme(theme.LightTheme())
-				}),
-			),
-		),
-	)
 }
 
 func main() {
@@ -135,21 +88,21 @@ func main() {
 	content := container.NewMax()
 	title := widget.NewLabel("Component name")
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
-	setTutorial := func(t tutorial) {
-		title.SetText(t.title)
-		intro.SetText(t.intro)
+	setTutorial := func(t tutorials.Tutorial) {
+		title.SetText(t.Title)
+		intro.SetText(t.Intro)
 
-		view := t.view(w)
+		view := t.View(w)
 		content.Objects = []fyne.CanvasObject{view}
 		content.Refresh()
 	}
 
 	tree := &widget.Tree{
 		ChildUIDs: func(uid string) []string {
-			return tutorialTree[uid]
+			return tutorials.TutorialIndex[uid]
 		},
 		IsBranch: func(uid string) bool {
-			children, ok := tutorialTree[uid]
+			children, ok := tutorials.TutorialIndex[uid]
 
 			return ok && len(children) > 0
 		},
@@ -157,17 +110,17 @@ func main() {
 			return widget.NewLabel("")
 		},
 		UpdateNode: func(uid string, branch bool, obj fyne.CanvasObject) {
-			tutorial, ok := tutorials[uid]
+			t, ok := tutorials.Tutorials[uid]
 			if !ok {
 				fyne.LogError("Missing tutorial panel: "+uid, nil)
 				return
 			}
-			obj.(*widget.Label).SetText(tutorial.title)
+			obj.(*widget.Label).SetText(t.Title)
 		},
 		OnSelectionChanged: func(uid string) {
-			if tutorial, ok := tutorials[uid]; ok {
+			if t, ok := tutorials.Tutorials[uid]; ok {
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
-				setTutorial(tutorial)
+				setTutorial(t)
 			}
 		},
 	}
