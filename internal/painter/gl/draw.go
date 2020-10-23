@@ -67,8 +67,7 @@ func (p *glPainter) drawTextureWithDetails(o fyne.CanvasObject, creator func(can
 	if img, ok := o.(*canvas.Image); ok {
 		aspect = painter.GetAspect(img)
 		if aspect == 0 {
-			fyne.LogError("Missing aspect ratio for loaded image", nil)
-			aspect = 1 // fallback, should not occur
+			aspect = 1 // fallback, should not occur - normally an image load error
 		}
 	}
 	points := p.rectCoords(size, pos, frame, fill, aspect, pad)
