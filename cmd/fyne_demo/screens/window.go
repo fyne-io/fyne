@@ -174,11 +174,11 @@ func loadDialogGroup(win fyne.Window) *widget.Card {
 		}),
 		widget.NewButton("Folder Open", func() {
 			dialog.ShowFolderOpen(func(list fyne.ListableURI, err error) {
-				if list == nil {
-					return
-				}
 				if err != nil {
 					dialog.ShowError(err, win)
+					return
+				}
+				if list == nil {
 					return
 				}
 				dialog.ShowInformation("Folder Open", list.String(), win)
