@@ -1,16 +1,12 @@
 package widget
 
 import (
-	"io/ioutil"
-	"os"
-	"path"
 	"testing"
 	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 
@@ -102,44 +98,6 @@ func TestTree(t *testing.T) {
 		assert.Equal(t, "d", leaves[2])
 		assert.Equal(t, "e", leaves[3])
 		assert.Equal(t, "f", leaves[4])
-	})
-	t.Run("NewTreeWithFiles", func(t *testing.T) {
-		tempDir, err := ioutil.TempDir("", "test")
-		assert.NoError(t, err)
-		defer os.RemoveAll(tempDir)
-		err = os.MkdirAll(path.Join(tempDir, "A"), os.ModePerm)
-		assert.NoError(t, err)
-		err = os.MkdirAll(path.Join(tempDir, "B"), os.ModePerm)
-		assert.NoError(t, err)
-		err = ioutil.WriteFile(path.Join(tempDir, "B", "C"), []byte("c"), os.ModePerm)
-		assert.NoError(t, err)
-
-		root := storage.NewURI("file://" + tempDir)
-		tree := NewTreeWithFiles(root)
-		tree.OpenAllBranches()
-		var branches []string
-		var leaves []string
-		tree.walkAll(func(uid string, branch bool, depth int) {
-			if branch {
-				branches = append(branches, uid)
-			} else {
-				leaves = append(leaves, uid)
-			}
-		})
-		assert.Equal(t, 3, len(branches))
-		assert.Equal(t, root.String(), branches[0]) // Root
-		b1, err := storage.Child(root, "A")
-		assert.NoError(t, err)
-		assert.Equal(t, b1.String(), branches[1])
-		b2, err := storage.Child(root, "B")
-		assert.NoError(t, err)
-		assert.Equal(t, b2.String(), branches[2])
-		assert.Equal(t, 1, len(leaves))
-		l1, err := storage.Child(root, "B")
-		assert.NoError(t, err)
-		l1, err = storage.Child(l1, "C")
-		assert.NoError(t, err)
-		assert.Equal(t, l1.String(), leaves[0])
 	})
 	t.Run("NewTreeWithStrings", func(t *testing.T) {
 		data := make(map[string][]string)
@@ -317,6 +275,37 @@ func TestTree_MinSize(t *testing.T) {
 
 			assertTreeContentMinSize(t, tree, tt.want)
 		})
+	}
+}
+
+func TestTree_Selection(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+
+	selection := make(chan string, 2)
+	tree.OnSelectionChanged = func(uid string) {
+		selection <- uid
+	}
+
+	tree.SetSelection("A")
+	assert.Equal(t, "A", tree.Selection())
+	select {
+	case s := <-selection:
+		assert.Equal(t, "A", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have occured")
+	}
+
+	tree.ClearSelection()
+	assert.Equal(t, TreeNoSelection, tree.Selection())
+	select {
+	case s := <-selection:
+		assert.Equal(t, TreeNoSelection, s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have been cleared")
 	}
 }
 

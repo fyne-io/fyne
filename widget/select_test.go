@@ -67,6 +67,128 @@ func TestSelect_ClearSelected(t *testing.T) {
 	assert.Equal(t, optClear, triggeredValue)
 }
 
+func TestSelect_FocusRendering(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	t.Run("gain/lose focus", func(t *testing.T) {
+		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
+		w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+		defer w.Close()
+		w.Resize(fyne.NewSize(200, 150))
+
+		c := w.Canvas()
+		test.AssertImageMatches(t, "select/focus_unfocused_none_selected.png", c.Capture())
+		c.Focus(sel)
+		test.AssertImageMatches(t, "select/focus_focused_none_selected.png", c.Capture())
+		c.Unfocus()
+		test.AssertImageMatches(t, "select/focus_unfocused_none_selected.png", c.Capture())
+
+		sel.SetSelected("Option B")
+		assert.Equal(t, "Option B", sel.Selected)
+		test.AssertImageMatches(t, "select/focus_unfocused_b_selected.png", c.Capture())
+		c.Focus(sel)
+		test.AssertImageMatches(t, "select/focus_focused_b_selected.png", c.Capture())
+		c.Unfocus()
+		test.AssertImageMatches(t, "select/focus_unfocused_b_selected.png", c.Capture())
+	})
+}
+
+func TestSelect_KeyboardControl(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+	test.ApplyTheme(t, theme.LightTheme())
+
+	t.Run("activate pop-up", func(t *testing.T) {
+		sel := widget.NewSelect([]string{"Option A", "Option B"}, nil)
+		w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+		defer w.Close()
+		w.Resize(fyne.NewSize(150, 200))
+		c := w.Canvas()
+		c.Focus(sel)
+
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+		test.TapCanvas(c, fyne.NewPos(0, 0))
+
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyUp})
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+		test.TapCanvas(c, fyne.NewPos(0, 0))
+
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected_popup.png", c.Capture())
+		test.TapCanvas(c, fyne.NewPos(0, 0))
+
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnter})
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+	})
+
+	t.Run("traverse options without pop-up", func(t *testing.T) {
+		sel := widget.NewSelect([]string{"Option A", "Option B", "Option C"}, nil)
+		w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+		defer w.Close()
+		w.Resize(fyne.NewSize(150, 200))
+		c := w.Canvas()
+		c.Focus(sel)
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+		assert.Equal(t, "Option C", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_c_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+		assert.Equal(t, "Option B", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_b_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+		assert.Equal(t, "Option A", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_a_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+		assert.Equal(t, "Option C", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_c_selected.png", c.Capture())
+
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+		assert.Equal(t, "Option A", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_a_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+		assert.Equal(t, "Option B", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_b_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+		assert.Equal(t, "Option C", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_c_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+		assert.Equal(t, "Option A", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_a_selected.png", c.Capture())
+	})
+
+	t.Run("trying to traverse empty options without pop-up", func(t *testing.T) {
+		sel := widget.NewSelect([]string{}, nil)
+		w := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), sel))
+		defer w.Close()
+		w.Resize(fyne.NewSize(150, 200))
+		c := w.Canvas()
+		c.Focus(sel)
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+		assert.Equal(t, "", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+		assert.Equal(t, "", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+		assert.Equal(t, "", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+		sel.TypedKey(&fyne.KeyEvent{Name: fyne.KeyRight})
+		assert.Equal(t, "", sel.Selected)
+		test.AssertImageMatches(t, "select/kbdctrl_none_selected.png", c.Capture())
+	})
+}
+
 func TestSelect_Move(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()

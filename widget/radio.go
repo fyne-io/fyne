@@ -14,6 +14,8 @@ const noRadioItemIndex = -1
 
 // Radio widget has a list of text labels and radio check icons next to each.
 // Changing the selection (only one can be selected) will trigger the changed func.
+//
+// Deprecated: Use RadioGroup instead.
 type Radio struct {
 	DisableableWidget
 	Horizontal bool
@@ -29,6 +31,8 @@ type Radio struct {
 var _ fyne.Widget = (*Radio)(nil)
 
 // NewRadio creates a new radio widget with the set options and change handler
+//
+// Deprecated: Use NewRadioGroup instead.
 func NewRadio(options []string, changed func(string)) *Radio {
 	r := &Radio{
 		DisableableWidget: DisableableWidget{},

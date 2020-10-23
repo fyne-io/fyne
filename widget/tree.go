@@ -6,10 +6,11 @@ import (
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
-	"fyne.io/fyne/layout"
-	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 )
+
+// TreeNoSelection is the Unique ID used to indicate that nothing is currently selected.
+const TreeNoSelection = "nothing-selected"
 
 const treeDividerHeight = 1
 
@@ -47,68 +48,6 @@ func NewTree(childUIDs func(string) []string, isBranch func(string) bool, create
 	return t
 }
 
-// NewTreeWithFiles creates a new tree with the given file system URI.
-func NewTreeWithFiles(root fyne.URI) (t *Tree) {
-	t = &Tree{
-		Root: root.String(),
-		ChildUIDs: func(uid string) (c []string) {
-			luri, err := storage.ListerForURI(storage.NewURI(uid))
-			if err != nil {
-				fyne.LogError("Unable to get lister for "+uid, err)
-			} else {
-				uris, err := luri.List()
-				if err != nil {
-					fyne.LogError("Unable to list "+luri.String(), err)
-				} else {
-					for _, u := range uris {
-						c = append(c, u.String())
-					}
-				}
-			}
-			return
-		},
-		IsBranch: func(uid string) bool {
-			_, err := storage.ListerForURI(storage.NewURI(uid))
-			return err == nil
-		},
-		CreateNode: func(branch bool) fyne.CanvasObject {
-			var icon fyne.CanvasObject
-			if branch {
-				icon = NewIcon(nil)
-			} else {
-				icon = NewFileIcon(nil)
-			}
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, NewLabel("Template Object"))
-		},
-	}
-	t.UpdateNode = func(uid string, branch bool, node fyne.CanvasObject) {
-		uri := storage.NewURI(uid)
-		c := node.(*fyne.Container)
-		if branch {
-			var r fyne.Resource
-			if t.IsBranchOpen(uid) {
-				// Set open folder icon
-				r = theme.FolderOpenIcon()
-			} else {
-				// Set folder icon
-				r = theme.FolderIcon()
-			}
-			c.Objects[0].(*Icon).SetResource(r)
-		} else {
-			// Set file uri to update icon
-			c.Objects[0].(*FileIcon).SetURI(uri)
-		}
-		l := c.Objects[1].(*Label)
-		if t.Root == uid {
-			l.SetText(uid)
-		} else {
-			l.SetText(uri.Name())
-		}
-	}
-	t.ExtendBaseWidget(t)
-	return
-}
-
 // NewTreeWithStrings creates a new tree with the given string map.
 // Data must contain a mapping for the root, which defaults to empty string ("").
 func NewTreeWithStrings(data map[string][]string) (t *Tree) {
@@ -130,6 +69,11 @@ func NewTreeWithStrings(data map[string][]string) (t *Tree) {
 	}
 	t.ExtendBaseWidget(t)
 	return
+}
+
+// ClearSelection clears the current selection.
+func (t *Tree) ClearSelection() {
+	t.SetSelection(TreeNoSelection)
 }
 
 // CloseAllBranches closes all branches in the tree.
@@ -234,10 +178,18 @@ func (t *Tree) Resize(size fyne.Size) {
 	t.Refresh() // trigger a redraw
 }
 
+// Selection returns the Unique ID of the currently selected node, or TreeNoSelection if nothing is selected.
+func (t *Tree) Selection() string {
+	return t.selected
+}
+
 // SetSelection updates the current selection to the node with the given Unique ID.
 func (t *Tree) SetSelection(uid string) {
 	t.selected = uid
 	t.Refresh()
+	if f := t.OnSelectionChanged; f != nil {
+		f(uid)
+	}
 }
 
 // ToggleBranch flips the state of the branch with the given Unique ID.
@@ -404,7 +356,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			if numDividers < len(r.dividers) {
 				divider = r.dividers[numDividers]
 			} else {
-				divider = widget.NewDivider()
+				divider = NewSeparator()
 				r.dividers = append(r.dividers, divider)
 			}
 			divider.Move(fyne.NewPos(theme.Padding(), y))
@@ -617,9 +569,6 @@ func (n *treeNode) MouseOut() {
 
 func (n *treeNode) Tapped(*fyne.PointEvent) {
 	n.tree.SetSelection(n.uid)
-	if f := n.tree.OnSelectionChanged; f != nil {
-		f(n.uid)
-	}
 }
 
 func (n *treeNode) partialRefresh() {

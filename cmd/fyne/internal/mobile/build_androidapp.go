@@ -23,7 +23,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string, iconPath, appName string) (map[string]bool, error) {
+func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []string,
+	iconPath, appName, version string, build int) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot()
 	if err != nil {
 		return nil, err
@@ -48,6 +49,8 @@ func goAndroidBuild(pkg *packages.Package, bundleID string, androidArchs []strin
 			Name:        strings.Title(appName),
 			Debug:       !buildRelease,
 			LibName:     libName,
+			Version:     version,
+			Build:       build,
 		})
 		if err != nil {
 			return nil, err

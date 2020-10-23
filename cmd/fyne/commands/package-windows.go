@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	"image"
@@ -18,7 +18,8 @@ import (
 )
 
 type windowsData struct {
-	Name string
+	Name            string
+	CombinedVersion string
 }
 
 func (p *packager) packageWindows() error {
@@ -58,7 +59,10 @@ func (p *packager) packageWindows() error {
 		manifestGenerated = true
 		manifestFile, _ := os.Create(manifest)
 
-		tplData := windowsData{Name: p.name}
+		tplData := windowsData{
+			Name:            p.name,
+			CombinedVersion: p.combinedVersion(),
+		}
 		err := templates.ManifestWindows.Execute(manifestFile, tplData)
 		if err != nil {
 			return errors.Wrap(err, "Failed to write manifest template")

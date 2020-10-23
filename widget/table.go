@@ -223,7 +223,7 @@ func (t *tableRenderer) moveIndicators() {
 
 	if len(t.dividers) < colDivs+rowDivs {
 		for i := len(t.dividers); i < colDivs+rowDivs; i++ {
-			t.dividers = append(t.dividers, widget.NewDivider())
+			t.dividers = append(t.dividers, NewSeparator())
 		}
 
 		obj := []fyne.CanvasObject{t.scroll, t.colMarker, t.rowMarker, t.colHover, t.rowHover}
@@ -360,13 +360,22 @@ func (c *tableCells) hoverAt(pos fyne.Position) {
 	c.t.hoveredColumn = pos.X / (c.cellSize.Width + tableDividerThickness)
 	c.t.hoveredRow = pos.Y / (c.cellSize.Height + tableDividerThickness)
 
+	rows, cols := 0, 0
+	if f := c.t.Length; f != nil {
+		rows, cols = c.t.Length()
+	}
+	if c.t.hoveredColumn >= cols || c.t.hoveredRow >= rows {
+		c.hoverOut()
+		return
+	}
+
 	if c.t.moveCallback != nil {
 		c.t.moveCallback()
 	}
 }
 
 func (c *tableCells) hoverOut() {
-	c.t.hoveredRow = -1
+	c.t.hoveredColumn = -1
 	c.t.hoveredRow = -1
 
 	if c.t.moveCallback != nil {

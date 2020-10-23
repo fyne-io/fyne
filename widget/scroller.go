@@ -75,6 +75,7 @@ func (b *scrollBar) Cursor() desktop.Cursor {
 }
 
 func (b *scrollBar) DragEnd() {
+	b.isDragged = false
 }
 
 func (b *scrollBar) Dragged(e *fyne.DragEvent) {
@@ -283,7 +284,8 @@ func (r *scrollContainerRenderer) Refresh() {
 		// push updated content object to baseRenderer
 		r.BaseRenderer.SetObjects([]fyne.CanvasObject{r.scroll.Content})
 	}
-	if r.oldMinSize == r.scroll.Content.MinSize() && r.scroll.Content.Size() == r.oldMinSize {
+	if r.oldMinSize == r.scroll.Content.MinSize() && r.oldMinSize == r.scroll.Content.Size() &&
+		(r.scroll.Size().Width <= r.oldMinSize.Width && r.scroll.Size().Height <= r.oldMinSize.Height) {
 		r.layoutBars(r.scroll.Size())
 		return
 	}
@@ -335,8 +337,7 @@ func (r *scrollContainerRenderer) updatePosition() {
 
 	if r.scroll.Direction != ScrollHorizontalOnly {
 		canvas.Refresh(r.vertArea) // this is required to force the canvas to update, we have no "Redraw()"
-	}
-	if r.scroll.Direction != ScrollVerticalOnly {
+	} else {
 		canvas.Refresh(r.horizArea) // this is required like above but if we are horizontal
 	}
 }
