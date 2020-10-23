@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -12,7 +13,11 @@ import (
 
 // collectionScreen loads a tab panel for collection widgets
 func collectionScreen(_ fyne.Window) fyne.CanvasObject {
-	return widget.NewLabel("Info about what these are, their design")
+	content := container.NewVBox(
+		widget.NewLabelWithStyle("func Length() int", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}),
+		widget.NewLabelWithStyle("func CreateItem() fyne.CanvasObject", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}),
+		widget.NewLabelWithStyle("func UpdateItem(ListItemID, fyne.CanvasObject)", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}))
+	return container.NewCenter(content)
 }
 
 func makeListTab(_ fyne.Window) fyne.CanvasObject {

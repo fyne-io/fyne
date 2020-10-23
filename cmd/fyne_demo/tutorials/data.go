@@ -26,7 +26,9 @@ var (
 			iconScreen,
 		},
 		"containers": {"Containers",
-			"Containers and collections.",
+			"Containers group other widgets and canvas objects, organising according to their layout.\n" +
+				"Standard containers are illustrated in this section, but developers can also provide custom " +
+				"layouts using the fyne.NewContainerWithLayout() constructor.",
 			containerScreen,
 		},
 		"apptabs": {"AppTabs Container",
@@ -58,7 +60,8 @@ var (
 			makeScrollTab,
 		},
 		"widgets": {"Widgets",
-			"Browse the toolkit widgets.",
+			"In this section you can see the features available in the toolkit widget set.\n" +
+				"Expand the tree on the left to browse the individual tutorial elements.",
 			widgetScreen,
 		},
 		"accordion": {"Accordion",
@@ -94,7 +97,9 @@ var (
 			makeProgressTab,
 		},
 		"collections": {"Collection Widgets",
-			"Learn about the collection widgets.",
+			"Collection widgets provide an efficient way to present lots of content.\n" +
+				"The List, Table and Tree provide a cache and re-use mechanism that make it possible to scroll through thousands of elements.\n" +
+				"Use this for large data sets or for lists that can expand as users scroll.",
 			collectionScreen,
 		},
 		"list": {"List Collection",

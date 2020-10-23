@@ -344,7 +344,11 @@ func stopProgress() {
 
 // widgetScreen shows a panel containing widget demos
 func widgetScreen(_ fyne.Window) fyne.CanvasObject {
-	return widget.NewLabel("Some information about widgets")
+	content := container.NewVBox(
+		widget.NewLabel("Labels"),
+		widget.NewButtonWithIcon("Icons", theme.HomeIcon(), func() {}),
+		widget.NewSlider(0, 1))
+	return container.NewCenter(content)
 }
 
 type contextMenuButton struct {
