@@ -56,7 +56,7 @@ func Test_gLDriver_AbsolutePositionForObject(t *testing.T) {
 	// 0 is the shadow
 	// 1 is the menu bar’s background
 	// 2 is the container holding the items
-	mbarCont := cache.Renderer(movl.(fyne.Widget)).Objects()[2].(*fyne.Container)
+	mbarCont := cache.Renderer(movl).Objects()[2].(*fyne.Container)
 	m2 := mbarCont.Objects[1]
 
 	tests := map[string]struct {
