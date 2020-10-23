@@ -660,7 +660,6 @@ func (r *treeNodeRenderer) partialRefresh() {
 	canvas.Refresh(r.treeNode.super())
 }
 
-var _ fyne.DoubleTappable = (*branch)(nil)
 var _ fyne.Widget = (*branch)(nil)
 
 type branch struct {
@@ -677,10 +676,6 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 	}
 	b.ExtendBaseWidget(b)
 	return
-}
-
-func (b *branch) DoubleTapped(*fyne.PointEvent) {
-	b.tree.ToggleBranch(b.uid)
 }
 
 func (b *branch) update(uid string, depth int) {
