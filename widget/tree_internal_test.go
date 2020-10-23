@@ -309,6 +309,39 @@ func TestTree_Selection(t *testing.T) {
 	}
 }
 
+func TestTree_ScrollToSelection(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A")
+	widget.AddTreePath(data, "B")
+	widget.AddTreePath(data, "C")
+	widget.AddTreePath(data, "D")
+	widget.AddTreePath(data, "E")
+	widget.AddTreePath(data, "F")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+
+	a := getLeaf(t, tree, "A")
+	m := a.MinSize()
+
+	// Make tree tall enough to display two nodes
+	tree.Resize(fyne.NewSize(m.Width, m.Height*2+treeDividerHeight))
+
+	// Above
+	tree.scroller.Offset.Y = m.Height*3 + treeDividerHeight*2 // Showing "D" & "E"
+	tree.Refresh()                                            // Force layout
+	tree.SetSelection("A")
+	// Tree should scroll to the top to show A
+	assert.Equal(t, 0, tree.scroller.Offset.Y)
+
+	// Below
+	tree.scroller.Offset.Y = 0 // Showing "A" & "B"
+	tree.Refresh()             // Force layout
+	tree.SetSelection("F")
+	// Tree should scroll to the bottom to show F
+	assert.Equal(t, m.Height*4+treeDividerHeight*3, tree.scroller.Offset.Y)
+}
+
 func TestTree_Tap(t *testing.T) {
 	t.Run("Branch", func(t *testing.T) {
 		data := make(map[string][]string)
