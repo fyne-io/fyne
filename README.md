@@ -61,18 +61,19 @@ Open a new file and you're ready to write your first app!
 package main
 
 import (
-	"fyne.io/fyne/widget"
 	"fyne.io/fyne/app"
+	"fyne.io/fyne/widget"
 )
 
 func main() {
-	app := app.New()
+	a := app.New()
+	w := a.NewWindow("Hello")
 
-	w := app.NewWindow("Hello")
+	hello := widget.NewLabel("Hello Fyne!")
 	w.SetContent(widget.NewVBox(
-		widget.NewLabel("Hello Fyne!"),
-		widget.NewButton("Quit", func() {
-			app.Quit()
+		hello,
+		widget.NewButton("Hi!", func() {
+			hello.SetText("Welcome :)")
 		}),
 	))
 
@@ -86,9 +87,15 @@ And you can run that simply as:
 
 It should look like this:
 
-<p align="center" markdown="1">
-  <img src="img/hello-normal.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
-</p>
+<div align="center">
+  <table cellpadding="0" cellspacing="0" style="margin: auto; border-collapse: collapse;">
+    <tr style="border: none;"><td style="border: none;">
+      <img src="img/hello-light.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
+    </td><td style="border: none;">
+      <img src="img/hello-dark.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
+    </td></tr>
+  </table>
+</div>
 
 > Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
 > To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
