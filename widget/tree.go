@@ -688,7 +688,6 @@ func (b *branch) update(uid string, depth int) {
 	b.icon.(*branchIcon).update(uid, depth)
 }
 
-var _ fyne.DoubleTappable = (*branchIcon)(nil)
 var _ fyne.Tappable = (*branchIcon)(nil)
 
 type branchIcon struct {
@@ -703,10 +702,6 @@ func newBranchIcon(tree *Tree) (i *branchIcon) {
 	}
 	i.ExtendBaseWidget(i)
 	return
-}
-
-func (i *branchIcon) DoubleTapped(*fyne.PointEvent) {
-	// Do nothing - this stops the event propagating to branch
 }
 
 func (i *branchIcon) Refresh() {
