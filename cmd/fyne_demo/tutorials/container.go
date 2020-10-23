@@ -3,48 +3,24 @@ package tutorials
 import (
 	"fmt"
 	"image/color"
-	"net/url"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
-	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
-// ContainerScreen loads a tab panel for containers and layouts
-func ContainerScreen(_ fyne.Window) fyne.CanvasObject {
-	return container.NewAppTabs( // TODO not best use of tabs here either
-		container.NewTabItem("Accordion", makeAccordionTab()),
-		container.NewTabItem("Card", makeCardTab()),
+// containerScreen loads a tab panel for containers
+func containerScreen(_ fyne.Window) fyne.CanvasObject {
+	return container.NewAppTabs(
 		container.NewTabItem("Split", makeSplitTab()),
 		container.NewTabItem("Scroll", makeScrollTab()),
-		container.NewTabItem("Table", makeTableTab()),
-		container.NewTabItem("Tree", makeTreeTab()),
-		// layouts
 		container.NewTabItem("Border", makeBorderLayout()),
 		container.NewTabItem("Box", makeBoxLayout()),
 		container.NewTabItem("Center", makeCenterLayout()),
 		container.NewTabItem("Grid", makeGridLayout()),
 	)
-}
-
-func makeAccordionTab() fyne.CanvasObject {
-	link, err := url.Parse("https://fyne.io/")
-	if err != nil {
-		fyne.LogError("Could not parse URL", err)
-	}
-	ac := widget.NewAccordion(
-		widget.NewAccordionItem("A", widget.NewHyperlink("One", link)),
-		widget.NewAccordionItem("B", widget.NewLabel("Two")),
-		&widget.AccordionItem{
-			Title:  "C",
-			Detail: widget.NewLabel("Three"),
-		},
-	)
-	ac.Append(widget.NewAccordionItem("D", &widget.Entry{Text: "Four"}))
-	return ac
 }
 
 func makeBorderLayout() *fyne.Container {
@@ -79,17 +55,6 @@ func makeButtonList(count int) []fyne.CanvasObject {
 	}
 
 	return items
-}
-
-func makeCardTab() fyne.CanvasObject {
-	card1 := widget.NewCard("Book a table", "Which time suits?",
-		widget.NewRadioGroup([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
-	card2 := widget.NewCard("With media", "No content, with image", nil)
-	card2.Image = canvas.NewImageFromResource(theme.FyneLogo())
-	card3 := widget.NewCard("Title 3", "Subtitle", widget.NewCheck("Check me", func(bool) {}))
-	card4 := widget.NewCard("Title 4", "Another card", widget.NewLabel("Content"))
-	return container.NewGridWithColumns(3, container.NewVBox(card1, card4),
-		container.NewVBox(card2), container.NewVBox(card3))
 }
 
 func makeCell() fyne.CanvasObject {
@@ -145,41 +110,4 @@ func makeSplitTab() fyne.CanvasObject {
 		widget.NewButton("Button", func() { fmt.Println("button tapped!") }),
 	)
 	return container.NewHSplit(container.NewVScroll(left), right)
-}
-
-func makeTableTab() fyne.CanvasObject {
-	return widget.NewTable(
-		func() (int, int) { return 500, 150 },
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Cell 000, 000")
-		},
-		func(row, col int, cell fyne.CanvasObject) {
-			label := cell.(*widget.Label)
-			label.SetText(fmt.Sprintf("Cell %d, %d", row+1, col+1))
-		})
-}
-
-func makeTreeTab() fyne.CanvasObject {
-	data := make(map[string][]string)
-	internalWidget.AddTreePath(data, "A", "B", "C", "abc")
-	internalWidget.AddTreePath(data, "A", "D", "E", "F", "adef")
-	internalWidget.AddTreePath(data, "A", "D", "E", "G", "adeg")
-	internalWidget.AddTreePath(data, "A", "H", "I", "ahi")
-	internalWidget.AddTreePath(data, "A", "J", "K", "ajk")
-	internalWidget.AddTreePath(data, "A", "L", "M", "N", "almn")
-	internalWidget.AddTreePath(data, "A", "O", "ao")
-	internalWidget.AddTreePath(data, "A", "P", "Q", "R", "apqr")
-	internalWidget.AddTreePath(data, "A", "S", "T", "U", "astu")
-	internalWidget.AddTreePath(data, "A", "V", "W", "X", "Y", "Z", "avwxyz")
-
-	tree := widget.NewTreeWithStrings(data)
-	tree.OnSelectionChanged = func(id string) {
-		fmt.Println("TreeNodeSelected:", id)
-	}
-	tree.OpenBranch("A")
-	tree.OpenBranch("D")
-	tree.OpenBranch("E")
-	tree.OpenBranch("L")
-	tree.OpenBranch("M")
-	return tree
 }

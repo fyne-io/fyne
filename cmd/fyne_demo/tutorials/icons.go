@@ -27,8 +27,8 @@ func (b *browser) setIcon(index int) {
 	b.icon.SetResource(icons[index].icon)
 }
 
-// IconsPanel loads a panel that shows the various icons available in Fyne
-func IconsPanel() fyne.CanvasObject {
+// iconScreen loads a panel that shows the various icons available in Fyne
+func iconScreen(_ fyne.Window) fyne.CanvasObject {
 	b := &browser{}
 
 	prev := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
