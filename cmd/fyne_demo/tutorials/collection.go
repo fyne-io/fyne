@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/container"
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -13,14 +12,10 @@ import (
 
 // collectionScreen loads a tab panel for collection widgets
 func collectionScreen(_ fyne.Window) fyne.CanvasObject {
-	return container.NewAppTabs(
-		container.NewTabItem("List", makeListTab()),
-		container.NewTabItem("Table", makeTableTab()),
-		container.NewTabItem("Tree", makeTreeTab()),
-	)
+	return widget.NewLabel("Info about what these are, their design")
 }
 
-func makeListTab() fyne.CanvasObject {
+func makeListTab(_ fyne.Window) fyne.CanvasObject {
 	var data []string
 	for i := 0; i < 1000; i++ {
 		data = append(data, fmt.Sprintf("Test Item %d", i))
@@ -53,7 +48,7 @@ func makeListTab() fyne.CanvasObject {
 	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
 }
 
-func makeTableTab() fyne.CanvasObject {
+func makeTableTab(_ fyne.Window) fyne.CanvasObject {
 	return widget.NewTable(
 		func() (int, int) { return 500, 150 },
 		func() fyne.CanvasObject {
@@ -65,7 +60,7 @@ func makeTableTab() fyne.CanvasObject {
 		})
 }
 
-func makeTreeTab() fyne.CanvasObject {
+func makeTreeTab(_ fyne.Window) fyne.CanvasObject {
 	data := make(map[string][]string)
 	internalWidget.AddTreePath(data, "A", "B", "C", "abc")
 	internalWidget.AddTreePath(data, "A", "D", "E", "F", "adef")

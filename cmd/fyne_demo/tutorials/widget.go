@@ -35,7 +35,7 @@ var (
 	endProgress chan interface{}
 )
 
-func makeAccordionTab() fyne.CanvasObject {
+func makeAccordionTab(_ fyne.Window) fyne.CanvasObject {
 	link, err := url.Parse("https://fyne.io/")
 	if err != nil {
 		fyne.LogError("Could not parse URL", err)
@@ -52,7 +52,7 @@ func makeAccordionTab() fyne.CanvasObject {
 	return ac
 }
 
-func makeButtonTab() fyne.CanvasObject {
+func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
 
@@ -89,7 +89,7 @@ func makeButtonTab() fyne.CanvasObject {
 	)
 }
 
-func makeCardTab() fyne.CanvasObject {
+func makeCardTab(_ fyne.Window) fyne.CanvasObject {
 	card1 := widget.NewCard("Book a table", "Which time suits?",
 		widget.NewRadioGroup([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
 	card2 := widget.NewCard("With media", "No content, with image", nil)
@@ -120,7 +120,7 @@ func makeTextGrid() *widget.TextGrid {
 	return grid
 }
 
-func makeTextTab() fyne.CanvasObject {
+func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	label := widget.NewLabel("Label")
 
 	link, err := url.Parse("https://fyne.io/")
@@ -200,7 +200,7 @@ func makeTextTab() fyne.CanvasObject {
 		fixed, entryLoremIpsumScroller, grid)
 }
 
-func makeInputTab() fyne.CanvasObject {
+func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Entry")
 	entryDisabled := widget.NewEntry()
@@ -234,7 +234,7 @@ func makeInputTab() fyne.CanvasObject {
 	)
 }
 
-func makeProgressTab() fyne.CanvasObject {
+func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
 	progress = widget.NewProgressBar()
 
 	fprogress = widget.NewProgressBar()
@@ -245,13 +245,20 @@ func makeProgressTab() fyne.CanvasObject {
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
 
+	// TODO make sure this resets when we hide etc...
+	//	if t.Content == progress {
+	startProgress()
+	//	} else {
+	//		stopProgress()
+	//	}
+
 	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,
 		widget.NewLabel("Formatted"), fprogress,
 		widget.NewLabel("Infinite"), infProgress)
 }
 
-func makeFormTab() fyne.Widget {
+func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 	name := widget.NewEntry()
 	name.SetPlaceHolder("John Smith")
 
@@ -283,6 +290,18 @@ func makeFormTab() fyne.Widget {
 	form.Append("Password", password)
 	form.Append("Message", largeText)
 	return form
+}
+
+func makeToolbarTab(_ fyne.Window) fyne.CanvasObject {
+	t := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
+		widget.NewToolbarSeparator(),
+		widget.NewToolbarSpacer(),
+		widget.NewToolbarAction(theme.ContentCutIcon(), func() { fmt.Println("Cut") }),
+		widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
+		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
+	)
+
+	return container.NewBorder(t, nil, nil, nil)
 }
 
 func startProgress() {
@@ -325,36 +344,7 @@ func stopProgress() {
 
 // widgetScreen shows a panel containing widget demos
 func widgetScreen(_ fyne.Window) fyne.CanvasObject {
-	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
-		widget.NewToolbarSeparator(),
-		widget.NewToolbarSpacer(),
-		widget.NewToolbarAction(theme.ContentCutIcon(), func() { fmt.Println("Cut") }),
-		widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
-		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
-	)
-
-	progress := makeProgressTab()
-	tabs := container.NewAppTabs( // TODO move to something better suited to this content
-		container.NewTabItem("Buttons", makeButtonTab()),
-		container.NewTabItem("Text", makeTextTab()),
-		container.NewTabItem("Input", makeInputTab()),
-		container.NewTabItem("Progress", progress),
-		container.NewTabItem("Form", makeFormTab()),
-
-		container.NewTabItem("Accordion", makeAccordionTab()),
-		container.NewTabItem("Card", makeCardTab()),
-	)
-	tabs.OnChanged = func(t *container.TabItem) {
-		if t.Content == progress {
-			startProgress()
-		} else {
-			stopProgress()
-		}
-	}
-
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(toolbar, nil, nil, nil),
-		toolbar, tabs,
-	)
+	return widget.NewLabel("Some information about widgets")
 }
 
 type contextMenuButton struct {
