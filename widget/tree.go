@@ -20,9 +20,8 @@ var _ fyne.Widget = (*Tree)(nil)
 // Each node of the tree must be identified by a Unique ID.
 type Tree struct {
 	BaseWidget
-	Root     string
-	selected string
-	Offset   fyne.Position
+	Root   string
+	Offset fyne.Position
 
 	ChildUIDs          func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
 	IsBranch           func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
@@ -32,7 +31,9 @@ type Tree struct {
 	OnBranchClosed     func(uid string)                                      // Called when a Branch is closed
 	OnSelectionChanged func(uid string)                                      // Called when the Node with the given Unique ID is selected.
 
-	open          map[string]bool
+	open     map[string]bool
+	selected string
+
 	branchMinSize fyne.Size
 	leafMinSize   fyne.Size
 }
