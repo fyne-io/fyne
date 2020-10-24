@@ -31,7 +31,7 @@ func colorPicked(c color.Color, w fyne.Window) {
 
 // dialogScreen loads demos of the dialogs we support
 func dialogScreen(win fyne.Window) fyne.CanvasObject {
-	return container.NewVBox(
+	return container.NewVScroll(container.NewVBox(
 		widget.NewButton("Info", func() {
 			dialog.ShowInformation("Information", "You should know this thing...", win)
 		}),
@@ -143,7 +143,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 				},
 				win)
 		}),
-	)
+	))
 }
 
 func fileOpened(f fyne.URIReadCloser) {

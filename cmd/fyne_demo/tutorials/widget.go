@@ -94,10 +94,27 @@ func makeCardTab(_ fyne.Window) fyne.CanvasObject {
 		widget.NewRadioGroup([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
 	card2 := widget.NewCard("With media", "No content, with image", nil)
 	card2.Image = canvas.NewImageFromResource(theme.FyneLogo())
-	card3 := widget.NewCard("Title 3", "Subtitle", widget.NewCheck("Check me", func(bool) {}))
-	card4 := widget.NewCard("Title 4", "Another card", widget.NewLabel("Content"))
-	return container.NewGridWithColumns(3, container.NewVBox(card1, card4),
-		container.NewVBox(card2), container.NewVBox(card3))
+	card3 := widget.NewCard("Title 3", "Another card", widget.NewLabel("Content"))
+	return container.NewGridWithColumns(2, container.NewVBox(card1, card3),
+		container.NewVBox(card2))
+}
+
+func makeEntryTab(_ fyne.Window) fyne.CanvasObject {
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder("Entry")
+	entryDisabled := widget.NewEntry()
+	entryDisabled.SetText("Entry (disabled)")
+	entryDisabled.Disable()
+	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
+	entryValidated.SetPlaceHolder("Must contain a number")
+	entryMultiLine := widget.NewMultiLineEntry()
+	entryMultiLine.SetPlaceHolder("MultiLine Entry")
+
+	return container.NewVBox(
+		entry,
+		entryDisabled,
+		entryValidated,
+		entryMultiLine)
 }
 
 func makeTextGrid() *widget.TextGrid {
@@ -201,15 +218,6 @@ func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeInputTab(_ fyne.Window) fyne.CanvasObject {
-	entry := widget.NewEntry()
-	entry.SetPlaceHolder("Entry")
-	entryDisabled := widget.NewEntry()
-	entryDisabled.SetText("Entry (disabled)")
-	entryDisabled.Disable()
-	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
-	entryValidated.SetPlaceHolder("Must contain a number")
-	entryMultiLine := widget.NewMultiLineEntry()
-	entryMultiLine.SetPlaceHolder("MultiLine Entry")
 	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
 	selectEntry.PlaceHolder = "Type or select"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
@@ -220,10 +228,6 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 	disabledRadio.Disable()
 
 	return container.NewVBox(
-		entry,
-		entryDisabled,
-		entryValidated,
-		entryMultiLine,
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
