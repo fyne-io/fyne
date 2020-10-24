@@ -1,4 +1,4 @@
-// +build !ci,!windows
+// +build !windows
 
 package widget
 
@@ -43,7 +43,7 @@ func TestNewFileIcon(t *testing.T) {
 	assert.Equal(t, theme.FileVideoIcon(), item.resource)
 }
 
-func TestNewFileIconNoExtension(t *testing.T) {
+func TestNewFileIcon_NoExtension(t *testing.T) {
 	workingDir, err := os.Getwd()
 	if err != nil {
 		fyne.LogError("Could not get current working directory", err)
@@ -59,6 +59,15 @@ func TestNewFileIconNoExtension(t *testing.T) {
 	item = newRenderedFileIcon(storage.NewURI("file://" + textFileWithNoExt))
 	assert.Equal(t, "", item.extension)
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
+}
+
+func TestNewURI_WithFolder(t *testing.T) {
+	folder, err := storage.ListerForURI(storage.NewURI("file://testdata"))
+	assert.Empty(t, err)
+
+	item := newRenderedFileIcon(folder)
+	assert.Empty(t, item.extension)
+	assert.Equal(t, theme.FolderIcon(), item.resource)
 }
 
 func TestSetURI(t *testing.T) {
@@ -81,4 +90,16 @@ func TestSetURI(t *testing.T) {
 	item.SetURI(storage.NewURI("file:///path/to/filename.mp4"))
 	assert.Equal(t, ".mp4", item.extension)
 	assert.Equal(t, theme.FileVideoIcon(), item.resource)
+}
+
+func TestSetURI_WithFolder(t *testing.T) {
+	item := newRenderedFileIcon(nil)
+	assert.Empty(t, item.extension)
+
+	folder, err := storage.ListerForURI(storage.NewURI("file://testdata"))
+	assert.Empty(t, err)
+
+	item.SetURI(folder)
+	assert.Empty(t, item.extension)
+	assert.Equal(t, theme.FolderIcon(), item.resource)
 }
