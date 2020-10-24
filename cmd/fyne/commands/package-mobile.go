@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"os/exec"
 	"path/filepath"
 
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
@@ -19,5 +20,20 @@ func (p *packager) packageIOS() error {
 
 	appDir := filepath.Join(p.dir, mobile.AppOutputName(p.os, p.name))
 	iconPath := filepath.Join(appDir, "Icon.png")
-	return util.CopyFile(p.icon, iconPath)
+	if err = util.CopyFile(p.icon, iconPath); err != nil {
+		return err
+	}
+
+	if err = copyResizeIcon("120", appDir); err != nil {
+		return err
+	}
+	if err = copyResizeIcon("76", appDir); err != nil {
+		return err
+	}
+	return copyResizeIcon("152", appDir)
+}
+
+func copyResizeIcon(size, dir string) error {
+	cmd := exec.Command("sips", "-o", dir+"/Icon_"+size+".png", "-Z", "120", dir+"/Icon.png")
+	return cmd.Run()
 }

@@ -84,10 +84,6 @@ func (r *releaser) afterPackage() error {
 		payloadAppDir := filepath.Join(payload, appName)
 		os.Rename(filepath.Join(r.dir, appName), payloadAppDir)
 
-		copyResizeIcon("120", payloadAppDir)
-		copyResizeIcon("76", payloadAppDir)
-		copyResizeIcon("152", payloadAppDir)
-
 		entitlementPath := filepath.Join(r.dir, "entitlements.plist")
 		defer os.Remove(entitlementPath)
 		entitlements, _ := os.Create(entitlementPath)
@@ -145,6 +141,9 @@ func (r *releaser) validate() error {
 			return errors.New("missing required -keyStore parameter for android release")
 		}
 	} else if r.os == "ios" {
+		if r.certificate == "" {
+			return errors.New("missing required -certificate parameter for iOS release")
+		}
 		if r.profile == "" {
 			return errors.New("missing required -profile parameter for iOS release")
 		}
@@ -166,9 +165,4 @@ func (r *releaser) zipAlign(path string) error {
 		return err
 	}
 	return os.Remove(unaligned)
-}
-
-func copyResizeIcon(size, dir string) error {
-	cmd := exec.Command("sips", "-o", dir+"/Icon_"+size+".png", "-Z", "120", dir+"/Icon.png")
-	return cmd.Run()
 }

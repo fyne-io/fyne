@@ -31,13 +31,19 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	}
 
 	projPbxproj := new(bytes.Buffer)
-	if err := projPbxprojTmpl.Execute(projPbxproj, projPbxprojTmplData{
+	projData := projPbxprojTmplData{
 		BitcodeEnabled: bitcodeEnabled,
 		BundleID:       bundleID,
 		Certificate:    cert,
 		Profile:        profile,
 		TeamID:         teamID,
-	}); err != nil {
+		Type:           "Manual",
+	}
+	if profile == "" {
+		projData.Certificate = "iPhone Developer"
+		projData.Type = "Auto"
+	}
+	if err := projPbxprojTmpl.Execute(projPbxproj, projData); err != nil {
 		return nil, err
 	}
 
@@ -282,8 +288,6 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
     <dict>
       <key>CFBundlePrimaryIcon</key>
       <dict>
-        <key>CFBundleIconName</key>
-        <string>Icon</string>
         <key>CFBundleIconFiles</key>
         <array>
           <string>Icon.png</string>
@@ -295,6 +299,8 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
     </dict>
   <key>LSRequiresIPhoneOS</key>
   <true/>
+  <key>UILaunchStoryboardName</key>
+  <string>LaunchScreen</string>
   <key>UIRequiredDeviceCapabilities</key>
   <array>
     <string>armv7</string>
@@ -323,7 +329,7 @@ type projPbxprojTmplData struct {
 	BundleID       string
 	Certificate    string
 	Profile        string
-	TeamID         string
+	TeamID, Type   string
 }
 
 var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF8*$!
@@ -415,7 +421,7 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
           254BB83D1B1FD08900C56DE9 = {
             CreatedOnToolsVersion = 6.3.1;
             DevelopmentTeam = {{.TeamID}};
-            ProvisioningStyle = Manual;
+            ProvisioningStyle = {{.Type}};
           };
         };
       };
