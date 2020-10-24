@@ -30,6 +30,7 @@ type packager struct {
 	os, appID, appVersion        string
 	appBuild                     int
 	install, release             bool
+	certificate, profile         string // optional flags for releasing
 }
 
 // NewPackager returns a packager command that can wrap executables into full GUI app packages.

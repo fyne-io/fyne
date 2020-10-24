@@ -8,7 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
+	"fyne.io/fyne/cmd/fyne/internal/templates"
 	"fyne.io/fyne/cmd/fyne/internal/util"
 )
 
@@ -34,6 +36,9 @@ func (r *releaser) AddFlags() {
 	flag.StringVar(&r.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
 	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
+	flag.StringVar(&r.certificate, "certificate", "Apple Distribution", "iOS/macOS/Windows: name of the certificate to sign the build")
+	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
+	// password (for (windows?) certificate)
 }
 
 func (r *releaser) PrintHelp(indent string) {
@@ -66,7 +71,44 @@ func (r *releaser) afterPackage() error {
 		}
 		return r.sign(apk)
 	}
+	if r.os == "ios" {
+		team, err := mobile.DetectIOSTeamID(r.certificate)
+		if err != nil {
+			return errors.New("failed to determine team ID")
+		}
 
+		payload := filepath.Join(r.dir, "Payload")
+		os.Mkdir(payload, 0750)
+		defer os.Remove(payload)
+		appName := mobile.AppOutputName(r.os, r.name)
+		payloadAppDir := filepath.Join(payload, appName)
+		os.Rename(filepath.Join(r.dir, appName), payloadAppDir)
+
+		copyResizeIcon("120", payloadAppDir)
+		copyResizeIcon("76", payloadAppDir)
+		copyResizeIcon("152", payloadAppDir)
+
+		entitlementPath := filepath.Join(r.dir, "entitlements.plist")
+		defer os.Remove(entitlementPath)
+		entitlements, _ := os.Create(entitlementPath)
+		entitlementData := struct{ TeamID, AppID string }{
+			TeamID: team,
+			AppID:  r.appID,
+		}
+		err = templates.EntitlementsDarwin.Execute(entitlements, entitlementData)
+		if err != nil {
+			return errors.New("failed to write entitlements plist template")
+		}
+
+		cmd := exec.Command("codesign", "-f", "-vv", "-s", r.certificate, "--entitlements",
+			"entitlements.plist", "Payload/"+appName+"/")
+		if err := cmd.Run(); err != nil {
+			fyne.LogError("Codesign failed", err)
+			return errors.New("unable to codesign application bundle")
+		}
+
+		return exec.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
+	}
 	return nil
 }
 
@@ -102,6 +144,10 @@ func (r *releaser) validate() error {
 		if r.keyStore == "" {
 			return errors.New("missing required -keyStore parameter for android release")
 		}
+	} else if r.os == "ios" {
+		if r.profile == "" {
+			return errors.New("missing required -profile parameter for iOS release")
+		}
 	}
 	return nil
 }
@@ -120,4 +166,9 @@ func (r *releaser) zipAlign(path string) error {
 		return err
 	}
 	return os.Remove(unaligned)
+}
+
+func copyResizeIcon(size, dir string) error {
+	cmd := exec.Command("sips", "-o", dir+"/Icon_"+size+".png", "-Z", "120", dir+"/Icon.png")
+	return cmd.Run()
 }

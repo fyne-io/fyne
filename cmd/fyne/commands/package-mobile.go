@@ -8,11 +8,11 @@ import (
 )
 
 func (p *packager) packageAndroid(arch string) error {
-	return mobile.RunNewBuild(arch, p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release)
+	return mobile.RunNewBuild(arch, p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release, "", "")
 }
 
 func (p *packager) packageIOS() error {
-	err := mobile.RunNewBuild("ios", p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release)
+	err := mobile.RunNewBuild("ios", p.appID, p.icon, p.name, p.appVersion, p.appBuild, p.release, p.certificate, p.profile)
 	if err != nil {
 		return err
 	}
