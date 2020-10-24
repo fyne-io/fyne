@@ -20,9 +20,6 @@ cache:
     - $HOME/gopath/pkg/mod
   apt: true
 
-before_script:
-  - GO111MODULE=off go get github.com/mattn/goveralls
-
 script:
   - |
     if [ "$GO111MODULE" == "on" ]
@@ -33,12 +30,12 @@ script:
       go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
     fi
   - go test -tags ci ./...
-  - go vet -tags ci -unsafeptr=false ./...
 
 after_success:
   - |
     set -e
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      GO111MODULE=off go get github.com/mattn/goveralls
       go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
       if [ $coverage -lt 69 ]; then echo "Test coverage lowered"; exit 1; fi
 
