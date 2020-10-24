@@ -29,7 +29,7 @@ type List struct {
 	OnUnselected func(id ListItemID)
 
 	scroller *ScrollContainer
-	selected ListItemID
+	selected []ListItemID
 	itemMin  fyne.Size
 	offsetY  int
 }
@@ -37,7 +37,7 @@ type List struct {
 // NewList creates and returns a list widget for displaying items in
 // a vertical layout with scrolling and caching for performance.
 func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem func(ListItemID, fyne.CanvasObject)) *List {
-	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem, selected: -1}
+	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem}
 	list.ExtendBaseWidget(list)
 	return list
 }
@@ -75,10 +75,10 @@ func (l *List) Select(id ListItemID) {
 		return
 	}
 	old := l.selected
-	l.selected = id
+	l.selected = []ListItemID{id}
 	defer func() {
-		if f := l.OnUnselected; f != nil && old >= 0 {
-			f(old)
+		if f := l.OnUnselected; f != nil && len(old) > 0 {
+			f(old[0])
 		}
 		if f := l.OnSelected; f != nil {
 			f(id)
@@ -99,7 +99,7 @@ func (l *List) Select(id ListItemID) {
 
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
-	l.selected = -1
+	l.selected = nil
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
 		f(id)
@@ -303,19 +303,21 @@ func (l *listRenderer) scrollUp(offsetChange int) {
 }
 
 func (l *listRenderer) setupListItem(item fyne.CanvasObject, id ListItemID) {
-	previousIndicator := item.(*listItem).selected
-	if id != l.list.selected {
-		item.(*listItem).selected = false
-	} else {
-		item.(*listItem).selected = true
+	li := item.(*listItem)
+	previousIndicator := li.selected
+	li.selected = false
+	for _, s := range l.list.selected {
+		if id == s {
+			li.selected = true
+		}
 	}
-	if previousIndicator != item.(*listItem).selected {
+	if previousIndicator != li.selected {
 		item.Refresh()
 	}
 	if f := l.list.UpdateItem; f != nil {
-		f(id, item.(*listItem).child)
+		f(id, li.child)
 	}
-	item.(*listItem).onTapped = func() {
+	li.onTapped = func() {
 		l.list.Select(id)
 	}
 }
