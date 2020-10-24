@@ -1,3 +1,4 @@
+// +build !ci
 // +build !mobile
 // +build !darwin no_native_menus
 
@@ -8,6 +9,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
+
 	"github.com/stretchr/testify/assert"
 )
 
