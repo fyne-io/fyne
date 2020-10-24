@@ -696,7 +696,6 @@ func (r *treeNodeRenderer) partialRefresh() {
 	canvas.Refresh(r.treeNode.super())
 }
 
-var _ fyne.DoubleTappable = (*branch)(nil)
 var _ fyne.Widget = (*branch)(nil)
 
 type branch struct {
@@ -715,16 +714,11 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 	return
 }
 
-func (b *branch) DoubleTapped(*fyne.PointEvent) {
-	b.tree.ToggleBranch(b.uid)
-}
-
 func (b *branch) update(uid string, depth int) {
 	b.treeNode.update(uid, depth)
 	b.icon.(*branchIcon).update(uid, depth)
 }
 
-var _ fyne.DoubleTappable = (*branchIcon)(nil)
 var _ fyne.Tappable = (*branchIcon)(nil)
 
 type branchIcon struct {
@@ -739,10 +733,6 @@ func newBranchIcon(tree *Tree) (i *branchIcon) {
 	}
 	i.ExtendBaseWidget(i)
 	return
-}
-
-func (i *branchIcon) DoubleTapped(*fyne.PointEvent) {
-	// Do nothing - this stops the event propagating to branch
 }
 
 func (i *branchIcon) Refresh() {
