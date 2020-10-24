@@ -1,5 +1,5 @@
-name: Code checks
 
+name: Static Analysis
 on: [push, pull_request]
 
 jobs:
@@ -10,20 +10,28 @@ jobs:
     - uses: actions/setup-go@v2
       with:
         go-version: '^1.15.x'     
-    - name: get dependencies
+
+    - name: Get dependencies
       run: |
-        sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev xorg-dev
+        sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
         GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
         GO111MODULE=off go get github.com/fzipp/gocyclo/cmd/gocyclo
         GO111MODULE=off go get golang.org/x/lint/golint
         GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
-    - name: cleanup repository
+    - name: Cleanup repository
       run: rm -rf vendor/
-    - name: goimports
+
+    - name: Vet
+      run: go vet -tags ci ./...
+
+    - name: Goimports
       run: test -z $(goimports -e -d . | tee /dev/stderr)
-    - name: gocyclo
+
+    - name: Gocyclo
       run: gocyclo -over 50 .
-    - name: golint
+
+    - name: Golint
       run: golint -set_exit_status $(go list -tags ci ./...)
-    - name: staticcheck
-      run: CGO_ENABLED=1 staticcheck -debug.no-compile-errors -f stylish ./...
+
+    - name: Staticcheck
+      run: CGO_ENABLED=1 staticcheck -f stylish ./...
