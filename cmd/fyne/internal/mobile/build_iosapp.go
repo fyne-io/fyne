@@ -155,6 +155,9 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	return nmpkgs, nil
 }
 
+// DetectIOSTeamID finds the team ID used by the app certificates.
+// The optional parameter specifies the certificate name to use.
+// If none is specified the code will check standard names
 func DetectIOSTeamID(optCert string) (string, error) {
 	pemString, err := lookupCert(optCert)
 	if err != nil {
