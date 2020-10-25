@@ -5,6 +5,7 @@ package widget
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -68,6 +69,13 @@ func TestNewURI_WithFolder(t *testing.T) {
 	item := newRenderedFileIcon(folder)
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
+
+	// MimeType fallbacks for folders using regular URI
+	if runtime.GOOS == "Darwin" || runtime.GOOS == "Linux" {
+		item = newRenderedFileIcon(storage.NewURI("file://testdata"))
+		assert.Empty(t, item.extension)
+		assert.Equal(t, theme.FolderIcon(), item.resource)
+	}
 }
 
 func TestSetURI(t *testing.T) {
@@ -102,4 +110,11 @@ func TestSetURI_WithFolder(t *testing.T) {
 	item.SetURI(folder)
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
+
+	// MimeType fallbacks for folders using regular URI
+	if runtime.GOOS == "Darwin" || runtime.GOOS == "Linux" {
+		item.SetURI(storage.NewURI("file://testdata"))
+		assert.Empty(t, item.extension)
+		assert.Equal(t, theme.FolderIcon(), item.resource)
+	}
 }

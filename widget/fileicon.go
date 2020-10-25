@@ -87,6 +87,8 @@ func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 	}
 
 	switch splitMimeType(uri) {
+	case "inode/directory", "application/x-directory": // Folder fallbacks for macOS and Linux.
+		return theme.FolderIcon()
 	case "application":
 		return theme.FileApplicationIcon()
 	case "audio":
