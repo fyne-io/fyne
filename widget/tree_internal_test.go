@@ -207,7 +207,7 @@ func TestTree_MinSize(t *testing.T) {
 	}{
 		"single_item": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -218,7 +218,7 @@ func TestTree_MinSize(t *testing.T) {
 		},
 		"single_item_opened": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -230,13 +230,13 @@ func TestTree_MinSize(t *testing.T) {
 		},
 		"multiple_items": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
@@ -247,13 +247,13 @@ func TestTree_MinSize(t *testing.T) {
 		},
 		"multiple_items_opened": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
