@@ -77,8 +77,8 @@ func TestTree_Layout(t *testing.T) {
 
 	for name, tt := range map[string]struct {
 		items    [][]string
-		selected string
-		opened   []string
+		selected widget.TreeNodeID
+		opened   []widget.TreeNodeID
 	}{
 		"single_leaf": {
 			items: [][]string{
@@ -277,7 +277,7 @@ func TestTree_Layout(t *testing.T) {
 			for _, o := range tt.opened {
 				tree.OpenBranch(o)
 			}
-			tree.SetSelection(tt.selected)
+			tree.Select(tt.selected)
 
 			window := test.NewWindow(tree)
 			defer window.Close()
