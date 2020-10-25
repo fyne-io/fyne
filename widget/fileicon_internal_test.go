@@ -68,11 +68,6 @@ func TestNewURI_WithFolder(t *testing.T) {
 	item := newRenderedFileIcon(folder)
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
-
-	// MimeType fallbacks for folders using regular URI
-	item = newRenderedFileIcon(storage.NewURI("file://testdata"))
-	assert.Empty(t, item.extension)
-	assert.Equal(t, theme.FolderIcon(), item.resource)
 }
 
 func TestSetURI(t *testing.T) {
@@ -105,11 +100,6 @@ func TestSetURI_WithFolder(t *testing.T) {
 	assert.Empty(t, err)
 
 	item.SetURI(folder)
-	assert.Empty(t, item.extension)
-	assert.Equal(t, theme.FolderIcon(), item.resource)
-
-	// MimeType fallbacks for folders using regular URI
-	item.SetURI(storage.NewURI("file://testdata"))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 }
