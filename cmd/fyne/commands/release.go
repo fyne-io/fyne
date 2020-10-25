@@ -103,6 +103,18 @@ func (r *releaser) beforePackage() error {
 	return nil
 }
 
+func (r *releaser) nameFromCertInfo(info string) string {
+	// format should be "CN=Company, O=Company, L=City, S=State, C=Country"
+	parts := strings.Split(info, ",")
+	cn := parts[0]
+	pos := strings.Index(cn, "CN=")
+	if pos == -1 {
+		return cn // not what we were expecting, but should be OK
+	}
+
+	return cn[pos+3:]
+}
+
 func (r *releaser) packageIOSRelease() error {
 	team, err := mobile.DetectIOSTeamID(r.certificate)
 	if err != nil {
@@ -151,8 +163,8 @@ func (r *releaser) packageWindowsRelease(outFile string) error {
 	manifestData := struct{ AppID, Developer, DeveloperName, Name, Version string }{
 		AppID: r.appID,
 		// TODO read this info
-		Developer:     "CN=MyCompany, O=MyCompany, L=MyCity, S=MyState, C=MyCountry",
-		DeveloperName: "MyCompany",
+		Developer:     r.developer,
+		DeveloperName: r.nameFromCertInfo(r.developer),
 		Name:          r.name,
 		Version:       r.combinedVersion(),
 	}
@@ -210,6 +222,10 @@ func (r *releaser) validate() error {
 		}
 	}
 	if r.os == "windows" {
+		if r.developer == "" {
+			return errors.New("missing required -developer parameter for windows release,\n" +
+				"use data from Partner Portal, format \"CN=Company, O=Company, L=City, S=State, C=Country\"")
+		}
 		if r.certificate == "" {
 			return errors.New("missing required -certificate parameter for windows release")
 		}
