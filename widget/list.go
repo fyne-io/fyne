@@ -67,6 +67,9 @@ func (l *List) MinSize() fyne.Size {
 
 // Select add the item identified by the given ID to the selection.
 func (l *List) Select(id ListItemID) {
+	if len(l.selected) > 0 && id == l.selected[0] {
+		return
+	}
 	length := 0
 	if f := l.Length; f != nil {
 		length = f()
@@ -99,6 +102,10 @@ func (l *List) Select(id ListItemID) {
 
 // Unselect removes the item identified by the given ID from the selection.
 func (l *List) Unselect(id ListItemID) {
+	if len(l.selected) == 0 {
+		return
+	}
+
 	l.selected = nil
 	l.Refresh()
 	if f := l.OnUnselected; f != nil {
