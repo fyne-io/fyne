@@ -444,7 +444,7 @@ func (c *glCanvas) setDirty(dirty bool) {
 	c.dirty = dirty
 }
 
-func (c *glCanvas) setMenuOverlay(b *MenuBar) {
+func (c *glCanvas) setMenuOverlay(b fyne.CanvasObject) {
 	c.menu = b
 	c.menuTree = &renderCacheTree{root: &renderCacheNode{obj: c.menu}}
 	c.menuFocusMgr = app.NewFocusManager(c.menu)
