@@ -87,7 +87,7 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 }
 
 func (f *FocusManager) nextWithWalker(current fyne.Focusable, walker walkerFunc) fyne.Focusable {
-	var first, next fyne.Focusable
+	var next fyne.Focusable
 	found := current == nil // if we have no starting point then pretend we matched already
 	walker(f.content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
@@ -104,21 +104,18 @@ func (f *FocusManager) nextWithWalker(current fyne.Focusable, walker walkerFunc)
 			next = focus
 			return true
 		}
+		if next == nil {
+			next = focus
+		}
 
 		if obj == current.(fyne.CanvasObject) {
 			found = true
-		}
-		if first == nil {
-			first = focus
 		}
 
 		return false
 	}, nil)
 
-	if next != nil {
-		return next
-	}
-	return first
+	return next
 }
 
 func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
