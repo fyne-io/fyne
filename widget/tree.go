@@ -20,7 +20,7 @@ var _ fyne.Widget = (*Tree)(nil)
 // Each node of the tree must be identified by a Unique ID.
 type Tree struct {
 	BaseWidget
-	Root string
+	Root TreeNodeID
 
 	ChildUIDs      func(uid TreeNodeID) (c []TreeNodeID)                     // Return a sorted slice of Children Unique IDs for the given Node Unique ID
 	CreateNode     func(branch bool) (o fyne.CanvasObject)                   // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
@@ -242,7 +242,7 @@ func (t *Tree) Unselect(uid TreeNodeID) {
 		return
 	}
 
-	t.selected = []TreeNodeID{}
+	t.selected = nil
 	t.Refresh()
 	if f := t.OnUnselected; f != nil {
 		f(uid)
