@@ -44,7 +44,7 @@ type Tree struct {
 // isBranch returns true if the given node is a branch, false if it is a leaf.
 // create returns a new template object that can be cached.
 // update is used to apply data at specified data location to the passed template CanvasObject.
-func NewTree(childUIDs func(string) []string, isBranch func(string) bool, create func(bool) fyne.CanvasObject, update func(string, bool, fyne.CanvasObject)) *Tree {
+func NewTree(childUIDs func(TreeNodeID) []TreeNodeID, isBranch func(TreeNodeID) bool, create func(bool) fyne.CanvasObject, update func(TreeNodeID, bool, fyne.CanvasObject)) *Tree {
 	t := &Tree{ChildUIDs: childUIDs, IsBranch: isBranch, CreateNode: create, UpdateNode: update}
 	t.ExtendBaseWidget(t)
 	return t
