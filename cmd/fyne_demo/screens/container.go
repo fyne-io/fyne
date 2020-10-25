@@ -173,8 +173,11 @@ func makeTreeTab() fyne.CanvasObject {
 	internalWidget.AddTreePath(data, "A", "V", "W", "X", "Y", "Z", "avwxyz")
 
 	tree := widget.NewTreeWithStrings(data)
-	tree.OnSelectionChanged = func(id string) {
-		fmt.Println("TreeNodeSelected:", id)
+	tree.OnSelected = func(id widget.TreeNodeID) {
+		fmt.Println("Tree node selected:", id)
+	}
+	tree.OnUnselected = func(id widget.TreeNodeID) {
+		fmt.Println("Tree node unselected:", id)
 	}
 	tree.OpenBranch("A")
 	tree.OpenBranch("D")
