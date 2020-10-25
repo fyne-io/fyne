@@ -87,8 +87,6 @@ func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 	}
 
 	switch splitMimeType(uri) {
-	case "inode/directory", "application/x-directory": // Fallbacks for folders that do not conform to fyne.ListableURI.
-		return theme.FolderIcon()
 	case "application":
 		return theme.FileApplicationIcon()
 	case "audio":
