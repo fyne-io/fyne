@@ -278,7 +278,7 @@ func TestTree_MinSize(t *testing.T) {
 	}
 }
 
-func TestTree_Selection(t *testing.T) {
+func TestTree_Select(t *testing.T) {
 	data := make(map[string][]string)
 	widget.AddTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
@@ -286,12 +286,8 @@ func TestTree_Selection(t *testing.T) {
 	tree.Refresh() // Force layout
 
 	selection := make(chan string, 1)
-	unselection := make(chan string, 1)
 	tree.OnSelected = func(uid TreeNodeID) {
 		selection <- uid
-	}
-	tree.OnUnselected = func(uid TreeNodeID) {
-		unselection <- uid
 	}
 
 	tree.Select("A")
@@ -303,14 +299,28 @@ func TestTree_Selection(t *testing.T) {
 	case <-time.After(1 * time.Second):
 		assert.Fail(t, "Selection should have occurred")
 	}
+}
 
-	tree.Unselect("A")
-	assert.Equal(t, 0, len(tree.selected))
+func TestTree_Select_Unselects(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+	tree.Select("A")
+
+	unselection := make(chan string, 1)
+	tree.OnUnselected = func(uid TreeNodeID) {
+		unselection <- uid
+	}
+
+	tree.Select("B")
+	assert.Equal(t, 1, len(tree.selected))
 	select {
 	case s := <-unselection:
 		assert.Equal(t, "A", s)
 	case <-time.After(1 * time.Second):
-		assert.Fail(t, "Selection should have been cleared")
+		assert.Fail(t, "Selection should have been unselected")
 	}
 }
 
@@ -403,6 +413,29 @@ func TestTree_Tap(t *testing.T) {
 			assert.Fail(t, "Leaf should have been selected")
 		}
 	})
+}
+
+func TestTree_Unselect(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+	tree.Select("A")
+
+	unselection := make(chan string, 1)
+	tree.OnUnselected = func(uid TreeNodeID) {
+		unselection <- uid
+	}
+
+	tree.Unselect("A")
+	assert.Equal(t, 0, len(tree.selected))
+	select {
+	case s := <-unselection:
+		assert.Equal(t, "A", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have been cleared")
+	}
 }
 
 func TestTree_Walk(t *testing.T) {

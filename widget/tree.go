@@ -183,7 +183,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 			return // no change
 		}
 		if f := t.OnUnselected; f != nil {
-			f(uid)
+			f(t.selected[0])
 		}
 	}
 	t.selected = []TreeNodeID{uid}
