@@ -154,7 +154,7 @@ func TestTree_Resize(t *testing.T) {
 	tree.OpenBranch("B")
 
 	width := templateMinSize.Width + indentation() + theme.IconInlineSize() + doublePadding + theme.Padding()
-	height := (fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*3 + tree.dividerHeight*2
+	height := (fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding)*3 + treeDividerHeight*2
 	assertTreeContentMinSize(t, tree, fyne.NewSize(width, height))
 
 	a := getLeaf(t, tree, "A")
@@ -167,18 +167,17 @@ func TestTree_Resize(t *testing.T) {
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, a.Size().Height)
 
 	assert.Equal(t, 0, b.Position().X)
-	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+tree.dividerHeight, b.Position().Y)
+	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+treeDividerHeight, b.Position().Y)
 	assert.Equal(t, treeSize, b.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, b.Size().Height)
 
 	assert.Equal(t, 0, c.Position().X)
-	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+tree.dividerHeight), c.Position().Y)
+	assert.Equal(t, 2*(fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding+treeDividerHeight), c.Position().Y)
 	assert.Equal(t, treeSize, c.Size().Width)
 	assert.Equal(t, fyne.Max(templateMinSize.Height, theme.IconInlineSize())+doublePadding, c.Size().Height)
 }
 
 func TestTree_MinSize(t *testing.T) {
-	treeDividerHeight := NewSeparator().MinSize().Height
 	t.Run("Default", func(t *testing.T) {
 		tree := &Tree{}
 		min := tree.MinSize()
@@ -331,11 +330,11 @@ func TestTree_ScrollToSelection(t *testing.T) {
 	m := a.MinSize()
 
 	// Make tree tall enough to display two nodes
-	tree.Resize(fyne.NewSize(m.Width, m.Height*2+tree.dividerHeight))
+	tree.Resize(fyne.NewSize(m.Width, m.Height*2+treeDividerHeight))
 
 	// Above
-	tree.scroller.Offset.Y = m.Height*3 + tree.dividerHeight*3 // Showing "D" & "E"
-	tree.Refresh()                                             // Force layout
+	tree.scroller.Offset.Y = m.Height*3 + treeDividerHeight*3 // Showing "D" & "E"
+	tree.Refresh()                                            // Force layout
 	tree.Select("A")
 	// Tree should scroll to the top to show A
 	assert.Equal(t, 0, tree.scroller.Offset.Y)
@@ -345,7 +344,7 @@ func TestTree_ScrollToSelection(t *testing.T) {
 	tree.Refresh()             // Force layout
 	tree.Select("F")
 	// Tree should scroll to the bottom to show F
-	assert.Equal(t, m.Height*4+tree.dividerHeight*3, tree.scroller.Offset.Y)
+	assert.Equal(t, m.Height*4+treeDividerHeight*3, tree.scroller.Offset.Y)
 }
 
 func TestTree_Tap(t *testing.T) {
