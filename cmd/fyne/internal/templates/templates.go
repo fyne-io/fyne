@@ -11,6 +11,9 @@ var (
 	// DesktopFileUNIX is the template the desktop file on UNIX systems like Linux and BSD
 	DesktopFileUNIX = template.Must(template.New("DesktopFile").Parse(string(resourceAppDesktop.StaticContent)))
 
+	// EntitlementsDarwin is a plist file that lists build entitlements for darwin releases
+	EntitlementsDarwin = template.Must(template.New("Entitlements").Parse(string(resourceEntitlementsPlist.StaticContent)))
+
 	// ManifestWindows is the manifest file for windows packaging
 	ManifestWindows = template.Must(template.New("Manifest").Parse(string(resourceAppManifest.StaticContent)))
 
