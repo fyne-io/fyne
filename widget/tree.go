@@ -12,8 +12,6 @@ import (
 // TreeNodeID represents the unique id of a tree node.
 type TreeNodeID = string
 
-const treeDividerHeight = 1
-
 var _ fyne.Widget = (*Tree)(nil)
 
 // Tree widget displays hierarchical data.
@@ -32,6 +30,7 @@ type Tree struct {
 	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given Unique ID
 
 	branchMinSize fyne.Size
+	dividerHeight int
 	leafMinSize   fyne.Size
 	offset        fyne.Position
 	open          map[TreeNodeID]bool
@@ -178,6 +177,11 @@ func (t *Tree) Resize(size fyne.Size) {
 
 // Select marks the specified node to be selected
 func (t *Tree) Select(uid TreeNodeID) {
+	treeDividerHeight := t.dividerHeight
+	if treeDividerHeight == 0 {
+		treeDividerHeight = NewSeparator().MinSize().Height
+	}
+
 	if len(t.selected) > 0 {
 		if uid == t.selected[0] {
 			return // no change
@@ -337,7 +341,7 @@ func newTreeContent(tree *Tree) (c *treeContent) {
 }
 
 func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
-	return &treeContentRenderer{
+	r := &treeContentRenderer{
 		BaseRenderer: widget.BaseRenderer{},
 		treeContent:  c,
 		branches:     make(map[string]*branch),
@@ -345,6 +349,8 @@ func (c *treeContent) CreateRenderer() fyne.WidgetRenderer {
 		branchPool:   &syncPool{},
 		leafPool:     &syncPool{},
 	}
+	r.updateSizes()
+	return r
 }
 
 func (c *treeContent) Resize(size fyne.Size) {
@@ -408,10 +414,10 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				r.dividers = append(r.dividers, divider)
 			}
 			divider.Move(fyne.NewPos(theme.Padding(), y))
-			s := fyne.NewSize(width-2*theme.Padding(), treeDividerHeight)
+			s := fyne.NewSize(width-2*theme.Padding(), r.treeContent.tree.dividerHeight)
 			divider.Resize(s)
 			divider.Show()
-			y += treeDividerHeight
+			y += r.treeContent.tree.dividerHeight
 			numDividers++
 		}
 
@@ -496,7 +502,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 		// If this is not the first item, add a divider
 		if min.Height > 0 {
-			min.Height += treeDividerHeight
+			min.Height += r.treeContent.tree.dividerHeight
 		}
 
 		m := r.treeContent.tree.leafMinSize
@@ -524,6 +530,7 @@ func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
 }
 
 func (r *treeContentRenderer) Refresh() {
+	r.updateSizes()
 	s := r.treeContent.Size()
 	if s.IsZero() {
 		r.treeContent.Resize(r.treeContent.MinSize().Max(r.treeContent.tree.Size()))
@@ -567,6 +574,14 @@ func (r *treeContentRenderer) getLeaf() (l *leaf) {
 		l = newLeaf(r.treeContent.tree, content)
 	}
 	return
+}
+
+func (r *treeContentRenderer) updateSizes() {
+	if len(r.dividers) == 0 {
+		r.treeContent.tree.dividerHeight = NewSeparator().MinSize().Height
+	} else {
+		r.treeContent.tree.dividerHeight = r.dividers[0].MinSize().Height
+	}
 }
 
 var _ desktop.Hoverable = (*treeNode)(nil)
