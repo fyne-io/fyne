@@ -17,19 +17,19 @@ const treeDividerHeight = 1
 var _ fyne.Widget = (*Tree)(nil)
 
 // Tree widget displays hierarchical data.
-// Each node of the tree must be identified by a Unique ID.
+// Each node of the tree must be identified by a Unique TreeNodeID.
 type Tree struct {
 	BaseWidget
 	Root TreeNodeID
 
-	ChildUIDs      func(uid TreeNodeID) (c []TreeNodeID)                     // Return a sorted slice of Children Unique IDs for the given Node Unique ID
+	ChildUIDs      func(uid TreeNodeID) (c []TreeNodeID)                     // Return a sorted slice of Children TreeNodeIDs for the given Node TreeNodeID
 	CreateNode     func(branch bool) (o fyne.CanvasObject)                   // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
-	IsBranch       func(uid TreeNodeID) (ok bool)                            // Return true if the given Unique ID represents a Branch
+	IsBranch       func(uid TreeNodeID) (ok bool)                            // Return true if the given TreeNodeID represents a Branch
 	OnBranchClosed func(uid TreeNodeID)                                      // Called when a Branch is closed
 	OnBranchOpened func(uid TreeNodeID)                                      // Called when a Branch is opened
-	OnSelected     func(uid TreeNodeID)                                      // Called when the Node with the given Unique ID is selected.
-	OnUnselected   func(uid TreeNodeID)                                      // Called when the Node with the given Unique ID is unselected.
-	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given Unique ID
+	OnSelected     func(uid TreeNodeID)                                      // Called when the Node with the given TreeNodeID is selected.
+	OnUnselected   func(uid TreeNodeID)                                      // Called when the Node with the given TreeNodeID is unselected.
+	UpdateNode     func(uid TreeNodeID, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given TreeNodeID
 
 	branchMinSize fyne.Size
 	leafMinSize   fyne.Size
@@ -40,7 +40,7 @@ type Tree struct {
 }
 
 // NewTree returns a new performant tree widget defined by the passed functions.
-// childUIDs returns the child Unique IDs of the given node.
+// childUIDs returns the child TreeNodeIDs of the given node.
 // isBranch returns true if the given node is a branch, false if it is a leaf.
 // create returns a new template object that can be cached.
 // update is used to apply data at specified data location to the passed template CanvasObject.
@@ -81,7 +81,7 @@ func (t *Tree) CloseAllBranches() {
 	t.Refresh()
 }
 
-// CloseBranch closes the branch with the given Unique ID.
+// CloseBranch closes the branch with the given TreeNodeID.
 func (t *Tree) CloseBranch(uid TreeNodeID) {
 	t.ensureOpenMap()
 	t.propertyLock.Lock()
@@ -117,7 +117,7 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// IsBranchOpen returns true if the branch with the given Unique ID is expanded.
+// IsBranchOpen returns true if the branch with the given TreeNodeID is expanded.
 func (t *Tree) IsBranchOpen(uid TreeNodeID) bool {
 	if uid == t.Root {
 		return true // Root is always open
@@ -147,7 +147,7 @@ func (t *Tree) OpenAllBranches() {
 	t.Refresh()
 }
 
-// OpenBranch opens the branch with the given Unique ID.
+// OpenBranch opens the branch with the given TreeNodeID.
 func (t *Tree) OpenBranch(uid TreeNodeID) {
 	t.ensureOpenMap()
 	t.propertyLock.Lock()
@@ -227,7 +227,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 	}
 }
 
-// ToggleBranch flips the state of the branch with the given Unique ID.
+// ToggleBranch flips the state of the branch with the given TreeNodeID.
 func (t *Tree) ToggleBranch(uid string) {
 	if t.IsBranchOpen(uid) {
 		t.CloseBranch(uid)
@@ -274,7 +274,7 @@ func (t *Tree) walk(uid string, depth int, onNode func(string, bool, int)) {
 	}
 }
 
-// walkAll visits every open node of the tree and calls the given callback with node Unique ID, whether node is branch, and the depth of node.
+// walkAll visits every open node of the tree and calls the given callback with TreeNodeID, whether node is branch, and the depth of node.
 func (t *Tree) walkAll(onNode func(TreeNodeID, bool, int)) {
 	t.walk(t.Root, 0, onNode)
 }
