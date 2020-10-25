@@ -50,7 +50,7 @@ func (i *FileIcon) setURI(uri fyne.URI) {
 
 	i.URI = uri
 	i.cachedURI = nil
-	i.resource = i.setIcon(i.URI)
+	i.resource = i.lookupIcon(i.URI)
 	i.extension = trimmedExtension(uri)
 }
 
@@ -81,7 +81,7 @@ func (i *FileIcon) SetSelected(selected bool) {
 	i.Refresh()
 }
 
-func (i *FileIcon) setIcon(uri fyne.URI) fyne.Resource {
+func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 	if _, ok := uri.(fyne.ListableURI); ok {
 		return theme.FolderIcon()
 	}
