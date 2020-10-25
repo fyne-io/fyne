@@ -119,8 +119,8 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 
 func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
 	var last, previous fyne.Focusable
-	found := false
-	driver.WalkVisibleObjectTree(f.content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	found := current == nil // if we have no starting point then pretend we matched already
+	driver.ReverseWalkVisibleObjectTree(f.content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 			// disabled widget cannot receive focus
 			return false
@@ -131,16 +131,19 @@ func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
 			return false
 		}
 
+		if found {
+			previous = focus
+			return true
+		}
+
 		if current != nil && obj == current.(fyne.CanvasObject) {
 			found = true
 		}
-		last = focus
-
-		if !found {
-			previous = focus
+		if last == nil {
+			last = focus
 		}
 
-		return false // we cannot exit early - until we make a reverse tree walk...
+		return false
 	}, nil)
 
 	if previous != nil {
