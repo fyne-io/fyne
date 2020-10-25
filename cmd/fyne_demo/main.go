@@ -43,6 +43,7 @@ func main() {
 	settingsItem := fyne.NewMenuItem("Settings", func() {
 		w := a.NewWindow("Fyne Settings")
 		w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
+		w.Resize(fyne.NewSize(480, 480))
 		w.Show()
 	})
 

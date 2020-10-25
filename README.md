@@ -40,13 +40,13 @@ To run a showcase of the features of Fyne execute the following:
 And you should see something like this (after you click a few buttons):
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-dark.png" width="877" height="636" alt="Fyne Hello Light Theme" style="max-width: 100%" />
+  <img src="img/widgets-dark.png" width="752" height="594" alt="Fyne Hello Light Theme" style="max-width: 100%" />
 </p>
 
 Or if you are using the light theme:
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-light.png" width="877" height="636" alt="Fyne Hello Light Theme" style="max-width: 100%" />
+  <img src="img/widgets-light.png" width="752" height="594" alt="Fyne Hello Light Theme" style="max-width: 100%" />
 </p>
 
 # Getting Started
