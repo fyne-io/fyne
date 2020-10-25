@@ -269,19 +269,20 @@ func TestFindObjectAtPositionMatching(t *testing.T) {
 }
 
 func TestWalkVisibleObjectTree(t *testing.T) {
-	rect := canvas.NewRectangle(color.White)
-	rect.SetMinSize(fyne.NewSize(100, 100))
-	child := canvas.NewRectangle(color.Black)
-	child.Hide()
-	base := widget.NewHBox(rect, child)
+	child1 := canvas.NewRectangle(color.White)
+	child1.SetMinSize(fyne.NewSize(100, 100))
+	child2 := canvas.NewRectangle(color.Black)
+	child2.Hide()
+	child3 := canvas.NewRectangle(color.White)
+	base := widget.NewHBox(child1, child2, child3)
 
-	walked := 0
+	var walked []fyne.CanvasObject
 	driver.WalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
-		walked++
+		walked = append(walked, object)
 		return false
 	}, nil)
 
-	assert.Equal(t, 2, walked)
+	assert.Equal(t, []fyne.CanvasObject{base, child1, child3}, walked)
 }
 
 func TestWalkVisibleObjectTree_Clip(t *testing.T) {
@@ -306,19 +307,20 @@ func TestWalkVisibleObjectTree_Clip(t *testing.T) {
 }
 
 func TestWalkWholeObjectTree(t *testing.T) {
-	rect := canvas.NewRectangle(color.White)
-	rect.SetMinSize(fyne.NewSize(100, 100))
-	child := canvas.NewRectangle(color.Black)
-	child.Hide()
-	base := widget.NewHBox(rect, child)
+	child1 := canvas.NewRectangle(color.White)
+	child1.SetMinSize(fyne.NewSize(100, 100))
+	child2 := canvas.NewRectangle(color.Black)
+	child2.Hide()
+	child3 := canvas.NewRectangle(color.White)
+	base := widget.NewHBox(child1, child2, child3)
 
-	walked := 0
+	var walked []fyne.CanvasObject
 	driver.WalkCompleteObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
-		walked++
+		walked = append(walked, object)
 		return false
 	}, nil)
 
-	assert.Equal(t, 3, walked)
+	assert.Equal(t, []fyne.CanvasObject{base, child1, child2, child3}, walked)
 }
 
 var _ fyne.Widget = (*objectTree)(nil)
