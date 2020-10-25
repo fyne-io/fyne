@@ -350,16 +350,15 @@ func TestTree_Tap(t *testing.T) {
 
 		tree.Refresh() // Force layout
 
-		tapped := make(chan bool)
-		tree.OnBranchOpened = func(uid string) {
-			tapped <- true
+		selected := make(chan bool)
+		tree.OnSelectionChanged = func(uid string) {
+			selected <- true
 		}
-		go test.DoubleTap(getBranch(t, tree, "A"))
+		go test.Tap(getBranch(t, tree, "A"))
 		select {
-		case open := <-tapped:
-			assert.True(t, open, "Branch should be open")
+		case <-selected:
 		case <-time.After(1 * time.Second):
-			assert.Fail(t, "Branch should have been changed")
+			assert.Fail(t, "Branch should have been selected")
 		}
 	})
 	t.Run("BranchIcon", func(t *testing.T) {

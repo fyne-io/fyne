@@ -15,7 +15,7 @@ const defaultPlaceHolder string = "(Select one)"
 
 // Select widget has a list of options, with the current one shown, and triggers an event func when clicked
 type Select struct {
-	BaseWidget
+	DisableableWidget
 
 	Selected    string
 	Options     []string
@@ -32,6 +32,9 @@ var _ fyne.Widget = (*Select)(nil)
 var _ desktop.Hoverable = (*Select)(nil)
 var _ fyne.Tappable = (*Select)(nil)
 var _ fyne.Focusable = (*Select)(nil)
+var _ fyne.Disableable = (*Select)(nil)
+
+var _ textPresenter = (*Select)(nil)
 
 // NewSelect creates a new select widget with the set list of options and changes handler
 func NewSelect(options []string, changed func(string)) *Select {
@@ -57,21 +60,15 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
 	icon := NewIcon(theme.MenuDropDownIcon())
-	text := NewLabel(s.Selected)
-	text.TextStyle.Bold = true
-	text.Wrapping = fyne.TextTruncate
-
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
 	}
-	if s.Selected == "" {
-		text.Text = s.PlaceHolder
-	}
-	text.Alignment = fyne.TextAlignLeading
+	txtProv := newTextProvider(s.Selected, s)
+	txtProv.ExtendBaseWidget(txtProv)
 
 	bg := canvas.NewRectangle(color.Transparent)
-	objects := []fyne.CanvasObject{bg, text, icon}
-	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, text, bg, s}
+	objects := []fyne.CanvasObject{bg, txtProv, icon}
+	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, bg, s}
 	bg.FillColor = r.buttonColor()
 	r.updateLabel()
 	r.updateIcon()
@@ -188,6 +185,10 @@ func (s *Select) SetSelectedIndex(index int) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (s *Select) Tapped(*fyne.PointEvent) {
+	if s.Disabled() {
+		return
+	}
+
 	s.tapped = true
 	defer func() { // TODO move to a real animation
 		time.Sleep(time.Millisecond * buttonTapDuration)
@@ -228,6 +229,14 @@ func (s *Select) TypedRune(_ rune) {
 	// intentionally left blank
 }
 
+func (s *Select) concealed() bool {
+	return false
+}
+
+func (s *Select) object() fyne.Widget {
+	return nil
+}
+
 func (s *Select) optionTapped(text string) {
 	s.SetSelected(text)
 	s.popUp = nil
@@ -254,6 +263,25 @@ func (s *Select) showPopUp() {
 	s.popUp.Resize(fyne.NewSize(s.Size().Width-theme.Padding()*2, s.popUp.MinSize().Height))
 }
 
+func (s *Select) textAlign() fyne.TextAlign {
+	return fyne.TextAlignLeading
+}
+
+func (s *Select) textColor() color.Color {
+	if s.Disabled() {
+		return theme.DisabledTextColor()
+	}
+	return theme.TextColor()
+}
+
+func (s *Select) textStyle() fyne.TextStyle {
+	return fyne.TextStyle{Bold: true}
+}
+
+func (s *Select) textWrap() fyne.TextWrap {
+	return fyne.TextTruncate
+}
+
 func (s *Select) updateSelected(text string) {
 	s.Selected = text
 
@@ -268,7 +296,7 @@ type selectRenderer struct {
 	*widget.ShadowingRenderer
 
 	icon  *Icon
-	label *Label
+	label *textProvider
 	bg    *canvas.Rectangle
 	combo *Select
 }
@@ -307,7 +335,7 @@ func (s *selectRenderer) MinSize() fyne.Size {
 	s.combo.propertyLock.RLock()
 	defer s.combo.propertyLock.RUnlock()
 
-	min := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.label.TextStyle)
+	min := fyne.MeasureText(s.combo.PlaceHolder, theme.TextSize(), s.combo.textStyle())
 
 	min = min.Add(fyne.NewSize(theme.Padding()*6, theme.Padding()*4))
 	return min.Add(fyne.NewSize(theme.IconInlineSize()+theme.Padding(), 0))
@@ -329,6 +357,9 @@ func (s *selectRenderer) Refresh() {
 }
 
 func (s *selectRenderer) buttonColor() color.Color {
+	if s.combo.Disabled() {
+		return theme.ButtonColor()
+	}
 	if s.combo.focused {
 		return theme.FocusColor()
 	}
@@ -339,11 +370,12 @@ func (s *selectRenderer) buttonColor() color.Color {
 }
 
 func (s *selectRenderer) updateIcon() {
-	if false { // s.combo.down {
-		s.icon.Resource = theme.MenuDropUpIcon()
+	if s.combo.Disabled() {
+		s.icon.Resource = theme.NewDisabledResource(theme.MenuDropDownIcon())
 	} else {
 		s.icon.Resource = theme.MenuDropDownIcon()
 	}
+	s.icon.Refresh()
 }
 
 func (s *selectRenderer) updateLabel() {
@@ -352,8 +384,8 @@ func (s *selectRenderer) updateLabel() {
 	}
 
 	if s.combo.Selected == "" {
-		s.label.SetText(s.combo.PlaceHolder)
+		s.label.setText(s.combo.PlaceHolder)
 	} else {
-		s.label.SetText(s.combo.Selected)
+		s.label.setText(s.combo.Selected)
 	}
 }

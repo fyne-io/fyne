@@ -20,22 +20,22 @@ var _ fyne.Widget = (*Tree)(nil)
 // Each node of the tree must be identified by a Unique ID.
 type Tree struct {
 	BaseWidget
-	Root     string
-	selected string
-	Offset   fyne.Position
+	Root string
 
 	ChildUIDs          func(uid string) (c []string)                         // Return a sorted slice of Children Unique IDs for the given Node Unique ID
-	IsBranch           func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
 	CreateNode         func(branch bool) (o fyne.CanvasObject)               // Return a CanvasObject that can represent a Branch (if branch is true), or a Leaf (if branch is false)
-	UpdateNode         func(uid string, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given Unique ID
-	OnBranchOpened     func(uid string)                                      // Called when a Branch is opened
+	IsBranch           func(uid string) (ok bool)                            // Return true if the given Unique ID represents a Branch
 	OnBranchClosed     func(uid string)                                      // Called when a Branch is closed
+	OnBranchOpened     func(uid string)                                      // Called when a Branch is opened
 	OnSelectionChanged func(uid string)                                      // Called when the Node with the given Unique ID is selected.
+	UpdateNode         func(uid string, branch bool, node fyne.CanvasObject) // Called to update the given CanvasObject to represent the data at the given Unique ID
 
-	scroller      *ScrollContainer
-	open          map[string]bool
 	branchMinSize fyne.Size
 	leafMinSize   fyne.Size
+	offset        fyne.Position
+	open          map[string]bool
+	scroller      *ScrollContainer
+	selected      string
 }
 
 // NewTree returns a new performant tree widget defined by the passed functions.
@@ -110,10 +110,10 @@ func (t *Tree) CreateRenderer() fyne.WidgetRenderer {
 		scroller:     s,
 	}
 	s.onOffsetChanged = func() {
-		if t.Offset == s.Offset {
+		if t.offset == s.Offset {
 			return
 		}
-		t.Offset = s.Offset
+		t.offset = s.Offset
 		c.Refresh()
 	}
 	r.updateMinSizes()
@@ -370,7 +370,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
 
-	offsetY := r.treeContent.tree.Offset.Y
+	offsetY := r.treeContent.tree.offset.Y
 	viewport := r.treeContent.viewport
 	width := fyne.Max(size.Width, viewport.Width)
 	y := 0
@@ -696,7 +696,6 @@ func (r *treeNodeRenderer) partialRefresh() {
 	canvas.Refresh(r.treeNode.super())
 }
 
-var _ fyne.DoubleTappable = (*branch)(nil)
 var _ fyne.Widget = (*branch)(nil)
 
 type branch struct {
@@ -715,16 +714,11 @@ func newBranch(tree *Tree, content fyne.CanvasObject) (b *branch) {
 	return
 }
 
-func (b *branch) DoubleTapped(*fyne.PointEvent) {
-	b.tree.ToggleBranch(b.uid)
-}
-
 func (b *branch) update(uid string, depth int) {
 	b.treeNode.update(uid, depth)
 	b.icon.(*branchIcon).update(uid, depth)
 }
 
-var _ fyne.DoubleTappable = (*branchIcon)(nil)
 var _ fyne.Tappable = (*branchIcon)(nil)
 
 type branchIcon struct {
@@ -739,10 +733,6 @@ func newBranchIcon(tree *Tree) (i *branchIcon) {
 	}
 	i.ExtendBaseWidget(i)
 	return
-}
-
-func (i *branchIcon) DoubleTapped(*fyne.PointEvent) {
-	// Do nothing - this stops the event propagating to branch
 }
 
 func (i *branchIcon) Refresh() {

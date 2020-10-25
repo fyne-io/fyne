@@ -413,6 +413,8 @@ func (r *tableCellsRenderer) MinSize() fyne.Size {
 }
 
 func (r *tableCellsRenderer) Refresh() {
+	r.cells.propertyLock.Lock()
+	defer r.cells.propertyLock.Unlock()
 	oldSize := r.cells.cellSize
 	r.cells.cellSize = r.cells.t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	if oldSize != r.cells.cellSize { // theme changed probably

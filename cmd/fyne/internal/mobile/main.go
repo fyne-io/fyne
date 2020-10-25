@@ -31,9 +31,9 @@ type command struct {
 	Short string
 	Long  string
 
-	IconPath, AppName string
-	Version           string
-	Build             int
+	IconPath, AppName      string
+	Version, Cert, Profile string
+	Build                  int
 }
 
 func (cmd *command) usage() {

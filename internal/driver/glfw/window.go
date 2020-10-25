@@ -643,7 +643,7 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-	co, pos, layer := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
 		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, fyne.Draggable, desktop.Mouseable, desktop.Hoverable:
 			return true
@@ -675,12 +675,10 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		}
 	}
 
-	if layer != 1 { // 0 - overlay, 1 - menu, 2 - content
-		if wid, ok := co.(fyne.Focusable); ok {
-			w.canvas.Focus(wid)
-		} else {
-			w.canvas.Unfocus()
-		}
+	if wid, ok := co.(fyne.Focusable); ok {
+		w.canvas.Focus(wid)
+	} else {
+		w.canvas.Unfocus()
 	}
 
 	if action == glfw.Press {

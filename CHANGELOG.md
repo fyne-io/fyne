@@ -8,7 +8,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 ### Added (highlights)
 
 * List (#156), Table (#157) and Tree collection Widgets
-* Card, FileItem widgets
+* Card, FileItem, Separator widgets
 * ColorPicker dialog
 * User selection of primary colour
 * Container API package to ease using layouts and container widgets
@@ -20,6 +20,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Canvas.InteractiveArea() to indicate where widgets should avoid
 * TextFormatter for ProgressBar
 * FileDialog.SetLocation() (#821)
+* Added dialog.ShowFolderOpen (#941)
 * Support to install on iOS and android with 'fyne install'
 * Support asset bundling with go:generate
 * Add fyne release command for preparing signed apps
