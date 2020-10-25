@@ -268,6 +268,48 @@ func TestFindObjectAtPositionMatching(t *testing.T) {
 	}
 }
 
+func TestReverseWalkVisibleObjectTree(t *testing.T) {
+	child1 := canvas.NewRectangle(color.White)
+	child1.SetMinSize(fyne.NewSize(100, 100))
+	child2 := canvas.NewRectangle(color.Black)
+	child2.Hide()
+	child3 := canvas.NewRectangle(color.White)
+	base := widget.NewHBox(child1, child2, child3)
+
+	var walked []fyne.CanvasObject
+	driver.ReverseWalkVisibleObjectTree(
+		base,
+		func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
+			walked = append(walked, object)
+			return false
+		},
+		nil,
+	)
+
+	assert.Equal(t, []fyne.CanvasObject{base, child3, child1}, walked)
+}
+
+func TestReverseWalkVisibleObjectTree_Clip(t *testing.T) {
+	rect := canvas.NewRectangle(color.White)
+	rect.SetMinSize(fyne.NewSize(100, 100))
+	child := canvas.NewRectangle(color.Black)
+	base := fyne.NewContainerWithLayout(layout.NewGridLayout(1), rect, widget.NewScrollContainer(child))
+
+	clipPos := fyne.NewPos(0, 0)
+	clipSize := rect.MinSize()
+
+	driver.ReverseWalkVisibleObjectTree(base, func(object fyne.CanvasObject, position fyne.Position, clippingPos fyne.Position, clippingSize fyne.Size) bool {
+		if _, ok := object.(*widget.ScrollContainer); ok {
+			clipPos = clippingPos
+			clipSize = clippingSize
+		}
+		return false
+	}, nil)
+
+	assert.Equal(t, fyne.NewPos(0, 104), clipPos)
+	assert.Equal(t, fyne.NewSize(100, 100), clipSize)
+}
+
 func TestWalkVisibleObjectTree(t *testing.T) {
 	child1 := canvas.NewRectangle(color.White)
 	child1.SetMinSize(fyne.NewSize(100, 100))

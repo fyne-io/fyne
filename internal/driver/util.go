@@ -80,6 +80,24 @@ func FindObjectAtPositionMatching(mouse fyne.Position, matches func(object fyne.
 	return found, foundPos, layer
 }
 
+// ReverseWalkVisibleObjectTree will walk an object tree in reverse order for all visible objects
+// executing the passed functions following the following rules:
+// - beforeChildren is called for the start obj before traversing its children
+// - the obj's children are traversed by calling walkObjects on each of the visible items
+// - afterChildren is called for the obj after traversing the obj's children
+// The walk can be aborted by returning true in one of the functions:
+// - if beforeChildren returns true, further traversing is stopped immediately, the after function
+//   will not be called for the obj where the walk stopped, however, it will be called for all its
+//   parents
+func ReverseWalkVisibleObjectTree(
+	obj fyne.CanvasObject,
+	beforeChildren func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
+	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
+) bool {
+	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
+	return walkObjectTree(obj, true, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
+}
+
 // WalkCompleteObjectTree will walk an object tree for all objects (ignoring visible state) executing the passed
 // functions following the following rules:
 // - beforeChildren is called for the start obj before traversing its children
@@ -95,7 +113,7 @@ func WalkCompleteObjectTree(
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
-	return walkObjectTree(obj, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
+	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, false)
 }
 
 // WalkVisibleObjectTree will walk an object tree for all visible objects executing the passed functions following
@@ -113,11 +131,12 @@ func WalkVisibleObjectTree(
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 ) bool {
 	clipSize := fyne.NewSize(math.MaxInt32, math.MaxInt32)
-	return walkObjectTree(obj, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, false)
+	return walkObjectTree(obj, false, nil, fyne.NewPos(0, 0), fyne.NewPos(0, 0), clipSize, beforeChildren, afterChildren, true)
 }
 
 func walkObjectTree(
 	obj fyne.CanvasObject,
+	reverse bool,
 	parent fyne.CanvasObject,
 	offset, clipPos fyne.Position,
 	clipSize fyne.Size,
@@ -150,10 +169,24 @@ func walkObjectTree(
 	}
 
 	cancelled := false
-	for _, child := range children {
-		if walkObjectTree(child, obj, pos, clipPos, clipSize, beforeChildren, afterChildren, requireVisible) {
+	followChild := func(child fyne.CanvasObject) bool {
+		if walkObjectTree(child, reverse, obj, pos, clipPos, clipSize, beforeChildren, afterChildren, requireVisible) {
 			cancelled = true
-			break
+			return true
+		}
+		return false
+	}
+	if reverse {
+		for i := len(children) - 1; i >= 0; i-- {
+			if followChild(children[i]) {
+				break
+			}
+		}
+	} else {
+		for _, child := range children {
+			if followChild(child) {
+				break
+			}
 		}
 	}
 
