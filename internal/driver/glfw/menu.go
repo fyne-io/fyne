@@ -4,7 +4,7 @@ import (
 	"fyne.io/fyne"
 )
 
-func buildMenuOverlay(menus *fyne.MainMenu, c fyne.Canvas) *MenuBar {
+func buildMenuOverlay(menus *fyne.MainMenu, c fyne.Canvas) fyne.CanvasObject {
 	if len(menus.Items) == 0 {
 		fyne.LogError("Main menu must have at least one child menu", nil)
 		return nil
