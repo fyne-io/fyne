@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/cmd/fyne/internal/mobile"
@@ -20,7 +21,9 @@ var _ Command = (*releaser)(nil)
 type releaser struct {
 	packager
 
-	keyStore string
+	keyStore  string
+	developer string
+	password  string
 }
 
 // NewReleaser returns a command that can adapt app packages for distribution
@@ -36,9 +39,10 @@ func (r *releaser) AddFlags() {
 	flag.StringVar(&r.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
 	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
-	flag.StringVar(&r.certificate, "certificate", "Apple Distribution", "iOS/macOS/Windows: name of the certificate to sign the build")
+	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to signAndroid the build")
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
-	// password (for (windows?) certificate)
+	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
+	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to signAndroid the build")
 }
 
 func (r *releaser) PrintHelp(indent string) {
@@ -69,41 +73,22 @@ func (r *releaser) afterPackage() error {
 		if err := r.zipAlign(apk); err != nil {
 			return err
 		}
-		return r.sign(apk)
+		return r.signAndroid(apk)
 	}
 	if r.os == "ios" {
-		team, err := mobile.DetectIOSTeamID(r.certificate)
-		if err != nil {
-			return errors.New("failed to determine team ID")
+		return r.packageIOSRelease()
+	}
+	if r.os == "windows" {
+		outName := r.name + ".appx"
+		if pos := strings.LastIndex(r.name, ".exe"); pos > 0 {
+			outName = r.name[:pos] + ".appx"
 		}
 
-		payload := filepath.Join(r.dir, "Payload")
-		os.Mkdir(payload, 0750)
-		defer os.Remove(payload)
-		appName := mobile.AppOutputName(r.os, r.name)
-		payloadAppDir := filepath.Join(payload, appName)
-		os.Rename(filepath.Join(r.dir, appName), payloadAppDir)
-
-		entitlementPath := filepath.Join(r.dir, "entitlements.plist")
-		defer os.Remove(entitlementPath)
-		entitlements, _ := os.Create(entitlementPath)
-		entitlementData := struct{ TeamID, AppID string }{
-			TeamID: team,
-			AppID:  r.appID,
+		outPath := filepath.Join(r.dir, outName)
+		if err := r.packageWindowsRelease(outPath); err != nil {
+			return err
 		}
-		err = templates.EntitlementsDarwin.Execute(entitlements, entitlementData)
-		if err != nil {
-			return errors.New("failed to write entitlements plist template")
-		}
-
-		cmd := exec.Command("codesign", "-f", "-vv", "-s", r.certificate, "--entitlements",
-			"entitlements.plist", "Payload/"+appName+"/")
-		if err := cmd.Run(); err != nil {
-			fyne.LogError("Codesign failed", err)
-			return errors.New("unable to codesign application bundle")
-		}
-
-		return exec.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
+		return r.signWindows(outPath)
 	}
 	return nil
 }
@@ -118,7 +103,78 @@ func (r *releaser) beforePackage() error {
 	return nil
 }
 
-func (r *releaser) sign(path string) error {
+func (r *releaser) packageIOSRelease() error {
+	team, err := mobile.DetectIOSTeamID(r.certificate)
+	if err != nil {
+		return errors.New("failed to determine team ID")
+	}
+
+	payload := filepath.Join(r.dir, "Payload")
+	os.Mkdir(payload, 0750)
+	defer os.RemoveAll(payload)
+	appName := mobile.AppOutputName(r.os, r.name)
+	payloadAppDir := filepath.Join(payload, appName)
+	os.Rename(filepath.Join(r.dir, appName), payloadAppDir)
+
+	entitlementPath := filepath.Join(r.dir, "entitlements.plist")
+	entitlements, _ := os.Create(entitlementPath)
+	entitlementData := struct{ TeamID, AppID string }{
+		TeamID: team,
+		AppID:  r.appID,
+	}
+	err = templates.EntitlementsDarwin.Execute(entitlements, entitlementData)
+	entitlements.Close()
+	if err != nil {
+		return errors.New("failed to write entitlements plist template")
+	}
+
+	cmd := exec.Command("codesign", "-f", "-vv", "-s", r.certificate, "--entitlements",
+		"entitlements.plist", "Payload/"+appName+"/")
+	if err := cmd.Run(); err != nil {
+		fyne.LogError("Codesign failed", err)
+		return errors.New("unable to codesign application bundle")
+	}
+
+	return exec.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
+}
+
+func (r *releaser) packageWindowsRelease(outFile string) error {
+	payload := filepath.Join(r.dir, "Payload")
+	os.Mkdir(payload, 0750)
+	defer os.RemoveAll(payload)
+
+	manifestPath := filepath.Join(payload, "appxmanifest.xml")
+	manifest, err := os.Create(manifestPath)
+	if err != nil {
+		return err
+	}
+	manifestData := struct{ AppID, Developer, DeveloperName, Name, Version string }{
+		AppID: r.appID,
+		// TODO read this info
+		Developer:     "CN=MyCompany, O=MyCompany, L=MyCity, S=MyState, C=MyCountry",
+		DeveloperName: "MyCompany",
+		Name:          r.name,
+		Version:       r.combinedVersion(),
+	}
+	err = templates.AppxManifestWindows.Execute(manifest, manifestData)
+	manifest.Close()
+	if err != nil {
+		return errors.New("failed to write application manifest template")
+	}
+
+	util.CopyFile(r.icon, filepath.Join(payload, "Icon.png"))
+	util.CopyFile(r.name, filepath.Join(payload, r.name))
+
+	binDir, err := findWindowsSDKBin()
+	if err != nil {
+		return errors.New("cannot find makeappx.exe, make sure you have installed the Windows SDK")
+	}
+
+	cmd := exec.Command(filepath.Join(binDir, "makeappx.exe"), "pack", "/d", payload, "/p", outFile)
+	return cmd.Run()
+}
+
+func (r *releaser) signAndroid(path string) error {
 	signer := filepath.Join(util.AndroidBuildToolsPath(), "/apksigner")
 	cmd := exec.Command(signer, "sign", "--ks", r.keyStore, path)
 	cmd.Stdout = os.Stdout
@@ -127,7 +183,24 @@ func (r *releaser) sign(path string) error {
 	return cmd.Run()
 }
 
+func (r *releaser) signWindows(appx string) error {
+	binDir, err := findWindowsSDKBin()
+	if err != nil {
+		return errors.New("cannot find signtool.exe, make sure you have installed the Windows SDK")
+	}
+
+	cmd := exec.Command(filepath.Join(binDir, "signtool.exe"),
+		"sign", "/a", "/v", "/fd", "SHA256", "/f", r.certificate, "/p", r.password, appx)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	return cmd.Run()
+}
+
 func (r *releaser) validate() error {
+	if r.os == "" {
+		r.os = targetOS()
+	}
 	if util.IsMobile(r.os) || r.os == "windows" {
 		if r.appVersion == "" { // Here it is required, if provided then package validate will check format
 			return errors.New("missing required -appVersion parameter")
@@ -136,13 +209,21 @@ func (r *releaser) validate() error {
 			return errors.New("missing required -appBuild parameter")
 		}
 	}
+	if r.os == "windows" {
+		if r.certificate == "" {
+			return errors.New("missing required -certificate parameter for windows release")
+		}
+		if r.password == "" {
+			return errors.New("missing required -password parameter for windows release")
+		}
+	}
 	if util.IsAndroid(r.os) {
 		if r.keyStore == "" {
 			return errors.New("missing required -keyStore parameter for android release")
 		}
 	} else if r.os == "ios" {
 		if r.certificate == "" {
-			return errors.New("missing required -certificate parameter for iOS release")
+			r.certificate = "Apple Distribution"
 		}
 		if r.profile == "" {
 			return errors.New("missing required -profile parameter for iOS release")
@@ -165,4 +246,18 @@ func (r *releaser) zipAlign(path string) error {
 		return err
 	}
 	return os.Remove(unaligned)
+}
+
+func findWindowsSDKBin() (string, error) {
+	inPath, err := exec.LookPath("makeappx.exe")
+	if err == nil {
+		return inPath, nil
+	}
+
+	matches, err := filepath.Glob("C:\\Program Files (x86)\\Windows Kits\\*\\bin\\*\\*\\makeappx.exe")
+	if err != nil || len(matches) == 0 {
+		return "", errors.New("failed to look up standard locations for makeappx.exe")
+	}
+
+	return filepath.Dir(matches[0]), nil
 }
