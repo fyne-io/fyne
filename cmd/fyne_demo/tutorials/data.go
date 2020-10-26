@@ -99,7 +99,7 @@ var (
 		},
 		"collections": {"Collections",
 			"Collection widgets provide an efficient way to present lots of content.\n" +
-				"The List, Table and Tree provide a cache and re-use mechanism that make it possible to scroll through thousands of elements.\n" +
+				"The List, Table, and Tree provide a cache and re-use mechanism that make it possible to scroll through thousands of elements.\n" +
 				"Use this for large data sets or for collections that can expand as users scroll.",
 			collectionScreen,
 		},
