@@ -11,6 +11,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/storage"
+	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 )
 
@@ -79,6 +80,37 @@ func TestFileIcon_NewURI_WithFolder(t *testing.T) {
 	item.SetURI(storage.NewURI("file://" + dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
+}
+
+func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		fyne.LogError("Could not get current working directory", err)
+		t.FailNow()
+	}
+
+	icon := NewFileIcon(nil)
+
+	w := test.NewWindow(icon)
+	w.Resize(fyne.NewSize(150, 150))
+
+	test.AssertImageMatches(t, "fileicon/fileicon_nil.png", w.Canvas().Capture())
+
+	file := filepath.Join(workingDir, "testdata/text.txt")
+	icon2 := NewFileIcon(storage.NewURI("file://" + file))
+
+	w.SetContent(icon2)
+	w.Resize(fyne.NewSize(150, 150))
+	test.AssertImageMatches(t, "fileicon/fileicon_txt.png", w.Canvas().Capture())
+
+	dir := filepath.Join(workingDir, "testdata")
+	icon3 := NewFileIcon(storage.NewURI("file://" + dir))
+
+	w.SetContent(icon3)
+	w.Resize(fyne.NewSize(150, 150))
+	test.AssertImageMatches(t, "fileicon/fileicon_folder.png", w.Canvas().Capture())
+
+	w.Close()
 }
 
 func TestFileIcon_SetURI(t *testing.T) {
