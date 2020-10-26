@@ -16,7 +16,9 @@ func collectionScreen(_ fyne.Window) fyne.CanvasObject {
 	content := container.NewVBox(
 		widget.NewLabelWithStyle("func Length() int", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}),
 		widget.NewLabelWithStyle("func CreateItem() fyne.CanvasObject", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}),
-		widget.NewLabelWithStyle("func UpdateItem(ListItemID, fyne.CanvasObject)", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}))
+		widget.NewLabelWithStyle("func UpdateItem(ListItemID, fyne.CanvasObject)", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}),
+		widget.NewLabelWithStyle("func OnSelected(ListItemID)", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}),
+		widget.NewLabelWithStyle("func OnUnselected(ListItemID)", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}))
 	return container.NewCenter(content)
 }
 
@@ -37,19 +39,19 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 		func() fyne.CanvasObject {
 			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
 		},
-		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[index])
+		func(id widget.ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[id])
 		},
 	)
-	list.OnSelectionChanged = func(index int) {
-		if index == -1 {
-			label.SetText("Select An Item From The List")
-			icon.SetResource(nil)
-		}
-		label.SetText(data[index])
+	list.OnSelected = func(id widget.ListItemID) {
+		label.SetText(data[id])
 		icon.SetResource(theme.DocumentIcon())
 	}
-	list.SetSelection(125)
+	list.OnUnselected = func(id widget.ListItemID) {
+		label.SetText("Select An Item From The List")
+		icon.SetResource(nil)
+	}
+	list.Select(125)
 	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
 }
 
