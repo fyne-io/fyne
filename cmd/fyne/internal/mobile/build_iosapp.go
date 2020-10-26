@@ -21,14 +21,29 @@ import (
 )
 
 func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
-	appName, version string, build int) (map[string]bool, error) {
+	appName, version string, build int, cert, profile string) (map[string]bool, error) {
 	src := pkg.PkgPath
 	buildO = rfc1034Label(appName) + ".app"
+	// Detect the team ID
+	teamID, err := DetectIOSTeamID(cert)
+	if err != nil {
+		return nil, err
+	}
 
 	projPbxproj := new(bytes.Buffer)
-	if err := projPbxprojTmpl.Execute(projPbxproj, projPbxprojTmplData{
+	projData := projPbxprojTmplData{
 		BitcodeEnabled: bitcodeEnabled,
-	}); err != nil {
+		BundleID:       bundleID,
+		Certificate:    cert,
+		Profile:        profile,
+		TeamID:         teamID,
+		Type:           "Manual",
+	}
+	if profile == "" {
+		projData.Certificate = "iPhone Developer"
+		projData.Type = "Auto"
+	}
+	if err := projPbxprojTmpl.Execute(projPbxproj, projData); err != nil {
 		return nil, err
 	}
 
@@ -97,12 +112,6 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 		return nil, err
 	}
 
-	// Detect the team ID
-	teamID, err := detectTeamID()
-	if err != nil {
-		return nil, err
-	}
-
 	// Build and move the release build to the output directory.
 	cmdStrings := []string{
 		"xcodebuild",
@@ -146,25 +155,13 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	return nmpkgs, nil
 }
 
-func detectTeamID() (string, error) {
-	// Grabs the first certificate for "iPhone Developer"; will not work if there
-	// are multiple certificates and the first is not desired.
-	cmd := exec.Command(
-		"security", "find-certificate",
-		"-c", "iPhone Developer", "-p",
-	)
-	pemString, err := cmd.Output()
+// DetectIOSTeamID finds the team ID used by the app certificates.
+// The optional parameter specifies the certificate name to use.
+// If none is specified the code will check standard names
+func DetectIOSTeamID(optCert string) (string, error) {
+	pemString, err := lookupCert(optCert)
 	if err != nil {
-		// If no "iPhone Developer" cert is found then try the new "Apple Development".
-		cmd := exec.Command(
-			"security", "find-certificate",
-			"-c", "Apple Development", "-p",
-		)
-		pemString, err = cmd.Output()
-		if err != nil {
-			err = fmt.Errorf("failed to pull the signing certificate to determine your team ID: %v", err)
-			return "", err
-		}
+		return "", err
 	}
 
 	block, _ := pem.Decode(pemString)
@@ -229,6 +226,38 @@ func iosCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
 	})
 }
 
+func lookupCert(optName string) ([]byte, error) {
+	if optName != "" {
+		return lookupCertNamed(optName)
+	}
+	if buildRelease {
+		// Grabs the first certificate for "iPhone Distribution"; will not work if there
+		// are multiple certificates and the first is not desired.
+		pemString, err := lookupCertNamed("iPhone Distribution")
+		if err != nil {
+			// If no "iPhone Distribution" cert is found then try the new "Apple Development".
+			return lookupCertNamed("Apple Distribution")
+		}
+		return pemString, nil
+	}
+	// Grabs the first certificate for "iPhone Developer"; will not work if there
+	// are multiple certificates and the first is not desired.
+	pemString, err := lookupCertNamed("iPhone Developer")
+	if err != nil {
+		// If no "iPhone Developer" cert is found then try the new "Apple Development".
+		return lookupCertNamed("Apple Development")
+	}
+	return pemString, err
+}
+
+func lookupCertNamed(name string) ([]byte, error) {
+	cmd := exec.Command(
+		"security", "find-certificate",
+		"-c", name, "-p",
+	)
+	return cmd.Output()
+}
+
 type infoplistTmplData struct {
 	BundleID string
 	Name     string
@@ -258,6 +287,19 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <string>????</string>
   <key>CFBundleVersion</key>
   <string>{{.Build}}</string>
+  <key>CFBundleIcons</key>
+    <dict>
+      <key>CFBundlePrimaryIcon</key>
+      <dict>
+        <key>CFBundleIconFiles</key>
+        <array>
+          <string>Icon.png</string>
+          <string>Icon_76.png</string>
+          <string>Icon_152.png</string>
+          <string>Icon_120.png</string>
+        </array>
+      </dict>
+    </dict>
   <key>LSRequiresIPhoneOS</key>
   <true/>
   <key>UILaunchStoryboardName</key>
@@ -266,6 +308,8 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <array>
     <string>armv7</string>
   </array>
+  <key>UIRequiresFullScreen</key>
+  <true/>
   <key>UISupportedInterfaceOrientations</key>
   <array>
     <string>UIInterfaceOrientationPortrait</string>
@@ -285,6 +329,10 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
 
 type projPbxprojTmplData struct {
 	BitcodeEnabled bool
+	BundleID       string
+	Certificate    string
+	Profile        string
+	TeamID, Type   string
 }
 
 var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF8*$!
@@ -375,6 +423,8 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
         TargetAttributes = {
           254BB83D1B1FD08900C56DE9 = {
             CreatedOnToolsVersion = 6.3.1;
+            DevelopmentTeam = {{.TeamID}};
+            ProvisioningStyle = {{.Type}};
           };
         };
       };
@@ -427,7 +477,7 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
         CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
         CLANG_WARN_UNREACHABLE_CODE = YES;
         CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-        "CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+        "CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "{{.Certificate}}";
         COPY_PHASE_STRIP = NO;
         DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
         ENABLE_NS_ASSERTIONS = NO;
@@ -440,8 +490,10 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
         GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
         GCC_WARN_UNUSED_FUNCTION = YES;
         GCC_WARN_UNUSED_VARIABLE = YES;
-        IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+        IPHONEOS_DEPLOYMENT_TARGET = 9.0;
         MTL_ENABLE_DEBUG_INFO = NO;
+        PRODUCT_BUNDLE_IDENTIFIER = {{.BundleID}};
+        PROVISIONING_PROFILE_SPECIFIER = "{{.Profile}}";
         SDKROOT = iphoneos;
         TARGETED_DEVICE_FAMILY = "1,2";
         VALIDATE_PRODUCT = YES;

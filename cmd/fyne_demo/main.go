@@ -133,7 +133,7 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial)) fyne.CanvasObject {
 			}
 			obj.(*widget.Label).SetText(t.Title)
 		},
-		OnSelectionChanged: func(uid string) {
+		OnSelected: func(uid string) {
 			if t, ok := tutorials.Tutorials[uid]; ok {
 				a.Preferences().SetString(preferenceCurrentTutorial, uid)
 				setTutorial(t)
@@ -141,7 +141,7 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial)) fyne.CanvasObject {
 		},
 	}
 	currentPref := a.Preferences().StringWithFallback(preferenceCurrentTutorial, "welcome")
-	tree.SetSelection(currentPref)
+	tree.Select(currentPref)
 
 	themes := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 		widget.NewButton("Dark", func() {
