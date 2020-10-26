@@ -110,35 +110,47 @@ func TestList_Selection(t *testing.T) {
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
 	children[0].(*listItem).Tapped(&fyne.PointEvent{})
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
-	assert.Equal(t, list.selected, 0)
+	assert.Equal(t, 1, len(list.selected))
+	assert.Equal(t, 0, list.selected[0])
 	children[1].(*listItem).Tapped(&fyne.PointEvent{})
 	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
-	assert.Equal(t, list.selected, 1)
+	assert.Equal(t, 1, len(list.selected))
+	assert.Equal(t, 1, list.selected[0])
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
-	list.ClearSelection()
-	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
-	assert.Equal(t, list.selected, -1)
 }
 
-func TestList_SetSelection(t *testing.T) {
+func TestList_Select(t *testing.T) {
 	list := createList(1000)
 
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 0)
-	list.SetSelection(50)
+	list.Select(50)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).lastItemIndex, 50)
 	children := test.WidgetRenderer(list).(*listRenderer).children
 	assert.Equal(t, children[len(children)-1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
 
-	list.SetSelection(5)
+	list.Select(5)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.FocusColor())
 
-	list.SetSelection(6)
+	list.Select(6)
 	assert.Equal(t, test.WidgetRenderer(list).(*listRenderer).firstItemIndex, 5)
 	children = test.WidgetRenderer(list).(*listRenderer).children
 	assert.Equal(t, children[0].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
 	assert.Equal(t, children[1].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+}
+
+func TestList_Unselect(t *testing.T) {
+	list := createList(1000)
+
+	list.Select(10)
+	children := test.WidgetRenderer(list).(*listRenderer).children
+	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.FocusColor())
+
+	list.Unselect(10)
+	children = test.WidgetRenderer(list).(*listRenderer).children
+	assert.Equal(t, children[10].(*listItem).statusIndicator.FillColor, theme.BackgroundColor())
+	assert.Nil(t, list.selected)
 }
 
 func TestList_DataChange(t *testing.T) {
@@ -181,8 +193,8 @@ func TestList_SmallList(t *testing.T) {
 		func() fyne.CanvasObject {
 			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 		},
-		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 		},
 	)
 	w := test.NewWindow(list)
@@ -237,8 +249,8 @@ func TestList_RemoveItem(t *testing.T) {
 		func() fyne.CanvasObject {
 			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 		},
-		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 		},
 	)
 	w := test.NewWindow(list)
@@ -275,8 +287,8 @@ func createList(items int) *List {
 		func() fyne.CanvasObject {
 			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object"))
 		},
-		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+		func(id ListItemID, item fyne.CanvasObject) {
+			item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 		},
 	)
 	list.Resize(fyne.NewSize(200, 1000))
@@ -288,7 +300,7 @@ func changeData(list *List) {
 	list.Length = func() int {
 		return len(data)
 	}
-	list.UpdateItem = func(index int, item fyne.CanvasObject) {
-		item.(*fyne.Container).Objects[1].(*Label).SetText(data[index])
+	list.UpdateItem = func(id ListItemID, item fyne.CanvasObject) {
+		item.(*fyne.Container).Objects[1].(*Label).SetText(data[id])
 	}
 }
