@@ -106,7 +106,14 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 				if list == nil {
 					return
 				}
-				dialog.ShowInformation("Folder Open", list.String(), win)
+
+				children, err := list.List()
+				if err != nil {
+					dialog.ShowError(err, win)
+					return
+				}
+				out := fmt.Sprintf("Folder %s (%d children):\n%s", list.Name(), len(children), list.String())
+				dialog.ShowInformation("Folder Open", out, win)
 			}, win)
 		}),
 		widget.NewButton("Color Picker", func() {
