@@ -21,7 +21,7 @@ func newRenderedFileIcon(uri fyne.URI) *FileIcon {
 	return f
 }
 
-func TestNewFileIcon(t *testing.T) {
+func TestFileIcon_NewFileIcon(t *testing.T) {
 	item := newRenderedFileIcon(storage.NewURI("file:///path/to/filename.zip"))
 	assert.Equal(t, ".zip", item.extension)
 	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
@@ -43,7 +43,7 @@ func TestNewFileIcon(t *testing.T) {
 	assert.Equal(t, theme.FileVideoIcon(), item.resource)
 }
 
-func TestNewFileIcon_NoExtension(t *testing.T) {
+func TestFileIcon_NewFileIcon_NoExtension(t *testing.T) {
 	workingDir, err := os.Getwd()
 	if err != nil {
 		fyne.LogError("Could not get current working directory", err)
@@ -61,7 +61,7 @@ func TestNewFileIcon_NoExtension(t *testing.T) {
 	assert.Equal(t, theme.FileTextIcon(), item.resource)
 }
 
-func TestNewURI_WithFolder(t *testing.T) {
+func TestFileIcon_NewURI_WithFolder(t *testing.T) {
 	workingDir, err := os.Getwd()
 	if err != nil {
 		fyne.LogError("Could not get current working directory", err)
@@ -81,7 +81,7 @@ func TestNewURI_WithFolder(t *testing.T) {
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 }
 
-func TestSetURI(t *testing.T) {
+func TestFileIcon_SetURI(t *testing.T) {
 	item := newRenderedFileIcon(storage.NewURI("file:///path/to/filename.zip"))
 	assert.Equal(t, ".zip", item.extension)
 	assert.Equal(t, theme.FileApplicationIcon(), item.resource)
@@ -103,7 +103,7 @@ func TestSetURI(t *testing.T) {
 	assert.Equal(t, theme.FileVideoIcon(), item.resource)
 }
 
-func TestSetURI_WithFolder(t *testing.T) {
+func TestFileIcon_SetURI_WithFolder(t *testing.T) {
 	workingDir, err := os.Getwd()
 	if err != nil {
 		fyne.LogError("Could not get current working directory", err)
