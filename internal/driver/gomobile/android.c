@@ -2,7 +2,9 @@
 
 #include <android/log.h>
 #include <jni.h>
+#include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define LOG_FATAL(...) __android_log_print(ANDROID_LOG_FATAL, "Fyne", __VA_ARGS__)
 
@@ -36,6 +38,26 @@ static jmethodID find_static_method(JNIEnv *env, jclass clazz, const char *name,
 	return m;
 }
 
+char* getString(uintptr_t jni_env, uintptr_t ctx, jstring str) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	const char *chars = (*env)->GetStringUTFChars(env, str, NULL);
+
+	const char *copy = strdup(chars);
+	(*env)->ReleaseStringUTFChars(env, str, chars);
+    return copy;
+}
+
+jobject parseURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+
+	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
+	jclass uriClass = find_class(env, "android/net/Uri");
+	jmethodID parse = find_static_method(env, uriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
+
+	return (jobject)(*env)->CallStaticObjectMethod(env, uriClass, parse, uriStr);
+}
+
 // clipboard
 
 jobject getClipboard(uintptr_t jni_env, uintptr_t ctx) {
@@ -59,14 +81,11 @@ char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx) {
 		return "";
 	}
 
-	jclass clzCharSequence = (*env)->GetObjectClass(env, content);
+    jclass clzCharSequence = (*env)->GetObjectClass(env, content);
 	jmethodID toString = (*env)->GetMethodID(env, clzCharSequence, "toString", "()Ljava/lang/String;");
 	jobject s = (*env)->CallObjectMethod(env, content, toString);
 
-	const char *chars = (*env)->GetStringUTFChars(env, s, NULL);
-	const char *copy = strdup(chars);
-	(*env)->ReleaseStringUTFChars(env, s, chars);
-	return copy;
+	return getString(jni_env, ctx, s);
 }
 
 void setClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *content) {
@@ -97,11 +116,7 @@ void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 	jmethodID openInputStream = find_method(env, resolverClass, "openInputStream", "(Landroid/net/Uri;)Ljava/io/InputStream;");
 
-	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
-	jclass uriClass = find_class(env, "android/net/Uri");
-	jmethodID parse = find_static_method(env, uriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
-	jobject uri = (jobject)(*env)->CallStaticObjectMethod(env, uriClass, parse, uriStr);
-
+	jobject uri = parseURI(jni_env, ctx, uriCstr);
 	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, openInputStream, uri);
     jthrowable loadErr = (*env)->ExceptionOccurred(env);
 
@@ -138,4 +153,80 @@ void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream) {
 	(*env)->CallVoidMethod(env, stream, close);
 
 	(*env)->DeleteGlobalRef(env, stream);
+}
+
+bool uriCanList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jobject resolver = getContentResolver(jni_env, ctx);
+	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
+    jobject uri = parseURI(jni_env, ctx, uriCstr);
+
+	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
+    jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+    jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
+
+    jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+    jobject treeUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, uri, docID);
+
+	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
+	jmethodID getType = find_method(env, resolverClass, "getType", "(Landroid/net/Uri;)Ljava/lang/String;");
+	jstring type = (jstring)(*env)->CallObjectMethod(env, resolver, getType, treeUri);
+
+    if (type == NULL) {
+        return false;
+    }
+
+    char *str = getString(jni_env, ctx, type);
+    return strcmp(str, "vnd.android.document/directory") == 0;
+}
+
+char* uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	JNIEnv *env = (JNIEnv*)jni_env;
+	jobject resolver = getContentResolver(jni_env, ctx);
+	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
+    jobject uri = parseURI(jni_env, ctx, uriCstr);
+
+	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
+    jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+    jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
+
+    jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+    jobject childrenUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, docID);
+
+	jclass stringClass = find_class(env, "java/lang/String");
+	jobjectArray project = (*env)->NewObjectArray(env, 1, stringClass, (*env)->NewStringUTF(env, "document_id"));
+
+	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
+	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
+
+	jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, project, NULL, NULL);
+	jclass cursorClass = (*env)->GetObjectClass(env, cursor);
+    jmethodID next = find_method(env, cursorClass, "moveToNext", "()Z");
+    jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
+
+    char *ret = NULL;
+    int len = 0;
+    while (((jboolean)(*env)->CallBooleanMethod(env, cursor, next)) == JNI_TRUE) {
+        jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
+        jobject childUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, name);
+        jclass uriClass = (*env)->GetObjectClass(env, childUri);
+	    jmethodID toString = (*env)->GetMethodID(env, uriClass, "toString", "()Ljava/lang/String;");
+    	jobject s = (*env)->CallObjectMethod(env, childUri, toString);
+
+        char *uid = getString(jni_env, ctx, name);
+
+        // append
+        char *old = ret;
+        len = len + strlen(uid) + 1;
+        ret = malloc(sizeof(char)*(len+1));
+        if (old != NULL) {
+            strcpy(ret, old);
+            free(old);
+        }
+        strcat(ret, uid);
+        strcat(ret, "|");
+    }
+
+    ret[len-1] = '\0';
+    return ret;
 }

@@ -2,7 +2,6 @@ package gomobile
 
 import (
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/fyne-io/mobile/app"
@@ -33,10 +32,6 @@ func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.URIReadCloser, error) 
 	}
 	file.ReadCloser = read
 	return file, err
-}
-
-func (d *mobileDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
-	return nil, fmt.Errorf("mobile driver does support creating listable URIs yet")
 }
 
 func (d *mobileDriver) FileWriterForURI(u fyne.URI) (fyne.URIWriteCloser, error) {
