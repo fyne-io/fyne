@@ -85,6 +85,7 @@ func (r *releaser) afterPackage() error {
 		}
 
 		outPath := filepath.Join(r.dir, outName)
+		os.Remove(outPath) // MakeAppx will hang if the file exists... ignore result
 		if err := r.packageWindowsRelease(outPath); err != nil {
 			return err
 		}
