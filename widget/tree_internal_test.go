@@ -206,7 +206,7 @@ func TestTree_MinSize(t *testing.T) {
 	}{
 		"single_item": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -217,7 +217,7 @@ func TestTree_MinSize(t *testing.T) {
 		},
 		"single_item_opened": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -229,13 +229,13 @@ func TestTree_MinSize(t *testing.T) {
 		},
 		"multiple_items": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
@@ -246,13 +246,13 @@ func TestTree_MinSize(t *testing.T) {
 		},
 		"multiple_items_opened": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
@@ -278,34 +278,49 @@ func TestTree_MinSize(t *testing.T) {
 	}
 }
 
-func TestTree_Selection(t *testing.T) {
+func TestTree_Select(t *testing.T) {
 	data := make(map[string][]string)
 	widget.AddTreePath(data, "A", "B")
 	tree := NewTreeWithStrings(data)
 
 	tree.Refresh() // Force layout
 
-	selection := make(chan string, 2)
-	tree.OnSelectionChanged = func(uid string) {
+	selection := make(chan string, 1)
+	tree.OnSelected = func(uid TreeNodeID) {
 		selection <- uid
 	}
 
-	tree.SetSelection("A")
-	assert.Equal(t, "A", tree.Selection())
+	tree.Select("A")
+	assert.Equal(t, 1, len(tree.selected))
+	assert.Equal(t, "A", tree.selected[0])
 	select {
 	case s := <-selection:
 		assert.Equal(t, "A", s)
 	case <-time.After(1 * time.Second):
-		assert.Fail(t, "Selection should have occured")
+		assert.Fail(t, "Selection should have occurred")
+	}
+}
+
+func TestTree_Select_Unselects(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+	tree.Select("A")
+
+	unselection := make(chan string, 1)
+	tree.OnUnselected = func(uid TreeNodeID) {
+		unselection <- uid
 	}
 
-	tree.ClearSelection()
-	assert.Equal(t, TreeNoSelection, tree.Selection())
+	tree.Select("B")
+	assert.Equal(t, 1, len(tree.selected))
 	select {
-	case s := <-selection:
-		assert.Equal(t, TreeNoSelection, s)
+	case s := <-unselection:
+		assert.Equal(t, "A", s)
 	case <-time.After(1 * time.Second):
-		assert.Fail(t, "Selection should have been cleared")
+		assert.Fail(t, "Selection should have been unselected")
 	}
 }
 
@@ -328,16 +343,16 @@ func TestTree_ScrollToSelection(t *testing.T) {
 	tree.Resize(fyne.NewSize(m.Width, m.Height*2+treeDividerHeight))
 
 	// Above
-	tree.scroller.Offset.Y = m.Height*3 + treeDividerHeight*2 // Showing "D" & "E"
+	tree.scroller.Offset.Y = m.Height*3 + treeDividerHeight*3 // Showing "D" & "E"
 	tree.Refresh()                                            // Force layout
-	tree.SetSelection("A")
+	tree.Select("A")
 	// Tree should scroll to the top to show A
 	assert.Equal(t, 0, tree.scroller.Offset.Y)
 
 	// Below
 	tree.scroller.Offset.Y = 0 // Showing "A" & "B"
 	tree.Refresh()             // Force layout
-	tree.SetSelection("F")
+	tree.Select("F")
 	// Tree should scroll to the bottom to show F
 	assert.Equal(t, m.Height*4+treeDividerHeight*3, tree.scroller.Offset.Y)
 }
@@ -351,7 +366,7 @@ func TestTree_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		selected := make(chan bool)
-		tree.OnSelectionChanged = func(uid string) {
+		tree.OnSelected = func(uid string) {
 			selected <- true
 		}
 		go test.Tap(getBranch(t, tree, "A"))
@@ -369,7 +384,7 @@ func TestTree_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		tapped := make(chan bool)
-		tree.OnBranchOpened = func(uid string) {
+		tree.OnBranchOpened = func(uid TreeNodeID) {
 			tapped <- true
 		}
 		go test.Tap(getBranch(t, tree, "A").icon.(*branchIcon))
@@ -388,7 +403,7 @@ func TestTree_Tap(t *testing.T) {
 		tree.Refresh() // Force layout
 
 		selected := make(chan bool)
-		tree.OnSelectionChanged = func(uid string) {
+		tree.OnSelected = func(uid TreeNodeID) {
 			selected <- true
 		}
 		go test.Tap(getLeaf(t, tree, "A"))
@@ -398,6 +413,29 @@ func TestTree_Tap(t *testing.T) {
 			assert.Fail(t, "Leaf should have been selected")
 		}
 	})
+}
+
+func TestTree_Unselect(t *testing.T) {
+	data := make(map[string][]string)
+	widget.AddTreePath(data, "A", "B")
+	tree := NewTreeWithStrings(data)
+
+	tree.Refresh() // Force layout
+	tree.Select("A")
+
+	unselection := make(chan string, 1)
+	tree.OnUnselected = func(uid TreeNodeID) {
+		unselection <- uid
+	}
+
+	tree.Unselect("A")
+	assert.Equal(t, 0, len(tree.selected))
+	select {
+	case s := <-unselection:
+		assert.Equal(t, "A", s)
+	case <-time.After(1 * time.Second):
+		assert.Fail(t, "Selection should have been cleared")
+	}
 }
 
 func TestTree_Walk(t *testing.T) {

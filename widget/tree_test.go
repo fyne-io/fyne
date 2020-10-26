@@ -77,19 +77,19 @@ func TestTree_Layout(t *testing.T) {
 
 	for name, tt := range map[string]struct {
 		items    [][]string
-		selected string
-		opened   []string
+		selected widget.TreeNodeID
+		opened   []widget.TreeNodeID
 	}{
 		"single_leaf": {
 			items: [][]string{
-				[]string{
+				{
 					"11111",
 				},
 			},
 		},
 		"single_leaf_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"11111",
 				},
 			},
@@ -97,14 +97,14 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"single_branch": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
 		},
 		"single_branch_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -112,7 +112,7 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"single_branch_opened": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -120,7 +120,7 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"single_branch_opened_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -129,7 +129,7 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"single_branch_opened_leaf_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
 			},
@@ -138,26 +138,26 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"multiple": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"44444444444444444444",
 				},
 			},
 		},
 		"multiple_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"44444444444444444444",
 				},
 			},
@@ -165,32 +165,32 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"multiple_leaf": {
 			items: [][]string{
-				[]string{
+				{
 					"11111",
 				},
-				[]string{
+				{
 					"2222222222",
 				},
-				[]string{
+				{
 					"333333333333333",
 				},
-				[]string{
+				{
 					"44444444444444444444",
 				},
 			},
 		},
 		"multiple_leaf_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"11111",
 				},
-				[]string{
+				{
 					"2222222222",
 				},
-				[]string{
+				{
 					"333333333333333",
 				},
-				[]string{
+				{
 					"44444444444444444444",
 				},
 			},
@@ -198,26 +198,26 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"multiple_branch": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
 		},
 		"multiple_branch_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
@@ -225,13 +225,13 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"multiple_branch_opened": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
@@ -239,13 +239,13 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"multiple_branch_opened_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
@@ -254,13 +254,13 @@ func TestTree_Layout(t *testing.T) {
 		},
 		"multiple_branch_opened_leaf_selected": {
 			items: [][]string{
-				[]string{
+				{
 					"A", "11111",
 				},
-				[]string{
+				{
 					"B", "2222222222",
 				},
-				[]string{
+				{
 					"B", "C", "333333333333333",
 				},
 			},
@@ -277,7 +277,7 @@ func TestTree_Layout(t *testing.T) {
 			for _, o := range tt.opened {
 				tree.OpenBranch(o)
 			}
-			tree.SetSelection(tt.selected)
+			tree.Select(tt.selected)
 
 			window := test.NewWindow(tree)
 			defer window.Close()

@@ -1,4 +1,4 @@
-package screens
+package tutorials
 
 import (
 	"fmt"
@@ -26,9 +26,9 @@ func setScaleText(obj *widget.Label, win fyne.Window) {
 	}
 }
 
-// AdvancedScreen loads a panel that shows details and settings that are a bit
+// advancedScreen loads a panel that shows details and settings that are a bit
 // more detailed than normally needed.
-func AdvancedScreen(win fyne.Window) fyne.CanvasObject {
+func advancedScreen(win fyne.Window) fyne.CanvasObject {
 	scale := widget.NewLabel("")
 
 	screen := widget.NewCard("Screen info", "", widget.NewForm(
