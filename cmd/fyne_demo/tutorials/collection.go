@@ -59,9 +59,9 @@ func makeTableTab(_ fyne.Window) fyne.CanvasObject {
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Cell 000, 000")
 		},
-		func(row, col int, cell fyne.CanvasObject) {
+		func(id *widget.CellID, cell fyne.CanvasObject) {
 			label := cell.(*widget.Label)
-			label.SetText(fmt.Sprintf("Cell %d, %d", row+1, col+1))
+			label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
 		})
 }
 

@@ -15,48 +15,39 @@ const tableDividerThickness = 1
 // Declare conformity with Widget interface.
 var _ fyne.Widget = (*Table)(nil)
 
+// CellID is a type that represents a cell's position in a table based on it's row and column location.
+type CellID struct {
+	Row int
+	Col int
+}
+
 // Table widget is a grid of items that can be scrolled and a cell selected.
 // It's performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
 // The size of the content rows/columns is returned by the Length callback.
 type Table struct {
 	BaseWidget
 
-	Length     func() (int, int)
-	CreateCell func() fyne.CanvasObject
-	UpdateCell func(row, col int, template fyne.CanvasObject)
-	// OnSelectionChanged is called whenever the selection changes, such as through user tap.
-	// The row and col values will be -1 if no cell is currently selected.
-	OnSelectionChanged func(row, col int)
+	Length       func() (int, int)
+	CreateCell   func() fyne.CanvasObject
+	UpdateCell   func(id *CellID, template fyne.CanvasObject)
+	OnSelected   func(id *CellID)
+	OnUnselected func(id *CellID)
 
-	selectedRow, selectedColumn int
-	hoveredRow, hoveredColumn   int
-	cells                       *tableCells
-	moveCallback                func()
-	offset                      fyne.Position
-	scroll                      *ScrollContainer
+	selectedCell, hoveredCell *CellID
+	cells                     *tableCells
+	moveCallback              func()
+	offset                    fyne.Position
+	scroll                    *ScrollContainer
 }
 
 // NewTable returns a new performant table widget defined by the passed functions.
 // The first returns the data size in rows and columns, second parameter is a function that returns cell
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
-func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(int, int, fyne.CanvasObject)) *Table {
-	t := &Table{Length: length, CreateCell: create, UpdateCell: update, selectedRow: -1, selectedColumn: -1}
+func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(*CellID, fyne.CanvasObject)) *Table {
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update, selectedCell: nil, hoveredCell: nil}
 	t.ExtendBaseWidget(t)
 	return t
-}
-
-// ClearSelection will clear any cell selection.
-func (t *Table) ClearSelection() {
-	t.selectedRow = -1
-	t.selectedColumn = -1
-	if t.moveCallback != nil {
-		t.moveCallback()
-	}
-
-	if t.OnSelectionChanged != nil {
-		t.OnSelectionChanged(-1, -1)
-	}
 }
 
 // CreateRenderer returns a new renderer for the table.
@@ -68,8 +59,6 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	rowMarker := canvas.NewRectangle(theme.PrimaryColor())
 	colHover := canvas.NewRectangle(theme.HoverColor())
 	rowHover := canvas.NewRectangle(theme.HoverColor())
-	t.hoveredColumn = -1
-	t.hoveredRow = -1
 
 	cellSize := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 	t.cells = newTableCells(t, cellSize)
@@ -90,41 +79,52 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 	return r
 }
 
-// Selection will mark the specified cell (at row, col) to be marked as selected.
-func (t *Table) Selection() (row, col int) {
-	return t.selectedRow, t.selectedColumn
-}
+// Select will mark the specified cell as selected.
+func (t *Table) Select(id *CellID) {
+	if id == nil {
+		return
+	}
+	t.Unselect(t.selectedCell)
+	t.selectedCell = id
 
-// SetSelection will mark the specified cell (at row, col) to be marked as selected.
-func (t *Table) SetSelection(row, col int) {
-	t.selectedRow = row
-	t.selectedColumn = col
-
-	t.scrollTo(row, col)
+	t.scrollTo(t.selectedCell)
 	if t.moveCallback != nil {
 		t.moveCallback()
 	}
 
-	if t.OnSelectionChanged != nil {
-		t.OnSelectionChanged(row, col)
+	if t.OnSelected != nil {
+		t.OnSelected(t.selectedCell)
 	}
 }
 
-func (t *Table) scrollTo(row, col int) {
-	if row == -1 || col == -1 || t.scroll == nil {
+// Unselect will mark the cell provided by id as unselected.
+func (t *Table) Unselect(id *CellID) {
+	t.selectedCell = nil
+
+	if t.moveCallback != nil {
+		t.moveCallback()
+	}
+
+	if t.OnUnselected != nil && id != nil {
+		t.OnUnselected(id)
+	}
+}
+
+func (t *Table) scrollTo(id *CellID) {
+	if id == nil || t.scroll == nil {
 		return
 	}
 	scrollPos := t.offset
 
 	cellPadded := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-	cellX := col * (cellPadded.Width + tableDividerThickness)
+	cellX := id.Col * (cellPadded.Width + tableDividerThickness)
 	if cellX < scrollPos.X {
 		scrollPos.X = cellX
 	} else if cellX+cellPadded.Width > scrollPos.X+t.scroll.size.Width {
 		scrollPos.X = cellX + cellPadded.Width - t.scroll.size.Width
 	}
 
-	cellY := col * (cellPadded.Height + tableDividerThickness)
+	cellY := id.Row * (cellPadded.Height + tableDividerThickness)
 	if cellY < scrollPos.Y {
 		scrollPos.Y = cellY
 	} else if cellY+cellPadded.Height > scrollPos.Y+t.scroll.size.Height {
@@ -213,10 +213,20 @@ func (t *tableRenderer) moveColumnMarker(marker fyne.CanvasObject, col int) {
 }
 
 func (t *tableRenderer) moveIndicators() {
-	t.moveColumnMarker(t.colMarker, t.t.selectedColumn)
-	t.moveColumnMarker(t.colHover, t.t.hoveredColumn)
-	t.moveRowMarker(t.rowMarker, t.t.selectedRow)
-	t.moveRowMarker(t.rowHover, t.t.hoveredRow)
+	if t.t.selectedCell == nil {
+		t.moveColumnMarker(t.colMarker, -1)
+		t.moveRowMarker(t.rowMarker, -1)
+	} else {
+		t.moveColumnMarker(t.colMarker, t.t.selectedCell.Col)
+		t.moveRowMarker(t.rowMarker, t.t.selectedCell.Row)
+	}
+	if t.t.hoveredCell == nil {
+		t.moveColumnMarker(t.colHover, -1)
+		t.moveRowMarker(t.rowHover, -1)
+	} else {
+		t.moveColumnMarker(t.colHover, t.t.hoveredCell.Col)
+		t.moveRowMarker(t.rowHover, t.t.hoveredCell.Row)
+	}
 
 	colDivs := int(math.Ceil(float64(t.t.size.Width+tableDividerThickness) / float64(t.cellSize.Width+1)))
 	rowDivs := int(math.Ceil(float64(t.t.size.Height+tableDividerThickness) / float64(t.cellSize.Height+1)))
@@ -309,7 +319,7 @@ func newTableCells(t *Table, s fyne.Size) *tableCells {
 }
 
 func (c *tableCells) CreateRenderer() fyne.WidgetRenderer {
-	return &tableCellsRenderer{cells: c, pool: &syncPool{}, visible: make(map[cellID]fyne.CanvasObject)}
+	return &tableCellsRenderer{cells: c, pool: &syncPool{}, visible: make(map[CellID]fyne.CanvasObject)}
 }
 
 func (c *tableCells) MouseIn(ev *desktop.MouseEvent) {
@@ -334,21 +344,14 @@ func (c *tableCells) Resize(s fyne.Size) {
 
 func (c *tableCells) Tapped(e *fyne.PointEvent) {
 	if e.Position.X < 0 || e.Position.X >= c.Size().Width || e.Position.Y < 0 || e.Position.Y >= c.Size().Height {
-		c.t.selectedColumn = -1
-		c.t.selectedRow = -1
+		c.t.selectedCell = nil
 		c.t.Refresh()
 		return
 	}
 
-	c.t.selectedColumn = e.Position.X / (c.cellSize.Width + tableDividerThickness)
-	c.t.selectedRow = e.Position.Y / (c.cellSize.Height + tableDividerThickness)
-	if c.t.moveCallback != nil {
-		c.t.moveCallback()
-	}
-
-	if c.t.OnSelectionChanged != nil {
-		c.t.OnSelectionChanged(c.t.selectedRow, c.t.selectedColumn)
-	}
+	col := e.Position.X / (c.cellSize.Width + tableDividerThickness)
+	row := e.Position.Y / (c.cellSize.Height + tableDividerThickness)
+	c.t.Select(&CellID{row, col})
 }
 
 func (c *tableCells) hoverAt(pos fyne.Position) {
@@ -357,14 +360,15 @@ func (c *tableCells) hoverAt(pos fyne.Position) {
 		return
 	}
 
-	c.t.hoveredColumn = pos.X / (c.cellSize.Width + tableDividerThickness)
-	c.t.hoveredRow = pos.Y / (c.cellSize.Height + tableDividerThickness)
+	col := pos.X / (c.cellSize.Width + tableDividerThickness)
+	row := pos.Y / (c.cellSize.Height + tableDividerThickness)
+	c.t.hoveredCell = &CellID{row, col}
 
 	rows, cols := 0, 0
 	if f := c.t.Length; f != nil {
 		rows, cols = c.t.Length()
 	}
-	if c.t.hoveredColumn >= cols || c.t.hoveredRow >= rows {
+	if c.t.hoveredCell.Col >= cols || c.t.hoveredCell.Row >= rows {
 		c.hoverOut()
 		return
 	}
@@ -375,16 +379,11 @@ func (c *tableCells) hoverAt(pos fyne.Position) {
 }
 
 func (c *tableCells) hoverOut() {
-	c.t.hoveredColumn = -1
-	c.t.hoveredRow = -1
+	c.t.hoveredCell = nil
 
 	if c.t.moveCallback != nil {
 		c.t.moveCallback()
 	}
-}
-
-type cellID struct {
-	row, col int
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -395,7 +394,7 @@ type tableCellsRenderer struct {
 
 	cells   *tableCells
 	pool    pool
-	visible map[cellID]fyne.CanvasObject
+	visible map[CellID]fyne.CanvasObject
 }
 
 func (r *tableCellsRenderer) Layout(_ fyne.Size) {
@@ -434,11 +433,11 @@ func (r *tableCellsRenderer) Refresh() {
 	maxRow := fyne.Min(minRow+rows, dataRows)
 
 	wasVisible := r.visible
-	r.visible = make(map[cellID]fyne.CanvasObject)
+	r.visible = make(map[CellID]fyne.CanvasObject)
 	var cells []fyne.CanvasObject
 	for y := minRow; y < maxRow; y++ {
 		for x := minCol; x < maxCol; x++ {
-			id := cellID{y, x}
+			id := CellID{x, y}
 			c, ok := wasVisible[id]
 			if !ok {
 				c = r.pool.Obtain()
@@ -454,7 +453,7 @@ func (r *tableCellsRenderer) Refresh() {
 					theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
 
 				if f := r.cells.t.UpdateCell; f != nil {
-					r.cells.t.UpdateCell(y, x, c)
+					r.cells.t.UpdateCell(&CellID{y, x}, c)
 				} else {
 					fyne.LogError("Missing UpdateCell callback required for Table", nil)
 				}
@@ -477,7 +476,7 @@ func (r *tableCellsRenderer) returnAllToPool() {
 	for _, cell := range r.BaseRenderer.Objects() {
 		r.pool.Release(cell)
 	}
-	r.visible = make(map[cellID]fyne.CanvasObject)
+	r.visible = make(map[CellID]fyne.CanvasObject)
 	r.SetObjects(nil)
 }
 
