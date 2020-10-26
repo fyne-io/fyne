@@ -159,8 +159,8 @@ func (p *packager) validate() error {
 	if p.appID == "" {
 		if p.os == "darwin" {
 			p.appID = "com.example." + p.name
-		} else if p.os == "ios" || p.os == "android" {
-			return errors.New("Missing appID parameter for mobile package")
+		} else if p.os == "ios" || util.IsAndroid(p.os) || (p.os == "windows" && p.release) {
+			return errors.New("Missing appID parameter for package")
 		}
 	}
 	if p.appVersion != "" && !isValidVersion(p.appVersion) {
