@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 )
 
@@ -82,7 +83,7 @@ func (i *FileIcon) SetSelected(selected bool) {
 }
 
 func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
-	if _, ok := uri.(fyne.ListableURI); ok {
+	if i.isDir(uri) {
 		return theme.FolderIcon()
 	}
 
@@ -100,6 +101,19 @@ func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
 	default:
 		return theme.FileIcon()
 	}
+}
+
+func (i *FileIcon) isDir(uri fyne.URI) bool {
+	if _, ok := uri.(fyne.ListableURI); ok {
+		return true
+	}
+
+	if luri, err := storage.ListerForURI(uri); err == nil {
+		i.URI = luri // Optimization to avoid having to list it next time
+		return true
+	}
+
+	return false
 }
 
 type fileIconRenderer struct {

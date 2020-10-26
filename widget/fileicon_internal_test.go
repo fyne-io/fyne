@@ -62,10 +62,21 @@ func TestNewFileIcon_NoExtension(t *testing.T) {
 }
 
 func TestNewURI_WithFolder(t *testing.T) {
-	folder, err := storage.ListerForURI(storage.NewURI("file://testdata"))
+	workingDir, err := os.Getwd()
+	if err != nil {
+		fyne.LogError("Could not get current working directory", err)
+		t.FailNow()
+	}
+
+	dir := filepath.Join(workingDir, "testdata")
+	folder, err := storage.ListerForURI(storage.NewURI("file://" + dir))
 	assert.Empty(t, err)
 
 	item := newRenderedFileIcon(folder)
+	assert.Empty(t, item.extension)
+	assert.Equal(t, theme.FolderIcon(), item.resource)
+
+	item.SetURI(storage.NewURI("file://" + dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 }
@@ -93,13 +104,24 @@ func TestSetURI(t *testing.T) {
 }
 
 func TestSetURI_WithFolder(t *testing.T) {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		fyne.LogError("Could not get current working directory", err)
+		t.FailNow()
+	}
+	dir := filepath.Join(workingDir, "testdata")
+
 	item := newRenderedFileIcon(nil)
 	assert.Empty(t, item.extension)
 
-	folder, err := storage.ListerForURI(storage.NewURI("file://testdata"))
+	folder, err := storage.ListerForURI(storage.NewURI("file://" + dir))
 	assert.Empty(t, err)
 
 	item.SetURI(folder)
+	assert.Empty(t, item.extension)
+	assert.Equal(t, theme.FolderIcon(), item.resource)
+
+	item.SetURI(storage.NewURI("file://" + dir))
 	assert.Empty(t, item.extension)
 	assert.Equal(t, theme.FolderIcon(), item.resource)
 }

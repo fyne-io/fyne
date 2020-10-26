@@ -219,24 +219,21 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 		return
 	}
 	if parent != nil && parent.String() != dir.String() {
-		fi := &fileDialogItem{picker: f,
-			name: "(Parent)", location: parent, dir: true}
+		fi := &fileDialogItem{picker: f, name: "(Parent)", location: parent, dir: true}
 		fi.ExtendBaseWidget(fi)
 		icons = append(icons, fi)
 	}
+
 	for _, file := range files {
 		if isHidden(file) {
 			continue
 		}
-		if f.file.isDirectory() && !isListable(file) {
+
+		listable, err := storage.ListerForURI(file)
+		if f.file.isDirectory() && err != nil {
 			continue
-		}
-
-		_, err := storage.ListerForURI(file)
-		if err == nil {
-			// URI points to a directory
-			icons = append(icons, f.newFileItem(file, true))
-
+		} else if err == nil { // URI points to a directory
+			icons = append(icons, f.newFileItem(listable, true)) // Pass the listable URI to avoid doing the same check in FileIcon
 		} else if f.file.filter == nil || f.file.filter.Matches(file) {
 			icons = append(icons, f.newFileItem(file, false))
 		}

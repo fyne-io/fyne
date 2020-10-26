@@ -30,12 +30,3 @@ func ShowFolderOpen(callback func(fyne.ListableURI, error), parent fyne.Window) 
 func (f *FileDialog) isDirectory() bool {
 	return f.filter == folderFilter
 }
-
-func isListable(u fyne.URI) bool {
-	if _, ok := u.(fyne.ListableURI); ok {
-		return true
-	}
-
-	_, err := storage.ListerForURI(u)
-	return err == nil
-}
