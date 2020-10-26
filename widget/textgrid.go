@@ -465,6 +465,9 @@ func (t *textGridRenderer) MinSize() fyne.Size {
 }
 
 func (t *textGridRenderer) Refresh() {
+	// theme could change text size
+	t.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
+
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
 	t.updateGridSize(t.text.size)
 	t.refreshGrid()
