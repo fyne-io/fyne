@@ -185,21 +185,37 @@ func (t *TextGrid) SetRowStyle(row int, style TextGridStyle) {
 	t.Rows[row].Style = style
 }
 
+// SetCell sets a grid data to the cell at named row and column.
+func (t *TextGrid) SetCell(row, col int, cell TextGridCell) {
+	if row < 0 || col < 0 {
+		return
+	}
+	t.ensureCells(row, col)
+
+	t.Rows[row].Cells[col] = cell
+	t.refreshCell(row, col)
+}
+
+// SetRune sets a character to the cell at named row and column.
+func (t *TextGrid) SetRune(row, col int, r rune) {
+	if row < 0 || col < 0 {
+		return
+	}
+	t.ensureCells(row, col)
+
+	t.Rows[row].Cells[col].Rune = r
+	t.refreshCell(row, col)
+}
+
 // SetStyle sets a grid style to the cell at named row and column.
 func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
 	if row < 0 || col < 0 {
 		return
 	}
-	for len(t.Rows) <= row {
-		t.Rows = append(t.Rows, TextGridRow{})
-	}
-	data := t.Rows[row]
+	t.ensureCells(row, col)
 
-	for len(data.Cells) <= col {
-		data.Cells = append(data.Cells, TextGridCell{})
-		t.Rows[row] = data
-	}
-	data.Cells[col].Style = style
+	t.Rows[row].Cells[col].Style = style
+	t.refreshCell(row, col)
 }
 
 // SetStyleRange sets a grid style to all the cells between the start row and column through to the end row and column.
@@ -248,6 +264,23 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	render.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
 
 	return render
+}
+
+func (t *TextGrid) ensureCells(row, col int) {
+	for len(t.Rows) <= row {
+		t.Rows = append(t.Rows, TextGridRow{})
+	}
+	data := t.Rows[row]
+
+	for len(data.Cells) <= col {
+		data.Cells = append(data.Cells, TextGridCell{})
+		t.Rows[row] = data
+	}
+}
+
+func (t *TextGrid) refreshCell(row, col int) {
+	// TODO trigger single cell refresh
+	t.Refresh()
 }
 
 // NewTextGrid creates a new empty TextGrid widget.
