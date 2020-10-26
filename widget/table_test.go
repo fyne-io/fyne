@@ -26,7 +26,7 @@ func TestTable_Cache(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		},
-		func(id *CellID, c fyne.CanvasObject) {
+		func(id TableCellID, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
@@ -59,7 +59,7 @@ func TestTable_ChangeTheme(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		},
-		func(id *CellID, c fyne.CanvasObject) {
+		func(id TableCellID, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
@@ -84,21 +84,21 @@ func TestTable_Unselect(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		},
-		func(id *CellID, c fyne.CanvasObject) {
+		func(id TableCellID, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
 	unselectedRow, unselectedColumn := 0, 0
-	table.OnUnselected = func(id *CellID) {
+	table.OnUnselected = func(id TableCellID) {
 		unselectedRow = id.Row
 		unselectedColumn = id.Col
 	}
-	table.selectedCell = &CellID{1, 1}
+	table.selectedCell = &TableCellID{1, 1}
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 
-	table.Unselect(table.selectedCell)
+	table.Unselect(*table.selectedCell)
 	assert.Equal(t, 1, unselectedRow)
 	assert.Equal(t, 1, unselectedColumn)
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
@@ -114,7 +114,7 @@ func TestTable_Hovered(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		},
-		func(id *CellID, c fyne.CanvasObject) {
+		func(id TableCellID, c fyne.CanvasObject) {
 			c.(*Label).SetText(fmt.Sprintf("Cell %d, %d", id.Row, id.Col))
 		})
 
@@ -152,7 +152,7 @@ func TestTable_Selection(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		},
-		func(id *CellID, c fyne.CanvasObject) {
+		func(id TableCellID, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
@@ -163,7 +163,7 @@ func TestTable_Selection(t *testing.T) {
 	w.Resize(fyne.NewSize(180, 180))
 
 	selectedCol, selectedRow := 0, 0
-	table.OnSelected = func(id *CellID) {
+	table.OnSelected = func(id TableCellID) {
 		selectedCol = id.Col
 		selectedRow = id.Row
 	}
@@ -186,7 +186,7 @@ func TestTable_Select(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		},
-		func(id *CellID, c fyne.CanvasObject) {
+		func(id TableCellID, c fyne.CanvasObject) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
@@ -196,18 +196,18 @@ func TestTable_Select(t *testing.T) {
 	w.Resize(fyne.NewSize(180, 180))
 
 	selectedCol, selectedRow := 0, 0
-	table.OnSelected = func(id *CellID) {
+	table.OnSelected = func(id TableCellID) {
 		selectedCol = id.Col
 		selectedRow = id.Row
 	}
-	table.Select(&CellID{1, 0})
+	table.Select(TableCellID{1, 0})
 	assert.Equal(t, 0, table.selectedCell.Col)
 	assert.Equal(t, 1, table.selectedCell.Row)
 	assert.Equal(t, 0, selectedCol)
 	assert.Equal(t, 1, selectedRow)
 	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
 
-	table.Select(&CellID{3, 3})
+	table.Select(TableCellID{3, 3})
 	assert.Equal(t, 3, table.selectedCell.Col)
 	assert.Equal(t, 3, table.selectedCell.Row)
 	assert.Equal(t, 3, selectedCol)
@@ -221,7 +221,7 @@ func TestTable_ShowVisible(t *testing.T) {
 		func() fyne.CanvasObject {
 			return NewLabel("placeholder")
 		},
-		func(*CellID, fyne.CanvasObject) {})
+		func(TableCellID, fyne.CanvasObject) {})
 	table.Resize(fyne.NewSize(120, 120))
 
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
