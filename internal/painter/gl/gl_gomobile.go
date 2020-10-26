@@ -31,6 +31,9 @@ var NoTexture = Texture(gl.Texture{0})
 var textureFilterToGL = []int{gl.LINEAR, gl.NEAREST}
 
 func (p *glPainter) logError() {
+	if fyne.CurrentApp().Settings().BuildType() != fyne.BuildDebug {
+		return
+	}
 	err := p.glctx().GetError()
 	logGLError(uint32(err))
 }
