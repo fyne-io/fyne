@@ -315,29 +315,34 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 }
 
 func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
-	rect := t.objects[pos*2].(*canvas.Rectangle)
-	text := t.objects[pos*2+1].(*canvas.Text)
 	if str == 0 {
-		text.Text = " "
-	} else {
-		text.Text = string(str)
+		str = ' '
 	}
 
+	text := t.objects[pos*2+1].(*canvas.Text)
 	fg := theme.TextColor()
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
 		fg = rowStyle.TextColor()
 	}
-	text.Color = fg
+	if (text.Text == "" || str != []rune(text.Text)[0]) || fg != text.Color {
+		text.Text = string(str)
+		text.Color = fg
+		canvas.Refresh(text)
+	}
 
+	rect := t.objects[pos*2].(*canvas.Rectangle)
 	bg := color.Color(color.Transparent)
 	if style != nil && style.BackgroundColor() != nil {
 		bg = style.BackgroundColor()
 	} else if rowStyle != nil && rowStyle.BackgroundColor() != nil {
 		bg = rowStyle.BackgroundColor()
 	}
-	rect.FillColor = bg
+	if bg != rect.FillColor {
+		rect.FillColor = bg
+		canvas.Refresh(rect)
+	}
 }
 
 func (t *textGridRenderer) addCellsIfRequired() {
@@ -407,7 +412,6 @@ func (t *textGridRenderer) refreshGrid() {
 	for ; x < len(t.objects)/2; x++ {
 		t.setCellRune(' ', x, TextGridStyleDefault, nil) // trailing cells and blank lines
 	}
-	canvas.Refresh(t.text)
 }
 
 func (t *textGridRenderer) lineNumberWidth() int {
