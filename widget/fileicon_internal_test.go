@@ -96,17 +96,31 @@ func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
 
 	test.AssertImageMatches(t, "fileicon/fileicon_nil.png", w.Canvas().Capture())
 
-	file := filepath.Join(workingDir, "testdata/text.txt")
-	icon2 := NewFileIcon(storage.NewURI("file://" + file))
+	text := filepath.Join(workingDir, "testdata/text")
+	icon2 := NewFileIcon(storage.NewURI("file://" + text))
 
 	w.SetContent(icon2)
 	w.Resize(fyne.NewSize(150, 150))
-	test.AssertImageMatches(t, "fileicon/fileicon_txt.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "fileicon/fileicon_text.png", w.Canvas().Capture())
 
-	dir := filepath.Join(workingDir, "testdata")
-	icon3 := NewFileIcon(storage.NewURI("file://" + dir))
+	text += ".txt"
+	icon3 := NewFileIcon(storage.NewURI("file://" + text))
 
 	w.SetContent(icon3)
+	w.Resize(fyne.NewSize(150, 150))
+	test.AssertImageMatches(t, "fileicon/fileicon_text_txt.png", w.Canvas().Capture())
+
+	bin := filepath.Join(workingDir, "testdata/bin")
+	icon4 := NewFileIcon(storage.NewURI("file://" + bin))
+
+	w.SetContent(icon4)
+	w.Resize(fyne.NewSize(150, 150))
+	test.AssertImageMatches(t, "fileicon/fileicon_bin.png", w.Canvas().Capture())
+
+	dir := filepath.Join(workingDir, "testdata")
+	icon5 := NewFileIcon(storage.NewURI("file://" + dir))
+
+	w.SetContent(icon5)
 	w.Resize(fyne.NewSize(150, 150))
 	test.AssertImageMatches(t, "fileicon/fileicon_folder.png", w.Canvas().Capture())
 
