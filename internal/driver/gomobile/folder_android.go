@@ -13,7 +13,6 @@ char *uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 */
 import "C"
 import (
-	"log"
 	"strings"
 	"unsafe"
 
@@ -46,7 +45,6 @@ func uriList(uri fyne.URI) ([]fyne.URI, error) {
 		return nil
 	})
 
-	log.Printf("GOT %s", C.GoString(str))
 	parts := strings.Split(C.GoString(str), "|")
 	var list []fyne.URI
 	for _, part := range parts {
