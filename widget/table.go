@@ -45,7 +45,7 @@ type Table struct {
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
 func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
-	t := &Table{Length: length, CreateCell: create, UpdateCell: update, selectedCell: nil, hoveredCell: nil}
+	t := &Table{Length: length, CreateCell: create, UpdateCell: update}
 	t.ExtendBaseWidget(t)
 	return t
 }
@@ -81,8 +81,8 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 // Select will mark the specified cell as selected.
 func (t *Table) Select(id TableCellID) {
-	if t.OnUnselected != nil && t.selectedCell != nil {
-		t.OnUnselected(*t.selectedCell)
+	if f := t.OnUnselected; f != nil && t.selectedCell != nil {
+		f(*t.selectedCell)
 	}
 	t.selectedCell = &id
 
@@ -91,8 +91,8 @@ func (t *Table) Select(id TableCellID) {
 		t.moveCallback()
 	}
 
-	if t.OnSelected != nil {
-		t.OnSelected(id)
+	if f := t.OnSelected; f != nil {
+		f(id)
 	}
 }
 
@@ -104,8 +104,8 @@ func (t *Table) Unselect(id TableCellID) {
 		t.moveCallback()
 	}
 
-	if t.OnUnselected != nil {
-		t.OnUnselected(id)
+	if f := t.OnUnselected; f != nil {
+		f(id)
 	}
 }
 
@@ -139,13 +139,13 @@ func (t *Table) scrollTo(id *TableCellID) {
 }
 
 func (t *Table) templateSize() fyne.Size {
-	if t.CreateCell == nil {
-		fyne.LogError("Missing CreateCell callback required for Table", nil)
-		return fyne.Size{}
+	if f := t.CreateCell; f != nil {
+		template := f() // don't use cache, we need new template
+		return template.MinSize()
 	}
 
-	template := t.CreateCell() // don't use cache, we need new template
-	return template.MinSize()
+	fyne.LogError("Missing CreateCell callback required for Table", nil)
+	return fyne.Size{}
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -440,8 +440,8 @@ func (r *tableCellsRenderer) Refresh() {
 			c, ok := wasVisible[id]
 			if !ok {
 				c = r.pool.Obtain()
-				if c == nil && r.cells.t.CreateCell != nil {
-					c = r.cells.t.CreateCell()
+				if f := r.cells.t.CreateCell; f != nil && c == nil {
+					c = f()
 					c.Resize(r.cells.cellSize)
 				}
 				if c == nil {
@@ -452,7 +452,7 @@ func (r *tableCellsRenderer) Refresh() {
 					theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
 
 				if f := r.cells.t.UpdateCell; f != nil {
-					r.cells.t.UpdateCell(TableCellID{y, x}, c)
+					f(TableCellID{y, x}, c)
 				} else {
 					fyne.LogError("Missing UpdateCell callback required for Table", nil)
 				}
