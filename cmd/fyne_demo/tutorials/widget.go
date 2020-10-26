@@ -1,4 +1,4 @@
-package screens
+package tutorials
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/layout"
@@ -34,7 +35,24 @@ var (
 	endProgress chan interface{}
 )
 
-func makeButtonTab() fyne.CanvasObject {
+func makeAccordionTab(_ fyne.Window) fyne.CanvasObject {
+	link, err := url.Parse("https://fyne.io/")
+	if err != nil {
+		fyne.LogError("Could not parse URL", err)
+	}
+	ac := widget.NewAccordion(
+		widget.NewAccordionItem("A", widget.NewHyperlink("One", link)),
+		widget.NewAccordionItem("B", widget.NewLabel("Two")),
+		&widget.AccordionItem{
+			Title:  "C",
+			Detail: widget.NewLabel("Three"),
+		},
+	)
+	ac.Append(widget.NewAccordionItem("D", &widget.Entry{Text: "Four"}))
+	return ac
+}
+
+func makeButtonTab(_ fyne.Window) fyne.CanvasObject {
 	disabled := widget.NewButton("Disabled", func() {})
 	disabled.Disable()
 
@@ -71,6 +89,34 @@ func makeButtonTab() fyne.CanvasObject {
 	)
 }
 
+func makeCardTab(_ fyne.Window) fyne.CanvasObject {
+	card1 := widget.NewCard("Book a table", "Which time suits?",
+		widget.NewRadioGroup([]string{"6:30pm", "7:00pm", "7:45pm"}, func(string) {}))
+	card2 := widget.NewCard("With media", "No content, with image", nil)
+	card2.Image = canvas.NewImageFromResource(theme.FyneLogo())
+	card3 := widget.NewCard("Title 3", "Another card", widget.NewLabel("Content"))
+	return container.NewGridWithColumns(2, container.NewVBox(card1, card3),
+		container.NewVBox(card2))
+}
+
+func makeEntryTab(_ fyne.Window) fyne.CanvasObject {
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder("Entry")
+	entryDisabled := widget.NewEntry()
+	entryDisabled.SetText("Entry (disabled)")
+	entryDisabled.Disable()
+	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
+	entryValidated.SetPlaceHolder("Must contain a number")
+	entryMultiLine := widget.NewMultiLineEntry()
+	entryMultiLine.SetPlaceHolder("MultiLine Entry")
+
+	return container.NewVBox(
+		entry,
+		entryDisabled,
+		entryValidated,
+		entryMultiLine)
+}
+
 func makeTextGrid() *widget.TextGrid {
 	grid := widget.NewTextGridFromString("TextGrid\n  Content\nZebra")
 	grid.SetStyleRange(0, 4, 0, 7,
@@ -91,7 +137,7 @@ func makeTextGrid() *widget.TextGrid {
 	return grid
 }
 
-func makeTextTab() fyne.CanvasObject {
+func makeTextTab(_ fyne.Window) fyne.CanvasObject {
 	label := widget.NewLabel("Label")
 
 	link, err := url.Parse("https://fyne.io/")
@@ -171,16 +217,7 @@ func makeTextTab() fyne.CanvasObject {
 		fixed, entryLoremIpsumScroller, grid)
 }
 
-func makeInputTab() fyne.CanvasObject {
-	entry := widget.NewEntry()
-	entry.SetPlaceHolder("Entry")
-	entryDisabled := widget.NewEntry()
-	entryDisabled.SetText("Entry (disabled)")
-	entryDisabled.Disable()
-	entryValidated := &widget.Entry{Validator: validation.NewRegexp(`\d`, "Must contain a number")}
-	entryValidated.SetPlaceHolder("Must contain a number")
-	entryMultiLine := widget.NewMultiLineEntry()
-	entryMultiLine.SetPlaceHolder("MultiLine Entry")
+func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 	selectEntry := widget.NewSelectEntry([]string{"Option A", "Option B", "Option C"})
 	selectEntry.PlaceHolder = "Type or select"
 	disabledCheck := widget.NewCheck("Disabled check", func(bool) {})
@@ -191,10 +228,6 @@ func makeInputTab() fyne.CanvasObject {
 	disabledRadio.Disable()
 
 	return container.NewVBox(
-		entry,
-		entryDisabled,
-		entryValidated,
-		entryMultiLine,
 		widget.NewSelect([]string{"Option 1", "Option 2", "Option 3"}, func(s string) { fmt.Println("selected", s) }),
 		selectEntry,
 		widget.NewCheck("Check", func(on bool) { fmt.Println("checked", on) }),
@@ -205,7 +238,7 @@ func makeInputTab() fyne.CanvasObject {
 	)
 }
 
-func makeProgressTab() fyne.CanvasObject {
+func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
 	progress = widget.NewProgressBar()
 
 	fprogress = widget.NewProgressBar()
@@ -215,6 +248,7 @@ func makeProgressTab() fyne.CanvasObject {
 
 	infProgress = widget.NewProgressBarInfinite()
 	endProgress = make(chan interface{}, 1)
+	startProgress()
 
 	return container.NewVBox(
 		widget.NewLabel("Percent"), progress,
@@ -222,7 +256,7 @@ func makeProgressTab() fyne.CanvasObject {
 		widget.NewLabel("Infinite"), infProgress)
 }
 
-func makeFormTab() fyne.Widget {
+func makeFormTab(_ fyne.Window) fyne.CanvasObject {
 	name := widget.NewEntry()
 	name.SetPlaceHolder("John Smith")
 
@@ -256,6 +290,18 @@ func makeFormTab() fyne.Widget {
 	return form
 }
 
+func makeToolbarTab(_ fyne.Window) fyne.CanvasObject {
+	t := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
+		widget.NewToolbarSeparator(),
+		widget.NewToolbarSpacer(),
+		widget.NewToolbarAction(theme.ContentCutIcon(), func() { fmt.Println("Cut") }),
+		widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
+		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
+	)
+
+	return container.NewBorder(t, nil, nil, nil)
+}
+
 func startProgress() {
 	progress.SetValue(0)
 	fprogress.SetValue(0)
@@ -281,6 +327,9 @@ func startProgress() {
 
 		progress.SetValue(1)
 		fprogress.SetValue(1)
+
+		// TODO make sure this resets when we hide etc...
+		stopProgress()
 	}()
 	infProgress.Start()
 }
@@ -294,69 +343,13 @@ func stopProgress() {
 	endProgress <- struct{}{}
 }
 
-func makeListTab() fyne.CanvasObject {
-	var data []string
-	for i := 0; i < 1000; i++ {
-		data = append(data, fmt.Sprintf("Test Item %d", i))
-	}
-
-	icon := widget.NewIcon(nil)
-	label := widget.NewLabel("Select An Item From The List")
-	hbox := fyne.NewContainerWithLayout(layout.NewHBoxLayout(), icon, label)
-
-	list := widget.NewList(
-		func() int {
-			return len(data)
-		},
-		func() fyne.CanvasObject {
-			return fyne.NewContainerWithLayout(layout.NewHBoxLayout(), widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("Template Object"))
-		},
-		func(index int, item fyne.CanvasObject) {
-			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(data[index])
-		},
-	)
-	list.OnSelectionChanged = func(index int) {
-		if index == -1 {
-			label.SetText("Select An Item From The List")
-			icon.SetResource(nil)
-		}
-		label.SetText(data[index])
-		icon.SetResource(theme.DocumentIcon())
-	}
-	list.SetSelection(125)
-	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
-}
-
-// WidgetScreen shows a panel containing widget demos
-func WidgetScreen() fyne.CanvasObject {
-	toolbar := widget.NewToolbar(widget.NewToolbarAction(theme.MailComposeIcon(), func() { fmt.Println("New") }),
-		widget.NewToolbarSeparator(),
-		widget.NewToolbarSpacer(),
-		widget.NewToolbarAction(theme.ContentCutIcon(), func() { fmt.Println("Cut") }),
-		widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
-		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
-	)
-
-	progress := makeProgressTab()
-	tabs := container.NewAppTabs( // TODO move to something better suited to this content
-		container.NewTabItem("Buttons", makeButtonTab()),
-		container.NewTabItem("Text", makeTextTab()),
-		container.NewTabItem("Input", makeInputTab()),
-		container.NewTabItem("Progress", progress),
-		container.NewTabItem("Form", makeFormTab()),
-		container.NewTabItem("List", makeListTab()),
-	)
-	tabs.OnChanged = func(t *container.TabItem) {
-		if t.Content == progress {
-			startProgress()
-		} else {
-			stopProgress()
-		}
-	}
-
-	return fyne.NewContainerWithLayout(layout.NewBorderLayout(toolbar, nil, nil, nil),
-		toolbar, tabs,
-	)
+// widgetScreen shows a panel containing widget demos
+func widgetScreen(_ fyne.Window) fyne.CanvasObject {
+	content := container.NewVBox(
+		widget.NewLabel("Labels"),
+		widget.NewButtonWithIcon("Icons", theme.HomeIcon(), func() {}),
+		widget.NewSlider(0, 1))
+	return container.NewCenter(content)
 }
 
 type contextMenuButton struct {
