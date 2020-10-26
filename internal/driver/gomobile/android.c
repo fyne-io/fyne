@@ -81,7 +81,7 @@ char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx) {
 		return "";
 	}
 
-    jclass clzCharSequence = (*env)->GetObjectClass(env, content);
+	jclass clzCharSequence = (*env)->GetObjectClass(env, content);
 	jmethodID toString = (*env)->GetMethodID(env, clzCharSequence, "toString", "()Ljava/lang/String;");
 	jobject s = (*env)->CallObjectMethod(env, content, toString);
 
@@ -118,12 +118,12 @@ void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 	jobject stream = (jobject)(*env)->CallObjectMethod(env, resolver, openInputStream, uri);
-    jthrowable loadErr = (*env)->ExceptionOccurred(env);
+	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 
-    if (loadErr != NULL) {
+	if (loadErr != NULL) {
 		(*env)->ExceptionClear(env);
 		return NULL;
-    }
+	}
 
 	return (*env)->NewGlobalRef(env, stream);
 }
