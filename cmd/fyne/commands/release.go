@@ -107,7 +107,7 @@ func (r *releaser) nameFromCertInfo(info string) string {
 	// format should be "CN=Company, O=Company, L=City, S=State, C=Country"
 	parts := strings.Split(info, ",")
 	cn := parts[0]
-	pos := strings.Index(cn, "CN=")
+	pos := strings.Index(strings.ToUpper(cn), "CN=")
 	if pos == -1 {
 		return cn // not what we were expecting, but should be OK
 	}
