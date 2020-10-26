@@ -39,10 +39,10 @@ func (r *releaser) AddFlags() {
 	flag.StringVar(&r.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
 	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
-	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to signAndroid the build")
+	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to sign the build")
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
 	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
-	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to signAndroid the build")
+	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to sign the build")
 }
 
 func (r *releaser) PrintHelp(indent string) {
