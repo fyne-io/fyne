@@ -190,8 +190,8 @@ char* uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
 	jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
 
-    jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
-    jobject childrenUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, docID);
+	jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+	jobject childrenUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, docID);
 
 	jclass stringClass = find_class(env, "java/lang/String");
 	jobjectArray project = (*env)->NewObjectArray(env, 1, stringClass, (*env)->NewStringUTF(env, "document_id"));
@@ -201,32 +201,32 @@ char* uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, project, NULL, NULL);
 	jclass cursorClass = (*env)->GetObjectClass(env, cursor);
-    jmethodID next = find_method(env, cursorClass, "moveToNext", "()Z");
-    jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
+	jmethodID next = find_method(env, cursorClass, "moveToNext", "()Z");
+	jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
 
-    char *ret = NULL;
-    int len = 0;
-    while (((jboolean)(*env)->CallBooleanMethod(env, cursor, next)) == JNI_TRUE) {
-        jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
-        jobject childUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, name);
-        jclass uriClass = (*env)->GetObjectClass(env, childUri);
-	    jmethodID toString = (*env)->GetMethodID(env, uriClass, "toString", "()Ljava/lang/String;");
-    	jobject s = (*env)->CallObjectMethod(env, childUri, toString);
+	char *ret = NULL;
+	int len = 0;
+	while (((jboolean)(*env)->CallBooleanMethod(env, cursor, next)) == JNI_TRUE) {
+		jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
+		jobject childUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, name);
+		jclass uriClass = (*env)->GetObjectClass(env, childUri);
+		jmethodID toString = (*env)->GetMethodID(env, uriClass, "toString", "()Ljava/lang/String;");
+		jobject s = (*env)->CallObjectMethod(env, childUri, toString);
 
-        char *uid = getString(jni_env, ctx, name);
+		char *uid = getString(jni_env, ctx, name);
 
-        // append
-        char *old = ret;
-        len = len + strlen(uid) + 1;
-        ret = malloc(sizeof(char)*(len+1));
-        if (old != NULL) {
-            strcpy(ret, old);
-            free(old);
-        }
-        strcat(ret, uid);
-        strcat(ret, "|");
-    }
+		// append
+		char *old = ret;
+		len = len + strlen(uid) + 1;
+		ret = malloc(sizeof(char)*(len+1));
+		if (old != NULL) {
+			strcpy(ret, old);
+			free(old);
+		}
+		strcat(ret, uid);
+		strcat(ret, "|");
+	}
 
-    ret[len-1] = '\0';
-    return ret;
+	ret[len-1] = '\0';
+	return ret;
 }
