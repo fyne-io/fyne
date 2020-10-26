@@ -17,6 +17,8 @@ import (
 
 const preferenceCurrentTutorial = "currentTutorial"
 
+var topWindow fyne.Window
+
 func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)
@@ -26,8 +28,8 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 func main() {
 	a := app.NewWithID("io.fyne.demo")
 	a.SetIcon(theme.FyneLogo())
-
 	w := a.NewWindow("Fyne Demo")
+	topWindow = w
 
 	newItem := fyne.NewMenuItem("New", nil)
 	otherItem := fyne.NewMenuItem("Other", nil)
@@ -92,25 +94,38 @@ func main() {
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
 	intro.Wrapping = fyne.TextWrapWord
 	setTutorial := func(t tutorials.Tutorial) {
+		if fyne.CurrentDevice().IsMobile() {
+			child := a.NewWindow(t.Title)
+			topWindow = child
+			child.SetContent(t.View(topWindow))
+			child.Show()
+			child.SetOnClosed(func() {
+				topWindow = w
+			})
+			return
+		}
+
 		title.SetText(t.Title)
 		intro.SetText(t.Intro)
 
-		view := t.View(w)
-		content.Objects = []fyne.CanvasObject{view}
+		content.Objects = []fyne.CanvasObject{t.View(w)}
 		content.Refresh()
 	}
 
 	tutorial := container.NewBorder(
 		container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, content)
-	split := container.NewHSplit(makeNav(setTutorial), tutorial)
-	split.Offset = 0.2
-	w.SetContent(split)
+	if fyne.CurrentDevice().IsMobile() {
+		w.SetContent(makeNav(setTutorial, false))
+	} else {
+		split := container.NewHSplit(makeNav(setTutorial, true), tutorial)
+		split.Offset = 0.2
+		w.SetContent(split)
+	}
 	w.Resize(fyne.NewSize(640, 460))
-
 	w.ShowAndRun()
 }
 
-func makeNav(setTutorial func(tutorial tutorials.Tutorial)) fyne.CanvasObject {
+func makeNav(setTutorial func(tutorial tutorials.Tutorial), loadPrevious bool) fyne.CanvasObject {
 	a := fyne.CurrentApp()
 
 	tree := &widget.Tree{
@@ -140,8 +155,11 @@ func makeNav(setTutorial func(tutorial tutorials.Tutorial)) fyne.CanvasObject {
 			}
 		},
 	}
-	currentPref := a.Preferences().StringWithFallback(preferenceCurrentTutorial, "welcome")
-	tree.Select(currentPref)
+
+	if loadPrevious {
+		currentPref := a.Preferences().StringWithFallback(preferenceCurrentTutorial, "welcome")
+		tree.Select(currentPref)
+	}
 
 	themes := fyne.NewContainerWithLayout(layout.NewGridLayout(2),
 		widget.NewButton("Dark", func() {
