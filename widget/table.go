@@ -81,8 +81,8 @@ func (t *Table) CreateRenderer() fyne.WidgetRenderer {
 
 // Select will mark the specified cell as selected.
 func (t *Table) Select(id TableCellID) {
-	if t.selectedCell != nil {
-		t.Unselect(*t.selectedCell)
+	if t.OnUnselected != nil && t.selectedCell != nil {
+		t.OnUnselected(*t.selectedCell)
 	}
 	t.selectedCell = &id
 
