@@ -90,9 +90,9 @@ It should look like this:
 <div align="center">
   <table cellpadding="0" cellspacing="0" style="margin: auto; border-collapse: collapse;">
     <tr style="border: none;"><td style="border: none;">
-      <img src="img/hello-light.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
+      <img src="img/hello-light.png" width="207" height="212" alt="Fyne Hello Dark Theme" />
     </td><td style="border: none;">
-      <img src="img/hello-dark.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
+      <img src="img/hello-dark.png" width="207" height="212" alt="Fyne Hello Dark Theme" />
     </td></tr>
   </table>
 </div>
