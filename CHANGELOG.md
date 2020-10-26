@@ -53,7 +53,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fix missing key events for some keypad keys (#1325)
 * Issue with non-english folder names in Linux favourites (#1248)
 * Fix overlays escaping screen interactive bounds (#1358)
-
+* Key events not blocked by overlays (#814)
 * Update scroll container content if it is changed (#1341)
 * Respect SelectEntry datta changes on refresh (#1462)
 * Incorrect SelectEntry dropdown button position (#1361)
@@ -66,6 +66,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Respect GOOS/GOARCH in fyne command utilities
 * BSD support in build tools
 
+* Many optimisations and widget performance enhancements
 * Various fixes to file creation and saving on mobile devices
 
 
