@@ -205,6 +205,11 @@ func (l *listRenderer) Layout(size fyne.Size) {
 			f(i, child.(*listItem).child)
 		}
 		l.setupListItem(child, i)
+		if i == length-1 {
+			child.(*listItem).divider.Hide()
+		} else {
+			child.(*listItem).divider.Show()
+		}
 		i++
 	}
 }
@@ -314,6 +319,11 @@ func (l *listRenderer) scrollUp(offsetChange int) {
 func (l *listRenderer) setupListItem(item fyne.CanvasObject, id ListItemID) {
 	li := item.(*listItem)
 	previousIndicator := li.selected
+	length := 0
+	if f := l.list.Length; f != nil {
+		length = f()
+	}
+
 	li.selected = false
 	for _, s := range l.list.selected {
 		if id == s {
@@ -325,6 +335,11 @@ func (l *listRenderer) setupListItem(item fyne.CanvasObject, id ListItemID) {
 	}
 	if f := l.list.UpdateItem; f != nil {
 		f(id, li.child)
+		if id == length-1 {
+			li.divider.Hide()
+		} else {
+			li.divider.Show()
+		}
 	}
 	li.onTapped = func() {
 		l.list.Select(id)
@@ -350,6 +365,7 @@ func newListItem(child fyne.CanvasObject, tapped func()) *listItem {
 	li := &listItem{
 		child:    child,
 		onTapped: tapped,
+		divider:  NewSeparator(),
 	}
 
 	li.ExtendBaseWidget(li)
@@ -361,7 +377,6 @@ func (li *listItem) CreateRenderer() fyne.WidgetRenderer {
 	li.ExtendBaseWidget(li)
 
 	li.statusIndicator = canvas.NewRectangle(theme.BackgroundColor())
-	li.divider = NewSeparator()
 
 	objects := []fyne.CanvasObject{li.statusIndicator, li.child, li.divider}
 
