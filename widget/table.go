@@ -104,6 +104,7 @@ func (t *Table) Unselect(id TableCellID) {
 	if t.selectedCell == nil {
 		return
 	}
+	t.selectedCell = nil
 
 	if t.moveCallback != nil {
 		t.moveCallback()
