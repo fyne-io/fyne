@@ -89,7 +89,7 @@ func (t *Table) Select(id TableCellID) {
 	}
 	t.selectedCell = &id
 
-	t.scrollTo(t.selectedCell)
+	t.scrollTo(id)
 	if t.moveCallback != nil {
 		t.moveCallback()
 	}
@@ -115,8 +115,8 @@ func (t *Table) Unselect(id TableCellID) {
 	}
 }
 
-func (t *Table) scrollTo(id *TableCellID) {
-	if id == nil || t.scroll == nil {
+func (t *Table) scrollTo(id TableCellID) {
+	if t.scroll == nil {
 		return
 	}
 	scrollPos := t.offset
@@ -133,7 +133,7 @@ func (t *Table) scrollTo(id *TableCellID) {
 	if cellY < scrollPos.Y {
 		scrollPos.Y = cellY
 	} else if cellY+cellPadded.Height > scrollPos.Y+t.scroll.size.Height {
-		scrollPos.Y = cellY + t.scroll.size.Height - cellPadded.Height
+		scrollPos.Y = cellY + cellPadded.Height - t.scroll.size.Height
 	}
 	t.scroll.Offset = scrollPos
 	t.offset = scrollPos

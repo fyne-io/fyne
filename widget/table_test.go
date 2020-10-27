@@ -207,11 +207,11 @@ func TestTable_Select(t *testing.T) {
 	assert.Equal(t, 1, selectedRow)
 	test.AssertImageMatches(t, "table/selected.png", w.Canvas().Capture())
 
-	table.Select(TableCellID{3, 3})
+	table.Select(TableCellID{4, 3})
 	assert.Equal(t, 3, table.selectedCell.Col)
-	assert.Equal(t, 3, table.selectedCell.Row)
+	assert.Equal(t, 4, table.selectedCell.Row)
 	assert.Equal(t, 3, selectedCol)
-	assert.Equal(t, 3, selectedRow)
+	assert.Equal(t, 4, selectedRow)
 	test.AssertImageMatches(t, "table/selected_scrolled.png", w.Canvas().Capture())
 }
 
