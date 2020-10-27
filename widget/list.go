@@ -469,7 +469,7 @@ func (l *listLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 func (l *listLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	if f := l.list.Length; f != nil {
 		return fyne.NewSize(l.list.itemMin.Width,
-			(l.list.itemMin.Height+listDividerHeight)*f()-listDividerHeight
+			(l.list.itemMin.Height+listDividerHeight)*f()-listDividerHeight)
 	}
 	return fyne.NewSize(0, 0)
 }
