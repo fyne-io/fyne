@@ -10,6 +10,8 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+const listDividerHeight = 1
+
 // ListItemID uniquely identifies an item within a list.
 type ListItemID = int
 
@@ -93,8 +95,8 @@ func (l *List) Select(id ListItemID) {
 	y := id * l.itemMin.Height
 	if y < l.scroller.Offset.Y {
 		l.scroller.Offset.Y = y
-	} else if y+l.itemMin.Height > l.scroller.Offset.Y+l.scroller.Size().Height {
-		l.scroller.Offset.Y = y + l.itemMin.Height - l.scroller.Size().Height
+	} else if y+l.itemMin.Height-listDividerHeight > l.scroller.Offset.Y+l.scroller.Size().Height {
+		l.scroller.Offset.Y = y + l.itemMin.Height - listDividerHeight - l.scroller.Size().Height
 	}
 	l.scroller.onOffsetChanged()
 	l.Refresh()
@@ -411,14 +413,14 @@ type listItemRenderer struct {
 func (li *listItemRenderer) MinSize() (size fyne.Size) {
 	itemSize := li.item.child.MinSize()
 	size = fyne.NewSize(itemSize.Width+theme.Padding()*3,
-		itemSize.Height+theme.Padding()*2)
+		itemSize.Height+theme.Padding()*2+listDividerHeight)
 	return
 }
 
 // Layout the components of the listItem widget.
 func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.item.statusIndicator.Move(fyne.NewPos(0, 0))
-	s := fyne.NewSize(theme.Padding(), size.Height-1)
+	s := fyne.NewSize(theme.Padding(), size.Height-listDividerHeight)
 	li.item.statusIndicator.SetMinSize(s)
 	li.item.statusIndicator.Resize(s)
 
@@ -426,7 +428,7 @@ func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.item.child.Resize(fyne.NewSize(size.Width-theme.Padding()*3, size.Height-theme.Padding()*2))
 
 	li.item.divider.Move(fyne.NewPos(theme.Padding(), size.Height-1))
-	s = fyne.NewSize(size.Width-theme.Padding()*2, 1)
+	s = fyne.NewSize(size.Width-theme.Padding()*2, listDividerHeight)
 	li.item.divider.Resize(s)
 }
 

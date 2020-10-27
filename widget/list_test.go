@@ -82,9 +82,9 @@ func TestList_OffsetChange(t *testing.T) {
 	newVisibleCount := test.WidgetRenderer(list).(*listRenderer).visibleItemCount
 
 	assert.NotEqual(t, firstItemIndex, newFirstItemIndex)
-	assert.Equal(t, newFirstItemIndex, firstItemIndex+indexChange-1)
+	assert.Equal(t, newFirstItemIndex, firstItemIndex+indexChange)
 	assert.NotEqual(t, lastItemIndex, newLastItemIndex)
-	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange-1)
+	assert.Equal(t, newLastItemIndex, lastItemIndex+indexChange)
 	assert.Equal(t, visibleCount, newVisibleCount)
 	assert.Equal(t, newVisibleCount, newLastItemIndex-newFirstItemIndex)
 	test.AssertImageMatches(t, "list/list_offset_changed.png", w.Canvas().Capture())
