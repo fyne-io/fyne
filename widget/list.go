@@ -419,7 +419,7 @@ func (li *listItemRenderer) MinSize() (size fyne.Size) {
 // Layout the components of the listItem widget.
 func (li *listItemRenderer) Layout(size fyne.Size) {
 	li.item.statusIndicator.Move(fyne.NewPos(0, 0))
-	s := fyne.NewSize(theme.Padding(), size.Height-1)
+	s := fyne.NewSize(theme.Padding(), size.Height)
 	li.item.statusIndicator.SetMinSize(s)
 	li.item.statusIndicator.Resize(s)
 
