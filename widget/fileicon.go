@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
+	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
 )
 
@@ -15,7 +16,7 @@ const (
 	ratioTextSize = 0.22
 )
 
-// FileIcon is an adaption of widget.Icon for showing file information
+// FileIcon is an adaption of widget.Icon for showing files and folders
 type FileIcon struct {
 	BaseWidget
 
@@ -48,23 +49,9 @@ func (i *FileIcon) setURI(uri fyne.URI) {
 		return
 	}
 
-	switch splitMimeType(uri) {
-	case "application":
-		i.resource = theme.FileApplicationIcon()
-	case "audio":
-		i.resource = theme.FileAudioIcon()
-	case "image":
-		i.resource = theme.FileImageIcon()
-	case "text":
-		i.resource = theme.FileTextIcon()
-	case "video":
-		i.resource = theme.FileVideoIcon()
-	default:
-		i.resource = theme.FileIcon()
-	}
-
 	i.URI = uri
 	i.cachedURI = nil
+	i.resource = i.lookupIcon(i.URI)
 	i.extension = trimmedExtension(uri)
 }
 
@@ -93,6 +80,40 @@ func (i *FileIcon) CreateRenderer() fyne.WidgetRenderer {
 func (i *FileIcon) SetSelected(selected bool) {
 	i.Selected = selected
 	i.Refresh()
+}
+
+func (i *FileIcon) lookupIcon(uri fyne.URI) fyne.Resource {
+	if i.isDir(uri) {
+		return theme.FolderIcon()
+	}
+
+	switch splitMimeType(uri) {
+	case "application":
+		return theme.FileApplicationIcon()
+	case "audio":
+		return theme.FileAudioIcon()
+	case "image":
+		return theme.FileImageIcon()
+	case "text":
+		return theme.FileTextIcon()
+	case "video":
+		return theme.FileVideoIcon()
+	default:
+		return theme.FileIcon()
+	}
+}
+
+func (i *FileIcon) isDir(uri fyne.URI) bool {
+	if _, ok := uri.(fyne.ListableURI); ok {
+		return true
+	}
+
+	if luri, err := storage.ListerForURI(uri); err == nil {
+		i.URI = luri // Optimization to avoid having to list it next time
+		return true
+	}
+
+	return false
 }
 
 type fileIconRenderer struct {
