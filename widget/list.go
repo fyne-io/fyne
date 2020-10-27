@@ -490,7 +490,7 @@ func (l *listLayout) appendedItem(objects []fyne.CanvasObject) {
 }
 
 func (l *listLayout) prependedItem(objects []fyne.CanvasObject) {
-	objects[0].Move(fyne.NewPos(0, objects[1].Position().Y-l.list.itemMin.Height))
+	objects[0].Move(fyne.NewPos(0, objects[1].Position().Y-l.list.itemMin.Height-listDividerHeight))
 	objects[0].Resize(fyne.NewSize(l.list.size.Width, l.list.itemMin.Height))
 }
 
