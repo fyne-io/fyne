@@ -99,6 +99,46 @@ func TestTree(t *testing.T) {
 		assert.Equal(t, "e", leaves[3])
 		assert.Equal(t, "f", leaves[4])
 	})
+	t.Run("NewTree", func(t *testing.T) {
+		tree := NewTree(
+			func(uid string) (children []string) {
+				if uid == "" {
+					children = append(children, "a", "b", "c")
+				} else if uid == "c" {
+					children = append(children, "d", "e", "f")
+				}
+				return
+			},
+			func(uid string) bool {
+				return uid == "" || uid == "c"
+			},
+			func(branch bool) fyne.CanvasObject {
+				return &Label{}
+			},
+			func(uid string, branch bool, node fyne.CanvasObject) {
+				node.(*Label).SetText(uid)
+			},
+		)
+		tree.OpenBranch("c")
+		var branches []string
+		var leaves []string
+		tree.walkAll(func(uid string, branch bool, depth int) {
+			if branch {
+				branches = append(branches, uid)
+			} else {
+				leaves = append(leaves, uid)
+			}
+		})
+		assert.Equal(t, 2, len(branches))
+		assert.Equal(t, "", branches[0])
+		assert.Equal(t, "c", branches[1])
+		assert.Equal(t, 5, len(leaves))
+		assert.Equal(t, "a", leaves[0])
+		assert.Equal(t, "b", leaves[1])
+		assert.Equal(t, "d", leaves[2])
+		assert.Equal(t, "e", leaves[3])
+		assert.Equal(t, "f", leaves[4])
+	})
 	t.Run("NewTreeWithStrings", func(t *testing.T) {
 		data := make(map[string][]string)
 		widget.AddTreePath(data, "foo", "foobar")

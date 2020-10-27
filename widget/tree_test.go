@@ -18,19 +18,56 @@ func TestTree_OpenClose(t *testing.T) {
 		internalwidget.AddTreePath(data, "foo", "foobar")
 		tree := widget.NewTreeWithStrings(data)
 
+		closed := make(chan string, 1)
+		opened := make(chan string, 1)
+		tree.OnBranchClosed = func(uid widget.TreeNodeID) {
+			closed <- uid
+		}
+		tree.OnBranchOpened = func(uid widget.TreeNodeID) {
+			opened <- uid
+		}
+
 		assert.False(t, tree.IsBranchOpen("foo"))
 
 		tree.OpenBranch("foo")
 		assert.True(t, tree.IsBranchOpen("foo"))
 
+		select {
+		case s := <-opened:
+			assert.Equal(t, "foo", s)
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Branch should have been opened")
+		}
+
 		tree.CloseBranch("foo")
 		assert.False(t, tree.IsBranchOpen("foo"))
+
+		select {
+		case s := <-closed:
+			assert.Equal(t, "foo", s)
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Branch should have been closed")
+		}
 
 		tree.ToggleBranch("foo")
 		assert.True(t, tree.IsBranchOpen("foo"))
 
+		select {
+		case s := <-opened:
+			assert.Equal(t, "foo", s)
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Branch should have been opened")
+		}
+
 		tree.ToggleBranch("foo")
 		assert.False(t, tree.IsBranchOpen("foo"))
+
+		select {
+		case s := <-closed:
+			assert.Equal(t, "foo", s)
+		case <-time.After(1 * time.Second):
+			assert.Fail(t, "Branch should have been closed")
+		}
 	})
 	t.Run("Missing", func(t *testing.T) {
 		data := make(map[string][]string)
