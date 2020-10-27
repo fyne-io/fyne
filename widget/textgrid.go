@@ -185,21 +185,37 @@ func (t *TextGrid) SetRowStyle(row int, style TextGridStyle) {
 	t.Rows[row].Style = style
 }
 
+// SetCell sets a grid data to the cell at named row and column.
+func (t *TextGrid) SetCell(row, col int, cell TextGridCell) {
+	if row < 0 || col < 0 {
+		return
+	}
+	t.ensureCells(row, col)
+
+	t.Rows[row].Cells[col] = cell
+	t.refreshCell(row, col)
+}
+
+// SetRune sets a character to the cell at named row and column.
+func (t *TextGrid) SetRune(row, col int, r rune) {
+	if row < 0 || col < 0 {
+		return
+	}
+	t.ensureCells(row, col)
+
+	t.Rows[row].Cells[col].Rune = r
+	t.refreshCell(row, col)
+}
+
 // SetStyle sets a grid style to the cell at named row and column.
 func (t *TextGrid) SetStyle(row, col int, style TextGridStyle) {
 	if row < 0 || col < 0 {
 		return
 	}
-	for len(t.Rows) <= row {
-		t.Rows = append(t.Rows, TextGridRow{})
-	}
-	data := t.Rows[row]
+	t.ensureCells(row, col)
 
-	for len(data.Cells) <= col {
-		data.Cells = append(data.Cells, TextGridCell{})
-		t.Rows[row] = data
-	}
-	data.Cells[col].Style = style
+	t.Rows[row].Cells[col].Style = style
+	t.refreshCell(row, col)
 }
 
 // SetStyleRange sets a grid style to all the cells between the start row and column through to the end row and column.
@@ -250,6 +266,23 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	return render
 }
 
+func (t *TextGrid) ensureCells(row, col int) {
+	for len(t.Rows) <= row {
+		t.Rows = append(t.Rows, TextGridRow{})
+	}
+	data := t.Rows[row]
+
+	for len(data.Cells) <= col {
+		data.Cells = append(data.Cells, TextGridCell{})
+		t.Rows[row] = data
+	}
+}
+
+func (t *TextGrid) refreshCell(row, col int) {
+	// TODO trigger single cell refresh
+	t.Refresh()
+}
+
 // NewTextGrid creates a new empty TextGrid widget.
 func NewTextGrid() *TextGrid {
 	grid := &TextGrid{}
@@ -282,29 +315,34 @@ func (t *textGridRenderer) appendTextCell(str rune) {
 }
 
 func (t *textGridRenderer) setCellRune(str rune, pos int, style, rowStyle TextGridStyle) {
-	rect := t.objects[pos*2].(*canvas.Rectangle)
-	text := t.objects[pos*2+1].(*canvas.Text)
 	if str == 0 {
-		text.Text = " "
-	} else {
-		text.Text = string(str)
+		str = ' '
 	}
 
+	text := t.objects[pos*2+1].(*canvas.Text)
 	fg := theme.TextColor()
 	if style != nil && style.TextColor() != nil {
 		fg = style.TextColor()
 	} else if rowStyle != nil && rowStyle.TextColor() != nil {
 		fg = rowStyle.TextColor()
 	}
-	text.Color = fg
+	if (text.Text == "" || str != []rune(text.Text)[0]) || fg != text.Color {
+		text.Text = string(str)
+		text.Color = fg
+		canvas.Refresh(text)
+	}
 
+	rect := t.objects[pos*2].(*canvas.Rectangle)
 	bg := color.Color(color.Transparent)
 	if style != nil && style.BackgroundColor() != nil {
 		bg = style.BackgroundColor()
 	} else if rowStyle != nil && rowStyle.BackgroundColor() != nil {
 		bg = rowStyle.BackgroundColor()
 	}
-	rect.FillColor = bg
+	if bg != rect.FillColor {
+		rect.FillColor = bg
+		canvas.Refresh(rect)
+	}
 }
 
 func (t *textGridRenderer) addCellsIfRequired() {
@@ -374,7 +412,6 @@ func (t *textGridRenderer) refreshGrid() {
 	for ; x < len(t.objects)/2; x++ {
 		t.setCellRune(' ', x, TextGridStyleDefault, nil) // trailing cells and blank lines
 	}
-	canvas.Refresh(t.text)
 }
 
 func (t *textGridRenderer) lineNumberWidth() int {
@@ -432,6 +469,9 @@ func (t *textGridRenderer) MinSize() fyne.Size {
 }
 
 func (t *textGridRenderer) Refresh() {
+	// theme could change text size
+	t.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
+
 	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
 	t.updateGridSize(t.text.size)
 	t.refreshGrid()
