@@ -162,7 +162,13 @@ bool uriCanList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 
 	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
+	if (contractClass == NULL) { // API 19
+		return false;
+	}
 	jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+	if (getDoc == NULL) { // API 21
+		return false;
+	}
 	jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
 
 	jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
@@ -187,7 +193,13 @@ char* uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
 
 	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
+	if (contractClass == NULL) { // API 19
+		return "";
+	}
 	jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+	if (getDoc == NULL) { // API 21
+		return "";
+	}
 	jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
 
 	jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
@@ -198,6 +210,9 @@ char* uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 
 	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
 	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
+	if (getDoc == NULL) { // API 26
+		return "";
+	}
 
 	jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, project, NULL, NULL);
 	jclass cursorClass = (*env)->GetObjectClass(env, cursor);
