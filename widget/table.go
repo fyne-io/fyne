@@ -437,6 +437,11 @@ func (r *tableCellsRenderer) Refresh() {
 	minRow := offY / (r.cells.cellSize.Height + tableDividerThickness)
 	maxRow := fyne.Min(minRow+rows, dataRows)
 
+	updateCell := r.cells.t.UpdateCell
+	if updateCell == nil {
+		fyne.LogError("Missing UpdateCell callback required for Table", nil)
+	}
+
 	wasVisible := r.visible
 	r.visible = make(map[TableCellID]fyne.CanvasObject)
 	var cells []fyne.CanvasObject
@@ -456,14 +461,11 @@ func (r *tableCellsRenderer) Refresh() {
 
 				c.Move(fyne.NewPos(theme.Padding()+x*r.cells.cellSize.Width+(x-1)*tableDividerThickness,
 					theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
-
-				if f := r.cells.t.UpdateCell; f != nil {
-					f(TableCellID{y, x}, c)
-				} else {
-					fyne.LogError("Missing UpdateCell callback required for Table", nil)
-				}
 			}
 
+			if updateCell != nil {
+				updateCell(TableCellID{y, x}, c)
+			}
 			r.visible[id] = c
 			cells = append(cells, c)
 		}
