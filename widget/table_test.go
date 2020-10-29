@@ -147,7 +147,7 @@ func TestTable_Refresh(t *testing.T) {
 	table := NewTable(
 		func() (int, int) { return 5, 5 },
 		func() fyne.CanvasObject {
-			return NewLabel(displayText)
+			return NewLabel("template")
 		},
 		func(_ TableCellID, obj fyne.CanvasObject) {
 			obj.(*Label).SetText(displayText)
