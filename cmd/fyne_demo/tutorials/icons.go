@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -48,7 +49,8 @@ func iconScreen(_ fyne.Window) fyne.CanvasObject {
 		}
 	})
 	b.name.SetSelected(icons[b.current].name)
-	bar := widget.NewHBox(prev, next, b.name)
+	buttons := container.NewHBox(prev, next)
+	bar := container.NewBorder(nil, nil, buttons, nil, b.name)
 
 	background := canvas.NewRasterWithPixels(checkerPattern)
 	background.SetMinSize(fyne.NewSize(280, 280))
