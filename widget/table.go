@@ -445,9 +445,9 @@ func (r *tableCellsRenderer) Refresh() {
 	wasVisible := r.visible
 	r.visible = make(map[TableCellID]fyne.CanvasObject)
 	var cells []fyne.CanvasObject
-	for y := minRow; y < maxRow; y++ {
-		for x := minCol; x < maxCol; x++ {
-			id := TableCellID{x, y}
+	for row := minRow; row < maxRow; row++ {
+		for col := minCol; col < maxCol; col++ {
+			id := TableCellID{row, col}
 			c, ok := wasVisible[id]
 			if !ok {
 				c = r.pool.Obtain()
@@ -459,12 +459,12 @@ func (r *tableCellsRenderer) Refresh() {
 					continue
 				}
 
-				c.Move(fyne.NewPos(theme.Padding()+x*r.cells.cellSize.Width+(x-1)*tableDividerThickness,
-					theme.Padding()+y*r.cells.cellSize.Height+(y-1)*tableDividerThickness))
+				c.Move(fyne.NewPos(theme.Padding()+col*r.cells.cellSize.Width+(col-1)*tableDividerThickness,
+					theme.Padding()+row*r.cells.cellSize.Height+(row-1)*tableDividerThickness))
 			}
 
 			if updateCell != nil {
-				updateCell(TableCellID{y, x}, c)
+				updateCell(TableCellID{row, col}, c)
 			}
 			r.visible[id] = c
 			cells = append(cells, c)
