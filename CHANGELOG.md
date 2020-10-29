@@ -65,6 +65,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Add missing raster support in software render
 * Respect GOOS/GOARCH in fyne command utilities
 * BSD support in build tools
+* SVG Cache could return the incorrect resource (#1479)
 
 * Many optimisations and widget performance enhancements
 * Various fixes to file creation and saving on mobile devices
