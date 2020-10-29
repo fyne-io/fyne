@@ -142,6 +142,27 @@ func TestTable_Hovered(t *testing.T) {
 	test.AssertImageMatches(t, "table/hovered.png", w.Canvas().Capture())
 }
 
+func TestTable_Refresh(t *testing.T) {
+	displayText := "placeholder"
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("template")
+		},
+		func(_ TableCellID, obj fyne.CanvasObject) {
+			obj.(*Label).SetText(displayText)
+		})
+	table.Resize(fyne.NewSize(120, 120))
+
+	renderer := test.WidgetRenderer(table).(*tableRenderer)
+	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	assert.Equal(t, "placeholder", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
+
+	displayText = "replaced"
+	table.Refresh()
+	assert.Equal(t, "replaced", cellRenderer.(*tableCellsRenderer).Objects()[7].(*Label).Text)
+}
+
 func TestTable_Selection(t *testing.T) {
 	app := test.NewApp()
 	defer test.NewApp()
