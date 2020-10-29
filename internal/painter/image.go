@@ -41,7 +41,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 		}
 
 		if strings.ToLower(filepath.Ext(name)) == ".svg" {
-			tex := svgCacheGet(img.Resource, width, height)
+			tex := svgCacheGet(name, width, height)
 			if tex == nil {
 				// Not in cache, so load the item and add to cache
 
@@ -82,7 +82,7 @@ func PaintImage(img *canvas.Image, c fyne.Canvas, width, height int) image.Image
 					return nil
 				}
 
-				svgCachePut(img.Resource, tex, width, height)
+				svgCachePut(name, tex, width, height)
 			}
 
 			return tex
