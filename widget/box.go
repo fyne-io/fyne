@@ -64,13 +64,13 @@ func (b *Box) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // NewHBox creates a new horizontally aligned box widget with the specified list of child objects.
-// Deprecated: Use layout.NewHBoxContainer() instead.
+// Deprecated: Use container.NewHBox() instead.
 func NewHBox(children ...fyne.CanvasObject) *Box {
 	return &Box{BaseWidget: BaseWidget{}, Horizontal: true, Children: children}
 }
 
 // NewVBox creates a new vertically aligned box widget with the specified list of child objects.
-// Deprecated: Use layout.NewVBoxContainer() instead.
+// Deprecated: Use container.NewVBox() instead.
 func NewVBox(children ...fyne.CanvasObject) *Box {
 	return &Box{BaseWidget: BaseWidget{}, Horizontal: false, Children: children}
 }
