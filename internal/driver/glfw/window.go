@@ -3,6 +3,7 @@ package glfw
 import "C"
 import (
 	"bytes"
+	"context"
 	"image"
 	_ "image/png" // for the icon
 	"runtime"
@@ -21,7 +22,7 @@ import (
 
 const (
 	scrollSpeed      = 10
-	doubleClickDelay = 500 // ms (maximum interval between clicks for double click detection)
+	doubleClickDelay = 300 // ms (maximum interval between clicks for double click detection)
 )
 
 var (
@@ -70,9 +71,10 @@ type window struct {
 	mouseDragStarted   bool
 	mouseButton        desktop.MouseButton
 	mouseOver          desktop.Hoverable
-	mouseClickTime     time.Time
 	mouseLastClick     fyne.CanvasObject
 	mousePressed       fyne.CanvasObject
+	mouseClickCount    int
+	mouseCancelFunc    context.CancelFunc
 	onClosed           func()
 	onCloseIntercepted func()
 
@@ -497,7 +499,7 @@ func (w *window) destroy(d *gLDriver) {
 	if w.master {
 		d.Quit()
 	} else if runtime.GOOS == "darwin" {
-		d.focusPreviousWindow()
+		go d.focusPreviousWindow()
 	}
 }
 
@@ -540,8 +542,11 @@ func (w *window) frameSized(viewport *glfw.Window, width, height int) {
 	}
 
 	winWidth, _ := viewport.GetSize()
-	w.canvas.texScale = float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
-	w.canvas.Refresh(w.canvas.Content())                   // apply texture scale
+	newTexScale := float32(width) / float32(winWidth) // This will be > 1.0 on a HiDPI screen
+	if w.canvas.texScale != newTexScale {
+		w.canvas.texScale = newTexScale
+		w.canvas.Refresh(w.canvas.Content()) // reset graphics to apply texture scale
+	}
 }
 
 func (w *window) refresh(_ *glfw.Window) {
@@ -638,9 +643,9 @@ func (w *window) mouseOut() {
 }
 
 func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
-	co, pos, layer := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
+	co, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		switch object.(type) {
-		case fyne.Tappable, fyne.SecondaryTappable, fyne.Focusable, fyne.Draggable, desktop.Mouseable, desktop.Hoverable:
+		case fyne.Tappable, fyne.SecondaryTappable, fyne.DoubleTappable, fyne.Focusable, fyne.Draggable, desktop.Mouseable, desktop.Hoverable:
 			return true
 		}
 
@@ -656,7 +661,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		co, _ = w.mouseDragged.(fyne.CanvasObject)
 		ev.Position = w.mousePos.Subtract(w.mouseDraggedOffset).Subtract(co.Position())
 	}
-
 	button, modifiers := convertMouseButton(btn, mods)
 	if wid, ok := co.(desktop.Mouseable); ok {
 		mev := new(desktop.MouseEvent)
@@ -671,12 +675,10 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		}
 	}
 
-	if layer != 1 { // 0 - overlay, 1 - menu, 2 - content
-		if wid, ok := co.(fyne.Focusable); ok {
-			w.canvas.Focus(wid)
-		} else {
-			w.canvas.Unfocus()
-		}
+	if wid, ok := co.(fyne.Focusable); ok {
+		w.canvas.Focus(wid)
+	} else {
+		w.canvas.Unfocus()
 	}
 
 	if action == glfw.Press {
@@ -685,38 +687,6 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		w.mouseButton = 0
 	}
 
-	// Check for double click/tap
-	doubleTapped := false
-	if action == glfw.Release && button == desktop.LeftMouseButton {
-		now := time.Now()
-		// we can safely subtract the first "zero" time as it'll be much larger than doubleClickDelay
-		if now.Sub(w.mouseClickTime).Nanoseconds()/1e6 <= doubleClickDelay && w.mouseLastClick == co {
-			if wid, ok := co.(fyne.DoubleTappable); ok {
-				doubleTapped = true
-				w.queueEvent(func() { wid.DoubleTapped(ev) })
-			}
-		}
-		w.mouseClickTime = now
-		w.mouseLastClick = co
-	}
-
-	_, tap := co.(fyne.Tappable)
-	_, altTap := co.(fyne.SecondaryTappable)
-	// Prevent Tapped from triggering if DoubleTapped has been sent
-	if (tap || altTap) && !doubleTapped {
-		if action == glfw.Press {
-			w.mousePressed = co
-		} else if action == glfw.Release {
-			if co == w.mousePressed {
-				if button == desktop.RightMouseButton && altTap {
-					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
-				} else if button == desktop.LeftMouseButton && tap {
-					w.queueEvent(func() { co.(fyne.Tappable).Tapped(ev) })
-				}
-			}
-			w.mousePressed = nil
-		}
-	}
 	if wid, ok := co.(fyne.Draggable); ok {
 		if action == glfw.Press {
 			w.mouseDragPos = w.mousePos
@@ -734,6 +704,59 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 		}
 		w.mouseDragged = nil
 	}
+	_, tap := co.(fyne.Tappable)
+	_, altTap := co.(fyne.SecondaryTappable)
+	if tap || altTap {
+		if action == glfw.Press {
+			w.mousePressed = co
+		} else if action == glfw.Release {
+			if co == w.mousePressed {
+				if button == desktop.RightMouseButton && altTap {
+					w.queueEvent(func() { co.(fyne.SecondaryTappable).TappedSecondary(ev) })
+				}
+			}
+		}
+	}
+
+	// Check for double click/tap on left mouse button
+	if action == glfw.Release && button == desktop.LeftMouseButton {
+		_, doubleTap := co.(fyne.DoubleTappable)
+		if doubleTap {
+			w.mouseClickCount++
+			w.mouseLastClick = co
+			if w.mouseCancelFunc != nil {
+				w.mouseCancelFunc()
+				return
+			}
+			go w.waitForDoubleTap(co, ev)
+		} else {
+			if wid, ok := co.(fyne.Tappable); ok && co == w.mousePressed {
+				w.queueEvent(func() { wid.Tapped(ev) })
+			}
+			w.mousePressed = nil
+		}
+	}
+}
+
+func (w *window) waitForDoubleTap(co fyne.CanvasObject, ev *fyne.PointEvent) {
+	var ctx context.Context
+	ctx, w.mouseCancelFunc = context.WithDeadline(context.TODO(), time.Now().Add(time.Millisecond*doubleClickDelay))
+	defer w.mouseCancelFunc()
+
+	<-ctx.Done()
+	if w.mouseClickCount == 2 && w.mouseLastClick == co {
+		if wid, ok := co.(fyne.DoubleTappable); ok {
+			w.queueEvent(func() { wid.DoubleTapped(ev) })
+		}
+	} else if co == w.mousePressed {
+		if wid, ok := co.(fyne.Tappable); ok {
+			w.queueEvent(func() { wid.Tapped(ev) })
+		}
+	}
+	w.mouseClickCount = 0
+	w.mousePressed = nil
+	w.mouseCancelFunc = nil
+	w.mouseLastClick = nil
 }
 
 func (w *window) mouseScrolled(viewport *glfw.Window, xoff float64, yoff float64) {
@@ -817,16 +840,26 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyF12: fyne.KeyF12,
 
 	// numbers - lookup by code to avoid AZERTY using the symbol name instead of number
-	glfw.Key0: fyne.Key0,
-	glfw.Key1: fyne.Key1,
-	glfw.Key2: fyne.Key2,
-	glfw.Key3: fyne.Key3,
-	glfw.Key4: fyne.Key4,
-	glfw.Key5: fyne.Key5,
-	glfw.Key6: fyne.Key6,
-	glfw.Key7: fyne.Key7,
-	glfw.Key8: fyne.Key8,
-	glfw.Key9: fyne.Key9,
+	glfw.Key0:   fyne.Key0,
+	glfw.KeyKP0: fyne.Key0,
+	glfw.Key1:   fyne.Key1,
+	glfw.KeyKP1: fyne.Key1,
+	glfw.Key2:   fyne.Key2,
+	glfw.KeyKP2: fyne.Key2,
+	glfw.Key3:   fyne.Key3,
+	glfw.KeyKP3: fyne.Key3,
+	glfw.Key4:   fyne.Key4,
+	glfw.KeyKP4: fyne.Key4,
+	glfw.Key5:   fyne.Key5,
+	glfw.KeyKP5: fyne.Key5,
+	glfw.Key6:   fyne.Key6,
+	glfw.KeyKP6: fyne.Key6,
+	glfw.Key7:   fyne.Key7,
+	glfw.KeyKP7: fyne.Key7,
+	glfw.Key8:   fyne.Key8,
+	glfw.KeyKP8: fyne.Key8,
+	glfw.Key9:   fyne.Key9,
+	glfw.KeyKP9: fyne.Key9,
 
 	// desktop
 	glfw.KeyLeftShift:    desktop.KeyShiftLeft,
@@ -838,6 +871,7 @@ var keyCodeMap = map[glfw.Key]fyne.KeyName{
 	glfw.KeyLeftSuper:    desktop.KeySuperLeft,
 	glfw.KeyRightSuper:   desktop.KeySuperRight,
 	glfw.KeyMenu:         desktop.KeyMenu,
+	glfw.KeyPrintScreen:  desktop.KeyPrintScreen,
 	glfw.KeyCapsLock:     desktop.KeyCapsLock,
 }
 
@@ -847,9 +881,11 @@ var keyNameMap = map[string]fyne.KeyName{
 	"-": fyne.KeyMinus,
 	".": fyne.KeyPeriod,
 	"/": fyne.KeySlash,
+	"*": fyne.KeyAsterisk,
 	"`": fyne.KeyBackTick,
 
 	";": fyne.KeySemicolon,
+	"+": fyne.KeyPlus,
 	"=": fyne.KeyEqual,
 
 	"a": fyne.KeyA,
@@ -885,6 +921,10 @@ var keyNameMap = map[string]fyne.KeyName{
 }
 
 func keyToName(code glfw.Key, scancode int) fyne.KeyName {
+	if runtime.GOOS == "darwin" && scancode == 0x69 { // TODO remove once fixed upstream glfw/glfw#1786
+		code = glfw.KeyPrintScreen
+	}
+
 	ret, ok := keyCodeMap[code]
 	if ok {
 		return ret

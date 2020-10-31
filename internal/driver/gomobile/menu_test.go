@@ -25,7 +25,7 @@ func TestMobileCanvas_DismissBar(t *testing.T) {
 	assert.NotNil(t, c.menu)
 	// simulate tap as the test util does not know about our menu...
 	c.tapDown(fyne.NewPos(80, 20), 1)
-	c.tapUp(fyne.NewPos(80, 20), 1, nil, nil, nil)
+	c.tapUp(fyne.NewPos(80, 20), 1, nil, nil, nil, nil)
 	assert.Nil(t, c.menu)
 }
 

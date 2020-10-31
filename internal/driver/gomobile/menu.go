@@ -59,12 +59,11 @@ func (c *mobileCanvas) showMenu(menu *fyne.MainMenu) {
 	shadow := canvas.NewHorizontalGradient(theme.ShadowColor(), color.Transparent)
 	c.menu = fyne.NewContainer(panel, shadow)
 
-	devicePadTopLeft, devicePadBottomRight := c.edgePadding()
-	padY := devicePadTopLeft.Height + devicePadBottomRight.Height
-	panel.Move(fyne.NewPos(devicePadTopLeft.Width, devicePadTopLeft.Height))
-	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), c.size.Height-padY))
-	shadow.Resize(fyne.NewSize(theme.Padding()/2, c.size.Height-padY))
-	shadow.Move(fyne.NewPos(panel.Size().Width+devicePadTopLeft.Width, devicePadTopLeft.Height))
+	safePos, safeSize := c.InteractiveArea()
+	panel.Move(safePos)
+	panel.Resize(fyne.NewSize(panel.MinSize().Width+theme.Padding(), safeSize.Height))
+	shadow.Resize(fyne.NewSize(theme.Padding()/2, safeSize.Height))
+	shadow.Move(fyne.NewPos(panel.Size().Width+safePos.X, safePos.Y))
 }
 
 func (d *mobileDriver) findMenu(win *window) *fyne.MainMenu {

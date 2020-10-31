@@ -84,6 +84,7 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 			exists, _ := storage.Exists(location)
 
+			// check if a directory is selected
 			_, err := storage.ListerForURI(location)
 
 			if !exists {
@@ -93,8 +94,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				}
 				callback(storage.SaveFileToURI(location))
 				return
-			} else if err != nil {
-				// check if the directory exists
+			} else if err == nil {
+				// a directory has been selected
 				ShowInformation("Cannot overwrite",
 					"Files cannot replace a directory,\ncheck the file name and try again", f.file.parent)
 				return
@@ -119,6 +120,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 				f.file.onClosedCallback(true)
 			}
 			callback(storage.OpenFileFromURI(f.selected.location))
+		} else if f.file.isDirectory() {
+			callback := f.file.callback.(func(fyne.ListableURI, error))
+			f.win.Hide()
+			if f.file.onClosedCallback != nil {
+				f.file.onClosedCallback(true)
+			}
+			callback(f.dir, nil)
 		}
 	})
 	f.open.Style = widget.PrimaryButton
@@ -135,6 +143,8 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 		if f.file.callback != nil {
 			if f.file.save {
 				f.file.callback.(func(fyne.URIWriteCloser, error))(nil, nil)
+			} else if f.file.isDirectory() {
+				f.file.callback.(func(fyne.ListableURI, error))(nil, nil)
 			} else {
 				f.file.callback.(func(fyne.URIReadCloser, error))(nil, nil)
 			}
@@ -156,15 +166,13 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	scrollBread := widget.NewHScrollContainer(f.breadcrumb)
 	body := fyne.NewContainerWithLayout(layout.NewBorderLayout(scrollBread, nil, nil, nil),
 		scrollBread, f.fileScroll)
-	header := widget.NewLabelWithStyle(label+" File", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-
-	favorites, err := f.loadFavorites()
-	if err != nil {
-		// only generate the Favorites group if we were able to load
-		// them successfully
-		favorites = []fyne.CanvasObject{}
-		fyne.LogError("Unable to load favorites", err)
+	title := label + " File"
+	if f.file.isDirectory() {
+		title = label + " Folder"
 	}
+	header := widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+
+	favorites := f.loadFavorites()
 
 	favoritesGroup := widget.NewGroup("Favorites", favorites...)
 	return fyne.NewContainerWithLayout(layout.NewBorderLayout(header, footer, favoritesGroup, nil),
@@ -172,63 +180,27 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 
 }
 
-func (f *fileDialog) loadFavorites() ([]fyne.CanvasObject, error) {
-	var home fyne.ListableURI
-	var documents fyne.ListableURI
-	var downloads fyne.ListableURI
-	var osHome string
-	var err, err1 error
-
-	osHome, err = os.UserHomeDir()
-
-	if err == nil {
-		home, err1 = storage.ListerForURI(storage.NewFileURI(osHome))
-		if err1 == nil {
-			var documentsURI fyne.URI
-			documentsURI, err1 = storage.Child(home, "Documents")
-			if err1 == nil {
-				documents, err1 = storage.ListerForURI(documentsURI)
-				if err1 != nil {
-					err = err1
-				}
-			} else {
-				err = err1
-			}
-			var downloadsURI fyne.URI
-			downloadsURI, err1 = storage.Child(home, "Downloads")
-			if err1 == nil {
-				downloads, err1 = storage.ListerForURI(downloadsURI)
-				if err1 != nil {
-					err = err1
-				}
-			} else {
-				err = err1
-			}
-		} else {
-			err = err1
-		}
+func (f *fileDialog) loadFavorites() []fyne.CanvasObject {
+	favoriteLocations, err := getFavoriteLocations()
+	if err != nil {
+		fyne.LogError("Getting favorite locations", err)
 	}
+	favoriteIcons := getFavoriteIcons()
+	favoriteOrder := getFavoriteOrder()
 
 	var places []fyne.CanvasObject
-
-	if home != nil {
-		places = append(places, makeFavoriteButton("Home", theme.HomeIcon(), func() {
-			f.setLocation(home)
+	for _, locName := range favoriteOrder {
+		loc, ok := favoriteLocations[locName]
+		if !ok {
+			continue
+		}
+		icon := favoriteIcons[locName]
+		places = append(places, makeFavoriteButton(locName, icon, func() {
+			f.setLocation(loc)
 		}))
 	}
-	if documents != nil {
-		places = append(places, makeFavoriteButton("Documents", theme.DocumentIcon(), func() {
-			f.setLocation(documents)
-		}))
-	}
-	if downloads != nil {
-		places = append(places, makeFavoriteButton("Downloads", theme.DownloadIcon(), func() {
-			f.setLocation(downloads)
-		}))
-	}
-
 	places = append(places, f.loadPlaces()...)
-	return places, err
+	return places
 }
 
 func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
@@ -247,21 +219,21 @@ func (f *fileDialog) refreshDir(dir fyne.ListableURI) {
 		return
 	}
 	if parent != nil && parent.String() != dir.String() {
-		fi := &fileDialogItem{picker: f,
-			name: "(Parent)", location: parent, dir: true}
+		fi := &fileDialogItem{picker: f, name: "(Parent)", location: parent, dir: true}
 		fi.ExtendBaseWidget(fi)
 		icons = append(icons, fi)
 	}
+
 	for _, file := range files {
-		if isHidden(file.Name(), dir.Name()) {
+		if isHidden(file) {
 			continue
 		}
 
-		_, err := storage.ListerForURI(file)
-		if err == nil {
-			// URI points to a directory
-			icons = append(icons, f.newFileItem(file, true))
-
+		listable, err := storage.ListerForURI(file)
+		if f.file.isDirectory() && err != nil {
+			continue
+		} else if err == nil { // URI points to a directory
+			icons = append(icons, f.newFileItem(listable, true)) // Pass the listable URI to avoid doing the same check in FileIcon
 		} else if f.file.filter == nil || f.file.filter.Matches(file) {
 			icons = append(icons, f.newFileItem(file, false))
 		}
@@ -314,6 +286,10 @@ func (f *fileDialog) setLocation(dir fyne.ListableURI) error {
 		)
 	}
 
+	if f.file.isDirectory() {
+		f.fileName.SetText(dir.Name())
+		f.open.Enable()
+	}
 	f.refreshDir(dir)
 
 	return nil
@@ -520,6 +496,10 @@ func (f *FileDialog) SetOnClosed(closed func()) {
 
 // SetFilter sets a filter for limiting files that can be chosen in the file dialog.
 func (f *FileDialog) SetFilter(filter storage.FileFilter) {
+	if f.isDirectory() {
+		fyne.LogError("Cannot set a filter for a folder dialog", nil)
+		return
+	}
 	f.filter = filter
 	if f.dialog != nil {
 		f.dialog.refreshDir(f.dialog.dir)
@@ -567,4 +547,20 @@ func makeFavoriteButton(title string, icon fyne.Resource, f func()) *widget.Butt
 
 	b.Alignment = widget.ButtonAlignLeading
 	return b
+}
+
+func getFavoriteIcons() map[string]fyne.Resource {
+	return map[string]fyne.Resource{
+		"Home":      theme.HomeIcon(),
+		"Documents": theme.DocumentIcon(),
+		"Downloads": theme.DownloadIcon(),
+	}
+}
+
+func getFavoriteOrder() []string {
+	return []string{
+		"Home",
+		"Documents",
+		"Downloads",
+	}
 }

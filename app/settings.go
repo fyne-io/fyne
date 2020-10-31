@@ -31,13 +31,16 @@ type settings struct {
 	propertyLock   sync.RWMutex
 	theme          fyne.Theme
 	themeSpecified bool
-	color          string
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
 	watcher         interface{} // normally *fsnotify.Watcher or nil - avoid import in this file
 
 	schema SettingsSchema
+}
+
+func (s *settings) BuildType() fyne.BuildType {
+	return buildMode
 }
 
 func (s *settings) PrimaryColor() string {

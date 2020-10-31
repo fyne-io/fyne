@@ -202,11 +202,6 @@ func (r *tabContainerRenderer) Destroy() {
 }
 
 func (r *tabContainerRenderer) Layout(size fyne.Size) {
-	tabLocation := r.container.tabLocation
-	if fyne.CurrentDevice().IsMobile() && (tabLocation == TabLocationLeading || tabLocation == TabLocationTrailing) {
-		tabLocation = TabLocationBottom
-	}
-
 	tabBarMinSize := r.tabBar.MinSize()
 	var tabBarPos fyne.Position
 	var tabBarSize fyne.Size
@@ -214,7 +209,7 @@ func (r *tabContainerRenderer) Layout(size fyne.Size) {
 	var lineSize fyne.Size
 	var childPos fyne.Position
 	var childSize fyne.Size
-	switch tabLocation {
+	switch r.adaptedLocation() {
 	case TabLocationTop:
 		buttonHeight := tabBarMinSize.Height
 		tabBarPos = fyne.NewPos(0, 0)
@@ -324,6 +319,15 @@ func (r *tabContainerRenderer) Refresh() {
 	canvas.Refresh(r.container)
 }
 
+func (r *tabContainerRenderer) adaptedLocation() TabLocation {
+	tabLocation := r.container.tabLocation
+	if fyne.CurrentDevice().IsMobile() && (tabLocation == TabLocationLeading || tabLocation == TabLocationTrailing) {
+		return TabLocationBottom
+	}
+
+	return r.container.tabLocation
+}
+
 func (r *tabContainerRenderer) buildButton(item *TabItem, iconPos buttonIconPosition) *tabButton {
 	return &tabButton{
 		Text:         item.Text,
@@ -362,7 +366,7 @@ func (r *tabContainerRenderer) moveSelection() {
 
 	var underlinePos fyne.Position
 	var underlineSize fyne.Size
-	switch r.container.tabLocation {
+	switch r.adaptedLocation() {
 	case TabLocationTop:
 		underlinePos = fyne.NewPos(selected.Position().X, r.tabBar.MinSize().Height)
 		underlineSize = fyne.NewSize(selected.Size().Width, theme.Padding())

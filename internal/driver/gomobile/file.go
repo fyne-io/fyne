@@ -2,7 +2,6 @@ package gomobile
 
 import (
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/fyne-io/mobile/app"
@@ -33,10 +32,6 @@ func (d *mobileDriver) FileReaderForURI(u fyne.URI) (fyne.URIReadCloser, error) 
 	}
 	file.ReadCloser = read
 	return file, err
-}
-
-func (d *mobileDriver) ListerForURI(uri fyne.URI) (fyne.ListableURI, error) {
-	return nil, fmt.Errorf("mobile driver does support creating listable URIs yet")
 }
 
 func (d *mobileDriver) FileWriterForURI(u fyne.URI) (fyne.URIWriteCloser, error) {
@@ -70,6 +65,18 @@ func ShowFileOpenPicker(callback func(fyne.URIReadCloser, error), filter storage
 			if f != nil {
 				f.(*fileOpen).done = closer
 			}
+			callback(f, err)
+		}, mobileFilter(filter))
+	}
+}
+
+// ShowFolderOpenPicker loads the native folder open dialog and calls back the chosen directory path as a ListableURI.
+func ShowFolderOpenPicker(callback func(fyne.ListableURI, error)) {
+	filter := storage.NewMimeTypeFileFilter([]string{"application/x-directory"})
+	drv := fyne.CurrentApp().Driver().(*mobileDriver)
+	if a, ok := drv.app.(hasPicker); ok {
+		a.ShowFileOpenPicker(func(uri string, _ func()) {
+			f, err := drv.ListerForURI(storage.NewURI(uri))
 			callback(f, err)
 		}, mobileFilter(filter))
 	}

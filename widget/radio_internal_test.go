@@ -132,7 +132,7 @@ func TestRadio_Append(t *testing.T) {
 	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 
 	radio.Options = append(radio.Options, "Another")
-	Refresh(radio)
+	radio.Refresh()
 
 	assert.Equal(t, 2, len(radio.Options))
 	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioRenderer).items))
@@ -145,7 +145,7 @@ func TestRadio_Remove(t *testing.T) {
 	assert.Equal(t, 2, len(test.WidgetRenderer(radio).(*radioRenderer).items))
 
 	radio.Options = radio.Options[:1]
-	Refresh(radio)
+	radio.Refresh()
 
 	assert.Equal(t, 1, len(radio.Options))
 	assert.Equal(t, 1, len(test.WidgetRenderer(radio).(*radioRenderer).items))
@@ -168,7 +168,7 @@ func TestRadio_SetSelectedWithSameOption(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Another"}, nil)
 
 	radio.Selected = "Another"
-	Refresh(radio)
+	radio.Refresh()
 
 	radio.SetSelected("Another")
 
@@ -179,7 +179,7 @@ func TestRadio_SetSelectedEmpty(t *testing.T) {
 	radio := NewRadio([]string{"Hi", "Another"}, nil)
 
 	radio.Selected = "Another"
-	Refresh(radio)
+	radio.Refresh()
 
 	radio.SetSelected("")
 

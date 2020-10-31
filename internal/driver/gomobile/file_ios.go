@@ -7,7 +7,6 @@ package gomobile
 #cgo LDFLAGS: -framework Foundation
 
 #import <stdlib.h>
-#import <stdbool.h>
 
 void* iosParseUrl(const char* url);
 const void* iosReadFromURL(void* url, int* len);

@@ -15,8 +15,7 @@ import (
 )
 
 var (
-	goos   = runtime.GOOS
-	goarch = runtime.GOARCH
+	goos = runtime.GOOS
 )
 
 func mkdir(dir string) error {

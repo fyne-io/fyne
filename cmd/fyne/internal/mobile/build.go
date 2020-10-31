@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"go/build"
 	"io"
 	"os"
 	"os/exec"
@@ -144,7 +143,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName)
+		nmpkgs, err = goAndroidBuild(pkg, buildBundleID, targetArchs, cmd.IconPath, cmd.AppName, cmd.Version, cmd.Build)
 		if err != nil {
 			return nil, err
 		}
@@ -164,7 +163,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName)
+		nmpkgs, err = goIOSBuild(pkg, buildBundleID, targetArchs, cmd.AppName, cmd.Version, cmd.Build, cmd.Cert, cmd.Profile)
 		if err != nil {
 			return nil, err
 		}
@@ -216,16 +215,6 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 	return nmpkgs, nil
 }
 
-func importsApp(pkg *build.Package) error {
-	// Building a program, make sure it is appropriate for mobile.
-	for _, path := range pkg.Imports {
-		if path == "github.com/fyne-io/mobile/app" {
-			return nil
-		}
-	}
-	return fmt.Errorf(`%s does not import "github.com/fyne-io/mobile/app"`, pkg.ImportPath)
-}
-
 var xout io.Writer = os.Stderr
 
 func printcmd(format string, args ...interface{}) {
@@ -269,7 +258,7 @@ var (
 )
 
 // RunNewBuild executes a new mobile build for the specified configuration
-func RunNewBuild(target, appID, icon, name string, release bool) error {
+func RunNewBuild(target, appID, icon, name, version string, build int, release bool, cert, profile string) error {
 	buildTarget = target
 	buildBundleID = appID
 	buildRelease = release
@@ -278,6 +267,10 @@ func RunNewBuild(target, appID, icon, name string, release bool) error {
 	cmd.Flag = flag.FlagSet{}
 	cmd.IconPath = icon
 	cmd.AppName = name
+	cmd.Version = version
+	cmd.Build = build
+	cmd.Cert = cert
+	cmd.Profile = profile
 	return runBuild(cmd)
 }
 
@@ -303,11 +296,6 @@ func addBuildFlagsNVXWork(cmd *command) {
 	cmd.Flag.BoolVar(&buildWork, "work", false, "")
 }
 
-type binInfo struct {
-	hasPkgApp bool
-	hasPkgAL  bool
-}
-
 func init() {
 	addBuildFlags(cmdBuild)
 	addBuildFlagsNVXWork(cmdBuild)
@@ -317,10 +305,6 @@ func init() {
 
 func goBuild(src string, env []string, args ...string) error {
 	return goCmd("build", []string{src}, env, args...)
-}
-
-func goBuildAt(at string, src string, env []string, args ...string) error {
-	return goCmdAt(at, "build", []string{src}, env, args...)
 }
 
 func goCmd(subcmd string, srcs []string, env []string, args ...string) error {

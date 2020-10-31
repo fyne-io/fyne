@@ -33,11 +33,11 @@ with
 and each call to a GL function will log its input, output, and any
 error messages. For example,
 
-	I/GoLog   (27668): gl.GenBuffers(1) [Buffer(70001)]
-	I/GoLog   (27668): gl.BindBuffer(ARRAY_BUFFER, Buffer(70001))
-	I/GoLog   (27668): gl.BufferData(ARRAY_BUFFER, 36, len(36), STATIC_DRAW)
-	I/GoLog   (27668): gl.BindBuffer(ARRAY_BUFFER, Buffer(70001))
-	I/GoLog   (27668): gl.VertexAttribPointer(Attrib(0), 6, FLOAT, false, 0, 0)  error: [INVALID_VALUE]
+	I/Fyne   (27668): gl.GenBuffers(1) [Buffer(70001)]
+	I/Fyne   (27668): gl.BindBuffer(ARRAY_BUFFER, Buffer(70001))
+	I/Fyne   (27668): gl.BufferData(ARRAY_BUFFER, 36, len(36), STATIC_DRAW)
+	I/Fyne   (27668): gl.BindBuffer(ARRAY_BUFFER, Buffer(70001))
+	I/Fyne   (27668): gl.VertexAttribPointer(Attrib(0), 6, FLOAT, false, 0, 0)  error: [INVALID_VALUE]
 
 The gldebug tracing has very high overhead, so make sure to remove
 the build tag before deploying any binaries.

@@ -41,9 +41,10 @@ type Entry struct {
 	MultiLine bool
 	Wrapping  fyne.TextWrap
 
-	Validator        fyne.Validator
-	validationStatus *validationStatus
-	validationError  error
+	Validator           fyne.StringValidator
+	validationStatus    *validationStatus
+	onValidationChanged func(error)
+	validationError     error
 
 	CursorRow, CursorColumn int
 	OnCursorChanged         func() `json:"-"`
@@ -213,18 +214,6 @@ func (e *Entry) ExtendBaseWidget(wid fyne.Widget) {
 	e.registerShortcut()
 }
 
-// Focused returns whether or not this Entry has focus.
-//
-// Implements: fyne.Focusable
-//
-// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
-func (e *Entry) Focused() bool {
-	e.propertyLock.RLock()
-	defer e.propertyLock.RUnlock()
-
-	return e.focused
-}
-
 // FocusGained is called when the Entry has been given focus.
 //
 // Implements: fyne.Focusable
@@ -246,6 +235,18 @@ func (e *Entry) FocusLost() {
 	})
 }
 
+// Focused returns whether or not this Entry has focus.
+//
+// Implements: fyne.Focusable
+//
+// Deprecated: this method will be removed as it is no longer required, widgets do not expose their focus state.
+func (e *Entry) Focused() bool {
+	e.propertyLock.RLock()
+	defer e.propertyLock.RUnlock()
+
+	return e.focused
+}
+
 // Hide hides the entry.
 //
 // Implements: fyne.Widget
@@ -255,6 +256,20 @@ func (e *Entry) Hide() {
 		e.popUp = nil
 	}
 	e.DisableableWidget.Hide()
+}
+
+// Keyboard implements the Keyboardable interface
+//
+// Implements: mobile.Keyboardable
+func (e *Entry) Keyboard() mobile.KeyboardType {
+	e.propertyLock.RLock()
+	defer e.propertyLock.RUnlock()
+
+	if e.MultiLine {
+		return mobile.DefaultKeyboard
+	}
+
+	return mobile.SingleLineKeyboard
 }
 
 // KeyDown handler for keypress events - used to store shift modifier state for text selection
@@ -628,20 +643,6 @@ func (e *Entry) TypedRune(r rune) {
 // Implements: fyne.Shortcutable
 func (e *Entry) TypedShortcut(shortcut fyne.Shortcut) {
 	e.shortcut.TypedShortcut(shortcut)
-}
-
-// Keyboard implements the Keyboardable interface
-//
-// Implements: mobile.Keyboardable
-func (e *Entry) Keyboard() mobile.KeyboardType {
-	e.propertyLock.RLock()
-	defer e.propertyLock.RUnlock()
-
-	if e.MultiLine {
-		return mobile.DefaultKeyboard
-	}
-
-	return mobile.SingleLineKeyboard
 }
 
 // concealed tells the rendering textProvider if we are a concealed field
@@ -1130,17 +1131,28 @@ func (r *entryRenderer) Refresh() {
 	if r.entry.ActionItem != nil {
 		r.entry.ActionItem.Refresh()
 	}
+
 	if r.entry.Validator != nil {
-		r.entry.validationError = r.entry.Validator(content)
+		err := r.entry.Validator(content)
+		if err != r.entry.validationError {
+			r.entry.validationError = err
+
+			if f := r.entry.onValidationChanged; f != nil {
+				f(err)
+			}
+		}
+
 		if !r.entry.focused && r.entry.Text != "" && r.entry.validationError != nil {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
 		}
 
 		r.ensureValidationSetup()
+
 		r.entry.validationStatus.Refresh()
 	} else if r.entry.validationStatus != nil {
 		r.entry.validationStatus.Hide()
 	}
+
 	canvas.Refresh(r.entry.super())
 }
 
@@ -1285,6 +1297,9 @@ func (p *placeholderPresenter) textAlign() fyne.TextAlign {
 
 // textColor tells the rendering textProvider our color
 func (p *placeholderPresenter) textColor() color.Color {
+	if p.e.Disabled() {
+		return theme.DisabledTextColor()
+	}
 	return theme.PlaceHolderColor()
 }
 

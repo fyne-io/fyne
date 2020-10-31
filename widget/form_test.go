@@ -94,7 +94,7 @@ func TestForm_Renderer(t *testing.T) {
 	w := test.NewWindow(form)
 	defer w.Close()
 
-	test.AssertImageMatches(t, "form_initial.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "form/initial.png", w.Canvas().Capture())
 }
 
 func TestForm_ChangeText(t *testing.T) {
@@ -125,10 +125,10 @@ func TestForm_ChangeTheme(t *testing.T) {
 	w.Resize(fyne.NewSize(300, 200))
 	defer w.Close()
 
-	test.AssertImageMatches(t, "form_theme_initial.png", w.Canvas().Capture())
+	test.AssertImageMatches(t, "form/theme_initial.png", w.Canvas().Capture())
 
 	test.WithTestTheme(t, func() {
 		form.Refresh()
-		test.AssertImageMatches(t, "form_theme_changed.png", w.Canvas().Capture())
+		test.AssertImageMatches(t, "form/theme_changed.png", w.Canvas().Capture())
 	})
 }

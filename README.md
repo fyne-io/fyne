@@ -40,13 +40,13 @@ To run a showcase of the features of Fyne execute the following:
 And you should see something like this (after you click a few buttons):
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-dark.png" width="877" height="636" alt="Fyne Hello Light Theme" style="max-width: 100%" />
+  <img src="img/widgets-dark.png" width="752" height="594" alt="Fyne Hello Light Theme" style="max-width: 100%" />
 </p>
 
 Or if you are using the light theme:
 
 <p align="center" markdown="1" style="max-width: 100%">
-  <img src="img/widgets-light.png" width="877" height="636" alt="Fyne Hello Light Theme" style="max-width: 100%" />
+  <img src="img/widgets-light.png" width="752" height="594" alt="Fyne Hello Light Theme" style="max-width: 100%" />
 </p>
 
 # Getting Started
@@ -61,18 +61,19 @@ Open a new file and you're ready to write your first app!
 package main
 
 import (
-	"fyne.io/fyne/widget"
 	"fyne.io/fyne/app"
+	"fyne.io/fyne/widget"
 )
 
 func main() {
-	app := app.New()
+	a := app.New()
+	w := a.NewWindow("Hello")
 
-	w := app.NewWindow("Hello")
+	hello := widget.NewLabel("Hello Fyne!")
 	w.SetContent(widget.NewVBox(
-		widget.NewLabel("Hello Fyne!"),
-		widget.NewButton("Quit", func() {
-			app.Quit()
+		hello,
+		widget.NewButton("Hi!", func() {
+			hello.SetText("Welcome :)")
 		}),
 	))
 
@@ -86,16 +87,43 @@ And you can run that simply as:
 
 It should look like this:
 
-<p align="center" markdown="1">
-  <img src="img/hello-normal.png" width="207" height="204" alt="Fyne Hello Dark Theme" />
-</p>
+<div align="center">
+  <table cellpadding="0" cellspacing="0" style="margin: auto; border-collapse: collapse;">
+    <tr style="border: none;"><td style="border: none;">
+      <img src="img/hello-light.png" width="207" height="212" alt="Fyne Hello Dark Theme" />
+    </td><td style="border: none;">
+      <img src="img/hello-dark.png" width="207" height="212" alt="Fyne Hello Dark Theme" />
+    </td></tr>
+  </table>
+</div>
 
 > Note that Windows applications load from a command prompt by default, which means if you click an icon you may see a command window.
 > To fix this add the parameters `-ldflags -H=windowsgui` to your run or build commands.
 
+# Installing
+
+Using `go install` will copy the executable into your go `bin` dir.
+To install the application with icons etc into your operating system's standard
+application location you can use the fyne utility and the "install" subcommand.
+
+    $ go get fyne.io/fyne/cmd/fyne
+    $ fyne install
+
+# Packaging a release
+
+Using the fyne utility "release" subcommand you can package up your app for release
+to app stores and market places. Make sure you have the standard build tools installed
+and have followed the platform documentation for setting up accounts and signing.
+Then you can execute something like the following, notice the `-os ios` parameter allows
+building an iOS app from macOS computer. Other combinations work as well :)
+
+    $ fyne release -os ios -certificate "Apple Distribution" -profile "My App Distribution" -appID "com.example.myapp"
+    
+The above command will create a '.ipa' file that can then be uploaded to the iOS App Store.
+
 # Documentation
 
-More documentation is available at the [Fyne developer website](https://fyne.io/develop/) or on [pkg.go.dev](https://pkg.go.dev/fyne.io/fyne?tab=doc).
+More documentation is available at the [Fyne developer website](https://developer.fyne.io/) or on [pkg.go.dev](https://pkg.go.dev/fyne.io/fyne?tab=doc).
 
 # Examples
 

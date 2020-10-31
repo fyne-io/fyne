@@ -53,14 +53,19 @@ type manifestTmplData struct {
 	Name        string
 	Debug       bool
 	LibName     string
+	Version     string
+	Build       int
 }
 
 var manifestTmpl = template.Must(template.New("manifest").Parse(`
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="{{.JavaPkgPath}}"
-	android:versionCode="1"
-	android:versionName="1.0">
+	android:versionCode="{{.Build}}"
+	android:versionName="{{.Version}}">
+
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 	<application android:label="{{.Name}}" android:debuggable="{{.Debug}}">
 	<activity android:name="org.golang.app.GoNativeActivity"

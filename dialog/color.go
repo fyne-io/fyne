@@ -96,7 +96,7 @@ func (p *ColorPickerDialog) updateUI() {
 					p.createSimplePickers()...,
 				),
 			),
-			canvas.NewLine(theme.ShadowColor()),
+			widget.NewSeparator(),
 			p.advanced,
 		)
 
