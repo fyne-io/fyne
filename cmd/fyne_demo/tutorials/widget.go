@@ -239,6 +239,8 @@ func makeInputTab(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeProgressTab(_ fyne.Window) fyne.CanvasObject {
+	stopProgress()
+
 	progress = widget.NewProgressBar()
 
 	fprogress = widget.NewProgressBar()
@@ -311,11 +313,12 @@ func startProgress() {
 	}
 
 	go func() {
+		end := endProgress
 		num := 0.0
 		for num < 1.0 {
 			time.Sleep(100 * time.Millisecond)
 			select {
-			case <-endProgress:
+			case <-end:
 				return
 			default:
 			}
