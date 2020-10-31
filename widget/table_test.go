@@ -63,15 +63,19 @@ func TestTable_ChangeTheme(t *testing.T) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
+	content := test.WidgetRenderer(test.WidgetRenderer(table).(*tableRenderer).scroll.Content.(*tableCells)).(*tableCellsRenderer)
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
+	assert.Equal(t, "Cell 0, 0", content.Objects()[0].(*Label).Text)
+	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
 
 	test.WithTestTheme(t, func() {
 		test.WidgetRenderer(table).Refresh()
 		test.AssertImageMatches(t, "table/theme_changed.png", w.Canvas().Capture())
 	})
+	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
 }
 
 func TestTable_Unselect(t *testing.T) {
