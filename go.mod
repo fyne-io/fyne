@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/Kodeworks/golang-image-ico v0.0.0-20141118225523-73f0f4cfade9
+	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/akavel/rsrc v0.8.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
