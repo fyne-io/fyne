@@ -125,7 +125,9 @@ func (d *gLDriver) runAnimations() {
 
 			select {
 			case <-draw.C:
-				for i, a := range d.animations {
+				for i := len(d.animations) - 1; i >= 0; i-- { // backwards so we can remove safely
+					a := d.animations[i]
+
 					if !d.tickAnimation(a) {
 						if i == len(d.animations)-1 {
 							d.animations = d.animations[:len(d.animations)-1]
@@ -141,6 +143,7 @@ func (d *gLDriver) runAnimations() {
 
 func (d *gLDriver) tickAnimation(a *anim) bool {
 	if time.Now().After(a.end) {
+		a.a.Tick(1.0)
 		if !a.a.Repeat {
 			return false
 		}
