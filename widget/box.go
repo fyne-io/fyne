@@ -12,7 +12,7 @@ import (
 
 // Box widget is a simple list where the child elements are arranged in a single column
 // for vertical or a single row for horizontal arrangement.
-// Deprecated: Use layout.NewVBoxContainer() or layout.NewHBoxContainer().
+// Deprecated: Use container.NewVBox() or container.NewHBox().
 type Box struct {
 	BaseWidget
 	background color.Color
