@@ -16,7 +16,7 @@ It is designed to build applications that run on desktop and mobile devices with
 single codebase.
 
 Version 1.4 is the current release - it introduced high performance collection widgets,
-Card, Separator and FileItem widgets as well as a folder open dialog.
+Card, Separator and Filecon widgets as well as a folder open dialog.
 It also saw a theme refresh updating the colors and button styles for a more
 material design look.
 We are now working towards [2.0](https://github.com/fyne-io/fyne/milestone/6)
