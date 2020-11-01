@@ -424,6 +424,7 @@ func (r *tableCellsRenderer) Refresh() {
 	if oldSize != r.cells.cellSize { // theme changed probably
 		r.returnAllToPool()
 	}
+	contentSize := r.cells.cellSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	dataRows, dataCols := 0, 0
 	if f := r.cells.t.Length; f != nil {
@@ -453,7 +454,7 @@ func (r *tableCellsRenderer) Refresh() {
 				c = r.pool.Obtain()
 				if f := r.cells.t.CreateCell; f != nil && c == nil {
 					c = f()
-					c.Resize(r.cells.cellSize)
+					c.Resize(contentSize)
 				}
 				if c == nil {
 					continue
