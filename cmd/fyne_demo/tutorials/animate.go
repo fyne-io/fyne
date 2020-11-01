@@ -7,20 +7,31 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 )
 
 func makeAnimate(_ fyne.Window) fyne.CanvasObject {
-	r1 := canvas.NewRectangle(color.Black)
-	r1.Resize(fyne.NewSize(200, 200))
+	rect := canvas.NewRectangle(color.Black)
+	rect.Resize(fyne.NewSize(200, 200))
 
 	a := canvas.NewColorAnimator(theme.PrimaryColorNamed(theme.ColorBlue), theme.PrimaryColorNamed(theme.ColorYellow),
 		time.Second*3, func(c color.Color) {
-			r1.FillColor = c
-			canvas.Refresh(r1)
+			rect.FillColor = c
+			canvas.Refresh(rect)
 		})
 	a.Repeat = true
 	a.Start()
 
+	var a2 *fyne.Animation
+	btn := widget.NewButton("Slide", func() {
+		a2.Start()
+	})
+	btn.Resize(btn.MinSize())
+	btn.Move(fyne.NewPos(20, 220))
 
-	return fyne.NewContainerWithoutLayout(r1)
+	a2 = canvas.NewPositionAnimator(fyne.NewPos(20, 220), fyne.NewPos(320, 220), canvas.DurationStandard, func(p fyne.Position) {
+		btn.Move(p)
+	})
+
+	return fyne.NewContainerWithoutLayout(rect, btn)
 }

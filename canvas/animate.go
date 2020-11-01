@@ -7,6 +7,11 @@ import (
 	"fyne.io/fyne"
 )
 
+const (
+	// DurationStandard is the time a standard interface animation will run.
+	DurationStandard = time.Millisecond * 300
+)
+
 func NewColorAnimator(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
 	return &fyne.Animation{
 		Duration: d,
@@ -19,9 +24,30 @@ func NewColorAnimator(start, stop color.Color, d time.Duration, fn func(color.Co
 		}}
 }
 
+func NewPositionAnimator(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
+	return &fyne.Animation{
+		Duration: d,
+		Tick: func(done float32) {
+			fn(fyne.NewPos(scaleInt(start.X, stop.X, done), scaleInt(start.Y, stop.Y, done)))
+		}}
+}
+
+func NewSizeAnimator(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
+	return &fyne.Animation{
+		Duration: d,
+		Tick: func(done float32) {
+			fn(fyne.NewSize(scaleInt(start.Width, stop.Width, done), scaleInt(start.Height, stop.Height, done)))
+		}}
+}
+
 func scaleColor(start uint32, end uint32, done float32) uint8 {
 	diff := int(end) - int(start)
 	shift := int(float32(diff) * done)
 
 	return uint8((int(start) + shift) >> 8)
+}
+
+func scaleInt(start, end int, done float32) int {
+	shift := int(float32(end-start) * done)
+	return start + shift
 }

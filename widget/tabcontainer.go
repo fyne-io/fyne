@@ -187,6 +187,7 @@ func (c *TabContainer) mismatchedContent() bool {
 }
 
 type tabContainerRenderer struct {
+	animate         *fyne.Animation
 	container       *TabContainer
 	tabLoc          TabLocation
 	line, underline *canvas.Rectangle
@@ -380,8 +381,25 @@ func (r *tabContainerRenderer) moveSelection() {
 		underlinePos = fyne.NewPos(r.tabBar.Position().X-theme.Padding(), selected.Position().Y)
 		underlineSize = fyne.NewSize(theme.Padding(), selected.Size().Height)
 	}
-	r.underline.Resize(underlineSize)
-	r.underline.Move(underlinePos)
+
+	if r.underline.Position().IsZero() || r.underline.Position() == underlinePos {
+		r.underline.Move(underlinePos)
+		r.underline.Resize(underlineSize)
+	} else if r.animate == nil {
+		r.animate = canvas.NewPositionAnimator(r.underline.Position(), underlinePos, canvas.DurationStandard, func(p fyne.Position) {
+			r.underline.Move(p)
+			canvas.Refresh(r.underline)
+			if p == underlinePos {
+				r.animate = nil
+			}
+		})
+		r.animate.Start()
+
+		canvas.NewSizeAnimator(r.underline.Size(), underlineSize, canvas.DurationStandard, func(s fyne.Size) {
+			r.underline.Resize(s)
+			canvas.Refresh(r.underline)
+		}).Start()
+	}
 }
 
 func (r *tabContainerRenderer) tabsInSync() bool {
