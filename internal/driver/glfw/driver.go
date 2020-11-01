@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
@@ -27,6 +28,8 @@ type gLDriver struct {
 	device     *glDevice
 	done       chan interface{}
 	drawDone   chan interface{}
+
+	animations []*anim
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
@@ -71,6 +74,15 @@ func (d *gLDriver) Run() {
 	d.runGL()
 }
 
+func (d *gLDriver) StartAnimation(a *fyne.Animation) {
+	wasStopped := len(d.animations) == 0
+
+	d.animations = append(d.animations, &anim{a, time.Now(), time.Now().Add(a.Duration)})
+	if wasStopped {
+		d.runAnimations()
+	}
+}
+
 func (d *gLDriver) addWindow(w *window) {
 	d.windowLock.Lock()
 	defer d.windowLock.Unlock()
@@ -97,6 +109,53 @@ func (d *gLDriver) focusPreviousWindow() {
 		return
 	}
 	chosen.RequestFocus()
+}
+
+type anim struct {
+	a     *fyne.Animation
+	start time.Time
+	end   time.Time
+}
+
+func (d *gLDriver) runAnimations() {
+	draw := time.NewTicker(time.Second / 60)
+
+	go func() {
+		for len(d.animations) > 0 {
+
+			select {
+			case <-draw.C:
+				for i, a := range d.animations {
+					if !d.tickAnimation(a) {
+						if i == len(d.animations)-1 {
+							d.animations = d.animations[:len(d.animations)-1]
+						} else {
+							d.animations = append(d.animations[:i], d.animations[i+1])
+						}
+					}
+				}
+			}
+		}
+	}()
+}
+
+func (d *gLDriver) tickAnimation(a *anim) bool {
+	if time.Now().After(a.end) {
+		if !a.a.Repeat {
+			return false
+		}
+
+		a.start = time.Now()
+		a.end = a.start.Add(a.a.Duration)
+	}
+
+	total := a.end.Sub(a.start).Milliseconds()
+	delta := time.Now().Sub(a.start).Milliseconds()
+
+	val := float32(delta) / float32(total)
+	a.a.Tick(val)
+
+	return true
 }
 
 func (d *gLDriver) windowList() []fyne.Window {

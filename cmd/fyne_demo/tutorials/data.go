@@ -18,6 +18,10 @@ var (
 			"See the canvas capabilities.",
 			canvasScreen,
 		},
+		"animate": {"Animation",
+			"See how to animate components.",
+			makeAnimate,
+		},
 		"icons": {"Theme Icons",
 			"Browse the embedded icons.",
 			iconScreen,
@@ -131,7 +135,7 @@ var (
 
 	// TutorialIndex  defines how our tutorials should be laid out in the index tree
 	TutorialIndex = map[string][]string{
-		"":            {"welcome", "canvas", "icons", "widgets", "collections", "containers", "dialogs", "windows", "advanced"},
+		"":            {"welcome", "canvas", "animate", "icons", "widgets", "collections", "containers", "dialogs", "windows", "advanced"},
 		"collections": {"list", "table", "tree"},
 		"containers":  {"apptabs", "border", "box", "center", "grid", "split", "scroll"},
 		"widgets":     {"accordion", "button", "card", "entry", "form", "input", "text", "toolbar", "progress"},

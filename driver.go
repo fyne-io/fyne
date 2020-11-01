@@ -34,4 +34,7 @@ type Driver interface {
 	Run()
 	// Quit closes the driver and open windows, then exit the application.
 	Quit()
+
+	// StartAnimation registers a new animation with this driver and requests it be started.
+	StartAnimation(*Animation)
 }
