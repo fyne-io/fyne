@@ -12,7 +12,10 @@ const (
 	DurationStandard = time.Millisecond * 300
 )
 
-func NewColorAnimator(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
+// NewColorAnimation sets up a new animation that will transition from the start to stop Color over
+// the specified Duration. The content of fn should apply the color values to an object and refresh it.
+// You should call Start() on the returned animation to start it.
+func NewColorAnimation(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
@@ -24,7 +27,10 @@ func NewColorAnimator(start, stop color.Color, d time.Duration, fn func(color.Co
 		}}
 }
 
-func NewPositionAnimator(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
+// NewPositionAnimation sets up a new animation that will transition from the start to stop Position over
+// the specified Duration. The content of fn should apply the position value to an object for the change
+// to be visible. You should call Start() on the returned animation to start it.
+func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
@@ -32,7 +38,10 @@ func NewPositionAnimator(start, stop fyne.Position, d time.Duration, fn func(fyn
 		}}
 }
 
-func NewSizeAnimator(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
+// NewSizeAnimation sets up a new animation that will transition from the start to stop Size over
+// the specified Duration. The content of fn should apply the size value to an object for the change
+// to be visible. You should call Start() on the returned animation to start it.
+func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {

@@ -14,7 +14,7 @@ func makeAnimate(_ fyne.Window) fyne.CanvasObject {
 	rect := canvas.NewRectangle(color.Black)
 	rect.Resize(fyne.NewSize(200, 200))
 
-	a := canvas.NewColorAnimator(theme.PrimaryColorNamed(theme.ColorBlue), theme.PrimaryColorNamed(theme.ColorYellow),
+	a := canvas.NewColorAnimation(theme.PrimaryColorNamed(theme.ColorBlue), theme.PrimaryColorNamed(theme.ColorYellow),
 		time.Second*3, func(c color.Color) {
 			rect.FillColor = c
 			canvas.Refresh(rect)
@@ -29,7 +29,7 @@ func makeAnimate(_ fyne.Window) fyne.CanvasObject {
 	btn.Resize(btn.MinSize())
 	btn.Move(fyne.NewPos(20, 220))
 
-	a2 = canvas.NewPositionAnimator(fyne.NewPos(20, 220), fyne.NewPos(320, 220), canvas.DurationStandard, func(p fyne.Position) {
+	a2 = canvas.NewPositionAnimation(fyne.NewPos(20, 220), fyne.NewPos(320, 220), canvas.DurationStandard, func(p fyne.Position) {
 		btn.Move(p)
 	})
 

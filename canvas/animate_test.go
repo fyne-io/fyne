@@ -14,7 +14,7 @@ func TestNewColorAnimation(t *testing.T) {
 	stop := color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
 
 	var current color.Color
-	anim := NewColorAnimator(start, stop, time.Second, func(c color.Color) {
+	anim := NewColorAnimation(start, stop, time.Second, func(c color.Color) {
 		current = c
 	})
 
@@ -31,7 +31,7 @@ func TestNewPositionAnimation(t *testing.T) {
 	stop := fyne.NewPos(10, 110)
 
 	var current fyne.Position
-	anim := NewPositionAnimator(start, stop, time.Second, func(p fyne.Position) {
+	anim := NewPositionAnimation(start, stop, time.Second, func(p fyne.Position) {
 		current = p
 	})
 
@@ -48,7 +48,7 @@ func TestNewPSizeAnimation(t *testing.T) {
 	stop := fyne.NewSize(10, 110)
 
 	var current fyne.Size
-	anim := NewSizeAnimator(start, stop, time.Second, func(s fyne.Size) {
+	anim := NewSizeAnimation(start, stop, time.Second, func(s fyne.Size) {
 		current = s
 	})
 
