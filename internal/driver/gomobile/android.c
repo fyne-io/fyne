@@ -1,10 +1,12 @@
 // +build android
 
 #include <android/log.h>
+#include <dirent.h>
 #include <jni.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define LOG_FATAL(...) __android_log_print(ANDROID_LOG_FATAL, "Fyne", __VA_ARGS__)
 
@@ -121,6 +123,7 @@ void* openStream(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	jthrowable loadErr = (*env)->ExceptionOccurred(env);
 
 	if (loadErr != NULL) {
+		(*env)->ExceptionDescribe(loadErr);
 		(*env)->ExceptionClear(env);
 		return NULL;
 	}
@@ -155,93 +158,183 @@ void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream) {
 	(*env)->DeleteGlobalRef(env, stream);
 }
 
+bool hasPrefix(char* string, char* prefix) {
+	size_t lp = strlen(prefix);
+	size_t ls = strlen(string);
+	if (ls < lp) {
+		return false;
+	}
+	return memcmp(prefix, string, lp) == 0;
+}
+
 bool uriCanList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
-	JNIEnv *env = (JNIEnv*)jni_env;
-	jobject resolver = getContentResolver(jni_env, ctx);
-	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
-	jobject uri = parseURI(jni_env, ctx, uriCstr);
+	if (hasPrefix(uriCstr, "file://")) {
+		// Get file path from URI
+		size_t length = strlen(uriCstr)-7;// -7 for 'file://'
+		char* path = malloc(sizeof(char)*(length+1));// +1 for '\0'
+		memcpy(path, &uriCstr[7], length);
+		path[length] = '\0';
 
-	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
-	if (contractClass == NULL) { // API 19
-		return false;
+		// Stat path to determine if it points to a directory
+		struct stat statbuf;
+		int result = stat(path, &statbuf);
+
+		free(path);
+
+		if (result == 0) {
+			return S_ISDIR(statbuf.st_mode);
+		}
+	} else if (hasPrefix(uriCstr, "content://")) {
+		JNIEnv *env = (JNIEnv*)jni_env;
+		jobject resolver = getContentResolver(jni_env, ctx);
+		jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
+		jobject uri = parseURI(jni_env, ctx, uriCstr);
+		jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+		if (loadErr != NULL) {
+			(*env)->ExceptionDescribe(loadErr);
+			(*env)->ExceptionClear(env);
+			return false;
+		}
+
+		jclass contractClass = find_class(env, "android/provider/DocumentsContract");
+		if (contractClass == NULL) { // API 19
+			return false;
+		}
+		jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+		if (getDoc == NULL) { // API 21
+			return false;
+		}
+		jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
+
+		jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+		jobject treeUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, uri, docID);
+
+		jclass resolverClass = (*env)->GetObjectClass(env, resolver);
+		jmethodID getType = find_method(env, resolverClass, "getType", "(Landroid/net/Uri;)Ljava/lang/String;");
+		jstring type = (jstring)(*env)->CallObjectMethod(env, resolver, getType, treeUri);
+
+		if (type == NULL) {
+			return false;
+		}
+
+		char *str = getString(jni_env, ctx, type);
+		return strcmp(str, "vnd.android.document/directory") == 0;
 	}
-	jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
-	if (getDoc == NULL) { // API 21
-		return false;
-	}
-	jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
-
-	jmethodID getTree = find_static_method(env, contractClass, "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
-	jobject treeUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getTree, uri, docID);
-
-	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
-	jmethodID getType = find_method(env, resolverClass, "getType", "(Landroid/net/Uri;)Ljava/lang/String;");
-	jstring type = (jstring)(*env)->CallObjectMethod(env, resolver, getType, treeUri);
-
-	if (type == NULL) {
-		return false;
-	}
-
-	char *str = getString(jni_env, ctx, type);
-	return strcmp(str, "vnd.android.document/directory") == 0;
+	return false;
 }
 
 char* uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
-	JNIEnv *env = (JNIEnv*)jni_env;
-	jobject resolver = getContentResolver(jni_env, ctx);
-	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
-	jobject uri = parseURI(jni_env, ctx, uriCstr);
+	if (hasPrefix(uriCstr, "file://")) {
 
-	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
-	if (contractClass == NULL) { // API 19
-		return "";
-	}
-	jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
-	if (getDoc == NULL) { // API 21
-		return "";
-	}
-	jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
+		// Get file path from URI
+		size_t length = strlen(uriCstr)-7;// -7 for 'file://'
+		char* path = malloc(sizeof(char)*(length+1));// +1 for '\0'
+		memcpy(path, &uriCstr[7], length);
+		path[length] = '\0';
 
-	jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
-	jobject childrenUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, docID);
-
-	jclass stringClass = find_class(env, "java/lang/String");
-	jobjectArray project = (*env)->NewObjectArray(env, 1, stringClass, (*env)->NewStringUTF(env, "document_id"));
-
-	jclass resolverClass = (*env)->GetObjectClass(env, resolver);
-	jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
-	if (getDoc == NULL) { // API 26
-		return "";
-	}
-
-	jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, project, NULL, NULL);
-	jclass cursorClass = (*env)->GetObjectClass(env, cursor);
-	jmethodID next = find_method(env, cursorClass, "moveToNext", "()Z");
-	jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
-
-	char *ret = NULL;
-	int len = 0;
-	while (((jboolean)(*env)->CallBooleanMethod(env, cursor, next)) == JNI_TRUE) {
-		jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
-		jobject childUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, name);
-		jclass uriClass = (*env)->GetObjectClass(env, childUri);
-		jmethodID toString = (*env)->GetMethodID(env, uriClass, "toString", "()Ljava/lang/String;");
-		jobject s = (*env)->CallObjectMethod(env, childUri, toString);
-
-		char *uid = getString(jni_env, ctx, name);
-
-		// append
-		char *old = ret;
-		len = len + strlen(uid) + 1;
-		ret = malloc(sizeof(char)*(len+1));
-		if (old != NULL) {
-			strcpy(ret, old);
-			free(old);
+		char *ret = NULL;
+		DIR *dfd;
+		if ((dfd = opendir(path)) != NULL) {
+			struct dirent *dp;
+			int len = 0;
+			while ((dp = readdir(dfd)) != NULL) {
+				if (strcmp(dp->d_name, ".") == 0) {
+					// Ignore current directory
+					continue;
+				}
+				if (strcmp(dp->d_name, "..") == 0) {
+					// Ignore parent directory
+					continue;
+				}
+				// append
+				char *old = ret;
+				len = len + strlen(uriCstr) + 1 + strlen(dp->d_name) + 1;
+				ret = malloc(sizeof(char)*(len+1));
+				if (old != NULL) {
+					strcpy(ret, old);
+					free(old);
+				}
+				strcat(ret, uriCstr);
+				strcat(ret, "/");
+				strcat(ret, dp->d_name);
+				strcat(ret, "|");
+			}
+			if (ret != NULL) {
+				ret[len-1] = '\0';
+			}
 		}
-		strcat(ret, uid);
-		strcat(ret, "|");
-	}
 
-	ret[len-1] = '\0';
-	return ret;
+		free(path);
+
+		return ret;
+	} else if (hasPrefix(uriCstr, "content://")) {
+		JNIEnv *env = (JNIEnv*)jni_env;
+		jobject resolver = getContentResolver(jni_env, ctx);
+		jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
+		jobject uri = parseURI(jni_env, ctx, uriCstr);
+		jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+		if (loadErr != NULL) {
+			(*env)->ExceptionDescribe(loadErr);
+			(*env)->ExceptionClear(env);
+			return "";
+		}
+
+		jclass contractClass = find_class(env, "android/provider/DocumentsContract");
+		if (contractClass == NULL) { // API 19
+			return "";
+		}
+		jmethodID getDoc = find_static_method(env, contractClass, "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;");
+		if (getDoc == NULL) { // API 21
+			return "";
+		}
+		jstring docID = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getDoc, uri);
+
+		jmethodID getChild = find_static_method(env, contractClass, "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;");
+		jobject childrenUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, docID);
+
+		jclass stringClass = find_class(env, "java/lang/String");
+		jobjectArray project = (*env)->NewObjectArray(env, 1, stringClass, (*env)->NewStringUTF(env, "document_id"));
+
+		jclass resolverClass = (*env)->GetObjectClass(env, resolver);
+		jmethodID query = find_method(env, resolverClass, "query", "(Landroid/net/Uri;[Ljava/lang/String;Landroid/os/Bundle;Landroid/os/CancellationSignal;)Landroid/database/Cursor;");
+		if (getDoc == NULL) { // API 26
+			return "";
+		}
+
+		jobject cursor = (jobject)(*env)->CallObjectMethod(env, resolver, query, childrenUri, project, NULL, NULL);
+		jclass cursorClass = (*env)->GetObjectClass(env, cursor);
+		jmethodID next = find_method(env, cursorClass, "moveToNext", "()Z");
+		jmethodID get = find_method(env, cursorClass, "getString", "(I)Ljava/lang/String;");
+
+		char *ret = NULL;
+		int len = 0;
+		while (((jboolean)(*env)->CallBooleanMethod(env, cursor, next)) == JNI_TRUE) {
+			jstring name = (jstring)(*env)->CallObjectMethod(env, cursor, get, 0);
+			jobject childUri = (jobject)(*env)->CallStaticObjectMethod(env, contractClass, getChild, uri, name);
+			jclass uriClass = (*env)->GetObjectClass(env, childUri);
+			jmethodID toString = (*env)->GetMethodID(env, uriClass, "toString", "()Ljava/lang/String;");
+			jobject s = (*env)->CallObjectMethod(env, childUri, toString);
+
+			char *uid = getString(jni_env, ctx, name);
+
+			// append
+			char *old = ret;
+			len = len + strlen(uid) + 1;
+			ret = malloc(sizeof(char)*(len+1));
+			if (old != NULL) {
+				strcpy(ret, old);
+				free(old);
+			}
+			strcat(ret, uid);
+			strcat(ret, "|");
+		}
+
+		if (ret != NULL) {
+			ret[len-1] = '\0';
+		}
+		return ret;
+	}
+	return "";
 }
