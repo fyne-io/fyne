@@ -123,17 +123,15 @@ func (d *gLDriver) runAnimations() {
 	go func() {
 		for len(d.animations) > 0 {
 
-			select {
-			case <-draw.C:
-				for i := len(d.animations) - 1; i >= 0; i-- { // backwards so we can remove safely
-					a := d.animations[i]
+			<-draw.C
+			for i := len(d.animations) - 1; i >= 0; i-- { // backwards so we can remove safely
+				a := d.animations[i]
 
-					if !d.tickAnimation(a) {
-						if i == len(d.animations)-1 {
-							d.animations = d.animations[:len(d.animations)-1]
-						} else {
-							d.animations = append(d.animations[:i], d.animations[i+1])
-						}
+				if !d.tickAnimation(a) {
+					if i == len(d.animations)-1 {
+						d.animations = d.animations[:len(d.animations)-1]
+					} else {
+						d.animations = append(d.animations[:i], d.animations[i+1])
 					}
 				}
 			}
@@ -153,7 +151,7 @@ func (d *gLDriver) tickAnimation(a *anim) bool {
 	}
 
 	total := a.end.Sub(a.start).Milliseconds()
-	delta := time.Now().Sub(a.start).Milliseconds()
+	delta := time.Since(a.start).Milliseconds()
 
 	val := float32(delta) / float32(total)
 	a.a.Tick(val)
