@@ -150,8 +150,8 @@ func (d *gLDriver) tickAnimation(a *anim) bool {
 		a.end = a.start.Add(a.a.Duration)
 	}
 
-	total := a.end.Sub(a.start).Milliseconds()
-	delta := time.Since(a.start).Milliseconds()
+	total := a.end.Sub(a.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
+	delta := time.Since(a.start).Nanoseconds() / 1000000
 
 	val := float32(delta) / float32(total)
 	a.a.Tick(val)
