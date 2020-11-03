@@ -306,7 +306,7 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <string>LaunchScreen</string>
   <key>UIRequiredDeviceCapabilities</key>
   <array>
-    <string>armv7</string>
+    <string>armv64</string>
   </array>
   <key>UIRequiresFullScreen</key>
   <true/>
