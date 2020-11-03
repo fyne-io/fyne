@@ -12,8 +12,6 @@ import (
 // TreeNodeID represents the unique id of a tree node.
 type TreeNodeID = string
 
-const treeDividerHeight = 1
-
 var _ fyne.Widget = (*Tree)(nil)
 
 // Tree widget displays hierarchical data.
@@ -207,7 +205,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 				}
 				// If this is not the first item, add a divider
 				if y > 0 {
-					y += treeDividerHeight
+					y += separatorThickness
 				}
 
 				y += m.Height
@@ -408,10 +406,10 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				r.dividers = append(r.dividers, divider)
 			}
 			divider.Move(fyne.NewPos(theme.Padding(), y))
-			s := fyne.NewSize(width-2*theme.Padding(), treeDividerHeight)
+			s := fyne.NewSize(width-2*theme.Padding(), separatorThickness)
 			divider.Resize(s)
 			divider.Show()
-			y += treeDividerHeight
+			y += separatorThickness
 			numDividers++
 		}
 
@@ -496,7 +494,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 		// If this is not the first item, add a divider
 		if min.Height > 0 {
-			min.Height += treeDividerHeight
+			min.Height += separatorThickness
 		}
 
 		m := r.treeContent.tree.leafMinSize
