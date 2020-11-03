@@ -21,14 +21,14 @@ import (
 	"fyne.io/fyne/storage"
 )
 
-func uriCanList(uri fyne.URI) bool {
+func canListURI(uri fyne.URI) bool {
 	uriStr := C.CString(uri.String())
 	defer C.free(unsafe.Pointer(uriStr))
 
 	return bool(C.iosCanList(uriStr))
 }
 
-func uriList(uri fyne.URI) ([]fyne.URI, error) {
+func listURI(uri fyne.URI) ([]fyne.URI, error) {
 	uriStr := C.CString(uri.String())
 	defer C.free(unsafe.Pointer(uriStr))
 
