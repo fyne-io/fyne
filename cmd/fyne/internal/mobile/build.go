@@ -152,7 +152,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			return nil, fmt.Errorf("-os=ios requires XCode")
 		}
 		if buildRelease {
-			targetArchs = []string{"arm", "arm64"}
+			targetArchs = []string{"arm64"}
 		}
 
 		if pkg.Name != "main" {
