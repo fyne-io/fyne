@@ -29,7 +29,8 @@ type gLDriver struct {
 	done       chan interface{}
 	drawDone   chan interface{}
 
-	animations []*anim
+	animationMutex sync.RWMutex
+	animations     []*anim
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
@@ -75,6 +76,8 @@ func (d *gLDriver) Run() {
 }
 
 func (d *gLDriver) StartAnimation(a *fyne.Animation) {
+	d.animationMutex.Lock()
+	defer d.animationMutex.Unlock()
 	wasStopped := len(d.animations) == 0
 
 	d.animations = append(d.animations, &anim{a, time.Now(), time.Now().Add(a.Duration)})
@@ -121,24 +124,29 @@ func (d *gLDriver) runAnimations() {
 	draw := time.NewTicker(time.Second / 60)
 
 	go func() {
-		for len(d.animations) > 0 {
+		done := false
+		for !done {
 
 			<-draw.C
-			for i := len(d.animations) - 1; i >= 0; i-- { // backwards so we can remove safely
-				a := d.animations[i]
-
-				if !d.tickAnimation(a) {
-					if i == len(d.animations)-1 {
-						d.animations = d.animations[:len(d.animations)-1]
-					} else {
-						d.animations = append(d.animations[:i], d.animations[i+1])
-					}
+			d.animationMutex.Lock()
+			oldList := d.animations
+			d.animations = nil // clear the list so we can append any new ones after processing
+			d.animationMutex.Unlock()
+			var newList []*anim
+			for _, a := range oldList {
+				if d.tickAnimation(a) {
+					newList = append(newList, a)
 				}
 			}
+			d.animationMutex.Lock()
+			d.animations = append(newList, d.animations...)
+			done = len(newList) == 0
+			d.animationMutex.Unlock()
 		}
 	}()
 }
 
+// tickAnimation will process a frame of animation and return true if this should continue animating
 func (d *gLDriver) tickAnimation(a *anim) bool {
 	if time.Now().After(a.end) {
 		a.a.Tick(1.0)
