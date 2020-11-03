@@ -34,6 +34,6 @@ func (p *packager) packageIOS() error {
 }
 
 func copyResizeIcon(size, dir string) error {
-	cmd := exec.Command("sips", "-o", dir+"/Icon_"+size+".png", "-Z", "120", dir+"/Icon.png")
+	cmd := exec.Command("sips", "-o", dir+"/Icon_"+size+".png", "-Z", size, dir+"/Icon.png")
 	return cmd.Run()
 }
