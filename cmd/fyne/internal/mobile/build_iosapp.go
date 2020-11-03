@@ -27,7 +27,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	// Detect the team ID
 	teamID, err := DetectIOSTeamID(cert)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to look up certificate %s: %s", cert, err.Error())
 	}
 
 	projPbxproj := new(bytes.Buffer)
@@ -306,7 +306,7 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <string>LaunchScreen</string>
   <key>UIRequiredDeviceCapabilities</key>
   <array>
-    <string>armv64</string>
+    <string>arm64</string>
   </array>
   <key>UIRequiresFullScreen</key>
   <true/>
