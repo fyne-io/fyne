@@ -23,7 +23,9 @@ var (
 
 	darwinArmNM string
 
-	allArchs = []string{"arm", "arm64", "386", "amd64"}
+	allArchs = map[string][]string{
+		"android": {"arm", "arm64", "386", "amd64"},
+		"ios":     {"arm64", "amd64"}}
 
 	bitcodeEnabled bool
 )
@@ -136,7 +138,7 @@ func envInit() (err error) {
 
 	darwinArmNM = "nm"
 	darwinEnv = make(map[string][]string)
-	for _, arch := range allArchs {
+	for _, arch := range allArchs["ios"] {
 		var env []string
 		var err error
 		var clang, cflags string
