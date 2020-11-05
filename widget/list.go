@@ -185,7 +185,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	if l.visibleItemCount == 0 {
 		return
 	}
-	min := int(math.Min(float64(length), float64(l.visibleItemCount)))
+	min := int(math.Max(math.Min(float64(length), float64(l.visibleItemCount)), 1))
 	if len(l.children) > min {
 		for i := len(l.children); i >= min; i-- {
 			l.itemPool.Release(l.children[i-1])
