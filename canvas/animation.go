@@ -7,10 +7,8 @@ import (
 	"fyne.io/fyne"
 )
 
-const (
-	// DurationStandard is the time a standard interface animation will run.
-	DurationStandard = time.Millisecond * 300
-)
+// DurationStandard is the time a standard interface animation will run.
+const DurationStandard = time.Millisecond * 300
 
 // NewColorAnimation sets up a new animation that will transition from the start to stop Color over
 // the specified Duration. The content of fn should apply the color values to an object and refresh it.

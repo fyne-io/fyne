@@ -19,6 +19,5 @@ func NewAnimation(d time.Duration, fn func(float32)) *Animation {
 
 // Start registers the animation with the application run-loop and starts its execution.
 func (a *Animation) Start() {
-	d := CurrentApp().Driver()
-	d.StartAnimation(a)
+	CurrentApp().Driver().StartAnimation(a)
 }
