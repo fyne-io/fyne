@@ -23,9 +23,9 @@ func collectionScreen(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeListTab(_ fyne.Window) fyne.CanvasObject {
-	var data []string
-	for i := 0; i < 1000; i++ {
-		data = append(data, fmt.Sprintf("Test Item %d", i))
+	data := make([]string, 1000)
+	for i := range data {
+		data[i] = fmt.Sprintf("Test Item %d", i)
 	}
 
 	icon := widget.NewIcon(nil)
@@ -52,6 +52,7 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 		icon.SetResource(nil)
 	}
 	list.Select(125)
+
 	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
 }
 
