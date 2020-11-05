@@ -19,7 +19,7 @@ func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI,
 	}
 
 	cmd := exec.Command(cmdName, name)
-	err, loc := cmd.Output()
+	loc, err := cmd.Output()
 	if err != nil {
 		return storage.Child(homeURI, fallbackName)
 	}
