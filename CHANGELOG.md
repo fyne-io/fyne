@@ -12,6 +12,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * file:// based URI on Android would fail to list folder (#1495)
 * Images in iOS release were not all correct size (#1498)
 * iOS compile failed with Go 1.15 (#1497)
+* Possible crash when minimising app containing List on Windows
 
 
 ## 1.4 - 1 November 2020
