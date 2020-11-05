@@ -75,5 +75,8 @@ func CurrentApp() App {
 	appLock.RLock()
 	defer appLock.RUnlock()
 
+	if app == nil {
+		LogError("Attempt to access current Fyne app when none is started", nil)
+	}
 	return app
 }
