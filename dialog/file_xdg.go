@@ -26,7 +26,7 @@ func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI,
 
 	// Remove \n at the end
 	loc = loc[:len(loc)-1]
-	locURI := storage.NewFileURI(loc)
+	locURI := storage.NewFileURI(stringg(loc))
 
 	if locURI.String() == homeURI.String() {
 		fallback, _ := storage.Child(homeURI, fallbackName)
