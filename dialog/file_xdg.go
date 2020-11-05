@@ -4,7 +4,6 @@
 package dialog
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -20,15 +19,11 @@ func getFavoriteLocation(homeURI fyne.URI, name, fallbackName string) (fyne.URI,
 	}
 
 	cmd := exec.Command(cmdName, name)
-	stdout := bytes.NewBufferString("")
-
-	cmd.Stdout = stdout
-	err := cmd.Run()
+	err, loc := cmd.Output()
 	if err != nil {
 		return storage.Child(homeURI, fallbackName)
 	}
 
-	loc := stdout.String()
 	// Remove \n at the end
 	loc = loc[:len(loc)-1]
 	locURI := storage.NewFileURI(loc)
