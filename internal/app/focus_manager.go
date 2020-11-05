@@ -83,9 +83,13 @@ func (f *FocusManager) focus(obj fyne.Focusable) {
 }
 
 func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
-	var first, next fyne.Focusable
+	return f.nextWithWalker(current, driver.WalkVisibleObjectTree)
+}
+
+func (f *FocusManager) nextWithWalker(current fyne.Focusable, walker walkerFunc) fyne.Focusable {
+	var next fyne.Focusable
 	found := current == nil // if we have no starting point then pretend we matched already
-	driver.WalkVisibleObjectTree(f.content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
+	walker(f.content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
 		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
 			// disabled widget cannot receive focus
 			return false
@@ -100,51 +104,26 @@ func (f *FocusManager) nextInChain(current fyne.Focusable) fyne.Focusable {
 			next = focus
 			return true
 		}
+		if next == nil {
+			next = focus
+		}
 
 		if obj == current.(fyne.CanvasObject) {
 			found = true
-		}
-		if first == nil {
-			first = focus
 		}
 
 		return false
 	}, nil)
 
-	if next != nil {
-		return next
-	}
-	return first
+	return next
 }
 
 func (f *FocusManager) previousInChain(current fyne.Focusable) fyne.Focusable {
-	var last, previous fyne.Focusable
-	found := false
-	driver.WalkVisibleObjectTree(f.content, func(obj fyne.CanvasObject, _ fyne.Position, _ fyne.Position, _ fyne.Size) bool {
-		if w, ok := obj.(fyne.Disableable); ok && w.Disabled() {
-			// disabled widget cannot receive focus
-			return false
-		}
-
-		focus, ok := obj.(fyne.Focusable)
-		if !ok {
-			return false
-		}
-
-		if current != nil && obj == current.(fyne.CanvasObject) {
-			found = true
-		}
-		last = focus
-
-		if !found {
-			previous = focus
-		}
-
-		return false // we cannot exit early - until we make a reverse tree walk...
-	}, nil)
-
-	if previous != nil {
-		return previous
-	}
-	return last
+	return f.nextWithWalker(current, driver.ReverseWalkVisibleObjectTree)
 }
+
+type walkerFunc func(
+	fyne.CanvasObject,
+	func(fyne.CanvasObject, fyne.Position, fyne.Position, fyne.Size) bool,
+	func(fyne.CanvasObject, fyne.CanvasObject),
+) bool
