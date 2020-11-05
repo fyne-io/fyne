@@ -17,10 +17,33 @@ func TestIcon_Layout(t *testing.T) {
 
 	for name, tt := range map[string]struct {
 		resource fyne.Resource
+		want     string
 	}{
-		"empty": {},
+		"empty": {
+			want: `
+				<canvas padded size="150x200">
+					<content>
+						<container pos="4,4" size="142x192">
+							<widget pos="61,86" size="20x20" type="*widget.Icon">
+							</widget>
+						</container>
+					</content>
+				</canvas>
+			`,
+		},
 		"resource": {
 			resource: theme.CancelIcon(),
+			want: `
+				<canvas padded size="150x200">
+					<content>
+						<container pos="4,4" size="142x192">
+							<widget pos="61,86" size="20x20" type="*widget.Icon">
+								<image fillMode="contain" rsc="cancelIcon" size="iconInlineSize"/>
+							</widget>
+						</container>
+					</content>
+				</canvas>
+			`,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -31,7 +54,7 @@ func TestIcon_Layout(t *testing.T) {
 			window := test.NewWindow(fyne.NewContainerWithLayout(layout.NewCenterLayout(), icon))
 			window.Resize(icon.MinSize().Max(fyne.NewSize(150, 200)))
 
-			test.AssertImageMatches(t, "icon/layout_"+name+".png", window.Canvas().Capture())
+			test.AssertRendersToMarkup(t, tt.want, window.Canvas())
 
 			window.Close()
 		})
