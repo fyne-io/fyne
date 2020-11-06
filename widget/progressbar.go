@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
@@ -121,5 +122,18 @@ func NewProgressBar() *ProgressBar {
 	p := &ProgressBar{Min: 0, Max: 1}
 
 	Renderer(p).Layout(p.MinSize())
+	return p
+}
+
+// NewProgressBarWithData returns a progress bar connected with the specified data source.
+func NewProgressBarWithData(data binding.Float) *ProgressBar {
+	p := NewProgressBar()
+	p.Value = data.Get()
+
+	data.AddListener(binding.NewNotifyFunction(func(d binding.DataItem) {
+		p.Value = d.(binding.Float).Get()
+		p.Refresh()
+	}))
+
 	return p
 }

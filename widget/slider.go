@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
@@ -43,6 +44,22 @@ func NewSlider(min, max float64) *Slider {
 		Orientation: Horizontal,
 	}
 	slider.ExtendBaseWidget(slider)
+	return slider
+}
+
+// NewSliderWithData returns a slider connected with the specified data source.
+func NewSliderWithData(min, max float64, data binding.Float) *Slider {
+	slider := NewSlider(min, max)
+	slider.Value = data.Get()
+
+	data.AddListener(binding.NewNotifyFunction(func(binding.DataItem) {
+		slider.Value = data.Get()
+		slider.Refresh()
+	}))
+	slider.OnChanged = func(f float64) {
+		data.(binding.Float).Set(f)
+	}
+
 	return slider
 }
 
