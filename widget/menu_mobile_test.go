@@ -42,12 +42,51 @@ func TestMenu_Layout(t *testing.T) {
 		menuPos      fyne.Position
 		tapPositions []fyne.Position
 		useTestTheme bool
-		wantImage    string
+		want         string
 	}{
 		"normal": {
 			windowSize: fyne.NewSize(500, 300),
 			menuPos:    fyne.NewPos(10, 10),
-			wantImage:  "menu/layout_normal.png",
+			want: `
+				<canvas size="500x300">
+					<content>
+						<rectangle size="500x300"/>
+					</content>
+					<overlay>
+						<widget size="500x300" type="*widget.OverlayContainer">
+							<widget pos="10,10" size="71x108" type="*widget.Menu">
+								<widget size="71x108" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="71,0" size="4x108" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="71,108" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,108" size="71x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,108" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x108"/>
+								</widget>
+								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
+									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
+										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+										</widget>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</overlay>
+				</canvas>
+			`,
 		},
 		"normal with submenus": {
 			windowSize: fyne.NewSize(500, 300),
@@ -56,7 +95,94 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),
 				fyne.NewPos(100, 170),
 			},
-			wantImage: "menu/mobile/layout_normal_with_submenus.png",
+			want: `
+				<canvas size="500x300">
+					<content>
+						<rectangle size="500x300"/>
+					</content>
+					<overlay>
+						<widget size="500x300" type="*widget.OverlayContainer">
+							<widget pos="10,10" size="71x108" type="*widget.Menu">
+								<widget size="71x108" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="71,0" size="4x108" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="71,108" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,108" size="71x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,108" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x108"/>
+								</widget>
+								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
+									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
+										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+										</widget>
+									</widget>
+								</widget>
+								<widget pos="71,71" size="153x103" type="*widget.Menu">
+									<widget size="153x103" type="*widget.Shadow">
+										<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+										<linearGradient endColor="shadow" pos="0,-4" size="153x4"/>
+										<radialGradient centerOffset="-0.5,0.5" pos="153,-4" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" pos="153,0" size="4x103" startColor="shadow"/>
+										<radialGradient centerOffset="-0.5,-0.5" pos="153,103" size="4x4" startColor="shadow"/>
+										<linearGradient pos="0,103" size="153x4" startColor="shadow"/>
+										<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+									</widget>
+									<widget clip="153x103@81,81" size="153x103" type="*widget.ScrollContainer">
+										<widget clip="153x103@81,81" size="153x103" type="*widget.menuBox">
+											<widget clip="153x103@81,81" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@81,81" pos="8,4" size="72x21">subitem A</text>
+											</widget>
+											<widget clip="153x103@81,81" pos="0,33" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@81,81" pos="8,4" size="72x21">subitem B</text>
+											</widget>
+											<widget clip="153x103@81,81" pos="0,66" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@81,81" pos="8,4" size="117x21">subitem C (long)</text>
+												<image clip="153x103@81,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</widget>
+									</widget>
+									<widget pos="153,66" size="159x70" type="*widget.Menu">
+										<widget size="159x70" type="*widget.Shadow">
+											<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+											<linearGradient endColor="shadow" pos="0,-4" size="159x4"/>
+											<radialGradient centerOffset="-0.5,0.5" pos="159,-4" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" pos="159,0" size="4x70" startColor="shadow"/>
+											<radialGradient centerOffset="-0.5,-0.5" pos="159,70" size="4x4" startColor="shadow"/>
+											<linearGradient pos="0,70" size="159x4" startColor="shadow"/>
+											<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+										</widget>
+										<widget clip="159x70@234,147" size="159x70" type="*widget.ScrollContainer">
+											<widget clip="159x70@234,147" size="159x70" type="*widget.menuBox">
+												<widget clip="159x70@234,147" size="159x29" type="*widget.menuItem">
+													<text clip="159x70@234,147" pos="8,4" size="143x21">subsubitem A (long)</text>
+												</widget>
+												<widget clip="159x70@234,147" pos="0,33" size="159x29" type="*widget.menuItem">
+													<text clip="159x70@234,147" pos="8,4" size="98x21">subsubitem B</text>
+												</widget>
+											</widget>
+										</widget>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</overlay>
+				</canvas>
+			`,
 		},
 		"background of active submenu parents resets if sibling is hovered": {
 			windowSize: fyne.NewSize(500, 300),
@@ -67,7 +193,46 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(300, 170), // hover subsubmenu item
 				fyne.NewPos(30, 60),   // hover sibling of submenu parent
 			},
-			wantImage: "menu/mobile/layout_background_reset.png",
+			want: `
+				<canvas size="500x300">
+					<content>
+						<rectangle size="500x300"/>
+					</content>
+					<overlay>
+						<widget size="500x300" type="*widget.OverlayContainer">
+							<widget pos="10,10" size="71x108" type="*widget.Menu">
+								<widget size="71x108" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="71,0" size="4x108" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="71,108" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,108" size="71x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,108" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x108"/>
+								</widget>
+								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
+									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
+										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+										</widget>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</overlay>
+				</canvas>
+			`,
 		},
 		"no space on right side for submenu": {
 			windowSize: fyne.NewSize(500, 300),
@@ -76,7 +241,94 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(430, 100), // open submenu
 				fyne.NewPos(300, 170), // open subsubmenu
 			},
-			wantImage: "menu/mobile/layout_no_space_on_right.png",
+			want: `
+				<canvas size="500x300">
+					<content>
+						<rectangle size="500x300"/>
+					</content>
+					<overlay>
+						<widget size="500x300" type="*widget.OverlayContainer">
+							<widget pos="410,10" size="71x108" type="*widget.Menu">
+								<widget size="71x108" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="71,0" size="4x108" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="71,108" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,108" size="71x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,108" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x108"/>
+								</widget>
+								<widget clip="71x108@410,10" size="71x108" type="*widget.ScrollContainer">
+									<widget clip="71x108@410,10" size="71x108" type="*widget.menuBox">
+										<widget clip="71x108@410,10" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@410,10" pos="8,4" size="10x21">A</text>
+										</widget>
+										<widget clip="71x108@410,10" pos="0,33" size="71x1" type="*widget.Separator">
+											<rectangle clip="71x108@410,10" fillColor="disabled text" size="71x1"/>
+										</widget>
+										<widget clip="71x108@410,10" pos="0,38" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@410,10" pos="8,4" size="55x21">B (long)</text>
+										</widget>
+										<widget clip="71x108@410,10" pos="0,71" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@410,10" pos="8,4" size="10x21">C</text>
+											<image clip="71x108@410,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+										</widget>
+									</widget>
+								</widget>
+								<widget pos="-153,71" size="153x103" type="*widget.Menu">
+									<widget size="153x103" type="*widget.Shadow">
+										<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+										<linearGradient endColor="shadow" pos="0,-4" size="153x4"/>
+										<radialGradient centerOffset="-0.5,0.5" pos="153,-4" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" pos="153,0" size="4x103" startColor="shadow"/>
+										<radialGradient centerOffset="-0.5,-0.5" pos="153,103" size="4x4" startColor="shadow"/>
+										<linearGradient pos="0,103" size="153x4" startColor="shadow"/>
+										<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+									</widget>
+									<widget clip="153x103@257,81" size="153x103" type="*widget.ScrollContainer">
+										<widget clip="153x103@257,81" size="153x103" type="*widget.menuBox">
+											<widget clip="153x103@257,81" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@257,81" pos="8,4" size="72x21">subitem A</text>
+											</widget>
+											<widget clip="153x103@257,81" pos="0,33" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@257,81" pos="8,4" size="72x21">subitem B</text>
+											</widget>
+											<widget clip="153x103@257,81" pos="0,66" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@257,81" pos="8,4" size="117x21">subitem C (long)</text>
+												<image clip="153x103@257,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</widget>
+									</widget>
+									<widget pos="-159,66" size="159x70" type="*widget.Menu">
+										<widget size="159x70" type="*widget.Shadow">
+											<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+											<linearGradient endColor="shadow" pos="0,-4" size="159x4"/>
+											<radialGradient centerOffset="-0.5,0.5" pos="159,-4" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" pos="159,0" size="4x70" startColor="shadow"/>
+											<radialGradient centerOffset="-0.5,-0.5" pos="159,70" size="4x4" startColor="shadow"/>
+											<linearGradient pos="0,70" size="159x4" startColor="shadow"/>
+											<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+										</widget>
+										<widget clip="159x70@98,147" size="159x70" type="*widget.ScrollContainer">
+											<widget clip="159x70@98,147" size="159x70" type="*widget.menuBox">
+												<widget clip="159x70@98,147" size="159x29" type="*widget.menuItem">
+													<text clip="159x70@98,147" pos="8,4" size="143x21">subsubitem A (long)</text>
+												</widget>
+												<widget clip="159x70@98,147" pos="0,33" size="159x29" type="*widget.menuItem">
+													<text clip="159x70@98,147" pos="8,4" size="98x21">subsubitem B</text>
+												</widget>
+											</widget>
+										</widget>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</overlay>
+				</canvas>
+			`,
 		},
 		"no space on left & right side for submenu": {
 			windowSize: fyne.NewSize(200, 300),
@@ -85,7 +337,94 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 170), // open subsubmenu
 			},
-			wantImage: "menu/mobile/layout_no_space_on_both_sides.png",
+			want: `
+				<canvas size="200x300">
+					<content>
+						<rectangle size="200x300"/>
+					</content>
+					<overlay>
+						<widget size="200x300" type="*widget.OverlayContainer">
+							<widget pos="10,10" size="71x108" type="*widget.Menu">
+								<widget size="71x108" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="71,0" size="4x108" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="71,108" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,108" size="71x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,108" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x108"/>
+								</widget>
+								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
+									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
+										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+										</widget>
+									</widget>
+								</widget>
+								<widget pos="37,71" size="153x103" type="*widget.Menu">
+									<widget size="153x103" type="*widget.Shadow">
+										<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+										<linearGradient endColor="shadow" pos="0,-4" size="153x4"/>
+										<radialGradient centerOffset="-0.5,0.5" pos="153,-4" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" pos="153,0" size="4x103" startColor="shadow"/>
+										<radialGradient centerOffset="-0.5,-0.5" pos="153,103" size="4x4" startColor="shadow"/>
+										<linearGradient pos="0,103" size="153x4" startColor="shadow"/>
+										<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+									</widget>
+									<widget clip="153x103@47,81" size="153x103" type="*widget.ScrollContainer">
+										<widget clip="153x103@47,81" size="153x103" type="*widget.menuBox">
+											<widget clip="153x103@47,81" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@47,81" pos="8,4" size="72x21">subitem A</text>
+											</widget>
+											<widget clip="153x103@47,81" pos="0,33" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@47,81" pos="8,4" size="72x21">subitem B</text>
+											</widget>
+											<widget clip="153x103@47,81" pos="0,66" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@47,81" pos="8,4" size="117x21">subitem C (long)</text>
+												<image clip="153x103@47,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</widget>
+									</widget>
+									<widget pos="-6,66" size="159x70" type="*widget.Menu">
+										<widget size="159x70" type="*widget.Shadow">
+											<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+											<linearGradient endColor="shadow" pos="0,-4" size="159x4"/>
+											<radialGradient centerOffset="-0.5,0.5" pos="159,-4" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" pos="159,0" size="4x70" startColor="shadow"/>
+											<radialGradient centerOffset="-0.5,-0.5" pos="159,70" size="4x4" startColor="shadow"/>
+											<linearGradient pos="0,70" size="159x4" startColor="shadow"/>
+											<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+										</widget>
+										<widget clip="159x70@41,147" size="159x70" type="*widget.ScrollContainer">
+											<widget clip="159x70@41,147" size="159x70" type="*widget.menuBox">
+												<widget clip="159x70@41,147" size="159x29" type="*widget.menuItem">
+													<text clip="159x70@41,147" pos="8,4" size="143x21">subsubitem A (long)</text>
+												</widget>
+												<widget clip="159x70@41,147" pos="0,33" size="159x29" type="*widget.menuItem">
+													<text clip="159x70@41,147" pos="8,4" size="98x21">subsubitem B</text>
+												</widget>
+											</widget>
+										</widget>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</overlay>
+				</canvas>
+			`,
 		},
 		"window too short for submenu": {
 			windowSize: fyne.NewSize(500, 150),
@@ -94,18 +433,190 @@ func TestMenu_Layout(t *testing.T) {
 				fyne.NewPos(30, 100),  // open submenu
 				fyne.NewPos(100, 130), // open subsubmenu
 			},
-			wantImage: "menu/mobile/layout_window_too_short_for_submenu.png",
+			want: `
+				<canvas size="500x150">
+					<content>
+						<rectangle size="500x150"/>
+					</content>
+					<overlay>
+						<widget size="500x150" type="*widget.OverlayContainer">
+							<widget pos="10,10" size="71x108" type="*widget.Menu">
+								<widget size="71x108" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="71,0" size="4x108" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="71,108" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,108" size="71x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,108" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x108"/>
+								</widget>
+								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
+									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
+										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+										</widget>
+									</widget>
+								</widget>
+								<widget pos="71,37" size="153x103" type="*widget.Menu">
+									<widget size="153x103" type="*widget.Shadow">
+										<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+										<linearGradient endColor="shadow" pos="0,-4" size="153x4"/>
+										<radialGradient centerOffset="-0.5,0.5" pos="153,-4" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" pos="153,0" size="4x103" startColor="shadow"/>
+										<radialGradient centerOffset="-0.5,-0.5" pos="153,103" size="4x4" startColor="shadow"/>
+										<linearGradient pos="0,103" size="153x4" startColor="shadow"/>
+										<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+										<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+									</widget>
+									<widget clip="153x103@81,47" size="153x103" type="*widget.ScrollContainer">
+										<widget clip="153x103@81,47" size="153x103" type="*widget.menuBox">
+											<widget clip="153x103@81,47" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@81,47" pos="8,4" size="72x21">subitem A</text>
+											</widget>
+											<widget clip="153x103@81,47" pos="0,33" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@81,47" pos="8,4" size="72x21">subitem B</text>
+											</widget>
+											<widget clip="153x103@81,47" pos="0,66" size="153x29" type="*widget.menuItem">
+												<text clip="153x103@81,47" pos="8,4" size="117x21">subitem C (long)</text>
+												<image clip="153x103@81,47" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</widget>
+									</widget>
+									<widget pos="153,33" size="159x70" type="*widget.Menu">
+										<widget size="159x70" type="*widget.Shadow">
+											<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+											<linearGradient endColor="shadow" pos="0,-4" size="159x4"/>
+											<radialGradient centerOffset="-0.5,0.5" pos="159,-4" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" pos="159,0" size="4x70" startColor="shadow"/>
+											<radialGradient centerOffset="-0.5,-0.5" pos="159,70" size="4x4" startColor="shadow"/>
+											<linearGradient pos="0,70" size="159x4" startColor="shadow"/>
+											<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+											<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+										</widget>
+										<widget clip="159x70@234,80" size="159x70" type="*widget.ScrollContainer">
+											<widget clip="159x70@234,80" size="159x70" type="*widget.menuBox">
+												<widget clip="159x70@234,80" size="159x29" type="*widget.menuItem">
+													<text clip="159x70@234,80" pos="8,4" size="143x21">subsubitem A (long)</text>
+												</widget>
+												<widget clip="159x70@234,80" pos="0,33" size="159x29" type="*widget.menuItem">
+													<text clip="159x70@234,80" pos="8,4" size="98x21">subsubitem B</text>
+												</widget>
+											</widget>
+										</widget>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</overlay>
+				</canvas>
+			`,
 		},
 		"theme change": {
 			windowSize:   fyne.NewSize(500, 300),
 			menuPos:      fyne.NewPos(10, 10),
 			useTestTheme: true,
-			wantImage:    "menu/layout_theme_changed.png",
+			want: `
+				<canvas size="500x300">
+					<content>
+						<rectangle size="500x300"/>
+					</content>
+					<overlay>
+						<widget size="500x300" type="*widget.OverlayContainer">
+							<widget pos="10,10" size="71x108" type="*widget.Menu">
+								<widget size="71x108" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="71,0" size="4x108" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="71,108" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,108" size="71x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,108" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x108"/>
+								</widget>
+								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
+									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
+										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+										</widget>
+										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+										</widget>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</overlay>
+				</canvas>
+			`,
 		},
 		"window too short for menu": {
 			windowSize: fyne.NewSize(100, 50),
 			menuPos:    fyne.NewPos(10, 10),
-			wantImage:  "menu/layout_window_too_short.png",
+			want: `
+				<canvas size="100x50">
+					<content>
+						<rectangle size="100x50"/>
+					</content>
+					<overlay>
+						<widget size="100x50" type="*widget.OverlayContainer">
+							<widget pos="10,10" size="71x40" type="*widget.Menu">
+								<widget size="71x40" type="*widget.Shadow">
+									<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+									<linearGradient endColor="shadow" pos="0,-4" size="71x4"/>
+									<radialGradient centerOffset="-0.5,0.5" pos="71,-4" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" pos="71,0" size="4x40" startColor="shadow"/>
+									<radialGradient centerOffset="-0.5,-0.5" pos="71,40" size="4x4" startColor="shadow"/>
+									<linearGradient pos="0,40" size="71x4" startColor="shadow"/>
+									<radialGradient centerOffset="0.5,-0.5" pos="-4,40" size="4x4" startColor="shadow"/>
+									<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x40"/>
+								</widget>
+								<widget clip="71x40@10,10" size="71x40" type="*widget.ScrollContainer">
+									<widget clip="71x40@10,10" size="71x108" type="*widget.menuBox">
+										<widget clip="71x40@10,10" size="71x29" type="*widget.menuItem">
+											<text clip="71x40@10,10" pos="8,4" size="10x21">A</text>
+										</widget>
+										<widget clip="71x40@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+											<rectangle clip="71x40@10,10" fillColor="disabled text" size="71x1"/>
+										</widget>
+										<widget clip="71x40@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+											<text clip="71x40@10,10" pos="8,4" size="55x21">B (long)</text>
+										</widget>
+										<widget clip="71x40@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+											<text clip="71x40@10,10" pos="8,4" size="10x21">C</text>
+											<image clip="71x40@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+										</widget>
+									</widget>
+									<widget clip="71x40@10,10" pos="65,0" size="6x40" type="*widget.scrollBarArea">
+										<widget clip="71x40@10,10" pos="3,0" size="3x16" type="*widget.scrollBar">
+										</widget>
+									</widget>
+									<widget clip="71x40@10,10" pos="0,40" size="71x0" type="*widget.Shadow">
+										<linearGradient clip="71x40@10,10" endColor="shadow" pos="0,-8" size="71x8"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</overlay>
+				</canvas>
+			`,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -119,12 +630,12 @@ func TestMenu_Layout(t *testing.T) {
 			for _, pos := range tt.tapPositions {
 				test.TapCanvas(c, pos)
 			}
+			test.AssertRendersToMarkup(t, tt.want, w.Canvas())
 			if tt.useTestTheme {
+				test.AssertImageMatches(t, "menu/layout_normal.png", c.Capture())
 				test.WithTestTheme(t, func() {
-					test.AssertImageMatches(t, tt.wantImage, c.Capture())
+					test.AssertImageMatches(t, "menu/layout_theme_changed.png", c.Capture())
 				})
-			} else {
-				test.AssertImageMatches(t, tt.wantImage, c.Capture())
 			}
 		})
 	}
@@ -157,17 +668,278 @@ func TestMenu_Dragging(t *testing.T) {
 	m.Move(fyne.NewPos(10, 10))
 	m.Resize(m.MinSize())
 	maxDragDistance := m.MinSize().Height - 90
-	test.AssertImageMatches(t, "menu/mobile/drag_top.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas size="100x100">
+			<content>
+				<rectangle size="100x100"/>
+			</content>
+			<overlay>
+				<widget size="100x100" type="*widget.OverlayContainer">
+					<widget pos="10,10" size="28x90" type="*widget.Menu">
+						<widget size="28x90" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="28x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="28,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="28,0" size="4x90" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="28,90" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,90" size="28x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,90" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x90"/>
+						</widget>
+						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
+							<widget clip="28x90@10,10" size="28x202" type="*widget.menuBox">
+								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
+								<widget clip="28x90@10,10" pos="3,0" size="3x40" type="*widget.scrollBar">
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" pos="0,90" size="28x0" type="*widget.Shadow">
+								<linearGradient clip="28x90@10,10" endColor="shadow" pos="0,-8" size="28x8"/>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 
 	test.Drag(c, fyne.NewPos(20, 20), 0, -50)
-	test.AssertImageMatches(t, "menu/mobile/drag_middle.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas size="100x100">
+			<content>
+				<rectangle size="100x100"/>
+			</content>
+			<overlay>
+				<widget size="100x100" type="*widget.OverlayContainer">
+					<widget pos="10,10" size="28x90" type="*widget.Menu">
+						<widget size="28x90" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="28x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="28,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="28,0" size="4x90" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="28,90" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,90" size="28x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,90" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x90"/>
+						</widget>
+						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
+							<widget clip="28x90@10,10" pos="0,-50" size="28x202" type="*widget.menuBox">
+								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
+								<widget clip="28x90@10,10" pos="3,22" size="3x40" type="*widget.scrollBar">
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" size="28x0" type="*widget.Shadow">
+								<linearGradient clip="28x90@10,10" size="28x8" startColor="shadow"/>
+							</widget>
+							<widget clip="28x90@10,10" pos="0,90" size="28x0" type="*widget.Shadow">
+								<linearGradient clip="28x90@10,10" endColor="shadow" pos="0,-8" size="28x8"/>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 
 	test.Drag(c, fyne.NewPos(20, 20), 0, -maxDragDistance)
-	test.AssertImageMatches(t, "menu/mobile/drag_bottom.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas size="100x100">
+			<content>
+				<rectangle size="100x100"/>
+			</content>
+			<overlay>
+				<widget size="100x100" type="*widget.OverlayContainer">
+					<widget pos="10,10" size="28x90" type="*widget.Menu">
+						<widget size="28x90" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="28x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="28,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="28,0" size="4x90" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="28,90" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,90" size="28x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,90" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x90"/>
+						</widget>
+						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
+							<widget clip="28x90@10,10" pos="0,-112" size="28x202" type="*widget.menuBox">
+								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
+								<widget clip="28x90@10,10" pos="3,50" size="3x40" type="*widget.scrollBar">
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" size="28x0" type="*widget.Shadow">
+								<linearGradient clip="28x90@10,10" size="28x8" startColor="shadow"/>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 
 	test.Drag(c, fyne.NewPos(20, 20), 0, maxDragDistance-50)
-	test.AssertImageMatches(t, "menu/mobile/drag_middle.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas size="100x100">
+			<content>
+				<rectangle size="100x100"/>
+			</content>
+			<overlay>
+				<widget size="100x100" type="*widget.OverlayContainer">
+					<widget pos="10,10" size="28x90" type="*widget.Menu">
+						<widget size="28x90" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="28x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="28,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="28,0" size="4x90" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="28,90" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,90" size="28x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,90" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x90"/>
+						</widget>
+						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
+							<widget clip="28x90@10,10" pos="0,-50" size="28x202" type="*widget.menuBox">
+								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
+								<widget clip="28x90@10,10" pos="3,22" size="3x40" type="*widget.scrollBar">
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" size="28x0" type="*widget.Shadow">
+								<linearGradient clip="28x90@10,10" size="28x8" startColor="shadow"/>
+							</widget>
+							<widget clip="28x90@10,10" pos="0,90" size="28x0" type="*widget.Shadow">
+								<linearGradient clip="28x90@10,10" endColor="shadow" pos="0,-8" size="28x8"/>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 
 	test.Drag(c, fyne.NewPos(20, 20), 0, 50)
-	test.AssertImageMatches(t, "menu/mobile/drag_top.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas size="100x100">
+			<content>
+				<rectangle size="100x100"/>
+			</content>
+			<overlay>
+				<widget size="100x100" type="*widget.OverlayContainer">
+					<widget pos="10,10" size="28x90" type="*widget.Menu">
+						<widget size="28x90" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="28x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="28,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="28,0" size="4x90" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="28,90" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,90" size="28x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,90" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x90"/>
+						</widget>
+						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
+							<widget clip="28x90@10,10" size="28x202" type="*widget.menuBox">
+								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+								</widget>
+								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
+								<widget clip="28x90@10,10" pos="3,0" size="3x40" type="*widget.scrollBar">
+								</widget>
+							</widget>
+							<widget clip="28x90@10,10" pos="0,90" size="28x0" type="*widget.Shadow">
+								<linearGradient clip="28x90@10,10" endColor="shadow" pos="0,-8" size="28x8"/>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 }
