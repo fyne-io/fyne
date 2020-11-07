@@ -13,6 +13,9 @@ type floatToString struct {
 	from Float
 }
 
+// FloatToString creates a binding that connects a Float data item to a String.
+// Changes to the float will be pushed to the string and setting the string will parse the string and set the float
+// if the parse was successful.
 func FloatToString(f Float) String {
 	str := &floatToString{from: f}
 	f.AddListener(str)
