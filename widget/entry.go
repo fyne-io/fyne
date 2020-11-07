@@ -7,6 +7,7 @@ import (
 	"unicode"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/driver/mobile"
@@ -75,6 +76,22 @@ func NewEntry() *Entry {
 	e := &Entry{}
 	e.ExtendBaseWidget(e)
 	return e
+}
+
+// NewEntryWithData returns an Entry widget connected to the specified data source.
+func NewEntryWithData(data binding.String) *Entry {
+	entry := NewEntry()
+	entry.Text = data.Get()
+
+	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
+		entry.Text = data.Get()
+		entry.Refresh()
+	}))
+	entry.OnChanged = func(s string) {
+		data.Set(s)
+	}
+
+	return entry
 }
 
 // NewMultiLineEntry creates a new entry that allows multiple lines

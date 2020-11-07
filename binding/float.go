@@ -36,6 +36,9 @@ func (f *floatBind) Get() float64 {
 }
 
 func (f *floatBind) Set(val float64) {
+	if *f.val == val {
+		return
+	}
 	*f.val = val
 
 	f.trigger(f)
