@@ -12,7 +12,7 @@ import (
 func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 	data := binding.NewFloat()
 	label := widget.NewLabel(floatLabel(data))
-	data.AddListener(binding.NewNotifyFunction(func(binding.DataItem) {
+	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
 		label.SetText(floatLabel(data))
 	}))
 

@@ -52,12 +52,12 @@ func NewSliderWithData(min, max float64, data binding.Float) *Slider {
 	slider := NewSlider(min, max)
 	slider.Value = data.Get()
 
-	data.AddListener(binding.NewNotifyFunction(func(binding.DataItem) {
+	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
 		slider.Value = data.Get()
 		slider.Refresh()
 	}))
 	slider.OnChanged = func(f float64) {
-		data.(binding.Float).Set(f)
+		data.Set(f)
 	}
 
 	return slider

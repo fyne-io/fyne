@@ -130,7 +130,7 @@ func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p := NewProgressBar()
 	p.Value = data.Get()
 
-	data.AddListener(binding.NewNotifyFunction(func(d binding.DataItem) {
+	data.AddListener(binding.NewDataItemListener(func(d binding.DataItem) {
 		p.Value = d.(binding.Float).Get()
 		p.Refresh()
 	}))

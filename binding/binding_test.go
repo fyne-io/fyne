@@ -15,7 +15,7 @@ func TestBase_AddListener(t *testing.T) {
 	assert.Equal(t, 0, len(data.listeners))
 
 	called := false
-	fn := NewNotifyFunction(func(DataItem) {
+	fn := NewDataItemListener(func(DataItem) {
 		called = true
 	})
 	data.AddListener(fn)
@@ -27,7 +27,7 @@ func TestBase_AddListener(t *testing.T) {
 
 func TestBase_RemoveListener(t *testing.T) {
 	called := false
-	fn := NewNotifyFunction(func(DataItem) {
+	fn := NewDataItemListener(func(DataItem) {
 		called = true
 	})
 	data := &simpleItem{}
@@ -43,7 +43,7 @@ func TestBase_RemoveListener(t *testing.T) {
 
 func TestNewNotifyFunction(t *testing.T) {
 	called := false
-	fn := NewNotifyFunction(func(DataItem) {
+	fn := NewDataItemListener(func(DataItem) {
 		called = true
 	})
 

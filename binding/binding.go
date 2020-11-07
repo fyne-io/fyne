@@ -46,8 +46,8 @@ type listener struct {
 	callback func(DataItem)
 }
 
-// NewNotifyFunction is a helper function that creates a new listener type from a simple callback function.
-func NewNotifyFunction(fn func(DataItem)) DataItemListener {
+// NewDataItemListener is a helper function that creates a new listener type from a simple callback function.
+func NewDataItemListener(fn func(DataItem)) DataItemListener {
 	return &listener{fn}
 }
 
