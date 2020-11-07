@@ -25,29 +25,118 @@ func TestSelectEntry_Disableable(t *testing.T) {
 	e.Move(fyne.NewPos(10, 10))
 	c := w.Canvas()
 
+	enabled := `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+		</canvas>
+	`
+	enabledOpened := `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+			<overlay>
+				<widget size="150x200" type="*widget.OverlayContainer">
+					<widget pos="14,47" size="122x103" type="*widget.Menu">
+						<widget size="122x103" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="122x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="122,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="122,0" size="4x103" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="122,103" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,103" size="122x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+						</widget>
+						<widget clip="122x103@14,47" size="122x103" type="*widget.ScrollContainer">
+							<widget clip="122x103@14,47" size="122x103" type="*widget.menuBox">
+								<container clip="122x103@14,47" pos="0,4" size="122x111">
+									<widget clip="122x103@14,47" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,33" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,66" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">C</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`
+	disabled := `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="disabled text" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="disabled text" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="disabled text" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle fillColor="disabled button" pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="disabled"/>
+					</widget>
+				</widget>
+			</content>
+		</canvas>
+	`
+
 	assert.False(t, e.Disabled())
-	test.AssertImageMatches(t, "select_entry/disableable_enabled.png", c.Capture())
+	test.AssertRendersToMarkup(t, enabled, c)
 
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/disableable_enabled_opened.png", c.Capture())
+	test.AssertRendersToMarkup(t, enabledOpened, c)
 
 	test.TapCanvas(c, fyne.NewPos(0, 0))
-	test.AssertImageMatches(t, "select_entry/disableable_enabled.png", c.Capture())
+	test.AssertRendersToMarkup(t, enabled, c)
 
 	e.Disable()
 	assert.True(t, e.Disabled())
-	test.AssertImageMatches(t, "select_entry/disableable_disabled.png", c.Capture())
+	test.AssertRendersToMarkup(t, disabled, c)
 
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/disableable_disabled.png", c.Capture(), "no drop-down when disabled")
+	test.AssertRendersToMarkup(t, disabled, c, "no drop-down when disabled")
 
 	e.Enable()
 	assert.False(t, e.Disabled())
-	test.AssertImageMatches(t, "select_entry/disableable_enabled.png", c.Capture())
+	test.AssertRendersToMarkup(t, enabled, c)
 
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/disableable_enabled_opened.png", c.Capture())
+	test.AssertRendersToMarkup(t, enabledOpened, c)
 }
 
 func TestSelectEntry_DropDown(t *testing.T) {
@@ -64,22 +153,165 @@ func TestSelectEntry_DropDown(t *testing.T) {
 	e.Move(fyne.NewPos(10, 10))
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "select_entry/dropdown_initial.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+		</canvas>
+	`, c)
 	assert.Nil(t, c.Overlays().Top())
 
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+			<overlay>
+				<widget size="150x200" type="*widget.OverlayContainer">
+					<widget pos="14,47" size="122x103" type="*widget.Menu">
+						<widget size="122x103" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="122x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="122,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="122,0" size="4x103" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="122,103" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,103" size="122x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+						</widget>
+						<widget clip="122x103@14,47" size="122x103" type="*widget.ScrollContainer">
+							<widget clip="122x103@14,47" size="122x103" type="*widget.menuBox">
+								<container clip="122x103@14,47" pos="0,4" size="122x111">
+									<widget clip="122x103@14,47" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,33" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,66" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">C</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, c)
 
 	test.TapCanvas(c, fyne.NewPos(50, 15+2*(theme.Padding()+e.Size().Height)))
-	test.AssertImageMatches(t, "select_entry/dropdown_tapped_B.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21">B</text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+		</canvas>
+	`, c)
 	assert.Equal(t, "B", e.Text)
 
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/dropdown_B_opened.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21">B</text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+			<overlay>
+				<widget size="150x200" type="*widget.OverlayContainer">
+					<widget pos="14,47" size="122x103" type="*widget.Menu">
+						<widget size="122x103" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="122x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="122,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="122,0" size="4x103" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="122,103" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,103" size="122x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+						</widget>
+						<widget clip="122x103@14,47" size="122x103" type="*widget.ScrollContainer">
+							<widget clip="122x103@14,47" size="122x103" type="*widget.menuBox">
+								<container clip="122x103@14,47" pos="0,4" size="122x111">
+									<widget clip="122x103@14,47" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,33" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,66" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">C</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, c)
 
 	test.TapCanvas(c, fyne.NewPos(50, 15+3*(theme.Padding()+e.Size().Height)))
-	test.AssertImageMatches(t, "select_entry/dropdown_tapped_C.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21">C</text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+		</canvas>
+	`, c)
 	assert.Equal(t, "C", e.Text)
 }
 
@@ -97,18 +329,135 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 	e.Move(fyne.NewPos(10, 10))
 	c := w.Canvas()
 
-	test.AssertImageMatches(t, "select_entry/dropdown_initial.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+		</canvas>
+	`, c)
 	assert.Nil(t, c.Overlays().Top())
 
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened.png", c.Capture())
+	opened := `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+			<overlay>
+				<widget size="150x200" type="*widget.OverlayContainer">
+					<widget pos="14,47" size="122x103" type="*widget.Menu">
+						<widget size="122x103" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="122x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="122,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="122,0" size="4x103" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="122,103" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,103" size="122x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+						</widget>
+						<widget clip="122x103@14,47" size="122x103" type="*widget.ScrollContainer">
+							<widget clip="122x103@14,47" size="122x103" type="*widget.menuBox">
+								<container clip="122x103@14,47" pos="0,4" size="122x111">
+									<widget clip="122x103@14,47" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,33" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,66" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">C</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`
+	test.AssertRendersToMarkup(t, opened, c)
 
 	e.Resize(e.Size().Subtract(fyne.NewSize(20, 0)))
-	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened_shrunk.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="110x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="110x4"/>
+					<widget pos="4,4" size="122x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="114x21"></text>
+					</widget>
+					<widget pos="4,4" size="122x29" type="*widget.textProvider">
+						<text pos="4,4" size="114x21"></text>
+					</widget>
+					<widget pos="82,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+			<overlay>
+				<widget size="150x200" type="*widget.OverlayContainer">
+					<widget pos="14,47" size="102x103" type="*widget.Menu">
+						<widget size="102x103" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="102x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="102,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="102,0" size="4x103" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="102,103" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,103" size="102x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+						</widget>
+						<widget clip="102x103@14,47" size="102x103" type="*widget.ScrollContainer">
+							<widget clip="102x103@14,47" size="102x103" type="*widget.menuBox">
+								<container clip="102x103@14,47" pos="0,4" size="102x111">
+									<widget clip="102x103@14,47" size="102x29" type="*widget.menuItem">
+										<text clip="102x103@14,47" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="102x103@14,47" pos="0,33" size="102x29" type="*widget.menuItem">
+										<text clip="102x103@14,47" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="102x103@14,47" pos="0,66" size="102x29" type="*widget.menuItem">
+										<text clip="102x103@14,47" pos="8,4" size="10x21">C</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, c)
 
 	e.Resize(e.Size().Add(fyne.NewSize(20, 0)))
-	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened.png", c.Capture())
+	test.AssertRendersToMarkup(t, opened, c)
 }
 
 func TestSelectEntry_MinSize(t *testing.T) {
@@ -190,12 +539,110 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/dropdown_empty_opened.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+			<overlay>
+				<widget size="150x200" type="*widget.OverlayContainer">
+					<widget pos="14,47" size="122x103" type="*widget.Menu">
+						<widget size="122x103" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="122x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="122,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="122,0" size="4x103" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="122,103" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,103" size="122x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+						</widget>
+						<widget clip="122x103@14,47" size="122x103" type="*widget.ScrollContainer">
+							<widget clip="122x103@14,47" size="122x103" type="*widget.menuBox">
+								<container clip="122x103@14,47" pos="0,4" size="122x111">
+									<widget clip="122x103@14,47" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,33" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,66" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="10x21">C</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, c)
 	test.TapCanvas(c, switchPos)
 
 	e.SetOptions([]string{"1", "2", "3"})
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/dropdown_empty_setopts.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+			<overlay>
+				<widget size="150x200" type="*widget.OverlayContainer">
+					<widget pos="14,47" size="122x103" type="*widget.Menu">
+						<widget size="122x103" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="122x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="122,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="122,0" size="4x103" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="122,103" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,103" size="122x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+						</widget>
+						<widget clip="122x103@14,47" size="122x103" type="*widget.ScrollContainer">
+							<widget clip="122x103@14,47" size="122x103" type="*widget.menuBox">
+								<container clip="122x103@14,47" pos="0,4" size="122x111">
+									<widget clip="122x103@14,47" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="9x21">1</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,33" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="9x21">2</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,66" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="9x21">3</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, c)
 }
 
 func TestSelectEntry_SetOptions_Empty(t *testing.T) {
@@ -214,12 +661,60 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 	switchPos := fyne.NewPos(140-theme.Padding()-theme.IconInlineSize()/2, 10+theme.Padding()+theme.IconInlineSize()/2)
 	e.SetOptions([]string{"1", "2", "3"})
 	test.TapCanvas(c, switchPos)
-	test.AssertImageMatches(t, "select_entry/dropdown_empty_setopts.png", c.Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="150x200">
+			<content>
+				<widget pos="10,10" size="130x37" type="*widget.SelectEntry">
+					<rectangle fillColor="shadow" pos="0,33" size="130x4"/>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text color="placeholder" pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="4,4" size="142x29" type="*widget.textProvider">
+						<text pos="4,4" size="134x21"></text>
+					</widget>
+					<widget pos="102,8" size="20x20" type="*widget.Button">
+						<rectangle pos="2,2" size="16x16"/>
+						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
+					</widget>
+				</widget>
+			</content>
+			<overlay>
+				<widget size="150x200" type="*widget.OverlayContainer">
+					<widget pos="14,47" size="122x103" type="*widget.Menu">
+						<widget size="122x103" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="122x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="122,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="122,0" size="4x103" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="122,103" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,103" size="122x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,103" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x103"/>
+						</widget>
+						<widget clip="122x103@14,47" size="122x103" type="*widget.ScrollContainer">
+							<widget clip="122x103@14,47" size="122x103" type="*widget.menuBox">
+								<container clip="122x103@14,47" pos="0,4" size="122x111">
+									<widget clip="122x103@14,47" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="9x21">1</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,33" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="9x21">2</text>
+									</widget>
+									<widget clip="122x103@14,47" pos="0,66" size="122x29" type="*widget.menuItem">
+										<text clip="122x103@14,47" pos="8,4" size="9x21">3</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, c)
 }
 
 func dropDownIconWidth() int {
-	dropDownIconWidth := theme.IconInlineSize() + theme.Padding()
-	return dropDownIconWidth
+	return theme.IconInlineSize() + theme.Padding()
 }
 
 func emptyTextWidth() int {
