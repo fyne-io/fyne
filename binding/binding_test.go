@@ -41,7 +41,7 @@ func TestBase_RemoveListener(t *testing.T) {
 	assert.False(t, called)
 }
 
-func TestNewNotifyFunction(t *testing.T) {
+func TestNewDataItemListener(t *testing.T) {
 	called := false
 	fn := NewDataItemListener(func(DataItem) {
 		called = true

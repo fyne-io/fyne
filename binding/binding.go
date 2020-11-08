@@ -7,7 +7,7 @@ type DataItem interface {
 }
 
 // DataItemListener is any object that can register for changes in a bindable DataItem.
-// See NewNotifyFunction to define a new listener using just an inline function.
+// See NewDataItemListener to define a new listener using just an inline function.
 type DataItemListener interface {
 	DataChanged(DataItem)
 }
