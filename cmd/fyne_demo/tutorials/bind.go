@@ -1,8 +1,6 @@
 package tutorials
 
 import (
-	"fmt"
-
 	"fyne.io/fyne"
 	"fyne.io/fyne/binding"
 	"fyne.io/fyne/container"
@@ -11,10 +9,7 @@ import (
 
 func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 	data := binding.NewFloat()
-	label := widget.NewLabel(floatLabel(data))
-	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
-		label.SetText(floatLabel(data))
-	}))
+	label := widget.NewLabelWithData(binding.FloatToString(data))
 
 	slide := widget.NewSliderWithData(0, 1, data)
 	slide.Step = 0.1
@@ -34,9 +29,6 @@ func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 			data.Set(1)
 		}))
 
-	return container.NewVBox(label, slide, bar, buttons)
-}
-
-func floatLabel(data binding.Float) string { // TODO add type conversion
-	return fmt.Sprintf("Float current value: %0.1f", data.Get())
+	return container.NewVBox(container.NewHBox(widget.NewLabel("Float current value:"), label),
+		slide, bar, buttons)
 }
