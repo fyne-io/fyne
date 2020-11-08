@@ -1,15 +1,28 @@
 package binding
 
+// DataItem is the base interface for all bindable data items.
+type DataItem interface {
+	AddListener(DataItemListener)
+	RemoveListener(DataItemListener)
+}
+
 // DataItemListener is any object that can register for changes in a bindable DataItem.
 // See NewNotifyFunction to define a new listener using just an inline function.
 type DataItemListener interface {
 	DataChanged(DataItem)
 }
 
-// DataItem is the base interface for all bindable data items.
-type DataItem interface {
-	AddListener(DataItemListener)
-	RemoveListener(DataItemListener)
+// NewDataItemListener is a helper function that creates a new listener type from a simple callback function.
+func NewDataItemListener(fn func(DataItem)) DataItemListener {
+	return &listener{fn}
+}
+
+type listener struct {
+	callback func(DataItem)
+}
+
+func (l *listener) DataChanged(i DataItem) {
+	l.callback(i)
 }
 
 type base struct {
@@ -40,17 +53,4 @@ func (b *base) trigger(i DataItem) {
 	for _, listen := range b.listeners {
 		listen.DataChanged(i)
 	}
-}
-
-type listener struct {
-	callback func(DataItem)
-}
-
-// NewDataItemListener is a helper function that creates a new listener type from a simple callback function.
-func NewDataItemListener(fn func(DataItem)) DataItemListener {
-	return &listener{fn}
-}
-
-func (l *listener) DataChanged(i DataItem) {
-	l.callback(i)
 }
