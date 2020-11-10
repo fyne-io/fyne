@@ -61,8 +61,69 @@ func (b *bind{{ .Name }}) Set(val {{ .Type }}) {
 }
 `
 
+const toStringTemplate = `
+type stringFrom{{ .Name }} struct {
+	base
+
+	from {{ .Name }}
+}
+
+// {{ .Name }}ToString creates a binding that connects a {{ .Name }} data item to a String.
+// Changes to the {{ .Name }} will be pushed to the String and setting the string will parse and set the
+// {{ .Name }} if the parse was successful.
+func {{ .Name }}ToString(v {{ .Name }}) String {
+	str := &stringFrom{{ .Name }}{from: v}
+	v.AddListener(str)
+	return str
+}
+
+func (s *stringFrom{{ .Name }}) Get() string {
+	val := s.from.Get()
+
+	return fmt.Sprintf("{{ .Format }}", val)
+}
+
+func (s *stringFrom{{ .Name }}) Set(str string) {
+	var val {{ .Type }}
+	n, err := fmt.Sscanf(str, "{{ .Format }}", &val)
+	if err != nil || n != 1 {
+		fyne.LogError("{{ .Type }} parse error", err)
+		return
+	}
+	if val == s.from.Get() {
+		return
+	}
+	s.from.Set(val)
+
+	s.trigger(s)
+}
+
+func (s *stringFrom{{ .Name }}) DataChanged(_ DataItem) {
+	s.trigger(s)
+}
+`
+
 type bindValues struct {
 	Name, Type, Default string
+	Format              string
+}
+
+func newFile(name string) (*os.File, error) {
+	_, dirname, _, _ := runtime.Caller(0)
+	filepath := path.Join(path.Dir(dirname), name+".go")
+	os.Remove(filepath)
+	f, err := os.Create(filepath)
+	if err != nil {
+		fyne.LogError("Unable to open file "+f.Name(), err)
+		return nil, err
+	}
+
+	f.WriteString(`// auto-generated
+// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
+
+package binding
+`)
+	return f, nil
 }
 
 func writeFile(f *os.File, t *template.Template, d interface{}) {
@@ -72,30 +133,37 @@ func writeFile(f *os.File, t *template.Template, d interface{}) {
 }
 
 func main() {
-	_, dirname, _, _ := runtime.Caller(0)
-	filepath := path.Join(path.Dir(dirname), "binditems.go")
-	os.Remove(filepath)
-	f, err := os.Create(filepath)
+	itemFile, err := newFile("binditems")
 	if err != nil {
-		fyne.LogError("Unable to open file "+f.Name(), err)
 		return
 	}
-	defer f.Close()
+	defer itemFile.Close()
+	toStringFile, err := newFile("tostring")
+	if err != nil {
+		return
+	}
+	defer itemFile.Close()
+	toStringFile.WriteString(`
+import (
+	"fmt"
 
-	f.WriteString(`// auto-generated
-// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
-
-package binding
+	"fyne.io/fyne"
+)
 `)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
+	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	for _, b := range []bindValues{
-		bindValues{Name: "Bool", Type: "bool", Default: "false"},
-		bindValues{Name: "Float", Type: "float64", Default: "0.0"},
-		bindValues{Name: "Int", Type: "int", Default: "0"},
+		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t"},
+		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f"},
+		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d"},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\""},
 	} {
-		writeFile(f, item, b)
+		writeFile(itemFile, item, b)
+		if b.Type == "string" || b.Type == "rune" {
+			continue
+		}
+		writeFile(toStringFile, toString, b)
 	}
 }
