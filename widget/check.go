@@ -2,6 +2,7 @@ package widget
 
 import (
 	"fyne.io/fyne"
+	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
@@ -198,6 +199,21 @@ func NewCheck(label string, changed func(bool)) *Check {
 
 	c.ExtendBaseWidget(c)
 	return c
+}
+
+// NewCheckWithData returns a check widget connected with the specified data source.
+func NewCheckWithData(label string, data binding.Bool) *Check {
+	check := NewCheck(label, func(b bool) {
+		data.Set(b)
+	})
+	check.Checked = data.Get()
+
+	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
+		check.Checked = data.Get()
+		check.Refresh()
+	}))
+
+	return check
 }
 
 // FocusGained is called when the Check has been given focus.
