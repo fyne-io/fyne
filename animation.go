@@ -2,10 +2,21 @@ package fyne
 
 import "time"
 
+// AnimationCurve represents the different animation algorithms for animation timeline.
+type AnimationCurve int
+
+const (
+	// AnimationEaseInOut is the default easing, it starts slowly, accelerates to the middle and slows to the end.
+	AnimationEaseInOut AnimationCurve = iota
+	// AnimationLinear is a linear mapping for animations that progress uniformly through their duration.
+	AnimationLinear
+)
+
 // Animation represents an animated element within a Fyne canvas.
 // These animations may control individual objects or entire scenes.
 type Animation struct {
 	Duration time.Duration
+	Curve    AnimationCurve
 	Repeat   bool
 	Tick     func(float32)
 }

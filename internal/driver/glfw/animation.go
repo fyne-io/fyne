@@ -54,7 +54,24 @@ func (d *gLDriver) tickAnimation(a *anim) bool {
 	delta := time.Since(a.start).Nanoseconds() / 1000000
 
 	val := float32(delta) / float32(total)
-	a.a.Tick(val)
+	a.a.Tick(animationCurve(val, a.a.Curve))
 
 	return true
+}
+
+func animationCurve(val float32, curve fyne.AnimationCurve) float32 {
+	switch curve {
+	case fyne.AnimationLinear:
+		return val
+	default: // EaseInOut is default
+		return animationEaseInOut(val)
+	}
+}
+
+func animationEaseInOut(val float32) float32 {
+	if val <= 0.5 {
+		return val * val * 2
+	}
+
+	return -1 + (4-val*2)*val
 }
