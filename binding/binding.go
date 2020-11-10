@@ -1,3 +1,5 @@
+//go:generate go run gen.go
+
 package binding
 
 // DataItem is the base interface for all bindable data items.

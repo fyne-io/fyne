@@ -1,0 +1,244 @@
+// auto-generated
+// **** THIS FILE IS AUTO-GENERATED, PLEASE DO NOT EDIT IT **** //
+
+package binding
+
+// Bool supports binding a bool value in a Fyne application
+type Bool interface {
+	DataItem
+	Get() bool
+	Set(bool)
+}
+
+// NewBool returns a bindable bool value that is managed internally.
+func NewBool() Bool {
+	blank := false
+	return &bindBool{val: &blank}
+}
+
+// BindBool returns a new bindable value that controls the contents of the provided bool variable.
+func BindBool(v *bool) Bool {
+	if v == nil {
+		return NewBool() // never allow a nil value pointer
+	}
+
+	return &bindBool{val: v}
+}
+
+type bindBool struct {
+	base
+
+	val *bool
+}
+
+func (b *bindBool) Get() bool {
+	if b.val == nil {
+		return false
+	}
+	return *b.val
+}
+
+func (b *bindBool) Set(val bool) {
+	if *b.val == val {
+		return
+	}
+	if b.val == nil { // was not initialized with a blank value, recover
+		b.val = &val
+	} else {
+		*b.val = val
+	}
+
+	b.trigger(b)
+}
+
+// Float supports binding a float64 value in a Fyne application
+type Float interface {
+	DataItem
+	Get() float64
+	Set(float64)
+}
+
+// NewFloat returns a bindable float64 value that is managed internally.
+func NewFloat() Float {
+	blank := 0.0
+	return &bindFloat{val: &blank}
+}
+
+// BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
+func BindFloat(v *float64) Float {
+	if v == nil {
+		return NewFloat() // never allow a nil value pointer
+	}
+
+	return &bindFloat{val: v}
+}
+
+type bindFloat struct {
+	base
+
+	val *float64
+}
+
+func (b *bindFloat) Get() float64 {
+	if b.val == nil {
+		return 0.0
+	}
+	return *b.val
+}
+
+func (b *bindFloat) Set(val float64) {
+	if *b.val == val {
+		return
+	}
+	if b.val == nil { // was not initialized with a blank value, recover
+		b.val = &val
+	} else {
+		*b.val = val
+	}
+
+	b.trigger(b)
+}
+
+// Int supports binding a int value in a Fyne application
+type Int interface {
+	DataItem
+	Get() int
+	Set(int)
+}
+
+// NewInt returns a bindable int value that is managed internally.
+func NewInt() Int {
+	blank := 0
+	return &bindInt{val: &blank}
+}
+
+// BindInt returns a new bindable value that controls the contents of the provided int variable.
+func BindInt(v *int) Int {
+	if v == nil {
+		return NewInt() // never allow a nil value pointer
+	}
+
+	return &bindInt{val: v}
+}
+
+type bindInt struct {
+	base
+
+	val *int
+}
+
+func (b *bindInt) Get() int {
+	if b.val == nil {
+		return 0
+	}
+	return *b.val
+}
+
+func (b *bindInt) Set(val int) {
+	if *b.val == val {
+		return
+	}
+	if b.val == nil { // was not initialized with a blank value, recover
+		b.val = &val
+	} else {
+		*b.val = val
+	}
+
+	b.trigger(b)
+}
+
+// Rune supports binding a rune value in a Fyne application
+type Rune interface {
+	DataItem
+	Get() rune
+	Set(rune)
+}
+
+// NewRune returns a bindable rune value that is managed internally.
+func NewRune() Rune {
+	blank := rune(0)
+	return &bindRune{val: &blank}
+}
+
+// BindRune returns a new bindable value that controls the contents of the provided rune variable.
+func BindRune(v *rune) Rune {
+	if v == nil {
+		return NewRune() // never allow a nil value pointer
+	}
+
+	return &bindRune{val: v}
+}
+
+type bindRune struct {
+	base
+
+	val *rune
+}
+
+func (b *bindRune) Get() rune {
+	if b.val == nil {
+		return rune(0)
+	}
+	return *b.val
+}
+
+func (b *bindRune) Set(val rune) {
+	if *b.val == val {
+		return
+	}
+	if b.val == nil { // was not initialized with a blank value, recover
+		b.val = &val
+	} else {
+		*b.val = val
+	}
+
+	b.trigger(b)
+}
+
+// String supports binding a string value in a Fyne application
+type String interface {
+	DataItem
+	Get() string
+	Set(string)
+}
+
+// NewString returns a bindable string value that is managed internally.
+func NewString() String {
+	blank := ""
+	return &bindString{val: &blank}
+}
+
+// BindString returns a new bindable value that controls the contents of the provided string variable.
+func BindString(v *string) String {
+	if v == nil {
+		return NewString() // never allow a nil value pointer
+	}
+
+	return &bindString{val: v}
+}
+
+type bindString struct {
+	base
+
+	val *string
+}
+
+func (b *bindString) Get() string {
+	if b.val == nil {
+		return ""
+	}
+	return *b.val
+}
+
+func (b *bindString) Set(val string) {
+	if *b.val == val {
+		return
+	}
+	if b.val == nil { // was not initialized with a blank value, recover
+		b.val = &val
+	} else {
+		*b.val = val
+	}
+
+	b.trigger(b)
+}
