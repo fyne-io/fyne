@@ -43,7 +43,7 @@ func TestNewPositionAnimation(t *testing.T) {
 	assert.Equal(t, stop, current)
 }
 
-func TestNewPSizeAnimation(t *testing.T) {
+func TestNewSizeAnimation(t *testing.T) {
 	start := fyne.NewSize(110, 10)
 	stop := fyne.NewSize(10, 110)
 
