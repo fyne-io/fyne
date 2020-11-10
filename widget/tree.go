@@ -514,8 +514,6 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 }
 
 func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
-	r.treeContent.propertyLock.RLock()
-	defer r.treeContent.propertyLock.RUnlock()
 	return r.objects
 }
 
