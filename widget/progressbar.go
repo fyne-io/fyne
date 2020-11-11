@@ -5,8 +5,8 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/binding"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )

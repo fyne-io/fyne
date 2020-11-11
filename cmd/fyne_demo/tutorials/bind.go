@@ -2,7 +2,7 @@ package tutorials
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/binding"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/widget"
 )
