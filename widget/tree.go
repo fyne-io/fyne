@@ -367,6 +367,7 @@ type treeContentRenderer struct {
 	widget.BaseRenderer
 	treeContent *treeContent
 	dividers    []fyne.CanvasObject
+	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
 	branchPool  pool
@@ -377,6 +378,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
 
+	r.objects = nil
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
 
@@ -409,6 +411,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 			s := fyne.NewSize(width-2*theme.Padding(), separatorThickness)
 			divider.Resize(s)
 			divider.Show()
+			r.objects = append(r.objects, divider)
 			y += separatorThickness
 			numDividers++
 		}
@@ -435,6 +438,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				}
 				branches[uid] = b
 				n = b.treeNode
+				r.objects = append(r.objects, b)
 			} else {
 				l, ok := r.leaves[uid]
 				if !ok {
@@ -446,6 +450,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				}
 				leaves[uid] = l
 				n = l.treeNode
+				r.objects = append(r.objects, l)
 			}
 			if n != nil {
 				n.Move(fyne.NewPos(0, y))
@@ -508,17 +513,8 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 	return
 }
 
-func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
-	r.treeContent.propertyLock.RLock()
-	objects = r.dividers
-	for _, b := range r.branches {
-		objects = append(objects, b)
-	}
-	for _, l := range r.leaves {
-		objects = append(objects, l)
-	}
-	r.treeContent.propertyLock.RUnlock()
-	return
+func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
 }
 
 func (r *treeContentRenderer) Refresh() {
