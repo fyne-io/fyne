@@ -15,6 +15,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Possible crash when minimising app containing List on Windows
 * File chooser dialog ignores drive Z (#1513)
 * Entry copy/paste is crashing on android 7.1 (#1511)
+* Fyne package creating invalid windows packages (#1521)
 
 
 ## 1.4 - 1 November 2020
