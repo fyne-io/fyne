@@ -29,7 +29,7 @@ script:
       # check that go mod tidy does not change go.mod/go.sum
       go mod tidy && git diff-index --quiet HEAD -- || ( echo "go.mod/go.sum not up-to-date"; git diff-index HEAD --; false )
     fi
-  - go test -tags ci ./...
+  - go test -tags "ci $TAGS" ./...
 
 after_success:
   - |
@@ -53,25 +53,25 @@ matrix:
   include:
     - go: 1.12.x
       os: linux
-      env: GO111MODULE=on GOFLAGS=
+      env: GO111MODULE=on
     - go: 1.14.x
       os: linux
-      env: GO111MODULE=off GOFLAGS=
+      env: GO111MODULE=off
     - go: 1.14.x
       os: osx
-      env: GO111MODULE=off GOFLAGS=
+      env: GO111MODULE=off
     - go: 1.14.x
       os: windows
-      env: GO111MODULE=off GOFLAGS=
+      env: GO111MODULE=off
     - go: 1.15.x
       os: linux
-      env: GO111MODULE=on GOFLAGS=
+      env: GO111MODULE=on
     - go: 1.15.x
       os: osx
       env: GO111MODULE=on GOFLAGS=-mod=vendor
     - go: 1.15.x
       os: windows
-      env: GO111MODULE=off GOFLAGS=
+      env: GO111MODULE=off
     - go: 1.15.x
       os: linux
-      env: GO111MODULE=on GOFLAGS=-tags=mobile
+      env: GO111MODULE=on TAGS=mobile
