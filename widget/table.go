@@ -35,6 +35,7 @@ type Table struct {
 
 	selectedCell, hoveredCell *TableCellID
 	cells                     *tableCells
+	columnWidths              map[int]int
 	moveCallback              func()
 	offset                    fyne.Position
 	scroll                    *ScrollContainer
@@ -99,6 +100,17 @@ func (t *Table) Select(id TableCellID) {
 	}
 }
 
+// SetColumnWidth supports changing the width of the specified column. Columns normally take the width of the template
+// cell returned from the CreateCell callback. The width parameter uses the same units as a fyne.Size type and refers
+// to the internal content width not including any standard padding or divider size.
+func (t *Table) SetColumnWidth(id, width int) {
+	if t.columnWidths == nil {
+		t.columnWidths = make(map[int]int)
+	}
+	t.columnWidths[id] = width + 2*theme.Padding() // The API uses content size so it's consistent with templates
+	t.Refresh()
+}
+
 // Unselect will mark the cell provided by id as unselected.
 func (t *Table) Unselect(id TableCellID) {
 	if t.selectedCell == nil {
@@ -121,12 +133,26 @@ func (t *Table) scrollTo(id TableCellID) {
 	}
 	scrollPos := t.offset
 
-	cellPadded := t.templateSize().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
-	cellX := id.Col * (cellPadded.Width + tableDividerThickness)
+	minSize := t.templateSize()
+	cellPadded := minSize.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
+	cellX := 0
+	cellWidth := 0
+	for i := 0; i <= id.Col; i++ {
+		if cellWidth > 0 {
+			cellX += cellWidth + tableDividerThickness
+		}
+
+		width := cellPadded.Width
+		if w, ok := t.columnWidths[i]; ok {
+			width = w
+		}
+		cellWidth = width
+	}
+
 	if cellX < scrollPos.X {
 		scrollPos.X = cellX
-	} else if cellX+cellPadded.Width > scrollPos.X+t.scroll.size.Width {
-		scrollPos.X = cellX + cellPadded.Width - t.scroll.size.Width
+	} else if cellX+cellWidth > scrollPos.X+t.scroll.size.Width {
+		scrollPos.X = cellX + cellWidth - t.scroll.size.Width
 	}
 
 	cellY := id.Row * (cellPadded.Height + tableDividerThickness)
@@ -152,6 +178,43 @@ func (t *Table) templateSize() fyne.Size {
 
 	fyne.LogError("Missing CreateCell callback required for Table", nil)
 	return fyne.Size{}
+}
+
+func (t *Table) visibleColumnWidths(colWidth, cols int) (visible map[int]int, offX, minCol, maxCol int) {
+	maxCol = cols
+	colOffset := 0
+	isVisible := false
+	visible = make(map[int]int)
+
+	if t.scroll.size.Width <= 0 {
+		return
+	}
+
+	for i := 0; i < cols; i++ {
+		width := colWidth
+		if w, ok := t.columnWidths[i]; ok {
+			width = w
+		}
+
+		if colOffset <= t.offset.X-width-tableDividerThickness {
+			// before scroll
+		} else if colOffset <= t.offset.X {
+			minCol = i
+			offX = colOffset
+			isVisible = true
+		}
+		if colOffset < t.offset.X+t.scroll.size.Width {
+			maxCol = i + 1
+		} else {
+			break
+		}
+
+		colOffset += width + tableDividerThickness
+		if isVisible {
+			visible[i] = width
+		}
+	}
+	return
 }
 
 // Declare conformity with WidgetRenderer interface.
@@ -197,13 +260,22 @@ func (t *tableRenderer) Refresh() {
 	t.t.cells.Refresh()
 }
 
-func (t *tableRenderer) moveColumnMarker(marker fyne.CanvasObject, col int) {
+func (t *tableRenderer) moveColumnMarker(marker fyne.CanvasObject, col, offX, minCol int, widths map[int]int) {
 	if col == -1 {
 		marker.Hide()
 	} else {
-		offX := col*(t.cellSize.Width+tableDividerThickness) - t.scroll.Offset.X
+		xPos := offX
+		for i := minCol; i < col; i++ {
+			if width, ok := widths[i]; ok {
+				xPos += width
+			} else {
+				xPos += t.cellSize.Width
+			}
+			xPos += tableDividerThickness
+		}
+		offX := xPos - t.scroll.Offset.X
 		x1 := theme.Padding() + offX
-		x2 := x1 + t.cellSize.Width
+		x2 := x1 + widths[col]
 		if x2 < theme.Padding() || x1 > t.t.size.Width {
 			marker.Hide()
 		} else {
@@ -218,22 +290,28 @@ func (t *tableRenderer) moveColumnMarker(marker fyne.CanvasObject, col int) {
 }
 
 func (t *tableRenderer) moveIndicators() {
+	rows, cols := 0, 0
+	if f := t.t.Length; f != nil {
+		rows, cols = t.t.Length()
+	}
+	visibleColWidths, offX, minCol, _ := t.t.visibleColumnWidths(t.cellSize.Width, cols)
+
 	if t.t.selectedCell == nil {
-		t.moveColumnMarker(t.colMarker, -1)
+		t.moveColumnMarker(t.colMarker, -1, offX, minCol, visibleColWidths)
 		t.moveRowMarker(t.rowMarker, -1)
 	} else {
-		t.moveColumnMarker(t.colMarker, t.t.selectedCell.Col)
+		t.moveColumnMarker(t.colMarker, t.t.selectedCell.Col, offX, minCol, visibleColWidths)
 		t.moveRowMarker(t.rowMarker, t.t.selectedCell.Row)
 	}
 	if t.t.hoveredCell == nil {
-		t.moveColumnMarker(t.colHover, -1)
+		t.moveColumnMarker(t.colHover, -1, offX, minCol, visibleColWidths)
 		t.moveRowMarker(t.rowHover, -1)
 	} else {
-		t.moveColumnMarker(t.colHover, t.t.hoveredCell.Col)
+		t.moveColumnMarker(t.colHover, t.t.hoveredCell.Col, offX, minCol, visibleColWidths)
 		t.moveRowMarker(t.rowHover, t.t.hoveredCell.Row)
 	}
 
-	colDivs := int(math.Ceil(float64(t.t.size.Width+tableDividerThickness) / float64(t.cellSize.Width+1)))
+	colDivs := len(visibleColWidths) - 1
 	rowDivs := int(math.Ceil(float64(t.t.size.Height+tableDividerThickness) / float64(t.cellSize.Height+1)))
 
 	if len(t.dividers) < colDivs+rowDivs {
@@ -246,18 +324,11 @@ func (t *tableRenderer) moveIndicators() {
 	}
 
 	divs := 0
-	i := 0
-	rows, cols := 0, 0
-	if f := t.t.Length; f != nil {
-		rows, cols = t.t.Length()
-	}
-	for x := theme.Padding() + t.scroll.Offset.X - (t.scroll.Offset.X % (t.cellSize.Width + tableDividerThickness)) - tableDividerThickness; x < t.scroll.Offset.X+t.t.size.Width && i < cols-1; x += t.cellSize.Width + tableDividerThickness {
-		if x <= theme.Padding()+t.scroll.Offset.X {
-			continue
-		}
+	i := minCol
+	for x := offX + visibleColWidths[i]; i < minCol+colDivs; x += visibleColWidths[i] + tableDividerThickness {
 		i++
 
-		t.dividers[divs].Move(fyne.NewPos(x-t.scroll.Offset.X, theme.Padding()))
+		t.dividers[divs].Move(fyne.NewPos(theme.Padding()+x-t.scroll.Offset.X, theme.Padding()))
 		t.dividers[divs].Resize(fyne.NewSize(tableDividerThickness, t.t.size.Height-theme.Padding()))
 		t.dividers[divs].Show()
 		divs++
@@ -265,7 +336,7 @@ func (t *tableRenderer) moveIndicators() {
 
 	i = 0
 	for y := theme.Padding() + t.scroll.Offset.Y - (t.scroll.Offset.Y % (t.cellSize.Height + tableDividerThickness)) - tableDividerThickness; y < t.scroll.Offset.Y+t.t.size.Height && i < rows-1; y += t.cellSize.Height + tableDividerThickness {
-		if y <= theme.Padding()+t.scroll.Offset.Y {
+		if y < theme.Padding()+t.scroll.Offset.Y {
 			continue
 		}
 		i++
@@ -354,9 +425,27 @@ func (c *tableCells) Tapped(e *fyne.PointEvent) {
 		return
 	}
 
-	col := e.Position.X / (c.cellSize.Width + tableDividerThickness)
+	col := c.columnAt(e.Position)
 	row := e.Position.Y / (c.cellSize.Height + tableDividerThickness)
 	c.t.Select(TableCellID{row, col})
+}
+
+func (c *tableCells) columnAt(pos fyne.Position) int {
+	dataCols := 0
+	if f := c.t.Length; f != nil {
+		_, dataCols = c.t.Length()
+	}
+
+	col := -1
+	visibleColWidths, offX, minCol, _ := c.t.visibleColumnWidths(c.cellSize.Width, dataCols)
+	i := minCol
+	for x := offX; i < minCol+len(visibleColWidths); x += visibleColWidths[i-1] + tableDividerThickness {
+		if pos.X >= x && pos.X < x+visibleColWidths[i] {
+			col = i
+		}
+		i++
+	}
+	return col
 }
 
 func (c *tableCells) hoverAt(pos fyne.Position) {
@@ -365,7 +454,7 @@ func (c *tableCells) hoverAt(pos fyne.Position) {
 		return
 	}
 
-	col := pos.X / (c.cellSize.Width + tableDividerThickness)
+	col := c.columnAt(pos)
 	row := pos.Y / (c.cellSize.Height + tableDividerThickness)
 	c.t.hoveredCell = &TableCellID{row, col}
 
@@ -424,16 +513,16 @@ func (r *tableCellsRenderer) Refresh() {
 	if oldSize != r.cells.cellSize { // theme changed probably
 		r.returnAllToPool()
 	}
-	contentSize := r.cells.cellSize.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2))
 
 	dataRows, dataCols := 0, 0
 	if f := r.cells.t.Length; f != nil {
 		dataRows, dataCols = r.cells.t.Length()
 	}
-	rows, cols := r.visibleCount()
-	offX := r.cells.t.offset.X - (r.cells.t.offset.X % (r.cells.cellSize.Width + tableDividerThickness))
-	minCol := offX / (r.cells.cellSize.Width + tableDividerThickness)
-	maxCol := fyne.Min(minCol+cols, dataCols)
+	rows := r.visibleRows()
+	visibleColWidths, offX, minCol, maxCol := r.cells.t.visibleColumnWidths(r.cells.cellSize.Width, dataCols)
+	if len(visibleColWidths) == 0 { // we can't show anything until we have some dimensions
+		return
+	}
 	offY := r.cells.t.offset.Y - (r.cells.t.offset.Y % (r.cells.cellSize.Height + tableDividerThickness))
 	minRow := offY / (r.cells.cellSize.Height + tableDividerThickness)
 	maxRow := fyne.Min(minRow+rows, dataRows)
@@ -447,21 +536,23 @@ func (r *tableCellsRenderer) Refresh() {
 	r.visible = make(map[TableCellID]fyne.CanvasObject)
 	var cells []fyne.CanvasObject
 	for row := minRow; row < maxRow; row++ {
+		cellOffset := offX
 		for col := minCol; col < maxCol; col++ {
 			id := TableCellID{row, col}
+			colWidth := visibleColWidths[col]
 			c, ok := wasVisible[id]
 			if !ok {
 				c = r.pool.Obtain()
 				if f := r.cells.t.CreateCell; f != nil && c == nil {
 					c = f()
-					c.Resize(contentSize)
 				}
 				if c == nil {
 					continue
 				}
 
-				c.Move(fyne.NewPos(theme.Padding()+col*(r.cells.cellSize.Width+tableDividerThickness),
+				c.Move(fyne.NewPos(theme.Padding()+cellOffset,
 					theme.Padding()+row*(r.cells.cellSize.Height+tableDividerThickness)))
+				c.Resize(fyne.NewSize(colWidth-theme.Padding()*2, r.cells.cellSize.Height-theme.Padding()*2))
 			}
 
 			if updateCell != nil {
@@ -469,6 +560,7 @@ func (r *tableCellsRenderer) Refresh() {
 			}
 			r.visible[id] = c
 			cells = append(cells, c)
+			cellOffset += colWidth + tableDividerThickness
 		}
 	}
 
@@ -488,13 +580,12 @@ func (r *tableCellsRenderer) returnAllToPool() {
 	r.SetObjects(nil)
 }
 
-func (r *tableCellsRenderer) visibleCount() (int, int) {
-	cols := math.Ceil(float64(r.cells.t.Size().Width)/float64(r.cells.cellSize.Width+tableDividerThickness) + 1)
+func (r *tableCellsRenderer) visibleRows() int {
 	rows := math.Ceil(float64(r.cells.t.Size().Height)/float64(r.cells.cellSize.Height+tableDividerThickness) + 1)
 
-	dataRows, dataCols := 0, 0
+	dataRows := 0
 	if f := r.cells.t.Length; f != nil {
-		dataRows, dataCols = r.cells.t.Length()
+		dataRows, _ = r.cells.t.Length()
 	}
-	return fyne.Min(int(rows), dataRows), fyne.Min(int(cols), dataCols)
+	return fyne.Min(int(rows), dataRows)
 }
