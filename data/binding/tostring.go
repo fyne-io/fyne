@@ -12,6 +12,7 @@ import (
 type stringFromBool struct {
 	base
 
+	format string
 	from Bool
 }
 
@@ -19,7 +20,14 @@ type stringFromBool struct {
 // Changes to the Bool will be pushed to the String and setting the string will parse and set the
 // Bool if the parse was successful.
 func BoolToString(v Bool) String {
-	str := &stringFromBool{from: v}
+	return BoolToStringWithFormat(v, "%t")
+}
+
+// BoolToStringWithFormat creates a binding that connects a Bool data item to a String and is
+// presented using the specified format. Changes to the Bool will be pushed to the String and setting
+// the string will parse and set the Bool if the string matches the format and its parse was successful.
+func BoolToStringWithFormat(v Bool, format string) String {
+	str := &stringFromBool{from: v, format: format}
 	v.AddListener(str)
 	return str
 }
@@ -27,12 +35,12 @@ func BoolToString(v Bool) String {
 func (s *stringFromBool) Get() string {
 	val := s.from.Get()
 
-	return fmt.Sprintf("%t", val)
+	return fmt.Sprintf(s.format, val)
 }
 
 func (s *stringFromBool) Set(str string) {
 	var val bool
-	n, err := fmt.Sscanf(str, "%t", &val)
+	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("bool parse error", err)
 		return
@@ -52,6 +60,7 @@ func (s *stringFromBool) DataChanged(_ DataItem) {
 type stringFromFloat struct {
 	base
 
+	format string
 	from Float
 }
 
@@ -59,7 +68,14 @@ type stringFromFloat struct {
 // Changes to the Float will be pushed to the String and setting the string will parse and set the
 // Float if the parse was successful.
 func FloatToString(v Float) String {
-	str := &stringFromFloat{from: v}
+	return FloatToStringWithFormat(v, "%f")
+}
+
+// FloatToStringWithFormat creates a binding that connects a Float data item to a String and is
+// presented using the specified format. Changes to the Float will be pushed to the String and setting
+// the string will parse and set the Float if the string matches the format and its parse was successful.
+func FloatToStringWithFormat(v Float, format string) String {
+	str := &stringFromFloat{from: v, format: format}
 	v.AddListener(str)
 	return str
 }
@@ -67,12 +83,12 @@ func FloatToString(v Float) String {
 func (s *stringFromFloat) Get() string {
 	val := s.from.Get()
 
-	return fmt.Sprintf("%f", val)
+	return fmt.Sprintf(s.format, val)
 }
 
 func (s *stringFromFloat) Set(str string) {
 	var val float64
-	n, err := fmt.Sscanf(str, "%f", &val)
+	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("float64 parse error", err)
 		return
@@ -92,6 +108,7 @@ func (s *stringFromFloat) DataChanged(_ DataItem) {
 type stringFromInt struct {
 	base
 
+	format string
 	from Int
 }
 
@@ -99,7 +116,14 @@ type stringFromInt struct {
 // Changes to the Int will be pushed to the String and setting the string will parse and set the
 // Int if the parse was successful.
 func IntToString(v Int) String {
-	str := &stringFromInt{from: v}
+	return IntToStringWithFormat(v, "%d")
+}
+
+// IntToStringWithFormat creates a binding that connects a Int data item to a String and is
+// presented using the specified format. Changes to the Int will be pushed to the String and setting
+// the string will parse and set the Int if the string matches the format and its parse was successful.
+func IntToStringWithFormat(v Int, format string) String {
+	str := &stringFromInt{from: v, format: format}
 	v.AddListener(str)
 	return str
 }
@@ -107,12 +131,12 @@ func IntToString(v Int) String {
 func (s *stringFromInt) Get() string {
 	val := s.from.Get()
 
-	return fmt.Sprintf("%d", val)
+	return fmt.Sprintf(s.format, val)
 }
 
 func (s *stringFromInt) Set(str string) {
 	var val int
-	n, err := fmt.Sscanf(str, "%d", &val)
+	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("int parse error", err)
 		return

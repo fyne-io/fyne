@@ -65,6 +65,7 @@ const toStringTemplate = `
 type stringFrom{{ .Name }} struct {
 	base
 
+	format string
 	from {{ .Name }}
 }
 
@@ -72,7 +73,14 @@ type stringFrom{{ .Name }} struct {
 // Changes to the {{ .Name }} will be pushed to the String and setting the string will parse and set the
 // {{ .Name }} if the parse was successful.
 func {{ .Name }}ToString(v {{ .Name }}) String {
-	str := &stringFrom{{ .Name }}{from: v}
+	return {{ .Name }}ToStringWithFormat(v, "{{ .Format }}")
+}
+
+// {{ .Name }}ToStringWithFormat creates a binding that connects a {{ .Name }} data item to a String and is
+// presented using the specified format. Changes to the {{ .Name }} will be pushed to the String and setting
+// the string will parse and set the {{ .Name }} if the string matches the format and its parse was successful.
+func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
+	str := &stringFrom{{ .Name }}{from: v, format: format}
 	v.AddListener(str)
 	return str
 }
@@ -80,12 +88,12 @@ func {{ .Name }}ToString(v {{ .Name }}) String {
 func (s *stringFrom{{ .Name }}) Get() string {
 	val := s.from.Get()
 
-	return fmt.Sprintf("{{ .Format }}", val)
+	return fmt.Sprintf(s.format, val)
 }
 
 func (s *stringFrom{{ .Name }}) Set(str string) {
 	var val {{ .Type }}
-	n, err := fmt.Sscanf(str, "{{ .Format }}", &val)
+	n, err := fmt.Sscanf(str, s.format, &val)
 	if err != nil || n != 1 {
 		fyne.LogError("{{ .Type }} parse error", err)
 		return

@@ -9,9 +9,9 @@ import (
 
 func bindingScreen(_ fyne.Window) fyne.CanvasObject {
 	data := binding.NewFloat()
-	label := widget.NewLabelWithData(binding.FloatToString(data))
+	label := widget.NewLabelWithData(binding.FloatToStringWithFormat(data, "Float value: %0.2f"))
 	entry := widget.NewEntryWithData(binding.FloatToString(data))
-	floats := container.NewGridWithColumns(3, widget.NewLabel("Float value:"), label, entry)
+	floats := container.NewGridWithColumns(2, label, entry)
 
 	slide := widget.NewSliderWithData(0, 1, data)
 	slide.Step = 0.01
