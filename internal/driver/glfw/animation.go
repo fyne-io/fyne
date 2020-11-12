@@ -32,7 +32,7 @@ func (d *gLDriver) runAnimations() {
 			}
 			d.animationMutex.Lock()
 			d.animations = append(newList, d.animations...)
-			done = len(newList) == 0
+			done = len(d.animations) == 0
 			d.animationMutex.Unlock()
 		}
 	}()
