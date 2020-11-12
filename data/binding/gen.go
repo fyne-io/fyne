@@ -22,7 +22,7 @@ type {{ .Name }} interface {
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
-	return &bind{{ .Name }}{val: &blank}
+	return &bound{{ .Name }}{val: &blank}
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
@@ -31,23 +31,23 @@ func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }} {
 		return New{{ .Name }}() // never allow a nil value pointer
 	}
 
-	return &bind{{ .Name }}{val: v}
+	return &bound{{ .Name }}{val: v}
 }
 
-type bind{{ .Name }} struct {
+type bound{{ .Name }} struct {
 	base
 
 	val *{{ .Type }}
 }
 
-func (b *bind{{ .Name }}) Get() {{ .Type }} {
+func (b *bound{{ .Name }}) Get() {{ .Type }} {
 	if b.val == nil {
 		return {{ .Default }}
 	}
 	return *b.val
 }
 
-func (b *bind{{ .Name }}) Set(val {{ .Type }}) {
+func (b *bound{{ .Name }}) Set(val {{ .Type }}) {
 	if *b.val == val {
 		return
 	}

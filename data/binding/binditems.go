@@ -13,7 +13,7 @@ type Bool interface {
 // NewBool returns a bindable bool value that is managed internally.
 func NewBool() Bool {
 	blank := false
-	return &bindBool{val: &blank}
+	return &boundBool{val: &blank}
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
@@ -22,23 +22,23 @@ func BindBool(v *bool) Bool {
 		return NewBool() // never allow a nil value pointer
 	}
 
-	return &bindBool{val: v}
+	return &boundBool{val: v}
 }
 
-type bindBool struct {
+type boundBool struct {
 	base
 
 	val *bool
 }
 
-func (b *bindBool) Get() bool {
+func (b *boundBool) Get() bool {
 	if b.val == nil {
 		return false
 	}
 	return *b.val
 }
 
-func (b *bindBool) Set(val bool) {
+func (b *boundBool) Set(val bool) {
 	if *b.val == val {
 		return
 	}
@@ -61,7 +61,7 @@ type Float interface {
 // NewFloat returns a bindable float64 value that is managed internally.
 func NewFloat() Float {
 	blank := 0.0
-	return &bindFloat{val: &blank}
+	return &boundFloat{val: &blank}
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
@@ -70,23 +70,23 @@ func BindFloat(v *float64) Float {
 		return NewFloat() // never allow a nil value pointer
 	}
 
-	return &bindFloat{val: v}
+	return &boundFloat{val: v}
 }
 
-type bindFloat struct {
+type boundFloat struct {
 	base
 
 	val *float64
 }
 
-func (b *bindFloat) Get() float64 {
+func (b *boundFloat) Get() float64 {
 	if b.val == nil {
 		return 0.0
 	}
 	return *b.val
 }
 
-func (b *bindFloat) Set(val float64) {
+func (b *boundFloat) Set(val float64) {
 	if *b.val == val {
 		return
 	}
@@ -109,7 +109,7 @@ type Int interface {
 // NewInt returns a bindable int value that is managed internally.
 func NewInt() Int {
 	blank := 0
-	return &bindInt{val: &blank}
+	return &boundInt{val: &blank}
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
@@ -118,23 +118,23 @@ func BindInt(v *int) Int {
 		return NewInt() // never allow a nil value pointer
 	}
 
-	return &bindInt{val: v}
+	return &boundInt{val: v}
 }
 
-type bindInt struct {
+type boundInt struct {
 	base
 
 	val *int
 }
 
-func (b *bindInt) Get() int {
+func (b *boundInt) Get() int {
 	if b.val == nil {
 		return 0
 	}
 	return *b.val
 }
 
-func (b *bindInt) Set(val int) {
+func (b *boundInt) Set(val int) {
 	if *b.val == val {
 		return
 	}
@@ -157,7 +157,7 @@ type Rune interface {
 // NewRune returns a bindable rune value that is managed internally.
 func NewRune() Rune {
 	blank := rune(0)
-	return &bindRune{val: &blank}
+	return &boundRune{val: &blank}
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
@@ -166,23 +166,23 @@ func BindRune(v *rune) Rune {
 		return NewRune() // never allow a nil value pointer
 	}
 
-	return &bindRune{val: v}
+	return &boundRune{val: v}
 }
 
-type bindRune struct {
+type boundRune struct {
 	base
 
 	val *rune
 }
 
-func (b *bindRune) Get() rune {
+func (b *boundRune) Get() rune {
 	if b.val == nil {
 		return rune(0)
 	}
 	return *b.val
 }
 
-func (b *bindRune) Set(val rune) {
+func (b *boundRune) Set(val rune) {
 	if *b.val == val {
 		return
 	}
@@ -205,7 +205,7 @@ type String interface {
 // NewString returns a bindable string value that is managed internally.
 func NewString() String {
 	blank := ""
-	return &bindString{val: &blank}
+	return &boundString{val: &blank}
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
@@ -214,23 +214,23 @@ func BindString(v *string) String {
 		return NewString() // never allow a nil value pointer
 	}
 
-	return &bindString{val: v}
+	return &boundString{val: v}
 }
 
-type bindString struct {
+type boundString struct {
 	base
 
 	val *string
 }
 
-func (b *bindString) Get() string {
+func (b *boundString) Get() string {
 	if b.val == nil {
 		return ""
 	}
 	return *b.val
 }
 
-func (b *bindString) Set(val string) {
+func (b *boundString) Set(val string) {
 	if *b.val == val {
 		return
 	}
