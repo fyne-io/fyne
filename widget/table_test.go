@@ -2,9 +2,11 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"github.com/stretchr/testify/assert"
@@ -76,6 +78,26 @@ func TestTable_ChangeTheme(t *testing.T) {
 		test.AssertImageMatches(t, "table/theme_changed.png", w.Canvas().Capture())
 	})
 	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
+}
+
+func TestTable_Filled(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			r := canvas.NewRectangle(color.Black)
+			r.SetMinSize(fyne.NewSize(30, 20))
+			return r
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(180, 180))
+	test.AssertImageMatches(t, "table/filled.png", w.Canvas().Capture())
 }
 
 func TestTable_Unselect(t *testing.T) {

@@ -460,8 +460,8 @@ func (r *tableCellsRenderer) Refresh() {
 					continue
 				}
 
-				c.Move(fyne.NewPos(theme.Padding()+col*r.cells.cellSize.Width+(col-1)*tableDividerThickness,
-					theme.Padding()+row*r.cells.cellSize.Height+(row-1)*tableDividerThickness))
+				c.Move(fyne.NewPos(theme.Padding()+col*(r.cells.cellSize.Width+tableDividerThickness),
+					theme.Padding()+row*(r.cells.cellSize.Height+tableDividerThickness)))
 			}
 
 			if updateCell != nil {
