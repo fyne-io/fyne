@@ -44,37 +44,36 @@ func makeAnimateCanvas() fyne.CanvasObject {
 }
 
 func makeAnimateCurves() fyne.CanvasObject {
-	label1 := widget.NewLabel("EaseInOut")
-	label1.Alignment = fyne.TextAlignCenter
-	label1.Resize(fyne.NewSize(380, 30))
-	box1 := canvas.NewRectangle(theme.TextColor())
-	box1.Resize(fyne.NewSize(30, 30))
-	box1.Move(fyne.NewPos(0, 0))
-	a1 := canvas.NewPositionAnimation(
-		fyne.NewPos(0, 0), fyne.NewPos(380, 0), time.Second, func(p fyne.Position) {
-			box1.Move(p)
-		})
-
-	label2 := widget.NewLabel("Linear")
-	label2.Alignment = fyne.TextAlignCenter
-	label2.Move(fyne.NewPos(0, 30+theme.Padding()))
-	label2.Resize(fyne.NewSize(380, 30))
-	box2 := canvas.NewRectangle(theme.TextColor())
-	box2.Resize(fyne.NewSize(30, 30))
-	box2.Move(fyne.NewPos(0, 30+theme.Padding()))
-
-	a2 := canvas.NewPositionAnimation(
-		fyne.NewPos(0, 32+theme.Padding()), fyne.NewPos(380, 32+theme.Padding()), time.Second,
-		func(p fyne.Position) {
-			box2.Move(p)
-		})
-	a2.Curve = fyne.AnimationLinear
+	label1, box1, a1 := makeAnimationCurveItem("EaseInOut", fyne.AnimationEaseInOut, 0)
+	label2, box2, a2 := makeAnimationCurveItem("EaseIn", fyne.AnimationEaseIn, 30+theme.Padding())
+	label3, box3, a3 := makeAnimationCurveItem("EaseOut", fyne.AnimationEaseOut, 60+theme.Padding()*2)
+	label4, box4, a4 := makeAnimationCurveItem("Linear", fyne.AnimationLinear, 90+theme.Padding()*3)
 
 	start := widget.NewButton("Compare", func() {
 		a1.Start()
 		a2.Start()
+		a3.Start()
+		a4.Start()
 	})
 	start.Resize(start.MinSize())
-	start.Move(fyne.NewPos(0, 60+theme.Padding()*2))
-	return fyne.NewContainerWithoutLayout(label1, label2, box1, box2, start)
+	start.Move(fyne.NewPos(0, 120+theme.Padding()*4))
+	return fyne.NewContainerWithoutLayout(label1, label2, label3, label4, box1, box2, box3, box4, start)
+}
+
+func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff int) (
+	text *widget.Label, box fyne.CanvasObject, anim *fyne.Animation) {
+	text = widget.NewLabel(label)
+	text.Alignment = fyne.TextAlignCenter
+	text.Resize(fyne.NewSize(380, 30))
+	text.Move(fyne.NewPos(0, yOff))
+	box = canvas.NewRectangle(theme.TextColor())
+	box.Resize(fyne.NewSize(30, 30))
+	box.Move(fyne.NewPos(0, yOff))
+
+	anim = canvas.NewPositionAnimation(
+		fyne.NewPos(0, yOff), fyne.NewPos(380, yOff), time.Second, func(p fyne.Position) {
+			box.Move(p)
+		})
+	anim.Curve = curve
+	return
 }

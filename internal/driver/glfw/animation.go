@@ -63,9 +63,17 @@ func animationCurve(val float32, curve fyne.AnimationCurve) float32 {
 	switch curve {
 	case fyne.AnimationLinear:
 		return val
+	case fyne.AnimationEaseIn:
+		return animationEaseIn(val)
+	case fyne.AnimationEaseOut:
+		return animationEaseOut(val)
 	default: // EaseInOut is default
 		return animationEaseInOut(val)
 	}
+}
+
+func animationEaseIn(val float32) float32 {
+	return val * val
 }
 
 func animationEaseInOut(val float32) float32 {
@@ -74,4 +82,8 @@ func animationEaseInOut(val float32) float32 {
 	}
 
 	return -1 + (4-val*2)*val
+}
+
+func animationEaseOut(val float32) float32 {
+	return val * (2 - val)
 }

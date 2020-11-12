@@ -8,6 +8,10 @@ type AnimationCurve int
 const (
 	// AnimationEaseInOut is the default easing, it starts slowly, accelerates to the middle and slows to the end.
 	AnimationEaseInOut AnimationCurve = iota
+	// AnimationEaseIn starts slowly and accelerates to the end.
+	AnimationEaseIn
+	// AnimationEaseOut starts at speed and slows to the end.
+	AnimationEaseOut
 	// AnimationLinear is a linear mapping for animations that progress uniformly through their duration.
 	AnimationLinear
 )
