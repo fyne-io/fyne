@@ -2,6 +2,8 @@
 
 package binding
 
+import "sync"
+
 // DataItem is the base interface for all bindable data items.
 type DataItem interface {
 	AddListener(DataItemListener)
@@ -29,15 +31,22 @@ func (l *listener) DataChanged(i DataItem) {
 
 type base struct {
 	listeners []DataItemListener
+	lock      sync.RWMutex
 }
 
 // AddListener allows a data listener to be informed of changes to this item.
 func (b *base) AddListener(l DataItemListener) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	b.listeners = append(b.listeners, l)
 }
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.
 func (b *base) RemoveListener(l DataItemListener) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
 	for i, listen := range b.listeners {
 		if listen != l {
 			continue
@@ -52,6 +61,9 @@ func (b *base) RemoveListener(l DataItemListener) {
 }
 
 func (b *base) trigger(i DataItem) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
 	for _, listen := range b.listeners {
 		listen.DataChanged(i)
 	}
