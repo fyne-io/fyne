@@ -66,7 +66,7 @@ type stringFrom{{ .Name }} struct {
 	base
 
 	format string
-	from {{ .Name }}
+	from   {{ .Name }}
 }
 
 // {{ .Name }}ToString creates a binding that connects a {{ .Name }} data item to a String.
