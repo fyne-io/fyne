@@ -2,18 +2,21 @@ package fyne
 
 import "time"
 
-// AnimationCurve represents the different animation algorithms for animation timeline.
-type AnimationCurve int
+// AnimationCurve represents an animation algorithm for calculating the progress through a timeline.
+// Custom animations can be provided by implementing the "func(float32) float32" definition.
+// The input parameter will start at 0.0 when an animation starts and travel up to 1.0 at which point it will end.
+// A linear animation would return the same output value as is passed in.
+type AnimationCurve func(float32) float32
 
-const (
+var (
 	// AnimationEaseInOut is the default easing, it starts slowly, accelerates to the middle and slows to the end.
-	AnimationEaseInOut AnimationCurve = iota
+	AnimationEaseInOut = animationEaseInOut
 	// AnimationEaseIn starts slowly and accelerates to the end.
-	AnimationEaseIn
+	AnimationEaseIn = animationEaseIn
 	// AnimationEaseOut starts at speed and slows to the end.
-	AnimationEaseOut
+	AnimationEaseOut = animationEaseOut
 	// AnimationLinear is a linear mapping for animations that progress uniformly through their duration.
-	AnimationLinear
+	AnimationLinear = animationLinear
 )
 
 // Animation represents an animated element within a Fyne canvas.
@@ -35,4 +38,24 @@ func NewAnimation(d time.Duration, fn func(float32)) *Animation {
 // Start registers the animation with the application run-loop and starts its execution.
 func (a *Animation) Start() {
 	CurrentApp().Driver().StartAnimation(a)
+}
+
+func animationEaseIn(val float32) float32 {
+	return val * val
+}
+
+func animationEaseInOut(val float32) float32 {
+	if val <= 0.5 {
+		return val * val * 2
+	}
+
+	return -1 + (4-val*2)*val
+}
+
+func animationEaseOut(val float32) float32 {
+	return val * (2 - val)
+}
+
+func animationLinear(val float32) float32 {
+	return val
 }

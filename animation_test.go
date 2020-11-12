@@ -1,16 +1,13 @@
-package glfw
+package fyne
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"fyne.io/fyne"
 )
 
-func TestAnimationCurve(t *testing.T) {
-	assert.Equal(t, float32(0.25), animationCurve(0.25, fyne.AnimationLinear))
-	assert.True(t, 0.25 > animationCurve(0.25, fyne.AnimationEaseInOut))
+func TestAnimationLinear(t *testing.T) {
+	assert.Equal(t, float32(0.25), animationLinear(0.25))
 }
 
 func TestAnimationEaseInOut(t *testing.T) {
