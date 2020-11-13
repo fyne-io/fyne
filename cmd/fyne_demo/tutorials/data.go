@@ -20,7 +20,7 @@ var (
 		},
 		"animations": {"Animations",
 			"See how to animate components.",
-			makeAnimate,
+			makeAnimationScreen,
 		},
 		"icons": {"Theme Icons",
 			"Browse the embedded icons.",

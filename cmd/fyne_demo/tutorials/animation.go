@@ -10,13 +10,13 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-func makeAnimate(_ fyne.Window) fyne.CanvasObject {
-	curves := makeAnimateCurves()
+func makeAnimationScreen(_ fyne.Window) fyne.CanvasObject {
+	curves := makeAnimationCurves()
 	curves.Move(fyne.NewPos(0, 140+theme.Padding()))
-	return fyne.NewContainerWithoutLayout(makeAnimateCanvas(), curves)
+	return fyne.NewContainerWithoutLayout(makeAnimationCanvas(), curves)
 }
 
-func makeAnimateCanvas() fyne.CanvasObject {
+func makeAnimationCanvas() fyne.CanvasObject {
 	rect := canvas.NewRectangle(color.Black)
 	rect.Resize(fyne.NewSize(410, 140))
 
@@ -43,7 +43,7 @@ func makeAnimateCanvas() fyne.CanvasObject {
 	return fyne.NewContainerWithoutLayout(rect, i)
 }
 
-func makeAnimateCurves() fyne.CanvasObject {
+func makeAnimationCurves() fyne.CanvasObject {
 	label1, box1, a1 := makeAnimationCurveItem("EaseInOut", fyne.AnimationEaseInOut, 0)
 	label2, box2, a2 := makeAnimationCurveItem("EaseIn", fyne.AnimationEaseIn, 30+theme.Padding())
 	label3, box3, a3 := makeAnimationCurveItem("EaseOut", fyne.AnimationEaseOut, 60+theme.Padding()*2)
