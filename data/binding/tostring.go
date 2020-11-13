@@ -28,6 +28,7 @@ func BoolToString(v Bool) String {
 // the string will parse and set the Bool if the string matches the format and its parse was successful.
 func BoolToStringWithFormat(v Bool, format string) String {
 	str := &stringFromBool{from: v, format: format}
+	str.data = str
 	v.AddListener(str)
 	return str
 }
@@ -76,6 +77,7 @@ func FloatToString(v Float) String {
 // the string will parse and set the Float if the string matches the format and its parse was successful.
 func FloatToStringWithFormat(v Float, format string) String {
 	str := &stringFromFloat{from: v, format: format}
+	str.data = str
 	v.AddListener(str)
 	return str
 }
@@ -124,6 +126,7 @@ func IntToString(v Int) String {
 // the string will parse and set the Int if the string matches the format and its parse was successful.
 func IntToStringWithFormat(v Int, format string) String {
 	str := &stringFromInt{from: v, format: format}
+	str.data = str
 	v.AddListener(str)
 	return str
 }

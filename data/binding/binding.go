@@ -6,7 +6,12 @@ import "sync"
 
 // DataItem is the base interface for all bindable data items.
 type DataItem interface {
+	// AddListener attaches a new change listener to this DataItem.
+	// Listeners are called each time the data inside this DataItem changes.
+	// Additionally the listener will be triggered upon successful connection to get the current value.
 	AddListener(DataItemListener)
+	// RemoveListener will detach the specified change listener from the DataItem.
+	// Disconnected listener will no longer be triggered when changes occur.
 	RemoveListener(DataItemListener)
 }
 
@@ -30,6 +35,7 @@ func (l *listener) DataChanged(i DataItem) {
 }
 
 type base struct {
+	data      DataItem
 	listeners []DataItemListener
 	lock      sync.RWMutex
 }
@@ -40,6 +46,7 @@ func (b *base) AddListener(l DataItemListener) {
 	defer b.lock.Unlock()
 
 	b.listeners = append(b.listeners, l)
+	l.DataChanged(b.data)
 }
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.

@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/data/binding"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -128,11 +129,12 @@ func NewProgressBar() *ProgressBar {
 // NewProgressBarWithData returns a progress bar connected with the specified data source.
 func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p := NewProgressBar()
-	p.Value = data.Get()
 
 	data.AddListener(binding.NewDataItemListener(func(d binding.DataItem) {
 		p.Value = d.(binding.Float).Get()
-		p.Refresh()
+		if cache.IsRendered(p) {
+			p.Refresh()
+		}
 	}))
 
 	return p

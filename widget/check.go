@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/driver/desktop"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -206,11 +207,12 @@ func NewCheckWithData(label string, data binding.Bool) *Check {
 	check := NewCheck(label, func(b bool) {
 		data.Set(b)
 	})
-	check.Checked = data.Get()
 
 	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
 		check.Checked = data.Get()
-		check.Refresh()
+		if cache.IsRendered(check) {
+			check.Refresh()
+		}
 	}))
 
 	return check

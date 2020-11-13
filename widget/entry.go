@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/driver/mobile"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -81,11 +82,12 @@ func NewEntry() *Entry {
 // NewEntryWithData returns an Entry widget connected to the specified data source.
 func NewEntryWithData(data binding.String) *Entry {
 	entry := NewEntry()
-	entry.Text = data.Get()
 
 	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
 		entry.Text = data.Get()
-		entry.Refresh()
+		if cache.IsRendered(entry) {
+			entry.Refresh()
+		}
 	}))
 	entry.OnChanged = func(s string) {
 		data.Set(s)

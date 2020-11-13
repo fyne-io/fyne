@@ -13,7 +13,9 @@ type Bool interface {
 // NewBool returns a bindable bool value that is managed internally.
 func NewBool() Bool {
 	blank := false
-	return &boundBool{val: &blank}
+	b := &boundBool{val: &blank}
+	b.data = b
+	return b
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
@@ -22,7 +24,9 @@ func BindBool(v *bool) Bool {
 		return NewBool() // never allow a nil value pointer
 	}
 
-	return &boundBool{val: v}
+	b := &boundBool{val: v}
+	b.data = b
+	return b
 }
 
 type boundBool struct {
@@ -61,7 +65,9 @@ type Float interface {
 // NewFloat returns a bindable float64 value that is managed internally.
 func NewFloat() Float {
 	blank := 0.0
-	return &boundFloat{val: &blank}
+	b := &boundFloat{val: &blank}
+	b.data = b
+	return b
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
@@ -70,7 +76,9 @@ func BindFloat(v *float64) Float {
 		return NewFloat() // never allow a nil value pointer
 	}
 
-	return &boundFloat{val: v}
+	b := &boundFloat{val: v}
+	b.data = b
+	return b
 }
 
 type boundFloat struct {
@@ -109,7 +117,9 @@ type Int interface {
 // NewInt returns a bindable int value that is managed internally.
 func NewInt() Int {
 	blank := 0
-	return &boundInt{val: &blank}
+	b := &boundInt{val: &blank}
+	b.data = b
+	return b
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
@@ -118,7 +128,9 @@ func BindInt(v *int) Int {
 		return NewInt() // never allow a nil value pointer
 	}
 
-	return &boundInt{val: v}
+	b := &boundInt{val: v}
+	b.data = b
+	return b
 }
 
 type boundInt struct {
@@ -157,7 +169,9 @@ type Rune interface {
 // NewRune returns a bindable rune value that is managed internally.
 func NewRune() Rune {
 	blank := rune(0)
-	return &boundRune{val: &blank}
+	b := &boundRune{val: &blank}
+	b.data = b
+	return b
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
@@ -166,7 +180,9 @@ func BindRune(v *rune) Rune {
 		return NewRune() // never allow a nil value pointer
 	}
 
-	return &boundRune{val: v}
+	b := &boundRune{val: v}
+	b.data = b
+	return b
 }
 
 type boundRune struct {
@@ -205,7 +221,9 @@ type String interface {
 // NewString returns a bindable string value that is managed internally.
 func NewString() String {
 	blank := ""
-	return &boundString{val: &blank}
+	b := &boundString{val: &blank}
+	b.data = b
+	return b
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
@@ -214,7 +232,9 @@ func BindString(v *string) String {
 		return NewString() // never allow a nil value pointer
 	}
 
-	return &boundString{val: v}
+	b := &boundString{val: v}
+	b.data = b
+	return b
 }
 
 type boundString struct {

@@ -8,7 +8,8 @@ import (
 )
 
 func bindingScreen(_ fyne.Window) fyne.CanvasObject {
-	data := binding.NewFloat()
+	f := 0.2
+	data := binding.BindFloat(&f)
 	label := widget.NewLabelWithData(binding.FloatToStringWithFormat(data, "Float value: %0.2f"))
 	entry := widget.NewEntryWithData(binding.FloatToString(data))
 	floats := container.NewGridWithColumns(2, label, entry)

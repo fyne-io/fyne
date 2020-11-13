@@ -22,7 +22,9 @@ type {{ .Name }} interface {
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
-	return &bound{{ .Name }}{val: &blank}
+	b := &bound{{ .Name }}{val: &blank}
+	b.data = b
+	return b
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
@@ -31,7 +33,9 @@ func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }} {
 		return New{{ .Name }}() // never allow a nil value pointer
 	}
 
-	return &bound{{ .Name }}{val: v}
+	b := &bound{{ .Name }}{val: v}
+	b.data = b
+	return b
 }
 
 type bound{{ .Name }} struct {
@@ -81,6 +85,7 @@ func {{ .Name }}ToString(v {{ .Name }}) String {
 // the string will parse and set the {{ .Name }} if the string matches the format and its parse was successful.
 func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	str := &stringFrom{{ .Name }}{from: v, format: format}
+	str.data = str
 	v.AddListener(str)
 	return str
 }
