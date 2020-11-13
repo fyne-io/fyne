@@ -111,10 +111,6 @@ func (r *markupRenderer) setFloatPosAttr(attrs map[string]*string, name string, 
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setIntAttr(attrs map[string]*string, name string, i int) {
-	r.setIntAttrWithDefault(attrs, name, i, 0)
-}
-
 func (r *markupRenderer) setIntAttrWithDefault(attrs map[string]*string, name string, i int, d int) {
 	if i == d {
 		return
