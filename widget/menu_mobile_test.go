@@ -635,7 +635,7 @@ func TestMenu_Layout(t *testing.T) {
 										</container>
 									</widget>
 									<widget clip="71x40@10,10" pos="65,0" size="6x40" type="*widget.scrollBarArea">
-										<widget clip="71x40@10,10" pos="3,0" size="3x16" type="*widget.scrollBar">
+										<widget backgroundColor="scrollbar" clip="71x40@10,10" pos="3,0" size="3x16" type="*widget.scrollBar">
 										</widget>
 									</widget>
 									<widget clip="71x40@10,10" pos="0,40" size="71x0" type="*widget.Shadow">
@@ -739,7 +739,7 @@ func TestMenu_Dragging(t *testing.T) {
 								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
-								<widget clip="28x90@10,10" pos="3,0" size="3x40" type="*widget.scrollBar">
+								<widget backgroundColor="scrollbar" clip="28x90@10,10" pos="3,0" size="3x40" type="*widget.scrollBar">
 								</widget>
 							</widget>
 							<widget clip="28x90@10,10" pos="0,90" size="28x0" type="*widget.Shadow">
@@ -795,7 +795,7 @@ func TestMenu_Dragging(t *testing.T) {
 								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
-								<widget clip="28x90@10,10" pos="3,22" size="3x40" type="*widget.scrollBar">
+								<widget backgroundColor="scrollbar" clip="28x90@10,10" pos="3,22" size="3x40" type="*widget.scrollBar">
 								</widget>
 							</widget>
 							<widget clip="28x90@10,10" size="28x0" type="*widget.Shadow">
@@ -854,7 +854,7 @@ func TestMenu_Dragging(t *testing.T) {
 								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
-								<widget clip="28x90@10,10" pos="3,50" size="3x40" type="*widget.scrollBar">
+								<widget backgroundColor="scrollbar" clip="28x90@10,10" pos="3,50" size="3x40" type="*widget.scrollBar">
 								</widget>
 							</widget>
 							<widget clip="28x90@10,10" size="28x0" type="*widget.Shadow">
@@ -910,7 +910,7 @@ func TestMenu_Dragging(t *testing.T) {
 								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
-								<widget clip="28x90@10,10" pos="3,22" size="3x40" type="*widget.scrollBar">
+								<widget backgroundColor="scrollbar" clip="28x90@10,10" pos="3,22" size="3x40" type="*widget.scrollBar">
 								</widget>
 							</widget>
 							<widget clip="28x90@10,10" size="28x0" type="*widget.Shadow">
@@ -969,7 +969,7 @@ func TestMenu_Dragging(t *testing.T) {
 								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
-								<widget clip="28x90@10,10" pos="3,0" size="3x40" type="*widget.scrollBar">
+								<widget backgroundColor="scrollbar" clip="28x90@10,10" pos="3,0" size="3x40" type="*widget.scrollBar">
 								</widget>
 							</widget>
 							<widget clip="28x90@10,10" pos="0,90" size="28x0" type="*widget.Shadow">

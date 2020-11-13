@@ -93,7 +93,7 @@ func TestSelect_Disable(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 						</widget>
-						<rectangle pos="4,4" size="128x29"/>
+						<rectangle fillColor="button" pos="4,4" size="128x29"/>
 						<widget pos="8,4" size="100x29" type="*widget.textProvider">
 							<text bold color="disabled text" pos="4,4" size="92x21">(Select one)</text>
 						</widget>
@@ -191,7 +191,7 @@ func TestSelect_FocusRendering(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="128x29"/>
+								<rectangle fillColor="button" pos="4,4" size="128x29"/>
 								<widget pos="8,4" size="100x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="92x21">(Select one)</text>
 								</widget>
@@ -226,7 +226,7 @@ func TestSelect_FocusRendering(t *testing.T) {
 								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 							</widget>
-							<rectangle pos="4,4" size="128x29"/>
+							<rectangle fillColor="button" pos="4,4" size="128x29"/>
 							<widget pos="8,4" size="100x29" type="*widget.textProvider">
 								<text bold pos="4,4" size="92x21">Option B</text>
 							</widget>
@@ -295,7 +295,7 @@ func TestSelect_FocusRendering(t *testing.T) {
 								<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 							</widget>
-							<rectangle pos="4,4" size="128x29"/>
+							<rectangle fillColor="button" pos="4,4" size="128x29"/>
 							<widget pos="8,4" size="100x29" type="*widget.textProvider">
 								<text bold color="disabled text" pos="4,4" size="92x21">(Select one)</text>
 							</widget>
@@ -593,7 +593,7 @@ func TestSelect_Move(t *testing.T) {
 						<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 					</widget>
-					<rectangle pos="4,4" size="128x29"/>
+					<rectangle fillColor="button" pos="4,4" size="128x29"/>
 					<widget pos="8,4" size="100x29" type="*widget.textProvider">
 						<text bold pos="4,4" size="92x21">(Select one)</text>
 					</widget>
@@ -620,7 +620,7 @@ func TestSelect_Move(t *testing.T) {
 						<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 					</widget>
-					<rectangle pos="4,4" size="128x29"/>
+					<rectangle fillColor="button" pos="4,4" size="128x29"/>
 					<widget pos="8,4" size="100x29" type="*widget.textProvider">
 						<text bold pos="4,4" size="92x21">(Select one)</text>
 					</widget>
@@ -675,7 +675,7 @@ func TestSelect_Move(t *testing.T) {
 						<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 						<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 					</widget>
-					<rectangle pos="4,4" size="128x29"/>
+					<rectangle fillColor="button" pos="4,4" size="128x29"/>
 					<widget pos="8,4" size="100x29" type="*widget.textProvider">
 						<text bold pos="4,4" size="92x21">(Select one)</text>
 					</widget>
@@ -766,7 +766,7 @@ func TestSelect_SetSelected(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 						</widget>
-						<rectangle pos="4,4" size="128x29"/>
+						<rectangle fillColor="button" pos="4,4" size="128x29"/>
 						<widget pos="8,4" size="100x29" type="*widget.textProvider">
 							<text bold pos="4,4" size="92x21">(Select one)</text>
 						</widget>
@@ -794,7 +794,7 @@ func TestSelect_SetSelected(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 						</widget>
-						<rectangle pos="4,4" size="128x29"/>
+						<rectangle fillColor="button" pos="4,4" size="128x29"/>
 						<widget pos="8,4" size="100x29" type="*widget.textProvider">
 							<text bold pos="4,4" size="92x21">2</text>
 						</widget>
@@ -1045,7 +1045,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="128x29"/>
+								<rectangle fillColor="button" pos="4,4" size="128x29"/>
 								<widget pos="8,4" size="100x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="92x21">(Select one)</text>
 								</widget>
@@ -1075,7 +1075,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="95x29"/>
+								<rectangle fillColor="button" pos="4,4" size="95x29"/>
 								<widget pos="8,4" size="67x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="59x21">(Pick 1)</text>
 								</widget>
@@ -1210,7 +1210,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="128x29"/>
+								<rectangle fillColor="button" pos="4,4" size="128x29"/>
 								<widget pos="8,4" size="100x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="92x21">(Select one)</text>
 								</widget>
@@ -1241,7 +1241,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="95x29"/>
+								<rectangle fillColor="button" pos="4,4" size="95x29"/>
 								<widget pos="8,4" size="67x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="59x21">(Pick 1)</text>
 								</widget>
@@ -1272,7 +1272,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="128x29"/>
+								<rectangle fillColor="button" pos="4,4" size="128x29"/>
 								<widget pos="8,4" size="100x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="92x21">Test</text>
 								</widget>
@@ -1304,7 +1304,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="95x29"/>
+								<rectangle fillColor="button" pos="4,4" size="95x29"/>
 								<widget pos="8,4" size="67x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="59x21">Test</text>
 								</widget>
@@ -1562,7 +1562,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="128x29"/>
+								<rectangle fillColor="button" pos="4,4" size="128x29"/>
 								<widget pos="8,4" size="100x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="92x21">(Select one)</text>
 								</widget>
@@ -1593,7 +1593,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="95x29"/>
+								<rectangle fillColor="button" pos="4,4" size="95x29"/>
 								<widget pos="8,4" size="67x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="59x21">(Pick 1)</text>
 								</widget>
@@ -1624,7 +1624,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="128x29"/>
+								<rectangle fillColor="button" pos="4,4" size="128x29"/>
 								<widget pos="8,4" size="100x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="92x21">Foo</text>
 								</widget>
@@ -1656,7 +1656,7 @@ func TestSelect_Layout(t *testing.T) {
 									<radialGradient centerOffset="0.5,-0.5" pos="-2,29" size="2x2" startColor="shadow"/>
 									<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x29"/>
 								</widget>
-								<rectangle pos="4,4" size="95x29"/>
+								<rectangle fillColor="button" pos="4,4" size="95x29"/>
 								<widget pos="8,4" size="67x29" type="*widget.textProvider">
 									<text bold pos="4,4" size="59x21">Foo</text>
 								</widget>

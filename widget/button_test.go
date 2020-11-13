@@ -147,7 +147,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="55,85" size="32x21">Test</text>
 						</widget>
 					</content>
@@ -162,7 +162,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="55,85" size="32x21">Test</text>
 						</widget>
 					</content>
@@ -177,7 +177,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="12,85" size="32x21">Test</text>
 						</widget>
 					</content>
@@ -192,7 +192,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="12,85" size="32x21">Test</text>
 						</widget>
 					</content>
@@ -207,7 +207,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="98,85" size="32x21">Test</text>
 						</widget>
 					</content>
@@ -222,7 +222,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="98,85" size="32x21">Test</text>
 						</widget>
 					</content>
@@ -237,7 +237,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<image fillMode="contain" pos="61,86" rsc="cancelIcon" size="iconInlineSize"/>
 						</widget>
 					</content>
@@ -252,7 +252,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<image fillMode="contain" pos="61,86" rsc="cancelIcon" size="iconInlineSize"/>
 						</widget>
 					</content>
@@ -267,7 +267,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<image fillMode="contain" pos="8,86" rsc="cancelIcon" size="iconInlineSize"/>
 						</widget>
 					</content>
@@ -282,7 +282,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<image fillMode="contain" pos="8,86" rsc="cancelIcon" size="iconInlineSize"/>
 						</widget>
 					</content>
@@ -297,7 +297,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<image fillMode="contain" pos="114,86" rsc="cancelIcon" size="iconInlineSize"/>
 						</widget>
 					</content>
@@ -312,7 +312,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<image fillMode="contain" pos="114,86" rsc="cancelIcon" size="iconInlineSize"/>
 						</widget>
 					</content>
@@ -328,7 +328,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="67,85" size="32x21">Test</text>
 							<image fillMode="contain" pos="43,85" rsc="cancelIcon" size="20x21"/>
 						</widget>
@@ -345,7 +345,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="43,85" size="32x21">Test</text>
 							<image fillMode="contain" pos="79,85" rsc="cancelIcon" size="20x21"/>
 						</widget>
@@ -362,7 +362,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="36,85" size="32x21">Test</text>
 							<image fillMode="contain" pos="12,85" rsc="cancelIcon" size="20x21"/>
 						</widget>
@@ -379,7 +379,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="12,85" size="32x21">Test</text>
 							<image fillMode="contain" pos="48,85" rsc="cancelIcon" size="20x21"/>
 						</widget>
@@ -396,7 +396,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="98,85" size="32x21">Test</text>
 							<image fillMode="contain" pos="74,85" rsc="cancelIcon" size="20x21"/>
 						</widget>
@@ -413,7 +413,7 @@ func TestButton_Layout(t *testing.T) {
 				<canvas padded size="150x200">
 					<content>
 						<widget pos="4,4" size="142x192" type="*widget.Button">` + shadowMarkup + `
-							<rectangle pos="2,2" size="138x188"/>
+							<rectangle fillColor="button" pos="2,2" size="138x188"/>
 							<text bold pos="74,85" size="32x21">Test</text>
 							<image fillMode="contain" pos="110,85" rsc="cancelIcon" size="20x21"/>
 						</widget>

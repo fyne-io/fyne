@@ -195,7 +195,7 @@ func TestCard_Layout(t *testing.T) {
 							<text bold size="0x0" textSize="23"></text>
 							<text size="0x0"></text>
 							<widget pos="6,10" size="68x23" type="*widget.Hyperlink">
-								<text color="focus" pos="4,4" size="60x21">link</text>
+								<text color="hyperlink" pos="4,4" size="60x21">link</text>
 							</widget>
 						</widget>
 					</content>
@@ -224,7 +224,7 @@ func TestCard_Layout(t *testing.T) {
 							<text bold pos="10,6" size="65x34" textSize="23">Hello</text>
 							<text size="0x0"></text>
 							<widget pos="6,48" size="73x19" type="*widget.Hyperlink">
-								<text color="focus" pos="4,4" size="65x21">link</text>
+								<text color="hyperlink" pos="4,4" size="65x21">link</text>
 							</widget>
 						</widget>
 					</content>
@@ -254,7 +254,7 @@ func TestCard_Layout(t *testing.T) {
 							<text size="0x0"></text>
 							<image pos="2,2" rsc="fyneLogo" size="76x128"/>
 							<widget pos="6,138" size="68x23" type="*widget.Hyperlink">
-								<text color="focus" pos="4,4" size="60x21">link</text>
+								<text color="hyperlink" pos="4,4" size="60x21">link</text>
 							</widget>
 						</widget>
 					</content>
@@ -284,7 +284,7 @@ func TestCard_Layout(t *testing.T) {
 							<text pos="10,172" size="146x21">subtitle with length</text>
 							<image pos="2,2" rsc="fyneLogo" size="162x128"/>
 							<widget pos="6,201" size="154x15" type="*widget.Hyperlink">
-								<text color="focus" pos="4,4" size="146x21">link</text>
+								<text color="hyperlink" pos="4,4" size="146x21">link</text>
 							</widget>
 						</widget>
 					</content>

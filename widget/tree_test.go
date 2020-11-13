@@ -159,7 +159,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="28,4" size="160x29" type="*widget.Label">
 											<text clip="192x292@4,4" pos="4,4" size="152x21">11111</text>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 								</widget>
 							</widget>
@@ -216,7 +216,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="4,4" size="20x29" type="*widget.branchIcon">
 											<image clip="192x292@4,4" fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 								</widget>
 							</widget>
@@ -284,7 +284,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="4,4" size="20x29" type="*widget.branchIcon">
 											<image clip="192x292@4,4" fillMode="contain" rsc="moveDownIcon" size="20x29"/>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 									<widget clip="192x292@4,4" pos="4,37" size="184x1" type="*widget.Separator">
 										<rectangle clip="192x292@4,4" fillColor="disabled text" size="184x1"/>
@@ -332,7 +332,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="52,4" size="136x29" type="*widget.Label">
 											<text clip="192x292@4,4" pos="4,4" size="128x21">11111</text>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 								</widget>
 							</widget>
@@ -443,7 +443,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="28,4" size="160x29" type="*widget.Label">
 											<text clip="192x292@4,4" pos="4,4" size="152x21">44444444444444444444</text>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 								</widget>
 							</widget>
@@ -548,7 +548,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="28,4" size="160x29" type="*widget.Label">
 											<text clip="192x292@4,4" pos="4,4" size="152x21">2222222222</text>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 									<widget clip="192x292@4,4" pos="4,75" size="184x1" type="*widget.Separator">
 										<rectangle clip="192x292@4,4" fillColor="disabled text" size="184x1"/>
@@ -659,7 +659,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="4,4" size="20x29" type="*widget.branchIcon">
 											<image clip="192x292@4,4" fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 								</widget>
 							</widget>
@@ -809,7 +809,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="4,4" size="20x29" type="*widget.branchIcon">
 											<image clip="192x292@4,4" fillMode="contain" rsc="moveDownIcon" size="20x29"/>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 									<widget clip="192x292@4,4" pos="4,113" size="198x1" type="*widget.Separator">
 										<rectangle clip="192x292@4,4" fillColor="disabled text" size="198x1"/>
@@ -912,7 +912,7 @@ func TestTree_Layout(t *testing.T) {
 										<widget clip="192x292@4,4" pos="52,4" size="150x29" type="*widget.Label">
 											<text clip="192x292@4,4" pos="4,4" size="142x21">2222222222</text>
 										</widget>
-										<rectangle clip="192x292@4,4" fillColor="focus" size="4x37"/>
+										<rectangle clip="192x292@4,4" fillColor="primary" size="4x37"/>
 									</widget>
 									<widget clip="192x292@4,4" pos="4,151" size="198x1" type="*widget.Separator">
 										<rectangle clip="192x292@4,4" fillColor="disabled text" size="198x1"/>

@@ -220,8 +220,8 @@ func TestTable_Selection(t *testing.T) {
 							<linearGradient angle="270" clip="168x168@8,8" endColor="shadow" pos="-8,0" size="8x168"/>
 						</widget>
 					</widget>
-					<rectangle fillColor="focus" pos="4,0" size="101x4"/>
-					<rectangle fillColor="focus" pos="0,42" size="4x37"/>
+					<rectangle fillColor="primary" pos="4,0" size="101x4"/>
+					<rectangle fillColor="primary" pos="0,42" size="4x37"/>
 					<widget pos="105,4" size="1x168" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="1x168"/>
 					</widget>
@@ -341,8 +341,8 @@ func TestTable_Select(t *testing.T) {
 							<linearGradient angle="270" clip="168x168@8,8" endColor="shadow" pos="-8,0" size="8x168"/>
 						</widget>
 					</widget>
-					<rectangle fillColor="focus" pos="4,0" size="101x4"/>
-					<rectangle fillColor="focus" pos="0,42" size="4x37"/>
+					<rectangle fillColor="primary" pos="4,0" size="101x4"/>
+					<rectangle fillColor="primary" pos="0,42" size="4x37"/>
 					<widget pos="105,4" size="1x168" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="1x168"/>
 					</widget>
@@ -441,8 +441,8 @@ func TestTable_Select(t *testing.T) {
 							<linearGradient angle="270" clip="168x168@8,8" endColor="shadow" pos="-8,0" size="8x168"/>
 						</widget>
 					</widget>
-					<rectangle fillColor="focus" pos="71,0" size="101x4"/>
-					<rectangle fillColor="focus" pos="0,135" size="4x37"/>
+					<rectangle fillColor="primary" pos="71,0" size="101x4"/>
+					<rectangle fillColor="primary" pos="0,135" size="4x37"/>
 					<widget pos="70,4" size="1x168" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="1x168"/>
 					</widget>

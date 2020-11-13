@@ -121,7 +121,7 @@ func TestAccordion_Layout(t *testing.T) {
 						<container pos="4,4" size="142x192">
 							<widget pos="45,77" size="52x37" type="*widget.Accordion">
 								<widget pos="0,4" size="52x29" type="*widget.Button">
-									<rectangle pos="2,2" size="48x25"/>
+									<rectangle fillColor="button" pos="2,2" size="48x25"/>
 									<text bold pos="28,4" size="11x21">A</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
@@ -145,7 +145,7 @@ func TestAccordion_Layout(t *testing.T) {
 						<container pos="4,4" size="142x192">
 							<widget pos="45,61" size="52x70" type="*widget.Accordion">
 								<widget pos="0,4" size="52x29" type="*widget.Button">
-									<rectangle pos="2,2" size="48x25"/>
+									<rectangle fillColor="button" pos="2,2" size="48x25"/>
 									<text bold pos="28,4" size="11x21">A</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
 								</widget>
@@ -175,12 +175,12 @@ func TestAccordion_Layout(t *testing.T) {
 						<container pos="4,4" size="142x192">
 							<widget pos="23,58" size="95x75" type="*widget.Accordion">
 								<widget pos="0,4" size="95x29" type="*widget.Button">
-									<rectangle pos="2,2" size="91x25"/>
+									<rectangle fillColor="button" pos="2,2" size="91x25"/>
 									<text bold pos="28,4" size="11x21">A</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
 								<widget pos="0,42" size="95x29" type="*widget.Button">
-									<rectangle pos="2,2" size="91x25"/>
+									<rectangle fillColor="button" pos="2,2" size="91x25"/>
 									<text bold pos="28,4" size="11x21">B</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
@@ -211,12 +211,12 @@ func TestAccordion_Layout(t *testing.T) {
 						<container pos="4,4" size="142x192">
 							<widget pos="23,42" size="95x108" type="*widget.Accordion">
 								<widget pos="0,4" size="95x29" type="*widget.Button">
-									<rectangle pos="2,2" size="91x25"/>
+									<rectangle fillColor="button" pos="2,2" size="91x25"/>
 									<text bold pos="28,4" size="11x21">A</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
 								<widget pos="0,42" size="95x29" type="*widget.Button">
-									<rectangle pos="2,2" size="91x25"/>
+									<rectangle fillColor="button" pos="2,2" size="91x25"/>
 									<text bold pos="28,4" size="11x21">B</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
 								</widget>
@@ -246,7 +246,7 @@ func TestAccordion_Layout(t *testing.T) {
 						<container pos="4,4" size="142x192">
 							<widget pos="45,77" size="52x37" type="*widget.Accordion">
 								<widget pos="0,4" size="52x29" type="*widget.Button">
-									<rectangle pos="2,2" size="48x25"/>
+									<rectangle fillColor="button" pos="2,2" size="48x25"/>
 									<text bold pos="28,4" size="11x21">A</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
@@ -271,7 +271,7 @@ func TestAccordion_Layout(t *testing.T) {
 						<container pos="4,4" size="142x192">
 							<widget pos="45,61" size="52x70" type="*widget.Accordion">
 								<widget pos="0,4" size="52x29" type="*widget.Button">
-									<rectangle pos="2,2" size="48x25"/>
+									<rectangle fillColor="button" pos="2,2" size="48x25"/>
 									<text bold pos="28,4" size="11x21">A</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
 								</widget>
@@ -302,12 +302,12 @@ func TestAccordion_Layout(t *testing.T) {
 						<container pos="4,4" size="142x192">
 							<widget pos="23,58" size="95x75" type="*widget.Accordion">
 								<widget pos="0,4" size="95x29" type="*widget.Button">
-									<rectangle pos="2,2" size="91x25"/>
+									<rectangle fillColor="button" pos="2,2" size="91x25"/>
 									<text bold pos="28,4" size="11x21">A</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
 								<widget pos="0,42" size="95x29" type="*widget.Button">
-									<rectangle pos="2,2" size="91x25"/>
+									<rectangle fillColor="button" pos="2,2" size="91x25"/>
 									<text bold pos="28,4" size="11x21">B</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
@@ -339,12 +339,12 @@ func TestAccordion_Layout(t *testing.T) {
 						<container pos="4,4" size="142x192">
 							<widget pos="23,25" size="95x141" type="*widget.Accordion">
 								<widget pos="0,4" size="95x29" type="*widget.Button">
-									<rectangle pos="2,2" size="91x25"/>
+									<rectangle fillColor="button" pos="2,2" size="91x25"/>
 									<text bold pos="28,4" size="11x21">A</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
 								</widget>
 								<widget pos="0,75" size="95x29" type="*widget.Button">
-									<rectangle pos="2,2" size="91x25"/>
+									<rectangle fillColor="button" pos="2,2" size="91x25"/>
 									<text bold pos="28,4" size="11x21">B</text>
 									<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="20x21"/>
 								</widget>

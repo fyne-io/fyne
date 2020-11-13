@@ -36,7 +36,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -55,7 +55,7 @@ func TestSelectEntry_Disableable(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -163,7 +163,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -186,7 +186,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -235,7 +235,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 						<text pos="4,4" size="134x21">B</text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -254,7 +254,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 						<text pos="4,4" size="134x21">B</text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -303,7 +303,7 @@ func TestSelectEntry_DropDown(t *testing.T) {
 						<text pos="4,4" size="134x21">C</text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -338,7 +338,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -361,7 +361,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -414,7 +414,7 @@ func TestSelectEntry_DropDownResize(t *testing.T) {
 						<text pos="4,4" size="114x21"></text>
 					</widget>
 					<widget pos="82,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -547,7 +547,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -601,7 +601,7 @@ func TestSelectEntry_SetOptions(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>
@@ -668,7 +668,7 @@ func TestSelectEntry_SetOptions_Empty(t *testing.T) {
 						<text pos="4,4" size="134x21"></text>
 					</widget>
 					<widget pos="102,8" size="20x20" type="*widget.Button">
-						<rectangle pos="2,2" size="16x16"/>
+						<rectangle fillColor="button" pos="2,2" size="16x16"/>
 						<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize"/>
 					</widget>
 				</widget>

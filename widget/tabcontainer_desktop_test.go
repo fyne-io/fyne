@@ -55,14 +55,14 @@ func TestTabContainer_ChangeItemContent(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -76,14 +76,14 @@ func TestTabContainer_ChangeItemContent(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -129,7 +129,7 @@ func TestTabContainer_ChangeItemIcon(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="28x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="28x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -153,7 +153,7 @@ func TestTabContainer_ChangeItemIcon(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="28x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="28x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -177,7 +177,7 @@ func TestTabContainer_ChangeItemIcon(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="28x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="28x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -206,14 +206,14 @@ func TestTabContainer_ChangeItemText(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -230,14 +230,14 @@ func TestTabContainer_ChangeItemText(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget size="63x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="47x21">New 1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="47x21">New 1</text>
 						</widget>
 						<widget pos="67,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="63x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="63x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -254,14 +254,14 @@ func TestTabContainer_ChangeItemText(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget size="63x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="47x21">New 1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="47x21">New 1</text>
 						</widget>
 						<widget pos="67,0" size="63x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="47x21">New 2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="63x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="63x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -289,11 +289,11 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 					</widget>
 					<container size="300x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -312,14 +312,14 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 					</widget>
 					<container size="300x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -337,11 +337,11 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 					</widget>
 					<container size="300x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -360,11 +360,11 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 					</widget>
 					<container size="300x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test2</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -386,7 +386,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 					</widget>
 					<container size="300x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test2</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test2</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test3</text>
@@ -399,7 +399,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -423,7 +423,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 					</widget>
 					<container size="300x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test6</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test6</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test7</text>
@@ -433,7 +433,7 @@ func TestTabContainer_DynamicTabs(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="300x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -462,14 +462,14 @@ func TestTabContainer_HoverButtons(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -483,14 +483,14 @@ func TestTabContainer_HoverButtons(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget backgroundColor="hover" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -504,14 +504,14 @@ func TestTabContainer_HoverButtons(t *testing.T) {
 					</widget>
 					<container size="150x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget backgroundColor="hover" pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -554,12 +554,12 @@ func TestTabContainer_Layout(t *testing.T) {
 							<circle fillColor="background" pos="0,33" size="150x117"/>
 							<container size="150x29">
 								<widget size="82x29" type="*widget.tabButton">
-									<text alignment="center" bold color="focus" pos="32,4" size="42x21">Text1</text>
+									<text alignment="center" bold color="primary" pos="32,4" size="42x21">Text1</text>
 									<image pos="8,4" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-							<rectangle fillColor="focus" pos="0,29" size="82x4"/>
+							<rectangle fillColor="primary" pos="0,29" size="82x4"/>
 						</widget>
 					</content>
 				</canvas>
@@ -576,11 +576,11 @@ func TestTabContainer_Layout(t *testing.T) {
 							<circle fillColor="background" pos="0,33" size="150x117"/>
 							<container size="150x29">
 								<widget size="58x29" type="*widget.tabButton">
-									<text alignment="center" bold color="focus" pos="8,4" size="42x21">Text2</text>
+									<text alignment="center" bold color="primary" pos="8,4" size="42x21">Text2</text>
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-							<rectangle fillColor="focus" pos="0,29" size="58x4"/>
+							<rectangle fillColor="primary" pos="0,29" size="58x4"/>
 						</widget>
 					</content>
 				</canvas>
@@ -601,7 +601,7 @@ func TestTabContainer_Layout(t *testing.T) {
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="0,29" size="150x4"/>
-							<rectangle fillColor="focus" pos="0,29" size="28x4"/>
+							<rectangle fillColor="primary" pos="0,29" size="28x4"/>
 						</widget>
 					</content>
 				</canvas>
@@ -618,12 +618,12 @@ func TestTabContainer_Layout(t *testing.T) {
 							<circle fillColor="background" size="150x117"/>
 							<container pos="0,121" size="150x29">
 								<widget size="82x29" type="*widget.tabButton">
-									<text alignment="center" bold color="focus" pos="32,4" size="42x21">Text1</text>
+									<text alignment="center" bold color="primary" pos="32,4" size="42x21">Text1</text>
 									<image pos="8,4" rsc="cancelIcon" size="iconInlineSize" themed="primary"/>
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="0,117" size="150x4"/>
-							<rectangle fillColor="focus" pos="0,117" size="82x4"/>
+							<rectangle fillColor="primary" pos="0,117" size="82x4"/>
 						</widget>
 					</content>
 				</canvas>
@@ -640,11 +640,11 @@ func TestTabContainer_Layout(t *testing.T) {
 							<circle fillColor="background" size="150x117"/>
 							<container pos="0,121" size="150x29">
 								<widget size="58x29" type="*widget.tabButton">
-									<text alignment="center" bold color="focus" pos="8,4" size="42x21">Text2</text>
+									<text alignment="center" bold color="primary" pos="8,4" size="42x21">Text2</text>
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="0,117" size="150x4"/>
-							<rectangle fillColor="focus" pos="0,117" size="58x4"/>
+							<rectangle fillColor="primary" pos="0,117" size="58x4"/>
 						</widget>
 					</content>
 				</canvas>
@@ -665,7 +665,7 @@ func TestTabContainer_Layout(t *testing.T) {
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="0,117" size="150x4"/>
-							<rectangle fillColor="focus" pos="0,117" size="28x4"/>
+							<rectangle fillColor="primary" pos="0,117" size="28x4"/>
 						</widget>
 					</content>
 				</canvas>
@@ -682,12 +682,12 @@ func TestTabContainer_Layout(t *testing.T) {
 							<circle fillColor="background" pos="54,0" size="96x150"/>
 							<container size="50x150">
 								<widget size="50x73" type="*widget.tabButton">
-									<text alignment="center" bold color="focus" pos="4,48" size="42x21">Text1</text>
+									<text alignment="center" bold color="primary" pos="4,48" size="42x21">Text1</text>
 									<image pos="5,4" rsc="cancelIcon" size="40x40" themed="primary"/>
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="50,0" size="4x150"/>
-							<rectangle fillColor="focus" pos="50,0" size="4x73"/>
+							<rectangle fillColor="primary" pos="50,0" size="4x73"/>
 						</widget>
 					</content>
 				</canvas>
@@ -704,11 +704,11 @@ func TestTabContainer_Layout(t *testing.T) {
 							<circle fillColor="background" pos="54,0" size="96x150"/>
 							<container size="50x150">
 								<widget size="50x29" type="*widget.tabButton">
-									<text alignment="center" bold color="focus" pos="4,4" size="42x21">Text2</text>
+									<text alignment="center" bold color="primary" pos="4,4" size="42x21">Text2</text>
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="50,0" size="4x150"/>
-							<rectangle fillColor="focus" pos="50,0" size="4x29"/>
+							<rectangle fillColor="primary" pos="50,0" size="4x29"/>
 						</widget>
 					</content>
 				</canvas>
@@ -729,7 +729,7 @@ func TestTabContainer_Layout(t *testing.T) {
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="48,0" size="4x150"/>
-							<rectangle fillColor="focus" pos="48,0" size="4x48"/>
+							<rectangle fillColor="primary" pos="48,0" size="4x48"/>
 						</widget>
 					</content>
 				</canvas>
@@ -746,12 +746,12 @@ func TestTabContainer_Layout(t *testing.T) {
 							<circle fillColor="background" size="96x150"/>
 							<container pos="100,0" size="50x150">
 								<widget size="50x73" type="*widget.tabButton">
-									<text alignment="center" bold color="focus" pos="4,48" size="42x21">Text1</text>
+									<text alignment="center" bold color="primary" pos="4,48" size="42x21">Text1</text>
 									<image pos="5,4" rsc="cancelIcon" size="40x40" themed="primary"/>
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="96,0" size="4x150"/>
-							<rectangle fillColor="focus" pos="96,0" size="4x73"/>
+							<rectangle fillColor="primary" pos="96,0" size="4x73"/>
 						</widget>
 					</content>
 				</canvas>
@@ -768,11 +768,11 @@ func TestTabContainer_Layout(t *testing.T) {
 							<circle fillColor="background" size="96x150"/>
 							<container pos="100,0" size="50x150">
 								<widget size="50x29" type="*widget.tabButton">
-									<text alignment="center" bold color="focus" pos="4,4" size="42x21">Text2</text>
+									<text alignment="center" bold color="primary" pos="4,4" size="42x21">Text2</text>
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="96,0" size="4x150"/>
-							<rectangle fillColor="focus" pos="96,0" size="4x29"/>
+							<rectangle fillColor="primary" pos="96,0" size="4x29"/>
 						</widget>
 					</content>
 				</canvas>
@@ -793,7 +793,7 @@ func TestTabContainer_Layout(t *testing.T) {
 								</widget>
 							</container>
 							<rectangle fillColor="shadow" pos="98,0" size="4x150"/>
-							<rectangle fillColor="focus" pos="98,0" size="4x48"/>
+							<rectangle fillColor="primary" pos="98,0" size="4x48"/>
 						</widget>
 					</content>
 				</canvas>
@@ -834,7 +834,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 					</widget>
 					<container size="179x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
@@ -844,7 +844,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="179x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -858,7 +858,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 					</widget>
 					<container size="49x95">
 						<widget size="49x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="4,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="4,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="0,33" size="49x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="4,4" size="41x21">Test2</text>
@@ -868,7 +868,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="49,0" size="4x95"/>
-					<rectangle fillColor="focus" pos="49,0" size="4x29"/>
+					<rectangle fillColor="primary" pos="49,0" size="4x29"/>
 				</widget>
 			</content>
 		</canvas>
@@ -882,7 +882,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 					</widget>
 					<container pos="0,33" size="179x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
@@ -892,7 +892,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="179x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -906,7 +906,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 					</widget>
 					<container pos="56,0" size="49x95">
 						<widget size="49x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="4,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="4,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="0,33" size="49x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="4,4" size="41x21">Test2</text>
@@ -916,7 +916,7 @@ func TestTabContainer_SetTabLocation(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="52,0" size="4x95"/>
-					<rectangle fillColor="focus" pos="52,0" size="4x29"/>
+					<rectangle fillColor="primary" pos="52,0" size="4x29"/>
 				</widget>
 			</content>
 		</canvas>
@@ -964,7 +964,7 @@ func TestTabContainer_Tapped(t *testing.T) {
 					</widget>
 					<container size="200x29">
 						<widget size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test1</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
@@ -974,7 +974,7 @@ func TestTabContainer_Tapped(t *testing.T) {
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="200x4"/>
-					<rectangle fillColor="focus" pos="0,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="0,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -991,14 +991,14 @@ func TestTabContainer_Tapped(t *testing.T) {
 							<text alignment="center" bold pos="8,4" size="41x21">Test1</text>
 						</widget>
 						<widget pos="61,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test2</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test2</text>
 						</widget>
 						<widget pos="122,0" size="57x29" type="*widget.tabButton">
 							<text alignment="center" bold pos="8,4" size="41x21">Test3</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="200x4"/>
-					<rectangle fillColor="focus" pos="61,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="61,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>
@@ -1018,11 +1018,11 @@ func TestTabContainer_Tapped(t *testing.T) {
 							<text alignment="center" bold pos="8,4" size="41x21">Test2</text>
 						</widget>
 						<widget pos="122,0" size="57x29" type="*widget.tabButton">
-							<text alignment="center" bold color="focus" pos="8,4" size="41x21">Test3</text>
+							<text alignment="center" bold color="primary" pos="8,4" size="41x21">Test3</text>
 						</widget>
 					</container>
 					<rectangle fillColor="shadow" pos="0,29" size="200x4"/>
-					<rectangle fillColor="focus" pos="122,29" size="57x4"/>
+					<rectangle fillColor="primary" pos="122,29" size="57x4"/>
 				</widget>
 			</content>
 		</canvas>

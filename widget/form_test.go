@@ -135,7 +135,7 @@ func TestForm_Renderer(t *testing.T) {
 								<radialGradient centerOffset="0.5,-0.5" pos="-2,33" size="2x2" startColor="shadow"/>
 								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
 							</widget>
-							<rectangle pos="2,2" size="95x33"/>
+							<rectangle fillColor="button" pos="2,2" size="95x33"/>
 							<text bold pos="36,8" size="51x21">Cancel</text>
 							<image fillMode="contain" pos="12,8" rsc="cancelIcon" size="20x21"/>
 						</widget>
@@ -150,7 +150,7 @@ func TestForm_Renderer(t *testing.T) {
 								<radialGradient centerOffset="0.5,-0.5" pos="-2,33" size="2x2" startColor="shadow"/>
 								<linearGradient angle="270" endColor="shadow" pos="-2,0" size="2x33"/>
 							</widget>
-							<rectangle fillColor="focus" pos="2,2" size="99x33"/>
+							<rectangle fillColor="primary" pos="2,2" size="99x33"/>
 							<text bold color="background" pos="36,8" size="55x21">Submit</text>
 							<image fillMode="contain" pos="12,8" rsc="confirmIcon" size="20x21" themed="inverted"/>
 						</widget>
