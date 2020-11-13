@@ -65,19 +65,21 @@ func TestMenu_Layout(t *testing.T) {
 								</widget>
 								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
 									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
-										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
-											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
-											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-										</widget>
+										<container clip="71x108@10,10" pos="0,4" size="71x116">
+											<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+												<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+												<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
 									</widget>
 								</widget>
 							</widget>
@@ -113,19 +115,21 @@ func TestMenu_Layout(t *testing.T) {
 								</widget>
 								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
 									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
-										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
-											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
-											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-										</widget>
+										<container clip="71x108@10,10" pos="0,4" size="71x116">
+											<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+												<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+												<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
 									</widget>
 								</widget>
 								<widget pos="71,71" size="153x103" type="*widget.Menu">
@@ -141,16 +145,18 @@ func TestMenu_Layout(t *testing.T) {
 									</widget>
 									<widget clip="153x103@81,81" size="153x103" type="*widget.ScrollContainer">
 										<widget clip="153x103@81,81" size="153x103" type="*widget.menuBox">
-											<widget clip="153x103@81,81" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@81,81" pos="8,4" size="72x21">subitem A</text>
-											</widget>
-											<widget clip="153x103@81,81" pos="0,33" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@81,81" pos="8,4" size="72x21">subitem B</text>
-											</widget>
-											<widget clip="153x103@81,81" pos="0,66" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@81,81" pos="8,4" size="117x21">subitem C (long)</text>
-												<image clip="153x103@81,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-											</widget>
+											<container clip="153x103@81,81" pos="0,4" size="153x111">
+												<widget clip="153x103@81,81" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@81,81" pos="8,4" size="72x21">subitem A</text>
+												</widget>
+												<widget clip="153x103@81,81" pos="0,33" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@81,81" pos="8,4" size="72x21">subitem B</text>
+												</widget>
+												<widget clip="153x103@81,81" pos="0,66" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@81,81" pos="8,4" size="117x21">subitem C (long)</text>
+													<image clip="153x103@81,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+												</widget>
+											</container>
 										</widget>
 									</widget>
 									<widget pos="153,66" size="159x70" type="*widget.Menu">
@@ -166,12 +172,14 @@ func TestMenu_Layout(t *testing.T) {
 										</widget>
 										<widget clip="159x70@234,147" size="159x70" type="*widget.ScrollContainer">
 											<widget clip="159x70@234,147" size="159x70" type="*widget.menuBox">
-												<widget clip="159x70@234,147" size="159x29" type="*widget.menuItem">
-													<text clip="159x70@234,147" pos="8,4" size="143x21">subsubitem A (long)</text>
-												</widget>
-												<widget clip="159x70@234,147" pos="0,33" size="159x29" type="*widget.menuItem">
-													<text clip="159x70@234,147" pos="8,4" size="98x21">subsubitem B</text>
-												</widget>
+												<container clip="159x70@234,147" pos="0,4" size="159x78">
+													<widget clip="159x70@234,147" size="159x29" type="*widget.menuItem">
+														<text clip="159x70@234,147" pos="8,4" size="143x21">subsubitem A (long)</text>
+													</widget>
+													<widget clip="159x70@234,147" pos="0,33" size="159x29" type="*widget.menuItem">
+														<text clip="159x70@234,147" pos="8,4" size="98x21">subsubitem B</text>
+													</widget>
+												</container>
 											</widget>
 										</widget>
 									</widget>
@@ -211,19 +219,21 @@ func TestMenu_Layout(t *testing.T) {
 								</widget>
 								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
 									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
-										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
-											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
-											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-										</widget>
+										<container clip="71x108@10,10" pos="0,4" size="71x116">
+											<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+												<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+												<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
 									</widget>
 								</widget>
 							</widget>
@@ -259,19 +269,21 @@ func TestMenu_Layout(t *testing.T) {
 								</widget>
 								<widget clip="71x108@410,10" size="71x108" type="*widget.ScrollContainer">
 									<widget clip="71x108@410,10" size="71x108" type="*widget.menuBox">
-										<widget clip="71x108@410,10" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@410,10" pos="8,4" size="10x21">A</text>
-										</widget>
-										<widget clip="71x108@410,10" pos="0,33" size="71x1" type="*widget.Separator">
-											<rectangle clip="71x108@410,10" fillColor="disabled text" size="71x1"/>
-										</widget>
-										<widget clip="71x108@410,10" pos="0,38" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@410,10" pos="8,4" size="55x21">B (long)</text>
-										</widget>
-										<widget clip="71x108@410,10" pos="0,71" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@410,10" pos="8,4" size="10x21">C</text>
-											<image clip="71x108@410,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-										</widget>
+										<container clip="71x108@410,10" pos="0,4" size="71x116">
+											<widget clip="71x108@410,10" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@410,10" pos="8,4" size="10x21">A</text>
+											</widget>
+											<widget clip="71x108@410,10" pos="0,33" size="71x1" type="*widget.Separator">
+												<rectangle clip="71x108@410,10" fillColor="disabled text" size="71x1"/>
+											</widget>
+											<widget clip="71x108@410,10" pos="0,38" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@410,10" pos="8,4" size="55x21">B (long)</text>
+											</widget>
+											<widget clip="71x108@410,10" pos="0,71" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@410,10" pos="8,4" size="10x21">C</text>
+												<image clip="71x108@410,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
 									</widget>
 								</widget>
 								<widget pos="-153,71" size="153x103" type="*widget.Menu">
@@ -287,16 +299,18 @@ func TestMenu_Layout(t *testing.T) {
 									</widget>
 									<widget clip="153x103@257,81" size="153x103" type="*widget.ScrollContainer">
 										<widget clip="153x103@257,81" size="153x103" type="*widget.menuBox">
-											<widget clip="153x103@257,81" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@257,81" pos="8,4" size="72x21">subitem A</text>
-											</widget>
-											<widget clip="153x103@257,81" pos="0,33" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@257,81" pos="8,4" size="72x21">subitem B</text>
-											</widget>
-											<widget clip="153x103@257,81" pos="0,66" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@257,81" pos="8,4" size="117x21">subitem C (long)</text>
-												<image clip="153x103@257,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-											</widget>
+											<container clip="153x103@257,81" pos="0,4" size="153x111">
+												<widget clip="153x103@257,81" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@257,81" pos="8,4" size="72x21">subitem A</text>
+												</widget>
+												<widget clip="153x103@257,81" pos="0,33" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@257,81" pos="8,4" size="72x21">subitem B</text>
+												</widget>
+												<widget clip="153x103@257,81" pos="0,66" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@257,81" pos="8,4" size="117x21">subitem C (long)</text>
+													<image clip="153x103@257,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+												</widget>
+											</container>
 										</widget>
 									</widget>
 									<widget pos="-159,66" size="159x70" type="*widget.Menu">
@@ -312,12 +326,14 @@ func TestMenu_Layout(t *testing.T) {
 										</widget>
 										<widget clip="159x70@98,147" size="159x70" type="*widget.ScrollContainer">
 											<widget clip="159x70@98,147" size="159x70" type="*widget.menuBox">
-												<widget clip="159x70@98,147" size="159x29" type="*widget.menuItem">
-													<text clip="159x70@98,147" pos="8,4" size="143x21">subsubitem A (long)</text>
-												</widget>
-												<widget clip="159x70@98,147" pos="0,33" size="159x29" type="*widget.menuItem">
-													<text clip="159x70@98,147" pos="8,4" size="98x21">subsubitem B</text>
-												</widget>
+												<container clip="159x70@98,147" pos="0,4" size="159x78">
+													<widget clip="159x70@98,147" size="159x29" type="*widget.menuItem">
+														<text clip="159x70@98,147" pos="8,4" size="143x21">subsubitem A (long)</text>
+													</widget>
+													<widget clip="159x70@98,147" pos="0,33" size="159x29" type="*widget.menuItem">
+														<text clip="159x70@98,147" pos="8,4" size="98x21">subsubitem B</text>
+													</widget>
+												</container>
 											</widget>
 										</widget>
 									</widget>
@@ -355,19 +371,21 @@ func TestMenu_Layout(t *testing.T) {
 								</widget>
 								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
 									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
-										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
-											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
-											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-										</widget>
+										<container clip="71x108@10,10" pos="0,4" size="71x116">
+											<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+												<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+												<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
 									</widget>
 								</widget>
 								<widget pos="37,71" size="153x103" type="*widget.Menu">
@@ -383,16 +401,18 @@ func TestMenu_Layout(t *testing.T) {
 									</widget>
 									<widget clip="153x103@47,81" size="153x103" type="*widget.ScrollContainer">
 										<widget clip="153x103@47,81" size="153x103" type="*widget.menuBox">
-											<widget clip="153x103@47,81" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@47,81" pos="8,4" size="72x21">subitem A</text>
-											</widget>
-											<widget clip="153x103@47,81" pos="0,33" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@47,81" pos="8,4" size="72x21">subitem B</text>
-											</widget>
-											<widget clip="153x103@47,81" pos="0,66" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@47,81" pos="8,4" size="117x21">subitem C (long)</text>
-												<image clip="153x103@47,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-											</widget>
+											<container clip="153x103@47,81" pos="0,4" size="153x111">
+												<widget clip="153x103@47,81" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@47,81" pos="8,4" size="72x21">subitem A</text>
+												</widget>
+												<widget clip="153x103@47,81" pos="0,33" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@47,81" pos="8,4" size="72x21">subitem B</text>
+												</widget>
+												<widget clip="153x103@47,81" pos="0,66" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@47,81" pos="8,4" size="117x21">subitem C (long)</text>
+													<image clip="153x103@47,81" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+												</widget>
+											</container>
 										</widget>
 									</widget>
 									<widget pos="-6,66" size="159x70" type="*widget.Menu">
@@ -408,12 +428,14 @@ func TestMenu_Layout(t *testing.T) {
 										</widget>
 										<widget clip="159x70@41,147" size="159x70" type="*widget.ScrollContainer">
 											<widget clip="159x70@41,147" size="159x70" type="*widget.menuBox">
-												<widget clip="159x70@41,147" size="159x29" type="*widget.menuItem">
-													<text clip="159x70@41,147" pos="8,4" size="143x21">subsubitem A (long)</text>
-												</widget>
-												<widget clip="159x70@41,147" pos="0,33" size="159x29" type="*widget.menuItem">
-													<text clip="159x70@41,147" pos="8,4" size="98x21">subsubitem B</text>
-												</widget>
+												<container clip="159x70@41,147" pos="0,4" size="159x78">
+													<widget clip="159x70@41,147" size="159x29" type="*widget.menuItem">
+														<text clip="159x70@41,147" pos="8,4" size="143x21">subsubitem A (long)</text>
+													</widget>
+													<widget clip="159x70@41,147" pos="0,33" size="159x29" type="*widget.menuItem">
+														<text clip="159x70@41,147" pos="8,4" size="98x21">subsubitem B</text>
+													</widget>
+												</container>
 											</widget>
 										</widget>
 									</widget>
@@ -451,19 +473,21 @@ func TestMenu_Layout(t *testing.T) {
 								</widget>
 								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
 									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
-										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
-											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
-											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-										</widget>
+										<container clip="71x108@10,10" pos="0,4" size="71x116">
+											<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+												<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+												<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
 									</widget>
 								</widget>
 								<widget pos="71,37" size="153x103" type="*widget.Menu">
@@ -479,16 +503,18 @@ func TestMenu_Layout(t *testing.T) {
 									</widget>
 									<widget clip="153x103@81,47" size="153x103" type="*widget.ScrollContainer">
 										<widget clip="153x103@81,47" size="153x103" type="*widget.menuBox">
-											<widget clip="153x103@81,47" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@81,47" pos="8,4" size="72x21">subitem A</text>
-											</widget>
-											<widget clip="153x103@81,47" pos="0,33" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@81,47" pos="8,4" size="72x21">subitem B</text>
-											</widget>
-											<widget clip="153x103@81,47" pos="0,66" size="153x29" type="*widget.menuItem">
-												<text clip="153x103@81,47" pos="8,4" size="117x21">subitem C (long)</text>
-												<image clip="153x103@81,47" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-											</widget>
+											<container clip="153x103@81,47" pos="0,4" size="153x111">
+												<widget clip="153x103@81,47" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@81,47" pos="8,4" size="72x21">subitem A</text>
+												</widget>
+												<widget clip="153x103@81,47" pos="0,33" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@81,47" pos="8,4" size="72x21">subitem B</text>
+												</widget>
+												<widget clip="153x103@81,47" pos="0,66" size="153x29" type="*widget.menuItem">
+													<text clip="153x103@81,47" pos="8,4" size="117x21">subitem C (long)</text>
+													<image clip="153x103@81,47" pos="133,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+												</widget>
+											</container>
 										</widget>
 									</widget>
 									<widget pos="153,33" size="159x70" type="*widget.Menu">
@@ -504,12 +530,14 @@ func TestMenu_Layout(t *testing.T) {
 										</widget>
 										<widget clip="159x70@234,80" size="159x70" type="*widget.ScrollContainer">
 											<widget clip="159x70@234,80" size="159x70" type="*widget.menuBox">
-												<widget clip="159x70@234,80" size="159x29" type="*widget.menuItem">
-													<text clip="159x70@234,80" pos="8,4" size="143x21">subsubitem A (long)</text>
-												</widget>
-												<widget clip="159x70@234,80" pos="0,33" size="159x29" type="*widget.menuItem">
-													<text clip="159x70@234,80" pos="8,4" size="98x21">subsubitem B</text>
-												</widget>
+												<container clip="159x70@234,80" pos="0,4" size="159x78">
+													<widget clip="159x70@234,80" size="159x29" type="*widget.menuItem">
+														<text clip="159x70@234,80" pos="8,4" size="143x21">subsubitem A (long)</text>
+													</widget>
+													<widget clip="159x70@234,80" pos="0,33" size="159x29" type="*widget.menuItem">
+														<text clip="159x70@234,80" pos="8,4" size="98x21">subsubitem B</text>
+													</widget>
+												</container>
 											</widget>
 										</widget>
 									</widget>
@@ -544,19 +572,21 @@ func TestMenu_Layout(t *testing.T) {
 								</widget>
 								<widget clip="71x108@10,10" size="71x108" type="*widget.ScrollContainer">
 									<widget clip="71x108@10,10" size="71x108" type="*widget.menuBox">
-										<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
-											<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
-										</widget>
-										<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
-											<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
-											<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-										</widget>
+										<container clip="71x108@10,10" pos="0,4" size="71x116">
+											<widget clip="71x108@10,10" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">A</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+												<rectangle clip="71x108@10,10" fillColor="disabled text" size="71x1"/>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="55x21">B (long)</text>
+											</widget>
+											<widget clip="71x108@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+												<text clip="71x108@10,10" pos="8,4" size="10x21">C</text>
+												<image clip="71x108@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
 									</widget>
 								</widget>
 							</widget>
@@ -588,19 +618,21 @@ func TestMenu_Layout(t *testing.T) {
 								</widget>
 								<widget clip="71x40@10,10" size="71x40" type="*widget.ScrollContainer">
 									<widget clip="71x40@10,10" size="71x108" type="*widget.menuBox">
-										<widget clip="71x40@10,10" size="71x29" type="*widget.menuItem">
-											<text clip="71x40@10,10" pos="8,4" size="10x21">A</text>
-										</widget>
-										<widget clip="71x40@10,10" pos="0,33" size="71x1" type="*widget.Separator">
-											<rectangle clip="71x40@10,10" fillColor="disabled text" size="71x1"/>
-										</widget>
-										<widget clip="71x40@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
-											<text clip="71x40@10,10" pos="8,4" size="55x21">B (long)</text>
-										</widget>
-										<widget clip="71x40@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
-											<text clip="71x40@10,10" pos="8,4" size="10x21">C</text>
-											<image clip="71x40@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
-										</widget>
+										<container clip="71x40@10,10" pos="0,4" size="71x116">
+											<widget clip="71x40@10,10" size="71x29" type="*widget.menuItem">
+												<text clip="71x40@10,10" pos="8,4" size="10x21">A</text>
+											</widget>
+											<widget clip="71x40@10,10" pos="0,33" size="71x1" type="*widget.Separator">
+												<rectangle clip="71x40@10,10" fillColor="disabled text" size="71x1"/>
+											</widget>
+											<widget clip="71x40@10,10" pos="0,38" size="71x29" type="*widget.menuItem">
+												<text clip="71x40@10,10" pos="8,4" size="55x21">B (long)</text>
+											</widget>
+											<widget clip="71x40@10,10" pos="0,71" size="71x29" type="*widget.menuItem">
+												<text clip="71x40@10,10" pos="8,4" size="10x21">C</text>
+												<image clip="71x40@10,10" pos="51,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+											</widget>
+										</container>
 									</widget>
 									<widget clip="71x40@10,10" pos="65,0" size="6x40" type="*widget.scrollBarArea">
 										<widget clip="71x40@10,10" pos="3,0" size="3x16" type="*widget.scrollBar">
@@ -685,24 +717,26 @@ func TestMenu_Dragging(t *testing.T) {
 						</widget>
 						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
 							<widget clip="28x90@10,10" size="28x202" type="*widget.menuBox">
-								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
-								</widget>
+								<container clip="28x90@10,10" pos="0,4" size="28x210">
+									<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+									</widget>
+								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
 								<widget clip="28x90@10,10" pos="3,0" size="3x40" type="*widget.scrollBar">
@@ -739,24 +773,26 @@ func TestMenu_Dragging(t *testing.T) {
 						</widget>
 						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
 							<widget clip="28x90@10,10" pos="0,-50" size="28x202" type="*widget.menuBox">
-								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
-								</widget>
+								<container clip="28x90@10,10" pos="0,4" size="28x210">
+									<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+									</widget>
+								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
 								<widget clip="28x90@10,10" pos="3,22" size="3x40" type="*widget.scrollBar">
@@ -796,24 +832,26 @@ func TestMenu_Dragging(t *testing.T) {
 						</widget>
 						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
 							<widget clip="28x90@10,10" pos="0,-112" size="28x202" type="*widget.menuBox">
-								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
-								</widget>
+								<container clip="28x90@10,10" pos="0,4" size="28x210">
+									<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+									</widget>
+								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
 								<widget clip="28x90@10,10" pos="3,50" size="3x40" type="*widget.scrollBar">
@@ -850,24 +888,26 @@ func TestMenu_Dragging(t *testing.T) {
 						</widget>
 						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
 							<widget clip="28x90@10,10" pos="0,-50" size="28x202" type="*widget.menuBox">
-								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
-								</widget>
+								<container clip="28x90@10,10" pos="0,4" size="28x210">
+									<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+									</widget>
+								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
 								<widget clip="28x90@10,10" pos="3,22" size="3x40" type="*widget.scrollBar">
@@ -907,24 +947,26 @@ func TestMenu_Dragging(t *testing.T) {
 						</widget>
 						<widget clip="28x90@10,10" size="28x90" type="*widget.ScrollContainer">
 							<widget clip="28x90@10,10" size="28x202" type="*widget.menuBox">
-								<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
-								</widget>
-								<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
-									<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
-								</widget>
+								<container clip="28x90@10,10" pos="0,4" size="28x210">
+									<widget clip="28x90@10,10" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">A</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,33" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">B</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,66" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="10x21">C</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,99" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="12x21">D</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,132" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="9x21">E</text>
+									</widget>
+									<widget clip="28x90@10,10" pos="0,165" size="28x29" type="*widget.menuItem">
+										<text clip="28x90@10,10" pos="8,4" size="8x21">F</text>
+									</widget>
+								</container>
 							</widget>
 							<widget clip="28x90@10,10" pos="22,0" size="6x90" type="*widget.scrollBarArea">
 								<widget clip="28x90@10,10" pos="3,0" size="3x40" type="*widget.scrollBar">
