@@ -56,51 +56,24 @@ func (r *markupRenderer) setColorAttr(attrs map[string]*string, name string, c c
 }
 
 func (r *markupRenderer) setColorAttrWithDefault(attrs map[string]*string, name string, c color.Color, d color.Color) {
-	var value string
-	switch c {
-	case d, nil:
+	if c == nil || c == d {
 		return
-	case theme.BackgroundColor():
-		value = "background"
-	case theme.ButtonColor():
-		value = "button"
-	case theme.DisabledButtonColor():
-		value = "disabled button"
-	case theme.DisabledTextColor():
-		value = "disabled text"
-	case theme.FocusColor():
-		value = "focus"
-	case theme.HoverColor():
-		value = "hover"
-	case theme.PlaceHolderColor():
-		value = "placeholder"
-	case theme.PrimaryColor():
-		value = "primary"
-	case theme.ScrollBarColor():
-		value = "scrollbar"
-	case theme.ShadowColor():
-		value = "shadow"
-	case theme.TextColor():
-		value = "text"
-	case theme.DisabledIconColor():
-		value = "disabled icon"
-	case theme.HyperlinkColor():
-		value = "hyperlink"
-	case theme.IconColor():
-		value = "icon"
-	default:
-		for _, n := range theme.PrimaryColorNames() {
-			if c == theme.PrimaryColorNamed(n) {
-				value = n
-				break
-			}
-		}
-		if value == "" {
-			rd, g, b, a := c.RGBA()
-			value = fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a))
+	}
+
+	if value := knownColor(c); value != "" {
+		r.setStringAttr(attrs, name, value)
+		return
+	}
+
+	for _, n := range theme.PrimaryColorNames() {
+		if c == theme.PrimaryColorNamed(n) {
+			r.setStringAttr(attrs, name, n)
+			return
 		}
 	}
-	attrs[name] = &value
+
+	rd, g, b, a := c.RGBA()
+	r.setStringAttr(attrs, name, fmt.Sprintf("rgba(%d,%d,%d,%d)", uint8(rd), uint8(g), uint8(b), uint8(a)))
 }
 
 func (r *markupRenderer) setFillModeAttr(attrs map[string]*string, name string, m canvas.ImageFill) {
@@ -112,6 +85,8 @@ func (r *markupRenderer) setFillModeAttr(attrs map[string]*string, name string, 
 		fillMode = "contain"
 	case canvas.ImageFillOriginal:
 		fillMode = "original"
+	default:
+		fillMode = fmt.Sprintf("unknown fill mode: %d", m)
 	}
 	r.setStringAttr(attrs, name, fillMode)
 }
@@ -165,166 +140,8 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 	if rsc == nil {
 		return
 	}
-	var value string
-	switch rsc {
-	case theme.CancelIcon():
-		value = "cancelIcon"
-	case theme.CheckButtonCheckedIcon():
-		value = "checkButtonCheckedIcon"
-	case theme.CheckButtonIcon():
-		value = "checkButtonIcon"
-	case theme.ColorAchromaticIcon():
-		value = "colorAchromaticIcon"
-	case theme.ColorChromaticIcon():
-		value = "colorChromaticIcon"
-	case theme.ColorPaletteIcon():
-		value = "colorPaletteIcon"
-	case theme.ComputerIcon():
-		value = "computerIcon"
-	case theme.ConfirmIcon():
-		value = "confirmIcon"
-	case theme.ContentAddIcon():
-		value = "contentAddIcon"
-	case theme.ContentClearIcon():
-		value = "contentClearIcon"
-	case theme.ContentCopyIcon():
-		value = "contentCopyIcon"
-	case theme.ContentCutIcon():
-		value = "contentCutIcon"
-	case theme.ContentPasteIcon():
-		value = "contentPasteIcon"
-	case theme.ContentRedoIcon():
-		value = "contentRedoIcon"
-	case theme.ContentRemoveIcon():
-		value = "contentRemoveIcon"
-	case theme.ContentUndoIcon():
-		value = "contentUndoIcon"
-	case theme.DeleteIcon():
-		value = "deleteIcon"
-	case theme.DocumentCreateIcon():
-		value = "documentCreateIcon"
-	case theme.DocumentIcon():
-		value = "documentIcon"
-	case theme.DocumentPrintIcon():
-		value = "documentPrintIcon"
-	case theme.DocumentSaveIcon():
-		value = "documentSaveIcon"
-	case theme.DownloadIcon():
-		value = "downloadIcon"
-	case theme.ErrorIcon():
-		value = "errorIcon"
-	case theme.FileApplicationIcon():
-		value = "fileApplicationIcon"
-	case theme.FileAudioIcon():
-		value = "fileAudioIcon"
-	case theme.FileIcon():
-		value = "fileIcon"
-	case theme.FileImageIcon():
-		value = "fileImageIcon"
-	case theme.FileTextIcon():
-		value = "fileTextIcon"
-	case theme.FileVideoIcon():
-		value = "fileVideoIcon"
-	case theme.FolderIcon():
-		value = "folderIcon"
-	case theme.FolderNewIcon():
-		value = "folderNewIcon"
-	case theme.FolderOpenIcon():
-		value = "folderOpenIcon"
-	case theme.FyneLogo():
-		value = "fyneLogo"
-	case theme.HelpIcon():
-		value = "helpIcon"
-	case theme.HistoryIcon():
-		value = "historyIcon"
-	case theme.HomeIcon():
-		value = "homeIcon"
-	case theme.InfoIcon():
-		value = "infoIcon"
-	case theme.MailAttachmentIcon():
-		value = "mailAttachementIcon"
-	case theme.MailComposeIcon():
-		value = "mailComposeIcon"
-	case theme.MailForwardIcon():
-		value = "mailForwardIcon"
-	case theme.MailReplyAllIcon():
-		value = "mailReplyAllIcon"
-	case theme.MailReplyIcon():
-		value = "mailReplyIcon"
-	case theme.MailSendIcon():
-		value = "mailSendIcon"
-	case theme.MediaFastForwardIcon():
-		value = "mediaFastForwardIcon"
-	case theme.MediaFastRewindIcon():
-		value = "mediaFastRewindIcon"
-	case theme.MediaPauseIcon():
-		value = "mediaPauseIcon"
-	case theme.MediaPlayIcon():
-		value = "mediaPlayIcon"
-	case theme.MediaRecordIcon():
-		value = "mediaRecordIcon"
-	case theme.MediaReplayIcon():
-		value = "mediaReplayIcon"
-	case theme.MediaSkipNextIcon():
-		value = "mediaSkipNextIcon"
-	case theme.MediaSkipPreviousIcon():
-		value = "mediaSkipPreviousIcon"
-	case theme.MenuDropDownIcon():
-		value = "menuDropDownIcon"
-	case theme.MenuDropUpIcon():
-		value = "menuDropUpIcon"
-	case theme.MenuExpandIcon():
-		value = "menuExpandIcon"
-	case theme.MenuIcon():
-		value = "menuIcon"
-	case theme.MoveDownIcon():
-		value = "moveDownIcon"
-	case theme.MoveUpIcon():
-		value = "moveUpIcon"
-	case theme.NavigateBackIcon():
-		value = "navigateBackIcon"
-	case theme.NavigateNextIcon():
-		value = "navigateNextIcon"
-	case theme.QuestionIcon():
-		value = "questionIcon"
-	case theme.RadioButtonCheckedIcon():
-		value = "radioButtonCheckedIcon"
-	case theme.RadioButtonIcon():
-		value = "radioButtonIcon"
-	case theme.SearchIcon():
-		value = "searchIcon"
-	case theme.SearchReplaceIcon():
-		value = "searchReplaceIcon"
-	case theme.SettingsIcon():
-		value = "settingsIcon"
-	case theme.StorageIcon():
-		value = "storageIcon"
-	case theme.ViewFullScreenIcon():
-		value = "viewFullScreenIcon"
-	case theme.ViewRefreshIcon():
-		value = "viewRefreshIcon"
-	case theme.ViewRestoreIcon():
-		value = "viewRestoreIcon"
-	case theme.VisibilityIcon():
-		value = "visibilityIcon"
-	case theme.VisibilityOffIcon():
-		value = "visibilityOffIcon"
-	case theme.VolumeDownIcon():
-		value = "volumeDownIcon"
-	case theme.VolumeMuteIcon():
-		value = "volumeMuteIcon"
-	case theme.VolumeUpIcon():
-		value = "volumeUpIcon"
-	case theme.WarningIcon():
-		value = "warningIcon"
-	case theme.ZoomFitIcon():
-		value = "zoomFitIcon"
-	case theme.ZoomInIcon():
-		value = "zoomInIcon"
-	case theme.ZoomOutIcon():
-		value = "zoomOutIcon"
-	}
-	if value != "" {
+
+	if value := knownResource(rsc); value != "" {
 		r.setStringAttr(attrs, name, value)
 		return
 	}
@@ -345,6 +162,7 @@ func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, 
 		r.setStringAttr(attrs, name, rsc.Name())
 		return
 	}
+
 	// That’s some magic to access the private `source` field of the themed resource.
 	v := reflect.ValueOf(rsc).Elem().Field(0)
 	src := reflect.NewAt(v.Type(), unsafe.Pointer(v.UnsafeAddr())).Elem().Interface().(fyne.Resource)
@@ -359,6 +177,8 @@ func (r *markupRenderer) setScaleModeAttr(attrs map[string]*string, name string,
 		// default mode, don’t add an attr
 	case canvas.ImageScalePixels:
 		scaleMode = "pixels"
+	default:
+		scaleMode = fmt.Sprintf("unknown scale mode: %d", m)
 	}
 	r.setStringAttr(attrs, name, scaleMode)
 }
@@ -571,6 +391,108 @@ func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 	r.writeTag("widget", false, attrs)
 	r.w.WriteRune('\n')
 	r.indentation++
+}
+
+func knownColor(c color.Color) string {
+	return map[color.Color]string{
+		theme.BackgroundColor():     "background",
+		theme.ButtonColor():         "button",
+		theme.DisabledButtonColor(): "disabled button",
+		theme.DisabledTextColor():   "disabled text",
+		theme.FocusColor():          "focus",
+		theme.HoverColor():          "hover",
+		theme.PlaceHolderColor():    "placeholder",
+		theme.PrimaryColor():        "primary",
+		theme.ScrollBarColor():      "scrollbar",
+		theme.ShadowColor():         "shadow",
+		theme.TextColor():           "text",
+		theme.DisabledIconColor():   "disabled icon",
+		theme.HyperlinkColor():      "hyperlink",
+		theme.IconColor():           "icon",
+	}[c]
+}
+
+func knownResource(rsc fyne.Resource) string {
+	return map[fyne.Resource]string{
+		theme.CancelIcon():             "cancelIcon",
+		theme.CheckButtonCheckedIcon(): "checkButtonCheckedIcon",
+		theme.CheckButtonIcon():        "checkButtonIcon",
+		theme.ColorAchromaticIcon():    "colorAchromaticIcon",
+		theme.ColorChromaticIcon():     "colorChromaticIcon",
+		theme.ColorPaletteIcon():       "colorPaletteIcon",
+		theme.ComputerIcon():           "computerIcon",
+		theme.ConfirmIcon():            "confirmIcon",
+		theme.ContentAddIcon():         "contentAddIcon",
+		theme.ContentClearIcon():       "contentClearIcon",
+		theme.ContentCopyIcon():        "contentCopyIcon",
+		theme.ContentCutIcon():         "contentCutIcon",
+		theme.ContentPasteIcon():       "contentPasteIcon",
+		theme.ContentRedoIcon():        "contentRedoIcon",
+		theme.ContentRemoveIcon():      "contentRemoveIcon",
+		theme.ContentUndoIcon():        "contentUndoIcon",
+		theme.DeleteIcon():             "deleteIcon",
+		theme.DocumentCreateIcon():     "documentCreateIcon",
+		theme.DocumentIcon():           "documentIcon",
+		theme.DocumentPrintIcon():      "documentPrintIcon",
+		theme.DocumentSaveIcon():       "documentSaveIcon",
+		theme.DownloadIcon():           "downloadIcon",
+		theme.ErrorIcon():              "errorIcon",
+		theme.FileApplicationIcon():    "fileApplicationIcon",
+		theme.FileAudioIcon():          "fileAudioIcon",
+		theme.FileIcon():               "fileIcon",
+		theme.FileImageIcon():          "fileImageIcon",
+		theme.FileTextIcon():           "fileTextIcon",
+		theme.FileVideoIcon():          "fileVideoIcon",
+		theme.FolderIcon():             "folderIcon",
+		theme.FolderNewIcon():          "folderNewIcon",
+		theme.FolderOpenIcon():         "folderOpenIcon",
+		theme.FyneLogo():               "fyneLogo",
+		theme.HelpIcon():               "helpIcon",
+		theme.HistoryIcon():            "historyIcon",
+		theme.HomeIcon():               "homeIcon",
+		theme.InfoIcon():               "infoIcon",
+		theme.MailAttachmentIcon():     "mailAttachementIcon",
+		theme.MailComposeIcon():        "mailComposeIcon",
+		theme.MailForwardIcon():        "mailForwardIcon",
+		theme.MailReplyAllIcon():       "mailReplyAllIcon",
+		theme.MailReplyIcon():          "mailReplyIcon",
+		theme.MailSendIcon():           "mailSendIcon",
+		theme.MediaFastForwardIcon():   "mediaFastForwardIcon",
+		theme.MediaFastRewindIcon():    "mediaFastRewindIcon",
+		theme.MediaPauseIcon():         "mediaPauseIcon",
+		theme.MediaPlayIcon():          "mediaPlayIcon",
+		theme.MediaRecordIcon():        "mediaRecordIcon",
+		theme.MediaReplayIcon():        "mediaReplayIcon",
+		theme.MediaSkipNextIcon():      "mediaSkipNextIcon",
+		theme.MediaSkipPreviousIcon():  "mediaSkipPreviousIcon",
+		theme.MenuDropDownIcon():       "menuDropDownIcon",
+		theme.MenuDropUpIcon():         "menuDropUpIcon",
+		theme.MenuExpandIcon():         "menuExpandIcon",
+		theme.MenuIcon():               "menuIcon",
+		theme.MoveDownIcon():           "moveDownIcon",
+		theme.MoveUpIcon():             "moveUpIcon",
+		theme.NavigateBackIcon():       "navigateBackIcon",
+		theme.NavigateNextIcon():       "navigateNextIcon",
+		theme.QuestionIcon():           "questionIcon",
+		theme.RadioButtonCheckedIcon(): "radioButtonCheckedIcon",
+		theme.RadioButtonIcon():        "radioButtonIcon",
+		theme.SearchIcon():             "searchIcon",
+		theme.SearchReplaceIcon():      "searchReplaceIcon",
+		theme.SettingsIcon():           "settingsIcon",
+		theme.StorageIcon():            "storageIcon",
+		theme.ViewFullScreenIcon():     "viewFullScreenIcon",
+		theme.ViewRefreshIcon():        "viewRefreshIcon",
+		theme.ViewRestoreIcon():        "viewRestoreIcon",
+		theme.VisibilityIcon():         "visibilityIcon",
+		theme.VisibilityOffIcon():      "visibilityOffIcon",
+		theme.VolumeDownIcon():         "volumeDownIcon",
+		theme.VolumeMuteIcon():         "volumeMuteIcon",
+		theme.VolumeUpIcon():           "volumeUpIcon",
+		theme.WarningIcon():            "warningIcon",
+		theme.ZoomFitIcon():            "zoomFitIcon",
+		theme.ZoomInIcon():             "zoomInIcon",
+		theme.ZoomOutIcon():            "zoomOutIcon",
+	}[rsc]
 }
 
 func sortedKeys(m map[string]*string) []string {
