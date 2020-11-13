@@ -178,7 +178,7 @@ var (
 	checked, unchecked, radioButton, radioButtonChecked                             *ThemedResource
 	colorAchromatic, colorChromatic, colorPalette                                   *ThemedResource
 	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                *ThemedResource
-	contentRedo, contentUndo, info, question, warning, errori                       *ThemedResource
+	contentClear, contentRedo, contentUndo, info, question, warning, errori         *ThemedResource
 	document, documentCreate, documentPrint, documentSave                           *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     *ThemedResource
 	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        *ThemedResource
@@ -186,7 +186,7 @@ var (
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
 	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
 	folder, folderNew, folderOpen, help, history, home, settings, storage           *ThemedResource
-	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               *ThemedResource
+	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut, viewRestore  *ThemedResource
 	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
 )
 
@@ -205,6 +205,7 @@ func init() {
 	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes, nil)
 
 	contentAdd = NewThemedResource(contentaddIconRes, nil)
+	contentClear = NewThemedResource(cancelIconRes, nil)
 	contentRemove = NewThemedResource(contentremoveIconRes, nil)
 	contentCut = NewThemedResource(contentcutIconRes, nil)
 	contentCopy = NewThemedResource(contentcopyIconRes, nil)
@@ -265,6 +266,7 @@ func init() {
 
 	viewFullScreen = NewThemedResource(viewfullscreenIconRes, nil)
 	viewRefresh = NewThemedResource(viewrefreshIconRes, nil)
+	viewRestore = NewThemedResource(viewzoomfitIconRes, nil)
 	viewZoomFit = NewThemedResource(viewzoomfitIconRes, nil)
 	viewZoomIn = NewThemedResource(viewzoominIconRes, nil)
 	viewZoomOut = NewThemedResource(viewzoomoutIconRes, nil)
@@ -353,7 +355,7 @@ func ContentRemoveIcon() fyne.Resource {
 
 // ContentClearIcon returns a resource containing the standard content clear icon for the current theme
 func ContentClearIcon() fyne.Resource {
-	return cancel
+	return contentClear
 }
 
 // ContentCutIcon returns a resource containing the standard content cut icon for the current theme
@@ -608,7 +610,7 @@ func ViewFullScreenIcon() fyne.Resource {
 
 // ViewRestoreIcon returns a resource containing the standard exit fullscreen icon for the current theme
 func ViewRestoreIcon() fyne.Resource {
-	return viewZoomFit
+	return viewRestore
 }
 
 // ViewRefreshIcon returns a resource containing the standard refresh icon for the current theme
