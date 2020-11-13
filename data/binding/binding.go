@@ -46,7 +46,7 @@ func (b *base) AddListener(l DataItemListener) {
 	defer b.lock.Unlock()
 
 	b.listeners = append(b.listeners, l)
-	l.DataChanged(b.data)
+	queueItem(l.DataChanged, b.data)
 }
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.
@@ -72,6 +72,6 @@ func (b *base) trigger(i DataItem) {
 	defer b.lock.RUnlock()
 
 	for _, listen := range b.listeners {
-		listen.DataChanged(i)
+		queueItem(listen.DataChanged, i)
 	}
 }
