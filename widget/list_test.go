@@ -31,6 +31,7 @@ func TestNewList(t *testing.T) {
 }
 
 func TestList_Resize(t *testing.T) {
+	defer test.NewApp()
 	list, w := setupList(t)
 	template := newListItem(fyne.NewContainerWithLayout(layout.NewHBoxLayout(), NewIcon(theme.DocumentIcon()), NewLabel("Template Object")), nil)
 
@@ -313,6 +314,9 @@ func TestList_Resize(t *testing.T) {
 }
 
 func TestList_OffsetChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))
@@ -596,6 +600,9 @@ func TestList_Unselect(t *testing.T) {
 }
 
 func TestList_DataChange(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	list, w := setupList(t)
 	children := test.WidgetRenderer(list).(*listRenderer).children
 
@@ -794,6 +801,7 @@ func TestList_DataChange(t *testing.T) {
 }
 
 func TestList_ThemeChange(t *testing.T) {
+	defer test.NewApp()
 	list, w := setupList(t)
 
 	test.AssertImageMatches(t, "list/list_initial.png", w.Canvas().Capture())
@@ -806,6 +814,9 @@ func TestList_ThemeChange(t *testing.T) {
 }
 
 func TestList_SmallList(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	var data []string
 	data = append(data, "Test Item 0")
 
@@ -875,6 +886,7 @@ func TestList_SmallList(t *testing.T) {
 }
 
 func TestList_ClearList(t *testing.T) {
+	defer test.NewApp()
 	list, w := setupList(t)
 	assert.Equal(t, 1000, list.Length())
 
@@ -908,6 +920,9 @@ func TestList_ClearList(t *testing.T) {
 }
 
 func TestList_RemoveItem(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	var data []string
 	data = append(data, "Test Item 0")
 	data = append(data, "Test Item 1")
@@ -1016,6 +1031,7 @@ func changeData(list *List) {
 }
 
 func setupList(t *testing.T) (*List, fyne.Window) {
+	test.NewApp()
 	list := createList(1000)
 	w := test.NewWindow(list)
 	w.Resize(fyne.NewSize(200, 400))

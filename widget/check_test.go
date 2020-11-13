@@ -6,14 +6,12 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
 func TestCheck_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		text     string

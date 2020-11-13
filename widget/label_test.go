@@ -158,6 +158,9 @@ func TestLabel_CreateRendererDoesNotAffectSize(t *testing.T) {
 }
 
 func TestLabel_ChangeTruncate(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	c := test.NewCanvasWithPainter(software.NewPainter())
 	c.SetPadded(false)
 	text := NewLabel("Hello")

@@ -2929,9 +2929,8 @@ func TestPasswordEntry_Placeholder(t *testing.T) {
 }
 
 func TestPasswordEntry_Reveal(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	initial := `
 		<canvas padded size="150x100">
@@ -3127,8 +3126,7 @@ func getClickPosition(str string, row int) *fyne.PointEvent {
 }
 
 func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
-	app := test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.NewApp()
 
 	entry := &widget.Entry{MultiLine: multiLine}
 	w := test.NewWindow(entry)
@@ -3179,8 +3177,7 @@ func setupImageTest(t *testing.T, multiLine bool) (*widget.Entry, fyne.Window) {
 }
 
 func setupPasswordTest(t *testing.T) (*widget.Entry, fyne.Window) {
-	app := test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
+	test.NewApp()
 
 	entry := widget.NewPasswordEntry()
 	w := test.NewWindow(entry)

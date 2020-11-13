@@ -10,14 +10,12 @@ import (
 	"fyne.io/fyne/canvas"
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
 func TestMenu_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.DarkTheme())
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()
@@ -676,7 +674,6 @@ func TestMenu_Layout(t *testing.T) {
 func TestMenu_Scrolling(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.DarkTheme())
 
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	defer w.Close()

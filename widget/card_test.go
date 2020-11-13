@@ -34,7 +34,6 @@ func TestCard_SetContent(t *testing.T) {
 
 func TestCard_Layout(t *testing.T) {
 	test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		title, subtitle string

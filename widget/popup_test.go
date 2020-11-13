@@ -26,6 +26,9 @@ func TestNewPopUp(t *testing.T) {
 }
 
 func TestShowPopUp(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 200))
 	require.Nil(t, w.Canvas().Overlays().Top())
@@ -82,6 +85,9 @@ func TestShowPopUpAtPosition(t *testing.T) {
 }
 
 func TestShowModalPopUp(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 200))
 	require.Nil(t, w.Canvas().Overlays().Top())

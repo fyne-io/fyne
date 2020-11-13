@@ -10,6 +10,9 @@ import (
 )
 
 func TestRadio_Layout(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	for name, tt := range map[string]struct {
 		disabled   bool
 		horizontal bool

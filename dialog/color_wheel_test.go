@@ -5,13 +5,11 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 )
 
 func Test_colorWheel_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	wheel := newColorWheel(nil)
 	wheel.SetHSLA(180, 100, 50, 255)

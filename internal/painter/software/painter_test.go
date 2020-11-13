@@ -20,7 +20,7 @@ func makeTestImage(w, h int) image.Image {
 }
 
 func TestPainter_paintCircle(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewCircle(color.Black)
 
 	c := test.NewCanvas()
@@ -33,7 +33,7 @@ func TestPainter_paintCircle(t *testing.T) {
 }
 
 func TestPainter_paintCircleStroke(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewCircle(color.White)
 	obj.StrokeColor = color.Black
 	obj.StrokeWidth = 4
@@ -48,7 +48,7 @@ func TestPainter_paintCircleStroke(t *testing.T) {
 }
 
 func TestPainter_paintGradient_clipped(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	g := canvas.NewRadialGradient(color.NRGBA{R: 200, A: 255}, color.NRGBA{B: 200, A: 255})
 	g.SetMinSize(fyne.NewSize(100, 100))
 	scroll := widget.NewScrollContainer(g)
@@ -79,7 +79,7 @@ func TestPainter_paintImage(t *testing.T) {
 }
 
 func TestPainter_paintImage_clipped(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	img := canvas.NewImageFromImage(makeTestImage(5, 5))
 	img.ScaleMode = canvas.ImageScalePixels
 	img.SetMinSize(fyne.NewSize(100, 100))
@@ -163,7 +163,7 @@ func TestPainter_paintImage_contain(t *testing.T) {
 }
 
 func TestPainter_paintImage_containX(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	img := canvas.NewImageFromImage(makeTestImage(3, 4))
 	img.FillMode = canvas.ImageFillContain
 	img.ScaleMode = canvas.ImageScalePixels
@@ -179,7 +179,7 @@ func TestPainter_paintImage_containX(t *testing.T) {
 }
 
 func TestPainter_paintImage_containY(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	img := canvas.NewImageFromImage(makeTestImage(4, 3))
 	img.FillMode = canvas.ImageFillContain
 	img.ScaleMode = canvas.ImageScalePixels
@@ -195,7 +195,7 @@ func TestPainter_paintImage_containY(t *testing.T) {
 }
 
 func TestPainter_paintLine(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewLine(color.Black)
 	obj.StrokeWidth = 6
 
@@ -252,7 +252,7 @@ func TestPainter_paintRaster_scaled(t *testing.T) {
 }
 
 func TestPainter_paintRectangle_clipped(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	red1 := canvas.NewRectangle(color.NRGBA{R: 200, A: 255})
 	red1.SetMinSize(fyne.NewSize(20, 20))
 	red2 := canvas.NewRectangle(color.NRGBA{R: 150, A: 255})
@@ -290,7 +290,7 @@ func TestPainter_paintRectangle_clipped(t *testing.T) {
 }
 
 func TestPainter_paintRectangle_stroke(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	obj := canvas.NewRectangle(color.Black)
 	obj.StrokeWidth = 5
 	obj.StrokeColor = &color.RGBA{R: 0xFF, G: 0x33, B: 0x33, A: 0xFF}
@@ -305,7 +305,7 @@ func TestPainter_paintRectangle_stroke(t *testing.T) {
 }
 
 func TestPainter_paintText_clipped(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	scroll := widget.NewScrollContainer(widget.NewLabel("some text\nis here\nand here"))
 	scroll.Move(fyne.NewPos(10, 10))
 	scroll.Resize(fyne.NewSize(50, 50))
@@ -321,7 +321,7 @@ func TestPainter_paintText_clipped(t *testing.T) {
 }
 
 func TestPainter_paintWidgetBackground_clipped(t *testing.T) {
-	test.ApplyTheme(t, theme.LightTheme())
+	test.ApplyTheme(t, test.Theme())
 	w := &testWidget{min: fyne.NewSize(100, 100)}
 	scroll := widget.NewScrollContainer(w)
 	scroll.Move(fyne.NewPos(10, 10))

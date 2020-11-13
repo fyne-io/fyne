@@ -8,15 +8,13 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTable_Hovered(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	table := NewTable(
 		func() (int, int) { return 2, 2 },

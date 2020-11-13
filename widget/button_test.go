@@ -120,7 +120,6 @@ func TestButton_Disabled(t *testing.T) {
 func TestButton_Layout(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	shadowMarkup := `
 							<widget pos="2,2" size="138x188" type="*widget.Shadow">
@@ -441,9 +440,8 @@ func TestButton_Layout(t *testing.T) {
 }
 
 func TestButton_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	b := widget.NewButton("Test", func() {})
 	w := test.NewWindow(b)

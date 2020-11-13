@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -81,9 +80,8 @@ func TestForm_AddRemoveButton(t *testing.T) {
 }
 
 func TestForm_Renderer(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	form := &Form{
 		Items: []*FormItem{
@@ -177,9 +175,8 @@ func TestForm_ChangeText(t *testing.T) {
 }
 
 func TestForm_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	form := &Form{
 		Items: []*FormItem{

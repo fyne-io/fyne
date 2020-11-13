@@ -513,8 +513,7 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 }
 
 func setupPopUpMenuTest() (*PopUpMenu, fyne.Window) {
-	app := test.NewApp()
-	app.Settings().SetTheme(theme.DarkTheme())
+	test.NewApp()
 
 	w := test.NewWindow(canvas.NewRectangle(color.NRGBA{G: 150, B: 150, A: 255}))
 	w.Resize(fyne.NewSize(200, 200))
