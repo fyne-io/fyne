@@ -14,7 +14,7 @@ func TestNewColorAnimation(t *testing.T) {
 	stop := color.NRGBA{R: 0xFF, G: 0xFF, B: 0xFF, A: 0xFF}
 
 	var current color.Color
-	anim := NewColorAnimation(start, stop, time.Second, func(c color.Color) {
+	anim := NewColorRGBAAnimation(start, stop, time.Second, func(c color.Color) {
 		current = c
 	})
 

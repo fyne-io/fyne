@@ -10,10 +10,11 @@ import (
 // DurationStandard is the time a standard interface animation will run.
 const DurationStandard = time.Millisecond * 300
 
-// NewColorAnimation sets up a new animation that will transition from the start to stop Color over
-// the specified Duration. The content of fn should apply the color values to an object and refresh it.
+// NewColorRGBAAnimation sets up a new animation that will transition from the start to stop Color over
+// the specified Duration. The colour transition will move linearly through the RGB colour space.
+// The content of fn should apply the color values to an object and refresh it.
 // You should call Start() on the returned animation to start it.
-func NewColorAnimation(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
+func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {

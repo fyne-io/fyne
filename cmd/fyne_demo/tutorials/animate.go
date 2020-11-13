@@ -20,7 +20,7 @@ func makeAnimateCanvas() fyne.CanvasObject {
 	rect := canvas.NewRectangle(color.Black)
 	rect.Resize(fyne.NewSize(410, 140))
 
-	a := canvas.NewColorAnimation(theme.PrimaryColorNamed(theme.ColorBlue), theme.PrimaryColorNamed(theme.ColorGreen),
+	a := canvas.NewColorRGBAAnimation(theme.PrimaryColorNamed(theme.ColorBlue), theme.PrimaryColorNamed(theme.ColorGreen),
 		time.Second*3, func(c color.Color) {
 			rect.FillColor = c
 			canvas.Refresh(rect)
