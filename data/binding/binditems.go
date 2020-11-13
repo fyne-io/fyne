@@ -13,9 +13,7 @@ type Bool interface {
 // NewBool returns a bindable bool value that is managed internally.
 func NewBool() Bool {
 	blank := false
-	b := &boundBool{val: &blank}
-	b.data = b
-	return b
+	return &boundBool{val: &blank}
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
@@ -24,9 +22,7 @@ func BindBool(v *bool) Bool {
 		return NewBool() // never allow a nil value pointer
 	}
 
-	b := &boundBool{val: v}
-	b.data = b
-	return b
+	return &boundBool{val: v}
 }
 
 type boundBool struct {
@@ -52,7 +48,7 @@ func (b *boundBool) Set(val bool) {
 		*b.val = val
 	}
 
-	b.trigger(b)
+	b.trigger()
 }
 
 // Float supports binding a float64 value in a Fyne application
@@ -65,9 +61,7 @@ type Float interface {
 // NewFloat returns a bindable float64 value that is managed internally.
 func NewFloat() Float {
 	blank := 0.0
-	b := &boundFloat{val: &blank}
-	b.data = b
-	return b
+	return &boundFloat{val: &blank}
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
@@ -76,9 +70,7 @@ func BindFloat(v *float64) Float {
 		return NewFloat() // never allow a nil value pointer
 	}
 
-	b := &boundFloat{val: v}
-	b.data = b
-	return b
+	return &boundFloat{val: v}
 }
 
 type boundFloat struct {
@@ -104,7 +96,7 @@ func (b *boundFloat) Set(val float64) {
 		*b.val = val
 	}
 
-	b.trigger(b)
+	b.trigger()
 }
 
 // Int supports binding a int value in a Fyne application
@@ -117,9 +109,7 @@ type Int interface {
 // NewInt returns a bindable int value that is managed internally.
 func NewInt() Int {
 	blank := 0
-	b := &boundInt{val: &blank}
-	b.data = b
-	return b
+	return &boundInt{val: &blank}
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
@@ -128,9 +118,7 @@ func BindInt(v *int) Int {
 		return NewInt() // never allow a nil value pointer
 	}
 
-	b := &boundInt{val: v}
-	b.data = b
-	return b
+	return &boundInt{val: v}
 }
 
 type boundInt struct {
@@ -156,7 +144,7 @@ func (b *boundInt) Set(val int) {
 		*b.val = val
 	}
 
-	b.trigger(b)
+	b.trigger()
 }
 
 // Rune supports binding a rune value in a Fyne application
@@ -169,9 +157,7 @@ type Rune interface {
 // NewRune returns a bindable rune value that is managed internally.
 func NewRune() Rune {
 	blank := rune(0)
-	b := &boundRune{val: &blank}
-	b.data = b
-	return b
+	return &boundRune{val: &blank}
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
@@ -180,9 +166,7 @@ func BindRune(v *rune) Rune {
 		return NewRune() // never allow a nil value pointer
 	}
 
-	b := &boundRune{val: v}
-	b.data = b
-	return b
+	return &boundRune{val: v}
 }
 
 type boundRune struct {
@@ -208,7 +192,7 @@ func (b *boundRune) Set(val rune) {
 		*b.val = val
 	}
 
-	b.trigger(b)
+	b.trigger()
 }
 
 // String supports binding a string value in a Fyne application
@@ -221,9 +205,7 @@ type String interface {
 // NewString returns a bindable string value that is managed internally.
 func NewString() String {
 	blank := ""
-	b := &boundString{val: &blank}
-	b.data = b
-	return b
+	return &boundString{val: &blank}
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
@@ -232,9 +214,7 @@ func BindString(v *string) String {
 		return NewString() // never allow a nil value pointer
 	}
 
-	b := &boundString{val: v}
-	b.data = b
-	return b
+	return &boundString{val: v}
 }
 
 type boundString struct {
@@ -260,5 +240,5 @@ func (b *boundString) Set(val string) {
 		*b.val = val
 	}
 
-	b.trigger(b)
+	b.trigger()
 }

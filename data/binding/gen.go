@@ -22,9 +22,7 @@ type {{ .Name }} interface {
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
-	b := &bound{{ .Name }}{val: &blank}
-	b.data = b
-	return b
+	return &bound{{ .Name }}{val: &blank}
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
@@ -33,9 +31,7 @@ func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }} {
 		return New{{ .Name }}() // never allow a nil value pointer
 	}
 
-	b := &bound{{ .Name }}{val: v}
-	b.data = b
-	return b
+	return &bound{{ .Name }}{val: v}
 }
 
 type bound{{ .Name }} struct {
@@ -61,7 +57,7 @@ func (b *bound{{ .Name }}) Set(val {{ .Type }}) {
 		*b.val = val
 	}
 
-	b.trigger(b)
+	b.trigger()
 }
 `
 
@@ -85,7 +81,6 @@ func {{ .Name }}ToString(v {{ .Name }}) String {
 // the string will parse and set the {{ .Name }} if the string matches the format and its parse was successful.
 func {{ .Name }}ToStringWithFormat(v {{ .Name }}, format string) String {
 	str := &stringFrom{{ .Name }}{from: v, format: format}
-	str.data = str
 	v.AddListener(str)
 	return str
 }
@@ -108,11 +103,11 @@ func (s *stringFrom{{ .Name }}) Set(str string) {
 	}
 	s.from.Set(val)
 
-	s.trigger(s)
+	s.trigger()
 }
 
-func (s *stringFrom{{ .Name }}) DataChanged(_ DataItem) {
-	s.trigger(s)
+func (s *stringFrom{{ .Name }}) DataChanged() {
+	s.trigger()
 }
 `
 

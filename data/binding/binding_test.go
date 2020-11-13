@@ -15,20 +15,20 @@ func TestBase_AddListener(t *testing.T) {
 	assert.Equal(t, 0, len(data.listeners))
 
 	called := false
-	fn := NewDataItemListener(func(DataItem) {
+	fn := NewDataItemListener(func() {
 		called = true
 	})
 	data.AddListener(fn)
 	assert.Equal(t, 1, len(data.listeners))
 
 	waitForItems()
-	data.trigger(data)
+	data.trigger()
 	assert.True(t, called)
 }
 
 func TestBase_RemoveListener(t *testing.T) {
 	called := false
-	fn := NewDataItemListener(func(DataItem) {
+	fn := NewDataItemListener(func() {
 		called = true
 	})
 	data := &simpleItem{}
@@ -39,17 +39,17 @@ func TestBase_RemoveListener(t *testing.T) {
 	assert.Equal(t, 0, len(data.listeners))
 
 	waitForItems()
-	data.trigger(data)
+	data.trigger()
 	assert.False(t, called)
 }
 
 func TestNewDataItemListener(t *testing.T) {
 	called := false
-	fn := NewDataItemListener(func(DataItem) {
+	fn := NewDataItemListener(func() {
 		called = true
 	})
 
 	waitForItems()
-	fn.DataChanged(nil)
+	fn.DataChanged()
 	assert.True(t, called)
 }

@@ -27,7 +27,7 @@ func NewLabel(text string) *Label {
 func NewLabelWithData(data binding.String) *Label {
 	label := NewLabel(data.Get())
 
-	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
+	data.AddListener(binding.NewDataItemListener(func() {
 		label.Text = data.Get()
 		label.Refresh()
 	}))

@@ -8,12 +8,12 @@ import (
 
 func TestQueueItem(t *testing.T) {
 	called := 0
-	queueItem(func(DataItem) {
+	queueItem(func() {
 		called++
-	}, nil)
-	queueItem(func(DataItem) {
+	})
+	queueItem(func() {
 		called++
-	}, nil)
+	})
 
 	waitForItems()
 	assert.Equal(t, 2, called)

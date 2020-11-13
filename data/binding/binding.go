@@ -18,24 +18,23 @@ type DataItem interface {
 // DataItemListener is any object that can register for changes in a bindable DataItem.
 // See NewDataItemListener to define a new listener using just an inline function.
 type DataItemListener interface {
-	DataChanged(DataItem)
+	DataChanged()
 }
 
 // NewDataItemListener is a helper function that creates a new listener type from a simple callback function.
-func NewDataItemListener(fn func(DataItem)) DataItemListener {
+func NewDataItemListener(fn func()) DataItemListener {
 	return &listener{fn}
 }
 
 type listener struct {
-	callback func(DataItem)
+	callback func()
 }
 
-func (l *listener) DataChanged(i DataItem) {
-	l.callback(i)
+func (l *listener) DataChanged() {
+	l.callback()
 }
 
 type base struct {
-	data      DataItem
 	listeners []DataItemListener
 	lock      sync.RWMutex
 }
@@ -46,7 +45,7 @@ func (b *base) AddListener(l DataItemListener) {
 	defer b.lock.Unlock()
 
 	b.listeners = append(b.listeners, l)
-	queueItem(l.DataChanged, b.data)
+	queueItem(l.DataChanged)
 }
 
 // RemoveListener should be called if the listener is no longer interested in being informed of data change events.
@@ -67,11 +66,11 @@ func (b *base) RemoveListener(l DataItemListener) {
 	}
 }
 
-func (b *base) trigger(i DataItem) {
+func (b *base) trigger() {
 	b.lock.RLock()
 	defer b.lock.RUnlock()
 
 	for _, listen := range b.listeners {
-		queueItem(listen.DataChanged, i)
+		queueItem(listen.DataChanged)
 	}
 }

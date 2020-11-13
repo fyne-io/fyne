@@ -83,7 +83,7 @@ func NewEntry() *Entry {
 func NewEntryWithData(data binding.String) *Entry {
 	entry := NewEntry()
 
-	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
+	data.AddListener(binding.NewDataItemListener(func() {
 		entry.Text = data.Get()
 		if cache.IsRendered(entry) {
 			entry.Refresh()

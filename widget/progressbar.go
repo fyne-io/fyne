@@ -130,8 +130,8 @@ func NewProgressBar() *ProgressBar {
 func NewProgressBarWithData(data binding.Float) *ProgressBar {
 	p := NewProgressBar()
 
-	data.AddListener(binding.NewDataItemListener(func(d binding.DataItem) {
-		p.Value = d.(binding.Float).Get()
+	data.AddListener(binding.NewDataItemListener(func() {
+		p.Value = data.Get()
 		if cache.IsRendered(p) {
 			p.Refresh()
 		}

@@ -208,7 +208,7 @@ func NewCheckWithData(label string, data binding.Bool) *Check {
 		data.Set(b)
 	})
 
-	data.AddListener(binding.NewDataItemListener(func(binding.DataItem) {
+	data.AddListener(binding.NewDataItemListener(func() {
 		check.Checked = data.Get()
 		if cache.IsRendered(check) {
 			check.Refresh()

@@ -3,13 +3,12 @@ package binding
 var itemQueue = make(chan itemData, 1024)
 
 type itemData struct {
-	fn   func(DataItem)
-	item DataItem
+	fn   func()
 	done chan interface{}
 }
 
-func queueItem(f func(DataItem), i DataItem) {
-	itemQueue <- itemData{fn: f, item: i}
+func queueItem(f func()) {
+	itemQueue <- itemData{fn: f}
 }
 
 func init() {
@@ -20,7 +19,7 @@ func processItems() {
 	for {
 		i := <-itemQueue
 		if i.fn != nil {
-			i.fn(i.item)
+			i.fn()
 		}
 		if i.done != nil {
 			i.done <- struct{}{}

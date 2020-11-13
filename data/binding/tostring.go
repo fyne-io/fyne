@@ -28,7 +28,6 @@ func BoolToString(v Bool) String {
 // the string will parse and set the Bool if the string matches the format and its parse was successful.
 func BoolToStringWithFormat(v Bool, format string) String {
 	str := &stringFromBool{from: v, format: format}
-	str.data = str
 	v.AddListener(str)
 	return str
 }
@@ -51,11 +50,11 @@ func (s *stringFromBool) Set(str string) {
 	}
 	s.from.Set(val)
 
-	s.trigger(s)
+	s.trigger()
 }
 
-func (s *stringFromBool) DataChanged(_ DataItem) {
-	s.trigger(s)
+func (s *stringFromBool) DataChanged() {
+	s.trigger()
 }
 
 type stringFromFloat struct {
@@ -77,7 +76,6 @@ func FloatToString(v Float) String {
 // the string will parse and set the Float if the string matches the format and its parse was successful.
 func FloatToStringWithFormat(v Float, format string) String {
 	str := &stringFromFloat{from: v, format: format}
-	str.data = str
 	v.AddListener(str)
 	return str
 }
@@ -100,11 +98,11 @@ func (s *stringFromFloat) Set(str string) {
 	}
 	s.from.Set(val)
 
-	s.trigger(s)
+	s.trigger()
 }
 
-func (s *stringFromFloat) DataChanged(_ DataItem) {
-	s.trigger(s)
+func (s *stringFromFloat) DataChanged() {
+	s.trigger()
 }
 
 type stringFromInt struct {
@@ -126,7 +124,6 @@ func IntToString(v Int) String {
 // the string will parse and set the Int if the string matches the format and its parse was successful.
 func IntToStringWithFormat(v Int, format string) String {
 	str := &stringFromInt{from: v, format: format}
-	str.data = str
 	v.AddListener(str)
 	return str
 }
@@ -149,9 +146,9 @@ func (s *stringFromInt) Set(str string) {
 	}
 	s.from.Set(val)
 
-	s.trigger(s)
+	s.trigger()
 }
 
-func (s *stringFromInt) DataChanged(_ DataItem) {
-	s.trigger(s)
+func (s *stringFromInt) DataChanged() {
+	s.trigger()
 }
