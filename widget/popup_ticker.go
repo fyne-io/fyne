@@ -1,7 +1,8 @@
 package widget
 
 import (
-	"math"
+	//"math"
+	"fmt"
 	
 	"image/color"
 
@@ -174,8 +175,6 @@ func (p *TickerPopUp) getRatio(posDiff *fyne.Position) float64 {
 }
 
 func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
-	//ratio := p.getRatio(&(e.PointEvent.Position))
-
 	if p.draggedX.X == 0 {
 		p.draggedX = e.Position
 		return
@@ -183,14 +182,12 @@ func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 	var diffPosition fyne.Position
 	diffPosition.X = e.Position.X - p.draggedX.X
 	diffPosition.Y = e.Position.Y- p.draggedX.Y
-	ratio := p.getRatio(&diffPosition)
+	offset := diffPosition.X
+	p.draggedX = e.Position
+
+	fmt.Printf("%d\n", offset)
 
 	if label, ok := p.Content.(*Label); ok {
-		writeArea := p.rb.Length()
-		if p.rb.bound != 0 {
-			writeArea = p.rb.bound
-		}
-		offset := math.Round(ratio * float64(writeArea))
 		p.rb.Seek(int(offset))
 		label.Text = string(p.rb.Data())
 		label.Refresh() // Sweet!
