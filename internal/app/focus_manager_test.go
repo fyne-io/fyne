@@ -12,17 +12,7 @@ import (
 )
 
 func TestFocusManager_Focus(t *testing.T) {
-	entry1 := &focusable{}
-	hidden := widget.NewCheck("test", func(bool) {})
-	hidden.Hide()
-	entry2 := &focusable{}
-	disabled := widget.NewCheck("test", func(bool) {})
-	disabled.Disable()
-	entry3 := &focusable{}
-	c := widget.NewVBox(entry1, hidden, entry2, disabled, entry3)
-
-	manager := app.NewFocusManager(c)
-	assert.Nil(t, manager.Focused())
+	manager, entry1, _, entry2, _, entry3 := setupFocusManager(t)
 
 	manager.Focus(entry2)
 	assert.Equal(t, entry2, manager.Focused())
@@ -44,12 +34,8 @@ func TestFocusManager_Focus(t *testing.T) {
 }
 
 func TestFocusManager_FocusLost_FocusGained(t *testing.T) {
-	entry1 := &focusable{}
-	entry2 := &focusable{}
-	entry3 := &focusable{}
-	c := widget.NewVBox(entry1, entry2, entry3)
+	manager, entry1, _, entry2, _, _ := setupFocusManager(t)
 
-	manager := app.NewFocusManager(c)
 	manager.Focus(entry2)
 	require.Equal(t, entry2, manager.Focused())
 	require.False(t, entry1.focused)
@@ -67,17 +53,7 @@ func TestFocusManager_FocusLost_FocusGained(t *testing.T) {
 }
 
 func TestFocusManager_FocusNext(t *testing.T) {
-	entry1 := &focusable{}
-	hidden := widget.NewCheck("test", func(bool) {})
-	hidden.Hide()
-	entry2 := &focusable{}
-	disabled := widget.NewCheck("test", func(bool) {})
-	disabled.Disable()
-	entry3 := &focusable{}
-	c := widget.NewVBox(entry1, hidden, entry2, disabled, entry3)
-
-	manager := app.NewFocusManager(c)
-	assert.Nil(t, manager.Focused())
+	manager, entry1, _, entry2, _, entry3 := setupFocusManager(t)
 
 	manager.FocusNext()
 	assert.Equal(t, entry1, manager.Focused())
@@ -100,17 +76,7 @@ func TestFocusManager_FocusNext(t *testing.T) {
 }
 
 func TestFocusManager_FocusPrevious(t *testing.T) {
-	entry1 := &focusable{}
-	hidden := widget.NewCheck("test", func(bool) {})
-	hidden.Hide()
-	entry2 := &focusable{}
-	disabled := widget.NewCheck("test", func(bool) {})
-	disabled.Disable()
-	entry3 := &focusable{}
-	c := widget.NewVBox(entry1, hidden, entry2, disabled, entry3)
-
-	manager := app.NewFocusManager(c)
-	assert.Nil(t, manager.Focused())
+	manager, entry1, _, entry2, _, entry3 := setupFocusManager(t)
 
 	manager.FocusPrevious()
 	assert.Equal(t, entry3, manager.Focused())
@@ -146,4 +112,17 @@ func (f *focusable) FocusGained() {
 
 func (f *focusable) FocusLost() {
 	f.focused = false
+}
+
+func setupFocusManager(t *testing.T) (m *app.FocusManager, entry1, hidden, entry2, disabled, entry3 *focusable) {
+	entry1 = &focusable{}
+	hidden = &focusable{}
+	hidden.Hide()
+	entry2 = &focusable{}
+	disabled = &focusable{}
+	disabled.Disable()
+	entry3 = &focusable{}
+	m = app.NewFocusManager(widget.NewVBox(entry1, hidden, entry2, disabled, entry3))
+	assert.Nil(t, m.Focused())
+	return
 }
