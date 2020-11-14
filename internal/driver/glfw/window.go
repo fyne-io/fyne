@@ -682,9 +682,9 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	if action == glfw.Press {
-		w.mouseButton = button
+		w.mouseButton |= button
 	} else if action == glfw.Release {
-		w.mouseButton = 0
+		w.mouseButton &= ^button
 	}
 
 	if wid, ok := co.(fyne.Draggable); ok {
