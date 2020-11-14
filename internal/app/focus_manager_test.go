@@ -12,25 +12,42 @@ import (
 )
 
 func TestFocusManager_Focus(t *testing.T) {
-	manager, entry1, _, entry2, _, entry3 := setupFocusManager(t)
+	t.Run("focusing and unfocusing", func(t *testing.T) {
+		manager, entry1, _, entry2, _, entry3 := setupFocusManager(t)
 
-	manager.Focus(entry2)
-	assert.Equal(t, entry2, manager.Focused())
-	assert.True(t, entry2.focused)
+		manager.Focus(entry2)
+		assert.Equal(t, entry2, manager.Focused())
+		assert.True(t, entry2.focused)
 
-	manager.Focus(entry1)
-	assert.Equal(t, entry1, manager.Focused())
-	assert.True(t, entry1.focused)
-	assert.False(t, entry2.focused)
+		manager.Focus(entry1)
+		assert.Equal(t, entry1, manager.Focused())
+		assert.True(t, entry1.focused)
+		assert.False(t, entry2.focused)
 
-	manager.Focus(entry3)
-	assert.Equal(t, entry3, manager.Focused())
-	assert.True(t, entry3.focused)
-	assert.False(t, entry1.focused)
+		manager.Focus(entry3)
+		assert.Equal(t, entry3, manager.Focused())
+		assert.True(t, entry3.focused)
+		assert.False(t, entry1.focused)
 
-	manager.Focus(nil)
-	assert.Nil(t, manager.Focused())
-	assert.False(t, entry3.focused)
+		manager.Focus(nil)
+		assert.Nil(t, manager.Focused())
+		assert.False(t, entry3.focused)
+	})
+
+	t.Run("focus disabled", func(t *testing.T) {
+		manager, entry1, _, _, disabled, _ := setupFocusManager(t)
+
+		manager.Focus(disabled)
+		assert.Nil(t, manager.Focused())
+		assert.False(t, disabled.focused)
+
+		manager.Focus(entry1)
+		require.True(t, entry1.focused)
+		manager.Focus(disabled)
+		assert.Nil(t, manager.Focused())
+		assert.False(t, disabled.focused)
+		assert.False(t, entry1.focused)
+	})
 }
 
 func TestFocusManager_FocusLost_FocusGained(t *testing.T) {
