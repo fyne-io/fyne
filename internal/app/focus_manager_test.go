@@ -3,12 +3,11 @@ package app_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"fyne.io/fyne/internal/app"
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFocusManager_Focus(t *testing.T) {
@@ -55,6 +54,23 @@ func TestFocusManager_Focus(t *testing.T) {
 	t.Run("focus hidden", func(t *testing.T) {
 		manager, entry1, hidden, _, _, _ := setupFocusManager(t)
 		itBehavesLikeUnfocus(manager, hidden, entry1)
+	})
+
+	t.Run("focus foreign", func(t *testing.T) {
+		manager, entry1, _, _, _, _ := setupFocusManager(t)
+		foreigner := &focusable{}
+
+		manager.Focus(foreigner)
+		assert.Nil(t, manager.Focused())
+		assert.False(t, foreigner.focused)
+
+		manager.Focus(entry1)
+		require.Equal(t, entry1, manager.Focused())
+		require.True(t, entry1.focused)
+		manager.Focus(foreigner)
+		assert.False(t, foreigner.focused)
+		assert.Equal(t, entry1, manager.Focused())
+		assert.True(t, entry1.focused)
 	})
 }
 

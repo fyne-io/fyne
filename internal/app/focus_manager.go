@@ -24,6 +24,18 @@ func NewFocusManager(c fyne.CanvasObject) *FocusManager {
 func (f *FocusManager) Focus(obj fyne.Focusable) {
 	f.Lock()
 	defer f.Unlock()
+	if obj != nil {
+		found := driver.WalkCompleteObjectTree(
+			f.content,
+			func(object fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
+				return object == obj.(fyne.CanvasObject)
+			},
+			nil,
+		)
+		if !found {
+			return
+		}
+	}
 	f.focus(obj)
 }
 

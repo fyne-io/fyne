@@ -144,6 +144,9 @@ func walkObjectTree(
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 	requireVisible bool,
 ) bool {
+	if obj == nil {
+		return false
+	}
 	if requireVisible && !obj.Visible() {
 		return false
 	}
