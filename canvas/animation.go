@@ -7,8 +7,12 @@ import (
 	"fyne.io/fyne"
 )
 
-// DurationStandard is the time a standard interface animation will run.
-const DurationStandard = time.Millisecond * 300
+const (
+	// DurationStandard is the time a standard interface animation will run.
+	DurationStandard = time.Millisecond * 300
+	// DurationShort is the time a subtle or small transition should use.
+	DurationShort = time.Millisecond * 150
+)
 
 // NewColorRGBAAnimation sets up a new animation that will transition from the start to stop Color over
 // the specified Duration. The colour transition will move linearly through the RGB colour space.
