@@ -160,6 +160,8 @@ func (c *glCanvas) Resize(size fyne.Size) {
 			// TODO: remove this when #707 is being addressed.
 			// “Notifies” the PopUp of the canvas size change.
 			p.Resize(p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
+		} else if p, ok := overlay.(*widget.TickerPopUp); ok {
+			p.Resize(p.Content.Size().Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		} else {
 			overlay.Resize(size)
 		}
