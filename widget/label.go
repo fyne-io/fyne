@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/theme"
 )
 
@@ -20,6 +21,18 @@ type Label struct {
 // NewLabel creates a new label widget with the set text content
 func NewLabel(text string) *Label {
 	return NewLabelWithStyle(text, fyne.TextAlignLeading, fyne.TextStyle{})
+}
+
+// NewLabelWithData returns an Label widget connected to the specified data source.
+func NewLabelWithData(data binding.String) *Label {
+	label := NewLabel(data.Get())
+
+	data.AddListener(binding.NewDataItemListener(func() {
+		label.Text = data.Get()
+		label.Refresh()
+	}))
+
+	return label
 }
 
 // NewLabelWithStyle creates a new label widget with the set text content
