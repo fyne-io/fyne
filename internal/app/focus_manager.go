@@ -73,6 +73,10 @@ func (f *FocusManager) focus(obj fyne.Focusable) {
 		obj = nil
 	}
 
+	if hid, ok := obj.(fyne.CanvasObject); ok && !hid.Visible() {
+		obj = nil
+	}
+
 	if f.focused != nil {
 		f.focused.FocusLost()
 	}

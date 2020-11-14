@@ -34,19 +34,27 @@ func TestFocusManager_Focus(t *testing.T) {
 		assert.False(t, entry3.focused)
 	})
 
+	itBehavesLikeUnfocus := func(manager *app.FocusManager, notFocusableObj *focusable, focusableObj *focusable) {
+		manager.Focus(notFocusableObj)
+		assert.Nil(t, manager.Focused())
+		assert.False(t, notFocusableObj.focused)
+
+		manager.Focus(focusableObj)
+		require.True(t, focusableObj.focused)
+		manager.Focus(notFocusableObj)
+		assert.Nil(t, manager.Focused())
+		assert.False(t, notFocusableObj.focused)
+		assert.False(t, focusableObj.focused)
+	}
+
 	t.Run("focus disabled", func(t *testing.T) {
 		manager, entry1, _, _, disabled, _ := setupFocusManager(t)
+		itBehavesLikeUnfocus(manager, disabled, entry1)
+	})
 
-		manager.Focus(disabled)
-		assert.Nil(t, manager.Focused())
-		assert.False(t, disabled.focused)
-
-		manager.Focus(entry1)
-		require.True(t, entry1.focused)
-		manager.Focus(disabled)
-		assert.Nil(t, manager.Focused())
-		assert.False(t, disabled.focused)
-		assert.False(t, entry1.focused)
+	t.Run("focus hidden", func(t *testing.T) {
+		manager, entry1, hidden, _, _, _ := setupFocusManager(t)
+		itBehavesLikeUnfocus(manager, hidden, entry1)
 	})
 }
 
