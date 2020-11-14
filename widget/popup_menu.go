@@ -134,7 +134,7 @@ func NewPopUpMenuAtPosition(menu *fyne.Menu, c fyne.Canvas, pos fyne.Position) *
 // NewPopUpMenu creates a PopUp widget populated with menu items from the passed menu structure.
 // It will automatically be shown as an overlay on the specified canvas.
 //
-// Deprecated: This will no longer show the pop-up in 2.0. Use ShowPopUpMenuAtPosition() instead.
+// Deprecated: Use ShowPopUpMenuAtPosition() with an empty position instead.
 func NewPopUpMenu(menu *fyne.Menu, c fyne.Canvas) *PopUp {
 	return NewPopUpMenuAtPosition(menu, c, fyne.NewPos(0, 0))
 }
