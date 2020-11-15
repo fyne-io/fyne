@@ -92,7 +92,7 @@ func envInit() (err error) {
 		return err
 	}
 	if len(strings.TrimSpace(string(out))) > 0 {
-		bitcodeEnabled = true
+//		bitcodeEnabled = true // TODO re-enable once we find out what broke after September event 2020
 	}
 
 	// Setup the cross-compiler environments.
