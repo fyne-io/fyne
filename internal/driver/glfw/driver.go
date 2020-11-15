@@ -80,10 +80,23 @@ func (d *gLDriver) StartAnimation(a *fyne.Animation) {
 	defer d.animationMutex.Unlock()
 	wasStopped := len(d.animations) == 0
 
-	d.animations = append(d.animations, &anim{a, time.Now(), time.Now().Add(a.Duration)})
+	d.animations = append(d.animations, &anim{a: a, start: time.Now(), end: time.Now().Add(a.Duration)})
 	if wasStopped {
 		d.runAnimations()
 	}
+}
+
+func (d *gLDriver) StopAnimation(a *fyne.Animation) {
+	d.animationMutex.Lock()
+	defer d.animationMutex.Unlock()
+	oldList := d.animations
+	var newList []*anim
+	for _, item := range oldList {
+		if item.a != a {
+			newList = append(newList, item)
+		}
+	}
+	d.animations = newList
 }
 
 func (d *gLDriver) addWindow(w *window) {

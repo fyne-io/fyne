@@ -22,10 +22,11 @@ var (
 // Animation represents an animated element within a Fyne canvas.
 // These animations may control individual objects or entire scenes.
 type Animation struct {
-	Duration time.Duration
-	Curve    AnimationCurve
-	Repeat   bool
-	Tick     func(float32)
+	AutoReverse bool
+	Curve       AnimationCurve
+	Duration    time.Duration
+	Repeat      bool
+	Tick        func(float32)
 }
 
 // NewAnimation creates a very basic animation where the callback function will be called for every
@@ -38,6 +39,10 @@ func NewAnimation(d time.Duration, fn func(float32)) *Animation {
 // Start registers the animation with the application run-loop and starts its execution.
 func (a *Animation) Start() {
 	CurrentApp().Driver().StartAnimation(a)
+}
+
+func (a *Animation) Stop() {
+	CurrentApp().Driver().StopAnimation(a)
 }
 
 func animationEaseIn(val float32) float32 {

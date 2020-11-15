@@ -7,9 +7,10 @@ import (
 )
 
 type anim struct {
-	a     *fyne.Animation
-	start time.Time
-	end   time.Time
+	a       *fyne.Animation
+	end     time.Time
+	reverse bool
+	start   time.Time
 }
 
 func (d *gLDriver) runAnimations() {
@@ -41,8 +42,19 @@ func (d *gLDriver) runAnimations() {
 // tickAnimation will process a frame of animation and return true if this should continue animating
 func (d *gLDriver) tickAnimation(a *anim) bool {
 	if time.Now().After(a.end) {
-		a.a.Tick(1.0)
-		if !a.a.Repeat {
+		if a.reverse {
+			a.a.Tick(0.0)
+			if !a.a.Repeat {
+				return false
+			}
+			a.reverse = false
+		} else {
+			a.a.Tick(1.0)
+			if a.a.AutoReverse {
+				a.reverse = true
+			}
+		}
+		if !a.a.Repeat && !a.reverse {
 			return false
 		}
 
@@ -58,7 +70,11 @@ func (d *gLDriver) tickAnimation(a *anim) bool {
 	if curve == nil {
 		curve = fyne.AnimationLinear
 	}
-	a.a.Tick(curve(val))
+	if a.reverse {
+		a.a.Tick(curve(1 - val))
+	} else {
+		a.a.Tick(curve(val))
+	}
 
 	return true
 }

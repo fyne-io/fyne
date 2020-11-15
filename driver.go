@@ -37,4 +37,6 @@ type Driver interface {
 
 	// StartAnimation registers a new animation with this driver and requests it be started.
 	StartAnimation(*Animation)
+	// StopAnimation stops an animation and unregisters from this driver.
+	StopAnimation(*Animation)
 }
