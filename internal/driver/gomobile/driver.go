@@ -179,6 +179,10 @@ func (d *mobileDriver) Run() {
 	})
 }
 
+func (d *mobileDriver) StartAnimation(a *fyne.Animation) {
+	// TODO implement mobile animations
+}
+
 func (d *mobileDriver) onStart() {
 }
 
