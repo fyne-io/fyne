@@ -2,7 +2,6 @@
 package dialog // import "fyne.io/fyne/dialog"
 
 import (
-	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/container"
@@ -109,18 +108,35 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	ok := &widget.Button{Text: confirm, Icon: theme.ConfirmIcon(), Importance: widget.HighImportance,
+	ok := &widget.Button{Text: confirm, Icon: nil, Importance: widget.HighImportance,
 		OnTapped: func() {
-			for _, item := range items {
-				if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
-					if err := validatable.Validate(); err != nil {
-						ShowError(fmt.Errorf("%s %v", validationErrorPrefix, err), parent)
-						return
-					}
-				}
-			}
 			d.hideWithResponse(true)
 		}}
+	// Setting icon afterward to ensure that `disabledIcon` is setup correctly.
+	ok.SetIcon(theme.ConfirmIcon())
+	validateItems := func() {
+		for _, item := range items {
+			if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
+				if err := validatable.Validate(); err != nil {
+					ok.Disable()
+					return
+				}
+			}
+		}
+		ok.Enable()
+	}
+	// "Prime" the ok button state based on user provided validation
+	validateItems()
+
+	// Set the item validation edge state callbacks
+	for _, item := range items {
+		if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
+			validatable.SetOnValidationChanged(func(error) {
+				// Need to validate *all* items to determine net validation state, not just this one.
+				validateItems()
+			})
+		}
+	}
 	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
 	return d
 }
@@ -179,7 +195,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	// content
 	contentStart := d.label.Position().Y + d.label.MinSize().Height + padHeight
 	contentEnd := obj[3].Position().Y - theme.Padding()
-	obj[2].Move(fyne.NewPos((padWidth / 2), d.label.MinSize().Height+padHeight))
+	obj[2].Move(fyne.NewPos(padWidth / 2, d.label.MinSize().Height+padHeight))
 	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 
