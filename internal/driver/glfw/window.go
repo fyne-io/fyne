@@ -38,6 +38,7 @@ func initCursors() {
 		desktop.PointerCursor:   glfw.CreateStandardCursor(glfw.HandCursor),
 		desktop.HResizeCursor:   glfw.CreateStandardCursor(glfw.HResizeCursor),
 		desktop.VResizeCursor:   glfw.CreateStandardCursor(glfw.VResizeCursor),
+		desktop.InvisibleCursor: glfw.CreateCursor(image.NewNRGBA(image.Rectangle{Max: image.Point{X: 16, Y: 16}}), 0, 0),
 	}
 }
 
