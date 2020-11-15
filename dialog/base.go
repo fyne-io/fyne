@@ -91,7 +91,7 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
 	parent fyne.Window) Dialog {
-	var itemObjects = make([]fyne.CanvasObject, 0, len(items) * 2)
+	var itemObjects = make([]fyne.CanvasObject, 0, len(items)*2)
 	for _, ii := range items {
 		itemObjects = append(itemObjects, widget.NewLabel(ii.Text), ii.Widget)
 	}
@@ -139,7 +139,7 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 }
 func ShowFormDialog(title, confirm, dismiss string, content []*widget.FormItem,
 	callback func(bool), parent fyne.Window) {
-	NewFormDialog(title, confirm, dismiss, content, callback, parent)//.Show()
+	NewFormDialog(title, confirm, dismiss, content, callback, parent).Show()
 }
 
 func (d *dialog) Hide() {

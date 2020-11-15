@@ -161,7 +161,7 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 				return nil
 			}
 			remember := false
-			items := []*widget.FormItem {
+			items := []*widget.FormItem{
 				widget.NewFormItem("Username", username),
 				widget.NewFormItem("Password", password),
 				widget.NewFormItem("Remember me", widget.NewCheck("", func(checked bool) {
