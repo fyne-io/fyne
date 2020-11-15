@@ -66,7 +66,23 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 }
 
 func (c *glCanvas) Focus(obj fyne.Focusable) {
-	c.focusManager().Focus(obj)
+	focusMgr := c.focusManager()
+	if focusMgr.Focus(obj) { // fast path – probably >99.9% of all cases
+		return
+	}
+
+	c.RLock()
+	focusMgrs := append([]*app.FocusManager{c.contentFocusMgr, c.menuFocusMgr}, c.overlays.ListFocusManagers()...)
+	c.RUnlock()
+
+	for _, mgr := range focusMgrs {
+		if focusMgr != mgr {
+			if mgr.Focus(obj) {
+				return
+			}
+		}
+	}
+	fyne.LogError("Failed to focus object which is not part of the canvas’ content, menu or overlays.", nil)
 }
 
 func (c *glCanvas) Focused() fyne.Focusable {

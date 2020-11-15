@@ -165,6 +165,45 @@ func TestGlCanvas_ContentChangeWithoutMinSizeChangeDoesNotLayout(t *testing.T) {
 	assert.Nil(t, layout.popLayoutEvent())
 }
 
+func TestGlCanvas_Focus(t *testing.T) {
+	w := createWindow("Test")
+	w.SetPadded(false)
+	c := w.Canvas().(*glCanvas)
+
+	ce := &focusable{id: "ce1"}
+	content := container.NewVBox(ce)
+	me := &focusable{id: "o2e1"}
+	menuOverlay := container.NewVBox(me)
+	o1e := &focusable{id: "o1e1"}
+	overlay1 := container.NewVBox(o1e)
+	o2e := &focusable{id: "o2e1"}
+	overlay2 := container.NewVBox(o2e)
+	w.SetContent(content)
+	c.setMenuOverlay(menuOverlay)
+	c.Overlays().Add(overlay1)
+	c.Overlays().Add(overlay2)
+
+	c.Focus(ce)
+	assert.True(t, ce.focused, "focuses content object even if content is not in focus")
+
+	c.Focus(me)
+	assert.True(t, me.focused, "focuses menu object even if menu is not in focus")
+	assert.True(t, ce.focused, "does not affect focus on other layer")
+
+	c.Focus(o1e)
+	assert.True(t, o1e.focused, "focuses overlay object even if menu is not in focus")
+	assert.True(t, me.focused, "does not affect focus on other layer")
+
+	c.Focus(o2e)
+	assert.True(t, o2e.focused)
+	assert.True(t, o1e.focused, "does not affect focus on other layer")
+
+	foreign := &focusable{id: "o2e1"}
+	c.Focus(foreign)
+	assert.False(t, foreign.focused, "does not focus foreign object")
+	assert.True(t, o2e.focused)
+}
+
 func TestGlCanvas_FocusHandlingWhenAddingAndRemovingOverlays(t *testing.T) {
 	w := createWindow("Test")
 	w.SetPadded(false)
