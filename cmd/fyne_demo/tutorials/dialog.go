@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
+	"regexp"
 	"time"
 
 	"fyne.io/fyne"
@@ -141,6 +142,43 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 				}
 
 				log.Println("Please Authenticate", username.Text, password.Text)
+			}, win)
+		}),
+		widget.NewButton("Form Dialog (Login Form)", func() {
+			validationRx := regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
+			username := widget.NewEntry()
+			username.Validator = func(user string) error {
+				if !validationRx.MatchString(user) {
+					return errors.New("Username can only contain letters, numbers, '_', and '-'")
+				}
+				return nil
+			}
+			password := widget.NewPasswordEntry()
+			password.Validator = func(pass string) error {
+				if !validationRx.MatchString(pass) {
+					return errors.New("Password can only contain letters, numbers, '_', and '-'")
+				}
+				return nil
+			}
+			remember := false
+			items := []*widget.FormItem{
+				widget.NewFormItem("Username", username),
+				widget.NewFormItem("Password", password),
+				widget.NewFormItem("Remember me", widget.NewCheck("", func(checked bool) {
+					remember = checked
+				})),
+			}
+
+			dialog.ShowFormDialog("Login...", "Log In", "Cancel", items, func(b bool) {
+				if !b {
+					return
+				}
+				var rememberText string
+				if remember {
+					rememberText = "and remember this login"
+				}
+
+				log.Println("Please Authenticate", username.Text, password.Text, rememberText)
 			}, win)
 		}),
 		widget.NewButton("Text Entry Dialog", func() {
