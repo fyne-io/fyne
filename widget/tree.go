@@ -12,8 +12,6 @@ import (
 // TreeNodeID represents the unique id of a tree node.
 type TreeNodeID = string
 
-const treeDividerHeight = 1
-
 var _ fyne.Widget = (*Tree)(nil)
 
 // Tree widget displays hierarchical data.
@@ -207,7 +205,7 @@ func (t *Tree) Select(uid TreeNodeID) {
 				}
 				// If this is not the first item, add a divider
 				if y > 0 {
-					y += treeDividerHeight
+					y += separatorThickness
 				}
 
 				y += m.Height
@@ -369,6 +367,7 @@ type treeContentRenderer struct {
 	widget.BaseRenderer
 	treeContent *treeContent
 	dividers    []fyne.CanvasObject
+	objects     []fyne.CanvasObject
 	branches    map[string]*branch
 	leaves      map[string]*leaf
 	branchPool  pool
@@ -379,6 +378,7 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 	r.treeContent.propertyLock.Lock()
 	defer r.treeContent.propertyLock.Unlock()
 
+	r.objects = nil
 	branches := make(map[string]*branch)
 	leaves := make(map[string]*leaf)
 
@@ -408,10 +408,11 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				r.dividers = append(r.dividers, divider)
 			}
 			divider.Move(fyne.NewPos(theme.Padding(), y))
-			s := fyne.NewSize(width-2*theme.Padding(), treeDividerHeight)
+			s := fyne.NewSize(width-2*theme.Padding(), separatorThickness)
 			divider.Resize(s)
 			divider.Show()
-			y += treeDividerHeight
+			r.objects = append(r.objects, divider)
+			y += separatorThickness
 			numDividers++
 		}
 
@@ -430,24 +431,26 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				b, ok := r.branches[uid]
 				if !ok {
 					b = r.getBranch()
-					b.update(uid, depth)
 					if f := r.treeContent.tree.UpdateNode; f != nil {
 						f(uid, true, b.Content())
 					}
+					b.update(uid, depth)
 				}
 				branches[uid] = b
 				n = b.treeNode
+				r.objects = append(r.objects, b)
 			} else {
 				l, ok := r.leaves[uid]
 				if !ok {
 					l = r.getLeaf()
-					l.update(uid, depth)
 					if f := r.treeContent.tree.UpdateNode; f != nil {
 						f(uid, false, l.Content())
 					}
+					l.update(uid, depth)
 				}
 				leaves[uid] = l
 				n = l.treeNode
+				r.objects = append(r.objects, l)
 			}
 			if n != nil {
 				n.Move(fyne.NewPos(0, y))
@@ -496,7 +499,7 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 
 		// If this is not the first item, add a divider
 		if min.Height > 0 {
-			min.Height += treeDividerHeight
+			min.Height += separatorThickness
 		}
 
 		m := r.treeContent.tree.leafMinSize
@@ -510,17 +513,8 @@ func (r *treeContentRenderer) MinSize() (min fyne.Size) {
 	return
 }
 
-func (r *treeContentRenderer) Objects() (objects []fyne.CanvasObject) {
-	r.treeContent.propertyLock.RLock()
-	objects = r.dividers
-	for _, b := range r.branches {
-		objects = append(objects, b)
-	}
-	for _, l := range r.leaves {
-		objects = append(objects, l)
-	}
-	r.treeContent.propertyLock.RUnlock()
-	return
+func (r *treeContentRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
 }
 
 func (r *treeContentRenderer) Refresh() {

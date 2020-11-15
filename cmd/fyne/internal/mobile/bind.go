@@ -65,14 +65,14 @@ func writeFile(filename string, generate func(io.Writer) error) error {
 	return generate(f)
 }
 
-func packagesConfig(targetOS string) *packages.Config {
+func packagesConfig(targetOS, targetArch string) *packages.Config {
 	config := &packages.Config{}
 	// Add CGO_ENABLED=1 explicitly since Cgo is disabled when GOOS is different from host OS.
-	config.Env = append(os.Environ(), "GOARCH=arm", "GOOS="+targetOS, "CGO_ENABLED=1")
+	config.Env = append(os.Environ(), "GOARCH="+targetArch, "GOOS="+targetOS, "CGO_ENABLED=1")
 	if targetOS == "android" {
 		// with Cgo enabled we need to ensure the C compiler is set via CC to
 		// avoid the error: "gcc: error: unrecognized command line option '-marm'"
-		config.Env = append(os.Environ(), androidEnv["arm"]...)
+		config.Env = append(os.Environ(), androidEnv[targetArch]...)
 	}
 	tags := buildTags
 	if targetOS == "darwin" {

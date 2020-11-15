@@ -64,9 +64,6 @@ var manifestTmpl = template.Must(template.New("manifest").Parse(`
 	android:versionCode="{{.Build}}"
 	android:versionName="{{.Version}}">
 
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
 	<application android:label="{{.Name}}" android:debuggable="{{.Debug}}">
 	<activity android:name="org.golang.app.GoNativeActivity"
 		android:label="{{.Name}}"
@@ -78,4 +75,7 @@ var manifestTmpl = template.Must(template.New("manifest").Parse(`
 		</intent-filter>
 	</activity>
 	</application>
+
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 </manifest>`))

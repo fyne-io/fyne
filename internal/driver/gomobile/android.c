@@ -1,10 +1,12 @@
 // +build android
 
 #include <android/log.h>
+#include <dirent.h>
 #include <jni.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define LOG_FATAL(...) __android_log_print(ANDROID_LOG_FATAL, "Fyne", __VA_ARGS__)
 
@@ -155,11 +157,26 @@ void closeStream(uintptr_t jni_env, uintptr_t ctx, void* stream) {
 	(*env)->DeleteGlobalRef(env, stream);
 }
 
-bool uriCanList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+bool hasPrefix(char* string, char* prefix) {
+	size_t lp = strlen(prefix);
+	size_t ls = strlen(string);
+	if (ls < lp) {
+		return false;
+	}
+	return memcmp(prefix, string, lp) == 0;
+}
+
+bool canListContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
 	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
+	jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+	if (loadErr != NULL) {
+		(*env)->ExceptionClear(env);
+		return false;
+	}
 
 	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
 	if (contractClass == NULL) { // API 19
@@ -186,11 +203,43 @@ bool uriCanList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	return strcmp(str, "vnd.android.document/directory") == 0;
 }
 
-char* uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+bool canListFileURI(char* uriCstr) {
+	// Get file path from URI
+	size_t length = strlen(uriCstr)-7;// -7 for 'file://'
+	char* path = malloc(sizeof(char)*(length+1));// +1 for '\0'
+	memcpy(path, &uriCstr[7], length);
+	path[length] = '\0';
+
+	// Stat path to determine if it points to a directory
+	struct stat statbuf;
+	int result = stat(path, &statbuf);
+
+	free(path);
+
+	return (result == 0) && S_ISDIR(statbuf.st_mode);
+}
+
+bool canListURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	if (hasPrefix(uriCstr, "file://")) {
+		return canListFileURI(uriCstr);
+	} else if (hasPrefix(uriCstr, "content://")) {
+		return canListContentURI(jni_env, ctx, uriCstr);
+	}
+	LOG_FATAL("Unrecognized scheme: %s", uriCstr);
+	return false;
+}
+
+char* listContentURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject resolver = getContentResolver(jni_env, ctx);
 	jstring uriStr = (*env)->NewStringUTF(env, uriCstr);
 	jobject uri = parseURI(jni_env, ctx, uriCstr);
+	jthrowable loadErr = (*env)->ExceptionOccurred(env);
+
+	if (loadErr != NULL) {
+		(*env)->ExceptionClear(env);
+		return "";
+	}
 
 	jclass contractClass = find_class(env, "android/provider/DocumentsContract");
 	if (contractClass == NULL) { // API 19
@@ -237,11 +286,74 @@ char* uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
 		if (old != NULL) {
 			strcpy(ret, old);
 			free(old);
+		} else {
+			ret[0] = '\0';
 		}
 		strcat(ret, uid);
 		strcat(ret, "|");
 	}
 
-	ret[len-1] = '\0';
+	if (ret != NULL) {
+		ret[len-1] = '\0';
+	}
 	return ret;
+}
+
+char* listFileURI(char* uriCstr) {
+
+	size_t uriLength = strlen(uriCstr);
+
+	// Get file path from URI
+	size_t length = uriLength-7;// -7 for 'file://'
+	char* path = malloc(sizeof(char)*(length+1));// +1 for '\0'
+	memcpy(path, &uriCstr[7], length);
+	path[length] = '\0';
+
+	char *ret = NULL;
+	DIR *dfd;
+	if ((dfd = opendir(path)) != NULL) {
+		struct dirent *dp;
+		int len = 0;
+		while ((dp = readdir(dfd)) != NULL) {
+			if (strcmp(dp->d_name, ".") == 0) {
+				// Ignore current directory
+				continue;
+			}
+			if (strcmp(dp->d_name, "..") == 0) {
+				// Ignore parent directory
+				continue;
+			}
+			// append
+			char *old = ret;
+			len = len + uriLength + 1 /* / */ + strlen(dp->d_name) + 1 /* | */;
+			ret = malloc(sizeof(char)*(len+1));
+			if (old != NULL) {
+				strcpy(ret, old);
+				free(old);
+			} else {
+				ret[0] = '\0';
+			}
+			strcat(ret, uriCstr);
+			strcat(ret, "/");
+			strcat(ret, dp->d_name);
+			strcat(ret, "|");
+		}
+		if (ret != NULL) {
+			ret[len-1] = '\0';
+		}
+	}
+
+	free(path);
+
+	return ret;
+}
+
+char* listURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr) {
+	if (hasPrefix(uriCstr, "file://")) {
+		return listFileURI(uriCstr);
+	} else if (hasPrefix(uriCstr, "content://")) {
+		return listContentURI(jni_env, ctx, uriCstr);
+	}
+	LOG_FATAL("Unrecognized scheme: %s", uriCstr);
+	return "";
 }

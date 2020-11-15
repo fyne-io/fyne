@@ -8,8 +8,10 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/driver/mobile"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -75,6 +77,23 @@ func NewEntry() *Entry {
 	e := &Entry{}
 	e.ExtendBaseWidget(e)
 	return e
+}
+
+// NewEntryWithData returns an Entry widget connected to the specified data source.
+func NewEntryWithData(data binding.String) *Entry {
+	entry := NewEntry()
+
+	data.AddListener(binding.NewDataItemListener(func() {
+		entry.Text = data.Get()
+		if cache.IsRendered(entry) {
+			entry.Refresh()
+		}
+	}))
+	entry.OnChanged = func(s string) {
+		data.Set(s)
+	}
+
+	return entry
 }
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
@@ -423,6 +442,10 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 //
 // Implements: fyne.SecondaryTappable
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
+	if e.Disabled() && e.concealed() {
+		return // no popup options for a disabled concealed field
+	}
+
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.cutToClipboard(clipboard)
@@ -442,10 +465,6 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
 	c := fyne.CurrentApp().Driver().CanvasForObject(super)
 
-	if e.Disabled() && e.concealed() {
-		return // no popup options for a disabled concealed field
-	}
-
 	var menu *fyne.Menu
 	if e.Disabled() {
 		menu = fyne.NewMenu("", copyItem, selectAllItem)
@@ -454,6 +473,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	} else {
 		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
 	}
+
 	e.popUp = newPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
 }

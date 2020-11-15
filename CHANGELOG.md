@@ -3,7 +3,29 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
-## 1.4 - Ongoing
+## 2.0 - Ongoing
+
+### Changes that are not backward compatible
+
+These changes likely break some apps, please read the 
+[upgrading doc](https://developer.fyne.io/api/v2.0/upgrading) for more info
+
+*
+
+### Added
+
+*
+
+### Changed
+
+*
+
+### Fixed
+
+*
+
+
+## 1.4 - 1 November 2020
 
 ### Added (highlights)
 
