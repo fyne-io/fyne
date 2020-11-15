@@ -2,8 +2,9 @@
 package dialog // import "fyne.io/fyne/dialog"
 
 import (
-	"fyne.io/fyne/container"
 	"image/color"
+
+	"fyne.io/fyne/container"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
