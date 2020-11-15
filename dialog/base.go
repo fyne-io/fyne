@@ -137,6 +137,13 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 	callback func(bool), parent fyne.Window) {
 	NewCustomConfirm(title, confirm, dismiss, content, callback, parent).Show()
 }
+
+// ShowFormDialog shows a dialog over the specified application using
+// the provided FormItems. The cancel button will have the dismiss text set and the "OK" will
+// use the confirm text. The response callback is called on user action after validation passes.
+// If any Validatable passed to the function reports that validation has failed, then an error
+// dialog will be shown containing the text of the error.
+// The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func ShowFormDialog(title, confirm, dismiss string, content []*widget.FormItem,
 	callback func(bool), parent fyne.Window) {
 	NewFormDialog(title, confirm, dismiss, content, callback, parent).Show()
