@@ -21,6 +21,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Entry copy/paste is crashing on android 7.1 (#1511)
 * Fyne package creating invalid windows packages (#1521)
 * Menu bar initially doesn't respond to mouse input on macOS (#505) 
+* iOS: Missing CFBundleIconName and asset catalog (#1504)
 
 
 ## 1.4 - 1 November 2020
