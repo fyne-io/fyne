@@ -149,14 +149,14 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			username := widget.NewEntry()
 			username.Validator = func(user string) error {
 				if !validationRx.MatchString(user) {
-					return errors.New("Username can only contain letters, numbers, '_', and '-'")
+					return errors.New("username can only contain letters, numbers, '_', and '-'")
 				}
 				return nil
 			}
 			password := widget.NewPasswordEntry()
 			password.Validator = func(pass string) error {
 				if !validationRx.MatchString(pass) {
-					return errors.New("Password can only contain letters, numbers, '_', and '-'")
+					return errors.New("password can only contain letters, numbers, '_', and '-'")
 				}
 				return nil
 			}

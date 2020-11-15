@@ -2,6 +2,7 @@
 package dialog // import "fyne.io/fyne/dialog"
 
 import (
+	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/container"
@@ -14,8 +15,9 @@ import (
 )
 
 const (
-	padWidth  = 32
-	padHeight = 16
+	padWidth              = 32
+	padHeight             = 16
+	validationErrorPrefix = "Validation error:"
 )
 
 // Dialog is the common API for any dialog window with a single dismiss button
@@ -112,7 +114,7 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 			for _, item := range items {
 				if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
 					if err := validatable.Validate(); err != nil {
-						ShowError(err, parent)
+						ShowError(fmt.Errorf("%s %v", validationErrorPrefix, err), parent)
 						return
 					}
 				}
