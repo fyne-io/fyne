@@ -86,10 +86,11 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 }
 
 // NewFormDialog creates and returns a dialog over the specified application using
-// the provided FormItems. The cancel button will have the dismiss text set and the "OK" will
+// the provided FormItems. The cancel button will have the dismiss text set and the confirm button will
 // use the confirm text. The response callback is called on user action after validation passes.
-// If any Validatable passed to the function reports that validation has failed, then an error
-// dialog will be shown containing the text of the error.
+// If any Validatable widget reports that validation has failed, then the confirm
+// button will be disabled. The initial state of the confirm button will reflect the initial
+// validation state of the items added to the form dialog.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
 	parent fyne.Window) Dialog {
@@ -112,7 +113,7 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 		OnTapped: func() {
 			d.hideWithResponse(true)
 		}}
-	// Setting icon afterward to ensure that `disabledIcon` is setup correctly.
+	// Mitigation for issue #1553
 	ok.SetIcon(theme.ConfirmIcon())
 	validateItems := func() {
 		for _, item := range items {
@@ -125,14 +126,11 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 		}
 		ok.Enable()
 	}
-	// "Prime" the ok button state based on user provided validation
 	validateItems()
 
-	// Set the item validation edge state callbacks
 	for _, item := range items {
 		if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
 			validatable.SetOnValidationChanged(func(error) {
-				// Need to validate *all* items to determine net validation state, not just this one.
 				validateItems()
 			})
 		}
@@ -158,10 +156,11 @@ func ShowCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject
 }
 
 // ShowFormDialog shows a dialog over the specified application using
-// the provided FormItems. The cancel button will have the dismiss text set and the "OK" will
+// the provided FormItems. The cancel button will have the dismiss text set and the confirm button will
 // use the confirm text. The response callback is called on user action after validation passes.
-// If any Validatable passed to the function reports that validation has failed, then an error
-// dialog will be shown containing the text of the error.
+// If any Validatable widget reports that validation has failed, then the confirm
+// button will be disabled. The initial state of the confirm button will reflect the initial
+// validation state of the items added to the form dialog.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func ShowFormDialog(title, confirm, dismiss string, content []*widget.FormItem,
 	callback func(bool), parent fyne.Window) {
@@ -195,7 +194,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	// content
 	contentStart := d.label.Position().Y + d.label.MinSize().Height + padHeight
 	contentEnd := obj[3].Position().Y - theme.Padding()
-	obj[2].Move(fyne.NewPos(padWidth / 2, d.label.MinSize().Height+padHeight))
+	obj[2].Move(fyne.NewPos(padWidth/2, d.label.MinSize().Height+padHeight))
 	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 
