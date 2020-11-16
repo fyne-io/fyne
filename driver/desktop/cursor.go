@@ -16,6 +16,8 @@ const (
 	HResizeCursor
 	// VResizeCursor is the cursor often used to indicate vertical resize
 	VResizeCursor
+	// HiddenCursor will cause the cursor to not be shown
+	HiddenCursor
 )
 
 // Cursorable describes any CanvasObject that needs a cursor change

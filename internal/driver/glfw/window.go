@@ -38,6 +38,7 @@ func initCursors() {
 		desktop.PointerCursor:   glfw.CreateStandardCursor(glfw.HandCursor),
 		desktop.HResizeCursor:   glfw.CreateStandardCursor(glfw.HResizeCursor),
 		desktop.VResizeCursor:   glfw.CreateStandardCursor(glfw.VResizeCursor),
+		desktop.HiddenCursor:    nil,
 	}
 }
 
@@ -579,8 +580,16 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		return hover
 	})
 
-	w.cursor = cursor
-	viewport.SetCursor(cursor)
+	if w.cursor != cursor {
+		// cursor has changed, store new cursor and apply change via glfw
+		w.cursor = cursor
+		if cursor == nil {
+			viewport.SetInputMode(glfw.CursorMode, glfw.CursorHidden)
+		} else {
+			viewport.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+			viewport.SetCursor(cursor)
+		}
+	}
 	if obj != nil && !w.objIsDragged(obj) {
 		ev := new(desktop.MouseEvent)
 		ev.AbsolutePosition = w.mousePos
