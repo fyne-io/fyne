@@ -126,7 +126,7 @@ func (w *window) CenterOnScreen() {
 	w.centered = true
 
 	if w.view() != nil {
-		w.doCenterOnScreen()
+		runOnMain(w.doCenterOnScreen)
 	}
 }
 
