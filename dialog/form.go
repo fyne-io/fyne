@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+// FormDialog is like the standard Dialog but with confirm and cancel buttons.
 type FormDialog struct {
 	*dialog
 	confirm *widget.Button
