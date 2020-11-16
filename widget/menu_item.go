@@ -77,7 +77,7 @@ func (i *menuItem) MinSize() fyne.Size {
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 	i.hovered = true
-	i.onShowChild(i)
+	i.showChild()
 	i.Refresh()
 }
 
@@ -130,13 +130,20 @@ func (i *menuItem) Show() {
 func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
-			i.onShowChild(i)
+			i.showChild()
 		}
 		return
 	}
 
 	i.Parent.Dismiss()
 	i.Item.Action()
+}
+
+func (i *menuItem) showChild() {
+	if i.Child() != nil {
+		i.Child().Show()
+	}
+	i.onShowChild(i)
 }
 
 type menuItemRenderer struct {

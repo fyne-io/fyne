@@ -138,7 +138,6 @@ func (m *Menu) activateChild(item *menuItem) {
 	}
 
 	m.activeItem = item
-	item.Child().Show()
 	m.Refresh()
 }
 
