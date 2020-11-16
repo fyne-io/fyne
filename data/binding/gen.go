@@ -75,7 +75,7 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 		if l, ok := listen.({{ .Name }}); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: " + key, nil)
+		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
 	}
 
 	listen := &prefBound{{ .Name }}{key: key, p: p}

@@ -18,7 +18,7 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 		if l, ok := listen.(Bool); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: " + key, nil)
+		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
 	}
 
 	listen := &prefBoundBool{key: key, p: p}
@@ -49,7 +49,7 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 		if l, ok := listen.(Float); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: " + key, nil)
+		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
 	}
 
 	listen := &prefBoundFloat{key: key, p: p}
@@ -80,7 +80,7 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 		if l, ok := listen.(Int); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: " + key, nil)
+		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
 	}
 
 	listen := &prefBoundInt{key: key, p: p}
