@@ -12,9 +12,8 @@ import (
 )
 
 const (
-	padWidth              = 32
-	padHeight             = 16
-	validationErrorPrefix = "Validation error:"
+	padWidth  = 32
+	padHeight = 16
 )
 
 // Dialog is the common API for any dialog window with a single dismiss button
