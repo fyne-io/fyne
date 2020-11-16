@@ -94,37 +94,44 @@ func NewCustomConfirm(title, confirm, dismiss string, content fyne.CanvasObject,
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
 	parent fyne.Window) Dialog {
+	formDialog, _, _ := testableNewFormDialog(title, confirm, dismiss, items, callback, parent)
+	return formDialog
+}
+
+func testableNewFormDialog(title string, confirm string, dismiss string, items []*widget.FormItem, callback func(bool),
+	parent fyne.Window) (d *dialog, confirmBtn *widget.Button, dismissBtn *widget.Button) {
 	var itemObjects = make([]fyne.CanvasObject, 0, len(items)*2)
 	for _, ii := range items {
 		itemObjects = append(itemObjects, widget.NewLabel(ii.Text), ii.Widget)
 	}
 	content := fyne.NewContainerWithLayout(layout.NewFormLayout(), itemObjects...)
-	d := &dialog{content: content, title: title, icon: nil, parent: parent}
+	d = &dialog{content: content, title: title, icon: nil, parent: parent}
 	d.callback = callback
 	// TODO: Copied from NewCustomConfirm above.
 	// This is still a problem because commenting out the `.Show()` call below will still result in the
 	// dialog being shown.
 	d.sendResponse = true
 
-	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
+	dismissBtn = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	ok := &widget.Button{Text: confirm, Icon: nil, Importance: widget.HighImportance,
+	d.dismiss = dismissBtn
+	confirmBtn = &widget.Button{Text: confirm, Icon: nil, Importance: widget.HighImportance,
 		OnTapped: func() {
 			d.hideWithResponse(true)
 		}}
 	// Mitigation for issue #1553
-	ok.SetIcon(theme.ConfirmIcon())
+	confirmBtn.SetIcon(theme.ConfirmIcon())
 	validateItems := func() {
 		for _, item := range items {
 			if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
 				if err := validatable.Validate(); err != nil {
-					ok.Disable()
+					confirmBtn.Disable()
 					return
 				}
 			}
 		}
-		ok.Enable()
+		confirmBtn.Enable()
 	}
 	validateItems()
 
@@ -135,8 +142,8 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 			})
 		}
 	}
-	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, ok, layout.NewSpacer()))
-	return d
+	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, confirmBtn, layout.NewSpacer()))
+	return
 }
 
 // ShowCustom shows a dialog over the specified application using custom
