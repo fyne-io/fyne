@@ -121,11 +121,11 @@ func (f *Form) checkValidation(err error) {
 
 	for i, item := range f.Items {
 		if item.validationError != nil {
-			break
-		} else if i == len(f.Items)-1 {
-			f.submitButton.Enable()
+			return
 		}
 	}
+	
+	f.submitButton.Enable()
 }
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
