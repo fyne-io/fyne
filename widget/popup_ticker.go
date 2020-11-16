@@ -32,6 +32,12 @@ func (rb *ringBuffer) Init(start int, data []byte) {
 
 // Turn - rotates the ringbuffer by appropriate offset.  -offset is left, +offset is right.
 func (rb *ringBuffer) Turn(offset int) {
+	if offset > 0 {
+		offset = 1
+	} else if offset < 0 {
+		offset = -1
+	}
+
 	if rb.forward {
 		rb.start = rb.start - offset
 	} else {
