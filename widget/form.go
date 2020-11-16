@@ -113,26 +113,27 @@ func (f *Form) updateButtons() {
 	}
 }
 
-func (f *Form) checkValidation(err error) {
-	if err != nil {
-		f.submitButton.Disable()
-		return
-	}
-
-	for i, item := range f.Items {
+func (f *Form) checkValidation() {
+	for _, item := range f.Items {
 		if item.validationError != nil {
+			f.submitButton.Disable()
 			return
 		}
 	}
-	
+
 	f.submitButton.Enable()
 }
 
 func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	if w, ok := widget.(fyne.Validatable); ok {
+		f.Items[i].validationError = w.Validate()
 		w.SetOnValidationChanged(func(err error) {
 			f.Items[i].validationError = err
-			f.checkValidation(err)
+			if err != nil {
+				f.submitButton.Disable()
+			} else {
+				f.checkValidation()
+			}
 		})
 	}
 }
@@ -153,8 +154,8 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
 	itemGrid := fyne.NewContainerWithLayout(layout.NewFormLayout(), []fyne.CanvasObject{}...)
 	for i, item := range f.Items {
-		itemGrid.AddObject(f.createLabel(item.Text))
-		itemGrid.AddObject(item.Widget)
+		itemGrid.Add(f.createLabel(item.Text))
+		itemGrid.Add(item.Widget)
 		f.setUpValidation(item.Widget, i)
 	}
 	f.itemGrid = itemGrid
@@ -165,7 +166,8 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
 
 	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))
-	f.updateButtons() // will set correct visibility on the submit/cancel btns
+	f.updateButtons()   // will set correct visibility on the submit/cancel btns
+	f.checkValidation() // make sure to check initial validation status
 	return renderer
 }
 
