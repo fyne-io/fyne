@@ -28,7 +28,7 @@ func (p *packager) packageDarwin() error {
 	infoFile, _ := os.Create(info)
 
 	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID, Version: p.appVersion, Build: p.appBuild}
-	err := templates.PlistDarwin.Execute(infoFile, tplData)
+	err := templates.InfoPlistDarwin.Execute(infoFile, tplData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to write plist template")
 	}

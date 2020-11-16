@@ -20,6 +20,9 @@ var (
 	// AppxManifestWindows is the manifest file for windows packaging
 	AppxManifestWindows = template.Must(template.New("ReleaseManifest").Parse(string(resourceAppxmanifestXML.StaticContent)))
 
-	// PlistDarwin is the manifest file for darwin packaging
-	PlistDarwin = template.Must(template.New("Manifest").Parse(string(resourceInfoPlist.StaticContent)))
+	// InfoPlistDarwin is the manifest file for darwin packaging
+	InfoPlistDarwin = template.Must(template.New("Manifest").Parse(string(resourceInfoPlist.StaticContent)))
+
+	// XCAssetsDarwin is the Contents.json file for darwin xcassets bundle
+	XCAssetsDarwin = template.Must(template.New("XCAssets").Parse(string(resourceXcassetsJSON.StaticContent)))
 )
