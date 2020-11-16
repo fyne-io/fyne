@@ -111,14 +111,16 @@ func (f *Form) updateButtons() {
 	} else {
 		f.buttonBox.Show()
 	}
-
-	f.checkValidation()
 }
 
-func (f *Form) checkValidation() {
+func (f *Form) checkValidation(err error) {
+	if err != nil {
+		f.submitButton.Disable()
+		return
+	}
+
 	for i, item := range f.Items {
 		if item.validationError != nil {
-			f.submitButton.Disable()
 			break
 		} else if i == len(f.Items)-1 {
 			f.submitButton.Enable()
@@ -130,11 +132,7 @@ func (f *Form) setUpValidation(widget fyne.CanvasObject, i int) {
 	if w, ok := widget.(fyne.Validatable); ok {
 		w.SetOnValidationChanged(func(err error) {
 			f.Items[i].validationError = err
-			if err != nil {
-				f.submitButton.Disable()
-			} else {
-				f.checkValidation()
-			}
+			f.checkValidation(err)
 		})
 	}
 }

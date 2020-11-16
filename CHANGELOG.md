@@ -22,6 +22,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fyne package creating invalid windows packages (#1521)
 * Menu bar initially doesn't respond to mouse input on macOS (#505) 
 * CenterOnScreen causes crash on MacOS when called from goroutine (#1539)
+* Avoid unnecessary validation check on Refresh in widget.Form
 
 
 ## 1.4 - 1 November 2020
