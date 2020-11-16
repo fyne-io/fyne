@@ -18,14 +18,14 @@ type menuItem struct {
 	Item   *fyne.MenuItem
 	Parent *Menu
 
-	child           *Menu
-	hovered         bool
-	onActivateChild func(*menuItem)
+	child       *Menu
+	hovered     bool
+	onShowChild func(*menuItem)
 }
 
 // newMenuItem creates a new menuItem.
-func newMenuItem(item *fyne.MenuItem, parent *Menu, onActivateChild func(*menuItem)) *menuItem {
-	return &menuItem{Item: item, Parent: parent, onActivateChild: onActivateChild}
+func newMenuItem(item *fyne.MenuItem, parent *Menu, onShowChild func(*menuItem)) *menuItem {
+	return &menuItem{Item: item, Parent: parent, onShowChild: onShowChild}
 }
 
 func (i *menuItem) Child() *Menu {
@@ -77,7 +77,7 @@ func (i *menuItem) MinSize() fyne.Size {
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 	i.hovered = true
-	i.onActivateChild(i)
+	i.onShowChild(i)
 	i.Refresh()
 }
 
@@ -130,7 +130,7 @@ func (i *menuItem) Show() {
 func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
-			i.onActivateChild(i)
+			i.onShowChild(i)
 		}
 		return
 	}
