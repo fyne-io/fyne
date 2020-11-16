@@ -22,30 +22,23 @@ type FormDialog struct {
 // validation state of the items added to the form dialog.
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
-	parent fyne.Window) Dialog {
-	formDialog, _, _ := testableNewFormDialog(title, confirm, dismiss, items, callback, parent)
-	return formDialog
-}
-
-func testableNewFormDialog(title string, confirm string, dismiss string, items []*widget.FormItem, callback func(bool),
-	parent fyne.Window) (d *dialog, confirmBtn *widget.Button, dismissBtn *widget.Button) {
+	parent fyne.Window) *FormDialog {
 	var itemObjects = make([]fyne.CanvasObject, 0, len(items)*2)
 	for _, ii := range items {
 		itemObjects = append(itemObjects, widget.NewLabel(ii.Text), ii.Widget)
 	}
 	content := fyne.NewContainerWithLayout(layout.NewFormLayout(), itemObjects...)
-	d = &dialog{content: content, title: title, icon: nil, parent: parent}
+	d := &dialog{content: content, title: title, icon: nil, parent: parent}
 	d.callback = callback
 	// TODO: Copied from NewCustomConfirm above.
 	// This is still a problem because commenting out the `.Show()` call below will still result in the
 	// dialog being shown.
 	d.sendResponse = true
 
-	dismissBtn = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
+	d.dismiss = &widget.Button{Text: dismiss, Icon: theme.CancelIcon(),
 		OnTapped: d.Hide,
 	}
-	d.dismiss = dismissBtn
-	confirmBtn = &widget.Button{Text: confirm, Icon: nil, Importance: widget.HighImportance,
+	confirmBtn := &widget.Button{Text: confirm, Icon: nil, Importance: widget.HighImportance,
 		OnTapped: func() {
 			d.hideWithResponse(true)
 		}}
@@ -72,7 +65,11 @@ func testableNewFormDialog(title string, confirm string, dismiss string, items [
 		}
 	}
 	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, confirmBtn, layout.NewSpacer()))
-	return
+	return &FormDialog{
+		dialog:  d,
+		confirm: confirmBtn,
+		cancel:  d.dismiss,
+	}
 }
 
 // ShowFormDialog shows a dialog over the specified application using
