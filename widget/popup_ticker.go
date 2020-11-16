@@ -2,7 +2,6 @@ package widget
 
 import (
 	//"math"
-	"fmt"
 	
 	"image/color"
 
@@ -89,6 +88,7 @@ type TickerPopUp struct {
 	innerSize    fyne.Size
 	modal        bool
 	overlayShown bool
+	hovered      bool
 	draggedX     fyne.Position
 }
 
@@ -149,6 +149,10 @@ func (p *TickerPopUp) DragEnd() {
 
 // Tapped is called when the user taps the tickerPopUp background - if not modal then dismiss this widget
 func (p *TickerPopUp) Tapped(e *fyne.PointEvent) {
+	if !p.hovered {
+		return
+	}
+
 	p.popupTickerListener.TapCallback(p, e)
 }
 
@@ -177,13 +181,16 @@ func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 		p.draggedX = e.Position
 		return
 	}
+
+	if e.Position.X < p.innerPos.X || e.Position.Y < p.innerPos.Y || e.Position.X > (p.innerPos.X + p.innerSize.Width) || e.Position.Y > (p.innerPos.Y + p.innerSize.Height) {
+		return
+	}
+
 	var diffPosition fyne.Position
 	diffPosition.X = e.Position.X - p.draggedX.X
 	diffPosition.Y = e.Position.Y- p.draggedX.Y
 	offset := diffPosition.X
 	p.draggedX = e.Position
-
-	fmt.Printf("%d\n", offset)
 
 	if label, ok := p.Content.(*Label); ok {
 		p.rb.Seek(int(offset))
