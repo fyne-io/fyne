@@ -24,6 +24,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Menu bar initially doesn't respond to mouse input on macOS (#505) 
 * iOS: Missing CFBundleIconName and asset catalog (#1504)
 * CenterOnScreen causes crash on MacOS when called from goroutine (#1539)
+* desktop.MouseHover Button state is not reliable (#1533)
 * Initial validation status in widget.Form is not respected
 
 
