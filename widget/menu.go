@@ -28,10 +28,74 @@ func NewMenu(menu *fyne.Menu) *Menu {
 		if item.IsSeparator {
 			items[i] = NewSeparator()
 		} else {
-			items[i] = newMenuItem(item, m, m.activateChild)
+			items[i] = newMenuItem(item, m)
 		}
 	}
 	return m
+}
+
+// ActivateLastSubmenu finds the last active menu item traversing through the open submenus
+// and activates its submenu if any.
+// It returns `true` if there was a submenu and it was activated and `false` elsewhere.
+// Activating a submenu does show it and activate its first item.
+func (m *Menu) ActivateLastSubmenu() bool {
+	if m.activeItem == nil {
+		return false
+	}
+	if !m.activeItem.activateLastSubmenu() {
+		return false
+	}
+	m.Refresh()
+	return true
+}
+
+// ActivateNext activates the menu item following the currently active menu item.
+// If there is no menu item active, it activates the first menu item.
+// If there is no menu item after the current active one, it does nothing.
+// If a submenu is open, it delegates the activation to this submenu.
+func (m *Menu) ActivateNext() {
+	if m.activeItem != nil && m.activeItem.isSubmenuOpen() {
+		m.activeItem.Child().ActivateNext()
+		return
+	}
+
+	found := m.activeItem == nil
+	for _, item := range m.Items {
+		if mItem, ok := item.(*menuItem); ok {
+			if found {
+				m.activateItem(mItem)
+				return
+			}
+			if mItem == m.activeItem {
+				found = true
+			}
+		}
+	}
+}
+
+// ActivatePrevious activates the menu item preceding the currently active menu item.
+// If there is no menu item active, it activates the last menu item.
+// If there is no menu item before the current active one, it does nothing.
+// If a submenu is open, it delegates the activation to this submenu.
+func (m *Menu) ActivatePrevious() {
+	if m.activeItem != nil && m.activeItem.isSubmenuOpen() {
+		m.activeItem.Child().ActivatePrevious()
+		return
+	}
+
+	found := m.activeItem == nil
+	for i := len(m.Items) - 1; i >= 0; i-- {
+		item := m.Items[i]
+		if mItem, ok := item.(*menuItem); ok {
+			if found {
+				m.activateItem(mItem)
+				return
+			}
+			if mItem == m.activeItem {
+				found = true
+			}
+		}
+	}
 }
 
 // CreateRenderer returns a new renderer for the menu.
@@ -56,12 +120,25 @@ func (m *Menu) CreateRenderer() fyne.WidgetRenderer {
 	}
 }
 
-// DeactivateChild deactivates the active child menu.
+// DeactivateChild deactivates the active menu item and hides its submenu if any.
 func (m *Menu) DeactivateChild() {
 	if m.activeItem != nil {
-		m.activeItem.Child().Hide()
+		if m.activeItem.Child() != nil {
+			m.activeItem.Child().Hide()
+		}
 		m.activeItem = nil
 	}
+}
+
+// DeactivateLastSubmenu finds the last open submenu traversing through the open submenus,
+// deactivates its active item and hides it.
+// This also deactivates any submenus of the deactivated submenu.
+// It returns `true` if there was a submenu open and closed and `false` elsewhere.
+func (m *Menu) DeactivateLastSubmenu() bool {
+	if m.activeItem == nil {
+		return false
+	}
+	return m.activeItem.deactivateLastSubmenu()
 }
 
 // Hide hides the menu.
@@ -116,7 +193,9 @@ func (m *Menu) Tapped(*fyne.PointEvent) {
 // Dismiss dismisses the menu by dismissing and hiding the active child and performing OnDismiss.
 func (m *Menu) Dismiss() {
 	if m.activeItem != nil {
-		defer m.activeItem.Child().Dismiss()
+		if m.activeItem.Child() != nil {
+			defer m.activeItem.Child().Dismiss()
+		}
 		m.DeactivateChild()
 	}
 	if m.OnDismiss != nil {
@@ -124,7 +203,7 @@ func (m *Menu) Dismiss() {
 	}
 }
 
-func (m *Menu) activateChild(item *menuItem) {
+func (m *Menu) activateItem(item *menuItem) {
 	if item.Child() != nil {
 		item.Child().DeactivateChild()
 	}
@@ -133,10 +212,6 @@ func (m *Menu) activateChild(item *menuItem) {
 	}
 
 	m.DeactivateChild()
-	if item.Child() == nil {
-		return
-	}
-
 	m.activeItem = item
 	m.Refresh()
 }
@@ -187,7 +262,7 @@ func (r *menuRenderer) Refresh() {
 
 func (r *menuRenderer) layoutActiveChild() {
 	item := r.m.activeItem
-	if item == nil {
+	if item == nil || item.Child() == nil {
 		return
 	}
 

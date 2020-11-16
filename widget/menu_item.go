@@ -18,14 +18,13 @@ type menuItem struct {
 	Item   *fyne.MenuItem
 	Parent *Menu
 
-	child       *Menu
-	hovered     bool
-	onShowChild func(*menuItem)
+	child   *Menu
+	hovered bool
 }
 
 // newMenuItem creates a new menuItem.
-func newMenuItem(item *fyne.MenuItem, parent *Menu, onShowChild func(*menuItem)) *menuItem {
-	return &menuItem{Item: item, Parent: parent, onShowChild: onShowChild}
+func newMenuItem(item *fyne.MenuItem, parent *Menu) *menuItem {
+	return &menuItem{Item: item, Parent: parent}
 }
 
 func (i *menuItem) Child() *Menu {
@@ -77,7 +76,7 @@ func (i *menuItem) MinSize() fyne.Size {
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseIn(*desktop.MouseEvent) {
 	i.hovered = true
-	i.showChild()
+	i.activate()
 	i.Refresh()
 }
 
@@ -92,6 +91,9 @@ func (i *menuItem) MouseMoved(*desktop.MouseEvent) {
 // Implements: desktop.Hoverable
 func (i *menuItem) MouseOut() {
 	i.hovered = false
+	if !i.isSubmenuOpen() {
+		i.deactivate()
+	}
 	i.Refresh()
 }
 
@@ -130,7 +132,7 @@ func (i *menuItem) Show() {
 func (i *menuItem) Tapped(*fyne.PointEvent) {
 	if i.Item.Action == nil {
 		if fyne.CurrentDevice().IsMobile() {
-			i.showChild()
+			i.activate()
 		}
 		return
 	}
@@ -139,11 +141,49 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 	i.Item.Action()
 }
 
-func (i *menuItem) showChild() {
+func (i *menuItem) activate() {
 	if i.Child() != nil {
 		i.Child().Show()
 	}
-	i.onShowChild(i)
+	i.Parent.activateItem(i)
+}
+
+func (i *menuItem) activateLastSubmenu() bool {
+	if i.Child() == nil {
+		return false
+	}
+	if i.isSubmenuOpen() {
+		return i.Child().ActivateLastSubmenu()
+	}
+	i.Child().Show()
+	i.Child().ActivateNext()
+	return true
+}
+
+func (i *menuItem) deactivate() {
+	if i.Child() != nil {
+		i.Child().Hide()
+	}
+	i.Parent.DeactivateChild()
+}
+
+func (i *menuItem) deactivateLastSubmenu() bool {
+	if !i.isSubmenuOpen() {
+		return false
+	}
+	if !i.Child().DeactivateLastSubmenu() {
+		i.Child().DeactivateChild()
+		i.Child().Hide()
+	}
+	return true
+}
+
+func (i *menuItem) isActive() bool {
+	return i.Parent.activeItem == i
+}
+
+func (i *menuItem) isSubmenuOpen() bool {
+	return i.Child() != nil && i.Child().Visible()
 }
 
 type menuItemRenderer struct {
@@ -156,8 +196,13 @@ type menuItemRenderer struct {
 }
 
 func (r *menuItemRenderer) BackgroundColor() color.Color {
-	if !fyne.CurrentDevice().IsMobile() && (r.i.hovered || (r.i.child != nil && r.i.child.Visible())) {
-		return theme.FocusColor()
+	if !fyne.CurrentDevice().IsMobile() {
+		if r.i.isActive() {
+			return theme.FocusColor()
+		}
+		if r.i.hovered {
+			return theme.HoverColor()
+		}
 	}
 
 	return color.Transparent

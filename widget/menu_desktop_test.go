@@ -11,6 +11,8 @@ import (
 	internalWidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMenu_Layout(t *testing.T) {
@@ -981,4 +983,365 @@ func TestMenu_Scrolling(t *testing.T) {
 			</overlay>
 		</canvas>
 	`, w.Canvas())
+}
+
+func TestMenu_TraverseMenu(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
+	w := fyne.CurrentApp().NewWindow("")
+	defer w.Close()
+	w.SetPadded(false)
+	c := w.Canvas()
+
+	itemWithChild := fyne.NewMenuItem("Bar", nil)
+	itemWithChild.ChildMenu = fyne.NewMenu("",
+		fyne.NewMenuItem("SubA", nil),
+		fyne.NewMenuItem("SubB", nil),
+	)
+	m := widget.NewMenu(fyne.NewMenu("",
+		fyne.NewMenuItem("Foo", nil),
+		fyne.NewMenuItemSeparator(),
+		itemWithChild,
+		fyne.NewMenuItemSeparator(),
+		fyne.NewMenuItem("Baz", nil),
+	))
+	w.SetContent(internalWidget.NewOverlayContainer(m, c, nil))
+	w.Resize(m.MinSize())
+	m.Resize(m.MinSize())
+
+	overlayOpen := `
+		<canvas size="61x113">
+			<content>
+				<widget size="61x113" type="*widget.OverlayContainer">`
+	overlayClose := `			</widget>
+			</content>
+		</canvas>
+	`
+	menuOpen := overlayOpen + `
+					<widget size="61x113" type="*widget.Menu">
+						<widget size="61x113" type="*widget.Shadow">
+							<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+							<linearGradient endColor="shadow" pos="0,-4" size="61x4"/>
+							<radialGradient centerOffset="-0.5,0.5" pos="61,-4" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" pos="61,0" size="4x113" startColor="shadow"/>
+							<radialGradient centerOffset="-0.5,-0.5" pos="61,113" size="4x4" startColor="shadow"/>
+							<linearGradient pos="0,113" size="61x4" startColor="shadow"/>
+							<radialGradient centerOffset="0.5,-0.5" pos="-4,113" size="4x4" startColor="shadow"/>
+							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x113"/>
+						</widget>
+						<widget size="61x113" type="*widget.ScrollContainer">
+							<widget size="61x113" type="*widget.menuBox">
+								<container pos="0,4" size="61x121">`
+	menuClose := ` 						</container>
+							</widget>
+						</widget>
+					</widget>
+	` + overlayClose
+
+	// going all the way down …
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c)
+
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget backgroundColor="focus" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c)
+
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget backgroundColor="focus" pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c)
+
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget backgroundColor="focus" pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c)
+
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget backgroundColor="focus" pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c, "does not wrap around if last item is already active")
+
+	// … and up again
+	m.ActivatePrevious()
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget backgroundColor="focus" pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c)
+
+	m.ActivatePrevious()
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget backgroundColor="focus" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c)
+
+	m.ActivatePrevious()
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget backgroundColor="focus" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c, "does not wrap around if on top")
+
+	// activate a submenu (show and activate first item)
+	subMenuOpen := menuOpen + `
+									<widget size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget backgroundColor="focus" pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+						<widget pos="8,38" size="53x70" type="*widget.Menu">
+							<widget size="53x70" type="*widget.Shadow">
+								<radialGradient centerOffset="0.5,0.5" pos="-4,-4" size="4x4" startColor="shadow"/>
+								<linearGradient endColor="shadow" pos="0,-4" size="53x4"/>
+								<radialGradient centerOffset="-0.5,0.5" pos="53,-4" size="4x4" startColor="shadow"/>
+								<linearGradient angle="270" pos="53,0" size="4x70" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="53,70" size="4x4" startColor="shadow"/>
+								<linearGradient pos="0,70" size="53x4" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
+							</widget>
+							<widget size="53x70" type="*widget.ScrollContainer">
+								<widget size="53x70" type="*widget.menuBox">
+									<container pos="0,4" size="53x78">`
+	subMenuClose := `								</container>
+								</widget>
+							</widget>
+						</widget>
+					</widget>
+	` + overlayClose
+
+	m.ActivateNext()
+	assert.True(t, m.ActivateLastSubmenu())
+	test.AssertRendersToMarkup(t, subMenuOpen+`
+										<widget backgroundColor="focus" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubA</text>
+										</widget>
+										<widget pos="0,33" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubB</text>
+										</widget>
+	`+subMenuClose, c)
+
+	assert.False(t, m.ActivateLastSubmenu())
+	test.AssertRendersToMarkup(t, subMenuOpen+`
+										<widget backgroundColor="focus" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubA</text>
+										</widget>
+										<widget pos="0,33" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubB</text>
+										</widget>
+	`+subMenuClose, c, "does nothing if there is no submenu at the last active item")
+
+	// traversing through items of opened submenu
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, subMenuOpen+`
+										<widget size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubA</text>
+										</widget>
+										<widget backgroundColor="focus" pos="0,33" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubB</text>
+										</widget>
+	`+subMenuClose, c)
+
+	m.ActivateNext()
+	test.AssertRendersToMarkup(t, subMenuOpen+`
+										<widget size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubA</text>
+										</widget>
+										<widget backgroundColor="focus" pos="0,33" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubB</text>
+										</widget>
+	`+subMenuClose, c, "does not wrap around if last item is already active")
+
+	m.ActivatePrevious()
+	test.AssertRendersToMarkup(t, subMenuOpen+`
+										<widget backgroundColor="focus" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubA</text>
+										</widget>
+										<widget pos="0,33" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubB</text>
+										</widget>
+	`+subMenuClose, c)
+
+	m.ActivatePrevious()
+	test.AssertRendersToMarkup(t, subMenuOpen+`
+										<widget backgroundColor="focus" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubA</text>
+										</widget>
+										<widget pos="0,33" size="53x29" type="*widget.menuItem">
+											<text pos="8,4" size="37x21">SubB</text>
+										</widget>
+	`+subMenuClose, c, "does not wrap around if on top")
+
+	// closing an open submenu
+	assert.True(t, m.DeactivateLastSubmenu())
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget backgroundColor="focus" pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c)
+
+	assert.False(t, m.DeactivateLastSubmenu())
+	test.AssertRendersToMarkup(t, menuOpen+`
+									<widget size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="27x21">Foo</text>
+									</widget>
+									<widget pos="0,33" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget backgroundColor="focus" pos="0,38" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Bar</text>
+										<image pos="41,4" rsc="menuExpandIcon" size="iconInlineSize"/>
+									</widget>
+									<widget pos="0,71" size="61x1" type="*widget.Separator">
+										<rectangle fillColor="disabled" size="61x1"/>
+									</widget>
+									<widget pos="0,76" size="61x29" type="*widget.menuItem">
+										<text pos="8,4" size="26x21">Baz</text>
+									</widget>
+	`+menuClose, c, "does nothing if there is no submenu opened")
 }
