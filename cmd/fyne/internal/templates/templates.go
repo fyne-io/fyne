@@ -22,4 +22,7 @@ var (
 
 	// InfoPlistDarwin is the manifest file for darwin packaging
 	InfoPlistDarwin = template.Must(template.New("Manifest").Parse(string(resourceInfoPlist.StaticContent)))
+
+	// XCAssetsDarwin is the Contents.json file for darwin xcassets bundle
+	XCAssetsDarwin = template.Must(template.New("XCAssets").Parse(string(resourceXcassetsJSON.StaticContent)))
 )
