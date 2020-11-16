@@ -4,6 +4,9 @@ package binding
 
 import "sync"
 
+// Because there is no preference listener yet we connect any listeners asking for the same key.
+var prefBinds = make(map[string]DataItem)
+
 // DataItem is the base interface for all bindable data items.
 type DataItem interface {
 	// AddListener attaches a new change listener to this DataItem.

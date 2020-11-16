@@ -61,6 +61,39 @@ func (b *bound{{ .Name }}) Set(val {{ .Type }}) {
 }
 `
 
+const prefTemplate = `
+type prefBound{{ .Name }} struct {
+	base
+	key string
+	p   fyne.Preferences
+}
+
+// BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
+// Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
+	if listen, ok := prefBinds[key]; ok {
+		if l, ok := listen.({{ .Name }}); ok {
+			return l
+		}
+		fyne.LogError("A previous preference binding exists with different type for key: " + key, nil)
+	}
+
+	listen := &prefBound{{ .Name }}{key: key, p: p}
+	prefBinds[key] = listen
+	return listen
+}
+
+func (b *prefBound{{ .Name }}) Get() {{ .Type }} {
+	return b.p.{{ .Name }}(b.key)
+}
+
+func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) {
+	b.p.Set{{ .Name }}(b.key, v)
+
+	b.trigger()
+}
+`
+
 const toStringTemplate = `
 type stringFrom{{ .Name }} struct {
 	base
@@ -158,9 +191,18 @@ import (
 	"fyne.io/fyne"
 )
 `)
+	prefFile, err := newFile("preference")
+	if err != nil {
+		return
+	}
+	defer prefFile.Close()
+	prefFile.WriteString(`
+import "fyne.io/fyne"
+`)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
+	preference := template.Must(template.New("preference").Parse(prefTemplate))
 	for _, b := range []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t"},
 		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f"},
@@ -173,5 +215,6 @@ import (
 			continue
 		}
 		writeFile(toStringFile, toString, b)
+		writeFile(prefFile, preference, b)
 	}
 }
