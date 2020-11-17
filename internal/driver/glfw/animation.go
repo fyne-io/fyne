@@ -14,6 +14,30 @@ type anim struct {
 	total   int64
 }
 
+func (d *gLDriver) StartAnimation(a *fyne.Animation) {
+	d.animationMutex.Lock()
+	defer d.animationMutex.Unlock()
+	wasStopped := len(d.animations) == 0
+
+	d.animations = append(d.animations, newAnim(a))
+	if wasStopped {
+		d.runAnimations()
+	}
+}
+
+func (d *gLDriver) StopAnimation(a *fyne.Animation) {
+	d.animationMutex.Lock()
+	defer d.animationMutex.Unlock()
+	oldList := d.animations
+	var newList []*anim
+	for _, item := range oldList {
+		if item.a != a {
+			newList = append(newList, item)
+		}
+	}
+	d.animations = newList
+}
+
 func newAnim(a *fyne.Animation) *anim {
 	animate := &anim{a: a, start: time.Now(), end: time.Now().Add(a.Duration)}
 	animate.total = animate.end.Sub(animate.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12

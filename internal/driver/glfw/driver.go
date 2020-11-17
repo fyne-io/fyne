@@ -74,30 +74,6 @@ func (d *gLDriver) Run() {
 	d.runGL()
 }
 
-func (d *gLDriver) StartAnimation(a *fyne.Animation) {
-	d.animationMutex.Lock()
-	defer d.animationMutex.Unlock()
-	wasStopped := len(d.animations) == 0
-
-	d.animations = append(d.animations, newAnim(a))
-	if wasStopped {
-		d.runAnimations()
-	}
-}
-
-func (d *gLDriver) StopAnimation(a *fyne.Animation) {
-	d.animationMutex.Lock()
-	defer d.animationMutex.Unlock()
-	oldList := d.animations
-	var newList []*anim
-	for _, item := range oldList {
-		if item.a != a {
-			newList = append(newList, item)
-		}
-	}
-	d.animations = newList
-}
-
 func (d *gLDriver) addWindow(w *window) {
 	d.windowLock.Lock()
 	defer d.windowLock.Unlock()
