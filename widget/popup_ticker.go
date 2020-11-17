@@ -1,7 +1,7 @@
 package widget
 
 import (
-	//"math"
+	"math"
 	
 	"image/color"
 
@@ -54,6 +54,32 @@ func (rb *ringBuffer) Seek(position int) {
 	rb.Turn(position)
 }
 
+// Turn - rotates the ringbuffer by appropriate offset.  -offset is left, +offset is right.
+func (rb *ringBuffer) GetSelected(ratio float64, separator string, fudge int) string {
+	currentData := rb.Data()
+	nearestIndex := int(math.Round(ratio * float64(len(currentData))))
+	nearestIndex = nearestIndex + fudge
+
+	for i := nearestIndex; i >= 0; i-- {
+		if string(currentData[i]) == separator {
+			break
+		}
+		nearestIndex = i
+	}
+
+	endIndex := nearestIndex
+
+	for i := nearestIndex; i < len(currentData); i++ {
+		if string(currentData[i]) == separator {
+			endIndex = i
+			break
+		}
+
+	}
+	return string(currentData[nearestIndex:endIndex])
+}
+
+
 // Data - returns current data at current turn, read circularly
 func (rb *ringBuffer) Data() []byte {
 	var data []byte
@@ -88,7 +114,6 @@ type TickerPopUp struct {
 	innerSize    fyne.Size
 	modal        bool
 	overlayShown bool
-	hovered      bool
 	draggedX     fyne.Position
 }
 
@@ -149,7 +174,7 @@ func (p *TickerPopUp) DragEnd() {
 
 // Tapped is called when the user taps the tickerPopUp background - if not modal then dismiss this widget
 func (p *TickerPopUp) Tapped(e *fyne.PointEvent) {
-	if !p.hovered {
+	if e.Position.X < p.innerPos.X || e.Position.Y < p.innerPos.Y || e.Position.X > (p.innerPos.X + p.innerSize.Width) || e.Position.Y > (p.innerPos.Y + p.innerSize.Height) {
 		return
 	}
 
@@ -160,20 +185,35 @@ func (p *TickerPopUp) endOffset() int {
 	return p.innerPos.X + theme.Padding()
 }
 
-func (p *TickerPopUp) getRatio(posDiff *fyne.Position) float64 {
-	pad := p.endOffset()
+func (p *TickerPopUp) getRatio(pos *fyne.Position) float64 {
+	x := pos.X - p.innerPos.X - theme.Padding()
 
-	x := posDiff.X
+	tickerWidth := p.innerSize.Width
 
-	if x > p.innerPos.X + p.innerSize.Width {
+	if x > p.innerPos.X + tickerWidth {
 		return 1.0
-	} else if x < pad {
+	} else if x < p.innerPos.X + theme.Padding() {
 		return 0.0
 	} else {
-		return float64(x-pad) / float64(p.innerPos.X + p.innerSize.Width-pad*2)
+		return float64(x) / float64(tickerWidth - (2 * theme.Padding()))
 	}
 	
 	return 0.0
+}
+
+func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar string) string {
+	ratio := p.getRatio(pos)
+	fudge := 0
+	selected := p.rb.GetSelected(ratio, separatorChar, fudge)
+	if len(selected) == 0 {
+		if ratio < .5  {
+			fudge = 1
+		} else {
+			fudge = -1
+		}
+		selected = p.rb.GetSelected(ratio, separatorChar, fudge)
+	}
+	return selected
 }
 
 func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
