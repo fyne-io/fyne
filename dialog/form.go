@@ -8,11 +8,33 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-// FormDialog is like the standard Dialog but with confirm and cancel buttons.
+// FormDialog is like the standard Dialog but with confirm and cancel buttons, as well as the FormItems in the dialog.
 type FormDialog struct {
 	*dialog
+	items   []*widget.FormItem
 	confirm *widget.Button
 	cancel  *widget.Button
+}
+
+// validateItems acts as a validation edge state handler that will respond to an individual widget's validation
+// state before checking all others to determine the net validation state. If the error passed is not nil, then the
+// confirm button will be disabled. If the error parameter is nil, then all other Validatable widgets in items are
+// checked as well to determine whether the confirm button should be disabled.
+// This method is passed to each Validatable widget's SetOnValidationChanged method in items by NewFormDialog.
+func (d *FormDialog) validateItems(err error) {
+	if err != nil {
+		d.confirm.Disable()
+	} else {
+		for _, item := range d.items {
+			if validatable, ok := item.Widget.(fyne.Validatable); ok {
+				if err := validatable.Validate(); err != nil {
+					d.confirm.Disable()
+					return
+				}
+			}
+		}
+		d.confirm.Enable()
+	}
 }
 
 // NewFormDialog creates and returns a dialog over the specified application using
@@ -24,9 +46,10 @@ type FormDialog struct {
 // The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
 	parent fyne.Window) *FormDialog {
-	var itemObjects = make([]fyne.CanvasObject, 0, len(items)*2)
-	for _, ii := range items {
-		itemObjects = append(itemObjects, widget.NewLabel(ii.Text), ii.Widget)
+	var itemObjects = make([]fyne.CanvasObject, len(items)*2)
+	for ii, item := range items {
+		itemObjects[ii*2] = widget.NewLabel(item.Text)
+		itemObjects[ii*2+1] = item.Widget
 	}
 	content := fyne.NewContainerWithLayout(layout.NewFormLayout(), itemObjects...)
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
@@ -45,32 +68,21 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 		}}
 	// Mitigation for issue #1553
 	confirmBtn.SetIcon(theme.ConfirmIcon())
-	validateItems := func() {
-		for _, item := range items {
-			if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
-				if err := validatable.Validate(); err != nil {
-					confirmBtn.Disable()
-					return
-				}
-			}
-		}
-		confirmBtn.Enable()
-	}
-	validateItems()
-
-	for _, item := range items {
-		if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
-			validatable.SetOnValidationChanged(func(error) {
-				validateItems()
-			})
-		}
-	}
-	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, confirmBtn, layout.NewSpacer()))
-	return &FormDialog{
+	formDialog := &FormDialog{
 		dialog:  d,
+		items:   items,
 		confirm: confirmBtn,
 		cancel:  d.dismiss,
 	}
+	formDialog.validateItems(nil)
+
+	for _, item := range items {
+		if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
+			validatable.SetOnValidationChanged(formDialog.validateItems)
+		}
+	}
+	d.setButtons(container.NewHBox(layout.NewSpacer(), d.dismiss, confirmBtn, layout.NewSpacer()))
+	return formDialog
 }
 
 // ShowFormDialog shows a dialog over the specified application using

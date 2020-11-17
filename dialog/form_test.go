@@ -11,16 +11,12 @@ import (
 	testify "github.com/stretchr/testify/assert"
 )
 
-type formDialogtestContext struct {
-	subject *FormDialog
-	items   []*widget.FormItem
-}
-
 func TestFormDialog_Control(t *testing.T) {
 	assert := testify.New(t)
 	ch := make(chan bool)
-	tc := controlFormDialog(ch, test.NewWindow(nil))
-	go test.Tap(tc.subject.confirm)
+	fd := controlFormDialog(ch, test.NewWindow(nil))
+	fd.Show()
+	go test.Tap(fd.confirm)
 
 	select {
 	case result := <-ch:
@@ -33,12 +29,12 @@ func TestFormDialog_Control(t *testing.T) {
 func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
 	assert := testify.New(t)
 	ch := make(chan bool)
-	tc := validatingFormDialog(ch, test.NewWindow(nil))
-	tc.subject.Show()
+	fd := validatingFormDialog(ch, test.NewWindow(nil))
+	fd.Show()
 
-	assert.False(tc.subject.win.Hidden)
-	assert.True(tc.subject.confirm.Disabled(), "Confirm button should be disabled due to validation state")
-	go test.Tap(tc.subject.confirm)
+	assert.False(fd.win.Hidden)
+	assert.True(fd.confirm.Disabled(), "Confirm button should be disabled due to validation state")
+	go test.Tap(fd.confirm)
 
 	select {
 	case <-ch:
@@ -50,16 +46,16 @@ func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
 func TestFormDialog_ValidCanSubmit(t *testing.T) {
 	assert := testify.New(t)
 	ch := make(chan bool)
-	tc := validatingFormDialog(ch, test.NewWindow(nil))
-	tc.subject.Show()
+	fd := validatingFormDialog(ch, test.NewWindow(nil))
+	fd.Show()
 
-	assert.False(tc.subject.win.Hidden)
-	assert.True(tc.subject.confirm.Disabled(), "Confirm button should be disabled due to validation state")
+	assert.False(fd.win.Hidden)
+	assert.True(fd.confirm.Disabled(), "Confirm button should be disabled due to validation state")
 
-	if validatingEntry, ok := tc.items[0].Widget.(*widget.Entry); ok {
+	if validatingEntry, ok := fd.items[0].Widget.(*widget.Entry); ok {
 		validatingEntry.SetText("abc")
-		assert.False(tc.subject.confirm.Disabled())
-		go test.Tap(tc.subject.confirm)
+		assert.False(fd.confirm.Disabled())
+		go test.Tap(fd.confirm)
 
 		select {
 		case result := <-ch:
@@ -75,11 +71,11 @@ func TestFormDialog_ValidCanSubmit(t *testing.T) {
 func TestFormDialog_CanCancelInvalid(t *testing.T) {
 	assert := testify.New(t)
 	ch := make(chan bool)
-	tc := validatingFormDialog(ch, test.NewWindow(nil))
-	tc.subject.Show()
-	assert.False(tc.subject.win.Hidden)
+	fd := validatingFormDialog(ch, test.NewWindow(nil))
+	fd.Show()
+	assert.False(fd.win.Hidden)
 
-	go test.Tap(tc.subject.dismiss)
+	go test.Tap(fd.dismiss)
 
 	select {
 	case result := <-ch:
@@ -92,11 +88,11 @@ func TestFormDialog_CanCancelInvalid(t *testing.T) {
 func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 	assert := testify.New(t)
 	ch := make(chan bool)
-	tc := controlFormDialog(ch, test.NewWindow(nil))
-	tc.subject.Show()
-	assert.False(tc.subject.win.Hidden)
+	fd := controlFormDialog(ch, test.NewWindow(nil))
+	fd.Show()
+	assert.False(fd.win.Hidden)
 
-	go test.Tap(tc.subject.dismiss)
+	go test.Tap(fd.dismiss)
 
 	select {
 	case result := <-ch:
@@ -106,7 +102,7 @@ func TestFormDialog_CanCancelNoValidation(t *testing.T) {
 	}
 }
 
-func validatingFormDialog(ch chan bool, parent fyne.Window) formDialogtestContext {
+func validatingFormDialog(ch chan bool, parent fyne.Window) *FormDialog {
 	validatingEntry := widget.NewEntry()
 	validatingEntry.Validator = func(input string) error {
 		if input != "abc" {
@@ -118,41 +114,31 @@ func validatingFormDialog(ch chan bool, parent fyne.Window) formDialogtestContex
 		Text:   "Only accepts 'abc'",
 		Widget: validatingEntry,
 	}
-	controlEntry := widget.NewEntry()
+	controlEntry := widget.NewPasswordEntry()
 	controlItem := &widget.FormItem{
 		Text:   "I accept anything",
 		Widget: controlEntry,
 	}
 
 	items := []*widget.FormItem{validatingItem, controlItem}
-	formDialog := NewFormDialog("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
+	return NewFormDialog("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
 		ch <- confirm
 	}, parent)
-	tc := formDialogtestContext{
-		subject: formDialog,
-		items:   items,
-	}
-	return tc
 }
 
-func controlFormDialog(ch chan bool, parent fyne.Window) formDialogtestContext {
+func controlFormDialog(ch chan bool, parent fyne.Window) *FormDialog {
 	controlEntry := widget.NewEntry()
 	controlItem := &widget.FormItem{
 		Text:   "I accept anything",
 		Widget: controlEntry,
 	}
-	controlEntry2 := widget.NewEntry()
+	controlEntry2 := widget.NewPasswordEntry()
 	controlItem2 := &widget.FormItem{
 		Text:   "I accept anything",
 		Widget: controlEntry2,
 	}
 	items := []*widget.FormItem{controlItem, controlItem2}
-	formDialog := NewFormDialog("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
+	return NewFormDialog("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
 		ch <- confirm
 	}, parent)
-	tc := formDialogtestContext{
-		subject: formDialog,
-		items:   items,
-	}
-	return tc
 }

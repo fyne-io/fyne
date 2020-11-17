@@ -6,12 +6,12 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
-	"regexp"
 	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/data/validation"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/storage"
 	"fyne.io/fyne/theme"
@@ -145,21 +145,12 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			}, win)
 		}),
 		widget.NewButton("Form Dialog (Login Form)", func() {
-			validationRx := regexp.MustCompile(`^[A-Za-z0-9_-]+$`)
+			userRx := validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "username can only contain letters, numbers, '_', and '-'")
 			username := widget.NewEntry()
-			username.Validator = func(user string) error {
-				if !validationRx.MatchString(user) {
-					return errors.New("username can only contain letters, numbers, '_', and '-'")
-				}
-				return nil
-			}
+			username.Validator = userRx
+			passRx := validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "password can only contain letters, numbers, '_', and '-'")
 			password := widget.NewPasswordEntry()
-			password.Validator = func(pass string) error {
-				if !validationRx.MatchString(pass) {
-					return errors.New("password can only contain letters, numbers, '_', and '-'")
-				}
-				return nil
-			}
+			password.Validator = passRx
 			remember := false
 			items := []*widget.FormItem{
 				widget.NewFormItem("Username", username),
