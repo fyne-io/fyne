@@ -77,7 +77,7 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 	formDialog.validateItems(nil)
 
 	for _, item := range items {
-		if validatable, canValidate := item.Widget.(fyne.Validatable); canValidate {
+		if validatable, ok := item.Widget.(fyne.Validatable); ok {
 			validatable.SetOnValidationChanged(formDialog.validateItems)
 		}
 	}
