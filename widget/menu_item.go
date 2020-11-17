@@ -137,8 +137,7 @@ func (i *menuItem) Tapped(*fyne.PointEvent) {
 		return
 	}
 
-	i.Parent.Dismiss()
-	i.Item.Action()
+	i.trigger()
 }
 
 func (i *menuItem) activate() {
@@ -184,6 +183,19 @@ func (i *menuItem) isActive() bool {
 
 func (i *menuItem) isSubmenuOpen() bool {
 	return i.Child() != nil && i.Child().Visible()
+}
+
+func (i *menuItem) trigger() {
+	i.Parent.Dismiss()
+	i.Item.Action()
+}
+
+func (i *menuItem) triggerLast() {
+	if i.isSubmenuOpen() {
+		i.Child().TriggerLast()
+		return
+	}
+	i.trigger()
 }
 
 type menuItemRenderer struct {

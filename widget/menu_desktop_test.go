@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMenu_Layout(t *testing.T) {
@@ -1344,4 +1345,72 @@ func TestMenu_TraverseMenu(t *testing.T) {
 										<text pos="8,4" size="26x21">Baz</text>
 									</widget>
 	`+menuClose, c, "does nothing if there is no submenu opened")
+}
+
+func TestMenu_TriggerTraversedMenu(t *testing.T) {
+	var triggered string
+	var dismissed bool
+	setupMenu := func() *widget.Menu {
+		triggered = ""
+		dismissed = false
+		itemWithChild := fyne.NewMenuItem("Bar", func() { triggered = "2nd" })
+		itemWithChild.ChildMenu = fyne.NewMenu("",
+			fyne.NewMenuItem("SubA", func() { triggered = "1st sub" }),
+			fyne.NewMenuItem("SubB", func() { triggered = "2nd sub" }),
+		)
+		m := widget.NewMenu(fyne.NewMenu("",
+			fyne.NewMenuItem("Foo", func() { triggered = "1st" }),
+			fyne.NewMenuItemSeparator(),
+			itemWithChild,
+			fyne.NewMenuItemSeparator(),
+			fyne.NewMenuItem("Baz", func() { triggered = "3rd" }),
+		))
+		m.OnDismiss = func() { dismissed = true }
+		w := fyne.CurrentApp().NewWindow("")
+		w.SetContent(internalWidget.NewOverlayContainer(m, w.Canvas(), nil))
+		return m
+	}
+
+	t.Run("without active item", func(t *testing.T) {
+		m := setupMenu()
+		m.TriggerLast()
+		assert.Equal(t, "", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("first item in submenu", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		require.True(t, m.ActivateLastSubmenu())
+		m.TriggerLast()
+		assert.Equal(t, "1st sub", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("last item in submenu", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		require.True(t, m.ActivateLastSubmenu())
+		m.ActivateNext()
+		m.TriggerLast()
+		assert.Equal(t, "2nd sub", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("item in menu", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		m.ActivateNext()
+		m.TriggerLast()
+		assert.Equal(t, "3rd", triggered)
+		assert.True(t, dismissed)
+	})
+	t.Run("item with (closed) submenu", func(t *testing.T) {
+		m := setupMenu()
+		m.ActivateNext()
+		m.ActivateNext()
+		m.TriggerLast()
+		assert.Equal(t, "2nd", triggered)
+		assert.True(t, dismissed)
+	})
 }

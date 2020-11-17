@@ -190,6 +190,15 @@ func (m *Menu) Tapped(*fyne.PointEvent) {
 	// Hit a separator or padding -> do nothing.
 }
 
+// TriggerLast finds the last active menu item traversing through the open submenus and triggers it.
+func (m *Menu) TriggerLast() {
+	if m.activeItem == nil {
+		m.Dismiss()
+		return
+	}
+	m.activeItem.triggerLast()
+}
+
 // Dismiss dismisses the menu by dismissing and hiding the active child and performing OnDismiss.
 func (m *Menu) Dismiss() {
 	if m.activeItem != nil {
