@@ -145,12 +145,10 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			}, win)
 		}),
 		widget.NewButton("Form Dialog (Login Form)", func() {
-			userRx := validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "username can only contain letters, numbers, '_', and '-'")
 			username := widget.NewEntry()
-			username.Validator = userRx
-			passRx := validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "password can only contain letters, numbers, '_', and '-'")
+			username.Validator = validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "username can only contain letters, numbers, '_', and '-'")
 			password := widget.NewPasswordEntry()
-			password.Validator = passRx
+			password.Validator = validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "password can only contain letters, numbers, '_', and '-'")
 			remember := false
 			items := []*widget.FormItem{
 				widget.NewFormItem("Username", username),
