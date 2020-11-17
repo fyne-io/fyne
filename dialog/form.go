@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-// FormDialog is like the standard Dialog but with confirm and cancel buttons, as well as the FormItems in the dialog.
+// FormDialog is a simple dialog window for displaying FormItems inside a form.
 type FormDialog struct {
 	*dialog
 	items   []*widget.FormItem
