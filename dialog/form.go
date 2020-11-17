@@ -8,8 +8,8 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-// FormDialog is a simple dialog window for displaying FormItems inside a form.
-type FormDialog struct {
+// formDialog is a simple dialog window for displaying FormItems inside a form.
+type formDialog struct {
 	*dialog
 	items   []*widget.FormItem
 	confirm *widget.Button
@@ -21,7 +21,7 @@ type FormDialog struct {
 // confirm button will be disabled. If the error parameter is nil, then all other Validatable widgets in items are
 // checked as well to determine whether the confirm button should be disabled.
 // This method is passed to each Validatable widget's SetOnValidationChanged method in items by NewFormDialog.
-func (d *FormDialog) validateItems(err error) {
+func (d *formDialog) validateItems(err error) {
 	if err != nil {
 		d.confirm.Disable()
 		return
@@ -43,13 +43,12 @@ func (d *FormDialog) validateItems(err error) {
 // If any Validatable widget reports that validation has failed, then the confirm
 // button will be disabled. The initial state of the confirm button will reflect the initial
 // validation state of the items added to the form dialog.
-// The MinSize() of the CanvasObject passed will be used to set the size of the window.
 func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
-	parent fyne.Window) *FormDialog {
+	parent fyne.Window) *formDialog {
 	var itemObjects = make([]fyne.CanvasObject, len(items)*2)
-	for ii, item := range items {
-		itemObjects[ii*2] = widget.NewLabel(item.Text)
-		itemObjects[ii*2+1] = item.Widget
+	for i, item := range items {
+		itemObjects[i*2] = widget.NewLabel(item.Text)
+		itemObjects[i*2+1] = item.Widget
 	}
 	content := fyne.NewContainerWithLayout(layout.NewFormLayout(), itemObjects...)
 	d := &dialog{content: content, title: title, icon: nil, parent: parent}
@@ -68,7 +67,7 @@ func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, cal
 		}}
 	// Mitigation for issue #1553
 	confirmBtn.SetIcon(theme.ConfirmIcon())
-	formDialog := &FormDialog{
+	formDialog := &formDialog{
 		dialog:  d,
 		items:   items,
 		confirm: confirmBtn,

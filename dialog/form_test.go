@@ -3,106 +3,85 @@ package dialog
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/widget"
-	testify "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
+)
+
+// formDialogResult is the result of the test form dialog callback.
+type formDialogResult int
+
+const (
+	formDialogNoAction formDialogResult = iota
+	formDialogConfirm
+	formDialogCancel
 )
 
 func TestFormDialog_Control(t *testing.T) {
-	assert := testify.New(t)
-	ch := make(chan bool)
-	fd := controlFormDialog(ch, test.NewWindow(nil))
+	var result formDialogResult
+	fd := controlFormDialog(&result, test.NewWindow(nil))
 	fd.Show()
-	go test.Tap(fd.confirm)
+	test.Tap(fd.confirm)
 
-	select {
-	case result := <-ch:
-		assert.True(result, "Control should allow confirmation with no validation constraints")
-	case <-time.After(500 * time.Millisecond):
-		assert.Fail("Should have received a confirmation by now")
-	}
+	assert.Equal(t, formDialogConfirm, result, "Control form should be confirmed with no validation")
 }
 
 func TestFormDialog_InvalidCannotSubmit(t *testing.T) {
-	assert := testify.New(t)
-	ch := make(chan bool)
-	fd := validatingFormDialog(ch, test.NewWindow(nil))
+	var result formDialogResult
+	fd := validatingFormDialog(&result, test.NewWindow(nil))
 	fd.Show()
 
-	assert.False(fd.win.Hidden)
-	assert.True(fd.confirm.Disabled(), "Confirm button should be disabled due to validation state")
-	go test.Tap(fd.confirm)
+	assert.False(t, fd.win.Hidden)
+	assert.True(t, fd.confirm.Disabled(), "Confirm button should be disabled due to validation state")
+	test.Tap(fd.confirm)
 
-	select {
-	case <-ch:
-		assert.Fail("Callback should not have ran with an invalid form")
-	case <-time.After(500 * time.Millisecond):
-	}
+	assert.Equal(t, formDialogNoAction, result, "Callback should not have ran with invalid form")
 }
 
 func TestFormDialog_ValidCanSubmit(t *testing.T) {
-	assert := testify.New(t)
-	ch := make(chan bool)
-	fd := validatingFormDialog(ch, test.NewWindow(nil))
+	var result formDialogResult
+	fd := validatingFormDialog(&result, test.NewWindow(nil))
 	fd.Show()
 
-	assert.False(fd.win.Hidden)
-	assert.True(fd.confirm.Disabled(), "Confirm button should be disabled due to validation state")
+	assert.False(t, fd.win.Hidden)
+	assert.True(t, fd.confirm.Disabled(), "Confirm button should be disabled due to validation state")
 
 	if validatingEntry, ok := fd.items[0].Widget.(*widget.Entry); ok {
 		validatingEntry.SetText("abc")
-		assert.False(fd.confirm.Disabled())
-		go test.Tap(fd.confirm)
+		assert.False(t, fd.confirm.Disabled())
+		test.Tap(fd.confirm)
 
-		select {
-		case result := <-ch:
-			assert.True(result, "Confirm should return true result")
-		case <-time.After(500 * time.Millisecond):
-			assert.Fail("Callback should have ran with a valid form")
-		}
+		assert.Equal(t, formDialogConfirm, result, "Valid form should be able to be confirmed")
 	} else {
-		assert.Fail("First item's widget should be an Entry (check validatingFormDialog)")
+		assert.Fail(t, "First item's widget should be an Entry (check validatingFormDialog)")
 	}
 }
 
 func TestFormDialog_CanCancelInvalid(t *testing.T) {
-	assert := testify.New(t)
-	ch := make(chan bool)
-	fd := validatingFormDialog(ch, test.NewWindow(nil))
+	var result formDialogResult
+	fd := validatingFormDialog(&result, test.NewWindow(nil))
 	fd.Show()
-	assert.False(fd.win.Hidden)
+	assert.False(t, fd.win.Hidden)
 
-	go test.Tap(fd.dismiss)
+	test.Tap(fd.dismiss)
 
-	select {
-	case result := <-ch:
-		assert.False(result, "Result should be false with cancellation")
-	case <-time.After(500 * time.Millisecond):
-		assert.Fail("Should have received a cancellation by now")
-	}
+	assert.Equal(t, formDialogCancel, result, "Expected cancel result")
 }
 
 func TestFormDialog_CanCancelNoValidation(t *testing.T) {
-	assert := testify.New(t)
-	ch := make(chan bool)
-	fd := controlFormDialog(ch, test.NewWindow(nil))
+	var result formDialogResult
+	fd := controlFormDialog(&result, test.NewWindow(nil))
 	fd.Show()
-	assert.False(fd.win.Hidden)
+	assert.False(t, fd.win.Hidden)
 
-	go test.Tap(fd.dismiss)
+	test.Tap(fd.dismiss)
 
-	select {
-	case result := <-ch:
-		assert.False(result, "Result should be false with cancellation")
-	case <-time.After(500 * time.Millisecond):
-		assert.Fail("Should have received a cancellation by now")
-	}
+	assert.Equal(t, formDialogCancel, result, "Expected cancel result")
 }
 
-func validatingFormDialog(ch chan bool, parent fyne.Window) *FormDialog {
+func validatingFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
 	validatingEntry := widget.NewEntry()
 	validatingEntry.Validator = func(input string) error {
 		if input != "abc" {
@@ -122,11 +101,15 @@ func validatingFormDialog(ch chan bool, parent fyne.Window) *FormDialog {
 
 	items := []*widget.FormItem{validatingItem, controlItem}
 	return NewFormDialog("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
-		ch <- confirm
+		if confirm {
+			*result = formDialogConfirm
+		} else {
+			*result = formDialogCancel
+		}
 	}, parent)
 }
 
-func controlFormDialog(ch chan bool, parent fyne.Window) *FormDialog {
+func controlFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
 	controlEntry := widget.NewEntry()
 	controlItem := &widget.FormItem{
 		Text:   "I accept anything",
@@ -139,6 +122,10 @@ func controlFormDialog(ch chan bool, parent fyne.Window) *FormDialog {
 	}
 	items := []*widget.FormItem{controlItem, controlItem2}
 	return NewFormDialog("Validating Form Dialog", "Submit", "Cancel", items, func(confirm bool) {
-		ch <- confirm
+		if confirm {
+			*result = formDialogConfirm
+		} else {
+			*result = formDialogCancel
+		}
 	}, parent)
 }

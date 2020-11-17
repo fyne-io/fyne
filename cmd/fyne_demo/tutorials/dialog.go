@@ -130,20 +130,6 @@ func dialogScreen(win fyne.Window) fyne.CanvasObject {
 			picker.Advanced = true
 			picker.Show()
 		}),
-		widget.NewButton("Custom Dialog (Login Form)", func() {
-			username := widget.NewEntry()
-			password := widget.NewPasswordEntry()
-			content := widget.NewForm(widget.NewFormItem("Username", username),
-				widget.NewFormItem("Password", password))
-
-			dialog.ShowCustomConfirm("Login...", "Log In", "Cancel", content, func(b bool) {
-				if !b {
-					return
-				}
-
-				log.Println("Please Authenticate", username.Text, password.Text)
-			}, win)
-		}),
 		widget.NewButton("Form Dialog (Login Form)", func() {
 			username := widget.NewEntry()
 			username.Validator = validation.NewRegexp(`^[A-Za-z0-9_-]+$`, "username can only contain letters, numbers, '_', and '-'")
