@@ -68,7 +68,7 @@ func (d *gLDriver) tickAnimation(a *anim) bool {
 	val := float32(delta) / float32(total)
 	curve := a.a.Curve
 	if curve == nil {
-		curve = fyne.AnimationLinear
+		curve = fyne.AnimationEaseInOut
 	}
 	if a.reverse {
 		a.a.Tick(curve(1 - val))
