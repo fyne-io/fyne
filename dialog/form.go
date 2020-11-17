@@ -24,17 +24,17 @@ type FormDialog struct {
 func (d *FormDialog) validateItems(err error) {
 	if err != nil {
 		d.confirm.Disable()
-	} else {
-		for _, item := range d.items {
-			if validatable, ok := item.Widget.(fyne.Validatable); ok {
-				if err := validatable.Validate(); err != nil {
-					d.confirm.Disable()
-					return
-				}
+		return
+	}
+	for _, item := range d.items {
+		if validatable, ok := item.Widget.(fyne.Validatable); ok {
+			if err := validatable.Validate(); err != nil {
+				d.confirm.Disable()
+				return
 			}
 		}
-		d.confirm.Enable()
 	}
+	d.confirm.Enable()
 }
 
 // NewFormDialog creates and returns a dialog over the specified application using
