@@ -506,6 +506,14 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 	}
 }
 
+// PresetFileName sets the filename in a FileSaveDialog.
+// This is normally called before the dialog is shown.
+func (f *FileDialog) PresetFileName(fileName string) {
+	if f.save {
+		f.dialog.fileName.SetText(fileName)
+	}
+}
+
 // NewFileOpen creates a file dialog allowing the user to choose a file to open.
 // The dialog will appear over the window specified when Show() is called.
 func NewFileOpen(callback func(fyne.URIReadCloser, error), parent fyne.Window) *FileDialog {
