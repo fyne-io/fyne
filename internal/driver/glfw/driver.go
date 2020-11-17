@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
@@ -80,7 +79,7 @@ func (d *gLDriver) StartAnimation(a *fyne.Animation) {
 	defer d.animationMutex.Unlock()
 	wasStopped := len(d.animations) == 0
 
-	d.animations = append(d.animations, &anim{a: a, start: time.Now(), end: time.Now().Add(a.Duration)})
+	d.animations = append(d.animations, newAnim(a))
 	if wasStopped {
 		d.runAnimations()
 	}

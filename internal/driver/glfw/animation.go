@@ -11,6 +11,13 @@ type anim struct {
 	end     time.Time
 	reverse bool
 	start   time.Time
+	total   int64
+}
+
+func newAnim(a *fyne.Animation) *anim {
+	animate := &anim{a: a, start: time.Now(), end: time.Now().Add(a.Duration)}
+	animate.total = animate.end.Sub(animate.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
+	return animate
 }
 
 func (d *gLDriver) runAnimations() {
@@ -19,7 +26,6 @@ func (d *gLDriver) runAnimations() {
 	go func() {
 		done := false
 		for !done {
-
 			<-draw.C
 			d.animationMutex.Lock()
 			oldList := d.animations
@@ -62,10 +68,9 @@ func (d *gLDriver) tickAnimation(a *anim) bool {
 		a.end = a.start.Add(a.a.Duration)
 	}
 
-	total := a.end.Sub(a.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
-	delta := time.Since(a.start).Nanoseconds() / 1000000
+	delta := time.Since(a.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
 
-	val := float32(delta) / float32(total)
+	val := float32(delta) / float32(a.total)
 	curve := a.a.Curve
 	if curve == nil {
 		curve = fyne.AnimationEaseInOut

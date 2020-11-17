@@ -19,14 +19,20 @@ const (
 // The content of fn should apply the color values to an object and refresh it.
 // You should call Start() on the returned animation to start it.
 func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
+	r1, g1, b1, a1 := start.RGBA()
+	r2, g2, b2, a2 := stop.RGBA()
+
+	rDelta := int(r2) - int(r1)
+	gDelta := int(g2) - int(g1)
+	bDelta := int(b2) - int(b1)
+	aDelta := int(a2) - int(a1)
+
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			r1, g1, b1, a1 := start.RGBA()
-			r2, g2, b2, a2 := stop.RGBA()
 
-			fn(color.NRGBA{R: scaleColor(r1, r2, done), G: scaleColor(g1, g2, done), B: scaleColor(b1, b2, done),
-				A: scaleColor(a1, a2, done)})
+			fn(color.NRGBA{R: scaleChannel(r1, rDelta, done), G: scaleChannel(g1, gDelta, done),
+				B: scaleChannel(b1, bDelta, done), A: scaleChannel(a1, aDelta, done)})
 		}}
 }
 
@@ -34,10 +40,13 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 // the specified Duration. The content of fn should apply the position value to an object for the change
 // to be visible. You should call Start() on the returned animation to start it.
 func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
+	xDelta := stop.X - start.X
+	yDelta := stop.Y - start.Y
+
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			fn(fyne.NewPos(scaleInt(start.X, stop.X, done), scaleInt(start.Y, stop.Y, done)))
+			fn(fyne.NewPos(scaleInt(start.X, xDelta, done), scaleInt(start.Y, yDelta, done)))
 		}}
 }
 
@@ -45,21 +54,23 @@ func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fy
 // the specified Duration. The content of fn should apply the size value to an object for the change
 // to be visible. You should call Start() on the returned animation to start it.
 func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
+	widthDelta := stop.Width - start.Width
+	heightDelta := stop.Height - start.Height
+
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			fn(fyne.NewSize(scaleInt(start.Width, stop.Width, done), scaleInt(start.Height, stop.Height, done)))
+			fn(fyne.NewSize(scaleInt(start.Width, widthDelta, done), scaleInt(start.Height, heightDelta, done)))
 		}}
 }
 
-func scaleColor(start uint32, end uint32, done float32) uint8 {
-	diff := int(end) - int(start)
+func scaleChannel(start uint32, diff int, done float32) uint8 {
 	shift := int(float32(diff) * done)
 
 	return uint8((int(start) + shift) >> 8)
 }
 
-func scaleInt(start, end int, done float32) int {
-	shift := int(float32(end-start) * done)
+func scaleInt(start, delta int, done float32) int {
+	shift := int(float32(delta) * done)
 	return start + shift
 }
