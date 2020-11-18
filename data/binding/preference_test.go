@@ -88,7 +88,7 @@ func TestPreferenceBindingTriggers(t *testing.T) {
 	bind2 := BindPreferenceString(key, p)
 
 	ch := make(chan interface{})
-	bind1.AddListener(NewDataItemListener(func() {
+	bind1.AddListener(NewDataListener(func() {
 		ch <- struct{}{}
 	}))
 
