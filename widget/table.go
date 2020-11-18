@@ -24,6 +24,8 @@ type TableCellID struct {
 // Table widget is a grid of items that can be scrolled and a cell selected.
 // It's performance is provided by caching cell templates created with CreateCell and re-using them with UpdateCell.
 // The size of the content rows/columns is returned by the Length callback.
+//
+// Since: 1.4
 type Table struct {
 	BaseWidget
 
@@ -45,6 +47,8 @@ type Table struct {
 // The first returns the data size in rows and columns, second parameter is a function that returns cell
 // template objects that can be cached and the third is used to apply data at specified data location to the
 // passed template CanvasObject.
+//
+// Since: 1.4
 func NewTable(length func() (int, int), create func() fyne.CanvasObject, update func(TableCellID, fyne.CanvasObject)) *Table {
 	t := &Table{Length: length, CreateCell: create, UpdateCell: update}
 	t.ExtendBaseWidget(t)
@@ -103,6 +107,8 @@ func (t *Table) Select(id TableCellID) {
 // SetColumnWidth supports changing the width of the specified column. Columns normally take the width of the template
 // cell returned from the CreateCell callback. The width parameter uses the same units as a fyne.Size type and refers
 // to the internal content width not including any standard padding or divider size.
+//
+// Since: 1.4.1
 func (t *Table) SetColumnWidth(id, width int) {
 	if t.columnWidths == nil {
 		t.columnWidths = make(map[int]int)

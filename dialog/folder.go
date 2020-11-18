@@ -9,6 +9,8 @@ var folderFilter = storage.NewMimeTypeFileFilter([]string{"application/x-directo
 
 // NewFolderOpen creates a file dialog allowing the user to choose a folder to open.
 // The dialog will appear over the window specified when Show() is called.
+//
+// Since: 1.4
 func NewFolderOpen(callback func(fyne.ListableURI, error), parent fyne.Window) *FileDialog {
 	dialog := &FileDialog{}
 	dialog.callback = callback
@@ -19,6 +21,8 @@ func NewFolderOpen(callback func(fyne.ListableURI, error), parent fyne.Window) *
 
 // ShowFolderOpen creates and shows a file dialog allowing the user to choose a folder to open.
 // The dialog will appear over the window specified.
+//
+// Since: 1.4
 func ShowFolderOpen(callback func(fyne.ListableURI, error), parent fyne.Window) {
 	dialog := NewFolderOpen(callback, parent)
 	if fileOpenOSOverride(dialog) {

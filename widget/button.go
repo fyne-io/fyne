@@ -19,6 +19,8 @@ type ButtonAlign int
 type ButtonIconPlacement int
 
 // ButtonImportance represents how prominent the button should appear
+//
+// Since: 1.4
 type ButtonImportance int
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -68,6 +70,8 @@ type Button struct {
 	Style ButtonStyle
 	Icon  fyne.Resource
 	// Specify how prominent the button should be, High will highlight the button and Low will remove some decoration.
+	//
+	// Since: 1.4
 	Importance    ButtonImportance
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement

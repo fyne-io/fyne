@@ -1,6 +1,8 @@
 package fyne
 
 // Validatable is an interface for specifying if a widget is validatable.
+//
+// Since: 1.4
 type Validatable interface {
 	Validate() error
 
@@ -10,4 +12,6 @@ type Validatable interface {
 }
 
 // StringValidator is a function signature for validating string inputs.
+//
+// Since: 1.4
 type StringValidator func(string) error
