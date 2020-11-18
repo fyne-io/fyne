@@ -193,13 +193,13 @@ func (p *TickerPopUp) endOffset() int {
 }
 
 func (p *TickerPopUp) getRatio(pos *fyne.Position) float64 {
-	x := pos.X - p.innerPos.X - theme.Padding()
+	x := pos.X - p.innerPos.X
 
 	tickerWidth := p.rb.width
 
 	if x > p.innerPos.X + tickerWidth {
 		return 1.0
-	} else if x < p.innerPos.X + theme.Padding() {
+	} else if pos.X < p.innerPos.X {
 		return 0.0
 	} else {
 		return float64(x) / float64(tickerWidth - (2 * theme.Padding()))
