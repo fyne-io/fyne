@@ -97,3 +97,34 @@ func (b *prefBoundInt) Set(v int) {
 
 	b.trigger()
 }
+
+type prefBoundString struct {
+	base
+	key string
+	p   fyne.Preferences
+}
+
+// BindPreferenceString returns a bindable string value that is managed by the application preferences.
+// Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+func BindPreferenceString(key string, p fyne.Preferences) String {
+	if listen, ok := prefBinds[key]; ok {
+		if l, ok := listen.(String); ok {
+			return l
+		}
+		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
+	}
+
+	listen := &prefBoundString{key: key, p: p}
+	prefBinds[key] = listen
+	return listen
+}
+
+func (b *prefBoundString) Get() string {
+	return b.p.String(b.key)
+}
+
+func (b *prefBoundString) Set(v string) {
+	b.p.SetString(b.key, v)
+
+	b.trigger()
+}

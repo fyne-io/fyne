@@ -147,6 +147,7 @@ func (s *stringFrom{{ .Name }}) DataChanged() {
 type bindValues struct {
 	Name, Type, Default string
 	Format              string
+	SupportsPreferences bool
 }
 
 func newFile(name string) (*os.File, error) {
@@ -204,17 +205,18 @@ import "fyne.io/fyne"
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	preference := template.Must(template.New("preference").Parse(prefTemplate))
 	for _, b := range []bindValues{
-		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t"},
-		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f"},
-		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d"},
+		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
+		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
+		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
-		bindValues{Name: "String", Type: "string", Default: "\"\""},
+		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
 	} {
 		writeFile(itemFile, item, b)
-		if b.Type == "string" || b.Type == "rune" {
-			continue
+		if b.SupportsPreferences {
+			writeFile(prefFile, preference, b)
 		}
-		writeFile(toStringFile, toString, b)
-		writeFile(prefFile, preference, b)
+		if b.Format != "" {
+			writeFile(toStringFile, toString, b)
+		}
 	}
 }
