@@ -44,7 +44,7 @@ func (d *formDialog) validateItems(err error) {
 // button will be disabled. The initial state of the confirm button will reflect the initial
 // validation state of the items added to the form dialog.
 func NewFormDialog(title, confirm, dismiss string, items []*widget.FormItem, callback func(bool),
-	parent fyne.Window) *formDialog {
+	parent fyne.Window) Dialog {
 	var itemObjects = make([]fyne.CanvasObject, len(items)*2)
 	for i, item := range items {
 		itemObjects[i*2] = widget.NewLabel(item.Text)

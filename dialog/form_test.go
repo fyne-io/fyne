@@ -106,7 +106,7 @@ func validatingFormDialog(result *formDialogResult, parent fyne.Window) *formDia
 		} else {
 			*result = formDialogCancel
 		}
-	}, parent)
+	}, parent).(*formDialog)
 }
 
 func controlFormDialog(result *formDialogResult, parent fyne.Window) *formDialog {
@@ -127,5 +127,5 @@ func controlFormDialog(result *formDialogResult, parent fyne.Window) *formDialog
 		} else {
 			*result = formDialogCancel
 		}
-	}, parent)
+	}, parent).(*formDialog)
 }
