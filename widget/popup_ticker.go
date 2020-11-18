@@ -17,6 +17,7 @@ type ringBuffer struct {
 	data []byte
 	start int // Start of ringBuffer can be anywhere in array.
 	bound int
+	width int
 	forward bool
 }
 
@@ -115,6 +116,7 @@ type TickerPopUp struct {
 	modal        bool
 	overlayShown bool
 	draggedX     fyne.Position
+	dragging     int
 }
 
 // Hide this widget, if it was previously visible
@@ -170,11 +172,16 @@ func (p *TickerPopUp) ShowAtPosition(pos fyne.Position) {
 
 // DragEnd function.
 func (p *TickerPopUp) DragEnd() {
+	p.dragging = 1
 }
 
 // Tapped is called when the user taps the tickerPopUp background - if not modal then dismiss this widget
 func (p *TickerPopUp) Tapped(e *fyne.PointEvent) {
 	if e.Position.X < p.innerPos.X || e.Position.Y < p.innerPos.Y || e.Position.X > (p.innerPos.X + p.innerSize.Width) || e.Position.Y > (p.innerPos.Y + p.innerSize.Height) {
+		return
+	}
+	if p.dragging > 0 {
+		p.dragging = 0
 		return
 	}
 
@@ -188,7 +195,7 @@ func (p *TickerPopUp) endOffset() int {
 func (p *TickerPopUp) getRatio(pos *fyne.Position) float64 {
 	x := pos.X - p.innerPos.X - theme.Padding()
 
-	tickerWidth := p.innerSize.Width
+	tickerWidth := p.rb.width
 
 	if x > p.innerPos.X + tickerWidth {
 		return 1.0
@@ -217,6 +224,7 @@ func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar string) stri
 }
 
 func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
+	p.dragging = 2
 	if p.draggedX.X == 0 {
 		p.draggedX = e.Position
 		return
@@ -293,7 +301,7 @@ func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerLi
 		characterSize := fyne.MeasureText("M", 8, label.TextStyle)
 		numChars := size.Width / characterSize.Width
 
-		rb := ringBuffer{ data: []byte(label.Text), start: 0, bound: numChars, forward: true }
+		rb := ringBuffer{ data: []byte(label.Text), start: 0, bound: numChars, width: characterSize.Width * numChars, forward: true }
 		label.Text = string(rb.Data())
 
 		ret := &TickerPopUp{Content: content, rb: rb, Canvas: canvas, popupTickerListener: popupTickerListener, modal: false}
