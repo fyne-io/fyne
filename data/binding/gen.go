@@ -61,6 +61,39 @@ func (b *bound{{ .Name }}) Set(val {{ .Type }}) {
 }
 `
 
+const prefTemplate = `
+type prefBound{{ .Name }} struct {
+	base
+	key string
+	p   fyne.Preferences
+}
+
+// BindPreference{{ .Name }} returns a bindable {{ .Type }} value that is managed by the application preferences.
+// Changes to this value will be saved to application storage and when the app starts the previous values will be read.
+func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
+	if listen, ok := prefBinds[key]; ok {
+		if l, ok := listen.({{ .Name }}); ok {
+			return l
+		}
+		fyne.LogError(keyTypeMismatchError+key, nil)
+	}
+
+	listen := &prefBound{{ .Name }}{key: key, p: p}
+	prefBinds[key] = listen
+	return listen
+}
+
+func (b *prefBound{{ .Name }}) Get() {{ .Type }} {
+	return b.p.{{ .Name }}(b.key)
+}
+
+func (b *prefBound{{ .Name }}) Set(v {{ .Type }}) {
+	b.p.Set{{ .Name }}(b.key, v)
+
+	b.trigger()
+}
+`
+
 const toStringTemplate = `
 type stringFrom{{ .Name }} struct {
 	base
@@ -114,6 +147,7 @@ func (s *stringFrom{{ .Name }}) DataChanged() {
 type bindValues struct {
 	Name, Type, Default string
 	Format              string
+	SupportsPreferences bool
 }
 
 func newFile(name string) (*os.File, error) {
@@ -158,20 +192,36 @@ import (
 	"fyne.io/fyne"
 )
 `)
+	prefFile, err := newFile("preference")
+	if err != nil {
+		return
+	}
+	defer prefFile.Close()
+	prefFile.WriteString(`
+import "fyne.io/fyne"
+
+const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
+
+// Because there is no preference listener yet we connect any listeners asking for the same key.
+var prefBinds = make(map[string]DataItem)
+`)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
+	preference := template.Must(template.New("preference").Parse(prefTemplate))
 	for _, b := range []bindValues{
-		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t"},
-		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f"},
-		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d"},
+		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
+		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
+		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
-		bindValues{Name: "String", Type: "string", Default: "\"\""},
+		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
 	} {
 		writeFile(itemFile, item, b)
-		if b.Type == "string" || b.Type == "rune" {
-			continue
+		if b.SupportsPreferences {
+			writeFile(prefFile, preference, b)
 		}
-		writeFile(toStringFile, toString, b)
+		if b.Format != "" {
+			writeFile(toStringFile, toString, b)
+		}
 	}
 }
