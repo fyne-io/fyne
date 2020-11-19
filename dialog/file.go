@@ -30,7 +30,7 @@ type fileDialog struct {
 	win      *widget.PopUp
 	selected *fileDialogItem
 	dir      fyne.ListableURI
-	// this will the initial filename in a FileSave dialog
+	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
 }
 
@@ -46,7 +46,7 @@ type FileDialog struct {
 	desiredSize      *fyne.Size
 	// this will be applied to dialog.dir when it's loaded
 	startingLocation fyne.ListableURI
-	// this will the initial filename in a FileSave dialog
+	// this will be the initial filename in a FileDialog in save mode
 	initialFileName string
 }
 
@@ -517,12 +517,12 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 	}
 }
 
-// SetFileName sets the filename in a FileSaveDialog.
+// SetFileName sets the filename in a FileDialog in save mode.
 // This is normally called before the dialog is shown.
 func (f *FileDialog) SetFileName(fileName string) {
 	if f.save {
 		f.initialFileName = fileName
-		//Update entry if filename has already been created
+		//Update entry if fileDialog has already been created
 		if f.dialog != nil {
 			f.dialog.fileName.SetText(fileName)
 		}
