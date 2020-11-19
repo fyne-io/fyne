@@ -3,6 +3,7 @@ package software
 import (
 	"testing"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
@@ -41,5 +42,10 @@ func TestRenderCanvas(t *testing.T) {
 
 	c := NewCanvas()
 	c.SetContent(obj)
-	test.AssertImageMatches(t, "canvas.png", RenderCanvas(c, theme.LightTheme()))
+
+	if fyne.CurrentDevice().IsMobile() {
+		test.AssertImageMatches(t, "canvas_mobile.png", RenderCanvas(c, theme.LightTheme()))
+	} else {
+		test.AssertImageMatches(t, "canvas.png", RenderCanvas(c, theme.LightTheme()))
+	}
 }
