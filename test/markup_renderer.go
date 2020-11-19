@@ -3,7 +3,6 @@ package test
 import (
 	"fmt"
 	"image/color"
-	"math"
 	"reflect"
 	"sort"
 	"strings"
@@ -221,13 +220,10 @@ func (r *markupRenderer) writeCanvas(c fyne.Canvas) {
 	r.writeCloseTag("canvas")
 }
 
-func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, clipPos fyne.Position, clipSize fyne.Size) bool {
+func (r *markupRenderer) writeCanvasObject(obj fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
 	attrs := map[string]*string{}
 	r.setPosAttr(attrs, "pos", obj.Position())
 	r.setSizeAttr(attrs, "size", obj.Size())
-	if clipPos != fyne.NewPos(0, 0) || clipSize != fyne.NewSize(math.MaxInt32, math.MaxInt32) {
-		r.setRectAttr(attrs, "clip", clipPos, clipSize)
-	}
 	switch o := obj.(type) {
 	case *canvas.Circle:
 		r.writeCircle(o, attrs)

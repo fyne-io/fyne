@@ -417,19 +417,6 @@ func Test_snapshot(t *testing.T) {
 				"\t</content>\n" +
 				"</canvas>\n",
 		},
-		"clipping container": { // scroll is still a widget but probably will be a container someday
-			content: container.NewScroll(container.NewVBox(canvas.NewCircle(color.Black), canvas.NewLine(color.White))),
-			want: "<canvas size=\"100x100\">\n" +
-				"\t<content>\n" +
-				"\t\t<widget clip=\"100x100@0,0\" size=\"100x100\" type=\"*widget.ScrollContainer\">\n" +
-				"\t\t\t<container clip=\"100x100@0,0\" size=\"100x100\">\n" +
-				"\t\t\t\t<circle clip=\"100x100@0,0\" fillColor=\"rgba(0,0,0,255)\" size=\"100x1\"/>\n" +
-				"\t\t\t\t<line clip=\"100x100@0,0\" pos=\"0,5\" size=\"100x1\" strokeColor=\"rgba(255,255,255,255)\"/>\n" +
-				"\t\t\t</container>\n" +
-				"\t\t</widget>\n" +
-				"\t</content>\n" +
-				"</canvas>\n",
-		},
 		"widget": {
 			content: &markupRendererTestWidget{bgColor: theme.BackgroundColor()},
 			want: "<canvas size=\"100x100\">\n" +

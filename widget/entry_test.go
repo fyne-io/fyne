@@ -440,20 +440,20 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,136" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x136"/>
 						</widget>
-						<widget clip="79x136@11,11" size="79x136" type="*widget.ScrollContainer">
-							<widget clip="79x136@11,11" size="79x136" type="*widget.menuBox">
-								<container clip="79x136@11,11" pos="0,4" size="79x144">
-									<widget clip="79x136@11,11" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@11,11" pos="8,4" size="25x21">Cut</text>
+						<widget size="79x136" type="*widget.ScrollContainer">
+							<widget size="79x136" type="*widget.menuBox">
+								<container pos="0,4" size="79x144">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Cut</text>
 									</widget>
-									<widget clip="79x136@11,11" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@11,11" pos="8,4" size="36x21">Copy</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="36x21">Copy</text>
 									</widget>
-									<widget clip="79x136@11,11" pos="0,66" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@11,11" pos="8,4" size="39x21">Paste</text>
+									<widget pos="0,66" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="39x21">Paste</text>
 									</widget>
-									<widget clip="79x136@11,11" pos="0,99" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@11,11" pos="8,4" size="63x21">Select all</text>
+									<widget pos="0,99" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Select all</text>
 									</widget>
 								</container>
 							</widget>
@@ -510,20 +510,20 @@ func TestEntry_FocusWithPopUp(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,136" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x136"/>
 						</widget>
-						<widget clip="79x136@11,11" size="79x136" type="*widget.ScrollContainer">
-							<widget clip="79x136@11,11" size="79x136" type="*widget.menuBox">
-								<container clip="79x136@11,11" pos="0,4" size="79x144">
-									<widget clip="79x136@11,11" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@11,11" pos="8,4" size="25x21">Cut</text>
+						<widget size="79x136" type="*widget.ScrollContainer">
+							<widget size="79x136" type="*widget.menuBox">
+								<container pos="0,4" size="79x144">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Cut</text>
 									</widget>
-									<widget clip="79x136@11,11" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@11,11" pos="8,4" size="36x21">Copy</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="36x21">Copy</text>
 									</widget>
-									<widget clip="79x136@11,11" pos="0,66" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@11,11" pos="8,4" size="39x21">Paste</text>
+									<widget pos="0,66" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="39x21">Paste</text>
 									</widget>
-									<widget clip="79x136@11,11" pos="0,99" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@11,11" pos="8,4" size="63x21">Select all</text>
+									<widget pos="0,99" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Select all</text>
 									</widget>
 								</container>
 							</widget>
@@ -2503,20 +2503,20 @@ func TestEntry_TappedSecondary(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,136" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x136"/>
 						</widget>
-						<widget clip="79x136@30,20" size="79x136" type="*widget.ScrollContainer">
-							<widget clip="79x136@30,20" size="79x136" type="*widget.menuBox">
-								<container clip="79x136@30,20" pos="0,4" size="79x144">
-									<widget clip="79x136@30,20" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@30,20" pos="8,4" size="25x21">Cut</text>
+						<widget size="79x136" type="*widget.ScrollContainer">
+							<widget size="79x136" type="*widget.menuBox">
+								<container pos="0,4" size="79x144">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="25x21">Cut</text>
 									</widget>
-									<widget clip="79x136@30,20" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@30,20" pos="8,4" size="36x21">Copy</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="36x21">Copy</text>
 									</widget>
-									<widget clip="79x136@30,20" pos="0,66" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@30,20" pos="8,4" size="39x21">Paste</text>
+									<widget pos="0,66" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="39x21">Paste</text>
 									</widget>
-									<widget clip="79x136@30,20" pos="0,99" size="79x29" type="*widget.menuItem">
-										<text clip="79x136@30,20" pos="8,4" size="63x21">Select all</text>
+									<widget pos="0,99" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Select all</text>
 									</widget>
 								</container>
 							</widget>
@@ -2557,14 +2557,14 @@ func TestEntry_TappedSecondary(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@30,20" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@30,20" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@30,20" pos="0,4" size="79x78">
-									<widget clip="79x70@30,20" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@30,20" pos="8,4" size="36x21">Copy</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="36x21">Copy</text>
 									</widget>
-									<widget clip="79x70@30,20" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@30,20" pos="8,4" size="63x21">Select all</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Select all</text>
 									</widget>
 								</container>
 							</widget>
@@ -2626,14 +2626,14 @@ func TestEntry_TappedSecondary(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@30,20" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@30,20" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@30,20" pos="0,4" size="79x78">
-									<widget clip="79x70@30,20" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@30,20" pos="8,4" size="39x21">Paste</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="39x21">Paste</text>
 									</widget>
-									<widget clip="79x70@30,20" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@30,20" pos="8,4" size="63x21">Select all</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Select all</text>
 									</widget>
 								</container>
 							</widget>

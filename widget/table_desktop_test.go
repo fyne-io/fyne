@@ -38,27 +38,27 @@ func TestTable_Hovered(t *testing.T) {
 		<canvas padded size="180x180">
 			<content>
 				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget clip="168x168@8,8" pos="4,4" size="168x168" type="*widget.ScrollContainer">
-						<widget clip="168x168@8,8" size="203x168" type="*widget.tableCells">
-							<widget clip="168x168@8,8" pos="3,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 0</text>
+					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
+						<widget size="203x168" type="*widget.tableCells">
+							<widget pos="3,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 1</text>
+							<widget pos="105,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 0</text>
+							<widget pos="3,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 1</text>
-							</widget>
-						</widget>
-						<widget clip="168x168@8,8" pos="0,162" size="168x6" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" clip="168x168@8,8" pos="0,3" size="139x3" type="*widget.scrollBar">
+							<widget pos="105,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 1</text>
 							</widget>
 						</widget>
-						<widget clip="168x168@8,8" pos="168,0" size="0x168" type="*widget.Shadow">
-							<linearGradient angle="270" clip="168x168@8,8" endColor="shadow" pos="-8,0" size="8x168"/>
+						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
+							<widget backgroundColor="scrollbar" pos="0,3" size="139x3" type="*widget.scrollBar">
+							</widget>
+						</widget>
+						<widget pos="168,0" size="0x168" type="*widget.Shadow">
+							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
 						</widget>
 					</widget>
 					<widget pos="105,4" size="1x168" type="*widget.Separator">
@@ -98,42 +98,42 @@ func TestTable_Hovered(t *testing.T) {
 		<canvas padded size="180x180">
 			<content>
 				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget clip="168x168@8,8" pos="4,4" size="168x168" type="*widget.ScrollContainer">
-						<widget clip="168x168@8,8" size="509x168" type="*widget.tableCells">
-							<widget clip="168x168@8,8" pos="3,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 0</text>
+					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
+						<widget size="509x168" type="*widget.tableCells">
+							<widget pos="3,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 1</text>
+							<widget pos="105,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 2</text>
+							<widget pos="207,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 0</text>
+							<widget pos="3,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 1</text>
+							<widget pos="105,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 2</text>
+							<widget pos="207,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 0</text>
+							<widget pos="3,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 1</text>
+							<widget pos="105,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 2</text>
-							</widget>
-						</widget>
-						<widget clip="168x168@8,8" pos="0,162" size="168x6" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" clip="168x168@8,8" pos="0,3" size="55x3" type="*widget.scrollBar">
+							<widget pos="207,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 2</text>
 							</widget>
 						</widget>
-						<widget clip="168x168@8,8" pos="168,0" size="0x168" type="*widget.Shadow">
-							<linearGradient angle="270" clip="168x168@8,8" endColor="shadow" pos="-8,0" size="8x168"/>
+						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
+							<widget backgroundColor="scrollbar" pos="0,3" size="55x3" type="*widget.scrollBar">
+							</widget>
+						</widget>
+						<widget pos="168,0" size="0x168" type="*widget.Shadow">
+							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
 						</widget>
 					</widget>
 					<rectangle fillColor="hover" pos="4,0" size="101x4"/>

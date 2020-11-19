@@ -157,67 +157,67 @@ func TestTable_Selection(t *testing.T) {
 		<canvas padded size="180x180">
 			<content>
 				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget clip="168x168@8,8" pos="4,4" size="168x168" type="*widget.ScrollContainer">
-						<widget clip="168x168@8,8" size="509x189" type="*widget.tableCells">
-							<widget clip="168x168@8,8" pos="3,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 0</text>
+					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
+						<widget size="509x189" type="*widget.tableCells">
+							<widget pos="3,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 1</text>
+							<widget pos="105,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 2</text>
+							<widget pos="207,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 0</text>
+							<widget pos="3,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 1</text>
+							<widget pos="105,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 2</text>
+							<widget pos="207,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 0</text>
+							<widget pos="3,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 1</text>
+							<widget pos="105,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 2</text>
+							<widget pos="207,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 0</text>
+							<widget pos="3,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 1</text>
+							<widget pos="105,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 2</text>
+							<widget pos="207,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 0</text>
+							<widget pos="3,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 1</text>
+							<widget pos="105,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 2</text>
-							</widget>
-						</widget>
-						<widget clip="168x168@8,8" pos="162,0" size="6x168" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" clip="168x168@8,8" pos="3,0" size="3x149" type="*widget.scrollBar">
+							<widget pos="207,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 2</text>
 							</widget>
 						</widget>
-						<widget clip="168x168@8,8" pos="0,168" size="168x0" type="*widget.Shadow">
-							<linearGradient clip="168x168@8,8" endColor="shadow" pos="0,-8" size="168x8"/>
-						</widget>
-						<widget clip="168x168@8,8" pos="0,162" size="168x6" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" clip="168x168@8,8" pos="0,3" size="55x3" type="*widget.scrollBar">
+						<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
+							<widget backgroundColor="scrollbar" pos="3,0" size="3x149" type="*widget.scrollBar">
 							</widget>
 						</widget>
-						<widget clip="168x168@8,8" pos="168,0" size="0x168" type="*widget.Shadow">
-							<linearGradient angle="270" clip="168x168@8,8" endColor="shadow" pos="-8,0" size="8x168"/>
+						<widget pos="0,168" size="168x0" type="*widget.Shadow">
+							<linearGradient endColor="shadow" pos="0,-8" size="168x8"/>
+						</widget>
+						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
+							<widget backgroundColor="scrollbar" pos="0,3" size="55x3" type="*widget.scrollBar">
+							</widget>
+						</widget>
+						<widget pos="168,0" size="0x168" type="*widget.Shadow">
+							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
 						</widget>
 					</widget>
 					<rectangle fillColor="primary" pos="4,0" size="101x4"/>
@@ -278,67 +278,67 @@ func TestTable_Select(t *testing.T) {
 		<canvas padded size="180x180">
 			<content>
 				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget clip="168x168@8,8" pos="4,4" size="168x168" type="*widget.ScrollContainer">
-						<widget clip="168x168@8,8" size="509x189" type="*widget.tableCells">
-							<widget clip="168x168@8,8" pos="3,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 0</text>
+					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
+						<widget size="509x189" type="*widget.tableCells">
+							<widget pos="3,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 1</text>
+							<widget pos="105,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 2</text>
+							<widget pos="207,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 0</text>
+							<widget pos="3,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 1</text>
+							<widget pos="105,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 2</text>
+							<widget pos="207,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 0</text>
+							<widget pos="3,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 1</text>
+							<widget pos="105,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 2</text>
+							<widget pos="207,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 0</text>
+							<widget pos="3,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 1</text>
+							<widget pos="105,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 2</text>
+							<widget pos="207,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="3,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 0</text>
+							<widget pos="3,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 0</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="105,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 1</text>
+							<widget pos="105,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 1</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 2</text>
-							</widget>
-						</widget>
-						<widget clip="168x168@8,8" pos="162,0" size="6x168" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" clip="168x168@8,8" pos="3,0" size="3x149" type="*widget.scrollBar">
+							<widget pos="207,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 2</text>
 							</widget>
 						</widget>
-						<widget clip="168x168@8,8" pos="0,168" size="168x0" type="*widget.Shadow">
-							<linearGradient clip="168x168@8,8" endColor="shadow" pos="0,-8" size="168x8"/>
-						</widget>
-						<widget clip="168x168@8,8" pos="0,162" size="168x6" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" clip="168x168@8,8" pos="0,3" size="55x3" type="*widget.scrollBar">
+						<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
+							<widget backgroundColor="scrollbar" pos="3,0" size="3x149" type="*widget.scrollBar">
 							</widget>
 						</widget>
-						<widget clip="168x168@8,8" pos="168,0" size="0x168" type="*widget.Shadow">
-							<linearGradient angle="270" clip="168x168@8,8" endColor="shadow" pos="-8,0" size="8x168"/>
+						<widget pos="0,168" size="168x0" type="*widget.Shadow">
+							<linearGradient endColor="shadow" pos="0,-8" size="168x8"/>
+						</widget>
+						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
+							<widget backgroundColor="scrollbar" pos="0,3" size="55x3" type="*widget.scrollBar">
+							</widget>
+						</widget>
+						<widget pos="168,0" size="0x168" type="*widget.Shadow">
+							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
 						</widget>
 					</widget>
 					<rectangle fillColor="primary" pos="4,0" size="101x4"/>
@@ -375,70 +375,70 @@ func TestTable_Select(t *testing.T) {
 		<canvas padded size="180x180">
 			<content>
 				<widget pos="4,4" size="172x172" type="*widget.Table">
-					<widget clip="168x168@8,8" pos="4,4" size="168x168" type="*widget.ScrollContainer">
-						<widget clip="168x168@8,8" pos="-239,-21" size="509x189" type="*widget.tableCells">
-							<widget clip="168x168@8,8" pos="207,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 2</text>
+					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
+						<widget pos="-239,-21" size="509x189" type="*widget.tableCells">
+							<widget pos="207,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="309,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 3</text>
+							<widget pos="309,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 3</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="411,3" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 0, 4</text>
+							<widget pos="411,3" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 0, 4</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 2</text>
+							<widget pos="207,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="309,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 3</text>
+							<widget pos="309,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 3</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="411,41" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 1, 4</text>
+							<widget pos="411,41" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 1, 4</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 2</text>
+							<widget pos="207,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="309,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 3</text>
+							<widget pos="309,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 3</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="411,79" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 2, 4</text>
+							<widget pos="411,79" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 2, 4</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 2</text>
+							<widget pos="207,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="309,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 3</text>
+							<widget pos="309,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 3</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="411,117" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 3, 4</text>
+							<widget pos="411,117" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 3, 4</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="207,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 2</text>
+							<widget pos="207,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 2</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="309,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 3</text>
+							<widget pos="309,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 3</text>
 							</widget>
-							<widget clip="168x168@8,8" pos="411,155" size="101x37" type="*widget.Label">
-								<text clip="168x168@8,8" pos="4,4" size="93x21">Cell 4, 4</text>
-							</widget>
-						</widget>
-						<widget clip="168x168@8,8" pos="162,0" size="6x168" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" clip="168x168@8,8" pos="3,19" size="3x149" type="*widget.scrollBar">
+							<widget pos="411,155" size="101x37" type="*widget.Label">
+								<text pos="4,4" size="93x21">Cell 4, 4</text>
 							</widget>
 						</widget>
-						<widget clip="168x168@8,8" size="168x0" type="*widget.Shadow">
-							<linearGradient clip="168x168@8,8" size="168x8" startColor="shadow"/>
-						</widget>
-						<widget clip="168x168@8,8" pos="0,162" size="168x6" type="*widget.scrollBarArea">
-							<widget backgroundColor="scrollbar" clip="168x168@8,8" pos="79,3" size="55x3" type="*widget.scrollBar">
+						<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
+							<widget backgroundColor="scrollbar" pos="3,19" size="3x149" type="*widget.scrollBar">
 							</widget>
 						</widget>
-						<widget clip="168x168@8,8" size="0x168" type="*widget.Shadow">
-							<linearGradient angle="270" clip="168x168@8,8" size="8x168" startColor="shadow"/>
+						<widget size="168x0" type="*widget.Shadow">
+							<linearGradient size="168x8" startColor="shadow"/>
 						</widget>
-						<widget clip="168x168@8,8" pos="168,0" size="0x168" type="*widget.Shadow">
-							<linearGradient angle="270" clip="168x168@8,8" endColor="shadow" pos="-8,0" size="8x168"/>
+						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
+							<widget backgroundColor="scrollbar" pos="79,3" size="55x3" type="*widget.scrollBar">
+							</widget>
+						</widget>
+						<widget size="0x168" type="*widget.Shadow">
+							<linearGradient angle="270" size="8x168" startColor="shadow"/>
+						</widget>
+						<widget pos="168,0" size="0x168" type="*widget.Shadow">
+							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x168"/>
 						</widget>
 					</widget>
 					<rectangle fillColor="primary" pos="71,0" size="101x4"/>

@@ -37,14 +37,14 @@ func TestPopUpMenu_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@0,0" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@0,0" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@0,0" pos="0,4" size="79x78">
-									<widget clip="79x70@0,0" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@0,0" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@0,0" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@0,0" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -74,14 +74,14 @@ func TestPopUpMenu_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@20,20" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@20,20" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@20,20" pos="0,4" size="79x78">
-									<widget clip="79x70@20,20" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@20,20" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@20,20" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@20,20" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -111,14 +111,14 @@ func TestPopUpMenu_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@121,10" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@121,10" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@121,10" pos="0,4" size="79x78">
-									<widget clip="79x70@121,10" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@121,10" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@121,10" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@121,10" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -148,14 +148,14 @@ func TestPopUpMenu_Move(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@10,130" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@10,130" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@10,130" pos="0,4" size="79x78">
-									<widget clip="79x70@10,130" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@10,130" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@10,130" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@10,130" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -191,14 +191,14 @@ func TestPopUpMenu_Resize(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@10,10" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@10,10" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@10,10" pos="0,4" size="79x78">
-									<widget clip="79x70@10,10" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@10,10" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@10,10" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@10,10" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -228,14 +228,14 @@ func TestPopUpMenu_Resize(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,80" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x80"/>
 						</widget>
-						<widget clip="89x80@10,10" size="89x80" type="*widget.ScrollContainer">
-							<widget clip="89x80@10,10" size="89x80" type="*widget.menuBox">
-								<container clip="89x80@10,10" pos="0,4" size="89x88">
-									<widget clip="89x80@10,10" size="89x29" type="*widget.menuItem">
-										<text clip="89x80@10,10" pos="8,4" size="63x21">Option A</text>
+						<widget size="89x80" type="*widget.ScrollContainer">
+							<widget size="89x80" type="*widget.menuBox">
+								<container pos="0,4" size="89x88">
+									<widget size="89x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="89x80@10,10" pos="0,33" size="89x29" type="*widget.menuItem">
-										<text clip="89x80@10,10" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="89x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -266,14 +266,14 @@ func TestPopUpMenu_Resize(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,200" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x200"/>
 						</widget>
-						<widget clip="210x200@0,0" size="210x200" type="*widget.ScrollContainer">
-							<widget clip="210x200@0,0" size="210x200" type="*widget.menuBox">
-								<container clip="210x200@0,0" pos="0,4" size="210x208">
-									<widget clip="210x200@0,0" size="210x29" type="*widget.menuItem">
-										<text clip="210x200@0,0" pos="8,4" size="63x21">Option A</text>
+						<widget size="210x200" type="*widget.ScrollContainer">
+							<widget size="210x200" type="*widget.menuBox">
+								<container pos="0,4" size="210x208">
+									<widget size="210x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="210x200@0,0" pos="0,33" size="210x29" type="*widget.menuItem">
-										<text clip="210x200@0,0" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="210x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -318,14 +318,14 @@ func TestPopUpMenu_Show(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@0,0" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@0,0" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@0,0" pos="0,4" size="79x78">
-									<widget clip="79x70@0,0" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@0,0" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@0,0" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@0,0" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -370,14 +370,14 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@10,10" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@10,10" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@10,10" pos="0,4" size="79x78">
-									<widget clip="79x70@10,10" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@10,10" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@10,10" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@10,10" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -410,14 +410,14 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@121,10" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@121,10" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@121,10" pos="0,4" size="79x78">
-									<widget clip="79x70@121,10" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@121,10" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@121,10" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@121,10" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -450,14 +450,14 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,70" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x70"/>
 						</widget>
-						<widget clip="79x70@10,130" size="79x70" type="*widget.ScrollContainer">
-							<widget clip="79x70@10,130" size="79x70" type="*widget.menuBox">
-								<container clip="79x70@10,130" pos="0,4" size="79x78">
-									<widget clip="79x70@10,130" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@10,130" pos="8,4" size="63x21">Option A</text>
+						<widget size="79x70" type="*widget.ScrollContainer">
+							<widget size="79x70" type="*widget.menuBox">
+								<container pos="0,4" size="79x78">
+									<widget size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="79x70@10,130" pos="0,33" size="79x29" type="*widget.menuItem">
-										<text clip="79x70@10,130" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="79x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
@@ -492,14 +492,14 @@ func TestPopUpMenu_ShowAtPosition(t *testing.T) {
 							<radialGradient centerOffset="0.5,-0.5" pos="-4,200" size="4x4" startColor="shadow"/>
 							<linearGradient angle="270" endColor="shadow" pos="-4,0" size="4x200"/>
 						</widget>
-						<widget clip="210x200@0,0" size="210x200" type="*widget.ScrollContainer">
-							<widget clip="210x200@0,0" size="210x200" type="*widget.menuBox">
-								<container clip="210x200@0,0" pos="0,4" size="210x208">
-									<widget clip="210x200@0,0" size="210x29" type="*widget.menuItem">
-										<text clip="210x200@0,0" pos="8,4" size="63x21">Option A</text>
+						<widget size="210x200" type="*widget.ScrollContainer">
+							<widget size="210x200" type="*widget.menuBox">
+								<container pos="0,4" size="210x208">
+									<widget size="210x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option A</text>
 									</widget>
-									<widget clip="210x200@0,0" pos="0,33" size="210x29" type="*widget.menuItem">
-										<text clip="210x200@0,0" pos="8,4" size="63x21">Option B</text>
+									<widget pos="0,33" size="210x29" type="*widget.menuItem">
+										<text pos="8,4" size="63x21">Option B</text>
 									</widget>
 								</container>
 							</widget>
