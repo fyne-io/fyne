@@ -46,12 +46,12 @@ func Theme() fyne.Theme {
 			boldItalic:         bolditalic,
 			button:             color.NRGBA{R: 0x33, G: 0x33, B: 0x33, A: 0xff},
 			disabledButton:     color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
-			disabledIcon:       color.NRGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff}, // deprecated: outstanding red variant to make it visible
+			disabledIcon:       color.NRGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
 			disabledText:       color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 			focus:              color.NRGBA{R: 0x81, G: 0xc7, B: 0x84, A: 0xff},
 			hover:              color.NRGBA{R: 0x88, G: 0xff, B: 0xff, A: 0x22},
-			hyperlink:          color.NRGBA{R: 0xee, G: 0x00, B: 0x00, A: 0xff}, // deprecated: outstanding red variant to make it visible
-			icon:               color.NRGBA{R: 0xdd, G: 0x00, B: 0x00, A: 0xff}, // deprecated: outstanding red variant to make it visible
+			hyperlink:          color.NRGBA{R: 0xee, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
+			icon:               color.NRGBA{R: 0xdd, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
 			iconInlineSize:     20,
 			italic:             italic,
 			monospace:          monospace,
