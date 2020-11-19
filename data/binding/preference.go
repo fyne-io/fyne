@@ -5,6 +5,8 @@ package binding
 
 import "fyne.io/fyne"
 
+const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
+
 // Because there is no preference listener yet we connect any listeners asking for the same key.
 var prefBinds = make(map[string]DataItem)
 
@@ -21,7 +23,7 @@ func BindPreferenceBool(key string, p fyne.Preferences) Bool {
 		if l, ok := listen.(Bool); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
+		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBoundBool{key: key, p: p}
@@ -52,7 +54,7 @@ func BindPreferenceFloat(key string, p fyne.Preferences) Float {
 		if l, ok := listen.(Float); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
+		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBoundFloat{key: key, p: p}
@@ -83,7 +85,7 @@ func BindPreferenceInt(key string, p fyne.Preferences) Int {
 		if l, ok := listen.(Int); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
+		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBoundInt{key: key, p: p}
@@ -114,7 +116,7 @@ func BindPreferenceString(key string, p fyne.Preferences) String {
 		if l, ok := listen.(String); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
+		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBoundString{key: key, p: p}

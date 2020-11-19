@@ -75,7 +75,7 @@ func BindPreference{{ .Name }}(key string, p fyne.Preferences) {{ .Name }} {
 		if l, ok := listen.({{ .Name }}); ok {
 			return l
 		}
-		fyne.LogError("A previous preference binding exists with different type for key: "+key, nil)
+		fyne.LogError(keyTypeMismatchError+key, nil)
 	}
 
 	listen := &prefBound{{ .Name }}{key: key, p: p}
@@ -199,6 +199,8 @@ import (
 	defer prefFile.Close()
 	prefFile.WriteString(`
 import "fyne.io/fyne"
+
+const keyTypeMismatchError = "A previous preference binding exists with different type for key: "
 
 // Because there is no preference listener yet we connect any listeners asking for the same key.
 var prefBinds = make(map[string]DataItem)
