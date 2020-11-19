@@ -199,6 +199,9 @@ import (
 	defer prefFile.Close()
 	prefFile.WriteString(`
 import "fyne.io/fyne"
+
+// Because there is no preference listener yet we connect any listeners asking for the same key.
+var prefBinds = make(map[string]DataItem)
 `)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
