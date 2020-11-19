@@ -37,6 +37,8 @@ func (l *paddedLayout) MinSize(objects []fyne.CanvasObject) (min fyne.Size) {
 }
 
 // NewPaddedLayout creates a new PaddedLayout instance
+//
+// Since: 1.4
 func NewPaddedLayout() fyne.Layout {
 	return &paddedLayout{}
 }

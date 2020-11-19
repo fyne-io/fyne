@@ -8,6 +8,8 @@ import (
 )
 
 // Card widget groups title, subtitle with content and a header image
+//
+// Since: 1.4
 type Card struct {
 	BaseWidget
 	Title, Subtitle string
@@ -16,6 +18,8 @@ type Card struct {
 }
 
 // NewCard creates a new card widget with the specified title, subtitle and content (all optional).
+//
+// Since: 1.4
 func NewCard(title, subtitle string, content fyne.CanvasObject) *Card {
 	card := &Card{
 		Title:    title,

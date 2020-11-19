@@ -58,7 +58,6 @@ func (s *Select) ClearSelected() {
 func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	s.ExtendBaseWidget(s)
 	s.propertyLock.RLock()
-	defer s.propertyLock.RUnlock()
 	icon := NewIcon(theme.MenuDropDownIcon())
 	if s.PlaceHolder == "" {
 		s.PlaceHolder = defaultPlaceHolder
@@ -70,8 +69,9 @@ func (s *Select) CreateRenderer() fyne.WidgetRenderer {
 	objects := []fyne.CanvasObject{bg, txtProv, icon}
 	r := &selectRenderer{widget.NewShadowingRenderer(objects, widget.ButtonLevel), icon, txtProv, bg, s}
 	bg.FillColor = r.buttonColor()
-	r.updateLabel()
 	r.updateIcon()
+	s.propertyLock.RUnlock() // updateLabel and some text handling isn't quite right, resolve in text refactor for 2.0
+	r.updateLabel()
 	return r
 }
 

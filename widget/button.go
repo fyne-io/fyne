@@ -2,7 +2,6 @@ package widget
 
 import (
 	"image/color"
-	"strings"
 	"time"
 
 	"fyne.io/fyne"
@@ -20,6 +19,8 @@ type ButtonAlign int
 type ButtonIconPlacement int
 
 // ButtonImportance represents how prominent the button should appear
+//
+// Since: 1.4
 type ButtonImportance int
 
 // ButtonStyle determines the behaviour and rendering of a button.
@@ -69,8 +70,9 @@ type Button struct {
 	Style ButtonStyle
 	Icon  fyne.Resource
 	// Specify how prominent the button should be, High will highlight the button and Low will remove some decoration.
+	//
+	// Since: 1.4
 	Importance    ButtonImportance
-	disabledIcon  fyne.Resource
 	Alignment     ButtonAlign
 	IconPlacement ButtonIconPlacement
 
@@ -95,10 +97,9 @@ func NewButton(label string, tapped func()) *Button {
 // NewButtonWithIcon creates a new button widget with the specified label, themed icon and tap handler
 func NewButtonWithIcon(label string, icon fyne.Resource, tapped func()) *Button {
 	button := &Button{
-		Text:         label,
-		Icon:         icon,
-		disabledIcon: theme.NewDisabledResource(icon),
-		OnTapped:     tapped,
+		Text:     label,
+		Icon:     icon,
+		OnTapped: tapped,
 	}
 
 	button.ExtendBaseWidget(button)
@@ -167,12 +168,6 @@ func (b *Button) MouseOut() {
 func (b *Button) SetIcon(icon fyne.Resource) {
 	b.Icon = icon
 
-	if icon != nil {
-		b.disabledIcon = theme.NewDisabledResource(icon)
-	} else {
-		b.disabledIcon = nil
-	}
-
 	b.Refresh()
 }
 
@@ -185,6 +180,10 @@ func (b *Button) SetText(text string) {
 
 // Tapped is called when a pointer tapped event is captured and triggers any tap handler
 func (b *Button) Tapped(*fyne.PointEvent) {
+	if b.Disabled() {
+		return
+	}
+
 	b.tapped = true
 	defer func() { // TODO move to a real animation
 		time.Sleep(time.Millisecond * buttonTapDuration)
@@ -193,7 +192,7 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 	}()
 	b.Refresh()
 
-	if b.OnTapped != nil && !b.Disabled() {
+	if b.OnTapped != nil {
 		b.OnTapped()
 	}
 }
@@ -291,20 +290,15 @@ func (b *buttonRenderer) Refresh() {
 		if b.icon == nil {
 			b.icon = canvas.NewImageFromResource(b.button.Icon)
 			b.icon.FillMode = canvas.ImageFillContain
-			b.SetObjects(append(b.Objects(), b.icon))
-		} else {
-			if b.button.Disabled() {
-				// if the icon has changed, create a new disabled version
-				// if we could be sure that button.Icon is only ever set through the button.SetIcon method, we could remove this
-				if !strings.HasSuffix(b.button.disabledIcon.Name(), b.button.Icon.Name()) {
-					b.icon.Resource = theme.NewDisabledResource(b.button.Icon)
-				} else {
-					b.icon.Resource = b.button.disabledIcon
-				}
-			} else {
-				b.icon.Resource = b.button.Icon
-			}
+			b.SetObjects([]fyne.CanvasObject{b.bg, b.label, b.icon})
 		}
+
+		if b.button.Disabled() {
+			b.icon.Resource = theme.NewDisabledResource(b.button.Icon)
+		} else {
+			b.icon.Resource = b.button.Icon
+		}
+		b.icon.Refresh()
 		b.icon.Show()
 	} else if b.icon != nil {
 		b.icon.Hide()
