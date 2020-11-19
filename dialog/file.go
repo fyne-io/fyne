@@ -30,6 +30,8 @@ type fileDialog struct {
 	win      *widget.PopUp
 	selected *fileDialogItem
 	dir      fyne.ListableURI
+	// this will the initial filename in a FileSave dialog
+	initialFileName string
 }
 
 // FileDialog is a dialog containing a file picker for use in opening or saving files.
@@ -44,6 +46,8 @@ type FileDialog struct {
 	desiredSize      *fyne.Size
 	// this will be applied to dialog.dir when it's loaded
 	startingLocation fyne.ListableURI
+	// this will the initial filename in a FileSave dialog
+	initialFileName string
 }
 
 // Declare conformity to Dialog interface
@@ -131,6 +135,9 @@ func (f *fileDialog) makeUI() fyne.CanvasObject {
 	})
 	f.open.Style = widget.PrimaryButton
 	f.open.Disable()
+	if f.file.save {
+		f.fileName.SetText(f.initialFileName)
+	}
 	dismissLabel := "Cancel"
 	if f.file.dismissText != "" {
 		dismissLabel = f.file.dismissText
@@ -311,8 +318,12 @@ func (f *fileDialog) setSelected(file *fileDialogItem) {
 	f.selected = file
 
 	if file == nil || file.location.String()[len(file.location.Scheme())+3:] == "" {
-		f.fileName.SetText("")
-		f.open.Disable()
+		// keep user input while navigating
+		// in a FileSave dialog
+		if !f.file.save {
+			f.fileName.SetText("")
+			f.open.Disable()
+		}
 	} else {
 		file.isCurrent = true
 		f.fileName.SetText(file.location.Name())
@@ -383,7 +394,7 @@ func (f *FileDialog) effectiveStartingDir() fyne.ListableURI {
 }
 
 func showFile(file *FileDialog) *fileDialog {
-	d := &fileDialog{file: file}
+	d := &fileDialog{file: file, initialFileName: file.initialFileName}
 	ui := d.makeUI()
 
 	d.setLocation(file.effectiveStartingDir())
@@ -506,11 +517,15 @@ func (f *FileDialog) SetFilter(filter storage.FileFilter) {
 	}
 }
 
-// PresetFileName sets the filename in a FileSaveDialog.
+// SetFileName sets the filename in a FileSaveDialog.
 // This is normally called before the dialog is shown.
-func (f *FileDialog) PresetFileName(fileName string) {
+func (f *FileDialog) SetFileName(fileName string) {
 	if f.save {
-		f.dialog.fileName.SetText(fileName)
+		f.initialFileName = fileName
+		//Update entry if filename has already been created
+		if f.dialog != nil {
+			f.dialog.fileName.SetText(fileName)
+		}
 	}
 }
 
