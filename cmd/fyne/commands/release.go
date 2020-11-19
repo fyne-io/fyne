@@ -23,6 +23,7 @@ type releaser struct {
 
 	keyStore     string
 	keyStorePass string
+	keyPass      string
 	developer    string
 	password     string
 }
@@ -41,6 +42,7 @@ func (r *releaser) AddFlags() {
 	flag.IntVar(&r.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.StringVar(&r.keyStore, "keyStore", "", "Android: location of .keystore file containing signing information")
 	flag.StringVar(&r.keyStorePass, "keyStorePass", "", "Android: password for the .keystore file, default take the password from stdin")
+	flag.StringVar(&r.keyPass, "keyPass", "", "Android: password for the signer's private key, which is needed if the private key is password-protected. Default take the password from stdin")
 	flag.StringVar(&r.certificate, "certificate", "", "iOS/macOS/Windows: name of the certificate to sign the build")
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
 	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
@@ -195,12 +197,16 @@ func (r *releaser) packageWindowsRelease(outFile string) error {
 func (r *releaser) signAndroid(path string) error {
 	signer := filepath.Join(util.AndroidBuildToolsPath(), "/apksigner")
 
-	keyStorePass := "stdin"
+	args := []string{"sign", "--ks", r.keyStore}
 	if r.keyStorePass != "" {
-		keyStorePass = "pass:" + r.keyStorePass
+		args = append(args, "--ks-pass", "pass:"+r.keyStorePass)
 	}
+	if r.keyPass != "" {
+		args = append(args, "--key-pass", "pass:"+r.keyPass)
+	}
+	args = append(args, path)
 
-	cmd := exec.Command(signer, "sign", "--ks", r.keyStore, "--ks-pass", keyStorePass, path)
+	cmd := exec.Command(signer, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
