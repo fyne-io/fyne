@@ -394,3 +394,38 @@ func TestFileFavorites(t *testing.T) {
 
 	test.Tap(dlg.dialog.dismiss)
 }
+
+func TestSetFileNameBeforeShow(t *testing.T) {
+	win := test.NewWindow(widget.NewLabel("Content"))
+	dSave := NewFileSave(func(fyne.URIWriteCloser, error) {}, win)
+	dSave.SetFileName("testfile.zip")
+	dSave.Show()
+
+	assert.Equal(t, "testfile.zip", dSave.dialog.fileName.(*widget.Entry).Text)
+
+	// Should have no effect on FileOpen dialog
+	dOpen := NewFileOpen(func(f fyne.URIReadCloser, e error) {}, win)
+	dOpen.SetFileName("testfile.zip")
+	dOpen.Show()
+
+	assert.NotEqual(t, "testfile.zip", dOpen.dialog.fileName.(*widget.Label).Text)
+
+}
+
+func TestSetFileNameAfterShow(t *testing.T) {
+
+	win := test.NewWindow(widget.NewLabel("Content"))
+	dSave := NewFileSave(func(fyne.URIWriteCloser, error) {}, win)
+	dSave.Show()
+	dSave.SetFileName("testfile.zip")
+
+	assert.Equal(t, "testfile.zip", dSave.dialog.fileName.(*widget.Entry).Text)
+
+	// Should have no effect on FileOpen dialog
+	dOpen := NewFileOpen(func(f fyne.URIReadCloser, e error) {}, win)
+	dOpen.Show()
+	dOpen.SetFileName("testfile.zip")
+
+	assert.NotEqual(t, "testfile.zip", dOpen.dialog.fileName.(*widget.Label).Text)
+
+}
