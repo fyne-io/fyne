@@ -51,10 +51,11 @@ func (r *RadioGroup) CreateRenderer() fyne.WidgetRenderer {
 	defer r.propertyLock.Unlock()
 
 	r.update()
-	var objects []fyne.CanvasObject
-	for _, item := range r.items {
-		objects = append(objects, item)
+	objects := make([]fyne.CanvasObject, len(r.items))
+	for i, item := range r.items {
+		objects[i] = item
 	}
+
 	return &radioGroupRenderer{widget.NewBaseRenderer(objects), r.items, r}
 }
 
