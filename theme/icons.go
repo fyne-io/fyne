@@ -573,6 +573,11 @@ func MediaSkipPreviousIcon() fyne.Resource {
 	return mediaSkipPrevious
 }
 
+// MediaStopIcon returns a resource containing the standard media stop icon for the current theme
+func MediaStopIcon() fyne.Resource {
+	return mediaStop
+}
+
 // MoveDownIcon returns a resource containing the standard down arrow icon for the current theme
 func MoveDownIcon() fyne.Resource {
 	return arrowDown
@@ -671,4 +676,9 @@ func DownloadIcon() fyne.Resource {
 // StorageIcon returns a resource containing the standard storage icon for the current theme
 func StorageIcon() fyne.Resource {
 	return storage
+}
+
+// UploadIcon returns a resource containing the standard upload icon for the current theme
+func UploadIcon() fyne.Resource {
+	return upload
 }
