@@ -144,6 +144,62 @@ func (s *stringFrom{{ .Name }}) DataChanged() {
 }
 `
 
+const fromStringTemplate = `
+type stringTo{{ .Name }} struct {
+	base
+
+	format string
+	from   String
+}
+
+// StringTo{{ .Name }} creates a binding that connects a String data item to a {{ .Name }}.
+// Changes to the String will be parsed and pushed to the {{ .Name }} if the parse was successful, and setting
+// the {{ .Name }} update the String binding.
+func StringTo{{ .Name }}(str String) {{ .Name }} {
+	return StringTo{{ .Name }}WithFormat(str, "{{ .Format }}")
+}
+
+// StringTo{{ .Name }}WithFormat creates a binding that connects a String data item to a {{ .Name }} and is
+// presented using the specified format. Changes to the {{ .Name }} will be parsed and if the format matches and
+// the parse is successful it will be pushed to the String. Setting the {{ .Name }} will push a formatted value
+// into the String.
+func StringTo{{ .Name }}WithFormat(str String, format string) {{ .Name }} {
+	v := &stringTo{{ .Name }}{from: str, format: format}
+	str.AddListener(v)
+	return v
+}
+
+func (s *stringTo{{ .Name }}) Get() {{ .Type }} {
+	str := s.from.Get()
+	if str == "" {
+		return {{ .Default }}
+	}
+
+	var val {{ .Type }}
+	n, err := fmt.Sscanf(str, s.format, &val)
+	if err != nil || n != 1 {
+		fyne.LogError("{{ .Type }} parse error", err)
+		return {{ .Default }}
+	}
+
+	return val
+}
+
+func (s *stringTo{{ .Name }}) Set(val {{ .Type }}) {
+	str := fmt.Sprintf(s.format, val)
+	if str == s.from.Get() {
+		return
+	}
+
+	s.from.Set(str)
+	s.trigger()
+}
+
+func (s *stringTo{{ .Name }}) DataChanged() {
+	s.trigger()
+}
+`
+
 type bindValues struct {
 	Name, Type, Default string
 	Format              string
@@ -180,12 +236,12 @@ func main() {
 		return
 	}
 	defer itemFile.Close()
-	toStringFile, err := newFile("tostring")
+	convertFile, err := newFile("convert")
 	if err != nil {
 		return
 	}
-	defer itemFile.Close()
-	toStringFile.WriteString(`
+	defer convertFile.Close()
+	convertFile.WriteString(`
 import (
 	"fmt"
 
@@ -207,21 +263,29 @@ var prefBinds = make(map[string]DataItem)
 `)
 
 	item := template.Must(template.New("item").Parse(itemBindTemplate))
+	fromString := template.Must(template.New("fromString").Parse(fromStringTemplate))
 	toString := template.Must(template.New("toString").Parse(toStringTemplate))
 	preference := template.Must(template.New("preference").Parse(prefTemplate))
-	for _, b := range []bindValues{
+	binds := []bindValues{
 		bindValues{Name: "Bool", Type: "bool", Default: "false", Format: "%t", SupportsPreferences: true},
 		bindValues{Name: "Float", Type: "float64", Default: "0.0", Format: "%f", SupportsPreferences: true},
 		bindValues{Name: "Int", Type: "int", Default: "0", Format: "%d", SupportsPreferences: true},
 		bindValues{Name: "Rune", Type: "rune", Default: "rune(0)"},
 		bindValues{Name: "String", Type: "string", Default: "\"\"", SupportsPreferences: true},
-	} {
+	}
+	for _, b := range binds {
 		writeFile(itemFile, item, b)
 		if b.SupportsPreferences {
 			writeFile(prefFile, preference, b)
 		}
 		if b.Format != "" {
-			writeFile(toStringFile, toString, b)
+			writeFile(convertFile, toString, b)
+		}
+	}
+	// add StringTo... at the bottom of the convertFile for correct ordering
+	for _, b := range binds {
+		if b.Format != "" {
+			writeFile(convertFile, fromString, b)
 		}
 	}
 }
