@@ -88,10 +88,13 @@ func (e *SelectEntry) SetOptions(options []string) {
 
 	if e.ActionItem == nil {
 		e.ActionItem = e.setupDropDown()
+		if e.Disabled() {
+			e.ActionItem.(fyne.Disableable).Disable()
+		}
 	}
 }
 
-func (e *SelectEntry) setupDropDown() fyne.CanvasObject {
+func (e *SelectEntry) setupDropDown() *Button {
 	dropDownButton := NewButton("", func() {
 		c := fyne.CurrentApp().Driver().CanvasForObject(e.super())
 

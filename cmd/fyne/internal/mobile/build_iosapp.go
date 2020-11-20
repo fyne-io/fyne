@@ -27,7 +27,7 @@ func goIOSBuild(pkg *packages.Package, bundleID string, archs []string,
 	// Detect the team ID
 	teamID, err := DetectIOSTeamID(cert)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to look up certificate %s: %s", cert, err.Error())
 	}
 
 	projPbxproj := new(bytes.Buffer)
@@ -288,25 +288,39 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
   <key>CFBundleVersion</key>
   <string>{{.Build}}</string>
   <key>CFBundleIcons</key>
+  <dict>
+    <key>CFBundlePrimaryIcon</key>
     <dict>
-      <key>CFBundlePrimaryIcon</key>
-      <dict>
-        <key>CFBundleIconFiles</key>
-        <array>
-          <string>Icon.png</string>
-          <string>Icon_76.png</string>
-          <string>Icon_152.png</string>
-          <string>Icon_120.png</string>
-        </array>
-      </dict>
+      <key>CFBundleIconFiles</key>
+      <array>
+        <string>AppIcon60x60</string>
+      </array>
+      <key>CFBundleIconName</key>
+      <string>AppIcon</string>
     </dict>
+  </dict>
+  <key>CFBundleIcons~ipad</key>
+  <dict>
+    <key>CFBundlePrimaryIcon</key>
+    <dict>
+      <key>CFBundleIconFiles</key>
+      <array>
+        <string>AppIcon60x60</string>
+        <string>AppIcon76x76</string>
+      </array>
+      <key>CFBundleIconName</key>
+      <string>AppIcon</string>
+    </dict>
+  </dict>
+  <key>CFBundleIconName</key>
+  <string>AppIcon</string>
   <key>LSRequiresIPhoneOS</key>
   <true/>
   <key>UILaunchStoryboardName</key>
   <string>LaunchScreen</string>
   <key>UIRequiredDeviceCapabilities</key>
   <array>
-    <string>armv7</string>
+    <string>arm64</string>
   </array>
   <key>UIRequiresFullScreen</key>
   <true/>

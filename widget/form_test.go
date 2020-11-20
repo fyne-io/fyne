@@ -122,7 +122,7 @@ func TestForm_ChangeTheme(t *testing.T) {
 		},
 		OnSubmit: func() {}, OnCancel: func() {}}
 	w := test.NewWindow(form)
-	w.Resize(fyne.NewSize(300, 200))
+	w.Resize(fyne.NewSize(340, 240))
 	defer w.Close()
 
 	test.AssertImageMatches(t, "form/theme_initial.png", w.Canvas().Capture())

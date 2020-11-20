@@ -430,10 +430,10 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				b, ok := r.branches[uid]
 				if !ok {
 					b = r.getBranch()
-					b.update(uid, depth)
 					if f := r.treeContent.tree.UpdateNode; f != nil {
 						f(uid, true, b.Content())
 					}
+					b.update(uid, depth)
 				}
 				branches[uid] = b
 				n = b.treeNode
@@ -441,10 +441,10 @@ func (r *treeContentRenderer) Layout(size fyne.Size) {
 				l, ok := r.leaves[uid]
 				if !ok {
 					l = r.getLeaf()
-					l.update(uid, depth)
 					if f := r.treeContent.tree.UpdateNode; f != nil {
 						f(uid, false, l.Content())
 					}
+					l.update(uid, depth)
 				}
 				leaves[uid] = l
 				n = l.treeNode

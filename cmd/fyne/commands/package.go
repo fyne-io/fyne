@@ -19,7 +19,7 @@ import (
 
 const (
 	defaultAppBuild   = 1
-	defaultAppVersion = "1.0"
+	defaultAppVersion = "1.0.0"
 )
 
 // Declare conformity to Command interface

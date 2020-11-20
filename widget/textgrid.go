@@ -24,12 +24,6 @@ var (
 	TextGridStyleWhitespace TextGridStyle
 )
 
-// define the types separately to the var definition so the custom style API is not leaked in their instances.
-func init() {
-	TextGridStyleDefault = &CustomTextGridStyle{}
-	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
-}
-
 // TextGridCell represents a single cell in a text grid.
 // It has a rune for the text content and a style associated with it.
 type TextGridCell struct {
@@ -262,6 +256,9 @@ func (t *TextGrid) CreateRenderer() fyne.WidgetRenderer {
 	t.ExtendBaseWidget(t)
 	render := &textGridRenderer{text: t}
 	render.cellSize = fyne.MeasureText("M", theme.TextSize(), fyne.TextStyle{Monospace: true})
+
+	TextGridStyleDefault = &CustomTextGridStyle{}
+	TextGridStyleWhitespace = &CustomTextGridStyle{FGColor: theme.DisabledTextColor()}
 
 	return render
 }
