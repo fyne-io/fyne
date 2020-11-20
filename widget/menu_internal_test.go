@@ -48,9 +48,9 @@ func TestMenu_ItemTapped(t *testing.T) {
 	assert.True(t, sm.Visible(), "submenu is visible")
 
 	test.Tap(smi)
-	assert.True(t, dismissed, "tap on sub item dismisses the root menu")
+	assert.True(t, dismissed, "tap on child item dismisses the root menu")
 	assert.True(t, m.Visible(), "tap on item does not hide the menu … OnDismiss is responsible for that")
-	assert.False(t, sm.Visible(), "tap on sub item hides the submenu")
+	assert.False(t, sm.Visible(), "tap on child item hides the submenu")
 
 	newActionTapped := false
 	item2.Action = func() { newActionTapped = true }
