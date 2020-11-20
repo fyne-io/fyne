@@ -155,7 +155,7 @@ var icons = []struct {
 	{"MediaFastRewind", theme.MediaFastRewindIcon()},
 	{"MediaPause", theme.MediaPauseIcon()},
 	{"MediaPlay", theme.MediaPlayIcon()},
-	{"MediaStop", theme.MediaPlayIcon()},
+	{"MediaStop", theme.MediaStopIcon()},
 	{"MediaRecord", theme.MediaRecordIcon()},
 	{"MediaReplay", theme.MediaReplayIcon()},
 	{"MediaSkipNext", theme.MediaSkipNextIcon()},
