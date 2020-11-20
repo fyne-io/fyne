@@ -106,7 +106,6 @@ func main() {
 
 	bundleIcon("check-box", f)
 	bundleIcon("check-box-blank", f)
-	bundleIcon("check-box-indeterminate", f)
 	bundleIcon("radio-button", f)
 	bundleIcon("radio-button-checked", f)
 
@@ -125,7 +124,6 @@ func main() {
 	bundleIcon("document", f)
 	bundleIcon("document-create", f)
 	bundleIcon("document-print", f)
-	bundleIcon("document-rename", f)
 	bundleIcon("document-save", f)
 
 	bundleIcon("info", f)
@@ -186,7 +184,6 @@ func main() {
 
 	bundleIcon("download", f)
 	bundleIcon("computer", f)
-	bundleIcon("refresh", f)
 	bundleIcon("storage", f)
 	bundleIcon("upload", f)
 
