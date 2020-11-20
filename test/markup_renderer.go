@@ -126,11 +126,6 @@ func (r *markupRenderer) setPosAttr(attrs map[string]*string, name string, pos f
 	attrs[name] = &value
 }
 
-func (r *markupRenderer) setRectAttr(attrs map[string]*string, name string, pos fyne.Position, size fyne.Size) {
-	value := fmt.Sprintf("%dx%d@%d,%d", size.Width, size.Height, pos.X, pos.Y)
-	attrs[name] = &value
-}
-
 func (r *markupRenderer) setResourceAttr(attrs map[string]*string, name string, rsc fyne.Resource) {
 	if rsc == nil {
 		return
