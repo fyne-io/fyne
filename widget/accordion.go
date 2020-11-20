@@ -232,12 +232,12 @@ func (r *accordionRenderer) updateObjects() {
 		r.headers[i].Hide()
 	}
 	// Set objects
-	var objects []fyne.CanvasObject
-	for _, h := range r.headers {
-		objects = append(objects, h)
+	objects := make([]fyne.CanvasObject, len(r.headers)+len(r.container.Items)) // Pre-allocate instead of appending, for better performance
+	for i, header := range r.headers {
+		objects[i] = header
 	}
-	for _, i := range r.container.Items {
-		objects = append(objects, i.Detail)
+	for i, item := range r.container.Items {
+		objects[len(r.headers)+i] = item.Detail
 	}
 	// add dividers
 	for i = 0; i < len(r.dividers); i++ {
