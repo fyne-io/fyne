@@ -1,14 +1,16 @@
 package widget_test
 
 import (
+	"image/color"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestCard_SetImage(t *testing.T) {
@@ -74,25 +76,25 @@ func TestCard_Layout(t *testing.T) {
 			title:    "",
 			subtitle: "",
 			icon:     nil,
-			content:  widget.NewHyperlink("link", nil),
+			content:  newContentRect(),
 		},
 		"title_content": {
 			title:    "Hello",
 			subtitle: "",
 			icon:     nil,
-			content:  widget.NewHyperlink("link", nil),
+			content:  newContentRect(),
 		},
 		"image_content": {
 			title:    "",
 			subtitle: "",
 			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
-			content:  widget.NewHyperlink("link", nil),
+			content:  newContentRect(),
 		},
 		"all_items": {
 			title:    "Longer title",
 			subtitle: "subtitle with length",
 			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
-			content:  widget.NewHyperlink("link", nil),
+			content:  newContentRect(),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -106,10 +108,29 @@ func TestCard_Layout(t *testing.T) {
 			window := test.NewWindow(card)
 			size := card.MinSize().Max(fyne.NewSize(80, 0)) // give a little width for image only tests
 			window.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-
+			if tt.content != nil {
+				assert.Equal(t, 10, tt.content.Size().Height)
+			}
 			test.AssertImageMatches(t, "card/layout_"+name+".png", window.Canvas().Capture())
 
 			window.Close()
 		})
 	}
+}
+
+func TestCard_MinSize(t *testing.T) {
+	content := widget.NewLabel("simple")
+	card := &widget.Card{Content: content}
+
+	inner := card.MinSize().Subtract(fyne.NewSize(theme.Padding()*3, theme.Padding()*3)) // shadow + content pad
+	assert.Equal(t, content.MinSize(), inner)
+}
+
+func newContentRect() *canvas.Rectangle {
+	rect := canvas.NewRectangle(color.Gray{0x66})
+	rect.StrokeColor = color.Black
+	rect.StrokeWidth = 2
+	rect.SetMinSize(fyne.NewSize(10, 10))
+
+	return rect
 }
