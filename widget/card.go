@@ -136,7 +136,7 @@ func (c *cardRenderer) Layout(size fyne.Size) {
 		pos.Y += titlePad
 	}
 
-	size.Width -= contentPad*2
+	size.Width -= contentPad * 2
 	pos.X += contentPad
 	if c.card.Content != nil {
 		height := size.Height - contentPad*2 - (pos.Y - theme.Padding()/2) // adjust for content and initial offset
