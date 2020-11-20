@@ -232,7 +232,7 @@ func (r *accordionRenderer) updateObjects() {
 		r.headers[i].Hide()
 	}
 	// Set objects
-	objects := make([]fyne.CanvasObject, len(r.headers)+len(r.container.Items)) // Pre-allocate instead of appending, for better performance
+	objects := make([]fyne.CanvasObject, len(r.headers)+len(r.container.Items))
 	for i, header := range r.headers {
 		objects[i] = header
 	}
