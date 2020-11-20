@@ -18,6 +18,18 @@ func TestBoolToString(t *testing.T) {
 	assert.Equal(t, false, b.Get())
 }
 
+func TestBoolToStringWithFormat(t *testing.T) {
+	b := NewBool()
+	s := BoolToStringWithFormat(b, "%tly")
+	assert.Equal(t, "falsely", s.Get())
+
+	b.Set(true)
+	assert.Equal(t, "truely", s.Get())
+
+	s.Set("falsely")
+	assert.Equal(t, false, b.Get())
+}
+
 func TestFloatToString(t *testing.T) {
 	f := NewFloat()
 	s := FloatToString(f)
@@ -30,6 +42,18 @@ func TestFloatToString(t *testing.T) {
 	assert.Equal(t, 5.0, f.Get())
 }
 
+func TestFloatToStringWithFormat(t *testing.T) {
+	f := NewFloat()
+	s := FloatToStringWithFormat(f, "%f%%")
+	assert.Equal(t, "0.000000%", s.Get())
+
+	f.Set(0.3)
+	assert.Equal(t, "0.300000%", s.Get())
+
+	s.Set("5.00%")
+	assert.Equal(t, 5.0, f.Get())
+}
+
 func TestIntToString(t *testing.T) {
 	i := NewInt()
 	s := IntToString(i)
@@ -39,6 +63,18 @@ func TestIntToString(t *testing.T) {
 	assert.Equal(t, "3", s.Get())
 
 	s.Set("5")
+	assert.Equal(t, 5, i.Get())
+}
+
+func TestIntToStringWithFormat(t *testing.T) {
+	i := NewInt()
+	s := IntToStringWithFormat(i, "num%d")
+	assert.Equal(t, "num0", s.Get())
+
+	i.Set(3)
+	assert.Equal(t, "num3", s.Get())
+
+	s.Set("num5")
 	assert.Equal(t, 5, i.Get())
 }
 
