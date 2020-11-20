@@ -43,6 +43,8 @@ type Entry struct {
 	MultiLine bool
 	Wrapping  fyne.TextWrap
 
+	// Set a validator that this entry will check against
+	// Since: 1.4
 	Validator           fyne.StringValidator
 	validationStatus    *validationStatus
 	onValidationChanged func(error)

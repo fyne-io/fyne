@@ -19,6 +19,8 @@ var _ fyne.Widget = (*List)(nil)
 // List is a widget that pools list items for performance and
 // lays the items out in a vertical direction inside of a scroller.
 // List requires that all items are the same size.
+//
+// Since: 1.4
 type List struct {
 	BaseWidget
 
@@ -36,6 +38,8 @@ type List struct {
 
 // NewList creates and returns a list widget for displaying items in
 // a vertical layout with scrolling and caching for performance.
+//
+// Since: 1.4
 func NewList(length func() int, createItem func() fyne.CanvasObject, updateItem func(ListItemID, fyne.CanvasObject)) *List {
 	list := &List{BaseWidget: BaseWidget{}, Length: length, CreateItem: createItem, UpdateItem: updateItem}
 	list.ExtendBaseWidget(list)
@@ -148,7 +152,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 	if f := l.list.Length; f != nil {
 		length = f()
 	}
-	if length == 0 {
+	if length <= 0 {
 		if len(l.children) > 0 {
 			for _, child := range l.children {
 				l.itemPool.Release(child)
@@ -180,10 +184,10 @@ func (l *listRenderer) Layout(size fyne.Size) {
 
 	// Relayout What Is Visible - no scroll change - initial layout or possibly from a resize.
 	l.visibleItemCount = int(math.Ceil(float64(l.scroller.size.Height) / float64(l.list.itemMin.Height+separatorThickness)))
-	if l.visibleItemCount == 0 {
+	if l.visibleItemCount <= 0 {
 		return
 	}
-	min := int(math.Min(float64(length), float64(l.visibleItemCount)))
+	min := fyne.Min(length, l.visibleItemCount)
 	if len(l.children) > min {
 		for i := len(l.children); i >= min; i-- {
 			l.itemPool.Release(l.children[i-1])

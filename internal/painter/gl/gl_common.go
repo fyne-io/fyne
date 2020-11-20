@@ -124,7 +124,7 @@ func (p *glPainter) newGlRasterTexture(obj fyne.CanvasObject) Texture {
 	width := p.textureScaleInt(rast.Size().Width)
 	height := p.textureScaleInt(rast.Size().Height)
 
-	return p.imgToTexture(rast.Generator(width, height), canvas.ImageScaleSmooth)
+	return p.imgToTexture(rast.Generator(width, height), rast.ScaleMode)
 }
 
 func (p *glPainter) newGlLinearGradientTexture(obj fyne.CanvasObject) Texture {

@@ -87,6 +87,8 @@ type ProgressBar struct {
 
 	// TextFormatter can be used to have a custom format of progress text.
 	// If set, it overrides the percentage readout and runs each time the value updates.
+	//
+	// Since: 1.4
 	TextFormatter func() string
 }
 

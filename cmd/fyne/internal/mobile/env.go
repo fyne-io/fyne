@@ -85,15 +85,17 @@ func envInit() (err error) {
 	// An arbitrary standard package ('runtime' here) is given to go-list.
 	// This is because go-list tries to analyze the module at the current directory if no packages are given,
 	// and if the module doesn't have any Go file, go-list fails. See golang/go#36668.
-	cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
-	cmd.Stderr = os.Stderr
-	out, err := cmd.Output()
-	if err != nil {
-		return err
-	}
-	if len(strings.TrimSpace(string(out))) > 0 {
-		bitcodeEnabled = true
-	}
+
+	// TODO re-enable once we find out what broke after September event 2020
+	//cmd := exec.Command("go", "list", "-e", "-f", `{{range context.ReleaseTags}}{{if eq . "go1.14"}}{{.}}{{end}}{{end}}`, "runtime")
+	//cmd.Stderr = os.Stderr
+	//out, err := cmd.Output()
+	//if err != nil {
+	//	return err
+	//}
+	//if len(strings.TrimSpace(string(out))) > 0 {
+	//		bitcodeEnabled = true
+	//}
 
 	// Setup the cross-compiler environments.
 	if ndkRoot, err := ndkRoot(); err == nil {

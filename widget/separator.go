@@ -12,11 +12,15 @@ const separatorThickness = 1
 var _ fyne.Widget = (*Separator)(nil)
 
 // Separator is a widget for displaying a separator with themeable color.
+//
+// Since: 1.4
 type Separator struct {
 	widget.Base
 }
 
 // NewSeparator creates a new separator.
+//
+// Since: 1.4
 func NewSeparator() *Separator {
 	return &Separator{}
 }

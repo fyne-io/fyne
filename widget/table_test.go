@@ -2,12 +2,15 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
 	"fyne.io/fyne/theme"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestTable_Empty(t *testing.T) {
@@ -37,14 +40,14 @@ func TestTable_Cache(t *testing.T) {
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 9, len(cellRenderer.Objects()))
+	assert.Equal(t, 6, len(cellRenderer.Objects()))
 	assert.Equal(t, "Cell 0, 0", cellRenderer.Objects()[0].(*Label).Text)
 	objRef := cellRenderer.Objects()[0].(*Label)
 
 	test.Scroll(c, fyne.NewPos(10, 10), -150, -150)
 	assert.Equal(t, 0, renderer.scroll.Offset.Y) // we didn't scroll as data shorter
 	assert.Equal(t, 150, renderer.scroll.Offset.X)
-	assert.Equal(t, 9, len(cellRenderer.Objects()))
+	assert.Equal(t, 6, len(cellRenderer.Objects()))
 	assert.Equal(t, "Cell 0, 1", cellRenderer.Objects()[0].(*Label).Text)
 	assert.NotEqual(t, objRef, cellRenderer.Objects()[0].(*Label)) // we want to re-use visible cells without rewriting them
 }
@@ -63,15 +66,40 @@ func TestTable_ChangeTheme(t *testing.T) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
+	content := test.WidgetRenderer(test.WidgetRenderer(table).(*tableRenderer).scroll.Content.(*tableCells)).(*tableCellsRenderer)
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
+	assert.Equal(t, "Cell 0, 0", content.Objects()[0].(*Label).Text)
+	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
 
 	test.WithTestTheme(t, func() {
 		test.WidgetRenderer(table).Refresh()
 		test.AssertImageMatches(t, "table/theme_changed.png", w.Canvas().Capture())
 	})
+	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
+}
+
+func TestTable_Filled(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			r := canvas.NewRectangle(color.Black)
+			r.SetMinSize(fyne.NewSize(30, 20))
+			r.Resize(fyne.NewSize(30, 20))
+			return r
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(180, 180))
+	test.AssertImageMatches(t, "table/filled.png", w.Canvas().Capture())
 }
 
 func TestTable_Unselect(t *testing.T) {
@@ -198,6 +226,39 @@ func TestTable_Select(t *testing.T) {
 	test.AssertImageMatches(t, "table/selected_scrolled.png", w.Canvas().Capture())
 }
 
+func TestTable_SetColumnWidth(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(id TableCellID, obj fyne.CanvasObject) {
+			if id.Col == 0 {
+				obj.(*Label).Text = "p"
+			} else {
+				obj.(*Label).Text = "placeholder"
+			}
+		})
+	table.SetColumnWidth(0, 16)
+	table.Resize(fyne.NewSize(120, 120))
+	table.Select(TableCellID{1, 0})
+
+	renderer := test.WidgetRenderer(table).(*tableRenderer)
+	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer.Refresh()
+	assert.Equal(t, 10, len(cellRenderer.Objects()))
+	assert.Equal(t, 16, cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120+(2*theme.Padding()), 120+(2*theme.Padding())))
+	test.AssertImageMatches(t, "table/col_size.png", w.Canvas().Capture())
+}
+
 func TestTable_ShowVisible(t *testing.T) {
 	table := NewTable(
 		func() (int, int) { return 50, 50 },
@@ -210,5 +271,5 @@ func TestTable_ShowVisible(t *testing.T) {
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 15, len(cellRenderer.Objects()))
+	assert.Equal(t, 10, len(cellRenderer.Objects()))
 }

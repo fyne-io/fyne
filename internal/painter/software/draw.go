@@ -78,19 +78,23 @@ func drawImage(c fyne.Canvas, img *canvas.Image, pos fyne.Position, base *image.
 		}
 	}
 
+	drawPixels(scaledX, scaledY, width, height, img.ScaleMode, base, origImg, clip)
+}
+
+func drawPixels(x, y, width, height int, mode canvas.ImageScale, base *image.NRGBA, origImg image.Image, clip image.Rectangle) {
 	scaledBounds := image.Rect(0, 0, width, height)
 	scaledImg := image.NewNRGBA(scaledBounds)
-	switch img.ScaleMode {
+	switch mode {
 	case canvas.ImageScalePixels:
 		draw.NearestNeighbor.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
 	default:
-		if img.ScaleMode != canvas.ImageScaleSmooth {
-			fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", img.ScaleMode), nil)
+		if mode != canvas.ImageScaleSmooth {
+			fyne.LogError(fmt.Sprintf("Invalid canvas.ImageScale value (%d), using canvas.ImageScaleSmooth as default value", mode), nil)
 		}
 		draw.CatmullRom.Scale(scaledImg, scaledBounds, origImg, origImg.Bounds(), draw.Over, nil)
 	}
 
-	drawTex(scaledX, scaledY, width, height, base, scaledImg, clip)
+	drawTex(x, y, width, height, base, scaledImg, clip)
 }
 
 func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {
@@ -115,7 +119,7 @@ func drawLine(c fyne.Canvas, line *canvas.Line, pos fyne.Position, base *image.N
 	draw.Draw(base, bounds, raw, image.Point{offX, offY}, draw.Over)
 }
 
-func drawTex(x, y, width int, height int, base *image.NRGBA, tex image.Image, clip image.Rectangle) {
+func drawTex(x, y, width, height int, base *image.NRGBA, tex image.Image, clip image.Rectangle) {
 	outBounds := image.Rect(x, y, x+width, y+height)
 	clippedBounds := clip.Intersect(outBounds)
 	srcPt := image.Point{X: clippedBounds.Min.X - outBounds.Min.X, Y: clippedBounds.Min.Y - outBounds.Min.Y}
@@ -170,7 +174,12 @@ func drawRaster(c fyne.Canvas, rast *canvas.Raster, pos fyne.Position, base *ima
 	height := internal.ScaleInt(c, bounds.Height)
 	scaledX, scaledY := internal.ScaleInt(c, pos.X), internal.ScaleInt(c, pos.Y)
 
-	drawTex(scaledX, scaledY, width, height, base, rast.Generator(width, height), clip)
+	pix := rast.Generator(width, height)
+	if pix.Bounds().Bounds().Dx() != width || pix.Bounds().Dy() != height {
+		drawPixels(scaledX, scaledY, width, height, rast.ScaleMode, base, pix, clip)
+	} else {
+		drawTex(scaledX, scaledY, width, height, base, pix, clip)
+	}
 }
 
 func drawRectangleStroke(c fyne.Canvas, rect *canvas.Rectangle, pos fyne.Position, base *image.NRGBA, clip image.Rectangle) {

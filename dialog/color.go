@@ -14,6 +14,8 @@ import (
 )
 
 // ColorPickerDialog is a simple dialog window that displays a color picker.
+//
+// Since: 1.4
 type ColorPickerDialog struct {
 	*dialog
 	Advanced bool
@@ -26,6 +28,8 @@ type ColorPickerDialog struct {
 // NewColorPicker creates a color dialog and returns the handle.
 // Using the returned type you should call Show() and then set its color through SetColor().
 // The callback is triggered when the user selects a color.
+//
+// Since: 1.4
 func NewColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) *ColorPickerDialog {
 	p := &ColorPickerDialog{
 		dialog:   newDialog(title, message, theme.ColorPaletteIcon(), nil /*cancel?*/, parent),
@@ -37,6 +41,8 @@ func NewColorPicker(title, message string, callback func(c color.Color), parent 
 
 // ShowColorPicker creates and shows a color dialog.
 // The callback is triggered when the user selects a color.
+//
+// Since: 1.4
 func ShowColorPicker(title, message string, callback func(c color.Color), parent fyne.Window) {
 	NewColorPicker(title, message, callback, parent).Show()
 }

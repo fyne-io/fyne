@@ -481,6 +481,8 @@ func (f *FileDialog) SetDismissText(label string) {
 
 // SetLocation tells this FileDirectory which location to display.
 // This is normally called before the dialog is shown.
+//
+// Since: 1.4
 func (f *FileDialog) SetLocation(u fyne.ListableURI) {
 	f.startingLocation = u
 	if f.dialog != nil {
