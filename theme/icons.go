@@ -182,10 +182,10 @@ var (
 	document, documentCreate, documentPrint, documentSave                           *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     *ThemedResource
 	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        *ThemedResource
-	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                      *ThemedResource
+	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious, mediaStop           *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
 	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
-	folder, folderNew, folderOpen, help, history, home, settings, storage           *ThemedResource
+	folder, folderNew, folderOpen, help, history, home, settings, storage, upload   *ThemedResource
 	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               *ThemedResource
 	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
 )
@@ -241,6 +241,7 @@ func init() {
 	mediaReplay = NewThemedResource(mediareplayIconRes, nil)
 	mediaSkipNext = NewThemedResource(mediaskipnextIconRes, nil)
 	mediaSkipPrevious = NewThemedResource(mediaskippreviousIconRes, nil)
+	mediaStop = NewThemedResource(mediastopIconRes, nil)
 
 	arrowBack = NewThemedResource(arrowbackIconRes, nil)
 	arrowDown = NewThemedResource(arrowdownIconRes, nil)
@@ -279,6 +280,7 @@ func init() {
 	download = NewThemedResource(downloadIconRes, nil)
 	computer = NewThemedResource(computerIconRes, nil)
 	storage = NewThemedResource(storageIconRes, nil)
+	upload = NewThemedResource(uploadIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -571,6 +573,11 @@ func MediaSkipPreviousIcon() fyne.Resource {
 	return mediaSkipPrevious
 }
 
+// MediaStopIcon returns a resource containing the standard media stop icon for the current theme
+func MediaStopIcon() fyne.Resource {
+	return mediaStop
+}
+
 // MoveDownIcon returns a resource containing the standard down arrow icon for the current theme
 func MoveDownIcon() fyne.Resource {
 	return arrowDown
@@ -669,4 +676,9 @@ func DownloadIcon() fyne.Resource {
 // StorageIcon returns a resource containing the standard storage icon for the current theme
 func StorageIcon() fyne.Resource {
 	return storage
+}
+
+// UploadIcon returns a resource containing the standard upload icon for the current theme
+func UploadIcon() fyne.Resource {
+	return upload
 }

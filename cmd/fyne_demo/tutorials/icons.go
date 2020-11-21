@@ -134,6 +134,7 @@ var icons = []struct {
 	{"SettingsIcon", theme.SettingsIcon()},
 	{"StorageIcon", theme.StorageIcon()},
 	{"DownloadIcon", theme.DownloadIcon()},
+	{"UploadIcon", theme.UploadIcon()},
 
 	{"ViewFullScreenIcon", theme.ViewFullScreenIcon()},
 	{"ViewRestoreIcon", theme.ViewRestoreIcon()},
@@ -166,6 +167,7 @@ var icons = []struct {
 	{"MediaFastRewind", theme.MediaFastRewindIcon()},
 	{"MediaPause", theme.MediaPauseIcon()},
 	{"MediaPlay", theme.MediaPlayIcon()},
+	{"MediaStop", theme.MediaStopIcon()},
 	{"MediaRecord", theme.MediaRecordIcon()},
 	{"MediaReplay", theme.MediaReplayIcon()},
 	{"MediaSkipNext", theme.MediaSkipNextIcon()},
