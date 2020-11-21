@@ -22,17 +22,20 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 	r1, g1, b1, a1 := start.RGBA()
 	r2, g2, b2, a2 := stop.RGBA()
 
-	rDelta := int(r2) - int(r1)
-	gDelta := int(g2) - int(g1)
-	bDelta := int(b2) - int(b1)
-	aDelta := int(a2) - int(a1)
+	rStart := uint8(r1 >> 8)
+	gStart := uint8(g1 >> 8)
+	bStart := uint8(b1 >> 8)
+	aStart := uint8(a1 >> 8)
+	rDelta := float32(int(r2>>8) - int(rStart))
+	gDelta := float32(int(g2>>8) - int(gStart))
+	bDelta := float32(int(b2>>8) - int(bStart))
+	aDelta := float32(int(a2>>8) - int(aStart))
 
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-
-			fn(color.NRGBA{R: scaleChannel(r1, rDelta, done), G: scaleChannel(g1, gDelta, done),
-				B: scaleChannel(b1, bDelta, done), A: scaleChannel(a1, aDelta, done)})
+			fn(color.RGBA{R: scaleChannel(rStart, rDelta, done), G: scaleChannel(gStart, gDelta, done),
+				B: scaleChannel(bStart, bDelta, done), A: scaleChannel(aStart, aDelta, done)})
 		}}
 }
 
@@ -64,10 +67,8 @@ func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)
 		}}
 }
 
-func scaleChannel(start uint32, diff int, done float32) uint8 {
-	shift := int(float32(diff) * done)
-
-	return uint8((int(start) + shift) >> 8)
+func scaleChannel(start uint8, diff, done float32) uint8 {
+	return uint8(int(start) + int(diff*done))
 }
 
 func scaleInt(start, delta int, done float32) int {

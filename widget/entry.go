@@ -1394,7 +1394,7 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
 	cursorOpaque := theme.FocusColor()
 	r, g, b, _ := theme.FocusColor().RGBA()
-	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x66}
+	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
 	anim := canvas.NewColorRGBAAnimation(cursorDim, cursorOpaque, time.Second/2, func(c color.Color) {
 		cursor.FillColor = c
 		cursor.Refresh()
