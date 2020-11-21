@@ -91,6 +91,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff int) (
 	anim = canvas.NewPositionAnimation(
 		fyne.NewPos(0, yOff), fyne.NewPos(380, yOff), time.Second, func(p fyne.Position) {
 			box.Move(p)
+			box.Refresh()
 		})
 	anim.Curve = curve
 	return
