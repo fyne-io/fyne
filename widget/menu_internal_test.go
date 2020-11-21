@@ -45,12 +45,12 @@ func TestMenu_ItemTapped(t *testing.T) {
 	sm := mi3.child
 	smi := sm.Items[0].(*menuItem)
 	assert.Equal(t, subItem, smi.Item)
-	assert.True(t, sm.Visible(), "sub menu is visible")
+	assert.True(t, sm.Visible(), "submenu is visible")
 
 	test.Tap(smi)
-	assert.True(t, dismissed, "tap on sub item dismisses the root menu")
+	assert.True(t, dismissed, "tap on child item dismisses the root menu")
 	assert.True(t, m.Visible(), "tap on item does not hide the menu … OnDismiss is responsible for that")
-	assert.False(t, sm.Visible(), "tap on sub item hides the sub menu")
+	assert.False(t, sm.Visible(), "tap on child item hides the submenu")
 
 	newActionTapped := false
 	item2.Action = func() { newActionTapped = true }
