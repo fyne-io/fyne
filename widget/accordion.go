@@ -194,6 +194,7 @@ func (r *accordionRenderer) Refresh() {
 func (r *accordionRenderer) updateObjects() {
 	is := len(r.container.Items)
 	hs := len(r.headers)
+	ds := len(r.dividers)
 	i := 0
 	for ; i < is; i++ {
 		ai := r.container.Items[i]
@@ -232,21 +233,21 @@ func (r *accordionRenderer) updateObjects() {
 		r.headers[i].Hide()
 	}
 	// Set objects
-	objects := make([]fyne.CanvasObject, len(r.headers)+len(r.container.Items))
+	objects := make([]fyne.CanvasObject, hs+is+ds)
 	for i, header := range r.headers {
 		objects[i] = header
 	}
 	for i, item := range r.container.Items {
-		objects[len(r.headers)+i] = item.Detail
+		objects[hs+i] = item.Detail
 	}
 	// add dividers
-	for i = 0; i < len(r.dividers); i++ {
+	for i = 0; i < ds; i++ {
 		if i < len(r.container.Items)-1 {
 			r.dividers[i].Show()
 		} else {
 			r.dividers[i].Hide()
 		}
-		objects = append(objects, r.dividers[i])
+		objects[hs+is+i] = r.dividers[i]
 	}
 	// make new dividers
 	for ; i < is-1; i++ {
