@@ -61,9 +61,8 @@ func (f *Form) AppendItem(item *FormItem) {
 	if f.itemGrid != nil {
 		f.itemGrid.Add(f.createLabel(item.Text))
 		f.itemGrid.Add(item.Widget)
+		f.setUpValidation(item.Widget, len(f.Items)-1)
 	}
-
-	f.setUpValidation(item.Widget, len(f.Items)-1)
 
 	f.Refresh()
 }
@@ -114,9 +113,7 @@ func (f *Form) updateButtons() {
 }
 
 func (f *Form) checkValidation(err error) {
-	if f.submitButton == nil {
-		return // The renderer has not been created yet.
-	} else if err != nil {
+	if err != nil {
 		f.submitButton.Disable()
 		return
 	}
@@ -156,6 +153,10 @@ func (f *Form) updateLabels() {
 func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	f.ExtendBaseWidget(f)
 
+	f.cancelButton = &Button{Icon: theme.CancelIcon(), OnTapped: f.OnCancel}
+	f.submitButton = &Button{Icon: theme.ConfirmIcon(), OnTapped: f.OnSubmit, Importance: HighImportance}
+	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
+
 	objects := make([]fyne.CanvasObject, len(f.Items)*2)
 	for i, item := range f.Items {
 		objects[i*2] = f.createLabel(item.Text)
@@ -164,21 +165,16 @@ func (f *Form) CreateRenderer() fyne.WidgetRenderer {
 	}
 	f.itemGrid = fyne.NewContainerWithLayout(layout.NewFormLayout(), objects...)
 
-	f.cancelButton = NewButtonWithIcon("", theme.CancelIcon(), f.OnCancel)
-	f.submitButton = NewButtonWithIcon("", theme.ConfirmIcon(), f.OnSubmit)
-	f.submitButton.Importance = HighImportance
-	f.buttonBox = NewHBox(layout.NewSpacer(), f.cancelButton, f.submitButton)
-
 	renderer := cache.Renderer(NewVBox(f.itemGrid, f.buttonBox))
 	f.updateButtons()      // will set correct visibility on the submit/cancel btns
-	f.checkValidation(nil) // trigger a validation check for correct intial validation status
+	f.checkValidation(nil) // will trigger a validation check for correct intial validation status
 	return renderer
 }
 
 // NewForm creates a new form widget with the specified rows of form items
 // and (if any of them should be shown) a form controls row at the bottom
 func NewForm(items ...*FormItem) *Form {
-	form := &Form{BaseWidget: BaseWidget{}, Items: items}
+	form := &Form{Items: items}
 	form.ExtendBaseWidget(form)
 
 	return form
