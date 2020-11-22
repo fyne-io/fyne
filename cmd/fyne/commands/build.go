@@ -18,20 +18,24 @@ func (b *builder) build() error {
 		goos = targetOS()
 	}
 
-	var cmd *exec.Cmd
+	args := []string{}
 	if goos == "windows" {
 		if b.release {
-			cmd = exec.Command("go", "build", "-ldflags", "-s -w -H=windowsgui", ".")
+			args = append(args, "build", "-ldflags", "-s -w -H=windowsgui")
 		} else {
-			cmd = exec.Command("go", "build", "-ldflags", "-H=windowsgui", ".")
+			args = append(args, "build", "-ldflags", "-H=windowsgui")
 		}
 	} else {
 		if b.release {
-			cmd = exec.Command("go", "build", "-ldflags", "-s -w", ".")
+			args = append(args, "build", "-ldflags", "-s -w")
 		} else {
-			cmd = exec.Command("go", "build", ".")
+			args = append(args, "build")
 		}
 	}
+	if b.release {
+		args = append(args, "-tags", "release")
+	}
+	cmd := exec.Command("go", args...)
 	cmd.Dir = b.srcdir
 	env := os.Environ()
 	env = append(env, "CGO_ENABLED=1") // in case someone is trying to cross-compile...
