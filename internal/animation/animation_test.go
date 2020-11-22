@@ -19,6 +19,7 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 		}}
 
 	run.Start(a)
+	time.Sleep(time.Millisecond * 20)
 	assert.Greater(t, ticks, 0)
 }
 
@@ -32,6 +33,7 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 		}}
 
 	run.Start(a)
+	time.Sleep(time.Millisecond * 20)
 	run.Stop(a)
 	assert.Greater(t, ticks, 0)
 	assert.Zero(t, len(run.animations))
