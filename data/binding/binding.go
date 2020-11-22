@@ -15,6 +15,10 @@ type DataItem interface {
 	RemoveListener(DataListener)
 }
 
+type DataItemFromVariable interface {
+	UpdateFromVariable()
+}
+
 // DataListener is any object that can register for changes in a bindable DataItem.
 // See NewDataListener to define a new listener using just an inline function.
 type DataListener interface {

@@ -10,6 +10,12 @@ type Bool interface {
 	Set(bool)
 }
 
+// BoolFromVariable supports binding a bool value in a Fyne application
+type BoolFromVariable interface {
+	Bool
+	DataItemFromVariable
+}
+
 // NewBool returns a bindable bool value that is managed internally.
 func NewBool() Bool {
 	blank := false
@@ -17,9 +23,9 @@ func NewBool() Bool {
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
-func BindBool(v *bool) Bool {
+func BindBool(v *bool) BoolFromVariable {
 	if v == nil {
-		return NewBool() // never allow a nil value pointer
+		return NewBool().(*boundBool) // never allow a nil value pointer
 	}
 
 	return &boundBool{val: v}
@@ -39,13 +45,22 @@ func (b *boundBool) Get() bool {
 }
 
 func (b *boundBool) Set(val bool) {
-	if *b.val == val {
-		return
-	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
 	} else {
+		if *b.val == val {
+			return
+		}
+
 		*b.val = val
+	}
+
+	b.trigger()
+}
+
+func (b *boundBool) UpdateFromVariable() {
+	if b.val == nil {
+		return
 	}
 
 	b.trigger()
@@ -58,6 +73,12 @@ type Float interface {
 	Set(float64)
 }
 
+// FloatFromVariable supports binding a float64 value in a Fyne application
+type FloatFromVariable interface {
+	Float
+	DataItemFromVariable
+}
+
 // NewFloat returns a bindable float64 value that is managed internally.
 func NewFloat() Float {
 	blank := 0.0
@@ -65,9 +86,9 @@ func NewFloat() Float {
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
-func BindFloat(v *float64) Float {
+func BindFloat(v *float64) FloatFromVariable {
 	if v == nil {
-		return NewFloat() // never allow a nil value pointer
+		return NewFloat().(*boundFloat) // never allow a nil value pointer
 	}
 
 	return &boundFloat{val: v}
@@ -87,13 +108,22 @@ func (b *boundFloat) Get() float64 {
 }
 
 func (b *boundFloat) Set(val float64) {
-	if *b.val == val {
-		return
-	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
 	} else {
+		if *b.val == val {
+			return
+		}
+
 		*b.val = val
+	}
+
+	b.trigger()
+}
+
+func (b *boundFloat) UpdateFromVariable() {
+	if b.val == nil {
+		return
 	}
 
 	b.trigger()
@@ -106,6 +136,12 @@ type Int interface {
 	Set(int)
 }
 
+// IntFromVariable supports binding a int value in a Fyne application
+type IntFromVariable interface {
+	Int
+	DataItemFromVariable
+}
+
 // NewInt returns a bindable int value that is managed internally.
 func NewInt() Int {
 	blank := 0
@@ -113,9 +149,9 @@ func NewInt() Int {
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
-func BindInt(v *int) Int {
+func BindInt(v *int) IntFromVariable {
 	if v == nil {
-		return NewInt() // never allow a nil value pointer
+		return NewInt().(*boundInt) // never allow a nil value pointer
 	}
 
 	return &boundInt{val: v}
@@ -135,13 +171,22 @@ func (b *boundInt) Get() int {
 }
 
 func (b *boundInt) Set(val int) {
-	if *b.val == val {
-		return
-	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
 	} else {
+		if *b.val == val {
+			return
+		}
+
 		*b.val = val
+	}
+
+	b.trigger()
+}
+
+func (b *boundInt) UpdateFromVariable() {
+	if b.val == nil {
+		return
 	}
 
 	b.trigger()
@@ -154,6 +199,12 @@ type Rune interface {
 	Set(rune)
 }
 
+// RuneFromVariable supports binding a rune value in a Fyne application
+type RuneFromVariable interface {
+	Rune
+	DataItemFromVariable
+}
+
 // NewRune returns a bindable rune value that is managed internally.
 func NewRune() Rune {
 	blank := rune(0)
@@ -161,9 +212,9 @@ func NewRune() Rune {
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
-func BindRune(v *rune) Rune {
+func BindRune(v *rune) RuneFromVariable {
 	if v == nil {
-		return NewRune() // never allow a nil value pointer
+		return NewRune().(*boundRune) // never allow a nil value pointer
 	}
 
 	return &boundRune{val: v}
@@ -183,13 +234,22 @@ func (b *boundRune) Get() rune {
 }
 
 func (b *boundRune) Set(val rune) {
-	if *b.val == val {
-		return
-	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
 	} else {
+		if *b.val == val {
+			return
+		}
+
 		*b.val = val
+	}
+
+	b.trigger()
+}
+
+func (b *boundRune) UpdateFromVariable() {
+	if b.val == nil {
+		return
 	}
 
 	b.trigger()
@@ -202,6 +262,12 @@ type String interface {
 	Set(string)
 }
 
+// StringFromVariable supports binding a string value in a Fyne application
+type StringFromVariable interface {
+	String
+	DataItemFromVariable
+}
+
 // NewString returns a bindable string value that is managed internally.
 func NewString() String {
 	blank := ""
@@ -209,9 +275,9 @@ func NewString() String {
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
-func BindString(v *string) String {
+func BindString(v *string) StringFromVariable {
 	if v == nil {
-		return NewString() // never allow a nil value pointer
+		return NewString().(*boundString) // never allow a nil value pointer
 	}
 
 	return &boundString{val: v}
@@ -231,13 +297,22 @@ func (b *boundString) Get() string {
 }
 
 func (b *boundString) Set(val string) {
-	if *b.val == val {
-		return
-	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
 	} else {
+		if *b.val == val {
+			return
+		}
+
 		*b.val = val
+	}
+
+	b.trigger()
+}
+
+func (b *boundString) UpdateFromVariable() {
+	if b.val == nil {
+		return
 	}
 
 	b.trigger()

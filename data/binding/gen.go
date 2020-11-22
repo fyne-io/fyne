@@ -19,6 +19,12 @@ type {{ .Name }} interface {
 	Set({{ .Type }})
 }
 
+// {{ .Name }}FromVariable supports binding a {{ .Type }} value in a Fyne application
+type {{ .Name }}FromVariable interface {
+	{{.Name }}
+	DataItemFromVariable
+}
+
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
 func New{{ .Name }}() {{ .Name }} {
 	blank := {{ .Default }}
@@ -26,9 +32,9 @@ func New{{ .Name }}() {{ .Name }} {
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
-func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }} {
+func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }}FromVariable {
 	if v == nil {
-		return New{{ .Name }}() // never allow a nil value pointer
+		return New{{ .Name }}().(*bound{{ .Name }}) // never allow a nil value pointer
 	}
 
 	return &bound{{ .Name }}{val: v}
@@ -48,13 +54,22 @@ func (b *bound{{ .Name }}) Get() {{ .Type }} {
 }
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) {
-	if *b.val == val {
-		return
-	}
 	if b.val == nil { // was not initialized with a blank value, recover
 		b.val = &val
 	} else {
+		if *b.val == val {
+			return
+		}
+
 		*b.val = val
+	}
+
+	b.trigger()
+}
+
+func (b *bound{{ .Name }}) UpdateFromVariable() {
+	if b.val == nil {
+		return
 	}
 
 	b.trigger()
