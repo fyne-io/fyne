@@ -7,9 +7,41 @@ import (
 )
 
 type anim struct {
-	a     *fyne.Animation
-	start time.Time
-	end   time.Time
+	a       *fyne.Animation
+	end     time.Time
+	reverse bool
+	start   time.Time
+	total   int64
+}
+
+func (d *gLDriver) StartAnimation(a *fyne.Animation) {
+	d.animationMutex.Lock()
+	defer d.animationMutex.Unlock()
+	wasStopped := len(d.animations) == 0
+
+	d.animations = append(d.animations, newAnim(a))
+	if wasStopped {
+		d.runAnimations()
+	}
+}
+
+func (d *gLDriver) StopAnimation(a *fyne.Animation) {
+	d.animationMutex.Lock()
+	defer d.animationMutex.Unlock()
+	oldList := d.animations
+	var newList []*anim
+	for _, item := range oldList {
+		if item.a != a {
+			newList = append(newList, item)
+		}
+	}
+	d.animations = newList
+}
+
+func newAnim(a *fyne.Animation) *anim {
+	animate := &anim{a: a, start: time.Now(), end: time.Now().Add(a.Duration)}
+	animate.total = animate.end.Sub(animate.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
+	return animate
 }
 
 func (d *gLDriver) runAnimations() {
@@ -18,7 +50,6 @@ func (d *gLDriver) runAnimations() {
 	go func() {
 		done := false
 		for !done {
-
 			<-draw.C
 			d.animationMutex.Lock()
 			oldList := d.animations
@@ -41,8 +72,19 @@ func (d *gLDriver) runAnimations() {
 // tickAnimation will process a frame of animation and return true if this should continue animating
 func (d *gLDriver) tickAnimation(a *anim) bool {
 	if time.Now().After(a.end) {
-		a.a.Tick(1.0)
-		if !a.a.Repeat {
+		if a.reverse {
+			a.a.Tick(0.0)
+			if !a.a.Repeat {
+				return false
+			}
+			a.reverse = false
+		} else {
+			a.a.Tick(1.0)
+			if a.a.AutoReverse {
+				a.reverse = true
+			}
+		}
+		if !a.a.Repeat && !a.reverse {
 			return false
 		}
 
@@ -50,15 +92,18 @@ func (d *gLDriver) tickAnimation(a *anim) bool {
 		a.end = a.start.Add(a.a.Duration)
 	}
 
-	total := a.end.Sub(a.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
-	delta := time.Since(a.start).Nanoseconds() / 1000000
+	delta := time.Since(a.start).Nanoseconds() / 1000000 // TODO change this to Milliseconds() when we drop Go 1.12
 
-	val := float32(delta) / float32(total)
+	val := float32(delta) / float32(a.total)
 	curve := a.a.Curve
 	if curve == nil {
-		curve = fyne.AnimationLinear
+		curve = fyne.AnimationEaseInOut
 	}
-	a.a.Tick(curve(val))
+	if a.reverse {
+		a.a.Tick(curve(1 - val))
+	} else {
+		a.a.Tick(curve(val))
+	}
 
 	return true
 }

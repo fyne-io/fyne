@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"math"
 	"strings"
+	"time"
 	"unicode"
 
 	"fyne.io/fyne"
@@ -142,7 +143,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
+	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, nil, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
@@ -1029,6 +1030,7 @@ var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 type entryRenderer struct {
 	line, cursor *canvas.Rectangle
 	selection    []fyne.CanvasObject
+	cursorAnim   *fyne.Animation
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1126,7 +1128,15 @@ func (r *entryRenderer) Refresh() {
 	if focused {
 		r.cursor.Show()
 		r.line.FillColor = theme.FocusColor()
+		if r.cursorAnim == nil {
+			r.cursorAnim = makeCursorAnimation(r.cursor)
+			r.cursorAnim.Start()
+		}
 	} else {
+		if r.cursorAnim != nil {
+			r.cursorAnim.Stop()
+			r.cursorAnim = nil
+		}
 		r.cursor.Hide()
 		if r.entry.Disabled() {
 			r.line.FillColor = theme.DisabledTextColor()
@@ -1381,4 +1391,18 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 		end += col // otherwise include the text slice position
 	}
 	return start, end
+}
+
+func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
+	cursorOpaque := theme.FocusColor()
+	r, g, b, _ := theme.FocusColor().RGBA()
+	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
+	anim := canvas.NewColorRGBAAnimation(cursorDim, cursorOpaque, time.Second/2, func(c color.Color) {
+		cursor.FillColor = c
+		cursor.Refresh()
+	})
+	anim.Repeat = true
+	anim.AutoReverse = true
+
+	return anim
 }

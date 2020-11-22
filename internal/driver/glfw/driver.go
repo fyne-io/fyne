@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/internal/driver"
@@ -73,17 +72,6 @@ func (d *gLDriver) Run() {
 		panic("Run() or ShowAndRun() must be called from main goroutine")
 	}
 	d.runGL()
-}
-
-func (d *gLDriver) StartAnimation(a *fyne.Animation) {
-	d.animationMutex.Lock()
-	defer d.animationMutex.Unlock()
-	wasStopped := len(d.animations) == 0
-
-	d.animations = append(d.animations, &anim{a, time.Now(), time.Now().Add(a.Duration)})
-	if wasStopped {
-		d.runAnimations()
-	}
 }
 
 func (d *gLDriver) addWindow(w *window) {

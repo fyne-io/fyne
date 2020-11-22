@@ -26,6 +26,7 @@ func makeAnimationCanvas() fyne.CanvasObject {
 			canvas.Refresh(rect)
 		})
 	a.Repeat = true
+	a.AutoReverse = true
 	a.Start()
 
 	var a2 *fyne.Animation
@@ -37,10 +38,27 @@ func makeAnimationCanvas() fyne.CanvasObject {
 		i.Resize(fyne.NewSize(width, width))
 	})
 	a2.Repeat = true
+	a2.AutoReverse = true
 	a2.Curve = fyne.AnimationLinear
 	a2.Start()
 
-	return fyne.NewContainerWithoutLayout(rect, i)
+	running := true
+	var toggle *widget.Button
+	toggle = widget.NewButton("Stop", func() {
+		if running {
+			a.Stop()
+			a2.Stop()
+			toggle.SetText("Start")
+		} else {
+			a.Start()
+			a2.Start()
+			toggle.SetText("Stop")
+		}
+		running = !running
+	})
+	toggle.Resize(toggle.MinSize())
+	toggle.Move(fyne.NewPos(152, 54))
+	return fyne.NewContainerWithoutLayout(rect, i, toggle)
 }
 
 func makeAnimationCurves() fyne.CanvasObject {
@@ -73,6 +91,7 @@ func makeAnimationCurveItem(label string, curve fyne.AnimationCurve, yOff int) (
 	anim = canvas.NewPositionAnimation(
 		fyne.NewPos(0, yOff), fyne.NewPos(380, yOff), time.Second, func(p fyne.Position) {
 			box.Move(p)
+			box.Refresh()
 		})
 	anim.Curve = curve
 	return

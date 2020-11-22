@@ -19,14 +19,23 @@ const (
 // The content of fn should apply the color values to an object and refresh it.
 // You should call Start() on the returned animation to start it.
 func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(color.Color)) *fyne.Animation {
+	r1, g1, b1, a1 := start.RGBA()
+	r2, g2, b2, a2 := stop.RGBA()
+
+	rStart := int(r1 >> 8)
+	gStart := int(g1 >> 8)
+	bStart := int(b1 >> 8)
+	aStart := int(a1 >> 8)
+	rDelta := float32(int(r2>>8) - rStart)
+	gDelta := float32(int(g2>>8) - gStart)
+	bDelta := float32(int(b2>>8) - bStart)
+	aDelta := float32(int(a2>>8) - aStart)
+
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			r1, g1, b1, a1 := start.RGBA()
-			r2, g2, b2, a2 := stop.RGBA()
-
-			fn(color.NRGBA{R: scaleColor(r1, r2, done), G: scaleColor(g1, g2, done), B: scaleColor(b1, b2, done),
-				A: scaleColor(a1, a2, done)})
+			fn(color.RGBA{R: scaleChannel(rStart, rDelta, done), G: scaleChannel(gStart, gDelta, done),
+				B: scaleChannel(bStart, bDelta, done), A: scaleChannel(aStart, aDelta, done)})
 		}}
 }
 
@@ -34,10 +43,13 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 // the specified Duration. The content of fn should apply the position value to an object for the change
 // to be visible. You should call Start() on the returned animation to start it.
 func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
+	xDelta := float32(stop.X - start.X)
+	yDelta := float32(stop.Y - start.Y)
+
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			fn(fyne.NewPos(scaleInt(start.X, stop.X, done), scaleInt(start.Y, stop.Y, done)))
+			fn(fyne.NewPos(scaleInt(start.X, xDelta, done), scaleInt(start.Y, yDelta, done)))
 		}}
 }
 
@@ -45,21 +57,20 @@ func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fy
 // the specified Duration. The content of fn should apply the size value to an object for the change
 // to be visible. You should call Start() on the returned animation to start it.
 func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
+	widthDelta := float32(stop.Width - start.Width)
+	heightDelta := float32(stop.Height - start.Height)
+
 	return &fyne.Animation{
 		Duration: d,
 		Tick: func(done float32) {
-			fn(fyne.NewSize(scaleInt(start.Width, stop.Width, done), scaleInt(start.Height, stop.Height, done)))
+			fn(fyne.NewSize(scaleInt(start.Width, widthDelta, done), scaleInt(start.Height, heightDelta, done)))
 		}}
 }
 
-func scaleColor(start uint32, end uint32, done float32) uint8 {
-	diff := int(end) - int(start)
-	shift := int(float32(diff) * done)
-
-	return uint8((int(start) + shift) >> 8)
+func scaleChannel(start int, diff, done float32) uint8 {
+	return uint8(start + int(diff*done))
 }
 
-func scaleInt(start, end int, done float32) int {
-	shift := int(float32(end-start) * done)
-	return start + shift
+func scaleInt(start int, delta, done float32) int {
+	return start + int(delta*done)
 }
