@@ -29,7 +29,7 @@ type gLDriver struct {
 	done       chan interface{}
 	drawDone   chan interface{}
 
-	animation  *animation.Runner
+	animation *animation.Runner
 }
 
 func (d *gLDriver) RenderedTextSize(text string, size int, style fyne.TextStyle) fyne.Size {
