@@ -22,14 +22,14 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 	r1, g1, b1, a1 := start.RGBA()
 	r2, g2, b2, a2 := stop.RGBA()
 
-	rStart := uint8(r1 >> 8)
-	gStart := uint8(g1 >> 8)
-	bStart := uint8(b1 >> 8)
-	aStart := uint8(a1 >> 8)
-	rDelta := float32(int(r2>>8) - int(rStart))
-	gDelta := float32(int(g2>>8) - int(gStart))
-	bDelta := float32(int(b2>>8) - int(bStart))
-	aDelta := float32(int(a2>>8) - int(aStart))
+	rStart := int(r1 >> 8)
+	gStart := int(g1 >> 8)
+	bStart := int(b1 >> 8)
+	aStart := int(a1 >> 8)
+	rDelta := float32(int(r2>>8) - rStart)
+	gDelta := float32(int(g2>>8) - gStart)
+	bDelta := float32(int(b2>>8) - bStart)
+	aDelta := float32(int(a2>>8) - aStart)
 
 	return &fyne.Animation{
 		Duration: d,
@@ -43,8 +43,8 @@ func NewColorRGBAAnimation(start, stop color.Color, d time.Duration, fn func(col
 // the specified Duration. The content of fn should apply the position value to an object for the change
 // to be visible. You should call Start() on the returned animation to start it.
 func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fyne.Position)) *fyne.Animation {
-	xDelta := stop.X - start.X
-	yDelta := stop.Y - start.Y
+	xDelta := float32(stop.X - start.X)
+	yDelta := float32(stop.Y - start.Y)
 
 	return &fyne.Animation{
 		Duration: d,
@@ -57,8 +57,8 @@ func NewPositionAnimation(start, stop fyne.Position, d time.Duration, fn func(fy
 // the specified Duration. The content of fn should apply the size value to an object for the change
 // to be visible. You should call Start() on the returned animation to start it.
 func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)) *fyne.Animation {
-	widthDelta := stop.Width - start.Width
-	heightDelta := stop.Height - start.Height
+	widthDelta := float32(stop.Width - start.Width)
+	heightDelta := float32(stop.Height - start.Height)
 
 	return &fyne.Animation{
 		Duration: d,
@@ -67,11 +67,10 @@ func NewSizeAnimation(start, stop fyne.Size, d time.Duration, fn func(fyne.Size)
 		}}
 }
 
-func scaleChannel(start uint8, diff, done float32) uint8 {
-	return uint8(int(start) + int(diff*done))
+func scaleChannel(start int, diff, done float32) uint8 {
+	return uint8(start + int(diff*done))
 }
 
-func scaleInt(start, delta int, done float32) int {
-	shift := int(float32(delta) * done)
-	return start + shift
+func scaleInt(start int, delta, done float32) int {
+	return start + int(delta*done)
 }
