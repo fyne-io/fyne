@@ -15,7 +15,9 @@ type DataItem interface {
 	RemoveListener(DataListener)
 }
 
+// DataItemFromVariable is used by any binding that is backed by a source variable.
 type DataItemFromVariable interface {
+	// UpdateFromVariable should be called if this binding's value has been directly edited outside of the binding API.
 	UpdateFromVariable()
 }
 
