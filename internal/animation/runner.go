@@ -7,11 +7,13 @@ import (
 	"fyne.io/fyne"
 )
 
+// Runner is the main driver for animations package
 type Runner struct {
 	animationMutex sync.RWMutex
 	animations     []*anim
 }
 
+// Start will register the passed application and initiate its ticking.
 func (r *Runner) Start(a *fyne.Animation) {
 	r.animationMutex.Lock()
 	defer r.animationMutex.Unlock()
@@ -23,6 +25,7 @@ func (r *Runner) Start(a *fyne.Animation) {
 	}
 }
 
+// Stop causes an animation to stop ticking (if it was still running) and removes it from the runner.
 func (r *Runner) Stop(a *fyne.Animation) {
 	r.animationMutex.Lock()
 	defer r.animationMutex.Unlock()
