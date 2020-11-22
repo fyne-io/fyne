@@ -1,7 +1,4 @@
-// +build !ci
-// +build !mobile
-
-package glfw
+package animation
 
 import (
 	"testing"
@@ -13,6 +10,7 @@ import (
 )
 
 func TestGLDriver_StartAnimation(t *testing.T) {
+	run := &Runner{}
 	ticks := 0
 	a := &fyne.Animation{
 		Duration: time.Millisecond * 100,
@@ -20,11 +18,12 @@ func TestGLDriver_StartAnimation(t *testing.T) {
 			ticks++
 		}}
 
-	a.Start()
+	run.Start(a)
 	assert.Greater(t, ticks, 0)
 }
 
 func TestGLDriver_StopAnimation(t *testing.T) {
+	run := &Runner{}
 	ticks := 0
 	a := &fyne.Animation{
 		Duration: time.Second * 10,
@@ -32,8 +31,8 @@ func TestGLDriver_StopAnimation(t *testing.T) {
 			ticks++
 		}}
 
-	a.Start()
-	a.Stop()
+	run.Start(a)
+	run.Stop(a)
 	assert.Greater(t, ticks, 0)
-	assert.Zero(t, len(d.(*gLDriver).animations))
+	assert.Zero(t, len(run.animations))
 }

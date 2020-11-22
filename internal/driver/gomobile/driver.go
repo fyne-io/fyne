@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/internal"
+	"fyne.io/fyne/internal/animation"
 	"fyne.io/fyne/internal/driver"
 	"fyne.io/fyne/internal/painter"
 	pgl "fyne.io/fyne/internal/painter/gl"
@@ -29,8 +30,9 @@ type mobileDriver struct {
 	app   app.App
 	glctx gl.Context
 
-	windows []fyne.Window
-	device  *device
+	windows   []fyne.Window
+	device    *device
+	animation *animation.Runner
 }
 
 // Declare conformity with Driver
@@ -177,14 +179,6 @@ func (d *mobileDriver) Run() {
 			}
 		}
 	})
-}
-
-func (d *mobileDriver) StartAnimation(a *fyne.Animation) {
-	// TODO implement mobile animations
-}
-
-func (d *mobileDriver) StopAnimation(a *fyne.Animation) {
-	// TODO implement mobile animations
 }
 
 func (d *mobileDriver) onStart() {
@@ -418,5 +412,7 @@ func (d *mobileDriver) Device() fyne.Device {
 // NewGoMobileDriver sets up a new Driver instance implemented using the Go
 // Mobile extension and OpenGL bindings.
 func NewGoMobileDriver() fyne.Driver {
-	return new(mobileDriver)
+	d := new(mobileDriver)
+	d.animation = &animation.Runner{}
+	return d
 }
