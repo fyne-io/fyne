@@ -3,6 +3,15 @@
 This file lists the main changes with each version of the Fyne toolkit.
 More detailed release notes can be found on the [releases page](https://github.com/fyne-io/fyne/releases). 
 
+## 1.4.2 - Ongoing
+
+### Fixed
+
+* [fyne-cli] Android: allow to specify an inline password for the keystore
+* Fixed Card widget MinSize (#1581)
+* Fix missing release tag to enable BuildRelease in Settings.BuildType()
+
+
 ## 1.4.1 - 20 November 2020
 
 ### Changed
