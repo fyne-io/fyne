@@ -30,4 +30,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
-replace github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3 => github.com/fyne-io/glfw/v3.3/glfw v0.0.0-20201114140358-a39598fbf952
+replace github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3 => github.com/fyne-io/glfw/v3.3/glfw v0.0.0-20201123143003-f2279069162d
