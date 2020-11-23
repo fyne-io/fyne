@@ -68,6 +68,9 @@ type Entry struct {
 
 	// ActionItem is a small item which is displayed at the outer right of the entry (like a password revealer)
 	ActionItem fyne.CanvasObject
+
+	// EventConsumer is a consumer of touch events.
+	EventConsumer fyne.EventConsumer
 }
 
 // NewEntry creates a new single line entry widget.
@@ -150,7 +153,7 @@ func (e *Entry) Disabled() bool {
 // DoubleTapped is called when this entry has been double tapped so we should select text below the pointer
 //
 // Implements: fyne.DoubleTappable
-func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
+func (e *Entry) DoubleTapped(pe *fyne.PointEvent) {
 	row := e.textProvider().row(e.CursorRow)
 
 	start, end := getTextWhitespaceRegion(row, e.CursorColumn)
@@ -171,12 +174,19 @@ func (e *Entry) DoubleTapped(_ *fyne.PointEvent) {
 		}
 		e.selecting = true
 	})
+
+	if e.EventConsumer != nil {
+		e.EventConsumer.DoubleTapped(pe)
+	}
 }
 
 // DragEnd is called at end of a drag event. It does nothing.
 //
 // Implements: fyne.Draggable
 func (e *Entry) DragEnd() {
+	if e.EventConsumer != nil {
+		e.EventConsumer.DragEnd()
+	}
 }
 
 // Dragged is called when the pointer moves while a button is held down.
@@ -190,6 +200,9 @@ func (e *Entry) Dragged(d *fyne.DragEvent) {
 		e.selecting = true
 	}
 	e.updateMousePointer(&d.PointEvent, false)
+	if e.EventConsumer != nil {
+		e.EventConsumer.Dragged(d)
+	}
 }
 
 // Enable this widget, updating any style or features appropriately.
@@ -410,11 +423,14 @@ func (e *Entry) SetText(text string) {
 // Tapped is called when this entry has been tapped so we should update the cursor position.
 //
 // Implements: fyne.Tappable
-func (e *Entry) Tapped(ev *fyne.PointEvent) {
+func (e *Entry) Tapped(pe *fyne.PointEvent) {
 	if fyne.CurrentDevice().IsMobile() && e.selecting {
 		e.selecting = false
 	}
-	e.updateMousePointer(ev, false)
+	e.updateMousePointer(pe, false)
+	if e.EventConsumer != nil {
+		e.EventConsumer.Tapped(pe)
+	}
 }
 
 // TappedSecondary is called when right or alternative tap is invoked.
@@ -456,6 +472,9 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	}
 	e.popUp = newPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
+	if e.EventConsumer != nil {
+		e.EventConsumer.TappedSecondary(pe)
+	}
 }
 
 // TypedKey receives key input events when the Entry widget is focused.
