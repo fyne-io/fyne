@@ -29,3 +29,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
+
+replace github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200625191551-73d3c3675aa3 => github.com/fyne-io/glfw/v3.3/glfw v0.0.0-20201114140358-a39598fbf952

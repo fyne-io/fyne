@@ -4,12 +4,15 @@ import (
 	"image/color"
 	"math"
 	"strings"
+	"time"
 	"unicode"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/driver/mobile"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/theme"
 )
 
@@ -41,6 +44,8 @@ type Entry struct {
 	MultiLine bool
 	Wrapping  fyne.TextWrap
 
+	// Set a validator that this entry will check against
+	// Since: 1.4
 	Validator           fyne.StringValidator
 	validationStatus    *validationStatus
 	onValidationChanged func(error)
@@ -75,6 +80,23 @@ func NewEntry() *Entry {
 	e := &Entry{}
 	e.ExtendBaseWidget(e)
 	return e
+}
+
+// NewEntryWithData returns an Entry widget connected to the specified data source.
+func NewEntryWithData(data binding.String) *Entry {
+	entry := NewEntry()
+
+	data.AddListener(binding.NewDataListener(func() {
+		entry.Text = data.Get()
+		if cache.IsRendered(entry) {
+			entry.Refresh()
+		}
+	}))
+	entry.OnChanged = func(s string) {
+		data.Set(s)
+	}
+
+	return entry
 }
 
 // NewMultiLineEntry creates a new entry that allows multiple lines
@@ -121,7 +143,7 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, e.ActionItem)
 	}
 
-	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, objects, e}
+	return &entryRenderer{line, cursor, []fyne.CanvasObject{}, nil, objects, e}
 }
 
 // Cursor returns the cursor type of this widget
@@ -423,6 +445,10 @@ func (e *Entry) Tapped(ev *fyne.PointEvent) {
 //
 // Implements: fyne.SecondaryTappable
 func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
+	if e.Disabled() && e.concealed() {
+		return // no popup options for a disabled concealed field
+	}
+
 	cutItem := fyne.NewMenuItem("Cut", func() {
 		clipboard := fyne.CurrentApp().Driver().AllWindows()[0].Clipboard()
 		e.cutToClipboard(clipboard)
@@ -442,10 +468,6 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	popUpPos := entryPos.Add(fyne.NewPos(pe.Position.X, pe.Position.Y))
 	c := fyne.CurrentApp().Driver().CanvasForObject(super)
 
-	if e.Disabled() && e.concealed() {
-		return // no popup options for a disabled concealed field
-	}
-
 	var menu *fyne.Menu
 	if e.Disabled() {
 		menu = fyne.NewMenu("", copyItem, selectAllItem)
@@ -454,6 +476,7 @@ func (e *Entry) TappedSecondary(pe *fyne.PointEvent) {
 	} else {
 		menu = fyne.NewMenu("", cutItem, copyItem, pasteItem, selectAllItem)
 	}
+
 	e.popUp = newPopUpMenu(menu, c)
 	e.popUp.ShowAtPosition(popUpPos)
 }
@@ -1007,6 +1030,7 @@ var _ fyne.WidgetRenderer = (*entryRenderer)(nil)
 type entryRenderer struct {
 	line, cursor *canvas.Rectangle
 	selection    []fyne.CanvasObject
+	cursorAnim   *fyne.Animation
 
 	objects []fyne.CanvasObject
 	entry   *Entry
@@ -1104,7 +1128,15 @@ func (r *entryRenderer) Refresh() {
 	if focused {
 		r.cursor.Show()
 		r.line.FillColor = theme.FocusColor()
+		if r.cursorAnim == nil {
+			r.cursorAnim = makeCursorAnimation(r.cursor)
+			r.cursorAnim.Start()
+		}
 	} else {
+		if r.cursorAnim != nil {
+			r.cursorAnim.Stop()
+			r.cursorAnim = nil
+		}
 		r.cursor.Hide()
 		if r.entry.Disabled() {
 			r.line.FillColor = theme.DisabledTextColor()
@@ -1359,4 +1391,18 @@ func getTextWhitespaceRegion(row []rune, col int) (int, int) {
 		end += col // otherwise include the text slice position
 	}
 	return start, end
+}
+
+func makeCursorAnimation(cursor *canvas.Rectangle) *fyne.Animation {
+	cursorOpaque := theme.FocusColor()
+	r, g, b, _ := theme.FocusColor().RGBA()
+	cursorDim := color.NRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 0x16}
+	anim := canvas.NewColorRGBAAnimation(cursorDim, cursorOpaque, time.Second/2, func(c color.Color) {
+		cursor.FillColor = c
+		cursor.Refresh()
+	})
+	anim.Repeat = true
+	anim.AutoReverse = true
+
+	return anim
 }

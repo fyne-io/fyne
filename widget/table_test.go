@@ -2,10 +2,13 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/test"
+	"fyne.io/fyne/theme"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,14 +40,14 @@ func TestTable_Cache(t *testing.T) {
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 9, len(cellRenderer.Objects()))
+	assert.Equal(t, 6, len(cellRenderer.Objects()))
 	assert.Equal(t, "Cell 0, 0", cellRenderer.Objects()[0].(*Label).Text)
 	objRef := cellRenderer.Objects()[0].(*Label)
 
 	test.Scroll(c, fyne.NewPos(10, 10), -150, -150)
 	assert.Equal(t, 0, renderer.scroll.Offset.Y) // we didn't scroll as data shorter
 	assert.Equal(t, 150, renderer.scroll.Offset.X)
-	assert.Equal(t, 9, len(cellRenderer.Objects()))
+	assert.Equal(t, 6, len(cellRenderer.Objects()))
 	assert.Equal(t, "Cell 0, 1", cellRenderer.Objects()[0].(*Label).Text)
 	assert.NotEqual(t, objRef, cellRenderer.Objects()[0].(*Label)) // we want to re-use visible cells without rewriting them
 }
@@ -62,15 +65,40 @@ func TestTable_ChangeTheme(t *testing.T) {
 			text := fmt.Sprintf("Cell %d, %d", id.Row, id.Col)
 			c.(*Label).SetText(text)
 		})
+	content := test.WidgetRenderer(test.WidgetRenderer(table).(*tableRenderer).scroll.Content.(*tableCells)).(*tableCellsRenderer)
 	w := test.NewWindow(table)
 	defer w.Close()
 	w.Resize(fyne.NewSize(180, 180))
 	test.AssertImageMatches(t, "table/theme_initial.png", w.Canvas().Capture())
+	assert.Equal(t, "Cell 0, 0", content.Objects()[0].(*Label).Text)
+	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
 
 	test.WithTestTheme(t, func() {
 		test.WidgetRenderer(table).Refresh()
 		test.AssertImageMatches(t, "table/theme_changed.png", w.Canvas().Capture())
 	})
+	assert.Equal(t, NewLabel("placeholder").MinSize(), content.Objects()[0].(*Label).Size())
+}
+
+func TestTable_Filled(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			r := canvas.NewRectangle(color.Black)
+			r.SetMinSize(fyne.NewSize(30, 20))
+			r.Resize(fyne.NewSize(30, 20))
+			return r
+		},
+		func(TableCellID, fyne.CanvasObject) {})
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(180, 180))
+	test.AssertImageMatches(t, "table/filled.png", w.Canvas().Capture())
 }
 
 func TestTable_Unselect(t *testing.T) {
@@ -159,50 +187,35 @@ func TestTable_Selection(t *testing.T) {
 				<widget pos="4,4" size="172x172" type="*widget.Table">
 					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
 						<widget size="509x189" type="*widget.tableCells">
-							<widget pos="3,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 0</text>
+							<widget pos="4,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 0</text>
 							</widget>
-							<widget pos="105,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 1</text>
+							<widget pos="106,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 1</text>
 							</widget>
-							<widget pos="207,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 2</text>
+							<widget pos="4,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 0</text>
 							</widget>
-							<widget pos="3,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 0</text>
+							<widget pos="106,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 1</text>
 							</widget>
-							<widget pos="105,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 1</text>
+							<widget pos="4,80" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 2, 0</text>
 							</widget>
-							<widget pos="207,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 2</text>
+							<widget pos="106,80" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 2, 1</text>
 							</widget>
-							<widget pos="3,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 0</text>
+							<widget pos="4,118" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 3, 0</text>
 							</widget>
-							<widget pos="105,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 1</text>
+							<widget pos="106,118" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 3, 1</text>
 							</widget>
-							<widget pos="207,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 2</text>
+							<widget pos="4,156" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 4, 0</text>
 							</widget>
-							<widget pos="3,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 0</text>
-							</widget>
-							<widget pos="105,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 1</text>
-							</widget>
-							<widget pos="207,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 2</text>
-							</widget>
-							<widget pos="3,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 0</text>
-							</widget>
-							<widget pos="105,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 1</text>
-							</widget>
-							<widget pos="207,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 2</text>
+							<widget pos="106,156" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 4, 1</text>
 							</widget>
 						</widget>
 						<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
@@ -236,9 +249,6 @@ func TestTable_Selection(t *testing.T) {
 					</widget>
 					<widget pos="4,155" size="168x1" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="168x1"/>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
 					</widget>
 				</widget>
 			</content>
@@ -280,50 +290,35 @@ func TestTable_Select(t *testing.T) {
 				<widget pos="4,4" size="172x172" type="*widget.Table">
 					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
 						<widget size="509x189" type="*widget.tableCells">
-							<widget pos="3,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 0</text>
+							<widget pos="4,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 0</text>
 							</widget>
-							<widget pos="105,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 1</text>
+							<widget pos="106,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 1</text>
 							</widget>
-							<widget pos="207,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 2</text>
+							<widget pos="4,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 0</text>
 							</widget>
-							<widget pos="3,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 0</text>
+							<widget pos="106,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 1</text>
 							</widget>
-							<widget pos="105,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 1</text>
+							<widget pos="4,80" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 2, 0</text>
 							</widget>
-							<widget pos="207,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 2</text>
+							<widget pos="106,80" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 2, 1</text>
 							</widget>
-							<widget pos="3,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 0</text>
+							<widget pos="4,118" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 3, 0</text>
 							</widget>
-							<widget pos="105,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 1</text>
+							<widget pos="106,118" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 3, 1</text>
 							</widget>
-							<widget pos="207,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 2</text>
+							<widget pos="4,156" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 4, 0</text>
 							</widget>
-							<widget pos="3,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 0</text>
-							</widget>
-							<widget pos="105,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 1</text>
-							</widget>
-							<widget pos="207,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 2</text>
-							</widget>
-							<widget pos="3,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 0</text>
-							</widget>
-							<widget pos="105,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 1</text>
-							</widget>
-							<widget pos="207,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 2</text>
+							<widget pos="106,156" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 4, 1</text>
 							</widget>
 						</widget>
 						<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
@@ -358,9 +353,6 @@ func TestTable_Select(t *testing.T) {
 					<widget pos="4,155" size="168x1" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="168x1"/>
 					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
-					</widget>
 				</widget>
 			</content>
 		</canvas>
@@ -377,50 +369,35 @@ func TestTable_Select(t *testing.T) {
 				<widget pos="4,4" size="172x172" type="*widget.Table">
 					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
 						<widget pos="-239,-21" size="509x189" type="*widget.tableCells">
-							<widget pos="207,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 2</text>
+							<widget pos="208,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 2</text>
 							</widget>
-							<widget pos="309,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 3</text>
+							<widget pos="310,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 3</text>
 							</widget>
-							<widget pos="411,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 4</text>
+							<widget pos="208,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 2</text>
 							</widget>
-							<widget pos="207,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 2</text>
+							<widget pos="310,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 3</text>
 							</widget>
-							<widget pos="309,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 3</text>
+							<widget pos="208,80" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 2, 2</text>
 							</widget>
-							<widget pos="411,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 4</text>
+							<widget pos="310,80" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 2, 3</text>
 							</widget>
-							<widget pos="207,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 2</text>
+							<widget pos="208,118" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 3, 2</text>
 							</widget>
-							<widget pos="309,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 3</text>
+							<widget pos="310,118" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 3, 3</text>
 							</widget>
-							<widget pos="411,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 4</text>
+							<widget pos="208,156" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 4, 2</text>
 							</widget>
-							<widget pos="207,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 2</text>
-							</widget>
-							<widget pos="309,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 3</text>
-							</widget>
-							<widget pos="411,117" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 3, 4</text>
-							</widget>
-							<widget pos="207,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 2</text>
-							</widget>
-							<widget pos="309,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 3</text>
-							</widget>
-							<widget pos="411,155" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 4, 4</text>
+							<widget pos="310,156" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 4, 3</text>
 							</widget>
 						</widget>
 						<widget pos="162,0" size="6x168" type="*widget.scrollBarArea">
@@ -458,13 +435,43 @@ func TestTable_Select(t *testing.T) {
 					<widget pos="4,134" size="168x1" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="168x1"/>
 					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
-					</widget>
 				</widget>
 			</content>
 		</canvas>
 	`, w.Canvas())
+}
+
+func TestTable_SetColumnWidth(t *testing.T) {
+	app := test.NewApp()
+	defer test.NewApp()
+	app.Settings().SetTheme(theme.LightTheme())
+
+	table := NewTable(
+		func() (int, int) { return 5, 5 },
+		func() fyne.CanvasObject {
+			return NewLabel("placeholder")
+		},
+		func(id TableCellID, obj fyne.CanvasObject) {
+			if id.Col == 0 {
+				obj.(*Label).Text = "p"
+			} else {
+				obj.(*Label).Text = "placeholder"
+			}
+		})
+	table.SetColumnWidth(0, 16)
+	table.Resize(fyne.NewSize(120, 120))
+	table.Select(TableCellID{1, 0})
+
+	renderer := test.WidgetRenderer(table).(*tableRenderer)
+	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
+	cellRenderer.Refresh()
+	assert.Equal(t, 10, len(cellRenderer.Objects()))
+	assert.Equal(t, 16, cellRenderer.(*tableCellsRenderer).Objects()[0].Size().Width)
+
+	w := test.NewWindow(table)
+	defer w.Close()
+	w.Resize(fyne.NewSize(120+(2*theme.Padding()), 120+(2*theme.Padding())))
+	test.AssertImageMatches(t, "table/col_size.png", w.Canvas().Capture())
 }
 
 func TestTable_ShowVisible(t *testing.T) {
@@ -479,5 +486,5 @@ func TestTable_ShowVisible(t *testing.T) {
 	renderer := test.WidgetRenderer(table).(*tableRenderer)
 	cellRenderer := test.WidgetRenderer(renderer.scroll.Content.(*tableCells))
 	cellRenderer.Refresh()
-	assert.Equal(t, 15, len(cellRenderer.Objects()))
+	assert.Equal(t, 10, len(cellRenderer.Objects()))
 }

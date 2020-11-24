@@ -34,7 +34,7 @@ func listDrives() []string {
 	var drives []string
 	mask := driveMask()
 
-	for i := 0; i < 24; i++ {
+	for i := 0; i < 26; i++ {
 		if mask&1 == 1 {
 			letter := string('A' + rune(i))
 			drives = append(drives, letter+":")

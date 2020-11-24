@@ -167,6 +167,7 @@ func main() {
 	bundleIcon("media-replay", f)
 	bundleIcon("media-skip-next", f)
 	bundleIcon("media-skip-previous", f)
+	bundleIcon("media-stop", f)
 
 	bundleIcon("view-fullscreen", f)
 	bundleIcon("view-refresh", f)
@@ -184,6 +185,7 @@ func main() {
 	bundleIcon("download", f)
 	bundleIcon("computer", f)
 	bundleIcon("storage", f)
+	bundleIcon("upload", f)
 
 	f.Close()
 }

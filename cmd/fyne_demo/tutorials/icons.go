@@ -95,6 +95,10 @@ var icons = []struct {
 	{"RadioButtonIcon", theme.RadioButtonIcon()},
 	{"RadioButtonCheckedIcon", theme.RadioButtonCheckedIcon()},
 
+	{"ColorAchromaticIcon", theme.ColorAchromaticIcon()},
+	{"ColorChromaticIcon", theme.ColorChromaticIcon()},
+	{"ColorPaletteIcon", theme.ColorPaletteIcon()},
+
 	{"ContentAddIcon", theme.ContentAddIcon()},
 	{"ContentRemoveIcon", theme.ContentRemoveIcon()},
 	{"ContentClearIcon", theme.ContentClearIcon()},
@@ -105,9 +109,11 @@ var icons = []struct {
 	{"ContentUndoIcon", theme.ContentUndoIcon()},
 
 	{"InfoIcon", theme.InfoIcon()},
+	{"ErrorIcon", theme.ErrorIcon()},
 	{"QuestionIcon", theme.QuestionIcon()},
 	{"WarningIcon", theme.WarningIcon()},
 
+	{"DocumentIcon", theme.DocumentIcon()},
 	{"DocumentCreateIcon", theme.DocumentCreateIcon()},
 	{"DocumentPrintIcon", theme.DocumentPrintIcon()},
 	{"DocumentSaveIcon", theme.DocumentSaveIcon()},
@@ -121,9 +127,14 @@ var icons = []struct {
 	{"FolderIcon", theme.FolderIcon()},
 	{"FolderNewIcon", theme.FolderNewIcon()},
 	{"FolderOpenIcon", theme.FolderOpenIcon()},
+	{"ComputerIcon", theme.ComputerIcon()},
 	{"HomeIcon", theme.HomeIcon()},
 	{"HelpIcon", theme.HelpIcon()},
+	{"HistoryIcon", theme.HistoryIcon()},
 	{"SettingsIcon", theme.SettingsIcon()},
+	{"StorageIcon", theme.StorageIcon()},
+	{"DownloadIcon", theme.DownloadIcon()},
+	{"UploadIcon", theme.UploadIcon()},
 
 	{"ViewFullScreenIcon", theme.ViewFullScreenIcon()},
 	{"ViewRestoreIcon", theme.ViewRestoreIcon()},
@@ -140,6 +151,8 @@ var icons = []struct {
 	{"NavigateBackIcon", theme.NavigateBackIcon()},
 	{"NavigateNextIcon", theme.NavigateNextIcon()},
 
+	{"Menu", theme.MenuIcon()},
+	{"MenuExpand", theme.MenuExpandIcon()},
 	{"MenuDropDown", theme.MenuDropDownIcon()},
 	{"MenuDropUp", theme.MenuDropUpIcon()},
 
@@ -154,6 +167,7 @@ var icons = []struct {
 	{"MediaFastRewind", theme.MediaFastRewindIcon()},
 	{"MediaPause", theme.MediaPauseIcon()},
 	{"MediaPlay", theme.MediaPlayIcon()},
+	{"MediaStop", theme.MediaStopIcon()},
 	{"MediaRecord", theme.MediaRecordIcon()},
 	{"MediaReplay", theme.MediaReplayIcon()},
 	{"MediaSkipNext", theme.MediaSkipNextIcon()},

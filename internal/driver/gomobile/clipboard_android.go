@@ -22,6 +22,10 @@ func (c *mobileClipboard) Content() string {
 	content := ""
 	app.RunOnJVM(func(vm, env, ctx uintptr) error {
 		chars := C.getClipboardContent(C.uintptr_t(vm), C.uintptr_t(env), C.uintptr_t(ctx))
+		if chars == nil {
+			return nil
+		}
+
 		content = C.GoString(chars)
 		C.free(unsafe.Pointer(chars))
 		return nil

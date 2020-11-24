@@ -1,6 +1,7 @@
 package widget_test
 
 import (
+	"image/color"
 	"testing"
 
 	"fyne.io/fyne"
@@ -47,20 +48,20 @@ func TestCard_Layout(t *testing.T) {
 			icon:     nil,
 			content:  nil,
 			want: `
-				<canvas padded size="88x54">
+				<canvas padded size="88x62">
 					<content>
-						<widget pos="4,4" size="80x46" type="*widget.Card">
-							<widget pos="2,2" size="76x42" type="*widget.Shadow">
+						<widget pos="4,4" size="80x54" type="*widget.Card">
+							<widget pos="2,2" size="76x50" type="*widget.Shadow">
 								<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
 								<linearGradient endColor="shadow" pos="0,-1" size="76x1"/>
 								<radialGradient centerOffset="-0.5,0.5" pos="76,-1" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" pos="76,0" size="1x42" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="76,42" size="1x1" startColor="shadow"/>
-								<linearGradient pos="0,42" size="76x1" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-1,42" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x42"/>
+								<linearGradient angle="270" pos="76,0" size="1x50" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="76,50" size="1x1" startColor="shadow"/>
+								<linearGradient pos="0,50" size="76x1" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-1,50" size="1x1" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x50"/>
 							</widget>
-							<text bold pos="10,6" size="60x34" textSize="23">Title</text>
+							<text bold pos="10,10" size="60x34" textSize="23">Title</text>
 							<text size="0x0"></text>
 						</widget>
 					</content>
@@ -73,21 +74,21 @@ func TestCard_Layout(t *testing.T) {
 			icon:     nil,
 			content:  nil,
 			want: `
-				<canvas padded size="88x41">
+				<canvas padded size="88x49">
 					<content>
-						<widget pos="4,4" size="80x33" type="*widget.Card">
-							<widget pos="2,2" size="76x29" type="*widget.Shadow">
+						<widget pos="4,4" size="80x41" type="*widget.Card">
+							<widget pos="2,2" size="76x37" type="*widget.Shadow">
 								<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
 								<linearGradient endColor="shadow" pos="0,-1" size="76x1"/>
 								<radialGradient centerOffset="-0.5,0.5" pos="76,-1" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" pos="76,0" size="1x29" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="76,29" size="1x1" startColor="shadow"/>
-								<linearGradient pos="0,29" size="76x1" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-1,29" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x29"/>
+								<linearGradient angle="270" pos="76,0" size="1x37" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="76,37" size="1x1" startColor="shadow"/>
+								<linearGradient pos="0,37" size="76x1" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-1,37" size="1x1" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x37"/>
 							</widget>
 							<text bold size="0x0" textSize="23"></text>
-							<text pos="10,6" size="60x21">Subtitle</text>
+							<text pos="10,10" size="60x21">Subtitle</text>
 						</widget>
 					</content>
 				</canvas>
@@ -99,21 +100,21 @@ func TestCard_Layout(t *testing.T) {
 			icon:     nil,
 			content:  nil,
 			want: `
-				<canvas padded size="88x83">
+				<canvas padded size="88x87">
 					<content>
-						<widget pos="4,4" size="80x75" type="*widget.Card">
-							<widget pos="2,2" size="76x71" type="*widget.Shadow">
+						<widget pos="4,4" size="80x79" type="*widget.Card">
+							<widget pos="2,2" size="76x75" type="*widget.Shadow">
 								<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
 								<linearGradient endColor="shadow" pos="0,-1" size="76x1"/>
 								<radialGradient centerOffset="-0.5,0.5" pos="76,-1" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" pos="76,0" size="1x71" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="76,71" size="1x1" startColor="shadow"/>
-								<linearGradient pos="0,71" size="76x1" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-1,71" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x71"/>
+								<linearGradient angle="270" pos="76,0" size="1x75" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="76,75" size="1x1" startColor="shadow"/>
+								<linearGradient pos="0,75" size="76x1" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-1,75" size="1x1" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x75"/>
 							</widget>
-							<text bold pos="10,6" size="60x34" textSize="23">Title</text>
-							<text pos="10,44" size="60x21">Subtitle</text>
+							<text bold pos="10,10" size="60x34" textSize="23">Title</text>
+							<text pos="10,48" size="60x21">Subtitle</text>
 						</widget>
 					</content>
 				</canvas>
@@ -125,21 +126,21 @@ func TestCard_Layout(t *testing.T) {
 			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
 			content:  nil,
 			want: `
-				<canvas padded size="88x211">
+				<canvas padded size="88x215">
 					<content>
-						<widget pos="4,4" size="80x203" type="*widget.Card">
-							<widget pos="2,2" size="76x199" type="*widget.Shadow">
+						<widget pos="4,4" size="80x207" type="*widget.Card">
+							<widget pos="2,2" size="76x203" type="*widget.Shadow">
 								<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
 								<linearGradient endColor="shadow" pos="0,-1" size="76x1"/>
 								<radialGradient centerOffset="-0.5,0.5" pos="76,-1" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" pos="76,0" size="1x199" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="76,199" size="1x1" startColor="shadow"/>
-								<linearGradient pos="0,199" size="76x1" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-1,199" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x199"/>
+								<linearGradient angle="270" pos="76,0" size="1x203" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="76,203" size="1x1" startColor="shadow"/>
+								<linearGradient pos="0,203" size="76x1" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-1,203" size="1x1" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x203"/>
 							</widget>
-							<text bold pos="10,134" size="60x34" textSize="23">Title</text>
-							<text pos="10,172" size="60x21">Subtitle</text>
+							<text bold pos="10,138" size="60x34" textSize="23">Title</text>
+							<text pos="10,176" size="60x21">Subtitle</text>
 							<image pos="2,2" rsc="fyneLogo" size="76x128"/>
 						</widget>
 					</content>
@@ -177,26 +178,24 @@ func TestCard_Layout(t *testing.T) {
 			title:    "",
 			subtitle: "",
 			icon:     nil,
-			content:  widget.NewHyperlink("link", nil),
+			content:  newContentRect(),
 			want: `
-				<canvas padded size="88x57">
+				<canvas padded size="88x30">
 					<content>
-						<widget pos="4,4" size="80x49" type="*widget.Card">
-							<widget pos="2,2" size="76x45" type="*widget.Shadow">
+						<widget pos="4,4" size="80x22" type="*widget.Card">
+							<widget pos="2,2" size="76x18" type="*widget.Shadow">
 								<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
 								<linearGradient endColor="shadow" pos="0,-1" size="76x1"/>
 								<radialGradient centerOffset="-0.5,0.5" pos="76,-1" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" pos="76,0" size="1x45" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="76,45" size="1x1" startColor="shadow"/>
-								<linearGradient pos="0,45" size="76x1" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-1,45" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x45"/>
+								<linearGradient angle="270" pos="76,0" size="1x18" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="76,18" size="1x1" startColor="shadow"/>
+								<linearGradient pos="0,18" size="76x1" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-1,18" size="1x1" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x18"/>
 							</widget>
 							<text bold size="0x0" textSize="23"></text>
 							<text size="0x0"></text>
-							<widget pos="6,10" size="68x23" type="*widget.Hyperlink">
-								<text color="hyperlink" pos="4,4" size="60x21">link</text>
-							</widget>
+							<rectangle fillColor="rgba(102,102,102,255)" pos="6,6" size="68x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
 						</widget>
 					</content>
 				</canvas>
@@ -206,26 +205,24 @@ func TestCard_Layout(t *testing.T) {
 			title:    "Hello",
 			subtitle: "",
 			icon:     nil,
-			content:  widget.NewHyperlink("link", nil),
+			content:  newContentRect(),
 			want: `
-				<canvas padded size="93x91">
+				<canvas padded size="93x80">
 					<content>
-						<widget pos="4,4" size="85x83" type="*widget.Card">
-							<widget pos="2,2" size="81x79" type="*widget.Shadow">
+						<widget pos="4,4" size="85x72" type="*widget.Card">
+							<widget pos="2,2" size="81x68" type="*widget.Shadow">
 								<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
 								<linearGradient endColor="shadow" pos="0,-1" size="81x1"/>
 								<radialGradient centerOffset="-0.5,0.5" pos="81,-1" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" pos="81,0" size="1x79" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="81,79" size="1x1" startColor="shadow"/>
-								<linearGradient pos="0,79" size="81x1" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-1,79" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x79"/>
+								<linearGradient angle="270" pos="81,0" size="1x68" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="81,68" size="1x1" startColor="shadow"/>
+								<linearGradient pos="0,68" size="81x1" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-1,68" size="1x1" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x68"/>
 							</widget>
-							<text bold pos="10,6" size="65x34" textSize="23">Hello</text>
+							<text bold pos="10,10" size="65x34" textSize="23">Hello</text>
 							<text size="0x0"></text>
-							<widget pos="6,48" size="73x19" type="*widget.Hyperlink">
-								<text color="hyperlink" pos="4,4" size="65x21">link</text>
-							</widget>
+							<rectangle fillColor="rgba(102,102,102,255)" pos="6,56" size="73x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
 						</widget>
 					</content>
 				</canvas>
@@ -235,27 +232,25 @@ func TestCard_Layout(t *testing.T) {
 			title:    "",
 			subtitle: "",
 			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
-			content:  widget.NewHyperlink("link", nil),
+			content:  newContentRect(),
 			want: `
-				<canvas padded size="88x185">
+				<canvas padded size="88x158">
 					<content>
-						<widget pos="4,4" size="80x177" type="*widget.Card">
-							<widget pos="2,2" size="76x173" type="*widget.Shadow">
+						<widget pos="4,4" size="80x150" type="*widget.Card">
+							<widget pos="2,2" size="76x146" type="*widget.Shadow">
 								<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
 								<linearGradient endColor="shadow" pos="0,-1" size="76x1"/>
 								<radialGradient centerOffset="-0.5,0.5" pos="76,-1" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" pos="76,0" size="1x173" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="76,173" size="1x1" startColor="shadow"/>
-								<linearGradient pos="0,173" size="76x1" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-1,173" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x173"/>
+								<linearGradient angle="270" pos="76,0" size="1x146" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="76,146" size="1x1" startColor="shadow"/>
+								<linearGradient pos="0,146" size="76x1" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-1,146" size="1x1" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x146"/>
 							</widget>
 							<text bold size="0x0" textSize="23"></text>
 							<text size="0x0"></text>
 							<image pos="2,2" rsc="fyneLogo" size="76x128"/>
-							<widget pos="6,138" size="68x23" type="*widget.Hyperlink">
-								<text color="hyperlink" pos="4,4" size="60x21">link</text>
-							</widget>
+							<rectangle fillColor="rgba(102,102,102,255)" pos="6,134" size="68x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
 						</widget>
 					</content>
 				</canvas>
@@ -265,27 +260,25 @@ func TestCard_Layout(t *testing.T) {
 			title:    "Longer title",
 			subtitle: "subtitle with length",
 			icon:     canvas.NewImageFromResource(theme.FyneLogo()),
-			content:  widget.NewHyperlink("link", nil),
+			content:  newContentRect(),
 			want: `
-				<canvas padded size="174x240">
+				<canvas padded size="174x233">
 					<content>
-						<widget pos="4,4" size="166x232" type="*widget.Card">
-							<widget pos="2,2" size="162x228" type="*widget.Shadow">
+						<widget pos="4,4" size="166x225" type="*widget.Card">
+							<widget pos="2,2" size="162x221" type="*widget.Shadow">
 								<radialGradient centerOffset="0.5,0.5" pos="-1,-1" size="1x1" startColor="shadow"/>
 								<linearGradient endColor="shadow" pos="0,-1" size="162x1"/>
 								<radialGradient centerOffset="-0.5,0.5" pos="162,-1" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" pos="162,0" size="1x228" startColor="shadow"/>
-								<radialGradient centerOffset="-0.5,-0.5" pos="162,228" size="1x1" startColor="shadow"/>
-								<linearGradient pos="0,228" size="162x1" startColor="shadow"/>
-								<radialGradient centerOffset="0.5,-0.5" pos="-1,228" size="1x1" startColor="shadow"/>
-								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x228"/>
+								<linearGradient angle="270" pos="162,0" size="1x221" startColor="shadow"/>
+								<radialGradient centerOffset="-0.5,-0.5" pos="162,221" size="1x1" startColor="shadow"/>
+								<linearGradient pos="0,221" size="162x1" startColor="shadow"/>
+								<radialGradient centerOffset="0.5,-0.5" pos="-1,221" size="1x1" startColor="shadow"/>
+								<linearGradient angle="270" endColor="shadow" pos="-1,0" size="1x221"/>
 							</widget>
-							<text bold pos="10,134" size="146x34" textSize="23">Longer title</text>
-							<text pos="10,172" size="146x21">subtitle with length</text>
+							<text bold pos="10,138" size="146x34" textSize="23">Longer title</text>
+							<text pos="10,176" size="146x21">subtitle with length</text>
 							<image pos="2,2" rsc="fyneLogo" size="162x128"/>
-							<widget pos="6,201" size="154x15" type="*widget.Hyperlink">
-								<text color="hyperlink" pos="4,4" size="146x21">link</text>
-							</widget>
+							<rectangle fillColor="rgba(102,102,102,255)" pos="6,209" size="154x10" strokeColor="rgba(0,0,0,255)" strokeWidth="2"/>
 						</widget>
 					</content>
 				</canvas>
@@ -303,10 +296,29 @@ func TestCard_Layout(t *testing.T) {
 			window := test.NewWindow(card)
 			size := card.MinSize().Max(fyne.NewSize(80, 0)) // give a little width for image only tests
 			window.Resize(size.Add(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
-
+			if tt.content != nil {
+				assert.Equal(t, 10, tt.content.Size().Height)
+			}
 			test.AssertRendersToMarkup(t, tt.want, window.Canvas())
 
 			window.Close()
 		})
 	}
+}
+
+func TestCard_MinSize(t *testing.T) {
+	content := widget.NewLabel("simple")
+	card := &widget.Card{Content: content}
+
+	inner := card.MinSize().Subtract(fyne.NewSize(theme.Padding()*3, theme.Padding()*3)) // shadow + content pad
+	assert.Equal(t, content.MinSize(), inner)
+}
+
+func newContentRect() *canvas.Rectangle {
+	rect := canvas.NewRectangle(color.Gray{0x66})
+	rect.StrokeColor = color.Black
+	rect.StrokeWidth = 2
+	rect.SetMinSize(fyne.NewSize(10, 10))
+
+	return rect
 }

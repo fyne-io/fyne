@@ -40,17 +40,17 @@ func TestTable_Hovered(t *testing.T) {
 				<widget pos="4,4" size="172x172" type="*widget.Table">
 					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
 						<widget size="203x168" type="*widget.tableCells">
-							<widget pos="3,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 0</text>
+							<widget pos="4,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 0</text>
 							</widget>
-							<widget pos="105,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 1</text>
+							<widget pos="106,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 1</text>
 							</widget>
-							<widget pos="3,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 0</text>
+							<widget pos="4,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 0</text>
 							</widget>
-							<widget pos="105,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 1</text>
+							<widget pos="106,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 1</text>
 							</widget>
 						</widget>
 						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
@@ -66,9 +66,6 @@ func TestTable_Hovered(t *testing.T) {
 					</widget>
 					<widget pos="4,41" size="168x1" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="168x1"/>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="0x0"/>
@@ -100,32 +97,23 @@ func TestTable_Hovered(t *testing.T) {
 				<widget pos="4,4" size="172x172" type="*widget.Table">
 					<widget pos="4,4" size="168x168" type="*widget.ScrollContainer">
 						<widget size="509x168" type="*widget.tableCells">
-							<widget pos="3,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 0</text>
+							<widget pos="4,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 0</text>
 							</widget>
-							<widget pos="105,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 1</text>
+							<widget pos="106,4" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 0, 1</text>
 							</widget>
-							<widget pos="207,3" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 0, 2</text>
+							<widget pos="4,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 0</text>
 							</widget>
-							<widget pos="3,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 0</text>
+							<widget pos="106,42" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 1, 1</text>
 							</widget>
-							<widget pos="105,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 1</text>
+							<widget pos="4,80" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 2, 0</text>
 							</widget>
-							<widget pos="207,41" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 1, 2</text>
-							</widget>
-							<widget pos="3,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 0</text>
-							</widget>
-							<widget pos="105,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 1</text>
-							</widget>
-							<widget pos="207,79" size="101x37" type="*widget.Label">
-								<text pos="4,4" size="93x21">Cell 2, 2</text>
+							<widget pos="106,80" size="93x29" type="*widget.Label">
+								<text pos="4,4" size="85x21">Cell 2, 1</text>
 							</widget>
 						</widget>
 						<widget pos="0,162" size="168x6" type="*widget.scrollBarArea">
@@ -146,9 +134,6 @@ func TestTable_Hovered(t *testing.T) {
 					</widget>
 					<widget pos="4,79" size="168x1" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="168x1"/>
-					</widget>
-					<widget size="0x0" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="0x0"/>
 					</widget>
 					<widget size="0x0" type="*widget.Separator">
 						<rectangle fillColor="disabled text" size="0x0"/>

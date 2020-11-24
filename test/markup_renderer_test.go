@@ -407,12 +407,12 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"container": {
-			content: container.NewVBox(canvas.NewCircle(color.Black), canvas.NewLine(color.White)),
+			content: container.NewVBox(canvas.NewCircle(color.Black), canvas.NewLine(color.RGBA{R: 250, G: 250, B: 250, A: 250})),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<container size=\"100x100\">\n" +
 				"\t\t\t<circle fillColor=\"rgba(0,0,0,255)\" size=\"100x1\"/>\n" +
-				"\t\t\t<line pos=\"0,5\" size=\"100x1\" strokeColor=\"rgba(255,255,255,255)\"/>\n" +
+				"\t\t\t<line pos=\"0,5\" size=\"100x1\" strokeColor=\"rgba(250,250,250,250)\"/>\n" +
 				"\t\t</container>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
@@ -431,14 +431,14 @@ func Test_snapshot(t *testing.T) {
 				bgColor: theme.BackgroundColor(),
 				objs: []fyne.CanvasObject{
 					canvas.NewCircle(color.Black),
-					canvas.NewLine(color.White),
+					canvas.NewLine(color.RGBA{R: 250, G: 250, B: 250, A: 250}),
 				},
 			},
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<widget size=\"100x100\" type=\"*test.markupRendererTestWidget\">\n" +
 				"\t\t\t<circle fillColor=\"rgba(0,0,0,255)\" size=\"0x0\"/>\n" +
-				"\t\t\t<line size=\"0x0\" strokeColor=\"rgba(255,255,255,255)\"/>\n" +
+				"\t\t\t<line size=\"0x0\" strokeColor=\"rgba(250,250,250,250)\"/>\n" +
 				"\t\t</widget>\n" +
 				"\t</content>\n" +
 				"</canvas>\n",
@@ -464,7 +464,7 @@ func Test_snapshot(t *testing.T) {
 			content: func() fyne.CanvasObject {
 				c := canvas.NewCircle(color.Black)
 				c.Hide()
-				l := canvas.NewLine(color.White)
+				l := canvas.NewLine(color.RGBA{R: 250, G: 250, B: 250, A: 250})
 				l.Hide()
 				w := widget.NewButton("tap me if you can", nil)
 				w.Hide()
@@ -513,7 +513,7 @@ func Test_snapshot(t *testing.T) {
 		c := NewCanvas()
 		c.SetPadded(true)
 		c.SetContent(canvas.NewCircle(color.Black))
-		c.Overlays().Add(canvas.NewRectangle(color.White))
+		c.Overlays().Add(canvas.NewRectangle(color.RGBA{R: 250, G: 250, B: 250, A: 250}))
 		c.Overlays().Add(canvas.NewRectangle(color.Transparent))
 		c.Resize(fyne.NewSize(100, 100))
 		assert.Equal(
@@ -523,7 +523,7 @@ func Test_snapshot(t *testing.T) {
 				"\t\t<circle fillColor=\"rgba(0,0,0,255)\" pos=\"4,4\" size=\"92x92\"/>\n"+
 				"\t</content>\n"+
 				"\t<overlay>\n"+
-				"\t\t<rectangle fillColor=\"rgba(255,255,255,255)\" size=\"100x100\"/>\n"+
+				"\t\t<rectangle fillColor=\"rgba(250,250,250,250)\" size=\"100x100\"/>\n"+
 				"\t</overlay>\n"+
 				"\t<overlay>\n"+
 				"\t\t<rectangle size=\"100x100\"/>\n"+

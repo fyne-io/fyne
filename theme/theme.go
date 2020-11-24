@@ -203,7 +203,7 @@ func (t *builtinTheme) TextFont() fyne.Resource {
 	return t.regular
 }
 
-// TextBoldFont retutns the font resource for the bold font style
+// TextBoldFont returns the font resource for the bold font style
 func (t *builtinTheme) TextBoldFont() fyne.Resource {
 	return t.bold
 }
@@ -218,7 +218,7 @@ func (t *builtinTheme) TextBoldItalicFont() fyne.Resource {
 	return t.boldItalic
 }
 
-// TextMonospaceFont retutns the font resource for the monospace font face
+// TextMonospaceFont returns the font resource for the monospace font face
 func (t *builtinTheme) TextMonospaceFont() fyne.Resource {
 	return t.monospace
 }
@@ -313,7 +313,7 @@ func HoverColor() color.Color {
 	return current().HoverColor()
 }
 
-// FocusColor returns the color used to highlight a focussed widget
+// FocusColor returns the color used to highlight a focused widget
 func FocusColor() color.Color {
 	return current().FocusColor()
 }
@@ -338,7 +338,7 @@ func TextFont() fyne.Resource {
 	return current().TextFont()
 }
 
-// TextBoldFont retutns the font resource for the bold font style
+// TextBoldFont returns the font resource for the bold font style
 func TextBoldFont() fyne.Resource {
 	return current().TextBoldFont()
 }
@@ -353,7 +353,7 @@ func TextBoldItalicFont() fyne.Resource {
 	return current().TextBoldItalicFont()
 }
 
-// TextMonospaceFont retutns the font resource for the monospace font face
+// TextMonospaceFont returns the font resource for the monospace font face
 func TextMonospaceFont() fyne.Resource {
 	return current().TextMonospaceFont()
 }
@@ -384,7 +384,7 @@ func DefaultTextFont() fyne.Resource {
 	return regular
 }
 
-// DefaultTextBoldFont retutns the font resource for the built-in bold font style
+// DefaultTextBoldFont returns the font resource for the built-in bold font style
 func DefaultTextBoldFont() fyne.Resource {
 	return bold
 }
@@ -399,7 +399,7 @@ func DefaultTextBoldItalicFont() fyne.Resource {
 	return bolditalic
 }
 
-// DefaultTextMonospaceFont retutns the font resource for the built-in monospace font face
+// DefaultTextMonospaceFont returns the font resource for the built-in monospace font face
 func DefaultTextMonospaceFont() fyne.Resource {
 	return monospace
 }

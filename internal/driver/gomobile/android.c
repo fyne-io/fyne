@@ -68,19 +68,30 @@ jobject getClipboard(uintptr_t jni_env, uintptr_t ctx) {
 	jmethodID getSystemService = find_method(env, ctxClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
 
 	jstring service = (*env)->NewStringUTF(env, "clipboard");
-	return (jobject)(*env)->CallObjectMethod(env, ctx, getSystemService, service);
+	jobject ret = (jobject)(*env)->CallObjectMethod(env, ctx, getSystemService, service);
+	jthrowable err = (*env)->ExceptionOccurred(env);
+
+	if (err != NULL) {
+		LOG_FATAL("cannot lookup clipboard");
+		(*env)->ExceptionClear(env);
+		return NULL;
+	}
+	return ret;
 }
 
 char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject mgr = getClipboard(jni_env, ctx);
+	if (mgr == NULL) {
+		return NULL;
+	}
 
 	jclass mgrClass = (*env)->GetObjectClass(env, mgr);
 	jmethodID getText = find_method(env, mgrClass, "getText", "()Ljava/lang/CharSequence;");
 
 	jobject content = (jstring)(*env)->CallObjectMethod(env, mgr, getText);
 	if (content == NULL) {
-		return "";
+		return NULL;
 	}
 
 	jclass clzCharSequence = (*env)->GetObjectClass(env, content);
@@ -93,6 +104,9 @@ char *getClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx) {
 void setClipboardContent(uintptr_t java_vm, uintptr_t jni_env, uintptr_t ctx, char *content) {
 	JNIEnv *env = (JNIEnv*)jni_env;
 	jobject mgr = getClipboard(jni_env, ctx);
+	if (mgr == NULL) {
+		return;
+	}
 
 	jclass mgrClass = (*env)->GetObjectClass(env, mgr);
 	jmethodID setText = find_method(env, mgrClass, "setText", "(Ljava/lang/CharSequence;)V");

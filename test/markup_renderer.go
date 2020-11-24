@@ -380,23 +380,28 @@ func (r *markupRenderer) writeWidget(w fyne.Widget, attrs map[string]*string) {
 	r.indentation++
 }
 
+func rgbaColor(c color.Color) color.RGBA {
+	r, g, b, a := c.RGBA()
+	return color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)}
+}
+
 func knownColor(c color.Color) string {
 	return map[color.Color]string{
-		theme.BackgroundColor():     "background",
-		theme.ButtonColor():         "button",
-		theme.DisabledButtonColor(): "disabled button",
-		theme.DisabledTextColor():   "disabled text",
-		theme.FocusColor():          "focus",
-		theme.HoverColor():          "hover",
-		theme.PlaceHolderColor():    "placeholder",
-		theme.PrimaryColor():        "primary",
-		theme.ScrollBarColor():      "scrollbar",
-		theme.ShadowColor():         "shadow",
-		theme.TextColor():           "text",
-		theme.DisabledIconColor():   "disabled icon",
-		theme.HyperlinkColor():      "hyperlink",
-		theme.IconColor():           "icon",
-	}[c]
+		rgbaColor(theme.BackgroundColor()):     "background",
+		rgbaColor(theme.ButtonColor()):         "button",
+		rgbaColor(theme.DisabledButtonColor()): "disabled button",
+		rgbaColor(theme.DisabledTextColor()):   "disabled text",
+		rgbaColor(theme.FocusColor()):          "focus",
+		rgbaColor(theme.HoverColor()):          "hover",
+		rgbaColor(theme.PlaceHolderColor()):    "placeholder",
+		rgbaColor(theme.PrimaryColor()):        "primary",
+		rgbaColor(theme.ScrollBarColor()):      "scrollbar",
+		rgbaColor(theme.ShadowColor()):         "shadow",
+		rgbaColor(theme.TextColor()):           "text",
+		rgbaColor(theme.DisabledIconColor()):   "disabled icon",
+		rgbaColor(theme.HyperlinkColor()):      "hyperlink",
+		rgbaColor(theme.IconColor()):           "icon",
+	}[rgbaColor(c)]
 }
 
 func knownResource(rsc fyne.Resource) string {

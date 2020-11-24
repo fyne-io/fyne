@@ -6,6 +6,8 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/data/binding"
+	"fyne.io/fyne/internal/cache"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
 )
@@ -85,6 +87,8 @@ type ProgressBar struct {
 
 	// TextFormatter can be used to have a custom format of progress text.
 	// If set, it overrides the percentage readout and runs each time the value updates.
+	//
+	// Since: 1.4
 	TextFormatter func() string
 }
 
@@ -121,5 +125,19 @@ func NewProgressBar() *ProgressBar {
 	p := &ProgressBar{Min: 0, Max: 1}
 
 	Renderer(p).Layout(p.MinSize())
+	return p
+}
+
+// NewProgressBarWithData returns a progress bar connected with the specified data source.
+func NewProgressBarWithData(data binding.Float) *ProgressBar {
+	p := NewProgressBar()
+
+	data.AddListener(binding.NewDataListener(func() {
+		p.Value = data.Get()
+		if cache.IsRendered(p) {
+			p.Refresh()
+		}
+	}))
+
 	return p
 }

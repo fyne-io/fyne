@@ -46,6 +46,8 @@ func NewContainerWithLayout(layout Layout, objects ...CanvasObject) *Container {
 }
 
 // Add appends the specified object to the items this container manages.
+//
+// Since: 1.4
 func (c *Container) Add(add CanvasObject) {
 	c.Objects = append(c.Objects, add)
 	c.layout()
