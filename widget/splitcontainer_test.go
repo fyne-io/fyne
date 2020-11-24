@@ -29,19 +29,25 @@ func TestSplitContainer_Resize(t *testing.T) {
 	for name, tt := range map[string]struct {
 		horizontal       bool
 		size             fyne.Size
+		wantLeadingPos   fyne.Position
 		wantLeadingSize  fyne.Size
+		wantTrailingPos  fyne.Position
 		wantTrailingSize fyne.Size
 	}{
 		"horizontal": {
 			true,
 			fyne.NewSize(100, 100),
+			fyne.NewPos(0, 0),
 			fyne.NewSize(50-halfDividerThickness(), 100),
+			fyne.NewPos(50+halfDividerThickness(), 0),
 			fyne.NewSize(50-halfDividerThickness(), 100),
 		},
 		"vertical": {
 			false,
 			fyne.NewSize(100, 100),
+			fyne.NewPos(0, 0),
 			fyne.NewSize(100, 50-halfDividerThickness()),
+			fyne.NewPos(0, 50+halfDividerThickness()),
 			fyne.NewSize(100, 50-halfDividerThickness()),
 		},
 	} {
@@ -56,7 +62,9 @@ func TestSplitContainer_Resize(t *testing.T) {
 			}
 			c.Resize(tt.size)
 
+			assert.Equal(t, tt.wantLeadingPos, objA.Position(), "leading position")
 			assert.Equal(t, tt.wantLeadingSize, objA.Size(), "leading size")
+			assert.Equal(t, tt.wantTrailingPos, objB.Position(), "trailing position")
 			assert.Equal(t, tt.wantTrailingSize, objB.Size(), "trailing size")
 		})
 	}
