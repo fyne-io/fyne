@@ -26,12 +26,12 @@ const (
 )
 
 var (
-	cursorMap    map[desktop.Cursor]*glfw.Cursor
+	cursorMap    map[desktop.StandardCursor]*glfw.Cursor
 	defaultTitle = "Fyne Application"
 )
 
 func initCursors() {
-	cursorMap = map[desktop.Cursor]*glfw.Cursor{
+	cursorMap = map[desktop.StandardCursor]*glfw.Cursor{
 		desktop.DefaultCursor:   glfw.CreateStandardCursor(glfw.ArrowCursor),
 		desktop.TextCursor:      glfw.CreateStandardCursor(glfw.IBeamCursor),
 		desktop.CrosshairCursor: glfw.CreateStandardCursor(glfw.CrosshairCursor),
@@ -52,11 +52,12 @@ type window struct {
 	decorate   bool
 	fixedSize  bool
 
-	cursor   *glfw.Cursor
-	canvas   *glCanvas
-	title    string
-	icon     fyne.Resource
-	mainmenu *fyne.MainMenu
+	cursor    desktop.Cursor
+	rawCursor *glfw.Cursor // rawCursor is only filled for custom cursors in order to be destroyed when becoming un-needed
+	canvas    *glCanvas
+	title     string
+	icon      fyne.Resource
+	mainmenu  *fyne.MainMenu
 
 	clipboard fyne.Clipboard
 
@@ -558,22 +559,31 @@ func (w *window) findObjectAtPositionMatching(canvas *glCanvas, mouse fyne.Posit
 	return driver.FindObjectAtPositionMatching(mouse, matches, canvas.Overlays().Top(), canvas.menu, canvas.Content())
 }
 
-func fyneToNativeCursor(cursor desktop.Cursor) *glfw.Cursor {
-	ret, ok := cursorMap[cursor]
-	if !ok {
-		return cursorMap[desktop.DefaultCursor]
+func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
+	switch v := cursor.(type) {
+	case desktop.StandardCursor:
+		ret, ok := cursorMap[v]
+		if !ok {
+			return cursorMap[desktop.DefaultCursor], true
+		}
+		return ret, true
+	default:
+		img, x, y := cursor.Image()
+		if img == nil {
+			return nil, true
+		}
+		return glfw.CreateCursor(img, x, y), false
 	}
-	return ret
 }
 
 func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 	w.mousePos = fyne.NewPos(internal.UnscaleInt(w.canvas, int(xpos)), internal.UnscaleInt(w.canvas, int(ypos)))
 
-	cursor := cursorMap[desktop.DefaultCursor]
+	cursor := desktop.Cursor(desktop.DefaultCursor)
+
 	obj, pos, _ := w.findObjectAtPositionMatching(w.canvas, w.mousePos, func(object fyne.CanvasObject) bool {
 		if cursorable, ok := object.(desktop.Cursorable); ok {
-			fyneCursor := cursorable.Cursor()
-			cursor = fyneToNativeCursor(fyneCursor)
+			cursor = cursorable.Cursor()
 		}
 
 		_, hover := object.(desktop.Hoverable)
@@ -582,12 +592,25 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	if w.cursor != cursor {
 		// cursor has changed, store new cursor and apply change via glfw
+		newCursor, isStdCursor := fyneToNativeCursor(cursor)
 		w.cursor = cursor
-		if cursor == nil {
+		oldCursor := w.rawCursor
+
+		if isStdCursor {
+			w.rawCursor = nil
+		} else {
+			w.rawCursor = newCursor
+		}
+
+		if newCursor == nil {
 			viewport.SetInputMode(glfw.CursorMode, glfw.CursorHidden)
 		} else {
 			viewport.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
-			viewport.SetCursor(cursor)
+			viewport.SetCursor(newCursor)
+		}
+		if oldCursor != nil {
+			// destroy old cursor now as to avoid viewport reverting to default cursor even for an instant
+			oldCursor.Destroy()
 		}
 	}
 	if obj != nil && !w.objIsDragged(obj) {
