@@ -149,16 +149,14 @@ func (r *splitContainerRenderer) BackgroundColor() color.Color {
 func (r *splitContainerRenderer) Destroy() {
 }
 
-func (r *splitContainerRenderer) computeSplitLengths(total, leading, trailing int) (int, int) {
-	half := float64(halfDividerThickness())
-
-	var min, max float64
+func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin int) (int, int) {
+	available := float64(total - dividerThickness())
+	ld := float64(lMin)
+	tr := float64(tMin)
 	offset := r.split.Offset
-	ttl := float64(total)
-	ld := float64(leading)
-	tr := float64(trailing)
-	max = 1.0 - ((tr + half) / ttl)
-	min = (ld + half) / ttl
+
+	min := ld / available
+	max := 1 - tr/available
 	if offset < min {
 		offset = min
 	}
@@ -166,7 +164,9 @@ func (r *splitContainerRenderer) computeSplitLengths(total, leading, trailing in
 		offset = max
 	}
 
-	return int(offset*ttl - half), int((1.0-offset)*ttl - half)
+	ld = offset * available
+	tr = available - ld
+	return int(ld), int(tr)
 }
 
 // Declare conformity with interfaces
