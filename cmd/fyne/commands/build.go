@@ -5,11 +5,13 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 type builder struct {
 	os, srcdir string
 	release    bool
+	tags       []string
 }
 
 func (b *builder) build() error {
@@ -32,9 +34,16 @@ func (b *builder) build() error {
 			args = append(args, "build")
 		}
 	}
+
+	// handle build tags
+	tags := b.tags
 	if b.release {
-		args = append(args, "-tags", "release")
+		args = append(tags, "release")
 	}
+	if len(tags) > 0 {
+		args = append(args, "-tags", strings.Join(tags, ","))
+	}
+
 	cmd := exec.Command("go", args...)
 	cmd.Dir = b.srcdir
 	env := os.Environ()

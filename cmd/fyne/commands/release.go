@@ -47,6 +47,7 @@ func (r *releaser) AddFlags() {
 	flag.StringVar(&r.profile, "profile", "", "iOS/macOS: name of the provisioning profile for this release build")
 	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
 	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to sign the build")
+	flag.StringVar(&r.tags, "tags", "", "A comma-separated list of build tags")
 }
 
 func (r *releaser) PrintHelp(indent string) {
