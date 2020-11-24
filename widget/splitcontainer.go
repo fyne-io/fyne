@@ -82,56 +82,29 @@ type splitContainerRenderer struct {
 func (r *splitContainerRenderer) Layout(size fyne.Size) {
 	var dividerPos, leadingPos, trailingPos fyne.Position
 	var dividerSize, leadingSize, trailingSize fyne.Size
-	half := float64(halfDividerThickness())
-
-	var min, max float64
-	offset := r.split.Offset
-	if r.split.Horizontal {
-		sw := float64(size.Width)
-		lw := float64(r.split.Leading.MinSize().Width)
-		tw := float64(r.split.Trailing.MinSize().Width)
-		max = 1.0 - ((tw + half) / sw)
-		min = (lw + half) / sw
-	} else {
-		sh := float64(size.Height)
-		lh := float64(r.split.Leading.MinSize().Height)
-		th := float64(r.split.Trailing.MinSize().Height)
-		max = 1.0 - ((th + half) / sh)
-		min = (lh + half) / sh
-	}
-	if offset < min {
-		offset = min
-	}
-	if offset > max {
-		offset = max
-	}
 
 	if r.split.Horizontal {
-		x := 0
-		leadingPos.X = x
-		leadingSize.Width = int(offset*float64(size.Width) - half)
+		lw, tw := r.computeSplitLengths(size.Width, r.split.Leading.MinSize().Width, r.split.Trailing.MinSize().Width)
+		leadingPos.X = 0
+		leadingSize.Width = lw
 		leadingSize.Height = size.Height
-		x += leadingSize.Width
-		dividerPos.X = x
+		dividerPos.X = lw
 		dividerSize.Width = dividerThickness()
 		dividerSize.Height = size.Height
-		x += dividerSize.Width
-		trailingPos.X = x
-		trailingSize.Width = int((1.0-offset)*float64(size.Width) - half)
+		trailingPos.X = lw + dividerSize.Width
+		trailingSize.Width = tw
 		trailingSize.Height = size.Height
 	} else {
-		y := 0
-		leadingPos.Y = y
+		lh, th := r.computeSplitLengths(size.Height, r.split.Leading.MinSize().Height, r.split.Trailing.MinSize().Height)
+		leadingPos.Y = 0
 		leadingSize.Width = size.Width
-		leadingSize.Height = int(offset*float64(size.Height) - half)
-		y += leadingSize.Height
-		dividerPos.Y = y
+		leadingSize.Height = lh
+		dividerPos.Y = lh
 		dividerSize.Width = size.Width
 		dividerSize.Height = dividerThickness()
-		y += dividerSize.Height
-		trailingPos.Y = y
+		trailingPos.Y = lh + dividerSize.Height
 		trailingSize.Width = size.Width
-		trailingSize.Height = int((1.0-offset)*float64(size.Height) - half)
+		trailingSize.Height = th
 	}
 
 	r.divider.Move(dividerPos)
@@ -174,6 +147,26 @@ func (r *splitContainerRenderer) BackgroundColor() color.Color {
 }
 
 func (r *splitContainerRenderer) Destroy() {
+}
+
+func (r *splitContainerRenderer) computeSplitLengths(total, leading, trailing int) (int, int) {
+	half := float64(halfDividerThickness())
+
+	var min, max float64
+	offset := r.split.Offset
+	ttl := float64(total)
+	ld := float64(leading)
+	tr := float64(trailing)
+	max = 1.0 - ((tr + half) / ttl)
+	min = (ld + half) / ttl
+	if offset < min {
+		offset = min
+	}
+	if offset > max {
+		offset = max
+	}
+
+	return int(offset*ttl - half), int((1.0-offset)*ttl - half)
 }
 
 // Declare conformity with interfaces
