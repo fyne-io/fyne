@@ -50,10 +50,62 @@ func TestSplitContainer_Resize(t *testing.T) {
 			fyne.NewPos(0, 50+dividerThickness()/2),
 			fyne.NewSize(100, 50-dividerThickness()/2),
 		},
+		"horizontal insufficient width": {
+			true,
+			fyne.NewSize(20, 100),
+			fyne.NewPos(0, 0),
+			// minSize of leading is 1/3 of minSize of trailing
+			fyne.NewSize((20-dividerThickness())/4, 100),
+			fyne.NewPos((20-dividerThickness())/4+dividerThickness(), 0),
+			fyne.NewSize((20-dividerThickness())*3/4, 100),
+		},
+		"vertical insufficient height": {
+			false,
+			fyne.NewSize(100, 20),
+			fyne.NewPos(0, 0),
+			// minSize of leading is 1/3 of minSize of trailing
+			fyne.NewSize(100, (20-dividerThickness())/4),
+			fyne.NewPos(0, (20-dividerThickness())/4+dividerThickness()),
+			fyne.NewSize(100, (20-dividerThickness())*3/4),
+		},
+		"horizontal zero width": {
+			true,
+			fyne.NewSize(0, 100),
+			fyne.NewPos(0, 0),
+			fyne.NewSize(0, 100),
+			fyne.NewPos(dividerThickness(), 0),
+			fyne.NewSize(0, 100),
+		},
+		"horizontal zero height": {
+			true,
+			fyne.NewSize(100, 0),
+			fyne.NewPos(0, 0),
+			fyne.NewSize(50-dividerThickness()/2, 0),
+			fyne.NewPos(50+dividerThickness()/2, 0),
+			fyne.NewSize(50-dividerThickness()/2, 0),
+		},
+		"vertical zero width": {
+			false,
+			fyne.NewSize(0, 100),
+			fyne.NewPos(0, 0),
+			fyne.NewSize(0, 50-dividerThickness()/2),
+			fyne.NewPos(0, 50+dividerThickness()/2),
+			fyne.NewSize(0, 50-dividerThickness()/2),
+		},
+		"vertical zero height": {
+			false,
+			fyne.NewSize(100, 0),
+			fyne.NewPos(0, 0),
+			fyne.NewSize(100, 0),
+			fyne.NewPos(0, dividerThickness()),
+			fyne.NewSize(100, 0),
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			objA := canvas.NewRectangle(color.White)
 			objB := canvas.NewRectangle(color.Black)
+			objA.SetMinSize(fyne.NewSize(10, 10))
+			objB.SetMinSize(fyne.NewSize(30, 30))
 			var c *SplitContainer
 			if tt.horizontal {
 				c = NewHSplitContainer(objA, objB)

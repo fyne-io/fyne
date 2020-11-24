@@ -153,17 +153,24 @@ func (r *splitContainerRenderer) Refresh() {
 
 func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin int) (int, int) {
 	available := float64(total - dividerThickness())
+	if available <= 0 {
+		return 0, 0
+	}
 	ld := float64(lMin)
 	tr := float64(tMin)
 	offset := r.split.Offset
 
 	min := ld / available
 	max := 1 - tr/available
-	if offset < min {
-		offset = min
-	}
-	if offset > max {
-		offset = max
+	if min <= max {
+		if offset < min {
+			offset = min
+		}
+		if offset > max {
+			offset = max
+		}
+	} else {
+		offset = ld / (ld + tr)
 	}
 
 	ld = offset * available
