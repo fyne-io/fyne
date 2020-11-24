@@ -50,6 +50,17 @@ func newSplitContainer(horizontal bool, leading, trailing fyne.CanvasObject) *Sp
 	return s
 }
 
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (s *SplitContainer) CreateRenderer() fyne.WidgetRenderer {
+	s.ExtendBaseWidget(s)
+	d := newDivider(s)
+	return &splitContainerRenderer{
+		split:   s,
+		divider: d,
+		objects: []fyne.CanvasObject{s.Leading, d, s.Trailing},
+	}
+}
+
 // SetOffset sets the offset (0.0 to 1.0) of the SplitContainer divider.
 // 0.0 - Leading is min size, Trailing uses all remaining space.
 // 0.5 - Leading & Trailing equally share the available space.
@@ -62,21 +73,19 @@ func (s *SplitContainer) SetOffset(offset float64) {
 	s.Refresh()
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (s *SplitContainer) CreateRenderer() fyne.WidgetRenderer {
-	s.ExtendBaseWidget(s)
-	d := newDivider(s)
-	return &splitContainerRenderer{
-		split:   s,
-		divider: d,
-		objects: []fyne.CanvasObject{s.Leading, d, s.Trailing},
-	}
-}
+var _ fyne.WidgetRenderer = (*splitContainerRenderer)(nil)
 
 type splitContainerRenderer struct {
 	split   *SplitContainer
 	divider *divider
 	objects []fyne.CanvasObject
+}
+
+func (r *splitContainerRenderer) BackgroundColor() color.Color {
+	return theme.BackgroundColor()
+}
+
+func (r *splitContainerRenderer) Destroy() {
 }
 
 func (r *splitContainerRenderer) Layout(size fyne.Size) {
@@ -133,20 +142,13 @@ func (r *splitContainerRenderer) MinSize() fyne.Size {
 	return s
 }
 
-func (r *splitContainerRenderer) Refresh() {
-	r.Layout(r.split.Size())
-	canvas.Refresh(r.split)
-}
-
 func (r *splitContainerRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-func (r *splitContainerRenderer) BackgroundColor() color.Color {
-	return theme.BackgroundColor()
-}
-
-func (r *splitContainerRenderer) Destroy() {
+func (r *splitContainerRenderer) Refresh() {
+	r.Layout(r.split.Size())
+	canvas.Refresh(r.split)
 }
 
 func (r *splitContainerRenderer) computeSplitLengths(total, lMin, tMin int) (int, int) {
@@ -189,6 +191,17 @@ func newDivider(split *SplitContainer) *divider {
 	return d
 }
 
+// CreateRenderer is a private method to Fyne which links this widget to its renderer
+func (d *divider) CreateRenderer() fyne.WidgetRenderer {
+	d.ExtendBaseWidget(d)
+	r := canvas.NewRectangle(theme.IconColor())
+	return &dividerRenderer{
+		divider:   d,
+		rectangle: r,
+		objects:   []fyne.CanvasObject{r},
+	}
+}
+
 func (d *divider) Cursor() desktop.Cursor {
 	if d.split.Horizontal {
 		return desktop.HResizeCursor
@@ -214,28 +227,29 @@ func (d *divider) MouseIn(event *desktop.MouseEvent) {
 	d.split.Refresh()
 }
 
+func (d *divider) MouseMoved(event *desktop.MouseEvent) {}
+
 func (d *divider) MouseOut() {
 	d.hovered = false
 	d.split.Refresh()
 }
 
-func (d *divider) MouseMoved(event *desktop.MouseEvent) {}
-
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
-func (d *divider) CreateRenderer() fyne.WidgetRenderer {
-	d.ExtendBaseWidget(d)
-	r := canvas.NewRectangle(theme.IconColor())
-	return &dividerRenderer{
-		divider:   d,
-		rectangle: r,
-		objects:   []fyne.CanvasObject{r},
-	}
-}
+var _ fyne.WidgetRenderer = (*dividerRenderer)(nil)
 
 type dividerRenderer struct {
 	divider   *divider
 	rectangle *canvas.Rectangle
 	objects   []fyne.CanvasObject
+}
+
+func (r *dividerRenderer) BackgroundColor() color.Color {
+	if r.divider.hovered {
+		return theme.HoverColor()
+	}
+	return theme.ShadowColor()
+}
+
+func (r *dividerRenderer) Destroy() {
 }
 
 func (r *dividerRenderer) Layout(size fyne.Size) {
@@ -262,23 +276,13 @@ func (r *dividerRenderer) MinSize() fyne.Size {
 	return fyne.NewSize(dividerLength(), dividerThickness())
 }
 
-func (r *dividerRenderer) Refresh() {
-	r.rectangle.FillColor = theme.IconColor()
-	r.Layout(r.divider.Size())
-}
-
 func (r *dividerRenderer) Objects() []fyne.CanvasObject {
 	return r.objects
 }
 
-func (r *dividerRenderer) BackgroundColor() color.Color {
-	if r.divider.hovered {
-		return theme.HoverColor()
-	}
-	return theme.ShadowColor()
-}
-
-func (r *dividerRenderer) Destroy() {
+func (r *dividerRenderer) Refresh() {
+	r.rectangle.FillColor = theme.IconColor()
+	r.Layout(r.divider.Size())
 }
 
 func dividerThickness() int {
