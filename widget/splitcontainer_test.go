@@ -11,33 +11,40 @@ import (
 )
 
 func TestSplitContainer(t *testing.T) {
-	size := fyne.NewSize(100, 100)
+	for name, tt := range map[string]struct {
+		horizontal       bool
+		size             fyne.Size
+		wantLeadingSize  fyne.Size
+		wantTrailingSize fyne.Size
+	}{
+		"horizontal": {
+			true,
+			fyne.NewSize(100, 100),
+			fyne.NewSize(50-halfDividerThickness(), 100),
+			fyne.NewSize(50-halfDividerThickness(), 100),
+		},
+		"vertical": {
+			false,
+			fyne.NewSize(100, 100),
+			fyne.NewSize(100, 50-halfDividerThickness()),
+			fyne.NewSize(100, 50-halfDividerThickness()),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			objA := canvas.NewRectangle(color.White)
+			objB := canvas.NewRectangle(color.Black)
+			var c *SplitContainer
+			if tt.horizontal {
+				c = NewHSplitContainer(objA, objB)
+			} else {
+				c = NewVSplitContainer(objA, objB)
+			}
+			c.Resize(tt.size)
 
-	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
-	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
-
-	t.Run("Horizontal", func(t *testing.T) {
-		NewHSplitContainer(objA, objB).Resize(size)
-
-		sizeA := objA.Size()
-		sizeB := objB.Size()
-
-		assert.Equal(t, 50-halfDividerThickness(), sizeA.Width)
-		assert.Equal(t, 100, sizeA.Height)
-		assert.Equal(t, 50-halfDividerThickness(), sizeB.Width)
-		assert.Equal(t, 100, sizeB.Height)
-	})
-	t.Run("Vertical", func(t *testing.T) {
-		NewVSplitContainer(objA, objB).Resize(size)
-
-		sizeA := objA.Size()
-		sizeB := objB.Size()
-
-		assert.Equal(t, 100, sizeA.Width)
-		assert.Equal(t, 50-halfDividerThickness(), sizeA.Height)
-		assert.Equal(t, 100, sizeB.Width)
-		assert.Equal(t, 50-halfDividerThickness(), sizeB.Height)
-	})
+			assert.Equal(t, tt.wantLeadingSize, objA.Size(), "leading size")
+			assert.Equal(t, tt.wantTrailingSize, objB.Size(), "trailing size")
+		})
+	}
 }
 
 func TestSplitContainer_MinSize(t *testing.T) {
