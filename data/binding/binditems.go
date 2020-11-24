@@ -40,31 +40,19 @@ type boundBool struct {
 }
 
 func (b *boundBool) Get() bool {
-	if b.val == nil {
-		return false
-	}
 	return *b.val
 }
 
 func (b *boundBool) Set(val bool) {
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		if *b.val == val {
-			return
-		}
-
-		*b.val = val
+	if *b.val == val {
+		return
 	}
 
+	*b.val = val
 	b.trigger()
 }
 
 func (b *boundBool) Reload() {
-	if b.val == nil {
-		return
-	}
-
 	b.trigger()
 }
 
@@ -105,31 +93,19 @@ type boundFloat struct {
 }
 
 func (b *boundFloat) Get() float64 {
-	if b.val == nil {
-		return 0.0
-	}
 	return *b.val
 }
 
 func (b *boundFloat) Set(val float64) {
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		if *b.val == val {
-			return
-		}
-
-		*b.val = val
+	if *b.val == val {
+		return
 	}
 
+	*b.val = val
 	b.trigger()
 }
 
 func (b *boundFloat) Reload() {
-	if b.val == nil {
-		return
-	}
-
 	b.trigger()
 }
 
@@ -170,31 +146,19 @@ type boundInt struct {
 }
 
 func (b *boundInt) Get() int {
-	if b.val == nil {
-		return 0
-	}
 	return *b.val
 }
 
 func (b *boundInt) Set(val int) {
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		if *b.val == val {
-			return
-		}
-
-		*b.val = val
+	if *b.val == val {
+		return
 	}
 
+	*b.val = val
 	b.trigger()
 }
 
 func (b *boundInt) Reload() {
-	if b.val == nil {
-		return
-	}
-
 	b.trigger()
 }
 
@@ -235,31 +199,19 @@ type boundRune struct {
 }
 
 func (b *boundRune) Get() rune {
-	if b.val == nil {
-		return rune(0)
-	}
 	return *b.val
 }
 
 func (b *boundRune) Set(val rune) {
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		if *b.val == val {
-			return
-		}
-
-		*b.val = val
+	if *b.val == val {
+		return
 	}
 
+	*b.val = val
 	b.trigger()
 }
 
 func (b *boundRune) Reload() {
-	if b.val == nil {
-		return
-	}
-
 	b.trigger()
 }
 
@@ -300,30 +252,18 @@ type boundString struct {
 }
 
 func (b *boundString) Get() string {
-	if b.val == nil {
-		return ""
-	}
 	return *b.val
 }
 
 func (b *boundString) Set(val string) {
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		if *b.val == val {
-			return
-		}
-
-		*b.val = val
+	if *b.val == val {
+		return
 	}
 
+	*b.val = val
 	b.trigger()
 }
 
 func (b *boundString) Reload() {
-	if b.val == nil {
-		return
-	}
-
 	b.trigger()
 }

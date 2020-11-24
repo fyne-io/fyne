@@ -49,31 +49,19 @@ type bound{{ .Name }} struct {
 }
 
 func (b *bound{{ .Name }}) Get() {{ .Type }} {
-	if b.val == nil {
-		return {{ .Default }}
-	}
 	return *b.val
 }
 
 func (b *bound{{ .Name }}) Set(val {{ .Type }}) {
-	if b.val == nil { // was not initialized with a blank value, recover
-		b.val = &val
-	} else {
-		if *b.val == val {
-			return
-		}
-
-		*b.val = val
+	if *b.val == val {
+		return
 	}
 
+	*b.val = val
 	b.trigger()
 }
 
 func (b *bound{{ .Name }}) Reload() {
-	if b.val == nil {
-		return
-	}
-
 	b.trigger()
 }
 `
