@@ -28,7 +28,7 @@ func TestBindFloatUpdate(t *testing.T) {
 
 	called = false
 	val = 1.2
-	f.UpdateFromVariable()
+	f.Reload()
 	waitForItems()
 	assert.Equal(t, 1.2, val)
 	assert.True(t, called)

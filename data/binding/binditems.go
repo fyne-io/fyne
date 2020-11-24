@@ -10,10 +10,10 @@ type Bool interface {
 	Set(bool)
 }
 
-// BoolFromVariable supports binding a bool value in a Fyne application
-type BoolFromVariable interface {
+// BoolPointer supports binding a bool value in a Fyne application
+type BoolPointer interface {
 	Bool
-	DataItemFromVariable
+	DataPointer
 }
 
 // NewBool returns a bindable bool value that is managed internally.
@@ -23,7 +23,7 @@ func NewBool() Bool {
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
-func BindBool(v *bool) BoolFromVariable {
+func BindBool(v *bool) BoolPointer {
 	if v == nil {
 		return NewBool().(*boundBool) // never allow a nil value pointer
 	}
@@ -58,7 +58,7 @@ func (b *boundBool) Set(val bool) {
 	b.trigger()
 }
 
-func (b *boundBool) UpdateFromVariable() {
+func (b *boundBool) Reload() {
 	if b.val == nil {
 		return
 	}
@@ -73,10 +73,10 @@ type Float interface {
 	Set(float64)
 }
 
-// FloatFromVariable supports binding a float64 value in a Fyne application
-type FloatFromVariable interface {
+// FloatPointer supports binding a float64 value in a Fyne application
+type FloatPointer interface {
 	Float
-	DataItemFromVariable
+	DataPointer
 }
 
 // NewFloat returns a bindable float64 value that is managed internally.
@@ -86,7 +86,7 @@ func NewFloat() Float {
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
-func BindFloat(v *float64) FloatFromVariable {
+func BindFloat(v *float64) FloatPointer {
 	if v == nil {
 		return NewFloat().(*boundFloat) // never allow a nil value pointer
 	}
@@ -121,7 +121,7 @@ func (b *boundFloat) Set(val float64) {
 	b.trigger()
 }
 
-func (b *boundFloat) UpdateFromVariable() {
+func (b *boundFloat) Reload() {
 	if b.val == nil {
 		return
 	}
@@ -136,10 +136,10 @@ type Int interface {
 	Set(int)
 }
 
-// IntFromVariable supports binding a int value in a Fyne application
-type IntFromVariable interface {
+// IntPointer supports binding a int value in a Fyne application
+type IntPointer interface {
 	Int
-	DataItemFromVariable
+	DataPointer
 }
 
 // NewInt returns a bindable int value that is managed internally.
@@ -149,7 +149,7 @@ func NewInt() Int {
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
-func BindInt(v *int) IntFromVariable {
+func BindInt(v *int) IntPointer {
 	if v == nil {
 		return NewInt().(*boundInt) // never allow a nil value pointer
 	}
@@ -184,7 +184,7 @@ func (b *boundInt) Set(val int) {
 	b.trigger()
 }
 
-func (b *boundInt) UpdateFromVariable() {
+func (b *boundInt) Reload() {
 	if b.val == nil {
 		return
 	}
@@ -199,10 +199,10 @@ type Rune interface {
 	Set(rune)
 }
 
-// RuneFromVariable supports binding a rune value in a Fyne application
-type RuneFromVariable interface {
+// RunePointer supports binding a rune value in a Fyne application
+type RunePointer interface {
 	Rune
-	DataItemFromVariable
+	DataPointer
 }
 
 // NewRune returns a bindable rune value that is managed internally.
@@ -212,7 +212,7 @@ func NewRune() Rune {
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
-func BindRune(v *rune) RuneFromVariable {
+func BindRune(v *rune) RunePointer {
 	if v == nil {
 		return NewRune().(*boundRune) // never allow a nil value pointer
 	}
@@ -247,7 +247,7 @@ func (b *boundRune) Set(val rune) {
 	b.trigger()
 }
 
-func (b *boundRune) UpdateFromVariable() {
+func (b *boundRune) Reload() {
 	if b.val == nil {
 		return
 	}
@@ -262,10 +262,10 @@ type String interface {
 	Set(string)
 }
 
-// StringFromVariable supports binding a string value in a Fyne application
-type StringFromVariable interface {
+// StringPointer supports binding a string value in a Fyne application
+type StringPointer interface {
 	String
-	DataItemFromVariable
+	DataPointer
 }
 
 // NewString returns a bindable string value that is managed internally.
@@ -275,7 +275,7 @@ func NewString() String {
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
-func BindString(v *string) StringFromVariable {
+func BindString(v *string) StringPointer {
 	if v == nil {
 		return NewString().(*boundString) // never allow a nil value pointer
 	}
@@ -310,7 +310,7 @@ func (b *boundString) Set(val string) {
 	b.trigger()
 }
 
-func (b *boundString) UpdateFromVariable() {
+func (b *boundString) Reload() {
 	if b.val == nil {
 		return
 	}
