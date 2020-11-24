@@ -15,12 +15,6 @@ type DataItem interface {
 	RemoveListener(DataListener)
 }
 
-// DataPointer is used by any binding that is backed by a source variable.
-type DataPointer interface {
-	// Reload should be called if this binding's value has been directly edited and the value should be reloaded.
-	Reload()
-}
-
 // DataListener is any object that can register for changes in a bindable DataItem.
 // See NewDataListener to define a new listener using just an inline function.
 type DataListener interface {

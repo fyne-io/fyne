@@ -10,10 +10,12 @@ type Bool interface {
 	Set(bool)
 }
 
-// BoolPointer supports binding a bool value in a Fyne application
-type BoolPointer interface {
+// BoolFromPointer supports binding a bool value in a Fyne application
+type BoolFromPointer interface {
 	Bool
-	DataPointer
+
+	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
+	Reload()
 }
 
 // NewBool returns a bindable bool value that is managed internally.
@@ -23,7 +25,7 @@ func NewBool() Bool {
 }
 
 // BindBool returns a new bindable value that controls the contents of the provided bool variable.
-func BindBool(v *bool) BoolPointer {
+func BindBool(v *bool) BoolFromPointer {
 	if v == nil {
 		return NewBool().(*boundBool) // never allow a nil value pointer
 	}
@@ -73,10 +75,12 @@ type Float interface {
 	Set(float64)
 }
 
-// FloatPointer supports binding a float64 value in a Fyne application
-type FloatPointer interface {
+// FloatFromPointer supports binding a float64 value in a Fyne application
+type FloatFromPointer interface {
 	Float
-	DataPointer
+
+	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
+	Reload()
 }
 
 // NewFloat returns a bindable float64 value that is managed internally.
@@ -86,7 +90,7 @@ func NewFloat() Float {
 }
 
 // BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
-func BindFloat(v *float64) FloatPointer {
+func BindFloat(v *float64) FloatFromPointer {
 	if v == nil {
 		return NewFloat().(*boundFloat) // never allow a nil value pointer
 	}
@@ -136,10 +140,12 @@ type Int interface {
 	Set(int)
 }
 
-// IntPointer supports binding a int value in a Fyne application
-type IntPointer interface {
+// IntFromPointer supports binding a int value in a Fyne application
+type IntFromPointer interface {
 	Int
-	DataPointer
+
+	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
+	Reload()
 }
 
 // NewInt returns a bindable int value that is managed internally.
@@ -149,7 +155,7 @@ func NewInt() Int {
 }
 
 // BindInt returns a new bindable value that controls the contents of the provided int variable.
-func BindInt(v *int) IntPointer {
+func BindInt(v *int) IntFromPointer {
 	if v == nil {
 		return NewInt().(*boundInt) // never allow a nil value pointer
 	}
@@ -199,10 +205,12 @@ type Rune interface {
 	Set(rune)
 }
 
-// RunePointer supports binding a rune value in a Fyne application
-type RunePointer interface {
+// RuneFromPointer supports binding a rune value in a Fyne application
+type RuneFromPointer interface {
 	Rune
-	DataPointer
+
+	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
+	Reload()
 }
 
 // NewRune returns a bindable rune value that is managed internally.
@@ -212,7 +220,7 @@ func NewRune() Rune {
 }
 
 // BindRune returns a new bindable value that controls the contents of the provided rune variable.
-func BindRune(v *rune) RunePointer {
+func BindRune(v *rune) RuneFromPointer {
 	if v == nil {
 		return NewRune().(*boundRune) // never allow a nil value pointer
 	}
@@ -262,10 +270,12 @@ type String interface {
 	Set(string)
 }
 
-// StringPointer supports binding a string value in a Fyne application
-type StringPointer interface {
+// StringFromPointer supports binding a string value in a Fyne application
+type StringFromPointer interface {
 	String
-	DataPointer
+
+	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
+	Reload()
 }
 
 // NewString returns a bindable string value that is managed internally.
@@ -275,7 +285,7 @@ func NewString() String {
 }
 
 // BindString returns a new bindable value that controls the contents of the provided string variable.
-func BindString(v *string) StringPointer {
+func BindString(v *string) StringFromPointer {
 	if v == nil {
 		return NewString().(*boundString) // never allow a nil value pointer
 	}

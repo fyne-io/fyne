@@ -19,10 +19,12 @@ type {{ .Name }} interface {
 	Set({{ .Type }})
 }
 
-// {{ .Name }}Pointer supports binding a {{ .Type }} value in a Fyne application
-type {{ .Name }}Pointer interface {
+// {{ .Name }}FromPointer supports binding a {{ .Type }} value in a Fyne application
+type {{ .Name }}FromPointer interface {
 	{{.Name }}
-	DataPointer
+
+	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
+	Reload()
 }
 
 // New{{ .Name }} returns a bindable {{ .Type }} value that is managed internally.
@@ -32,7 +34,7 @@ func New{{ .Name }}() {{ .Name }} {
 }
 
 // Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
-func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }}Pointer {
+func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }}FromPointer {
 	if v == nil {
 		return New{{ .Name }}().(*bound{{ .Name }}) // never allow a nil value pointer
 	}
