@@ -3,15 +3,15 @@
 
 package binding
 
-// Bool supports binding a bool value in a Fyne application
+// Bool supports binding a new bool value in a Fyne application.
 type Bool interface {
 	DataItem
 	Get() bool
 	Set(bool)
 }
 
-// BoolFromPointer supports binding a bool value in a Fyne application
-type BoolFromPointer interface {
+// BoolPointer supports binding to an existing bool value in a Fyne application.
+type BoolPointer interface {
 	Bool
 
 	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
@@ -24,8 +24,9 @@ func NewBool() Bool {
 	return &boundBool{val: &blank}
 }
 
-// BindBool returns a new bindable value that controls the contents of the provided bool variable.
-func BindBool(v *bool) BoolFromPointer {
+// BindBool returns a binding to an existing bool value passed into this function.
+// If you modify the bool value directly you should call Reload() to inform the binding.
+func BindBool(v *bool) BoolPointer {
 	if v == nil {
 		return NewBool().(*boundBool) // never allow a nil value pointer
 	}
@@ -56,15 +57,15 @@ func (b *boundBool) Reload() {
 	b.trigger()
 }
 
-// Float supports binding a float64 value in a Fyne application
+// Float supports binding a new float64 value in a Fyne application.
 type Float interface {
 	DataItem
 	Get() float64
 	Set(float64)
 }
 
-// FloatFromPointer supports binding a float64 value in a Fyne application
-type FloatFromPointer interface {
+// FloatPointer supports binding to an existing float64 value in a Fyne application.
+type FloatPointer interface {
 	Float
 
 	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
@@ -77,8 +78,9 @@ func NewFloat() Float {
 	return &boundFloat{val: &blank}
 }
 
-// BindFloat returns a new bindable value that controls the contents of the provided float64 variable.
-func BindFloat(v *float64) FloatFromPointer {
+// BindFloat returns a binding to an existing float64 value passed into this function.
+// If you modify the float64 value directly you should call Reload() to inform the binding.
+func BindFloat(v *float64) FloatPointer {
 	if v == nil {
 		return NewFloat().(*boundFloat) // never allow a nil value pointer
 	}
@@ -109,15 +111,15 @@ func (b *boundFloat) Reload() {
 	b.trigger()
 }
 
-// Int supports binding a int value in a Fyne application
+// Int supports binding a new int value in a Fyne application.
 type Int interface {
 	DataItem
 	Get() int
 	Set(int)
 }
 
-// IntFromPointer supports binding a int value in a Fyne application
-type IntFromPointer interface {
+// IntPointer supports binding to an existing int value in a Fyne application.
+type IntPointer interface {
 	Int
 
 	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
@@ -130,8 +132,9 @@ func NewInt() Int {
 	return &boundInt{val: &blank}
 }
 
-// BindInt returns a new bindable value that controls the contents of the provided int variable.
-func BindInt(v *int) IntFromPointer {
+// BindInt returns a binding to an existing int value passed into this function.
+// If you modify the int value directly you should call Reload() to inform the binding.
+func BindInt(v *int) IntPointer {
 	if v == nil {
 		return NewInt().(*boundInt) // never allow a nil value pointer
 	}
@@ -162,15 +165,15 @@ func (b *boundInt) Reload() {
 	b.trigger()
 }
 
-// Rune supports binding a rune value in a Fyne application
+// Rune supports binding a new rune value in a Fyne application.
 type Rune interface {
 	DataItem
 	Get() rune
 	Set(rune)
 }
 
-// RuneFromPointer supports binding a rune value in a Fyne application
-type RuneFromPointer interface {
+// RunePointer supports binding to an existing rune value in a Fyne application.
+type RunePointer interface {
 	Rune
 
 	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
@@ -183,8 +186,9 @@ func NewRune() Rune {
 	return &boundRune{val: &blank}
 }
 
-// BindRune returns a new bindable value that controls the contents of the provided rune variable.
-func BindRune(v *rune) RuneFromPointer {
+// BindRune returns a binding to an existing rune value passed into this function.
+// If you modify the rune value directly you should call Reload() to inform the binding.
+func BindRune(v *rune) RunePointer {
 	if v == nil {
 		return NewRune().(*boundRune) // never allow a nil value pointer
 	}
@@ -215,15 +219,15 @@ func (b *boundRune) Reload() {
 	b.trigger()
 }
 
-// String supports binding a string value in a Fyne application
+// String supports binding a new string value in a Fyne application.
 type String interface {
 	DataItem
 	Get() string
 	Set(string)
 }
 
-// StringFromPointer supports binding a string value in a Fyne application
-type StringFromPointer interface {
+// StringPointer supports binding to an existing string value in a Fyne application.
+type StringPointer interface {
 	String
 
 	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
@@ -236,8 +240,9 @@ func NewString() String {
 	return &boundString{val: &blank}
 }
 
-// BindString returns a new bindable value that controls the contents of the provided string variable.
-func BindString(v *string) StringFromPointer {
+// BindString returns a binding to an existing string value passed into this function.
+// If you modify the string value directly you should call Reload() to inform the binding.
+func BindString(v *string) StringPointer {
 	if v == nil {
 		return NewString().(*boundString) // never allow a nil value pointer
 	}

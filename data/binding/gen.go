@@ -12,15 +12,15 @@ import (
 )
 
 const itemBindTemplate = `
-// {{ .Name }} supports binding a {{ .Type }} value in a Fyne application
+// {{ .Name }} supports binding a new {{ .Type }} value in a Fyne application.
 type {{ .Name }} interface {
 	DataItem
 	Get() {{ .Type }}
 	Set({{ .Type }})
 }
 
-// {{ .Name }}FromPointer supports binding a {{ .Type }} value in a Fyne application
-type {{ .Name }}FromPointer interface {
+// {{ .Name }}Pointer supports binding to an existing {{ .Type }} value in a Fyne application.
+type {{ .Name }}Pointer interface {
 	{{.Name }}
 
 	// Reload should be called if the value this binding points to has been directly edited and should be reloaded.
@@ -33,8 +33,9 @@ func New{{ .Name }}() {{ .Name }} {
 	return &bound{{ .Name }}{val: &blank}
 }
 
-// Bind{{ .Name }} returns a new bindable value that controls the contents of the provided {{ .Type }} variable.
-func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }}FromPointer {
+// Bind{{ .Name }} returns a binding to an existing {{ .Type }} value passed into this function.
+// If you modify the {{ .Type }} value directly you should call Reload() to inform the binding.
+func Bind{{ .Name }}(v *{{ .Type }}) {{ .Name }}Pointer {
 	if v == nil {
 		return New{{ .Name }}().(*bound{{ .Name }}) // never allow a nil value pointer
 	}
