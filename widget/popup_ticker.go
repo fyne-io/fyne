@@ -72,6 +72,15 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 		}
 	}
 
+	if string(currentData[nearestIndex]) == separator {
+		// Don't start on a separator.
+		if nearestIndex > 1 {
+			nearestIndex = nearestIndex - 1
+		} else {
+			nearestIndex = nearestIndex + 1
+		}
+	}
+
 	for i := nearestIndex; i >= 0; i-- {
 		if string(currentData[i]) == separator {
 			break
