@@ -10,7 +10,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSplitContainer(t *testing.T) {
+func TestSplitContainer_MinSize(t *testing.T) {
+	textA := canvas.NewText("TEXTA", color.NRGBA{0, 0xff, 0, 0})
+	textB := canvas.NewText("TEXTB", color.NRGBA{0, 0xff, 0, 0})
+	t.Run("Horizontal", func(t *testing.T) {
+		min := NewHSplitContainer(textA, textB).MinSize()
+		assert.Equal(t, textA.MinSize().Width+textB.MinSize().Width+dividerThickness(), min.Width)
+		assert.Equal(t, fyne.Max(textA.MinSize().Height, fyne.Max(textB.MinSize().Height, dividerLength())), min.Height)
+	})
+	t.Run("Vertical", func(t *testing.T) {
+		min := NewVSplitContainer(textA, textB).MinSize()
+		assert.Equal(t, fyne.Max(textA.MinSize().Width, fyne.Max(textB.MinSize().Width, dividerLength())), min.Width)
+		assert.Equal(t, textA.MinSize().Height+textB.MinSize().Height+dividerThickness(), min.Height)
+	})
+}
+
+func TestSplitContainer_Resize(t *testing.T) {
 	for name, tt := range map[string]struct {
 		horizontal       bool
 		size             fyne.Size
@@ -45,21 +60,6 @@ func TestSplitContainer(t *testing.T) {
 			assert.Equal(t, tt.wantTrailingSize, objB.Size(), "trailing size")
 		})
 	}
-}
-
-func TestSplitContainer_MinSize(t *testing.T) {
-	textA := canvas.NewText("TEXTA", color.NRGBA{0, 0xff, 0, 0})
-	textB := canvas.NewText("TEXTB", color.NRGBA{0, 0xff, 0, 0})
-	t.Run("Horizontal", func(t *testing.T) {
-		min := NewHSplitContainer(textA, textB).MinSize()
-		assert.Equal(t, textA.MinSize().Width+textB.MinSize().Width+dividerThickness(), min.Width)
-		assert.Equal(t, fyne.Max(textA.MinSize().Height, fyne.Max(textB.MinSize().Height, dividerLength())), min.Height)
-	})
-	t.Run("Vertical", func(t *testing.T) {
-		min := NewVSplitContainer(textA, textB).MinSize()
-		assert.Equal(t, fyne.Max(textA.MinSize().Width, fyne.Max(textB.MinSize().Width, dividerLength())), min.Width)
-		assert.Equal(t, textA.MinSize().Height+textB.MinSize().Height+dividerThickness(), min.Height)
-	})
 }
 
 func TestSplitContainer_SetRatio(t *testing.T) {
