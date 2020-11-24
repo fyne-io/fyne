@@ -281,12 +281,8 @@ func (r *dividerRenderer) BackgroundColor() color.Color {
 func (r *dividerRenderer) Destroy() {
 }
 
-func halfDividerThickness() int {
-	return theme.Padding()
-}
-
 func dividerThickness() int {
-	return halfDividerThickness() * 2
+	return theme.Padding() * 2
 }
 
 func dividerLength() int {

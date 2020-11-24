@@ -38,17 +38,17 @@ func TestSplitContainer_Resize(t *testing.T) {
 			true,
 			fyne.NewSize(100, 100),
 			fyne.NewPos(0, 0),
-			fyne.NewSize(50-halfDividerThickness(), 100),
-			fyne.NewPos(50+halfDividerThickness(), 0),
-			fyne.NewSize(50-halfDividerThickness(), 100),
+			fyne.NewSize(50-dividerThickness()/2, 100),
+			fyne.NewPos(50+dividerThickness()/2, 0),
+			fyne.NewSize(50-dividerThickness()/2, 100),
 		},
 		"vertical": {
 			false,
 			fyne.NewSize(100, 100),
 			fyne.NewPos(0, 0),
-			fyne.NewSize(100, 50-halfDividerThickness()),
-			fyne.NewPos(0, 50+halfDividerThickness()),
-			fyne.NewSize(100, 50-halfDividerThickness()),
+			fyne.NewSize(100, 50-dividerThickness()/2),
+			fyne.NewPos(0, 50+dividerThickness()/2),
+			fyne.NewSize(100, 50-dividerThickness()/2),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
