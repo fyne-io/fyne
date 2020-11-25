@@ -3,6 +3,7 @@ package app_test
 import (
 	"testing"
 
+	"fyne.io/fyne"
 	"fyne.io/fyne/internal/app"
 	"fyne.io/fyne/widget"
 
@@ -12,7 +13,7 @@ import (
 
 func TestFocusManager_Focus(t *testing.T) {
 	t.Run("focusing and unfocusing", func(t *testing.T) {
-		manager, entry1, _, entry2, _, entry3 := setupFocusManager(t)
+		manager, entry1, _, _, entry2, _, entry3 := setupFocusManager(t)
 
 		manager.Focus(entry2)
 		assert.Equal(t, entry2, manager.Focused())
@@ -48,24 +49,29 @@ func TestFocusManager_Focus(t *testing.T) {
 	}
 
 	t.Run("focus disabled", func(t *testing.T) {
-		manager, entry1, _, _, disabled, _ := setupFocusManager(t)
+		manager, entry1, _, _, _, disabled, _ := setupFocusManager(t)
 		itBehavesLikeDoingNothing(t, manager, disabled, entry1)
 	})
 
 	t.Run("focus hidden", func(t *testing.T) {
-		manager, entry1, hidden, _, _, _ := setupFocusManager(t)
+		manager, entry1, hidden, _, _, _, _ := setupFocusManager(t)
 		itBehavesLikeDoingNothing(t, manager, hidden, entry1)
 	})
 
+	t.Run("focus visible inside hidden", func(t *testing.T) {
+		manager, entry1, _, visibleInsideHidden, _, _, _ := setupFocusManager(t)
+		itBehavesLikeDoingNothing(t, manager, visibleInsideHidden, entry1)
+	})
+
 	t.Run("focus foreign", func(t *testing.T) {
-		manager, entry1, _, _, _, _ := setupFocusManager(t)
+		manager, entry1, _, _, _, _, _ := setupFocusManager(t)
 		foreigner := &focusable{}
 		itBehavesLikeDoingNothing(t, manager, foreigner, entry1)
 	})
 }
 
 func TestFocusManager_FocusLost_FocusGained(t *testing.T) {
-	manager, entry1, _, entry2, _, _ := setupFocusManager(t)
+	manager, entry1, _, _, entry2, _, _ := setupFocusManager(t)
 
 	manager.Focus(entry2)
 	require.Equal(t, entry2, manager.Focused())
@@ -84,7 +90,7 @@ func TestFocusManager_FocusLost_FocusGained(t *testing.T) {
 }
 
 func TestFocusManager_FocusNext(t *testing.T) {
-	manager, entry1, _, entry2, _, entry3 := setupFocusManager(t)
+	manager, entry1, _, _, entry2, _, entry3 := setupFocusManager(t)
 
 	manager.FocusNext()
 	assert.Equal(t, entry1, manager.Focused())
@@ -107,7 +113,7 @@ func TestFocusManager_FocusNext(t *testing.T) {
 }
 
 func TestFocusManager_FocusPrevious(t *testing.T) {
-	manager, entry1, _, entry2, _, entry3 := setupFocusManager(t)
+	manager, entry1, _, _, entry2, _, entry3 := setupFocusManager(t)
 
 	manager.FocusPrevious()
 	assert.Equal(t, entry3, manager.Focused())
@@ -129,9 +135,25 @@ func TestFocusManager_FocusPrevious(t *testing.T) {
 	assert.False(t, entry1.focused)
 }
 
+var _ fyne.Focusable = (*focusable)(nil)
+var _ fyne.Disableable = (*focusable)(nil)
+
 type focusable struct {
-	widget.Entry
-	focused bool
+	fyne.Container
+	disabled bool
+	focused  bool
+}
+
+func (f *focusable) Disable() {
+	f.disabled = true
+}
+
+func (f *focusable) Disabled() bool {
+	return f.disabled
+}
+
+func (f *focusable) Enable() {
+	f.disabled = false
 }
 
 func (f *focusable) FocusGained() {
@@ -145,15 +167,30 @@ func (f *focusable) FocusLost() {
 	f.focused = false
 }
 
-func setupFocusManager(t *testing.T) (m *app.FocusManager, entry1, hidden, entry2, disabled, entry3 *focusable) {
+func (f *focusable) Focused() bool {
+	return f.focused
+}
+
+func (f *focusable) TypedRune(_ rune) {
+}
+
+func (f *focusable) TypedKey(_ *fyne.KeyEvent) {
+}
+
+func setupFocusManager(t *testing.T) (m *app.FocusManager, entry1, hidden, visibleInsideHidden, entry2, disabled, entry3 *focusable) {
 	entry1 = &focusable{}
-	hidden = &focusable{}
+	visibleInsideHidden = &focusable{}
+	hidden = &focusable{
+		Container: fyne.Container{Objects: []fyne.CanvasObject{visibleInsideHidden}},
+	}
 	hidden.Hide()
 	entry2 = &focusable{}
 	disabled = &focusable{}
 	disabled.Disable()
 	entry3 = &focusable{}
 	m = app.NewFocusManager(widget.NewVBox(entry1, hidden, entry2, disabled, entry3))
-	assert.Nil(t, m.Focused())
+	require.Nil(t, m.Focused())
+	require.False(t, hidden.Visible())
+	require.True(t, visibleInsideHidden.Visible())
 	return
 }
