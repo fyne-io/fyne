@@ -486,15 +486,9 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 	var icon *canvas.Image
 	if b.Icon != nil {
 		icon = canvas.NewImageFromResource(b.Icon)
-		if b.Importance == HighImportance {
-			icon.Resource = theme.NewPrimaryThemedResource(b.Icon)
-		}
 	}
 
 	label := canvas.NewText(b.Text, theme.TextColor())
-	if b.Importance == HighImportance {
-		label.Color = theme.PrimaryColor()
-	}
 	label.TextStyle.Bold = true
 	label.Alignment = fyne.TextAlignCenter
 
@@ -503,12 +497,14 @@ func (b *tabButton) CreateRenderer() fyne.WidgetRenderer {
 		objects = append(objects, icon)
 	}
 
-	return &tabButtonRenderer{
+	r := &tabButtonRenderer{
 		button:  b,
 		icon:    icon,
 		label:   label,
 		objects: objects,
 	}
+	r.Refresh()
+	return r
 }
 
 func (b *tabButton) MinSize() fyne.Size {
@@ -633,6 +629,11 @@ func (r *tabButtonRenderer) Refresh() {
 		r.label.Color = theme.TextColor()
 	}
 	r.label.TextSize = theme.TextSize()
+	if r.button.Text == "" {
+		r.label.Hide()
+	} else {
+		r.label.Show()
+	}
 
 	if r.icon != nil && r.icon.Resource != nil {
 		switch res := r.icon.Resource.(type) {

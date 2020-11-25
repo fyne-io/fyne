@@ -83,6 +83,9 @@ func TestFileIcon_NewURI_WithFolder(t *testing.T) {
 }
 
 func TestFileIcon_NewFileIcon_Rendered(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	workingDir, err := os.Getwd()
 	if err != nil {
 		fyne.LogError("Could not get current working directory", err)
