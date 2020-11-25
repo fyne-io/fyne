@@ -31,6 +31,7 @@ type packager struct {
 	appBuild                     int
 	install, release             bool
 	certificate, profile         string // optional flags for releasing
+	tags                         string
 }
 
 // NewPackager returns a packager command that can wrap executables into full GUI app packages.
@@ -48,6 +49,7 @@ func (p *packager) AddFlags() {
 	flag.StringVar(&p.appVersion, "appVersion", "", "Version number in the form x, x.y or x.y.z semantic version")
 	flag.IntVar(&p.appBuild, "appBuild", 0, "Build number, should be greater than 0 and incremented for each build")
 	flag.BoolVar(&p.release, "release", false, "Should this package be prepared for release? (disable debug etc)")
+	flag.StringVar(&p.tags, "tags", "", "A comma-separated list of build tags")
 }
 
 func (*packager) PrintHelp(indent string) {
@@ -71,10 +73,12 @@ func (p *packager) Run(_ []string) {
 }
 
 func (p *packager) buildPackage() error {
+	tags := strings.Split(p.tags, ",")
 	b := &builder{
 		os:      p.os,
 		srcdir:  p.srcDir,
 		release: p.release,
+		tags:    tags,
 	}
 
 	return b.build()

@@ -5,6 +5,10 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 ## 1.4.2 - Ongoing
 
+### Added
+
+* [fyne-cli] Add support for passing custom build tags (#1538)
+
 ### Fixed
 
 * [fyne-cli] Android: allow to specify an inline password for the keystore
