@@ -13,7 +13,7 @@ import (
 var _ fyne.Draggable = (*TickerPopUp)(nil)
 
 type ringBuffer struct {
-	data []byte
+	data []rune
 	start int // Start of ringBuffer can be anywhere in array.
 	bufferWidth int
 	width int                     // Width of draw area
@@ -26,7 +26,7 @@ type PopupTickerListener interface {
 	TapCallback(fyne.Tappable, *fyne.PointEvent)
 }
 
-func (rb *ringBuffer) Init(start int, data []byte) {
+func (rb *ringBuffer) Init(start int, data []rune) {
 	rb.data = data
 	rb.start = start
 }
@@ -101,8 +101,8 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 }
 
 // Data - returns current data at current turn, read circularly
-func (rb *ringBuffer) Data() []byte {
-	var data []byte
+func (rb *ringBuffer) Data() []rune {
+	var data []rune
 	if rb.start == 0 {
 		data = rb.data
 	} else {
@@ -319,7 +319,7 @@ func ShowTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, po
 func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int) *TickerPopUp {
 	if label, ok := content.(*Label); ok {
 
-		rb := ringBuffer{ data: []byte(label.Text), start: 0, labelFontSize: fontSize, labelTextStyle: label.TextStyle, width: size.Width, forward: true }
+		rb := ringBuffer{ data: []rune(label.Text), start: 0, labelFontSize: fontSize, labelTextStyle: label.TextStyle, width: size.Width, forward: true }
 		label.Text = string(rb.Data())
 
 		ret := &TickerPopUp{Content: content, rb: rb, Canvas: canvas, popupTickerListener: popupTickerListener, modal: false}
