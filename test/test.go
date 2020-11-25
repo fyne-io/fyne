@@ -42,6 +42,8 @@ func AssertImageMatches(t *testing.T, masterFilename string, img image.Image, ms
 // Every element starts on a new line indented one more than its parent.
 // Closing elements stand on their own line, too, using the same indentation as the opening element.
 // The only exception to this are text elements which do not contain line breaks unless the text includes them.
+//
+// Since: 2.0.0
 func AssertRendersToMarkup(t *testing.T, expected string, c fyne.Canvas, msgAndArgs ...interface{}) bool {
 	return assert.Equal(t, removeCommonIndent(expected), snapshot(c), msgAndArgs...)
 }
