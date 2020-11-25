@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"image/color"
-	"log"
 
 	"fyne.io/fyne"
 )
@@ -17,15 +16,7 @@ type ThemedResource struct {
 }
 
 // NewThemedResource creates a resource that adapts to the current theme setting.
-//
-// Deprecated: NewThemedResource() will be replaced with a single parameter version in a future release
-// usage of this method will break, but using the first parameter only will be a trivial change.
-func NewThemedResource(src, ignored fyne.Resource) *ThemedResource {
-	if ignored != nil {
-		log.Println("Deprecation Warning: In version 2.0 NewThemedResource() will only accept a single StaticResource.\n" +
-			"While two resources are still supported to preserve backwards compatibility, only the first resource is rendered.\n" +
-			"The resource color is set by the theme's IconColor().")
-	}
+func NewThemedResource(src fyne.Resource) *ThemedResource {
 	return &ThemedResource{
 		source: src,
 	}
@@ -191,98 +182,98 @@ var (
 )
 
 func init() {
-	cancel = NewThemedResource(cancelIconRes, nil)
-	confirm = NewThemedResource(checkIconRes, nil)
-	delete = NewThemedResource(deleteIconRes, nil)
-	search = NewThemedResource(searchIconRes, nil)
-	searchReplace = NewThemedResource(searchreplaceIconRes, nil)
-	menu = NewThemedResource(menuIconRes, nil)
-	menuExpand = NewThemedResource(menuexpandIconRes, nil)
+	cancel = NewThemedResource(cancelIconRes)
+	confirm = NewThemedResource(checkIconRes)
+	delete = NewThemedResource(deleteIconRes)
+	search = NewThemedResource(searchIconRes)
+	searchReplace = NewThemedResource(searchreplaceIconRes)
+	menu = NewThemedResource(menuIconRes)
+	menuExpand = NewThemedResource(menuexpandIconRes)
 
-	checked = NewThemedResource(checkboxIconRes, nil)
-	unchecked = NewThemedResource(checkboxblankIconRes, nil)
-	radioButton = NewThemedResource(radiobuttonIconRes, nil)
-	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes, nil)
+	checked = NewThemedResource(checkboxIconRes)
+	unchecked = NewThemedResource(checkboxblankIconRes)
+	radioButton = NewThemedResource(radiobuttonIconRes)
+	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes)
 
-	contentAdd = NewThemedResource(contentaddIconRes, nil)
-	contentClear = NewThemedResource(cancelIconRes, nil)
-	contentRemove = NewThemedResource(contentremoveIconRes, nil)
-	contentCut = NewThemedResource(contentcutIconRes, nil)
-	contentCopy = NewThemedResource(contentcopyIconRes, nil)
-	contentPaste = NewThemedResource(contentpasteIconRes, nil)
-	contentRedo = NewThemedResource(contentredoIconRes, nil)
-	contentUndo = NewThemedResource(contentundoIconRes, nil)
+	contentAdd = NewThemedResource(contentaddIconRes)
+	contentClear = NewThemedResource(cancelIconRes)
+	contentRemove = NewThemedResource(contentremoveIconRes)
+	contentCut = NewThemedResource(contentcutIconRes)
+	contentCopy = NewThemedResource(contentcopyIconRes)
+	contentPaste = NewThemedResource(contentpasteIconRes)
+	contentRedo = NewThemedResource(contentredoIconRes)
+	contentUndo = NewThemedResource(contentundoIconRes)
 
-	colorAchromatic = NewThemedResource(colorachromaticIconRes, nil)
-	colorChromatic = NewThemedResource(colorchromaticIconRes, nil)
-	colorPalette = NewThemedResource(colorpaletteIconRes, nil)
+	colorAchromatic = NewThemedResource(colorachromaticIconRes)
+	colorChromatic = NewThemedResource(colorchromaticIconRes)
+	colorPalette = NewThemedResource(colorpaletteIconRes)
 
-	document = NewThemedResource(documentIconRes, nil)
-	documentCreate = NewThemedResource(documentcreateIconRes, nil)
-	documentPrint = NewThemedResource(documentprintIconRes, nil)
-	documentSave = NewThemedResource(documentsaveIconRes, nil)
+	document = NewThemedResource(documentIconRes)
+	documentCreate = NewThemedResource(documentcreateIconRes)
+	documentPrint = NewThemedResource(documentprintIconRes)
+	documentSave = NewThemedResource(documentsaveIconRes)
 
-	info = NewThemedResource(infoIconRes, nil)
-	question = NewThemedResource(questionIconRes, nil)
-	warning = NewThemedResource(warningIconRes, nil)
-	errori = NewThemedResource(errorIconRes, nil)
+	info = NewThemedResource(infoIconRes)
+	question = NewThemedResource(questionIconRes)
+	warning = NewThemedResource(warningIconRes)
+	errori = NewThemedResource(errorIconRes)
 
-	mailAttachment = NewThemedResource(mailattachmentIconRes, nil)
-	mailCompose = NewThemedResource(mailcomposeIconRes, nil)
-	mailForward = NewThemedResource(mailforwardIconRes, nil)
-	mailReply = NewThemedResource(mailreplyIconRes, nil)
-	mailReplyAll = NewThemedResource(mailreplyallIconRes, nil)
-	mailSend = NewThemedResource(mailsendIconRes, nil)
+	mailAttachment = NewThemedResource(mailattachmentIconRes)
+	mailCompose = NewThemedResource(mailcomposeIconRes)
+	mailForward = NewThemedResource(mailforwardIconRes)
+	mailReply = NewThemedResource(mailreplyIconRes)
+	mailReplyAll = NewThemedResource(mailreplyallIconRes)
+	mailSend = NewThemedResource(mailsendIconRes)
 
-	mediaFastForward = NewThemedResource(mediafastforwardIconRes, nil)
-	mediaFastRewind = NewThemedResource(mediafastrewindIconRes, nil)
-	mediaPause = NewThemedResource(mediapauseIconRes, nil)
-	mediaPlay = NewThemedResource(mediaplayIconRes, nil)
-	mediaRecord = NewThemedResource(mediarecordIconRes, nil)
-	mediaReplay = NewThemedResource(mediareplayIconRes, nil)
-	mediaSkipNext = NewThemedResource(mediaskipnextIconRes, nil)
-	mediaSkipPrevious = NewThemedResource(mediaskippreviousIconRes, nil)
-	mediaStop = NewThemedResource(mediastopIconRes, nil)
+	mediaFastForward = NewThemedResource(mediafastforwardIconRes)
+	mediaFastRewind = NewThemedResource(mediafastrewindIconRes)
+	mediaPause = NewThemedResource(mediapauseIconRes)
+	mediaPlay = NewThemedResource(mediaplayIconRes)
+	mediaRecord = NewThemedResource(mediarecordIconRes)
+	mediaReplay = NewThemedResource(mediareplayIconRes)
+	mediaSkipNext = NewThemedResource(mediaskipnextIconRes)
+	mediaSkipPrevious = NewThemedResource(mediaskippreviousIconRes)
+	mediaStop = NewThemedResource(mediastopIconRes)
 
-	arrowBack = NewThemedResource(arrowbackIconRes, nil)
-	arrowDown = NewThemedResource(arrowdownIconRes, nil)
-	arrowForward = NewThemedResource(arrowforwardIconRes, nil)
-	arrowUp = NewThemedResource(arrowupIconRes, nil)
-	arrowDropDown = NewThemedResource(arrowdropdownIconRes, nil)
-	arrowDropUp = NewThemedResource(arrowdropupIconRes, nil)
+	arrowBack = NewThemedResource(arrowbackIconRes)
+	arrowDown = NewThemedResource(arrowdownIconRes)
+	arrowForward = NewThemedResource(arrowforwardIconRes)
+	arrowUp = NewThemedResource(arrowupIconRes)
+	arrowDropDown = NewThemedResource(arrowdropdownIconRes)
+	arrowDropUp = NewThemedResource(arrowdropupIconRes)
 
-	file = NewThemedResource(fileIconRes, nil)
-	fileApplication = NewThemedResource(fileapplicationIconRes, nil)
-	fileAudio = NewThemedResource(fileaudioIconRes, nil)
-	fileImage = NewThemedResource(fileimageIconRes, nil)
-	fileText = NewThemedResource(filetextIconRes, nil)
-	fileVideo = NewThemedResource(filevideoIconRes, nil)
-	folder = NewThemedResource(folderIconRes, nil)
-	folderNew = NewThemedResource(foldernewIconRes, nil)
-	folderOpen = NewThemedResource(folderopenIconRes, nil)
-	help = NewThemedResource(helpIconRes, nil)
-	history = NewThemedResource(historyIconRes, nil)
-	home = NewThemedResource(homeIconRes, nil)
-	settings = NewThemedResource(settingsIconRes, nil)
+	file = NewThemedResource(fileIconRes)
+	fileApplication = NewThemedResource(fileapplicationIconRes)
+	fileAudio = NewThemedResource(fileaudioIconRes)
+	fileImage = NewThemedResource(fileimageIconRes)
+	fileText = NewThemedResource(filetextIconRes)
+	fileVideo = NewThemedResource(filevideoIconRes)
+	folder = NewThemedResource(folderIconRes)
+	folderNew = NewThemedResource(foldernewIconRes)
+	folderOpen = NewThemedResource(folderopenIconRes)
+	help = NewThemedResource(helpIconRes)
+	history = NewThemedResource(historyIconRes)
+	home = NewThemedResource(homeIconRes)
+	settings = NewThemedResource(settingsIconRes)
 
-	viewFullScreen = NewThemedResource(viewfullscreenIconRes, nil)
-	viewRefresh = NewThemedResource(viewrefreshIconRes, nil)
-	viewRestore = NewThemedResource(viewzoomfitIconRes, nil)
-	viewZoomFit = NewThemedResource(viewzoomfitIconRes, nil)
-	viewZoomIn = NewThemedResource(viewzoominIconRes, nil)
-	viewZoomOut = NewThemedResource(viewzoomoutIconRes, nil)
+	viewFullScreen = NewThemedResource(viewfullscreenIconRes)
+	viewRefresh = NewThemedResource(viewrefreshIconRes)
+	viewRestore = NewThemedResource(viewzoomfitIconRes)
+	viewZoomFit = NewThemedResource(viewzoomfitIconRes)
+	viewZoomIn = NewThemedResource(viewzoominIconRes)
+	viewZoomOut = NewThemedResource(viewzoomoutIconRes)
 
-	visibility = NewThemedResource(visibilityIconRes, nil)
-	visibilityOff = NewThemedResource(visibilityoffIconRes, nil)
+	visibility = NewThemedResource(visibilityIconRes)
+	visibilityOff = NewThemedResource(visibilityoffIconRes)
 
-	volumeDown = NewThemedResource(volumedownIconRes, nil)
-	volumeMute = NewThemedResource(volumemuteIconRes, nil)
-	volumeUp = NewThemedResource(volumeupIconRes, nil)
+	volumeDown = NewThemedResource(volumedownIconRes)
+	volumeMute = NewThemedResource(volumemuteIconRes)
+	volumeUp = NewThemedResource(volumeupIconRes)
 
-	download = NewThemedResource(downloadIconRes, nil)
-	computer = NewThemedResource(computerIconRes, nil)
-	storage = NewThemedResource(storageIconRes, nil)
-	upload = NewThemedResource(uploadIconRes, nil)
+	download = NewThemedResource(downloadIconRes)
+	computer = NewThemedResource(computerIconRes)
+	storage = NewThemedResource(storageIconRes)
+	upload = NewThemedResource(uploadIconRes)
 }
 
 // FyneLogo returns a resource containing the Fyne logo

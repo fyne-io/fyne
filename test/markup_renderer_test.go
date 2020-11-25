@@ -100,7 +100,7 @@ func Test_snapshot(t *testing.T) {
 				"</canvas>\n",
 		},
 		"image themed resource": {
-			content: canvas.NewImageFromResource(theme.NewThemedResource(fyne.NewStaticResource("resource name", []byte{}), nil)),
+			content: canvas.NewImageFromResource(theme.NewThemedResource(fyne.NewStaticResource("resource name", []byte{}))),
 			want: "<canvas size=\"100x100\">\n" +
 				"\t<content>\n" +
 				"\t\t<image rsc=\"resource name\" size=\"100x100\" themed=\"default\"/>\n" +
