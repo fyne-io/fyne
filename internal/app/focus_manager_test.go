@@ -33,44 +33,34 @@ func TestFocusManager_Focus(t *testing.T) {
 		assert.False(t, entry3.focused)
 	})
 
-	itBehavesLikeUnfocus := func(manager *app.FocusManager, notFocusableObj *focusable, focusableObj *focusable) {
+	itBehavesLikeDoingNothing := func(t *testing.T, manager *app.FocusManager, notFocusableObj *focusable, focusableObj *focusable) {
 		manager.Focus(notFocusableObj)
 		assert.Nil(t, manager.Focused())
 		assert.False(t, notFocusableObj.focused)
 
 		manager.Focus(focusableObj)
+		require.Equal(t, focusableObj, manager.Focused())
 		require.True(t, focusableObj.focused)
 		manager.Focus(notFocusableObj)
-		assert.Nil(t, manager.Focused())
 		assert.False(t, notFocusableObj.focused)
-		assert.False(t, focusableObj.focused)
+		assert.Equal(t, focusableObj, manager.Focused())
+		assert.True(t, focusableObj.focused)
 	}
 
 	t.Run("focus disabled", func(t *testing.T) {
 		manager, entry1, _, _, disabled, _ := setupFocusManager(t)
-		itBehavesLikeUnfocus(manager, disabled, entry1)
+		itBehavesLikeDoingNothing(t, manager, disabled, entry1)
 	})
 
 	t.Run("focus hidden", func(t *testing.T) {
 		manager, entry1, hidden, _, _, _ := setupFocusManager(t)
-		itBehavesLikeUnfocus(manager, hidden, entry1)
+		itBehavesLikeDoingNothing(t, manager, hidden, entry1)
 	})
 
 	t.Run("focus foreign", func(t *testing.T) {
 		manager, entry1, _, _, _, _ := setupFocusManager(t)
 		foreigner := &focusable{}
-
-		manager.Focus(foreigner)
-		assert.Nil(t, manager.Focused())
-		assert.False(t, foreigner.focused)
-
-		manager.Focus(entry1)
-		require.Equal(t, entry1, manager.Focused())
-		require.True(t, entry1.focused)
-		manager.Focus(foreigner)
-		assert.False(t, foreigner.focused)
-		assert.Equal(t, entry1, manager.Focused())
-		assert.True(t, entry1.focused)
+		itBehavesLikeDoingNothing(t, manager, foreigner, entry1)
 	})
 }
 
