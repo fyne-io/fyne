@@ -72,9 +72,9 @@ func checkerPattern(x, y, _, _ int) color.Color {
 }
 
 func iconList() []string {
-	var ret []string
-	for _, icon := range icons {
-		ret = append(ret, icon.name)
+	ret := make([]string, len(icons))
+	for i, icon := range icons {
+		ret[i] = icon.name
 	}
 
 	return ret
