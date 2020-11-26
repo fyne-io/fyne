@@ -19,9 +19,9 @@ func TestExtendDefaultTheme(t *testing.T) {
 
 func TestExtendTheme_Color(t *testing.T) {
 	newTheme := ExtendDefaultTheme(wrappedTheme)
-	assert.Equal(t, overrideColor, newTheme.Color(Colors.Background, Variants.Light))
-	assert.Equal(t, ShadowColor(), newTheme.Color(Colors.Shadow, Variants.Light))
-	assert.Equal(t, overrideColor, newTheme.Color(Colors.Text, Variants.Light))
+	assert.Equal(t, overrideColor, newTheme.Color(Colors.Background, Variants.Dark))
+	assert.Equal(t, ShadowColor(), newTheme.Color(Colors.Shadow, Variants.Dark))
+	assert.Equal(t, overrideColor, newTheme.Color(Colors.Text, Variants.Dark))
 }
 
 func TestExtendTheme_Font(t *testing.T) {

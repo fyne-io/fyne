@@ -11,13 +11,13 @@ import (
 //
 // Since: 2.0.0
 func ExtendDefaultTheme(t fyne.Theme) fyne.Theme {
-	return &themeWrapper{override: t}
+	return &themeWrapper{override: t, fallback: DefaultTheme()}
 }
 
 var _ fyne.Theme = (*themeWrapper)(nil)
 
 type themeWrapper struct {
-	override fyne.Theme
+	override, fallback fyne.Theme
 }
 
 func (t *themeWrapper) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
@@ -26,7 +26,7 @@ func (t *themeWrapper) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.C
 		return c
 	}
 
-	return current().Color(n, v)
+	return t.fallback.Color(n, v)
 }
 
 func (t *themeWrapper) Size(n fyne.ThemeSizeName) int {
@@ -35,7 +35,7 @@ func (t *themeWrapper) Size(n fyne.ThemeSizeName) int {
 		return s
 	}
 
-	return current().Size(n)
+	return t.fallback.Size(n)
 }
 
 func (t *themeWrapper) Font(s fyne.TextStyle) fyne.Resource {
@@ -44,5 +44,5 @@ func (t *themeWrapper) Font(s fyne.TextStyle) fyne.Resource {
 		return f
 	}
 
-	return current().Font(s)
+	return t.fallback.Font(s)
 }
