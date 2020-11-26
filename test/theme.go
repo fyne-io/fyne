@@ -100,58 +100,6 @@ func (t *configurableTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) co
 	}
 }
 
-func (t *configurableTheme) ButtonColor() color.Color {
-	return t.button
-}
-
-func (t *configurableTheme) DisabledButtonColor() color.Color {
-	return t.disabledButton
-}
-
-func (t *configurableTheme) DisabledIconColor() color.Color {
-	return t.disabledIcon
-}
-
-func (t *configurableTheme) DisabledTextColor() color.Color {
-	return t.disabledText
-}
-
-func (t *configurableTheme) FocusColor() color.Color {
-	return t.focus
-}
-
-func (t *configurableTheme) HoverColor() color.Color {
-	return t.hover
-}
-
-func (t *configurableTheme) HyperlinkColor() color.Color {
-	return t.hyperlink
-}
-
-func (t *configurableTheme) IconColor() color.Color {
-	return t.icon
-}
-
-func (t *configurableTheme) PlaceHolderColor() color.Color {
-	return t.placeholder
-}
-
-func (t *configurableTheme) PrimaryColor() color.Color {
-	return t.primary
-}
-
-func (t *configurableTheme) ScrollBarColor() color.Color {
-	return t.scrollBar
-}
-
-func (t *configurableTheme) ShadowColor() color.Color {
-	return t.shadow
-}
-
-func (t *configurableTheme) TextColor() color.Color {
-	return t.text
-}
-
 func (t *configurableTheme) Font(style fyne.TextStyle) fyne.Resource {
 	if style.Monospace {
 		return t.monospace
