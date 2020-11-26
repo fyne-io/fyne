@@ -24,6 +24,21 @@ func NewFocusManager(c fyne.CanvasObject) *FocusManager {
 func (f *FocusManager) Focus(obj fyne.Focusable) {
 	f.Lock()
 	defer f.Unlock()
+	if obj != nil {
+		if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
+			return
+		}
+		found := driver.WalkVisibleObjectTree(
+			f.content,
+			func(object fyne.CanvasObject, _, _ fyne.Position, _ fyne.Size) bool {
+				return object == obj.(fyne.CanvasObject)
+			},
+			nil,
+		)
+		if !found {
+			return
+		}
+	}
 	f.focus(obj)
 }
 
@@ -67,10 +82,6 @@ func (f *FocusManager) FocusPrevious() {
 func (f *FocusManager) focus(obj fyne.Focusable) {
 	if f.focused == obj {
 		return
-	}
-
-	if dis, ok := obj.(fyne.Disableable); ok && dis.Disabled() {
-		obj = nil
 	}
 
 	if f.focused != nil {
