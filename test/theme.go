@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-var defaulTheme fyne.Theme
+var defaultTheme fyne.Theme
 
 var _ fyne.Theme = (*configurableTheme)(nil)
 
@@ -17,12 +17,9 @@ type configurableTheme struct {
 	boldItalic         fyne.Resource
 	button             color.Color
 	disabledButton     color.Color
-	disabledIcon       color.Color
 	disabledText       color.Color
 	focus              color.Color
 	hover              color.Color
-	hyperlink          color.Color
-	icon               color.Color
 	iconInlineSize     int
 	italic             fyne.Resource
 	monospace          fyne.Resource
@@ -40,19 +37,16 @@ type configurableTheme struct {
 
 // Theme returns a theme useful for image based tests.
 func Theme() fyne.Theme {
-	if defaulTheme == nil {
-		defaulTheme = &configurableTheme{
+	if defaultTheme == nil {
+		defaultTheme = &configurableTheme{
 			background:         color.NRGBA{R: 0x44, G: 0x44, B: 0x44, A: 0xff},
 			bold:               theme.DefaultTextBoldFont(),
 			boldItalic:         theme.DefaultTextBoldItalicFont(),
 			button:             color.NRGBA{R: 0x33, G: 0x33, B: 0x33, A: 0xff},
 			disabledButton:     color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
-			disabledIcon:       color.NRGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
 			disabledText:       color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 			focus:              color.NRGBA{R: 0x81, G: 0xc7, B: 0x84, A: 0xff},
 			hover:              color.NRGBA{R: 0x88, G: 0xff, B: 0xff, A: 0x22},
-			hyperlink:          color.NRGBA{R: 0xee, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
-			icon:               color.NRGBA{R: 0xdd, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
 			iconInlineSize:     20,
 			italic:             theme.DefaultTextItalicFont(),
 			monospace:          theme.DefaultTextMonospaceFont(),
@@ -68,7 +62,7 @@ func Theme() fyne.Theme {
 			textSize:           14,
 		}
 	}
-	return defaulTheme
+	return defaultTheme
 }
 
 func (t *configurableTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
