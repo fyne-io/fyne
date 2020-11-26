@@ -107,7 +107,6 @@ var (
 )
 
 type builtinTheme struct {
-	background color.Color
 	variant    fyne.ThemeVariant
 
 	regular, bold, italic, boldItalic, monospace fyne.Resource
