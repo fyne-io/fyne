@@ -107,7 +107,7 @@ var (
 )
 
 type builtinTheme struct {
-	variant    fyne.ThemeVariant
+	variant fyne.ThemeVariant
 
 	regular, bold, italic, boldItalic, monospace fyne.Resource
 }
