@@ -79,7 +79,6 @@ func (c *testCanvas) Capture() image.Image {
 	if c.painter != nil {
 		return c.painter.Paint(c)
 	}
-	theme := fyne.CurrentApp().Settings().Theme()
 
 	bounds := image.Rect(0, 0, internal.ScaleInt(c, c.Size().Width), internal.ScaleInt(c, c.Size().Height))
 	img := image.NewNRGBA(bounds)
@@ -172,7 +171,6 @@ func (c *testCanvas) Resize(size fyne.Size) {
 	}
 
 	if padded {
-		theme := fyne.CurrentApp().Settings().Theme()
 		content.Resize(size.Subtract(fyne.NewSize(theme.Padding()*2, theme.Padding()*2)))
 		content.Move(fyne.NewPos(theme.Padding(), theme.Padding()))
 	} else {

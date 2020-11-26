@@ -398,9 +398,6 @@ func knownColor(c color.Color) string {
 		rgbaColor(theme.ScrollBarColor()):      "scrollbar",
 		rgbaColor(theme.ShadowColor()):         "shadow",
 		rgbaColor(theme.TextColor()):           "text",
-		rgbaColor(theme.DisabledIconColor()):   "disabled icon",
-		rgbaColor(theme.HyperlinkColor()):      "hyperlink",
-		rgbaColor(theme.IconColor()):           "icon",
 	}[rgbaColor(c)]
 }
 

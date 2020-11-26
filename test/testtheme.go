@@ -26,98 +26,52 @@ func NewTheme() fyne.Theme {
 	return &testTheme{}
 }
 
-func (testTheme) BackgroundColor() color.Color {
-	return red
+func (testTheme) Color(c fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
+	switch c {
+	case theme.Colors.Background:
+		return red
+	case theme.Colors.Button, theme.Colors.DisabledText:
+		return color.Black
+	case theme.Colors.PlaceHolder, theme.Colors.ScrollBar, theme.Colors.Shadow:
+		return blue
+	case theme.Colors.Primary, theme.Colors.Hover, theme.Colors.Focus:
+		return green
+	default:
+		return color.White
+	}
 }
 
-func (testTheme) ButtonColor() color.Color {
-	return color.Black
+func (testTheme) Size(s fyne.ThemeSizeName) int {
+	switch s {
+	case theme.Sizes.Padding:
+		return 10
+	case theme.Sizes.InlineIcon:
+		return 24
+	case theme.Sizes.ScrollBar:
+		return 10
+	case theme.Sizes.ScrollBarSmall:
+		return 2
+	case theme.Sizes.Text:
+		return testTextSize
+	default:
+		return 0
+	}
 }
 
-func (testTheme) DisabledButtonColor() color.Color {
-	return color.White
-}
+func (testTheme) Font(style fyne.TextStyle) fyne.Resource {
+	if style.Monospace {
+		return theme.DefaultTextFont()
+	}
 
-func (testTheme) DisabledIconColor() color.Color {
-	return color.Black
-}
+	if style.Bold {
+		if style.Italic {
+			return theme.DefaultTextMonospaceFont()
+		}
+		return theme.DefaultTextItalicFont()
+	}
+	if style.Italic {
+		return theme.DefaultTextBoldItalicFont()
+	}
 
-func (testTheme) DisabledTextColor() color.Color {
-	return color.Black
-}
-
-func (testTheme) FocusColor() color.Color {
-	return green
-}
-
-func (testTheme) HoverColor() color.Color {
-	return green
-}
-
-func (testTheme) HyperlinkColor() color.Color {
-	return green
-}
-
-func (testTheme) IconColor() color.Color {
-	return color.White
-}
-
-func (testTheme) IconInlineSize() int {
-	return 24
-}
-
-func (testTheme) Padding() int {
-	return 10
-}
-
-func (testTheme) PlaceHolderColor() color.Color {
-	return blue
-}
-
-func (testTheme) PrimaryColor() color.Color {
-	return green
-}
-
-func (testTheme) ScrollBarColor() color.Color {
-	return blue
-}
-
-func (testTheme) ScrollBarSize() int {
-	return 10
-}
-
-func (testTheme) ScrollBarSmallSize() int {
-	return 2
-}
-
-func (testTheme) ShadowColor() color.Color {
-	return blue
-}
-
-func (testTheme) TextBoldFont() fyne.Resource {
-	return theme.DefaultTextItalicFont()
-}
-
-func (testTheme) TextBoldItalicFont() fyne.Resource {
-	return theme.DefaultTextMonospaceFont()
-}
-
-func (testTheme) TextColor() color.Color {
-	return color.White
-}
-
-func (testTheme) TextFont() fyne.Resource {
 	return theme.DefaultTextBoldFont()
-}
-
-func (testTheme) TextItalicFont() fyne.Resource {
-	return theme.DefaultTextBoldItalicFont()
-}
-
-func (testTheme) TextMonospaceFont() fyne.Resource {
-	return theme.DefaultTextFont()
-}
-
-func (testTheme) TextSize() int {
-	return testTextSize
 }

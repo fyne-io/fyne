@@ -28,11 +28,73 @@ const (
 	ColorGray = "gray"
 )
 
+var (
+	// Colors specifies each of the known colour names that a theme can contain.
+	//
+	// Since 2.0.0
+	Colors = struct {
+		Background     fyne.ThemeColorName
+		Text           fyne.ThemeColorName
+		Button         fyne.ThemeColorName
+		DisabledButton fyne.ThemeColorName
+		DisabledText   fyne.ThemeColorName
+		Focus          fyne.ThemeColorName
+		Hover          fyne.ThemeColorName
+		PlaceHolder    fyne.ThemeColorName
+		Primary        fyne.ThemeColorName
+		ScrollBar      fyne.ThemeColorName
+		Shadow         fyne.ThemeColorName
+	}{
+		"background",
+		"text",
+		"button",
+		"disabledButton",
+		"disabledText",
+		"focus",
+		"hover",
+		"placeholder",
+		"primary",
+		"scrollBar",
+		"shadow",
+	}
+
+	// Sizes specifies each of the known size names that a theme can contain.
+	//
+	// Since 2.0.0
+	Sizes = struct {
+		Padding        fyne.ThemeSizeName
+		ScrollBar      fyne.ThemeSizeName
+		ScrollBarSmall fyne.ThemeSizeName
+		Text           fyne.ThemeSizeName
+		InlineIcon     fyne.ThemeSizeName
+	}{
+		"paddinng",
+		"scrollBar",
+		"scrollBarSmall",
+		"text",
+		"iconInline",
+	}
+
+	// Variants lists each of the known theme variants that can apply to a color lookup.
+	//
+	// Since 2.0.0
+	Variants = struct {
+		Dark  fyne.ThemeVariant
+		Light fyne.ThemeVariant
+		// potential for adding theme types such as high visibility or monochrome...
+	}{
+		1,
+		2,
+	}
+
+	currentVariant = Variants.Dark
+)
+
 type builtinTheme struct {
 	background color.Color
+	variant    fyne.ThemeVariant
 
-	button, disabledButton, text, placeholder, hover, shadow, disabled, scrollBar color.Color
-	regular, bold, italic, boldItalic, monospace                                  fyne.Resource
+	regular, bold, italic, boldItalic, monospace fyne.Resource
 }
 
 var (
@@ -48,21 +110,45 @@ var (
 	}
 
 	//	themeSecondaryColor = color.NRGBA{R: 0xff, G: 0x40, B: 0x81, A: 0xff}
+
+	darkPalette = map[fyne.ThemeColorName]color.Color{
+		"background":     color.NRGBA{0x30, 0x30, 0x30, 0xff},
+		"button":         color.Transparent,
+		"disabledText":   color.NRGBA{0xff, 0xff, 0xff, 0x42},
+		"disabledButton": color.NRGBA{0x26, 0x26, 0x26, 0xff},
+		"text":           color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		"placeholder":    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
+		"hover":          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
+		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		"shadow":         color.NRGBA{0x0, 0x0, 0x0, 0x66},
+	}
+
+	lightPalette = map[fyne.ThemeColorName]color.Color{
+		"background":     color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		"button":         color.Transparent,
+		"disabledText":   color.NRGBA{0x0, 0x0, 0x0, 0x42},
+		"disabledButton": color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
+		"text":           color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		"placeholder":    color.NRGBA{0x88, 0x88, 0x88, 0xff},
+		"hover":          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
+		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
+		"shadow":         color.NRGBA{0x0, 0x0, 0x0, 0x33}}
 )
+
+// DefaultTheme returns a built-in theme that can adapt to the user preference of light or dark colors.
+//
+// Since 2.0.0
+func DefaultTheme() fyne.Theme {
+	theme := &builtinTheme{}
+
+	theme.initFonts()
+	return theme
+}
 
 // LightTheme defines the built in light theme colors and sizes
 func LightTheme() fyne.Theme {
-	theme := &builtinTheme{
-		background:     color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		button:         color.Transparent,
-		disabled:       color.NRGBA{0x0, 0x0, 0x0, 0x42},
-		disabledButton: color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
-		text:           color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		placeholder:    color.NRGBA{0x88, 0x88, 0x88, 0xff},
-		hover:          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
-		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x33},
-	}
+	theme := &builtinTheme{variant: Variants.Light}
+	currentVariant = Variants.Light
 
 	theme.initFonts()
 	return theme
@@ -70,100 +156,11 @@ func LightTheme() fyne.Theme {
 
 // DarkTheme defines the built in dark theme colors and sizes
 func DarkTheme() fyne.Theme {
-	theme := &builtinTheme{
-		background:     color.NRGBA{0x30, 0x30, 0x30, 0xff},
-		button:         color.Transparent,
-		disabled:       color.NRGBA{0xff, 0xff, 0xff, 0x42},
-		disabledButton: color.NRGBA{0x26, 0x26, 0x26, 0xff},
-		text:           color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		placeholder:    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
-		hover:          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
-		scrollBar:      color.NRGBA{0x0, 0x0, 0x0, 0x99},
-		shadow:         color.NRGBA{0x0, 0x0, 0x0, 0x66},
-	}
+	theme := &builtinTheme{variant: Variants.Dark}
+	currentVariant = Variants.Dark
 
 	theme.initFonts()
 	return theme
-}
-
-func (t *builtinTheme) BackgroundColor() color.Color {
-	return t.background
-}
-
-// ButtonColor returns the theme's standard button color.
-func (t *builtinTheme) ButtonColor() color.Color {
-	return t.button
-}
-
-// DisabledButtonColor returns the theme's disabled button color.
-func (t *builtinTheme) DisabledButtonColor() color.Color {
-	return t.disabledButton
-}
-
-// HyperlinkColor returns the theme's standard hyperlink color.
-//
-// Deprecated: Hyperlinks now use the primary color for consistency.
-func (t *builtinTheme) HyperlinkColor() color.Color {
-	return t.PrimaryColor()
-}
-
-// TextColor returns the theme's standard text color
-func (t *builtinTheme) TextColor() color.Color {
-	return t.text
-}
-
-// DisabledIconColor returns the color for a disabledIcon UI element
-func (t *builtinTheme) DisabledTextColor() color.Color {
-	return t.disabled
-}
-
-// IconColor returns the theme's standard text color.
-//
-// Deprecated: Icons now use the text colour for consistency.
-func (t *builtinTheme) IconColor() color.Color {
-	return t.text
-}
-
-// DisabledIconColor returns the color for a disabledIcon UI element.
-//
-// Deprecated: Disabled icons match disabled text color for consistency.
-func (t *builtinTheme) DisabledIconColor() color.Color {
-	return t.disabled
-}
-
-// PlaceHolderColor returns the theme's placeholder text color
-func (t *builtinTheme) PlaceHolderColor() color.Color {
-	return t.placeholder
-}
-
-// PrimaryColor returns the color used to highlight primary features
-func (t *builtinTheme) PrimaryColor() color.Color {
-	return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
-}
-
-// HoverColor returns the color used to highlight interactive elements currently under a cursor
-func (t *builtinTheme) HoverColor() color.Color {
-	return t.hover
-}
-
-// FocusColor returns the color used to highlight a focused widget
-func (t *builtinTheme) FocusColor() color.Color {
-	return t.PrimaryColor()
-}
-
-// ScrollBarColor returns the color (and translucency) for a scrollBar
-func (t *builtinTheme) ScrollBarColor() color.Color {
-	return t.scrollBar
-}
-
-// ShadowColor returns the color (and translucency) for shadows used for indicating elevation
-func (t *builtinTheme) ShadowColor() color.Color {
-	return t.shadow
-}
-
-// TextSize returns the standard text size
-func (t *builtinTheme) TextSize() int {
-	return 14
 }
 
 func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
@@ -198,185 +195,173 @@ func (t *builtinTheme) initFonts() {
 	}
 }
 
+func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	if t.variant > 0 {
+		v = t.variant // override if using the old LightTheme() or DarkTheme() constructor
+	}
+	colors := darkPalette
+	if v == Variants.Light {
+		colors = lightPalette
+	}
+
+	if n == Colors.Primary || n == Colors.Focus { // TODO new focus color
+		return PrimaryColorNamed(fyne.CurrentApp().Settings().PrimaryColor())
+	}
+
+	if c, ok := colors[n]; ok {
+		return c
+	}
+	return color.Transparent
+}
+
 // TextFont returns the font resource for the regular font style
-func (t *builtinTheme) TextFont() fyne.Resource {
+func (t *builtinTheme) Font(style fyne.TextStyle) fyne.Resource {
+	if style.Monospace {
+		return t.monospace
+	}
+	if style.Bold {
+		if style.Italic {
+			return t.boldItalic
+		}
+		return t.bold
+	}
+	if style.Italic {
+		return t.italic
+	}
 	return t.regular
 }
 
-// TextBoldFont returns the font resource for the bold font style
-func (t *builtinTheme) TextBoldFont() fyne.Resource {
-	return t.bold
-}
-
-// TextItalicFont returns the font resource for the italic font style
-func (t *builtinTheme) TextItalicFont() fyne.Resource {
-	return t.italic
-}
-
-// TextBoldItalicFont returns the font resource for the bold and italic font style
-func (t *builtinTheme) TextBoldItalicFont() fyne.Resource {
-	return t.boldItalic
-}
-
-// TextMonospaceFont returns the font resource for the monospace font face
-func (t *builtinTheme) TextMonospaceFont() fyne.Resource {
-	return t.monospace
-}
-
-// Padding is the standard gap between elements and the border around interface
-// elements
-func (t *builtinTheme) Padding() int {
-	return 4
-}
-
-// IconInlineSize is the standard size of icons which appear within buttons, labels etc.
-func (t *builtinTheme) IconInlineSize() int {
-	return 20
-}
-
-// ScrollBarSize is the width (or height) of the bars on a ScrollContainer
-func (t *builtinTheme) ScrollBarSize() int {
-	return 16
-}
-
-// ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer
-func (t *builtinTheme) ScrollBarSmallSize() int {
-	return 3
+func (t *builtinTheme) Size(s fyne.ThemeSizeName) int {
+	switch s {
+	case Sizes.InlineIcon:
+		return 20
+	case Sizes.Padding:
+		return 4
+	case Sizes.ScrollBar:
+		return 16
+	case Sizes.ScrollBarSmall:
+		return 3
+	case Sizes.Text:
+		return 14
+	default:
+		return 0
+	}
 }
 
 func current() fyne.Theme {
 	if fyne.CurrentApp() == nil || fyne.CurrentApp().Settings().Theme() == nil {
+		currentVariant = Variants.Dark
 		return DarkTheme()
 	}
 
+	currentVariant = fyne.CurrentApp().Settings().ThemeVariant()
 	return fyne.CurrentApp().Settings().Theme()
 }
 
 // BackgroundColor returns the theme's background color
 func BackgroundColor() color.Color {
-	return current().BackgroundColor()
+	return current().Color(Colors.Background, currentVariant)
 }
 
 // ButtonColor returns the theme's standard button color.
 func ButtonColor() color.Color {
-	return current().ButtonColor()
+	return current().Color(Colors.Button, currentVariant)
 }
 
 // DisabledButtonColor returns the theme's disabled button color.
 func DisabledButtonColor() color.Color {
-	return current().DisabledButtonColor()
-}
-
-// HyperlinkColor returns the theme's standard hyperlink color.
-//
-// Deprecated: Hyperlinks now use the primary color for consistency.
-func HyperlinkColor() color.Color {
-	return current().HyperlinkColor()
+	return current().Color(Colors.DisabledButton, currentVariant)
 }
 
 // TextColor returns the theme's standard text color
 func TextColor() color.Color {
-	return current().TextColor()
+	return current().Color(Colors.Text, currentVariant)
 }
 
 // DisabledTextColor returns the color for a disabledIcon UI element
 func DisabledTextColor() color.Color {
-	return current().DisabledTextColor()
-}
-
-// IconColor returns the theme's standard text color.
-//
-// Deprecated: Icons now use the text colour for consistency.
-func IconColor() color.Color {
-	return current().IconColor()
-}
-
-// DisabledIconColor returns the color for a disabledIcon UI element.
-//
-// Deprecated: Disabled icons match disabled text color for consistency.
-func DisabledIconColor() color.Color {
-	return current().DisabledIconColor()
+	return current().Color(Colors.DisabledText, currentVariant)
 }
 
 // PlaceHolderColor returns the theme's standard text color
 func PlaceHolderColor() color.Color {
-	return current().PlaceHolderColor()
+	return current().Color(Colors.PlaceHolder, currentVariant)
 }
 
 // PrimaryColor returns the color used to highlight primary features
 func PrimaryColor() color.Color {
-	return current().PrimaryColor()
+	return current().Color(Colors.Primary, currentVariant)
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor
 func HoverColor() color.Color {
-	return current().HoverColor()
+	return current().Color(Colors.Hover, currentVariant)
 }
 
 // FocusColor returns the color used to highlight a focused widget
 func FocusColor() color.Color {
-	return current().FocusColor()
+	return current().Color(Colors.Focus, currentVariant)
 }
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar
 func ScrollBarColor() color.Color {
-	return current().ScrollBarColor()
+	return current().Color(Colors.ScrollBar, currentVariant)
 }
 
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func ShadowColor() color.Color {
-	return current().ShadowColor()
+	return current().Color(Colors.Shadow, currentVariant)
 }
 
 // TextSize returns the standard text size
 func TextSize() int {
-	return current().TextSize()
+	return current().Size(Sizes.Text)
 }
 
 // TextFont returns the font resource for the regular font style
 func TextFont() fyne.Resource {
-	return current().TextFont()
+	return current().Font(fyne.TextStyle{})
 }
 
 // TextBoldFont returns the font resource for the bold font style
 func TextBoldFont() fyne.Resource {
-	return current().TextBoldFont()
+	return current().Font(fyne.TextStyle{Bold: true})
 }
 
 // TextItalicFont returns the font resource for the italic font style
 func TextItalicFont() fyne.Resource {
-	return current().TextItalicFont()
+	return current().Font(fyne.TextStyle{Italic: true})
 }
 
 // TextBoldItalicFont returns the font resource for the bold and italic font style
 func TextBoldItalicFont() fyne.Resource {
-	return current().TextBoldItalicFont()
+	return current().Font(fyne.TextStyle{Bold: true, Italic: true})
 }
 
 // TextMonospaceFont returns the font resource for the monospace font face
 func TextMonospaceFont() fyne.Resource {
-	return current().TextMonospaceFont()
+	return current().Font(fyne.TextStyle{Monospace: true})
 }
 
 // Padding is the standard gap between elements and the border around interface
 // elements
 func Padding() int {
-	return current().Padding()
+	return current().Size(Sizes.Padding)
 }
 
 // IconInlineSize is the standard size of icons which appear within buttons, labels etc.
 func IconInlineSize() int {
-	return current().IconInlineSize()
+	return current().Size(Sizes.InlineIcon)
 }
 
 // ScrollBarSize is the width (or height) of the bars on a ScrollContainer
 func ScrollBarSize() int {
-	return current().ScrollBarSize()
+	return current().Size(Sizes.ScrollBar)
 }
 
 // ScrollBarSmallSize is the width (or height) of the minimized bars on a ScrollContainer
 func ScrollBarSmallSize() int {
-	return current().ScrollBarSmallSize()
+	return current().Size(Sizes.ScrollBarSmall)
 }
 
 // DefaultTextFont returns the font resource for the built-in regular font style

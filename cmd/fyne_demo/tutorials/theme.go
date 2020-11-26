@@ -17,100 +17,42 @@ var (
 type customTheme struct {
 }
 
-func (customTheme) BackgroundColor() color.Color {
-	return purple
+func (customTheme) Color(c fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
+	switch c {
+	case theme.Colors.Background:
+		return purple
+	case theme.Colors.Button, theme.Colors.DisabledText:
+		return color.Black
+	case theme.Colors.PlaceHolder, theme.Colors.ScrollBar:
+		return grey
+	case theme.Colors.Primary, theme.Colors.Hover, theme.Colors.Focus:
+		return orange
+	case theme.Colors.Shadow:
+		return &color.RGBA{R: 0xcc, G: 0xcc, B: 0xcc, A: 0xcc}
+	default:
+		return color.White
+	}
 }
 
-func (customTheme) ButtonColor() color.Color {
-	return color.Black
+func (customTheme) Size(s fyne.ThemeSizeName) int {
+	switch s {
+	case theme.Sizes.Padding:
+		return 10
+	case theme.Sizes.InlineIcon:
+		return 20
+	case theme.Sizes.ScrollBar:
+		return 10
+	case theme.Sizes.ScrollBarSmall:
+		return 5
+	case theme.Sizes.Text:
+		return 12
+	default:
+		return 0
+	}
 }
 
-func (customTheme) DisabledButtonColor() color.Color {
-	return color.White
-}
-
-func (customTheme) HyperlinkColor() color.Color {
-	return orange
-}
-
-func (customTheme) TextColor() color.Color {
-	return color.White
-}
-
-func (customTheme) DisabledTextColor() color.Color {
-	return color.Black
-}
-
-func (customTheme) IconColor() color.Color {
-	return color.White
-}
-
-func (customTheme) DisabledIconColor() color.Color {
-	return color.Black
-}
-
-func (customTheme) PlaceHolderColor() color.Color {
-	return grey
-}
-
-func (customTheme) PrimaryColor() color.Color {
-	return orange
-}
-
-func (customTheme) HoverColor() color.Color {
-	return orange
-}
-
-func (customTheme) FocusColor() color.Color {
-	return orange
-}
-
-func (customTheme) ScrollBarColor() color.Color {
-	return grey
-}
-
-func (customTheme) ShadowColor() color.Color {
-	return &color.RGBA{0xcc, 0xcc, 0xcc, 0xcc}
-}
-
-func (customTheme) TextSize() int {
-	return 12
-}
-
-func (customTheme) TextFont() fyne.Resource {
-	return theme.DefaultTextBoldFont()
-}
-
-func (customTheme) TextBoldFont() fyne.Resource {
-	return theme.DefaultTextBoldFont()
-}
-
-func (customTheme) TextItalicFont() fyne.Resource {
-	return theme.DefaultTextBoldItalicFont()
-}
-
-func (customTheme) TextBoldItalicFont() fyne.Resource {
-	return theme.DefaultTextBoldItalicFont()
-}
-
-func (customTheme) TextMonospaceFont() fyne.Resource {
-	return theme.DefaultTextMonospaceFont()
-}
-
-func (customTheme) Padding() int {
-	return 10
-}
-
-func (customTheme) IconInlineSize() int {
-	return 20
-}
-
-func (customTheme) ScrollBarSize() int {
-	return 10
-}
-
-func (customTheme) ScrollBarSmallSize() int {
-	return 5
+func (customTheme) Font(style fyne.TextStyle) fyne.Resource {
+	return theme.DarkTheme().Font(style)
 }
 
 func newCustomTheme() fyne.Theme {

@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/theme"
 )
 
 var defaulTheme fyne.Theme
@@ -70,8 +71,33 @@ func Theme() fyne.Theme {
 	return defaulTheme
 }
 
-func (t *configurableTheme) BackgroundColor() color.Color {
-	return t.background
+func (t *configurableTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
+	switch n {
+	case theme.Colors.Background:
+		return t.background
+	case theme.Colors.Text:
+		return t.text
+	case theme.Colors.Button:
+		return t.button
+	case theme.Colors.DisabledButton:
+		return t.disabledButton
+	case theme.Colors.DisabledText:
+		return t.disabledText
+	case theme.Colors.Focus:
+		return t.focus
+	case theme.Colors.Hover:
+		return t.hover
+	case theme.Colors.PlaceHolder:
+		return t.placeholder
+	case theme.Colors.Primary:
+		return t.primary
+	case theme.Colors.ScrollBar:
+		return t.scrollBar
+	case theme.Colors.Shadow:
+		return t.shadow
+	default:
+		return color.Transparent
+	}
 }
 
 func (t *configurableTheme) ButtonColor() color.Color {
@@ -106,14 +132,6 @@ func (t *configurableTheme) IconColor() color.Color {
 	return t.icon
 }
 
-func (t *configurableTheme) IconInlineSize() int {
-	return t.iconInlineSize
-}
-
-func (t *configurableTheme) Padding() int {
-	return t.padding
-}
-
 func (t *configurableTheme) PlaceHolderColor() color.Color {
 	return t.placeholder
 }
@@ -126,14 +144,6 @@ func (t *configurableTheme) ScrollBarColor() color.Color {
 	return t.scrollBar
 }
 
-func (t *configurableTheme) ScrollBarSize() int {
-	return t.scrollBarSize
-}
-
-func (t *configurableTheme) ScrollBarSmallSize() int {
-	return t.scrollBarSmallSize
-}
-
 func (t *configurableTheme) ShadowColor() color.Color {
 	return t.shadow
 }
@@ -142,26 +152,35 @@ func (t *configurableTheme) TextColor() color.Color {
 	return t.text
 }
 
-func (t *configurableTheme) TextSize() int {
-	return t.textSize
-}
-
-func (t *configurableTheme) TextBoldFont() fyne.Resource {
-	return t.bold
-}
-
-func (t *configurableTheme) TextBoldItalicFont() fyne.Resource {
-	return t.boldItalic
-}
-
-func (t *configurableTheme) TextFont() fyne.Resource {
+func (t *configurableTheme) Font(style fyne.TextStyle) fyne.Resource {
+	if style.Monospace {
+		return t.monospace
+	}
+	if style.Bold {
+		if style.Italic {
+			return t.boldItalic
+		}
+		return t.bold
+	}
+	if style.Italic {
+		return t.italic
+	}
 	return t.regular
 }
 
-func (t *configurableTheme) TextItalicFont() fyne.Resource {
-	return t.italic
-}
-
-func (t *configurableTheme) TextMonospaceFont() fyne.Resource {
-	return t.monospace
+func (t *configurableTheme) Size(s fyne.ThemeSizeName) int {
+	switch s {
+	case theme.Sizes.InlineIcon:
+		return t.iconInlineSize
+	case theme.Sizes.Padding:
+		return t.padding
+	case theme.Sizes.ScrollBar:
+		return t.scrollBarSize
+	case theme.Sizes.ScrollBarSmall:
+		return t.scrollBarSmallSize
+	case theme.Sizes.Text:
+		return t.textSize
+	default:
+		return 0
+	}
 }

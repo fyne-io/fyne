@@ -11,6 +11,8 @@ These changes likely break some apps, please read the
 [upgrading doc](https://developer.fyne.io/api/v2.0/upgrading) for more info
 
 * The second parameter of `theme.NewThemedResource` was removed, it was previously ignored
+* `fyne.Theme` moved to `fyne.LegacyTheme`
+* A new, more flexible, Theme interface has been created that we encourage developers to use
 
 ### Added
 

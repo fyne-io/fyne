@@ -24,9 +24,9 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-func defaultTheme() fyne.Theme {
+func defaultVariant() fyne.ThemeVariant {
 	// TODO read the iOS setting when 10.13 arrives in 2019
-	return theme.LightTheme()
+	return theme.Variants.Light
 }
 
 func rootConfigDir() string {

@@ -31,6 +31,7 @@ type settings struct {
 	propertyLock   sync.RWMutex
 	theme          fyne.Theme
 	themeSpecified bool
+	mode           fyne.ThemeVariant
 
 	listenerLock    sync.Mutex
 	changeListeners []chan fyne.Settings
@@ -66,12 +67,17 @@ func (s *settings) Theme() fyne.Theme {
 
 func (s *settings) SetTheme(theme fyne.Theme) {
 	s.themeSpecified = true
-	s.applyTheme(theme)
+	s.applyTheme(theme, s.mode)
 }
 
-func (s *settings) applyTheme(theme fyne.Theme) {
+func (s *settings) ThemeVariant() fyne.ThemeVariant {
+	return s.mode
+}
+
+func (s *settings) applyTheme(theme fyne.Theme, mode fyne.ThemeVariant) {
 	s.propertyLock.Lock()
 	defer s.propertyLock.Unlock()
+	s.mode = mode
 	s.theme = theme
 	s.apply()
 }
@@ -140,11 +146,11 @@ func (s *settings) setupTheme() {
 	}
 
 	if name == "light" {
-		s.applyTheme(theme.LightTheme())
+		s.applyTheme(theme.LightTheme(), theme.Variants.Light)
 	} else if name == "dark" {
-		s.applyTheme(theme.DarkTheme())
+		s.applyTheme(theme.DarkTheme(), theme.Variants.Dark)
 	} else {
-		s.applyTheme(defaultTheme())
+		s.applyTheme(theme.DefaultTheme(), defaultVariant())
 	}
 }
 

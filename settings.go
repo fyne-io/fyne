@@ -23,6 +23,10 @@ const (
 type Settings interface {
 	Theme() Theme
 	SetTheme(Theme)
+	// ThemeVariant defines which preferred version of a theme should be used (i.e. light or dark)
+	//
+	// Since 2.0.0
+	ThemeVariant() ThemeVariant
 	Scale() float32
 	PrimaryColor() string
 

@@ -41,55 +41,49 @@ func TestBuiltinTheme_ShadowColor(t *testing.T) {
 func TestTheme_Dark_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	bg := BackgroundColor()
-	assert.Equal(t, DarkTheme().BackgroundColor(), bg, "wrong dark theme background color")
+	assert.Equal(t, DarkTheme().Color(Colors.Background, Variants.Dark), bg, "wrong dark theme background color")
 }
 
 func TestTheme_Light_ReturnsCorrectBackground(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(LightTheme())
 	bg := BackgroundColor()
-	assert.Equal(t, LightTheme().BackgroundColor(), bg, "wrong light theme background color")
+	assert.Equal(t, LightTheme().Color(Colors.Background, Variants.Light), bg, "wrong light theme background color")
 }
 
 func Test_ButtonColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := ButtonColor()
-	assert.Equal(t, DarkTheme().ButtonColor(), c, "wrong button color")
-}
-
-func Test_HyperlinkColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := HyperlinkColor()
-	assert.Equal(t, DarkTheme().HyperlinkColor(), c, "wrong hyperlink color")
+	assert.Equal(t, DarkTheme().Color(Colors.Button, Variants.Dark), c, "wrong button color")
 }
 
 func Test_TextColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := TextColor()
-	assert.Equal(t, DarkTheme().TextColor(), c, "wrong text color")
+	assert.Equal(t, DarkTheme().Color(Colors.Text, Variants.Dark), c, "wrong text color")
 }
 
 func Test_DisabledTextColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := DisabledTextColor()
-	assert.Equal(t, DarkTheme().DisabledTextColor(), c, "wrong disabled text color")
+	assert.Equal(t, DarkTheme().Color(Colors.DisabledText, Variants.Dark), c, "wrong disabled text color")
 }
 
 func Test_PlaceHolderColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := PlaceHolderColor()
-	assert.Equal(t, DarkTheme().PlaceHolderColor(), c, "wrong placeholder color")
+	assert.Equal(t, DarkTheme().Color(Colors.PlaceHolder, Variants.Dark), c, "wrong placeholder color")
 }
 
 func Test_PrimaryColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := PrimaryColor()
-	assert.Equal(t, DarkTheme().PrimaryColor(), c, "wrong primary color")
+	assert.Equal(t, DarkTheme().Color(Colors.Primary, Variants.Dark), c, "wrong primary color")
 }
 
 func Test_HoverColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := HoverColor()
-	assert.Equal(t, DarkTheme().HoverColor(), c, "wrong hover color")
+	assert.Equal(t, DarkTheme().Color(Colors.Hover, Variants.Dark), c, "wrong hover color")
 }
 
 func Test_FocusColor(t *testing.T) {
@@ -101,24 +95,12 @@ func Test_FocusColor(t *testing.T) {
 func Test_ScrollBarColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
 	c := ScrollBarColor()
-	assert.Equal(t, DarkTheme().ScrollBarColor(), c, "wrong scrollbar color")
-}
-
-func Test_IconColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := IconColor()
-	assert.Equal(t, DarkTheme().IconColor(), c, "wrong icon color")
-}
-
-func Test_DisabledIconColor(t *testing.T) {
-	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := DisabledIconColor()
-	assert.Equal(t, DarkTheme().DisabledIconColor(), c, "wrong disabled icon color")
+	assert.Equal(t, DarkTheme().Color(Colors.ScrollBar, Variants.Dark), c, "wrong scrollbar color")
 }
 
 func Test_TextSize(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().TextSize(), TextSize(), "wrong text size")
+	assert.Equal(t, DarkTheme().Size(Sizes.Text), TextSize(), "wrong text size")
 }
 
 func Test_TextFont(t *testing.T) {
@@ -158,17 +140,17 @@ func Test_TextMonospaceFont(t *testing.T) {
 
 func Test_Padding(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().Padding(), Padding(), "wrong padding")
+	assert.Equal(t, DarkTheme().Size(Sizes.Padding), Padding(), "wrong padding")
 }
 
 func Test_IconInlineSize(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().IconInlineSize(), IconInlineSize(), "wrong inline icon size")
+	assert.Equal(t, DarkTheme().Size(Sizes.InlineIcon), IconInlineSize(), "wrong inline icon size")
 }
 
 func Test_ScrollBarSize(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	assert.Equal(t, DarkTheme().ScrollBarSize(), ScrollBarSize(), "wrong inline icon size")
+	assert.Equal(t, DarkTheme().Size(Sizes.ScrollBar), ScrollBarSize(), "wrong inline icon size")
 }
 
 func Test_DefaultTextFont(t *testing.T) {

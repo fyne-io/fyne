@@ -29,7 +29,7 @@ func (res *ThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current text color.
 func (res *ThemedResource) Content() []byte {
-	clr := current().TextColor()
+	clr := TextColor()
 	return colorizeResource(res.source, clr)
 }
 
@@ -57,7 +57,7 @@ func (res *InvertedThemedResource) Name() string {
 
 // Content returns the underlying content of the resource adapted to the current background color.
 func (res *InvertedThemedResource) Content() []byte {
-	clr := current().BackgroundColor()
+	clr := BackgroundColor()
 	return colorizeResource(res.source, clr)
 }
 
@@ -134,7 +134,7 @@ func (res *DisabledResource) Name() string {
 
 // Content returns the disabled style content of the correct resource for the current theme
 func (res *DisabledResource) Content() []byte {
-	clr := fyne.CurrentApp().Settings().Theme().DisabledIconColor()
+	clr := DisabledTextColor()
 	return colorizeResource(res.source, clr)
 }
 

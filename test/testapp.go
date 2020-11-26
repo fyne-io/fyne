@@ -155,6 +155,10 @@ func (s *testSettings) Theme() fyne.Theme {
 	return s.theme
 }
 
+func (s *testSettings) ThemeVariant() fyne.ThemeVariant {
+	return theme.Variants.Light
+}
+
 func (s *testSettings) Scale() float32 {
 	s.propertyLock.RLock()
 	defer s.propertyLock.RUnlock()
