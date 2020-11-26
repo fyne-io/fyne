@@ -8,6 +8,8 @@ import (
 
 // ExtendDefaultTheme allows a theme to specify alterations to the default theme.
 // It will delegate all colour, theme or font lookups ignored to the built-in theme.
+//
+// Since: 2.0.0
 func ExtendDefaultTheme(t fyne.Theme) fyne.Theme {
 	return &themeWrapper{override: t}
 }
