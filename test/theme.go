@@ -43,8 +43,8 @@ func Theme() fyne.Theme {
 	if defaulTheme == nil {
 		defaulTheme = &configurableTheme{
 			background:         color.NRGBA{R: 0x44, G: 0x44, B: 0x44, A: 0xff},
-			bold:               bold,
-			boldItalic:         bolditalic,
+			bold:               theme.DefaultTextBoldFont(),
+			boldItalic:         theme.DefaultTextBoldItalicFont(),
 			button:             color.NRGBA{R: 0x33, G: 0x33, B: 0x33, A: 0xff},
 			disabledButton:     color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
 			disabledIcon:       color.NRGBA{R: 0xff, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
@@ -54,12 +54,12 @@ func Theme() fyne.Theme {
 			hyperlink:          color.NRGBA{R: 0xee, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
 			icon:               color.NRGBA{R: 0xdd, G: 0x00, B: 0x00, A: 0xff}, // deprecated: bright red variant to make it visible
 			iconInlineSize:     20,
-			italic:             italic,
-			monospace:          monospace,
+			italic:             theme.DefaultTextItalicFont(),
+			monospace:          theme.DefaultTextMonospaceFont(),
 			padding:            4,
 			placeholder:        color.NRGBA{R: 0xaa, G: 0xaa, B: 0xaa, A: 0xff},
 			primary:            color.NRGBA{R: 0xff, G: 0xcc, B: 0x80, A: 0xff},
-			regular:            regular,
+			regular:            theme.DefaultTextFont(),
 			scrollBar:          color.NRGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xaa},
 			scrollBarSize:      16,
 			scrollBarSmallSize: 3,
