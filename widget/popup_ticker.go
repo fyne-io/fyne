@@ -1,7 +1,7 @@
 package widget
 
 import (
-	
+//	"strings"
 	"image/color"
 
 	"fyne.io/fyne"
@@ -57,8 +57,8 @@ func (rb *ringBuffer) Seek(position int) {
 }
 
 // GetSelected -- given pixel offset, returns selected text.
-func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separator string) string {
-	currentData := rb.Data()
+func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separator rune) string {
+	currentData := rb.Data(false)
 
 	// Seek the offset by character widths.
 	width := popupTickerPosX
@@ -66,23 +66,21 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 	for i := 0; i < len(currentData); i++ {
 		charWidth := fyne.MeasureText(string(currentData[i]), rb.labelFontSize, rb.labelTextStyle).Width
 		width = width + charWidth
-		if width >= selectedPosX || width > rb.width {
+		if width >= selectedPosX {
 			nearestIndex = i
 			break
 		}
 	}
 
-	if string(currentData[nearestIndex]) == separator {
+	if currentData[nearestIndex] == separator {
 		// Don't start on a separator.
-		if nearestIndex > 1 {
-			nearestIndex = nearestIndex - 1
-		} else {
-			nearestIndex = nearestIndex + 1
-		}
+		nearestIndex = nearestIndex + 1
 	}
 
+	nearestSeparatorFound := false
 	for i := nearestIndex; i >= 0; i-- {
-		if string(currentData[i]) == separator {
+		if currentData[i] == separator {
+			nearestSeparatorFound = true
 			break
 		}
 		nearestIndex = i
@@ -91,25 +89,47 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 	endIndex := nearestIndex
 
 	for i := nearestIndex; i < len(currentData); i++ {
-		if string(currentData[i]) == separator {
+		if currentData[i] == separator {
 			endIndex = i
 			break
 		}
-
 	}
-	return string(currentData[nearestIndex:endIndex])
+	var result string
+
+	if !nearestSeparatorFound {
+		//partialResult := string(currentData[nearestIndex:endIndex])
+		result = string(currentData[nearestIndex:])
+		fullData := rb.Data(true)
+
+		for i := len(fullData) - 1; i >= 0; i-- {
+			if fullData[i] == separator {
+				nearestSeparatorFound = true
+				break
+			}
+			nearestIndex = i
+		}
+		if nearestIndex > endIndex {
+			result = string(fullData[nearestIndex:]) + string(fullData[0:endIndex])
+		} else {
+			result = string(rb.data[nearestIndex:endIndex])
+		}
+	} else {
+		result = string(currentData[nearestIndex:endIndex])
+	}
+
+	return result
 }
 
 // Data - returns current data at current turn, read circularly
-func (rb *ringBuffer) Data() []rune {
+func (rb *ringBuffer) Data(complete bool) []rune {
 	var data []rune
 	if rb.start == 0 {
 		data = rb.data
 	} else {
-		data = append(rb.data[rb.start:], rb.data[0: rb.start - 1]...)
+		data = append(rb.data[rb.start:], rb.data[0: rb.start]...)
 	}
 
-	if rb.width > 0 {
+	if !complete && rb.width > 0 {
 		width := 0
 		boundIndex := 0
 		for i := 0; i < len(data); i++ {
@@ -239,8 +259,8 @@ func (p *TickerPopUp) getRatio(pos *fyne.Position) float64 {
 	return 0.0
 }
 
-func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar string) string {
-	selected := p.rb.GetSelected(p.innerPos.X, pos.X, separatorChar)
+func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar rune) string {
+	selected := p.rb.GetSelected(p.innerPos.X + theme.Padding(), pos.X, separatorChar)
 	return selected
 }
 
@@ -264,7 +284,7 @@ func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 
 	if label, ok := p.Content.(*Label); ok {
 		p.rb.Seek(int(offset))
-		label.Text = string(p.rb.Data())
+		label.Text = string(p.rb.Data(false))
 		label.Refresh() // Sweet!
 	}
 }
@@ -320,7 +340,7 @@ func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerLi
 	if label, ok := content.(*Label); ok {
 
 		rb := ringBuffer{ data: []rune(label.Text), start: 0, labelFontSize: fontSize, labelTextStyle: label.TextStyle, width: size.Width, forward: true }
-		label.Text = string(rb.Data())
+		label.Text = string(rb.Data(false))
 
 		ret := &TickerPopUp{Content: content, rb: rb, Canvas: canvas, popupTickerListener: popupTickerListener, modal: false}
 		ret.ExtendBaseWidget(ret)
