@@ -80,6 +80,9 @@ func (r *releaser) afterPackage() error {
 		}
 		return r.signAndroid(apk)
 	}
+	if r.os == "darwin" {
+		return r.packageMacOSRelease()
+	}
 	if r.os == "ios" {
 		return r.packageIOSRelease()
 	}
@@ -154,6 +157,12 @@ func (r *releaser) packageIOSRelease() error {
 	}
 
 	return exec.Command("zip", "-r", appName[:len(appName)-4]+".ipa", "Payload/").Run()
+}
+
+func (r *releaser) packageMacOSRelease() error {
+	cmd := exec.Command("productbuild", "--component", r.name+".app", "/Applications/",
+		"--product", r.name+".app/Contents/Info.plist", r.name+".pkg")
+	return cmd.Run()
 }
 
 func (r *releaser) packageWindowsRelease(outFile string) error {
