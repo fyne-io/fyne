@@ -11,20 +11,36 @@ import (
 
 const (
 	// ColorRed is the red primary color name
+	//
+	// Since: 1.4.0
 	ColorRed = "red"
 	// ColorOrange is the orange primary color name
+	//
+	// Since: 1.4.0
 	ColorOrange = "orange"
 	// ColorYellow is the yellow primary color name
+	//
+	// Since: 1.4.0
 	ColorYellow = "yellow"
 	// ColorGreen is the green primary color name
+	//
+	// Since: 1.4.0
 	ColorGreen = "green"
 	// ColorBlue is the blue primary color name
+	//
+	// Since: 1.4.0
 	ColorBlue = "blue"
 	// ColorPurple is the purple primary color name
+	//
+	// Since: 1.4.0
 	ColorPurple = "purple"
 	// ColorBrown is the brown primary color name
+	//
+	// Since: 1.4.0
 	ColorBrown = "brown"
 	// ColorGray is the gray primary color name
+	//
+	// Since: 1.4.0
 	ColorGray = "gray"
 )
 
@@ -390,11 +406,15 @@ func DefaultTextMonospaceFont() fyne.Resource {
 }
 
 // PrimaryColorNames returns a list of the standard primary color options.
+//
+// Since: 1.4.0
 func PrimaryColorNames() []string {
 	return []string{ColorRed, ColorOrange, ColorYellow, ColorGreen, ColorBlue, ColorPurple, ColorBrown, ColorGray}
 }
 
 // PrimaryColorNamed returns a theme specific color value for a named primary color.
+//
+// Since 1.4.0
 func PrimaryColorNamed(name string) color.Color {
 	col, ok := primaryColors[name]
 	if !ok {

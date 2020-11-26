@@ -28,6 +28,9 @@ type Settings interface {
 	// Since 2.0.0
 	ThemeVariant() ThemeVariant
 	Scale() float32
+	// PrimaryColor indicates a user preference for a named primary color
+	//
+	// Since 1.4.0
 	PrimaryColor() string
 
 	AddChangeListener(chan Settings)
