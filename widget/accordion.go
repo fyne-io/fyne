@@ -205,6 +205,7 @@ func (r *accordionRenderer) updateObjects() {
 		} else {
 			h = &Button{}
 			r.headers = append(r.headers, h)
+			hs++
 		}
 		h.Alignment = ButtonAlignLeading
 		h.IconPlacement = ButtonIconLeadingText
