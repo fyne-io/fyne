@@ -12,7 +12,10 @@ var (
 	DesktopFileUNIX = template.Must(template.New("DesktopFile").Parse(string(resourceAppDesktop.StaticContent)))
 
 	// EntitlementsDarwin is a plist file that lists build entitlements for darwin releases
-	EntitlementsDarwin = template.Must(template.New("Entitlements").Parse(string(resourceEntitlementsPlist.StaticContent)))
+	EntitlementsDarwin = template.Must(template.New("Entitlements").Parse(string(resourceEntitlementsDarwinPlist.StaticContent)))
+
+	// EntitlementsDarwinMobile is a plist file that lists build entitlements for iOS releases
+	EntitlementsDarwinMobile = template.Must(template.New("EntitlementsMobile").Parse(string(resourceEntitlementsIosPlist.StaticContent)))
 
 	// ManifestWindows is the manifest file for windows packaging
 	ManifestWindows = template.Must(template.New("Manifest").Parse(string(resourceAppManifest.StaticContent)))
@@ -21,7 +24,7 @@ var (
 	AppxManifestWindows = template.Must(template.New("ReleaseManifest").Parse(string(resourceAppxmanifestXML.StaticContent)))
 
 	// InfoPlistDarwin is the manifest file for darwin packaging
-	InfoPlistDarwin = template.Must(template.New("Manifest").Parse(string(resourceInfoPlist.StaticContent)))
+	InfoPlistDarwin = template.Must(template.New("InfoPlist").Parse(string(resourceInfoPlist.StaticContent)))
 
 	// XCAssetsDarwin is the Contents.json file for darwin xcassets bundle
 	XCAssetsDarwin = template.Must(template.New("XCAssets").Parse(string(resourceXcassetsJSON.StaticContent)))
