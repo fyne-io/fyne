@@ -87,9 +87,11 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 	}
 
 	endIndex := nearestIndex
+	farthestSeparatorFound := false
 
 	for i := nearestIndex; i < len(currentData); i++ {
 		if currentData[i] == separator {
+			farthestSeparatorFound = true
 			endIndex = i
 			break
 		}
@@ -97,8 +99,6 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 	var result string
 
 	if !nearestSeparatorFound {
-		//partialResult := string(currentData[nearestIndex:endIndex])
-		result = string(currentData[nearestIndex:])
 		fullData := rb.Data(true)
 
 		for i := len(fullData) - 1; i >= 0; i-- {
@@ -113,6 +113,17 @@ func (rb *ringBuffer) GetSelected(popupTickerPosX int, selectedPosX int, separat
 		} else {
 			result = string(rb.data[nearestIndex:endIndex])
 		}
+	} else if !farthestSeparatorFound {
+		fullData := rb.Data(true)
+
+		for i := nearestIndex; i < len(fullData); i++ {
+			if fullData[i] == separator {
+				farthestSeparatorFound = true
+				endIndex = i
+				break
+			}
+		}
+		result = string(fullData[nearestIndex:endIndex])
 	} else {
 		result = string(currentData[nearestIndex:endIndex])
 	}
