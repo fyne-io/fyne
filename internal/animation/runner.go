@@ -43,8 +43,7 @@ func (r *Runner) runAnimations() {
 	draw := time.NewTicker(time.Second / 60)
 
 	go func() {
-		done := false
-		for !done {
+		for done := false; !done; {
 			<-draw.C
 			r.animationMutex.Lock()
 			oldList := r.animations
