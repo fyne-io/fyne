@@ -61,6 +61,7 @@ func (r *Runner) runAnimations() {
 			done = len(r.animations) == 0
 			r.animationMutex.Unlock()
 		}
+		draw.Stop()
 	}()
 }
 
