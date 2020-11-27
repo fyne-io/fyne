@@ -999,6 +999,18 @@ func (e *Entry) updateText(text string) {
 		}
 	})
 
+	if validate := e.Validator; validate != nil {
+		if err := validate(text); err != e.validationError {
+			e.validationError = err
+
+			if f := e.onValidationChanged; f != nil {
+				f(err)
+			}
+		}
+
+		e.validationStatus.Refresh()
+	}
+
 	if callback != nil {
 		callback(text)
 	}
@@ -1135,21 +1147,10 @@ func (r *entryRenderer) Refresh() {
 	}
 
 	if r.entry.Validator != nil {
-		err := r.entry.Validator(content)
-		if err != r.entry.validationError {
-			r.entry.validationError = err
-
-			if f := r.entry.onValidationChanged; f != nil {
-				f(err)
-			}
-		}
-
 		if !r.entry.focused && r.entry.Text != "" && r.entry.validationError != nil {
 			r.line.FillColor = &color.NRGBA{0xf4, 0x43, 0x36, 0xff} // TODO: Should be current().ErrorColor() in the future
 		}
-
 		r.ensureValidationSetup()
-
 		r.entry.validationStatus.Refresh()
 	} else if r.entry.validationStatus != nil {
 		r.entry.validationStatus.Hide()

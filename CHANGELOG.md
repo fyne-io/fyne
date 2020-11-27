@@ -9,6 +9,11 @@ More detailed release notes can be found on the [releases page](https://github.c
 
 * [fyne-cli] Add support for passing custom build tags (#1538)
 
+### Changed
+
+* Run validation on content change instead of on each Refresh in widget.Entry
+* Run onValidationChanged() when calling entry.SetValidationError()
+
 ### Fixed
 
 * [fyne-cli] Android: allow to specify an inline password for the keystore
@@ -19,6 +24,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Support older macOS by default - back to 10.11 (#886)
 * Complete certification of macOS App Store releases (#1443)
 * Fix compilation errors for early stage Wayland testing
+* Fix entry.SetValidationError() not working correctly
 
 
 ## 1.4.1 - 20 November 2020

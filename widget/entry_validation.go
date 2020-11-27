@@ -29,10 +29,15 @@ func (e *Entry) SetOnValidationChanged(callback func(error)) {
 // SetValidationError manually updates the validation status until the next input change
 func (e *Entry) SetValidationError(err error) {
 	e.validationError = err
-
-	if e.Validator != nil {
-		e.validationStatus.Refresh()
+	if e.Validator == nil {
+		return
 	}
+
+	if err != e.validationError && e.onValidationChanged != nil {
+		e.onValidationChanged(err)
+	}
+
+	e.validationStatus.Refresh()
 }
 
 var _ fyne.Widget = (*validationStatus)(nil)
@@ -83,7 +88,6 @@ func (r *validationStatusRenderer) Refresh() {
 	defer r.entry.propertyLock.RUnlock()
 	if r.entry.Text == "" {
 		r.icon.Hide()
-		canvas.Refresh(r.icon)
 		return
 	}
 
