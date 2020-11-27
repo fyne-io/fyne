@@ -59,7 +59,7 @@ func (r *releaser) AddFlags() {
 	flag.StringVar(&r.developer, "developer", "", "Windows: the developer identity for your Microsoft store account")
 	flag.StringVar(&r.password, "password", "", "Windows: password for the certificate used to sign the build")
 	flag.StringVar(&r.tags, "tags", "", "A comma-separated list of build tags")
-	flag.StringVar(&r.category, "category", "", "iOS: category of the app for store listing")
+	flag.StringVar(&r.category, "category", "", "macOS: category of the app for store listing")
 }
 
 func (r *releaser) PrintHelp(indent string) {
