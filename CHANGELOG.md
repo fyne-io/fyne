@@ -15,6 +15,7 @@ More detailed release notes can be found on the [releases page](https://github.c
 * Fixed Card widget MinSize (#1581)
 * Fix missing release tag to enable BuildRelease in Settings.BuildType()
 * Dialog shadow does not resize after Refresh (#1370)
+* Android Duplicate Number Entry (#1256)
 
 
 ## 1.4.1 - 20 November 2020
