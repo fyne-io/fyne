@@ -4,6 +4,7 @@ import (
 	"image"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"fyne.io/fyne/cmd/fyne/internal/templates"
 	"fyne.io/fyne/cmd/fyne/internal/util"
@@ -17,6 +18,7 @@ type darwinData struct {
 	AppID         string
 	Version       string
 	Build         int
+	Category      string
 }
 
 func (p *packager) packageDarwin() error {
@@ -27,7 +29,8 @@ func (p *packager) packageDarwin() error {
 	info := filepath.Join(contentsDir, "Info.plist")
 	infoFile, _ := os.Create(info)
 
-	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID, Version: p.appVersion, Build: p.appBuild}
+	tplData := darwinData{Name: p.name, ExeName: exeName, AppID: p.appID, Version: p.appVersion, Build: p.appBuild,
+		Category: strings.ToLower(p.category)}
 	err := templates.InfoPlistDarwin.Execute(infoFile, tplData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to write plist template")
