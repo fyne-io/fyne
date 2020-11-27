@@ -38,7 +38,7 @@ func (b *builder) build() error {
 	// handle build tags
 	tags := b.tags
 	if b.release {
-		args = append(tags, "release")
+		tags = append(tags, "release")
 	}
 	if len(tags) > 0 {
 		args = append(args, "-tags", strings.Join(tags, ","))
