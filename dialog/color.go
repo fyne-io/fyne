@@ -21,7 +21,7 @@ type ColorPickerDialog struct {
 	Advanced bool
 	color    color.Color
 	callback func(c color.Color)
-	advanced *widget.AccordionContainer
+	advanced *widget.Accordion
 	picker   *colorAdvancedPicker
 }
 
@@ -94,7 +94,7 @@ func (p *ColorPickerDialog) updateUI() {
 		p.picker = newColorAdvancedPicker(p.color, func(c color.Color) {
 			p.color = c
 		})
-		p.advanced = widget.NewAccordionContainer(widget.NewAccordionItem("Advanced", p.picker))
+		p.advanced = widget.NewAccordion(widget.NewAccordionItem("Advanced", p.picker))
 
 		p.dialog.content = fyne.NewContainerWithLayout(layout.NewVBoxLayout(),
 			fyne.NewContainerWithLayout(layout.NewCenterLayout(),
