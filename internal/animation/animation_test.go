@@ -10,31 +10,39 @@ import (
 )
 
 func TestGLDriver_StartAnimation(t *testing.T) {
+	done := make(chan float32)
 	run := &Runner{}
-	ticks := 0
 	a := &fyne.Animation{
 		Duration: time.Millisecond * 100,
-		Tick: func(done float32) {
-			ticks++
+		Tick: func(d float32) {
+			done <- d
 		}}
 
 	run.Start(a)
-	time.Sleep(time.Millisecond * 20)
-	assert.Greater(t, ticks, 0)
+	select {
+	case d := <-done:
+		assert.Greater(t, d, float32(0))
+	case <-time.After(100 * time.Millisecond):
+		t.Error("animation was not ticked")
+	}
 }
 
 func TestGLDriver_StopAnimation(t *testing.T) {
+	done := make(chan float32)
 	run := &Runner{}
-	ticks := 0
 	a := &fyne.Animation{
 		Duration: time.Second * 10,
-		Tick: func(done float32) {
-			ticks++
+		Tick: func(d float32) {
+			done <- d
 		}}
 
 	run.Start(a)
-	time.Sleep(time.Millisecond * 20)
+	select {
+	case d := <-done:
+		assert.Greater(t, d, float32(0))
+	case <-time.After(100 * time.Millisecond):
+		t.Error("animation was not ticked")
+	}
 	run.Stop(a)
-	assert.Greater(t, ticks, 0)
 	assert.Zero(t, len(run.animations))
 }
