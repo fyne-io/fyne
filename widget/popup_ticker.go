@@ -276,6 +276,10 @@ func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar rune) string
 
 func (p *TickerPopUp) SetText(data []rune) {
 	p.rb.data = data
+	if label, ok := p.Content.(*Label); ok {
+		label.Text = string(p.rb.Data(false))
+		label.Refresh()
+	}
 }
 
 func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
