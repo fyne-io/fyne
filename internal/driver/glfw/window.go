@@ -52,12 +52,12 @@ type window struct {
 	decorate   bool
 	fixedSize  bool
 
-	cursor    desktop.Cursor
-	rawCursor *glfw.Cursor // rawCursor is only filled for custom cursors in order to be destroyed when becoming un-needed
-	canvas    *glCanvas
-	title     string
-	icon      fyne.Resource
-	mainmenu  *fyne.MainMenu
+	cursor       desktop.Cursor
+	customCursor *glfw.Cursor
+	canvas       *glCanvas
+	title        string
+	icon         fyne.Resource
+	mainmenu     *fyne.MainMenu
 
 	clipboard fyne.Clipboard
 
@@ -601,12 +601,12 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 			viewport.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
 			viewport.SetCursor(rawCursor)
 		}
-		if w.rawCursor != nil {
-			w.rawCursor.Destroy()
-			w.rawCursor = nil
+		if w.customCursor != nil {
+			w.customCursor.Destroy()
+			w.customCursor = nil
 		}
 		if isCustomCursor {
-			w.rawCursor = rawCursor
+			w.customCursor = rawCursor
 		}
 	}
 	if obj != nil && !w.objIsDragged(obj) {
