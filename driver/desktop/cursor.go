@@ -3,14 +3,20 @@ package desktop
 import "image"
 
 // Cursor interface is used for objects usable as cursor
+//
+// Since: 2.0.0
 type Cursor interface {
 	Image() (image.Image, int, int) // Image returns the image for the given cursor, or nil to hide the cursor
 }
 
 // StandardCursor represents a standard fyne cursor
+//
+// Since: 2.0.0
 type StandardCursor int
 
 // Image will always return nil for StandardCursor
+//
+// Since: 2.0.0
 func (d StandardCursor) Image() (image.Image, int, int) {
 	return nil, 0, 0
 }
