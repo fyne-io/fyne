@@ -1,7 +1,6 @@
 package widget
 
 import (
-//	"strings"
 	"image/color"
 
 	"fyne.io/fyne"
@@ -273,6 +272,10 @@ func (p *TickerPopUp) getRatio(pos *fyne.Position) float64 {
 func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar rune) string {
 	selected := p.rb.GetSelected(p.innerPos.X + theme.Padding(), pos.X, separatorChar)
 	return selected
+}
+
+func (p *TickerPopUp) SetText(data []rune) {
+	p.rb.data = data
 }
 
 func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
