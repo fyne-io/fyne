@@ -564,15 +564,15 @@ func fyneToNativeCursor(cursor desktop.Cursor) (*glfw.Cursor, bool) {
 	case desktop.StandardCursor:
 		ret, ok := cursorMap[v]
 		if !ok {
-			return cursorMap[desktop.DefaultCursor], true
+			return cursorMap[desktop.DefaultCursor], false
 		}
-		return ret, true
+		return ret, false
 	default:
 		img, x, y := cursor.Image()
 		if img == nil {
 			return nil, true
 		}
-		return glfw.CreateCursor(img, x, y), false
+		return glfw.CreateCursor(img, x, y), true
 	}
 }
 
@@ -592,25 +592,21 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 
 	if w.cursor != cursor {
 		// cursor has changed, store new cursor and apply change via glfw
-		newCursor, isStdCursor := fyneToNativeCursor(cursor)
+		rawCursor, isCustomCursor := fyneToNativeCursor(cursor)
 		w.cursor = cursor
-		oldCursor := w.rawCursor
 
-		if isStdCursor {
-			w.rawCursor = nil
-		} else {
-			w.rawCursor = newCursor
-		}
-
-		if newCursor == nil {
+		if rawCursor == nil {
 			viewport.SetInputMode(glfw.CursorMode, glfw.CursorHidden)
 		} else {
 			viewport.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
-			viewport.SetCursor(newCursor)
+			viewport.SetCursor(rawCursor)
 		}
-		if oldCursor != nil {
-			// destroy old cursor now as to avoid viewport reverting to default cursor even for an instant
-			oldCursor.Destroy()
+		if w.rawCursor != nil {
+			w.rawCursor.Destroy()
+			w.rawCursor = nil
+		}
+		if isCustomCursor {
+			w.rawCursor = rawCursor
 		}
 	}
 	if obj != nil && !w.objIsDragged(obj) {
