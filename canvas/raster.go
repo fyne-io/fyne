@@ -15,9 +15,14 @@ var _ fyne.CanvasObject = (*Raster)(nil)
 type Raster struct {
 	baseObject
 
-	Generator func(w, h int) image.Image // Render the raster image from code
+	// Render the raster image from code
+	Generator func(w, h int) image.Image
 
-	Translucency float64 // Set a translucency value > 0.0 to fade the raster
+	// Set a translucency value > 0.0 to fade the raster
+	Translucency float64
+	// Specify the type of scaling interpolation applied to the raster if it is not full-size
+	// Since: 1.4.1
+	ScaleMode ImageScale
 }
 
 // Alpha is a convenience function that returns the alpha value for a raster

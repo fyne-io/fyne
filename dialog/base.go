@@ -125,7 +125,7 @@ func (d *dialog) Layout(obj []fyne.CanvasObject, size fyne.Size) {
 	// content
 	contentStart := d.label.Position().Y + d.label.MinSize().Height + padHeight
 	contentEnd := obj[3].Position().Y - theme.Padding()
-	obj[2].Move(fyne.NewPos((padWidth / 2), d.label.MinSize().Height+padHeight))
+	obj[2].Move(fyne.NewPos(padWidth/2, d.label.MinSize().Height+padHeight))
 	obj[2].Resize(fyne.NewSize(size.Width-padWidth, contentEnd-contentStart))
 }
 

@@ -428,9 +428,6 @@ static GLFWbool initializeTIS(void)
 {
     if (_glfw.hints.init.ns.menubar)
     {
-        // In case we are unbundled, make us a proper UI application
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-
         // Menu bar setup must go between sharedApplication and finishLaunching
         // in order to properly emulate the behavior of NSApplicationMain
 
@@ -442,6 +439,13 @@ static GLFWbool initializeTIS(void)
         }
         else
             createMenuBar();
+
+        // Fix for issue #1648: menubar not clickable on macOS Catalina until
+        // it lost and regained focus
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // In case we are unbundled, make us a proper UI application
+            [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+        });
     }
 }
 

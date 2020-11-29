@@ -26,6 +26,9 @@ func TestNewPopUp(t *testing.T) {
 }
 
 func TestShowPopUp(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 200))
 	require.Nil(t, w.Canvas().Overlays().Top())
@@ -40,7 +43,31 @@ func TestShowPopUp(t *testing.T) {
 		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
 	}
 
-	test.AssertImageMatches(t, "popup/normal.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="200x200">
+			<content>
+				<rectangle pos="4,4" size="192x192"/>
+			</content>
+			<overlay>
+				<widget size="200x200" type="*widget.PopUp">
+					<widget size="32x37" type="*widget.Shadow">
+						<radialGradient centerOffset="0.5,0.5" pos="-8,-8" size="8x8" startColor="shadow"/>
+						<linearGradient endColor="shadow" pos="0,-8" size="32x8"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="32,-8" size="8x8" startColor="shadow"/>
+						<linearGradient angle="270" pos="32,0" size="8x37" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="32,37" size="8x8" startColor="shadow"/>
+						<linearGradient pos="0,37" size="32x8" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-8,37" size="8x8" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x37"/>
+					</widget>
+					<rectangle fillColor="background" size="32x37"/>
+					<widget pos="4,4" size="24x29" type="*widget.Label">
+						<text pos="4,4" size="16x21">Hi</text>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 }
 
 func TestShowPopUpAtPosition(t *testing.T) {
@@ -58,6 +85,9 @@ func TestShowPopUpAtPosition(t *testing.T) {
 }
 
 func TestShowModalPopUp(t *testing.T) {
+	test.NewApp()
+	defer test.NewApp()
+
 	w := test.NewWindow(canvas.NewRectangle(color.Transparent))
 	w.Resize(fyne.NewSize(200, 200))
 	require.Nil(t, w.Canvas().Overlays().Top())
@@ -72,7 +102,31 @@ func TestShowModalPopUp(t *testing.T) {
 		assert.Equal(t, 1, len(w.Canvas().Overlays().List()))
 	}
 
-	test.AssertImageMatches(t, "popup/modal.png", w.Canvas().Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="200x200">
+			<content>
+				<rectangle pos="4,4" size="192x192"/>
+			</content>
+			<overlay>
+				<widget backgroundColor="shadow" size="200x200" type="*widget.PopUp">
+					<widget pos="84,81" size="32x37" type="*widget.Shadow">
+						<radialGradient centerOffset="0.5,0.5" pos="-24,-24" size="24x24" startColor="shadow"/>
+						<linearGradient endColor="shadow" pos="0,-24" size="32x24"/>
+						<radialGradient centerOffset="-0.5,0.5" pos="32,-24" size="24x24" startColor="shadow"/>
+						<linearGradient angle="270" pos="32,0" size="24x37" startColor="shadow"/>
+						<radialGradient centerOffset="-0.5,-0.5" pos="32,37" size="24x24" startColor="shadow"/>
+						<linearGradient pos="0,37" size="32x24" startColor="shadow"/>
+						<radialGradient centerOffset="0.5,-0.5" pos="-24,37" size="24x24" startColor="shadow"/>
+						<linearGradient angle="270" endColor="shadow" pos="-24,0" size="24x37"/>
+					</widget>
+					<rectangle fillColor="background" pos="84,81" size="32x37"/>
+					<widget pos="88,85" size="24x29" type="*widget.Label">
+						<text pos="4,4" size="16x21">Hi</text>
+					</widget>
+				</widget>
+			</overlay>
+		</canvas>
+	`, w.Canvas())
 }
 
 func TestPopUp_Show(t *testing.T) {

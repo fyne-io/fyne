@@ -7,8 +7,8 @@ import (
 	"fyne.io/fyne"
 	internalwidget "fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
-	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -110,12 +110,12 @@ func TestTree_OpenCloseAll(t *testing.T) {
 
 func TestTree_Layout(t *testing.T) {
 	test.NewApp()
-	test.ApplyTheme(t, theme.LightTheme())
 
 	for name, tt := range map[string]struct {
 		items    [][]string
 		selected widget.TreeNodeID
 		opened   []widget.TreeNodeID
+		want     string
 	}{
 		"single_leaf": {
 			items: [][]string{
@@ -123,6 +123,24 @@ func TestTree_Layout(t *testing.T) {
 					"11111",
 				},
 			},
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">11111</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"single_leaf_selected": {
 			items: [][]string{
@@ -131,6 +149,24 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 			selected: "11111",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">11111</text>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"single_branch": {
 			items: [][]string{
@@ -138,6 +174,27 @@ func TestTree_Layout(t *testing.T) {
 					"A", "11111",
 				},
 			},
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"single_branch_selected": {
 			items: [][]string{
@@ -146,6 +203,27 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 			selected: "A",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"single_branch_opened": {
 			items: [][]string{
@@ -154,6 +232,36 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 			opened: []string{"A"},
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.leaf">
+										<widget pos="52,4" size="136x29" type="*widget.Label">
+											<text pos="4,4" size="128x21">11111</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"single_branch_opened_selected": {
 			items: [][]string{
@@ -163,6 +271,36 @@ func TestTree_Layout(t *testing.T) {
 			},
 			opened:   []string{"A"},
 			selected: "A",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.leaf">
+										<widget pos="52,4" size="136x29" type="*widget.Label">
+											<text pos="4,4" size="128x21">11111</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"single_branch_opened_leaf_selected": {
 			items: [][]string{
@@ -172,6 +310,36 @@ func TestTree_Layout(t *testing.T) {
 			},
 			opened:   []string{"A"},
 			selected: "11111",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.leaf">
+										<widget pos="52,4" size="136x29" type="*widget.Label">
+											<text pos="4,4" size="128x21">11111</text>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple": {
 			items: [][]string{
@@ -185,6 +353,48 @@ func TestTree_Layout(t *testing.T) {
 					"44444444444444444444",
 				},
 			},
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">B</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,75" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,76" size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">44444444444444444444</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple_selected": {
 			items: [][]string{
@@ -199,6 +409,48 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 			selected: "44444444444444444444",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">B</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,75" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,76" size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">44444444444444444444</text>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple_leaf": {
 			items: [][]string{
@@ -215,6 +467,51 @@ func TestTree_Layout(t *testing.T) {
 					"44444444444444444444",
 				},
 			},
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">11111</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">2222222222</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,75" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,76" size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">333333333333333</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,113" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,114" size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">44444444444444444444</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple_leaf_selected": {
 			items: [][]string{
@@ -232,6 +529,51 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 			selected: "2222222222",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">11111</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">2222222222</text>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+									<widget pos="4,75" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,76" size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">333333333333333</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,113" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,114" size="192x37" type="*widget.leaf">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">44444444444444444444</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple_branch": {
 			items: [][]string{
@@ -245,6 +587,39 @@ func TestTree_Layout(t *testing.T) {
 					"B", "C", "333333333333333",
 				},
 			},
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">B</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple_branch_selected": {
 			items: [][]string{
@@ -259,6 +634,39 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 			selected: "B",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="192x292" type="*widget.treeContent">
+									<widget size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="184x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="184x1"/>
+									</widget>
+									<widget pos="0,38" size="192x37" type="*widget.branch">
+										<widget pos="28,4" size="160x29" type="*widget.Label">
+											<text pos="4,4" size="152x21">B</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="navigateNextIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple_branch_opened": {
 			items: [][]string{
@@ -273,6 +681,85 @@ func TestTree_Layout(t *testing.T) {
 				},
 			},
 			opened: []string{"A", "B", "C"},
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="206x292" type="*widget.treeContent">
+									<widget size="206x37" type="*widget.branch">
+										<widget pos="28,4" size="174x29" type="*widget.Label">
+											<text pos="4,4" size="166x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,38" size="206x37" type="*widget.leaf">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">11111</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,75" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,76" size="206x37" type="*widget.branch">
+										<widget pos="28,4" size="174x29" type="*widget.Label">
+											<text pos="4,4" size="166x21">B</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,113" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,114" size="206x37" type="*widget.leaf">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">2222222222</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,151" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,152" size="206x37" type="*widget.branch">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">C</text>
+										</widget>
+										<widget pos="28,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,189" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,190" size="206x37" type="*widget.leaf">
+										<widget pos="76,4" size="126x29" type="*widget.Label">
+											<text pos="4,4" size="118x21">333333333333333</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+								<widget pos="0,286" size="192x6" type="*widget.scrollBarArea">
+									<widget backgroundColor="scrollbar" pos="0,3" size="178x3" type="*widget.scrollBar">
+									</widget>
+								</widget>
+								<widget pos="192,0" size="0x292" type="*widget.Shadow">
+									<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x292"/>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple_branch_opened_selected": {
 			items: [][]string{
@@ -288,6 +775,85 @@ func TestTree_Layout(t *testing.T) {
 			},
 			opened:   []string{"A", "B", "C"},
 			selected: "B",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="206x292" type="*widget.treeContent">
+									<widget size="206x37" type="*widget.branch">
+										<widget pos="28,4" size="174x29" type="*widget.Label">
+											<text pos="4,4" size="166x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,38" size="206x37" type="*widget.leaf">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">11111</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,75" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,76" size="206x37" type="*widget.branch">
+										<widget pos="28,4" size="174x29" type="*widget.Label">
+											<text pos="4,4" size="166x21">B</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+									<widget pos="4,113" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,114" size="206x37" type="*widget.leaf">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">2222222222</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,151" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,152" size="206x37" type="*widget.branch">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">C</text>
+										</widget>
+										<widget pos="28,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,189" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,190" size="206x37" type="*widget.leaf">
+										<widget pos="76,4" size="126x29" type="*widget.Label">
+											<text pos="4,4" size="118x21">333333333333333</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+								<widget pos="0,286" size="192x6" type="*widget.scrollBarArea">
+									<widget backgroundColor="scrollbar" pos="0,3" size="178x3" type="*widget.scrollBar">
+									</widget>
+								</widget>
+								<widget pos="192,0" size="0x292" type="*widget.Shadow">
+									<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x292"/>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 		"multiple_branch_opened_leaf_selected": {
 			items: [][]string{
@@ -303,6 +869,85 @@ func TestTree_Layout(t *testing.T) {
 			},
 			opened:   []string{"A", "B", "C"},
 			selected: "2222222222",
+			want: `
+				<canvas padded size="200x300">
+					<content>
+						<widget pos="4,4" size="192x292" type="*widget.Tree">
+							<widget size="192x292" type="*widget.ScrollContainer">
+								<widget size="206x292" type="*widget.treeContent">
+									<widget size="206x37" type="*widget.branch">
+										<widget pos="28,4" size="174x29" type="*widget.Label">
+											<text pos="4,4" size="166x21">A</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,37" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,38" size="206x37" type="*widget.leaf">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">11111</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,75" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,76" size="206x37" type="*widget.branch">
+										<widget pos="28,4" size="174x29" type="*widget.Label">
+											<text pos="4,4" size="166x21">B</text>
+										</widget>
+										<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,113" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,114" size="206x37" type="*widget.leaf">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">2222222222</text>
+										</widget>
+										<rectangle fillColor="primary" size="4x37"/>
+									</widget>
+									<widget pos="4,151" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,152" size="206x37" type="*widget.branch">
+										<widget pos="52,4" size="150x29" type="*widget.Label">
+											<text pos="4,4" size="142x21">C</text>
+										</widget>
+										<widget pos="28,4" size="20x29" type="*widget.branchIcon">
+											<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+									<widget pos="4,189" size="198x1" type="*widget.Separator">
+										<rectangle fillColor="disabled text" size="198x1"/>
+									</widget>
+									<widget pos="0,190" size="206x37" type="*widget.leaf">
+										<widget pos="76,4" size="126x29" type="*widget.Label">
+											<text pos="4,4" size="118x21">333333333333333</text>
+										</widget>
+										<rectangle fillColor="background" size="4x37"/>
+									</widget>
+								</widget>
+								<widget pos="0,286" size="192x6" type="*widget.scrollBarArea">
+									<widget backgroundColor="scrollbar" pos="0,3" size="178x3" type="*widget.scrollBar">
+									</widget>
+								</widget>
+								<widget pos="192,0" size="0x292" type="*widget.Shadow">
+									<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x292"/>
+								</widget>
+							</widget>
+						</widget>
+					</content>
+				</canvas>
+			`,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -322,15 +967,14 @@ func TestTree_Layout(t *testing.T) {
 
 			tree.Refresh() // Force layout
 
-			test.AssertImageMatches(t, "tree/layout_"+name+".png", window.Canvas().Capture())
+			test.AssertRendersToMarkup(t, tt.want, window.Canvas())
 		})
 	}
 }
 
 func TestTree_ChangeTheme(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	data := make(map[string][]string)
 	internalwidget.AddTreePath(data, "foo", "foobar")
@@ -353,9 +997,8 @@ func TestTree_ChangeTheme(t *testing.T) {
 }
 
 func TestTree_Move(t *testing.T) {
-	app := test.NewApp()
+	test.NewApp()
 	defer test.NewApp()
-	app.Settings().SetTheme(theme.LightTheme())
 
 	data := make(map[string][]string)
 	internalwidget.AddTreePath(data, "foo", "foobar")
@@ -368,8 +1011,66 @@ func TestTree_Move(t *testing.T) {
 
 	tree.Refresh() // Force layout
 
-	test.AssertImageMatches(t, "tree/move_initial.png", window.Canvas().Capture())
+	test.AssertRendersToMarkup(t, `
+  	<canvas padded size="220x220">
+  		<content>
+  			<widget pos="4,4" size="212x212" type="*widget.Tree">
+  				<widget size="212x212" type="*widget.ScrollContainer">
+  					<widget size="212x212" type="*widget.treeContent">
+  						<widget size="212x37" type="*widget.branch">
+  							<widget pos="28,4" size="180x29" type="*widget.Label">
+  								<text pos="4,4" size="172x21">foo</text>
+  							</widget>
+  							<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+  								<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+  							</widget>
+  							<rectangle fillColor="background" size="4x37"/>
+  						</widget>
+  						<widget pos="4,37" size="204x1" type="*widget.Separator">
+  							<rectangle fillColor="disabled text" size="204x1"/>
+  						</widget>
+  						<widget pos="0,38" size="212x37" type="*widget.leaf">
+  							<widget pos="52,4" size="156x29" type="*widget.Label">
+  								<text pos="4,4" size="148x21">foobar</text>
+  							</widget>
+  							<rectangle fillColor="background" size="4x37"/>
+  						</widget>
+  					</widget>
+  				</widget>
+  			</widget>
+  		</content>
+  	</canvas>
+	`, window.Canvas())
 
 	tree.Move(fyne.NewPos(20, 20))
-	test.AssertImageMatches(t, "tree/move_moved.png", window.Canvas().Capture())
+	test.AssertRendersToMarkup(t, `
+		<canvas padded size="220x220">
+			<content>
+				<widget pos="20,20" size="212x212" type="*widget.Tree">
+					<widget size="212x212" type="*widget.ScrollContainer">
+						<widget size="212x212" type="*widget.treeContent">
+							<widget size="212x37" type="*widget.branch">
+								<widget pos="28,4" size="180x29" type="*widget.Label">
+									<text pos="4,4" size="172x21">foo</text>
+								</widget>
+								<widget pos="4,4" size="20x29" type="*widget.branchIcon">
+									<image fillMode="contain" rsc="moveDownIcon" size="20x29"/>
+								</widget>
+								<rectangle fillColor="background" size="4x37"/>
+							</widget>
+							<widget pos="4,37" size="204x1" type="*widget.Separator">
+								<rectangle fillColor="disabled text" size="204x1"/>
+							</widget>
+							<widget pos="0,38" size="212x37" type="*widget.leaf">
+								<widget pos="52,4" size="156x29" type="*widget.Label">
+									<text pos="4,4" size="148x21">foobar</text>
+								</widget>
+								<rectangle fillColor="background" size="4x37"/>
+							</widget>
+						</widget>
+					</widget>
+				</widget>
+			</content>
+		</canvas>
+`, window.Canvas())
 }

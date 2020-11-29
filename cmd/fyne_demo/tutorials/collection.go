@@ -23,9 +23,9 @@ func collectionScreen(_ fyne.Window) fyne.CanvasObject {
 }
 
 func makeListTab(_ fyne.Window) fyne.CanvasObject {
-	var data []string
-	for i := 0; i < 1000; i++ {
-		data = append(data, fmt.Sprintf("Test Item %d", i))
+	data := make([]string, 1000)
+	for i := range data {
+		data[i] = fmt.Sprintf("Test Item %d", i)
 	}
 
 	icon := widget.NewIcon(nil)
@@ -52,19 +52,30 @@ func makeListTab(_ fyne.Window) fyne.CanvasObject {
 		icon.SetResource(nil)
 	}
 	list.Select(125)
+
 	return widget.NewHSplitContainer(list, fyne.NewContainerWithLayout(layout.NewCenterLayout(), hbox))
 }
 
 func makeTableTab(_ fyne.Window) fyne.CanvasObject {
-	return widget.NewTable(
+	t := widget.NewTable(
 		func() (int, int) { return 500, 150 },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("Cell 000, 000")
 		},
 		func(id widget.TableCellID, cell fyne.CanvasObject) {
 			label := cell.(*widget.Label)
-			label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
+			switch id.Col {
+			case 0:
+				label.SetText(fmt.Sprintf("%d", id.Row+1))
+			case 1:
+				label.SetText("A longer cell")
+			default:
+				label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
+			}
 		})
+	t.SetColumnWidth(0, 34)
+	t.SetColumnWidth(1, 102)
+	return t
 }
 
 func makeTreeTab(_ fyne.Window) fyne.CanvasObject {

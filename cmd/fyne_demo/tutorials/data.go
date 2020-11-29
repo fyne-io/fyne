@@ -18,6 +18,10 @@ var (
 			"See the canvas capabilities.",
 			canvasScreen,
 		},
+		"animations": {"Animations",
+			"See how to animate components.",
+			makeAnimationScreen,
+		},
 		"icons": {"Theme Icons",
 			"Browse the embedded icons.",
 			iconScreen,
@@ -123,6 +127,9 @@ var (
 			"Window function demo.",
 			windowScreen,
 		},
+		"binding": {"Data Binding",
+			"Connecting widgets to a data source.",
+			bindingScreen},
 		"advanced": {"Advanced",
 			"Debug and advanced information.",
 			advancedScreen,
@@ -131,7 +138,7 @@ var (
 
 	// TutorialIndex  defines how our tutorials should be laid out in the index tree
 	TutorialIndex = map[string][]string{
-		"":            {"welcome", "canvas", "icons", "widgets", "collections", "containers", "dialogs", "windows", "advanced"},
+		"":            {"welcome", "canvas", "animations", "icons", "widgets", "collections", "containers", "dialogs", "windows", "binding", "advanced"},
 		"collections": {"list", "table", "tree"},
 		"containers":  {"apptabs", "border", "box", "center", "grid", "split", "scroll"},
 		"widgets":     {"accordion", "button", "card", "entry", "form", "input", "text", "toolbar", "progress"},

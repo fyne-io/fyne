@@ -178,15 +178,15 @@ var (
 	checked, unchecked, radioButton, radioButtonChecked                             *ThemedResource
 	colorAchromatic, colorChromatic, colorPalette                                   *ThemedResource
 	contentAdd, contentRemove, contentCut, contentCopy, contentPaste                *ThemedResource
-	contentRedo, contentUndo, info, question, warning, errori                       *ThemedResource
+	contentClear, contentRedo, contentUndo, info, question, warning, errori         *ThemedResource
 	document, documentCreate, documentPrint, documentSave                           *ThemedResource
 	mailAttachment, mailCompose, mailForward, mailReply, mailReplyAll, mailSend     *ThemedResource
 	mediaFastForward, mediaFastRewind, mediaPause, mediaPlay                        *ThemedResource
-	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious                      *ThemedResource
+	mediaRecord, mediaReplay, mediaSkipNext, mediaSkipPrevious, mediaStop           *ThemedResource
 	arrowBack, arrowDown, arrowForward, arrowUp, arrowDropDown, arrowDropUp         *ThemedResource
 	file, fileApplication, fileAudio, fileImage, fileText, fileVideo                *ThemedResource
-	folder, folderNew, folderOpen, help, history, home, settings, storage           *ThemedResource
-	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut               *ThemedResource
+	folder, folderNew, folderOpen, help, history, home, settings, storage, upload   *ThemedResource
+	viewFullScreen, viewRefresh, viewZoomFit, viewZoomIn, viewZoomOut, viewRestore  *ThemedResource
 	visibility, visibilityOff, volumeDown, volumeMute, volumeUp, download, computer *ThemedResource
 )
 
@@ -205,6 +205,7 @@ func init() {
 	radioButtonChecked = NewThemedResource(radiobuttoncheckedIconRes, nil)
 
 	contentAdd = NewThemedResource(contentaddIconRes, nil)
+	contentClear = NewThemedResource(cancelIconRes, nil)
 	contentRemove = NewThemedResource(contentremoveIconRes, nil)
 	contentCut = NewThemedResource(contentcutIconRes, nil)
 	contentCopy = NewThemedResource(contentcopyIconRes, nil)
@@ -241,6 +242,7 @@ func init() {
 	mediaReplay = NewThemedResource(mediareplayIconRes, nil)
 	mediaSkipNext = NewThemedResource(mediaskipnextIconRes, nil)
 	mediaSkipPrevious = NewThemedResource(mediaskippreviousIconRes, nil)
+	mediaStop = NewThemedResource(mediastopIconRes, nil)
 
 	arrowBack = NewThemedResource(arrowbackIconRes, nil)
 	arrowDown = NewThemedResource(arrowdownIconRes, nil)
@@ -265,6 +267,7 @@ func init() {
 
 	viewFullScreen = NewThemedResource(viewfullscreenIconRes, nil)
 	viewRefresh = NewThemedResource(viewrefreshIconRes, nil)
+	viewRestore = NewThemedResource(viewzoomfitIconRes, nil)
 	viewZoomFit = NewThemedResource(viewzoomfitIconRes, nil)
 	viewZoomIn = NewThemedResource(viewzoominIconRes, nil)
 	viewZoomOut = NewThemedResource(viewzoomoutIconRes, nil)
@@ -279,6 +282,7 @@ func init() {
 	download = NewThemedResource(downloadIconRes, nil)
 	computer = NewThemedResource(computerIconRes, nil)
 	storage = NewThemedResource(storageIconRes, nil)
+	upload = NewThemedResource(uploadIconRes, nil)
 }
 
 // FyneLogo returns a resource containing the Fyne logo
@@ -353,7 +357,7 @@ func ContentRemoveIcon() fyne.Resource {
 
 // ContentClearIcon returns a resource containing the standard content clear icon for the current theme
 func ContentClearIcon() fyne.Resource {
-	return cancel
+	return contentClear
 }
 
 // ContentCutIcon returns a resource containing the standard content cut icon for the current theme
@@ -571,6 +575,11 @@ func MediaSkipPreviousIcon() fyne.Resource {
 	return mediaSkipPrevious
 }
 
+// MediaStopIcon returns a resource containing the standard media stop icon for the current theme
+func MediaStopIcon() fyne.Resource {
+	return mediaStop
+}
+
 // MoveDownIcon returns a resource containing the standard down arrow icon for the current theme
 func MoveDownIcon() fyne.Resource {
 	return arrowDown
@@ -608,7 +617,7 @@ func ViewFullScreenIcon() fyne.Resource {
 
 // ViewRestoreIcon returns a resource containing the standard exit fullscreen icon for the current theme
 func ViewRestoreIcon() fyne.Resource {
-	return viewZoomFit
+	return viewRestore
 }
 
 // ViewRefreshIcon returns a resource containing the standard refresh icon for the current theme
@@ -669,4 +678,9 @@ func DownloadIcon() fyne.Resource {
 // StorageIcon returns a resource containing the standard storage icon for the current theme
 func StorageIcon() fyne.Resource {
 	return storage
+}
+
+// UploadIcon returns a resource containing the standard upload icon for the current theme
+func UploadIcon() fyne.Resource {
+	return upload
 }

@@ -7,14 +7,20 @@ import (
 	"fyne.io/fyne/theme"
 )
 
+const separatorThickness = 1
+
 var _ fyne.Widget = (*Separator)(nil)
 
 // Separator is a widget for displaying a separator with themeable color.
+//
+// Since: 1.4
 type Separator struct {
 	widget.Base
 }
 
 // NewSeparator creates a new separator.
+//
+// Since: 1.4
 func NewSeparator() *Separator {
 	return &Separator{}
 }
@@ -43,7 +49,7 @@ func (s *Separator) Hide() {
 //
 // Implements: fyne.Widget
 func (s *Separator) MinSize() fyne.Size {
-	return fyne.NewSize(1, 1)
+	return fyne.NewSize(separatorThickness, separatorThickness)
 }
 
 // Move sets the position of the separator relative to its parent.
@@ -87,7 +93,7 @@ func (r *separatorRenderer) Layout(size fyne.Size) {
 }
 
 func (r *separatorRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(1, 1)
+	return fyne.NewSize(separatorThickness, separatorThickness)
 }
 
 func (r *separatorRenderer) Refresh() {

@@ -35,6 +35,8 @@ type URI interface {
 
 // ListableURI represents a URI that can have child items, most commonly a
 // directory on disk in the native filesystem.
+//
+// Since: 1.4
 type ListableURI interface {
 	URI
 

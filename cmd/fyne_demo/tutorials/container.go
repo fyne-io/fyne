@@ -25,7 +25,7 @@ func containerScreen(_ fyne.Window) fyne.CanvasObject {
 func makeAppTabsTab(_ fyne.Window) fyne.CanvasObject {
 	return container.NewAppTabs(
 		container.NewTabItem("Tab 1", widget.NewLabel("Content of tab 1")),
-		container.NewTabItem("Tab 2", widget.NewLabel("Content of tab 2")),
+		container.NewTabItem("Tab 2 bigger", widget.NewLabel("Content of tab 2")),
 		container.NewTabItem("Tab 3", widget.NewLabel("Content of tab 3")),
 	)
 }

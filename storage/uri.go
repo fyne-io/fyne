@@ -121,6 +121,8 @@ func parentGeneric(location string) (string, error) {
 
 // Parent gets the parent of a URI by splitting it along '/' separators and
 // removing the last item.
+//
+// Since: 1.4
 func Parent(u fyne.URI) (fyne.URI, error) {
 	s := u.String()
 
@@ -162,6 +164,8 @@ func Parent(u fyne.URI) (fyne.URI, error) {
 }
 
 // Child appends a new path element to a URI, separated by a '/' character.
+//
+// Since: 1.4
 func Child(u fyne.URI, component string) (fyne.URI, error) {
 	// While as implemented this does not need to return an error, it is
 	// reasonable to expect that future implementations of this, especially
@@ -181,6 +185,8 @@ func Child(u fyne.URI, component string) (fyne.URI, error) {
 // Exists will return true if the resource the URI refers to exists, and false
 // otherwise. If an error occurs while checking, false is returned as the first
 // return.
+//
+// Since: 1.4
 func Exists(u fyne.URI) (bool, error) {
 	if u.Scheme() != "file" {
 		return false, fmt.Errorf("don't know how to check existence of %s scheme", u.Scheme())

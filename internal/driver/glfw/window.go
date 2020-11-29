@@ -38,6 +38,7 @@ func initCursors() {
 		desktop.PointerCursor:   glfw.CreateStandardCursor(glfw.HandCursor),
 		desktop.HResizeCursor:   glfw.CreateStandardCursor(glfw.HResizeCursor),
 		desktop.VResizeCursor:   glfw.CreateStandardCursor(glfw.VResizeCursor),
+		desktop.HiddenCursor:    nil,
 	}
 }
 
@@ -126,7 +127,7 @@ func (w *window) CenterOnScreen() {
 	w.centered = true
 
 	if w.view() != nil {
-		w.doCenterOnScreen()
+		runOnMain(w.doCenterOnScreen)
 	}
 }
 
@@ -579,8 +580,16 @@ func (w *window) mouseMoved(viewport *glfw.Window, xpos float64, ypos float64) {
 		return hover
 	})
 
-	w.cursor = cursor
-	viewport.SetCursor(cursor)
+	if w.cursor != cursor {
+		// cursor has changed, store new cursor and apply change via glfw
+		w.cursor = cursor
+		if cursor == nil {
+			viewport.SetInputMode(glfw.CursorMode, glfw.CursorHidden)
+		} else {
+			viewport.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+			viewport.SetCursor(cursor)
+		}
+	}
 	if obj != nil && !w.objIsDragged(obj) {
 		ev := new(desktop.MouseEvent)
 		ev.AbsolutePosition = w.mousePos
@@ -682,9 +691,9 @@ func (w *window) mouseClicked(_ *glfw.Window, btn glfw.MouseButton, action glfw.
 	}
 
 	if action == glfw.Press {
-		w.mouseButton = button
+		w.mouseButton |= button
 	} else if action == glfw.Release {
-		w.mouseButton = 0
+		w.mouseButton &= ^button
 	}
 
 	if wid, ok := co.(fyne.Draggable); ok {

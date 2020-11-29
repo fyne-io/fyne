@@ -8,8 +8,8 @@ package gomobile
 #include <stdbool.h>
 #include <stdlib.h>
 
-bool uriCanList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
-char *uriList(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
+bool canListURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
+char *listURI(uintptr_t jni_env, uintptr_t ctx, char* uriCstr);
 */
 import "C"
 import (
@@ -22,26 +22,26 @@ import (
 	"fyne.io/fyne/storage"
 )
 
-func uriCanList(uri fyne.URI) bool {
+func canListURI(uri fyne.URI) bool {
 	uriStr := C.CString(uri.String())
 	defer C.free(unsafe.Pointer(uriStr))
 	listable := false
 
 	app.RunOnJVM(func(_, env, ctx uintptr) error {
-		listable = bool(C.uriCanList(C.uintptr_t(env), C.uintptr_t(ctx), uriStr))
+		listable = bool(C.canListURI(C.uintptr_t(env), C.uintptr_t(ctx), uriStr))
 		return nil
 	})
 
 	return listable
 }
 
-func uriList(uri fyne.URI) ([]fyne.URI, error) {
+func listURI(uri fyne.URI) ([]fyne.URI, error) {
 	uriStr := C.CString(uri.String())
 	defer C.free(unsafe.Pointer(uriStr))
 
 	var str *C.char
 	app.RunOnJVM(func(_, env, ctx uintptr) error {
-		str = C.uriList(C.uintptr_t(env), C.uintptr_t(ctx), uriStr)
+		str = C.listURI(C.uintptr_t(env), C.uintptr_t(ctx), uriStr)
 		return nil
 	})
 
