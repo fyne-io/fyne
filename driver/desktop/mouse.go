@@ -12,7 +12,7 @@ const (
 	// RightMouseButton is the secondary button on most mouse input devices.
 	RightMouseButton
 
-	// MiddleMouseButton is the middle button on the mouse, assuming it has one.
+	// MiddleMouseButton is the middle button on the mouse, assuming it has one. Since: 2.0.0
 	MiddleMouseButton
 )
 
