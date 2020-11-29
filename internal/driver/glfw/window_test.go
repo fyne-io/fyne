@@ -157,7 +157,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	assert.Nil(t, d2.popDragEvent())
 
 	// no drag event on mouseDown
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.waitForEvents()
 	assert.Nil(t, d1.popDragEvent())
 	assert.Nil(t, d2.popDragEvent())
@@ -207,7 +207,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	assert.Nil(t, d2.popDragEvent())
 
 	// drag end event on mouseUp
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 	w.waitForEvents()
 	assert.Nil(t, d1.popDragEvent())
 	assert.NotNil(t, d1.popDragEndEvent())
@@ -220,7 +220,7 @@ func TestWindow_HandleDragging(t *testing.T) {
 	assert.Nil(t, d2.popDragEvent())
 
 	// no drag event on mouseDown
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.waitForEvents()
 	assert.Nil(t, d1.popDragEvent())
 	assert.Nil(t, d2.popDragEvent())
@@ -251,7 +251,7 @@ func TestWindow_DragObjectThatMoves(t *testing.T) {
 
 	// drag -1,-1
 	w.mouseMoved(w.viewport, 9, 9)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 8, 8)
 	w.waitForEvents()
 	assert.Equal(t,
@@ -295,9 +295,9 @@ func TestWindow_DragIntoNewObjectKeepingFocus(t *testing.T) {
 
 	// drag from d1 into d2
 	w.mouseMoved(w.viewport, 9, 9)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 19, 9)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 	w.waitForEvents()
 
 	// we should only have 2 mouse events on d1
@@ -332,9 +332,9 @@ func TestWindow_NoDragEndWithoutDraggedEvent(t *testing.T) {
 
 	w.mouseMoved(w.viewport, 9, 9)
 	// mouse down (potential drag)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	// mouse release without move (not really a drag)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 	w.waitForEvents()
 
 	assert.Nil(t, do.popDragEvent(), "no drag event without move")
@@ -356,7 +356,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 			AbsolutePosition: fyne.NewPos(8, 8)}},
 		dh.popMouseInEvent(),
 	)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 8, 8)
 	w.waitForEvents()
 	assert.Equal(t,
@@ -400,7 +400,7 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 	assert.Nil(t, dh.popMouseMovedEvent())
 
 	// no hover events on end of drag event
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 	w.waitForEvents()
 	assert.Nil(t, dh.popMouseInEvent())
 	assert.Nil(t, dh.popMouseMovedEvent())
@@ -408,9 +408,9 @@ func TestWindow_HoverableOnDragging(t *testing.T) {
 
 	// mouseOut on mouse release after dragging out of area
 	w.mouseMoved(w.viewport, 8, 8)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 16, 8) // outside the 10x10 object
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 	w.waitForEvents()
 	assert.NotNil(t, dh.popMouseOutEvent())
 }
@@ -424,8 +424,8 @@ func TestWindow_Tapped(t *testing.T) {
 	w.SetContent(widget.NewVBox(rect, o))
 
 	w.mousePos = fyne.NewPos(50, 160)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 	w.waitForEvents()
 
 	assert.Nil(t, o.popSecondaryTapEvent(), "no secondary tap")
@@ -442,8 +442,8 @@ func TestWindow_TappedSecondary(t *testing.T) {
 	w.SetContent(o)
 
 	w.mousePos = fyne.NewPos(50, 60)
-	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonRight, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonRight, glfw.Release, 0)
 	w.waitForEvents()
 
 	assert.Nil(t, o.popTapEvent(), "no primary tap")
@@ -462,14 +462,14 @@ func TestWindow_TappedSecondary_OnPrimaryOnlyTarget(t *testing.T) {
 	w.SetContent(o)
 
 	w.mousePos = fyne.NewPos(10, 25)
-	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton2, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonRight, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonRight, glfw.Release, 0)
 	w.waitForEvents()
 
 	assert.False(t, tapped)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 	w.waitForEvents()
 
 	assert.True(t, tapped)
@@ -495,16 +495,16 @@ func TestWindow_TappedIgnoresScrollerClip(t *testing.T) {
 	refreshWindow(w) // ensure any async resize is done
 
 	w.mousePos = fyne.NewPos(10, 80)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 
 	w.waitForEvents()
 
 	assert.False(t, tapped, "Tapped button that was clipped")
 
 	w.mousePos = fyne.NewPos(10, 120)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 
 	w.waitForEvents()
 
@@ -519,24 +519,24 @@ func TestWindow_TappedIgnoredWhenMovedOffOfTappable(t *testing.T) {
 	w.SetContent(widget.NewVBox(b1, b2))
 
 	w.mouseMoved(w.viewport, 15, 25)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 
 	w.waitForEvents()
 
 	assert.Equal(t, 1, tapped, "Button 1 should be tapped")
 	tapped = 0
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.mouseMoved(w.viewport, 15, 45)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 
 	w.waitForEvents()
 
 	assert.Equal(t, 0, tapped, "button was tapped without mouse press & release on it %d", tapped)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 
 	w.waitForEvents()
 
@@ -556,8 +556,8 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	w.SetContent(fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil), but))
 
 	w.mouseMoved(w.viewport, 15, 25)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 
 	w.waitForEvents()
 	time.Sleep(500 * time.Millisecond)
@@ -565,11 +565,11 @@ func TestWindow_TappedAndDoubleTapped(t *testing.T) {
 	assert.Equal(t, 1, tapped, "Single tap should have fired")
 	tapped = 0
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 	w.waitForEvents()
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Release, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Release, 0)
 
 	w.waitForEvents()
 	time.Sleep(500 * time.Millisecond)
@@ -669,7 +669,7 @@ func TestWindow_MouseEventContainsModifierKeys(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			require.Nil(t, m.popMouseEvent(), "no initial mouse event")
-			w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, tt.modifier)
+			w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, tt.modifier)
 			w.waitForEvents()
 			me, _ := m.popMouseEvent().(*desktop.MouseEvent)
 			if assert.NotNil(t, me, "mouse event triggered") {
@@ -825,12 +825,12 @@ func TestWindow_ManualFocus(t *testing.T) {
 	repaintWindow(w)
 
 	w.mouseMoved(w.viewport, 9, 9)
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.waitForEvents()
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.waitForEvents()
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 0, content.unfocusedTimes)
@@ -848,7 +848,7 @@ func TestWindow_ManualFocus(t *testing.T) {
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 1, content.unfocusedTimes)
 
-	w.mouseClicked(w.viewport, glfw.MouseButton1, glfw.Press, 0)
+	w.mouseClicked(w.viewport, glfw.MouseButtonLeft, glfw.Press, 0)
 	w.waitForEvents()
 	assert.Equal(t, 1, content.focusedTimes)
 	assert.Equal(t, 1, content.unfocusedTimes)
