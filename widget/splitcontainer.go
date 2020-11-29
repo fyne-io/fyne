@@ -222,8 +222,20 @@ func (d *divider) DragEnd() {
 func (d *divider) Dragged(event *fyne.DragEvent) {
 	offset := d.split.Offset
 	if d.split.Horizontal {
+		if leadingRatio := float64(d.split.Leading.Size().Width) / float64(d.split.Size().Width); offset < leadingRatio {
+			offset = leadingRatio
+		}
+		if trailingRatio := 1. - (float64(d.split.Trailing.Size().Width) / float64(d.split.Size().Width)); offset > trailingRatio {
+			offset = trailingRatio
+		}
 		offset += float64(event.DraggedX) / float64(d.split.Size().Width)
 	} else {
+		if leadingRatio := float64(d.split.Leading.Size().Height) / float64(d.split.Size().Height); offset < leadingRatio {
+			offset = leadingRatio
+		}
+		if trailingRatio := 1. - (float64(d.split.Trailing.Size().Height) / float64(d.split.Size().Height)); offset > trailingRatio {
+			offset = trailingRatio
+		}
 		offset += float64(event.DraggedY) / float64(d.split.Size().Height)
 	}
 	d.split.SetOffset(offset)
