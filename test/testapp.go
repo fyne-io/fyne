@@ -156,7 +156,7 @@ func (s *testSettings) Theme() fyne.Theme {
 }
 
 func (s *testSettings) ThemeVariant() fyne.ThemeVariant {
-	return theme.Variants.Light
+	return 2 // not a preference
 }
 
 func (s *testSettings) Scale() float32 {

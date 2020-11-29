@@ -99,8 +99,8 @@ var (
 		Light fyne.ThemeVariant
 		// potential for adding theme types such as high visibility or monochrome...
 	}{
+		0,
 		1,
-		2,
 	}
 
 	currentVariant = Variants.Dark
