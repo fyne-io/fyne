@@ -131,12 +131,12 @@ func TestEntry_Disableable(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled text" pos="0,33" size="120x4"/>
+					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 				</widget>
 			</content>
@@ -185,12 +185,12 @@ func TestEntry_Disableable(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled text" pos="0,33" size="120x4"/>
+					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21">Type!</text>
+						<text color="disabled" pos="4,4" size="104x21">Type!</text>
 					</widget>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 				</widget>
 			</content>
@@ -236,9 +236,9 @@ func TestEntry_Disableable(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled text" pos="0,33" size="120x4"/>
+					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21">Hello</text>
+						<text color="disabled" pos="4,4" size="104x21">Hello</text>
 					</widget>
 				</widget>
 			</content>
@@ -2231,12 +2231,12 @@ func TestEntry_SetReadOnly_OnFocus(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled text" pos="0,33" size="120x4"/>
+					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 				</widget>
 			</content>
@@ -2537,12 +2537,12 @@ func TestEntry_TappedSecondary(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled text" pos="0,33" size="120x4"/>
+					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 				</widget>
 			</content>
@@ -2586,12 +2586,12 @@ func TestEntry_TappedSecondary(t *testing.T) {
 		<canvas padded size="150x200">
 			<content>
 				<widget pos="10,10" size="120x37" type="*widget.Entry">
-					<rectangle fillColor="disabled text" pos="0,33" size="120x4"/>
+					<rectangle fillColor="disabled" pos="0,33" size="120x4"/>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 					<widget pos="4,4" size="112x29" type="*widget.textProvider">
-						<text color="disabled text" pos="4,4" size="104x21"></text>
+						<text color="disabled" pos="4,4" size="104x21"></text>
 					</widget>
 				</widget>
 			</content>

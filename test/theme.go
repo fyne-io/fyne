@@ -17,8 +17,9 @@ type configurableTheme struct {
 	boldItalic         fyne.Resource
 	button             color.Color
 	disabledButton     color.Color
-	disabledText       color.Color
+	disabled           color.Color
 	focus              color.Color
+	foreground         color.Color
 	hover              color.Color
 	iconInlineSize     int
 	italic             fyne.Resource
@@ -31,7 +32,6 @@ type configurableTheme struct {
 	scrollBarSize      int
 	scrollBarSmallSize int
 	shadow             color.Color
-	text               color.Color
 	textSize           int
 }
 
@@ -43,9 +43,10 @@ func Theme() fyne.Theme {
 			bold:               theme.DefaultTextBoldFont(),
 			boldItalic:         theme.DefaultTextBoldItalicFont(),
 			button:             color.NRGBA{R: 0x33, G: 0x33, B: 0x33, A: 0xff},
+			disabled:           color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 			disabledButton:     color.NRGBA{R: 0x22, G: 0x22, B: 0x22, A: 0xff},
-			disabledText:       color.NRGBA{R: 0x88, G: 0x88, B: 0x88, A: 0xff},
 			focus:              color.NRGBA{R: 0x81, G: 0xc7, B: 0x84, A: 0xff},
+			foreground:         color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
 			hover:              color.NRGBA{R: 0x88, G: 0xff, B: 0xff, A: 0x22},
 			iconInlineSize:     20,
 			italic:             theme.DefaultTextItalicFont(),
@@ -58,7 +59,6 @@ func Theme() fyne.Theme {
 			scrollBarSize:      16,
 			scrollBarSmallSize: 3,
 			shadow:             color.NRGBA{A: 0x88},
-			text:               color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff},
 			textSize:           14,
 		}
 	}
@@ -69,14 +69,14 @@ func (t *configurableTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) co
 	switch n {
 	case theme.Colors.Background:
 		return t.background
-	case theme.Colors.Text:
-		return t.text
+	case theme.Colors.Foreground:
+		return t.foreground
 	case theme.Colors.Button:
 		return t.button
 	case theme.Colors.DisabledButton:
 		return t.disabledButton
-	case theme.Colors.DisabledText:
-		return t.disabledText
+	case theme.Colors.Disabled:
+		return t.disabled
 	case theme.Colors.Focus:
 		return t.focus
 	case theme.Colors.Hover:

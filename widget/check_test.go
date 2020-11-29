@@ -63,7 +63,7 @@ func TestCheck_Layout(t *testing.T) {
 							<widget pos="36,81" size="70x29" type="*widget.Check">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="42x29">Test</text>
+								<text color="disabled" pos="32,0" size="42x29">Test</text>
 							</widget>
 						</container>
 					</content>
@@ -80,7 +80,7 @@ func TestCheck_Layout(t *testing.T) {
 							<widget pos="36,81" size="70x29" type="*widget.Check">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="checkButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="42x29">Test</text>
+								<text color="disabled" pos="32,0" size="42x29">Test</text>
 							</widget>
 						</container>
 					</content>

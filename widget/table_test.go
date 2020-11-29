@@ -236,19 +236,19 @@ func TestTable_Selection(t *testing.T) {
 					<rectangle fillColor="primary" pos="4,0" size="101x4"/>
 					<rectangle fillColor="primary" pos="0,42" size="4x37"/>
 					<widget pos="105,4" size="1x168" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="1x168"/>
+						<rectangle fillColor="disabled" size="1x168"/>
 					</widget>
 					<widget pos="4,41" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,79" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,117" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,155" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 				</widget>
 			</content>
@@ -339,19 +339,19 @@ func TestTable_Select(t *testing.T) {
 					<rectangle fillColor="primary" pos="4,0" size="101x4"/>
 					<rectangle fillColor="primary" pos="0,42" size="4x37"/>
 					<widget pos="105,4" size="1x168" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="1x168"/>
+						<rectangle fillColor="disabled" size="1x168"/>
 					</widget>
 					<widget pos="4,41" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,79" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,117" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,155" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 				</widget>
 			</content>
@@ -421,19 +421,19 @@ func TestTable_Select(t *testing.T) {
 					<rectangle fillColor="primary" pos="71,0" size="101x4"/>
 					<rectangle fillColor="primary" pos="0,135" size="4x37"/>
 					<widget pos="70,4" size="1x168" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="1x168"/>
+						<rectangle fillColor="disabled" size="1x168"/>
 					</widget>
 					<widget pos="4,20" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,58" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,96" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 					<widget pos="4,134" size="168x1" type="*widget.Separator">
-						<rectangle fillColor="disabled text" size="168x1"/>
+						<rectangle fillColor="disabled" size="168x1"/>
 					</widget>
 				</widget>
 			</content>

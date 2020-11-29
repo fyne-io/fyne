@@ -50,10 +50,10 @@ var (
 	// Since 2.0.0
 	Colors = struct {
 		Background     fyne.ThemeColorName
-		Text           fyne.ThemeColorName
+		Foreground     fyne.ThemeColorName
 		Button         fyne.ThemeColorName
 		DisabledButton fyne.ThemeColorName
-		DisabledText   fyne.ThemeColorName
+		Disabled       fyne.ThemeColorName
 		Focus          fyne.ThemeColorName
 		Hover          fyne.ThemeColorName
 		PlaceHolder    fyne.ThemeColorName
@@ -62,10 +62,10 @@ var (
 		Shadow         fyne.ThemeColorName
 	}{
 		"background",
-		"text",
+		"foreground",
 		"button",
 		"disabledButton",
-		"disabledText",
+		"disabled",
 		"focus",
 		"hover",
 		"placeholder",
@@ -129,9 +129,9 @@ var (
 	darkPalette = map[fyne.ThemeColorName]color.Color{
 		"background":     color.NRGBA{0x30, 0x30, 0x30, 0xff},
 		"button":         color.Transparent,
-		"disabledText":   color.NRGBA{0xff, 0xff, 0xff, 0x42},
+		"disabled":       color.NRGBA{0xff, 0xff, 0xff, 0x42},
 		"disabledButton": color.NRGBA{0x26, 0x26, 0x26, 0xff},
-		"text":           color.NRGBA{0xff, 0xff, 0xff, 0xff},
+		"foreground":     color.NRGBA{0xff, 0xff, 0xff, 0xff},
 		"placeholder":    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
 		"hover":          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
 		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
@@ -141,9 +141,9 @@ var (
 	lightPalette = map[fyne.ThemeColorName]color.Color{
 		"background":     color.NRGBA{0xff, 0xff, 0xff, 0xff},
 		"button":         color.Transparent,
-		"disabledText":   color.NRGBA{0x0, 0x0, 0x0, 0x42},
+		"disabled":       color.NRGBA{0x0, 0x0, 0x0, 0x42},
 		"disabledButton": color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
-		"text":           color.NRGBA{0x21, 0x21, 0x21, 0xff},
+		"foreground":     color.NRGBA{0x21, 0x21, 0x21, 0xff},
 		"placeholder":    color.NRGBA{0x88, 0x88, 0x88, 0xff},
 		"hover":          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
 		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
@@ -289,13 +289,24 @@ func DisabledButtonColor() color.Color {
 }
 
 // TextColor returns the theme's standard text color
+//
+// Deprecated: Use theme.Foreground colour instead
 func TextColor() color.Color {
-	return current().Color(Colors.Text, currentVariant)
+	return current().Color(Colors.Foreground, currentVariant)
+}
+
+// DisabledColor returns the foreground color for a disabled UI element
+//
+// Since: 2.0.0
+func DisabledColor() color.Color {
+	return current().Color(Colors.Disabled, currentVariant)
 }
 
 // DisabledTextColor returns the color for a disabledIcon UI element
+//
+// Deprecated: Use DisabledColor() instead
 func DisabledTextColor() color.Color {
-	return current().Color(Colors.DisabledText, currentVariant)
+	return current().Color(Colors.Disabled, currentVariant)
 }
 
 // PlaceHolderColor returns the theme's standard text color
@@ -316,6 +327,13 @@ func HoverColor() color.Color {
 // FocusColor returns the color used to highlight a focused widget
 func FocusColor() color.Color {
 	return current().Color(Colors.Focus, currentVariant)
+}
+
+// ForegroundColor returns the theme's standard foreground color for text and icons
+//
+// Since: 2.0.0
+func ForegroundColor() color.Color {
+	return current().Color(Colors.Foreground, currentVariant)
 }
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar

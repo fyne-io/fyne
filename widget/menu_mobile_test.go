@@ -70,7 +70,7 @@ func TestMenu_Layout(t *testing.T) {
 												<text pos="8,4" size="10x21">A</text>
 											</widget>
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
-												<rectangle fillColor="disabled text" size="71x1"/>
+												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
@@ -120,7 +120,7 @@ func TestMenu_Layout(t *testing.T) {
 												<text pos="8,4" size="10x21">A</text>
 											</widget>
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
-												<rectangle fillColor="disabled text" size="71x1"/>
+												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
@@ -224,7 +224,7 @@ func TestMenu_Layout(t *testing.T) {
 												<text pos="8,4" size="10x21">A</text>
 											</widget>
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
-												<rectangle fillColor="disabled text" size="71x1"/>
+												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
@@ -274,7 +274,7 @@ func TestMenu_Layout(t *testing.T) {
 												<text pos="8,4" size="10x21">A</text>
 											</widget>
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
-												<rectangle fillColor="disabled text" size="71x1"/>
+												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
@@ -376,7 +376,7 @@ func TestMenu_Layout(t *testing.T) {
 												<text pos="8,4" size="10x21">A</text>
 											</widget>
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
-												<rectangle fillColor="disabled text" size="71x1"/>
+												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
@@ -478,7 +478,7 @@ func TestMenu_Layout(t *testing.T) {
 												<text pos="8,4" size="10x21">A</text>
 											</widget>
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
-												<rectangle fillColor="disabled text" size="71x1"/>
+												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
@@ -577,7 +577,7 @@ func TestMenu_Layout(t *testing.T) {
 												<text pos="8,4" size="10x21">A</text>
 											</widget>
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
-												<rectangle fillColor="disabled text" size="71x1"/>
+												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>
@@ -623,7 +623,7 @@ func TestMenu_Layout(t *testing.T) {
 												<text pos="8,4" size="10x21">A</text>
 											</widget>
 											<widget pos="0,33" size="71x1" type="*widget.Separator">
-												<rectangle fillColor="disabled text" size="71x1"/>
+												<rectangle fillColor="disabled" size="71x1"/>
 											</widget>
 											<widget pos="0,38" size="71x29" type="*widget.menuItem">
 												<text pos="8,4" size="55x21">B (long)</text>

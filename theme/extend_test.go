@@ -21,7 +21,7 @@ func TestExtendTheme_Color(t *testing.T) {
 	newTheme := ExtendDefaultTheme(wrappedTheme)
 	assert.Equal(t, overrideColor, newTheme.Color(Colors.Background, Variants.Dark))
 	assert.Equal(t, ShadowColor(), newTheme.Color(Colors.Shadow, Variants.Dark))
-	assert.Equal(t, overrideColor, newTheme.Color(Colors.Text, Variants.Dark))
+	assert.Equal(t, overrideColor, newTheme.Color(Colors.Foreground, Variants.Dark))
 }
 
 func TestExtendTheme_Font(t *testing.T) {
@@ -50,7 +50,7 @@ type extendedTheme struct {
 }
 
 func (e *extendedTheme) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
-	if n == Colors.Background || n == Colors.Text {
+	if n == Colors.Background || n == Colors.Foreground {
 		return overrideColor
 	}
 

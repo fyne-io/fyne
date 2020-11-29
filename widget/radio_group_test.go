@@ -246,17 +246,17 @@ func TestRadioGroup_FocusRendering(t *testing.T) {
 							<widget size="103x29" type="*widget.radioItem">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="103x29">Option A</text>
+								<text color="disabled" pos="32,0" size="103x29">Option A</text>
 							</widget>
 							<widget pos="0,29" size="103x29" type="*widget.radioItem">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="103x29">Option B</text>
+								<text color="disabled" pos="32,0" size="103x29">Option B</text>
 							</widget>
 							<widget pos="0,58" size="103x29" type="*widget.radioItem">
 								<circle fillColor="background" size="28x28"/>
 								<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-								<text color="disabled text" pos="32,0" size="103x29">Option C</text>
+								<text color="disabled" pos="32,0" size="103x29">Option C</text>
 							</widget>
 						</widget>
 					</container>
@@ -329,7 +329,7 @@ func TestRadioGroup_Layout(t *testing.T) {
 								<widget size="70x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="70x29">Test</text>
+									<text color="disabled" pos="32,0" size="70x29">Test</text>
 								</widget>
 							</widget>
 						</container>
@@ -368,7 +368,7 @@ func TestRadioGroup_Layout(t *testing.T) {
 								<widget size="70x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="70x29">Test</text>
+									<text color="disabled" pos="32,0" size="70x29">Test</text>
 								</widget>
 							</widget>
 						</container>
@@ -407,7 +407,7 @@ func TestRadioGroup_Layout(t *testing.T) {
 								<widget size="70x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="70x29">Test</text>
+									<text color="disabled" pos="32,0" size="70x29">Test</text>
 								</widget>
 							</widget>
 						</container>
@@ -448,7 +448,7 @@ func TestRadioGroup_Layout(t *testing.T) {
 								<widget size="70x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="70x29">Test</text>
+									<text color="disabled" pos="32,0" size="70x29">Test</text>
 								</widget>
 							</widget>
 						</container>
@@ -490,12 +490,12 @@ func TestRadioGroup_Layout(t *testing.T) {
 								<widget size="67x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="67x29">Foo</text>
+									<text color="disabled" pos="32,0" size="67x29">Foo</text>
 								</widget>
 								<widget pos="0,29" size="67x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="67x29">Bar</text>
+									<text color="disabled" pos="32,0" size="67x29">Bar</text>
 								</widget>
 							</widget>
 						</container>
@@ -539,12 +539,12 @@ func TestRadioGroup_Layout(t *testing.T) {
 								<widget size="66x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="66x29">Foo</text>
+									<text color="disabled" pos="32,0" size="66x29">Foo</text>
 								</widget>
 								<widget pos="66,0" size="66x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="66x29">Bar</text>
+									<text color="disabled" pos="32,0" size="66x29">Bar</text>
 								</widget>
 							</widget>
 						</container>
@@ -588,12 +588,12 @@ func TestRadioGroup_Layout(t *testing.T) {
 								<widget size="67x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="67x29">Foo</text>
+									<text color="disabled" pos="32,0" size="67x29">Foo</text>
 								</widget>
 								<widget pos="0,29" size="67x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="67x29">Bar</text>
+									<text color="disabled" pos="32,0" size="67x29">Bar</text>
 								</widget>
 							</widget>
 						</container>
@@ -639,12 +639,12 @@ func TestRadioGroup_Layout(t *testing.T) {
 								<widget size="66x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonCheckedIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="66x29">Foo</text>
+									<text color="disabled" pos="32,0" size="66x29">Foo</text>
 								</widget>
 								<widget pos="66,0" size="66x29" type="*widget.radioItem">
 									<circle fillColor="background" size="28x28"/>
 									<image pos="4,4" rsc="radioButtonIcon" size="iconInlineSize" themed="disabled"/>
-									<text color="disabled text" pos="32,0" size="66x29">Bar</text>
+									<text color="disabled" pos="32,0" size="66x29">Bar</text>
 								</widget>
 							</widget>
 						</container>

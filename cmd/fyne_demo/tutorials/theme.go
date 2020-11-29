@@ -21,7 +21,7 @@ func (customTheme) Color(c fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color
 	switch c {
 	case theme.Colors.Background:
 		return purple
-	case theme.Colors.Button, theme.Colors.DisabledText:
+	case theme.Colors.Button, theme.Colors.Disabled:
 		return color.Black
 	case theme.Colors.PlaceHolder, theme.Colors.ScrollBar:
 		return grey

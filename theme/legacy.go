@@ -23,13 +23,13 @@ func (l *legacyWrapper) Color(n fyne.ThemeColorName, _ fyne.ThemeVariant) color.
 	switch n {
 	case Colors.Background:
 		return l.old.BackgroundColor()
-	case Colors.Text:
+	case Colors.Foreground:
 		return l.old.TextColor()
 	case Colors.Button:
 		return l.old.ButtonColor()
 	case Colors.DisabledButton:
 		return l.old.DisabledButtonColor()
-	case Colors.DisabledText:
+	case Colors.Disabled:
 		return l.old.DisabledTextColor()
 	case Colors.Focus:
 		return l.old.FocusColor()

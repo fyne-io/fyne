@@ -21,7 +21,7 @@ func TestLegacyWrapper_Color(t *testing.T) {
 	newTheme := FromLegacy(oldTheme)
 	assert.Equal(t, oldTheme.BackgroundColor(), newTheme.Color(Colors.Background, Variants.Light))
 	assert.Equal(t, oldTheme.ShadowColor(), newTheme.Color(Colors.Shadow, Variants.Light))
-	assert.Equal(t, oldTheme.TextColor(), newTheme.Color(Colors.Text, Variants.Light))
+	assert.Equal(t, oldTheme.TextColor(), newTheme.Color(Colors.Foreground, Variants.Light))
 }
 
 func TestLegacyWrapper_Font(t *testing.T) {

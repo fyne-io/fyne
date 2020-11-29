@@ -248,55 +248,55 @@ func TestList_Resize(t *testing.T) {
 								</container>
 							</widget>
 							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
+								<rectangle fillColor="disabled" size="0x0"/>
 							</widget>
 							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,75" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,113" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,151" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,189" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,227" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,265" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,303" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,341" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,379" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,417" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,455" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,493" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,531" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,569" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,607" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 						</container>
 						<widget pos="186,0" size="6x592" type="*widget.scrollBarArea">
@@ -483,40 +483,40 @@ func TestList_OffsetChange(t *testing.T) {
 								</container>
 							</widget>
 							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
+								<rectangle fillColor="disabled" size="0x0"/>
 							</widget>
 							<widget pos="4,303" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,341" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,379" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,417" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,455" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,493" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,531" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,569" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,607" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,645" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,683" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 						</container>
 						<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">
@@ -750,40 +750,40 @@ func TestList_DataChange(t *testing.T) {
 								</container>
 							</widget>
 							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
+								<rectangle fillColor="disabled" size="0x0"/>
 							</widget>
 							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,75" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,113" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,151" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,189" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,227" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,265" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,303" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,341" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,379" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,417" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 						</container>
 						<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">
@@ -872,10 +872,10 @@ func TestList_SmallList(t *testing.T) {
 								</container>
 							</widget>
 							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
+								<rectangle fillColor="disabled" size="0x0"/>
 							</widget>
 							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 						</container>
 					</widget>
@@ -979,10 +979,10 @@ func TestList_RemoveItem(t *testing.T) {
 								</container>
 							</widget>
 							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
+								<rectangle fillColor="disabled" size="0x0"/>
 							</widget>
 							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 						</container>
 					</widget>
@@ -1174,40 +1174,40 @@ func setupList(t *testing.T) (*List, fyne.Window) {
 								</container>
 							</widget>
 							<widget size="0x0" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="0x0"/>
+								<rectangle fillColor="disabled" size="0x0"/>
 							</widget>
 							<widget pos="4,37" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,75" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,113" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,151" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,189" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,227" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,265" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,303" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,341" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,379" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 							<widget pos="4,417" size="184x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="184x1"/>
+								<rectangle fillColor="disabled" size="184x1"/>
 							</widget>
 						</container>
 						<widget pos="186,0" size="6x392" type="*widget.scrollBarArea">

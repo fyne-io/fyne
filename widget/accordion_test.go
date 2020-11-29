@@ -185,7 +185,7 @@ func TestAccordion_Layout(t *testing.T) {
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
 								<widget pos="0,37" size="95x1" type="*widget.Separator">
-									<rectangle fillColor="disabled text" size="95x1"/>
+									<rectangle fillColor="disabled" size="95x1"/>
 								</widget>
 							</widget>
 						</container>
@@ -224,7 +224,7 @@ func TestAccordion_Layout(t *testing.T) {
 									<text pos="4,4" size="87x21">2222222222</text>
 								</widget>
 								<widget pos="0,37" size="95x1" type="*widget.Separator">
-									<rectangle fillColor="disabled text" size="95x1"/>
+									<rectangle fillColor="disabled" size="95x1"/>
 								</widget>
 							</widget>
 						</container>
@@ -312,7 +312,7 @@ func TestAccordion_Layout(t *testing.T) {
 									<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="20x21"/>
 								</widget>
 								<widget pos="0,37" size="95x1" type="*widget.Separator">
-									<rectangle fillColor="disabled text" size="95x1"/>
+									<rectangle fillColor="disabled" size="95x1"/>
 								</widget>
 							</widget>
 						</container>
@@ -355,7 +355,7 @@ func TestAccordion_Layout(t *testing.T) {
 									<text pos="4,4" size="87x21">2222222222</text>
 								</widget>
 								<widget pos="0,70" size="95x1" type="*widget.Separator">
-									<rectangle fillColor="disabled text" size="95x1"/>
+									<rectangle fillColor="disabled" size="95x1"/>
 								</widget>
 							</widget>
 						</container>

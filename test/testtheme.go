@@ -20,8 +20,9 @@ func NewTheme() fyne.Theme {
 		bold:               theme.DefaultTextItalicFont(),
 		boldItalic:         theme.DefaultTextMonospaceFont(),
 		button:             color.Black,
+		disabled:           color.Black,
 		disabledButton:     color.White,
-		disabledText:       color.Black,
+		foreground:         color.White,
 		focus:              green,
 		hover:              green,
 		iconInlineSize:     24,
@@ -35,7 +36,6 @@ func NewTheme() fyne.Theme {
 		scrollBarSize:      10,
 		scrollBarSmallSize: 2,
 		shadow:             blue,
-		text:               color.White,
 		textSize:           18,
 	}
 }

@@ -248,7 +248,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.leaf">
 										<widget pos="52,4" size="136x29" type="*widget.Label">
@@ -287,7 +287,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="primary" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.leaf">
 										<widget pos="52,4" size="136x29" type="*widget.Label">
@@ -326,7 +326,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.leaf">
 										<widget pos="52,4" size="136x29" type="*widget.Label">
@@ -369,7 +369,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -381,7 +381,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,75" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,76" size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -425,7 +425,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -437,7 +437,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,75" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,76" size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -480,7 +480,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -489,7 +489,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,75" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,76" size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -498,7 +498,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,113" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,114" size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -542,7 +542,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -551,7 +551,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="primary" size="4x37"/>
 									</widget>
 									<widget pos="4,75" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,76" size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -560,7 +560,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,113" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,114" size="192x37" type="*widget.leaf">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -603,7 +603,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -650,7 +650,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="184x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="184x1"/>
+										<rectangle fillColor="disabled" size="184x1"/>
 									</widget>
 									<widget pos="0,38" size="192x37" type="*widget.branch">
 										<widget pos="28,4" size="160x29" type="*widget.Label">
@@ -697,7 +697,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,38" size="206x37" type="*widget.leaf">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -706,7 +706,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,75" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,76" size="206x37" type="*widget.branch">
 										<widget pos="28,4" size="174x29" type="*widget.Label">
@@ -718,7 +718,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,113" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,114" size="206x37" type="*widget.leaf">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -727,7 +727,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,151" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,152" size="206x37" type="*widget.branch">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -739,7 +739,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,189" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,190" size="206x37" type="*widget.leaf">
 										<widget pos="76,4" size="126x29" type="*widget.Label">
@@ -791,7 +791,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,38" size="206x37" type="*widget.leaf">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -800,7 +800,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,75" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,76" size="206x37" type="*widget.branch">
 										<widget pos="28,4" size="174x29" type="*widget.Label">
@@ -812,7 +812,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="primary" size="4x37"/>
 									</widget>
 									<widget pos="4,113" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,114" size="206x37" type="*widget.leaf">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -821,7 +821,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,151" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,152" size="206x37" type="*widget.branch">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -833,7 +833,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,189" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,190" size="206x37" type="*widget.leaf">
 										<widget pos="76,4" size="126x29" type="*widget.Label">
@@ -885,7 +885,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,37" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,38" size="206x37" type="*widget.leaf">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -894,7 +894,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,75" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,76" size="206x37" type="*widget.branch">
 										<widget pos="28,4" size="174x29" type="*widget.Label">
@@ -906,7 +906,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,113" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,114" size="206x37" type="*widget.leaf">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -915,7 +915,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="primary" size="4x37"/>
 									</widget>
 									<widget pos="4,151" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,152" size="206x37" type="*widget.branch">
 										<widget pos="52,4" size="150x29" type="*widget.Label">
@@ -927,7 +927,7 @@ func TestTree_Layout(t *testing.T) {
 										<rectangle fillColor="background" size="4x37"/>
 									</widget>
 									<widget pos="4,189" size="198x1" type="*widget.Separator">
-										<rectangle fillColor="disabled text" size="198x1"/>
+										<rectangle fillColor="disabled" size="198x1"/>
 									</widget>
 									<widget pos="0,190" size="206x37" type="*widget.leaf">
 										<widget pos="76,4" size="126x29" type="*widget.Label">
@@ -1027,7 +1027,7 @@ func TestTree_Move(t *testing.T) {
   							<rectangle fillColor="background" size="4x37"/>
   						</widget>
   						<widget pos="4,37" size="204x1" type="*widget.Separator">
-  							<rectangle fillColor="disabled text" size="204x1"/>
+  							<rectangle fillColor="disabled" size="204x1"/>
   						</widget>
   						<widget pos="0,38" size="212x37" type="*widget.leaf">
   							<widget pos="52,4" size="156x29" type="*widget.Label">
@@ -1059,7 +1059,7 @@ func TestTree_Move(t *testing.T) {
 								<rectangle fillColor="background" size="4x37"/>
 							</widget>
 							<widget pos="4,37" size="204x1" type="*widget.Separator">
-								<rectangle fillColor="disabled text" size="204x1"/>
+								<rectangle fillColor="disabled" size="204x1"/>
 							</widget>
 							<widget pos="0,38" size="212x37" type="*widget.leaf">
 								<widget pos="52,4" size="156x29" type="*widget.Label">

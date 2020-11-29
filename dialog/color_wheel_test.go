@@ -22,8 +22,8 @@ func Test_colorWheel_Layout(t *testing.T) {
 			<content>
 				<widget pos="4,4" size="120x120" type="*dialog.colorWheel">
 					<raster size="120x120"/>
-					<line pos="0,60" size="120x0" strokeColor="text"/>
-					<line size="0x120" strokeColor="text"/>
+					<line pos="0,60" size="120x0" strokeColor="foreground"/>
+					<line size="0x120" strokeColor="foreground"/>
 				</widget>
 			</content>
 		</canvas>

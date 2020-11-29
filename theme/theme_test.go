@@ -58,14 +58,14 @@ func Test_ButtonColor(t *testing.T) {
 
 func Test_TextColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := TextColor()
-	assert.Equal(t, DarkTheme().Color(Colors.Text, Variants.Dark), c, "wrong text color")
+	c := ForegroundColor()
+	assert.Equal(t, DarkTheme().Color(Colors.Foreground, Variants.Dark), c, "wrong text color")
 }
 
 func Test_DisabledTextColor(t *testing.T) {
 	fyne.CurrentApp().Settings().SetTheme(DarkTheme())
-	c := DisabledTextColor()
-	assert.Equal(t, DarkTheme().Color(Colors.DisabledText, Variants.Dark), c, "wrong disabled text color")
+	c := DisabledColor()
+	assert.Equal(t, DarkTheme().Color(Colors.Disabled, Variants.Dark), c, "wrong disabled text color")
 }
 
 func Test_PlaceHolderColor(t *testing.T) {
