@@ -212,6 +212,64 @@ func TestSplitContainer_divider_drag(t *testing.T) {
 	})
 }
 
+func TestSplitContainer_divider_drag_StartOffsetLessThanMinSize(t *testing.T) {
+	size := fyne.NewSize(30, 30)
+	objA := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	objA.SetMinSize(size)
+	objB := canvas.NewRectangle(color.NRGBA{0, 0, 0, 0})
+	objB.SetMinSize(size)
+	t.Run("Horizontal", func(t *testing.T) {
+		split := NewHSplitContainer(objA, objB)
+		split.Resize(fyne.NewSize(100, 100))
+		divider := newDivider(split)
+		t.Run("Leading", func(t *testing.T) {
+			split.SetOffset(0.1)
+
+			divider.Dragged(&fyne.DragEvent{
+				DraggedX: 10,
+			})
+			divider.DragEnd()
+
+			assert.Equal(t, 0.4, split.Offset)
+		})
+		t.Run("Trailing", func(t *testing.T) {
+			split.SetOffset(0.9)
+
+			divider.Dragged(&fyne.DragEvent{
+				DraggedX: -10,
+			})
+			divider.DragEnd()
+
+			assert.Equal(t, 0.6, split.Offset)
+		})
+	})
+	t.Run("Vertical", func(t *testing.T) {
+		split := NewVSplitContainer(objA, objB)
+		split.Resize(fyne.NewSize(100, 100))
+		divider := newDivider(split)
+		t.Run("Leading", func(t *testing.T) {
+			split.SetOffset(0.1)
+
+			divider.Dragged(&fyne.DragEvent{
+				DraggedY: 10,
+			})
+			divider.DragEnd()
+
+			assert.Equal(t, 0.4, split.Offset)
+		})
+		t.Run("Trailing", func(t *testing.T) {
+			split.SetOffset(0.9)
+
+			divider.Dragged(&fyne.DragEvent{
+				DraggedY: -10,
+			})
+			divider.DragEnd()
+
+			assert.Equal(t, 0.6, split.Offset)
+		})
+	})
+}
+
 func TestSplitContainer_divider_hover(t *testing.T) {
 	t.Run("Horizontal", func(t *testing.T) {
 		divider := newDivider(&SplitContainer{Horizontal: true})
