@@ -42,7 +42,6 @@ type Entry struct {
 	// Deprecated: Use Disable() instead
 	ReadOnly  bool
 	MultiLine bool
-	HideSeparator bool
 	Wrapping  fyne.TextWrap
 
 	// Set a validator that this entry will check against
@@ -124,9 +123,6 @@ func (e *Entry) CreateRenderer() fyne.WidgetRenderer {
 	line := canvas.NewRectangle(theme.ShadowColor())
 	cursor := canvas.NewRectangle(theme.FocusColor())
 	cursor.Hide()
-	if e.HideSeparator {
-		line.Hide()
-	}
 
 	e.propertyLock.Lock()
 	defer e.propertyLock.Unlock()
@@ -1050,9 +1046,6 @@ func (r *entryRenderer) Destroy() {
 func (r *entryRenderer) Layout(size fyne.Size) {
 	r.line.Resize(fyne.NewSize(size.Width, theme.Padding()))
 	r.line.Move(fyne.NewPos(0, size.Height-theme.Padding()))
-	if r.entry.HideSeparator {
-		r.line.Hide()
-	}
 
 	actionIconSize := fyne.NewSize(0, 0)
 	if r.entry.ActionItem != nil {
