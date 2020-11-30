@@ -265,8 +265,6 @@ func (p *TickerPopUp) getRatio(pos *fyne.Position) float64 {
 	} else {
 		return float64(x) / float64(tickerWidth - (2 * theme.Padding()))
 	}
-	
-	return 0.0
 }
 
 func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar rune) string {
