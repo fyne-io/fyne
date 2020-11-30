@@ -177,6 +177,8 @@ type TickerPopUp struct {
 	overlayShown bool
 	draggedX     fyne.Position
 	dragging     int
+	dragScale    int
+	dsCount      int
 }
 
 // Hide this widget, if it was previously visible
@@ -295,13 +297,20 @@ func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 	var diffPosition fyne.Position
 	diffPosition.X = e.Position.X - p.draggedX.X
 	diffPosition.Y = e.Position.Y- p.draggedX.Y
-	offset := diffPosition.X
 	p.draggedX = e.Position
 
-	if label, ok := p.Content.(*Label); ok {
-		p.rb.Seek(int(offset))
-		label.Text = string(p.rb.Data(false))
-		label.Refresh() // Sweet!
+	if diffPosition.X <= p.dragScale && diffPosition.X >= -p.dragScale {
+		p.dsCount = (p.dsCount + 1) % p.dragScale
+	} else {
+		p.dsCount = 0
+	}
+
+	if p.dsCount == 0 {
+		if label, ok := p.Content.(*Label); ok {
+			p.rb.Seek(int(diffPosition.X))
+			label.Text = string(p.rb.Data(false))
+			label.Refresh()
+		}
 	}
 }
 
@@ -358,7 +367,7 @@ func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerLi
 		rb := ringBuffer{ data: []rune(label.Text), start: 0, labelFontSize: fontSize, labelTextStyle: label.TextStyle, width: size.Width, forward: true }
 		label.Text = string(rb.Data(false))
 
-		ret := &TickerPopUp{Content: content, rb: rb, Canvas: canvas, popupTickerListener: popupTickerListener, modal: false}
+		ret := &TickerPopUp{Content: content, rb: rb, Canvas: canvas, popupTickerListener: popupTickerListener, modal: false, dragScale: 5}
 		ret.ExtendBaseWidget(ret)
 		ret.Resize(size)
 		return ret
