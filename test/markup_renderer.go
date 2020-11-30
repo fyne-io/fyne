@@ -392,12 +392,12 @@ func knownColor(c color.Color) string {
 		rgbaColor(theme.DisabledButtonColor()): "disabled button",
 		rgbaColor(theme.DisabledColor()):       "disabled",
 		rgbaColor(theme.FocusColor()):          "focus",
+		rgbaColor(theme.ForegroundColor()):     "foreground",
 		rgbaColor(theme.HoverColor()):          "hover",
 		rgbaColor(theme.PlaceHolderColor()):    "placeholder",
 		rgbaColor(theme.PrimaryColor()):        "primary",
 		rgbaColor(theme.ScrollBarColor()):      "scrollbar",
 		rgbaColor(theme.ShadowColor()):         "shadow",
-		rgbaColor(theme.ForegroundColor()):     "foreground",
 	}[rgbaColor(c)]
 }
 

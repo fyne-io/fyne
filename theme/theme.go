@@ -50,11 +50,11 @@ var (
 	// Since 2.0.0
 	Colors = struct {
 		Background     fyne.ThemeColorName
-		Foreground     fyne.ThemeColorName
 		Button         fyne.ThemeColorName
 		DisabledButton fyne.ThemeColorName
 		Disabled       fyne.ThemeColorName
 		Focus          fyne.ThemeColorName
+		Foreground     fyne.ThemeColorName
 		Hover          fyne.ThemeColorName
 		PlaceHolder    fyne.ThemeColorName
 		Primary        fyne.ThemeColorName
@@ -62,11 +62,11 @@ var (
 		Shadow         fyne.ThemeColorName
 	}{
 		"background",
-		"foreground",
 		"button",
 		"disabledButton",
 		"disabled",
 		"focus",
+		"foreground",
 		"hover",
 		"placeholder",
 		"primary",
@@ -78,17 +78,17 @@ var (
 	//
 	// Since 2.0.0
 	Sizes = struct {
+		InlineIcon     fyne.ThemeSizeName
 		Padding        fyne.ThemeSizeName
 		ScrollBar      fyne.ThemeSizeName
 		ScrollBarSmall fyne.ThemeSizeName
 		Text           fyne.ThemeSizeName
-		InlineIcon     fyne.ThemeSizeName
 	}{
-		"paddinng",
+		"iconInline",
+		"padding",
 		"scrollBar",
 		"scrollBarSmall",
 		"text",
-		"iconInline",
 	}
 
 	// Variants lists each of the known theme variants that can apply to a color lookup.
@@ -132,8 +132,8 @@ var (
 		"disabled":       color.NRGBA{0xff, 0xff, 0xff, 0x42},
 		"disabledButton": color.NRGBA{0x26, 0x26, 0x26, 0xff},
 		"foreground":     color.NRGBA{0xff, 0xff, 0xff, 0xff},
-		"placeholder":    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
 		"hover":          color.NRGBA{0xff, 0xff, 0xff, 0x0f},
+		"placeholder":    color.NRGBA{0xb2, 0xb2, 0xb2, 0xff},
 		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		"shadow":         color.NRGBA{0x0, 0x0, 0x0, 0x66},
 	}
@@ -144,8 +144,8 @@ var (
 		"disabled":       color.NRGBA{0x0, 0x0, 0x0, 0x42},
 		"disabledButton": color.NRGBA{0xe5, 0xe5, 0xe5, 0xff},
 		"foreground":     color.NRGBA{0x21, 0x21, 0x21, 0xff},
-		"placeholder":    color.NRGBA{0x88, 0x88, 0x88, 0xff},
 		"hover":          color.NRGBA{0x0, 0x0, 0x0, 0x0f},
+		"placeholder":    color.NRGBA{0x88, 0x88, 0x88, 0xff},
 		"scrollBar":      color.NRGBA{0x0, 0x0, 0x0, 0x99},
 		"shadow":         color.NRGBA{0x0, 0x0, 0x0, 0x33}}
 )
