@@ -25,7 +25,7 @@ func TestNewList(t *testing.T) {
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
-	assert.Equal(t, list.MinSize(), test.WidgetRenderer(list).(*listRenderer).scroller.MinSize())
+	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.WidgetRenderer(list).(*listRenderer).scroller.MinSize()))
 	assert.Equal(t, 0, firstItemIndex)
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
 }
