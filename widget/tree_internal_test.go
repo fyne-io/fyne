@@ -1,10 +1,12 @@
 package widget
 
 import (
+	"image/color"
 	"testing"
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/test"
@@ -221,22 +223,47 @@ func TestTree_MinSize(t *testing.T) {
 	t.Run("Default", func(t *testing.T) {
 		tree := &Tree{}
 		min := tree.MinSize()
-		assert.Equal(t, 32, min.Width)
-		assert.Equal(t, 32, min.Height)
+		assert.Equal(t, scrollContainerMinSize, min.Width)
+		assert.Equal(t, scrollContainerMinSize, min.Height)
 	})
 	t.Run("Callback", func(t *testing.T) {
-		tree := &Tree{
-			CreateNode: func(isBranch bool) fyne.CanvasObject {
-				if isBranch {
-					return NewLabel("Branch")
-				}
-				return NewLabel("Leaf")
+		for name, tt := range map[string]struct {
+			leafSize        fyne.Size
+			branchSize      fyne.Size
+			expectedMinSize fyne.Size
+		}{
+			"small": {
+				fyne.NewSize(1, 1),
+				fyne.NewSize(1, 1),
+				fyne.NewSize(fyne.Max(1+3*theme.Padding()+theme.IconInlineSize(), scrollContainerMinSize), scrollContainerMinSize),
 			},
+			"large-leaf": {
+				fyne.NewSize(100, 100),
+				fyne.NewSize(1, 1),
+				fyne.NewSize(100+3*theme.Padding()+theme.IconInlineSize(), 100+2*theme.Padding()),
+			},
+			"large-branch": {
+				fyne.NewSize(1, 1),
+				fyne.NewSize(100, 100),
+				fyne.NewSize(100+3*theme.Padding()+theme.IconInlineSize(), 100+2*theme.Padding()),
+			},
+		} {
+			t.Run(name, func(t *testing.T) {
+				assert.Equal(t, tt.expectedMinSize, (&Tree{
+					CreateNode: func(isBranch bool) fyne.CanvasObject {
+						r := canvas.NewRectangle(color.Black)
+						if isBranch {
+							r.SetMinSize(tt.branchSize)
+							r.Resize(tt.branchSize)
+						} else {
+							r.SetMinSize(tt.leafSize)
+							r.Resize(tt.leafSize)
+						}
+						return r
+					},
+				}).MinSize())
+			})
 		}
-		tMin := tree.MinSize()
-		bMin := newBranch(tree, NewLabel("Branch")).MinSize()
-		assert.Equal(t, fyne.Max(32, bMin.Width), tMin.Width)
-		assert.Equal(t, fyne.Max(32, bMin.Height), tMin.Height)
 	})
 
 	for name, tt := range map[string]struct {

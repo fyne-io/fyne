@@ -215,7 +215,7 @@ func (l *listRenderer) Layout(size fyne.Size) {
 }
 
 func (l *listRenderer) MinSize() fyne.Size {
-	return l.scroller.MinSize()
+	return l.scroller.MinSize().Max(l.list.itemMin)
 }
 
 func (l *listRenderer) Refresh() {
