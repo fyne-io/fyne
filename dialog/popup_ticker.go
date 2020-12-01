@@ -1,15 +1,22 @@
-package widget
+package dialog
 
 import (
 	"image/color"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
-	"fyne.io/fyne/internal/widget"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/internal/widget"
+	commonwidget "fyne.io/fyne/widget"
 )
 
 var _ fyne.Draggable = (*TickerPopUp)(nil)
+
+type TextWidget interface {
+	GetText() string
+	SetText(string)
+	TextStyle() fyne.TextStyle
+}
 
 type ringBuffer struct {
 	data []rune
@@ -165,7 +172,7 @@ func (rb *ringBuffer) Length() int {
 // It wraps any standard elements with padding and a shadow.
 // If it is modal then the shadow will cover the entire canvas it hovers over and block interactions.
 type TickerPopUp struct {
-	BaseWidget
+	commonwidget.BaseWidget
 
 	Content fyne.CanvasObject
 	rb      ringBuffer // backing the content with a ringBuffer.
@@ -276,10 +283,7 @@ func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar rune) string
 
 func (p *TickerPopUp) SetText(data []rune) {
 	p.rb.data = data
-	if label, ok := p.Content.(*Label); ok {
-		label.Text = string(p.rb.Data(false))
-		label.Refresh()
-	}
+	p.Content.(TextWidget).SetText(string(p.rb.Data(false)))
 }
 
 func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
@@ -306,11 +310,8 @@ func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 	}
 
 	if p.dsCount == 0 {
-		if label, ok := p.Content.(*Label); ok {
-			p.rb.Seek(int(diffPosition.X))
-			label.Text = string(p.rb.Data(false))
-			label.Refresh()
-		}
+		p.rb.Seek(int(diffPosition.X))
+		p.Content.(TextWidget).SetText(string(p.rb.Data(false)))
 	}
 }
 
@@ -362,18 +363,30 @@ func ShowTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, po
 }
 
 func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int) *TickerPopUp {
-	if label, ok := content.(*Label); ok {
-
-		rb := ringBuffer{ data: []rune(label.Text), start: 0, labelFontSize: fontSize, labelTextStyle: label.TextStyle, width: size.Width, forward: true }
-		label.Text = string(rb.Data(false))
-
-		ret := &TickerPopUp{Content: content, rb: rb, Canvas: canvas, popupTickerListener: popupTickerListener, modal: false, dragScale: 5}
-		ret.ExtendBaseWidget(ret)
-		ret.Resize(size)
-		return ret
+	var textData *string
+	var textStyle fyne.TextStyle
+	// TODO: would be nice if Label and Entry implemented GetText() and TextStyle().  Then remove switch and access directly.
+	switch content.(type) {
+	case *commonwidget.Label:
+		textData = &content.(*commonwidget.Label).Text
+		textStyle = content.(*commonwidget.Label).TextStyle
+		break
+	case *commonwidget.Entry:
+		textData = &content.(*commonwidget.Entry).Text
+		textStyle = fyne.TextStyle{} // Entry should provide.
+		break
+	case TextWidget:
+		td := content.(TextWidget).GetText()
+		textData = &td
+		textStyle = content.(TextWidget).TextStyle()
 	}
+	rb := ringBuffer{ data: []rune(*textData), start: 0, labelFontSize: fontSize, labelTextStyle: textStyle, width: size.Width, forward: true }
+	content.(TextWidget).SetText(string(rb.Data(false)))
 
-	return nil // non-label tickers not supported yet.  Consider what this would mean anyways.
+	ret := &TickerPopUp{Content: content, rb: rb, Canvas: canvas, popupTickerListener: popupTickerListener, modal: false, dragScale: 5}
+	ret.ExtendBaseWidget(ret)
+	ret.Resize(size)
+	return ret
 }
 
 // NewTickerPopUp creates a new tickerPopUp for the specified content and displays it on the passed canvas.
