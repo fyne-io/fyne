@@ -2,11 +2,13 @@ package widget
 
 import (
 	"fmt"
+	"image/color"
 	"math"
 	"testing"
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
@@ -25,9 +27,37 @@ func TestNewList(t *testing.T) {
 
 	assert.Equal(t, 1000, list.Length())
 	assert.GreaterOrEqual(t, list.MinSize().Width, template.MinSize().Width)
-	assert.Equal(t, list.MinSize(), test.WidgetRenderer(list).(*listRenderer).scroller.MinSize())
+	assert.Equal(t, list.MinSize(), template.MinSize().Max(test.WidgetRenderer(list).(*listRenderer).scroller.MinSize()))
 	assert.Equal(t, 0, firstItemIndex)
 	assert.Equal(t, visibleCount, lastItemIndex-firstItemIndex+1)
+}
+
+func TestList_MinSize(t *testing.T) {
+	for name, tt := range map[string]struct {
+		cellSize        fyne.Size
+		expectedMinSize fyne.Size
+	}{
+		"small": {
+			fyne.NewSize(1, 1),
+			fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize),
+		},
+		"large": {
+			fyne.NewSize(100, 100),
+			fyne.NewSize(100+3*theme.Padding(), 100+2*theme.Padding()),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tt.expectedMinSize, NewList(
+				func() int { return 5 },
+				func() fyne.CanvasObject {
+					r := canvas.NewRectangle(color.Black)
+					r.SetMinSize(tt.cellSize)
+					r.Resize(tt.cellSize)
+					return r
+				},
+				func(ListItemID, fyne.CanvasObject) {}).MinSize())
+		})
+	}
 }
 
 func TestList_Resize(t *testing.T) {

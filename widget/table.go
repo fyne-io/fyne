@@ -244,7 +244,7 @@ func (t *tableRenderer) Layout(s fyne.Size) {
 }
 
 func (t *tableRenderer) MinSize() fyne.Size {
-	return t.cellSize
+	return t.t.scroll.MinSize().Max(t.cellSize.Add(fyne.NewSize(theme.Padding(), theme.Padding())))
 }
 
 func (t *tableRenderer) Refresh() {
