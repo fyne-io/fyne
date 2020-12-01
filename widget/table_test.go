@@ -112,7 +112,7 @@ func TestTable_MinSize(t *testing.T) {
 		},
 		"large": {
 			fyne.NewSize(100, 100),
-			fyne.NewSize(100+2*theme.Padding(), 100+2*theme.Padding()),
+			fyne.NewSize(100+3*theme.Padding(), 100+2*theme.Padding()),
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
