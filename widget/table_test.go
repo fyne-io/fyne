@@ -101,6 +101,34 @@ func TestTable_Filled(t *testing.T) {
 	test.AssertImageMatches(t, "table/filled.png", w.Canvas().Capture())
 }
 
+func TestTable_MinSize(t *testing.T) {
+	for name, tt := range map[string]struct {
+		cellSize        fyne.Size
+		expectedMinSize fyne.Size
+	}{
+		"small": {
+			fyne.NewSize(1, 1),
+			fyne.NewSize(scrollContainerMinSize, scrollContainerMinSize),
+		},
+		"large": {
+			fyne.NewSize(100, 100),
+			fyne.NewSize(100+3*theme.Padding(), 100+3*theme.Padding()),
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tt.expectedMinSize, NewTable(
+				func() (int, int) { return 5, 5 },
+				func() fyne.CanvasObject {
+					r := canvas.NewRectangle(color.Black)
+					r.SetMinSize(tt.cellSize)
+					r.Resize(tt.cellSize)
+					return r
+				},
+				func(TableCellID, fyne.CanvasObject) {}).MinSize())
+		})
+	}
+}
+
 func TestTable_Unselect(t *testing.T) {
 	test.NewApp()
 	defer test.NewApp()

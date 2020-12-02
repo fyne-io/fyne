@@ -144,6 +144,9 @@ func walkObjectTree(
 	afterChildren func(fyne.CanvasObject, fyne.CanvasObject),
 	requireVisible bool,
 ) bool {
+	if obj == nil {
+		return false
+	}
 	if requireVisible && !obj.Visible() {
 		return false
 	}
@@ -155,11 +158,11 @@ func walkObjectTree(
 		children = co.Objects
 	case fyne.Widget:
 		children = cache.Renderer(co).Objects()
+	}
 
-		if _, ok := obj.(fyne.Scrollable); ok {
-			clipPos = pos
-			clipSize = obj.Size()
-		}
+	if _, ok := obj.(fyne.Scrollable); ok {
+		clipPos = pos
+		clipSize = obj.Size()
 	}
 
 	if beforeChildren != nil {

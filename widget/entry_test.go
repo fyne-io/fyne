@@ -289,10 +289,15 @@ func TestEntry_DoubleTapped(t *testing.T) {
 func TestEntry_DoubleTapped_AfterCol(t *testing.T) {
 	entry := widget.NewEntry()
 	entry.SetText("A\nB\n")
-	c := fyne.CurrentApp().Driver().CanvasForObject(entry)
+	window := test.NewWindow(entry)
+	defer window.Close()
+	window.SetPadded(false)
+	window.Resize(entry.MinSize())
+	entry.Resize(entry.MinSize())
+	c := window.Canvas()
 
 	test.Tap(entry)
-	assert.Equal(t, c.Focused(), entry)
+	assert.Equal(t, entry, c.Focused())
 
 	testCharSize := theme.TextSize()
 	pos := fyne.NewPos(testCharSize, testCharSize*4) // tap below rows
@@ -389,7 +394,7 @@ func TestEntry_Focus(t *testing.T) {
 		</canvas>
 	`, c)
 
-	test.Canvas().Focus(entry)
+	window.Canvas().Focus(entry)
 	test.AssertRendersToMarkup(t, `
 		<canvas padded size="150x200">
 			<content>

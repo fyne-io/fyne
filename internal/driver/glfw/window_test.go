@@ -81,16 +81,16 @@ func TestWindow_Cursor(t *testing.T) {
 	w.SetContent(widget.NewVBox(e, h, b))
 
 	w.mouseMoved(w.viewport, 10, float64(e.Position().Y+10))
-	textCursor := cursorMap[desktop.TextCursor]
-	assert.Same(t, textCursor, w.cursor)
+	textCursor := desktop.TextCursor
+	assert.Equal(t, textCursor, w.cursor)
 
 	w.mouseMoved(w.viewport, 10, float64(h.Position().Y+10))
-	pointerCursor := cursorMap[desktop.PointerCursor]
-	assert.Same(t, pointerCursor, w.cursor)
+	pointerCursor := desktop.PointerCursor
+	assert.Equal(t, pointerCursor, w.cursor)
 
 	w.mouseMoved(w.viewport, 10, float64(b.Position().Y+10))
-	defaultCursor := cursorMap[desktop.DefaultCursor]
-	assert.Same(t, defaultCursor, w.cursor)
+	defaultCursor := desktop.DefaultCursor
+	assert.Equal(t, defaultCursor, w.cursor)
 }
 
 func TestWindow_HandleHoverable(t *testing.T) {
