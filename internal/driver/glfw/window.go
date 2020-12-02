@@ -802,7 +802,7 @@ func convertMouseButton(btn glfw.MouseButton, mods glfw.ModifierKey) (desktop.Mo
 		}
 	}
 	switch btn {
-	case glfw.MouseButtonL1:
+	case glfw.MouseButton1:
 		if rightClick {
 			button = desktop.RightMouseButton
 		} else {
