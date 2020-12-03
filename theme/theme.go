@@ -98,12 +98,13 @@ var (
 		Dark  fyne.ThemeVariant
 		Light fyne.ThemeVariant
 		// potential for adding theme types such as high visibility or monochrome...
+		userPreference fyne.ThemeVariant // locally used in builtinTheme for backward compatibility
 	}{
 		0,
 		1,
+		2,
 	}
 
-	currentVariant = Variants.Dark
 	defaultTheme = setupDefaultTheme()
 )
 
@@ -168,7 +169,6 @@ func setupDefaultTheme() fyne.Theme {
 // LightTheme defines the built in light theme colors and sizes
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{variant: Variants.Light}
-	currentVariant = Variants.Light
 
 	theme.initFonts()
 	return theme
@@ -177,7 +177,6 @@ func LightTheme() fyne.Theme {
 // DarkTheme defines the built in dark theme colors and sizes
 func DarkTheme() fyne.Theme {
 	theme := &builtinTheme{variant: Variants.Dark}
-	currentVariant = Variants.Dark
 
 	theme.initFonts()
 	return theme
@@ -216,9 +215,6 @@ func (t *builtinTheme) initFonts() {
 }
 
 func (t *builtinTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	if t.variant > 0 {
-		v = t.variant // override if using the old LightTheme() or DarkTheme() constructor
-	}
 	colors := darkPalette
 	if v == Variants.Light {
 		colors = lightPalette
@@ -270,85 +266,83 @@ func (t *builtinTheme) Size(s fyne.ThemeSizeName) int {
 
 func current() fyne.Theme {
 	if fyne.CurrentApp() == nil || fyne.CurrentApp().Settings().Theme() == nil {
-		currentVariant = Variants.Dark
 		return DarkTheme()
 	}
 
-	currentVariant = fyne.CurrentApp().Settings().ThemeVariant()
 	return fyne.CurrentApp().Settings().Theme()
 }
 
 // BackgroundColor returns the theme's background color
 func BackgroundColor() color.Color {
-	return current().Color(Colors.Background, currentVariant)
+	return current().Color(Colors.Background, currentVariant())
 }
 
 // ButtonColor returns the theme's standard button color.
 func ButtonColor() color.Color {
-	return current().Color(Colors.Button, currentVariant)
+	return current().Color(Colors.Button, currentVariant())
 }
 
 // DisabledButtonColor returns the theme's disabled button color.
 func DisabledButtonColor() color.Color {
-	return current().Color(Colors.DisabledButton, currentVariant)
+	return current().Color(Colors.DisabledButton, currentVariant())
 }
 
 // TextColor returns the theme's standard text color
 //
 // Deprecated: Use theme.Foreground colour instead
 func TextColor() color.Color {
-	return current().Color(Colors.Foreground, currentVariant)
+	return current().Color(Colors.Foreground, currentVariant())
 }
 
 // DisabledColor returns the foreground color for a disabled UI element
 //
 // Since: 2.0.0
 func DisabledColor() color.Color {
-	return current().Color(Colors.Disabled, currentVariant)
+	return current().Color(Colors.Disabled, currentVariant())
 }
 
 // DisabledTextColor returns the color for a disabledIcon UI element
 //
 // Deprecated: Use DisabledColor() instead
 func DisabledTextColor() color.Color {
-	return current().Color(Colors.Disabled, currentVariant)
+	return current().Color(Colors.Disabled, currentVariant())
 }
 
 // PlaceHolderColor returns the theme's standard text color
 func PlaceHolderColor() color.Color {
-	return current().Color(Colors.PlaceHolder, currentVariant)
+	return current().Color(Colors.PlaceHolder, currentVariant())
 }
 
 // PrimaryColor returns the color used to highlight primary features
 func PrimaryColor() color.Color {
-	return current().Color(Colors.Primary, currentVariant)
+	return current().Color(Colors.Primary, currentVariant())
 }
 
 // HoverColor returns the color used to highlight interactive elements currently under a cursor
 func HoverColor() color.Color {
-	return current().Color(Colors.Hover, currentVariant)
+	return current().Color(Colors.Hover, currentVariant())
 }
 
 // FocusColor returns the color used to highlight a focused widget
 func FocusColor() color.Color {
-	return current().Color(Colors.Focus, currentVariant)
+	return current().Color(Colors.Focus, currentVariant())
 }
 
 // ForegroundColor returns the theme's standard foreground color for text and icons
 //
 // Since: 2.0.0
 func ForegroundColor() color.Color {
-	return current().Color(Colors.Foreground, currentVariant)
+	return current().Color(Colors.Foreground, currentVariant())
 }
 
 // ScrollBarColor returns the color (and translucency) for a scrollBar
 func ScrollBarColor() color.Color {
-	return current().Color(Colors.ScrollBar, currentVariant)
+	return current().Color(Colors.ScrollBar, currentVariant())
 }
 
 // ShadowColor returns the color (and translucency) for shadows used for indicating elevation
 func ShadowColor() color.Color {
-	return current().Color(Colors.Shadow, currentVariant)
+	return current().Color(Colors.Shadow, currentVariant())
 }
 
 // TextSize returns the standard text size
@@ -443,4 +437,14 @@ func PrimaryColorNamed(name string) color.Color {
 		return primaryColors[ColorBlue]
 	}
 	return col
+}
+
+func currentVariant() fyne.ThemeVariant {
+	if std, ok := current().(*builtinTheme); ok {
+		if std.variant != Variants.userPreference {
+			return std.variant // override if using the old LightTheme() or DarkTheme() constructor
+		}
+	}
+
+	return fyne.CurrentApp().Settings().ThemeVariant()
 }
