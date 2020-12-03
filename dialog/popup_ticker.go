@@ -246,7 +246,7 @@ func (p *TickerPopUp) DragEnd() {
 
 // Tapped is called when the user taps the tickerPopUp background - if not modal then dismiss this widget
 func (p *TickerPopUp) Tapped(e *fyne.PointEvent) {
-	if e.Position.X < p.innerPos.X || e.Position.Y < p.innerPos.Y || e.Position.X > (p.innerPos.X + p.innerSize.Width) || e.Position.Y > (p.innerPos.Y + p.innerSize.Height) {
+	if e.AbsolutePosition.X < p.innerPos.X || e.AbsolutePosition.Y < p.innerPos.Y || e.AbsolutePosition.X > (p.innerPos.X + p.innerSize.Width) || e.AbsolutePosition.Y > (p.innerPos.Y + p.innerSize.Height) {
 		p.Hide()
 		return
 	}
@@ -283,7 +283,16 @@ func (p *TickerPopUp) GetSelected(pos *fyne.Position, separatorChar rune) string
 
 func (p *TickerPopUp) SetText(data []rune) {
 	p.rb.data = data
-	p.Content.(TextWidget).SetText(string(p.rb.Data(false)))
+	switch p.Content.(type) {
+	case *commonwidget.Label:
+		p.Content.(*commonwidget.Label).Text = string(p.rb.Data(false))
+		break
+	case *commonwidget.Entry:
+		p.Content.(*commonwidget.Entry).Text = string(p.rb.Data(false))
+		break
+	case TextWidget:
+		p.Content.(TextWidget).SetText(string(p.rb.Data(false)))
+	}
 }
 
 func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
@@ -293,7 +302,7 @@ func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 		return
 	}
 
-	if e.Position.X < p.innerPos.X || e.Position.Y < p.innerPos.Y || e.Position.X > (p.innerPos.X + p.innerSize.Width) || e.Position.Y > (p.innerPos.Y + p.innerSize.Height) {
+	if e.AbsolutePosition.X < p.innerPos.X || e.AbsolutePosition.Y < p.innerPos.Y || e.AbsolutePosition.X > (p.innerPos.X + p.innerSize.Width) || e.AbsolutePosition.Y > (p.innerPos.Y + p.innerSize.Height) {
 		p.Hide()
 		return
 	}
@@ -309,9 +318,19 @@ func (p *TickerPopUp) Dragged(e *fyne.DragEvent) {
 		p.dsCount = 0
 	}
 
-	if p.dsCount == 0 {
+	if p.dsCount != 0 {
 		p.rb.Seek(int(diffPosition.X))
-		p.Content.(TextWidget).SetText(string(p.rb.Data(false)))
+		switch p.Content.(type) {
+		case *commonwidget.Label:
+			p.Content.(*commonwidget.Label).Text = string(p.rb.Data(false))
+			break
+		case *commonwidget.Entry:
+			p.Content.(*commonwidget.Entry).Text = string(p.rb.Data(false))
+			break
+		case TextWidget:
+			p.Content.(TextWidget).SetText(string(p.rb.Data(false)))
+		}
+		p.Content.Refresh()
 	}
 }
 
@@ -363,25 +382,25 @@ func ShowTickerPopUpAtPosition(content fyne.CanvasObject, canvas fyne.Canvas, po
 }
 
 func newTickerPopUp(content fyne.CanvasObject, canvas fyne.Canvas, popupTickerListener PopupTickerListener, size fyne.Size, fontSize int) *TickerPopUp {
-	var textData *string
-	var textStyle fyne.TextStyle
+	rb := ringBuffer{ start: 0, labelFontSize: fontSize, width: size.Width, forward: true }
+
 	// TODO: would be nice if Label and Entry implemented GetText() and TextStyle().  Then remove switch and access directly.
 	switch content.(type) {
 	case *commonwidget.Label:
-		textData = &content.(*commonwidget.Label).Text
-		textStyle = content.(*commonwidget.Label).TextStyle
+		rb.data = []rune(content.(*commonwidget.Label).Text)
+		rb.labelTextStyle = content.(*commonwidget.Label).TextStyle
+		content.(*commonwidget.Label).Text = string(rb.Data(false))
 		break
 	case *commonwidget.Entry:
-		textData = &content.(*commonwidget.Entry).Text
-		textStyle = fyne.TextStyle{} // Entry should provide.
+		rb.data = []rune(content.(*commonwidget.Entry).Text)
+		rb.labelTextStyle = fyne.TextStyle{} // Entry should provide.
+		content.(*commonwidget.Entry).Text = string(rb.Data(false))
 		break
 	case TextWidget:
-		td := content.(TextWidget).GetText()
-		textData = &td
-		textStyle = content.(TextWidget).TextStyle()
+		rb.data = []rune(content.(TextWidget).GetText())
+		rb.labelTextStyle = content.(TextWidget).TextStyle()
+		content.(TextWidget).SetText(string(rb.Data(false)))
 	}
-	rb := ringBuffer{ data: []rune(*textData), start: 0, labelFontSize: fontSize, labelTextStyle: textStyle, width: size.Width, forward: true }
-	content.(TextWidget).SetText(string(rb.Data(false)))
 
 	ret := &TickerPopUp{Content: content, rb: rb, Canvas: canvas, popupTickerListener: popupTickerListener, modal: false, dragScale: 5}
 	ret.ExtendBaseWidget(ret)
