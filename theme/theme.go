@@ -159,13 +159,6 @@ func DefaultTheme() fyne.Theme {
 	return defaultTheme
 }
 
-func setupDefaultTheme() fyne.Theme {
-	theme := &builtinTheme{}
-
-	theme.initFonts()
-	return theme
-}
-
 // LightTheme defines the built in light theme colors and sizes
 func LightTheme() fyne.Theme {
 	theme := &builtinTheme{variant: Variants.Light}
@@ -180,18 +173,6 @@ func DarkTheme() fyne.Theme {
 
 	theme.initFonts()
 	return theme
-}
-
-func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
-	variantPath := strings.Replace(env, "Regular", variant, -1)
-
-	res, err := fyne.LoadResourceFromPath(variantPath)
-	if err != nil {
-		fyne.LogError("Error loading specified font", err)
-		return fallback
-	}
-
-	return res
 }
 
 func (t *builtinTheme) initFonts() {
@@ -447,4 +428,23 @@ func currentVariant() fyne.ThemeVariant {
 	}
 
 	return fyne.CurrentApp().Settings().ThemeVariant()
+}
+
+func loadCustomFont(env, variant string, fallback fyne.Resource) fyne.Resource {
+	variantPath := strings.Replace(env, "Regular", variant, -1)
+
+	res, err := fyne.LoadResourceFromPath(variantPath)
+	if err != nil {
+		fyne.LogError("Error loading specified font", err)
+		return fallback
+	}
+
+	return res
+}
+
+func setupDefaultTheme() fyne.Theme {
+	theme := &builtinTheme{}
+
+	theme.initFonts()
+	return theme
 }
